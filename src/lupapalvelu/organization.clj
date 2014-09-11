@@ -3,7 +3,7 @@
             [clojure.string :as s]
             [monger.operators :refer :all]
             [lupapalvelu.core :refer [ok fail fail!]]
-            [lupapalvelu.action :refer [defquery defcommand non-blank-parameters vector-parameters]]
+            [lupapalvelu.action :refer [defquery defcommand non-blank-parameters vector-parameters boolean-parameters]]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.xml.krysp.reader :as krysp]
             [lupapalvelu.mongo :as mongo]
@@ -95,8 +95,8 @@
   (let [default (get-in organization [:name :fi] (str "???ORG:" (:id organization) "???"))]
     (get-in organization [:name i18n/*lang*] default)))
 
-(defn get-organization-name [{organization-id :organization :as application}]
-  (loc-organization-name (get-organization organization-id)))
+(defn get-organization-name [organization]
+  (loc-organization-name organization))
 
 (defn resolve-organizations
   ([municipality]
@@ -250,6 +250,15 @@
   [{{:keys [organizations]} :user}]
   ; FIXME: validate operation and attachments
   (update-organization (first organizations) {$set {(str "operations-attachments." operation) attachments}})
+  (ok))
+
+(defcommand set-organization-app-required-fields-filling-obligatory
+  {:parameters [isObligatory]
+   :roles [:authorityAdmin]
+   :input-validators  [(partial non-blank-parameters [:isObligatory])
+                       (partial boolean-parameters [:isObligatory])]}
+  [{{:keys [organizations]} :user}]
+  (update-organization (first organizations) {$set {:app-required-fields-filling-obligatory isObligatory}})
   (ok))
 
 (defquery krysp-config

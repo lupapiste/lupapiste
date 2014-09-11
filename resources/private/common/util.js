@@ -14,8 +14,7 @@ var util = (function() {
                           f = pair[1];
                       if (!_.isFunction(f)) { throw "The value of key '" + k + "' is not a function: " + f; }
                       m[k] = function() { f.apply(context || m, arguments); return m; };
-                      return m;
-                    },
+                      return m; },
                     {});
   }
 
@@ -33,7 +32,7 @@ var util = (function() {
   }
 
   function isValidEmailAddress(val) {
-    return (/\S+@\S+\.\S+/).test(val);
+    return /\S+@\S+\.\S+/.test(val);
   }
 
   var propertyIdDbFormat = /^([0-9]{1,3})([0-9]{1,3})([0-9]{1,4})([0-9]{1,4})$/;
@@ -112,6 +111,19 @@ var util = (function() {
     return undefined;
   }
 
+    function locKeyFromDocPath(pathStr) {
+    var res = (pathStr.replace(/\.+\d+\./g, ".")).replace(/\.+/g, ".");
+    return res;
+  }
+
+  function getDocumentOrder(doc) {
+    var num = doc.schema.info.order || 7;
+    return num * 10000000000 + doc.created / 1000;
+  }
+
+  function isPartyDoc(doc) { return doc["schema-info"].type === "party"; }
+  function isNotPartyDoc(doc) { return !isPartyDoc(doc); }
+
   function isValidFinnishY(y) {
     var m = /^FI(\d{7})-(\d)$/.exec(y || ""),
         number = m && m[1],
@@ -181,7 +193,11 @@ var util = (function() {
     nop:          nop,
     constantly:   function(value) { return function() { return value; }; },
     isNum:        isNum,
-    getIn:        getIn
+    getIn:        getIn,
+        locKeyFromDocPath: locKeyFromDocPath,
+    getDocumentOrder: getDocumentOrder,
+    isPartyDoc: isPartyDoc,
+    isNotPartyDoc: isNotPartyDoc
   };
 
 })();

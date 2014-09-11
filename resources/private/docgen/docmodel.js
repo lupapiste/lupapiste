@@ -1,4 +1,4 @@
-var DocModel = function(schema, model, meta, docId, application, authorizationModel, options) {
+var DocModel = function(schema, doc, application, authorizationModel, options) {
   "use strict";
 
   var self = this;
@@ -13,13 +13,13 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
   if (!self.schemaI18name) {
       self.schemaI18name = self.schemaName;
   }
-  self.model = model;
-  self.meta = meta;
-  self.docId = docId;
+  self.model = doc.data;
+  self.meta = doc.meta;
+  self.docId = doc.id;
   self.appId = application.id;
   self.application = application;
   self.authorizationModel = authorizationModel;
-  self.eventData = { doc: docId, app: self.appId };
+  self.eventData = { doc: doc.id, app: self.appId };
   self.propertyId = application.propertyId;
   self.isDisabled = options && options.disabled;
 
@@ -123,10 +123,6 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
     return "group-" + pathStrToID(pathStr);
   }
 
-  function locKeyFromPath(pathStr) {
-    return (self.schemaI18name + "." + pathStr.replace(/\.+\d+\./g, ".")).replace(/\.+/g, ".");
-  }
-
   // Option utils
 
   self.getCollection = function() {
@@ -150,7 +146,7 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
     var label = document.createElement("label");
     var path = groupLabel ? pathStr + "._group_label" : pathStr;
 
-    var locKey = locKeyFromPath(path);
+    var locKey = util.locKeyFromDocPath(self.schemaI18name + "." + path);
     if (schema.i18nkey) {
       locKey = schema.i18nkey;
     }
@@ -170,7 +166,7 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
   function makeInput(type, pathStr, value, extraClass, readonly) {
     var input = document.createElement("input");
     input.id = pathStrToID(pathStr);
-    input.name = docId + "." + pathStr;
+    input.name = self.docId + "." + pathStr;
     input.setAttribute("data-docgen-path", pathStr);
 
     try {
@@ -199,7 +195,7 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
 
   function makeEntrySpan(subSchema, pathStr) {
     var help = null;
-    var helpLocKey = locKeyFromPath(pathStr + ".help");
+    var helpLocKey = util.locKeyFromDocPath(self.schemaI18name + "." + pathStr + ".help");
     if (subSchema.i18nkey) {
       helpLocKey = subSchema.i18nkey + ".help";
     }
@@ -468,7 +464,7 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
     // date
     var input = $("<input>", {
       id: pathStrToID(myPath),
-      name: docId + "." + myPath,
+      name: self.docId + "." + myPath,
       type: "text",
       "class": "form-input text form-date",
       value: value
@@ -641,7 +637,7 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
 
         var buildingId = target.value;
         ajax
-          .command("merge-details-from-krysp", { id: self.appId, documentId: docId, buildingId: buildingId, collection: self.getCollection() })
+          .command("merge-details-from-krysp", { id: self.appId, documentId: self.docId, buildingId: buildingId, collection: self.getCollection() })
           .success(function () {
             save(event);
             repository.load(self.appId);
@@ -776,7 +772,7 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
       var userId = target.value;
       if (!_.isEmpty(userId)) {
         ajax
-        .command("set-user-to-document", { id: self.appId, documentId: docId, userId: userId, path: myNs, collection: self.getCollection() })
+        .command("set-user-to-document", { id: self.appId, documentId: self.docId, userId: userId, path: myNs, collection: self.getCollection() })
         .success(function () {
           save(event, function () { repository.load(self.appId); });
         })
@@ -908,7 +904,9 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
                 { title: loc("no") });
           };
           if (subSchema.type === "table") {
-            elem.appendChild(removeButton, elem.childNodes[0]);
+            var td = document.createElement("td");
+            td.appendChild(removeButton);
+            elem.appendChild(td, elem.childNodes[0]);
           } else {
             elem.insertBefore(removeButton, elem.childNodes[0]);
           }
@@ -929,12 +927,12 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
       var thead = document.createElement("thead");
       var tr = document.createElement("tr");
       _.each(subSchema.body, function(item) {
-        var locKey = locKeyFromPath(pathStr + "." + item.name);
+        var locKey = util.locKeyFromDocPath(self.schemaI18name + "." + pathStr + "." + item.name);
         if (item.i18nkey) {
           locKey = item.i18nkey;
         }
         var th = document.createElement("th");
-        th.textContent = loc(locKey);
+        th.innerHTML = loc(locKey);
         tr.appendChild(th);
       });
       // remove button column
@@ -978,7 +976,7 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
       var appendButton = makeButton(myPath.join("_") + "_append", loc([self.schemaI18name, myPath.join("."), "_append_label"]));
 
       var appender = function () {
-        var parent$ = $(this.parentNode);
+        var parent$ = $(this).closest(".accordion-fields")
         var count = parent$.children("*[data-repeating-id='" + repeatingId + "']").length;
         while (parent$.children("*[data-repeating-id-" + repeatingId + "='" + count + "']").length) {
           count++;
@@ -1145,7 +1143,7 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
       .call();
   }
 
-  function showValidationResults(results) {
+  self.showValidationResults = function(results) {
     // remove warning and error highlights
     $("#document-" + self.docId).find("*").removeClass("warn").removeClass("error").removeClass("tip");
     // clear validation errors
@@ -1172,7 +1170,7 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
     if (!options || options.validate) {
       ajax
         .query("validate-doc", { id: self.appId, doc: self.docId, collection: self.getCollection() })
-        .success(function (e) { showValidationResults(e.results); })
+        .success(function (e) { self.showValidationResults(e.results); })
         .call();
     }
   }
@@ -1211,7 +1209,7 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
   }
 
   function afterSave(label, loader, indicator, callback, status, results) {
-    showValidationResults(results);
+    self.showValidationResults(results);
     if (label) {
       label.removeChild(loader);
     }
@@ -1320,7 +1318,7 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
 
     sectionContainer.className = "accordion_content expanded";
     sectionContainer.setAttribute("data-accordion-state", "open");
-    sectionContainer.id = "document-" + docId;
+    sectionContainer.id = "document-" + self.docId;
 
     appendElements(elements, self.schema, self.model, []);
 
@@ -1330,7 +1328,14 @@ var DocModel = function(schema, model, meta, docId, application, authorizationMo
     return section;
   }
 
+
   self.element = buildElement();
-  validate();
+  // If doc.validationErrors is truthy, i.e. doc includes ready evaluated errors,
+  // self.showValidationResults is called with in docgen.js after this docmodel has been appended to DOM.
+  // So self.showValidationResults cannot be called here because of its jQuery lookups.
+  if (!doc.validationErrors) {
+    validate();
+  }
   disableBasedOnOptions();
+
 };

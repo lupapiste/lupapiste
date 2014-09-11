@@ -4,12 +4,12 @@
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.domain :as domain]))
 
-(defn- invite [apikey application-id document-id doc-name email]
+(defn- invite [apikey application-id document-id doc-name email & [text]]
   (command apikey :invite
     :id application-id
     :email email
     :title email
-    :text email
+    :text  (or text email)
     :documentName doc-name
     :documentId document-id
     :path ""))
@@ -43,14 +43,15 @@
     (fact "Mikko must be able to invite Teppo!"
       (last-email) ; Inbox zero
 
-      (invite mikko application-id suunnittelija-doc "suunnittelija" (email-for-key teppo)) => ok?
+      (invite mikko application-id suunnittelija-doc "suunnittelija" (email-for-key teppo) "Hei, sinut on kustuttu") => ok?
 
       (count (:invites (query teppo :invites))) => 1
 
       (let [email (last-email)]
         email => (partial contains-application-link? application-id)
         (:to email) => (email-for-key teppo)
-        (:subject email) => "Lupapiste.fi: Kutsukatu 13 - kutsu"))
+        (:subject email) => "Lupapiste.fi: Kutsukatu 13 - kutsu"
+        (get-in email [:body :plain]) => (contains "Hei, sinut on kustuttu")))
 
     (fact "Sonja must NOT be able to uninvite Teppo!"
       (command sonja :remove-auth :id application-id :email (email-for-key teppo)) => unauthorized?

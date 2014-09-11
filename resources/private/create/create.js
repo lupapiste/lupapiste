@@ -109,7 +109,7 @@
     self.requestType = ko.observable();
 
     self.clear = function() {
-      var zoomLevel = features.enabled("use-wmts-map") ? 2 : 0;
+      var zoomLevel = 2;
       if (self.map) {
         self.map.clear();
       } else {
@@ -147,6 +147,7 @@
     self.center = function(x, y, zoom) { if (self.map) { self.map.center(x, y, zoom); } return self; };
 
     self.addressOk = ko.computed(function() { return self.municipality() && !isBlank(self.addressString()); });
+    self.propertyIdOk = ko.computed(function(value) { return util.prop.isPropertyId(self.propertyId()) && !isBlank(self.propertyId());});
 
     //
     // Concurrency control:
@@ -202,7 +203,7 @@
       };
     }
 
-    function zoom(item, level) { self.center(item.location.x, item.location.y, level || zoomLevelEnum[item.type] || features.enabled("use-wmts-map") ? 11 : 8); }
+    function zoom(item, level) { self.center(item.location.x, item.location.y, level || zoomLevelEnum[item.type] || 11); }
     function zoomer(level) { return function(item) { zoom(item, level); }; }
     function fillMunicipality(item) {
       self.search(", " + loc(["municipality", item.municipality]));
@@ -220,11 +221,11 @@
     var handlers = [
       [{kind: "poi"}, comp(zoom, fillMunicipality)],
       [{kind: "address"}, comp(fillAddress, self.searchNow)],
-      [{kind: "address", type: "street"}, zoomer(features.enabled("use-wmts-map") ? 13 : 10)],
-      [{kind: "address", type: "street-city"}, zoomer(features.enabled("use-wmts-map") ? 13 : 10)],
-      [{kind: "address", type: "street-number"}, zoomer(features.enabled("use-wmts-map") ? 14 : 11)],
-      [{kind: "address", type: "street-number-city"}, zoomer(features.enabled("use-wmts-map") ? 14 : 11)],
-      [{kind: "property-id"}, comp(zoomer(features.enabled("use-wmts-map") ? 14 : 12), self.searchNow)]
+      [{kind: "address", type: "street"}, zoomer(13)],
+      [{kind: "address", type: "street-city"}, zoomer(13)],
+      [{kind: "address", type: "street-number"}, zoomer(14)],
+      [{kind: "address", type: "street-number-city"}, zoomer(14)],
+      [{kind: "property-id"}, comp(zoomer(14), self.searchNow)]
     ];
 
     var renderers = [
@@ -282,7 +283,7 @@
                 y = data.location.y;
             self
               .useManualEntry(false)
-              .center(x, y, features.enabled("use-wmts-map") ? 13 : 11)
+              .center(x, y, 13)
               .setXY(x, y)
               .addressData(data)
               .beginUpdateRequest()
@@ -300,7 +301,7 @@
                 y = data.y;
             self
               .useManualEntry(false)
-              .center(x, y, features.enabled("use-wmts-map") ? 14 : 11)
+              .center(x, y, 14)
               .setXY(x, y)
               .propertyId(id)
               .beginUpdateRequest()

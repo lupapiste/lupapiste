@@ -10,6 +10,13 @@ Hyv&auml;ksy&auml;ksesi roolin ja n&auml;hd&auml;ksesi hakemuksen tiedot klikkaa
 
 Jos linkki ei toimi, kopioi osoite ja liitä se selaimen osoiteriville.
 
+
+---
+
+Kutsujan viesti / Meddelande:
+
+{{message}}
+
 ---
 
 # Hej,

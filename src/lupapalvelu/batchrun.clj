@@ -1,15 +1,20 @@
 (ns lupapalvelu.batchrun
-  (:require [lupapalvelu.notifications :as notifications]
+  (:require [taoensso.timbre :refer [error]]
+            [lupapalvelu.notifications :as notifications]
             [lupapalvelu.neighbors :as neighbors]
             [lupapalvelu.open-inforequest :as inforequest]
             [clj-time.core :refer [days weeks months ago]]
             [clj-time.coerce :refer [to-long]]
             [monger.operators :refer :all]
+            [clojure.string :as s]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.core :refer [now]]
+            [lupapalvelu.core :refer [now ok?]]
             [lupapalvelu.user :as user]
-            [lupapalvelu.verdict-api :as application]
+            [lupapalvelu.logging :as logging]
+            [lupapalvelu.verdict-api :as verdict-api]
+            [lupapalvelu.organization :as organization]
+            [lupapalvelu.xml.krysp.reader :as krysp]
             [lupapalvelu.action :refer :all]
             [sade.util :as util]
             [sade.env :as env]
@@ -26,11 +31,9 @@
 
 (defn- older-than [timestamp] {$lt timestamp})
 
-(defn- get-app-owner-email [application]
-  (let [owner (domain/get-auths-by-role application :owner)
-        owner-id (-> owner first :id)
-        user (user/get-user-by-id owner-id)]
-    (:email user)))
+(defn- get-app-owner [application]
+  (let [owner (domain/get-auths-by-role application :owner)]
+    (user/get-user-by-id (-> owner first :id))))
 
 
 ;; Email definition for the "open info request reminder"
@@ -141,7 +144,7 @@
                                                {:reminder-sent (older-than timestamp-1-month-ago)}]})]
     (doseq [app apps]
       (notifications/notify! :reminder-application-state {:application app
-                                                          :data {:email (get-app-owner-email app)}})
+                                                          :data {:email (:email (get-app-owner app))}})
       (update-application (application->command app)
         {$set {:reminder-sent (now)}}))))
 
@@ -157,21 +160,44 @@
     (mongo/disconnect!)))
 
 (defn fetch-verdics []
-  (let [apps (mongo/select :applications {:state {$in ["sent"]}})
-        ids-of-all-orgs (map :id (mongo/select :organizations {} {:_id 1}))
+  (let [orgs-with-wfs-url-defined-for-some-scope (organization/get-organizations
+                                                   {$or [{:krysp.R.url {$exists true}}
+                                                         {:krysp.YA.url {$exists true}}
+                                                         {:krysp.P.url {$exists true}}
+                                                         {:krysp.MAL.url {$exists true}}
+                                                         {:krysp.VVVL.url {$exists true}}
+                                                         {:krysp.YI.url {$exists true}}
+                                                         {:krysp.YL.url {$exists true}}]}
+                                                   {:krysp 1})
+        orgs-by-id (reduce #(assoc %1 (:id %2) (:krysp %2)) {} orgs-with-wfs-url-defined-for-some-scope)
+        org-ids (keys orgs-by-id)
+        apps (mongo/select :applications {:state {$in ["sent"]} :organization {$in org-ids}})
         eraajo-user {:id "-"
                      :enabled true
                      :lastName "Er\u00e4ajo"
                      :firstName "Lupapiste"
                      :role "authority"
-                     :organizations ids-of-all-orgs}]
+                     :organizations org-ids}]
     (doall
       (pmap
-        (fn [app]
-          (let [command (application->command app)
-                verdicts-info (application/do-check-for-verdict command eraajo-user (now) (:application command))]
-            (when (and verdicts-info (pos? (:verdictCount verdicts-info)))
-              (notifications/notify! :application-verdict command))))
+        (fn [{:keys [id permitType organization] :as app}]
+
+          (try
+            (let [url (get-in orgs-by-id [organization (keyword permitType) :url])]
+              (logging/with-logging-context {:applicationId id}
+                (if-not (s/blank? url)
+
+                  (let [command (application->command app)
+                        resp (verdict-api/do-check-for-verdict command eraajo-user (now) (:application command))]
+                    (when (and (ok? resp) (:verdictCount resp) (pos? (:verdictCount resp)))
+                      ;; Print manually to events.log, because "normal" prints would be sent as emails to us.
+                      (logging/log-event :info {:run-by "Automatic verdicts checking" :event "Found new verdict"})
+                      (notifications/notify! :application-verdict command)))
+
+                  (logging/log-event :info {:run-by "Automatic verdicts checking"
+                                            :event "No Krysp WFS url defined for organization"
+                                            :organization {:id organization :permit-type permitType}}))))
+            (catch Exception e (error e))))
         apps))))
 
 (defn check-for-verdicts [& args]

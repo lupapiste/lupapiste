@@ -126,7 +126,7 @@
    :create-task  {:js ["create-task.js"]
                   :html ["create-task.html"]}
 
-   :application  {:depends [:common :repository :tree :task :create-task :modal-datepicker :signing]
+   :application  {:depends [:common :repository :tree :task :create-task :modal-datepicker :signing :invites]
                   :js ["add-link-permit.js" "map-model.js" "change-location.js" "invite.js" "verdicts-model.js"
                        "add-operation.js" "stamp-model.js" "request-statement-model.js" "add-party.js"
                        "application-model.js" "application.js"]
