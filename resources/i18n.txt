@@ -58,13 +58,15 @@ close:     Sulje
 
 register.company.add-user.open:          Lisää käyttäjä
 register.company.add-user.header:        Uusi yrityskäyttäjä
-register.company.add-user.message:       Anna uuden käyttäjän tiedot:
-register.company.add-user.submit:        Lisää käyttäjä
+register.company.add-user.message:       Uuden käyttäjän tiedot:
+register.company.add-user.searchUser:    Jatka
 register.company.add-user.admin:         Ylläpitäjä?
 register.company.add-user.pending:       Odota, pyyntöä käsitellään...
 register.company.add-user.done.header:   Käyttäjä kutsuttu.
 register.company.add-user.done.message:  Käyttäjälle on lähetetty sähköposti jonka avulla hän voi aktivoida tilinsä.
 register.company.add-user.done.canClose: Voit sulkea tämän ikkunan.
+register.company.add-user.submit:        Kutsu
+register.company.add-user.already-in:    Käyttäjä on jo yritystilin käyttäjänä.
 
 register.company.form.billing:            Laskutus tiedot:
 register.company.form.billing.reference:  Viite:

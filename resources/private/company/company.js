@@ -4,48 +4,87 @@
   var required      = {required: true},
       notRequired   = {required: false};
 
+  function assoc(m, k, v) { m[k] = v; return m; }
+  function dissoc(m, k) { delete m[k]; return m; }
+  function unObservableize(fields, m) { return _.reduce(fields, function(acc, f) { return assoc(acc, f, m[f]()); }, {}); }
+  function updateObservables(fields, target, source) { _.each(fields, function(f) { target[f](source[f]); }); return target; }
+
   // ========================================================================================
   // NewCompanyUser:
   // ========================================================================================
 
   function NewCompanyUser() {
-    this.model = ko.validatedObservable({
-      firstName: ko.observable().extend(required),
-      lastName:  ko.observable().extend(required),
-      email:     ko.observable().extend(required).extend({email: true}),
-      admin:     ko.observable().extend(notRequired)
-    });
+    this.email     = ko.observable().extend(required).extend({email: true});
+    this.firstName = ko.observable().extend(required);
+    this.lastName  = ko.observable().extend(required);
+    this.admin     = ko.observable().extend(notRequired);
 
-    this.pending   = ko.observable();
-    this.done      = ko.observable(false);
-    this.canSubmit = ko.computed(function() { return !this.pending() && this.model.isValid() && !this.done(); }, this);
+    this.fields = ["email", "firstName", "lastName", "admin"];
+
+    this.isValid = ko.computed(function() {
+      return _.every(this.fields, function(f) { return this[f].isValid(); }, this);
+    }, this);
+
+    this.showSearchEmail    = ko.observable();
+    this.showUserInCompany  = ko.observable();
+    this.showUserInvited    = ko.observable();
+    this.showUserDetails    = ko.observable();
+
+    this.views  = ["showSearchEmail", "showUserInCompany", "showUserInvited", "showUserDetails"];
+
+    this.canSearchUser    = this.email.isValid;
+    this.pending          = ko.observable();
+    this.canCancel        = ko.computed(function() { return this.pending(); }, this);
+
+    this.emailEnabled     = ko.observable();
+    this.done             = ko.observable();
+
+    this.canSubmit = ko.computed(function() { return !this.pending() && !this.done() && this.isValid(); }, this);
     this.canClose  = ko.computed(function() { return !this.pending(); }, this);
-
-    this.open = function() {
-      this
-        .pending(false)
-        .done(false)
-        .model()
-          .firstName(null)
-          .lastName(null)
-          .email(null)
-          .admin(false);
-      LUPAPISTE.ModalDialog.open("#dialog-company-new-user");
-    };
-
-    this.submit = function() {
-      var m = this.model(),
-          data = _.reduce(
-              ["firstName", "lastName", "email", "admin"],
-              function(acc, k) { acc[k] = m[k](); return acc; },
-              {});
-      ajax
-        .command("company-add-user", data)
-        .pending(this.pending)
-        .success(this.done.bind(this, true))
-        .call();
-    };
   }
+
+  NewCompanyUser.prototype.update = function(source) {
+    updateObservables(this.fields, this, source || {});
+    return this;
+  };
+
+  NewCompanyUser.prototype.searchUser = function() {
+    this.emailEnabled(false);
+    ajax
+      .query("company-search-user", {email: this.email()})
+      .pending(this.pending)
+      .success(function(data) {
+        var result = data.result;
+        if (result === "already-in-company") {
+          this.showSearchEmail(false).showUserInCompany(true);
+        } else if (result === "can-invite") {
+          this.showSearchEmail(false).showUserInvited(true);
+        } else if (result === "not-found") {
+          this.showSearchEmail(false).showUserDetails(true);
+        }
+      }, this)
+      .call();
+  };
+
+  NewCompanyUser.prototype.open = function() {
+    updateObservables(this.fields, this, {});
+    updateObservables(this.views, this, {});
+    this
+      .pending(false)
+      .done(false)
+      .emailEnabled(true)
+      .showSearchEmail(true);
+    LUPAPISTE.ModalDialog.open("#dialog-company-new-user");
+  };
+
+  NewCompanyUser.prototype.submit = function() {
+    console.log("submit:", unObservableize(this.fields, this));
+    ajax
+      .command("company-add-user", unObservableize(this.fields, this))
+      .pending(this.pending)
+      .success(this.done.bind(this, true))
+      .call();
+  };
 
   var newCompanyUser = new NewCompanyUser();
 
@@ -160,11 +199,6 @@
   // ========================================================================================
   // CompanyModel:
   // ========================================================================================
-
-  function assoc(m, k, v) { m[k] = v; return m; }
-  function dissoc(m, k) { delete m[k]; return m; }
-  function unObservableize(fieldNames, m) { return _.reduce(fieldNames, function(acc, field) { return assoc(acc, field, m[field]()); }, {}); }
-  function updateObservables(fieldNames, target, source) { _.each(fieldNames, function(field) { target[field](source[field]); }); return target; }
 
   function CompanyInfo(parent) {
     this.parent = parent;

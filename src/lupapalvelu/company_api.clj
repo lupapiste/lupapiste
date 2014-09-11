@@ -11,8 +11,13 @@
 ; Validator: check is user is either :admin or user belongs to requested company
 
 (defn validate-user-is-admin-or-company-member [{{:keys [role company]} :user {requested-company :company} :data}]
-  (if-not (or (= role :admin)
+  (if-not (or (= role "admin")
               (= (:id company) requested-company))
+    (fail "forbidden")))
+
+(defn validate-user-is-admin-or-company-admin [{user :user}]
+  (if-not (or (= (get user :role) "admin")
+              (= (get-in user [:company :role]) "admin"))
     (fail "forbidden")))
 
 ;;
@@ -46,6 +51,23 @@
       (fail! :forbidden))
     (c/update-user! user-id (keyword op) value)
     (ok)))
+
+(defquery company-search-user
+  {:roles [:anonymous]
+   :input-validators [validate-user-is-admin-or-company-admin]
+   :parameters [email]}
+  [{caller :user}]
+  (println "company-search-user:" caller)
+  (let [user (u/find-user {:email email})]
+    (cond
+      (nil? user)
+      (ok :result :not-found)
+
+      (get-in user [:company :id])
+      (ok :result :already-in-company)
+
+      :else
+      (ok :result :can-invite))))
 
 (defcommand company-add-user
   {:roles [:anonymous]
