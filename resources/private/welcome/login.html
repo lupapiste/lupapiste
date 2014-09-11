@@ -182,6 +182,22 @@
     </form>
   </section>
 
+  <section class="page container" id="invite-company-user">
+    <h1 data-bind="ltext: 'invite-company-user.title'"></h1>
+
+    <div data-bind="visible: pending">
+      <p data-bind="lhtml: 'new-company-user.loading'"></p>
+    </div>
+
+    <div data-bind="visible: ok">
+      <p data-bind="ltext: 'invite-company-user.success'"></p>
+      <a data-bind="ltext: 'invite-company-user.login'" href="#!/login"></a>
+    </div>
+
+    <div data-bind="visible: fail">
+      <p data-bind="ltext: 'invite-company-user.fail'"></p>
+    </div>
+  </section>
 
 </body>
 </html>

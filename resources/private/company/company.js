@@ -51,18 +51,27 @@
   NewCompanyUser.prototype.searchUser = function() {
     this.emailEnabled(false);
     ajax
-      .query("company-search-user", {email: this.email()})
+      .query("company-invite-user", {email: this.email()})
       .pending(this.pending)
       .success(function(data) {
         var result = data.result;
-        if (result === "already-in-company") {
-          this.showSearchEmail(false).showUserInCompany(true);
-        } else if (result === "can-invite") {
+        if (result === "invited") {
           this.showSearchEmail(false).showUserInvited(true);
+        } else if (result === "already-in-company") {
+          this.showSearchEmail(false).showUserInCompany(true);
         } else if (result === "not-found") {
           this.showSearchEmail(false).showUserDetails(true);
         }
       }, this)
+      .call();
+  };
+
+  NewCompanyUser.prototype.submit = function() {
+    console.log("submit:", unObservableize(this.fields, this));
+    ajax
+      .command("company-add-user", unObservableize(this.fields, this))
+      .pending(this.pending)
+      .success(this.done.bind(this, true))
       .call();
   };
 
@@ -75,15 +84,6 @@
       .emailEnabled(true)
       .showSearchEmail(true);
     LUPAPISTE.ModalDialog.open("#dialog-company-new-user");
-  };
-
-  NewCompanyUser.prototype.submit = function() {
-    console.log("submit:", unObservableize(this.fields, this));
-    ajax
-      .command("company-add-user", unObservableize(this.fields, this))
-      .pending(this.pending)
-      .success(this.done.bind(this, true))
-      .call();
   };
 
   var newCompanyUser = new NewCompanyUser();

@@ -59,6 +59,13 @@ new-company-user.subject:   Kutsu Lupapiste.fi palveluun
 new-company-user.title:     Tervetuloa Lupapiste.fi palvelun käyttäjäksi
 new-company-user.info:      Sinut on kutsuttu yritys-tilin käyttäjäksi <b>Lupapiste.fi</b> palveluun. Alla näet tiedot jotka kutsuja on syöttänyt.
 new-company-user.setpw:     Aseta itsellesi salasana
+new-company-user.loading:   Odota, tietoja ladataan...
+
+invite-company-user.subject:   Kutsu Lupapiste.fi palveluun
+invite-company-user.title:     Tilin liittäminen yrityksen tiliin
+invite-company-user.success:   Tilisi on liiitetty onnistuneesti yrityksen tiliin. Ole hyvä ja kirjaudu <b>Lupapiste.fi</b> paleluun tunnuksillasi.
+invite-company-user.fail:      Tilin liittäminen yrityksen tiliin epäonnistui. Valtuutus linkki on joko väärä, tai vanhentunut.
+invite-company-user.login:     Siirry Lupapiste.fi palveluun
 
 new-company-user.company-name:  Yrityksen nimi:
 new-company-user.company-y:     Yrityksen Y-tunnus:
@@ -73,7 +80,6 @@ userInfo.company.title:    Yrityksen tiedot
 userInfo.company.loading:  Odota, yrityksen tietoja ladataan...
 userInfo.company.name:     Yrityksen nimi:
 userInfo.company.y:        Y-tunnus:
-
 company.title:               Yritys
 company.loading:             Odota, yrityksen tietoja ladataan...
 company.user.firstName:      Etunimi

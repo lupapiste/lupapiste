@@ -52,12 +52,11 @@
     (c/update-user! user-id (keyword op) value)
     (ok)))
 
-(defquery company-search-user
+(defquery company-invite-user
   {:roles [:anonymous]
    :input-validators [validate-user-is-admin-or-company-admin]
    :parameters [email]}
   [{caller :user}]
-  (println "company-search-user:" caller)
   (let [user (u/find-user {:email email})]
     (cond
       (nil? user)
@@ -67,12 +66,15 @@
       (ok :result :already-in-company)
 
       :else
-      (ok :result :can-invite))))
+      (do
+        (c/invite-user! email (-> caller :company :id))
+        (ok :result :invited)))))
 
 (defcommand company-add-user
   {:roles [:anonymous]
-   :parameters [firstName lastName email admin]}
-  [{user :user}]
+   :parameters [firstName lastName email]}
+  [{user :user {:keys [admin]} :params}]
+  (println firstName lastName email (str "admin: [" admin "]"))
   (if-not (or (= (:role user) "admin")
               (= (get-in user [:company :role]) "admin"))
     (fail! :forbidden))

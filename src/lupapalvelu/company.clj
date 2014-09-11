@@ -1,5 +1,6 @@
 (ns lupapalvelu.company
-  (:require [monger.operators :refer :all]
+  (:require [taoensso.timbre :as timbre :refer [trace debug info infof warn warnf error fatal]]
+            [monger.operators :refer :all]
             [schema.core :as sc]
             [sade.util :refer [min-length-string max-length-string y? ovt? fn->]]
             [sade.env :as env]
@@ -8,7 +9,8 @@
             [lupapalvelu.core :refer [now ok fail!]]
             [lupapalvelu.token :as token]
             [lupapalvelu.notifications :as notif]
-            [lupapalvelu.user-api :as u])
+            [lupapalvelu.user-api :as uapi]
+            [lupapalvelu.user :as u])
   (:import [java.util Date]))
 
 ;;
@@ -88,7 +90,7 @@
     (fail! :bad-request)))
 
 ;;
-;; Add new company user:
+;; Add/invite new company user:
 ;;
 
 (defn add-user! [user company role]
@@ -105,7 +107,7 @@
 
 (defmethod token/handle-token :new-company-user [{{:keys [user company role]} :data} {password :password}]
   (find-company-by-id! (:id company)) ; make sure company still exists
-  (u/create-new-user nil
+  (uapi/create-new-user nil
                      {:email       (:email user)
                       :username    (:email user)
                       :firstName   (:firstName user)
@@ -117,4 +119,32 @@
                       :architect   true
                       :enabled     true}
                      :send-email false)
+  (ok))
+
+(defn invite-user! [user-email company-id]
+  (let [company   (find-company! {:id company-id})
+        user      (u/get-user-by-email user-email)
+        token-id  (token/make-token :invite-company-user nil {:user user, :company company, :role :user} :auto-consume false)]
+    (notif/notify! :invite-company-user {:user       user
+                                         :company    company
+                                         :ok-fi    (str (env/value :host) "/app/fi/welcome#!/invite-company-user/ok/" token-id)
+                                         :ok-sv    (str (env/value :host) "/app/sv/welcome#!/invite-company-user/ok/" token-id)
+                                         :cancel-fi    (str (env/value :host) "/app/fi/welcome#!/invite-company-user/cancel/" token-id)
+                                         :cancel-sv    (str (env/value :host) "/app/sv/welcome#!/invite-company-user/cancel/" token-id)})
+    token-id))
+
+(notif/defemail :invite-company-user {:subject-key   "invite-company-user.subject"
+                                      :recipients-fn (fn-> :user :email vector)
+                                      :model-fn      (fn [model _] model)})
+
+(defmethod token/handle-token :invite-company-user [{{:keys [user company role]} :data} {accept :ok}]
+  (infof "user %s (%s) %s invitation to company %s (%s)"
+         (if accept "ACCEPTED" "CANCELLED")
+         (:username user)
+         (:id user)
+         (:name company)
+         (:id company))
+  (when accept
+    (find-company-by-id! (:id company)) ; make sure company still exists
+    (u/link-user-to-company! (:id user) (:id company) role))
   (ok))

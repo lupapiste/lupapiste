@@ -275,3 +275,11 @@
 
 (defn same-user? [{id1 :id} {id2 :id}]
   (= id1 id2))
+
+;;
+;; Link user to company:
+;;
+
+(defn link-user-to-company! [user-id company-id role]
+  (println (str "\n\n==================: link: [" user-id "] [" company-id "] [" role "]")))
+

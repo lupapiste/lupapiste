@@ -167,6 +167,28 @@
   hub.onPageChange("login", function() { $("#login-username:first").focus(); });
 
   //
+  // Invite:
+  //
+
+  function InviteCompanyUser() {
+    this.result   = ko.observable("pending");
+    this.pending  = ko.computed(function() { return this.result() === "pending"; }, this);
+    this.ok       = ko.computed(function() { return this.result() === "ok"; }, this);
+    this.fail     = ko.computed(function() { return this.result() === "fail"; }, this);
+    hub.onPageChange("invite-company-user", this.open.bind(this));
+  }
+
+  InviteCompanyUser.prototype.open = function(e) {
+    this.result("pending");
+    ajax
+      .post("/api/token/" + e.pagePath[1])
+      .json({ok: true})
+      .success(this.result.bind(this, "ok"))
+      .fail(this.result.bind(this, "fail"))
+      .call();
+  };
+
+  //
   // Initialize:
   //
 
@@ -175,6 +197,7 @@
     $("section#reset").applyBindings(new Reset());
     $("section#setpw").applyBindings(new SetPW());
     $("section#new-company-user").applyBindings(new NewCompanyUser());
+    $("section#invite-company-user").applyBindings(new InviteCompanyUser());
 
     $("#login-button").click(login);
     $("#register-button").click(function() {
