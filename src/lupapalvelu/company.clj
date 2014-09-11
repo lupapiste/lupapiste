@@ -54,7 +54,7 @@
 (defn find-company
   "Returns company mathing the provided query, or nil"
   [q]
-  (mongo/select-one :companies (mongo/with-_id q)))
+  (some->> q (mongo/with-_id) (mongo/select-one :companies))) ; mongo/select-one return ANY FUCKING doc if query is nil. ANY...FUCKING....DOC...!!!!
 
 (defn find-company!
   "Returns company mathing the provided query. Throws if not found."
@@ -153,3 +153,18 @@
   (if accept
     (u/link-user-to-company! (:id user) (:id company) role))
   (ok))
+
+(defn company->auth [company]
+  (some-> company
+          (select-keys [:id :name :y])
+          (assoc :role      "writer"
+                 :type      "company"
+                 :username  (:y company)
+                 :firstName (:name company)
+                 :lastName  "")))
+
+(defn company-invite [application-id company-id]
+  (mongo/update-by-query :applications
+                         {:_id application-id}
+                         {$push {:auth (-> (find-company! {:id company-id})
+                                           (company->auth))}}))

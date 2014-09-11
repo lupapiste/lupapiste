@@ -79,11 +79,16 @@
   {:roles [:anonymous]
    :parameters [firstName lastName email]}
   [{user :user {:keys [admin]} :params}]
-  (println firstName lastName email (str "admin: [" admin "]"))
   (if-not (or (= (:role user) "admin")
               (= (get-in user [:company :role]) "admin"))
     (fail! :forbidden))
   (c/add-user! {:firstName firstName :lastName lastName :email email}
                (c/find-company-by-id (-> user :company :id))
                (if admin :admin :user))
+  (ok))
+
+(defcommand company-invite
+  {:roles [:anonymous]
+   :parameters [application-id company-id]}
+  (c/company-invite application-id company-id)
   (ok))

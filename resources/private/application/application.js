@@ -9,7 +9,6 @@
   var changeLocationModel = new LUPAPISTE.ChangeLocationModel();
   var addLinkPermitModel = new LUPAPISTE.AddLinkPermitModel();
   var constructionStateChangeModel = new LUPAPISTE.ModalDatepickerModel();
-  var inviteCompanyModel = new LUPAPISTE.InviteCompanyModel(applicationModel);
 
   constructionStateChangeModel.openConstructionStartDialog = _.partial(
       constructionStateChangeModel.openWithConfig,
@@ -61,6 +60,8 @@
   var preAttachmentsByGroup = ko.observableArray();
   var postAttachmentsByGroup = ko.observableArray();
   var postVerdict = ko.observable(false);
+
+  var inviteCompanyModel = new LUPAPISTE.InviteCompanyModel(applicationModel.id);
 
   var accordian = function(data, event) { accordion.toggle(event); };
 

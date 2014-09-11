@@ -646,10 +646,11 @@
                        :address             address
                        :propertyId          property-id
                        :title               address
-                       :auth                [owner]
+                       :auth                (if-let [company (some-> user :company :id c/find-company-by-id c/company->auth)]
+                                              (do (println "USER:" user) (println "COMP:" company) [owner company])
+                                              [owner])
                        :comments            (map #(domain/->comment % {:type "application"} (:role user) user nil created [:applicant :authority]) messages)
-                       :schema-version      (schemas/get-latest-schema-version)
-                       :company             (some-> user :company :id c/find-company-by-id (select-keys [:id :name :y]))})]
+                       :schema-version      (schemas/get-latest-schema-version)})]
     (merge application (when-not info-request?
                          {:attachments (make-attachments created op organization state)
                           :documents   (make-documents user created op application)}))))
