@@ -139,12 +139,11 @@
 
 (defmethod token/handle-token :invite-company-user [{{:keys [user company role]} :data} {accept :ok}]
   (infof "user %s (%s) %s invitation to company %s (%s)"
-         (if accept "ACCEPTED" "CANCELLED")
          (:username user)
          (:id user)
+         (if accept "ACCEPTED" "CANCELLED")
          (:name company)
          (:id company))
-  (when accept
-    (find-company-by-id! (:id company)) ; make sure company still exists
+  (if accept
     (u/link-user-to-company! (:id user) (:id company) role))
   (ok))

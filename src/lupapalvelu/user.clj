@@ -281,5 +281,4 @@
 ;;
 
 (defn link-user-to-company! [user-id company-id role]
-  (println (str "\n\n==================: link: [" user-id "] [" company-id "] [" role "]")))
-
+  (mongo/update :users {:_id user-id} {$set {:company {:id company-id, :role role}}}))

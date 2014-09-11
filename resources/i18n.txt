@@ -67,6 +67,8 @@ invite-company-user.success:   Tilisi on liiitetty onnistuneesti yrityksen tilii
 invite-company-user.fail:      Tilin liittäminen yrityksen tiliin epäonnistui. Valtuutus linkki on joko väärä, tai vanhentunut.
 invite-company-user.login:     Siirry Lupapiste.fi palveluun
 
+register.company.refesh: Päivitä
+
 new-company-user.company-name:  Yrityksen nimi:
 new-company-user.company-y:     Yrityksen Y-tunnus:
 new-company-user.firstName:     Etunimesi:
@@ -142,3 +144,9 @@ register.company.form.billing.pop:        Maksuoperaattori:
 
 error.invalidY:   Virheellinen Y-tunnus
 error.invalidOVT: Virheellinen OVT-tunnus
+
+company-invite.invite:     Valtuuta uusi yritys
+company-invite.add:        Valtuuta uusi yritys
+company-invite.desc:       Voit valtuuttaa yrityksen hakemukseesi
+company-invite.invite:     Valtuuta
+
