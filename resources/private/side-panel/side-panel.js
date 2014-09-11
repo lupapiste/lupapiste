@@ -1,8 +1,6 @@
-LUPAPISTE.SidePanelModel = function(authorizationModel) {
+LUPAPISTE.SidePanelModel = function(authorizationModel, takeAll) {
   "use strict";
   var self = this;
-
-  self.comment = ko.observable(comments.create(true));
   self.applicationId = ko.observable();
   self.notice = ko.observable({});
   if (LUPAPISTE.NoticeModel) {
@@ -10,11 +8,12 @@ LUPAPISTE.SidePanelModel = function(authorizationModel) {
   }
   self.showConversationPanel = ko.observable(false);
   self.showNoticePanel = ko.observable(false);
-  self.application = ko.observable();
   self.unseenComments = ko.observable();
   self.authorization = authorizationModel;
+  self.comment = ko.observable(comments.create(takeAll === undefined ? true : takeAll));
   self.permitType = ko.observable();
   self.authorities = ko.observableArray([]);
+  self.infoRequest = ko.observable();
 
   var AuthorityInfo = function(id, firstName, lastName) {
     this.id = id;
@@ -30,16 +29,16 @@ LUPAPISTE.SidePanelModel = function(authorizationModel) {
     self.authorities(authorityInfos);
   }
 
-  self.refresh = function(application, authorities) {
-    console.log("refresh side-panel", application, authorizationModel, authorities);
+  self.refresh = function(application, authorities, opts) {
+    console.log("refresh side-panel", application, authorizationModel, authorities, opts);
     self.applicationId(application.id);
-    self.application(ko.mapping.fromJS(application));
+    self.infoRequest(application.infoRequest);
     self.unseenComments(application.unseenComments);
     // Notice
     if (self.notice().refresh) {
       self.notice().refresh(application);
     }
-    self.comment().refresh(application);
+    self.comment().refresh(application, opts && "comments" in opts ? opts.comments : undefined);
     self.permitType(application.permitType);
     initAuthoritiesSelectList(authorities);
   }

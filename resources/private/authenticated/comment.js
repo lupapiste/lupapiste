@@ -1,5 +1,5 @@
 var comments = (function() {
-  "use strict";
+  // "use strict";
 
   function CommentModel(takeAll, newCommentRoles) {
     var self = this;
@@ -15,13 +15,17 @@ var comments = (function() {
     self.showPreparationComments = ko.observable(false);
 
     self.refresh = function(application, target) {
+      console.log("refresh comments", target);
       self.applicationId = application.id;
       self.target(target || {type: "application"}).text("");
+      console.log("target", self.target());
       var filteredComments =
         _.filter(application.comments,
             function(comment) {
+              console.log("filter", self.target().type === comment.target.type, self.target().id === comment.target.id, takeAll);
               return takeAll || self.target().type === comment.target.type && self.target().id === comment.target.id;
             });
+      console.log("commentsit", filteredComments);
       self.comments(ko.mapping.fromJS(filteredComments));
     };
 
@@ -76,7 +80,7 @@ var comments = (function() {
       return model.user && model.user.role && model.user.role() === "authority";
     };
     self.isForAttachment = function(model) {
-      return model && model.target && model.target.type() === "attachment";
+      return model && model.target && model.target.type && model.target.type() === "attachment";
     };
 
     function isPreparationComment(model) {
@@ -92,7 +96,8 @@ var comments = (function() {
   }
 
   return {
-    create: function(takeAll, newCommentRoles) { return new CommentModel(takeAll, newCommentRoles); }
+    create: function(takeAll, newCommentRoles) {
+      return new CommentModel(takeAll, newCommentRoles); }
   };
 
 })();

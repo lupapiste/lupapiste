@@ -56,7 +56,7 @@
         (update-in [:attachments] (partial only-authority-sees user relates-to-draft))
         commented-attachment-exists
         (update-in [:tasks] (partial only-authority-sees user relates-to-draft))
-        (#(filter-notice-from-application % user))))))
+        (filter-notice-from-application user)))))
 
 (defn get-application-as [application-id user]
   {:pre [user]}

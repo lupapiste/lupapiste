@@ -152,7 +152,7 @@
 
   var statementModel = new StatementModel();
   var authorizationModel = authorization.create();
-  var commentsModel = new comments.create(false);
+  // var commentsModel = new comments.create(true, undefined, authorizationModel);
   var attachmentsModel = new AttachmentsModel();
 
   repository.loaded(["statement"], function(application) {
@@ -160,7 +160,7 @@
       authorizationModel.refresh(application, {statementId: statementId});
       statementModel.refresh(application);
       attachmentsModel.refresh(application);
-      commentsModel.refresh(application, {type: "statement", id: statementId});
+      // commentsModel.refresh(application, {type: "statement", id: statementId});
     }
   });
 
@@ -175,7 +175,7 @@
     $("#statement").applyBindings({
       statementModel: statementModel,
       authorization: authorizationModel,
-      commentsModel: commentsModel,
+      // commentsModel: commentsModel,
       attachmentsModel: attachmentsModel
     });
   });

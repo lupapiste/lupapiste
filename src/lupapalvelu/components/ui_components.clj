@@ -115,7 +115,7 @@
                   :html ["signing-dialogs.html"]
                   :js ["signing-model.js"]}
 
-   :attachment   {:depends [:common :repository :signing]
+   :attachment   {:depends [:common :repository :signing :side-panel]
                   :js ["targeted-attachments-model.js" "attachment.js" "attachmentTypeSelect.js"]
                   :html ["targetted-attachments-template.html" "attachment.html" "upload.html"]}
 

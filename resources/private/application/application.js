@@ -5,7 +5,7 @@
   var currentId = null;
   var authorizationModel = authorization.create();
   var applicationModel = new LUPAPISTE.ApplicationModel(authorizationModel);
-  var commentModel = comments.create(true);
+  // var commentModel = comments.create(true);
   var sidePanelModel = new LUPAPISTE.SidePanelModel(authorizationModel);
   var changeLocationModel = new LUPAPISTE.ChangeLocationModel();
   var addLinkPermitModel = new LUPAPISTE.AddLinkPermitModel();
@@ -158,9 +158,10 @@
       inviteModel.setApplicationId(app.id);
 
       // Comments
-      commentModel.refresh(app);
+      // commentModel.refresh(app);
 
       // Side Panel
+      console.log("refresh side panel from application");
       sidePanelModel.refresh(app, applicationDetails.authorities);
 
       // Verdict details
@@ -438,8 +439,8 @@
       attachmentTemplatesModel: attachmentTemplatesModel,
       authorization: authorizationModel,
       changeLocationModel: changeLocationModel,
-      comment: commentModel,
       sidePanel: sidePanelModel,
+      // comment: commentModel,
       constructionStateChangeModel: constructionStateChangeModel,
       createTask: createTaskController,
       invite: inviteModel,
