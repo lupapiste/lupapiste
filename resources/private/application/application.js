@@ -448,7 +448,7 @@
       stampModel: stampModel,
       signingModel: signingModel,
       verdictModel: verdictModel,
-      inviteCompanyModel: inviteCompanyModel
+      openInviteCompany: inviteCompanyModel.open.bind(inviteCompanyModel)
     };
 
     $("#application").applyBindings(bindings);

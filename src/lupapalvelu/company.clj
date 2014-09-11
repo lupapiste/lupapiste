@@ -1,6 +1,7 @@
 (ns lupapalvelu.company
   (:require [taoensso.timbre :as timbre :refer [trace debug info infof warn warnf error fatal]]
             [monger.operators :refer :all]
+            [monger.query :as q]
             [schema.core :as sc]
             [sade.util :refer [min-length-string max-length-string y? ovt? fn->]]
             [sade.env :as env]
@@ -69,6 +70,11 @@
   "Returns company by given ID, throws if not found"
   [id]
   (or (find-company-by-id id) (fail! :company.not-found)))
+
+(defn find-companies []
+  (q/with-collection "companies"
+    (q/sort {:name 1})
+    (q/fields [:name :address1 :po])))
 
 (defn update-company!
   "Update company. Throws if company is not found, or if provided updates would make company invalid.

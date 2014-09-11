@@ -32,6 +32,11 @@
   (ok :company (c/find-company! {:id company})
       :users   (and users (u/get-users {:company.id company}))))
 
+(defquery companies
+  {:roles [:anonymous]}
+  [_]
+  (ok :companies (c/find-companies)))
+
 (defcommand company-update
   {:roles [:anonymous]
    :input-validators [validate-user-is-admin-or-company-member]

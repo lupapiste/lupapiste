@@ -1,6 +1,7 @@
 (ns lupapalvelu.stamper-test
   (:require [midje.sweet :refer :all]
-            [midje.util :refer [testable-privates]]))
+            [midje.util :refer [testable-privates]]
+            [lupapalvelu.stamper]))
 
 (testable-privates lupapalvelu.stamper calculate-x-y get-origin)
 
