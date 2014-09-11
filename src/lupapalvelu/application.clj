@@ -648,7 +648,7 @@
                        :title               address
                        :auth                [owner]
                        :comments            (map #(domain/->comment % {:type "application"} (:role user) user nil created [:applicant :authority]) messages)
-                       :schema-version      (schemas/get-latest-schema-version)})
+                       :schema-version      (schemas/get-latest-schema-version)
                        :company             (some-> user :company :id c/find-company-by-id (select-keys [:id :name :y]))})]
     (merge application (when-not info-request?
                          {:attachments (make-attachments created op organization state)
