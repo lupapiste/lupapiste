@@ -30,7 +30,7 @@
    :parameters [company]}
   [{{:keys [users]} :data}]
   (ok :company (c/find-company! {:id company})
-      :users   (and users (u/get-users {:company.id company}))))
+      :users   (and users (c/find-company-users company))))
 
 (defquery companies
   {:roles [:anonymous]}
@@ -90,5 +90,6 @@
 (defcommand company-invite
   {:roles [:anonymous]
    :parameters [application-id company-id]}
-  (c/company-invite application-id company-id)
+  [{caller :user}]
+  (c/company-invite caller application-id company-id)
   (ok))

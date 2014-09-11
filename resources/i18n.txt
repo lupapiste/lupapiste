@@ -63,9 +63,15 @@ new-company-user.loading:   Odota, tietoja ladataan...
 
 invite-company-user.subject:   Kutsu Lupapiste.fi palveluun
 invite-company-user.title:     Tilin liittäminen yrityksen tiliin
-invite-company-user.success:   Tilisi on liiitetty onnistuneesti yrityksen tiliin. Ole hyvä ja kirjaudu <b>Lupapiste.fi</b> paleluun tunnuksillasi.
+invite-company-user.success:   Tilisi on liiitetty onnistuneesti yrityksen tiliin. Ole hyvä ja kirjaudu Lupapiste.fi paleluun tunnuksillasi.
 invite-company-user.fail:      Tilin liittäminen yrityksen tiliin epäonnistui. Valtuutus linkki on joko väärä, tai vanhentunut.
 invite-company-user.login:     Siirry Lupapiste.fi palveluun
+
+accept-company-invitation.subject:   Kutsu hakemuksen liittämiseksi yritystiliin
+accept-company-invitation.title:     Hakemuksen liittäminen yrityksen tiliin
+accept-company-invitation.success:   Hakemus on liitetty onnistuneesti yrityksen tiliin.
+accept-company-invitation.fail:      Hakemusken liittäminen epäonnistui. Valtuutus linkki on joko jo käytetty, tai vanhentunut.
+accept-company-invitation.login:     Siirry Lupapiste.fi palveluun
 
 register.company.refesh: Päivitä
 
@@ -150,3 +156,4 @@ company-invite.add:        Valtuuta uusi yritys
 company-invite.desc:       Voit valtuuttaa yrityksen hakemukseesi
 company-invite.invite:     Valtuuta
 
+accept-company-invitation.subject:  Kutsu osallistua hakemuksen käsittelyyn

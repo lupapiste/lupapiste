@@ -3,7 +3,7 @@
             [monger.operators :refer :all]
             [monger.query :as q]
             [schema.core :as sc]
-            [sade.util :refer [min-length-string max-length-string y? ovt? fn->]]
+            [sade.util :refer [min-length-string max-length-string y? ovt? fn-> fn->>]]
             [sade.env :as env]
             [lupapalvelu.core :refer [fail!]]
             [lupapalvelu.mongo :as mongo]
@@ -75,6 +75,12 @@
   (q/with-collection "companies"
     (q/sort {:name 1})
     (q/fields [:name :address1 :po])))
+
+(defn find-company-users [company-id]
+  (u/get-users {:company.id company-id}))
+
+(defn find-company-admins [company-id]
+  (u/get-users {:company.id company-id, :company.role "admin"}))
 
 (defn update-company!
   "Update company. Throws if company is not found, or if provided updates would make company invalid.
@@ -163,8 +169,22 @@
                  :firstName (:name company)
                  :lastName  "")))
 
-(defn company-invite [application-id company-id]
+(defn company-invite [caller application-id company-id]
+  (let [admins    (find-company-admins company-id)
+        token-id  (token/make-token :accept-company-invitation nil {:caller caller, :company-id company-id, :application-id application-id} :auto-consume false)]
+    (notif/notify! :accept-company-invitation {:admins     admins
+                                               :caller     caller
+                                               :link-fi    (str (env/value :host) "/app/fi/welcome#!/accept-company-invitation/" token-id)
+                                               :link-sv    (str (env/value :host) "/app/sv/welcome#!/accept-company-invitation/" token-id)})
+    token-id))
+
+(notif/defemail :accept-company-invitation {:subject-key   "accept-company-invitation.subject"
+                                            :recipients-fn (fn->> :admins (map :email))
+                                            :model-fn      (fn [model _] model)})
+
+(defmethod token/handle-token :accept-company-invitation [{{:keys [company-id application-id]} :data} _]
+  (infof "comnpany %s accepted application %s" company-id application-id)
   (mongo/update-by-query :applications
                          {:_id application-id}
-                         {$push {:auth (-> (find-company! {:id company-id})
-                                           (company->auth))}}))
+                         {$push {:auth (-> (find-company! {:id company-id}) (company->auth))}})
+  (ok))
