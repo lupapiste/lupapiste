@@ -2,6 +2,8 @@ LUPAPISTE.SidePanelModel = function(authorizationModel, takeAll, newCommentRoles
   "use strict";
   var self = this;
 
+  takeAll = takeAll === undefined ? true : takeAll
+
   self.applicationId = ko.observable();
   self.notice = ko.observable({});
   if (LUPAPISTE.NoticeModel) {
