@@ -1,5 +1,6 @@
 (ns lupapalvelu.verdict-api
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error fatal]]
+            [pandect.core :as pandect]
             [monger.operators :refer :all]
             [sade.http :as http]
             [sade.strings :as ss]
@@ -31,7 +32,7 @@
                                (clojure.string/replace (get (:headers resp) "content-disposition") #"attachment;filename=" ""))
 
             content-length  (util/->int (get-in resp [:headers "content-length"] 0))
-            urlhash         (digest/sha1 url)
+            urlhash         (pandect/sha1 url)
             attachment-id   urlhash
             attachment-type {:type-group "muut" :type-id "muu"}
             target          {:type "verdict" :id verdict-id :urlHash urlhash}

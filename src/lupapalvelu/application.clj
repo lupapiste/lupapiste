@@ -2,7 +2,7 @@
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error fatal]]
             [clojure.string :refer [blank? join trim split]]
             [clojure.walk :refer [keywordize-keys]]
-            [swiss-arrows.core :refer [-<>>]]
+            [swiss.arrows :refer [-<>>]]
             [clj-time.core :refer [year]]
             [clj-time.local :refer [local-now]]
             [clj-time.format :as tf]
