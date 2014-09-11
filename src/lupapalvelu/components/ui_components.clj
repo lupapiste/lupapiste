@@ -137,7 +137,7 @@
                   :html ["applications.html"]
                   :js ["applications.js"]}
 
-   :statement    {:depends [:common :repository]
+   :statement    {:depends [:common :repository :side-panel]
                   :js ["statement.js"]
                   :html ["statement.html"]}
 
