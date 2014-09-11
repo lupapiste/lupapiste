@@ -22,6 +22,7 @@
       <button data-bind="click: deleteVerdict, enable: $data.draft() && $root.authorization.ok('delete-verdict'), ltext: 'verdict.delete'" class="btn" style="float:right" data-test-id="delete-verdict"></button>
     </div>
 
+    <div data-bind="template: {name: 'side-panel-template', data: $root.sidePanel}"></div>
     <div>
       <form>
         <label class="form-label" data-bind="ltext: 'verdict.id'"></label><br/>

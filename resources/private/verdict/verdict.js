@@ -170,8 +170,8 @@ LUPAPISTE.verdictPageController = (function() {
   var authorizationModel = authorization.create();
   var attachmentsModel = new LUPAPISTE.TargetedAttachmentsModel({}, "muut.muu");
   var createTaskController = LUPAPISTE.createTaskController;
-  // var commentsModel = new comments.create(false, ["authority"], authorizationModel);
   var authorities = ko.observableArray([]);
+  var sidePanelModel = new LUPAPISTE.SidePanelModel(authorizationModel, false, ["authority"]);
 
   function refresh(application, authorityUsers, verdictId) {
     var target = {type: "verdict", id: verdictId};
@@ -183,7 +183,7 @@ LUPAPISTE.verdictPageController = (function() {
     verdictModel.refresh(application, verdictId);
     attachmentsModel.refresh(application, target);
     createTaskController.reset(currentApplicationId, target);
-    // commentsModel.refresh(application, target);
+    sidePanelModel.refresh(application, authorityUsers, {comments: target});
     authorities(authorityUsers);
   }
 
@@ -212,9 +212,9 @@ LUPAPISTE.verdictPageController = (function() {
       authorization: authorizationModel,
       attachmentsModel: attachmentsModel,
       createTask: createTaskController,
-      // commentsModel: commentsModel,
       authorities: authorities, // Authorities for comment template
-      application: {} // Dummy application for comment template
+      application: {}, // Dummy application for comment template
+      sidePanel: sidePanelModel
     });
   });
 

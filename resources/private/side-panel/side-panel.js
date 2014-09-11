@@ -1,6 +1,7 @@
-LUPAPISTE.SidePanelModel = function(authorizationModel, takeAll) {
+LUPAPISTE.SidePanelModel = function(authorizationModel, takeAll, newCommentRoles) {
   "use strict";
   var self = this;
+
   self.applicationId = ko.observable();
   self.notice = ko.observable({});
   if (LUPAPISTE.NoticeModel) {
@@ -10,7 +11,7 @@ LUPAPISTE.SidePanelModel = function(authorizationModel, takeAll) {
   self.showNoticePanel = ko.observable(false);
   self.unseenComments = ko.observable();
   self.authorization = authorizationModel;
-  self.comment = ko.observable(comments.create(takeAll === undefined ? true : takeAll));
+  self.comment = ko.observable(comments.create(takeAll, newCommentRoles));
   self.permitType = ko.observable();
   self.authorities = ko.observableArray([]);
   self.infoRequest = ko.observable();
@@ -30,7 +31,7 @@ LUPAPISTE.SidePanelModel = function(authorizationModel, takeAll) {
   }
 
   self.refresh = function(application, authorities, opts) {
-    console.log("refresh side-panel", application, authorizationModel, authorities, opts);
+    console.log("refresh side-panel", application, authorizationModel, authorities, opts, newCommentRoles);
     self.applicationId(application.id);
     self.infoRequest(application.infoRequest);
     self.unseenComments(application.unseenComments);
