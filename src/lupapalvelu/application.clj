@@ -145,14 +145,6 @@
           :permitSubtypes (permit/permit-subtypes (:permitType app))))
     (fail :error.not-found)))
 
-;; Gets an array of application ids and returns a map for each application that contains the
-;; application id and the authorities in that organization.
-(defquery authorities-in-applications-organization
-  {:parameters [:id]
-   :roles [:applicant :authority]}
-  [{app :application}]
-  (ok :authorityInfo (find-authorities-in-applications-organization app)))
-
 (defn filter-repeating-party-docs [schema-version schema-names]
   (let [schemas (schemas/get-schemas schema-version)]
     (filter
