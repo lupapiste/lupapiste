@@ -242,7 +242,7 @@
 (defcommand approve-invite
   {:parameters [id]
    :roles      [:applicant]
-   :states     (action/all-application-states-but [:sent :verdictGiven :constructionStarted :closed :canceled])}   ;; TODO: Info state removed, ok?
+   :states     (action/all-application-states-but [:sent :verdictGiven :constructionStarted :closed :canceled])}
   [{:keys [created user application] :as command}]
   (when-let [my-invite (domain/invite application (:email user))]
     (update-application command
@@ -311,7 +311,7 @@
 (defcommand set-user-to-document
   {:parameters [id documentId userId path]
    :roles      [:applicant :authority]
-   :states     (action/all-states-but [:info :sent :verdictGiven :constructionStarted :closed :canceled])}    ;; TODO: Info-tila pois?
+   :states     (action/all-states-but [:info :sent :verdictGiven :constructionStarted :closed :canceled])}
   [{:keys [user created application] :as command}]
   (if-let [document (domain/get-document-by-id application documentId)]
     (set-user-to-document application document userId path user created)
