@@ -137,12 +137,13 @@
     (fact "Mikko sees the application" (query mikko :application :id application-id) => ok?)
     (fact "Sonja sees the application" (query sonja :application :id application-id) => ok?)
     (fact "Sonja can cancel Mikko's application" (command sonja :cancel-application :id application-id) => ok?)
-    (fact "Sonja does not see the application" (query sonja :application :id application-id) => fail?)
+    (fact "Sonja sees the canceled application" (query sonja :application :id application-id) => ok?)
     (let [email (last-email)]
       (:to email) => (email-for-key mikko)
       (:subject email) => "Lupapiste.fi: Peruutustie 23 - hakemuksen tila muuttunut"
       (get-in email [:body :plain]) => (contains "Peruutettu")
       email => (partial contains-application-link? application-id)))
+
   (fact "Authority can cancel own application"
     (let [application-id  (create-app-id sonja :municipality sonja-muni)]
       (fact "Sonja sees the application" (query sonja :application :id application-id) => ok?)
