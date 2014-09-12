@@ -1,7 +1,7 @@
 (ns lupapalvelu.document.canonical-common
   (:require [clojure.string :as s]
             [clojure.walk :as walk]
-            [swiss-arrows.core :refer [-<>]]
+            [swiss.arrows :refer [-<>]]
             [sade.strings :as ss]
             [sade.util :refer :all]
             [lupapalvelu.core :refer [now]]

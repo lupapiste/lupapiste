@@ -6,7 +6,7 @@
             [clojure.walk :as walk]
             [me.raynes.fs :as fs]
             [monger.collection :as mc]
-            [swiss-arrows.core :refer :all])
+            [swiss.arrows :refer :all])
   (:import [org.jasypt.encryption.pbe StandardPBEStringEncryptor]
            [org.jasypt.properties EncryptableProperties]))
 
@@ -59,7 +59,7 @@
                           (io/file (System/getProperty "lupapiste.properties"))
                           (io/file (System/getenv "LUPAPISTE_PROPERTIES"))]))))
 
-(def ^:private config (atom (read-all-configs)))
+(defonce ^:private config (atom (read-all-configs)))
 
 (defn get-config [] @config)
 
@@ -114,7 +114,7 @@
 (def log-level (keyword (get-prop "lupapiste.loglevel" (if (= mode :dev) "debug" "info"))))
 (def log-dir (get-prop "lupapiste.logdir" (if (= mode :dev) "target" "")))
 (def perf-mon-on (Boolean/parseBoolean (str (get-prop "lupapiste.perfmon" "false"))))
-(def proxy-off (atom (Boolean/parseBoolean (str (get-prop "lupapiste.proxy-off" "false")))))
+(defonce proxy-off (atom (Boolean/parseBoolean (str (get-prop "lupapiste.proxy-off" "false")))))
 
 (defn dev-mode? []
   (= :dev mode))
