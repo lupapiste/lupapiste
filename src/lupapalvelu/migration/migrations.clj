@@ -553,5 +553,16 @@
 (defmigration add-location-to-rakennuspaikat
   {:apply-when (pos? (mongo/count :applications {:documents {$elemMatch {$and [{"schema-info.name" {$in ["rakennuspaikka"
                                                                                                          "poikkeusasian-rakennuspaikka"
-                                                                                                         "vesihuolto-kiinteisto"]}}
-                                                                               {:schema-info.type {$exists false}}]}}}))})
+                                                                                                         "vesihuolto-kiinteisto"
+                                                                                                         "kiinteisto"]}}
+                                                                               {:schema-info.type {$exists false}}]}}}))}
+  (doseq [collection [:applications :submitted-applications]]
+    (let [names #{"rakennuspaikka" "poikkeusasian-rakennuspaikka" "vesihuolto-kiinteisto" "kiinteisto"}
+          applications-to-update (mongo/select collection)]
+      (doseq [application applications-to-update]
+        (let [new-documents (map
+                              #(if ((contains? names (-> % :schema-info :name))) 
+                                 (update-in % [:schema-info] assoc :type "location")
+                                 %)
+                              (:documents application))]
+          (mongo/update-by-id collection (:id application) {$set {:documents new-documents}}))))))
