@@ -548,3 +548,10 @@
     (if (some seq (map #(tools/deep-find % :huoneistot) (:documents application))) 
       (let [updated-documents (flatten-huoneisto-data application)]
         (mongo/update-by-id collection (:id application) {$set {:documents updated-documents}})))))
+
+
+(defmigration add-location-to-rakennuspaikat
+  {:apply-when (pos? (mongo/count :applications {:documents {$elemMatch {$and [{"schema-info.name" {$in ["rakennuspaikka"
+                                                                                                         "poikkeusasian-rakennuspaikka"
+                                                                                                         "vesihuolto-kiinteisto"]}}
+                                                                               {:schema-info.type {$exists false}}]}}}))})
