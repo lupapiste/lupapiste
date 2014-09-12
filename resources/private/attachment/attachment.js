@@ -9,7 +9,6 @@ var attachment = (function() {
   var authorizationModel = authorization.create();
   var approveModel = new ApproveModel(authorizationModel);
   var signingModel = new LUPAPISTE.SigningModel("#dialog-sign-attachment", false);
-  var sidePanelModel = new LUPAPISTE.SidePanelModel(authorizationModel, false);
 
   function deleteAttachmentFromServer() {
     ajax
@@ -230,7 +229,6 @@ var attachment = (function() {
     authorizationModel.refresh(application, {attachmentId: attachmentId});
 
     // Side Panel
-    sidePanelModel.refresh(application, applicationDetails.authorities, {comments: {type: "attachment", id: attachmentId}});
 
     pageutil.hideAjaxWait();
   }
@@ -274,7 +272,6 @@ var attachment = (function() {
       attachment: model,
       approve: approveModel,
       authorization: authorizationModel,
-      sidePanel: sidePanelModel
     });
     $("#upload-page").applyBindings({});
     $(signingModel.dialogSelector).applyBindings({signingModel: signingModel, authorization: authorizationModel});

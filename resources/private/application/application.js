@@ -5,8 +5,6 @@
   var currentId = null;
   var authorizationModel = authorization.create();
   var applicationModel = new LUPAPISTE.ApplicationModel(authorizationModel);
-  // var commentModel = comments.create(true);
-  var sidePanelModel = new LUPAPISTE.SidePanelModel(authorizationModel);
   var changeLocationModel = new LUPAPISTE.ChangeLocationModel();
   var addLinkPermitModel = new LUPAPISTE.AddLinkPermitModel();
   var constructionStateChangeModel = new LUPAPISTE.ModalDatepickerModel();
@@ -156,12 +154,6 @@
 
       // Invite
       inviteModel.setApplicationId(app.id);
-
-      // Comments
-      // commentModel.refresh(app);
-
-      // Side Panel
-      sidePanelModel.refresh(app, applicationDetails.authorities);
 
       // Verdict details
       verdictModel.refresh(app, applicationDetails.authorities);
@@ -438,8 +430,6 @@
       attachmentTemplatesModel: attachmentTemplatesModel,
       authorization: authorizationModel,
       changeLocationModel: changeLocationModel,
-      sidePanel: sidePanelModel,
-      // comment: commentModel,
       constructionStateChangeModel: constructionStateChangeModel,
       createTask: createTaskController,
       invite: inviteModel,

@@ -1,19 +1,20 @@
-LUPAPISTE.SidePanelModel = function(authorizationModel, takeAll, newCommentRoles) {
+LUPAPISTE.SidePanelModel = function() {
   "use strict";
   var self = this;
 
-  takeAll = takeAll === undefined ? true : takeAll
+  self.typeId = undefined;
 
   self.applicationId = ko.observable();
   self.notice = ko.observable({});
+  self.attachmentId = ko.observable();
   if (LUPAPISTE.NoticeModel) {
     self.notice(new LUPAPISTE.NoticeModel());
   }
   self.showConversationPanel = ko.observable(false);
   self.showNoticePanel = ko.observable(false);
   self.unseenComments = ko.observable();
-  self.authorization = authorizationModel;
-  self.comment = ko.observable(comments.create(takeAll, newCommentRoles));
+  self.authorization = authorization.create();
+  self.comment = ko.observable(comments.create());
   self.permitType = ko.observable();
   self.authorities = ko.observableArray([]);
   self.infoRequest = ko.observable();
@@ -32,14 +33,26 @@ LUPAPISTE.SidePanelModel = function(authorizationModel, takeAll, newCommentRoles
     self.authorities(authorityInfos);
   }
 
-  self.refresh = function(application, authorities, opts) {
+  self.refresh = function(application, authorities) {
     self.applicationId(application.id);
     self.infoRequest(application.infoRequest);
     self.unseenComments(application.unseenComments);
     if (self.notice().refresh) {
       self.notice().refresh(application);
     }
-    self.comment().refresh(application, opts && "comments" in opts ? opts.comments : undefined);
+    var type = pageutil.getPage();
+    switch(type) {
+      case "attachment":
+      case "statement":
+        self.comment().refresh(application, false, {type: type, id: pageutil.lastSubPage()});
+        break;
+      case "verdict":
+        self.comment().refresh(application, false, {type: type, id: pageutil.lastSubPage()}, ["authority"]);
+        break;
+      default:
+        self.comment().refresh(application, true);
+        break;
+    }
     self.permitType(application.permitType);
     initAuthoritiesSelectList(authorities);
   }
@@ -63,7 +76,7 @@ LUPAPISTE.SidePanelModel = function(authorizationModel, takeAll, newCommentRoles
 
     setTimeout(function() {
       // Mark comments seen after a second
-      if (self.applicationId() && authorizationModel.ok("mark-seen")) {
+      if (self.applicationId() && self.authorization.ok("mark-seen")) {
         ajax.command("mark-seen", {id: self.applicationId(), type: "comments"})
           .success(function() {self.unseenComments(0);})
           .call();
@@ -84,4 +97,16 @@ LUPAPISTE.SidePanelModel = function(authorizationModel, takeAll, newCommentRoles
       self.toggleNoticePanel();
     }
   }
+
+  repository.loaded(["application","inforequest","attachment","statement","neighbors","task","verdict"], function(application, applicationDetails) {
+    self.authorization.refreshWithCallback({id: applicationDetails.application.id}, function() {
+      self.refresh(application, applicationDetails.authorities);
+    });
+    $("#side-panel-template").addClass("visible");
+  });
 }
+
+$(function() {
+  var sidePanel = new LUPAPISTE.SidePanelModel();
+  $("#side-panel-template").applyBindings(sidePanel);
+});
