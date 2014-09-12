@@ -18,7 +18,7 @@
 
 (defn get-organizations
   ([]
-    (get-organizations {}))
+    (get-organizations {} {}))
   ([query]
     (get-organizations query {}))
   ([query projection]

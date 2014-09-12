@@ -136,7 +136,7 @@
 (defquery application
   {:roles [:applicant :authority]
    :extra-auth-roles [:any]
-   :parameters [:id]}
+   :parameters       [:id]}
   [{app :application user :user}]
   (if app
     (let [app (assoc app :allowedAttachmentTypes (attachment/get-attachment-types-for-application app))]
@@ -282,18 +282,19 @@
              $set  {:modified (:created command)}}
             (when (seq doc-updates) {$unset doc-updates})))))))
 
-(defcommand decline-invitation
-  {:parameters [:id]
-   :roles [:applicant :authority]}
-  [command]
-  (do-remove-auth command (get-in command [:user :email])))
-
 (defcommand remove-auth
   {:parameters [:id email]
    :input-validators [(partial action/non-blank-parameters [:email])]
    :roles      [:applicant :authority]}
   [command]
   (do-remove-auth command email))
+
+(defcommand decline-invitation
+  {:parameters [:id]
+   :roles [:applicant :authority]
+   :states     (action/all-application-states-but [:canceled])}
+  [command]
+  (do-remove-auth command (get-in command [:user :email])))
 
 (defcommand mark-seen
   {:parameters [:id type]

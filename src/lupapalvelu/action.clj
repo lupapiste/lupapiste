@@ -310,19 +310,19 @@
 ;;
 
 (def supported-action-meta-data
-  {:parameters "Vector of parameters. Parameters can be keywords or symbols. Symbols will be available in the action body. If a parameter is missing from request, an error will be raised."
-   :roles "Vector of role keywords."
-   :extra-auth-roles "Vector of role keywords."
+  {:parameters  "Vector of parameters. Parameters can be keywords or symbols. Symbols will be available in the action body. If a parameter is missing from request, an error will be raised."
+   :roles       "Vector of role keywords."
+   :extra-auth-roles  "Vector of role keywords."
    :description "Documentation string."
-   :notified "Boolean. Documents that the action will be sending (email) notifications."
-   :pre-checks "Vector of functions."
-   :input-validators "Vector of functions."
-   :states  "Vector of application state keywords"
+   :notified    "Boolean. Documents that the action will be sending (email) notifications."
+   :pre-checks  "Vector of functions."
+   :input-validators  "Vector of functions."
+   :states      "Vector of application state keywords"
    :on-complete "Function or vector of functions."
-   :on-success "Function or vector of functions."
-   :on-fail "Function or vector of functions."
-   :feature "Keyword: feature flag name. Action is run only if the feature flag is true.
-             If you have feature.some-feature properties file, use :feature :some-feature in action meta data"})
+   :on-success  "Function or vector of functions."
+   :on-fail     "Function or vector of functions."
+   :feature     "Keyword: feature flag name. Action is run only if the feature flag is true.
+                 If you have feature.some-feature properties file, use :feature :some-feature in action meta data"})
 
 (def ^:private supported-action-meta-data-keys (set (keys supported-action-meta-data)))
 
@@ -335,9 +335,9 @@
     (swap! actions assoc
       action-keyword
       (merge meta-data {:type action-type
-                     :ns ns-str
-                     :line line
-                     :handler handler}))))
+                        :ns ns-str
+                        :line line
+                        :handler handler}))))
 
 (defmacro defaction [form-meta action-type action-name & args]
   (let [doc-string  (when (string? (first args)) (first args))
