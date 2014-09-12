@@ -344,7 +344,9 @@
 
 (defn register-action [action-type action-name meta-data line ns-str handler]
   (assert (every? supported-action-meta-data-keys (keys meta-data)) (str (keys meta-data)))
-  (assert (seq (:roles meta-data)) (str "You must defive :roles meta data for " action-name ". Use :roles [:anonymous] to grant access to anyone."))
+  (assert (seq (:roles meta-data)) (str "You must define :roles meta data for " action-name ". Use :roles [:anonymous] to grant access to anyone."))
+  (assert (if (some #(= % :id) (:parameters meta-data)) (seq (:states meta-data)) true)
+    (str "You must define :states meta data for " action-name " if action has the :id parameter (i.e. application is attached to the action)."))
 
   (let [action-keyword (keyword action-name)]
     (tracef "registering %s: '%s' (%s:%s)" (name action-type) action-name ns-str line)
