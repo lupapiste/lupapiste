@@ -36,7 +36,10 @@ operations.rasitetoimitus: Rasitetoimitus
 operations.rasitetoimitus.desc:
 operations.tilan-rekisteroiminen-tontiksi: Tilan rekisteröiminen tontiksi
 operations.tilan-rekisteroiminen-tontiksi.desc:
-operations.tonttijaon-hakeminen.desc:
+operations.tonttijaon-hakeminen.desc: Tonttijako on lohkomissuunnitelma, joka tarvitaan asemakaava-alueella ennen lohkomista. Tonttijako lähtee liikkeelle maanomistajan aloitteesta.
+
+Ensimmäinen tonttijako on maksuton, jos korttelialueella on useita maanomistajia. Jos tonttijako tehdään vain yhden maanomistajan tarpeisiin, peritään siitä maksu.
+
 operations.tonttijaon-muutoksen-hakeminen: Tonttijaon hakeminen
 operations.tonttijaon-muutoksen-hakeminen.desc: Tonttijaon muutoksen hakeminen
 operations.yhdistaminen: Yhdistäminen
