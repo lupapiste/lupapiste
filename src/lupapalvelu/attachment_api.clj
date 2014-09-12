@@ -6,7 +6,7 @@
             [sade.strings :as ss]
             [sade.util :refer [future*]]
             [lupapalvelu.core :refer [ok fail fail!]]
-            [lupapalvelu.action :refer [defquery defcommand defraw update-application application->command notify]]
+            [lupapalvelu.action :refer [defquery defcommand defraw update-application application->command notify] :as action]
             [lupapalvelu.comment :as comment]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.attachment :as a]
@@ -86,7 +86,8 @@
 (defquery attachment-types
   {:parameters [:id]
    :extra-auth-roles [:statementGiver]
-   :roles      [:applicant :authority]}
+   :roles      [:applicant :authority]
+   :states     action/all-states}
   [{application :application}]
   (ok :attachmentTypes (attachment/get-attachment-types-for-application application)))
 
@@ -94,7 +95,7 @@
   {:parameters [id attachmentId attachmentType]
    :roles      [:applicant :authority]
    :extra-auth-roles [:statementGiver]
-   :states     [:draft :info :open :submitted :complement-needed :verdictGiven :constructionStarted]}
+   :states     (action/all-states-but [:answered :sent :closed :canceled])}
   [{:keys [application user] :as command}]
 
   (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
@@ -117,7 +118,7 @@
   {:description "Authority can approve attachment, moves to ok"
    :parameters  [id attachmentId]
    :roles       [:authority]
-   :states      [:draft :info :open :submitted :complement-needed :verdictGiven :constructionStarted]}
+   :states      (action/all-states-but [:answered :sent :closed :canceled])}
   [{:keys [created] :as command}]
   (update-application command
     {:attachments {$elemMatch {:id attachmentId}}}
@@ -128,7 +129,7 @@
   {:description "Authority can reject attachment, requires user action."
    :parameters  [id attachmentId]
    :roles       [:authority]
-   :states      [:draft :info :open :submitted :complement-needed :verdictGiven :constructionStarted]}
+   :states      (action/all-states-but [:answered :sent :closed :canceled])}
   [{:keys [created] :as command}]
   (update-application command
     {:attachments {$elemMatch {:id attachmentId}}}
@@ -143,7 +144,7 @@
   {:description "Authority can set a placeholder for an attachment"
    :parameters  [:id :attachmentTypes]
    :roles       [:authority]
-   :states      [:draft :info :open :submitted :complement-needed :verdictGiven :constructionStarted]}
+   :states      (action/all-states-but [:answered :sent :closed :canceled])}
   [{application :application {attachment-types :attachmentTypes} :data created :created}]
   (if-let [attachment-ids (a/create-attachments application attachment-types created)]
     (ok :applicationId (:id application) :attachmentIds attachment-ids)
@@ -158,7 +159,7 @@
    :parameters  [id attachmentId]
    :roles       [:applicant :authority]
    :extra-auth-roles [:statementGiver]
-   :states      [:draft :info :open :submitted :complement-needed :verdictGiven :constructionStarted]}
+   :states      (action/all-states-but [:answered :sent :closed :canceled])}
   [{:keys [application user]}]
 
   (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
@@ -172,7 +173,7 @@
    :parameters  [:id attachmentId fileId]
    :roles       [:applicant :authority]
    :extra-auth-roles [:statementGiver]
-   :states      [:draft :info :open :submitted :complement-needed :verdictGiven :constructionStarted]}
+   :states      (action/all-states-but [:answered :sent :closed :canceled])}
   [{:keys [application user]}]
 
   (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
@@ -241,6 +242,7 @@
 (defraw "download-all-attachments"
   {:parameters [:id]
    :roles      [:applicant :authority]
+   :states     action/all-states
    :extra-auth-roles [:statementGiver]}
   [{:keys [application lang]}]
   (if application
@@ -265,7 +267,7 @@
                 (partial if-not-authority-states-must-match #{:sent})]
    :input-validators [(fn [{{size :size} :data}] (when-not (pos? size) (fail :error.select-file)))
                       (fn [{{filename :filename} :data}] (when-not (mime/allowed-file? filename) (fail :error.illegal-file-type)))]
-   :states     [:draft :info :answered :open :sent :submitted :complement-needed :verdictGiven :constructionStarted]
+   :states     (action/all-states-but [:closed :canceled])
    :notified   true
    :on-success [(notify :new-comment)
                 open-inforequest/notify-on-comment]

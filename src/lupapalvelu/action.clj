@@ -49,6 +49,22 @@
                     (or (env/value :email :skip-mx-validation) (dns/valid-mx-domain? email))))
         (fail :error.email)))))
 
+;; State helpers
+
+(def all-application-states [:draft :open :submitted :sent :complement-needed
+                             :verdictGiven :constructionStarted :closed :canceled])
+(def all-inforequest-states [:info :answered])
+(def all-states             (concat all-application-states all-inforequest-states))
+
+(defn all-states-but [drop-states-array]
+  (vec (util/exclude-from-sequence all-states drop-states-array)))
+
+(defn all-application-states-but [drop-states-array]
+  (vec (util/exclude-from-sequence all-application-states drop-states-array)))
+
+(defn all-inforequest-states-but [drop-states-array]
+  (vec (util/exclude-from-sequence all-inforequest-states drop-states-array)))
+
 ;; Notificator
 
 (defn notify [notification]
