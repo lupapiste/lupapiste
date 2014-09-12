@@ -215,7 +215,7 @@
 (defn requires-application? [{data :data}]
   (contains? data :id))
 
-(defn get-application
+(defn- get-application
   "if :id parameter is present read application from command
    (pre-loaded) or load application for user."
   [{{id :id} :data user :user application :application}]
