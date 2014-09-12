@@ -324,7 +324,7 @@
 (defcommand assign-to-me
   {:parameters [:id]
    :roles      [:authority]
-   :states     (action/all-application-states-but [:draft :closed :canceled])}
+   :states     (action/all-states-but [:draft :closed :canceled])}
   [{:keys [user created] :as command}]
   (update-application command
     {$set {:modified created
@@ -334,7 +334,7 @@
   {:parameters  [:id assigneeId]
    :pre-checks  [open-inforequest/not-open-inforequest-user-validator]
    :roles       [:authority]
-   :states      (action/all-application-states-but [:draft :closed :canceled])}
+   :states      (action/all-states-but [:draft :closed :canceled])}
   [{:keys [user created] :as command}]
   (let [assignee (mongo/select-one :users {:_id assigneeId :enabled true})]
     (if (or assignee (nil? assigneeId))
