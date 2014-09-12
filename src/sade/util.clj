@@ -254,3 +254,11 @@
       (let [cn (mod (reduce + (map * [7 9 10 5 8 4 2] (map #(Long/parseLong (str %)) number))) 11)
             cn (if (zero? cn) 0 (- 11 cn))]
         (= (Long/parseLong check) cn)))))
+
+(defn exclude-from-sequence
+  "Removes the items in the sequential given as the second parameter from the sequential given as the first parameter"
+  [orig-seq exclude-seq]
+  {:pre [(and (sequential? orig-seq) (sequential? exclude-seq))]}
+  (let [exclude-set (set exclude-seq)]
+    (remove #(exclude-set %) orig-seq)))
+
