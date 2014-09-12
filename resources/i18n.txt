@@ -54,3 +54,5 @@ operations.tontin-lohkominen.desc:
 operations.tree.tontin-lohkominen: Tontin lohkominen
 operations.tontin-lohkominen:  Tontin lohkominen
 tontin-lohkominen._group_label:
+
+canceled.title: Hakemus on merkitty peruutetuksi
