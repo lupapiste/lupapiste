@@ -1,5 +1,6 @@
 (ns lupapalvelu.verdict-api
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error fatal]]
+            [pandect.core :as pandect]
             [monger.operators :refer :all]
             [sade.http :as http]
             [sade.strings :as ss]
@@ -31,7 +32,7 @@
                                (clojure.string/replace (get (:headers resp) "content-disposition") #"attachment;filename=" ""))
 
             content-length  (util/->int (get-in resp [:headers "content-length"] 0))
-            urlhash         (digest/sha1 url)
+            urlhash         (pandect/sha1 url)
             attachment-id   urlhash
             attachment-type {:type-group "muut" :type-id "muu"}
             target          {:type "verdict" :id verdict-id :urlHash urlhash}
@@ -56,33 +57,34 @@
 
 (defn verdict-attachments [application user timestamp verdict]
   {:pre [application]}
-  (let [verdict-id (mongo/create-id)]
-    (->
-      (assoc verdict :id verdict-id, :timestamp timestamp)
-      (update-in [:paatokset]
-        (fn [paatokset]
-          (map (fn [paatos] (update-in paatos [:poytakirjat] #(map (partial get-poytakirja application user timestamp verdict-id) %))) paatokset))))))
+  (when (:paatokset verdict)
+    (let [verdict-id (mongo/create-id)]
+      (->
+        (assoc verdict :id verdict-id, :timestamp timestamp)
+        (update-in [:paatokset]
+          (fn [paatokset]
+            (map (fn [paatos] (update-in paatos [:poytakirjat] #(map (partial get-poytakirja application user timestamp verdict-id) %))) paatokset)))))))
 
-(defn- get-verdicts-with-attachments  [application user timestamp xml]
+(defn- get-verdicts-with-attachments [application user timestamp xml]
   (let [permit-type (:permitType application)
         reader (permit/get-verdict-reader permit-type)
         verdicts (krysp/->verdicts xml reader)]
-    (map (partial verdict-attachments application user timestamp) verdicts)))
+    (filter seq (map (partial verdict-attachments application user timestamp) verdicts))))
 
 (defn do-check-for-verdict [command user created application]
   (let [xml (application/get-application-xml application)
         extras-reader (permit/get-verdict-extras-reader (:permitType application))]
     (if-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created xml))]
-     (let [has-old-verdict-tasks (some #(= "verdict" (get-in % [:source :type]))  (:tasks application))
-           tasks (tasks/verdicts->tasks (assoc application :verdicts verdicts-with-attachments) created)
-           updates {$set (merge {:verdicts verdicts-with-attachments
-                                 :modified created
-                                 :state    :verdictGiven}
-                           (when-not has-old-verdict-tasks {:tasks tasks})
-                           (when extras-reader (extras-reader xml)))}]
-       (update-application command updates)
-       (ok :verdictCount (count verdicts-with-attachments) :taskCount (count (get-in updates [$set :tasks]))))
-     (fail :info.no-verdicts-found-from-backend))))
+      (let [has-old-verdict-tasks (some #(= "verdict" (get-in % [:source :type]))  (:tasks application))
+            tasks (tasks/verdicts->tasks (assoc application :verdicts verdicts-with-attachments) created)
+            updates {$set (merge {:verdicts verdicts-with-attachments
+                                  :modified created
+                                  :state    :verdictGiven}
+                            (when-not has-old-verdict-tasks {:tasks tasks})
+                            (when extras-reader (extras-reader xml)))}]
+        (update-application command updates)
+        (ok :verdictCount (count verdicts-with-attachments) :taskCount (count (get-in updates [$set :tasks]))))
+      (fail :info.no-verdicts-found-from-backend))))
 
 (defcommand check-for-verdict
   {:description "Fetches verdicts from municipality backend system.
