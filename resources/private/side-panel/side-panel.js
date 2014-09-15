@@ -71,7 +71,7 @@ LUPAPISTE.SidePanelModel = function() {
 
   self.toggleConversationPanel = function(data, event) {
     togglePanel(self.showConversationPanel(), ".btn-conversation");
-    self.showConversationPanel(true);
+    self.showConversationPanel(!self.showConversationPanel());
     self.showNoticePanel(false);
 
     setTimeout(function() {
@@ -86,7 +86,7 @@ LUPAPISTE.SidePanelModel = function() {
   self.toggleNoticePanel = function(data, event) {
     togglePanel(self.showNoticePanel(), ".btn-notice");
     self.showConversationPanel(false);
-    self.showNoticePanel(true);
+    self.showNoticePanel(!self.showNoticePanel());
   };
 
   self.hideSidePanel = function(data, event) {
