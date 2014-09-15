@@ -530,7 +530,7 @@ Input comment and mark answered
 Comment count is
   [Arguments]  ${section}  ${amount}
   Open side panel  conversation
-  Wait until  Xpath Should Match X Times  //section[@id='${section}']//div[contains(@class,'comment-text')]  ${amount}
+  Wait until  Xpath Should Match X Times  //div[@id='conversation-panel']//div[contains(@class,'comment-text')]  ${amount}
   Close side panel  conversation
 
 #
