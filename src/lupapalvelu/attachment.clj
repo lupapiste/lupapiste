@@ -199,7 +199,7 @@
           :pohjavesitutkimus
           :muu]])
 
-(def ^:priate attachment-types-KM
+(def ^:private attachment-types-KM
   [:hakija])
 
 ;;
