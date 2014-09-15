@@ -100,10 +100,20 @@
   [{documents :documents} schema-name]
   (filter (comp (partial = schema-name) :name :schema-info) documents))
 
+(defn get-documents-by-type
+  "returns document from application by schema type"
+  [{documents :documents} schema-type]
+  (filter (comp (partial = schema-type) :type :schema-info) documents))
+
 (defn get-document-by-name
   "returns first document from application by schema name"
   [application schema-name]
   (first (get-documents-by-name application schema-name)))
+
+(defn get-document-by-type
+  "returns first document from application by schema name"
+  [application type-to-find]
+  (first (get-documents-by-type application type-to-find)))
 
 (defn get-document-by-operation
   "returns first document from application that is associated with the operation"

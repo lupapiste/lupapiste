@@ -263,7 +263,7 @@
                  :body [{:name "poisto" :i18nkey "huoneistot.muutostapa.poisto"}
                         {:name "lis\u00e4ys" :i18nkey "huoneistot.muutostapa.lisays"}
                         {:name "muutos" :i18nkey "huoneistot.muutostapa.muutos"}]})
-  
+
 (def huoneistoRow [{:name "huoneistoTyyppi" :type :select :label false :i18nkey "huoneistot.huoneistoTyyppi"
                    :body [{:name "asuinhuoneisto" :i18nkey "huoneistot.huoneistoTyyppi.asuinhuoneisto"}
                           {:name "toimitila" :i18nkey "huoneistot.huoneistoTyyppi.toimitila"}
@@ -424,7 +424,7 @@
                               {:name "uuni"}
                               {:name "ei l\u00e4mmityst\u00e4"}
                               {:name "ei tiedossa"}]}
-                      {:name "lammonlahde" :type :select :required true :other-key "muu-lammonlahde"
+                      {:name "lammonlahde" :type :select :other-key "muu-lammonlahde"
                        :body [{:name "kauko tai aluel\u00e4mp\u00f6"}
                               {:name "kevyt poltto\u00f6ljy"}
                               {:name "raskas poltto\u00f6ljy"}
@@ -667,6 +667,9 @@
 
     {:info {:name "maisematyo" :approvable true}
      :body (approvable-top-level-groups maisematyo)}
+    {:info {:name "kiinteiston-muodostus" :approvable true}
+     :body (approvable-top-level-groups (body kuvaus))}
+
 
     {:info {:name "hakija"
             :order 3
@@ -720,9 +723,17 @@
             :type :party}
      :body maksaja}
 
-    {:info {:name "rakennuspaikka" :approvable true
-            :order 2}
+    {:info {:name "rakennuspaikka"
+            :approvable true
+            :order 2
+            :type :location}
      :body (schema-body-without-element-by-name rakennuspaikka "rantaKytkin")}
+
+    {:info {:name "kiinteisto"
+            :approvable true
+            :order 2
+            :type :location}
+     :body (schema-body-without-element-by-name rakennuspaikka "rantaKytkin" "hallintaperuste" "kaavanaste")}
 
     {:info {:name "aloitusoikeus" :removable false :approvable true}
      :body aloitusoikeus}

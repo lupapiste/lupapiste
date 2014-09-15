@@ -131,12 +131,25 @@
         ["vesijohdosta-ja-viemarista" :vvvl-vesijohdosta-ja-viemarista]
         ["hulevesiviemarista" :vvvl-hulevesiviemarista]]]])])
 
+(def operation-tree-for-kiinteiston-muodostus
+  ["kiinteiston-muodostus"
+   [["tonttijaon-hakeminen" :tonttijaon-hakeminen]
+    ["tonttijaon-muutoksen-hakeminen" :tonttijaon-muutoksen-hakeminen]
+    ["tontin-lohkominen" :tontin-lohkominen]
+    ["tilan-rekisteroiminen-tontiksi" :tilan-rekisteroiminen-tontiksi]
+    ["yhdistaminen" :yhdistaminen]
+    ["halkominen" :halkominen]
+    ["rasitetoimitus" :rasitetoimitus]
+    ["rajankaynnin-hakeminen" :rajankaynnin-hakeminen]
+    ["rajannayton-hakeminen" :rajannayton-hakeminen]]])
+
 
 (def operation-tree
   (filterv identity
     [operation-tree-for-R
      operation-tree-for-environment-R
      operation-tree-for-P
+     (when (env/feature? :kiinteistonMuodostus) operation-tree-for-kiinteiston-muodostus)
      (when (env/feature? :ymparisto) operation-tree-for-Y)
      operation-tree-for-YA]))
 
@@ -147,6 +160,8 @@
 ; Mappings to schemas and attachments are currently random.
 
 (def ^:private common-schemas ["hankkeen-kuvaus" "maksaja" "rakennuspaikka" "paasuunnittelija" "suunnittelija" "tyonjohtaja"])
+
+(def ^:private common-kiinteiston-muodostus-schemas ["maksaja" "kiinteisto"])
 
 (def ^:private common-poikkeamis-schemas ["hankkeen-kuvaus" "maksaja" "poikkeusasian-rakennuspaikka"])
 
@@ -455,6 +470,60 @@
                                    :required  common-schemas
                                    :attachments [:paapiirustus [:asemapiirros]]
                                    :add-operation-allowed true
+                                   :link-permit-required false}
+     :tonttijaon-hakeminen        {:schema "kiinteiston-muodostus"
+                                   :permit-type permit/KM
+                                   :required common-kiinteiston-muodostus-schemas
+                                   :attachments [:paapiirustus [:asemapiirros]]
+                                   :add-operation-allowed false
+                                   :link-permit-required false}
+    :tonttijaon-muutoksen-hakeminen {:schema "kiinteiston-muodostus"
+                                   :permit-type permit/KM
+                                   :required common-kiinteiston-muodostus-schemas
+                                   :attachments [:paapiirustus [:asemapiirros]]
+                                   :add-operation-allowed false
+                                   :link-permit-required false}
+    :tontin-lohkominen            {:schema "kiinteiston-muodostus"
+                                   :permit-type permit/KM
+                                   :required common-kiinteiston-muodostus-schemas
+                                   :attachments [:paapiirustus [:asemapiirros]]
+                                   :add-operation-allowed false
+                                   :link-permit-required false}
+   :tilan-rekisteroiminen-tontiksi {:schema "kiinteiston-muodostus"
+                                   :permit-type permit/KM
+                                   :required common-kiinteiston-muodostus-schemas
+                                   :attachments [:paapiirustus [:asemapiirros]]
+                                   :add-operation-allowed false
+                                   :link-permit-required false}
+   :yhdistaminen                  {:schema "kiinteiston-muodostus"
+                                   :permit-type permit/KM
+                                   :required common-kiinteiston-muodostus-schemas
+                                   :attachments [:paapiirustus [:asemapiirros]]
+                                   :add-operation-allowed false
+                                   :link-permit-required false}
+   :halkominen                    {:schema "kiinteiston-muodostus"
+                                   :permit-type permit/KM
+                                   :required common-kiinteiston-muodostus-schemas
+                                   :attachments [:paapiirustus [:asemapiirros]]
+                                   :add-operation-allowed false
+                                   :link-permit-required false}
+   :rasitetoimitus                {:schema "kiinteiston-muodostus"
+                                   :permit-type permit/KM
+                                   :required common-kiinteiston-muodostus-schemas
+                                   :attachments [:paapiirustus [:asemapiirros]]
+                                   :add-operation-allowed false
+                                   :link-permit-required false}
+    :rajankaynnin-hakeminen       {:schema "kiinteiston-muodostus"
+                                   :permit-type permit/KM
+                                   :required common-kiinteiston-muodostus-schemas
+                                   :attachments [:paapiirustus [:asemapiirros]]
+                                   :add-operation-allowed false
+                                   :link-permit-required false}
+    :rajannayton-hakeminen        {:schema "kiinteiston-muodostus"
+                                   :permit-type permit/KM
+                                   :required common-kiinteiston-muodostus-schemas
+                                   :attachments [:paapiirustus [:asemapiirros]]
+                                   :add-operation-allowed false
                                    :link-permit-required false}
      :poikkeamis                  {:schema "rakennushanke"
                                    :permit-type "P"

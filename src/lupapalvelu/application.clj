@@ -2,7 +2,7 @@
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error fatal]]
             [clojure.string :refer [blank? join trim split]]
             [clojure.walk :refer [keywordize-keys]]
-            [swiss-arrows.core :refer [-<>>]]
+            [swiss.arrows :refer [-<>>]]
             [clj-time.core :refer [year]]
             [clj-time.local :refer [local-now]]
             [clj-time.format :as tf]
@@ -166,16 +166,16 @@
 
 (defn- autofill-rakennuspaikka [application time]
   (when (and (not (= "Y" (:permitType application))) (not (:infoRequest application)))
-    (when-let [rakennuspaikka (or (domain/get-document-by-name application "rakennuspaikka")
-                                  (domain/get-document-by-name application "poikkeusasian-rakennuspaikka")
-                                  (domain/get-document-by-name application "vesihuolto-kiinteisto"))]
+    (when-let [rakennuspaikka (domain/get-document-by-type application :location)]
       (when-let [ktj-tiedot (ktj/rekisteritiedot-xml (:propertyId application))]
         (let [updates [[[:kiinteisto :tilanNimi]        (or (:nimi ktj-tiedot) "")]
                        [[:kiinteisto :maapintaala]      (or (:maapintaala ktj-tiedot) "")]
                        [[:kiinteisto :vesipintaala]     (or (:vesipintaala ktj-tiedot) "")]
                        [[:kiinteisto :rekisterointipvm] (or (try
                                                               (tf/unparse output-format (tf/parse ktj-format (:rekisterointipvm ktj-tiedot)))
-                                                              (catch Exception e (:rekisterointipvm ktj-tiedot))) "")]]]
+                                                              (catch Exception e (:rekisterointipvm ktj-tiedot))) "")]]
+              schema (schemas/get-schema (:schema-info rakennuspaikka))
+              updates (filter (fn [[update-path _]] (model/find-by-name (:body schema) update-path)) updates)]
           (commands/persist-model-updates
             application
             "documents"
@@ -827,7 +827,8 @@
    :input-validators [(partial action/non-blank-parameters [:linkPermitId])
                       (fn [{d :data}] (when-not (mongo/valid-key? (:linkPermitId d)) (fail :error.invalid-db-key)))]}
   [{application :application}]
-  (do-add-link-permit application (ss/trim linkPermitId)))
+  (do-add-link-permit application (ss/trim linkPermitId))
+  (ok))
 
 (defcommand remove-link-permit-by-app-id
   {:parameters [id linkPermitId]
