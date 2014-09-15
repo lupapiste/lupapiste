@@ -9,3 +9,5 @@ register.company.add-user.searchUser:     Jatka
 register.company.add-user.done.canClose:  Voit sulkea tämän ikkunan.
 
 register-company-success:  Antamaasi osoitteeseen on lähetetty sähköposti, jossa on linkki rekisteröitymisen vahvistukseen ja salasanan määritykseen. Salasanan määrityksen jälkeen rekisteröityminen on valmis, ja voit kirjautua palveluun pääkäyttäjätunnuksellasi.
+
+company-invite.invite: Valtuuta uusi yritys
