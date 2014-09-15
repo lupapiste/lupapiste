@@ -20,9 +20,9 @@
       maaraykset (filter (partial task-by-type "lupamaarays") tasks)
       tyonjohtajat (filter (partial task-by-type "vaadittu-tyonjohtaja") tasks)]
 
-  (fact "fixture has 2 verdics and 9 tasks"
+  (fact "fixture has 1 verdict and 9 tasks"
     resp => ok?
-    (:verdictCount resp) => 2
+    (:verdictCount resp) => 1
     (:taskCount resp) => 9)
 
   (fact "id is set" (-> tasks first :id) => truthy)
@@ -61,9 +61,9 @@
         application (query-application pena application-id)
         tasks (:tasks application)]
 
-    (fact "read 2 verdicts again"
+    (fact "read 1 verdict again"
       resp => ok?
-      (:verdictCount resp) => 2)
+      (:verdictCount resp) => 1)
 
     (fact "application has been modified"
       (:modified application) => (partial < modified))
