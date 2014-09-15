@@ -100,7 +100,6 @@ company-invite.desc:       Voit valtuuttaa yrityksen hakemukseesi
 company-invite.invite:     Valtuuta
 
 accept-company-invitation.subject:  Kutsu osallistua hakemuksen käsittelyyn
-
 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 userInfo.company.title:    Yrityksen tiedot
@@ -116,3 +115,5 @@ register.company.add-user.done.canClose:  Voit sulkea tämän ikkunan.
 register-company-success:  Antamaasi osoitteeseen on lähetetty sähköposti, jossa on linkki rekisteröitymisen vahvistukseen ja salasanan määritykseen. Salasanan määrityksen jälkeen rekisteröityminen on valmis, ja voit kirjautua palveluun pääkäyttäjätunnuksellasi.
 
 company-invite.invite: Valtuuta uusi yritys
+
+accept-company-invitation.loading:  Odota, tietoja ladataan...
