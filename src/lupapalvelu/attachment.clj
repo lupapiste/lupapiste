@@ -199,6 +199,9 @@
           :pohjavesitutkimus
           :muu]])
 
+(def ^:priate attachment-types-KM
+  [:hakija])
+
 ;;
 ;; Api
 ;;
@@ -234,6 +237,7 @@
       :YL attachment-types-YL
       :VVVL attachment-types-YI ;TODO quick fix to get test and qa work. Put correct attachment list here
       :MAL attachment-types-MAL
+      :KM attachment-types-KM ; TODO define attachment properly, quick fix for test
       (fail! (str "unsupported permit-type: " permit-type)))))
 
 (defn get-attachment-types-for-application
