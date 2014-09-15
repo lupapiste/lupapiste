@@ -1,0 +1,11 @@
+userInfo.company.title:    Yrityksen tiedot
+userInfo.company.loading:  Odota, yrityksen tietoja ladataan...
+userInfo.company.name:     Yrityksen nimi:
+userInfo.company.y:        Y-tunnus:
+company.user.firstName:    Etunimi
+company.user.lastName:     Sukunimi
+
+register.company.add-user.searchUser:     Jatka
+register.company.add-user.done.canClose:  Voit sulkea tämän ikkunan.
+
+register-company-success:  Antamaasi osoitteeseen on lähetetty sähköposti, jossa on linkki rekisteröitymisen vahvistukseen ja salasanan määritykseen. Salasanan määrityksen jälkeen rekisteröityminen on valmis, ja voit kirjautua palveluun pääkäyttäjätunnuksellasi.
