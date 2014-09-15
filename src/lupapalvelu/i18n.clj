@@ -97,3 +97,11 @@
 
   (defn get-localizations []
     (update-in @excel-data [:fi] merge (load-add-ons))))
+
+(defn- load-add-ons []
+  (when-let [in (io/resource "i18n.txt")]
+    (with-open [in (io/reader in)]
+      (read-lines (line-seq in)))))
+
+(defn get-localizations []
+  (update-in @excel-data [:fi] merge (load-add-ons)))
