@@ -98,11 +98,18 @@ LUPAPISTE.SidePanelModel = function() {
     }
   }
 
-  repository.loaded(["application","inforequest","attachment","statement","neighbors","task","verdict"], function(application, applicationDetails) {
+  var pages = ["application","inforequest","attachment","statement","neighbors","verdict"];
+
+  hub.subscribe({type: "page-change"}, function() {
+    if(_.contains(pages, pageutil.getPage())) {
+      $("#side-panel-template").addClass("visible");
+    }
+  });
+
+  repository.loaded(pages, function(application, applicationDetails) {
     self.authorization.refreshWithCallback({id: applicationDetails.application.id}, function() {
       self.refresh(application, applicationDetails.authorities);
     });
-    $("#side-panel-template").addClass("visible");
   });
 }
 
