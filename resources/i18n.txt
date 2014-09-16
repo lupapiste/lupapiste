@@ -1,3 +1,9 @@
+applications.urgent:
+notice.title: Huomiot
+notice.prompt: Viranomaisten huomiot
+notice.prompt.info: eivät näy hakijalla
+notice.urgent: Kiireellinen hakemus
+conversation.title: Keskustelu
 operations.tree.kiinteiston-muodostus: Kiinteistön muodostus
 operations.tree.tonttijaon-hakeminen: Tonttijaon hakeminen
 operations.tree.tonttijaon-muutoksen-hakeminen: Tonttijaon muutoksen hakeminen

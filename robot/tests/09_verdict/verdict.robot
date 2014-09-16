@@ -116,8 +116,10 @@ Input verdict
 
 Comment verdict
   [Arguments]  ${message}
-  Input text  xpath=//section[@id='verdict']//textarea[@data-test-id='application-new-comment-text']  ${message}
-  Wait Until  Element should be enabled  xpath=//section[@id='verdict']//*[@data-test-id='application-new-comment-btn']
-  Click element  xpath=//section[@id='verdict']//*[@data-test-id='application-new-comment-btn']
-  Wait until  Element should be visible  xpath=//section[@id='verdict']//div[@data-test-id='comments-table']//span[text()='${message}']
+  Open side panel  conversation
+  Input text  xpath=//div[@id='conversation-panel']//textarea[@data-test-id='application-new-comment-text']  ${message}
+  Wait Until  Element should be enabled  xpath=//div[@id='conversation-panel']//*[@data-test-id='application-new-comment-btn']
+  Click element  xpath=//div[@id='conversation-panel']//*[@data-test-id='application-new-comment-btn']
+  Wait until  Element should be visible  xpath=//div[@id='conversation-panel']//div[@data-test-id='comments-table']//span[text()='${message}']
+  Close side panel  conversation
 

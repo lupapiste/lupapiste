@@ -69,7 +69,7 @@ Sonja can't give statement to Ronjas statement
 
 Sonja can comment on Ronjas statement
   Wait until  Comment count is  statement  0
-  Input comment  statement  kas kummaa.
+  Input comment  kas kummaa.
   Wait until  Comment count is  statement  1
   [Teardown]  Return from statement
 
