@@ -12,12 +12,12 @@
 
 (defn init-sign []
   (-> (u/command u/pena :init-sign
-                 :companyName "company-name"
-                 :companyY    "FI2341528-4"
-                 :firstName   "First"
-                 :lastName    "Last"
-                 :email       "a@b.c"
-                 :lang        "fi")
+                 :company {:name  "company-name"
+                           :y     "FI2341528-4"}
+                 :signer {:firstName   "First"
+                          :lastName    "Last"
+                          :email       "a@b.c"}
+                 :lang "fi")
       :processId
       get-process))
 
@@ -27,9 +27,9 @@
                                       :y    "FI2341528-4"}
                             :signer {:firstName   "First"
                                      :lastName    "Last"
-                                     :email        "a@b.c"
-                                     :lang         "fi"}
-                            :status  "created"}))
+                                     :email        "a@b.c"}
+                            :status  "created"
+                            :lang    "fi"}))
 
 (fact "cancel"
   (let [process-id (:id (init-sign))]
