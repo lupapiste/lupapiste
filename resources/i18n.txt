@@ -117,3 +117,11 @@ register-company-success:  Antamaasi osoitteeseen on lähetetty sähköposti, jo
 company-invite.invite: Valtuuta uusi yritys
 
 accept-company-invitation.loading:  Odota, tietoja ladataan...
+register.company.info:              Tekemällä yrityssopimuksen Lupapisteen kanssa annat työntekijöillesi tai kollegoillesi mahdollisuuden osallistua yhteisten hankkeiden valmisteluun ja helpotat yrityksesi asiointia. Tarjoamme yritysasiakkaillemme myös erityisiä lisäpalveluita ja parempia tukitasoja. Kun rekisteröit sopimuksen ja teet sopimuksen, luomme sinulle pääkäyttäjätilin, jonka avulla voit hallita yrityksesi tietoja ja käyttäjätilejä. Sopimus tehdään helposti sähköisen allekirjoituspalvelun avulla. Yrityssopimuksen allekirjoituksessa käytetään henkilökohtaisia pankkitunnuksia, jotta saamme varmuuden allekirjoittajan henkilöllisyydestä, joten varaa lähettyvillesi henkilökohtaiset tunnuksesi.
+register.company.sign.info:         Sinut ohjataan seuraavaksi onnistuu.fi-palveluun, jossa laaditaan ja allekirjoitetaan sopimus palvelun käytöstä. Sopimuksen laadinta on hyvin helppoa ja se kestää vain muutaman minuutin. Varaa saataville henkilökohtaiset pankkitunnuksesi, joilla allekirjoitat sopimuksen.
+register-company-success.title:     Rekisteröinti onnistui
+register-company-success.message:   Antamaasi osoitteeseen on lähetetty sähköposti, jossa on linkki rekisteröitymisen vahvistukseen ja salasanan määritykseen. Salasanan määrityksen jälkeen rekisteröityminen on valmis, ja voit kirjautua palveluun pääkäyttäjätunnuksellasi.
+register-company-fail.title:        Rekisteröinti epäonnistui
+register-company-fail.message:      Yrityksen rekisteröinti epäonnistui. Ole hyvä ja ota yhteyytä Lupapiste.fi palvelun tukeen.
+
+email-in-use: Sähköpostiosoite on jo käytössä
