@@ -20,7 +20,7 @@ ${APPLICATIONS PATH}            /app/fi/applicant#!/applications
 ${AUTHORITY APPLICATIONS PATH}  /app/fi/authority#!/applications
 ${FIXTURE URL}                  ${SERVER}/dev/fixture
 ${CREATE URL}                   ${SERVER}/dev/create
-
+${LAST EMAIL URL}                    ${SERVER}/api/last-email
 ${SELENIUM}                     ${EMPTY}
 
 *** Keywords ***
@@ -40,6 +40,10 @@ Go to login page
   Go to  ${LOGIN URL}
   Wait Until  Title should be  Lupapiste
   Wait Until  Page should contain  Haluan kirjautua palveluun
+
+Go to last email
+  Go to  ${LAST EMAIL URL}
+  Wait until  Element should be visible  //*[@id='subject']
 
 Applications page should be open
   Location should contain  ${APPLICATIONS PATH}
