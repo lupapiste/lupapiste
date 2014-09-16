@@ -31,6 +31,7 @@
     self.phone = ko.observable();
     self.role = ko.observable();
     self.architect = ko.observable();
+    self.companyId = ko.observable();
     self.degree = ko.observable();
     self.graduatingYear = ko.observable();
     self.fise = ko.observable();
@@ -44,7 +45,36 @@
     });
     self.loadingAttachments = ko.observable();
 
+    self.company = {
+      id:    ko.observable(),
+      name:  ko.observable(),
+      y:     ko.observable()
+    };
+
+    self.companyShow = ko.observable();
+    self.showSimpleCompanyInfo = ko.computed(function () { return !self.companyShow(); });
+    self.companyLoading = ko.observable();
+    self.companyLoaded = ko.computed(function() { return !self.companyLoading(); });
+
     self.init = function(u) {
+      self.company
+        .id(null)
+        .name(null)
+        .y(null);
+      if (u.company) {
+        self
+          .companyShow(true)
+          .companyLoading(true);
+        ajax
+          .query("company", {company: u.company.id})
+          .pending(self.companyLoading)
+          .success(function(data) { self.company.id(data.company.id).name(data.company.name).y(data.company.y); })
+          .call();
+      } else {
+        self
+          .companyShow(false)
+          .companyLoading(false);
+      }
       return self
         .error(null)
         .saved(false)
@@ -86,7 +116,7 @@
         ["firstName", "lastName",
          "street", "city", "zip", "phone",
          "architect",
-         "degree", "graduatingYear", "fise", 
+         "degree", "graduatingYear", "fise",
          "companyName", "companyId",
          "allowDirectMarketing"]);
 
@@ -245,8 +275,8 @@
                 .filesize(f.size);
             },
             send: uploadModel.sending,
-            done: function(e, data) { 
-              uploadModel.done(); 
+            done: function(e, data) {
+              uploadModel.done();
               LUPAPISTE.ModalDialog.close();
             },
             fail: uploadModel.error

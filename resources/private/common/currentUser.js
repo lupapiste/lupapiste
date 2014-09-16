@@ -1,15 +1,20 @@
 var currentUser = (function() {
   "use strict";
 
-  var user = ko.mapping.fromJS({id:             "",
-                                email:          "",
-                                role:           "",
-                                oir:            "",
-                                organizations:  [],
-                                firstName:      "",
-                                lastName:       "",
-                                phone:          "",
-                                username:       ""});
+  var user = ko.mapping.fromJS({
+    id:             "",
+    email:          "",
+    role:           "",
+    oir:            "",
+    organizations:  [],
+    firstName:      "",
+    lastName:       "",
+    phone:          "",
+    username:       "",
+    company: {
+      id:   null,
+      role: null
+    }});
 
   return {
     set: function(u) { ko.mapping.fromJS(u, user); },

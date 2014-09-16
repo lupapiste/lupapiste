@@ -129,9 +129,9 @@
    :application  {:depends [:common :repository :tree :task :create-task :modal-datepicker :signing :invites :side-panel]
                   :js ["add-link-permit.js" "map-model.js" "change-location.js" "invite.js" "verdicts-model.js"
                        "add-operation.js" "stamp-model.js" "request-statement-model.js" "add-party.js"
-                       "application-model.js" "application.js"]
+                       "application-model.js" "invite-company.js" "application.js"]
                   :html ["add-link-permit.html" "application.html" "inforequest.html" "add-operation.html"
-                         "change-location.html"]}
+                         "change-location.html" "invite-company.html"]}
 
    :applications {:depends [:common :repository :invites]
                   :html ["applications.html"]
@@ -176,6 +176,10 @@
    :users        {:js ["users.js"]
                   :html ["users.html"]}
 
+   :company      {:js ["company.js"]
+                  :html ["company.html"]
+                  :css ["company.css"]}
+
    :admins       {:depends [:users]}
 
    :notice       {:js ["notice.js"]
@@ -195,12 +199,14 @@
                   :css ["upload.css"]}
 
    :applicant    {:depends [:common :authenticated :map :applications :application
-                            :statement :docgen :create :mypage :user-menu :debug]
+                            :statement :docgen :create :mypage :user-menu :debug
+                            :company]
                   :js ["applicant.js"]
                   :html ["index.html"]}
 
    :authority    {:depends [:common :authenticated :map :applications :notice :application
-                            :statement :verdict :neighbors :docgen :create :mypage :user-menu :debug]
+                            :statement :verdict :neighbors :docgen :create :mypage :user-menu :debug
+                            :company]
                   :js ["authority.js" "integration-error.js"]
                   :html ["index.html" "integration-error.html"]}
 

@@ -285,6 +285,7 @@
   (mc/ensure-index :users {:email 1} {:unique true})
   (mc/ensure-index :users {:organizations 1} {:sparse true})
   (mc/ensure-index :users {:private.apikey 1} {:unique true :sparse true})
+  (mc/ensure-index :users {:company.id 1} {:sparse true})
   (mc/ensure-index :applications {:municipality 1})
   (mc/ensure-index :applications {:organization 1})
   (mc/ensure-index :applications {:auth.id 1})
@@ -299,7 +300,8 @@
   (mc/ensure-index :open-inforequest-token {:application-id 1})
   (mc/ensure-index :app-links {:link 1})
   ; Disabled TTL for now: (mc/ensure-index :sign-processes {:created 1} {:expireAfterSeconds (env/value :onnistuu :timeout)})
-  )
+  (mc/ensure-index :companies {:name 1} {:name "company-name"})
+  (mc/ensure-index :companies {:y 1} {:name "company-y"}))
 
 (defn clear! []
   (if-let [mode (db-mode)]

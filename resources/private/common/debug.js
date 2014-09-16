@@ -132,10 +132,39 @@ $(function() {
       $("footer input[data-id='proxy']").prop("checked", data.data);
       // Refresh maps checkbox too, features might not have been loaded when the box was initialized
       $("footer input[data-id='maps']").prop("checked", features.enabled("maps-disabled"));
-     })
+    })
     .call();
 
   // Helper function to execute xpath queries. Useful for testing xpath declarations in robot files.
   window.xpath = function(p) { return document.evaluate(p, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue; };
+
+  // Help registering company:
+
+  $("<div>")
+    .css("padding", "8px")
+    .css("margin-top", "20px")
+    .append($("<button>")
+      .addClass("btn btn-decline")
+      .html("DEBUG: Auto fill")
+      .click(function() {
+        var form = $("#register-company .form-group"),
+            fill = function(id, value) { $("[data-test-id=register-company-" + id + "]", form).val(value).change(); },
+            fillAll = function(f) { _.each(f, function(value, id) { fill(id, value); }); };
+        fillAll({
+          name:      "Oy FooBar Ab",
+          y:         "FI1234567-1",
+          reference: "Kansantanhu osasto",
+          address1:  "Latokuja 1",
+          po:        "Sipoo",
+          zip:       "12345",
+          country:   "SUAMI",
+          ovt:       "0037123456710007",
+          pop:       "003776543212",
+          firstName: "fo",
+          lastName:  "ba",
+          email:     "fo@ba.com"
+        });
+      }))
+    .appendTo("#register-company .content");
 
 });
