@@ -28,15 +28,14 @@
                  [de.ubercode.clostache/clostache "1.4.0"]
                  [endophile "0.1.2" :exclusions [hiccup]]
                  [com.draines/postal "1.11.1" :exclusions [commons-codec/commons-codec]]
-                 [swiss-arrows "0.6.0"]
-                 [me.raynes/fs "1.4.5"]
-                 [ontodev/excel "0.2.0" :exclusions [xml-apis]]
+                 [swiss-arrows "1.0.0"]
+                 [me.raynes/fs "1.4.6"]
+                 [ontodev/excel "0.2.3" :exclusions [xml-apis]]
                  [com.googlecode.htmlcompressor/htmlcompressor "1.5.2"]
                  [com.yahoo.platform.yui/yuicompressor "2.4.7" :exclusions [rhino/js]] ; http://jira.xwiki.org/browse/XWIKI-6148?focusedCommentId=59523#comment-59523
                  [fi.sito/oskari "0.9.33"]
                  [slingshot "0.10.3"]
                  [com.google.zxing/javase "2.2"]
-                 [prismatic/schema "0.2.4"]
                  [cljts "0.2.0" :exclusions [xerces/xercesImpl]]]
   :profiles {:dev {:dependencies [[midje "1.6.3"]
                                   [ring-mock "0.1.5"]
@@ -62,7 +61,7 @@
   :repositories [["solita-archiva" {:url "http://mvn.solita.fi/archiva/repository/solita"
                                     :checksum :ignore}]]
   :plugin-repositories [["solita-archiva" {:url "http://mvn.solita.fi/archiva/repository/solita"
-                                           :checksum :ignore}]]
+                                            :checksum :ignore}]]
   :aliases {"integration" ["with-profile" "dev,itest" "midje"]
             "verify"      ["with-profile" "dev,alltests" "do" "nitpicker," "midje"]}
   :main ^:skip-aot lupapalvelu.server
