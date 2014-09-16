@@ -159,7 +159,7 @@
 ; Operations must be the same as in the tree structure above.
 ; Mappings to schemas and attachments are currently random.
 
-(def ^:private common-schemas ["hankkeen-kuvaus" "maksaja" "rakennuspaikka" "paasuunnittelija" "suunnittelija" "tyonjohtaja"])
+(def ^:private common-schemas ["hankkeen-kuvaus" "maksaja" "rakennuspaikka" "paasuunnittelija" "suunnittelija"])
 
 (def ^:private common-kiinteiston-muodostus-schemas ["maksaja" "kiinteisto"])
 
