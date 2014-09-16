@@ -67,7 +67,6 @@
   };
 
   NewCompanyUser.prototype.submit = function() {
-    console.log("submit:", unObservableize(this.fields, this));
     ajax
       .command("company-add-user", unObservableize(this.fields, this))
       .pending(this.pending)
