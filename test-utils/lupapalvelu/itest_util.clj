@@ -115,7 +115,7 @@
 
 (defn apply-remote-fixture [fixture-name]
   (let [resp (decode-response (http/get (str (server-address) "/dev/fixture/" fixture-name)))]
-    (assert (-> resp :body :ok))))
+    (assert (-> resp :body :ok) (str "Response not ok: fixture: \"" fixture-name "\": response: " (pr-str resp)))))
 
 (def apply-remote-minimal (partial apply-remote-fixture "minimal"))
 

@@ -103,6 +103,7 @@ LUPAPISTE.ModalDialog.dynamicDialogs = [];
  *  - html: bind html instead of plain text. Default to false.
  */
 LUPAPISTE.ModalDialog.setDialogContent = function(dialog$, title, content, yesButton, noButton, renderOptions) {
+  "use strict";
   function bindButton(elem$, button) {
     if (elem$ && button) {
       elem$.unbind("click").text(button.title || "");

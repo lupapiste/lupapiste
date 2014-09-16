@@ -35,7 +35,8 @@
             [lupapalvelu.open-inforequest :as open-inforequest]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.application-search :as search]
-            [lupapalvelu.application-meta-fields :as meta-fields]))
+            [lupapalvelu.application-meta-fields :as meta-fields]
+            [lupapalvelu.company :as c]))
 
 ;; Validators
 
@@ -645,7 +646,9 @@
                        :address             address
                        :propertyId          property-id
                        :title               address
-                       :auth                [owner]
+                       :auth                (if-let [company (some-> user :company :id c/find-company-by-id c/company->auth)]
+                                              (do (println "USER:" user) (println "COMP:" company) [owner company])
+                                              [owner])
                        :comments            (map #(domain/->comment % {:type "application"} (:role user) user nil created [:applicant :authority]) messages)
                        :schema-version      (schemas/get-latest-schema-version)})]
     (merge application (when-not info-request?

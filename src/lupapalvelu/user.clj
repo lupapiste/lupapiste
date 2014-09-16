@@ -143,13 +143,22 @@
 ;; ==============================================================================
 ;;
 
+(defn get-user [q]
+  (non-private (find-user q)))
+
+(defn get-users [q]
+  (map non-private (find-users q)))
+
 (defn get-user-by-id [id]
   {:pre [id]}
-  (non-private (find-user {:id id})))
+  (get-user {:id id}))
+
+(defn get-user-by-id! [id]
+  (or (get-user-by-id id) (fail! :not-found)))
 
 (defn get-user-by-email [email]
   {:pre [email]}
-  (non-private (find-user {:email email})))
+  (get-user {:email email}))
 
 (defn get-user-with-password [username password]
   (when-not (or (ss/blank? username) (ss/blank? password))
@@ -266,3 +275,10 @@
 
 (defn same-user? [{id1 :id} {id2 :id}]
   (= id1 id2))
+
+;;
+;; Link user to company:
+;;
+
+(defn link-user-to-company! [user-id company-id role]
+  (mongo/update :users {:_id user-id} {$set {:company {:id company-id, :role role}}}))
