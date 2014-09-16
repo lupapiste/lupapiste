@@ -39,6 +39,11 @@
     (update-in application [:comments]
       #(filter (fn [{target :target}] (or (empty? target) (not= (:type target) "attachment") (attachments (:id target)))) %))))
 
+(defn- filter-notice-from-application [application user]
+  (if (user/authority? user) 
+    application 
+    (dissoc application :urgent :authorityNotice)))
+
 (defn filter-application-content-for [application user]
   (when (seq application)
     (let [draft-verdict-ids (->> application :verdicts (filter :draft) (map :id) set)
@@ -50,7 +55,8 @@
         (update-in [:verdicts] (partial only-authority-sees-drafts user))
         (update-in [:attachments] (partial only-authority-sees user relates-to-draft))
         commented-attachment-exists
-        (update-in [:tasks] (partial only-authority-sees user relates-to-draft))))))
+        (update-in [:tasks] (partial only-authority-sees user relates-to-draft))
+        (filter-notice-from-application user)))))
 
 (defn get-application-as [application-id user]
   {:pre [user]}
@@ -184,6 +190,7 @@
    :attachments              []
    :auth                     []
    :authority                {}
+   :authorityNotice          ""
    :buildings                []
    :closed                   nil ; timestamp
    :closedBy                 {}
@@ -213,6 +220,7 @@
    :submitted                nil ; timestamp
    :tasks                    []
    :title                    ""
+   :urgent                   false
    :verdicts                 []})
 
 

@@ -61,7 +61,7 @@ Mikko see that attachment is for authority
 Mikko adds comment
   [Tags]  attachments
   Open attachment details  muut.muu
-  Input comment  attachment  mahtava liite!
+  Input comment  mahtava liite!
 
 Comment is added
   [Tags]  attachments
@@ -110,7 +110,7 @@ Switch user
 Sonja goes to conversation tab
   [Tags]  attachments
   Open application  ${appname}  753-416-25-30
-  Open tab  conversation
+  Open side panel  conversation
   Click Element  link=Ote alueen peruskartasta
   Wait Until Page Contains  ${TXT_TESTFILE_NAME}
 
@@ -179,4 +179,6 @@ Attachment state should be
 
 Comment count is
   [Arguments]  ${amount}
-  Xpath Should Match X Times  //section[@id='attachment']//div[@data-bind='foreach: comments().slice(0).reverse()']/div  ${amount}
+  Open side panel  conversation
+  Xpath Should Match X Times  //div[@id='conversation-panel']//div[@data-bind='foreach: comments().slice(0).reverse()']/div  ${amount}
+  Close side panel  conversation
