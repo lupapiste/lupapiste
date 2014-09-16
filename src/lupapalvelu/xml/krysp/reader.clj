@@ -372,6 +372,9 @@
           verdict-model)))
     (enlive/select (cr/strip-xml-namespaces xml) case-elem-selector)))
 
+(defn ->ya-app-state [xml]
+  (-> xml cr/strip-xml-namespaces (get-text [:Kasittelytieto :hakemuksenTila])))
+
 (defn- buildings-summary-for-application [xml]
   (let [summary (->buildings-summary xml)]
     (when (seq summary)

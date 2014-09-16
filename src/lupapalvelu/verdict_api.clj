@@ -4,6 +4,7 @@
             [sade.http :as http]
             [sade.strings :as ss]
             [sade.util :as util]
+            [sade.xml :as xml]
             [lupapalvelu.core :refer [ok fail fail! now]]
             [lupapalvelu.action :refer [defquery defcommand update-application notify boolean-parameters] :as action]
             [lupapalvelu.attachment :as attachment]
@@ -54,12 +55,17 @@
         (-> pk (assoc :urlHash urlhash) (dissoc :liite))))
     pk))
 
-(defn- is-valid-paatos [timestamp paatos]
-  (and (:paivamaarat paatos) (> timestamp (-> paatos :paivamaarat :anto))))
+(defn- valid-paatos? [paatos timestamp permit-type has-simple-verdict?]
+  (let [pvm (or (-> paatos :paivamaarat :anto) (-> paatos :paivamaarat :paatosdokumentinPvm))
+        poytakirja-has-paatos-info? (if-not has-simple-verdict?
+                                      ;; TODO: Uncomment the "paatos" key?
+                                      (some #(and #_(:paatos %) (:paatoskoodi %) (:paatoksentekija %) (:paatospvm %)) (:poytakirjat paatos))
+                                      true)]
+    (and pvm (> timestamp pvm) poytakirja-has-paatos-info?)))
 
-(defn verdict-attachments [application user timestamp verdict]
+(defn verdict-attachments [application user timestamp has-simple-verdict? verdict]
   {:pre [application]}
-  (when (and (:paatokset verdict) (some #(is-valid-paatos timestamp %) (:paatokset verdict)))
+  (when (and (:paatokset verdict) (some #(valid-paatos? % timestamp (:permitType application) has-simple-verdict?) (:paatokset verdict)))
     (let [verdict-id (mongo/create-id)]
       (->
         (assoc verdict :id verdict-id, :timestamp timestamp)
@@ -67,14 +73,20 @@
           (fn [paatokset]
             (filter seq
               (map (fn [paatos]
-                     (when (is-valid-paatos timestamp paatos)
+                     (when (valid-paatos? paatos timestamp (:permitType application) has-simple-verdict?)
                        (update-in paatos [:poytakirjat] #(map (partial get-poytakirja application user timestamp verdict-id) %)))) paatokset))))))))
 
 (defn- get-verdicts-with-attachments [application user timestamp xml]
   (let [permit-type (:permitType application)
+        has-simple-verdict? (#{"YA" "YL" "MAL" "VVVL"} permit-type)
         reader (permit/get-verdict-reader permit-type)
         verdicts (krysp/->verdicts xml reader)]
-    (filter seq (map (partial verdict-attachments application user timestamp) verdicts))))
+    (if-not (and
+              has-simple-verdict?
+              ;; TODO: Can we expect these states also from other backing systems (taustajarjestelma) than those of YA's (from Vianova and KeyPro)?
+              (#{"luonnos" "hakemus" "valmistelussa" "vastaanotettu" "tarkastettu, t\u00e4ydennyspyynt\u00f6"} (ss/lower-case (krysp/->ya-app-state xml))))
+      (filter seq (map (partial verdict-attachments application user timestamp has-simple-verdict?) verdicts))
+      [])))
 
 (defn do-check-for-verdict [command user created application]
   (let [xml (application/get-application-xml application)
