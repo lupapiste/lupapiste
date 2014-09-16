@@ -13,7 +13,7 @@
             [clojure.walk :refer [keywordize-keys]]
             [clojure.java.io :as io]
             [clojure.string :as s]
-            [swiss-arrows.core :refer [-<>>]]
+            [swiss.arrows :refer [-<>>]]
             [taoensso.timbre :as timbre :refer (trace debug info warn error fatal)])
   (:import org.apache.http.client.CookieStore
            org.apache.http.cookie.Cookie))

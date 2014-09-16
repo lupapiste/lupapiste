@@ -235,7 +235,7 @@
         servers (if (map? conf) (vals conf) conf)]
     (map #(apply m/server-address [(:host %) (:port %)]) servers)))
 
-(def connected (atom false))
+(defonce connected (atom false))
 
 (defn connect!
   ([]

@@ -21,6 +21,7 @@
             [lupapalvelu.statement-api]
             [lupapalvelu.tasks-api]
             [lupapalvelu.verdict-api]
+            [lupapalvelu.notice-api]
             [lupapalvelu.company-api]
             [lupapalvelu.onnistuu]
             [lupapalvelu.admin]

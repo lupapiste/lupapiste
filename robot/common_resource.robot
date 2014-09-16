@@ -103,11 +103,31 @@ Tab should be visible
   [Arguments]  ${name}
   Wait until  Element should be visible  application-${name}-tab
 
+Side panel should be visible
+  [Arguments]  ${name}
+  Wait until  Element should be visible  ${name}-panel
+
+Side panel should not be visible
+  [Arguments]  ${name}
+  Wait until  Element should not be visible  ${name}-panel
+
 Logout
   Wait for jQuery
   ${secs} =  Get Time  epoch
   Go to  ${LOGOUT URL}?s=${secs}
   Wait Until  Page should contain  Haluan kirjautua palveluun
+
+Open side panel
+  [Arguments]  ${name}
+  ${sidePanelClosed} =  Run Keyword And Return Status  Element should not be visible  ${name}-panel
+  Run keyword If  ${sidePanelClosed}  Click by test id  open-${name}-side-panel
+  Side panel should be visible  ${name}
+
+Close side panel
+  [Arguments]  ${name}
+  ${sidePanelOpen} =  Run Keyword And Return Status  Element should be visible  ${name}-panel
+  Run keyword If  ${sidePanelOpen}  Click by test id  open-${name}-side-panel
+  Side panel should not be visible  ${name}
 
 #
 # Login stuff
@@ -467,42 +487,51 @@ Request should not be visible
 
 Add comment
   [Arguments]  ${message}
-  Open tab  conversation
-  Input text  xpath=//div[@id='application-conversation-tab']//textarea[@data-test-id='application-new-comment-text']  ${message}
+  Open side panel  conversation
+  Input text  xpath=//div[@id='conversation-panel']//textarea[@data-test-id='application-new-comment-text']  ${message}
   Click by test id  application-new-comment-btn
-  Wait until  Element should be visible  xpath=//div[@id='application-conversation-tab']//div[@data-test-id='comments-table']//span[text()='${message}']
+  Wait until  Element should be visible  xpath=//div[@id='conversation-panel']//div[@data-test-id='comments-table']//span[text()='${message}']
+  Close side panel  conversation
 
 Open to authorities
   [Arguments]  ${message}
-  Open tab  conversation
-  Input text  xpath=//div[@id='application-conversation-tab']//textarea[@data-test-id='application-new-comment-text']  ${message}
+  Open side panel  conversation
+  Input text  xpath=//div[@id='conversation-panel']//textarea[@data-test-id='application-new-comment-text']  ${message}
   Click by test id  application-open-application-btn
-  Wait until  Element should be visible  xpath=//div[@id='application-conversation-tab']//div[@data-test-id='comments-table']//span[text()='${message}']
+  Wait until  Element should be visible  xpath=//div[@id='conversation-panel']//div[@data-test-id='comments-table']//span[text()='${message}']
+  Close side panel  conversation
 
 Input comment
-  [Arguments]  ${section}  ${message}
-  Input text  xpath=//section[@id='${section}']//textarea[@data-test-id='application-new-comment-text']  ${message}
-  Click element  xpath=//section[@id='${section}']//button[@data-test-id='application-new-comment-btn']
-  Wait until  Element should be visible  xpath=//section[@id='${section}']//div[contains(@class,'comment-text')]//span[text()='${message}']
+  [Arguments]  ${message}
+  Open side panel  conversation
+  Input text  xpath=//div[@id='conversation-panel']//textarea[@data-test-id='application-new-comment-text']  ${message}
+  Click element  xpath=//div[@id='conversation-panel']//button[@data-test-id='application-new-comment-btn']
+  Wait until  Element should be visible  xpath=//div[@id='conversation-panel']//div[contains(@class,'comment-text')]//span[text()='${message}']
 
 Input comment and open to authorities
-  [Arguments]  ${section}  ${message}
-  Input text  xpath=//section[@id='${section}']//textarea[@data-test-id='application-new-comment-text']  ${message}
-  Click element  xpath=//section[@id='${section}']//button[@data-test-id='application-open-application-btn']
-  Wait until  Element should be visible  xpath=//section[@id='${section}']//div[contains(@class,'comment-text')]//span[text()='${message}']
+  [Arguments]  ${message}
+  Open side panel  conversation
+  Input text  xpath=//div[@id='conversation-panel']//textarea[@data-test-id='application-new-comment-text']  ${message}
+  Click element  xpath=//div[@id='conversation-panel']//button[@data-test-id='application-open-application-btn']
+  Wait until  Element should be visible  xpath=//div[@id='conversation-panel']//div[contains(@class,'comment-text')]//span[text()='${message}']
+  Close side panel  conversation
 
 Input comment and mark answered
-  [Arguments]  ${section}  ${message}
-  Input text  xpath=//section[@id='${section}']//textarea[@data-test-id='application-new-comment-text']  ${message}
-  Click element  xpath=//section[@id='${section}']//button[@data-test-id='comment-request-mark-answered']
+  [Arguments]  ${message}
+  Open side panel  conversation
+  Input text  xpath=//div[@id='conversation-panel']//textarea[@data-test-id='application-new-comment-text']  ${message}
+  Click element  xpath=//div[@id='conversation-panel']//button[@data-test-id='comment-request-mark-answered']
   Wait until  element should be visible  xpath=//div[@id='dynamic-ok-confirm-dialog']//button[@data-test-id='confirm-yes']
   Click element  xpath=//div[@id='dynamic-ok-confirm-dialog']//button[@data-test-id='confirm-yes']
   Wait until  element should not be visible  xpath=//div[@id='dynamic-ok-confirm-dialog']
-  Wait until  Element should be visible  xpath=//section[@id='${section}']//div[contains(@class,'comment-text')]//span[text()='${message}']
+  Wait until  Element should be visible  xpath=//div[@id='conversation-panel']//div[contains(@class,'comment-text')]//span[text()='${message}']
+  Close side panel  conversation
 
 Comment count is
   [Arguments]  ${section}  ${amount}
-  Wait until  Xpath Should Match X Times  //section[@id='${section}']//div[contains(@class,'comment-text')]  ${amount}
+  Open side panel  conversation
+  Wait until  Xpath Should Match X Times  //div[@id='conversation-panel']//div[contains(@class,'comment-text')]  ${amount}
+  Close side panel  conversation
 
 #
 # Tasks

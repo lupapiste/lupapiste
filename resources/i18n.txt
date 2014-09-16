@@ -1,3 +1,69 @@
+applications.urgent:
+notice.title: Huomiot
+notice.prompt: Viranomaisten huomiot
+notice.prompt.info: eivät näy hakijalla
+notice.urgent: Kiireellinen hakemus
+conversation.title: Keskustelu
+operations.tree.kiinteiston-muodostus: Kiinteistön muodostus
+operations.tree.tonttijaon-hakeminen: Tonttijaon hakeminen
+operations.tree.tonttijaon-muutoksen-hakeminen: Tonttijaon muutoksen hakeminen
+operations.tree.tilan-rekisteroiminen-tontiksi: Tilan rekisteröiminen tontiksi
+operations.tree.yhdistaminen: Yhdistäminen
+operations.tree.halkominen: Halkominen
+operations.tree.rasitetoimitus: Rasitetoimitus
+operations.tree.rajankaynnin-hakeminen: Rajakäynnin hakeminen
+operations.tree.rajannayton-hakeminen: Rajanäytön hakeminen
+operations.tree.kiinteiston-muodostus: Kiinteistön muodostus
+operations.rajannayton-hakeminen: Rajanäytön hakeminen
+operations.tree.rajannayton-hakeminen: Rajanäytön hakeminen
+operations.tonttijaon-hakeminen: Tonttijaon hakeminen
+kiinteiston-muodostus._group_label: Perustelut
+kiinteiston-muodostus.kuvaus: Perustelut
+tonttijaon-hakeminen._group_label: Tontti jako
+kiinteisto._group_label: Kohteena oleva kiinteistö
+kiinteisto.kiinteisto._group_label: Kiinteistö
+kiinteisto.kiinteisto.kiinteistotunnus: Kiinteistötunnus
+kiinteisto.kiinteisto.kylaNimi: Kylän tai kaupunginosan nimi
+kiinteisto.kiinteisto.maapintaala: Maapinta-ala
+kiinteisto.kiinteisto.maaraalaTunnus: Määräalan tunnus (jos kyseessä määräala)
+kiinteisto.kiinteisto.kiinteisto.huoneistonTyyppi._group_label: Huoneiston tyyppi
+kiinteisto.kiinteisto.rantaKytkin: kiinteisto sijaitsee rannalla
+kiinteisto.kiinteisto.rekisterointipvm: Rekisteröintipäivä
+kiinteisto.kiinteisto.tilanNimi: Tilan nimi
+kiinteisto.kiinteisto.vesipintaala: Vesipinta-ala
+halkominen._group_label: Halkominen
+operations.halkominen: Halkominen
+operations.halkominen.desc: Halkominen on toimitus, jolla voidaan purkaa tilan tai tontin yhteisomistus omiksi tonteikseen. Ennen halkomista on tonttijako muutettava vastaamaan haluttua lopputulosta. Halkomista voi hakea omistaja, jolla on lainhuuto kohdekiinteistön määräosaan. Asemakaava-alueella voidaan halkominen tehdä vain, jos sen lopputuloksena syntyy tonttijaon mukaisia tontteja. Halkomisen yhteydessä voidaan asiakkaan hakemuksesta perustaa rasitteita. Tällöin tulee hakemukseen liittää mukaan rasitesopimus, jossa on liitekartta.
+operations.rajankaynnin-hakeminen: Rajakäynnin hakeminen
+operations.rajankaynnin-hakeminen.desc: Jos rajan paikasta on epäselvyyttä ja se halutaan maastoon merkittäväksi virallisilla rajamerkeillä voi maanomistaja hakea rajanmääräämistä. Rajanmäärääminen on kiinteistötoimitus, jossa viranomainen tekee päätöksen rajan paikasta.
+operations.rajannayton-hakeminen: Rajanäytön hakeminen
+operations.rajannayton-hakeminen.desc: Jos rajan paikasta ei ole naapureiden kesken riitaa, mutta sen sijainti halutaan maastoon näkyviin, voi maanomistaja tilata rajan näytön. Rajannäytön kautta maastoon merkitään paaluin asiakkaan tilaamat rajamerkit tai rajat.
+operations.rasitetoimitus: Rasitetoimitus
+operations.rasitetoimitus.desc: Pysyvät käyttöoikeudet rakennuspaikkojen välillä tai niiden tarpeisiin perustetaan joko tontin lohkomisen yhteydessä tai erillisessä rasitetoimituksessa. Rasitetoimituksen vireilletulo edellyttää jonkun rakennuspaikan kaikkien omistajien hakemusta.
+operations.tilan-rekisteroiminen-tontiksi: Tilan rekisteröiminen tontiksi
+operations.tilan-rekisteroiminen-tontiksi.desc:
+operations.tonttijaon-hakeminen.desc: Tonttijako on lohkomissuunnitelma, joka tarvitaan asemakaava-alueella ennen lohkomista. Tonttijako lähtee liikkeelle maanomistajan aloitteesta. Ensimmäinen tonttijako on maksuton, jos korttelialueella on useita maanomistajia. Jos tonttijako tehdään vain yhden maanomistajan tarpeisiin, peritään siitä maksu.
+
+operations.tonttijaon-muutoksen-hakeminen: Tonttijaon hakeminen
+operations.tonttijaon-muutoksen-hakeminen.desc: Jos rakennuspaikkojen ulottuvuutta on tarpeen muuttaa, maanomistajat voivat hakea tonttijaon muutosta. Tonttijaon muutos on aina maksullinen ja se edellyttää kaikkien tonttijakoalueen maanomistajien hakemusta.
+operations.yhdistaminen: Yhdistäminen
+operations.yhdistaminen.desc: Jos uusi tontti muodostuu useista kokonaisista tiloista tai tonteista, voidaan se tietyin edellytyksin merkitä rekisteriin tekemällä kiinteistöjen yhdistäminen. Yhdistäminen tehdään omistajan hakemuksesta.
+rajankaynnin-hakeminen._group_label: Rajakäynnin hakeminen
+rajannayton-hakeminen._group_label: Rajanäytön hakeminen
+rasitetoimitus._group_label: Rasitetoimitus
+tilan-rekisteroiminen-tontiksi._group_label: Tilan rekisteröiminen tontikksi
+tonttijaon-muutoksen-hakeminen._group_label: Tonttijaon muutoksen hakeminen
+yhdistaminen._group_label: Yhdistäminen
+
+operations.tree.tontin-lohkominen: Tontin lohkominen
+operations.tontin-lohkominen: Tontin lohkominen
+operations.tontin-lohkominen.desc: Asemakaava-alueella rakennuspaikat muodostetaan lohkomalla. Ennen lohkomista pitää kohteella olla tonttijako. Tontin lohkomisen yhteydessä voidaan asiakkaan hakemuksesta perustaa rasitteita tai tehdä tontinosan lunastaminen.
+tontin-lohkominen._group_label:
+
+
+
+
+
 new-company-user.subject:   Kutsu Lupapiste.fi palveluun
 new-company-user.title:     Tervetuloa Lupapiste.fi palvelun käyttäjäksi
 new-company-user.info:      Sinut on kutsuttu yritys-tilin käyttäjäksi <b>Lupapiste.fi</b> palveluun. Alla näet tiedot jotka kutsuja on syöttänyt.
@@ -100,7 +166,6 @@ company-invite.desc:       Voit valtuuttaa yrityksen hakemukseesi
 company-invite.invite:     Valtuuta
 
 accept-company-invitation.subject:  Kutsu osallistua hakemuksen käsittelyyn
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 userInfo.company.title:    Yrityksen tiedot
 userInfo.company.loading:  Odota, yrityksen tietoja ladataan...
