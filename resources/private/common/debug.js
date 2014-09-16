@@ -9,6 +9,20 @@ $(function() {
     return false;
   }
 
+  function createApplication(operation) {
+    $.ajax({
+      url: "/dev/create",
+      data: { address: "Latokuja 3",
+              propertyId: "753-416-55-7",
+              municipality: "753",
+              operation: operation,
+              x: "404369.304000",
+              y: "6693806.957000" },
+      success: function() { $("#debug-create-done").text(" DONE!").show().delay(1000).fadeOut(); }
+    });
+    return false;
+  }
+
   function throttle(type, e) {
     var t = $(e.target);
     var value = t.val();
@@ -85,6 +99,9 @@ $(function() {
           .append($("<span>").attr("id", "debug-apply-done").css("font-weight", "bold").hide())
           .append($("<a>").attr("id", "debug-apply-minimal").attr("href", "#").text("minimal").click(function() { applyFixture("minimal"); }))
           .append($("<a>").attr("id", "debug-apply-minimal").attr("href", "#").text("municipality-test-users").click(function() { applyFixture("municipality-test-users"); })))
+        .append($("<p>").text("Create:")
+          .append($("<span>").attr("id", "debug-create-done").css("font-weight", "bold").hide())
+          .append($("<a>").attr("id", "debug-create-application").attr("href", "#").text("asuinrakennus").click(function() { createApplication("asuinrakennus"); })))
         .append($("<span>").attr("id", "debug-apply-done").css("font-weight", "bold").hide())
         .append($("<span>").text("Throttle web: "))
         .append($("<b>").addClass("dev-throttle-web").text("0"))

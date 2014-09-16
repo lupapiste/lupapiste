@@ -41,7 +41,7 @@ operations.rajannayton-hakeminen.desc: Jos rajan paikasta ei ole naapureiden kes
 operations.rasitetoimitus: Rasitetoimitus
 operations.rasitetoimitus.desc: Pysyvät käyttöoikeudet rakennuspaikkojen välillä tai niiden tarpeisiin perustetaan joko tontin lohkomisen yhteydessä tai erillisessä rasitetoimituksessa. Rasitetoimituksen vireilletulo edellyttää jonkun rakennuspaikan kaikkien omistajien hakemusta.
 operations.tilan-rekisteroiminen-tontiksi: Tilan rekisteröiminen tontiksi
-operations.tilan-rekisteroiminen-tontiksi.desc:
+operations.tilan-rekisteroiminen-tontiksi.desc: Tilan rekisteröintiä tontiksi (Laadun muutos) haetaan aina silloin, kun tontti rekisteröidään ilman uutta mittausta. Tila voidaan rekisteröidä, jos vanha tila vastaa täsmälleen uutta muodostettavaa tonttia.
 operations.tonttijaon-hakeminen.desc: Tonttijako on lohkomissuunnitelma, joka tarvitaan asemakaava-alueella ennen lohkomista. Tonttijako lähtee liikkeelle maanomistajan aloitteesta. Ensimmäinen tonttijako on maksuton, jos korttelialueella on useita maanomistajia. Jos tonttijako tehdään vain yhden maanomistajan tarpeisiin, peritään siitä maksu.
 
 operations.tonttijaon-muutoksen-hakeminen: Tonttijaon hakeminen
