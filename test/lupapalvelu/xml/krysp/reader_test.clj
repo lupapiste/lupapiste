@@ -10,7 +10,7 @@
 (defn- to-timestamp [yyyy-mm-dd]
   (coerce/to-long (coerce/from-string yyyy-mm-dd)))
 
-(testable-privates lupapalvelu.xml.krysp.reader ->verdict ->simple-verdict)
+(testable-privates lupapalvelu.xml.krysp.reader ->standard-verdicts ->simple-verdicts)
 
 (fact "property-equals returns url-encoded data"
   (property-equals "_a_" "_b_") => "%3CPropertyIsEqualTo%3E%3CPropertyName%3E_a_%3C%2FPropertyName%3E%3CLiteral%3E_b_%3C%2FLiteral%3E%3C%2FPropertyIsEqualTo%3E")
@@ -20,7 +20,7 @@
 
 (facts "KRYSP verdict"
   (let [xml (sade.xml/parse (slurp "resources/krysp/sample/verdict.xml"))
-      cases (->verdicts xml ->verdict)]
+      cases (->verdicts xml ->standard-verdicts)]
 
     (fact "xml is parsed" cases => truthy)
     (fact "xml has 2 cases" (count cases) => 2)
@@ -101,7 +101,7 @@
 
 (facts "CGI sample verdict"
   (let [xml (sade.xml/parse (slurp "dev-resources/krysp/cgi-verdict.xml"))
-        cases (->verdicts xml ->verdict)]
+        cases (->verdicts xml ->standard-verdicts)]
     (fact "xml is parsed" cases => truthy)
     (fact "xml has 1 case" (count cases) => 1)
     (fact "case has 1 verdict" (-> cases last :paatokset count) => 1)
@@ -151,7 +151,7 @@
 
 (facts "Tekla sample verdict"
   (let [xml (sade.xml/parse (slurp "dev-resources/krysp/teklap.xml"))
-        cases (->verdicts xml ->verdict)]
+        cases (->verdicts xml ->standard-verdicts)]
 
     (fact "xml is parsed" cases => truthy)
     (fact "xml has one case" (count cases) => 1)
@@ -182,18 +182,18 @@
 
 (facts "case not found"
   (let [xml (sade.xml/parse (slurp "dev-resources/krysp/notfound.xml"))
-        cases (->verdicts xml ->verdict)]
+        cases (->verdicts xml ->standard-verdicts)]
     (fact "xml is parsed" cases => truthy)
     (fact "xml has no cases" (count cases) => 0)))
 
 (facts "nil xml"
-  (let [cases (->verdicts nil ->verdict)]
+  (let [cases (->verdicts nil ->standard-verdicts)]
     (seq cases) => nil
     (count cases) => 0))
 
 (facts "no verdicts"
   (let [xml (sade.xml/parse (slurp "dev-resources/krysp/no-verdicts.xml"))
-        cases (->verdicts xml ->verdict)]
+        cases (->verdicts xml ->standard-verdicts)]
     (fact "xml is parsed" cases => truthy)
     (fact "xml has 1 case" (count cases) => 1)
     (fact "kuntalupatunnus" (:kuntalupatunnus (last cases)) => "13-0185-R")
@@ -271,7 +271,7 @@
 
 (facts "KRYSP ya-verdict"
   (let [xml (sade.xml/parse (slurp "resources/krysp/sample/yleiset alueet/ya-verdict.xml"))
-        cases (->verdicts xml ->simple-verdict)]
+        cases (->verdicts xml ->simple-verdicts)]
 
     (fact "xml is parsed" cases => truthy)
     (fact "xml has 1 cases" (count cases) => 1)
@@ -307,7 +307,7 @@
 (facts "Ymparisto verdicts"
   (doseq [permit-type ["yl" "mal" "vvvl"]]
     (let [xml (sade.xml/parse (slurp (str "resources/krysp/sample/verdict-" permit-type ".xml")))
-          cases (->verdicts xml ->simple-verdict)]
+          cases (->verdicts xml ->simple-verdicts)]
 
       (fact "xml is parsed" cases => truthy)
       (fact "xml has 1 cases" (count cases) => 1)

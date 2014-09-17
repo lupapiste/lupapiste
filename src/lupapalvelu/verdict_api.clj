@@ -55,12 +55,13 @@
         (-> pk (assoc :urlHash urlhash) (dissoc :liite))))
     pk))
 
-(defn- is-valid-paatos [timestamp paatos]
-  (and (:paivamaarat paatos) (> timestamp (-> paatos :paivamaarat :anto))))
+(defn- valid-paatos? [paatos timestamp]
+  (let [pvm (or (-> paatos :paivamaarat :anto) (-> paatos :paivamaarat :paatosdokumentinPvm))]
+    (and pvm (> timestamp pvm))))
 
 (defn verdict-attachments [application user timestamp verdict]
   {:pre [application]}
-  (when (and (:paatokset verdict) (some #(is-valid-paatos timestamp %) (:paatokset verdict)))
+  (when (and (:paatokset verdict) (some #(valid-paatos? % timestamp) (:paatokset verdict)))
     (let [verdict-id (mongo/create-id)]
       (->
         (assoc verdict :id verdict-id, :timestamp timestamp)
@@ -68,7 +69,7 @@
           (fn [paatokset]
             (filter seq
               (map (fn [paatos]
-                     (when (is-valid-paatos timestamp paatos)
+                     (when (valid-paatos? paatos timestamp)
                        (update-in paatos [:poytakirjat] #(map (partial get-poytakirja application user timestamp verdict-id) %)))) paatokset))))))))
 
 (defn- get-verdicts-with-attachments [application user timestamp xml]

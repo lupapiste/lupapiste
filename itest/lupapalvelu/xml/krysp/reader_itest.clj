@@ -5,7 +5,7 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.itest-util :refer :all]))
 
-(testable-privates lupapalvelu.xml.krysp.reader ->verdict ->simple-verdict)
+(testable-privates lupapalvelu.xml.krysp.reader ->standard-verdicts ->simple-verdicts)
 
 (def id "75300301050006")
 
@@ -124,18 +124,18 @@
 (fact "converting rakval verdict krysp to lupapiste domain model"
   (let [xml (rakval-application-xml local-krysp id false)]
     xml => truthy
-    (count (->verdicts xml ->verdict)) => 2))
+    (count (->verdicts xml ->standard-verdicts)) => 2))
 
 (fact "converting poikkeamis verdict krysp to lupapiste domain model"
   (let [xml (poik-application-xml local-krysp id false)]
     xml => truthy
-    (count (->verdicts xml ->verdict)) => 1))
+    (count (->verdicts xml ->standard-verdicts)) => 1))
 
 
 (fact "converting ya-verdict krysp to lupapiste domain model"
   (let [xml (ya-application-xml local-krysp id false)]
     xml => truthy
-    (count (->verdicts xml ->simple-verdict)) => 1))
+    (count (->verdicts xml ->simple-verdicts)) => 1))
 
 (facts "converting ymparisto verdicts  krysp to lupapiste domain model"
   (doseq [permit-type ["YL" "MAL" "VVVL"]]
