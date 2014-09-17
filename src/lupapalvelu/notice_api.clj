@@ -7,12 +7,14 @@
 (defcommand toggle-urgent
   {:parameters [id urgent]
    :roles [:authority]
+   :states action/all-states
    :input-validators [(partial action/boolean-parameters [:urgent])]}
   [command]
   (update-application command {$set {:urgent urgent}}))
 
 (defcommand add-authority-notice
   {:parameters [id authorityNotice]
+   :states action/all-states
    :roles [:authority]}
   [command]
   (update-application command {$set {:authorityNotice authorityNotice}}))
