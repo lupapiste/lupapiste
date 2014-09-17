@@ -14,7 +14,9 @@
 
 (defn basic-application-query-for [user]
   (case (keyword (:role user))
-    :applicant {:auth.id (:id user)}
+    :applicant (if-let [company-id (get-in user [:company :id])]
+                 {$or [{:auth.id (:id user)} {:auth.id company-id}]}
+                 {:auth.id (:id user)})
     :authority {$or [{:organization {$in (:organizations user)}} {:auth.id (:id user)}]}
     :trusted-etl {}
     (do
@@ -40,6 +42,11 @@
     (update-in application [:comments]
       #(filter (fn [{target :target}] (or (empty? target) (not= (:type target) "attachment") (attachments (:id target)))) %))))
 
+(defn- filter-notice-from-application [application user]
+  (if (user/authority? user) 
+    application 
+    (dissoc application :urgent :authorityNotice)))
+
 (defn- filter-application-content-for [application user]
   (when (seq application)
     (let [draft-verdict-ids (->> application :verdicts (filter :draft) (map :id) set)
@@ -51,7 +58,8 @@
         (update-in [:verdicts] (partial only-authority-sees-drafts user))
         (update-in [:attachments] (partial only-authority-sees user relates-to-draft))
         commented-attachment-exists
-        (update-in [:tasks] (partial only-authority-sees user relates-to-draft))))))
+        (update-in [:tasks] (partial only-authority-sees user relates-to-draft))
+        (filter-notice-from-application user)))))
 
 (defn get-application
   ([]
@@ -200,6 +208,7 @@
    :attachments              []
    :auth                     []
    :authority                {}
+   :authorityNotice          ""
    :buildings                []
    :closed                   nil ; timestamp
    :closedBy                 {}
@@ -229,6 +238,7 @@
    :submitted                nil ; timestamp
    :tasks                    []
    :title                    ""
+   :urgent                   false
    :verdicts                 []})
 
 

@@ -14,7 +14,7 @@
             maxlength="4000">
           </textarea>
           <button
-            data-bind="visible: $root.authorization.ok('add-comment'), disable: disabled, click: submit"
+            data-bind="visible: $parent.authorization.ok('add-comment'), disable: disabled, click: submit"
             data-test-id="application-new-comment-btn"
             type="submit"
             class="btn btn-primary">
@@ -23,7 +23,7 @@
           </button>
 
           <button
-            data-bind="visible: $root.authorization.ok('open-application'), disable: disabled, click: stateOpenApplication"
+            data-bind="visible: $parent.authorization.ok('open-application'), disable: disabled, click: stateOpenApplication"
             data-test-id="application-open-application-btn"
             type="submit"
             class="btn btn-primary">
@@ -31,10 +31,10 @@
             <em data-bind="visible: pending" class="button-loader"></em>
           </button>
 
-          <div data-bind="with: $parent.authorities, visible: $root.authorization.ok('can-target-comment-to-authority')" class="comment-controls">
-            <div class="mark-answered" data-bind="visible: $root.application.infoRequest">
+          <div data-bind="visible: $parent.authorization.ok('can-target-comment-to-authority')" class="comment-controls">
+            <div class="mark-answered" data-bind="visible: $parent.infoRequest">
               <button
-                data-bind="visible: $root.authorization.ok('add-comment'), click: $parent.markAnswered"
+                data-bind="visible: $parent.authorization.ok('add-comment'), click: markAnswered"
                 data-test-id="comment-request-mark-answered"
                 type="submit"
                 class="btn btn-primary">
@@ -44,12 +44,12 @@
             <div class="comment-request">
               <label data-bind="ltext: 'comment-request-label'"></label>
               <select
-                data-bind="options: $data,
+                data-bind="options: $parent.authorities,
                            optionsText: function(item) { return item.firstName + ' ' + item.lastName; },
                            optionsValue: 'id',
                            value: $parent.to,
                            optionsCaption: loc('comment-request-prompt')"
-                data-test-id="application-assigneed-authority">
+                data-test-id="side-panel-assigneed-authority">
               </select>
             </div>
 
@@ -58,7 +58,7 @@
         <div class="comment-toggle" data-bind="if: $parent.mainConversation">
           <input type="checkbox" id="show-attachment-comments" data-bind="checked: showAttachmentComments">
           <label for="show-attachment-comments" data-bind="ltext: 'conversation.attachment.toggle'"></label>
-          <div data-bind="if: $root.authorization.ok('save-verdict-draft')">
+          <div data-bind="if: $parent.authorization.ok('save-verdict-draft')">
             <input type="checkbox" id="show-preparation-comments" data-bind="checked: showPreparationComments">
             <label for="show-preparation-comments" data-bind="ltext: 'conversation.preparation.toggle'"></label>
           </div>
@@ -76,7 +76,7 @@
                 <br />
                 <span class="author" data-bind="fullName: user"></span>
                 <span data-bind="with: $data.to">
-                  --> <span class="author" data-bind="fullName: $data"></span>
+                  <span class="author" data-bind="fullName: $data"></span>
                 </span>
                 <br />
                 <b>(<span class="role" data-bind="ltext: user.role"></span>)</b>
@@ -85,7 +85,7 @@
                 <span data-bind="if: $parents[1].mainConversation">
                   <span data-bind="if: $parent.isForAttachment($data)" class="attachment-details">
                     <span data-bind="if: target.id()">
-                    <a data-bind="attr: {href: '#!/attachment/' + $root.application.id() + '/' + target.id()}">
+                    <a data-bind="attr: {href: '#!/attachment/' + $parent.applicationId + '/' + target.id()}">
                       <span data-bind="text: target.attachmentType"></span>
                     </a></span>
                   </span>

@@ -1,10 +1,13 @@
 var comments = (function() {
-  "use strict";
+  // "use strict";
 
-  function CommentModel(takeAll, newCommentRoles) {
+  function CommentModel() {
     var self = this;
 
     self.applicationId = null;
+    self.takeAll = false;
+    self.newCommentRoles = undefined;
+
     self.target = ko.observable({type: "application"});
     self.text = ko.observable();
     self.comments = ko.observableArray();
@@ -14,14 +17,16 @@ var comments = (function() {
     self.showAttachmentComments = ko.observable(false);
     self.showPreparationComments = ko.observable(false);
 
-    self.refresh = function(application, target) {
+    self.refresh = function(application, takeAll, target, newCommentRoles) {
       self.applicationId = application.id;
       self.target(target || {type: "application"}).text("");
+      self.takeAll = takeAll;
+      self.newCommentRoles = newCommentRoles;
       var filteredComments =
         _.filter(application.comments,
-            function(comment) {
-              return takeAll || self.target().type === comment.target.type && self.target().id === comment.target.id;
-            });
+          function(comment) {
+            return self.takeAll || self.target().type === comment.target.type && self.target().id === comment.target.id;
+          });
       self.comments(ko.mapping.fromJS(filteredComments));
     };
 
@@ -35,26 +40,26 @@ var comments = (function() {
 
 
     var doAddComment = function(markAnswered, openApplication) {
-        ajax.command("add-comment", {
-            id: self.applicationId,
-            text: self.text(),
-            target: self.target(),
-            to: self.to(),
-            roles: newCommentRoles || ["applicant","authority"],
-            "mark-answered": markAnswered,
-            openApplication: openApplication
-        })
-        .processing(self.processing)
-        .pending(self.pending)
-        .success(function() {
-            self.text("").to(undefined);
-            if (markAnswered) {
-                LUPAPISTE.ModalDialog.showDynamicOk(loc('comment-request-mark-answered-label'), loc('comment-request-mark-answered.ok'));
-            }
-            repository.load(self.applicationId);
-        })
-        .call();
-        return false;
+      ajax.command("add-comment", {
+          id: self.applicationId,
+          text: self.text(),
+          target: self.target(),
+          to: self.to(),
+          roles: self.newCommentRoles || ["applicant","authority"],
+          "mark-answered": markAnswered,
+          openApplication: openApplication
+      })
+      .processing(self.processing)
+      .pending(self.pending)
+      .success(function() {
+          self.text("").to(undefined);
+          if (markAnswered) {
+              LUPAPISTE.ModalDialog.showDynamicOk(loc('comment-request-mark-answered-label'), loc('comment-request-mark-answered.ok'));
+          }
+          repository.load(self.applicationId);
+      })
+      .call();
+      return false;
     };
 
     self.markAnswered = function() {
@@ -76,7 +81,7 @@ var comments = (function() {
       return model.user && model.user.role && model.user.role() === "authority";
     };
     self.isForAttachment = function(model) {
-      return model && model.target && model.target.type() === "attachment";
+      return model && model.target && model.target.type && model.target.type() === "attachment";
     };
 
     function isPreparationComment(model) {
@@ -84,7 +89,7 @@ var comments = (function() {
     }
 
     self.isVisible = function(model) {
-      return !takeAll ||
+      return !self.takeAll ||
                ((!self.isForNewAttachment(model) || self.showAttachmentComments() ) &&
                 (!isPreparationComment(model)    || self.showPreparationComments()));
     };
@@ -92,7 +97,8 @@ var comments = (function() {
   }
 
   return {
-    create: function(takeAll, newCommentRoles) { return new CommentModel(takeAll, newCommentRoles); }
+    create: function() {
+      return new CommentModel(); }
   };
 
 })();

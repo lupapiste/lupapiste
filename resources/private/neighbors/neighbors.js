@@ -20,6 +20,7 @@
   var model = new Model();
   var editModel = new EditModel();
   var ownersModel = new OwnersModel();
+  var authorizationModel = authorization.create();
 
   function Model() {
     var self = this;
@@ -305,8 +306,11 @@
     repository.load(applicationId);
   });
 
-  repository.loaded(["neighbors"], function(application) {
-    if (applicationId === application.id) { model.init(application); }
+  repository.loaded(["neighbors"], function(application, applicationDetails) {
+    if (applicationId === application.id) {
+      model.init(application);
+      authorizationModel.refresh(application);
+    }
   });
 
   $(function() {

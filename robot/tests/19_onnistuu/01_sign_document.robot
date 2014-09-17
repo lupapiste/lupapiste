@@ -19,10 +19,12 @@ Bob decides to register his company after all, but still chikens out
   Wait and click  xpath=//*[@data-test-id='register-company-start']
   Wait until  Element should be visible  xpath=//*[@data-test-id='register-company-submit']
   Input text by test id  register-company-name        Peten rakennus Oy
-  Input text by test id  register-company-y           1234567-8
+  Input text by test id  register-company-y           FI2341528-4
   Input text by test id  register-company-firstName   Pete
   Input text by test id  register-company-lastName    Puuha
   Input text by test id  register-company-email       puuha.pete@pete-rakennus.fi
+  Input text by test id  register-company-ovt         0037123456710007
+  Input text by test id  register-company-pop         003776543212
   Click enabled by test id  register-company-submit
   Wait Until  Element Should Be Disabled  xpath=//*[@data-test-id='register-company-submit']
   Element Should Be Disabled  xpath=//*[@data-test-id='register-company-cancel']
@@ -36,10 +38,12 @@ Bob decides to register his company after all, and this time he means it
   Wait and click  xpath=//*[@data-test-id='register-company-start']
   Wait until  Element should be visible  xpath=//*[@data-test-id='register-company-submit']
   Input text by test id  register-company-name        Peten rakennus Oy
-  Input text by test id  register-company-y           1234567-8
+  Input text by test id  register-company-y           FI2341528-4
   Input text by test id  register-company-firstName   Pete
   Input text by test id  register-company-lastName    Puuha
   Input text by test id  register-company-email       puuha.pete@pete-rakennus.fi
+  Input text by test id  register-company-ovt         0037123456710007
+  Input text by test id  register-company-pop         003776543212
   Click enabled by test id  register-company-submit
   Wait Until  Element Should Be Disabled  xpath=//*[@data-test-id='register-company-submit']
   Element Should Be Disabled  xpath=//*[@data-test-id='register-company-cancel']
