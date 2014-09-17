@@ -49,6 +49,22 @@
                     (or (env/value :email :skip-mx-validation) (dns/valid-mx-domain? email))))
         (fail :error.email)))))
 
+;; State helpers
+
+(def all-application-states [:draft :open :submitted :sent :complement-needed
+                             :verdictGiven :constructionStarted :closed :canceled])
+(def all-inforequest-states [:info :answered])
+(def all-states             (concat all-application-states all-inforequest-states))
+
+(defn all-states-but [drop-states-array]
+  (vec (util/exclude-from-sequence all-states drop-states-array)))
+
+(defn all-application-states-but [drop-states-array]
+  (vec (util/exclude-from-sequence all-application-states drop-states-array)))
+
+(defn all-inforequest-states-but [drop-states-array]
+  (vec (util/exclude-from-sequence all-inforequest-states drop-states-array)))
+
 ;; Notificator
 
 (defn notify [notification]
@@ -215,11 +231,11 @@
 (defn requires-application? [{data :data}]
   (contains? data :id))
 
-(defn get-application
+(defn- get-application
   "if :id parameter is present read application from command
    (pre-loaded) or load application for user."
   [{{id :id} :data user :user application :application}]
-  (and id (or application (domain/get-application-as id user))))
+  (and id (or application (domain/get-application-as-including-canceled id user))))
 
 (defn- user-is-not-allowed-to-access?
   "Current user must be owner, authority or writer OR have some other supplied extra-auth-roles"
@@ -310,34 +326,36 @@
 ;;
 
 (def supported-action-meta-data
-  {:parameters "Vector of parameters. Parameters can be keywords or symbols. Symbols will be available in the action body. If a parameter is missing from request, an error will be raised."
-   :roles "Vector of role keywords."
-   :extra-auth-roles "Vector of role keywords."
+  {:parameters  "Vector of parameters. Parameters can be keywords or symbols. Symbols will be available in the action body. If a parameter is missing from request, an error will be raised."
+   :roles       "Vector of role keywords."
+   :extra-auth-roles  "Vector of role keywords."
    :description "Documentation string."
-   :notified "Boolean. Documents that the action will be sending (email) notifications."
-   :pre-checks "Vector of functions."
-   :input-validators "Vector of functions."
-   :states  "Vector of application state keywords"
+   :notified    "Boolean. Documents that the action will be sending (email) notifications."
+   :pre-checks  "Vector of functions."
+   :input-validators  "Vector of functions."
+   :states      "Vector of application state keywords"
    :on-complete "Function or vector of functions."
-   :on-success "Function or vector of functions."
-   :on-fail "Function or vector of functions."
-   :feature "Keyword: feature flag name. Action is run only if the feature flag is true.
-             If you have feature.some-feature properties file, use :feature :some-feature in action meta data"})
+   :on-success  "Function or vector of functions."
+   :on-fail     "Function or vector of functions."
+   :feature     "Keyword: feature flag name. Action is run only if the feature flag is true.
+                 If you have feature.some-feature properties file, use :feature :some-feature in action meta data"})
 
 (def ^:private supported-action-meta-data-keys (set (keys supported-action-meta-data)))
 
 (defn register-action [action-type action-name meta-data line ns-str handler]
   (assert (every? supported-action-meta-data-keys (keys meta-data)) (str (keys meta-data)))
   (assert (seq (:roles meta-data)) (str "You must define :roles meta data for " action-name ". Use :roles [:anonymous] to grant access to anyone."))
+  (assert (if (some #(= % :id) (:parameters meta-data)) (seq (:states meta-data)) true)
+    (str "You must define :states meta data for " action-name " if action has the :id parameter (i.e. application is attached to the action)."))
 
   (let [action-keyword (keyword action-name)]
     (tracef "registering %s: '%s' (%s:%s)" (name action-type) action-name ns-str line)
     (swap! actions assoc
       action-keyword
       (merge meta-data {:type action-type
-                     :ns ns-str
-                     :line line
-                     :handler handler}))))
+                        :ns ns-str
+                        :line line
+                        :handler handler}))))
 
 (defmacro defaction [form-meta action-type action-name & args]
   (let [doc-string  (when (string? (first args)) (first args))

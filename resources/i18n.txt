@@ -190,3 +190,5 @@ register-company-fail.title:        Rekisteröinti epäonnistui
 register-company-fail.message:      Yrityksen rekisteröinti epäonnistui. Ole hyvä ja ota yhteyytä Lupapiste.fi palvelun tukeen.
 
 email-in-use: Sähköpostiosoite on jo käytössä
+
+canceled.title: Hakemus on merkitty peruutetuksi
