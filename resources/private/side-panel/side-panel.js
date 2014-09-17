@@ -98,7 +98,7 @@ LUPAPISTE.SidePanelModel = function() {
     }
   }
 
-  var pages = ["application","inforequest","attachment","statement","neighbors","verdict"];
+  var pages = ["application","attachment","statement","neighbors","verdict"];
 
   hub.subscribe({type: "page-change"}, function() {
     if(_.contains(pages, pageutil.getPage())) {

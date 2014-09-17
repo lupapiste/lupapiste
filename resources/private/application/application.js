@@ -8,6 +8,7 @@
   var changeLocationModel = new LUPAPISTE.ChangeLocationModel();
   var addLinkPermitModel = new LUPAPISTE.AddLinkPermitModel();
   var constructionStateChangeModel = new LUPAPISTE.ModalDatepickerModel();
+  var commentModel = comments.create(true);
 
   constructionStateChangeModel.openConstructionStartDialog = _.partial(
       constructionStateChangeModel.openWithConfig,
@@ -157,6 +158,9 @@
 
       // Invite
       inviteModel.setApplicationId(app.id);
+
+      // Comments
+      commentModel.refresh(app, true);
 
       // Verdict details
       verdictModel.refresh(app, applicationDetails.authorities);
@@ -433,6 +437,7 @@
       attachmentTemplatesModel: attachmentTemplatesModel,
       authorization: authorizationModel,
       changeLocationModel: changeLocationModel,
+      applicationComment: commentModel,
       constructionStateChangeModel: constructionStateChangeModel,
       createTask: createTaskController,
       invite: inviteModel,

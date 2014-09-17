@@ -46,20 +46,17 @@ Mikko comes back and sees his application and inforequest
 
 Mikko inspects inforequest and sees his initial comments
   Open inforequest  create-info  753-416-25-22
-  Open side panel  conversation
-  Wait until  Xpath Should Match X Times  //div[@id='conversation-panel']//div[@data-test-id='comments-table']//span[text()='Hoblaa']  1
-  Close side panel  conversation
+  Wait until  Xpath Should Match X Times  //section[@id='inforequest']//div[@data-test-id='comments-table']//span[text()='Hoblaa']  1
 
 #LUPA-585
 The contents of unsent inforequest's message field is resetted properly when moving to another inforequest
-  Open side panel  conversation
   Wait until  Element should be visible  conversation-panel
-  Input text  xpath=//div[@id='conversation-panel']//textarea[@data-test-id='application-new-comment-text']  roskaa
+  Input text  xpath=//section[@id='inforequest']//textarea[@data-test-id='application-new-comment-text']  roskaa
   # XXX 'Element Should Contain' or 'Textfield Value Should Be' do not work for some reason
-  Wait For Condition  return $("#conversation-panel").find("textarea[data-test-id='application-new-comment-text']").val() == "roskaa";
+  Wait For Condition  return $("#inforequest").find("textarea[data-test-id='application-new-comment-text']").val() == "roskaa";
 
   Create inforequest the fast way  create-info-2  360603.153  6734222.95  753  753-416-25-22  asuinrakennus  init-comment-2
-  Wait For Condition  return $("#conversation-panel").find("textarea[data-test-id='application-new-comment-text']").val() == "";
+  Wait For Condition  return $("#inforequest").find("textarea[data-test-id='application-new-comment-text']").val() == "";
   Close side panel  conversation
 
 Mikko creates new application
