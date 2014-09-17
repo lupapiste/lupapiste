@@ -43,11 +43,11 @@
       #(filter (fn [{target :target}] (or (empty? target) (not= (:type target) "attachment") (attachments (:id target)))) %))))
 
 (defn- filter-notice-from-application [application user]
-  (if (user/authority? user) 
-    application 
+  (if (user/authority? user)
+    application
     (dissoc application :urgent :authorityNotice)))
 
-(defn- filter-application-content-for [application user]
+(defn filter-application-content-for [application user]
   (when (seq application)
     (let [draft-verdict-ids (->> application :verdicts (filter :draft) (map :id) set)
           relates-to-draft (fn [m]
