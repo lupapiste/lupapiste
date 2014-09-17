@@ -1,5 +1,6 @@
 (ns lupapalvelu.onnistuu.process
   (:require [taoensso.timbre :as timbre :refer [infof warnf errorf]]
+            [clojure.java.io :as io]
             [clojure.walk :as walk]
             [monger.collection :as mc]
             [monger.operators :refer :all]
@@ -120,7 +121,7 @@
   (-> (find-sign-process! process-id)
       (process-update! :started ts))
   ; FIXME: where we get the actual document?
-  ["text/plain" "da pdf"])
+  ["application/pdf" (-> "hello.pdf" io/resource io/input-stream)])
 
 ;
 ; Success:
