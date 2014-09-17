@@ -1,4 +1,3 @@
-
 (ns lupapalvelu.organization
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf fatal]]
             [clojure.string :as s]
