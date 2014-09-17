@@ -28,9 +28,7 @@
             <div class="process-nav"></div>
           </div>
           <!-- ko if: authorization.ok('toggle-urgent') -->
-          <div id="notice-panel" data-bind="visible: showNoticePanel">
-            <div data-bind="template: {name: 'notice-template', data: notice}"></div>
-          </div>
+          <div id="notice-panel" data-bind="visible: showNoticePanel, template: {name: 'notice-template', data: notice}"></div>
           <!-- /ko -->
         </div>
       </div>
