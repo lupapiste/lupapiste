@@ -339,7 +339,7 @@
            ;;
            ;; TODO: Is "paatos" also one of the requirements?
            ;;
-           (when (some #(and #_(:paatos %) (:paatoskoodi %) (:paatoksentekija %) (:paatospvm %)) poytakirjat)
+;           (when (some #(and #_(:paatos %) (:paatoskoodi %) (:paatoksentekija %) (:paatospvm %)) poytakirjat)
              {:lupamaaraykset (->lupamaaraukset paatos-xml-without-ns)
               :paivamaarat    (get-pvm-dates paatos-xml-without-ns
                                 [:aloitettava :lainvoimainen :voimassaHetki :raukeamis :anto :viimeinenValitus :julkipano])
@@ -349,15 +349,17 @@
     (select xml-without-ns [:paatostieto :Paatos])))
 
 (defn- ->simple-verdicts [xml-without-ns]
-  (let [app-state (ss/lower-case (get-text xml-without-ns [:Kasittelytieto :hakemuksenTila]))]
-    (when-not (#{"luonnos" "hakemus" "valmistelussa" "vastaanotettu" "tarkastettu, t\u00e4ydennyspyynt\u00f6"} app-state)
+;  (let [app-state (ss/lower-case (get-text xml-without-ns [:Kasittelytieto :hakemuksenTila]))]
+;    (when-not (#{"luonnos" "hakemus" "valmistelussa" "vastaanotettu" "tarkastettu, t\u00e4ydennyspyynt\u00f6"} app-state)
       (map (fn [paatos-xml-without-ns]
              {:lupamaaraykset {:takuuaikaPaivat (get-text paatos-xml-without-ns :takuuaikaPaivat)
                                :muutMaaraykset (->lupamaaraukset-text paatos-xml-without-ns)}
               :paivamaarat    {:paatosdokumentinPvm (cr/to-timestamp (get-text paatos-xml-without-ns :paatosdokumentinPvm))}
               :poytakirjat    (when-let [liitetiedot (seq (select paatos-xml-without-ns [:liitetieto]))]
                                 (map ->liite (map (fn [[k v]] {:liite v}) (cr/all-of liitetiedot))))})
-        (select xml-without-ns [:paatostieto :Paatos])))))
+        (select xml-without-ns [:paatostieto :Paatos]))
+;      ))
+  )
 
 (permit/register-function permit/R :verdict-krysp-reader ->standard-verdicts)
 (permit/register-function permit/P :verdict-krysp-reader ->standard-verdicts)
