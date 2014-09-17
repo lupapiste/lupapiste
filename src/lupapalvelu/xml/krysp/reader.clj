@@ -343,7 +343,9 @@
              {:lupamaaraykset (->lupamaaraukset paatos-xml-without-ns)
               :paivamaarat    (get-pvm-dates paatos-xml-without-ns
                                 [:aloitettava :lainvoimainen :voimassaHetki :raukeamis :anto :viimeinenValitus :julkipano])
-              :poytakirjat    poytakirjat})))
+              :poytakirjat    (seq poytakirjat)}
+;             )
+           ))
     (select xml-without-ns [:paatostieto :Paatos])))
 
 (defn- ->simple-verdicts [xml-without-ns]
