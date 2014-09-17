@@ -141,7 +141,8 @@
     ["halkominen" :halkominen]
     ["rasitetoimitus" :rasitetoimitus]
     ["rajankaynnin-hakeminen" :rajankaynnin-hakeminen]
-    ["rajannayton-hakeminen" :rajannayton-hakeminen]]])
+    ["rajannayton-hakeminen" :rajannayton-hakeminen]
+    ["ya-lohkomistoimituksen-hakeminen-kunta" :ya-lohkomistoimituksen-hakeminen-kunta]]])
 
 
 (def operation-tree
@@ -520,6 +521,12 @@
                                    :add-operation-allowed false
                                    :link-permit-required false}
     :rajannayton-hakeminen        {:schema "kiinteiston-muodostus"
+                                   :permit-type permit/KM
+                                   :required common-kiinteiston-muodostus-schemas
+                                   :attachments [:paapiirustus [:asemapiirros]]
+                                   :add-operation-allowed false
+                                   :link-permit-required false}
+    :ya-lohkomistoimituksen-hakeminen-kunta {:schema "kiinteiston-muodostus"
                                    :permit-type permit/KM
                                    :required common-kiinteiston-muodostus-schemas
                                    :attachments [:paapiirustus [:asemapiirros]]

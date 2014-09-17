@@ -14,6 +14,7 @@ operations.tree.rasitetoimitus: Rasitetoimitus
 operations.tree.rajankaynnin-hakeminen: Rajakäynnin hakeminen
 operations.tree.rajannayton-hakeminen: Rajanäytön hakeminen
 operations.tree.kiinteiston-muodostus: Kiinteistön muodostus
+operations.tree.ya-lohkomistoimituksen-hakeminen-kunta: Yleisten alueiden lohkomistoimituksen hakeminen (kunta hakijana)
 operations.rajannayton-hakeminen: Rajanäytön hakeminen
 operations.tree.rajannayton-hakeminen: Rajanäytön hakeminen
 operations.tonttijaon-hakeminen: Tonttijaon hakeminen
@@ -60,7 +61,9 @@ operations.tontin-lohkominen: Tontin lohkominen
 operations.tontin-lohkominen.desc: Asemakaava-alueella rakennuspaikat muodostetaan lohkomalla. Ennen lohkomista pitää kohteella olla tonttijako. Tontin lohkomisen yhteydessä voidaan asiakkaan hakemuksesta perustaa rasitteita tai tehdä tontinosan lunastaminen.
 tontin-lohkominen._group_label:
 
-
+operations.ya-lohkomistoimituksen-hakeminen-kunta: Yleisten alueiden lohkomistoimituksen hakeminen (kunta hakijana)
+operations.ya-lohkomistoimituksen-hakeminen-kunta.desc: Kunnan itse käynnistämä toimitus yleisen alueen lohkomiseksi. Toimitus ei sovellu kuntalaisten käyttöön.
+ya-lohkomistoimituksen-hakeminen-kunta._group_label: Yleisten alueiden lohkomistoimituksen hakeminen
 
 
 
