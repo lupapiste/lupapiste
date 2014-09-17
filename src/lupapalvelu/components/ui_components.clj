@@ -211,7 +211,7 @@
                   :html ["index.html" "integration-error.html"]}
 
    :oir          {:depends [:common :authenticated :map :application :attachment
-                            :docgen :debug]
+                            :docgen :debug :notice]
                   :js ["oir.js"]
                   :css ["oir.css"]
                   :html ["index.html"]}
