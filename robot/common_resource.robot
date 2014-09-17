@@ -386,6 +386,8 @@ Add attachment
   Wait until       Page should contain element  xpath=//form[@id='attachmentUploadForm']//option[@value='muut.muu']
   Select From List  attachmentType  muut.muu
   Input text       text  ${description}
+  Wait until       Page should contain element  xpath=//form[@id='attachmentUploadForm']/input[@type='file']
+  Focus            xpath=//form[@id='attachmentUploadForm']/input[@type='file']
   Choose File      xpath=//form[@id='attachmentUploadForm']/input[@type='file']  ${path}
   Click element    test-save-new-attachment
   Unselect Frame
