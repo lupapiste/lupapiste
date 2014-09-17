@@ -10,7 +10,6 @@ Resource        ../../common_resource.robot
 Mikko creates a new application
   Mikko logs in
   Create application the fast way  invite-app  753  753-423-2-159  asuinrakennus
-  Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  753-423-2-159
 
 Mikko can see invite paasuunnittelija button
   Open tab  parties
@@ -112,6 +111,16 @@ Mikko invites previously unknown user Oskari as paasuunnittelija
 
 # TODO: should create new user "oskari@example.com" and make sure he has access
 
+
+#  TODO: Tyonjohtaja on poistettu tavallisilta R-hakemuksilta (LUPA-1603).
+#        Testataan tyonjohtajan kutsuminen erikseen omalla hakemuksellaan.
+Mikko creates a new tyonjohtaja application
+  #Mikko logs in
+  Create application the fast way  invite-app-tyonjohtaja  753  753-423-2-159  tyonjohtajan-nimeaminen
+
+Mikko can see invite tyonjohtaja button in parties tab
+  Open tab  parties
+  Element should be visible  xpath=//*[@data-test-id='application-invite-tyonjohtaja']
 Mikko invites previously unknown user Unto as tyonjohtaja
   Element should be visible  xpath=//*[@data-test-id='application-invite-tyonjohtaja']
   Click by test id  application-invite-tyonjohtaja
@@ -121,7 +130,7 @@ Mikko invites previously unknown user Unto as tyonjohtaja
   Click by test id  application-invite-submit
   Wait until  Mask is invisible
   Wait until  Element should not be visible  invite-email
-  Wait until  Invite count is  2
+  Wait until  Invite count is  1
 
 *** Keywords ***
 
