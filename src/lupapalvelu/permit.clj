@@ -52,6 +52,10 @@
   {:subtypes       []
    :sftp-directory "/ymparisto"})
 
+(defpermit KM "Kiinteiston muodostus"
+  {:subtypes       []
+   :sftp-directory "/rakennus"})
+
 ;;
 ;; Helpers
 ;;

@@ -5,7 +5,7 @@
             [monger.core :as m]
             [monger.collection :as mc]
             [monger.db :as db]
-            [swiss-arrows.core :refer [-<>>]]
+            [swiss.arrows :refer [-<>>]]
             [slingshot.slingshot :refer [try+ throw+]]))
 
 ;;

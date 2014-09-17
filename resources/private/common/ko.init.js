@@ -20,11 +20,26 @@
   ko.validation.localize(loc.getErrorMessages());
 
   ko.validation.rules.validPassword = {
-      validator: function (val) {
-        return val && util.isValidPassword(val);
-      },
-      message: loc("error.password.minlength")
-    };
+    validator: function (val) {
+      return val && util.isValidPassword(val);
+    },
+    message: loc("error.password.minlength")
+  };
+
+  ko.validation.rules.y = {
+    validator: function(y) {
+      return _.isBlank(y) || util.isValidY(y);
+    },
+    message: loc("error.invalidY")
+  };
+
+  ko.validation.rules.ovt = {
+    validator: function(ovt) {
+      return _.isBlank(ovt) || util.isValidOVT(ovt);
+    },
+    message: loc("error.invalidOVT")
+  };
+
   ko.validation.registerExtenders();
 
   ko.bindingHandlers.dateString = {
@@ -46,20 +61,20 @@
     var fn = e$[fnName];
     var value = ko.utils.unwrapObservable(valueAccessor());
     if (value) {
-        var v = loc(value);
-        fn.call(e$, (v ? v : "$$EMPTY_LTEXT$$"));
-        if (v) {
-          e$.removeClass("ltext-error");
-        } else {
-          e$.addClass("ltext-error");
-        }
-      } else {
-        // value is null or undefined, show it as empty string. Note that this
-        // does not mean that the localization would be missing. It's just that
-        // the actual value to use for localization is not available at this time.
-        fn.call(e$, "");
+      var v = loc(value);
+      fn.call(e$, (v ? v : "$$EMPTY_LTEXT$$"));
+      if (v) {
         e$.removeClass("ltext-error");
-      }   
+      } else {
+        e$.addClass("ltext-error");
+      }
+    } else {
+      // value is null or undefined, show it as empty string. Note that this
+      // does not mean that the localization would be missing. It's just that
+      // the actual value to use for localization is not available at this time.
+      fn.call(e$, "");
+      e$.removeClass("ltext-error");
+    }
   }
 
   ko.bindingHandlers.ltext = {

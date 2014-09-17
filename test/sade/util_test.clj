@@ -1,6 +1,7 @@
 (ns sade.util-test
   (:require [sade.util :refer :all]
-            [midje.sweet :refer :all]))
+            [midje.sweet :refer :all]
+            [schema.core :as sc]))
 
 
 (facts "strip-nils"
@@ -210,4 +211,31 @@
   (fact (y? "foo")         => falsey)
   (fact (y? "FI2341529-4") => falsey)
   (fact (y? "FI2341528-4") => truthy)
-  (fact (y? "SW123456789") => falsey))
+  (fact (y? "SW123456789") => truthy))
+
+(facts ovt?
+  (fact (ovt? nil)             => falsey)
+  (fact (ovt? "")              => falsey)
+  (fact (ovt? "foo")           => falsey)
+  (fact (ovt? "1234")          => falsey)
+  (fact (ovt? "12345")         => truthy) ; foreign OVT
+  (fact (ovt? "003712345")     => falsey)
+  (fact (ovt? "003723415284")  => truthy)
+  (fact (ovt? "0037234152841") => truthy)
+  (fact (ovt? "00372341528412") => truthy)
+  (fact (ovt? "003723415284123") => truthy)
+  (fact (ovt? "0037234152841234") => truthy)
+  (fact (ovt? "00372341528412345") => truthy)
+  (fact (ovt? "003723415284123456") => falsey)
+  (fact (ovt? "003701902735") => truthy)
+  (fact (ovt? "003710601555") => truthy))
+
+(facts max-length
+  (fact (sc/check (max-length 1) []) => nil)
+  (fact (sc/check (max-length 1) [1]) => nil)
+  (fact (sc/check (max-length 1) [1 2]) =not=> nil))
+
+(facts max-length-string
+  (fact (sc/check (max-length-string 1) "a") => nil)
+  (fact (sc/check (max-length-string 1) "ab") =not=> nil)
+  (fact (sc/check (max-length-string 1) [1]) =not=> nil))

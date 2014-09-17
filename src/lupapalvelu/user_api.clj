@@ -120,21 +120,21 @@
 (defn- create-new-user-entity [user-data]
   (let [email (-> user-data :email ss/lower-case ss/trim)]
     (-> user-data
-      (select-keys [:email :username :role :firstName :lastName :personId
-                    :phone :city :street :zip :enabled :organization
-                    :allowDirectMarketing :architect])
-      (as-> user-data (merge {:firstName "" :lastName "" :username email} user-data))
-      (assoc
-        :email email
-        :enabled (= "true" (str (:enabled user-data)))
-        :organizations (if (:organization user-data) [(:organization user-data)] [])
-        :private (merge {}
-                   (when (:password user-data)
-                     {:password (security/get-hash (:password user-data))})
-                   (when (and (:apikey user-data) (not= "false" (:apikey user-data)))
-                     {:apikey (if (and (env/dev-mode?) (not (#{"true" "false"} (:apikey user-data))))
-                                (:apikey user-data)
-                                (security/random-password))}))))))
+        (select-keys [:email :username :role :firstName :lastName :personId
+                      :phone :city :street :zip :enabled :organization
+                      :allowDirectMarketing :architect :company])
+        (as-> user-data (merge {:firstName "" :lastName "" :username email} user-data))
+        (assoc
+          :email email
+          :enabled (= "true" (str (:enabled user-data)))
+          :organizations (if (:organization user-data) [(:organization user-data)] [])
+          :private (merge {}
+                          (when (:password user-data)
+                            {:password (security/get-hash (:password user-data))})
+                          (when (and (:apikey user-data) (not= "false" (:apikey user-data)))
+                            {:apikey (if (and (env/dev-mode?) (not (#{"true" "false"} (:apikey user-data))))
+                                       (:apikey user-data)
+                                       (security/random-password))}))))))
 
 ;;
 ;; TODO: Ylimaaraisen "send-email"-parametrin sijaan siirra mailin lahetys pois
@@ -147,11 +147,11 @@
   [caller user-data & {:keys [send-email] :or {send-email true}}]
   (validate-create-new-user! caller user-data)
   (let [user-entry  (create-new-user-entity user-data)
-        old-user  (user/get-user-by-email (:email user-entry))
-        new-user  (if old-user
-                    (assoc user-entry :id (:id old-user))
-                    (assoc user-entry :id (mongo/create-id)))
-        email     (:email new-user)
+        old-user    (user/get-user-by-email (:email user-entry))
+        new-user    (if old-user
+                      (assoc user-entry :id (:id old-user))
+                      (assoc user-entry :id (mongo/create-id)))
+        email       (:email new-user)
         {old-id :id old-role :role}  old-user]
     (try
       (condp = old-role
@@ -565,4 +565,3 @@
                        ;:attachment-target attachment-target
                        :locked false}))))
   (ok))
-

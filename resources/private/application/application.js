@@ -3,12 +3,12 @@
 
   var isInitializing = true;
   var currentId = null;
-  var applicationModel = new LUPAPISTE.ApplicationModel();
   var authorizationModel = authorization.create();
-  var commentModel = comments.create(true);
+  var applicationModel = new LUPAPISTE.ApplicationModel(authorizationModel);
   var changeLocationModel = new LUPAPISTE.ChangeLocationModel();
   var addLinkPermitModel = new LUPAPISTE.AddLinkPermitModel();
   var constructionStateChangeModel = new LUPAPISTE.ModalDatepickerModel();
+
   constructionStateChangeModel.openConstructionStartDialog = _.partial(
       constructionStateChangeModel.openWithConfig,
       {commandName         : "inform-construction-started",
@@ -59,6 +59,8 @@
   var preAttachmentsByGroup = ko.observableArray();
   var postAttachmentsByGroup = ko.observableArray();
   var postVerdict = ko.observable(false);
+
+  var inviteCompanyModel = new LUPAPISTE.InviteCompanyModel(applicationModel.id);
 
   var accordian = function(data, event) { accordion.toggle(event); };
 
@@ -155,9 +157,6 @@
 
       // Invite
       inviteModel.setApplicationId(app.id);
-
-      // Comments
-      commentModel.refresh(app);
 
       // Verdict details
       verdictModel.refresh(app, applicationDetails.authorities);
@@ -434,7 +433,6 @@
       attachmentTemplatesModel: attachmentTemplatesModel,
       authorization: authorizationModel,
       changeLocationModel: changeLocationModel,
-      comment: commentModel,
       constructionStateChangeModel: constructionStateChangeModel,
       createTask: createTaskController,
       invite: inviteModel,
@@ -445,7 +443,8 @@
       sendNeighborEmailModel: sendNeighborEmailModel,
       stampModel: stampModel,
       signingModel: signingModel,
-      verdictModel: verdictModel
+      verdictModel: verdictModel,
+      openInviteCompany: inviteCompanyModel.open.bind(inviteCompanyModel)
     };
 
     $("#application").applyBindings(bindings);
@@ -454,6 +453,7 @@
     $(addLinkPermitModel.dialogSelector).applyBindings({addLinkPermitModel: addLinkPermitModel});
     $(constructionStateChangeModel.dialogSelector).applyBindings({constructionStateChangeModel: constructionStateChangeModel});
     $(signingModel.dialogSelector).applyBindings({signingModel: signingModel, authorization: authorizationModel});
+    $(inviteCompanyModel.selector).applyBindings(inviteCompanyModel);
     attachmentTemplatesModel.init();
   });
 

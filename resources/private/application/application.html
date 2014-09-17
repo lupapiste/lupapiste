@@ -257,13 +257,6 @@
                   <span data-bind="if: $data.tasksRequiringAction">
                     <span data-bind="text: tasksRequiringAction"
                           id="applicationTasksRequiringAction" class="indicator"></span></span></a></li>
-
-            <li><a data-bind="click: changeTab"
-                   href="#" data-target="conversation" data-test-id="application-open-conversation-tab" >
-                  <span data-bind="ltext: 'application.tabConversation'"></span>
-                  <span data-bind="if: unseenComments">
-                    <span data-bind="text: unseenComments"
-                          id="applicationUnseenComments" class="indicator"></span></span></a></li>
           </ul>
         </div>
       </div>
@@ -344,6 +337,14 @@
                   <button class="btn-primary"
                         data-bind="ltext: 'personSelector.invite', visible: $root.authorization.ok('invite'), enabled: $root.authorization.ok('invite')"
                         onclick="$('#invite-document-name').val('').change();$('#invite-document-path').val('').change();$('#invite-document-id').val('').change();LUPAPISTE.ModalDialog.open('#dialog-valtuutus');return false;"></button>
+
+                  <button class="btn-primary"
+                          data-bind="ltext: 'company-invite.invite',
+                                     visible: $root.authorization.ok('invite'),
+                                     enabled: $root.authorization.ok('invite'),
+                                     click: $root.openInviteCompany">
+                  </button>
+
 
                 </div>
               </div>
@@ -593,7 +594,7 @@
                 <!-- /ko -->
             <!-- /ko -->
 
-             
+
           </div>
 
           <div class="process-nav">
@@ -1361,7 +1362,41 @@
       </div>
 
     </div>
+
   </section>
+
+  <div style="display:none;">
+    <div id="dialog-company-user-op" class="window autosized">
+      <div class="dialog-header">
+        <p data-bind="text: title"></p>
+        <p class="dialog-close close">X</p>
+      </div>
+      <div class="dialog-content">
+
+        <div>
+          <span data-bind="html: message"></span>
+        </div>
+
+        <div data-bind="visible: pending">
+          <em class="button-loader" style="position: relative;"></em>
+          <span data-bind="ltext: 'company.user.op.pending'"></span>
+        </div>
+
+        <button data-bind="click: ok,
+                           enable: !pending(),
+                           ltext: 'yes'"
+                class="btn btn-primary btn-dialog"
+                data-test-id="dialog-company-user-op.ok">
+        </button>
+        <button data-bind="enable: !pending(),
+                           ltext: 'no'"
+                class="btn btn-dialog close">
+        </button>
+
+      </div>
+    </div>
+  </div>
+
 
 </body>
 </html>

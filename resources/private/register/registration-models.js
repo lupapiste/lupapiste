@@ -4,6 +4,7 @@
  * Used keys can be set with optional last constructor parameter.
  */
 LUPAPISTE.RegistrationModel = function(commandName, afterSuccessFn, errorSelector, ks) {
+  "use strict";
 
   var self = this;
 

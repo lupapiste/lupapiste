@@ -17,7 +17,7 @@
 
   (info "Initializing dummy email server")
 
-  (def sent-messages (atom []))
+  (defonce sent-messages (atom []))
 
   (defn parse-body [body {content-type :type content :content}]
     (if (and content-type content)

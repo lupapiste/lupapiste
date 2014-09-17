@@ -75,8 +75,9 @@ Authority can not convert the inforequest to application
   Element should not be visible  //*[@data-test-id='inforequest-convert-to-application']
 
 Authority adds a comment marking inforequest answered
-  Wait until  Page should contain element  //section[@id='inforequest']//button[@data-test-id='comment-request-mark-answered']
-  Input comment and mark answered  inforequest  oletko miettinyt tuulivoimaa?
+  Open side panel  conversation
+  Wait until  Page should contain element  //div[@id='conversation-panel']//button[@data-test-id='comment-request-mark-answered']
+  Input comment and mark answered  oletko miettinyt tuulivoimaa?
   Wait until  Inforequest state is  Vastattu
   Logout
 
@@ -89,7 +90,7 @@ Mikko should still be able to add attachment
   Element should be visible  //*[@data-test-id='add-inforequest-attachment']
 
 When Mikko adds a comment inforequest goes back to Avoin
-  Input comment  inforequest  tuulivoima on ok.
+  Input comment  tuulivoima on ok.
   Wait until  Inforequest state is  Avoin
   Logout
 

@@ -1,5 +1,6 @@
 (ns lupapalvelu.verdict-api
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error fatal]]
+            [pandect.core :as pandect]
             [monger.operators :refer :all]
             [sade.http :as http]
             [sade.strings :as ss]
@@ -31,7 +32,7 @@
                                (clojure.string/replace (get (:headers resp) "content-disposition") #"attachment;filename=" ""))
 
             content-length  (util/->int (get-in resp [:headers "content-length"] 0))
-            urlhash         (digest/sha1 url)
+            urlhash         (pandect/sha1 url)
             attachment-id   urlhash
             attachment-type {:type-group "muut" :type-id "muu"}
             target          {:type "verdict" :id verdict-id :urlHash urlhash}
@@ -54,15 +55,22 @@
         (-> pk (assoc :urlHash urlhash) (dissoc :liite))))
     pk))
 
+(defn- valid-paatos? [paatos timestamp]
+  (let [pvm (or (-> paatos :paivamaarat :anto) (-> paatos :paivamaarat :paatosdokumentinPvm))]
+    (and pvm (> timestamp pvm))))
+
 (defn verdict-attachments [application user timestamp verdict]
   {:pre [application]}
-  (when (:paatokset verdict)
+  (when (and (:paatokset verdict) (some #(valid-paatos? % timestamp) (:paatokset verdict)))
     (let [verdict-id (mongo/create-id)]
       (->
         (assoc verdict :id verdict-id, :timestamp timestamp)
         (update-in [:paatokset]
           (fn [paatokset]
-            (map (fn [paatos] (update-in paatos [:poytakirjat] #(map (partial get-poytakirja application user timestamp verdict-id) %))) paatokset)))))))
+            (filter seq
+              (map (fn [paatos]
+                     (when (valid-paatos? paatos timestamp)
+                       (update-in paatos [:poytakirjat] #(map (partial get-poytakirja application user timestamp verdict-id) %)))) paatokset))))))))
 
 (defn- get-verdicts-with-attachments [application user timestamp xml]
   (let [permit-type (:permitType application)

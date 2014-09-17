@@ -14,8 +14,7 @@ Mikko creates an info request to Loppi
   Element should not be visible  //button[@data-test-id='inforequest-convert-to-application']
 
 Email is sent to Loppi rakennusvalvonta
-  Execute Javascript  window.location = "/api/last-email";
-  Wait until  Element should be visible  //*[@id='subject']
+  Go to last email
   ${subject}=  Execute Javascript  return document.getElementById("subject").innerHTML
   Should Be Equal  ${subject}  Lupapiste.fi: Ojatie 1, Loppi - Neuvontapyyntö
 

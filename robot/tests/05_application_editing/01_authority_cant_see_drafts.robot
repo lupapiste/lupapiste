@@ -23,7 +23,6 @@ Application is in draft state
   Application state should be  draft
 
 There are no comments yet
-  Open tab  conversation
   Comment count is  0
 
 Mikko adds a comment
