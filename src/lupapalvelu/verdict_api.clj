@@ -4,7 +4,7 @@
             [sade.http :as http]
             [sade.strings :as ss]
             [sade.util :as util]
-            [lupapalvelu.core :refer [ok fail fail! now]]
+            [lupapalvelu.core :refer [ok fail fail!]]
             [lupapalvelu.action :refer [defquery defcommand update-application notify boolean-parameters] :as action]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.application :as application]
@@ -54,13 +54,9 @@
         (-> pk (assoc :urlHash urlhash) (dissoc :liite))))
     pk))
 
-(defn- valid-paatos? [paatos timestamp]
-  (let [pvm (or (-> paatos :paivamaarat :anto) (-> paatos :paivamaarat :paatosdokumentinPvm))]
-    (and pvm (> timestamp pvm))))
-
 (defn verdict-attachments [application user timestamp verdict]
   {:pre [application]}
-  (when (and (:paatokset verdict) (some #(valid-paatos? % timestamp) (:paatokset verdict)))
+  (when (:paatokset verdict)
     (let [verdict-id (mongo/create-id)]
       (->
         (assoc verdict :id verdict-id, :timestamp timestamp)
@@ -68,8 +64,8 @@
           (fn [paatokset]
             (filter seq
               (map (fn [paatos]
-                     (when (valid-paatos? paatos timestamp)
-                       (update-in paatos [:poytakirjat] #(map (partial get-poytakirja application user timestamp verdict-id) %)))) paatokset))))))))
+                     (update-in paatos [:poytakirjat] #(map (partial get-poytakirja application user timestamp verdict-id) %)))
+                paatokset))))))))
 
 (defn- get-verdicts-with-attachments [application user timestamp xml]
   (let [permit-type (:permitType application)
