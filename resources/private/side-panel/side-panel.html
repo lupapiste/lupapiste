@@ -3,15 +3,15 @@
 <body>
   <section class="page container" id="side-panel-template">
     <!-- <div id="side-panel-overlay" data-bind="click: hideSidePanel" class="hide-side-panel"></div> -->
-    <div id="side-panel" class="hide-side-panel">
+    <div id="side-panel" data-bind="slideVisible: showSidePanel">
       <div class="buttons">
-        <button class="btn-conversation" data-bind="click: toggleConversationPanel" data-test-id="open-conversation-side-panel">
+        <button class="btn-conversation" data-bind="click: toggleConversationPanel, css: {active: showConversationPanel}" data-test-id="open-conversation-side-panel">
           <span data-bind="if: unseenComments">
             <span data-bind="text: unseenComments" id="applicationUnseenComments" class="unseen-comments"></span>
           </span>
           <span class="btn-title" data-bind="ltext: 'conversation.title'"></span>
         </button>
-        <button class="btn-notice" data-bind="click: toggleNoticePanel, visible: authorization.ok('toggle-urgent')" data-test-id="open-notice-side-panel">
+        <button class="btn-notice" data-bind="click: toggleNoticePanel, visible: authorization.ok('toggle-urgent'), css: {active: showNoticePanel}" data-test-id="open-notice-side-panel">
           <span class="btn-title" data-bind="ltext: 'notice.title'"></span>
         </button>
       </div>

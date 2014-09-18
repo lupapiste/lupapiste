@@ -19,6 +19,10 @@ LUPAPISTE.SidePanelModel = function() {
   self.authorities = ko.observableArray([]);
   self.infoRequest = ko.observable();
 
+  self.showSidePanel = ko.computed(function() {
+    return self.showConversationPanel() || self.showNoticePanel();
+  });
+
   var AuthorityInfo = function(id, firstName, lastName) {
     this.id = id;
     this.firstName = firstName;
@@ -57,20 +61,7 @@ LUPAPISTE.SidePanelModel = function() {
     initAuthoritiesSelectList(authorities);
   }
 
-  var togglePanel = function(visible, button) {
-    var panel = $("#side-panel, #side-panel-overlay");
-    if(panel.hasClass("hide-side-panel")) {
-      panel.toggleClass("hide-side-panel", 100);
-    }
-    else if(visible) {
-      panel.toggleClass("hide-side-panel", 100);
-    }
-    $("#side-panel " + button).siblings().removeClass("active");
-    $("#side-panel " + button).toggleClass("active");
-  }
-
   self.toggleConversationPanel = function(data, event) {
-    togglePanel(self.showConversationPanel(), ".btn-conversation");
     self.showConversationPanel(!self.showConversationPanel());
     self.showNoticePanel(false);
 
@@ -84,9 +75,8 @@ LUPAPISTE.SidePanelModel = function() {
   };
 
   self.toggleNoticePanel = function(data, event) {
-    togglePanel(self.showNoticePanel(), ".btn-notice");
-    self.showConversationPanel(false);
     self.showNoticePanel(!self.showNoticePanel());
+    self.showConversationPanel(false);
   };
 
   self.hideSidePanel = function(data, event) {
@@ -112,6 +102,17 @@ LUPAPISTE.SidePanelModel = function() {
     });
   });
 }
+
+ko.bindingHandlers.slideVisible = {
+    init: function(element, valueAccessor) {
+        var value = valueAccessor();
+        $(element).toggleClass("hide-side-panel", !value(), 100);
+    },
+    update: function(element, valueAccessor) {
+        var value = valueAccessor();
+        $(element).toggleClass("hide-side-panel", !value(), 100);
+    }
+};
 
 $(function() {
   var sidePanel = new LUPAPISTE.SidePanelModel();
