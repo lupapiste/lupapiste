@@ -178,7 +178,7 @@
                              {:name "muu"}]})
 
 (def patevyys [koulutusvalinta
-               {:name "koulutus" :type :string :required false}
+               {:name "koulutus" :type :string :required false :i18nkey "muukoulutus"}
                {:name "valmistumisvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size "s" :required false}
                {:name "fise" :type :string :required false}
                {:name "patevyys" :type :string :required false}
@@ -243,7 +243,7 @@
                                           {:name "ei tiedossa"}]}])
 
 (def patevyys-tyonjohtaja [koulutusvalinta
-                           {:name "koulutus" :type :string :required false}
+                           {:name "koulutus" :type :string :required false  :i18nkey "muukoulutus"}
                            {:name "patevyysvaatimusluokka" :type :select :required false
                             :body [{:name "C"}
                                    {:name "B"}
