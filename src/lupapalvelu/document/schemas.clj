@@ -151,7 +151,33 @@
                                 {:name "yritys" :type :group :body yritys}))
 
 
-(def patevyys [{:name "koulutus" :type :string :required false}
+(def patevyys [{:name "koulutusvalinta" :type :select :required
+                :body [{:name "arkkitehti"}
+                       {:name "arkkitehtiylioppilas"}
+                       {:name "diplomi-insin\u00f6\u00f6ri"}
+                       {:name "insin\u00f6\u00f6ri"}
+                       {:name "IV-asentaja"}
+                       {:name "kirvesmies"}
+                       {:name "LV-asentaja"}
+                       {:name "LVI-asentaja"}
+                       {:name "LVI-insin\u00f6\u00f6ri"}
+                       {:name "LVI-teknikko"}
+                       {:name "LVI-ty\u00f6teknikko"}
+                       {:name "maisema-arkkitehti"}
+                       {:name "rakennusammattity\u00f6mies"}
+                       {:name "rakennusarkkitehti"}
+                       {:name "rakennusinsin\u00f6\u00f6ri"}
+                       {:name "rakennusmestari"}
+                       {:name "rakennuspiirt\u00e4j\u00e4"}
+                       {:name "rakennusteknikko"}
+                       {:name "rakennusty\u00f6teknikko"}
+                       {:name "sisustusarkkitehti"}
+                       {:name "talonrakennusinsin\u00f6\u00f6ri"}
+                       {:name "talonrakennusteknikko"}
+                       {:name "tekniikan kandidaatti"}
+                       {:name "teknikko"}
+                       {:name "muu"}]}
+               {:name "koulutus" :type :string :required false}
                {:name "valmistumisvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size "s" :required false}
                {:name "fise" :type :string :required false}
                {:name "patevyys" :type :string :required false}

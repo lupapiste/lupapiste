@@ -352,10 +352,10 @@
                     {:henkilotunnus (-> suunnittelija :henkilotiedot :hetu)}
                     (get-yhteystiedot-data (:yhteystiedot suunnittelija)))]
       (merge codes
-        {:koulutus (-> patevyys :koulutus)
-         :patevyysvaatimusluokka (-> patevyys :patevyysluokka)
-         :valmistumisvuosi (-> patevyys :valmistumisvuosi)
-         :kokemusvuodet (-> patevyys :kokemus)}
+        {:koulutus (:koulutusvalinta patevyys)
+         :patevyysvaatimusluokka (:patevyysluokka patevyys)
+         :valmistumisvuosi (:valmistumisvuosi patevyys)
+         :kokemusvuodet (:kokemus patevyys)}
         (when (-> henkilo :nimi :sukunimi)
           {:henkilo henkilo})
         (when (-> suunnittelija :yritys :yritysnimi s/blank? not)

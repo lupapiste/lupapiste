@@ -3,6 +3,7 @@
             [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]]
             [clojure.walk :as walk]
             [sade.util :refer [dissoc-in postwalk-map strip-nils]]
+            [sade.strings :as ss]
             [lupapalvelu.migration.core :refer [defmigration]]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
@@ -566,3 +567,23 @@
                                 %)
                               (:documents application))]
           (mongo/update-by-id collection (:id application) {$set {:documents new-documents}}))))))
+
+(defmigration tutkinto-mapping
+  {:apply-when (pos? (mongo/count :applications {"documents.data.patevyys.koulutus.value" {$exists true}}))}
+  (let [mapping (sade.excel-reader/read-map "tutkinto-mapping.xlsx")]
+    (doseq [collection [:applications :submitted-applications]
+           application (mongo/select collection {"documents.data.patevyys.koulutus.value" {$exists true}} {:documents 1})]
+     (let [id (:id application)
+           documents (map
+                       (fn [doc]
+                         (if-let [koulutus (get-in doc [:data :patevyys :koulutus :value])]
+                           (let [normalized (-> koulutus ss/trim ss/lower-case)]
+                             (if-not (ss/blank? normalized)
+                               (let [mapped     (get mapping normalized "muu")
+                                     modified (get-in doc [:data :patevyys :koulutus :modified])]
+                                 (debugf "%s/%s: Mapping '%s' to %s" collection id koulutus mapped)
+                                 (assoc-in-in doc [:data :patevyys :koulutusvalinta] {:value mapped, :modified modified}))
+                               doc))
+                           doc)) (:documents application))]
+       (mongo/update-by-id collection id {$set {:documents documents}})))))
+
