@@ -45,8 +45,7 @@ Arto clicks on the marker again and the marker contents window is closed
   Wait until  Element should not be visible  //div[@id='inforequest-marker-map-contents']
 
 Arto adds comment and it is visible in the marker contents window
-  Open side panel  conversation
-  Wait until  Page should contain element  //div[@id='conversation-panel']//button[@data-test-id='comment-request-mark-answered']
+  Wait until  Page should contain element  //section[@id='inforequest']//button[@data-test-id='comment-request-mark-answered']
   Input comment and mark answered  Oletko miettinyt askeesia?
   Wait until   Element Text Should Be  test-inforequest-state  Vastattu
 
