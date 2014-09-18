@@ -4,6 +4,7 @@ LUPAPISTE.SidePanelModel = function() {
 
   self.typeId = undefined;
 
+  self.application = ko.observable();
   self.applicationId = ko.observable();
   self.notice = ko.observable({});
   self.attachmentId = ko.observable();
@@ -18,6 +19,8 @@ LUPAPISTE.SidePanelModel = function() {
   self.permitType = ko.observable();
   self.authorities = ko.observableArray([]);
   self.infoRequest = ko.observable();
+  self.authentication = ko.observable();
+  self.authorities = ko.observable();
 
   self.showSidePanel = ko.computed(function() {
     return self.showConversationPanel() || self.showNoticePanel();
@@ -38,27 +41,35 @@ LUPAPISTE.SidePanelModel = function() {
   }
 
   self.refresh = function(application, authorities) {
-    self.applicationId(application.id);
-    self.infoRequest(application.infoRequest);
-    self.unseenComments(application.unseenComments);
-    if (self.notice().refresh) {
-      self.notice().refresh(application);
+    // TODO applicationId, inforequest etc. could be computed
+    if(application && authorities) {
+      self.application(application);
+      self.authorities(authorities);
+      self.applicationId(application.id);
+      self.infoRequest(application.infoRequest);
+      self.unseenComments(application.unseenComments);
+      if (self.notice().refresh) {
+        self.notice().refresh(application);
+      }
+      self.permitType(self.application().permitType);
+      initAuthoritiesSelectList(self.authorities());
     }
-    var type = pageutil.getPage();
-    switch(type) {
-      case "attachment":
-      case "statement":
-        self.comment().refresh(application, false, {type: type, id: pageutil.lastSubPage()});
-        break;
-      case "verdict":
-        self.comment().refresh(application, false, {type: type, id: pageutil.lastSubPage()}, ["authority"]);
-        break;
-      default:
-        self.comment().refresh(application, true);
-        break;
+
+    if (self.application()) {
+      var type = pageutil.getPage();
+      switch(type) {
+        case "attachment":
+        case "statement":
+          self.comment().refresh(self.application(), false, {type: type, id: pageutil.lastSubPage()});
+          break;
+        case "verdict":
+          self.comment().refresh(self.application(), false, {type: type, id: pageutil.lastSubPage()}, ["authority"]);
+          break;
+        default:
+          self.comment().refresh(self.application(), true);
+          break;
+      }
     }
-    self.permitType(application.permitType);
-    initAuthoritiesSelectList(authorities);
   }
 
   self.toggleConversationPanel = function(data, event) {
@@ -92,6 +103,7 @@ LUPAPISTE.SidePanelModel = function() {
 
   hub.subscribe({type: "page-change"}, function() {
     if(_.contains(pages, pageutil.getPage())) {
+      self.refresh();
       $("#side-panel-template").addClass("visible");
     }
   });
