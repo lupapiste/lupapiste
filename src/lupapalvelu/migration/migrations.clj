@@ -582,7 +582,7 @@
                                (let [mapped     (get mapping normalized "muu")
                                      modified (get-in doc [:data :patevyys :koulutus :modified])]
                                  (debugf "%s/%s: Mapping '%s' to %s" collection id koulutus mapped)
-                                 (assoc-in-in doc [:data :patevyys :koulutusvalinta] {:value mapped, :modified modified}))
+                                 (assoc-in doc [:data :patevyys :koulutusvalinta] {:value mapped, :modified modified}))
                                doc))
                            doc)) (:documents application))]
        (mongo/update-by-id collection id {$set {:documents documents}})))))
