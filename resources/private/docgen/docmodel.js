@@ -1298,6 +1298,43 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     if (op) {
       title.appendChild(document.createTextNode(loc([op.name, "_group_label"])));
+
+      var descriptionSpan = document.createElement("span");
+      descriptionSpan.className = "op-description";
+      if (op.description) {
+        descriptionSpan.innerHTML = op.description;
+      }
+      title.appendChild(descriptionSpan);
+
+      var input = document.createElement("input");
+      input.type = "text";
+      input.className = "accordion-input text hidden";
+      title.appendChild(input);
+      var iconSpan = document.createElement("span");
+
+      input.onclick = function(event) {
+        event.stopPropagation();
+      };
+      input.onkeyup = function(event) {
+        if (event.keyCode == 13) {
+          console.log("hide input");
+          $(input).addClass("hidden");
+          $(iconSpan).removeClass("hidden");
+          $(descriptionSpan).removeClass("hidden");
+        }
+      };
+
+      iconSpan.className = "icon edit";
+      iconSpan.onclick = function(event) {
+        event.stopPropagation();
+        input.focus();
+        $(iconSpan).addClass("hidden");
+        $(input).removeClass("hidden");
+        $(descriptionSpan).addClass("hidden");
+      };
+
+      title.appendChild(iconSpan);
+
     } else {
       title.appendChild(document.createTextNode(loc([self.schemaI18name, "_group_label"])));
     }
