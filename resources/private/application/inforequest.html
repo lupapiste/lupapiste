@@ -166,7 +166,7 @@
 
         <div class="inforequest-conversation">
           <h2  data-bind="ltext: 'inforequest.comments'"></h2>
-          <div data-bind="template: {name: 'comment-template', data: {comment: $root.comment, authorities: $root.authorities, mainConversation: true}}"></div>
+          <div data-bind="template: {name: 'comment-template', data: {comment: applicationComment, authorities: authorities, mainConversation: true, authorization: $root.authorization, infoRequest: $root.application.infoRequest}}"></div>
         </div>
 
       </div>

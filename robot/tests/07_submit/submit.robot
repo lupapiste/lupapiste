@@ -32,7 +32,7 @@ Mikko submits application
   Submit application
 
 Mikko cant re-submit application
-  Wait Until  Element should be disabled  xpath=//*[@data-test-id='application-submit-btn']
+  Wait Until  Element should not be visible  xpath=//*[@data-test-id='application-submit-btn']
 
 Submit date should be visible
   Wait until  Element should be visible  xpath=//span[@data-test-id='application-submitted-date']

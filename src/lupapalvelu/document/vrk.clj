@@ -205,15 +205,16 @@
   (and lammitystapa (not= lammitystapa ei-lammitysta) (s/blank? polttoaine)))
 
 (defvalidator :vrk:CR336
-  {:doc "Jos lammitystapa on 5 (ei kiinteaa lammitystapaa), ei saa olla polttoainetta"
-   :schema "uusiRakennus"
-   :fields [lammitystapa [:lammitys :lammitystapa]
-            polttoaine   [:lammitys :lammonlahde]]
-   :facts {:ok   [["ei l\u00e4mmityst\u00e4" nil]
-                  ["ei l\u00e4mmityst\u00e4" ""]
-                  ["suora s\u00e4hk\u00f6" "s\u00e4hk\u00f6"]]
-           :fail [["ei l\u00e4mmityst\u00e4" "s\u00e4hk\u00f6"]]}}
-  (and (= lammitystapa ei-lammitysta) (exists? polttoaine)))
+ {:doc "Jos lammitystapa on 5 (ei kiinteaa lammitystapaa), ei saa olla polttoainetta"
+  :schema "uusiRakennus"
+  :fields [lammitystapa [:lammitys :lammitystapa]
+           polttoaine   [:lammitys :lammonlahde]]
+  :facts {:ok   [["ei l\u00e4mmityst\u00e4" nil]
+                 ["ei l\u00e4mmityst\u00e4" ""]
+                 ["suora s\u00e4hk\u00f6" "s\u00e4hk\u00f6"]]
+          :fail [["ei l\u00e4mmityst\u00e4" "s\u00e4hk\u00f6"]
+                 ["ei l\u00e4mmityst\u00e4" "ei tiedossa"]]}}
+ (and (= lammitystapa ei-lammitysta) (exists? polttoaine)))
 
 (defvalidator :vrk:CR326
   {:doc    "Kokonaisalan oltava vahintaan kerrosala"
@@ -317,7 +318,7 @@
           (#{:162 :163 :169 :611 :613 :699 :712 :719 :722} kayttotarkoitus))))))
 
 (defvalidator :vrk:CR314
-  {:doc     "Asuinrakennukssa pitaa olla lammitys"
+  {:doc     "Asuinrakennuksessa pitaa olla lammitys"
    :schema  "uusiRakennus"
    :fields  [kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus ->int]
              lammitystapa    [:lammitys :lammitystapa]]
@@ -461,7 +462,7 @@
 (defvalidator :vrk:BR319:julkisivu
   {:doc "Jos rakentamistoimenpide on 1, ovat kantavien rakenteiden rakennusaine,
          rakennuksen rakentamistapa, julkisivumateriaali ja lammitystapa pakollisia Huom!
-         Kuitenkin, jos kayttotarkoitus on > 729 saavat paaasiallinen julkisivumateriaali ja lammitystapa puuttua."
+         Kuitenkin, jos kayttotarkoitus on > 729, saavat paaasiallinen julkisivumateriaali ja lammitystapa puuttua."
    :schema "uusiRakennus"
    :level  :tip
    :fields [kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus ->int]
@@ -470,30 +471,24 @@
                     ["032 luhtitalot"       "ei tiedossa"]
                     ["931 saunarakennukset" nil]]
             :fail  [["032 luhtitalot"       nil]]}}
-  (and
-    (<= kayttotarkoitus 729)
-    (not julkisivu)))
+  (and (<= kayttotarkoitus 729) (not julkisivu)))
 
 (defvalidator :vrk:BR319:lammitystapa
   {:doc "Jos rakentamistoimenpide on 1, ovat kantavien rakenteiden rakennusaine,
          rakennuksen rakentamistapa, julkisivumateriaali ja lammitystapa pakollisia Huom!
-         Kuitenkin, jos kayttotarkoitus on > 729 saavat paaasiallinen julkisivumateriaali ja lammitystapa puuttua."
+         Kuitenkin, jos kayttotarkoitus on > 729, saavat paaasiallinen julkisivumateriaali ja lammitystapa puuttua."
    :schema "uusiRakennus"
    :level   :tip
    :fields [kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus ->int]
             lammitystapa    [:lammitys :lammitystapa]]
-   :facts  {:ok    [["032 luhtitalot"       "uuni"]
-                    ["032 luhtitalot"       "ei tiedossa"]
+   :facts  {:ok    [["141 ravintolat yms."  "uuni"]
+                    ["141 ravintolat yms."  ei-lammitysta]
+                    ["141 ravintolat yms."  "ei tiedossa"]
                     ["931 saunarakennukset" ei-lammitysta]
                     ["931 saunarakennukset" nil]
                     ["931 saunarakennukset" " "]]
-            :fail  [["032 luhtitalot"       nil]
-                    ["032 luhtitalot"       ei-lammitysta]]}}
-  (and
-    (<= kayttotarkoitus 729)
-    (or
-      (not lammitystapa)
-      (= ei-lammitysta lammitystapa))))
+            :fail  [["141 ravintolat yms."  nil]]}}
+  (and (<= kayttotarkoitus 729) (not lammitystapa)))
 
 #_(defvalidator :vrk:BR203
   {:doc "Jos huoneiston jakokirjain on annettu taytyy olla myos porraskirjain tai huoneistonumero"

@@ -10,7 +10,7 @@
             [monger.operators :refer :all]
             [clj-time.local :refer [local-now]]
             [clj-time.format :as format]
-            [digest]
+            [pandect.core :as pandect]
             [sade.env :as env]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.vtj :as vtj]))
@@ -77,7 +77,7 @@
 ;;
 
 (defn- secret [{rcvid :rcvid key :key}] (str rcvid "-" key))
-(defn mac [data]  (-> data (.getBytes encoding) digest/sha-256 .toUpperCase))
+(defn mac [data]  (-> data (.getBytes encoding) pandect/sha256 .toUpperCase))
 
 (defn- mac-of [m keys]
   (->

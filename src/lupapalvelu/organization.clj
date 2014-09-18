@@ -18,7 +18,7 @@
 
 (defn get-organizations
   ([]
-    (get-organizations {}))
+    (get-organizations {} {}))
   ([query]
     (get-organizations query {}))
   ([query projection]
@@ -212,8 +212,9 @@
 
 (defquery addable-operations
   {:description "returns operations addable for the application whose id is given as parameter"
-   :parameters [:id]
-   :roles [:applicant :authority]}
+   :parameters  [:id]
+   :roles       [:applicant :authority]
+   :states      [:draft :open :submitted :complement-needed]}
   [{{:keys [organization permitType]} :application}]
   (when-let [org (get-organization organization)]
     (let [selected-operations (map keyword (:selected-operations org))]

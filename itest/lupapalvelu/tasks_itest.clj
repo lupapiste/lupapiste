@@ -20,7 +20,7 @@
       maaraykset (filter (partial task-by-type "lupamaarays") tasks)
       tyonjohtajat (filter (partial task-by-type "vaadittu-tyonjohtaja") tasks)]
 
-  (fact "fixture has 2 verdics and 9 tasks"
+  (fact "fixture has 2 verdicts and 9 tasks"
     resp => ok?
     (:verdictCount resp) => 2
     (:taskCount resp) => 9)

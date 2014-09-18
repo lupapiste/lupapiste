@@ -13,7 +13,7 @@
             [clojure.walk :refer [keywordize-keys]]
             [clojure.java.io :as io]
             [clojure.string :as s]
-            [swiss-arrows.core :refer [-<>>]]
+            [swiss.arrows :refer [-<>>]]
             [taoensso.timbre :as timbre :refer (trace debug info warn error fatal)])
   (:import org.apache.http.client.CookieStore
            org.apache.http.cookie.Cookie))
@@ -115,7 +115,7 @@
 
 (defn apply-remote-fixture [fixture-name]
   (let [resp (decode-response (http/get (str (server-address) "/dev/fixture/" fixture-name)))]
-    (assert (-> resp :body :ok))))
+    (assert (-> resp :body :ok) (str "Response not ok: fixture: \"" fixture-name "\": response: " (pr-str resp)))))
 
 (def apply-remote-minimal (partial apply-remote-fixture "minimal"))
 
@@ -223,6 +223,14 @@
     (comment-application apikey id open? nil))
   ([apikey id open? to]
     (command apikey :add-comment :id id :text "hello" :to to :target {:type "application"} :openApplication open? :roles [])))
+
+(defn toggle-application-urgent
+  ([apikey id urgent]
+    (command apikey :toggle-urgent :id id :urgent urgent)))
+
+(defn add-authority-notice
+  ([apikey id notice]
+    (command apikey :add-authority-notice :id id :authorityNotice notice)))
 
 (defn query-application
   "Fetch application from server.
