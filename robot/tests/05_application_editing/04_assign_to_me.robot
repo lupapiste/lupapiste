@@ -26,7 +26,7 @@ Sonja sees comment indicator on applications list
 
 Application is not assigned
   Open application  ${appname}  ${propertyId}
-  Application is not assigned
+  Wait Until  Application is assigned to  Valitse..
 
 Sonja sees comment indicator on application
   Element text should be  applicationUnseenComments  1
@@ -81,7 +81,4 @@ Application is assigned to
   Wait until  Element should be visible  xpath=//select[@data-test-id='application-assigneed-authority']
   ${assignee} =  Get selected list label  xpath=//select[@data-test-id='application-assigneed-authority']
   Should be equal  ${assignee}  ${to}
-
-Application is not assigned
-  Wait Until  Application is assigned to  Valitse..
 

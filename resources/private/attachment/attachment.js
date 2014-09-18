@@ -6,7 +6,6 @@ var attachment = (function() {
   var attachmentId = null;
   var model = null;
 
-  var commentsModel = new comments.create(false);
   var authorizationModel = authorization.create();
   var approveModel = new ApproveModel(authorizationModel);
   var signingModel = new LUPAPISTE.SigningModel("#dialog-sign-attachment", false);
@@ -193,7 +192,8 @@ var attachment = (function() {
     }
   });
 
-  function showAttachment(application) {
+  function showAttachment(applicationDetails) {
+    var application = applicationDetails.application;
     if (!applicationId || !attachmentId) { return; }
     var attachment = _.find(application.attachments, function(value) {return value.id === attachmentId;});
     if (!attachment) {
@@ -223,12 +223,13 @@ var attachment = (function() {
     model.application.title(application.title);
     model.id = attachmentId;
 
-    commentsModel.refresh(application, {type: "attachment", id: attachmentId});
-
     approveModel.setApplication(application);
     approveModel.setAttachmentId(attachmentId);
 
     authorizationModel.refresh(application, {attachmentId: attachmentId});
+
+    // Side Panel
+
     pageutil.hideAjaxWait();
   }
 
@@ -239,9 +240,9 @@ var attachment = (function() {
     repository.load(applicationId);
   });
 
-  repository.loaded(["attachment"], function(application) {
+  repository.loaded(["attachment"], function(application, applicationDetails) {
     if (applicationId === application.id) {
-      showAttachment(application);
+      showAttachment(applicationDetails);
     }
   });
 
@@ -271,7 +272,6 @@ var attachment = (function() {
       attachment: model,
       approve: approveModel,
       authorization: authorizationModel,
-      commentsModel: commentsModel
     });
     $("#upload-page").applyBindings({});
     $(signingModel.dialogSelector).applyBindings({signingModel: signingModel, authorization: authorizationModel});

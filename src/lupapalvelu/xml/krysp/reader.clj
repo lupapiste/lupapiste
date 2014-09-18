@@ -10,6 +10,7 @@
             [sade.util :as util]
             [sade.common-reader :as cr]
             [sade.strings :as ss]
+            [lupapalvelu.core :refer [now]]
             [lupapalvelu.document.schemas :as schema]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.xml.krysp.verdict :as verdict]))
@@ -333,26 +334,42 @@
     (#(assoc % :status (verdict/verdict-id (:paatoskoodi %))))
     (#(update-in % [:liite] ->liite))))
 
-(defn- ->verdict [paatos-xml-without-ns]
-  {:lupamaaraykset (->lupamaaraukset paatos-xml-without-ns)
-   :paivamaarat    (get-pvm-dates paatos-xml-without-ns
-                     [:aloitettava :lainvoimainen :voimassaHetki :raukeamis :anto :viimeinenValitus :julkipano])
-   :poytakirjat    (when-let [poytakirjat (seq (select paatos-xml-without-ns [:poytakirja]))]
-                     (map ->paatospoytakirja poytakirjat))})
+(defn- ->standard-verdicts [xml-without-ns]
+  (map (fn [paatos-xml-without-ns]
+         (let [poytakirjat (map ->paatospoytakirja (select paatos-xml-without-ns [:poytakirja]))
+               ;;
+               ;; TODO: Is "paatos" also one of the requirements?
+               ;;
+               poytakirja-with-paatos-data (some #(when (and #_(:paatos %) (:paatoskoodi %) (:paatoksentekija %) (:paatospvm %)) %) poytakirjat)]
+           (when (and poytakirja-with-paatos-data (> (now) (:paatospvm poytakirja-with-paatos-data)))
+             {:lupamaaraykset (->lupamaaraukset paatos-xml-without-ns)
+              :paivamaarat    (get-pvm-dates paatos-xml-without-ns
+                                [:aloitettava :lainvoimainen :voimassaHetki :raukeamis :anto :viimeinenValitus :julkipano])
+              :poytakirjat    (seq poytakirjat)})))
+    (select xml-without-ns [:paatostieto :Paatos])))
 
-(defn- ->simple-verdict [paatos-xml-without-ns]
-  {:lupamaaraykset {:takuuaikaPaivat (get-text paatos-xml-without-ns :takuuaikaPaivat)
-                    :muutMaaraykset (->lupamaaraukset-text paatos-xml-without-ns)}
-   :paivamaarat    {:paatosdokumentinPvm (cr/to-timestamp (get-text paatos-xml-without-ns :paatosdokumentinPvm))}
-   :poytakirjat    (when-let [liitetiedot (seq (select paatos-xml-without-ns [:liitetieto]))]
-                     (map ->liite (map (fn [[k v]] {:liite v}) (cr/all-of liitetiedot))))})
+(defn- ->simple-verdicts [xml-without-ns]
+  (let [app-state (ss/lower-case (get-text xml-without-ns [:Kasittelytieto :hakemuksenTila]))]
+    ;;
+    ;; TODO: Ovatko nama tilat validit?
+    ;;
+    (when-not (#{"luonnos" "hakemus" "valmistelussa" "vastaanotettu" "tarkastettu, t\u00e4ydennyspyynt\u00f6"} app-state)
+      (map (fn [paatos-xml-without-ns]
+             (let [paatosdokumentinPvm-timestamp (cr/to-timestamp (get-text paatos-xml-without-ns :paatosdokumentinPvm))]
+               (when (and paatosdokumentinPvm-timestamp (> (now) paatosdokumentinPvm-timestamp))
+                 {:lupamaaraykset {:takuuaikaPaivat (get-text paatos-xml-without-ns :takuuaikaPaivat)
+                                   :muutMaaraykset (->lupamaaraukset-text paatos-xml-without-ns)}
+                  :paivamaarat    {:paatosdokumentinPvm paatosdokumentinPvm-timestamp}
+                  :poytakirjat    (when-let [liitetiedot (seq (select paatos-xml-without-ns [:liitetieto]))]
+                                    (map ->liite (map (fn [[k v]] {:liite v}) (cr/all-of liitetiedot))))})))
+        (select xml-without-ns [:paatostieto :Paatos])))))
 
-(permit/register-function permit/R :verdict-krysp-reader ->verdict)
-(permit/register-function permit/P :verdict-krysp-reader ->verdict)
-(permit/register-function permit/YA :verdict-krysp-reader ->simple-verdict)
-(permit/register-function permit/YL :verdict-krysp-reader ->simple-verdict)
-(permit/register-function permit/MAL :verdict-krysp-reader ->simple-verdict)
-(permit/register-function permit/VVVL :verdict-krysp-reader ->simple-verdict)
+(permit/register-function permit/R :verdict-krysp-reader ->standard-verdicts)
+(permit/register-function permit/P :verdict-krysp-reader ->standard-verdicts)
+(permit/register-function permit/YA :verdict-krysp-reader ->simple-verdicts)
+(permit/register-function permit/YL :verdict-krysp-reader ->simple-verdicts)
+(permit/register-function permit/MAL :verdict-krysp-reader ->simple-verdicts)
+(permit/register-function permit/VVVL :verdict-krysp-reader ->simple-verdicts)
 
 (defn- ->kuntalupatunnus [asia]
   {:kuntalupatunnus (or (get-text asia [:luvanTunnisteTiedot :LupaTunnus :kuntalupatunnus])
@@ -362,11 +379,10 @@
   (map
     (fn [asia]
       (let [verdict-model (->kuntalupatunnus asia)
-            verdicts      (->> (select asia [:paatostieto :Paatos])
-                           (map ->function)
+            verdicts      (->> asia
+                           (->function)
                            (cleanup)
                            (filter seq))]
-
         (if (seq verdicts)
           (assoc verdict-model :paatokset verdicts)
           verdict-model)))

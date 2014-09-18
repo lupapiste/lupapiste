@@ -36,6 +36,7 @@
                  [fi.sito/oskari "0.9.33"]
                  [slingshot "0.10.3"]
                  [com.google.zxing/javase "2.2"]
+                 [prismatic/schema "0.2.4"]
                  [cljts "0.2.0" :exclusions [xerces/xercesImpl]]]
   :profiles {:dev {:dependencies [[midje "1.6.3"]
                                   [ring-mock "0.1.5"]
@@ -61,7 +62,7 @@
   :repositories [["solita-archiva" {:url "http://mvn.solita.fi/archiva/repository/solita"
                                     :checksum :ignore}]]
   :plugin-repositories [["solita-archiva" {:url "http://mvn.solita.fi/archiva/repository/solita"
-                                            :checksum :ignore}]]
+                                           :checksum :ignore}]]
   :aliases {"integration" ["with-profile" "dev,itest" "midje"]
             "verify"      ["with-profile" "dev,alltests" "do" "nitpicker," "midje"]}
   :main ^:skip-aot lupapalvelu.server

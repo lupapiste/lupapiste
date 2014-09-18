@@ -11,7 +11,7 @@
 
 (defn returns [])
 
-(defcommand "test-command" {:description "jabba" :roles [:anonymous]} [command] (returns))
+(defcommand "test-command" {:description "jabba" :states all-states :roles [:anonymous]} [command] (returns))
 
 (facts "get-meta"
   (get-meta "test-command") => (contains {:description "jabba"}))
@@ -45,6 +45,7 @@
 (facts "Test general validation in command execution"
   (against-background
     (get-actions) => {:test-command {:parameters [:id]
+                                     :states     all-states
                                      :roles      [:authority]}})
 
   (fact (execute {})
@@ -69,7 +70,7 @@
 (facts "Test valid-states"
   (against-background
     (get-actions) => {:test-command {:parameters [:id]
-                                      :states     [:open]}})
+                                     :states     [:open]}})
   (fact "invalid state"
         (invalid-state-in-application {:action "test-command" :data {:id "123"}} {:state "closed"})
         => { :ok false :text "error.command-illegal-state"})
@@ -80,45 +81,55 @@
 
 (facts "Test authority"
   (against-background
-    (get-actions) => {:test-command-auth {:parameters [:id] :roles [:authority]}}
-    (domain/get-application-as "123" {:id "user123" :organizations ["ankkalinna"] :role :authority}) =>  {:organization "ankkalinna"}
-    (domain/get-application-as "123" {:id "user123" :organizations ["hanhivaara"] :role :authority}) =>  nil)
+    (get-actions) => {:test-command-auth {:parameters [:id]
+                                          :roles      [:authority]
+                                          :states     all-states}}
+    (domain/get-application-as-including-canceled "123" {:id "user123" :organizations ["ankkalinna"] :role :authority}) =>  {:state "submitted" :organization "ankkalinna"}
+    (domain/get-application-as-including-canceled "123" {:id "user123" :organizations ["hanhivaara"] :role :authority}) =>  nil)
 
   (fact "regular user is not authority"
-        (execute {:action "test-command-auth" :user {:id "user123"} :data {:id "123"}}) => unauthorized)
+    (execute {:action "test-command-auth" :user {:id "user123"} :data {:id "123"}}) => unauthorized)
 
   (fact "with correct authority command is executed"
-        (execute {:action "test-command-auth" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => ok?)
+    (execute {:action "test-command-auth" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => ok?)
 
-  (fact "with incorred authority error is returned"
-        (execute {:action "test-command-auth" :user {:id "user123" :organizations ["hanhivaara"] :role :authority} :data {:id "123"}}) => unauthorized))
+  (fact "with incorrect authority error is returned"
+    (execute {:action "test-command-auth" :user {:id "user123" :organizations ["hanhivaara"] :role :authority} :data {:id "123"}}) => unauthorized))
 
 (facts "Access based on extra-auth-roles"
   (against-background
     (get-actions) => {:test-command-auth {:parameters [:id]
                                           :roles [:authority]
+                                          :states all-states
                                           :extra-auth-roles [:someRole]}
                       :without-extra-roles {:parameters [:id]
-                                            :roles [:authority]}
+                                            :roles [:authority]
+                                            :states all-states}
                       :with-any-extra-role {:parameters [:id]
                                             :roles [:anonymous]
+                                            :states all-states
                                             :extra-auth-roles [:any]}}
-    (domain/get-application-as "123" {:id "some1" :organizations ["999-R"] :role :authority}) => {:organization "999-R"
-                                                                                                  :auth [{:id "user123" :role "someRole"}]}
+    (domain/get-application-as-including-canceled "123" {:id "some1" :organizations ["999-R"] :role :authority}) => {:organization "999-R"
+                                                                                                                     :state "submitted"
+                                                                                                                     :auth [{:id "user123" :role "someRole"}]}
 
-    (domain/get-application-as "123" {:id "some1" :organizations ["999-R"] :role :applicant}) => {:organization "999-R" :auth []}
+    (domain/get-application-as-including-canceled "123" {:id "some1" :organizations ["999-R"] :role :applicant}) => {:organization "999-R" :state "submitted" :auth []}
 
-    (domain/get-application-as "123" {:id "user123" :organizations [] :role :authority}) =>  {:organization "999-R"
-                                                                                              :auth [{:id "user123" :role "someRole"}]}
+    (domain/get-application-as-including-canceled "123" {:id "user123" :organizations [] :role :authority}) =>  {:organization "999-R"
+                                                                                                                 :state "submitted"
+                                                                                                                 :auth [{:id "user123" :role "someRole"}]}
 
-    (domain/get-application-as "123" {:id "user234" :organizations [] :role :authority}) =>  {:organization "999-R"
-                                                                                              :auth [{:id "user234" :role "otherRole"}]}
+    (domain/get-application-as-including-canceled "123" {:id "user234" :organizations [] :role :authority}) =>  {:organization "999-R"
+                                                                                                                 :state "submitted"
+                                                                                                                 :auth [{:id "user234" :role "otherRole"}]}
 
-    (domain/get-application-as "123" {:id "user345" :organizations [] :role :authority}) =>  {:organization "999-R"
-                                                                                              :auth [{:id "user345" :role "writer"}]}
+    (domain/get-application-as-including-canceled "123" {:id "user345" :organizations [] :role :authority}) =>  {:organization "999-R"
+                                                                                                                 :state "submitted"
+                                                                                                                 :auth [{:id "user345" :role "writer"}]}
 
-    (domain/get-application-as "123" {:id "user456" :organizations [] :role :authority}) =>  {:organization "999-R"
-                                                                                              :auth [{:id "user456" :role "3rdRole"}]}
+    (domain/get-application-as-including-canceled "123" {:id "user456" :organizations [] :role :authority}) =>  {:organization "999-R"
+                                                                                                                 :state "submitted"
+                                                                                                                 :auth [{:id "user456" :role "3rdRole"}]}
     )
 
   (fact "Authority from same org has access"
@@ -150,31 +161,31 @@
   (fact  (missing-parameters {:action "test-command" :data {:id 1 :_ 2}}) => nil))
 
 (facts "Custom pre-check is run"
- (against-background
-   (get-actions) => {:test-command1 {:pre-checks [(constantly (fail "FAIL"))] :roles [:authority]}
-                     :test-command2 {:pre-checks [(constantly nil)] :roles [:authority]}
-                     :test-command3 {:pre-checks [(constantly nil) (constantly nil) (constantly (fail "FAIL"))] :roles [:authority]}}
-   (domain/get-application-as "123" {:id "user123" :organizations ["ankkalinna"] :role :authority}) =>  {:organization "ankkalinna"})
+  (against-background
+    (get-actions) => {:test-command1 {:pre-checks [(constantly (fail "FAIL"))] :roles [:authority]}
+                      :test-command2 {:pre-checks [(constantly nil)] :roles [:authority]}
+                      :test-command3 {:pre-checks [(constantly nil) (constantly nil) (constantly (fail "FAIL"))] :roles [:authority]}}
+    (domain/get-application-as-including-canceled "123" {:id "user123" :organizations ["ankkalinna"] :role :authority}) =>  {:organization "ankkalinna" :state "submitted"})
 
- (fact (execute {:action "test-command1" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => {:ok false :text "FAIL"})
- (fact (execute {:action "test-command2" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => ok?)
- (fact (execute {:action "test-command3" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => {:ok false :text "FAIL"}))
+  (fact (execute {:action "test-command1" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => {:ok false :text "FAIL"})
+  (fact (execute {:action "test-command2" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => ok?)
+  (fact (execute {:action "test-command3" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => {:ok false :text "FAIL"}))
 
 (facts "Custom input-validator is run"
- (against-background
-   (get-actions) => {:test-command1 {:input-validators [(constantly (fail "FAIL"))] :roles [:authority]}
-                     :test-command2 {:input-validators [(constantly nil)] :roles [:authority]}
-                     :test-command3 {:input-validators [(constantly nil) (constantly nil) (constantly (fail "FAIL"))] :roles [:authority]}}
-   (domain/get-application-as "123" {:id "user123" :organizations ["ankkalinna"] :role :authority}) =>  {:organization "ankkalinna"})
+  (against-background
+    (get-actions) => {:test-command1 {:input-validators [(constantly (fail "FAIL"))] :roles [:authority]}
+                      :test-command2 {:input-validators [(constantly nil)] :roles [:authority]}
+                      :test-command3 {:input-validators [(constantly nil) (constantly nil) (constantly (fail "FAIL"))] :roles [:authority]}}
+    (domain/get-application-as-including-canceled "123" {:id "user123" :organizations ["ankkalinna"] :role :authority}) =>  {:organization "ankkalinna" :state "submitted"})
 
- (fact (execute {:action "test-command1" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => {:ok false :text "FAIL"})
- (fact (execute {:action "test-command2" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => ok?)
- (fact (execute {:action "test-command3" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => {:ok false :text "FAIL"}))
+  (fact (execute {:action "test-command1" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => {:ok false :text "FAIL"})
+  (fact (execute {:action "test-command2" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => ok?)
+  (fact (execute {:action "test-command3" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => {:ok false :text "FAIL"}))
 
 (facts "Input-validator is not run during auth check"
   (against-background
-   (get-actions) => {:test-command1 {:input-validators [(constantly (fail "FAIL"))]:roles [:authority]}}
-   (domain/get-application-as "123" {:id "user123" :organizations ["ankkalinna"] :role :authority}) =>  {:organization "ankkalinna"})
+    (get-actions) => {:test-command1 {:input-validators [(constantly (fail "FAIL"))]:roles [:authority]}}
+    (domain/get-application-as-including-canceled "123" {:id "user123" :organizations ["ankkalinna"] :role :authority}) =>  {:organization "ankkalinna" :state "submitted"})
   (validate {:action "test-command1" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => ok?)
 
 (facts "Defined querys work only in query pipelines"

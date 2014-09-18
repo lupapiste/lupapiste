@@ -29,7 +29,7 @@ var ajax = (function() {
       complete:  self.onComplete,
       success: function(e) {
         var handler = (self.rawData || e.ok) ? self.successHandler : self.errorHandler;
-        handler(e);
+        handler.call(self.savedThis, e);
       },
       error: function(jqXHR, textStatus, errorThrown) {
         self.failHandler(jqXHR, textStatus, errorThrown);
@@ -41,11 +41,11 @@ var ajax = (function() {
       }
     };
 
-    self.successHandler = function(e) { };
+    self.successHandler = function() { };
     self.errorHandler = function(e) {
       error("AJAX: ERROR", self.request.url, e);
       notify.error(loc("error.dialog.title"), loc(e.text));
-      };
+    };
     self.failHandler = function(jqXHR, textStatus, errorThrown) {
       if (jqXHR && jqXHR.status > 0 &&jqXHR.status !== 403 && jqXHR.readyState > 0) {
         error("Ajax: FAIL", self.request.url, jqXHR, textStatus, errorThrown);
@@ -80,8 +80,9 @@ var ajax = (function() {
       return self;
     };
 
-    self.success = function(f) {
+    self.success = function(f, savedThis) {
       self.successHandler = f;
+      self.savedThis = savedThis;
       return self;
     };
 
@@ -89,8 +90,9 @@ var ajax = (function() {
       return self.success(function(e) { hub.send(n, e); });
     };
 
-    self.error = function(f) {
+    self.error = function(f, savedThis) {
       self.errorHandler = f;
+      self.savedThis = savedThis;
       return self;
     };
 

@@ -265,8 +265,8 @@
 
 (def sijaisuus-tyonjohtaja [{:name "sijaistus"
                              :type :group
-                             :body [{:name "sijaistettavaHloEtunimi" :type :string :required true}
-                                    {:name "sijaistettavaHloSukunimi" :type :string :required true}
+                             :body [{:name "sijaistettavaHloEtunimi" :type :string}
+                                    {:name "sijaistettavaHloSukunimi" :type :string}
                                     {:name "alkamisPvm" :type :date}
                                     {:name "paattymisPvm" :type :date}]}])
 

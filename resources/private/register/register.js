@@ -1,4 +1,4 @@
-;(function() {
+(function() {
   "use strict";
 
   var registrationModel = new LUPAPISTE.RegistrationModel("register-user", function() {window.location.hash = "!/register3";}, "#register-email-error");
