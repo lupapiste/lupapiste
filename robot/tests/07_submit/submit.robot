@@ -32,7 +32,6 @@ Mikko submits application
   Submit application
 
 Mikko cant re-submit application
-  Wait Until  Element should not be visible  xpath=//*[@data-test-id='application-open-requiredFieldSummary-tab']
   Wait Until  Element should not be visible  xpath=//*[@data-test-id='application-submit-btn']
 
 Submit date should be visible

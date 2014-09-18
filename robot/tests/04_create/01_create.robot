@@ -50,14 +50,12 @@ Mikko inspects inforequest and sees his initial comments
 
 #LUPA-585
 The contents of unsent inforequest's message field is resetted properly when moving to another inforequest
-  Wait until  Element should be visible  conversation-panel
   Input text  xpath=//section[@id='inforequest']//textarea[@data-test-id='application-new-comment-text']  roskaa
   # XXX 'Element Should Contain' or 'Textfield Value Should Be' do not work for some reason
   Wait For Condition  return $("#inforequest").find("textarea[data-test-id='application-new-comment-text']").val() == "roskaa";
 
   Create inforequest the fast way  create-info-2  360603.153  6734222.95  753  753-416-25-22  asuinrakennus  init-comment-2
   Wait For Condition  return $("#inforequest").find("textarea[data-test-id='application-new-comment-text']").val() == "";
-  Close side panel  conversation
 
 Mikko creates new application
   Go to page  applications
