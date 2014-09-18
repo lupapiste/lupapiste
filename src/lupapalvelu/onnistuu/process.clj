@@ -152,9 +152,9 @@
     (resp-assert! (-> process :company :y)  identifier  "wrong Y")
     (process-update! process :done ts)
     (infof "sign:success:%s: OK: y [%s], company: [%s]"
-             process-id
-             identifier
-             name)
+           process-id
+           identifier
+           name)
     (let [company  (c/create-company (merge (:company process) {:name name, :process-id process-id}))
           token-id (c/add-user! signer company :admin)]
       (infof "sign:success:%s: company-created: y [%s], company: [%s], id: [%s], token: [%s]"
