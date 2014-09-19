@@ -212,6 +212,7 @@
    :buildings                []
    :closed                   nil ; timestamp
    :closedBy                 {}
+   :convertedToApplication   nil ; timestamp
    :comments                 []
    :created                  nil ; timestamp
    :documents                []
