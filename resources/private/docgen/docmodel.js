@@ -1297,18 +1297,22 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     title.appendChild(icon);
 
     if (op) {
+      var opDescription = doc.meta && doc.meta.opDescription ? doc.meta.opDescription : undefined;
+
       title.appendChild(document.createTextNode(loc([op.name, "_group_label"])));
 
       var descriptionSpan = document.createElement("span");
       var description = document.createTextNode("");
+      var input = document.createElement("input");
+
       descriptionSpan.className = "op-description";
-      if (op.description) {
-        description.nodeValue = op.description;
+      if (opDescription) {
+        description.nodeValue = opDescription;
+        input.value = opDescription;
       }
       descriptionSpan.appendChild(description);
       title.appendChild(descriptionSpan);
 
-      var input = document.createElement("input");
       input.type = "text";
       input.className = "accordion-input text hidden";
       title.appendChild(input);
@@ -1318,14 +1322,29 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         event.stopPropagation();
       };
 
-      input.onkeyup = function(event) {
-        if (event.keyCode == 13) {
-          description.nodeValue = input.value;
-          $(input).addClass("hidden");
-          $(iconSpan).removeClass("hidden");
-          $(descriptionSpan).removeClass("hidden");
-        }
+      var saveInput = function() {
+        input.onblur = undefined;
+        var value = input.value;
+        // ajax
+        //   .command("save-operation-description")
+        description.nodeValue = input.value;
+        $(input).addClass("hidden");
+        $(iconSpan).removeClass("hidden");
+        $(descriptionSpan).removeClass("hidden");
       };
+
+      input.onfocus = function(event) {
+        input.onblur = function(event) {
+          saveInput();
+        }
+      }
+
+      input.onkeyup = function(event) {
+        if (event.keyCode == 13 || event.keyCode == 27) {
+          $(input).off("blur");
+          saveInput();
+        }
+      }
 
       iconSpan.className = "icon edit";
       iconSpan.onclick = function(event) {
