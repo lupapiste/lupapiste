@@ -1300,10 +1300,12 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       title.appendChild(document.createTextNode(loc([op.name, "_group_label"])));
 
       var descriptionSpan = document.createElement("span");
+      var description = document.createTextNode("");
       descriptionSpan.className = "op-description";
       if (op.description) {
-        descriptionSpan.innerHTML = op.description;
+        description.nodeValue = op.description;
       }
+      descriptionSpan.appendChild(description);
       title.appendChild(descriptionSpan);
 
       var input = document.createElement("input");
@@ -1315,9 +1317,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       input.onclick = function(event) {
         event.stopPropagation();
       };
+
       input.onkeyup = function(event) {
         if (event.keyCode == 13) {
-          console.log("hide input");
+          description.nodeValue = input.value;
           $(input).addClass("hidden");
           $(iconSpan).removeClass("hidden");
           $(descriptionSpan).removeClass("hidden");
@@ -1327,10 +1330,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       iconSpan.className = "icon edit";
       iconSpan.onclick = function(event) {
         event.stopPropagation();
-        input.focus();
         $(iconSpan).addClass("hidden");
         $(input).removeClass("hidden");
         $(descriptionSpan).addClass("hidden");
+        input.focus();
       };
 
       title.appendChild(iconSpan);
