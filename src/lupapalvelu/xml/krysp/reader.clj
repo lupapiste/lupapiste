@@ -346,11 +346,17 @@
     (select xml-without-ns [:paatostieto :Paatos])))
 
 (defn- ->simple-verdicts [xml-without-ns]
-  (let [app-state (ss/lower-case (get-text xml-without-ns [:Kasittelytieto :hakemuksenTila]))]
+  (let [app-state (->> (select xml-without-ns [:Kasittelytieto])
+                    (map (fn [kasittelytieto] (-> (cr/all-of kasittelytieto) (cr/convert-keys-to-timestamps [:muutosHetki]))))
+                    (filter :hakemuksenTila) ;; this because hakemuksenTila is optional in Krysp, and can be nil
+                    (sort-by :muutosHetki)
+                    last
+                    :hakemuksenTila
+                    ss/lower-case)]
     ;;
     ;; TODO: Ovatko nama tilat validit?
     ;;
-    (when-not (#{"luonnos" "hakemus" "valmistelussa" "vastaanotettu" "tarkastettu, t\u00e4ydennyspyynt\u00f6"} app-state)
+    (when-not (#{nil "luonnos" "hakemus" "valmistelussa" "vastaanotettu" "tarkastettu, t\u00e4ydennyspyynt\u00f6"} app-state)
       (map (fn [paatos-xml-without-ns]
              (let [paatosdokumentinPvm-timestamp (cr/to-timestamp (get-text paatos-xml-without-ns :paatosdokumentinPvm))]
                (when (and paatosdokumentinPvm-timestamp (> (now) paatosdokumentinPvm-timestamp))
