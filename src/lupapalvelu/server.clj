@@ -35,7 +35,7 @@
             [lupapalvelu.screenmessage]))
 
 (defn -main [& _]
-  (infof "Server starting in %s mode" env/mode)
+  (infof "Build %s starting in %s mode" (:build-number env/buildinfo) (name env/mode))
   (infof "Running on %s version %s (%s) [%s], trustStore is %s"
     (System/getProperty "java.vm.name")
     (System/getProperty "java.runtime.version")
