@@ -566,3 +566,8 @@
                                 %)
                               (:documents application))]
           (mongo/update-by-id collection (:id application) {$set {:documents new-documents}}))))))
+
+(defmigration set-converted-timestamp
+  (reduce + 0
+    (for [collection [:applications :submitted-applications]]
+     (mongo/update-by-query collection {:convertedToApplication {$exists false}} {$set {:convertedToApplication nil}}))))
