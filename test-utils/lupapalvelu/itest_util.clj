@@ -224,9 +224,9 @@
   ([apikey id open? to]
     (command apikey :add-comment :id id :text "hello" :to to :target {:type "application"} :openApplication open? :roles [])))
 
-(defn toggle-application-urgent
-  ([apikey id urgent]
-    (command apikey :toggle-urgent :id id :urgent urgent)))
+(defn change-application-urgency
+  ([apikey id urgency]
+    (command apikey :change-urgency :id id :urgency urgency)))
 
 (defn add-authority-notice
   ([apikey id notice]
