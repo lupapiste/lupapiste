@@ -571,3 +571,7 @@
   (reduce + 0
     (for [collection [:applications :submitted-applications]]
      (mongo/update-by-query collection {:convertedToApplication {$exists false}} {$set {:convertedToApplication nil}}))))
+
+(defmigration set-urgency
+  {:apply-when (pos? (mongo/count [:applications :submitted-applications] {:urgency {$exists false}}))}
+  (mongo/update-by-query [:applications :submitted-applications] {:urgency {$exists false}} {$set {:urgency "normal"}}))
