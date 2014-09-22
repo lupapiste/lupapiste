@@ -571,3 +571,8 @@
   (reduce + 0
     (for [collection [:applications :submitted-applications]]
      (mongo/update-by-query collection {:convertedToApplication {$exists false}} {$set {:convertedToApplication nil}}))))
+
+(defmigration set-urgency
+  (reduce + 0
+    (for [collection [:applications :submitted-applications]]
+     (mongo/update-by-query collection {:urgency {$exists false}} {$set {:urgency "normal"}}))))

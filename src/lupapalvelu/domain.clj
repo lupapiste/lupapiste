@@ -45,7 +45,7 @@
 (defn- filter-notice-from-application [application user]
   (if (user/authority? user)
     application
-    (dissoc application :urgent :authorityNotice)))
+    (dissoc application :urgency :authorityNotice)))
 
 (defn filter-application-content-for [application user]
   (when (seq application)
@@ -239,7 +239,7 @@
    :submitted                nil ; timestamp
    :tasks                    []
    :title                    ""
-   :urgent                   false
+   :urgency                  "normal"
    :verdicts                 []})
 
 

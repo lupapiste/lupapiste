@@ -4,13 +4,17 @@
             [monger.operators :refer :all])
 )
 
-(defcommand toggle-urgent
-  {:parameters [id urgent]
+(defn validate-urgency [{{urgency :urgency} :data}]
+  (when-not (#{"normal" "urgent" "pending"} urgency)
+    (fail :error.unknown-urgency-state)))
+
+(defcommand change-urgency
+  {:parameters [id urgency]
    :roles [:authority]
    :states action/all-states
-   :input-validators [(partial action/boolean-parameters [:urgent])]}
+   :input-validators [validate-urgency]}
   [command]
-  (update-application command {$set {:urgent urgent}}))
+  (update-application command {$set {:urgency urgency}}))
 
 (defcommand add-authority-notice
   {:parameters [id authorityNotice]
