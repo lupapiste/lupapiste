@@ -1279,6 +1279,11 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return false;
   }
 
+  // function updateDocMeta() {
+  //   ajax.command("update-doc-description", {id: self.appId, doc: self.docId, collection: self.getCollection(), desc: "test" })
+  //     .success().call();
+  // }
+
   function buildElement() {
     var op = self.schema.info.op;
 
@@ -1297,7 +1302,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     title.appendChild(icon);
 
     if (op) {
-      var opDescription = doc.meta && doc.meta.opDescription ? doc.meta.opDescription : undefined;
+      var opDescription = doc.meta && doc.meta.description ? doc.meta.description : undefined;
 
       title.appendChild(document.createTextNode(loc([op.name, "_group_label"])));
 

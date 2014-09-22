@@ -589,7 +589,8 @@
                                            "yleiset-alueet-maksaja" (schema-data-to-body operations/schema-data-yritys-selected application)
                                            "tyomaastaVastaava"      (schema-data-to-body operations/schema-data-yritys-selected application)
                                            {})
-                                         created)})
+                                         created)
+                                 :meta {}})
         existing-schema-names (set (map (comp :name :schema-info) existing-documents))
         required-schema-names (remove existing-schema-names (:required op-info))
         required-docs         (map make required-schema-names)
@@ -616,8 +617,7 @@
 (defn- make-op [op-name created]
   {:id (mongo/create-id)
    :name (keyword op-name)
-   :created created
-   :description nil})
+   :created created})
 
 (defn user-is-authority-in-organization? [user-id organization-id]
   (mongo/any? :users {$and [{:organizations organization-id} {:_id user-id}]}))
