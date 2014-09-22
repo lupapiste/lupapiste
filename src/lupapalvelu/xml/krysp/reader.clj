@@ -337,10 +337,7 @@
 (defn- ->standard-verdicts [xml-without-ns]
   (map (fn [paatos-xml-without-ns]
          (let [poytakirjat (map ->paatospoytakirja (select paatos-xml-without-ns [:poytakirja]))
-               ;;
-               ;; TODO: Is "paatos" also one of the requirements?
-               ;;
-               poytakirja-with-paatos-data (some #(when (and #_(:paatos %) (:paatoskoodi %) (:paatoksentekija %) (:paatospvm %)) %) poytakirjat)]
+               poytakirja-with-paatos-data (some #(when (and (:paatoskoodi %) (:paatoksentekija %) (:paatospvm %)) %) poytakirjat)]
            (when (and poytakirja-with-paatos-data (> (now) (:paatospvm poytakirja-with-paatos-data)))
              {:lupamaaraykset (->lupamaaraukset paatos-xml-without-ns)
               :paivamaarat    (get-pvm-dates paatos-xml-without-ns
