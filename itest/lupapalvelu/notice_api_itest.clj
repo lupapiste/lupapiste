@@ -9,7 +9,7 @@
           (change-application-urgency pena id "urgent") =not=> ok?)    
 
     (fact "authority can set application urgency"
-          sonja => (allowed? :toggle-urgency :id id :urgency "urgent")
+          sonja => (allowed? :change-urgency :id id :urgency "urgent")
           (change-application-urgency sonja id "urgent") => ok?
           (:urgency (query-application sonja id)) => "urgent")
 

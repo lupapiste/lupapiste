@@ -346,6 +346,7 @@
     (select xml-without-ns [:paatostieto :Paatos])))
 
 (defn- ->simple-verdicts [xml-without-ns]
+  ;; using the newest app state in the message
   (let [app-state (->> (select xml-without-ns [:Kasittelytieto])
                     (map (fn [kasittelytieto] (-> (cr/all-of kasittelytieto) (cr/convert-keys-to-timestamps [:muutosHetki]))))
                     (filter :hakemuksenTila) ;; this because hakemuksenTila is optional in Krysp, and can be nil

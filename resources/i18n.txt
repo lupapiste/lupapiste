@@ -1,4 +1,0 @@
-notice.urgency: Hakemuksen kiireellisyys
-notice.urgency.normal: Normaali
-notice.urgency.pending: Odottaa
-notice.urgency.urgent: Kiirellinen
