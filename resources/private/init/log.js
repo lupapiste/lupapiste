@@ -5,7 +5,8 @@
   };
 
   function filtered(page, message) {
-    return _.startsWith(page, "resource://") || _.include(message, "NPObject");
+    var pageFilter = /^(resource:\/|https:\/\/[a-z1-9]+\.checkpoint\.com\/)/;
+    return pageFilter.test(page) || _.include(message, "NPObject");
   }
 
   var levelName = ["TRACE", "DEBUG", "INFO", "WARN", "ERROR"];

@@ -22,7 +22,7 @@ LUPAPISTE.SidePanelModel = function() {
   self.authentication = ko.observable();
   self.authorities = ko.observable();
 
-  self.showSidePanel = ko.computed(function() {
+  self.sidePanelVisible = ko.computed(function() {
     return self.showConversationPanel() || self.showNoticePanel();
   });
 
@@ -90,7 +90,7 @@ LUPAPISTE.SidePanelModel = function() {
     self.showConversationPanel(false);
   };
 
-  self.hideSidePanel = function(data, event) {
+  self.closeSidePanel = function(data, event) {
     if (self.showConversationPanel()) {
       self.toggleConversationPanel();
     }
@@ -115,22 +115,31 @@ LUPAPISTE.SidePanelModel = function() {
   });
 }
 
-ko.bindingHandlers.slideVisible = {
-    init: function(element, valueAccessor) {
-        var value = valueAccessor();
-        $(element).toggleClass("hide-side-panel", !value(), 100);
-    },
-    update: function(element, valueAccessor) {
-        var value = valueAccessor();
-        $(element).toggleClass("hide-side-panel", !value(), 100);
+ko.bindingHandlers.transition = {
+  init: function(element, valueAccessor, allBindings) {
+    var value = ko.utils.unwrapObservable(valueAccessor());
+    var className = allBindings().class;
+    if (className) {
+      $(element).toggleClass(className, value);
     }
+  },
+  update: function(element, valueAccessor, allBindings) {
+    var value = ko.utils.unwrapObservable(valueAccessor());
+    var className = allBindings().class;
+    var type = allBindings().type
+    if (type) {
+      $(element)[type + "Toggle"](1000);
+    } else {
+      $(element).toggleClass(className, value, 100);
+    }
+  }
 };
 
 $(function() {
   var sidePanel = new LUPAPISTE.SidePanelModel();
   $(document).keyup(function(e) {
     // esc hides the side panel
-    if (e.keyCode == 27) { sidePanel.hideSidePanel() };
+    if (e.keyCode == 27) { sidePanel.closeSidePanel() };
   });
   $("#side-panel-template").applyBindings(sidePanel);
 });
