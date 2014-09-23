@@ -7,30 +7,42 @@ LUPAPISTE.NoticeModel = function() {
   self.authorityNotice = ko.observable();
   self.urgency = ko.observable('normal');
 
+  self.showSaveIndicator = ko.observable(false);
+
   self.availableUrgencyStates = ko.observableArray(['normal', 'urgent', 'pending']);
 
-  var subscibtions = [];
+  var subscriptions = [];
+
+  var showIndicator = function() {
+    self.showSaveIndicator(true);
+    setTimeout(function() {
+      self.showSaveIndicator(false);
+    }, 4000);
+  }
+
   var subscribe = function() {
-    subscibtions.push(self.urgency.subscribe(_.debounce(function(value) {
+    subscriptions.push(self.urgency.subscribe(_.debounce(function(value) {
       ajax
         .command("change-urgency", {
           id: self.applicationId,
           urgency: value})
+        .success(showIndicator)
         .call();
     }, 500)));
 
-    subscibtions.push(self.authorityNotice.subscribe(_.debounce(function(value) {
+    subscriptions.push(self.authorityNotice.subscribe(_.debounce(function(value) {
       ajax
         .command("add-authority-notice", {
           id: self.applicationId,
           authorityNotice: value})
+        .success(showIndicator)
         .call();
     }, 500)));
   };
 
   var unsubscribe = function() {
-    while(subscibtions.length != 0) {
-      subscibtions.pop().dispose();
+    while(subscriptions.length != 0) {
+      subscriptions.pop().dispose();
     }
   }
 
