@@ -173,7 +173,7 @@
     $("#statement").applyBindings({
       statementModel: statementModel,
       authorization: authorizationModel,
-      attachmentsModel: attachmentsModel,
+      attachmentsModel: attachmentsModel
     });
   });
 
