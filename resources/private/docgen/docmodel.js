@@ -1279,10 +1279,71 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return false;
   }
 
-  // function updateDocMeta() {
-  //   ajax.command("update-doc-description", {id: self.appId, doc: self.docId, collection: self.getCollection(), desc: "test" })
-  //     .success().call();
-  // }
+  function buildDescriptionElement(opDescription) {
+    var wrapper = document.createElement("span");
+    var descriptionSpan = document.createElement("span");
+    var description = document.createTextNode("");
+    var descriptionInput = document.createElement("input");
+    var iconSpan = document.createElement("span");
+
+    wrapper.className = "op-description-wrapper";
+    descriptionSpan.className = "op-description"
+    if (opDescription) {
+      description.nodeValue = opDescription;
+      descriptionInput.value = opDescription;
+    }
+
+    descriptionInput.type = "text";
+    descriptionInput.className = "accordion-input text hidden";
+
+    descriptionInput.onclick = function(event) {
+      // Prevent collapsing accordion when input is clicked
+      event.stopPropagation();
+    };
+
+    var saveInput = function() {
+      descriptionInput.onblur = undefined;
+      var value = descriptionInput.value;
+      ajax.command("update-doc-description", {id: self.appId, doc: self.docId, collection: self.getCollection(), desc: value })
+        .success(function() {
+          // TODO show indicator
+        })
+        .call();
+      description.nodeValue = descriptionInput.value;
+      $(descriptionInput).addClass("hidden");
+      $(iconSpan).removeClass("hidden");
+      $(descriptionSpan).removeClass("hidden");
+    };
+
+    descriptionInput.onfocus = function(event) {
+      descriptionInput.onblur = function(event) {
+        saveInput();
+      }
+    }
+
+    descriptionInput.onkeyup = function(event) {
+      // trigger save on enter and esc keypress
+      if (event.keyCode == 13 || event.keyCode == 27) {
+        $(descriptionInput).off("blur");
+        saveInput();
+      }
+    }
+
+    iconSpan.className = "icon edit";
+    iconSpan.onclick = function(event) {
+      event.stopPropagation();
+      $(iconSpan).addClass("hidden");
+      $(descriptionInput).removeClass("hidden");
+      $(descriptionSpan).addClass("hidden");
+      descriptionInput.focus();
+    };
+
+    descriptionSpan.appendChild(description);
+    wrapper.appendChild(descriptionSpan);
+    wrapper.appendChild(descriptionInput);
+    wrapper.appendChild(iconSpan);
+    return wrapper;
+  }
 
   function buildElement() {
     var op = self.schema.info.op;
@@ -1302,66 +1363,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     title.appendChild(icon);
 
     if (op) {
-      var opDescription = doc.meta && doc.meta.description ? doc.meta.description : undefined;
-
       title.appendChild(document.createTextNode(loc([op.name, "_group_label"])));
-
-      var descriptionSpan = document.createElement("span");
-      var description = document.createTextNode("");
-      var input = document.createElement("input");
-
-      descriptionSpan.className = "op-description";
-      if (opDescription) {
-        description.nodeValue = opDescription;
-        input.value = opDescription;
-      }
-      descriptionSpan.appendChild(description);
-      title.appendChild(descriptionSpan);
-
-      input.type = "text";
-      input.className = "accordion-input text hidden";
-      title.appendChild(input);
-      var iconSpan = document.createElement("span");
-
-      input.onclick = function(event) {
-        event.stopPropagation();
-      };
-
-      var saveInput = function() {
-        input.onblur = undefined;
-        var value = input.value;
-        // ajax
-        //   .command("save-operation-description")
-        description.nodeValue = input.value;
-        $(input).addClass("hidden");
-        $(iconSpan).removeClass("hidden");
-        $(descriptionSpan).removeClass("hidden");
-      };
-
-      input.onfocus = function(event) {
-        input.onblur = function(event) {
-          saveInput();
-        }
-      }
-
-      input.onkeyup = function(event) {
-        if (event.keyCode == 13 || event.keyCode == 27) {
-          $(input).off("blur");
-          saveInput();
-        }
-      }
-
-      iconSpan.className = "icon edit";
-      iconSpan.onclick = function(event) {
-        event.stopPropagation();
-        $(iconSpan).addClass("hidden");
-        $(input).removeClass("hidden");
-        $(descriptionSpan).addClass("hidden");
-        input.focus();
-      };
-
-      title.appendChild(iconSpan);
-
+      title.appendChild(buildDescriptionElement(doc.meta && doc.meta.description ? doc.meta.description : undefined));
     } else {
       title.appendChild(document.createTextNode(loc([self.schemaI18name, "_group_label"])));
     }
