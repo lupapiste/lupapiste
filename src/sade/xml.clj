@@ -19,15 +19,15 @@
     (parse s ch)))
 
 (defn parse-string [^String s encoding]
+  {:pre [(not (s/blank? s))]}
   (xml/parse (java.io.ByteArrayInputStream. (.getBytes s encoding)) startparse-sax-no-doctype))
 
 (defn parse [^String s & {:keys [encoding] :or {encoding "UTF-8"}}]
-  {:pre [s]}
-  (when-not (s/blank? s)
-    (let [xml (-> s s/trim (s/replace #"[\uFEFF-\uFFFF]", ""))]
-      (if (.startsWith xml "<")
-        (parse-string xml encoding)
-        (xml/parse xml startparse-sax-no-doctype)))))
+  {:pre [(not (s/blank? s))]}
+  (let [xml (-> s s/trim (s/replace #"[\uFEFF-\uFFFF]", ""))]
+    (if (.startsWith xml "<")
+      (parse-string xml encoding)
+      (xml/parse xml startparse-sax-no-doctype))))
 
 (defn attr [xml] (:attrs xml))
 (defn text [xml] (-> xml :content first))
