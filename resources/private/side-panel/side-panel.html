@@ -35,7 +35,7 @@
           <div class="header">
             <h1 data-bind="ltext: 'notice.title'"></h1>
             <div class="indicator">
-              <span class="saved" data-bind="ltext: 'form.saved', transition: notice().showSaveIndicator, type: 'fade'"></span>
+              <span class="saved" data-bind="ltext: 'form.saved', transition: notice().showSaveIndicator, type: 'fade'" data-test-id="notice-saved-indicator"></span>
             </div>
             <span class="close-btn" data-bind="click: closeSidePanel"></span>
           </div>

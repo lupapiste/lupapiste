@@ -247,6 +247,9 @@ Veikko logs in
 Sonja logs in
   Authority logs in  sonja  sonja  Sonja Sibbo
 
+Ronja logs in
+  Authority logs in  ronja  sonja  Ronja Sibbo
+
 Sipoo logs in
   Authority-admin logs in  sipoo  sipoo  Simo Suurvisiiri
 
