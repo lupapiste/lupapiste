@@ -112,16 +112,14 @@
     (cr/get-xml url credentials raw?)))
 
 (defn rakval-application-xml [server id raw?] (application-xml rakval-case-type asian-lp-lupatunnus server id raw?))
-(defn poik-application-xml [server id raw?] (application-xml poik-case-type poik-lp-lupatunnus server id raw?))
-(defn yl-application-xml [server id raw?] (application-xml yl-case-type yl-lp-lupatunnus server id raw?))
-(defn mal-application-xml [server id raw?] (application-xml mal-case-type mal-lp-lupatunnus server id raw?))
-(defn vvvl-application-xml [server id raw?] (application-xml vvvl-case-type vvvl-lp-lupatunnus server id raw?))
-
-(defn ya-application-xml [server id raw?]
-  (let [options (post-body-for-ya-application id)
-        credentials nil]
-    (debug "Get application: " server " with post body: " options )
-    (cr/get-xml-with-post server options credentials raw?)))
+(defn poik-application-xml   [server id raw?] (application-xml poik-case-type poik-lp-lupatunnus server id raw?))
+(defn yl-application-xml     [server id raw?] (application-xml yl-case-type yl-lp-lupatunnus server id raw?))
+(defn mal-application-xml    [server id raw?] (application-xml mal-case-type mal-lp-lupatunnus server id raw?))
+(defn vvvl-application-xml   [server id raw?] (application-xml vvvl-case-type vvvl-lp-lupatunnus server id raw?))
+(defn ya-application-xml     [server id raw?] (let [options (post-body-for-ya-application id)
+                                                    credentials nil]
+                                                (debug "Get application: " server " with post body: " options )
+                                                (cr/get-xml-with-post server options credentials raw?)))
 
 (permit/register-function permit/R  :xml-from-krysp rakval-application-xml)
 (permit/register-function permit/P  :xml-from-krysp poik-application-xml)

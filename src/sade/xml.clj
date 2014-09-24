@@ -23,10 +23,11 @@
 
 (defn parse [^String s & {:keys [encoding] :or {encoding "UTF-8"}}]
   {:pre [s]}
-  (let [xml (s/replace (s/trim s) #"[\uFEFF-\uFFFF]", "")]
-    (if (.startsWith xml "<")
-      (parse-string xml encoding)
-      (xml/parse xml startparse-sax-no-doctype))))
+  (when-not (s/blank? s)
+    (let [xml (-> s s/trim (s/replace #"[\uFEFF-\uFFFF]", ""))]
+      (if (.startsWith xml "<")
+        (parse-string xml encoding)
+        (xml/parse xml startparse-sax-no-doctype)))))
 
 (defn attr [xml] (:attrs xml))
 (defn text [xml] (-> xml :content first))
