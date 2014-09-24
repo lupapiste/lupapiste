@@ -4,14 +4,14 @@
 
 (fact "adding notice"
   (let [{id :id} (create-and-submit-application pena)]
-    (fact "user can't set application urgent"
-          pena =not=> (allowed? :toggle-urgent :id id :urgent true)
-          (toggle-application-urgent pena id true) =not=> ok?)    
+    (fact "user can't set application urgency"
+          pena =not=> (allowed? :change-urgency :id id :urgency "urgent")
+          (change-application-urgency pena id "urgent") =not=> ok?)    
 
-    (fact "authority can set application urgent"
-          sonja => (allowed? :toggle-urgent :id id :urgent true)
-          (toggle-application-urgent sonja id true) => ok?
-          (:urgent (query-application sonja id)) => true)
+    (fact "authority can set application urgency"
+          sonja => (allowed? :change-urgency :id id :urgency "urgent")
+          (change-application-urgency sonja id "urgent") => ok?
+          (:urgency (query-application sonja id)) => "urgent")
 
     (fact "user can't set notice message"
           pena =not=> (allowed? :add-authority-notice :id id :authorityNotice "foobar")

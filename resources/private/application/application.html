@@ -572,7 +572,7 @@
 
             <!--  ko if:  hasIncorrectlyFilledRequiredFields -->
               <h2 data-bind="ltext: 'application.requiredDataMissing'"></h2>
-              <i data-bind="ltext: 'application.requiredDataDesc', visible: requiredFieldsFillingObligatory() && hasIncorrectlyFilledRequiredFields()"></i><br>
+              <i class="error-text" data-bind="ltext: 'application.requiredDataDesc', visible: requiredFieldsFillingObligatory() && hasIncorrectlyFilledRequiredFields()"></i><br>
               <button class="btn btn-primary"
                        data-test-id="application-submit-btn"
                        data-bind="click: submitApplication,

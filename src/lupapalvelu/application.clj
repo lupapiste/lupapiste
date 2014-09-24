@@ -1028,6 +1028,8 @@
     (update-application command
       {$set {:infoRequest false
              :state :open
+             :opened created
+             :convertedToApplication created
              :documents (make-documents user created op application)
              :modified created}
        $push {:attachments {$each (make-attachments created op organization (:state application))}}})
