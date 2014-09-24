@@ -16,24 +16,32 @@
         </button>
       </div>
       <div class="content-wrapper">
-        <div class="header">
-          <h1 data-bind="ltext: 'conversation.title', visible: showConversationPanel"></h1>
-          <h1 data-bind="ltext: 'notice.title', visible: showNoticePanel"></h1>
-          <div class="indicator">
-            <span class="saved" data-bind="ltext: 'form.saved', transition: notice().showSaveIndicator, type: 'fade'"></span>
+        <div id="conversation-panel" data-bind="visible: showConversationPanel">
+          <div class="header">
+            <h1 data-bind="ltext: 'conversation.title'"></h1>
+            <div class="indicator">
+              <span class="saved" data-bind="ltext: 'form.saved', transition: notice().showSaveIndicator, type: 'fade'"></span>
+            </div>
+            <span class="close-btn" data-bind="click: closeSidePanel"></span>
           </div>
-          <span class="close-btn" data-bind="click: closeSidePanel"></span>
-        </div>
-        <div class="content">
-          <div id="conversation-panel" data-bind="visible: showConversationPanel">
+          <div class="content">
             <p data-bind="lhtml: 'help.' + permitType() + '.conversationDesc'" class="panel-info"></p>
             <div data-bind="template: {name: 'comment-template', data: {comment: comment, authorities: authorities, mainConversation: true, authorization: authorization, infoRequest: infoRequest}}"></div>
             <div class="process-nav"></div>
           </div>
-          <!-- ko if: authorization.ok('change-urgency') -->
-          <div id="notice-panel" data-bind="visible: showNoticePanel, template: {name: 'notice-template', data: notice}"></div>
-          <!-- /ko -->
         </div>
+        <!-- ko if: authorization.ok('change-urgency') -->
+        <div id="notice-panel" data-bind="visible: showNoticePanel">
+          <div class="header">
+            <h1 data-bind="ltext: 'notice.title'"></h1>
+            <div class="indicator">
+              <span class="saved" data-bind="ltext: 'form.saved', transition: notice().showSaveIndicator, type: 'fade'" data-test-id="notice-saved-indicator"></span>
+            </div>
+            <span class="close-btn" data-bind="click: closeSidePanel"></span>
+          </div>
+          <div class="content" data-bind="template: {name: 'notice-template', data: notice}"></div>
+        </div>
+        <!-- /ko -->
       </div>
     </div>
   </section>
