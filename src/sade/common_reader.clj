@@ -1,5 +1,6 @@
 (ns sade.common-reader
-  (:require [clojure.string :as s]
+  (:require [taoensso.timbre :as timbre :refer [debug warn error]]
+            [clojure.string :as s]
             [clj-time.coerce :as coerce]
             [clj-time.format :as timeformat]
             [sade.http :as http]
@@ -106,6 +107,14 @@
   "transform a form with replacing all sequential collections with keyword-indexed maps."
   [m] (postwalk-map (partial map (fn [[k v]] [k (if (sequential? v) (map-index v) v)])) m))
 
+(defn- do-get-xml [http-fn url options raw?]
+  (let [raw (:body (if options (http-fn url options) (http-fn url)))]
+    (if-not (s/blank? raw)
+      (if raw? raw (parse raw))
+      (do
+        (error "Received an empty XML response with GET from url: " url)
+        nil))))
+
 (defn get-xml
   ([url]
     (get-xml url nil false))
@@ -113,11 +122,8 @@
     {:pre [url
            (or (nil? credentials) (= (count credentials) 2))
            (or (nil? raw?) (boolean? raw?))]}
-    (let [raw (:body (if credentials
-                       (http/get url :basic-auth credentials)
-                       (http/get url)))
-          xml (parse raw)]
-      (if raw? raw xml))))
+    (let [options (when credentials {:basic-auth credentials})]
+      (do-get-xml http/get url options raw?))))
 
 (defn get-xml-with-post
   ([url options]
@@ -127,11 +133,8 @@
            (or (nil? options) (map? options))
            (or (nil? credentials) (= (count credentials) 2))
            (or (nil? raw?) (boolean? raw?))]}
-    (let [raw (:body (if credentials
-                       (http/post url (assoc options :basic-auth credentials))
-                       (http/post url options)))
-          xml (parse raw)]
-      (if raw? raw xml))))
+    (let [options (if credentials (assoc options :basic-auth credentials) options)]
+      (do-get-xml http/post url options raw?))))
 
 
 (defn get-boolean [xml & selector] (to-boolean (apply get-text xml selector)))

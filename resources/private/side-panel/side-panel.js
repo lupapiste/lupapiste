@@ -139,7 +139,7 @@ $(function() {
   var sidePanel = new LUPAPISTE.SidePanelModel();
   $(document).keyup(function(e) {
     // esc hides the side panel
-    if (e.keyCode == 27) { sidePanel.closeSidePanel(); };
+    if (e.keyCode === 27) { sidePanel.closeSidePanel(); };
   });
   $("#side-panel-template").applyBindings(sidePanel);
 });

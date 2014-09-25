@@ -275,7 +275,7 @@ var attachment = (function() {
     $("#attachment").applyBindings({
       attachment: model,
       approve: approveModel,
-      authorization: authorizationModel,
+      authorization: authorizationModel
     });
     $("#upload-page").applyBindings({});
     $(signingModel.dialogSelector).applyBindings({signingModel: signingModel, authorization: authorizationModel});
