@@ -168,7 +168,7 @@
                                      :osoite {:katu {:value "Paapankuja 12"}
                                               :postinumero {:value "10203"}
                                               :postitoimipaikannimi {:value "Piippola"}}
-                                     :patevyys {:koulutus {:value "El\u00e4m\u00e4n koulu"}
+                                     :patevyys {:koulutusvalinta {:value "muu"}, :koulutus {:value "El\u00e4m\u00e4n koulu"}
                                                 :valmistumisvuosi {:value "2010"}
                                                 :patevyysluokka {:value "C"}
                                                 :kokemus {:value "3"}
@@ -340,7 +340,7 @@
         _ (get-in osoite [:osoitenimi :teksti]) => "Paapankuja 12"
         _ (:postinumero osoite) => "10203"
         _ (:postitoimipaikannimi osoite) => "Piippola"
-        _ (:koulutus Suunnittelija) => "Arkkitehti"
+        _ (:koulutus Suunnittelija) => "arkkitehti"
         _ (:patevyysvaatimusluokka Suunnittelija) => "AA"
         _ (:valmistumisvuosi Suunnittelija) => "2010"
         _ (:kokemusvuodet Suunnittelija) => "3"
@@ -359,7 +359,7 @@
         _ (get-in osoite [:osoitenimi :teksti]) => "Paapankuja 12"
         _ (:postinumero osoite) => "10203"
         _ (:postitoimipaikannimi osoite) => "Piippola"
-        _ (:koulutus Suunnittelija) => "El\u00e4m\u00e4n koulu"
+        _ (:koulutus Suunnittelija) => "muu"
         _ (:patevyysvaatimusluokka Suunnittelija) => "C"
         _ (:valmistumisvuosi Suunnittelija) => "2010"
         _ (:kokemusvuodet Suunnittelija) => "3"
@@ -550,7 +550,7 @@
         _ (get-in osoite [:osoitenimi :teksti]) => "Paapankuja 12"
         _ (:postinumero osoite) => "10203"
         _ (:postitoimipaikannimi osoite) => "Piippola"
-        _ (:koulutus Suunnittelija) => "Arkkitehti"
+        _ (:koulutus Suunnittelija) => "arkkitehti"
         _ (:patevyysvaatimusluokka Suunnittelija) => "AA"
 
         ;Suunnitelija
@@ -566,7 +566,7 @@
         _ (get-in osoite [:osoitenimi :teksti]) => "Paapankuja 12"
         _ (:postinumero osoite) => "10203"
         _ (:postitoimipaikannimi osoite) => "Piippola"
-        _ (:koulutus Suunnittelija) => "El\u00e4m\u00e4n koulu"
+        _ (:koulutus Suunnittelija) => "muu"
         _ (:patevyysvaatimusluokka Suunnittelija) => "C"
 
         rakennuspaikkatieto (:rakennuspaikkatieto Suunnittelutarveasia) => truthy
