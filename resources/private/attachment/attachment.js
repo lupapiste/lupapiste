@@ -148,6 +148,10 @@ var attachment = (function() {
       LUPAPISTE.ModalDialog.open("#dialog-confirm-delete-attachment");
     },
 
+    showChangeTypeDialog: function() {
+      LUPAPISTE.ModalDialog.open("#change-type-dialog");
+    },
+
     deleteVersion: function(fileModel) {
       var fileId = fileModel.fileId;
       deleteAttachmentVersionFromServerProxy = function() { deleteAttachmentVersionFromServer(fileId); };

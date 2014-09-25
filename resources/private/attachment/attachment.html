@@ -22,22 +22,13 @@
             <p data-bind="lhtml: 'attachment.view.desc'"  class="tab-info"></p>
           </div>
           <div class="attachment-actions">
-          <div data-bind="with: $root.approve">
-            <button id="test-attachment-approve" data-bind="ltext: 'document.approve', click: approveAttachment, enable: isApprovable() && isNotOk(), visible: isApprovable()" class="btn btn-primary">Hyv&auml;ksy</button>
-            <button id="test-attachment-reject" data-bind="ltext: 'attachment.reject', click: rejectAttachment, enable: isRejectable() && doesNotRequireUserAction(), visible: isRejectable()" class="btn btn-decline">Tarkennettavaa</button>
+            <div data-bind="with: $root.approve">
+              <button id="test-attachment-approve" data-bind="ltext: 'document.approve', click: approveAttachment, enable: isApprovable() && isNotOk(), visible: isApprovable()" class="btn btn-primary">Hyv&auml;ksy</button>
+              <button id="test-attachment-reject" data-bind="ltext: 'attachment.reject', click: rejectAttachment, enable: isRejectable() && doesNotRequireUserAction(), visible: isRejectable()" class="btn btn-decline">Tarkennettavaa</button>
+            </div>
+            <button data-bind="ltext: 'attachment.changeType', click: showChangeTypeDialog"></button>
+            <button data-bind="ltext: 'attachment.delete', click: deleteAttachment, visible: $root.authorization.ok('delete-attachment'),  enable: $root.authorization.ok('delete-attachment')" data-test-id="delete-attachment">Poista liite</button>
           </div>
-             <button class="attachment-delete inline-block" data-bind="ltext: 'attachment.delete', click: deleteAttachment, visible: $root.authorization.ok('delete-attachment'),  enable: $root.authorization.ok('delete-attachment')"
-              data-test-id="delete-attachment">Poista liite</button>
-          </div>
-
-
-          <div class="form-entry change-type">
-            <label for="attachment-type-select" class="form-label">
-             <span data-bind="ltext: 'attachment.changeType'">Vaihda liitteen tyyppi</span>
-             <img src="/img/ajax-loader-12.gif" alt="..." width="12" height="12" id="attachment-type-select-loader" style="display: none;">
-            </label>
-            <div><select id="attachment-type-select" class="long" data-bind="enable: $root.authorization.ok('set-attachment-type')"></select></div>
-        </div>
         </div>
       </div>
 
@@ -125,6 +116,23 @@
 
     </div>
 
+    <div class="window autosized" id="change-type-dialog">
+      <div class="dialog-header">
+       <p data-bind="ltext: 'attachment.changeType'"></p>
+       <p class="dialog-close close">X</p>
+      </div>
+        <div class="form-entry change-type">
+          <label for="attachment-type-select" class="form-label">
+           <img src="/img/ajax-loader-12.gif" alt="..." width="12" height="12" id="attachment-type-select-loader" style="display: none;">
+          </label>
+          <div>
+            <select id="attachment-type-select" class="long" data-bind="enable: $root.authorization.ok('set-attachment-type')"></select>
+          </div>
+        </div>
+        <div style="text-align:center">
+          <button class="btn btn-primary btn-dialog" data-test-id="confirm-yes" style="position:relative" data-bind="ltext: 'button.ok', click: LUPAPISTE.ModalDialog.close"></button>
+        </div>
+    </div>
   </section>
 </body>
 </html>
