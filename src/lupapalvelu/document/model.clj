@@ -436,7 +436,7 @@
                 :postitoimipaikannimi (wrap city)}
        :yritys {:yritysnimi           (wrap companyName)
                 :liikeJaYhteisoTunnus (wrap companyId)}
-       :patevyys {:koulutusvalinta nil ; TODO
+       :patevyys {:koulutusvalinta    nil
                   :koulutus           (wrap degree)
                   :valmistumisvuosi   (wrap graduatingYear)
                   :fise               (wrap fise)}}
