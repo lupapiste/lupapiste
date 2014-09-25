@@ -64,7 +64,7 @@
                  :version 1}
    :data (merge
            suunnittelija-henkilo
-           {:patevyys {:koulutus {:value "Arkkitehti"}
+           {:patevyys {:koulutusvalinta {:value "arkkitehti"}, :koulutus {:value "Arkkitehti"}
                        :patevyysluokka {:value "ei tiedossa"}
                        :valmistumisvuosi {:value "2010"}
                        :kokemus {:value "5"}
@@ -76,7 +76,7 @@
                                       :version 1}
    :data (merge suunnittelija-henkilo
                 {:kuntaRoolikoodi {:value "ARK-rakennussuunnittelija"}}
-                {:patevyys {:koulutus {:value "Arkkitehti"}
+                {:patevyys {:koulutusvalinta {:value "arkkitehti"}, :koulutus {:value "Arkkitehti"}
                             :patevyysluokka {:value "B"}
                             :valmistumisvuosi {:value "2010"}
                             :kokemus {:value "5"}
@@ -88,7 +88,8 @@
                                        :version 1}
    :data (merge suunnittelija-henkilo
                 {:kuntaRoolikoodi {:value "GEO-suunnittelija"}}
-                {:patevyys {:koulutus {:value "El\u00e4m\u00e4n koulu"}
+                {:patevyys {:koulutusvalinta {:value "muu"}
+                            :koulutus {:value "El\u00e4m\u00e4n koulu"}
                             :patevyysluokka {:value "AA"}
                             :valmistumisvuosi {:value "2010"}
                             :kokemus {:value "5"}
@@ -99,7 +100,7 @@
   {:id "suunnittelija-old-schema-LUPA771" :schema-info {:name "suunnittelija"
                                                         :version 1}
    :data (merge suunnittelija-henkilo
-                {:patevyys {:koulutus {:value "Arkkitehti"}
+                {:patevyys {:koulutusvalinta {:value "arkkitehti"}, :koulutus {:value "Arkkitehti"}
                             :kuntaRoolikoodi {:value "ARK-rakennussuunnittelija"}
                             :patevyysluokka {:value "B"}
                             :valmistumisvuosi {:value "2010"}
@@ -111,7 +112,7 @@
                                                 :version 1}
    :data (merge suunnittelija-henkilo
                 {:kuntaRoolikoodi {:value ""}}
-                {:patevyys {:koulutus {:value "Arkkitehti"}
+                {:patevyys {:koulutusvalinta {:value "arkkitehti"}, :koulutus {:value "Arkkitehti"}
                             :patevyysluokka {:value "B"}
                             :valmistumisvuosi {:value "2010"}
                             :kokemus {:value "5"}
@@ -133,7 +134,7 @@
    :schema-info {:name "tyonjohtaja", :version 1}
    :data (merge suunnittelija-henkilo
            {:kuntaRoolikoodi {:value "KVV-ty\u00f6njohtaja"}
-            :patevyys {:koulutus {:value "Koulutus"}
+            :patevyys {:koulutusvalinta {:value "muu"}, :koulutus {:value "Koulutus"}
                        :patevyysvaatimusluokka {:value "A"}
                        :valmistumisvuosi {:value "2010"}
                        :tyonjohtajaHakemusKytkin {:value "hakemus"}
@@ -485,7 +486,7 @@
     (fact "model" suunnittelija-model => truthy)
     (fact "suunnittelijaRoolikoodi" (:suunnittelijaRoolikoodi suunnittelija-model) => "p\u00e4\u00e4suunnittelija")
     (fact "VRKrooliKoodi" (:VRKrooliKoodi suunnittelija-model) => "p\u00e4\u00e4suunnittelija")
-    (fact "koulutus" (:koulutus suunnittelija-model) => "Arkkitehti")
+    (fact "koulutus" (:koulutus suunnittelija-model) => "arkkitehti")
     (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka suunnittelija-model) => "ei tiedossa")
     (fact "valmistumisvuosi" (:valmistumisvuosi suunnittelija-model) => "2010")
     (fact "kokemusvuodet" (:kokemusvuodet suunnittelija-model) => "5")
@@ -498,7 +499,7 @@
     (fact "model" suunnittelija-model => truthy)
     (fact "suunnittelijaRoolikoodi" (:suunnittelijaRoolikoodi suunnittelija-model) => "ARK-rakennussuunnittelija")
     (fact "VRKrooliKoodi" (:VRKrooliKoodi suunnittelija-model) => "rakennussuunnittelija")
-    (fact "koulutus" (:koulutus suunnittelija-model) => "Arkkitehti")
+    (fact "koulutus" (:koulutus suunnittelija-model) => "arkkitehti")
     (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka suunnittelija-model) => "B")
     (fact "valmistumisvuosi" (:valmistumisvuosi suunnittelija-model) => "2010")
     (fact "kokemusvuodet" (:kokemusvuodet suunnittelija-model) => "5")
@@ -511,7 +512,7 @@
     (fact "model" suunnittelija-model => truthy)
     (fact "suunnittelijaRoolikoodi" (:suunnittelijaRoolikoodi suunnittelija-model) => "GEO-suunnittelija")
     (fact "VRKrooliKoodi" (:VRKrooliKoodi suunnittelija-model) => "erityissuunnittelija")
-    (fact "koulutus" (:koulutus suunnittelija-model) => "El\u00e4m\u00e4n koulu")
+    (fact "koulutus" (:koulutus suunnittelija-model) => "muu")
     (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka suunnittelija-model) => "AA")
     (fact "valmistumisvuosi" (:valmistumisvuosi suunnittelija-model) => "2010")
     (fact "kokemusvuodet" (:kokemusvuodet suunnittelija-model) => "5")
@@ -524,7 +525,7 @@
     (fact "model" suunnittelija-model => truthy)
     (fact "suunnittelijaRoolikoodi" (:suunnittelijaRoolikoodi suunnittelija-model) => "ARK-rakennussuunnittelija")
     (fact "VRKrooliKoodi" (:VRKrooliKoodi suunnittelija-model) => "rakennussuunnittelija")
-    (fact "koulutus" (:koulutus suunnittelija-model) => "Arkkitehti")
+    (fact "koulutus" (:koulutus suunnittelija-model) => "arkkitehti")
     (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka suunnittelija-model) => "B")
     (fact "valmistumisvuosi" (:valmistumisvuosi suunnittelija-model) => "2010")
     (fact "kokemusvuodet" (:kokemusvuodet suunnittelija-model) => "5")))
@@ -547,7 +548,7 @@
     (fact "tyonjohtajaRooliKoodi" (:tyonjohtajaRooliKoodi tyonjohtaja-model) => (-> tyonjohtaja :data :kuntaRoolikoodi :value))
     (fact "alkamisPvm" (:alkamisPvm tyonjohtaja-model) => "2014-02-13")
     (fact "paattymisPvm" (:paattymisPvm tyonjohtaja-model) => "2014-02-20")
-    (fact "koulutus" (:koulutus tyonjohtaja-model) => (-> tyonjohtaja :data :patevyys :koulutus :value))
+    (fact "koulutus" (:koulutus tyonjohtaja-model) => (-> tyonjohtaja :data :patevyys :koulutusvalinta :value))
     (fact "valmistumisvuosi" (:valmistumisvuosi tyonjohtaja-model) => (-> tyonjohtaja :data :patevyys :valmistumisvuosi :value))
     (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka tyonjohtaja-model) => (-> tyonjohtaja :data :patevyys :patevyysvaatimusluokka :value))
     (fact "kokemusvuodet" (:kokemusvuodet tyonjohtaja-model) => (-> tyonjohtaja :data :patevyys :kokemusvuodet :value))
