@@ -1299,7 +1299,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     if (op) {
       title.appendChild(document.createTextNode(loc([op.name, "_group_label"])));
     } else {
-      title.appendChild(document.createTextNode(loc([self.schemaI18name, "_group_label"])));
+      title.appendChild(document.createTextNode(loc([self.schema.info.name, "_group_label"])));
     }
     title.setAttribute("data-doc-id", self.docId);
     title.setAttribute("data-app-id", self.appId);

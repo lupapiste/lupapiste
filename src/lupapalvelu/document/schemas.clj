@@ -672,6 +672,7 @@
 
 
     {:info {:name "hakija"
+            :i18name "osapuoli"
             :order 3
             :removable true
             :repeating true
@@ -683,6 +684,7 @@
      :body party}
 
     {:info {:name "hakija-ya"
+            :i18name "osapuoli"
             :order 3
             :removable false
             :repeating false
@@ -693,6 +695,7 @@
      :body (schema-body-without-element-by-name party turvakielto)}
 
     {:info {:name "paasuunnittelija"
+            :i18name "osapuoli"
             :order 4
             :removable false
             :approvable true
@@ -700,6 +703,7 @@
      :body paasuunnittelija}
 
     {:info {:name "suunnittelija"
+            :i18name "osapuoli"
             :repeating true
             :order 5
             :removable true
@@ -708,6 +712,7 @@
      :body suunnittelija}
 
     {:info {:name "tyonjohtaja"
+            :i18name "osapuoli"
             :order 5
             :removable true
             :repeating true
@@ -716,6 +721,7 @@
      :body tyonjohtaja}
 
     {:info {:name "maksaja"
+            :i18name "osapuoli"
             :repeating true
             :order 6
             :removable true
