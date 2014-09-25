@@ -142,7 +142,7 @@
                                         :osoite {:katu {:value "Paapankuja 12"}
                                                  :postinumero {:value "10203"}
                                                  :postitoimipaikannimi {:value "Piippola"}}
-                                        :patevyys {:koulutus {:value "Arkkitehti"}
+                                        :patevyys {:koulutusvalinta {:value "arkkitehti"}, :koulutus {:value "Arkkitehti"}
                                                    :valmistumisvuosi {:value "2010"}
                                                    :patevyysluokka {:value "AA"}
                                                    :kokemus {:value "3"}
