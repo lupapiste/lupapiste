@@ -18,7 +18,7 @@ LUPAPISTE.NoticeModel = function() {
     setTimeout(function() {
       self.showSaveIndicator(false);
     }, 4000);
-  }
+  };
 
   var subscribe = function() {
     subscriptions.push(self.urgency.subscribe(_.debounce(function(value) {
@@ -41,10 +41,10 @@ LUPAPISTE.NoticeModel = function() {
   };
 
   var unsubscribe = function() {
-    while(subscriptions.length != 0) {
+    while(subscriptions.length !== 0) {
       subscriptions.pop().dispose();
     }
-  }
+  };
 
   subscribe();
 
