@@ -116,7 +116,7 @@ var gis = (function() {
     var getIconHeight = function(feature) {
       if (feature.cluster && (feature.cluster.length > 1 || feature.cluster[0].attributes.isCluster)) {
         return 53;
-      } else if (feature.cluster[0].style.externalGraphic == iconDefaultPath) {
+      } else if (feature.cluster[0].style.externalGraphic === iconDefaultPath) {
         return 47;
       } else {
         return 30;
@@ -140,7 +140,7 @@ var gis = (function() {
       graphicWidth: function(feature) {
         if (feature.cluster && (feature.cluster.length > 1 || feature.cluster[0].attributes.isCluster)) {
           return 56;
-        } else if (feature.cluster[0].style.externalGraphic == iconDefaultPath) {
+        } else if (feature.cluster[0].style.externalGraphic === iconDefaultPath) {
           return 44;
         } else {
           return 25;
@@ -255,7 +255,7 @@ var gis = (function() {
 
       popup.panMapIfOutOfView = true;
       popup.relativePosition = "br";
-      popup.calculateRelativePosition = function() {return "tr";}
+      popup.calculateRelativePosition = function() {return "tr";};
       popup.closeOnMove = false;
       popup.autoSize = true;
       popup.minSize = new OpenLayers.Size(270, 505);
