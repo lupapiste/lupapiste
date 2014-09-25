@@ -112,16 +112,14 @@
     (cr/get-xml url credentials raw?)))
 
 (defn rakval-application-xml [server id raw?] (application-xml rakval-case-type asian-lp-lupatunnus server id raw?))
-(defn poik-application-xml [server id raw?] (application-xml poik-case-type poik-lp-lupatunnus server id raw?))
-(defn yl-application-xml [server id raw?] (application-xml yl-case-type yl-lp-lupatunnus server id raw?))
-(defn mal-application-xml [server id raw?] (application-xml mal-case-type mal-lp-lupatunnus server id raw?))
-(defn vvvl-application-xml [server id raw?] (application-xml vvvl-case-type vvvl-lp-lupatunnus server id raw?))
-
-(defn ya-application-xml [server id raw?]
-  (let [options (post-body-for-ya-application id)
-        credentials nil]
-    (debug "Get application: " server " with post body: " options )
-    (cr/get-xml-with-post server options credentials raw?)))
+(defn poik-application-xml   [server id raw?] (application-xml poik-case-type poik-lp-lupatunnus server id raw?))
+(defn yl-application-xml     [server id raw?] (application-xml yl-case-type yl-lp-lupatunnus server id raw?))
+(defn mal-application-xml    [server id raw?] (application-xml mal-case-type mal-lp-lupatunnus server id raw?))
+(defn vvvl-application-xml   [server id raw?] (application-xml vvvl-case-type vvvl-lp-lupatunnus server id raw?))
+(defn ya-application-xml     [server id raw?] (let [options (post-body-for-ya-application id)
+                                                    credentials nil]
+                                                (debug "Get application: " server " with post body: " options )
+                                                (cr/get-xml-with-post server options credentials raw?)))
 
 (permit/register-function permit/R  :xml-from-krysp rakval-application-xml)
 (permit/register-function permit/P  :xml-from-krysp poik-application-xml)
@@ -337,10 +335,7 @@
 (defn- ->standard-verdicts [xml-without-ns]
   (map (fn [paatos-xml-without-ns]
          (let [poytakirjat (map ->paatospoytakirja (select paatos-xml-without-ns [:poytakirja]))
-               ;;
-               ;; TODO: Is "paatos" also one of the requirements?
-               ;;
-               poytakirja-with-paatos-data (some #(when (and #_(:paatos %) (:paatoskoodi %) (:paatoksentekija %) (:paatospvm %)) %) poytakirjat)]
+               poytakirja-with-paatos-data (some #(when (and (:paatoskoodi %) (:paatoksentekija %) (:paatospvm %)) %) poytakirjat)]
            (when (and poytakirja-with-paatos-data (> (now) (:paatospvm poytakirja-with-paatos-data)))
              {:lupamaaraykset (->lupamaaraukset paatos-xml-without-ns)
               :paivamaarat    (get-pvm-dates paatos-xml-without-ns
@@ -349,11 +344,18 @@
     (select xml-without-ns [:paatostieto :Paatos])))
 
 (defn- ->simple-verdicts [xml-without-ns]
-  (let [app-state (ss/lower-case (get-text xml-without-ns [:Kasittelytieto :hakemuksenTila]))]
+  ;; using the newest app state in the message
+  (let [app-state (->> (select xml-without-ns [:Kasittelytieto])
+                    (map (fn [kasittelytieto] (-> (cr/all-of kasittelytieto) (cr/convert-keys-to-timestamps [:muutosHetki]))))
+                    (filter :hakemuksenTila) ;; this because hakemuksenTila is optional in Krysp, and can be nil
+                    (sort-by :muutosHetki)
+                    last
+                    :hakemuksenTila
+                    ss/lower-case)]
     ;;
     ;; TODO: Ovatko nama tilat validit?
     ;;
-    (when-not (#{"luonnos" "hakemus" "valmistelussa" "vastaanotettu" "tarkastettu, t\u00e4ydennyspyynt\u00f6"} app-state)
+    (when-not (#{nil "luonnos" "hakemus" "valmistelussa" "vastaanotettu" "tarkastettu, t\u00e4ydennyspyynt\u00f6"} app-state)
       (map (fn [paatos-xml-without-ns]
              (let [paatosdokumentinPvm-timestamp (cr/to-timestamp (get-text paatos-xml-without-ns :paatosdokumentinPvm))]
                (when (and paatosdokumentinPvm-timestamp (> (now) paatosdokumentinPvm-timestamp))

@@ -265,7 +265,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       .click(function () {
         ajax.command(cmd, cmdArgs)
         .success(function () {
-            if (noun == "approved") {
+            if (noun === "approved") {
                 approveButton$.hide();
                 rejectButton$.show();
             } else {
@@ -295,8 +295,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var meta = self.getMeta(path);
     var approval = meta ? meta._approved : null;
     var requiresApproval = !approval || modelModifiedSince(model, approval.timestamp);
-    var allowApprove = requiresApproval || (approval && approval.value == "rejected");
-    var allowReject = requiresApproval || (approval && approval.value == "approved");
+    var allowApprove = requiresApproval || (approval && approval.value === "rejected");
+    var allowReject = requiresApproval || (approval && approval.value === "approved");
 
     if (self.authorizationModel.ok("approve-doc")) {
       approveButton$ = makeApprovalButton("approve", "approved", "btn-primary");
@@ -979,7 +979,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       var appendButton = makeButton(myPath.join("_") + "_append", loc([self.schemaI18name, myPath.join("."), "_append_label"]));
 
       var appender = function () {
-        var parent$ = $(this).closest(".accordion-fields")
+        var parent$ = $(this).closest(".accordion-fields");
         var count = parent$.children("*[data-repeating-id='" + repeatingId + "']").length;
         while (parent$.children("*[data-repeating-id-" + repeatingId + "='" + count + "']").length) {
           count++;
@@ -1028,7 +1028,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         });
 
         parent$.append(newItem);
-      }
+      };
 
       var buttonGroup = document.createElement("div");
       buttonGroup.className = "button-group";
@@ -1036,7 +1036,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
       if (subSchema.type === "table") {
         $(appendButton).click(tableAppender);
-        var locKey = [self.schemaI18name, myPath.join("."), "copyLabel"]
+        var locKey = [self.schemaI18name, myPath.join("."), "copyLabel"];
         if (subSchema.i18nkey) {
           locKey = [subSchema.i18nkey, "copyLabel"];
         }
@@ -1167,7 +1167,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         $("#" + pathStrToID(pathStr)).addClass(level);
       });
     }
-  }
+  };
 
   function validate() {
     if (!options || options.validate) {
