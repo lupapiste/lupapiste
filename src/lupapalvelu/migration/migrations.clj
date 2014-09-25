@@ -586,6 +586,7 @@
                                doc))
                            doc)) (:documents application))]
        (mongo/update-by-id collection id {$set {:documents documents}})))))
+
 (defmigration set-converted-timestamp
   (reduce + 0
     (for [collection [:applications :submitted-applications]]
