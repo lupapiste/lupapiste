@@ -228,6 +228,7 @@
           schema (or schema (get-document-schema document))
           document-loc-key (or (-> schema :info :i18name) (-> schema :info :name))
           info {:document {:id (:id document)
+                           :name (-> schema :info :name)
                            :locKey document-loc-key
                            :type (-> schema :info :type)}
                 :schema-body (:body schema)}]
