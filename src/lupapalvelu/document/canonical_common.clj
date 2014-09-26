@@ -408,7 +408,7 @@
                      {:vastattavaTyo
                       (if (= k :muuMika)
                         v
-                        (let [loc-s (loc (str "tyonjohtaja.vastattavatTyotehtavat." (name k)))]
+                        (let [loc-s (loc (str "osapuoli.tyonjohtaja.vastattavatTyotehtavat." (name k)))]
                           (assert (not (re-matches #"^\?\?\?.*" loc-s)))
                           loc-s))}}))
              tyotehtavat))}))))
