@@ -277,3 +277,18 @@
         doc-after       (domain/get-document-by-name merged-app "purkaminen")]
         (get-in doc-after [:data :mitat :kokonaisala :source]) => "krysp"
         (get-in doc-after [:data :kaytto :kayttotarkoitus :source]) => "krysp"))
+
+
+(facts "Facts about update operation description"
+  (let [application-id (create-app-id pena :operation "asuinrakennus" :municipality sonja-muni)
+        application (query-application pena application-id)
+        op (first (:operations application))
+        test-desc "Testdesc"]
+    (fact "operation desc is empty" (-> op :description empty?) => truthy)
+    (command pena :update-op-description :id application-id :op-id (:id op) :desc test-desc :collection "operations")
+    (let [updated-app (query-application pena application-id)
+          updated-op (some #(when (= (:id op) (:id %)) %) (:operations updated-app))
+          updated-docs (:documents updated-app)]
+      (fact "description is set" (-> updated-op :description) => test-desc)
+      (fact "description is set to matching documents" ()))))
+
