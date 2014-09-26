@@ -289,6 +289,8 @@
     (let [updated-app (query-application pena application-id)
           updated-op (some #(when (= (:id op) (:id %)) %) (:operations updated-app))
           updated-docs (:documents updated-app)]
-      (fact "description is set" (-> updated-op :description) => test-desc)
-      (fact "description is set to matching documents" ()))))
+      (fact "description is set" (:description updated-op) => test-desc)
+      (fact "description is set to matching document" (get-in 
+                                                        (some #(when (= (:id op) (get-in % [:schema-info :op :id])) %) updated-docs) 
+                                                        [:schema-info :op :description]) => test-desc))))
 
