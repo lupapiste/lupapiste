@@ -729,7 +729,7 @@
                                  $set {:modified created}})))
 
 (defcommand update-op-description
-  {:parameters [id op-id desc collection]
+  {:parameters [id op-id desc]
    :roles      [:applicant :authority]
    :states     action/all-states}
   [command]
