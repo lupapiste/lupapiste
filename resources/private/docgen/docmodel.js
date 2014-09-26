@@ -1279,7 +1279,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return false;
   }
 
-  function buildDescriptionElement(opDescription) {
+  function buildDescriptionElement(operationId) {
+    var opDescription = _.findWhere(self.application.operations, {id: operationId})['description'];
+
     var wrapper = document.createElement("span");
     var descriptionSpan = document.createElement("span");
     var description = document.createTextNode("");
@@ -1304,7 +1306,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var saveInput = function() {
       descriptionInput.onblur = undefined;
       var value = descriptionInput.value;
-      ajax.command("update-doc-description", {id: self.appId, doc: self.docId, collection: self.getCollection(), desc: value })
+      ajax.command("update-op-description", {id: self.appId, 'op-id': operationId, desc: value })
         .success(function() {
           // TODO show indicator
         })
@@ -1364,7 +1366,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     if (op) {
       title.appendChild(document.createTextNode(loc([op.name, "_group_label"])));
-      title.appendChild(buildDescriptionElement(doc.meta && doc.meta.description ? doc.meta.description : undefined));
+      title.appendChild(buildDescriptionElement(op.id));
     } else {
       title.appendChild(document.createTextNode(loc([self.schemaI18name, "_group_label"])));
     }
