@@ -249,6 +249,13 @@
   });
 
   function openTab(id) {
+    // old conversation tab opens both info tab and side panel
+    if (id == 'conversation') {
+      id = 'info';
+      if (!$("#conversation-panel").is(":visible")) {
+        $("#open-conversation-side-panel").click();
+      }
+    }
     if(tabFlow) {
       $('html, body').animate({ scrollTop: $("#application-"+id+"-tab").offset().top}, 100);
     } else {

@@ -1,5 +1,5 @@
 var comments = (function() {
-  // "use strict";
+  "use strict";
 
   function CommentModel() {
     var self = this;
