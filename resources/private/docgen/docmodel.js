@@ -531,6 +531,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         var locKey = self.schemaI18name + "." + myPath.replace(/\.\d+\./g, ".") + "." + e.name;
         if (e.i18nkey) {
           locKey = e.i18nkey;
+        } else if (subSchema.i18nkey) {
+          locKey = subSchema.i18nkey + "." + e.name;
+
         }
         return [e.name, loc(locKey)];
         })
