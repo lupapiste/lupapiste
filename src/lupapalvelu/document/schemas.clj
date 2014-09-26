@@ -204,15 +204,17 @@
                         designer-basic
                         {:name "patevyys" :type :group :body patevyys}))
 
-(def kuntaroolikoodi [{:name "kuntaRoolikoodi" :type :select
-                       :body [{:name "GEO-suunnittelija"}
-                              {:name "LVI-suunnittelija"}
-                              {:name "IV-suunnittelija"}
-                              {:name "KVV-suunnittelija"}
-                              {:name "RAK-rakennesuunnittelija"}
-                              {:name "ARK-rakennussuunnittelija"}
-                              {:name "Vaikeiden t\u00F6iden suunnittelija"}
-                              {:name "ei tiedossa"}]}])
+(def kuntaroolikoodi [{:name "kuntaRoolikoodi"
+                       :i18nkey "osapuoli.suunnittelija.kuntaRoolikoodi._group_label"
+                       :type :select
+                       :body [{:name "GEO-suunnittelija" :i18nkey "osapuoli.suunnittelija.kuntaRoolikoodi.GEO-suunnittelija"}
+                              {:name "LVI-suunnittelija" :i18nkey "osapuoli.suunnittelija.kuntaRoolikoodi.LVI-suunnittelija"}
+                              {:name "IV-suunnittelija" :i18nkey "osapuoli.suunnittelija.kuntaRoolikoodi.IV-suunnittelija"}
+                              {:name "KVV-suunnittelija" :i18nkey "osapuoli.suunnittelija.kuntaRoolikoodi.KVV-suunnittelija"}
+                              {:name "RAK-rakennesuunnittelija" :i18nkey "osapuoli.suunnittelija.kuntaRoolikoodi.RAK-rakennesuunnittelija"}
+                              {:name "ARK-rakennussuunnittelija" :i18nkey "osapuoli.suunnittelija.kuntaRoolikoodi.ARK-rakennussuunnittelija"}
+                              {:name "Vaikeiden t\u00F6iden suunnittelija" :i18nkey "osapuoli.suunnittelija.kuntaRoolikoodi.Vaikeiden töiden suunnittelija"}
+                              {:name "ei tiedossa" :i18nkey "osapuoli.kuntaRoolikoodi.ei tiedossa"}]}])
 
 (def suunnittelija (body
                      kuntaroolikoodi
@@ -221,26 +223,30 @@
                      {:name "patevyys" :type :group :body patevyys}))
 
 (def vastattavat-tyotehtavat-tyonjohtaja [{:name "vastattavatTyotehtavat"
+                                           :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat._group_label"
                                            :type :group
                                            :layout :vertical
-                                           :body [{:name "rakennuksenRakentaminen" :type :checkbox}
-                                                  {:name "rakennuksenMuutosJaKorjaustyo" :type :checkbox}
-                                                  {:name "rakennuksenPurkaminen" :type :checkbox}
-                                                  {:name "maanrakennustyo" :type :checkbox}
-                                                  {:name "rakennelmaTaiLaitos" :type :checkbox}
-                                                  {:name "elementtienAsennus" :type :checkbox}
-                                                  {:name "terasRakenteet_tiilirakenteet" :type :checkbox}
-                                                  {:name "kiinteistonVesiJaViemarilaitteistonRakentaminen" :type :checkbox}
-                                                  {:name "kiinteistonilmanvaihtolaitteistonRakentaminen" :type :checkbox}
-                                                  {:name "muuMika" :type :string}]}])
+                                           :body [{:name "rakennuksenRakentaminen" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.rakennuksenRakentaminen" :type :checkbox}
+                                                  {:name "rakennuksenMuutosJaKorjaustyo" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.rakennuksenMuutosJaKorjaustyo"  :type :checkbox}
+                                                  {:name "rakennuksenPurkaminen" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.rakennuksenPurkaminen"  :type :checkbox}
+                                                  {:name "maanrakennustyo" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.maanrakennustyo"  :type :checkbox}
+                                                  {:name "rakennelmaTaiLaitos" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.rakennelmaTaiLaitos"  :type :checkbox}
+                                                  {:name "elementtienAsennus" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.elementtienAsennus"  :type :checkbox}
+                                                  {:name "terasRakenteet_tiilirakenteet" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.terasRakenteet_tiilirakenteet"  :type :checkbox}
+                                                  {:name "kiinteistonVesiJaViemarilaitteistonRakentaminen" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.kiinteistonVesiJaViemarilaitteistonRakentaminen"  :type :checkbox}
+                                                  {:name "kiinteistonilmanvaihtolaitteistonRakentaminen" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.kiinteistonilmanvaihtolaitteistonRakentaminen"  :type :checkbox}
+                                                  {:name "muuMika" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.muuMika"  :type :string}]}])
 
-(def kuntaroolikoodi-tyonjohtaja [{:name "kuntaRoolikoodi" :type :select :required true
-                                   :body [{:name "KVV-ty\u00F6njohtaja"}
-                                          {:name "IV-ty\u00F6njohtaja"}
-                                          {:name "erityisalojen ty\u00F6njohtaja"}
-                                          {:name "vastaava ty\u00F6njohtaja"}
-                                          {:name "ty\u00F6njohtaja"}
-                                          {:name "ei tiedossa"}]}])
+(def kuntaroolikoodi-tyonjohtaja [{:name "kuntaRoolikoodi"
+                                   :i18nkey "osapuoli.tyonjohtaja.kuntaRoolikoodi._group_label"
+                                   :type
+                                   :select :required true
+                                   :body [{:name "KVV-ty\u00F6njohtaja" :i18nkey "osapuoli.tyonjohtaja.kuntaRoolikoodi.KVV-työnjohtaja"}
+                                          {:name "IV-ty\u00F6njohtaja" :i18nkey "osapuoli.tyonjohtaja.kuntaRoolikoodi.IV-työnjohtaja"}
+                                          {:name "erityisalojen ty\u00F6njohtaja" :i18nkey "osapuoli.tyonjohtaja.kuntaRoolikoodi.erityisalojen työnjohtaja"}
+                                          {:name "vastaava ty\u00F6njohtaja" :i18nkey "osapuoli.tyonjohtaja.kuntaRoolikoodi.vastaava työnjohtaja"}
+                                          {:name "ty\u00F6njohtaja" :i18nkey "osapuoli.tyonjohtaja.kuntaRoolikoodi.työnjohtaja"}
+                                          {:name "ei tiedossa" :i18nkey "osapuoli.kuntaRoolikoodi.ei tiedossa"}]}])
 
 (def patevyys-tyonjohtaja [koulutusvalinta
                            {:name "koulutus" :type :string :required false  :i18nkey "muukoulutus"}
@@ -252,11 +258,11 @@
                                    {:name "ei tiedossa"}]}
                            {:name "valmistumisvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size "s" :required false}
                            {:name "kokemusvuodet" :type :string :subtype :number :min-len 1 :max-len 2 :size "s" :required false}
-                           {:name "valvottavienKohteidenMaara" :type :string :subtype :number :size "s" :required false}
+                           {:name "valvottavienKohteidenMaara" :i18nkey "tyonjohtaja.patevyys.valvottavienKohteidenMaara" :type :string :subtype :number :size "s" :required false}
                            ;; TODO: Miten tyonjohtajaHakemusKytkimen saa piilotettua hakijalta?
-                           {:name "tyonjohtajaHakemusKytkin" :type :select :required false :blacklist [:applicant]
-                            :body [{:name "nimeaminen"}
-                                   {:name "hakemus"}]}])
+                           {:name "tyonjohtajaHakemusKytkin" :i18nkey "tyonjohtaja.patevyys.tyonjohtajaHakemusKytkin._group_label" :type :select :required false :blacklist [:applicant]
+                            :body [{:name "nimeaminen" :i18nkey "tyonjohtaja.patevyys.tyonjohtajaHakemusKytkin.nimeaminen"}
+                                   {:name "hakemus" :i18nkey "tyonjohtaja.patevyys.tyonjohtajaHakemusKytkin.hakemus"}]}])
 
 ;; FIXME remove + migration
 (def vastuuaika-tyonjohtaja [{:name "vastuuaika"
@@ -265,12 +271,12 @@
                               :body [{:name "vastuuaika-alkaa-pvm" :type :date}
                                      {:name "vastuuaika-paattyy-pvm" :type :date}]}])
 
-(def sijaisuus-tyonjohtaja [{:name "sijaistus"
+(def sijaisuus-tyonjohtaja [{:name "sijaistus" :i18nkey "tyonjohtaja.sijaistus._group_label"
                              :type :group
-                             :body [{:name "sijaistettavaHloEtunimi" :type :string}
-                                    {:name "sijaistettavaHloSukunimi" :type :string}
-                                    {:name "alkamisPvm" :type :date}
-                                    {:name "paattymisPvm" :type :date}]}])
+                             :body [{:name "sijaistettavaHloEtunimi" :i18nkey "tyonjohtaja.sijaistus.sijaistettavaHloEtunimi" :type :string}
+                                    {:name "sijaistettavaHloSukunimi" :i18nkey "tyonjohtaja.sijaistus.sijaistettavaHloSukunimi" :type :string}
+                                    {:name "alkamisPvm" :i18nkey "tyonjohtaja.sijaistus.alkamisPvm" :type :date}
+                                    {:name "paattymisPvm" :i18nkey "tyonjohtaja.sijaistus.paattymisPvm" :type :date}]}])
 
 (def tyonjohtaja (body
                    kuntaroolikoodi-tyonjohtaja
@@ -700,6 +706,7 @@
 
 
     {:info {:name "hakija"
+            :i18name "osapuoli"
             :order 3
             :removable true
             :repeating true
@@ -711,6 +718,7 @@
      :body party}
 
     {:info {:name "hakija-ya"
+            :i18name "osapuoli"
             :order 3
             :removable false
             :repeating false
@@ -721,6 +729,7 @@
      :body (schema-body-without-element-by-name party turvakielto)}
 
     {:info {:name "paasuunnittelija"
+            :i18name "osapuoli"
             :order 4
             :removable false
             :approvable true
@@ -728,6 +737,7 @@
      :body paasuunnittelija}
 
     {:info {:name "suunnittelija"
+            :i18name "osapuoli"
             :repeating true
             :order 5
             :removable true
@@ -736,6 +746,7 @@
      :body suunnittelija}
 
     {:info {:name "tyonjohtaja"
+            :i18name "osapuoli"
             :order 5
             :removable true
             :repeating true
@@ -744,6 +755,7 @@
      :body tyonjohtaja}
 
     {:info {:name "maksaja"
+            :i18name "osapuoli"
             :repeating true
             :order 6
             :removable true
