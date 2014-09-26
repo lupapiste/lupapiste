@@ -735,9 +735,7 @@
   [command]
   (let [application (:application command)
         app-command (application->command application)]
-    (update-application app-command {"operations" {$elemMatch {:id op-id}}} {$set {"operations.$.description" desc}})
-    (update-application app-command {"documents" {$elemMatch {"schema-info.op.id" op-id}}} {$set {"documents.$.schema-info.op.description" desc}})
-    #_(update-application app-command {"attachments" {$elemMatch {:op {:id op-id}}}} {$set {(str "attachments.$.op.description") desc}})))
+    (update-application app-command {"operations" {$elemMatch {:id op-id}}} {$set {"operations.$.description" desc}})))
 
 (defcommand change-permit-sub-type
   {:parameters [id permitSubtype]

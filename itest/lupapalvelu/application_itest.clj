@@ -287,10 +287,6 @@
     (fact "operation desc is empty" (-> op :description empty?) => truthy)
     (command pena :update-op-description :id application-id :op-id (:id op) :desc test-desc :collection "operations")
     (let [updated-app (query-application pena application-id)
-          updated-op (some #(when (= (:id op) (:id %)) %) (:operations updated-app))
-          updated-docs (:documents updated-app)]
-      (fact "description is set" (:description updated-op) => test-desc)
-      (fact "description is set to matching document" (get-in 
-                                                        (some #(when (= (:id op) (get-in % [:schema-info :op :id])) %) updated-docs) 
-                                                        [:schema-info :op :description]) => test-desc))))
+          updated-op (some #(when (= (:id op) (:id %)) %) (:operations updated-app))]
+      (fact "description is set" (:description updated-op) => test-desc))))
 
