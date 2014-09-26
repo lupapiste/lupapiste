@@ -1305,7 +1305,11 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     var saveInput = function() {
       descriptionInput.onblur = undefined;
-      var value = descriptionInput.value;
+      var value = _.trim(descriptionInput.value);
+      if (value === "") {
+        value = null;
+      }
+
       ajax.command("update-op-description", {id: self.appId, 'op-id': operationId, desc: value })
         .success(function() {
           // TODO show indicator
