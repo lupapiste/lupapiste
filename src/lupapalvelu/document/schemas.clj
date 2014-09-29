@@ -140,6 +140,17 @@
                        [henkilotiedot-minimal]
                        yhteystiedot)}))
 
+(def verkkolaskutustiedot [{:name "ovtTunnus" :type :string :min-len 12 :max-len 17}
+                           {:name "verkkolaskuTunnus" :type :string}
+                           {:name "valittajaTunnus" :type :string}])
+
+(def yritys-with-verkkolaskutustieto (body
+                                       yritys
+                                       {:name "verkkolaskutustiedot"
+                                        :type :group
+                                        :body (body
+                                                verkkolaskutustiedot)}))
+
 (def party (body
              {:name select-one-of-key :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}]}
              {:name "henkilo" :type :group :body henkilo}
@@ -288,7 +299,9 @@
                    sijaisuus-tyonjohtaja))
 
 (def maksaja (body
-               party
+               {:name select-one-of-key :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}]}
+               {:name "henkilo" :type :group :body henkilo}
+               {:name "yritys" :type :group :body yritys-with-verkkolaskutustieto}
                {:name "laskuviite" :type :string :max-len 30 :layout :full-width}))
 
 (def aloitusoikeus [{:name "kuvaus" :type :text :max-len 4000 :required true :layout :full-width}])

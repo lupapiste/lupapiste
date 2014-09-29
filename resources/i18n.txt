@@ -1,1 +1,5 @@
 muukoulutus: Muu tutkinto tai koulutus
+osapuoli.yritys.verkkolaskutustiedot._group_label: Verkkolaskutustiedot
+osapuoli.yritys.verkkolaskutustiedot.ovtTunnus: OVT-tunnus
+osapuoli.yritys.verkkolaskutustiedot.verkkolaskuTunnus:  Verkkolaskutunnus
+osapuoli.yritys.verkkolaskutustiedot.valittajaTunnus: Välittäjätunnus
