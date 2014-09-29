@@ -1183,11 +1183,12 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }
   }
 
-  function createIndicator(eventTarget) {
+  function createIndicator(eventTarget, className) {
+    className = className || "form-indicator";
     var parent$ = $(eventTarget.parentNode);
-    parent$.find(".form-indicator").remove();
+    parent$.find("." + className).remove();
     var indicator = document.createElement("span");
-    indicator.className = "form-indicator";
+    indicator.className = className;
     parent$.append(indicator);
     return indicator;
   }
@@ -1312,9 +1313,11 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
       ajax.command("update-op-description", {id: self.appId, 'op-id': operationId, desc: value })
         .success(function() {
-          // TODO show indicator
+          var indicator = createIndicator(descriptionInput, "accordion-indicator")
+          showIndicator(indicator, "accordion-input-saved", "form.saved");
         })
         .call();
+
       description.nodeValue = descriptionInput.value;
       $(descriptionInput).addClass("hidden");
       $(iconSpan).removeClass("hidden");
