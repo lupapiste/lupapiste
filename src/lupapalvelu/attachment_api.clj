@@ -435,8 +435,8 @@
   (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
     (fail! :error.pre-verdict-attachment))
   (let [newOp {:id   (:id op) 
-               :name (:name op)
-               :created (now)}]
+               :name (:name op)}]
     (update-application command
                         {:attachments {$elemMatch {:id attachmentId}}}
-                        {$set {:attachments.$.op newOp}})))
+                        {$set {:attachments.$.op newOp,
+                               :attachments.$.modified (now)}})))
