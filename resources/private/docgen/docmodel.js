@@ -1287,6 +1287,11 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var descriptionInput = document.createElement("input");
     var iconSpan = document.createElement("span");
 
+    // test ids
+    descriptionSpan.setAttribute("data-test-id", "op-description");
+    iconSpan.setAttribute("data-test-id", "edit-op-description");
+    descriptionInput.setAttribute("data-test-id", "op-description-editor");
+
     wrapper.className = "op-description-wrapper";
     descriptionSpan.className = "op-description"
     if (operation.description) {

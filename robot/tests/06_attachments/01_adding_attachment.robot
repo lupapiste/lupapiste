@@ -157,19 +157,6 @@ Approve-button should be disabled
 
 *** Keywords ***
 
-Open attachment details
-  [Arguments]  ${type}
-  Open tab  attachments
-  Wait Until  Page Should Contain Element  xpath=//a[@data-test-type="${type}"]
-  # Make sure the element is visible on browser view before clicking. Take header heigth into account.
-  #Execute Javascript  window.scrollTo(0, $("[data-test-type='muut.muu']").position().top - 130);
-  Focus  xpath=//a[@data-test-type="${type}"]
-  Click element  xpath=//a[@data-test-type="${type}"]
-  Wait Until  Element Should Be Visible  test-attachment-file-name
-  Wait Until Page Contains  ${TXT_TESTFILE_NAME}
-  Element Text Should Be  test-attachment-file-name  ${TXT_TESTFILE_NAME}
-  Element Text Should Be  test-attachment-version  1.0
-
 Attachment state should be
   [Arguments]  ${type}  ${state}
   ## Fragile: assumes there is only one element that has data-test-state
