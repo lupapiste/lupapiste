@@ -1280,9 +1280,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return false;
   }
 
-  function buildDescriptionElement(operationId) {
-    var opDescription = _.findWhere(self.application.operations, {id: operationId})['description'];
-
+  function buildDescriptionElement(operation) {
     var wrapper = document.createElement("span");
     var descriptionSpan = document.createElement("span");
     var description = document.createTextNode("");
@@ -1291,9 +1289,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     wrapper.className = "op-description-wrapper";
     descriptionSpan.className = "op-description"
-    if (opDescription) {
-      description.nodeValue = opDescription;
-      descriptionInput.value = opDescription;
+    if (operation.description) {
+      description.nodeValue = operation.description;
+      descriptionInput.value = operation.description;
     }
 
     descriptionInput.type = "text";
@@ -1305,13 +1303,13 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     };
 
     var saveInput = function() {
-      descriptionInput.onblur = undefined;
+      $(descriptionInput).off("blur");
       var value = _.trim(descriptionInput.value);
       if (value === "") {
         value = null;
       }
 
-      ajax.command("update-op-description", {id: self.appId, 'op-id': operationId, desc: value })
+      ajax.command("update-op-description", {id: self.appId, 'op-id': operation.id, desc: value })
         .success(function() {
           var indicator = createIndicator(descriptionInput, "accordion-indicator")
           showIndicator(indicator, "accordion-input-saved", "form.saved");
@@ -1332,15 +1330,20 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     descriptionInput.onkeyup = function(event) {
       // trigger save on enter and esc keypress
-      if (event.keyCode == 13 || event.keyCode == 27) {
+      var keyCode = event ? event.keyCode : window.event.keyCode; // ie8
+      if (keyCode == 13 || keyCode == 27) {
         $(descriptionInput).off("blur");
+        descriptionInput.blur();
         saveInput();
       }
     }
 
     iconSpan.className = "icon edit";
     iconSpan.onclick = function(event) {
-      event.stopPropagation();
+      // on ie8 there is no event
+      if (event) {
+        event.stopPropagation();
+      }
       $(iconSpan).addClass("hidden");
       $(descriptionInput).removeClass("hidden");
       $(descriptionSpan).addClass("hidden");
@@ -1373,7 +1376,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     if (op) {
       title.appendChild(document.createTextNode(loc([op.name, "_group_label"])));
-      title.appendChild(buildDescriptionElement(op.id));
+      title.appendChild(buildDescriptionElement(op));
     } else {
       title.appendChild(document.createTextNode(loc([self.schemaI18name, "_group_label"])));
     }
