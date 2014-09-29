@@ -123,7 +123,9 @@
                 return {
                   html: html,
                   applyBindingsFn: function(popupId) {
-                    $("#" + popupId + "_contentDiv").applyBindings(self);
+                    var popupIdName = popupId + "_contentDiv";
+                    ko.cleanNode(document.getElementById(popupIdName));
+                    $("#" + popupIdName).applyBindings(self);
                   }
                 };
               }
