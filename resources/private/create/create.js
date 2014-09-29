@@ -119,9 +119,8 @@
           .addClickHandler(self.click)
           .setPopupContentProvider(
               function() {
-                var html = $("div.map-select-info")[0].innerHTML;
                 return {
-                  html: html,
+                  html: $("div.map-select-info")[0].innerHTML,
                   applyBindingsFn: function(popupId) {
                     var popupIdName = popupId + "_contentDiv";
                     ko.cleanNode(document.getElementById(popupIdName));
@@ -326,14 +325,14 @@
 
     self.create = function(infoRequest) {
       if (infoRequest) {
-        if (model.inforequestsDisabled()) {
+        if (self.inforequestsDisabled()) {
           LUPAPISTE.ModalDialog.showDynamicOk(
               loc("new-applications-or-inforequests-disabled.dialog.title"),
               loc("new-applications-or-inforequests-disabled.inforequests-disabled"));
           return;
         }
         LUPAPISTE.ModalDialog.showDynamicOk(loc("create.prompt.title"), loc("create.prompt.text"));
-      } else if (model.newApplicationsDisabled()) {
+      } else if (self.newApplicationsDisabled()) {
         LUPAPISTE.ModalDialog.showDynamicOk(
             loc("new-applications-or-inforequests-disabled.dialog.title"),
             loc("new-applications-or-inforequests-disabled.new-applications-disabled"));
