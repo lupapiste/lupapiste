@@ -271,6 +271,9 @@ var gis = (function() {
       onSelect: function(feature) {
         self.selectedFeature = feature;
 
+        //
+        // TODO: Could only one OpenLayers Popup instance be used here?
+        //
         if (self.popupContentProvider) {
           popupContentProviderResp = self.popupContentProvider();
           feature.popup = createPopup(feature, popupContentProviderResp.html);
