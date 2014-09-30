@@ -1,10 +1,32 @@
 (function() {
   "use strict";
 
+  var rememberMeCookieName = "my-email";
+
+  var rememberMe = ko.observable(false);
+
+  function recallMe() {
+    var oldUsername = _.trim($.cookie(rememberMeCookieName));
+    if (oldUsername) {
+      rememberMe(true);
+      $("#login-username").val(oldUsername.toLowerCase());
+      $("#login-password").focus();
+    } else {
+      rememberMe(false);
+      $("#login-username").focus();
+    }
+  }
+
   function login() {
-    var username = $("#login-username").val();
+    var username = _.trim($("#login-username").val());
     var password = $("#login-password").val();
     $("#login-message").text("").css('display', 'none');
+
+    if (rememberMe()) {
+      $.cookie(rememberMeCookieName, username.toLowerCase(), { expires: 365, path: "/", secure: LUPAPISTE.config.cookie.secure});
+    } else {
+      $.removeCookie(rememberMeCookieName, {path: "/"});
+    }
 
     ajax.postJson("/api/login", {"username": username, "password": password})
       .raw(false)
@@ -164,7 +186,6 @@
 
   }
 
-  hub.onPageChange("login", function() { $("#login-username:first").focus(); });
 
   //
   // Invite:
@@ -210,8 +231,10 @@
   // Initialize:
   //
 
+  hub.onPageChange("login", recallMe);
+
   $(function() {
-    $("section#login").applyBindings({});
+    $("section#login").applyBindings({rememberMe: rememberMe});
     $("section#reset").applyBindings(new Reset());
     $("section#setpw").applyBindings(new SetPW());
     $("section#new-company-user").applyBindings(new NewCompanyUser());
