@@ -26,7 +26,7 @@
               <button id="test-attachment-approve" data-bind="ltext: 'document.approve', click: approveAttachment, enable: isApprovable() && isNotOk(), visible: isApprovable()" class="btn btn-primary">Hyv&auml;ksy</button>
               <button id="test-attachment-reject" data-bind="ltext: 'attachment.reject', click: rejectAttachment, enable: isRejectable() && doesNotRequireUserAction(), visible: isRejectable()" class="btn btn-decline">Tarkennettavaa</button>
             </div>
-            <button data-bind="ltext: 'attachment.changeType', click: showChangeTypeDialog"></button>
+            <button data-test-id="change-attachment-type" data-bind="ltext: 'attachment.changeType', click: showChangeTypeDialog"></button>
             <button data-bind="ltext: 'attachment.delete', click: deleteAttachment, visible: $root.authorization.ok('delete-attachment'),  enable: $root.authorization.ok('delete-attachment')" data-test-id="delete-attachment">Poista liite</button>
           </div>
           <div class="attachment-infomation">
