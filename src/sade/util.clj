@@ -3,7 +3,8 @@
             [sade.strings :refer [numeric? decimal-number?] :as ss]
             [clj-time.format :as timeformat]
             [clj-time.coerce :as tc]
-            [schema.core :as sc]))
+            [schema.core :as sc])
+  (:import [org.joda.time LocalDateTime]))
 
 (defn postwalk-map
   "traverses m and applies f to all maps within"
@@ -167,11 +168,18 @@
          ()
          required-keys)))
 
+(defn- local-date-time [^Long timestamp]
+  (LocalDateTime. timestamp))
 
 (defn to-local-date [^Long timestamp]
   (when timestamp
-    (let [dt (tc/from-long timestamp)]
-      (timeformat/unparse (timeformat/formatter "dd.MM.YYYY") dt))))
+    (let [dt (local-date-time timestamp)]
+      (timeformat/unparse-local (timeformat/formatter "dd.MM.YYYY") dt))))
+
+(defn to-local-datetime [^Long timestamp]
+  (when timestamp
+    (let [dt (local-date-time timestamp)]
+      (timeformat/unparse-local (timeformat/formatter "dd.MM.yyyy HH:mm") dt))))
 
 (defn to-xml-date [^Long timestamp]
   (when timestamp
@@ -191,7 +199,7 @@
 (defn to-xml-datetime-from-string [^String date-as-string]
   (when date-as-string
     (let [d (timeformat/parse-local (timeformat/formatter "dd.MM.YYYY" ) date-as-string)]
-      (timeformat/unparse-local-date (timeformat/formatter "YYYY-MM-dd'T'HH:mm:ss") d))))
+      (timeformat/unparse-local-date (timeformat/formatter "YYYY-MM-dd'T'HH:mm:ssZ") d))))
 
 (defn to-millis-from-local-date-string [^String date-as-string]
   (when date-as-string
