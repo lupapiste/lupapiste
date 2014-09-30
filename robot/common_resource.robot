@@ -668,13 +668,13 @@ Fetch verdict
 # User management
 
 Fill in new password
-  [Arguments]  ${password}
+  [Arguments]  ${section}  ${password}
   Wait Until  Page Should Contain  Salasanan vaihtaminen
-  Input text  xpath=//section[@id='setpw']//input[@placeholder='Uusi salasana']  ${password}
-  Element Should Be Disabled  xpath=//section[@id='setpw']//button
-  Input text  xpath=//section[@id='setpw']//input[@placeholder='Salasana uudelleen']  ${password}
-  Wait Until  Element Should Be Enabled  xpath=//section[@id='setpw']//button
-  Click Element  xpath=//section[@id='setpw']//button
+  Input text  xpath=//section[@id='${section}']//input[@placeholder='Uusi salasana']  ${password}
+  Element Should Be Disabled  xpath=//section[@id='${section}']//button
+  Input text  xpath=//section[@id='${section}']//input[@placeholder='Salasana uudelleen']  ${password}
+  Wait Until  Element Should Be Enabled  xpath=//section[@id='${section}']//button
+  Click Element  xpath=//section[@id='${section}']//button
   Go to login page
 
 
