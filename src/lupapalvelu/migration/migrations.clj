@@ -569,7 +569,6 @@
           (mongo/update-by-id collection (:id application) {$set {:documents new-documents}}))))))
 
 (defmigration tutkinto-mapping
-  {:apply-when (pos? (mongo/count :applications {"documents.data.patevyys.koulutus.value" {$exists true}}))}
   (let [mapping (sade.excel-reader/read-map "tutkinto-mapping.xlsx")]
     (doseq [collection [:applications :submitted-applications]
            application (mongo/select collection {"documents.data.patevyys.koulutus.value" {$exists true}} {:documents 1})]

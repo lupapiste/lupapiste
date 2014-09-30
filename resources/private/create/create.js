@@ -138,7 +138,7 @@
         .propertyId(null)
         .municipalityCode(null)
         .message("")
-        .requestType(null)
+        .requestType(null);
     };
 
     self.resetXY = function() { if (self.map) { self.map.clear(); } return self.x(0).y(0); };
