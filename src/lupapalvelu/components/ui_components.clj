@@ -184,10 +184,10 @@
 
    :notice       {:js ["notice.js"]
                   :html ["notice.html"]}
-   
+
    :side-panel   {:js ["side-panel.js"]
                   :html ["side-panel.html"]}
-   
+
    ;; Single Page Apps and standalone components:
    ;; (compare to auth-methods in web.clj)
 

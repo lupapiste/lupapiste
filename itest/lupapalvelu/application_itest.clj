@@ -243,6 +243,7 @@
           (get-in updated-suunnittelija [:data :henkilotiedot :sukunimi :value]) => "Intonen"
           (get-in updated-suunnittelija [:data :yritys :yritysnimi :value]) => "Yritys Oy"
           (get-in updated-suunnittelija [:data :yritys :liikeJaYhteisoTunnus :value]) => "1234567-1"
+          (get-in updated-suunnittelija [:data :patevyys :koulutusvalinta :value]) => nil
           (get-in updated-suunnittelija [:data :patevyys :koulutus :value]) => "Tutkinto"
           (get-in updated-suunnittelija [:data :patevyys :valmistumisvuosi :value]) => "2000"
           (get-in updated-suunnittelija [:data :patevyys :fise :value]) => "f"

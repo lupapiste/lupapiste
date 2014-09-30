@@ -124,13 +124,13 @@ Logout
 Open side panel
   [Arguments]  ${name}
   ${sidePanelClosed} =  Run Keyword And Return Status  Element should not be visible  ${name}-panel
-  Run keyword If  ${sidePanelClosed}  Click by test id  open-${name}-side-panel
+  Run keyword If  ${sidePanelClosed}  Click by id  open-${name}-side-panel
   Side panel should be visible  ${name}
 
 Close side panel
   [Arguments]  ${name}
   ${sidePanelOpen} =  Run Keyword And Return Status  Element should be visible  ${name}-panel
-  Run keyword If  ${sidePanelOpen}  Click by test id  open-${name}-side-panel
+  Run keyword If  ${sidePanelOpen}  Click by id  open-${name}-side-panel
   Side panel should not be visible  ${name}
 
 #
@@ -272,6 +272,13 @@ Select From List by test id
   [Arguments]  ${id}  ${value}
   Wait until page contains element  xpath=//select[@data-test-id="${id}"]
   Select From List  xpath=//select[@data-test-id="${id}"]  ${value}
+
+Click by id
+  [Arguments]  ${id}
+  ${selector} =   Set Variable  $("[id='${id}']:visible")
+  # 'Click Element' is broken in Selenium 2.35/FF 23 on Windows, using jQuery instead
+  Wait For Condition  return ${selector}.length===1;  10
+  Execute Javascript  ${selector}.click();
 
 Click by test id
   [Arguments]  ${id}

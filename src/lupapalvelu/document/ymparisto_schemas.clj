@@ -85,15 +85,17 @@
            :order 51}
     :body ottamis-suunnitelma}
    {:info {:name "maa-ainesluvan-omistaja"
+           :i18name "osapuoli"
            :order 3
            :type :party}
     :body party}
    {:info {:name "ottamis-suunnitelman-laatija"
+           :i18name "osapuoli"
            :order 4
            :type :party}
     :body party}
    {:info {:name "ymp-maksaja"
-           :i18name "maksaja"
+           :i18name "osapuoli"
            :repeating false
            :order 6
            :removable false

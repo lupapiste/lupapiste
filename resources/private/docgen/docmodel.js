@@ -531,6 +531,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         var locKey = self.schemaI18name + "." + myPath.replace(/\.\d+\./g, ".") + "." + e.name;
         if (e.i18nkey) {
           locKey = e.i18nkey;
+        } else if (subSchema.i18nkey) {
+          locKey = subSchema.i18nkey + "." + e.name;
+
         }
         return [e.name, loc(locKey)];
         })
@@ -1383,7 +1386,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       title.appendChild(document.createTextNode(loc([op.name, "_group_label"])));
       title.appendChild(buildDescriptionElement(op));
     } else {
-      title.appendChild(document.createTextNode(loc([self.schemaI18name, "_group_label"])));
+      title.appendChild(document.createTextNode(loc([self.schema.info.name, "_group_label"])));
     }
     title.setAttribute("data-doc-id", self.docId);
     title.setAttribute("data-app-id", self.appId);
