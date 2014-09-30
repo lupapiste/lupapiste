@@ -120,11 +120,9 @@
           .setPopupContentProvider(
               function() {
                 return {
-                  html: $("div.map-select-info")[0].innerHTML,
+                  html: $("section#map-popup-content")[0].innerHTML,
                   applyBindingsFn: function(popupId) {
-                    var popupIdName = popupId + "_contentDiv";
-                    ko.cleanNode(document.getElementById(popupIdName));
-                    $("#" + popupIdName).applyBindings(self);
+                    $("#" + popupId + "_contentDiv").applyBindings(self);
                   }
                 };
               }

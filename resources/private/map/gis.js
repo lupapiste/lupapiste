@@ -258,8 +258,8 @@ var gis = (function() {
       popup.calculateRelativePosition = function() {return "tr";};
       popup.closeOnMove = false;
       popup.autoSize = true;
-      popup.minSize = new OpenLayers.Size(270, 505);
-      popup.maxSize = new OpenLayers.Size(270, 505);
+      popup.minSize = new OpenLayers.Size(270, 580);
+      popup.maxSize = new OpenLayers.Size(270, 580);
       return popup;
     }
 

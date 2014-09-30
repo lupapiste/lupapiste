@@ -164,7 +164,7 @@
 
    :create       {:depends [:common]
                   :js ["municipalities.js" "create.js"]
-                  :html ["create.html"]
+                  :html ["create.html" "map-popup.html"]
                   :css ["create.css"]}
 
    :iframe       {:depends [:common]
