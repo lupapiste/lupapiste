@@ -234,8 +234,8 @@
                  :css     ["login-frame.css"]}
 
    :welcome {:depends [:login :register :link-account :debug :user-menu :screenmessages]
-             :js ["welcome.js"]
-             :html ["index.html" "login.html"]}
+             :js ["welcome.js" "company-user.js"]
+             :html ["index.html" "login.html" "company-user.html"]}
 
    :oskari  {:css ["oskari.css"]}
 
