@@ -2,3 +2,10 @@ operations.tree.ya-lohkomistoimituksen-hakeminen-kunta: Yleisten alueiden lohkom
 operations.ya-lohkomistoimituksen-hakeminen-kunta: Yleisten alueiden lohkomistoimituksen hakeminen (kunta hakijana)
 operations.ya-lohkomistoimituksen-hakeminen-kunta.desc: Kunnan itse käynnistämä toimitus yleisen alueen lohkomiseksi. Toimitus ei sovellu kuntalaisten käyttöön.
 ya-lohkomistoimituksen-hakeminen-kunta._group_label: Yleisten alueiden lohkomistoimituksen hakeminen
+help.KM.attachmentsDesc: Tänne voit lisätä hakemukseen kuuluvia liitteitä. Viranomainen voi myös pyytää sinulta tarpeellisia liitteitä. Nämä pyynnöt ja korjauksia vaativat liitteet merkitään taulukossa punaisella lipulla. Viranomainen voi myös merkitä liitteen <b>alustavasti hyväksytyksi tai korjattavaksi. Tämä ei ole vielä virallinen hyväksyntä, sillä sitä varten hakemus pitää käsitellä kunnan päätöksentekoprosessin mukaisesti</b>.
+attachmentType.hakija.virkatodistus: Virkatodistus
+attachmentType.kiinteiston_hallinta._group_label: Kiinteistön hallinta
+attachmentType.kiinteiston_hallinta.jaljennos_perunkirjasta: Jäljennös perunkirjasta
+attachmentType.kiinteiston_hallinta.rasitesopimus: Rasitesopimus
+attachmentType.kiinteiston_hallinta.rasitesopimuksen_liitekartta: Rasitesopimuksen liitekartta
+attachmentType.kiinteiston_hallinta.ote_asunto-osakeyhtion_kokouksen_poytakirjasta: Ote asunto-osakeyhtiön hallituksen kokouksen pöytäkirjasta
