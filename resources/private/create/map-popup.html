@@ -15,8 +15,8 @@
            <label class="form-label"
              data-bind="ltext: 'newRequest.propertyId'"></label> <input
              data-bind="textInput: propertyId,
-                            enable: useManualEntry,
-                            readonly: !currentUser.isAuthority()"
+                        enable: useManualEntry,
+                        readonly: !currentUser.isAuthority()"
              data-test-id="create-property-id" type="text"
              class="form-input text bottom-marginM">
          </div>
@@ -31,11 +31,11 @@
            <label class="form-label"
              data-bind="ltext: 'newRequest.municipality'"></label> <select
              data-bind="visible: useManualEntry,
-                            options: municipalities.municipalities,
-                            optionsText: function(m) { return loc(['municipality', m.id]); },
-                            optionsValue: 'id',
-                            value: municipalityCode,
-                            optionsCaption: loc('choose')"
+                        options: municipalities.municipalities,
+                        optionsText: function(m) { return loc(['municipality', m.id]); },
+                        optionsValue: 'id',
+                        value: municipalityCode,
+                        optionsCaption: loc('choose')"
              data-test-id="create-municipality-select"
              class="form-select form-input combobox">
            </select> <input
