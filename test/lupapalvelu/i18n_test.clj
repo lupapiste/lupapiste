@@ -10,10 +10,10 @@
     (provided
       (env/dev-mode?) => true))
 
-(fact "in non-dev-mode empty string is returned"
-  (unknown-term "kikka") => ""
-  (provided
-    (env/dev-mode?) => false)))
+  (fact "in non-dev-mode empty string is returned"
+    (unknown-term "kikka") => ""
+    (provided
+      (env/dev-mode?) => false)))
 
 (facts "regression test for line parsing"
   (read-lines ["error.vrk:BR319:lammitustapa: this: should: work!"
