@@ -4,7 +4,7 @@
             [sade.util :as util]
             [sade.strings :as ss]
             [lupapalvelu.core :refer :all]
-            [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters update-application]]
+            [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters update-application] :as action]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.attachment :as attachment]
@@ -100,6 +100,7 @@
 (defquery task-types-for-application
   {:description "Returns a list of allowed schema names for current application and user"
    :parameters [:id]
-   :roles      [:authority]}
+   :roles      [:authority]
+   :states     action/all-states}
   [{application :application}]
   (ok :schemas (map (comp :name :info) (sort-by (comp :order :info) (tasks/task-schemas application)))))

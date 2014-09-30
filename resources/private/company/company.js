@@ -211,7 +211,7 @@
       zip:          ko.observable().extend(notRequired),
       country:      ko.observable().extend(notRequired),
       ovt:          ko.observable().extend(notRequired).extend({ovt: true}),
-      pop:          ko.observable().extend(notRequired).extend({ovt: true}),
+      pop:          ko.observable().extend(notRequired).extend({ovt: true})
     });
     this.fieldNames    = ["name", "y", "reference", "address1", "address2", "po", "zip", "country", "ovt", "pop"];
     this.edit          = ko.observable(false);

@@ -224,6 +224,14 @@
   ([apikey id open? to]
     (command apikey :add-comment :id id :text "hello" :to to :target {:type "application"} :openApplication open? :roles [])))
 
+(defn change-application-urgency
+  ([apikey id urgency]
+    (command apikey :change-urgency :id id :urgency urgency)))
+
+(defn add-authority-notice
+  ([apikey id notice]
+    (command apikey :add-authority-notice :id id :authorityNotice notice)))
+
 (defn query-application
   "Fetch application from server.
    Asserts that application is found and that the application data looks sane.

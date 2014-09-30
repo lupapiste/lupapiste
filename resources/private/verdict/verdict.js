@@ -211,7 +211,7 @@ LUPAPISTE.verdictPageController = (function() {
       attachmentsModel: attachmentsModel,
       createTask: createTaskController,
       authorities: authorities, // Authorities for comment template
-      application: {}, // Dummy application for comment template
+      application: {} // Dummy application for comment template
     });
   });
 

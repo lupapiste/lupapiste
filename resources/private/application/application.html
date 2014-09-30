@@ -30,6 +30,7 @@
               <span data-bind="ltext: 'verdictGiven', attr: {'title' : loc('verdictGiven.title')}" class="verdictGiven-box"></span>
               <span data-bind="ltext: 'constructionStarted', attr: {'title' : loc('constructionStarted.title')}" class="constructionStarted-box"></span>
               <span data-bind="ltext: 'closed', attr: {'title' : loc('closed.title')}" class="closed-box"></span>
+              <span data-bind="ltext: 'canceled', attr: {'title' : loc('canceled.title')}" class="canceled-box"></span>
             </div>
           </div>
 
@@ -233,7 +234,7 @@
                   <span data-bind="text: attachmentsRequiringAction"
                         id="applicationAttachmentsRequiringAction" class="indicator"></span></span></a></li>
 
-            <li data-bind="if: $root.authorization.ok('submit-application')">
+            <li data-bind="if: _.contains(['draft', 'open', 'submitted', 'complement-needed'], state())">
               <a data-bind="click: changeTab" href="#" data-target="requiredFieldSummary" data-test-id="application-open-requiredFieldSummary-tab">
                 <span data-bind="ltext: 'application.tabRequiredFieldSummary'"></span></a></li>
 
@@ -571,7 +572,7 @@
 
             <!--  ko if:  hasIncorrectlyFilledRequiredFields -->
               <h2 data-bind="ltext: 'application.requiredDataMissing'"></h2>
-              <i data-bind="ltext: 'application.requiredDataDesc', visible: requiredFieldsFillingObligatory() && hasIncorrectlyFilledRequiredFields()"></i><br>
+              <i class="error-text" data-bind="ltext: 'application.requiredDataDesc', visible: requiredFieldsFillingObligatory() && hasIncorrectlyFilledRequiredFields()"></i><br>
               <button class="btn btn-primary"
                        data-test-id="application-submit-btn"
                        data-bind="click: submitApplication,
@@ -582,7 +583,7 @@
                </button>
                 <!-- ko foreach: incorrectlyFilledRequiredFields -->
                   <div data-bind="with: $data[0]">
-                    <h3 class="required-field-error-doc" data-bind="ltext: document.locKey + '._group_label'"></h3>
+                    <h3 class="required-field-error-doc" data-bind="ltext: document.name + '._group_label'"></h3>
                   </div>
                   <!-- ko foreach: $data -->
                   <div class="requiredField-line">

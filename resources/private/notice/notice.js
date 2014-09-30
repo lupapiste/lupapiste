@@ -4,33 +4,47 @@ LUPAPISTE.NoticeModel = function() {
   var self = this;
 
   self.applicationId = null;
-  self.urgent = ko.observable();
   self.authorityNotice = ko.observable();
+  self.urgency = ko.observable('normal');
 
-  var subscibtions = [];
+  self.showSaveIndicator = ko.observable(false);
+
+  self.availableUrgencyStates = ko.observableArray(['normal', 'urgent', 'pending']);
+
+  var subscriptions = [];
+
+  var showIndicator = function() {
+    self.showSaveIndicator(true);
+    setTimeout(function() {
+      self.showSaveIndicator(false);
+    }, 4000);
+  };
+
   var subscribe = function() {
-    subscibtions.push(self.urgent.subscribe(_.debounce(function(value) {
+    subscriptions.push(self.urgency.subscribe(_.debounce(function(value) {
       ajax
-        .command("toggle-urgent", {
+        .command("change-urgency", {
           id: self.applicationId,
-          urgent: value})
+          urgency: value})
+        .success(showIndicator)
         .call();
     }, 500)));
 
-    subscibtions.push(self.authorityNotice.subscribe(_.debounce(function(value) {
+    subscriptions.push(self.authorityNotice.subscribe(_.debounce(function(value) {
       ajax
         .command("add-authority-notice", {
           id: self.applicationId,
           authorityNotice: value})
+        .success(showIndicator)
         .call();
     }, 500)));
   };
 
   var unsubscribe = function() {
-    while(subscibtions.length != 0) {
-      subscibtions.pop().dispose();
+    while(subscriptions.length !== 0) {
+      subscriptions.pop().dispose();
     }
-  }
+  };
 
   subscribe();
 
@@ -38,7 +52,7 @@ LUPAPISTE.NoticeModel = function() {
     // unsubscribe so that refresh does not trigger save
     unsubscribe();
     self.applicationId = application.id;
-    self.urgent(application.urgent);
+    self.urgency(application.urgency);
     self.authorityNotice(application.authorityNotice);
     subscribe();
   };
