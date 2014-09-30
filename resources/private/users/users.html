@@ -29,7 +29,7 @@
         <span data-bind="visible: show.search" data-test-id="users-list-filter-role">
           <span data-bind="ltext: 'users.filters.search'"></span>
           <input
-            data-bind="value: filters.search, valueUpdate: 'afterkeydown'"
+            data-bind="textInput: filters.search"
             type="text"
             data-test-id="users-list-input-search"/>
         </span>

@@ -7,7 +7,7 @@
     <h1 data-bind="ltext: 'newRequest.topic'"></h1>
     <div class="create-application-search-box">
       <p data-bind="ltext: 'newRequest.locationInfo'"></p>
-      <input data-bind="value: search, valueUpdate: 'afterkeydown', attr: {placeholder: loc('create.placeholder')}" id="create-search" type="text" class="form-input text address-search" autofocus="autofocus" />
+      <input data-bind="textInput: search, attr: {placeholder: loc('create.placeholder')}" id="create-search" type="text" class="form-input text address-search" autofocus="autofocus" />
       <button data-bind="click: searchNow" class="btn btn-primary" data-test-id="create-search-button">
         <span data-bind="ltext: 'search'"></span><span class="icon search left-align"></span>
       </button>
@@ -96,7 +96,7 @@
         <h3 data-bind="ltext: 'newRequest.messageTitle'"></h3>
         <textarea
             class="form-input tree-width"
-            data-bind="attr: {placeholder: loc('newRequest.inforequestMessage')}, value: message, valueUpdate: 'afterkeydown'"
+            data-bind="attr: {placeholder: loc('newRequest.inforequestMessage')}, textInput: message"
             rows="3"
             data-test-id="create-inforequest-message">
         </textarea>
