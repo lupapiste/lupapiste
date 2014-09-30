@@ -13,7 +13,7 @@
             [sade.strings :as ss]
             [sade.xml :as xml]
             [lupapalvelu.core :refer :all]
-            [lupapalvelu.action :refer [defquery defcommand update-application without-system-keys notify] :as action]
+            [lupapalvelu.action :refer [defquery defcommand update-application without-system-keys notify application->command] :as action]
             [lupapalvelu.mongo :refer [$each] :as mongo]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.domain :as domain]
@@ -616,6 +616,7 @@
 (defn- make-op [op-name created]
   {:id (mongo/create-id)
    :name (keyword op-name)
+   :description nil
    :created created})
 
 (defn user-is-authority-in-organization? [user-id organization-id]
@@ -726,6 +727,15 @@
                                         :documents {$each new-docs}
                                         :attachments {$each (make-attachments created op organization (:state application))}}
                                  $set {:modified created}})))
+
+(defcommand update-op-description
+  {:parameters [id op-id desc]
+   :roles      [:applicant :authority]
+   :states     action/all-states}
+  [command]
+  (let [application (:application command)
+        app-command (application->command application)]
+    (update-application app-command {"operations" {$elemMatch {:id op-id}}} {$set {"operations.$.description" desc}})))
 
 (defcommand change-permit-sub-type
   {:parameters [id permitSubtype]

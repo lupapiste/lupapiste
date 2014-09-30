@@ -69,6 +69,7 @@ Comment is added
 
 Change attachment type
   [Tags]  attachments
+  Click enabled by test id  change-attachment-type
   Select From List  attachment-type-select  rakennuspaikka.ote_alueen_peruskartasta
   Wait Until  Element Should Not Be Visible  attachment-type-select-loader
   Click element  xpath=//a[@data-test-id="back-to-application-from-attachment"]
@@ -156,19 +157,6 @@ Approve-button should be disabled
   Wait until  Element should be disabled  test-attachment-approve
 
 *** Keywords ***
-
-Open attachment details
-  [Arguments]  ${type}
-  Open tab  attachments
-  Wait Until  Page Should Contain Element  xpath=//a[@data-test-type="${type}"]
-  # Make sure the element is visible on browser view before clicking. Take header heigth into account.
-  #Execute Javascript  window.scrollTo(0, $("[data-test-type='muut.muu']").position().top - 130);
-  Focus  xpath=//a[@data-test-type="${type}"]
-  Click element  xpath=//a[@data-test-type="${type}"]
-  Wait Until  Element Should Be Visible  test-attachment-file-name
-  Wait Until Page Contains  ${TXT_TESTFILE_NAME}
-  Element Text Should Be  test-attachment-file-name  ${TXT_TESTFILE_NAME}
-  Element Text Should Be  test-attachment-version  1.0
 
 Attachment state should be
   [Arguments]  ${type}  ${state}

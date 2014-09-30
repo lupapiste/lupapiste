@@ -109,6 +109,8 @@ var attachment = (function() {
     attachmentType: ko.observable(),
     allowedAttachmentTypes: ko.observableArray([]),
     previewDisabled: ko.observable(false),
+    operation:       ko.observable(),
+    selectableOperations: ko.observableArray(),
 
     hasPreview: function() {
       return !model.previewDisabled() && (model.isImage() || model.isPdf() || model.isPlainText());
@@ -148,6 +150,10 @@ var attachment = (function() {
       LUPAPISTE.ModalDialog.open("#dialog-confirm-delete-attachment");
     },
 
+    showChangeTypeDialog: function() {
+      LUPAPISTE.ModalDialog.open("#change-type-dialog");
+    },
+
     deleteVersion: function(fileModel) {
       var fileId = fileModel.fileId;
       deleteAttachmentVersionFromServerProxy = function() { deleteAttachmentVersionFromServer(fileId); };
@@ -160,6 +166,8 @@ var attachment = (function() {
       signingModel.init({id: applicationId, attachments:[model]});
     }
   };
+
+  model.selectedOperationId = ko.observable();
 
   model.name = ko.computed(function() {
     if (model.attachmentType()) {
@@ -192,6 +200,26 @@ var attachment = (function() {
     }
   });
 
+  model.selectedOperationId.subscribe(function(id) {
+    if (model.operation() && id !== model.operation().id) {
+      // TODO show indocator
+      var op = _.findWhere(model.selectableOperations(), {id: id});
+      ajax
+        .command("set-attachment-operation",
+          {id:            applicationId,
+           attachmentId:  attachmentId,
+           op:            op})
+        .success(function() {
+          repository.load(applicationId);
+        })
+        .error(function(e) {
+          repository.load(applicationId);
+          error(e.text);
+        })
+        .call();
+    }
+  });
+
   function showAttachment(applicationDetails) {
     var application = applicationDetails.application;
     if (!applicationId || !attachmentId) { return; }
@@ -208,6 +236,9 @@ var attachment = (function() {
     model.signatures(attachment.signatures || []);
     model.filename(attachment.filename);
     model.type(attachment.type);
+    model.selectableOperations(application.operations);
+    model.operation(attachment.op);
+    model.selectedOperationId(attachment.op ? attachment.op.id : undefined);
 
     var type = attachment.type["type-group"] + "." + attachment.type["type-id"];
     model.attachmentType(type);
