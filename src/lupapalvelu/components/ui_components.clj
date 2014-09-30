@@ -23,6 +23,7 @@
                  :passwordMinLength (env/value :password :minlength)
                  :mode              env/mode
                  :build             (:build-number env/buildinfo)
+                 :cookie            (env/value :cookie)
                  :wannaJoinUrl      (env/value :oir :wanna-join-url)
                  :userAttachmentTypes (map #(str "osapuolet." (name %)) attachment-types-osapuoli)}]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
@@ -184,10 +185,10 @@
 
    :notice       {:js ["notice.js"]
                   :html ["notice.html"]}
-   
+
    :side-panel   {:js ["side-panel.js"]
                   :html ["side-panel.html"]}
-   
+
    ;; Single Page Apps and standalone components:
    ;; (compare to auth-methods in web.clj)
 

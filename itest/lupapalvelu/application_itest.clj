@@ -73,29 +73,20 @@
         hakija (domain/get-document-by-name application "hakija")]
     (:organization application) => "069-R"))
 
-(fact "Application in Sipoo has two possible authorities: Sonja and Ronja."
-  (let [id (create-app-id pena :municipality sonja-muni)]
-    (comment-application pena id true) => ok?
-    (let [query-resp   (query sonja :authorities-in-applications-organization :id id)]
-      (success query-resp) => true
-      (count (:authorityInfo query-resp)) => 2)))
-
 (fact* "Assign application to an authority"
   (let [application-id (create-app-id pena :municipality sonja-muni)
         ;; add a comment to change state to open
         _ (comment-application pena application-id true) => ok?
         application (query-application sonja application-id)
         authority-before-assignation (:authority application)
-        authorities (:authorityInfo (query sonja :authorities-in-applications-organization :id application-id))
-        authority (first authorities)
-        resp (command sonja :assign-application :id application-id :assigneeId (:id authority))
+        resp (command sonja :assign-application :id application-id :assigneeId ronja-id)
         assigned-app (query-application sonja application-id)
         authority-after-assignation (:authority assigned-app)]
     application-id => truthy
     application => truthy
     (success resp) => true
     (empty? authority-before-assignation) => true
-    authority-after-assignation => (contains {:id (:id authority)})
+    authority-after-assignation => (contains {:id ronja-id})
     (fact "Authority is not able to submit"
       sonja =not=> (allowed? sonja :submit-application :id application-id))))
 
@@ -105,9 +96,7 @@
         _ (comment-application pena application-id true) => ok?
         application (query-application sonja application-id)
         authority-before-assignation (:authority application)
-        authorities (:authorityInfo (query sonja :authorities-in-applications-organization :id application-id))
-        authority (first authorities)
-        resp (command sonja :assign-application :id application-id :assigneeId (:id authority))
+        resp (command sonja :assign-application :id application-id :assigneeId sonja-id)
         resp (command sonja :assign-application :id application-id :assigneeId nil)
         assigned-app (query-application sonja application-id)
         authority-in-the-end (:authority assigned-app)]
@@ -148,12 +137,13 @@
     (fact "Mikko sees the application" (query mikko :application :id application-id) => ok?)
     (fact "Sonja sees the application" (query sonja :application :id application-id) => ok?)
     (fact "Sonja can cancel Mikko's application" (command sonja :cancel-application :id application-id) => ok?)
-    (fact "Sonja does not see the application" (query sonja :application :id application-id) => fail?)
+    (fact "Sonja sees the canceled application" (query sonja :application :id application-id) => ok?)
     (let [email (last-email)]
       (:to email) => (email-for-key mikko)
       (:subject email) => "Lupapiste.fi: Peruutustie 23 - hakemuksen tila muuttunut"
       (get-in email [:body :plain]) => (contains "Peruutettu")
       email => (partial contains-application-link? application-id)))
+
   (fact "Authority can cancel own application"
     (let [application-id  (create-app-id sonja :municipality sonja-muni)]
       (fact "Sonja sees the application" (query sonja :application :id application-id) => ok?)
@@ -253,6 +243,7 @@
           (get-in updated-suunnittelija [:data :henkilotiedot :sukunimi :value]) => "Intonen"
           (get-in updated-suunnittelija [:data :yritys :yritysnimi :value]) => "Yritys Oy"
           (get-in updated-suunnittelija [:data :yritys :liikeJaYhteisoTunnus :value]) => "1234567-1"
+          (get-in updated-suunnittelija [:data :patevyys :koulutusvalinta :value]) => nil
           (get-in updated-suunnittelija [:data :patevyys :koulutus :value]) => "Tutkinto"
           (get-in updated-suunnittelija [:data :patevyys :valmistumisvuosi :value]) => "2000"
           (get-in updated-suunnittelija [:data :patevyys :fise :value]) => "f"
@@ -287,3 +278,16 @@
         doc-after       (domain/get-document-by-name merged-app "purkaminen")]
         (get-in doc-after [:data :mitat :kokonaisala :source]) => "krysp"
         (get-in doc-after [:data :kaytto :kayttotarkoitus :source]) => "krysp"))
+
+
+(facts "Facts about update operation description"
+  (let [application-id (create-app-id pena :operation "asuinrakennus" :municipality sonja-muni)
+        application (query-application pena application-id)
+        op (first (:operations application))
+        test-desc "Testdesc"]
+    (fact "operation desc is empty" (-> op :description empty?) => truthy)
+    (command pena :update-op-description :id application-id :op-id (:id op) :desc test-desc :collection "operations")
+    (let [updated-app (query-application pena application-id)
+          updated-op (some #(when (= (:id op) (:id %)) %) (:operations updated-app))]
+      (fact "description is set" (:description updated-op) => test-desc))))
+

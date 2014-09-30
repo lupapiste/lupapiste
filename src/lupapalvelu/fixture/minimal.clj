@@ -460,7 +460,7 @@
                               :new-application-enabled true}]
                      :links [{:name {:fi "Sipoo", :sv "Sibbo"}
                               :url "http://sipoo.fi"}]
-                     :krysp {:YA {:ftpUser "dev_ya_sipoo" :version "2.1.3"}}
+                     :krysp {:YA {:url local-krysp :ftpUser "dev_ya_sipoo" :version "2.1.3"}}
                      :statementGivers [{:id "516560d6c2e6f603beb85147"
                                          :text "Paloviranomainen",
                                          :email "sonja.sibbo@sipoo.fi",
@@ -476,8 +476,7 @@
                               :new-application-enabled true}]
                      :links [{:name {:fi "Kuopio", :sv "Kuopio"}
                               :url "http://www.kuopio.fi"}]
-                     :krysp {:YA {:url local-krysp, :version "2.1.2"
-                                  :ftpUser "dev_ya_kuopio"}}
+                     :krysp {:YA {:url local-krysp :version "2.1.2" :ftpUser "dev_ya_kuopio"}}
                      :statementGivers [{:id "516560d6c2e6f603beb85147"
                                          :text "Paloviranomainen",
                                          :email "sonja.sibbo@sipoo.fi",

@@ -124,13 +124,13 @@ Logout
 Open side panel
   [Arguments]  ${name}
   ${sidePanelClosed} =  Run Keyword And Return Status  Element should not be visible  ${name}-panel
-  Run keyword If  ${sidePanelClosed}  Click by test id  open-${name}-side-panel
+  Run keyword If  ${sidePanelClosed}  Click by id  open-${name}-side-panel
   Side panel should be visible  ${name}
 
 Close side panel
   [Arguments]  ${name}
   ${sidePanelOpen} =  Run Keyword And Return Status  Element should be visible  ${name}-panel
-  Run keyword If  ${sidePanelOpen}  Click by test id  open-${name}-side-panel
+  Run keyword If  ${sidePanelOpen}  Click by id  open-${name}-side-panel
   Side panel should not be visible  ${name}
 
 #
@@ -247,6 +247,9 @@ Veikko logs in
 Sonja logs in
   Authority logs in  sonja  sonja  Sonja Sibbo
 
+Ronja logs in
+  Authority logs in  ronja  sonja  Ronja Sibbo
+
 Sipoo logs in
   Authority-admin logs in  sipoo  sipoo  Simo Suurvisiiri
 
@@ -269,6 +272,13 @@ Select From List by test id
   [Arguments]  ${id}  ${value}
   Wait until page contains element  xpath=//select[@data-test-id="${id}"]
   Select From List  xpath=//select[@data-test-id="${id}"]  ${value}
+
+Click by id
+  [Arguments]  ${id}
+  ${selector} =   Set Variable  $("[id='${id}']:visible")
+  # 'Click Element' is broken in Selenium 2.35/FF 23 on Windows, using jQuery instead
+  Wait For Condition  return ${selector}.length===1;  10
+  Execute Javascript  ${selector}.click();
 
 Click by test id
   [Arguments]  ${id}
@@ -386,10 +396,26 @@ Add attachment
   Wait until       Page should contain element  xpath=//form[@id='attachmentUploadForm']//option[@value='muut.muu']
   Select From List  attachmentType  muut.muu
   Input text       text  ${description}
+  Wait until       Page should contain element  xpath=//form[@id='attachmentUploadForm']/input[@type='file']
+  Focus            xpath=//form[@id='attachmentUploadForm']/input[@type='file']
   Choose File      xpath=//form[@id='attachmentUploadForm']/input[@type='file']  ${path}
   Click element    test-save-new-attachment
   Unselect Frame
   Wait Until Page Contains  Muu liite
+
+
+Open attachment details
+  [Arguments]  ${type}
+  Open tab  attachments
+  Wait Until  Page Should Contain Element  xpath=//a[@data-test-type="${type}"]
+  # Make sure the element is visible on browser view before clicking. Take header heigth into account.
+  #Execute Javascript  window.scrollTo(0, $("[data-test-type='muut.muu']").position().top - 130);
+  Focus  xpath=//a[@data-test-type="${type}"]
+  Click element  xpath=//a[@data-test-type="${type}"]
+  Wait Until  Element Should Be Visible  test-attachment-file-name
+  Wait Until Page Contains  ${TXT_TESTFILE_NAME}
+  Element Text Should Be  test-attachment-file-name  ${TXT_TESTFILE_NAME}
+  Element Text Should Be  test-attachment-version  1.0
 
 
 Select operation path by permit type
@@ -512,6 +538,12 @@ Input comment
   Click element  xpath=//div[@id='conversation-panel']//button[@data-test-id='application-new-comment-btn']
   Wait until  Element should be visible  xpath=//div[@id='conversation-panel']//div[contains(@class,'comment-text')]//span[text()='${message}']
 
+Input inforequest comment
+  [Arguments]  ${message}
+  Input text  xpath=//section[@id='inforequest']//textarea[@data-test-id='application-new-comment-text']  ${message}
+  Click element  xpath=//section[@id='inforequest']//button[@data-test-id='application-new-comment-btn']
+  Wait until  Element should be visible  xpath=//section[@id='inforequest']//div[contains(@class,'comment-text')]//span[text()='${message}']
+
 Input comment and open to authorities
   [Arguments]  ${message}
   Open side panel  conversation
@@ -522,14 +554,12 @@ Input comment and open to authorities
 
 Input comment and mark answered
   [Arguments]  ${message}
-  Open side panel  conversation
-  Input text  xpath=//div[@id='conversation-panel']//textarea[@data-test-id='application-new-comment-text']  ${message}
-  Click element  xpath=//div[@id='conversation-panel']//button[@data-test-id='comment-request-mark-answered']
+  Input text  xpath=//section[@id='inforequest']//textarea[@data-test-id='application-new-comment-text']  ${message}
+  Click element  xpath=//section[@id='inforequest']//button[@data-test-id='comment-request-mark-answered']
   Wait until  element should be visible  xpath=//div[@id='dynamic-ok-confirm-dialog']//button[@data-test-id='confirm-yes']
   Click element  xpath=//div[@id='dynamic-ok-confirm-dialog']//button[@data-test-id='confirm-yes']
   Wait until  element should not be visible  xpath=//div[@id='dynamic-ok-confirm-dialog']
-  Wait until  Element should be visible  xpath=//div[@id='conversation-panel']//div[contains(@class,'comment-text')]//span[text()='${message}']
-  Close side panel  conversation
+  Wait until  Element should be visible  xpath=//section[@id='inforequest']//div[contains(@class,'comment-text')]//span[text()='${message}']
 
 Comment count is
   [Arguments]  ${section}  ${amount}

@@ -5,8 +5,8 @@
             [swiss.arrows :refer [-<> -<>>]]
             [sade.strings :as ss]
             [sade.util :refer [future*]]
-            [lupapalvelu.core :refer [ok fail fail!]]
-            [lupapalvelu.action :refer [defquery defcommand defraw update-application application->command notify]]
+            [lupapalvelu.core :refer [ok fail fail! now]]
+            [lupapalvelu.action :refer [defquery defcommand defraw update-application application->command notify] :as action]
             [lupapalvelu.comment :as comment]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.attachment :as a]
@@ -22,7 +22,8 @@
             [lupapalvelu.ke6666 :as ke6666]
             [lupapalvelu.statement :as statement]
             [lupapalvelu.mime :as mime]
-            [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp])
+            [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
+            [sade.util :as util])
   (:import [java.util.zip ZipOutputStream ZipEntry]
            [java.io File OutputStream FilterInputStream]))
 
@@ -48,6 +49,10 @@
         (or (not (post-verdict-states currentState))
             (post-verdict-states attachmentApplicationState)
             (= (keyword userRole) :authority)))))
+
+(defn- validate-operation [{{op :op} :data}]
+  (when-let [missing (util/missing-keys op [:id :name])]
+    (fail! :error.missing-parameters :parameters missing)))
 
 ;;
 ;; KRYSP
@@ -86,7 +91,8 @@
 (defquery attachment-types
   {:parameters [:id]
    :extra-auth-roles [:statementGiver]
-   :roles      [:applicant :authority]}
+   :roles      [:applicant :authority]
+   :states     action/all-states}
   [{application :application}]
   (ok :attachmentTypes (attachment/get-attachment-types-for-application application)))
 
@@ -94,7 +100,7 @@
   {:parameters [id attachmentId attachmentType]
    :roles      [:applicant :authority]
    :extra-auth-roles [:statementGiver]
-   :states     [:draft :info :open :submitted :complement-needed :verdictGiven :constructionStarted]}
+   :states     (action/all-states-but [:answered :sent :closed :canceled])}
   [{:keys [application user] :as command}]
 
   (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
@@ -117,7 +123,7 @@
   {:description "Authority can approve attachment, moves to ok"
    :parameters  [id attachmentId]
    :roles       [:authority]
-   :states      [:draft :info :open :submitted :complement-needed :verdictGiven :constructionStarted]}
+   :states      (action/all-states-but [:answered :sent :closed :canceled])}
   [{:keys [created] :as command}]
   (update-application command
     {:attachments {$elemMatch {:id attachmentId}}}
@@ -128,7 +134,7 @@
   {:description "Authority can reject attachment, requires user action."
    :parameters  [id attachmentId]
    :roles       [:authority]
-   :states      [:draft :info :open :submitted :complement-needed :verdictGiven :constructionStarted]}
+   :states      (action/all-states-but [:answered :sent :closed :canceled])}
   [{:keys [created] :as command}]
   (update-application command
     {:attachments {$elemMatch {:id attachmentId}}}
@@ -143,7 +149,7 @@
   {:description "Authority can set a placeholder for an attachment"
    :parameters  [:id :attachmentTypes]
    :roles       [:authority]
-   :states      [:draft :info :open :submitted :complement-needed :verdictGiven :constructionStarted]}
+   :states      (action/all-states-but [:answered :sent :closed :canceled])}
   [{application :application {attachment-types :attachmentTypes} :data created :created}]
   (if-let [attachment-ids (a/create-attachments application attachment-types created)]
     (ok :applicationId (:id application) :attachmentIds attachment-ids)
@@ -158,7 +164,7 @@
    :parameters  [id attachmentId]
    :roles       [:applicant :authority]
    :extra-auth-roles [:statementGiver]
-   :states      [:draft :info :open :submitted :complement-needed :verdictGiven :constructionStarted]}
+   :states      (action/all-states-but [:answered :sent :closed :canceled])}
   [{:keys [application user]}]
 
   (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
@@ -172,7 +178,7 @@
    :parameters  [:id attachmentId fileId]
    :roles       [:applicant :authority]
    :extra-auth-roles [:statementGiver]
-   :states      [:draft :info :open :submitted :complement-needed :verdictGiven :constructionStarted]}
+   :states      (action/all-states-but [:answered :sent :closed :canceled])}
   [{:keys [application user]}]
 
   (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
@@ -241,6 +247,7 @@
 (defraw "download-all-attachments"
   {:parameters [:id]
    :roles      [:applicant :authority]
+   :states     action/all-states
    :extra-auth-roles [:statementGiver]}
   [{:keys [application lang]}]
   (if application
@@ -265,7 +272,7 @@
                 (partial if-not-authority-states-must-match #{:sent})]
    :input-validators [(fn [{{size :size} :data}] (when-not (pos? size) (fail :error.select-file)))
                       (fn [{{filename :filename} :data}] (when-not (mime/allowed-file? filename) (fail :error.illegal-file-type)))]
-   :states     [:draft :info :answered :open :sent :submitted :complement-needed :verdictGiven :constructionStarted]
+   :states     (action/all-states-but [:closed :canceled])
    :notified   true
    :on-success [(notify :new-comment)
                 open-inforequest/notify-on-comment]
@@ -412,3 +419,24 @@
        ; Throttle giving information about incorrect password
        (Thread/sleep 2000)
        (fail :error.password)))))
+
+;;
+;; Operation
+;;
+
+(defcommand set-attachment-operation
+  {:parameters [id attachmentId op]
+   :roles      [:applicant :authority]
+   :extra-auth-roles [:statementGiver]
+   :states     (action/all-states-but [:answered :sent :closed :canceled])
+   :input-validators [validate-operation]}
+  [{:keys [application user] :as command}]
+  
+  (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
+    (fail! :error.pre-verdict-attachment))
+  (let [newOp {:id   (:id op) 
+               :name (:name op)}]
+    (update-application command
+                        {:attachments {$elemMatch {:id attachmentId}}}
+                        {$set {:attachments.$.op newOp,
+                               :attachments.$.modified (now)}})))

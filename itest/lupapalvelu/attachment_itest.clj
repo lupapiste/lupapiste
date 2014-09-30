@@ -113,6 +113,19 @@
                 created => pos?
                 version => (:version latest))))))
 
+      
+      (fact "Pena change attachement operation"
+            
+        (fact "Pena can change operation"
+          (command pena :set-attachment-operation :id application-id :attachmentId (first attachment-ids) :op {:id "foo" :name "bar"}) => ok?)
+        
+        (fact "Operation is set"
+          (let [application (query-application pena application-id)
+                attachment (get-attachment-info application (first attachment-ids))
+                op (:op attachment)]
+            (:id op) => "foo"
+            (:name op) => "bar")))
+      
       (let [versioned-attachment (first (:attachments (query-application veikko application-id)))]
         (last-email) ; Inbox zero
         (fact "Meta"

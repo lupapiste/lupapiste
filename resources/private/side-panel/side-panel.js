@@ -4,6 +4,7 @@ LUPAPISTE.SidePanelModel = function() {
 
   self.typeId = undefined;
 
+  self.application = ko.observable();
   self.applicationId = ko.observable();
   self.notice = ko.observable({});
   self.attachmentId = ko.observable();
@@ -18,6 +19,12 @@ LUPAPISTE.SidePanelModel = function() {
   self.permitType = ko.observable();
   self.authorities = ko.observableArray([]);
   self.infoRequest = ko.observable();
+  self.authentication = ko.observable();
+  self.authorities = ko.observable();
+
+  self.sidePanelVisible = ko.computed(function() {
+    return self.showConversationPanel() || self.showNoticePanel();
+  });
 
   var AuthorityInfo = function(id, firstName, lastName) {
     this.id = id;
@@ -34,43 +41,38 @@ LUPAPISTE.SidePanelModel = function() {
   }
 
   self.refresh = function(application, authorities) {
-    self.applicationId(application.id);
-    self.infoRequest(application.infoRequest);
-    self.unseenComments(application.unseenComments);
-    if (self.notice().refresh) {
-      self.notice().refresh(application);
+    // TODO applicationId, inforequest etc. could be computed
+    if(application && authorities) {
+      self.application(application);
+      self.authorities(authorities);
+      self.applicationId(application.id);
+      self.infoRequest(application.infoRequest);
+      self.unseenComments(application.unseenComments);
+      if (self.notice().refresh) {
+        self.notice().refresh(application);
+      }
+      self.permitType(self.application().permitType);
+      initAuthoritiesSelectList(self.authorities());
     }
-    var type = pageutil.getPage();
-    switch(type) {
-      case "attachment":
-      case "statement":
-        self.comment().refresh(application, false, {type: type, id: pageutil.lastSubPage()});
-        break;
-      case "verdict":
-        self.comment().refresh(application, false, {type: type, id: pageutil.lastSubPage()}, ["authority"]);
-        break;
-      default:
-        self.comment().refresh(application, true);
-        break;
-    }
-    self.permitType(application.permitType);
-    initAuthoritiesSelectList(authorities);
-  }
 
-  var togglePanel = function(visible, button) {
-    var panel = $("#side-panel, #side-panel-overlay");
-    if(panel.hasClass("hide-side-panel")) {
-      panel.toggleClass("hide-side-panel", 100);
+    if (self.application()) {
+      var type = pageutil.getPage();
+      switch(type) {
+        case "attachment":
+        case "statement":
+          self.comment().refresh(self.application(), false, {type: type, id: pageutil.lastSubPage()});
+          break;
+        case "verdict":
+          self.comment().refresh(self.application(), false, {type: type, id: pageutil.lastSubPage()}, ["authority"]);
+          break;
+        default:
+          self.comment().refresh(self.application(), true);
+          break;
+      }
     }
-    else if(visible) {
-      panel.toggleClass("hide-side-panel", 100);
-    }
-    $("#side-panel " + button).siblings().removeClass("active");
-    $("#side-panel " + button).toggleClass("active");
-  }
+  };
 
   self.toggleConversationPanel = function(data, event) {
-    togglePanel(self.showConversationPanel(), ".btn-conversation");
     self.showConversationPanel(!self.showConversationPanel());
     self.showNoticePanel(false);
 
@@ -84,24 +86,24 @@ LUPAPISTE.SidePanelModel = function() {
   };
 
   self.toggleNoticePanel = function(data, event) {
-    togglePanel(self.showNoticePanel(), ".btn-notice");
-    self.showConversationPanel(false);
     self.showNoticePanel(!self.showNoticePanel());
+    self.showConversationPanel(false);
   };
 
-  self.hideSidePanel = function(data, event) {
+  self.closeSidePanel = function(data, event) {
     if (self.showConversationPanel()) {
       self.toggleConversationPanel();
     }
     if (self.showNoticePanel()) {
       self.toggleNoticePanel();
     }
-  }
+  };
 
-  var pages = ["application","inforequest","attachment","statement","neighbors","verdict"];
+  var pages = ["application","attachment","statement","neighbors","verdict"];
 
   hub.subscribe({type: "page-change"}, function() {
     if(_.contains(pages, pageutil.getPage())) {
+      self.refresh();
       $("#side-panel-template").addClass("visible");
     }
   });
@@ -111,9 +113,33 @@ LUPAPISTE.SidePanelModel = function() {
       self.refresh(application, applicationDetails.authorities);
     });
   });
-}
+};
+
+ko.bindingHandlers.transition = {
+  init: function(element, valueAccessor, allBindings) {
+    var value = ko.utils.unwrapObservable(valueAccessor());
+    var className = allBindings()["class"];
+    if (className) {
+      $(element).toggleClass(className, value);
+    }
+  },
+  update: function(element, valueAccessor, allBindings) {
+    var value = ko.utils.unwrapObservable(valueAccessor());
+    var className = allBindings()["class"];
+    var type = allBindings().type;
+    if (type) {
+      $(element)[type + "Toggle"](1000);
+    } else {
+      $(element).toggleClass(className, value, 100);
+    }
+  }
+};
 
 $(function() {
   var sidePanel = new LUPAPISTE.SidePanelModel();
+  $(document).keyup(function(e) {
+    // esc hides the side panel
+    if (e.keyCode === 27) { sidePanel.closeSidePanel(); };
+  });
   $("#side-panel-template").applyBindings(sidePanel);
 });

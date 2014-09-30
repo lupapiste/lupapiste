@@ -2,36 +2,46 @@
 <html>
 <body>
   <section class="page container" id="side-panel-template">
-    <!-- <div id="side-panel-overlay" data-bind="click: hideSidePanel" class="hide-side-panel"></div> -->
-    <div id="side-panel" class="hide-side-panel">
-      <div class="close-btn" data-bind="click: hideSidePanel"></div>
+    <!-- <div id="side-panel-overlay" data-bind="click: closeSidePanel" class="show-side-panel"></div> -->
+    <div id="side-panel" data-bind="transition: sidePanelVisible, class: 'show-side-panel'">
       <div class="buttons">
-        <button class="btn-conversation" data-bind="click: toggleConversationPanel" data-test-id="open-conversation-side-panel">
+        <button class="btn-conversation" data-bind="click: toggleConversationPanel, css: {active: showConversationPanel}" id="open-conversation-side-panel">
           <span data-bind="if: unseenComments">
             <span data-bind="text: unseenComments" id="applicationUnseenComments" class="unseen-comments"></span>
           </span>
           <span class="btn-title" data-bind="ltext: 'conversation.title'"></span>
         </button>
-        <button class="btn-notice" data-bind="click: toggleNoticePanel, visible: authorization.ok('toggle-urgent')" data-test-id="open-notice-side-panel">
+        <button class="btn-notice" data-bind="click: toggleNoticePanel, visible: authorization.ok('change-urgency'), css: {active: showNoticePanel}" id="open-notice-side-panel">
           <span class="btn-title" data-bind="ltext: 'notice.title'"></span>
         </button>
       </div>
-      <div class="content">
-        <div class="panel-content" data-bind="visible: showConversationPanel">
-          <div id="conversation-panel">
-            <h1 data-bind="ltext: 'application.tabConversation'"></h1>
+      <div class="content-wrapper">
+        <div id="conversation-panel" data-bind="visible: showConversationPanel">
+          <div class="header">
+            <h1 data-bind="ltext: 'conversation.title'"></h1>
+            <div class="indicator">
+              <span class="saved" data-bind="ltext: 'form.saved', transition: notice().showSaveIndicator, type: 'fade'"></span>
+            </div>
+            <span class="close-btn" data-bind="click: closeSidePanel"></span>
+          </div>
+          <div class="content">
             <p data-bind="lhtml: 'help.' + permitType() + '.conversationDesc'" class="panel-info"></p>
             <div data-bind="template: {name: 'comment-template', data: {comment: comment, authorities: authorities, mainConversation: true, authorization: authorization, infoRequest: infoRequest}}"></div>
             <div class="process-nav"></div>
           </div>
         </div>
-        <div class="panel-content" data-bind="visible: showNoticePanel">
-          <!-- ko if: authorization.ok('toggle-urgent') -->
-          <div id="notice-panel">
-            <div data-bind="template: {name: 'notice-template', data: notice}"></div>
+        <!-- ko if: authorization.ok('change-urgency') -->
+        <div id="notice-panel" data-bind="visible: showNoticePanel">
+          <div class="header">
+            <h1 data-bind="ltext: 'notice.title'"></h1>
+            <div class="indicator">
+              <span class="saved" data-bind="ltext: 'form.saved', transition: notice().showSaveIndicator, type: 'fade'" data-test-id="notice-saved-indicator"></span>
+            </div>
+            <span class="close-btn" data-bind="click: closeSidePanel"></span>
           </div>
-          <!-- /ko -->
+          <div class="content" data-bind="template: {name: 'notice-template', data: notice}"></div>
         </div>
+        <!-- /ko -->
       </div>
     </div>
   </section>

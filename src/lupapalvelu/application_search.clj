@@ -40,7 +40,7 @@
 ;; Table definition
 ;;
 
-(def ^:private col-sources [(fn [app] (select-keys app [:urgent :authorityNotice]))
+(def ^:private col-sources [(fn [app] (select-keys app [:urgency :authorityNotice]))
                             :indicators
                             :attachmentsRequiringAction
                             :unseenComments

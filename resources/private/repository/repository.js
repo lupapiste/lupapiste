@@ -49,8 +49,21 @@ var repository = (function() {
         doc.schema.info = _.merge(schemaInfo, doc.schema.info);
       };
 
+      function setOperation(application, doc) {
+        var schemaInfo = doc["schema-info"];
+        if (schemaInfo.op) {
+          var op = _.findWhere(application.operations, {id: schemaInfo.op.id});
+          if (op) {
+            schemaInfo.op = op;
+          }
+        }
+      };
+
       if (application) {
-        _.each(application.documents || [], setSchema);
+        _.each(application.documents || [], function(doc) {
+          setOperation(application, doc);
+          setSchema(doc);
+        });
         _.each(application.tasks || [], setSchema);
         _.each(application.comments || [], function(comment) {
           if (comment.target && comment.target.type === 'attachment' && comment.target.id) {

@@ -4,32 +4,40 @@
   <section class="page container" id="attachment" data-bind="with: attachment">
     <div>
       <div class="attachment-info">
-        <h1>
-          <span data-bind="text: application.title"></span>: <span data-bind="ltext: name"></span>
-          <span data-bind="if: latestVersion">
-            <span data-bind="ltext: 'attachment.version'">versio</span>
-            <span id="test-attachment-version" data-bind="version: latestVersion().version">0.0</span>
-          </span>
-        </h1>
-        <p data-bind="lhtml: 'attachment.view.desc'"  class="tab-info"></p>
-         <button class="attachment-delete inline-block" data-bind="ltext: 'attachment.delete', click: deleteAttachment, visible: $root.authorization.ok('delete-attachment'),  enable: $root.authorization.ok('delete-attachment')"
-          style="margin-left: 0" data-test-id="delete-attachment">Poista liite</button>
-        <a class="btn attachment-back inline-block btn-nav-back" data-bind ="attr: {href: '#!/application/' + application.id() + '/attachments' }" data-test-id="back-to-application-from-attachment">
-          <span data-bind =" ltext: 'attachment.return'"></span>
-          <span class="icon drill-left-black-bigger left-align"></span>
-        </a>
-        <div data-bind="with: $root.approve" class="inline-block">
-          <button id="test-attachment-approve" data-bind="ltext: 'document.approve', click: approveAttachment, enable: isApprovable() && isNotOk(), visible: isApprovable()" class="btn btn-primary">Hyv&auml;ksy</button>
-          <button id="test-attachment-reject" data-bind="ltext: 'attachment.reject', click: rejectAttachment, enable: isRejectable() && doesNotRequireUserAction(), visible: isRejectable()" class="btn btn-decline">Tarkennettavaa</button>
-        </div>
-
-        <div class="form-entry change-type">
-          <label for="attachment-type-select" class="form-label">
-           <span data-bind="ltext: 'attachment.changeType'">Vaihda liitteen tyyppi</span>
-           <img src="/img/ajax-loader-12.gif" alt="..." width="12" height="12" id="attachment-type-select-loader" style="display: none;">
-          </label>
-          <div><select id="attachment-type-select" class="long"></select></div>
-
+        <div class="container">
+          <div class="left">
+            <div class="attachment-info-header">
+              <h1>
+                <span data-bind="text: application.title"></span>: <span data-bind="ltext: name"></span>
+                <span data-bind="if: latestVersion">
+                  <span data-bind="ltext: 'attachment.version'">versio</span>
+                  <span id="test-attachment-version" data-bind="version: latestVersion().version">0.0</span>
+                </span>
+              </h1>
+              <a class="btn attachment-back inline-block btn-nav-back" data-bind ="attr: {href: '#!/application/' + application.id() + '/attachments' }" data-test-id="back-to-application-from-attachment">
+                <span data-bind =" ltext: 'attachment.return'"></span>
+                <span class="icon drill-left-black-bigger left-align"></span>
+              </a>
+            </div>
+            <p data-bind="lhtml: 'attachment.view.desc'"  class="tab-info"></p>
+          </div>
+          <div class="attachment-actions">
+            <div data-bind="with: $root.approve">
+              <button id="test-attachment-approve" data-bind="ltext: 'document.approve', click: approveAttachment, enable: isApprovable() && isNotOk(), visible: isApprovable()" class="btn btn-primary">Hyv&auml;ksy</button>
+              <button id="test-attachment-reject" data-bind="ltext: 'attachment.reject', click: rejectAttachment, enable: isRejectable() && doesNotRequireUserAction(), visible: isRejectable()" class="btn btn-decline">Tarkennettavaa</button>
+            </div>
+            <button data-test-id="change-attachment-type" data-bind="ltext: 'attachment.changeType', click: showChangeTypeDialog"></button>
+            <button data-bind="ltext: 'attachment.delete', click: deleteAttachment, visible: $root.authorization.ok('delete-attachment'),  enable: $root.authorization.ok('delete-attachment')" data-test-id="delete-attachment">Poista liite</button>
+          </div>
+          <div class="attachment-infomation">
+            <label data-bind="ltext: 'applications.operation'"></label>
+            <select id="attachment-operation-select" class="long"
+              data-bind="options: selectableOperations,
+                         optionsText: function(item) {return item.description ? loc([item.name, '_group_label']) + ' - ' + item.description : loc([item.name, '_group_label'])},
+                         optionsValue: 'id',
+                         value: selectedOperationId,
+                         enable: $root.authorization.ok('set-attachment-type')"></select>
+          </div>
         </div>
       </div>
 
@@ -117,6 +125,23 @@
 
     </div>
 
+    <div class="window autosized" id="change-type-dialog">
+      <div class="dialog-header">
+       <p data-bind="ltext: 'attachment.changeType'"></p>
+       <p class="dialog-close close">X</p>
+      </div>
+        <div class="form-entry change-type">
+          <label for="attachment-type-select" class="form-label">
+           <img src="/img/ajax-loader-12.gif" alt="..." width="12" height="12" id="attachment-type-select-loader" style="display: none;">
+          </label>
+          <div>
+            <select id="attachment-type-select" class="long" data-bind="enable: $root.authorization.ok('set-attachment-type')"></select>
+          </div>
+        </div>
+        <div style="text-align:center">
+          <button class="btn btn-primary btn-dialog" data-test-id="confirm-yes" style="position:relative" data-bind="ltext: 'button.ok', click: LUPAPISTE.ModalDialog.close"></button>
+        </div>
+    </div>
   </section>
 </body>
 </html>

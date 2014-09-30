@@ -63,12 +63,14 @@
            :order 60}
     :body hankkeen-kuvaus-kaivulupa}
    {:info {:name "tyomaastaVastaava"                                       ;; vastuuhenkilotietoType
+           :i18name "osapuoli"
            :type :party
            :removable false
            :repeating false
            :order 61}
     :body tyomaasta-vastaava}
    {:info {:name "yleiset-alueet-maksaja"                                  ;; maksajaTietoType
+           :i18name "osapuoli"
            :type :party
            :removable false
            :repeating false

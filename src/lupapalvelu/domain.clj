@@ -5,6 +5,7 @@
             [lupapalvelu.user :as user]
             [lupapalvelu.xml.krysp.verdict :as verdict]
             [sade.strings :refer [lower-case]]
+            [sade.util :as util]
             [sade.env :as env]))
 
 ;;
@@ -26,7 +27,7 @@
   (merge
     (basic-application-query-for user)
     (case (keyword (:role user))
-      :applicant {:state {$ne "canceled"}}
+      :applicant {:state {$nin ["canceled"]}}
       :authority {:state {$nin ["draft" "canceled"]}}
       {})))
 
@@ -42,9 +43,9 @@
       #(filter (fn [{target :target}] (or (empty? target) (not= (:type target) "attachment") (attachments (:id target)))) %))))
 
 (defn- filter-notice-from-application [application user]
-  (if (user/authority? user) 
-    application 
-    (dissoc application :urgent :authorityNotice)))
+  (if (user/authority? user)
+    application
+    (dissoc application :urgency :authorityNotice)))
 
 (defn filter-application-content-for [application user]
   (when (seq application)
@@ -60,14 +61,29 @@
         (update-in [:tasks] (partial only-authority-sees user relates-to-draft))
         (filter-notice-from-application user)))))
 
+(defn get-application
+  ([]
+    (get-application {} {}))
+  ([query]
+    (get-application query {}))
+  ([query projection]
+    (mongo/select-one :applications query projection)))
+
 (defn get-application-as [application-id user]
   {:pre [user]}
   (filter-application-content-for
-    (mongo/select-one :applications {$and [{:_id application-id} (application-query-for user)]})
+    (get-application {$and [{:_id application-id} (application-query-for user)]})
     user))
 
+(defn get-application-as-including-canceled [application-id user]
+  {:pre [user]}
+  (let [query-incl-canceleds (update-in (application-query-for user) [:state $nin] #(util/exclude-from-sequence % ["canceled"]))]
+   (filter-application-content-for
+     (get-application {$and [{:_id application-id} query-incl-canceleds]})
+     user)))
+
 (defn get-application-no-access-checking [application-id]
-  (mongo/select-one :applications {:_id application-id}))
+  (get-application  {:_id application-id}))
 
 ;;
 ;; authorization
@@ -196,6 +212,7 @@
    :buildings                []
    :closed                   nil ; timestamp
    :closedBy                 {}
+   :convertedToApplication   nil ; timestamp
    :comments                 []
    :created                  nil ; timestamp
    :documents                []
@@ -222,7 +239,7 @@
    :submitted                nil ; timestamp
    :tasks                    []
    :title                    ""
-   :urgent                   false
+   :urgency                  "normal"
    :verdicts                 []})
 
 
