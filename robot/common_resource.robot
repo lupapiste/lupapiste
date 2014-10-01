@@ -537,6 +537,7 @@ Input comment
   Input text  xpath=//div[@id='conversation-panel']//textarea[@data-test-id='application-new-comment-text']  ${message}
   Click element  xpath=//div[@id='conversation-panel']//button[@data-test-id='application-new-comment-btn']
   Wait until  Element should be visible  xpath=//div[@id='conversation-panel']//div[contains(@class,'comment-text')]//span[text()='${message}']
+  Close side panel  conversation
 
 Input inforequest comment
   [Arguments]  ${message}
@@ -668,13 +669,13 @@ Fetch verdict
 # User management
 
 Fill in new password
-  [Arguments]  ${password}
+  [Arguments]  ${section}  ${password}
   Wait Until  Page Should Contain  Salasanan vaihtaminen
-  Input text  xpath=//section[@id='setpw']//input[@placeholder='Uusi salasana']  ${password}
-  Element Should Be Disabled  xpath=//section[@id='setpw']//button
-  Input text  xpath=//section[@id='setpw']//input[@placeholder='Salasana uudelleen']  ${password}
-  Wait Until  Element Should Be Enabled  xpath=//section[@id='setpw']//button
-  Click Element  xpath=//section[@id='setpw']//button
+  Input text  xpath=//section[@id='${section}']//input[@placeholder='Uusi salasana']  ${password}
+  Element Should Be Disabled  xpath=//section[@id='${section}']//button
+  Input text  xpath=//section[@id='${section}']//input[@placeholder='Salasana uudelleen']  ${password}
+  Wait Until  Element Should Be Enabled  xpath=//section[@id='${section}']//button
+  Click Element  xpath=//section[@id='${section}']//button
   Go to login page
 
 
