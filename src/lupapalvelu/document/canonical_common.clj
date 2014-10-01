@@ -288,9 +288,9 @@
             :puhelin (:puhelin yhteystiedot)
             :sahkopostiosoite (:email yhteystiedot)}
            (when verkkolaskutustiedot
-             {:verkkolaskutustiedot {:ovtTunnus (:ovtTunnus verkkolaskutustiedot)
-                                     :verkkolaskuTunnus (:verkkolaskuTunnus verkkolaskutustiedot)
-                                     :valittajaTunnus (:valittajaTunnus verkkolaskutustiedot)}}))))
+             {:verkkolaskutustieto {:Verkkolaskutus {:ovtTunnus (:ovtTunnus verkkolaskutustiedot)
+                                                    :verkkolaskuTunnus (:verkkolaskuTunnus verkkolaskutustiedot)
+                                                    :valittajaTunnus (:valittajaTunnus verkkolaskutustiedot)}}}))))
 
 (def ^:private default-role "ei tiedossa")
 (defn- get-kuntaRooliKoodi [party party-type]

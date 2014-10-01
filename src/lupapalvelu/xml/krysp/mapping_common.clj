@@ -174,6 +174,7 @@
 
 (def yritys-child_213
   (in-yhteiset-ns (-> yritys-child_211
+    (conj {:tag :verkkolaskutustieto :child [verkkolaskutus_213]})
     (update-child-element [:kayntiosoite] {:tag :kayntiosoitetieto :child [{:tag :kayntiosoite :child postiosoite-children}]})
     (update-child-element [:postiosoite]  {:tag :postiosoitetieto  :child [{:tag :postiosoite  :child postiosoite-children}]}))))
 
