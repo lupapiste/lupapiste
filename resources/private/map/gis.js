@@ -200,9 +200,9 @@ var gis = (function() {
 
     // Select control
 
-    var popupContentProviderResp = null;
     var popupId = "popup-id";
     self.selectedFeature = null;
+    self.popupContentModel = null;
 
     function clearMarkerKnockoutBindings(feature) {
       if (feature && feature.popup) {
@@ -274,11 +274,11 @@ var gis = (function() {
         //
         // TODO: Could only one OpenLayers Popup instance be used here?
         //
-        if (self.popupContentProvider) {
-          popupContentProviderResp = self.popupContentProvider();
-          feature.popup = createPopup(feature, popupContentProviderResp.html);
+        if (self.popupContentModel) {
+          var html = $("section#map-popup-content")[0].innerHTML;
+          feature.popup = createPopup(feature, html);
           self.map.addPopup(feature.popup, true);
-          popupContentProviderResp.applyBindingsFn(popupId);
+          $("#" + popupId + "_contentDiv").applyBindings(self.popupContentModel);
         }
 
         if (self.markerClickCallback) {
@@ -321,15 +321,15 @@ var gis = (function() {
 
       self.markerLayer.addFeatures(newMarkers);
 
-      if (autoSelect && self.popupContentProvider) {
+      if (autoSelect && self.popupContentModel) {
         self.selectControl.select(self.markerLayer.features[0]);
       }
 
       return self;
     };
 
-    self.setPopupContentProvider = function(handler) {
-      self.popupContentProvider = handler;
+    self.setPopupContentModel = function(model) {
+      self.popupContentModel = model;
       return self;
     };
 

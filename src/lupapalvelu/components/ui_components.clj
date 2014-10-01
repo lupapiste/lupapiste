@@ -80,7 +80,8 @@
                   :html ["404.html" "footer.html"]}
 
    :map          {:depends [:common]
-                  :js ["openlayers-2.13_20140619.min.lupapiste.js" "gis.js" "locationsearch.js"]}
+                  :js ["openlayers-2.13_20140619.min.lupapiste.js" "gis.js" "locationsearch.js"]
+                  :html ["map-popup.html"]}
 
    :mypage       {:depends [:common]
                   :js ["mypage.js"]
@@ -165,7 +166,7 @@
 
    :create       {:depends [:common]
                   :js ["municipalities.js" "create.js"]
-                  :html ["create.html" "map-popup.html"]
+                  :html ["create.html"]
                   :css ["create.css"]}
 
    :iframe       {:depends [:common]

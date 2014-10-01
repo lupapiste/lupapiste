@@ -117,16 +117,7 @@
           .makeMap("create-map", false)
           .center(404168, 7205000, zoomLevel)
           .addClickHandler(self.click)
-          .setPopupContentProvider(
-              function() {
-                return {
-                  html: $("section#map-popup-content")[0].innerHTML,
-                  applyBindingsFn: function(popupId) {
-                    $("#" + popupId + "_contentDiv").applyBindings(self);
-                  }
-                };
-              }
-          );
+          .setPopupContentModel(self);
       }
 
       return self
