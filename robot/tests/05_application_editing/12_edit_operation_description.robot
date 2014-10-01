@@ -14,7 +14,9 @@ Mikko edits operation description
   Wait and click  xpath=//span[@data-test-id='edit-op-description']
   Input text by test id  op-description-editor  Talo A
   Wait until  Page should contain  Tallennettu
-  logout
+  Wait until  Element should not be visible  xpath=//input[@data-test-id="edit-op-description"]
+
+  [Teardown]  logout
 
 Mikko can see new operation description
   Mikko logs in
