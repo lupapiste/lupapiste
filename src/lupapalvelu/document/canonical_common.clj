@@ -279,14 +279,18 @@
 (defn- get-simple-yritys [{:keys [yritysnimi liikeJaYhteisoTunnus] :as yritys}]
   {:nimi yritysnimi, :liikeJaYhteisotunnus liikeJaYhteisoTunnus})
 
-(defn- get-yritys-data [{:keys [osoite yhteyshenkilo] :as yritys}]
+(defn- get-yritys-data [{:keys [osoite yhteyshenkilo verkkolaskutustiedot] :as yritys}]
   (let [yhteystiedot (:yhteystiedot yhteyshenkilo)
         postiosoite (get-simple-osoite osoite)]
     (merge (get-simple-yritys yritys)
            {:postiosoite postiosoite ; - 2.1.4
             :postiosoitetieto {:postiosoite postiosoite} ; 2.1.5+
             :puhelin (:puhelin yhteystiedot)
-            :sahkopostiosoite (:email yhteystiedot)})))
+            :sahkopostiosoite (:email yhteystiedot)}
+           (when verkkolaskutustiedot
+             {:verkkolaskutustiedot {:ovtTunnus (:ovtTunnus verkkolaskutustiedot)
+                                     :verkkolaskuTunnus (:verkkolaskuTunnus verkkolaskutustiedot)
+                                     :valittajaTunnus (:valittajaTunnus verkkolaskutustiedot)}}))))
 
 (def ^:private default-role "ei tiedossa")
 (defn- get-kuntaRooliKoodi [party party-type]
@@ -561,7 +565,7 @@
       (assoc-when {}
         :laskuviite (get-in unwrapped-party-doc [:data :laskuviite])
         ; TODO
-        :verkkolaskutustieto nil))))
+        :verkkolaskutustieto (get-in unwrapped-party-doc [:data :verkkolaskutustieto])))))
 
 (defn- get-pos [coordinates]
   {:pos (map #(str (-> % .x) " " (-> % .y)) coordinates)})

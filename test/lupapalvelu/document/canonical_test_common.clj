@@ -111,7 +111,10 @@
                                                    :sukunimi {:value "Betalare"}}
                                    :yhteystiedot {:email {:value "pappa@business.example.com"}
                                                   :puhelin {:value "0500 123456"}}}
-                   :yritysnimi {:value "Pappas Business"}}}})
+                   :yritysnimi {:value "Pappas Business"}
+                   :verkkolaskutustiedot {:ovtTunnus "ovt-1234567890"
+                                          :verkkolaskuTunnus "laskutunnus-1234"
+                                          :valittajaTunnus "valittajatunnus-1234"}}}})
 
 (def drawings [{:id 1,
                :name "alue",

@@ -127,7 +127,11 @@
 (def ^:private maksaja-yritys
   {:id "maksaja-yritys" :schema-info {:name "maksaja"
                                       :version 1}
-   :data {:_selected {:value "yritys"}, :yritys yritys}})
+   :data {:_selected {:value "yritys"}
+          :yritys (merge yritys
+                         {:verkkolaskutustiedot {:ovtTunnus {:value "ovt-1234567890"}
+                                                 :verkkolaskuTunnus {:value "laskutunnus-1234"}
+                                                 :valittajaTunnus {:value "valittajatunnus-1234"}}})}})
 
 (def ^:private tyonjohtaja
   {:id "tyonjohtaja"
@@ -613,16 +617,23 @@
     (validate-person henkilo)
     (fact "yritys is nil" yritys => nil)))
 
+(defn- validate-einvoice [einvoice]
+  (fact "ovt-tunnus" (:ovtTunnus einvoice) => "ovt-1234567890")
+  (fact "verkkolaskuTunnus" (:verkkolaskuTunnus einvoice) => "laskutunnus-1234")
+  (fact "valittajaTunnus" (:valittajaTunnus einvoice) => "valittajatunnus-1234"))
+
 (facts "Canonical maksaja/yritys model is correct"
   (let [osapuoli (tools/unwrapped (:data maksaja-yritys))
         maksaja-model (get-osapuoli-data osapuoli :maksaja)
         henkilo (:henkilo maksaja-model)
-        yritys (:yritys maksaja-model)]
+        yritys (:yritys maksaja-model)
+        verkkolaskutustiedot (:verkkolaskutustiedot yritys)]
     (fact "model" maksaja-model => truthy)
     (fact "kuntaRooliKoodi" (:kuntaRooliKoodi maksaja-model) => "Rakennusvalvonta-asian laskun maksaja")
     (fact "VRKrooliKoodi" (:VRKrooliKoodi maksaja-model) => "maksaja")
     (validate-minimal-person henkilo)
-    (validate-company yritys)))
+    (validate-company yritys)
+    (validate-einvoice verkkolaskutustiedot)))
 
 (testable-privates lupapalvelu.document.canonical-common get-handler)
 
