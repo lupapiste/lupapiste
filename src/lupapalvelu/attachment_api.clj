@@ -51,7 +51,7 @@
             (= (keyword userRole) :authority)))))
 
 (defn- validate-operation [{{op :op} :data}]
-  (when-let [missing (util/missing-keys op [:id :name])]
+  (when-let [missing (if op (util/missing-keys op [:id :name]) false)]
     (fail! :error.missing-parameters :parameters missing)))
 
 ;;
@@ -421,8 +421,8 @@
        (fail :error.password)))))
 
 ;;
-;; Operation
-;;
+;; Label
+;; 
 
 (defcommand set-attachment-operation
   {:parameters [id attachmentId op]
@@ -440,3 +440,18 @@
                         {:attachments {$elemMatch {:id attachmentId}}}
                         {$set {:attachments.$.op newOp,
                                :attachments.$.modified (now)}})))
+
+(defcommand set-attachment-contents
+  {:parameters [id attachmentId contents]
+   :roles      [:applicant :authority]
+   :extra-auth-roles [:statementGiver]
+   :states     (action/all-states-but [:answered :sent :closed :canceled])}
+  [{:keys [application user] :as command}]
+  
+  (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
+    (fail! :error.pre-verdict-attachment))
+
+  (update-application command
+                      {:attachments {$elemMatch {:id attachmentId}}}
+                      {$set {:attachments.$.contents contents,
+                             :attachments.$.modified (now)}}))

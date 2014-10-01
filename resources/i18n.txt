@@ -16,3 +16,5 @@ help.KM.statementsDesc: Viranomainen voi tarvittaessa pyytää hakemuksesta <b> 
 help.KM.verdictDesc: Täällä näet viranomaisen tekemät hakemukseesi liittyvät päätökset. Saat sähköpostiviestin, kun viranomainen lisää päätöksen.
 help.KM.neighborsDesc: Viranomainen voi tarvittaessa pyytää tiedottamaan naapureitasi hankkeestasi. Tällä välilehdellä näet <b>listan tiedotettavista naapureista</b>. Voit hoitaa naapurin tiedottamisen paperilomakkeella ja liittää skannatun lomakkeen tai <b>lähettää naapurille tiedotteen sähköpostitse Lupapisteen kautta</b>.
 help.KM.conversationDesc: Täällä voit keskustella hakemuksesta viranomaisten ja valtuutettujen kanssa. "Kysy viranomaiselta" - toiminnolla kutsut viranomaisen vastaamaan kysymykseesi. Tällöin viranomainen näkee hakemuksesi ja voi vastata esittämiisi kysymyksiin. Näin voitte yhdessä valmistella hakemusta ennen sen jättämistä.
+
+attachment.label.contents: Piirustuksen sisältö

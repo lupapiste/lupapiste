@@ -101,16 +101,19 @@ var attachment = (function() {
       id:     ko.observable(),
       title:  ko.observable()
     },
-    filename:       ko.observable(),
-    latestVersion:  ko.observable({}),
-    versions:       ko.observable([]),
-    signatures:     ko.observableArray([]),
-    type:           ko.observable(),
-    attachmentType: ko.observable(),
+    filename:        ko.observable(),
+    latestVersion:   ko.observable({}),
+    versions:        ko.observable([]),
+    signatures:      ko.observableArray([]),
+    type:            ko.observable(),
+    attachmentType:  ko.observable(),
     allowedAttachmentTypes: ko.observableArray([]),
     previewDisabled: ko.observable(false),
     operation:       ko.observable(),
     selectableOperations: ko.observableArray(),
+    contents:        ko.observable(),
+
+    subscriptions:   [],
 
     hasPreview: function() {
       return !model.previewDisabled() && (model.isImage() || model.isPdf() || model.isPlainText());
@@ -176,7 +179,7 @@ var attachment = (function() {
     return null;
   });
 
-  model.attachmentType.subscribe(function(attachmentType) {
+  model.subscriptions.push(model.attachmentType.subscribe(function(attachmentType) {
     var type = model.type();
     var prevAttachmentType = type["type-group"] + "." + type["type-id"];
     var loader$ = $("#attachment-type-select-loader");
@@ -198,27 +201,46 @@ var attachment = (function() {
         })
         .call();
     }
-  });
+  }));
 
-  model.selectedOperationId.subscribe(function(id) {
-    if (model.operation() && id !== model.operation().id) {
-      // TODO show indocator
-      var op = _.findWhere(model.selectableOperations(), {id: id});
-      ajax
-        .command("set-attachment-operation",
-          {id:            applicationId,
-           attachmentId:  attachmentId,
-           op:            op})
-        .success(function() {
-          repository.load(applicationId);
-        })
-        .error(function(e) {
-          repository.load(applicationId);
-          error(e.text);
-        })
-        .call();
+  function saveLabelInformation(type, data) {
+    data.id = applicationId
+    data.attachmentId = attachmentId;
+    ajax
+      .command("set-attachment-" + type, data)
+      .success(function() {
+        console.log("success");
+        repository.load(applicationId);
+      })
+      .error(function(e) {
+        error(e.text)
+        repository.load(applicationId);
+      })
+      .call();
+  }
+
+  function subscribe() {
+    model.subscriptions.push(model.selectedOperationId.subscribe(function(id) {
+      if (!model.operation() || id !== model.operation().id) {
+        var op = _.findWhere(model.selectableOperations(), {id: id});
+        op = op || null
+        saveLabelInformation("operation", {op: op});
+      }
+    }));
+
+    model.subscriptions.push(model.contents.subscribe(_.debounce(function(value) {
+      // TODO prevent saving contents in initialization
+      if (value) {
+        saveLabelInformation("contents", {contents: value});
+      }
+    }, 500)));
+  }
+
+  function unsubscribe() {
+    while(model.subscriptions.length !== 0) {
+      model.subscriptions.pop().dispose();
     }
-  });
+  }
 
   function showAttachment(applicationDetails) {
     var application = applicationDetails.application;
@@ -239,6 +261,7 @@ var attachment = (function() {
     model.selectableOperations(application.operations);
     model.operation(attachment.op);
     model.selectedOperationId(attachment.op ? attachment.op.id : undefined);
+    model.contents(attachment.contents);
 
     var type = attachment.type["type-group"] + "." + attachment.type["type-id"];
     model.attachmentType(type);
@@ -260,7 +283,6 @@ var attachment = (function() {
     authorizationModel.refresh(application, {attachmentId: attachmentId});
 
     // Side Panel
-
     pageutil.hideAjaxWait();
   }
 
@@ -273,7 +295,9 @@ var attachment = (function() {
 
   repository.loaded(["attachment"], function(application, applicationDetails) {
     if (applicationId === application.id) {
+      unsubscribe();
       showAttachment(applicationDetails);
+      subscribe();
     }
   });
 

@@ -30,11 +30,14 @@
             <button data-bind="ltext: 'attachment.delete', click: deleteAttachment, visible: $root.authorization.ok('delete-attachment'),  enable: $root.authorization.ok('delete-attachment')" data-test-id="delete-attachment">Poista liite</button>
           </div>
           <div class="attachment-infomation">
+            <label data-bind="ltext: 'attachment.label.contents'"></label>
+            <input class="form-input" type="text" data-bind="value: contents, valueUpdate: 'afterkeydown'"></input>
             <label data-bind="ltext: 'applications.operation'"></label>
             <select id="attachment-operation-select" class="long"
               data-bind="options: selectableOperations,
                          optionsText: function(item) {return item.description ? loc([item.name, '_group_label']) + ' - ' + item.description : loc([item.name, '_group_label'])},
                          optionsValue: 'id',
+                         optionsCaption: loc('choose'),
                          value: selectedOperationId,
                          enable: $root.authorization.ok('set-attachment-type')"></select>
           </div>
