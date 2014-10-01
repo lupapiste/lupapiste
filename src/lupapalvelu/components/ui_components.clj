@@ -23,6 +23,7 @@
                  :passwordMinLength (env/value :password :minlength)
                  :mode              env/mode
                  :build             (:build-number env/buildinfo)
+                 :cookie            (env/value :cookie)
                  :wannaJoinUrl      (env/value :oir :wanna-join-url)
                  :userAttachmentTypes (map #(str "osapuolet." (name %)) attachment-types-osapuoli)}]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
@@ -233,8 +234,8 @@
                  :css     ["login-frame.css"]}
 
    :welcome {:depends [:login :register :link-account :debug :user-menu :screenmessages]
-             :js ["welcome.js"]
-             :html ["index.html" "login.html"]}
+             :js ["welcome.js" "password-reset.js" "company-user.js"]
+             :html ["index.html" "login.html" "password-reset.html" "company-user.html"]}
 
    :oskari  {:css ["oskari.css"]}
 
