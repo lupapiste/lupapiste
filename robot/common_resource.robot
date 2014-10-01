@@ -537,6 +537,7 @@ Input comment
   Input text  xpath=//div[@id='conversation-panel']//textarea[@data-test-id='application-new-comment-text']  ${message}
   Click element  xpath=//div[@id='conversation-panel']//button[@data-test-id='application-new-comment-btn']
   Wait until  Element should be visible  xpath=//div[@id='conversation-panel']//div[contains(@class,'comment-text')]//span[text()='${message}']
+  Close side panel  conversation
 
 Input inforequest comment
   [Arguments]  ${message}
