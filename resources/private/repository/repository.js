@@ -26,6 +26,10 @@ var repository = (function() {
         attachment.signed = true;
       }
     }
+    
+    if (!_.isUndefined(attachment.sent)) {
+      attachment.sentDateString = moment(attachment.sent).format("D.M.YYYY");
+    }
   }
 
   function load(id, pending, callback) {
