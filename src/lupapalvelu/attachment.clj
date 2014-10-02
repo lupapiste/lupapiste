@@ -22,6 +22,14 @@
    :paa_ja_rakennussuunnittelijan_tiedot
    :tutkintotodistus])
 
+(def attachment-scales
+  ["1:20"
+   "1:50"
+   "1:100"
+   "1:200"
+   "1:500"
+   :muu])
+
 (def ^:private attachment-types-R
   [:hakija [:osakeyhtion_perustamiskirja
             :ote_asunto_osakeyhtion_hallituksen_kokouksen_poytakirjasta

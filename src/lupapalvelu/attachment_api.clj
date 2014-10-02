@@ -455,3 +455,18 @@
                       {:attachments {$elemMatch {:id attachmentId}}}
                       {$set {:attachments.$.contents contents,
                              :attachments.$.modified (now)}}))
+
+(defcommand set-attachment-scale
+  {:parameters [id attachmentId scale]
+   :roles      [:applicant :authority]
+   :extra-auth-roles [:statementGiver]
+   :states     (action/all-states-but [:answered :sent :closed :canceled])}
+  [{:keys [application user] :as command}]
+  
+  (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
+    (fail! :error.pre-verdict-attachment))
+
+  (update-application command
+                      {:attachments {$elemMatch {:id attachmentId}}}
+                      {$set {:attachments.$.scale scale,
+                             :attachments.$.modified (now)}}))
