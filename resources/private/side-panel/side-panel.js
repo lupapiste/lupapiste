@@ -21,6 +21,7 @@ LUPAPISTE.SidePanelModel = function() {
   self.infoRequest = ko.observable();
   self.authentication = ko.observable();
   self.authorities = ko.observable();
+  self.mainConversation = ko.observable(true);
 
   self.sidePanelVisible = ko.computed(function() {
     return self.showConversationPanel() || self.showNoticePanel();
@@ -57,8 +58,10 @@ LUPAPISTE.SidePanelModel = function() {
 
     if (self.application()) {
       var type = pageutil.getPage();
+      self.mainConversation(true);
       switch(type) {
         case "attachment":
+          self.mainConversation(false);
         case "statement":
           self.comment().refresh(self.application(), false, {type: type, id: pageutil.lastSubPage()});
           break;
@@ -75,6 +78,8 @@ LUPAPISTE.SidePanelModel = function() {
   self.toggleConversationPanel = function(data, event) {
     self.showConversationPanel(!self.showConversationPanel());
     self.showNoticePanel(false);
+    // Set focus to new comment textarea
+    self.comment().isSelected(self.showConversationPanel());
 
     setTimeout(function() {
       // Mark comments seen after a second

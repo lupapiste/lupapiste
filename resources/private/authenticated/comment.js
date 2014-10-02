@@ -16,8 +16,10 @@ var comments = (function() {
     self.to = ko.observable();
     self.showAttachmentComments = ko.observable(false);
     self.showPreparationComments = ko.observable(false);
+    self.isSelected = ko.observable();
 
     self.refresh = function(application, takeAll, target, newCommentRoles) {
+      var oldValue = self.text();
       self.applicationId = application.id;
       self.target(target || {type: "application"}).text("");
       self.takeAll = takeAll;
@@ -28,6 +30,7 @@ var comments = (function() {
             return self.takeAll || self.target().type === comment.target.type && self.target().id === comment.target.id;
           });
       self.comments(ko.mapping.fromJS(filteredComments));
+      self.text(oldValue);
     };
 
     self.isForMe = function(model) {
@@ -37,7 +40,6 @@ var comments = (function() {
     self.disabled = ko.computed(function() {
       return self.processing() || _.isEmpty(_.trim(self.text()));
     });
-
 
     var doAddComment = function(markAnswered, openApplication) {
       ajax.command("add-comment", {
