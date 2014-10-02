@@ -13,9 +13,12 @@ Mikko edits operation description
   Open application  application-papplication  753-416-25-30
   Wait and click  xpath=//span[@data-test-id='edit-op-description']
   Input text by test id  op-description-editor  Talo A
+  Wait until  Page should contain  Tallennettu
+  Wait until  Element should not be visible  xpath=//input[@data-test-id="edit-op-description"]
+
+  [Teardown]  logout
 
 Mikko can see new operation description
-  logout
   Mikko logs in
   Open application  application-papplication  753-416-25-30
   Wait until  Element text should be  xpath=//span[@data-test-id='op-description']  Talo A
