@@ -112,6 +112,8 @@ var attachment = (function() {
     operation:       ko.observable(),
     selectableOperations: ko.observableArray(),
     contents:        ko.observable(),
+    scale:           ko.observable(),
+    scales:          ko.observableArray(LUPAPISTE.config.attachmentScales),
 
     subscriptions:   [],
 
@@ -209,7 +211,6 @@ var attachment = (function() {
     ajax
       .command("set-attachment-" + type, data)
       .success(function() {
-        console.log("success");
         repository.load(applicationId);
       })
       .error(function(e) {
@@ -220,6 +221,16 @@ var attachment = (function() {
   }
 
   function subscribe() {
+    function applySubscription(label) {
+      model.subscriptions.push(model[label].subscribe(_.debounce(function(value) {
+        if (value) {
+          var data = {}
+          data[label] = value
+          saveLabelInformation(label, data);
+        }
+      }, 500)));
+    }
+
     model.subscriptions.push(model.selectedOperationId.subscribe(function(id) {
       if (!model.operation() || id !== model.operation().id) {
         var op = _.findWhere(model.selectableOperations(), {id: id});
@@ -228,12 +239,8 @@ var attachment = (function() {
       }
     }));
 
-    model.subscriptions.push(model.contents.subscribe(_.debounce(function(value) {
-      // TODO prevent saving contents in initialization
-      if (value) {
-        saveLabelInformation("contents", {contents: value});
-      }
-    }, 500)));
+    applySubscription("contents");
+    applySubscription("scale");
   }
 
   function unsubscribe() {
@@ -262,6 +269,7 @@ var attachment = (function() {
     model.operation(attachment.op);
     model.selectedOperationId(attachment.op ? attachment.op.id : undefined);
     model.contents(attachment.contents);
+    model.scale(attachment.scale);
 
     var type = attachment.type["type-group"] + "." + attachment.type["type-id"];
     model.attachmentType(type);
