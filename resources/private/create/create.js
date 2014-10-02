@@ -117,7 +117,7 @@
           .makeMap("create-map", false)
           .center(404168, 7205000, zoomLevel)
           .addClickHandler(self.click)
-          .setPopupContentModel(self);
+          .setPopupContentModel(self, "section#map-popup-content");
       }
 
       return self

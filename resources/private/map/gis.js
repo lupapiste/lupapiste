@@ -275,10 +275,10 @@ var gis = (function() {
         // TODO: Could only one OpenLayers Popup instance be used here?
         //
         if (self.popupContentModel) {
-          var html = $("section#map-popup-content")[0].innerHTML;
+          var html = $(self.popupContentModel.templateId)[0].innerHTML;
           feature.popup = createPopup(feature, html);
           self.map.addPopup(feature.popup, true);
-          $("#" + popupId + "_contentDiv").applyBindings(self.popupContentModel);
+          $("#" + popupId + "_contentDiv").applyBindings(self.popupContentModel.model);
         }
 
         if (self.markerClickCallback) {
@@ -328,8 +328,11 @@ var gis = (function() {
       return self;
     };
 
-    self.setPopupContentModel = function(model) {
-      self.popupContentModel = model;
+    self.setPopupContentModel = function(model, templateId) {
+      self.popupContentModel = {
+        model: model,
+        templateId: templateId
+      };
       return self;
     };
 
