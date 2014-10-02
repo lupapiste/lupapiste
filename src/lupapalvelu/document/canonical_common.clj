@@ -558,6 +558,9 @@
            :sahkopostiosoite (:email yhteystiedot))))
       )))
 
+(defn get-verkkolaskutustieto [unwrapped-party-doc]
+  {:Verkkolaskutus (get-in unwrapped-party-doc [:data :yritys :verkkolaskutustiedot])})
+
 (defn get-maksajatiedot [unwrapped-party-doc]
   (merge
     (get-yhteystiedot unwrapped-party-doc)
@@ -565,7 +568,7 @@
       (assoc-when {}
         :laskuviite (get-in unwrapped-party-doc [:data :laskuviite])
         ; TODO
-        :verkkolaskutustieto (get-in unwrapped-party-doc [:data :verkkolaskutustieto])))))
+        :verkkolaskutustieto (get-verkkolaskutustieto unwrapped-party-doc)))))
 
 (defn- get-pos [coordinates]
   {:pos (map #(str (-> % .x) " " (-> % .y)) coordinates)})
