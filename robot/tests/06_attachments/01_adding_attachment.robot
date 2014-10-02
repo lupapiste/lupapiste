@@ -116,6 +116,7 @@ Sonja goes to conversation tab
   Open side panel  conversation
   Click Element  link=Ote alueen peruskartasta
   Wait Until Page Contains  ${TXT_TESTFILE_NAME}
+  Close side panel  conversation
 
 Sonja goes to attachments tab
   [Tags]  attachments
