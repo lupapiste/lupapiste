@@ -111,7 +111,7 @@
 (defn get-document-by-id
   "returns first document from application with the document-id"
   [{documents :documents} document-id]
-  (first (filter #(= (name document-id) (:id %)) documents)))
+  (first (filter #(= document-id (:id %)) documents)))
 
 (defn get-documents-by-name
   "returns document from application by schema name"
