@@ -29,14 +29,14 @@
             <button data-test-id="change-attachment-type" data-bind="ltext: 'attachment.changeType', click: showChangeTypeDialog"></button>
             <button data-bind="ltext: 'attachment.delete', click: deleteAttachment, visible: $root.authorization.ok('delete-attachment'),  enable: $root.authorization.ok('delete-attachment')" data-test-id="delete-attachment">Poista liite</button>
           </div>
-          <div class="attachment-infomation">
+          <div class="attachment-label">
             <div class="attachment-info-field">
               <label data-bind="ltext: 'attachment.label.contents'"></label>
               <input class="form-input" type="text" data-bind="value: contents, valueUpdate: 'afterkeydown'" data-test-id="attachment-content-input"></input>
             </div>
             <div class="attachment-info-field">
               <label data-bind="ltext: 'applications.operation'"></label>
-              <select id="attachment-operation-select" class="long"
+              <select id="attachment-operation-select"
                 data-bind="options: selectableOperations,
                            optionsText: function(item) {return item.description ? loc([item.name, '_group_label']) + ' - ' + item.description : loc([item.name, '_group_label'])},
                            optionsValue: 'id',
@@ -46,7 +46,7 @@
             </div>
             <div class="attachment-info-field">
               <label data-bind="ltext: 'attachment.label.scale'"></label>
-              <select id="attachment-scale-select" class="long"
+              <select id="attachment-scale-select"
                 data-bind="options: scales,
                            optionsText: function(item) {return item === 'muu' ? loc('select-other') : item},
                            optionsCaption: loc('choose'),
