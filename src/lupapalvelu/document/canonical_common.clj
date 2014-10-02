@@ -567,7 +567,6 @@
     (not-empty
       (assoc-when {}
         :laskuviite (get-in unwrapped-party-doc [:data :laskuviite])
-        ; TODO
         :verkkolaskutustieto (get-verkkolaskutustieto unwrapped-party-doc)))))
 
 (defn- get-pos [coordinates]
