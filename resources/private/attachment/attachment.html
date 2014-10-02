@@ -31,7 +31,7 @@
           </div>
           <div class="attachment-infomation">
             <label data-bind="ltext: 'attachment.label.contents'"></label>
-            <input class="form-input" type="text" data-bind="value: contents, valueUpdate: 'afterkeydown'"></input>
+            <input class="form-input" type="text" data-bind="value: contents, valueUpdate: 'afterkeydown'" data-test-id="attachment-content-input"></input>
             <label data-bind="ltext: 'applications.operation'"></label>
             <select id="attachment-operation-select" class="long"
               data-bind="options: selectableOperations,
