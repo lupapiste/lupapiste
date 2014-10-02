@@ -172,6 +172,13 @@
                    {:tag :www}
                    {:tag :sahkopostiosoite}])
 
+(def verkkolaskutus_213
+  {:tag :Verkkolaskutus
+   :ns "yht"
+   :child [{:tag :ovtTunnus}
+           {:tag :verkkolaskuTunnus}
+           {:tag :valittajaTunnus}]})
+
 (def yritys-child_213
   (in-yhteiset-ns (-> yritys-child_211
     (conj {:tag :verkkolaskutustieto :child [verkkolaskutus_213]})
@@ -371,13 +378,6 @@
                                             :child [{:tag :nimi
                                                      :child [{:tag :etunimi}
                                                              {:tag :sukunimi}]}]}]}])
-
-(def verkkolaskutus_213
-  {:tag :Verkkolaskutus
-   :ns "yht"
-   :child [{:tag :ovtTunnus}
-           {:tag :verkkolaskuTunnus}
-           {:tag :valittajaTunnus}]})
 
 (def yhteystietotype-children_213
   (in-yhteiset-ns
