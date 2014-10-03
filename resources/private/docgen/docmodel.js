@@ -1289,6 +1289,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var description = document.createTextNode("");
     var descriptionInput = document.createElement("input");
     var iconSpan = document.createElement("span");
+    var iconSpanDescription = document.createTextNode(loc('edit'));
 
     // test ids
     descriptionSpan.setAttribute("data-test-id", "op-description");
@@ -1300,6 +1301,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     if (operation.description) {
       description.nodeValue = operation.description;
       descriptionInput.value = operation.description;
+    } else {
+      iconSpan.appendChild(iconSpanDescription);
     }
 
     descriptionInput.type = "text";
@@ -1315,6 +1318,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       var value = _.trim(descriptionInput.value);
       if (value === "") {
         value = null;
+        iconSpan.appendChild(iconSpanDescription);
+
       }
 
       ajax.command("update-op-description", {id: self.appId, 'op-id': operation.id, desc: value })
@@ -1348,13 +1353,16 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     iconSpan.className = "icon edit";
     iconSpan.onclick = function(event) {
+      if (iconSpan.contains(iconSpanDescription)) {
+        iconSpan.removeChild(iconSpanDescription);
+      }
       // on ie8 there is no event
       if (event) {
         event.stopPropagation();
       }
       $(iconSpan).addClass("hidden");
-      $(descriptionInput).removeClass("hidden");
       $(descriptionSpan).addClass("hidden");
+      $(descriptionInput).removeClass("hidden");
       descriptionInput.focus();
     };
 
