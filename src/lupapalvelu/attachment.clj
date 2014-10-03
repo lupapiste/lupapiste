@@ -206,7 +206,8 @@
    :kiinteiston_hallinta [:jaljennos_perunkirjasta
                           :rasitesopimus
                           :rasitesopimuksen_liitekartta
-                          :ote_asunto-osakeyhtion_kokouksen_poytakirjasta]])
+                          :ote_asunto-osakeyhtion_kokouksen_poytakirjasta]
+   :muut [:muu]])
 
 ;;
 ;; Api
