@@ -140,16 +140,16 @@
                        [henkilotiedot-minimal]
                        yhteystiedot)}))
 
-(def verkkolaskutustiedot [{:name "ovtTunnus" :type :string :min-len 12 :max-len 17}
-                           {:name "verkkolaskuTunnus" :type :string}
-                           {:name "valittajaTunnus" :type :string}])
+(def verkkolaskutustieto [{:name "ovtTunnus" :type :string :min-len 12 :max-len 17}
+                          {:name "verkkolaskuTunnus" :type :string}
+                          {:name "valittajaTunnus" :type :string}])
 
 (def yritys-with-verkkolaskutustieto (body
                                        yritys
-                                       {:name "verkkolaskutustiedot"
+                                       {:name "verkkolaskutustieto"
                                         :type :group
                                         :body (body
-                                                verkkolaskutustiedot)}))
+                                                verkkolaskutustieto)}))
 
 (def party (body
              {:name select-one-of-key :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}]}

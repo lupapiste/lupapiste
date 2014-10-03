@@ -129,9 +129,10 @@
                                       :version 1}
    :data {:_selected {:value "yritys"}
           :yritys (merge yritys
-                         {:verkkolaskutustiedot {:ovtTunnus {:value "ovt-1234567890"}
-                                                 :verkkolaskuTunnus {:value "laskutunnus-1234"}
-                                                 :valittajaTunnus {:value "valittajatunnus-1234"}}})}})
+                         {:verkkolaskutustieto
+                           {:ovtTunnus {:value "ovt-1234567890"}
+                           :verkkolaskuTunnus {:value "laskutunnus-1234"}
+                           :valittajaTunnus {:value "valittajatunnus-1234"}}})}})
 
 (def ^:private tyonjohtaja
   {:id "tyonjohtaja"
@@ -627,13 +628,13 @@
         maksaja-model (get-osapuoli-data osapuoli :maksaja)
         henkilo (:henkilo maksaja-model)
         yritys (:yritys maksaja-model)
-        verkkolaskutustiedot (:verkkolaskutustiedot yritys)]
+        verkkolaskutustieto (-> yritys :verkkolaskutustieto :Verkkolaskutus)]
     (fact "model" maksaja-model => truthy)
     (fact "kuntaRooliKoodi" (:kuntaRooliKoodi maksaja-model) => "Rakennusvalvonta-asian laskun maksaja")
     (fact "VRKrooliKoodi" (:VRKrooliKoodi maksaja-model) => "maksaja")
     (validate-minimal-person henkilo)
     (validate-company yritys)
-    (validate-einvoice verkkolaskutustiedot)))
+    (validate-einvoice verkkolaskutustieto)))
 
 (testable-privates lupapalvelu.document.canonical-common get-handler)
 

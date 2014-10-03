@@ -279,7 +279,7 @@
 (defn- get-simple-yritys [{:keys [yritysnimi liikeJaYhteisoTunnus] :as yritys}]
   {:nimi yritysnimi, :liikeJaYhteisotunnus liikeJaYhteisoTunnus})
 
-(defn- get-yritys-data [{:keys [osoite yhteyshenkilo verkkolaskutustiedot] :as yritys}]
+(defn- get-yritys-data [{:keys [osoite yhteyshenkilo verkkolaskutustieto] :as yritys}]
   (let [yhteystiedot (:yhteystiedot yhteyshenkilo)
         postiosoite (get-simple-osoite osoite)]
     (merge (get-simple-yritys yritys)
@@ -287,10 +287,10 @@
             :postiosoitetieto {:postiosoite postiosoite} ; 2.1.5+
             :puhelin (:puhelin yhteystiedot)
             :sahkopostiosoite (:email yhteystiedot)}
-           (when verkkolaskutustiedot
-             {:verkkolaskutustieto {:Verkkolaskutus {:ovtTunnus (:ovtTunnus verkkolaskutustiedot)
-                                                    :verkkolaskuTunnus (:verkkolaskuTunnus verkkolaskutustiedot)
-                                                    :valittajaTunnus (:valittajaTunnus verkkolaskutustiedot)}}}))))
+           (when verkkolaskutustieto
+             {:verkkolaskutustieto {:Verkkolaskutus {:ovtTunnus (-> verkkolaskutustieto :ovtTunnus)
+                                                    :verkkolaskuTunnus (-> verkkolaskutustieto :verkkolaskuTunnus)
+                                                    :valittajaTunnus (-> verkkolaskutustieto :valittajaTunnus)}}}))))
 
 (def ^:private default-role "ei tiedossa")
 (defn- get-kuntaRooliKoodi [party party-type]
@@ -329,7 +329,7 @@
                         {:henkilotunnus (-> (:henkilotiedot henkilo) :hetu)
                          :osoite (get-simple-osoite (:osoite henkilo))}))}
           (when yritys-type-osapuoli?
-            {:yritys  (get-yritys-data (:yritys osapuoli))})
+            {:yritys (get-yritys-data (:yritys osapuoli))})
           (when omistajalaji {:omistajalaji omistajalaji}))))))
 
 (defn get-parties-by-type [documents tag-name party-type doc-transformer]
@@ -559,7 +559,9 @@
       )))
 
 (defn get-verkkolaskutustieto [unwrapped-party-doc]
-  {:Verkkolaskutus (get-in unwrapped-party-doc [:data :yritys :verkkolaskutustiedot])})
+  (let [verkkolaskutustieto (get-in unwrapped-party-doc [:data :yritys :verkkolaskutustieto])]
+    (assoc-when {}
+      :Verkkolaskutus verkkolaskutustieto)))
 
 (defn get-maksajatiedot [unwrapped-party-doc]
   (merge
