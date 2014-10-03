@@ -140,7 +140,7 @@
                        [henkilotiedot-minimal]
                        yhteystiedot)}))
 
-(def verkkolaskutustieto [{:name "ovtTunnus" :type :string :min-len 12 :max-len 17}
+(def verkkolaskutustieto [{:name "ovtTunnus" :type :string :subtype :ovt :min-len 12 :max-len 17}
                           {:name "verkkolaskuTunnus" :type :string}
                           {:name "valittajaTunnus" :type :string}])
 
