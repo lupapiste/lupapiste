@@ -565,7 +565,9 @@
                 <td>
                   <span data-bind="click: $root.application.deleteSingleAttachment,
                                   clickBubble: false,
-                                  attr: {'class': 'icon remove-grey', 'title': loc('attachment.delete')}"></span>
+                                  attr: {'class': 'icon remove-grey',
+                                         'title': loc('attachment.delete'),
+                                         'data-test-icon': 'delete-' + type['type-group'] + '.' + type['type-id']}"></span>
                 </td>
               </tr>
               <!-- /ko -->
