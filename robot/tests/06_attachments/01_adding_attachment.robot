@@ -79,7 +79,7 @@ Change attachment type
   Wait Until  Page Should Not Contain  xpath=//a[@data-test-type="muut.muu"]
 
 Signature icon is not visible
-  Element should not be visible  xpath=//span[@data-test-icon="signed-rakennuspaikka.ote_alueen_peruskartasta"]
+  Element should not be visible  xpath=//div[@id="application-attachments-tab"]//span[@data-test-icon="signed-rakennuspaikka.ote_alueen_peruskartasta"]
   
 Sign all attachments
   [Tags]  attachments
@@ -92,7 +92,7 @@ Sign all attachments
   Confirm  dynamic-ok-confirm-dialog
 
 Signature icon is visible
-  Wait Until  Element should be visible  xpath=//span[@data-test-icon="signed-rakennuspaikka.ote_alueen_peruskartasta"]
+  Wait Until  Element should be visible  xpath=//div[@id="application-attachments-tab"]//span[@data-test-icon="signed-rakennuspaikka.ote_alueen_peruskartasta"]
   
 Signature is visible
   Open attachment details  rakennuspaikka.ote_alueen_peruskartasta
@@ -164,6 +164,11 @@ Sonja approves attachment
 Approve-button should be disabled
   [Tags]  attachments
   Wait until  Element should be disabled  test-attachment-approve
+  
+Attachment state should be ok
+  Click element  xpath=//a[@data-test-id="back-to-application-from-attachment"]
+  Tab should be visible  attachments
+  Wait Until  Attachment state should be  rakennuspaikka.ote_alueen_peruskartasta  ok
 
 *** Keywords ***
 
