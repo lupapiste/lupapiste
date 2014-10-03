@@ -1186,11 +1186,12 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }
   }
 
-  function createIndicator(eventTarget) {
+  function createIndicator(eventTarget, className) {
+    className = className || "form-indicator";
     var parent$ = $(eventTarget.parentNode);
-    parent$.find(".form-indicator").remove();
+    parent$.find("." + className).remove();
     var indicator = document.createElement("span");
-    indicator.className = "form-indicator";
+    indicator.className = className;
     parent$.append(indicator);
     return indicator;
   }
@@ -1282,6 +1283,96 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return false;
   }
 
+  function buildDescriptionElement(operation) {
+    var wrapper = document.createElement("span");
+    var descriptionSpan = document.createElement("span");
+    var description = document.createTextNode("");
+    var descriptionInput = document.createElement("input");
+    var iconSpan = document.createElement("span");
+    var iconSpanDescription = document.createTextNode(loc('edit'));
+
+    // test ids
+    descriptionSpan.setAttribute("data-test-id", "op-description");
+    iconSpan.setAttribute("data-test-id", "edit-op-description");
+    descriptionInput.setAttribute("data-test-id", "op-description-editor");
+
+    wrapper.className = "op-description-wrapper";
+    descriptionSpan.className = "op-description"
+    if (operation.description) {
+      description.nodeValue = operation.description;
+      descriptionInput.value = operation.description;
+    } else {
+      iconSpan.appendChild(iconSpanDescription);
+    }
+
+    descriptionInput.type = "text";
+    descriptionInput.className = "accordion-input text hidden";
+
+    descriptionInput.onclick = function(event) {
+      // Prevent collapsing accordion when input is clicked
+      event.stopPropagation();
+    };
+
+    var saveInput = function() {
+      $(descriptionInput).off("blur");
+      var value = _.trim(descriptionInput.value);
+      if (value === "") {
+        value = null;
+        iconSpan.appendChild(iconSpanDescription);
+
+      }
+
+      ajax.command("update-op-description", {id: self.appId, 'op-id': operation.id, desc: value })
+        .success(function() {
+          var indicator = createIndicator(descriptionInput, "accordion-indicator")
+          showIndicator(indicator, "accordion-input-saved", "form.saved");
+        })
+        .call();
+
+      description.nodeValue = descriptionInput.value;
+      $(descriptionInput).addClass("hidden");
+      $(iconSpan).removeClass("hidden");
+      $(descriptionSpan).removeClass("hidden");
+    };
+
+    descriptionInput.onfocus = function(event) {
+      descriptionInput.onblur = function(event) {
+        saveInput();
+      }
+    }
+
+    descriptionInput.onkeyup = function(event) {
+      // trigger save on enter and esc keypress
+      var keyCode = event ? event.keyCode : window.event.keyCode; // ie8
+      if (keyCode == 13 || keyCode == 27) {
+        $(descriptionInput).off("blur");
+        descriptionInput.blur();
+        saveInput();
+      }
+    }
+
+    iconSpan.className = "icon edit";
+    iconSpan.onclick = function(event) {
+      if (iconSpan.contains(iconSpanDescription)) {
+        iconSpan.removeChild(iconSpanDescription);
+      }
+      // on ie8 there is no event
+      if (event) {
+        event.stopPropagation();
+      }
+      $(iconSpan).addClass("hidden");
+      $(descriptionSpan).addClass("hidden");
+      $(descriptionInput).removeClass("hidden");
+      descriptionInput.focus();
+    };
+
+    descriptionSpan.appendChild(description);
+    wrapper.appendChild(descriptionSpan);
+    wrapper.appendChild(descriptionInput);
+    wrapper.appendChild(iconSpan);
+    return wrapper;
+  }
+
   function buildElement() {
     var op = self.schema.info.op;
 
@@ -1301,6 +1392,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     if (op) {
       title.appendChild(document.createTextNode(loc([op.name, "_group_label"])));
+      title.appendChild(buildDescriptionElement(op));
     } else {
       title.appendChild(document.createTextNode(loc([self.schema.info.name, "_group_label"])));
     }

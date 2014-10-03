@@ -25,6 +25,7 @@
                  [commons-io/commons-io "2.4"]
                  [commons-codec/commons-codec "1.9"]
                  [com.lowagie/itext "4.2.1" :exclusions [org.bouncycastle/bctsp-jdk14]]
+                 [net.java.dev.jai-imageio/jai-imageio-core-standalone "1.2-pre-dr-b04-2014-09-13"]
                  [de.ubercode.clostache/clostache "1.4.0"]
                  [endophile "0.1.2" :exclusions [hiccup]]
                  [com.draines/postal "1.11.1" :exclusions [commons-codec/commons-codec]]
@@ -60,7 +61,9 @@
   :nitpicker {:exts ["clj" "js" "html"]
               :excludes [#"jquery" #"underscore" #"hgnotes" #"terms\.html" #"\/email-templates\/"]}
   :repositories [["solita-archiva" {:url "http://mvn.solita.fi/archiva/repository/solita"
-                                    :checksum :ignore}]]
+                                    :checksum :ignore}]
+                 ["mygrid-repository" {:url "http://www.mygrid.org.uk/maven/repository"
+                                       :snapshots false}]]
   :plugin-repositories [["solita-archiva" {:url "http://mvn.solita.fi/archiva/repository/solita"
                                            :checksum :ignore}]]
   :aliases {"integration" ["with-profile" "dev,itest" "midje"]

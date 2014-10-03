@@ -200,7 +200,14 @@
           :muu]])
 
 (def ^:private attachment-types-KM
-  [:hakija])
+  [:hakija [:valtakirja
+            :virkatodistus
+            :ote_kauppa_ja_yhdistysrekisterista]
+   :kiinteiston_hallinta [:jaljennos_perunkirjasta
+                          :rasitesopimus
+                          :rasitesopimuksen_liitekartta
+                          :ote_asunto-osakeyhtion_kokouksen_poytakirjasta]
+   :muut [:muu]])
 
 ;;
 ;; Api
@@ -237,7 +244,7 @@
       :YL attachment-types-YL
       :VVVL attachment-types-YI ;TODO quick fix to get test and qa work. Put correct attachment list here
       :MAL attachment-types-MAL
-      :KM attachment-types-KM ; TODO define attachment properly, quick fix for test
+      :KM attachment-types-KM
       (fail! (str "unsupported permit-type: " permit-type)))))
 
 (defn get-attachment-types-for-application
