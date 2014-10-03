@@ -78,6 +78,9 @@ Change attachment type
   Tab should be visible  attachments
   Wait Until  Page Should Not Contain  xpath=//a[@data-test-type="muut.muu"]
 
+Signature icon is not visible
+  Element should not be visible  xpath=//span[@data-test-icon="signed-rakennuspaikka.ote_alueen_peruskartasta"]
+  
 Sign all attachments
   [Tags]  attachments
   Tab should be visible  attachments
@@ -88,6 +91,9 @@ Sign all attachments
   Wait Until   Element should not be visible  signAttachmentPassword
   Confirm  dynamic-ok-confirm-dialog
 
+Signature icon is visible
+  Wait Until  Element should be visible  xpath=//span[@data-test-icon="signed-rakennuspaikka.ote_alueen_peruskartasta"]
+  
 Signature is visible
   Open attachment details  rakennuspaikka.ote_alueen_peruskartasta
   Wait Until  Xpath Should Match X Times  //section[@id="attachment"]//tbody[@data-bind="foreach: signatures"]/tr/td[@data-bind="fullName: user"]  1
