@@ -98,24 +98,6 @@
                                    :puhelin {:value "0400-123456"}}}
           :laskuviite {:value "1686343528523"}}})
 
-(def yritysmaksaja
-  {:id "532c400eef4eb00000000010"
-   :schema-info {:name "ymp-maksaja" :version 1 :approvable true :type "party"}
-   :data {:_selected {:value "yritys"}
-          :laskuviite {:value "168634352"}
-          :yritys {:liikeJaYhteisoTunnus {:value "1234567-1"}
-                   :osoite {:katu {:value "Satamakatu 1"}
-                            :postinumero {:value "00200"}
-                            :postitoimipaikannimi {:value "Affenammaa"}}
-                   :yhteyshenkilo {:henkilotiedot {:etunimi {:value "Pappa"}
-                                                   :sukunimi {:value "Betalare"}}
-                                   :yhteystiedot {:email {:value "pappa@business.example.com"}
-                                                  :puhelin {:value "0500 123456"}}}
-                   :yritysnimi {:value "Pappas Business"}
-                   :verkkolaskutustiedot {:ovtTunnus "ovt-1234567890"
-                                          :verkkolaskuTunnus "laskutunnus-1234"
-                                          :valittajaTunnus "valittajatunnus-1234"}}}})
-
 (def drawings [{:id 1,
                :name "alue",
                :desc "alue 1",
