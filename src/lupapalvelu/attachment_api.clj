@@ -54,6 +54,10 @@
   (when-let [missing (if op (util/missing-keys op [:id :name]) false)]
     (fail! :error.missing-parameters :parameters missing)))
 
+(defn- validate-scale [{{scale :scale} :data}]
+ (when-not (some #{scale} attachment/attachment-scales)
+   (fail :error.illegal-attachment-scale)))
+
 ;;
 ;; KRYSP
 ;;
@@ -460,7 +464,8 @@
   {:parameters [id attachmentId scale]
    :roles      [:applicant :authority]
    :extra-auth-roles [:statementGiver]
-   :states     (action/all-states-but [:answered :sent :closed :canceled])}
+   :states     (action/all-states-but [:answered :sent :closed :canceled])
+   :input-validators [validate-scale]}
   [{:keys [application user] :as command}]
   
   (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
