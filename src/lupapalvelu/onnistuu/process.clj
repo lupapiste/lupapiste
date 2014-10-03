@@ -1,5 +1,6 @@
 (ns lupapalvelu.onnistuu.process
   (:require [taoensso.timbre :as timbre :refer [infof warnf errorf]]
+            [clojure.java.io :as io]
             [clojure.walk :as walk]
             [monger.collection :as mc]
             [monger.operators :refer :all]
@@ -120,7 +121,7 @@
   (-> (find-sign-process! process-id)
       (process-update! :started ts))
   ; FIXME: where we get the actual document?
-  ["text/plain" "da pdf"])
+  ["application/pdf" (-> "hello.pdf" io/resource io/input-stream)])
 
 ;
 ; Success:
@@ -151,9 +152,9 @@
     (resp-assert! (-> process :company :y)  identifier  "wrong Y")
     (process-update! process :done ts)
     (infof "sign:success:%s: OK: y [%s], company: [%s]"
-             process-id
-             identifier
-             name)
+           process-id
+           identifier
+           name)
     (let [company  (c/create-company (merge (:company process) {:name name, :process-id process-id}))
           token-id (c/add-user! signer company :admin)]
       (infof "sign:success:%s: company-created: y [%s], company: [%s], id: [%s], token: [%s]"

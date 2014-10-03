@@ -129,6 +129,10 @@
   (missing-keys {:a false} [:a])              => nil
   (missing-keys {:a nil} [:a])                => [:a])
 
+(facts "Local vs. UTC from timestamp"
+  (fact (to-local-datetime 1412092916016) => "30.09.2014 19:01")
+  (fact (to-xml-datetime 1412092916016) => "2014-09-30T16:01:56"))
+
 (facts "to-xml-date"
   (fact "nil -> nil" (to-xml-date nil) => nil)
   (fact "0 -> 1970"  (to-xml-date 0) => "1970-01-01"))

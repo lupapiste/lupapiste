@@ -36,7 +36,7 @@ Email was send
   Click link  xpath=//a
 
 Reset password
-  Fill in new password  teppo123
+  Fill in new password  setpw  teppo123
 
 Can not login with the old password
   Login fails  teppo@example.com  teppo69

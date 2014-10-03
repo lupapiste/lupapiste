@@ -35,7 +35,7 @@ Hessu activates account via email
   Page Should Contain  hessu.kesa@example.com
   ## First link
   Click link  xpath=//a
-  Fill in new password  hessu123
+  Fill in new password  setpw  hessu123
 
 Hessu can login
   User logs in  hessu.kesa@example.com  hessu123  Hessu Kesa

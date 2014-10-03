@@ -5,7 +5,7 @@
             [swiss.arrows :refer [-<> -<>>]]
             [sade.strings :as ss]
             [sade.util :refer [future*]]
-            [lupapalvelu.core :refer [ok fail fail!]]
+            [lupapalvelu.core :refer [ok fail fail! now]]
             [lupapalvelu.action :refer [defquery defcommand defraw update-application application->command notify] :as action]
             [lupapalvelu.comment :as comment]
             [lupapalvelu.mongo :as mongo]
@@ -22,7 +22,8 @@
             [lupapalvelu.ke6666 :as ke6666]
             [lupapalvelu.statement :as statement]
             [lupapalvelu.mime :as mime]
-            [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp])
+            [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
+            [sade.util :as util])
   (:import [java.util.zip ZipOutputStream ZipEntry]
            [java.io File OutputStream FilterInputStream]))
 
@@ -48,6 +49,10 @@
         (or (not (post-verdict-states currentState))
             (post-verdict-states attachmentApplicationState)
             (= (keyword userRole) :authority)))))
+
+(defn- validate-operation [{{op :op} :data}]
+  (when-let [missing (util/missing-keys op [:id :name])]
+    (fail! :error.missing-parameters :parameters missing)))
 
 ;;
 ;; KRYSP
@@ -414,3 +419,24 @@
        ; Throttle giving information about incorrect password
        (Thread/sleep 2000)
        (fail :error.password)))))
+
+;;
+;; Operation
+;;
+
+(defcommand set-attachment-operation
+  {:parameters [id attachmentId op]
+   :roles      [:applicant :authority]
+   :extra-auth-roles [:statementGiver]
+   :states     (action/all-states-but [:answered :sent :closed :canceled])
+   :input-validators [validate-operation]}
+  [{:keys [application user] :as command}]
+  
+  (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
+    (fail! :error.pre-verdict-attachment))
+  (let [newOp {:id   (:id op) 
+               :name (:name op)}]
+    (update-application command
+                        {:attachments {$elemMatch {:id attachmentId}}}
+                        {$set {:attachments.$.op newOp,
+                               :attachments.$.modified (now)}})))

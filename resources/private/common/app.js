@@ -15,7 +15,7 @@ var LUPAPISTE = LUPAPISTE || {};
   self.currentPage = undefined;
   self.session = undefined;
   self.allowAnonymous = allowAnonymous;
-  self.showUserMenu = (showUserMenu != undefined) ? showUserMenu : !allowAnonymous;
+  self.showUserMenu = (showUserMenu !== undefined) ? showUserMenu : !allowAnonymous;
 
   /**
   * Window unload event handler
@@ -166,7 +166,7 @@ var LUPAPISTE = LUPAPISTE || {};
     $(document.documentElement).keyup(function(event) { hub.send("keyup", event); });
 
     var logoHref = window.location.href;
-    if (self.startPage && !self.startPage.charAt(0) != "/") {
+    if (self.startPage && !self.startPage.charAt(0) !== "/") {
       logoHref = "#!/" + self.startPage;
     }
 

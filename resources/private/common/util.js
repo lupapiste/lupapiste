@@ -23,6 +23,10 @@ var util = (function() {
   }
 
   function getPwQuality(password) {
+    if (!password) {
+      return null;
+    }
+
     var l = password.length;
     if (l < 7)  { return "poor"; }
     if (l <= 8)  { return "low"; }

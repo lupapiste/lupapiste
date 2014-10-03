@@ -243,6 +243,7 @@
           (get-in updated-suunnittelija [:data :henkilotiedot :sukunimi :value]) => "Intonen"
           (get-in updated-suunnittelija [:data :yritys :yritysnimi :value]) => "Yritys Oy"
           (get-in updated-suunnittelija [:data :yritys :liikeJaYhteisoTunnus :value]) => "1234567-1"
+          (get-in updated-suunnittelija [:data :patevyys :koulutusvalinta :value]) => nil
           (get-in updated-suunnittelija [:data :patevyys :koulutus :value]) => "Tutkinto"
           (get-in updated-suunnittelija [:data :patevyys :valmistumisvuosi :value]) => "2000"
           (get-in updated-suunnittelija [:data :patevyys :fise :value]) => "f"
@@ -277,3 +278,16 @@
         doc-after       (domain/get-document-by-name merged-app "purkaminen")]
         (get-in doc-after [:data :mitat :kokonaisala :source]) => "krysp"
         (get-in doc-after [:data :kaytto :kayttotarkoitus :source]) => "krysp"))
+
+
+(facts "Facts about update operation description"
+  (let [application-id (create-app-id pena :operation "asuinrakennus" :municipality sonja-muni)
+        application (query-application pena application-id)
+        op (first (:operations application))
+        test-desc "Testdesc"]
+    (fact "operation desc is empty" (-> op :description empty?) => truthy)
+    (command pena :update-op-description :id application-id :op-id (:id op) :desc test-desc :collection "operations")
+    (let [updated-app (query-application pena application-id)
+          updated-op (some #(when (= (:id op) (:id %)) %) (:operations updated-app))]
+      (fact "description is set" (:description updated-op) => test-desc))))
+

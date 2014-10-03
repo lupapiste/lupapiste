@@ -7,7 +7,7 @@
         <form>
           <h3 data-bind="ltext: 'application.conversationPrompt'">Kirjoita viesti:</h3>
           <textarea
-            data-bind="attr: {placeholder: loc('comment.placeholder')}, value: text, valueUpdate: 'afterkeydown'"
+            data-bind="attr: {placeholder: loc('comment.placeholder')}, value: text, valueUpdate: 'afterkeydown', hasfocus: isSelected"
             data-test-id="application-new-comment-text"
             class="form-input textarea"
             rows="3"
@@ -47,7 +47,7 @@
                 data-bind="options: $parent.authorities,
                            optionsText: function(item) { return item.firstName + ' ' + item.lastName; },
                            optionsValue: 'id',
-                           value: $parent.to,
+                           value: to,
                            optionsCaption: loc('comment-request-prompt')"
                 data-test-id="side-panel-assigneed-authority">
               </select>
@@ -77,6 +77,7 @@
                 <span class="author" data-bind="fullName: user"></span>
                 <span data-bind="with: $data.to">
                   <span class="author" data-bind="fullName: $data"></span>
+                  --> <span class="author" data-bind="fullName: $data"></span>
                 </span>
                 <br />
                 <b>(<span class="role" data-bind="ltext: user.role"></span>)</b>

@@ -23,8 +23,9 @@
     (fact (get-document-by-name application "") => nil)))
 
 (facts
-  (let [application {:documents [{:id 1 :data "jee" :schema-info {:name "kukka" :type :location}}]}]
-    (fact (get-document-by-type application :location) => {:id 1 :data "jee" :schema-info {:name "kukka" :type :location}})
+  (let [application {:documents [{:id 1 :data "jee" :schema-info {:name "kukka" :type "location"}}]}]
+    (fact (get-document-by-type application :location) => {:id 1 :data "jee" :schema-info {:name "kukka" :type "location"}})
+    (fact (get-document-by-type application "location") => {:id 1 :data "jee" :schema-info {:name "kukka" :type "location"}})
     (fact (get-document-by-type application :not-gona-found) => nil)))
 
 (facts "invites"

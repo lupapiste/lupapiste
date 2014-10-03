@@ -116,12 +116,12 @@
 (defn get-documents-by-name
   "returns document from application by schema name"
   [{documents :documents} schema-name]
-  (filter (comp (partial = schema-name) :name :schema-info) documents))
+  (filter (comp (partial = (name schema-name)) :name :schema-info) documents))
 
 (defn get-documents-by-type
   "returns document from application by schema type"
   [{documents :documents} schema-type]
-  (filter (comp (partial = schema-type) :type :schema-info) documents))
+  (filter (comp (partial = (name schema-type)) :type :schema-info) documents))
 
 (defn get-document-by-name
   "returns first document from application by schema name"

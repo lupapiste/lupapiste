@@ -3,13 +3,14 @@
             [sade.env :as env]
             [sade.http :as http]
             [sade.common-reader :as cr]
+            [sade.xml :as xml]
             [midje.sweet :refer :all]))
 
 (defn- mock-response [xml-file] {:body (slurp (clojure.java.io/resource xml-file))})
 
 (defn- to-date [x] (cr/to-timestamp x))
 
-(fact "Kaksi luonnollista henkil\u00F6\u00E4" (lh/get-owners "1234") 
+(fact "Kaksi luonnollista henkil\u00F6\u00E4" (lh/get-owners "1234")
       => [{:henkilolaji :luonnollinen
            :etunimet "Ahma Ky\u00F6sti Jaakkima"
            :sukunimi "Voller"
@@ -17,7 +18,7 @@
            ;:ulkomaalainen false
            :jakeluosoite "Valli & kuja I/X:s Gaatta"
            :postinumero "00100"
-           :paikkakunta "Helsinki"} 
+           :paikkakunta "Helsinki"}
           {:henkilolaji :luonnollinen
            :etunimet "Jaakko Jaakkima Jorma"
            :sukunimi "Pakkanen"
@@ -27,15 +28,15 @@
            :postinumero "00100"
            :paikkakunta "Helsinki"
            }]
-      (provided (http/get anything anything anything) => (mock-response "mml/yhteystiedot-LU.xml")))
+      (provided (cr/get-xml anything anything anything) => (xml/parse (:body (mock-response "mml/yhteystiedot-LU.xml")))))
 
-(fact "Juridinen henkil\u00F6" (lh/get-owners "1234") 
+(fact "Juridinen henkil\u00F6" (lh/get-owners "1234")
       => [{:henkilolaji :juridinen
            :nimi "Hokki-kiinteist\u00F6t Oy"
            :ytunnus "0704458-3"}]
-      (provided (http/get anything anything anything) => (mock-response "mml/yhteystiedot-JU.xml")))
+      (provided (cr/get-xml anything anything anything) => (xml/parse (:body (mock-response "mml/yhteystiedot-JU.xml")))))
 
-(fact "Kaksi kuolinpes\u00E4\u00E4" (lh/get-owners "1234") 
+(fact "Kaksi kuolinpes\u00E4\u00E4" (lh/get-owners "1234")
       => [{:henkilolaji :kuolinpesa
            :etunimet "Pjotr Seppo Risto"
            :sukunimi "Yl\u00E4m\u00E4rssy"
@@ -50,7 +51,7 @@
                            :jakeluosoite "Valli & kuja I/X:s Gaatta"
                            :postinumero "00100"
                            :paikkakunta "Helsinki"
-                           }} 
+                           }}
           {:henkilolaji :kuolinpesa
            :etunimet "Legolas Kalervo Jalmari"
            :sukunimi "Niinist\u00F6"
@@ -66,4 +67,4 @@
                            :postinumero "00100"
                            :paikkakunta "Helsinki"
                            }}]
-      (provided (http/get anything anything anything) => (mock-response "mml/yhteystiedot-KP.xml")))
+      (provided (cr/get-xml anything anything anything) => (xml/parse (:body (mock-response "mml/yhteystiedot-KP.xml")))))
