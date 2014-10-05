@@ -54,11 +54,11 @@
         (get-in email [:body :plain]) => (contains "Hei, sinut on kustuttu")))
 
     (fact "Sonja must NOT be able to uninvite Teppo!"
-      (command sonja :remove-auth :id application-id :email (email-for-key teppo)) => unauthorized?
+      (command sonja :remove-auth :id application-id :username (email-for-key teppo)) => unauthorized?
       (count (:invites (query teppo :invites))) => 1)
 
     (fact "Mikko must be able to uninvite Teppo!"
-      (command mikko :remove-auth :id application-id :email (email-for-key teppo)) => ok?
+      (command mikko :remove-auth :id application-id :username (email-for-key teppo)) => ok?
       (count (:invites (query teppo :invites))) => 0)
 
     (fact "Mikko must be able to re-invite Teppo!"
@@ -115,7 +115,7 @@
         (-> actions :cancel-application :ok) => true))
 
     (fact "Sonja must be able to remove authz from Teppo!"
-      (command sonja :remove-auth :id application-id :email (email-for-key teppo)) => ok?)
+      (command sonja :remove-auth :id application-id :username (email-for-key teppo)) => ok?)
 
     (fact "Teppo should NOT be able to do stuff."
       (query teppo :allowed-actions :id application-id) => unauthorized?)
@@ -150,7 +150,7 @@
       (count (:invites (query teppo :invites))) => 1)
 
     (fact "Sonja must be able to uninvite Teppo!"
-      (command sonja :remove-auth :id id :email (email-for-key teppo)) => ok?
+      (command sonja :remove-auth :id id :username (email-for-key teppo)) => ok?
       (count (:invites (query teppo :invites))) => 0)
 
     (fact "Reinvite & accept"
@@ -165,7 +165,7 @@
       (invite teppo id suunnittelija-doc "suunnittelija" "mikko@example.com") => ok?)
 
     (fact "Sonja must be able to remove authz from Teppo!"
-      (command sonja :remove-auth :id id :email (email-for-key teppo)) => ok?)
+      (command sonja :remove-auth :id id :username (email-for-key teppo)) => ok?)
 
     (fact "Invite without document"
       (invite sonja id "" "" (email-for-key teppo)) => ok?
