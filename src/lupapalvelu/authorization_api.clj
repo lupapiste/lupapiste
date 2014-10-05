@@ -4,8 +4,8 @@
             [swiss.arrows :refer [-<>>]]
             [monger.operators :refer :all]
             [sade.strings :as ss]
-            [lupapalvelu.core :refer [ok fail fail! now]]
-            [lupapalvelu.action :refer [defquery defcommand defraw update-application application->command notify] :as action]
+            [lupapalvelu.core :refer [ok fail fail! unauthorized]]
+            [lupapalvelu.action :refer [defquery defcommand defraw update-application all-application-states notify] :as action]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.mongo :as mongo]
@@ -125,3 +125,26 @@
    :states     (action/all-application-states-but [:canceled])}
   [command]
   (do-remove-auth command username))
+
+(defn- manage-unsubscription [{application :application user :user :as command} unsubscribe?]
+  (let [username (get-in command [:data :username])]
+    (if (or (= username (:username user))
+         (some (partial = (:organization application)) (:organizations user)))
+      (update-application command
+        {:auth {$elemMatch {:username username}}}
+        {$set {:auth.$.unsubscribed unsubscribe?}})
+      unauthorized)))
+
+(defcommand unsubscribe-notifications
+  {:parameters [:id :username]
+   :roles [:applicant :authority]
+   :states all-application-states}
+  [command]
+  (manage-unsubscription command true))
+
+(defcommand subscribe-notifications
+  {:parameters [:id :username]
+   :roles [:applicant :authority]
+   :states all-application-states}
+  [command]
+  (manage-unsubscription command false))

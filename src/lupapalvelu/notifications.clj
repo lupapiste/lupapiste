@@ -35,13 +35,15 @@
                          (str (i18n/localize "fi" "municipality" municipality) ", ")) title)]
     (str "Lupapiste.fi: " title-begin (when (and title title-key)" - ") (when title-key title-postfix))))
 
-; emails are sent to everyone in auth array except statement persons
-(defn- get-email-recipients-for-application [{:keys [auth statements]} included-roles excluded-roles]
-  (let [included-users   (if (seq included-roles)
-                           (filter (fn [user] (some #(= (:role user) %) included-roles)) auth)
-                           auth)
+(defn- get-email-recipients-for-application
+  "Emails are sent to everyone in auth array except statement persons,
+   those who haven't accepted invite or have unsubscribed emails."
+  [{:keys [auth statements]} included-roles excluded-roles]
+  (let [users            (->> auth (remove :invite) (remove :unsubscribed))
+        included-users   (if (seq included-roles)
+                           (filter (fn [user] (some #(= (:role user) %) included-roles)) users)
+                           users)
         auth-user-emails (->> included-users
-                           (remove :invite) ; filters out users that have not accepted invite
                            (filter (fn [user] (not-any? #(= (:role user) %) excluded-roles)))
                            (map #(:email (mongo/by-id :users (:id %) {:email 1}))))]
     (if (some #(= "statementGiver" %) excluded-roles)

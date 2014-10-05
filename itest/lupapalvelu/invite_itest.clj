@@ -57,6 +57,9 @@
       (command sonja :remove-auth :id application-id :username (email-for-key teppo)) => unauthorized?
       (count (:invites (query teppo :invites))) => 1)
 
+    (fact "Mikko can't unsubscribe Teppo's notifications"
+      (command pena :unsubscribe-notifications :id application-id :username (email-for-key teppo)) => unauthorized?)
+
     (fact "Mikko must be able to uninvite Teppo!"
       (command mikko :remove-auth :id application-id :username (email-for-key teppo)) => ok?
       (count (:invites (query teppo :invites))) => 0)
