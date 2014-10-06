@@ -30,7 +30,7 @@
 
             <div class="form-entry">
               <label class="form-label tip" data-bind="ltext: 'register.company.form.companyName'"></label>
-              <input class="form-input text" data-bind="value: model().name, enable: edit, valueUpdate: 'afterkeydown'" type="text"/>
+              <input class="form-input text" data-bind="textInput: model().name, enable: edit" type="text"/>
             </div>
             <div class="form-entry">
               <label class="form-label tip" data-bind="ltext: 'register.company.form.companyY'"></label>
@@ -41,42 +41,42 @@
 
             <div class="form-entry">
               <label class="form-label" data-bind="ltext: 'register.company.form.billing.reference'"></label>
-              <input class="form-input text" data-bind="value: model().reference, enable: edit, valueUpdate: 'afterkeydown'" type="text"/>
+              <input class="form-input text" data-bind="textInput: model().reference, enable: edit" type="text"/>
             </div>
 
             <div class="form-entry">
               <label class="form-label" data-bind="ltext: 'register.company.form.billing.address'"></label>
-              <input class="form-input text" data-bind="value: model().address1, enable: edit, valueUpdate: 'afterkeydown'" type="text"/>
-              <input class="form-input text" data-bind="value: model().address2, enable: edit, valueUpdate: 'afterkeydown'" type="text"/>
+              <input class="form-input text" data-bind="textInput: model().address1, enable: edit" type="text"/>
+              <input class="form-input text" data-bind="textInput: model().address2, enable: edit" type="text"/>
             </div>
 
             <br/>
 
             <div class="form-entry">
               <label class="form-label" data-bind="ltext: 'register.company.form.billing.po'"></label>
-              <input class="form-input text" data-bind="value: model().po, enable: edit, valueUpdate: 'afterkeydown'" type="text"/>
+              <input class="form-input text" data-bind="textInput: model().po, enable: edit" type="text"/>
             </div>
 
             <div class="form-entry">
               <label class="form-label" data-bind="ltext: 'register.company.form.billing.zip'"></label>
-              <input class="form-input text" data-bind="value: model().zip, enable: edit, valueUpdate: 'afterkeydown'" type="text"/>
+              <input class="form-input text" data-bind="textInput: model().zip, enable: edit" type="text"/>
             </div>
 
             <div class="form-entry">
               <label class="form-label" data-bind="ltext: 'register.company.form.billing.country'"></label>
-              <input class="form-input text" data-bind="value: model().country, enable: edit, valueUpdate: 'afterkeydown'" type="text"/>
+              <input class="form-input text" data-bind="textInput: model().country, enable: edit" type="text"/>
             </div>
 
             <br/>
 
             <div class="form-entry">
               <label class="form-label" data-bind="ltext: 'register.company.form.billing.ovt'"></label>
-              <input class="form-input text" data-bind="value: model().ovt, enable: edit, valueUpdate: 'afterkeydown'" type="text"/>
+              <input class="form-input text" data-bind="textInput: model().ovt, enable: edit" type="text"/>
             </div>
 
             <div class="form-entry">
               <label class="form-label" data-bind="ltext: 'register.company.form.billing.pop'"></label>
-              <input class="form-input text" data-bind="value: model().pop, enable: edit, valueUpdate: 'afterkeydown'" type="text"/>
+              <input class="form-input text" data-bind="textInput: model().pop, enable: edit" type="text"/>
             </div>
 
             <div>
@@ -171,7 +171,7 @@
 
          <form>
           <label data-bind="ltext: 'company.user.email'" class="form-label tip"></label>
-          <input data-bind="value: email, enable: emailEnabled, valueUpdate: 'afterkeydown'" class="form-input" type="text" placeholder="etunimi.sukunimi@osoite.fi"/>
+          <input data-bind="textInput: email, enable: emailEnabled" class="form-input" type="text" placeholder="etunimi.sukunimi@osoite.fi"/>
 
           <div data-bind="visible: showSearchEmail">
             <button data-bind="enable: canSearchUser, click: searchUser" type="submit" class="btn btn-dialog btn-primary">
@@ -197,10 +197,10 @@
         <form data-bind="visible: showUserDetails">
 
           <label data-bind="ltext: 'company.user.firstName'" class="form-label tip"></label>
-          <input data-bind="value: firstName, valueUpdate: 'afterkeydown'" class="form-input" type="text" placeholder="Etunimi"/>
+          <input data-bind="textInput: firstName" class="form-input" type="text" placeholder="Etunimi"/>
 
           <label data-bind="ltext: 'company.user.lastName'" class="form-label tip"></label>
-          <input data-bind="value: lastName, valueUpdate: 'afterkeydown'" class="form-input" type="text" placeholder="Sukunimi"/>
+          <input data-bind="textInput: lastName" class="form-input" type="text" placeholder="Sukunimi"/>
 
           <input data-bind="checked: admin" class="form-input" type="checkbox" id="register.company.add-user.admin"></input>
           <label data-bind="ltext: 'register.company.add-user.admin'" class="form-label" for="register.company.add-user.admin"></label>
