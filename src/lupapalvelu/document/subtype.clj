@@ -96,7 +96,7 @@
 (defmethod subtype-validation :ovt [_ v]
   (cond
     (blank? v) nil
-    (re-matches #"^.{12,17}$" v) nil
+    (re-matches #"^\d{12}.{0,5}$" v) nil
     :else [:warn "illegal-ovt-tunnus"]))
 
 (defmethod subtype-validation nil [_ _]
