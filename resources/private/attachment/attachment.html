@@ -5,7 +5,7 @@
     <div>
       <div class="attachment-info">
         <div class="container">
-          <div class="left">
+          <div class="col1">
             <div class="attachment-info-header">
               <h1>
                 <span data-bind="text: application.title"></span>: <span data-bind="ltext: name"></span>
@@ -29,7 +29,18 @@
             <button data-test-id="change-attachment-type" data-bind="ltext: 'attachment.changeType', click: showChangeTypeDialog"></button>
             <button data-bind="ltext: 'attachment.delete', click: deleteAttachment, visible: $root.authorization.ok('delete-attachment'),  enable: $root.authorization.ok('delete-attachment')" data-test-id="delete-attachment">Poista liite</button>
           </div>
-          <div class="attachment-label">
+          <div class="attachment-label col2">
+            <!-- ko if: latestVersion -->
+            <h4 data-bind="with: latestVersion">
+              <span class="attachment-label-header-item"><a data-bind="text: $data.filename, attr: {href: '/api/raw/download-attachment?attachment-id=' + $data.fileId}"></a></span>
+              <span class="attachment-label-header-item">
+                <span data-bind="ltext: 'attachment.version'">Versio</span>
+                <span data-bind="version: $data.version"></span>
+              </span>
+              <span class="attachment-label-header-item" data-bind="dateTimeString: $data.created"></span>
+              <span class="attachment-label-header-item" data-bind="fullName: $data.user"></span>
+            </h4>
+            <!-- /ko -->
             <div class="attachment-info-field">
               <label data-bind="ltext: 'attachment.label.contents'"></label>
               <input class="form-input" type="text" data-bind="value: contents, valueUpdate: 'afterkeydown'" data-test-id="attachment-content-input"></input>
