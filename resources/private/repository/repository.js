@@ -27,11 +27,11 @@ var repository = (function() {
       }
     }
     
-    if (!_.isUndefined(attachment.sent)) {
+    if (!_.isUndefined(attachment.sent) || attachment.sent) {
       attachment.sentDateString = moment(attachment.sent).format("D.M.YYYY");
     }
 
-    attachment.stamped = _.isUndefined(attachment.latestVersion) ? false : attachment.latestVersion.stamped;
+    attachment.stamped = _.isUndefined(attachment.latestVersion) || !attachment.latestVersion ? false : attachment.latestVersion.stamped;
   }
 
   function load(id, pending, callback) {
