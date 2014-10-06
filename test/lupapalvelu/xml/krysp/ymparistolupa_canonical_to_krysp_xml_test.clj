@@ -21,8 +21,6 @@
         xml-s     (indent-str krysp-xml)
         lp-xml    (cr/strip-xml-namespaces (xml/parse xml-s))]
 
-    ;(println xml-s)
-
     (validator/validate xml-s (:permitType application) "2.1.2") ; throws exception
 
     (fact "kiinteistotunnus"
