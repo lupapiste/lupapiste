@@ -523,7 +523,7 @@
                                    'title': loc('attachment.signed'), 
                                    'data-test-icon': 'signed-' + type['type-group'] + '.' + type['type-id']}">
                   </span>
-                  <span data-bind="visible:!_.isUndefined($data.sentDateString),
+                  <span data-bind="visible:$data.isSent,
                                    attr: {'class': 'icon transfered',
                                    'title': loc('application.attachmentSentDate') + ' ' + $data.sentDateString,
                                    'data-test-icon': 'transfered-' + type['type-group'] + '.' + type['type-id']}">

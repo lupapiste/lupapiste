@@ -27,7 +27,10 @@ var repository = (function() {
       }
     }
     
+    attachment.isSent = false;
+    attachment.sentDateString = "-";
     if (!_.isUndefined(attachment.sent) || attachment.sent) {
+      attachment.isSent = true;
       attachment.sentDateString = moment(attachment.sent).format("D.M.YYYY");
     }
 
