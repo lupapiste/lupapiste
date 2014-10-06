@@ -138,7 +138,6 @@
     :organizations ["753-R" "753-YA" "998-R-TESTI-2"]
     :firstName "Sonja"
     :lastName "Sibbo"
-    :personId "120464-121C"
     :phone "03121991"
     :street "Katuosoite 1 a 1"
     :zip "33456"
@@ -154,7 +153,6 @@
     :organizations ["753-R"]
     :firstName "Ronja"
     :lastName "Sibbo"
-    :personId "120464-121C"
     :phone "03121991"
     :street "Katuosoite 1 a 1"
     :zip "33456"
