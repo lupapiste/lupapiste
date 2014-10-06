@@ -45,7 +45,7 @@
       <p data-bind="ltext: 'setpw.info'"></p>
 
       <label data-bind="ltext: 'setpw.password.1'" class="form-label"></label>
-      <input data-bind="value: password1, valueUpdate: 'afterkeydown', attr: {placeholder: loc('setpw.placeholder.1')}" class="form-input" type="password" autofocus="autofocus">
+      <input data-bind="textInput: password1, attr: {placeholder: loc('setpw.placeholder.1')}" class="form-input" type="password" autofocus="autofocus">
       <div>
         <span data-bind="ltext: 'setpw.quality'"></span>
         <span data-bind="visible: passwordQuality,
@@ -54,7 +54,7 @@
       </div>
 
       <label data-bind="ltext: 'setpw.password.2'" class="form-label"></label>
-      <input data-bind="value: password2, valueUpdate: 'afterkeydown', attr: {placeholder: loc('setpw.placeholder.2')}" class="form-input" type="password">
+      <input data-bind="textInput: password2, attr: {placeholder: loc('setpw.placeholder.2')}" class="form-input" type="password">
       <div>
         <span data-bind="ltext: 'setpw.notSame', visible: password2() != null && password1() != password2()"></span><span>&nbsp;</span>
       </div>

@@ -239,6 +239,7 @@
     self.type = ko.observable();
     self.nameOfDeceased = ko.observable();
     self.businessID = ko.observable();
+    self.pending = ko.observable(false);
 
     self.typeLabel = ko.computed(function() {
         var t = self.type();
@@ -261,13 +262,7 @@
 
     self.propertyIdOk = ko.computed(function() { return util.prop.isPropertyId(self.propertyId()); });
     self.emailOk = ko.computed(function() { return _.isBlank(self.email()) || util.isValidEmailAddress(self.email()); });
-    self.ok = ko.computed(function() { return self.propertyIdOk() && self.emailOk(); });
-
-    self.pending = function(pending) {
-      // Should have ajax indicator too
-      $("#dialog-edit-neighbor button").attr("disabled", pending ? "disabled" : null);
-      return self;
-    };
+    self.disabled = ko.computed(function() { return self.pending() || !self.propertyIdOk() || !self.emailOk(); });
 
     var paramNames = ["id", "neighborId", "propertyId", "name", "street", "city", "zip", "email", "type", "businessID", "nameOfDeceased"];
     function paramValue(paramName) { return self[paramName](); }

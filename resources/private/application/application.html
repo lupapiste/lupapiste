@@ -339,13 +339,14 @@
                         data-bind="ltext: 'personSelector.invite', visible: $root.authorization.ok('invite'), enabled: $root.authorization.ok('invite')"
                         onclick="$('#invite-document-name').val('').change();$('#invite-document-path').val('').change();$('#invite-document-id').val('').change();LUPAPISTE.ModalDialog.open('#dialog-valtuutus');return false;"></button>
 
+<div data-bind="if: features.enabled('company')"><div class="feature">
                   <button class="btn-primary"
                           data-bind="ltext: 'company-invite.invite',
                                      visible: $root.authorization.ok('invite'),
                                      enabled: $root.authorization.ok('invite'),
                                      click: $root.openInviteCompany">
                   </button>
-
+</div></div>
 
                 </div>
               </div>
@@ -1054,17 +1055,17 @@
           <p data-bind="ltext: 'invite.desc'" class="dialog-desc"> </p>
           <form data-bind="with: $root.invite">
             <!-- label data-bind="ltext: 'userinfo.role'" class="form-label" for="invite-document"></label -->
-            <input class="form-input text long" id="invite-document-name" disabled="disabled" type="hidden" data-bind="value: documentName, valueUpdate: 'afterkeydown'" />
-            <input class="form-input text long" id="invite-document-id" disabled="disabled" type="hidden" data-bind="value: documentId, valueUpdate: 'afterkeydown'" />
-            <input class="form-input text long" id="invite-document-path" disabled="disabled" type="hidden" data-bind="value: path, valueUpdate: 'afterkeydown'" />
+            <input class="form-input text long" id="invite-document-name" disabled="disabled" type="hidden" data-bind="value: documentName" />
+            <input class="form-input text long" id="invite-document-id" disabled="disabled" type="hidden" data-bind="value: documentId" />
+            <input class="form-input text long" id="invite-document-path" disabled="disabled" type="hidden" data-bind="value: path" />
             <label data-bind="ltext: 'userinfo.email'" class="form-label" for="invite-email"></label>
-            <input class="form-input text long" id="invite-email" type="text" data-bind="value: email, valueUpdate: 'afterkeydown'" />
+            <input class="form-input text long" id="invite-email" type="text" data-bind="textInput: email" />
             <label data-bind="ltext: 'application.inviteMessage'" class="form-label" for="invite-text"></label>
-            <textarea id="invite-text" rows=10 class="form-input textarea really-long high" data-bind="value: text, valueUpdate: 'afterkeydown'"></textarea>
+            <textarea id="invite-text" rows=10 class="form-input textarea really-long high" data-bind="textInput: text"></textarea>
             <div data-bind="visible: error" >
               <div data-bind="text: error" class="context-error"></div>
             </div>
-            <button class="btn btn-primary btn-dialog" data-test-id="application-invite-submit" data-bind="click: submit, disable: processing">
+            <button class="btn btn-primary btn-dialog" data-test-id="application-invite-submit" data-bind="click: submit, disable: disabled">
               <span data-bind="ltext: 'application.inviteSend'"></span>
               <em data-bind="visible: pending" class="button-loader"></em>
             </button>
@@ -1079,7 +1080,8 @@
         </div>
         <div class="dialog-content" data-bind="with: $root.requestForStatementModel">
           <div data-bind="foreach: data()" class="scrolling-content">
-            <input class="form-input" type="checkbox" data-test-id="check-statement-giver" data-bind="value: id, checked: $root.requestForStatementModel.personIds, valueUpdate: 'afterkeydown', attr: {'id': id, 'data-test-id' : 'check-statement-giver-' + $index()}" />
+            <input class="form-input" type="checkbox" data-test-id="check-statement-giver"
+                   data-bind="value: id, checked: $root.requestForStatementModel.personIds, attr: {'id': id, 'data-test-id' : 'check-statement-giver-' + $index()}" />
             <label data-bind="text: text()+' '+name() + ' (' + email() + ')', attr: {'for': id}" class="form-label"></label><br/>
           </div>
           <button
@@ -1121,10 +1123,7 @@
                     <td data-bind="ltext: 'stamp.text'" class="label"></td>
                     <td colspan="2">
                       <input
-                        data-bind="
-                          value: text,
-                          enable: status() === statusReady,
-                          valueUpdate: 'afterkeydown'"
+                        data-bind="value: text, enable: status() === statusReady"
                         type="text"
                         class="form-input text"/>
                       </td>
@@ -1145,10 +1144,7 @@
                     <td data-bind="ltext: 'stamp.organization'" class="label"></td>
                     <td colspan="2">
                       <input
-                        data-bind="
-                          value: organization,
-                          enable: status() === statusReady,
-                          valueUpdate: 'afterkeydown'"
+                        data-bind="textInput: organization, enable: status() === statusReady"
                         type="text"
                         class="form-input text"/>
                       </td>
@@ -1161,9 +1157,8 @@
                     <td>
                       <input
                         data-bind="
-                          value: xMargin,
+                          textInput: xMargin,
                           enable: status() === statusReady,
-                          valueUpdate: 'afterkeydown',
                           css: {'invalid-margin': !xMarginOk()}"
                         type="text"
                         class="form-input text"/>
@@ -1175,9 +1170,8 @@
                     <td>
                       <input
                         data-bind="
-                          value: yMargin,
+                          textInput: yMargin,
                           enable: status() === statusReady,
-                          valueUpdate: 'afterkeydown',
                           css: {'invalid-margin': !yMarginOk()}"
                         type="text"
                         class="form-input text"/>
@@ -1278,8 +1272,7 @@
               </span>
 
               <label data-bind="ltext: 'neighbors.sendEmail.email'" class="form-label" for="neighbors-sendemail-email"></label>
-              <input data-bind="value: email,
-                                valueUpdate: 'afterkeydown',
+              <input data-bind="textInput: email,
                                 attr: {placeholder: loc('neighbors.sendEmail.email.placeholder')}"
                      id="neighbors-sendemail-email"
                      class="form-input text long" />
