@@ -53,6 +53,15 @@
                            value: scale,
                            enable: $root.authorization.ok('set-attachment-scale')"></select>
             </div>
+            <div class="attachment-info-field">
+              <label data-bind="ltext: 'attachment.label.size'"></label>
+              <select id="attachment-size-select"
+                data-bind="options: sizes,
+                           optionsText: function(item) {return item === 'muu' ? loc('select-other') : item},
+                           optionsCaption: loc('choose'),
+                           value: size,
+                           enable: $root.authorization.ok('set-attachment-size')"></select>
+            </div>
           </div>
         </div>
       </div>

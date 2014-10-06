@@ -114,7 +114,8 @@ var attachment = (function() {
     contents:        ko.observable(),
     scale:           ko.observable(),
     scales:          ko.observableArray(LUPAPISTE.config.attachmentScales),
-
+    size:            ko.observable(),
+    sizes:           ko.observableArray(LUPAPISTE.config.attachmentSizes),
     subscriptions:   [],
 
     hasPreview: function() {

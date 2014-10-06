@@ -1,4 +1,5 @@
 
 attachment.label.contents: Piirustuksen sisältö
-attachment.label.scale: Mittakaava
+attachment.label.scale: Piirustuksen mittakaava
+attachment.label.size: Piirustuksen koko
 
