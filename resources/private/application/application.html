@@ -1080,7 +1080,7 @@
         <div class="dialog-content" data-bind="with: $root.requestForStatementModel">
           <div data-bind="foreach: data()" class="scrolling-content">
             <input class="form-input" type="checkbox" data-test-id="check-statement-giver"
-                   data-bind="checked: $root.requestForStatementModel.personIds, attr: {'id': id, 'data-test-id' : 'check-statement-giver-' + $index()}" />
+                   data-bind="value: id, checked: $root.requestForStatementModel.personIds, attr: {'id': id, 'data-test-id' : 'check-statement-giver-' + $index()}" />
             <label data-bind="text: text()+' '+name() + ' (' + email() + ')', attr: {'for': id}" class="form-label"></label><br/>
           </div>
           <button
