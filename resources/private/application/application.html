@@ -1054,9 +1054,9 @@
           <p data-bind="ltext: 'invite.desc'" class="dialog-desc"> </p>
           <form data-bind="with: $root.invite">
             <!-- label data-bind="ltext: 'userinfo.role'" class="form-label" for="invite-document"></label -->
-            <input class="form-input text long" id="invite-document-name" disabled="disabled" type="hidden" data-bind="textInput: documentName" />
-            <input class="form-input text long" id="invite-document-id" disabled="disabled" type="hidden" data-bind="textInput: documentId" />
-            <input class="form-input text long" id="invite-document-path" disabled="disabled" type="hidden" data-bind="textInput: path" />
+            <input class="form-input text long" id="invite-document-name" disabled="disabled" type="hidden" data-bind="value: documentName" />
+            <input class="form-input text long" id="invite-document-id" disabled="disabled" type="hidden" data-bind="value: documentId" />
+            <input class="form-input text long" id="invite-document-path" disabled="disabled" type="hidden" data-bind="value: path" />
             <label data-bind="ltext: 'userinfo.email'" class="form-label" for="invite-email"></label>
             <input class="form-input text long" id="invite-email" type="text" data-bind="textInput: email" />
             <label data-bind="ltext: 'application.inviteMessage'" class="form-label" for="invite-text"></label>
