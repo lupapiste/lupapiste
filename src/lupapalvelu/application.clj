@@ -31,7 +31,6 @@
             [lupapalvelu.ktj :as ktj]
             [lupapalvelu.open-inforequest :as open-inforequest]
             [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.application-search :as search]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.company :as c]))
 
@@ -972,13 +971,3 @@
           buildings (krysp/->buildings-summary kryspxml)]
       (ok :data buildings))
     (fail :error.no-legacy-available)))
-
-;;
-;; Service point for jQuery dataTables:
-;;
-
-(defquery applications-for-datatables
-  {:parameters [params]
-   :roles      [:applicant :authority]}
-  [{user :user}]
-  (ok :data (search/applications-for-user user params)))
