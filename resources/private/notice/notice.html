@@ -14,7 +14,7 @@
       <h3><span data-bind="ltext: 'notice.prompt'"/> (<span data-bind="ltext: 'notice.prompt.info'"/>): </h3>
       <div class="textarea-wrapper">
         <textarea
-          data-bind="attr: {placeholder: loc('comment.placeholder')}, value: authorityNotice, valueUpdate: ['blur', 'change', 'afterkeydown']"
+          data-bind="attr: {placeholder: loc('comment.placeholder')}, textInput: authorityNotice"
           data-test-id="application-authority-notice"
           class="form-input textarea"
           maxlength="4000">

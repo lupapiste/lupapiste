@@ -350,25 +350,15 @@ Prepare new request
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${permitType}
   Go to page  applications
   Click by test id  applications-create-new
-
-  Input Text  create-search  ${propertyId}
-  Click enabled by test id  create-search-button
-  Wait until  Element should be visible  xpath=//div[@id='popup-id']//input[@data-test-id='create-property-id']
-  Textfield Value Should Be  xpath=//div[@id='popup-id']//input[@data-test-id='create-property-id']  ${propertyId}
-  Wait Until  List Selection Should Be  xpath=//select[@data-test-id='create-municipality-select']  ${municipality}
-  Execute Javascript  $("div[id='popup-id'] input[data-test-id='create-address']").val("${address}").change();
-
-  Set animations off
-  Click enabled by test id  create-continue
-  Select operation path by permit type  ${permitType}
-  Wait until  Element should be visible  xpath=//section[@id="create-part-2"]//div[@class="tree-content"]//*[@data-test-id="create-application"]
-  Set animations on
+  Do prepare new request
 
 Prepare first request
   [Arguments]  ${address}  ${municipality}  ${propertyId}  ${permitType}
   Go to page  applications
   Click by test id  applications-create-new-inforequest
+  Do prepare new request
 
+Do prepare new request
   Input Text  create-search  ${propertyId}
   Click enabled by test id  create-search-button
   Wait until  Element should be visible  xpath=//div[@id='popup-id']//input[@data-test-id='create-property-id']
