@@ -393,7 +393,7 @@
             <span class="missing icon"></span>
             <span data-bind="ltext: 'missing.title'"></span>
           </div>
-          <div class="attachment-actions" data-bind="visible: (!postVerdict() && preAttachmentsByGroup().length > 0) || (postVerdict() && postAttachmentsByGroup().length > 0)">
+          <div class="attachment-actions" data-bind="visible: (!postVerdict() && attachmentTab.preAttachmentsByGroup().length > 0) || (postVerdict() && attachmentTab.postAttachmentsByGroup().length > 0)">
             <div data-bind="with: application">
               <button
                 data-bind="click: newAttachment, ltext: 'application.attachmentsAdd', visible: $root.authorization.ok('upload-attachment'), enable: !processing()"
@@ -420,20 +420,20 @@
           </div>
 
           <div class="">
-            <div data-bind="if: postAttachmentsByGroup().length > 0" data-test-id="application-post-attachments-table">
+            <div data-bind="if: attachmentTab.postAttachmentsByGroup().length > 0" data-test-id="application-post-attachments-table">
               <h2><span data-bind="ltext: 'application.attachments.post-verdict'"/></h2>
-              <div data-bind="template: {name: 'attachments-template', data: postAttachmentsByGroup()}"/>
+              <div data-bind="template: {name: 'attachments-template', data: attachmentTab.postAttachmentsByGroup()}"/>
             </div>
             <!-- ko if: !postVerdict() -->
-            <div data-bind="if: preAttachmentsByGroup().length > 0" data-test-id="application-pre-attachments-table">
+            <div data-bind="if: attachmentTab.preAttachmentsByGroup().length > 0" data-test-id="application-pre-attachments-table">
               <h2><span data-bind="ltext: 'application.attachments.pre-verdict'"/></h2>
-              <div data-bind="template: {name: 'attachments-template', data: preAttachmentsByGroup()}"/>
+              <div data-bind="template: {name: 'attachments-template', data: attachmentTab.preAttachmentsByGroup()}"/>
             </div>
             <!-- /ko -->
 
             <div class="attachment-actions">
 
-              <div data-bind="if: preAttachmentsByGroup().length == 0 && postAttachmentsByGroup().length == 0">
+              <div data-bind="if: attachmentTab.preAttachmentsByGroup().length == 0 && attachmentTab.postAttachmentsByGroup().length == 0">
                 <i data-bind="ltext: 'application.attachmentsEmpty'" data-test-id="application-attachments-no-attachments"></i>
               </div>
 

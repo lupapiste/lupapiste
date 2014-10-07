@@ -54,40 +54,16 @@
   var addPartyModel = new LUPAPISTE.AddPartyModel();
   var createTaskController = LUPAPISTE.createTaskController;
   var mapModel = new LUPAPISTE.MapModel(authorizationModel);
+  var attachmentTab = new LUPAPISTE.AttachmentTabModel(postVerdictStates);
 
   var authorities = ko.observableArray([]);
   var permitSubtypes = ko.observableArray([]);
-  var preAttachmentsByGroup = ko.observableArray();
-  var postAttachmentsByGroup = ko.observableArray();
   var postVerdict = ko.observable(false);
 
   var inviteCompanyModel = new LUPAPISTE.InviteCompanyModel(applicationModel.id);
 
   var accordian = function(data, event) { accordion.toggle(event); };
 
-  function getPreAttachmentsByGroup(source) {
-    return getAttachmentsByGroup(
-      _.filter(source, function(attachment) {
-          return !postVerdictStates[attachment.applicationState];
-      }));
-  }
-
-  function getPostAttachmentsByGroup(source) {
-    return getAttachmentsByGroup(
-      _.filter(source, function(attachment) {
-          return postVerdictStates[attachment.applicationState];
-      }));
-  }
-
-  function getAttachmentsByGroup(source) {
-    var attachments = _.map(source, function(a) {
-      a.latestVersion = _.last(a.versions || []);
-      a.statusName = LUPAPISTE.statuses[a.state] || "unknown";
-      return a;
-    });
-    var grouped = _.groupBy(attachments, function(attachment) { return attachment.type['type-group']; });
-    return _.map(grouped, function(attachments, group) { return {group: group, attachments: attachments}; });
-  }
 
   var AuthorityInfo = function(id, firstName, lastName) {
     this.id = id;
@@ -171,11 +147,7 @@
       // Operations
       applicationModel.operationsCount(_.map(_.countBy(app.operations, "name"), function(v, k) { return {name: k, count: v}; }));
 
-      // Pre-verdict attachments
-      preAttachmentsByGroup(getPreAttachmentsByGroup(app.attachments));
-
-      // Post-verdict attachments
-      postAttachmentsByGroup(getPostAttachmentsByGroup(app.attachments));
+      attachmentTab.refresh(app.attachments);
 
       // Setting disable value for the "Send unsent attachments" button
       var unsentAttachmentFound =
@@ -436,8 +408,6 @@
       authorities: authorities,
       permitSubtypes: permitSubtypes,
       postVerdict: postVerdict,
-      preAttachmentsByGroup: preAttachmentsByGroup,
-      postAttachmentsByGroup: postAttachmentsByGroup,
       // models
       addLinkPermitModel: addLinkPermitModel,
       addPartyModel: addPartyModel,
@@ -456,7 +426,8 @@
       stampModel: stampModel,
       signingModel: signingModel,
       verdictModel: verdictModel,
-      openInviteCompany: inviteCompanyModel.open.bind(inviteCompanyModel)
+      openInviteCompany: inviteCompanyModel.open.bind(inviteCompanyModel),
+      attachmentTab: attachmentTab
     };
 
     $("#application").applyBindings(bindings);
