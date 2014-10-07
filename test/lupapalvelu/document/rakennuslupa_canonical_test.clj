@@ -650,7 +650,6 @@
 (facts "Toimenpiteet"
   (let [documents (by-type (:documents (tools/unwrapped application-rakennuslupa)))
         actions (get-operations documents (tools/unwrapped application-rakennuslupa))]
-    ;(clojure.pprint/pprint actions)
     (fact "actions" (seq actions) => truthy)))
 
 (testable-privates lupapalvelu.document.rakennuslupa_canonical get-huoneisto-data)

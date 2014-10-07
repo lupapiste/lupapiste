@@ -91,8 +91,8 @@
         hakijat (:hakija ymparistolupa) => seq
         luvat (get-in ymparistolupa [:voimassaOlevatLuvat :luvat :lupa]) => seq
 
-        maksaja (get-in ymparistolupa [:maksajatieto :Maksaja]) => truthy]
-
+        maksaja (get-in ymparistolupa [:maksajatieto :Maksaja]) => truthy
+        yritysmaksaja (get-in ymparistolupa [:maksajatieto :Maksaja]) => truthy]
 
     (fact "Canonical model has all fields"
       (util/contains-value? canonical nil?) => falsey)
@@ -160,3 +160,40 @@
         (:puhelinnumero maksaja) => "0400-123456"
         (:laskuviite maksaja) => "1686343528523"))
     ))
+
+(def application-yritysmaksaja
+  (merge application {:documents [kuvaus
+                                  ctc/henkilohakija
+                                  (select-keys ctc/henkilohakija [:schema-info])
+                                  ctc/yrityshakija
+                                  ctc/yritysmaksaja]}))
+
+(ctc/validate-all-documents application-yritysmaksaja)
+
+(facts* "yritysmaksaja-ymparistolupa to canonical"
+  (let [canonical (ylc/ymparistolupa-canonical application-yritysmaksaja "fi") => truthy
+        ymparistolupa (get-in canonical [:Ymparistoluvat :ymparistolupatieto :Ymparistolupa])
+        yritysmaksaja (get-in ymparistolupa [:maksajatieto :Maksaja]) => truthy]
+    (facts "yritysmaksaja"
+      (let [Verkkolaskutus (get-in yritysmaksaja [:verkkolaskutustieto :Verkkolaskutus]) => truthy]
+        (doseq [[k v] {:ovtTunnus "003712345671"
+                       :verkkolaskuTunnus "verkkolaskuTunnus"
+                       :valittajaTunnus "valittajatunnus"}]
+          (k Verkkolaskutus) => v))
+
+      (let [Osoite (get-in yritysmaksaja [:osoitetieto :Osoite]) => truthy
+            osoitenimi (:osoitenimi Osoite) => truthy]
+        (:teksti osoitenimi) => "Satakunnankatu"
+
+        (doseq [[k v] {:postitoimipaikannimi "Tammerfors"
+                       :postinumero "33210"}]
+          (k Osoite) => v))
+
+      (:yrityksenNimi yritysmaksaja) => "Solita Oy"
+      (:puhelinnumero yritysmaksaja) => "0400-123456"
+      (:sahkopostiosoite yritysmaksaja) => "pappa@example.com"
+      (:yTunnus yritysmaksaja) => "1234567-1"
+      (:yhteyshenkilonNimi yritysmaksaja) => "Pappa Betalare")
+    )
+
+  )
