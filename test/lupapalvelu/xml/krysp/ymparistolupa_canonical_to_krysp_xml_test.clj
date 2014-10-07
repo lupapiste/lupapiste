@@ -1,7 +1,7 @@
 (ns lupapalvelu.xml.krysp.ymparistolupa-canonical-to-krysp-xml-test
   (:require [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :refer :all :as mapping-to-krysp]
             [lupapalvelu.document.ymparistolupa-canonical :refer [ymparistolupa-canonical]]
-            [lupapalvelu.document.ymparistolupa-canonical-test :refer [application]]
+            [lupapalvelu.document.ymparistolupa-canonical-test :refer [application application-yritysmaksaja]]
             [lupapalvelu.xml.krysp.ymparistolupa-mapping :refer [ymparistolupa_to_krysp]]
             [lupapalvelu.xml.krysp.canonical-to-krysp-xml-test-common :refer [has-tag]]
             [lupapalvelu.xml.krysp.validator :as validator]
@@ -56,5 +56,22 @@
       (let [maksaja (xml/select lp-xml [:maksajatieto :Maksaja])]
         (fact "etunimi" (xml/get-text maksaja [:etunimi]) => "Pappa")
         (fact "sukunimi" (xml/get-text maksaja [:sukunimi]) => "Betalare")
-        (fact "laskuviite" (xml/get-text maksaja [:laskuviite]) => "1686343528523")))
+        (fact "laskuviite" (xml/get-text maksaja [:laskuviite]) => "1686343528523")))))
+
+(facts "Ymparistolupa with yritysmaksaja"
+  (let [canonical (ymparistolupa-canonical application-yritysmaksaja "fi")
+        krysp-xml (element-to-xml canonical ymparistolupa_to_krysp)
+        xml-s     (indent-str krysp-xml)
+        lp-xml    (cr/strip-xml-namespaces (xml/parse xml-s))]
+
+    ; TODO - other fields could/should be tested as well
+
+    (fact "Verkkolaskutus"
+      (let [Verkkolaskutus (xml/select lp-xml [:maksajatieto :Maksaja :Verkkolaskutus])]
+        (def test-values {:ovtTunnus         "003712345671"
+                          :verkkolaskuTunnus "verkkolaskuTunnus"
+                          :valittajaTunnus   "valittajatunnus"})
+
+        (doseq [[k v] test-values]
+          (xml/get-text Verkkolaskutus [k]) => v)))
     ))
