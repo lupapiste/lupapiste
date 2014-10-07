@@ -50,17 +50,20 @@
             (post-verdict-states attachmentApplicationState)
             (= (keyword userRole) :authority)))))
 
-(defn- validate-operation [{{op :op} :data}]
-  (when-let [missing (if op (util/missing-keys op [:id :name]) false)]
-    (fail! :error.missing-parameters :parameters missing)))
+(defn- validate-operation [{{meta :meta} :data}]
+  (let [op (:op meta)] 
+    (when-let [missing (if op (util/missing-keys op [:id :name]) false)]
+      (fail! :error.missing-parameters :parameters missing))))
 
-(defn- validate-scale [{{scale :scale} :data}]
- (when-not (some #{scale} attachment/attachment-scales)
-   (fail :error.illegal-attachment-scale)))
+(defn- validate-scale [{{meta :meta} :data}]
+  (let [scale (:scale meta)]
+    (when (and scale (not-any? #{scale} attachment/attachment-scales))
+      (fail :error.illegal-attachment-scale))))
 
-(defn- validate-size [{{size :size} :data}]
- (when-not (some #{size} attachment/attachment-sizes)
-   (fail :error.illegal-attachment-size)))
+(defn- validate-size [{{meta :meta} :data}]
+  (let [size (:size meta)]
+    (when (and size (not-any? #{size} attachment/attachment-sizes))
+      (fail :error.illegal-attachment-size))))
 
 ;;
 ;; KRYSP
@@ -429,69 +432,24 @@
        (fail :error.password)))))
 
 ;;
-;; Label
+;; Label metadata
 ;; 
-
-(defcommand set-attachment-operation
-  {:parameters [id attachmentId op]
+  
+(defcommand set-attachment-meta
+  {:parameters [id attachmentId meta]
    :roles      [:applicant :authority]
    :extra-auth-roles [:statementGiver]
    :states     (action/all-states-but [:answered :sent :closed :canceled])
-   :input-validators [validate-operation]}
+   :input-validators [validate-scale validate-size validate-operation]}
   [{:keys [application user] :as command}]
-  
+
   (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
     (fail! :error.pre-verdict-attachment))
-  (let [newOp {:id   (:id op) 
-               :name (:name op)}]
-    (update-application command
-                        {:attachments {$elemMatch {:id attachmentId}}}
-                        {$set {:attachments.$.op newOp,
-                               :attachments.$.modified (now)}})))
-
-(defcommand set-attachment-contents
-  {:parameters [id attachmentId contents]
-   :roles      [:applicant :authority]
-   :extra-auth-roles [:statementGiver]
-   :states     (action/all-states-but [:answered :sent :closed :canceled])}
-  [{:keys [application user] :as command}]
   
-  (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
-    (fail! :error.pre-verdict-attachment))
-
-  (update-application command
-                      {:attachments {$elemMatch {:id attachmentId}}}
-                      {$set {:attachments.$.contents contents,
-                             :attachments.$.modified (now)}}))
-
-(defcommand set-attachment-scale
-  {:parameters [id attachmentId scale]
-   :roles      [:applicant :authority]
-   :extra-auth-roles [:statementGiver]
-   :states     (action/all-states-but [:answered :sent :closed :canceled])
-   :input-validators [validate-scale]}
-  [{:keys [application user] :as command}]
-  
-  (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
-    (fail! :error.pre-verdict-attachment))
-
-  (update-application command
-                      {:attachments {$elemMatch {:id attachmentId}}}
-                      {$set {:attachments.$.scale scale,
-                             :attachments.$.modified (now)}}))
-
-(defcommand set-attachment-size
-  {:parameters [id attachmentId size]
-   :roles      [:applicant :authority]
-   :extra-auth-roles [:statementGiver]
-   :states     (action/all-states-but [:answered :sent :closed :canceled])
-   :input-validators [validate-size]}
-  [{:keys [application user] :as command}]
-  
-  (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
-    (fail! :error.pre-verdict-attachment))
-
-  (update-application command
-                      {:attachments {$elemMatch {:id attachmentId}}}
-                      {$set {:attachments.$.size size,
-                             :attachments.$.modified (now)}}))
+  (doseq [[k v] meta]
+    (let [setKey (keyword (str "attachments.$." (name k)))]
+      (update-application command
+                          {:attachments {$elemMatch {:id attachmentId}}}
+                          {$set {setKey v,
+                                 :attachments.$.modified (now)}})))
+  (ok))

@@ -210,7 +210,7 @@ var attachment = (function() {
     data.id = applicationId
     data.attachmentId = attachmentId;
     ajax
-      .command("set-attachment-" + type, data)
+      .command("set-attachment-meta", data)
       .success(function() {
         repository.load(applicationId);
       })
@@ -224,10 +224,10 @@ var attachment = (function() {
   function subscribe() {
     function applySubscription(label) {
       model.subscriptions.push(model[label].subscribe(_.debounce(function(value) {
-        if (value) {
+        if (value || value === "") {
           var data = {}
           data[label] = value
-          saveLabelInformation(label, data);
+          saveLabelInformation(label, {meta: data});
         }
       }, 500)));
     }
@@ -236,12 +236,13 @@ var attachment = (function() {
       if (!model.operation() || id !== model.operation().id) {
         var op = _.findWhere(model.selectableOperations(), {id: id});
         op = op || null
-        saveLabelInformation("operation", {op: op});
+        saveLabelInformation("operation", {meta: {op: op}});
       }
     }));
 
     applySubscription("contents");
     applySubscription("scale");
+    applySubscription("size");
   }
 
   function unsubscribe() {
@@ -271,6 +272,7 @@ var attachment = (function() {
     model.selectedOperationId(attachment.op ? attachment.op.id : undefined);
     model.contents(attachment.contents);
     model.scale(attachment.scale);
+    model.size(attachment.size);
 
     var type = attachment.type["type-group"] + "." + attachment.type["type-id"];
     model.attachmentType(type);

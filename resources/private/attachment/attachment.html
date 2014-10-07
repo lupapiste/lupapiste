@@ -41,37 +41,43 @@
               <span class="attachment-label-header-item" data-bind="fullName: $data.user"></span>
             </h4>
             <!-- /ko -->
-            <div class="attachment-info-field">
-              <label data-bind="ltext: 'attachment.label.contents'"></label>
-              <input class="form-input" type="text" data-bind="value: contents, valueUpdate: 'afterkeydown'" data-test-id="attachment-content-input"></input>
-            </div>
-            <div class="attachment-info-field">
-              <label data-bind="ltext: 'applications.operation'"></label>
-              <select id="attachment-operation-select"
-                data-bind="options: selectableOperations,
-                           optionsText: function(item) {return item.description ? loc([item.name, '_group_label']) + ' - ' + item.description : loc([item.name, '_group_label'])},
-                           optionsValue: 'id',
-                           optionsCaption: loc('choose'),
-                           value: selectedOperationId,
-                           enable: $root.authorization.ok('set-attachment-type')"></select>
-            </div>
-            <div class="attachment-info-field">
-              <label data-bind="ltext: 'attachment.label.scale'"></label>
-              <select id="attachment-scale-select"
-                data-bind="options: scales,
-                           optionsText: function(item) {return item === 'muu' ? loc('select-other') : item},
-                           optionsCaption: loc('choose'),
-                           value: scale,
-                           enable: $root.authorization.ok('set-attachment-scale')"></select>
-            </div>
-            <div class="attachment-info-field">
-              <label data-bind="ltext: 'attachment.label.size'"></label>
-              <select id="attachment-size-select"
-                data-bind="options: sizes,
-                           optionsText: function(item) {return item === 'muu' ? loc('select-other') : item},
-                           optionsCaption: loc('choose'),
-                           value: size,
-                           enable: $root.authorization.ok('set-attachment-size')"></select>
+            <div class="attachment-info-fields">
+              <div class="attachment-info-field">
+                <label data-bind="ltext: 'attachment.label.contents'"></label>
+                <input class="form-input" type="text"
+                  data-bind="value: contents,
+                             valueUpdate: 'afterkeydown',
+                             enable: $root.authorization.ok('set-attachment-meta')"
+                  data-test-id="attachment-content-input"></input>
+              </div>
+              <div class="attachment-info-field">
+                <label data-bind="ltext: 'applications.operation'"></label>
+                <select id="attachment-operation-select"
+                  data-bind="options: selectableOperations,
+                             optionsText: function(item) {return item.description ? loc([item.name, '_group_label']) + ' - ' + item.description : loc([item.name, '_group_label'])},
+                             optionsValue: 'id',
+                             optionsCaption: loc('choose'),
+                             value: selectedOperationId,
+                             enable: $root.authorization.ok('set-attachment-meta')"></select>
+              </div>
+              <div class="attachment-info-field">
+                <label data-bind="ltext: 'attachment.label.scale'"></label>
+                <select id="attachment-scale-select"
+                  data-bind="options: scales,
+                             optionsText: function(item) {return item === 'muu' ? loc('select-other') : item},
+                             optionsCaption: loc('choose'),
+                             value: scale,
+                             enable: $root.authorization.ok('set-attachment-meta')"></select>
+              </div>
+              <div class="attachment-info-field">
+                <label data-bind="ltext: 'attachment.label.size'"></label>
+                <select id="attachment-size-select"
+                  data-bind="options: sizes,
+                             optionsText: function(item) {return item === 'muu' ? loc('select-other') : item},
+                             optionsCaption: loc('choose'),
+                             value: size,
+                             enable: $root.authorization.ok('set-attachment-meta')"></select>
+              </div>
             </div>
           </div>
         </div>
