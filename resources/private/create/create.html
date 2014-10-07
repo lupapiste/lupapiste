@@ -7,73 +7,12 @@
     <h1 data-bind="ltext: 'newRequest.topic'"></h1>
     <div class="create-application-search-box">
       <p data-bind="ltext: 'newRequest.locationInfo'"></p>
-      <input data-bind="value: search, valueUpdate: 'afterkeydown', attr: {placeholder: loc('create.placeholder')}" id="create-search" type="text" class="form-input text address-search" autofocus="autofocus" />
+      <input data-bind="textInput: search, attr: {placeholder: loc('create.placeholder')}" id="create-search" type="text" class="form-input text address-search" autofocus="autofocus" />
       <button data-bind="click: searchNow" class="btn btn-primary" data-test-id="create-search-button">
         <span data-bind="ltext: 'search'"></span><span class="icon search left-align"></span>
       </button>
     </div>
-    <div class="selected-location">
-
-      <div data-bind="visible: false">
-        <div class="map-select-info">
-          <h3 data-bind="ltext: 'newRequest.chosenLocation'"></h3>
-          <p data-bind="ltext: 'create.search-check-prompt'"></p>
-
-          <div data-bind="visible: useManualEntry, ltext: 'integration.getAddressNotWorking'"></div>
-          <div>
-            <div class="form-entry">
-              <label class="form-label" data-bind="ltext: 'newRequest.propertyId'"></label>
-              <input
-                data-bind="value: propertyId,
-                           valueUpdate: 'afterkeydown',
-                           enable: useManualEntry,
-                           readonly: !currentUser.isAuthority()"
-                data-test-id="create-property-id"
-                type="text"
-                class="form-input text bottom-marginM">
-            </div>
-
-            <div class="form-entry">
-              <label class="form-label" data-bind ="ltext: 'newRequest.address'"></label>
-              <input
-                data-bind="value: addressString, valueUpdate: 'afterkeydown'"
-                data-test-id="create-address"
-                type="text"
-                class="form-input text"></input>
-            </div>
-
-            <div class="form-entry">
-              <label class="form-label" data-bind="ltext: 'newRequest.municipality'"></label>
-              <select
-                data-bind="visible: useManualEntry,
-                           options: municipalities.municipalities,
-                           optionsText: function(m) { return loc(['municipality', m.id]); },
-                           optionsValue: 'id',
-                           value: municipalityCode,
-                           optionsCaption: loc('choose')"
-                data-test-id="create-municipality-select"
-                class="form-select form-input combobox">
-              </select>
-              <input
-                data-bind="visible: !useManualEntry(), value: municipalityName"
-                disabled="disabled"
-                type="text"
-                class="form-input text">
-            </div>
-
-            <button
-                data-bind="enable: addressOk() && propertyIdOk(), click: goPhase2"
-                class="btn btn-primary btn-nav-forward"
-                data-test-id="create-continue"
-                id="create-location-continue">
-              <span data-bind="ltext: 'continue'"></span><span class="icon drill-right-white right-align"></span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div id="create-map" class="map create-application-map" style="width: 100%; height: 700px;"></div>
-    </div>
+    <div id="create-map" class="map create-application-map" style="width: 100%; height: 700px;"></div>
   </section>
   <!-- Phase 2: -->
   <section class="page container" id="create-part-2">
@@ -96,7 +35,7 @@
         <h3 data-bind="ltext: 'newRequest.messageTitle'"></h3>
         <textarea
             class="form-input tree-width"
-            data-bind="attr: {placeholder: loc('newRequest.inforequestMessage')}, value: message, valueUpdate: 'afterkeydown'"
+            data-bind="attr: {placeholder: loc('newRequest.inforequestMessage')}, textInput: message"
             rows="3"
             data-test-id="create-inforequest-message">
         </textarea>

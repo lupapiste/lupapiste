@@ -101,7 +101,8 @@
             </tbody>
           </table>
         </div>
-        <button data-bind="click: $root.addSelectedOwners, enable: status() === statusSelectOwners && selectedOwners().length > 0, ltext: 'neighbors.select.ok'" class="btn btn-primary btn-dialog" data-test-id="neighbors.select.ok"></button>
+        <button data-bind="click: $root.addSelectedOwners, enable: status() === statusSelectOwners && selectedOwners().length > 0, ltext: 'neighbors.select.ok'"
+                class="btn btn-primary btn-dialog" data-test-id="neighbors.select.ok"></button>
         <button data-bind="ltext: 'neighbors.edit.cancel'" class="btn btn-dialog close" data-test-id="neighbors.edit.cancel"></button>
       </div>
     </div>
@@ -118,7 +119,8 @@
         </div>
         <form>
           <label data-bind="ltext: 'neighbors.edit.propertyId'" class="form-label" for="neighbors.edit.propertyId"></label>
-          <input data-bind="value: editablePropertyId, enable: status() > statusInit, css: {'error': !propertyIdOk()}, valueUpdate: 'afterkeydown'" class="form-input text long" type="text" id="neighbors.edit.propertyId" data-test-id="neighbors.edit.propertyId" />
+          <input data-bind="textInput: editablePropertyId, enable: status() > statusInit, css: {'error': !propertyIdOk()}"
+                 class="form-input text long" type="text" id="neighbors.edit.propertyId" data-test-id="neighbors.edit.propertyId" />
 
           <!-- ko if: type -->
           <label data-bind="ltext: 'neighbors.owner.type'" class="form-label" for="neighbors.owner.type"></label>
@@ -148,10 +150,11 @@
           <input data-bind="value: city, enable: status() > statusInit" class="form-input text long" type="text" id="neighbors.owner.address.city" />
 
           <label data-bind="ltext: 'neighbors.owner.email'" class="form-label" for="neighbors.owner.email"></label>
-          <input data-bind="value: email, enable: status() > statusInit, css: {'error': !emailOk()}, valueUpdate: 'afterkeydown'" class="form-input text long" type="text" id="neighbors.owner.email" data-test-id="neighbors.edit.email" />
+          <input data-bind="textInput: email, enable: status() > statusInit, css: {'error': !emailOk()}"
+                 class="form-input text long" type="text" id="neighbors.owner.email" data-test-id="neighbors.edit.email" />
         </form>
 
-        <button data-bind="click: save, enable: ok, ltext: 'neighbors.edit.ok'" class="btn btn-primary btn-dialog" data-test-id="neighbors.edit.ok"></button>
+        <button data-bind="click: save, disable: disabled, ltext: 'neighbors.edit.ok'" class="btn btn-primary btn-dialog" data-test-id="neighbors.edit.ok"></button>
         <button data-bind="ltext: 'neighbors.edit.cancel'" class="btn btn-dialog close"></button>
 
       </div>
