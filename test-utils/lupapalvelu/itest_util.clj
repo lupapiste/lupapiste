@@ -6,7 +6,6 @@
             [lupapalvelu.document.model :as model]
             [lupapalvelu.vetuma :as vetuma]
             [lupapalvelu.web :as web]
-            [sade.util :refer [fn-> fn->>]]
             [sade.http :as http]
             [midje.sweet :refer :all]
             [cheshire.core :as json]

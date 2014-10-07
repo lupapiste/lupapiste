@@ -2,12 +2,10 @@
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error fatal]]
             [clojure.string :refer [blank? join trim split]]
             [clojure.walk :refer [keywordize-keys]]
-            [swiss.arrows :refer [-<>>]]
             [clj-time.core :refer [year]]
             [clj-time.local :refer [local-now]]
             [clj-time.format :as tf]
             [monger.operators :refer :all]
-            [monger.query :as query]
             [sade.env :as env]
             [sade.util :as util]
             [sade.strings :as ss]
@@ -23,8 +21,7 @@
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
-            [lupapalvelu.user :refer [with-user-by-email] :as user]
-            [lupapalvelu.user-api :as user-api]
+            [lupapalvelu.user :as user]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.tasks :as tasks]
@@ -74,7 +71,7 @@
         (fail! :error.unknown)))
     (fail! :error.no-legacy-available)))
 
-(defn- set-user-to-document [application document user-id path current-user timestamp]
+(defn set-user-to-document [application document user-id path current-user timestamp]
   {:pre [document]}
   (when-not (ss/blank? user-id)
     (let [path-arr     (if-not (blank? path) (split path #"\.") [])
@@ -187,112 +184,6 @@
         original-schema-names (:required ((keyword initialOp) operations/operations))
         original-party-documents (filter-repeating-party-docs (:schema-version application) original-schema-names)]
     (ok :partyDocumentNames (conj original-party-documents "hakija"))))
-
-;;
-;; Invites
-;;
-
-(defquery invites
-  {:roles [:applicant :authority]}
-  [{{:keys [id]} :user}]
-  (let [common     {:auth {$elemMatch {:invite.user.id id}}}
-        projection (assoc common :_id 0)
-        filter     {$and [common {:state {$ne :canceled}}]}
-        data       (mongo/select :applications filter projection)
-        invites    (map :invite (mapcat :auth data))]
-    (ok :invites invites)))
-
-(defn- create-invite-model [command conf]
-  (assoc (notifications/create-app-model command conf) :message (get-in command [:data :text]) ))
-
-(notifications/defemail :invite  {:recipients-fn  notifications/from-data
-                                  :model-fn create-invite-model})
-
-(defcommand invite
-  {:parameters [id email title text documentName documentId path]
-   :input-validators [(partial action/non-blank-parameters [:email])
-                      action/email-validator]
-   :states     (action/all-application-states-but [:canceled])
-   :roles      [:applicant :authority]
-   :notified   true
-   :on-success (notify :invite)}
-  [{:keys [created user application] :as command}]
-  (let [email (-> email ss/lower-case ss/trim)]
-    (if (domain/invite application email)
-      (fail :invite.already-has-auth)
-      (let [invited (user-api/get-or-create-user-by-email email user)
-            invite  {:title        title
-                     :application  id
-                     :text         text
-                     :path         path
-                     :documentName documentName
-                     :documentId   documentId
-                     :created      created
-                     :email        email
-                     :user         (user/summary invited)
-                     :inviter      (user/summary user)}
-            writer  (user/user-in-role invited :writer)
-            auth    (assoc writer :invite invite)]
-        (if (domain/has-auth? application (:id invited))
-          (fail :invite.already-has-auth)
-          (update-application command
-            {:auth {$not {$elemMatch {:invite.user.username email}}}}
-            {$push {:auth     auth}
-             $set  {:modified created}}))))))
-
-(defcommand approve-invite
-  {:parameters [id]
-   :roles      [:applicant]
-   :states     (action/all-application-states-but [:sent :verdictGiven :constructionStarted :closed :canceled])}
-  [{:keys [created user application] :as command}]
-  (when-let [my-invite (domain/invite application (:email user))]
-    (update-application command
-      {:auth {$elemMatch {:invite.user.id (:id user)}}}
-      {$set  {:modified created
-              :auth.$ (assoc (user/user-in-role user :writer) :inviteAccepted created)}})
-    (when-let [document (domain/get-document-by-id application (:documentId my-invite))]
-      ; Document can be undefined in invite or removed by the time invite is approved.
-      ; It's not possible to combine Mongo writes here,
-      ; because only the last $elemMatch counts.
-      (set-user-to-document (domain/get-application-as id user) document (:id user) (:path my-invite) user created))))
-
-(defn generate-remove-invalid-user-from-docs-updates [{docs :documents :as application}]
-  (-<>> docs
-    (map-indexed
-      (fn [i doc]
-        (->> (model/validate application doc)
-          (filter #(= (:result %) [:err "application-does-not-have-given-auth"]))
-          (map (comp (partial map name) :path))
-          (map (comp (partial join ".") (partial concat ["documents" i "data"]))))))
-    flatten
-    (zipmap <> (repeat ""))))
-
-(defn- do-remove-auth [{application :application :as command} email]
-  (let [email (-> email ss/lower-case ss/trim)
-        user-pred #(when (and (= (:username %) email) (not= (:type %) "owner")) %)]
-    (when (some user-pred (:auth application))
-      (let [updated-app (update-in application [:auth] (fn [a] (remove user-pred a)))
-            doc-updates (generate-remove-invalid-user-from-docs-updates updated-app)]
-        (update-application command
-          (merge
-            {$pull {:auth {$and [{:username email}, {:type {$ne :owner}}]}}
-             $set  {:modified (:created command)}}
-            (when (seq doc-updates) {$unset doc-updates})))))))
-
-(defcommand remove-auth
-  {:parameters [:id email]
-   :input-validators [(partial action/non-blank-parameters [:email])]
-   :roles      [:applicant :authority]
-   :states     (action/all-application-states-but [:canceled])}
-  [command]
-  (do-remove-auth command email))
-
-(defcommand decline-invitation
-  {:parameters [:id]
-   :roles [:applicant :authority]
-   :states     (action/all-application-states-but [:canceled])}
-  [command]
-  (do-remove-auth command (get-in command [:user :email])))
 
 (defcommand mark-seen
   {:parameters [:id type]
