@@ -5,7 +5,7 @@
             [noir.session :as session]
             [camel-snake-kebab :as kebab]
             [sade.strings :as ss]
-            [sade.util :refer [fn->] :as util]
+            [sade.util :as util]
             [sade.env :as env]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.core :refer [fail fail!]]
@@ -30,8 +30,11 @@
   (when user
     (select-keys user [:id :username :firstName :lastName :role])))
 
-(def authority? (fn-> :role keyword (= :authority)))
-(def applicant? (fn-> :role keyword (= :applicant)))
+(defn authority? [{role :role}]
+  (= :authority (keyword role)))
+
+(defn applicant? [{role :role}]
+  (= :applicant (keyword role)))
 
 (defn same-user? [{id1 :id} {id2 :id}]
   (= id1 id2))
@@ -266,15 +269,6 @@
 ;; Other:
 ;; ==============================================================================
 ;;
-
-(defn authority? [{role :role}]
-  (= :authority (keyword role)))
-
-(defn applicant? [{role :role}]
-  (= :applicant (keyword role)))
-
-(defn same-user? [{id1 :id} {id2 :id}]
-  (= id1 id2))
 
 ;;
 ;; Link user to company:

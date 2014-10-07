@@ -3,8 +3,7 @@
             [lupapalvelu.organization :as local-org-api]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.factlet :refer [fact* facts*]]
-            [lupapalvelu.itest-util :refer :all]
-            [sade.util :refer [fn->]]))
+            [lupapalvelu.itest-util :refer :all]))
 
 (apply-remote-minimal)
 
