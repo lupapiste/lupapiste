@@ -333,7 +333,7 @@
                       </span>
                       <span data-bind="visible: $root.application.isNotOwner($data)"><a href="#" data-bind="ltext: 'application.remove-auth', click: $root.application.removeAuth"></a></span>
 
-                      <span data-bind="visible: $root.application.canSubscribe($data)">
+                      <span data-bind="if: $root.application.canSubscribe($data)">
                       <a href="#" data-bind="visible: $data.unsubscribed && $data.unsubscribed(), click: $root.application.subscribeNotifications, ltext: 'subscribeNotifications'"></a>
                       <a href="#" data-bind="visible: !$data.unsubscribed || !$data.unsubscribed(), click: $root.application.unsubscribeNotifications, ltext: 'unsubscribeNotifications'"></a>
                       </span>
