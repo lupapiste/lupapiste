@@ -548,6 +548,9 @@
                       <i data-bind="ltext: 'attachment.noName'"></i>
                     </span>
                   </a>
+                  <!-- ko if: $data.contents -->
+                    <div class="attachment-content-desc"><span data-bind="text: $data.contents"></span></div>
+                  <!-- /ko -->
                 </td>
                 <td>
                   <span data-bind="if: $data.latestVersion">
