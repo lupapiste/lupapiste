@@ -24,7 +24,7 @@
         :postinumero (-> yritys :osoite :postinumero)
         :postitoimipaikannimi (-> yritys :osoite :postitoimipaikannimi)))))
 
-(defn- get-yritys [yritys is-maksaja-doc]
+(defn- get-yritys [yritys]
   (let [postiosoite (get-postiosoite yritys)
         yritys-basic (not-empty
                        (assoc-when {}
@@ -33,8 +33,8 @@
     (if postiosoite
       (merge
         yritys-basic
-        {:postiosoite postiosoite}
-        {:postiosoitetieto {:Postiosoite postiosoite}})
+        {:postiosoite postiosoite
+         :postiosoitetieto {:Postiosoite postiosoite}})
       yritys-basic)))
 
 (defn- get-hakija [hakija-doc]
@@ -43,7 +43,7 @@
   (let [hakija (not-empty
                  (if (= "yritys" (:_selected hakija-doc))
                    (let [yritys (deep-merge (:yritys (get-osapuoli-data hakija-doc :hakija ))
-                                  (get-yritys (:yritys hakija-doc) false))
+                                  (get-yritys (:yritys hakija-doc)))
                          henkilo (get-henkilo (-> hakija-doc :yritys :yhteyshenkilo))]
                      (when (and yritys henkilo)
                        {:Osapuoli {:yritystieto {:Yritys yritys}
@@ -90,7 +90,7 @@
         {:Vastuuhenkilo vastuuhenkilo}
         (when (= "yritys" type)
           (when-let [yritys (deep-merge (:yritys (get-osapuoli-data tyomaasta-vastaava :tyomaastaVastaava ))
-                                  (get-yritys (:yritys tyomaasta-vastaava) false))]
+                                  (get-yritys (:yritys tyomaasta-vastaava)))]
             {:Osapuoli {:yritystieto {:Yritys yritys}
                         :rooliKoodi "ty\u00f6nsuorittaja"}}))))))
 
@@ -101,7 +101,7 @@
                (let [vastuuhenkilo-roolikoodi (if is-maksaja-doc "maksajan vastuuhenkil\u00f6" "hankkeen vastuuhenkil\u00f6")
                      vastuuhenkilo (get-vastuuhenkilo doc "yritys" vastuuhenkilo-roolikoodi)
                      yritys (deep-merge (:yritys (get-osapuoli-data doc :tyomaastaVastaava ))
-                                        (get-yritys (:yritys doc) is-maksaja-doc))]
+                                        (get-yritys (:yritys doc)))]
                  (when (and vastuuhenkilo yritys)
                    {:Vastuuhenkilo vastuuhenkilo
                     :Osapuoli {:yritystieto {:Yritys yritys}}}))

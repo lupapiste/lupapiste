@@ -37,6 +37,17 @@ Mikko removes apartment
 Mikko goes to parties tab of an application
   Open tab  parties
 
+Mikko unsubscribes notifications
+  Xpath Should Match X Times  //a[contains(text(),'Peruuta sähköposti-ilmoitukset')]  1
+  Click Link   Peruuta sähköposti-ilmoitukset
+  Wait Until  Element should not be visible  xpath=//a[contains(text(),'Peruuta sähköposti-ilmoitukset')]
+  Wait Until  Element should be visible  xpath=//a[contains(text(),'Tilaa sähköposti-ilmoitukset')]
+
+Mikko subscribes notifications
+  Click Link  Tilaa sähköposti-ilmoitukset
+  Wait Until  Element should not be visible  xpath=//a[contains(text(),'Tilaa sähköposti-ilmoitukset')]
+  Wait Until  Element should be visible  xpath=//a[contains(text(),'Peruuta sähköposti-ilmoitukset')]
+
 Mikko decides to delete maksaja
   Set Suite Variable  ${maksajaXpath}  //section[@id='application']//div[@id='application-parties-tab']//section[@data-doc-type='maksaja']
   Wait until  Xpath Should Match X Times  ${maksajaXpath}  1

@@ -114,17 +114,33 @@
                 version => (:version latest))))))
 
       
-      (fact "Pena change attachement operation"
+      (fact "Pena change attachment metadata"
             
         (fact "Pena can change operation"
-          (command pena :set-attachment-operation :id application-id :attachmentId (first attachment-ids) :op {:id "foo" :name "bar"}) => ok?)
-        
-        (fact "Operation is set"
+          (command pena :set-attachment-meta :id application-id :attachmentId (first attachment-ids) :meta {:op {:id "foo" :name "bar"}}) => ok?)        
+        (fact "Pena can change contents"
+          (command pena :set-attachment-meta :id application-id :attachmentId (first attachment-ids) :meta {:contents "foobart"}) => ok?)
+        (fact "Pena can change size"
+          (command pena :set-attachment-meta :id application-id :attachmentId (first attachment-ids) :meta {:size "A4"}) => ok?)
+        (fact "Pena can change scale"
+          (command pena :set-attachment-meta :id application-id :attachmentId (first attachment-ids) :meta {:scale "1:500"}) => ok?)
+
+        (fact "Metadata is set"
           (let [application (query-application pena application-id)
                 attachment (get-attachment-info application (first attachment-ids))
-                op (:op attachment)]
+                op (:op attachment)
+                contents (:contents attachment)
+                size (:size attachment)
+                scale (:scale attachment)]
             (:id op) => "foo"
-            (:name op) => "bar")))
+            (:name op) => "bar"
+            contents => "foobart"
+            size => "A4"
+            scale => "1:500"))
+
+
+        
+        )
       
       (let [versioned-attachment (first (:attachments (query-application veikko application-id)))]
         (last-email) ; Inbox zero

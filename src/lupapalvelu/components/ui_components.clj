@@ -7,7 +7,7 @@
             [sade.env :as env]
             [sade.util :as util]
             [cheshire.core :as json]
-            [lupapalvelu.attachment :refer [attachment-types-osapuoli]]))
+            [lupapalvelu.attachment :refer [attachment-types-osapuoli, attachment-scales, attachment-sizes]]))
 
 (def debugjs {:depends [:init :jquery]
               :js ["debug.js"]
@@ -25,7 +25,9 @@
                  :build             (:build-number env/buildinfo)
                  :cookie            (env/value :cookie)
                  :wannaJoinUrl      (env/value :oir :wanna-join-url)
-                 :userAttachmentTypes (map #(str "osapuolet." (name %)) attachment-types-osapuoli)}]
+                 :userAttachmentTypes (map #(str "osapuolet." (name %)) attachment-types-osapuoli)
+                 :attachmentScales  attachment-scales
+                 :attachmentSizes   attachment-sizes}]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
 
 (defn- loc->js []
@@ -36,11 +38,11 @@
 
 (def ui-components
   {;; 3rd party libs
-   :cdn-fallback   {:js ["jquery-1.8.3.min.js" "jquery-ui-1.10.2.min.js" "jquery.dataTables.min.js" "knockout-2.2.1.js"]}
+   :cdn-fallback   {:js ["jquery-1.8.3.min.js" "jquery-ui-1.10.2.min.js" "jquery.dataTables.min.js" "knockout-3.2.0.js"]}
    :jquery         {:js ["jquery.ba-hashchange.js" "jquery.metadata-2.1.js" "jquery.cookie.js" "jquery.caret.js"]
                     :css ["jquery-ui.css"]}
    :jquery-upload  {:js ["jquery.ui.widget.js" "jquery.iframe-transport.js" "jquery.fileupload.js"]}
-   :knockout       {:js ["knockout.mapping-2.3.2.js" "knockout.validation.js" "knockout-repeat-1.4.2.js"]}
+   :knockout       {:js ["knockout.mapping-2.4.1.js" "knockout.validation-2.0.0-pre.3.js" "knockout-repeat-2.0.0.js"]}
    :lo-dash        {:js ["lodash-1.3.1.min.js"]}
    :underscore     {:depends [:lo-dash]
                     :js ["underscore.string.min.js" "underscore.string.init.js"]}
@@ -80,7 +82,8 @@
                   :html ["404.html" "footer.html"]}
 
    :map          {:depends [:common]
-                  :js ["openlayers-2.13_20140619.min.lupapiste.js" "gis.js" "locationsearch.js"]}
+                  :js ["openlayers-2.13_20140619.min.lupapiste.js" "gis.js" "locationsearch.js"]
+                  :html ["map-popup.html"]}
 
    :mypage       {:depends [:common]
                   :js ["mypage.js"]

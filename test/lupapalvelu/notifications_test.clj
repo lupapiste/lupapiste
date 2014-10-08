@@ -63,6 +63,16 @@
     (mongo/by-id :users "w2" {:email 1}) => {:email "w2@foo.com"}
     (mongo/by-id :users "w3" {:email 1}) => {:email "w3@foo.com"}))
 
+(fact "Unsubsribtion prevents email"
+  (get-email-recipients-for-application
+    {:auth [{:id "a" :role "owner" :unsubscribed false}
+            {:id "b" :role "writer" :unsubscribed true}
+            {:id "c" :role "unknown"}] :title "title" }
+    nil nil) => ["a@foo.com" "c@foo.com"]
+  (provided
+    (mongo/by-id :users "a" {:email 1}) => {:email "a@foo.com"}
+    (mongo/by-id :users "c" {:email 1}) => {:email "c@foo.com"}))
+
 (testable-privates lupapalvelu.open-inforequest base-email-model)
 (fact "Email for sending an open inforequest is like"
   (against-background
