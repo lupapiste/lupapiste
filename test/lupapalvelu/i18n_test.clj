@@ -1,7 +1,8 @@
 (ns lupapalvelu.i18n-test
-  (:use [lupapalvelu.i18n]
-        [midje.sweet])
-  (:require [taoensso.timbre :as timbre :refer (trace debug info warn error fatal)]
+  (:require [lupapalvelu.i18n :refer :all]
+            [midje.sweet :refer :all]
+            [lupapalvelu.test-util :refer :all]
+            [lupapalvelu.mime :as mime]
             [sade.env :as env]))
 
 (facts
@@ -19,3 +20,9 @@
   (read-lines ["error.vrk:BR319:lammitustapa: this: should: work!"
                "kukka: kakka"]) => {"error.vrk:BR319:lammitustapa" "this: should: work!"
                                     "kukka" "kakka"})
+
+(fact "every supported mime type has a display name"
+  (doseq [lang [:fi :sv]
+          allowed-mime (filter #(re-matches mime/mime-type-pattern %) (vals mime/mime-types))]
+    (let [result (doc-result (has-term? lang allowed-mime) (str (name lang) ": " allowed-mime))]
+        (fact result => (doc-check true?)))))
