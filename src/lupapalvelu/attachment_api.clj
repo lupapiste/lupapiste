@@ -447,9 +447,10 @@
     (fail! :error.pre-verdict-attachment))
   
   (doseq [[k v] meta]
-    (let [setKey (keyword (str "attachments.$." (name k)))]
+    (let [keyStr (str "attachments.$." (name k))
+          setKey (keyword keyStr)]
       (update-application command
                           {:attachments {$elemMatch {:id attachmentId}}}
-                          {$set {setKey v,
+                          {$set {setKey v
                                  :attachments.$.modified (now)}})))
   (ok))
