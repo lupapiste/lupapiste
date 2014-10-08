@@ -227,6 +227,14 @@
                     <span data-bind="text: partyDocumentIndicator"
                           id="applicationPartyDocumentIndicator" class="indicator"></span></span></a></li>
 
+
+            <li data-bind="if: _.contains(['verdictGiven', 'constructionStarted', 'closed'], state())">
+              <a data-bind="click: changeTab" href="#" data-target="tasks" data-test-id="application-open-tasks-tab">
+                  <span data-bind="ltext: 'application.tabConstructionTimeTasks'"></span>
+                  <span data-bind="if: $data.tasksRequiringAction">
+                    <span data-bind="text: tasksRequiringAction"
+                          id="applicationTasksRequiringAction" class="indicator"></span></span></a></li>
+
             <li><a data-bind="click: changeTab"
                    href="#" data-target="attachments" data-test-id="application-open-attachments-tab">
                 <span data-bind="ltext: 'application.tabAttachments'"></span>
@@ -253,11 +261,9 @@
                         id="applicationUnseenVerdists" class="indicator"></span></span></a></li>
 
             <li data-bind="if: _.contains(['verdictGiven', 'constructionStarted', 'closed'], state())">
-              <a data-bind="click: changeTab" href="#" data-target="tasks" data-test-id="application-open-tasks-tab">
-                  <span data-bind="ltext: 'application.tabConstructionTimeTasks'"></span>
-                  <span data-bind="if: $data.tasksRequiringAction">
-                    <span data-bind="text: tasksRequiringAction"
-                          id="applicationTasksRequiringAction" class="indicator"></span></span></a></li>
+              <a data-bind="click: changeTab" href="#" data-target="applicationSummary" data-test-id="application-open-applicationSummary-tab">
+                  <span data-bind="ltext: 'application.applicationSummary'"></span></a></li>
+
           </ul>
         </div>
       </div>
@@ -275,6 +281,8 @@
       </div>
 
       <div class="tab-content-container content">
+
+        <!-- Application info tab -->
 
         <div id="application-info-tab" class="tab-content">
           <h1 data-bind="ltext: 'application.tabInfo'"></h1>
@@ -307,6 +315,9 @@
             </a>
           </div>
         </div>
+
+        <!-- Parties tab -->
+
         <div id="application-parties-tab" class="tab-content">
           <h1 data-bind="ltext: 'application.tabParties'"></h1>
           <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.PartiesDesc'" class="tab-info"></p>
@@ -383,6 +394,8 @@
           </div>
         </div>
 
+        <!-- Attachments tab -->
+
         <div id="application-attachments-tab" class="tab-content">
           <h1 data-bind="ltext: 'application.tabAttachments'"></h1>
           <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.attachmentsDesc'" class="tab-info"></p>
@@ -424,7 +437,7 @@
             </div>
           </div>
 
-          <div class="">
+          <div>
             <div data-bind="if: postAttachmentsByGroup().length > 0" data-test-id="application-post-attachments-table">
               <h2><span data-bind="ltext: 'application.attachments.post-verdict'"></span></h2>
               <div data-bind="template: {name: 'attachments-template', data: postAttachmentsByGroup()}"></div>
@@ -556,11 +569,9 @@
           </table>
         </script>
 
+        <!-- Required field summary tab -->
 
-        <div id="application-requiredFieldSummary-tab"
-             data-bind="with: $root.application"
-             class="tab-content">
-
+        <div id="application-requiredFieldSummary-tab" data-bind="with: $root.application" class="tab-content">
           <div>
             <h1 data-bind="ltext: 'application.tabRequiredFieldSummary'"></h1>
 
@@ -600,8 +611,6 @@
                   <!-- /ko -->
                 <!-- /ko -->
             <!-- /ko -->
-
-
           </div>
 
           <div class="process-nav">
@@ -611,6 +620,30 @@
             </a>
           </div>
         </div>
+
+        <!-- Application summary tab -->
+
+        <div id="application-applicationSummary-tab" data-bind="with: $root.application" class="tab-content" >
+
+          <div class="application_section">
+            <div id="partiesDocgen" class="docgen-content">
+              <!-- This is where generated document will be placed. -->
+            </div>
+          </div>
+
+          <h1 data-bind="ltext: 'application.tabApplicationSummary'"></h1>
+          <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.applicationSummaryDesc'" class="tab-info"></p>
+<!--      <div data-bind="template: {name: 'comment-template', data: {comment: $root.comment, authorities: $root.authorities, mainConversation: true}}"></div> -->
+          <div class="process-nav">
+            <a class="btn process-previous btn-nav-back" data-bind="click: $root.application.nextTab" href="#" data-target="attachments">
+              <span data-bind="ltext: 'application.previous-tab'"></span>
+              <span class="icon drill-left-black-bigger left-align"></span>
+            </a>
+          </div>
+
+        </div>
+
+        <!-- Verdict tab -->
 
         <div id="application-verdict-tab" class="tab-content">
           <h1 data-bind="ltext: 'application.tabVerdict'"></h1>
@@ -803,6 +836,8 @@
           </button>
         </div>
 
+        <!-- Statement tab -->
+
         <div id="application-statement-tab" class="tab-content">
 
           <div data-bind="with: application" class="application-statements">
@@ -922,6 +957,8 @@
           </div>
         </div>
 
+        <!-- Tasks tab -->
+
         <div id="application-tasks-tab" data-bind="with: $root.application" class="tab-content" >
 
           <div data-bind="if: buildings() && buildings().length > 0 && $root.authorization.ok('inform-building-construction-started')">
@@ -1039,6 +1076,8 @@
                              visible: $root.authorization.ok('create-task'),
                              enable: $root.authorization.ok('create-task')"></button>
         </div>
+
+        <!-- Conversation tab -->
 
         <div id="application-conversation-tab" data-bind="with: $root.comment" class="tab-content" >
           <h1 data-bind="ltext: 'application.tabConversation'"></h1>

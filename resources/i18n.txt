@@ -1,3 +1,7 @@
 subscribeNotifications: Tilaa sähköposti-ilmoitukset
 unsubscribeNotifications: Peruuta sähköposti-ilmoitukset
 application.remove-auth: Poista valtuutus
+
+application.applicationSummary: Hakemus
+application.tabApplicationSummary: Hakemuksen tiedot
+help.R.applicationSummaryDesc: kuvaus R
