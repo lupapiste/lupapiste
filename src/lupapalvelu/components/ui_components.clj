@@ -7,7 +7,7 @@
             [sade.env :as env]
             [sade.util :as util]
             [cheshire.core :as json]
-            [lupapalvelu.attachment :refer [attachment-types-osapuoli]]))
+            [lupapalvelu.attachment :refer [attachment-types-osapuoli, attachment-scales, attachment-sizes]]))
 
 (def debugjs {:depends [:init :jquery]
               :js ["debug.js"]
@@ -25,7 +25,9 @@
                  :build             (:build-number env/buildinfo)
                  :cookie            (env/value :cookie)
                  :wannaJoinUrl      (env/value :oir :wanna-join-url)
-                 :userAttachmentTypes (map #(str "osapuolet." (name %)) attachment-types-osapuoli)}]
+                 :userAttachmentTypes (map #(str "osapuolet." (name %)) attachment-types-osapuoli)
+                 :attachmentScales  attachment-scales
+                 :attachmentSizes   attachment-sizes}]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
 
 (defn- loc->js []
