@@ -325,13 +325,18 @@
                       <span class="invite-state">
                         <span data-bind="if: $data.invite"><span class="user-invite" data-bind="ltext: 'invited'"></span></span>
                         <span data-bind="if: !$data.invite">
-                          <span data-bind="ltext: 'accepted'"></span>
+                          <span data-bind="visible: $root.application.isNotOwner($data), ltext: 'accepted'"></span>
                           <!-- ko if: $data.inviteAccepted -->
                           <span data-test-id="invite-accepted-span" data-bind="dateTimeString: $data.inviteAccepted"></span>
                           <!-- /ko -->
                         </span>
                       </span>
-                      <span data-bind="visible: $root.application.isNotOwner($data)"><a class="remove-read" href="#" data-bind="ltext: 'remove', click: $root.application.removeAuth"></a></span>
+                      <span data-bind="visible: $root.application.isNotOwner($data)"><a href="#" data-bind="ltext: 'application.remove-auth', click: $root.application.removeAuth"></a></span>
+
+                      <span data-bind="if: $root.application.canSubscribe($data)">
+                      <a href="#" data-bind="visible: $data.unsubscribed && $data.unsubscribed(), click: $root.application.subscribeNotifications, ltext: 'subscribeNotifications'"></a>
+                      <a href="#" data-bind="visible: !$data.unsubscribed || !$data.unsubscribed(), click: $root.application.unsubscribeNotifications, ltext: 'unsubscribeNotifications'"></a>
+                      </span>
                     </li>
                   </ul>
 
