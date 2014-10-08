@@ -1392,7 +1392,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     if (op) {
       title.appendChild(document.createTextNode(loc([op.name, "_group_label"])));
-      title.appendChild(buildDescriptionElement(op));
+      if (authorizationModel.ok('update-op-description')) {
+        title.appendChild(buildDescriptionElement(op));
+      }
     } else {
       title.appendChild(document.createTextNode(loc([self.schema.info.name, "_group_label"])));
     }

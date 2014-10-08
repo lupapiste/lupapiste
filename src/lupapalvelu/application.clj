@@ -622,7 +622,7 @@
 (defcommand update-op-description
   {:parameters [id op-id desc]
    :roles      [:applicant :authority]
-   :states     action/all-states}
+   :states     [:draft :open :submitted :complement-needed]}
   [command]
   (let [application (:application command)
         app-command (application->command application)]
