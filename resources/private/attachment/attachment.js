@@ -117,6 +117,7 @@ var attachment = (function() {
     size:            ko.observable(),
     sizes:           ko.observableArray(LUPAPISTE.config.attachmentSizes),
     subscriptions:   [],
+    indicator:       ko.observable().extend({notify: 'always'}),
 
     hasPreview: function() {
       return !model.previewDisabled() && (model.isImage() || model.isPdf() || model.isPlainText());
@@ -188,11 +189,10 @@ var attachment = (function() {
     ajax
       .command("set-attachment-meta", data)
       .success(function() {
-        repository.load(applicationId);
+        model.indicator(type);
       })
       .error(function(e) {
         error(e.text)
-        repository.load(applicationId);
       })
       .call();
   }

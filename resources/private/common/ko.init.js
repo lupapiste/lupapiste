@@ -193,6 +193,19 @@
     }
   };
 
+  ko.bindingHandlers.saveIndicator = {
+    update: function(element, valueAccessor, allBindingsAccessor) {
+      var value = ko.utils.unwrapObservable(valueAccessor());
+      var bindings = ko.utils.unwrapObservable(allBindingsAccessor());
+      if (value === bindings.name) {
+        $(element).fadeIn(200);
+        setTimeout(function() {
+          $(element).fadeOut(200)
+        }, 4000);
+      }
+    }
+  }
+
   $.fn.applyBindings = function(model) {
     if (!this.length) {
       warn(this.selector + " didn't match any elements");
