@@ -54,6 +54,13 @@
       (xml/get-text lp-xml-212 [:MuuTunnus :tunnus]) => (:id application)
       (xml/get-text lp-xml-213 [:MuuTunnus :sovellus]) => "Lupapiste")
 
+    (when (xml/get-text lp-xml-213 [:verkkolaskutustieto])
+      (fact
+        (let [Verkkolaskutus (xml/select lp-xml-213 [:verkkolaskutustieto :Verkkolaskutus])]
+          (xml/get-text Verkkolaskutus [:ovtTunnus]) => "003712345671"
+          (xml/get-text Verkkolaskutus [:verkkolaskuTunnus]) => "laskutunnus-1234"
+          (xml/get-text Verkkolaskutus [:valittajaTunnus]) => "valittajatunnus-1234")))
+
     (when (:linkPermitData application)
       (fact "Link permit"
         (let [muut-tunnukset (xml/select lp-xml-213 [:MuuTunnus])
