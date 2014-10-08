@@ -405,7 +405,7 @@
                 class="btn btn-primary">
               </button>
               <button
-                data-bind="click: $root.attachmentTemplatesModel.show, ltext: 'application.newAttachmentTemplates', visible: $root.authorization.ok('create-attachments'), enable: !processing()"
+                data-bind="click: $root.attachmentTab.attachmentTemplatesModel.show, ltext: 'application.newAttachmentTemplates', visible: $root.authorization.ok('create-attachments'), enable: !processing()"
                 class="btn">
               </button>
               <button data-bind="click: $root.stampModel.init,visible: $root.authorization.ok('stamp-attachments'), enable: !processing() && $root.authorization.ok('stamp-attachments')" class="btn">
@@ -450,7 +450,7 @@
                   data-test-id="attachments-copy-own">
                 </button>
                 <button
-                  data-bind="click: $root.attachmentTemplatesModel.show, ltext: 'application.newAttachmentTemplates', visible: $root.authorization.ok('create-attachments'), enable: !processing()"
+                  data-bind="click: $root.attachmentTab.attachmentTemplatesModel.show, ltext: 'application.newAttachmentTemplates', visible: $root.authorization.ok('create-attachments'), enable: !processing()"
                   class="btn">
                 </button>
                 <button data-bind="click: $root.stampModel.init,visible: $root.authorization.ok('stamp-attachments'), enable: !processing() && $root.authorization.ok('stamp-attachments')" data-test-id="application-stamp-btn"  class="btn">

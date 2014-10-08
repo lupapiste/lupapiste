@@ -54,7 +54,7 @@
   var addPartyModel = new LUPAPISTE.AddPartyModel();
   var createTaskController = LUPAPISTE.createTaskController;
   var mapModel = new LUPAPISTE.MapModel(authorizationModel);
-  var attachmentTab = new LUPAPISTE.AttachmentTabModel(postVerdictStates);
+  var attachmentTab = new LUPAPISTE.AttachmentTabModel(postVerdictStates, applicationModel.id);
 
   var authorities = ko.observableArray([]);
   var permitSubtypes = ko.observableArray([]);
@@ -258,39 +258,7 @@
       }}, 1000);
   }
 
-  var attachmentTemplatesModel = new function() {
-    var self = this;
 
-    self.ok = function(ids) {
-      ajax.command("create-attachments", {id: applicationModel.id(), attachmentTypes: ids})
-        .success(function() { repository.load(applicationModel.id()); })
-        .complete(LUPAPISTE.ModalDialog.close)
-        .call();
-    };
-
-    self.init = function() {
-      self.selectm = $("#dialog-add-attachment-templates .attachment-templates").selectm();
-      self.selectm.ok(self.ok).cancel(LUPAPISTE.ModalDialog.close);
-      return self;
-    };
-
-    self.show = function() {
-      var data = _.map(applicationModel.allowedAttachmentTypes(), function(g) {
-        var groupId = g[0];
-        var groupText = loc(["attachmentType", groupId, "_group_label"]);
-        var attachemntIds = g[1];
-        var attachments = _.map(attachemntIds, function(a) {
-          var id = {"type-group": groupId, "type-id": a};
-          var text = loc(["attachmentType", groupId, a]);
-          return {id: id, text: text};
-        });
-        return [groupText, attachments];
-      });
-      self.selectm.reset(data);
-      LUPAPISTE.ModalDialog.open("#dialog-add-attachment-templates");
-      return self;
-    };
-  }();
 
   function initPage(kind, e) {
     var newId = e.pagePath[0];
@@ -411,7 +379,6 @@
       // models
       addLinkPermitModel: addLinkPermitModel,
       addPartyModel: addPartyModel,
-      attachmentTemplatesModel: attachmentTemplatesModel,
       authorization: authorizationModel,
       changeLocationModel: changeLocationModel,
       applicationComment: commentModel,
@@ -437,7 +404,7 @@
     $(constructionStateChangeModel.dialogSelector).applyBindings({constructionStateChangeModel: constructionStateChangeModel});
     $(signingModel.dialogSelector).applyBindings({signingModel: signingModel, authorization: authorizationModel});
     $(inviteCompanyModel.selector).applyBindings(inviteCompanyModel);
-    attachmentTemplatesModel.init();
+    attachmentTab.attachmentTemplatesModel.init();
   });
 
 })();
