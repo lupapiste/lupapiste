@@ -625,15 +625,16 @@
 
         <div id="application-applicationSummary-tab" data-bind="with: $root.application" class="tab-content" >
 
+          <h1 data-bind="ltext: 'application.tabApplicationSummary'"></h1>
+          <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.applicationSummaryDesc'" class="tab-info"></p>
+<!--      <div data-bind="template: {name: 'comment-template', data: {comment: $root.comment, authorities: $root.authorities, mainConversation: true}}"></div> -->
+
           <div class="application_section">
-            <div id="partiesDocgen" class="docgen-content">
+            <div id="applicationAndPartiesDocgen" class="docgen-content">
               <!-- This is where generated document will be placed. -->
             </div>
           </div>
 
-          <h1 data-bind="ltext: 'application.tabApplicationSummary'"></h1>
-          <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.applicationSummaryDesc'" class="tab-info"></p>
-<!--      <div data-bind="template: {name: 'comment-template', data: {comment: $root.comment, authorities: $root.authorities, mainConversation: true}}"></div> -->
           <div class="process-nav">
             <a class="btn process-previous btn-nav-back" data-bind="click: $root.application.nextTab" href="#" data-target="attachments">
               <span data-bind="ltext: 'application.previous-tab'"></span>

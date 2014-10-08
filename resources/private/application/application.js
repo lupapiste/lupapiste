@@ -209,6 +209,7 @@
       var sortedNonpartyDocs = _.sortBy(nonpartyDocs, util.getDocumentOrder);
       var partyDocs = _.filter(app.documents, util.isPartyDoc);
       var sortedPartyDocs = _.sortBy(partyDocs, util.getDocumentOrder);
+      var allDocs = sortedNonpartyDocs.concat(sortedPartyDocs);
 
       var nonpartyDocErrors = _.map(sortedNonpartyDocs, function(doc) { return doc.validationErrors; });
       var partyDocErrors = _.map(sortedPartyDocs, function(doc) { return doc.validationErrors; });
@@ -217,6 +218,7 @@
 
       docgen.displayDocuments("#applicationDocgen", app, sortedNonpartyDocs, authorizationModel);
       docgen.displayDocuments("#partiesDocgen",     app, sortedPartyDocs, authorizationModel);
+      docgen.displayDocuments("#applicationAndPartiesDocgen", app, allDocs, authorizationModel);
 
       // Indicators
       function sumDocIndicators(sum, doc) {
