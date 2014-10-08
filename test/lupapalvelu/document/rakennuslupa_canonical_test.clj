@@ -130,7 +130,7 @@
    :data {:_selected {:value "yritys"}
           :yritys (merge yritys
                          {:verkkolaskutustieto
-                           {:ovtTunnus {:value "003712345678"}
+                           {:ovtTunnus {:value "003712345671"}
                            :verkkolaskuTunnus {:value "laskutunnus-1234"}
                            :valittajaTunnus {:value "valittajatunnus-1234"}}})}})
 
@@ -619,7 +619,7 @@
     (fact "yritys is nil" yritys => nil)))
 
 (defn- validate-einvoice [einvoice]
-  (fact "ovt-tunnus" (:ovtTunnus einvoice) => "003712345678")
+  (fact "ovt-tunnus" (:ovtTunnus einvoice) => "003712345671")
   (fact "verkkolaskuTunnus" (:verkkolaskuTunnus einvoice) => "laskutunnus-1234")
   (fact "valittajaTunnus" (:valittajaTunnus einvoice) => "valittajatunnus-1234"))
 

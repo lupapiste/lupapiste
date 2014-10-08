@@ -193,7 +193,4 @@
       (:puhelinnumero yritysmaksaja) => "0400-123456"
       (:sahkopostiosoite yritysmaksaja) => "pappa@example.com"
       (:yTunnus yritysmaksaja) => "1234567-1"
-      (:yhteyshenkilonNimi yritysmaksaja) => "Pappa Betalare")
-    )
-
-  )
+      (:yhteyshenkilonNimi yritysmaksaja) => "Pappa Betalare")))
