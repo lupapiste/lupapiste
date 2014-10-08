@@ -171,7 +171,7 @@
   [{user :user data :data}]
   (let [user-query (domain/basic-application-query-for user)
         query (make-query user-query data user)
-        fields (concat [:id :location :infoRequest :address :municipality :operations] (filter keyword? col-sources))
+        fields (concat [:id :location :infoRequest :address :municipality :operations :drawings] (filter keyword? col-sources))
         apps (mongo/select :applications query (zipmap fields (repeat 1)))
         rows (map #(-> %
                      (domain/filter-application-content-for user)
