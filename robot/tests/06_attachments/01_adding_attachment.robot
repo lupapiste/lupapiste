@@ -81,7 +81,7 @@ Change attachment type
 Change attachment content label
   [Tags]  attachments
   Open attachment details  muut.muu
-  Input text by test id  attachment-content-input  2. Kerros pohoja kuva
+  Input text by test id  attachment-contents-input  2. Kerros pohoja kuva
   Click element  xpath=//a[@data-test-id="back-to-application-from-attachment"]
   # TODO check content label when label is implemented
 
