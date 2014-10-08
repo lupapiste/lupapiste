@@ -165,16 +165,25 @@
 ;; Regular query for integrations
 ;;
 
+(defn- localize-application [application]
+  (let [op-name (fn [op lang] (i18n/localize lang "operations" (:name op)))]
+    (-> application
+      (update-in [:operations] #(map (fn [op] (assoc op :displayNameFi (op-name op "fi") :displayNameSv (op-name op "sv"))) %))
+      (assoc
+        :stateNameFi (i18n/localize "fi" (:state application))
+        :stateNameSv (i18n/localize "sv" (:state application))))))
+
 (defquery applications
   {:parameters []
    :roles      [:applicant :authority]}
   [{user :user data :data}]
   (let [user-query (domain/basic-application-query-for user)
         query (make-query user-query data user)
-        fields (concat [:id :location :infoRequest :address :municipality :operations :drawings] (filter keyword? col-sources))
+        fields (concat [:id :location :infoRequest :address :municipality :operations :drawings :permitType] (filter keyword? col-sources))
         apps (mongo/select :applications query (zipmap fields (repeat 1)))
         rows (map #(-> %
                      (domain/filter-application-content-for user)
-                     ; filters empty lists from previous step
-                     (select-keys fields)) apps)]
+                     (select-keys fields) ; filters empty lists from previous step
+                     localize-application)
+               apps)]
     (ok :applications rows)))
