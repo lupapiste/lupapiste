@@ -182,30 +182,6 @@ var attachment = (function() {
     return null;
   });
 
-  model.subscriptions.push(model.attachmentType.subscribe(function(attachmentType) {
-    var type = model.type();
-    var prevAttachmentType = type["type-group"] + "." + type["type-id"];
-    var loader$ = $("#attachment-type-select-loader");
-    if (prevAttachmentType !== attachmentType) {
-      loader$.show();
-      ajax
-        .command("set-attachment-type",
-          {id:              applicationId,
-           attachmentId:    attachmentId,
-           attachmentType:  attachmentType})
-        .success(function() {
-          loader$.hide();
-          repository.load(applicationId);
-        })
-        .error(function(e) {
-          loader$.hide();
-          repository.load(applicationId);
-          error(e.text);
-        })
-        .call();
-    }
-  }));
-
   function saveLabelInformation(type, data) {
     data.id = applicationId
     data.attachmentId = attachmentId;
@@ -222,6 +198,30 @@ var attachment = (function() {
   }
 
   function subscribe() {
+    model.subscriptions.push(model.attachmentType.subscribe(function(attachmentType) {
+      var type = model.type();
+      var prevAttachmentType = type["type-group"] + "." + type["type-id"];
+      var loader$ = $("#attachment-type-select-loader");
+      if (prevAttachmentType !== attachmentType) {
+        loader$.show();
+        ajax
+          .command("set-attachment-type",
+            {id:              applicationId,
+             attachmentId:    attachmentId,
+             attachmentType:  attachmentType})
+          .success(function() {
+            loader$.hide();
+            repository.load(applicationId);
+          })
+          .error(function(e) {
+            loader$.hide();
+            repository.load(applicationId);
+            error(e.text);
+          })
+          .call();
+      }
+    }));
+
     function applySubscription(label) {
       model.subscriptions.push(model[label].subscribe(_.debounce(function(value) {
         if (value || value === "") {
