@@ -78,6 +78,13 @@ Change attachment type
   Tab should be visible  attachments
   Wait Until  Page Should Not Contain  xpath=//a[@data-test-type="muut.muu"]
 
+Change attachment content label
+  [Tags]  attachments
+  Open attachment details  muut.muu
+  Input text by test id  attachment-content-input  2. Kerros pohoja kuva
+  Click element  xpath=//a[@data-test-id="back-to-application-from-attachment"]
+  # TODO check content label when label is implemented
+
 Sign all attachments
   [Tags]  attachments
   Tab should be visible  attachments

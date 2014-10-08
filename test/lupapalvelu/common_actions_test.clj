@@ -18,8 +18,8 @@
                           :should-see-unsubmitted-statements
                           :view-attachment
                           :delete-attachment
-                          :set-attachment-operation
                           :set-attachment-type
+                          :set-attachment-meta
                           :upload-attachment
                           :download-all-attachments
                           :download-attachment
