@@ -2,6 +2,8 @@
 attachment.label.contents: Piirustuksen sisältö
 attachment.label.scale: Piirustuksen mittakaava
 attachment.label.size: Piirustuksen koko
+attachment.label.operation: Liittyy
+attachment.label.operation.choose: Yleisesti hankkeeseen
 
 subscribeNotifications: Tilaa sähköposti-ilmoitukset
 unsubscribeNotifications: Peruuta sähköposti-ilmoitukset
