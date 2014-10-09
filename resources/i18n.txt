@@ -1,9 +1,4 @@
 muukoulutus: Muu tutkinto tai koulutus
-osapuoli.yritys.verkkolaskutustieto._group_label: Verkkolaskutustiedot
-osapuoli.yritys.verkkolaskutustieto.ovtTunnus: OVT-tunnus
-osapuoli.yritys.verkkolaskutustieto.ovtTunnus.help: Min. 12 merkkiä, max. 17
-osapuoli.yritys.verkkolaskutustieto.verkkolaskuTunnus:  Verkkolaskutunnus
-osapuoli.yritys.verkkolaskutustieto.valittajaTunnus: Välittäjätunnus
 
 attachment.label.contents: Piirustuksen sisältö
 attachment.label.scale: Piirustuksen mittakaava
