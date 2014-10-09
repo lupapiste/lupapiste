@@ -284,17 +284,26 @@
     (cleanup)
 
     (cr/ensure-sequental :vaaditutKatselmukset)
-    (#(assoc % :vaaditutKatselmukset (map :Katselmus (:vaaditutKatselmukset %))))
+    (#(let [kats (map :Katselmus (:vaaditutKatselmukset %))]
+        (if (seq kats)
+          (assoc % :vaaditutKatselmukset kats)
+          (dissoc % :vaaditutKatselmukset))))
 
     ; KRYSP yhteiset 2.1.1+
     (cr/ensure-sequental :vaadittuTyonjohtajatieto)
-    (update-in [:vaadittuTyonjohtajatieto] #(map (comp :tyonjohtajaLaji :VaadittuTyonjohtaja ) %))
-    ; KRYSP yhteiset 2.1.0 and below have vaaditutTyonjohtajat key that contains the same data in a single string.
-    ; Convert the new format to the old.
-    (#(if (seq (:vaadittuTyonjohtajatieto %)) (assoc % :vaaditutTyonjohtajat (s/join ", " (:vaadittuTyonjohtajatieto %))) %))
+    (#(let [tyonjohtajat (map (comp :tyonjohtajaLaji :VaadittuTyonjohtaja) (:vaadittuTyonjohtajatieto %))]
+        (if (seq tyonjohtajat)
+          (-> %
+            (assoc :vaadittuTyonjohtajatieto tyonjohtajat)
+            ; KRYSP yhteiset 2.1.0 and below have vaaditutTyonjohtajat key that contains the same data in a single string.
+            ; Convert the new format to the old.
+            (assoc :vaaditutTyonjohtajat (s/join ", " tyonjohtajat)))
+          (dissoc % :vaadittuTyonjohtajatieto))))
 
     (cr/ensure-sequental :maarays)
-    (#(if-let [maarays (:maarays %)] (assoc % :maaraykset (cr/convert-keys-to-timestamps maarays [:maaraysaika :toteutusHetki])) %))
+    (#(if-let [maarays (:maarays %)]
+        (assoc % :maaraykset (cr/convert-keys-to-timestamps maarays [:maaraysaika :toteutusHetki]))
+        %))
     (dissoc :maarays)
 
     (cr/convert-keys-to-ints [:autopaikkojaEnintaan

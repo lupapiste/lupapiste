@@ -11,3 +11,5 @@ application.remove-auth: Poista valtuutus
 application.applicationSummary: Hakemus
 application.tabApplicationSummary: Hakemuksen tiedot
 help.R.applicationSummaryDesc: kuvaus R
+verdict.lupamaaraukset.missing: Ei lupamääräyksiä
+verdict.poytakirjat.missing: Ei pöytäkirjoja
