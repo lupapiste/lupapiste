@@ -44,6 +44,7 @@
             <div class="attachment-info-fields">
               <div class="attachment-info-field">
                 <label data-bind="ltext: 'attachment.label.contents'"></label>
+                <span class="save-indicator" data-bind="saveIndicator: indicator, name: 'contents'">Tallennettu</span>
                 <input class="form-input" type="text"
                        data-test-id="attachment-contents-input"
                        data-bind="value: contents,
@@ -52,6 +53,7 @@
               </div>
               <div class="attachment-info-field">
                 <label data-bind="ltext: 'applications.operation'"></label>
+                <span class="save-indicator" data-bind="saveIndicator: indicator, name: 'operation'">Tallennettu</span>
                 <select data-test-id="attachment-operation-select"
                         data-bind="options: selectableOperations,
                                    optionsText: function(item) {return item.description ? loc([item.name, '_group_label']) + ' - ' + item.description : loc([item.name, '_group_label'])},
@@ -62,6 +64,7 @@
               </div>
               <div class="attachment-info-field">
                 <label data-bind="ltext: 'attachment.label.scale'"></label>
+                <span class="save-indicator" data-bind="saveIndicator: indicator, name: 'scale'">Tallennettu</span>
                 <select data-test-id="attachment-scale-select"
                         data-bind="options: scales,
                                    optionsText: function(item) {return item === 'muu' ? loc('select-other') : item},
@@ -71,6 +74,7 @@
               </div>
               <div class="attachment-info-field">
                 <label data-bind="ltext: 'attachment.label.size'"></label>
+                <span class="save-indicator" data-bind="saveIndicator: indicator, name: 'size'">Tallennettu</span>
                 <select data-test-id="attachment-size-select"
                         data-bind="options: sizes,
                                    optionsText: function(item) {return item === 'muu' ? loc('select-other') : item},
