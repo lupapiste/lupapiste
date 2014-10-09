@@ -627,13 +627,36 @@
 
           <h1 data-bind="ltext: 'application.tabApplicationSummary'"></h1>
           <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.applicationSummaryDesc'" class="tab-info"></p>
-<!--      <div data-bind="template: {name: 'comment-template', data: {comment: $root.comment, authorities: $root.authorities, mainConversation: true}}"></div> -->
 
           <div class="application_section">
             <div id="applicationAndPartiesDocgen" class="docgen-content">
               <!-- This is where generated document will be placed. -->
             </div>
           </div>
+
+          <section class="accordion">
+            <h2 onclick="accordion.click(this)">
+              <span class="icon toggle-icon drill-down-white"></span>
+              <span data-bind="ltext: 'application.statements'" style="margin-right: 0">Lausunnot</span>
+            </h2>
+            <div class="accordion_content expanded">
+              <div class="accordion-fields">
+                <div data-bind="template: {name: 'statements-template', data: {statements: $data.statements}}"></div>
+              </div>
+            </div>
+          </section>
+
+          <section class="accordion">
+            <h2 onclick="accordion.click(this)">
+              <span class="icon toggle-icon drill-down-white"></span>
+              <span data-bind="lhtml: 'application.neighbors.hearings'" style="margin-right: 0">Naapurit</span>
+            </h2>
+            <div class="accordion_content expanded">
+              <div class="accordion-fields">
+                <div data-bind="template: {name: 'neighbors-template', data: {neighbors: $data.neighbors}}"></div>
+              </div>
+            </div>
+          </section>
 
           <div class="process-nav">
             <a class="btn process-previous btn-nav-back" data-bind="click: $root.application.nextTab" href="#" data-target="attachments">
@@ -853,121 +876,127 @@
         <div id="application-statement-tab" class="tab-content">
 
           <div data-bind="with: application" class="application-statements">
-
             <h1 data-bind="ltext: 'application.statements'">Lausunnot</h1>
             <p data-bind="lhtml: 'help.' + permitType() + '.statementsDesc'" class="tab-info"></p>
-            <div data-bind="ifnot: $data.statements && statements().length>0">
-              <p data-bind="ltext: 'application.statement.missing'" data-test-id="application-no-statements"></p>
-            </div>
 
-            <div data-bind="if: $data.statements && statements().length>0">
-              <table class="table table-striped tablesorter" data-test-id="application-statements">
-                <thead>
-                  <tr>
-                    <th data-bind="ltext: 'application.statement.desc'"></th>
-                    <th data-bind="ltext: 'auth-admin.statement-person.name'"></th>
-                    <th data-bind="ltext: 'application.statement.requested'"></th>
-                    <th data-bind="ltext: 'application.statement.given'"></th>
-                    <th data-bind="ltext: 'application.statement.status'"></th>
-                  </tr>
-                </thead>
-                <tbody data-bind="foreach: $data.statements()">
-                  <tr class="statement-row">
-                    <td>
-                      <span data-bind="if: status() || $root.authorization.ok('should-see-unsubmitted-statements')">
-                        <a href="#" data-bind="text: person.text, click: $root.requestForStatementModel.openStatement, attr: {'data-test-id' : 'open-statement-' + $index()}"></a>
-                      </span>
-                      <span data-bind="ifnot: status() || $root.authorization.ok('should-see-unsubmitted-statements')">
-                        <span data-bind="text: person.text, attr: {'data-test-id' : 'open-statement-' + $index()}"></span>
-                      </span>
-                    </td>
-                    <td data-bind="text: person.name"></td>
-                    <td data-bind="dateString: requested"></td>
-                    <td data-bind="dateString: given"></td>
-                    <td data-bind="text: status() && loc(['statement', status()]), attr: {'data-test-name' : person.name}"></td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+            <div data-bind="template: {name: 'statements-template', data: {statements: $data.statements}}"></div>
 
-            <button
-                data-bind="click: $root.requestForStatementModel.openDialog, ltext: 'application.statement.add', visible: $root.authorization.ok('request-for-statement')"
-                class="btn btn-primary modal"
-                data-test-id="add-statement">
+            <button data-bind="click: $root.requestForStatementModel.openDialog, ltext: 'application.statement.add', visible: $root.authorization.ok('request-for-statement')"
+                    class="btn btn-primary modal"
+                    data-test-id="add-statement">
             </button>
-
           </div>
 
           <div data-bind="with: application" class="application-neighbors">
 
             <h1 data-bind="lhtml: 'application.' + $root.application.permitType() + '.neighbors'">Naapurit</h1>
             <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.neighborsDesc'" class="tab-info"></p>
-            <div data-bind="ifnot: neighbors() && neighbors().length>0">
-              <p data-bind="ltext: 'neighbors.missing'" data-test-id="application-no-neigbors"></p>
-            </div>
 
-            <div data-bind="if: neighbors() && neighbors().length > 0">
-              <table>
-                <thead>
-                  <tr>
-                    <th data-bind="ltext: 'neighbors.propertyId'"></th>
-                    <th data-bind="ltext: 'neighbors.owner'"></th>
-                    <th data-bind="ltext: 'neighbors.status'"></th>
-                    <th data-bind="ltext: 'neighbors.actions'"></th>
-                  </tr>
-                </thead>
-                <tbody data-bind="foreach: neighbors">
-                  <tr data-bind="attr: {'data-test-id': 'neighbors-row-email-' + owner.email()}">
-                    <td data-bind="propertyId: propertyId"></td>
-                    <td data-bind="with: owner">
-                      <span data-bind="text: name" class="owner-name"></span>
-                      <span data-bind="text: address.street" class="owner-street"></span>
-                      <span data-bind="text: address.zip" class="owner-zip"></span>
-                      <span data-bind="text: address.city" class="owner-city"></span>
-                      <span data-bind="text: email" class="owner-email"></span>
-                    </td>
-                    <td>
-                      <a data-bind="visible: $root.neighbor.statusCompleted($data),
-                                    click: $root.neighbor.showStatus,
-                                    attr: {'data-test-id': 'neighbors-row-status-' + _.last(status()).state()}"
-                         href="#">
-                        <span data-bind="text: loc(['neighbor.state', _.last(status()).state()])" class="status-state"></span>
-                      </a>
-                      <span data-bind="visible: !$root.neighbor.statusCompleted($data),
-                                       text: loc(['neighbor.state', _.last(status()).state()]),
-                                       attr: {'data-test-id': 'neighbors-row-status-' + _.last(status()).state()}"
-                            class="status-state">
-                      </span>
-                      <span data-bind="dateTimeString: _.last(status()).created()" class="status-time"></span>
-                    </td>
-                    <td>
-                      <span data-bind="visible: !$root.neighbor.statusCompleted($data)">
-                        <a data-bind="click: $root.sendNeighborEmailModel.open,
-                                      visible: $root.authorization.ok('neighbor-send-invite'),
-                                      ltext: 'neighbors.actions.sendEmail'"
-                           data-test-id="neighbor-row-invite"
-                           class="command"
-                           href="#">
-                        </a>
-                        <a data-bind="click: $root.neighbor.markDone,
-                                      visible: _.last(status()).state() != 'mark-done' && $root.authorization.ok('neighbor-mark-done'),
-                                      ltext: 'neighbors.actions.markDone',
-                                      clickBubble: false"
-                           data-test-id="neighbor-row-mark-done"
-                           class="command"
-                           href="#">
-                         </a>
-                      </span>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+            <div data-bind="template: {name: 'neighbors-template', data: {neighbors: $data.neighbors}}"></div>
 
             <button data-bind="click: $root.neighbor.manage, ltext: 'neighbors.manage', visible: $root.authorization.ok('neighbor-add')" class="btn btn-primary modal" data-test-id="manage-neighbors"></button>
-
           </div>
         </div>
+
+        <script type="text/html" id="statements-template">
+           <div data-bind="ifnot: $data.statements && statements().length > 0">
+            <p data-bind="ltext: 'application.statement.missing'" data-test-id="application-no-statements"></p>
+          </div>
+
+          <div data-bind="if: $data.statements && statements().length > 0">
+            <table class="table table-striped tablesorter" data-test-id="application-statements">
+              <thead>
+                <tr>
+                  <th data-bind="ltext: 'application.statement.desc'"></th>
+                  <th data-bind="ltext: 'auth-admin.statement-person.name'"></th>
+                  <th data-bind="ltext: 'application.statement.requested'"></th>
+                  <th data-bind="ltext: 'application.statement.given'"></th>
+                  <th data-bind="ltext: 'application.statement.status'"></th>
+                </tr>
+              </thead>
+              <tbody data-bind="foreach: $data.statements()">
+                <tr class="statement-row">
+                  <td>
+                    <span data-bind="if: status() || $root.authorization.ok('should-see-unsubmitted-statements')">
+                      <a href="#" data-bind="text: person.text, click: $root.requestForStatementModel.openStatement, attr: {'data-test-id' : 'open-statement-' + $index()}"></a>
+                    </span>
+                    <span data-bind="ifnot: status() || $root.authorization.ok('should-see-unsubmitted-statements')">
+                      <span data-bind="text: person.text, attr: {'data-test-id' : 'open-statement-' + $index()}"></span>
+                    </span>
+                  </td>
+                  <td data-bind="text: person.name"></td>
+                  <td data-bind="dateString: requested"></td>
+                  <td data-bind="dateString: given"></td>
+                  <td data-bind="text: status() && loc(['statement', status()]), attr: {'data-test-name' : person.name}"></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </script>
+
+        <script type="text/html" id="neighbors-template">
+          <div data-bind="ifnot: neighbors() && neighbors().length > 0">
+            <p data-bind="ltext: 'neighbors.missing'" data-test-id="application-no-neigbors"></p>
+          </div>
+
+          <div data-bind="if: neighbors() && neighbors().length > 0">
+            <table>
+              <thead>
+                <tr>
+                  <th data-bind="ltext: 'neighbors.propertyId'"></th>
+                  <th data-bind="ltext: 'neighbors.owner'"></th>
+                  <th data-bind="ltext: 'neighbors.status'"></th>
+                  <th data-bind="ltext: 'neighbors.actions'"></th>
+                </tr>
+              </thead>
+              <tbody data-bind="foreach: neighbors">
+                <tr data-bind="attr: {'data-test-id': 'neighbors-row-email-' + owner.email()}">
+                  <td data-bind="propertyId: propertyId"></td>
+                  <td data-bind="with: owner">
+                    <span data-bind="text: name" class="owner-name"></span>
+                    <span data-bind="text: address.street" class="owner-street"></span>
+                    <span data-bind="text: address.zip" class="owner-zip"></span>
+                    <span data-bind="text: address.city" class="owner-city"></span>
+                    <span data-bind="text: email" class="owner-email"></span>
+                  </td>
+                  <td>
+                    <a data-bind="visible: $root.neighbor.statusCompleted($data),
+                                  click: $root.neighbor.showStatus,
+                                  attr: {'data-test-id': 'neighbors-row-status-' + _.last(status()).state()}"
+                       href="#">
+                      <span data-bind="text: loc(['neighbor.state', _.last(status()).state()])" class="status-state"></span>
+                    </a>
+                    <span data-bind="visible: !$root.neighbor.statusCompleted($data),
+                                     text: loc(['neighbor.state', _.last(status()).state()]),
+                                     attr: {'data-test-id': 'neighbors-row-status-' + _.last(status()).state()}"
+                          class="status-state">
+                    </span>
+                    <span data-bind="dateTimeString: _.last(status()).created()" class="status-time"></span>
+                  </td>
+                  <td>
+                    <span data-bind="visible: !$root.neighbor.statusCompleted($data)">
+                      <a data-bind="click: $root.sendNeighborEmailModel.open,
+                                    visible: $root.authorization.ok('neighbor-send-invite'),
+                                    ltext: 'neighbors.actions.sendEmail'"
+                         data-test-id="neighbor-row-invite"
+                         class="command"
+                         href="#">
+                      </a>
+                      <a data-bind="click: $root.neighbor.markDone,
+                                    visible: _.last(status()).state() != 'mark-done' && $root.authorization.ok('neighbor-mark-done'),
+                                    ltext: 'neighbors.actions.markDone',
+                                    clickBubble: false"
+                         data-test-id="neighbor-row-mark-done"
+                         class="command"
+                         href="#">
+                       </a>
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </script>
 
         <!-- Tasks tab -->
 
