@@ -206,6 +206,20 @@
     }
   }
 
+  ko.bindingHandlers.slider = {
+    update: function(element, valueAccessor, allBindingsAccessor) {
+      var value = ko.utils.unwrapObservable(valueAccessor());
+      var bindings = ko.utils.unwrapObservable(allBindingsAccessor());
+      var duration = bindings.duration || 100;
+      var easing = bindings.easing || "swing";
+      if (value) {
+        $(element).slideDown(duration, easing);
+      } else {
+        $(element).slideUp(duration, easing);
+      }
+    }
+  }
+
   $.fn.applyBindings = function(model) {
     if (!this.length) {
       warn(this.selector + " didn't match any elements");

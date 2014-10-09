@@ -5,6 +5,8 @@ attachment.label.size: Piirustuksen koko
 attachment.label.operation: Liittyy
 attachment.label.operation.choose: Yleisesti hankkeeseen
 
+attachment.showVersionHistory: Näytä versiohistoria
+
 subscribeNotifications: Tilaa sähköposti-ilmoitukset
 unsubscribeNotifications: Peruuta sähköposti-ilmoitukset
 application.remove-auth: Poista valtuutus
