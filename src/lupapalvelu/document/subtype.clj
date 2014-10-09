@@ -93,6 +93,12 @@
     (re-matches #"^[0-9]{4}$" v) nil
     :else [:warn "illegal-maaraala-tunnus"]))
 
+(defmethod subtype-validation :ovt [_ v]
+  (cond
+    (blank? v) nil
+    (re-matches #"^\d{12}.{0,5}$" v) nil
+    :else [:warn "illegal-ovt-tunnus"]))
+
 (defmethod subtype-validation nil [_ _]
   nil)
 

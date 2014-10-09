@@ -15,7 +15,8 @@
             [midje.sweet :refer :all]
             [clojure.data.xml :refer :all]
             [sade.xml :as xml]
-            [sade.common-reader :as cr]))
+            [sade.common-reader :as cr]
+            [lupapalvelu.domain :refer [get-document-by-name]]))
 
 (defn- do-test [application]
   (let [operation-name-key (-> application :operations first :name keyword)
@@ -53,6 +54,13 @@
     (fact "LP-tunnus"
       (xml/get-text lp-xml-212 [:MuuTunnus :tunnus]) => (:id application)
       (xml/get-text lp-xml-213 [:MuuTunnus :sovellus]) => "Lupapiste")
+
+    (when (get-document-by-name application :yleiset-alueet-maksaja)
+      (fact "Verkkolaskutus fields are present in xml under yleiset-alueet-maksaja"
+        (let [Verkkolaskutus (xml/select lp-xml-213 [:verkkolaskutustieto :Verkkolaskutus])]
+          (xml/get-text Verkkolaskutus [:ovtTunnus]) => "003712345671"
+          (xml/get-text Verkkolaskutus [:verkkolaskuTunnus]) => "laskutunnus-1234"
+          (xml/get-text Verkkolaskutus [:valittajaTunnus]) => "valittajatunnus-1234")))
 
     (when (:linkPermitData application)
       (fact "Link permit"

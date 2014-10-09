@@ -117,6 +117,7 @@ var attachment = (function() {
     size:            ko.observable(),
     sizes:           ko.observableArray(LUPAPISTE.config.attachmentSizes),
     subscriptions:   [],
+    indicator:       ko.observable().extend({notify: 'always'}),
 
     hasPreview: function() {
       return !model.previewDisabled() && (model.isImage() || model.isPdf() || model.isPlainText());
@@ -182,46 +183,45 @@ var attachment = (function() {
     return null;
   });
 
-  model.subscriptions.push(model.attachmentType.subscribe(function(attachmentType) {
-    var type = model.type();
-    var prevAttachmentType = type["type-group"] + "." + type["type-id"];
-    var loader$ = $("#attachment-type-select-loader");
-    if (prevAttachmentType !== attachmentType) {
-      loader$.show();
-      ajax
-        .command("set-attachment-type",
-          {id:              applicationId,
-           attachmentId:    attachmentId,
-           attachmentType:  attachmentType})
-        .success(function() {
-          loader$.hide();
-          repository.load(applicationId);
-        })
-        .error(function(e) {
-          loader$.hide();
-          repository.load(applicationId);
-          error(e.text);
-        })
-        .call();
-    }
-  }));
-
   function saveLabelInformation(type, data) {
     data.id = applicationId
     data.attachmentId = attachmentId;
     ajax
       .command("set-attachment-meta", data)
       .success(function() {
-        repository.load(applicationId);
+        model.indicator(type);
       })
       .error(function(e) {
         error(e.text)
-        repository.load(applicationId);
       })
       .call();
   }
 
   function subscribe() {
+    model.subscriptions.push(model.attachmentType.subscribe(function(attachmentType) {
+      var type = model.type();
+      var prevAttachmentType = type["type-group"] + "." + type["type-id"];
+      var loader$ = $("#attachment-type-select-loader");
+      if (prevAttachmentType !== attachmentType) {
+        loader$.show();
+        ajax
+          .command("set-attachment-type",
+            {id:              applicationId,
+             attachmentId:    attachmentId,
+             attachmentType:  attachmentType})
+          .success(function() {
+            loader$.hide();
+            repository.load(applicationId);
+          })
+          .error(function(e) {
+            loader$.hide();
+            repository.load(applicationId);
+            error(e.text);
+          })
+          .call();
+      }
+    }));
+
     function applySubscription(label) {
       model.subscriptions.push(model[label].subscribe(_.debounce(function(value) {
         if (value || value === "") {
