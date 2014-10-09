@@ -3655,7 +3655,6 @@ tiedot</xs:documentation>
 					<xs:restriction base="xs:string">
 						<xs:minLength value="12"/>
 						<xs:maxLength value="17"/>
-						<xs:pattern value=""/>
 					</xs:restriction>
 				</xs:simpleType>
 			</xs:element>

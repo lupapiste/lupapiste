@@ -279,14 +279,18 @@
 (defn- get-simple-yritys [{:keys [yritysnimi liikeJaYhteisoTunnus] :as yritys}]
   {:nimi yritysnimi, :liikeJaYhteisotunnus liikeJaYhteisoTunnus})
 
-(defn- get-yritys-data [{:keys [osoite yhteyshenkilo] :as yritys}]
+(defn- get-yritys-data [{:keys [osoite yhteyshenkilo verkkolaskutustieto] :as yritys}]
   (let [yhteystiedot (:yhteystiedot yhteyshenkilo)
         postiosoite (get-simple-osoite osoite)]
     (merge (get-simple-yritys yritys)
            {:postiosoite postiosoite ; - 2.1.4
             :postiosoitetieto {:postiosoite postiosoite} ; 2.1.5+
             :puhelin (:puhelin yhteystiedot)
-            :sahkopostiosoite (:email yhteystiedot)})))
+            :sahkopostiosoite (:email yhteystiedot)}
+           (when verkkolaskutustieto
+             {:verkkolaskutustieto {:Verkkolaskutus {:ovtTunnus (-> verkkolaskutustieto :ovtTunnus)
+                                                    :verkkolaskuTunnus (-> verkkolaskutustieto :verkkolaskuTunnus)
+                                                    :valittajaTunnus (-> verkkolaskutustieto :valittajaTunnus)}}}))))
 
 (def ^:private default-role "ei tiedossa")
 (defn- get-kuntaRooliKoodi [party party-type]
@@ -325,7 +329,7 @@
                         {:henkilotunnus (-> (:henkilotiedot henkilo) :hetu)
                          :osoite (get-simple-osoite (:osoite henkilo))}))}
           (when yritys-type-osapuoli?
-            {:yritys  (get-yritys-data (:yritys osapuoli))})
+            {:yritys (get-yritys-data (:yritys osapuoli))})
           (when omistajalaji {:omistajalaji omistajalaji}))))))
 
 (defn get-parties-by-type [documents tag-name party-type doc-transformer]
@@ -554,14 +558,18 @@
            :sahkopostiosoite (:email yhteystiedot))))
       )))
 
+(defn get-verkkolaskutustieto [unwrapped-party-doc]
+  (let [verkkolaskutustieto (get-in unwrapped-party-doc [:data :yritys :verkkolaskutustieto])]
+    (assoc-when {}
+      :Verkkolaskutus verkkolaskutustieto)))
+
 (defn get-maksajatiedot [unwrapped-party-doc]
   (merge
     (get-yhteystiedot unwrapped-party-doc)
     (not-empty
       (assoc-when {}
         :laskuviite (get-in unwrapped-party-doc [:data :laskuviite])
-        ; TODO
-        :verkkolaskutustieto nil))))
+        :verkkolaskutustieto (get-verkkolaskutustieto unwrapped-party-doc)))))
 
 (defn- get-pos [coordinates]
   {:pos (map #(str (-> % .x) " " (-> % .y)) coordinates)})

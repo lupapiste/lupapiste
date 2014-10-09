@@ -90,19 +90,25 @@
 
 ;; Document: Maksaja
 
+(def yritys-with-verkkolaskutustieto
+  (merge yritys
+         {:verkkolaskutustieto {:ovtTunnus {:value "003712345671"}
+                                :verkkolaskuTunnus {:value "laskutunnus-1234"}
+                                :valittajaTunnus {:value "valittajatunnus-1234"}}}))
+
 (def _laskuviite {:modified 1379404963313, :value "1234567890"})
 
-(def maksaja {:id "52380c6894a74fc25bb4ba49",
-              :created "1379404904514",
-              :schema-info {:name "yleiset-alueet-maksaja",
-                            :removable false,
-                            :repeating false,
-                            :version 1,
-                            :type "party",
-                            :order 62},
+(def maksaja {:id "52380c6894a74fc25bb4ba49"
+              :created "1379404904514"
+              :schema-info {:name "yleiset-alueet-maksaja"
+                            :removable false
+                            :repeating false
+                            :version 1
+                            :type "party"
+                            :order 62}
               :data {:_selected {:modified 1379405011475, :value "yritys"},
-                     :henkilo henkilo,
-                     :yritys yritys,
+                     :henkilo henkilo
+                     :yritys yritys-with-verkkolaskutustieto
                      :laskuviite _laskuviite}})
 
 ;; Document: Tyoaika
