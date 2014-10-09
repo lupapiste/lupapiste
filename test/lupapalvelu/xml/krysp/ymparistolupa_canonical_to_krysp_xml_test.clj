@@ -67,10 +67,10 @@
     ; TODO - other fields could/should be tested as well
 
     (fact "Verkkolaskutus"
-      (let [Verkkolaskutus (xml/select lp-xml [:maksajatieto :Maksaja :Verkkolaskutus])]
-        (def test-values {:ovtTunnus         "003712345671"
-                          :verkkolaskuTunnus "verkkolaskuTunnus"
-                          :valittajaTunnus   "valittajatunnus"})
+      (let [Verkkolaskutus (xml/select lp-xml [:maksajatieto :Maksaja :Verkkolaskutus])
+            test-values {:ovtTunnus         "003712345671"
+                         :verkkolaskuTunnus "verkkolaskuTunnus"
+                         :valittajaTunnus   "valittajatunnus"}]
 
         (doseq [[k v] test-values]
           (xml/get-text Verkkolaskutus [k]) => v)))
