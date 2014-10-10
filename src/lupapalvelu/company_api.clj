@@ -1,6 +1,6 @@
 (ns lupapalvelu.company-api
   (:require [lupapalvelu.core :refer [ok fail fail! unauthorized unauthorized!]]
-            [lupapalvelu.action :refer [defquery defcommand]]
+            [lupapalvelu.action :refer [defquery defcommand] :as action]
             [lupapalvelu.company :as c]
             [lupapalvelu.user :as u]))
 
@@ -88,8 +88,9 @@
   (ok))
 
 (defcommand company-invite
-  {:roles [:applicant :authority]
-   :parameters [application-id company-id]}
-  [{caller :user}]
-  (c/company-invite caller application-id company-id)
+  {:parameters [id company-id]
+   :states (action/all-application-states-but [:closed :canceled])
+   :roles [:applicant :authority]}
+  [{caller :user application :application}]
+  (c/company-invite caller application company-id)
   (ok))
