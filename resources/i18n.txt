@@ -1,3 +1,4 @@
+muukoulutus: Muu tutkinto tai koulutus
 
 attachment.label.contents: Piirustuksen sisältö
 attachment.label.scale: Piirustuksen mittakaava
