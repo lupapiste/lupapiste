@@ -145,7 +145,7 @@
       // Operations
       applicationModel.operationsCount(_.map(_.countBy(app.operations, "name"), function(v, k) { return {name: k, count: v}; }));
 
-      attachmentsTab.refresh(app);
+      attachmentsTab.refresh(applicationModel);
 
       // Setting disable value for the "Send unsent attachments" button
       var unsentAttachmentFound =

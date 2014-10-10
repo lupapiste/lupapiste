@@ -35,18 +35,18 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
     return _.map(grouped, function(attachments, group) { return {group: group, attachments: attachments}; });
   }
 
-  self.refresh = function(app) {
+  self.refresh = function(appModel) {
 
-
+    self.appModel = appModel;
 
     // Pre-verdict attachments
-    self.preAttachmentsByGroup(getPreAttachmentsByGroup(app.attachments));
+    self.preAttachmentsByGroup(getPreAttachmentsByGroup(ko.mapping.toJS(appModel.attachments)));
 
     // Post-verdict attachments
-    self.postAttachmentsByGroup(getPostAttachmentsByGroup(app.attachments));
+    self.postAttachmentsByGroup(getPostAttachmentsByGroup(ko.mapping.toJS(appModel.attachments)));
 
     // Post/pre verdict state?
-    self.postVerdict(postVerdictStates[app.state]);
+    self.postVerdict(postVerdictStates[self.appModel.state()]);
   }
 
   self.attachmentTemplatesModel = new function() {
