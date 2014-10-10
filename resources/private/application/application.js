@@ -54,7 +54,7 @@
   var addPartyModel = new LUPAPISTE.AddPartyModel();
   var createTaskController = LUPAPISTE.createTaskController;
   var mapModel = new LUPAPISTE.MapModel(authorizationModel);
-  var attachmentTab = new LUPAPISTE.AttachmentTabModel(postVerdictStates, applicationModel.id);
+  var attachmentsTab = new LUPAPISTE.AttachmentsTabModel(postVerdictStates, applicationModel.id);
 
   var authorities = ko.observableArray([]);
   var permitSubtypes = ko.observableArray([]);
@@ -147,7 +147,7 @@
       // Operations
       applicationModel.operationsCount(_.map(_.countBy(app.operations, "name"), function(v, k) { return {name: k, count: v}; }));
 
-      attachmentTab.refresh(app.attachments);
+      attachmentsTab.refresh(app.attachments);
 
       // Setting disable value for the "Send unsent attachments" button
       var unsentAttachmentFound =
@@ -394,7 +394,7 @@
       signingModel: signingModel,
       verdictModel: verdictModel,
       openInviteCompany: inviteCompanyModel.open.bind(inviteCompanyModel),
-      attachmentTab: attachmentTab
+      attachmentsTab: attachmentsTab
     };
 
     $("#application").applyBindings(bindings);
@@ -404,7 +404,7 @@
     $(constructionStateChangeModel.dialogSelector).applyBindings({constructionStateChangeModel: constructionStateChangeModel});
     $(signingModel.dialogSelector).applyBindings({signingModel: signingModel, authorization: authorizationModel});
     $(inviteCompanyModel.selector).applyBindings(inviteCompanyModel);
-    attachmentTab.attachmentTemplatesModel.init();
+    attachmentsTab.attachmentTemplatesModel.init();
   });
 
 })();
