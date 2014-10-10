@@ -1,10 +1,12 @@
-LUPAPISTE.AttachmentsTabModel = function(postVerdictStates, appId) {
+LUPAPISTE.AttachmentsTabModel = function(appId) {
   "use strict";
 
   var self = this;
 
   self.applicationId = appId;
-  self.postVerdictStates = postVerdictStates;
+
+  var postVerdictStates = {verdictGiven:true, constructionStarted:true, closed:true};
+  self.postVerdict = ko.observable(false);
   
   self.preAttachmentsByGroup = ko.observableArray();
   self.postAttachmentsByGroup = ko.observableArray();
@@ -12,14 +14,14 @@ LUPAPISTE.AttachmentsTabModel = function(postVerdictStates, appId) {
   function getPreAttachmentsByGroup(source) {
     return getAttachmentsByGroup(
       _.filter(source, function(attachment) {
-          return !self.postVerdictStates[attachment.applicationState];
+          return !postVerdictStates[attachment.applicationState];
       }));
   }
 
   function getPostAttachmentsByGroup(source) {
     return getAttachmentsByGroup(
       _.filter(source, function(attachment) {
-          return self.postVerdictStates[attachment.applicationState];
+          return postVerdictStates[attachment.applicationState];
       }));
   }
 
@@ -33,12 +35,16 @@ LUPAPISTE.AttachmentsTabModel = function(postVerdictStates, appId) {
     return _.map(grouped, function(attachments, group) { return {group: group, attachments: attachments}; });
   }
 
-  self.refresh = function(attachments) {
+  self.refresh = function(app) {
+
     // Pre-verdict attachments
-    self.preAttachmentsByGroup(getPreAttachmentsByGroup(attachments));
+    self.preAttachmentsByGroup(getPreAttachmentsByGroup(app.attachments));
 
     // Post-verdict attachments
-    self.postAttachmentsByGroup(getPostAttachmentsByGroup(attachments));
+    self.postAttachmentsByGroup(getPostAttachmentsByGroup(app.attachments));
+
+    // Post/pre verdict state?
+    self.postVerdict(postVerdictStates[app.state]);
   }
 
   self.attachmentTemplatesModel = new function() {

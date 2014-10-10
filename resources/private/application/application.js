@@ -44,7 +44,6 @@
     return false;
   };
 
-  var postVerdictStates = {verdictGiven:true, constructionStarted:true, closed:true};
 
   var inviteModel = new LUPAPISTE.InviteModel();
   var verdictModel = new LUPAPISTE.VerdictsModel();
@@ -54,11 +53,10 @@
   var addPartyModel = new LUPAPISTE.AddPartyModel();
   var createTaskController = LUPAPISTE.createTaskController;
   var mapModel = new LUPAPISTE.MapModel(authorizationModel);
-  var attachmentsTab = new LUPAPISTE.AttachmentsTabModel(postVerdictStates, applicationModel.id);
+  var attachmentsTab = new LUPAPISTE.AttachmentsTabModel(applicationModel.id);
 
   var authorities = ko.observableArray([]);
   var permitSubtypes = ko.observableArray([]);
-  var postVerdict = ko.observable(false);
 
   var inviteCompanyModel = new LUPAPISTE.InviteCompanyModel(applicationModel.id);
 
@@ -147,7 +145,7 @@
       // Operations
       applicationModel.operationsCount(_.map(_.countBy(app.operations, "name"), function(v, k) { return {name: k, count: v}; }));
 
-      attachmentsTab.refresh(app.attachments);
+      attachmentsTab.refresh(app);
 
       // Setting disable value for the "Send unsent attachments" button
       var unsentAttachmentFound =
@@ -168,8 +166,6 @@
       // permit subtypes
       permitSubtypes(applicationDetails.permitSubtypes);
 
-      // Post/pre verdict state?
-      postVerdict(!!postVerdictStates[app.state]);
 
       // Mark-seen
       if (applicationModel.infoRequest() && authorizationModel.ok("mark-seen")) {
@@ -375,7 +371,6 @@
       application: applicationModel,
       authorities: authorities,
       permitSubtypes: permitSubtypes,
-      postVerdict: postVerdict,
       // models
       addLinkPermitModel: addLinkPermitModel,
       addPartyModel: addPartyModel,

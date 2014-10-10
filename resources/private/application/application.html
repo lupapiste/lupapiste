@@ -401,7 +401,7 @@
             <span class="missing icon"></span>
             <span data-bind="ltext: 'missing.title'"></span>
           </div>
-          <div class="attachment-actions" data-bind="visible: (!postVerdict() && attachmentsTab.preAttachmentsByGroup().length > 0) || (postVerdict() && attachmentsTab.postAttachmentsByGroup().length > 0)">
+          <div class="attachment-actions" data-bind="visible: (!attachmentsTab.postVerdict() && attachmentsTab.preAttachmentsByGroup().length > 0) || (attachmentsTab.postVerdict() && attachmentsTab.postAttachmentsByGroup().length > 0)">
             <div data-bind="with: application">
               <button
                 data-bind="click: newAttachment, ltext: 'application.attachmentsAdd', visible: $root.authorization.ok('upload-attachment'), enable: !processing()"
@@ -432,7 +432,7 @@
               <h2><span data-bind="ltext: 'application.attachments.post-verdict'"/></h2>
               <div data-bind="template: {name: 'attachments-template', data: attachmentsTab.postAttachmentsByGroup()}"/>
             </div>
-            <!-- ko if: !postVerdict() -->
+            <!-- ko if: !attachmentsTab.postVerdict() -->
             <div data-bind="if: attachmentsTab.preAttachmentsByGroup().length > 0" data-test-id="application-pre-attachments-table">
               <h2><span data-bind="ltext: 'application.attachments.pre-verdict'"/></h2>
               <div data-bind="template: {name: 'attachments-template', data: attachmentsTab.preAttachmentsByGroup()}"/>
@@ -481,7 +481,7 @@
               </div>
             </div>
 
-            <!-- ko if: postVerdict() -->
+            <!-- ko if: attachmentsTab.postVerdict() -->
             <div data-bind="if: attachmentsTab.preAttachmentsByGroup().length > 0" data-test-id="application-pre-attachments-table">
               <h2><span data-bind="ltext: 'application.attachments.pre-verdict'"></span></h2>
               <div data-bind="template: {name: 'attachments-template', data: attachmentsTab.preAttachmentsByGroup()}"></div>
