@@ -90,10 +90,10 @@ Sign all attachments
 
 Signature is visible
   Open attachment details  rakennuspaikka.ote_alueen_peruskartasta
-  Wait Until  Xpath Should Match X Times  //section[@id="attachment"]//tbody[@data-bind="foreach: signatures"]/tr/td[@data-bind="fullName: user"]  1
-  Element text should be  xpath=//section[@id="attachment"]//tbody[@data-bind="foreach: signatures"]/tr/td[@data-bind="fullName: user"]  Mikko Intonen
-  Element text should be  xpath=//section[@id="attachment"]//tbody[@data-bind="foreach: signatures"]/tr/td[@data-bind="version: version"]  1.0
-  Element should be visible  xpath=//section[@id="attachment"]//tbody[@data-bind="foreach: signatures"]/tr/td[@data-bind="dateTimeString: created"]
+  Wait Until  Xpath Should Match X Times  //section[@id="attachment"]//*/div[@data-bind="fullName: user"]  1
+  Element text should be  xpath=//section[@id="attachment"]//*/div[@data-bind="fullName: user"]  Mikko Intonen
+  Element text should be  xpath=//section[@id="attachment"]//*/span[@data-bind="version: version"]  1.0
+  Element should be visible  xpath=//section[@id="attachment"]//*/div[@data-bind="dateTimeString: created"]
 
 Sign single attachment
   Click enabled by test id  signLatestAttachmentVersion
@@ -103,7 +103,7 @@ Sign single attachment
   Wait Until   Element should not be visible  signSingleAttachmentPassword
 
 Two signatures are visible
-  Wait Until  Xpath Should Match X Times  //section[@id="attachment"]//tbody[@data-bind="foreach: signatures"]/tr/td[@data-bind="fullName: user"]  2
+  Wait Until  Xpath Should Match X Times  //section[@id="attachment"]//*/div[@data-bind="fullName: user"]  2
 
 Switch user
   [Tags]  attachments

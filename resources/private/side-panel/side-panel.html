@@ -23,9 +23,13 @@
               <span class="saved" data-bind="ltext: 'form.saved', transition: notice().showSaveIndicator, type: 'fade'"></span>
             </div>
             <span class="close-btn" data-bind="click: closeSidePanel"></span>
+            <div class="help" data-bind="click: toggleHelp">
+              <span>Ohje</span>
+              <span class="icon info-indicator"></span>
+            </div>
           </div>
           <div class="content">
-            <p data-bind="lhtml: 'help.' + permitType() + '.conversationDesc'" class="panel-info"></p>
+            <p data-bind="slider: showHelp, lhtml: 'help.' + permitType() + '.conversationDesc'" class="panel-info"></p>
             <div data-bind="template: {name: 'comment-template', data: {comment: comment, authorities: authorities, mainConversation: mainConversation, authorization: authorization, infoRequest: infoRequest}}"></div>
             <div class="process-nav"></div>
           </div>

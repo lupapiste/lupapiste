@@ -1,0 +1,4 @@
+attachment.label.operation: Liittyy
+attachment.label.operation.choose: Yleisesti hankkeeseen
+
+attachment.showVersionHistory: Näytä versiohistoria

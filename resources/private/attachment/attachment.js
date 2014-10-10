@@ -118,6 +118,7 @@ var attachment = (function() {
     sizes:           ko.observableArray(LUPAPISTE.config.attachmentSizes),
     subscriptions:   [],
     indicator:       ko.observable().extend({notify: 'always'}),
+    showAttachmentVersionHistory: ko.observable(),
 
     hasPreview: function() {
       return !model.previewDisabled() && (model.isImage() || model.isPdf() || model.isPlainText());
@@ -171,6 +172,10 @@ var attachment = (function() {
     sign: function() {
       model.previewDisabled(true);
       signingModel.init({id: applicationId, attachments:[model]});
+    },
+
+    toggleAttachmentVersionHistory: function() {
+      model.showAttachmentVersionHistory(!model.showAttachmentVersionHistory());
     }
   };
 
@@ -293,7 +298,8 @@ var attachment = (function() {
 
     authorizationModel.refresh(application, {attachmentId: attachmentId});
 
-    // Side Panel
+    model.showAttachmentVersionHistory(false);
+
     pageutil.hideAjaxWait();
   }
 
