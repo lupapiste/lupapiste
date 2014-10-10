@@ -20,8 +20,8 @@
 ;; Authority Admin operations
 ;;
 
-(defquery get-statement-givers
-  {:roles [:authority :authorityAdmin]}
+(defquery get-organizations-statement-givers
+  {:roles [:authorityAdmin]}
   [{{:keys [organizations]} :user}]
   (let [organization (organization/get-organization (first organizations))
         permitPersons (or (:statementGivers organization) [])]
@@ -58,6 +58,15 @@
 ;;
 ;; Authority operations
 ;;
+
+(defquery get-statement-givers
+  {:parameters [:id]
+   :roles [:authority]
+   :states action/all-application-states}
+  [{application :application}]
+  (let [organization (organization/get-organization (:organization application))
+        permitPersons (or (:statementGivers organization) [])]
+    (ok :data permitPersons)))
 
 (defcommand should-see-unsubmitted-statements
   {:description "Pseudo command for UI authorization logic"

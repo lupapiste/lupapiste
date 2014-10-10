@@ -22,6 +22,7 @@ LUPAPISTE.SidePanelModel = function() {
   self.authentication = ko.observable();
   self.authorities = ko.observable();
   self.mainConversation = ko.observable(true);
+  self.showHelp = ko.observable();
 
   self.sidePanelVisible = ko.computed(function() {
     return self.showConversationPanel() || self.showNoticePanel();
@@ -103,6 +104,10 @@ LUPAPISTE.SidePanelModel = function() {
       self.toggleNoticePanel();
     }
   };
+
+  self.toggleHelp = function() {
+    self.showHelp(!self.showHelp());
+  }
 
   var pages = ["application","attachment","statement","neighbors","verdict"];
 

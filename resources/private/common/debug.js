@@ -10,11 +10,16 @@ $(function() {
   }
 
   function createApplication(operation) {
+    var municipality = "753";
+    if (currentUser.isAuthority()) {
+      var org = currentUser.get().organizations()[0];
+      municipality = org.split("-")[0];
+    }
     $.ajax({
       url: "/dev/create",
       data: { address: "Latokuja 3",
-              propertyId: "753-416-55-7",
-              municipality: "753",
+              propertyId: municipality + "-416-55-7",
+              municipality: municipality,
               operation: operation,
               x: "404369.304000",
               y: "6693806.957000" },
