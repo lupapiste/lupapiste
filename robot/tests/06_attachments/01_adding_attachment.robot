@@ -92,13 +92,7 @@ Change attachment type
 
 Signature icon is not visible
   Element should not be visible  xpath=//div[@id="application-attachments-tab"]//span[@data-test-icon="signed-rakennuspaikka.ote_alueen_peruskartasta"]
-  
-Change attachment content label
-  [Tags]  attachments
-  Open attachment details  muut.muu
-  Input text by test id  attachment-contents-input  2. Kerros pohoja kuva
-  Click element  xpath=//a[@data-test-id="back-to-application-from-attachment"]
-  # TODO check content label when label is implemented
+
 
 Sign all attachments
   [Tags]  attachments

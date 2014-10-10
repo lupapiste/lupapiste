@@ -99,19 +99,22 @@
           :laskuviite {:value "1686343528523"}}})
 
 (def yritysmaksaja
-  {:id "532c400eef4eb00000000010"
+  {:id "532c400eef4eb00000000001"
    :schema-info {:name "ymp-maksaja" :version 1 :approvable true :type "party"}
    :data {:_selected {:value "yritys"}
-          :laskuviite {:value "168634352"}
           :yritys {:liikeJaYhteisoTunnus {:value "1234567-1"}
-                   :osoite {:katu {:value "Satamakatu 1"}
-                            :postinumero {:value "00200"}
-                            :postitoimipaikannimi {:value "Affenammaa"}}
+                   :osoite {:katu {:value "Satakunnankatu"}
+                            :postinumero {:value "33210"}
+                            :postitoimipaikannimi {:value "Tammerfors"}}
+                   :verkkolaskutustieto {:ovtTunnus {:value "003712345671"}
+                                         :valittajaTunnus {:value "valittajatunnus"}
+                                         :verkkolaskuTunnus {:value "verkkolaskuTunnus"}}
                    :yhteyshenkilo {:henkilotiedot {:etunimi {:value "Pappa"}
-                                                   :sukunimi {:value "Betalare"}}
-                                   :yhteystiedot {:email {:value "pappa@business.example.com"}
-                                                  :puhelin {:value "0500 123456"}}}
-                   :yritysnimi {:value "Pappas Business"}}}})
+                                                   :sukunimi {:value "Betalare"}
+                                                   :turvakieltoKytkin {:value true}}
+                                   :yhteystiedot {:email {:value "pappa@example.com"}
+                                                  :puhelin {:value "0400-123456"}}}
+                   :yritysnimi {:value "Solita Oy"}}}})
 
 (def drawings [{:id 1,
                :name "alue",

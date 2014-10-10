@@ -2,10 +2,3 @@ attachment.signed: Allekirjoitettu
 attachment.stamped: Leimattu
 application.attachmentsAddList: Lisää liitetiedosto
 
-attachment.label.contents: Piirustuksen sisältö
-attachment.label.scale: Piirustuksen mittakaava
-attachment.label.size: Piirustuksen koko
-
-subscribeNotifications: Tilaa sähköposti-ilmoitukset
-unsubscribeNotifications: Peruuta sähköposti-ilmoitukset
-application.remove-auth: Poista valtuutus

@@ -12,7 +12,7 @@ LUPAPISTE.InviteModel = function() {
   self.pending = ko.observable();
   self.disabled = ko.computed(function() {
     // self.path is allowed to be empty
-    return self.processing() || !self.email() || !self.text() || !self.documentName() || !self.documentId();
+    return self.processing() || !util.isValidEmailAddress(self.email()) || !self.text();
   });
 
   self.setApplicationId = function(applicationId) {
