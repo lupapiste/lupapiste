@@ -147,16 +147,6 @@
 
       attachmentsTab.refresh(applicationModel);
 
-      // Setting disable value for the "Send unsent attachments" button
-      var unsentAttachmentFound =
-        _.some(app.attachments, function(a) {
-          var lastVersion = _.last(a.versions);
-          return lastVersion &&
-                 (!a.sent || lastVersion.created > a.sent) &&
-                 (!a.target || (a.target.type !== "statement" && a.target.type !== "verdict"));
-        });
-      applicationModel.unsentAttachmentsNotFound(!unsentAttachmentFound);
-
       // Statements
       requestForStatementModel.setApplicationId(app.id);
 

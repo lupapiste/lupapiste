@@ -10,6 +10,12 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
   
   self.preAttachmentsByGroup = ko.observableArray();
   self.postAttachmentsByGroup = ko.observableArray();
+
+  self.unsentAttachmentsNotFound = ko.observable(false);
+  self.sendUnsentAttachmentsButtonDisabled = ko.computed(function() {
+    return self.appModel.pending() || self.appModel.processing() || self.unsentAttachmentsNotFound();
+  });
+
     
   function getPreAttachmentsByGroup(source) {
     return getAttachmentsByGroup(
@@ -35,8 +41,16 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
     return _.map(grouped, function(attachments, group) { return {group: group, attachments: attachments}; });
   }
 
-  self.refresh = function(appModel) {
+  function unsentAttachmentFound() {
+    return _.some(ko.mapping.toJS(appModel.attachments), function(a) {
+      var lastVersion = _.last(a.versions);
+      return lastVersion &&
+             (!a.sent || lastVersion.created > a.sent) &&
+             (!a.target || (a.target.type !== "statement" && a.target.type !== "verdict"));
+    });
+  }
 
+  self.refresh = function(appModel) {
     self.appModel = appModel;
 
     // Pre-verdict attachments
@@ -47,7 +61,18 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
 
     // Post/pre verdict state?
     self.postVerdict(postVerdictStates[self.appModel.state()]);
+
+    self.unsentAttachmentsNotFound(!unsentAttachmentFound());
   }
+
+  self.sendUnsentAttachmentsToBackingSystem = function() {
+    ajax
+      .command("move-attachments-to-backing-system", {id: self.appModel.id(), lang: loc.getCurrentLanguage()})
+      .success(self.appModel.reload)
+      .processing(self.appModel.processing)
+      .pending(self.appModel.pending)
+      .call();
+  };
 
   self.attachmentTemplatesModel = new function() {
     var templateModel = this;

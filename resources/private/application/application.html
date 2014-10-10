@@ -470,8 +470,8 @@
                   <span class="icon stamp left-align"></span>
                 </button>
                 <button
-                    data-bind="click: sendUnsentAttachmentsToBackingSystem,
-                               disable: sendUnsentAttachmentsButtonDisabled,
+                    data-bind="click: $root.attachmentsTab.sendUnsentAttachmentsToBackingSystem,
+                               disable: $root.attachmentsTab.sendUnsentAttachmentsButtonDisabled,
                                visible: $root.authorization.ok('move-attachments-to-backing-system')"
                     class="btn btn-primary modal"
                     data-test-id="send-unsent-attachments">
