@@ -5,7 +5,9 @@
             [schema.core :as sc]
             [sade.util :refer [min-length-string max-length-string y? ovt? fn-> fn->>]]
             [sade.env :as env]
-            [lupapalvelu.core :refer [fail!]]
+            [lupapalvelu.core :refer [fail! fail]]
+            [lupapalvelu.domain :as domain]
+            [lupapalvelu.action :refer [update-application application->command]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.core :refer [now ok fail!]]
             [lupapalvelu.token :as token]
@@ -184,7 +186,9 @@
 
 (defmethod token/handle-token :accept-company-invitation [{{:keys [company-id application-id]} :data} _]
   (infof "comnpany %s accepted application %s" company-id application-id)
-  (mongo/update-by-query :applications
-                         {:_id application-id}
-                         {$push {:auth (-> (find-company! {:id company-id}) (company->auth))}})
-  (ok))
+  (if-let [application (domain/get-application-no-access-checking application-id)]
+    (do
+      (update-application (application->command application)
+       {$push {:auth (-> (find-company! {:id company-id}) (company->auth))}})
+      (ok))
+    (fail :error.unknown)))
