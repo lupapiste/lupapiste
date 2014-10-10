@@ -220,6 +220,9 @@
       docgen.displayDocuments("#partiesDocgen",     app, sortedPartyDocs, authorizationModel);
       docgen.displayDocuments("#applicationAndPartiesDocgen", app, allDocs, authorizationModel);
 
+      // Close the accordions in the Hakemus tab
+      $("#application-applicationSummary-tab .accordion").find("h2:first").click();
+
       // Indicators
       function sumDocIndicators(sum, doc) {
         return sum + app.documentModificationsPerDoc[doc.id];
