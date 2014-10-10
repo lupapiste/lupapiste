@@ -168,7 +168,7 @@
           (select-keys [:id :name :y])
           (assoc :role      "writer"
                  :type      "company"
-                 :username  (-> company :y ss/trim ss/lower-case)
+                 :username  (-> company :y ss/trim ss/lower-case) ; usernames are always in lower case
                  :firstName (:name company)
                  :lastName  "")))
 
@@ -176,7 +176,7 @@
   {:pre [(map? caller) (map? application) (string? company-id)]}
   (let [company   (find-company! {:id company-id})
         auth      (assoc (company->auth company)
-                    :id ""
+                    :id "" ; prevents access to application before accepting invite
                     :role ""
                     :invite {:user {:id company-id}})
         admins    (find-company-admins company-id)
