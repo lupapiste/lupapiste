@@ -5,6 +5,8 @@
 
 (apply-remote-minimal)
 
+(def sonja-email (email-for-key sonja))
+
 (defn- auth-contains-ronjas-statement [{auth :auth}]
   (some #(and
           (:statementId %)
@@ -12,12 +14,29 @@
           (= (:username %) "ronja")) auth))
 
 (facts* "statements"
+
+  (fact "authorityAdmin can't query get-statement-givers"
+    (query sipoo :get-statement-givers) => unauthorized?)
+
+    (let [resp (query sipoo :get-organizations-statement-givers) => ok?
+          givers (:data resp)]
+      (fact "One statement giver in Sipoo, Sonja (set in minimal fixture)"
+        (count givers) => 1
+        (-> givers first :email) => sonja-email))
+
   (let [ronja-email  (email-for "ronja")
         veikko-email (email-for "veikko")
         application-id     (create-app-id sonja :municipality sonja-muni :address "Lausuntobulevardi 1 A 1")
         resp (command sipoo :create-statement-giver :email (email-for "ronja") :text "<b>bold</b>") => ok?
         statement-giver-ronja (:id resp)
         email (last-email)]
+
+    (let [resp (query sipoo :get-organizations-statement-givers) => ok?
+          givers (:data resp)]
+      (fact "Two statement givers in Sipoo, Sonja & Ronja"
+        (count givers) => 2
+        (-> givers first :email) => sonja-email
+        (-> givers second :email) => ronja-email))
 
     (fact "new statement person receives email which contains the (html escaped) input text"
       (:to email) => ronja-email
@@ -57,8 +76,16 @@
     (fact "Veikko gives a statement"
       (last-email) ; Inbox zero
       (let [application (query-application veikko application-id)
-            statement   (first (:statements application))
-            sonja-email (email-for "sonja")]
+            statement   (first (:statements application))]
+
+        (fact* "Veikko is one of the possible statement givers"
+          (let [resp (query sonja :get-statement-givers :id application-id) => ok?
+                giver-emails (->> resp :data (map :email) set)]
+            (count giver-emails) => 3
+            (giver-emails sonja-email) => sonja-email
+            (giver-emails ronja-email) => ronja-email
+            (giver-emails veikko-email) => veikko-email))
+
         (get-in statement [:person :email]) => veikko-email
         (command veikko :give-statement :id application-id :statementId (:id statement) :status "yes" :text "I will approve" :lang "fi") => ok?
 

@@ -76,9 +76,7 @@
     (let [path-arr     (if-not (blank? path) (split path #"\.") [])
           schema       (schemas/get-schema (:schema-info document))
           subject      (user/get-user-by-id user-id)
-          with-hetu    (and
-                         (model/has-hetu? (:body schema) path-arr)
-                         (user/same-user? current-user subject))
+          with-hetu    (model/has-hetu? (:body schema) path-arr)
           person       (tools/unwrapped (model/->henkilo subject :with-hetu with-hetu :with-empty-defaults true))
           model        (if (seq path-arr)
                          (assoc-in {} (map keyword path-arr) person)

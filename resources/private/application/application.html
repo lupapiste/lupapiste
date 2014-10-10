@@ -290,7 +290,10 @@
             </div>
             <div data-bind="if: $root.authorization.ok('link-permit-required')">
               <p data-bind="ltext: 'help.AddPermit'"></p>
-              <button data-bind="click: $root.addLinkPermitModel.openAddLinkPermitDialog, enable: $root.authorization.ok('link-permit-required')" class="btn-primary">
+              <button data-bind="click: $root.addLinkPermitModel.openAddLinkPermitDialog,
+                                 enable: $root.authorization.ok('link-permit-required'),
+                                 visible: $root.authorization.ok('add-link-permit')"
+                      class="btn-primary">
                <span data-bind="ltext: 'application.addLinkPermit'"></span> <span class="icon add left-align"></span>
               </button>
             </div>
