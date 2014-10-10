@@ -213,56 +213,49 @@
         <!-- Tabs: -->
         <div class="tabs-container" data-bind="with: application">
           <ul class="tabs" id="applicationTabs">
-            <li><a data-bind="click: changeTab"
-                   href="#" data-target="info" data-test-id="application-open-info-tab">
-                  <span data-bind="ltext: 'application.tabInfo'"></span>
-                  <span data-bind="if: nonpartyDocumentIndicator">
-                    <span data-bind="text: nonpartyDocumentIndicator"
-                          id="applicationNonpartyDocumentIndicator" class="indicator"></span></span></a></li>
+            <li data-bind="ifnot: _.contains(['verdictGiven', 'constructionStarted', 'closed'], state())">
+              <a data-bind="click: changeTab" href="#" data-target="info" data-test-id="application-open-info-tab">
+                <span data-bind="ltext: 'application.tabInfo'"></span>
+                <span data-bind="if: nonpartyDocumentIndicator">
+                  <span data-bind="text: nonpartyDocumentIndicator" id="applicationNonpartyDocumentIndicator" class="indicator"></span></span></a></li>
 
-            <li><a data-bind="click: changeTab"
-                   href="#" data-target="parties" data-test-id="application-open-parties-tab">
-                  <span data-bind="ltext: 'application.tabParties'"></span>
-                  <span data-bind="if: partyDocumentIndicator">
-                    <span data-bind="text: partyDocumentIndicator"
-                          id="applicationPartyDocumentIndicator" class="indicator"></span></span></a></li>
-
+            <li data-bind="ifnot: _.contains(['verdictGiven', 'constructionStarted', 'closed'], state())">
+              <a data-bind="click: changeTab" href="#" data-target="parties" data-test-id="application-open-parties-tab">
+                <span data-bind="ltext: 'application.tabParties'"></span>
+                <span data-bind="if: partyDocumentIndicator">
+                  <span data-bind="text: partyDocumentIndicator" id="applicationPartyDocumentIndicator" class="indicator"></span></span></a></li>
 
             <li data-bind="if: _.contains(['verdictGiven', 'constructionStarted', 'closed'], state())">
               <a data-bind="click: changeTab" href="#" data-target="tasks" data-test-id="application-open-tasks-tab">
                   <span data-bind="ltext: 'application.tabConstructionTimeTasks'"></span>
                   <span data-bind="if: $data.tasksRequiringAction">
-                    <span data-bind="text: tasksRequiringAction"
-                          id="applicationTasksRequiringAction" class="indicator"></span></span></a></li>
+                    <span data-bind="text: tasksRequiringAction" id="applicationTasksRequiringAction" class="indicator"></span></span></a></li>
 
-            <li><a data-bind="click: changeTab"
-                   href="#" data-target="attachments" data-test-id="application-open-attachments-tab">
+            <li>
+              <a data-bind="click: changeTab" href="#" data-target="attachments" data-test-id="application-open-attachments-tab">
                 <span data-bind="ltext: 'application.tabAttachments'"></span>
                 <span data-bind="if: attachmentsRequiringAction">
-                  <span data-bind="text: attachmentsRequiringAction"
-                        id="applicationAttachmentsRequiringAction" class="indicator"></span></span></a></li>
+                  <span data-bind="text: attachmentsRequiringAction" id="applicationAttachmentsRequiringAction" class="indicator"></span></span></a></li>
 
             <li data-bind="if: _.contains(['draft', 'open', 'submitted', 'complement-needed'], state())">
               <a data-bind="click: changeTab" href="#" data-target="requiredFieldSummary" data-test-id="application-open-requiredFieldSummary-tab">
                 <span data-bind="ltext: 'application.tabRequiredFieldSummary'"></span></a></li>
 
-            <li><a data-bind="click: changeTab"
-                   href="#" data-target="statement" data-test-id="application-open-statement-tab">
-                  <span data-bind="ltext: 'application.tabStatement'"></span>
-                  <span data-bind="if: unseenStatements">
-                    <span data-bind="text: unseenStatements"
-                          id="applicationUnseenStatements" class="indicator"></span></span></a></li>
+            <li data-bind="ifnot: _.contains(['verdictGiven', 'constructionStarted', 'closed'], state())">
+              <a data-bind="click: changeTab" href="#" data-target="statement" data-test-id="application-open-statement-tab">
+                <span data-bind="ltext: 'application.tabStatement'"></span>
+                <span data-bind="if: unseenStatements">
+                  <span data-bind="text: unseenStatements" id="applicationUnseenStatements" class="indicator"></span></span></a></li>
 
             <li data-bind="ifnot: _.contains(['draft', 'open'], state())">
               <a data-bind="click: changeTab" href="#" data-target="verdict" data-test-id="application-open-verdict-tab">
-                  <span data-bind="ltext: 'application.tabVerdict'"></span>
-                  <span data-bind="if: unseenVerdicts">
-                    <span data-bind="text: unseenVerdicts"
-                        id="applicationUnseenVerdists" class="indicator"></span></span></a></li>
+                <span data-bind="ltext: 'application.tabVerdict'"></span>
+                <span data-bind="if: unseenVerdicts">
+                  <span data-bind="text: unseenVerdicts" id="applicationUnseenVerdists" class="indicator"></span></span></a></li>
 
             <li data-bind="if: _.contains(['verdictGiven', 'constructionStarted', 'closed'], state())">
               <a data-bind="click: changeTab" href="#" data-target="applicationSummary" data-test-id="application-open-applicationSummary-tab">
-                  <span data-bind="ltext: 'application.applicationSummary'"></span></a></li>
+                <span data-bind="ltext: 'application.applicationSummary'"></span></a></li>
 
           </ul>
         </div>
@@ -630,7 +623,7 @@
 
           <div class="application_section">
             <div id="applicationAndPartiesDocgen" class="docgen-content">
-              <!-- This is where generated document will be placed. -->
+              <!-- This is where the generated documents will be placed. -->
             </div>
           </div>
 
