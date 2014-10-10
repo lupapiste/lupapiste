@@ -1,9 +1,9 @@
-LUPAPISTE.AttachmentsTabModel = function(appId) {
+LUPAPISTE.AttachmentsTabModel = function(appModel) {
   "use strict";
 
   var self = this;
 
-  self.applicationId = appId;
+  self.appModel = appModel;
 
   var postVerdictStates = {verdictGiven:true, constructionStarted:true, closed:true};
   self.postVerdict = ko.observable(false);
@@ -37,6 +37,8 @@ LUPAPISTE.AttachmentsTabModel = function(appId) {
 
   self.refresh = function(app) {
 
+
+
     // Pre-verdict attachments
     self.preAttachmentsByGroup(getPreAttachmentsByGroup(app.attachments));
 
@@ -50,8 +52,8 @@ LUPAPISTE.AttachmentsTabModel = function(appId) {
   self.attachmentTemplatesModel = new function() {
     var templateModel = this;
     templateModel.ok = function(ids) {
-      ajax.command("create-attachments", {id: self.applicationId(), attachmentTypes: ids})
-        .success(function() { repository.load(self.applicationId()); })
+      ajax.command("create-attachments", {id: self.appModel.id(), attachmentTypes: ids})
+        .success(function() { repository.load(self.appModel.id()); })
         .complete(LUPAPISTE.ModalDialog.close)
         .call();
     };
