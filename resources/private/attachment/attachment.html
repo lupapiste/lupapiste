@@ -66,7 +66,9 @@
                   </thead>
                   <tbody data-bind="foreach: versions">
                     <tr style="cursor: pointer;">
-                      <td id="test-attachment-file-name"><a data-bind="text: $data.filename, attr: {href: '/api/raw/download-attachment?attachment-id=' + $data.fileId}"></a></td>
+                      <td>
+                        <a data-bind="text: $data.filename, attr: {href: '/api/raw/download-attachment?attachment-id=' + $data.fileId}"></a>
+                      </td>
                       <td data-bind="size: size"></td>
                       <td data-bind="version: version"></td>
                       <td data-bind="dateTimeString: created"></td>
@@ -80,7 +82,6 @@
                 </table>
               </div>
             </div>
-
             <div class="signatures" data-bind="visible: latestVersion">
               <h3 data-bind="ltext: 'attachment.signatures'"></h3>
               <div class="signature-table" data-bind="if: signatures && signatures().length > 0">
@@ -99,13 +100,12 @@
                   data-bind="click: sign, ltext: 'attachment.signLatest', visible: $root.authorization.ok('sign-attachments'),  enable: versions().length && $root.authorization.ok('sign-attachments')">
               </button>
             </div>
-
           </div>
 
           <div class="col2" data-bind="if: latestVersion">
             <div class="attachment-label">
               <h4 data-bind="with: latestVersion">
-                <span class="attachment-label-header-item"><a data-bind="text: $data.filename, attr: {href: '/api/raw/download-attachment?attachment-id=' + $data.fileId}"></a></span>
+                <span class="attachment-label-header-item" id="test-attachment-file-name"><a data-bind="text: $data.filename, attr: {href: '/api/raw/download-attachment?attachment-id=' + $data.fileId}"></a></span>
                 <span class="attachment-label-header-item">
                   <span data-bind="ltext: 'attachment.version'">Versio</span>
                   <span data-bind="version: $data.version"></span>
