@@ -1,5 +1,5 @@
 (ns lupapalvelu.company-api
-  (:require [lupapalvelu.core :refer [ok fail fail!]]
+  (:require [lupapalvelu.core :refer [ok fail fail! unauthorized unauthorized!]]
             [lupapalvelu.action :refer [defquery defcommand]]
             [lupapalvelu.company :as c]
             [lupapalvelu.user :as u]))
@@ -13,12 +13,12 @@
 (defn validate-user-is-admin-or-company-member [{{:keys [role company]} :user {requested-company :company} :data}]
   (if-not (or (= role "admin")
               (= (:id company) requested-company))
-    (fail "forbidden")))
+    unauthorized))
 
 (defn validate-user-is-admin-or-company-admin [{user :user}]
   (if-not (or (= (get user :role) "admin")
               (= (get-in user [:company :role]) "admin"))
-    (fail "forbidden")))
+    unauthorized))
 
 ;;
 ;; Basic API:
@@ -53,7 +53,7 @@
                         "admin")
                      (= (get-in caller [:company :id])
                         (get-in target-user [:company :id]))))
-      (fail! :forbidden))
+      (unauthorized!))
     (c/update-user! user-id (keyword op) value)
     (ok)))
 
@@ -88,7 +88,7 @@
   (ok))
 
 (defcommand company-invite
-  {:roles [:anonymous]
+  {:roles [:applicant :authority]
    :parameters [application-id company-id]}
   [{caller :user}]
   (c/company-invite caller application-id company-id)
