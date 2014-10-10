@@ -212,7 +212,7 @@
   {:parameters [id email title text documentName documentId path]
    :input-validators [(partial action/non-blank-parameters [:email])
                       action/email-validator]
-   :states     (action/all-application-states-but [:canceled])
+   :states     (action/all-application-states-but [:closed :canceled])
    :roles      [:applicant :authority]
    :notified   true
    :on-success (notify :invite)}
@@ -243,7 +243,7 @@
 (defcommand approve-invite
   {:parameters [id]
    :roles      [:applicant]
-   :states     (action/all-application-states-but [:sent :verdictGiven :constructionStarted :closed :canceled])}
+   :states     (action/all-application-states-but [:closed :canceled])}
   [{:keys [created user application] :as command}]
   (when-let [my-invite (domain/invite application (:email user))]
     (update-application command
