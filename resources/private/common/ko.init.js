@@ -220,6 +220,24 @@
     }
   }
 
+  ko.bindingHandlers.drill = {
+    init: function(element) {
+      $(element).addClass("icon");
+    },
+    update: function(element, valueAccessor, allBindingsAccessor) {
+      var value = ko.utils.unwrapObservable(valueAccessor());
+      var bindings = ko.utils.unwrapObservable(allBindingsAccessor());
+      var color = bindings.color || "white";
+      if (value) {
+        $(element).addClass("drill-down-" + color);
+        $(element).removeClass("drill-right-" + color);
+      } else {
+        $(element).removeClass("drill-down-" + color);
+        $(element).addClass("drill-right-" + color);
+      }
+    }
+  }
+
   $.fn.applyBindings = function(model) {
     if (!this.length) {
       warn(this.selector + " didn't match any elements");
