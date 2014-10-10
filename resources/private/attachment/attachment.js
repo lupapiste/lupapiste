@@ -6,7 +6,6 @@ var attachment = (function() {
   var attachmentId = null;
   var model = null;
 
-  var commentsModel = new comments.create(false);
   var authorizationModel = authorization.create();
   var approveModel = new ApproveModel(authorizationModel);
   var signingModel = new LUPAPISTE.SigningModel("#dialog-sign-attachment", false);
@@ -110,6 +109,8 @@ var attachment = (function() {
     attachmentType: ko.observable(),
     allowedAttachmentTypes: ko.observableArray([]),
     previewDisabled: ko.observable(false),
+    operation:       ko.observable(),
+    selectableOperations: ko.observableArray(),
 
     hasPreview: function() {
       return !model.previewDisabled() && (model.isImage() || model.isPdf() || model.isPlainText());
@@ -149,6 +150,10 @@ var attachment = (function() {
       LUPAPISTE.ModalDialog.open("#dialog-confirm-delete-attachment");
     },
 
+    showChangeTypeDialog: function() {
+      LUPAPISTE.ModalDialog.open("#change-type-dialog");
+    },
+
     deleteVersion: function(fileModel) {
       var fileId = fileModel.fileId;
       deleteAttachmentVersionFromServerProxy = function() { deleteAttachmentVersionFromServer(fileId); };
@@ -161,6 +166,8 @@ var attachment = (function() {
       signingModel.init({id: applicationId, attachments:[model]});
     }
   };
+
+  model.selectedOperationId = ko.observable();
 
   model.name = ko.computed(function() {
     if (model.attachmentType()) {
@@ -193,7 +200,28 @@ var attachment = (function() {
     }
   });
 
-  function showAttachment(application) {
+  model.selectedOperationId.subscribe(function(id) {
+    if (model.operation() && id !== model.operation().id) {
+      // TODO show indocator
+      var op = _.findWhere(model.selectableOperations(), {id: id});
+      ajax
+        .command("set-attachment-operation",
+          {id:            applicationId,
+           attachmentId:  attachmentId,
+           op:            op})
+        .success(function() {
+          repository.load(applicationId);
+        })
+        .error(function(e) {
+          repository.load(applicationId);
+          error(e.text);
+        })
+        .call();
+    }
+  });
+
+  function showAttachment(applicationDetails) {
+    var application = applicationDetails.application;
     if (!applicationId || !attachmentId) { return; }
     var attachment = _.find(application.attachments, function(value) {return value.id === attachmentId;});
     if (!attachment) {
@@ -208,6 +236,9 @@ var attachment = (function() {
     model.signatures(attachment.signatures || []);
     model.filename(attachment.filename);
     model.type(attachment.type);
+    model.selectableOperations(application.operations);
+    model.operation(attachment.op);
+    model.selectedOperationId(attachment.op ? attachment.op.id : undefined);
 
     var type = attachment.type["type-group"] + "." + attachment.type["type-id"];
     model.attachmentType(type);
@@ -223,12 +254,13 @@ var attachment = (function() {
     model.application.title(application.title);
     model.id = attachmentId;
 
-    commentsModel.refresh(application, {type: "attachment", id: attachmentId});
-
     approveModel.setApplication(application);
     approveModel.setAttachmentId(attachmentId);
 
     authorizationModel.refresh(application, {attachmentId: attachmentId});
+
+    // Side Panel
+
     pageutil.hideAjaxWait();
   }
 
@@ -239,9 +271,9 @@ var attachment = (function() {
     repository.load(applicationId);
   });
 
-  repository.loaded(["attachment"], function(application) {
+  repository.loaded(["attachment"], function(application, applicationDetails) {
     if (applicationId === application.id) {
-      showAttachment(application);
+      showAttachment(applicationDetails);
     }
   });
 
@@ -270,8 +302,7 @@ var attachment = (function() {
     $("#attachment").applyBindings({
       attachment: model,
       approve: approveModel,
-      authorization: authorizationModel,
-      commentsModel: commentsModel
+      authorization: authorizationModel
     });
     $("#upload-page").applyBindings({});
     $(signingModel.dialogSelector).applyBindings({signingModel: signingModel, authorization: authorizationModel});

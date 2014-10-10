@@ -1,25 +1,11 @@
 (function() {
   "use strict";
 
-  function makeNew(propertyId) {
-    return {
-      propertyId: propertyId,
-      owner: {
-        name: ko.observable(""),
-        address: {
-          street: ko.observable(""),
-          city: ko.observable(""),
-          zip: ko.observable("")
-        }
-      },
-      state: "new"
-    };
-  }
-
   var applicationId;
   var model = new Model();
   var editModel = new EditModel();
   var ownersModel = new OwnersModel();
+  var authorizationModel = authorization.create();
 
   function Model() {
     var self = this;
@@ -118,7 +104,7 @@
           return self.status() === self.statusSearchPropertyId || self.status() === self.statusSearchOwners;
       };
       self.isPropertyIdAvailable = function() {
-          return self.propertyId() != null;
+          return self.propertyId() !== null;
       };
       self.search = function(x, y) {
           return self.status(self.statusSearchPropertyId).beginUpdateRequest().searchPropertyId(x, y);
@@ -296,8 +282,6 @@
       return self;
     };
 
-    // self.neighbors.push(makeNew(propertyId));
-
   }
 
   hub.onPageChange("neighbors", function(e) {
@@ -305,8 +289,11 @@
     repository.load(applicationId);
   });
 
-  repository.loaded(["neighbors"], function(application) {
-    if (applicationId === application.id) { model.init(application); }
+  repository.loaded(["neighbors"], function(application, applicationDetails) {
+    if (applicationId === application.id) {
+      model.init(application);
+      authorizationModel.refresh(application);
+    }
   });
 
   $(function() {

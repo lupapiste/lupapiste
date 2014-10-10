@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container" id="notices">
+    <script type="text/html" id="notice-template">
+      <div class="application-state">
+        <label data-bind="ltext: 'notice.urgency'"></label>
+        <select data-test-id="notice-urgency-select" data-bind="options: availableUrgencyStates,
+                           value: urgency,
+                           optionsText: function(item) {
+                             return loc(['notice', 'urgency', item]);
+                           }"></select>
+      </div>
+      <h3><span data-bind="ltext: 'notice.prompt'"/> (<span data-bind="ltext: 'notice.prompt.info'"/>): </h3>
+      <div class="textarea-wrapper">
+        <textarea
+          data-bind="attr: {placeholder: loc('comment.placeholder')}, value: authorityNotice, valueUpdate: ['blur', 'change', 'afterkeydown']"
+          data-test-id="application-authority-notice"
+          class="form-input textarea"
+          maxlength="4000">
+        </textarea>
+      </div>
+    </script>
+  </section>
+</body>
+</html>

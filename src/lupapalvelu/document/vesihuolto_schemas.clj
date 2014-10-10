@@ -6,7 +6,8 @@
                                    :approvable true
                                    :removable false
                                    :repeating false
-                                   :order 2}
+                                   :order 2
+                                   :type :location}
                             :body (conj (schema-body-without-element-by-name rakennuspaikka
                                                                              "maaraalaTunnus"
                                                                              "rantaKytkin"

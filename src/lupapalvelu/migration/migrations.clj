@@ -3,6 +3,7 @@
             [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]]
             [clojure.walk :as walk]
             [sade.util :refer [dissoc-in postwalk-map strip-nils]]
+            [sade.strings :as ss]
             [lupapalvelu.migration.core :refer [defmigration]]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
@@ -519,15 +520,15 @@
       (mongo/update-by-id :applications id {$set {:organization organization-id}}))))
 
 (defn flatten-huoneisto-data [{documents :documents}]
-  (map 
+  (map
     (fn [doc]
-      (if-let [to-update (seq (tools/deep-find doc :huoneistot ))]       
-        (reduce 
+      (if-let [to-update (seq (tools/deep-find doc :huoneistot ))]
+        (reduce
           #(let [[p v] %2
                  path (conj p :huoneistot)]
-             (reduce 
-               (fn [old-doc [n _]] 
-                 (update-in old-doc (conj path n)  
+             (reduce
+               (fn [old-doc [n _]]
+                 (update-in old-doc (conj path n)
                             (fn [old-data]
                               (-> old-data
                                 (merge (:huoneistoTunnus old-data))
@@ -545,6 +546,52 @@
 (defmigration flatten-huoneisto
   (doseq [collection [:applications :submitted-applications]
           application (mongo/select collection {:infoRequest false})]
-    (if (some seq (map #(tools/deep-find % :huoneistot) (:documents application))) 
+    (if (some seq (map #(tools/deep-find % :huoneistot) (:documents application)))
       (let [updated-documents (flatten-huoneisto-data application)]
         (mongo/update-by-id collection (:id application) {$set {:documents updated-documents}})))))
+
+
+(defmigration add-location-to-rakennuspaikat
+  {:apply-when (pos? (mongo/count :applications {:documents {$elemMatch {$and [{"schema-info.name" {$in ["rakennuspaikka"
+                                                                                                         "poikkeusasian-rakennuspaikka"
+                                                                                                         "vesihuolto-kiinteisto"
+                                                                                                         "kiinteisto"]}}
+                                                                               {:schema-info.type {$exists false}}]}}}))}
+  (doseq [collection [:applications :submitted-applications]]
+    (let [names #{"rakennuspaikka" "poikkeusasian-rakennuspaikka" "vesihuolto-kiinteisto" "kiinteisto"}
+          applications-to-update (mongo/select collection)]
+      (doseq [application applications-to-update]
+        (let [new-documents (map
+                              #(if (contains? names (-> % :schema-info :name))
+                                (update-in % [:schema-info] assoc :type "location")
+                                %)
+                              (:documents application))]
+          (mongo/update-by-id collection (:id application) {$set {:documents new-documents}}))))))
+
+(defmigration tutkinto-mapping
+  (let [mapping (sade.excel-reader/read-map "tutkinto-mapping.xlsx")]
+    (doseq [collection [:applications :submitted-applications]
+           application (mongo/select collection {"documents.data.patevyys.koulutus.value" {$exists true}} {:documents 1})]
+     (let [id (:id application)
+           documents (map
+                       (fn [doc]
+                         (if-let [koulutus (get-in doc [:data :patevyys :koulutus :value])]
+                           (let [normalized (-> koulutus ss/trim ss/lower-case)]
+                             (if-not (ss/blank? normalized)
+                               (let [mapped     (get mapping normalized "muu")
+                                     modified (get-in doc [:data :patevyys :koulutus :modified])]
+                                 (debugf "%s/%s: Mapping '%s' to %s" collection id koulutus mapped)
+                                 (assoc-in doc [:data :patevyys :koulutusvalinta] {:value mapped, :modified modified}))
+                               doc))
+                           doc)) (:documents application))]
+       (mongo/update-by-id collection id {$set {:documents documents}})))))
+
+(defmigration set-converted-timestamp
+  (reduce + 0
+    (for [collection [:applications :submitted-applications]]
+     (mongo/update-by-query collection {:convertedToApplication {$exists false}} {$set {:convertedToApplication nil}}))))
+
+(defmigration set-urgency
+  (reduce + 0
+    (for [collection [:applications :submitted-applications]]
+     (mongo/update-by-query collection {:urgency {$exists false}} {$set {:urgency "normal"}}))))

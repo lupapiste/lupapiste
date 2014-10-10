@@ -1,9 +1,5 @@
 (ns user
-  (:require [lupapalvelu.server :as server]
-            [sade.env :as env]
-            [lupapalvelu.fixture :as fixture]
-            [lupapalvelu.mongo :as mongo]
-            [monger.operators :refer :all]
+  (:require [monger.operators :refer :all]
             [monger.core :as m]
             [monger.collection :as mc]
             [monger.db :as db]
@@ -11,9 +7,14 @@
             [monger.command :refer [server-status]]))
 
 (defn disable-anti-csrf []
-  (env/enable-feature! :disable-anti-csrf))
+  (require 'sade.env)
+  ((resolve 'sade.env/enable-feature!) :disable-anti-csrf))
 
-(def go server/-main)
+(defn go []
+  (println "Loading lupapalvelu.server...")
+  (require 'lupapalvelu.server)
+  (println "Launhing server...")
+  ((resolve 'lupapalvelu.server/-main)))
 
 (defn ktag
   "KRYSP mapping tag"

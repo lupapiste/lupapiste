@@ -150,8 +150,35 @@
                                 {:name "henkilo" :type :group :body henkilo-with-required-hetu}
                                 {:name "yritys" :type :group :body yritys}))
 
+(def koulutusvalinta {:name "koulutusvalinta" :type :select :i18nkey "koulutus"
+                      :body [{:name "arkkitehti"}
+                             {:name "arkkitehtiylioppilas"}
+                             {:name "diplomi-insin\u00f6\u00f6ri"}
+                             {:name "insin\u00f6\u00f6ri"}
+                             {:name "IV-asentaja"}
+                             {:name "kirvesmies"}
+                             {:name "LV-asentaja"}
+                             {:name "LVI-asentaja"}
+                             {:name "LVI-insin\u00f6\u00f6ri"}
+                             {:name "LVI-teknikko"}
+                             {:name "LVI-ty\u00f6teknikko"}
+                             {:name "maisema-arkkitehti"}
+                             {:name "rakennusammattity\u00f6mies"}
+                             {:name "rakennusarkkitehti"}
+                             {:name "rakennusinsin\u00f6\u00f6ri"}
+                             {:name "rakennusmestari"}
+                             {:name "rakennuspiirt\u00e4j\u00e4"}
+                             {:name "rakennusteknikko"}
+                             {:name "rakennusty\u00f6teknikko"}
+                             {:name "sisustusarkkitehti"}
+                             {:name "talonrakennusinsin\u00f6\u00f6ri"}
+                             {:name "talonrakennusteknikko"}
+                             {:name "tekniikan kandidaatti"}
+                             {:name "teknikko"}
+                             {:name "muu"}]})
 
-(def patevyys [{:name "koulutus" :type :string :required false}
+(def patevyys [koulutusvalinta
+               {:name "koulutus" :type :string :required false :i18nkey "muukoulutus"}
                {:name "valmistumisvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size "s" :required false}
                {:name "fise" :type :string :required false}
                {:name "patevyys" :type :string :required false}
@@ -177,15 +204,17 @@
                         designer-basic
                         {:name "patevyys" :type :group :body patevyys}))
 
-(def kuntaroolikoodi [{:name "kuntaRoolikoodi" :type :select
-                       :body [{:name "GEO-suunnittelija"}
-                              {:name "LVI-suunnittelija"}
-                              {:name "IV-suunnittelija"}
-                              {:name "KVV-suunnittelija"}
-                              {:name "RAK-rakennesuunnittelija"}
-                              {:name "ARK-rakennussuunnittelija"}
-                              {:name "Vaikeiden t\u00F6iden suunnittelija"}
-                              {:name "ei tiedossa"}]}])
+(def kuntaroolikoodi [{:name "kuntaRoolikoodi"
+                       :i18nkey "osapuoli.suunnittelija.kuntaRoolikoodi._group_label"
+                       :type :select
+                       :body [{:name "GEO-suunnittelija" :i18nkey "osapuoli.suunnittelija.kuntaRoolikoodi.GEO-suunnittelija"}
+                              {:name "LVI-suunnittelija" :i18nkey "osapuoli.suunnittelija.kuntaRoolikoodi.LVI-suunnittelija"}
+                              {:name "IV-suunnittelija" :i18nkey "osapuoli.suunnittelija.kuntaRoolikoodi.IV-suunnittelija"}
+                              {:name "KVV-suunnittelija" :i18nkey "osapuoli.suunnittelija.kuntaRoolikoodi.KVV-suunnittelija"}
+                              {:name "RAK-rakennesuunnittelija" :i18nkey "osapuoli.suunnittelija.kuntaRoolikoodi.RAK-rakennesuunnittelija"}
+                              {:name "ARK-rakennussuunnittelija" :i18nkey "osapuoli.suunnittelija.kuntaRoolikoodi.ARK-rakennussuunnittelija"}
+                              {:name "Vaikeiden t\u00F6iden suunnittelija" :i18nkey "osapuoli.suunnittelija.kuntaRoolikoodi.Vaikeiden t\u00f6iden suunnittelija"}
+                              {:name "ei tiedossa" :i18nkey "osapuoli.kuntaRoolikoodi.ei tiedossa"}]}])
 
 (def suunnittelija (body
                      kuntaroolikoodi
@@ -194,28 +223,33 @@
                      {:name "patevyys" :type :group :body patevyys}))
 
 (def vastattavat-tyotehtavat-tyonjohtaja [{:name "vastattavatTyotehtavat"
+                                           :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat._group_label"
                                            :type :group
                                            :layout :vertical
-                                           :body [{:name "rakennuksenRakentaminen" :type :checkbox}
-                                                  {:name "rakennuksenMuutosJaKorjaustyo" :type :checkbox}
-                                                  {:name "rakennuksenPurkaminen" :type :checkbox}
-                                                  {:name "maanrakennustyo" :type :checkbox}
-                                                  {:name "rakennelmaTaiLaitos" :type :checkbox}
-                                                  {:name "elementtienAsennus" :type :checkbox}
-                                                  {:name "terasRakenteet_tiilirakenteet" :type :checkbox}
-                                                  {:name "kiinteistonVesiJaViemarilaitteistonRakentaminen" :type :checkbox}
-                                                  {:name "kiinteistonilmanvaihtolaitteistonRakentaminen" :type :checkbox}
-                                                  {:name "muuMika" :type :string}]}])
+                                           :body [{:name "rakennuksenRakentaminen" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.rakennuksenRakentaminen" :type :checkbox}
+                                                  {:name "rakennuksenMuutosJaKorjaustyo" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.rakennuksenMuutosJaKorjaustyo"  :type :checkbox}
+                                                  {:name "rakennuksenPurkaminen" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.rakennuksenPurkaminen"  :type :checkbox}
+                                                  {:name "maanrakennustyo" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.maanrakennustyo"  :type :checkbox}
+                                                  {:name "rakennelmaTaiLaitos" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.rakennelmaTaiLaitos"  :type :checkbox}
+                                                  {:name "elementtienAsennus" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.elementtienAsennus"  :type :checkbox}
+                                                  {:name "terasRakenteet_tiilirakenteet" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.terasRakenteet_tiilirakenteet"  :type :checkbox}
+                                                  {:name "kiinteistonVesiJaViemarilaitteistonRakentaminen" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.kiinteistonVesiJaViemarilaitteistonRakentaminen"  :type :checkbox}
+                                                  {:name "kiinteistonilmanvaihtolaitteistonRakentaminen" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.kiinteistonilmanvaihtolaitteistonRakentaminen"  :type :checkbox}
+                                                  {:name "muuMika" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.muuMika"  :type :string}]}])
 
-(def kuntaroolikoodi-tyonjohtaja [{:name "kuntaRoolikoodi" :type :select :required true
-                                   :body [{:name "KVV-ty\u00F6njohtaja"}
-                                          {:name "IV-ty\u00F6njohtaja"}
-                                          {:name "erityisalojen ty\u00F6njohtaja"}
-                                          {:name "vastaava ty\u00F6njohtaja"}
-                                          {:name "ty\u00F6njohtaja"}
-                                          {:name "ei tiedossa"}]}])
+(def kuntaroolikoodi-tyonjohtaja [{:name "kuntaRoolikoodi"
+                                   :i18nkey "osapuoli.tyonjohtaja.kuntaRoolikoodi._group_label"
+                                   :type
+                                   :select :required true
+                                   :body [{:name "KVV-ty\u00F6njohtaja" :i18nkey "osapuoli.tyonjohtaja.kuntaRoolikoodi.KVV-ty\u00f6njohtaja"}
+                                          {:name "IV-ty\u00F6njohtaja" :i18nkey "osapuoli.tyonjohtaja.kuntaRoolikoodi.IV-ty\u00f6njohtaja"}
+                                          {:name "erityisalojen ty\u00F6njohtaja" :i18nkey "osapuoli.tyonjohtaja.kuntaRoolikoodi.erityisalojen ty\u00f6njohtaja"}
+                                          {:name "vastaava ty\u00F6njohtaja" :i18nkey "osapuoli.tyonjohtaja.kuntaRoolikoodi.vastaava ty\u00f6njohtaja"}
+                                          {:name "ty\u00F6njohtaja" :i18nkey "osapuoli.tyonjohtaja.kuntaRoolikoodi.ty\u00f6njohtaja"}
+                                          {:name "ei tiedossa" :i18nkey "osapuoli.kuntaRoolikoodi.ei tiedossa"}]}])
 
-(def patevyys-tyonjohtaja [{:name "koulutus" :type :string :required false}
+(def patevyys-tyonjohtaja [koulutusvalinta
+                           {:name "koulutus" :type :string :required false  :i18nkey "muukoulutus"}
                            {:name "patevyysvaatimusluokka" :type :select :required false
                             :body [{:name "C"}
                                    {:name "B"}
@@ -224,11 +258,11 @@
                                    {:name "ei tiedossa"}]}
                            {:name "valmistumisvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size "s" :required false}
                            {:name "kokemusvuodet" :type :string :subtype :number :min-len 1 :max-len 2 :size "s" :required false}
-                           {:name "valvottavienKohteidenMaara" :type :string :subtype :number :size "s" :required false}
+                           {:name "valvottavienKohteidenMaara" :i18nkey "tyonjohtaja.patevyys.valvottavienKohteidenMaara" :type :string :subtype :number :size "s" :required false}
                            ;; TODO: Miten tyonjohtajaHakemusKytkimen saa piilotettua hakijalta?
-                           {:name "tyonjohtajaHakemusKytkin" :type :select :required false :blacklist [:applicant]
-                            :body [{:name "nimeaminen"}
-                                   {:name "hakemus"}]}])
+                           {:name "tyonjohtajaHakemusKytkin" :i18nkey "tyonjohtaja.patevyys.tyonjohtajaHakemusKytkin._group_label" :type :select :required false :blacklist [:applicant]
+                            :body [{:name "nimeaminen" :i18nkey "tyonjohtaja.patevyys.tyonjohtajaHakemusKytkin.nimeaminen"}
+                                   {:name "hakemus" :i18nkey "tyonjohtaja.patevyys.tyonjohtajaHakemusKytkin.hakemus"}]}])
 
 ;; FIXME remove + migration
 (def vastuuaika-tyonjohtaja [{:name "vastuuaika"
@@ -237,12 +271,12 @@
                               :body [{:name "vastuuaika-alkaa-pvm" :type :date}
                                      {:name "vastuuaika-paattyy-pvm" :type :date}]}])
 
-(def sijaisuus-tyonjohtaja [{:name "sijaistus"
+(def sijaisuus-tyonjohtaja [{:name "sijaistus" :i18nkey "tyonjohtaja.sijaistus._group_label"
                              :type :group
-                             :body [{:name "sijaistettavaHloEtunimi" :type :string}
-                                    {:name "sijaistettavaHloSukunimi" :type :string}
-                                    {:name "alkamisPvm" :type :date}
-                                    {:name "paattymisPvm" :type :date}]}])
+                             :body [{:name "sijaistettavaHloEtunimi" :i18nkey "tyonjohtaja.sijaistus.sijaistettavaHloEtunimi" :type :string}
+                                    {:name "sijaistettavaHloSukunimi" :i18nkey "tyonjohtaja.sijaistus.sijaistettavaHloSukunimi" :type :string}
+                                    {:name "alkamisPvm" :i18nkey "tyonjohtaja.sijaistus.alkamisPvm" :type :date}
+                                    {:name "paattymisPvm" :i18nkey "tyonjohtaja.sijaistus.paattymisPvm" :type :date}]}])
 
 (def tyonjohtaja (body
                    kuntaroolikoodi-tyonjohtaja
@@ -260,23 +294,23 @@
 (def aloitusoikeus [{:name "kuvaus" :type :text :max-len 4000 :required true :layout :full-width}])
 
 (def muutostapa {:name "muutostapa" :type :select :required true :label false :i18nkey "huoneistot.muutostapa"
-                 :body [{:name "poisto" :i18nkey "huoneistot.muutostapa.poisto"}
+                 :body [{:name "poisto"}
                         {:name "lis\u00e4ys" :i18nkey "huoneistot.muutostapa.lisays"}
-                        {:name "muutos" :i18nkey "huoneistot.muutostapa.muutos"}]})
-  
+                        {:name "muutos"}]})
+
 (def huoneistoRow [{:name "huoneistoTyyppi" :type :select :label false :i18nkey "huoneistot.huoneistoTyyppi"
-                   :body [{:name "asuinhuoneisto" :i18nkey "huoneistot.huoneistoTyyppi.asuinhuoneisto"}
-                          {:name "toimitila" :i18nkey "huoneistot.huoneistoTyyppi.toimitila"}
+                   :body [{:name "asuinhuoneisto"}
+                          {:name "toimitila"}
                           {:name "ei tiedossa" :i18nkey "huoneistot.huoneistoTyyppi.eiTiedossa"}]}
                    {:name "porras" :type :string :subtype :letter :case :upper :max-len 1 :size "t" :label false :i18nkey "huoneistot.porras"}
                    {:name "huoneistonumero" :type :string :subtype :number :min-len 1 :max-len 3 :size "s" :required true :label false :i18nkey "huoneistot.huoneistonumero"}
                    {:name "jakokirjain" :type :string :subtype :letter :case :lower :max-len 1 :size "t" :label false :i18nkey "huoneistot.jakokirjain"}
                    {:name "huoneluku" :type :string :subtype :number :min 1 :max 99 :required true :size "t" :label false :i18nkey "huoneistot.huoneluku"}
                    {:name "keittionTyyppi" :type :select :required true :label false :i18nkey "huoneistot.keittionTyyppi"
-                    :body [{:name "keittio" :i18nkey "huoneistot.keittionTyyppi.keittio"}
-                           {:name "keittokomero" :i18nkey "huoneistot.keittionTyyppi.keittokomero"}
-                           {:name "keittotila" :i18nkey "huoneistot.keittionTyyppi.keittotila"}
-                           {:name "tupakeittio" :i18nkey "huoneistot.keittionTyyppi.tupakeittio"}
+                    :body [{:name "keittio"}
+                           {:name "keittokomero"}
+                           {:name "keittotila"}
+                           {:name "tupakeittio"}
                            {:name "ei tiedossa" :i18nkey "huoneistot.keittionTyyppi.eiTiedossa"}]}
                    {:name "huoneistoala" :type :string :subtype :number :size "s" :min 1 :max 9999999 :required true :label false :i18nkey "huoneistot.huoneistoala"}
                    {:name "WCKytkin" :type :checkbox :label false :i18nkey "huoneistot.WCKytkin"}
@@ -424,7 +458,7 @@
                               {:name "uuni"}
                               {:name "ei l\u00e4mmityst\u00e4"}
                               {:name "ei tiedossa"}]}
-                      {:name "lammonlahde" :type :select :required true :other-key "muu-lammonlahde"
+                      {:name "lammonlahde" :type :select :other-key "muu-lammonlahde"
                        :body [{:name "kauko tai aluel\u00e4mp\u00f6"}
                               {:name "kevyt poltto\u00f6ljy"}
                               {:name "raskas poltto\u00f6ljy"}
@@ -667,8 +701,12 @@
 
     {:info {:name "maisematyo" :approvable true}
      :body (approvable-top-level-groups maisematyo)}
+    {:info {:name "kiinteiston-muodostus" :approvable true}
+     :body (approvable-top-level-groups (body kuvaus))}
+
 
     {:info {:name "hakija"
+            :i18name "osapuoli"
             :order 3
             :removable true
             :repeating true
@@ -680,6 +718,7 @@
      :body party}
 
     {:info {:name "hakija-ya"
+            :i18name "osapuoli"
             :order 3
             :removable false
             :repeating false
@@ -690,6 +729,7 @@
      :body (schema-body-without-element-by-name party turvakielto)}
 
     {:info {:name "paasuunnittelija"
+            :i18name "osapuoli"
             :order 4
             :removable false
             :approvable true
@@ -697,6 +737,7 @@
      :body paasuunnittelija}
 
     {:info {:name "suunnittelija"
+            :i18name "osapuoli"
             :repeating true
             :order 5
             :removable true
@@ -705,6 +746,7 @@
      :body suunnittelija}
 
     {:info {:name "tyonjohtaja"
+            :i18name "osapuoli"
             :order 5
             :removable true
             :repeating true
@@ -713,6 +755,7 @@
      :body tyonjohtaja}
 
     {:info {:name "maksaja"
+            :i18name "osapuoli"
             :repeating true
             :order 6
             :removable true
@@ -720,9 +763,17 @@
             :type :party}
      :body maksaja}
 
-    {:info {:name "rakennuspaikka" :approvable true
-            :order 2}
+    {:info {:name "rakennuspaikka"
+            :approvable true
+            :order 2
+            :type :location}
      :body (schema-body-without-element-by-name rakennuspaikka "rantaKytkin")}
+
+    {:info {:name "kiinteisto"
+            :approvable true
+            :order 2
+            :type :location}
+     :body (schema-body-without-element-by-name rakennuspaikka "rantaKytkin" "hallintaperuste" "kaavanaste")}
 
     {:info {:name "aloitusoikeus" :removable false :approvable true}
      :body aloitusoikeus}

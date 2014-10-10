@@ -265,7 +265,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       .click(function () {
         ajax.command(cmd, cmdArgs)
         .success(function () {
-            if (noun == "approved") {
+            if (noun === "approved") {
                 approveButton$.hide();
                 rejectButton$.show();
             } else {
@@ -295,8 +295,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var meta = self.getMeta(path);
     var approval = meta ? meta._approved : null;
     var requiresApproval = !approval || modelModifiedSince(model, approval.timestamp);
-    var allowApprove = requiresApproval || (approval && approval.value == "rejected");
-    var allowReject = requiresApproval || (approval && approval.value == "approved");
+    var allowApprove = requiresApproval || (approval && approval.value === "rejected");
+    var allowReject = requiresApproval || (approval && approval.value === "approved");
 
     if (self.authorizationModel.ok("approve-doc")) {
       approveButton$ = makeApprovalButton("approve", "approved", "btn-primary");
@@ -528,9 +528,12 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     _(subSchema.body)
       .map(function(e) {
-        var locKey = self.schemaI18name + "." + myPath.replace(/\.\d+\./g, ".") + "." + e.name
+        var locKey = self.schemaI18name + "." + myPath.replace(/\.\d+\./g, ".") + "." + e.name;
         if (e.i18nkey) {
           locKey = e.i18nkey;
+        } else if (subSchema.i18nkey) {
+          locKey = subSchema.i18nkey + "." + e.name;
+
         }
         return [e.name, loc(locKey)];
         })
@@ -976,7 +979,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       var appendButton = makeButton(myPath.join("_") + "_append", loc([self.schemaI18name, myPath.join("."), "_append_label"]));
 
       var appender = function () {
-        var parent$ = $(this).closest(".accordion-fields")
+        var parent$ = $(this).closest(".accordion-fields");
         var count = parent$.children("*[data-repeating-id='" + repeatingId + "']").length;
         while (parent$.children("*[data-repeating-id-" + repeatingId + "='" + count + "']").length) {
           count++;
@@ -1025,7 +1028,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         });
 
         parent$.append(newItem);
-      }
+      };
 
       var buttonGroup = document.createElement("div");
       buttonGroup.className = "button-group";
@@ -1033,7 +1036,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
       if (subSchema.type === "table") {
         $(appendButton).click(tableAppender);
-        var locKey = [self.schemaI18name, myPath.join("."), "copyLabel"]
+        var locKey = [self.schemaI18name, myPath.join("."), "copyLabel"];
         if (subSchema.i18nkey) {
           locKey = [subSchema.i18nkey, "copyLabel"];
         }
@@ -1164,7 +1167,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         $("#" + pathStrToID(pathStr)).addClass(level);
       });
     }
-  }
+  };
 
   function validate() {
     if (!options || options.validate) {
@@ -1183,11 +1186,12 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }
   }
 
-  function createIndicator(eventTarget) {
+  function createIndicator(eventTarget, className) {
+    className = className || "form-indicator";
     var parent$ = $(eventTarget.parentNode);
-    parent$.find(".form-indicator").remove();
+    parent$.find("." + className).remove();
     var indicator = document.createElement("span");
-    indicator.className = "form-indicator";
+    indicator.className = className;
     parent$.append(indicator);
     return indicator;
   }
@@ -1279,6 +1283,96 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return false;
   }
 
+  function buildDescriptionElement(operation) {
+    var wrapper = document.createElement("span");
+    var descriptionSpan = document.createElement("span");
+    var description = document.createTextNode("");
+    var descriptionInput = document.createElement("input");
+    var iconSpan = document.createElement("span");
+    var iconSpanDescription = document.createTextNode(loc('edit'));
+
+    // test ids
+    descriptionSpan.setAttribute("data-test-id", "op-description");
+    iconSpan.setAttribute("data-test-id", "edit-op-description");
+    descriptionInput.setAttribute("data-test-id", "op-description-editor");
+
+    wrapper.className = "op-description-wrapper";
+    descriptionSpan.className = "op-description"
+    if (operation.description) {
+      description.nodeValue = operation.description;
+      descriptionInput.value = operation.description;
+    } else {
+      iconSpan.appendChild(iconSpanDescription);
+    }
+
+    descriptionInput.type = "text";
+    descriptionInput.className = "accordion-input text hidden";
+
+    descriptionInput.onclick = function(event) {
+      // Prevent collapsing accordion when input is clicked
+      event.stopPropagation();
+    };
+
+    var saveInput = function() {
+      $(descriptionInput).off("blur");
+      var value = _.trim(descriptionInput.value);
+      if (value === "") {
+        value = null;
+        iconSpan.appendChild(iconSpanDescription);
+
+      }
+
+      ajax.command("update-op-description", {id: self.appId, 'op-id': operation.id, desc: value })
+        .success(function() {
+          var indicator = createIndicator(descriptionInput, "accordion-indicator")
+          showIndicator(indicator, "accordion-input-saved", "form.saved");
+        })
+        .call();
+
+      description.nodeValue = descriptionInput.value;
+      $(descriptionInput).addClass("hidden");
+      $(iconSpan).removeClass("hidden");
+      $(descriptionSpan).removeClass("hidden");
+    };
+
+    descriptionInput.onfocus = function(event) {
+      descriptionInput.onblur = function(event) {
+        saveInput();
+      }
+    }
+
+    descriptionInput.onkeyup = function(event) {
+      // trigger save on enter and esc keypress
+      var keyCode = event ? event.keyCode : window.event.keyCode; // ie8
+      if (keyCode == 13 || keyCode == 27) {
+        $(descriptionInput).off("blur");
+        descriptionInput.blur();
+        saveInput();
+      }
+    }
+
+    iconSpan.className = "icon edit";
+    iconSpan.onclick = function(event) {
+      if (iconSpan.contains(iconSpanDescription)) {
+        iconSpan.removeChild(iconSpanDescription);
+      }
+      // on ie8 there is no event
+      if (event) {
+        event.stopPropagation();
+      }
+      $(iconSpan).addClass("hidden");
+      $(descriptionSpan).addClass("hidden");
+      $(descriptionInput).removeClass("hidden");
+      descriptionInput.focus();
+    };
+
+    descriptionSpan.appendChild(description);
+    wrapper.appendChild(descriptionSpan);
+    wrapper.appendChild(descriptionInput);
+    wrapper.appendChild(iconSpan);
+    return wrapper;
+  }
+
   function buildElement() {
     var op = self.schema.info.op;
 
@@ -1298,8 +1392,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     if (op) {
       title.appendChild(document.createTextNode(loc([op.name, "_group_label"])));
+      title.appendChild(buildDescriptionElement(op));
     } else {
-      title.appendChild(document.createTextNode(loc([self.schemaI18name, "_group_label"])));
+      title.appendChild(document.createTextNode(loc([self.schema.info.name, "_group_label"])));
     }
     title.setAttribute("data-doc-id", self.docId);
     title.setAttribute("data-app-id", self.appId);

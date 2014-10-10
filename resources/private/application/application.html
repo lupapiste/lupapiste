@@ -30,6 +30,7 @@
               <span data-bind="ltext: 'verdictGiven', attr: {'title' : loc('verdictGiven.title')}" class="verdictGiven-box"></span>
               <span data-bind="ltext: 'constructionStarted', attr: {'title' : loc('constructionStarted.title')}" class="constructionStarted-box"></span>
               <span data-bind="ltext: 'closed', attr: {'title' : loc('closed.title')}" class="closed-box"></span>
+              <span data-bind="ltext: 'canceled', attr: {'title' : loc('canceled.title')}" class="canceled-box"></span>
             </div>
           </div>
 
@@ -233,7 +234,7 @@
                   <span data-bind="text: attachmentsRequiringAction"
                         id="applicationAttachmentsRequiringAction" class="indicator"></span></span></a></li>
 
-            <li data-bind="if: $root.authorization.ok('submit-application')">
+            <li data-bind="if: _.contains(['draft', 'open', 'submitted', 'complement-needed'], state())">
               <a data-bind="click: changeTab" href="#" data-target="requiredFieldSummary" data-test-id="application-open-requiredFieldSummary-tab">
                 <span data-bind="ltext: 'application.tabRequiredFieldSummary'"></span></a></li>
 
@@ -257,13 +258,6 @@
                   <span data-bind="if: $data.tasksRequiringAction">
                     <span data-bind="text: tasksRequiringAction"
                           id="applicationTasksRequiringAction" class="indicator"></span></span></a></li>
-
-            <li><a data-bind="click: changeTab"
-                   href="#" data-target="conversation" data-test-id="application-open-conversation-tab" >
-                  <span data-bind="ltext: 'application.tabConversation'"></span>
-                  <span data-bind="if: unseenComments">
-                    <span data-bind="text: unseenComments"
-                          id="applicationUnseenComments" class="indicator"></span></span></a></li>
           </ul>
         </div>
       </div>
@@ -344,6 +338,15 @@
                   <button class="btn-primary"
                         data-bind="ltext: 'personSelector.invite', visible: $root.authorization.ok('invite'), enabled: $root.authorization.ok('invite')"
                         onclick="$('#invite-document-name').val('').change();$('#invite-document-path').val('').change();$('#invite-document-id').val('').change();LUPAPISTE.ModalDialog.open('#dialog-valtuutus');return false;"></button>
+
+<div data-bind="if: features.enabled('company')"><div class="feature">
+                  <button class="btn-primary"
+                          data-bind="ltext: 'company-invite.invite',
+                                     visible: $root.authorization.ok('invite'),
+                                     enabled: $root.authorization.ok('invite'),
+                                     click: $root.openInviteCompany">
+                  </button>
+</div></div>
 
                 </div>
               </div>
@@ -558,14 +561,30 @@
 
             <!--  ko if:  !hasIncorrectlyFilledRequiredFields() -->
               <h2 data-bind="ltext: 'application.allRequiredDataFilled'"></h2>
+              <button class="btn btn-primary"
+                       data-test-id="application-submit-btn"
+                       data-bind="click: submitApplication,
+                                  visible: $root.authorization.ok('submit-application'),
+                                  enable: !processing() && !showInviteButtons() && (!requiredFieldsFillingObligatory() || !hasIncorrectlyFilledRequiredFields())">
+                 <span data-bind="ltext: 'application.submitApplication'"></span>
+                 <span class="icon send left-align"></span>
+               </button>
             <!-- /ko -->
 
             <!--  ko if:  hasIncorrectlyFilledRequiredFields -->
               <h2 data-bind="ltext: 'application.requiredDataMissing'"></h2>
-
+              <i class="error-text" data-bind="ltext: 'application.requiredDataDesc', visible: requiredFieldsFillingObligatory() && hasIncorrectlyFilledRequiredFields()"></i><br>
+              <button class="btn btn-primary"
+                       data-test-id="application-submit-btn"
+                       data-bind="click: submitApplication,
+                                  visible: $root.authorization.ok('submit-application'),
+                                  enable: !processing() && !showInviteButtons() && (!requiredFieldsFillingObligatory() || !hasIncorrectlyFilledRequiredFields())">
+                 <span data-bind="ltext: 'application.submitApplication'"></span>
+                 <span class="icon send left-align"></span>
+               </button>
                 <!-- ko foreach: incorrectlyFilledRequiredFields -->
                   <div data-bind="with: $data[0]">
-                    <h3 class="required-field-error-doc" data-bind="ltext: document.locKey + '._group_label'"></h3>
+                    <h3 class="required-field-error-doc" data-bind="ltext: document.name + '._group_label'"></h3>
                   </div>
                   <!-- ko foreach: $data -->
                   <div class="requiredField-line">
@@ -577,14 +596,7 @@
                 <!-- /ko -->
             <!-- /ko -->
 
-             <button class="btn btn-primary"
-                     data-test-id="application-submit-btn"
-                     data-bind="click: submitApplication,
-                                visible: $root.authorization.ok('submit-application'),
-                                enable: !processing() && !showInviteButtons() && (!requiredFieldsFillingObligatory() || !hasIncorrectlyFilledRequiredFields())">
-               <span data-bind="ltext: 'application.submitApplication'"></span>
-               <span class="icon send left-align"></span>
-             </button>
+
           </div>
 
           <div class="process-nav">
@@ -1352,7 +1364,41 @@
       </div>
 
     </div>
+
   </section>
+
+  <div style="display:none;">
+    <div id="dialog-company-user-op" class="window autosized">
+      <div class="dialog-header">
+        <p data-bind="text: title"></p>
+        <p class="dialog-close close">X</p>
+      </div>
+      <div class="dialog-content">
+
+        <div>
+          <span data-bind="html: message"></span>
+        </div>
+
+        <div data-bind="visible: pending">
+          <em class="button-loader" style="position: relative;"></em>
+          <span data-bind="ltext: 'company.user.op.pending'"></span>
+        </div>
+
+        <button data-bind="click: ok,
+                           enable: !pending(),
+                           ltext: 'yes'"
+                class="btn btn-primary btn-dialog"
+                data-test-id="dialog-company-user-op.ok">
+        </button>
+        <button data-bind="enable: !pending(),
+                           ltext: 'no'"
+                class="btn btn-dialog close">
+        </button>
+
+      </div>
+    </div>
+  </div>
+
 
 </body>
 </html>

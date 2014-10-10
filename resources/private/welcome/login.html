@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <body>
   <section class="page welcome_page" id="login">
     <div class="welcome_top">
@@ -19,9 +19,10 @@
                 Asiointij&auml;rjestelm&auml;n k&auml;ytt&ouml; vaatii kirjautumisen. K&auml;ytt&auml;j&auml;tunnuksena toimii s&auml;hk&ouml;postiosoitteesi.
               </p>
               <label class="form-label" for="login-username" data-bind="ltext: 'userinfo.email'"></label>
-              <input class="form-input" id="login-username" type="text" data-bind="attr: {placeholder: loc('userinfo.username')}" name="username" autofocus="autofocus">
+              <input class="form-input" id="login-username" type="text" data-bind="attr: {placeholder: loc('userinfo.username')}" name="username">
               <label class="form-label" for="login-password" data-bind="ltext: 'userinfo.password'"></label>
               <input class="form-input" id="login-password" type="password" data-bind="attr: {placeholder: loc('userinfo.password')}" name="password">
+              <label class="form-label" ><input class="form-input" type="checkbox" id="rememberme" data-bind="checked: rememberMe"><span data-bind="ltext: 'userinfo.rememberme'"></span></label>
               <button id="login-button" class="btn btn-primary" data-bind="ltext: 'welcome.login'">Kirjaudu</button>
               <span id="login-message" style="display: none; color: red"></span>
               <div class="passwd-reset">
@@ -35,56 +36,6 @@
         </div>
       </div>
     </div>
-  </section>
-
-  <section class="page container" id="reset">
-    <form data-bind="submit: send">
-
-      <h1 data-bind="ltext: 'reset.title'"></h1>
-      <p data-bind="ltext: 'reset.info'"></p>
-
-      <label data-bind="ltext: 'reset.email'" class="form-label"></label>
-      <input data-bind="value: email, valueUpdate: 'afterkeydown', attr: {placeholder: loc('reset.email-placeholder')}" class="form-input" type="email" name="email" autofocus="autofocus">
-
-      <button data-bind="click: send, enable: ok, ltext: 'reset.send'" data-test-id="reset-send" class="btn btn-primary"></button>
-
-      <div data-bind="ltext: 'reset.sent.1', visible: sent" class="reset-sent-1"></div>
-      <div data-bind="ltext: 'reset.sent.2', visible: sent" class="reset-sent-2"></div>
-      <div data-bind="html: loc(['reset.fail', fail()]), visible: fail" class="reset-fail"></div>
-
-    </form>
-  </section>
-
-  <section class="page container" id="setpw">
-    <form data-bind="submit: send">
-
-      <h1 data-bind="ltext: 'setpw.title'"></h1>
-      <p data-bind="ltext: 'setpw.info'"></p>
-
-      <label data-bind="ltext: 'setpw.password.1'" class="form-label"></label>
-      <input data-bind="value: password1, valueUpdate: 'afterkeydown', attr: {placeholder: loc('setpw.placeholder.1')}" class="form-input" type="password" autofocus="autofocus">
-      <div>
-        <span data-bind="ltext: 'setpw.quality'"></span>
-        <span data-bind="visible: passwordQuality,
-                         attr: {'class': 'setpw-quality-' + passwordQuality()},
-                         text: loc(['setpw.quality', passwordQuality()])"></span>
-      </div>
-
-      <label data-bind="ltext: 'setpw.password.2'" class="form-label"></label>
-      <input data-bind="value: password2, valueUpdate: 'afterkeydown', attr: {placeholder: loc('setpw.placeholder.2')}" class="form-input" type="password">
-      <div>
-        <span data-bind="ltext: 'setpw.notSame', visible: password2() != null && password1() != password2()"></span><span>&nbsp;</span>
-      </div>
-
-      <button data-bind="click: send, enable: ok, ltext: 'setpw.send'" class="btn btn-primary"></button>
-
-      <div data-bind="visible: success">
-        <a data-bind="ltext: 'setpw.success'" href="#!/login"></a>
-      </div>
-
-      <div data-bind="ltext: 'setpw.fail', visible: fail"></div>
-
-    </form>
   </section>
 
   <section class="page container" id="auth-invite">

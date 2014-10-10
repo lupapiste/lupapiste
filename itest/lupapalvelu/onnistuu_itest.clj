@@ -12,24 +12,24 @@
 
 (defn init-sign []
   (-> (u/command u/pena :init-sign
-                 :companyName "company-name"
-                 :companyY    "1234567-8"
-                 :firstName   "First"
-                 :lastName    "Last"
-                 :email       "email"
-                 :lang        "fi")
+                 :company {:name  "company-name"
+                           :y     "FI2341528-4"}
+                 :signer {:firstName   "First"
+                          :lastName    "Last"
+                          :email       "a@b.c"}
+                 :lang "fi")
       :processId
       get-process))
 
 (fact "init-sign"
   (init-sign) => (contains {:stamp   #"[a-zA-Z0-9]{40}"
                             :company {:name "company-name"
-                                      :y    "1234567-8"}
-                            :signer {:first-name   "First"
-                                     :last-name    "Last"
-                                     :email        "email"
-                                     :lang         "fi"}
-                            :status  "created"}))
+                                      :y    "FI2341528-4"}
+                            :signer {:firstName   "First"
+                                     :lastName    "Last"
+                                     :email        "a@b.c"}
+                            :status  "created"
+                            :lang    "fi"}))
 
 (fact "cancel"
   (let [process-id (:id (init-sign))]

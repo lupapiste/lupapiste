@@ -1,6 +1,7 @@
 *** Settings ***
 
 Documentation  Mikko adds an attachment
+Suite setup     Apply minimal fixture now
 Suite teardown  Logout
 Resource       ../../common_resource.robot
 Variables      variables.py
@@ -61,7 +62,7 @@ Mikko see that attachment is for authority
 Mikko adds comment
   [Tags]  attachments
   Open attachment details  muut.muu
-  Input comment  attachment  mahtava liite!
+  Input comment  mahtava liite!
 
 Comment is added
   [Tags]  attachments
@@ -69,8 +70,10 @@ Comment is added
 
 Change attachment type
   [Tags]  attachments
+  Click enabled by test id  change-attachment-type
   Select From List  attachment-type-select  rakennuspaikka.ote_alueen_peruskartasta
   Wait Until  Element Should Not Be Visible  attachment-type-select-loader
+  Click enabled by test id  confirm-yes
   Click element  xpath=//a[@data-test-id="back-to-application-from-attachment"]
   Tab should be visible  attachments
   Wait Until  Page Should Not Contain  xpath=//a[@data-test-type="muut.muu"]
@@ -110,9 +113,10 @@ Switch user
 Sonja goes to conversation tab
   [Tags]  attachments
   Open application  ${appname}  753-416-25-30
-  Open tab  conversation
+  Open side panel  conversation
   Click Element  link=Ote alueen peruskartasta
   Wait Until Page Contains  ${TXT_TESTFILE_NAME}
+  Close side panel  conversation
 
 Sonja goes to attachments tab
   [Tags]  attachments
@@ -157,19 +161,6 @@ Approve-button should be disabled
 
 *** Keywords ***
 
-Open attachment details
-  [Arguments]  ${type}
-  Open tab  attachments
-  Wait Until  Page Should Contain Element  xpath=//a[@data-test-type="${type}"]
-  # Make sure the element is visible on browser view before clicking. Take header heigth into account.
-  #Execute Javascript  window.scrollTo(0, $("[data-test-type='muut.muu']").position().top - 130);
-  Focus  xpath=//a[@data-test-type="${type}"]
-  Click element  xpath=//a[@data-test-type="${type}"]
-  Wait Until  Element Should Be Visible  test-attachment-file-name
-  Wait Until Page Contains  ${TXT_TESTFILE_NAME}
-  Element Text Should Be  test-attachment-file-name  ${TXT_TESTFILE_NAME}
-  Element Text Should Be  test-attachment-version  1.0
-
 Attachment state should be
   [Arguments]  ${type}  ${state}
   ## Fragile: assumes there is only one element that has data-test-state
@@ -179,4 +170,6 @@ Attachment state should be
 
 Comment count is
   [Arguments]  ${amount}
-  Xpath Should Match X Times  //section[@id='attachment']//div[@data-bind='foreach: comments().slice(0).reverse()']/div  ${amount}
+  Open side panel  conversation
+  Xpath Should Match X Times  //div[@id='conversation-panel']//div[@data-bind='foreach: comments().slice(0).reverse()']/div  ${amount}
+  Close side panel  conversation

@@ -228,6 +228,7 @@
           schema (or schema (get-document-schema document))
           document-loc-key (or (-> schema :info :i18name) (-> schema :info :name))
           info {:document {:id (:id document)
+                           :name (-> schema :info :name)
                            :locKey document-loc-key
                            :type (-> schema :info :type)}
                 :schema-body (:body schema)}]
@@ -436,7 +437,8 @@
                 :postitoimipaikannimi (wrap city)}
        :yritys {:yritysnimi           (wrap companyName)
                 :liikeJaYhteisoTunnus (wrap companyId)}
-       :patevyys {:koulutus           (wrap degree)
+       :patevyys {:koulutusvalinta    nil
+                  :koulutus           (wrap degree)
                   :valmistumisvuosi   (wrap graduatingYear)
                   :fise               (wrap fise)}}
       util/strip-nils

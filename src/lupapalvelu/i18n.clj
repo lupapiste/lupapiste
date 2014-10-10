@@ -31,6 +31,8 @@
 
 (defn get-localizations [] @excel-data)
 
+(def languages (-> (get-localizations) keys set))
+
 (defn get-terms
   "Return localization terms for given language. If language is not supported returns terms for default language (\"fi\")"
   [lang]
@@ -95,3 +97,11 @@
 
   (defn get-localizations []
     (update-in @excel-data [:fi] merge (load-add-ons))))
+
+(defn- load-add-ons []
+  (when-let [in (io/resource "i18n.txt")]
+    (with-open [in (io/reader in)]
+      (read-lines (line-seq in)))))
+
+(defn get-localizations []
+  (update-in @excel-data [:fi] merge (load-add-ons)))

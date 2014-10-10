@@ -23,6 +23,10 @@ var util = (function() {
   }
 
   function getPwQuality(password) {
+    if (!password) {
+      return null;
+    }
+
     var l = password.length;
     if (l < 7)  { return "poor"; }
     if (l <= 8)  { return "low"; }
@@ -111,7 +115,7 @@ var util = (function() {
     return undefined;
   }
 
-  function locKeyFromDocPath(pathStr) {
+    function locKeyFromDocPath(pathStr) {
     var res = (pathStr.replace(/\.+\d+\./g, ".")).replace(/\.+/g, ".");
     return res;
   }
@@ -124,24 +128,77 @@ var util = (function() {
   function isPartyDoc(doc) { return doc["schema-info"].type === "party"; }
   function isNotPartyDoc(doc) { return !isPartyDoc(doc); }
 
+  function isValidFinnishY(y) {
+    var m = /^FI(\d{7})-(\d)$/.exec(y || ""),
+        number = m && m[1],
+        check  = m && m[2];
+
+    if (!m) { return false; }
+
+    var cn = _(number)
+      .chars()
+      .map(function(c) { return parseInt(c, 10); })
+      .zip([7, 9, 10, 5, 8, 4, 2])
+      .map(function(p) { return p[0] * p[1]; })
+      .reduce(function(acc, v) { return acc + v; });
+    cn = cn % 11;
+    cn = (cn === 0) ? cn : 11 - cn;
+    return cn === parseInt(check, 10);
+  }
+
+  function isValidNonFinnishY(y) {
+    var m = /^([A-Z]{2})\w+/.exec(y),
+        c = m && m[1];
+    return c && c !== "FI";
+  }
+
+  function isValidY(y) {
+    return isValidFinnishY(y) || isValidFinnishY("FI" + y) || isValidNonFinnishY(y);
+  }
+
+  function coerceNationalY(y) {
+    return isValidFinnishY("FI" + y) ? "FI" + y : y;
+  }
+
+  function isValidFinnishOVT(ovt) {
+    var m = /^0037(\d{7})(\d)\d{0,5}$/.exec(ovt || ""),
+        y = m && m[1],
+        c = m && m[2];
+    if (!y || !c) { return false; }
+    return isValidY("FI" + y + "-" + c);
+  }
+
+  function isValidNonFinnishOVT(ovt) {
+    var m = /^(\d{4}).+/.exec(ovt),
+        c = m && m[1];
+    return c && c !== "0037";
+  }
+
+  function isValidOVT(ovt) {
+    return isValidFinnishOVT(ovt) || isValidNonFinnishOVT(ovt);
+  }
+
   return {
-    zeropad: zeropad,
-    fluentify: fluentify,
-    getPwQuality: getPwQuality,
+    zeropad:             zeropad,
+    fluentify:           fluentify,
+    getPwQuality:        getPwQuality,
     isValidEmailAddress: isValidEmailAddress,
-    isValidPassword: isValidPassword,
+    isValidPassword:     isValidPassword,
+    isValidY:            isValidY,
+    coerceNationalY:     coerceNationalY,
+    isValidOVT:          isValidOVT,
     prop: {
-      isPropertyId: isPropertyId,
+      isPropertyId:           isPropertyId,
       isPropertyIdInDbFormat: isPropertyIdInDbFormat,
-      toHumanFormat: propertyIdToHumanFormat,
-      toDbFormat: propertyIdToDbFormat
+      toHumanFormat:          propertyIdToHumanFormat,
+      toDbFormat:             propertyIdToDbFormat
     },
     buildingName: buildingName,
-    nop: nop,
-    constantly: function(value) { return function() { return value; }; },
-    isNum: isNum,
-    getIn: getIn,
-    locKeyFromDocPath: locKeyFromDocPath,
+    nop:          nop,
+    constantly:   function(value) { return function() { return value; }; },
+    isNum:        isNum,
+    getIn:        getIn,
+        locKeyFromDocPath: locKeyFromDocPath,
     getDocumentOrder: getDocumentOrder,
     isPartyDoc: isPartyDoc,
     isNotPartyDoc: isNotPartyDoc

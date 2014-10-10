@@ -40,7 +40,8 @@
 ;; Table definition
 ;;
 
-(def ^:private col-sources [:indicators
+(def ^:private col-sources [(fn [app] (select-keys app [:urgency :authorityNotice]))
+                            :indicators
                             :attachmentsRequiringAction
                             :unseenComments
                             (fn [app] (if (:infoRequest app) "inforequest" "application"))
@@ -56,9 +57,10 @@
                           0 nil
                           1 nil
                           2 nil
-                          3 :infoRequest
-                          4 :address
-                          5 nil))
+                          3 nil
+                          4 :infoRequest
+                          5 :address
+                          6 nil))
 
 (def ^:private col-map (zipmap col-sources (map str (range))))
 
@@ -135,7 +137,7 @@
                       (query/sort (make-sort params))
                       (query/skip skip)
                       (query/limit limit))
-        rows        (map (comp make-row (partial meta-fields/with-indicators user)) apps)
+        rows        (map (comp make-row (partial meta-fields/with-indicators user) #(domain/filter-application-content-for % user) ) apps)
         echo        (str (util/->int (str (:sEcho params))))] ; Prevent XSS
     {:aaData                rows
      :iTotalRecords         user-total

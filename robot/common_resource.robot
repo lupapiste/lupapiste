@@ -20,7 +20,7 @@ ${APPLICATIONS PATH}            /app/fi/applicant#!/applications
 ${AUTHORITY APPLICATIONS PATH}  /app/fi/authority#!/applications
 ${FIXTURE URL}                  ${SERVER}/dev/fixture
 ${CREATE URL}                   ${SERVER}/dev/create
-
+${LAST EMAIL URL}                    ${SERVER}/api/last-email
 ${SELENIUM}                     ${EMPTY}
 
 *** Keywords ***
@@ -40,6 +40,10 @@ Go to login page
   Go to  ${LOGIN URL}
   Wait Until  Title should be  Lupapiste
   Wait Until  Page should contain  Haluan kirjautua palveluun
+
+Go to last email
+  Go to  ${LAST EMAIL URL}
+  Wait until  Element should be visible  //*[@id='subject']
 
 Applications page should be open
   Location should contain  ${APPLICATIONS PATH}
@@ -103,11 +107,31 @@ Tab should be visible
   [Arguments]  ${name}
   Wait until  Element should be visible  application-${name}-tab
 
+Side panel should be visible
+  [Arguments]  ${name}
+  Wait until  Element should be visible  ${name}-panel
+
+Side panel should not be visible
+  [Arguments]  ${name}
+  Wait until  Element should not be visible  ${name}-panel
+
 Logout
   Wait for jQuery
   ${secs} =  Get Time  epoch
   Go to  ${LOGOUT URL}?s=${secs}
   Wait Until  Page should contain  Haluan kirjautua palveluun
+
+Open side panel
+  [Arguments]  ${name}
+  ${sidePanelClosed} =  Run Keyword And Return Status  Element should not be visible  ${name}-panel
+  Run keyword If  ${sidePanelClosed}  Click by id  open-${name}-side-panel
+  Side panel should be visible  ${name}
+
+Close side panel
+  [Arguments]  ${name}
+  ${sidePanelOpen} =  Run Keyword And Return Status  Element should be visible  ${name}-panel
+  Run keyword If  ${sidePanelOpen}  Click by id  open-${name}-side-panel
+  Side panel should not be visible  ${name}
 
 #
 # Login stuff
@@ -223,6 +247,9 @@ Veikko logs in
 Sonja logs in
   Authority logs in  sonja  sonja  Sonja Sibbo
 
+Ronja logs in
+  Authority logs in  ronja  sonja  Ronja Sibbo
+
 Sipoo logs in
   Authority-admin logs in  sipoo  sipoo  Simo Suurvisiiri
 
@@ -245,6 +272,13 @@ Select From List by test id
   [Arguments]  ${id}  ${value}
   Wait until page contains element  xpath=//select[@data-test-id="${id}"]
   Select From List  xpath=//select[@data-test-id="${id}"]  ${value}
+
+Click by id
+  [Arguments]  ${id}
+  ${selector} =   Set Variable  $("[id='${id}']:visible")
+  # 'Click Element' is broken in Selenium 2.35/FF 23 on Windows, using jQuery instead
+  Wait For Condition  return ${selector}.length===1;  10
+  Execute Javascript  ${selector}.click();
 
 Click by test id
   [Arguments]  ${id}
@@ -362,10 +396,26 @@ Add attachment
   Wait until       Page should contain element  xpath=//form[@id='attachmentUploadForm']//option[@value='muut.muu']
   Select From List  attachmentType  muut.muu
   Input text       text  ${description}
+  Wait until       Page should contain element  xpath=//form[@id='attachmentUploadForm']/input[@type='file']
+  Focus            xpath=//form[@id='attachmentUploadForm']/input[@type='file']
   Choose File      xpath=//form[@id='attachmentUploadForm']/input[@type='file']  ${path}
   Click element    test-save-new-attachment
   Unselect Frame
   Wait Until Page Contains  Muu liite
+
+
+Open attachment details
+  [Arguments]  ${type}
+  Open tab  attachments
+  Wait Until  Page Should Contain Element  xpath=//a[@data-test-type="${type}"]
+  # Make sure the element is visible on browser view before clicking. Take header heigth into account.
+  #Execute Javascript  window.scrollTo(0, $("[data-test-type='muut.muu']").position().top - 130);
+  Focus  xpath=//a[@data-test-type="${type}"]
+  Click element  xpath=//a[@data-test-type="${type}"]
+  Wait Until  Element Should Be Visible  test-attachment-file-name
+  Wait Until Page Contains  ${TXT_TESTFILE_NAME}
+  Element Text Should Be  test-attachment-file-name  ${TXT_TESTFILE_NAME}
+  Element Text Should Be  test-attachment-version  1.0
 
 
 Select operation path by permit type
@@ -467,42 +517,56 @@ Request should not be visible
 
 Add comment
   [Arguments]  ${message}
-  Open tab  conversation
-  Input text  xpath=//div[@id='application-conversation-tab']//textarea[@data-test-id='application-new-comment-text']  ${message}
+  Open side panel  conversation
+  Input text  xpath=//div[@id='conversation-panel']//textarea[@data-test-id='application-new-comment-text']  ${message}
   Click by test id  application-new-comment-btn
-  Wait until  Element should be visible  xpath=//div[@id='application-conversation-tab']//div[@data-test-id='comments-table']//span[text()='${message}']
+  Wait until  Element should be visible  xpath=//div[@id='conversation-panel']//div[@data-test-id='comments-table']//span[text()='${message}']
+  Close side panel  conversation
 
 Open to authorities
   [Arguments]  ${message}
-  Open tab  conversation
-  Input text  xpath=//div[@id='application-conversation-tab']//textarea[@data-test-id='application-new-comment-text']  ${message}
+  Open side panel  conversation
+  Input text  xpath=//div[@id='conversation-panel']//textarea[@data-test-id='application-new-comment-text']  ${message}
   Click by test id  application-open-application-btn
-  Wait until  Element should be visible  xpath=//div[@id='application-conversation-tab']//div[@data-test-id='comments-table']//span[text()='${message}']
+  Wait until  Element should be visible  xpath=//div[@id='conversation-panel']//div[@data-test-id='comments-table']//span[text()='${message}']
+  Close side panel  conversation
 
 Input comment
-  [Arguments]  ${section}  ${message}
-  Input text  xpath=//section[@id='${section}']//textarea[@data-test-id='application-new-comment-text']  ${message}
-  Click element  xpath=//section[@id='${section}']//button[@data-test-id='application-new-comment-btn']
-  Wait until  Element should be visible  xpath=//section[@id='${section}']//div[contains(@class,'comment-text')]//span[text()='${message}']
+  [Arguments]  ${message}
+  Open side panel  conversation
+  Input text  xpath=//div[@id='conversation-panel']//textarea[@data-test-id='application-new-comment-text']  ${message}
+  Click element  xpath=//div[@id='conversation-panel']//button[@data-test-id='application-new-comment-btn']
+  Wait until  Element should be visible  xpath=//div[@id='conversation-panel']//div[contains(@class,'comment-text')]//span[text()='${message}']
+  Close side panel  conversation
+
+Input inforequest comment
+  [Arguments]  ${message}
+  Input text  xpath=//section[@id='inforequest']//textarea[@data-test-id='application-new-comment-text']  ${message}
+  Click element  xpath=//section[@id='inforequest']//button[@data-test-id='application-new-comment-btn']
+  Wait until  Element should be visible  xpath=//section[@id='inforequest']//div[contains(@class,'comment-text')]//span[text()='${message}']
 
 Input comment and open to authorities
-  [Arguments]  ${section}  ${message}
-  Input text  xpath=//section[@id='${section}']//textarea[@data-test-id='application-new-comment-text']  ${message}
-  Click element  xpath=//section[@id='${section}']//button[@data-test-id='application-open-application-btn']
-  Wait until  Element should be visible  xpath=//section[@id='${section}']//div[contains(@class,'comment-text')]//span[text()='${message}']
+  [Arguments]  ${message}
+  Open side panel  conversation
+  Input text  xpath=//div[@id='conversation-panel']//textarea[@data-test-id='application-new-comment-text']  ${message}
+  Click element  xpath=//div[@id='conversation-panel']//button[@data-test-id='application-open-application-btn']
+  Wait until  Element should be visible  xpath=//div[@id='conversation-panel']//div[contains(@class,'comment-text')]//span[text()='${message}']
+  Close side panel  conversation
 
 Input comment and mark answered
-  [Arguments]  ${section}  ${message}
-  Input text  xpath=//section[@id='${section}']//textarea[@data-test-id='application-new-comment-text']  ${message}
-  Click element  xpath=//section[@id='${section}']//button[@data-test-id='comment-request-mark-answered']
+  [Arguments]  ${message}
+  Input text  xpath=//section[@id='inforequest']//textarea[@data-test-id='application-new-comment-text']  ${message}
+  Click element  xpath=//section[@id='inforequest']//button[@data-test-id='comment-request-mark-answered']
   Wait until  element should be visible  xpath=//div[@id='dynamic-ok-confirm-dialog']//button[@data-test-id='confirm-yes']
   Click element  xpath=//div[@id='dynamic-ok-confirm-dialog']//button[@data-test-id='confirm-yes']
   Wait until  element should not be visible  xpath=//div[@id='dynamic-ok-confirm-dialog']
-  Wait until  Element should be visible  xpath=//section[@id='${section}']//div[contains(@class,'comment-text')]//span[text()='${message}']
+  Wait until  Element should be visible  xpath=//section[@id='inforequest']//div[contains(@class,'comment-text')]//span[text()='${message}']
 
 Comment count is
   [Arguments]  ${section}  ${amount}
-  Wait until  Xpath Should Match X Times  //section[@id='${section}']//div[contains(@class,'comment-text')]  ${amount}
+  Open side panel  conversation
+  Wait until  Xpath Should Match X Times  //div[@id='conversation-panel']//div[contains(@class,'comment-text')]  ${amount}
+  Close side panel  conversation
 
 #
 # Tasks
@@ -605,13 +669,13 @@ Fetch verdict
 # User management
 
 Fill in new password
-  [Arguments]  ${password}
+  [Arguments]  ${section}  ${password}
   Wait Until  Page Should Contain  Salasanan vaihtaminen
-  Input text  xpath=//section[@id='setpw']//input[@placeholder='Uusi salasana']  ${password}
-  Element Should Be Disabled  xpath=//section[@id='setpw']//button
-  Input text  xpath=//section[@id='setpw']//input[@placeholder='Salasana uudelleen']  ${password}
-  Wait Until  Element Should Be Enabled  xpath=//section[@id='setpw']//button
-  Click Element  xpath=//section[@id='setpw']//button
+  Input text  xpath=//section[@id='${section}']//input[@placeholder='Uusi salasana']  ${password}
+  Element Should Be Disabled  xpath=//section[@id='${section}']//button
+  Input text  xpath=//section[@id='${section}']//input[@placeholder='Salasana uudelleen']  ${password}
+  Wait Until  Element Should Be Enabled  xpath=//section[@id='${section}']//button
+  Click Element  xpath=//section[@id='${section}']//button
   Go to login page
 
 

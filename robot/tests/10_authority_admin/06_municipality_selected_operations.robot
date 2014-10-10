@@ -27,9 +27,10 @@ AuthAdmin removes 'Uuden rakennuksen rakentaminen (mökit, omakotitalot, saunat,
   Sipoo logs in
   # Open dialog
 
-  # ** TODO: Korjaa tama! **
-  # Total count of operations is 44
-  Wait until  Xpath Should Match X Times  //section[@id='admin']//table[@data-test-id='organization-selected-operations']//tr[@class='sel-op-row']  43
+  # => (ns lupapalvelu.operations)
+  # => (count (filter (fn [[_ v]] (#{permit/R permit/P permit/YI permit/YL permit/MAL permit/VVVL permit/KM} (:permit-type v) ))  operations))
+  # 53
+  Wait until  Xpath Should Match X Times  //section[@id='admin']//table[@data-test-id='organization-selected-operations']//tr[@class='sel-op-row']  53
 
   Click by test id  authadmin-edit-selected-operations
 

@@ -14,6 +14,20 @@ Mikko opens an application
   Set Suite Variable  ${propertyId}  753-423-2-41
   Create application the fast way  ${appname}  753  ${propertyId}  asuinrakennus
 
+# Testing the case that was fixed with hotfix/repeating-element-saving
+Mikko adds owner to the Uusirakennus document, and both owners are visible after page refresh
+  Xpath Should Match X Times  //div[@data-repeating-id="rakennuksenOmistajat"]  1
+  Input text  //section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.0.henkilo.henkilotiedot.etunimi']  pikku
+  Wait Until  Element Should Be Visible  //button[@id="rakennuksenOmistajat_append"]
+  Execute Javascript  $("button[id='rakennuksenOmistajat_append']").click();
+  Wait Until  Element Should Be Visible  //section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.1.henkilo.henkilotiedot.etunimi']
+  Input text  //section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.1.henkilo.henkilotiedot.etunimi']  ISO
+  Xpath Should Match X Times  //div[@data-repeating-id="rakennuksenOmistajat"]  2
+  Reload Page
+  Wait Until  Xpath Should Match X Times  //div[@data-repeating-id="rakennuksenOmistajat"]  2
+  Textfield Value Should Be  //section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.0.henkilo.henkilotiedot.etunimi']  pikku
+  Textfield Value Should Be  //section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.1.henkilo.henkilotiedot.etunimi']  ISO
+
 Mikko removes apartment
   Wait Until  Element Should Be Visible  //span[@data-test-class="delete-schemas.huoneistot"]
   Execute Javascript  $("span[data-test-class='delete-schemas.huoneistot']").click();
