@@ -56,7 +56,6 @@
                   <thead>
                     <tr>
                       <th data-bind="ltext: 'attachment.file'">Tiedosto</th>
-                      <th></th>
                       <th data-bind="ltext: 'attachment.version'">Versio</th>
                       <th data-bind="ltext: 'attachment.editDate'">Muokattu</th>
                       <th data-bind="ltext: 'attachment.editor'">Muokkaaja</th>
@@ -68,14 +67,14 @@
                       <td>
                         <a data-bind="text: $data.filename, attr: {href: '/api/raw/download-attachment?attachment-id=' + $data.fileId}"></a>
                       </td>
-                      <td data-bind="size: size"></td>
                       <td data-bind="version: version"></td>
-                      <td data-bind="dateTimeString: created"></td>
+                      <td data-bind="dateString: created"></td>
                       <td>
                         <span data-bind="fullName: user"></span>
-                        (<span data-bind="ltext: user.role"></span>)
                       </td>
-                      <td><a data-bind="click: $root.attachment.deleteVersion, ltext: 'remove', visible: $root.authorization.ok('delete-attachment-version'),  enable: $root.authorization.ok('delete-attachment-version')" ></a></td>
+                      <td>
+                        [<a data-bind="click: $root.attachment.deleteVersion, ltext: 'remove', visible: $root.authorization.ok('delete-attachment-version'),  enable: $root.authorization.ok('delete-attachment-version')"></a>]
+                      </td>
                     </tr>
                   </tbody>
                 </table>
