@@ -336,7 +336,7 @@
                   (if repeating
                     (reduce + 0 (map (fn [k] (modifications-since-approvals body (conj current-path k) data meta current-approvable (max-timestamp (conj current-path k)))) (keys (get-in data current-path))))
                     (modifications-since-approvals body current-path data meta current-approvable (max-timestamp current-path)))
-                  (if (and current-approvable (> (get-in data (conj current-path :modified) 0) (max-timestamp current-path))) 1 0))))]
+                  (if (and current-approvable (> (or (get-in data (conj current-path :modified)) 0) (max-timestamp current-path))) 1 0))))]
       (reduce + 0 (map count-mods schema-body)))))
 
 (defn mark-approval-indicators-seen-update
