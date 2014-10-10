@@ -42,13 +42,12 @@
                   <span data-bind="ltext: 'attachment.addVersion'"></span>
                   <span class="icon add left-align"></span>
                 </button>
-                <button
-                    id="show-attachment-versions"
-                    class="btn"
-                    data-bind="click: toggleAttachmentVersionHistory, visible: latestVersion">
+                <button id="show-attachment-versions"
+                        class="btn"
+                        data-bind="click: toggleAttachmentVersionHistory, visible: latestVersion">
                   <span data-bind="ltext: 'attachment.showVersionHistory'"></span>
-                  <span class="icon left-align"
-                    data-bind="css {'drill-down-white': showAttachmentVersionHistory, 'drill-right-white': !showAttachmentVersionHistory()}"></span>
+                  <span class="left-align"
+                        data-bind="drill: showAttachmentVersionHistory, color: 'black'"></span>
                 </button>
               </div>
               <div class="attachment-file-versions" data-bind="slider: showAttachmentVersionHistory">
@@ -97,7 +96,9 @@
                   <!-- /ko -->
               </div>
               <button data-test-id="signLatestAttachmentVersion" class="btn-primary"
-                  data-bind="click: sign, ltext: 'attachment.signLatest', visible: $root.authorization.ok('sign-attachments'),  enable: versions().length && $root.authorization.ok('sign-attachments')">
+                      data-bind="click: sign, visible: $root.authorization.ok('sign-attachments'),  enable: versions().length && $root.authorization.ok('sign-attachments')">
+                  <span data-bind="ltext: 'attachment.signLatest'"></span>
+                  <span class="icon signed-white left-align"></span>
               </button>
             </div>
           </div>
