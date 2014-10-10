@@ -20,10 +20,10 @@ Solita admin search Ronja and disables her access
   Click element                             xpath=//section[@id='users']//tr[@data-user-email='ronja.sibbo@sipoo.fi']//td/a[@data-op='disable']
   Confirm        dynamic-yes-no-confirm-dialog
   Logout
-  
+
 Ronja tries to login but can't
   Login fails  ronja  sonja
-  
+
 Solita admin enables Ronjas account
   SolitaAdmin logs in
   Wait until     Element should be visible  xpath=//a[@data-test-id='users']

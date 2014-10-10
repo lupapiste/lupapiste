@@ -349,6 +349,7 @@
 
 <div data-bind="if: features.enabled('company')"><div class="feature">
                   <button class="btn-primary"
+                          data-test-id="company-invite"
                           data-bind="ltext: 'company-invite.invite',
                                      visible: $root.authorization.ok('invite'),
                                      enabled: $root.authorization.ok('invite'),

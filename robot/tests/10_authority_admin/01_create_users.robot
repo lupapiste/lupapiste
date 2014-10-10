@@ -31,7 +31,7 @@ Authority admin removes Heikki
   Logout
 
 Hessu activates account via email
-  Go to  ${SERVER}/api/last-email
+  Open last email
   Page Should Contain  hessu.kesa@example.com
   ## First link
   Click link  xpath=//a
