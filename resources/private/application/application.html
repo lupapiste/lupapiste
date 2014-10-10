@@ -997,6 +997,11 @@
 
           <div data-bind="if: buildings() && buildings().length > 0 && $root.authorization.ok('inform-building-construction-started')">
 
+            <!--  ko if: _.contains(['verdictGiven', 'constructionStarted', 'closed'], $data.state()) -->
+            <h1 data-bind="ltext: 'application.tabConstructionTimeTasks'"></h1>
+            <p data-bind="lhtml: 'help.' + permitType() + '.tasksDesc.constructionTime'" class="tab-info"></p>
+            <!-- /ko -->
+
             <table>
               <thead>
                 <tr><td colspan="4"><h2 data-bind="ltext: 'application.aloitusilmoitukset'" style="padding-top:0.5em"></h2></td></tr>
