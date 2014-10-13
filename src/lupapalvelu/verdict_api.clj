@@ -178,3 +178,17 @@
       ; TODO pull from tasks, auth-comments
       (doseq [{attachment-id :id} attachments]
         (attachment/delete-attachment application attachment-id)))))
+
+(defcommand sign-verdict
+  {:parameters [id verdictId]
+   :states     [:submitted :complement-needed :sent :verdictGiven]
+   :roles      [:applicant]}
+  [{:keys [application created] :as command}]
+  (when-let [verdict (find-verdict application verdictId)]
+    (do
+      (println "******** Sign verdict" verdict))
+    #_(let [attachments (filter #(= (select-keys (:target %) [:id :type]) {:type "verdict" :id (:id verdict)}) (:attachments application))]
+      (update-application command {$pull {:verdicts {:id verdictId}}})
+      ; TODO pull from tasks, auth-comments
+      (doseq [{attachment-id :id} attachments]
+        (attachment/delete-attachment application attachment-id)))))
