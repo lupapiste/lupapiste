@@ -1,1 +1,0 @@
-company-invite.help: Voit valtuuttaa Lupapisteessä mukana olevan yrityksen käsittelemään hakemusta puolestasi. Yritysten valtuuttaminen on tällä hetkellä rajatussa pilottikäytössä.
