@@ -70,4 +70,5 @@
     (update-application command
       (util/deep-merge
         (comment/comment-mongo-update (:state application) text target (:role user) mark-answered user to-user created ensured-visibility)
-        (when openApplication {$set {:state :open, :opened created}})))))
+        (when (and openApplication (= (:state application) "draft"))
+          {$set {:state :open, :opened created}})))))

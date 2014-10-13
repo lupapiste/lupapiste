@@ -161,7 +161,7 @@
                                 {:name "henkilo" :type :group :body henkilo-with-required-hetu}
                                 {:name "yritys" :type :group :body yritys}))
 
-(def koulutusvalinta {:name "koulutusvalinta" :type :select :i18nkey "koulutus"
+(def koulutusvalinta {:name "koulutusvalinta" :type :select :sortBy :displayname :i18nkey "koulutus"
                       :body [{:name "arkkitehti"}
                              {:name "arkkitehtiylioppilas"}
                              {:name "diplomi-insin\u00f6\u00f6ri"}
@@ -193,7 +193,7 @@
                {:name "valmistumisvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size "s" :required false}
                {:name "fise" :type :string :required false}
                {:name "patevyys" :type :string :required false}
-               {:name "patevyysluokka" :type :select :required false
+               {:name "patevyysluokka" :type :select :sortBy nil :required false
                 :body [{:name "AA"}
                        {:name "A"}
                        {:name "B"}
@@ -217,7 +217,7 @@
 
 (def kuntaroolikoodi [{:name "kuntaRoolikoodi"
                        :i18nkey "osapuoli.suunnittelija.kuntaRoolikoodi._group_label"
-                       :type :select
+                       :type :select :sortBy :displayname
                        :body [{:name "GEO-suunnittelija" :i18nkey "osapuoli.suunnittelija.kuntaRoolikoodi.GEO-suunnittelija"}
                               {:name "LVI-suunnittelija" :i18nkey "osapuoli.suunnittelija.kuntaRoolikoodi.LVI-suunnittelija"}
                               {:name "IV-suunnittelija" :i18nkey "osapuoli.suunnittelija.kuntaRoolikoodi.IV-suunnittelija"}
@@ -250,8 +250,9 @@
 
 (def kuntaroolikoodi-tyonjohtaja [{:name "kuntaRoolikoodi"
                                    :i18nkey "osapuoli.tyonjohtaja.kuntaRoolikoodi._group_label"
-                                   :type
-                                   :select :required true
+                                   :type :select
+                                   :sortBy :displayname
+                                   :required true
                                    :body [{:name "KVV-ty\u00F6njohtaja" :i18nkey "osapuoli.tyonjohtaja.kuntaRoolikoodi.KVV-ty\u00f6njohtaja"}
                                           {:name "IV-ty\u00F6njohtaja" :i18nkey "osapuoli.tyonjohtaja.kuntaRoolikoodi.IV-ty\u00f6njohtaja"}
                                           {:name "erityisalojen ty\u00F6njohtaja" :i18nkey "osapuoli.tyonjohtaja.kuntaRoolikoodi.erityisalojen ty\u00f6njohtaja"}
@@ -261,17 +262,17 @@
 
 (def patevyys-tyonjohtaja [koulutusvalinta
                            {:name "koulutus" :type :string :required false  :i18nkey "muukoulutus"}
-                           {:name "patevyysvaatimusluokka" :type :select :required false
-                            :body [{:name "C"}
-                                   {:name "B"}
+                           {:name "patevyysvaatimusluokka" :type :select :sortBy nil :required false
+                            :body [{:name "AA"}
                                    {:name "A"}
-                                   {:name "AA"}
+                                   {:name "B"}
+                                   {:name "C"}
                                    {:name "ei tiedossa"}]}
                            {:name "valmistumisvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size "s" :required false}
                            {:name "kokemusvuodet" :type :string :subtype :number :min-len 1 :max-len 2 :size "s" :required false}
                            {:name "valvottavienKohteidenMaara" :i18nkey "tyonjohtaja.patevyys.valvottavienKohteidenMaara" :type :string :subtype :number :size "s" :required false}
                            ;; TODO: Miten tyonjohtajaHakemusKytkimen saa piilotettua hakijalta?
-                           {:name "tyonjohtajaHakemusKytkin" :i18nkey "tyonjohtaja.patevyys.tyonjohtajaHakemusKytkin._group_label" :type :select :required false :blacklist [:applicant]
+                           {:name "tyonjohtajaHakemusKytkin" :i18nkey "tyonjohtaja.patevyys.tyonjohtajaHakemusKytkin._group_label" :type :select :sortBy :displayname :required false :blacklist [:applicant]
                             :body [{:name "nimeaminen" :i18nkey "tyonjohtaja.patevyys.tyonjohtajaHakemusKytkin.nimeaminen"}
                                    {:name "hakemus" :i18nkey "tyonjohtaja.patevyys.tyonjohtajaHakemusKytkin.hakemus"}]}])
 
@@ -306,12 +307,12 @@
 
 (def aloitusoikeus [{:name "kuvaus" :type :text :max-len 4000 :required true :layout :full-width}])
 
-(def muutostapa {:name "muutostapa" :type :select :required true :label false :i18nkey "huoneistot.muutostapa"
+(def muutostapa {:name "muutostapa" :type :select :sortBy :displayname :required true :label false :i18nkey "huoneistot.muutostapa"
                  :body [{:name "poisto"}
                         {:name "lis\u00e4ys" :i18nkey "huoneistot.muutostapa.lisays"}
                         {:name "muutos"}]})
 
-(def huoneistoRow [{:name "huoneistoTyyppi" :type :select :label false :i18nkey "huoneistot.huoneistoTyyppi"
+(def huoneistoRow [{:name "huoneistoTyyppi" :type :select :sortBy :displayname :label false :i18nkey "huoneistot.huoneistoTyyppi"
                    :body [{:name "asuinhuoneisto"}
                           {:name "toimitila"}
                           {:name "ei tiedossa" :i18nkey "huoneistot.huoneistoTyyppi.eiTiedossa"}]}
@@ -319,7 +320,7 @@
                    {:name "huoneistonumero" :type :string :subtype :number :min-len 1 :max-len 3 :size "s" :required true :label false :i18nkey "huoneistot.huoneistonumero"}
                    {:name "jakokirjain" :type :string :subtype :letter :case :lower :max-len 1 :size "t" :label false :i18nkey "huoneistot.jakokirjain"}
                    {:name "huoneluku" :type :string :subtype :number :min 1 :max 99 :required true :size "t" :label false :i18nkey "huoneistot.huoneluku"}
-                   {:name "keittionTyyppi" :type :select :required true :label false :i18nkey "huoneistot.keittionTyyppi"
+                   {:name "keittionTyyppi" :type :select :sortBy :displayname :required true :label false :i18nkey "huoneistot.keittionTyyppi"
                     :body [{:name "keittio"}
                            {:name "keittokomero"}
                            {:name "keittotila"}
@@ -424,11 +425,11 @@
 
 (def kaytto {:name "kaytto"
              :type :group
-             :body [{:name "rakentajaTyyppi" :type :select :required true
+             :body [{:name "rakentajaTyyppi" :type :select :sortBy :displayname :required true
                      :body [{:name "liiketaloudellinen"}
                             {:name "muu"}
                             {:name "ei tiedossa"}]}
-                    {:name "kayttotarkoitus" :type :select :size "l"
+                    {:name "kayttotarkoitus" :type :select :sortBy :displayname :size "l"
                      :body rakennuksen-kayttotarkoitus}]})
 
 (def mitat {:name "mitat"
@@ -441,18 +442,18 @@
 
 (def rakenne {:name "rakenne"
               :type :group
-              :body [{:name "rakentamistapa" :type :select :required true
+              :body [{:name "rakentamistapa" :type :select :sortBy :displayname :required true
                       :body [{:name "elementti"}
                              {:name "paikalla"}
                              {:name "ei tiedossa"}]}
-                     {:name "kantavaRakennusaine" :type :select :required true :other-key "muuRakennusaine"
+                     {:name "kantavaRakennusaine" :type :select :sortBy :displayname :required true :other-key "muuRakennusaine"
                       :body [{:name "betoni"}
                              {:name "tiili"}
                              {:name "ter\u00e4s"}
                              {:name "puu"}
                              {:name "ei tiedossa"}]}
                      {:name "muuRakennusaine" :type :string}
-                     {:name "julkisivu" :type :select :other-key "muuMateriaali"
+                     {:name "julkisivu" :type :select :sortBy :displayname :other-key "muuMateriaali"
                       :body [{:name "betoni"}
                              {:name "tiili"}
                              {:name "metallilevy"}
@@ -464,14 +465,14 @@
 
 (def lammitys {:name "lammitys"
                :type :group
-               :body [{:name "lammitystapa" :type :select
+               :body [{:name "lammitystapa" :type :select :sortBy :displayname
                        :body [{:name "vesikeskus"}
                               {:name "ilmakeskus"}
                               {:name "suora s\u00e4hk\u00f6"}
                               {:name "uuni"}
                               {:name "ei l\u00e4mmityst\u00e4"}
                               {:name "ei tiedossa"}]}
-                      {:name "lammonlahde" :type :select :other-key "muu-lammonlahde"
+                      {:name "lammonlahde" :type :select :sortBy :displayname :other-key "muu-lammonlahde"
                        :body [{:name "kauko tai aluel\u00e4mp\u00f6"}
                               {:name "kevyt poltto\u00f6ljy"}
                               {:name "raskas poltto\u00f6ljy"}
@@ -505,7 +506,7 @@
 
 (def luokitus {:name "luokitus"
                :type :group
-               :body [{:name "energialuokka" :type :select
+               :body [{:name "energialuokka" :type :select :sortBy :displayname
                        :body [{:name "A"}
                               {:name "B"}
                               {:name "C"}
@@ -514,10 +515,10 @@
                               {:name "F"}
                               {:name "G"}]}
                       {:name "energiatehokkuusluku" :type :string :size "s" :subtype :number}
-                      {:name "energiatehokkuusluvunYksikko" :type :select
+                      {:name "energiatehokkuusluvunYksikko" :type :select :sortBy :displayname
                        :body [{:name "kWh/m2"}
                               {:name "kWh/brm2/vuosi"}]}
-                      {:name "paloluokka" :type :select
+                      {:name "paloluokka" :type :select :sortBy :displayname
                        :body [{:name "palonkest\u00e4v\u00e4"}
                                {:name "paloapid\u00e4tt\u00e4v\u00e4"}
                                {:name "paloahidastava"}
@@ -555,7 +556,7 @@
                              :repeating true
                              :approvable true
                              :body (body party-with-required-hetu
-                                     [{:name "omistajalaji" :type :select :other-key "muu-omistajalaji" :required true :size "l"
+                                     [{:name "omistajalaji" :type :select :sortBy :displayname :other-key "muu-omistajalaji" :required true :size "l"
                                        :body [{:name "yksityinen maatalousyritt\u00e4j\u00e4"}
                                               {:name "muu yksityinen henkil\u00f6 tai perikunta"}
                                               {:name "asunto-oy tai asunto-osuuskunta"}
@@ -577,7 +578,7 @@
 (def kayttotarkotuksen-muutos "rakennukse p\u00e4\u00e4asiallinen k\u00e4ytt\u00f6tarkoitusmuutos")
 
 (def muutostyonlaji [{:name "perusparannuskytkin" :type :checkbox}
-                     {:name "muutostyolaji" :type :select :required true
+                     {:name "muutostyolaji" :type :select :sortBy :displayname :required true
                       :body
                       [{:name perustusten-korjaus}
                        {:name kayttotarkotuksen-muutos}
@@ -624,7 +625,7 @@
                                                       {:name "kokonaisala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}
                                                       {:name "huoneistoala" :type :group :repeating true :removable true
                                                        :body [{:name "pintaAla" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}
-                                                              {:name "kayttotarkoitusKoodi" :type :select
+                                                              {:name "kayttotarkoitusKoodi" :type :select :sortBy :displayname
                                                                :body [{:name "asuntotilaa(ei vapaa-ajan asunnoista)"}
                                                                       {:name "myym\u00e4l\u00e4, majoitus- ja ravitsemustilaa"}
                                                                       {:name "hoitotilaa"}
@@ -638,7 +639,7 @@
                                      olemassaoleva-rakennus))
 
 (def purku (body
-             {:name "poistumanSyy" :type :select
+             {:name "poistumanSyy" :type :select :sortBy :displayname
               :body [{:name "purettu uudisrakentamisen vuoksi"}
                      {:name "purettu muusta syyst\u00e4"}
                      {:name "tuhoutunut"}
@@ -655,11 +656,11 @@
                              {:name "maapintaala" :type :string :readonly true :unit "hehtaaria"}
                              {:name "vesipintaala" :type :string :readonly true :unit "hehtaaria"}
                              {:name "rantaKytkin" :type :checkbox}]}
-                     {:name "hallintaperuste" :type :select :required true
+                     {:name "hallintaperuste" :type :select :sortBy :displayname :required true
                       :body [{:name "oma"}
                              {:name "vuokra"}
                              {:name "ei tiedossa"}]}
-                     {:name "kaavanaste" :type :select
+                     {:name "kaavanaste" :type :select :sortBy :displayname
                       :body [{:name "asema"}
                              {:name "ranta"}
                              {:name "rakennus"}

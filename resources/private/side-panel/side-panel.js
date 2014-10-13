@@ -125,26 +125,6 @@ LUPAPISTE.SidePanelModel = function() {
   });
 };
 
-ko.bindingHandlers.transition = {
-  init: function(element, valueAccessor, allBindings) {
-    var value = ko.utils.unwrapObservable(valueAccessor());
-    var className = allBindings()["class"];
-    if (className) {
-      $(element).toggleClass(className, value);
-    }
-  },
-  update: function(element, valueAccessor, allBindings) {
-    var value = ko.utils.unwrapObservable(valueAccessor());
-    var className = allBindings()["class"];
-    var type = allBindings().type;
-    if (type) {
-      $(element)[type + "Toggle"](1000);
-    } else {
-      $(element).toggleClass(className, value, 100);
-    }
-  }
-};
-
 $(function() {
   var sidePanel = new LUPAPISTE.SidePanelModel();
   $(document).keyup(function(e) {
