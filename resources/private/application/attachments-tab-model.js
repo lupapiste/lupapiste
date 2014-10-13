@@ -74,6 +74,10 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
       .call();
   };
 
+  self.newAttachment = function() {
+    attachment.initFileUpload(self.appModel.id(), null, null, true);
+  };
+
   self.attachmentTemplatesModel = new function() {
     var templateModel = this;
     templateModel.ok = function(ids) {
