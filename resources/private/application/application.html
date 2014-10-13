@@ -643,12 +643,12 @@
                     </div>
                   </div>
 
-                  <div data-bind="with: $parent" class="accordion-fields">
-                    <div style="float: right; margin-right: 5em;">
+                  <div class="accordion-fields">
+                    <div style="float: right; margin-right: 5em;" data-bind="with: $parent">
                       <h3>Allekirjoitukset</h3>
                       <span>Päätös vaatii hakijan allekirjoituksen</span>
                       <br/>
-                      <button class="btn btn-primary" data-bind="click: $root.verdictModel.sign">Allekirjoita</button>
+                      <button class="btn btn-primary" data-bind="click: function() {$root.verdictModel.sign($root, $data);}">Allekirjoita</button>
                     </div>
                     <!--  ko if:  $data.paivamaarat -->
                     <div data-bind="if: paivamaarat.anto" class="key-value-pair">
