@@ -401,7 +401,7 @@
             <span class="missing icon"></span>
             <span data-bind="ltext: 'missing.title'"></span>
           </div>
-          <div class="attachment-actions" data-bind="visible: (postVerdict() && preAttachmentsByGroup().length > 0) || (postVerdict() && postAttachmentsByGroup().length > 0)">
+          <div class="attachment-actions" data-bind="visible: (!postVerdict() && preAttachmentsByGroup().length > 0) || (postVerdict() && postAttachmentsByGroup().length > 0)">
             <div>
               <button
                 data-bind="click: newAttachment, ltext: 'application.attachmentsAdd', visible: $root.authorization.ok('upload-attachment'), enable: !appModel.processing()"
