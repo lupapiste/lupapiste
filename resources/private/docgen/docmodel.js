@@ -537,7 +537,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         }
         return [e.name, loc(locKey)];
         })
-      .sortBy(function(e) { return e[1]; })
       .forEach(function(e) {
         var name = e[0];
         var option = document.createElement("option");
