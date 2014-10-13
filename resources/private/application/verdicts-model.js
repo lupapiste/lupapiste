@@ -6,19 +6,6 @@ LUPAPISTE.VerdictsModel = function() {
     return bindings.application.id();
   }
 
-  self.sign = function() {
-    console.log("clicked verdict sign button")
-    
-  }
-
-  function VerdictSigningModel(dialogSelector, confirmSuccess) {
-    var self = this;
-
-    self.signVerdict = function signVerdict() {
-      console.log("signed verdict");
-    };
-  };
-
   self.authorities = [];
   self.verdicts = ko.observable();
   self.processing = ko.observable(false);
@@ -26,8 +13,6 @@ LUPAPISTE.VerdictsModel = function() {
 
   self.newProcessing = ko.observable(false);
   self.newPending = ko.observable(false);
-
-  self.verdictSigningModel = new VerdictSigningModel();
 
   self.refresh = function(application, authorities) {
     var verdicts = _.map(_.cloneDeep(application.verdicts || []), function(verdict) {
@@ -94,5 +79,14 @@ LUPAPISTE.VerdictsModel = function() {
       repository.load(applicationId);
     })
     .call();
+  };
+
+  self.sign = function(bindings, verdict) {
+    console.log("bindings: ", bindings);
+    console.log("verdict: ", verdict);
+    console.log("appId: ", getApplicationId(bindings));
+    console.log("verdictId: ", verdict.id)
+    console.log("clicked verdict sign button")
+    bindings.verdictSigningModel.init(getApplicationId(bindings), verdict.id);
   };
 };
