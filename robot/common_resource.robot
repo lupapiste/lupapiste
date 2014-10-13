@@ -133,6 +133,9 @@ Close side panel
   Run keyword If  ${sidePanelOpen}  Click by id  open-${name}-side-panel
   Side panel should not be visible  ${name}
 
+Open last email
+  Go to  ${SERVER}/api/last-email
+
 #
 # Login stuff
 #
