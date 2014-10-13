@@ -14,7 +14,7 @@
                                                                               "hallintaperuste"
                                                                               "kaavanaste")
                                                 {:name "kiinteistoonKuuluu" :type :group :repeating true
-                                                 :body [{:name "rakennuksenTyypi" :type :select
+                                                 :body [{:name "rakennuksenTyypi" :type :select :sortBy :displayname
                                                          :body [{:name "El\u00e4insuoja"}
                                                                 {:name "Saunarakennus"}
                                                                 {:name "Lomarakennus"}
@@ -49,7 +49,7 @@
            :removable false
            :repeating false
            }
-    :body [{:name "hulevedet" :type :select :other-key "johdetaanMuualle"
+    :body [{:name "hulevedet" :type :select :sortBy :displayname :other-key "johdetaanMuualle"
             :body [{:name "ojaan"}
                    {:name "imeytetaan"}]}
            {:name "johdetaanMuualle" :type :string :size "l"}]}
@@ -58,17 +58,17 @@
            :order 4
            :removable false
            :repeating false}
-    :body [{:name "hankinta" :type :select :other-key "muualta"
+    :body [{:name "hankinta" :type :select :sortBy :displayname :other-key "muualta"
             :body [{:name "Vesihuoltolaitoksen vesijohdosta"}
                    {:name "Kiinteist\u00f6n rengaskaivosta"}
                    {:name "Kiinteist\u00f6n porakaivosta"}]}
            {:name "muualta" :type :string :size "l"}
-           {:name "johdatus" :type :select
+           {:name "johdatus" :type :select :sortBy :displayname
             :body [{:name "kannetaan kaivosta tai vesist\u00f6st\u00e4"}
                    {:name "pumpataan kaivosta tai vesist\u00f6st\u00e4"}
                    {:name "johdetaan paineellisena vesijohtoa pitkin rakennukseen"}
                    {:name "ei tiedossa"}]}
-           {:name "riittavyys" :type :select
+           {:name "riittavyys" :type :select :sortBy :displayname
             :body [{:name "vesi ajoittain v\u00e4hiss\u00e4"}
                    {:name "vesi riitt\u00e4\u00e4 talouden tarpeisiin"}
                    {:name "ei tiedossa"}

@@ -536,7 +536,14 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
         }
         return [e.name, loc(locKey)];
-        })
+      })
+      .sortBy(function(e) {
+          if (subSchema.sortBy === "displayname") {
+            return e[1];
+          }
+          // lo-dash API doc tells that the sort is stable, so returning a static value equals to no sorting
+          return 0;
+      })
       .forEach(function(e) {
         var name = e[0];
         var option = document.createElement("option");
