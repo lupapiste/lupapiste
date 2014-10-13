@@ -16,14 +16,15 @@ Solita admin logs in and goes to 'users' page
 Solita admin search Ronja and disables her access
   Wait until     Element should be visible  xpath=//section[@id='users']//input[@data-test-id='users-list-input-search']
   Input text                                xpath=//section[@id='users']//input[@data-test-id='users-list-input-search']  ronj
+  Wait for jQuery
   Wait until     Element should be visible  xpath=//section[@id='users']//tr[@data-user-email='ronja.sibbo@sipoo.fi']//td/a[@data-op='disable']
   Click element                             xpath=//section[@id='users']//tr[@data-user-email='ronja.sibbo@sipoo.fi']//td/a[@data-op='disable']
   Confirm        dynamic-yes-no-confirm-dialog
-  Logout
-  
+  [Teardown]  Logout
+
 Ronja tries to login but can't
   Login fails  ronja  sonja
-  
+
 Solita admin enables Ronjas account
   SolitaAdmin logs in
   Wait until     Element should be visible  xpath=//a[@data-test-id='users']
@@ -31,10 +32,11 @@ Solita admin enables Ronjas account
   Wait until     Element should be visible  xpath=//section[@id='users']
   Wait until     Element should be visible  xpath=//section[@id='users']//input[@data-test-id='users-list-input-search']
   Input text                                xpath=//section[@id='users']//input[@data-test-id='users-list-input-search']  ronj
+  Wait for jQuery
   Wait until     Element should be visible  xpath=//section[@id='users']//tr[@data-user-email='ronja.sibbo@sipoo.fi']//td/a[@data-op='enable']
   Click element                             xpath=//section[@id='users']//tr[@data-user-email='ronja.sibbo@sipoo.fi']//td/a[@data-op='enable']
   Confirm        dynamic-yes-no-confirm-dialog
-  Logout
+  [Teardown]  Logout
 
 Ronja can login again
   Login  ronja  sonja
