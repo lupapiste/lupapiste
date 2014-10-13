@@ -86,6 +86,24 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
     return false;
   };
 
+  self.deleteSingleAttachment = function(a) {
+    var attId = _.isFunction(a.id) ? a.id() : a.id;
+    LUPAPISTE.ModalDialog.showDynamicYesNo(
+      loc("attachment.delete.header"),
+      loc("attachment.delete.message"),
+      {title: loc("yes"),
+       fn: function() {
+        ajax.command("delete-attachment", {id: self.appModel.id(), attachmentId: attId})
+          .success(function() {
+            self.appModel.reload();
+          })
+          .processing(self.appModel.processing)
+          .call();
+        return false;
+      }},
+      {title: loc("no")});
+  };
+
   self.attachmentTemplatesModel = new function() {
     var templateModel = this;
     templateModel.ok = function(ids) {
