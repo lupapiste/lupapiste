@@ -60,7 +60,7 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
     self.postAttachmentsByGroup(getPostAttachmentsByGroup(ko.mapping.toJS(appModel.attachments)));
 
     // Post/pre verdict state?
-    self.postVerdict(postVerdictStates[self.appModel.state()]);
+    self.postVerdict(!!postVerdictStates[self.appModel.state()]);
 
     self.unsentAttachmentsNotFound(!unsentAttachmentFound());
   }
@@ -96,6 +96,9 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
         ajax.command("delete-attachment", {id: self.appModel.id(), attachmentId: attId})
           .success(function() {
             self.appModel.reload();
+          })
+          .error(function (e) {
+            LUPAPISTE.ModalDialog.showDynamicOk(loc("error.dialog.title"), loc(e.text));;
           })
           .processing(self.appModel.processing)
           .call();
