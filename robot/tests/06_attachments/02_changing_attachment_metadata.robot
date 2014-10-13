@@ -62,10 +62,15 @@ Mikko can change contents
   Sleep  1
   [Teardown]  logout
 
-Mikko sees attachment label meta data is set
+Mikko logs in and goes to attachments tab
   Mikko logs in
   Open application  application-papplication  753-416-25-30
   Open tab  attachments
+
+Mikko sees that contents metadata is visible in attachments list
+  Element Text Should Be  xpath=//div[@id="application-attachments-tab"]//span[@data-test-id="attachment-contents"]  PuuCee
+
+Mikko opens attachment and sees that attachment label metadata is set
   Open attachment details  muut.muu
   Page should contain  Muun rakennuksen rakentaminen
   Page should contain  B0
