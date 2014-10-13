@@ -15,7 +15,7 @@
   task-schemas-version
   [{:info {:name "task-katselmus" :type :task :order 1 :i18nprefix "task-katselmus.katselmuksenLaji"} ; Had :i18npath ["katselmuksenLaji"]
     :body [{:name "katselmuksenLaji"
-            :type :select
+            :type :select :sortBy :displayname
             :required true
             :body [{:name "muu katselmus"}
                    {:name "muu tarkastus"}
@@ -34,7 +34,7 @@
             :repeating true
             :body [{:name "rakennus" :type :group :body schemas/uusi-rakennuksen-valitsin}
                    {:name "tila" :type :group
-                    :body [{:name "tila" :type :select :body [{:name "osittainen"} {:name "lopullinen"}]}
+                    :body [{:name "tila" :type :select :sortBy :displayname :body [{:name "osittainen"} {:name "lopullinen"}]}
                            {:name "kayttoonottava" :type :checkbox}]}]}
            {:name "katselmus" :type :group
             :body
@@ -47,7 +47,7 @@
                     {:name "toteamisHetki" :type :date}]}
             {:name "lasnaolijat" :type :text :max-len 4000 :layout :full-width}
             {:name "poikkeamat" :type :text :max-len 4000 :layout :full-width}
-            {:name "tila" :type :select :body [{:name "osittainen"} {:name "lopullinen"}]}]}]}
+            {:name "tila" :type :select :sortBy :displayname :body [{:name "osittainen"} {:name "lopullinen"}]}]}]}
 
    {:info {:name "task-vaadittu-tyonjohtaja" :type :task :order 10}
     :body [{:name "osapuolena" :type :checkbox}
