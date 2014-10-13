@@ -409,7 +409,7 @@
                 class="btn btn-primary modal">
               </button>
               <button
-                data-bind="click: copyOwnAttachments, ltext: 'application.attachmentsCopyOwn', visible: $root.authorization.ok('copy-user-attachments-to-application'), enable: !processing()"
+                data-bind="click: $root.attachmentsTab.copyOwnAttachments, ltext: 'application.attachmentsCopyOwn', visible: $root.authorization.ok('copy-user-attachments-to-application'), enable: !processing()"
                 class="btn btn-primary">
               </button>
               <button
@@ -453,7 +453,7 @@
                   data-test-id="add-attachment">
                 </button>
                 <button
-                  data-bind="click: copyOwnAttachments, ltext: 'application.attachmentsCopyOwn', visible: $root.authorization.ok('copy-user-attachments-to-application'), enable: !processing()"
+                  data-bind="click: $root.attachmentsTab.copyOwnAttachments, ltext: 'application.attachmentsCopyOwn', visible: $root.authorization.ok('copy-user-attachments-to-application'), enable: !processing()"
                   class="btn btn-primary"
                   data-test-id="attachments-copy-own">
                 </button>
