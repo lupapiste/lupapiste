@@ -6,11 +6,13 @@ verdict.lupamaaraukset.missing: Päätökseen ei liity lupamääräyksiä
 verdict.poytakirjat.missing: Päätökseen ei liity pöytäkirjoja
 application.neighbors.hearings: Kuulemiset
 
-help.R.tasksDesc.constructionTime: Tällä välilehdellä näet luvan edellyttämät rakentamisen aikaiset kokoukset, katselmukset ja tarkastukset.
-help.P.tasksDesc.constructionTime: Tällä välilehdellä näet luvan edellyttämät rakentamisen aikaiset kokoukset, katselmukset ja tarkastukset.
-help.YA.tasksDesc.constructionTime: Tällä välilehdellä näet luvan edellyttämät rakentamisen aikaiset kokoukset, katselmukset ja tarkastukset.
-help.YI.tasksDesc.constructionTime: Tällä välilehdellä näet luvan edellyttämät rakentamisen aikaiset kokoukset, katselmukset ja tarkastukset.
-help.YL.tasksDesc.constructionTime: Tällä välilehdellä näet luvan edellyttämät rakentamisen aikaiset kokoukset, katselmukset ja tarkastukset.
-help.MAL.tasksDesc.constructionTime: Tällä välilehdellä näet luvan edellyttämät rakentamisen aikaiset kokoukset, katselmukset ja tarkastukset.
-help.VVVL.tasksDesc.constructionTime: Tällä välilehdellä näet luvan edellyttämät rakentamisen aikaiset kokoukset, katselmukset ja tarkastukset.
-help.KM.tasksDesc.constructionTime: Tällä välilehdellä näet luvan edellyttämät rakentamisen aikaiset kokoukset, katselmukset ja tarkastukset.
+help.R.tasksDesc: Tällä välilehdellä näet luvan edellyttämät rakentamisen aikaiset kokoukset, katselmukset ja tarkastukset.
+help.P.tasksDesc: Tällä välilehdellä näet luvan edellyttämät rakentamisen aikaiset kokoukset, katselmukset ja tarkastukset.
+help.YA.tasksDesc: Tällä välilehdellä näet luvan edellyttämät rakentamisen aikaiset kokoukset, katselmukset ja tarkastukset.
+help.YI.tasksDesc: Tällä välilehdellä näet luvan edellyttämät rakentamisen aikaiset kokoukset, katselmukset ja tarkastukset.
+help.YL.tasksDesc: Tällä välilehdellä näet luvan edellyttämät rakentamisen aikaiset kokoukset, katselmukset ja tarkastukset.
+help.MAL.tasksDesc: Tällä välilehdellä näet luvan edellyttämät rakentamisen aikaiset kokoukset, katselmukset ja tarkastukset.
+help.VVVL.tasksDesc: Tällä välilehdellä näet luvan edellyttämät rakentamisen aikaiset kokoukset, katselmukset ja tarkastukset.
+help.KM.tasksDesc: Tällä välilehdellä näet luvan edellyttämät rakentamisen aikaiset kokoukset, katselmukset ja tarkastukset.
+
+task-katselmus.katselmus.lasnaolijat: Läsnäolijat
