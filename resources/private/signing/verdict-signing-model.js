@@ -11,16 +11,26 @@ LUPAPISTE.VerdictSigningModel = function(dialogSelector) {
 
   self.init = function(applicationId, verdictId) {
     self.applicationId = applicationId;
+    self.password("");
     self.verdictId = verdictId;
-    console.log("appid: ", applicationId);
+    self.processing(false);
+    self.pending(false);
+    self.errorMessage("");
+
     LUPAPISTE.ModalDialog.open(self.dialogSelector);
   };
 
   self.sign = function() {
-    var params = {id: self.applicationId, verdictId: self.verdictId};
-    ajax.command("sign-verdict", params)
+    self.errorMessage("");
+    ajax.command("sign-verdict", {id: self.applicationId, verdictId: self.verdictId, password: self.password()})
+      .processing(self.processing)
+      .pending(self.pending)
       .success(function() {
+        self.password("");
+        // repository.load(id); ??
         LUPAPISTE.ModalDialog.close();
-      }).call();
+      })
+      .error(function(e) { self.errorMessage(e.text); })
+      .call();
   };
 };

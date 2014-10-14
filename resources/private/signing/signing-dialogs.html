@@ -13,18 +13,16 @@
             <p>Päätöksen allekirjoituksen kuvaus</p>
 
             <label for="signVerdictPassword" class="form-label"></label>
-            <input id="signSingleAttachmentPassword" data-test-id="signVerdictPassword" type="password" class="form-input text"/>
+            <input id="signVerdictPassword" data-test-id="signVerdictPassword" type="password" data-bind="textInput: password"class="form-input text"/>
 
-            <!--
             <div data-bind="if: errorMessage" >
               <div data-bind="ltext: errorMessage" class="context-error"></div>
             </div>
-          -->
 
-            <button data-bind="click: sign" class="btn btn-primary btn-dialog"
+            <button data-bind="click: sign, enable: password() && !processing()" class="btn btn-primary btn-dialog"
                     data-test-id="do-sign-attachment">
               <span>Allekirjoita</span>
-              <!--<em data-bind="visible: pending" class="button-loader"></em>-->
+              <em data-bind="visible: pending" class="button-loader"></em>
             </button>
           </div>
         </div>
@@ -39,7 +37,7 @@
           <div class="dialog-content">
             <p data-bind="ltext: 'signAttachment.description'"></p>
 
-            <label for="signSingleAttachmentPassword" data-bind="ltext: 'signAttachment.verifyPassword'" class="form-label"></label>
+            <label for="signSingleAttachmentPassword" data-bind="ltext: 'signAttachment.verifyPassword'" class="form-label">Vahvista päätös salasanallasi</label>
             <input id="signSingleAttachmentPassword" data-test-id="signSingleAttachmentPassword" type="password" data-bind="textInput: password" class="form-input text">
 
             <div data-bind="if: errorMessage" >

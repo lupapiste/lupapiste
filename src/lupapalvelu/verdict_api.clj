@@ -13,6 +13,7 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.tasks :as tasks]
+            [lupapalvelu.user :as user]
             [lupapalvelu.xml.krysp.reader :as krysp])
   (:import [java.net URL]))
 
@@ -181,16 +182,21 @@
         (attachment/delete-attachment application attachment-id)))))
 
 (defcommand sign-verdict
-  {:parameters [id verdictId]
+  {:description "Applicant/application owner can sign an application's verdict"
+   :parameters [id verdictId password]
    :states     [:verdictGiven :constructionStarted]
    :pre-checks [domain/validate-owner-or-writer]
    :roles      [:applicant :authority]}
   [{:keys [application created user] :as command}]
-  (if (find-verdict application verdictId)
-    (update-application command
-                        {:verdicts {$elemMatch {:id verdictId}}}
-                        {$set {:modified                     created
-                               :verdicts.$.signature.created created
-                               :verdicts.$.signature.user    (select-keys user [:id :username :firstName :lastName :role])
-                              }})
-    (fail :error.unknown)))
+  (if (user/get-user-with-password (:username user) password)
+    (when (find-verdict application verdictId)
+      (update-application command
+                          {:verdicts {$elemMatch {:id verdictId}}}
+                          {$set {:modified                     created
+                                 :verdicts.$.signature.created created
+                                 :verdicts.$.signature.user    (select-keys user [:id :username :firstName :lastName :role])
+                                }}))
+    (do
+      ; Throttle giving information about incorrect password
+      (Thread/sleep 2000)
+      (fail :error.password))))
