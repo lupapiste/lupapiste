@@ -44,13 +44,6 @@
     (info "invalid property id parameters:" (join ", " invalid))
     (fail :error.invalid-property-id :parameters (vec invalid))))
 
-(defn- validate-owner-or-writer
-  "Validator: current user must be owner or writer.
-   To be used in commands' :pre-checks vector."
-  [command application]
-  (when-not (domain/owner-or-writer? application (-> command :user :id))
-    unauthorized))
-
 (defn- validate-x [{{:keys [x]} :data}]
   (when (and x (not (< 10000 (util/->double x) 800000)))
     (fail :error.illegal-coordinates)))
@@ -370,7 +363,7 @@
    :states     [:draft :open]
    :notified   true
    :on-success (notify :application-state-change)
-   :pre-checks [validate-owner-or-writer]}
+   :pre-checks [domain/validate-owner-or-writer]}
   [{:keys [application created] :as command}]
   (or (validate-link-permits application)
       (do-submit command application created)))
