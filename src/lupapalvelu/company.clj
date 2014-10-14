@@ -5,7 +5,10 @@
             [schema.core :as sc]
             [sade.util :refer [min-length-string max-length-string y? ovt? fn-> fn->>]]
             [sade.env :as env]
-            [lupapalvelu.core :refer [fail!]]
+            [sade.strings :as ss]
+            [lupapalvelu.core :refer [fail! fail now]]
+            [lupapalvelu.domain :as domain]
+            [lupapalvelu.action :refer [update-application application->command]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.core :refer [now ok fail!]]
             [lupapalvelu.token :as token]
@@ -165,18 +168,31 @@
           (select-keys [:id :name :y])
           (assoc :role      "writer"
                  :type      "company"
-                 :username  (:y company)
+                 :username  (-> company :y ss/trim ss/lower-case) ; usernames are always in lower case
                  :firstName (:name company)
                  :lastName  "")))
 
-(defn company-invite [caller application-id company-id]
-  (let [admins    (find-company-admins company-id)
-        token-id  (token/make-token :accept-company-invitation nil {:caller caller, :company-id company-id, :application-id application-id} :auto-consume false)]
-    (notif/notify! :accept-company-invitation {:admins     admins
-                                               :caller     caller
-                                               :link-fi    (str (env/value :host) "/app/fi/welcome#!/accept-company-invitation/" token-id)
-                                               :link-sv    (str (env/value :host) "/app/sv/welcome#!/accept-company-invitation/" token-id)})
-    token-id))
+(defn company-invite [caller application company-id]
+  {:pre [(map? caller) (map? application) (string? company-id)]}
+  (let [company   (find-company! {:id company-id})
+        auth      (assoc (company->auth company)
+                    :id "" ; prevents access to application before accepting invite
+                    :role ""
+                    :invite {:user {:id company-id}})
+        admins    (find-company-admins company-id)
+        application-id (:id application)
+        token-id  (token/make-token :accept-company-invitation nil {:caller caller, :company-id company-id, :application-id application-id} :auto-consume false)
+        update-count (update-application
+                       (application->command application)
+                       {:auth {$not {$elemMatch {:invite.user.id company-id}}}}
+                       {$push {:auth auth}, $set  {:modified (now)}}
+                       true)]
+    (when (pos? update-count)
+      (notif/notify! :accept-company-invitation {:admins     admins
+                                      :caller     caller
+                                      :link-fi    (str (env/value :host) "/app/fi/welcome#!/accept-company-invitation/" token-id)
+                                      :link-sv    (str (env/value :host) "/app/sv/welcome#!/accept-company-invitation/" token-id)})
+      token-id)))
 
 (notif/defemail :accept-company-invitation {:subject-key   "accept-company-invitation.subject"
                                             :recipients-fn (fn->> :admins (map :email))
@@ -184,7 +200,11 @@
 
 (defmethod token/handle-token :accept-company-invitation [{{:keys [company-id application-id]} :data} _]
   (infof "comnpany %s accepted application %s" company-id application-id)
-  (mongo/update-by-query :applications
-                         {:_id application-id}
-                         {$push {:auth (-> (find-company! {:id company-id}) (company->auth))}})
-  (ok))
+  (if-let [application (domain/get-application-no-access-checking application-id)]
+    (do
+      (update-application
+        (application->command application)
+        {:auth {$elemMatch {:invite.user.id company-id}}}
+        {$set  {:auth.$  (-> (find-company! {:id company-id}) (company->auth) (assoc :inviteAccepted (now)))}})
+      (ok))
+    (fail :error.unknown)))

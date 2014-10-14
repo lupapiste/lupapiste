@@ -347,14 +347,16 @@
                         data-bind="ltext: 'personSelector.invite', visible: $root.authorization.ok('invite'), enabled: $root.authorization.ok('invite')"
                         onclick="$('#invite-document-name').val('').change();$('#invite-document-path').val('').change();$('#invite-document-id').val('').change();LUPAPISTE.ModalDialog.open('#dialog-valtuutus');return false;"></button>
 
-<div data-bind="if: features.enabled('company')"><div class="feature">
-                  <button class="btn-primary"
+                  <p class="tab-info">
+                    <span data-bind="lhtml: 'company-invite.help'"></span><br>
+                    <button class="btn-primary"
+                          data-test-id="company-invite"
                           data-bind="ltext: 'company-invite.invite',
                                      visible: $root.authorization.ok('invite'),
                                      enabled: $root.authorization.ok('invite'),
                                      click: $root.openInviteCompany">
-                  </button>
-</div></div>
+                    </button>
+                  </p>
 
                 </div>
               </div>
