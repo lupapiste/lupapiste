@@ -173,7 +173,8 @@
    :roles      [:authority]}
   [{:keys [application created] :as command}]
   (when-let [verdict (find-verdict application verdictId)]
-    (let [attachments (filter #(= (select-keys (:target %) [:id :type]) {:type "verdict" :id (:id verdict)}) (:attachments application))]
+    (let [is-verdict-attachment? #(= (select-keys (:target %) [:id :type]) {:type "verdict" :id (:id verdict)})
+          attachments (filter is-verdict-attachment? (:attachments application))]
       (update-application command {$pull {:verdicts {:id verdictId}}})
       ; TODO pull from tasks, auth-comments
       (doseq [{attachment-id :id} attachments]
@@ -181,14 +182,15 @@
 
 (defcommand sign-verdict
   {:parameters [id verdictId]
-   :states     [:submitted :complement-needed :sent :verdictGiven]
-   :roles      [:applicant]}
-  [{:keys [application created] :as command}]
-  (when-let [verdict (find-verdict application verdictId)]
-    (do
-      (println "******** Sign verdict" verdict))
-    #_(let [attachments (filter #(= (select-keys (:target %) [:id :type]) {:type "verdict" :id (:id verdict)}) (:attachments application))]
-      (update-application command {$pull {:verdicts {:id verdictId}}})
-      ; TODO pull from tasks, auth-comments
-      (doseq [{attachment-id :id} attachments]
-        (attachment/delete-attachment application attachment-id)))))
+   :states     [:verdictGiven :constructionStarted]
+   :pre-checks [domain/validate-owner-or-writer]
+   :roles      [:applicant :authority]}
+  [{:keys [application created user] :as command}]
+  (if (find-verdict application verdictId)
+    (update-application command
+                        {:verdicts {$elemMatch {:id verdictId}}}
+                        {$set {:modified                     created
+                               :verdicts.$.signature.created created
+                               :verdicts.$.signature.user    (select-keys user [:id :username :firstName :lastName :role])
+                              }})
+    (fail :error.unknown)))
