@@ -235,7 +235,7 @@
   "if :id parameter is present read application from command
    (pre-loaded) or load application for user."
   [{{id :id} :data user :user application :application}]
-  (and id (or application (domain/get-application-as-including-canceled id user))))
+  (and id user (or application (domain/get-application-as-including-canceled id user))))
 
 (defn- user-is-not-allowed-to-access?
   "Current user must be owner, authority or writer OR have some other supplied extra-auth-roles"
