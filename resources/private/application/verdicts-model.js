@@ -82,11 +82,6 @@ LUPAPISTE.VerdictsModel = function() {
   };
 
   self.sign = function(bindings, verdict) {
-    console.log("bindings: ", bindings);
-    console.log("verdict: ", verdict);
-    console.log("appId: ", getApplicationId(bindings));
-    console.log("verdictId: ", verdict.id)
-    console.log("clicked verdict sign button")
     bindings.verdictSigningModel.init(getApplicationId(bindings), verdict.id);
   };
 };
