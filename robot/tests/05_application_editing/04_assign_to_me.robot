@@ -51,7 +51,7 @@ Sonja adds a comment
 
 # LUPA-463
 Open latest email
-  Go to  ${SERVER}/api/last-email
+  Open last email
   Page Should Contain  ${appname}
   Page Should Contain  mikko@example.com
 

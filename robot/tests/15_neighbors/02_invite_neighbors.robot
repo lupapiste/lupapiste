@@ -146,7 +146,7 @@ Mikko sends an email invitation to neighbor 'b'
   [Teardown]  Logout
 
 Mail is sent
-  Go to  ${SERVER}/api/last-email
+  Open last email
   Wait until  Element should contain  id=to  b@example.com
 
 Neighbor clicks on email link and sees epplication
