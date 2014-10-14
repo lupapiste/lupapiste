@@ -1383,11 +1383,13 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var sectionContainer = document.createElement("div");
     var elements = document.createElement("div");
 
+    var accordionCollapsed = (options && options.accordionCollapsed) ? true : false;
+
     section.className = "accordion";
     section.setAttribute("data-doc-type", self.schemaName);
     elements.className = "accordion-fields";
 
-    icon.className = "icon toggle-icon drill-down-white";
+    icon.className = "icon toggle-icon " + (accordionCollapsed ? "drill-right-white" : "drill-down-white");
     title.appendChild(icon);
 
     if (op) {
@@ -1413,8 +1415,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       elements.appendChild(self.makeApprovalButtons([], self.model));
     }
 
-    sectionContainer.className = "accordion_content expanded";
-    sectionContainer.setAttribute("data-accordion-state", "open");
+    sectionContainer.className = "accordion_content " + (accordionCollapsed ? "" : "expanded");
+    sectionContainer.setAttribute("data-accordion-state", (accordionCollapsed ? "closed" : "open"));
     sectionContainer.id = "document-" + self.docId;
 
     appendElements(elements, self.schema, self.model, []);

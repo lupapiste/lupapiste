@@ -11,44 +11,29 @@ var accordion = (function() {
     var content = target.next();
 
     var state = content.attr("data-accordion-state");
-
     if (toState === state) { return; }
-
-    if (toState === "toggle") { toState = (state !== "closed") ? "closed" : "open"; }
-
-    var height = content.attr("data-accordion-height");
-    if (!height) {
-      var h = content.height();
-      height = h + "px";
-      content
-        .attr("data-accordion-height", height)
-        .css({"height": height, "overflow": "visible"});
+    if (toState === "toggle") {
+      toState = (state !== "closed") ? "closed" : "open";
     }
-
-    if (toState === "closed") {
-      state = "closed";
-      height = "0px";
-    } else {
-      state = "open";
-    }
+    state = (toState === "closed") ? "closed" : "open";
 
     target
       .children(".toggle-icon")
       .removeClass(toState === "closed" ? "drill-down-white" : "drill-right-white")
       .addClass(toState === "closed" ? "drill-right-white" : "drill-down-white");
 
-    content
-      .attr("data-accordion-state", state)
-      .animate({ height: height }, animationTime, animationEasing, function() {
-        if (state === "closed") {
-          content.removeClass("expanded");
-        } else {
-          content.addClass("expanded");
-        }
-        target.trigger("accordion-" + state);
-        if (done) { done(target); }
-      })
-      .css('overflow', 'visible');
+    var complete = function() {
+      content.css('overflow', 'visible');
+      target.trigger("accordion-" + state);
+      if (done) { done(target) };
+    };
+
+    content.attr("data-accordion-state", state);
+    if (state !== "closed") {
+      content.slideDown(animationTime, animationEasing, complete);
+    } else {
+      content.slideUp(animationTime, animationEasing, complete);
+    }
 
     return t;
   }

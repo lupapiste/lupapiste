@@ -632,10 +632,10 @@
 
           <section class="accordion">
             <h2 onclick="accordion.click(this)">
-              <span class="icon toggle-icon drill-down-white"></span>
+              <span class="icon toggle-icon drill-right-white"></span>
               <span data-bind="ltext: 'application.statements'" style="margin-right: 0">Lausunnot</span>
             </h2>
-            <div class="accordion_content expanded">
+            <div class="accordion_content" data-accordion-state="closed">
               <div class="accordion-fields">
                 <div data-bind="template: {name: 'statements-template', data: {statements: $data.statements}}"></div>
               </div>
@@ -644,10 +644,10 @@
 
           <section class="accordion">
             <h2 onclick="accordion.click(this)">
-              <span class="icon toggle-icon drill-down-white"></span>
+              <span class="icon toggle-icon drill-right-white"></span>
               <span data-bind="lhtml: 'application.neighbors.hearings'" style="margin-right: 0">Naapurit</span>
             </h2>
-            <div class="accordion_content expanded">
+            <div class="accordion_content" data-accordion-state="closed">
               <div class="accordion-fields">
                 <div data-bind="template: {name: 'neighbors-template', data: {neighbors: $data.neighbors}}"></div>
               </div>
