@@ -76,7 +76,8 @@ Authority can not convert the inforequest to application
 
 Authority adds a comment marking inforequest answered
   Wait until  Page should contain element  //section[@id='inforequest']//button[@data-test-id='comment-request-mark-answered']
-  Input comment and mark answered  oletko miettinyt tuulivoimaa?
+  Input inforequest comment  oletko miettinyt tuulivoimaa?
+  Mark answered
   Wait until  Inforequest state is  Vastattu
   Logout
 
