@@ -23,7 +23,8 @@
             [lupapalvelu.statement :as statement]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
-            [sade.util :as util])
+            [sade.util :as util]
+            [lupapalvelu.domain :as domain])
   (:import [java.util.zip ZipOutputStream ZipEntry]
            [java.io File OutputStream FilterInputStream]))
 
@@ -407,7 +408,8 @@
   {:description "Designers can sign blueprints and other attachments. LUPA-1241"
    :parameters [:id attachmentIds password]
    :states     [:draft :open :submitted :sent :complement-needed :verdictGiven :constructionStarted]
-   :roles [:applicant]}
+   :pre-checks [domain/validate-owner-or-writer]
+   :roles      [:applicant :authority]}
   [{application :application u :user :as command}]
   (when (seq attachmentIds)
     (if (user/get-user-with-password (:username u) password)
