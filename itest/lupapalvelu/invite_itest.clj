@@ -93,7 +93,9 @@
       (count (:invites (query teppo :invites))) => 0)
 
     (fact "Teppo must be able to comment!"
-      (comment-application teppo application-id true) => ok?)
+      (comment-application teppo application-id true) => ok?
+      (fact "application stays in submitted state"
+        (:state (query-application teppo application-id)) => "submitted"))
 
     (fact "Mikko is the applicant"
       (let [application  (query-application mikko application-id)
@@ -112,10 +114,10 @@
           (:applicant application ) => "Teppo Nieminen")))
 
     (let [actions (:actions (query teppo :allowed-actions :id application-id))]
-      (fact "Teppo should be able to do stuff."
-        (-> actions :add-operation :ok) => true
-        (-> actions :submit-application :ok) => true
-        (-> actions :cancel-application :ok) => true))
+      (fact "Teppo should be able to"
+        (fact "add-operation" (-> actions :add-operation :ok) => true)
+        (fact "update-doc" (-> actions :update-doc :ok) => true)
+        (fact "cancel application" (-> actions :cancel-application :ok) => true)))
 
     (fact "Sonja must be able to remove authz from Teppo!"
       (command sonja :remove-auth :id application-id :username (email-for-key teppo)) => ok?)

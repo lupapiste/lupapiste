@@ -92,7 +92,7 @@
 (defn get-auths-by-role
   "returns vector of all auth-entries in an application with the given role. Role can be a keyword or a string."
   [{auth :auth} role]
-  (filter #(= (name (:role %)) (name role)) auth))
+  (filter #(= (name (get % :role "")) (name role)) auth))
 
 (defn has-auth? [{auth :auth} user-id]
   (or (some (partial = user-id) (map :id auth)) false))

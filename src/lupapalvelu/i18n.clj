@@ -6,15 +6,29 @@
             [cheshire.core :as json]
             [sade.env :as env]))
 
-(defn- add-term [row result lang]
-  (let [k (get row "key")
-        t (get row lang)]
-    (if (and k t (pos? (.length t)))
-      (assoc-in result [(keyword lang) k] (s/trim t))
-      result)))
+(def default-lang :fi)
 
-(defn- process-row [languages result row]
-  (reduce (partial add-term row) result languages))
+(defn- add-term [k t result lang]
+  (assoc-in result [(keyword lang) k] (s/trim t)))
+
+(defn- process-translation [row k default-t result lang]
+  (let [t (get row lang)]
+    (if (seq t)
+      (add-term k t result lang)
+      (do
+        (when-not (s/blank? default-t)
+          (errorf "Missing localization for %s in %s, defaulting to %s" k lang default-t))
+        (add-term k default-t result lang)))))
+
+(defn- process-row [langs-but-default result row]
+  (let [k (get row "key")
+        default-t (get row (name default-lang))]
+    (if (and (not (s/blank? k)) default-t)
+      (reduce
+        (partial process-translation row k default-t)
+        (add-term k default-t result default-lang)
+        langs-but-default)
+      result)))
 
 (defn- read-sheet [headers sheet]
   (->> sheet seq rest (map xls/read-row) (map (partial zipmap headers))))
@@ -24,8 +38,9 @@
     (let [wb      (xls/load-workbook in)
           langs   (-> wb seq first first xls/read-row rest)
           headers (cons "key" langs)
-          data    (->> wb (map (partial read-sheet headers)) (apply concat))]
-      (reduce (partial process-row langs) {} data))))
+          data    (->> wb (map (partial read-sheet headers)) (apply concat))
+          langs-but-default (disj (set langs) (name default-lang))]
+      (reduce (partial process-row langs-but-default) {} data))))
 
 (def ^:private excel-data (future (load-excel)))
 
@@ -37,7 +52,7 @@
   "Return localization terms for given language. If language is not supported returns terms for default language (\"fi\")"
   [lang]
   (let [terms (get-localizations)]
-    (or (terms (keyword lang)) (terms :fi))))
+    (or (terms (keyword lang)) (terms default-lang))))
 
 (defn unknown-term [term]
   (if (env/dev-mode?)
@@ -72,7 +87,7 @@
   (fn [request]
     (let [lang (or (get-in request [:params :lang])
                    (get-in request [:user :lang])
-                   "fi")]
+                   (name default-lang))]
       (with-lang lang
         (handler request)))))
 
@@ -96,7 +111,7 @@
         (read-lines (line-seq in)))))
 
   (defn get-localizations []
-    (update-in @excel-data [:fi] merge (load-add-ons))))
+    (update-in @excel-data [default-lang] merge (load-add-ons))))
 
 (defn- load-add-ons []
   (when-let [in (io/resource "i18n.txt")]
@@ -104,4 +119,4 @@
       (read-lines (line-seq in)))))
 
 (defn get-localizations []
-  (update-in @excel-data [:fi] merge (load-add-ons)))
+  (update-in @excel-data [default-lang] merge (load-add-ons)))

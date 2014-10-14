@@ -57,7 +57,7 @@ Bob decides to register his company after all, and this time he means it
 
 Registrations succeeds, user gets email
   Wait until  Element should be visible  xpath=//section[@id='register-company-success']
-  Go to  ${SERVER}/api/last-email
+  Open last email
   Wait Until  Page Should Contain  puuha.pete@pete-rakennus.fi
 
 Second link in email should lead to password reset

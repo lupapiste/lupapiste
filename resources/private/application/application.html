@@ -330,7 +330,9 @@
                         <i><span data-bind="foreach: roles"><span data-bind="text: loc($data)"></span> </span></i>
                       </span>
                       <span class="invite-state">
-                        <span data-bind="if: $data.invite"><span class="user-invite" data-bind="ltext: 'invited'"></span></span>
+                        <span data-bind="if: $data.invite">
+                          <span class="user-invite" data-bind="ltext: 'invited'"></span>
+                        </span>
                         <span data-bind="if: !$data.invite">
                           <span data-bind="visible: $root.application.isNotOwner($data), ltext: 'accepted'"></span>
                           <!-- ko if: $data.inviteAccepted -->
@@ -338,12 +340,11 @@
                           <!-- /ko -->
                         </span>
                       </span>
-                      <span data-bind="visible: $root.application.isNotOwner($data)"><a href="#" data-bind="ltext: 'application.remove-auth', click: $root.application.removeAuth"></a></span>
-
-                      <span data-bind="if: $root.application.canSubscribe($data)">
-                      <a href="#" data-bind="visible: $data.unsubscribed && $data.unsubscribed(), click: $root.application.subscribeNotifications, ltext: 'subscribeNotifications'"></a>
-                      <a href="#" data-bind="visible: !$data.unsubscribed || !$data.unsubscribed(), click: $root.application.unsubscribeNotifications, ltext: 'unsubscribeNotifications'"></a>
-                      </span>
+                      <a class="invite-action" href="#" data-bind="ltext: 'application.remove-auth', click: $root.application.removeAuth, visible: $root.application.isNotOwner($data)"></a>
+                      <!-- ko if: $root.application.canSubscribe($data) -->
+                      <a class="invite-action" href="#" data-bind="visible: $data.unsubscribed && $data.unsubscribed(), click: $root.application.subscribeNotifications, ltext: 'subscribeNotifications'"></a>
+                      <a class="invite-action" href="#" data-bind="visible: !$data.unsubscribed || !$data.unsubscribed(), click: $root.application.unsubscribeNotifications, ltext: 'unsubscribeNotifications'"></a>
+                      <!-- /ko -->
                     </li>
                   </ul>
 
@@ -351,14 +352,16 @@
                         data-bind="ltext: 'personSelector.invite', visible: $root.authorization.ok('invite'), enabled: $root.authorization.ok('invite')"
                         onclick="$('#invite-document-name').val('').change();$('#invite-document-path').val('').change();$('#invite-document-id').val('').change();LUPAPISTE.ModalDialog.open('#dialog-valtuutus');return false;"></button>
 
-<div data-bind="if: features.enabled('company')"><div class="feature">
-                  <button class="btn-primary"
+                  <p class="tab-info">
+                    <span data-bind="lhtml: 'company-invite.help'"></span><br>
+                    <button class="btn-primary"
+                          data-test-id="company-invite"
                           data-bind="ltext: 'company-invite.invite',
                                      visible: $root.authorization.ok('invite'),
                                      enabled: $root.authorization.ok('invite'),
                                      click: $root.openInviteCompany">
-                  </button>
-</div></div>
+                    </button>
+                  </p>
 
                 </div>
               </div>

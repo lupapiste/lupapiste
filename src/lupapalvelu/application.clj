@@ -677,7 +677,6 @@
   [{{:keys [propertyId] :as application} :application user :user :as command}]
   (let [results (mongo/select :applications
                   (merge (domain/application-query-for user) {:_id {$ne id}
-                                                              :state {$nin ["draft"]}
                                                               :infoRequest false
                                                               :permitType (:permitType application)
                                                               :operations.name {$nin ["ya-jatkoaika"]}})
@@ -709,9 +708,9 @@
     (mongo/update-by-id :app-links db-id
       {:_id  db-id
        :link [id link-permit-id]
-       id    {:type "application"
-              :apptype (:name (first operations))
-              :propertyId propertyId}
+       id             {:type "application"
+                       :apptype (:name (first operations))
+                       :propertyId propertyId}
        link-permit-id {:type "linkpermit"
                        :linkpermittype (if (.startsWith link-permit-id "LP-")
                                          "lupapistetunnus"
