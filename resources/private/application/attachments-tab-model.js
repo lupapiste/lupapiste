@@ -123,7 +123,7 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
     };
 
     templateModel.show = function() {
-      var data = _.map(this.allowedAttachmentTypes(), function(g) {
+      var data = _.map(self.appModel.allowedAttachmentTypes(), function(g) {
         var groupId = g[0];
         var groupText = loc(["attachmentType", groupId, "_group_label"]);
         var attachemntIds = g[1];
