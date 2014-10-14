@@ -417,6 +417,7 @@
               </button>
               <button
                 data-bind="click: attachmentTemplatesModel.show, ltext: 'application.newAttachmentTemplates', visible: $root.authorization.ok('create-attachments'), enable: !appModel.processing()"
+                data-test-id="new-attachment-template-button"
                 class="btn">
               </button>
               <button data-bind="click: $root.stampModel.init.bind($data, appModel),visible: $root.authorization.ok('stamp-attachments'), enable: !appModel.processing() && $root.authorization.ok('stamp-attachments')" class="btn">

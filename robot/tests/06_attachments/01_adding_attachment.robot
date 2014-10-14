@@ -19,6 +19,10 @@ Mikko goes to empty attachments tab
 Download all attachments should be disabled
   Wait Until  Element should not be visible   xpath=//a[@data-test-id="application-download-all-attachement"]
 
+New attachment template button should not be visible for Mikko
+  [Tags]  attachments
+  Element should not be visible  xpath=//div[@id="application-attachments-tab"]//button[@data-test-id="new-attachment-template-button"]
+
 Mikko adds txt attachment without comment
   [Tags]  attachments
   Add attachment  ${TXT_TESTFILE_PATH}  ${EMPTY}
@@ -142,7 +146,31 @@ Sonja goes to attachments tab
   Click element  xpath=//a[@data-test-id="back-to-application-from-attachment"]
   Open tab  attachments
 
-Sonja see that attachment is for authority
+Sonja adds new attachment template
+  Wait Until Element Is Visible  xpath=//div[@id="application-attachments-tab"]//button[@data-test-id="new-attachment-template-button"]
+  Click Element  xpath=//div[@id="application-attachments-tab"]//button[@data-test-id="new-attachment-template-button"]
+  Wait Until Element Is Visible  xpath=//div[@id="dialog-add-attachment-templates"]//input[@data-test-id="selectm-filter-input"]
+  Input Text  xpath=//div[@id="dialog-add-attachment-templates"]//input[@data-test-id="selectm-filter-input"]  muu
+  List Should Have No Selections  xpath=//div[@id="dialog-add-attachment-templates"]//select[@data-test-id="selectm-source-list"]
+  Wait Until  Select From List By Value  xpath=//div[@id="dialog-add-attachment-templates"]//select[@data-test-id="selectm-source-list"]  Muu liite
+  List Selection Should Be  xpath=//div[@id="dialog-add-attachment-templates"]//select[@data-test-id="selectm-source-list"]  Muu liite
+  Click Element  xpath=//div[@id="dialog-add-attachment-templates"]//button[@data-test-id="selectm-add"]
+  Wait Until  Select From List By Value  xpath=//div[@id="dialog-add-attachment-templates"]//select[@data-test-id="selectm-target-list"]  Muu liite
+  List Selection Should Be  xpath=//div[@id="dialog-add-attachment-templates"]//select[@data-test-id="selectm-target-list"]  Muu liite
+  Click Element  xpath=//div[@id="dialog-add-attachment-templates"]//button[@data-test-id="selectm-ok"]
+
+Attachment template dialog should not be visible
+  Wait Until  Element Should Not Be Visible  xpath=//div[@id="dialog-add-attachment-templates"]//input[@data-test-id="selectm-filter-input"]
+
+Sonja sees that new attachment template is visible in attachments list
+  Wait Until Element Is Visible  xpath=//div[@id="application-attachments-tab"]//a[@data-test-type="muut.muu"]
+
+Sonja deletes the newly created attachment template
+  Click element  xpath=//div[@id="application-attachments-tab"]//span[@data-test-icon="delete-muut.muu"]
+  Confirm  dynamic-yes-no-confirm-dialog
+  Wait Until  Element should not be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[@data-test-type="muut.muu"]
+
+Sonja continues with Mikko's attachment. She sees that attachment is for authority
   [Tags]  attachments
   Wait Until  Attachment state should be  rakennuspaikka.ote_alueen_peruskartasta  requires_authority_action
 
