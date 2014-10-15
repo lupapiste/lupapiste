@@ -1,4 +1,0 @@
-attachment.signed: Allekirjoitettu
-attachment.stamped: Leimattu
-application.attachmentsAddList: Lisää liitetiedosto
-
