@@ -8,14 +8,19 @@ LUPAPISTE.VerdictSigningModel = function(dialogSelector) {
   self.pending = ko.observable(false);
   self.errorMessage = ko.observable("");
   self.applicationId = null;
+  self.signed = ko.observable(false);
 
-  self.init = function(applicationId, verdictId) {
-    self.applicationId = applicationId;
+  self.authorizationModel = authorization.create();
+
+  self.init = function(application, verdictId) {
+    self.applicationId = application.id();
     self.password("");
     self.verdictId = verdictId;
     self.processing(false);
     self.pending(false);
     self.errorMessage("");
+
+    self.authorizationModel.refresh(application.id());
 
     LUPAPISTE.ModalDialog.open(self.dialogSelector);
   };
@@ -27,7 +32,7 @@ LUPAPISTE.VerdictSigningModel = function(dialogSelector) {
       .pending(self.pending)
       .success(function() {
         self.password("");
-        // repository.load(id); ??
+        repository.load(self.applicationId);
         LUPAPISTE.ModalDialog.close();
       })
       .error(function(e) { self.errorMessage(e.text); })

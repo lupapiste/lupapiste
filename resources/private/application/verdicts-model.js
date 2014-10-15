@@ -16,7 +16,6 @@ LUPAPISTE.VerdictsModel = function() {
 
   self.refresh = function(application, authorities) {
     var verdicts = _.map(_.cloneDeep(application.verdicts || []), function(verdict) {
-
       var paatokset = _.map(verdict.paatokset || [], function(paatos) {
         var poytakirjat = _.map(paatos.poytakirjat || [], function(pk) {
           var myFullId = {type: "verdict", id: verdict.id, urlHash: pk.urlHash};
@@ -28,6 +27,7 @@ LUPAPISTE.VerdictsModel = function() {
           return pk;
         });
         paatos.poytakirjat = poytakirjat;
+        paatos.signature = verdict.signature;
         return paatos;});
       verdict.paatokset = paatokset;
       return verdict;
@@ -81,7 +81,7 @@ LUPAPISTE.VerdictsModel = function() {
     .call();
   };
 
-  self.sign = function(bindings, verdict) {
-    bindings.verdictSigningModel.init(getApplicationId(bindings), verdict.id);
+  self.openSigningDialog = function(bindings, verdict) {
+    bindings.verdictSigningModel.init(bindings.application, verdict.id);
   };
 };
