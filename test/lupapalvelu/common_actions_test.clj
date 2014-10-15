@@ -23,7 +23,9 @@
                           :upload-attachment
                           :download-all-attachments
                           :download-attachment
-                          :delete-attachment-version}
+                          :delete-attachment-version
+                          :change-urgency
+                          :add-authority-notice}
         user {:id "user123" :organizations [] :role :applicant}
         application {:organization "999-R" :auth [{:id "user123" :role "statementGiver"}]}]
     (doseq [command (ca/foreach-action user {} application)
