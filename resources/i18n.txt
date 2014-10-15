@@ -5,22 +5,22 @@ verdict.lupamaaraukset.missing: Päätökseen ei liity lupamääräyksiä
 verdict.poytakirjat.missing: Päätökseen ei liity pöytäkirjoja
 application.neighbors.hearings: Kuulemiset
 
-help.R.applicationSummaryDesc: Tällä välilehdellä näet hakemukseesi liittyvät hakemuksen aikaiset tiedot.
-help.P.applicationSummaryDesc: Tällä välilehdellä näet hakemukseesi liittyvät hakemuksen aikaiset tiedot.
-help.YA.applicationSummaryDesc: Tällä välilehdellä näet hakemukseesi liittyvät hakemuksen aikaiset tiedot.
-help.YI.applicationSummaryDesc: Tällä välilehdellä näet hakemukseesi liittyvät hakemuksen aikaiset tiedot.
-help.YL.applicationSummaryDesc: Tällä välilehdellä näet hakemukseesi liittyvät hakemuksen aikaiset tiedot.
-help.MAL.applicationSummaryDesc: Tällä välilehdellä näet hakemukseesi liittyvät hakemuksen aikaiset tiedot.
-help.VVVL.applicationSummaryDesc: Tällä välilehdellä näet hakemukseesi liittyvät hakemuksen aikaiset tiedot.
-help.KM.applicationSummaryDesc: Tällä välilehdellä näet hakemukseesi liittyvät hakemuksen aikaiset tiedot.
+help.R.applicationSummaryDesc: Tällä välilehdellä näet hankkeeseesi liittyvät hakemuksen aikaiset tiedot.
+help.P.applicationSummaryDesc: Tällä välilehdellä näet hankkeeseesi liittyvät hakemuksen aikaiset tiedot.
+help.YA.applicationSummaryDesc: Tällä välilehdellä näet hankkeeseesi liittyvät hakemuksen aikaiset tiedot.
+help.YI.applicationSummaryDesc: Tällä välilehdellä näet hankkeeseesi liittyvät hakemuksen aikaiset tiedot.
+help.YL.applicationSummaryDesc: Tällä välilehdellä näet hankkeeseesi liittyvät hakemuksen aikaiset tiedot.
+help.MAL.applicationSummaryDesc: Tällä välilehdellä näet hankkeeseesi liittyvät hakemuksen aikaiset tiedot.
+help.VVVL.applicationSummaryDesc: Tällä välilehdellä näet hankkeeseesi liittyvät hakemuksen aikaiset tiedot.
+help.KM.applicationSummaryDesc: Tällä välilehdellä näet hankkeeseesi liittyvät hakemuksen aikaiset tiedot.
 
-help.R.tasksDesc: Tällä välilehdellä näet luvan edellyttämät rakentamisen aikaiset kokoukset, katselmukset ja tarkastukset.
-help.P.tasksDesc: Tällä välilehdellä näet luvan edellyttämät rakentamisen aikaiset kokoukset, katselmukset ja tarkastukset.
-help.YA.tasksDesc: Tällä välilehdellä näet luvan edellyttämät rakentamisen aikaiset kokoukset, katselmukset ja tarkastukset.
-help.YI.tasksDesc: Tällä välilehdellä näet luvan edellyttämät rakentamisen aikaiset kokoukset, katselmukset ja tarkastukset.
-help.YL.tasksDesc: Tällä välilehdellä näet luvan edellyttämät rakentamisen aikaiset kokoukset, katselmukset ja tarkastukset.
-help.MAL.tasksDesc: Tällä välilehdellä näet luvan edellyttämät rakentamisen aikaiset kokoukset, katselmukset ja tarkastukset.
-help.VVVL.tasksDesc: Tällä välilehdellä näet luvan edellyttämät rakentamisen aikaiset kokoukset, katselmukset ja tarkastukset.
-help.KM.tasksDesc: Tällä välilehdellä näet luvan edellyttämät rakentamisen aikaiset kokoukset, katselmukset ja tarkastukset.
+help.R.tasksDesc: Tällä välilehdellä näet luvan edellyttämät rakentamisen aikaiset kokoukset, katselmukset ja tarkastukset sekä muut lupavaatimukset.
+help.P.tasksDesc: Tällä välilehdellä näet luvan edellyttämät toiminnan aikaiset kokoukset, katselmukset ja tarkastukset sekä muut lupavaatimukset.
+help.YA.tasksDesc: Tällä välilehdellä näet luvan edellyttämät toiminnan aikaiset kokoukset, katselmukset ja tarkastukset sekä muut lupavaatimukset.
+help.YI.tasksDesc: Tällä välilehdellä näet luvan edellyttämät toiminnan aikaiset kokoukset, katselmukset ja tarkastukset sekä muut lupavaatimukset.
+help.YL.tasksDesc: Tällä välilehdellä näet luvan edellyttämät toiminnan aikaiset kokoukset, katselmukset ja tarkastukset sekä muut lupavaatimukset.
+help.MAL.tasksDesc: Tällä välilehdellä näet luvan edellyttämät toiminnan aikaiset kokoukset, katselmukset ja tarkastukset sekä muut lupavaatimukset.
+help.VVVL.tasksDesc: Tällä välilehdellä näet luvan edellyttämät toiminnan aikaiset kokoukset, katselmukset ja tarkastukset sekä muut lupavaatimukset.
+help.KM.tasksDesc: Tällä välilehdellä näet luvan edellyttämät toiminnan aikaiset kokoukset, katselmukset ja tarkastukset sekä muut lupavaatimukset.
 
 task-katselmus.katselmus.lasnaolijat: Läsnäolijat
