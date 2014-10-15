@@ -150,13 +150,14 @@ Sonja adds new attachment template
   Wait Until Element Is Visible  xpath=//div[@id="application-attachments-tab"]//button[@data-test-id="new-attachment-template-button"]
   Click Element  xpath=//div[@id="application-attachments-tab"]//button[@data-test-id="new-attachment-template-button"]
   Wait Until Element Is Visible  xpath=//div[@id="dialog-add-attachment-templates"]//input[@data-test-id="selectm-filter-input"]
-  Input Text  xpath=//div[@id="dialog-add-attachment-templates"]//input[@data-test-id="selectm-filter-input"]  muu
+  Input Text  xpath=//div[@id="dialog-add-attachment-templates"]//input[@data-test-id="selectm-filter-input"]  muu liite
   List Should Have No Selections  xpath=//div[@id="dialog-add-attachment-templates"]//select[@data-test-id="selectm-source-list"]
-  Wait Until  Select From List By Value  xpath=//div[@id="dialog-add-attachment-templates"]//select[@data-test-id="selectm-source-list"]  Muu liite
-  List Selection Should Be  xpath=//div[@id="dialog-add-attachment-templates"]//select[@data-test-id="selectm-source-list"]  Muu liite
+  # Log list items for future enhancements and possible failure cases when filter provides more than one list element (now assumed at index 0)
+  @{SOURCE_LIST} =  Get List Items  xpath=//div[@id="dialog-add-attachment-templates"]//select[@data-test-id="selectm-source-list"]
+  Log Many  @{SOURCE_LIST} 
+  Wait Until  Select From List By Index  xpath=//div[@id="dialog-add-attachment-templates"]//select[@data-test-id="selectm-source-list"]  0
+  # List Selection Should Be  xpath=//div[@id="dialog-add-attachment-templates"]//select[@data-test-id="selectm-source-list"]  Muu liite
   Click Element  xpath=//div[@id="dialog-add-attachment-templates"]//button[@data-test-id="selectm-add"]
-  Wait Until  Select From List By Value  xpath=//div[@id="dialog-add-attachment-templates"]//select[@data-test-id="selectm-target-list"]  Muu liite
-  List Selection Should Be  xpath=//div[@id="dialog-add-attachment-templates"]//select[@data-test-id="selectm-target-list"]  Muu liite
   Click Element  xpath=//div[@id="dialog-add-attachment-templates"]//button[@data-test-id="selectm-ok"]
 
 Attachment template dialog should not be visible
