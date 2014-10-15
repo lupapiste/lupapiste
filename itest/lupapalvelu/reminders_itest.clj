@@ -422,7 +422,7 @@
 
     (let [email (last emails)]
       (fact "email check"
-        (:to email) => to
+        (:to email) => (contains to)
         (:subject email) => subject
         (get-in email [:body :plain]) => (contains bodypart)))))
 

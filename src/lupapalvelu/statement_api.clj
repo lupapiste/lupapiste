@@ -72,6 +72,11 @@
   {:description "Pseudo command for UI authorization logic"
    :roles [:authority] :extra-auth-roles [:statementGiver]} [_])
 
+(notifications/defemail :request-statement
+  {:recipients-fn  :recipients
+   :subject-key    "statement-request"
+   :show-municipality-in-subject true})
+
 (defcommand request-for-statement
   {:parameters  [id personIds]
    :roles       [:authority]
@@ -96,10 +101,10 @@
                                  :email (:email %)}) persons)
             statements (map :statement details)
             auth       (map :auth details)
-            mail-list  (map :email details)]
+            recipients (map #(assoc (:auth %) :email (:email %)) details)]
           (update-application command {$push {:statements {$each statements}
                                               :auth {$each auth}}})
-          (notifications/notify! :request-statement (assoc command :data {:email mail-list}))))))
+          (notifications/notify! :request-statement (assoc command :recipients recipients))))))
 
 (defcommand delete-statement
   {:parameters [id statementId]

@@ -32,10 +32,10 @@
     (let [application (query-application sonja application-id) => truthy
           email       (last-email) => truthy]
       (:state application) => "constructionStarted"
-      (:to email) => (email-for-key sonja)
+      (:to email) => (contains (email-for-key sonja))
       (:subject email) => "Lupapiste.fi: Paatoskuja 11 - hakemuksen tila muuttunut"
       (get-in email [:body :plain]) => (contains "Rakennusty\u00f6t aloitettu")
-      email => (partial contains-application-link? application-id)
+      email => (partial contains-application-link? application-id "authority")
 
       (command sonja :inform-construction-ready :id application-id :readyTimestampStr "31.12.2013" :lang "fi") => ok?
 
@@ -46,10 +46,10 @@
         sonja =not=> (allowed? :inform-construction-started :id application-id)
         sonja =not=> (allowed? :create-continuation-period-permit :id application-id)
 
-        (:to email) => (email-for-key sonja)
+        (:to email) => (contains (email-for-key sonja))
         (:subject email) => "Lupapiste.fi: Paatoskuja 11 - hakemuksen tila muuttunut"
         (get-in email [:body :plain]) => (contains "Valmistunut")
-        email => (partial contains-application-link? application-id)))))
+        email => (partial contains-application-link? application-id "authority")))))
 
 (fact* "Application cannot be set to Started state if it is not an YA type of application."
   (let [application    (create-and-submit-application sonja :municipality sonja-muni :address "Paatoskuja 11") => truthy

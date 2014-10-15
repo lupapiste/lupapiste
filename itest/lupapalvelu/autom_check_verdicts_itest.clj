@@ -50,9 +50,9 @@
        (fact "email count" (count emails) => 1)
        (let [email (last emails)]
          (fact "email check"
-           (:to email) => (email-for-key sonja)
+           (:to email) => (contains (email-for-key sonja))
            (:subject email) => "Lupapiste.fi: Paatoskuja 18 - p\u00e4\u00e4t\u00f6s"
-           email => (partial contains-application-link-with-tab? application-id-sent "verdict")
+           email => (partial contains-application-link-with-tab? application-id-sent "verdict" "authority")
            (get-in email [:body :plain]) => (contains "P\u00e4\u00e4t\u00f6s annettu hakemukseen")))))
 
    (let [application-submitted (query-application local-query sonja application-id-submitted) => truthy

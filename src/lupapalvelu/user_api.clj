@@ -67,7 +67,7 @@
 ;; Emails
 (def ^:private base-email-conf
   {:recipients-fn notifications/from-data
-   :model-fn      (fn [{{token :token} :data} _]
+   :model-fn      (fn [{{token :token} :data} conf recipient]
                     {:link-fi (str (env/value :host) "/app/fi/welcome#!/setpw/" token)
                      :link-sv (str (env/value :host) "/app/sv/welcome#!/setpw/" token)})})
 

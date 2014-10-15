@@ -30,8 +30,8 @@
         invites    (map :invite (mapcat :auth data))]
     (ok :invites invites)))
 
-(defn- create-invite-model [command conf]
-  (assoc (notifications/create-app-model command conf) :message (get-in command [:data :text]) ))
+(defn- create-invite-model [command conf recipient]
+  (assoc (notifications/create-app-model command conf recipient) :message (get-in command [:data :text]) ))
 
 (notifications/defemail :invite  {:recipients-fn  notifications/from-data
                                   :model-fn create-invite-model})

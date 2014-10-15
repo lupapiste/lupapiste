@@ -11,9 +11,9 @@
 
 (notifications/defemail :account-activation
   {:recipients-fn  notifications/from-user
-   :model-fn       (fn [{user :user data :data} _]
+   :model-fn       (fn [{data :data} _ recipient]
                      {:link (str (env/value :host) (env/value :activation :path) (:key data))
-                      :name (:firstName user)})})
+                      :name (:firstName recipient)})})
 
 (defn send-activation-mail-for [user]
   (let [userid  (or (:_id user) (:id user))

@@ -38,7 +38,7 @@
 
 ;; Email definition for the "open info request reminder"
 
-(defn- oir-reminder-base-email-model [{{token :token-id created-date :created-date} :data} _]
+(defn- oir-reminder-base-email-model [{{token :token-id created-date :created-date} :data} _ recipient]
   (let  [link-fn (fn [lang] (str (env/value :host) "/api/raw/openinforequest?token-id=" token "&lang=" (name lang)))
          info-fn (fn [lang] (env/value :oir :wanna-join-url))]
     {:link-fi (link-fn :fi)
@@ -134,6 +134,10 @@
                                            :created  (now)}}})))))))
 
 
+(notifications/defemail :reminder-application-state
+  {:subject-key    "active-application-reminder"
+   :recipients-fn  notifications/from-user})
+
 ;; "Hakemus: Hakemuksen tila on valmisteilla tai vireilla, mutta edellisesta paivityksesta on aikaa yli kuukausi. Lahetetaan kuukausittain uudelleen."
 (defn application-state-reminder []
   (let [timestamp-1-month-ago (get-timestamp-from-now :month 1)
@@ -144,7 +148,7 @@
                                                {:reminder-sent (older-than timestamp-1-month-ago)}]})]
     (doseq [app apps]
       (notifications/notify! :reminder-application-state {:application app
-                                                          :data {:email (:email (get-app-owner app))}})
+                                                          :user (get-app-owner app)})
       (update-application (application->command app)
         {$set {:reminder-sent (now)}}))))
 

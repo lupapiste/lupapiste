@@ -113,11 +113,11 @@
                 created => pos?
                 version => (:version latest))))))
 
-      
+
       (fact "Pena change attachment metadata"
-            
+
         (fact "Pena can change operation"
-          (command pena :set-attachment-meta :id application-id :attachmentId (first attachment-ids) :meta {:op {:id "foo" :name "bar"}}) => ok?)        
+          (command pena :set-attachment-meta :id application-id :attachmentId (first attachment-ids) :meta {:op {:id "foo" :name "bar"}}) => ok?)
         (fact "Pena can change contents"
           (command pena :set-attachment-meta :id application-id :attachmentId (first attachment-ids) :meta {:contents "foobart"}) => ok?)
         (fact "Pena can change size"
@@ -139,9 +139,9 @@
             scale => "1:500"))
 
 
-        
+
         )
-      
+
       (let [versioned-attachment (first (:attachments (query-application veikko application-id)))]
         (last-email) ; Inbox zero
         (fact "Meta"
@@ -159,8 +159,8 @@
                    email  (first emails)
                    pena-email  (email-for "pena")]
                (count emails) => 1
-               email => (partial contains-application-link-with-tab? application-id "conversation")
-               (:to email) => pena-email))
+               email => (partial contains-application-link-with-tab? application-id "conversation" "applicant")
+               (:to email) => (contains pena-email)))
 
            (fact "Delete version"
              (command veikko :delete-attachment-version :id application-id

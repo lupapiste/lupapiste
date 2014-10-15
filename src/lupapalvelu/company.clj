@@ -117,8 +117,8 @@
     token-id))
 
 (notif/defemail :new-company-user {:subject-key   "new-company-user.subject"
-                                   :recipients-fn (fn-> :user :email vector)
-                                   :model-fn      (fn [model _] model)})
+                                   :recipients-fn notif/from-user
+                                   :model-fn      (fn [model _ __] model)})
 
 (defmethod token/handle-token :new-company-user [{{:keys [user company role]} :data} {password :password}]
   (find-company-by-id! (:id company)) ; make sure company still exists
@@ -149,8 +149,8 @@
     token-id))
 
 (notif/defemail :invite-company-user {:subject-key   "invite-company-user.subject"
-                                      :recipients-fn (fn-> :user :email vector)
-                                      :model-fn      (fn [model _] model)})
+                                      :recipients-fn notif/from-user
+                                      :model-fn      (fn [model _ __] model)})
 
 (defmethod token/handle-token :invite-company-user [{{:keys [user company role]} :data} {accept :ok}]
   (infof "user %s (%s) %s invitation to company %s (%s)"
@@ -195,11 +195,11 @@
       token-id)))
 
 (notif/defemail :accept-company-invitation {:subject-key   "accept-company-invitation.subject"
-                                            :recipients-fn (fn->> :admins (map :email))
-                                            :model-fn      (fn [model _] model)})
+                                            :recipients-fn :admins
+                                            :model-fn      (fn [model _ __] model)})
 
 (defmethod token/handle-token :accept-company-invitation [{{:keys [company-id application-id]} :data} _]
-  (infof "comnpany %s accepted application %s" company-id application-id)
+  (infof "company %s accepted application %s" company-id application-id)
   (if-let [application (domain/get-application-no-access-checking application-id)]
     (do
       (update-application
