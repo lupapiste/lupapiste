@@ -531,14 +531,14 @@
               <!-- ko foreach: attachments -->
               <tr class="attachment-row" data-bind="click: function() { window.location.hash='#!/attachment/' + $root.application.id() + '/' + id;}">
                 <td class="attachmentState">
-                  <span data-bind="attr: {'class': statusName + ' icon', 
-                                  'data-test-state': state, 
-                                  'data-test-type': type['type-group'] + '.' + type['type-id'], 
+                  <span data-bind="attr: {'class': statusName + ' icon',
+                                  'data-test-state': state,
+                                  'data-test-type': type['type-group'] + '.' + type['type-id'],
                                   'title': loc(statusName + '.title')}">
                   </span>
-                  <span data-bind="visible:$data.signed, 
-                                   attr: {'class': 'icon signed', 
-                                   'title': loc('attachment.signed'), 
+                  <span data-bind="visible:$data.signed,
+                                   attr: {'class': 'icon signed',
+                                   'title': loc('attachment.signed'),
                                    'data-test-icon': 'signed-' + type['type-group'] + '.' + type['type-id']}">
                   </span>
                   <span data-bind="visible:$data.isSent,
@@ -686,7 +686,7 @@
           <section class="accordion">
             <h2 onclick="accordion.click(this)">
               <span class="icon toggle-icon drill-right-white"></span>
-              <span data-bind="lhtml: 'application.neighbors.hearings'" style="margin-right: 0">Naapurit</span>
+              <span data-bind="lhtml: 'application.neighbors.hearings'" style="margin-right: 0">Kuulemiset</span>
             </h2>
             <div class="accordion_content" data-accordion-state="closed">
               <div class="accordion-fields">

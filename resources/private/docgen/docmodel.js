@@ -1421,7 +1421,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       elements.appendChild(self.makeApprovalButtons([], self.model));
     }
 
-    sectionContainer.className = "accordion_content " + (accordionCollapsed ? "" : "expanded");
+    sectionContainer.className = "accordion_content" + (accordionCollapsed ? "" : " expanded");
     sectionContainer.setAttribute("data-accordion-state", (accordionCollapsed ? "closed" : "open"));
     sectionContainer.id = "document-" + self.docId;
 
