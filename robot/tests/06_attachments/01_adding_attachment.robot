@@ -19,7 +19,23 @@ Mikko goes to empty attachments tab
 Download all attachments should be disabled
   Wait Until  Element should not be visible   xpath=//a[@data-test-id="application-download-all-attachement"]
 
+New attachment template button should not be visible for Mikko
+  [Tags]  attachments
+  Element should not be visible  xpath=//div[@id="application-attachments-tab"]//button[@data-test-id="new-attachment-template-button"]
+
 Mikko adds txt attachment without comment
+  [Tags]  attachments
+  Add attachment  ${TXT_TESTFILE_PATH}  ${EMPTY}
+  Application state should be  draft
+  Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${TXT_TESTFILE_NAME}')]
+  
+Mikko deletes attachment immediately by using remove icon
+  [Tags]  attachments
+  Click element  xpath=//div[@id="application-attachments-tab"]//span[@data-test-icon="delete-muut.muu"]
+  Confirm  dynamic-yes-no-confirm-dialog
+  Wait Until  Element should not be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${TXT_TESTFILE_NAME}')]
+  
+Mikko adds again txt attachment without comment
   [Tags]  attachments
   Add attachment  ${TXT_TESTFILE_PATH}  ${EMPTY}
   Application state should be  draft
@@ -78,6 +94,10 @@ Change attachment type
   Tab should be visible  attachments
   Wait Until  Page Should Not Contain  xpath=//a[@data-test-type="muut.muu"]
 
+Signature icon is not visible
+  Element should not be visible  xpath=//div[@id="application-attachments-tab"]//span[@data-test-icon="signed-rakennuspaikka.ote_alueen_peruskartasta"]
+
+
 Sign all attachments
   [Tags]  attachments
   Tab should be visible  attachments
@@ -88,6 +108,9 @@ Sign all attachments
   Wait Until   Element should not be visible  signAttachmentPassword
   Confirm  dynamic-ok-confirm-dialog
 
+Signature icon is visible
+  Wait Until  Element should be visible  xpath=//div[@id="application-attachments-tab"]//span[@data-test-icon="signed-rakennuspaikka.ote_alueen_peruskartasta"]
+  
 Signature is visible
   Open attachment details  rakennuspaikka.ote_alueen_peruskartasta
   Wait Until  Xpath Should Match X Times  //section[@id="attachment"]//*/div[@data-bind="fullName: user"]  1
@@ -123,7 +146,28 @@ Sonja goes to attachments tab
   Click element  xpath=//a[@data-test-id="back-to-application-from-attachment"]
   Open tab  attachments
 
-Sonja see that attachment is for authority
+Sonja adds new attachment template
+  Wait Until Element Is Visible  xpath=//div[@id="application-attachments-tab"]//button[@data-test-id="new-attachment-template-button"]
+  Click Element  xpath=//div[@id="application-attachments-tab"]//button[@data-test-id="new-attachment-template-button"]
+  Wait Until Element Is Visible  xpath=//div[@id="dialog-add-attachment-templates"]//input[@data-test-id="selectm-filter-input"]
+  Input Text  xpath=//div[@id="dialog-add-attachment-templates"]//input[@data-test-id="selectm-filter-input"]  muu
+  List Should Have No Selections  xpath=//div[@id="dialog-add-attachment-templates"]//select[@data-test-id="selectm-source-list"]
+  Click Element  xpath=//div[@id="dialog-add-attachment-templates"]//select[@data-test-id="selectm-source-list"]//option[contains(text(),'Muu liite')]
+  Click Element  xpath=//div[@id="dialog-add-attachment-templates"]//button[@data-test-id="selectm-add"]
+  Click Element  xpath=//div[@id="dialog-add-attachment-templates"]//button[@data-test-id="selectm-ok"]
+
+Attachment template dialog should not be visible
+  Wait Until  Element Should Not Be Visible  xpath=//div[@id="dialog-add-attachment-templates"]//input[@data-test-id="selectm-filter-input"]
+
+Sonja sees that new attachment template is visible in attachments list
+  Wait Until Element Is Visible  xpath=//div[@id="application-attachments-tab"]//a[@data-test-type="muut.muu"]
+
+Sonja deletes the newly created attachment template
+  Click element  xpath=//div[@id="application-attachments-tab"]//span[@data-test-icon="delete-muut.muu"]
+  Confirm  dynamic-yes-no-confirm-dialog
+  Wait Until  Element should not be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[@data-test-type="muut.muu"]
+
+Sonja continues with Mikko's attachment. She sees that attachment is for authority
   [Tags]  attachments
   Wait Until  Attachment state should be  rakennuspaikka.ote_alueen_peruskartasta  requires_authority_action
 
@@ -158,6 +202,11 @@ Sonja approves attachment
 Approve-button should be disabled
   [Tags]  attachments
   Wait until  Element should be disabled  test-attachment-approve
+  
+Attachment state should be ok
+  Click element  xpath=//a[@data-test-id="back-to-application-from-attachment"]
+  Tab should be visible  attachments
+  Wait Until  Attachment state should be  rakennuspaikka.ote_alueen_peruskartasta  ok
 
 *** Keywords ***
 

@@ -26,6 +26,15 @@ var repository = (function() {
         attachment.signed = true;
       }
     }
+    
+    attachment.isSent = false;
+    attachment.sentDateString = "-";
+    if (!_.isUndefined(attachment.sent) || attachment.sent) {
+      attachment.isSent = true;
+      attachment.sentDateString = moment(attachment.sent).format("D.M.YYYY");
+    }
+
+    attachment.stamped = _.isUndefined(attachment.latestVersion) || !attachment.latestVersion ? false : attachment.latestVersion.stamped;
   }
 
   function load(id, pending, callback) {
