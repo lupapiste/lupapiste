@@ -648,7 +648,7 @@
                       <h3 data-bind="ltext: 'verdict.signatures'"></h3>
 
                       <div data-bind="if: $data.signature">
-                        <label data-bind="text: signature.user.firstName + ' ' + signature.user.lastName"></label>
+                        <label data-bind="fullName: $data.signature.user"></label>
                         <span class="value" data-bind="dateString: signature.created"></span>
                       </div>
 
