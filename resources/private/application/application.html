@@ -326,7 +326,9 @@
                         <i><span data-bind="foreach: roles"><span data-bind="text: loc($data)"></span> </span></i>
                       </span>
                       <span class="invite-state">
-                        <span data-bind="if: $data.invite"><span class="user-invite" data-bind="ltext: 'invited'"></span></span>
+                        <span data-bind="if: $data.invite">
+                          <span class="user-invite" data-bind="ltext: 'invited'"></span>
+                        </span>
                         <span data-bind="if: !$data.invite">
                           <span data-bind="visible: $root.application.isNotOwner($data), ltext: 'accepted'"></span>
                           <!-- ko if: $data.inviteAccepted -->
@@ -334,12 +336,11 @@
                           <!-- /ko -->
                         </span>
                       </span>
-                      <span data-bind="visible: $root.application.isNotOwner($data)"><a href="#" data-bind="ltext: 'application.remove-auth', click: $root.application.removeAuth"></a></span>
-
-                      <span data-bind="if: $root.application.canSubscribe($data)">
-                      <a href="#" data-bind="visible: $data.unsubscribed && $data.unsubscribed(), click: $root.application.subscribeNotifications, ltext: 'subscribeNotifications'"></a>
-                      <a href="#" data-bind="visible: !$data.unsubscribed || !$data.unsubscribed(), click: $root.application.unsubscribeNotifications, ltext: 'unsubscribeNotifications'"></a>
-                      </span>
+                      <a class="invite-action" href="#" data-bind="ltext: 'application.remove-auth', click: $root.application.removeAuth, visible: $root.application.isNotOwner($data)"></a>
+                      <!-- ko if: $root.application.canSubscribe($data) -->
+                      <a class="invite-action" href="#" data-bind="visible: $data.unsubscribed && $data.unsubscribed(), click: $root.application.subscribeNotifications, ltext: 'subscribeNotifications'"></a>
+                      <a class="invite-action" href="#" data-bind="visible: !$data.unsubscribed || !$data.unsubscribed(), click: $root.application.unsubscribeNotifications, ltext: 'unsubscribeNotifications'"></a>
+                      <!-- /ko -->
                     </li>
                   </ul>
 
