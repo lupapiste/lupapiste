@@ -14,7 +14,7 @@
 ;; Helpers
 ;;
 
-(defn- get-application-link [{:keys [infoRequest id]} suffix lang {role :role :or {role "applicant"}}]
+(defn get-application-link [{:keys [infoRequest id]} suffix lang {role :role :or {role "applicant"}}]
   (let [permit-type-path (if infoRequest "/inforequest" "/application")
         full-path        (str permit-type-path "/" id suffix)]
     (str (env/value :host) "/app/" lang "/" (u/applicationpage-for role) "#!" full-path)))
@@ -74,15 +74,6 @@
    :state-sv (i18n/localize :sv (str (:state application)))
    :modified (to-local-date (:modified application))})
 
-(defn- request-statement-reminder-email-model [{{created-date :created-date} :data application :application :as command} _ recipient]
-  {:link-fi (get-application-link application nil "fi" recipient)
-   :link-sv (get-application-link application nil "sv" recipient)
-   :created-date created-date})
-
-(defn- statement-giver-model [{{:keys [text organization]} :data} _ __]
-  {:text text
-   :organization-fi (:fi (:name organization))
-   :organization-sv (:sv (:name organization))})
 
 ;;
 ;; Recipient functions
@@ -99,15 +90,7 @@
 ;; Configuration for generic notifications
 ;;
 
-(defonce ^:private mail-config
-  (atom {:application-verdict          {:subject-key    "verdict"
-                                        :tab            "/verdict"}
-         :add-statement-giver          {:recipients-fn  from-user
-                                        :subject-key    "application.statements"
-                                        :model-fn       statement-giver-model}
-         :reminder-request-statement   {:recipients-fn  from-data
-                                        :subject-key    "statement-request-reminder"
-                                        :model-fn       request-statement-reminder-email-model}}))
+(defonce ^:private mail-config (atom {}))
 
 ;;
 ;; Public API

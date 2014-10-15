@@ -66,17 +66,19 @@
 
 ;; Emails
 (def ^:private base-email-conf
-  {:recipients-fn notifications/from-data
-   :model-fn      (fn [{{token :token} :data} conf recipient]
+  {:model-fn      (fn [{{token :token} :data} conf recipient]
                     {:link-fi (str (env/value :host) "/app/fi/welcome#!/setpw/" token)
                      :link-sv (str (env/value :host) "/app/sv/welcome#!/setpw/" token)})})
 
-(notifications/defemail :invite-authority (assoc base-email-conf :subject-key "authority-invite.title"))
-(notifications/defemail :reset-password   (assoc base-email-conf :subject-key "reset.email.title"))
+(notifications/defemail :invite-authority
+  (assoc base-email-conf :subject-key "authority-invite.title" :recipients-fn notifications/from-user))
+
+(notifications/defemail :reset-password
+  (assoc base-email-conf :subject-key "reset.email.title" :recipients-fn notifications/from-data))
 
 (defn- notify-new-authority [new-user created-by]
   (let [token (token/make-token :authority-invitation created-by (merge new-user {:caller-email (:email created-by)}))]
-    (notifications/notify! :invite-authority {:data {:email (:email new-user) :token token}})))
+    (notifications/notify! :invite-authority {:user new-user, :data {:token token}})))
 
 (defn- validate-create-new-user! [caller user-data]
   (when-let [missing (util/missing-keys user-data [:email :role])]

@@ -33,7 +33,7 @@
 (defn- create-invite-model [command conf recipient]
   (assoc (notifications/create-app-model command conf recipient) :message (get-in command [:data :text]) ))
 
-(notifications/defemail :invite  {:recipients-fn  notifications/from-data
+(notifications/defemail :invite  {:recipients-fn :recipients
                                   :model-fn create-invite-model})
 
 (defcommand invite
@@ -42,8 +42,7 @@
                       action/email-validator]
    :states     (action/all-application-states-but [:closed :canceled])
    :roles      [:applicant :authority]
-   :notified   true
-   :on-success (notify :invite)}
+   :notified   true}
   [{:keys [created user application] :as command}]
   (let [email (-> email ss/lower-case ss/trim)]
     (if (domain/invite application email)
@@ -63,10 +62,13 @@
             auth    (assoc writer :invite invite)]
         (if (domain/has-auth? application (:id invited))
           (fail :invite.already-has-auth)
-          (update-application command
-            {:auth {$not {$elemMatch {:invite.user.username email}}}}
-            {$push {:auth     auth}
-             $set  {:modified created}}))))))
+          (do
+            (update-application command
+              {:auth {$not {$elemMatch {:invite.user.username email}}}}
+              {$push {:auth     auth}
+               $set  {:modified created}})
+            (notifications/notify! :invite (assoc command :recipients [invited]))
+            (ok)))))))
 
 (defcommand approve-invite
   {:parameters [id]

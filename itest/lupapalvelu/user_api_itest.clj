@@ -106,7 +106,7 @@
     (command sipoo :update-user-organization :email "tonja.sibbo@sipoo.fi" :firstName "bar" :lastName "har" :operation "add") => ok?
 
     (let [email (last-email)]
-      (:to email) => "tonja.sibbo@sipoo.fi"
+      (:to email) => (contains "tonja.sibbo@sipoo.fi")
       (:subject email) => "Lupapiste.fi: Kutsu Lupapiste.fi palvelun viranomaisk\u00e4ytt\u00e4j\u00e4ksi"
       (get-in email [:body :plain]) => (contains "/app/fi/welcome#!/setpw/"))))
 

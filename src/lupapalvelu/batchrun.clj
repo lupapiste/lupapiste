@@ -57,7 +57,15 @@
 
 (notifications/defemail :reminder-neighbor (assoc neighbors/email-conf :subject-key "neighbor-reminder"))
 
+(defn- request-statement-reminder-email-model [{{created-date :created-date} :data application :application :as command} _ recipient]
+  {:link-fi (notifications/get-application-link application nil "fi" recipient)
+   :link-sv (notifications/get-application-link application nil "sv" recipient)
+   :created-date created-date})
 
+(notifications/defemail :reminder-request-statement
+  {:recipients-fn  :recipients
+   :subject-key    "statement-request-reminder"
+   :model-fn       request-statement-reminder-email-model})
 
 ;; "Lausuntopyynto: Pyyntoon ei ole vastattu viikon kuluessa ja hakemuksen tila on valmisteilla tai vireilla. Lahetetaan viikoittain uudelleen."
 (defn statement-request-reminder []
@@ -70,14 +78,13 @@
                                                                         {:reminder-sent (older-than timestamp-1-week-ago)}]}}})]
     (doseq [app apps
             statement (:statements app)
-            :let [email (-> statement :person :email)
-                  requested (:requested statement)]
+            :let [requested (:requested statement)]
             :when (and
                     (nil? (:given statement))
                     (< requested timestamp-1-week-ago))]
       (notifications/notify! :reminder-request-statement {:application app
-                                                          :data {:email email
-                                                                 :created-date (util/to-local-date requested)}})
+                                                          :recipients [(:person statement)]
+                                                          :data {:created-date (util/to-local-date requested)}})
       (update-application (application->command app)
         {:statements {$elemMatch {:id (:id statement)}}}
         {$set {:statements.$.reminder-sent (now)}}))))

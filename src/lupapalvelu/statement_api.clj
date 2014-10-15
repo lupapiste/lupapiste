@@ -27,6 +27,17 @@
         permitPersons (or (:statementGivers organization) [])]
     (ok :data permitPersons)))
 
+(defn- statement-giver-model [{{:keys [text organization]} :data} _ __]
+  {:text text
+   :organization-fi (:fi (:name organization))
+   :organization-sv (:sv (:name organization))})
+
+
+(notifications/defemail :add-statement-giver
+  {:recipients-fn  notifications/from-user
+   :subject-key    "application.statements"
+   :model-fn       statement-giver-model})
+
 (defcommand create-statement-giver
   {:parameters [email text]
    :input-validators [(partial action/non-blank-parameters [:email])
