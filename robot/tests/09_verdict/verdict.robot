@@ -67,6 +67,21 @@ Add and delete verdict
   Confirm  dynamic-yes-no-confirm-dialog
   Verdict count is  3
 
+Correct tab opening elements are visible
+  Element should not be visible  //*[@data-test-id='application-open-info-tab']
+  Element should not be visible  //*[@data-test-id='application-open-parties-tab']
+  Element should be visible  //*[@data-test-id='application-open-tasks-tab']
+  Element should be visible  //*[@data-test-id='application-open-attachments-tab']
+  Element should not be visible  //*[@data-test-id='application-open-requiredFieldSummary-tab']
+  Element should not be visible  //*[@data-test-id='application-open-statement-tab']
+  Element should be visible  //*[@data-test-id='application-open-verdict-tab']
+  Element should be visible  //*[@data-test-id='application-open-applicationSummary-tab']
+
+Accordions in the Application Summary tab are closed
+  Open tab  applicationSummary
+  Xpath Should Match X Times  //div[@id='application-applicationSummary-tab']//section[@class='accordion']//div[@data-accordion-state='closed']  9
+  Xpath Should Match X Times  //div[@id='application-applicationSummary-tab']//section[@class='accordion']//div[@data-accordion-state='open']  0
+
 Stamping dialog opens
   Open tab  attachments
   Element should be visible  xpath=//section[@id='application']//button[@data-test-id='application-stamp-btn']
