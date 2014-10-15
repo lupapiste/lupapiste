@@ -7,3 +7,11 @@ attachment.label.size: Piirustuksen koko
 subscribeNotifications: Tilaa sähköposti-ilmoitukset
 unsubscribeNotifications: Peruuta sähköposti-ilmoitukset
 application.remove-auth: Poista valtuutus
+
+verdict.signatures: Allekirjoitukset
+verdict.signature.description: Päätös vaatii hakijan allekirjoituksen
+verdict.sign: Allekirjoita
+
+verdict.sign-dialog.header: Allekirjoita päätös
+verdict.sign-dialog.contentDescription: Päätöksen allekirjoituksen kuvaus
+verdict.sign-dialog.signButton: Allekirjoita

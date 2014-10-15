@@ -6,11 +6,11 @@
       <div id="dialog-sign-verdict" class="window autosized">
         <div data-bind="with: $root.verdictSigningModel">
           <div class="dialog-header">
-            <p>Allekirjoita päätös</p>
+            <p data-bind="ltext: 'verdict.sign-dialog.header'"></p>
             <p class="dialog-close close">X</p>
           </div>
           <div class="dialog-content">
-            <p>Päätöksen allekirjoituksen kuvaus</p>
+            <p data-bind="ltext: 'verdict.sign-dialog.contentDescription'"></p>
 
             <label for="signVerdictPassword" class="form-label"></label>
             <input id="signVerdictPassword" data-test-id="signVerdictPassword" type="password" data-bind="textInput: password"class="form-input text"/>
@@ -19,9 +19,9 @@
               <div data-bind="ltext: errorMessage" class="context-error"></div>
             </div>
 
-            <button data-bind="click: sign, enable: password() && !processing()" class="btn btn-primary btn-dialog"
-                    data-test-id="do-sign-attachment">
-              <span>Allekirjoita</span>
+            <button data-bind="click: sign, enable: authorizationModel.ok('sign-verdict') && password() && !processing()" class="btn btn-primary btn-dialog"
+                    data-test-id="do-sign-verdict">
+              <span data-bind="ltext: 'verdict.sign-dialog.signButton'"></span>
               <em data-bind="visible: pending" class="button-loader"></em>
             </button>
           </div>

@@ -644,13 +644,20 @@
                   </div>
 
                   <div class="accordion-fields">
-                    <div style="float: right; margin-right: 5em;" data-bind="with: $parent">
-                      <h3>Allekirjoitukset</h3>
-                      <div>
-                        <span>Päätös vaatii hakijan allekirjoituksen</span>
-                        <br/>
-                        <button class="btn btn-primary" data-bind="click: function() {$root.verdictModel.sign($root, $data);}">Allekirjoita</button>
+                    <div class="verdict-signature-fields" data-bind="visible: $root.authorization.ok('sign-verdict') && !$parent.draft">
+                      <h3 data-bind="ltext: 'verdict.signatures'"></h3>
+
+                      <div data-bind="if: $data.signature">
+                        <label data-bind="text: signature.user.firstName + ' ' + signature.user.lastName"></label>
+                        <span class="value" data-bind="dateString: signature.created"></span>
                       </div>
+
+                      <div data-bind="ifnot: $data.signature">
+                        <span data-bind="ltext: 'verdict.signature.description'"></span>
+                        <br/>
+                        <button class="btn btn-primary" data-bind="click: function() {$root.verdictModel.openSigningDialog($root, $parent);}, ltext: 'verdict.sign'"></button>
+                      </div>
+
                     </div>
                     <!--  ko if:  $data.paivamaarat -->
                     <div data-bind="if: paivamaarat.anto" class="key-value-pair">
