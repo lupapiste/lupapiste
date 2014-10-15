@@ -40,7 +40,7 @@
   {:parameters [id email title text documentName documentId path]
    :input-validators [(partial action/non-blank-parameters [:email])
                       action/email-validator]
-   :states     (action/all-application-states-but [:canceled])
+   :states     (action/all-application-states-but [:closed :canceled])
    :roles      [:applicant :authority]
    :notified   true
    :on-success (notify :invite)}
@@ -71,7 +71,7 @@
 (defcommand approve-invite
   {:parameters [id]
    :roles      [:applicant]
-   :states     (action/all-application-states-but [:sent :verdictGiven :constructionStarted :closed :canceled])}
+   :states     (action/all-application-states-but [:closed :canceled])}
   [{:keys [created user application] :as command}]
   (when-let [my-invite (domain/invite application (:email user))]
     (update-application command
@@ -95,8 +95,8 @@
     flatten
     (zipmap <> (repeat ""))))
 
-(defn- do-remove-auth [{application :application :as command} email]
-  (let [username (-> email ss/lower-case ss/trim)
+(defn- do-remove-auth [{application :application :as command} username]
+  (let [username (-> username ss/lower-case ss/trim)
         user-pred #(when (and (= (:username %) username) (not= (:type %) "owner")) %)]
     (when (some user-pred (:auth application))
       (let [updated-app (update-in application [:auth] (fn [a] (remove user-pred a)))

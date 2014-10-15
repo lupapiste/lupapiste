@@ -44,7 +44,6 @@
     return false;
   };
 
-  var postVerdictStates = {verdictGiven:true, constructionStarted:true, closed:true};
 
   var inviteModel = new LUPAPISTE.InviteModel();
   var verdictModel = new LUPAPISTE.VerdictsModel();
@@ -55,40 +54,15 @@
   var addPartyModel = new LUPAPISTE.AddPartyModel();
   var createTaskController = LUPAPISTE.createTaskController;
   var mapModel = new LUPAPISTE.MapModel(authorizationModel);
+  var attachmentsTab = new LUPAPISTE.AttachmentsTabModel(applicationModel);
 
   var authorities = ko.observableArray([]);
   var permitSubtypes = ko.observableArray([]);
-  var preAttachmentsByGroup = ko.observableArray();
-  var postAttachmentsByGroup = ko.observableArray();
-  var postVerdict = ko.observable(false);
 
   var inviteCompanyModel = new LUPAPISTE.InviteCompanyModel(applicationModel.id);
 
   var accordian = function(data, event) { accordion.toggle(event); };
 
-  function getPreAttachmentsByGroup(source) {
-    return getAttachmentsByGroup(
-      _.filter(source, function(attachment) {
-          return !postVerdictStates[attachment.applicationState];
-      }));
-  }
-
-  function getPostAttachmentsByGroup(source) {
-    return getAttachmentsByGroup(
-      _.filter(source, function(attachment) {
-          return postVerdictStates[attachment.applicationState];
-      }));
-  }
-
-  function getAttachmentsByGroup(source) {
-    var attachments = _.map(source, function(a) {
-      a.latestVersion = _.last(a.versions || []);
-      a.statusName = LUPAPISTE.statuses[a.state] || "unknown";
-      return a;
-    });
-    var grouped = _.groupBy(attachments, function(attachment) { return attachment.type['type-group']; });
-    return _.map(grouped, function(attachments, group) { return {group: group, attachments: attachments}; });
-  }
 
   var AuthorityInfo = function(id, firstName, lastName) {
     this.id = id;
@@ -172,21 +146,7 @@
       // Operations
       applicationModel.operationsCount(_.map(_.countBy(app.operations, "name"), function(v, k) { return {name: k, count: v}; }));
 
-      // Pre-verdict attachments
-      preAttachmentsByGroup(getPreAttachmentsByGroup(app.attachments));
-
-      // Post-verdict attachments
-      postAttachmentsByGroup(getPostAttachmentsByGroup(app.attachments));
-
-      // Setting disable value for the "Send unsent attachments" button
-      var unsentAttachmentFound =
-        _.some(app.attachments, function(a) {
-          var lastVersion = _.last(a.versions);
-          return lastVersion &&
-                 (!a.sent || lastVersion.created > a.sent) &&
-                 (!a.target || (a.target.type !== "statement" && a.target.type !== "verdict"));
-        });
-      applicationModel.unsentAttachmentsNotFound(!unsentAttachmentFound);
+      attachmentsTab.refresh(applicationModel);
 
       // Statements
       requestForStatementModel.setApplicationId(app.id);
@@ -197,8 +157,6 @@
       // permit subtypes
       permitSubtypes(applicationDetails.permitSubtypes);
 
-      // Post/pre verdict state?
-      postVerdict(!!postVerdictStates[app.state]);
 
       // Mark-seen
       if (applicationModel.infoRequest() && authorizationModel.ok("mark-seen")) {
@@ -287,39 +245,7 @@
       }}, 1000);
   }
 
-  var attachmentTemplatesModel = new function() {
-    var self = this;
 
-    self.ok = function(ids) {
-      ajax.command("create-attachments", {id: applicationModel.id(), attachmentTypes: ids})
-        .success(function() { repository.load(applicationModel.id()); })
-        .complete(LUPAPISTE.ModalDialog.close)
-        .call();
-    };
-
-    self.init = function() {
-      self.selectm = $("#dialog-add-attachment-templates .attachment-templates").selectm();
-      self.selectm.ok(self.ok).cancel(LUPAPISTE.ModalDialog.close);
-      return self;
-    };
-
-    self.show = function() {
-      var data = _.map(applicationModel.allowedAttachmentTypes(), function(g) {
-        var groupId = g[0];
-        var groupText = loc(["attachmentType", groupId, "_group_label"]);
-        var attachemntIds = g[1];
-        var attachments = _.map(attachemntIds, function(a) {
-          var id = {"type-group": groupId, "type-id": a};
-          var text = loc(["attachmentType", groupId, a]);
-          return {id: id, text: text};
-        });
-        return [groupText, attachments];
-      });
-      self.selectm.reset(data);
-      LUPAPISTE.ModalDialog.open("#dialog-add-attachment-templates");
-      return self;
-    };
-  }();
 
   function initPage(kind, e) {
     var newId = e.pagePath[0];
@@ -436,13 +362,9 @@
       application: applicationModel,
       authorities: authorities,
       permitSubtypes: permitSubtypes,
-      postVerdict: postVerdict,
-      preAttachmentsByGroup: preAttachmentsByGroup,
-      postAttachmentsByGroup: postAttachmentsByGroup,
       // models
       addLinkPermitModel: addLinkPermitModel,
       addPartyModel: addPartyModel,
-      attachmentTemplatesModel: attachmentTemplatesModel,
       authorization: authorizationModel,
       changeLocationModel: changeLocationModel,
       applicationComment: commentModel,
@@ -458,7 +380,8 @@
       signingModel: signingModel,
       verdictSigningModel: verdictSigningModel,
       verdictModel: verdictModel,
-      openInviteCompany: inviteCompanyModel.open.bind(inviteCompanyModel)
+      openInviteCompany: inviteCompanyModel.open.bind(inviteCompanyModel),
+      attachmentsTab: attachmentsTab
     };
 
     $("#application").applyBindings(bindings);
@@ -469,7 +392,7 @@
     $(signingModel.dialogSelector).applyBindings({signingModel: signingModel, authorization: authorizationModel});
     $(verdictSigningModel.dialogSelector).applyBindings({verdictSigningModel: verdictSigningModel});
     $(inviteCompanyModel.selector).applyBindings(inviteCompanyModel);
-    attachmentTemplatesModel.init();
+    attachmentsTab.attachmentTemplatesModel.init();
   });
 
 })();

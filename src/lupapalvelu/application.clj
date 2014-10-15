@@ -69,9 +69,7 @@
     (let [path-arr     (if-not (blank? path) (split path #"\.") [])
           schema       (schemas/get-schema (:schema-info document))
           subject      (user/get-user-by-id user-id)
-          with-hetu    (and
-                         (model/has-hetu? (:body schema) path-arr)
-                         (user/same-user? current-user subject))
+          with-hetu    (model/has-hetu? (:body schema) path-arr)
           person       (tools/unwrapped (model/->henkilo subject :with-hetu with-hetu :with-empty-defaults true))
           model        (if (seq path-arr)
                          (assoc-in {} (map keyword path-arr) person)
@@ -672,7 +670,6 @@
   [{{:keys [propertyId] :as application} :application user :user :as command}]
   (let [results (mongo/select :applications
                   (merge (domain/application-query-for user) {:_id {$ne id}
-                                                              :state {$nin ["draft"]}
                                                               :infoRequest false
                                                               :permitType (:permitType application)
                                                               :operations.name {$nin ["ya-jatkoaika"]}})
@@ -704,9 +701,9 @@
     (mongo/update-by-id :app-links db-id
       {:_id  db-id
        :link [id link-permit-id]
-       id    {:type "application"
-              :apptype (:name (first operations))
-              :propertyId propertyId}
+       id             {:type "application"
+                       :apptype (:name (first operations))
+                       :propertyId propertyId}
        link-permit-id {:type "linkpermit"
                        :linkpermittype (if (.startsWith link-permit-id "LP-")
                                          "lupapistetunnus"

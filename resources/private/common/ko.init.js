@@ -194,6 +194,9 @@
   };
 
   ko.bindingHandlers.saveIndicator = {
+    init: function(element) {
+      $(element).text(loc("form.saved"));
+    },
     update: function(element, valueAccessor, allBindingsAccessor) {
       var value = ko.utils.unwrapObservable(valueAccessor());
       var bindings = ko.utils.unwrapObservable(allBindingsAccessor());
@@ -202,6 +205,58 @@
         setTimeout(function() {
           $(element).fadeOut(200)
         }, 4000);
+      }
+    }
+  }
+
+  ko.bindingHandlers.transition = {
+    init: function(element, valueAccessor, allBindings) {
+      var value = ko.utils.unwrapObservable(valueAccessor());
+      var className = allBindings()["class"];
+      if (className) {
+        $(element).toggleClass(className, value);
+      }
+    },
+    update: function(element, valueAccessor, allBindings) {
+      var value = ko.utils.unwrapObservable(valueAccessor());
+      var className = allBindings()["class"];
+      var type = allBindings().type;
+      if (type) {
+        $(element)[type + "Toggle"](1000);
+      } else {
+        $(element).toggleClass(className, value, 100);
+      }
+    }
+  };
+
+  ko.bindingHandlers.slider = {
+    update: function(element, valueAccessor, allBindingsAccessor) {
+      var value = ko.utils.unwrapObservable(valueAccessor());
+      var bindings = ko.utils.unwrapObservable(allBindingsAccessor());
+      var duration = bindings.duration || 100;
+      var easing = bindings.easing || "swing";
+      if (value) {
+        $(element).slideDown(duration, easing);
+      } else {
+        $(element).slideUp(duration, easing);
+      }
+    }
+  }
+
+  ko.bindingHandlers.drill = {
+    init: function(element) {
+      $(element).addClass("icon");
+    },
+    update: function(element, valueAccessor, allBindingsAccessor) {
+      var value = ko.utils.unwrapObservable(valueAccessor());
+      var bindings = ko.utils.unwrapObservable(allBindingsAccessor());
+      var color = bindings.color || "white";
+      if (value) {
+        $(element).addClass("drill-down-" + color);
+        $(element).removeClass("drill-right-" + color);
+      } else {
+        $(element).removeClass("drill-down-" + color);
+        $(element).addClass("drill-right-" + color);
       }
     }
   }

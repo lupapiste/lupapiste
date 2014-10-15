@@ -12,6 +12,7 @@
   {:parameters [id urgency]
    :roles [:authority]
    :states action/all-states
+   :extra-auth-roles [:statementGiver]
    :input-validators [validate-urgency]}
   [command]
   (update-application command {$set {:urgency urgency}}))
@@ -19,6 +20,7 @@
 (defcommand add-authority-notice
   {:parameters [id authorityNotice]
    :states action/all-states
+   :extra-auth-roles [:statementGiver]
    :roles [:authority]}
   [command]
   (update-application command {$set {:authorityNotice authorityNotice}}))

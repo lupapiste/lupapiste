@@ -5,13 +5,18 @@
     <script type="text/html" id="notice-template">
       <div class="application-state">
         <label data-bind="ltext: 'notice.urgency'"></label>
+        <span class="save-indicator" data-bind="saveIndicator: indicator, name: 'urgency'"></span>
         <select data-test-id="notice-urgency-select" data-bind="options: availableUrgencyStates,
                            value: urgency,
                            optionsText: function(item) {
                              return loc(['notice', 'urgency', item]);
                            }"></select>
       </div>
-      <h3><span data-bind="ltext: 'notice.prompt'"/> (<span data-bind="ltext: 'notice.prompt.info'"/>): </h3>
+      <label>
+        <span data-bind="ltext: 'notice.prompt'"/>
+        (<span data-bind="ltext: 'notice.prompt.info'"/>):
+      </label>
+      <span class="save-indicator" data-bind="saveIndicator: indicator, name: 'notice'"></span>
       <div class="textarea-wrapper">
         <textarea
           data-bind="attr: {placeholder: loc('comment.placeholder')}, textInput: authorityNotice"

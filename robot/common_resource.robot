@@ -133,6 +133,9 @@ Close side panel
   Run keyword If  ${sidePanelOpen}  Click by id  open-${name}-side-panel
   Side panel should not be visible  ${name}
 
+Open last email
+  Go to  ${SERVER}/api/last-email
+
 #
 # Login stuff
 #
@@ -551,6 +554,12 @@ Input comment and mark answered
   Click element  xpath=//div[@id='dynamic-ok-confirm-dialog']//button[@data-test-id='confirm-yes']
   Wait until  element should not be visible  xpath=//div[@id='dynamic-ok-confirm-dialog']
   Wait until  Element should be visible  xpath=//section[@id='inforequest']//div[contains(@class,'comment-text')]//span[text()='${message}']
+
+Mark answered
+  Click element  xpath=//section[@id='inforequest']//button[@data-test-id='comment-request-mark-answered']
+  Wait until  element should be visible  xpath=//div[@id='dynamic-ok-confirm-dialog']//button[@data-test-id='confirm-yes']
+  Click element  xpath=//div[@id='dynamic-ok-confirm-dialog']//button[@data-test-id='confirm-yes']
+  Wait until  element should not be visible  xpath=//div[@id='dynamic-ok-confirm-dialog']
 
 Comment count is
   [Arguments]  ${section}  ${amount}

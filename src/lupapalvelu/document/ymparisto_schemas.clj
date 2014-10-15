@@ -18,7 +18,7 @@
 
 (def meluilmoitus (body
                     {:name "rakentaminen" :type :group
-                     :body [{:name "melua-aihettava-toiminta" :type :select
+                     :body [{:name "melua-aihettava-toiminta" :type :select :sortBy :displayname
                              :body [{:name "louhinta"}
                                     {:name "murskaus"}
                                     {:name "paalutus"}]}
@@ -57,7 +57,7 @@
                             :body [{:name "luokitus" :type :text :max-len 4000}
                                    {:name "suojavyohykkeet" :type :text :max-len 4000}]}
                            {:name "vedenottamot" :type :text :max-len 4000}
-                           {:name "vakuus" :type :select
+                           {:name "vakuus" :type :select :sortBy :displayname
                             :body [{:name "EiAloiteta"}
                                    {:name "Rahaa"}
                                    {:name "Pankkitakaus"}]}))
@@ -111,6 +111,6 @@
     :body [kuvaus]}
    {:info {:name "paatoksen-toimitus"
            :order 9999}
-    :body [{:name "paatoksenToimittaminen" :type :select
+    :body [{:name "paatoksenToimittaminen" :type :select :sortBy :displayname
             :body [{:name "Noudetaan"}
                    {:name "Postitetaan"}]}]}])

@@ -89,8 +89,27 @@ Mikko can't invite himself
 Mikko adds comment so thate application will be visible to admin
   Open to authorities  Woe to you, Oh Earth and Sea, for the Devil sends the beast with wrath, because he knows the time is short...
 
+Mikko invites Solita
+  Click enabled by test id  company-invite
+  Wait Until  Element should be visible  selectCompanyToInvite
+  Select From List  selectCompanyToInvite  Solita Oy, Tulli Business Park Tampere
+  Click enabled by test id  submit-company-invitation
+  Wait Until  Page should contain  fi1060155-5
+
 Mikko decides to go to the desert, put on his ipod, and listen some some British hard-rock band
   Logout
+
+Solita accepts invite
+  Open last email
+  Wait until  Element should contain  id=to  kaino@solita.fi
+  Click Element  xpath=(//a)[2]
+  Wait until  Page should contain  Hakemus on liitetty onnistuneesti yrityksen tiliin.
+  [Teardown]  Go to login page
+
+Kaino Solita logs in and opens the application
+  User logs in  kaino@solita.fi  kaino123  Kaino Solita
+  Open application  invite-app  753-423-2-159
+  [Teardown]  logout
 
 Sonja (the Authority) is not allowed to invite people
   Sonja logs in
@@ -124,6 +143,7 @@ Mikko creates a new tyonjohtaja application
 Mikko can see invite tyonjohtaja button in parties tab
   Open tab  parties
   Element should be visible  xpath=//*[@data-test-id='application-invite-tyonjohtaja']
+
 Mikko invites previously unknown user Unto as tyonjohtaja
   Element should be visible  xpath=//*[@data-test-id='application-invite-tyonjohtaja']
   Click by test id  application-invite-tyonjohtaja

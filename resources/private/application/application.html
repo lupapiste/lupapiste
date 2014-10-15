@@ -289,7 +289,10 @@
             </div>
             <div data-bind="if: $root.authorization.ok('link-permit-required')">
               <p data-bind="ltext: 'help.AddPermit'"></p>
-              <button data-bind="click: $root.addLinkPermitModel.openAddLinkPermitDialog, enable: $root.authorization.ok('link-permit-required')" class="btn-primary">
+              <button data-bind="click: $root.addLinkPermitModel.openAddLinkPermitDialog,
+                                 enable: $root.authorization.ok('link-permit-required'),
+                                 visible: $root.authorization.ok('add-link-permit')"
+                      class="btn-primary">
                <span data-bind="ltext: 'application.addLinkPermit'"></span> <span class="icon add left-align"></span>
               </button>
             </div>
@@ -323,7 +326,9 @@
                         <i><span data-bind="foreach: roles"><span data-bind="text: loc($data)"></span> </span></i>
                       </span>
                       <span class="invite-state">
-                        <span data-bind="if: $data.invite"><span class="user-invite" data-bind="ltext: 'invited'"></span></span>
+                        <span data-bind="if: $data.invite">
+                          <span class="user-invite" data-bind="ltext: 'invited'"></span>
+                        </span>
                         <span data-bind="if: !$data.invite">
                           <span data-bind="visible: $root.application.isNotOwner($data), ltext: 'accepted'"></span>
                           <!-- ko if: $data.inviteAccepted -->
@@ -331,12 +336,11 @@
                           <!-- /ko -->
                         </span>
                       </span>
-                      <span data-bind="visible: $root.application.isNotOwner($data)"><a href="#" data-bind="ltext: 'application.remove-auth', click: $root.application.removeAuth"></a></span>
-
-                      <span data-bind="if: $root.application.canSubscribe($data)">
-                      <a href="#" data-bind="visible: $data.unsubscribed && $data.unsubscribed(), click: $root.application.subscribeNotifications, ltext: 'subscribeNotifications'"></a>
-                      <a href="#" data-bind="visible: !$data.unsubscribed || !$data.unsubscribed(), click: $root.application.unsubscribeNotifications, ltext: 'unsubscribeNotifications'"></a>
-                      </span>
+                      <a class="invite-action" href="#" data-bind="ltext: 'application.remove-auth', click: $root.application.removeAuth, visible: $root.application.isNotOwner($data)"></a>
+                      <!-- ko if: $root.application.canSubscribe($data) -->
+                      <a class="invite-action" href="#" data-bind="visible: $data.unsubscribed && $data.unsubscribed(), click: $root.application.subscribeNotifications, ltext: 'subscribeNotifications'"></a>
+                      <a class="invite-action" href="#" data-bind="visible: !$data.unsubscribed || !$data.unsubscribed(), click: $root.application.unsubscribeNotifications, ltext: 'unsubscribeNotifications'"></a>
+                      <!-- /ko -->
                     </li>
                   </ul>
 
@@ -344,14 +348,16 @@
                         data-bind="ltext: 'personSelector.invite', visible: $root.authorization.ok('invite'), enabled: $root.authorization.ok('invite')"
                         onclick="$('#invite-document-name').val('').change();$('#invite-document-path').val('').change();$('#invite-document-id').val('').change();LUPAPISTE.ModalDialog.open('#dialog-valtuutus');return false;"></button>
 
-<div data-bind="if: features.enabled('company')"><div class="feature">
-                  <button class="btn-primary"
+                  <p class="tab-info">
+                    <span data-bind="lhtml: 'company-invite.help'"></span><br>
+                    <button class="btn-primary"
+                          data-test-id="company-invite"
                           data-bind="ltext: 'company-invite.invite',
                                      visible: $root.authorization.ok('invite'),
                                      enabled: $root.authorization.ok('invite'),
                                      click: $root.openInviteCompany">
-                  </button>
-</div></div>
+                    </button>
+                  </p>
 
                 </div>
               </div>
@@ -383,7 +389,7 @@
           </div>
         </div>
 
-        <div id="application-attachments-tab" class="tab-content">
+        <div id="application-attachments-tab" class="tab-content" data-bind="with: $root.attachmentsTab">
           <h1 data-bind="ltext: 'application.tabAttachments'"></h1>
           <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.attachmentsDesc'" class="tab-info"></p>
           <div class="attachment-legend">
@@ -399,25 +405,26 @@
             <span data-bind="ltext: 'missing.title'"></span>
           </div>
           <div class="attachment-actions" data-bind="visible: (!postVerdict() && preAttachmentsByGroup().length > 0) || (postVerdict() && postAttachmentsByGroup().length > 0)">
-            <div data-bind="with: application">
+            <div>
               <button
-                data-bind="click: newAttachment, ltext: 'application.attachmentsAdd', visible: $root.authorization.ok('upload-attachment'), enable: !processing()"
+                data-bind="click: newAttachment, ltext: 'application.attachmentsAdd', visible: $root.authorization.ok('upload-attachment'), enable: !appModel.processing()"
                 data-window-id="upload-dialog"
                 class="btn btn-primary modal">
               </button>
               <button
-                data-bind="click: copyOwnAttachments, ltext: 'application.attachmentsCopyOwn', visible: $root.authorization.ok('copy-user-attachments-to-application'), enable: !processing()"
+                data-bind="click: copyOwnAttachments, ltext: 'application.attachmentsCopyOwn', visible: $root.authorization.ok('copy-user-attachments-to-application'), enable: !appModel.processing()"
                 class="btn btn-primary">
               </button>
               <button
-                data-bind="click: $root.attachmentTemplatesModel.show, ltext: 'application.newAttachmentTemplates', visible: $root.authorization.ok('create-attachments'), enable: !processing()"
+                data-bind="click: attachmentTemplatesModel.show, ltext: 'application.newAttachmentTemplates', visible: $root.authorization.ok('create-attachments'), enable: !appModel.processing()"
+                data-test-id="new-attachment-template-button"
                 class="btn">
               </button>
-              <button data-bind="click: $root.stampModel.init,visible: $root.authorization.ok('stamp-attachments'), enable: !processing() && $root.authorization.ok('stamp-attachments')" class="btn">
+              <button data-bind="click: $root.stampModel.init.bind($data, appModel),visible: $root.authorization.ok('stamp-attachments'), enable: !appModel.processing() && $root.authorization.ok('stamp-attachments')" class="btn">
                 <span data-bind="ltext: 'application.stampAttachments'"></span>
                 <span class="icon stamp left-align"></span>
               </button>
-              <button data-bind="click: $root.signingModel.init, visible: $root.authorization.ok('sign-attachments'),    enable: !processing() && $root.authorization.ok('sign-attachments')" class="btn">
+              <button data-bind="click: $root.signingModel.init.bind($data, appModel), visible: $root.authorization.ok('sign-attachments'),    enable: !appModel.processing() && $root.authorization.ok('sign-attachments')" class="btn">
                 <span data-bind="ltext: 'application.signAttachments'"></span>
                 <span class="icon stamp left-align"></span>
               </button>
@@ -442,27 +449,27 @@
                 <i data-bind="ltext: 'application.attachmentsEmpty'" data-test-id="application-attachments-no-attachments"></i>
               </div>
 
-              <div data-bind="with: application">
+              <div>
                 <button
-                  data-bind="click: newAttachment, ltext: 'application.attachmentsAdd', visible: $root.authorization.ok('upload-attachment'), enable: !processing()"
+                  data-bind="click: newAttachment, ltext: 'application.attachmentsAdd', visible: $root.authorization.ok('upload-attachment'), enable: !appModel.processing()"
                   data-window-id="upload-dialog"
                   class="btn btn-primary modal"
                   data-test-id="add-attachment">
                 </button>
                 <button
-                  data-bind="click: copyOwnAttachments, ltext: 'application.attachmentsCopyOwn', visible: $root.authorization.ok('copy-user-attachments-to-application'), enable: !processing()"
+                  data-bind="click: copyOwnAttachments, ltext: 'application.attachmentsCopyOwn', visible: $root.authorization.ok('copy-user-attachments-to-application'), enable: !appModel.processing()"
                   class="btn btn-primary"
                   data-test-id="attachments-copy-own">
                 </button>
                 <button
-                  data-bind="click: $root.attachmentTemplatesModel.show, ltext: 'application.newAttachmentTemplates', visible: $root.authorization.ok('create-attachments'), enable: !processing()"
+                  data-bind="click: attachmentTemplatesModel.show, ltext: 'application.newAttachmentTemplates', visible: $root.authorization.ok('create-attachments'), enable: !appModel.processing()"
                   class="btn">
                 </button>
-                <button data-bind="click: $root.stampModel.init,visible: $root.authorization.ok('stamp-attachments'), enable: !processing() && $root.authorization.ok('stamp-attachments')" data-test-id="application-stamp-btn"  class="btn">
+                <button data-bind="click: $root.stampModel.init.bind($data, appModel),visible: $root.authorization.ok('stamp-attachments'), enable: !appModel.processing() && $root.authorization.ok('stamp-attachments')" data-test-id="application-stamp-btn"  class="btn">
                   <span data-bind="ltext: 'application.stampAttachments'"></span>
                   <span class="icon stamp left-align"></span>
                 </button>
-                <button data-bind="click: $root.signingModel.init, visible: $root.authorization.ok('sign-attachments'),    enable: !processing() && $root.authorization.ok('sign-attachments')"  data-test-id="application-sign-attachments-btn"  class="btn">
+                <button data-bind="click: $root.signingModel.init.bind($data, appModel), visible: $root.authorization.ok('sign-attachments'),    enable: !appModel.processing() && $root.authorization.ok('sign-attachments')"  data-test-id="application-sign-attachments-btn"  class="btn">
                   <span data-bind="ltext: 'application.signAttachments'"></span>
                   <span class="icon stamp left-align"></span>
                 </button>
@@ -473,7 +480,7 @@
                     class="btn btn-primary modal"
                     data-test-id="send-unsent-attachments">
                     <span data-bind="ltext: 'application.attachmentsMoveToBackingSystem'"></span>
-                    <em data-bind="visible: pending" class="button-loader"></em>
+                    <em data-bind="visible: appModel.pending" class="button-loader"></em>
                 </button>
               </div>
             </div>
@@ -485,7 +492,7 @@
             </div>
             <!-- /ko -->
 
-            <a data-bind="attr: {href: '/api/raw/download-all-attachments?id=' + $root.application.id() + '&lang=' + loc.getCurrentLanguage() }, visible: application.hasAttachment, ltext: 'download-all'" data-test-id="application-download-all-attachement" href="#" target="_blank"></a>
+            <a data-bind="attr: {href: '/api/raw/download-all-attachments?id=' + $root.application.id() + '&lang=' + loc.getCurrentLanguage() }, visible: $root.application.hasAttachment, ltext: 'download-all'" data-test-id="application-download-all-attachement" href="#" target="_blank"></a>
 
           </div>
           <div class="process-nav">
@@ -516,9 +523,30 @@
               </tr>
 
               <!-- ko foreach: attachments -->
-              <tr style="cursor: pointer;">
-                <td class="attachmentState"><span data-bind="attr: {'class': statusName + ' icon', 'data-test-state': state, 'data-test-type': type['type-group'] + '.' + type['type-id'], 'title': loc(statusName + '.title')}"></span><span class="icon signed" data-bind="visible:$data.signed"></span></td>
-                <td data-bind="click: function() { window.location.hash='#!/attachment/' + $root.application.id() + '/' + id;}">
+              <tr class="attachment-row" data-bind="click: function() { window.location.hash='#!/attachment/' + $root.application.id() + '/' + id;}">
+                <td class="attachmentState">
+                  <span data-bind="attr: {'class': statusName + ' icon', 
+                                  'data-test-state': state, 
+                                  'data-test-type': type['type-group'] + '.' + type['type-id'], 
+                                  'title': loc(statusName + '.title')}">
+                  </span>
+                  <span data-bind="visible:$data.signed, 
+                                   attr: {'class': 'icon signed', 
+                                   'title': loc('attachment.signed'), 
+                                   'data-test-icon': 'signed-' + type['type-group'] + '.' + type['type-id']}">
+                  </span>
+                  <span data-bind="visible:$data.isSent,
+                                   attr: {'class': 'icon transfered',
+                                   'title': loc('application.attachmentSentDate') + ' ' + $data.sentDateString,
+                                   'data-test-icon': 'transfered-' + type['type-group'] + '.' + type['type-id']}">
+                  </span>
+                  <span data-bind="visible:$data.stamped,
+                                   attr: {'class': 'icon stamped',
+                                   'title': loc('attachment.stamped'),
+                                   'data-test-icon': 'stamped-' + type['type-group'] + '.' + type['type-id']}">
+                  </span>
+                </td>
+                <td>
                   <a data-bind="attr: {href: '#!/attachment/' + $root.application.id() + '/' + id, 'data-test-type': type['type-group'] + '.' + type['type-id']}">
                     <span data-bind="if: type">
                       <span data-bind="text: loc(['attachmentType', type['type-group'], type['type-id']])"></span>
@@ -527,14 +555,23 @@
                       <i data-bind="ltext: 'attachment.noName'"></i>
                     </span>
                   </a>
+                  <!-- ko if: $data.contents -->
+                    <div class="attachment-content-desc"><span data-bind="text: $data.contents" data-test-id="attachment-contents"></span></div>
+                  <!-- /ko -->
                 </td>
                 <td>
                   <span data-bind="if: $data.latestVersion">
-                    <a href="#" data-bind="text: latestVersion.filename, attr: {href: '/api/raw/download-attachment?attachment-id=' + latestVersion.fileId}"></a><br/>
+                    <a href="#" data-bind="text: latestVersion.filename,
+                                           attr: {href: '/api/raw/download-attachment?attachment-id=' + latestVersion.fileId,
+                                                  title: loc('download')},
+                                           click: function() {return true;},
+                                           clickBubble: false"></a><br/>
                     <i data-bind="ltext: latestVersion.contentType"></i>
                     <i data-bind="size: latestVersion.size"></i>
                   </span>
-                  <a data-bind="if: !$data.latestVersion, ltext: 'application.attachmentsAddList', attr: {href: '#!/attachment/' + $root.application.id() + '/' + id, 'data-test-type': type['type-group'] + '.' + type['type-id']}"></a>
+                  <!-- ko if: !$data.latestVersion -->
+                  <a data-bind="ltext: 'application.attachmentsAddList', attr: {href: '#!/attachment/' + $root.application.id() + '/' + id, 'data-test-type': type['type-group'] + '.' + type['type-id']}"></a>
+                  <!-- /ko -->
                 </td>
                 <td>
                   <span data-bind="if: $data.latestVersion">
@@ -548,6 +585,13 @@
                   </span>
                 </td>
                 <td>
+                  <span data-bind="click: $root.attachmentsTab.deleteSingleAttachment,
+                                  clickBubble: false,
+                                  visible: $root.authorization.ok('delete-attachment'),
+                                  enable: $root.authorization.ok('delete-attachment'),
+                                  attr: {'class': 'icon remove-grey',
+                                         'title': loc('attachment.delete'),
+                                         'data-test-icon': 'delete-' + type['type-group'] + '.' + type['type-id']}"></span>
                 </td>
               </tr>
               <!-- /ko -->

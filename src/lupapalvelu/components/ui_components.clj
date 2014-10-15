@@ -133,7 +133,7 @@
    :application  {:depends [:common :repository :tree :task :create-task :modal-datepicker :signing :invites :side-panel]
                   :js ["add-link-permit.js" "map-model.js" "change-location.js" "invite.js" "verdicts-model.js"
                        "add-operation.js" "stamp-model.js" "request-statement-model.js" "add-party.js"
-                       "application-model.js" "invite-company.js" "application.js"]
+                       "attachments-tab-model.js" "application-model.js" "invite-company.js" "application.js"]
                   :html ["add-link-permit.html" "application.html" "inforequest.html" "add-operation.html"
                          "change-location.html" "invite-company.html"]}
 

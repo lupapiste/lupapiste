@@ -16,7 +16,7 @@ Send mock identity to server
 
 Got email
   [Tags]  integration  ie8
-  Go to  ${SERVER}/api/last-email
+  Open last email
   Wait Until  Page Should Contain  idf@example.com
   Page Should Contain  /app/fi/welcome#!/link-account
   ## Click the first link
