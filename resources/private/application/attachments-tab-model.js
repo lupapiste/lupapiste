@@ -17,18 +17,16 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
   });
 
     
-  function getPreAttachmentsByGroup(source) {
-    return getAttachmentsByGroup(
-      _.filter(source, function(attachment) {
+  function getPreAttachments(source) {
+    return _.filter(source, function(attachment) {
           return !postVerdictStates[attachment.applicationState];
-      }));
+      });
   }
 
-  function getPostAttachmentsByGroup(source) {
-    return getAttachmentsByGroup(
-      _.filter(source, function(attachment) {
+  function getPostAttachments(source) {
+    return _.filter(source, function(attachment) {
           return postVerdictStates[attachment.applicationState];
-      }));
+      });
   }
 
   function getAttachmentsByGroup(source) {
@@ -52,15 +50,16 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
 
   self.refresh = function(appModel) {
     self.appModel = appModel;
-
-    // Pre-verdict attachments
-    self.preAttachmentsByGroup(getPreAttachmentsByGroup(ko.mapping.toJS(appModel.attachments)));
-
-    // Post-verdict attachments
-    self.postAttachmentsByGroup(getPostAttachmentsByGroup(ko.mapping.toJS(appModel.attachments)));
+    var rawAttachments = ko.mapping.toJS(appModel.attachments);
 
     // Post/pre verdict state?
     self.postVerdict(!!postVerdictStates[self.appModel.state()]);
+
+    // Pre-verdict attachments
+    self.preAttachmentsByGroup(getAttachmentsByGroup(getPreAttachments(rawAttachments)));
+
+    // Post-verdict attachments
+    self.postAttachmentsByGroup(getAttachmentsByGroup(getPostAttachments(rawAttachments)));
 
     self.unsentAttachmentsNotFound(!unsentAttachmentFound());
   }
