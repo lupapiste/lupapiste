@@ -10,13 +10,16 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
   
   self.preAttachmentsByGroup = ko.observableArray();
   self.postAttachmentsByGroup = ko.observableArray();
+  self.postAttachmentsByOperation = ko.observableArray();
 
   self.unsentAttachmentsNotFound = ko.observable(false);
   self.sendUnsentAttachmentsButtonDisabled = ko.computed(function() {
     return self.appModel.pending() || self.appModel.processing() || self.unsentAttachmentsNotFound();
   });
 
-    
+  var f = function(attachment) { return attachment.type['type-group']; };
+  var f2 = function(attachment) { return attachment.op ? attachment.op['name'] : null;} 
+  
   function getPreAttachments(source) {
     return _.filter(source, function(attachment) {
           return !postVerdictStates[attachment.applicationState];
@@ -29,13 +32,13 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
       });
   }
 
-  function getAttachmentsByGroup(source) {
+  function getAttachmentsByGroup(source, f) {
     var attachments = _.map(source, function(a) {
       a.latestVersion = _.last(a.versions || []);
       a.statusName = LUPAPISTE.statuses[a.state] || "unknown";
       return a;
     });
-    var grouped = _.groupBy(attachments, function(attachment) { return attachment.type['type-group']; });
+    var grouped = _.groupBy(attachments, f);
     return _.map(grouped, function(attachments, group) { return {group: group, attachments: attachments}; });
   }
 
@@ -56,10 +59,13 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
     self.postVerdict(!!postVerdictStates[self.appModel.state()]);
 
     // Pre-verdict attachments
-    self.preAttachmentsByGroup(getAttachmentsByGroup(getPreAttachments(rawAttachments)));
-
+    self.preAttachmentsByGroup(getAttachmentsByGroup(getPreAttachments(rawAttachments), f));
+    
     // Post-verdict attachments
-    self.postAttachmentsByGroup(getAttachmentsByGroup(getPostAttachments(rawAttachments)));
+    self.postAttachmentsByGroup(getAttachmentsByGroup(getPostAttachments(rawAttachments), f));
+
+    self.postAttachmentsByOperation(getAttachmentsByGroup(getPostAttachments(rawAttachments), f2));
+    console.log(self.postAttachmentsByOperation());
 
     self.unsentAttachmentsNotFound(!unsentAttachmentFound());
   }
