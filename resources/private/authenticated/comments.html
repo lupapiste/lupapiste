@@ -73,13 +73,11 @@
                            visible: $parent.isVisible($data)">
               <div class="comment-party commenttd">
                 <span class="date" data-bind="dateTimeString: created"></span>
-                <br />
                 <span class="author" data-bind="fullName: user"></span>
                 <span data-bind="with: $data.to">
-                  <div class="nowrap">&nbsp;-->&nbsp;</div>
+                  <span class="nowrap">&nbsp;-->&nbsp;</span>
                   <span class="author" data-bind="fullName: $data"></span>
                 </span>
-                <br />
                 <b>(<span class="role" data-bind="ltext: user.role"></span>)</b>
               </div>
               <div class="comment-text">
