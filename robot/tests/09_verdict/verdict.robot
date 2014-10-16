@@ -81,6 +81,10 @@ Accordions in the Application Summary tab are closed
   Open tab  applicationSummary
   Xpath Should Match X Times  //div[@id='application-applicationSummary-tab']//section[@class='accordion']//div[@data-accordion-state='closed']  9
   Xpath Should Match X Times  //div[@id='application-applicationSummary-tab']//section[@class='accordion']//div[@data-accordion-state='open']  0
+  Click by test id  accordion-application-summary-statements-header
+  Xpath Should Match X Times  //div[@id='application-applicationSummary-tab']//section[@class='accordion']//div[@data-accordion-state='closed']  8
+  Xpath Should Match X Times  //div[@id='application-applicationSummary-tab']//section[@class='accordion']//div[@data-accordion-state='open']  1
+  Element should be visible  //div[@id='application-applicationSummary-tab']//section[@id='accordion-application-summary-statements']//div[@class='accordion_content']
 
 Stamping dialog opens
   Open tab  attachments
