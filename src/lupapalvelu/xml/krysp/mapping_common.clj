@@ -422,14 +422,15 @@
         r))
     #{} lausuntotieto))
 
-(defn get-Liite [title link attachment type file-id filename]
-   {:kuvaus title
-    :linkkiliitteeseen link
-    :muokkausHetki (to-xml-datetime (:modified attachment))
-    :versionumero 1
-    :tyyppi type
-    :fileId file-id
-    :filename filename})
+(defn get-Liite [title link attachment type file-id filename & [meta]]
+  {:kuvaus title
+   :linkkiliitteeseen link
+   :muokkausHetki (to-xml-datetime (:modified attachment))
+   :versionumero 1
+   :tyyppi type
+   :metatietotieto meta
+   :fileId file-id
+   :filename filename})
 
 (defn get-liite-for-lausunto [attachment application begin-of-link]
   (let [type "Lausunto"
@@ -450,6 +451,24 @@
                                                 (get-liite-for-lausunto attachment application begin-of-link))})]
     (not-empty canonical-attachments)))
 
+(defn- get-metatieto [k v]
+  {:metatieto {:metatietoNimi k :metatietoArvo v}})
+
+(defn get-attachment-meta [attachment]
+  (let [signatures (:signatures attachment)
+        latestVersion (:latestVersion attachment)]
+    (prn signatures)
+    (->> signatures
+         (filter #(and
+                   (= (get-in % [:version :major]) (get-in latestVersion [:version :major]))
+                   (= (get-in % [:version :minor]) (get-in latestVersion [:version :minor]))))
+         (map #(let [firstName (get-in % [:user :firstName])
+                     lastName (get-in % [:user :lastName])]
+                [(get-metatieto "allekirjoittaja" (str firstName " " lastName))
+                 (get-metatieto "allekirjoitusAika" (:created %))]))
+         (flatten)
+         (vec))))
+
 (defn get-attachments-as-canonical [{:keys [attachments title]} begin-of-link & [target]]
   (not-empty (for [attachment attachments
                    :when (and (:latestVersion attachment)
@@ -460,8 +479,9 @@
                          attachment-title (str title ": " type "-" (:id attachment))
                          file-id (get-in attachment [:latestVersion :fileId])
                          attachment-file-name (get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
-                         link (str begin-of-link attachment-file-name)]]
-               {:Liite (get-Liite attachment-title link attachment type file-id attachment-file-name)})))
+                         link (str begin-of-link attachment-file-name)
+                         meta (get-attachment-meta attachment)]]
+               {:Liite (get-Liite attachment-title link attachment type file-id attachment-file-name meta)})))
 
 (defn write-attachments [attachments output-dir]
   (doseq [attachment attachments]
