@@ -3,6 +3,7 @@
 Documentation   Application gets verdict
 Suite teardown  Logout
 Resource        ../../common_resource.robot
+Library         DateTime
 
 *** Test Cases ***
 
@@ -86,6 +87,18 @@ Mikko sees that the application has verdicts
   Open tab  verdict
   Verdict is given  2013-01  0
   Verdict is given  123567890  2
+
+Mikko signs the verdict
+  Element should be visible  xpath=//div[@data-test-id='verdict-signature-ui']
+  Click Element  xpath=//button[@data-test-id='sign-verdict-button']
+  Wait Until Element Is Visible  xpath=//input[@data-test-id='sign-verdict-password']
+  Input Text  xpath=//input[@data-test-id='sign-verdict-password']  mikko123
+  Click Element  xpath=//Button[@data-test-id='do-sign-verdict']
+  Wait Until  Element should be visible  xpath=//div[@data-test-id='verdict-signature-listing']
+  Element should not be visible  xpath=//div[@data-test-id='verdict-signature-ui']
+  Element should Contain  xpath=//div[@data-test-id='verdict-signature-listing']  Mikko Intonen
+  ${d} =  Get Current Date  result_format=%d.%m.%Y
+  Element should Contain  xpath=//div[@data-test-id='verdict-signature-listing']  ${d}
 
 *** Keywords ***
 

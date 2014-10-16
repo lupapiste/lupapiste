@@ -97,7 +97,6 @@ Change attachment type
 Signature icon is not visible
   Element should not be visible  xpath=//div[@id="application-attachments-tab"]//span[@data-test-icon="signed-rakennuspaikka.ote_alueen_peruskartasta"]
 
-
 Sign all attachments
   [Tags]  attachments
   Tab should be visible  attachments

@@ -13,14 +13,13 @@
             <p data-bind="ltext: 'verdict.sign-dialog.contentDescription'"></p>
 
             <label for="signVerdictPassword" class="form-label"></label>
-            <input id="signVerdictPassword" data-test-id="signVerdictPassword" type="password" data-bind="textInput: password"class="form-input text"/>
+            <input id="signVerdictPassword" data-test-id="sign-verdict-password" type="password" data-bind="textInput: password"class="form-input text"/>
 
             <div data-bind="if: errorMessage" >
               <div data-bind="ltext: errorMessage" class="context-error"></div>
             </div>
 
-            <button data-bind="click: sign, enable: authorizationModel.ok('sign-verdict') && password() && !processing()" class="btn btn-primary btn-dialog"
-                    data-test-id="do-sign-verdict">
+            <button data-bind="click: sign, enable: authorizationModel.ok('sign-verdict') && password() && !processing()" class="btn btn-primary btn-dialog" data-test-id="do-sign-verdict">
               <span data-bind="ltext: 'verdict.sign-dialog.signButton'"></span>
               <em data-bind="visible: pending" class="button-loader"></em>
             </button>

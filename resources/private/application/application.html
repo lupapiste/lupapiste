@@ -691,15 +691,15 @@
                     <div class="verdict-signature-fields" data-bind="visible: $root.authorization.ok('sign-verdict') && !$parent.draft">
                       <h3 data-bind="ltext: 'verdict.signatures'"></h3>
 
-                      <div data-bind="if: $data.signature">
+                      <div data-bind="if: $data.signature" data-test-id="verdict-signature-listing">
                         <label data-bind="fullName: $data.signature.user"></label>
                         <span class="value" data-bind="dateString: signature.created"></span>
                       </div>
 
-                      <div data-bind="ifnot: $data.signature">
+                      <div data-bind="ifnot: $data.signature" data-test-id="verdict-signature-ui">
                         <span data-bind="ltext: 'verdict.signature.description'"></span>
                         <br/>
-                        <button class="btn btn-primary" data-bind="click: function() {$root.verdictModel.openSigningDialog($root, $parent);}, ltext: 'verdict.sign'"></button>
+                        <button class="btn btn-primary" data-bind="click: function() {$root.verdictModel.openSigningDialog($root, $parent);}, ltext: 'verdict.sign'" data-test-id="sign-verdict-button"></button>
                       </div>
 
                     </div>
