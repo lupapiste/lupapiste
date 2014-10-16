@@ -111,17 +111,17 @@
 ;;
 
 (defn- post-process-app [app user]
-  ((comp
-     (fn [application] (update-in application [:documents] (fn [documents]
-                                                             (map
-                                                               (comp
-                                                                 model/mask-person-ids
-                                                                 (fn [doc] (assoc doc :validationErrors (model/validate application doc))))
-                                                               documents))))
-     without-system-keys
-     (partial meta-fields/with-meta-fields user)
-     meta-fields/enrich-with-link-permit-data)
-    app))
+  (-> app
+    meta-fields/enrich-with-link-permit-data
+    ((partial meta-fields/with-meta-fields user))
+    without-system-keys
+    ((fn [application]
+       (update-in application [:documents] (fn [documents]
+                                             (map
+                                               (comp
+                                                 model/mask-person-ids
+                                                 (fn [doc] (assoc doc :validationErrors (model/validate application doc))))
+                                               documents)))))))
 
 (defn find-authorities-in-applications-organization [app]
   (mongo/select :users
@@ -331,10 +331,9 @@
                         {:state :sent}))
         application (-> application
                       meta-fields/enrich-with-link-permit-data
-                      ((fn [app]
-                        (if (= "lupapistetunnus" (-> app :linkPermitData first :type))
-                          (update-link-permit-data-with-kuntalupatunnus-from-verdict app)
-                          app)))
+                      (#(if (= "lupapistetunnus" (-> % :linkPermitData first :type))
+                         (update-link-permit-data-with-kuntalupatunnus-from-verdict %)
+                         %))
                       (merge app-updates))
         mongo-query (if jatkoaika-app?
                       {:state {$in ["submitted" "complement-needed"]}}
@@ -357,7 +356,7 @@
                              :submitted (or (:submitted application) created)}})
   (try
     (mongo/insert :submitted-applications
-      (-> (meta-fields/enrich-with-link-permit-data application) (dissoc :id) (assoc :_id (:id application))))
+      (-> application meta-fields/enrich-with-link-permit-data (dissoc :id) (assoc :_id (:id application))))
     (catch com.mongodb.MongoException$DuplicateKey e
       ; This is ok. Only the first submit is saved.
       )))
@@ -397,7 +396,8 @@
      :title       (:title app)
      :location    (:location app)
      :operation   (->> (:operations app) first :name (i18n/localize lang "operations"))
-     :authName    (-> (domain/get-auths-by-role app :owner)
+     :authName    (-> app
+                    (domain/get-auths-by-role :owner)
                     first
                     (#(str (:firstName %) " " (:lastName %))))
      :comments    (->> (:comments app)
@@ -619,7 +619,7 @@
 (defcommand update-op-description
   {:parameters [id op-id desc]
    :roles      [:applicant :authority]
-   :states     action/all-states}
+   :states     [:draft :open :submitted :complement-needed]}
   [command]
   (let [application (:application command)
         app-command (application->command application)]
@@ -789,7 +789,7 @@
     (if (:started app)
       (util/to-local-date (:started app))
       (or
-        (-> (domain/get-document-by-name app "tyoaika") :data :tyoaika-alkaa-pvm :value)
+        (-> app (domain/get-document-by-name "tyoaika") :data :tyoaika-alkaa-pvm :value)
         (-> tapahtuma-data :tapahtuma-aika-alkaa-pvm :value)
         (util/to-local-date (:submitted app))))))
 
