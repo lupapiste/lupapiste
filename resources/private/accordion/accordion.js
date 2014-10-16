@@ -15,12 +15,12 @@ var accordion = (function() {
     if (toState === "toggle") {
       toState = (state !== "closed") ? "closed" : "open";
     }
-    state = (toState === "closed") ? "closed" : "open";
+    state = toState;
 
     target
       .children(".toggle-icon")
-      .removeClass(toState === "closed" ? "drill-down-white" : "drill-right-white")
-      .addClass(toState === "closed" ? "drill-right-white" : "drill-down-white");
+      .removeClass(state === "closed" ? "drill-down-white" : "drill-right-white")
+      .addClass(state === "closed" ? "drill-right-white" : "drill-down-white");
 
     var complete = function() {
       content.css('overflow', 'visible');
