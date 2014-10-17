@@ -19,6 +19,12 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
   var fGroupByOperation = function(attachment) {
     return attachment.op ? attachment.op['name'] : 'attachments.general';
   }
+  var fSortByAttachmentTypeGroup = function(attachment) {
+    return attachment.type['type-group'];
+  }
+  var fSortByAttachmentTypeId = function(attachment) {
+    return attachment.type['type-id'];
+  }
 
   function getPreAttachments(source) {
     return _.filter(source, function(attachment) {
@@ -32,18 +38,28 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
       });
   }
 
-  function getAttachmentsByGroup(source, f) {
+  /*
+   * Returns attachments (source), grouped by grouping function f.
+   * Optionally sorts first using sort and secondly with optional sort2
+   */
+  function getAttachmentsByGroup(source, f, sort, sort2) {
     var attachments = _.map(source, function(a) {
       a.latestVersion = _.last(a.versions || []);
       a.statusName = LUPAPISTE.statuses[a.state] || "unknown";
       return a;
     });
+    if ( _.isFunction(sort) ) {
+      attachments = _.sortBy(attachments, sort);
+      if ( _.isFunction(sort2) ) {
+        attachments = _.sortBy(attachments, sort2);
+      }
+    }
     var grouped = _.groupBy(attachments, f);
     return _.map(grouped, function(attachments, group) { return {group: group, attachments: attachments}; });
   }
 
-  function unsentAttachmentFound() {
-    return _.some(ko.mapping.toJS(appModel.attachments), function(a) {
+  function unsentAttachmentFound(attachments) {
+    return _.some(attachments, function(a) {
       var lastVersion = _.last(a.versions);
       return lastVersion &&
              (!a.sent || lastVersion.created > a.sent) &&
@@ -57,10 +73,16 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
     // Post/pre verdict state?
     self.postVerdict(!!postVerdictStates[self.appModel.state()]);
 
-    self.preAttachmentsByOperation(getAttachmentsByGroup(getPreAttachments(rawAttachments), fGroupByOperation));
-    self.postAttachmentsByOperation(getAttachmentsByGroup(getPostAttachments(rawAttachments), fGroupByOperation));
+    var preAttachments = getPreAttachments(rawAttachments);
+    var postAttachments = getPostAttachments(rawAttachments)
 
-    self.unsentAttachmentsNotFound(!unsentAttachmentFound());
+    var preGrouped = getAttachmentsByGroup(preAttachments, fGroupByOperation, fSortByAttachmentTypeId, fSortByAttachmentTypeGroup);
+    var postGrouped = getAttachmentsByGroup(postAttachments, fGroupByOperation, fSortByAttachmentTypeId, fSortByAttachmentTypeGroup);
+
+    self.preAttachmentsByOperation(preGrouped);
+    self.postAttachmentsByOperation(postGrouped);
+
+    self.unsentAttachmentsNotFound(!unsentAttachmentFound(rawAttachments));
   }
 
   self.sendUnsentAttachmentsToBackingSystem = function() {
