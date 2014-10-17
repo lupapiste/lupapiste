@@ -12,15 +12,15 @@ LUPAPISTE.VerdictSigningModel = function(dialogSelector) {
 
   self.authorizationModel = authorization.create();
 
-  self.init = function(application, verdictId) {
-    self.applicationId = application.id();
+  self.init = function(applicationId, verdictId) {
+    self.applicationId = applicationId;
     self.password("");
     self.verdictId = verdictId;
     self.processing(false);
     self.pending(false);
     self.errorMessage("");
 
-    self.authorizationModel.refresh(application.id());
+    self.authorizationModel.refresh(applicationId);
 
     LUPAPISTE.ModalDialog.open(self.dialogSelector);
   };

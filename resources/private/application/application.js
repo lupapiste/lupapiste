@@ -49,7 +49,6 @@
   var verdictModel = new LUPAPISTE.VerdictsModel();
   var stampModel = new LUPAPISTE.StampModel();
   var signingModel = new LUPAPISTE.SigningModel("#dialog-sign-attachments", true);
-  var verdictSigningModel = new LUPAPISTE.VerdictSigningModel("#dialog-sign-verdict");
   var requestForStatementModel = new LUPAPISTE.RequestForStatementModel();
   var addPartyModel = new LUPAPISTE.AddPartyModel();
   var createTaskController = LUPAPISTE.createTaskController;
@@ -378,7 +377,6 @@
       sendNeighborEmailModel: sendNeighborEmailModel,
       stampModel: stampModel,
       signingModel: signingModel,
-      verdictSigningModel: verdictSigningModel,
       verdictModel: verdictModel,
       openInviteCompany: inviteCompanyModel.open.bind(inviteCompanyModel),
       attachmentsTab: attachmentsTab
@@ -390,7 +388,6 @@
     $(addLinkPermitModel.dialogSelector).applyBindings({addLinkPermitModel: addLinkPermitModel});
     $(constructionStateChangeModel.dialogSelector).applyBindings({constructionStateChangeModel: constructionStateChangeModel});
     $(signingModel.dialogSelector).applyBindings({signingModel: signingModel, authorization: authorizationModel});
-    $(verdictSigningModel.dialogSelector).applyBindings({verdictSigningModel: verdictSigningModel});
     $(inviteCompanyModel.selector).applyBindings(inviteCompanyModel);
     attachmentsTab.attachmentTemplatesModel.init();
   });

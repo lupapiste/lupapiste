@@ -345,7 +345,6 @@
                   </ul>
 
                   <button class="btn-primary"
-                        data-test-id="application-invite-person"
                         data-bind="ltext: 'personSelector.invite', visible: $root.authorization.ok('invite'), enabled: $root.authorization.ok('invite')"
                         onclick="$('#invite-document-name').val('').change();$('#invite-document-path').val('').change();$('#invite-document-id').val('').change();LUPAPISTE.ModalDialog.open('#dialog-valtuutus');return false;"></button>
 
@@ -689,21 +688,23 @@
                   </div>
 
                   <div class="accordion-fields">
-                    <div class="verdict-signature-fields" data-bind="visible: $root.authorization.ok('sign-verdict') && !$parent.draft">
+                    <div class="verdict-signature-fields" data-bind="visible: !$parent.draft">
                       <h3 data-bind="ltext: 'verdict.signatures'"></h3>
 
-                      <div data-bind="if: $data.signature" data-test-id="verdict-signature-listing">
-                        <label data-bind="fullName: $data.signature.user"></label>
-                        <span class="value" data-bind="dateString: signature.created"></span>
+                      <div data-bind="foreach: $data.signatures">
+                        <div data-test-id="verdict-signature-listing">
+                          <label data-bind="fullName: $data.user"></label>
+                          <span class="value" data-bind="dateString: created"></span>
+                        </div>
                       </div>
 
-                      <div data-bind="ifnot: $data.signature" data-test-id="verdict-signature-ui">
+                      <div data-bind="if: $root.authorization.ok('sign-verdict') && !$root.verdictModel.verdictSignedByUser($data)" data-test-id="verdict-signature-ui">
                         <span data-bind="ltext: 'verdict.signature.description'"></span>
                         <br/>
-                        <button class="btn btn-primary" data-bind="click: function() {$root.verdictModel.openSigningDialog($root, $parent);}, ltext: 'verdict.sign'" data-test-id="sign-verdict-button"></button>
+                        <button class="btn btn-primary" data-bind="click: $root.verdictModel.openSigningDialog, ltext: 'verdict.sign'" data-test-id="sign-verdict-button"></button>
                       </div>
-
                     </div>
+
                     <!--  ko if:  $data.paivamaarat -->
                     <div data-bind="if: paivamaarat.anto" class="key-value-pair">
                       <label data-bind="ltext: 'verdict.anto'"></label>
