@@ -19,11 +19,29 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
   var fGroupByOperation = function(attachment) {
     return attachment.op ? attachment.op['name'] : 'attachments.general';
   }
-  var fSortByAttachmentTypeGroup = function(attachment) {
-    return attachment.type['type-group'];
-  }
-  var fSortByAttachmentTypeId = function(attachment) {
-    return attachment.type['type-id'];
+
+  /* Sorting function to sort attachments into
+   * same order as in allowedAttachmentTypes -observable
+   */
+  var fSortByAllowedAttachmentType = function(a, b) {
+    var types = _.flatten(self.appModel.allowedAttachmentTypes(), true);
+
+    var atg = a.type['type-group'];
+    var atgIdx = _.indexOf(types, atg);
+    var atid = a.type['type-id'];
+
+    var btg = b.type['type-group'];
+    var btgIdx = _.indexOf(types, btg);
+    var btid = b.type['type-id'];
+
+    if ( atg === btg ) {
+      // flattened array of allowed attachment types.
+      // types[atgIdx + 1] is array of type-ids,
+      // which correnspond to type-group in atgIdx
+      return _.indexOf(types[atgIdx + 1], atid) - _.indexOf(types[btgIdx + 1], btid);
+    } else {
+      return atgIdx - btgIdx;
+    }
   }
 
   function getPreAttachments(source) {
@@ -40,19 +58,16 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
 
   /*
    * Returns attachments (source), grouped by grouping function f.
-   * Optionally sorts first using sort and secondly with optional sort2
+   * Optionally sorts using sort
    */
-  function getAttachmentsByGroup(source, f, sort, sort2) {
+  function getAttachmentsByGroup(source, f, sort) {
     var attachments = _.map(source, function(a) {
       a.latestVersion = _.last(a.versions || []);
       a.statusName = LUPAPISTE.statuses[a.state] || "unknown";
       return a;
     });
     if ( _.isFunction(sort) ) {
-      attachments = _.sortBy(attachments, sort);
-      if ( _.isFunction(sort2) ) {
-        attachments = _.sortBy(attachments, sort2);
-      }
+      attachments.sort(sort);
     }
     var grouped = _.groupBy(attachments, f);
     return _.map(grouped, function(attachments, group) { return {group: group, attachments: attachments}; });
@@ -76,8 +91,8 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
     var preAttachments = getPreAttachments(rawAttachments);
     var postAttachments = getPostAttachments(rawAttachments)
 
-    var preGrouped = getAttachmentsByGroup(preAttachments, fGroupByOperation, fSortByAttachmentTypeId, fSortByAttachmentTypeGroup);
-    var postGrouped = getAttachmentsByGroup(postAttachments, fGroupByOperation, fSortByAttachmentTypeId, fSortByAttachmentTypeGroup);
+    var preGrouped = getAttachmentsByGroup(preAttachments, fGroupByOperation, fSortByAllowedAttachmentType);
+    var postGrouped = getAttachmentsByGroup(postAttachments, fGroupByOperation, fSortByAllowedAttachmentType);
 
     self.preAttachmentsByOperation(preGrouped);
     self.postAttachmentsByOperation(postGrouped);
