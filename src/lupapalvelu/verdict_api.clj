@@ -192,10 +192,10 @@
     (when (find-verdict application verdictId)
       (update-application command
                           {:verdicts {$elemMatch {:id verdictId}}}
-                          {$set {:modified                     created
-                                 :verdicts.$.signature.created created
-                                 :verdicts.$.signature.user    (select-keys user [:id :username :firstName :lastName :role])
-                                }}))
+                          {$set  {:modified              created}
+                           $push {:verdicts.$.signatures {:created created
+                                                          :user (user/summary user)}}
+                          }))
     (do
       ; Throttle giving information about incorrect password
       (Thread/sleep 2000)
