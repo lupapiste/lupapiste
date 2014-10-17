@@ -7,9 +7,8 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
 
   var postVerdictStates = {verdictGiven:true, constructionStarted:true, closed:true};
   self.postVerdict = ko.observable(false);
-  
-  self.preAttachmentsByGroup = ko.observableArray();
-  self.postAttachmentsByGroup = ko.observableArray();
+
+  self.preAttachmentsByOperation = ko.observableArray();
   self.postAttachmentsByOperation = ko.observableArray();
 
   self.unsentAttachmentsNotFound = ko.observable(false);
@@ -17,9 +16,10 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
     return self.appModel.pending() || self.appModel.processing() || self.unsentAttachmentsNotFound();
   });
 
-  var f = function(attachment) { return attachment.type['type-group']; };
-  var f2 = function(attachment) { return attachment.op ? attachment.op['name'] : null;} 
-  
+  var fGroupByOperation = function(attachment) {
+    return attachment.op ? attachment.op['name'] : 'attachments.general';
+  }
+
   function getPreAttachments(source) {
     return _.filter(source, function(attachment) {
           return !postVerdictStates[attachment.applicationState];
@@ -54,18 +54,11 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
   self.refresh = function(appModel) {
     self.appModel = appModel;
     var rawAttachments = ko.mapping.toJS(appModel.attachments);
-
     // Post/pre verdict state?
     self.postVerdict(!!postVerdictStates[self.appModel.state()]);
 
-    // Pre-verdict attachments
-    self.preAttachmentsByGroup(getAttachmentsByGroup(getPreAttachments(rawAttachments), f));
-    
-    // Post-verdict attachments
-    self.postAttachmentsByGroup(getAttachmentsByGroup(getPostAttachments(rawAttachments), f));
-
-    self.postAttachmentsByOperation(getAttachmentsByGroup(getPostAttachments(rawAttachments), f2));
-    console.log(self.postAttachmentsByOperation());
+    self.preAttachmentsByOperation(getAttachmentsByGroup(getPreAttachments(rawAttachments), fGroupByOperation));
+    self.postAttachmentsByOperation(getAttachmentsByGroup(getPostAttachments(rawAttachments), fGroupByOperation));
 
     self.unsentAttachmentsNotFound(!unsentAttachmentFound());
   }
