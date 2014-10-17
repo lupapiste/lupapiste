@@ -24,3 +24,5 @@ help.VVVL.tasksDesc: Tällä välilehdellä näet luvan edellyttämät toiminnan
 help.KM.tasksDesc: Tällä välilehdellä näet luvan edellyttämät toiminnan aikaiset kokoukset, katselmukset ja tarkastukset sekä muut lupavaatimukset.
 
 task-katselmus.katselmus.lasnaolijat: Läsnäolijat
+
+attachments.general: Yleiset hankkeen liitteet

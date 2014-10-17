@@ -411,7 +411,7 @@
             <span class="missing icon"></span>
             <span data-bind="ltext: 'missing.title'"></span>
           </div>
-          <div class="attachment-actions" data-bind="visible: (!postVerdict() && preAttachmentsByGroup().length > 0) || (postVerdict() && postAttachmentsByGroup().length > 0)">
+          <div class="attachment-actions" data-bind="visible: (!postVerdict() && preAttachmentsByOperation().length > 0) || (postVerdict() && postAttachmentsByOperation().length > 0)">
             <div>
               <button
                 data-bind="click: newAttachment, ltext: 'application.attachmentsAdd', visible: $root.authorization.ok('upload-attachment'), enable: !appModel.processing()"
@@ -439,20 +439,20 @@
           </div>
 
           <div>
-            <div data-bind="if: postAttachmentsByGroup().length > 0" data-test-id="application-post-attachments-table">
+            <div data-bind="if: postAttachmentsByOperation().length > 0" data-test-id="application-post-attachments-table">
               <h2><span data-bind="ltext: 'application.attachments.post-verdict'"></span></h2>
-              <div data-bind="template: {name: 'attachments-template', data: postAttachmentsByGroup()}"></div>
+              <div data-bind="template: {name: 'attachments-template-op', data: postAttachmentsByOperation()}"></div>
             </div>
             <!-- ko if: !postVerdict() -->
-            <div data-bind="if: preAttachmentsByGroup().length > 0" data-test-id="application-pre-attachments-table">
+            <div data-bind="if: preAttachmentsByOperation().length > 0" data-test-id="application-pre-attachments-table">
               <h2><span data-bind="ltext: 'application.attachments.pre-verdict'"></span></h2>
-              <div data-bind="template: {name: 'attachments-template', data: preAttachmentsByGroup()}"></div>
+              <div data-bind="template: {name: 'attachments-template-op', data: preAttachmentsByOperation()}"></div>
             </div>
             <!-- /ko -->
 
             <div class="attachment-actions">
 
-              <div data-bind="if: preAttachmentsByGroup().length == 0 && postAttachmentsByGroup().length == 0">
+              <div data-bind="if: preAttachmentsByOperation().length == 0 && postAttachmentsByOperation().length == 0">
                 <i data-bind="ltext: 'application.attachmentsEmpty'" data-test-id="application-attachments-no-attachments"></i>
               </div>
 
@@ -493,9 +493,9 @@
             </div>
 
             <!-- ko if: postVerdict() -->
-            <div data-bind="if: preAttachmentsByGroup().length > 0" data-test-id="application-pre-attachments-table">
+            <div data-bind="if: preAttachmentsByOperation().length > 0" data-test-id="application-pre-attachments-table">
               <h2><span data-bind="ltext: 'application.attachments.pre-verdict'"></span></h2>
-              <div data-bind="template: {name: 'attachments-template', data: preAttachmentsByGroup()}"></div>
+              <div data-bind="template: {name: 'attachments-template-op', data: preAttachmentsByOperation()}"></div>
             </div>
             <!-- /ko -->
 
@@ -514,15 +514,15 @@
           </div>
         </div>
 
-        <script type="text/html" id="attachments-template">
-          <table class="table">
+        <script type="text/html" id="attachments-template-op">
+          <table class="table attachments-template-table">
             <tbody data-bind="foreach: $data">
               <tr class="attachment-group-header">
-                <td data-bind="text: loc(['attachmentType', group, '_group_label'])" colspan="6"></td>
+                <td data-bind="text: loc.hasTerm(['operations', group]) ? loc(['operations', group]) : loc(group)" colspan="6"></td>
               </tr>
               <tr>
                 <th data-bind="ltext: 'application.attachmentState'">Tila</th>
-                <th data-bind="ltext: 'application.attachmentType'">Tyyppi</th>
+                <th colspan="2" data-bind="ltext: 'application.attachmentType'">Tyyppi</th>
                 <th data-bind="ltext: 'application.attachmentFile'">Tiedosto</th>
                 <th data-bind="ltext: 'application.attachmentVersion'">Versio</th>
                 <th data-bind="ltext: 'application.attachmentEditDate'">Muokattu</th>
@@ -553,7 +553,15 @@
                                    'data-test-icon': 'stamped-' + type['type-group'] + '.' + type['type-id']}">
                   </span>
                 </td>
-                <td>
+                <td class="attachment-type-group">
+                    <span data-bind="if: type">
+                      <span data-bind="text: loc(['attachmentType', type['type-group'], '_group_label'])"></span>
+                    </span>
+                    <span data-bind="if: !type">
+                      <i data-bind="ltext: 'attachment.noName'"></i>
+                    </span>
+                </td>
+                <td class="attachment-type-id">
                   <a data-bind="attr: {href: '#!/attachment/' + $root.application.id() + '/' + id, 'data-test-type': type['type-group'] + '.' + type['type-id']}">
                     <span data-bind="if: type">
                       <span data-bind="text: loc(['attachmentType', type['type-group'], type['type-id']])"></span>
