@@ -276,7 +276,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
               })
               .call();
           });
-      if (options && options.dataTestIds) {
+      if (options && options.dataTestSpecifiers) {
         button.attr("data-test-id", verb + "-doc-" + self.schemaName);
       }
       return button;
@@ -837,7 +837,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
           return false;
         }
       });
-    if (options && options.dataTestIds) {
+    if (options && options.dataTestSpecifiers) {
       button.attr("data-test-id", "application-invite-" + self.schemaName);
     }
     button.appendTo(span);
@@ -914,12 +914,14 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         if (subSchema.repeating && !self.isDisabled && authorizationModel.ok('remove-document-data')) {
           var removeButton = document.createElement("span");
           removeButton.className = "icon remove-grey inline-right";
-          removeButton.setAttribute("data-test-class", "delete-schemas." + subSchema.name);
           removeButton.onclick = function () {
             LUPAPISTE.ModalDialog.showDynamicYesNo(loc("document.delete.header"), loc("document.delete.message"),
                 { title: loc("yes"), fn: function () { removeData(self.appId, self.docId, myPath.concat([id])); } },
                 { title: loc("no") });
           };
+          if (options && options.dataTestSpecifiers) {
+            removeButton.setAttribute("data-test-class", "delete-schemas." + subSchema.name);
+          }
           if (subSchema.type === "table") {
             var td = document.createElement("td");
             td.appendChild(removeButton);
@@ -1306,7 +1308,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var iconSpanDescription = document.createTextNode(loc('edit'));
 
     // test ids
-    if (options && options.dataTestIds) {
+    if (options && options.dataTestSpecifiers) {
       descriptionSpan.setAttribute("data-test-id", "op-description");
       iconSpan.setAttribute("data-test-id", "edit-op-description");
       descriptionInput.setAttribute("data-test-id", "op-description-editor");
@@ -1420,11 +1422,14 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     title.setAttribute("data-app-id", self.appId);
     title.onclick = accordion.click;
     if (self.schema.info.removable && !self.isDisabled && authorizationModel.ok('remove-doc')) {
-      $(title)
-        .append($("<span>")
+      var removeSpan =
+        $("<span>")
           .addClass("icon remove inline-right")
-          .attr("data-test-class", "delete-schemas." + self.schemaName)
-          .click(removeDoc));
+          .click(removeDoc);
+      if (options && options.dataTestSpecifiers) {
+        removeSpan.attr("data-test-class", "delete-schemas." + self.schemaName);
+      }
+      $(title).append(removeSpan);
     }
 
     if (self.schema.info.approvable) {

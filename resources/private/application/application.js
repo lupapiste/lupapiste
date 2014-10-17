@@ -175,9 +175,9 @@
       applicationModel.initValidationErrors(nonpartyDocErrors.concat(partyDocErrors));
 
       var devMode = LUPAPISTE.config.mode === "dev";
-      docgen.displayDocuments("#applicationDocgen", app, sortedNonpartyDocs, authorizationModel, {dataTestIds: devMode});
-      docgen.displayDocuments("#partiesDocgen",     app, sortedPartyDocs, authorizationModel, {dataTestIds: devMode});
-      docgen.displayDocuments("#applicationAndPartiesDocgen", app, allDocs, authorizationModel, {dataTestIds: false, accordionCollapsed: true});
+      docgen.displayDocuments("#applicationDocgen", app, sortedNonpartyDocs, authorizationModel, {dataTestSpecifiers: devMode});
+      docgen.displayDocuments("#partiesDocgen",     app, sortedPartyDocs, authorizationModel, {dataTestSpecifiers: devMode});
+      docgen.displayDocuments("#applicationAndPartiesDocgen", app, allDocs, authorizationModel, {dataTestSpecifiers: false, accordionCollapsed: true});
 
       // Indicators
       function sumDocIndicators(sum, doc) {
