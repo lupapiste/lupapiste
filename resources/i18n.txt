@@ -1,26 +1,17 @@
+muukoulutus: Muu tutkinto tai koulutus
 
-application.applicationSummary: Hakemus
-application.tabApplicationSummary: Hakemuksen tiedot
-verdict.lupamaaraukset.missing: Päätökseen ei liity lupamääräyksiä
-verdict.poytakirjat.missing: Päätökseen ei liity pöytäkirjoja
-application.neighbors.hearings: Kuulemiset
+attachment.label.contents: Piirustuksen sisältö
+attachment.label.scale: Piirustuksen mittakaava
+attachment.label.size: Piirustuksen koko
 
-help.R.applicationSummaryDesc: Tällä välilehdellä näet hankkeeseesi liittyvät hakemuksen aikaiset tiedot.
-help.P.applicationSummaryDesc: Tällä välilehdellä näet hankkeeseesi liittyvät hakemuksen aikaiset tiedot.
-help.YA.applicationSummaryDesc: Tällä välilehdellä näet hankkeeseesi liittyvät hakemuksen aikaiset tiedot.
-help.YI.applicationSummaryDesc: Tällä välilehdellä näet hankkeeseesi liittyvät hakemuksen aikaiset tiedot.
-help.YL.applicationSummaryDesc: Tällä välilehdellä näet hankkeeseesi liittyvät hakemuksen aikaiset tiedot.
-help.MAL.applicationSummaryDesc: Tällä välilehdellä näet hankkeeseesi liittyvät hakemuksen aikaiset tiedot.
-help.VVVL.applicationSummaryDesc: Tällä välilehdellä näet hankkeeseesi liittyvät hakemuksen aikaiset tiedot.
-help.KM.applicationSummaryDesc: Tällä välilehdellä näet hankkeeseesi liittyvät hakemuksen aikaiset tiedot.
+subscribeNotifications: Tilaa sähköposti-ilmoitukset
+unsubscribeNotifications: Peruuta sähköposti-ilmoitukset
+application.remove-auth: Poista valtuutus
 
-help.R.tasksDesc: Tällä välilehdellä näet luvan edellyttämät rakentamisen aikaiset kokoukset, katselmukset ja tarkastukset sekä muut lupavaatimukset.
-help.P.tasksDesc: Tällä välilehdellä näet luvan edellyttämät toiminnan aikaiset kokoukset, katselmukset ja tarkastukset sekä muut lupavaatimukset.
-help.YA.tasksDesc: Tällä välilehdellä näet luvan edellyttämät toiminnan aikaiset kokoukset, katselmukset ja tarkastukset sekä muut lupavaatimukset.
-help.YI.tasksDesc: Tällä välilehdellä näet luvan edellyttämät toiminnan aikaiset kokoukset, katselmukset ja tarkastukset sekä muut lupavaatimukset.
-help.YL.tasksDesc: Tällä välilehdellä näet luvan edellyttämät toiminnan aikaiset kokoukset, katselmukset ja tarkastukset sekä muut lupavaatimukset.
-help.MAL.tasksDesc: Tällä välilehdellä näet luvan edellyttämät toiminnan aikaiset kokoukset, katselmukset ja tarkastukset sekä muut lupavaatimukset.
-help.VVVL.tasksDesc: Tällä välilehdellä näet luvan edellyttämät toiminnan aikaiset kokoukset, katselmukset ja tarkastukset sekä muut lupavaatimukset.
-help.KM.tasksDesc: Tällä välilehdellä näet luvan edellyttämät toiminnan aikaiset kokoukset, katselmukset ja tarkastukset sekä muut lupavaatimukset.
+verdict.signatures: Allekirjoitukset
+verdict.signature.description: Päätös vaatii hakijan allekirjoituksen
+verdict.sign: Allekirjoita
 
-task-katselmus.katselmus.lasnaolijat: Läsnäolijat
+verdict.sign-dialog.header: Allekirjoita päätös
+verdict.sign-dialog.contentDescription: Päätöksen allekirjoituksen kuvaus
+verdict.sign-dialog.signButton: Allekirjoita

@@ -14,9 +14,11 @@ LUPAPISTE.VerdictsModel = function() {
   self.newProcessing = ko.observable(false);
   self.newPending = ko.observable(false);
 
-  self.refresh = function(application, authorities) {
-    var verdicts = _.map(_.cloneDeep(application.verdicts || []), function(verdict) {
+  self.applicationId = null;
 
+  self.refresh = function(application, authorities) {
+    self.applicationId = application.id;
+    var verdicts = _.map(_.cloneDeep(application.verdicts || []), function(verdict) {
       var paatokset = _.map(verdict.paatokset || [], function(paatos) {
         var poytakirjat = _.map(paatos.poytakirjat || [], function(pk) {
           var myFullId = {type: "verdict", id: verdict.id, urlHash: pk.urlHash};
@@ -28,6 +30,8 @@ LUPAPISTE.VerdictsModel = function() {
           return pk;
         });
         paatos.poytakirjat = poytakirjat;
+        paatos.signatures = verdict.signatures;
+        paatos.verdict = verdict;
         return paatos;});
       verdict.paatokset = paatokset;
       return verdict;
@@ -80,4 +84,17 @@ LUPAPISTE.VerdictsModel = function() {
     })
     .call();
   };
+
+  self.verdictSigningModel = new LUPAPISTE.VerdictSigningModel("#dialog-sign-verdict");
+  $(function() {
+    $(self.verdictSigningModel.dialogSelector).applyBindings({verdictSigningModel: self.verdictSigningModel});
+  });
+
+  self.openSigningDialog = function(paatos) {
+    self.verdictSigningModel.init(self.applicationId, paatos.verdict.id);
+  };
+
+  self.verdictSignedByUser = function(paatos) {
+    return _.some(paatos.signatures, {user: {id: currentUser.id()}});
+  }
 };

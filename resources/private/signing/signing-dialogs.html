@@ -2,6 +2,31 @@
 <html>
   <body>
     <section class="page" id="signing-dialogs" style="visibility: visible; display: block;">
+      
+      <div id="dialog-sign-verdict" class="window autosized">
+        <div data-bind="with: $root.verdictSigningModel">
+          <div class="dialog-header">
+            <p data-bind="ltext: 'verdict.sign-dialog.header'"></p>
+            <p class="dialog-close close" data-test-id="verdict-signature-close-dialog">X</p>
+          </div>
+          <div class="dialog-content">
+            <p data-bind="ltext: 'verdict.sign-dialog.contentDescription'"></p>
+
+            <label for="signVerdictPassword" class="form-label"></label>
+            <input id="signVerdictPassword" data-test-id="sign-verdict-password" type="password" data-bind="textInput: password"class="form-input text"/>
+
+            <div data-bind="if: errorMessage">
+              <div data-bind="ltext: errorMessage" class="context-error" data-test-id="verdict-signature-error-message"></div>
+            </div>
+
+            <button data-bind="click: sign, enable: authorizationModel.ok('sign-verdict') && password() && !processing()" class="btn btn-primary btn-dialog" data-test-id="do-sign-verdict">
+              <span data-bind="ltext: 'verdict.sign-dialog.signButton'"></span>
+              <em data-bind="visible: pending" class="button-loader"></em>
+            </button>
+          </div>
+        </div>
+      </div>
+
       <div id="dialog-sign-attachment" class="window autosized">
         <div data-bind="with: $root.signingModel">
           <div class="dialog-header">
