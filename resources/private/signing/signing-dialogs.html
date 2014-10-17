@@ -7,7 +7,7 @@
         <div data-bind="with: $root.verdictSigningModel">
           <div class="dialog-header">
             <p data-bind="ltext: 'verdict.sign-dialog.header'"></p>
-            <p class="dialog-close close">X</p>
+            <p class="dialog-close close" data-test-id="verdict-signature-close-dialog">X</p>
           </div>
           <div class="dialog-content">
             <p data-bind="ltext: 'verdict.sign-dialog.contentDescription'"></p>
@@ -16,7 +16,7 @@
             <input id="signVerdictPassword" data-test-id="sign-verdict-password" type="password" data-bind="textInput: password"class="form-input text"/>
 
             <div data-bind="if: errorMessage" >
-              <div data-bind="ltext: errorMessage" class="context-error"></div>
+              <div data-bind="ltext: errorMessage" class="context-error" data-test-id="verdict-signature-error-message"></div>
             </div>
 
             <button data-bind="click: sign, enable: authorizationModel.ok('sign-verdict') && password() && !processing()" class="btn btn-primary btn-dialog" data-test-id="do-sign-verdict">

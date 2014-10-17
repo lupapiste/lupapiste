@@ -88,6 +88,13 @@ Mikko sees that the application has verdicts
   Verdict is given  2013-01  0
   Verdict is given  123567890  2
 
+Mikko tries to sign the verdict with wrong password
+  Click Element  xpath=//button[@data-test-id='sign-verdict-button']
+  Input Text  xpath=//input[@data-test-id='sign-verdict-password']  wrong_password
+  Click Element  xpath=//Button[@data-test-id='do-sign-verdict']
+  Wait Until  Element should be visible  xpath=//div[@data-test-id='verdict-signature-error-message']
+  Click Element  xpath=//p[@data-test-id='verdict-signature-close-dialog']
+
 Mikko signs the verdict
   Element should be visible  xpath=//div[@data-test-id='verdict-signature-ui']
   Click Element  xpath=//button[@data-test-id='sign-verdict-button']
