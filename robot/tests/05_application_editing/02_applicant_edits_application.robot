@@ -58,9 +58,9 @@ Mikko decides to delete maksaja
 
 Mikko adds party maksaja using dialog
   Click enabled by test id  add-party
-  Wait Until  Element should be visible  xpath=//div[@id='application-parties-tab']//select[@data-test-id='select-party-document']
-  Wait Until  Select From List By Value  xpath=//div[@id='application-parties-tab']//select[@data-test-id="select-party-document"]  maksaja
-  List Selection Should Be  xpath=//div[@id='application-parties-tab']//select[@data-test-id="select-party-document"]  maksaja
+  Wait Until  Element should be visible  xpath=//select[@data-test-id='select-party-document']
+  Wait Until  Select From List By Value  xpath=//select[@data-test-id="select-party-document"]  maksaja
+  List Selection Should Be  xpath=//select[@data-test-id="select-party-document"]  maksaja
   Click enabled by test id  add-party-button
   Wait Until  Element Should Not Be Visible  dialog-add-party
   Wait Until  Element Should Be Visible  xpath=//section[@id='application']//div[@id='application-parties-tab']//span[@data-test-class='delete-schemas.maksaja']
