@@ -16,23 +16,23 @@ Mikko opens an application
 
 # Testing the case that was fixed with hotfix/repeating-element-saving
 Mikko adds owner to the Uusirakennus document, and both owners are visible after page refresh
-  Xpath Should Match X Times  //div[@data-repeating-id="rakennuksenOmistajat"]  1
-  Input text  //section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.0.henkilo.henkilotiedot.etunimi']  pikku
+  Xpath Should Match X Times  //div[@id='application-parties-tab']//div[@data-repeating-id="rakennuksenOmistajat"]  1
+  Input text  //div[@id='application-parties-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.0.henkilo.henkilotiedot.etunimi']  pikku
   Wait Until  Element Should Be Visible  //button[@id="rakennuksenOmistajat_append"]
   Execute Javascript  $("button[id='rakennuksenOmistajat_append']").click();
-  Wait Until  Element Should Be Visible  //section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.1.henkilo.henkilotiedot.etunimi']
-  Input text  //section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.1.henkilo.henkilotiedot.etunimi']  ISO
-  Xpath Should Match X Times  //div[@data-repeating-id="rakennuksenOmistajat"]  2
+  Wait Until  Element Should Be Visible  //div[@id='application-parties-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.1.henkilo.henkilotiedot.etunimi']
+  Input text  //div[@id='application-parties-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.1.henkilo.henkilotiedot.etunimi']  ISO
+  Xpath Should Match X Times  //div[@id='application-parties-tab']//div[@data-repeating-id="rakennuksenOmistajat"]  2
   Reload Page
-  Wait Until  Xpath Should Match X Times  //div[@data-repeating-id="rakennuksenOmistajat"]  2
-  Textfield Value Should Be  //section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.0.henkilo.henkilotiedot.etunimi']  pikku
-  Textfield Value Should Be  //section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.1.henkilo.henkilotiedot.etunimi']  ISO
+  Wait Until  Xpath Should Match X Times  //div[@id='application-parties-tab']//div[@data-repeating-id="rakennuksenOmistajat"]  2
+  Textfield Value Should Be  //div[@id='application-parties-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.0.henkilo.henkilotiedot.etunimi']  pikku
+  Textfield Value Should Be  //div[@id='application-parties-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.1.henkilo.henkilotiedot.etunimi']  ISO
 
 Mikko removes apartment
-  Wait Until  Element Should Be Visible  //span[@data-test-class="delete-schemas.huoneistot"]
+  Wait Until  Element Should Be Visible  //div[@id='application-parties-tab']//span[@data-test-class="delete-schemas.huoneistot"]
   Execute Javascript  $("span[data-test-class='delete-schemas.huoneistot']").click();
   Confirm  dynamic-yes-no-confirm-dialog
-  Wait Until  Element Should Not Be Visible  //span[@data-test-class="delete-schemas.huoneistot"]
+  Wait Until  Element Should Not Be Visible  //div[@id='application-parties-tab']//span[@data-test-class="delete-schemas.huoneistot"]
 
 Mikko goes to parties tab of an application
   Open tab  parties
@@ -58,9 +58,9 @@ Mikko decides to delete maksaja
 
 Mikko adds party maksaja using dialog
   Click enabled by test id  add-party
-  Wait Until  Element should be visible  xpath=//select[@data-test-id='select-party-document']
-  Wait Until  Select From List By Value  xpath=//select[@data-test-id="select-party-document"]  maksaja
-  List Selection Should Be  xpath=//select[@data-test-id="select-party-document"]  maksaja
+  Wait Until  Element should be visible  xpath=//div[@id='application-parties-tab']//select[@data-test-id='select-party-document']
+  Wait Until  Select From List By Value  xpath=//div[@id='application-parties-tab']//select[@data-test-id="select-party-document"]  maksaja
+  List Selection Should Be  xpath=//div[@id='application-parties-tab']//select[@data-test-id="select-party-document"]  maksaja
   Click enabled by test id  add-party-button
   Wait Until  Element Should Not Be Visible  dialog-add-party
   Wait Until  Element Should Be Visible  xpath=//section[@id='application']//div[@id='application-parties-tab']//span[@data-test-class='delete-schemas.maksaja']

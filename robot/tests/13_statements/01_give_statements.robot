@@ -35,7 +35,7 @@ New applications does not have statements
   Open to authorities  Salibandyhalli FTW!
 
   Open tab  statement
-  Element should be visible  xpath=//*[@data-test-id='application-no-statements']
+  Element should be visible  xpath=//div[@id='application-statement-tab']//*[@data-test-id='application-no-statements']
   [Teardown]  logout
 
 Sonja sees indicators from pre-filled fields
@@ -45,7 +45,7 @@ Sonja sees indicators from pre-filled fields
 Sonja adds four statement persons to application
   Open application  ${appname}  753-416-25-22
   Open tab  statement
-  Element should be visible  xpath=//*[@data-test-id='application-no-statements']
+  Element should be visible  xpath=//div[@id='application-statement-tab']//*[@data-test-id='application-no-statements']
   Wait and click   xpath=//button[@data-test-id="add-statement"]
   Wait until  Element should be disabled  xpath=//*[@data-test-id='add-statement-giver']
   Wait until  Page Should Contain Element  xpath=//*[@data-test-id='check-statement-giver-3']
@@ -121,7 +121,7 @@ Sonja can see statement indicator
 
 Statement count is
   [Arguments]  ${amount}
-  Wait until  Xpath Should Match X Times  //tr[@class="statement-row"]  ${amount}
+  Wait until  Xpath Should Match X Times  //div[@id='application-statement-tab']//tr[@class="statement-row"]  ${amount}
 
 Return from statement
   Wait and click  xpath=//*[@data-test-id='statement-return']
@@ -130,7 +130,7 @@ Open statement
   [Arguments]  ${number}
   # FIXME: for some weird reason xpath query gets stuck
   Sleep  1
-  Wait and Click  xpath=//a[@data-test-id='open-statement-${number}']
+  Wait and Click  xpath=//div[@id='application-statement-tab']//a[@data-test-id='open-statement-${number}']
   Wait until  element should be visible  statement-type-select
 
 Statement is disabled

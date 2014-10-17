@@ -259,23 +259,27 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     function makeApprovalButton(verb, noun, cssClass) {
       var cmd = verb + "-doc";
       var title = loc(["document", verb]);
-      return $(makeButton(self.docId + "_" + verb, title))
-      .addClass(cssClass).addClass("btn-auto")
-      .attr("data-test-id", verb + "-doc-" + self.schemaName)
-      .click(function () {
-        ajax.command(cmd, cmdArgs)
-        .success(function () {
-            if (noun === "approved") {
-                approveButton$.hide();
-                rejectButton$.show();
-            } else {
-                approveButton$.show();
-                rejectButton$.hide();
-            }
-            setStatus({ value: noun });
-        })
-        .call();
-      });
+      var button =
+        $(makeButton(self.docId + "_" + verb, title))
+          .addClass(cssClass).addClass("btn-auto")
+          .click(function () {
+            ajax.command(cmd, cmdArgs)
+              .success(function () {
+                if (noun === "approved") {
+                  approveButton$.hide();
+                  rejectButton$.show();
+                } else {
+                  approveButton$.show();
+                  rejectButton$.hide();
+                }
+                setStatus({ value: noun });
+              })
+              .call();
+          });
+      if (options && options.dataTestIds) {
+        button.attr("data-test-id", verb + "-doc-" + self.schemaName);
+      }
+      return button;
     }
 
     function modelModifiedSince(model, timestamp) {
@@ -821,18 +825,22 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     span.appendChild(select);
 
     // new invite
-    $("<button>", {
-      "class": "icon-remove btn-primary",
-      "data-test-id": "application-invite-" + self.schemaName,
-      text: loc("personSelector.invite"),
-      click: function () {
-        $("#invite-document-name").val(self.schemaName).change();
-        $("#invite-document-path").val(myNs).change();
-        $("#invite-document-id").val(self.docId).change();
-        LUPAPISTE.ModalDialog.open("#dialog-valtuutus");
-        return false;
-      }
-    }).appendTo(span);
+    var button =
+      $("<button>", {
+        "class": "icon-remove btn-primary",
+        text: loc("personSelector.invite"),
+        click: function () {
+          $("#invite-document-name").val(self.schemaName).change();
+          $("#invite-document-path").val(myNs).change();
+          $("#invite-document-id").val(self.docId).change();
+          LUPAPISTE.ModalDialog.open("#dialog-valtuutus");
+          return false;
+        }
+      });
+    if (options && options.dataTestIds) {
+      button.attr("data-test-id", "application-invite-" + self.schemaName);
+    }
+    button.appendTo(span);
 
     return span;
   }
@@ -1298,9 +1306,11 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var iconSpanDescription = document.createTextNode(loc('edit'));
 
     // test ids
-    descriptionSpan.setAttribute("data-test-id", "op-description");
-    iconSpan.setAttribute("data-test-id", "edit-op-description");
-    descriptionInput.setAttribute("data-test-id", "op-description-editor");
+    if (options && options.dataTestIds) {
+      descriptionSpan.setAttribute("data-test-id", "op-description");
+      iconSpan.setAttribute("data-test-id", "edit-op-description");
+      descriptionInput.setAttribute("data-test-id", "op-description-editor");
+    }
 
     wrapper.className = "op-description-wrapper";
     descriptionSpan.className = "op-description"
