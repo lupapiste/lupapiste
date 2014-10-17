@@ -345,6 +345,7 @@
                   </ul>
 
                   <button class="btn-primary"
+                        data-test-id="application-invite-person"
                         data-bind="ltext: 'personSelector.invite', visible: $root.authorization.ok('invite'), enabled: $root.authorization.ok('invite')"
                         onclick="$('#invite-document-name').val('').change();$('#invite-document-path').val('').change();$('#invite-document-id').val('').change();LUPAPISTE.ModalDialog.open('#dialog-valtuutus');return false;"></button>
 

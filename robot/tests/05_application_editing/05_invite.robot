@@ -11,8 +11,18 @@ Mikko creates a new application
   Mikko logs in
   Create application the fast way  invite-app  753  753-423-2-159  asuinrakennus
 
-Mikko can see invite paasuunnittelija button
+Mikko can see the general invite button and opens invite dialog with it
   Open tab  parties
+  Element should be visible  xpath=//*[@data-test-id='application-invite-person']
+  Click by test id  application-invite-person
+  Wait until  Element should be visible  invite-email
+  Input Text  invite-email  teppo@example.com
+  Input Text  invite-text  Tervetuloa muokkaamaan hakemusta
+  Element should be enabled  xpath=//*[@data-test-id='application-invite-submit']
+  Click Element  xpath=//div[@id='dialog-valtuutus']//p[contains(@class,'close')]
+  Wait until  Mask is invisible
+
+Mikko can see invite paasuunnittelija button
   Element should be visible  xpath=//*[@data-test-id='application-invite-paasuunnittelija']
 
 Mikko invites Teppo
@@ -173,8 +183,12 @@ Invite Teppo
   Invite count is  0
   Click by test id  application-invite-paasuunnittelija
   Wait until  Element should be visible  invite-email
-  Input Text  invite-email  teppo@example.com
   Input Text  invite-text  Tervetuloa muokkaamaan hakemusta
+  Element should be disabled  xpath=//*[@data-test-id='application-invite-submit']
+  Input Text  invite-email  teppo@example
+  Element should be disabled  xpath=//*[@data-test-id='application-invite-submit']
+  Input Text  invite-email  teppo@example.com
+  Element should be enabled  xpath=//*[@data-test-id='application-invite-submit']
   Click by test id  application-invite-submit
   Wait until  Mask is invisible
   Wait until  Element should not be visible  invite-email
