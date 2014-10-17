@@ -4,6 +4,15 @@ var loc;
   "use strict";
 
   function notValidLocParam(v) { return v === undefined || v === null || v === ""; }
+  function joinTermArray(key) {
+    if (_.isArray(key)) {
+      if (_.some(key, notValidLocParam)) {
+        return null;
+      }
+      key = key.join(".");
+    }
+    return key;
+  }
 
   loc = function() {
     var args = Array.prototype.slice.call(arguments);
@@ -13,11 +22,9 @@ var loc;
       return null;
     }
 
-    if (_.isArray(key)) {
-      if (_.some(key, notValidLocParam)) {
-        return null;
-      }
-      key = key.join(".");
+    key = joinTermArray(key);
+    if (!key) {
+      return null;
     }
 
     var formatParams = args.slice(1);
@@ -44,7 +51,7 @@ var loc;
   loc.defaultLanguage = "fi";
 
   loc.hasTerm = function(key) {
-    return loc.terms[key] !== undefined;
+    return loc.terms[joinTermArray(key)] !== undefined;
   };
 
   function resolveLang() {
