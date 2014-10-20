@@ -22,7 +22,7 @@
           givers (:data resp)]
       (fact "One statement giver in Sipoo, Sonja (set in minimal fixture)"
         (count givers) => 1
-        (-> givers first :email) => sonja-email))
+        (-> givers first :email) => (contains sonja-email)))
 
   (let [ronja-email  (email-for "ronja")
         veikko-email (email-for "veikko")
@@ -39,7 +39,7 @@
         (-> givers second :email) => ronja-email))
 
     (fact "new statement person receives email which contains the (html escaped) input text"
-      (:to email) => ronja-email
+      (:to email) => (contains ronja-email)
       (:subject email) => "Lupapiste.fi: Lausunnot"
       (get-in email [:body :plain]) => (contains "<b>bold</b>")
       (get-in email [:body :html]) => (contains "&lt;b&gt;bold&lt;/b&gt;"))
@@ -60,7 +60,7 @@
               emails (sent-emails)
               email (first emails)]
           (fact "Veikko receives email"
-            (:to email) => veikko-email
+            (:to email) => (contains veikko-email)
             (:subject email) => "Lupapiste.fi: Sipoo, Lausuntobulevardi 1 A 1 - Lausuntopyynt\u00f6")
           (fact "...but no-one else"
             (count emails) => 1)
@@ -93,8 +93,8 @@
           (let [emails (sent-emails)
                 email  (first emails)]
           (count emails) => 1
-          (:to email) => sonja-email
-          email => (partial contains-application-link-with-tab? application-id "conversation")))
+          (:to email) => (contains sonja-email)
+          email => (partial contains-application-link-with-tab? application-id "conversation" "authority")))
         ))
 
     ; TODO facts about what Veikko can and can not do to application
