@@ -12,7 +12,7 @@ Mikko creates application
 
 Mikko edits operation description
   Open application  application-papplication  753-416-25-30
-  Wait and click  xpath=//span[@data-test-id='edit-op-description']
+  Wait and click  xpath=//div[@id='application-info-tab']//span[@data-test-id='edit-op-description']
   Input text by test id  op-description-editor  Talo A
   Wait until  Page should contain  Tallennettu
 
@@ -27,8 +27,8 @@ Mikko adds an operation
   Click enabled by test id  add-operation-to-application
 
 Mikko edits operation B description
-  Wait and click  xpath=(//span[@data-test-id='edit-op-description'])[last()]
-  Input text  xpath=(//input[@data-test-id='op-description-editor'])[last()]  Talo B
+  Wait and click  xpath=(//div[@id='application-info-tab']//span[@data-test-id='edit-op-description'])[last()]
+  Input text  xpath=(//div[@id='application-info-tab']//input[@data-test-id='op-description-editor'])[last()]  Talo B
   Wait until  Page should contain  Tallennettu
 
 Mikko adds txt attachment without comment
@@ -62,10 +62,15 @@ Mikko can change contents
   Sleep  1
   [Teardown]  logout
 
-Mikko sees attachment label meta data is set
+Mikko logs in and goes to attachments tab
   Mikko logs in
   Open application  application-papplication  753-416-25-30
   Open tab  attachments
+
+Mikko sees that contents metadata is visible in attachments list
+  Element Text Should Be  xpath=//div[@id="application-attachments-tab"]//span[@data-test-id="attachment-contents"]  PuuCee
+
+Mikko opens attachment and sees that attachment label metadata is set
   Open attachment details  muut.muu
   Page should contain  Muun rakennuksen rakentaminen
   Page should contain  B0
