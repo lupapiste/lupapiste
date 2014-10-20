@@ -16,7 +16,7 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
     return self.appModel.pending() || self.appModel.processing() || self.unsentAttachmentsNotFound();
   });
 
-  function GroupModel(groupName, groupDesc, attachments){
+  function GroupModel(groupName, groupDesc, attachments) {
     var self = this;
     self.attachments = attachments;
     self.groupName = groupName;
@@ -93,8 +93,8 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
       if ( group === 'attachments.general' ) {
         return new GroupModel(group, null, attachments); // group = attachments.general
       } else { // group == op.id
-        attachment = _.first(attachments);
-        return new GroupModel(attachment.op.name, attachment.op.description, attachments);
+        var att = _.first(attachments);
+        return new GroupModel(att.op.name, att.op.description, attachments);
       }
     });
   }
@@ -124,7 +124,7 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
     self.postAttachmentsByOperation(postGrouped);
 
     self.unsentAttachmentsNotFound(!unsentAttachmentFound(rawAttachments));
-  }
+  };
 
   self.sendUnsentAttachmentsToBackingSystem = function() {
     ajax
