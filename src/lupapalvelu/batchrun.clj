@@ -38,7 +38,7 @@
 
 ;; Email definition for the "open info request reminder"
 
-(defn- oir-reminder-base-email-model [{{token :token-id created-date :created-date} :data} _]
+(defn- oir-reminder-base-email-model [{{token :token-id created-date :created-date} :data} _ recipient]
   (let  [link-fn (fn [lang] (str (env/value :host) "/api/raw/openinforequest?token-id=" token "&lang=" (name lang)))
          info-fn (fn [lang] (env/value :oir :wanna-join-url))]
     {:link-fi (link-fn :fi)
@@ -57,7 +57,15 @@
 
 (notifications/defemail :reminder-neighbor (assoc neighbors/email-conf :subject-key "neighbor-reminder"))
 
+(defn- request-statement-reminder-email-model [{{created-date :created-date} :data application :application :as command} _ recipient]
+  {:link-fi (notifications/get-application-link application nil "fi" recipient)
+   :link-sv (notifications/get-application-link application nil "sv" recipient)
+   :created-date created-date})
 
+(notifications/defemail :reminder-request-statement
+  {:recipients-fn  :recipients
+   :subject-key    "statement-request-reminder"
+   :model-fn       request-statement-reminder-email-model})
 
 ;; "Lausuntopyynto: Pyyntoon ei ole vastattu viikon kuluessa ja hakemuksen tila on valmisteilla tai vireilla. Lahetetaan viikoittain uudelleen."
 (defn statement-request-reminder []
@@ -70,14 +78,13 @@
                                                                         {:reminder-sent (older-than timestamp-1-week-ago)}]}}})]
     (doseq [app apps
             statement (:statements app)
-            :let [email (-> statement :person :email)
-                  requested (:requested statement)]
+            :let [requested (:requested statement)]
             :when (and
                     (nil? (:given statement))
                     (< requested timestamp-1-week-ago))]
       (notifications/notify! :reminder-request-statement {:application app
-                                                          :data {:email email
-                                                                 :created-date (util/to-local-date requested)}})
+                                                          :recipients [(:person statement)]
+                                                          :data {:created-date (util/to-local-date requested)}})
       (update-application (application->command app)
         {:statements {$elemMatch {:id (:id statement)}}}
         {$set {:statements.$.reminder-sent (now)}}))))
@@ -134,6 +141,10 @@
                                            :created  (now)}}})))))))
 
 
+(notifications/defemail :reminder-application-state
+  {:subject-key    "active-application-reminder"
+   :recipients-fn  notifications/from-user})
+
 ;; "Hakemus: Hakemuksen tila on valmisteilla tai vireilla, mutta edellisesta paivityksesta on aikaa yli kuukausi. Lahetetaan kuukausittain uudelleen."
 (defn application-state-reminder []
   (let [timestamp-1-month-ago (get-timestamp-from-now :month 1)
@@ -144,7 +155,7 @@
                                                {:reminder-sent (older-than timestamp-1-month-ago)}]})]
     (doseq [app apps]
       (notifications/notify! :reminder-application-state {:application app
-                                                          :data {:email (:email (get-app-owner app))}})
+                                                          :user (get-app-owner app)})
       (update-application (application->command app)
         {$set {:reminder-sent (now)}}))))
 
