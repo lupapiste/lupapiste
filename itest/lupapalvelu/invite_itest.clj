@@ -48,8 +48,8 @@
       (count (:invites (query teppo :invites))) => 1
 
       (let [email (last-email)]
-        email => (partial contains-application-link? application-id)
-        (:to email) => (email-for-key teppo)
+        email => (partial contains-application-link? application-id "applicant")
+        (:to email) => (contains (email-for-key teppo))
         (:subject email) => "Lupapiste.fi: Kutsukatu 13 - kutsu"
         (get-in email [:body :plain]) => (contains "Hei, sinut on kustuttu")))
 
@@ -86,7 +86,7 @@
       (comment-application sonja application-id false) => ok?
       (let [emails (sent-emails)]
         (count emails) => 1
-        (:to (first emails)) => (email-for-key mikko)))
+        (:to (first emails)) => (contains (email-for-key mikko))))
 
     (fact "Teppo must be able to accept Teppo's invite"
       (command teppo :approve-invite :id application-id) => ok?

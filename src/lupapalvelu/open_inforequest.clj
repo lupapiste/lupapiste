@@ -15,7 +15,7 @@
   (when (:oir user)
     (fail :error.not-allowed-for-oir)))
 
-(defn- base-email-model [{{token :token-id} :data} _]
+(defn- base-email-model [{{token :token-id} :data} _ __]
   (let  [link-fn (fn [lang] (str (env/value :host) "/api/raw/openinforequest?token-id=" token "&lang=" (name lang)))
          info-fn (fn [lang] (env/value :oir :wanna-join-url))]
     {:link-fi (link-fn :fi)

@@ -82,7 +82,7 @@ Fill required fields for the parties
   Wait until  Element should be visible  //section[@id='application']//div[@id='application-parties-tab']
   Execute Javascript  $("input[value='yritys']").click();
   # Maksaja's default is Henkilo, that is why we have to wait its type has changed to Yritys.
-  Wait until  Element should be visible  //section[@data-doc-type='yleiset-alueet-maksaja']//input[@data-docgen-path='yritys.yhteyshenkilo.henkilotiedot.etunimi']
+  Wait until  Element should be visible  //div[@id='application-parties-tab']//section[@data-doc-type='yleiset-alueet-maksaja']//input[@data-docgen-path='yritys.yhteyshenkilo.henkilotiedot.etunimi']
   Fill in yritys info  hakija-ya
   Fill in yritys info  yleiset-alueet-maksaja
 
@@ -90,7 +90,7 @@ Fill required fields for the parties
 Fill in yritys info
   [Arguments]  ${dataDocType}
   ## NOTE: When using another variable (i.e. ${dataDocType}) to set the value of a variable, the keyword "Set Variable" must be used.
-  ${docSectionPath} =  Set Variable  //section[@data-doc-type='${dataDocType}']
+  ${docSectionPath} =  Set Variable  //div[@id='application-parties-tab']//section[@data-doc-type='${dataDocType}']
   Element should be visible  ${docSectionPath}//input[@data-docgen-path='yritys.yhteyshenkilo.henkilotiedot.sukunimi']
 
   Input text  ${docSectionPath}//input[@data-docgen-path='yritys.yhteyshenkilo.henkilotiedot.etunimi']  John
