@@ -923,6 +923,7 @@
         organization (organization/get-organization (:organization application))]
     (update-application command
       {$set {:infoRequest false
+             :openInfoRequest false
              :state :open
              :opened created
              :convertedToApplication created
