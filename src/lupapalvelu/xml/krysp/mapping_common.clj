@@ -458,7 +458,6 @@
 (defn get-attachment-meta [attachment]
   (let [signatures (:signatures attachment)
         latestVersion (:latestVersion attachment)]
-    (prn signatures)
     (->> signatures
          (filter #(and
                    (= (get-in % [:version :major]) (get-in latestVersion [:version :major]))
