@@ -16,8 +16,27 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
     return self.appModel.pending() || self.appModel.processing() || self.unsentAttachmentsNotFound();
   });
 
+  function GroupModel(groupName, groupDesc, attachments){
+    var self = this;
+    self.attachments = attachments;
+    self.groupName = groupName;
+    self.groupDesc = groupDesc;
+    // computed name, depending if attachments belongs to operation or not
+    self.name = ko.computed( function() {
+      if ( loc.hasTerm(['operations', self.groupName]) ) {
+        if ( self.groupDesc ) {
+          return loc(['operations', self.groupName]) + ' - ' + self.groupDesc;
+        } else {
+          return loc(['operations', self.groupName]);
+        }
+      } else {
+        return loc(self.groupName); // 'attachments.general'
+      }
+    });
+  };
+
   var fGroupByOperation = function(attachment) {
-    return attachment.op ? attachment.op['name'] : 'attachments.general';
+    return attachment.op ? attachment.op['id'] : 'attachments.general';
   }
 
   /* Sorting function to sort attachments into
@@ -70,7 +89,14 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
       attachments.sort(sort);
     }
     var grouped = _.groupBy(attachments, f);
-    return _.map(grouped, function(attachments, group) { return {group: group, attachments: attachments}; });
+    return _.map(grouped, function(attachments, group) {
+      if ( group === 'attachments.general' ) {
+        return new GroupModel(group, null, attachments); // group = attachments.general
+      } else { // group == op.id
+        attachment = _.first(attachments);
+        return new GroupModel(attachment.op.name, attachment.op.description, attachments);
+      }
+    });
   }
 
   function unsentAttachmentFound(attachments) {
@@ -89,7 +115,7 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
     self.postVerdict(!!postVerdictStates[self.appModel.state()]);
 
     var preAttachments = getPreAttachments(rawAttachments);
-    var postAttachments = getPostAttachments(rawAttachments)
+    var postAttachments = getPostAttachments(rawAttachments);
 
     var preGrouped = getAttachmentsByGroup(preAttachments, fGroupByOperation, fSortByAllowedAttachmentType);
     var postGrouped = getAttachmentsByGroup(postAttachments, fGroupByOperation, fSortByAllowedAttachmentType);
