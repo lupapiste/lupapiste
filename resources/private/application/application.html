@@ -281,7 +281,7 @@
           <h1 data-bind="ltext: 'application.tabInfo'"></h1>
           <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.applicationInfoDesc'" class="tab-info"></p>
           <p data-bind="lhtml: 'required.field.desc'"></p>
-          <div data-bind="with: application">
+          <div data-bind="with: application" style="width: 60%">
             <div data-bind="if: $root.authorization.ok('add-operation')">
               <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.AddOperations'"></p>
               <button data-bind="click: addOperation, enable: $root.authorization.ok('add-operation')" class="btn-primary">

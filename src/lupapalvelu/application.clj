@@ -34,6 +34,12 @@
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.company :as c]))
 
+;; Notifications
+
+(notifications/defemail :application-state-change
+  {:subject-key    "state-change"
+   :application-fn (fn [{id :id}] (domain/get-application-no-access-checking id))})
+
 ;; Validators
 
 (defn- property-id? [^String s]
@@ -923,6 +929,7 @@
         organization (organization/get-organization (:organization application))]
     (update-application command
       {$set {:infoRequest false
+             :openInfoRequest false
              :state :open
              :opened created
              :convertedToApplication created

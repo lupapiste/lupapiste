@@ -12,10 +12,10 @@
         application     (query-application pena application-id)
         email           (last-email) => truthy]
     (:state application) => "submitted"
-    (:to email) => (email-for-key pena)
+    (:to email) => (contains (email-for-key pena))
     (:subject email) => "Lupapiste.fi: Paatoskuja 9 - hakemuksen tila muuttunut"
     (get-in email [:body :plain]) => (contains "Vireill\u00e4")
-    email => (partial contains-application-link? application-id)
+    email => (partial contains-application-link? application-id "applicant")
 
     (let [new-verdict-resp (command sonja :new-verdict-draft :id application-id) => ok?
           verdict-id (:verdictId new-verdict-resp) => truthy
@@ -57,7 +57,7 @@
         (let [email (last-email)]
           (fact "Ronja got mail"
             email => map?
-            (:to email) => (email-for "ronja")
+            (:to email) => (contains (email-for "ronja"))
             (let [[href a-id v-id] (re-find #"(?sm)http.+/app/fi/authority#!/verdict/([A-Za-z0-9-]+)/([0-9a-z]+)" (get-in email [:body :plain]))]
               a-id => application-id
               v-id => verdict-id))))
@@ -69,9 +69,9 @@
               first-attachment (get-in application [:attachments 0])]
 
           (let [email (last-email)]
-            (:to email) => (email-for-key pena)
+            (:to email) => (contains (email-for-key pena))
             (:subject email) => "Lupapiste.fi: Paatoskuja 9 - p\u00e4\u00e4t\u00f6s"
-            email => (partial contains-application-link-with-tab? application-id "verdict"))
+            email => (partial contains-application-link-with-tab? application-id "verdict" "applicant"))
 
           (:state application) => "verdictGiven"
           (upload-attachment sonja (:id application) first-attachment true)
@@ -85,9 +85,9 @@
     (:organization application) => "753-R"
     (command sonja :check-for-verdict :id application-id) => ok?
     (let [email (last-email)]
-      (:to email) => (email-for-key mikko)
+      (:to email) => (contains (email-for-key mikko))
       (:subject email) => "Lupapiste.fi: Paatoskuja 17 - p\u00e4\u00e4t\u00f6s"
-      email => (partial contains-application-link-with-tab? application-id "verdict"))))
+      email => (partial contains-application-link-with-tab? application-id "verdict" "applicant"))))
 
 (fact "Rakennus & rakennelma"
   (let [application (create-and-submit-application mikko :municipality sonja-muni :address "Paatoskuja 17")
