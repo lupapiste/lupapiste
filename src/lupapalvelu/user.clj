@@ -189,7 +189,10 @@
 ;;
 
 (defn applicationpage-for [role]
-  (kebab/->kebab-case role))
+  (let [s (name role)]
+    (if (or (ss/blank? s) (= s "dummy"))
+     "applicant"
+     (kebab/->kebab-case s))))
 
 (defn user-in-role [user role & params]
   (merge (apply hash-map params) (assoc (summary user) :role role)))
