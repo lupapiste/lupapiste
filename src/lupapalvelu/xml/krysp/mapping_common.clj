@@ -437,8 +437,9 @@
         title (str (:title application) ": " type "-" (:id attachment))
         file-id (get-in attachment [:latestVersion :fileId])
         attachment-file-name (get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
-        link (str begin-of-link attachment-file-name)]
-    {:Liite (get-Liite title link attachment type file-id attachment-file-name)}))
+        link (str begin-of-link attachment-file-name)
+        meta (get-attachment-meta attachment)]
+    {:Liite (get-Liite title link attachment type file-id attachment-file-name meta)}))
 
 (defn get-statement-attachments-as-canonical [application begin-of-link allowed-statement-ids]
   (let [statement-attachments-by-id (group-by
@@ -462,10 +463,12 @@
          (filter #(and
                    (= (get-in % [:version :major]) (get-in latestVersion [:version :major]))
                    (= (get-in % [:version :minor]) (get-in latestVersion [:version :minor]))))
-         (map #(let [firstName (get-in % [:user :firstName])
-                     lastName (get-in % [:user :lastName])]
-                [(get-metatieto "allekirjoittaja" (str firstName " " lastName))
-                 (get-metatieto "allekirjoitusAika" (:created %))]))
+         (map #(let [firstName (get-in %2 [:user :firstName])
+                     lastName (get-in %2 [:user :lastName])
+                     created (to-xml-datetime (:created %2))
+                     count %1]
+                [(get-metatieto (str "allekirjoittaja_" count) (str firstName " " lastName))
+                 (get-metatieto (str "allekirjoittajaAika_" count) created)]) (range))
          (flatten)
          (vec))))
 
