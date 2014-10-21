@@ -226,8 +226,10 @@
   }
 
   function markTabActive(id) {
-    $("#applicationTabs li").removeClass("active");
-    $("a[data-target='"+id+"']").parent().addClass("active");
+    setTimeout(function() {
+      $("#applicationTabs li").removeClass("active");
+      $("a[data-target='"+id+"']").parent().addClass("active");
+    }, 500);
   }
 
   function selectTab(tab) {
@@ -252,13 +254,16 @@
   function initPage(kind, e) {
     var newId = e.pagePath[0];
     var tab = e.pagePath[1];
-    if (newId !== currentId || !tab) {
+    if (newId === currentId && tab) {
+      selectTab(tab);
+    } else {
       pageutil.showAjaxWait();
       currentId = newId;
       mapModel.updateMapSize(kind);
-      repository.load(currentId);
+      repository.load(currentId, applicationModel.pending, function(application) {
+        selectTab(tab || (application.inPostVerdictState ? "tasks" : "info"));
+      });
     }
-    selectTab(tab || "info");
   }
 
   hub.onPageChange("application", _.partial(initPage, "application"));
