@@ -268,7 +268,7 @@
 
 (defn- ->hashbang [v]
   (when (and v (= -1 (.indexOf v ":")))
-    (second (re-matches #"^[#!/]{0,3}(.*)" v))))
+    (->> (s/replace-first v "%21" "!") (re-matches #"^[#!/]{0,3}(.*)") second)))
 
 (defn- save-hashbang-on-client []
   (resp/set-headers {"Cache-Control" "no-cache", "ETag" "\"none\""}
