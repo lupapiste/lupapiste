@@ -95,6 +95,7 @@
 (defn- in-role? [role request]
   (= role (keyword (:role (user/current-user request)))))
 
+(def applicant? (partial in-role? :applicant))
 (def authority? (partial in-role? :authority))
 (def authority-admin? (partial in-role? :authorityAdmin))
 (def admin? (partial in-role? :admin))
@@ -197,7 +198,7 @@
                    :cdn-fallback anyone
                    :hashbang anyone
                    :upload logged-in?
-                   :applicant logged-in?
+                   :applicant applicant?
                    :authority authority?
                    :oir authority?
                    :authority-admin authority-admin?
