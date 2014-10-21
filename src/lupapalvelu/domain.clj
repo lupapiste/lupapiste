@@ -1,6 +1,7 @@
 (ns lupapalvelu.domain
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn warnf error fatal]]
             [monger.operators :refer :all]
+            [lupapalvelu.core :refer [unauthorized]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as user]
             [lupapalvelu.xml.krysp.verdict :as verdict]
@@ -103,6 +104,13 @@
 (defn owner-or-writer? [application user-id]
   (or (has-auth-role? application user-id "owner")
       (has-auth-role? application user-id "writer")))
+
+(defn validate-owner-or-writer
+  "Validator: current user must be owner or writer.
+   To be used in commands' :pre-checks vector."
+  [command application]
+  (when-not (owner-or-writer? application (-> command :user :id))
+    unauthorized))
 
 ;;
 ;; documents
