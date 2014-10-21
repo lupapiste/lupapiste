@@ -423,6 +423,7 @@
     #{} lausuntotieto))
 
 (defn get-Liite [title link attachment type file-id filename & [meta]]
+  (prn "get-liite")
   {:kuvaus title
    :linkkiliitteeseen link
    :muokkausHetki (to-xml-datetime (:modified attachment))
@@ -431,6 +432,25 @@
    :metatietotieto meta
    :fileId file-id
    :filename filename})
+
+(defn- get-metatieto [k v]
+  {:metatieto {:metatietoNimi k :metatietoArvo v}})
+
+(defn- get-attachment-meta [attachment]
+  (let [signatures (:signatures attachment)
+        latestVersion (:latestVersion attachment)]
+    (->> signatures
+         (filter #(and
+                   (= (get-in % [:version :major]) (get-in latestVersion [:version :major]))
+                   (= (get-in % [:version :minor]) (get-in latestVersion [:version :minor]))))
+         (map #(let [firstName (get-in %2 [:user :firstName])
+                     lastName (get-in %2 [:user :lastName])
+                     created (to-xml-datetime (:created %2))
+                     count %1]
+                [(get-metatieto (str "allekirjoittaja_" count) (str firstName " " lastName))
+                 (get-metatieto (str "allekirjoittajaAika_" count) created)]) (range))
+         (flatten)
+         (vec))))
 
 (defn get-liite-for-lausunto [attachment application begin-of-link]
   (let [type "Lausunto"
@@ -451,25 +471,6 @@
                                 {(keyword id) (for [attachment ((keyword id) statement-attachments-by-id)]
                                                 (get-liite-for-lausunto attachment application begin-of-link))})]
     (not-empty canonical-attachments)))
-
-(defn- get-metatieto [k v]
-  {:metatieto {:metatietoNimi k :metatietoArvo v}})
-
-(defn get-attachment-meta [attachment]
-  (let [signatures (:signatures attachment)
-        latestVersion (:latestVersion attachment)]
-    (->> signatures
-         (filter #(and
-                   (= (get-in % [:version :major]) (get-in latestVersion [:version :major]))
-                   (= (get-in % [:version :minor]) (get-in latestVersion [:version :minor]))))
-         (map #(let [firstName (get-in %2 [:user :firstName])
-                     lastName (get-in %2 [:user :lastName])
-                     created (to-xml-datetime (:created %2))
-                     count %1]
-                [(get-metatieto (str "allekirjoittaja_" count) (str firstName " " lastName))
-                 (get-metatieto (str "allekirjoittajaAika_" count) created)]) (range))
-         (flatten)
-         (vec))))
 
 (defn get-attachments-as-canonical [{:keys [attachments title]} begin-of-link & [target]]
   (not-empty (for [attachment attachments
