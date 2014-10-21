@@ -67,10 +67,10 @@
 
 ;; Helpers
 
-(defn get-application-xml [{:keys [id permitType] :as application} & [raw?]]
+(defn get-application-xml [{:keys [id permitType] :as application} & [raw? kuntalupatunnus?]]
   (if-let [{url :url} (organization/get-krysp-wfs application)]
-    (if-let [fetch (permit/get-application-xml-getter permitType)]
-      (fetch url id raw?)
+    (if-let [fetch-fn (permit/get-application-xml-getter permitType)]
+      (fetch-fn url id raw? kuntalupatunnus?)
       (do
         (error "No fetch function for" permitType (:organization application))
         (fail! :error.unknown)))

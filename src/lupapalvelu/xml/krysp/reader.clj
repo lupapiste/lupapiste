@@ -55,14 +55,17 @@
 
 ;; For building filters
 (def ^:private yht-tunnus "yht:LupaTunnus/yht:muuTunnustieto/yht:MuuTunnus/yht:tunnus")
+(def ^:private yht-kuntalupatunnus "yht:LupaTunnus/yht:kuntalupatunnus")
+(defn- tunnus-path [kuntalupatunnus?] (if kuntalupatunnus? yht-kuntalupatunnus yht-tunnus))
 
 (def rakennuksen-kiinteistotunnus "rakval:rakennustieto/rakval:Rakennus/rakval:rakennuksenTiedot/rakval:rakennustunnus/rakval:kiinttun")
-(def asian-lp-lupatunnus (str "rakval:luvanTunnisteTiedot/" yht-tunnus))
-(def yleisten-alueiden-lp-lupatunnus (str "yak:luvanTunnisteTiedot/" yht-tunnus))
-(def poik-lp-lupatunnus  (str "ppst:luvanTunnistetiedot/" yht-tunnus))
-(def yl-lp-lupatunnus (str "ymy:luvanTunnistetiedot/" yht-tunnus))
-(def mal-lp-lupatunnus (str "ymm:luvanTunnistetiedot/" yht-tunnus))
-(def vvvl-lp-lupatunnus (str "ymv:luvanTunnistetiedot/" yht-tunnus))
+
+(defn- asian-lp-lupatunnus [kuntalupatunnus?] (str "rakval:luvanTunnisteTiedot/" (tunnus-path kuntalupatunnus?)))
+(defn- poik-lp-lupatunnus  [kuntalupatunnus?] (str "ppst:luvanTunnistetiedot/" (tunnus-path kuntalupatunnus?)))
+(defn- yl-lp-lupatunnus    [kuntalupatunnus?] (str "ymy:luvanTunnistetiedot/" (tunnus-path kuntalupatunnus?)))
+(defn- mal-lp-lupatunnus   [kuntalupatunnus?] (str "ymm:luvanTunnistetiedot/" (tunnus-path kuntalupatunnus?)))
+(defn- vvvl-lp-lupatunnus  [kuntalupatunnus?] (str "ymv:luvanTunnistetiedot/" (tunnus-path kuntalupatunnus?)))
+(defn- yleisten-alueiden-lp-lupatunnus [kuntalupatunnus?] (str "yak:luvanTunnisteTiedot/" (tunnus-path kuntalupatunnus?)))
 
 
 (defn property-equals
@@ -70,24 +73,23 @@
   [property value]
   (codec/url-encode (str "<PropertyIsEqualTo><PropertyName>" (escape-xml property) "</PropertyName><Literal>" (escape-xml value) "</Literal></PropertyIsEqualTo>")))
 
-(defn- post-body-for-ya-application [application-id]
-  {:body (str "<wfs:GetFeature
-      service=\"WFS\"
-        version=\"1.1.0\"
-        outputFormat=\"GML2\"
-        xmlns:yak=\"http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus\"
-        xmlns:wfs=\"http://www.opengis.net/wfs\"
-        xmlns:ogc=\"http://www.opengis.net/ogc\"
-        xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">
-        <wfs:Query typeName=\"yak:Sijoituslupa,yak:Kayttolupa,yak:Liikennejarjestelylupa,yak:Tyolupa\">
-          <ogc:Filter>
-            <ogc:PropertyIsEqualTo>
-              <ogc:PropertyName>yak:luvanTunnisteTiedot/yht:LupaTunnus/yht:muuTunnustieto/yht:MuuTunnus/yht:tunnus</ogc:PropertyName>
-              <ogc:Literal>" application-id "</ogc:Literal>
-            </ogc:PropertyIsEqualTo>
-          </ogc:Filter>
-         </wfs:Query>
-       </wfs:GetFeature>")})
+(defn- post-body-for-ya-application [id kuntalupatunnus?]
+  {:body (str "<wfs:GetFeature service=\"WFS\"
+                               version=\"1.1.0\"
+                               outputFormat=\"GML2\"
+                               xmlns:yak=\"http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus\"
+                               xmlns:wfs=\"http://www.opengis.net/wfs\"
+                               xmlns:ogc=\"http://www.opengis.net/ogc\"
+                               xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">
+                 <wfs:Query typeName=\"yak:Sijoituslupa,yak:Kayttolupa,yak:Liikennejarjestelylupa,yak:Tyolupa\">
+                   <ogc:Filter>
+                     <ogc:PropertyIsEqualTo>
+                       <ogc:PropertyName>" (yleisten-alueiden-lp-lupatunnus kuntalupatunnus?) "</ogc:PropertyName>
+                       <ogc:Literal>" id "</ogc:Literal>
+                     </ogc:PropertyIsEqualTo>
+                   </ogc:Filter>
+                 </wfs:Query>
+               </wfs:GetFeature>")})
 
 (defn wfs-krysp-url [server object-type filter]
   (let [server (if (.contains server "?")
@@ -111,30 +113,30 @@
     (debug "Get application: " url)
     (cr/get-xml url credentials raw?)))
 
-(defn rakval-application-xml [server id raw?] (application-xml rakval-case-type asian-lp-lupatunnus server id raw?))
-(defn poik-application-xml   [server id raw?] (application-xml poik-case-type poik-lp-lupatunnus server id raw?))
-(defn yl-application-xml     [server id raw?] (application-xml yl-case-type yl-lp-lupatunnus server id raw?))
-(defn mal-application-xml    [server id raw?] (application-xml mal-case-type mal-lp-lupatunnus server id raw?))
-(defn vvvl-application-xml   [server id raw?] (application-xml vvvl-case-type vvvl-lp-lupatunnus server id raw?))
-(defn ya-application-xml     [server id raw?] (let [options (post-body-for-ya-application id)
-                                                    credentials nil]
-                                                (debug "Get application: " server " with post body: " options )
-                                                (cr/get-xml-with-post server options credentials raw?)))
+(defn rakval-application-xml [server id raw? kuntalupatunnus?] (application-xml rakval-case-type (asian-lp-lupatunnus kuntalupatunnus?) server id raw?))
+(defn poik-application-xml   [server id raw? kuntalupatunnus?] (application-xml poik-case-type (poik-lp-lupatunnus kuntalupatunnus?) server id raw?))
+(defn yl-application-xml     [server id raw? kuntalupatunnus?] (application-xml yl-case-type (yl-lp-lupatunnus kuntalupatunnus?) server id raw?))
+(defn mal-application-xml    [server id raw? kuntalupatunnus?] (application-xml mal-case-type (mal-lp-lupatunnus kuntalupatunnus?) server id raw?))
+(defn vvvl-application-xml   [server id raw? kuntalupatunnus?] (application-xml vvvl-case-type (vvvl-lp-lupatunnus kuntalupatunnus?) server id raw?))
+(defn ya-application-xml     [server id raw? kuntalupatunnus?] (let [options (post-body-for-ya-application id kuntalupatunnus?)
+                                                                     credentials nil]
+                                                                 (debug "Get application: " server " with post body: " options )
+                                                                 (cr/get-xml-with-post server options credentials raw?)))
 
-(permit/register-function permit/R  :xml-from-krysp rakval-application-xml)
-(permit/register-function permit/P  :xml-from-krysp poik-application-xml)
-(permit/register-function permit/YA :xml-from-krysp ya-application-xml)
-(permit/register-function permit/YL :xml-from-krysp yl-application-xml)
-(permit/register-function permit/MAL :xml-from-krysp mal-application-xml)
+(permit/register-function permit/R    :xml-from-krysp rakval-application-xml)
+(permit/register-function permit/P    :xml-from-krysp poik-application-xml)
+(permit/register-function permit/YA   :xml-from-krysp ya-application-xml)
+(permit/register-function permit/YL   :xml-from-krysp yl-application-xml)
+(permit/register-function permit/MAL  :xml-from-krysp mal-application-xml)
 (permit/register-function permit/VVVL :xml-from-krysp vvvl-application-xml)
 
 (defn- ->building-ids [id-container xml-no-ns]
   {:propertyId (get-text xml-no-ns id-container :kiinttun)
-  :buildingId  (get-text xml-no-ns id-container :rakennusnro)
-  :index       (get-text xml-no-ns id-container :jarjestysnumero)
-  :usage       (or (get-text xml-no-ns :kayttotarkoitus) "")
-  :area        (get-text xml-no-ns :kokonaisala)
-  :created     (->> (get-text xml-no-ns :alkuHetki) cr/parse-datetime (cr/unparse-datetime :year))})
+   :buildingId (get-text xml-no-ns id-container :rakennusnro)
+   :index      (get-text xml-no-ns id-container :jarjestysnumero)
+   :usage      (or (get-text xml-no-ns :kayttotarkoitus) "")
+   :area       (get-text xml-no-ns :kokonaisala)
+   :created    (->> (get-text xml-no-ns :alkuHetki) cr/parse-datetime (cr/unparse-datetime :year))})
 
 (defn ->buildings-summary [xml]
   (let [xml-no-ns (cr/strip-xml-namespaces xml)]
