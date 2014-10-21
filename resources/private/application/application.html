@@ -227,9 +227,9 @@
 
             <li data-bind="if: _.contains(['verdictGiven', 'constructionStarted', 'closed'], state())">
               <a data-bind="click: changeTab" href="#" data-target="tasks" data-test-id="application-open-tasks-tab">
-                  <span data-bind="ltext: 'application.tabConstructionTimeTasks'"></span>
-                  <span data-bind="if: $data.tasksRequiringAction">
-                    <span data-bind="text: tasksRequiringAction" id="applicationTasksRequiringAction" class="indicator"></span></span></a></li>
+                <span data-bind="ltext: 'application.tabConstructionTimeTasks'"></span>
+                <span data-bind="if: $data.tasksRequiringAction">
+                  <span data-bind="text: tasksRequiringAction" id="applicationTasksRequiringAction" class="indicator"></span></span></a></li>
 
             <li>
               <a data-bind="click: changeTab" href="#" data-target="attachments" data-test-id="application-open-attachments-tab">
@@ -713,6 +713,7 @@
 
           <div data-bind="if: $root.verdictModel.verdicts()">
             <div class="application_section" data-bind="foreach: $root.verdictModel.verdicts">
+
               <h2 class="application_section_header">
                 <span data-bind="ltext: 'verdict.id'"></span>:
                 <span data-bind="text: $data.kuntalupatunnus, attr: {'data-test-id' : 'given-verdict-id-' + $index()}"></span>
@@ -739,6 +740,23 @@
                     </div>
 
                     <div class="accordion-fields">
+                      <div class="verdict-signature-fields" data-bind="visible: !$parent.draft">
+                        <h3 data-bind="ltext: 'verdict.signatures'"></h3>
+
+                        <div data-bind="foreach: $data.signatures">
+                          <div data-test-id="verdict-signature-listing">
+                            <label data-bind="fullName: $data.user"></label>
+                            <span class="value" data-bind="dateString: created"></span>
+                          </div>
+                        </div>
+
+                        <div data-bind="if: $root.authorization.ok('sign-verdict') && !$root.verdictModel.verdictSignedByUser($data)" data-test-id="verdict-signature-ui">
+                          <span data-bind="ltext: 'verdict.signature.description'"></span>
+                          <br/>
+                          <button class="btn btn-primary" data-bind="click: $root.verdictModel.openSigningDialog, ltext: 'verdict.sign'" data-test-id="sign-verdict-button"></button>
+                        </div>
+                      </div>
+
                       <!--  ko if:  $data.paivamaarat -->
                       <div data-bind="if: paivamaarat.anto" class="key-value-pair">
                         <label data-bind="ltext: 'verdict.anto'"></label>
@@ -776,8 +794,8 @@
 
                       <h2 data-bind="ltext: 'verdict.lupamaaraukset'"></h2>
                       <div class="accordion-content-part">
-                        <!--  ko if:  $data.lupamaaraykset -->
 
+                        <!--  ko if:  $data.lupamaaraykset -->
                         <div data-bind="if: lupamaaraykset.autopaikkojaEnintaan" class="key-value-pair">
                           <label data-bind="ltext: 'verdict.autopaikkojaEnintaan'"></label><span class="value" data-bind="text: lupamaaraykset.autopaikkojaEnintaan"></span></div>
                         <div data-bind="if: lupamaaraykset.autopaikkojaVahintaan" class="key-value-pair">
@@ -809,7 +827,6 @@
 
                         <div data-bind='if: lupamaaraykset.vaaditutKatselmukset && lupamaaraykset.vaaditutKatselmukset.length'>
                           <h3 data-bind="ltext: 'verdict.vaaditutKatselmukset'"></h3>
-
                           <ul data-bind="foreach: lupamaaraykset.vaaditutKatselmukset">
                             <li data-bind='if: $data.katselmuksenLaji'>
                               <span data-bind="ltext: 'task-katselmus.katselmuksenLaji.'+ $data.katselmuksenLaji"></span>
@@ -840,15 +857,17 @@
                           </table>
                         </div>
                         <!-- /ko --> <!-- /lupamaaraykset -->
+
                         <!--  ko ifnot:  $data.lupamaaraykset -->
                         <div data-bind="ltext: 'verdict.lupamaaraukset.missing'"></div>
                         <!-- /ko -->
+
                       </div>
 
                       <h2 data-bind="ltext: 'verdict.poytakirjat'"></h2>
                       <div class="accordion-content-part">
-                        <!--  ko if:  $data.poytakirjat && $data.poytakirjat.length -->
 
+                        <!--  ko if:  $data.poytakirjat && $data.poytakirjat.length -->
                         <table class="table table-striped tablesorter" id="application-verdict-details">
                           <thead>
                             <tr>
@@ -877,8 +896,8 @@
                             </tr>
                           </tbody>
                         </table>
-
                         <!-- /ko --> <!-- /poytakirjat -->
+
                         <!--  ko ifnot:  $data.poytakirjat && $data.poytakirjat.length -->
                         <div data-bind="ltext: 'verdict.poytakirjat.missing'"></div>
                         <!-- /ko -->
@@ -937,7 +956,7 @@
         </div>
 
         <script type="text/html" id="statements-template">
-           <div data-bind="ifnot: $data.statements && statements().length > 0">
+          <div data-bind="ifnot: $data.statements && statements().length > 0">
             <p data-bind="ltext: 'application.statement.missing'" data-test-id="application-no-statements"></p>
           </div>
 
@@ -1044,6 +1063,7 @@
           <p data-bind="lhtml: 'help.' + permitType() + '.tasksDesc'" class="tab-info"></p>
 
           <div data-bind="if: buildings() && buildings().length > 0 && $root.authorization.ok('inform-building-construction-started')">
+
             <table>
               <thead>
                 <tr><td colspan="4"><h2 data-bind="ltext: 'application.aloitusilmoitukset'" style="padding-top:0.5em"></h2></td></tr>

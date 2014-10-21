@@ -14,6 +14,7 @@
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.tasks :as tasks]
+            [lupapalvelu.user :as user]
             [lupapalvelu.xml.krysp.reader :as krysp])
   (:import [java.net URL]))
 
@@ -178,8 +179,29 @@
    :roles      [:authority]}
   [{:keys [application created] :as command}]
   (when-let [verdict (find-verdict application verdictId)]
-    (let [attachments (filter #(= (select-keys (:target %) [:id :type]) {:type "verdict" :id (:id verdict)}) (:attachments application))]
+    (let [is-verdict-attachment? #(= (select-keys (:target %) [:id :type]) {:type "verdict" :id (:id verdict)})
+          attachments (filter is-verdict-attachment? (:attachments application))]
       (update-application command {$pull {:verdicts {:id verdictId}}})
       ; TODO pull from tasks, auth-comments
       (doseq [{attachment-id :id} attachments]
         (attachment/delete-attachment application attachment-id)))))
+
+(defcommand sign-verdict
+  {:description "Applicant/application owner can sign an application's verdict"
+   :parameters [id verdictId password]
+   :states     [:verdictGiven :constructionStarted]
+   :pre-checks [domain/validate-owner-or-writer]
+   :roles      [:applicant :authority]}
+  [{:keys [application created user] :as command}]
+  (if (user/get-user-with-password (:username user) password)
+    (when (find-verdict application verdictId)
+      (update-application command
+                          {:verdicts {$elemMatch {:id verdictId}}}
+                          {$set  {:modified              created}
+                           $push {:verdicts.$.signatures {:created created
+                                                          :user (user/summary user)}}
+                          }))
+    (do
+      ; Throttle giving information about incorrect password
+      (Thread/sleep 2000)
+      (fail :error.password))))
