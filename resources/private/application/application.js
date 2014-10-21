@@ -202,6 +202,7 @@
   });
 
   // tabs
+  var selectedTabName = ko.observable();
   var selectedTab = "";
   var tabFlow = false;
   hub.subscribe("set-debug-tab-flow", function(e) {
@@ -225,15 +226,8 @@
     }
   }
 
-  function markTabActive(id) {
-    setTimeout(function() {
-      $("#applicationTabs li").removeClass("active");
-      $("a[data-target='"+id+"']").parent().addClass("active");
-    }, 500);
-  }
-
   function selectTab(tab) {
-    markTabActive(tab);
+    selectedTabName(tab);
     openTab(tab);
     selectedTab = tab; // remove after tab-spike
 
@@ -248,8 +242,6 @@
           .call();
       }}, 1000);
   }
-
-
 
   function initPage(kind, e) {
     var newId = e.pagePath[0];
@@ -387,7 +379,8 @@
       signingModel: signingModel,
       verdictModel: verdictModel,
       openInviteCompany: inviteCompanyModel.open.bind(inviteCompanyModel),
-      attachmentsTab: attachmentsTab
+      attachmentsTab: attachmentsTab,
+      selectedTabName: selectedTabName
     };
 
     $("#application").applyBindings(bindings);
