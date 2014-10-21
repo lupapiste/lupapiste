@@ -345,7 +345,11 @@
                               {:tag :VRKrooliKoodi}
                               henkilo
                               yritys_211]}
-                     {:tag :tyyppi :ns "yht"}])
+                     {:tag :tyyppi :ns "yht"}
+                     {:tag :metatietotieto :ns "yht"
+                      :child [{:tag :metatieto
+                               :child [{:tag :metatietoArvo}
+                                       {:tag :metatietoNimi}]}]}])
 
 (def liite-children_213 (update-child-element liite-children_211 [:tekija :yritys] yritys_213))
 
@@ -423,7 +427,6 @@
     #{} lausuntotieto))
 
 (defn get-Liite [title link attachment type file-id filename & [meta]]
-  (prn "get-liite")
   {:kuvaus title
    :linkkiliitteeseen link
    :muokkausHetki (to-xml-datetime (:modified attachment))
