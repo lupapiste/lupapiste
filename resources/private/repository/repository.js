@@ -26,7 +26,7 @@ var repository = (function() {
         attachment.signed = true;
       }
     }
-    
+
     attachment.isSent = false;
     attachment.sentDateString = "-";
     if (!_.isUndefined(attachment.sent) || attachment.sent) {
@@ -35,6 +35,15 @@ var repository = (function() {
     }
 
     attachment.stamped = _.isUndefined(attachment.latestVersion) || !attachment.latestVersion ? false : attachment.latestVersion.stamped;
+  }
+
+  function setAttachmentOperation(operations, attachment) {
+    if ( !_.isUndefined(attachment.op) && !_.isNull(attachment.op) ) {
+      var op = _.findWhere(operations, {id: attachment.op.id});
+      if (op) {
+        attachment.op = op;
+      }
+    }
   }
 
   function load(id, pending, callback) {
@@ -85,7 +94,10 @@ var repository = (function() {
             }
           }
         });
-        _.each(application.attachments ||[], calculateAttachmentStateIndicators);
+        _.each(application.attachments ||[], function(att) {
+          calculateAttachmentStateIndicators(att);
+          setAttachmentOperation(application.operations, att);
+        });
         hub.send("application-loaded", {applicationDetails: loading});
         if (_.isFunction(callback)) {
           callback(application);
