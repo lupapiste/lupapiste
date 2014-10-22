@@ -213,47 +213,49 @@
         <!-- Tabs: -->
         <div class="tabs-container" data-bind="with: application">
           <ul class="tabs" id="applicationTabs">
-            <li data-bind="ifnot: _.contains(['verdictGiven', 'constructionStarted', 'closed'], state())">
+            <li data-bind="if: !inPostVerdictState(), css: {'active': $parent.selectedTabName() === 'info'}">
               <a data-bind="click: changeTab" href="#" data-target="info" data-test-id="application-open-info-tab">
                 <span data-bind="ltext: 'application.tabInfo'"></span>
                 <span data-bind="if: nonpartyDocumentIndicator">
                   <span data-bind="text: nonpartyDocumentIndicator" id="applicationNonpartyDocumentIndicator" class="indicator"></span></span></a></li>
 
-            <li data-bind="ifnot: _.contains(['verdictGiven', 'constructionStarted', 'closed'], state())">
+            <li data-bind="if: !inPostVerdictState(), css: {'active': $parent.selectedTabName() === 'parties'}">
               <a data-bind="click: changeTab" href="#" data-target="parties" data-test-id="application-open-parties-tab">
                 <span data-bind="ltext: 'application.tabParties'"></span>
                 <span data-bind="if: partyDocumentIndicator">
                   <span data-bind="text: partyDocumentIndicator" id="applicationPartyDocumentIndicator" class="indicator"></span></span></a></li>
 
-            <li data-bind="if: _.contains(['verdictGiven', 'constructionStarted', 'closed'], state())">
+            <li data-bind="if: inPostVerdictState(), css: {'active': $parent.selectedTabName() === 'tasks'}">
               <a data-bind="click: changeTab" href="#" data-target="tasks" data-test-id="application-open-tasks-tab">
                 <span data-bind="ltext: 'application.tabConstructionTimeTasks'"></span>
                 <span data-bind="if: $data.tasksRequiringAction">
                   <span data-bind="text: tasksRequiringAction" id="applicationTasksRequiringAction" class="indicator"></span></span></a></li>
 
-            <li>
+            <li data-bind="css: {'active': $parent.selectedTabName() === 'attachments'}">
               <a data-bind="click: changeTab" href="#" data-target="attachments" data-test-id="application-open-attachments-tab">
                 <span data-bind="ltext: 'application.tabAttachments'"></span>
                 <span data-bind="if: attachmentsRequiringAction">
                   <span data-bind="text: attachmentsRequiringAction" id="applicationAttachmentsRequiringAction" class="indicator"></span></span></a></li>
 
-            <li data-bind="if: _.contains(['draft', 'open', 'submitted', 'complement-needed'], state())">
+            <li data-bind="if: _.contains(['draft', 'open', 'submitted', 'complement-needed'], state()),
+                           css: {'active': $parent.selectedTabName() === 'requiredFieldSummary'}">
               <a data-bind="click: changeTab" href="#" data-target="requiredFieldSummary" data-test-id="application-open-requiredFieldSummary-tab">
                 <span data-bind="ltext: 'application.tabRequiredFieldSummary'"></span></a></li>
 
-            <li data-bind="ifnot: _.contains(['verdictGiven', 'constructionStarted', 'closed'], state())">
+            <li data-bind="if: !inPostVerdictState(), css: {'active': $parent.selectedTabName() === 'statement'}">
               <a data-bind="click: changeTab" href="#" data-target="statement" data-test-id="application-open-statement-tab">
                 <span data-bind="ltext: 'application.tabStatement'"></span>
                 <span data-bind="if: unseenStatements">
                   <span data-bind="text: unseenStatements" id="applicationUnseenStatements" class="indicator"></span></span></a></li>
 
-            <li data-bind="ifnot: _.contains(['draft', 'open'], state())">
+            <li data-bind="ifnot: _.contains(['draft', 'open'], state()),
+                           css: {'active': $parent.selectedTabName() === 'verdict'}">
               <a data-bind="click: changeTab" href="#" data-target="verdict" data-test-id="application-open-verdict-tab">
                 <span data-bind="ltext: 'application.tabVerdict'"></span>
                 <span data-bind="if: unseenVerdicts">
                   <span data-bind="text: unseenVerdicts" id="applicationUnseenVerdists" class="indicator"></span></span></a></li>
 
-            <li data-bind="if: _.contains(['verdictGiven', 'constructionStarted', 'closed'], state())">
+            <li data-bind="if: inPostVerdictState(), css: {'active': $parent.selectedTabName() === 'applicationSummary'}">
               <a data-bind="click: changeTab" href="#" data-target="applicationSummary" data-test-id="application-open-applicationSummary-tab">
                 <span data-bind="ltext: 'application.applicationSummary'"></span></a></li>
 
@@ -737,12 +739,12 @@
                   </h2>
                   <div class="accordion_content expanded">
 
-                    <div data-bind="with: $parent">
-                      <div data-bind="if: $data.draft">
-                        <button data-bind="visible: $root.authorization.ok('publish-verdict'), click: function() {$root.verdictModel.publishVerdict($root, $data);}, ltext: 'verdict.submit'"
-                                class="btn btn-primary" style="float: right;margin-left: 3px" data-test-id="publish-verdict"></button>
+                    <div data-bind="with: $parent" style="overflow: auto;">
+                      <div class="btn-container right-align" data-bind="if: $data.draft">
                         <button data-bind="visible: $root.authorization.ok('save-verdict-draft'), click: function() {$root.verdictModel.openVerdict($root, $data);}, ltext: 'edit'"
-                                class="btn btn-primary" style="float: right;" data-test-id="edit-verdict"></button>
+                                class="btn btn-primary" data-test-id="edit-verdict"></button>
+                        <button data-bind="visible: $root.authorization.ok('publish-verdict'), click: function() {$root.verdictModel.publishVerdict($root, $data);}, ltext: 'verdict.submit'"
+                                class="btn btn-primary" data-test-id="publish-verdict"></button>
                       </div>
                     </div>
 
@@ -800,7 +802,7 @@
                           </div>
                         </div>
                       </div>
-  
+
                       <div>
                         <h2 data-bind="ltext: 'verdict.lupamaaraukset'"></h2>
                         <div class="accordion-content-part">
