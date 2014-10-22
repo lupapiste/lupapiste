@@ -202,6 +202,7 @@
   });
 
   // tabs
+  var selectedTabName = ko.observable();
   var selectedTab = "";
   var tabFlow = false;
   hub.subscribe("set-debug-tab-flow", function(e) {
@@ -225,13 +226,8 @@
     }
   }
 
-  function markTabActive(id) {
-    $("#applicationTabs li").removeClass("active");
-    $("a[data-target='"+id+"']").parent().addClass("active");
-  }
-
   function selectTab(tab) {
-    markTabActive(tab);
+    selectedTabName(tab);
     openTab(tab);
     selectedTab = tab; // remove after tab-spike
 
@@ -247,18 +243,19 @@
       }}, 1000);
   }
 
-
-
   function initPage(kind, e) {
     var newId = e.pagePath[0];
     var tab = e.pagePath[1];
-    if (newId !== currentId || !tab) {
+    if (newId === currentId && tab) {
+      selectTab(tab);
+    } else {
       pageutil.showAjaxWait();
       currentId = newId;
       mapModel.updateMapSize(kind);
-      repository.load(currentId);
+      repository.load(currentId, applicationModel.pending, function(application) {
+        selectTab(tab || (application.inPostVerdictState ? "tasks" : "info"));
+      });
     }
-    selectTab(tab || "info");
   }
 
   hub.onPageChange("application", _.partial(initPage, "application"));
@@ -382,7 +379,8 @@
       signingModel: signingModel,
       verdictModel: verdictModel,
       openInviteCompany: inviteCompanyModel.open.bind(inviteCompanyModel),
-      attachmentsTab: attachmentsTab
+      attachmentsTab: attachmentsTab,
+      selectedTabName: selectedTabName
     };
 
     $("#application").applyBindings(bindings);

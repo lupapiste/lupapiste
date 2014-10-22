@@ -95,6 +95,7 @@
 (defn- in-role? [role request]
   (= role (keyword (:role (user/current-user request)))))
 
+(def applicant? (partial in-role? :applicant))
 (def authority? (partial in-role? :authority))
 (def authority-admin? (partial in-role? :authorityAdmin))
 (def admin? (partial in-role? :admin))
@@ -197,7 +198,7 @@
                    :cdn-fallback anyone
                    :hashbang anyone
                    :upload logged-in?
-                   :applicant logged-in?
+                   :applicant applicant?
                    :authority authority?
                    :oir authority?
                    :authority-admin authority-admin?
@@ -268,7 +269,7 @@
 
 (defn- ->hashbang [v]
   (when (and v (= -1 (.indexOf v ":")))
-    (second (re-matches #"^[#!/]{0,3}(.*)" v))))
+    (->> (s/replace-first v "%21" "!") (re-matches #"^[#!/]{0,3}(.*)") second)))
 
 (defn- save-hashbang-on-client []
   (resp/set-headers {"Cache-Control" "no-cache", "ETag" "\"none\""}

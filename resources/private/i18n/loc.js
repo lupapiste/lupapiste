@@ -47,16 +47,10 @@ var loc;
     return loc.terms[key] !== undefined;
   };
 
-  function langFromPath(path) {
-    var langEndI = path.indexOf("/", 5);
-    return langEndI > 0 ? path.substring(5, langEndI) : null;
-  }
-
   function resolveLang() {
-    var lang = langFromPath(window.location.pathname);
-    if (!_.contains(loc.supported, lang) && window.parent) {
-      lang = langFromPath(window.parent.location.pathname);
-    }
+    var url = window.parent ? window.parent.location.pathname : location.pathname;
+    var langEndI = url.indexOf("/", 5);
+    var lang = langEndI > 0 ? url.substring(5, langEndI) : null;
     return _.contains(loc.supported, lang) ? lang : loc.defaultLanguage;
   }
 
