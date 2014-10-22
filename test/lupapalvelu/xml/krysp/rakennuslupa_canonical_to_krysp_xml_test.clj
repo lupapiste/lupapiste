@@ -70,7 +70,12 @@
     (let [lp-xml_215 (cr/strip-xml-namespaces (xml/parse xml_215_s))]
       ; Address format has changed in 2.1.5
       (xml/get-text lp-xml_215 [:omistajatieto :Omistaja :yritys :postiosoitetieto :postiosoite :osoitenimi :teksti]) => "katu"
-      (xml/get-text lp-xml_215 [:omistajatieto :Omistaja :yritys :postiosoitetieto :postiosoite :kunta]) => "Tuonela")
+      (xml/get-text lp-xml_215 [:omistajatieto :Omistaja :yritys :postiosoitetieto :postiosoite :kunta]) => "Tuonela"
+
+      ; E-Invoicing fields added in 2.1.5
+      (xml/get-text lp-xml_215 [:osapuolitieto :Osapuoli :yritys :verkkolaskutustieto :Verkkolaskutus :ovtTunnus]) => "003712345678"
+      (xml/get-text lp-xml_215 [:osapuolitieto :Osapuoli :yritys :verkkolaskutustieto :Verkkolaskutus :verkkolaskuTunnus]) => "laskutunnus-1234"
+      (xml/get-text lp-xml_215 [:osapuolitieto :Osapuoli :yritys :verkkolaskutustieto :Verkkolaskutus :valittajaTunnus]) => "valittajatunnus-1234")
 
     ; Alla oleva tekee jo validoinnin, mutta annetaan olla tuossa alla viela validointi, jottei tule joku riko olemassa olevaa validointia
     (mapping-to-krysp/save-application-as-krysp application "fi" application {:krysp {:R {:ftpUser "dev_sipoo" :version "2.1.2"}}})

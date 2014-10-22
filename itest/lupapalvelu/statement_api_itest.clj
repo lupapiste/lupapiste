@@ -5,6 +5,8 @@
 
 (apply-remote-minimal)
 
+(def sonja-email (email-for-key sonja))
+
 (defn- auth-contains-ronjas-statement [{auth :auth}]
   (some #(and
           (:statementId %)
@@ -12,6 +14,16 @@
           (= (:username %) "ronja")) auth))
 
 (facts* "statements"
+
+  (fact "authorityAdmin can't query get-statement-givers"
+    (query sipoo :get-statement-givers) => unauthorized?)
+
+    (let [resp (query sipoo :get-organizations-statement-givers) => ok?
+          givers (:data resp)]
+      (fact "One statement giver in Sipoo, Sonja (set in minimal fixture)"
+        (count givers) => 1
+        (-> givers first :email) => (contains sonja-email)))
+
   (let [ronja-email  (email-for "ronja")
         veikko-email (email-for "veikko")
         application-id     (create-app-id sonja :municipality sonja-muni :address "Lausuntobulevardi 1 A 1")
@@ -19,8 +31,15 @@
         statement-giver-ronja (:id resp)
         email (last-email)]
 
+    (let [resp (query sipoo :get-organizations-statement-givers) => ok?
+          givers (:data resp)]
+      (fact "Two statement givers in Sipoo, Sonja & Ronja"
+        (count givers) => 2
+        (-> givers first :email) => sonja-email
+        (-> givers second :email) => ronja-email))
+
     (fact "new statement person receives email which contains the (html escaped) input text"
-      (:to email) => ronja-email
+      (:to email) => (contains ronja-email)
       (:subject email) => "Lupapiste.fi: Lausunnot"
       (get-in email [:body :plain]) => (contains "<b>bold</b>")
       (get-in email [:body :html]) => (contains "&lt;b&gt;bold&lt;/b&gt;"))
@@ -41,7 +60,7 @@
               emails (sent-emails)
               email (first emails)]
           (fact "Veikko receives email"
-            (:to email) => veikko-email
+            (:to email) => (contains veikko-email)
             (:subject email) => "Lupapiste.fi: Sipoo, Lausuntobulevardi 1 A 1 - Lausuntopyynt\u00f6")
           (fact "...but no-one else"
             (count emails) => 1)
@@ -57,8 +76,16 @@
     (fact "Veikko gives a statement"
       (last-email) ; Inbox zero
       (let [application (query-application veikko application-id)
-            statement   (first (:statements application))
-            sonja-email (email-for "sonja")]
+            statement   (first (:statements application))]
+
+        (fact* "Veikko is one of the possible statement givers"
+          (let [resp (query sonja :get-statement-givers :id application-id) => ok?
+                giver-emails (->> resp :data (map :email) set)]
+            (count giver-emails) => 3
+            (giver-emails sonja-email) => sonja-email
+            (giver-emails ronja-email) => ronja-email
+            (giver-emails veikko-email) => veikko-email))
+
         (get-in statement [:person :email]) => veikko-email
         (command veikko :give-statement :id application-id :statementId (:id statement) :status "yes" :text "I will approve" :lang "fi") => ok?
 
@@ -66,8 +93,8 @@
           (let [emails (sent-emails)
                 email  (first emails)]
           (count emails) => 1
-          (:to email) => sonja-email
-          email => (partial contains-application-link-with-tab? application-id "conversation")))
+          (:to email) => (contains sonja-email)
+          email => (partial contains-application-link-with-tab? application-id "conversation" "authority")))
         ))
 
     ; TODO facts about what Veikko can and can not do to application

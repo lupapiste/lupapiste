@@ -2,12 +2,10 @@
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error fatal]]
             [clojure.string :refer [blank? join trim split]]
             [clojure.walk :refer [keywordize-keys]]
-            [swiss.arrows :refer [-<>>]]
             [clj-time.core :refer [year]]
             [clj-time.local :refer [local-now]]
             [clj-time.format :as tf]
             [monger.operators :refer :all]
-            [monger.query :as query]
             [sade.env :as env]
             [sade.util :as util]
             [sade.strings :as ss]
@@ -23,8 +21,7 @@
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
-            [lupapalvelu.user :refer [with-user-by-email] :as user]
-            [lupapalvelu.user-api :as user-api]
+            [lupapalvelu.user :as user]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.tasks :as tasks]
@@ -34,9 +31,14 @@
             [lupapalvelu.ktj :as ktj]
             [lupapalvelu.open-inforequest :as open-inforequest]
             [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.application-search :as search]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.company :as c]))
+
+;; Notifications
+
+(notifications/defemail :application-state-change
+  {:subject-key    "state-change"
+   :application-fn (fn [{id :id}] (domain/get-application-no-access-checking id))})
 
 ;; Validators
 
@@ -74,15 +76,13 @@
         (fail! :error.unknown)))
     (fail! :error.no-legacy-available)))
 
-(defn- set-user-to-document [application document user-id path current-user timestamp]
+(defn set-user-to-document [application document user-id path current-user timestamp]
   {:pre [document]}
   (when-not (ss/blank? user-id)
     (let [path-arr     (if-not (blank? path) (split path #"\.") [])
           schema       (schemas/get-schema (:schema-info document))
           subject      (user/get-user-by-id user-id)
-          with-hetu    (and
-                         (model/has-hetu? (:body schema) path-arr)
-                         (user/same-user? current-user subject))
+          with-hetu    (model/has-hetu? (:body schema) path-arr)
           person       (tools/unwrapped (model/->henkilo subject :with-hetu with-hetu :with-empty-defaults true))
           model        (if (seq path-arr)
                          (assoc-in {} (map keyword path-arr) person)
@@ -117,17 +117,17 @@
 ;;
 
 (defn- post-process-app [app user]
-  ((comp
-     (fn [application] (update-in application [:documents] (fn [documents]
-                                                             (map
-                                                               (comp
-                                                                 model/mask-person-ids
-                                                                 (fn [doc] (assoc doc :validationErrors (model/validate application doc))))
-                                                               documents))))
-     without-system-keys
-     (partial meta-fields/with-meta-fields user)
-     meta-fields/enrich-with-link-permit-data)
-    app))
+  (-> app
+    meta-fields/enrich-with-link-permit-data
+    ((partial meta-fields/with-meta-fields user))
+    without-system-keys
+    ((fn [application]
+       (update-in application [:documents] (fn [documents]
+                                             (map
+                                               (comp
+                                                 model/mask-person-ids
+                                                 (fn [doc] (assoc doc :validationErrors (model/validate application doc))))
+                                               documents)))))))
 
 (defn find-authorities-in-applications-organization [app]
   (mongo/select :users
@@ -187,112 +187,6 @@
         original-schema-names (:required ((keyword initialOp) operations/operations))
         original-party-documents (filter-repeating-party-docs (:schema-version application) original-schema-names)]
     (ok :partyDocumentNames (conj original-party-documents "hakija"))))
-
-;;
-;; Invites
-;;
-
-(defquery invites
-  {:roles [:applicant :authority]}
-  [{{:keys [id]} :user}]
-  (let [common     {:auth {$elemMatch {:invite.user.id id}}}
-        projection (assoc common :_id 0)
-        filter     {$and [common {:state {$ne :canceled}}]}
-        data       (mongo/select :applications filter projection)
-        invites    (map :invite (mapcat :auth data))]
-    (ok :invites invites)))
-
-(defn- create-invite-model [command conf]
-  (assoc (notifications/create-app-model command conf) :message (get-in command [:data :text]) ))
-
-(notifications/defemail :invite  {:recipients-fn  notifications/from-data
-                                  :model-fn create-invite-model})
-
-(defcommand invite
-  {:parameters [id email title text documentName documentId path]
-   :input-validators [(partial action/non-blank-parameters [:email])
-                      action/email-validator]
-   :states     (action/all-application-states-but [:closed :canceled])
-   :roles      [:applicant :authority]
-   :notified   true
-   :on-success (notify :invite)}
-  [{:keys [created user application] :as command}]
-  (let [email (-> email ss/lower-case ss/trim)]
-    (if (domain/invite application email)
-      (fail :invite.already-has-auth)
-      (let [invited (user-api/get-or-create-user-by-email email user)
-            invite  {:title        title
-                     :application  id
-                     :text         text
-                     :path         path
-                     :documentName documentName
-                     :documentId   documentId
-                     :created      created
-                     :email        email
-                     :user         (user/summary invited)
-                     :inviter      (user/summary user)}
-            writer  (user/user-in-role invited :writer)
-            auth    (assoc writer :invite invite)]
-        (if (domain/has-auth? application (:id invited))
-          (fail :invite.already-has-auth)
-          (update-application command
-            {:auth {$not {$elemMatch {:invite.user.username email}}}}
-            {$push {:auth     auth}
-             $set  {:modified created}}))))))
-
-(defcommand approve-invite
-  {:parameters [id]
-   :roles      [:applicant]
-   :states     (action/all-application-states-but [:closed :canceled])}
-  [{:keys [created user application] :as command}]
-  (when-let [my-invite (domain/invite application (:email user))]
-    (update-application command
-      {:auth {$elemMatch {:invite.user.id (:id user)}}}
-      {$set  {:modified created
-              :auth.$ (assoc (user/user-in-role user :writer) :inviteAccepted created)}})
-    (when-let [document (domain/get-document-by-id application (:documentId my-invite))]
-      ; Document can be undefined in invite or removed by the time invite is approved.
-      ; It's not possible to combine Mongo writes here,
-      ; because only the last $elemMatch counts.
-      (set-user-to-document (domain/get-application-as id user) document (:id user) (:path my-invite) user created))))
-
-(defn generate-remove-invalid-user-from-docs-updates [{docs :documents :as application}]
-  (-<>> docs
-    (map-indexed
-      (fn [i doc]
-        (->> (model/validate application doc)
-          (filter #(= (:result %) [:err "application-does-not-have-given-auth"]))
-          (map (comp (partial map name) :path))
-          (map (comp (partial join ".") (partial concat ["documents" i "data"]))))))
-    flatten
-    (zipmap <> (repeat ""))))
-
-(defn- do-remove-auth [{application :application :as command} email]
-  (let [email (-> email ss/lower-case ss/trim)
-        user-pred #(when (and (= (:username %) email) (not= (:type %) "owner")) %)]
-    (when (some user-pred (:auth application))
-      (let [updated-app (update-in application [:auth] (fn [a] (remove user-pred a)))
-            doc-updates (generate-remove-invalid-user-from-docs-updates updated-app)]
-        (update-application command
-          (merge
-            {$pull {:auth {$and [{:username email}, {:type {$ne :owner}}]}}
-             $set  {:modified (:created command)}}
-            (when (seq doc-updates) {$unset doc-updates})))))))
-
-(defcommand remove-auth
-  {:parameters [:id email]
-   :input-validators [(partial action/non-blank-parameters [:email])]
-   :roles      [:applicant :authority]
-   :states     (action/all-application-states-but [:canceled])}
-  [command]
-  (do-remove-auth command email))
-
-(defcommand decline-invitation
-  {:parameters [:id]
-   :roles [:applicant :authority]
-   :states     (action/all-application-states-but [:canceled])}
-  [command]
-  (do-remove-auth command (get-in command [:user :email])))
 
 (defcommand mark-seen
   {:parameters [:id type]
@@ -443,10 +337,9 @@
                         {:state :sent}))
         application (-> application
                       meta-fields/enrich-with-link-permit-data
-                      ((fn [app]
-                        (if (= "lupapistetunnus" (-> app :linkPermitData first :type))
-                          (update-link-permit-data-with-kuntalupatunnus-from-verdict app)
-                          app)))
+                      (#(if (= "lupapistetunnus" (-> % :linkPermitData first :type))
+                         (update-link-permit-data-with-kuntalupatunnus-from-verdict %)
+                         %))
                       (merge app-updates))
         mongo-query (if jatkoaika-app?
                       {:state {$in ["submitted" "complement-needed"]}}
@@ -469,7 +362,7 @@
                              :submitted (or (:submitted application) created)}})
   (try
     (mongo/insert :submitted-applications
-      (-> (meta-fields/enrich-with-link-permit-data application) (dissoc :id) (assoc :_id (:id application))))
+      (-> application meta-fields/enrich-with-link-permit-data (dissoc :id) (assoc :_id (:id application))))
     (catch com.mongodb.MongoException$DuplicateKey e
       ; This is ok. Only the first submit is saved.
       )))
@@ -509,7 +402,8 @@
      :title       (:title app)
      :location    (:location app)
      :operation   (->> (:operations app) first :name (i18n/localize lang "operations"))
-     :authName    (-> (domain/get-auths-by-role app :owner)
+     :authName    (-> app
+                    (domain/get-auths-by-role :owner)
                     first
                     (#(str (:firstName %) " " (:lastName %))))
      :comments    (->> (:comments app)
@@ -731,7 +625,7 @@
 (defcommand update-op-description
   {:parameters [id op-id desc]
    :roles      [:applicant :authority]
-   :states     action/all-states}
+   :states     [:draft :open :submitted :complement-needed]}
   [command]
   (let [application (:application command)
         app-command (application->command application)]
@@ -789,7 +683,6 @@
   [{{:keys [propertyId] :as application} :application user :user :as command}]
   (let [results (mongo/select :applications
                   (merge (domain/application-query-for user) {:_id {$ne id}
-                                                              :state {$nin ["draft"]}
                                                               :infoRequest false
                                                               :permitType (:permitType application)
                                                               :operations.name {$nin ["ya-jatkoaika"]}})
@@ -821,9 +714,9 @@
     (mongo/update-by-id :app-links db-id
       {:_id  db-id
        :link [id link-permit-id]
-       id    {:type "application"
-              :apptype (:name (first operations))
-              :propertyId propertyId}
+       id             {:type "application"
+                       :apptype (:name (first operations))
+                       :propertyId propertyId}
        link-permit-id {:type "linkpermit"
                        :linkpermittype (if (.startsWith link-permit-id "LP-")
                                          "lupapistetunnus"
@@ -902,7 +795,7 @@
     (if (:started app)
       (util/to-local-date (:started app))
       (or
-        (-> (domain/get-document-by-name app "tyoaika") :data :tyoaika-alkaa-pvm :value)
+        (-> app (domain/get-document-by-name "tyoaika") :data :tyoaika-alkaa-pvm :value)
         (-> tapahtuma-data :tapahtuma-aika-alkaa-pvm :value)
         (util/to-local-date (:submitted app))))))
 
@@ -1036,6 +929,7 @@
         organization (organization/get-organization (:organization application))]
     (update-application command
       {$set {:infoRequest false
+             :openInfoRequest false
              :state :open
              :opened created
              :convertedToApplication created
@@ -1081,13 +975,3 @@
           buildings (krysp/->buildings-summary kryspxml)]
       (ok :data buildings))
     (fail :error.no-legacy-available)))
-
-;;
-;; Service point for jQuery dataTables:
-;;
-
-(defquery applications-for-datatables
-  {:parameters [params]
-   :roles      [:applicant :authority]}
-  [{user :user}]
-  (ok :data (search/applications-for-user user params)))

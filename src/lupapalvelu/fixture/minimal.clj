@@ -364,6 +364,20 @@
     :email  "dummy3@example.com"
     :private {:password "$2a$10$hLCt8BvzrJScTOGQcXJ34ea5ovSfS5b/4X0OAmPbfcs/x3hAqEDxy"}
     :role "applicant"}
+
+   ;; Yrityksen admin
+
+   {:id "kainosolita"
+    :enabled true
+    :username "kaino@solita.fi" ; / kaino123
+    :firstName "Kaino"
+    :lastName "Solita"
+    :email "kaino@solita.fi"
+    :private {:password "$2a$10$QjKZTnJy77sxiWaBKR0jQezFf1LSpKfg/sljmsSq4YIq05HRZI.l."}
+    :role "applicant"
+    :architect true
+    :company {:id "solita", :role "admin"}}
+
    ])
 
 (def ya-default-attachments-for-operations {:ya-kayttolupa-tapahtumat                                          [[:muut :muu]]
@@ -622,7 +636,22 @@
                                          :email "sonja.sibbo@sipoo.fi",
                                          :name "Sonja Sibbo"}]}])
 
+(def companies [{:_id "solita",
+                 :created 1412959886600
+                 :name "Solita Oy"
+                 :address1 "Tulli Business Park"
+                 :address2 "\u00c5kerlundinkatu 11"
+                 :zip "33100"
+                 :po "Tampere"
+                 :country "FINLAND"
+                 :y "FI1060155-5"
+                 :ovt "003710601555"
+                 :pop "BAWCFI22"
+                 :reference "Lupis"
+                 :process-id "CkaekKfpEymHUG0nn5z4MLxwNm34zIdpAXHqQ3FM"}])
+
 (deffixture "minimal" {}
   (mongo/clear!)
   (dorun (map (partial mongo/insert :users) users))
+  (dorun (map (partial mongo/insert :companies) companies))
   (dorun (map (partial mongo/insert :organizations) organizations)))

@@ -10,13 +10,13 @@
             [lupapalvelu.user :as user]))
 
 (defn- application-link [lang role full-path]
-  (str (env/value :host) "/app/" lang "/" role "#!" full-path))
+  (str (env/value :host) "/app/" lang "/" (user/applicationpage-for role) "#!" full-path))
 
-(defn- create-model [{{id :id info-request? :infoRequest} :application, {target :target} :data} _]
+(defn- create-model [{{id :id info-request? :infoRequest} :application, {target :target} :data} _ {role :role}]
   (let [permit-type-path (if info-request? "/inforequest" "/application")
-        [role full-path] (if (= (:type target) "verdict")
-                           ["authority" (str "/verdict/" id "/" (:id target))]
-                           ["applicant" (str permit-type-path "/" id "/conversation")])]
+        full-path (if (= (:type target) "verdict")
+                     (str "/verdict/" id "/" (:id target))
+                     (str permit-type-path "/" id "/conversation"))]
     {:link-fi (application-link "fi" role full-path)
      :link-sv (application-link "sv" role full-path)}))
 
@@ -70,4 +70,5 @@
     (update-application command
       (util/deep-merge
         (comment/comment-mongo-update (:state application) text target (:role user) mark-answered user to-user created ensured-visibility)
-        (when openApplication {$set {:state :open, :opened created}})))))
+        (when (and openApplication (= (:state application) "draft"))
+          {$set {:state :open, :opened created}})))))

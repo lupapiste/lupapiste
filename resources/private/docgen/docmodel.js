@@ -259,23 +259,27 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     function makeApprovalButton(verb, noun, cssClass) {
       var cmd = verb + "-doc";
       var title = loc(["document", verb]);
-      return $(makeButton(self.docId + "_" + verb, title))
-      .addClass(cssClass).addClass("btn-auto")
-      .attr("data-test-id", verb + "-doc-" + self.schemaName)
-      .click(function () {
-        ajax.command(cmd, cmdArgs)
-        .success(function () {
-            if (noun === "approved") {
-                approveButton$.hide();
-                rejectButton$.show();
-            } else {
-                approveButton$.show();
-                rejectButton$.hide();
-            }
-            setStatus({ value: noun });
-        })
-        .call();
-      });
+      var button =
+        $(makeButton(self.docId + "_" + verb, title))
+          .addClass(cssClass).addClass("btn-auto")
+          .click(function () {
+            ajax.command(cmd, cmdArgs)
+              .success(function () {
+                if (noun === "approved") {
+                  approveButton$.hide();
+                  rejectButton$.show();
+                } else {
+                  approveButton$.show();
+                  rejectButton$.hide();
+                }
+                setStatus({ value: noun });
+              })
+              .call();
+          });
+      if (options && options.dataTestSpecifiers) {
+        button.attr("data-test-id", verb + "-doc-" + self.schemaName);
+      }
+      return button;
     }
 
     function modelModifiedSince(model, timestamp) {
@@ -536,8 +540,14 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
         }
         return [e.name, loc(locKey)];
-        })
-      .sortBy(function(e) { return e[1]; })
+      })
+      .sortBy(function(e) {
+          if (subSchema.sortBy === "displayname") {
+            return e[1];
+          }
+          // lo-dash API doc tells that the sort is stable, so returning a static value equals to no sorting
+          return 0;
+      })
       .forEach(function(e) {
         var name = e[0];
         var option = document.createElement("option");
@@ -815,18 +825,22 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     span.appendChild(select);
 
     // new invite
-    $("<button>", {
-      "class": "icon-remove btn-primary",
-      "data-test-id": "application-invite-" + self.schemaName,
-      text: loc("personSelector.invite"),
-      click: function () {
-        $("#invite-document-name").val(self.schemaName).change();
-        $("#invite-document-path").val(myNs).change();
-        $("#invite-document-id").val(self.docId).change();
-        LUPAPISTE.ModalDialog.open("#dialog-valtuutus");
-        return false;
-      }
-    }).appendTo(span);
+    var button =
+      $("<button>", {
+        "class": "icon-remove btn-primary",
+        text: loc("personSelector.invite"),
+        click: function () {
+          $("#invite-document-name").val(self.schemaName).change();
+          $("#invite-document-path").val(myNs).change();
+          $("#invite-document-id").val(self.docId).change();
+          LUPAPISTE.ModalDialog.open("#dialog-valtuutus");
+          return false;
+        }
+      });
+    if (options && options.dataTestSpecifiers) {
+      button.attr("data-test-id", "application-invite-" + self.schemaName);
+    }
+    button.appendTo(span);
 
     return span;
   }
@@ -900,12 +914,14 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         if (subSchema.repeating && !self.isDisabled && authorizationModel.ok('remove-document-data')) {
           var removeButton = document.createElement("span");
           removeButton.className = "icon remove-grey inline-right";
-          removeButton.setAttribute("data-test-class", "delete-schemas." + subSchema.name);
           removeButton.onclick = function () {
             LUPAPISTE.ModalDialog.showDynamicYesNo(loc("document.delete.header"), loc("document.delete.message"),
                 { title: loc("yes"), fn: function () { removeData(self.appId, self.docId, myPath.concat([id])); } },
                 { title: loc("no") });
           };
+          if (options && options.dataTestSpecifiers) {
+            removeButton.setAttribute("data-test-class", "delete-schemas." + subSchema.name);
+          }
           if (subSchema.type === "table") {
             var td = document.createElement("td");
             td.appendChild(removeButton);
@@ -1292,9 +1308,11 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var iconSpanDescription = document.createTextNode(loc('edit'));
 
     // test ids
-    descriptionSpan.setAttribute("data-test-id", "op-description");
-    iconSpan.setAttribute("data-test-id", "edit-op-description");
-    descriptionInput.setAttribute("data-test-id", "op-description-editor");
+    if (options && options.dataTestSpecifiers) {
+      descriptionSpan.setAttribute("data-test-id", "op-description");
+      iconSpan.setAttribute("data-test-id", "edit-op-description");
+      descriptionInput.setAttribute("data-test-id", "op-description-editor");
+    }
 
     wrapper.className = "op-description-wrapper";
     descriptionSpan.className = "op-description"
@@ -1383,16 +1401,20 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var sectionContainer = document.createElement("div");
     var elements = document.createElement("div");
 
+    var accordionCollapsed = (options && options.accordionCollapsed) ? true : false;
+
     section.className = "accordion";
     section.setAttribute("data-doc-type", self.schemaName);
     elements.className = "accordion-fields";
 
-    icon.className = "icon toggle-icon drill-down-white";
+    icon.className = "icon toggle-icon " + (accordionCollapsed ? "drill-right-white" : "drill-down-white");
     title.appendChild(icon);
 
     if (op) {
       title.appendChild(document.createTextNode(loc([op.name, "_group_label"])));
-      title.appendChild(buildDescriptionElement(op));
+      if (authorizationModel.ok('update-op-description')) {
+        title.appendChild(buildDescriptionElement(op));
+      }
     } else {
       title.appendChild(document.createTextNode(loc([self.schema.info.name, "_group_label"])));
     }
@@ -1400,19 +1422,22 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     title.setAttribute("data-app-id", self.appId);
     title.onclick = accordion.click;
     if (self.schema.info.removable && !self.isDisabled && authorizationModel.ok('remove-doc')) {
-      $(title)
-        .append($("<span>")
+      var removeSpan =
+        $("<span>")
           .addClass("icon remove inline-right")
-          .attr("data-test-class", "delete-schemas." + self.schemaName)
-          .click(removeDoc));
+          .click(removeDoc);
+      if (options && options.dataTestSpecifiers) {
+        removeSpan.attr("data-test-class", "delete-schemas." + self.schemaName);
+      }
+      $(title).append(removeSpan);
     }
 
     if (self.schema.info.approvable) {
       elements.appendChild(self.makeApprovalButtons([], self.model));
     }
 
-    sectionContainer.className = "accordion_content expanded";
-    sectionContainer.setAttribute("data-accordion-state", "open");
+    sectionContainer.className = "accordion_content" + (accordionCollapsed ? "" : " expanded");
+    sectionContainer.setAttribute("data-accordion-state", (accordionCollapsed ? "closed" : "open"));
     sectionContainer.id = "document-" + self.docId;
 
     appendElements(elements, self.schema, self.model, []);

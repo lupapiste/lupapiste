@@ -40,7 +40,7 @@ Mikko sends an email invitation to neighbor 'a'
 
 Mail is sent
   [Tags]  integration
-  Go to  ${SERVER}/api/last-email
+  Open last email
   Wait until  Element should contain  id=to  a@example.com
 
 Neighbor clicks on email link and sees application
@@ -75,11 +75,11 @@ Mikko sees that the neighbor has given a comment
   Mikko logs in
   Open application  ${appname}  753-416-25-22
   Open tab  statement
-  Wait until  Element should be visible  xpath=//tr[@data-test-id='neighbors-row-email-a@example.com']
+  Wait until  Element should be visible  xpath=//div[@id='application-statement-tab']//tr[@data-test-id='neighbors-row-email-a@example.com']
 
 Mikko opens dialog to see neighbors response
   [Tags]  integration
-  Click element  xpath=//tr[@data-test-id='neighbors-row-email-a@example.com']//a[@data-test-id='neighbors-row-status-response-given-comments']
+  Click element  xpath=//div[@id='application-statement-tab']//tr[@data-test-id='neighbors-row-email-a@example.com']//a[@data-test-id='neighbors-row-status-response-given-comments']
   Wait until  Element should be visible  xpath=//div[@id='dialog-neighbor-status']
   Wait until  Element text should be  xpath=//div[@id='dialog-neighbor-status']//*[@data-test-id='neighbor-status-firstName']  PORTAALIA
   Wait until  Element text should be  xpath=//div[@id='dialog-neighbor-status']//*[@data-test-id='neighbor-status-lastName']  TESTAA
@@ -99,8 +99,8 @@ Sonja sees that the neighbour has given a comment
   Sonja logs in
   Open application  ${appname}  753-416-25-22
   Open tab  statement
-  Wait until  Element should be visible  xpath=//tr[@data-test-id='neighbors-row-email-a@example.com']
-  Click element  xpath=//tr[@data-test-id='neighbors-row-email-a@example.com']//a[@data-test-id='neighbors-row-status-response-given-comments']
+  Wait until  Element should be visible  xpath=//div[@id='application-statement-tab']//tr[@data-test-id='neighbors-row-email-a@example.com']
+  Click element  xpath=//div[@id='application-statement-tab']//tr[@data-test-id='neighbors-row-email-a@example.com']//a[@data-test-id='neighbors-row-status-response-given-comments']
   Wait until  Element should be visible  xpath=//div[@id='dialog-neighbor-status']
   Wait until  Element text should be  xpath=//div[@id='dialog-neighbor-status']//*[@data-test-id='neighbor-status-firstName']  PORTAALIA
   Wait until  Element text should be  xpath=//div[@id='dialog-neighbor-status']//*[@data-test-id='neighbor-status-lastName']  TESTAA

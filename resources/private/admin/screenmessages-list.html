@@ -30,12 +30,12 @@
           <div data-bind="with: screenMessagesListModel">
 
             <h3 data-bind="ltext: 'admin.screenmessages.fi'"></h3>
-            <textarea id="add-text-fi" rows="4" cols="50" data-bind="value: textFi, valueUpdate: 'afterkeydown'"></textarea>
+            <textarea id="add-text-fi" rows="4" cols="50" data-bind="textInput: textFi"></textarea>
             <h3>
               <span data-bind="ltext: 'admin.screenmessages.sv'"></span>
               <span data-bind="ltext: 'admin.screenmessages.ifNoSwedishGiven'"></span>
             </h3>
-            <textarea id="add-text-sv" rows="4" cols="50" data-bind="value: textSv, valueUpdate: 'afterkeydown'"></textarea>
+            <textarea id="add-text-sv" rows="4" cols="50" data-bind="textInput: textSv"></textarea>
             <br />
 
             <button href="#"

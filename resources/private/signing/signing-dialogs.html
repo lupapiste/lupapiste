@@ -12,7 +12,7 @@
             <p data-bind="ltext: 'signAttachment.description'"></p>
 
             <label for="signSingleAttachmentPassword" data-bind="ltext: 'signAttachment.verifyPassword'" class="form-label"></label>
-            <input id="signSingleAttachmentPassword" data-test-id="signSingleAttachmentPassword" type="password" data-bind="value: password, valueUpdate: 'afterkeydown'" class="form-input text ">
+            <input id="signSingleAttachmentPassword" data-test-id="signSingleAttachmentPassword" type="password" data-bind="textInput: password" class="form-input text">
 
             <div data-bind="if: errorMessage" >
               <div data-bind="ltext: errorMessage" class="context-error"></div>
@@ -76,7 +76,7 @@
             </div>
 
             <label for="signAttachmentPassword" data-bind="ltext: 'signAttachment.verifyPassword'" class="form-label"></label>
-            <input id="signAttachmentPassword" data-test-id="signAttachmentPassword" type="password" data-bind="value: password, valueUpdate: 'afterkeydown'" class="form-input text ">
+            <input id="signAttachmentPassword" data-test-id="signAttachmentPassword" type="password" data-bind="textInput: password" class="form-input text ">
 
             <div data-bind="if: errorMessage" >
               <div data-bind="ltext: errorMessage" class="context-error"></div>

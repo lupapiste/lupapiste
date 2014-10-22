@@ -432,13 +432,6 @@
                :open-inforequest-email ""}
        $set {:scope new-scopes}}))))
 
-(defmigration unset-invalid-user-ids
-  (doseq [collection [:applications :submitted-applications]
-          application (mongo/select collection)]
-    (let [updates (a/generate-remove-invalid-user-from-docs-updates application)]
-      (when (seq updates)
-        (mongo/update-by-id collection (:id application) {$unset updates})))))
-
 (defmigration cleanup-activation-collection-v2
   (let [users (map :email (mongo/select :users {} {:email 1}))]
     (mongo/remove-many :activation {:email {$nin users}})))

@@ -30,7 +30,7 @@ Fill in right email
 
 Email was send
   Wait Until  Page Should Contain  Sähköposti lähetetty
-  Go to  ${SERVER}/api/last-email
+  Open last email
   Page Should Contain  teppo@example.com
   ## First link
   Click link  xpath=//a

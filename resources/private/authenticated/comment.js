@@ -44,7 +44,7 @@ var comments = (function() {
     var doAddComment = function(markAnswered, openApplication) {
       ajax.command("add-comment", {
           id: self.applicationId,
-          text: self.text(),
+          text: self.text() ? _.trim(self.text()) : "",
           target: self.target(),
           to: self.to(),
           roles: self.newCommentRoles || ["applicant","authority"],

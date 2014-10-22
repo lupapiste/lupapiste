@@ -200,9 +200,9 @@ var gis = (function() {
 
     // Select control
 
-    var popupContentProviderResp = null;
     var popupId = "popup-id";
     self.selectedFeature = null;
+    self.popupContentModel = null;
 
     function clearMarkerKnockoutBindings(feature) {
       if (feature && feature.popup) {
@@ -258,8 +258,8 @@ var gis = (function() {
       popup.calculateRelativePosition = function() {return "tr";};
       popup.closeOnMove = false;
       popup.autoSize = true;
-      popup.minSize = new OpenLayers.Size(270, 505);
-      popup.maxSize = new OpenLayers.Size(270, 505);
+      popup.minSize = new OpenLayers.Size(270, 580);
+      popup.maxSize = new OpenLayers.Size(270, 580);
       return popup;
     }
 
@@ -271,11 +271,14 @@ var gis = (function() {
       onSelect: function(feature) {
         self.selectedFeature = feature;
 
-        if (self.popupContentProvider) {
-          popupContentProviderResp = self.popupContentProvider();
-          feature.popup = createPopup(feature, popupContentProviderResp.html);
+        //
+        // TODO: Could only one OpenLayers Popup instance be used here?
+        //
+        if (self.popupContentModel) {
+          var html = $(self.popupContentModel.templateId)[0].innerHTML;
+          feature.popup = createPopup(feature, html);
           self.map.addPopup(feature.popup, true);
-          popupContentProviderResp.applyBindingsFn(popupId);
+          $("#" + popupId + "_contentDiv").applyBindings(self.popupContentModel.model);
         }
 
         if (self.markerClickCallback) {
@@ -318,15 +321,18 @@ var gis = (function() {
 
       self.markerLayer.addFeatures(newMarkers);
 
-      if (autoSelect && self.popupContentProvider) {
+      if (autoSelect && self.popupContentModel) {
         self.selectControl.select(self.markerLayer.features[0]);
       }
 
       return self;
     };
 
-    self.setPopupContentProvider = function(handler) {
-      self.popupContentProvider = handler;
+    self.setPopupContentModel = function(model, templateId) {
+      self.popupContentModel = {
+        model: model,
+        templateId: templateId
+      };
       return self;
     };
 

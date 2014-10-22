@@ -23,7 +23,7 @@
 
 
             <label class="form-label" data-bind="ltext: 'task.name'"></label>
-            <input class="form-input text long" type="text" id="create-task-name" data-bind="value: taskName, valueUpdate: 'afterkeydown'" />
+            <input class="form-input text long" type="text" id="create-task-name" data-bind="textInput: taskName" />
 
             <button data-test-id="create-task-save" class="btn btn-primary btn-dialog close" data-bind="click: save, disable: disabled, ltext: 'save'"></button>
           </div>

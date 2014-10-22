@@ -12,21 +12,21 @@
           <div class="form-entry">
             <label data-bind="ltext: 'userinfo.firstName'"
               for="firstName" class="form-label"></label> <input
-              data-bind="value: firstName, attr: {placeholder: loc('userinfo.firstName')}, valueUpdate: 'afterkeydown'"
+              data-bind="textInput: firstName, attr: {placeholder: loc('userinfo.firstName')}"
               id="firstName" type="text" class="form-input"></input>
           </div>
 
           <div class="form-entry">
             <label data-bind="ltext: 'userinfo.lastName'" for="lastName"
               class="form-label"></label> <input
-              data-bind="value: lastName, attr: {placeholder: loc('userinfo.lastName')}, valueUpdate: 'afterkeydown'"
+              data-bind="textInput: lastName, attr: {placeholder: loc('userinfo.lastName')}"
               id="lastName" type="text" class="form-input"></input>
           </div>
 
           <div class="form-entry">
             <label data-bind="ltext: 'userinfo.phone'" for="phone"
               class="form-label"></label> <input
-              data-bind="value: phone, attr: {placeholder: loc('userinfo.phone')}, valueUpdate: 'afterkeydown'"
+              data-bind="textInput: phone, attr: {placeholder: loc('userinfo.phone')}"
               id="phone" type="text" class="form-input"></input>
           </div>
 
@@ -51,19 +51,19 @@
           <div class="form-entry">
             <label data-bind="ltext: 'userinfo.street'" for="street"
               class="form-label"></label> <input
-              data-bind="value: street, attr: {placeholder: loc('userinfo.street')}, valueUpdate: 'afterkeydown'"
+              data-bind="textInput: street, attr: {placeholder: loc('userinfo.street')}"
               id="street" type="text" class="form-input"></input>
           </div>
           <div class="form-entry">
             <label data-bind="ltext: 'userinfo.zip'" for="zip"
               class="form-label"></label> <input
-              data-bind="value: zip, attr: {placeholder: loc('userinfo.zip')}, valueUpdate: 'afterkeydown'"
+              data-bind="textInput: zip, attr: {placeholder: loc('userinfo.zip')}"
               id="zip" type="text" class="form-input"></input>
           </div>
           <div class="form-entry">
             <label data-bind="ltext: 'userinfo.city'" for="city"
               class="form-label"></label> <input
-              data-bind="value: city, attr: {placeholder: loc('userinfo.city')}, valueUpdate: 'afterkeydown'"
+              data-bind="textInput: city, attr: {placeholder: loc('userinfo.city')}"
               id="city" type="text" class="form-input"></input>
           </div>
 
@@ -189,13 +189,13 @@
           <div class="form-entry">
             <label data-bind="ltext: 'userinfo.oldPassword'"
               for="oldPassword" class="form-label"></label> <input
-              data-bind="value: oldPassword, valueUpdate: 'afterkeydown', attr: {placeholder: loc('userinfo.oldPassword')}"
+              data-bind="textInput: oldPassword, attr: {placeholder: loc('userinfo.oldPassword')}"
               id="oldPassword" type="password" class="form-input"></input>
           </div>
           <div class="form-entry">
             <label data-bind="ltext: 'userinfo.newPassword'"
               for="newPassword" class="form-label">:</label> <input
-              data-bind="value: newPassword, valueUpdate: 'afterkeydown', attr: {placeholder: loc('userinfo.newPassword')}"
+              data-bind="textInput: newPassword, attr: {placeholder: loc('userinfo.newPassword')}"
               id="newPassword" type="password" class="form-input"></input>
             <span
               data-bind="text: loc(['mypage.quality', quality()]), attr: {'class': quality}, visible: newPassword().length > 0"></span>
@@ -203,7 +203,7 @@
           <div class="form-entry">
             <label data-bind="ltext: 'userinfo.newPassword2'"
               for="newPassword2" class="form-label">:</label> <input
-              data-bind="value: newPassword2, valueUpdate: 'afterkeydown', attr: {placeholder: loc('userinfo.newPassword2')}"
+              data-bind="textInput: newPassword2, attr: {placeholder: loc('userinfo.newPassword2')}"
               id="newPassword2" type="password" class="form-input"></input>
             <span data-bind="visible: noMatch, ltext: 'mypage.noMatch'"
               style="color: gray; font-style: italic;"></span>

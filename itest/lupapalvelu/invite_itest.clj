@@ -48,17 +48,20 @@
       (count (:invites (query teppo :invites))) => 1
 
       (let [email (last-email)]
-        email => (partial contains-application-link? application-id)
-        (:to email) => (email-for-key teppo)
+        email => (partial contains-application-link? application-id "applicant")
+        (:to email) => (contains (email-for-key teppo))
         (:subject email) => "Lupapiste.fi: Kutsukatu 13 - kutsu"
         (get-in email [:body :plain]) => (contains "Hei, sinut on kustuttu")))
 
     (fact "Sonja must NOT be able to uninvite Teppo!"
-      (command sonja :remove-auth :id application-id :email (email-for-key teppo)) => unauthorized?
+      (command sonja :remove-auth :id application-id :username (email-for-key teppo)) => unauthorized?
       (count (:invites (query teppo :invites))) => 1)
 
+    (fact "Mikko can't unsubscribe Teppo's notifications"
+      (command pena :unsubscribe-notifications :id application-id :username (email-for-key teppo)) => unauthorized?)
+
     (fact "Mikko must be able to uninvite Teppo!"
-      (command mikko :remove-auth :id application-id :email (email-for-key teppo)) => ok?
+      (command mikko :remove-auth :id application-id :username (email-for-key teppo)) => ok?
       (count (:invites (query teppo :invites))) => 0)
 
     (fact "Mikko must be able to re-invite Teppo!"
@@ -83,14 +86,16 @@
       (comment-application sonja application-id false) => ok?
       (let [emails (sent-emails)]
         (count emails) => 1
-        (:to (first emails)) => (email-for-key mikko)))
+        (:to (first emails)) => (contains (email-for-key mikko))))
 
     (fact "Teppo must be able to accept Teppo's invite"
       (command teppo :approve-invite :id application-id) => ok?
       (count (:invites (query teppo :invites))) => 0)
 
     (fact "Teppo must be able to comment!"
-      (comment-application teppo application-id true) => ok?)
+      (comment-application teppo application-id true) => ok?
+      (fact "application stays in submitted state"
+        (:state (query-application teppo application-id)) => "submitted"))
 
     (fact "Mikko is the applicant"
       (let [application  (query-application mikko application-id)
@@ -109,13 +114,13 @@
           (:applicant application ) => "Teppo Nieminen")))
 
     (let [actions (:actions (query teppo :allowed-actions :id application-id))]
-      (fact "Teppo should be able to do stuff."
-        (-> actions :add-operation :ok) => true
-        (-> actions :submit-application :ok) => true
-        (-> actions :cancel-application :ok) => true))
+      (fact "Teppo should be able to"
+        (fact "add-operation" (-> actions :add-operation :ok) => true)
+        (fact "update-doc" (-> actions :update-doc :ok) => true)
+        (fact "cancel application" (-> actions :cancel-application :ok) => true)))
 
     (fact "Sonja must be able to remove authz from Teppo!"
-      (command sonja :remove-auth :id application-id :email (email-for-key teppo)) => ok?)
+      (command sonja :remove-auth :id application-id :username (email-for-key teppo)) => ok?)
 
     (fact "Teppo should NOT be able to do stuff."
       (query teppo :allowed-actions :id application-id) => unauthorized?)
@@ -150,7 +155,7 @@
       (count (:invites (query teppo :invites))) => 1)
 
     (fact "Sonja must be able to uninvite Teppo!"
-      (command sonja :remove-auth :id id :email (email-for-key teppo)) => ok?
+      (command sonja :remove-auth :id id :username (email-for-key teppo)) => ok?
       (count (:invites (query teppo :invites))) => 0)
 
     (fact "Reinvite & accept"
@@ -165,7 +170,7 @@
       (invite teppo id suunnittelija-doc "suunnittelija" "mikko@example.com") => ok?)
 
     (fact "Sonja must be able to remove authz from Teppo!"
-      (command sonja :remove-auth :id id :email (email-for-key teppo)) => ok?)
+      (command sonja :remove-auth :id id :username (email-for-key teppo)) => ok?)
 
     (fact "Invite without document"
       (invite sonja id "" "" (email-for-key teppo)) => ok?

@@ -83,7 +83,7 @@ Can not login before activation
 
 Vetuma-guy activates his account
   [Tags]  integration  ie8
-  Go to  ${SERVER}/api/last-email
+  Open last email
   Wait Until  Page Should Contain  vetuma@example.com
   Page Should Contain  /app/security/activate
   ## Click the first link

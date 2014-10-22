@@ -23,7 +23,7 @@
                             {:name "c" :type :list
                              :body [{:name "ca" :type :string}
                                     {:name "cb" :type :checkbox}]}
-                            {:name "d" :type :select
+                            {:name "d" :type :select :sortBy :displayname
                              :body [{:name "A"}
                                     {:name "B"}
                                     {:name "C"}]}]}]})

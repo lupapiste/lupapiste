@@ -22,6 +22,7 @@ LUPAPISTE.SidePanelModel = function() {
   self.authentication = ko.observable();
   self.authorities = ko.observable();
   self.mainConversation = ko.observable(true);
+  self.showHelp = ko.observable();
 
   self.sidePanelVisible = ko.computed(function() {
     return self.showConversationPanel() || self.showNoticePanel();
@@ -104,6 +105,10 @@ LUPAPISTE.SidePanelModel = function() {
     }
   };
 
+  self.toggleHelp = function() {
+    self.showHelp(!self.showHelp());
+  }
+
   var pages = ["application","attachment","statement","neighbors","verdict"];
 
   hub.subscribe({type: "page-change"}, function() {
@@ -118,26 +123,6 @@ LUPAPISTE.SidePanelModel = function() {
       self.refresh(application, applicationDetails.authorities);
     });
   });
-};
-
-ko.bindingHandlers.transition = {
-  init: function(element, valueAccessor, allBindings) {
-    var value = ko.utils.unwrapObservable(valueAccessor());
-    var className = allBindings()["class"];
-    if (className) {
-      $(element).toggleClass(className, value);
-    }
-  },
-  update: function(element, valueAccessor, allBindings) {
-    var value = ko.utils.unwrapObservable(valueAccessor());
-    var className = allBindings()["class"];
-    var type = allBindings().type;
-    if (type) {
-      $(element)[type + "Toggle"](1000);
-    } else {
-      $(element).toggleClass(className, value, 100);
-    }
-  }
 };
 
 $(function() {

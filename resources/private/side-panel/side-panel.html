@@ -19,13 +19,14 @@
         <div id="conversation-panel" data-bind="visible: showConversationPanel">
           <div class="header">
             <h1 data-bind="ltext: 'conversation.title'"></h1>
-            <div class="indicator">
-              <span class="saved" data-bind="ltext: 'form.saved', transition: notice().showSaveIndicator, type: 'fade'"></span>
-            </div>
             <span class="close-btn" data-bind="click: closeSidePanel"></span>
+            <div class="help" data-bind="click: toggleHelp">
+              <span>Ohje</span>
+              <span class="icon info-indicator"></span>
+            </div>
           </div>
           <div class="content">
-            <p data-bind="lhtml: 'help.' + permitType() + '.conversationDesc'" class="panel-info"></p>
+            <p data-bind="slider: showHelp, lhtml: 'help.' + permitType() + '.conversationDesc'" class="panel-info"></p>
             <div data-bind="template: {name: 'comment-template', data: {comment: comment, authorities: authorities, mainConversation: mainConversation, authorization: authorization, infoRequest: infoRequest}}"></div>
             <div class="process-nav"></div>
           </div>
@@ -34,9 +35,6 @@
         <div id="notice-panel" data-bind="visible: showNoticePanel">
           <div class="header">
             <h1 data-bind="ltext: 'notice.title'"></h1>
-            <div class="indicator">
-              <span class="saved" data-bind="ltext: 'form.saved', transition: notice().showSaveIndicator, type: 'fade'" data-test-id="notice-saved-indicator"></span>
-            </div>
             <span class="close-btn" data-bind="click: closeSidePanel"></span>
           </div>
           <div class="content" data-bind="template: {name: 'notice-template', data: notice}"></div>

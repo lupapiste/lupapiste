@@ -10,6 +10,10 @@ LUPAPISTE.InviteModel = function() {
   self.error = ko.observable();
   self.processing = ko.observable();
   self.pending = ko.observable();
+  self.disabled = ko.computed(function() {
+    // self.path is allowed to be empty
+    return self.processing() || !util.isValidEmailAddress(self.email()) || !self.text();
+  });
 
   self.setApplicationId = function(applicationId) {
     self.applicationId = applicationId;

@@ -11,6 +11,7 @@
             [lupapalvelu.application :as application]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.notifications :as notifications]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.tasks :as tasks]
             [lupapalvelu.xml.krysp.reader :as krysp])
@@ -89,6 +90,10 @@
           (ok :verdictCount (count verdicts-with-attachments) :taskCount (count (get-in updates [$set :tasks]))))
         (fail :info.no-verdicts-found-from-backend)))
     (fail :info.no-verdicts-found-from-backend)))
+
+(notifications/defemail :application-verdict
+  {:subject-key    "verdict"
+   :tab            "/verdict"})
 
 (defcommand check-for-verdict
   {:description "Fetches verdicts from municipality backend system.

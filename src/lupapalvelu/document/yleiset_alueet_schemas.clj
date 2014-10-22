@@ -37,8 +37,7 @@
 
 (def yleiset-alueet-maksaja
   (body
-    (schema-body-without-element-by-name party "turvakieltoKytkin")
-    {:name "laskuviite" :type :string :max-len 30 :layout :full-width}))
+    (schema-body-without-element-by-name maksaja "turvakieltoKytkin")))
 
 (def tyo-aika
   (body
