@@ -99,6 +99,9 @@
     {:name (organization/get-organization-name org)
      :requiredFieldsFillingObligatory (or (:app-required-fields-filling-obligatory org) false)}))
 
+(def post-verdict-states #{"verdictGiven" "constructionStarted" "closed"})
+(defn- in-post-verdict-state? [_ app] (if (post-verdict-states (name (:state app))) true false))
+
 (defn- indicator-sum [_ app]
   (apply + (map (fn [[k v]] (if (#{:documentModifications :unseenStatements :unseenVerdicts} k) v 0)) app)))
 
@@ -111,6 +114,7 @@
                             {:field :indicators :fn indicator-sum}])
 
 (def meta-fields (conj indicator-meta-fields
+                   {:field :inPostVerdictState :fn in-post-verdict-state?}
                    {:field :applicantPhone :fn get-applicant-phone}
                    {:field :organizationMeta :fn organization-meta}
                    {:field :neighbors :fn neighbors/normalize-neighbors}))
