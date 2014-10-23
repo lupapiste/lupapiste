@@ -437,7 +437,8 @@
    :filename filename})
 
 (defn- get-metatieto [k v]
-  {:metatieto {:metatietoNimi k :metatietoArvo v}})
+  {:metatieto {:metatietoNimi k :metatietoArvo v}
+   :Metatieto {:metatietoNimi k :metatietoArvo v}})
 
 (defn- get-attachment-meta [attachment]
   (let [signatures (:signatures attachment)
