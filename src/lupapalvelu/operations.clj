@@ -46,6 +46,7 @@
     ["Tyonjohtaja" :tyonjohtajan-nimeaminen]
     ["Suunnittelija" :suunnittelijan-nimeaminen]
     ["Jatkoaika" :jatkoaika]
+    ["Paperiluvan siirto" :paperiluvan-siirto]
     ["Aloitusoikeus" :aloitusoikeus]]])
 
 (def ^:private operation-tree-for-environment-R
@@ -600,6 +601,13 @@
                                    :attachments []
                                    :add-operation-allowed false
                                    :link-permit-required true}
+
+     :paperiluvan-siirto          {:schema "paperiluvan-siirto"
+                                   :permit-type permit/R
+                                   :required [#_"maksaja"]
+                                   :attachments []
+                                   :add-operation-allowed false
+                                   :link-permit-required #_true false}
 
      :aloitusoikeus               {:schema "aloitusoikeus"
                                    :permit-type permit/R
