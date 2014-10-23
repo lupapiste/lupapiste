@@ -6,8 +6,7 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
   self.appModel = appModel;
 
   var postVerdictStates = {verdictGiven:true, constructionStarted:true, closed:true};
-  self.postVerdict = ko.observable(false);
-  
+
   self.preAttachmentsByGroup = ko.observableArray();
   self.postAttachmentsByGroup = ko.observableArray();
 
@@ -16,7 +15,7 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
     return self.appModel.pending() || self.appModel.processing() || self.unsentAttachmentsNotFound();
   });
 
-    
+
   function getPreAttachmentsByGroup(source) {
     return getAttachmentsByGroup(
       _.filter(source, function(attachment) {
@@ -58,9 +57,6 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
 
     // Post-verdict attachments
     self.postAttachmentsByGroup(getPostAttachmentsByGroup(ko.mapping.toJS(appModel.attachments)));
-
-    // Post/pre verdict state?
-    self.postVerdict(!!postVerdictStates[self.appModel.state()]);
 
     self.unsentAttachmentsNotFound(!unsentAttachmentFound());
   }
