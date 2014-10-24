@@ -77,7 +77,7 @@
    :given nil
    :person {:id "5252ecdfe4b0138a23d8e385"
             :text "Turvatarkastus"
-            :email "esa.lupapiste@gmail.com"
+            :email "sakari.viranomainen@kuopio.fi"
             :name "Esa Lupapiste"}
    :requested timestamp-the-beginning-of-time
    :status nil})
@@ -178,7 +178,7 @@
 
 
 
-(defn- check-sent-reminder-email [to subject bodypart]
+(defn- check-sent-reminder-email [to subject bodypart & [application-id link-role]]
   (let [emails (dummy-email-server/messages :reset true)]
     (fact "email count"
       (count emails) => 1)
@@ -187,7 +187,9 @@
       (fact "email check"
         (:to email) => (contains to)
         (:subject email) => subject
-        (get-in email [:body :plain]) => (contains bodypart)))))
+        (get-in email [:body :plain]) => (contains bodypart)
+        (when link-role
+          email => (partial contains-application-link? application-id link-role))))))
 
 
 (facts "reminders"
@@ -219,7 +221,8 @@
        (check-sent-reminder-email
          (-> statement-matching :person :email)
          "Lupapiste.fi: Naapurikuja 3 - Muistutus lausuntopyynn\u00f6st\u00e4"
-         "Sinulta on pyydetty lausuntoa lupahakemukseen")
+         "Sinulta on pyydetty lausuntoa lupahakemukseen"
+         app-id "authority")
        ))
 
    (fact "the \"reminder-sent\" timestamp already exists"
@@ -236,7 +239,8 @@
      (check-sent-reminder-email
        (-> statement-matching :person :email)
        "Lupapiste.fi: Naapurikuja 3 - Muistutus lausuntopyynn\u00f6st\u00e4"
-       "Sinulta on pyydetty lausuntoa lupahakemukseen")
+       "Sinulta on pyydetty lausuntoa lupahakemukseen"
+       app-id "authority")
      ))
 
 
