@@ -317,6 +317,19 @@
 ;; Stuffin' data in
 ;;
 
+(defn sign-attachment [apikey id attachmentId password]
+  (let [uri (str (server-address) "/api/command/sign-attachments")
+        resp (http/post uri
+               {:headers {"authorization" (str "apikey=" apikey)
+                          "content-type" "application/json;charset=utf-8"}
+                :body (json/encode {:id id
+                                    :attachmentIds [attachmentId]
+                                    :password password})
+                :follow-redirects false
+                :throw-exceptions false})]
+    (facts "Signed succesfully"
+      (fact "Status code" (:status resp) => 200))))
+
 (defn upload-attachment [apikey application-id {attachment-id :id attachment-type :type} expect-to-succeed & {:keys [filename] :or {filename "dev-resources/test-attachment.txt"}}]
   (let [uploadfile  (io/file filename)
         uri         (str (server-address) "/api/upload/attachment")
