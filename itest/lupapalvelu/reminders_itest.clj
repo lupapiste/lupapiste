@@ -11,238 +11,6 @@
             [lupapalvelu.fixture :as fixture]
             [lupapalvelu.batchrun :as batchrun]))
 
-
-;;  ***  For testing ->  ***
-
-#_(def ^:private test-app-1
-   {:sent nil,
-    :schema-version 1,
-    :authority {},
-    :auth [{:lastName "Panaani",
-            :firstName "Pena",
-            :username "pena",
-            :type "owner",
-            :role "owner",
-            :id "777777777777777777000020"}],
-    :drawings [],
-    :submitted nil,
-    :state "open",
-    :permitSubtype nil,
-    :tasks [],
-    :closedBy {},
-    :_verdicts-seen-by {},
-    :location {:y 6666666.0, :x 444444.0},
-    :attachments [],
-    :statements [{:id "525533f7e4b0138a23d8r4b4",
-                  :given nil,
-                  :person {:text "Palotarkastus",
-                           :name "Sito Lupapiste 1",
-                           :email "sito.lupapiste@gmail.com",
-                           :id "5252ecdfe4b0138a23d8e385"},
-                  :requested 1398174717307,
-                  :status nil}
-                 {:id "525533f7e4b0138a23d8e4b5",
-                  :given nil,
-                  :person {:text "Palotarkastus",
-                           :name "Sito Lupapiste 1",
-                           :email "sito.lupapiste@gmail.com",
-                           :id "5252ecdfe4b0138a23d8e385"},
-                  :requested 0,
-                  :status nil}],
-    :organization "753-R",
-    :buildings [],
-    :title "Naapurikuja 3",
-    :started nil,
-    :closed nil,
-    :operations [{:name "asuinrakennus",
-                  :created 1397487653097,
-                  :id "534bf825299508fb3618455d"}],
-    :infoRequest false,
-    :openInfoRequest false,
-    :opened 1397487653750,
-    :created 1397487653097,
-    :_comments-seen-by {},
-    :propertyId "75312312341234",
-    :verdicts [],
-    :startedBy {},
-    :documents [],
-    :_statements-seen-by {},
-    :modified 0,
-    :comments [],
-    :address "Naapurikuja 3",
-    :permitType "R",
-    :id "LP-753-2014-12345",
-    :municipality "753"
-    :neighbors [{:id "534bf825299508fb3618489v",
-                 :propertyId "p",
-                 :owner {:name "n",
-                         :businessID nil,
-                         :nameOfDeceased nil,
-                         :email "e",
-                         :type nil,
-                         :address {:city "c", :street "s", :zip "z"}},
-                 :status [{:state "open", :created 1}
-                          {:state "email-sent",
-                           :created 1398174717307,
-                           :email "abba@example.com",
-                           :token "Ww4yJgCmPyuqkWdQNiODsp1gHBsTCYHhfGaGaRDc5kMEP5Ar",
-                           :user {:enabled true,
-                                  :lastName "Panaani",
-                                  :firstName "Pena",
-                                  :city "Piippola",
-                                  :username "pena",
-                                  :street "Paapankuja 12",
-                                  :phone "0102030405",
-                                  :email "pena@example.com",
-                                  :personId "010203-040A",
-                                  :role "applicant",
-                                  :zip "10203",
-                                  :id "777777777777777777000020"}}]}
-                {:id "534bf825299508fb3618456c",
-                 :owner {:name "n",
-                         :businessID nil,
-                         :nameOfDeceased nil,
-                         :email "e",
-                         :type nil,
-                         :address {:city "c", :street "s", :zip "z"}},
-                 :propertyId "p",
-                 :status [{:state "open", :created 1}
-                          {:state "email-sent",
-                           :created 0,
-                           :email "abba@example.com",
-                           :token "Ww4yJgCmPyuqkWdQNiODsp1gHBsTCYHhfGaGaRDc5kMEP5Ar",
-                           :user {:enabled true,
-                                  :lastName "Panaani",
-                                  :firstName "Pena",
-                                  :city "Piippola",
-                                  :username "pena",
-                                  :street "Paapankuja 12",
-                                  :phone "0102030405",
-                                  :email "pena@example.com",
-                                  :personId "010203-040A",
-                                  :role "applicant",
-                                  :zip "10203",
-                                  :id "777777777777777777000020"}}]}]})
-
-#_(def ^:private test-app-2
-   {:sent nil,
-    :schema-version 1,
-    :authority {},
-    :auth [{:lastName "Panaani",
-            :firstName "Pena",
-            :username "pena",
-            :type "owner",
-            :role "owner",
-            :id "777777777777777777000020"}],
-    :drawings [],
-    :submitted nil,
-    :state "open",
-    :permitSubtype nil,
-    :tasks [],
-    :closedBy {},
-    :_verdicts-seen-by {},
-    :location {:y 6666666.0, :x 444444.0},
-    :attachments [],
-    :statements [{:id "525533f7e4b0138a23d8r4b4",
-                  :given nil,
-                  :person {:text "Palotarkastus",
-                           :name "Sito Lupapiste 1",
-                           :email "sito.lupapiste@gmail.com",
-                           :id "5252ecdfe4b0138a23d8e385"},
-                  :requested 1398174717307,
-                  :status nil}],
-    :organization "753-R",
-    :buildings [],
-    :title "Naapurikuja 3",
-    :started nil,
-    :closed nil,
-    :operations [{:name "asuinrakennus",
-                  :created 1397487653097,
-                  :id "534bf825299508fb3618455d"}],
-    :infoRequest false,
-    :openInfoRequest false,
-    :opened 1397487653750,
-    :created 1397487653097,
-    :_comments-seen-by {},
-    :propertyId "75312312341234",
-    :verdicts [],
-    :startedBy {},
-    :documents [],
-    :_statements-seen-by {},
-    :modified 1398174717307,
-    :comments [],
-    :address "Naapurikuja 3",
-    :permitType "R",
-    :id "LP-753-2014-123456789",
-    :municipality "753"
-    :neighbors [{:id "534bf825299508fb3615223m",
-                 :propertyId "p",
-                 :owner {:name "n",
-                         :businessID nil,
-                         :nameOfDeceased nil,
-                         :email "e",
-                         :type nil,
-                         :address {:city "c", :street "s", :zip "z"}},
-                 :status [{:state "open", :created 1}
-                          {:state "email-sent",
-                           :created 0,
-                           :email "abba@example.com",
-                           :token "Ww4yJgCmPyuqkWdQNiODsp1gHBsTCYHhfGaGaRDc5kMEP5Ar",
-                           :user {:enabled true,
-                                  :lastName "Panaani",
-                                  :firstName "Pena",
-                                  :city "Piippola",
-                                  :username "pena",
-                                  :street "Paapankuja 12",
-                                  :phone "0102030405",
-                                  :email "pena@example.com",
-                                  :personId "010203-040A",
-                                  :role "applicant",
-                                  :zip "10203",
-                                  :id "777777777777777777000020"}}
-                          {:state "response-given-ok",
-                           :message "",
-                           :user nil,
-                           :created 1398174717307,
-                           :vetuma {:lastName "TESTAA",
-                                    :stamp "70505470151426009182",
-                                    :firstName "PORTAALIA",
-                                    :city nil,
-                                    :street nil,
-                                    :zip nil,
-                                    :userid "210281-9988"}}]}]})
-
-;; NOTE: This does not work for some reason
-#_(let [resp (mongo/select :applications
-              {:state {$in ["open" "submitted"]}
-               :neighbors {$elemMatch
-                           {:status {$all
-                                     [
-                                      {$elemMatch  {:state {$in ["email-sent"]}
-                                                    :created {$lt (batchrun/get-timestamp-from-now :week 1)}
-                                                    }}
-                                      {$elemMatch {:state {$nin ["reminder-sent"
-                                                                 "response-given-ok"
-                                                                 "response-given-comments"]}
-                                                   }}
-                                      ]
-                                     }}}
-               })]
-   (println "app count: " (count resp))
-   (doseq [r resp]
-
-     (println "****** \n")
-     (println "\n app id: " (:id r))
-     (println "\n app neighbors: ")
-     (clojure.pprint/pprint (:neighbors r))
-     (println "\n")
-
-     ))
-
-;; ***  <- For testing  ***
-
-
-
 (def ^:private timestamp-the-beginning-of-time 0)
 (def ^:private timestamp-1-day-ago (batchrun/get-timestamp-from-now :day 1))
 
@@ -309,7 +77,7 @@
    :given nil
    :person {:id "5252ecdfe4b0138a23d8e385"
             :text "Turvatarkastus"
-            :email "esa.lupapiste@gmail.com"
+            :email "sakari.viranomainen@kuopio.fi"
             :name "Esa Lupapiste"}
    :requested timestamp-the-beginning-of-time
    :status nil})
@@ -410,12 +178,7 @@
 
 
 
-(defn- check-sent-reminder-email [to subject bodypart]
-
-  ;; dummy-email-server/messages sometimes returned nil for the email
-  ;; (because the email sending is asynchronous). Thus applying sleep here.
-  (Thread/sleep 100)
-
+(defn- check-sent-reminder-email [to subject bodypart & [application-id link-role]]
   (let [emails (dummy-email-server/messages :reset true)]
     (fact "email count"
       (count emails) => 1)
@@ -424,7 +187,9 @@
       (fact "email check"
         (:to email) => (contains to)
         (:subject email) => subject
-        (get-in email [:body :plain]) => (contains bodypart)))))
+        (get-in email [:body :plain]) => (contains bodypart)
+        (when link-role
+          email => (partial contains-application-link? application-id link-role))))))
 
 
 (facts "reminders"
@@ -456,7 +221,8 @@
        (check-sent-reminder-email
          (-> statement-matching :person :email)
          "Lupapiste.fi: Naapurikuja 3 - Muistutus lausuntopyynn\u00f6st\u00e4"
-         "Sinulta on pyydetty lausuntoa lupahakemukseen")
+         "Sinulta on pyydetty lausuntoa lupahakemukseen"
+         app-id "authority")
        ))
 
    (fact "the \"reminder-sent\" timestamp already exists"
@@ -473,7 +239,8 @@
      (check-sent-reminder-email
        (-> statement-matching :person :email)
        "Lupapiste.fi: Naapurikuja 3 - Muistutus lausuntopyynn\u00f6st\u00e4"
-       "Sinulta on pyydetty lausuntoa lupahakemukseen")
+       "Sinulta on pyydetty lausuntoa lupahakemukseen"
+       app-id "authority")
      ))
 
 
