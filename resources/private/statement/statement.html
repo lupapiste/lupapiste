@@ -13,7 +13,7 @@
       </h1>
       <button class="attachment-delete inline-block" data-bind="ltext: 'statement.delete', click: $root.statementModel.openDeleteDialog, visible: $root.authorization.ok('delete-statement'), enable: $root.authorization.ok('delete-statement')" data-test-id="delete-statement">Poista lausunto</button>
       <div data-bind="with: application">
-        <a class="btn attachment-back inline-block" data-test-id="statement-return" data-bind="attr: {href: '#!/application/' + id() + '/statement' }"><span class="icon drill-left-black left-align"></span><span data-bind =" ltext: 'attachment.return'"></span></a></a>
+        <a class="btn btn-nav-back inline-block" data-test-id="statement-return" data-bind="attr: {href: '#!/application/' + id() + '/statement' }"><span class="icon drill-left-black left-align"></span><span data-bind =" ltext: 'attachment.return'"></span></a></a>
       </div>
     </div>
     <div data-bind="with: $root.attachmentsModel" class="statement-conversation">

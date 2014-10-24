@@ -413,7 +413,7 @@
             <span class="missing icon"></span>
             <span data-bind="ltext: 'missing.title'"></span>
           </div>
-          <div class="attachment-actions" data-bind="visible: (!postVerdict() && preAttachmentsByOperation().length > 0) || (postVerdict() && postAttachmentsByOperation().length > 0)">
+          <div class="attachment-actions" data-bind="visible: (!$root.application.inPostVerdictState() && preAttachmentsByOperation().length > 0) || ($root.application.inPostVerdictState() && postAttachmentsByOperation().length > 0)">
             <div>
               <button
                 data-bind="click: newAttachment, ltext: 'application.attachmentsAdd', visible: $root.authorization.ok('upload-attachment'), enable: !appModel.processing()"
@@ -445,7 +445,7 @@
               <h2><span data-bind="ltext: 'application.attachments.post-verdict'"></span></h2>
               <div data-bind="template: {name: 'attachments-template-op', data: postAttachmentsByOperation()}"></div>
             </div>
-            <!-- ko if: !postVerdict() -->
+            <!-- ko if: !$root.application.inPostVerdictState() -->
             <div data-bind="if: preAttachmentsByOperation().length > 0" data-test-id="application-pre-attachments-table">
               <div data-bind="template: {name: 'attachments-template-op', data: preAttachmentsByOperation()}"></div>
             </div>
@@ -493,7 +493,7 @@
               </div>
             </div>
 
-            <!-- ko if: postVerdict() -->
+            <!-- ko if: $root.application.inPostVerdictState() -->
             <div data-bind="if: preAttachmentsByOperation().length > 0" data-test-id="application-pre-attachments-table">
               <h2><span data-bind="ltext: 'application.attachments.pre-verdict'"></span></h2>
               <div data-bind="template: {name: 'attachments-template-op', data: preAttachmentsByOperation()}"></div>

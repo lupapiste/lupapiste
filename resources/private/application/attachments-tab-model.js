@@ -6,7 +6,6 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
   self.appModel = appModel;
 
   var postVerdictStates = {verdictGiven:true, constructionStarted:true, closed:true};
-  self.postVerdict = ko.observable(false);
 
   self.preAttachmentsByOperation = ko.observableArray();
   self.postAttachmentsByOperation = ko.observableArray();
@@ -111,8 +110,6 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
   self.refresh = function(appModel) {
     self.appModel = appModel;
     var rawAttachments = ko.mapping.toJS(appModel.attachments);
-    // Post/pre verdict state?
-    self.postVerdict(!!postVerdictStates[self.appModel.state()]);
 
     var preAttachments = getPreAttachments(rawAttachments);
     var postAttachments = getPostAttachments(rawAttachments);
