@@ -1,5 +1,8 @@
 (ns lupapalvelu.xml.krysp.application-from-krysp
-  :require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error fatal]])
+  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error fatal]]
+            [lupapalvelu.organization :as organization]
+            [lupapalvelu.permit :as permit]
+            [lupapalvelu.core :refer [fail!]]))
 
 (defn get-application-xml [{:keys [id permitType] :as application} & [raw? kuntalupatunnus?]]
   (if-let [{url :url} (organization/get-krysp-wfs application)]
