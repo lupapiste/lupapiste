@@ -27,6 +27,7 @@
             [lupapalvelu.tasks :as tasks]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
+            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch-api]
             [lupapalvelu.xml.krysp.rakennuslupa-mapping :as rakennuslupa-mapping]
             [lupapalvelu.ktj :as ktj]
             [lupapalvelu.open-inforequest :as open-inforequest]
@@ -58,16 +59,8 @@
   (when (and y (not (<= 6610000 (util/->double y) 7779999)))
     (fail :error.illegal-coordinates)))
 
-;; Helpers
 
-(defn get-application-xml [{:keys [id permitType] :as application} & [raw? kuntalupatunnus?]]
-  (if-let [{url :url} (organization/get-krysp-wfs application)]
-    (if-let [fetch-fn (permit/get-application-xml-getter permitType)]
-      (fetch-fn url id raw? kuntalupatunnus?)
-      (do
-        (error "No fetch function for" permitType (:organization application))
-        (fail! :error.unknown)))
-    (fail! :error.no-legacy-available)))
+;; Helpers
 
 (defn set-user-to-document [application document user-id path current-user timestamp]
   {:pre [document]}
@@ -612,8 +605,8 @@
             (ok :id (:id created-application))
             ))
 
-       ;; Jos kuntaluvalle ei loytynyt sanomaa, nayta virheilmoitus.
-       (fail :info.no-previous-permit-found-from-backend)))
+        ;; Jos kuntaluvalle ei loytynyt sanomaa, nayta virheilmoitus.
+        (fail :info.no-previous-permit-found-from-backend)))
 
    ;; TODO: These let-bindings are repeated in do-create-application, merge th somehow
    (let [permit-type       (operations/permit-type-of-operation operation)
