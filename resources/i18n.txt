@@ -1,0 +1,2 @@
+mypage.companyAccount.editInfo: Muokkaa yrityksen tietoja
+mypage.companyAccount.editUsers: Hallinnoi yrityksen käyttäjiä
