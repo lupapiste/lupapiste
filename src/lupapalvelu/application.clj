@@ -569,7 +569,7 @@
                       operation-validator]}
   [{{:keys [operation address municipality infoRequest kuntalupatunnus]} :data :keys [user created] :as command}]
 
-  (println "\n create-application, kuntalupatunnus: " kuntalupatunnus "\n")
+;  (println "\n create-application, kuntalupatunnus: " kuntalupatunnus "\n")
 
 ;  (if kuntalupatunnus
    ;; Fetch application from backing system with the provided kuntalupatunnus
