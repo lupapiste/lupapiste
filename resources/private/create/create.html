@@ -78,6 +78,7 @@
       <div data-bind="text: loc('operations.selected') + ' ' + loc(['operations', operation()])"></div>
       <div data-bind="html: loc(['operations', operation(), 'desc'])"></div>
 
+      <!-- ko ifnot: operation() === "aiemmalla-luvalla-hakeminen" -->
       <div class="organization-links" data-bind="visible: organizationLinks() && organizationLinks().length">
         <div data-bind="ltext: 'organization.links'"></div>
         <ul data-bind="foreach: organizationLinks">
@@ -103,6 +104,23 @@
           <span data-bind="ltext: 'newRequest.newApplication'"></span><span class="icon add left-align"></span>
         </button>
       </div>
+      <!-- /ko -->
+
+      <!-- ko if: operation() === "aiemmalla-luvalla-hakeminen" -->
+      <p data-bind="ltext: 'newRequest.newApplicationWithPrevPermit'"></p>
+      <input data-bind="textInput: kuntalupatunnusFromPrevPermit, attr: {placeholder: loc('create-app-with-with-prev-permit-placeholder')}"
+             id="create-app-with-with-prev-permit" data-test-id="test-create-app-with-with-prev-permit"
+             type="text" class="form-input text" autofocus="autofocus" />
+
+      <div class="create-buttons">
+        <button data-bind="click: createApplicationwithPrevPermit, disable: processing() || _.isEmpty(kuntalupatunnusFromPrevPermit())"
+                data-test-id="create-application-with-prev-permit" class="btn btn-primary">
+          <em data-bind="visible: pending" class="button-loader"></em>
+          <span data-bind="ltext: 'newRequest.newApplicationWithPrevPermit'"></span><span class="icon add left-align"></span>
+        </button>
+      </div>
+      <!-- /ko -->
+
     </div>
 
   </section>

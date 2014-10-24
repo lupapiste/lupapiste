@@ -561,13 +561,13 @@
 
 ;; TODO: separate methods for inforequests & applications for clarity.
 (defcommand create-application
-  {:parameters [:operation :x :y :address :propertyId :municipality]
+  {:parameters [:operation :x :y :address :propertyId :municipality :kuntalupatunnus]
    :roles      [:applicant :authority]
    :notified   true ; OIR
    :input-validators [(partial action/non-blank-parameters [:operation :address :municipality])
                       (partial property-id-parameters [:propertyId])
                       operation-validator]}
-  [{{:keys [operation address municipality infoRequest]} :data :keys [user created] :as command}]
+  [{{:keys [operation address municipality infoRequest kuntalupatunnus]} :data :keys [user created] :as command}]
 
   (println "\n create-application, kuntalupatunnus: " kuntalupatunnus "\n")
 

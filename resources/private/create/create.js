@@ -65,6 +65,10 @@
     self.inforequestsDisabled = ko.observable(false);
     self.newApplicationsDisabled = ko.observable(false);
     self.pending = ko.observable(false);
+    self.operation = ko.observable();
+    self.message = ko.observable("");
+    self.requestType = ko.observable();
+    self.kuntalupatunnusFromPrevPermit = ko.observable(null);
 
     self.municipalityCode.subscribe(function(code) {
       if (code) { self.findOperations(code); }
@@ -103,10 +107,6 @@
           .findMunicipality(code, self.municipality);
       }
     });
-
-    self.operation = ko.observable();
-    self.message = ko.observable("");
-    self.requestType = ko.observable();
 
     self.clear = function() {
       var zoomLevel = 2;
@@ -341,7 +341,8 @@
         address: self.addressString(),
         propertyId: util.prop.toDbFormat(self.propertyId()),
         messages: isBlank(self.message()) ? [] : [self.message()],
-        municipality: self.municipality().id
+        municipality: self.municipality().id,
+        kuntalupatunnus: self.kuntalupatunnusFromPrevPermit()
       })
       .processing(self.processing)
       .pending(self.pending)
@@ -353,6 +354,7 @@
     };
     self.createApplication = self.create.bind(self, false);
     self.createInfoRequest = self.create.bind(self, true);
+    self.createApplicationwithPrevPermit = self.create.bind(self, false);
 
   }();
 

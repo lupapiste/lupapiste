@@ -1,0 +1,1 @@
+info.no-previous-permit-found-from-backend: Annetulla lupatunnuksella ei löytynyt lupaa taustajärjestelmästä 
