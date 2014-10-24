@@ -1,0 +1,2 @@
+application.export.state: Hakemuksen vaihe
+application.export.empty: (Tyhjä)
