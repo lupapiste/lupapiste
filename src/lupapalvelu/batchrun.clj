@@ -83,7 +83,7 @@
                     (nil? (:given statement))
                     (< requested timestamp-1-week-ago))]
       (notifications/notify! :reminder-request-statement {:application app
-                                                          :recipients [(:person statement)]
+                                                         :recipients [(user/get-user-by-email (get-in statement [:person :email]))]
                                                           :data {:created-date (util/to-local-date requested)}})
       (update-application (application->command app)
         {:statements {$elemMatch {:id (:id statement)}}}
