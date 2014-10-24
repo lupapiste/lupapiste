@@ -111,8 +111,12 @@
       (errorf "*** multiple organizations in scope of - municipality=%s, permit-type=%s -> %s" municipality permit-type (count organizations)))
     (first organizations)))
 
-(defn resolve-organization-scope [organization municipality permit-type]
-  (first (filter #(and (= municipality (:municipality %)) (= permit-type (:permitType %))) (:scope organization))))
+(defn resolve-organization-scope
+  ([municipality permit-type]
+    (let [organization (resolve-organization municipality permit-type)]
+      (resolve-organization-scope municipality permit-type organization)))
+  ([municipality permit-type organization]
+   (first (filter #(and (= municipality (:municipality %)) (= permit-type (:permitType %))) (:scope organization)))))
 
 ;;
 ;; Actions
@@ -227,13 +231,12 @@
   [_]
   (let [permit-type (:permit-type ((keyword operation) operations/operations))]
     (if-let [organization (resolve-organization municipality permit-type)]
-      (let [scope (resolve-organization-scope organization municipality permit-type)]
+      (let [scope (resolve-organization-scope municipality permit-type organization)]
         (ok
-         :inforequests-disabled (not (:inforequest-enabled scope))
-         :new-applications-disabled (not (:new-application-enabled scope))
-         :links (:links organization)
-         :attachmentsForOp (-> organization :operations-attachments ((keyword operation)))))
-
+          :inforequests-disabled (not (:inforequest-enabled scope))
+          :new-applications-disabled (not (:new-application-enabled scope))
+          :links (:links organization)
+          :attachmentsForOp (-> organization :operations-attachments ((keyword operation)))))
       (fail :municipalityNotSupported :municipality municipality :permitType permit-type))))
 
 (defcommand set-organization-selected-operations

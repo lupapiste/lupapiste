@@ -550,7 +550,7 @@
   [{{:keys [operation x y address propertyId municipality infoRequest messages]} :data :keys [user created] :as command}]
   (let [permit-type       (operations/permit-type-of-operation operation)
         organization      (organization/resolve-organization municipality permit-type)
-        scope             (organization/resolve-organization-scope organization municipality permit-type)
+        scope             (organization/resolve-organization-scope municipality permit-type organization)
         organization-id   (:id organization)
         info-request?     (boolean infoRequest)
         open-inforequest? (and info-request? (:open-inforequest scope))
@@ -576,21 +576,61 @@
                       operation-validator]}
   [{{:keys [operation address municipality infoRequest]} :data :keys [user created] :as command}]
 
-  ;; TODO: These let-bindings are repeated in do-create-application, merge th somehow
-  (let [permit-type       (operations/permit-type-of-operation operation)
-        organization      (organization/resolve-organization municipality permit-type)
-        scope             (organization/resolve-organization-scope organization municipality permit-type)
-        info-request?     (boolean infoRequest)
-        open-inforequest? (and info-request? (:open-inforequest scope))
-        created-application (do-create-application command)]
+  (println "\n create-application, kuntalupatunnus: " kuntalupatunnus "\n")
 
-      (insert-application created-application)
-      (when open-inforequest?
-        (open-inforequest/new-open-inforequest! created-application))
-      (try
-        (autofill-rakennuspaikka created-application created)
-        (catch Exception e (error e "KTJ data was not updated")))
-      (ok :id (:id created-application))))
+;  (if kuntalupatunnus
+   ;; Fetch application from backing system with the provided kuntalupatunnus
+   #_(let [permit-type (operations/permit-type-of-operation operation)]
+
+      ;; get the application xml from backing system
+      (if-let [xml (krysp-fetch-api/get-application-xml {:id kuntalupatunnus :permitType permit-type} false true)]
+        (println "\n create-application, sanoma xml: ")
+        (clojure.pprint/pprint xml)
+        (println "\n")
+
+        ;; *** TODO: ***
+        ;; Lisaa tahan tarkistus:
+        ;; Jos ks. kuntalupatunnuksella on jo Lupapisteessa lupa, ja ks. henkilolla on sille oikeudet, avaa suoraan tama lupa.
+        ;; Jos henkilolla ei ole oikeuksia talle luvalle, nayta virheilmoitus.
+
+        ;; create the application
+        (let [created-application (do-create-application command)]
+          (println "\n create-application, created-application: ")
+          (clojure.pprint/pprint created-application)
+          (println "\n")
+
+          (insert-application created-application)   ;;TODO: uncomment
+
+          ;; get verdicts for the application
+          (let [command (assoc command :application created-application)
+                resp (verdict-api/do-check-for-verdict command user created)]
+
+            (println "\n create-application, do-check-for-verdict  resp: ")
+            (clojure.pprint/pprint resp)
+            (println "\n")
+
+            (ok :id (:id created-application))
+            ))
+
+       ;; Jos kuntaluvalle ei loytynyt sanomaa, nayta virheilmoitus.
+       (fail :info.no-previous-permit-found-from-backend)))
+
+   ;; TODO: These let-bindings are repeated in do-create-application, merge th somehow
+   (let [permit-type       (operations/permit-type-of-operation operation)
+         scope             (organization/resolve-organization-scope municipality permit-type)
+         info-request?     (boolean infoRequest)
+         open-inforequest? (and info-request? (:open-inforequest scope))
+         created-application (do-create-application command)]
+
+       (insert-application created-application)
+       (when open-inforequest?
+         (open-inforequest/new-open-inforequest! created-application))
+       (try
+         (autofill-rakennuspaikka created-application created)
+         (catch Exception e (error e "KTJ data was not updated")))
+       (ok :id (:id created-application)))
+;   )
+  )
 
 (defn- add-operation-allowed? [_ application]
   (let [op (-> application :operations first :name keyword)
@@ -907,8 +947,7 @@
 
 
 (defn- validate-new-applications-enabled [command {:keys [permitType municipality]}]
-  (let [org   (organization/resolve-organization municipality permitType)
-        scope (organization/resolve-organization-scope org municipality permitType)]
+  (let [scope (organization/resolve-organization-scope municipality permitType)]
     (when-not (= (:new-application-enabled scope) true)
       (fail :error.new-applications.disabled))))
 
