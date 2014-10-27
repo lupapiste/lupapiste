@@ -42,6 +42,8 @@ var repository = (function() {
       var op = _.findWhere(operations, {id: attachment.op.id});
       if (op) {
         attachment.op = op;
+      } else {
+        attachment.op = null;
       }
     }
   }
