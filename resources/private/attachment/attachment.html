@@ -14,9 +14,7 @@
                 <span id="test-attachment-version" data-bind="version: latestVersion().version">0.0</span>
               </span>
             </h1>
-            <div class="help" data-bind="click: toggleHelp">
-              <span class="icon help" data-bind="css: {expanded: showHelp}"></span>
-            </div>
+            <span class="icon help" data-bind="click: toggleHelp, css: {expanded: showHelp}"></span>
           </div>
 
           <p data-bind="slider: showHelp, lhtml: 'attachment.view.desc'"  class="tab-info"></p>          
