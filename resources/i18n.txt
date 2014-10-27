@@ -1,1 +1,2 @@
-info.no-previous-permit-found-from-backend: Annetulla lupatunnuksella ei löytynyt lupaa taustajärjestelmästä 
+info.no-previous-permit-found-from-backend: Annetulla lupatunnuksella ei löytynyt lupaa taustajärjestelmästä
+lupapiste-application-already-exists-but-unauthorized-to-access-it: Kyseisellä tunnuksella Lupapisteeseen on jo luotu hakemus, mutta sinulla ei ole oikeuksia sille.
