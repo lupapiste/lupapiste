@@ -109,10 +109,10 @@
                                              :reminder-sent nil
                                              :status    nil}
                                  :auth (user/user-in-role user :statementGiver :statementId statement-id)
-                                 :email (:email %)}) persons)
+                                 :recipient user}) persons)
             statements (map :statement details)
             auth       (map :auth details)
-            recipients (map #(assoc (:auth %) :email (:email %)) details)]
+            recipients (map :recipient details)]
           (update-application command {$push {:statements {$each statements}
                                               :auth {$each auth}}})
           (notifications/notify! :request-statement (assoc command :recipients recipients))))))

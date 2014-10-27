@@ -21,8 +21,7 @@
             <h1 data-bind="ltext: 'conversation.title'"></h1>
             <span class="close-btn" data-bind="click: closeSidePanel"></span>
             <div class="help" data-bind="click: toggleHelp">
-              <span>Ohje</span>
-              <span class="icon info-indicator"></span>
+              <span class="icon help" data-bind="css: {expanded: showHelp}"></span>
             </div>
           </div>
           <div class="content">
