@@ -15,6 +15,8 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
     return self.appModel.pending() || self.appModel.processing() || self.unsentAttachmentsNotFound();
   });
 
+  var generalAttachmentsStr = 'attachments.general';
+
   function GroupModel(groupName, groupDesc, attachments) {
     var self = this;
     self.attachments = attachments;
@@ -35,7 +37,7 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
   };
 
   var fGroupByOperation = function(attachment) {
-    return attachment.op ? attachment.op['id'] : 'attachments.general';
+    return attachment.op ? attachment.op['id'] : generalAttachmentsStr;
   }
 
   /* Sorting function to sort attachments into
@@ -88,14 +90,21 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
       attachments.sort(sort);
     }
     var grouped = _.groupBy(attachments, f);
-    return _.sortBy(_.map(grouped, function(attachments, group) {
-          if ( group === 'attachments.general' ) {
-            return new GroupModel(group, null, attachments); // group = attachments.general
-          } else { // group == op.id
-            var att = _.first(attachments);
-            return new GroupModel(att.op.name, att.op.description, attachments);
-          }
-        }), function(group) { return group.groupName === 'attachments.general' ? -1 : 0});
+    var mapped = _.map(grouped, function(attachments, group) {
+      if ( group === generalAttachmentsStr ) {
+        return new GroupModel(group, null, attachments); // group = attachments.general
+      } else { // group == op.id
+        var att = _.first(attachments);
+        return new GroupModel(att.op.name, att.op.description, attachments);
+      }
+    });
+    return _.sortBy(mapped, function(group) { // attachments.general on top, else sort by op.created
+      if ( group.groupName === generalAttachmentsStr ) {
+        return -1;
+      } else {
+        return (_.first(group.attachments)).op.created;
+      }
+    });
   }
 
   function unsentAttachmentFound(attachments) {
