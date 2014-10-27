@@ -91,10 +91,8 @@
                    enable: $root.authorization.ok('create-task')"></button>
 
 
-      <section>
-        <h2 data-bind="ltext: 'verdict.conversation'"></h2>
-        <div data-bind="template: {name: 'comment-template', data: {comment: $root.commentsModel, authorities: $root.authorities, authorization: $root.authorization}}"></div>
-      </section>
+
+      <div data-bind="template: {name: 'comment-template', data: {comment: $root.commentsModel, authorities: $root.authorities, authorization: $root.authorization}}"></div>
 
     </div>
 
