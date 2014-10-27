@@ -4,7 +4,7 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.core :refer [fail!]]))
 
-(defn get-application-xml [{:keys [id permitType] :as application} & [raw? kuntalupatunnus?]]
+(defn get-application-xml [{:keys [id permitType] :as application} & {:keys [raw? kuntalupatunnus?] :or {raw? false kuntalupatunnus? false}}]
   (if-let [{url :url} (organization/get-krysp-wfs application)]
     (if-let [fetch-fn (permit/get-application-xml-getter permitType)]
       (fetch-fn url id raw? kuntalupatunnus?)
