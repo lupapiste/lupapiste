@@ -16,7 +16,6 @@
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.notifications :as notifications]
-            [lupapalvelu.xml.krysp.reader :as krysp]
             [lupapalvelu.document.commands :as commands]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
@@ -26,6 +25,8 @@
             [lupapalvelu.operations :as operations]
             [lupapalvelu.tasks :as tasks]
             [lupapalvelu.permit :as permit]
+            [lupapalvelu.verdict-api :as verdict-api]
+            [lupapalvelu.xml.krysp.reader :as krysp-reader]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch-api]
             [lupapalvelu.xml.krysp.rakennuslupa-mapping :as rakennuslupa-mapping]
@@ -980,8 +981,8 @@
   (if-let [{url :url} (organization/get-krysp-wfs application)]
     (let [document     (commands/by-id application collection documentId)
           schema       (schemas/get-schema (:schema-info document))
-          kryspxml     (krysp/building-xml url propertyId)
-          updates      (-> (or (krysp/->rakennuksen-tiedot kryspxml buildingId) {}) tools/unwrapped tools/path-vals)
+          kryspxml     (krysp-reader/building-xml url propertyId)
+          updates      (-> (or (krysp-reader/->rakennuksen-tiedot kryspxml buildingId) {}) tools/unwrapped tools/path-vals)
           ; Path should exist in schema!
           updates      (filter (fn [[path _]] (model/find-by-name (:body schema) path)) updates)]
       (infof "merging data into %s %s" (get-in document [:schema-info :name]) (:id document))
@@ -996,7 +997,7 @@
    :states     (action/all-application-states-but [:sent :verdictGiven :constructionStarted :closed :canceled])}   ;; TODO: Info state removed, ok?
   [{{:keys [organization propertyId] :as application} :application}]
   (if-let [{url :url} (organization/get-krysp-wfs application)]
-    (let [kryspxml  (krysp/building-xml url propertyId)
-          buildings (krysp/->buildings-summary kryspxml)]
+    (let [kryspxml  (krysp-reader/building-xml url propertyId)
+          buildings (krysp-reader/->buildings-summary kryspxml)]
       (ok :data buildings))
     (fail :error.no-legacy-available)))
