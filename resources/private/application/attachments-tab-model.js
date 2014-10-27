@@ -88,14 +88,14 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
       attachments.sort(sort);
     }
     var grouped = _.groupBy(attachments, f);
-    return _.map(grouped, function(attachments, group) {
-      if ( group === 'attachments.general' ) {
-        return new GroupModel(group, null, attachments); // group = attachments.general
-      } else { // group == op.id
-        var att = _.first(attachments);
-        return new GroupModel(att.op.name, att.op.description, attachments);
-      }
-    });
+    return _.sortBy(_.map(grouped, function(attachments, group) {
+          if ( group === 'attachments.general' ) {
+            return new GroupModel(group, null, attachments); // group = attachments.general
+          } else { // group == op.id
+            var att = _.first(attachments);
+            return new GroupModel(att.op.name, att.op.description, attachments);
+          }
+        }), function(group) { return group.groupName === 'attachments.general' ? -1 : 0});
   }
 
   function unsentAttachmentFound(attachments) {
