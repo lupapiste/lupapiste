@@ -733,11 +733,17 @@
                   <div class="accordion_content expanded">
 
                     <div data-bind="with: $parent" style="overflow: auto;">
-                      <div class="btn-container right-align" data-bind="if: $data.draft">
-                        <button data-bind="visible: $root.authorization.ok('save-verdict-draft'), click: function() {$root.verdictModel.openVerdict($root, $data);}, ltext: 'edit'"
-                                class="btn btn-primary" data-test-id="edit-verdict"></button>
-                        <button data-bind="visible: $root.authorization.ok('publish-verdict'), click: function() {$root.verdictModel.publishVerdict($root, $data);}, ltext: 'verdict.submit'"
-                                class="btn btn-primary" data-test-id="publish-verdict"></button>
+                      <div class="btn-container right-align">
+                        <span data-bind="if: $data.draft" style="margin-right: 6px">
+                          <button data-bind="visible: $root.authorization.ok('save-verdict-draft'), click: function() {$root.verdictModel.openVerdict($root, $data);}, ltext: 'edit'"
+                                  class="btn btn-primary" data-test-id="edit-verdict"></button>
+                          <button data-bind="visible: $root.authorization.ok('publish-verdict'), click: function() {$root.verdictModel.publishVerdict($root, $data);}, ltext: 'verdict.submit'"
+                                  class="btn btn-primary" data-test-id="publish-verdict"></button>
+                        </span>
+                        <span data-bind="if: $root.authorization.ok('delete-verdict')">
+                          <button data-bind="click: $root.verdictModel.deleteVerdict, ltext: 'verdict.delete'"
+                                  class="btn btn-primary" data-test-id="delete-verdict"></button>
+                        </span>
                       </div>
                     </div>
 
