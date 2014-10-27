@@ -384,6 +384,10 @@
 (permit/register-function permit/MAL :verdict-krysp-reader ->simple-verdicts)
 (permit/register-function permit/VVVL :verdict-krysp-reader ->simple-verdicts)
 
+(defn- ->lp-tunnus [asia]
+  {:lupapiste-tunnus (or (get-text asia [:luvanTunnisteTiedot :LupaTunnus :muuTunnustieto :tunnus])
+                       (get-text asia [:luvanTunnistetiedot :LupaTunnus :muuTunnustieto :tunnus]))})
+
 (defn- ->kuntalupatunnus [asia]
   {:kuntalupatunnus (or (get-text asia [:luvanTunnisteTiedot :LupaTunnus :kuntalupatunnus])
                         (get-text asia [:luvanTunnistetiedot :LupaTunnus :kuntalupatunnus]))})
@@ -391,7 +395,7 @@
 (defn ->verdicts [xml ->function]
   (map
     (fn [asia]
-      (let [verdict-model (->kuntalupatunnus asia)
+      (let [verdict-model (merge (->kuntalupatunnus asia) (->lp-tunnus asia))
             verdicts      (->> asia
                            (->function)
                            (cleanup)
