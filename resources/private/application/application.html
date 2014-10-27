@@ -271,7 +271,7 @@
 
         <div id="application-info-tab" class="tab-content" data-bind="with: application">
           <h1 data-bind="ltext: 'application.tabInfo'"></h1>
-          <span class="icon help" data-bind="click: function(data, event) { toggleHelp('ApplicationInfo') }, css: {expanded: showApplicationInfoHelp}"></span>
+          <span class="icon help" data-bind="click: function(data, event) { toggleHelp('showApplicationInfoHelp') }, css: {expanded: showApplicationInfoHelp}"></span>
           <div class="tab-info" data-bind="slider: showApplicationInfoHelp">
             <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.applicationInfoDesc'"></p>
           </div>
@@ -311,7 +311,7 @@
 
         <div id="application-parties-tab" class="tab-content" data-bind="with: application">
           <h1 data-bind="ltext: 'application.tabParties'"></h1>
-          <span class="icon help" data-bind="click: function(data, event) { toggleHelp('PartiesInfo') }, css: {expanded: showPartiesInfoHelp}"></span>
+          <span class="icon help" data-bind="click: function(data, event) { toggleHelp('showPartiesInfoHelp') }, css: {expanded: showPartiesInfoHelp}"></span>
           <div class="tab-info" data-bind="slider: showPartiesInfoHelp">
             <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.PartiesDesc'"></p>
             <p data-bind="lhtml: 'company-invite.help'"></p>
@@ -667,7 +667,7 @@
         <div id="application-applicationSummary-tab" data-bind="with: $root.application" class="tab-content" >
 
           <h1 data-bind="ltext: 'application.tabApplicationSummary'"></h1>
-          <span class="icon help" data-bind="click: function(data, event) { toggleHelp('SummaryInfo') }, css: {expanded: showSummaryInfoHelp}"></span>
+          <span class="icon help" data-bind="click: function(data, event) { toggleHelp('showSummaryInfoHelp') }, css: {expanded: showSummaryInfoHelp}"></span>
           <div class="tab-info" data-bind="slider: showSummaryInfoHelp">
             <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.applicationSummaryDesc'"></p>
           </div>
@@ -714,7 +714,7 @@
 
         <div id="application-verdict-tab" class="tab-content">
           <h1 data-bind="ltext: 'application.tabVerdict'"></h1>
-          <span class="icon help" data-bind="click: function(data, event) { application.toggleHelp('VerdictInfo') }, css: {expanded: application.showVerdictInfoHelp}"></span>
+          <span class="icon help" data-bind="click: function(data, event) { application.toggleHelp('showVerdictInfoHelp') }, css: {expanded: application.showVerdictInfoHelp}"></span>
           <div class="tab-info" data-bind="slider: application.showVerdictInfoHelp">
             <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.verdictDesc'"></p>
           </div>
@@ -945,7 +945,7 @@
 
           <div data-bind="with: application" class="application-statements">
             <h1 data-bind="ltext: 'application.statements'">Lausunnot</h1>
-            <span class="icon help" data-bind="click: function(data, event) { toggleHelp('StatementsInfo') }, css: {expanded: showStatementsInfoHelp}"></span>
+            <span class="icon help" data-bind="click: function(data, event) { toggleHelp('showStatementsInfoHelp') }, css: {expanded: showStatementsInfoHelp}"></span>
             <div class="tab-info" data-bind="slider: showStatementsInfoHelp">
               <p data-bind="lhtml: 'help.' + permitType() + '.statementsDesc'"></p>
             </div>
@@ -959,7 +959,7 @@
           <div data-bind="with: application" class="application-neighbors">
 
             <h1 data-bind="lhtml: 'application.' + $root.application.permitType() + '.neighbors'">Naapurit</h1>
-            <span class="icon help" data-bind="click: function(data, event) { toggleHelp('NeighborsInfo') }, css: {expanded: showNeighborsInfoHelp}"></span>
+            <span class="icon help" data-bind="click: function(data, event) { toggleHelp('showNeighborsInfoHelp') }, css: {expanded: showNeighborsInfoHelp}"></span>
             <div class="tab-info" data-bind="slider: showNeighborsInfoHelp">
               <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.neighborsDesc'"></p>
             </div>
@@ -1074,7 +1074,7 @@
         <div id="application-tasks-tab" data-bind="with: $root.application" class="tab-content" >
 
           <h1 data-bind="ltext: 'application.tabConstructionTimeTasks'"></h1>
-          <span class="icon help" data-bind="click: function(data, event) { toggleHelp('ConstructionInfo') }, css: { expanded: showConstructionInfoHelp }"></span>
+          <span class="icon help" data-bind="click: function(data, event) { toggleHelp('showConstructionInfoHelp') }, css: { expanded: showConstructionInfoHelp }"></span>
           <div class="tab-info" data-bind="slider: showConstructionInfoHelp">
             <p data-bind="lhtml: 'help.' + permitType() + '.tasksDesc'"></p>
           </div>
