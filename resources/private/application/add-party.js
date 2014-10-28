@@ -7,7 +7,7 @@ LUPAPISTE.AddPartyModel = function() {
   self.documentName = ko.observable();
 
   self.init = function(model) {
-    self.applicationId = model.application.id();
+    self.applicationId = model.id();
     ajax.query("party-document-names", {id: self.applicationId})
       .success(function(d) {self.partyDocumentNames(ko.mapping.fromJS(d.partyDocumentNames));})
       .call();

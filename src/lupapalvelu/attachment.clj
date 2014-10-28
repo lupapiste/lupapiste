@@ -22,6 +22,8 @@
    :paa_ja_rakennussuunnittelijan_tiedot
    :tutkintotodistus])
 
+(def attachment-meta-types [:size :scale :op :contents])
+
 (def attachment-scales
   ["1:20"
    "1:50"

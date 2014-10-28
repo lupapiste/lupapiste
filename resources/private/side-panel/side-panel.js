@@ -22,7 +22,7 @@ LUPAPISTE.SidePanelModel = function() {
   self.authentication = ko.observable();
   self.authorities = ko.observable();
   self.mainConversation = ko.observable(true);
-  self.showHelp = ko.observable();
+  self.showHelp = ko.observable(false);
 
   self.sidePanelVisible = ko.computed(function() {
     return self.showConversationPanel() || self.showNoticePanel();
