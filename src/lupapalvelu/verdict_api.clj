@@ -76,29 +76,33 @@
         verdicts (krysp-reader/->verdicts xml reader)]
     (filter seq (map (partial verdict-attachments application user timestamp) verdicts))))
 
+(defn get-verdict-updates [{:keys [application user created] :as command} app-xml]
+  (when-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created app-xml))]
+    (let [extras-reader (permit/get-verdict-extras-reader (:permitType application))
+          has-old-verdict-tasks (some #(= "verdict" (get-in % [:source :type]))  (:tasks application))
+          tasks (tasks/verdicts->tasks (assoc application :verdicts verdicts-with-attachments) created)]
+      {$set (merge
+              {:verdicts verdicts-with-attachments
+               :modified created
+               :state    :verdictGiven}
+              (when-not has-old-verdict-tasks {:tasks tasks})
+              (when extras-reader (extras-reader app-xml)))})))
+
 (defn do-check-for-verdict
-  ([command user created]
-    {:pre [(:application command)]}
-    (let [xml (krysp-fetch-api/get-application-xml (:application command))]
-      (do-check-for-verdict command user created xml)))
-  ([command user created app-xml]
-    {:pre [(:application command)]}
-
-    (when-not app-xml (fail :info.no-verdicts-found-from-backend))
-
-    (let [application (:application command)
-          extras-reader (permit/get-verdict-extras-reader (:permitType application))]
-      (if-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created app-xml))]
-        (let [has-old-verdict-tasks (some #(= "verdict" (get-in % [:source :type]))  (:tasks application))
-              tasks (tasks/verdicts->tasks (assoc application :verdicts verdicts-with-attachments) created)
-              updates {$set (merge
-                              {:verdicts verdicts-with-attachments
-                               :modified created
-                               :state    :verdictGiven}
-                              (when-not has-old-verdict-tasks {:tasks tasks})
-                              (when extras-reader (extras-reader app-xml)))}]
+  ([command]
+    {:pre [(every? command [:application :user :created])]}
+    (if-let [app-xml (krysp-fetch-api/get-application-xml (:application command))]
+      (do-check-for-verdict command app-xml)
+      (fail :info.no-verdicts-found-from-backend)))
+  ([command app-xml]
+    {:pre [(and app-xml (every? command [:application :user :created]))]}
+    (let [updates (get-verdict-updates command app-xml)
+          verdict-updates (get-in updates [$set :verdicts])
+          task-updates (get-in updates [$set :tasks])]
+      (if verdict-updates
+        (do
           (update-application command updates)
-          (ok :verdictCount (count verdicts-with-attachments) :taskCount (count (get-in updates [$set :tasks]))))
+          (ok :verdictCount (count verdict-updates) :taskCount (count task-updates)))
         (fail :info.no-verdicts-found-from-backend)))))
 
 (notifications/defemail :application-verdict
@@ -114,8 +118,8 @@
    :roles      [:authority]
    :notified   true
    :on-success  (notify :application-verdict)}
-  [{:keys [user created] :as command}]
-  (do-check-for-verdict command user created))
+  [command]
+  (do-check-for-verdict command))
 
 ;;
 ;; Manual verdicts
