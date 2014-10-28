@@ -70,7 +70,7 @@ Add and delete verdict
 
 Correct tab opening elements are visible
   Element should not be visible  //*[@data-test-id='application-open-info-tab']
-  Element should not be visible  //*[@data-test-id='application-open-parties-tab']
+  Element should be visible  //*[@data-test-id='application-open-parties-tab']
   Element should be visible  //*[@data-test-id='application-open-tasks-tab']
   Element should be visible  //*[@data-test-id='application-open-attachments-tab']
   Element should not be visible  //*[@data-test-id='application-open-requiredFieldSummary-tab']
