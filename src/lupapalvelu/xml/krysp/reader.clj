@@ -385,17 +385,20 @@
 (permit/register-function permit/VVVL :verdict-krysp-reader ->simple-verdicts)
 
 (defn- ->lp-tunnus [asia]
-  {:lupapiste-tunnus (or (get-text asia [:luvanTunnisteTiedot :LupaTunnus :muuTunnustieto :tunnus])
-                       (get-text asia [:luvanTunnistetiedot :LupaTunnus :muuTunnustieto :tunnus]))})
+  (or (get-text asia [:luvanTunnisteTiedot :LupaTunnus :muuTunnustieto :tunnus])
+                       (get-text asia [:luvanTunnistetiedot :LupaTunnus :muuTunnustieto :tunnus])))
 
 (defn- ->kuntalupatunnus [asia]
-  {:kuntalupatunnus (or (get-text asia [:luvanTunnisteTiedot :LupaTunnus :kuntalupatunnus])
-                        (get-text asia [:luvanTunnistetiedot :LupaTunnus :kuntalupatunnus]))})
+  (or (get-text asia [:luvanTunnisteTiedot :LupaTunnus :kuntalupatunnus])
+      (get-text asia [:luvanTunnistetiedot :LupaTunnus :kuntalupatunnus])))
+
+(defn- select-asiat [xml]
+  (enlive/select (cr/strip-xml-namespaces xml) case-elem-selector))
 
 (defn ->verdicts [xml ->function]
   (map
     (fn [asia]
-      (let [verdict-model (merge (->kuntalupatunnus asia) (->lp-tunnus asia))
+      (let [verdict-model {:kuntalupatunnus (->kuntalupatunnus asia)}
             verdicts      (->> asia
                            (->function)
                            (cleanup)
@@ -403,7 +406,7 @@
         (if (seq verdicts)
           (assoc verdict-model :paatokset verdicts)
           verdict-model)))
-    (enlive/select (cr/strip-xml-namespaces xml) case-elem-selector)))
+    (select-asiat xml)))
 
 (defn- buildings-summary-for-application [xml]
   (let [summary (->buildings-summary xml)]
