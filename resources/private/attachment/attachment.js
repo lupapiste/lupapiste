@@ -119,6 +119,11 @@ var attachment = (function() {
     subscriptions:   [],
     indicator:       ko.observable().extend({notify: 'always'}),
     showAttachmentVersionHistory: ko.observable(),
+    showHelp:        ko.observable(false),
+
+    toggleHelp: function() {
+      model.showHelp(!model.showHelp());
+    },
 
     hasPreview: function() {
       return !model.previewDisabled() && (model.isImage() || model.isPdf() || model.isPlainText());
@@ -301,6 +306,8 @@ var attachment = (function() {
     model.showAttachmentVersionHistory(false);
 
     pageutil.hideAjaxWait();
+
+    model.latestVersion() ? model.showHelp(false) : model.showHelp(true);
   }
 
   hub.onPageChange("attachment", function(e) {

@@ -14,14 +14,19 @@
                 <span id="test-attachment-version" data-bind="version: latestVersion().version">0.0</span>
               </span>
             </h1>
-            <a class="btn inline-block btn-nav-back"
+            <span class="icon help" data-bind="click: toggleHelp, css: {expanded: showHelp}"></span>
+          </div>
+
+          <p data-bind="slider: showHelp, lhtml: 'attachment.view.desc'"  class="tab-info"></p>          
+
+          <div>
+            <a class="btn left-align btn-nav-back"
                data-bind="click: function() { window.location.hash = '!/application/' + application.id() + '/attachments'; repository.load(application.id()); }"
                data-test-id="back-to-application-from-attachment">
               <span data-bind =" ltext: 'attachment.return'"></span>
               <span class="icon drill-left-black-bigger left-align"></span>
             </a>
           </div>
-          <p data-bind="lhtml: 'attachment.view.desc'"  class="tab-info"></p>
 
           <div class="attachment-actions">
             <div data-bind="with: $root.approve">
@@ -31,6 +36,8 @@
             <button data-test-id="change-attachment-type" data-bind="ltext: 'attachment.changeType', click: showChangeTypeDialog"></button>
             <button data-bind="ltext: 'attachment.delete', click: deleteAttachment, visible: $root.authorization.ok('delete-attachment'),  enable: $root.authorization.ok('delete-attachment')" data-test-id="delete-attachment">Poista liite</button>
           </div>
+
+          <div class="clear"></div>
 
           <div class="col1">
             <div>

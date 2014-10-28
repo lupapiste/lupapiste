@@ -51,6 +51,11 @@
             (post-verdict-states attachmentApplicationState)
             (= (keyword userRole) :authority)))))
 
+(defn- validate-meta [{{meta :meta} :data}]
+  (doseq [[k v] meta]
+    (when (not-any? #{k} attachment/attachment-meta-types)
+      (fail! :error.illegal-meta-type :parameters k))))
+
 (defn- validate-operation [{{meta :meta} :data}]
   (let [op (:op meta)] 
     (when-let [missing (if op (util/missing-keys op [:id :name]) false)]
@@ -59,12 +64,12 @@
 (defn- validate-scale [{{meta :meta} :data}]
   (let [scale (:scale meta)]
     (when (and scale (not-any? #{scale} attachment/attachment-scales))
-      (fail :error.illegal-attachment-scale))))
+      (fail :error.illegal-attachment-scale :parameters scale))))
 
 (defn- validate-size [{{meta :meta} :data}]
   (let [size (:size meta)]
     (when (and size (not-any? #{size} attachment/attachment-sizes))
-      (fail :error.illegal-attachment-size))))
+      (fail :error.illegal-attachment-size :parameters size))))
 
 ;;
 ;; KRYSP
@@ -442,7 +447,7 @@
    :roles      [:applicant :authority]
    :extra-auth-roles [:statementGiver]
    :states     (action/all-states-but [:answered :sent :closed :canceled])
-   :input-validators [validate-scale validate-size validate-operation]}
+   :input-validators [validate-meta validate-scale validate-size validate-operation]}
   [{:keys [application user] :as command}]
 
   (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
