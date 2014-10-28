@@ -219,7 +219,7 @@
                 <span data-bind="if: nonpartyDocumentIndicator">
                   <span data-bind="text: nonpartyDocumentIndicator" id="applicationNonpartyDocumentIndicator" class="indicator"></span></span></a></li>
 
-            <li data-bind="if: !inPostVerdictState(), css: {'active': $parent.selectedTabName() === 'parties'}">
+            <li data-bind="ifnot: _.contains(['closed', 'canceled'], state()), css: {'active': $parent.selectedTabName() === 'parties'}">
               <a data-bind="click: changeTab" href="#" data-target="parties" data-test-id="application-open-parties-tab">
                 <span data-bind="ltext: 'application.tabParties'"></span>
                 <span data-bind="if: partyDocumentIndicator">
@@ -255,7 +255,8 @@
                 <span data-bind="if: unseenVerdicts">
                   <span data-bind="text: unseenVerdicts" id="applicationUnseenVerdists" class="indicator"></span></span></a></li>
 
-            <li data-bind="if: inPostVerdictState(), css: {'active': $parent.selectedTabName() === 'applicationSummary'}">
+            <!-- In post-verdict states plus 'canceled' -->
+            <li data-bind="if: _.contains(['verdictGiven', 'constructionStarted', 'closed', 'canceled'], state()), css: {'active': $parent.selectedTabName() === 'applicationSummary'}">
               <a data-bind="click: changeTab" href="#" data-target="applicationSummary" data-test-id="application-open-applicationSummary-tab">
                 <span data-bind="ltext: 'application.applicationSummary'"></span></a></li>
 
