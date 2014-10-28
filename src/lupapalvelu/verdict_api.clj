@@ -174,20 +174,17 @@
    :roles      [:authority]}
   [{:keys [application created] :as command}]
   (when-let [verdict (find-verdict application verdictId)]
-    (let [target {:id verdictId, :type "verdict"}
+    (let [target {:type "verdict", :id verdictId} ; key order seems to be significant!
           is-verdict-attachment? #(= (select-keys (:target %) [:id :type]) target)
           attachments (filter is-verdict-attachment? (:attachments application))
           {:keys [sent state verdicts]} application
           ; Deleting the only given verdict? Return sent or submitted state.
-          step-back? (and (= 1 (count verdicts)) (= "verdictGiven" state))]
-      (debug "step back?" step-back?)
-      (update-application command
-        (util/deep-merge
-          {$pull {:verdicts {:id verdictId}
-                  :comments {:target target}
-                  :tasks {:source target}}}
-          (when step-back?
-            {$set {:state (if sent :sent :submitted)}})))
+          step-back? (and (= 1 (count verdicts)) (= "verdictGiven" state))
+          updates (merge {$pull {:verdicts {:id verdictId}
+                                :comments {:target target}
+                                :tasks {:source target}}}
+                    (when step-back? {$set {:state (if sent :sent :submitted)}}))]
+      (update-application command updates)
       (doseq [{attachment-id :id} attachments]
         (attachment/delete-attachment application attachment-id))
       (when step-back?
