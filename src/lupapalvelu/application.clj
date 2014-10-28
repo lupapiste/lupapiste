@@ -560,6 +560,93 @@
         (fail! :error.new-applications-disabled)))
     (make-application id operation x y address propertyId municipality organization info-request? open-inforequest? messages user created)))
 
+(defn- create-application-from-previous-permit [{:keys [user created] :as command} operation permit-type organization kuntalupatunnus]
+  ;; Fetch application from backing system with the provided kuntalupatunnus
+  (let [xml (krysp-fetch-api/get-application-xml
+              {:id kuntalupatunnus :permitType permit-type :organization (:id organization)}
+              false true)]
+
+    (println "\n create-application-from-previous-permit, permit-type: " permit-type "\n")
+
+;    (println "\n create-application-from-previous-permit, sanoma xml: ")
+;    (clojure.pprint/pprint xml)
+;    (println "\n")
+
+    ;; get the application xml from backing system
+    (if xml
+
+      (let [reader (permit/get-verdict-reader permit-type)
+            app-info (krysp-reader/get-app-info-from-message xml reader kuntalupatunnus)
+            lupapiste-tunnus (:id app-info)]
+
+;        (println "\n create-application-from-previous-permit, verdicts: ")
+;        (clojure.pprint/pprint verdicts)
+        (println "\n create-application-from-previous-permit, app-info: ")
+        (clojure.pprint/pprint app-info)
+        (println "\n")
+
+        (println "\n lupapiste-tunnus verdicts:sta: " lupapiste-tunnus "\n")
+
+        (if app-info
+
+          (if lupapiste-tunnus
+
+            ;; Jos ks. kuntalupatunnuksella on jo Lupapisteessa lupa, ja ks. henkilolla on sille oikeudet, avaa suoraan tama lupa.
+            ;; Jos henkilolla ei ole oikeuksia talle luvalle, nayta virheilmoitus.
+            (let [existing-application (mongo/by-id :applications lupapiste-tunnus)]
+
+              (println "\n existing-application: " existing-application "\n")
+              (println "\n user id: " (:id user) ", owner-or-writer? : " (domain/owner-or-writer? existing-application (:id user)) "\n")
+
+              (if (domain/owner-or-writer? existing-application (:id user))
+                (ok :id lupapiste-tunnus)
+                (fail :lupapiste-application-already-exists-but-unauthorized-to-access-it :id lupapiste-tunnus)))
+
+            ;; create the application
+            (let [created-application (do-create-application command)]
+
+              (println "\n create-application-from-previous-permit, created-application: ")
+              (clojure.pprint/pprint created-application)
+              (println "\n")
+
+              ;; get verdicts for the application
+              (let [command (assoc command
+                              :application created-application
+                            ; :data {:id (:id created-application)}
+                              )
+                    verdict-updates (verdict-api/get-verdict-updates command xml)
+                    _  (do
+                         (println "\n create-application-from-previous-permit, verdict-updates: ")
+                         (clojure.pprint/pprint verdict-updates))
+                    ;; lupapalvelu.document.canonical-common/application-state-to-krysp-state kaanteisesti
+                    state (some #(when (= (-> app-info :viimeisin-tila :tila) (val %)) (first %)) lupapalvelu.document.canonical-common/application-state-to-krysp-state)
+                    _  (println "\n state: " state "\n")
+
+                    ;;
+                    ;; *** TODO: Aseta tassa applicationille viitelupatiedot -> kts. app-infon :viitelupatiedot! ***
+                    ;;
+                    updated-application (merge created-application
+                                          (get-in verdict-updates [$set])
+;                                          {:state state}   ;; *** TODO: Laita tama takaisin ***
+                                          )
+                    ]
+
+
+                (println "\n create-application-from-previous-permit, updated-application: ")
+                (clojure.pprint/pprint updated-application)
+                (println "\n")
+
+                (insert-application updated-application)
+                (ok :id (:id updated-application))
+                ))
+;           )
+
+          ;; Sanomasta ei saatu purettua tietoa, esimerkiksi sanomassa ei kuitenkaan ollut asiatietoa annetulla kuntalupatunnuksella.
+          (fail :info.no-previous-permit-found-from-backend)))
+
+      ;; Annetulle kuntalupatunnukselle ei loytynyt sanomaa.
+      (fail :info.no-previous-permit-found-from-backend))))
+
 ;; TODO: separate methods for inforequests & applications for clarity.
 (defcommand create-application
   {:parameters [:operation :x :y :address :propertyId :municipality :kuntalupatunnus]
@@ -571,60 +658,27 @@
   [{{:keys [operation address municipality infoRequest kuntalupatunnus]} :data :keys [user created] :as command}]
 
 ;  (println "\n create-application, kuntalupatunnus: " kuntalupatunnus "\n")
+;  (println "\n create-application, kuntalupatunnus count: " (count kuntalupatunnus) "\n")
 
-;  (if kuntalupatunnus
-   ;; Fetch application from backing system with the provided kuntalupatunnus
-   #_(let [permit-type (operations/permit-type-of-operation operation)]
+  (let [permit-type (operations/permit-type-of-operation operation)
+        organization (organization/resolve-organization municipality permit-type)]
 
-      ;; get the application xml from backing system
-      (if-let [xml (krysp-fetch-api/get-application-xml {:id kuntalupatunnus :permitType permit-type} false true)]
-        (println "\n create-application, sanoma xml: ")
-        (clojure.pprint/pprint xml)
-        (println "\n")
+    (if (ss/blank? kuntalupatunnus)
+      ;; TODO: These let-bindings are repeated in do-create-application, merge th somehow
+      (let [scope             (organization/resolve-organization-scope municipality permit-type organization)
+            info-request?     (boolean infoRequest)
+            open-inforequest? (and info-request? (:open-inforequest scope))
+            created-application (do-create-application command)]
 
-        ;; *** TODO: ***
-        ;; Lisaa tahan tarkistus:
-        ;; Jos ks. kuntalupatunnuksella on jo Lupapisteessa lupa, ja ks. henkilolla on sille oikeudet, avaa suoraan tama lupa.
-        ;; Jos henkilolla ei ole oikeuksia talle luvalle, nayta virheilmoitus.
-
-        ;; create the application
-        (let [created-application (do-create-application command)]
-          (println "\n create-application, created-application: ")
-          (clojure.pprint/pprint created-application)
-          (println "\n")
-
-          (insert-application created-application)   ;;TODO: uncomment
-
-          ;; get verdicts for the application
-          (let [command (assoc command :application created-application)
-                resp (verdict-api/do-check-for-verdict command user created)]
-
-            (println "\n create-application, do-check-for-verdict  resp: ")
-            (clojure.pprint/pprint resp)
-            (println "\n")
-
-            (ok :id (:id created-application))
-            ))
-
-        ;; Jos kuntaluvalle ei loytynyt sanomaa, nayta virheilmoitus.
-        (fail :info.no-previous-permit-found-from-backend)))
-
-   ;; TODO: These let-bindings are repeated in do-create-application, merge th somehow
-   (let [permit-type       (operations/permit-type-of-operation operation)
-         scope             (organization/resolve-organization-scope municipality permit-type)
-         info-request?     (boolean infoRequest)
-         open-inforequest? (and info-request? (:open-inforequest scope))
-         created-application (do-create-application command)]
-
-       (insert-application created-application)
-       (when open-inforequest?
-         (open-inforequest/new-open-inforequest! created-application))
-       (try
-         (autofill-rakennuspaikka created-application created)
-         (catch Exception e (error e "KTJ data was not updated")))
-       (ok :id (:id created-application)))
-;   )
-  )
+        (insert-application created-application)
+        (when open-inforequest?
+          (open-inforequest/new-open-inforequest! created-application))
+        (try
+          (autofill-rakennuspaikka created-application created)
+          (catch Exception e (error e "KTJ data was not updated")))
+        (ok :id (:id created-application)))
+      ;; Use previous permit that is fetched from municipality's backing system
+      (create-application-from-previous-permit command operation permit-type organization kuntalupatunnus))))
 
 (defn- add-operation-allowed? [_ application]
   (let [op (-> application :operations first :name keyword)
@@ -654,9 +708,7 @@
    :roles      [:applicant :authority]
    :states     [:draft :open :submitted :complement-needed]}
   [command]
-  (let [application (:application command)
-        app-command (application->command application)]
-    (update-application app-command {"operations" {$elemMatch {:id op-id}}} {$set {"operations.$.description" desc}})))
+  (update-application command {"operations" {$elemMatch {:id op-id}}} {$set {"operations.$.description" desc}}))
 
 (defcommand change-permit-sub-type
   {:parameters [id permitSubtype]
