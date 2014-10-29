@@ -206,4 +206,17 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
       return templateModel;
     };
   }();
+
+  hub.subscribe("op-description-changed", function(e) {
+    var opid = e['op-id'];
+    var desc = e['op-desc'];
+
+    _.each(self.appModel.attachments(), function(attachment) {
+      if ( ko.unwrap(attachment.op) && attachment.op.id() === opid ) {
+        attachment.op.description(desc);
+      }
+    });
+
+    self.refresh(self.appModel);
+  });
 };
