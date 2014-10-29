@@ -730,7 +730,7 @@
 
               <!--  ko if:  $data.paatokset -->
               <div data-bind="foreach: paatokset, attr: {'data-test-id' : 'given-verdict-id-' + $index() + '-content'}">
-                <section class="accordion">
+                <div class="accordion">
                   <h2 onclick="accordion.click(this)">
                     <span class="icon toggle-icon drill-down-white"></span>
                     <span data-bind="ltext: 'application.verdict.title'" style="margin-right: 0"></span>
@@ -916,7 +916,7 @@
                       </div>
                     </div>
                   </div>
-                </section>
+                </div>
               </div>
               <!-- /ko --> <!-- /paatokset -->
 
