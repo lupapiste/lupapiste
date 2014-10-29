@@ -1176,7 +1176,7 @@
           <div>
             <table data-bind="foreach: taskGroups" class="tasks">
               <thead>
-                <tr><td colspan="5"><h2 data-bind="text: name" style="padding-top:1em"></h2></td></tr>
+                <tr><td colspan="3"><h2 data-bind="text: name" style="padding-top:1em"></h2></td></tr>
                 <tr>
                   <th data-bind="ltext: 'application.taskState'"></th>
                   <th data-bind="ltext: 'application.taskDisplayName'"></th>
@@ -1491,9 +1491,6 @@
               <tr data-bind="if: userid">
                 <td data-bind="ltext: 'neighbors.status-dialog.user.userid'"></td>
                 <td data-bind="text: userid" data-test-id="neighbor-status-userid"></td>
-              </tr>
-              <tr>
-
               </tr>
             </tbody>
           </table>
