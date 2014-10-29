@@ -417,56 +417,29 @@
 
 (defn get-app-info-from-message [xml ->function kuntalupatunnus]
   (let [xml-no-ns (cr/strip-xml-namespaces xml)
-
-        toimituksenTiedot (cr/all-of xml-no-ns [:toimituksenTiedot])
         asiat (select-asiat xml)
         ;; Take first asia with given kuntalupatunnus. There should be only one. If there are many throw error.
-        asiat-with-kuntalupatunnus (filter (fn [a]
-                                             (println "(->kuntalupatunnus a): " (->kuntalupatunnus a) "\n")
-                                             (when (= kuntalupatunnus (->kuntalupatunnus a)) a)) asiat)
-        ]
-
-;    (println "\n get-app-info-from-message, asiat: ")
-;    (clojure.pprint/pprint asiat)
-;    (println "\n get-app-info-from-message, asiat-with-kuntalupatunnus count : " (count asiat-with-kuntalupatunnus))
-;    (println "\n get-app-info-from-message, asiat-with-kuntalupatunnus:")
-;    (clojure.pprint/pprint asiat-with-kuntalupatunnus)
-;    (println "\n")
-
+        asiat-with-kuntalupatunnus (filter #(when (= kuntalupatunnus (->kuntalupatunnus %)) %) asiat)]
     (when (pos? (count asiat-with-kuntalupatunnus))
+      ;; There should be only one RakennusvalvontaAsia element in the message, even though Krysp makes multiple elements possible.
+      ;; Log an error if there were many. Use the first one anyway.
       (when (> (count asiat-with-kuntalupatunnus) 1)
         (error "Creating application from previous permit. There were more than one with kuntalupatunnus " kuntalupatunnus "."))
 
-      (let [asia (first asiat-with-kuntalupatunnus)   #_(select1 xml-no-ns case-elem-selector)
-
+      (let [asia (first asiat-with-kuntalupatunnus)
             viitelupatiedot (map cr/all-of (select asia [:viitelupatieto :LupaTunnus]))
             luvanTunnisteTiedot (cr/all-of asia [:luvanTunnisteTiedot :LupaTunnus])
             kasittelynTilatiedot (->> (select xml-no-ns [:kasittelynTilatieto])
                                    (map #(-> (cr/all-of % [:Tilamuutos]) (cr/convert-keys-to-timestamps [:pvm])))
                                    (sort-by :pvm))
             viimeisin-tila (last kasittelynTilatiedot)
-            asianTiedot (cr/all-of asia [:asianTiedot :Asiantiedot])
-;            verdicts (->verdicts xml ->function)
-            ]
-
-        (println "\n get-app-info-from-message, kuntalupatunnukset: " (map ->kuntalupatunnus asiat))
-
-        (println "\n get-app-info-from-message, toimituksenTiedot: ")
-        (clojure.pprint/pprint toimituksenTiedot)
-        (println "\n")
-
-
+            asianTiedot (cr/all-of asia [:asianTiedot :Asiantiedot])]
         {:id (->lp-tunnus asia)
          :kuntalupatunnus (->kuntalupatunnus asia)
          :rakennusvalvontaasianKuvaus (:rakennusvalvontaasianKuvaus asianTiedot)
          :vahainenPoikkeaminen (:vahainenPoikkeaminen asianTiedot)
-         :viitelupatiedot viitelupatiedot                ;; TODO: Mita nailla?
+;         :viitelupatiedot viitelupatiedot                ;; TODO: Mita nailla?
          :kasittelynTilatiedot kasittelynTilatiedot
          :viimeisin-tila viimeisin-tila
 ;         :luvanTunnisteTiedot luvanTunnisteTiedot        ;; TODO: Poista?
-;         :paatokset verdicts                             ;; TODO: Haetaanko vaan myohemmin get-verdictsilla taman sijaan?
-         })
-      )
-
-    )
-  )
+         }))))
