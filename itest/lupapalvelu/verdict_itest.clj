@@ -77,17 +77,62 @@
           (upload-attachment sonja (:id application) first-attachment true)
           (upload-attachment pena (:id application) first-attachment false))))))
 
-(fact "Applicant receives email after verdict has been fetched from KRYSP backend"
+(facts* "Fetch verdict from KRYSP backend"
   (last-email) ; Inbox zero
 
   (let [application (create-and-submit-application mikko :municipality sonja-muni :address "Paatoskuja 17")
-        application-id (:id application)]
+        application-id (:id application)
+        attachment-count (-> application :attachments count)
+        _ (command sonja :check-for-verdict :id application-id) => ok?
+        app-with-verdict (query-application mikko application-id)
+        verdict-id1 (-> app-with-verdict :verdicts first :id)
+        verdict-id2 (-> app-with-verdict :verdicts second :id)
+        _ (command sonja :add-comment :id application-id :text "paatosta" :target {:id verdict-id1 :type "verdict"} :roles []) => ok?
+        app-with-verdict (query-application mikko application-id)]
+
     (:organization application) => "753-R"
-    (command sonja :check-for-verdict :id application-id) => ok?
-    (let [email (last-email)]
-      (:to email) => (contains (email-for-key mikko))
-      (:subject email) => "Lupapiste.fi: Paatoskuja 17 - p\u00e4\u00e4t\u00f6s"
-      email => (partial contains-application-link-with-tab? application-id "verdict" "applicant"))))
+
+    (fact "No verdicts in the beginnig"
+      (-> application :verdicts count) => 0)
+
+    (fact "Two verdicts from fixture"
+      (-> app-with-verdict :verdicts count) => 2)
+
+    (fact "No comments in the beginnig"
+      (-> application :comments count) => 0)
+
+    (fact "Has a verdict comment and an attachment comment"
+      (-> app-with-verdict :comments count) => 2
+      (-> app-with-verdict :comments first :target :type) => "attachment"
+      (-> app-with-verdict :comments last :target :type) => "verdict")
+
+    (fact "Applicant receives email about verdict (not about comment)"
+      (let [email (last-email)]
+       (:to email) => (contains (email-for-key mikko))
+       (:subject email) => "Lupapiste.fi: Paatoskuja 17 - p\u00e4\u00e4t\u00f6s"
+       email => (partial contains-application-link-with-tab? application-id "verdict" "applicant")))
+
+    (fact "There is one more attachments, see krysp/sample/verdict.xml"
+      (-> app-with-verdict :attachments count) => (inc attachment-count))
+
+    (fact "Lupaehdot, see krysp/sample/verdict.xml"
+      (-> application :tasks count) => 0
+      (-> app-with-verdict :tasks count) => 9)
+
+    (facts "Delete verdicts"
+     (command sonja :delete-verdict :id application-id :verdictId verdict-id1) => ok?
+     (command sonja :delete-verdict :id application-id :verdictId verdict-id2) => ok?
+     (let [app-without-verdict (query-application mikko application-id)]
+       (fact "Tasks have been deleted"
+         (-> app-without-verdict :tasks count) => 0)
+       (fact "Attachment has been deleted"
+         (-> app-without-verdict :attachments count) => attachment-count)
+       (fact "Verdicts have been deleted"
+         (-> app-without-verdict :verdicts count) => 0)
+       (fact "Comments have been deleted"
+         (-> app-without-verdict :comments count) => 0)))
+
+    ))
 
 (fact "Rakennus & rakennelma"
   (let [application (create-and-submit-application mikko :municipality sonja-muni :address "Paatoskuja 17")
