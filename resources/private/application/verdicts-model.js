@@ -41,15 +41,14 @@ LUPAPISTE.VerdictsModel = function() {
     self.authorities = authorities;
   };
 
-  self.newVerdict = function(bindings) {
-    var applicationId = getApplicationId(bindings);
-    ajax.command("new-verdict-draft", {id: applicationId})
+  self.newVerdict = function() {
+    ajax.command("new-verdict-draft", {id: self.applicationId})
       .processing(self.newProcessing)
       .pending(self.newPending)
       .success(function(d) {
-        repository.load(applicationId, self.newPending, function(application) {
+        repository.load(self.applicationId, self.newPending, function(application) {
           LUPAPISTE.verdictPageController.setApplicationModelAndVerdictId(application, self.authorities, d.verdictId);
-          window.location.hash = "!/verdict/" + applicationId + "/" + d.verdictId;
+          window.location.hash = "!/verdict/" + self.applicationId + "/" + d.verdictId;
         });})
     .call();
     return false;
@@ -67,6 +66,14 @@ LUPAPISTE.VerdictsModel = function() {
     LUPAPISTE.ModalDialog.showDynamicYesNo(loc("areyousure"), loc("verdict.confirmpublish"), {title: loc("yes"), fn: function() {
       ajax.command("publish-verdict", {id: applicationId, verdictId: verdict.id})
         .success(function(d) {repository.load(applicationId, self.newPending);})
+        .call();
+      }});
+  };
+
+  self.deleteVerdict = function(bindings) {
+    LUPAPISTE.ModalDialog.showDynamicYesNo(loc("areyousure"), loc("verdict.confirmdelete"), {title: loc("yes"), fn: function() {
+      ajax.command("delete-verdict", {id: self.applicationId, verdictId: bindings.id})
+        .success(function(d) {repository.load(self.applicationId);})
         .call();
       }});
   };
@@ -96,5 +103,5 @@ LUPAPISTE.VerdictsModel = function() {
 
   self.verdictSignedByUser = function(paatos) {
     return _.some(paatos.signatures, {user: {id: currentUser.id()}});
-  }
+  };
 };

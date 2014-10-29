@@ -11,6 +11,9 @@
             [lupapalvelu.fixture :as fixture]
             [lupapalvelu.batchrun :as batchrun]))
 
+(dummy-email-server/messages :reset true)  ;; clears inbox
+(fixture/apply-fixture "minimal")
+
 (def ^:private timestamp-the-beginning-of-time 0)
 (def ^:private timestamp-1-day-ago (batchrun/get-timestamp-from-now :day 1))
 
@@ -194,8 +197,6 @@
 
 (facts "reminders"
 
- (mongo/clear!)
- (fixture/apply-fixture "minimal")
  (mongo/insert :applications reminder-application)
  (mongo/insert :applications reminder-application-non-matching-neighbors)
  (mongo/insert :applications reminder-application-matching-to-inforequest)
@@ -204,7 +205,6 @@
  (mongo/insert :open-inforequest-token open-inforequest-entry-matching)
  (mongo/insert :open-inforequest-token open-inforequest-entry-with-application-with-non-matching-state)
  (dummy-email-server/messages :reset true)  ;; clears inbox
-
 
  (facts "statement-request-reminder"
 
