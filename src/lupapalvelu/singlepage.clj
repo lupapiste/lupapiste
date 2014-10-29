@@ -69,7 +69,7 @@
       :page   (concat (:page  c)  (enlive/select h [:section.page])))))
 
 (defn- resource-url [component kind]
-  (str (kind (env/value :cdn)) (name component) "." (name kind) "?b=" (:build-number env/buildinfo)))
+  (str (kind (env/value :cdn)) (:build-number env/buildinfo) "/" (name component) "." (name kind)))
 
 (def ^:private buildinfo-summary
   (format "%s %s [%s] %4$tF %4$tT (%5$s)"
