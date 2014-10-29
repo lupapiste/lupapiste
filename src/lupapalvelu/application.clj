@@ -591,17 +591,6 @@
 
           (if-not (ss/blank? lupapiste-tunnus)
 
-            ;; Jos ks. kuntalupatunnuksella on jo Lupapisteessa lupa, ja ks. henkilolla on sille oikeudet, avaa suoraan tama lupa.
-            ;; Jos henkilolla ei ole oikeuksia talle luvalle, nayta virheilmoitus.
-            (let [existing-application (mongo/by-id :applications lupapiste-tunnus)]
-
-              (println "\n existing-application: " existing-application "\n")
-              (println "\n user id: " (:id user) ", owner-or-writer? : " (domain/owner-or-writer? existing-application (:id user)) "\n")
-
-              (if (domain/owner-or-writer? existing-application (:id user))
-                (ok :id lupapiste-tunnus)
-                (fail :lupapiste-application-already-exists-but-unauthorized-to-access-it :id lupapiste-tunnus)))
-
             ;; create the application
             (let [created-application (do-create-application command)]
 
@@ -612,7 +601,7 @@
               ;; get verdicts for the application
               (let [command (assoc command
                               :application created-application
-                            ; :data {:id (:id created-application)}
+                              ; :data {:id (:id created-application)}
                               )
                     verdict-updates (verdict-api/get-verdict-updates command xml)
                     _  (do
@@ -639,7 +628,23 @@
                 (insert-application updated-application)
                 (ok :id (:id updated-application))
                 ))
-           )
+
+            ;; Jos ks. kuntalupatunnuksella on jo Lupapisteessa lupa, ja ks. henkilolla on sille oikeudet, avaa suoraan tama lupa.
+            ;; Jos henkilolla ei ole oikeuksia talle luvalle, nayta virheilmoitus.
+            (if-let [existing-application (mongo/by-id :applications lupapiste-tunnus)]
+
+              (do
+                (println "\n existing-application: " existing-application "\n")
+                (println "\n user id: " (:id user) ", owner-or-writer? : " (domain/owner-or-writer? existing-application (:id user)) "\n")
+
+                (if (domain/owner-or-writer? existing-application (:id user))
+                  (ok :id lupapiste-tunnus)
+                  (fail :lupapiste-application-already-exists-but-unauthorized-to-access-it :id lupapiste-tunnus)))
+              ;; The xml message included lupapiste-id, but an application with that id is not found from database. This should never be the case.
+              (do
+                (error "Creating application from previous permit. Not able to find application id '" lupapiste-tunnus "' it includes from database.")
+                (fail :not-able-to-open-with-lupapiste-id-that-previous-permit-included :id lupapiste-tunnus)))
+            )
 
           ;; Sanomasta ei saatu purettua tietoa, esimerkiksi sanomassa ei kuitenkaan ollut asiatietoa annetulla kuntalupatunnuksella.
           (fail :info.no-previous-permit-found-from-backend)))
