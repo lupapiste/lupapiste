@@ -458,8 +458,8 @@
 
         {:id (->lp-tunnus asia)
          :kuntalupatunnus (->kuntalupatunnus asia)
-         :vahainenPoikkeaminen (:vahainenPoikkeaminen asianTiedot)
          :rakennusvalvontaasianKuvaus (:rakennusvalvontaasianKuvaus asianTiedot)
+         :vahainenPoikkeaminen (:vahainenPoikkeaminen asianTiedot)
          :viitelupatiedot viitelupatiedot                ;; TODO: Mita nailla?
          :kasittelynTilatiedot kasittelynTilatiedot
          :viimeisin-tila viimeisin-tila
