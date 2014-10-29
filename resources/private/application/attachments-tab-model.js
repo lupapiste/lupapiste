@@ -15,6 +15,8 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
     return self.appModel.pending() || self.appModel.processing() || self.unsentAttachmentsNotFound();
   });
 
+  self.showHelp = ko.observable(false);
+
   var generalAttachmentsStr = 'attachments.general';
 
   function GroupModel(groupName, groupDesc, attachments) {
@@ -114,6 +116,10 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
              (!a.sent || lastVersion.created > a.sent) &&
              (!a.target || (a.target.type !== "statement" && a.target.type !== "verdict"));
     });
+  }
+
+  self.toggleHelp = function() {
+    self.showHelp(!self.showHelp());
   }
 
   self.refresh = function(appModel) {
