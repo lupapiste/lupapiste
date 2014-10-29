@@ -112,6 +112,7 @@
       var zoomLevel = 2;
       if (self.map) {
         self.map.clear();
+        self.map.updateSize();
       } else {
         self.map = gis
           .makeMap("create-map", false)
