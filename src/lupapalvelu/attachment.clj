@@ -533,3 +533,7 @@
     (mongo/upload file-id sanitazed-filename content-type content :application application-id)
     (update-or-create-attachment options)))
 
+(defn get-attachments-by-operation
+  [{:keys [attachments] :as application} op-id]
+  (filter #(= (:id (:op %)) op-id) attachments))
+

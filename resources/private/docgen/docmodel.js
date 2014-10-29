@@ -1343,8 +1343,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
       ajax.command("update-op-description", {id: self.appId, 'op-id': operation.id, desc: value })
         .success(function() {
-          var indicator = createIndicator(descriptionInput, "accordion-indicator")
+          var indicator = createIndicator(descriptionInput, "accordion-indicator");
           showIndicator(indicator, "accordion-input-saved", "form.saved");
+          hub.send("op-description-changed", {appId: self.appId, 'op-id': operation.id, 'op-desc': value});
         })
         .call();
 
