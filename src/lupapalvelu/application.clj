@@ -589,7 +589,7 @@
 
         (if app-info
 
-          (if lupapiste-tunnus
+          (if-not (ss/blank? lupapiste-tunnus)
 
             ;; Jos ks. kuntalupatunnuksella on jo Lupapisteessa lupa, ja ks. henkilolla on sille oikeudet, avaa suoraan tama lupa.
             ;; Jos henkilolla ei ole oikeuksia talle luvalle, nayta virheilmoitus.
