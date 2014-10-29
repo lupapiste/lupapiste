@@ -458,7 +458,6 @@
 (defn- make-documents [user created op application]
   (let [op-info               (operations/operations (keyword (:name op)))
         op-schema-name        (:schema op-info)
-        existing-documents    (:documents application)
         schema-version        (:schema-version application)
         make                  (fn [schema-name]
                                 {:id (mongo/create-id)
@@ -471,11 +470,12 @@
                                            "tyomaastaVastaava"      (schema-data-to-body operations/schema-data-yritys-selected application)
                                            {})
                                          created)})
+        ;;The merge below: If :removable is set manually in schema's info, do not override it to true.
+        op-doc                (update-in (make op-schema-name) [:schema-info] #(merge {:op op :removable true} %))
+        existing-documents    (:documents application)
         existing-schema-names (set (map (comp :name :schema-info) existing-documents))
         required-schema-names (remove existing-schema-names (:required op-info))
         required-docs         (map make required-schema-names)
-        ;;The merge below: If :removable is set manually in schema's info, do not override it to true.
-        op-doc                (update-in (make op-schema-name) [:schema-info] #(merge {:op op :removable true} %))
         new-docs              (cons op-doc required-docs)]
     (if-not user
       new-docs
