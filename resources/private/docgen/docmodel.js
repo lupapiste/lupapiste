@@ -1363,8 +1363,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     descriptionInput.onkeyup = function(e) {      
       // trigger save on enter and esc keypress
       var event = getEvent(e);
+      event.stopPropagation();
       if (event.keyCode == 13 || event.keyCode == 27) {
-        event.stopPropagation();
         $(descriptionInput).off("blur");
         descriptionInput.blur();
         saveInput();
