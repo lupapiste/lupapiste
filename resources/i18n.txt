@@ -1,1 +1,1 @@
-verdict.confirmdelete: Haluatko varmasti poistaa päätöksen ja siihen liittyvät liitteet, valmistelumerkinnät, lupaehdot ja määräykset?
+verdict.confirmdelete: Haluatko varmasti poistaa luvan ja siihen liittyvät liitteet, valmistelumerkinnät, lupaehdot ja määräykset Lupapisteestä?
