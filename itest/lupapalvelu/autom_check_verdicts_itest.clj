@@ -10,6 +10,7 @@
 
 (mongo/connect!)
 (mongo/remove-many :organizations {})
+(mongo/remove-many :applications {})
 
 (let [krysp-url (str (server-address) "/dev/krysp")
       organizations (map (fn [org] (update-in org [:krysp] #(assoc-in % [:R :url] krysp-url))) minimal/organizations)]
@@ -39,7 +40,7 @@
    (dummy-email-server/messages :reset true) ; Inbox zero
 
    (fact "checking verdicts and sending emails to the authorities related to the applications"
-     (batchrun/fetch-verdics))
+     (batchrun/fetch-verdics) => seq)
 
    (fact "Verifying the sent emails"
      (let [emails (dummy-email-server/messages :reset true)]

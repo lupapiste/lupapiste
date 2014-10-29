@@ -219,7 +219,7 @@
                 <span data-bind="if: nonpartyDocumentIndicator">
                   <span data-bind="text: nonpartyDocumentIndicator" id="applicationNonpartyDocumentIndicator" class="indicator"></span></span></a></li>
 
-            <li data-bind="if: !inPostVerdictState(), css: {'active': $parent.selectedTabName() === 'parties'}">
+            <li data-bind="ifnot: _.contains(['closed', 'canceled'], state()), css: {'active': $parent.selectedTabName() === 'parties'}">
               <a data-bind="click: changeTab" href="#" data-target="parties" data-test-id="application-open-parties-tab">
                 <span data-bind="ltext: 'application.tabParties'"></span>
                 <span data-bind="if: partyDocumentIndicator">
@@ -255,7 +255,8 @@
                 <span data-bind="if: unseenVerdicts">
                   <span data-bind="text: unseenVerdicts" id="applicationUnseenVerdists" class="indicator"></span></span></a></li>
 
-            <li data-bind="if: inPostVerdictState(), css: {'active': $parent.selectedTabName() === 'applicationSummary'}">
+            <!-- In post-verdict states plus 'canceled' -->
+            <li data-bind="if: _.contains(['verdictGiven', 'constructionStarted', 'closed', 'canceled'], state()), css: {'active': $parent.selectedTabName() === 'applicationSummary'}">
               <a data-bind="click: changeTab" href="#" data-target="applicationSummary" data-test-id="application-open-applicationSummary-tab">
                 <span data-bind="ltext: 'application.applicationSummary'"></span></a></li>
 
@@ -412,7 +413,7 @@
             <span class="missing icon"></span>
             <span data-bind="ltext: 'missing.title'"></span>
           </div>
-          <div class="attachment-actions" data-bind="visible: (!$root.application.inPostVerdictState() && preAttachmentsByGroup().length > 0) || ($root.application.inPostVerdictState() && postAttachmentsByGroup().length > 0)">
+          <div class="attachment-actions" data-bind="visible: (!$root.application.inPostVerdictState() && preAttachmentsByOperation().length > 0) || ($root.application.inPostVerdictState() && postAttachmentsByOperation().length > 0)">
             <div>
               <button
                 data-bind="click: newAttachment, ltext: 'application.attachmentsAdd', visible: $root.authorization.ok('upload-attachment'), enable: !appModel.processing()"
@@ -440,20 +441,19 @@
           </div>
 
           <div>
-            <div data-bind="if: postAttachmentsByGroup().length > 0" data-test-id="application-post-attachments-table">
-              <h2><span data-bind="ltext: 'application.attachments.post-verdict'"></span></h2>
-              <div data-bind="template: {name: 'attachments-template', data: postAttachmentsByGroup()}"></div>
+            <div data-bind="if: postAttachmentsByOperation().length > 0" data-test-id="application-post-attachments-table">
+              <h1><span data-bind="ltext: 'application.attachments.post-verdict'"></span></h1>
+              <div class="clear" data-bind="template: {name: 'attachments-template-op', data: postAttachmentsByOperation()}"></div>
             </div>
             <!-- ko if: !$root.application.inPostVerdictState() -->
-            <div data-bind="if: preAttachmentsByGroup().length > 0" data-test-id="application-pre-attachments-table">
-              <h2><span data-bind="ltext: 'application.attachments.pre-verdict'"></span></h2>
-              <div data-bind="template: {name: 'attachments-template', data: preAttachmentsByGroup()}"></div>
+            <div data-bind="if: preAttachmentsByOperation().length > 0" data-test-id="application-pre-attachments-table">
+              <div class="clear" data-bind="template: {name: 'attachments-template-op', data: preAttachmentsByOperation()}"></div>
             </div>
             <!-- /ko -->
 
             <div class="attachment-actions">
 
-              <div data-bind="if: preAttachmentsByGroup().length == 0 && postAttachmentsByGroup().length == 0">
+              <div data-bind="if: preAttachmentsByOperation().length == 0 && postAttachmentsByOperation().length == 0">
                 <i data-bind="ltext: 'application.attachmentsEmpty'" data-test-id="application-attachments-no-attachments"></i>
               </div>
 
@@ -494,9 +494,9 @@
             </div>
 
             <!-- ko if: $root.application.inPostVerdictState() -->
-            <div data-bind="if: preAttachmentsByGroup().length > 0" data-test-id="application-pre-attachments-table">
-              <h2><span data-bind="ltext: 'application.attachments.pre-verdict'"></span></h2>
-              <div data-bind="template: {name: 'attachments-template', data: preAttachmentsByGroup()}"></div>
+            <div data-bind="if: preAttachmentsByOperation().length > 0" data-test-id="application-pre-attachments-table">
+              <h1><span data-bind="ltext: 'application.attachments.pre-verdict'"></span></h1>
+              <div class="clear" data-bind="template: {name: 'attachments-template-op', data: preAttachmentsByOperation()}"></div>
             </div>
             <!-- /ko -->
 
@@ -515,15 +515,15 @@
           </div>
         </div>
 
-        <script type="text/html" id="attachments-template">
-          <table class="table">
+        <script type="text/html" id="attachments-template-op">
+          <table class="table attachments-template-table">
             <tbody data-bind="foreach: $data">
               <tr class="attachment-group-header">
-                <td data-bind="text: loc(['attachmentType', group, '_group_label'])" colspan="6"></td>
+                <td data-bind="text: name" colspan="6" data-test-id="attachment-group-header-text"></td>
               </tr>
               <tr>
                 <th data-bind="ltext: 'application.attachmentState'">Tila</th>
-                <th data-bind="ltext: 'application.attachmentType'">Tyyppi</th>
+                <th colspan="2" data-bind="ltext: 'application.attachmentType'">Tyyppi</th>
                 <th data-bind="ltext: 'application.attachmentFile'">Tiedosto</th>
                 <th data-bind="ltext: 'application.attachmentVersion'">Versio</th>
                 <th data-bind="ltext: 'application.attachmentEditDate'">Muokattu</th>
@@ -554,7 +554,15 @@
                                    'data-test-icon': 'stamped-' + type['type-group'] + '.' + type['type-id']}">
                   </span>
                 </td>
-                <td>
+                <td class="attachment-type-group">
+                    <span data-bind="if: type">
+                      <span data-bind="text: loc(['attachmentType', type['type-group'], '_group_label'])"></span>
+                    </span>
+                    <span data-bind="if: !type">
+                      <i data-bind="ltext: 'attachment.noName'"></i>
+                    </span>
+                </td>
+                <td class="attachment-type-id">
                   <a data-bind="attr: {href: '#!/attachment/' + $root.application.id() + '/' + id, 'data-test-type': type['type-group'] + '.' + type['type-id']}">
                     <span data-bind="if: type">
                       <span data-bind="text: loc(['attachmentType', type['type-group'], type['type-id']])"></span>
@@ -725,11 +733,17 @@
                 <span data-bind="ltext: 'verdict.id'"></span>:
                 <span data-bind="text: $data.kuntalupatunnus, attr: {'data-test-id' : 'given-verdict-id-' + $index()}"></span>
                 <span data-bind="visible: $data.draft" style="text-transform: lowercase;">(<span data-bind="ltext: 'draft'"></span>)</span>
+
+                <span class="icon remove-grey"
+                      data-bind="click: $root.verdictModel.deleteVerdict,
+                                 visible: $root.authorization.ok('delete-verdict'),
+                                 enable: $root.authorization.ok('delete-verdict'),
+                                 attr: {'title': loc('remove')}"></span>
               </h2>
 
               <!--  ko if:  $data.paatokset -->
               <div data-bind="foreach: paatokset, attr: {'data-test-id' : 'given-verdict-id-' + $index() + '-content'}">
-                <section class="accordion">
+                <div class="accordion">
                   <h2 onclick="accordion.click(this)">
                     <span class="icon toggle-icon drill-down-white"></span>
                     <span data-bind="ltext: 'application.verdict.title'" style="margin-right: 0"></span>
@@ -738,7 +752,7 @@
                   <div class="accordion_content expanded">
 
                     <div data-bind="with: $parent" style="overflow: auto;">
-                      <div class="btn-container right-align" data-bind="if: $data.draft">
+                      <div class="btn-container right-align"  data-bind="if: $data.draft" >
                         <button data-bind="visible: $root.authorization.ok('save-verdict-draft'), click: function() {$root.verdictModel.openVerdict($root, $data);}, ltext: 'edit'"
                                 class="btn btn-primary" data-test-id="edit-verdict"></button>
                         <button data-bind="visible: $root.authorization.ok('publish-verdict'), click: function() {$root.verdictModel.publishVerdict($root, $data);}, ltext: 'verdict.submit'"
@@ -915,7 +929,7 @@
                       </div>
                     </div>
                   </div>
-                </section>
+                </div>
               </div>
               <!-- /ko --> <!-- /paatokset -->
 
@@ -1169,7 +1183,7 @@
           <div>
             <table data-bind="foreach: taskGroups" class="tasks">
               <thead>
-                <tr><td colspan="5"><h2 data-bind="text: name" style="padding-top:1em"></h2></td></tr>
+                <tr><td colspan="3"><h2 data-bind="text: name" style="padding-top:1em"></h2></td></tr>
                 <tr>
                   <th data-bind="ltext: 'application.taskState'"></th>
                   <th data-bind="ltext: 'application.taskDisplayName'"></th>
@@ -1484,9 +1498,6 @@
               <tr data-bind="if: userid">
                 <td data-bind="ltext: 'neighbors.status-dialog.user.userid'"></td>
                 <td data-bind="text: userid" data-test-id="neighbor-status-userid"></td>
-              </tr>
-              <tr>
-
               </tr>
             </tbody>
           </table>
