@@ -1,14 +1,13 @@
 info.no-previous-permit-found-from-backend: Annetulla lupatunnuksella ei löytynyt lupaa taustajärjestelmästä
 lupapiste-application-already-exists-but-unauthorized-to-access-it: Kyseisellä tunnuksella Lupapisteeseen on jo luotu hakemus, mutta sinulla ei ole oikeuksia sille.
+not-able-to-open-with-lupapiste-id-that-previous-permit-included: Antamaasi kuntalupatunnukseen on jo liitetty Lupapiste-tunnus, mutta tuon tunnuksen sisältävää hakemusta ei kuitenkaan löytynyt järjestelmästä.
 
 operations.tree.aiemmalla-luvalla-hakeminen: Aiemmalla luvalla hakeminen
 
-aiemmalla-luvalla-hakeminen._group_label: aiemmalla-luvalla-hakeminen._group_label
+aiemmalla-luvalla-hakeminen._group_label: Hankkeen kuvaus
 operations.aiemmalla-luvalla-hakeminen: Aiemmalla luvalla hakeminen
 operations.aiemmalla-luvalla-hakeminen.desc: Tällä toimenpiteellä voit siirtää aiemman muualla kuin Lupapisteessä haetun lupasi Lupapisteeseen.
 
 create-app-with-with-prev-permit-label: Syötä alla olevaan kenttään aiemman lupasi kuntalupatunnus:
 create-app-with-with-prev-permit-placeholder: Kuntalupatunnus
 newRequest.newApplicationWithPrevPermit: Hae antamallasi kuntalupatunnuksella
-
-aiemmalla-luvalla-hakeminen._group_label: Hankkeen kuvaus
