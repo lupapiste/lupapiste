@@ -443,11 +443,11 @@
           <div>
             <div data-bind="if: postAttachmentsByOperation().length > 0" data-test-id="application-post-attachments-table">
               <h1><span data-bind="ltext: 'application.attachments.post-verdict'"></span></h1>
-              <div data-bind="template: {name: 'attachments-template-op', data: postAttachmentsByOperation()}"></div>
+              <div class="clear" data-bind="template: {name: 'attachments-template-op', data: postAttachmentsByOperation()}"></div>
             </div>
             <!-- ko if: !$root.application.inPostVerdictState() -->
             <div data-bind="if: preAttachmentsByOperation().length > 0" data-test-id="application-pre-attachments-table">
-              <div data-bind="template: {name: 'attachments-template-op', data: preAttachmentsByOperation()}"></div>
+              <div class="clear" data-bind="template: {name: 'attachments-template-op', data: preAttachmentsByOperation()}"></div>
             </div>
             <!-- /ko -->
 
@@ -496,7 +496,7 @@
             <!-- ko if: $root.application.inPostVerdictState() -->
             <div data-bind="if: preAttachmentsByOperation().length > 0" data-test-id="application-pre-attachments-table">
               <h1><span data-bind="ltext: 'application.attachments.pre-verdict'"></span></h1>
-              <div data-bind="template: {name: 'attachments-template-op', data: preAttachmentsByOperation()}"></div>
+              <div class="clear" data-bind="template: {name: 'attachments-template-op', data: preAttachmentsByOperation()}"></div>
             </div>
             <!-- /ko -->
 
