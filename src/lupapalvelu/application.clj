@@ -639,7 +639,7 @@
                 (insert-application updated-application)
                 (ok :id (:id updated-application))
                 ))
-;           )
+           )
 
           ;; Sanomasta ei saatu purettua tietoa, esimerkiksi sanomassa ei kuitenkaan ollut asiatietoa annetulla kuntalupatunnuksella.
           (fail :info.no-previous-permit-found-from-backend)))
