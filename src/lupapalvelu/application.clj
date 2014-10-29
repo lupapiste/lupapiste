@@ -6,6 +6,7 @@
             [clj-time.local :refer [local-now]]
             [clj-time.format :as tf]
             [monger.operators :refer :all]
+            [swiss.arrows :refer [-<>>]]
             [sade.env :as env]
             [sade.util :as util]
             [sade.strings :as ss]
@@ -472,11 +473,12 @@
                                          created)})
         ;;The merge below: If :removable is set manually in schema's info, do not override it to true.
         op-doc                (update-in (make op-schema-name) [:schema-info] #(merge {:op op :removable true} %))
-        existing-documents    (:documents application)
-        existing-schema-names (set (map (comp :name :schema-info) existing-documents))
-        required-schema-names (remove existing-schema-names (:required op-info))
-        required-docs         (map make required-schema-names)
-        new-docs              (cons op-doc required-docs)]
+        new-docs (-<>> (:documents application)
+                   (map (comp :name :schema-info))  ;; existing schema names
+                   set
+                   (remove <> (:required op-info))  ;; required schema names
+                   (map make)                       ;; required docs
+                   (cons op-doc))]                  ;; new docs
     (if-not user
       new-docs
       (let [permit-type (keyword (permit/permit-type application))
