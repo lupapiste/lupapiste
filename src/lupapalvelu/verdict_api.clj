@@ -165,12 +165,7 @@
       {$set {:modified created
              :state    :verdictGiven
              :verdicts.$.draft false}})
-    (do
-      (debug verdictId)
-      (debug (map :id (:verdicts application)))
-
-      (fail :error.unknown)) ; TODO
-    ))
+    (fail :error.unknown)))
 
 (defcommand delete-verdict
   {:parameters [id verdictId]
@@ -179,12 +174,21 @@
    :roles      [:authority]}
   [{:keys [application created] :as command}]
   (when-let [verdict (find-verdict application verdictId)]
-    (let [is-verdict-attachment? #(= (select-keys (:target %) [:id :type]) {:type "verdict" :id (:id verdict)})
-          attachments (filter is-verdict-attachment? (:attachments application))]
-      (update-application command {$pull {:verdicts {:id verdictId}}})
-      ; TODO pull from tasks, auth-comments
+    (let [target {:type "verdict", :id verdictId} ; key order seems to be significant!
+          is-verdict-attachment? #(= (select-keys (:target %) [:id :type]) target)
+          attachments (filter is-verdict-attachment? (:attachments application))
+          {:keys [sent state verdicts]} application
+          ; Deleting the only given verdict? Return sent or submitted state.
+          step-back? (and (= 1 (count verdicts)) (= "verdictGiven" state))
+          updates (merge {$pull {:verdicts {:id verdictId}
+                                :comments {:target target}
+                                :tasks {:source target}}}
+                    (when step-back? {$set {:state (if sent :sent :submitted)}}))]
+      (update-application command updates)
       (doseq [{attachment-id :id} attachments]
-        (attachment/delete-attachment application attachment-id)))))
+        (attachment/delete-attachment application attachment-id))
+      (when step-back?
+        (notifications/notify! :application-state-change command)))))
 
 (defcommand sign-verdict
   {:description "Applicant/application owner can sign an application's verdict"

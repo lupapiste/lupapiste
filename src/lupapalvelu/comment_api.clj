@@ -37,7 +37,7 @@
     (fail :error.to-settable-only-by-authority)))
 
 (defn- validate-comment-target [{{:keys [target]} :data}]
-  (when (string? target)
+  (when-not (#{"application", "attachment", "statement", "verdict"} (:type target))
     (fail :error.unknown-type)))
 
 (defquery can-target-comment-to-authority

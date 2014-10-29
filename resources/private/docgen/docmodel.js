@@ -1305,7 +1305,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var description = document.createTextNode("");
     var descriptionInput = document.createElement("input");
     var iconSpan = document.createElement("span");
-    var iconSpanDescription = document.createTextNode(loc('edit'));
+    var iconSpanDescription = document.createElement("span");
+    iconSpanDescription.appendChild(document.createTextNode(loc('edit')));
 
     // test ids
     if (options && options.dataTestSpecifiers) {
@@ -1323,13 +1324,14 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       iconSpan.appendChild(iconSpanDescription);
     }
 
-    descriptionInput.type = "text";
-    descriptionInput.className = "accordion-input text hidden";
-
-    descriptionInput.onclick = function(event) {
+    wrapper.onclick = function(e) {
+      var event = getEvent(e);
       // Prevent collapsing accordion when input is clicked
       event.stopPropagation();
-    };
+    }
+
+    descriptionInput.type = "text";
+    descriptionInput.className = "accordion-input text hidden";
 
     var saveInput = function() {
       $(descriptionInput).off("blur");
@@ -1337,7 +1339,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       if (value === "") {
         value = null;
         iconSpan.appendChild(iconSpanDescription);
-
       }
 
       ajax.command("update-op-description", {id: self.appId, 'op-id': operation.id, desc: value })
@@ -1354,16 +1355,17 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       $(descriptionSpan).removeClass("hidden");
     };
 
-    descriptionInput.onfocus = function(event) {
-      descriptionInput.onblur = function(event) {
+    descriptionInput.onfocus = function(e) {
+      descriptionInput.onblur = function(e) {
         saveInput();
       }
     }
 
-    descriptionInput.onkeyup = function(event) {
+    descriptionInput.onkeyup = function(e) {      
       // trigger save on enter and esc keypress
-      var keyCode = event ? event.keyCode : window.event.keyCode; // ie8
-      if (keyCode == 13 || keyCode == 27) {
+      var event = getEvent(e);
+      if (event.keyCode == 13 || event.keyCode == 27) {
+        event.stopPropagation();
         $(descriptionInput).off("blur");
         descriptionInput.blur();
         saveInput();
@@ -1371,14 +1373,14 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }
 
     iconSpan.className = "icon edit";
-    iconSpan.onclick = function(event) {
+    iconSpan.onclick = function(e) {
+      var event = getEvent(e);
+      event.stopPropagation();
+
       if (iconSpan.contains(iconSpanDescription)) {
         iconSpan.removeChild(iconSpanDescription);
       }
-      // on ie8 there is no event
-      if (event) {
-        event.stopPropagation();
-      }
+
       $(iconSpan).addClass("hidden");
       $(descriptionSpan).addClass("hidden");
       $(descriptionInput).removeClass("hidden");
