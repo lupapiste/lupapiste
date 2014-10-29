@@ -602,7 +602,7 @@
                                    :add-operation-allowed false
                                    :link-permit-required true}
 
-     :aiemmalla-luvalla-hakeminen {:schema "hankkeen-kuvaus-minimum"
+     :aiemmalla-luvalla-hakeminen {:schema "hankkeen-kuvaus"
                                    :permit-type permit/R
                                    :required []
                                    :attachments []
