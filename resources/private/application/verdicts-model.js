@@ -71,7 +71,7 @@ LUPAPISTE.VerdictsModel = function() {
   };
 
   self.deleteVerdict = function(bindings) {
-    LUPAPISTE.ModalDialog.showDynamicYesNo(loc("areyousure"), loc("areyousure.message"), {title: loc("yes"), fn: function() {
+    LUPAPISTE.ModalDialog.showDynamicYesNo(loc("areyousure"), loc("verdict.confirmdelete"), {title: loc("yes"), fn: function() {
       ajax.command("delete-verdict", {id: self.applicationId, verdictId: bindings.id})
         .success(function(d) {repository.load(self.applicationId);})
         .call();
