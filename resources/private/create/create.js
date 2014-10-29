@@ -129,7 +129,8 @@
         .propertyId(null)
         .municipalityCode(null)
         .message("")
-        .requestType(null);
+        .requestType(null)
+        .kuntalupatunnusFromPrevPermit(null);
     };
 
     self.resetXY = function() { if (self.map) { self.map.clear(); } return self.x(0).y(0); };
@@ -378,6 +379,7 @@
     tree = $("#create-part-2 .operation-tree").selectTree({
       template: $("#create-templates"),
       onSelect: function(v) {
+        model.kuntalupatunnusFromPrevPermit(null);
         if (v) {
           model.operation(v.op);
           ajax.query("organization-details",
