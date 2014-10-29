@@ -242,8 +242,10 @@
 (def ^:private unauthorized (resp/status 401 "Unauthorized\r\n"))
 
 ;; CSS & JS
-(defpage [:get ["/app/:app.:res-type" :res-type #"(css|js)"]] {app :app res-type :res-type}
-  (single-resource (keyword res-type) (keyword app) unauthorized))
+(defpage [:get ["/app/:build/:app.:res-type" :res-type #"(css|js)"]] {build :build app :app res-type :res-type}
+  (if (= build build-number)
+    (single-resource (keyword res-type) (keyword app) unauthorized)
+    (resp/redirect (str "/app/" build-number "/" app "." res-type ))))
 
 ;; Single Page App HTML
 (def apps-pattern
