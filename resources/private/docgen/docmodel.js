@@ -1324,14 +1324,14 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       iconSpan.appendChild(iconSpanDescription);
     }
 
-    descriptionInput.type = "text";
-    descriptionInput.className = "accordion-input text hidden";
-
-    descriptionInput.onclick = function(e) {
+    wrapper.onclick = function(e) {
       var event = getEvent(e);
       // Prevent collapsing accordion when input is clicked
       event.stopPropagation();
-    };
+    }
+
+    descriptionInput.type = "text";
+    descriptionInput.className = "accordion-input text hidden";
 
     var saveInput = function() {
       $(descriptionInput).off("blur");
