@@ -46,7 +46,7 @@
     ["Tyonjohtaja" :tyonjohtajan-nimeaminen]
     ["Suunnittelija" :suunnittelijan-nimeaminen]
     ["Jatkoaika" :jatkoaika]
-    ["Aiemmalla luvalla hakeminen" :aiemmalla-luvalla-hakeminen]
+    ["aiemmalla-luvalla-hakeminen" :aiemmalla-luvalla-hakeminen]
     ["Aloitusoikeus" :aloitusoikeus]]])
 
 (def ^:private operation-tree-for-environment-R

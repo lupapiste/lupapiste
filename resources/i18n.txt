@@ -1,7 +1,7 @@
 info.no-previous-permit-found-from-backend: Annetulla lupatunnuksella ei löytynyt lupaa taustajärjestelmästä
 lupapiste-application-already-exists-but-unauthorized-to-access-it: Kyseisellä tunnuksella Lupapisteeseen on jo luotu hakemus, mutta sinulla ei ole oikeuksia sille.
 
-operations.tree.Aiemmalla luvalla hakeminen: Aiemmalla luvalla hakeminen
+operations.tree.aiemmalla-luvalla-hakeminen: Aiemmalla luvalla hakeminen
 
 aiemmalla-luvalla-hakeminen._group_label: aiemmalla-luvalla-hakeminen._group_label
 operations.aiemmalla-luvalla-hakeminen: Aiemmalla luvalla hakeminen
