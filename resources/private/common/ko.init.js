@@ -224,7 +224,7 @@
       if (type) {
         $(element)[type + "Toggle"](1000);
       } else {
-        $(element).toggleClass(className, value, 100).promise().done(function() { $(element).css("overflow", "auto") });
+        $(element).toggleClass(className, value, 100);
       }
     }
   };
