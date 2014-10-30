@@ -54,7 +54,8 @@
   hub.onPageChange("login", recallMe);
 
   $(function() {
-    $("section#login").applyBindings({rememberMe: rememberMe});
+    recallMe();
+    $("#login").applyBindings({rememberMe: rememberMe});
     $("#login-button").click(login);
     $("#register-button").click(function() {
       window.location.hash = "!/register";
