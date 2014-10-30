@@ -1,4 +1,4 @@
-var ajax = (function() {
+var ajax = (function($) {
   "use strict";
 
   var callId = 0;
@@ -189,4 +189,4 @@ var ajax = (function() {
     datatables: datatables
   };
 
-})();
+})(jQuery);

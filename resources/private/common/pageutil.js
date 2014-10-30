@@ -1,4 +1,4 @@
-var pageutil = (function() {
+var pageutil = (function($) {
   "use strict";
 
   /**
@@ -76,4 +76,4 @@ var pageutil = (function() {
     makePendingAjaxWait:  makePendingAjaxWait
   };
 
-})();
+})(jQuery);

@@ -1,4 +1,4 @@
-(function() {
+(function($) {
   "use strict";
 
   var rememberMeCookieName = "my-email";
@@ -73,4 +73,4 @@
     });
   });
 
-})();
+})(jQuery);
