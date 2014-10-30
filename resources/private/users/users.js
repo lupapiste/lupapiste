@@ -1,4 +1,4 @@
-var users = (function() {
+var users = (function($) {
   "use strict";
 
   function toLoc(data, type, row) { return loc(data); }
@@ -132,4 +132,4 @@ var users = (function() {
     }
   };
 
-})();
+})(jQuery);
