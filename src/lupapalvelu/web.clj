@@ -242,8 +242,10 @@
 (def ^:private unauthorized (resp/status 401 "Unauthorized\r\n"))
 
 ;; CSS & JS
-(defpage [:get ["/app/:app.:res-type" :res-type #"(css|js)"]] {app :app res-type :res-type}
-  (single-resource (keyword res-type) (keyword app) unauthorized))
+(defpage [:get ["/app/:build/:app.:res-type" :res-type #"(css|js)"]] {build :build app :app res-type :res-type}
+  (if (= build build-number)
+    (single-resource (keyword res-type) (keyword app) unauthorized)
+    (resp/redirect (str "/app/" build-number "/" app "." res-type ))))
 
 ;; Single Page App HTML
 (def apps-pattern
@@ -420,7 +422,7 @@
         result (execute-command "upload-attachment" upload-data request)]
     (if (core/ok? result)
       (resp/redirect "/html/pages/upload-ok.html")
-      (resp/redirect (str (hiccup.util/url "/html/pages/upload-1.13.html"
+      (resp/redirect (str (hiccup.util/url "/html/pages/upload-1.47.html"
                                         (-> (:params request)
                                           (dissoc :upload)
                                           (dissoc ring.middleware.anti-forgery/token-key)

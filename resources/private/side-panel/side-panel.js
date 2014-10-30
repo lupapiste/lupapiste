@@ -44,7 +44,7 @@ LUPAPISTE.SidePanelModel = function() {
 
   self.refresh = function(application, authorities) {
     // TODO applicationId, inforequest etc. could be computed
-    if(application && authorities) {
+    if (application && authorities) {
       self.application(application);
       self.authorities(authorities);
       self.applicationId(application.id);
@@ -107,7 +107,7 @@ LUPAPISTE.SidePanelModel = function() {
 
   self.toggleHelp = function() {
     self.showHelp(!self.showHelp());
-  }
+  };
 
   var pages = ["application","attachment","statement","neighbors","verdict"];
 

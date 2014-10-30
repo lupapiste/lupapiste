@@ -20,6 +20,11 @@
     response => ok?
 
     (comment-application pena application-id true) => ok?
+    
+    (fact "by default 4 attachments exist and are related to operation 'asuinrakennus'"
+      (let [application (query-application pena application-id)
+            op-id (-> application :operations first :id)]
+        (count (get-attachments-by-operation application op-id)) => 4))
 
     (let [resp (command veikko
                  :create-attachments
