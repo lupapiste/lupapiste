@@ -99,14 +99,16 @@ var attachment = (function() {
     id:   ko.observable(),
     application: {
       id:     ko.observable(),
-      title:  ko.observable()
+      title:  ko.observable(),
+      state:  ko.observable()
     },
-    filename:        ko.observable(),
-    latestVersion:   ko.observable({}),
-    versions:        ko.observable([]),
-    signatures:      ko.observableArray([]),
-    type:            ko.observable(),
-    attachmentType:  ko.observable(),
+    applicationState: ko.observable(),
+    filename:         ko.observable(),
+    latestVersion:    ko.observable({}),
+    versions:         ko.observable([]),
+    signatures:       ko.observableArray([]),
+    type:             ko.observable(),
+    attachmentType:   ko.observable(),
     allowedAttachmentTypes: ko.observableArray([]),
     previewDisabled: ko.observable(false),
     operation:       ko.observable(),
@@ -191,6 +193,11 @@ var attachment = (function() {
       return "attachmentType." + model.attachmentType();
     }
     return null;
+  });
+
+  model.editable = ko.computed(function() {
+    var preVerdictStates = ['verdictGiven', 'constructionStarted', 'closed'];
+    return _.contains(preVerdictStates, ko.unwrap(model.application.state)) ? currentUser.isAuthority() || _.contains(preVerdictStates, ko.unwrap(model.applicationState)) : true;
   });
 
   function saveLabelInformation(type, data) {
@@ -283,6 +290,7 @@ var attachment = (function() {
     model.contents(attachment.contents);
     model.scale(attachment.scale);
     model.size(attachment.size);
+    model.applicationState(attachment.applicationState);
 
     var type = attachment.type["type-group"] + "." + attachment.type["type-id"];
     model.attachmentType(type);
@@ -296,6 +304,7 @@ var attachment = (function() {
 
     model.application.id(applicationId);
     model.application.title(application.title);
+    model.application.state(application.state);
     model.id = attachmentId;
 
     approveModel.setApplication(application);

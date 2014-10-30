@@ -19,11 +19,12 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
 
   var generalAttachmentsStr = 'attachments.general';
 
-  function GroupModel(groupName, groupDesc, attachments) {
+  function GroupModel(groupName, groupDesc, attachments, editable) {
     var self = this;
     self.attachments = attachments;
     self.groupName = groupName;
     self.groupDesc = groupDesc;
+    self.editable = editable;
     // computed name, depending if attachments belongs to operation or not
     self.name = ko.computed( function() {
       if ( loc.hasTerm(['operations', self.groupName]) ) {
@@ -82,7 +83,7 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
    * Returns attachments (source), grouped by grouping function f.
    * Optionally sorts using sort
    */
-  function getAttachmentsByGroup(source, f, sort) {
+  function getAttachmentsByGroup(source, f, sort, editable) {
     var attachments = _.map(source, function(a) {
       a.latestVersion = _.last(a.versions || []);
       a.statusName = LUPAPISTE.statuses[a.state] || "unknown";
@@ -94,10 +95,10 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
     var grouped = _.groupBy(attachments, f);
     var mapped = _.map(grouped, function(attachments, group) {
       if ( group === generalAttachmentsStr ) {
-        return new GroupModel(group, null, attachments); // group = attachments.general
+        return new GroupModel(group, null, attachments, editable); // group = attachments.general
       } else { // group == op.id
         var att = _.first(attachments);
-        return new GroupModel(att.op.name, att.op.description, attachments);
+        return new GroupModel(att.op.name, att.op.description, attachments, editable);
       }
     });
     return _.sortBy(mapped, function(group) { // attachments.general on top, else sort by op.created
@@ -129,8 +130,10 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
     var preAttachments = getPreAttachments(rawAttachments);
     var postAttachments = getPostAttachments(rawAttachments);
 
-    var preGrouped = getAttachmentsByGroup(preAttachments, fGroupByOperation, fSortByAllowedAttachmentType);
-    var postGrouped = getAttachmentsByGroup(postAttachments, fGroupByOperation, fSortByAllowedAttachmentType);
+    // pre verdict attachments are not editable after verdict has been given
+    var preGroupEditable = currentUser.isAuthority() || !postVerdictStates[appModel.state()];
+    var preGrouped = getAttachmentsByGroup(preAttachments, fGroupByOperation, fSortByAllowedAttachmentType, preGroupEditable);
+    var postGrouped = getAttachmentsByGroup(postAttachments, fGroupByOperation, fSortByAllowedAttachmentType, true);
 
     self.preAttachmentsByOperation(preGrouped);
     self.postAttachmentsByOperation(postGrouped);
