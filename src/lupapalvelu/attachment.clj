@@ -338,8 +338,11 @@
 (defn set-attachment-version
   ([application attachment-id file-id filename content-type size comment-text now user stamped]
     {:pre [(map? application)]}
-    (set-attachment-version application attachment-id file-id filename content-type size comment-text now user stamped 5 true))
+    (set-attachment-version application attachment-id file-id filename content-type size comment-text now user stamped 5 true :requires_authority_action))
   ([application attachment-id file-id filename content-type size comment-text now user stamped retry-limit make-comment]
+    {:pre [(map? application)]}
+    (set-attachment-version application attachment-id file-id filename content-type size comment-text now user stamped 5 true :requires_authority_action))
+  ([application attachment-id file-id filename content-type size comment-text now user stamped retry-limit make-comment state]
     {:pre [(map? application)]}
     ; TODO refactor to use proper optimistic locking
     ; TODO refactor to return version-model and mongo updates, so that updates can be merged into single statement
@@ -373,7 +376,7 @@
                              (when make-comment (comment/comment-mongo-update (:state application) comment-text comment-target :system false user nil now))
                              {$set {:modified now
                                     :attachments.$.modified now
-                                    :attachments.$.state  :requires_authority_action
+                                    :attachments.$.state  state
                                     :attachments.$.latestVersion version-model}
                               $push {:attachments.$.versions version-model}})
                            true)]

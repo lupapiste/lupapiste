@@ -20,7 +20,7 @@
     response => ok?
 
     (comment-application pena application-id true) => ok?
-    
+
     (fact "by default 4 attachments exist and are related to operation 'asuinrakennus'"
       (let [application (query-application pena application-id)
             op-id (-> application :operations first :id)]
@@ -205,6 +205,9 @@
     (fact "not stamped by default"
       (get-in (get-attachment-info application (:id attachment)) [:latestVersion :stamped]) => falsey)
 
+    (fact "Attachment state is not ok"
+      (:state (get-attachment-info application (:id attachment))) =not=> "ok")
+
     resp => ok?
     (fact "Job id is returned" (:id job) => truthy)
 
@@ -217,6 +220,9 @@
       (fact "Attachment has stamp and no new comments"
         (get-in attachment [:latestVersion :stamped]) => true
         comments-after => comments)
+
+      (fact "Attachment state is ok"
+        (:state attachment) => "ok")
 
       (facts "re-stamp"
         (let [{job :job :as resp} (command sonja :stamp-attachments :id application-id :timestamp "" :text "OK" :organization "" :files [(:id attachment)] :xMargin 0 :yMargin 0)]
