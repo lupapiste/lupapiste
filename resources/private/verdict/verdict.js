@@ -1,4 +1,4 @@
-LUPAPISTE.verdictPageController = (function() {
+LUPAPISTE.verdictPageController = (function($) {
   "use strict";
 
   var currentApplicationId = null;
@@ -219,4 +219,4 @@ LUPAPISTE.verdictPageController = (function() {
     setApplicationModelAndVerdictId: refresh
   };
 
-})();
+})(jQuery);
