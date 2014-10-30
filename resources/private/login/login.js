@@ -55,7 +55,7 @@
 
   $(function() {
     recallMe();
-    $("section#login").applyBindings({rememberMe: rememberMe});
+    $("#login").applyBindings({rememberMe: rememberMe});
     $("#login-button").click(login);
     $("#register-button").click(function() {
       window.location.hash = "!/register";
