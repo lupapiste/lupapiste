@@ -306,16 +306,16 @@
       (fail! (:text validation-error))))
 
   (when-not (attachment/attach-file! {:application application
-                             :filename filename
-                             :size size
-                             :content tempfile
-                             :attachment-id attachmentId
-                             :attachment-type attachmentType
-                             :comment-text text
-                             :target target
-                             :locked locked
-                             :user user
-                             :created created})
+                                      :filename filename
+                                      :size size
+                                      :content tempfile
+                                      :attachment-id attachmentId
+                                      :attachment-type attachmentType
+                                      :comment-text text
+                                      :target target
+                                      :locked locked
+                                      :user user
+                                      :created created})
     (fail :error.unknown)))
 
 
