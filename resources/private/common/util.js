@@ -1,4 +1,4 @@
-var util = (function() {
+var util = (function($) {
   "use strict";
 
   function nop() {}
@@ -204,4 +204,4 @@ var util = (function() {
     isNotPartyDoc: isNotPartyDoc
   };
 
-})();
+})(jQuery);

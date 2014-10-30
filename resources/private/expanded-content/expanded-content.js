@@ -1,4 +1,4 @@
-var expand = (function() {
+var expand = (function($) {
   "use strict";
 
   function click(event) {
@@ -21,4 +21,4 @@ var expand = (function() {
     click: click
   };
 
-})();
+})(jQuery);

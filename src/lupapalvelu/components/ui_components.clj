@@ -174,6 +174,7 @@
    :iframe       {:depends [:common]
                   :css ["iframe.css"]}
 
+   ;; Login can also be used as a standalone lib, see web.clj
    :login        {:depends [:common]
                   :js      ["login.js"]}
 
