@@ -56,7 +56,7 @@
       (fail! :error.illegal-meta-type :parameters k))))
 
 (defn- validate-operation [{{meta :meta} :data}]
-  (let [op (:op meta)] 
+  (let [op (:op meta)]
     (when-let [missing (if op (util/missing-keys op [:id :name]) false)]
       (fail! :error.missing-parameters :parameters missing))))
 
@@ -353,7 +353,7 @@
     (mongo/upload new-file-id filename contentType temp-file :application (:id application))
     (let [new-version (if re-stamp? ; FIXME these functions should return updates, that could be merged into comment update
                         (attachment/update-latest-version-content application attachment-id new-file-id (.length temp-file) now)
-                        (attachment/set-attachment-version application attachment-id new-file-id filename contentType (.length temp-file) nil now user true 5 false))])
+                        (attachment/set-attachment-version application attachment-id new-file-id filename contentType (.length temp-file) nil now user true 5 false :ok))])
     (try (.delete temp-file) (catch Exception _))))
 
 (defn- stamp-attachments! [file-infos {:keys [text created organization transparency job-id application] :as context}]
@@ -439,8 +439,8 @@
 
 ;;
 ;; Label metadata
-;; 
-  
+;;
+
 (defcommand set-attachment-meta
   {:parameters [id attachmentId meta]
    :roles      [:applicant :authority]
@@ -451,7 +451,7 @@
 
   (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
     (fail! :error.pre-verdict-attachment))
-  
+
   (doseq [[k v] meta]
     (let [keyStr (str "attachments.$." (name k))
           setKey (keyword keyStr)]
