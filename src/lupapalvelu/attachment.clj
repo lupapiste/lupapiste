@@ -384,7 +384,7 @@
         (if (pos? result-count)
           (assoc version-model :id attachment-id)
           (do
-            (error
+            (errorf
               "Latest version of attachment %s changed before new version could be saved, retry %d time(s)."
               attachment-id retry-limit)
             (set-attachment-version (mongo/by-id :applications (:id application)) attachment-id file-id filename content-type size now user stamped (dec retry-limit) make-comment))))
