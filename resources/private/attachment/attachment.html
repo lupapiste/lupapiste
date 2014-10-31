@@ -2,6 +2,7 @@
 <html >
 <body>
   <section class="page container" id="attachment" data-bind="with: attachment">
+    <!-- ko if: init -->
     <div>
       <div class="attachment-info">
         <div class="container">
@@ -204,6 +205,7 @@
           <button class="btn btn-primary btn-dialog" data-test-id="confirm-yes" style="position:relative" data-bind="ltext: 'button.ok', click: LUPAPISTE.ModalDialog.close"></button>
         </div>
     </div>
+    <!-- /ko -->
   </section>
 </body>
 </html>
