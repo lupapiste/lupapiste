@@ -415,21 +415,10 @@
    Otherwise a new attachment is created."
   [{:keys [application attachment-id attachment-type file-id filename content-type size comment-text created user target locked] :as options}]
   {:pre [(map? application)]}
-
-  application attachment-id attachment-type file-id filename content-type size comment-text created user target locked
-  application attachment-id                 file-id filename content-type size comment-text created user               false
-
-  (println "\n update-or-create-attachment, passing options: ")
-  (clojure.pprint/pprint (-> options
-                           (select-keys [:application :attachment-id :file-id :filename :content-type :size :comment-text :created :user])
-                           (assoc :stamped false)))
-  (println "\n")
-
   (let [attachment-id (cond
                         (ss/blank? attachment-id) (create-attachment application attachment-type created target locked)
                         (pos? (mongo/count :applications {:_id (:id application) :attachments.id attachment-id})) attachment-id
                         :else (create-attachment application attachment-type created target locked attachment-id))]
-    (println "\n update-or-create-attachment, attachment-id: " attachment-id "\n")
     (set-attachment-version (-> options
                               (select-keys [:application :attachment-id :file-id :filename :content-type :size :comment-text :user])
                               (assoc :stamped false :now created)))))
