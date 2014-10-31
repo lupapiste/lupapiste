@@ -456,7 +456,7 @@
       {} schema-data)))
 
 ;; TODO: permit-type splitting.
-(defn- make-documents [user created op application manual-schema-datas]
+(defn- make-documents [user created op application & [manual-schema-datas]]
   {:pre [(or (nil? manual-schema-datas) (map? manual-schema-datas))]}
 
   (let [op-info               (operations/operations (keyword (:name op)))
