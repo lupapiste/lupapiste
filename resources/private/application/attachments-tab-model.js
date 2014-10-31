@@ -5,6 +5,8 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
 
   self.appModel = appModel;
 
+  self.stampModel = new LUPAPISTE.StampModel();
+
   var postVerdictStates = {verdictGiven:true, constructionStarted:true, closed:true};
 
   self.preAttachmentsByOperation = ko.observableArray();
@@ -227,5 +229,9 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
     });
 
     self.refresh(self.appModel);
+  });
+
+  $(function() {
+    $(self.stampModel.selector).applyBindings({stampModel: self.stampModel});
   });
 };

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <section class="page" id="stamp-dialog" style="visibility: visible; display: block;">
+      <div id="dialog-stamp-attachments" class="window autosized">
+        <div data-bind="with: stampModel">
+
+          <div class="dialog-header">
+            <p data-bind="ltext: 'stamp.title'"></p>
+            <p class="dialog-close close">X</p>
+          </div>
+
+          <div class="dialog-content">
+
+            <div class="stamp-margin">
+              <table>
+                <tbody>
+                  <tr>
+                    <td data-bind="ltext: 'stamp.information'" colspan="3"></td>
+                  </tr>
+                  <tr>
+                    <td data-bind="ltext: 'stamp.text'" class="label"></td>
+                    <td colspan="2">
+                      <input
+                        data-bind="value: text, enable: status() === statusReady"
+                        type="text"
+                        class="form-input text"/>
+                      </td>
+                  </tr>
+                  <tr>
+                    <td data-bind="ltext: 'stamp.date'" class="label"></td>
+                    <td colspan="2">
+                      <input
+                        data-bind="
+                          datepicker: date,
+                          enable: status() === statusReady,
+                          valueUpdate: 'afterkeydown'"
+                        type="text"
+                        class="form-input text"/>
+                      </td>
+                  </tr>
+                  <tr>
+                    <td data-bind="ltext: 'stamp.organization'" class="label"></td>
+                    <td colspan="2">
+                      <input
+                        data-bind="textInput: organization, enable: status() === statusReady"
+                        type="text"
+                        class="form-input text"/>
+                      </td>
+                  </tr>
+                  <tr>
+                    <td data-bind="ltext: 'stamp.margin'" colspan="3"></td>
+                  </tr>
+                  <tr>
+                    <td data-bind="ltext: 'stamp.xMargin'" class="label"></td>
+                    <td>
+                      <input
+                        data-bind="
+                          textInput: xMargin,
+                          enable: status() === statusReady,
+                          css: {'invalid-margin': !xMarginOk()}"
+                        type="text"
+                        class="form-input text"/>
+                      </td>
+                    <td>mm</td>
+                  </tr>
+                  <tr>
+                    <td data-bind="ltext: 'stamp.yMargin'" class="label"></td>
+                    <td>
+                      <input
+                        data-bind="
+                          textInput: yMargin,
+                          enable: status() === statusReady,
+                          css: {'invalid-margin': !yMarginOk()}"
+                        type="text"
+                        class="form-input text"/>
+                      </td>
+                    <td>mm</td>
+                  </tr>
+                  <tr>
+                    <td data-bind="ltext: 'stamp.transparency'" class="label"></td>
+                    <td colspan="2">
+                      <select data-bind="options: transparencies, optionsText: 'text', value: transparency" class="form-input combobox"></select>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="stamp-files">
+              <table>
+                <thead>
+                  <tr>
+                    <th data-bind="ltext: 'stamp.filename'"></th>
+                    <th data-bind="ltext: 'stamp.version'"></th>
+                    <th data-bind="ltext: 'stamp.size'"></th>
+                    <th data-bind="ltext: status() <= statusReady ? 'stamp.select' : 'stamp.status'"></th>
+                  </tr>
+                </thead>
+                <tbody data-bind="foreach: files">
+                  <tr>
+                    <td data-bind="text: filename"></td>
+                    <td>
+                      <span data-bind="version: version"></span>
+                      <span data-bind="visible: restamp">*</span>
+                    </td>
+                    <td data-bind="size: size"></td>
+                    <td>
+                      <input type="checkbox" data-bind="
+                          checked: selected,
+                          visible: $parent.status() < $parent.statusRunning,
+                          enable: $parent.status() === $parent.statusReady" />
+                      <span data-bind="
+                          text: loc(['stamp.file.status', status()]),
+                          visible: $parent.status() >= $parent.statusRunning"></span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <div class="select-all">
+                <a data-bind="ltext: 'stamp.all', click: selectAll" href="#"></a>
+                <span>/</span>
+                <a data-bind="ltext: 'stamp.none', click: selectNone" href="#"></a>
+              </div>
+            </div>
+
+            <div class="stamp-status">
+              <span data-bind="text: loc(['stamp.status', status().toString()])"></span>
+            </div>
+
+            <div class="stamp-buttons">
+              <button data-bind="
+                  click: start,
+                  ltext: 'stamp.start',
+                  enable: status() === statusReady && xMarginOk() && yMarginOk() && selectedFiles().length > 0,
+                  visible: status() <= statusReady"
+                class="btn btn-primary btn-dialog"
+                data-test-id="start-stamping">
+              </button>
+              <button data-bind="
+                  ltext: 'stamp.cancel',
+                  enable: status() === statusReady,
+                  visible: status() <= statusReady"
+                class="btn btn-dialog close">
+              </button>
+              <button data-bind="
+                  ltext: 'stamp.ok',
+                  visible: status() > statusRunning"
+                class="btn btn-primary btn-dialog close"
+                data-test-id="application-stamp-dialdog-ok">
+              </button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>

@@ -119,6 +119,10 @@
                   :html ["signing-dialogs.html"]
                   :js ["signing-model.js" "verdict-signing-model.js"]}
 
+   :stamp        {:depends [:common]
+                  :html ["stamp-template.html"]
+                  :js ["stamp-model.js"]}
+
    :attachment   {:depends [:common :repository :signing :side-panel]
                   :js ["targeted-attachments-model.js" "attachment.js" "attachmentTypeSelect.js"]
                   :html ["targetted-attachments-template.html" "attachment.html" "upload.html"]}
@@ -130,9 +134,9 @@
    :create-task  {:js ["create-task.js"]
                   :html ["create-task.html"]}
 
-   :application  {:depends [:common :repository :tree :task :create-task :modal-datepicker :signing :invites :side-panel]
+   :application  {:depends [:common :repository :tree :task :create-task :modal-datepicker :signing :invites :side-panel :stamp]
                   :js ["add-link-permit.js" "map-model.js" "change-location.js" "invite.js" "verdicts-model.js"
-                       "add-operation.js" "stamp-model.js" "request-statement-model.js" "add-party.js"
+                       "add-operation.js" "request-statement-model.js" "add-party.js"
                        "attachments-tab-model.js" "application-model.js" "invite-company.js" "application.js"]
                   :html ["add-link-permit.html" "application.html" "inforequest.html" "add-operation.html"
                          "change-location.html" "invite-company.html"]}
