@@ -598,25 +598,31 @@
 
             ;; create the application
             (let [created-application (do-create-application command manual-schema-datas)
-                  ;; get verdicts for the application
-                  command (assoc command
-                            :application created-application
-                            ; :data {:id (:id created-application)}
-                            )
-                  verdict-updates (verdict-api/get-verdict-updates command xml)
+
+                  ;;
+                  ;; *** TODO: Aseta tassa applicationille viitelupatiedot -> kts. app-infon :viitelupatiedot ***
+                  ;;
+
+                  ;;
+                  ;; *** TODO: Aseta tassa applicationille viimeisin state? -> kts. alla ***
+                  ;;
 ;                  ;; lupapalvelu.document.canonical-common/application-state-to-krysp-state kaanteisesti
 ;                  state (some #(when (= (-> app-info :viimeisin-tila :tila) (val %)) (first %)) lupapalvelu.document.canonical-common/application-state-to-krysp-state)
-
-                  ;;
-                  ;; *** TODO: Aseta tassa applicationille viitelupatiedot -> kts. app-infon :viitelupatiedot! ***
-                  ;;
-
-                  updated-application (merge created-application
-                                        (get-in verdict-updates [$set])
+;
+;                  updated-application (merge created-application
+;                                        (get-in verdict-updates [$set])
 ;                                        {:state state}   ;; *** TODO: Laita tama takaisin ***
-                                        )]
-              (insert-application updated-application)
-              (ok :id (:id updated-application)))
+;                                        )
+
+                  ;; The application has to be inserted first, because it is assumed to be in the database when checking for verdicts (and their attachments).
+                  _ (insert-application created-application)
+
+                  ;; attaches the new application, and its id to path [:data :id], into the command
+                  command (merge command (application->command created-application))
+                  ;; get verdicts for the application
+                  _ (verdict-api/do-check-for-verdict command xml)
+                  ]
+              (ok :id (:id created-application)))
 
             ;; Jos ks. kuntalupatunnuksella on jo Lupapisteessa lupa, ja ks. henkilolla on sille oikeudet, avaa suoraan tama lupa.
             ;; Jos henkilolla ei ole oikeuksia talle luvalle, nayta virheilmoitus.
