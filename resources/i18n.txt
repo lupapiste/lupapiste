@@ -1,2 +1,4 @@
 application.export.state: Hakemuksen vaihe
 application.export.empty: (Tyhjä)
+
+uusiRakennus.huoneistot._group_label: Huoneistot
