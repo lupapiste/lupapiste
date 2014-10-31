@@ -138,7 +138,7 @@
                   :js ["add-link-permit.js" "map-model.js" "change-location.js" "invite.js" "verdicts-model.js"
                        "add-operation.js" "request-statement-model.js" "add-party.js"
                        "attachments-tab-model.js" "application-model.js" "invite-company.js" "application.js"]
-                  :html ["add-link-permit.html" "application.html" "inforequest.html" "add-operation.html"
+                  :html ["attachment-actions-template.html" "add-link-permit.html" "application.html" "inforequest.html" "add-operation.html"
                          "change-location.html" "invite-company.html"]}
 
    :applications {:depends [:common :repository :invites]
