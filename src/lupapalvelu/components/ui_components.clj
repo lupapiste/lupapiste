@@ -174,7 +174,6 @@
    :iframe       {:depends [:common]
                   :css ["iframe.css"]}
 
-   ;; Login can also be used as a standalone lib, see web.clj
    :login        {:depends [:common]
                   :js      ["login.js"]}
 
@@ -240,6 +239,8 @@
                  :html    ["login-frame.html"]
                  :js      ["login-frame.js"]
                  :css     ["login-frame.css"]}
+
+   :wordpress {:depends [:login :password-reset]}
 
    :welcome {:depends [:login :register :link-account :debug :user-menu :screenmessages :password-reset]
              :js ["welcome.js" "company-user.js"]
