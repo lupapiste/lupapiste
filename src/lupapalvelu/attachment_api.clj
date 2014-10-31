@@ -412,7 +412,10 @@
   {:description "Designers can sign blueprints and other attachments. LUPA-1241"
    :parameters [:id attachmentIds password]
    :states     [:draft :open :submitted :sent :complement-needed :verdictGiven :constructionStarted]
-   :pre-checks [domain/validate-owner-or-writer]
+   :pre-checks [domain/validate-owner-or-writer
+                (fn [_ application]
+                  (when-not (pos? (count (:attachments application)))
+                    (fail :application.attachmentsEmpty)))]
    :roles      [:applicant :authority]}
   [{application :application u :user :as command}]
   (when (seq attachmentIds)
