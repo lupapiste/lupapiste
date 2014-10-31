@@ -389,7 +389,7 @@
               attachment-id retry-limit)
             (set-attachment-version (mongo/by-id :applications (:id application)) attachment-id file-id filename content-type size now user stamped (dec retry-limit) make-comment))))
       (do
-        (error "Concurrancy issue: Could not save attachment version meta data.")
+        (error "Concurrency issue: Could not save attachment version meta data.")
         nil))))
 
 (defn update-latest-version-content [application attachment-id file-id size now]
