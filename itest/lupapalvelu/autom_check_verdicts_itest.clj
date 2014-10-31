@@ -43,6 +43,7 @@
      (count (batchrun/fetch-verdics)) => pos?)
 
    (fact "Verifying the sent emails"
+     (Thread/sleep 100) ; batchrun includes a parallel operation
      (let [emails (dummy-email-server/messages :reset true)]
        (fact "email count" (count emails) => 1)
        (let [email (last emails)]

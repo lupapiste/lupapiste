@@ -33,8 +33,8 @@
               <button id="test-attachment-approve" data-bind="ltext: 'document.approve', click: approveAttachment, enable: isApprovable() && isNotOk(), visible: isApprovable()" class="btn btn-primary">Hyv&auml;ksy</button>
               <button id="test-attachment-reject" data-bind="ltext: 'attachment.reject', click: rejectAttachment, enable: isRejectable() && doesNotRequireUserAction(), visible: isRejectable()" class="btn btn-decline">Tarkennettavaa</button>
             </div>
-            <button data-test-id="change-attachment-type" data-bind="ltext: 'attachment.changeType', click: showChangeTypeDialog"></button>
-            <button data-bind="ltext: 'attachment.delete', click: deleteAttachment, visible: $root.authorization.ok('delete-attachment'),  enable: $root.authorization.ok('delete-attachment')" data-test-id="delete-attachment">Poista liite</button>
+            <button data-test-id="change-attachment-type" data-bind="ltext: 'attachment.changeType', click: showChangeTypeDialog, visible: $root.authorization.ok('set-attachment-type') && editable"></button>
+            <button data-bind="ltext: 'attachment.delete', click: deleteAttachment, visible: $root.authorization.ok('delete-attachment') && editable" data-test-id="delete-attachment">Poista liite</button>
           </div>
 
           <div class="clear"></div>
@@ -46,7 +46,7 @@
                     id="add-new-attachment-version"
                     class="btn-primary"
                     data-window-id="upload-dialog"
-                    data-bind="click: newAttachmentVersion, visible: $root.authorization.ok('upload-attachment'),  enable: $root.authorization.ok('upload-attachment')">
+                    data-bind="click: newAttachmentVersion, visible: $root.authorization.ok('upload-attachment') && editable">
                   <span data-bind="ltext: 'attachment.addVersion'"></span>
                   <span class="icon add left-align"></span>
                 </button>
@@ -81,7 +81,7 @@
                         <span data-bind="fullName: user"></span>
                       </td>
                       <td>
-                        [<a data-bind="click: $root.attachment.deleteVersion, ltext: 'remove', visible: $root.authorization.ok('delete-attachment-version'),  enable: $root.authorization.ok('delete-attachment-version')"></a>]
+                        <a class="link-action" data-bind="click: $root.attachment.deleteVersion, ltext: 'remove', visible: $root.authorization.ok('delete-attachment-version') && $parent.editable"></a>
                       </td>
                     </tr>
                   </tbody>
@@ -103,7 +103,7 @@
                   <!-- /ko -->
               </div>
               <button data-test-id="signLatestAttachmentVersion" class="btn-primary"
-                      data-bind="click: sign, visible: $root.authorization.ok('sign-attachments'),  enable: versions().length && $root.authorization.ok('sign-attachments')">
+                      data-bind="click: sign, visible: $root.authorization.ok('sign-attachments'), visible: versions().length && $root.authorization.ok('sign-attachments')">
                   <span data-bind="ltext: 'attachment.signLatest'"></span>
                   <span class="icon signed-white left-align"></span>
               </button>
@@ -130,7 +130,7 @@
                          data-test-id="attachment-contents-input"
                          data-bind="value: contents,
                                     valueUpdate: 'afterkeydown',
-                                    enable: $root.authorization.ok('set-attachment-meta')"></input>
+                                    enable: $root.authorization.ok('set-attachment-meta') && editable"></input>
                 </div>
                 <div class="col2 attachment-info-field">
                   <label data-bind="ltext: 'attachment.label.operation'"></label>
@@ -141,7 +141,7 @@
                                      optionsValue: 'id',
                                      optionsCaption: loc('attachment.label.operation.choose'),
                                      value: selectedOperationId,
-                                     enable: $root.authorization.ok('set-attachment-meta')"></select>
+                                     enable: $root.authorization.ok('set-attachment-meta') && editable"></select>
                 </div>
                 <div class="col1 attachment-info-field">
                   <label data-bind="ltext: 'attachment.label.scale'"></label>
@@ -151,7 +151,7 @@
                                      optionsText: function(item) {return item === 'muu' ? loc('select-other') : item},
                                      optionsCaption: loc('choose'),
                                      value: scale,
-                                     enable: $root.authorization.ok('set-attachment-meta')"></select>
+                                     enable: $root.authorization.ok('set-attachment-meta') && editable"></select>
                 </div>
                 <div class="col2 attachment-info-field">
                   <label data-bind="ltext: 'attachment.label.size'"></label>
@@ -161,7 +161,7 @@
                                      optionsText: function(item) {return item === 'muu' ? loc('select-other') : item},
                                      optionsCaption: loc('choose'),
                                      value: size,
-                                     enable: $root.authorization.ok('set-attachment-meta')"></select>
+                                     enable: $root.authorization.ok('set-attachment-meta') && editable"></select>
                 </div>
               </div>
             </div>
