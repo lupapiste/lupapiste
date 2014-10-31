@@ -1,4 +1,4 @@
-(function() {
+(function($) {
   "use strict";
 
   function Reset() {
@@ -57,8 +57,10 @@
   var pwInputModel = new SetPW();
 
   $(function() {
-    $("section#reset").applyBindings(resetModel);
-    $("section#setpw").applyBindings(pwInputModel);
+    if (document.getElementById("reset")) {
+      $("#reset").applyBindings(resetModel);
+      $("#setpw").applyBindings(pwInputModel);
+    }
   });
 
-})();
+})(jQuery);
