@@ -617,6 +617,11 @@
                   ;; The application has to be inserted first, because it is assumed to be in the database when checking for verdicts (and their attachments).
                   _ (insert-application created-application)
 
+                  ;; Update the hakija document
+                  _ (if-let [document (domain/get-document-by-name created-application "hakija")]
+                      (set-user-to-document created-application document (:id user) "henkilo" user created)
+                      (fail! :error.document-not-found))
+
                   ;; attaches the new application, and its id to path [:data :id], into the command
                   command (merge command (application->command created-application))
                   ;; get verdicts for the application
