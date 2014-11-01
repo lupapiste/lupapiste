@@ -428,18 +428,43 @@
 
       (let [asia (first asiat-with-kuntalupatunnus)
             viitelupatiedot (map cr/all-of (select asia [:viitelupatieto :LupaTunnus]))
-            luvanTunnisteTiedot (cr/all-of asia [:luvanTunnisteTiedot :LupaTunnus])
             kasittelynTilatiedot (->> (select xml-no-ns [:kasittelynTilatieto])
                                    (map #(-> (cr/all-of % [:Tilamuutos]) (cr/convert-keys-to-timestamps [:pvm])))
                                    (sort-by :pvm))
             viimeisin-tila (last kasittelynTilatiedot)
-            asianTiedot (cr/all-of asia [:asianTiedot :Asiantiedot])]
+            asianTiedot (cr/all-of asia [:asianTiedot :Asiantiedot])
+            toimenpidetieto (map cr/all-of (select asia [:toimenpidetieto]))
+            sijaintitieto (-> toimenpidetieto first ((comp :Sijainti :sijaintitieto :Rakennus #(or (:rakennustieto %) (:rakennelmatieto %)) :Toimenpide)))
+            ]
         {:id (->lp-tunnus asia)
          :kuntalupatunnus (->kuntalupatunnus asia)
          :rakennusvalvontaasianKuvaus (:rakennusvalvontaasianKuvaus asianTiedot)
          :vahainenPoikkeaminen (:vahainenPoikkeaminen asianTiedot)
-;         :viitelupatiedot viitelupatiedot                ;; TODO: Mita nailla?
+         :viitelupatiedot viitelupatiedot                ;; TODO: Mita nailla?
          :kasittelynTilatiedot kasittelynTilatiedot
          :viimeisin-tila viimeisin-tila
-;         :luvanTunnisteTiedot luvanTunnisteTiedot        ;; TODO: Poista?
+
+         :asioimiskieli (cr/all-of asia [:lisatiedot :Lisatiedot :asioimiskieli])
+
+         :rakennusten-tiedot (->buildings xml)
+
+         :toimenpidetieto toimenpidetieto
+
+
+         ;;
+         ;; **** TODO: Mista hakemuksen SIJAINTI pitaisi hakea? ****
+         ;;
+         ;; Miten muutetaan gml:Pointista meille? Taitaa saada X:n ja Y:n suoraan...
+         ;;
+
+         :referenssiPiste (cr/all-of asia [:referenssiPiste])
+
+         ;;
+         ;; Onko tama oikea tapa hakea sijainti?  Eli vaan ensimmaisen toimenpiteen alta?
+         ;;  Esim. rakennuspaikkatietoa ei esimerkkisanomassa ollut ollenkaan...
+         ;;  Koordinaatit (esim. [2.5502936E7 6708332.0]) nayttavat olevan aivan metsasta...
+         ;;
+         :sijainti (-> sijaintitieto :piste :Point :pos (ss/split #" ") #_(#({:x (first %) :y (second %)})))
+         :osoite (-> sijaintitieto :osoite :osoitenimi) ;; TODO: Miksi tata ei ole ollenkaan esimerkkisanomassa?
+
          }))))
