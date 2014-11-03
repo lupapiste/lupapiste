@@ -547,23 +547,20 @@
    :pre-checks [(fn [command application] (not (-> command :user :architect)))]}
   [{application :application user :user}]
   (doseq [attachment (:attachments user)]
-    (let [
-          application-id id
+    (let [application-id id
           user-id (:id user)
           {:keys [attachment-type attachment-id file-name content-type size created]} attachment
           attachment (mongo/download-find {:id attachment-id :metadata.user-id user-id})
-          attachment-id (str application-id "." user-id "." attachment-id)
-          ]
+          attachment-id (str application-id "." user-id "." attachment-id)]
       (when (zero? (mongo/count :applications {:_id application-id :attachments.id attachment-id}))
         (attachment/attach-file! {:application application
-                       :attachment-id attachment-id
-                       :attachment-type attachment-type
-                       :content ((:content attachment))
-                       :filename file-name
-                       :content-type content-type
-                       :size size
-                       :created created
-                       :user user
-                       ;:attachment-target attachment-target
-                       :locked false}))))
+                                  :attachment-id attachment-id
+                                  :attachment-type attachment-type
+                                  :content ((:content attachment))
+                                  :filename file-name
+                                  :content-type content-type
+                                  :size size
+                                  :created created
+                                  :user user
+                                  :locked false}))))
   (ok))
