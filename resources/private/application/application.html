@@ -421,6 +421,83 @@
 
           <div class="attachment-actions" data-bind="visible: (!$root.application.inPostVerdictState() && preAttachmentsByOperation().length > 0) || ($root.application.inPostVerdictState() && postAttachmentsByOperation().length > 0), template: {name: 'attachment-actions-template'}"></div>
 
+          <!-- ko if: stampingMode -->
+            <div class="stamp-margin" data-bind="with: stampModel">
+              <table>
+                <tbody>
+                  <tr>
+                    <td data-bind="ltext: 'stamp.information'" colspan="3"></td>
+                  </tr>
+                  <tr>
+                    <td data-bind="ltext: 'stamp.text'" class="label"></td>
+                    <td colspan="2">
+                      <input
+                        data-bind="value: text, enable: status() === statusReady"
+                        type="text"
+                        class="form-input text"/>
+                      </td>
+                  </tr>
+                  <tr>
+                    <td data-bind="ltext: 'stamp.date'" class="label"></td>
+                    <td colspan="2">
+                      <input
+                        data-bind="
+                          datepicker: date,
+                          enable: status() === statusReady,
+                          valueUpdate: 'afterkeydown'"
+                        type="text"
+                        class="form-input text"/>
+                      </td>
+                  </tr>
+                  <tr>
+                    <td data-bind="ltext: 'stamp.organization'" class="label"></td>
+                    <td colspan="2">
+                      <input
+                        data-bind="textInput: organization, enable: status() === statusReady"
+                        type="text"
+                        class="form-input text"/>
+                      </td>
+                  </tr>
+                  <tr>
+                    <td data-bind="ltext: 'stamp.margin'" colspan="3"></td>
+                  </tr>
+                  <tr>
+                    <td data-bind="ltext: 'stamp.xMargin'" class="label"></td>
+                    <td>
+                      <input
+                        data-bind="
+                          textInput: xMargin,
+                          enable: status() === statusReady,
+                          css: {'invalid-margin': !xMarginOk()}"
+                        type="text"
+                        class="form-input text"/>
+                      </td>
+                    <td>mm</td>
+                  </tr>
+                  <tr>
+                    <td data-bind="ltext: 'stamp.yMargin'" class="label"></td>
+                    <td>
+                      <input
+                        data-bind="
+                          textInput: yMargin,
+                          enable: status() === statusReady,
+                          css: {'invalid-margin': !yMarginOk()}"
+                        type="text"
+                        class="form-input text"/>
+                      </td>
+                    <td>mm</td>
+                  </tr>
+                  <tr>
+                    <td data-bind="ltext: 'stamp.transparency'" class="label"></td>
+                    <td colspan="2">
+                      <select data-bind="options: transparencies, optionsText: 'text', value: transparency" class="form-input combobox"></select>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          <!-- /ko -->
+
           <div>
             <div data-bind="if: postAttachmentsByOperation().length > 0" data-test-id="application-post-attachments-table">
               <h1><span data-bind="ltext: 'application.attachments.post-verdict'"></span></h1>
@@ -434,6 +511,10 @@
 
             <div class="attachment-actions" data-bind="template: {name: 'attachment-actions-template'}"></div>
 
+            <!-- ko if: stampingMode -->
+            <button class="btn btn-primary">Leimaa valitut</button>
+            <a href="#" data-bind="ltext: 'stamp.cancel', click: cancelStamping"></a>
+            <!-- /ko -->
 
             <!-- ko if: $root.application.inPostVerdictState() -->
             <div data-bind="if: preAttachmentsByOperation().length > 0" data-test-id="application-pre-attachments-table">

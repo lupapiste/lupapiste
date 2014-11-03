@@ -88,6 +88,7 @@
                 </span>
               </td>
               <td>
+                <!-- ko ifnot: $root.attachmentsTab.stampingMode -->
                 <span data-bind="click: $root.attachmentsTab.deleteSingleAttachment,
                                 clickBubble: false,
                                 visible: $root.authorization.ok('delete-attachment') && $parent.editable,
@@ -95,6 +96,10 @@
                                 attr: {'class': 'icon remove-grey',
                                        'title': loc('attachment.delete'),
                                        'data-test-icon': 'delete-' + type['type-group'] + '.' + type['type-id']}"></span>
+                <!-- /ko -->
+                <!-- ko if: $root.attachmentsTab.stampingMode -->
+                <input type="checkbox" data-bind="click: $root.attachmentsTab.selectStampRow, clickBubble: false" />
+                <!-- /ko -->
               </td>
             </tr>
             <!-- /ko -->
