@@ -55,23 +55,25 @@
 
   $(function() {
     recallMe();
-    $("#login").applyBindings({rememberMe: rememberMe});
-    $("#login-button").click(login);
-    $("#register-button").click(function() {
-      window.location.hash = "!/register";
-    });
-    $("#login-username").keypress(function(e) {
-      if (e.which === 13) {
-        $("#login-password").focus();
-        return false;
-      }
-    });
-    $("#login-password").keypress(function(e) {
-      if (e.which === 13) {
-        login();
-        return false;
-      }
-    });
+    if (document.getElementById("login")) {
+      $("#login").applyBindings({rememberMe: rememberMe});
+      $("#login-button").click(login);
+      $("#register-button").click(function() {
+        window.location.hash = "!/register";
+      });
+      $("#login-username").keypress(function(e) {
+        if (e.which === 13) {
+          $("#login-password").focus();
+          return false;
+        }
+      });
+      $("#login-password").keypress(function(e) {
+        if (e.which === 13) {
+          login();
+          return false;
+        }
+      });
+    }
   });
 
 })(jQuery);

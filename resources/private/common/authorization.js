@@ -23,10 +23,10 @@ var authorization = (function() {
         .call();
     };
 
-    self.refresh = function(data, extraParams) {
+    self.refresh = function(data, extraParams, callback) {
       var id = _.isObject(data) ? data.id : data;
       var params =  _.isObject(extraParams) ? _.extend({id: id}, extraParams) : {id: id};
-      self.refreshWithCallback(params);
+      self.refreshWithCallback(params, callback);
     };
   }
 
