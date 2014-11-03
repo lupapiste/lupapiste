@@ -353,7 +353,11 @@
     (mongo/upload new-file-id filename contentType temp-file :application (:id application))
     (let [new-version (if re-stamp? ; FIXME these functions should return updates, that could be merged into comment update
                         (attachment/update-latest-version-content application attachment-id new-file-id (.length temp-file) now)
-                        (attachment/set-attachment-version application attachment-id new-file-id filename contentType (.length temp-file) nil now user true 5 false :ok))])
+                        (attachment/set-attachment-version {:application application :attachment-id attachment-id
+                                                            :file-id new-file-id :filename filename
+                                                            :content-type contentType :size (.length temp-file)
+                                                            :comment-text nil :now now :user user
+                                                            :stamped true :make-comment false :state :ok}))])
     (try (.delete temp-file) (catch Exception _))))
 
 (defn- stamp-attachments! [file-infos {:keys [text created organization transparency job-id application] :as context}]
