@@ -1,0 +1,4 @@
+application.conversation.unsentMessage.title: Lähettämätön viesti
+application.conversation.unsentMessage: Sinulla on viestikentässä viesti, jota ei vielä ole lähetetty. Tahdotko lähettää viestin, vai tyhjentää kentän?
+application.conversation.sendMessage: Lähetä
+application.conversation.clearMessage: Tyhjennä

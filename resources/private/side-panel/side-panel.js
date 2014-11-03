@@ -45,6 +45,7 @@ LUPAPISTE.SidePanelModel = function() {
   }
 
   self.refresh = function(application, authorities) {
+    console.log("refresh side-panel", application, authorities);
     // TODO applicationId, inforequest etc. could be computed
     if (application && authorities) {
       self.application(application);
@@ -112,23 +113,56 @@ LUPAPISTE.SidePanelModel = function() {
   };
 
   var pages = ["application","attachment","statement","neighbors","verdict"];
+  var lock = false;
 
-  hub.subscribe({type: "page-change"}, function() {
+  var refreshSidePanel = function(application, authorities) {
     var currentPage = pageutil.getPage();
     if (self.previousPage && currentPage !== self.previousPage && self.comment().text()) {
-      // TODO dialog to ask if user want's to delete unsent message on page change
-      self.comment().text(undefined);      
+      lock = true;
+      LUPAPISTE.ModalDialog.showDynamicYesNo(
+        loc("application.conversation.unsentMessage.title"),
+        loc("application.conversation.unsentMessage"),
+        {title: loc("application.conversation.sendMessage"), fn: function() {
+          self.comment().submit()
+          self.refresh(application, authorities);
+          lock = false;
+          // self.refresh(application, authorities);
+        }},
+        {title: loc("application.conversation.clearMessage"), fn: function() {
+          self.comment().text(undefined);
+          self.refresh(application, authorities);
+          lock = false;
+        }}
+      );
+    } else if (!lock) {
+      self.refresh(application, authorities);
     }
-    self.previousPage = pageutil.getPage();
+
+    // Show side panel on specified pages
     if(_.contains(pages, pageutil.getPage())) {
-      self.refresh();
       $("#side-panel-template").addClass("visible");
+    }
+
+    self.previousPage = pageutil.getPage();
+  }
+
+  hub.subscribe({type: "dialog-close"}, function(data) {
+    if (lock) {
+      self.comment().text(undefined);
+      repository.load(self.applicationId());
+      lock = false;
+    }
+  });
+
+  hub.subscribe({type: "page-change"}, function(data) {
+    if(_.contains(pages.concat("applications"), pageutil.getPage())) {
+      refreshSidePanel();
     }
   });
 
   repository.loaded(pages, function(application, applicationDetails) {
     self.authorization.refreshWithCallback({id: applicationDetails.application.id}, function() {
-      self.refresh(application, applicationDetails.authorities);
+      refreshSidePanel(application, applicationDetails.authorities);
     });
   });
 };
