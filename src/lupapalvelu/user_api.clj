@@ -561,7 +561,7 @@
                        :content ((:content attachment))
                        :filename file-name
                        :content-type content-type
-                       :file-size size
+                       :size size
                        :created created
                        :user user
                        ;:attachment-target attachment-target
