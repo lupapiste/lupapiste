@@ -21,11 +21,10 @@ LUPAPISTE.VerdictsModel = function() {
     var verdicts = _.map(_.cloneDeep(application.verdicts || []), function(verdict) {
       var paatokset = _.map(verdict.paatokset || [], function(paatos) {
         var poytakirjat = _.map(paatos.poytakirjat || [], function(pk) {
-          var myFullId = {type: "verdict", id: verdict.id, urlHash: pk.urlHash};
-          var myShortId = {type: "verdict", id: verdict.id};
           var myAttachments = _.filter(application.attachments || [], function(attachment) {
-            return (attachment.target && attachment.target.urlHash && _.isEqual(attachment.target, myFullId)) || _.isEqual(attachment.target, myShortId)
-          ;}) || [];
+            var target = attachment.target;
+            return target && target.type === "verdict" && (target.urlHash ? target.urlHash === pk.urlHash : target.id === verdict.id);
+          }) || [];
           pk.attachments = myAttachments;
           return pk;
         });

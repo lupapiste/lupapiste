@@ -28,6 +28,8 @@ LUPAPISTE.SidePanelModel = function() {
     return self.showConversationPanel() || self.showNoticePanel();
   });
 
+  self.previousPage;
+
   var AuthorityInfo = function(id, firstName, lastName) {
     this.id = id;
     this.firstName = firstName;
@@ -112,6 +114,12 @@ LUPAPISTE.SidePanelModel = function() {
   var pages = ["application","attachment","statement","neighbors","verdict"];
 
   hub.subscribe({type: "page-change"}, function() {
+    var currentPage = pageutil.getPage();
+    if (self.previousPage && currentPage !== self.previousPage && self.comment().text()) {
+      // TODO dialog to ask if user want's to delete unsent message on page change
+      self.comment().text(undefined);      
+    }
+    self.previousPage = pageutil.getPage();
     if(_.contains(pages, pageutil.getPage())) {
       self.refresh();
       $("#side-panel-template").addClass("visible");

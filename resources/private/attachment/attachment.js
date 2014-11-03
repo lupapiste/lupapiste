@@ -122,6 +122,7 @@ var attachment = (function() {
     indicator:       ko.observable().extend({notify: 'always'}),
     showAttachmentVersionHistory: ko.observable(),
     showHelp:        ko.observable(false),
+    init:            ko.observable(false),
 
     toggleHelp: function() {
       model.showHelp(!model.showHelp());
@@ -310,17 +311,20 @@ var attachment = (function() {
     approveModel.setApplication(application);
     approveModel.setAttachmentId(attachmentId);
 
-    authorizationModel.refresh(application, {attachmentId: attachmentId});
-
     model.showAttachmentVersionHistory(false);
 
     pageutil.hideAjaxWait();
-
-    model.latestVersion() ? model.showHelp(false) : model.showHelp(true);
+    model.indicator(false);
+    
+    authorizationModel.refresh(application, {attachmentId: attachmentId}, function() { 
+      model.latestVersion() ? model.showHelp(false) : model.showHelp(true);
+      model.init(true);
+    });
   }
 
   hub.onPageChange("attachment", function(e) {
     pageutil.showAjaxWait();
+    model.init(false);
     applicationId = e.pagePath[0];
     attachmentId = e.pagePath[1];
     repository.load(applicationId);
