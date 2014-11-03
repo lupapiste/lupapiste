@@ -1,36 +1,7 @@
-LUPAPISTE.StampModel = function() {
+LUPAPISTE.StampModel = function(params) {
   "use strict";
   var self = this;
   self.selector = "#dialog-stamp-attachments";
-
-  var transparencies = _.map([0,20,40,60,80], function(v) {
-    return {text: loc(["stamp.transparency", v.toString()]), value: Math.round(255 * v / 100.0)};
-  });
-
-                             // Start:  Cancel:  Ok:
-  self.statusInit      = 0;  //   -       -       -
-  self.statusReady     = 1;  //   +       +       -
-  self.statusStarting  = 2;  //   -       -       -
-  self.statusRunning   = 3;  //   -       -       -
-  self.statusDone      = 4;  //   -       -       +
-  self.statusNoFiles   = 5;  //   -       -       +
-
-  self.status = ko.observable(self.statusStarting);
-  self.application = null;
-  self.text = ko.observable("");
-  self.date = ko.observable();
-  self.organization = ko.observable("");
-  self.files = ko.observable(null);
-  self.selectedFiles = ko.computed(function() { return _.filter(self.files(), function(f) { return f.selected(); }); });
-  self.jobId = null;
-  self.jobVersion = null;
-
-  self.xMargin = ko.observable("");
-  self.xMarginOk = ko.computed(function() { return util.isNum(self.xMargin()); });
-  self.yMargin = ko.observable("");
-  self.yMarginOk = ko.computed(function() { return util.isNum(self.yMargin()); });
-  self.transparency = ko.observable();
-  self.transparencies = transparencies;
 
   function stampableAttachment(a) {
     var ct = "";
@@ -57,6 +28,40 @@ LUPAPISTE.StampModel = function() {
     };
   }
 
+  var transparencies = _.map([0,20,40,60,80], function(v) {
+    return {text: loc(["stamp.transparency", v.toString()]), value: Math.round(255 * v / 100.0)};
+  });
+
+
+                             // Start:  Cancel:  Ok:
+  self.statusInit      = 0;  //   -       -       -
+  self.statusReady     = 1;  //   +       +       -
+  self.statusStarting  = 2;  //   -       -       -
+  self.statusRunning   = 3;  //   -       -       -
+  self.statusDone      = 4;  //   -       -       +
+  self.statusNoFiles   = 5;  //   -       -       +
+
+console.log(params);
+  // Init
+  self.application = params.application;
+  self.files = ko.observable(_(self.application.attachments()).filter(stampableAttachment).map(normalizeAttachment).value());
+
+  self.status = ko.observable(self.files().length > 0 ? self.statusReady : self.statusNoFiles);
+  self.text = ko.observable(loc("stamp.verdict"));
+  self.date = ko.observable();
+  self.organization = ko.observable(self.application.organizationName());
+  self.selectedFiles = ko.computed(function() { return _.filter(self.files(), function(f) { return f.selected(); }); });
+  self.jobId = null;
+  self.jobVersion = null;
+
+  self.xMargin = ko.observable("10");
+  self.xMarginOk = ko.computed(function() { return util.isNum(self.xMargin()); });
+  self.yMargin = ko.observable("85");
+  self.yMarginOk = ko.computed(function() { return util.isNum(self.yMargin()); });
+  self.transparency = ko.observable(transparencies[0]);
+  self.transparencies = transparencies;
+
+
   self.init = function(application) {
     self.application = application;
 
@@ -68,8 +73,9 @@ LUPAPISTE.StampModel = function() {
       .xMargin("10")
       .yMargin("85")
       .transparency(self.transparencies[0]);
+    console.log("files:", self.files());
 
-    LUPAPISTE.ModalDialog.open("#dialog-stamp-attachments");
+    //LUPAPISTE.ModalDialog.open("#dialog-stamp-attachments");
     return self;
   };
 
