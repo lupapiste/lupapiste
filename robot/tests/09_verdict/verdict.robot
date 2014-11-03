@@ -3,7 +3,7 @@
 Documentation   Application gets verdict
 Suite teardown  Logout
 Resource        ../../common_resource.robot
-Library         DateTime
+Variables       variables.py
 
 *** Test Cases ***
 
@@ -123,8 +123,7 @@ Mikko signs the verdict
   Wait Until  Element should be visible  xpath=//div[@data-test-id='verdict-signature-listing']
   Element should not be visible  xpath=//div[@data-test-id='verdict-signature-ui']
   Element should Contain  xpath=//div[@data-test-id='verdict-signature-listing']  Mikko Intonen
-  ${d} =  Get Current Date  result_format=%-d.%m.%Y
-  Element should Contain  xpath=//div[@data-test-id='verdict-signature-listing']  ${d}
+  Element should Contain  xpath=//div[@data-test-id='verdict-signature-listing']  ${CURRENT_DATE}
 
 *** Keywords ***
 
