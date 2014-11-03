@@ -314,7 +314,8 @@ var attachment = (function() {
     model.showAttachmentVersionHistory(false);
 
     pageutil.hideAjaxWait();
-
+    model.indicator(false);
+    
     authorizationModel.refresh(application, {attachmentId: attachmentId}, function() { 
       model.latestVersion() ? model.showHelp(false) : model.showHelp(true);
       model.init(true);
