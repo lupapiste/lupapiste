@@ -187,3 +187,21 @@
                      localize-application)
                apps)]
     (ok :applications rows)))
+
+(defn- public-fields [{:keys [municipality submitted operations]}]
+  {:municipality municipality
+   :timestamp submitted
+   :operation (i18n/localize :fi "operations" (-> operations first :name))})
+
+(defquery latest-applications
+  {:parameters []
+   :roles      [:anonymous]}
+  [_]
+  (let [query {:submitted {$ne nil}}
+        limit 5
+        apps (query/with-collection "applications"
+               (query/find query)
+               (query/fields [:municipality :submitted :operations])
+               (query/sort {:submitted -1})
+               (query/limit limit))]
+    (ok :applications (map public-fields apps))))

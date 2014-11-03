@@ -30,7 +30,12 @@
                               :type "owner"
                               :role "owner"})
     (fact "has applicant" (:applicant app) => "Pena Panaani")
-    (fact "has allowedAttachmentTypes" (:allowedAttachmentTypes app) => seq)))
+    (fact "has allowedAttachmentTypes" (:allowedAttachmentTypes app) => seq)
+
+    (fact "Draft is not returned by latest-applications"
+      (let [resp (query pena :latest-applications)]
+        resp => ok?
+        (-> resp :applications count) => 0))))
 
 (fact "creating application with message"
   (let [application-id  (create-app-id pena :messages ["hello"])
