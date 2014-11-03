@@ -1,4 +1,5 @@
 application.export.title: Hakemus kunnan rakennusviranomaiselle
+application.export.subtitle: Hakemuksen tiedot
 application.export.state: Hakemuksen vaihe
 application.export.empty: (Tyhjä)
 
