@@ -52,7 +52,8 @@
                                     :target target
                                     :locked locked
                                     :user user
-                                    :created attachment-time})
+                                    :created attachment-time
+                                    :state :ok})
           (error (str (:status resp) " - unable to download " url ": " resp)))
         (-> pk (assoc :urlHash urlhash) (dissoc :liite))))
     pk))
