@@ -13,7 +13,10 @@
       </h1>
       <button class="attachment-delete inline-block" data-bind="ltext: 'statement.delete', click: $root.statementModel.openDeleteDialog, visible: $root.authorization.ok('delete-statement'), enable: $root.authorization.ok('delete-statement')" data-test-id="delete-statement">Poista lausunto</button>
       <div data-bind="with: application">
-        <a class="btn btn-nav-back inline-block" data-test-id="statement-return" data-bind="attr: {href: '#!/application/' + id() + '/statement' }"><span class="icon drill-left-black left-align"></span><span data-bind =" ltext: 'attachment.return'"></span></a></a>
+        <a class="btn btn-nav-back inline-block" data-test-id="statement-return" data-bind="attr: {href: '#!/application/' + id() + '/statement' }">
+          <span data-bind ="ltext: 'attachment.return'"></span>
+          <span class="icon drill-left-black-bigger left-align"></span>
+        </a>
       </div>
     </div>
     <div data-bind="with: $root.attachmentsModel" class="statement-conversation">
@@ -71,11 +74,14 @@
           </label>
           <select id="statement-type-select" class="form-input combobox" data-bind="options: statuses, optionsText: function(item) { return loc('statement.'+item);}, value: selectedStatus, optionsCaption: loc('choose'), disable: !$root.authorization.ok('give-statement')"></select>
         </div>
-        <label class="form-label" for="statement-text" data-bind="ltext: 'statement.text'"></label>
-        <textarea
-          data-bind="attr: {placeholder: loc('statement.message.placeholder')}, textInput: text, readonly: !$root.authorization.ok('give-statement')"
-          id="statement-text"
-          rows="20"></textarea>
+        <div>
+          <label class="form-label" for="statement-text" data-bind="ltext: 'statement.text'"></label>
+          <textarea
+            data-bind="attr: {placeholder: loc('statement.message.placeholder')}, textInput: text, readonly: !$root.authorization.ok('give-statement')"
+            id="statement-text"
+            rows="20">
+          </textarea>
+        </div>
         <button
           data-bind="disable: disabled, click: submit, ltext: submitLtext, visible: $root.authorization.ok('give-statement')"
           id="statement-submit"
