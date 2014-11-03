@@ -58,5 +58,16 @@
       (fact "no matches" (search "vaihtolavan sijoittaminen") => no-results?)
       (fact "one match" (search "Muun  rakennuksen:   rakentaminen") => id-matches?))
 
+    (fact "Submitted application is returned by latest-applications"
+      (let [resp (query pena :latest-applications)
+            applications (:applications resp)
+            application (first applications)]
+        resp => ok?
+        (count applications) => 1
+        (fact "Contains only public information: municipality, operation and timestamp"
+          (:municipality application) => sonja-muni
+          (:operation application) => "Muun rakennuksen rakentaminen"
+          (:timestamp application) => pos?
+          (count (keys application)) => 3)))
     ))
 
