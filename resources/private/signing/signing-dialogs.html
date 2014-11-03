@@ -12,7 +12,7 @@
           <div class="dialog-content">
             <p data-bind="ltext: 'verdict.sign-dialog.contentDescription'"></p>
 
-            <label for="signVerdictPassword" class="form-label"></label>
+            <label for="signVerdictPassword" data-bind="ltext: 'verdict.sign-dialog.verifyPassword'"class="form-label"></label>
             <input id="signVerdictPassword" data-test-id="sign-verdict-password" type="password" data-bind="textInput: password"class="form-input text"/>
 
             <div data-bind="if: errorMessage">

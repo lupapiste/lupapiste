@@ -413,6 +413,19 @@
             <span class="missing icon"></span>
             <span data-bind="ltext: 'missing.title'"></span>
           </div>
+          <div class="attachment-legend">
+            <span class="icon signed"></span>
+            <span data-bind="ltext: 'attachment.signed'"></span>
+          </div>
+          <div class="attachment-legend">
+            <span class="icon transfered"></span>
+            <span data-bind="ltext: 'application.attachmentSentDate'"></span>
+          </div>
+          <div class="attachment-legend">
+            <span class="icon stamped"></span>
+            <span data-bind="ltext: 'attachment.stamped'"></span>
+          </div>
+
           <div class="attachment-actions" data-bind="visible: (!$root.application.inPostVerdictState() && preAttachmentsByOperation().length > 0) || ($root.application.inPostVerdictState() && postAttachmentsByOperation().length > 0)">
             <div>
               <button
@@ -603,8 +616,8 @@
                 <td>
                   <span data-bind="click: $root.attachmentsTab.deleteSingleAttachment,
                                   clickBubble: false,
-                                  visible: $root.authorization.ok('delete-attachment'),
-                                  enable: $root.authorization.ok('delete-attachment'),
+                                  visible: $root.authorization.ok('delete-attachment') && $parent.editable,
+                                  enable: $root.authorization.ok('delete-attachment') && $parent.editable,
                                   attr: {'class': 'icon remove-grey',
                                          'title': loc('attachment.delete'),
                                          'data-test-icon': 'delete-' + type['type-group'] + '.' + type['type-id']}"></span>

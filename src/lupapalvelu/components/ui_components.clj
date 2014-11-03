@@ -192,6 +192,10 @@
    :side-panel   {:js ["side-panel.js"]
                   :html ["side-panel.html"]}
 
+   :password-reset {:depends [:common]
+                    :js ["password-reset.js"]
+                    :html ["password-reset.html"]}
+
    ;; Single Page Apps and standalone components:
    ;; (compare to auth-methods in web.clj)
 
@@ -236,9 +240,11 @@
                  :js      ["login-frame.js"]
                  :css     ["login-frame.css"]}
 
-   :welcome {:depends [:login :register :link-account :debug :user-menu :screenmessages]
-             :js ["welcome.js" "password-reset.js" "company-user.js"]
-             :html ["index.html" "login.html" "password-reset.html" "company-user.html"]}
+   :wordpress {:depends [:login :password-reset]}
+
+   :welcome {:depends [:login :register :link-account :debug :user-menu :screenmessages :password-reset]
+             :js ["welcome.js" "company-user.js"]
+             :html ["index.html" "login.html" "company-user.html"]}
 
    :oskari  {:css ["oskari.css"]}
 

@@ -154,3 +154,20 @@
         (fact "when the 'app-required-fields-filling-obligatory' flag set to True"
           (:app-required-fields-filling-obligatory org) => true
           (-> app :organizationMeta :requiredFieldsFillingObligatory) => true)))))
+
+(facts "municipality-active"
+  (fact "only info requests enabled"
+    (let [m (query pena :municipality-active :municipality "997")]
+      (:applications m) => empty?
+      (:infoRequests m) => ["R"]
+      (:opening m) => empty?))
+  (fact "only applications enabled"
+    (let [m (query pena :municipality-active :municipality "998")]
+      (:applications m) => ["R"]
+      (:infoRequests m) => empty?
+      (:opening m) => empty?))
+  (fact "nothing enabled"
+    (let [m (query pena :municipality-active :municipality "999")]
+      (:applications m) => empty?
+      (:infoRequests m) => empty?
+      (:opening m) => empty?)))

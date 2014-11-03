@@ -203,6 +203,7 @@
                    :oir authority?
                    :authority-admin authority-admin?
                    :admin admin?
+                   :wordpress anyone
                    :login-frame anyone
                    :welcome anyone
                    :oskari anyone
