@@ -123,7 +123,7 @@ Mikko signs the verdict
   Wait Until  Element should be visible  xpath=//div[@data-test-id='verdict-signature-listing']
   Element should not be visible  xpath=//div[@data-test-id='verdict-signature-ui']
   Element should Contain  xpath=//div[@data-test-id='verdict-signature-listing']  Mikko Intonen
-  ${d} =  Get Current Date  result_format=%d.%m.%Y
+  ${d} =  Get Current Date  result_format=%-d.%m.%Y
   Element should Contain  xpath=//div[@data-test-id='verdict-signature-listing']  ${d}
 
 *** Keywords ***
