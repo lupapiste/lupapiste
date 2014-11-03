@@ -62,12 +62,12 @@
 
 (defn- validate-scale [{{meta :meta} :data}]
   (let [scale (:scale meta)]
-    (when (and scale (not-any? #{scale} attachment/attachment-scales))
+    (when (and scale (not (contains? (set attachment/attachment-scales) (keyword scale))))
       (fail :error.illegal-attachment-scale :parameters scale))))
 
 (defn- validate-size [{{meta :meta} :data}]
   (let [size (:size meta)]
-    (when (and size (not-any? #{size} attachment/attachment-sizes))
+    (when (and size (not (contains? (set attachment/attachment-sizes) (keyword size))))
       (fail :error.illegal-attachment-size :parameters size))))
 
 ;;
