@@ -59,6 +59,8 @@
   $(function() {
     if (document.getElementById("reset")) {
       $("#reset").applyBindings(resetModel);
+    }
+    if (document.getElementById("setpw")) {
       $("#setpw").applyBindings(pwInputModel);
     }
   });
