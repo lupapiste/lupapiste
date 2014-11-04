@@ -231,7 +231,9 @@
   )
 
 (defn to-human-readable-property-id [property-id]
-  (join "-" (rest (re-matches human-readable-property-id-pattern property-id))))
+  (let [pid-components     (rest (re-matches human-readable-property-id-pattern property-id))
+        components-as-ints (map read-string pid-components)]
+    (join "-" components-as-ints)))
 
 (defn valid-email? [email]
   (try
