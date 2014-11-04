@@ -351,9 +351,7 @@
     (with-open [out (io/output-stream temp-file)]
       (stamper/stamp stamp fileId out x-margin y-margin transparency))
     (mongo/upload new-file-id filename contentType temp-file :application (:id application))
-    ;; FIXME: these functions should return updates, that could be merged into comment update
-    ;; The new version returned by these functions is ignored for now.
-    (if re-stamp?
+    (let [new-version (if re-stamp? ; FIXME these functions should return updates, that could be merged into comment update
                         (attachment/update-latest-version-content application attachment-id new-file-id (.length temp-file) now)
                         (attachment/set-attachment-version {:application application :attachment-id attachment-id
                                                             :file-id new-file-id :filename filename
