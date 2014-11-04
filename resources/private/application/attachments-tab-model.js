@@ -5,7 +5,6 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
 
   self.appModel = appModel;
 
-  self.stampModel = new LUPAPISTE.StampModel({application: appModel});
   self.stampingMode = ko.observable(false);
 
   var postVerdictStates = {verdictGiven:true, constructionStarted:true, closed:true};
@@ -242,10 +241,6 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
     });
 
     self.refresh(self.appModel);
-  });
-
-  $(function() {
-    $(self.stampModel.selector).applyBindings({stampModel: self.stampModel});
   });
 
   ko.components.register('stamping-component', {
