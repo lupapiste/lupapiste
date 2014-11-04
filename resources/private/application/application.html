@@ -422,7 +422,7 @@
           <div class="attachment-actions" data-bind="visible: (!$root.application.inPostVerdictState() && preAttachmentsByOperation().length > 0) || ($root.application.inPostVerdictState() && postAttachmentsByOperation().length > 0), template: {name: 'attachment-actions-template'}"></div>
 
           <!-- ko if: stampingMode -->
-          <div data-bind="component: {name: 'stamping-component', params: {application: appModel}}"></div>
+          <div data-bind="component: {name: 'stamping-component', params: {application: appModel, attachments: $root.application.inPostVerdictState() ? postAttachmentsByOperation : preAttachmentsByOperation}}"></div>
           <!-- /ko -->
 
           <div data-bind="ifnot: stampingMode">

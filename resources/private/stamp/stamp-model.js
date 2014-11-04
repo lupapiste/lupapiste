@@ -5,23 +5,23 @@ LUPAPISTE.StampModel = function(params) {
 
   function stampableAttachment(a) {
     var ct = "";
-    if (a.latestVersion && typeof a.latestVersion.contentType === "function") {
-      ct = a.latestVersion.contentType();
+    if (a.latestVersion) {
+      ct = a.latestVersion.contentType;
     }
     return ct === "application/pdf" || ct.search(/^image\//) === 0;
   }
 
   function normalizeAttachment(a) {
-    var versions = _(a.versions()).reverse().value(),
-        restamp = (typeof versions[0].stamped === "function" && versions[0].stamped()),
+    var versions = _(a.versions).reverse().value(),
+        restamp = versions[0].stamped,
         selected = restamp ? versions[1] : versions[0];
     return {
-      id:           a.id(),
-      type:         { "type-group": a.type["type-group"](), "type-id": a.type["type-id"]() },
-      contentType:  selected.contentType(),
-      filename:     selected.filename(),
-      version:      { major: selected.version.major(), minor: selected.version.minor() },
-      size:         selected.size(),
+      id:           a.id,
+      type:         { "type-group": a.type["type-group"], "type-id": a.type["type-id"] },
+      contentType:  selected.contentType,
+      filename:     selected.filename,
+      version:      { major: selected.version.major, minor: selected.version.minor },
+      size:         selected.size,
       selected:     ko.observable(true),
       status:       ko.observable(""),
       restamp:      restamp
@@ -41,10 +41,20 @@ LUPAPISTE.StampModel = function(params) {
   self.statusDone      = 4;  //   -       -       +
   self.statusNoFiles   = 5;  //   -       -       +
 
-console.log(params);
   // Init
   self.application = params.application;
-  self.files = ko.observable(_(self.application.attachments()).filter(stampableAttachment).map(normalizeAttachment).value());
+  self.newFiles = params.attachments;
+
+  self.newFilesFiltered = ko.observableArray(_.map(self.newFiles(), function(group) {
+    return {
+      attachments: _.filter(group.attachments, stampableAttachment),
+      groupName: group.groupName,
+      groupDesc: group.groupDesc,
+      name: group.name
+    };
+  }));
+
+  self.files = ko.observable(_(ko.mapping.toJS(self.application.attachments())).filter(stampableAttachment).map(normalizeAttachment).value());
 
   self.status = ko.observable(self.files().length > 0 ? self.statusReady : self.statusNoFiles);
   self.text = ko.observable(loc("stamp.verdict"));
