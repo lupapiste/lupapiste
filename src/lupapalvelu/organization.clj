@@ -190,11 +190,23 @@
   [_]
   (get-organization organizationId))
 
-(defquery "municipalities-with-organization"
+(defquery municipalities-with-organization
   {:description "Returns a list of municipality IDs that are affiliated with Lupapiste."
    :roles [:applicant :authority]}
   [_]
   (ok :municipalities (municipalities-with-organization)))
+
+(defquery municipality-active
+  {:parameters [municipality]
+   :roles      [:anonymous]}
+  [_]
+  (let [organizations (get-organizations {:scope.municipality municipality})
+        scopes (flatten (map :scope organizations))]
+      (ok
+        :applications (->> scopes (filter :new-application-enabled) (map :permitType))
+        :infoRequests (->> scopes (filter :inforequest-enabled) (map :permitType))
+        :opening [] ; TODO
+        )))
 
 (defquery all-operations-for-organization
   {:description "Returns operations that match the permit types of the organization whose id is given as parameter"

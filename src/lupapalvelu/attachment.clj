@@ -25,26 +25,26 @@
 (def attachment-meta-types [:size :scale :op :contents])
 
 (def attachment-scales
-  ["1:20"
-   "1:50"
-   "1:100"
-   "1:200"
-   "1:500"
+  [:1:20
+   :1:50
+   :1:100
+   :1:200
+   :1:500
    :muu])
 
 (def attachment-sizes
-  ["A0"
-   "A1"
-   "A2"
-   "A3"
-   "A4"
-   "A5"
-   "B0"
-   "B1"
-   "B2"
-   "B3"
-   "B4"
-   "B5"
+  [:A0
+   :A1
+   :A2
+   :A3
+   :A4
+   :A5
+   :B0
+   :B1
+   :B2
+   :B3
+   :B4
+   :B5
    :muu])
 
 (def ^:private attachment-types-R
@@ -336,10 +336,13 @@
     latest))
 
 (defn set-attachment-version
-  ([{:keys [application attachment-id file-id filename content-type size comment-text now user stamped retry-limit make-comment state]
-     :or {retry-limit 5 make-comment true state :requires_authority_action}
-     :as options}]
-    {:pre [(and (map? options) (map? (:application options)))]}
+  ([options]
+    {:pre [(map? options)]}
+    (set-attachment-version options 5))
+  ([{:keys [application attachment-id file-id filename content-type size comment-text now user stamped make-comment state target]
+     :or {make-comment true state :requires_authority_action} :as options}
+    retry-limit]
+    {:pre [(map? application) (string? attachment-id) (string? file-id) (string? filename) (string? content-type) (number? size) (number? now) (map? user) (not (nil? stamped))]}
     ; TODO refactor to use proper optimistic locking
     ; TODO refactor to return version-model and mongo updates, so that updates can be merged into single statement
     (if (pos? retry-limit)
@@ -354,14 +357,14 @@
                            ; Conversion could be done here as well, but we don't want to lose information.
                            :filename filename
                            :contentType content-type
-                           :size     size
-                           :stamped  stamped}
+                           :size size
+                           :stamped stamped}
 
-            comment-target {:type     :attachment
-                            :id       attachment-id
-                            :version  next-version
+            comment-target {:type :attachment
+                            :id attachment-id
+                            :version next-version
                             :filename filename
-                            :fileId   file-id}
+                            :fileId file-id}
 
             result-count (update-application
                            (application->command application)
@@ -370,6 +373,7 @@
                                                       :latestVersion.version.minor (:minor latest-version)}}}
                            (util/deep-merge
                              (when make-comment (comment/comment-mongo-update (:state application) comment-text comment-target :system false user nil now))
+                             (when target {$set {:attachments.$.target target}})
                              {$set {:modified now
                                     :attachments.$.modified now
                                     :attachments.$.state  state
@@ -380,10 +384,10 @@
         (if (pos? result-count)
           (assoc version-model :id attachment-id)
           (do
-            (errorf "Latest version of attachment %s changed before new version could be saved, retry %d time(s)." attachment-id retry-limit)
-            (set-attachment-version (assoc options
-                                      :application (mongo/by-id :applications (:id application))
-                                      :retry-limit (dec retry-limit))))))
+            (errorf
+              "Latest version of attachment %s changed before new version could be saved, retry %d time(s)."
+              attachment-id retry-limit)
+            (set-attachment-version (assoc options :application (mongo/by-id :applications (:id application))) (dec retry-limit)))))
       (do
         (error "Concurrency issue: Could not save attachment version meta data.")
         nil))))
@@ -419,9 +423,7 @@
                         (ss/blank? attachment-id) (create-attachment application attachment-type created target locked)
                         (pos? (mongo/count :applications {:_id (:id application) :attachments.id attachment-id})) attachment-id
                         :else (create-attachment application attachment-type created target locked attachment-id))]
-    (set-attachment-version (-> options
-                              (select-keys [:application :attachment-id :file-id :filename :content-type :size :comment-text :user])
-                              (assoc :stamped false :now created)))))
+    (set-attachment-version (assoc options :attachment-id attachment-id :now created :stamped false))))
 
 (defn parse-attachment-type [attachment-type]
   (if-let [match (re-find #"(.+)\.(.+)" (or attachment-type ""))]

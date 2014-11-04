@@ -62,12 +62,12 @@
 
 (defn- validate-scale [{{meta :meta} :data}]
   (let [scale (:scale meta)]
-    (when (and scale (not-any? #{scale} attachment/attachment-scales))
+    (when (and scale (not (contains? (set attachment/attachment-scales) (keyword scale))))
       (fail :error.illegal-attachment-scale :parameters scale))))
 
 (defn- validate-size [{{meta :meta} :data}]
   (let [size (:size meta)]
-    (when (and size (not-any? #{size} attachment/attachment-sizes))
+    (when (and size (not (contains? (set attachment/attachment-sizes) (keyword size))))
       (fail :error.illegal-attachment-size :parameters size))))
 
 ;;
@@ -306,16 +306,16 @@
       (fail! (:text validation-error))))
 
   (when-not (attachment/attach-file! {:application application
-                                      :filename filename
-                                      :size size
-                                      :content tempfile
-                                      :attachment-id attachmentId
-                                      :attachment-type attachmentType
-                                      :comment-text text
-                                      :target target
-                                      :locked locked
-                                      :user user
-                                      :created created})
+                             :filename filename
+                             :size size
+                             :content tempfile
+                             :attachment-id attachmentId
+                             :attachment-type attachmentType
+                             :comment-text text
+                             :target target
+                             :locked locked
+                             :user user
+                             :created created})
     (fail :error.unknown)))
 
 
@@ -354,10 +354,12 @@
     ;; FIXME: these functions should return updates, that could be merged into comment update
     ;; The new version returned by these functions is ignored for now.
     (if re-stamp?
-      (attachment/update-latest-version-content application attachment-id new-file-id (.length temp-file) now)
-      (attachment/set-attachment-version {:application application :attachment-id attachment-id :filename filename :now now :user user
-                                          :file-id new-file-id :content-type contentType :size (.length temp-file) :comment-text nil
-                                          :stamped true :retry-limit 5 :make-comment false :state :ok}))
+                        (attachment/update-latest-version-content application attachment-id new-file-id (.length temp-file) now)
+                        (attachment/set-attachment-version {:application application :attachment-id attachment-id
+                                                            :file-id new-file-id :filename filename
+                                                            :content-type contentType :size (.length temp-file)
+                                                            :comment-text nil :now now :user user
+                                                            :stamped true :make-comment false :state :ok}))])
     (try (.delete temp-file) (catch Exception _))))
 
 (defn- stamp-attachments! [file-infos {:keys [text created organization transparency job-id application] :as context}]
