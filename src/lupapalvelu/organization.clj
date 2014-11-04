@@ -140,7 +140,9 @@
 
 (defcommand update-organization
   {:description "Update organization details."
-   :parameters [permitType municipality inforequestEnabled applicationEnabled openInforequestEnabled openInforequestEmail]
+   :parameters [permitType municipality
+                inforequestEnabled applicationEnabled openInforequestEnabled openInforequestEmail
+                opening]
    :roles [:admin]}
   [_]
   (mongo/update-by-query :organizations
@@ -148,7 +150,8 @@
       {$set {:scope.$.inforequest-enabled inforequestEnabled
              :scope.$.new-application-enabled applicationEnabled
              :scope.$.open-inforequest openInforequestEnabled
-             :scope.$.open-inforequest-email openInforequestEmail}})
+             :scope.$.open-inforequest-email openInforequestEmail
+             :scope.$.opening (when (number? opening) opening)}})
   (ok))
 
 (defcommand add-organization-link
