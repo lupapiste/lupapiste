@@ -200,12 +200,14 @@
    :roles      [:anonymous]}
   [_]
   (let [organizations (get-organizations {:scope.municipality municipality})
-        scopes (flatten (map :scope organizations))]
+        scopes (->> organizations
+                 (map :scope)
+                 flatten
+                 (filter #(= municipality (:municipality %))))]
       (ok
         :applications (->> scopes (filter :new-application-enabled) (map :permitType))
         :infoRequests (->> scopes (filter :inforequest-enabled) (map :permitType))
-        :opening [] ; TODO
-        )))
+        :opening (->> scopes (filter :opening) (map #(select-keys % [:permitType :opening]))))))
 
 (defquery all-operations-for-organization
   {:description "Returns operations that match the permit types of the organization whose id is given as parameter"
