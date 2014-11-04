@@ -124,6 +124,8 @@
               </div>
             </div>
 
+            <div class="clear" data-bind="template: {name: 'attachments-template-op', data: newFilesFiltered()}"></div>
+
             <div class="stamp-status">
               <span data-bind="text: loc(['stamp.status', status().toString()])"></span>
             </div>
@@ -140,7 +142,8 @@
               <button data-bind="
                   ltext: 'stamp.cancel',
                   enable: status() === statusReady,
-                  visible: status() <= statusReady"
+                  visible: status() <= statusReady,
+                  click: $parent.cancelStamping"
                 class="btn btn-dialog close">
               </button>
               <button data-bind="
