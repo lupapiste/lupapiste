@@ -44,8 +44,27 @@ LUPAPISTE.SidePanelModel = function() {
     self.authorities(authorityInfos);
   }
 
+  self.refreshConversations = function(application) {
+    if (application) {
+      var type = pageutil.getPage();
+      self.mainConversation(true);
+      switch(type) {
+        case "attachment":
+          self.mainConversation(false);
+        case "statement":
+          self.comment().refresh(application, false, {type: type, id: pageutil.lastSubPage()});
+          break;
+        case "verdict":
+          self.comment().refresh(application, false, {type: type, id: pageutil.lastSubPage()}, ["authority"]);
+          break;
+        default:
+          self.comment().refresh(application, true);
+          break;
+      }
+    }
+  }
+
   self.refresh = function(application, authorities) {
-    console.log("refresh side-panel", application, authorities);
     // TODO applicationId, inforequest etc. could be computed
     if (application && authorities) {
       self.application(application);
@@ -59,24 +78,7 @@ LUPAPISTE.SidePanelModel = function() {
       self.permitType(self.application().permitType);
       initAuthoritiesSelectList(self.authorities());
     }
-
-    if (self.application()) {
-      var type = pageutil.getPage();
-      self.mainConversation(true);
-      switch(type) {
-        case "attachment":
-          self.mainConversation(false);
-        case "statement":
-          self.comment().refresh(self.application(), false, {type: type, id: pageutil.lastSubPage()});
-          break;
-        case "verdict":
-          self.comment().refresh(self.application(), false, {type: type, id: pageutil.lastSubPage()}, ["authority"]);
-          break;
-        default:
-          self.comment().refresh(self.application(), true);
-          break;
-      }
-    }
+    self.refreshConversations(self.application());
   };
 
   self.toggleConversationPanel = function(data, event) {
@@ -115,7 +117,7 @@ LUPAPISTE.SidePanelModel = function() {
   var pages = ["application","attachment","statement","neighbors","verdict"];
   var lock = false;
 
-  var refreshSidePanel = function(application, authorities) {
+  var refreshSidePanel = function(previousHash) {
     var currentPage = pageutil.getPage();
     if (self.previousPage && currentPage !== self.previousPage && self.comment().text()) {
       lock = true;
@@ -123,27 +125,27 @@ LUPAPISTE.SidePanelModel = function() {
         loc("application.conversation.unsentMessage.title"),
         loc("application.conversation.unsentMessage"),
         {title: loc("application.conversation.sendMessage"), fn: function() {
-          self.comment().submit()
-          self.refresh(application, authorities);
+          if (previousHash) {
+            location.hash = previousHash;            
+          }
           lock = false;
-          // self.refresh(application, authorities);
+          if (!self.showConversationPanel()) {
+            self.toggleConversationPanel();
+          }
         }},
         {title: loc("application.conversation.clearMessage"), fn: function() {
           self.comment().text(undefined);
-          self.refresh(application, authorities);
+          self.refresh();
           lock = false;
+          self.previousPage = pageutil.getPage();
         }}
       );
     } else if (!lock) {
-      self.refresh(application, authorities);
+      self.refresh();
+      self.previousPage = pageutil.getPage();
     }
 
-    // Show side panel on specified pages
-    if(_.contains(pages, pageutil.getPage())) {
-      $("#side-panel-template").addClass("visible");
-    }
 
-    self.previousPage = pageutil.getPage();
   }
 
   hub.subscribe({type: "dialog-close"}, function(data) {
@@ -156,14 +158,20 @@ LUPAPISTE.SidePanelModel = function() {
 
   hub.subscribe({type: "page-change"}, function(data) {
     if(_.contains(pages.concat("applications"), pageutil.getPage())) {
-      refreshSidePanel();
+      refreshSidePanel(data.previousHash);
+    }
+    // Show side panel on specified pages
+    if(_.contains(pages, pageutil.getPage())) {
+      $("#side-panel-template").addClass("visible");
     }
   });
 
   repository.loaded(pages, function(application, applicationDetails) {
-    self.authorization.refreshWithCallback({id: applicationDetails.application.id}, function() {
-      refreshSidePanel(application, applicationDetails.authorities);
-    });
+    if (!lock) {
+      self.authorization.refreshWithCallback({id: applicationDetails.application.id}, function() {
+        self.refresh(application, applicationDetails.authorities);
+      });
+    }
   });
 };
 
