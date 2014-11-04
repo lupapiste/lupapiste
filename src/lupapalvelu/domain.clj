@@ -158,7 +158,7 @@
 (defn invite [application email]
   (first (filter #(= (lower-case email) (:email %)) (invites application))))
 
-(defn no-pending-invites [application user-id]
+(defn no-pending-invites? [application user-id]
   (not-any? #(= user-id (-> % :user :id)) (invites application)))
 
 ;;
