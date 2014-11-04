@@ -342,7 +342,7 @@
   ([{:keys [application attachment-id file-id filename content-type size comment-text now user stamped make-comment state target]
      :or {make-comment true state :requires_authority_action} :as options}
     retry-limit]
-    {:pre [(map? application) (string? attachment-id) (string? file-id) (string? filename) (string? content-type) (number? size) (number? now) (map? user) (not (nil? stamped))]}
+    {:pre [(map? options) (map? application) (string? attachment-id) (string? file-id) (string? filename) (string? content-type) (number? size) (number? now) (map? user) (not (nil? stamped))]}
     ; TODO refactor to use proper optimistic locking
     ; TODO refactor to return version-model and mongo updates, so that updates can be merged into single statement
     (if (pos? retry-limit)
@@ -413,17 +413,16 @@
              :attachments.$.latestVersion.size size
              :attachments.$.latestVersion.created now}})))
 
-
 (defn update-or-create-attachment
   "If the attachment-id matches any old attachment, a new version will be added.
    Otherwise a new attachment is created."
   [{:keys [application attachment-id attachment-type file-id filename content-type size comment-text created user target locked] :as options}]
   {:pre [(map? application)]}
-  (let [attachment-id (cond
-                        (ss/blank? attachment-id) (create-attachment application attachment-type created target locked)
-                        (pos? (mongo/count :applications {:_id (:id application) :attachments.id attachment-id})) attachment-id
-                        :else (create-attachment application attachment-type created target locked attachment-id))]
-    (set-attachment-version (assoc options :attachment-id attachment-id :now created :stamped false))))
+  (let [att-id (cond
+                 (ss/blank? attachment-id) (create-attachment application attachment-type created target locked)
+                 (pos? (mongo/count :applications {:_id (:id application) :attachments.id attachment-id})) attachment-id
+                 :else (create-attachment application attachment-type created target locked attachment-id))]
+    (set-attachment-version (assoc options :attachment-id att-id :now created :stamped false))))
 
 (defn parse-attachment-type [attachment-type]
   (if-let [match (re-find #"(.+)\.(.+)" (or attachment-type ""))]
