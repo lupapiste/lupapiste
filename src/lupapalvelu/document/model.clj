@@ -115,7 +115,7 @@
   (when-not (and
               (not (ss/blank? v))
               (domain/has-auth? application v)
-              (domain/no-pending-invites application v))
+              (domain/no-pending-invites? application v))
     [:err "application-does-not-have-given-auth"]))
 
 (defmethod validate-field nil [_ _ _]

@@ -88,6 +88,9 @@ LUPAPISTE.VerdictsModel = function() {
       pageutil.showAjaxWait();
       repository.load(applicationId);
     })
+    .error(function(d) {
+      LUPAPISTE.ModalDialog.showDynamicOk(loc("verdict.fetch.title"), loc(d.text));
+    })
     .call();
   };
 
