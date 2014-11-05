@@ -121,7 +121,8 @@
       (Integer/parseInt (cond
                           (keyword? x) (name x)
                           (number? x)  (str (int x))
-                          :else        (str x)))
+                          :else        (str x))
+                        10)
       (catch Exception e
         default))))
 
@@ -232,7 +233,7 @@
 (defn to-human-readable-property-id [property-id]
   (->> (re-matches human-readable-property-id-pattern property-id)
        (rest)
-       (map read-string)
+       (map ->int)
        (join "-")))
 
 (defn valid-email? [email]
