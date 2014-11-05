@@ -27,7 +27,6 @@
             [lupapalvelu.proxy-services :as proxy-services]
             [lupapalvelu.organization]
             [lupapalvelu.application :as application]
-            [lupapalvelu.ke6666 :as ke6666]                 ;TODO remove
             [lupapalvelu.pdf-export :as pdf-export]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.token :as token]
