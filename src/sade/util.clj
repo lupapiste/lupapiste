@@ -227,8 +227,7 @@
 
 (def human-readable-property-id-pattern
   "Regex for splitting db-saved property id to human readable form"
-  #"^([0-9]{1,3})([0-9]{1,3})([0-9]{1,4})([0-9]{1,4})$"
-  )
+  #"^([0-9]{1,3})([0-9]{1,3})([0-9]{1,4})([0-9]{1,4})$")
 
 (defn to-human-readable-property-id [property-id]
   (->> (re-matches human-readable-property-id-pattern property-id)
