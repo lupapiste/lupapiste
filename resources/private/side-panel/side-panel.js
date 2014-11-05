@@ -44,6 +44,26 @@ LUPAPISTE.SidePanelModel = function() {
     self.authorities(authorityInfos);
   }
 
+  self.refreshConversations = function(application) {
+    if (application) {
+      var type = pageutil.getPage();
+      self.mainConversation(true);
+      switch(type) {
+        case "attachment":
+          self.mainConversation(false);
+        case "statement":
+          self.comment().refresh(application, false, {type: type, id: pageutil.lastSubPage()});
+          break;
+        case "verdict":
+          self.comment().refresh(application, false, {type: type, id: pageutil.lastSubPage()}, ["authority"]);
+          break;
+        default:
+          self.comment().refresh(application, true);
+          break;
+      }
+    }
+  }
+
   self.refresh = function(application, authorities) {
     // TODO applicationId, inforequest etc. could be computed
     if (application && authorities) {
@@ -58,24 +78,7 @@ LUPAPISTE.SidePanelModel = function() {
       self.permitType(self.application().permitType);
       initAuthoritiesSelectList(self.authorities());
     }
-
-    if (self.application()) {
-      var type = pageutil.getPage();
-      self.mainConversation(true);
-      switch(type) {
-        case "attachment":
-          self.mainConversation(false);
-        case "statement":
-          self.comment().refresh(self.application(), false, {type: type, id: pageutil.lastSubPage()});
-          break;
-        case "verdict":
-          self.comment().refresh(self.application(), false, {type: type, id: pageutil.lastSubPage()}, ["authority"]);
-          break;
-        default:
-          self.comment().refresh(self.application(), true);
-          break;
-      }
-    }
+    self.refreshConversations(self.application());
   };
 
   self.toggleConversationPanel = function(data, event) {
@@ -92,6 +95,18 @@ LUPAPISTE.SidePanelModel = function() {
           .call();
       }}, 1000);
   };
+
+  self.highlightConversation = function() {
+    if (!self.showConversationPanel()) {
+      self.toggleConversationPanel();
+    } else {
+      self.comment().isSelected(true);
+    }
+    $('#conversation-panel').addClass("highlight-conversation");
+    setTimeout(function() {
+      $('#conversation-panel').removeClass("highlight-conversation");
+    }, 2000);
+  }
 
   self.toggleNoticePanel = function(data, event) {
     self.showNoticePanel(!self.showNoticePanel());
@@ -112,24 +127,59 @@ LUPAPISTE.SidePanelModel = function() {
   };
 
   var pages = ["application","attachment","statement","neighbors","verdict"];
+  var unsentMessage = false;
 
-  hub.subscribe({type: "page-change"}, function() {
+  var refreshSidePanel = function(previousHash) {
     var currentPage = pageutil.getPage();
     if (self.previousPage && currentPage !== self.previousPage && self.comment().text()) {
-      // TODO dialog to ask if user want's to delete unsent message on page change
-      self.comment().text(undefined);      
-    }
-    self.previousPage = pageutil.getPage();
-    if(_.contains(pages, pageutil.getPage())) {
+      unsentMessage = true;
+      LUPAPISTE.ModalDialog.showDynamicYesNo(
+        loc("application.conversation.unsentMessage.header"),
+        loc("application.conversation.unsentMessage"),
+        {title: loc("application.conversation.sendMessage"), fn: function() {
+          if (previousHash) {
+            location.hash = previousHash;            
+          }
+          unsentMessage = false;
+          self.highlightConversation();
+        }},
+        {title: loc("application.conversation.clearMessage"), fn: function() {
+          self.comment().text(undefined);
+          self.refresh();
+          unsentMessage = false;
+          self.previousPage = currentPage;
+        }}
+      );
+    } else if (!unsentMessage) {
       self.refresh();
+      self.previousPage = currentPage;
+    }
+  }
+
+  hub.subscribe({type: "dialog-close"}, function(data) {
+    if (unsentMessage) {
+      self.comment().text(undefined);
+      repository.load(self.applicationId());
+      unsentMessage = false;
+    }
+  });
+
+  hub.subscribe({type: "page-change"}, function(data) {
+    if(_.contains(pages.concat("applications"), pageutil.getPage())) {
+      refreshSidePanel(data.previousHash);
+    }
+    // Show side panel on specified pages
+    if(_.contains(pages, pageutil.getPage())) {
       $("#side-panel-template").addClass("visible");
     }
   });
 
   repository.loaded(pages, function(application, applicationDetails) {
-    self.authorization.refreshWithCallback({id: applicationDetails.application.id}, function() {
-      self.refresh(application, applicationDetails.authorities);
-    });
+    if (!unsentMessage) {
+      self.authorization.refreshWithCallback({id: applicationDetails.application.id}, function() {
+        self.refresh(application, applicationDetails.authorities);
+      });
+    }
   });
 };
 
