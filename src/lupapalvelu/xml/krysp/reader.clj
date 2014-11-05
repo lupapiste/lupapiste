@@ -447,13 +447,17 @@
             asianTiedot (cr/all-of asia [:asianTiedot :Asiantiedot])
             toimenpidetieto (first (map cr/all-of (select asia [:toimenpidetieto])))
 
+            Rakennuspaikka (cr/all-of asia [:rakennuspaikkatieto :Rakennuspaikka])
+            sijainti-Rakennuspaikka (-> Rakennuspaikka :sijaintitieto :Sijainti :piste :Point :pos)
+            ;; TODO: Ruotsinkielinen osoite tulee kakkosena listalla. Otetaanko se mukaan?
+            osoite-Rakennuspaikka (-> Rakennuspaikka :osoite :osoitenimi :teksti (#(if (sequential? %) (first %) %)))
+
             referenssi-piste (cr/all-of asia [:referenssiPiste :Point :pos])
 ;            _  (println "\n referenssi-piste: " referenssi-piste "\n")
 
-;            sijaintitieto (-> toimenpidetieto ((comp :Sijainti :sijaintitieto #(or (:Rakennus %) (:Rakennelma %)) #(or (:rakennustieto %) (:rakennelmatieto %)) :Toimenpide)))
-            rakennus-tai-rakennelma (-> toimenpidetieto :Toimenpide (#(or (:rakennustieto %) (:rakennelmatieto %))) (#(or (:Rakennus %) (:Rakennelma %))))
-            sijaintitieto (-> rakennus-tai-rakennelma :sijaintitieto :Sijainti :piste :Point :pos)
-            osoite (-> rakennus-tai-rakennelma :rakennuksenTiedot :osoite)
+            Rakennus (-> toimenpidetieto :Toimenpide (#(or (:rakennustieto %) (:rakennelmatieto %))) (#(or (:Rakennus %) (:Rakennelma %))))
+            sijainti-Rakennus (-> Rakennus :sijaintitieto :Sijainti :piste :Point :pos)
+            osoite-Rakennus (-> Rakennus :rakennuksenTiedot :osoite :osoitenimi :teksti)
 
             ;; Varaudu tallaiseen. Huomaa srsName ja pilkku koordinaattien valimerkkina! (kts. LP-734-2014-00001:n paatossanoma)
 ;            <yht:pistesijainti>
@@ -470,8 +474,12 @@
                                 (subs source-projection-attr source-projection-name-index))
             ]
 
-;        (println "\n sijaintitieto: ")
-;        (clojure.pprint/pprint sijaintitieto)
+;        (println "\n Rakennuspaikka: ")
+;        (clojure.pprint/pprint Rakennuspaikka)
+;        (println "\n")
+
+;        (println "\n sijainti-Rakennus: ")
+;        (clojure.pprint/pprint sijainti-Rakennus)
 ;        (println "\n")
 
         ;; return nil as app-info if source projection is not found
@@ -484,9 +492,11 @@
                     ;; throws exception if cannot parse a number from the string
                     (read-string projection-id-str))
                   (catch Exception e (error e "Projection number could not be parsed from: " source-projection-attr)))))
-          ;; TODO: pitaisi kayttaa referenssipistetta? Se ei osoita nyt talla hetkella oikeaan pisteeseen.
+
+          ;; TODO: _Kvintus 5.11.2014_: sijainti-Rakennuspaikka osoitteen ja sijainnin oikea lahde.
+          ;;       Referenssipiste ei osoita nyt talla hetkella oikeaan pisteeseen.
           (when-let [coord-array (try
-                                   (->coordinate-array #_referenssi-piste sijaintitieto source-projection)
+                                   (->coordinate-array #_referenssi-piste #_sijainti-Rakennuspaikka sijainti-Rakennus source-projection)
                                    (catch Exception e (error e "Coordinate conversion failed")))]
 ;            (println "\n coord-array: " coord-array "\n")
             {:id (->lp-tunnus asia)
@@ -504,7 +514,7 @@
              :toimenpidetieto toimenpidetieto
 
              :location {:x (first coord-array) :y (second coord-array)}
-             :osoite (-> osoite :osoitenimi :teksti)
+             :osoite #_osoite-Rakennuspaikka osoite-Rakennus
              })
 
           (error "No source projection could be parsed from verdict xml for kuntalupatunnus " kuntalupatunnus)
