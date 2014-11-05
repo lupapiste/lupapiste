@@ -96,6 +96,18 @@ LUPAPISTE.SidePanelModel = function() {
       }}, 1000);
   };
 
+  self.highlightConversation = function() {
+    if (!self.showConversationPanel()) {
+      self.toggleConversationPanel();
+    } else {
+      self.comment().isSelected(true);
+    }
+    $('#conversation-panel').addClass("highlight-conversation");
+    setTimeout(function() {
+      $('#conversation-panel').removeClass("highlight-conversation");
+    }, 2000);
+  }
+
   self.toggleNoticePanel = function(data, event) {
     self.showNoticePanel(!self.showNoticePanel());
     self.showConversationPanel(false);
@@ -115,44 +127,40 @@ LUPAPISTE.SidePanelModel = function() {
   };
 
   var pages = ["application","attachment","statement","neighbors","verdict"];
-  var lock = false;
+  var unsentMessage = false;
 
   var refreshSidePanel = function(previousHash) {
     var currentPage = pageutil.getPage();
     if (self.previousPage && currentPage !== self.previousPage && self.comment().text()) {
-      lock = true;
+      unsentMessage = true;
       LUPAPISTE.ModalDialog.showDynamicYesNo(
-        loc("application.conversation.unsentMessage.title"),
+        loc("application.conversation.unsentMessage.header"),
         loc("application.conversation.unsentMessage"),
         {title: loc("application.conversation.sendMessage"), fn: function() {
           if (previousHash) {
             location.hash = previousHash;            
           }
-          lock = false;
-          if (!self.showConversationPanel()) {
-            self.toggleConversationPanel();
-          }
+          unsentMessage = false;
+          self.highlightConversation();
         }},
         {title: loc("application.conversation.clearMessage"), fn: function() {
           self.comment().text(undefined);
           self.refresh();
-          lock = false;
-          self.previousPage = pageutil.getPage();
+          unsentMessage = false;
+          self.previousPage = currentPage;
         }}
       );
-    } else if (!lock) {
+    } else if (!unsentMessage) {
       self.refresh();
-      self.previousPage = pageutil.getPage();
+      self.previousPage = currentPage;
     }
-
-
   }
 
   hub.subscribe({type: "dialog-close"}, function(data) {
-    if (lock) {
+    if (unsentMessage) {
       self.comment().text(undefined);
       repository.load(self.applicationId());
-      lock = false;
+      unsentMessage = false;
     }
   });
 
@@ -167,7 +175,7 @@ LUPAPISTE.SidePanelModel = function() {
   });
 
   repository.loaded(pages, function(application, applicationDetails) {
-    if (!lock) {
+    if (!unsentMessage) {
       self.authorization.refreshWithCallback({id: applicationDetails.application.id}, function() {
         self.refresh(application, applicationDetails.authorities);
       });
