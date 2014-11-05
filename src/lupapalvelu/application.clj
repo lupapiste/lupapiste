@@ -610,6 +610,7 @@
 
                   created-application (assoc (do-create-application command manual-schema-datas)
                                         :address (:osoite app-info)
+                                        :title (:osoite app-info)
                                         :location (:location app-info)
 ;                                        :state state
                                         )
