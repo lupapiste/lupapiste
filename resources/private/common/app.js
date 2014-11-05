@@ -18,6 +18,8 @@ var LUPAPISTE = LUPAPISTE || {};
     self.session = undefined;
     self.allowAnonymous = allowAnonymous;
     self.showUserMenu = (showUserMenu !== undefined) ? showUserMenu : !allowAnonymous;
+    self.previousHash;
+    self.currentHash;
 
     /**
     * Window unload event handler
@@ -53,18 +55,18 @@ var LUPAPISTE = LUPAPISTE || {};
         self.currentPage = pageId;
       }
 
-      hub.send("page-change", { pageId: pageId, pagePath: pagePath });
+      hub.send("page-change", { pageId: pageId, pagePath: pagePath, currentHash: "!/" + self.currentHash, previousHash: "!/" + self.previousHash });
     };
 
     self.hashChanged = function () {
-      var hash = (location.hash || "").substr(3);
-
-      if (hash === "") {
+      self.previousHash = self.currentHash      
+      self.currentHash = (location.hash || "").substr(3);
+      if (self.currentHash === "") {
         window.location.hash = "!/" + self.startPage;
         return;
       }
 
-      var path = hash.split("/");
+      var path = self.currentHash.split("/");
 
       if (!self.allowAnonymous && self.session === undefined) {
         ajax.query("user")
