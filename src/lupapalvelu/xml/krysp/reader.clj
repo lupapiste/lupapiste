@@ -10,6 +10,7 @@
             [sade.util :as util]
             [sade.common-reader :as cr]
             [sade.strings :as ss]
+            [sade.coordinate :as coordinate]
             [lupapalvelu.core :refer [now]]
             [lupapalvelu.document.schemas :as schema]
             [lupapalvelu.permit :as permit]
@@ -415,6 +416,9 @@
 
 (permit/register-function permit/R :verdict-extras-krysp-reader buildings-summary-for-application)
 
+
+(def ^:private to-projection "EPSG:3067")
+
 (defn get-app-info-from-message [xml ->function kuntalupatunnus]
   (let [xml-no-ns (cr/strip-xml-namespaces xml)
         asiat (select-asiat xml)
@@ -433,9 +437,78 @@
                                    (sort-by :pvm))
             viimeisin-tila (last kasittelynTilatiedot)
             asianTiedot (cr/all-of asia [:asianTiedot :Asiantiedot])
-            toimenpidetieto (map cr/all-of (select asia [:toimenpidetieto]))
-            sijaintitieto (-> toimenpidetieto first ((comp :Sijainti :sijaintitieto :Rakennus #(or (:rakennustieto %) (:rakennelmatieto %)) :Toimenpide)))
+            toimenpidetieto (first (map cr/all-of (select asia [:toimenpidetieto])))
+
+;            sijaintitieto (-> toimenpidetieto ((comp :Sijainti :sijaintitieto #(or (:Rakennus %) (:Rakennelma %)) #(or (:rakennustieto %) (:rakennelmatieto %)) :Toimenpide)))
+            rakennus-tai-rakennelma (-> toimenpidetieto :Toimenpide (#(or (:rakennustieto %) (:rakennelmatieto %))) (#(or (:Rakennus %) (:Rakennelma %))))
+            sijaintitieto (-> rakennus-tai-rakennelma :sijaintitieto :Sijainti :piste :Point)
+            osoite (-> rakennus-tai-rakennelma :rakennuksenTiedot :osoite)
+
+            source-projection-name (select1-attribute-value asia [:referenssiPiste :Point] :srsName)
+;            _  (println "\n source-projection-name: " source-projection-name "\n")
+            source-projection (subs source-projection-name (.lastIndexOf source-projection-name "EPSG:"))
+;            _  (println "\n source-projection: " source-projection "\n")
+
+            referenssi-piste (cr/all-of asia [:referenssiPiste :Point])
+;            _  (println "\n referenssi-piste: " referenssi-piste "\n")
+;            _  (println "\n sijaintitieto: " sijaintitieto "\n")
+            coord-array (-> #_referenssi-piste sijaintitieto      ;; TODO: pitaisi kayttaa referenssipistetta? Se ei osoita nyt talla hetkella oikeaan pisteeseen.
+                          :pos
+                          (ss/split #" ")
+                          ((partial map bigdec))
+                          ((partial coordinate/convert source-projection to-projection 0))
+                          (println "\n from convert: ")
+                          (println "\n")
+                          ((partial map #(.doubleValue %)))
+                          )
+            _  (println "\n coord-array: " coord-array "\n")
             ]
+
+
+;        CoordinateReferenceSystem sourceCrs = CRS.decode("EPSG:25829");
+;        CoordinateReferenceSystem targetCrs = CRS.decode("EPSG:4326");
+;
+;        double x = (double) 636497.59434;
+;        double y = (double) 4778964.017375;
+;
+;        boolean lenient = true;
+;        MathTransform mathTransform = CRS.findMathTransform(sourceCrs, targetCrs, lenient);
+;
+;        DirectPosition2D srcDirectPosition2D = new DirectPosition2D(sourceCrs, x, y);
+;        DirectPosition2D destDirectPosition2D = new DirectPosition2D();
+;        mathTransform.transform(srcDirectPostion2D, destDirectPosition2D);
+;
+;        double transX = destDirectPosition2D.x;
+;        double transY = destDirectPosition2D.y;
+
+
+
+;        var map, layer;
+;        map = new OpenLayers.Map('map');
+;        layer = new OpenLayers.Layer.OSM("Simple OSM Map");
+;        map.addLayer(layer);
+;
+;        var projection = new OpenLayers.Projection("EPSG:4326");
+;        var center = new OpenLayers.LonLat(-71.147, 42.472).transform(projection, map.getProjectionObject());
+;        map.setCenter(center, 12);
+
+;        (comment
+;         (def mapp (js/OpenLayers.Map. "map"))
+;         (def layer (js/OpenLayers.Layer.OSM. "Simple OSM Map"))
+;         (.addLayer mapp layer)
+;
+;         (def projection (js/OpenLayers.Projection. "EPSG:4326"))
+;         (def center (.transform (js/OpenLayers.LonLat. -71.147 42.472)
+;                       projection (.getProjectionObject mapp)))
+;         (.setCenter mapp center 12)
+;         )
+
+
+        (println "\n sijaintitieto: ")
+        (clojure.pprint/pprint sijaintitieto)
+        (println "\n")
+
+
         {:id (->lp-tunnus asia)
          :kuntalupatunnus (->kuntalupatunnus asia)
          :rakennusvalvontaasianKuvaus (:rakennusvalvontaasianKuvaus asianTiedot)
@@ -450,21 +523,6 @@
 
          :toimenpidetieto toimenpidetieto
 
-
-         ;;
-         ;; **** TODO: Mista hakemuksen SIJAINTI pitaisi hakea? ****
-         ;;
-         ;; Miten muutetaan gml:Pointista meille? Taitaa saada X:n ja Y:n suoraan...
-         ;;
-
-         :referenssiPiste (cr/all-of asia [:referenssiPiste])
-
-         ;;
-         ;; Onko tama oikea tapa hakea sijainti?  Eli vaan ensimmaisen toimenpiteen alta?
-         ;;  Esim. rakennuspaikkatietoa ei esimerkkisanomassa ollut ollenkaan...
-         ;;  Koordinaatit (esim. [2.5502936E7 6708332.0]) nayttavat olevan aivan metsasta...
-         ;;
-         :sijainti (-> sijaintitieto :piste :Point :pos (ss/split #" ") #_(#({:x (first %) :y (second %)})))
-         :osoite (-> sijaintitieto :osoite :osoitenimi) ;; TODO: Miksi tata ei ole ollenkaan esimerkkisanomassa?
-
+         :location {:x (first coord-array) :y (second coord-array)}
+         :osoite (-> osoite :osoitenimi :teksti)
          }))))

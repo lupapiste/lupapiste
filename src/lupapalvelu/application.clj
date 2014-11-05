@@ -597,8 +597,7 @@
           (if (ss/blank? lupapiste-tunnus)
 
             ;; create the application
-            (let [created-application (do-create-application command manual-schema-datas)
-
+            (let [
                   ;;
                   ;; *** TODO: Aseta tassa applicationille viitelupatiedot -> kts. app-infon :viitelupatiedot ***
                   ;;
@@ -608,11 +607,12 @@
                   ;;
 ;                  ;; lupapalvelu.document.canonical-common/application-state-to-krysp-state kaanteisesti
 ;                  state (some #(when (= (-> app-info :viimeisin-tila :tila) (val %)) (first %)) lupapalvelu.document.canonical-common/application-state-to-krysp-state)
-;
-;                  updated-application (merge created-application
-;                                        (get-in verdict-updates [$set])
-;                                        {:state state}   ;; *** TODO: Laita tama takaisin ***
-;                                        )
+
+                  created-application (assoc (do-create-application command manual-schema-datas)
+                                        :address (:osoite app-info)
+                                        :location (:location app-info)
+;                                        :state state
+                                        )
 
                   ;; The application has to be inserted first, because it is assumed to be in the database when checking for verdicts (and their attachments).
                   _ (insert-application created-application)
@@ -624,7 +624,7 @@
 
                   ;; attaches the new application, and its id to path [:data :id], into the command
                   command (merge command (application->command created-application))
-                  ;; get verdicts for the application
+                  ;; Get verdicts for the application
                   _ (verdict-api/do-check-for-verdict command xml)
                   ]
               (ok :id (:id created-application)))
