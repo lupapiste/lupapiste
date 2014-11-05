@@ -444,6 +444,13 @@
             sijaintitieto (-> rakennus-tai-rakennelma :sijaintitieto :Sijainti :piste :Point)
             osoite (-> rakennus-tai-rakennelma :rakennuksenTiedot :osoite)
 
+            ;; Varaudu tallaiseen. Huomaa srsName ja pilkku koordinaattien valimerkkina! (kts. LP-734-2014-00001:n paatossanoma)
+;            <yht:pistesijainti>
+;              <gml:Point srsName="http://www.opengis.net/gml/srs/epsg.xml#3877">
+;                <gml:coordinates>23528933.213,6699629.937</gml:coordinates>
+;              </gml:Point>
+;            </yht:pistesijainti>
+
             source-projection-name (select1-attribute-value asia [:referenssiPiste :Point] :srsName)
 ;            _  (println "\n source-projection-name: " source-projection-name "\n")
             source-projection (subs source-projection-name (.lastIndexOf source-projection-name "EPSG:"))
@@ -461,52 +468,12 @@
                           (println "\n")
                           ((partial map #(.doubleValue %)))
                           )
-            _  (println "\n coord-array: " coord-array "\n")
+;            _  (println "\n coord-array: " coord-array "\n")
             ]
 
-
-;        CoordinateReferenceSystem sourceCrs = CRS.decode("EPSG:25829");
-;        CoordinateReferenceSystem targetCrs = CRS.decode("EPSG:4326");
-;
-;        double x = (double) 636497.59434;
-;        double y = (double) 4778964.017375;
-;
-;        boolean lenient = true;
-;        MathTransform mathTransform = CRS.findMathTransform(sourceCrs, targetCrs, lenient);
-;
-;        DirectPosition2D srcDirectPosition2D = new DirectPosition2D(sourceCrs, x, y);
-;        DirectPosition2D destDirectPosition2D = new DirectPosition2D();
-;        mathTransform.transform(srcDirectPostion2D, destDirectPosition2D);
-;
-;        double transX = destDirectPosition2D.x;
-;        double transY = destDirectPosition2D.y;
-
-
-
-;        var map, layer;
-;        map = new OpenLayers.Map('map');
-;        layer = new OpenLayers.Layer.OSM("Simple OSM Map");
-;        map.addLayer(layer);
-;
-;        var projection = new OpenLayers.Projection("EPSG:4326");
-;        var center = new OpenLayers.LonLat(-71.147, 42.472).transform(projection, map.getProjectionObject());
-;        map.setCenter(center, 12);
-
-;        (comment
-;         (def mapp (js/OpenLayers.Map. "map"))
-;         (def layer (js/OpenLayers.Layer.OSM. "Simple OSM Map"))
-;         (.addLayer mapp layer)
-;
-;         (def projection (js/OpenLayers.Projection. "EPSG:4326"))
-;         (def center (.transform (js/OpenLayers.LonLat. -71.147 42.472)
-;                       projection (.getProjectionObject mapp)))
-;         (.setCenter mapp center 12)
-;         )
-
-
-        (println "\n sijaintitieto: ")
-        (clojure.pprint/pprint sijaintitieto)
-        (println "\n")
+;        (println "\n sijaintitieto: ")
+;        (clojure.pprint/pprint sijaintitieto)
+;        (println "\n")
 
 
         {:id (->lp-tunnus asia)

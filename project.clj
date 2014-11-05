@@ -37,7 +37,6 @@
                  [fi.sito/oskari "0.9.37"]
                  [slingshot "0.10.3"]
                  [com.google.zxing/javase "2.2"]
-                 #_[org.geotools/gt-referencing "2.6.2"]
                  [org.geotoolkit/geotk-referencing "3.20-geoapi-3.0"]
                  [prismatic/schema "0.2.4"]
                  [cljts "0.2.0" :exclusions [xerces/xercesImpl]]]
@@ -65,10 +64,7 @@
   :repositories [["solita-archiva" {:url "http://mvn.solita.fi/archiva/repository/solita"
                                     :checksum :ignore}]
                  ["mygrid-repository" {:url "http://www.mygrid.org.uk/maven/repository"
-                                       :snapshots false}]
-                 #_["geotools" {:url "http://download.osgeo.org/webdav/geotools/"
-                               ;; Onko tallaista keyta, missa taman dokumentaatio?
-                               :snapshots false}]]
+                                       :snapshots false}]]
   :plugin-repositories [["solita-archiva" {:url "http://mvn.solita.fi/archiva/repository/solita"
                                            :checksum :ignore}]]
   :aliases {"integration" ["with-profile" "dev,itest" "midje"]
