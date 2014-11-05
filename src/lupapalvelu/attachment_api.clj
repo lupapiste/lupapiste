@@ -19,7 +19,7 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.job :as job]
             [lupapalvelu.stamper :as stamper]
-            [lupapalvelu.ke6666 :as ke6666]
+            [lupapalvelu.pdf-export :as pdf-export]
             [lupapalvelu.statement :as statement]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
@@ -242,9 +242,9 @@
           (append-attachment zip (-> attachment :versions last)))
         ; Add submitted PDF, if exists:
         (when-let [submitted-application (mongo/by-id :submitted-applications (:id application))]
-          (append-stream zip (i18n/loc "attachment.zip.pdf.filename.submitted") (ke6666/generate submitted-application lang)))
+          (append-stream zip (i18n/loc "attachment.zip.pdf.filename.submitted") (pdf-export/generate submitted-application lang)))
         ; Add current PDF:
-        (append-stream zip (i18n/loc "attachment.zip.pdf.filename.current") (ke6666/generate application lang))
+        (append-stream zip (i18n/loc "attachment.zip.pdf.filename.current") (pdf-export/generate application lang))
         (.finish zip)))
     temp-file))
 
