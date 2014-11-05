@@ -1,5 +1,5 @@
 (ns lupapalvelu.xml.krysp.reader
-  (:require [taoensso.timbre :as timbre :refer [debug warn error]]
+  (:require [taoensso.timbre :as timbre :refer [debug info warn error]]
             [clojure.string :as s]
             [clojure.walk :refer [postwalk prewalk]]
             [clj-time.format :as timeformat]
@@ -419,6 +419,14 @@
 
 (def ^:private to-projection "EPSG:3067")
 
+(defn- ->coordinate-array [point-xml-no-ns source-projection]
+  (let [coords (ss/split point-xml-no-ns #" ")]
+    (info "Converting coordinates " coords " from projection " source-projection " to projection " to-projection)
+    (-> coords
+      ((partial map bigdec))
+      ((partial coordinate/convert source-projection to-projection 0))
+      ((partial map #(.doubleValue %))))))
+
 (defn get-app-info-from-message [xml ->function kuntalupatunnus]
   (let [xml-no-ns (cr/strip-xml-namespaces xml)
         asiat (select-asiat xml)
@@ -439,9 +447,12 @@
             asianTiedot (cr/all-of asia [:asianTiedot :Asiantiedot])
             toimenpidetieto (first (map cr/all-of (select asia [:toimenpidetieto])))
 
+            referenssi-piste (cr/all-of asia [:referenssiPiste :Point :pos])
+;            _  (println "\n referenssi-piste: " referenssi-piste "\n")
+
 ;            sijaintitieto (-> toimenpidetieto ((comp :Sijainti :sijaintitieto #(or (:Rakennus %) (:Rakennelma %)) #(or (:rakennustieto %) (:rakennelmatieto %)) :Toimenpide)))
             rakennus-tai-rakennelma (-> toimenpidetieto :Toimenpide (#(or (:rakennustieto %) (:rakennelmatieto %))) (#(or (:Rakennus %) (:Rakennelma %))))
-            sijaintitieto (-> rakennus-tai-rakennelma :sijaintitieto :Sijainti :piste :Point)
+            sijaintitieto (-> rakennus-tai-rakennelma :sijaintitieto :Sijainti :piste :Point :pos)
             osoite (-> rakennus-tai-rakennelma :rakennuksenTiedot :osoite)
 
             ;; Varaudu tallaiseen. Huomaa srsName ja pilkku koordinaattien valimerkkina! (kts. LP-734-2014-00001:n paatossanoma)
@@ -451,45 +462,50 @@
 ;              </gml:Point>
 ;            </yht:pistesijainti>
 
-            source-projection-name (select1-attribute-value asia [:referenssiPiste :Point] :srsName)
-;            _  (println "\n source-projection-name: " source-projection-name "\n")
-            source-projection (subs source-projection-name (.lastIndexOf source-projection-name "EPSG:"))
-;            _  (println "\n source-projection: " source-projection "\n")
+            source-projection-attr (select1-attribute-value asia [:referenssiPiste :Point] :srsName)
+            projection-prefix "EPSG:"
+            source-projection-name-index (.lastIndexOf source-projection-attr projection-prefix)
 
-            referenssi-piste (cr/all-of asia [:referenssiPiste :Point])
-;            _  (println "\n referenssi-piste: " referenssi-piste "\n")
-;            _  (println "\n sijaintitieto: " sijaintitieto "\n")
-            coord-array (-> #_referenssi-piste sijaintitieto      ;; TODO: pitaisi kayttaa referenssipistetta? Se ei osoita nyt talla hetkella oikeaan pisteeseen.
-                          :pos
-                          (ss/split #" ")
-                          ((partial map bigdec))
-                          ((partial coordinate/convert source-projection to-projection 0))
-                          (println "\n from convert: ")
-                          (println "\n")
-                          ((partial map #(.doubleValue %)))
-                          )
-;            _  (println "\n coord-array: " coord-array "\n")
+            source-projection (when-not (= -1 source-projection-name-index)
+                                (subs source-projection-attr source-projection-name-index))
             ]
 
 ;        (println "\n sijaintitieto: ")
 ;        (clojure.pprint/pprint sijaintitieto)
 ;        (println "\n")
 
+        ;; return nil as app-info if source projection is not found
+        (if (and
+              source-projection
+              ;; make sure projection number can be parsed
+              (number?
+                (try
+                  (let [projection-id-str (subs source-projection (count projection-prefix))]
+                    ;; throws exception if cannot parse a number from the string
+                    (read-string projection-id-str))
+                  (catch Exception e (error e "Projection number could not be parsed from: " source-projection-attr)))))
+          ;; TODO: pitaisi kayttaa referenssipistetta? Se ei osoita nyt talla hetkella oikeaan pisteeseen.
+          (when-let [coord-array (try
+                                   (->coordinate-array #_referenssi-piste sijaintitieto source-projection)
+                                   (catch Exception e (error e "Coordinate conversion failed")))]
+;            (println "\n coord-array: " coord-array "\n")
+            {:id (->lp-tunnus asia)
+             :kuntalupatunnus (->kuntalupatunnus asia)
+             :rakennusvalvontaasianKuvaus (:rakennusvalvontaasianKuvaus asianTiedot)
+             :vahainenPoikkeaminen (:vahainenPoikkeaminen asianTiedot)
+             :viitelupatiedot viitelupatiedot                ;; TODO: Mita nailla?
+             :kasittelynTilatiedot kasittelynTilatiedot
+             :viimeisin-tila viimeisin-tila
 
-        {:id (->lp-tunnus asia)
-         :kuntalupatunnus (->kuntalupatunnus asia)
-         :rakennusvalvontaasianKuvaus (:rakennusvalvontaasianKuvaus asianTiedot)
-         :vahainenPoikkeaminen (:vahainenPoikkeaminen asianTiedot)
-         :viitelupatiedot viitelupatiedot                ;; TODO: Mita nailla?
-         :kasittelynTilatiedot kasittelynTilatiedot
-         :viimeisin-tila viimeisin-tila
+             :asioimiskieli (cr/all-of asia [:lisatiedot :Lisatiedot :asioimiskieli])
 
-         :asioimiskieli (cr/all-of asia [:lisatiedot :Lisatiedot :asioimiskieli])
+             :rakennusten-tiedot (->buildings xml)
 
-         :rakennusten-tiedot (->buildings xml)
+             :toimenpidetieto toimenpidetieto
 
-         :toimenpidetieto toimenpidetieto
+             :location {:x (first coord-array) :y (second coord-array)}
+             :osoite (-> osoite :osoitenimi :teksti)
+             })
 
-         :location {:x (first coord-array) :y (second coord-array)}
-         :osoite (-> osoite :osoitenimi :teksti)
-         }))))
+          (error "No source projection could be parsed from verdict xml for kuntalupatunnus " kuntalupatunnus)
+          )))))
