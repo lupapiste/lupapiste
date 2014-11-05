@@ -1,4 +1,0 @@
-application.conversation.unsentMessage.header: Lähettämätön viesti
-application.conversation.unsentMessage: Sinulla on viestikentässä viesti, jota ei vielä ole lähetetty. Tahdotko palata näkymään, josta voit lähettää viestin, vai tyhjentää kentän?
-application.conversation.sendMessage: Palaa näkymään
-application.conversation.clearMessage: Tyhjennä
