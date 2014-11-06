@@ -11,3 +11,5 @@ operations.aiemmalla-luvalla-hakeminen.desc: Tällä toimenpiteellä voit siirt�
 create-app-with-with-prev-permit-label: Syötä alla olevaan kenttään aiemman lupasi kuntalupatunnus:
 create-app-with-with-prev-permit-placeholder: Kuntalupatunnus
 newRequest.newApplicationWithPrevPermit: Hae antamallasi kuntalupatunnuksella
+
+municipality.997: Testikunta
