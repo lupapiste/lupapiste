@@ -436,11 +436,13 @@
         xml (rakennuslupa-element-to-xml canonical krysp-version)]
 
     (mapping-common/write-to-disk
-      application attachments
+      application
+      attachments
       statement-attachments
       xml
       krysp-version
       output-dir
-      #(write-application-pdf-versions output-dir application submitted-application lang))))
+      submitted-application
+      lang)))
 
 (permit/register-function permit/R :app-krysp-mapper save-application-as-krysp)
