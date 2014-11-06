@@ -146,7 +146,15 @@
 
     self.newAttachment = function() {
       // created file is authority-file if created by authority
-      attachment.initFileUpload(applicationId, null, "muut.muu", false, {type: "statement", id: statementId}, true, currentUser.isAuthority());
+      attachment.initFileUpload({
+        applicationId: applicationId,
+        attachmentId: null,
+        attachmentType: "muut.muu",
+        typeSelector: false,
+        target: {type: "statement", id: statementId},
+        locked: true,
+        authority: currentUser.isAuthority()
+      });
     };
   }
 
