@@ -157,11 +157,18 @@ LUPAPISTE.SidePanelModel = function() {
   }
 
   hub.subscribe({type: "dialog-close"}, function(data) {
+    // Application error occurred
+    if (data.id === "dialog-application-load-error") {
+      self.comment().text(undefined);
+      unsentMessage = false;
+      return;
+    }
+
     if (unsentMessage) {
       self.comment().text(undefined);
       repository.load(self.applicationId());
       unsentMessage = false;
-    }
+    }     
   });
 
   hub.subscribe({type: "page-change"}, function(data) {
