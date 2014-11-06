@@ -451,6 +451,7 @@
             sijainti-Rakennuspaikka (-> Rakennuspaikka :sijaintitieto :Sijainti :piste :Point :pos)
             ;; TODO: Ruotsinkielinen osoite tulee kakkosena listalla. Otetaanko se mukaan?
             osoite-Rakennuspaikka (-> Rakennuspaikka :osoite :osoitenimi :teksti (#(if (sequential? %) (first %) %)))
+            kiinteistotunnus-Rakennuspaikka (-> Rakennuspaikka :rakennuspaikanKiinteistotieto :RakennuspaikanKiinteisto :Kiinteisto :kiinteistotunnus)
 
             referenssi-piste (cr/all-of asia [:referenssiPiste :Point :pos])
 ;            _  (println "\n referenssi-piste: " referenssi-piste "\n")
