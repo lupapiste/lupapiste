@@ -32,6 +32,7 @@
     self.inforequestEnabled = ko.observable(false);
     self.openInforequestEnabled = ko.observable(false);
     self.openInforequestEmail = ko.observable("");
+    self.opening = ko.observable("");
     self.processing = ko.observable();
     self.pending = ko.observable();
 
@@ -41,6 +42,7 @@
       self.inforequestEnabled(organizationScope['inforequest-enabled'] || false);
       self.openInforequestEnabled(organizationScope['open-inforequest'] || false);
       self.openInforequestEmail(organizationScope['open-inforequest-email'] || "");
+      self.opening(organizationScope['opening'] || "");
       self.processing(false);
       self.pending(false);
     };
@@ -67,12 +69,19 @@
     };
 
     self.updateOrganization = function() {
+      var opening = self.opening();
+      var openingMills = null;
+      if (opening) {
+        openingMills = new Date(opening).getTime();
+      }
+
       var data = {permitType: self.organizationScope.permitType,
                   municipality: self.organizationScope.municipality,
                   inforequestEnabled: self.inforequestEnabled(),
                   applicationEnabled: self.applicationEnabled(),
                   openInforequestEnabled: self.openInforequestEnabled(),
-                  openInforequestEmail: self.openInforequestEmail()};
+                  openInforequestEmail: self.openInforequestEmail(),
+                  opening: openingMills};
       ajax.command("update-organization", data)
         .processing(self.processing)
         .pending(self.pending)
