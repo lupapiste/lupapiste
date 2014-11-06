@@ -43,7 +43,7 @@
       ["Rakennuksen jatevesijarjestelman uusiminen" :jatevesi]
       ["Muun rakennelman rakentaminen" :muu-rakentaminen]]]
     ["Rakennuksen purkaminen" :purkaminen]
-    ;["Tyonjohtaja" :tyonjohtajan-nimeaminen]
+    ["Tyonjohtaja" :tyonjohtajan-nimeaminen]
     ["Suunnittelija" :suunnittelijan-nimeaminen]
     ["Jatkoaika" :jatkoaika]
     ["Aloitusoikeus" :aloitusoikeus]]])
