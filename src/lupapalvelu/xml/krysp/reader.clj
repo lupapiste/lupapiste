@@ -487,12 +487,7 @@
         (if (and
               source-projection
               ;; make sure projection number can be parsed
-              (number?
-                (try
-                  (let [projection-id-str (subs source-projection (count projection-prefix))]
-                    ;; throws exception if cannot parse a number from the string
-                    (read-string projection-id-str))
-                  (catch Exception e (error e "Projection number could not be parsed from: " source-projection-attr)))))
+              (util/->int (subs source-projection (count projection-prefix)) false))
 
           ;; TODO: _Kvintus 5.11.2014_: sijainti-Rakennuspaikka osoitteen ja sijainnin oikea lahde.
           ;;       Referenssipiste ei osoita nyt talla hetkella oikeaan pisteeseen.
@@ -518,5 +513,4 @@
              :osoite #_osoite-Rakennuspaikka osoite-Rakennus
              })
 
-          (error "No source projection could be parsed from verdict xml for kuntalupatunnus " kuntalupatunnus)
-          )))))
+          (error "No coordinate source projection could be parsed from string '" source-projection-attr "' for kuntalupatunnus " kuntalupatunnus))))))
