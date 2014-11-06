@@ -314,6 +314,23 @@
       return self;
     };
 
+    self.updateOrganizationDetails = function(operation) {
+      ajax.query("organization-details",
+        {municipality: self.municipality().id,
+         operation: operation,
+         lang: loc.getCurrentLanguage()})
+      .success(function(d) {
+        self.inforequestsDisabled(d["inforequests-disabled"]);
+        self.newApplicationsDisabled(d["new-applications-disabled"]);
+        self.organization(d);
+      })
+      .error(function(d) {
+        self.inforequestsDisabled(true);
+        self.newApplicationsDisabled(true);
+      })
+      .call();
+    };
+
     self.create = function(infoRequest) {
       if (infoRequest) {
         if (self.inforequestsDisabled()) {
@@ -383,20 +400,7 @@
         model.kuntalupatunnusFromPrevPermit(null);
         if (v) {
           model.operation(v.op);
-          ajax.query("organization-details",
-              {municipality: model.municipality().id,
-               operation: v.op,
-               lang: loc.getCurrentLanguage()})
-            .success(function(d) {
-              model.inforequestsDisabled(d["inforequests-disabled"]);
-              model.newApplicationsDisabled(d["new-applications-disabled"]);
-              model.organization(d);
-            })
-            .error(function(d) {
-              model.inforequestsDisabled(true);
-              model.newApplicationsDisabled(true);
-            })
-            .call();
+          model.updateOrganizationDetails(v.op);
         } else {
           model.operation(null);
           model.organization(null);
