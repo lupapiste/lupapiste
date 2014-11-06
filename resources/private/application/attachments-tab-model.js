@@ -155,7 +155,8 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
       applicationId: self.appModel.id(),
       attachmentId: null,
       attachmentType: null,
-      typeSelector: true
+      typeSelector: true,
+      opSelector: true
     });
   };
 

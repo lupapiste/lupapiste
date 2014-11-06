@@ -6,11 +6,15 @@ LUPAPISTE.Upload = {
   attachmentType: ko.observable(),
   attachmentTypeGroups: ko.observableArray(),
   typeSelector: ko.observable(false),
+  attachmentOp: ko.observable(),
+  opSelector: ko.observable(false),
   errorMessage: ko.observable(),
   targetType: ko.observable(),
   targetId: ko.observable(),
   locked: ko.observable(),
-  authority: ko.observable()
+  authority: ko.observable(),
+  selectableOperations: ko.observableArray(),
+  selectedOperationId: ko.observable()
 };
 
 LUPAPISTE.Upload.setModel = function(options) {
@@ -19,6 +23,8 @@ LUPAPISTE.Upload.setModel = function(options) {
   LUPAPISTE.Upload.attachmentId(options.attachmentId);
   LUPAPISTE.Upload.attachmentType(options.attachmentType);
   LUPAPISTE.Upload.typeSelector(options.typeSelector ? true : false);
+  LUPAPISTE.Upload.attachmentOp(options.attachmentOp);
+  LUPAPISTE.Upload.opSelector(options.opSelector ? true : false);
   LUPAPISTE.Upload.errorMessage(options.errorMessage);
   LUPAPISTE.Upload.targetType(options.target ? options.target.type : null);
   LUPAPISTE.Upload.targetId(options.target ? options.target.id : null);
@@ -59,11 +65,12 @@ LUPAPISTE.Upload.initFromURLParams = function() {
   "use strict";
   if (location.search) {
     var applicationId = pageutil.getURLParameter("applicationId");
-    options = {
+    var options = {
       applicationId: applicationId, 
       attachmentId: pageutil.getURLParameter("attachmentId"),
       attachmentType: pageutil.getURLParameter("attachmentType"),
       typeSelector: pageutil.getURLParameter("typeSelector"),
+      opSelector: pageutil.getURLParameter("opSelector"),
       errorMessage: pageutil.getURLParameter("errorMessage"),
       target: {type: pageutil.getURLParameter("targetType"), 
                id: pageutil.getURLParameter("targetId")},
