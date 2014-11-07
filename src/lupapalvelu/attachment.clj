@@ -294,9 +294,9 @@
   [now applicationState attachement-types]
   (map (partial make-attachment now nil false applicationState nil) attachement-types))
 
-(defn create-attachment [application attachement-type now target locked & [attachment-id]]
+(defn create-attachment [application attachement-type op now target locked & [attachment-id]]
   {:pre [(map? application)]}
-  (let [attachment (make-attachment now target locked (:state application) nil attachement-type attachment-id)]
+  (let [attachment (make-attachment now target locked (:state application) op attachement-type attachment-id)]
     (update-application
       (application->command application)
       {$set {:modified now}
@@ -417,12 +417,12 @@
 (defn update-or-create-attachment
   "If the attachment-id matches any old attachment, a new version will be added.
    Otherwise a new attachment is created."
-  [{:keys [application attachment-id attachment-type file-id filename content-type size comment-text created user target locked] :as options}]
+  [{:keys [application attachment-id attachment-type op file-id filename content-type size comment-text created user target locked] :as options}]
   {:pre [(map? application)]}
   (let [attachment-id (cond
-                        (ss/blank? attachment-id) (create-attachment application attachment-type created target locked)
+                        (ss/blank? attachment-id) (create-attachment application attachment-type op created target locked)
                         (pos? (mongo/count :applications {:_id (:id application) :attachments.id attachment-id})) attachment-id
-                        :else (create-attachment application attachment-type created target locked attachment-id))]
+                        :else (create-attachment application attachment-type op created target locked attachment-id))]
     (set-attachment-version (assoc options :attachment-id attachment-id :now created :stamped false))))
 
 (defn parse-attachment-type [attachment-type]

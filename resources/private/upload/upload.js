@@ -6,7 +6,7 @@ LUPAPISTE.Upload = {
   attachmentType: ko.observable(),
   attachmentTypeGroups: ko.observableArray(),
   typeSelector: ko.observable(false),
-  attachmentOp: ko.observable(),
+  operationId: ko.observable(),
   opSelector: ko.observable(false),
   errorMessage: ko.observable(),
   targetType: ko.observable(),
@@ -23,7 +23,8 @@ LUPAPISTE.Upload.setModel = function(options) {
   LUPAPISTE.Upload.attachmentId(options.attachmentId);
   LUPAPISTE.Upload.attachmentType(options.attachmentType);
   LUPAPISTE.Upload.typeSelector(options.typeSelector ? true : false);
-  LUPAPISTE.Upload.attachmentOp(options.attachmentOp);
+  LUPAPISTE.Upload.selectableOperations([{id: options.operationId}]);
+  LUPAPISTE.Upload.operationId(options.operationId);
   LUPAPISTE.Upload.opSelector(options.opSelector ? true : false);
   LUPAPISTE.Upload.errorMessage(options.errorMessage);
   LUPAPISTE.Upload.targetType(options.target ? options.target.type : null);
@@ -55,10 +56,27 @@ LUPAPISTE.Upload.loadTypes = function(applicationId) {
   }
 };
 
+LUPAPISTE.Upload.loadOperations = function(applicationId) {
+  "use strict";
+
+  if (applicationId) {
+    ajax
+      .query("attachment-operations", {id: applicationId})
+      .success(function(data) {
+        if (data.operations) {
+          LUPAPISTE.Upload.selectableOperations(data.operations);
+          LUPAPISTE.Upload.operationId.valueHasMutated();
+        }
+      })
+      .call();
+  }
+}
+
 LUPAPISTE.Upload.init = function(options) {
   "use strict";
   LUPAPISTE.Upload.setModel(options);
   LUPAPISTE.Upload.loadTypes(options.applicationId);
+  LUPAPISTE.Upload.loadOperations(options.applicationId);
 };
 
 LUPAPISTE.Upload.initFromURLParams = function() {
@@ -66,19 +84,19 @@ LUPAPISTE.Upload.initFromURLParams = function() {
   if (location.search) {
     var applicationId = pageutil.getURLParameter("applicationId");
     var options = {
-      applicationId: applicationId, 
+      applicationId: applicationId,
       attachmentId: pageutil.getURLParameter("attachmentId"),
       attachmentType: pageutil.getURLParameter("attachmentType"),
       typeSelector: JSON.parse(pageutil.getURLParameter("typeSelector")),
       opSelector: JSON.parse(pageutil.getURLParameter("opSelector")),
+      operationId: pageutil.getURLParameter("operationId"),
       errorMessage: pageutil.getURLParameter("errorMessage"),
-      target: {type: pageutil.getURLParameter("targetType"), 
+      target: {type: pageutil.getURLParameter("targetType"),
                id: pageutil.getURLParameter("targetId")},
       locked: JSON.parse(pageutil.getURLParameter("locked")),
-      authority: JSON.parse(pageutil.getURLParameter("authority")) 
+      authority: JSON.parse(pageutil.getURLParameter("authority"))
     }
-    LUPAPISTE.Upload.setModel(options);
-    LUPAPISTE.Upload.loadTypes(applicationId);
+    LUPAPISTE.Upload.init(options);
   }
 };
 

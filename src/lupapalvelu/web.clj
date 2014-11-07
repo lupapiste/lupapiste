@@ -402,20 +402,24 @@
 ;;
 
 (defpage [:post "/api/upload/attachment"]
-  {:keys [applicationId attachmentId attachmentType text upload typeSelector targetId targetType locked authority] :as data}
-  (infof "upload: %s: %s type=[%s] selector=[%s], locked=%s, authority=%s" data upload attachmentType typeSelector locked authority)
+  {:keys [applicationId attachmentId attachmentType operationId text upload typeSelector targetId targetType locked authority] :as data}
+  (infof "upload: %s: %s type=[%s] op=[%s] selector=[%s], locked=%s, authority=%s" data upload attachmentType operationId typeSelector locked authority)
   (let [request (request/ring-request)
         target (when-not (every? s/blank? [targetId targetType])
                  (if (s/blank? targetId)
                    {:type targetType}
                    {:type targetType :id targetId}))
+        operation (if-not (clojure.string/blank? operationId)
+                    {:id operationId}
+                    nil)
         upload-data (assoc upload
                       :id applicationId
                       :attachmentId attachmentId
                       :target target
                       :locked (java.lang.Boolean/parseBoolean locked)
                       :authority (java.lang.Boolean/parseBoolean authority)
-                      :text text)
+                      :text text
+                      :op operation)
         attachment-type (attachment/parse-attachment-type attachmentType)
         upload-data (if attachment-type
                       (assoc upload-data :attachmentType attachment-type)
