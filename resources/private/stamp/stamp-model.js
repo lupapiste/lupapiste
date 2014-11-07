@@ -46,6 +46,22 @@ LUPAPISTE.StampModel = function(params) {
   self.newFiles = params.attachments;
 
   self.newFilesFiltered = ko.observableArray(_.map(self.newFiles(), function(group) {
+    _.each(group.attachments, function(a) {
+      var versions = _(a.versions).reverse().value(),
+        restamp = versions[0].stamped,
+        selected = restamp ? versions[1] : versions[0];
+
+      a.contentType = selected.contentType;
+      a.filename = selected.filename,
+      a.version = {major: selected.version.major, minor: selected.version.minor};
+      a.size = selected.size;
+      a.selected = ko.observable(true);
+      a.status = ko.observable("");
+      a.status.subscribe(function (v) {
+        console.log(v);
+      });
+      a.restamp = restamp;
+    });
     return {
       attachments: _.filter(group.attachments, stampableAttachment),
       groupName: group.groupName,
@@ -56,11 +72,18 @@ LUPAPISTE.StampModel = function(params) {
 
   self.files = ko.observable(_(ko.mapping.toJS(self.application.attachments())).filter(stampableAttachment).map(normalizeAttachment).value());
 
-  self.status = ko.observable(self.files().length > 0 ? self.statusReady : self.statusNoFiles);
+  self.status = ko.observable(_(self.newFilesFiltered()).pluck('attachments').flatten().length > 0 ? self.statusReady : self.statusNoFiles);
   self.text = ko.observable(loc("stamp.verdict"));
   self.date = ko.observable();
   self.organization = ko.observable(self.application.organizationName());
-  self.selectedFiles = ko.computed(function() { return _.filter(self.files(), function(f) { return f.selected(); }); });
+  self.selectedFiles = ko.computed(function() {
+    return _(self.newFilesFiltered())
+      .pluck('attachments')
+      .flatten()
+      .filter(function(f) {
+          return f.selected();
+      }).value();
+  });
   self.jobId = null;
   self.jobVersion = null;
 
@@ -127,7 +150,13 @@ LUPAPISTE.StampModel = function(params) {
 
       self.jobVersion = update.version;
       _.each(update.value, function (newStatus, fileId) {
-        _(self.files()).filter({id: fileId}).each(function(f) { f.status(newStatus); });
+        _(self.newFilesFiltered())
+        .pluck('attachments')
+        .flatten()
+        .filter({id: fileId})
+        .each(function(f) {
+          f.status(newStatus);
+        });
       });
 
       if (update.status === "done") {
@@ -139,8 +168,15 @@ LUPAPISTE.StampModel = function(params) {
     return self.queryUpdate();
   };
 
+
   function selectAllFiles(value) {
-    _.each(self.files(), function(f) { f.selected(value); });
+    _(self.newFilesFiltered())
+        .pluck('attachments')
+        .flatten()
+        .filter({id: fileId})
+        .each(function(f) {
+          f.selected(value);
+        });
   }
 
   self.selectAll = _.partial(selectAllFiles, true);
