@@ -201,7 +201,8 @@
             </button>
             <button data-bind="
                 ltext: 'stamp.ok',
-                visible: status() > statusRunning"
+                visible: status() > statusRunning,
+                click: $parent.cancelStamping"
               class="btn btn-primary close"
               data-test-id="application-stamp-dialdog-ok">
             </button>
