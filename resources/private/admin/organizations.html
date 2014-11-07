@@ -19,6 +19,7 @@
               <th data-bind="ltext: 'organization.application.enabled'"></th>
               <th data-bind="ltext: 'organization.openinforequest.enabled'"></th>
               <th data-bind="ltext: 'organization.openinforequest.email'"></th>
+              <th>Palvelu avataan</th>
             </tr>
           </thead>
           <tbody data-bind="foreach: { data: organizationsModel.organizations, as: 'organization' }">
@@ -40,6 +41,7 @@
               <td data-bind="text: $data['new-application-enabled'] || false, attr: {'data-test-id': 'application-enabled-' + $data.municipality + '-' + $data.permitType}"></td>
               <td data-bind="text: $data['open-inforequest'] || false, attr: {'data-test-id': 'open-inforequest-' + $data.municipality + '-' + $data.permitType}"></td>
               <td data-bind="text: $data['open-inforequest-email'], attr: {'data-test-id': 'open-inforequest-email-' + $data.municipality + '-' + $data.permitType}"></td>
+              <td data-bind="dateString: $data['opening']"></td>
             </tr>
             <!-- /ko -->
           </tbody>
@@ -72,6 +74,11 @@
           <div>
             <label class="form-label" for="open-inforequest-email" data-bind ="ltext: 'organization.openinforequest.email'"></label>
             <input type="text" data-bind="value: openInforequestEmail" class="form-input" id="open-inforequest-email" data-test-id="open-inforequest-email"></input>
+          </div>
+
+          <div>
+            <label class="form-label" for="opening">Palvelu avataan</label>
+            <input type="text" data-bind="datepicker: opening" class="form-input" id="opening" data-test-id="opening"></input>
           </div>
 
           <button data-bind="click: updateOrganization, enable: ok, disable: processing" class="btn btn-primary btn-dialog" data-test-id="save-organization">

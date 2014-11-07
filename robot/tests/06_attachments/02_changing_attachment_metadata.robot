@@ -28,7 +28,7 @@ Mikko adds an operation
 
 Mikko edits operation B description
   Wait and click  xpath=(//div[@id='application-info-tab']//span[@data-test-id='edit-op-description'])[last()]
-  Input text  xpath=(//div[@id='application-info-tab']//input[@data-test-id='op-description-editor'])[last()]  Talo B
+  Execute Javascript  $("input[data-test-id='op-description-editor']:last").val("Talo B").change().blur();
   Wait until  Page should contain  Tallennettu
 
 Mikko adds txt attachment without comment

@@ -65,7 +65,7 @@
                   :html ["selectm.html"]
                   :css  ["selectm.css"]}
 
-   :licenses     {:html ["licenses.html"]}
+   ;:licenses     {:html ["licenses.html"]}
 
    :screenmessages  {:js   ["screenmessage.js"]
                      :html ["screenmessage.html"]}
@@ -74,7 +74,7 @@
                        :js ["expanded-content.js"]}
 
    :common       {:depends [:init :jquery :jquery-upload :knockout :underscore :moment :i18n :selectm
-                            :licenses :expanded-content :mockjax]
+                            :expanded-content :mockjax]
                   :js ["util.js" "event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js"
                        "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "features.js"
                        "statuses.js" "statusmodel.js" "authorization.js" "vetuma.js"]

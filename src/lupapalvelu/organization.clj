@@ -140,7 +140,9 @@
 
 (defcommand update-organization
   {:description "Update organization details."
-   :parameters [permitType municipality inforequestEnabled applicationEnabled openInforequestEnabled openInforequestEmail]
+   :parameters [permitType municipality
+                inforequestEnabled applicationEnabled openInforequestEnabled openInforequestEmail
+                opening]
    :roles [:admin]}
   [_]
   (mongo/update-by-query :organizations
@@ -148,7 +150,8 @@
       {$set {:scope.$.inforequest-enabled inforequestEnabled
              :scope.$.new-application-enabled applicationEnabled
              :scope.$.open-inforequest openInforequestEnabled
-             :scope.$.open-inforequest-email openInforequestEmail}})
+             :scope.$.open-inforequest-email openInforequestEmail
+             :scope.$.opening (when (number? opening) opening)}})
   (ok))
 
 (defcommand add-organization-link
@@ -186,11 +189,25 @@
   [_]
   (get-organization organizationId))
 
-(defquery "municipalities-with-organization"
+(defquery municipalities-with-organization
   {:description "Returns a list of municipality IDs that are affiliated with Lupapiste."
    :roles [:applicant :authority]}
   [_]
   (ok :municipalities (municipalities-with-organization)))
+
+(defquery municipality-active
+  {:parameters [municipality]
+   :roles      [:anonymous]}
+  [_]
+  (let [organizations (get-organizations {:scope.municipality municipality})
+        scopes (->> organizations
+                 (map :scope)
+                 flatten
+                 (filter #(= municipality (:municipality %))))]
+      (ok
+        :applications (->> scopes (filter :new-application-enabled) (map :permitType))
+        :infoRequests (->> scopes (filter :inforequest-enabled) (map :permitType))
+        :opening (->> scopes (filter :opening) (map #(select-keys % [:permitType :opening]))))))
 
 (defquery all-operations-for-organization
   {:description "Returns operations that match the permit types of the organization whose id is given as parameter"
