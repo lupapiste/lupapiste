@@ -95,6 +95,7 @@
 (defn- in-role? [role request]
   (= role (keyword (:role (user/current-user request)))))
 
+(def applicant? (partial in-role? :applicant))
 (def authority? (partial in-role? :authority))
 (def authority-admin? (partial in-role? :authorityAdmin))
 (def admin? (partial in-role? :admin))
@@ -197,11 +198,12 @@
                    :cdn-fallback anyone
                    :hashbang anyone
                    :upload logged-in?
-                   :applicant logged-in?
+                   :applicant applicant?
                    :authority authority?
                    :oir authority?
                    :authority-admin authority-admin?
                    :admin admin?
+                   :wordpress anyone
                    :login-frame anyone
                    :welcome anyone
                    :oskari anyone
@@ -241,8 +243,10 @@
 (def ^:private unauthorized (resp/status 401 "Unauthorized\r\n"))
 
 ;; CSS & JS
-(defpage [:get ["/app/:app.:res-type" :res-type #"(css|js)"]] {app :app res-type :res-type}
-  (single-resource (keyword res-type) (keyword app) unauthorized))
+(defpage [:get ["/app/:build/:app.:res-type" :res-type #"(css|js)"]] {build :build app :app res-type :res-type}
+  (if (= build build-number)
+    (single-resource (keyword res-type) (keyword app) unauthorized)
+    (resp/redirect (str "/app/" build-number "/" app "." res-type ))))
 
 ;; Single Page App HTML
 (def apps-pattern
@@ -268,7 +272,7 @@
 
 (defn- ->hashbang [v]
   (when (and v (= -1 (.indexOf v ":")))
-    (second (re-matches #"^[#!/]{0,3}(.*)" v))))
+    (->> (s/replace-first v "%21" "!") (re-matches #"^[#!/]{0,3}(.*)") second)))
 
 (defn- save-hashbang-on-client []
   (resp/set-headers {"Cache-Control" "no-cache", "ETag" "\"none\""}
@@ -416,10 +420,10 @@
         upload-data (if attachment-type
                       (assoc upload-data :attachmentType attachment-type)
                       upload-data)
-        result (execute (enriched (action/make-command "upload-attachment" upload-data) request))]
+        result (execute-command "upload-attachment" upload-data request)]
     (if (core/ok? result)
       (resp/redirect "/html/pages/upload-ok.html")
-      (resp/redirect (str (hiccup.util/url "/html/pages/upload-1.13.html"
+      (resp/redirect (str (hiccup.util/url "/html/pages/upload-1.47.html"
                                         (-> (:params request)
                                           (dissoc :upload)
                                           (dissoc ring.middleware.anti-forgery/token-key)

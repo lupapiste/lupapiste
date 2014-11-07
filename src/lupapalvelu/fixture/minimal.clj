@@ -575,18 +575,17 @@
                      :scope [{:municipality "491" :permitType "Y" :inforequest-enabled true :new-application-enabled true}]}
 
                     ;; Loppi R
-                    ;; Organisation for municipality "Loppi" (known as "Takahikia") that uses the "neuvontapyynnon-avaus" system.
+                    ;; Organisation for municipality "Loppi" that uses the "neuvontapyynnon-avaus" system.
                     ;; Nice address for testing "Ojatie 1, Loppi"
                     {:id "433-R"
-                     :name {:fi "Takahiki\u00e4n rakennusvalvonta"}
+                     :name {:fi "Loppi rakennusvalvonta"}
                      :scope [{:municipality "433"
                               :permitType "R"
                               :new-application-enabled false
                               :inforequest-enabled true
                               :open-inforequest true
-                              :open-inforequest-email "erajorma@takahikia.fi"}]
-                     :links [{:name {:fi "Takahiki\u00e4", :sv "Tillbakasvettas"}
-                              :url "http://urbaanisanakirja.com/word/takahikia/"}]}
+                              :open-inforequest-email "erajorma@example.com"}]
+                     :links []}
 
 
                     ;;

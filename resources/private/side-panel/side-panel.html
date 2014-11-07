@@ -20,13 +20,10 @@
           <div class="header">
             <h1 data-bind="ltext: 'conversation.title'"></h1>
             <span class="close-btn" data-bind="click: closeSidePanel"></span>
-            <div class="help" data-bind="click: toggleHelp">
-              <span>Ohje</span>
-              <span class="icon info-indicator"></span>
-            </div>
-          </div>
-          <div class="content">
+            <span class="icon help" data-bind="click: toggleHelp, css: {expanded: showHelp}"></span>
             <p data-bind="slider: showHelp, lhtml: 'help.' + permitType() + '.conversationDesc'" class="panel-info"></p>
+          </div>
+          <div class="content" data-bind="transition: showHelp, class: 'expanded'">
             <div data-bind="template: {name: 'comment-template', data: {comment: comment, authorities: authorities, mainConversation: mainConversation, authorization: authorization, infoRequest: infoRequest}}"></div>
             <div class="process-nav"></div>
           </div>

@@ -158,7 +158,7 @@
 (defn invite [application email]
   (first (filter #(= (lower-case email) (:email %)) (invites application))))
 
-(defn no-pending-invites [application user-id]
+(defn no-pending-invites? [application user-id]
   (not-any? #(= user-id (-> % :user :id)) (invites application)))
 
 ;;
@@ -194,7 +194,8 @@
          (number? timestamp) (or (sequential? roles) (set? roles))]}
 
   {:text    text
-   :target  target
+   ; target key order seems to be significant in MongoDB updates
+   :target  (if (:id target) {:type (:type target), :id (:id target)} {:type (:type target)})
    :type    type
    :created timestamp
    :roles   (if to-user (conj (set roles) (:role to-user)) roles)

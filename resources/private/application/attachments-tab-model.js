@@ -6,43 +6,112 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
   self.appModel = appModel;
 
   var postVerdictStates = {verdictGiven:true, constructionStarted:true, closed:true};
-  self.postVerdict = ko.observable(false);
-  
-  self.preAttachmentsByGroup = ko.observableArray();
-  self.postAttachmentsByGroup = ko.observableArray();
+
+  self.preAttachmentsByOperation = ko.observableArray();
+  self.postAttachmentsByOperation = ko.observableArray();
 
   self.unsentAttachmentsNotFound = ko.observable(false);
   self.sendUnsentAttachmentsButtonDisabled = ko.computed(function() {
     return self.appModel.pending() || self.appModel.processing() || self.unsentAttachmentsNotFound();
   });
 
-    
-  function getPreAttachmentsByGroup(source) {
-    return getAttachmentsByGroup(
-      _.filter(source, function(attachment) {
+  self.showHelp = ko.observable(false);
+
+  var generalAttachmentsStr = 'attachments.general';
+
+  function GroupModel(groupName, groupDesc, attachments, editable) {
+    var self = this;
+    self.attachments = attachments;
+    self.groupName = groupName;
+    self.groupDesc = groupDesc;
+    self.editable = editable;
+    // computed name, depending if attachments belongs to operation or not
+    self.name = ko.computed( function() {
+      if ( loc.hasTerm(['operations', self.groupName]) ) {
+        if ( self.groupDesc ) {
+          return loc(['operations', self.groupName]) + ' - ' + self.groupDesc;
+        } else {
+          return loc(['operations', self.groupName]);
+        }
+      } else {
+        return loc(self.groupName); // 'attachments.general'
+      }
+    });
+  };
+
+  var fGroupByOperation = function(attachment) {
+    return attachment.op ? attachment.op['id'] : generalAttachmentsStr;
+  }
+
+  /* Sorting function to sort attachments into
+   * same order as in allowedAttachmentTypes -observable
+   */
+  var fSortByAllowedAttachmentType = function(a, b) {
+    var types = _.flatten(self.appModel.allowedAttachmentTypes(), true);
+
+    var atg = a.type['type-group'];
+    var atgIdx = _.indexOf(types, atg);
+    var atid = a.type['type-id'];
+
+    var btg = b.type['type-group'];
+    var btgIdx = _.indexOf(types, btg);
+    var btid = b.type['type-id'];
+
+    if ( atg === btg ) {
+      // flattened array of allowed attachment types.
+      // types[atgIdx + 1] is array of type-ids,
+      // which correnspond to type-group in atgIdx
+      return _.indexOf(types[atgIdx + 1], atid) - _.indexOf(types[btgIdx + 1], btid);
+    } else {
+      return atgIdx - btgIdx;
+    }
+  }
+
+  function getPreAttachments(source) {
+    return _.filter(source, function(attachment) {
           return !postVerdictStates[attachment.applicationState];
-      }));
+      });
   }
 
-  function getPostAttachmentsByGroup(source) {
-    return getAttachmentsByGroup(
-      _.filter(source, function(attachment) {
+  function getPostAttachments(source) {
+    return _.filter(source, function(attachment) {
           return postVerdictStates[attachment.applicationState];
-      }));
+      });
   }
 
-  function getAttachmentsByGroup(source) {
+  /*
+   * Returns attachments (source), grouped by grouping function f.
+   * Optionally sorts using sort
+   */
+  function getAttachmentsByGroup(source, f, sort, editable) {
     var attachments = _.map(source, function(a) {
       a.latestVersion = _.last(a.versions || []);
       a.statusName = LUPAPISTE.statuses[a.state] || "unknown";
       return a;
     });
-    var grouped = _.groupBy(attachments, function(attachment) { return attachment.type['type-group']; });
-    return _.map(grouped, function(attachments, group) { return {group: group, attachments: attachments}; });
+    if ( _.isFunction(sort) ) {
+      attachments.sort(sort);
+    }
+    var grouped = _.groupBy(attachments, f);
+    var mapped = _.map(grouped, function(attachments, group) {
+      if ( group === generalAttachmentsStr ) {
+        return new GroupModel(group, null, attachments, editable); // group = attachments.general
+      } else { // group == op.id
+        var att = _.first(attachments);
+        return new GroupModel(att.op.name, att.op.description, attachments, editable);
+      }
+    });
+    return _.sortBy(mapped, function(group) { // attachments.general on top, else sort by op.created
+      if ( group.groupName === generalAttachmentsStr ) {
+        return -1;
+      } else {
+        return (_.first(group.attachments)).op.created;
+      }
+    });
   }
 
-  function unsentAttachmentFound() {
-    return _.some(ko.mapping.toJS(appModel.attachments), function(a) {
+  function unsentAttachmentFound(attachments) {
+    return _.some(attachments, function(a) {
       var lastVersion = _.last(a.versions);
       return lastVersion &&
              (!a.sent || lastVersion.created > a.sent) &&
@@ -50,20 +119,27 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
     });
   }
 
+  self.toggleHelp = function() {
+    self.showHelp(!self.showHelp());
+  }
+
   self.refresh = function(appModel) {
     self.appModel = appModel;
+    var rawAttachments = ko.mapping.toJS(appModel.attachments);
 
-    // Pre-verdict attachments
-    self.preAttachmentsByGroup(getPreAttachmentsByGroup(ko.mapping.toJS(appModel.attachments)));
+    var preAttachments = getPreAttachments(rawAttachments);
+    var postAttachments = getPostAttachments(rawAttachments);
 
-    // Post-verdict attachments
-    self.postAttachmentsByGroup(getPostAttachmentsByGroup(ko.mapping.toJS(appModel.attachments)));
+    // pre verdict attachments are not editable after verdict has been given
+    var preGroupEditable = currentUser.isAuthority() || !postVerdictStates[appModel.state()];
+    var preGrouped = getAttachmentsByGroup(preAttachments, fGroupByOperation, fSortByAllowedAttachmentType, preGroupEditable);
+    var postGrouped = getAttachmentsByGroup(postAttachments, fGroupByOperation, fSortByAllowedAttachmentType, true);
 
-    // Post/pre verdict state?
-    self.postVerdict(!!postVerdictStates[self.appModel.state()]);
+    self.preAttachmentsByOperation(preGrouped);
+    self.postAttachmentsByOperation(postGrouped);
 
-    self.unsentAttachmentsNotFound(!unsentAttachmentFound());
-  }
+    self.unsentAttachmentsNotFound(!unsentAttachmentFound(rawAttachments));
+  };
 
   self.sendUnsentAttachmentsToBackingSystem = function() {
     ajax
@@ -139,4 +215,17 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
       return templateModel;
     };
   }();
+
+  hub.subscribe("op-description-changed", function(e) {
+    var opid = e['op-id'];
+    var desc = e['op-desc'];
+
+    _.each(self.appModel.attachments(), function(attachment) {
+      if ( ko.unwrap(attachment.op) && attachment.op.id() === opid ) {
+        attachment.op.description(desc);
+      }
+    });
+
+    self.refresh(self.appModel);
+  });
 };

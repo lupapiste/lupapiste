@@ -21,11 +21,10 @@ LUPAPISTE.VerdictsModel = function() {
     var verdicts = _.map(_.cloneDeep(application.verdicts || []), function(verdict) {
       var paatokset = _.map(verdict.paatokset || [], function(paatos) {
         var poytakirjat = _.map(paatos.poytakirjat || [], function(pk) {
-          var myFullId = {type: "verdict", id: verdict.id, urlHash: pk.urlHash};
-          var myShortId = {type: "verdict", id: verdict.id};
           var myAttachments = _.filter(application.attachments || [], function(attachment) {
-            return (attachment.target && attachment.target.urlHash && _.isEqual(attachment.target, myFullId)) || _.isEqual(attachment.target, myShortId)
-          ;}) || [];
+            var target = attachment.target;
+            return target && target.type === "verdict" && (target.urlHash ? target.urlHash === pk.urlHash : target.id === verdict.id);
+          }) || [];
           pk.attachments = myAttachments;
           return pk;
         });
@@ -41,15 +40,14 @@ LUPAPISTE.VerdictsModel = function() {
     self.authorities = authorities;
   };
 
-  self.newVerdict = function(bindings) {
-    var applicationId = getApplicationId(bindings);
-    ajax.command("new-verdict-draft", {id: applicationId})
+  self.newVerdict = function() {
+    ajax.command("new-verdict-draft", {id: self.applicationId})
       .processing(self.newProcessing)
       .pending(self.newPending)
       .success(function(d) {
-        repository.load(applicationId, self.newPending, function(application) {
+        repository.load(self.applicationId, self.newPending, function(application) {
           LUPAPISTE.verdictPageController.setApplicationModelAndVerdictId(application, self.authorities, d.verdictId);
-          window.location.hash = "!/verdict/" + applicationId + "/" + d.verdictId;
+          window.location.hash = "!/verdict/" + self.applicationId + "/" + d.verdictId;
         });})
     .call();
     return false;
@@ -71,6 +69,14 @@ LUPAPISTE.VerdictsModel = function() {
       }});
   };
 
+  self.deleteVerdict = function(bindings) {
+    LUPAPISTE.ModalDialog.showDynamicYesNo(loc("areyousure"), loc("verdict.confirmdelete"), {title: loc("yes"), fn: function() {
+      ajax.command("delete-verdict", {id: self.applicationId, verdictId: bindings.id})
+        .success(function(d) {repository.load(self.applicationId);})
+        .call();
+      }});
+  };
+
   self.checkVerdict = function(bindings){
     var applicationId = getApplicationId(bindings);
     ajax.command("check-for-verdict", {id: applicationId})
@@ -81,6 +87,9 @@ LUPAPISTE.VerdictsModel = function() {
       LUPAPISTE.ModalDialog.showDynamicOk(loc("verdict.fetch.title"), content);
       pageutil.showAjaxWait();
       repository.load(applicationId);
+    })
+    .error(function(d) {
+      LUPAPISTE.ModalDialog.showDynamicOk(loc("verdict.fetch.title"), loc(d.text));
     })
     .call();
   };
@@ -96,5 +105,5 @@ LUPAPISTE.VerdictsModel = function() {
 
   self.verdictSignedByUser = function(paatos) {
     return _.some(paatos.signatures, {user: {id: currentUser.id()}});
-  }
+  };
 };

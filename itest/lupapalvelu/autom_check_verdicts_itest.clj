@@ -10,6 +10,7 @@
 
 (mongo/connect!)
 (mongo/remove-many :organizations {})
+(mongo/remove-many :applications {})
 
 (let [krysp-url (str (server-address) "/dev/krysp")
       organizations (map (fn [org] (update-in org [:krysp] #(assoc-in % [:R :url] krysp-url))) minimal/organizations)]
@@ -39,13 +40,10 @@
    (dummy-email-server/messages :reset true) ; Inbox zero
 
    (fact "checking verdicts and sending emails to the authorities related to the applications"
-     (batchrun/fetch-verdics))
+     (count (batchrun/fetch-verdics)) => pos?)
 
    (fact "Verifying the sent emails"
-     ;; dummy-email-server/messages sometimes returned nil for the email
-     ;; (because the email sending is asynchronous). Thus applying sleep here.
-     (Thread/sleep 100)
-
+     (Thread/sleep 100) ; batchrun includes a parallel operation
      (let [emails (dummy-email-server/messages :reset true)]
        (fact "email count" (count emails) => 1)
        (let [email (last emails)]

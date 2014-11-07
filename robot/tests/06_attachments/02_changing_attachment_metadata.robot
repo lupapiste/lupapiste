@@ -28,7 +28,7 @@ Mikko adds an operation
 
 Mikko edits operation B description
   Wait and click  xpath=(//div[@id='application-info-tab']//span[@data-test-id='edit-op-description'])[last()]
-  Input text  xpath=(//div[@id='application-info-tab']//input[@data-test-id='op-description-editor'])[last()]  Talo B
+  Execute Javascript  $("input[data-test-id='op-description-editor']:last").val("Talo B").change().blur();
   Wait until  Page should contain  Tallennettu
 
 Mikko adds txt attachment without comment
@@ -69,6 +69,12 @@ Mikko logs in and goes to attachments tab
 
 Mikko sees that contents metadata is visible in attachments list
   Element Text Should Be  xpath=//div[@id="application-attachments-tab"]//span[@data-test-id="attachment-contents"]  PuuCee
+
+Mikko sees that attachments are grouped by operations
+  Xpath Should Match X Times  //div[@id="application-attachments-tab"]//tr[@class="attachment-group-header"]  2
+
+Mikko sees that his attachment is grouped by "Muun rakennuksen rakentaminen - Talo B" operation
+  Element Text Should Be  xpath=(//div[@id="application-attachments-tab"]//tr[@class="attachment-group-header"])[last()]//td[@data-test-id="attachment-group-header-text"]  Muun rakennuksen rakentaminen - Talo B
 
 Mikko opens attachment and sees that attachment label metadata is set
   Open attachment details  muut.muu

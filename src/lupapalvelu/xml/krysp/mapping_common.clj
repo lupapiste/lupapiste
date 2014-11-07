@@ -346,7 +346,11 @@
                               {:tag :VRKrooliKoodi}
                               henkilo
                               yritys_211]}
-                     {:tag :tyyppi :ns "yht"}])
+                     {:tag :tyyppi :ns "yht"}
+                     {:tag :metatietotieto :ns "yht"
+                      :child [{:tag :metatieto
+                               :child [{:tag :metatietoArvo}
+                                       {:tag :metatietoNimi}]}]}])
 
 (def liite-children_213 (update-child-element liite-children_211 [:tekija :yritys] yritys_213))
 
@@ -423,22 +427,44 @@
         r))
     #{} lausuntotieto))
 
-(defn get-Liite [title link attachment type file-id filename]
-   {:kuvaus title
-    :linkkiliitteeseen link
-    :muokkausHetki (to-xml-datetime (:modified attachment))
-    :versionumero 1
-    :tyyppi type
-    :fileId file-id
-    :filename filename})
+(defn get-Liite [title link attachment type file-id filename & [meta]]
+  {:kuvaus title
+   :linkkiliitteeseen link
+   :muokkausHetki (to-xml-datetime (:modified attachment))
+   :versionumero 1
+   :tyyppi type
+   :metatietotieto meta
+   :fileId file-id
+   :filename filename})
+
+(defn- get-metatieto [k v]
+  {:metatieto {:metatietoNimi k :metatietoArvo v}
+   :Metatieto {:metatietoNimi k :metatietoArvo v}})
+
+(defn- get-attachment-meta [attachment]
+  (let [signatures (:signatures attachment)
+        latestVersion (:latestVersion attachment)]
+    (->> signatures
+         (filter #(and
+                   (= (get-in % [:version :major]) (get-in latestVersion [:version :major]))
+                   (= (get-in % [:version :minor]) (get-in latestVersion [:version :minor]))))
+         (map #(let [firstName (get-in %2 [:user :firstName])
+                     lastName (get-in %2 [:user :lastName])
+                     created (to-xml-datetime (:created %2))
+                     count %1]
+                [(get-metatieto (str "allekirjoittaja_" count) (str firstName " " lastName))
+                 (get-metatieto (str "allekirjoittajaAika_" count) created)]) (range))
+         (flatten)
+         (vec))))
 
 (defn get-liite-for-lausunto [attachment application begin-of-link]
   (let [type "Lausunto"
         title (str (:title application) ": " type "-" (:id attachment))
         file-id (get-in attachment [:latestVersion :fileId])
         attachment-file-name (get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
-        link (str begin-of-link attachment-file-name)]
-    {:Liite (get-Liite title link attachment type file-id attachment-file-name)}))
+        link (str begin-of-link attachment-file-name)
+        meta (get-attachment-meta attachment)]
+    {:Liite (get-Liite title link attachment type file-id attachment-file-name meta)}))
 
 (defn get-statement-attachments-as-canonical [application begin-of-link allowed-statement-ids]
   (let [statement-attachments-by-id (group-by
@@ -461,8 +487,9 @@
                          attachment-title (str title ": " type "-" (:id attachment))
                          file-id (get-in attachment [:latestVersion :fileId])
                          attachment-file-name (get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
-                         link (str begin-of-link attachment-file-name)]]
-               {:Liite (get-Liite attachment-title link attachment type file-id attachment-file-name)})))
+                         link (str begin-of-link attachment-file-name)
+                         meta (get-attachment-meta attachment)]]
+               {:Liite (get-Liite attachment-title link attachment type file-id attachment-file-name meta)})))
 
 (defn write-attachments [attachments output-dir]
   (doseq [attachment attachments]

@@ -25,6 +25,7 @@
   (->hashbang "foo")             => "foo"
   (->hashbang "/foo")            => "foo"
   (->hashbang "!/foo")           => "foo"
+  (->hashbang "%21/foo")         => "foo"
   (->hashbang "#!/foo")          => "foo")
 
 (fact {:a 1 :b 2}

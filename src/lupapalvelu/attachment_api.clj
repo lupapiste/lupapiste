@@ -9,7 +9,6 @@
             [lupapalvelu.action :refer [defquery defcommand defraw update-application application->command notify] :as action]
             [lupapalvelu.comment :as comment]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.attachment :as a]
             [lupapalvelu.user :as user]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.permit :as permit]
@@ -31,7 +30,7 @@
 ;; Validators
 
 (defn- attachment-is-not-locked [{{:keys [attachmentId]} :data :as command} application]
-  (when (-> (a/get-attachment-info application attachmentId) :locked (= true))
+  (when (-> (attachment/get-attachment-info application attachmentId) :locked (= true))
     (fail :error.attachment-is-locked)))
 
 (defn- if-not-authority-states-must-match [state-set {user :user} {state :state}]
@@ -44,27 +43,32 @@
 
 (defn- attachment-editable-by-applicationState? [application attachmentId userRole]
   (or (ss/blank? attachmentId)
-      (let [attachment (a/get-attachment-info application attachmentId)
+      (let [attachment (attachment/get-attachment-info application attachmentId)
             attachmentApplicationState (keyword (:applicationState attachment))
             currentState (keyword (:state application))]
         (or (not (post-verdict-states currentState))
             (post-verdict-states attachmentApplicationState)
             (= (keyword userRole) :authority)))))
 
+(defn- validate-meta [{{meta :meta} :data}]
+  (doseq [[k v] meta]
+    (when (not-any? #{k} attachment/attachment-meta-types)
+      (fail! :error.illegal-meta-type :parameters k))))
+
 (defn- validate-operation [{{meta :meta} :data}]
-  (let [op (:op meta)] 
+  (let [op (:op meta)]
     (when-let [missing (if op (util/missing-keys op [:id :name]) false)]
       (fail! :error.missing-parameters :parameters missing))))
 
 (defn- validate-scale [{{meta :meta} :data}]
   (let [scale (:scale meta)]
-    (when (and scale (not-any? #{scale} attachment/attachment-scales))
-      (fail :error.illegal-attachment-scale))))
+    (when (and scale (not (contains? (set attachment/attachment-scales) (keyword scale))))
+      (fail :error.illegal-attachment-scale :parameters scale))))
 
 (defn- validate-size [{{meta :meta} :data}]
   (let [size (:size meta)]
-    (when (and size (not-any? #{size} attachment/attachment-sizes))
-      (fail :error.illegal-attachment-size))))
+    (when (and size (not (contains? (set attachment/attachment-sizes) (keyword size))))
+      (fail :error.illegal-attachment-size :parameters size))))
 
 ;;
 ;; KRYSP
@@ -118,8 +122,8 @@
   (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
     (fail! :error.pre-verdict-attachment))
 
-  (let [attachment-type (a/parse-attachment-type attachmentType)]
-    (if (a/allowed-attachment-type-for-application? application attachment-type)
+  (let [attachment-type (attachment/parse-attachment-type attachmentType)]
+    (if (attachment/allowed-attachment-type-for-application? application attachment-type)
       (update-application command
         {:attachments {$elemMatch {:id attachmentId}}}
         {$set {:attachments.$.type attachment-type}})
@@ -163,7 +167,7 @@
    :roles       [:authority]
    :states      (action/all-states-but [:answered :sent :closed :canceled])}
   [{application :application {attachment-types :attachmentTypes} :data created :created}]
-  (if-let [attachment-ids (a/create-attachments application attachment-types created)]
+  (if-let [attachment-ids (attachment/create-attachments application attachment-types created)]
     (ok :applicationId (:id application) :attachmentIds attachment-ids)
     (fail :error.attachment-placeholder)))
 
@@ -182,7 +186,7 @@
   (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
     (fail! :error.pre-verdict-attachment))
 
-  (a/delete-attachment application attachmentId)
+  (attachment/delete-attachment application attachmentId)
   (ok))
 
 (defcommand delete-attachment-version
@@ -196,8 +200,8 @@
   (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
     (fail! :error.pre-verdict-attachment))
 
-  (if (a/file-id-in-application? application attachmentId fileId)
-    (a/delete-attachment-version application attachmentId fileId)
+  (if (attachment/file-id-in-application? application attachmentId fileId)
+    (attachment/delete-attachment-version application attachmentId fileId)
     (fail :file_not_linked_to_the_document)))
 
 ;;
@@ -209,14 +213,14 @@
    :roles      [:applicant :authority]
    :extra-auth-roles [:statementGiver]}
   [{{:keys [attachment-id]} :data user :user}]
-  (a/output-attachment attachment-id false (partial a/get-attachment-as user)))
+  (attachment/output-attachment attachment-id false (partial attachment/get-attachment-as user)))
 
 (defraw "download-attachment"
   {:parameters [:attachment-id]
    :roles      [:applicant :authority]
    :extra-auth-roles [:statementGiver]}
   [{{:keys [attachment-id]} :data user :user}]
-  (a/output-attachment attachment-id true (partial a/get-attachment-as user)))
+  (attachment/output-attachment attachment-id true (partial attachment/get-attachment-as user)))
 
 (defn- append-gridfs-file [zip file-name file-id]
   (when file-id
@@ -291,7 +295,7 @@
    :description "Reads :tempfile parameter, which is a java.io.File set by ring"}
   [{:keys [created user application] {:keys [text target locked]} :data :as command}]
 
-  (when-not (a/allowed-attachment-type-for-application? application attachmentType)
+  (when-not (attachment/allowed-attachment-type-for-application? application attachmentType)
     (fail! :error.illegal-attachment-type))
 
   (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
@@ -301,7 +305,7 @@
     (when-let [validation-error (statement/statement-owner (assoc-in command [:data :statementId] (:id target)) application)]
       (fail! (:text validation-error))))
 
-  (when-not (a/attach-file! {:application application
+  (when-not (attachment/attach-file! {:application application
                              :filename filename
                              :size size
                              :content tempfile
@@ -348,8 +352,12 @@
       (stamper/stamp stamp fileId out x-margin y-margin transparency))
     (mongo/upload new-file-id filename contentType temp-file :application (:id application))
     (let [new-version (if re-stamp? ; FIXME these functions should return updates, that could be merged into comment update
-                        (a/update-latest-version-content application attachment-id new-file-id (.length temp-file) now)
-                        (a/set-attachment-version application attachment-id new-file-id filename contentType (.length temp-file) nil now user true 5 false))])
+                        (attachment/update-latest-version-content application attachment-id new-file-id (.length temp-file) now)
+                        (attachment/set-attachment-version {:application application :attachment-id attachment-id
+                                                            :file-id new-file-id :filename filename
+                                                            :content-type contentType :size (.length temp-file)
+                                                            :comment-text nil :now now :user user
+                                                            :stamped true :make-comment false :state :ok}))])
     (try (.delete temp-file) (catch Exception _))))
 
 (defn- stamp-attachments! [file-infos {:keys [text created organization transparency job-id application] :as context}]
@@ -380,7 +388,7 @@
    :description "Stamps all attachments of given application"}
   [{application :application {transparency :transparency} :data :as command}]
   (ok :job (make-stamp-job
-             (key-by :attachment-id (map ->file-info (a/get-attachments-infos application files)))
+             (key-by :attachment-id (map ->file-info (attachment/get-attachments-infos application files)))
              {:application application
               :user (:user command)
               :text (if-not (ss/blank? text) text (i18n/loc "stamp.verdict"))
@@ -413,7 +421,7 @@
   [{application :application u :user :as command}]
   (when (seq attachmentIds)
     (if (user/get-user-with-password (:username u) password)
-     (let [attachments (a/get-attachments-infos application attachmentIds)
+     (let [attachments (attachment/get-attachments-infos application attachmentIds)
            signature {:user (user/summary u)
                       :created (:created command)}
            updates (reduce (fn [m {attachment-id :id {version :version} :latestVersion}]
@@ -435,19 +443,19 @@
 
 ;;
 ;; Label metadata
-;; 
-  
+;;
+
 (defcommand set-attachment-meta
   {:parameters [id attachmentId meta]
    :roles      [:applicant :authority]
    :extra-auth-roles [:statementGiver]
    :states     (action/all-states-but [:answered :sent :closed :canceled])
-   :input-validators [validate-scale validate-size validate-operation]}
+   :input-validators [validate-meta validate-scale validate-size validate-operation]}
   [{:keys [application user] :as command}]
 
   (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
     (fail! :error.pre-verdict-attachment))
-  
+
   (doseq [[k v] meta]
     (let [keyStr (str "attachments.$." (name k))
           setKey (keyword keyStr)]

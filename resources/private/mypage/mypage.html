@@ -93,11 +93,12 @@
 
             <div data-bind="visible: companyLoaded">
               <label data-bind="ltext: 'userInfo.company.name'" class="form-label"></label>
-              <a data-bind="attr: {href: '#!/company/' + company.id()}" href="#">
-                <span data-bind="text: company.name" class="form-input"></span>
-              </a>
+              <span data-bind="text: company.name" class="form-input"></span>
               <label data-bind="ltext: 'userInfo.company.y'" class="form-label"></label>
               <span data-bind="text: company.y" class="form-input"></span>
+
+              <a data-bind="attr: {href: '#!/company/' + company.id()}, ltext: 'mypage.companyAccount.editInfo'" href="#" class="btn btn-primary"></a>
+              <a data-bind="attr: {href: '#!/company/' + company.id() + '/users/'}, ltext: 'mypage.companyAccount.editUsers'" href="#" class="btn btn-primary"></a>
             </div>
 
           </div>

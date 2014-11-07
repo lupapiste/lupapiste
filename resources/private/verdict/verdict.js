@@ -1,4 +1,4 @@
-LUPAPISTE.verdictPageController = (function() {
+LUPAPISTE.verdictPageController = (function($) {
   "use strict";
 
   var currentApplicationId = null;
@@ -158,7 +158,7 @@ LUPAPISTE.verdictPageController = (function() {
     };
 
     self.deleteVerdict = function() {
-      LUPAPISTE.ModalDialog.showDynamicYesNo(loc("areyousure"), loc("areyousure.message"), {title: loc("yes"), fn: _.partial(self.commandAndBack, "delete-verdict")});
+      LUPAPISTE.ModalDialog.showDynamicYesNo(loc("areyousure"), loc("verdict.confirmdelete"), {title: loc("yes"), fn: _.partial(self.commandAndBack, "delete-verdict")});
     };
 
     self.disabled = ko.computed(function() {
@@ -219,4 +219,4 @@ LUPAPISTE.verdictPageController = (function() {
     setApplicationModelAndVerdictId: refresh
   };
 
-})();
+})(jQuery);

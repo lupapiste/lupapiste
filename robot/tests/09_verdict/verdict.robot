@@ -3,7 +3,7 @@
 Documentation   Application gets verdict
 Suite teardown  Logout
 Resource        ../../common_resource.robot
-Library         DateTime
+Variables       variables.py
 
 *** Test Cases ***
 
@@ -37,7 +37,7 @@ Sonja creates verdict with adds comment
   Comment verdict  Myönnetään...
 
 Return to application and come back
-  Click enabled by test id  return-from-verdict
+  Wait and click  xpath=//a[@data-test-id='return-from-verdict']
   Click enabled by test id  edit-verdict
 
 Add katselmus
@@ -70,7 +70,7 @@ Add and delete verdict
 
 Correct tab opening elements are visible
   Element should not be visible  //*[@data-test-id='application-open-info-tab']
-  Element should not be visible  //*[@data-test-id='application-open-parties-tab']
+  Element should be visible  //*[@data-test-id='application-open-parties-tab']
   Element should be visible  //*[@data-test-id='application-open-tasks-tab']
   Element should be visible  //*[@data-test-id='application-open-attachments-tab']
   Element should not be visible  //*[@data-test-id='application-open-requiredFieldSummary-tab']
@@ -123,8 +123,7 @@ Mikko signs the verdict
   Wait Until  Element should be visible  xpath=//div[@data-test-id='verdict-signature-listing']
   Element should not be visible  xpath=//div[@data-test-id='verdict-signature-ui']
   Element should Contain  xpath=//div[@data-test-id='verdict-signature-listing']  Mikko Intonen
-  ${d} =  Get Current Date  result_format=%d.%m.%Y
-  Element should Contain  xpath=//div[@data-test-id='verdict-signature-listing']  ${d}
+  Element should Contain  xpath=//div[@data-test-id='verdict-signature-listing']  ${CURRENT_DATE}
 
 *** Keywords ***
 

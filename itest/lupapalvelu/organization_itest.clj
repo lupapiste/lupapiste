@@ -26,7 +26,8 @@
                                :inforequestEnabled (not (:inforequest-enabled orig-scope))
                                :applicationEnabled (not (:new-application-enabled orig-scope))
                                :openInforequestEnabled (not (:open-inforequest orig-scope))
-                               :openInforequestEmail "someone@localhost")
+                               :openInforequestEmail "someone@localhost"
+                               :opening nil)
         updated-organization (query admin :organization-by-id :organizationId organization-id)
         updated-scope        (local-org-api/resolve-organization-scope updated-organization (:municipality orig-scope) (:permitType orig-scope))]
 
@@ -154,3 +155,28 @@
         (fact "when the 'app-required-fields-filling-obligatory' flag set to True"
           (:app-required-fields-filling-obligatory org) => true
           (-> app :organizationMeta :requiredFieldsFillingObligatory) => true)))))
+
+(facts "municipality-active"
+  (fact "only info requests enabled"
+    (let [m (query pena :municipality-active :municipality "997")]
+      (:applications m) => empty?
+      (:infoRequests m) => ["R"]
+      (:opening m) => empty?))
+  (fact "only applications enabled"
+    (let [m (query pena :municipality-active :municipality "998")]
+      (:applications m) => ["R"]
+      (:infoRequests m) => empty?
+      (:opening m) => empty?))
+  (fact "nothing enabled, but coming"
+    (command admin :update-organization
+      :permitType "R"
+      :municipality "999"
+      :inforequestEnabled false
+      :applicationEnabled false
+      :openInforequestEnabled false
+      :openInforequestEmail "someone@localhost"
+      :opening 123)
+    (let [m (query pena :municipality-active :municipality "999")]
+      (:applications m) => empty?
+      (:infoRequests m) => empty?
+      (:opening m) => [{:permitType "R", :opening 123}])))
