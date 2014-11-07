@@ -29,7 +29,7 @@
     node)
   )
 
-(fact* "Generate PDF from an R application with dummy document values"
+(fact "Generate PDF from an R application with dummy document values"
   (let [test-municipality 444
         test-address      "Testikuja 1234"
         test-property-id  "44400100100100"
