@@ -10,17 +10,17 @@
 
 (apply-remote-minimal)
 
-(defn- localize-value [value lang]
+(defn- localize-value [value]
   (cond
     (= java.lang.Boolean (type value))
       (let [loc-key (if value "yes" "no")]
         (loc loc-key))
     :else value))
 
-(defn- walk-function [locale pdf-content node]
+(defn- walk-function [pdf-content node]
   ; What to do when this is a value node
   (when (and (map? node) (contains? node :value))
-    (let [loc-value (localize-value (:value node, locale) locale)]
+    (let [loc-value (localize-value (:value node))]
       pdf-content => (contains loc-value)))
 
   ; When do we need to stop going deeper in the tree
@@ -34,8 +34,7 @@
         test-address      "Testikuja 1234"
         test-property-id  "44400100100100"
         test-submitted    (clj-time.coerce/to-long "2014-01-01")
-        test-authority    {:firstName "Erkki"
-                           :lastName "Testihenkilo"}
+        test-authority    {:firstName "Erkki" :lastName "Testihenkilo"}
         test-operations   [{:name "asuinrakennus"} {:name "aita"}]
 
         application (create-and-submit-application pena)
@@ -51,19 +50,19 @@
                             :authority    test-authority
                             :operations   test-operations})
 
-        fpath       "/tmp/test.pdf"
-        file        (io/file fpath)
-        locale      "fi"]
+        lang        "fi"
+        file        (java.io.File/createTempFile "test" ".pdf")]
 
-    (with-lang locale
+
+    (with-lang lang
       (fact "Test data assertions (just in case)"
         (loc (str "municipality." test-municipality)) => "Lohja"
         (loc (str "operations.asuinrakennus")) => "Asuinrakennuksen rakentaminen"
         (loc (str "operations.aita")) => "Aidan rakentaminen")
 
-      (pdf-export/generate application locale file)
+      (pdf-export/generate application lang file)
 
-      (let [pdf-content    (pdfbox/extract fpath)
+      (let [pdf-content (pdfbox/extract (.getAbsolutePath file))
             documents-data (map :data (:documents application))]
 
         ; common fields
@@ -78,4 +77,5 @@
 
         ; documents
         (doseq [doc-data documents-data]
-          (clojure.walk/prewalk (partial walk-function locale pdf-content) doc-data))))))
+          (clojure.walk/prewalk (partial walk-function pdf-content) doc-data)))
+        (.delete file))))
