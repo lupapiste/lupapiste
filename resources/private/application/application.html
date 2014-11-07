@@ -450,11 +450,6 @@
 
             <div class="attachment-actions" data-bind="template: {name: 'attachment-actions-template'}"></div>
 
-            <!-- ko if: stampingMode -->
-            <button class="btn btn-primary">Leimaa valitut</button>
-            <a href="#" data-bind="ltext: 'stamp.cancel', click: cancelStamping"></a>
-            <!-- /ko -->
-
             <!-- ko if: $root.application.inPostVerdictState() -->
             <div data-bind="if: preAttachmentsByOperation().length > 0" data-test-id="application-pre-attachments-table">
               <h1><span data-bind="ltext: 'application.attachments.pre-verdict'"></span></h1>

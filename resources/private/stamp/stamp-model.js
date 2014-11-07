@@ -63,7 +63,12 @@ LUPAPISTE.StampModel = function(params) {
       attachments: group.attachments,
       groupName: group.groupName,
       groupDesc: group.groupDesc,
-      name: group.name
+      name: group.name,
+      allSelected: ko.computed(function() {
+        return _.every(group.attachments, function(a) {
+          return a.selected();
+        });
+      })
     };
   }));
 
@@ -159,21 +164,16 @@ LUPAPISTE.StampModel = function(params) {
 
 
   function selectAllFiles(value) {
-    _(self.files())
-        .pluck('attachments')
-        .flatten()
-        .filter({id: fileId})
-        .each(function(f) {
-          f.selected(value);
-        });
+    _(self.files()).pluck('attachments').flatten().filter({id: fileId}).each(function(f) { f.selected(value); });
   }
 
   self.selectAll = _.partial(selectAllFiles, true);
   self.selectNone = _.partial(selectAllFiles, false);
 
   self.toggleGroupSelect = function(group) {
+    var sel = group.allSelected();
     _.each(group.attachments, function(a) {
-      a.selected(!a.selected());
+        a.selected(!sel);
     });
   };
 };
