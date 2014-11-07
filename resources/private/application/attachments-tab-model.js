@@ -193,10 +193,6 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
     self.stampingMode(false);
   };
 
-  self.selectStampRow = function(data) {
-    console.log("stamp row:", data);
-  }
-
   self.attachmentTemplatesModel = new function() {
     var templateModel = this;
     templateModel.ok = function(ids) {
