@@ -69,13 +69,13 @@ LUPAPISTE.Upload.initFromURLParams = function() {
       applicationId: applicationId, 
       attachmentId: pageutil.getURLParameter("attachmentId"),
       attachmentType: pageutil.getURLParameter("attachmentType"),
-      typeSelector: pageutil.getURLParameter("typeSelector"),
-      opSelector: pageutil.getURLParameter("opSelector"),
+      typeSelector: JSON.parse(pageutil.getURLParameter("typeSelector")),
+      opSelector: JSON.parse(pageutil.getURLParameter("opSelector")),
       errorMessage: pageutil.getURLParameter("errorMessage"),
       target: {type: pageutil.getURLParameter("targetType"), 
                id: pageutil.getURLParameter("targetId")},
-      locked: pageutil.getURLParameter("locked"),
-      authority: pageutil.getURLParameter("authority") 
+      locked: JSON.parse(pageutil.getURLParameter("locked")),
+      authority: JSON.parse(pageutil.getURLParameter("authority")) 
     }
     LUPAPISTE.Upload.setModel(options);
     LUPAPISTE.Upload.loadTypes(applicationId);
