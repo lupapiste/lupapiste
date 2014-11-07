@@ -80,9 +80,10 @@
           </div>
 
           <table class="table attachments-template-table">
-            <tbody data-bind="foreach: newFilesFiltered()">
+            <tbody data-bind="foreach: files()">
               <tr class="attachment-group-header">
                 <td data-bind="text: name" colspan="6" data-test-id="attachment-group-header-text"></td>
+                <td class="attachment-group-select"><a href="#" data-bind="ltext: 'attachments.group.select', click: $parent.toggleGroupSelect, visible: $parent.status() < $parent.statusRunning"></a></td>
               </tr>
               <tr>
                 <th data-bind="ltext: 'application.attachmentState'">Tila</th>
@@ -149,7 +150,7 @@
                     <i data-bind="ltext: latestVersion.contentType"></i>
                     <i data-bind="size: latestVersion.size"></i>
                   </span>
-                  <!-- ko if: !$data.latestVersion -->
+                  <!-- ko ifnot: $data.latestVersion -->
                   <a data-bind="ltext: 'application.attachmentsAddList', attr: {href: '#!/attachment/' + $root.application.id() + '/' + id, 'data-test-type': type['type-group'] + '.' + type['type-id']}"></a>
                   <!-- /ko -->
                 </td>

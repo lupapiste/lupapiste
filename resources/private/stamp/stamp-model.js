@@ -1,7 +1,6 @@
 LUPAPISTE.StampModel = function(params) {
   "use strict";
   var self = this;
-  self.selector = "#dialog-stamp-attachments";
 
   function stampableAttachment(a) {
     var ct = "";
@@ -46,7 +45,7 @@ LUPAPISTE.StampModel = function(params) {
   self.newFiles = params.attachments;
 
   self.files = ko.observableArray(_.map(self.newFiles(), function(group) {
-    _.each(group.attachments, function(a) {
+    group.attachments = _(group.attachments).filter(stampableAttachment).each(function(a) {
       var versions = _(a.versions).reverse().value(),
         restamp = versions[0].stamped,
         selected = restamp ? versions[1] : versions[0];
@@ -57,13 +56,11 @@ LUPAPISTE.StampModel = function(params) {
       a.size = selected.size;
       a.selected = ko.observable(true);
       a.status = ko.observable("");
-      a.status.subscribe(function (v) {
-        console.log(v);
-      });
       a.restamp = restamp;
-    });
+    }).value();
+
     return {
-      attachments: _.filter(group.attachments, stampableAttachment),
+      attachments: group.attachments,
       groupName: group.groupName,
       groupDesc: group.groupDesc,
       name: group.name
@@ -174,5 +171,9 @@ LUPAPISTE.StampModel = function(params) {
   self.selectAll = _.partial(selectAllFiles, true);
   self.selectNone = _.partial(selectAllFiles, false);
 
-
+  self.toggleGroupSelect = function(group) {
+    _.each(group.attachments, function(a) {
+      a.selected(!a.selected());
+    });
+  };
 };
