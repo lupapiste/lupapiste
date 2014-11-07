@@ -83,9 +83,6 @@ LUPAPISTE.StampModel = function(params) {
       .xMargin("10")
       .yMargin("85")
       .transparency(self.transparencies[0]);
-    console.log("files:", self.files());
-
-    //LUPAPISTE.ModalDialog.open("#dialog-stamp-attachments");
     return self;
   };
 
