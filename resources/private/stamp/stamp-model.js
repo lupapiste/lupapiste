@@ -45,7 +45,7 @@ LUPAPISTE.StampModel = function(params) {
   self.application = params.application;
   self.newFiles = params.attachments;
 
-  self.newFilesFiltered = ko.observableArray(_.map(self.newFiles(), function(group) {
+  self.files = ko.observableArray(_.map(self.newFiles(), function(group) {
     _.each(group.attachments, function(a) {
       var versions = _(a.versions).reverse().value(),
         restamp = versions[0].stamped,
@@ -70,14 +70,12 @@ LUPAPISTE.StampModel = function(params) {
     };
   }));
 
-  self.files = ko.observable(_(ko.mapping.toJS(self.application.attachments())).filter(stampableAttachment).map(normalizeAttachment).value());
-
-  self.status = ko.observable(_(self.newFilesFiltered()).pluck('attachments').flatten().length > 0 ? self.statusReady : self.statusNoFiles);
+  self.status = ko.observable(_(self.files()).pluck('attachments').flatten().value().length > 0 ? self.statusReady : self.statusNoFiles);
   self.text = ko.observable(loc("stamp.verdict"));
   self.date = ko.observable();
   self.organization = ko.observable(self.application.organizationName());
   self.selectedFiles = ko.computed(function() {
-    return _(self.newFilesFiltered())
+    return _(self.files())
       .pluck('attachments')
       .flatten()
       .filter(function(f) {
@@ -150,13 +148,7 @@ LUPAPISTE.StampModel = function(params) {
 
       self.jobVersion = update.version;
       _.each(update.value, function (newStatus, fileId) {
-        _(self.newFilesFiltered())
-        .pluck('attachments')
-        .flatten()
-        .filter({id: fileId})
-        .each(function(f) {
-          f.status(newStatus);
-        });
+        _(self.selectedFiles()).each(function(f) { f.status(newStatus); });
       });
 
       if (update.status === "done") {
@@ -170,7 +162,7 @@ LUPAPISTE.StampModel = function(params) {
 
 
   function selectAllFiles(value) {
-    _(self.newFilesFiltered())
+    _(self.files())
         .pluck('attachments')
         .flatten()
         .filter({id: fileId})
