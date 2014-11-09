@@ -228,8 +228,8 @@
     (if (or assignee (ss/blank? assigneeId))
       (update-application command
         {$set {:modified created
-               :authority  (if assignee (user/summary assignee) (:authority domain/application-skeleton))}}
-      (fail "error.user.not.found" :id assigneeId))))
+               :authority  (if assignee (user/summary assignee) (:authority domain/application-skeleton))}})
+      (fail "error.user.not.found"))))
 
 (defcommand cancel-application
   {:parameters [id]
