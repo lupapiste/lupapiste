@@ -215,7 +215,7 @@
    :roles       [:authority]
    :states      (action/all-states-but [:draft :closed :canceled])}
   [{:keys [user created] :as command}]
-  (let [assignee (mongo/select-one :users {:_id assigneeId :enabled true})]
+  (let [assignee (mongo/select-one :users {:_id assigneeId :enabled true :role "authority"})]
     (if (or assignee (ss/blank? assigneeId))
       (update-application command
         {$set {:modified created
