@@ -50,6 +50,10 @@ Sonja assign application to herself
 Assignee has changed
   Wait Until  Application is assigned to  Sonja Sibbo
 
+Sonja sees Mikko's full person ID
+  Open tab  parties
+  Wait Until  Textfield value should be  xpath=//div[@id='application-parties-tab']//input[@data-docgen-path='henkilo.henkilotiedot.hetu']  210281-0002
+
 # LUPA-23
 Sonja could add an operation
   It is possible to add operation
