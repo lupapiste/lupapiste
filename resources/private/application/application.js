@@ -81,7 +81,7 @@
 
     ajax.command("assign-application", {id: currentId, assigneeId: assigneeId})
       .success(function() {
-        authorizationModel.refresh(currentId);
+        repository.load(currentId, applicationModel.pending);
         })
       .error(function(data) {
         LUPAPISTE.ModalDialog.showDynamicOk(loc("error.dialog.title"), loc(data.text) + ": " + data.id);
