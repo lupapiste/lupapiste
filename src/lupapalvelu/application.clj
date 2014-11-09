@@ -227,10 +227,8 @@
   (let [assignee (mongo/select-one :users {:_id assigneeId :enabled true})]
     (if (or assignee (ss/blank? assigneeId))
       (update-application command
-                          (if assignee
-                            {$set   {:modified created
-                                     :authority (user/summary assignee)}}
-                            {$unset {:authority ""}}))
+        {$set {:modified created
+               :authority  (if assignee (user/summary assignee) (:authority domain/application-skeleton))}}
       (fail "error.user.not.found" :id assigneeId))))
 
 (defcommand cancel-application
