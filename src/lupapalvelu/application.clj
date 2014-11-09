@@ -209,15 +209,6 @@
 ;; Assign
 ;;
 
-(defcommand assign-to-me
-  {:parameters [:id]
-   :roles      [:authority]
-   :states     (action/all-states-but [:draft :closed :canceled])}
-  [{:keys [user created] :as command}]
-  (update-application command
-    {$set {:modified created
-           :authority (user/summary user)}}))
-
 (defcommand assign-application
   {:parameters  [:id assigneeId]
    :pre-checks  [open-inforequest/not-open-inforequest-user-validator]
