@@ -15,6 +15,11 @@ Mikko creates an application
   Open to authorities  hojo-hojo
   Element should not be visible  applicationUnseenComments
 
+Mikko sets himself as the applicant
+  Open tab  parties
+  Select From List  henkilo.userId  Mikko Intonen
+  Wait Until  Textfield value should be  xpath=//div[@id='application-parties-tab']//input[@data-docgen-path='henkilo.henkilotiedot.hetu']  210281-****
+
 # LUPA-23
 Mikko could add an operation
   It is possible to add operation
@@ -27,6 +32,10 @@ Sonja sees comment indicator on applications list
 Application is not assigned
   Open application  ${appname}  ${propertyId}
   Wait Until  Application is assigned to  Valitse..
+
+Sonja sees Mikko's person ID masked
+  Open tab  parties
+  Wait Until  Textfield value should be  xpath=//div[@id='application-parties-tab']//input[@data-docgen-path='henkilo.henkilotiedot.hetu']  210281-****
 
 Sonja sees comment indicator on application
   Element text should be  applicationUnseenComments  1

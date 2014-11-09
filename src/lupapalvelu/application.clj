@@ -111,7 +111,7 @@
 
 (defn- process-documents [user {authority :authority :as application}]
   (let [validate (fn [doc] (assoc doc :validationErrors (model/validate application doc)))
-        mask-person-ids (if (not= (user/same-user? user authority)) model/mask-person-ids identity)
+        mask-person-ids (if-not (user/same-user? user authority) model/mask-person-ids identity)
         doc-mapper (comp mask-person-ids validate)]
     (update-in application [:documents] (partial map doc-mapper))))
 
