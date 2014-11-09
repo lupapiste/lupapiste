@@ -109,18 +109,18 @@
 ;; Query application:
 ;;
 
+(defn- process-documents [user {authority :authority :as application}]
+  (let [validate (fn [doc] (assoc doc :validationErrors (model/validate application doc)))
+        mask-person-ids (if (not= (user/same-user? user authority)) model/mask-person-ids identity)
+        doc-mapper (comp mask-person-ids validate)]
+    (update-in application [:documents] (partial map doc-mapper))))
+
 (defn- post-process-app [app user]
   (-> app
     meta-fields/enrich-with-link-permit-data
     ((partial meta-fields/with-meta-fields user))
     without-system-keys
-    ((fn [application]
-       (update-in application [:documents] (fn [documents]
-                                             (map
-                                               (comp
-                                                 model/mask-person-ids
-                                                 (fn [doc] (assoc doc :validationErrors (model/validate application doc))))
-                                               documents)))))))
+    ((partial process-documents user))))
 
 (defn find-authorities-in-applications-organization [app]
   (mongo/select :users
