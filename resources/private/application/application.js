@@ -83,9 +83,6 @@
       .success(function() {
         repository.load(currentId, applicationModel.pending);
         })
-      .error(function(data) {
-        LUPAPISTE.ModalDialog.showDynamicOk(loc("error.dialog.title"), loc(data.text) + ": " + data.id);
-      })
       .call();
   }
 
