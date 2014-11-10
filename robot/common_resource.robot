@@ -377,7 +377,7 @@ Do prepare new request
 
 
 Add attachment
-  [Arguments]  ${path}  ${description}
+  [Arguments]  ${path}  ${description}  ${operation}
 
   # Go home Selenium, you're drunk! Why the fuck are you clicking the 'process-previous' button?
   # Must I do everything manually??
@@ -388,6 +388,8 @@ Add attachment
   Wait until       Element should be visible  test-save-new-attachment
   Wait until       Page should contain element  xpath=//form[@id='attachmentUploadForm']//option[@value='muut.muu']
   Select From List  attachmentType  muut.muu
+  Wait until       Page should contain element  xpath=//form[@id='attachmentUploadForm']//option[text()='${operation}']
+  Select From List  attachmentOperation  ${operation}
   Input text       text  ${description}
   Wait until       Page should contain element  xpath=//form[@id='attachmentUploadForm']/input[@type='file']
   Focus            xpath=//form[@id='attachmentUploadForm']/input[@type='file']
