@@ -4,6 +4,7 @@
             [lupapalvelu.core :refer [fail! unauthorized]]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.model :as model]
+            [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.vetuma :as vetuma]
             [lupapalvelu.web :as web]
             [sade.http :as http]
@@ -395,6 +396,12 @@
         :id (:id application)
         :doc (:id document)
         :updates updates) => ok?)))
+
+(defn dummy-doc [schema-name]
+  (let [schema (schemas/get-schema (schemas/get-latest-schema-version) schema-name)
+        data   (tools/create-document-data schema (partial tools/dummy-values nil))]
+    {:schema-info (:info schema)
+     :data        data}))
 
 ;;
 ;; Vetuma
