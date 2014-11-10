@@ -23,7 +23,10 @@
               <label class="form-label" for="login-password" data-bind="ltext: 'userinfo.password'"></label>
               <input class="form-input" id="login-password" type="password" data-bind="attr: {placeholder: loc('userinfo.password')}" name="password">
               <label class="form-label" ><input class="form-input" type="checkbox" id="rememberme" data-bind="checked: rememberMe"><span data-bind="ltext: 'userinfo.rememberme'"></span></label>
-              <button id="login-button" class="btn btn-primary" data-bind="ltext: 'welcome.login'">Kirjaudu</button>
+              <button id="login-button" class="btn btn-primary" data-bind="disable: processing">
+                <span data-bind="ltext: 'welcome.login'"></span>
+                <em data-bind="visible: pending" class="button-loader"></em>
+              </button>
               <span id="login-message" style="display: none; color: red"></span>
               <div class="passwd-reset">
                 <a href="#!/reset" data-bind="ltext: 'login.reset-question'"></a>

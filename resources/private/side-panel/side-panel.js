@@ -28,6 +28,8 @@ LUPAPISTE.SidePanelModel = function() {
     return self.showConversationPanel() || self.showNoticePanel();
   });
 
+  self.previousPage;
+
   var AuthorityInfo = function(id, firstName, lastName) {
     this.id = id;
     this.firstName = firstName;
@@ -42,9 +44,29 @@ LUPAPISTE.SidePanelModel = function() {
     self.authorities(authorityInfos);
   }
 
+  self.refreshConversations = function(application) {
+    if (application) {
+      var type = pageutil.getPage();
+      self.mainConversation(true);
+      switch(type) {
+        case "attachment":
+          self.mainConversation(false);
+        case "statement":
+          self.comment().refresh(application, false, {type: type, id: pageutil.lastSubPage()});
+          break;
+        case "verdict":
+          self.comment().refresh(application, false, {type: type, id: pageutil.lastSubPage()}, ["authority"]);
+          break;
+        default:
+          self.comment().refresh(application, true);
+          break;
+      }
+    }
+  }
+
   self.refresh = function(application, authorities) {
     // TODO applicationId, inforequest etc. could be computed
-    if(application && authorities) {
+    if (application && authorities) {
       self.application(application);
       self.authorities(authorities);
       self.applicationId(application.id);
@@ -56,24 +78,7 @@ LUPAPISTE.SidePanelModel = function() {
       self.permitType(self.application().permitType);
       initAuthoritiesSelectList(self.authorities());
     }
-
-    if (self.application()) {
-      var type = pageutil.getPage();
-      self.mainConversation(true);
-      switch(type) {
-        case "attachment":
-          self.mainConversation(false);
-        case "statement":
-          self.comment().refresh(self.application(), false, {type: type, id: pageutil.lastSubPage()});
-          break;
-        case "verdict":
-          self.comment().refresh(self.application(), false, {type: type, id: pageutil.lastSubPage()}, ["authority"]);
-          break;
-        default:
-          self.comment().refresh(self.application(), true);
-          break;
-      }
-    }
+    self.refreshConversations(self.application());
   };
 
   self.toggleConversationPanel = function(data, event) {
@@ -91,6 +96,18 @@ LUPAPISTE.SidePanelModel = function() {
       }}, 1000);
   };
 
+  self.highlightConversation = function() {
+    if (!self.showConversationPanel()) {
+      self.toggleConversationPanel();
+    } else {
+      self.comment().isSelected(true);
+    }
+    $('#conversation-panel').addClass("highlight-conversation");
+    setTimeout(function() {
+      $('#conversation-panel').removeClass("highlight-conversation");
+    }, 2000);
+  }
+
   self.toggleNoticePanel = function(data, event) {
     self.showNoticePanel(!self.showNoticePanel());
     self.showConversationPanel(false);
@@ -107,21 +124,69 @@ LUPAPISTE.SidePanelModel = function() {
 
   self.toggleHelp = function() {
     self.showHelp(!self.showHelp());
-  }
+  };
 
   var pages = ["application","attachment","statement","neighbors","verdict"];
+  var unsentMessage = false;
 
-  hub.subscribe({type: "page-change"}, function() {
-    if(_.contains(pages, pageutil.getPage())) {
+  var refreshSidePanel = function(previousHash) {
+    var currentPage = pageutil.getPage();
+    if (self.previousPage && currentPage !== self.previousPage && self.comment().text()) {
+      unsentMessage = true;
+      LUPAPISTE.ModalDialog.showDynamicYesNo(
+        loc("application.conversation.unsentMessage.header"),
+        loc("application.conversation.unsentMessage"),
+        {title: loc("application.conversation.sendMessage"), fn: function() {
+          if (previousHash) {
+            location.hash = previousHash;            
+          }
+          unsentMessage = false;
+          self.highlightConversation();
+        }},
+        {title: loc("application.conversation.clearMessage"), fn: function() {
+          self.comment().text(undefined);
+          self.refresh();
+          unsentMessage = false;
+          self.previousPage = currentPage;
+        }}
+      );
+    } else if (!unsentMessage) {
       self.refresh();
+      self.previousPage = currentPage;
+    }
+  }
+
+  hub.subscribe({type: "dialog-close"}, function(data) {
+    // Application error occurred
+    if (data.id === "dialog-application-load-error") {
+      self.comment().text(undefined);
+      unsentMessage = false;
+      return;
+    }
+
+    if (unsentMessage) {
+      self.comment().text(undefined);
+      repository.load(self.applicationId());
+      unsentMessage = false;
+    }     
+  });
+
+  hub.subscribe({type: "page-change"}, function(data) {
+    if(_.contains(pages.concat("applications"), pageutil.getPage())) {
+      refreshSidePanel(data.previousHash);
+    }
+    // Show side panel on specified pages
+    if(_.contains(pages, pageutil.getPage())) {
       $("#side-panel-template").addClass("visible");
     }
   });
 
   repository.loaded(pages, function(application, applicationDetails) {
-    self.authorization.refreshWithCallback({id: applicationDetails.application.id}, function() {
-      self.refresh(application, applicationDetails.authorities);
-    });
+    if (!unsentMessage) {
+      self.authorization.refreshWithCallback({id: applicationDetails.application.id}, function() {
+        self.refresh(application, applicationDetails.authorities);
+      });
+    }
   });
 };
 

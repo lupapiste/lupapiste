@@ -25,19 +25,19 @@ New attachment template button should not be visible for Mikko
 
 Mikko adds txt attachment without comment
   [Tags]  attachments
-  Add attachment  ${TXT_TESTFILE_PATH}  ${EMPTY}
+  Add attachment  ${TXT_TESTFILE_PATH}  ${EMPTY}  Uusi asuinrakennus
   Application state should be  draft
   Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${TXT_TESTFILE_NAME}')]
-  
+
 Mikko deletes attachment immediately by using remove icon
   [Tags]  attachments
   Click element  xpath=//div[@id="application-attachments-tab"]//span[@data-test-icon="delete-muut.muu"]
   Confirm  dynamic-yes-no-confirm-dialog
   Wait Until  Element should not be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${TXT_TESTFILE_NAME}')]
-  
+
 Mikko adds again txt attachment without comment
   [Tags]  attachments
-  Add attachment  ${TXT_TESTFILE_PATH}  ${EMPTY}
+  Add attachment  ${TXT_TESTFILE_PATH}  ${EMPTY}  Uusi asuinrakennus
   Application state should be  draft
   Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${TXT_TESTFILE_NAME}')]
 
@@ -65,7 +65,7 @@ Mikko deletes attachment
 
 Mikko adds txt attachment with comment
   [Tags]  attachments
-  Add attachment  ${TXT_TESTFILE_PATH}  ${TXT_TESTFILE_DESCRIPTION}
+  Add attachment  ${TXT_TESTFILE_PATH}  ${TXT_TESTFILE_DESCRIPTION}  Uusi asuinrakennus
 
 Mikko opens application to authorities
   Open to authorities  pliip
@@ -109,7 +109,7 @@ Sign all attachments
 
 Signature icon is visible
   Wait Until  Element should be visible  xpath=//div[@id="application-attachments-tab"]//span[@data-test-icon="signed-rakennuspaikka.ote_alueen_peruskartasta"]
-  
+
 Signature is visible
   Open attachment details  rakennuspaikka.ote_alueen_peruskartasta
   Wait Until  Xpath Should Match X Times  //section[@id="attachment"]//*/div[@data-bind="fullName: user"]  1
@@ -201,7 +201,7 @@ Sonja approves attachment
 Approve-button should be disabled
   [Tags]  attachments
   Wait until  Element should be disabled  test-attachment-approve
-  
+
 Attachment state should be ok
   Click element  xpath=//a[@data-test-id="back-to-application-from-attachment"]
   Tab should be visible  attachments

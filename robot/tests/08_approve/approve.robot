@@ -21,10 +21,10 @@ Mikko sets himself the applicant
 
 Mikko can't approve application
   Wait Until  Element should be disabled  xpath=//*[@data-test-id='approve-application']
-  
+
 Mikko adds an attachment
   Open tab  attachments
-  Add attachment  ${TXT_TESTFILE_PATH}  ${EMPTY}
+  Add attachment  ${TXT_TESTFILE_PATH}  ${EMPTY}  Uusi asuinrakennus
   Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${TXT_TESTFILE_NAME}')]
 
 Mikko decides to submit application
@@ -61,7 +61,7 @@ Sonja cant re-approve application
 
 Party tab indicators have been reset
   Wait Until  Element should not be visible  applicationPartyDocumentIndicator
-  
+
 Sonja sees that attachment has transferred indicator icon
   Open tab  attachments
   Wait Until  Element should be visible  xpath=//div[@id="application-attachments-tab"]//span[@data-test-icon="transfered-muut.muu"]

@@ -27,7 +27,7 @@
             [lupapalvelu.proxy-services :as proxy-services]
             [lupapalvelu.organization]
             [lupapalvelu.application :as application]
-            [lupapalvelu.ke6666 :as ke6666]
+            [lupapalvelu.pdf-export :as pdf-export]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.token :as token]
             [lupapalvelu.activation :as activation]
@@ -203,6 +203,7 @@
                    :oir authority?
                    :authority-admin authority-admin?
                    :admin admin?
+                   :wordpress anyone
                    :login-frame anyone
                    :welcome anyone
                    :oskari anyone
@@ -242,8 +243,10 @@
 (def ^:private unauthorized (resp/status 401 "Unauthorized\r\n"))
 
 ;; CSS & JS
-(defpage [:get ["/app/:app.:res-type" :res-type #"(css|js)"]] {app :app res-type :res-type}
-  (single-resource (keyword res-type) (keyword app) unauthorized))
+(defpage [:get ["/app/:build/:app.:res-type" :res-type #"(css|js)"]] {build :build app :app res-type :res-type}
+  (if (= build build-number)
+    (single-resource (keyword res-type) (keyword app) unauthorized)
+    (resp/redirect (str "/app/" build-number "/" app "." res-type ))))
 
 ;; Single Page App HTML
 (def apps-pattern
@@ -399,20 +402,24 @@
 ;;
 
 (defpage [:post "/api/upload/attachment"]
-  {:keys [applicationId attachmentId attachmentType text upload typeSelector targetId targetType locked authority] :as data}
-  (infof "upload: %s: %s type=[%s] selector=[%s], locked=%s, authority=%s" data upload attachmentType typeSelector locked authority)
+  {:keys [applicationId attachmentId attachmentType operationId text upload typeSelector targetId targetType locked authority] :as data}
+  (infof "upload: %s: %s type=[%s] op=[%s] selector=[%s], locked=%s, authority=%s" data upload attachmentType operationId typeSelector locked authority)
   (let [request (request/ring-request)
         target (when-not (every? s/blank? [targetId targetType])
                  (if (s/blank? targetId)
                    {:type targetType}
                    {:type targetType :id targetId}))
+        operation (if-not (clojure.string/blank? operationId)
+                    {:id operationId}
+                    nil)
         upload-data (assoc upload
                       :id applicationId
                       :attachmentId attachmentId
                       :target target
                       :locked (java.lang.Boolean/parseBoolean locked)
                       :authority (java.lang.Boolean/parseBoolean authority)
-                      :text text)
+                      :text text
+                      :op operation)
         attachment-type (attachment/parse-attachment-type attachmentType)
         upload-data (if attachment-type
                       (assoc upload-data :attachmentType attachment-type)
@@ -420,7 +427,7 @@
         result (execute-command "upload-attachment" upload-data request)]
     (if (core/ok? result)
       (resp/redirect "/html/pages/upload-ok.html")
-      (resp/redirect (str (hiccup.util/url "/html/pages/upload-1.13.html"
+      (resp/redirect (str (hiccup.util/url "/html/pages/upload-1.47.html"
                                         (-> (:params request)
                                           (dissoc :upload)
                                           (dissoc ring.middleware.anti-forgery/token-key)

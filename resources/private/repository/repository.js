@@ -26,15 +26,26 @@ var repository = (function() {
         attachment.signed = true;
       }
     }
-    
+
     attachment.isSent = false;
     attachment.sentDateString = "-";
-    if (!_.isUndefined(attachment.sent) || attachment.sent) {
+    if (attachment.sent) {
       attachment.isSent = true;
       attachment.sentDateString = moment(attachment.sent).format("D.M.YYYY");
     }
 
-    attachment.stamped = _.isUndefined(attachment.latestVersion) || !attachment.latestVersion ? false : attachment.latestVersion.stamped;
+    attachment.stamped = attachment.latestVersion ? attachment.latestVersion.stamped : false;
+  }
+
+  function setAttachmentOperation(operations, attachment) {
+    if (attachment.op) {
+      var op = _.findWhere(operations, {id: attachment.op.id});
+      if (op) {
+        attachment.op = op;
+      } else {
+        attachment.op = null;
+      }
+    }
   }
 
   function load(id, pending, callback) {
@@ -85,7 +96,10 @@ var repository = (function() {
             }
           }
         });
-        _.each(application.attachments ||[], calculateAttachmentStateIndicators);
+        _.each(application.attachments ||[], function(att) {
+          calculateAttachmentStateIndicators(att);
+          setAttachmentOperation(application.operations, att);
+        });
         hub.send("application-loaded", {applicationDetails: loading});
         if (_.isFunction(callback)) {
           callback(application);

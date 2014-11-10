@@ -99,14 +99,16 @@ var attachment = (function() {
     id:   ko.observable(),
     application: {
       id:     ko.observable(),
-      title:  ko.observable()
+      title:  ko.observable(),
+      state:  ko.observable()
     },
-    filename:        ko.observable(),
-    latestVersion:   ko.observable({}),
-    versions:        ko.observable([]),
-    signatures:      ko.observableArray([]),
-    type:            ko.observable(),
-    attachmentType:  ko.observable(),
+    applicationState: ko.observable(),
+    filename:         ko.observable(),
+    latestVersion:    ko.observable({}),
+    versions:         ko.observable([]),
+    signatures:       ko.observableArray([]),
+    type:             ko.observable(),
+    attachmentType:   ko.observable(),
     allowedAttachmentTypes: ko.observableArray([]),
     previewDisabled: ko.observable(false),
     operation:       ko.observable(),
@@ -120,6 +122,7 @@ var attachment = (function() {
     indicator:       ko.observable().extend({notify: 'always'}),
     showAttachmentVersionHistory: ko.observable(),
     showHelp:        ko.observable(false),
+    init:            ko.observable(false),
 
     toggleHelp: function() {
       model.showHelp(!model.showHelp());
@@ -149,7 +152,12 @@ var attachment = (function() {
     },
 
     newAttachmentVersion: function() {
-      initFileUpload(applicationId, attachmentId, model.attachmentType(), false);
+      initFileUpload({
+        applicationId: applicationId,
+        attachmentId: attachmentId,
+        attachmentType: model.attachmentType(),
+        typeSelector: false
+      });
 
       model.previewDisabled(true);
 
@@ -191,6 +199,11 @@ var attachment = (function() {
       return "attachmentType." + model.attachmentType();
     }
     return null;
+  });
+
+  model.editable = ko.computed(function() {
+    var preVerdictStates = ['verdictGiven', 'constructionStarted', 'closed'];
+    return _.contains(preVerdictStates, ko.unwrap(model.application.state)) ? currentUser.isAuthority() || _.contains(preVerdictStates, ko.unwrap(model.applicationState)) : true;
   });
 
   function saveLabelInformation(type, data) {
@@ -283,6 +296,7 @@ var attachment = (function() {
     model.contents(attachment.contents);
     model.scale(attachment.scale);
     model.size(attachment.size);
+    model.applicationState(attachment.applicationState);
 
     var type = attachment.type["type-group"] + "." + attachment.type["type-id"];
     model.attachmentType(type);
@@ -296,22 +310,26 @@ var attachment = (function() {
 
     model.application.id(applicationId);
     model.application.title(application.title);
+    model.application.state(application.state);
     model.id = attachmentId;
 
     approveModel.setApplication(application);
     approveModel.setAttachmentId(attachmentId);
 
-    authorizationModel.refresh(application, {attachmentId: attachmentId});
-
     model.showAttachmentVersionHistory(false);
 
     pageutil.hideAjaxWait();
-
-    model.latestVersion() ? model.showHelp(false) : model.showHelp(true);
+    model.indicator(false);
+    
+    authorizationModel.refresh(application, {attachmentId: attachmentId}, function() { 
+      model.latestVersion() ? model.showHelp(false) : model.showHelp(true);
+      model.init(true);
+    });
   }
 
   hub.onPageChange("attachment", function(e) {
     pageutil.showAjaxWait();
+    model.init(false);
     applicationId = e.pagePath[0];
     attachmentId = e.pagePath[1];
     repository.load(applicationId);
@@ -370,11 +388,12 @@ var attachment = (function() {
 
   hub.subscribe("upload-done", uploadDone);
 
-  function initFileUpload(applicationId, attachmentId, attachmentType, typeSelector, target, locked, authority) {
-    uploadingApplicationId = applicationId;
+  // applicationId, attachmentId, attachmentType, typeSelector, target, locked, authority
+  function initFileUpload(options) {
+    uploadingApplicationId = options.applicationId;
     var iframeId = "uploadFrame";
     var iframe = document.getElementById(iframeId);
-    iframe.contentWindow.LUPAPISTE.Upload.init(applicationId, attachmentId, attachmentType, typeSelector, target, locked, authority);
+    iframe.contentWindow.LUPAPISTE.Upload.init(options);
   }
 
   function regroupAttachmentTypeList(types) {

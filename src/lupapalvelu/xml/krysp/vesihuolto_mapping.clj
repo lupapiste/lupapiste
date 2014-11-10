@@ -55,7 +55,7 @@
 (defn save-application-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent.
    3rd parameter (submitted-application) is not used on VVVL applications."
-  [application lang _ krysp-version output-dir begin-of-link]
+  [application lang submitted-application krysp-version output-dir begin-of-link]
   (let [krysp-polku-lausuntoon [:Vesihuoltolaki :vapautukset :Vapautus :lausuntotieto]
         canonical-without-attachments  (vesihuolto-canonical/vapautus-canonical application lang)
         statement-given-ids (mapping-common/statements-ids-with-status
@@ -69,6 +69,14 @@
                     attachments)
         xml (element-to-xml canonical vesihuolto-to-krysp)]
 
-    (mapping-common/write-to-disk application attachments statement-attachments xml krysp-version output-dir)))
+    (mapping-common/write-to-disk
+      application
+      attachments
+      statement-attachments
+      xml
+      krysp-version
+      output-dir
+      submitted-application
+      lang)))
 
 (permit/register-function permit/VVVL :app-krysp-mapper save-application-as-krysp)

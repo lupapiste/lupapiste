@@ -15,6 +15,7 @@
                           :validate-doc
                           :add-comment
                           :attachment-types
+                          :attachment-operations
                           :should-see-unsubmitted-statements
                           :view-attachment
                           :delete-attachment
