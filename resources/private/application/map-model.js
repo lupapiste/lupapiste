@@ -2,8 +2,6 @@ LUPAPISTE.MapModel = function(authorizationModel) {
   "use strict";
   var self = this;
 
-  var authorizationModel = authorizationModel;
-
   var currentAppId = null;
   var applicationMap = null;
   var inforequestMap = null;

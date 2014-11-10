@@ -70,7 +70,7 @@ LUPAPISTE.Upload.loadOperations = function(applicationId) {
       })
       .call();
   }
-}
+};
 
 LUPAPISTE.Upload.init = function(options) {
   "use strict";
@@ -95,7 +95,7 @@ LUPAPISTE.Upload.initFromURLParams = function() {
                id: pageutil.getURLParameter("targetId")},
       locked: JSON.parse(pageutil.getURLParameter("locked")),
       authority: JSON.parse(pageutil.getURLParameter("authority"))
-    }
+    };
     LUPAPISTE.Upload.init(options);
   }
 };
