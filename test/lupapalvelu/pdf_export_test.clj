@@ -32,7 +32,6 @@
         file         (java.io.File/createTempFile "test" ".pdf")
         langs        ["fi"]]                                ;TODO Add sv to lang after export loc keys in excel
 
-    (println schema-names)
     ; Iterate over all languages
     (doseq [lang langs]
       (pdf-export/generate application lang file)
