@@ -29,9 +29,3 @@
   ([schema result]
     (fn [document]
       (or (fact (model/validate {} document schema) => (has not-every? (contains {:result result}))) true))))
-
-(defn dummy-doc [schema-name]
-  (let [schema (schemas/get-schema (schemas/get-latest-schema-version) schema-name)
-        data   (create-document-data schema (partial dummy-values nil))]
-    {:schema-info (:info schema)
-     :data        data}))

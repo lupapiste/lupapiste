@@ -1,8 +1,8 @@
 (ns lupapalvelu.document.vrk-test
   (:use [lupapalvelu.document.tools]
-        [lupapalvelu.document.schemas]
         [lupapalvelu.document.validators]
         [lupapalvelu.document.model]
+        [lupapalvelu.itest-util]
         [midje.sweet]
         [sade.util])
   (:require [lupapalvelu.document.validator :as v]

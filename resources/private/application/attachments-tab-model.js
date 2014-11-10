@@ -156,7 +156,13 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
   };
 
   self.newAttachment = function() {
-    attachment.initFileUpload(self.appModel.id(), null, null, true);
+    attachment.initFileUpload({
+      applicationId: self.appModel.id(),
+      attachmentId: null,
+      attachmentType: null,
+      typeSelector: true,
+      opSelector: true
+    });
   };
 
   self.copyOwnAttachments = function(model) {

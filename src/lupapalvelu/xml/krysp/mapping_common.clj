@@ -8,7 +8,8 @@
             [lupapalvelu.core :refer [fail!]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.xml.krysp.validator :as validator]))
+            [lupapalvelu.xml.krysp.validator :as validator]
+            [lupapalvelu.pdf-export :as pdf-export]))
 
 (def ^:private rp-yht {"2.1.2" "2.1.0"
                         "2.1.3" "2.1.1"
@@ -525,10 +526,17 @@
       canonical
       statement-attachments)))
 
+(defn- write-application-pdf-versions [output-dir application submitted-application lang]
+  (let [id (:id application)
+        submitted-file (io/file (str output-dir "/" (get-submitted-filename id)))
+        current-file (io/file (str output-dir "/" (get-current-filename id)))]
+    (pdf-export/generate submitted-application lang submitted-file)
+    (pdf-export/generate application lang current-file)))
+
 (defn write-to-disk
   "Writes XML string to disk and copies attachments from database. XML is validated before writing.
    Returns a sequence of attachment fileIds that were written to disk."
-  [application attachments statement-attachments xml krysp-version output-dir & [extra-emitter]]
+  [application attachments statement-attachments xml krysp-version output-dir & [submitted-application lang]]
   {:pre [(string? output-dir)]
    :post [%]}
 
@@ -556,7 +564,8 @@
     (write-attachments attachments output-dir)
     (write-statement-attachments statement-attachments output-dir)
 
-    (when (fn? extra-emitter) (extra-emitter))
+    (when (and submitted-application lang)
+      (write-application-pdf-versions output-dir application submitted-application lang))
 
     (when (fs/exists? outfile) (fs/delete outfile))
     (fs/rename tempfile outfile))
