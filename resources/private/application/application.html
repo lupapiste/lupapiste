@@ -437,7 +437,8 @@
           <div data-bind="component: {name: 'stamping-component', params: {application: appModel, attachments: $root.application.inPostVerdictState() ? postAttachmentsByOperation : preAttachmentsByOperation}}"></div>
           <!-- /ko -->
 
-          <div data-bind="ifnot: stampingMode">
+          <!-- ko ifnot: stampingMode -->
+          <div>
             <div data-bind="if: postAttachmentsByOperation().length > 0" data-test-id="application-post-attachments-table">
               <h1><span data-bind="ltext: 'application.attachments.post-verdict'"></span></h1>
               <div class="clear" data-bind="template: {name: 'attachments-template-op', data: postAttachmentsByOperation()}"></div>
@@ -460,6 +461,8 @@
             <a data-bind="attr: {href: '/api/raw/download-all-attachments?id=' + $root.application.id() + '&lang=' + loc.getCurrentLanguage() }, visible: $root.application.hasAttachment, ltext: 'download-all'" data-test-id="application-download-all-attachement" href="#" target="_blank"></a>
 
           </div>
+          <!-- /ko -->
+
           <div class="process-nav">
             <a class="btn process-next btn-nav-forward" data-bind="click: $root.application.nextTab" href="#" data-target="requiredFieldSummary">
               <span data-bind="ltext: 'application.next-tab'"></span>
