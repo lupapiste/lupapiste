@@ -4,6 +4,8 @@
   var rememberMeCookieName = "my-email";
 
   var rememberMe = ko.observable(false);
+  var processing = ko.observable(false);
+  var pending = ko.observable(false);
 
   function recallMe() {
     var oldUsername = _.trim($.cookie(rememberMeCookieName));
@@ -30,6 +32,8 @@
 
     ajax.postJson("/api/login", {"username": username, "password": password})
       .raw(false)
+      .processing(processing)
+      .pending(pending)
       .success(function(e) {
         var applicationpage = e.applicationpage;
         var redirectLocation = "/app/" + loc.getCurrentLanguage() + "/" + applicationpage;
@@ -56,7 +60,7 @@
   $(function() {
     recallMe();
     if (document.getElementById("login")) {
-      $("#login").applyBindings({rememberMe: rememberMe});
+      $("#login").applyBindings({rememberMe: rememberMe, processing: processing, pending: pending});
       $("#login-button").click(login);
       $("#register-button").click(function() {
         window.location.hash = "!/register";
