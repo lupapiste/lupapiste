@@ -152,7 +152,12 @@ var attachment = (function() {
     },
 
     newAttachmentVersion: function() {
-      initFileUpload(applicationId, attachmentId, model.attachmentType(), false);
+      initFileUpload({
+        applicationId: applicationId,
+        attachmentId: attachmentId,
+        attachmentType: model.attachmentType(),
+        typeSelector: false
+      });
 
       model.previewDisabled(true);
 
@@ -383,11 +388,12 @@ var attachment = (function() {
 
   hub.subscribe("upload-done", uploadDone);
 
-  function initFileUpload(applicationId, attachmentId, attachmentType, typeSelector, target, locked, authority) {
-    uploadingApplicationId = applicationId;
+  // applicationId, attachmentId, attachmentType, typeSelector, target, locked, authority
+  function initFileUpload(options) {
+    uploadingApplicationId = options.applicationId;
     var iframeId = "uploadFrame";
     var iframe = document.getElementById(iframeId);
-    iframe.contentWindow.LUPAPISTE.Upload.init(applicationId, attachmentId, attachmentType, typeSelector, target, locked, authority);
+    iframe.contentWindow.LUPAPISTE.Upload.init(options);
   }
 
   function regroupAttachmentTypeList(types) {

@@ -18,5 +18,5 @@ Sonja prepares the application
 
 Add post-verdict attachment
   Open tab  attachments
-  Add attachment  ${TXT_TESTFILE_PATH}  ${EMPTY}
+  Add attachment  ${TXT_TESTFILE_PATH}  ${EMPTY}  Uusi asuinrakennus
   Wait Until  Element should be visible  xpath=//div[@data-test-id='application-post-attachments-table']//a[contains(., '${TXT_TESTFILE_NAME}')]
