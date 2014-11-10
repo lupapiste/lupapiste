@@ -10,7 +10,7 @@
                                                                  katselmus-canonical
                                                                  unsent-attachments-to-canonical]]
             [lupapalvelu.xml.emit :refer [element-to-xml]]
-            [lupapalvelu.ke6666 :as ke6666]))
+            [lupapalvelu.pdf-export :as pdf-export]))
 
 ;RakVal
 
@@ -277,8 +277,8 @@
   (let [id (:id application)
         submitted-file (io/file (str output-dir "/" (mapping-common/get-submitted-filename id)))
         current-file (io/file (str output-dir "/" (mapping-common/get-current-filename id)))]
-    (ke6666/generate submitted-application lang submitted-file)
-    (ke6666/generate application lang current-file)))
+    (pdf-export/generate submitted-application lang submitted-file)
+    (pdf-export/generate application lang current-file)))
 
 (defn- save-katselmus-xml [application
                            lang
@@ -436,11 +436,13 @@
         xml (rakennuslupa-element-to-xml canonical krysp-version)]
 
     (mapping-common/write-to-disk
-      application attachments
+      application
+      attachments
       statement-attachments
       xml
       krysp-version
       output-dir
-      #(write-application-pdf-versions output-dir application submitted-application lang))))
+      submitted-application
+      lang)))
 
 (permit/register-function permit/R :app-krysp-mapper save-application-as-krysp)
