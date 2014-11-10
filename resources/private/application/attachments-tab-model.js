@@ -19,6 +19,9 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
 
   self.showHelp = ko.observable(false);
 
+  self.stampButtonStr = ko.computed(function() {
+    return self.stampingMode() ? 'cancel' : 'application.stampAttachments';
+  });
   var generalAttachmentsStr = 'attachments.general';
 
   function GroupModel(groupName, groupDesc, attachments, editable) {
@@ -183,10 +186,6 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
         return false;
       }},
       {title: loc("no")});
-  };
-
-  self.startStamping = function() {
-    self.stampingMode(true);
   };
 
   self.cancelStamping = function() {

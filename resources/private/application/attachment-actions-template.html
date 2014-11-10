@@ -20,10 +20,11 @@
             data-test-id="new-attachment-template-button"
             class="btn">
           </button>
-          <button data-bind="click: startStamping, visible: $root.authorization.ok('stamp-attachments'), enable: !appModel.processing() && $root.authorization.ok('stamp-attachments')" class="btn">
-            <span data-bind="ltext: 'application.stampAttachments'"></span>
-            <span class="icon stamp left-align"></span>
+          <button data-bind="toggleClick: stampingMode, visible: $root.authorization.ok('stamp-attachments'), enable: !appModel.processing() && $root.authorization.ok('stamp-attachments')" class="btn">
+            <span data-bind="text: loc(stampButtonStr())"></span>
+            <!-- ko ifnot: stampingMode --> <span class="icon stamp left-align"></span> <!-- /ko -->
           </button>
+          <!-- ko ifnot: stampingMode -->
           <button data-bind="click: $root.signingModel.init.bind($data, appModel), visible: $root.authorization.ok('sign-attachments'),    enable: !appModel.processing() && $root.authorization.ok('sign-attachments')"  data-test-id="application-sign-attachments-btn"  class="btn">
             <span data-bind="ltext: 'application.signAttachments'"></span>
             <span class="icon stamp left-align"></span>
@@ -37,6 +38,7 @@
               <span data-bind="ltext: 'application.attachmentsMoveToBackingSystem'"></span>
               <em data-bind="visible: appModel.pending" class="button-loader"></em>
           </button>
+          <!-- /ko -->
         </div>
       </script>
     </section>
