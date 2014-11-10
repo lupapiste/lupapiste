@@ -130,6 +130,17 @@
       (do
         (errorf "attempt to set new attachment-type: [%s] [%s]: %s" id attachmentId attachment-type)
         (fail :error.attachmentTypeNotAllowed)))))
+;;
+;; Operations
+;;
+
+(defquery attachment-operations
+  {:parameters [:id]
+   :extra-auth-roles [:statementGiver]
+   :roles [:applicant :authority]
+   :states action/all-states}
+  [{application :application}]
+  (ok :operations (:operations application)))
 
 ;;
 ;; States
@@ -281,7 +292,7 @@
 
 
 (defcommand upload-attachment
-  {:parameters [id attachmentId attachmentType filename tempfile size]
+  {:parameters [id attachmentId attachmentType op filename tempfile size]
    :roles      [:applicant :authority]
    :extra-auth-roles [:statementGiver]
    :pre-checks [attachment-is-not-locked
@@ -295,6 +306,7 @@
    :description "Reads :tempfile parameter, which is a java.io.File set by ring"}
   [{:keys [created user application] {:keys [text target locked]} :data :as command}]
 
+  (prn "op sdfjkdsfjkdfj" op)
   (when-not (attachment/allowed-attachment-type-for-application? application attachmentType)
     (fail! :error.illegal-attachment-type))
 
@@ -311,6 +323,7 @@
                              :content tempfile
                              :attachment-id attachmentId
                              :attachment-type attachmentType
+                             :op op
                              :comment-text text
                              :target target
                              :locked locked
