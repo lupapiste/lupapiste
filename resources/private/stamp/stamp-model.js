@@ -31,7 +31,6 @@ LUPAPISTE.StampModel = function(params) {
     return {text: loc(["stamp.transparency", v.toString()]), value: Math.round(255 * v / 100.0)};
   });
 
-
                              // Start:  Cancel:  Ok:
   self.statusInit      = 0;  //   -       -       -
   self.statusReady     = 1;  //   +       +       -
@@ -54,7 +53,7 @@ LUPAPISTE.StampModel = function(params) {
       a.filename = selected.filename,
       a.version = {major: selected.version.major, minor: selected.version.minor};
       a.size = selected.size;
-      a.selected = ko.observable(true);
+      a.selected = ko.observable(false);
       a.status = ko.observable("");
       a.restamp = restamp;
     }).value();
