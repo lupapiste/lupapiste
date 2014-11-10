@@ -29,7 +29,14 @@ LUPAPISTE.TargetedAttachmentsModel = function(attachmentTarget, attachmentType, 
   };
 
   self.newAttachment = function() {
-    attachment.initFileUpload(self.applicationId, null, self.attachmentType, self.typeSelector, self.target, true);
+    attachment.initFileUpload({
+      applicationId: self.applicationId,
+      attachmentId: null,
+      attachmentType: self.attachmentType,
+      typeSelector: self.typeSelector,
+      target: self.target,
+      locked: true
+    });
     LUPAPISTE.ModalDialog.open("#upload-dialog");
   };
 };

@@ -109,18 +109,18 @@
 ;; Query application:
 ;;
 
+(defn- process-documents [user {authority :authority :as application}]
+  (let [validate (fn [doc] (assoc doc :validationErrors (model/validate application doc)))
+        mask-person-ids (if-not (user/same-user? user authority) model/mask-person-ids identity)
+        doc-mapper (comp mask-person-ids validate)]
+    (update-in application [:documents] (partial map doc-mapper))))
+
 (defn- post-process-app [app user]
   (-> app
     meta-fields/enrich-with-link-permit-data
     ((partial meta-fields/with-meta-fields user))
     without-system-keys
-    ((fn [application]
-       (update-in application [:documents] (fn [documents]
-                                             (map
-                                               (comp
-                                                 model/mask-person-ids
-                                                 (fn [doc] (assoc doc :validationErrors (model/validate application doc))))
-                                               documents)))))))
+    ((partial process-documents user))))
 
 (defn find-authorities-in-applications-organization [app]
   (mongo/select :users
@@ -209,29 +209,19 @@
 ;; Assign
 ;;
 
-(defcommand assign-to-me
-  {:parameters [:id]
-   :roles      [:authority]
-   :states     (action/all-states-but [:draft :closed :canceled])}
-  [{:keys [user created] :as command}]
-  (update-application command
-    {$set {:modified created
-           :authority (user/summary user)}}))
-
 (defcommand assign-application
   {:parameters  [:id assigneeId]
    :pre-checks  [open-inforequest/not-open-inforequest-user-validator]
    :roles       [:authority]
    :states      (action/all-states-but [:draft :closed :canceled])}
-  [{:keys [user created] :as command}]
-  (let [assignee (mongo/select-one :users {:_id assigneeId :enabled true})]
-    (if (or assignee (nil? assigneeId))
+  [{:keys [user created application] :as command}]
+  (let [assignee (user/find-user {:_id assigneeId :enabled true
+                                  :role "authority" :organizations (:organization application)})]
+    (if (or assignee (ss/blank? assigneeId))
       (update-application command
-                          (if assignee
-                            {$set   {:modified created
-                                     :authority (user/summary assignee)}}
-                            {$unset {:authority ""}}))
-      (fail "error.user.not.found" :id assigneeId))))
+        {$set {:modified created
+               :authority  (if assignee (user/summary assignee) (:authority domain/application-skeleton))}})
+      (fail "error.user.not.found"))))
 
 (defcommand cancel-application
   {:parameters [id]
