@@ -95,7 +95,7 @@
               </tr>
 
               <!-- ko foreach: attachments -->
-              <tr class="attachment-row">
+              <tr class="attachment-row stamp-attachment-row" data-bind="toggleClick: selected, clickBubble: false, css: {selected: selected}">
                 <td class="attachmentState">
 
                   <span data-bind="attr: {'class': statusName + ' icon',
@@ -168,7 +168,8 @@
                 <td>
                   <input type="checkbox" data-bind="checked: $data.selected,
                         visible: $parents[1].status() < $parents[1].statusRunning,
-                        enable: $parents[1].status() === $parents[1].statusReady" />
+                        enable: $parents[1].status() === $parents[1].statusReady,
+                        click: function() {return true;}, clickBubble: false" />
                     <span data-bind="
                         text: loc(['stamp.file.status', $data.status()]),
                         visible: $parents[1].status() >= $parents[1].statusRunning"></span>
