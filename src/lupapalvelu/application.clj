@@ -214,8 +214,9 @@
    :pre-checks  [open-inforequest/not-open-inforequest-user-validator]
    :roles       [:authority]
    :states      (action/all-states-but [:draft :closed :canceled])}
-  [{:keys [user created] :as command}]
-  (let [assignee (mongo/select-one :users {:_id assigneeId :enabled true :role "authority"})]
+  [{:keys [user created application] :as command}]
+  (let [assignee (user/find-user {:_id assigneeId :enabled true
+                                  :role "authority" :organizations (:organization application)})]
     (if (or assignee (ss/blank? assigneeId))
       (update-application command
         {$set {:modified created
