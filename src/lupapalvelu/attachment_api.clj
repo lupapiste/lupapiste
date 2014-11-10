@@ -306,7 +306,6 @@
    :description "Reads :tempfile parameter, which is a java.io.File set by ring"}
   [{:keys [created user application] {:keys [text target locked]} :data :as command}]
 
-  (prn "op sdfjkdsfjkdfj" op)
   (when-not (attachment/allowed-attachment-type-for-application? application attachmentType)
     (fail! :error.illegal-attachment-type))
 

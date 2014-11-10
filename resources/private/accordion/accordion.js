@@ -25,7 +25,7 @@ var accordion = (function() {
     var complete = function() {
       content.css('overflow', 'visible');
       target.trigger("accordion-" + state);
-      if (done) { done(target) };
+      if (done) { done(target); };
     };
 
     content.attr("data-accordion-state", state);
