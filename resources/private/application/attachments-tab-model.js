@@ -5,8 +5,6 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
 
   self.appModel = appModel;
 
-  self.stampingMode = ko.observable(false);
-
   var postVerdictStates = {verdictGiven:true, constructionStarted:true, closed:true};
 
   self.preAttachmentsByOperation = ko.observableArray();
@@ -19,9 +17,6 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
 
   self.showHelp = ko.observable(false);
 
-  self.stampButtonStr = ko.computed(function() {
-    return self.stampingMode() ? 'cancel' : 'application.stampAttachments';
-  });
   var generalAttachmentsStr = 'attachments.general';
 
   function GroupModel(groupName, groupDesc, attachments, editable) {
@@ -194,8 +189,9 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
       {title: loc("no")});
   };
 
-  self.cancelStamping = function() {
-    self.stampingMode(false);
+  self.startStamping = function() {
+    var attachments = appModel.inPostVerdictState() ? self.postAttachmentsByOperation : self.preAttachmentsByOperation;
+    stamping.initStamp(self.appModel, attachments);
   };
 
   self.attachmentTemplatesModel = new function() {
@@ -244,8 +240,4 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
     self.refresh(self.appModel);
   });
 
-  ko.components.register('stamping-component', {
-    viewModel: LUPAPISTE.StampModel,
-    template: {element: "dialog-stamp-attachments"}
-  });
 };

@@ -1,9 +1,15 @@
 <!DOCTYPE html>
 <html>
   <body>
-    <section class="page" id="stamp-dialog" style="visibility: visible; display: block;">
+    <section class="page container" id="stamping">
+      <div id="stamping-container" data-bind="with: stamping">
+      <!-- ko if: stampingMode -->
+      <div data-bind="component: {name: 'stamping-component', params: {application: appModel, attachments: attachments}}"></div>
+      <!-- /ko -->
+      </div>
+
       <script type="text/html" id="dialog-stamp-attachments">
-        <div class="hidden" data-bind="slider: $parent.stampingMode, duration: 250">
+        <div>
           <div class="stamp-margin">
             <table>
               <tbody>
@@ -128,14 +134,12 @@
                     </span>
                 </td>
                 <td class="attachment-type-id">
-                  <a data-bind="attr: {href: '#!/attachment/' + $root.application.id() + '/' + id, 'data-test-type': type['type-group'] + '.' + type['type-id']}">
                     <span data-bind="if: type">
                       <span data-bind="text: loc(['attachmentType', type['type-group'], type['type-id']])"></span>
                     </span>
                     <span data-bind="if: !type">
                       <i data-bind="ltext: 'attachment.noName'"></i>
                     </span>
-                  </a>
                   <!-- ko if: $data.contents -->
                     <div class="attachment-content-desc"><span data-bind="text: $data.contents" data-test-id="attachment-contents"></span></div>
                   <!-- /ko -->
@@ -197,13 +201,13 @@
                 ltext: 'stamp.cancel',
                 enable: status() === statusReady,
                 visible: status() <= statusReady,
-                click: $parent.cancelStamping"
+                click: $parents[1].cancelStamping"
               class="btn close">
             </button>
             <button data-bind="
                 ltext: 'stamp.ok',
                 visible: status() > statusRunning,
-                click: $parent.cancelStamping"
+                click: $parents[1].cancelStamping"
               class="btn btn-primary close"
               data-test-id="application-stamp-dialdog-ok">
             </button>
