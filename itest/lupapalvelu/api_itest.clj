@@ -57,13 +57,13 @@
       (comment-application sonja id false) => ok?)
 
     (fact "Mikko must not be able to assign to himself!"
-      (command mikko :assign-to-me :id id) => unauthorized?)
+      (command mikko :assign-application :id id :assigneeId mikko-id) => unauthorized?)
 
     (fact "Teppo must not be able to assign to himself!"
-      (command teppo :assign-to-me :id id) => unauthorized?)
+      (command teppo :assign-application :id id :assigneeId teppo-id) => unauthorized?)
 
     (fact "Veikko must not be able to assign to himself!"
-      (command veikko :assign-to-me :id id) => unauthorized?)
+      (command veikko :assign-application :id id :assigneeId veikko-id) => unauthorized?)
 
     (fact "Sonja must be able to assign to herself!"
-      (command sonja :assign-to-me :id id) => ok?)))
+      (command sonja :assign-application :id id :assigneeId sonja-id) => ok?)))

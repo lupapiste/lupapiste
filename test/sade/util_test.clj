@@ -172,6 +172,10 @@
   (to-property-id "245-03-0105-06") => "24500301050006"
   (to-property-id "05-03-0105-006") => "00500301050006")
 
+(facts "to-human-readable-property-id"
+  (to-human-readable-property-id "24500301050006") => "245-3-105-6"
+  (to-human-readable-property-id "00500301050006") => "5-3-105-6")
+
 (facts sequable?
   (sequable? [])        => true
   (sequable? '())       => true

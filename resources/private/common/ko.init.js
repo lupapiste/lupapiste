@@ -203,11 +203,11 @@
       if (value === bindings.name) {
         $(element).fadeIn(200);
         setTimeout(function() {
-          $(element).fadeOut(200)
+          $(element).fadeOut(200);
         }, 4000);
       }
     }
-  }
+  };
 
   ko.bindingHandlers.transition = {
     init: function(element, valueAccessor, allBindings) {
@@ -241,7 +241,7 @@
         $(element).slideUp(duration, easing);
       }
     }
-  }
+  };
 
   ko.bindingHandlers.drill = {
     init: function(element) {
@@ -259,7 +259,7 @@
         $(element).addClass("drill-right-" + color);
       }
     }
-  }
+  };
 
   $.fn.applyBindings = function(model) {
     if (!this.length) {

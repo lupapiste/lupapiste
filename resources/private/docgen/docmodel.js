@@ -1316,7 +1316,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }
 
     wrapper.className = "op-description-wrapper";
-    descriptionSpan.className = "op-description"
+    descriptionSpan.className = "op-description";
     if (operation.description) {
       description.nodeValue = operation.description;
       descriptionInput.value = operation.description;
@@ -1328,7 +1328,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       var event = getEvent(e);
       // Prevent collapsing accordion when input is clicked
       event.stopPropagation();
-    }
+    };
 
     descriptionInput.type = "text";
     descriptionInput.className = "accordion-input text hidden";
@@ -1358,10 +1358,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     descriptionInput.onfocus = function(e) {
       descriptionInput.onblur = function(e) {
         saveInput();
-      }
-    }
+      };
+    };
 
-    descriptionInput.onkeyup = function(e) {      
+    descriptionInput.onkeyup = function(e) {
       // trigger save on enter and esc keypress
       var event = getEvent(e);
       event.stopPropagation();
@@ -1370,7 +1370,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         descriptionInput.blur();
         saveInput();
       }
-    }
+    };
 
     iconSpan.className = "icon edit";
     iconSpan.onclick = function(e) {

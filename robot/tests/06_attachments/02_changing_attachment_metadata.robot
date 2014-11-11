@@ -36,7 +36,7 @@ Mikko adds txt attachment without comment
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  attachments${secs}
   Open tab  attachments
-  Add attachment  ${TXT_TESTFILE_PATH}  ${EMPTY}
+  Add attachment  ${TXT_TESTFILE_PATH}  ${EMPTY}  Uusi asuinrakennus - Talo A
   Application state should be  draft
   Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${TXT_TESTFILE_NAME}')]
 

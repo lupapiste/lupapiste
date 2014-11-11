@@ -179,12 +179,12 @@
                :attachmentId (:id versioned-attachment)) => ok?
              (get-attachment-by-id veikko application-id (:id versioned-attachment)) => nil?)))))))
 
-(fact "pdf does not work with YA-lupa"
+(fact "pdf works with YA-lupa"
   (let [{application-id :id :as response} (create-app pena :municipality "753" :operation "ya-katulupa-vesi-ja-viemarityot")
         application (query-application pena application-id)]
     (:organization application) => "753-YA"
-    pena =not=> (allowed? :pdf-export :id application-id)
-    (raw pena "pdf-export" :id application-id) => http404?))
+    pena => (allowed? :pdf-export :id application-id)
+    (raw pena "pdf-export" :id application-id) => http200?))
 
 (defn- poll-job [id version limit]
   (when (pos? limit)
