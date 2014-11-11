@@ -59,7 +59,7 @@ var LUPAPISTE = LUPAPISTE || {};
     };
 
     self.hashChanged = function () {
-      self.previousHash = self.currentHash      
+      self.previousHash = self.currentHash;
       self.currentHash = (location.hash || "").substr(3);
       if (self.currentHash === "") {
         window.location.hash = "!/" + self.startPage;

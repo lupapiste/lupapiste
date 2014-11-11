@@ -46,7 +46,7 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
 
   var fGroupByOperation = function(attachment) {
     return attachment.op ? attachment.op['id'] : generalAttachmentsStr;
-  }
+  };
 
   /* Sorting function to sort attachments into
    * same order as in allowedAttachmentTypes -observable
@@ -70,7 +70,7 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
     } else {
       return atgIdx - btgIdx;
     }
-  }
+  };
 
   function getPreAttachments(source) {
     return _.filter(source, function(attachment) {
@@ -126,7 +126,7 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
 
   self.toggleHelp = function() {
     self.showHelp(!self.showHelp());
-  }
+  };
 
   self.refresh = function(appModel) {
     self.appModel = appModel;
