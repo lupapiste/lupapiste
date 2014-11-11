@@ -121,7 +121,7 @@
 
    :stamp        {:depends [:common]
                   :html ["stamp-template.html"]
-                  :js ["stamp-model.js"]}
+                  :js ["stamp-model.js" "stamp.js"]}
 
    :attachment   {:depends [:common :repository :signing :side-panel]
                   :js ["targeted-attachments-model.js" "attachment.js" "attachmentTypeSelect.js"]
