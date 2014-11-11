@@ -15,7 +15,7 @@
            [org.mozilla.javascript ErrorReporter EvaluatorException]))
 
 (defn write-header [kind out n]
-  (when (env/dev-mode?)
+  (when (env/feature? :no-minification)
     (.write out (format "\n\n/*\n * %s\n */\n" n)))
   (when (= kind :js)
     (.write out "\n;\n\n"))
@@ -35,7 +35,7 @@
 
 (defn- minified [kind ^java.io.Reader in ^java.io.Writer out]
   (cond
-    (env/dev-mode?) (IOUtils/copy in out)
+    (env/feature? :no-minification) (IOUtils/copy in out)
     (= kind :js) (let [c (JavaScriptCompressor. in error-reporter)]
                    ; no linebreaks, obfuscate locals, no verbose,
                    (.compress c out -1 true false

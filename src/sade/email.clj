@@ -91,7 +91,7 @@
 (defn fetch-html-template [template-name]
   (enlive/html-resource (find-resource template-name)))
 
-(when-not (env/dev-mode?)
+(when-not (env/feature? :no-cache)
   (alter-var-root #'fetch-template memoize)
   (alter-var-root #'fetch-html-template memoize))
 
