@@ -11,7 +11,9 @@ var stamping = (function() {
     var id = self.appModel.id();
     self.appModel = null;
     self.attachments = null;
+
     window.location.hash='#!/application/' + id + '/attachments';
+    repository.load(id);
   };
 
   function initStamp(appModel, attachments) {

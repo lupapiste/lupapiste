@@ -4,6 +4,7 @@
     <section class="page container" id="stamping">
       <div id="stamping-container" data-bind="with: stamping">
       <!-- ko if: stampingMode -->
+      <h1 data-bind="ltext: 'application.stampAttachments'"></h1>
       <div data-bind="component: {name: 'stamping-component', params: {application: appModel, attachments: attachments}}"></div>
       <!-- /ko -->
       </div>
