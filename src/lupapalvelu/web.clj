@@ -210,7 +210,7 @@
                    :neighbor anyone})
 
 (defn cache-headers [resource-type]
-  (if (env/dev-mode?)
+  (if (env/feature? :no-cache)
     {"Cache-Control" "no-cache"}
     (if (= :html resource-type)
       {"Cache-Control" "no-cache"
@@ -224,7 +224,7 @@
 (def default-lang "fi")
 
 (def ^:private compose
-  (if (env/dev-mode?)
+  (if (env/feature? :no-cache)
     singlepage/compose
     (memoize (fn [resource-type app] (singlepage/compose resource-type app)))))
 
