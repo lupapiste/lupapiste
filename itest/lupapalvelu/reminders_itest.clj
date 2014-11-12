@@ -2,22 +2,22 @@
   (:require [clojure.java.io :as io]
             [monger.operators :refer :all]
             [midje.sweet :refer :all]
-            [lupapalvelu.core :refer [now]]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.factlet :refer [fact* facts*]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.action :refer :all]
             [sade.dummy-email-server :as dummy-email-server]
+            [sade.core :refer :all]
             [lupapalvelu.fixture :as fixture]
             [lupapalvelu.batchrun :as batchrun]))
 
 (dummy-email-server/messages :reset true)  ;; clears inbox
 (fixture/apply-fixture "minimal")
 
-(def ^:private timestamp-the-beginning-of-time 0)
-(def ^:private timestamp-1-day-ago (batchrun/get-timestamp-from-now :day 1))
+(def- timestamp-the-beginning-of-time 0)
+(def- timestamp-1-day-ago (batchrun/get-timestamp-from-now :day 1))
 
-(def ^:private neighbor-non-matching
+(def- neighbor-non-matching
   {:id "534bf825299508fb3618489v"
    :propertyId "p"
    :owner {:type nil
@@ -45,12 +45,12 @@
                     :zip "10203"
                     :id "777777777777777777000020"}}]})
 
-(def ^:private neighbor-matching
+(def- neighbor-matching
   (-> neighbor-non-matching
     (assoc :id "534bf825299508fb3618456c")
     (assoc-in [:status 1 :created] timestamp-the-beginning-of-time)))
 
-(def ^:private neighbor-non-matching-with-response-given
+(def- neighbor-non-matching-with-response-given
   (-> neighbor-matching
     (assoc :id "534bf825299508fb3615223m")
     (update-in [:status] conj {:state "response-given-ok"
@@ -65,7 +65,7 @@
                                         :lastName "TESTAA"
                                         :firstName "PORTAALIA"}})))
 
-(def ^:private statement-non-matching
+(def- statement-non-matching
   {:id "525533f7e4b0138a23d8r4b4"
     :given nil
     :person {:id "5252ecdfe4b0138a23d8e385"
@@ -75,7 +75,7 @@
     :requested timestamp-1-day-ago
     :status nil})
 
-(def ^:private statement-matching
+(def- statement-matching
   {:id "525533f7e4b0138a23d8e4b5"
    :given nil
    :person {:id "5252ecdfe4b0138a23d8e385"
@@ -85,10 +85,10 @@
    :requested timestamp-the-beginning-of-time
    :status nil})
 
-(def ^:private app-id
+(def- app-id
   "LP-753-2014-12345")
 
-(def ^:private reminder-application
+(def- reminder-application
   {:sent nil
    :neighbors [neighbor-non-matching
                neighbor-matching]
@@ -136,14 +136,14 @@
    :id app-id
    :municipality "753"})
 
-(def ^:private reminder-application-non-matching-neighbors
+(def- reminder-application-non-matching-neighbors
   (assoc reminder-application
     :id "LP-753-2014-123456789"
     :modified timestamp-1-day-ago
     :statements [statement-non-matching]
     :neighbors [neighbor-non-matching-with-response-given]))
 
-(def ^:private reminder-application-matching-to-inforequest
+(def- reminder-application-matching-to-inforequest
   (assoc reminder-application
     :id "LP-732-2013-00006"
     :state "info"
@@ -153,26 +153,26 @@
     :statements []
     :neighbors []))
 
-(def ^:private reminder-application-non-matching-to-inforequest
+(def- reminder-application-non-matching-to-inforequest
   (assoc reminder-application
     :id "LP-732-2013-00007"
     :state "canceled"))
 
-(def ^:private open-inforequest-entry-non-matching {:_id "0yqaV2vEcGDH9LYaLFOlxSTpLidKI7xWbuJ9IGGv0iPM0Rrd"
+(def- open-inforequest-entry-non-matching {:_id "0yqaV2vEcGDH9LYaLFOlxSTpLidKI7xWbuJ9IGGv0iPM0Rrd"
                                                     :application-id (:id reminder-application-matching-to-inforequest)
                                                     :created timestamp-1-day-ago
                                                     :email "reba.skebamies@example.com"
                                                     :last-used nil
                                                     :organization-id "732-R"})
 
-(def ^:private open-inforequest-entry-matching
+(def- open-inforequest-entry-matching
   (-> open-inforequest-entry-non-matching
     (assoc
       :_id "0yqaV2vEcGDH9LYaLFOlxSTpLidKI7xWbuJ9IGGv0iPM0Rv2"
       :created timestamp-the-beginning-of-time
       :email "juba.skebamies@example.com")))
 
-(def ^:private open-inforequest-entry-with-application-with-non-matching-state
+(def- open-inforequest-entry-with-application-with-non-matching-state
   (-> open-inforequest-entry-non-matching
     (assoc
       :_id "0yqaV2vEcGDH9LYaLFOlxSTpLidKI7xWbuJ9IGGv0iPM0As5"

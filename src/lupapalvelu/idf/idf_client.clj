@@ -5,7 +5,7 @@
             [clojure.string :refer [split-lines]]
             [sade.http :as http]
             [sade.strings :as ss]
-            [lupapalvelu.core :refer [now]]
+            [sade.core :refer [now]]
             [lupapalvelu.logging :as logging]
             [lupapalvelu.idf.idf-core :refer :all]))
 

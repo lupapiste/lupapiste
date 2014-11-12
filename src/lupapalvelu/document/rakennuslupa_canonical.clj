@@ -2,7 +2,7 @@
   (:require [clojure.java.io :as io]
             [clojure.xml :as xml]
             [clojure.string :as s]
-            [lupapalvelu.core :refer [now]]
+            [sade.core :refer [now]]
             [sade.strings :refer :all]
             [sade.util :refer :all]
             [lupapalvelu.i18n :refer [with-lang loc]]

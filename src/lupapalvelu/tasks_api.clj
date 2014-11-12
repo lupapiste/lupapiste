@@ -3,7 +3,7 @@
             [monger.operators :refer :all]
             [sade.util :as util]
             [sade.strings :as ss]
-            [lupapalvelu.core :refer :all]
+            [sade.core :refer :all]
             [lupapalvelu.action :refer [defquery defcommand defraw non-blank-parameters update-application] :as action]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.schemas :as schemas]
