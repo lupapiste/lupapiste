@@ -50,11 +50,16 @@
       (select-keys krysp-config [:url :version])))))
 
 (defn- municipalities-with-organization []
-  (let [organizations (get-organizations {} {:scope 1})]
-    (distinct
-      (for [{scopes :scope} organizations
-            {municipality :municipality} scopes]
-        municipality))))
+  (let [organizations (get-organizations {} {:scope 1 :krysp 1})]
+    {:all (distinct
+            (for [{scopes :scope} organizations
+                  {municipality :municipality} scopes]
+              municipality))
+     :with-backend (distinct
+                     (for [{scopes :scope :as org} organizations
+                           {municipality :municipality :as scope} scopes]
+                       (when (-> org :krysp (get (-> scope :permitType keyword)) :url s/blank? not)
+                         municipality)))}))
 
 (defn- organization-attachments
   "Returns a map where key is permit type, value is a list of attachment types for the permit type"
@@ -197,7 +202,10 @@
   {:description "Returns a list of municipality IDs that are affiliated with Lupapiste."
    :roles [:applicant :authority]}
   [_]
-  (ok :municipalities (municipalities-with-organization)))
+  (let [munis (municipalities-with-organization)]
+    (ok
+      :municipalities (:all munis)
+      :municipalitiesWithBackendInUse (:with-backend munis))))
 
 (defquery municipality-active
   {:parameters [municipality]

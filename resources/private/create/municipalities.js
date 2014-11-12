@@ -3,6 +3,8 @@ var municipalities = (function() {
 
   var municipalities = ko.observable();
   var municipalitiesById = ko.observable();
+  var municipalitiesWithBackendSystemById = ko.observable();
+  var municipalitiesWithBackendSystem = ko.observable();
 
   function findById(id, callback) {
     if (!_.isFunction(callback)) { throw "callback must be a function: " + callback; }
@@ -11,9 +13,17 @@ var municipalities = (function() {
     callback( municipalitiesById()[id] );
   }
 
-  function reset(ms) {
-    municipalitiesById(_.reduce(ms, function(d, m) { d[m] = {supported: true, id: m}; return d; }, {}));
-    municipalities(_.sortBy(_.values(municipalitiesById()), function(m) { return loc(["municipality", m.id]); }));
+  function reset(ms, msWithBackendInUse) {
+    var makeMsById = function(munis) {
+      return _.reduce(munis, function(d, m) {
+        d[m] = {supported: true, id: m, name: loc(["municipality", m])};
+        return d; }, {});
+    };
+    var sortMunis = function(munis) { return _.sortBy(_.values(munis), "name"); };
+    municipalitiesById( makeMsById(ms) );
+    municipalities( sortMunis(municipalitiesById()) );
+    municipalitiesWithBackendSystemById( makeMsById(msWithBackendInUse) );
+    municipalitiesWithBackendSystem( sortMunis(municipalitiesWithBackendSystemById()) );
   }
 
   // TODO: Use requestContext here, like in locationSearch component?
@@ -30,7 +40,7 @@ var municipalities = (function() {
   function init() {
     ajax
       .query("municipalities-with-organization")
-      .success(function(data) { reset(data.municipalities); })
+      .success(function(data) { reset(data.municipalities, data.municipalitiesWithBackendInUse); })
       .call();
   }
 
@@ -42,6 +52,11 @@ var municipalities = (function() {
     // sorted alphabetically by name:
 
     municipalities: municipalities,
+
+    // Observable containing a list of supported municipalities that use a backing system,
+    // sorted alphabetically by name:
+
+    municipalitiesWithBackendSystem: municipalitiesWithBackendSystem,
 
     // Observable containing a map of municipalities keyed by
     // municipality id (id = string of three digits):
