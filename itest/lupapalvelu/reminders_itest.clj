@@ -7,7 +7,7 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.action :refer :all]
             [sade.dummy-email-server :as dummy-email-server]
-            [sade.core :refer :all]
+            [sade.core :refer [def- now]]
             [lupapalvelu.fixture :as fixture]
             [lupapalvelu.batchrun :as batchrun]))
 
