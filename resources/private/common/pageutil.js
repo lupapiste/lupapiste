@@ -5,13 +5,10 @@ var pageutil = (function($) {
    * Returns HTTP GET parameter value or null if the parameter is not set.
    */
   function getURLParameter(name) {
-    if (location.search) {
-      var value = (location.search.match(new RegExp("[?|&]" + name + "=([^&]*)(&|$)")) || [null])[1];
-      if (value !== null) {
-        return decodeURIComponent(value).replace(/\+/g, " ");
-      }
-    }
-    return null;
+    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+        results = regex.exec(location.search);
+    return results === null ? null : decodeURIComponent(results[1].replace(/\+/g, " "));
   }
 
   function getPage() {
