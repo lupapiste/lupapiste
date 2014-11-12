@@ -419,7 +419,7 @@
 (def- to-projection "EPSG:3067")
 (def- allowed-projection-prefix "EPSG:")
 
-(defn- ->source-projection [xml path #_source-projection-attr #_source-projection-point-dimension]
+(defn- ->source-projection [xml path]
   (let [source-projection-attr (select1-attribute-value xml path :srsName)                          ;; e.g. "urn:x-ogc:def:crs:EPSG:3879"
         source-projection-point-dimension (-> (select1-attribute-value xml path :srsDimension) (util/->int false))]
     (when (and source-projection-attr (= 2 source-projection-point-dimension))
@@ -433,11 +433,8 @@
 
 (defn- ->coordinate-array [point-xml-no-ns source-projection]
   (let [coords (ss/split point-xml-no-ns #" ")]
-    (info "Converting coordinates " coords " from projection " source-projection " to projection " to-projection)
-    (-> coords
-      ((partial map bigdec))
-      ((partial coordinate/convert source-projection to-projection 0))  ;; TODO: koita eri maaralla desimaaleja
-      ((partial map #(.doubleValue %))))))
+    ;; TODO: koita eri maaralla desimaaleja
+    (coordinate/convert source-projection to-projection 0 coords)))
 
 ;; Information parsed from verdict xml message for application creation
 (defn get-app-info-from-message [xml ->function kuntalupatunnus]
@@ -479,7 +476,7 @@
             coord-array-Rakennuspaikka (try
                                          (when-let [source-projection (->source-projection asia [:rakennuspaikkatieto :Rakennuspaikka :sijaintitieto :Sijainti :piste :Point])]
                                            (->coordinate-array (-> Rakennuspaikka :sijaintitieto :Sijainti :piste :Point :pos) source-projection))
-                                         (catch Exception e (error e "Coordinate conversion failed")))
+                                         (catch Exception e (error e "Coordinate conversion failed for kuntalupatunnus " kuntalupatunnus)))
 
             ;; Rakennus
             Rakennus (or
@@ -493,7 +490,7 @@
             coord-array-Rakennus (try
                                    (when-let [source-projection (->source-projection Rakennus-or-Rakennelma-with-ns [:sijaintitieto :Sijainti :piste :Point])]
                                      (->coordinate-array (-> Rakennus :sijaintitieto :Sijainti :piste :Point :pos) source-projection))
-                                   (catch Exception e (error e "Coordinate conversion failed")))
+                                   (catch Exception e (error e "Coordinate conversion failed for kuntalupatunnus " kuntalupatunnus)))
 
             ;; Varaudu tallaiseen. Huomaa srsName ja pilkku koordinaattien valimerkkina! (kts. LP-734-2014-00001:n paatossanoma)
 ;            <yht:pistesijainti>
