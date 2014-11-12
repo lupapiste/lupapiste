@@ -1,7 +1,7 @@
 (ns lupapalvelu.itest-util
   (:require [noir.request :refer [*request*]]
             [lupapalvelu.fixture.minimal :as minimal]
-            [lupapalvelu.core :refer [fail! unauthorized]]
+            [sade.core :refer [fail! unauthorized]]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]

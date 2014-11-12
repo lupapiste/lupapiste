@@ -7,13 +7,14 @@
             [lupapalvelu.document.canonical-test-common :as ctc]
             [lupapalvelu.document.yleiset-alueet-canonical :refer [application-to-canonical]]
             [lupapalvelu.document.tools :as tools]
-            [sade.util :refer :all]))
+            [sade.util :refer :all]
+            [sade.core :refer :all]))
 
-(def ^:private operation {:id "52380c6894a74fc25bb4ba46",
+(def- operation {:id "52380c6894a74fc25bb4ba46",
                           :created 1379404904514,
                           :name "ya-kayttolupa-terassit"})
 
-(def ^:private hankkeen-kuvaus {:id "52380c6894a74fc25bb4ba4a"
+(def- hankkeen-kuvaus {:id "52380c6894a74fc25bb4ba4a"
                                 :created 1379404904514
                                 :schema-info {:name "yleiset-alueet-hankkeen-kuvaus-kayttolupa"
                                               :removable false
@@ -25,9 +26,9 @@
 ;                                       :sijoitusLuvanTunniste {:value "LP-753-2013-00001"}
                                        :varattava-pinta-ala {:value "333"}}})
 
-(def ^:private tyoaika-kayttolupa (assoc-in tyoaika [:schema-info :op] operation))
+(def- tyoaika-kayttolupa (assoc-in tyoaika [:schema-info :op] operation))
 
-(def ^:private documents [hakija
+(def- documents [hakija
                           tyoaika-kayttolupa
                           maksaja
                           hankkeen-kuvaus])

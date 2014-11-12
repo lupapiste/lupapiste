@@ -1,6 +1,6 @@
 (ns lupapalvelu.statement
   (:require [sade.strings :as ss]
-            [lupapalvelu.core :refer [fail]]))
+            [sade.core :refer [fail]]))
 
 ;;
 ;; Common

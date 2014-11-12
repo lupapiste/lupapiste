@@ -10,7 +10,7 @@
             [sade.util :as util]
             [sade.strings :as ss]
             [sade.xml :as xml]
-            [lupapalvelu.core :refer :all]
+            [sade.core :refer :all]
             [lupapalvelu.action :refer [defquery defcommand update-application without-system-keys notify application->command] :as action]
             [lupapalvelu.mongo :refer [$each] :as mongo]
             [lupapalvelu.attachment :as attachment]

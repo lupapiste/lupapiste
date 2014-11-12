@@ -4,7 +4,7 @@
             [swiss.arrows :refer [-<>>]]
             [monger.operators :refer :all]
             [sade.strings :as ss]
-            [lupapalvelu.core :refer [ok fail fail! unauthorized]]
+            [sade.core :refer [ok fail fail! unauthorized]]
             [lupapalvelu.action :refer [defquery defcommand defraw update-application all-application-states notify] :as action]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.notifications :as notifications]

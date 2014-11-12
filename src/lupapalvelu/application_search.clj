@@ -6,7 +6,7 @@
             [monger.query :as query]
             [sade.strings :as ss]
             [sade.util :as util]
-            [lupapalvelu.core :refer :all]
+            [sade.core :refer :all]
             [lupapalvelu.action :refer [defquery] :as action]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.domain :as domain]
@@ -43,7 +43,7 @@
 ;; Table definition
 ;;
 
-(def ^:private col-sources [(fn [app] (select-keys app [:urgency :authorityNotice]))
+(def- col-sources [(fn [app] (select-keys app [:urgency :authorityNotice]))
                             :indicators
                             :attachmentsRequiringAction
                             :unseenComments
@@ -56,7 +56,7 @@
                             :state
                             :authority])
 
-(def ^:private order-by (assoc col-sources
+(def- order-by (assoc col-sources
                           0 nil
                           1 nil
                           2 nil
@@ -65,7 +65,7 @@
                           5 :address
                           6 nil))
 
-(def ^:private col-map (zipmap col-sources (map str (range))))
+(def- col-map (zipmap col-sources (map str (range))))
 
 ;;
 ;; Query construction

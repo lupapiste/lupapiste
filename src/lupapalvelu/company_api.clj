@@ -1,5 +1,5 @@
 (ns lupapalvelu.company-api
-  (:require [lupapalvelu.core :refer [ok fail fail! unauthorized unauthorized!]]
+  (:require [sade.core :refer [ok fail fail! unauthorized unauthorized!]]
             [lupapalvelu.action :refer [defquery defcommand] :as action]
             [lupapalvelu.company :as c]
             [lupapalvelu.user :as u]))

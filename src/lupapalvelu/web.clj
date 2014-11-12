@@ -17,7 +17,8 @@
             [sade.util :as util]
             [sade.status :as status]
             [sade.strings :as ss]
-            [lupapalvelu.core :refer [ok fail now] :as core]
+            [sade.core :refer [def-]]
+            [sade.core :refer [ok fail now] :as core]
             [lupapalvelu.action :refer [defcommand defquery] :as action]
             [lupapalvelu.i18n :refer [*lang*]]
             [lupapalvelu.user :as user]
@@ -186,7 +187,7 @@
 ;; Web UI:
 ;;
 
-(def ^:private build-number (:build-number env/buildinfo))
+(def- build-number (:build-number env/buildinfo))
 
 (def etag (str "\"" build-number "\""))
 
@@ -219,11 +220,11 @@
        "Vary"          "Accept-Encoding"
        "ETag"          etag})))
 
-(def ^:private never-cache #{:hashbang})
+(def- never-cache #{:hashbang})
 
 (def default-lang "fi")
 
-(def ^:private compose
+(def- compose
   (if (env/feature? :no-cache)
     singlepage/compose
     (memoize (fn [resource-type app] (singlepage/compose resource-type app)))))
@@ -240,7 +241,7 @@
        {:status 304})
      failure)))
 
-(def ^:private unauthorized (resp/status 401 "Unauthorized\r\n"))
+(def- unauthorized (resp/status 401 "Unauthorized\r\n"))
 
 ;; CSS & JS
 (defpage [:get ["/app/:build/:app.:res-type" :res-type #"(css|js)"]] {build :build app :app res-type :res-type}

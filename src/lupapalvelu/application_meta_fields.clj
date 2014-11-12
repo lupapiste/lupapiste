@@ -8,7 +8,7 @@
             [lupapalvelu.organization :as organization]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.neighbors :as neighbors]
-            [lupapalvelu.core :refer :all]
+            [sade.core :refer :all]
             [sade.env :as env]
             [sade.strings :as ss]))
 

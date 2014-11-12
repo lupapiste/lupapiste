@@ -1,6 +1,6 @@
 (ns lupapalvelu.xml.krysp.maa-aines-mapping
   (:require [sade.util :as util]
-            [lupapalvelu.core :refer [now]]
+            [sade.core :refer [now]]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.document.maa-aines-canonical :as maa-aines-canonical]
             [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
