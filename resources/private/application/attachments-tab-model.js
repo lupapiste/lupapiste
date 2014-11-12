@@ -191,7 +191,7 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
 
   self.startStamping = function() {
     var attachments = appModel.inPostVerdictState() ? self.postAttachmentsByOperation : self.preAttachmentsByOperation;
-    stamping.initStamp(self.appModel, attachments);
+    hub.send('start-stamping', {application: self.appModel, attachments: attachments});
   };
 
   self.attachmentTemplatesModel = new function() {

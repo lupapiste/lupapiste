@@ -28,6 +28,10 @@ var stamping = (function() {
     self.stampingMode(self.appModel !== null);
   });
 
+  hub.subscribe('start-stamping', function(param) {
+    initStamp(param.application, param.attachments);
+  });
+
   ko.components.register('stamping-component', {
     viewModel: LUPAPISTE.StampModel,
     template: {element: "dialog-stamp-attachments"}
