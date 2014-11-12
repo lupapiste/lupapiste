@@ -16,13 +16,13 @@ var municipalities = (function() {
     municipalities(_.sortBy(_.values(municipalitiesById()), function(m) { return loc(["municipality", m.id]); }));
   }
 
-  function operationsForMunicipality(municipality, callback, context) {
+  // TODO: Use requestContext here, like in locationSearch component?
+  function operationsForMunicipality(municipality, callback) {
     if (!_.isFunction(callback)) { throw "callback must be a function: " + callback; }
     ajax
       .query("selected-operations-for-municipality", {municipality: municipality})
       .success(function(data) {
-        var operations = data.operations;
-        callback.call(context, operations);
+        callback(data.operations);
       })
       .call();
     }
