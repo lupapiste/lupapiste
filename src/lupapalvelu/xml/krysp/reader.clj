@@ -416,8 +416,8 @@
 
 ;; Coordinates
 
-(def ^:private to-projection "EPSG:3067")
-(def ^:private allowed-projection-prefix "EPSG:")
+(def- to-projection "EPSG:3067")
+(def- allowed-projection-prefix "EPSG:")
 
 (defn- ->source-projection [xml path #_source-projection-attr #_source-projection-point-dimension]
   (let [source-projection-attr (select1-attribute-value xml path :srsName)                          ;; e.g. "urn:x-ogc:def:crs:EPSG:3879"
