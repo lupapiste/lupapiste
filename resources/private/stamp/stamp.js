@@ -1,53 +1,56 @@
 var stamping = (function() {
-
-  var self = this;
+  "use strict";
 
   var postVerdictStates = {verdictGiven:true, constructionStarted:true, closed:true}; // TODO make global var
 
-  self.stampingMode = ko.observable(false);
-  self.appModel = null;
-  self.attachments = null;
+  var model = {
+    stampingMode: ko.observable(false),
 
-  self.cancelStamping = function() {
-    self.stampingMode(false);
-    var id = self.appModel.id();
-    self.appModel = null;
-    self.attachments = null;
+    appModel: null,
+    attachments: null,
 
-    window.location.hash='#!/application/' + id + '/attachments';
-    repository.load(id);
+    cancelStamping: function() {
+      model.stampingMode(false);
+      var id = model.appModel.id();
+      model.appModel = null;
+      model.attachments = null;
+
+      window.location.hash='#!/application/' + id + '/attachments';
+      repository.load(id);
+    }
   };
 
-  function initStamp(appModel, attachments) {
-    self.appModel = appModel;
-    self.attachments = attachments;
 
-    window.location.hash='#!/stamping/' + self.appModel.id();
+  function initStamp(appModel, attachments) {
+    model.appModel = appModel;
+    model.attachments = attachments;
+
+    window.location.hash='#!/stamping/' + model.appModel.id();
 
   };
 
   hub.onPageChange('stamping', function(e) {
-    if ( !self.appModel ) {
+    if ( !model.appModel ) {
       if ( e.pagePath[0] ) {
         var appId = e.pagePath[0];
         repository.load(appId, null, function(application) {
-          self.appModel = new LUPAPISTE.ApplicationModel(authorization.create());
-          ko.mapping.fromJS(application, {}, self.appModel);
+          model.appModel = new LUPAPISTE.ApplicationModel(authorization.create());
+          ko.mapping.fromJS(application, {}, model.appModel);
 
-          var attachments = _.filter(ko.mapping.toJS(self.appModel.attachments), function(attachment) {
-            return self.appModel.inPostVerdictState() ? postVerdictStates[attachment.applicationState] : !postVerdictStates[attachment.applicationState];
+          var filtered = _.filter(ko.mapping.toJS(model.appModel.attachments), function(attachment) {
+            return model.appModel.inPostVerdictState() ? postVerdictStates[attachment.applicationState] : !postVerdictStates[attachment.applicationState];
           });
 
-          self.attachments = ko.observableArray(attachmentUtils.getGroupByOperation(attachments, true, self.appModel.allowedAttachmentTypes()));
+          model.attachments = ko.observableArray(attachmentUtils.getGroupByOperation(filtered, true, model.appModel.allowedAttachmentTypes()));
 
-          self.stampingMode(self.appModel !== null); // show
+          model.stampingMode(model.appModel !== null); // show
         });
       } else {
         error("No application ID provided for stamping");
         LUPAPISTE.ModalDialog.open("#dialog-application-load-error");
       }
     } else { // appModel already initialized, show stamping
-      self.stampingMode(true);
+      model.stampingMode(true);
     }
   });
 
@@ -61,7 +64,7 @@ var stamping = (function() {
   });
 
   $(function() {
-    $("#stamping-container").applyBindings({stampingMode: self.stampingMode, cancelStamping: self.cancelStamping});
+    $("#stamping-container").applyBindings(model);
   });
 
   return {
