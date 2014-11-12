@@ -315,20 +315,24 @@
     };
 
     self.updateOrganizationDetails = function(operation) {
-      ajax.query("organization-details",
-        {municipality: self.municipality().id,
-         operation: operation,
-         lang: loc.getCurrentLanguage()})
-      .success(function(d) {
-        self.inforequestsDisabled(d["inforequests-disabled"]);
-        self.newApplicationsDisabled(d["new-applications-disabled"]);
-        self.organization(d);
-      })
-      .error(function(d) {
-        self.inforequestsDisabled(true);
-        self.newApplicationsDisabled(true);
-      })
-      .call();
+      if (self.municipality() && operation) {
+        ajax
+          .query("organization-details", {
+            municipality: self.municipality().id,
+            operation: operation,
+            lang: loc.getCurrentLanguage()
+          })
+          .success(function(d) {
+            self.inforequestsDisabled(d["inforequests-disabled"]);
+            self.newApplicationsDisabled(d["new-applications-disabled"]);
+            self.organization(d);
+          })
+          .error(function(d) {
+            self.inforequestsDisabled(true);
+            self.newApplicationsDisabled(true);
+          })
+          .call();
+      }
     };
 
     self.create = function(infoRequest) {
