@@ -2,7 +2,7 @@
   (:require [clojure.java.io :as io]
             [clojure.xml :as xml]
             [clojure.string :as s]
-            [lupapalvelu.core :refer [now]]
+            [sade.core :refer [now]]
             [sade.strings :refer :all]
             [sade.util :refer :all]
             [lupapalvelu.i18n :refer [with-lang loc]]
@@ -294,16 +294,17 @@
 (defn katselmus-canonical [application lang task-id task-name pitoPvm buildings user katselmuksen-nimi tyyppi osittainen pitaja lupaehtona huomautukset lasnaolijat poikkeamat]
   (let [application (tools/unwrapped application)
         documents (documents-by-type-without-blanks application)
+        katselmusTyyppi (katselmusnimi-to-type katselmuksen-nimi tyyppi)
         katselmus (strip-nils
                     (merge
                       {:pitoPvm (if (number? pitoPvm) (to-xml-date pitoPvm) (to-xml-date-from-string pitoPvm))
-                       :katselmuksenLaji (katselmusnimi-to-type katselmuksen-nimi tyyppi)
+                       :katselmuksenLaji katselmusTyyppi
                        :vaadittuLupaehtonaKytkin (true? lupaehtona)
-                       :tarkastuksenTaiKatselmuksenNimi task-name
                        :osittainen osittainen
                        :lasnaolijat lasnaolijat
                        :pitaja pitaja
                        :poikkeamat poikkeamat}
+                      (when-not (some #{katselmusTyyppi} ["muu tarkastus" "muu katselmus"]) {:tarkastuksenTaiKatselmuksenNimi task-name})
                       (when task-id {:muuTunnustieto {:MuuTunnus {:tunnus task-id :sovellus "Lupapiste"}}}) ; v 2.1.3
                       (when (seq buildings)
                         {:rakennustunnus (let [building (-> buildings first :rakennus)]

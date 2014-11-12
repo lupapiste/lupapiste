@@ -2,7 +2,7 @@
   (:require [midje.sweet :refer :all]
             [lupapalvelu.company :as c]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.core :as core]))
+            [sade.core :as core]))
 
 (facts create-company
   (fact

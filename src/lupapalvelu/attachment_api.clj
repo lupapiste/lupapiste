@@ -5,7 +5,7 @@
             [swiss.arrows :refer [-<> -<>>]]
             [sade.strings :as ss]
             [sade.util :refer [future*]]
-            [lupapalvelu.core :refer [ok fail fail! now]]
+            [sade.core :refer [ok fail fail! now]]
             [lupapalvelu.action :refer [defquery defcommand defraw update-application application->command notify] :as action]
             [lupapalvelu.comment :as comment]
             [lupapalvelu.mongo :as mongo]
@@ -18,7 +18,7 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.job :as job]
             [lupapalvelu.stamper :as stamper]
-            [lupapalvelu.ke6666 :as ke6666]
+            [lupapalvelu.pdf-export :as pdf-export]
             [lupapalvelu.statement :as statement]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
@@ -130,6 +130,17 @@
       (do
         (errorf "attempt to set new attachment-type: [%s] [%s]: %s" id attachmentId attachment-type)
         (fail :error.attachmentTypeNotAllowed)))))
+;;
+;; Operations
+;;
+
+(defquery attachment-operations
+  {:parameters [:id]
+   :extra-auth-roles [:statementGiver]
+   :roles [:applicant :authority]
+   :states action/all-states}
+  [{application :application}]
+  (ok :operations (:operations application)))
 
 ;;
 ;; States
@@ -246,9 +257,9 @@
           (append-attachment zip (-> attachment :versions last)))
         ; Add submitted PDF, if exists:
         (when-let [submitted-application (mongo/by-id :submitted-applications (:id application))]
-          (append-stream zip (i18n/loc "attachment.zip.pdf.filename.submitted") (ke6666/generate submitted-application lang)))
+          (append-stream zip (i18n/loc "attachment.zip.pdf.filename.submitted") (pdf-export/generate submitted-application lang)))
         ; Add current PDF:
-        (append-stream zip (i18n/loc "attachment.zip.pdf.filename.current") (ke6666/generate application lang))
+        (append-stream zip (i18n/loc "attachment.zip.pdf.filename.current") (pdf-export/generate application lang))
         (.finish zip)))
     temp-file))
 
@@ -281,7 +292,7 @@
 
 
 (defcommand upload-attachment
-  {:parameters [id attachmentId attachmentType filename tempfile size]
+  {:parameters [id attachmentId attachmentType op filename tempfile size]
    :roles      [:applicant :authority]
    :extra-auth-roles [:statementGiver]
    :pre-checks [attachment-is-not-locked
@@ -311,6 +322,7 @@
                              :content tempfile
                              :attachment-id attachmentId
                              :attachment-type attachmentType
+                             :op op
                              :comment-text text
                              :target target
                              :locked locked

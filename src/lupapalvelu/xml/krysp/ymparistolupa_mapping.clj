@@ -1,7 +1,7 @@
 (ns lupapalvelu.xml.krysp.ymparistolupa-mapping
   (:require [clojure.walk :as walk]
             [sade.util :as util]
-            [lupapalvelu.core :refer [now]]
+            [sade.core :refer [now]]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.document.ymparistolupa-canonical :as ymparistolupa-canonical]
             [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
@@ -81,7 +81,7 @@
 (defn save-application-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent.
    3rd parameter (submitted-application) is not used on YL applications."
-  [application lang _ krysp-version output-dir begin-of-link]
+  [application lang submitted-application krysp-version output-dir begin-of-link]
   (let [krysp-polku-lausuntoon [:Ymparistoluvat :ymparistolupatieto :Ymparistolupa :lausuntotieto]
         canonical-without-attachments  (ymparistolupa-canonical/ymparistolupa-canonical application lang)
         statement-given-ids (mapping-common/statements-ids-with-status
@@ -95,7 +95,15 @@
                     attachments)
         xml (element-to-xml canonical ymparistolupa_to_krysp)]
 
-    (mapping-common/write-to-disk application attachments statement-attachments xml krysp-version output-dir)))
+    (mapping-common/write-to-disk
+      application
+      attachments
+      statement-attachments
+      xml
+      krysp-version
+      output-dir
+      submitted-application
+      lang)))
 
 (permit/register-function permit/YL :app-krysp-mapper save-application-as-krysp)
 

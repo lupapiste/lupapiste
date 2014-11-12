@@ -62,7 +62,7 @@ LUPAPISTE.SidePanelModel = function() {
           break;
       }
     }
-  }
+  };
 
   self.refresh = function(application, authorities) {
     // TODO applicationId, inforequest etc. could be computed
@@ -106,7 +106,7 @@ LUPAPISTE.SidePanelModel = function() {
     setTimeout(function() {
       $('#conversation-panel').removeClass("highlight-conversation");
     }, 2000);
-  }
+  };
 
   self.toggleNoticePanel = function(data, event) {
     self.showNoticePanel(!self.showNoticePanel());
@@ -138,7 +138,7 @@ LUPAPISTE.SidePanelModel = function() {
         loc("application.conversation.unsentMessage"),
         {title: loc("application.conversation.sendMessage"), fn: function() {
           if (previousHash) {
-            location.hash = previousHash;            
+            location.hash = previousHash;
           }
           unsentMessage = false;
           self.highlightConversation();
@@ -154,9 +154,16 @@ LUPAPISTE.SidePanelModel = function() {
       self.refresh();
       self.previousPage = currentPage;
     }
-  }
+  };
 
   hub.subscribe({type: "dialog-close"}, function(data) {
+    // Application error occurred
+    if (data.id === "dialog-application-load-error") {
+      self.comment().text(undefined);
+      unsentMessage = false;
+      return;
+    }
+
     if (unsentMessage) {
       self.comment().text(undefined);
       repository.load(self.applicationId());

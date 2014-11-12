@@ -3,6 +3,7 @@
             [clojure.string :as s]
             [sade.env :as env]
             [sade.util :as util]
+            [sade.core :refer :all]
             [sade.strings :as ss]
             [cheshire.core :as json]
             [clojure.java.io :as io])
@@ -35,8 +36,8 @@
 ;; event log:
 ;;
 
-(def ^:private ^DateTimeFormatter time-fmt (DateTimeFormat/forPattern time-format))
-(def ^:private ^java.io.Writer event-log-out (io/writer (io/file (doto (io/file env/log-dir "logs") (.mkdirs)) "events.log") :append true))
+(def- ^DateTimeFormatter time-fmt (DateTimeFormat/forPattern time-format))
+(def- ^java.io.Writer event-log-out (io/writer (io/file (doto (io/file env/log-dir "logs") (.mkdirs)) "events.log") :append true))
 
 (defn- unsecure-log-event [level event]
   (.write event-log-out (str (log-prefix {:level level :timestamp (.print time-fmt (System/currentTimeMillis)) :ns ""}) " - " event \newline))

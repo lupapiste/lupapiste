@@ -7,14 +7,15 @@
             [lupapalvelu.document.canonical-common :refer :all]
             [lupapalvelu.document.yleiset-alueet-canonical :refer [application-to-canonical]]
             [lupapalvelu.document.tools :as tools]
-            [sade.util :refer :all]))
+            [sade.util :refer :all]
+            [sade.core :refer :all]))
 
 
-(def ^:private operation {:id "523ae9ba94a7542b3520e649",
+(def- operation {:id "523ae9ba94a7542b3520e649",
                           :created 1379592634015,
                           :name "ya-sijoituslupa-maalampoputkien-sijoittaminen"})
 
-(def ^:private  hankkeen-kuvaus-sijoituslupa
+(def-  hankkeen-kuvaus-sijoituslupa
   {:id "523ae9ba94a7542b3520e64a"
    :created 1379592634015
    :schema-info {:order 65
@@ -25,7 +26,7 @@
                  :op operation}
    :data {:kayttotarkoitus {:value "Hankkeen kuvaus."}}})
 
-(def ^:private  documents [hakija
+(def-  documents [hakija
                            maksaja
                            hankkeen-kuvaus-sijoituslupa])
 

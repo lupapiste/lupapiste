@@ -196,6 +196,7 @@
             suunnittelija? (in? ["paasuunnittelija" "suunnittelija"] schema-name )]
         (get-in update-doc (into person-path [:etunimi :value])) => "Mikko"
         (get-in update-doc (into person-path [:sukunimi :value])) => "Intonen"
+        (get-in update-doc (into person-path [:hetu :value])) => "210281-****"
         (get-in update-doc (into company-path [:yritysnimi :value])) => (if suunnittelija? "Yritys Oy" nil)
         (get-in update-doc (into company-path [:liikeJaYhteisoTunnus :value])) => (if suunnittelija? "1234567-1" nil)
         (get-in update-doc (into experience-path [:koulutus :value])) => (if suunnittelija? "Tutkinto" nil)
@@ -203,8 +204,8 @@
         (get-in update-doc (into experience-path [:fise :value])) => (if suunnittelija? "f" nil))))
 
 (facts "Set user to document"
-  (let [application-id   (create-app-id mikko :municipality sonja-muni)
-        application      (query-application mikko application-id)
+  (let [application   (create-and-submit-application mikko :municipality sonja-muni)
+        application-id   (:id application)
         paasuunnittelija (domain/get-document-by-name application "paasuunnittelija")
         suunnittelija    (domain/get-document-by-name application "suunnittelija")
         hakija     (domain/get-document-by-name application "hakija")
@@ -246,6 +247,7 @@
               updated-suunnittelija (domain/get-document-by-id updated-app doc-id)]
           (get-in updated-suunnittelija [:data :henkilotiedot :etunimi :value]) => "Mikko"
           (get-in updated-suunnittelija [:data :henkilotiedot :sukunimi :value]) => "Intonen"
+          (get-in updated-suunnittelija [:data :henkilotiedot :hetu :value]) => "210281-****"
           (get-in updated-suunnittelija [:data :yritys :yritysnimi :value]) => "Yritys Oy"
           (get-in updated-suunnittelija [:data :yritys :liikeJaYhteisoTunnus :value]) => "1234567-1"
           (get-in updated-suunnittelija [:data :patevyys :koulutusvalinta :value]) => nil
@@ -253,7 +255,33 @@
           (get-in updated-suunnittelija [:data :patevyys :valmistumisvuosi :value]) => "2000"
           (get-in updated-suunnittelija [:data :patevyys :fise :value]) => "f"
           (fact "suunnittelija kuntaroolikoodi is preserved (LUPA-774)"
-            (get-in updated-suunnittelija [:data :kuntaRoolikoodi :value]) => code))))))
+            (get-in updated-suunnittelija [:data :kuntaRoolikoodi :value]) => code)))
+
+      (fact "application is unassigned, Sonja does not see the full person IDs"
+        (let [app (query-application sonja application-id)
+              suunnittelija (domain/get-document-by-id app doc-id)]
+          (:authority app) => empty?
+          (get-in suunnittelija [:data :henkilotiedot :hetu :value]) => "210281-****"))
+
+      (fact "application is unassigned, Ronja does not see the full person IDs"
+        (let [app (query-application ronja application-id)
+              suunnittelija (domain/get-document-by-id app doc-id)]
+          (get-in suunnittelija [:data :henkilotiedot :hetu :value]) => "210281-****"))
+
+      (fact "Sonja assigns the application to herself and sees the full person ID"
+        (command sonja :assign-application :id application-id :assigneeId sonja-id) => ok?
+        (let [app (query-application sonja application-id)
+              suunnittelija (domain/get-document-by-id app doc-id)]
+          (:authority app) => (contains {:id sonja-id})
+          (get-in suunnittelija [:data :henkilotiedot :hetu :value]) => "210281-0002"))
+
+      (fact "Ronja still does not see the person ID"
+        (let [app (query-application ronja application-id)
+              suunnittelija (domain/get-document-by-id app doc-id)]
+          (:authority app) => (contains {:id sonja-id})
+          (get-in suunnittelija [:data :henkilotiedot :hetu :value]) => "210281-****"))
+
+      )))
 
 (fact* "Merging building information from KRYSP does not overwrite the rest of the document"
   (let [application-id  (create-app-id pena :municipality sonja-muni :operation "kayttotark-muutos")

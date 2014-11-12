@@ -26,3 +26,6 @@ more-prev-app-info-needed-desc: Taustajärjestelmästä ei voitu noutaa kaikkea 
 
 more-prev-app-info-needed-message-title: Lisäinformaatiota tarvitaan
 more-prev-app-info-needed-message: Taustajärjestelmästä ei voitu noutaa kaikkea tarvittua tietoa kiinteistöstä. Voisitteko ystävällisesti syöttää katuosoitetiedon oheiseen kenttään.
+
+application.export.name: Lupapiste
+application.export.page: Sivu

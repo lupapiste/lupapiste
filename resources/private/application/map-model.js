@@ -2,8 +2,6 @@ LUPAPISTE.MapModel = function(authorizationModel) {
   "use strict";
   var self = this;
 
-  var authorizationModel = authorizationModel;
-
   var currentAppId = null;
   var applicationMap = null;
   var inforequestMap = null;
@@ -199,8 +197,10 @@ LUPAPISTE.MapModel = function(authorizationModel) {
 
   // When a shape is drawn in Oskari map, save it to application
   hub.subscribe("oskari-save-drawings", function(e) {
-    if (_.isArray(e.data.drawings)) {
-      ajax.command("save-application-drawings", {id: currentAppId, drawings: e.data.drawings})
+    var data = e.data;
+    var drawings = data.drawings ? JSON.parse(data.drawings) : undefined;
+    if (_.isArray(drawings)) {
+      ajax.command("save-application-drawings", {id: currentAppId, drawings: drawings})
       .success(function() {
         repository.load(currentAppId);
       })

@@ -1,8 +1,8 @@
 (ns lupapalvelu.common-actions-test
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
+            [sade.core :refer :all]
             [lupapalvelu.test-util :refer :all]
-            [lupapalvelu.core :refer :all]
             [lupapalvelu.action :refer :all]
             [lupapalvelu.common-actions :as ca]))
 
@@ -15,6 +15,7 @@
                           :validate-doc
                           :add-comment
                           :attachment-types
+                          :attachment-operations
                           :should-see-unsubmitted-statements
                           :view-attachment
                           :delete-attachment

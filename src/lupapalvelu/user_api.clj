@@ -11,7 +11,7 @@
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.util :as util]
-            [lupapalvelu.core :refer :all]
+            [sade.core :refer :all]
             [lupapalvelu.action :refer [defquery defcommand defraw] :as action]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.activation :as activation]
@@ -65,7 +65,7 @@
 ;;
 
 ;; Emails
-(def ^:private base-email-conf
+(def- base-email-conf
   {:model-fn      (fn [{{token :token} :data} conf recipient]
                     {:link-fi (str (env/value :host) "/app/fi/welcome#!/setpw/" token)
                      :link-sv (str (env/value :host) "/app/sv/welcome#!/setpw/" token)})})
@@ -231,7 +231,7 @@
 ;; General changes:
 ;;
 
-(def ^:private user-data-editable-fields [:firstName :lastName :street :city :zip :phone
+(def- user-data-editable-fields [:firstName :lastName :street :city :zip :phone
                                           :architect :degree :graduatingYear :fise
                                           :companyName :companyId :allowDirectMarketing])
 

@@ -7,7 +7,7 @@
             [sade.env :as env]
             [sade.util :as util]
             [sade.strings :as ss]
-            [lupapalvelu.core :refer :all]
+            [sade.core :refer :all]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.logging :as log]
             [lupapalvelu.notifications :as notifications]
@@ -289,16 +289,16 @@
               (invoke-post-fns! post-fns command status)
               status))
           (ok))))
-    (catch [:lupapalvelu.core/type :lupapalvelu.core/fail] {:keys [text] :as all}
+    (catch [:sade.core/type :sade.core/fail] {:keys [text] :as all}
       (do
         (errorf "fail! in action: \"%s\" [%s:%d]: %s (%s)"
           (:action command)
-          (:lupapalvelu.core/file all)
-          (:lupapalvelu.core/line all)
+          (:sade.core/file all)
+          (:sade.core/line all)
           text
-          (dissoc all :text :lupapalvelu.core/type :lupapalvelu.core/file :lupapalvelu.core/line))
+          (dissoc all :text :sade.core/type :sade.core/file :sade.core/line))
         (when execute? (log/log-event :error command))
-        (fail text (dissoc all :lupapalvelu.core/type :lupapalvelu.core/file :lupapalvelu.core/line))))
+        (fail text (dissoc all :sade.core/type :sade.core/file :sade.core/line))))
     (catch response? resp
       (do
         (warnf "%s -> proxy fail: %s" (:action command) resp)
@@ -340,7 +340,7 @@
    :feature     "Keyword: feature flag name. Action is run only if the feature flag is true.
                  If you have feature.some-feature properties file, use :feature :some-feature in action meta data"})
 
-(def ^:private supported-action-meta-data-keys (set (keys supported-action-meta-data)))
+(def- supported-action-meta-data-keys (set (keys supported-action-meta-data)))
 
 (defn register-action [action-type action-name meta-data line ns-str handler]
   (assert (every? supported-action-meta-data-keys (keys meta-data)) (str (keys meta-data)))

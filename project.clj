@@ -5,7 +5,8 @@
                  [org.clojure/data.xml "0.0.8"]
                  [org.clojure/tools.nrepl "0.2.6"]
                  [org.clojure/tools.trace "0.7.8"]
-                 [ring "1.2.1"]
+                 [commons-fileupload "1.3.1"] ; The latest version - ring requires 1.3
+                 [ring "1.3.1"]
                  [noir "1.3.0" :exclusions [compojure clj-stacktrace org.clojure/tools.macro ring hiccup bultitude]]
                  [bultitude "0.2.6"] ; noir requires 0.2.0, midje 1.6 requires 0.2.2
                  [compojure "1.1.9" :exclusions [org.clojure/tools.macro]]
@@ -33,16 +34,20 @@
                  [me.raynes/fs "1.4.6"]
                  [ontodev/excel "0.2.3" :exclusions [xml-apis]]
                  [com.googlecode.htmlcompressor/htmlcompressor "1.5.2"]
-                 [com.yahoo.platform.yui/yuicompressor "2.4.7" :exclusions [rhino/js]] ; http://jira.xwiki.org/browse/XWIKI-6148?focusedCommentId=59523#comment-59523
-                 [fi.sito/oskari "0.9.37"]
+                 [com.yahoo.platform.yui/yuicompressor "2.4.8" :exclusions [rhino/js]] ; http://jira.xwiki.org/browse/XWIKI-6148?focusedCommentId=59523#comment-59523
+                 [fi.sito/oskari "0.9.38"]
                  [slingshot "0.10.3"]
                  [com.google.zxing/javase "2.2"]
                  [org.geotoolkit/geotk-referencing "3.20-geoapi-3.0"]
                  [prismatic/schema "0.2.4"]
-                 [cljts "0.2.0" :exclusions [xerces/xercesImpl]]]
+                 [cljts "0.2.0" :exclusions [xerces/xercesImpl]]
+                 ; batik-js includes a built-in rhino, which breaks yuicompressor (it too has rhino built in)
+                 ; xalan excluded just to avoid bloat, presumably XSLT is not needed
+                 [clj-pdf "1.11.21" :exclusions [xalan org.apache.xmlgraphics/batik-js]]]
   :profiles {:dev {:dependencies [[midje "1.6.3"]
                                   [ring-mock "0.1.5"]
-                                  [clj-ssh "0.5.7"]]
+                                  [clj-ssh "0.5.7"]
+                                  [pdfboxing "0.1.3"]]
                    :plugins [[lein-midje "3.1.1"]
                              [lein-buildid "0.2.0"]
                              [lein-nitpicker "0.4.0"]

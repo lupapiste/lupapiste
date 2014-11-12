@@ -17,7 +17,8 @@
             [sade.util :as util]
             [sade.status :as status]
             [sade.strings :as ss]
-            [lupapalvelu.core :refer [ok fail now] :as core]
+            [sade.core :refer [def-]]
+            [sade.core :refer [ok fail now] :as core]
             [lupapalvelu.action :refer [defcommand defquery] :as action]
             [lupapalvelu.i18n :refer [*lang*]]
             [lupapalvelu.user :as user]
@@ -27,7 +28,7 @@
             [lupapalvelu.proxy-services :as proxy-services]
             [lupapalvelu.organization]
             [lupapalvelu.application :as application]
-            [lupapalvelu.ke6666 :as ke6666]
+            [lupapalvelu.pdf-export :as pdf-export]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.token :as token]
             [lupapalvelu.activation :as activation]
@@ -186,7 +187,7 @@
 ;; Web UI:
 ;;
 
-(def ^:private build-number (:build-number env/buildinfo))
+(def- build-number (:build-number env/buildinfo))
 
 (def etag (str "\"" build-number "\""))
 
@@ -210,7 +211,7 @@
                    :neighbor anyone})
 
 (defn cache-headers [resource-type]
-  (if (env/dev-mode?)
+  (if (env/feature? :no-cache)
     {"Cache-Control" "no-cache"}
     (if (= :html resource-type)
       {"Cache-Control" "no-cache"
@@ -219,12 +220,12 @@
        "Vary"          "Accept-Encoding"
        "ETag"          etag})))
 
-(def ^:private never-cache #{:hashbang})
+(def- never-cache #{:hashbang})
 
 (def default-lang "fi")
 
-(def ^:private compose
-  (if (env/dev-mode?)
+(def- compose
+  (if (env/feature? :no-cache)
     singlepage/compose
     (memoize (fn [resource-type app] (singlepage/compose resource-type app)))))
 
@@ -240,7 +241,7 @@
        {:status 304})
      failure)))
 
-(def ^:private unauthorized (resp/status 401 "Unauthorized\r\n"))
+(def- unauthorized (resp/status 401 "Unauthorized\r\n"))
 
 ;; CSS & JS
 (defpage [:get ["/app/:build/:app.:res-type" :res-type #"(css|js)"]] {build :build app :app res-type :res-type}
@@ -402,20 +403,24 @@
 ;;
 
 (defpage [:post "/api/upload/attachment"]
-  {:keys [applicationId attachmentId attachmentType text upload typeSelector targetId targetType locked authority] :as data}
-  (infof "upload: %s: %s type=[%s] selector=[%s], locked=%s, authority=%s" data upload attachmentType typeSelector locked authority)
+  {:keys [applicationId attachmentId attachmentType operationId text upload typeSelector targetId targetType locked authority] :as data}
+  (infof "upload: %s: %s type=[%s] op=[%s] selector=[%s], locked=%s, authority=%s" data upload attachmentType operationId typeSelector locked authority)
   (let [request (request/ring-request)
         target (when-not (every? s/blank? [targetId targetType])
                  (if (s/blank? targetId)
                    {:type targetType}
                    {:type targetType :id targetId}))
+        operation (if-not (clojure.string/blank? operationId)
+                    {:id operationId}
+                    nil)
         upload-data (assoc upload
                       :id applicationId
                       :attachmentId attachmentId
                       :target target
                       :locked (java.lang.Boolean/parseBoolean locked)
                       :authority (java.lang.Boolean/parseBoolean authority)
-                      :text text)
+                      :text text
+                      :op operation)
         attachment-type (attachment/parse-attachment-type attachmentType)
         upload-data (if attachment-type
                       (assoc upload-data :attachmentType attachment-type)

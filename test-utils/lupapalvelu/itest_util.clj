@@ -1,9 +1,10 @@
 (ns lupapalvelu.itest-util
   (:require [noir.request :refer [*request*]]
             [lupapalvelu.fixture.minimal :as minimal]
-            [lupapalvelu.core :refer [fail! unauthorized]]
+            [sade.core :refer [fail! unauthorized]]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.model :as model]
+            [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.vetuma :as vetuma]
             [lupapalvelu.web :as web]
             [sade.http :as http]
@@ -48,8 +49,9 @@
 (def veikko-muni (muni-for "veikko"))
 (def sonja       (apikey-for "sonja"))
 (def sonja-id    (id-for "sonja"))
-(def ronja-id    (id-for "ronja"))
 (def sonja-muni  (muni-for "sonja"))
+(def ronja       (apikey-for "ronja"))
+(def ronja-id    (id-for "ronja"))
 (def sipoo       (apikey-for "sipoo"))
 (def tampere-ya  (apikey-for "tampere-ya"))
 (def naantali    (apikey-for "admin@naantali.fi"))
@@ -395,6 +397,12 @@
         :id (:id application)
         :doc (:id document)
         :updates updates) => ok?)))
+
+(defn dummy-doc [schema-name]
+  (let [schema (schemas/get-schema (schemas/get-latest-schema-version) schema-name)
+        data   (tools/create-document-data schema (partial tools/dummy-values nil))]
+    {:schema-info (:info schema)
+     :data        data}))
 
 ;;
 ;; Vetuma

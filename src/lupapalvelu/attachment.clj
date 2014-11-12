@@ -4,7 +4,7 @@
             [sade.util :as util]
             [sade.env :as env]
             [sade.strings :as ss]
-            [lupapalvelu.core :refer [fail fail!]]
+            [sade.core :refer :all]
             [lupapalvelu.action :refer [update-application application->command]]
             [lupapalvelu.domain :refer [get-application-as get-application-no-access-checking]]
             [lupapalvelu.comment :as comment]
@@ -47,7 +47,7 @@
    :B5
    :muu])
 
-(def ^:private attachment-types-R
+(def- attachment-types-R
   [:hakija [:osakeyhtion_perustamiskirja
             :ote_asunto_osakeyhtion_hallituksen_kokouksen_poytakirjasta
             :ote_kauppa_ja_yhdistysrekisterista
@@ -128,7 +128,7 @@
           :ympariston_tietomalli_BIM
           :muu]])
 
-(def ^:private attachment-types-YA
+(def- attachment-types-YA
   [:yleiset-alueet [:aiemmin-hankittu-sijoituspaatos
                     :asemapiirros
                     :liitoslausunto
@@ -145,11 +145,11 @@
    ;; This is needed for statement attachments to work.
    :muut [:muu]])
 
-(def ^:private attachment-types-YI
+(def- attachment-types-YI
   [:kartat [:kartta-melun-ja-tarinan-leviamisesta]
    :muut [:muu]])
 
-(def ^:private attachment-types-YL
+(def- attachment-types-YL
    [:laitoksen_tiedot [:voimassa_olevat_ymparistolupa_vesilupa
                        :muut_paatokset_sopimukset
                        :selvitys_ymparistovahinkovakuutuksesta]
@@ -206,7 +206,7 @@
            :selvitys_suuronnettomuuden_vaaran_arvioimiseksi
            :muu]])
 
-(def ^:private attachment-types-MAL
+(def- attachment-types-MAL
   [:hakija [:valtakirja
             :ottamisalueen_omistus_hallintaoikeus]
    :ottamisalue [:ote_alueen_peruskartasta
@@ -224,7 +224,7 @@
           :pohjavesitutkimus
           :muu]])
 
-(def ^:private attachment-types-KM
+(def- attachment-types-KM
   [:hakija [:valtakirja
             :virkatodistus
             :ote_kauppa_ja_yhdistysrekisterista]
@@ -294,9 +294,9 @@
   [now applicationState attachement-types]
   (map (partial make-attachment now nil false applicationState nil) attachement-types))
 
-(defn create-attachment [application attachement-type now target locked & [attachment-id]]
+(defn create-attachment [application attachement-type op now target locked & [attachment-id]]
   {:pre [(map? application)]}
-  (let [attachment (make-attachment now target locked (:state application) nil attachement-type attachment-id)]
+  (let [attachment (make-attachment now target locked (:state application) op attachement-type attachment-id)]
     (update-application
       (application->command application)
       {$set {:modified now}
@@ -416,12 +416,12 @@
 (defn update-or-create-attachment
   "If the attachment-id matches any old attachment, a new version will be added.
    Otherwise a new attachment is created."
-  [{:keys [application attachment-id attachment-type file-id filename content-type size comment-text created user target locked] :as options}]
+  [{:keys [application attachment-id attachment-type op file-id filename content-type size comment-text created user target locked] :as options}]
   {:pre [(map? application)]}
   (let [att-id (cond
-                 (ss/blank? attachment-id) (create-attachment application attachment-type created target locked)
+                 (ss/blank? attachment-id) (create-attachment application attachment-type op created target locked)
                  (pos? (mongo/count :applications {:_id (:id application) :attachments.id attachment-id})) attachment-id
-                 :else (create-attachment application attachment-type created target locked attachment-id))]
+                 :else (create-attachment application attachment-type op created target locked attachment-id))]
     (set-attachment-version (assoc options :attachment-id att-id :now created :stamped false))))
 
 (defn parse-attachment-type [attachment-type]

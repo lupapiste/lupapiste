@@ -9,7 +9,6 @@
             [clojure.string :as s]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.core :refer [now ok?]]
             [lupapalvelu.user :as user]
             [lupapalvelu.logging :as logging]
             [lupapalvelu.verdict-api :as verdict-api]
@@ -18,7 +17,8 @@
             [lupapalvelu.action :refer :all]
             [sade.util :as util]
             [sade.env :as env]
-            [sade.dummy-email-server]))
+            [sade.dummy-email-server]
+            [sade.core :refer :all]))
 
 
 (defn get-timestamp-from-now [time-key amount]
@@ -45,7 +45,7 @@
      :link-sv (link-fn :sv)
      :created-date created-date}))
 
-(def ^:private oir-reminder-email-conf
+(def- oir-reminder-email-conf
   {:recipients-fn  notifications/from-data
    :subject-key    "open-inforequest-reminder"
    :model-fn       oir-reminder-base-email-model

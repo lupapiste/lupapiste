@@ -29,16 +29,16 @@ var repository = (function() {
 
     attachment.isSent = false;
     attachment.sentDateString = "-";
-    if (!_.isUndefined(attachment.sent) || attachment.sent) {
+    if (attachment.sent) {
       attachment.isSent = true;
       attachment.sentDateString = moment(attachment.sent).format("D.M.YYYY");
     }
 
-    attachment.stamped = _.isUndefined(attachment.latestVersion) || !attachment.latestVersion ? false : attachment.latestVersion.stamped;
+    attachment.stamped = attachment.latestVersion ? attachment.latestVersion.stamped : false;
   }
 
   function setAttachmentOperation(operations, attachment) {
-    if ( !_.isUndefined(attachment.op) && !_.isNull(attachment.op) ) {
+    if (attachment.op) {
       var op = _.findWhere(operations, {id: attachment.op.id});
       if (op) {
         attachment.op = op;

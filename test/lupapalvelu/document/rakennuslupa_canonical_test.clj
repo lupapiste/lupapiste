@@ -7,6 +7,7 @@
             [lupapalvelu.xml.krysp.rakennuslupa-mapping :refer :all]
             [lupapalvelu.factlet :as fl]
             [sade.util :refer :all]
+            [sade.core :refer :all]
             [clojure.data.xml :refer :all]
             [clj-time.core :refer [date-time]]
             [midje.sweet :refer :all]
@@ -20,27 +21,27 @@
   (fact (to-xml-date (date-time 2012 1 14)) => "2012-01-14")
   (fact (to-xml-date (date-time 2012 2 29)) => "2012-02-29"))
 
-(def ^:private municipality 753)
+(def- municipality 753)
 
-(def ^:private nimi {:etunimi {:value "Pena"} :sukunimi {:value "Penttil\u00e4"}})
+(def- nimi {:etunimi {:value "Pena"} :sukunimi {:value "Penttil\u00e4"}})
 
-(def ^:private henkilotiedot (assoc nimi :hetu {:value "210281-9988"} :turvakieltoKytkin {:value true}))
+(def- henkilotiedot (assoc nimi :hetu {:value "210281-9988"} :turvakieltoKytkin {:value true}))
 
-(def ^:private osoite {:katu {:value "katu"} :postinumero {:value "33800"} :postitoimipaikannimi {:value "Tuonela"}})
+(def- osoite {:katu {:value "katu"} :postinumero {:value "33800"} :postitoimipaikannimi {:value "Tuonela"}})
 
-(def ^:private henkilo
+(def- henkilo
   {:henkilotiedot henkilotiedot
    :yhteystiedot {:puhelin {:value "+358401234567"}
                   :email {:value "pena@example.com"}}
    :osoite osoite})
 
-(def ^:private suunnittelija-henkilo
+(def- suunnittelija-henkilo
   (assoc henkilo :henkilotiedot (dissoc henkilotiedot :turvakieltoKytkin)))
 
-(def ^:private yritysnimi-ja-ytunnus
+(def- yritysnimi-ja-ytunnus
   {:yritysnimi {:value "Solita Oy"} :liikeJaYhteisoTunnus {:value "1060155-5"}})
 
-(def ^:private yritys
+(def- yritys
   (merge
     yritysnimi-ja-ytunnus
     {:osoite osoite
@@ -48,17 +49,17 @@
                      :yhteystiedot {:email {:value "solita@solita.fi"},
                                     :puhelin {:value "03-389 1380"}}}}))
 
-(def ^:private hakija-henkilo
+(def- hakija-henkilo
   {:id "hakija-henkilo" :schema-info {:name "hakija"
                                       :version 1}
    :data {:henkilo henkilo}})
 
-(def ^:private hakija-yritys
+(def- hakija-yritys
   {:id "hakija-yritys" :schema-info {:name "hakija"
                                      :version 1}
    :data {:_selected {:value "yritys"}, :yritys yritys}})
 
-(def ^:private paasuunnittelija
+(def- paasuunnittelija
   {:id "50bc85e4ea3e790c9ff7cdb2"
    :schema-info {:name "paasuunnittelija"
                  :version 1}
@@ -71,7 +72,7 @@
                        :fise {:value "http://www.ym.fi"}}}
            {:yritys yritysnimi-ja-ytunnus})})
 
-(def ^:private suunnittelija1
+(def- suunnittelija1
   {:id "suunnittelija1" :schema-info {:name "suunnittelija"
                                       :version 1}
    :data (merge suunnittelija-henkilo
@@ -83,7 +84,7 @@
                             :fise {:value "http://www.ym.fi"}}}
                 {:yritys yritysnimi-ja-ytunnus})})
 
-(def ^:private suunnittelija2
+(def- suunnittelija2
   {:id "suunnittelija2"  :schema-info {:name "suunnittelija"
                                        :version 1}
    :data (merge suunnittelija-henkilo
@@ -96,7 +97,7 @@
                             :fise {:value "http://www.ym.fi"}}}
                 {:yritys yritysnimi-ja-ytunnus})})
 
-(def ^:private suunnittelija-old-schema-LUPA-771
+(def- suunnittelija-old-schema-LUPA-771
   {:id "suunnittelija-old-schema-LUPA771" :schema-info {:name "suunnittelija"
                                                         :version 1}
    :data (merge suunnittelija-henkilo
@@ -107,7 +108,7 @@
                             :kokemus {:value "5"}
                             :fise {:value "http://www.ym.fi"}}})})
 
-(def ^:private suunnittelija-blank-role
+(def- suunnittelija-blank-role
   {:id "suunnittelija-blank-role" :schema-info {:name "suunnittelija"
                                                 :version 1}
    :data (merge suunnittelija-henkilo
@@ -119,12 +120,12 @@
                             :fise {:value "http://www.ym.fi"}}}
                 {:yritys yritysnimi-ja-ytunnus})})
 
-(def ^:private maksaja-henkilo
+(def- maksaja-henkilo
   {:id "maksaja-henkilo" :schema-info {:name "maksaja"
                                        :version 1}
    :data {:henkilo henkilo}})
 
-(def ^:private maksaja-yritys
+(def- maksaja-yritys
   {:id "maksaja-yritys" :schema-info {:name "maksaja"
                                       :version 1}
    :data {:_selected {:value "yritys"}
@@ -134,7 +135,7 @@
                            :verkkolaskuTunnus {:value "laskutunnus-1234"}
                            :valittajaTunnus {:value "valittajatunnus-1234"}}})}})
 
-(def ^:private tyonjohtaja
+(def- tyonjohtaja
   {:id "tyonjohtaja"
    :schema-info {:name "tyonjohtaja", :version 1}
    :data (merge suunnittelija-henkilo
@@ -156,18 +157,18 @@
                             :alkamisPvm {:value "13.02.2014"}
                             :paattymisPvm {:value "20.02.2014"}}})})
 
-(def ^:private tyonjohtaja-blank-role-and-blank-qualification
+(def- tyonjohtaja-blank-role-and-blank-qualification
   (-> tyonjohtaja
     (assoc-in [:data :kuntaRoolikoodi :value] nil)
     (assoc-in [:data :patevyys :patevyysvaatimusluokka :value] "ei tiedossa")
     (assoc-in [:data :patevyys :tyonjohtajaHakemusKytkin :value] "nimeaminen")))
 
-(def ^:private tyonjohtajan-sijaistus-blank-dates
+(def- tyonjohtajan-sijaistus-blank-dates
   (-> tyonjohtaja
     (dissoc-in [:data :sijaistus :alkamisPvm])
     (assoc-in  [:data :sijaistus :paattymisPvm :value] "")))
 
-(def ^:private rakennuspaikka
+(def- rakennuspaikka
   {:id "rakennuspaikka" :schema-info {:name "rakennuspaikka"
                                       :version 1}
    :data {:kiinteisto {:tilanNimi {:value "Hiekkametsa"}
@@ -175,7 +176,7 @@
           :hallintaperuste {:value "oma"}
           :kaavanaste {:value "yleis"}}})
 
-(def ^:private common-rakennus
+(def- common-rakennus
   {:rakennuksenOmistajat {:0 {:_selected {:value "henkilo"}
                               :henkilo henkilo
                               :omistajalaji {:value "muu yksityinen henkil\u00f6 tai perikunta"}}
@@ -238,7 +239,7 @@
                     :saunaKytkin {:value true}
                     :lamminvesiKytkin {:value true}}}})
 
-(def ^:private uusi-rakennus
+(def- uusi-rakennus
   {:id "uusi-rakennus"
    :created 2
    :schema-info {:name "uusiRakennus"
@@ -246,7 +247,7 @@
                  :op {:name "asuinrakennus"}}
    :data common-rakennus})
 
-(def ^:private rakennuksen-muuttaminen
+(def- rakennuksen-muuttaminen
   {:id "muuttaminen"
    :created 1
    :schema-info {:name "rakennuksen-muuttaminen"
@@ -258,7 +259,7 @@
            :perusparannuskytkin {:value true}
            :muutostyolaji {:value "muut muutosty\u00f6t"}})})
 
-(def ^:private laajentaminen
+(def- laajentaminen
   {:id "laajennus"
    :created 3
    :schema-info {:name "rakennuksen-laajentaminen"
@@ -278,7 +279,7 @@
                                                              :kayttotarkoitusKoodi {:value "varastotilaa"}}}}}})})
 
 
-(def ^:private purku {:id "purku"
+(def- purku {:id "purku"
                       :created 4
                       :schema-info {:name "purkaminen"
                                     :version 1
@@ -295,7 +296,7 @@
                                :poistumanAjankohta {:value "17.04.2013"},
                                :poistumanSyy {:value "tuhoutunut"}})})
 
-(def ^:private aidan-rakentaminen {:data {:kokonaisala {:value "0"}
+(def- aidan-rakentaminen {:data {:kokonaisala {:value "0"}
                                           :kuvaus { :value "Aidan rakentaminen rajalle"}}
                                    :id "aidan-rakentaminen"
                                    :created 5
@@ -305,7 +306,7 @@
                                                  :name "kaupunkikuvatoimenpide"
                                                  :version 1}})
 
-(def ^:private puun-kaataminen {:created 6
+(def- puun-kaataminen {:created 6
                                 :data { :kuvaus {:value "Puun kaataminen"}}
                                 :id "puun kaataminen"
                                 :schema-info {:removable true
@@ -315,18 +316,18 @@
                                               :name "maisematyo"
                                               :version 1}})
 
-(def ^:private hankkeen-kuvaus-minimum {:id "Hankkeen kuvaus"
+(def- hankkeen-kuvaus-minimum {:id "Hankkeen kuvaus"
                                         :schema-info {:name "hankkeen-kuvaus-minimum" :version 1 :order 1},
                                         :data {:kuvaus {:value "Uuden rakennuksen rakentaminen tontille."}}})
 
-(def ^:private hankkeen-kuvaus
+(def- hankkeen-kuvaus
   (-> hankkeen-kuvaus-minimum
     (assoc-in [:data :poikkeamat] {:value "Ei poikkeamisia"})
     (assoc-in [:schema-info :name] "hankkeen-kuvaus")))
 
-(def ^:private link-permit-data-kuntalupatunnus {:id "123-123-123-123" :type "kuntalupatunnus"})
-(def ^:private link-permit-data-lupapistetunnus {:id "LP-753-2013-00099" :type "lupapistetunnus"})
-(def ^:private app-linking-to-us {:id "LP-753-2013-00008"})
+(def- link-permit-data-kuntalupatunnus {:id "123-123-123-123" :type "kuntalupatunnus"})
+(def- link-permit-data-lupapistetunnus {:id "LP-753-2013-00099" :type "lupapistetunnus"})
+(def- app-linking-to-us {:id "LP-753-2013-00008"})
 
 ;TODO LIITETIETO
 
@@ -947,7 +948,7 @@
     (fact "rakennusvalvontasian-kuvaus" rakennusvalvontasian-kuvaus => "Uuden rakennuksen rakentaminen tontille.")
     (fact "kayttotapaus" kayttotapaus => "Uuden suunnittelijan nime\u00e4minen")))
 
-(def ^:private authority-user-jussi {:id "777777777777777777000017"
+(def- authority-user-jussi {:id "777777777777777777000017"
                                      :email "jussi.viranomainen@tampere.fi"
                                      :enabled true
                                      :role "authority"

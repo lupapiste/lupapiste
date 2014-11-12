@@ -152,7 +152,12 @@ var attachment = (function() {
     },
 
     newAttachmentVersion: function() {
-      initFileUpload(applicationId, attachmentId, model.attachmentType(), false);
+      initFileUpload({
+        applicationId: applicationId,
+        attachmentId: attachmentId,
+        attachmentType: model.attachmentType(),
+        typeSelector: false
+      });
 
       model.previewDisabled(true);
 
@@ -202,7 +207,7 @@ var attachment = (function() {
   });
 
   function saveLabelInformation(type, data) {
-    data.id = applicationId
+    data.id = applicationId;
     data.attachmentId = attachmentId;
     ajax
       .command("set-attachment-meta", data)
@@ -210,7 +215,7 @@ var attachment = (function() {
         model.indicator(type);
       })
       .error(function(e) {
-        error(e.text)
+        error(e.text);
       })
       .call();
   }
@@ -243,8 +248,8 @@ var attachment = (function() {
     function applySubscription(label) {
       model.subscriptions.push(model[label].subscribe(_.debounce(function(value) {
         if (value || value === "") {
-          var data = {}
-          data[label] = value
+          var data = {};
+          data[label] = value;
           saveLabelInformation(label, {meta: data});
         }
       }, 500)));
@@ -253,7 +258,7 @@ var attachment = (function() {
     model.subscriptions.push(model.selectedOperationId.subscribe(function(id) {
       if (!model.operation() || id !== model.operation().id) {
         var op = _.findWhere(model.selectableOperations(), {id: id});
-        op = op || null
+        op = op || null;
         saveLabelInformation("operation", {meta: {op: op}});
       }
     }));
@@ -315,8 +320,8 @@ var attachment = (function() {
 
     pageutil.hideAjaxWait();
     model.indicator(false);
-    
-    authorizationModel.refresh(application, {attachmentId: attachmentId}, function() { 
+
+    authorizationModel.refresh(application, {attachmentId: attachmentId}, function() {
       model.latestVersion() ? model.showHelp(false) : model.showHelp(true);
       model.init(true);
     });
@@ -383,11 +388,12 @@ var attachment = (function() {
 
   hub.subscribe("upload-done", uploadDone);
 
-  function initFileUpload(applicationId, attachmentId, attachmentType, typeSelector, target, locked, authority) {
-    uploadingApplicationId = applicationId;
+  // applicationId, attachmentId, attachmentType, typeSelector, target, locked, authority
+  function initFileUpload(options) {
+    uploadingApplicationId = options.applicationId;
     var iframeId = "uploadFrame";
     var iframe = document.getElementById(iframeId);
-    iframe.contentWindow.LUPAPISTE.Upload.init(applicationId, attachmentId, attachmentType, typeSelector, target, locked, authority);
+    iframe.contentWindow.LUPAPISTE.Upload.init(options);
   }
 
   function regroupAttachmentTypeList(types) {

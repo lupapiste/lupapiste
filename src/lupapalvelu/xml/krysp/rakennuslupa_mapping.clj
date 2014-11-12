@@ -1,20 +1,20 @@
 (ns lupapalvelu.xml.krysp.rakennuslupa-mapping
   (:require [taoensso.timbre :as timbre :refer [debug]]
             [clojure.java.io :as io]
-            [lupapalvelu.core :refer [now]]
             [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.document.tools :as tools]
             [sade.util :refer :all]
+            [sade.core :refer :all]
             [lupapalvelu.document.rakennuslupa_canonical :refer [application-to-canonical
                                                                  katselmus-canonical
                                                                  unsent-attachments-to-canonical]]
             [lupapalvelu.xml.emit :refer [element-to-xml]]
-            [lupapalvelu.ke6666 :as ke6666]))
+            [lupapalvelu.pdf-export :as pdf-export]))
 
 ;RakVal
 
-(def ^:private huoneisto {:tag :huoneisto
+(def- huoneisto {:tag :huoneisto
                           :child [{:tag :muutostapa}
                                   {:tag :huoneluku}
                                   {:tag :keittionTyyppi}
@@ -32,17 +32,17 @@
                                            {:tag :jakokirjain}]}]})
 
 
-(def ^:private rakennustunnus
+(def- rakennustunnus
   [{:tag :jarjestysnumero}
    {:tag :kiinttun}
    {:tag :rakennusnro}])
 
-(def ^:private rakennustunnus_213
+(def- rakennustunnus_213
   (conj rakennustunnus
     {:tag :katselmusOsittainen}
     {:tag :kayttoonottoKytkin}))
 
-(def ^:private rakennus
+(def- rakennus
   {:tag :Rakennus
    :child [{:tag :yksilointitieto :ns "yht"}
            {:tag :alkuHetki :ns "yht"}
@@ -99,7 +99,7 @@
                               :child [{:tag :muu}
                                       {:tag :omistajalaji}]}]}]}]})
 
-(def ^:private rakennus_215
+(def- rakennus_215
   (update-in rakennus [:child] mapping-common/update-child-element
       [:omistajatieto :Omistaja]
       {:tag :Omistaja :child [{:tag :kuntaRooliKoodi :ns "yht"}
@@ -110,7 +110,7 @@
                                :child [{:tag :muu}
                                        {:tag :omistajalaji}]}]}))
 
-(def ^:private katselmustieto
+(def- katselmustieto
   {:tag :katselmustieto
    :child [{:tag :Katselmus
             :child [{:tag :rakennustunnus :child rakennustunnus}
@@ -193,7 +193,7 @@
                                        :child [{:tag :vahainenPoikkeaminen}
                                                 {:tag :rakennusvalvontaasianKuvaus}]}]}]}]}]})
 
-(def ^:private katselmus_213
+(def- katselmus_213
   {:tag :katselmustieto
    :child [{:tag :Katselmus
             :child [{:tag :katselmuksenRakennustieto :child [{:tag :KatselmuksenRakennus :child rakennustunnus_213}]}
@@ -213,7 +213,7 @@
                     {:tag :lasnaolijat}
                     {:tag :poikkeamat}]}]})
 
-(def ^:private katselmus_215
+(def- katselmus_215
   (update-in katselmus_213 [:child] mapping-common/update-child-element
       [:Katselmus :katselmuspoytakirja]
       {:tag :katselmuspoytakirja :child mapping-common/liite-children_213}))
@@ -277,8 +277,8 @@
   (let [id (:id application)
         submitted-file (io/file (str output-dir "/" (mapping-common/get-submitted-filename id)))
         current-file (io/file (str output-dir "/" (mapping-common/get-current-filename id)))]
-    (ke6666/generate submitted-application lang submitted-file)
-    (ke6666/generate application lang current-file)))
+    (pdf-export/generate submitted-application lang submitted-file)
+    (pdf-export/generate application lang current-file)))
 
 (defn- save-katselmus-xml [application
                            lang
@@ -436,11 +436,13 @@
         xml (rakennuslupa-element-to-xml canonical krysp-version)]
 
     (mapping-common/write-to-disk
-      application attachments
+      application
+      attachments
       statement-attachments
       xml
       krysp-version
       output-dir
-      #(write-application-pdf-versions output-dir application submitted-application lang))))
+      submitted-application
+      lang)))
 
 (permit/register-function permit/R :app-krysp-mapper save-application-as-krysp)

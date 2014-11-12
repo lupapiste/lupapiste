@@ -1,5 +1,5 @@
 (ns lupapalvelu.notice-api
-  (:require [lupapalvelu.core :refer [ok fail fail!]]
+  (:require [sade.core :refer [ok fail fail!]]
             [lupapalvelu.action :refer [defquery defcommand update-application notify] :as action]
             [monger.operators :refer :all])
 )

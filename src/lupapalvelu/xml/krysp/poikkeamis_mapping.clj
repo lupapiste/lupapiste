@@ -118,6 +118,14 @@
                     attachments)
         xml (element-to-xml canonical (get-mapping krysp-version))]
 
-    (mapping-common/write-to-disk application attachments statement-attachments xml krysp-version output-dir)))
+    (mapping-common/write-to-disk
+      application
+      attachments
+      statement-attachments
+      xml
+      krysp-version
+      output-dir
+      submitted-application
+      lang)))
 
 (permit/register-function permit/P :app-krysp-mapper save-application-as-krysp)
