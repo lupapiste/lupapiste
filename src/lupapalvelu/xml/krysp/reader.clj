@@ -435,8 +435,7 @@
   (try
     (when-let [source-projection (->source-projection point-xml-with-ns [:Point])]
       (let [coords (ss/split point-str #" ")]
-        (coordinate/convert source-projection to-projection 0 coords)   ;; TODO: koita eri maaralla desimaaleja
-        ))
+        (coordinate/convert source-projection to-projection 3 coords)))
     (catch Exception e (error e "Coordinate conversion failed for kuntalupatunnus " kuntalupatunnus))))
 
 ;;
