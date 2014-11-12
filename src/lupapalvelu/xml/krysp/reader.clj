@@ -11,7 +11,7 @@
             [sade.common-reader :as cr]
             [sade.strings :as ss]
             [sade.coordinate :as coordinate]
-            [sade.core :refer [now]]
+            [sade.core :refer [now def-]]
             [lupapalvelu.document.schemas :as schema]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.xml.krysp.verdict :as verdict]))
