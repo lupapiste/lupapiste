@@ -431,12 +431,17 @@
          source-projection
          (throw (Exception. (str "No coordinate source projection could be parsed from string '" source-projection-attr "'"))))))))
 
-(defn- ->coordinate-array [point-xml-no-ns source-projection]
-  (let [coords (ss/split point-xml-no-ns #" ")]
-    ;; TODO: koita eri maaralla desimaaleja
-    (coordinate/convert source-projection to-projection 0 coords)))
+(defn- resolve-coordinates [point-xml-with-ns point-str kuntalupatunnus]
+  (try
+    (when-let [source-projection (->source-projection point-xml-with-ns [:Point])]
+      (let [coords (ss/split point-str #" ")]
+        (coordinate/convert source-projection to-projection 0 coords)   ;; TODO: koita eri maaralla desimaaleja
+        ))
+    (catch Exception e (error e "Coordinate conversion failed for kuntalupatunnus " kuntalupatunnus))))
 
+;;
 ;; Information parsed from verdict xml message for application creation
+;;
 (defn get-app-info-from-message [xml ->function kuntalupatunnus]
   (let [xml-no-ns (cr/strip-xml-namespaces xml)
         kuntakoodi (-> (select1 xml-no-ns [:toimituksenTiedot :kuntakoodi]) cr/all-of)
@@ -456,41 +461,41 @@
                                    (sort-by :pvm))
             viimeisin-tila (last kasittelynTilatiedot)
             asianTiedot (cr/all-of asia [:asianTiedot :Asiantiedot])
-            toimenpidetieto (first (map cr/all-of (select asia [:toimenpidetieto])))
 
             ;;
             ;; TODO: _Kvintus 5.11.2014_: Rakennuspaikka osoitteen ja sijainnin oikea lahde.
             ;;       Referenssipiste ei osoita nyt talla hetkella oikeaan pisteeseen.
             ;;
             ;; Referenssipiste
-            coord-array-referenssipiste (try
-                                          (when-let [source-projection (->source-projection asia [:referenssiPiste :Point])]
-                                            (->coordinate-array (cr/all-of asia [:referenssiPiste :Point :pos]) source-projection))
-                                          (catch Exception e (error e "Coordinate conversion failed for kuntalupatunnus " kuntalupatunnus)))
+            referenssiPiste-xml (select1 asia [:referenssiPiste])
+            coord-array-referenssipiste (resolve-coordinates
+                                          referenssiPiste-xml
+                                          (cr/all-of referenssiPiste-xml [:Point :pos])
+                                          kuntalupatunnus)
 
             ;; Rakennuspaikka
             Rakennuspaikka (cr/all-of asia [:rakennuspaikkatieto :Rakennuspaikka])
             ;; TODO: Ruotsinkielinen osoite tulee kakkosena listalla. Otetaanko se mukaan?
             osoite-Rakennuspaikka (-> Rakennuspaikka :osoite :osoitenimi :teksti (#(if (sequential? %) (first %) %)))
             kiinteistotunnus-Rakennuspaikka (-> Rakennuspaikka :rakennuspaikanKiinteistotieto :RakennuspaikanKiinteisto :kiinteistotieto :Kiinteisto :kiinteistotunnus)
-            coord-array-Rakennuspaikka (try
-                                         (when-let [source-projection (->source-projection asia [:rakennuspaikkatieto :Rakennuspaikka :sijaintitieto :Sijainti :piste :Point])]
-                                           (->coordinate-array (-> Rakennuspaikka :sijaintitieto :Sijainti :piste :Point :pos) source-projection))
-                                         (catch Exception e (error e "Coordinate conversion failed for kuntalupatunnus " kuntalupatunnus)))
+            coord-array-Rakennuspaikka (resolve-coordinates
+                                         (select1 asia [:rakennuspaikkatieto :Rakennuspaikka :sijaintitieto :Sijainti :piste])
+                                         (-> Rakennuspaikka :sijaintitieto :Sijainti :piste :Point :pos)
+                                         kuntalupatunnus)
 
-            ;; Rakennus
+            ;; Rakennus tai Rakennelma
+            toimenpidetieto (-> (select asia [:toimenpidetieto]) first cr/all-of)
             Rakennus (or
                        (-> toimenpidetieto :Toimenpide :rakennustieto :Rakennus)
                        (-> toimenpidetieto :Toimenpide :rakennelmatieto :Rakennelma))
             osoite-Rakennus (-> Rakennus :rakennuksenTiedot :osoite :osoitenimi :teksti)
             kiinteistotunnus-Rakennus (-> Rakennus :rakennuksenTiedot :rakennustunnus :kiinttun)
-            Rakennus-or-Rakennelma-with-ns (or
-                                             (select1 asia [:toimenpidetieto :Toimenpide :rakennustieto :Rakennus])
-                                             (select1 asia [:toimenpidetieto :Toimenpide :rakennelmatieto :Rakennelma]))
-            coord-array-Rakennus (try
-                                   (when-let [source-projection (->source-projection Rakennus-or-Rakennelma-with-ns [:sijaintitieto :Sijainti :piste :Point])]
-                                     (->coordinate-array (-> Rakennus :sijaintitieto :Sijainti :piste :Point :pos) source-projection))
-                                   (catch Exception e (error e "Coordinate conversion failed for kuntalupatunnus " kuntalupatunnus)))
+            coord-array-Rakennus (resolve-coordinates
+                                   (or
+                                     (select1 asia [:toimenpidetieto :Toimenpide :rakennustieto :Rakennus :sijaintitieto :Sijainti :piste])
+                                     (select1 asia [:toimenpidetieto :Toimenpide :rakennelmatieto :Rakennelma :sijaintitieto :Sijainti :piste]))
+                                   (-> Rakennus :sijaintitieto :Sijainti :piste :Point :pos)
+                                   kuntalupatunnus)
 
             ;; Varaudu tallaiseen. Huomaa srsName ja pilkku koordinaattien valimerkkina! (kts. LP-734-2014-00001:n paatossanoma)
 ;            <yht:pistesijainti>
