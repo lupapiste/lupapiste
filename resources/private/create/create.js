@@ -74,8 +74,14 @@
     self.kuntalupatunnusFromPrevPermit = ko.observable(null);
     self.needMorePrevPermitInfo = ko.observable(false);
     self.creatingAppWithPrevPermitOk = ko.computed(function() {
-      var addressOk = self.needMorePrevPermitInfo() ? !_.isEmpty(self.addressString()) : true;
-      return !self.processing() && !self.pending() && !_.isEmpty(self.kuntalupatunnusFromPrevPermit()) && !_.isEmpty(self.municipalityCode()) && addressOk;
+      return !self.processing() && !self.pending() &&
+             !isBlank(self.kuntalupatunnusFromPrevPermit()) &&
+             !isBlank(self.municipalityCode()) && self.municipality() &&
+             ( !self.needMorePrevPermitInfo() || (self.propertyId() &&
+                                                  !isBlank(self.addressString()) &&
+                                                  !isBlank(self.search()) &&
+                                                  self.addressData() &&
+                                                  self.x() !== 0 && self.y() !== 0));   // TODO:
     });
 
 
@@ -303,11 +309,10 @@
                 function(d) {
                   if (successCallback) { successCallback(result); } },  // Note: returning the result of the locationSearch.pointByAddress query
                 function(d) {
-                  // TODO: Mita pitaisi palauttaa taman parametrina?
-                  if (errorCallback) { errorCallback(d); } });
+                  if (errorCallback) { errorCallback(d); } });   // TODO: Mita pitaisi palauttaa taman parametrina?
           } else {
-            // TODO: Pitaisiko tassa kutsua successCallback?
-            if (errorCallback) { errorCallback(result); }
+            if (errorCallback) {
+              errorCallback(result); }  // TODO: Pitaisiko tassa kutsua successCallback?
           }
         },
         function(d) {
@@ -394,63 +399,23 @@
         error("No operation!", {selected: tree.getSelected(), stack: tree.getStack()});
       }
 
-      if (self.creatingAppWithPrevPermit) {
-
-        ajax.command("create-application-from-previous-permit", {
-          operation: op,
-          y: self.y(),
-          x: self.x(),
-          address: self.addressString(),
-          propertyId: util.prop.toDbFormat(self.propertyId()),
-          municipality: self.municipality().id,
-          kuntalupatunnus: self.kuntalupatunnusFromPrevPermit()
-        })
-        .processing(self.processing)
-        .pending(self.pending)
-        .success(function(data) {
-          setTimeout(self.clear, 0);
-          window.location = "#!/application/" + data.id;
-        })
-        .error(function(d) {
-          // If app creation failed because the "rakennuksen tiedot" data was not received in the xml message from municipality's backend,
-          // then show user a prompt to fill up the address using autocomplete (that now appears),
-          // otherwise show user the original error message thrown.
-          // The original error is also shown after a request with additional address information about previous permit has has been made.
-          if (d.needMorePrevPermitInfo) {
-            if (self.needMorePrevPermitInfo()) {
-              notify.error(loc("error.dialog.title"), loc("info.no-previous-permit-found-from-backend"));
-            } else {
-              notify.error(loc("more-prev-app-info-needed-message-title"), loc("more-prev-app-info-needed-message"));
-              self.needMorePrevPermitInfo(true);
-            }
-
-          } else {
-            notify.error(loc("error.dialog.title"), loc(d.text));
-          }
-        })
-        .call();
-
-      } else {
-
-        ajax.command("create-application", {
-          infoRequest: infoRequest,
-          operation: op,
-          y: self.y(),
-          x: self.x(),
-          address: self.addressString(),
-          propertyId: util.prop.toDbFormat(self.propertyId()),
-          messages: isBlank(self.message()) ? [] : [self.message()],
-          municipality: self.municipality().id
-        })
-        .processing(self.processing)
-        .pending(self.pending)
-        .success(function(data) {
-          setTimeout(self.clear, 0);
-          window.location = (infoRequest ? "#!/inforequest/" : "#!/application/") + data.id;
-        })
-        .call();
-
-      }
+      ajax.command("create-application", {
+        infoRequest: infoRequest,
+        operation: op,
+        y: self.y(),
+        x: self.x(),
+        address: self.addressString(),
+        propertyId: util.prop.toDbFormat(self.propertyId()),
+        messages: isBlank(self.message()) ? [] : [self.message()],
+        municipality: self.municipality().id
+      })
+      .processing(self.processing)
+      .pending(self.pending)
+      .success(function(data) {
+        setTimeout(self.clear, 0);
+        window.location = (infoRequest ? "#!/inforequest/" : "#!/application/") + data.id;
+      })
+      .call();
 
     };
     self.createApplication = self.create.bind(self, false);
@@ -466,17 +431,62 @@
       self.operation("aiemmalla-luvalla-hakeminen");
     };
 
-    self.createApplicationwithPrevPermit = function() {
+    var doCreateApplicationWithPrevPermit = function() {
+      if (self.newApplicationsDisabled()) {
+        LUPAPISTE.ModalDialog.showDynamicOk(
+            loc("new-applications-or-inforequests-disabled.dialog.title"),
+            loc("new-applications-or-inforequests-disabled.new-applications-disabled"));
+        return;
+      }
+
+      ajax.command("create-application-from-previous-permit", {
+        operation: self.operation(),
+        y: self.y(),
+        x: self.x(),
+        address: self.addressString(),
+        propertyId: util.prop.toDbFormat(self.propertyId()),
+        municipality: self.municipality().id,
+        kuntalupatunnus: self.kuntalupatunnusFromPrevPermit()
+      })
+      .processing(self.processing)
+      .pending(self.pending)
+      .success(function(data) {
+        setTimeout(self.clear, 0);
+        window.location = "#!/application/" + data.id;
+      })
+      .error(function(d) {
+        // If app creation failed because the "rakennuksen tiedot" data was not received in the xml message from municipality's backend,
+        // then show user a prompt to fill up the address using autocomplete (that now appears),
+        // otherwise show user the original error message thrown.
+        // The original error is also shown after a request with additional address information about previous permit has has been made.
+        if (d.needMorePrevPermitInfo) {
+          if (self.needMorePrevPermitInfo()) {
+            notify.error(loc("error.dialog.title"), loc("info.no-previous-permit-found-from-backend"));
+          } else {
+            notify.error(loc("more-prev-app-info-needed-message-title"), loc("more-prev-app-info-needed-message"));
+            self.needMorePrevPermitInfo(true);
+          }
+
+        } else {
+          notify.error(loc("error.dialog.title"), loc(d.text));
+        }
+      })
+      .call();
+    }
+
+    self.createApplicationWithPrevPermit = function() {
       if (!self.needMorePrevPermitInfo()) {
-        self.create(false);
+        doCreateApplicationWithPrevPermit();
       } else {
-        self.beginUpdateRequest();
-        self.searchPointByAddress(
-          self.addressString(),
-          _.partial(self.create, false),
-          function(d) {
-            LUPAPISTE.ModalDialog.showDynamicOk(loc("error.dialog.title"), loc("info.no-previous-permit-found-from-backend"));
-          });
+        //
+        // TODO: ovatko tarkastukset parempi olla napissa, tassa vai molemmissa?
+        //
+        if (!isBlank(self.kuntalupatunnusFromPrevPermit) && !isBlank(self.addressString()) &&
+            self.addressData() && self.propertyId() && self.x() !== 0 && self.y() !== 0 && self.municipality() ) {
+          doCreateApplicationWithPrevPermit();
+        } else {
+          notify.error(loc("error.dialog.title"), loc("info.no-previous-permit-found-from-backend"));
+        }
       }
     };
 
