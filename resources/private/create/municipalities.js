@@ -4,16 +4,11 @@ var municipalities = (function() {
   var municipalities = ko.observable();
   var municipalitiesById = ko.observable();
 
-  function findById(id, callback, context) {
+  function findById(id, callback) {
     if (!_.isFunction(callback)) { throw "callback must be a function: " + callback; }
-    if (!id) {
-      callback.call(context, null);
-      return context;
-    }
-    var m = municipalitiesById()[id];
+    if (!id) { callback(null); }
     // TODO: Implement and use search to find municipality data for unsupported municipalities too.
-    callback.call(context, m);
-    return context;
+    callback( municipalitiesById()[id] );
   }
 
   function findByLocation(x, y, callback, context) {
