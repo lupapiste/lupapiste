@@ -1,4 +1,10 @@
+applications.createWithPrevPermit.title: Aiemman lupasi siirto Lupapisteeseen
+applications.createWithPrevPermit.desc: Tällä toiminnolla voit siirtää aiemman lupa-asiasi Lupapisteeseen. Tällainen voi olla esimerkiksi aiempi paperilla hakemasi lupa.
+newRequest.createWithPrevPermit: Aloita siirto
+newRequest.createNewWithPrevPermit: Siirrä aiempi lupasi Lupapisteeseen
+
 info.no-previous-permit-found-from-backend: Annetulla lupatunnuksella ei löytynyt lupaa taustajärjestelmästä
+info.previous-permit-found-from-backend-is-of-different-organization: Syöttämäsi osoitetta vastaava organisaatio on eri kuin syöttämäsi kuntalupatunnukseen liitetty organisaatio. Tarkista antamasi osoite.
 lupapiste-application-already-exists-but-unauthorized-to-access-it: Kyseisellä tunnuksella Lupapisteeseen on jo luotu hakemus, mutta sinulla ei ole oikeuksia sille.
 not-able-to-open-with-lupapiste-id-that-previous-permit-included: Antamaasi kuntalupatunnukseen on jo liitetty Lupapiste-tunnus, mutta tuon tunnuksen sisältävää hakemusta ei kuitenkaan löytynyt järjestelmästä.
 
@@ -6,10 +12,17 @@ operations.tree.aiemmalla-luvalla-hakeminen: Aiemmalla luvalla hakeminen
 
 aiemmalla-luvalla-hakeminen._group_label: Hankkeen kuvaus
 operations.aiemmalla-luvalla-hakeminen: Aiemmalla luvalla hakeminen
-operations.aiemmalla-luvalla-hakeminen.desc: Tällä toimenpiteellä voit siirtää aiemman muualla kuin Lupapisteessä haetun lupasi Lupapisteeseen.
+operations.aiemmalla-luvalla-hakeminen.desc: Tällä toimenpiteellä voit siirtää aiemman muualla kuin Lupapisteessä haetun lupasi Lupapisteeseen. Syötä alle siihen liittyvät tiedot.
 
-create-app-with-with-prev-permit-label: Syötä alla olevaan kenttään aiemman lupasi kuntalupatunnus:
-create-app-with-with-prev-permit-placeholder: Kuntalupatunnus
+prev-permit-label-kuntalupatunnus: Kuntalupatunnus:
+prev-permit-placeholder-kuntalupatunnus: kuntalupatunnus
+prev-permit-label-address: Katuosoite:
+prev-permit-placeholder-address: katuosoite
+prev-permit-label-municipality: Kunta:
+
 newRequest.newApplicationWithPrevPermit: Hae antamallasi kuntalupatunnuksella
 
-municipality.997: Testikunta
+more-prev-app-info-needed-desc: Taustajärjestelmästä ei voitu noutaa kaikkea tarvittua tietoa kiinteistöstä. Voisitteko ystävällisesti syöttää osoitetiedon alla olevaan kenttään.
+
+more-prev-app-info-needed-message-title: Lisäinformaatiota tarvitaan
+more-prev-app-info-needed-message: Taustajärjestelmästä ei voitu noutaa kaikkea tarvittua tietoa kiinteistöstä. Voisitteko ystävällisesti syöttää katuosoitetiedon oheiseen kenttään.

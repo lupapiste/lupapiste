@@ -387,14 +387,11 @@
 
 (defn- ->lp-tunnus [asia]
   (or (get-text asia [:luvanTunnisteTiedot :LupaTunnus :muuTunnustieto :tunnus])
-                       (get-text asia [:luvanTunnistetiedot :LupaTunnus :muuTunnustieto :tunnus])))
+      (get-text asia [:luvanTunnistetiedot :LupaTunnus :muuTunnustieto :tunnus])))
 
 (defn- ->kuntalupatunnus [asia]
   (or (get-text asia [:luvanTunnisteTiedot :LupaTunnus :kuntalupatunnus])
       (get-text asia [:luvanTunnistetiedot :LupaTunnus :kuntalupatunnus])))
-
-(defn- select-asiat [xml]
-  (enlive/select (cr/strip-xml-namespaces xml) case-elem-selector))
 
 (defn ->verdicts [xml ->function]
   (map
@@ -407,7 +404,7 @@
         (if (seq verdicts)
           (assoc verdict-model :paatokset verdicts)
           verdict-model)))
-    (select-asiat xml)))
+    (enlive/select (cr/strip-xml-namespaces xml) case-elem-selector)))
 
 (defn- buildings-summary-for-application [xml]
   (let [summary (->buildings-summary xml)]
@@ -417,19 +414,36 @@
 (permit/register-function permit/R :verdict-extras-krysp-reader buildings-summary-for-application)
 
 
+;; Coordinates
+
 (def ^:private to-projection "EPSG:3067")
+(def ^:private allowed-projection-prefix "EPSG:")
+
+(defn- ->source-projection [xml path #_source-projection-attr #_source-projection-point-dimension]
+  (let [source-projection-attr (select1-attribute-value xml path :srsName)                          ;; e.g. "urn:x-ogc:def:crs:EPSG:3879"
+        source-projection-point-dimension (-> (select1-attribute-value xml path :srsDimension) (util/->int false))]
+    (when (and source-projection-attr (= 2 source-projection-point-dimension))
+     (let [projection-name-index    (.lastIndexOf source-projection-attr allowed-projection-prefix) ;; find index of "EPSG:"
+           source-projection        (when (> projection-name-index -1)
+                                      (subs source-projection-attr projection-name-index))          ;; rip "EPSG:3879"
+           source-projection-number (subs source-projection (count allowed-projection-prefix))]
+       (if (util/->int source-projection-number false)              ;; make sure the stuff after "EPSG:" parses as an Integer
+         source-projection
+         (throw (Exception. (str "No coordinate source projection could be parsed from string '" source-projection-attr "'"))))))))
 
 (defn- ->coordinate-array [point-xml-no-ns source-projection]
   (let [coords (ss/split point-xml-no-ns #" ")]
     (info "Converting coordinates " coords " from projection " source-projection " to projection " to-projection)
     (-> coords
       ((partial map bigdec))
-      ((partial coordinate/convert source-projection to-projection 0))
+      ((partial coordinate/convert source-projection to-projection 0))  ;; TODO: koita eri maaralla desimaaleja
       ((partial map #(.doubleValue %))))))
 
+;; Information parsed from verdict xml message for application creation
 (defn get-app-info-from-message [xml ->function kuntalupatunnus]
   (let [xml-no-ns (cr/strip-xml-namespaces xml)
-        asiat (select-asiat xml)
+        kuntakoodi (-> (select1 xml-no-ns [:toimituksenTiedot :kuntakoodi]) cr/all-of)
+        asiat (enlive/select xml-no-ns case-elem-selector)
         ;; Take first asia with given kuntalupatunnus. There should be only one. If there are many throw error.
         asiat-with-kuntalupatunnus (filter #(when (= kuntalupatunnus (->kuntalupatunnus %)) %) asiat)]
     (when (pos? (count asiat-with-kuntalupatunnus))
@@ -440,25 +454,46 @@
 
       (let [asia (first asiat-with-kuntalupatunnus)
             viitelupatiedot (map cr/all-of (select asia [:viitelupatieto :LupaTunnus]))
-            kasittelynTilatiedot (->> (select xml-no-ns [:kasittelynTilatieto])
+            kasittelynTilatiedot (->> (select asia [:kasittelynTilatieto])
                                    (map #(-> (cr/all-of % [:Tilamuutos]) (cr/convert-keys-to-timestamps [:pvm])))
                                    (sort-by :pvm))
             viimeisin-tila (last kasittelynTilatiedot)
             asianTiedot (cr/all-of asia [:asianTiedot :Asiantiedot])
             toimenpidetieto (first (map cr/all-of (select asia [:toimenpidetieto])))
 
+            ;;
+            ;; TODO: _Kvintus 5.11.2014_: Rakennuspaikka osoitteen ja sijainnin oikea lahde.
+            ;;       Referenssipiste ei osoita nyt talla hetkella oikeaan pisteeseen.
+            ;;
+            ;; Referenssipiste
+            coord-array-referenssipiste (try
+                                          (when-let [source-projection (->source-projection asia [:referenssiPiste :Point])]
+                                            (->coordinate-array (cr/all-of asia [:referenssiPiste :Point :pos]) source-projection))
+                                          (catch Exception e (error e "Coordinate conversion failed for kuntalupatunnus " kuntalupatunnus)))
+
+            ;; Rakennuspaikka
             Rakennuspaikka (cr/all-of asia [:rakennuspaikkatieto :Rakennuspaikka])
-            sijainti-Rakennuspaikka (-> Rakennuspaikka :sijaintitieto :Sijainti :piste :Point :pos)
             ;; TODO: Ruotsinkielinen osoite tulee kakkosena listalla. Otetaanko se mukaan?
             osoite-Rakennuspaikka (-> Rakennuspaikka :osoite :osoitenimi :teksti (#(if (sequential? %) (first %) %)))
-            kiinteistotunnus-Rakennuspaikka (-> Rakennuspaikka :rakennuspaikanKiinteistotieto :RakennuspaikanKiinteisto :Kiinteisto :kiinteistotunnus)
+            kiinteistotunnus-Rakennuspaikka (-> Rakennuspaikka :rakennuspaikanKiinteistotieto :RakennuspaikanKiinteisto :kiinteistotieto :Kiinteisto :kiinteistotunnus)
+            coord-array-Rakennuspaikka (try
+                                         (when-let [source-projection (->source-projection asia [:rakennuspaikkatieto :Rakennuspaikka :sijaintitieto :Sijainti :piste :Point])]
+                                           (->coordinate-array (-> Rakennuspaikka :sijaintitieto :Sijainti :piste :Point :pos) source-projection))
+                                         (catch Exception e (error e "Coordinate conversion failed")))
 
-            referenssi-piste (cr/all-of asia [:referenssiPiste :Point :pos])
-;            _  (println "\n referenssi-piste: " referenssi-piste "\n")
-
-            Rakennus (-> toimenpidetieto :Toimenpide (#(or (:rakennustieto %) (:rakennelmatieto %))) (#(or (:Rakennus %) (:Rakennelma %))))
-            sijainti-Rakennus (-> Rakennus :sijaintitieto :Sijainti :piste :Point :pos)
+            ;; Rakennus
+            Rakennus (or
+                       (-> toimenpidetieto :Toimenpide :rakennustieto :Rakennus)
+                       (-> toimenpidetieto :Toimenpide :rakennelmatieto :Rakennelma))
             osoite-Rakennus (-> Rakennus :rakennuksenTiedot :osoite :osoitenimi :teksti)
+            kiinteistotunnus-Rakennus (-> Rakennus :rakennuksenTiedot :rakennustunnus :kiinttun)
+            Rakennus-or-Rakennelma-with-ns (or
+                                             (select1 asia [:toimenpidetieto :Toimenpide :rakennustieto :Rakennus])
+                                             (select1 asia [:toimenpidetieto :Toimenpide :rakennelmatieto :Rakennelma]))
+            coord-array-Rakennus (try
+                                   (when-let [source-projection (->source-projection Rakennus-or-Rakennelma-with-ns [:sijaintitieto :Sijainti :piste :Point])]
+                                     (->coordinate-array (-> Rakennus :sijaintitieto :Sijainti :piste :Point :pos) source-projection))
+                                   (catch Exception e (error e "Coordinate conversion failed")))
 
             ;; Varaudu tallaiseen. Huomaa srsName ja pilkku koordinaattien valimerkkina! (kts. LP-734-2014-00001:n paatossanoma)
 ;            <yht:pistesijainti>
@@ -466,51 +501,27 @@
 ;                <gml:coordinates>23528933.213,6699629.937</gml:coordinates>
 ;              </gml:Point>
 ;            </yht:pistesijainti>
-
-            source-projection-attr (select1-attribute-value asia [:referenssiPiste :Point] :srsName)
-            projection-prefix "EPSG:"
-            source-projection-name-index (.lastIndexOf source-projection-attr projection-prefix)
-
-            source-projection (when-not (= -1 source-projection-name-index)
-                                (subs source-projection-attr source-projection-name-index))
             ]
 
-;        (println "\n Rakennuspaikka: ")
-;        (clojure.pprint/pprint Rakennuspaikka)
-;        (println "\n")
-
-;        (println "\n sijainti-Rakennus: ")
-;        (clojure.pprint/pprint sijainti-Rakennus)
-;        (println "\n")
-
-        ;; return nil as app-info if source projection is not found
-        (if (and
-              source-projection
-              ;; make sure projection number can be parsed
-              (util/->int (subs source-projection (count projection-prefix)) false))
-
-          ;; TODO: _Kvintus 5.11.2014_: sijainti-Rakennuspaikka osoitteen ja sijainnin oikea lahde.
-          ;;       Referenssipiste ei osoita nyt talla hetkella oikeaan pisteeseen.
-          (when-let [coord-array (try
-                                   (->coordinate-array #_referenssi-piste #_sijainti-Rakennuspaikka sijainti-Rakennus source-projection)
-                                   (catch Exception e (error e "Coordinate conversion failed")))]
-;            (println "\n coord-array: " coord-array "\n")
-            {:id (->lp-tunnus asia)
-             :kuntalupatunnus (->kuntalupatunnus asia)
-             :rakennusvalvontaasianKuvaus (:rakennusvalvontaasianKuvaus asianTiedot)
-             :vahainenPoikkeaminen (:vahainenPoikkeaminen asianTiedot)
-             :viitelupatiedot viitelupatiedot                ;; TODO: Mita nailla?
-             :kasittelynTilatiedot kasittelynTilatiedot
-             :viimeisin-tila viimeisin-tila
-
-             :asioimiskieli (cr/all-of asia [:lisatiedot :Lisatiedot :asioimiskieli])
-
-             :rakennusten-tiedot (->buildings xml)
-
-             :toimenpidetieto toimenpidetieto
-
-             :location {:x (first coord-array) :y (second coord-array)}
-             :osoite #_osoite-Rakennuspaikka osoite-Rakennus
-             })
-
-          (error "No coordinate source projection could be parsed from string '" source-projection-attr "' for kuntalupatunnus " kuntalupatunnus))))))
+        (merge
+          {:id (->lp-tunnus asia)
+           :kuntalupatunnus (->kuntalupatunnus asia)
+           :municipality kuntakoodi
+           :rakennusvalvontaasianKuvaus (:rakennusvalvontaasianKuvaus asianTiedot)
+           :vahainenPoikkeaminen (:vahainenPoikkeaminen asianTiedot)
+           :viitelupatiedot viitelupatiedot                ;; TODO: Mita nailla?
+;           :kasittelynTilatiedot kasittelynTilatiedot
+           :viimeisin-tila viimeisin-tila
+;           :rakennusten-tiedot (->buildings xml)
+;           :toimenpidetieto toimenpidetieto
+           :asioimiskieli (cr/all-of asia [:lisatiedot :Lisatiedot :asioimiskieli])}
+          (when (and coord-array-Rakennuspaikka osoite-Rakennus kiinteistotunnus-Rakennus)
+            {:ensimmainen-rakennus {:x (first coord-array-Rakennus)
+                                    :y (second coord-array-Rakennus)
+                                    :address osoite-Rakennus
+                                    :propertyId kiinteistotunnus-Rakennus}})
+          (when (and coord-array-Rakennuspaikka osoite-Rakennuspaikka kiinteistotunnus-Rakennuspaikka)
+            {:rakennuspaikka {:x (first coord-array-Rakennuspaikka)
+                              :y (second coord-array-Rakennuspaikka)
+                              :address osoite-Rakennuspaikka
+                              :propertyId kiinteistotunnus-Rakennuspaikka}}))))))
