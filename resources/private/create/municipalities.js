@@ -11,28 +11,6 @@ var municipalities = (function() {
     callback( municipalitiesById()[id] );
   }
 
-  function findByLocation(x, y, callback, context) {
-    if (!_.isFunction(callback)) { throw "callback must be a function: " + callback; }
-    if (!x || !y) {
-      callback.call(context, null);
-      return context;
-    }
-    ajax
-      .query("municipality-by-location", {x: x, y: y})
-      .success(function(data) {
-        var m = data.municipality;
-        var s = municipalitiesById()[m.id];
-        if (s) {
-          m = s;
-        } else {
-          m.supported = false;
-        }
-        callback.call(context, m);
-      })
-      .call();
-    return context;
-  }
-
   function reset(ms) {
     municipalitiesById(_.reduce(ms, function(d, m) { d[m] = {supported: true, id: m}; return d; }, {}));
     municipalities(_.sortBy(_.values(municipalitiesById()), function(m) { return loc(["municipality", m.id]); }));
@@ -74,11 +52,6 @@ var municipalities = (function() {
     // Provided municipality has field "supported" set to true if municipality is supported:
 
     findById: findById,
-
-    // Find municipality by location. Calls callback with municipality. Provided municipality
-    // has field "supported" set to true if municipality is supported:
-
-    findByLocation: findByLocation,
 
     // Gets the operations supported in the municipality by all organizations
     operationsForMunicipality: operationsForMunicipality
