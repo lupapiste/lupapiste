@@ -50,7 +50,7 @@ LUPAPISTE.StampModel = function(params) {
         selected = restamp ? versions[1] : versions[0];
 
       a.contentType = selected.contentType;
-      a.filename = selected.filename,
+      a.filename = selected.filename;
       a.version = {major: selected.version.major, minor: selected.version.minor};
       a.size = selected.size;
       a.selected = ko.observable(false);

@@ -5,7 +5,7 @@
       <div id="stamping-container" >
         <div class="nav-back-container">
           <a class="btn left-align btn-nav-back"
-             data-bind="click: function() { window.location.hash = '!/application/' + appModel.id() + '/attachments'; repository.load(appModel.id()); }"
+             data-bind="click: cancelStamping"
              data-test-id="back-to-application-from-attachment">
             <span data-bind =" ltext: 'attachment.return'"></span>
             <span class="icon drill-left-black-bigger left-align"></span>
