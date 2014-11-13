@@ -2,6 +2,7 @@
   (:require [lupapalvelu.migration.core :refer :all]
             [lupapalvelu.mongo :as mongo]
             [sade.strings :as ss]
+            [sade.core :refer [now]]
             [midje.sweet :refer :all]))
 
 (mongo/connect!)
