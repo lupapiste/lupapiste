@@ -585,6 +585,7 @@
      (mongo/update-by-query collection {:urgency {$exists false}} {$set {:urgency "normal"}}))))
 
 (defmigration applicant-index-regeneration
-  (doseq [collection [:applications :submitted-applications]]
-    (let [applications (mongo/select collection)]
-      (dorun (map #(mongo/update-by-id collection (:id %) (app-meta-fields/applicant-index-update %)) applications)))))
+  (reduce + 0
+   (for [collection [:applications :submitted-applications]]
+     (let [applications (mongo/select collection)]
+       (count (map #(mongo/update-by-id collection (:id %) (app-meta-fields/applicant-index-update %)) applications))))))
