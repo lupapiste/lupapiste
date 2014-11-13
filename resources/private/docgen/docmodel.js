@@ -247,7 +247,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       if (approval) {
         var text = loc(["document", approval.value]);
         if (approval.user && approval.timestamp) {
-          text += " (" + approval.user.firstName + " " + approval.user.lastName;
+          text += " (" + approval.user.lastName + " " + approval.user.firstName;
           text += " " + moment(approval.timestamp).format("D.M.YYYY HH:mm") + ")";
         }
         statusContainer$.text(text);
@@ -806,7 +806,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         var option = document.createElement("option");
         var value = user.id;
         option.value = value;
-        option.appendChild(document.createTextNode(user.firstName + " " + user.lastName));
+        option.appendChild(document.createTextNode(user.lastName + " " + user.firstName));
         if (selectedOption === value) {
           option.selected = "selected";
         }

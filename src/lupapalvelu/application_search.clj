@@ -63,7 +63,13 @@
                           3 nil
                           4 :infoRequest
                           5 :address
-                          6 nil))
+                          6 nil
+                          ; 7 applicant - sorted as is
+                          ; 8 submitted - sorted as is
+                          ; 9 modified - sorted as is
+                          ; 10 state - sorted as is
+                          11 ["authority.lastName" "authority.firstName"]
+                          ))
 
 (def- col-map (zipmap col-sources (map str (range))))
 
@@ -113,7 +119,10 @@
 (defn- make-sort [params]
   (let [col (get order-by (:iSortCol_0 params))
         dir (if (= "asc" (:sSortDir_0 params)) 1 -1)]
-    (if col {col dir} {})))
+    (cond
+      (nil? col) {}
+      (sequential? col) (zipmap col (repeat dir))
+      :else {col dir})))
 
 ;;
 ;; Result presentation
