@@ -17,7 +17,7 @@ Mikko as applicant does not see the inforequest marker map
   Set Suite Variable  ${propertyId-first}  433-405-3-427
   #Set Suite Variable  ${address-first}  Holvitie 4
   Create inforequest the fast way  ${inforequest-first}  360383.382  6734086.21  433  ${propertyId-first}  asuinrakennus  Jiihaa-first
-  Wait until  Element text should be  //section[@id='inforequest']//span[@data-test-id='inforequest-application-applicant']  Mikko Intonen
+  Wait until  Element text should be  //section[@id='inforequest']//span[@data-test-id='inforequest-application-applicant']  Intonen Mikko
   Element should not be visible  //div[@id='inforequest-marker-map']
   Element should not be visible  //div[@id='inforequest-marker-map-contents']
   Logout

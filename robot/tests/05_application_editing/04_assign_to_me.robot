@@ -17,7 +17,7 @@ Mikko creates an application
 
 Mikko sets himself as the applicant
   Open tab  parties
-  Select From List  henkilo.userId  Mikko Intonen
+  Select From List  henkilo.userId  Intonen Mikko
   Wait Until  Textfield value should be  xpath=//div[@id='application-parties-tab']//input[@data-docgen-path='henkilo.henkilotiedot.hetu']  210281-****
 
 # LUPA-23
@@ -45,10 +45,10 @@ Sonja resets indicators
   Wait until  Element should not be visible  applicationUnseenComments
 
 Sonja assign application to herself
-  Select From List  xpath=//select[@data-test-id='application-assigneed-authority']  Sonja Sibbo
+  Select From List  xpath=//select[@data-test-id='application-assigneed-authority']  Sibbo Sonja
 
 Assignee has changed
-  Wait Until  Application is assigned to  Sonja Sibbo
+  Wait Until  Application is assigned to  Sibbo Sonja
 
 Sonja sees Mikko's full person ID
   Open tab  parties
@@ -74,7 +74,7 @@ Clicking the first link in email should redirect to front page
   Wait Until  Title should be  Lupapiste
 
 Application is shown after login
-  User logs in  mikko@example.com  mikko123  Mikko Intonen
+  Mikko logs in
   Wait until  Element Text Should Be  xpath=//span[@data-test-id='application-property-id']  ${propertyId}
   Logout
 
