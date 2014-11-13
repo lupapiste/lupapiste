@@ -806,7 +806,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         var option = document.createElement("option");
         var value = user.id;
         option.value = value;
-        option.appendChild(document.createTextNode(user.firstName + " " + user.lastName));
+        option.appendChild(document.createTextNode(user.lastName + " " + user.firstName));
         if (selectedOption === value) {
           option.selected = "selected";
         }
