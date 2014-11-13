@@ -15,7 +15,7 @@
 (defn- applicant-name-from-auth [application]
   (let [owner (first (domain/get-auths-by-role application :owner))
         {first-name :firstName last-name :lastName} owner]
-    (s/trim (str first-name \space last-name))))
+    (s/trim (str last-name \space first-name))))
 
 (defn- applicant-name-from-doc [document]
   (when-let [body (:data document)]
