@@ -22,7 +22,7 @@
     (if (= (get-in body [:_selected :value]) "yritys")
       (get-in body [:yritys :yritysnimi :value])
       (let [{first-name :etunimi last-name :sukunimi} (get-in body [:henkilo :henkilotiedot])]
-        (s/trim (str (:value first-name) \space (:value last-name)))))))
+        (s/trim (str (:value last-name) \space (:value first-name)))))))
 
 (defn applicant-index [application]
   (let [applicants (remove s/blank? (map applicant-name-from-doc (domain/get-applicant-documents application)))
