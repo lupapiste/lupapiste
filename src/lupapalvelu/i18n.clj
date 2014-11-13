@@ -66,7 +66,7 @@
   (not (nil? (get (get-terms (keyword lang)) (s/join \. terms)))))
 
 (defn localize [lang & terms]
-  (let [term (s/join \. terms)]
+  (let [term (s/join \. (map name terms))]
     (if-let [result (get (get-terms (keyword lang)) term)]
       result
       (unknown-term term))))
