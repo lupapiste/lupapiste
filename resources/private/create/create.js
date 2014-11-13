@@ -222,13 +222,13 @@
     function fillMunicipality(item) {
       self.search(", " + loc(["municipality", item.municipality]));
       $("#create-search").caretToStart();
-      $("#prev-permit-create-search").caretToStart();
+      $("#prev-permit-address-search").caretToStart();
     }
     function fillAddress(item) {
       self.search(item.street + " " + item.number + ", " + loc(["municipality", item.municipality]));
       var addressEndIndex = item.street.length + item.number.toString().length + 1;
       $("#create-search").caretTo(addressEndIndex);
-      $("#prev-permit-create-search").caretTo(addressEndIndex);
+      $("#prev-permit-address-search").caretTo(addressEndIndex);
     }
 
     function selector(item) { return function(value) { return _.every(value[0], function(v, k) { return item[k] === v; }); }; }
@@ -514,7 +514,7 @@
     $("#create-page-prev-permit").applyBindings(model);
 
     initAutocomplete("#create-search");
-    initAutocomplete("#prev-permit-create-search");  // TODO: Miten filtteroida autocomplete-tuloksista pois ne kunnat, joilla ei ole asetettuna taustajarjestelmaa?
+    initAutocomplete("#prev-permit-address-search");  // TODO: Miten filtteroida autocomplete-tuloksista pois ne kunnat, joilla ei ole asetettuna taustajarjestelmaa?
 
     tree = $("#create-part-2 .operation-tree").selectTree({
       template: $("#create-templates"),
