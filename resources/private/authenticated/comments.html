@@ -45,7 +45,7 @@
               <label data-bind="ltext: 'comment-request-label'"></label>
               <select
                 data-bind="options: $parent.authorities,
-                           optionsText: function(item) { return item.firstName + ' ' + item.lastName; },
+                           optionsText: function(item) { return item.lastName + ' ' + item.firstName; },
                            optionsValue: 'id',
                            value: to,
                            optionsCaption: loc('comment-request-prompt')"

@@ -247,7 +247,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       if (approval) {
         var text = loc(["document", approval.value]);
         if (approval.user && approval.timestamp) {
-          text += " (" + approval.user.firstName + " " + approval.user.lastName;
+          text += " (" + approval.user.lastName + " " + approval.user.firstName;
           text += " " + moment(approval.timestamp).format("D.M.YYYY HH:mm") + ")";
         }
         statusContainer$.text(text);
