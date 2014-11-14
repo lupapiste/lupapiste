@@ -408,5 +408,5 @@
                       :password "koulutus"}
                      :send-email false)]
           (mongo/update-by-id :users (:id user) {$set {:enabled true}}))
-        (catch [:lupapalvelu.core/type :lupapalvelu.core/fail] {:keys [text desc] :as all}
+        (catch [:sade.core/type :sade.core/fail] {:keys [text desc] :as all}
           (println text (or desc "")))))))

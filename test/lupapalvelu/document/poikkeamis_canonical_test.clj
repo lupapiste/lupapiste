@@ -5,10 +5,11 @@
             [lupapalvelu.document.poikkeamis-schemas :refer :all]
             [lupapalvelu.document.tools :as tools]
             [midje.sweet :refer :all]
-            [midje.util :refer [testable-privates]]))
+            [midje.util :refer [testable-privates]]
+            [sade.core :refer :all]))
 
 
-(def ^:private hakija {:id "523844e1da063788effc1c58"
+(def- hakija {:id "523844e1da063788effc1c58"
                        :created 1379419361123
                        :schema-info {:approvable true
                                      :subtype "hakija"
@@ -38,7 +39,7 @@
                                                 :postinumero {:value "10203"}
                                                 :postitoimipaikannimi {:value "Piippola"}}}}})
 
-(def ^:private uusi {:id "523844e1da063788effc1c57"
+(def- uusi {:id "523844e1da063788effc1c57"
                      :created 1379419361123
                      :schema-info {:order 50
                                    :version 1
@@ -54,7 +55,7 @@
                                            :kerrosala {:value "200"}
                                            :kokonaisala {:value "220"}}}})
 
-(def ^:private uusi2 {:id "523844e1da063788effc1c57"
+(def- uusi2 {:id "523844e1da063788effc1c57"
                       :created 1379419361123
                       :schema-info {:order 50
                                     :version 1
@@ -69,7 +70,7 @@
                                              :kerrosala {:value "25"}
                                              :kokonaisala {:value "30"}}}})
 
-(def ^:private laajennus {:id "523844e1da063788effc1c57"
+(def- laajennus {:id "523844e1da063788effc1c57"
                           :created 1379419361123
                           :schema-info {:order 50
                                         :version 1
@@ -86,7 +87,7 @@
                                                 :kerrosala {:value "25"}
                                                 :kokonaisala {:value "30"}}}})
 
-(def ^:private hanke {:id "523844e1da063788effc1c59"
+(def- hanke {:id "523844e1da063788effc1c59"
                       :created 1379419361123
                       :schema-info {:approvable true
                                     :name "hankkeen-kuvaus"
@@ -95,7 +96,7 @@
                       :data {:kuvaus {:value "Omakotitalon ja tallin rakentaminen."}
                              :poikkeamat {:value "Alueelle ei voimassa olevaa kaava."}}})
 
-(def ^:private maksaja {:id "523844e1da063788effc1c5a"
+(def- maksaja {:id "523844e1da063788effc1c5a"
                         :created 1379419361123
                         :schema-info {:approvable true
                                       :name "maksaja"
@@ -116,7 +117,7 @@
                                                                        :puhelin {:value "020202"}}}
                                         :yritysnimi {:value "YIT"}}}})
 
-(def ^:private rakennuspaikka {:id "523844e1da063788effc1c5b"
+(def- rakennuspaikka {:id "523844e1da063788effc1c5b"
                                :created 1379419361123
                                :schema-info {:approvable true
                                              :name "poikkeusasian-rakennuspaikka"
@@ -128,7 +129,7 @@
                                                    :tilanNimi {:value "Omatila"}
                                                    :rantaKytkin {:value true}}}})
 
-(def ^:private paasuunnittelija {:id "523844e1da063788effc1c5d"
+(def- paasuunnittelija {:id "523844e1da063788effc1c5d"
                                  :created 1379419361123
                                  :schema-info {:approvable true
                                                :name "paasuunnittelija"
@@ -151,7 +152,7 @@
                                         :yhteystiedot {:email {:value "pena@example.com"}
                                                        :puhelin {:value "0102030405"}}}})
 
-(def ^:private suunnittelija {:id "523844e1da063788effc1c5e"
+(def- suunnittelija {:id "523844e1da063788effc1c5e"
                               :schema-info {:approvable true
                                             :name "suunnittelija"
                                             :removable true
@@ -179,7 +180,7 @@
                                      :yritys {:liikeJaYhteisoTunnus {:value "1743842-0"}
                                               :yritysnimi {:value "ewq"}}}})
 
-(def ^:private lisaosa {:id "523844e1da063788effc1c5f"
+(def- lisaosa {:id "523844e1da063788effc1c5f"
                         :created 1379419361123
                         :schema-info {:name "suunnittelutarveratkaisun-lisaosa"
                                       :version 1
@@ -200,7 +201,7 @@
                                                                   :muita_vaikutuksia {:value "Maisemallisesti talo tulee sijoittumaan m\u00e4en harjalle."}}
                                :virkistys_tarpeet {:ulkoilu_ja_virkistysaluetta_varattu {:value true}}}})
 
-(def ^:private documents [hakija
+(def- documents [hakija
                           uusi
                           uusi2
                           hanke
@@ -210,7 +211,7 @@
                           suunnittelija
                           lisaosa])
 
-(def ^:private documents-for-laajennus [hakija
+(def- documents-for-laajennus [hakija
                                         laajennus
                                         hanke
                                         maksaja

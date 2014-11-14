@@ -2,9 +2,10 @@
   (:require [lupapalvelu.mongo :as mongo]
             [lupapalvelu.fixture :refer :all]
             [lupapalvelu.operations :as operations]
-            [lupapalvelu.attachment :as attachment]))
+            [lupapalvelu.attachment :as attachment]
+            [sade.core :refer :all]))
 
-(def ^:private local-krysp "http://localhost:8000/dev/krysp")
+(def- local-krysp "http://localhost:8000/dev/krysp")
 
 (def users
   [;; Solita admin:  admin / admin

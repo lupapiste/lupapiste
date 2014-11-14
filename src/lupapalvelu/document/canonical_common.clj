@@ -4,7 +4,7 @@
             [swiss.arrows :refer [-<>]]
             [sade.strings :as ss]
             [sade.util :refer :all]
-            [lupapalvelu.core :refer [now]]
+            [sade.core :refer :all]
             [lupapalvelu.i18n :refer [with-lang loc]]
             [cljts.geom :as geo]
             [cljts.io :as jts]))
@@ -35,7 +35,7 @@
    :constructionStarted "ei tiedossa"
    :closed "13 P\u00e4\u00e4t\u00f6s lainvoimainen"})
 
-(def ^:private state-timestamp-fn
+(def- state-timestamp-fn
   {:open #(or (:opened %) (:created %))
    :submitted :submitted
    :sent :submitted ; Enables XML to be formed from sent applications
@@ -64,7 +64,7 @@
   [{documents :documents}]
   (by-type (walk/postwalk empty-strings-to-nil documents)))
 
-(def ^:private puolto-mapping {:condition "ehdoilla"
+(def- puolto-mapping {:condition "ehdoilla"
                                :no "ei puolla"
                                :yes "puoltaa"})
 
@@ -292,7 +292,7 @@
                                                     :verkkolaskuTunnus (-> verkkolaskutustieto :verkkolaskuTunnus)
                                                     :valittajaTunnus (-> verkkolaskutustieto :valittajaTunnus)}}}))))
 
-(def ^:private default-role "ei tiedossa")
+(def- default-role "ei tiedossa")
 (defn- get-kuntaRooliKoodi [party party-type]
   (if (contains? kuntaRoolikoodit party-type)
     (kuntaRoolikoodit party-type)

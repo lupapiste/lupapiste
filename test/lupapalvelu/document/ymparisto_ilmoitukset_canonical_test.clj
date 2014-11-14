@@ -4,9 +4,10 @@
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.factlet :as fl]
             [lupapalvelu.document.canonical-test-common :as ctc]
-            [lupapalvelu.document.ymparisto-schemas]))
+            [lupapalvelu.document.ymparisto-schemas]
+            [sade.core :refer :all]))
 
-(def ^:private kesto {:id "52ef4ef14206428d3c0394b7"
+(def- kesto {:id "52ef4ef14206428d3c0394b7"
                       :schema-info {:name "ymp-ilm-kesto", :version 1, :order 60}
                       :data (tools/wrapped
                               {:kesto
@@ -16,7 +17,7 @@
                                 :lauantai {:lauantaiAlkuAika "8:00", :lauantaiLoppuAika "20:00:00.0"}
                                 :sunnuntai {:sunnuntaiAlkuAika "12:00", :sunnuntaiLoppuAika "18:00"}}})})
 
-(def ^:private meluilmo
+(def- meluilmo
   {:id "52ef4ef14206428d3c0394b5"
    :created 1391415025497
    :schema-info {:name "meluilmoitus", :version 1, :op {:id "52ef4ef14206428d3c0394b4", :name "meluilmoitus", :created 1391415025497}}

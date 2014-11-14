@@ -1,8 +1,8 @@
 (ns lupapalvelu.document.yleiset-alueet-canonical
-  (:require [lupapalvelu.core :refer [now]]
-            [lupapalvelu.document.canonical-common :refer :all]
+  (:require [lupapalvelu.document.canonical-common :refer :all]
             [lupapalvelu.document.tools :as tools]
             [sade.util :refer :all]
+            [sade.core :refer :all]
             [clojure.walk :as walk]))
 
 (defn get-kasittelytieto [application]
@@ -136,13 +136,13 @@
 
 ;; Configs
 
-(def ^:private default-config {:hankkeen-kuvaus                                true
+(def- default-config {:hankkeen-kuvaus                                true
                                :tyoaika                                        true})
 
-(def ^:private kayttolupa-config-plus-tyomaastavastaava
+(def- kayttolupa-config-plus-tyomaastavastaava
   (merge default-config {:tyomaasta-vastaava                                   true}))
 
-(def ^:private configs-per-permit-name
+(def- configs-per-permit-name
   {:Kayttolupa                  default-config
 
    :Tyolupa                     (merge default-config

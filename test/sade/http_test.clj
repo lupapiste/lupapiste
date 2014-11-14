@@ -1,10 +1,11 @@
 (ns sade.http-test
-  (:require [midje.sweet :refer :all]
+  (:require [sade.core :refer :all]
+            [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]))
 
 (testable-privates sade.http merge-to-defaults)
 
-(def ^:private some-defaults {:jokuavain "oletusarvo"})
+(def- some-defaults {:jokuavain "oletusarvo"})
 
 (background (sade.env/value :http-client) => some-defaults)
 

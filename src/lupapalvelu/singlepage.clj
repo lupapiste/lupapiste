@@ -6,6 +6,7 @@
             [clj-time.coerce :as tc]
             [sade.env :as env]
             [sade.strings :as ss]
+            [sade.core :refer :all]
             [lupapalvelu.components.core :as c])
   (:import [java.io ByteArrayOutputStream ByteArrayInputStream]
            [java.util.zip GZIPOutputStream]
@@ -71,7 +72,7 @@
 (defn- resource-url [component kind]
   (str (kind (env/value :cdn)) (:build-number env/buildinfo) "/" (name component) "." (name kind)))
 
-(def ^:private buildinfo-summary
+(def- buildinfo-summary
   (format "%s %s [%s] %4$tF %4$tT (%5$s)"
           env/target-env
           (:branch env/buildinfo)

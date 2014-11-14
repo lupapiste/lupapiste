@@ -6,11 +6,10 @@
             [sade.util :refer [min-length-string max-length-string y? ovt? fn-> fn->>]]
             [sade.env :as env]
             [sade.strings :as ss]
-            [lupapalvelu.core :refer [fail! fail now]]
+            [sade.core :refer :all]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.action :refer [update-application application->command]]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.core :refer [now ok fail!]]
             [lupapalvelu.token :as token]
             [lupapalvelu.notifications :as notif]
             [lupapalvelu.user-api :as uapi]
@@ -21,7 +20,7 @@
 ;; Company schema:
 ;;
 
-(def ^:private max-64-or-nil (sc/either (max-length-string 64) (sc/pred nil?)))
+(def- max-64-or-nil (sc/either (max-length-string 64) (sc/pred nil?)))
 
 (def Company {:name                          (sc/both (min-length-string 1) (max-length-string 64))
               :y                             (sc/pred y? "Not valid Y code")

@@ -7,28 +7,29 @@
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.yleiset-alueet-canonical :refer [jatkoaika-to-canonical]]
             [lupapalvelu.document.canonical-test-common :as ctc]
-            [sade.util :refer :all]))
+            [sade.util :refer :all]
+            [sade.core :refer :all]))
 
 
-(def ^:private operation {:id "52aab3daad59b51c3e6d4adb"
+(def- operation {:id "52aab3daad59b51c3e6d4adb"
                           :created 1386918874564
                           :name "ya-jatkoaika"})
 
-(def ^:private link-permit-data {:id "LP-753-2013-00003"
+(def- link-permit-data {:id "LP-753-2013-00003"
                                  :type "lupapistetunnus"
                                  :operation "ya-katulupa-vesi-ja-viemarityot"})
 
-(def ^:private hankkeen-kuvaus-jatkoaika {:id "Hankkeen kuvaus"
+(def- hankkeen-kuvaus-jatkoaika {:id "Hankkeen kuvaus"
                                           :schema-info {:name "hankkeen-kuvaus-jatkoaika" :version 1 :order 1}
                                           :data {:kuvaus {:value "Kaksi viikkoa lisaaikaa hakkeelle LP-753-2013-00017."}}})
 
-(def ^:private tyoaika-jatkoaika {:id "52ab1eedad593ba3e388e9af"
+(def- tyoaika-jatkoaika {:id "52ab1eedad593ba3e388e9af"
                                   :created 1386946285742
                                   :schema-info {:name "tyo-aika-for-jatkoaika" :version 1 :order 63}
                                   :data {:tyoaika-alkaa-pvm {:value "28.12.2013"}
                                          :tyoaika-paattyy-pvm {:value "30.12.2013"}}})
 
-(def ^:private  documents [hakija
+(def-  documents [hakija
                            (assoc-in maksaja [:data :_selected :value] "henkilo")
                            hankkeen-kuvaus-jatkoaika
                            tyoaika-jatkoaika])

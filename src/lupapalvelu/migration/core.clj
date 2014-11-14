@@ -2,9 +2,8 @@
   (:require [monger.collection :as mc]
             [monger.query :as q]
             [slingshot.slingshot :refer [try+ throw+]]
-            [clojure.stacktrace :refer [print-cause-trace]]))
-
-(defn now [] (java.lang.System/currentTimeMillis))
+            [clojure.stacktrace :refer [print-cause-trace]]
+            [sade.core :refer [def- now]]))
 
 (defonce migrations (atom {}))
 (defonce migration-order (atom 0))
@@ -16,7 +15,7 @@
   (q/with-collection "migrations"
     (q/sort {:time 1})))
 
-(def ^:private execution-name {:pre "pre-condition"
+(def- execution-name {:pre "pre-condition"
                                :post "post-condition"
                                :apply-when "apply-when"
                                :fn "execution"})

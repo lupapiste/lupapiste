@@ -4,7 +4,7 @@
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.util :as util]
-            [lupapalvelu.core :refer :all]
+            [sade.core :refer :all]
             [lupapalvelu.action :refer [defquery defcommand update-application executed] :as action]
             [lupapalvelu.mongo :refer [$each] :as mongo]
             [lupapalvelu.user :refer [with-user-by-email] :as user]

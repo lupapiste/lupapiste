@@ -1,6 +1,6 @@
 (ns lupapalvelu.mml.yhteystiedot-api
   (:require [lupapalvelu.mml.yhteystiedot :refer :all]
-            [lupapalvelu.core :refer :all]
+            [sade.core :refer [ok]]
             [lupapalvelu.action :refer [defquery disallow-impersonation]]))
 
 (defquery owners

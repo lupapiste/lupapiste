@@ -11,7 +11,7 @@
             [noir.response :as resp]
             [sade.env :as env]
             [sade.util :refer [max-length-string valid-email?]]
-            [lupapalvelu.core :refer [ok]]
+            [sade.core :refer [ok]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :refer [random-password]]
             [lupapalvelu.onnistuu.crypt :as crypt]
