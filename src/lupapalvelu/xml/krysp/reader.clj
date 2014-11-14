@@ -451,7 +451,7 @@
       ;; There should be only one RakennusvalvontaAsia element in the message, even though Krysp makes multiple elements possible.
       ;; Log an error if there were many. Use the first one anyway.
       (when (> (count asiat-with-kuntalupatunnus) 1)
-        (error "Creating application from previous permit. There were more than one with kuntalupatunnus " kuntalupatunnus "."))
+        (error "Creating application from previous permit. More than one RakennusvalvontaAsia element were received in the xml message with kuntalupatunnus " kuntalupatunnus "."))
 
       (let [asia (first asiat-with-kuntalupatunnus)
             viitelupatiedot (map cr/all-of (select asia [:viitelupatieto :LupaTunnus]))
