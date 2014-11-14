@@ -489,12 +489,21 @@
                                                            {:maaraAlaTunnus (str "M" (-> kiinteisto :maaraalaTunnus))}))}}}}}))
 
 (defn get-viitelupatieto [link-permit-data]
+  (prn)
   (when link-permit-data
-    (assoc-in
-      (if (= (:type link-permit-data) "kuntalupatunnus")
-        {:LupaTunnus {:kuntalupatunnus (:id link-permit-data)}}
-        (lupatunnus link-permit-data))
-      [:LupaTunnus :viittaus] "edellinen rakennusvalvonta-asia")))
+    (let [lupapiste-id (:lupapisteId link-permit-data)
+          lupatunnus-map (if (= (:type link-permit-data) "kuntalupatunnus")
+                           {:LupaTunnus {:kuntalupatunnus (:id link-permit-data)}}
+                           (lupatunnus link-permit-data))
+          lupatunnus-map (assoc-in lupatunnus-map
+                           [:LupaTunnus :viittaus] "edellinen rakennusvalvonta-asia")
+          muu-tunnustieto {:MuuTunnus {:tunnus lupapiste-id, :sovellus "Lupapiste"}}
+          lupatunnus-map  (if (nil? lupapiste-id)
+                            lupatunnus-map
+                            (assoc-in lupatunnus-map
+                              [:LupaTunnus :muuTunnustieto]
+                              muu-tunnustieto))]
+      lupatunnus-map)))
 
 (defn get-kasittelytieto-ymp [application kt-key]
   {kt-key {:muutosHetki (to-xml-datetime (:modified application))
