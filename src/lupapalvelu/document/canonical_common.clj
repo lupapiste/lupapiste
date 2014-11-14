@@ -488,8 +488,8 @@
                                                          (when (-> kiinteisto :maaraalaTunnus)
                                                            {:maaraAlaTunnus (str "M" (-> kiinteisto :maaraalaTunnus))}))}}}}}))
 
+;; TODO lupatunnus type is always kuntalupatunnus?
 (defn get-viitelupatieto [link-permit-data]
-  (prn)
   (when link-permit-data
     (let [lupapiste-id (:lupapisteId link-permit-data)
           lupatunnus-map (if (= (:type link-permit-data) "kuntalupatunnus")
