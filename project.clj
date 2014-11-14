@@ -34,13 +34,15 @@
                  [me.raynes/fs "1.4.6"]
                  [ontodev/excel "0.2.3" :exclusions [xml-apis]]
                  [com.googlecode.htmlcompressor/htmlcompressor "1.5.2"]
-                 [com.yahoo.platform.yui/yuicompressor "2.4.7" :exclusions [rhino/js]] ; http://jira.xwiki.org/browse/XWIKI-6148?focusedCommentId=59523#comment-59523
+                 [com.yahoo.platform.yui/yuicompressor "2.4.8" :exclusions [rhino/js]] ; http://jira.xwiki.org/browse/XWIKI-6148?focusedCommentId=59523#comment-59523
                  [fi.sito/oskari "0.9.38"]
                  [slingshot "0.10.3"]
                  [com.google.zxing/javase "2.2"]
                  [prismatic/schema "0.2.4"]
                  [cljts "0.2.0" :exclusions [xerces/xercesImpl]]
-                 [clj-pdf "1.11.21"]]
+                 ; batik-js includes a built-in rhino, which breaks yuicompressor (it too has rhino built in)
+                 ; xalan excluded just to avoid bloat, presumably XSLT is not needed
+                 [clj-pdf "1.11.21" :exclusions [xalan org.apache.xmlgraphics/batik-js]]]
   :profiles {:dev {:dependencies [[midje "1.6.3"]
                                   [ring-mock "0.1.5"]
                                   [clj-ssh "0.5.7"]

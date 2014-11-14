@@ -6,7 +6,7 @@
 
 (facts "compose-resource js without Exceptions"
   (against-background
-    (env/dev-mode?) => false)
+    (env/feature? :no-minification) => false)
 
   (fact "login-frame"
     (compose-resource :js :login-frame) => truthy)
@@ -30,6 +30,9 @@
     (compose-resource :js :oskari) => truthy)
 
   (fact "oir"
+    (compose-resource :js :oir) => truthy)
+
+  (fact "wordpress"
     (compose-resource :js :oir) => truthy)
 
   (fact "neighbor"
