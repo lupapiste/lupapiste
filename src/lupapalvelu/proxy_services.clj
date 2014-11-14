@@ -57,6 +57,13 @@
       (resp/json {:data (map wfs/feature-to-position features)})
       (resp/status 503 "Service temporarily unavailable"))))
 
+(defn area-by-property-id-proxy [request]
+  (let [property-id (get (:params request) :property-id)
+        features (wfs/area-by-property-id property-id)]
+    (if features
+      (resp/json {:data (map wfs/feature-to-area features)})
+      (resp/status 503 "Service temporarily unavailable"))))
+
 (defn property-id-by-point-proxy [request]
   (let [{x :x y :y} (:params request)
         features (wfs/property-id-by-point x y)]
@@ -127,6 +134,7 @@
                "wms" (cache (* 3 60 60 24) (secure wfs/raster-images "wms"))
                "wmts" (cache (* 3 60 60 24) (secure wfs/raster-images "wmts"))
                "point-by-property-id" point-by-property-id-proxy
+               "area-by-property-id" area-by-property-id-proxy
                "property-id-by-point" property-id-by-point-proxy
                "address-by-point" address-by-point-proxy
                "find-address" find-addresses-proxy
