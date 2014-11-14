@@ -170,7 +170,7 @@
 
     (mongo/disconnect!)))
 
-(defn fetch-verdics []
+(defn fetch-verdicts []
   (let [orgs-with-wfs-url-defined-for-some-scope (organization/get-organizations
                                                    {$or [{:krysp.R.url {$exists true}}
                                                          {:krysp.YA.url {$exists true}}
@@ -214,5 +214,5 @@
 (defn check-for-verdicts [& args]
   (when (env/feature? :automatic-verdicts-checking)
     (mongo/connect!)
-    (fetch-verdics)
+    (fetch-verdicts)
     (mongo/disconnect!)))
