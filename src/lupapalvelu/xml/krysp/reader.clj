@@ -441,7 +441,7 @@
 ;;
 ;; Information parsed from verdict xml message for application creation
 ;;
-(defn get-app-info-from-message [xml ->function kuntalupatunnus]
+(defn get-app-info-from-message [xml kuntalupatunnus]
   (let [xml-no-ns (cr/strip-xml-namespaces xml)
         kuntakoodi (-> (select1 xml-no-ns [:toimituksenTiedot :kuntakoodi]) cr/all-of)
         asiat (enlive/select xml-no-ns case-elem-selector)

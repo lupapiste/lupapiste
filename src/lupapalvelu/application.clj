@@ -618,8 +618,7 @@
         (let [enough-info-from-parameters (and
                                             (not (ss/blank? address)) (not (ss/blank? propertyId))
                                             (-> x util/->double pos?) (-> y util/->double pos?))
-              reader (permit/get-verdict-reader permit-type)
-              app-info (krysp-reader/get-app-info-from-message xml reader kuntalupatunnus)
+              app-info (krysp-reader/get-app-info-from-message xml kuntalupatunnus)
               rakennuspaikka-exists (and (:rakennuspaikka app-info) (every? #{:x :y :address :propertyId} (-> app-info :rakennuspaikka keys)))
               lupapiste-tunnus (:id app-info)
               asian-kuvaus (:rakennusvalvontaasianKuvaus app-info)
