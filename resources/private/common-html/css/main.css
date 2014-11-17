@@ -294,7 +294,7 @@ h2 {
 h3 {
   font-size: 18px;
   font-family: "Source Sans Pro", sans-serif;
-  font-weight: lighter;
+  font-weight: normal;
   margin-bottom: 6px;
 }
 
@@ -656,20 +656,14 @@ h1 .icon {
   margin-right: 3px;
 }
 
-/* line 250, ../sass/partials/_icons.scss */
-h2 .icon {
-  margin-left: 12px;
-  margin-bottom: -2px;
-}
-
-/* line 257, ../sass/partials/_icons.scss */
+/* line 252, ../sass/partials/_icons.scss */
 .ui-icon.ui-icon-circle-triangle-w {
   background-image: url("/img/icons-sprite-1.12.png");
   background-repeat: no-repeat;
   background-position: 2px -3097px;
 }
 
-/* line 262, ../sass/partials/_icons.scss */
+/* line 257, ../sass/partials/_icons.scss */
 .ui-icon.ui-icon-circle-triangle-e {
   background-image: url("/img/icons-sprite-1.12.png");
   background-repeat: no-repeat;
@@ -931,14 +925,15 @@ footer #buildinfo {
 [type=submit] span:nth-child(1), .btn span:nth-child(1), button span:nth-child(1) {
   max-width: 100px;
   height: auto;
+  margin-left: 12px;
 }
 
-/* line 56, ../sass/partials/_buttons.scss */
+/* line 57, ../sass/partials/_buttons.scss */
 .btn.left-align {
   float: left;
 }
 
-/* line 60, ../sass/partials/_buttons.scss */
+/* line 61, ../sass/partials/_buttons.scss */
 .btn-dialog {
   position: absolute;
   text-align: center;
@@ -950,12 +945,12 @@ footer #buildinfo {
   max-width: 16.25em;
   margin-left: 6px;
 }
-/* line 71, ../sass/partials/_buttons.scss */
+/* line 72, ../sass/partials/_buttons.scss */
 .btn-dialog.cancel {
   width: auto;
 }
 
-/* line 76, ../sass/partials/_buttons.scss */
+/* line 77, ../sass/partials/_buttons.scss */
 .btn-link {
   line-height: 23px;
   margin: 24px;
@@ -965,35 +960,35 @@ footer #buildinfo {
   overflow: auto;
 }
 
-/* line 85, ../sass/partials/_buttons.scss */
+/* line 86, ../sass/partials/_buttons.scss */
 .btn-dialog.btn-primary {
   left: 0;
 }
 
-/* line 89, ../sass/partials/_buttons.scss */
+/* line 90, ../sass/partials/_buttons.scss */
 .btn-wizard {
   margin-top: 12px;
 }
 
-/* line 93, ../sass/partials/_buttons.scss */
+/* line 94, ../sass/partials/_buttons.scss */
 .btn-wizard.btn-primary {
   float: right;
   margin-right: 24px;
 }
 
-/* line 98, ../sass/partials/_buttons.scss */
+/* line 99, ../sass/partials/_buttons.scss */
 .btn-narrow {
   width: 10em;
   text-align: center;
 }
 
-/* line 103, ../sass/partials/_buttons.scss */
+/* line 104, ../sass/partials/_buttons.scss */
 .btn-auto {
   width: auto;
   text-align: center;
 }
 
-/* line 113, ../sass/partials/_buttons.scss */
+/* line 114, ../sass/partials/_buttons.scss */
 .btn-primary {
   background: #04c714;
   text-transform: uppercase;
@@ -1001,21 +996,21 @@ footer #buildinfo {
   text-shadow: none;
   font-weight: 600;
 }
-/* line 119, ../sass/partials/_buttons.scss */
+/* line 120, ../sass/partials/_buttons.scss */
 .btn-primary:hover {
   background: #03950f;
   -webkit-box-shadow: 0 1px 2px #c3c3c3;
   box-shadow: 0 1px 2px #c3c3c3;
 }
 
-/* line 131, ../sass/partials/_buttons.scss */
+/* line 132, ../sass/partials/_buttons.scss */
 .btn-decline {
   background: red;
   color: white;
   text-transform: uppercase;
 }
 
-/* line 138, ../sass/partials/_buttons.scss */
+/* line 139, ../sass/partials/_buttons.scss */
 .button-loader {
   white-space: nowrap;
   display: inline-block;
@@ -1027,7 +1022,7 @@ footer #buildinfo {
   right: 8px;
 }
 
-/* line 149, ../sass/partials/_buttons.scss */
+/* line 150, ../sass/partials/_buttons.scss */
 .btn-nav-forward {
   position: relative;
   max-height: 30px;
@@ -1035,7 +1030,7 @@ footer #buildinfo {
   margin-right: 20px;
   text-align: center;
 }
-/* line 156, ../sass/partials/_buttons.scss */
+/* line 157, ../sass/partials/_buttons.scss */
 .btn-nav-forward:after {
   content: " ";
   width: 0;
@@ -1047,33 +1042,33 @@ footer #buildinfo {
   top: 0;
   right: -22px;
 }
-/* line 170, ../sass/partials/_buttons.scss */
+/* line 171, ../sass/partials/_buttons.scss */
 .btn-nav-forward:disabled:after, .btn-nav-forward[disabled=disabled]:after, .btn-nav-forward.disabled:after, .btn-nav-forward:disabled:hover:after, .btn-nav-forward[disabled=disabled]:hover:after, .btn-nav-forward.disabled:hover:after, .btn-nav-forward:disabled:active:after, .btn-nav-forward[disabled=disabled]:active:after, .btn-nav-forward.disabled:active:after {
   border-left: 22px solid #f6f6f6;
 }
-/* line 176, ../sass/partials/_buttons.scss */
+/* line 177, ../sass/partials/_buttons.scss */
 .btn-nav-forward:hover:after {
   border-left: 22px solid #dddddd;
 }
-/* line 181, ../sass/partials/_buttons.scss */
+/* line 182, ../sass/partials/_buttons.scss */
 .btn-nav-forward.btn-primary:after {
   border-left: 22px solid #04c714;
 }
-/* line 187, ../sass/partials/_buttons.scss */
+/* line 188, ../sass/partials/_buttons.scss */
 .btn-nav-forward.btn-primary:disabled:after, .btn-nav-forward.btn-primary[disabled=disabled]:after, .btn-nav-forward.btn-primary.disabled:after, .btn-nav-forward.btn-primary:disabled:hover:after, .btn-nav-forward.btn-primary[disabled=disabled]:hover:after, .btn-nav-forward.btn-primary.disabled:hover:after, .btn-nav-forward.btn-primary:disabled:active:after, .btn-nav-forward.btn-primary[disabled=disabled]:active:after, .btn-nav-forward.btn-primary.disabled:active:after {
   border-left: 22px solid #f6f6f6;
 }
-/* line 192, ../sass/partials/_buttons.scss */
+/* line 193, ../sass/partials/_buttons.scss */
 .btn-nav-forward.btn-primary:hover:after {
   border-left: 22px solid #03950f;
 }
-/* line 197, ../sass/partials/_buttons.scss */
+/* line 198, ../sass/partials/_buttons.scss */
 .btn-nav-forward .icon.right-align {
   right: -12px;
   z-index: 3;
 }
 
-/* line 203, ../sass/partials/_buttons.scss */
+/* line 204, ../sass/partials/_buttons.scss */
 .btn-nav-back {
   text-align: center;
   position: relative;
@@ -1081,7 +1076,7 @@ footer #buildinfo {
   margin-left: 22px;
   overflow: visible;
 }
-/* line 210, ../sass/partials/_buttons.scss */
+/* line 211, ../sass/partials/_buttons.scss */
 .btn-nav-back:before {
   content: " ";
   width: 0;
@@ -1093,30 +1088,30 @@ footer #buildinfo {
   top: 0;
   left: -22px;
 }
-/* line 224, ../sass/partials/_buttons.scss */
+/* line 225, ../sass/partials/_buttons.scss */
 .btn-nav-back:disabled:before, .btn-nav-back[disabled=disabled]:before, .btn-nav-back.disabled:before, .btn-nav-back:disabled:hover:before, .btn-nav-back[disabled=disabled]:hover:before, .btn-nav-back.disabled:hover:before, .btn-nav-back:disabled:active:before, .btn-nav-back[disabled=disabled]:active:before, .btn-nav-back.disabled:active:before {
   border-right: 22px solid #f6f6f6;
 }
-/* line 229, ../sass/partials/_buttons.scss */
+/* line 230, ../sass/partials/_buttons.scss */
 .btn-nav-back:hover:before {
   border-right: 22px solid #dddddd;
 }
-/* line 233, ../sass/partials/_buttons.scss */
+/* line 234, ../sass/partials/_buttons.scss */
 .btn-nav-back .icon.left-align {
   left: -9px;
   z-index: 3;
 }
 
-/* line 240, ../sass/partials/_buttons.scss */
+/* line 241, ../sass/partials/_buttons.scss */
 .btn-container button {
   margin-right: 6px;
 }
-/* line 243, ../sass/partials/_buttons.scss */
+/* line 244, ../sass/partials/_buttons.scss */
 .btn-container button:last-child {
   margin-right: 0;
 }
 
-/* line 248, ../sass/partials/_buttons.scss */
+/* line 249, ../sass/partials/_buttons.scss */
 .btn-container.right-align {
   float: right;
 }
@@ -2781,7 +2776,7 @@ ul.attachments-list li.mandatory-attachments {
   line-height: 27px;
   position: relative;
   cursor: pointer;
-  font-weight: 100;
+  font-weight: normal;
   margin-bottom: 0;
   position: relative;
   width: 100%;
