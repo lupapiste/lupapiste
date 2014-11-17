@@ -2,7 +2,6 @@
   (:require [clojure.string :as s]
             [sade.strings :refer [encode-filename]]
             [monger.core :as monger]
-            [lupapalvelu.core :as core]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.attachment :refer :all]
             [clojure.test :refer :all]

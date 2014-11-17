@@ -77,7 +77,7 @@
               <select id="inforequest-assignee-select"
                       class="form-input combobox"
                       data-bind="options: $root.authorities,
-                                 optionsText: function(item) { return item.firstName + ' ' + item.lastName; },
+                                 optionsText: function(item) { return item.lastName + ' ' + item.firstName; },
                                  optionsValue: 'id',
                                  value: $root.application.assignee,
                                  optionsCaption: loc('choose')">

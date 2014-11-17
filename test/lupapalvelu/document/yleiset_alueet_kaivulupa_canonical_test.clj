@@ -7,14 +7,15 @@
             [lupapalvelu.document.yleiset-alueet-canonical :refer [application-to-canonical]]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.canonical-test-common :as ctc]
-            [sade.util :refer :all]))
+            [sade.util :refer :all]
+            [sade.core :refer :all]))
 
 
-(def ^:private operation {:id "51cc1cab23e74941fee4f495",
+(def- operation {:id "51cc1cab23e74941fee4f495",
                           :created 1372331179008,
                           :name "ya-katulupa-vesi-ja-viemarityot"})
 
-(def ^:private hankkeen-kuvaus {:id "52380c6894a74fc25bb4ba4a",
+(def- hankkeen-kuvaus {:id "52380c6894a74fc25bb4ba4a",
                                 :created 1379404904514,
                                 :schema-info {:name "yleiset-alueet-hankkeen-kuvaus-kaivulupa",
                                               :removable false,
@@ -26,9 +27,9 @@
                                        :sijoitusLuvanTunniste {:value "LP-753-2013-00002"}
                                        :varattava-pinta-ala {:value "333"}}})
 
-(def ^:private tyomaasta-vastaava-kaivulupa (assoc-in tyomaasta-vastaava [:schema-info :op] operation))
+(def- tyomaasta-vastaava-kaivulupa (assoc-in tyomaasta-vastaava [:schema-info :op] operation))
 
-(def ^:private documents [hakija
+(def- documents [hakija
                           tyomaasta-vastaava-kaivulupa
                           maksaja
                           hankkeen-kuvaus
@@ -61,7 +62,7 @@
 (ctc/validate-all-documents kaivulupa-application)
 
 
-(def ^:private link-permit-data {:id "LP-753-2013-00003"
+(def- link-permit-data {:id "LP-753-2013-00003"
                                  :type "kuntalupatunnus"
                                  :operation nil})
 

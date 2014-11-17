@@ -4,7 +4,7 @@
             [noir.session :as session]
             [noir.response :as resp]
             [sade.env :as env]
-            [lupapalvelu.core :refer [now fail fail!]]
+            [sade.core :refer [now fail fail!]]
             [lupapalvelu.action :refer [defraw]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as organization]

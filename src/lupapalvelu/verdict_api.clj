@@ -5,7 +5,7 @@
             [sade.http :as http]
             [sade.strings :as ss]
             [sade.util :as util]
-            [lupapalvelu.core :refer [ok fail fail!]]
+            [sade.core :refer [ok fail fail!]]
             [lupapalvelu.action :refer [defquery defcommand update-application notify boolean-parameters] :as action]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.application :as application]

@@ -1,7 +1,8 @@
-(ns lupapalvelu.xml.krysp.verdict)
+(ns lupapalvelu.xml.krysp.verdict
+  (:require [sade.core :refer :all]))
 
 ; TODO Enumeration has changed in new KRYSP. Fuck.
-(def ^:private verdict-map {:1 "my\u00f6nnetty"
+(def- verdict-map {:1 "my\u00f6nnetty"
                             :2 "hyv\u00e4ksytty"
                             :3 "osittain my\u00f6nnetty"
                             :4 "pysytti osittain my\u00f6nnettyn\u00e4 (luvat)"

@@ -27,12 +27,12 @@ Authority assigns an inforequest to herself
 
 Now Sonja is marked as authority
   Go to page  applications
-  Inforequest is assigned to  ${inforequest-handling}  Sonja Sibbo
+  Inforequest is assigned to  ${inforequest-handling}  Sibbo Sonja
   Logout
 
 Mikko sees Sonja as authority
   Mikko logs in
-  Inforequest is assigned to  ${inforequest-handling}  Sonja Sibbo
+  Inforequest is assigned to  ${inforequest-handling}  Sibbo Sonja
 
 Mikko should be able to cancel the inforequest but not mark it as answered
   Open inforequest  ${inforequest-handling}  ${propertyId}

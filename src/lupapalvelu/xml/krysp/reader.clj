@@ -10,7 +10,7 @@
             [sade.util :as util]
             [sade.common-reader :as cr]
             [sade.strings :as ss]
-            [lupapalvelu.core :refer [now]]
+            [sade.core :refer :all]
             [lupapalvelu.document.schemas :as schema]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.xml.krysp.verdict :as verdict]))
@@ -54,7 +54,7 @@
                           [:Vapautus]})
 
 ;; For building filters
-(def ^:private yht-tunnus "yht:LupaTunnus/yht:muuTunnustieto/yht:MuuTunnus/yht:tunnus")
+(def- yht-tunnus "yht:LupaTunnus/yht:muuTunnustieto/yht:MuuTunnus/yht:tunnus")
 
 (def rakennuksen-kiinteistotunnus "rakval:rakennustieto/rakval:Rakennus/rakval:rakennuksenTiedot/rakval:rakennustunnus/rakval:kiinttun")
 (def asian-lp-lupatunnus (str "rakval:luvanTunnisteTiedot/" yht-tunnus))

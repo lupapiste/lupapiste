@@ -7,14 +7,15 @@
             [lupapalvelu.document.yleiset-alueet-canonical :refer [application-to-canonical]]
             [lupapalvelu.document.canonical-test-common :as ctc]
             [lupapalvelu.document.tools :as tools]
-            [sade.util :refer :all]))
+            [sade.util :refer :all]
+            [sade.core :refer :all]))
 
 
-(def ^:private operation {:id "523fea5694a7732d5096f25d",
+(def- operation {:id "523fea5694a7732d5096f25d",
                           :created 1379920470831,
                           :name "ya-kayttolupa-mainostus-ja-viitoitus"})
 
-(def ^:private tapahtuma-info
+(def- tapahtuma-info
   {:id "523fea5694a7732d5096f25e",
    :created 1379920470831,
    :schema-info {:order 64,
@@ -37,7 +38,7 @@
                                         :tapahtuman-nimi {:value "Viitoitettavan tapahtuman nimi"},
                                         :tapahtumapaikka {:value "Sipoon urheilukentt\u00e4"}}}})
 
-(def ^:private documents [hakija
+(def- documents [hakija
                           maksaja
                           tapahtuma-info])
 

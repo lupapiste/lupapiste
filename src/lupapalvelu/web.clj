@@ -17,7 +17,8 @@
             [sade.util :as util]
             [sade.status :as status]
             [sade.strings :as ss]
-            [lupapalvelu.core :refer [ok fail now] :as core]
+            [sade.core :refer [def-]]
+            [sade.core :refer [ok fail now] :as core]
             [lupapalvelu.action :refer [defcommand defquery] :as action]
             [lupapalvelu.i18n :refer [*lang*]]
             [lupapalvelu.user :as user]
@@ -186,7 +187,7 @@
 ;; Web UI:
 ;;
 
-(def ^:private build-number (:build-number env/buildinfo))
+(def- build-number (:build-number env/buildinfo))
 
 (def etag (str "\"" build-number "\""))
 
@@ -196,6 +197,7 @@
 
 (def auth-methods {:init anyone
                    :cdn-fallback anyone
+                   :common anyone
                    :hashbang anyone
                    :upload logged-in?
                    :applicant applicant?
@@ -210,7 +212,7 @@
                    :neighbor anyone})
 
 (defn cache-headers [resource-type]
-  (if (env/dev-mode?)
+  (if (env/feature? :no-cache)
     {"Cache-Control" "no-cache"}
     (if (= :html resource-type)
       {"Cache-Control" "no-cache"
@@ -219,12 +221,12 @@
        "Vary"          "Accept-Encoding"
        "ETag"          etag})))
 
-(def ^:private never-cache #{:hashbang})
+(def- never-cache #{:hashbang})
 
 (def default-lang "fi")
 
-(def ^:private compose
-  (if (env/dev-mode?)
+(def- compose
+  (if (env/feature? :no-cache)
     singlepage/compose
     (memoize (fn [resource-type app] (singlepage/compose resource-type app)))))
 
@@ -240,7 +242,7 @@
        {:status 304})
      failure)))
 
-(def ^:private unauthorized (resp/status 401 "Unauthorized\r\n"))
+(def- unauthorized (resp/status 401 "Unauthorized\r\n"))
 
 ;; CSS & JS
 (defpage [:get ["/app/:build/:app.:res-type" :res-type #"(css|js)"]] {build :build app :app res-type :res-type}
@@ -427,7 +429,7 @@
         result (execute-command "upload-attachment" upload-data request)]
     (if (core/ok? result)
       (resp/redirect "/html/pages/upload-ok.html")
-      (resp/redirect (str (hiccup.util/url "/html/pages/upload-1.47.html"
+      (resp/redirect (str (hiccup.util/url "/html/pages/upload-1.52.html"
                                         (-> (:params request)
                                           (dissoc :upload)
                                           (dissoc ring.middleware.anti-forgery/token-key)

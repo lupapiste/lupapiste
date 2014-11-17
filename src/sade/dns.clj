@@ -1,10 +1,11 @@
 (ns sade.dns
-  (:require [sade.strings :as ss])
+  (:require [sade.strings :as ss]
+            [sade.core :refer :all])
   (:import javax.naming.directory.InitialDirContext))
 
-(def ^:private dns-lookup-env (doto (java.util.Hashtable.) (.put InitialDirContext/INITIAL_CONTEXT_FACTORY "com.sun.jndi.dns.DnsContextFactory")))
+(def- dns-lookup-env (doto (java.util.Hashtable.) (.put InitialDirContext/INITIAL_CONTEXT_FACTORY "com.sun.jndi.dns.DnsContextFactory")))
 
-(def ^:private mx-query (into-array String ["MX"]))
+(def- mx-query (into-array String ["MX"]))
 
 (defn valid-mx-domain?
   "Validates MX record for given email address or domain name"

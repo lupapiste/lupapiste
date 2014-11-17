@@ -1,7 +1,7 @@
 (ns lupapalvelu.xml.krysp.ymparistolupa-mapping
   (:require [clojure.walk :as walk]
             [sade.util :as util]
-            [lupapalvelu.core :refer [now]]
+            [sade.core :refer [now]]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.document.ymparistolupa-canonical :as ymparistolupa-canonical]
             [lupapalvelu.xml.krysp.mapping-common :as mapping-common]

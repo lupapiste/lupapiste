@@ -9,12 +9,11 @@
   (ok :text "success") => {:ok true :text "success"})
 
 (facts
-  (fail :kosh)               => {:ok false :text "kosh"}
-  (fail "kosh")              => {:ok false :text "kosh"}
-  (fail "kosh" "er")         => {:ok false :text "kosh"}
-  (fail "kosh%s" "er")       => {:ok false :text "kosher"}
-  (fail "kosh%s%s" "er" "!") => {:ok false :text "kosher!"}
-  (fail "kosh%s%s" "er")     => (throws Exception))
+  (fact (fail :kosh)              => {:ok false :text "kosh"})
+  (fact (fail "kosh")             => {:ok false :text "kosh"})
+  (fact (fail "kosh" :id)         => (throws Exception))
+  (fact (fail "kosh" :id "1")     => {:ok false :text "kosh" :id "1"})
+  (fact (fail "kosh" {:id "1"})   => {:ok false :text "kosh" :id "1"}))
 
 (facts
   (ok? {:ok true})   => true

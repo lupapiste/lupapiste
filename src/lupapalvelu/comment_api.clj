@@ -2,7 +2,7 @@
   (:require [monger.operators :refer :all]
             [sade.env :as env]
             [sade.util :as util]
-            [lupapalvelu.core :refer [ok fail fail!]]
+            [sade.core :refer [ok fail fail!]]
             [lupapalvelu.action :refer [defquery defcommand update-application notify] :as action]
             [lupapalvelu.comment :as comment]
             [lupapalvelu.notifications :as notifications]

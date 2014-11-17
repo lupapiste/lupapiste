@@ -1,0 +1,44 @@
+#register3 {
+  .container {
+    width: 600px;
+    margin: 24px 0;
+  }
+}
+
+.register-form, #pw-form {
+
+  .error-message {
+    font-style: italic;
+    color: red;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+
+  }
+
+  p {
+    margin-bottom: 8px;
+  }
+
+  .form-entry {
+    height: 78px;
+    &.register-checkbox {
+      width: 100%;
+      height: auto;
+      min-height: 32px;
+    }
+  }
+
+  .register-error {
+    position: relative;
+  }
+
+
+}
+
+#dialogRakentajafi .dialog-content {
+  width: 400px;
+  p {
+   margin-bottom: $baseline/2;
+  }
+}

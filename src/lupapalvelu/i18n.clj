@@ -4,7 +4,8 @@
             [clojure.string :as s]
             [ontodev.excel :as xls]
             [cheshire.core :as json]
-            [sade.env :as env]))
+            [sade.env :as env]
+            [sade.core :refer :all]))
 
 (def default-lang :fi)
 
@@ -42,7 +43,7 @@
           langs-but-default (disj (set langs) (name default-lang))]
       (reduce (partial process-row langs-but-default) {} data))))
 
-(def ^:private excel-data (future (load-excel)))
+(def- excel-data (future (load-excel)))
 
 (defn get-localizations [] @excel-data)
 
@@ -65,7 +66,7 @@
   (not (nil? (get (get-terms (keyword lang)) (s/join \. terms)))))
 
 (defn localize [lang & terms]
-  (let [term (s/join \. terms)]
+  (let [term (s/join \. (map name terms))]
     (if-let [result (get (get-terms (keyword lang)) term)]
       result
       (unknown-term term))))
