@@ -27,5 +27,7 @@ more-prev-app-info-needed-desc: Taustajärjestelmästä ei voitu noutaa kaikkea 
 more-prev-app-info-needed-message-title: Lisäinformaatiota tarvitaan
 more-prev-app-info-needed-message: Taustajärjestelmästä ei voitu noutaa kaikkea tarvittua tietoa kiinteistöstä. Voisitteko ystävällisesti syöttää katuosoitetiedon oheiseen kenttään.
 
+error.link-permit-already-having-us-as-link-permit: Tämänhetkinen lupa on jo viitelupana luvalla, jota yrität lisätä. Viitelupalinkitys ei voi olla kaksisuuntainen.
+
 application.export.name: Lupapiste
 application.export.page: Sivu
