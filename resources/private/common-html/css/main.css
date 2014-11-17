@@ -250,6 +250,16 @@ body {
   margin-bottom: 12px;
 }
 
+/* line 72, ../sass/partials/_base.scss */
+.right {
+  float: right;
+}
+
+/* line 76, ../sass/partials/_base.scss */
+.left {
+  float: left;
+}
+
 /* THEME (colors and others)
 ----------------------------------------------------------------------------- */
 /* colors*/
@@ -1928,6 +1938,7 @@ table.attachments-template-table td.attachment-type-id {
 /* line 93, ../sass/partials/_tables.scss */
 table.attachments-template-table td.attachment-group-select a {
   font-size: 15px;
+  float: right;
 }
 
 /* line 1, ../sass/partials/_breadcrum.scss */
