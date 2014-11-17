@@ -1,2 +1,0 @@
-application.export.name: Lupapiste
-application.export.page: Sivu
