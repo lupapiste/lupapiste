@@ -2,11 +2,12 @@
   (:require [pandect.core :as pandect]
             [sade.env :as env]
             [sade.strings :as ss]
+            [sade.core :refer :all]
             [lupapalvelu.user :as user]))
 
 (def send-or-receive-set #{:send :receive} )
 
-(def ^:private config (reduce (fn [m [k v]] (assoc m (:name v) (assoc v :id (name k)))) {} (env/value :idf)))
+(def- config (reduce (fn [m [k v]] (assoc m (:name v) (assoc v :id (name k)))) {} (env/value :idf)))
 
 (defn known-partner? [partner-name]
   (contains? config partner-name))

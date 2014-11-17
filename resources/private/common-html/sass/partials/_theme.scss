@@ -1,0 +1,26 @@
+/* colors*/
+
+$lp-green: rgb(4,199,20);
+$lp-orange: rgb(245,126,35);
+$lp-dark-grey: rgb(79,79,79);
+$lp-light-grey: rgb(246,246,246);
+$color-text: #333;
+$color-dark-bg: rgb(136,138,140);
+$grey-text: rgb(89,89,89);
+$error-text: red;
+
+$lupapisteBlue: #01BEF5;
+$borderColor: #01BEF5;
+$lupapisteLightblue: #C1E8F7;
+
+@mixin blue-background {
+  background: #30B2E5; /* Old browsers */
+  @include background( linear-gradient(top,  #49c0f0 0%, #2cafe3 100%));
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#49c0f0', endColorstr='#2cafe3',GradientType=0 ); /* IE6-9 */
+}
+
+@mixin red-background {
+  background: #febbbb; /* Old browsers */
+  @include background( linear-gradient(top, #febbbb 0%, #fe9090 45%, #ff5c5c 100%));
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#febbbb', endColorstr='#ff5c5c',GradientType=0 ); /* IE6-9 */
+}

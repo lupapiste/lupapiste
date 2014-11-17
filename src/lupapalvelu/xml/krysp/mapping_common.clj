@@ -5,20 +5,20 @@
             [me.raynes.fs :as fs]
             [sade.strings :as ss]
             [sade.util :refer :all]
-            [lupapalvelu.core :refer [fail!]]
+            [sade.core :refer :all]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.xml.krysp.validator :as validator]
             [lupapalvelu.pdf-export :as pdf-export]))
 
-(def ^:private rp-yht {"2.1.2" "2.1.0"
+(def- rp-yht {"2.1.2" "2.1.0"
                         "2.1.3" "2.1.1"
                         "2.1.4" "2.1.2"
                         "2.1.5" "2.1.3"})
 
-(def ^:private ymp-yht {"2.1.2" "2.1.3"})
+(def- ymp-yht {"2.1.2" "2.1.3"})
 
-(def ^:private yht-version
+(def- yht-version
   {"rakennusvalvonta" rp-yht
    "poikkeamispaatos_ja_suunnittelutarveratkaisu" rp-yht
    "yleisenalueenkaytonlupahakemus" {"2.1.2" "2.1.0"
@@ -78,7 +78,7 @@
                       {:tag :rakennusnro}
                       {:tag :aanestysalue}])
 
-(def ^:private postiosoite-children [{:tag :kunta}
+(def- postiosoite-children [{:tag :kunta}
                                      {:tag :osoitenimi :child [{:tag :teksti}]}
                                      {:tag :postinumero}
                                      {:tag :postitoimipaikannimi}])
@@ -86,7 +86,7 @@
 ;; henkilo-child is used also in "yleiset alueet" but it needs the namespace to be defined again to "yht")
 (def postiosoite-children-ns-yht (in-yhteiset-ns postiosoite-children))
 
-(def ^:private osoite {:tag :osoite :ns "yht" :child postiosoite-children})
+(def- osoite {:tag :osoite :ns "yht" :child postiosoite-children})
 
 (def gml-point {:tag :Point :ns "gml" :child [{:tag :pos}]})
 
@@ -116,7 +116,7 @@
              sijantiType
              (when xmlns {:ns xmlns}))]})
 
-(def ^:private rakennusoikeudet [:tag :rakennusoikeudet
+(def- rakennusoikeudet [:tag :rakennusoikeudet
                                  :child [{:tag :kayttotarkoitus
                                           :child [{:tag :pintaAla}
                                                   {:tag :kayttotarkoitusKoodi}]}]])
@@ -151,7 +151,7 @@
                              {:tag :uusiKytkin :ns "yht"}]})
 
 
-(def ^:private henkilo-child [{:tag :nimi
+(def- henkilo-child [{:tag :nimi
                                :child [{:tag :etunimi}
                                        {:tag :sukunimi}]}
                               {:tag :osoite :child postiosoite-children}
@@ -215,7 +215,7 @@
 
 (def osapuoli-body_213 (update-in osapuoli-body_211 [:child] update-child-element [:yritys] yritys_213))
 
-(def ^:private naapuri {:tag :naapuritieto
+(def- naapuri {:tag :naapuritieto
                         :child [{:tag :Naapuri
                                  :child [{:tag :henkilo}
                                          {:tag :kiinteistotunnus}
@@ -540,7 +540,7 @@
   {:pre [(string? output-dir)]
    :post [%]}
 
-  (let [file-name  (str output-dir "/" (:id application) "_" (lupapalvelu.core/now))
+  (let [file-name  (str output-dir "/" (:id application) "_" (now))
         tempfile   (io/file (str file-name ".tmp"))
         outfile    (io/file (str file-name ".xml"))
         xml-s      (indent-str xml)]

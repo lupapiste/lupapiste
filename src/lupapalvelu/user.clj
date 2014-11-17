@@ -8,7 +8,7 @@
             [sade.util :as util]
             [sade.env :as env]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.core :refer [fail fail!]]
+            [sade.core :refer [fail fail!]]
             [clj-time.core :as time]
             [clj-time.coerce :refer [to-date]]
             [lupapalvelu.security :as security]))

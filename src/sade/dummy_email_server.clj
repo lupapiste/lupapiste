@@ -6,7 +6,7 @@
             [net.cgrand.enlive-html :as enlive]
             [sade.email :as email]
             [sade.env :as env]
-            [lupapalvelu.core :refer [ok fail now]]
+            [sade.core :refer [ok fail now]]
             [lupapalvelu.action :refer [defquery defcommand]]))
 
 ;;

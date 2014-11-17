@@ -2,7 +2,7 @@
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf fatal]]
             [clojure.string :as s]
             [monger.operators :refer :all]
-            [lupapalvelu.core :refer [ok fail fail!]]
+            [sade.core :refer [ok fail fail!]]
             [lupapalvelu.action :refer [defquery defcommand non-blank-parameters vector-parameters boolean-parameters]]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.xml.krysp.reader :as krysp]

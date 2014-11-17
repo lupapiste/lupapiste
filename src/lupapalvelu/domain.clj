@@ -1,10 +1,10 @@
 (ns lupapalvelu.domain
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn warnf error fatal]]
             [monger.operators :refer :all]
-            [lupapalvelu.core :refer [unauthorized]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as user]
             [lupapalvelu.xml.krysp.verdict :as verdict]
+            [sade.core :refer [unauthorized]]
             [sade.strings :refer [lower-case]]
             [sade.util :as util]
             [sade.env :as env]))

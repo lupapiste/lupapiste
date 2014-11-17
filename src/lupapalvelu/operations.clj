@@ -2,7 +2,7 @@
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
             [sade.util :refer :all]
             [sade.env :as env]
-            [lupapalvelu.core :refer [ok]]
+            [sade.core :refer :all]
             [lupapalvelu.action :refer [defquery]]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.document.schemas :as schemas]
@@ -16,7 +16,7 @@
 
 (def default-description "operations.tree.default-description")
 
-(def ^:private operation-tree-for-R
+(def- operation-tree-for-R
   ["Rakentaminen ja purkaminen"
    [["Uuden rakennuksen rakentaminen"
      [["Asuinrakennus" :asuinrakennus]
@@ -48,7 +48,7 @@
     ["Jatkoaika" :jatkoaika]
     ["Aloitusoikeus" :aloitusoikeus]]])
 
-(def ^:private operation-tree-for-environment-R
+(def- operation-tree-for-environment-R
   ["Elinympariston muuttaminen"
    [["Maisemaa muutava toimenpide"
      [["Kaivaminen, louhiminen tai maan tayttaminen" :kaivuu]
@@ -60,7 +60,7 @@
       ["Korttelin yhteisiin alueisiin liittyva muutos" :kortteli-yht-alue-muutos]
       ["Muu-tontti-tai-korttelialueen-jarjestelymuutos" :muu-tontti-tai-kort-muutos]]]]])
 
-(def ^:private operation-tree-for-YA
+(def- operation-tree-for-YA
   ["yleisten-alueiden-luvat"
    [["sijoituslupa"
      [["pysyvien-maanalaisten-rakenteiden-sijoittaminen"
@@ -103,10 +103,10 @@
       ["muu-kayttolupa" :ya-kayttolupa-muu-kayttolupa]]]
     ["jatkoaika" :ya-jatkoaika]]])
 
-(def ^:private operation-tree-for-P
+(def- operation-tree-for-P
   ["Poikkeusluvat ja suunnittelutarveratkaisut" :poikkeamis])
 
-(def ^:private operation-tree-for-Y
+(def- operation-tree-for-Y
   ["Ymp\u00e4rist\u00f6luvat"
    (filterv identity ; TODO remove filter after pima feature is in production
      [; permit/YI
@@ -160,20 +160,20 @@
 ; Operations must be the same as in the tree structure above.
 ; Mappings to schemas and attachments are currently random.
 
-(def ^:private common-schemas ["hankkeen-kuvaus" "maksaja" "rakennuspaikka" "paasuunnittelija" "suunnittelija"])
+(def- common-schemas ["hankkeen-kuvaus" "maksaja" "rakennuspaikka" "paasuunnittelija" "suunnittelija"])
 
-(def ^:private common-kiinteiston-muodostus-schemas ["maksaja" "kiinteisto"])
+(def- common-kiinteiston-muodostus-schemas ["maksaja" "kiinteisto"])
 
-(def ^:private common-poikkeamis-schemas ["hankkeen-kuvaus" "maksaja" "poikkeusasian-rakennuspaikka"])
+(def- common-poikkeamis-schemas ["hankkeen-kuvaus" "maksaja" "poikkeusasian-rakennuspaikka"])
 
-(def ^:private common-yleiset-alueet-schemas ["yleiset-alueet-maksaja"])
+(def- common-yleiset-alueet-schemas ["yleiset-alueet-maksaja"])
 
-(def ^:private common-ymparistolupa-schemas ["ymp-maksaja" "rakennuspaikka"])
+(def- common-ymparistolupa-schemas ["ymp-maksaja" "rakennuspaikka"])
 
-(def ^:private common-vvvl-schemas ["hankkeen-kuvaus-vesihuolto" "vesihuolto-kiinteisto"])
+(def- common-vvvl-schemas ["hankkeen-kuvaus-vesihuolto" "vesihuolto-kiinteisto"])
 
 
-(def ^:private uuden_rakennuksen_liitteet [:paapiirustus
+(def- uuden_rakennuksen_liitteet [:paapiirustus
                                            [:asemapiirros
                                             :pohjapiirros
                                             :julkisivupiirros
@@ -181,21 +181,21 @@
                                            :rakennuspaikka
                                            [:selvitys_rakennuspaikan_perustamis_ja_pohjaolosuhteista]])
 
-(def ^:private rakennuksen_muutos_liitteet [:paapiirustus
+(def- rakennuksen_muutos_liitteet [:paapiirustus
                                             [:pohjapiirros
                                              :julkisivupiirros]])
 
-(def ^:private rakennuksen_laajennuksen_liitteet [:paapiirustus
+(def- rakennuksen_laajennuksen_liitteet [:paapiirustus
                                                   [:asemapiirros
                                                    :pohjapiirros
                                                    :julkisivupiirros
                                                    :leikkauspiirros]])
 
-(def ^:private kaupunkikuva_toimenpide_liitteet [:paapiirustus
+(def- kaupunkikuva_toimenpide_liitteet [:paapiirustus
                                                  [:asemapiirros
                                                   :julkisivupiirros]])
 
-(def ^:private ya-katulupa-general {:schema "tyomaastaVastaava"
+(def- ya-katulupa-general {:schema "tyomaastaVastaava"
                                     :permit-type permit/YA
                                     :schema-data schema-data-yritys-selected
                                     :required (conj common-yleiset-alueet-schemas
@@ -205,7 +205,7 @@
                                     :add-operation-allowed false
                                     :link-permit-required false})
 
-(def ^:private ya-kayttolupa-general {:schema "tyoaika"
+(def- ya-kayttolupa-general {:schema "tyoaika"
                                       :permit-type permit/YA
                                       :required (conj common-yleiset-alueet-schemas
                                                   "yleiset-alueet-hankkeen-kuvaus-kayttolupa")
@@ -213,10 +213,10 @@
                                       :add-operation-allowed false
                                       :link-permit-required false})
 
-(def ^:private ya-kayttolupa-with-tyomaastavastaava
+(def- ya-kayttolupa-with-tyomaastavastaava
   (update-in ya-kayttolupa-general [:required] conj "tyomaastaVastaava"))
 
-(def ^:private ya-sijoituslupa-general {:schema "yleiset-alueet-hankkeen-kuvaus-sijoituslupa"
+(def- ya-sijoituslupa-general {:schema "yleiset-alueet-hankkeen-kuvaus-sijoituslupa"
                                         :permit-type permit/YA
                                         :required common-yleiset-alueet-schemas
                                         :attachments []
@@ -268,8 +268,8 @@
                                            :add-operation-allowed false
                                            :link-permit-required true}})
 
-(def ^:private ymparistolupa-attachments []) ; TODO
-(def ^:private ymparistolupa-operation
+(def- ymparistolupa-attachments []) ; TODO
+(def- ymparistolupa-operation
   {:schema "yl-hankkeen-kuvaus"
    :permit-type permit/YL
    :schema-data []

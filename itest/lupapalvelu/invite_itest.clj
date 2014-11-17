@@ -102,7 +102,7 @@
             first-hakija (domain/get-document-by-name application "hakija")]
         (:id first-hakija) =not=> hakija-doc
         (get-in first-hakija [:data :henkilo :henkilotiedot :etunimi :value]) => nil
-        (:applicant application ) => "Mikko Intonen"))
+        (:applicant application ) => "Intonen Mikko"))
 
     (fact "Mikko sets Teppo as co-applicant"
       (command mikko :set-user-to-document :id application-id :documentId hakija-doc :userId teppo-id :path "henkilo") => ok?
@@ -111,7 +111,7 @@
               hakija (domain/get-document-by-id application hakija-doc)]
           (get-in hakija [:data :henkilo :henkilotiedot :etunimi :value]) => "Teppo"
           (get-in hakija [:data :henkilo :userId :value]) => teppo-id
-          (:applicant application ) => "Teppo Nieminen")))
+          (:applicant application ) => "Nieminen Teppo")))
 
     (let [actions (:actions (query teppo :allowed-actions :id application-id))]
       (fact "Teppo should be able to"
@@ -130,7 +130,7 @@
             hakija (domain/get-document-by-id application hakija-doc)]
           (get-in hakija [:data :henkilo :henkilotiedot :etunimi :value]) => "Teppo"
           (get-in hakija [:data :henkilo :userId :value]) => nil?
-          (:applicant application ) => "Teppo Nieminen"))
+          (:applicant application ) => "Nieminen Teppo"))
 
     (fact "Pena is inveted to a deleted doc"
       (invite mikko application-id paasuunnittelija-doc "paasuunnittelija" (email-for "pena")) => ok?

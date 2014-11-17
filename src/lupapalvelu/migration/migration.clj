@@ -2,6 +2,7 @@
   (:require [lupapalvelu.mongo :as mongo]
             [lupapalvelu.migration.core :refer :all]
             [lupapalvelu.migration.migrations]
+            [sade.core :refer :all]
             [slingshot.slingshot :refer [try+ throw+]]
             [clojure.stacktrace :refer [print-cause-trace]]
             [clojure.pprint :refer [pprint]])
@@ -9,7 +10,7 @@
            [java.util Date]))
 
 
-(def ^:private time-formatter (SimpleDateFormat. "yyyy/MM/dd HH:mm:ss"))
+(def- time-formatter (SimpleDateFormat. "yyyy/MM/dd HH:mm:ss"))
 
 (defn- time->str [t]
   (->> t Date. (.format time-formatter)))
@@ -33,7 +34,7 @@
     (println (:name m)))
   (flush))
 
-(def ^:private status {true "SUCCESS" false "FAIL"})
+(def- status {true "SUCCESS" false "FAIL"})
 
 (defn- show-history [long-format]
   (doseq [r (migration-history)]

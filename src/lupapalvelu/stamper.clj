@@ -8,7 +8,7 @@
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.util :as util]
-            [lupapalvelu.core :refer [now]]
+            [sade.core :refer :all]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.mime :as mime])
   (:import [java.io InputStream OutputStream]
@@ -83,7 +83,7 @@
     (when-not (zero? (:exit result))
       (throw (RuntimeException. (str "pdftk returned " (:exit result) ", STDOUT: " (str (:out result) ", STDERR: " (:err result))))))))
 
-(def ^:private tmp (str (System/getProperty "java.io.tmpdir") (System/getProperty "file.separator")))
+(def- tmp (str (System/getProperty "java.io.tmpdir") (System/getProperty "file.separator")))
 
 (defn- retry-stamping [stamp-graphic file-id out x-margin y-margin transparency]
   (let [tmp-file-name (str tmp file-id "-" (now) ".pdf")]
