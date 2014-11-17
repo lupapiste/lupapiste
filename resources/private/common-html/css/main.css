@@ -1834,6 +1834,23 @@ input[readonly]:focus, textarea[readonly]:focus {
   opacity: 1;
 }
 
+/* line 666, ../sass/partials/_forms.scss */
+#stamp-info {
+  width: 66%;
+}
+/* line 669, ../sass/partials/_forms.scss */
+#stamp-info .col1 {
+  float: left;
+  padding-right: 12px;
+  width: 33%;
+}
+/* line 675, ../sass/partials/_forms.scss */
+#stamp-info .col2 {
+  float: left;
+  padding-left: 12px;
+  width: 33%;
+}
+
 /* line 4, ../sass/partials/_tables.scss */
 table {
   width: 100%;

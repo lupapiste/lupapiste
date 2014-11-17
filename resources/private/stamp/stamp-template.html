@@ -21,43 +21,49 @@
 
       <script type="text/html" id="dialog-stamp-attachments">
         <div>
-          <form>
-            <label data-bind="ltext: 'stamp.text'"></label>
-            <input data-bind="value: text, enable: status() === statusReady"
-                      type="text"
-                      class="form-input text"/>
+          <form id="stamp-info">
+            <fieldset class="col1">
+              <legend data-bind="ltext: 'stamp.information'"></legend>
 
-            <label data-bind="ltext: 'stamp.date'"></label>
-            <input data-bind="
-                        datepicker: date,
-                        enable: status() === statusReady,
-                        valueUpdate: 'afterkeydown'"
-                      type="text"
-                      class="form-input text"/>
+              <label data-bind="ltext: 'stamp.text'"></label>
+              <input data-bind="value: text, enable: status() === statusReady"
+                        type="text"
+                        class="form-input text"/>
 
-            <label data-bind="ltext: 'stamp.organization'"></label>
-            <input data-bind="textInput: organization, enable: status() === statusReady"
-                      type="text"
-                      class="form-input text"/>
+              <label data-bind="ltext: 'stamp.date'"></label>
+              <input data-bind="
+                          datepicker: date,
+                          enable: status() === statusReady,
+                          valueUpdate: 'afterkeydown'"
+                        type="text"
+                        class="form-input text"/>
 
-            <label data-bind="ltext: 'stamp.margin'"></label><br />
+              <label data-bind="ltext: 'stamp.organization'"></label>
+              <input data-bind="textInput: organization, enable: status() === statusReady"
+                        type="text"
+                        class="form-input text"/>
+            </fieldset>
 
-            <label data-bind="ltext: 'stamp.xMargin'"></label>
-            <input data-bind="textInput: xMargin,
-                        enable: status() === statusReady,
-                        css: {'invalid-margin': !xMarginOk()}"
-                      type="text"
-                      class="form-input text"/>
+            <fieldset class="col2">
+              <legend data-bind="ltext: 'stamp.margin'"></legend>
 
-            <label data-bind="ltext: 'stamp.yMargin'"></label>
-            <input data-bind="textInput: yMargin,
-                        enable: status() === statusReady,
-                        css: {'invalid-margin': !yMarginOk()}"
-                      type="text"
-                      class="form-input text"/>
+              <label data-bind="ltext: 'stamp.xMargin'"></label>
+              <input data-bind="textInput: xMargin,
+                          enable: status() === statusReady,
+                          css: {'invalid-margin': !xMarginOk()}"
+                        type="text"
+                        class="form-input text"/>
 
-            <label data-bind="ltext: 'stamp.transparency'"></label>
-            <select data-bind="options: transparencies, optionsText: 'text', value: transparency" class="form-input combobox"></select>
+              <label data-bind="ltext: 'stamp.yMargin'"></label>
+              <input data-bind="textInput: yMargin,
+                          enable: status() === statusReady,
+                          css: {'invalid-margin': !yMarginOk()}"
+                        type="text"
+                        class="form-input text"/>
+
+              <label data-bind="ltext: 'stamp.transparency'"></label>
+              <select data-bind="options: transparencies, optionsText: 'text', value: transparency" class="form-input combobox"></select>
+            </fieldset>
           </form>
 
           <table class="table attachments-template-table">
