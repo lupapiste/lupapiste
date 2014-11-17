@@ -10,6 +10,7 @@
             [monger.db :as db]
             [monger.gridfs :as gfs]
             [monger.command :refer [server-status]]
+            [monger.query :as query]
             [sade.status :refer [defstatus]])
   (:import [javax.net.ssl SSLSocketFactory]
            [org.bson.types ObjectId]
@@ -104,7 +105,12 @@
   ([collection query]
     (select collection query {}))
   ([collection query projection]
-    (map with-id (mc/find-maps collection query projection))))
+    (map with-id (mc/find-maps collection query projection)))
+  ([collection query projection order-by]
+    (map with-id (query/with-collection (name collection)
+                   (query/find query)
+                   (query/fields (if (map? projection) (keys projection) projection))
+                   (query/sort order-by)))))
 
 (defn select-one
   "returns one entry by matching the monger query"
