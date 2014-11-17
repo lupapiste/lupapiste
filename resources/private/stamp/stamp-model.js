@@ -64,7 +64,7 @@ LUPAPISTE.StampModel = function(params) {
       groupName: group.groupName,
       groupDesc: group.groupDesc,
       name: group.name,
-      allSelected: ko.computed(function() {
+      groupSelected: ko.computed(function() {
         return _.every(group.attachments, function(a) {
           return a.selected();
         });
@@ -83,6 +83,11 @@ LUPAPISTE.StampModel = function(params) {
       .filter(function(f) {
           return f.selected();
       }).value();
+  });
+  self.allSelected = ko.computed(function() {
+    return _(self.files()).pluck('attachments').flatten().every(function(f) {
+          return f.selected();
+      });
   });
   self.jobId = null;
   self.jobVersion = null;
@@ -165,7 +170,7 @@ LUPAPISTE.StampModel = function(params) {
   self.selectNone = _.partial(selectAllFiles, false);
 
   self.toggleGroupSelect = function(group) {
-    var sel = group.allSelected();
+    var sel = group.groupSelected();
     _.each(group.attachments, function(a) {
         a.selected(!sel);
     });

@@ -158,7 +158,14 @@
               <!-- /ko -->
             </tbody>
           </table>
-
+          <div>
+            <!-- ko ifnot: allSelected -->
+            <a href="#" data-bind="ltext: 'stamp.all', click: selectAll, visible: status() < statusRunning"></a>
+            <!-- /ko -->
+            <!-- ko if: allSelected -->
+            <a href="#" data-bind="ltext: 'stamp.none', click: selectNone, visible: status() < statusRunning"></a>
+            <!-- /ko -->
+          </div>
           <div class="stamp-status">
             <span data-bind="text: loc(['stamp.status', status().toString()])"></span>
           </div>
