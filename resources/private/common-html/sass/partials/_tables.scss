@@ -1,0 +1,98 @@
+// Default table
+//
+// Styleguide 4.1
+table {
+  width:100%;
+  margin-bottom: $marginL;
+
+}
+
+th {
+  background: darken($lp-light-grey, 10%);
+  font-family: $font-heading;
+  font-size: 0.85em;
+  font-weight: 700;
+  letter-spacing: 0.125em;
+}
+
+tr {
+  background: white;
+  border-bottom: 1px solid darken($lp-light-grey, 5%);;
+  &:nth-child(even) {
+    background: darken($lp-light-grey, .5%);
+  }
+  &.attachment-row {
+    cursor: pointer;
+
+    td:last-child {
+      text-align: right;
+    }
+  }
+  &.stamp-attachment-row {
+    &.selected {
+      background-color: fade-out($lp-green, 0.8);
+    }
+    &:hover {
+      background-color: fade-out($lp-green, 0.7);
+    }
+  }
+}
+
+th, td {
+  padding:6px 16px;
+  text-align:left;
+  &.btn{
+    margin-bottom: 0px;
+  }
+  .icon {
+    margin: $marginM $marginM $marginS $marginM;
+  }
+}
+
+tbody {
+  color: #555;
+  font-size: 0.875em;
+  td {
+    vertical-align:middle;
+  }
+}
+
+
+.dataTables_wrapper {
+  position: relative;
+}
+.table-filter {
+  float: right;
+  position: absolute;
+  top: -$marginL*1.5;
+  right: 0;
+}
+
+table.tasks thead tr:first-child td {
+  padding-left: 0
+}
+
+table.attachments-template-table {
+  td {
+    &.attachmentState {
+      padding: 0 0 0 12px;
+      white-space: nowrap;
+
+      .icon {
+        margin: $marginS;
+        vertical-align: middle;
+      }
+    }
+    &.attachment-type-group {
+      padding-right: 0;
+    }
+    &.attachment-type-id {
+      padding-left: 0;
+    }
+    &.attachment-group-select {
+      a {
+        font-size: $font-size-body;
+      }
+    }
+  }
+}

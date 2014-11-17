@@ -1,0 +1,27 @@
+/*
+  Bootstrap sets img width to 100% and that messes GoogleMaps and OpenLayers.
+*/
+ 
+.map {
+  margin-bottom: $marginM;
+  img {
+    max-width: none;
+  }
+}
+
+.map-large {
+  width: 100%;
+  height: $baseline * 16;
+}
+
+.create-application-actions {
+  position: absolute;
+  bottom: 0px;
+  right: $marginS;
+  z-index: 12000;
+}
+
+.related-map {
+  margin: 0 0 0 12px;
+}
+

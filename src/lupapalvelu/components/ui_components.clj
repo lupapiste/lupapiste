@@ -62,7 +62,8 @@
 
    :selectm      {:js ["selectm.js"]}
 
-   ;:licenses     {:html ["licenses.html"]}
+   :selectm-html {:html ["selectm.html"]
+                  :css ["selectm.css"]}
 
    :screenmessages  {:js   ["screenmessage.js"]
                      :html ["screenmessage.html"]}
@@ -71,16 +72,19 @@
                        :js ["expanded-content.js"]}
 
    :common       {:depends [:init :jquery :jquery-upload :knockout :underscore :moment :i18n :selectm
-                            :expanded-content :mockjax]
+                            :expanded-content :mockjax :open-layers]
                   :js ["util.js" "event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js"
                        "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "features.js"
                        "statuses.js" "statusmodel.js" "authorization.js" "vetuma.js"]}
 
-   :common-html  {:css ["css/main.css" "selectm.css" "jquery-ui.css"]
-                  :html ["404.html" "footer.html" "selectm.html"]}
+   :open-layers {:js ["openlayers-2.13_20140619.min.lupapiste.js"]}
+
+   :common-html  {:depends [:selectm-html]
+                  :css ["css/main.css" "jquery-ui.css"]
+                  :html ["404.html" "footer.html"]}
 
    :map          {:depends [:common-html]
-                  :js ["openlayers-2.13_20140619.min.lupapiste.js" "gis.js" "locationsearch.js"]
+                  :js [ "gis.js" "locationsearch.js"]
                   :html ["map-popup.html"]}
 
    :mypage       {:depends [:common-html]

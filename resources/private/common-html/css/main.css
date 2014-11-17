@@ -653,24 +653,23 @@ i {
 
 /* line 246, ../sass/partials/_icons.scss */
 h1 .icon {
-  margin-bottom: -4px;
   margin-right: 3px;
 }
 
-/* line 251, ../sass/partials/_icons.scss */
+/* line 250, ../sass/partials/_icons.scss */
 h2 .icon {
   margin-left: 12px;
   margin-bottom: -2px;
 }
 
-/* line 258, ../sass/partials/_icons.scss */
+/* line 257, ../sass/partials/_icons.scss */
 .ui-icon.ui-icon-circle-triangle-w {
   background-image: url("/img/icons-sprite-1.12.png");
   background-repeat: no-repeat;
   background-position: 2px -3097px;
 }
 
-/* line 263, ../sass/partials/_icons.scss */
+/* line 262, ../sass/partials/_icons.scss */
 .ui-icon.ui-icon-circle-triangle-e {
   background-image: url("/img/icons-sprite-1.12.png");
   background-repeat: no-repeat;

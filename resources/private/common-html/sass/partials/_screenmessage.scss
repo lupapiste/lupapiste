@@ -1,0 +1,47 @@
+@mixin message-icon {
+  content:"";
+  display: block;
+  @include spite-bg;
+  background-position: 0px -4800px;
+  height:32px;
+  width: 30px;
+  margin: 17px $marginS $marginS $marginS;
+  float: left;
+}
+
+#sys-notification {
+  margin-bottom: $marginS;
+  box-shadow: 2px 1px 3px $lp-dark-grey, 3px 2px 4px $lp-light-grey;
+  color: white;
+  min-height: 56px;
+  background-color: $lp-dark-grey;
+
+  ul {
+    list-style: none;
+    font-size: 1.2em;
+    padding-left: 0;
+    
+    &:before {
+     @include message-icon;
+    }
+
+    li {
+      
+      padding: $marginM;
+
+      &:last-child {
+        margin-bottom: 0px;
+      }
+    }
+  }
+  span {
+    float: right;
+    margin: $marginM $marginL $marginM $marginM;
+    cursor: pointer;
+    font-size: 1.8em;
+  }
+}
+
+.screenmessagebutton {
+  width: 170px;
+}

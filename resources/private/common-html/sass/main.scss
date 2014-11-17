@@ -1,0 +1,240 @@
+/*!
+ * ajk's Hot New Template
+ * Made by ajk (ajk.fi)
+ */
+
+@import "partials/_frameless";
+@import "compass/css3";
+@import "compass/css3/user-interface";
+@import "compass/typography/links/link-colors";
+
+// Style wide settings
+
+// Mixins
+@mixin image-replacement {
+  text-indent:100%;
+  overflow:hidden;
+  white-space:nowrap;
+}
+
+@mixin clearfix {
+  *zoom: 1;
+  &:before, &:after {
+    content: "";
+    display: table;
+  }
+  &:after {
+    clear: both;
+  }
+}
+
+@mixin disable-select {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+@mixin spite-bg {
+  background-image: url('/img/icons-sprite-1.12.png');
+  background-repeat: no-repeat;
+}
+
+/* RESET
+----------------------------------------------------------------------------- */
+@import "partials/_reset";
+
+/*------------------------------------*\
+    ELEMENTS
+\*------------------------------------*/
+
+/* BASE
+----------------------------------------------------------------------------- */
+@import "partials/_base";
+
+/* THEME (colors and others)
+----------------------------------------------------------------------------- */
+@import "partials/_theme";
+
+/* TYPOGRAPHY
+----------------------------------------------------------------------------- */
+@import "partials/_typography";
+
+/* ABSTRACTIONS (OOCSS style)
+----------------------------------------------------------------------------- */
+@import "partials/_abstractions";
+
+
+
+/*------------------------------------*\
+    OBJECTS
+\*------------------------------------*/
+
+/* ICONS & ANIMATIONS
+----------------------------------------------------------------------------- */
+@import "partials/_icons";
+
+/* NAV
+----------------------------------------------------------------------------- */
+@import "partials/_header";
+@import "partials/_sidebar";
+@import "partials/_footer";
+
+/*------------------------------------*\
+    COMPONENTS
+\*------------------------------------*/
+
+@import "partials/_buttons";
+@import "partials/_forms";
+@import "partials/_tables";
+@import "partials/_breadcrum";
+@import "partials/_tabs";
+@import "partials/_conversation";
+@import "partials/_modal";
+@import "partials/_map";
+@import "partials/_errors";
+@import "partials/_help";
+@import "partials/_autocomplete";
+@import "partials/_tree";
+@import "partials/_accordion";
+@import "partials/_datepicker";
+@import "partials/_screenmessage";
+@import "partials/_selectm";
+
+/* VIEWS
+------------------------------------------------------------------------------*/
+@import "views/_welcome";
+@import "views/_applications";
+@import "views/_application";
+@import "views/_create_application";
+@import "views/_attachment";
+@import "views/_statement";
+@import "views/_mypage";
+@import "views/_admin";
+@import "views/_neighbor";
+@import "views/_register";
+@import "views/_login_frame";
+@import "views/_verdict";
+@import "views/_side_panel";
+@import "views/_company";
+@import "views/_stamping";
+
+
+/*------------------------------------*\
+    OTHER
+\*------------------------------------*/
+
+/* ALL THE REST
+----------------------------------------------------------------------------- */
+@import "partials/_other";
+@import "partials/_todo";
+
+/*
+  Lupapalvelu CSS:
+*/
+
+// missing key in localization
+.ltext-error {
+  color: lighten(orange,25%) !important;
+  font-weight:bold !important;
+  text-shadow: 0px 1px 0 black !important;
+}
+
+.visible {
+  display: block;
+}
+
+.hidden {
+  display: none;
+}
+
+.template {
+  display: none;
+}
+
+#main-nav-bar {
+  display:  none;
+}
+
+.inert-table tbody tr:hover td,
+.inert-table tbody tr:hover th {
+  background-color: #ffffff;
+}
+
+#application table input {
+  margin: 0px;
+}
+
+.droparea {
+  width: 150px;
+  height: 100px;
+  border: 5px #858585 dotted;
+  color: #858585;
+  border-radius: 15px;
+  vertical-align: middle;
+  text-align: center;
+  display: table-cell;
+}
+
+.droparea-hover {
+  border-color: #101010;
+  color: #101010;
+}
+
+/* basic styles*/
+
+
+.table{
+    font-size: 16px;
+    line-height: $baseline;
+}
+
+/* map zoomer fix */
+div.pzbDiv {
+    right: 8px;
+    top: 10px;
+}
+
+.dev-debug {
+  z-index: 666;
+  width: 146px;
+  position: fixed !important;
+  right: 8px;
+  bottom: 8px;
+  background-color: white;
+  padding: 8px;
+  border: 1px solid black;
+  box-shadow: 3px 4px 7px;
+  font-size: 0.8em;
+
+  p {
+    margin-bottom: 4px;
+    a {
+      display: block;
+    }
+  }
+}
+
+#ui-datepicker-div {
+  display: none;
+}
+
+/* find address and poi list: */
+.create-find {
+  font-size: 12px;
+  .type {
+    color: #555;
+    font-style: italic;
+    &:before { content: " ("; }
+    &:after { content: ")"; }
+  }
+  .number {
+    &:before { content: " "; }
+  }
+  .municipality {
+    color: #555;
+    &:before { content: ", "; }
+  }
+}
