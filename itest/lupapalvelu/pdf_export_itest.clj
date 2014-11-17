@@ -72,7 +72,7 @@
         pdf-content => (contains "444-1-10-100")
         pdf-content => (contains "01.01.2014")
         pdf-content => (contains (:id application))
-        pdf-content => (contains "Erkki Testihenkilo")
+        pdf-content => (contains "Testihenkilo Erkki")
         pdf-content => (contains "Asuinrakennuksen rakentaminen, Aidan rakentaminen")
 
         ; documents
