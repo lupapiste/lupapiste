@@ -396,11 +396,6 @@
       (mongo/update-by-id collection (:id application)
         {$set {:neighbors (convert-neighbors (:neighbors application))}}))))
 
-(defmigration applicant-index
-  (doseq [collection [:applications :submitted-applications]]
-    (let [applications (mongo/select collection)]
-      (dorun (map #(mongo/update-by-id collection (:id %) (app-meta-fields/applicant-index-update %)) applications)))))
-
 (defmigration remove-sijoituksen-and-tyon-tarkoitus
   (doseq [collection [:applications :submitted-applications]]
     (let [applications-to-update (mongo/select collection {:documents {$elemMatch {$or [{:schema-info.name "yleiset-alueet-hankkeen-kuvaus-kaivulupa"}
@@ -588,3 +583,9 @@
   (reduce + 0
     (for [collection [:applications :submitted-applications]]
      (mongo/update-by-query collection {:urgency {$exists false}} {$set {:urgency "normal"}}))))
+
+(defmigration applicant-index-regeneration
+  (reduce + 0
+   (for [collection [:applications :submitted-applications]]
+     (let [applications (mongo/select collection)]
+       (count (map #(mongo/update-by-id collection (:id %) (app-meta-fields/applicant-index-update %)) applications))))))

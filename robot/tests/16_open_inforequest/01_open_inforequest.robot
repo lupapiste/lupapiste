@@ -10,7 +10,7 @@ Mikko creates an info request to Loppi
   Mikko logs in
   User role should be  applicant
   Create inforequest the fast way  Ojatie 1, Loppi  360834.385  6723358.262  433  433-406-3-229  asuinrakennus  Jiihaa
-  Wait until  Element text should be  //section[@id='inforequest']//span[@data-test-id='inforequest-application-applicant']  Mikko Intonen
+  Wait until  Element text should be  //section[@id='inforequest']//span[@data-test-id='inforequest-application-applicant']  Intonen Mikko
   Element should not be visible  //button[@data-test-id='inforequest-convert-to-application']
 
 Email is sent to Loppi rakennusvalvonta
@@ -21,7 +21,7 @@ Email is sent to Loppi rakennusvalvonta
 Loppi auth clicks the link in email
   Execute Javascript  document.getElementsByTagName("a")[0].click()
   Wait until  User role should be  authority
-  Wait until  Element text should be  //section[@id='inforequest']//span[@data-test-id='inforequest-application-applicant']  Mikko Intonen
+  Wait until  Element text should be  //section[@id='inforequest']//span[@data-test-id='inforequest-application-applicant']  Intonen Mikko
   User nav menu is not visible
   Element should be visible  //h2[@data-test-id='wanna-join']
   Element should not be visible  //select[@id='inforequest-assignee-select']

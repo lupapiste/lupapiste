@@ -9,11 +9,11 @@
             [cheshire.core :as json]
             [lupapalvelu.attachment :refer [attachment-types-osapuoli, attachment-scales, attachment-sizes]]))
 
-(def debugjs {:depends [:init :jquery]
+(def debugjs {:depends [:jquery]
               :js ["debug.js"]
               :name "common"})
 
-(def mockjax {:depends [:init :jquery]
+(def mockjax {:depends [:jquery]
               :js ["jquery.mockjax.js"]
               :name "jquery"})
 
@@ -38,11 +38,10 @@
 
 (def ui-components
   {;; 3rd party libs
-   :cdn-fallback   {:js ["jquery-1.8.3.min.js" "jquery-ui-1.10.2.min.js" "jquery.dataTables.min.js" "knockout-3.2.0.js"]}
-   :jquery         {:js ["jquery.ba-hashchange.js" "jquery.metadata-2.1.js" "jquery.cookie.js" "jquery.caret.js"]
-                    :css ["jquery-ui.css"]}
+   :cdn-fallback   {:js ["jquery-1.8.3.min.js" "jquery-ui-1.10.2.min.js" "jquery.dataTables.min.js"]}
+   :jquery         {:js ["jquery.ba-hashchange.js" "jquery.metadata-2.1.js" "jquery.cookie.js" "jquery.caret.js"]}
    :jquery-upload  {:js ["jquery.ui.widget.js" "jquery.iframe-transport.js" "jquery.fileupload.js"]}
-   :knockout       {:js ["knockout.mapping-2.4.1.js" "knockout.validation-2.0.0-pre.3.js" "knockout-repeat-2.0.0.js"]}
+   :knockout       {:js ["knockout-3.2.0.min.js" "knockout.mapping-2.4.1.js" "knockout.validation-2.0.0-pre.3.js" "knockout-repeat-2.0.0.js"]}
    :lo-dash        {:js ["lodash-1.3.1.min.js"]}
    :underscore     {:depends [:lo-dash]
                     :js ["underscore.string.min.js" "underscore.string.init.js"]}
@@ -61,9 +60,7 @@
    :i18n         {:depends [:jquery :underscore]
                   :js ["loc.js" loc->js]}
 
-   :selectm      {:js   ["selectm.js"]
-                  :html ["selectm.html"]
-                  :css  ["selectm.css"]}
+   :selectm      {:js ["selectm.js"]}
 
    ;:licenses     {:html ["licenses.html"]}
 
@@ -77,83 +74,82 @@
                             :expanded-content :mockjax]
                   :js ["util.js" "event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js"
                        "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "features.js"
-                       "statuses.js" "statusmodel.js" "authorization.js" "vetuma.js"]
-                  :css ["css/main.css"]
-                  :html ["404.html" "footer.html"]}
+                       "statuses.js" "statusmodel.js" "authorization.js" "vetuma.js"]}
 
-   :map          {:depends [:common]
+   :common-html  {:css ["css/main.css" "selectm.css" "jquery-ui.css"]
+                  :html ["404.html" "footer.html" "selectm.html"]}
+
+   :map          {:depends [:common-html]
                   :js ["openlayers-2.13_20140619.min.lupapiste.js" "gis.js" "locationsearch.js"]
                   :html ["map-popup.html"]}
 
-   :mypage       {:depends [:common]
+   :mypage       {:depends [:common-html]
                   :js ["mypage.js"]
                   :html ["mypage.html"]
                   :css ["mypage.css"]}
 
    :user-menu     {:html ["nav.html"]}
 
-   :modal-datepicker {:depends [:common]
+   :modal-datepicker {:depends [:common-html]
                       :html ["modal-datepicker.html"]
                       :js   ["modal-datepicker.js"]}
 
-   :authenticated {:depends [:init :jquery :knockout :moment :i18n :selectm :screenmessages]
+   :authenticated {:depends [:screenmessages]
                    :js ["comment.js"]
                    :html ["comments.html"]}
 
-   :invites      {:depends [:common]
+   :invites      {:depends [:common-html]
                   :js ["invites.js"]}
 
-   :repository   {:depends [:common]
+   :repository   {:depends [:common-html]
                   :js ["repository.js"]}
 
-   :tree         {:depends [:jquery]
-                  :js ["tree.js"]
+   :tree         {:js ["tree.js"]
                   :html ["tree.html"]
                   :css ["tree.css"]}
 
-   :accordion    {:depends [:jquery]
-                  :js ["accordion.js"]
+   :accordion    {:js ["accordion.js"]
                   :css ["accordion.css"]}
 
-   :signing      {:depends [:common]
+   :signing      {:depends [:common-html]
                   :html ["signing-dialogs.html"]
                   :js ["signing-model.js" "verdict-signing-model.js"]}
 
-   :attachment   {:depends [:common :repository :signing :side-panel]
+   :attachment   {:depends [:common-html :repository :signing :side-panel]
                   :js ["targeted-attachments-model.js" "attachment.js" "attachmentTypeSelect.js"]
                   :html ["targetted-attachments-template.html" "attachment.html" "upload.html"]}
 
-   :task         {:depends [:common :attachment]
+   :task         {:depends [:common-html :attachment]
                   :js ["task.js"]
                   :html ["task.html"]}
 
    :create-task  {:js ["create-task.js"]
                   :html ["create-task.html"]}
 
-   :application  {:depends [:common :repository :tree :task :create-task :modal-datepicker :signing :invites :side-panel]
+   :application  {:depends [:common-html :repository :tree :task :create-task :modal-datepicker :signing :invites :side-panel]
                   :js ["add-link-permit.js" "map-model.js" "change-location.js" "invite.js" "verdicts-model.js"
                        "add-operation.js" "stamp-model.js" "request-statement-model.js" "add-party.js"
                        "attachments-tab-model.js" "application-model.js" "invite-company.js" "application.js"]
                   :html ["add-link-permit.html" "application.html" "inforequest.html" "add-operation.html"
                          "change-location.html" "invite-company.html"]}
 
-   :applications {:depends [:common :repository :invites]
+   :applications {:depends [:common-html :repository :invites]
                   :html ["applications.html"]
                   :js ["applications.js"]}
 
-   :statement    {:depends [:common :repository :side-panel]
+   :statement    {:depends [:common-html :repository :side-panel]
                   :js ["statement.js"]
                   :html ["statement.html"]}
 
-   :verdict      {:depends [:common :repository :attachment]
+   :verdict      {:depends [:common-html :repository :attachment]
                   :js ["verdict.js"]
                   :html ["verdict.html"]}
 
-   :neighbors    {:depends [:common :repository :side-panel]
+   :neighbors    {:depends [:common-html :repository :side-panel]
                   :js ["neighbors.js"]
                   :html ["neighbors.html"]}
 
-   :register     {:depends [:common]
+   :register     {:depends [:common-html]
                   :js ["registration-models.js" "register.js"
                        "company-registration.js"]
                   :html ["register.html" "register2.html" "register3.html"
@@ -163,18 +159,18 @@
                   :js ["link-account.js"]
                   :html ["link-account-1.html" "link-account-2.html" "link-account-3.html"]}
 
-   :docgen       {:depends [:accordion :common]
+   :docgen       {:depends [:accordion :common-html]
                   :js ["docmodel.js" "docgen.js"]}
 
-   :create       {:depends [:common]
+   :create       {:depends [:common-html]
                   :js ["municipalities.js" "create.js"]
                   :html ["create.html"]
                   :css ["create.css"]}
 
-   :iframe       {:depends [:common]
+   :iframe       {:depends [:common-html]
                   :css ["iframe.css"]}
 
-   :login        {:depends [:common]
+   :login        {:depends [:common-html]
                   :js      ["login.js"]}
 
    :users        {:js ["users.js"]
@@ -192,43 +188,43 @@
    :side-panel   {:js ["side-panel.js"]
                   :html ["side-panel.html"]}
 
-   :password-reset {:depends [:common]
+   :password-reset {:depends [:common-html]
                     :js ["password-reset.js"]
                     :html ["password-reset.html"]}
 
    ;; Single Page Apps and standalone components:
    ;; (compare to auth-methods in web.clj)
 
-   :hashbang     {:depends [:common]
+   :hashbang     {:depends [:common-html]
                   :html ["index.html"]}
 
    :upload       {:depends [:iframe]
                   :js ["upload.js"]
                   :css ["upload.css"]}
 
-   :applicant    {:depends [:common :authenticated :map :applications :application
+   :applicant    {:depends [:common-html :authenticated :map :applications :application
                             :statement :docgen :create :mypage :user-menu :debug
                             :company]
                   :js ["applicant.js"]
                   :html ["index.html"]}
 
-   :authority    {:depends [:common :authenticated :map :applications :notice :application
+   :authority    {:depends [:common-html :authenticated :map :applications :notice :application
                             :statement :verdict :neighbors :docgen :create :mypage :user-menu :debug
                             :company]
                   :js ["authority.js" "integration-error.js"]
                   :html ["index.html" "integration-error.html"]}
 
-   :oir          {:depends [:common :authenticated :map :application :attachment
+   :oir          {:depends [:common-html :authenticated :map :application :attachment
                             :docgen :debug :notice]
                   :js ["oir.js"]
                   :css ["oir.css"]
                   :html ["index.html"]}
 
-   :authority-admin {:depends [:common :authenticated :admins :mypage :user-menu :debug]
+   :authority-admin {:depends [:common-html :authenticated :admins :mypage :user-menu :debug]
                      :js ["admin.js" schema-versions-by-permit-type]
                      :html ["index.html" "admin.html"]}
 
-   :admin   {:depends [:common :authenticated :admins :map :mypage :user-menu :debug]
+   :admin   {:depends [:common-html :authenticated :admins :map :mypage :user-menu :debug]
              :js ["admin.js"
                   "admin-users.js" "organizations.js" "fixtures.js" "features.js" "actions.js" "screenmessages-list.js"]
              :html ["index.html" "admin.html"
@@ -248,7 +244,7 @@
 
    :oskari  {:css ["oskari.css"]}
 
-   :neighbor {:depends [:common :map :debug :docgen :debug :user-menu :screenmessages]
+   :neighbor {:depends [:common-html :map :debug :docgen :debug :user-menu :screenmessages]
               :html ["neighbor-show.html" "index.html"]
               :js ["neighbor-app.js" "neighbor-show.js"]}})
 

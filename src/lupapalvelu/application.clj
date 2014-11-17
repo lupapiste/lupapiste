@@ -125,7 +125,8 @@
 (defn find-authorities-in-applications-organization [app]
   (mongo/select :users
     {:organizations (:organization app) :role "authority" :enabled true}
-    {:firstName 1 :lastName 1}))
+    {:firstName 1, :lastName 1}
+    {:lastName 1, :firstName 1}))
 
 (defquery application
   {:roles            [:applicant :authority]
@@ -280,6 +281,7 @@
         kuntalupatunnus (-> verdicts :verdicts first :kuntalupatunnus)]
     (if kuntalupatunnus
       (-> application
+         (assoc-in [:linkPermitData 0 :lupapisteId] link-permit-app-id)
          (assoc-in [:linkPermitData 0 :id] kuntalupatunnus)
          (assoc-in [:linkPermitData 0 :type] "kuntalupatunnus"))
       (do

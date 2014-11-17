@@ -15,14 +15,14 @@
 (defn- applicant-name-from-auth [application]
   (let [owner (first (domain/get-auths-by-role application :owner))
         {first-name :firstName last-name :lastName} owner]
-    (s/trim (str first-name \space last-name))))
+    (s/trim (str last-name \space first-name))))
 
 (defn- applicant-name-from-doc [document]
   (when-let [body (:data document)]
     (if (= (get-in body [:_selected :value]) "yritys")
       (get-in body [:yritys :yritysnimi :value])
       (let [{first-name :etunimi last-name :sukunimi} (get-in body [:henkilo :henkilotiedot])]
-        (s/trim (str (:value first-name) \space (:value last-name)))))))
+        (s/trim (str (:value last-name) \space (:value first-name)))))))
 
 (defn applicant-index [application]
   (let [applicants (remove s/blank? (map applicant-name-from-doc (domain/get-applicant-documents application)))

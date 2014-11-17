@@ -25,7 +25,7 @@
   (make-sort {:iSortCol_0 8 :sSortDir_0 "asc"})  => {:submitted 1}
   (make-sort {:iSortCol_0 9 :sSortDir_0 "asc"})  => {:modified 1}
   (make-sort {:iSortCol_0 10 :sSortDir_0 "asc"})  => {:state 1}
-  (make-sort {:iSortCol_0 11 :sSortDir_0 "asc"}) => {:authority 1}
+  (make-sort {:iSortCol_0 11 :sSortDir_0 "asc"}) => {"authority.lastName" 1, "authority.firstName" 1}
   (make-sort {:iSortCol_0 {:injection "attempt"}
               :sSortDir_0 "; drop database;"})   => {}
   (make-sort {})                                 => {}
