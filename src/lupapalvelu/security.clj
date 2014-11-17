@@ -1,13 +1,14 @@
 (ns lupapalvelu.security
   (:require [sade.strings :as ss]
-            [sade.env :as env])
+            [sade.env :as env]
+            [sade.core :refer :all])
   (:import [org.mindrot.jbcrypt BCrypt]))
 
 ;;
 ;; Password generation and checking:
 ;;
 
-(def ^:private token-chars (concat (range (int \0) (inc (int \9)))
+(def- token-chars (concat (range (int \0) (inc (int \9)))
                                    (range (int \A) (inc (int \Z)))
                                    (range (int \a) (inc (int \z)))))
 

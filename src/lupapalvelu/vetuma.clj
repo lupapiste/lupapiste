@@ -12,6 +12,7 @@
             [clj-time.format :as format]
             [pandect.core :as pandect]
             [sade.env :as env]
+            [sade.core :refer :all]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.vtj :as vtj]))
 
@@ -200,7 +201,7 @@
       (redirect uri)
       (redirect (str (host) "/app/fi/welcome#!/register2")))))
 
-(def ^:private error-status-codes
+(def- error-status-codes
   ; From Vetuma_palvelun_kutsurajapinnan_maarittely_v3_0.pdf
   {"REJECTED" "Kutsun palveleminen ep\u00e4onnistui, koska se k\u00e4ytt\u00e4j\u00e4n valitsema vuorovaikutteinen taustapalvelu johon Vetuma-palvelu ohjasi k\u00e4ytt\u00e4j\u00e4n toimintoa suorittamaan hylk\u00e4si toiminnon suorittaminen."
    "ERROR" "Kutsu oli virheellinen."

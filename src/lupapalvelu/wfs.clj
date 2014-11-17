@@ -9,7 +9,8 @@
             [sade.env :as env]
             [sade.xml]
             [sade.strings :refer [starts-with-i]]
-            [sade.util :refer [future*]]))
+            [sade.util :refer [future*]]
+            [sade.core :refer :all]))
 
 
 ;; SAX options
@@ -32,7 +33,7 @@
 (def maasto "https://ws.nls.fi/maasto/wfs")
 (def nearestfeature "https://ws.nls.fi/maasto/nearestfeature")
 
-(def ^:private auth
+(def- auth
   (let [conf (env/value :nls)]
     {:raster        [(:username (:raster conf))     (:password (:raster conf))]
      :kiinteisto    [(:username (:kiinteisto conf)) (:password (:kiinteisto conf))]
@@ -216,7 +217,7 @@
 ;; Executing HTTP calls to Maanmittauslaitos:
 ;;
 
-(def ^:private http-method {:post [http/post :body]
+(def- http-method {:post [http/post :body]
                             :get  [http/get  :query-params]})
 
 (defn- exec-http [http-fn url request]

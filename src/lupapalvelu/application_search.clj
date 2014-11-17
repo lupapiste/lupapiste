@@ -6,7 +6,7 @@
             [monger.query :as query]
             [sade.strings :as ss]
             [sade.util :as util]
-            [lupapalvelu.core :refer :all]
+            [sade.core :refer :all]
             [lupapalvelu.action :refer [defquery] :as action]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.domain :as domain]
@@ -43,7 +43,7 @@
 ;; Table definition
 ;;
 
-(def ^:private col-sources [(fn [app] (select-keys app [:urgency :authorityNotice]))
+(def- col-sources [(fn [app] (select-keys app [:urgency :authorityNotice]))
                             :indicators
                             :attachmentsRequiringAction
                             :unseenComments
@@ -56,16 +56,22 @@
                             :state
                             :authority])
 
-(def ^:private order-by (assoc col-sources
+(def- order-by (assoc col-sources
                           0 nil
                           1 nil
                           2 nil
                           3 nil
                           4 :infoRequest
                           5 :address
-                          6 nil))
+                          6 nil
+                          ; 7 applicant - sorted as is
+                          ; 8 submitted - sorted as is
+                          ; 9 modified - sorted as is
+                          ; 10 state - sorted as is
+                          11 ["authority.lastName" "authority.firstName"]
+                          ))
 
-(def ^:private col-map (zipmap col-sources (map str (range))))
+(def- col-map (zipmap col-sources (map str (range))))
 
 ;;
 ;; Query construction
@@ -113,7 +119,10 @@
 (defn- make-sort [params]
   (let [col (get order-by (:iSortCol_0 params))
         dir (if (= "asc" (:sSortDir_0 params)) 1 -1)]
-    (if col {col dir} {})))
+    (cond
+      (nil? col) {}
+      (sequential? col) (zipmap col (repeat dir))
+      :else {col dir})))
 
 ;;
 ;; Result presentation

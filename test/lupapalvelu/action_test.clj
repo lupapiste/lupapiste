@@ -3,8 +3,8 @@
             [midje.util :refer [testable-privates]]
             [monger.operators :refer :all]
             [sade.env :as env]
+            [sade.core :refer :all]
             [lupapalvelu.server]
-            [lupapalvelu.core :refer :all]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.user :as user]
             [lupapalvelu.action :refer :all]))

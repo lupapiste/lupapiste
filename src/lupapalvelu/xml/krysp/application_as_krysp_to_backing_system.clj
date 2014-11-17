@@ -1,7 +1,7 @@
 (ns lupapalvelu.xml.krysp.application-as-krysp-to-backing-system
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error fatal]]
             [sade.env :as env]
-            [lupapalvelu.core :refer [fail!]]
+            [sade.core :refer [fail!]]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.permit :as permit]
             ;; Make sure all the mappers are registered

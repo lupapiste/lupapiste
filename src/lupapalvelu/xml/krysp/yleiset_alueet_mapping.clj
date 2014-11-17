@@ -1,7 +1,7 @@
 (ns lupapalvelu.xml.krysp.yleiset-alueet-mapping
   (:require [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
             [sade.util :refer :all]
-            [lupapalvelu.core :refer [now]]
+            [sade.core :refer :all]
             [clojure.walk :as walk]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.document.canonical-common :refer [ya-operation-type-to-schema-name-key]]
@@ -13,7 +13,7 @@
 ;; :postiosoite -> :postiosoitetieto
 ;; Added tag :Kayntiosoite after :kayntiosoitetieto
 ;; Added tag :Postiosoite after :postiosoitetieto
-(def ^:private yritys-child-modified_211
+(def- yritys-child-modified_211
   (walk/prewalk
     (fn [m] (if (= (:tag m) :kayntiosoite)
               (assoc

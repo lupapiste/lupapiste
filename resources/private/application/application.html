@@ -65,7 +65,7 @@
             <span class="application_summary_text">
               <select
                 data-bind="options: $root.authorities,
-                           optionsText: function(item) { return item.firstName + ' ' + item.lastName; },
+                           optionsText: function(item) { return item.lastName + ' ' + item.firstName; },
                            optionsValue: 'id',
                            value: $root.application.assignee,
                            optionsCaption: loc('choose')"
@@ -325,7 +325,7 @@
                   <ul data-bind="foreach: roles">
                     <li class="party">
                       <span class="person">
-                        <span data-bind="text: firstName"></span> <span data-bind="text: lastName"></span>
+                        <span data-bind="fullName: $data"></span>
                         (<span data-bind="text: username"></span>)
                         <i><span data-bind="foreach: roles"><span data-bind="text: loc($data)"></span> </span></i>
                       </span>

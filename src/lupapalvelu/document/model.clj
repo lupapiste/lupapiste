@@ -12,6 +12,7 @@
             [sade.env :as env]
             [sade.util :as util]
             [sade.strings :as ss]
+            [sade.core :refer :all]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.validator :as validator]
             [lupapalvelu.document.subtype :as subtype]
@@ -25,7 +26,7 @@
 (def default-max-len 255)
 (def dd-mm-yyyy (timeformat/formatter "dd.MM.YYYY"))
 
-(def ^:private latin1 (java.nio.charset.Charset/forName "ISO-8859-1"))
+(def- latin1 (java.nio.charset.Charset/forName "ISO-8859-1"))
 
 (defn- latin1-encoder
   "Creates a new ISO-8859-1 CharsetEncoder instance, which is not thread safe."

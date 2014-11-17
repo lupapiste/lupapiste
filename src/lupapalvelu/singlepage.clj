@@ -6,6 +6,7 @@
             [clj-time.coerce :as tc]
             [sade.env :as env]
             [sade.strings :as ss]
+            [sade.core :refer :all]
             [lupapalvelu.components.core :as c])
   (:import [java.io ByteArrayOutputStream ByteArrayInputStream]
            [java.util.zip GZIPOutputStream]
@@ -15,7 +16,7 @@
            [org.mozilla.javascript ErrorReporter EvaluatorException]))
 
 (defn write-header [kind out n]
-  (when (env/dev-mode?)
+  (when (env/feature? :no-minification)
     (.write out (format "\n\n/*\n * %s\n */\n" n)))
   (when (= kind :js)
     (.write out "\n;\n\n"))
@@ -35,7 +36,7 @@
 
 (defn- minified [kind ^java.io.Reader in ^java.io.Writer out]
   (cond
-    (env/dev-mode?) (IOUtils/copy in out)
+    (env/feature? :no-minification) (IOUtils/copy in out)
     (= kind :js) (let [c (JavaScriptCompressor. in error-reporter)]
                    ; no linebreaks, obfuscate locals, no verbose,
                    (.compress c out -1 true false
@@ -71,7 +72,7 @@
 (defn- resource-url [component kind]
   (str (kind (env/value :cdn)) (:build-number env/buildinfo) "/" (name component) "." (name kind)))
 
-(def ^:private buildinfo-summary
+(def- buildinfo-summary
   (format "%s %s [%s] %4$tF %4$tT (%5$s)"
           env/target-env
           (:branch env/buildinfo)

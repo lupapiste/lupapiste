@@ -5,7 +5,7 @@
             [swiss.arrows :refer [-<> -<>>]]
             [sade.strings :as ss]
             [sade.util :refer [future*]]
-            [lupapalvelu.core :refer [ok fail fail! now]]
+            [sade.core :refer [ok fail fail! now]]
             [lupapalvelu.action :refer [defquery defcommand defraw update-application application->command notify] :as action]
             [lupapalvelu.comment :as comment]
             [lupapalvelu.mongo :as mongo]

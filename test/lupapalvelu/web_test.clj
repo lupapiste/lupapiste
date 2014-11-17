@@ -1,6 +1,5 @@
 (ns lupapalvelu.web-test
-  (:require [lupapalvelu.core :refer :all]
-            [lupapalvelu.web :refer :all]
+  (:require [lupapalvelu.web :refer :all]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]])
   (:import [org.apache.commons.io IOUtils]))
