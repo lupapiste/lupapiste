@@ -197,6 +197,7 @@
 
 (def auth-methods {:init anyone
                    :cdn-fallback anyone
+                   :common anyone
                    :hashbang anyone
                    :upload logged-in?
                    :applicant applicant?
