@@ -56,6 +56,7 @@ LUPAPISTE.StampModel = function(params) {
       a.selected = ko.observable(false);
       a.status = ko.observable("");
       a.restamp = restamp;
+      a.stamped = ko.observable(a.stamped);
     }).value();
 
     return {
@@ -93,20 +94,6 @@ LUPAPISTE.StampModel = function(params) {
   self.transparency = ko.observable(transparencies[0]);
   self.transparencies = transparencies;
 
-
-  self.init = function(application) {
-    self.application = application;
-
-    self
-      .files(_(application.attachments()).filter(stampableAttachment).map(normalizeAttachment).value())
-      .status(self.files().length > 0 ? self.statusReady : self.statusNoFiles)
-      .text(loc("stamp.verdict"))
-      .organization(application.organizationName())
-      .xMargin("10")
-      .yMargin("85")
-      .transparency(self.transparencies[0]);
-    return self;
-  };
 
   self.start = function() {
     self.status(self.statusStarting);
@@ -149,11 +136,11 @@ LUPAPISTE.StampModel = function(params) {
 
       self.jobVersion = update.version;
       _.each(update.value, function (newStatus, fileId) {
-        _(self.selectedFiles()).each(function(f) { f.status(newStatus); });
+        _(self.selectedFiles()).filter({id: fileId}).each(function(f) { f.status(newStatus); });
       });
 
       if (update.status === "done") {
-        repository.load(self.application.id());
+        _(self.selectedFiles()).each(function(f) { f.stamped(true); });
         return self.status(self.statusDone);
       }
     }
@@ -163,7 +150,7 @@ LUPAPISTE.StampModel = function(params) {
 
 
   function selectAllFiles(value) {
-    _(self.files()).pluck('attachments').flatten().filter({id: fileId}).each(function(f) { f.selected(value); });
+    _(self.files()).pluck('attachments').flatten().each(function(f) { f.selected(value); });
   }
 
   self.selectAll = _.partial(selectAllFiles, true);
