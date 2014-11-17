@@ -1,3 +1,1 @@
 attachments.group.select: Valitse ryhmän liitteet
-application.export.name: Lupapiste
-application.export.page: Sivu
