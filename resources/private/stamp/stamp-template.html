@@ -63,8 +63,15 @@
           <table class="table attachments-template-table">
             <tbody data-bind="foreach: files()">
               <tr class="attachment-group-header">
-                <td data-bind="text: name" colspan="6" data-test-id="attachment-group-header-text"></td>
-                <td class="attachment-group-select"><a href="#" data-bind="ltext: 'attachments.group.select', click: $parent.toggleGroupSelect, visible: $parent.status() < $parent.statusRunning"></a></td>
+                <td data-bind="text: name" colspan="4" data-test-id="attachment-group-header-text"></td>
+                <td colspan="3" class="attachment-group-select">
+                  <!-- ko ifnot: groupSelected -->
+                  <a href="#" data-bind="ltext: 'attachments.group.select', click: $parent.toggleGroupSelect, visible: $parent.status() < $parent.statusRunning"></a>
+                  <!-- /ko -->
+                  <!-- ko if: groupSelected -->
+                  <a href="#" data-bind="ltext: 'attachments.group.deselect', click: $parent.toggleGroupSelect, visible: $parent.status() < $parent.statusRunning"></a>
+                  <!-- /ko -->
+                </td>
               </tr>
               <tr>
                 <th data-bind="ltext: 'application.attachmentState'">Tila</th>
@@ -158,7 +165,7 @@
               <!-- /ko -->
             </tbody>
           </table>
-          <div>
+          <div class="right">
             <!-- ko ifnot: allSelected -->
             <a href="#" data-bind="ltext: 'stamp.all', click: selectAll, visible: status() < statusRunning"></a>
             <!-- /ko -->
