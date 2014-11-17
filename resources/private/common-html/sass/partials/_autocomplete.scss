@@ -1,0 +1,14 @@
+.autocomplete {
+  background: #fff;
+  border: 1px solid darken($lp-light-grey, 10%);
+  div {
+    line-height: $baseline*1.5;
+    border-bottom: 1px solid darken($lp-light-grey, 10%);
+    cursor:pointer;
+    padding-left: $marginS;
+    &:hover {
+      background-color: darken($lp-light-grey, 5%);
+    }
+  }
+
+}

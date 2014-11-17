@@ -1,0 +1,138 @@
+/* Z-index of .mask must lower than .window */
+.mask {
+  position:absolute;
+  z-index:9000;
+  display:none;
+  top: 0;
+  left: 0;
+  &.black {
+    background-color:#000;
+  }
+  &.white {
+    background-color:#fff;
+  }
+}
+
+.window {
+  position:fixed;
+  display:none;
+  z-index:9999;
+  padding: $marginM $marginM $marginM $marginM;
+  background: white;
+  overflow:hidden;
+  &.rounded {
+    border-radius: 6px;
+  }
+}
+
+.autosized {
+  min-width:$cols4;
+  min-height:$baseline * 6;
+  height: auto;
+  width: auto;
+}
+
+.autosized-yes-no {
+  min-height:$baseline * 6;
+  height: auto;
+  width:$cols6;
+}
+.autosized-ok {
+  min-height:$baseline * 5;
+  height: auto;
+  width:$cols4;
+}
+/* Customize your modal window here, you can add background image too */
+
+.dialog-header {
+  height: 32px;
+  padding: 2px $marginL;
+  border-bottom: 1px solid;
+  p {
+    margin: 0px;
+    font-size: 20px;
+    display: inline;
+  }
+  .dialog-close {
+    position: absolute;
+    right: 14px;
+    top: 12px;
+    cursor:pointer;
+  }
+}
+
+.dialog-content{
+  /* somewhat less than .autosized - .dialog-header */
+  min-height: $baseline * 4;
+  position: relative;
+  margin: $marginM  0;
+  padding-bottom: 64px;
+
+  .dialog-desc {
+    width: 300px;
+  }
+  [type=submit], .btn, button {
+    padding: 4px $marginL;
+    min-width: $cols2;
+    max-width: $cols3;
+    
+  }
+
+  .file-upload {
+    margin: $marginM 0;
+  }
+
+  .dialog-user-content {
+    padding: $marginM 0;
+  }
+
+}
+.scrolling-content {
+  overflow-y: scroll;
+  max-height: 288px;
+}
+
+.dialog-content-low {
+  min-height: $baseline * 3;
+  padding-bottom:0;
+}
+
+.with-map {
+  display: table-row;
+
+  .map-container {
+    padding: 0;
+  }
+
+  .btn-primary {
+    left: auto; right: 260px;
+    bottom: 5px;
+  }
+  a.btn-dialog {
+    right:-70px;
+    bottom: 10px;
+    width: 100px;
+  }
+}
+
+.with-map > div {
+  display: table-cell;
+  vertical-align: top;
+  padding-left: $marginM;
+}
+
+.neighbors-message {
+  margin: $marginM;
+}
+
+#dialog-add-link-permit {
+  .combobox{
+    margin-bottom: 8px;
+  }
+} 
+
+#upload-dialog {
+  .dialog-content {
+    padding-bottom: 0;
+  }
+}
