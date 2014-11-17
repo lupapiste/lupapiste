@@ -76,7 +76,7 @@
               </tr>
 
               <!-- ko foreach: attachments -->
-              <tr class="attachment-row stamp-attachment-row" data-bind="toggleClick: selected, clickBubble: false, css: {selected: selected}">
+              <tr class="attachment-row stamp-attachment-row" data-bind="click: $parents[1].selectRow, clickBubble: false, css: {selected: selected}">
                 <td class="attachmentState">
 
                   <span data-bind="attr: {'class': statusName + ' icon',

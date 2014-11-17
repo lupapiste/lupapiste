@@ -148,6 +148,14 @@ LUPAPISTE.StampModel = function(params) {
     return self.queryUpdate();
   };
 
+  self.selectRow = function(row) {
+    if ( self.status() < self.statusDone ) {
+      row.selected(!row.selected());
+    } else {
+      return true;
+    }
+  };
+
 
   function selectAllFiles(value) {
     _(self.files()).pluck('attachments').flatten().each(function(f) { f.selected(value); });
