@@ -66,8 +66,4 @@ var stamping = (function() {
   $(function() {
     $("#stamping-container").applyBindings(model);
   });
-
-  return {
-    initStamp: initStamp
-  };
 })();
