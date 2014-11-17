@@ -1,0 +1,121 @@
+.accordion {
+  width: 100%;
+  position: relative;
+  z-index: 5;
+  height: auto;
+  margin-bottom: $marginS;
+  @include box-sizing(border-box);
+
+  h2 {
+    padding:  $marginS $marginM;
+    background: $lp-dark-grey;
+    vertical-align: middle;
+    color: white;
+    font-size: 18px;
+    line-height: 27px;
+    position: relative;
+    cursor: pointer;
+    font-weight: 100;
+    margin-bottom: 0;
+    position: relative;
+    width: 100%;
+    padding-right:0;
+    @include box-sizing(border-box);
+    span {
+      margin-right: $marginM;
+    }
+    .icon {
+      border-right: 1px solid white;
+      padding-right: $marginL;
+    }
+    .icon.remove {
+      border-right: none;
+      padding-right: 0;
+    }
+    .icon.edit {
+      border-right: none;
+      padding-right: 0;
+      padding-left: 25px;
+      margin-left: $marginM;
+      width: auto;
+    }
+
+    .op-description-wrapper {
+      display: inline-block;
+      max-width: 700px;
+      white-space: nowrap;
+      line-height: 20px;
+      span {
+        margin-right: 0;
+        vertical-align: bottom;
+      }
+      .accordion-input {
+        width: 600px;
+        margin-left: $marginS;
+      }
+      .op-description {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        &:before {
+          content: "-";
+          margin: 0 $marginS;
+        }
+        &:empty {
+          display: none;
+        }
+      }
+    }
+  }
+
+  .accordion_content {
+    display: none;
+    padding: $marginS;
+    position: relative;
+    background: darken($lp-light-grey, 5%);
+    .accordion-content-part {
+      margin-left: $marginM;
+      margin-bottom: $marginM;
+    }
+    .accordion-fields {
+      width: 100%;
+      h2 {
+        background: darken($lp-light-grey, 5%);
+        color: black;
+        margin: $marginM 0;
+        padding-left: 0;
+      }
+      h3 {
+        margin-top: $marginM;
+      }
+    }
+  }
+
+  .accordion_content.expanded {
+    display: block;
+  }
+}
+
+.accordion-indicator {
+  z-index: 12000;
+  width: 112px;
+  min-height: 18px;
+  display: none;
+  padding: 0 0 0 $marginL;
+  margin-left: $marginM;
+}
+
+.accordion-input-saved {
+  @include spite-bg;
+  background-position: 4px -2499px;
+}
+.accordion-input-warn
+{
+  @include spite-bg;
+  background-position: 4px -3199px;
+}
+.accordion-input-err
+{
+  @include spite-bg;
+  background-position: 4px -2399px;
+}
+

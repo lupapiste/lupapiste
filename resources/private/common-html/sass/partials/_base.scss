@@ -1,0 +1,70 @@
+/* breakpoints*/
+$breakpoint5:  $cols6;
+$breakpoint6:  $cols7;
+$breakpoint7:  $cols8;
+$breakpoint8:  $cols9;
+$breakpoint9:  $cols10;
+$breakpoint10: $cols11;
+$breakpoint11: $cols12;
+$breakpoint12: $cols13;
+$breakpoint13: $cols14;
+$breakpoint14: $cols15;
+
+
+/* baseline & margins */
+$baseline: 24px;
+$marginL: $baseline;
+$marginM: $baseline/2;
+$marginS: $baseline/4;
+
+$application-max-width: 1280px;
+
+@mixin width-wrapper {
+  margin:0 auto;
+
+  /* Default width for browsers that don't support media queries */
+  width: 90%;
+}
+
+html {
+    background:#fff;
+    -webkit-font-smoothing: antialiased;
+    /* Inflate text size on mobiles by full increments only */
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+}
+
+body {
+  min-width: 820px;
+}
+.container {
+  @include box-sizing(border-box);
+  padding: $marginM 8px 0 8px;
+  width: 100%;
+  max-width: $application-max-width;
+  margin: $baseline auto $baseline auto;
+  position: relative;
+  .content {
+    width: 100%;
+  }
+  .content-narrow {
+    width: 68%;
+  }
+
+  .sidebar {
+    width: 18%;
+  }
+
+ }
+ .page {
+  display: none;
+  margin-top: 0;
+}
+
+.clear {
+  clear: both;
+}
+
+.spacerM {
+  margin-bottom: $marginM;
+}
