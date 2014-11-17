@@ -13,6 +13,7 @@
     CSS Reset by ajk (http://ajk.im/)
     Based on http://necolas.github.com/normalize.css/
 */
+@import url(http://fonts.googleapis.com/css?family=Source+Sans+Pro:200,300,400,700,200italic,300italic,400italic,700italic);
 /* line 6, ../sass/partials/_reset.scss */
 html, body, div,
 span, object, iframe,
@@ -255,26 +256,25 @@ body {
 /* colors*/
 /* TYPOGRAPHY
 ----------------------------------------------------------------------------- */
-/* fonts */
-/* line 7, ../sass/partials/_typography.scss */
+/* line 8, ../sass/partials/_typography.scss */
 body {
-  font-family: "Calibri", "Verdana", sans-serif;
+  font-family: "Source Sans Pro", sans-serif;
   font-size: 15px;
   line-height: 24px;
   margin-bottom: 24px;
   color: #595959;
 }
 
-/* line 15, ../sass/partials/_typography.scss */
+/* line 16, ../sass/partials/_typography.scss */
 p {
   color: #616161;
   margin-bottom: 24px;
   line-height: 24px;
 }
 
-/* line 21, ../sass/partials/_typography.scss */
+/* line 22, ../sass/partials/_typography.scss */
 h1 {
-  font-family: "Calibri", "Verdana" sans-serif;
+  font-family: "Source Sans Pro", sans-serif;
   font-weight: normal;
   font-size: 24px;
   line-height: 48px;
@@ -283,27 +283,27 @@ h1 {
   color: #595959;
 }
 
-/* line 32, ../sass/partials/_typography.scss */
+/* line 33, ../sass/partials/_typography.scss */
 h2 {
   font-size: 21.6px;
-  font-family: "Calibri", "Verdana" sans-serif;
+  font-family: "Source Sans Pro", sans-serif;
   margin-bottom: 6px;
 }
 
-/* line 38, ../sass/partials/_typography.scss */
+/* line 39, ../sass/partials/_typography.scss */
 h3 {
   font-size: 18px;
-  font-family: "Calibri", "Verdana" sans-serif;
+  font-family: "Source Sans Pro", sans-serif;
   font-weight: lighter;
   margin-bottom: 6px;
 }
 
-/* line 44, ../sass/partials/_typography.scss */
+/* line 45, ../sass/partials/_typography.scss */
 i {
   margin-bottom: 12px;
 }
 
-/* line 48, ../sass/partials/_typography.scss */
+/* line 49, ../sass/partials/_typography.scss */
 .error-text {
   color: red;
 }
@@ -1123,7 +1123,7 @@ footer #buildinfo {
 
 /* line 1, ../sass/partials/_forms.scss */
 legend {
-  font-family: "Calibri", "Verdana" sans-serif;
+  font-family: "Source Sans Pro", sans-serif;
   margin: 0 0 24px;
 }
 
@@ -1431,7 +1431,7 @@ input[readonly]:focus, textarea[readonly]:focus {
   width: 100%;
   display: block;
   text-transform: uppercase;
-  font-family: "Calibri", "Verdana" sans-serif;
+  font-family: "Source Sans Pro", sans-serif;
 }
 /* line 295, ../sass/partials/_forms.scss */
 .form-group .form-entry, .form-choice .form-entry, .form-table .form-entry {
@@ -1876,7 +1876,7 @@ table {
 /* line 10, ../sass/partials/_tables.scss */
 th {
   background: #dddddd;
-  font-family: "Calibri", "Verdana" sans-serif;
+  font-family: "Source Sans Pro", sans-serif;
   font-size: 0.85em;
   font-weight: 700;
   letter-spacing: 0.125em;
