@@ -73,9 +73,6 @@ LUPAPISTE.StampModel = function(params) {
   }));
 
   self.status = ko.observable(_(self.files()).pluck('attachments').flatten().value().length > 0 ? self.statusReady : self.statusNoFiles);
-  self.text = ko.observable(loc("stamp.verdict"));
-  self.date = ko.observable();
-  self.organization = ko.observable(self.application.organizationName());
   self.selectedFiles = ko.computed(function() {
     return _(self.files())
       .pluck('attachments')
@@ -92,10 +89,16 @@ LUPAPISTE.StampModel = function(params) {
   self.jobId = null;
   self.jobVersion = null;
 
+  // Stamping fields
+
+  self.text = ko.observable(loc("stamp.verdict"));
+  self.date = ko.observable();
+  self.organization = ko.observable(self.application.organizationName());
   self.xMargin = ko.observable("10");
   self.xMarginOk = ko.computed(function() { return util.isNum(self.xMargin()); });
   self.yMargin = ko.observable("85");
   self.yMarginOk = ko.computed(function() { return util.isNum(self.yMargin()); });
+
   self.transparency = ko.observable(transparencies[0]);
   self.transparencies = transparencies;
 
