@@ -1,8 +1,10 @@
 (ns lupapalvelu.xml.krysp.reader-test
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
-            [lupapalvelu.xml.krysp.reader :refer :all]
+            [lupapalvelu.factlet :refer [fact* facts*]]
             [clj-time.coerce :as coerce]
+            [sade.xml :as xml]
+            [lupapalvelu.xml.krysp.reader :refer :all]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]))
@@ -19,7 +21,7 @@
   (property-equals "<a>" "<b>") => "%3CPropertyIsEqualTo%3E%3CPropertyName%3E%26lt%3Ba%26gt%3B%3C%2FPropertyName%3E%3CLiteral%3E%26lt%3Bb%26gt%3B%3C%2FLiteral%3E%3C%2FPropertyIsEqualTo%3E")
 
 (facts "KRYSP verdict"
-  (let [xml (sade.xml/parse (slurp "resources/krysp/sample/verdict.xml"))
+  (let [xml (xml/parse (slurp "resources/krysp/sample/verdict.xml"))
       cases (->verdicts xml ->standard-verdicts)]
 
     (fact "xml is parsed" cases => truthy)
@@ -100,7 +102,7 @@
             poytakirjat2 => sequential?))))))
 
 (facts "CGI sample verdict"
-  (let [xml (sade.xml/parse (slurp "dev-resources/krysp/cgi-verdict.xml"))
+  (let [xml (xml/parse (slurp "dev-resources/krysp/cgi-verdict.xml"))
         cases (->verdicts xml ->standard-verdicts)]
     (fact "xml is parsed" cases => truthy)
     (fact "xml has 1 case" (count cases) => 1)
@@ -150,7 +152,7 @@
           (:tyyppi liite) => "P\u00e4\u00e4t\u00f6sote")))))
 
 (facts "Tekla sample verdict"
-  (let [xml (sade.xml/parse (slurp "dev-resources/krysp/teklap.xml"))
+  (let [xml (xml/parse (slurp "dev-resources/krysp/teklap.xml"))
         cases (->verdicts xml ->standard-verdicts)]
 
     (fact "xml is parsed" cases => truthy)
@@ -181,7 +183,7 @@
       )))
 
 (facts "case not found"
-  (let [xml (sade.xml/parse (slurp "dev-resources/krysp/notfound.xml"))
+  (let [xml (xml/parse (slurp "dev-resources/krysp/notfound.xml"))
         cases (->verdicts xml ->standard-verdicts)]
     (fact "xml is parsed" cases => truthy)
     (fact "xml has no cases" (count cases) => 0)))
@@ -192,7 +194,7 @@
     (count cases) => 0))
 
 (facts "no verdicts"
-  (let [xml (sade.xml/parse (slurp "dev-resources/krysp/no-verdicts.xml"))
+  (let [xml (xml/parse (slurp "dev-resources/krysp/no-verdicts.xml"))
         cases (->verdicts xml ->standard-verdicts)]
     (fact "xml is parsed" cases => truthy)
     (fact "xml has 1 case" (count cases) => 1)
@@ -200,7 +202,7 @@
     (fact "case has no verdicts" (-> cases last :paatokset count) => 0)))
 
 (facts "KRYSP yhteiset 2.1.0"
-  (let [xml (sade.xml/parse (slurp "resources/krysp/sample/sito-porvoo-building.xml"))
+  (let [xml (xml/parse (slurp "resources/krysp/sample/sito-porvoo-building.xml"))
         buildings (->buildings-summary xml)
         building1-id (:buildingId (first buildings))
         building2-id (:buildingId (last buildings))
@@ -267,10 +269,10 @@
         (get-in owner2 [:yritys :osoite :postitoimipaikannimi]) => "PORVOO"))))
 
 
-;YA verdict
+;; YA verdict
 
 (facts "KRYSP ya-verdict"
-  (let [xml (sade.xml/parse (slurp "resources/krysp/sample/yleiset alueet/ya-verdict.xml"))
+  (let [xml (xml/parse (slurp "resources/krysp/sample/yleiset alueet/ya-verdict.xml"))
         cases (->verdicts xml ->simple-verdicts)]
 
     (fact "xml is parsed" cases => truthy)
@@ -306,7 +308,7 @@
 
 (facts "Ymparisto verdicts"
   (doseq [permit-type ["yl" "mal" "vvvl"]]
-    (let [xml (sade.xml/parse (slurp (str "resources/krysp/sample/verdict-" permit-type ".xml")))
+    (let [xml (xml/parse (slurp (str "resources/krysp/sample/verdict-" permit-type ".xml")))
           cases (->verdicts xml ->simple-verdicts)]
 
       (fact "xml is parsed" cases => truthy)
@@ -342,16 +344,57 @@
           (:tyyppi liite) => "Muu liite"))))))
 
 (facts "Buildings from verdict message"
-  (let [xml (sade.xml/parse (slurp "resources/krysp/sample/sito-porvoo-LP-638-2013-00024-paatos-ilman-liitteita.xml"))
+  (let [xml (xml/parse (slurp "resources/krysp/sample/sito-porvoo-LP-638-2013-00024-paatos-ilman-liitteita.xml"))
         buildings (->buildings xml)
         building1 (first buildings)]
-
     (count buildings) => 1
     (:jarjestysnumero building1) => "31216"
     (:kiinttun building1) => "63820130310000"
     (:rakennusnro building1) => "123"))
 
 (facts "wfs-krysp-url works correctly"
-  (fact "without ? returns url with ?" (wfs-krysp-url "http://localhost" rakval-case-type (property-equals "test" "lp-1")) =>  "http://localhost?request=GetFeature&typeName=rakval%3ARakennusvalvontaAsia&filter=%3CPropertyIsEqualTo%3E%3CPropertyName%3Etest%3C%2FPropertyName%3E%3CLiteral%3Elp-1%3C%2FLiteral%3E%3C%2FPropertyIsEqualTo%3E")
-  (fact "with ? returns url with ?" (wfs-krysp-url "http://localhost" rakval-case-type (property-equals "test" "lp-1")) =>  "http://localhost?request=GetFeature&typeName=rakval%3ARakennusvalvontaAsia&filter=%3CPropertyIsEqualTo%3E%3CPropertyName%3Etest%3C%2FPropertyName%3E%3CLiteral%3Elp-1%3C%2FLiteral%3E%3C%2FPropertyIsEqualTo%3E")
-  (fact "without extraparam returns correct" (wfs-krysp-url "http://localhost?output=KRYSP" rakval-case-type (property-equals "test" "lp-1")) =>  "http://localhost?output=KRYSP&request=GetFeature&typeName=rakval%3ARakennusvalvontaAsia&filter=%3CPropertyIsEqualTo%3E%3CPropertyName%3Etest%3C%2FPropertyName%3E%3CLiteral%3Elp-1%3C%2FLiteral%3E%3C%2FPropertyIsEqualTo%3E"))
+  (fact "without ? returns url with ?"
+    (wfs-krysp-url "http://localhost" rakval-case-type (property-equals "test" "lp-1")) => "http://localhost?request=GetFeature&typeName=rakval%3ARakennusvalvontaAsia&filter=%3CPropertyIsEqualTo%3E%3CPropertyName%3Etest%3C%2FPropertyName%3E%3CLiteral%3Elp-1%3C%2FLiteral%3E%3C%2FPropertyIsEqualTo%3E")
+  (fact "with ? returns url with ?"
+    (wfs-krysp-url "http://localhost" rakval-case-type (property-equals "test" "lp-1")) => "http://localhost?request=GetFeature&typeName=rakval%3ARakennusvalvontaAsia&filter=%3CPropertyIsEqualTo%3E%3CPropertyName%3Etest%3C%2FPropertyName%3E%3CLiteral%3Elp-1%3C%2FLiteral%3E%3C%2FPropertyIsEqualTo%3E")
+  (fact "without extraparam returns correct"
+    (wfs-krysp-url "http://localhost?output=KRYSP" rakval-case-type (property-equals "test" "lp-1")) => "http://localhost?output=KRYSP&request=GetFeature&typeName=rakval%3ARakennusvalvontaAsia&filter=%3CPropertyIsEqualTo%3E%3CPropertyName%3Etest%3C%2FPropertyName%3E%3CLiteral%3Elp-1%3C%2FLiteral%3E%3C%2FPropertyIsEqualTo%3E"))
+
+
+
+(facts* "Testing information parsed from a verdict xml message for application creation"
+  (let [xml (xml/parse (slurp "resources/krysp/sample/verdict-rakval-from-kuntalupatunnus-query.xml"))
+        info (get-app-info-from-message xml "invalid-kuntalupatunnus") => nil
+        info-keys [:id :kuntalupatunnus :municipality :rakennusvalvontaasianKuvaus :vahainenPoikkeaminen :rakennuspaikka :ensimmainen-rakennus
+                   ; :viitelupatiedot :viimeisin-tila :asioimiskieli
+                   ]
+        info-keys-as-symbols (-> info-keys ((partial map (comp symbol name))) vec)
+        {:keys [id kuntalupatunnus municipality rakennusvalvontaasianKuvaus vahainenPoikkeaminen rakennuspaikka ensimmainen-rakennus
+                ; viitelupatiedot viimeisin-tila asioimiskieli
+                ] :as info}        (get-app-info-from-message xml "14-0241-R 3") => truthy]
+
+    (fact "info contains the needed keys" (every? (partial contains info) info-keys))
+
+    (fact "id" id => "LP-186-2014-00290")
+    (fact "kuntalupatunnus" kuntalupatunnus => "14-0241-R 3")
+    (fact "municipality" municipality => "186")
+    (fact "rakennusvalvontaasianKuvaus" rakennusvalvontaasianKuvaus => "Rakennetaan yksikerroksinen lautaverhottu omakotitalo jossa kytketty autokatos/ varasto.")
+    (fact "vahainenPoikkeaminen" vahainenPoikkeaminen => "Poikekkaa meillä!")
+
+    (facts "Rakennuspaikka"
+      (let [{:keys [x y address propertyId] :as rakennuspaikka} (:rakennuspaikka info)]
+        (fact "contains all the needed keys" (every? #{:x :y :address :propertyId} rakennuspaikka))
+        (fact "x" x => #(and (instance? Double %) (= 393033.614 %)))
+        (fact "y" y => #(and (instance? Double %) (= 6707228.994 %)))
+        (fact "address" address => "Kylykuja")
+        (fact "propertyId" propertyId => "18600303560006")))
+
+    (facts "Rakennus"
+      (let [{:keys [x y address propertyId] :as rakennus} (:ensimmainen-rakennus info)]
+        (fact "contains all the needed keys" (every? #{:x :y :address :propertyId} rakennus))
+        (fact "x" x => #(and (instance? Double %) (= 393033.614 %)))
+        (fact "y" y => #(and (instance? Double %) (= 6707228.994 %)))
+        (fact "address" address => "Kylykuja")
+        (fact "propertyId" propertyId => "18600303560006")))))
+
+
