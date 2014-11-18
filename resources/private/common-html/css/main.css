@@ -5174,7 +5174,11 @@ div.stamp-content {
 #stamping-component-container .stamp-status span {
   font-size: 18px;
 }
-/* line 18, ../sass/views/_stamping.scss */
+/* line 17, ../sass/views/_stamping.scss */
+#stamping-component-container .stamp-status .icon {
+  margin-left: 6px;
+}
+/* line 21, ../sass/views/_stamping.scss */
 #stamping-component-container .stamp-buttons {
   margin-top: 10px;
 }
