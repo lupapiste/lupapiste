@@ -56,6 +56,14 @@
   }
 }
 
+// IE 8
+button[disabled] {
+    color: darken($lp-light-grey, 30%);
+    -webkit-box-shadow:none;
+    box-shadow:none;
+    background: $lp-light-grey;
+}
+
 .btn.left-align {
   float: left;
 }
