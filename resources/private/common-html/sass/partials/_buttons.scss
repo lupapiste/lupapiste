@@ -49,14 +49,17 @@
   span:nth-child(1){
     max-width: 100px;
     height: auto;
-    margin-left: 12px;
   }
 
+  span.label {
+    margin-left: 12px;
+  }
 }
 
 .btn.left-align {
   float: left;
 }
+
 
 .btn-dialog {
    position: absolute;
