@@ -510,12 +510,13 @@
            :municipality kuntakoodi
            :rakennusvalvontaasianKuvaus (:rakennusvalvontaasianKuvaus asianTiedot)
            :vahainenPoikkeaminen (:vahainenPoikkeaminen asianTiedot)
-           :viitelupatiedot viitelupatiedot                ;; TODO: Mita nailla?
+;           :viitelupatiedot viitelupatiedot
 ;           :kasittelynTilatiedot kasittelynTilatiedot
-           :viimeisin-tila viimeisin-tila
+;           :viimeisin-tila viimeisin-tila
 ;           :rakennusten-tiedot (->buildings xml)
 ;           :toimenpidetieto toimenpidetieto
-           :asioimiskieli (cr/all-of asia [:lisatiedot :Lisatiedot :asioimiskieli])}
+;           :asioimiskieli (cr/all-of asia [:lisatiedot :Lisatiedot :asioimiskieli])
+          }
           (when (and coord-array-Rakennuspaikka osoite-Rakennus kiinteistotunnus-Rakennus)
             {:ensimmainen-rakennus {:x (first coord-array-Rakennus)
                                     :y (second coord-array-Rakennus)
