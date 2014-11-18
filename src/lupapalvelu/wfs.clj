@@ -329,16 +329,27 @@
 (defn layer-to-name [layer]
   (first (xml-> layer :Name text)))
 
-(defn plan-info-by-point [x y]
-  (let [bbox [(- (read-string x) 128) (- (read-string y) 128) (+ (read-string x) 128) (+ (read-string y) 128)]]
-    (:body (http/get "http://194.111.49.141/WMSMikkeli.mapdef?"
+(defn plan-info-by-point [x y municipality]
+  (let [bbox [(- (read-string x) 128) (- (read-string y) 128) (+ (read-string x) 128) (+ (read-string y) 128)]
+        {:keys [host path]} (env/value :geoserver :wms)
+        wms-url (str host path)
+        url (case municipality 
+                       491 "http://194.111.49.141/WMSMikkeli.mapdef?"
+                       wms-url)
+        layers (case municipality 
+                       491 "Asemakaavaindeksi"
+                       (str municipality "_asemakaavaindeksi"))
+        format (case municipality 
+                       491 "text/xml"
+                       "application/vnd.ogc.gml")]
+    (:body (http/get url
              {:query-params {"REQUEST" "GetFeatureInfo"
                              "EXCEPTIONS" "application/vnd.ogc.se_xml"
                              "SERVICE" "WMS"
-                             "INFO_FORMAT" "text/xml"
-                             "QUERY_LAYERS" "Asemakaavaindeksi"
+                             "INFO_FORMAT" format
+                             "QUERY_LAYERS" layers
                              "FEATURE_COUNT" "50"
-                             "Layers" "Asemakaavaindeksi"
+                             "Layers" layers
                              "WIDTH" "256"
                              "HEIGHT" "256"
                              "format" "image/png"
@@ -349,7 +360,8 @@
                              "y" "128"
                              "BBOX" (s/join "," bbox)}}))))
 
-(defn gfi-to-features [gfi]
+;;; Mikkeli is special because it was done first and they use Bentley WMS
+(defn gfi-to-features-mikkeli [gfi]
   (when gfi
     (let [info (zip/xml-zip
                  (xml/parse
@@ -357,13 +369,31 @@
                    startparse-sax-non-validating))]
       (xml-> info :FeatureKeysInLevel :FeatureInfo :FeatureKey))))
 
-(defn feature-to-feature-info  [feature]
+(defn feature-to-feature-info-mikkeli  [feature]
   (when feature
     {:id (first (xml-> feature :property (attr= :name "ID") text))
      :kaavanro (first (xml-> feature :property (attr= :name "Kaavanro") text))
      :kaavalaji (first (xml-> feature :property (attr= :name "Kaavalaji") text))
      :kasitt_pvm (first (xml-> feature :property (attr= :name "Kasitt_pvm") text))
-     :linkki (first (xml-> feature :property (attr= :name "Linkki") text))}))
+     :linkki (first (xml-> feature :property (attr= :name "Linkki") text))
+     :type "bentley"}))
+
+(defn gfi-to-features-sito [gfi municipality]
+  (when gfi
+    (let [info (zip/xml-zip
+                 (xml/parse
+                   (java.io.ByteArrayInputStream. (.getBytes gfi))
+                   startparse-sax-non-validating))]
+      (xml-> info :gml:featureMember (keyword (str "lupapiste:" municipality "_asemakaavaindeksi"))))))
+
+(defn feature-to-feature-info-sito  [feature]
+  (when feature
+    {:id (first (xml-> feature :lupapiste:TUNNUS text))
+     :kuntanro (first (xml-> feature :lupapiste:KUNTA_ID text))
+     :kaavanro (first (xml-> feature :lupapiste:TUNNUS text))
+     :vahvistett_pvm (first (xml-> feature :lupapiste:VAHVISTETT text))
+     :linkki (first (xml-> feature :lupapiste:LINKKI text))
+     :type "sito"}))
 ;;
 ;; Raster images:
 ;;
