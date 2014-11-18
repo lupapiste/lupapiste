@@ -12,19 +12,17 @@ LUPAPISTE.StampModel = function(params) {
 
   function normalizeAttachment(a) {
     var versions = _(a.versions).reverse().value(),
-        restamp = versions[0].stamped,
-        selected = restamp ? versions[1] : versions[0];
-    return {
-      id:           a.id,
-      type:         { "type-group": a.type["type-group"], "type-id": a.type["type-id"] },
-      contentType:  selected.contentType,
-      filename:     selected.filename,
-      version:      { major: selected.version.major, minor: selected.version.minor },
-      size:         selected.size,
-      selected:     ko.observable(true),
-      status:       ko.observable(""),
-      restamp:      restamp
-    };
+      restamp = versions[0].stamped,
+      selected = restamp ? versions[1] : versions[0];
+
+    a.contentType = selected.contentType;
+    a.filename = selected.filename;
+    a.version = {major: selected.version.major, minor: selected.version.minor};
+    a.size = selected.size;
+    a.selected = ko.observable(false);
+    a.status = ko.observable("");
+    a.restamp = restamp;
+    a.stamped = ko.observable(a.stamped);
   }
 
   var transparencies = _.map([0,20,40,60,80], function(v) {
@@ -41,24 +39,10 @@ LUPAPISTE.StampModel = function(params) {
 
   // Init
   self.application = params.application;
-  self.newFiles = params.attachments;
 
-  self.files = ko.observableArray(_.map(self.newFiles(), function(group) {
-    group.attachments = _(group.attachments).filter(stampableAttachment).each(function(a) {
-      var versions = _(a.versions).reverse().value(),
-        restamp = versions[0].stamped,
-        selected = restamp ? versions[1] : versions[0];
-
-      a.contentType = selected.contentType;
-      a.filename = selected.filename;
-      a.version = {major: selected.version.major, minor: selected.version.minor};
-      a.size = selected.size;
-      a.selected = ko.observable(false);
-      a.status = ko.observable("");
-      a.restamp = restamp;
-      a.stamped = ko.observable(a.stamped);
-    }).value();
-
+  // params.attachments() are GroupModel objects from attachmentUtils.getGroupByOperation
+  self.files = ko.observableArray(_.map(params.attachments(), function(group) {
+    group.attachments = _(group.attachments).filter(stampableAttachment).each(normalizeAttachment).value();
     return {
       attachments: group.attachments,
       groupName: group.groupName,

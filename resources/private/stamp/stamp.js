@@ -29,15 +29,15 @@ var stamping = (function() {
   };
 
 
-  function initStamp(appModel, attachments, stampFields) {
+  function initStamp(appModel, attachments) {
     model.appModel = appModel;
     model.attachments = attachments;
+
     if ( !model.stampFields.organization ) {
       model.stampFields.organization = ko.observable(model.appModel.organizationName());
     }
 
     window.location.hash='#!/stamping/' + model.appModel.id();
-
   };
 
   hub.onPageChange('stamping', function(e) {
