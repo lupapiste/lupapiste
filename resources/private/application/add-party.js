@@ -8,11 +8,16 @@ LUPAPISTE.AddPartyModel = function() {
 
   self.init = function(model) {
     self.applicationId = model.id();
-    ajax.query("party-document-names", {id: self.applicationId})
-      .success(function(d) {self.partyDocumentNames(ko.mapping.fromJS(d.partyDocumentNames));})
+    if (self.applicationId) {
+      ajax.query("party-document-names", {id: self.applicationId})
+        .success(function(d) {
+          self.partyDocumentNames(ko.mapping.fromJS(d.partyDocumentNames));
+          LUPAPISTE.ModalDialog.open("#dialog-add-party");
+        })
       .call();
-
-    LUPAPISTE.ModalDialog.open("#dialog-add-party");
+    } else {
+      error("LUPAPISTE.AddPartyModel.init could not determine application ID");
+    }
     return false;
   };
 
