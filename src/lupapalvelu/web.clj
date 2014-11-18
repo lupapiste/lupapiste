@@ -245,9 +245,10 @@
 
 ;; CSS & JS
 (defpage [:get ["/app/:build/:app.:res-type" :res-type #"(css|js)"]] {build :build app :app res-type :res-type}
-  (if (= build build-number)
-    (single-resource (keyword res-type) (keyword app) unauthorized)
-    (resp/redirect (str "/app/" build-number "/" app "." res-type ))))
+  (let [build-number (:build-number env/buildinfo)]
+    (if (= build build-number)
+     (single-resource (keyword res-type) (keyword app) unauthorized)
+     (resp/redirect (str "/app/" build-number "/" app "." res-type )))))
 
 ;; Single Page App HTML
 (def apps-pattern
