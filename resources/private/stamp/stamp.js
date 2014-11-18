@@ -13,7 +13,8 @@ var stamping = (function() {
       date: ko.observable(new Date()),
       organization: null,
       xMargin: ko.observable("10"),
-      yMargin: ko.observable("85")
+      yMargin: ko.observable("85"),
+      transparency: ko.observable()
     },
 
     cancelStamping: function() {

@@ -100,7 +100,12 @@ LUPAPISTE.StampModel = function(params) {
   self.yMargin = self.stampFields.yMargin;
   self.yMarginOk = ko.computed(function() { return util.isNum(self.yMargin()); });
 
-  self.transparency = ko.observable(transparencies[0]);
+  self.transparency = self.stampFields.transparency;
+
+  if ( !self.transparency() ) {
+    self.transparency(transparencies[0].value);
+  }
+
   self.transparencies = transparencies;
 
 
@@ -115,7 +120,7 @@ LUPAPISTE.StampModel = function(params) {
         files: _.map(self.selectedFiles(), "id"),
         xMargin: _.parseInt(self.xMargin(), 10),
         yMargin: _.parseInt(self.yMargin(), 10),
-        transparency: self.transparency().value
+        transparency: self.transparency()
       })
       .success(self.started)
       .call();
