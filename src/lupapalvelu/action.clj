@@ -187,6 +187,7 @@
   (when-let [valid-states (:states (meta-data command))]
     (let [state (:state application)]
       (when-not (.contains valid-states (keyword state))
+        (errorf "Can not execute %s while %s is in state '%s'" (:action command) (:id application) state)
         (fail :error.command-illegal-state)))))
 
 (defn pre-checks-fail [command application]
