@@ -38,44 +38,66 @@
         jatkoaika-application     (query-application apikey jatkoaika-application-id) => truthy
         _                         (:state jatkoaika-application) => "closed"
 
+        ;; App 4 - old submitted application
+        submitted-application     (create-and-submit-application apikey
+                                    :municipality municipality
+                                    :address "Paatoskuja 13"
+                                    :operation "ya-katulupa-vesi-ja-viemarityot") => truthy
+        submitted-application-id  (:id submitted-application)
+        _                         (generate-documents submitted-application apikey)
+
         ;; App that gets a link permit attached to it
         test-application          (create-and-submit-application apikey
                                     :municipality municipality
                                     :address "Paatoskuja 15"
                                     :operation "ya-katulupa-vesi-ja-viemarityot") => truthy
-        test-application-id       (:id test-application)
+        test-application-id       (:id test-application)]
 
-        ;; The "matches", i.e. the contents of the dropdown selection component in the link-permit dialog
-        ;; is allowed to have only these kind of applications:
-        ;;    - different id than current application has, but same permit-type
-        ;;    - not in draft state
-        ;;    - whose operation is not of type "ya-jatkoaika"
-        ;;
-        matches-resp (query apikey :app-matches-for-link-permits :id test-application-id) => ok?
-        matches (:app-links matches-resp)]
-
-    (count matches) => 2
-    (-> matches first :id) => approved-application-id
-    (-> matches second :id) => verdict-given-application-id
+    ;;
+    ;; The "matches", i.e. the contents of the dropdown selection component in the link-permit dialog
+    ;; is allowed to have only these kind of applications:
+    ;;    - different id than current application has, but same permit-type
+    ;;    - do not have a previous link-permit relationship to the current application
+    ;;    - not in draft state
+    ;;    - whose operation is not of type "ya-jatkoaika"
+    ;;
+    (fact "The jatkoaika application is not among the matches in the link permit dropdown selection"
+      (let [matches-resp (query apikey :app-matches-for-link-permits :id test-application-id) => ok?
+            matches (:app-links matches-resp)]
+        (count matches) => 3
+        (every? #{approved-application-id
+                  verdict-given-application-id
+                  submitted-application-id} (map :id matches)) => true?))
 
     (fact "Can not insert invalid key"
       (command apikey :add-link-permit :id test-application-id :linkPermitId "foo.bar") => fail?
       (command apikey :add-link-permit :id test-application-id :linkPermitId " ") => fail?)
 
-    (command apikey :add-link-permit :id test-application-id :linkPermitId verdict-given-application-id) => ok?
-    (generate-documents test-application apikey)
-    (command apikey :approve-application :id test-application-id :lang "fi") => ok?
-    (command apikey :add-link-permit
-      :id test-application-id
-      :linkPermitId verdict-given-application-id) => (partial expected-failure? "error.command-illegal-state")
+    (fact "A link permit is succesfully added to an application in submitted state"
+      (command apikey :add-link-permit :id test-application-id :linkPermitId verdict-given-application-id) => ok?)
 
-    (fact "Authority gives verdict and adds link permit"
-      (command sonja :add-link-permit :id verdict-given-application-id :linkPermitId approved-application-id) => ok?)
+    (fact "Adding link permit to approved application in sent state fails"
+      (command apikey :add-link-permit
+        :id approved-application-id :linkPermitId verdict-given-application-id) => (partial expected-failure? "error.command-illegal-state"))
 
-    (let [app (query-application apikey test-application-id) => truthy]
-      (-> app first :appsLinkingToUs) => nil?
-      (count (:linkPermitData app)) => 1
-      (let [link-permit-data (-> app :linkPermitData first)]
-        (:id link-permit-data)        => verdict-given-application-id
-        (:type link-permit-data)      => "lupapistetunnus"
-        (:operation link-permit-data) => "ya-katulupa-vesi-ja-viemarityot"))))
+    (fact "Authority gives verdict and then adds link permit (in verdict-given state)"
+      (command apikey :add-link-permit :id verdict-given-application-id :linkPermitId approved-application-id) => ok?)
+
+    (fact "Test app is added as link permit to another app"
+      (command apikey :add-link-permit :id submitted-application-id :linkPermitId test-application-id) => ok?)
+
+    (fact "Test application has valid link permit relations"
+      (let [app (query-application apikey test-application-id) => truthy]
+       (count (:appsLinkingToUs app)) => 1
+       (-> app :appsLinkingToUs first :id) => submitted-application-id
+       (count (:linkPermitData app)) => 1
+       (let [link-permit-data (-> app :linkPermitData first)]
+         (:id link-permit-data)        => verdict-given-application-id
+         (:type link-permit-data)      => "lupapistetunnus"
+         (:operation link-permit-data) => "ya-katulupa-vesi-ja-viemarityot")))
+
+    (fact "Application matches for dropdown selection contents do not include the applications that have a link-permit relation to the current application"
+      (let [matches-resp (query apikey :app-matches-for-link-permits :id test-application-id) => ok?
+            matches (:app-links matches-resp)]
+        (count matches) => 1
+        (-> matches first :id) => approved-application-id))))
