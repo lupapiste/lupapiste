@@ -2,3 +2,4 @@ attachments.group.select: Valitse ryhmän liitteet
 attachments.group.deselect: Poista ryhmän valinnat
 stamp.all: Valitse kaikki
 stamp.none: Poista valinnat
+unit.mm: mm

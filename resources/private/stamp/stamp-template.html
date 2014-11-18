@@ -47,14 +47,14 @@
             <fieldset class="col2">
               <legend data-bind="ltext: 'stamp.margin'"></legend>
 
-              <label data-bind="ltext: 'stamp.xMargin'"></label>
+              <label data-bind="text: loc('stamp.xMargin') + ' (' + loc('unit.mm') + ')'"></label>
               <input data-bind="textInput: xMargin,
                           enable: status() === statusReady,
                           css: {'invalid-margin': !xMarginOk()}"
                         type="text"
                         class="form-input text"/>
 
-              <label data-bind="ltext: 'stamp.yMargin'"></label>
+              <label data-bind="text: loc('stamp.yMargin') + ' (' + loc('unit.mm') + ')'"></label>
               <input data-bind="textInput: yMargin,
                           enable: status() === statusReady,
                           css: {'invalid-margin': !yMarginOk()}"
