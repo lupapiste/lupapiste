@@ -56,7 +56,7 @@
                          :number "19",
                          :name {:fi "Tampere" :sv "Tammerfors"}
                          :municipality "837"
-                         :location {:x "320193.034" :y "6825190.138"}}])))
+                         :location {:x "320187.869", :y "6825189.742"}}])))
 
 (facts "point-by-property-id"
   (let [property-id "09100200990013"
