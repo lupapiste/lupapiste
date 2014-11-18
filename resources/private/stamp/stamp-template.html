@@ -132,13 +132,9 @@
                     <div class="attachment-content-desc"><span data-bind="text: $data.contents" data-test-id="attachment-contents"></span></div>
                   <!-- /ko -->
                 </td>
-                <td>
+                <td class="attachment-file">
                   <span data-bind="if: $data.latestVersion">
-                    <a href="#" data-bind="text: latestVersion.filename,
-                                           attr: {href: '/api/raw/download-attachment?attachment-id=' + latestVersion.fileId,
-                                                  title: loc('download')},
-                                           click: function() {return true;},
-                                           clickBubble: false"></a><br/>
+                    <span class="attachment-file-name" data-bind="text: latestVersion.filename"></span>
                     <i data-bind="ltext: latestVersion.contentType"></i>
                     <i data-bind="size: latestVersion.size"></i>
                   </span>

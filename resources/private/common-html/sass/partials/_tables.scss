@@ -35,6 +35,11 @@ tr {
     &:hover {
       background-color: fade-out($lp-green, 0.7);
     }
+    td.attachment-file {
+      span.attachment-file-name {
+        display: block;
+      }
+    }
   }
 }
 

@@ -1898,37 +1898,41 @@ tr.stamp-attachment-row.selected {
 tr.stamp-attachment-row:hover {
   background-color: rgba(4, 199, 20, 0.3);
 }
+/* line 39, ../sass/partials/_tables.scss */
+tr.stamp-attachment-row td.attachment-file span.attachment-file-name {
+  display: block;
+}
 
-/* line 41, ../sass/partials/_tables.scss */
+/* line 46, ../sass/partials/_tables.scss */
 th, td {
   padding: 6px 16px;
   text-align: left;
 }
-/* line 44, ../sass/partials/_tables.scss */
+/* line 49, ../sass/partials/_tables.scss */
 th.btn, td.btn {
   margin-bottom: 0px;
 }
-/* line 47, ../sass/partials/_tables.scss */
+/* line 52, ../sass/partials/_tables.scss */
 th .icon, td .icon {
   margin: 12px 12px 6px 12px;
 }
 
-/* line 52, ../sass/partials/_tables.scss */
+/* line 57, ../sass/partials/_tables.scss */
 tbody {
   color: #555;
   font-size: 0.875em;
 }
-/* line 55, ../sass/partials/_tables.scss */
+/* line 60, ../sass/partials/_tables.scss */
 tbody td {
   vertical-align: middle;
 }
 
-/* line 61, ../sass/partials/_tables.scss */
+/* line 66, ../sass/partials/_tables.scss */
 .dataTables_wrapper {
   position: relative;
 }
 
-/* line 64, ../sass/partials/_tables.scss */
+/* line 69, ../sass/partials/_tables.scss */
 .table-filter {
   float: right;
   position: absolute;
@@ -1936,30 +1940,30 @@ tbody td {
   right: 0;
 }
 
-/* line 71, ../sass/partials/_tables.scss */
+/* line 76, ../sass/partials/_tables.scss */
 table.tasks thead tr:first-child td {
   padding-left: 0;
 }
 
-/* line 77, ../sass/partials/_tables.scss */
+/* line 82, ../sass/partials/_tables.scss */
 table.attachments-template-table td.attachmentState {
   padding: 0 0 0 12px;
   white-space: nowrap;
 }
-/* line 81, ../sass/partials/_tables.scss */
+/* line 86, ../sass/partials/_tables.scss */
 table.attachments-template-table td.attachmentState .icon {
   margin: 6px;
   vertical-align: middle;
 }
-/* line 86, ../sass/partials/_tables.scss */
+/* line 91, ../sass/partials/_tables.scss */
 table.attachments-template-table td.attachment-type-group {
   padding-right: 0;
 }
-/* line 89, ../sass/partials/_tables.scss */
+/* line 94, ../sass/partials/_tables.scss */
 table.attachments-template-table td.attachment-type-id {
   padding-left: 0;
 }
-/* line 93, ../sass/partials/_tables.scss */
+/* line 98, ../sass/partials/_tables.scss */
 table.attachments-template-table td.attachment-group-select a {
   font-size: 15px;
   font-weight: normal;
