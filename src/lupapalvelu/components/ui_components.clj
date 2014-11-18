@@ -46,12 +46,13 @@
    :underscore     {:depends [:lo-dash]
                     :js ["underscore.string.min.js" "underscore.string.init.js"]}
    :moment         {:js ["moment.min.js"]}
+   :open-layers    {:js ["openlayers-2.13_20140619.min.lupapiste.js"]}
 
    ;; Init can also be used as a standalone lib, see web.clj
    :init         {:depends [:underscore]
                   :js [conf "hub.js" "log.js"]}
 
-   ;; Components to be included in a SPA
+   ;; Common components
 
    :debug        (if (env/dev-mode?) debugjs {})
 
@@ -65,9 +66,6 @@
    :selectm-html {:html ["selectm.html"]
                   :css ["selectm.css"]}
 
-   :screenmessages  {:js   ["screenmessage.js"]
-                     :html ["screenmessage.html"]}
-
    :expanded-content  {:depends [:jquery]
                        :js ["expanded-content.js"]}
 
@@ -77,11 +75,14 @@
                        "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "features.js"
                        "statuses.js" "statusmodel.js" "authorization.js" "vetuma.js"]}
 
-   :open-layers {:js ["openlayers-2.13_20140619.min.lupapiste.js"]}
-
    :common-html  {:depends [:selectm-html]
                   :css ["css/main.css" "jquery-ui.css"]
                   :html ["404.html" "footer.html"]}
+
+   ;; Components to be included in a SPA
+
+   :screenmessages  {:js   ["screenmessage.js"]
+                     :html ["screenmessage.html"]}
 
    :map          {:depends [:common-html]
                   :js [ "gis.js" "locationsearch.js"]

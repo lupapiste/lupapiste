@@ -51,11 +51,15 @@
     height: auto;
   }
 
+  span.label {
+    margin-left: 12px;
+  }
 }
 
 .btn.left-align {
   float: left;
 }
+
 
 .btn-dialog {
    position: absolute;

@@ -208,7 +208,7 @@
       (do
         (notify-new-authority user caller)
         (ok :id (:id user) :user user))
-      (let [token-ttl (* 7 24 60 60 1000)
+      (let [token-ttl (* 180 24 60 60 1000)
             token (token/make-token :password-reset caller {:email (:email user)} :ttl token-ttl)]
         (ok :id (:id user)
           :user user
