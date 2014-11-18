@@ -31,6 +31,9 @@ var stamping = (function() {
   function initStamp(appModel, attachments, stampFields) {
     model.appModel = appModel;
     model.attachments = attachments;
+    if ( !model.stampFields.organization ) {
+      model.stampFields.organization = ko.observable(model.appModel.organizationName());
+    }
 
     window.location.hash='#!/stamping/' + model.appModel.id();
 
@@ -49,6 +52,7 @@ var stamping = (function() {
           });
 
           model.attachments = ko.observableArray(attachmentUtils.getGroupByOperation(filtered, true, model.appModel.allowedAttachmentTypes()));
+          model.stampFields.organization = ko.observable(model.appModel.organizationName());
 
           model.stampingMode(model.appModel !== null); // show
         });
