@@ -67,7 +67,7 @@ var stamping = (function() {
   });
 
   hub.subscribe('start-stamping', function(param) {
-    initStamp(param.application, param.attachments);
+    initStamp(param.application, param.attachments); // attachments from AttachmentsTabModel
   });
 
   ko.components.register('stamping-component', {

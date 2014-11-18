@@ -29,19 +29,7 @@ LUPAPISTE.StampModel = function(params) {
     return {text: loc(["stamp.transparency", v.toString()]), value: Math.round(255 * v / 100.0)};
   });
 
-                             // Start:  Cancel:  Ok:
-  self.statusInit      = 0;  //   -       -       -
-  self.statusReady     = 1;  //   +       +       -
-  self.statusStarting  = 2;  //   -       -       -
-  self.statusRunning   = 3;  //   -       -       -
-  self.statusDone      = 4;  //   -       -       +
-  self.statusNoFiles   = 5;  //   -       -       +
-
-  // Init
-  self.application = params.application;
-
-  // params.attachments() are GroupModel objects from attachmentUtils.getGroupByOperation
-  self.files = ko.observableArray(_.map(params.attachments(), function(group) {
+  function mapAttachmentGroup(group) {
     group.attachments = _(group.attachments).filter(stampableAttachment).each(normalizeAttachment).value();
     return {
       attachments: group.attachments,
@@ -54,7 +42,22 @@ LUPAPISTE.StampModel = function(params) {
         });
       })
     };
-  }));
+  }
+
+
+                             // Start:  Cancel:  Ok:
+  self.statusInit      = 0;  //   -       -       -
+  self.statusReady     = 1;  //   +       +       -
+  self.statusStarting  = 2;  //   -       -       -
+  self.statusRunning   = 3;  //   -       -       -
+  self.statusDone      = 4;  //   -       -       +
+  self.statusNoFiles   = 5;  //   -       -       +
+
+  // Init
+  self.application = params.application;
+
+  // params.attachments() are GroupModel objects from attachmentUtils.getGroupByOperation
+  self.files = ko.observableArray(_.map(params.attachments(), mapAttachmentGroup));
 
   self.status = ko.observable(_(self.files()).pluck('attachments').flatten().value().length > 0 ? self.statusReady : self.statusNoFiles);
   self.selectedFiles = ko.computed(function() {
