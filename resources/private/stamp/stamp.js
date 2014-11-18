@@ -71,7 +71,7 @@ var stamping = (function() {
 
   ko.components.register('stamping-component', {
     viewModel: LUPAPISTE.StampModel,
-    template: {element: "dialog-stamp-attachments"}
+    template: {element: "stamp-attachments-template"}
   });
 
   $(function() {

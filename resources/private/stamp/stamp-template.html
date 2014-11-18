@@ -14,12 +14,12 @@
         <div class="stamp-content">
           <!-- ko if: stampingMode -->
           <h1 data-bind="ltext: 'application.stampAttachments'"></h1>
-          <div data-bind="component: {name: 'stamping-component', params: {application: appModel, attachments: attachments, stampFields: stampFields}}"></div>
+          <div id="stamping-component-container" data-bind="component: {name: 'stamping-component', params: {application: appModel, attachments: attachments, stampFields: stampFields}}"></div>
           <!-- /ko -->
         </div>
       </div>
 
-      <script type="text/html" id="dialog-stamp-attachments">
+      <script type="text/html" id="stamp-attachments-template">
         <div>
           <form id="stamp-info">
             <fieldset class="col1">
