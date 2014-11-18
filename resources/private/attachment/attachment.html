@@ -18,9 +18,11 @@
             <span class="icon help" data-bind="click: toggleHelp, css: {expanded: showHelp}"></span>
           </div>
 
-          <p data-bind="slider: showHelp, lhtml: 'attachment.view.desc'"  class="tab-info"></p>
+          <div class="tab-info" data-bind="slider: showHelp">
+            <p data-bind="lhtml: 'attachment.view.desc'"></p>
+          </div>
 
-          <div>
+          <div class="clear">
             <a class="btn left-align btn-nav-back"
                data-bind="click: function() { window.location.hash = '!/application/' + application.id() + '/attachments'; repository.load(application.id()); }"
                data-test-id="back-to-application-from-attachment">
