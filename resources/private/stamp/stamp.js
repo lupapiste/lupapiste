@@ -8,6 +8,13 @@ var stamping = (function() {
 
     appModel: null,
     attachments: null,
+    stampFields: {
+      text: ko.observable(loc("stamp.verdict")),
+      date: ko.observable(new Date()),
+      organization: null,
+      xMargin: ko.observable("10"),
+      yMargin: ko.observable("85")
+    },
 
     cancelStamping: function() {
       model.stampingMode(false);
@@ -21,7 +28,7 @@ var stamping = (function() {
   };
 
 
-  function initStamp(appModel, attachments) {
+  function initStamp(appModel, attachments, stampFields) {
     model.appModel = appModel;
     model.attachments = attachments;
 

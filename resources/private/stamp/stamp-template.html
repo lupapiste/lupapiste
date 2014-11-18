@@ -14,7 +14,7 @@
         <div class="stamp-content">
           <!-- ko if: stampingMode -->
           <h1 data-bind="ltext: 'application.stampAttachments'"></h1>
-          <div data-bind="component: {name: 'stamping-component', params: {application: appModel, attachments: attachments}}"></div>
+          <div data-bind="component: {name: 'stamping-component', params: {application: appModel, attachments: attachments, stampFields: stampFields}}"></div>
           <!-- /ko -->
         </div>
       </div>

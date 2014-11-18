@@ -90,13 +90,14 @@ LUPAPISTE.StampModel = function(params) {
   self.jobVersion = null;
 
   // Stamping fields
+  self.stampFields = params.stampFields;
 
-  self.text = ko.observable(loc("stamp.verdict"));
-  self.date = ko.observable();
-  self.organization = ko.observable(self.application.organizationName());
-  self.xMargin = ko.observable("10");
+  self.text = self.stampFields.text;
+  self.date = self.stampFields.date;
+  self.organization = self.stampFields.organization;
+  self.xMargin = self.stampFields.xMargin;
   self.xMarginOk = ko.computed(function() { return util.isNum(self.xMargin()); });
-  self.yMargin = ko.observable("85");
+  self.yMargin = self.stampFields.yMargin;
   self.yMarginOk = ko.computed(function() { return util.isNum(self.yMargin()); });
 
   self.transparency = ko.observable(transparencies[0]);
