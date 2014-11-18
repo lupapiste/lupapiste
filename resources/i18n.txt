@@ -29,5 +29,3 @@ more-prev-app-info-needed-message: Taustajärjestelmästä ei voitu noutaa kaikk
 
 error.link-permit-already-having-us-as-link-permit: Tämänhetkinen lupa on jo viitelupana luvalla, jota yrität lisätä. Viitelupalinkitys ei voi olla kaksisuuntainen.
 
-application.export.name: Lupapiste
-application.export.page: Sivu

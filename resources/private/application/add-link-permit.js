@@ -3,7 +3,6 @@ LUPAPISTE.AddLinkPermitModel = function() {
   self.dialogSelector = "#dialog-add-link-permit";
 
   self.appId = 0;
-  self.tempLinkPermitDataForInit = [];
   self.propertyId = ko.observable("");
   self.kuntalupatunnus = ko.observable("");
   self.selectedLinkPermit = ko.observable("");
@@ -27,11 +26,6 @@ LUPAPISTE.AddLinkPermitModel = function() {
       .processing(self.processing)
       .pending(self.pending)
       .success(function(data) {
-
-        data["app-links"] =
-          _.reject(data["app-links"],
-                   function(link){ return _.contains(self.tempLinkPermitDataForInit, link.id); });
-
         self.errorMessage(null);
         self.appMatches(data["app-links"]);
       })
@@ -48,17 +42,6 @@ LUPAPISTE.AddLinkPermitModel = function() {
     self.errorMessage(null);
     self.processing(false);
     self.pending(false);
-
-    self.tempLinkPermitDataForInit = [];
-
-    var data = app.linkPermitData();
-    if (_.size(data)) {
-      self.tempLinkPermitDataForInit = _.reduce(data,
-          function(memo, linkData){
-        memo.push(linkData.id());
-        return memo;
-      }, []);
-    }
 
     getAppMatchesForLinkPermitsSelect(app.id());
   };

@@ -197,6 +197,7 @@
 
 (def auth-methods {:init anyone
                    :cdn-fallback anyone
+                   :common anyone
                    :hashbang anyone
                    :upload logged-in?
                    :applicant applicant?
@@ -428,7 +429,7 @@
         result (execute-command "upload-attachment" upload-data request)]
     (if (core/ok? result)
       (resp/redirect "/html/pages/upload-ok.html")
-      (resp/redirect (str (hiccup.util/url "/html/pages/upload-1.47.html"
+      (resp/redirect (str (hiccup.util/url "/html/pages/upload-1.52.html"
                                         (-> (:params request)
                                           (dissoc :upload)
                                           (dissoc ring.middleware.anti-forgery/token-key)

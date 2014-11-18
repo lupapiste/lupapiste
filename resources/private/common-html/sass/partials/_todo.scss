@@ -1,0 +1,28 @@
+/* todo class for marking unfinished content */
+
+.todo {
+  opacity: 0.2;
+  outline: black dotted medium;
+}
+
+.todo-off {
+  opacity: 1;
+  outline: none;
+}
+
+.feature {
+  opacity: 0.8;
+  border: orange dotted medium;
+  padding: 6px;
+  border-radius: 10px;
+  .legend {
+    display: inline-block;
+    position: relative;
+    top: -20px;
+    right: -10px;
+    background-color: orange;
+    color: black;
+    padding: 3px;
+    border-radius: 5px;
+  }
+}

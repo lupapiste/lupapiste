@@ -120,7 +120,8 @@
 (defn find-authorities-in-applications-organization [app]
   (mongo/select :users
     {:organizations (:organization app) :role "authority" :enabled true}
-    {:firstName 1 :lastName 1}))
+    {:firstName 1, :lastName 1}
+    {:lastName 1, :firstName 1}))
 
 (defquery application
   {:roles            [:applicant :authority]
@@ -275,10 +276,12 @@
         kuntalupatunnus (-> verdicts :verdicts first :kuntalupatunnus)]
     (if kuntalupatunnus
       (-> application
+         (assoc-in [:linkPermitData 0 :lupapisteId] link-permit-app-id)
          (assoc-in [:linkPermitData 0 :id] kuntalupatunnus)
          (assoc-in [:linkPermitData 0 :type] "kuntalupatunnus"))
       (do
-        (error "Not able to get a kuntalupatunnus for the application  " (:id application) " from it link permit's (" link-permit-app-id ") verdict.")
+        (error "Not able to get a kuntalupatunnus for the application  " (:id application) " from it's link permit's (" link-permit-app-id ") verdict."
+               " Associated Link-permit data: " (:linkPermitData application))
         (fail! :error.kuntalupatunnus-not-available-from-verdict)))))
 
 (defn- organization-has-ftp-user? [organization application]
@@ -777,19 +780,23 @@
    :roles      [:applicant :authority]
    :states     (action/all-application-states-but [:sent :closed :canceled])}
   [{{:keys [propertyId] :as application} :application user :user :as command}]
-  (let [results (mongo/select :applications
-                  (merge (domain/application-query-for user) {:_id {$ne id}
+  (let [application (meta-fields/enrich-with-link-permit-data application)
+        ;; exclude from results the current application itself, and the applications that have a link-permit relation to it
+        ignore-ids (-> application
+                     (#(concat (:linkPermitData %) (:appsLinkingToUs %)))
+                     (#(map :id %))
+                     (conj id))
+        results (mongo/select :applications
+                  (merge (domain/application-query-for user) {:_id {$nin ignore-ids}
                                                               :infoRequest false
                                                               :permitType (:permitType application)
                                                               :operations.name {$nin ["ya-jatkoaika"]}})
                   {:_id 1 :permitType 1 :address 1 :propertyId 1})
+        ;; add the text to show in the dropdown for selections
         enriched-results (map
-                           (fn [r]
-                             (assoc r :text
-                               (str
-                                 (:address r) ", "
-                                 (:id r))))
+                           (fn [r] (assoc r :text (str (:address r) ", " (:id r))))
                            results)
+        ;; sort the results
         same-property-id-fn #(= propertyId (:propertyId %))
         with-same-property-id (vec (filter same-property-id-fn enriched-results))
         without-same-property-id (sort-by :text (vec (remove same-property-id-fn enriched-results)))
@@ -822,14 +829,26 @@
 (defn- validate-jatkolupa-zero-link-permits [_ application]
   (let [application (meta-fields/enrich-with-link-permit-data application)]
     (when (and (= :ya-jatkoaika (-> application :operations first :name keyword))
-            (not= 0 (-> application :linkPermitData count)))
+            (pos? (-> application :linkPermitData count)))
       (fail :error.jatkolupa-can-only-be-added-one-link-permit))))
+
+(defn- validate-link-permit-id [{:keys [data]} application]
+  (let [application (meta-fields/enrich-with-link-permit-data application)
+        ignore-ids (-> application
+                     (#(concat (:linkPermitData %) (:appsLinkingToUs %)))
+                     (#(map :id %))
+                     (conj (:id application)))]
+    (when (some
+            #( = (:id %) (:linkPermitId data))
+            (:appsLinkingToUs application))
+      (fail :error.link-permit-already-having-us-as-link-permit))))
 
 (defcommand add-link-permit
   {:parameters ["id" linkPermitId]
    :roles      [:applicant :authority]
    :states     (action/all-application-states-but [:sent :closed :canceled]);; Pitaako olla myos 'sent'-tila?
-   :pre-checks [validate-jatkolupa-zero-link-permits]
+   :pre-checks [validate-jatkolupa-zero-link-permits
+                validate-link-permit-id]
    :input-validators [(partial action/non-blank-parameters [:linkPermitId])
                       (fn [{d :data}] (when-not (mongo/valid-key? (:linkPermitId d)) (fail :error.invalid-db-key)))]}
   [{application :application}]

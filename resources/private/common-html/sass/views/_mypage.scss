@@ -1,0 +1,85 @@
+#mypage .poor {
+  color: red;
+  font-weight: bold;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+}
+
+#mypage .low {
+  color: red;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+}
+
+#mypage .average {
+  color: black;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+}
+
+#mypage .good {
+  color: green;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+}
+
+#mypage .excellent {
+  color: green;
+  font-weight: bold;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+}
+
+#mypage {
+
+}
+
+/*  */
+#own-info-form {
+  padding:0 $marginL;
+  .architect-toggle, .allowDirectMarketing-toggle {
+    height: 55px;
+    margin: 9px 0;
+    display: block;
+    width: 100%;
+
+    label, input {
+     display: inline;
+     width: $cols1;
+    }
+    input {
+      margin-right: $marginM;
+      display: inline;
+    }
+  }
+  .form-group {
+    padding: $marginM;
+  }
+}
+
+#pw-form {
+  padding: 0 $marginL;
+
+  .form-group {
+    padding: $marginM;
+  }
+  .form-entry {
+    height: 78px;
+  }
+}
+
+
+.architect-info {
+  margin: $marginL auto;
+  transition: height 2s;
+    
+
+  .architect-attachments {
+    margin-top: $marginL;
+  }
+}

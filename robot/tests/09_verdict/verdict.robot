@@ -122,7 +122,7 @@ Mikko signs the verdict
   Click Element  xpath=//Button[@data-test-id='do-sign-verdict']
   Wait Until  Element should be visible  xpath=//div[@data-test-id='verdict-signature-listing']
   Element should not be visible  xpath=//div[@data-test-id='verdict-signature-ui']
-  Element should Contain  xpath=//div[@data-test-id='verdict-signature-listing']  Mikko Intonen
+  Element should Contain  xpath=//div[@data-test-id='verdict-signature-listing']  Intonen Mikko
   Element should Contain  xpath=//div[@data-test-id='verdict-signature-listing']  ${CURRENT_DATE}
 
 *** Keywords ***

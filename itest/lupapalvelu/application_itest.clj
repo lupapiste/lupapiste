@@ -29,7 +29,7 @@
                               :lastName "Panaani"
                               :type "owner"
                               :role "owner"})
-    (fact "has applicant" (:applicant app) => "Pena Panaani")
+    (fact "has applicant" (:applicant app) => "Panaani Pena")
     (fact "has allowedAttachmentTypes" (:allowedAttachmentTypes app) => seq)
 
     (fact "Draft is not returned by latest-applications"

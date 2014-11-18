@@ -15,14 +15,14 @@
 (defn- applicant-name-from-auth [application]
   (let [owner (first (domain/get-auths-by-role application :owner))
         {first-name :firstName last-name :lastName} owner]
-    (s/trim (str first-name \space last-name))))
+    (s/trim (str last-name \space first-name))))
 
 (defn- applicant-name-from-doc [document]
   (when-let [body (:data document)]
     (if (= (get-in body [:_selected :value]) "yritys")
       (get-in body [:yritys :yritysnimi :value])
       (let [{first-name :etunimi last-name :sukunimi} (get-in body [:henkilo :henkilotiedot])]
-        (s/trim (str (:value first-name) \space (:value last-name)))))))
+        (s/trim (str (:value last-name) \space (:value first-name)))))))
 
 (defn applicant-index [application]
   (let [applicants (remove s/blank? (map applicant-name-from-doc (domain/get-applicant-documents application)))
@@ -135,11 +135,14 @@
         resp (mongo/select :app-links {:link {$in [app-id]}})]
     (if (seq resp)
       ;; Link permit data was found
-      (let [convert-fn (fn [link-data]
+      (let [our-link-permits (filter #(= (:type ((keyword app-id) %)) "application") resp)
+            apps-linking-to-us (filter #(= (:type ((keyword app-id) %)) "linkpermit") resp)
+            convert-fn (fn [link-data]
                          (let [link-array (:link link-data)
-                               app-index (.indexOf link-array app-id)
-                               link-permit-id (link-array (if (zero? app-index) 1 0))
+                               link-permit-id ((if (-> link-array (.indexOf app-id) zero?) second first)
+                                                link-array)
                                link-permit-type (:linkpermittype ((keyword link-permit-id) link-data))]
+
                            (if (= (:type ((keyword app-id) link-data)) "application")
 
                              ;; TODO: Jos viiteluvan tyyppi on myos jatkolupa, niin sitten :operation pitaa hakea
@@ -150,9 +153,8 @@
                                                         (-> (mongo/by-id "applications" link-permit-id {:operations 1})
                                                           :operations first :name))]
                                {:id link-permit-id :type link-permit-type :operation link-permit-app-op})
-                             {:id link-permit-id})))
-            our-link-permits (filter #(= (:type ((keyword app-id) %)) "application") resp)
-            apps-linking-to-us (filter #(= (:type ((keyword app-id) %)) "linkpermit") resp)]
+
+                             {:id link-permit-id :type link-permit-type})))]
 
         (-> app
           (assoc :linkPermitData (when (seq our-link-permits)
