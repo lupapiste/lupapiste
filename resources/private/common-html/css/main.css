@@ -13,6 +13,7 @@
     CSS Reset by ajk (http://ajk.im/)
     Based on http://necolas.github.com/normalize.css/
 */
+@import url(http://fonts.googleapis.com/css?family=Source+Sans+Pro:200,300,400,700,200italic,300italic,400italic,700italic);
 /* line 11, ../sass/partials/_reset.scss */
 html, body, div,
 span, object, iframe,
@@ -255,26 +256,25 @@ body {
 /* colors*/
 /* TYPOGRAPHY
 ----------------------------------------------------------------------------- */
-/* fonts */
-/* line 7, ../sass/partials/_typography.scss */
+/* line 8, ../sass/partials/_typography.scss */
 body {
-  font-family: "Calibri", "Verdana", sans-serif;
+  font-family: "Source Sans Pro", sans-serif;
   font-size: 15px;
   line-height: 24px;
   margin-bottom: 24px;
   color: #595959;
 }
 
-/* line 15, ../sass/partials/_typography.scss */
+/* line 16, ../sass/partials/_typography.scss */
 p {
   color: #616161;
   margin-bottom: 24px;
   line-height: 24px;
 }
 
-/* line 21, ../sass/partials/_typography.scss */
+/* line 22, ../sass/partials/_typography.scss */
 h1 {
-  font-family: "Calibri", "Verdana" sans-serif;
+  font-family: "Source Sans Pro", sans-serif;
   font-weight: normal;
   font-size: 24px;
   line-height: 48px;
@@ -283,27 +283,27 @@ h1 {
   color: #595959;
 }
 
-/* line 32, ../sass/partials/_typography.scss */
+/* line 33, ../sass/partials/_typography.scss */
 h2 {
   font-size: 21.6px;
-  font-family: "Calibri", "Verdana" sans-serif;
+  font-family: "Source Sans Pro", sans-serif;
   margin-bottom: 6px;
 }
 
-/* line 38, ../sass/partials/_typography.scss */
+/* line 39, ../sass/partials/_typography.scss */
 h3 {
   font-size: 18px;
-  font-family: "Calibri", "Verdana" sans-serif;
-  font-weight: lighter;
+  font-family: "Source Sans Pro", sans-serif;
+  font-weight: normal;
   margin-bottom: 6px;
 }
 
-/* line 44, ../sass/partials/_typography.scss */
+/* line 45, ../sass/partials/_typography.scss */
 i {
   margin-bottom: 12px;
 }
 
-/* line 48, ../sass/partials/_typography.scss */
+/* line 49, ../sass/partials/_typography.scss */
 .error-text {
   color: red;
 }
@@ -653,24 +653,17 @@ i {
 
 /* line 246, ../sass/partials/_icons.scss */
 h1 .icon {
-  margin-bottom: -4px;
   margin-right: 3px;
 }
 
-/* line 251, ../sass/partials/_icons.scss */
-h2 .icon {
-  margin-left: 12px;
-  margin-bottom: -2px;
-}
-
-/* line 258, ../sass/partials/_icons.scss */
+/* line 252, ../sass/partials/_icons.scss */
 .ui-icon.ui-icon-circle-triangle-w {
   background-image: url("/img/icons-sprite-1.12.png");
   background-repeat: no-repeat;
   background-position: 2px -3097px;
 }
 
-/* line 263, ../sass/partials/_icons.scss */
+/* line 257, ../sass/partials/_icons.scss */
 .ui-icon.ui-icon-circle-triangle-e {
   background-image: url("/img/icons-sprite-1.12.png");
   background-repeat: no-repeat;
@@ -933,13 +926,25 @@ footer #buildinfo {
   max-width: 100px;
   height: auto;
 }
+/* line 54, ../sass/partials/_buttons.scss */
+[type=submit] span.label, .btn span.label, button span.label {
+  margin-left: 12px;
+}
 
-/* line 56, ../sass/partials/_buttons.scss */
+/* line 60, ../sass/partials/_buttons.scss */
+button[disabled] {
+  color: #aaaaaa;
+  -webkit-box-shadow: none;
+  box-shadow: none;
+  background: #f6f6f6;
+}
+
+/* line 67, ../sass/partials/_buttons.scss */
 .btn.left-align {
   float: left;
 }
 
-/* line 60, ../sass/partials/_buttons.scss */
+/* line 72, ../sass/partials/_buttons.scss */
 .btn-dialog {
   position: absolute;
   text-align: center;
@@ -951,12 +956,12 @@ footer #buildinfo {
   max-width: 16.25em;
   margin-left: 6px;
 }
-/* line 71, ../sass/partials/_buttons.scss */
+/* line 83, ../sass/partials/_buttons.scss */
 .btn-dialog.cancel {
   width: auto;
 }
 
-/* line 76, ../sass/partials/_buttons.scss */
+/* line 88, ../sass/partials/_buttons.scss */
 .btn-link {
   line-height: 23px;
   margin: 24px;
@@ -966,35 +971,35 @@ footer #buildinfo {
   overflow: auto;
 }
 
-/* line 85, ../sass/partials/_buttons.scss */
+/* line 97, ../sass/partials/_buttons.scss */
 .btn-dialog.btn-primary {
   left: 0;
 }
 
-/* line 89, ../sass/partials/_buttons.scss */
+/* line 101, ../sass/partials/_buttons.scss */
 .btn-wizard {
   margin-top: 12px;
 }
 
-/* line 93, ../sass/partials/_buttons.scss */
+/* line 105, ../sass/partials/_buttons.scss */
 .btn-wizard.btn-primary {
   float: right;
   margin-right: 24px;
 }
 
-/* line 98, ../sass/partials/_buttons.scss */
+/* line 110, ../sass/partials/_buttons.scss */
 .btn-narrow {
   width: 10em;
   text-align: center;
 }
 
-/* line 103, ../sass/partials/_buttons.scss */
+/* line 115, ../sass/partials/_buttons.scss */
 .btn-auto {
   width: auto;
   text-align: center;
 }
 
-/* line 113, ../sass/partials/_buttons.scss */
+/* line 125, ../sass/partials/_buttons.scss */
 .btn-primary {
   background: #04c714;
   text-transform: uppercase;
@@ -1002,21 +1007,21 @@ footer #buildinfo {
   text-shadow: none;
   font-weight: 600;
 }
-/* line 119, ../sass/partials/_buttons.scss */
+/* line 131, ../sass/partials/_buttons.scss */
 .btn-primary:hover {
   background: #03950f;
   -webkit-box-shadow: 0 1px 2px #c3c3c3;
   box-shadow: 0 1px 2px #c3c3c3;
 }
 
-/* line 131, ../sass/partials/_buttons.scss */
+/* line 143, ../sass/partials/_buttons.scss */
 .btn-decline {
   background: red;
   color: white;
   text-transform: uppercase;
 }
 
-/* line 138, ../sass/partials/_buttons.scss */
+/* line 150, ../sass/partials/_buttons.scss */
 .button-loader {
   white-space: nowrap;
   display: inline-block;
@@ -1028,7 +1033,7 @@ footer #buildinfo {
   right: 8px;
 }
 
-/* line 149, ../sass/partials/_buttons.scss */
+/* line 161, ../sass/partials/_buttons.scss */
 .btn-nav-forward {
   position: relative;
   max-height: 30px;
@@ -1036,7 +1041,7 @@ footer #buildinfo {
   margin-right: 20px;
   text-align: center;
 }
-/* line 156, ../sass/partials/_buttons.scss */
+/* line 168, ../sass/partials/_buttons.scss */
 .btn-nav-forward:after {
   content: " ";
   width: 0;
@@ -1048,33 +1053,33 @@ footer #buildinfo {
   top: 0;
   right: -22px;
 }
-/* line 170, ../sass/partials/_buttons.scss */
+/* line 182, ../sass/partials/_buttons.scss */
 .btn-nav-forward:disabled:after, .btn-nav-forward[disabled=disabled]:after, .btn-nav-forward.disabled:after, .btn-nav-forward:disabled:hover:after, .btn-nav-forward[disabled=disabled]:hover:after, .btn-nav-forward.disabled:hover:after, .btn-nav-forward:disabled:active:after, .btn-nav-forward[disabled=disabled]:active:after, .btn-nav-forward.disabled:active:after {
   border-left: 22px solid #f6f6f6;
 }
-/* line 176, ../sass/partials/_buttons.scss */
+/* line 188, ../sass/partials/_buttons.scss */
 .btn-nav-forward:hover:after {
   border-left: 22px solid #dddddd;
 }
-/* line 181, ../sass/partials/_buttons.scss */
+/* line 193, ../sass/partials/_buttons.scss */
 .btn-nav-forward.btn-primary:after {
   border-left: 22px solid #04c714;
 }
-/* line 187, ../sass/partials/_buttons.scss */
+/* line 199, ../sass/partials/_buttons.scss */
 .btn-nav-forward.btn-primary:disabled:after, .btn-nav-forward.btn-primary[disabled=disabled]:after, .btn-nav-forward.btn-primary.disabled:after, .btn-nav-forward.btn-primary:disabled:hover:after, .btn-nav-forward.btn-primary[disabled=disabled]:hover:after, .btn-nav-forward.btn-primary.disabled:hover:after, .btn-nav-forward.btn-primary:disabled:active:after, .btn-nav-forward.btn-primary[disabled=disabled]:active:after, .btn-nav-forward.btn-primary.disabled:active:after {
   border-left: 22px solid #f6f6f6;
 }
-/* line 192, ../sass/partials/_buttons.scss */
+/* line 204, ../sass/partials/_buttons.scss */
 .btn-nav-forward.btn-primary:hover:after {
   border-left: 22px solid #03950f;
 }
-/* line 197, ../sass/partials/_buttons.scss */
+/* line 209, ../sass/partials/_buttons.scss */
 .btn-nav-forward .icon.right-align {
   right: -12px;
   z-index: 3;
 }
 
-/* line 203, ../sass/partials/_buttons.scss */
+/* line 215, ../sass/partials/_buttons.scss */
 .btn-nav-back {
   text-align: center;
   position: relative;
@@ -1082,7 +1087,7 @@ footer #buildinfo {
   margin-left: 22px;
   overflow: visible;
 }
-/* line 210, ../sass/partials/_buttons.scss */
+/* line 222, ../sass/partials/_buttons.scss */
 .btn-nav-back:before {
   content: " ";
   width: 0;
@@ -1094,37 +1099,37 @@ footer #buildinfo {
   top: 0;
   left: -22px;
 }
-/* line 224, ../sass/partials/_buttons.scss */
+/* line 236, ../sass/partials/_buttons.scss */
 .btn-nav-back:disabled:before, .btn-nav-back[disabled=disabled]:before, .btn-nav-back.disabled:before, .btn-nav-back:disabled:hover:before, .btn-nav-back[disabled=disabled]:hover:before, .btn-nav-back.disabled:hover:before, .btn-nav-back:disabled:active:before, .btn-nav-back[disabled=disabled]:active:before, .btn-nav-back.disabled:active:before {
   border-right: 22px solid #f6f6f6;
 }
-/* line 229, ../sass/partials/_buttons.scss */
+/* line 241, ../sass/partials/_buttons.scss */
 .btn-nav-back:hover:before {
   border-right: 22px solid #dddddd;
 }
-/* line 233, ../sass/partials/_buttons.scss */
+/* line 245, ../sass/partials/_buttons.scss */
 .btn-nav-back .icon.left-align {
   left: -9px;
   z-index: 3;
 }
 
-/* line 240, ../sass/partials/_buttons.scss */
+/* line 252, ../sass/partials/_buttons.scss */
 .btn-container button {
   margin-right: 6px;
 }
-/* line 243, ../sass/partials/_buttons.scss */
+/* line 255, ../sass/partials/_buttons.scss */
 .btn-container button:last-child {
   margin-right: 0;
 }
 
-/* line 248, ../sass/partials/_buttons.scss */
+/* line 260, ../sass/partials/_buttons.scss */
 .btn-container.right-align {
   float: right;
 }
 
 /* line 1, ../sass/partials/_forms.scss */
 legend {
-  font-family: "Calibri", "Verdana" sans-serif;
+  font-family: "Source Sans Pro", sans-serif;
   margin: 0 0 24px;
 }
 
@@ -1432,7 +1437,7 @@ input[readonly]:focus, textarea[readonly]:focus {
   width: 100%;
   display: block;
   text-transform: uppercase;
-  font-family: "Calibri", "Verdana" sans-serif;
+  font-family: "Source Sans Pro", sans-serif;
 }
 /* line 295, ../sass/partials/_forms.scss */
 .form-group .form-entry, .form-choice .form-entry, .form-table .form-entry {
@@ -1877,7 +1882,7 @@ table {
 /* line 10, ../sass/partials/_tables.scss */
 th {
   background: #dddddd;
-  font-family: "Calibri", "Verdana" sans-serif;
+  font-family: "Source Sans Pro", sans-serif;
   font-size: 0.85em;
   font-weight: 700;
   letter-spacing: 0.125em;
@@ -2783,7 +2788,7 @@ ul.attachments-list li.mandatory-attachments {
   line-height: 27px;
   position: relative;
   cursor: pointer;
-  font-weight: 100;
+  font-weight: normal;
   margin-bottom: 0;
   position: relative;
   width: 100%;
@@ -5260,45 +5265,45 @@ td.comment-text {
 /*
   Lupapalvelu CSS:
 */
-/* line 138, ../sass/main.scss */
+/* line 139, ../sass/main.scss */
 .ltext-error {
   color: #ffd280 !important;
   font-weight: bold !important;
   text-shadow: 0px 1px 0 black !important;
 }
 
-/* line 144, ../sass/main.scss */
+/* line 145, ../sass/main.scss */
 .visible {
   display: block;
 }
 
-/* line 148, ../sass/main.scss */
+/* line 149, ../sass/main.scss */
 .hidden {
   display: none;
 }
 
-/* line 152, ../sass/main.scss */
+/* line 153, ../sass/main.scss */
 .template {
   display: none;
 }
 
-/* line 156, ../sass/main.scss */
+/* line 157, ../sass/main.scss */
 #main-nav-bar {
   display: none;
 }
 
-/* line 161, ../sass/main.scss */
+/* line 162, ../sass/main.scss */
 .inert-table tbody tr:hover td,
 .inert-table tbody tr:hover th {
   background-color: #ffffff;
 }
 
-/* line 165, ../sass/main.scss */
+/* line 166, ../sass/main.scss */
 #application table input {
   margin: 0px;
 }
 
-/* line 169, ../sass/main.scss */
+/* line 170, ../sass/main.scss */
 .droparea {
   width: 150px;
   height: 100px;
@@ -5310,27 +5315,27 @@ td.comment-text {
   display: table-cell;
 }
 
-/* line 180, ../sass/main.scss */
+/* line 181, ../sass/main.scss */
 .droparea-hover {
   border-color: #101010;
   color: #101010;
 }
 
 /* basic styles*/
-/* line 188, ../sass/main.scss */
+/* line 189, ../sass/main.scss */
 .table {
   font-size: 16px;
   line-height: 24px;
 }
 
 /* map zoomer fix */
-/* line 194, ../sass/main.scss */
+/* line 195, ../sass/main.scss */
 div.pzbDiv {
   right: 8px;
   top: 10px;
 }
 
-/* line 199, ../sass/main.scss */
+/* line 200, ../sass/main.scss */
 .dev-debug {
   z-index: 666;
   width: 146px;
@@ -5343,47 +5348,47 @@ div.pzbDiv {
   box-shadow: 3px 4px 7px;
   font-size: 0.8em;
 }
-/* line 211, ../sass/main.scss */
+/* line 212, ../sass/main.scss */
 .dev-debug p {
   margin-bottom: 4px;
 }
-/* line 213, ../sass/main.scss */
+/* line 214, ../sass/main.scss */
 .dev-debug p a {
   display: block;
 }
 
-/* line 219, ../sass/main.scss */
+/* line 220, ../sass/main.scss */
 #ui-datepicker-div {
   display: none;
 }
 
 /* find address and poi list: */
-/* line 224, ../sass/main.scss */
+/* line 225, ../sass/main.scss */
 .create-find {
   font-size: 12px;
 }
-/* line 226, ../sass/main.scss */
+/* line 227, ../sass/main.scss */
 .create-find .type {
   color: #555;
   font-style: italic;
 }
-/* line 229, ../sass/main.scss */
+/* line 230, ../sass/main.scss */
 .create-find .type:before {
   content: " (";
 }
-/* line 230, ../sass/main.scss */
+/* line 231, ../sass/main.scss */
 .create-find .type:after {
   content: ")";
 }
-/* line 233, ../sass/main.scss */
+/* line 234, ../sass/main.scss */
 .create-find .number:before {
   content: " ";
 }
-/* line 235, ../sass/main.scss */
+/* line 236, ../sass/main.scss */
 .create-find .municipality {
   color: #555;
 }
-/* line 237, ../sass/main.scss */
+/* line 238, ../sass/main.scss */
 .create-find .municipality:before {
   content: ", ";
 }
