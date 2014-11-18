@@ -1131,8 +1131,8 @@ footer #buildinfo {
 
 /* line 1, ../sass/partials/_forms.scss */
 legend {
-  font-family: "Source Sans Pro", sans-serif;
   font-size: 21.6px;
+  font-family: "Source Sans Pro", sans-serif;
   margin: 0 0 12px;
 }
 
@@ -5155,16 +5155,15 @@ div.stamp-content {
 }
 
 /* line 10, ../sass/views/_stamping.scss */
-#dialog-stamp-attachments .invalid-margin {
+#stamping-component-container .invalid-margin {
   background: #f06464;
 }
 /* line 14, ../sass/views/_stamping.scss */
-#dialog-stamp-attachments .stamp-status span {
+#stamping-component-container .stamp-status span {
   font-size: 18px;
-  color: #616161;
 }
-/* line 19, ../sass/views/_stamping.scss */
-#dialog-stamp-attachments .stamp-buttons {
+/* line 18, ../sass/views/_stamping.scss */
+#stamping-component-container .stamp-buttons {
   margin-top: 10px;
 }
 
