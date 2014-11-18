@@ -230,6 +230,10 @@
   };
 
   ko.bindingHandlers.slider = {
+    init: function(element, valueAccessor) {
+      var value = ko.utils.unwrapObservable(valueAccessor());
+      $(element).toggleClass("hidden", value);
+    },
     update: function(element, valueAccessor, allBindingsAccessor) {
       var value = ko.utils.unwrapObservable(valueAccessor());
       var bindings = ko.utils.unwrapObservable(allBindingsAccessor());
