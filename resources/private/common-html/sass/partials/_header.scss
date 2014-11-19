@@ -1,0 +1,87 @@
+
+nav {
+  position: fixed;
+  top:0;
+  z-index: 1100;
+  background: #fff;
+  height: ($baseline * 3);
+  padding-bottom: $marginS;
+  width: 100%;
+  &.nav-wrapper {
+    width: 100%;
+    max-width: $application-max-width;
+    margin: 0 auto;
+    position: relative;
+    .brand {
+      margin-top: $marginS;
+      margin-left: 8px;
+      position: relative;
+      width: 300px;
+      display: inline-block;
+        height: 64px;
+      a img {
+        width: 234px;
+        height: 50px;
+      }
+      .change-language {
+        color: $lp-dark-grey;
+        text-decoration: none;
+        position: absolute;
+        right: 63px;
+        bottom: 5px;
+      }
+    }
+    .header-menu {
+      position: absolute;
+      top: 0;
+      right: 0;
+      .main-nav {
+        width:$cols3;
+        background: $lp-dark-grey;
+        height: ($baseline * 3);
+        margin-right: $marginS;
+        display: inline-block;
+        span {
+          color: white;
+          text-decoration: none;
+          position: absolute;
+          bottom: 12px;
+          left: $marginL;
+          font-size: 1.1em;
+        }
+        .icon {
+          left: $marginS;
+          bottom: 16px;
+        }
+
+      }
+
+      .user-menu {
+        display: inline-block;
+        width:$cols3;
+        background: $lp-dark-grey;
+        height: ($baseline * 3);
+        position: relative;
+
+        #user-name {
+          text-decoration: underline;
+        }
+
+        a {
+          color: white;
+          text-decoration: none;
+          float: right;
+          margin: $marginM $marginS 0 0;
+          max-height: 24px;
+          overflow: hidden;
+        }
+        a + a {
+          margin: $marginS $marginS $marginS $cols2;
+        }
+      }
+    }
+    
+  }
+}
+
+

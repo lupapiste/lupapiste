@@ -46,12 +46,13 @@
    :underscore     {:depends [:lo-dash]
                     :js ["underscore.string.min.js" "underscore.string.init.js"]}
    :moment         {:js ["moment.min.js"]}
+   :open-layers    {:js ["openlayers-2.13_20140619.min.lupapiste.js"]}
 
    ;; Init can also be used as a standalone lib, see web.clj
    :init         {:depends [:underscore]
                   :js [conf "hub.js" "log.js"]}
 
-   ;; Components to be included in a SPA
+   ;; Common components
 
    :debug        (if (env/dev-mode?) debugjs {})
 
@@ -62,25 +63,29 @@
 
    :selectm      {:js ["selectm.js"]}
 
-   ;:licenses     {:html ["licenses.html"]}
-
-   :screenmessages  {:js   ["screenmessage.js"]
-                     :html ["screenmessage.html"]}
+   :selectm-html {:html ["selectm.html"]
+                  :css ["selectm.css"]}
 
    :expanded-content  {:depends [:jquery]
                        :js ["expanded-content.js"]}
 
    :common       {:depends [:init :jquery :jquery-upload :knockout :underscore :moment :i18n :selectm
-                            :expanded-content :mockjax]
+                            :expanded-content :mockjax :open-layers]
                   :js ["util.js" "event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js"
                        "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "features.js"
                        "statuses.js" "statusmodel.js" "authorization.js" "vetuma.js"]}
 
-   :common-html  {:css ["css/main.css" "selectm.css" "jquery-ui.css"]
-                  :html ["404.html" "footer.html" "selectm.html"]}
+   :common-html  {:depends [:selectm-html]
+                  :css ["css/main.css" "jquery-ui.css"]
+                  :html ["404.html" "footer.html"]}
+
+   ;; Components to be included in a SPA
+
+   :screenmessages  {:js   ["screenmessage.js"]
+                     :html ["screenmessage.html"]}
 
    :map          {:depends [:common-html]
-                  :js ["openlayers-2.13_20140619.min.lupapiste.js" "gis.js" "locationsearch.js"]
+                  :js [ "gis.js" "locationsearch.js"]
                   :html ["map-popup.html"]}
 
    :mypage       {:depends [:common-html]
@@ -230,11 +235,6 @@
              :html ["index.html" "admin.html"
                     "admin-users.html" "organizations.html" "fixtures.html" "features.html" "actions.html"
                     "screenmessages-list.html"]}
-
-   :login-frame {:depends [:login]
-                 :html    ["login-frame.html"]
-                 :js      ["login-frame.js"]
-                 :css     ["login-frame.css"]}
 
    :wordpress {:depends [:login :password-reset]}
 

@@ -71,10 +71,16 @@ var LUPAPISTE = LUPAPISTE || {};
       if (!self.allowAnonymous && self.session === undefined) {
         ajax.query("user")
           .success(function (e) {
-            self.session = true;
-            currentUser.set(e.user);
-            hub.send("login", e);
-            self.hashChanged();
+            if (e.user) {
+              self.session = true;
+              currentUser.set(e.user);
+              hub.send("login", e);
+              self.hashChanged();
+            } else {
+              error("User query did not return user, response: ", e);
+              self.session = false;
+              hub.send("logout", e);
+            }
           })
           .error(function (e) {
             self.session = false;

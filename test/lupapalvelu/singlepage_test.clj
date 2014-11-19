@@ -8,8 +8,8 @@
   (against-background
     (env/feature? :no-minification) => false)
 
-  (fact "login-frame"
-    (compose-resource :js :login-frame) => truthy)
+  (fact "common"
+    (compose-resource :js :common) => truthy)
 
   (fact "welcome"
     (compose-resource :js :welcome) => truthy)
@@ -33,7 +33,7 @@
     (compose-resource :js :oir) => truthy)
 
   (fact "wordpress"
-    (compose-resource :js :oir) => truthy)
+    (compose-resource :js :wordpress) => truthy)
 
   (fact "neighbor"
     (compose-resource :js :neighbor) => truthy))
