@@ -3,9 +3,7 @@
             [clojure.string :refer [join]]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.factlet  :refer :all]
-            [lupapalvelu.operations :as operations]
-            [lupapalvelu.domain :as domain]
-            [lupapalvelu.document.schemas :as schemas]))
+            [lupapalvelu.domain :as domain]))
 
 (apply-remote-minimal)
 
@@ -279,9 +277,7 @@
         (let [app (query-application ronja application-id)
               suunnittelija (domain/get-document-by-id app doc-id)]
           (:authority app) => (contains {:id sonja-id})
-          (get-in suunnittelija [:data :henkilotiedot :hetu :value]) => "210281-****"))
-
-      )))
+          (get-in suunnittelija [:data :henkilotiedot :hetu :value]) => "210281-****")))))
 
 (fact* "Merging building information from KRYSP does not overwrite the rest of the document"
   (let [application-id  (create-app-id pena :municipality sonja-muni :operation "kayttotark-muutos")
@@ -311,7 +307,6 @@
         doc-after       (domain/get-document-by-name merged-app "purkaminen")]
         (get-in doc-after [:data :mitat :kokonaisala :source]) => "krysp"
         (get-in doc-after [:data :kaytto :kayttotarkoitus :source]) => "krysp"))
-
 
 (facts "Facts about update operation description"
   (let [application-id (create-app-id pena :operation "asuinrakennus" :municipality sonja-muni)
