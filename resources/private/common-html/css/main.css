@@ -1999,14 +1999,13 @@ table.attachments-template-table td.attachment-type-id {
   list-style: none;
   margin: 0;
   padding: 5px 0 0 0;
-  font: 16px Calibri;
   display: inline;
 }
-/* line 43, ../sass/partials/_tabs.scss */
+/* line 42, ../sass/partials/_tabs.scss */
 .tabs li {
   display: inline-block;
 }
-/* line 45, ../sass/partials/_tabs.scss */
+/* line 44, ../sass/partials/_tabs.scss */
 .tabs li a {
   display: inline-block;
   padding: 8px 10px;
@@ -2023,7 +2022,7 @@ table.attachments-template-table td.attachment-type-id {
 .tabs li a:hover {
   border-bottom: 6px solid #f57e23;
 }
-/* line 48, ../sass/partials/_tabs.scss */
+/* line 47, ../sass/partials/_tabs.scss */
 .tabs li a .indicator {
   background-color: #f57e23;
   border-radius: 2px;
@@ -2031,7 +2030,7 @@ table.attachments-template-table td.attachment-type-id {
   padding: 2px 6px;
   margin-right: 14px;
 }
-/* line 55, ../sass/partials/_tabs.scss */
+/* line 54, ../sass/partials/_tabs.scss */
 .tabs li a:after {
   content: " ";
   display: inline-block;
@@ -2043,10 +2042,10 @@ table.attachments-template-table td.attachment-type-id {
   width: 10px;
   height: 13px;
   position: absolute;
-  top: 6px;
+  top: 8px;
   right: 0px;
 }
-/* line 66, ../sass/partials/_tabs.scss */
+/* line 65, ../sass/partials/_tabs.scss */
 .tabs li a:before {
   content: " ";
   display: inline-block;
@@ -2058,19 +2057,19 @@ table.attachments-template-table td.attachment-type-id {
   width: 10px;
   height: 13px;
   position: absolute;
-  bottom: 4px;
+  bottom: 6px;
   right: 0px;
 }
-/* line 78, ../sass/partials/_tabs.scss */
+/* line 77, ../sass/partials/_tabs.scss */
 .tabs li.active a {
   border-bottom: 6px solid #f57e23;
 }
-/* line 82, ../sass/partials/_tabs.scss */
+/* line 81, ../sass/partials/_tabs.scss */
 .tabs li:first-child a {
   padding-left: 0;
 }
 
-/* line 89, ../sass/partials/_tabs.scss */
+/* line 88, ../sass/partials/_tabs.scss */
 .tabs-content-container {
   border: 1px solid #ccc;
   border-top: none;
@@ -2078,21 +2077,21 @@ table.attachments-template-table td.attachment-type-id {
   width: 400px;
 }
 
-/* line 96, ../sass/partials/_tabs.scss */
+/* line 95, ../sass/partials/_tabs.scss */
 .tab-content {
   padding: 0;
 }
-/* line 98, ../sass/partials/_tabs.scss */
+/* line 97, ../sass/partials/_tabs.scss */
 .tab-content h1 {
   line-height: normal;
   float: left;
 }
 
-/* line 104, ../sass/partials/_tabs.scss */
+/* line 103, ../sass/partials/_tabs.scss */
 .radio-tabs {
   display: inline;
 }
-/* line 107, ../sass/partials/_tabs.scss */
+/* line 106, ../sass/partials/_tabs.scss */
 .radio-tabs input[type=radio] {
   display: none;
   width: 0px;
@@ -2103,7 +2102,7 @@ table.attachments-template-table td.attachment-type-id {
   position: absolute;
   z-index: -1;
 }
-/* line 117, ../sass/partials/_tabs.scss */
+/* line 116, ../sass/partials/_tabs.scss */
 .radio-tabs input[type="radio"] + label {
   display: inline-block;
   padding: 8px 10px;
@@ -2114,30 +2113,30 @@ table.attachments-template-table td.attachment-type-id {
   /* Note: IE filters and border-radius don't mix */
   filter: none;
 }
-/* line 126, ../sass/partials/_tabs.scss */
+/* line 125, ../sass/partials/_tabs.scss */
 .radio-tabs input[type="radio"] + label:hover {
   cursor: pointer;
 }
-/* line 130, ../sass/partials/_tabs.scss */
+/* line 129, ../sass/partials/_tabs.scss */
 .radio-tabs input[type="radio"]:checked + label {
   background: #dddddd;
 }
-/* line 134, ../sass/partials/_tabs.scss */
+/* line 133, ../sass/partials/_tabs.scss */
 .radio-tabs [type="radio"] + label.checked {
   background: #dddddd;
 }
-/* line 137, ../sass/partials/_tabs.scss */
+/* line 136, ../sass/partials/_tabs.scss */
 .radio-tabs .form-input {
   margin-bottom: 7px;
 }
-/* line 140, ../sass/partials/_tabs.scss */
+/* line 139, ../sass/partials/_tabs.scss */
 .radio-tabs button.application-create {
   display: inline;
   margin-bottom: 0;
   width: 340px;
 }
 @media all and (max-width: 1000px) {
-  /* line 140, ../sass/partials/_tabs.scss */
+  /* line 139, ../sass/partials/_tabs.scss */
   .radio-tabs button.application-create {
     position: absolute;
     left: 8px;
@@ -4481,38 +4480,37 @@ td.comment-text {
 }
 /* line 166, ../sass/views/_attachment.scss */
 .attachment-label .attachment-label-header {
-  font-family: "Calibri", "Verdana" sans-serif;
   font-size: 0.85em;
   font-weight: 700;
   letter-spacing: 0.125em;
 }
-/* line 173, ../sass/views/_attachment.scss */
+/* line 172, ../sass/views/_attachment.scss */
 .attachment-label .attachment-label-header-item {
   margin-right: 24px;
 }
-/* line 177, ../sass/views/_attachment.scss */
+/* line 176, ../sass/views/_attachment.scss */
 .attachment-label input {
   display: block;
   margin: 0;
   width: 22em;
   height: 25px;
 }
-/* line 184, ../sass/views/_attachment.scss */
+/* line 183, ../sass/views/_attachment.scss */
 .attachment-label select {
   display: block;
   width: 22.5em;
 }
-/* line 189, ../sass/views/_attachment.scss */
+/* line 188, ../sass/views/_attachment.scss */
 .attachment-label .attachment-info-field {
   margin-bottom: 6px;
 }
 
-/* line 194, ../sass/views/_attachment.scss */
+/* line 193, ../sass/views/_attachment.scss */
 .signatures {
   margin-top: 12px;
 }
 
-/* line 198, ../sass/views/_attachment.scss */
+/* line 197, ../sass/views/_attachment.scss */
 .signature-table {
   display: table;
   width: auto;
@@ -4520,7 +4518,7 @@ td.comment-text {
   margin-left: 6px;
 }
 
-/* line 205, ../sass/views/_attachment.scss */
+/* line 204, ../sass/views/_attachment.scss */
 .signature-row {
   display: table-row;
   width: auto;
@@ -4529,7 +4527,7 @@ td.comment-text {
   line-height: 27px;
 }
 
-/* line 213, ../sass/views/_attachment.scss */
+/* line 212, ../sass/views/_attachment.scss */
 .signature-cell {
   display: table-column;
   width: 200px;
