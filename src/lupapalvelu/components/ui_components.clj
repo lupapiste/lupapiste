@@ -136,7 +136,7 @@
                        "add-operation.js" "stamp-model.js" "request-statement-model.js" "add-party.js"
                        "attachments-tab-model.js" "application-model.js" "invite-company.js" "application.js"]
                   :html ["add-link-permit.html" "application.html" "inforequest.html" "add-operation.html"
-                         "change-location.html" "invite-company.html"]}
+                         "change-location.html" "invite-company.html" "foreman-template.html"]}
 
    :applications {:depends [:common-html :repository :invites]
                   :html ["applications.html"]

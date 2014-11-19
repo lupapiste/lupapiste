@@ -1,0 +1,3 @@
+application.parties.foreman: Työnjohtaja
+application.parties.addForeman: Nimeä työnjohtaja
+help.AddForeman: Työnjohtaja ilmoitetaan aina erillisellä ilmoituksella.<br/>Paina alla olevaan painiketta, jos haluat ilmoittaa työnjohtajan jo lupahakemuksen yhteydessaä.
