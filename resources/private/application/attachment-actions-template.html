@@ -20,7 +20,9 @@
             data-test-id="new-attachment-template-button"
             class="btn">
           </button>
-          <button data-bind="click: startStamping, visible: $root.authorization.ok('stamp-attachments'), enable: !appModel.processing() && $root.authorization.ok('stamp-attachments')" class="btn">
+          <button data-bind="click: startStamping, visible: $root.authorization.ok('stamp-attachments'), enable: !appModel.processing() && $root.authorization.ok('stamp-attachments')"
+                  class="btn"
+                  data-test-id="stamp-attachments-btn">
             <span data-bind="ltext: 'application.stampAttachments'"></span>
             <span class="icon stamp left-align"></span>
           </button>
