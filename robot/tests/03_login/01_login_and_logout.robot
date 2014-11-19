@@ -95,18 +95,6 @@ Mikko logs in with username that has capital letters and wants to be forgotten
   Wait Until  Element Should Be Visible  rememberme
   Checkbox Should Not Be Selected  rememberme
 
-Mikko logs in via iframe
-  [Tags]  ie8
-  Go to  ${SERVER}/html/pages/login-iframe.html
-  Select Frame  loginframe
-  Element Should Not Be Visible  xpath=//nav
-  Checkbox Should Not Be Selected  rememberme
-  Login  ${LOGIN}  ${PASSWORD}
-  User should be logged in  ${USERNAME}
-  Applications page should be open
-  Number of visible applications  0
-  [Teardown]  logout
-
 Solita Admin can log in
   [Tags]  ie8
   SolitaAdmin logs in
