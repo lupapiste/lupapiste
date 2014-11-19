@@ -611,7 +611,7 @@
 
       (if (domain/owner-or-writer? app-with-verdict (:id user))
         (ok :id (:id app-with-verdict))
-        (fail :lupapiste-application-already-exists-but-unauthorized-to-access-it :id (:id app-with-verdict)))
+        (fail :error.lupapiste-application-already-exists-but-unauthorized-to-access-it :id (:id app-with-verdict)))
 
       ;; Fetch application from backing system with the provided kuntalupatunnus
       (if-let [xml (krysp-fetch-api/get-application-xml
@@ -632,7 +632,7 @@
                                                          (when-not (ss/blank? poikkeamat)   [["poikkeamat"] poikkeamat])))}]
           (if-not (empty? app-info)
 
-            (if (= (:id organization) (:id (organization/resolve-organization (:municipality app-info) permit-type)))
+             (if (= (:id organization) (:id (organization/resolve-organization (:municipality app-info) permit-type)))
 
               (if (or rakennuspaikka-exists enough-info-from-parameters)
 
@@ -649,7 +649,7 @@
                                               (do-create-application command manual-schema-datas)
                                               (catch Exception e
                                                 ;; TODO: Jos tulee unauthorized, pitaako se valittaa sellaisenaan eteenpain? Ja muuten "permit-not-found"?
-                                                (fail! :info.no-previous-permit-found-from-backend)))
+                                                (fail! :error.no-previous-permit-found-from-backend)))
                         ;;
                         ;; *** TODO: Aseta applicationille viitelupatiedot -> kts. app-infon :viitelupatiedot ***
                         ;;
@@ -686,19 +686,19 @@
                     ;; The xml message included lupapiste-id, but an application with that id is not found from database. This should never be the case.
                     (do
                       (error "Creating application from previous permit. Not able to find application id '" lupapiste-tunnus "' it includes from database.")
-                      (fail :not-able-to-open-with-lupapiste-id-that-previous-permit-included :id lupapiste-tunnus))))
+                      (fail :error.not-able-to-open-with-lupapiste-id-that-previous-permit-included :id lupapiste-tunnus))))
 
                 ;; If we did not get the "rakennuspaikkatieto" element in the verdict xml message,
                 ;; let's ask more needed info from user
-                (fail :more-prev-app-info-needed :needMorePrevPermitInfo true))
+                (fail :error.more-prev-app-info-needed :needMorePrevPermitInfo true))
 
-              (fail :info.previous-permit-found-from-backend-is-of-different-organization))
+              (fail :error.previous-permit-found-from-backend-is-of-different-organization))
 
             ;; Sanomasta ei saatu purettua tietoa, esimerkiksi sanomassa ei kuitenkaan ollut asiatietoa annetulla kuntalupatunnuksella.
-            (fail :info.no-previous-permit-found-from-backend)))
+            (fail :error.no-previous-permit-found-from-backend))))
 
         ;; Annetulle kuntalupatunnukselle ei loytynyt sanomaa.
-        (fail :info.no-previous-permit-found-from-backend)))))
+        (fail :error.no-previous-permit-found-from-backend)))))
 
 (defn- add-operation-allowed? [_ application]
   (let [op (-> application :operations first :name keyword)
