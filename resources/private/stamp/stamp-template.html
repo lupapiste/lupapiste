@@ -28,7 +28,8 @@
               <label data-bind="ltext: 'stamp.text'"></label>
               <input data-bind="value: text, enable: status() === statusReady"
                         type="text"
-                        class="form-input text"/>
+                        class="form-input text"
+                     data-test-id="stamp-info-text"/>
 
               <label data-bind="ltext: 'stamp.date'"></label>
               <input data-bind="
@@ -36,12 +37,14 @@
                           enable: status() === statusReady,
                           valueUpdate: 'afterkeydown'"
                         type="text"
-                        class="form-input text"/>
+                        class="form-input text"
+                     data-test-id="stamp-info-date"/>
 
               <label data-bind="ltext: 'stamp.organization'"></label>
               <input data-bind="textInput: organization, enable: status() === statusReady"
                         type="text"
-                        class="form-input text"/>
+                        class="form-input text"/
+                     data-test-id="stamp-info-organization">
             </fieldset>
 
             <fieldset class="col2">
@@ -52,21 +55,24 @@
                           enable: status() === statusReady,
                           css: {'invalid-margin': !xMarginOk()}"
                         type="text"
-                        class="form-input text"/>
+                        class="form-input text"/
+                     data-test-id="stamp-info-xmargin">
 
               <label data-bind="text: loc('stamp.yMargin') + ' (' + loc('unit.mm') + ')'"></label>
               <input data-bind="textInput: yMargin,
                           enable: status() === statusReady,
                           css: {'invalid-margin': !yMarginOk()}"
                         type="text"
-                        class="form-input text"/>
+                        class="form-input text"
+                     data-test-id="stamp-info-ymargin"/>
 
               <label data-bind="ltext: 'stamp.transparency'"></label>
-              <select data-bind="options: transparencies, optionsText: 'text', optionsValue: 'value', value: transparency" class="form-input combobox"></select>
+              <select data-bind="options: transparencies, optionsText: 'text', optionsValue: 'value', value: transparency" class="form-input combobox"
+                      data-test-id="stamp-info-transparency"></select>
             </fieldset>
           </form>
 
-          <table class="table attachments-template-table">
+          <table id="stamp-attachments-table" class="table attachments-template-table">
             <tbody data-bind="foreach: files()">
               <tr class="attachment-group-header">
                 <td data-bind="text: name" colspan="4" data-test-id="attachment-group-header-text"></td>
@@ -169,14 +175,14 @@
           </table>
           <div class="right">
             <!-- ko ifnot: allSelected -->
-            <a href="#" data-bind="ltext: 'stamp.all', click: selectAll, visible: status() < statusRunning"></a>
+            <a href="#" data-bind="ltext: 'stamp.all', click: selectAll, visible: status() < statusRunning" data-test-id="stamp-select-all"></a>
             <!-- /ko -->
             <!-- ko if: allSelected -->
-            <a href="#" data-bind="ltext: 'stamp.none', click: selectNone, visible: status() < statusRunning"></a>
+            <a href="#" data-bind="ltext: 'stamp.none', click: selectNone, visible: status() < statusRunning" data-test-id="stamp-select-none"></a>
             <!-- /ko -->
           </div>
           <div class="stamp-status">
-            <span data-bind="text: loc(['stamp.status', status().toString()])"></span>
+            <span data-bind="text: loc(['stamp.status', status().toString()])" data-test-id="stamp-status-text"></span>
             <span class="ok icon" data-bind="visible: status() === statusDone"></span>
             <span class="missing icon" data-bind="visible: status() === statusNoFiles"></span>
           </div>
@@ -195,14 +201,15 @@
                 enable: status() === statusReady,
                 visible: status() <= statusReady,
                 click: $parent.cancelStamping"
-              class="btn close">
+              class="btn close"
+              data-test-id="cancel-stamping">
             </button>
             <button data-bind="
                 ltext: 'stamp.ok',
                 visible: status() > statusRunning,
                 click: $parent.cancelStamping"
               class="btn btn-primary close"
-              data-test-id="application-stamp-dialdog-ok">
+              data-test-id="stamp-ok">
             </button>
           </div>
         </div>
