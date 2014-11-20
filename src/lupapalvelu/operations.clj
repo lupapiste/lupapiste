@@ -51,13 +51,21 @@
 (def- new-operation-tree-for-R
   ["Rakentaminen ja purkaminen"
    [["Uuden rakennuksen rakentaminen"
-     [["Asuinrakennus" :asuinrakennus]
+     [["kerrostalo-rivitalo" :kerrostalo-rivitalo]
+      ["pientalo" :pientalo]
       ["Vapaa-ajan asuinrakennus" :vapaa-ajan-asuinrakennus]
       ["Varasto, sauna, autotalli tai muu talousrakennus" :varasto-tms]
-      ["Julkinen rakennus" :julkinen-rakennus]
+      ["teollisuusrakennus" :teollisuusrakennus]
       ["Muun rakennuksen rakentaminen" :muu-uusi-rakentaminen]]]
+    ["Rakennuksen-laajentaminen"
+     [["kerrostalo-rt-laaj" :kerrostalo-rt-laaj]
+      ["pientalo-laaj" :pientalo-laaj]
+      ["vapaa-ajan-rakennus-laaj" :vapaa-ajan-rakennus-laaj]
+      ["talousrakennus-laaj" :talousrakennus-laaj]
+      ["teollisuusrakennus-laaj" :teollisuusrakennus-laaj]
+      ["muu-rakennus-laaj" :muu-rakennus-laaj]]]
     ["Rakennuksen korjaaminen tai muuttaminen"
-     [["Rakennuksen laajentaminen tai korjaaminen" :laajentaminen]
+     [#_["Rakennuksen laajentaminen tai korjaaminen" :laajentaminen]
       ["Perustusten tai kantavien rakenteiden muuttaminen tai korjaaminen" :perus-tai-kant-rak-muutos]
       ["Kayttotarkoituksen muutos" :kayttotark-muutos]
       ["Rakennuksen julkisivun tai katon muuttaminen" :julkisivu-muutos]
@@ -338,6 +346,22 @@
                                    :required common-schemas
                                    :attachments uuden_rakennuksen_liitteet
                                    :add-operation-allowed true
+                                   :link-permit-required false} ;TODO old op-tree, remove later
+     :kerrostalo-rivitalo         {:schema "uusiRakennus"
+                                   :permit-type permit/R
+                                   :schema-data [[["kaytto" "kayttotarkoitus"] schemas/yhden-asunnon-talot]
+                                                 [["huoneistot" "0" "huoneistonumero"] "000"]]
+                                   :required common-schemas
+                                   :attachments uuden_rakennuksen_liitteet
+                                   :add-operation-allowed true
+                                   :link-permit-required false}
+     :pientalo                    {:schema "uusiRakennus"
+                                   :permit-type permit/R
+                                   :schema-data [[["kaytto" "kayttotarkoitus"] schemas/yhden-asunnon-talot]
+                                                 [["huoneistot" "0" "huoneistonumero"] "000"]]
+                                   :required common-schemas
+                                   :attachments uuden_rakennuksen_liitteet
+                                   :add-operation-allowed true
                                    :link-permit-required false}
      :vapaa-ajan-asuinrakennus    {:schema "uusi-rakennus-ei-huoneistoa"
                                    :permit-type permit/R
@@ -358,6 +382,12 @@
                                    :required common-schemas
                                    :attachments uuden_rakennuksen_liitteet
                                    :add-operation-allowed true
+                                   :link-permit-required false} ;TODO old op-tree, remove later
+     :teollisuusrakennus          {:schema "uusiRakennus"
+                                   :permit-type permit/R
+                                   :required common-schemas
+                                   :attachments uuden_rakennuksen_liitteet
+                                   :add-operation-allowed true
                                    :link-permit-required false}
      :muu-uusi-rakentaminen       {:schema "uusiRakennus"
                                    :permit-type permit/R
@@ -366,6 +396,42 @@
                                    :add-operation-allowed true
                                    :link-permit-required false}
      :laajentaminen               {:schema "rakennuksen-laajentaminen"
+                                   :permit-type permit/R
+                                   :required common-schemas
+                                   :attachments rakennuksen_laajennuksen_liitteet
+                                   :add-operation-allowed true
+                                   :link-permit-required false} ;TODO old op-tree, remove later
+     :kerrostalo-rt-laaj          {:schema "rakennuksen-laajentaminen"
+                                   :permit-type permit/R
+                                   :required common-schemas
+                                   :attachments rakennuksen_laajennuksen_liitteet
+                                   :add-operation-allowed true
+                                   :link-permit-required false}
+     :pientalo-laaj               {:schema "rakennuksen-laajentaminen"
+                                   :permit-type permit/R
+                                   :required common-schemas
+                                   :attachments rakennuksen_laajennuksen_liitteet
+                                   :add-operation-allowed true
+                                   :link-permit-required false}
+     :vapaa-ajan-rakennus-laaj    {:schema "rakennuksen-laajentaminen"
+                                   :permit-type permit/R
+                                   :required common-schemas
+                                   :attachments rakennuksen_laajennuksen_liitteet
+                                   :add-operation-allowed true
+                                   :link-permit-required false}
+     :talousrakennus-laaj         {:schema "rakennuksen-laajentaminen"
+                                   :permit-type permit/R
+                                   :required common-schemas
+                                   :attachments rakennuksen_laajennuksen_liitteet
+                                   :add-operation-allowed true
+                                   :link-permit-required false}
+     :teollisuusrakennus-laaj     {:schema "rakennuksen-laajentaminen"
+                                   :permit-type permit/R
+                                   :required common-schemas
+                                   :attachments rakennuksen_laajennuksen_liitteet
+                                   :add-operation-allowed true
+                                   :link-permit-required false}
+     :muu-rakennus-laaj           {:schema "rakennuksen-laajentaminen"
                                    :permit-type permit/R
                                    :required common-schemas
                                    :attachments rakennuksen_laajennuksen_liitteet
