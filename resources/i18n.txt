@@ -27,3 +27,12 @@ operations.sisatila-muutos: Rakennuksen sisätilojen muutos (käyttötarkoitus j
 operations.tree.linjasaneeraus: Rakennuksen linjasaneeraus ja/tai talotekniikan muuttaminen
 operations.linjasaneeraus: Rakennuksen linjasaneeraus ja/tai talotekniikan muuttaminen
 
+operations.tree.tontin-jarjestelymuutos: Tontin ajoliittymän, paikoitusjärjestelyjen tai varastointialueen rakentaminen tai muutos
+operations.tontin-jarjestelymuutos: Tontin ajoliittymän, paikoitusjärjestelyjen tai varastointialueen rakentaminen tai muutos
+
+operations.tree.rakennustyo-muutostoimenpiteet: Rakennustyön aikaiset muutostoimenpiteet
+operations.rakennustyo-muutostoimenpiteet: Rakennustyön aikaiset muutostoimenpiteet
+operations.tree.rak-valm-tyo: Rakentamista valmisteleva työ (puunkaato, maankaivu, louhinta)
+operations.rak-valm-tyo: Rakentamista valmisteleva työ (puunkaato, maankaivu, louhinta)
+operations.tree.raktyo-aloit-loppuunsaat: Rakennustyön aloittamisen ja/tai loppuunsaattamisen jatkaminen
+operations.raktyo-aloit-loppuunsaat: Rakennustyön aloittamisen ja/tai loppuunsaattamisen jatkaminen

@@ -48,6 +48,18 @@
     ["Jatkoaika" :jatkoaika]
     ["Aloitusoikeus" :aloitusoikeus]]])
 
+(def- operation-tree-for-environment-R
+  ["Elinympariston muuttaminen"
+   [["Maisemaa muutava toimenpide"
+     [["Kaivaminen, louhiminen tai maan tayttaminen" :kaivuu]
+      ["Puun kaataminen" :puun-kaataminen]
+      ["Muu maisemaa muuttava toimenpide" :muu-maisema-toimenpide]]]
+    ["Tontti tai korttelialueen jarjestelymuutos"
+     [["Tontin ajoliittyman muutos" :tontin-ajoliittyman-muutos]
+      ["Paikoitusjarjestelyihin liittyvat muutokset" :paikoutysjarjestus-muutos]
+      ["Korttelin yhteisiin alueisiin liittyva muutos" :kortteli-yht-alue-muutos]
+      ["Muu-tontti-tai-korttelialueen-jarjestelymuutos" :muu-tontti-tai-kort-muutos]]]]])
+
 (def- new-operation-tree-for-R
   ["Rakentaminen ja purkaminen"
    [["Uuden rakennuksen rakentaminen"
@@ -80,37 +92,20 @@
       ["Mainoslaite" :mainoslaite]
       ["Aita" :aita]
       ["Maalampokaivon poraaminen tai lammonkeruuputkiston asentaminen" :maalampo]
-      ["Rakennuksen jatevesijarjestelman uusiminen" :jatevesi]
-      ["Muun rakennelman rakentaminen" :muu-rakentaminen]]]
+      ["Rakennuksen jatevesijarjestelman uusiminen" :jatevesi]]]
     ["Rakennuksen purkaminen" :purkaminen]
-    ["Tyonjohtaja" :tyonjohtajan-nimeaminen]
-    ["Suunnittelija" :suunnittelijan-nimeaminen]
-    ["Jatkoaika" :jatkoaika]
-    ["Aloitusoikeus" :aloitusoikeus]]])
-
-(def- operation-tree-for-environment-R
-  ["Elinympariston muuttaminen"
-   [["Maisemaa muutava toimenpide"
-     [["Kaivaminen, louhiminen tai maan tayttaminen" :kaivuu]
-      ["Puun kaataminen" :puun-kaataminen]
+    ["Maisemaa muutava toimenpide"
+     [["Puun kaataminen" :puun-kaataminen]
+      ["tontin-jarjestelymuutos" :tontin-jarjestelymuutos]
+      ["Muu-tontti-tai-korttelialueen-jarjestelymuutos" :muu-tontti-tai-kort-muutos]
+      ["Kaivaminen, louhiminen tai maan tayttaminen" :kaivuu]
       ["Muu maisemaa muuttava toimenpide" :muu-maisema-toimenpide]]]
-    ["Tontti tai korttelialueen jarjestelymuutos"
-     [["Tontin ajoliittyman muutos" :tontin-ajoliittyman-muutos]
-      ["Paikoitusjarjestelyihin liittyvat muutokset" :paikoutysjarjestus-muutos]
-      ["Korttelin yhteisiin alueisiin liittyva muutos" :kortteli-yht-alue-muutos]
-      ["Muu-tontti-tai-korttelialueen-jarjestelymuutos" :muu-tontti-tai-kort-muutos]]]]])
-
-(def- new-operation-tree-for-environment-R
-      ["Elinympariston muuttaminen"
-       [["Maisemaa muutava toimenpide"
-         [["Kaivaminen, louhiminen tai maan tayttaminen" :kaivuu]
-          ["Puun kaataminen" :puun-kaataminen]
-          ["Muu maisemaa muuttava toimenpide" :muu-maisema-toimenpide]]]
-        ["Tontti tai korttelialueen jarjestelymuutos"
-         [["Tontin ajoliittyman muutos" :tontin-ajoliittyman-muutos]
-          ["Paikoitusjarjestelyihin liittyvat muutokset" :paikoutysjarjestus-muutos]
-          ["Korttelin yhteisiin alueisiin liittyva muutos" :kortteli-yht-alue-muutos]
-          ["Muu-tontti-tai-korttelialueen-jarjestelymuutos" :muu-tontti-tai-kort-muutos]]]]])
+    ["rakennustyo-muutostoimenpiteet"
+     [["Suunnittelija" :suunnittelijan-nimeaminen]
+      ["Tyonjohtaja" :tyonjohtajan-nimeaminen]
+      ["rak-valm-tyo" :rak-valm-tyo]
+      ["Aloitusoikeus" :aloitusoikeus]
+      ["raktyo-aloit-loppuunsaat" :raktyo-aloit-loppuunsaat]]]]])
 
 (def- operation-tree-for-YA
   ["yleisten-alueiden-luvat"
@@ -201,7 +196,7 @@
   (filterv identity
     `[
       ~@(if (env/feature? :new-operations-tree)
-        [new-operation-tree-for-R new-operation-tree-for-environment-R]
+        [new-operation-tree-for-R]
         [operation-tree-for-R operation-tree-for-environment-R])
       ~@[operation-tree-for-P
          (when (env/feature? :kiinteistonMuodostus) operation-tree-for-kiinteiston-muodostus)
@@ -568,6 +563,12 @@
                                    :attachments [:paapiirustus [:asemapiirros]]
                                    :add-operation-allowed true
                                    :link-permit-required false}
+     :tontin-jarjestelymuutos     {:schema "maisematyo"
+                                   :permit-type permit/R
+                                   :required  common-schemas
+                                   :attachments [:paapiirustus [:asemapiirros]]
+                                   :add-operation-allowed true
+                                   :link-permit-required false}
      :muu-maisema-toimenpide      {:schema "maisematyo"
                                    :permit-type permit/R
                                    :required  common-schemas
@@ -726,13 +727,25 @@
                                    :attachments []
                                    :add-operation-allowed false
                                    :link-permit-required true}
-
+     :rak-valm-tyo                {:schema "maisematyo"
+                                   :permit-type permit/R
+                                   :required common-schemas
+                                   :attachments [:paapiirustus [:asemapiirros]]
+                                   :add-operation-allowed true
+                                   :link-permit-required false}
      :aloitusoikeus               {:schema "aloitusoikeus"
                                    :permit-type permit/R
                                    :required ["maksaja"]
                                    :attachments []
                                    :add-operation-allowed false
-                                   :link-permit-required true}}
+                                   :link-permit-required true}
+     :raktyo-aloit-loppuunsaat   {:schema "hankkeen-kuvaus-minimum"
+                                  :permit-type permit/R
+                                  :required ["maksaja"]
+                                  :attachments []
+                                  :add-operation-allowed false
+                                  :link-permit-required true}
+     }
     ya-operations
     yl-operations))
 
