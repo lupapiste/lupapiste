@@ -72,108 +72,15 @@
             </fieldset>
           </form>
         </div>
-        <div>
-          <table id="stamp-attachments-table" class="table attachments-template-table">
-            <tbody data-bind="foreach: files()">
-              <tr class="attachment-group-header">
-                <td data-bind="text: name" colspan="4" data-test-id="attachment-group-header-text"></td>
-                <td colspan="3" class="attachment-group-select">
-                  <!-- ko ifnot: groupSelected -->
-                  <a href="#" data-bind="ltext: 'attachments.group.select', click: $parent.toggleGroupSelect, visible: $parent.status() < $parent.statusRunning"></a>
-                  <!-- /ko -->
-                  <!-- ko if: groupSelected -->
-                  <a href="#" data-bind="ltext: 'attachments.group.deselect', click: $parent.toggleGroupSelect, visible: $parent.status() < $parent.statusRunning"></a>
-                  <!-- /ko -->
-                </td>
-              </tr>
-              <tr>
-                <th data-bind="ltext: 'application.attachmentState'">Tila</th>
-                <th colspan="2" data-bind="ltext: 'application.attachmentType'">Tyyppi</th>
-                <th data-bind="ltext: 'application.attachmentFile'">Tiedosto</th>
-                <th data-bind="ltext: 'application.attachmentVersion'">Versio</th>
-                <th data-bind="ltext: 'application.attachmentEditDate'">Muokattu</th>
-                <th></th>
-              </tr>
-
-              <!-- ko foreach: attachments -->
-              <tr class="attachment-row stamp-attachment-row" data-bind="click: $parents[1].selectRow, clickBubble: false, css: {selected: selected}">
-                <td class="attachmentState">
-
-                  <span data-bind="attr: {'class': statusName + ' icon',
-                                  'data-test-state': state,
-                                  'data-test-type': type['type-group'] + '.' + type['type-id'],
-                                  'title': loc(statusName + '.title')}">
-                  </span>
-                  <span data-bind="visible:$data.signed,
-                                   attr: {'class': 'icon signed',
-                                   'title': loc('attachment.signed'),
-                                   'data-test-icon': 'signed-' + type['type-group'] + '.' + type['type-id']}">
-                  </span>
-                  <span data-bind="visible:$data.isSent,
-                                   attr: {'class': 'icon transfered',
-                                   'title': loc('application.attachmentSentDate') + ' ' + $data.sentDateString,
-                                   'data-test-icon': 'transfered-' + type['type-group'] + '.' + type['type-id']}">
-                  </span>
-                  <span data-bind="visible:$data.stamped,
-                                   attr: {'class': 'icon stamped',
-                                   'title': loc('attachment.stamped'),
-                                   'data-test-icon': 'stamped-' + type['type-group'] + '.' + type['type-id']}">
-                  </span>
-                </td>
-                <td class="attachment-type-group">
-                    <span data-bind="if: type">
-                      <span data-bind="text: loc(['attachmentType', type['type-group'], '_group_label'])"></span>
-                    </span>
-                    <span data-bind="if: !type">
-                      <i data-bind="ltext: 'attachment.noName'"></i>
-                    </span>
-                </td>
-                <td class="attachment-type-id">
-                    <span data-bind="if: type">
-                      <span data-bind="text: loc(['attachmentType', type['type-group'], type['type-id']])"></span>
-                    </span>
-                    <span data-bind="if: !type">
-                      <i data-bind="ltext: 'attachment.noName'"></i>
-                    </span>
-                  <!-- ko if: $data.contents -->
-                    <div class="attachment-content-desc"><span data-bind="text: $data.contents" data-test-id="attachment-contents"></span></div>
-                  <!-- /ko -->
-                </td>
-                <td class="attachment-file">
-                  <span data-bind="if: $data.latestVersion">
-                    <span class="attachment-file-name" data-bind="text: latestVersion.filename"></span>
-                    <i data-bind="ltext: latestVersion.contentType"></i>
-                    <i data-bind="size: latestVersion.size"></i>
-                  </span>
-                  <!-- ko ifnot: $data.latestVersion -->
-                  <a data-bind="ltext: 'application.attachmentsAddList', attr: {href: '#!/attachment/' + $root.application.id() + '/' + id, 'data-test-type': type['type-group'] + '.' + type['type-id']}"></a>
-                  <!-- /ko -->
-                </td>
-                <td>
-                  <span data-bind="if: $data.latestVersion">
-                    <span data-bind="version: latestVersion.version"></span>
-                  </span>
-                </td>
-                <td>
-                  <span data-bind="if: $data.latestVersion">
-                    <span data-bind="dateString: modified"></span>
-                    <span data-bind="fullName: latestVersion.user"></span>
-                  </span>
-                </td>
-                <td>
-                  <input type="checkbox" data-bind="checked: $data.selected,
-                        visible: $parents[1].status() < $parents[1].statusRunning,
-                        enable: $parents[1].status() === $parents[1].statusReady,
-                        click: function() {return true;}, clickBubble: false" />
-                    <span data-bind="
-                        text: loc(['stamp.file.status', $data.status()]),
-                        visible: $parents[1].status() >= $parents[1].statusRunning"></span>
-                </td>
-              </tr>
-
-              <!-- /ko -->
-            </tbody>
-          </table>
+        <div class="clear">
+            <div data-bind="if: postFiles().length > 0">
+              <h1><span data-bind="ltext: 'application.attachments.post-verdict'"></span></h1>
+              <div class="clear" data-bind="template: {name: 'stamp-attachments-table', data: postFiles()}"></div>
+            </div>
+            <div data-bind="if: preFiles().length > 0">
+              <h1><span data-bind="ltext: 'application.attachments.pre-verdict'"></span></h1>
+              <div class="clear" data-bind="template: {name: 'stamp-attachments-table', data: preFiles()}"></div>
+            </div>
           <div class="right">
             <!-- ko ifnot: allSelected -->
             <a href="#" data-bind="ltext: 'stamp.all', click: selectAll, visible: status() < statusRunning" data-test-id="stamp-select-all"></a>
@@ -215,6 +122,110 @@
           </button>
         </div>
       </script>
+
+      <script type="text/html" id="stamp-attachments-table">
+        <table class="table attachments-template-table">
+          <tbody data-bind="foreach: $data">
+            <tr class="attachment-group-header">
+              <td data-bind="text: name" colspan="4" data-test-id="attachment-group-header-text"></td>
+              <td colspan="3" class="attachment-group-select">
+                <!-- ko ifnot: groupSelected -->
+                <a href="#" data-bind="ltext: 'attachments.group.select', click: $parents[1].toggleGroupSelect, visible: $parents[1].status() < $parents[1].statusRunning"></a>
+                <!-- /ko -->
+                <!-- ko if: groupSelected -->
+                <a href="#" data-bind="ltext: 'attachments.group.deselect', click: $parents[1].toggleGroupSelect, visible: $parents[1].status() < $parents[1].statusRunning"></a>
+                <!-- /ko -->
+              </td>
+            </tr>
+            <tr>
+              <th data-bind="ltext: 'application.attachmentState'">Tila</th>
+              <th colspan="2" data-bind="ltext: 'application.attachmentType'">Tyyppi</th>
+              <th data-bind="ltext: 'application.attachmentFile'">Tiedosto</th>
+              <th data-bind="ltext: 'application.attachmentVersion'">Versio</th>
+              <th data-bind="ltext: 'application.attachmentEditDate'">Muokattu</th>
+              <th></th>
+            </tr>
+
+            <!-- ko foreach: attachments -->
+            <tr class="attachment-row stamp-attachment-row" data-bind="click: $parents[2].selectRow, clickBubble: false, css: {selected: selected}">
+              <td class="attachmentState">
+
+                <span data-bind="attr: {'class': statusName + ' icon',
+                                'data-test-state': state,
+                                'data-test-type': type['type-group'] + '.' + type['type-id'],
+                                'title': loc(statusName + '.title')}">
+                </span>
+                <span data-bind="visible:$data.signed,
+                                 attr: {'class': 'icon signed',
+                                 'title': loc('attachment.signed'),
+                                 'data-test-icon': 'signed-' + type['type-group'] + '.' + type['type-id']}">
+                </span>
+                <span data-bind="visible:$data.isSent,
+                                 attr: {'class': 'icon transfered',
+                                 'title': loc('application.attachmentSentDate') + ' ' + $data.sentDateString,
+                                 'data-test-icon': 'transfered-' + type['type-group'] + '.' + type['type-id']}">
+                </span>
+                <span data-bind="visible:$data.stamped,
+                                 attr: {'class': 'icon stamped',
+                                 'title': loc('attachment.stamped'),
+                                 'data-test-icon': 'stamped-' + type['type-group'] + '.' + type['type-id']}">
+                </span>
+              </td>
+              <td class="attachment-type-group">
+                  <span data-bind="if: type">
+                    <span data-bind="text: loc(['attachmentType', type['type-group'], '_group_label'])"></span>
+                  </span>
+                  <span data-bind="if: !type">
+                    <i data-bind="ltext: 'attachment.noName'"></i>
+                  </span>
+              </td>
+              <td class="attachment-type-id">
+                  <span data-bind="if: type">
+                    <span data-bind="text: loc(['attachmentType', type['type-group'], type['type-id']])"></span>
+                  </span>
+                  <span data-bind="if: !type">
+                    <i data-bind="ltext: 'attachment.noName'"></i>
+                  </span>
+                <!-- ko if: $data.contents -->
+                  <div class="attachment-content-desc"><span data-bind="text: $data.contents" data-test-id="attachment-contents"></span></div>
+                <!-- /ko -->
+              </td>
+              <td class="attachment-file">
+                <span data-bind="if: $data.latestVersion">
+                  <span class="attachment-file-name" data-bind="text: latestVersion.filename"></span>
+                  <i data-bind="ltext: latestVersion.contentType"></i>
+                  <i data-bind="size: latestVersion.size"></i>
+                </span>
+                <!-- ko ifnot: $data.latestVersion -->
+                <a data-bind="ltext: 'application.attachmentsAddList', attr: {href: '#!/attachment/' + $root.application.id() + '/' + id, 'data-test-type': type['type-group'] + '.' + type['type-id']}"></a>
+                <!-- /ko -->
+              </td>
+              <td>
+                <span data-bind="if: $data.latestVersion">
+                  <span data-bind="version: latestVersion.version"></span>
+                </span>
+              </td>
+              <td>
+                <span data-bind="if: $data.latestVersion">
+                  <span data-bind="dateString: modified"></span>
+                  <span data-bind="fullName: latestVersion.user"></span>
+                </span>
+              </td>
+              <td>
+                <input type="checkbox" data-bind="checked: $data.selected,
+                      visible: $parents[2].status() < $parents[2].statusRunning,
+                      enable: $parents[2].status() === $parents[2].statusReady,
+                      click: function() {return true;}, clickBubble: false" />
+                  <span data-bind="
+                      text: loc(['stamp.file.status', $data.status()]),
+                      visible: $parents[2].status() >= $parents[2].statusRunning"></span>
+              </td>
+            </tr>
+
+            <!-- /ko -->
+          </tbody>
+        </table>
+     </script>
     </section>
   </body>
 </html>
