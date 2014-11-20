@@ -240,11 +240,6 @@
                     "admin-users.html" "organizations.html" "fixtures.html" "features.html" "actions.html"
                     "screenmessages-list.html"]}
 
-   :login-frame {:depends [:login]
-                 :html    ["login-frame.html"]
-                 :js      ["login-frame.js"]
-                 :css     ["login-frame.css"]}
-
    :wordpress {:depends [:login :password-reset]}
 
    :welcome {:depends [:login :register :link-account :debug :user-menu :screenmessages :password-reset]
