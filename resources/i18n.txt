@@ -1,5 +1,5 @@
 attachments.group.select: Valitse ryhmän liitteet
 attachments.group.deselect: Poista ryhmän valinnat
 stamp.all: Valitse kaikki
-stamp.none: Poista valinnat
+stamp.none: Poista kaikki valinnat
 unit.mm: mm
