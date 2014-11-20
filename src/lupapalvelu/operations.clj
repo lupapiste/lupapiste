@@ -344,7 +344,7 @@
                                    :link-permit-required false} ;TODO old op-tree, remove later
      :kerrostalo-rivitalo         {:schema "uusiRakennus"
                                    :permit-type permit/R
-                                   :schema-data [[["kaytto" "kayttotarkoitus"] schemas/yhden-asunnon-talot]
+                                   :schema-data [[["kaytto" "kayttotarkoitus"] schemas/rivitalot]
                                                  [["huoneistot" "0" "huoneistonumero"] "000"]]
                                    :required common-schemas
                                    :attachments uuden_rakennuksen_liitteet
