@@ -11,7 +11,7 @@ JPG_TESTFILE_DESCRIPTION = "attachment-jpg-foo"
 JPG_TESTFILE_PATH = os.path.join(os.path.expanduser('~'), JPG_TESTFILE_NAME)
 
 PDF_TESTFILE_NAME = 'robotframework-testfile-05_application_editing.pdf'
-PDF_TESTFILE_CONTENT = ''
+PDF_TESTFILE_CONTENT = '1234'
 PDF_TESTFILE_DESCRIPTION = "attachment-pdf-foo"
 PDF_TESTFILE_PATH = os.path.join(os.path.expanduser('~'), PDF_TESTFILE_NAME)
 
