@@ -21,7 +21,7 @@
 
       <script type="text/html" id="stamp-attachments-template">
         <div>
-          <form id="stamp-info">
+          <form id="stamp-info" class="clear">
             <fieldset class="col1">
               <legend data-bind="ltext: 'stamp.information'"></legend>
 
@@ -71,7 +71,8 @@
                       data-test-id="stamp-info-transparency"></select>
             </fieldset>
           </form>
-
+        </div>
+        <div>
           <table id="stamp-attachments-table" class="table attachments-template-table">
             <tbody data-bind="foreach: files()">
               <tr class="attachment-group-header">
@@ -181,37 +182,37 @@
             <a href="#" data-bind="ltext: 'stamp.none', click: selectNone, visible: status() < statusRunning" data-test-id="stamp-select-none"></a>
             <!-- /ko -->
           </div>
-          <div class="stamp-status">
-            <span data-bind="text: loc(['stamp.status', status().toString()])" data-test-id="stamp-status-text"></span>
-            <span class="ok icon" data-bind="visible: status() === statusDone"></span>
-            <span class="missing icon" data-bind="visible: status() === statusNoFiles"></span>
-          </div>
+        </div>
+        <div class="stamp-status">
+          <span data-bind="text: loc(['stamp.status', status().toString()])" data-test-id="stamp-status-text"></span>
+          <span class="ok icon" data-bind="visible: status() === statusDone"></span>
+          <span class="missing icon" data-bind="visible: status() === statusNoFiles"></span>
+        </div>
 
-          <div class="stamp-buttons">
-            <button data-bind="
-                click: start,
-                ltext: 'stamp.start',
-                enable: status() === statusReady && xMarginOk() && yMarginOk() && selectedFiles().length > 0,
-                visible: status() <= statusReady"
-              class="btn btn-primary"
-              data-test-id="start-stamping">
-            </button>
-            <button data-bind="
-                ltext: 'stamp.cancel',
-                enable: status() === statusReady,
-                visible: status() <= statusReady,
-                click: $parent.cancelStamping"
-              class="btn close"
-              data-test-id="cancel-stamping">
-            </button>
-            <button data-bind="
-                ltext: 'stamp.ok',
-                visible: status() > statusRunning,
-                click: $parent.cancelStamping"
-              class="btn btn-primary close"
-              data-test-id="stamp-ok">
-            </button>
-          </div>
+        <div class="stamp-buttons">
+          <button data-bind="
+              click: start,
+              ltext: 'stamp.start',
+              enable: status() === statusReady && xMarginOk() && yMarginOk() && selectedFiles().length > 0,
+              visible: status() <= statusReady"
+            class="btn btn-primary"
+            data-test-id="start-stamping">
+          </button>
+          <button data-bind="
+              ltext: 'stamp.cancel',
+              enable: status() === statusReady,
+              visible: status() <= statusReady,
+              click: $parent.cancelStamping"
+            class="btn close"
+            data-test-id="cancel-stamping">
+          </button>
+          <button data-bind="
+              ltext: 'stamp.ok',
+              visible: status() > statusRunning,
+              click: $parent.cancelStamping"
+            class="btn btn-primary close"
+            data-test-id="stamp-ok">
+          </button>
         </div>
       </script>
     </section>
