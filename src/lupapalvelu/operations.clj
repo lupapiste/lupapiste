@@ -65,15 +65,15 @@
       ["teollisuusrakennus-laaj" :teollisuusrakennus-laaj]
       ["muu-rakennus-laaj" :muu-rakennus-laaj]]]
     ["Rakennuksen korjaaminen tai muuttaminen"
-     [#_["Rakennuksen laajentaminen tai korjaaminen" :laajentaminen]
-      ["Perustusten tai kantavien rakenteiden muuttaminen tai korjaaminen" :perus-tai-kant-rak-muutos]
-      ["Kayttotarkoituksen muutos" :kayttotark-muutos]
+     [["kayttotark-muutos" :kayttotark-muutos]
+      ["sisatila-muutos" :sisatila-muutos]
       ["Rakennuksen julkisivun tai katon muuttaminen" :julkisivu-muutos]
-      ["Asuinhuoneiston jakaminen tai yhdistaminen" :jakaminen-tai-yhdistaminen]
       ["Markatilan laajentaminen" :markatilan-laajentaminen]
-      ["Takan ja savuhormin rakentaminen" :takka-tai-hormi]
+      ["linjasaneeraus" :linjasaneeraus]
       ["Parvekkeen tai terassin lasittaminen" :parveke-tai-terassi]
-      ["Muu rakennuksen muutostyo" :muu-laajentaminen]]]
+      ["Perustusten tai kantavien rakenteiden muuttaminen tai korjaaminen" :perus-tai-kant-rak-muutos]
+      ["Takan ja savuhormin rakentaminen" :takka-tai-hormi]
+      ["Asuinhuoneiston jakaminen tai yhdistaminen" :jakaminen-tai-yhdistaminen]]]
     ["Rakennelman rakentaminen"
      [["Auto- tai grillikatos, vaja, kioski tai vastaava" :auto-katos]
       ["Masto, piippu, sailio, laituri tai vastaava" :masto-tms]
@@ -451,6 +451,13 @@
                                    :attachments rakennuksen_muutos_liitteet
                                    :add-operation-allowed true
                                    :link-permit-required false}
+     :sisatila-muutos             {:schema "rakennuksen-muuttaminen"
+                                   :permit-type permit/R
+                                   :schema-data [[["muutostyolaji"] schemas/kayttotarkotuksen-muutos]]
+                                   :required common-schemas
+                                   :attachments rakennuksen_muutos_liitteet
+                                   :add-operation-allowed true
+                                   :link-permit-required false}
      :julkisivu-muutos            {:schema "rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia"
                                    :permit-type permit/R
                                    :schema-data [[["muutostyolaji"] schemas/muumuutostyo]]
@@ -466,6 +473,13 @@
                                    :add-operation-allowed true
                                    :link-permit-required false}
      :markatilan-laajentaminen    {:schema "rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia"
+                                   :permit-type permit/R
+                                   :schema-data [[["muutostyolaji"] schemas/muumuutostyo]]
+                                   :required common-schemas
+                                   :attachments rakennuksen_laajennuksen_liitteet
+                                   :add-operation-allowed true
+                                   :link-permit-required false}
+     :linjasaneeraus              {:schema "rakennuksen-muuttaminen"
                                    :permit-type permit/R
                                    :schema-data [[["muutostyolaji"] schemas/muumuutostyo]]
                                    :required common-schemas

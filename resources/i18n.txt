@@ -1,6 +1,5 @@
 operations.tree.Rakennuksen-laajentaminen: Rakennuksen laajentaminen (kerrosala, kokonaisala ja/tai tilavuus kasvaa)
 
-
 operations.tree.kerrostalo-rivitalo: Asuinkerrostalon ja/tai rivitalon rakentaminen
 operations.kerrostalo-rivitalo: Asuinkerrostalon ja/tai rivitalon rakentaminen
 operations.tree.pientalo: Asuinpientalon rakentaminen (enintään kaksiasuntoinen erillispientalo)
@@ -20,4 +19,11 @@ operations.tree.teollisuusrakennus-laaj: Teollisuus- tai varastorakennuksen laaj
 operations.teollisuusrakennus-laaj: Teollisuus- tai varastorakennuksen laajentaminen
 operations.tree.muu-rakennus-laaj: Liike-, toimisto-, opetus-, päiväkoti-, palvelu-, hoitolaitos- tai muun rakennuksen laajentaminen
 operations.muu-rakennus-laaj: Liike-, toimisto-, opetus-, päiväkoti-, palvelu-, hoitolaitos- tai muun rakennuksen laajentaminen
+
+operations.tree.kayttotark-muutos: Koko rakennuksen käyttötarkoituksen muutos tai merkittävä korjaaminen
+operations.kayttotark-muutos: Koko rakennuksen käyttötarkoituksen muutos tai merkittävä korjaaminen
+operations.tree.sisatila-muutos: Rakennuksen sisätilojen muutos (käyttötarkoitus ja/tai muu merkittävä sisämuutos)
+operations.sisatila-muutos: Rakennuksen sisätilojen muutos (käyttötarkoitus ja/tai muu merkittävä sisämuutos)
+operations.tree.linjasaneeraus: Rakennuksen linjasaneeraus ja/tai talotekniikan muuttaminen
+operations.linjasaneeraus: Rakennuksen linjasaneeraus ja/tai talotekniikan muuttaminen
 
