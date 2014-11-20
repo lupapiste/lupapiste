@@ -66,7 +66,7 @@
         (count applications) => 1
         (fact "Contains only public information: municipality, operation and timestamp"
           (:municipality application) => sonja-muni
-          (:operation application) => "Muun rakennuksen rakentaminen"
+          (:operation application) => "Muun kuin edellä mainitun rakennuksen rakentaminen\n(liike-, toimisto-, opetus-, päiväkoti-, palvelu-, hoitolaitos- tai muu rakennus)"
           (:timestamp application) => pos?
           (count (keys application)) => 3)))
     ))

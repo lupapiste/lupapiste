@@ -196,8 +196,8 @@
   (filterv identity
     `[
       ~@(if (env/feature? :new-operations-tree)
-        [new-operation-tree-for-R]
-        [operation-tree-for-R operation-tree-for-environment-R])
+          [new-operation-tree-for-R]
+          [operation-tree-for-R operation-tree-for-environment-R])
       ~@[operation-tree-for-P
          (when (env/feature? :kiinteistonMuodostus) operation-tree-for-kiinteiston-muodostus)
          (when (env/feature? :ymparisto) operation-tree-for-Y)
