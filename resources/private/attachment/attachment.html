@@ -18,13 +18,15 @@
             <span class="icon help" data-bind="click: toggleHelp, css: {expanded: showHelp}"></span>
           </div>
 
-          <p data-bind="slider: showHelp, lhtml: 'attachment.view.desc'"  class="tab-info"></p>          
+          <div class="tab-info" data-bind="slider: showHelp">
+            <p data-bind="lhtml: 'attachment.view.desc'"></p>
+          </div>
 
-          <div>
+          <div class="clear">
             <a class="btn left-align btn-nav-back"
                data-bind="click: function() { window.location.hash = '!/application/' + application.id() + '/attachments'; repository.load(application.id()); }"
                data-test-id="back-to-application-from-attachment">
-              <span data-bind =" ltext: 'attachment.return'"></span>
+              <span data-bind =" ltext: 'application.return'"></span>
               <span class="icon drill-left-black-bigger left-align"></span>
             </a>
           </div>
@@ -106,7 +108,7 @@
               </div>
               <button data-test-id="signLatestAttachmentVersion" class="btn-primary"
                       data-bind="click: sign, visible: $root.authorization.ok('sign-attachments'), visible: versions().length && $root.authorization.ok('sign-attachments')">
-                  <span data-bind="ltext: 'attachment.signLatest'"></span>
+                  <span class="label" data-bind="ltext: 'attachment.signLatest'"></span>
                   <span class="icon signed-white left-align"></span>
               </button>
             </div>

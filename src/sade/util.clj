@@ -170,6 +170,11 @@
          ()
          required-keys)))
 
+(defn- format-utc-timestamp [^Long timestamp ^String fmt]
+  (when timestamp
+    (let [dt (tc/from-long timestamp)]
+      (timeformat/unparse (timeformat/formatter fmt) dt))))
+
 (defn- local-date-time [^Long timestamp]
   (LocalDateTime. timestamp))
 
@@ -184,14 +189,10 @@
       (timeformat/unparse-local (timeformat/formatter "dd.MM.yyyy HH:mm") dt))))
 
 (defn to-xml-date [^Long timestamp]
-  (when timestamp
-    (let [dt (tc/from-long timestamp)]
-      (timeformat/unparse (timeformat/formatter "YYYY-MM-dd") dt))))
+  (format-utc-timestamp timestamp "YYYY-MM-dd"))
 
 (defn to-xml-datetime [^Long timestamp]
-  (when timestamp
-    (let [dt (tc/from-long timestamp)]
-      (timeformat/unparse (timeformat/formatter "YYYY-MM-dd'T'HH:mm:ss") dt))))
+  (format-utc-timestamp timestamp "YYYY-MM-dd'T'HH:mm:ss"))
 
 (defn to-xml-date-from-string [^String date-as-string]
   (when date-as-string
@@ -207,6 +208,9 @@
   (when date-as-string
     (let [d (timeformat/parse (timeformat/formatter "dd.MM.YYYY" ) date-as-string)]
       (tc/to-long d))))
+
+(defn to-RFC1123-datetime [^Long timestamp]
+  (format-utc-timestamp timestamp "EEE, dd MMM yyyy HH:mm:ss 'GMT'"))
 
 (def time-pattern #"^([012]?[0-9]):([0-5]?[0-9])(:([0-5][0-9])(\.(\d))?)?$")
 

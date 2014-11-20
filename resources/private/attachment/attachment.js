@@ -322,14 +322,19 @@ var attachment = (function() {
     model.indicator(false);
 
     authorizationModel.refresh(application, {attachmentId: attachmentId}, function() {
-      model.latestVersion() ? model.showHelp(false) : model.showHelp(true);
       model.init(true);
+      if (!model.latestVersion()) {
+        setTimeout(function() {
+          model.showHelp(true);
+        }, 1500);
+      }
     });
   }
 
   hub.onPageChange("attachment", function(e) {
     pageutil.showAjaxWait();
     model.init(false);
+    model.showHelp(false);
     applicationId = e.pagePath[0];
     attachmentId = e.pagePath[1];
     repository.load(applicationId);

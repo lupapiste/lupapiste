@@ -1,0 +1,166 @@
+.ui-autocomplete-loading {
+  background: white url("/img/ajax-loader-16.gif") right center no-repeat;
+}
+
+.create-application-search-box {
+  background: $lp-light-grey;
+  padding: $marginL;
+  margin-bottom: $marginM;
+  min-height: $baseline*4;
+  p {
+    margin-bottom: $marginM;
+    padding: 0;
+    width: 80%;
+  }
+
+}
+
+.map-select-info {
+  background: white;
+  position: relative;
+  min-height: 580px - $marginM;
+  h3 {
+    text-transform:uppercase;
+  }
+  p {
+    margin-bottom: 24px;
+    width: 100%;
+  }
+  button {
+    margin-bottom: 0px;
+    position: absolute;
+    bottom: $marginM;
+    width: 80%;
+    left: 12px;
+  }
+  input {
+    width: 90%;
+  }
+  .use-manual-entry {
+    color: red;
+    margin-bottom: 15px;
+  }
+}
+
+.create-application-map {
+  position: relative;
+  background: white;
+}
+
+.create-info-text {
+  width: 20%;
+  float: left;
+  margin-right: $marginL;
+}
+
+.create-buttons {
+  float: right;
+}
+.create-content {
+  width: 75%;
+  float: right;
+}
+
+
+
+
+
+.address-search {
+  width: $cols4;
+  display: inline-block;
+  height: 25px;
+}
+
+.create-application-details {
+  width: 800px;
+  height: 200px;
+}
+
+.create-application-form {
+  display: inline-block;
+}
+
+.create-application-actions {
+  width: $cols4;
+  display: inline-block;
+  float: right;
+  vertical-align: bottom;
+}
+
+.btn-create-application {
+  line-height: 60px;
+}
+
+.label-container {
+  display: inline-block;
+  width: $cols2;
+}
+
+.create-group{
+  margin-top: $baseline;
+  padding: $marginM;
+  border-radius: 3px;
+  border: 1px solid $borderColor;
+
+  label {
+    display: inline-block;
+  }
+}
+.top-marginL {
+  margin-top: $marginL*2;
+}
+.bottom-marginM {
+  margin-bottom: $marginM !important;
+}
+
+#popup-id_close {
+  @include spite-bg;
+  background-position: 0px -4100px;
+  top: 4px !important;
+  right: 4px !important;
+}
+#popup-id_contentDiv {
+  padding: 0;
+  width: 95% !important;
+  overflow: hidden;
+
+}
+#popup-id_GroupDiv {
+  padding: 8px;
+}
+#popup-id {
+  background: white;
+  color: black;
+  background: rgba(255,255,255, 0.95)!important;
+  overflow: visible !important;
+  box-shadow: 2px 2px 1px #888888, 3px 3px 1px #888888;
+  border: 1px solid $lp-dark-grey;
+  p {
+  //color: black;
+  }
+  &:before {
+    content: " ";
+    display: block;
+    position: absolute;
+    left: -51px;
+    top: 330px;
+    width: 0;
+    height: 0;
+    border-top: 25px solid transparent;
+    border-right: 51px solid $lp-dark-grey;
+    border-bottom: 25px solid transparent;
+  }
+  &:after {
+    content: " ";
+    display: block;
+    position: absolute;
+    left: -50px;
+    top: 330px;
+    width: 0;
+    height: 0;
+    border-top: 25px solid transparent;
+    border-right: 50px solid rgba(255, 255, 255, 0.95);
+    border-bottom: 25px solid transparent;
+    z-index: 2;
+  }
+}

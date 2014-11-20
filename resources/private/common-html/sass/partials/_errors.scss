@@ -1,0 +1,14 @@
+.context-error {
+  color: #f00;
+  border: 1px solid #f00;
+  border-radius: 3px;
+  padding: $marginS;
+  margin: $marginM 0
+}
+
+.error-message {
+  display: block;
+  margin-left:   5px;
+  font-style:    italic;
+  color:         red;
+}

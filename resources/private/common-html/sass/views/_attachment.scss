@@ -1,0 +1,216 @@
+/* attachments */
+
+#attachment.container {
+  padding-right: 0;
+}
+
+.attachment-iframe{
+  height: 450px;
+  width: 600px;
+  border:0;
+  overflow: hidden;
+}
+/*style="*/
+
+$previewHeight: 500px;
+
+.file-preview {
+  width: 100%;
+  float: left;
+  position: relative;
+}
+
+.file-preview-image img {
+  width: 100%;
+  height: auto;
+}
+
+.file-preview-actions {
+  position: absolute;
+  bottom: $marginS;
+  right: $marginS;
+  .btn{
+    margin: 0;
+  }
+}
+
+.file-preview-links {
+  float: right;
+}
+
+.file-preview-pdf {
+  iframe {
+    width: 100%;
+    height: $previewHeight;
+  }
+}
+
+.attachment-file-versions {
+  display: none;
+  border-top: 1px solid darken($lp-light-grey, 15%);
+  border-bottom: 1px solid darken($lp-light-grey, 15%);
+  padding: $marginS 0;
+  th {
+    padding: $marginS;
+  }
+  td {
+    padding: $marginS;
+    max-width: 130px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.attachment-file-conversation {
+  width: 48%;
+  float: right;
+}
+
+.attachment-info {
+  width: 100%;
+
+  .container {
+    padding: 0;
+    margin-top: 0;
+  }
+
+  .col1 {
+    float: left;
+    padding-right: $marginM;
+    width: 50%;
+  }
+
+  .col2 {
+    float: right;
+    padding-left: $marginM;
+    width: 50%;
+  }
+
+  .attachment-actions {
+    float: right;
+    width: $cols3;
+    button {
+      width: 100%;
+    }
+  }
+}
+
+.attachment-info-header {
+  overflow: auto;
+  width: 80%;
+  h1 {
+    float: left;
+    line-height: normal;
+  }
+  a {
+    float: left;
+    margin-left: $marginL * 2;
+  }
+  .help {
+    margin-left: $marginM;
+  }
+}
+
+.add-new-version {
+  float: right;
+}
+
+td.comment-text {
+  vertical-align: top;
+  text-align: left;
+}
+
+.new-attachment-version-details {
+  display: block;
+  font-style: italic;
+}
+
+.attachment-group-header {
+  font-weight:bold;
+  font-size: 1.5em;
+  background: white !important;
+  height:50px;
+  vertical-align:bottom;
+  td {
+    padding: $marginS 0;
+  }
+}
+
+.attachment-back {
+  text-align: center;
+  margin-right: $marginS;
+  margin-left: $marginL;
+  .icon {
+    height: 15px;
+    margin-bottom: 3px;
+  }
+}
+
+.inline-block {
+  display: inline-block;
+}
+
+#attachment-type-select {
+  margin-bottom: $marginL;
+}
+
+.change-type {
+  clear: both;
+  display: block;
+}
+
+.attachment-label {
+  margin-bottom: $marginM;
+  overflow: hidden;
+
+  .attachment-label-header {
+    font-size: 0.85em;
+    font-weight: 700;
+    letter-spacing: 0.125em;
+  }
+
+  .attachment-label-header-item {
+    margin-right: $marginL;
+  }
+
+  input {
+    display: block;
+    margin: 0;
+    width: $cols4 - 0.5em;
+    height: 25px;
+  }
+
+  select {
+    display: block;
+    width: $cols4;
+  }
+
+  .attachment-info-field {
+    margin-bottom: $marginS;
+  }
+}
+
+.signatures {
+  margin-top: $marginM;
+}
+
+.signature-table {
+  display: table;
+  width: auto;
+  margin-bottom: $marginM;
+  margin-left: $marginS;
+}
+
+.signature-row {
+  display: table-row;
+  width: auto;
+  clear: both;
+  margin-bottom: $marginS;
+  line-height: 27px;
+}
+
+.signature-cell {
+  display: table-column;
+  width: 200px;
+  float: left;
+}
