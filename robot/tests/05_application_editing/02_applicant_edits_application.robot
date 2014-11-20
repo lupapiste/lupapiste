@@ -12,7 +12,7 @@ Mikko opens an application
   Set Suite Variable  ${appname}  create-app${secs}
   Set Suite Variable  ${newName}  ${appname}-edit
   Set Suite Variable  ${propertyId}  753-423-2-41
-  Create application the fast way  ${appname}  753  ${propertyId}  asuinrakennus
+  Create application the fast way  ${appname}  753  ${propertyId}  kerrostalo-rivitalo
 
 # Testing the case that was fixed with hotfix/repeating-element-saving
 Mikko adds owner to the Uusirakennus document, and both owners are visible after page refresh

@@ -22,7 +22,7 @@ Mikko sees application in list
 Mikko creates a new inforequest
   Create inforequest  create-info  753  753-416-25-22  Hoblaa  R
   Wait until  Element text should be  //section[@id='inforequest']//span[@data-test-id='inforequest-application-applicant']  Intonen Mikko
-  Wait until  Element should be visible  //section[@id='inforequest']//span[@data-test-operation-id='asuinrakennus']
+  Wait until  Element should be visible  //section[@id='inforequest']//span[@data-test-operation-id='kerrostalo-rivitalo']
   Element should not be visible  //h2[@data-test-id='wanna-join']
 
 Mikko sees one application and one inforequest
@@ -54,13 +54,13 @@ The contents of unsent inforequest's message field is resetted properly when mov
   # XXX 'Element Should Contain' or 'Textfield Value Should Be' do not work for some reason
   Wait For Condition  return $("#inforequest").find("textarea[data-test-id='application-new-comment-text']").val() == "roskaa";
 
-  Create inforequest the fast way  create-info-2  360603.153  6734222.95  753  753-416-25-22  asuinrakennus  init-comment-2
+  Create inforequest the fast way  create-info-2  360603.153  6734222.95  753  753-416-25-22  kerrostalo-rivitalo  init-comment-2
   Wait For Condition  return $("#inforequest").find("textarea[data-test-id='application-new-comment-text']").val() == "";
 
 Mikko creates new application
   Go to page  applications
   Applications page should be open
-  Create application the fast way  create-app-2  753  753-416-25-22  asuinrakennus
+  Create application the fast way  create-app-2  753  753-416-25-22  kerrostalo-rivitalo
   Go to page  applications
   Request should be visible  create-app
   Request should be visible  create-info
@@ -77,7 +77,7 @@ Mikko closes application at Latokuja 3 and logs out
 # LUPA-23
 Authority (Veikko) can create an application
   Veikko logs in
-  Create application the fast way  create-veikko-auth-app  837  837-111-172-1  asuinrakennus
+  Create application the fast way  create-veikko-auth-app  837  837-111-172-1  kerrostalo-rivitalo
   Wait until  Application state should be  open
   It is possible to add operation
 

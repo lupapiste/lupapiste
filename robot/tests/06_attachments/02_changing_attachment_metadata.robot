@@ -8,7 +8,7 @@ Variables      variables.py
 
 Mikko creates application
   Mikko logs in
-  Create application the fast way  application-papplication  753  753-416-25-30  asuinrakennus
+  Create application the fast way  application-papplication  753  753-416-25-30  kerrostalo-rivitalo
 
 Mikko edits operation description
   Open application  application-papplication  753-416-25-30
@@ -20,8 +20,8 @@ Mikko adds an operation
   Set animations off
   Click enabled by test id  add-operation
   Wait Until  Element Should Be Visible  add-operation
-  Wait and click  //section[@id="add-operation"]//div[@class="tree-content"]//*[text()="Rakentaminen ja purkaminen (talot, grillikatokset, autotallit, remontointi)"]
-  Wait and click  //section[@id="add-operation"]//div[@class="tree-content"]//*[text()="Uuden rakennuksen rakentaminen (mökit, omakotitalot, saunat, julkiset rakennukset)"]
+  Wait and click  //section[@id="add-operation"]//div[@class="tree-content"]//*[text()="Rakentaminen ja purkaminen sekä maisemaan vaikuttava toimenpide"]
+  Wait and click  //section[@id="add-operation"]//div[@class="tree-content"]//*[text()="Uuden rakennuksen rakentaminen"]
   Wait and click  //section[@id="add-operation"]//div[@class="tree-content"]//*[text()="Muun rakennuksen rakentaminen"]
   Wait until  Element should be visible  xpath=//section[@id="add-operation"]//div[@class="tree-content"]//*[@data-test-id="add-operation-to-application"]
   Click enabled by test id  add-operation-to-application
