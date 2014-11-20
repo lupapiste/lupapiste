@@ -66,7 +66,6 @@
 
         <div class="table table-striped conversation" data-test-id="comments-table">
           <div data-bind="foreach: comments().slice(0).reverse()">
-            <!-- ko if: !($parents[1].infoRequest() && $parent.isForAttachment($data)) -->
             <div data-bind="css: {'attachment-comment': $parent.isForNewAttachment($data),
                                   'comment-for-me':     $parent.isForMe($data),
                                   'authority-comment':  $parent.isAuthorityComment($data),
@@ -98,7 +97,6 @@
                 <span data-bind="text: text" class="comment-message"></span>
               </div>
             </div>
-            <!-- /ko -->
           </div>
         </div>
       </div>

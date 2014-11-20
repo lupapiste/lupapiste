@@ -63,11 +63,13 @@ $tree-height: 320px;
   }
   .tree-last {
     width: 90%;
+    font-size: 18px;
     padding: $baseline $marginL;
     width: $tree-width;
     float: left;
     text-align: left;
     li {
+      font-size: 18px;
       list-style-type: none;
       a {
         color: $color-text;
