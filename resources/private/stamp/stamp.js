@@ -27,9 +27,9 @@ var stamping = (function() {
   };
 
 
-  function initStamp(appModel, attachments) {
+  function initStamp(appModel) {
     model.appModel = appModel;
-    model.attachments = attachments;
+    model.attachments = model.appModel.attachments();
 
     if ( !model.stampFields.organization ) {
       model.stampFields.organization = ko.observable(model.appModel.organizationName());
@@ -46,7 +46,7 @@ var stamping = (function() {
           model.appModel = new LUPAPISTE.ApplicationModel(authorization.create());
           ko.mapping.fromJS(application, {}, model.appModel);
 
-          model.attachments = ko.observableArray(attachmentUtils.getGroupByOperation(application.attachments, true, application.allowedAttachmentTypes));
+          model.attachments = model.appModel.attachments();
           model.stampFields.organization = ko.observable(model.appModel.organizationName());
 
           model.stampingMode(model.appModel !== null); // show
@@ -61,7 +61,7 @@ var stamping = (function() {
   });
 
   hub.subscribe('start-stamping', function(param) {
-    initStamp(param.application, param.attachments); // attachments from AttachmentsTabModel
+    initStamp(param.application);
   });
 
   ko.components.register('stamping-component', {
