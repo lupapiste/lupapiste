@@ -21,7 +21,7 @@
   border: none;
   color: rgb(48,48,48);
   position: relative;
-  min-height: 1.8em;
+  min-height: 30px;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
   -webkit-font-smoothing: antialiased;
@@ -169,9 +169,9 @@ button[disabled] {
     content: " ";
     width: 0;
     height: 0;
-    border-top: 1.15em solid transparent;
+    border-top: 15px solid transparent;
     border-left: 22px solid darken($lp-light-grey, 15%);
-    border-bottom: 1.15em solid transparent;
+    border-bottom: 15px solid transparent;
     position: absolute;
     top: 0;
     right: -22px;
@@ -223,9 +223,9 @@ button[disabled] {
     content: " ";
     width: 0;
     height: 0;
-    border-top: 1.15em solid transparent;
+    border-top: 15px solid transparent;
     border-right: 22px solid darken($lp-light-grey, 15%);
-    border-bottom: 1.15em solid transparent;
+    border-bottom: 15px solid transparent;
     position: absolute;
     top: 0;
     left: -22px;
