@@ -2,6 +2,8 @@ LUPAPISTE.StampModel = function(params) {
   "use strict";
   var self = this;
 
+  var postVerdictStates = {verdictGiven:true, constructionStarted:true, closed:true}; // TODO move to global App
+
   function stampableAttachment(a) {
     var ct = "";
     if (a.latestVersion) {
@@ -30,7 +32,7 @@ LUPAPISTE.StampModel = function(params) {
   });
 
   function mapAttachmentGroup(group) {
-    group.attachments = _(group.attachments).filter(stampableAttachment).each(normalizeAttachment).value();
+    group.attachments = _(group.attachments).each(normalizeAttachment).value();
     return {
       attachments: group.attachments,
       groupName: group.groupName,
@@ -44,6 +46,19 @@ LUPAPISTE.StampModel = function(params) {
     };
   }
 
+  function getSelectedAttachments(files) {
+    return _(files).pluck('attachments').flatten()
+      .filter(function(f) {
+          return f.selected();
+      }).value();
+  }
+
+  function eachSelected(files) {
+    return _(files).pluck('attachments').flatten().every(function(f) {
+      return f.selected();
+    });
+  }
+
 
                              // Start:  Cancel:  Ok:
   self.statusInit      = 0;  //   -       -       -
@@ -55,24 +70,31 @@ LUPAPISTE.StampModel = function(params) {
 
   // Init
   self.application = params.application;
+  self.attachments = params.attachments;
+  self.filteredFiles = _(ko.mapping.toJS(self.attachments)).filter(stampableAttachment).value();
 
-  // params.attachments() are GroupModel objects from attachmentUtils.getGroupByOperation
-  self.files = ko.observableArray(_.map(params.attachments(), mapAttachmentGroup));
+  // group by post/pre verdict attachments
+  var grouped = _.groupBy(self.filteredFiles, function(a) {
+    return postVerdictStates[a.applicationState] ? 'post' : 'pre';
+  });
 
-  self.status = ko.observable(_(self.files()).pluck('attachments').flatten().value().length > 0 ? self.statusReady : self.statusNoFiles);
+  // group attachments by operation
+  grouped['pre'] = attachmentUtils.getGroupByOperation(grouped['pre'], true, application.allowedAttachmentTypes);
+  grouped['post'] = attachmentUtils.getGroupByOperation(grouped['post'], true, application.allowedAttachmentTypes);
+
+  // map files for stamping
+  self.preFiles = ko.observableArray(_.map(grouped['pre'], mapAttachmentGroup));
+  self.postFiles = ko.observableArray(_.map(grouped['post'], mapAttachmentGroup));
+
+  self.status = ko.observable(self.filteredFiles.length > 0 ? self.statusReady : self.statusNoFiles);
+
   self.selectedFiles = ko.computed(function() {
-    return _(self.files())
-      .pluck('attachments')
-      .flatten()
-      .filter(function(f) {
-          return f.selected();
-      }).value();
+    return getSelectedAttachments(self.preFiles()).concat(getSelectedAttachments(self.postFiles()));
   });
   self.allSelected = ko.computed(function() {
-    return _(self.files()).pluck('attachments').flatten().every(function(f) {
-          return f.selected();
-      });
+    return eachSelected(self.preFiles()) && eachSelected(self.postFiles());
   });
+
   self.jobId = null;
   self.jobVersion = null;
 
@@ -152,14 +174,13 @@ LUPAPISTE.StampModel = function(params) {
   self.selectRow = function(row) {
     if ( self.status() < self.statusDone ) {
       row.selected(!row.selected());
-    } else {
-      return true;
     }
   };
 
 
   function selectAllFiles(value) {
-    _(self.files()).pluck('attachments').flatten().each(function(f) { f.selected(value); });
+    _(self.preFiles()).pluck('attachments').flatten().each(function(f) { f.selected(value); });
+    _(self.postFiles()).pluck('attachments').flatten().each(function(f) { f.selected(value); });
   }
 
   self.selectAll = _.partial(selectAllFiles, true);
