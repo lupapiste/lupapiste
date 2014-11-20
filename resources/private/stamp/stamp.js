@@ -1,8 +1,6 @@
 var stamping = (function() {
   "use strict";
 
-  var postVerdictStates = {verdictGiven:true, constructionStarted:true, closed:true}; // TODO make global var
-
   var model = {
     stampingMode: ko.observable(false),
 
@@ -48,11 +46,7 @@ var stamping = (function() {
           model.appModel = new LUPAPISTE.ApplicationModel(authorization.create());
           ko.mapping.fromJS(application, {}, model.appModel);
 
-          var filtered = _.filter(ko.mapping.toJS(model.appModel.attachments), function(attachment) {
-            return model.appModel.inPostVerdictState() ? postVerdictStates[attachment.applicationState] : !postVerdictStates[attachment.applicationState];
-          });
-
-          model.attachments = ko.observableArray(attachmentUtils.getGroupByOperation(filtered, true, model.appModel.allowedAttachmentTypes()));
+          model.attachments = ko.observableArray(attachmentUtils.getGroupByOperation(application.attachments, true, application.allowedAttachmentTypes));
           model.stampFields.organization = ko.observable(model.appModel.organizationName());
 
           model.stampingMode(model.appModel !== null); // show
