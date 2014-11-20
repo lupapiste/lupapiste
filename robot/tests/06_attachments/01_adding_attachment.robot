@@ -13,7 +13,7 @@ Mikko goes to empty attachments tab
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  attachments${secs}
   Mikko logs in
-  Create application the fast way  ${appname}  753  753-416-25-30  asuinrakennus
+  Create application the fast way  ${appname}  753  753-416-25-30  kerrostalo-rivitalo
   Open tab  attachments
 
 Download all attachments should be disabled
