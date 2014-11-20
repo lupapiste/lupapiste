@@ -334,13 +334,13 @@
         {:keys [host path]} (env/value :geoserver :wms)
         wms-url (str host path)
         url (case municipality 
-                       491 "http://194.111.49.141/WMSMikkeli.mapdef?"
+                       "491" "http://194.111.49.141/WMSMikkeli.mapdef?"
                        wms-url)
         layers (case municipality 
-                       491 "Asemakaavaindeksi"
+                       "491" "Asemakaavaindeksi"
                        (str municipality "_asemakaavaindeksi"))
         format (case municipality 
-                       491 "text/xml"
+                       "491" "text/xml"
                        "application/vnd.ogc.gml")]
     (:body (http/get url
              {:query-params {"REQUEST" "GetFeatureInfo"

@@ -98,7 +98,7 @@
         response (wfs/plan-info-by-point x y municipality)]
     (if response
       (case municipality
-        491 (resp/json (map wfs/feature-to-feature-info-mikkeli (wfs/gfi-to-features-mikkeli response)))
+        "491" (resp/json (map wfs/feature-to-feature-info-mikkeli (wfs/gfi-to-features-mikkeli response)))
         (resp/json (map wfs/feature-to-feature-info-sito (wfs/gfi-to-features-sito response municipality))))
       (resp/status 503 "Service temporarily unavailable"))))
 
