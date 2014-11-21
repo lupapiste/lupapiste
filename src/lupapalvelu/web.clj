@@ -13,14 +13,13 @@
             [noir.response :as resp]
             [noir.session :as session]
             [noir.cookies :as cookies]
+            [sade.core :refer [ok fail now def-] :as core]
             [sade.env :as env]
             [sade.util :as util]
             [sade.status :as status]
             [sade.strings :as ss]
-            [sade.core :refer [def-]]
-            [sade.core :refer [ok fail now] :as core]
             [lupapalvelu.action :refer [defcommand defquery] :as action]
-            [lupapalvelu.i18n :refer [*lang*]]
+            [lupapalvelu.i18n :refer [*lang*] :as i18n]
             [lupapalvelu.user :as user]
             [lupapalvelu.singlepage :as singlepage]
             [lupapalvelu.user :as user]
@@ -187,9 +186,9 @@
 ;; Web UI:
 ;;
 
-(def- build-number (:build-number env/buildinfo))
+(def- build-ts (let [ts (:time env/buildinfo)] (if (pos? ts) ts (now))))
 
-(def etag (str "\"" build-number "\""))
+(def last-modified (util/to-RFC1123-datetime build-ts))
 
 (def content-type {:html "text/html; charset=utf-8"
                    :js   "application/javascript; charset=utf-8"
@@ -206,7 +205,6 @@
                    :authority-admin authority-admin?
                    :admin admin?
                    :wordpress anyone
-                   :login-frame anyone
                    :welcome anyone
                    :oskari anyone
                    :neighbor anyone})
@@ -216,14 +214,14 @@
     {"Cache-Control" "no-cache"}
     (if (= :html resource-type)
       {"Cache-Control" "no-cache"
-       "ETag"          etag}
+       "Last-Modified" last-modified}
       {"Cache-Control" "public, max-age=864000"
        "Vary"          "Accept-Encoding"
-       "ETag"          etag})))
+       "Last-Modified" last-modified})))
 
 (def- never-cache #{:hashbang})
 
-(def default-lang "fi")
+(def default-lang (name i18n/default-lang))
 
 (def- compose
   (if (env/feature? :no-cache)
@@ -233,8 +231,8 @@
 (defn- single-resource [resource-type app failure]
   (let [request (request/ring-request)]
     (if ((auth-methods app nobody) request)
-     ; Check If-None-Match header, see cache-headers above
-     (if (or (never-cache app) (s/blank? build-number) (not= (get-in request [:headers "if-none-match"]) etag))
+     ; Check If-Modified-Since header, see cache-headers above
+     (if (or (never-cache app) (env/feature? :no-cache) (not= (get-in request [:headers "if-modified-since"]) last-modified))
        (->>
          (java.io.ByteArrayInputStream. (compose resource-type app))
          (resp/content-type (resource-type content-type))
@@ -246,9 +244,10 @@
 
 ;; CSS & JS
 (defpage [:get ["/app/:build/:app.:res-type" :res-type #"(css|js)"]] {build :build app :app res-type :res-type}
-  (if (= build build-number)
-    (single-resource (keyword res-type) (keyword app) unauthorized)
-    (resp/redirect (str "/app/" build-number "/" app "." res-type ))))
+  (let [build-number (:build-number env/buildinfo)]
+    (if (= build build-number)
+     (single-resource (keyword res-type) (keyword app) unauthorized)
+     (resp/redirect (str "/app/" build-number "/" app "." res-type )))))
 
 ;; Single Page App HTML
 (def apps-pattern
@@ -277,7 +276,7 @@
     (->> (s/replace-first v "%21" "!") (re-matches #"^[#!/]{0,3}(.*)") second)))
 
 (defn- save-hashbang-on-client []
-  (resp/set-headers {"Cache-Control" "no-cache", "ETag" "\"none\""}
+  (resp/set-headers {"Cache-Control" "no-cache", "Last-Modified" (util/to-RFC1123-datetime 0)}
     (single-resource :html :hashbang unauthorized)))
 
 (defn serve-app [app hashbang lang]

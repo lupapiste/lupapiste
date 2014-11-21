@@ -11,7 +11,7 @@ Mikko want to build Olutteltta
   Mikko logs in
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  Olutteltta${secs}
-  Create application the fast way  ${appname}  753  753-416-25-30  asuinrakennus
+  Create application the fast way  ${appname}  753  753-416-25-30  kerrostalo-rivitalo
 
 The verdict tab is not visible
   Element should not be visible  application-verdict-tab
