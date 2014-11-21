@@ -108,7 +108,7 @@
               </div>
               <button data-test-id="signLatestAttachmentVersion" class="btn-primary"
                       data-bind="click: sign, visible: $root.authorization.ok('sign-attachments'), visible: versions().length && $root.authorization.ok('sign-attachments')">
-                  <span class="label" data-bind="ltext: 'attachment.signLatest'"></span>
+                  <span class="btn-label" data-bind="ltext: 'attachment.signLatest'"></span>
                   <span class="icon signed-white left-align"></span>
               </button>
             </div>
@@ -173,13 +173,26 @@
             <!-- Preview images and pdf files only -->
             <div class="file-preview" data-bind="visible: hasPreview()">
               <div class="file-preview-image" data-bind="if: isImage()">
-                <a data-bind="attr: {href: '/api/raw/view-attachment?attachment-id=' + latestVersion().fileId}">
-                  <img data-bind="attr: {src: '/api/raw/view-attachment?attachment-id=' + latestVersion().fileId}" src="/img/ajax-loader.gif" alt=""/>
+                <a class="btn btn-auto" data-bind="click: togglePreview" target="file-preview-iframe-name">
+                  <span class="btn-label" data-bind="text: loc('attachment.pdf.preview.link')"></span>
+                  <span class="left-align"
+                        data-bind="drill: showPreview, color: 'black'"></span>
                 </a>
+                <div data-bind="slider: showPreview" class="file-preview-content">
+                  <a data-bind="attr: {href: '/api/raw/view-attachment?attachment-id=' + latestVersion().fileId}">
+                    <img data-bind="attr: {src: '/api/raw/view-attachment?attachment-id=' + latestVersion().fileId}" src="/img/ajax-loader.gif" alt=""/>
+                  </a>
+                </div>
               </div>
               <div class="file-preview-pdf" data-bind="if: isPdf() || isPlainText()">
-              <a class="btn" data-bind="text: loc('attachment.pdf.preview.link'), attr: {href: '/api/raw/view-attachment?attachment-id=' + latestVersion().fileId}" target="file-preview-iframe-name"></a>
-                <iframe id="file-preview-iframe" name="file-preview-iframe-name"></iframe>
+                <a class="btn btn-auto" data-bind="attr: {href: '/api/raw/view-attachment?attachment-id=' + latestVersion().fileId}, click: togglePreview" target="file-preview-iframe-name">
+                  <span class="btn-label" data-bind="text: loc('attachment.pdf.preview.link')"></span>
+                  <span class="left-align"
+                        data-bind="drill: showPreview, color: 'black'"></span>
+                </a>
+                <div data-bind="slider: showPreview" class="file-preview-content">
+                  <iframe id="file-preview-iframe" name="file-preview-iframe-name"></iframe>
+                </div>
               </div>
             </div>
 

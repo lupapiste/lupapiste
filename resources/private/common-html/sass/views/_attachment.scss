@@ -34,6 +34,12 @@ $previewHeight: 500px;
   }
 }
 
+.file-preview-content {
+  padding-top: $marginS;
+  border-top: 1px solid darken($lp-light-grey, 15%);
+  border-bottom: 1px solid darken($lp-light-grey, 15%);
+}
+
 .file-preview-links {
   float: right;
 }
@@ -42,6 +48,7 @@ $previewHeight: 500px;
   iframe {
     width: 100%;
     height: $previewHeight;
+    border: 0;
   }
 }
 
