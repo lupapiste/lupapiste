@@ -8,7 +8,7 @@
 (apply-remote-minimal)
 
 (fact* "Organization details query works"
- (let [resp  (query pena "organization-details" :municipality "753" :operation "asuinrakennus" :lang "fi") => ok?]
+ (let [resp  (query pena "organization-details" :municipality "753" :operation "kerrostalo-rivitalo" :lang "fi") => ok?]
    (count (:attachmentsForOp resp )) => pos?
    (count (:links resp)) => pos?))
 
@@ -56,18 +56,20 @@
       (-> operations first first) => "yleisten-alueiden-luvat"))
 
   (fact* "Set selected operations"
-    (command pena "set-organization-selected-operations" :operations ["asuinrakennus" "jatkoaika"]) => unauthorized?
-    (command sipoo "set-organization-selected-operations" :operations ["asuinrakennus" "jatkoaika"]) => ok?)
+    (command pena "set-organization-selected-operations" :operations ["pientalo" "aita"]) => unauthorized?
+    (command sipoo "set-organization-selected-operations" :operations ["pientalo" "aita"]) => ok?)
 
   (fact* "Query selected operations"
     (query pena "selected-operations-for-municipality" :municipality "753") => ok?
     (let [resp (query sipoo "selected-operations-for-municipality" :municipality "753")]
       resp => ok?
+
       ;; Received the two selected R operations plus all the YA operations.
       (:operations resp) => [["Rakentaminen ja purkaminen"
                               [["Uuden rakennuksen rakentaminen"
-                                [["Asuinrakennus" "asuinrakennus"]]]
-                               ["Jatkoaika" "jatkoaika"]]]
+                                [["pientalo" "pientalo"]]]
+                               ["Rakennelman rakentaminen"
+                                [["Aita" "aita"]]]]]
                              ["yleisten-alueiden-luvat"
                               [["sijoituslupa"
                                 [["pysyvien-maanalaisten-rakenteiden-sijoittaminen"
@@ -124,17 +126,17 @@
                                ["jatkoaika" "ya-jatkoaika"]]]]))
 
   (fact* "Query selected operations"
-    (let [id   (create-app-id pena :operation "asuinrakennus" :municipality sonja-muni)
+    (let [id   (create-app-id pena :operation "kerrostalo-rivitalo" :municipality sonja-muni)
           resp (query pena "addable-operations" :id id) => ok?]
-      (:operations resp) => [["Rakentaminen ja purkaminen" [["Uuden rakennuksen rakentaminen" [["Asuinrakennus" "asuinrakennus"]]]]]]))
+      (:operations resp) => [["Rakentaminen ja purkaminen" [["Uuden rakennuksen rakentaminen" [["pientalo" "pientalo"]]] ["Rakennelman rakentaminen" [["Aita" "aita"]]]]]]))
 
   (fact* "The query 'organization-by-user' correctly returns the selected operations of the organization"
     (let [resp (query pena "organization-by-user") => unauthorized?
           resp (query sipoo "organization-by-user") => ok?]
-      (get-in resp [:organization :selectedOperations]) => {:R ["asuinrakennus" "jatkoaika"]}))
+      (get-in resp [:organization :selectedOperations]) => {:R ["aita" "pientalo"]}))
 
   (fact "An application query correctly returns the 'required fields filling obligatory' info in the organization meta data"
-    (let [app-id (create-app-id pena :operation "asuinrakennus" :municipality sonja-muni)
+    (let [app-id (create-app-id pena :operation "kerrostalo-rivitalo" :municipality sonja-muni)
           app    (query-application pena app-id)
           org    (query admin "organization-by-id" :organizationId  (:organization app))]
 

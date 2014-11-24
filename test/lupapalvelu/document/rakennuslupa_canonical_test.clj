@@ -244,7 +244,7 @@
    :created 2
    :schema-info {:name "uusiRakennus"
                  :version 1
-                 :op {:name "asuinrakennus"}}
+                 :op {:name "kerrostalo-rivitalo"}}
    :data common-rakennus})
 
 (def- rakennuksen-muuttaminen
@@ -816,7 +816,7 @@
 
     (fact "Muu tunnus" (:tunnus MuuTunnus) => "LP-753-2013-00001")
     (fact "Sovellus" (:sovellus MuuTunnus) => "Lupapiste")
-    (fact "Toimenpiteen kuvaus" (-> toimenpide :uusi :kuvaus) => "Asuinrakennuksen rakentaminen")
+    (fact "Toimenpiteen kuvaus" (-> toimenpide :uusi :kuvaus) => "Asuinkerrostalon ja/tai rivitalon rakentaminen")
     (fact "Toimenpiteen kuvaus" (-> muu-muutostyo :muuMuutosTyo :kuvaus) => "Muu rakennuksen muutosty\u00f6")
     (fact "Muu muutostyon perusparannuskytkin" (-> muu-muutostyo :muuMuutosTyo :perusparannusKytkin) => true)
     (fact "Muutostyon laji" (-> muu-muutostyo :muuMuutosTyo :muutostyonLaji) => "muut muutosty\u00f6t")

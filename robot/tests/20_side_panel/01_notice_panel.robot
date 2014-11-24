@@ -9,7 +9,7 @@ Mikko creates new application
   Mikko logs in
   Go to page  applications
   Applications page should be open
-  Create application the fast way  create-app  753  753-416-25-22  asuinrakennus
+  Create application the fast way  create-app  753  753-416-25-22  kerrostalo-rivitalo
   Go to page  applications
   Request should be visible  create-app
 

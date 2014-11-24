@@ -9,7 +9,7 @@ Resource        ../../common_resource.robot
 
 Mikko creates a new application
   Mikko logs in
-  Create application the fast way  invite-app  753  753-423-2-159  asuinrakennus
+  Create application the fast way  invite-app  753  753-423-2-159  kerrostalo-rivitalo
 
 Mikko can see the general invite button and opens invite dialog with it
   Open tab  parties
