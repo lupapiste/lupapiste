@@ -30,10 +30,10 @@ tr {
   }
   &.stamp-attachment-row {
     &.selected {
-      background-color: fade-out($lp-green, 0.8);
+      background-color: $lp-green-light;
     }
     &:hover {
-      background-color: fade-out($lp-green, 0.7);
+      background-color: $lp-green-light;
     }
     td.attachment-file {
       span.attachment-file-name {

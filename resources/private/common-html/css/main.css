@@ -1265,12 +1265,12 @@ input[readonly]:focus, textarea[readonly]:focus {
   background-position: 4px -2496px;
 }
 
-/* line 135, ../sass/partials/_forms.scss */
+/* line 136, ../sass/partials/_forms.scss */
 .form-input-warn {
   background-position: 4px -3196px;
 }
 
-/* line 139, ../sass/partials/_forms.scss */
+/* line 140, ../sass/partials/_forms.scss */
 .form-input-err {
   background-position: 4px -2396px;
 }
@@ -1420,7 +1420,7 @@ input[readonly]:focus, textarea[readonly]:focus {
   background: #f6f6f6;
   border-bottom: 1px solid #e9e9e9;
 }
-/* line 270, ../sass/partials/_forms.scss */
+/* line 271, ../sass/partials/_forms.scss */
 .form-group:last-child, .form-choice:last-child, .form-table:last-child {
   border-bottom: none;
 }
@@ -1892,11 +1892,11 @@ tr.attachment-row td:last-child {
 }
 /* line 32, ../sass/partials/_tables.scss */
 tr.stamp-attachment-row.selected {
-  background-color: rgba(4, 199, 20, 0.2);
+  background-color: #92fd9b;
 }
 /* line 35, ../sass/partials/_tables.scss */
 tr.stamp-attachment-row:hover {
-  background-color: rgba(4, 199, 20, 0.3);
+  background-color: #92fd9b;
 }
 /* line 39, ../sass/partials/_tables.scss */
 tr.stamp-attachment-row td.attachment-file span.attachment-file-name {
@@ -5311,7 +5311,7 @@ div.stamp-content {
   display: none;
 }
 
-/* line 160, ../sass/main.scss */
+/* line 161, ../sass/main.scss */
 .inert-table tbody tr:hover td,
 .inert-table tbody tr:hover th {
   background-color: #ffffff;
