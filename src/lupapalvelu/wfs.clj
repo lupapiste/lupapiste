@@ -357,7 +357,7 @@
                              "BBOX" (s/join "," bbox)}}))))
 
 ;;; Mikkeli is special because it was done first and they use Bentley WMS
-(defn gfi-to-features-mikkeli [gfi]
+(defn gfi-to-features-mikkeli [gfi _]
   (when gfi
     (let [info (zip/xml-zip
                  (xml/parse

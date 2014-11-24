@@ -6,6 +6,7 @@
             [lupapalvelu.wfs :as wfs]
             [lupapalvelu.find-address :as find-address]
             [clojure.data.zip.xml :refer :all]
+            [sade.env :as env]
             [sade.util :refer [dissoc-in select]]))
 
 ;;
@@ -95,11 +96,16 @@
 
 (defn plan-urls-by-point-proxy [request]
   (let [{x :x y :y municipality :municipality} (:params request)
-        response (wfs/plan-info-by-point x y municipality)]
+        response (wfs/plan-info-by-point x y municipality)
+        k (keyword municipality)
+        gfi-mapper (if-let [f-name (env/value :plan-info k :gfi-mapper)]
+                     (resolve (symbol f-name))
+                     wfs/gfi-to-features-sito)
+        feature-mapper (if-let [f-name (env/value :plan-info k :feature-mapper)]
+                         (resolve (symbol f-name))
+                         wfs/feature-to-feature-info-sito)]
     (if response
-      (case municipality
-        "491" (resp/json (map wfs/feature-to-feature-info-mikkeli (wfs/gfi-to-features-mikkeli response)))
-        (resp/json (map wfs/feature-to-feature-info-sito (wfs/gfi-to-features-sito response municipality))))
+      (resp/json (map feature-mapper (gfi-mapper response municipality)))
       (resp/status 503 "Service temporarily unavailable"))))
 
 ;
