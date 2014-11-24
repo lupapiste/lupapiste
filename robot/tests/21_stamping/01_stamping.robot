@@ -4,7 +4,7 @@ Documentation  Stamping functionality for authority
 Suite setup     Apply minimal fixture now
 Suite teardown  Logout
 Resource       ../../common_resource.robot
-Variables      ../06_attachments/variables.py
+Variables      variables.py
 
 *** Test Cases ***
 
@@ -24,8 +24,8 @@ Mikko creates application and goes to empty attachments tab
   Open tab  attachments
 
 Mikko adds PDF attachment without comment
-  Add attachment  ${PDF_TESTFILE_PATH}  ${EMPTY}  Uusi asuinrakennus
-  Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${PDF_TESTFILE_NAME}')]
+  Add attachment  ${PDF_TESTFILE_PATH1}  ${EMPTY}  Uusi asuinrakennus
+  Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${PDF_TESTFILE_NAME1}')]
   
 Mikko does not see stamping button
   Element should not be visible  xpath=//div[@id="application-attachments-tab"]//button[@data-test-id="stamp-attachments-btn"]
