@@ -1,5 +1,4 @@
 (ns lupapalvelu.wfs
-  (:refer-clojure :exclude [and or sort-by filter])
   (:require [taoensso.timbre :as timbre :refer [trace debug info infof warn errorf fatal]]
             [sade.http :as http]
             [clojure.string :as s]
@@ -9,7 +8,7 @@
             [sade.env :as env]
             [sade.xml]
             [sade.strings :refer [starts-with-i]]
-            [sade.util :refer [future*]]
+            [sade.util :refer [future*] :as util]
             [sade.core :refer :all]))
 
 
@@ -85,9 +84,9 @@
        "  </wfs:Query>
         </wfs:GetFeature>"))
 
-(defn sort-by
+(defn ogc-sort-by
   ([property-names]
-    (sort-by property-names "desc"))
+    (ogc-sort-by property-names "desc"))
   ([property-names order]
     (let [sort-properties (apply str (map #(str "<ogc:SortProperty><ogc:PropertyName>" % "</ogc:PropertyName></ogc:SortProperty>") property-names))]
       (str "<ogc:SortBy>"
@@ -95,13 +94,13 @@
            "<ogc:SortOrder>" (s/upper-case order) "</ogc:SortOrder>"
            "</ogc:SortBy>"))))
 
-(defn filter [& e]
+(defn ogc-filter [& e]
   (str "<ogc:Filter>" (apply str e) "</ogc:Filter>"))
 
-(defn and [& e]
+(defn ogc-and [& e]
   (str "<ogc:And>" (apply str e) "</ogc:And>"))
 
-(defn or [& e]
+(defn ogc-or [& e]
   (str "<ogc:Or>" (apply str e) "</ogc:Or>"))
 
 (defn intersects [& e]
@@ -263,7 +262,7 @@
     (query {"typeName" "ktjkiiwfs:PalstanTietoja" "srsName" "EPSG:3067"}
       (property-name "ktjkiiwfs:rekisteriyksikonKiinteistotunnus")
       (property-name "ktjkiiwfs:tunnuspisteSijainti")
-      (filter
+      (ogc-filter
         (intersects
           (property-name "ktjkiiwfs:sijainti")
           (point x y))))))
@@ -273,7 +272,7 @@
     (query {"typeName" "ktjkiiwfs:PalstanTietoja" "srsName" "EPSG:3067"}
       (property-name "ktjkiiwfs:rekisteriyksikonKiinteistotunnus")
       (property-name "ktjkiiwfs:tunnuspisteSijainti")
-      (filter
+      (ogc-filter
         (property-is-equal "ktjkiiwfs:rekisteriyksikonKiinteistotunnus" property-id)))))
 
 (defn property-info-by-point [x y]
@@ -282,7 +281,7 @@
       (property-name "ktjkiiwfs:rekisteriyksikkolaji")
       (property-name "ktjkiiwfs:kiinteistotunnus")
       (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja")
-      (filter
+      (ogc-filter
         (intersects
           (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:sijainti")
           (point x y))))))
@@ -293,7 +292,7 @@
       (property-name "ktjkiiwfs:rekisteriyksikkolaji")
       (property-name "ktjkiiwfs:kiinteistotunnus")
       (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja")
-      (filter
+      (ogc-filter
         (intersects
           (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:sijainti")
           (line l))))))
@@ -304,7 +303,7 @@
       (property-name "ktjkiiwfs:rekisteriyksikkolaji")
       (property-name "ktjkiiwfs:kiinteistotunnus")
       (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja")
-      (filter
+      (ogc-filter
         (intersects
           (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:sijainti")
           (polygon p))))))
@@ -329,16 +328,24 @@
 (defn layer-to-name [layer]
   (first (xml-> layer :Name text)))
 
-(defn plan-info-by-point [x y]
-  (let [bbox [(- (read-string x) 128) (- (read-string y) 128) (+ (read-string x) 128) (+ (read-string y) 128)]]
-    (:body (http/get "http://194.111.49.141/WMSMikkeli.mapdef?"
+(defn- plan-info-config [municipality]
+  (let [{:keys [host path]} (env/value :geoserver :wms)
+        k (keyword municipality)]
+    {:url    (or (env/value :plan-info k :url) (str host path))
+     :layers (or (env/value :plan-info k :layers) (str municipality "_asemakaavaindeksi"))
+     :format (or (env/value :plan-info k :format) "application/vnd.ogc.gml")}))
+
+(defn plan-info-by-point [x y municipality]
+  (let [bbox [(- (util/->double x) 128) (- (util/->double y) 128) (+ (util/->double x) 128) (+ (util/->double y) 128)]
+        {:keys [url layers format]} (plan-info-config municipality)]
+    (:body (http/get url
              {:query-params {"REQUEST" "GetFeatureInfo"
                              "EXCEPTIONS" "application/vnd.ogc.se_xml"
                              "SERVICE" "WMS"
-                             "INFO_FORMAT" "text/xml"
-                             "QUERY_LAYERS" "Asemakaavaindeksi"
+                             "INFO_FORMAT" format
+                             "QUERY_LAYERS" layers
                              "FEATURE_COUNT" "50"
-                             "Layers" "Asemakaavaindeksi"
+                             "Layers" layers
                              "WIDTH" "256"
                              "HEIGHT" "256"
                              "format" "image/png"
@@ -349,7 +356,8 @@
                              "y" "128"
                              "BBOX" (s/join "," bbox)}}))))
 
-(defn gfi-to-features [gfi]
+;;; Mikkeli is special because it was done first and they use Bentley WMS
+(defn gfi-to-features-mikkeli [gfi _]
   (when gfi
     (let [info (zip/xml-zip
                  (xml/parse
@@ -357,13 +365,31 @@
                    startparse-sax-non-validating))]
       (xml-> info :FeatureKeysInLevel :FeatureInfo :FeatureKey))))
 
-(defn feature-to-feature-info  [feature]
+(defn feature-to-feature-info-mikkeli  [feature]
   (when feature
     {:id (first (xml-> feature :property (attr= :name "ID") text))
      :kaavanro (first (xml-> feature :property (attr= :name "Kaavanro") text))
      :kaavalaji (first (xml-> feature :property (attr= :name "Kaavalaji") text))
      :kasitt_pvm (first (xml-> feature :property (attr= :name "Kasitt_pvm") text))
-     :linkki (first (xml-> feature :property (attr= :name "Linkki") text))}))
+     :linkki (first (xml-> feature :property (attr= :name "Linkki") text))
+     :type "bentley"}))
+
+(defn gfi-to-features-sito [gfi municipality]
+  (when gfi
+    (let [info (zip/xml-zip
+                 (xml/parse
+                   (java.io.ByteArrayInputStream. (.getBytes gfi))
+                   startparse-sax-non-validating))]
+      (xml-> info :gml:featureMember (keyword (str "lupapiste:" municipality "_asemakaavaindeksi"))))))
+
+(defn feature-to-feature-info-sito  [feature]
+  (when feature
+    {:id (first (xml-> feature :lupapiste:TUNNUS text))
+     :kuntanro (first (xml-> feature :lupapiste:KUNTA_ID text))
+     :kaavanro (first (xml-> feature :lupapiste:TUNNUS text))
+     :vahvistett_pvm (first (xml-> feature :lupapiste:VAHVISTETT text))
+     :linkki (first (xml-> feature :lupapiste:LINKKI text))
+     :type "sito"}))
 ;;
 ;; Raster images:
 ;;

@@ -4,7 +4,7 @@
             [clojure.string :as s]
             [sade.core :refer [now]]
             [sade.strings :refer :all]
-            [sade.util :refer :all]
+            [sade.util :refer :all :as util]
             [lupapalvelu.i18n :refer [with-lang loc]]
             [lupapalvelu.document.canonical-common :refer :all]
             [lupapalvelu.document.tools :as tools]
@@ -28,7 +28,7 @@
             :huoneistonTyyppi (-> huoneisto :huoneistoTyyppi)}
            (when (numeric? huoneistonumero)
              {:huoneistotunnus
-              (merge {:huoneistonumero (format "%03d" (read-string (remove-leading-zeros huoneistonumero)))}
+              (merge {:huoneistonumero (format "%03d" (util/->int (remove-leading-zeros huoneistonumero)))}
                      (when (not-empty huoneistoPorras) {:porras (s/upper-case huoneistoPorras)})
                      (when (not-empty jakokirjain) {:jakokirjain (lower-case jakokirjain)}))}))))
 
