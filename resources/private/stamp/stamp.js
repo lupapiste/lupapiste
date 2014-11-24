@@ -31,7 +31,7 @@ var stamping = (function() {
     model.appModel = appModel;
     model.attachments = model.appModel.attachments();
 
-    if ( !model.stampFields.organization ) {
+    if ( !model.stampFields.organization || (model.stampFields.organization() !== model.appModel.organization()) ) {
       model.stampFields.organization = ko.observable(model.appModel.organizationName());
     }
 
