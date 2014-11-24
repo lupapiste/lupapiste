@@ -363,7 +363,7 @@
                  :removable true
                  :approvable true,
                  :op {:id "51b59c112438736b8f1b9d0d",
-                      :name "asuinrakennus",
+                      :name "kerrostalo-rivitalo",
                       :created 1370856465069}}
    :meta {:rakennuksenOmistajat {:0 {:_approved {:value "rejected"
                                                  :user {:lastName "Sibbo", :firstName "Sonja", :id "777777777777777777000023"}
