@@ -329,19 +329,16 @@
 (defn layer-to-name [layer]
   (first (xml-> layer :Name text)))
 
+(defn- plan-info-config [municipality]
+  (let [{:keys [host path]} (env/value :geoserver :wms)
+        k (keyword municipality)]
+    {:url    (or (env/value :plan-info k :url) (str host path))
+     :layers (or (env/value :plan-info k :layers) (str municipality "_asemakaavaindeksi"))
+     :format (or (env/value :plan-info k :format) "application/vnd.ogc.gml")}))
+
 (defn plan-info-by-point [x y municipality]
   (let [bbox [(- (read-string x) 128) (- (read-string y) 128) (+ (read-string x) 128) (+ (read-string y) 128)]
-        {:keys [host path]} (env/value :geoserver :wms)
-        wms-url (str host path)
-        url (case municipality
-                       "491" "http://194.111.49.141/WMSMikkeli.mapdef?"
-                       wms-url)
-        layers (case municipality
-                       "491" "Asemakaavaindeksi"
-                       (str municipality "_asemakaavaindeksi"))
-        format (case municipality
-                       "491" "text/xml"
-                       "application/vnd.ogc.gml")]
+        {:keys [url layers format]} (plan-info-config municipality)]
     (:body (http/get url
              {:query-params {"REQUEST" "GetFeatureInfo"
                              "EXCEPTIONS" "application/vnd.ogc.se_xml"
