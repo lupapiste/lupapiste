@@ -43,7 +43,10 @@ var stamping = (function() {
       if ( e.pagePath[0] ) {
         var appId = e.pagePath[0];
         repository.load(appId, null, function(application) {
-          model.appModel = new LUPAPISTE.ApplicationModel(authorization.create());
+          var authorizationModel = authorization.create();
+          model.appModel = new LUPAPISTE.ApplicationModel(authorizationModel);
+          authorizationModel.refresh(application);
+
           ko.mapping.fromJS(application, {}, model.appModel);
 
           model.attachments = model.appModel.attachments();
