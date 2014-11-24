@@ -100,3 +100,7 @@ Select all files and start stamping
   Click element  xpath=//div[@id="stamping-container"]//button[@data-test-id="start-stamping"]
   Xpath should match x times  //div[@id="stamping-container"]//span[@data-test-id="attachment-status-text"]  3
   Wait Until  Element text should be  xpath=//div[@id="stamping-container"]//span[@data-test-id="stamp-status-text"]  Leimaus valmis
+
+Return from stamping to attachments tab
+  Click element  xpath=//div[@id="stamping-container"]//button[@data-test-id="stamp-ok"]
+  Element should be visible  application-attachments-tab
