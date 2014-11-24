@@ -126,14 +126,16 @@
       <script type="text/html" id="stamp-attachments-table">
         <table class="table attachments-template-table">
           <tbody data-bind="foreach: $data">
-            <tr class="attachment-group-header">
+            <tr class="attachment-group-header" data-bind="attr: {'data-test-id': $data.groupName}">
               <td data-bind="text: name" colspan="4" data-test-id="attachment-group-header-text"></td>
               <td colspan="3" class="attachment-group-select">
                 <!-- ko ifnot: groupSelected -->
-                <a href="#" data-bind="ltext: 'attachments.group.select', click: $parents[1].toggleGroupSelect, visible: $parents[1].status() < $parents[1].statusRunning"></a>
+                <a href="#" data-bind="ltext: 'attachments.group.select', click: $parents[1].toggleGroupSelect, visible: $parents[1].status() < $parents[1].statusRunning"
+                            data-test-id="attachments-group-select"></a>
                 <!-- /ko -->
                 <!-- ko if: groupSelected -->
-                <a href="#" data-bind="ltext: 'attachments.group.deselect', click: $parents[1].toggleGroupSelect, visible: $parents[1].status() < $parents[1].statusRunning"></a>
+                <a href="#" data-bind="ltext: 'attachments.group.deselect', click: $parents[1].toggleGroupSelect, visible: $parents[1].status() < $parents[1].statusRunning"
+                            data-test-id="attachments-group-deselect"></a>
                 <!-- /ko -->
               </td>
             </tr>
@@ -218,7 +220,8 @@
                       click: function() {return true;}, clickBubble: false" />
                   <span data-bind="
                       text: loc(['stamp.file.status', $data.status()]),
-                      visible: $parents[2].status() >= $parents[2].statusRunning"></span>
+                      visible: $parents[2].status() >= $parents[2].statusRunning"
+                      data-test-id="attachment-status-text"></span>
               </td>
             </tr>
 

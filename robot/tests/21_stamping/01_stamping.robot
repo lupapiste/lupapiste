@@ -26,6 +26,10 @@ Mikko creates application and goes to empty attachments tab
 Mikko adds PDF attachment without comment
   Add attachment  ${PDF_TESTFILE_PATH1}  ${EMPTY}  Uusi asuinrakennus
   Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${PDF_TESTFILE_NAME1}')]
+  Add attachment  ${PDF_TESTFILE_PATH2}  ${EMPTY}  Uusi asuinrakennus
+  Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${PDF_TESTFILE_NAME2}')]
+  Add attachment  ${PDF_TESTFILE_PATH3}  ${EMPTY}  Yleisesti hankkeeseen
+  Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${PDF_TESTFILE_NAME3}')]
   
 Mikko does not see stamping button
   Element should not be visible  xpath=//div[@id="application-attachments-tab"]//button[@data-test-id="stamp-attachments-btn"]
@@ -75,3 +79,24 @@ Sonja can go to attachments tab. When she returns, stamp info fields are persist
   Textfield value should be  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-xmargin"]  ${STAMP_XMARGIN}
   Textfield value should be  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-ymargin"]  ${STAMP_YMARGIN}
   
+Sonja can toggle selection of attachments by group/all/none
+  # Mikko uploaded 2 attachments belonging to operation "Uusi asuinrakennus" and 1 attachment to "Yleiset hankkeen liitteet"
+  Click element  xpath=//div[@id="stamping-container"]//tr[@data-test-id="asuinrakennus"]//a[@data-test-id="attachments-group-select"]
+  Xpath should match x times  //div[@id="stamping-container"]//tr[contains(@class,'selected')]  2
+  Click element  xpath=//div[@id="stamping-container"]//tr[@data-test-id="asuinrakennus"]//a[@data-test-id="attachments-group-deselect"]
+  Xpath should match x times  //div[@id="stamping-container"]//tr[contains(@class,'selected')]  0
+  Click element  xpath=//div[@id="stamping-container"]//tr[@data-test-id="attachments.general"]//a[@data-test-id="attachments-group-select"]
+  Xpath should match x times  //div[@id="stamping-container"]//tr[contains(@class,'selected')]  1
+  Click element  xpath=//div[@id="stamping-container"]//a[@data-test-id="stamp-select-all"]
+  Xpath should match x times  //div[@id="stamping-container"]//tr[contains(@class,'selected')]  3
+  Click element  xpath=//div[@id="stamping-container"]//a[@data-test-id="stamp-select-none"]
+  Xpath should match x times  //div[@id="stamping-container"]//tr[contains(@class,'selected')]  0
+  
+Status of stamping is ready
+  Element text should be  xpath=//div[@id="stamping-container"]//span[@data-test-id="stamp-status-text"]  Valmiina leimaamaan liitteet
+  
+Select all files and start stamping
+  Click element  xpath=//div[@id="stamping-container"]//a[@data-test-id="stamp-select-all"]
+  Click element  xpath=//div[@id="stamping-container"]//button[@data-test-id="start-stamping"]
+  Xpath should match x times  //div[@id="stamping-container"]//span[@data-test-id="attachment-status-text"]  3
+  Wait Until  Element text should be  xpath=//div[@id="stamping-container"]//span[@data-test-id="stamp-status-text"]  Leimaus valmis
