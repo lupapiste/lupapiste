@@ -25,7 +25,7 @@ Mikko adds an operation
 
 Application contains two operations
   Wait Until  Page Should Contain  Asuinkerrostalon ja/tai rivitalon rakentaminen
-  Wait Until  Page Should Contain  Muun rakennuksen rakentaminen
+  Wait Until  Page Should Contain  Muun kuin edellä mainitun rakennuksen rakentaminen (liike-, toimisto-, opetus-, päiväkoti-, palvelu-, hoitolaitos- tai muu rakennus)
 
 Add another operation
   Click enabled by test id  add-operation
