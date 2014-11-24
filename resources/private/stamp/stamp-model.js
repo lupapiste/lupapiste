@@ -12,7 +12,7 @@ LUPAPISTE.StampModel = function(params) {
     return ct === "application/pdf" || ct.search(/^image\//) === 0;
   }
 
-  function normalizeAttachment(a) {
+  function enhanceAttachment(a) {
     var versions = _(a.versions).reverse().value(),
       restamp = versions[0].stamped,
       selected = restamp ? versions[1] : versions[0];
@@ -32,7 +32,7 @@ LUPAPISTE.StampModel = function(params) {
   });
 
   function mapAttachmentGroup(group) {
-    group.attachments = _(group.attachments).each(normalizeAttachment).value();
+    group.attachments = _(group.attachments).each(enhanceAttachment).value();
     return {
       attachments: group.attachments,
       groupName: group.groupName,
@@ -172,7 +172,7 @@ LUPAPISTE.StampModel = function(params) {
   };
 
   self.selectRow = function(row) {
-    if ( self.status() < self.statusDone ) {
+    if ( self.status() < self.statusStarting ) {
       row.selected(!row.selected());
     }
   };
