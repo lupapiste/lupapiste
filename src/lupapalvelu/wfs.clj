@@ -1,5 +1,4 @@
 (ns lupapalvelu.wfs
-  (:refer-clojure :exclude [and or sort-by filter])
   (:require [taoensso.timbre :as timbre :refer [trace debug info infof warn errorf fatal]]
             [sade.http :as http]
             [clojure.string :as s]
@@ -85,9 +84,9 @@
        "  </wfs:Query>
         </wfs:GetFeature>"))
 
-(defn sort-by
+(defn ogc-sort-by
   ([property-names]
-    (sort-by property-names "desc"))
+    (ogc-sort-by property-names "desc"))
   ([property-names order]
     (let [sort-properties (apply str (map #(str "<ogc:SortProperty><ogc:PropertyName>" % "</ogc:PropertyName></ogc:SortProperty>") property-names))]
       (str "<ogc:SortBy>"
@@ -95,13 +94,13 @@
            "<ogc:SortOrder>" (s/upper-case order) "</ogc:SortOrder>"
            "</ogc:SortBy>"))))
 
-(defn filter [& e]
+(defn ogc-filter [& e]
   (str "<ogc:Filter>" (apply str e) "</ogc:Filter>"))
 
-(defn and [& e]
+(defn ogc-and [& e]
   (str "<ogc:And>" (apply str e) "</ogc:And>"))
 
-(defn or [& e]
+(defn ogc-or [& e]
   (str "<ogc:Or>" (apply str e) "</ogc:Or>"))
 
 (defn intersects [& e]
@@ -263,7 +262,7 @@
     (query {"typeName" "ktjkiiwfs:PalstanTietoja" "srsName" "EPSG:3067"}
       (property-name "ktjkiiwfs:rekisteriyksikonKiinteistotunnus")
       (property-name "ktjkiiwfs:tunnuspisteSijainti")
-      (filter
+      (ogc-filter
         (intersects
           (property-name "ktjkiiwfs:sijainti")
           (point x y))))))
@@ -273,7 +272,7 @@
     (query {"typeName" "ktjkiiwfs:PalstanTietoja" "srsName" "EPSG:3067"}
       (property-name "ktjkiiwfs:rekisteriyksikonKiinteistotunnus")
       (property-name "ktjkiiwfs:tunnuspisteSijainti")
-      (filter
+      (ogc-filter
         (property-is-equal "ktjkiiwfs:rekisteriyksikonKiinteistotunnus" property-id)))))
 
 (defn property-info-by-point [x y]
@@ -282,7 +281,7 @@
       (property-name "ktjkiiwfs:rekisteriyksikkolaji")
       (property-name "ktjkiiwfs:kiinteistotunnus")
       (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja")
-      (filter
+      (ogc-filter
         (intersects
           (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:sijainti")
           (point x y))))))
@@ -293,7 +292,7 @@
       (property-name "ktjkiiwfs:rekisteriyksikkolaji")
       (property-name "ktjkiiwfs:kiinteistotunnus")
       (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja")
-      (filter
+      (ogc-filter
         (intersects
           (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:sijainti")
           (line l))))))
@@ -304,7 +303,7 @@
       (property-name "ktjkiiwfs:rekisteriyksikkolaji")
       (property-name "ktjkiiwfs:kiinteistotunnus")
       (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja")
-      (filter
+      (ogc-filter
         (intersects
           (property-name "ktjkiiwfs:rekisteriyksikonPalstanTietoja/ktjkiiwfs:sijainti")
           (polygon p))))))

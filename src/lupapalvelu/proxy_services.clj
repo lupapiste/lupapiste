@@ -24,12 +24,12 @@
 (defn get-addresses [street number city]
   (wfs/post wfs/maasto
     (wfs/query {"typeName" "oso:Osoitenimi"}
-      (wfs/sort-by ["oso:katunumero"])
-      (wfs/filter
-        (wfs/and
+      (wfs/ogc-sort-by ["oso:katunumero"])
+      (wfs/ogc-filter
+        (wfs/ogc-and
           (wfs/property-is-like "oso:katunimi"     street)
           (wfs/property-is-like "oso:katunumero"   number)
-          (wfs/or
+          (wfs/ogc-or
             (wfs/property-is-like "oso:kuntanimiFin" city)
             (wfs/property-is-like "oso:kuntanimiSwe" city)))))))
 
