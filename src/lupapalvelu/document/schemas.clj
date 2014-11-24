@@ -342,12 +342,13 @@
                       :body huoneistoRow})
 
 (def yhden-asunnon-talot "011 yhden asunnon talot")
+(def rivitalot "021 rivitalot")
 (def vapaa-ajan-asuinrakennus "041 vapaa-ajan asuinrakennukset")
 (def talousrakennus "941 talousrakennukset")
 (def rakennuksen-kayttotarkoitus [{:name yhden-asunnon-talot}
                                   {:name "012 kahden asunnon talot"}
                                   {:name "013 muut erilliset talot"}
-                                  {:name "021 rivitalot"}
+                                  {:name rivitalot}
                                   {:name "022 ketjutalot"}
                                   {:name "032 luhtitalot"}
                                   {:name "039 muut asuinkerrostalot"}
