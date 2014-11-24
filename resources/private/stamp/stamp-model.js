@@ -179,17 +179,21 @@ LUPAPISTE.StampModel = function(params) {
 
 
   function selectAllFiles(value) {
-    _(self.preFiles()).pluck('attachments').flatten().each(function(f) { f.selected(value); });
-    _(self.postFiles()).pluck('attachments').flatten().each(function(f) { f.selected(value); });
+    if ( self.status() < self.statusStarting ) {
+      _(self.preFiles()).pluck('attachments').flatten().each(function(f) { f.selected(value); });
+      _(self.postFiles()).pluck('attachments').flatten().each(function(f) { f.selected(value); });
+    }
   }
 
   self.selectAll = _.partial(selectAllFiles, true);
   self.selectNone = _.partial(selectAllFiles, false);
 
   self.toggleGroupSelect = function(group) {
-    var sel = group.groupSelected();
-    _.each(group.attachments, function(a) {
-        a.selected(!sel);
-    });
+    if ( self.status() < self.statusStarting ) {
+      var sel = group.groupSelected();
+      _.each(group.attachments, function(a) {
+          a.selected(!sel);
+      });
+    }
   };
 };
