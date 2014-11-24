@@ -18,7 +18,7 @@
             </tr>
 
             <!-- ko foreach: attachments -->
-            <tr class="attachment-row" data-bind="click: function() { window.location.hash='#!/attachment/' + $root.application.id() + '/' + id;}">
+            <tr class="attachment-row" data-bind="click: function() { window.location.hash='!/attachment/' + $root.application.id() + '/' + id;}">
               <td class="attachmentState">
                 <span data-bind="attr: {'class': statusName + ' icon',
                                 'data-test-state': state,

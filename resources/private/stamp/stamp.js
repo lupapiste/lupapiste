@@ -21,7 +21,7 @@ var stamping = (function() {
       model.appModel = null;
       model.attachments = null;
 
-      window.location.hash='#!/application/' + id + '/attachments';
+      window.location.hash='!/application/' + id + '/attachments';
       repository.load(id);
     }
   };
@@ -35,7 +35,7 @@ var stamping = (function() {
       model.stampFields.organization = ko.observable(model.appModel.organizationName());
     }
 
-    window.location.hash='#!/stamping/' + model.appModel.id();
+    window.location.hash='!/stamping/' + model.appModel.id();
   };
 
   hub.onPageChange('stamping', function(e) {
