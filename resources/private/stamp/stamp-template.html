@@ -11,11 +11,9 @@
             <span class="icon drill-left-black-bigger left-align"></span>
           </a>
         </div>
-        <div class="stamp-content">
-          <!-- ko if: stampingMode -->
+        <div class="stamp-content" data-bind="if: stampingMode">
           <h1 data-bind="ltext: 'application.stampAttachments'"></h1>
           <div id="stamping-component-container" data-bind="component: {name: 'stamping-component', params: {application: appModel, attachments: attachments, stampFields: stampFields}}"></div>
-          <!-- /ko -->
         </div>
       </div>
 
@@ -188,9 +186,7 @@
                   <span data-bind="if: !type">
                     <i data-bind="ltext: 'attachment.noName'"></i>
                   </span>
-                <!-- ko if: $data.contents -->
-                  <div class="attachment-content-desc"><span data-bind="text: $data.contents" data-test-id="attachment-contents"></span></div>
-                <!-- /ko -->
+                  <div class="attachment-content-desc" data-bind="if: $data.contents"><span data-bind="text: $data.contents" data-test-id="attachment-contents"></span></div>
               </td>
               <td class="attachment-file">
                 <span data-bind="if: $data.latestVersion">
