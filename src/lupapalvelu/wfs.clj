@@ -333,13 +333,13 @@
   (let [bbox [(- (read-string x) 128) (- (read-string y) 128) (+ (read-string x) 128) (+ (read-string y) 128)]
         {:keys [host path]} (env/value :geoserver :wms)
         wms-url (str host path)
-        url (case municipality 
+        url (case municipality
                        "491" "http://194.111.49.141/WMSMikkeli.mapdef?"
                        wms-url)
-        layers (case municipality 
+        layers (case municipality
                        "491" "Asemakaavaindeksi"
                        (str municipality "_asemakaavaindeksi"))
-        format (case municipality 
+        format (case municipality
                        "491" "text/xml"
                        "application/vnd.ogc.gml")]
     (:body (http/get url
