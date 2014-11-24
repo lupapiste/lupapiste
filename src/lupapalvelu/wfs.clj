@@ -8,7 +8,7 @@
             [sade.env :as env]
             [sade.xml]
             [sade.strings :refer [starts-with-i]]
-            [sade.util :refer [future*]]
+            [sade.util :refer [future*] :as util]
             [sade.core :refer :all]))
 
 
@@ -336,7 +336,7 @@
      :format (or (env/value :plan-info k :format) "application/vnd.ogc.gml")}))
 
 (defn plan-info-by-point [x y municipality]
-  (let [bbox [(- (read-string x) 128) (- (read-string y) 128) (+ (read-string x) 128) (+ (read-string y) 128)]
+  (let [bbox [(- (util/->double x) 128) (- (util/->double y) 128) (+ (util/->double x) 128) (+ (util/->double y) 128)]
         {:keys [url layers format]} (plan-info-config municipality)]
     (:body (http/get url
              {:query-params {"REQUEST" "GetFeatureInfo"
