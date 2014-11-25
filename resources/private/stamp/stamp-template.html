@@ -118,6 +118,13 @@
             class="btn btn-primary close"
             data-test-id="stamp-ok">
           </button>
+          <button data-bind="
+              ltext: 'stamp.reset',
+              visible: status() == statusDone,
+              click: reset"
+            class="btn btn-primary close"
+            data-test-id="stamp-reset">
+          </button>
         </div>
       </script>
 
