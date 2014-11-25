@@ -27,7 +27,8 @@
                  :wannaJoinUrl      (env/value :oir :wanna-join-url)
                  :userAttachmentTypes (map #(str "osapuolet." (name %)) attachment-types-osapuoli)
                  :attachmentScales  attachment-scales
-                 :attachmentSizes   attachment-sizes}]
+                 :attachmentSizes   attachment-sizes
+                 :postVerdictStates lupapalvelu.attachment-api/post-verdict-states}]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
 
 (defn- loc->js []

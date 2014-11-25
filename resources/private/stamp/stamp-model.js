@@ -2,8 +2,6 @@ LUPAPISTE.StampModel = function(params) {
   "use strict";
   var self = this;
 
-  var postVerdictStates = {verdictGiven:true, constructionStarted:true, closed:true}; // TODO move to global App
-
   function stampableAttachment(a) {
     var ct = "";
     if (a.latestVersion) {
@@ -75,7 +73,7 @@ LUPAPISTE.StampModel = function(params) {
 
   // group by post/pre verdict attachments
   var grouped = _.groupBy(self.filteredFiles, function(a) {
-    return postVerdictStates[a.applicationState] ? 'post' : 'pre';
+    return _.contains(LUPAPISTE.config.postVerdictStates, a.applicationState) ? 'post' : 'pre';
   });
 
   // group attachments by operation

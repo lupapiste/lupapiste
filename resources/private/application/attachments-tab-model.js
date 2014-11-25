@@ -5,8 +5,6 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
 
   self.appModel = appModel;
 
-  var postVerdictStates = {verdictGiven:true, constructionStarted:true, closed:true};
-
   self.preAttachmentsByOperation = ko.observableArray();
   self.postAttachmentsByOperation = ko.observableArray();
 
@@ -19,13 +17,13 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
 
   function getPreAttachments(source) {
     return _.filter(source, function(attachment) {
-          return !postVerdictStates[attachment.applicationState];
+          return !_.contains(LUPAPISTE.config.postVerdictStates, attachment.applicationState);
       });
   }
 
   function getPostAttachments(source) {
     return _.filter(source, function(attachment) {
-          return postVerdictStates[attachment.applicationState];
+          return _.contains(LUPAPISTE.config.postVerdictStates, attachment.applicationState);
       });
   }
 
@@ -50,7 +48,7 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
     var postAttachments = getPostAttachments(rawAttachments);
 
     // pre verdict attachments are not editable after verdict has been given
-    var preGroupEditable = currentUser.isAuthority() || !postVerdictStates[appModel.state()];
+    var preGroupEditable = currentUser.isAuthority() || !_.contains(LUPAPISTE.config.postVerdictStates, appModel.state());
     var preGrouped = attachmentUtils.getGroupByOperation(preAttachments, preGroupEditable, self.appModel.allowedAttachmentTypes());
     var postGrouped = attachmentUtils.getGroupByOperation(postAttachments, true, self.appModel.allowedAttachmentTypes());
 
