@@ -1275,9 +1275,11 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }
     var op = self.schema.info.op;
 
-    var documentName = loc([self.schemaI18name, "_group_label"]);
+    var documentName = "";
     if (op) {
       documentName = loc([op.name, "_group_label"]);
+    } else {
+      documentName = loc([self.schema.info.name, "_group_label"]);
     }
 
     function onRemovalConfirmed() {
