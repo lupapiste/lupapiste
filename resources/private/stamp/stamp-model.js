@@ -200,16 +200,4 @@ LUPAPISTE.StampModel = function(params) {
       });
     }
   };
-
-  self.reset = function() {
-    _(self.preFiles()).pluck('attachments').flatten().each(function(a) {
-      a.selected(false);
-      a.status("");
-    });
-    _(self.postFiles()).pluck('attachments').flatten().each(function(a) {
-      a.selected(false);
-      a.status("");
-    });
-    self.status(self.statusReady);
-  }
 };
