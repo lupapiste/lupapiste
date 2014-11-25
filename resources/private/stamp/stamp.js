@@ -39,9 +39,12 @@ var stamping = (function() {
   };
 
   hub.onPageChange('stamping', function(e) {
-    if ( !model.appModel ) {
-      if ( e.pagePath[0] ) {
-        var appId = e.pagePath[0];
+    if ( pageutil.subPage() ) {
+      if ( !model.appModel || model.appModel.id() !== pageutil.subPage() ) {
+        // refresh
+        model.stampingMode(false);
+
+        var appId = pageutil.subPage();
         repository.load(appId, null, function(application) {
           var authorizationModel = authorization.create();
           model.appModel = new LUPAPISTE.ApplicationModel(authorizationModel);
@@ -52,14 +55,14 @@ var stamping = (function() {
           model.attachments = model.appModel.attachments();
           model.stampFields.organization = ko.observable(model.appModel.organizationName());
 
-          model.stampingMode(model.appModel !== null); // show
+          model.stampingMode(true);
         });
-      } else {
-        error("No application ID provided for stamping");
-        LUPAPISTE.ModalDialog.open("#dialog-application-load-error");
+      } else { // appModel already initialized, show stamping
+        model.stampingMode(true);
       }
-    } else { // appModel already initialized, show stamping
-      model.stampingMode(true);
+    } else {
+      error("No application ID provided for stamping");
+      LUPAPISTE.ModalDialog.open("#dialog-application-load-error");
     }
   });
 
