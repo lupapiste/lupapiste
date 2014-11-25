@@ -78,4 +78,4 @@
           (fact "Add operation not allowed" operation-allowed => (doc-check = error))
           (fact "Add operation allowed" operation-allowed => (doc-check nil?)))))
     (fact "Add operation not allowed for :muutoslupa"
-          (add-operation-allowed? nil {:operations [{:name "asuinrakennus"}] :permitSubtype :muutoslupa}) => error)))
+          (add-operation-allowed? nil {:operations [{:name "kerrostalo-rivitalo"}] :permitSubtype :muutoslupa}) => error)))
