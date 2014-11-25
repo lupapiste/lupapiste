@@ -26,6 +26,11 @@
 
 ; (set! *warn-on-reflection* true)
 
+(def file-types (conj (distinct (for [i (iterator-seq (.getServiceProviders
+                                                 (javax.imageio.spi.IIORegistry/getDefaultInstance)
+                                                 javax.imageio.spi.ImageReaderSpi false))]
+                           (re-find #"\b\w+(?=\.\w+@)" (str i))))
+                  "pdf"))
 ;;
 ;; Generate stamp:
 ;;

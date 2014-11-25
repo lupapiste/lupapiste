@@ -28,7 +28,8 @@
                  :userAttachmentTypes (map #(str "osapuolet." (name %)) attachment-types-osapuoli)
                  :attachmentScales  attachment-scales
                  :attachmentSizes   attachment-sizes
-                 :postVerdictStates lupapalvelu.attachment-api/post-verdict-states}]
+                 :postVerdictStates lupapalvelu.attachment-api/post-verdict-states
+                 :stampableMimes    (filter identity (map lupapalvelu.mime/mime-types lupapalvelu.stamper/file-types))}]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
 
 (defn- loc->js []
