@@ -35,7 +35,7 @@ var stamping = (function() {
     model.authorization = authorization.create();
     model.authorization.refresh(model.appModel.id());
 
-    if ( !model.stampFields.organization || (model.stampFields.organization() !== model.appModel.organization()) ) {
+    if ( !model.stampFields.organization ) ) {
       model.stampFields.organization = ko.observable(model.appModel.organizationName());
     }
 
