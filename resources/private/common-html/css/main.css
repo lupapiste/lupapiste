@@ -1892,11 +1892,11 @@ tr.attachment-row td:last-child {
 }
 /* line 32, ../sass/partials/_tables.scss */
 tr.stamp-attachment-row.selected {
-  background-color: #92fd9b;
+  background-color: #b9febe;
 }
 /* line 35, ../sass/partials/_tables.scss */
 tr.stamp-attachment-row:hover {
-  background-color: #92fd9b;
+  background-color: #b9febe;
 }
 /* line 39, ../sass/partials/_tables.scss */
 tr.stamp-attachment-row td.attachment-file span.attachment-file-name {
