@@ -370,7 +370,8 @@
                                                             :content-type contentType :size (.length temp-file)
                                                             :comment-text nil :now now :user user
                                                             :stamped true :make-comment false :state :ok}))])
-    (try (.delete temp-file) (catch Exception _))))
+    (try (.delete temp-file) (catch Exception _))
+    new-file-id))
 
 (defn- stamp-attachments! [file-infos {:keys [text created organization transparency job-id application] :as context}]
   {:pre [text organization (pos? created)]}
@@ -378,18 +379,18 @@
     (doseq [file-info (vals file-infos)]
       (try
         (debug "Stamping" (select-keys file-info [:attachment-id :contentType :fileId :filename :re-stamp?]))
-        (job/update job-id assoc (:attachment-id file-info) :working)
-        (stamp-attachment! stamp file-info context)
-        (job/update job-id assoc (:attachment-id file-info) :done)
+        (job/update job-id assoc (:attachment-id file-info) {:status :working :fileId (:fileId file-info)})
+        (let [new-file-id (stamp-attachment! stamp file-info context)]
+          (job/update job-id assoc (:attachment-id file-info) {:status :done :fileId new-file-id}))
         (catch Throwable t
           (errorf t "failed to stamp attachment: application=%s, file=%s" (:id application) (:fileId file-info))
-          (job/update job-id assoc (:attachment-id file-info) :error))))))
+          (job/update job-id assoc (:attachment-id file-info) {:status :error :fileId (:fileId file-info)}))))))
 
 (defn- stamp-job-status [data]
-  (if (every? #{:done :error} (vals data)) :done :runnig))
+  (if (every? #{:done :error} (map #(get-in % [:status]) (vals data))) :done :running))
 
 (defn- make-stamp-job [file-infos context]
-  (let [job (job/start (zipmap (keys file-infos) (repeat :pending)) stamp-job-status)]
+  (let [job (job/start (zipmap (keys file-infos) (map #(assoc % :status :pending) (vals file-infos))) stamp-job-status)]
     (future* (stamp-attachments! file-infos (assoc context :job-id (:id job))))
     job))
 
