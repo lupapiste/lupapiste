@@ -3,6 +3,7 @@ var stamping = (function() {
 
   var model = {
     stampingMode: ko.observable(false),
+    authorization: null,
 
     appModel: null,
     attachments: null,
@@ -20,6 +21,7 @@ var stamping = (function() {
       var id = model.appModel.id();
       model.appModel = null;
       model.attachments = null;
+      model.authorization = null;
 
       window.location.hash='!/application/' + id + '/attachments';
       repository.load(id);
@@ -30,6 +32,8 @@ var stamping = (function() {
   function initStamp(appModel) {
     model.appModel = appModel;
     model.attachments = model.appModel.attachments();
+    model.authorization = authorization.create();
+    model.authorization.refresh(model.appModel.id());
 
     if ( !model.stampFields.organization || (model.stampFields.organization() !== model.appModel.organization()) ) {
       model.stampFields.organization = ko.observable(model.appModel.organizationName());
@@ -46,9 +50,9 @@ var stamping = (function() {
 
         var appId = pageutil.subPage();
         repository.load(appId, null, function(application) {
-          var authorizationModel = authorization.create();
-          model.appModel = new LUPAPISTE.ApplicationModel(authorizationModel);
-          authorizationModel.refresh(application);
+          model.authorization = authorization.create();
+          model.appModel = new LUPAPISTE.ApplicationModel(model.authorization);
+          model.authorization.refresh(application);
 
           ko.mapping.fromJS(application, {}, model.appModel);
 

@@ -99,7 +99,7 @@
               click: start,
               ltext: 'stamp.start',
               enable: status() === statusReady && xMarginOk() && yMarginOk() && selectedFiles().length > 0,
-              visible: status() <= statusReady"
+              visible: status() <= statusReady && $parent.authorization.ok('stamp-attachments')"
             class="btn btn-primary"
             data-test-id="start-stamping">
           </button>
