@@ -7,7 +7,7 @@ LUPAPISTE.StampModel = function(params) {
     if (a.latestVersion) {
       ct = a.latestVersion.contentType;
     }
-    return ct === "application/pdf" || ct.search(/^image\//) === 0;
+    return _.contains(LUPAPISTE.config.stampableMimes, ct);
   }
 
   function enhanceAttachment(a) {
@@ -194,4 +194,16 @@ LUPAPISTE.StampModel = function(params) {
       });
     }
   };
+
+  self.reset = function() {
+    _(self.preFiles()).pluck('attachments').flatten().each(function(a) {
+      a.selected(false);
+      a.status("");
+    });
+    _(self.postFiles()).pluck('attachments').flatten().each(function(a) {
+      a.selected(false);
+      a.status("");
+    });
+    self.status(self.statusReady);
+  }
 };
