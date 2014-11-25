@@ -137,7 +137,7 @@
    :create-task  {:js ["create-task.js"]
                   :html ["create-task.html"]}
 
-   :application  {:depends [:common-html :repository :tree :task :create-task :modal-datepicker :signing :invites :side-panel :stamp]
+   :application  {:depends [:common-html :repository :tree :task :create-task :modal-datepicker :signing :invites :side-panel]
                   :js ["add-link-permit.js" "map-model.js" "change-location.js" "invite.js" "verdicts-model.js"
                        "add-operation.js" "request-statement-model.js" "add-party.js"
                        "attachments-tab-model.js" "application-model.js" "invite-company.js" "application.js"]
@@ -221,7 +221,7 @@
 
    :authority    {:depends [:common-html :authenticated :map :applications :notice :application
                             :statement :verdict :neighbors :docgen :create :mypage :user-menu :debug
-                            :company]
+                            :company :stamp]
                   :js ["authority.js" "integration-error.js"]
                   :html ["index.html" "integration-error.html"]}
 
