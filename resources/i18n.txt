@@ -19,3 +19,4 @@ tontin-jarjestelymuutos._group_label: Tontin ajoliittymän, paikoitusjärjestely
 rakennustyo-muutostoimenpiteet._group_label: Rakennustyön aikaiset muutostoimenpiteet
 rak-valm-tyo._group_label: Rakentamista valmisteleva työ (puunkaato, maankaivu, louhinta)
 raktyo-aloit-loppuunsaat._group_label: Rakennustyön aloittamisen ja/tai loppuunsaattamisen jatkaminen
+stamp.reset: Uusi leimaus
