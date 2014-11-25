@@ -7,7 +7,8 @@
             [sade.env :as env]
             [sade.util :as util]
             [cheshire.core :as json]
-            [lupapalvelu.attachment :refer [attachment-types-osapuoli, attachment-scales, attachment-sizes]]))
+            [lupapalvelu.attachment :refer [attachment-types-osapuoli, attachment-scales, attachment-sizes]]
+            [lupapalvelu.attachment-api :refer [post-verdict-states]]))
 
 (def debugjs {:depends [:jquery]
               :js ["debug.js"]
@@ -28,8 +29,8 @@
                  :userAttachmentTypes (map #(str "osapuolet." (name %)) attachment-types-osapuoli)
                  :attachmentScales  attachment-scales
                  :attachmentSizes   attachment-sizes
-                 :postVerdictStates lupapalvelu.attachment-api/post-verdict-states
-                 :stampableMimes    (filter identity (map lupapalvelu.mime/mime-types lupapalvelu.stamper/file-types))}]
+                 :postVerdictStates post-verdict-states
+                 :stampableMimes    (filter identity (map mime/mime-types lupapalvelu.stamper/file-types))}]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
 
 (defn- loc->js []
