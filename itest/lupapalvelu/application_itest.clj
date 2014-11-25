@@ -314,7 +314,7 @@
 
 
 (facts "Facts about update operation description"
-  (let [application-id (create-app-id pena :operation "asuinrakennus" :municipality sonja-muni)
+  (let [application-id (create-app-id pena :operation "kerrostalo-rivitalo" :municipality sonja-muni)
         application (query-application pena application-id)
         op (first (:operations application))
         test-desc "Testdesc"]
