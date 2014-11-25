@@ -96,9 +96,11 @@
                                                    :jarjestysnumero nil
                                                    :kiinttun (:propertyId application)}}
                                  (-> toimenpide :rakennusnro)
-                                 {:rakennustunnus {:rakennusnro (-> toimenpide :rakennusnro)
-                                                   :jarjestysnumero nil
-                                                   :kiinttun (:propertyId application)}}
+                                 {:rakennustunnus (assoc-when {:rakennusnro (-> toimenpide :rakennusnro)
+                                                               :jarjestysnumero nil
+                                                               :kiinttun (:propertyId application)}
+                                                              :valtakunnallinenNumero (-> toimenpide :valtakunnallinenNumero)
+                                                              )}
                                  :default
                                  {:rakennustunnus {:jarjestysnumero nil
                                                    :kiinttun (:propertyId application)}})
