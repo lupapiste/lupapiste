@@ -50,7 +50,7 @@
       (finally
         (try (.close in) (catch Exception _))))))
 
-(defn- read-all-configs []
+(defn- read-all-configs [& _]
   (let [password (or (System/getProperty "lupapiste.masterpassword") (System/getenv "LUPAPISTE_MASTERPASSWORD") "lupapiste")]
     (reduce deep-merge (map (partial read-config password)
                          [(io/resource "lupapiste.properties")
@@ -62,6 +62,9 @@
 (defonce ^:private config (atom (read-all-configs)))
 
 (defn get-config [] @config)
+
+(defn reload! []
+  (swap! config read-all-configs))
 
 (defn value
   "Returns a value from config."

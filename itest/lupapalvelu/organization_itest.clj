@@ -8,7 +8,7 @@
 (apply-remote-minimal)
 
 (fact* "Organization details query works"
- (let [resp  (query pena "organization-details" :municipality "753" :operation "asuinrakennus" :lang "fi") => ok?]
+ (let [resp  (query pena "organization-details" :municipality "753" :operation "kerrostalo-rivitalo" :lang "fi") => ok?]
    (count (:attachmentsForOp resp )) => pos?
    (count (:links resp)) => pos?))
 
@@ -126,7 +126,7 @@
                                ["jatkoaika" "ya-jatkoaika"]]]]))
 
   (fact* "Query selected operations"
-    (let [id   (create-app-id pena :operation "asuinrakennus" :municipality sonja-muni)
+    (let [id   (create-app-id pena :operation "kerrostalo-rivitalo" :municipality sonja-muni)
           resp (query pena "addable-operations" :id id) => ok?]
       (:operations resp) => [["Rakentaminen ja purkaminen" [["Uuden rakennuksen rakentaminen" [["pientalo" "pientalo"]]] ["Rakennelman rakentaminen" [["Aita" "aita"]]]]]]))
 
@@ -136,7 +136,7 @@
       (get-in resp [:organization :selectedOperations]) => {:R ["aita" "pientalo"]}))
 
   (fact "An application query correctly returns the 'required fields filling obligatory' info in the organization meta data"
-    (let [app-id (create-app-id pena :operation "asuinrakennus" :municipality sonja-muni)
+    (let [app-id (create-app-id pena :operation "kerrostalo-rivitalo" :municipality sonja-muni)
           app    (query-application pena app-id)
           org    (query admin "organization-by-id" :organizationId  (:organization app))]
 

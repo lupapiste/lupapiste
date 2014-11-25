@@ -6,6 +6,7 @@
             [lupapalvelu.wfs :as wfs]
             [lupapalvelu.find-address :as find-address]
             [clojure.data.zip.xml :refer :all]
+            [sade.env :as env]
             [sade.util :refer [dissoc-in select]]))
 
 ;;
@@ -24,12 +25,12 @@
 (defn get-addresses [street number city]
   (wfs/post wfs/maasto
     (wfs/query {"typeName" "oso:Osoitenimi"}
-      (wfs/sort-by ["oso:katunumero"])
-      (wfs/filter
-        (wfs/and
+      (wfs/ogc-sort-by ["oso:katunumero"])
+      (wfs/ogc-filter
+        (wfs/ogc-and
           (wfs/property-is-like "oso:katunimi"     street)
           (wfs/property-is-like "oso:katunumero"   number)
-          (wfs/or
+          (wfs/ogc-or
             (wfs/property-is-like "oso:kuntanimiFin" city)
             (wfs/property-is-like "oso:kuntanimiSwe" city)))))))
 
@@ -94,10 +95,17 @@
       (resp/status 503 "Service temporarily unavailable"))))
 
 (defn plan-urls-by-point-proxy [request]
-  (let [{x :x y :y} (:params request)
-        response (wfs/plan-info-by-point x y)]
+  (let [{x :x y :y municipality :municipality} (:params request)
+        response (wfs/plan-info-by-point x y municipality)
+        k (keyword municipality)
+        gfi-mapper (if-let [f-name (env/value :plan-info k :gfi-mapper)]
+                     (resolve (symbol f-name))
+                     wfs/gfi-to-features-sito)
+        feature-mapper (if-let [f-name (env/value :plan-info k :feature-mapper)]
+                         (resolve (symbol f-name))
+                         wfs/feature-to-feature-info-sito)]
     (if response
-      (resp/json (map wfs/feature-to-feature-info (wfs/gfi-to-features response)))
+      (resp/json (map feature-mapper (gfi-mapper response municipality)))
       (resp/status 503 "Service temporarily unavailable"))))
 
 ;
