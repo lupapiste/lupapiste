@@ -117,7 +117,8 @@
                               {:a [3 4 5]}]) => [6 9 12])
 
 (facts future*
-  (binding [*out* (NullWriter.)]
+  (binding [*out* (NullWriter.)
+            *err* (NullWriter.)]
     (deref (future* (throw (Exception. "bang!")))))
   => (throws java.util.concurrent.ExecutionException "java.lang.Exception: bang!"))
 
