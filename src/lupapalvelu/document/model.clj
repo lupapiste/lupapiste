@@ -109,7 +109,14 @@
 ;; implement validator, the same as :select?
 (defmethod validate-field :radioGroup [_ elem v] nil)
 
-(defmethod validate-field :buildingSelector [_ elem v] (subtype/subtype-validation {:subtype :rakennusnumero} v))
+(defmethod validate-field :buildingSelector [_ elem v]
+  (cond
+    (ss/blank? v) nil
+    (= "other" v) nil
+    (util/rakennusnumero? v) nil
+    (util/rakennustunnus? v) nil
+    :else [:warn "illegal-rakennusnumero"]))
+
 (defmethod validate-field :newBuildingSelector [_ elem v] (subtype/subtype-validation {:subtype :number} v))
 
 (defmethod validate-field :personSelector [application elem v]
