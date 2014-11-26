@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <section class="page container" id="stamping">
+      <div id="stamping-container" >
+        <div class="nav-back-container">
+          <a class="btn left-align btn-nav-back"
+             data-bind="click: cancelStamping"
+             data-test-id="back-to-application-from-stamping">
+            <span data-bind =" ltext: 'application.return'"></span>
+            <span class="icon drill-left-black-bigger left-align"></span>
+          </a>
+        </div>
+        <div class="stamp-content" data-bind="if: stampingMode">
+          <h1 data-bind="ltext: 'application.stampAttachments'"></h1>
+          <div id="stamping-component-container" data-bind="component: {name: 'stamping-component', params: {application: appModel, attachments: attachments, stampFields: stampFields}}"></div>
+        </div>
+      </div>
+
+      <script type="text/html" id="stamp-attachments-template">
+        <div>
+          <form id="stamp-info" class="clear">
+            <fieldset class="col1">
+              <legend data-bind="ltext: 'stamp.information'"></legend>
+
+              <label data-bind="ltext: 'stamp.text'"></label>
+              <input data-bind="value: text, enable: status() === statusReady"
+                        type="text"
+                        class="form-input text"
+                     data-test-id="stamp-info-text"/>
+
+              <label data-bind="ltext: 'stamp.date'"></label>
+              <input data-bind="
+                          datepicker: date,
+                          enable: status() === statusReady,
+                          valueUpdate: 'afterkeydown'"
+                        type="text"
+                        class="form-input text"
+                     data-test-id="stamp-info-date"/>
+
+              <label data-bind="ltext: 'stamp.organization'"></label>
+              <input data-bind="textInput: organization, enable: status() === statusReady"
+                        type="text"
+                        class="form-input text"/
+                     data-test-id="stamp-info-organization">
+            </fieldset>
+
+            <fieldset class="col2">
+              <legend data-bind="ltext: 'stamp.margin'"></legend>
+
+              <label data-bind="text: loc('stamp.xMargin') + ' (' + loc('unit.mm') + ')'"></label>
+              <input data-bind="textInput: xMargin,
+                          enable: status() === statusReady,
+                          css: {'invalid-margin': !xMarginOk()}"
+                        type="text"
+                        class="form-input text"/
+                     data-test-id="stamp-info-xmargin">
+
+              <label data-bind="text: loc('stamp.yMargin') + ' (' + loc('unit.mm') + ')'"></label>
+              <input data-bind="textInput: yMargin,
+                          enable: status() === statusReady,
+                          css: {'invalid-margin': !yMarginOk()}"
+                        type="text"
+                        class="form-input text"
+                     data-test-id="stamp-info-ymargin"/>
+
+              <label data-bind="ltext: 'stamp.transparency'"></label>
+              <select data-bind="options: transparencies, optionsText: 'text', optionsValue: 'value', value: transparency" class="form-input combobox"
+                      data-test-id="stamp-info-transparency"></select>
+            </fieldset>
+          </form>
+        </div>
+        <div class="clear">
+            <div data-bind="if: postFiles().length > 0">
+              <h1><span data-bind="ltext: 'application.attachments.post-verdict'"></span></h1>
+              <div class="clear" data-bind="template: {name: 'stamp-attachments-table', data: postFiles()}"></div>
+            </div>
+            <div data-bind="if: preFiles().length > 0">
+              <h1><span data-bind="ltext: 'application.attachments.pre-verdict'"></span></h1>
+              <div class="clear" data-bind="template: {name: 'stamp-attachments-table', data: preFiles()}"></div>
+            </div>
+          <div class="right">
+            <!-- ko ifnot: allSelected -->
+            <a href="#" data-bind="ltext: 'stamp.all', click: selectAll, visible: status() < statusRunning" data-test-id="stamp-select-all"></a>
+            <!-- /ko -->
+            <!-- ko if: allSelected -->
+            <a href="#" data-bind="ltext: 'stamp.none', click: selectNone, visible: status() < statusRunning" data-test-id="stamp-select-none"></a>
+            <!-- /ko -->
+          </div>
+        </div>
+        <div class="stamp-status">
+          <span data-bind="text: loc(['stamp.status', status().toString()])" data-test-id="stamp-status-text"></span>
+          <span class="ok icon" data-bind="visible: status() === statusDone"></span>
+          <span class="missing icon" data-bind="visible: status() === statusNoFiles"></span>
+        </div>
+
+        <div class="stamp-buttons">
+          <button data-bind="
+              click: start,
+              ltext: 'stamp.start',
+              enable: status() === statusReady && xMarginOk() && yMarginOk() && selectedFiles().length > 0,
+              visible: status() <= statusReady && $parent.authorization.ok('stamp-attachments')"
+            class="btn btn-primary"
+            data-test-id="start-stamping">
+          </button>
+          <button data-bind="
+              ltext: 'stamp.cancel',
+              enable: status() === statusReady,
+              visible: status() <= statusReady,
+              click: $parent.cancelStamping"
+            class="btn close"
+            data-test-id="cancel-stamping">
+          </button>
+          <button data-bind="
+              ltext: 'stamp.ok',
+              visible: status() > statusRunning,
+              click: $parent.cancelStamping"
+            class="btn btn-primary close"
+            data-test-id="stamp-ok">
+          </button>
+        </div>
+      </script>
+
+      <script type="text/html" id="stamp-attachments-table">
+        <table class="table attachments-template-table">
+          <tbody data-bind="foreach: $data">
+            <tr class="attachment-group-header" data-bind="attr: {'data-test-id': $data.groupName}">
+              <td data-bind="text: name" colspan="4" data-test-id="attachment-group-header-text"></td>
+              <td colspan="3" class="attachment-group-select">
+                <!-- ko ifnot: groupSelected -->
+                <a href="#" data-bind="ltext: 'attachments.group.select', click: $parents[1].toggleGroupSelect, visible: $parents[1].status() < $parents[1].statusRunning"
+                            data-test-id="attachments-group-select"></a>
+                <!-- /ko -->
+                <!-- ko if: groupSelected -->
+                <a href="#" data-bind="ltext: 'attachments.group.deselect', click: $parents[1].toggleGroupSelect, visible: $parents[1].status() < $parents[1].statusRunning"
+                            data-test-id="attachments-group-deselect"></a>
+                <!-- /ko -->
+              </td>
+            </tr>
+            <tr>
+              <th data-bind="ltext: 'application.attachmentState'">Tila</th>
+              <th colspan="2" data-bind="ltext: 'application.attachmentType'">Tyyppi</th>
+              <th data-bind="ltext: 'application.attachmentFile'">Tiedosto</th>
+              <th data-bind="ltext: 'application.attachmentVersion'">Versio</th>
+              <th data-bind="ltext: 'application.attachmentEditDate'">Muokattu</th>
+              <th></th>
+            </tr>
+
+            <!-- ko foreach: attachments -->
+            <tr class="attachment-row stamp-attachment-row" data-bind="click: $parents[2].selectRow, clickBubble: false, css: {selected: selected}">
+              <td class="attachmentState">
+
+                <span data-bind="attr: {'class': statusName + ' icon',
+                                'data-test-state': state,
+                                'data-test-type': type['type-group'] + '.' + type['type-id'],
+                                'title': loc(statusName + '.title')}">
+                </span>
+                <span data-bind="visible:$data.signed,
+                                 attr: {'class': 'icon signed',
+                                 'title': loc('attachment.signed'),
+                                 'data-test-icon': 'signed-' + type['type-group'] + '.' + type['type-id']}">
+                </span>
+                <span data-bind="visible:$data.isSent,
+                                 attr: {'class': 'icon transfered',
+                                 'title': loc('application.attachmentSentDate') + ' ' + $data.sentDateString,
+                                 'data-test-icon': 'transfered-' + type['type-group'] + '.' + type['type-id']}">
+                </span>
+                <span data-bind="visible:$data.stamped,
+                                 attr: {'class': 'icon stamped',
+                                 'title': loc('attachment.stamped'),
+                                 'data-test-icon': 'stamped-' + type['type-group'] + '.' + type['type-id']}">
+                </span>
+              </td>
+              <td class="attachment-type-group">
+                  <span data-bind="if: type">
+                    <span data-bind="text: loc(['attachmentType', type['type-group'], '_group_label'])"></span>
+                  </span>
+                  <span data-bind="if: !type">
+                    <i data-bind="ltext: 'attachment.noName'"></i>
+                  </span>
+              </td>
+              <td class="attachment-type-id">
+                  <span data-bind="if: type">
+                    <span data-bind="text: loc(['attachmentType', type['type-group'], type['type-id']])"></span>
+                  </span>
+                  <span data-bind="if: !type">
+                    <i data-bind="ltext: 'attachment.noName'"></i>
+                  </span>
+                  <div class="attachment-content-desc" data-bind="if: $data.contents"><span data-bind="text: $data.contents" data-test-id="attachment-contents"></span></div>
+              </td>
+              <td class="attachment-file">
+                <span data-bind="if: $data.latestVersion">
+                  <a href="#" data-bind="text: latestVersion.filename,
+                                         attr: {href: '/api/raw/download-attachment?attachment-id=' + fileId(),
+                                                title: loc('download')},
+                                         click: function() {return true;},
+                                         clickBubble: false"></a><br/>
+                  <i data-bind="ltext: latestVersion.contentType"></i>
+                  <i data-bind="size: latestVersion.size"></i>
+                </span>
+                <!-- ko ifnot: $data.latestVersion -->
+                <a data-bind="ltext: 'application.attachmentsAddList', attr: {href: '#!/attachment/' + $root.application.id() + '/' + id, 'data-test-type': type['type-group'] + '.' + type['type-id']}"></a>
+                <!-- /ko -->
+              </td>
+              <td>
+                <span data-bind="if: $data.latestVersion">
+                  <span data-bind="version: latestVersion.version"></span>
+                </span>
+              </td>
+              <td>
+                <span data-bind="if: $data.latestVersion">
+                  <span data-bind="dateString: modified"></span>
+                  <span data-bind="fullName: latestVersion.user"></span>
+                </span>
+              </td>
+              <td>
+                <input type="checkbox" data-bind="checked: $data.selected,
+                      visible: $parents[2].status() < $parents[2].statusRunning,
+                      enable: $parents[2].status() === $parents[2].statusReady,
+                      click: function() {return true;}, clickBubble: false" />
+                  <span data-bind="
+                      text: loc(['stamp.file.status', $data.status()]),
+                      visible: $parents[2].status() >= $parents[2].statusRunning"
+                      data-test-id="attachment-status-text"></span>
+              </td>
+            </tr>
+
+            <!-- /ko -->
+          </tbody>
+        </table>
+     </script>
+    </section>
+  </body>
+</html>

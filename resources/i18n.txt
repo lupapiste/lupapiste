@@ -1,0 +1,6 @@
+attachments.group.select: Valitse ryhmän liitteet
+attachments.group.deselect: Poista ryhmän valinnat
+stamp.all: Valitse kaikki
+stamp.none: Poista kaikki valinnat
+unit.mm: mm
+stamp.reset: Uusi leimaus

@@ -28,6 +28,19 @@ tr {
       text-align: right;
     }
   }
+  &.stamp-attachment-row {
+    &.selected {
+      background-color: $lp-light-green;
+    }
+    &:hover {
+      background-color: $lp-light-green;
+    }
+    td.attachment-file {
+      span.attachment-file-name {
+        display: block;
+      }
+    }
+  }
 }
 
 th, td {
@@ -80,6 +93,13 @@ table.attachments-template-table {
     }
     &.attachment-type-id {
       padding-left: 0;
+    }
+    &.attachment-group-select {
+      a {
+        font-size: $font-size-body;
+        font-weight: normal;
+        float: right;
+      }
     }
   }
 }
