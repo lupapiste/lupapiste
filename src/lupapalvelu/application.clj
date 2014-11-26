@@ -531,7 +531,7 @@
                        :propertyId          property-id
                        :title               address
                        :auth                (if-let [company (some-> user :company :id c/find-company-by-id c/company->auth)]
-                                              (do (println "USER:" user) (println "COMP:" company) [owner company])
+                                              [owner company]
                                               [owner])
                        :comments            (map #(domain/->comment % {:type "application"} (:role user) user nil created [:applicant :authority]) messages)
                        :schema-version      (schemas/get-latest-schema-version)})]
