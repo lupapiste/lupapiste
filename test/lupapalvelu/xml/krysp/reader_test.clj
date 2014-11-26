@@ -209,7 +209,7 @@
     (fact "xml is parsed" buildings => truthy)
     (fact "xml has 2 buildings" (count buildings) => 2)
     (fact "Kiinteistotunnus" (:propertyId (first buildings)) => "63845900130022")
-    (fact "Rakennustunnus" building1-id => "001")
+    (fact "Rakennustunnus" building1-id => "123456789A")
     (fact "Kayttotarkoitus" (:usage (first buildings)) => "011 yhden asunnon talot")
     (fact "Alkuhetki year as created" (:created (first buildings)) => "2013")
     (let [building1  (dissoc (->rakennuksen-tiedot xml building1-id) :kiinttun)
