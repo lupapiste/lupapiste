@@ -100,10 +100,12 @@
 (defn wfs-krysp-url-with-service [server object-type filter]
   (str (wfs-krysp-url server object-type filter) "&service=WFS"))
 
-(defn building-xml [server property-id]
+(defn building-xml
+  "Returns clojure.xml map or an empty map if the data could not be downloaded."
+  [server property-id]
   (let [url (wfs-krysp-url server building-type (property-equals rakennuksen-kiinteistotunnus property-id))]
     (debug "Get building: " url)
-    (cr/get-xml url)))
+    (or (cr/get-xml url) {})))
 
 (defn- application-xml [type-name id-path server id raw?]
   (let [url (wfs-krysp-url-with-service server type-name (property-equals id-path id))
