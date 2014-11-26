@@ -75,4 +75,4 @@
   (subtype-validation {:subtype :rakennustunnus} nil) => nil?
   (subtype-validation {:subtype :rakennustunnus} "100012345A") => nil?
   (subtype-validation {:subtype :rakennustunnus} "123456789A") => nil?
-  (subtype-validation {:subtype :rakennustunnus} "023456789A") => [:warn "illegal-rakennustunnus"])
+  (subtype-validation {:subtype :rakennustunnus} "23456789A") => [:warn "illegal-rakennustunnus"])

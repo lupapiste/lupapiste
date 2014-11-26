@@ -244,7 +244,7 @@
   (fact (rakennustunnus? "foo") => falsey)
   (fact (rakennustunnus? "1a") => falsey)
   (fact (rakennustunnus? "1A") => falsey)
-  (fact (rakennustunnus? "012345678A") => falsey)
+  (fact (rakennustunnus? "912345678A") => truthy)
   (fact "SYKE sample" (rakennustunnus? "100012345A") => truthy)
   (fact "VRK sample" (rakennustunnus? "123456789A") => truthy))
 
