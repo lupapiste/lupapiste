@@ -51,18 +51,18 @@
                      data-test-id="stamp-info-extratext">
             </fieldset>
             <fieldset class="col2">
-              <legend>Tunnustiedot</legend>
+              <legend data-bind="ltext: 'stamp.reference-info'"></legend>
 
               <label data-bind="ltext: 'stamp.id.building'"></label>
               <input data-bind="enable: status() === statusReady"
                         type="text"
                         class="form-input text"
                      data-test-id="stamp-info-rakid"/>
-              <label data-bind="ltext: 'stamp.id.application'"></label>
+              <label data-bind="ltext: 'stamp.municipality.appid'"></label>
               <input data-bind="enable: status() === statusReady"
                         type="text"
                         class="form-input text"
-                     data-test-id="stamp-info-appid"/>
+                     data-test-id="stamp-info-muni-appid"/>
               <label data-bind="ltext: 'stamp.section'"></label>
               <input data-bind="enable: status() === statusReady"
                         type="text"
