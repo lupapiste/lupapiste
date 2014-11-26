@@ -130,11 +130,11 @@
 
 (defn- ->building-ids [id-container xml-no-ns]
   {:propertyId (get-text xml-no-ns id-container :kiinttun)
-  :buildingId  (get-text xml-no-ns id-container :rakennusnro)
-  :index       (get-text xml-no-ns id-container :jarjestysnumero)
-  :usage       (or (get-text xml-no-ns :kayttotarkoitus) "")
-  :area        (get-text xml-no-ns :kokonaisala)
-  :created     (->> (get-text xml-no-ns :alkuHetki) cr/parse-datetime (cr/unparse-datetime :year))})
+   :buildingId  (some #(when-not (ss/blank? %) %) [(get-text xml-no-ns id-container :valtakunnallinenNumero) (get-text xml-no-ns id-container :rakennusnro)])
+   :index       (get-text xml-no-ns id-container :jarjestysnumero)
+   :usage       (or (get-text xml-no-ns :kayttotarkoitus) "")
+   :area        (get-text xml-no-ns :kokonaisala)
+   :created     (->> (get-text xml-no-ns :alkuHetki) cr/parse-datetime (cr/unparse-datetime :year))})
 
 (defn ->buildings-summary [xml]
   (let [xml-no-ns (cr/strip-xml-namespaces xml)]
