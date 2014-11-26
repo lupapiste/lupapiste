@@ -107,6 +107,11 @@ LUPAPISTE.StampModel = function(params) {
   self.xMarginOk = ko.computed(function() { return util.isNum(self.xMargin()); });
   self.yMargin = self.stampFields.yMargin;
   self.yMarginOk = ko.computed(function() { return util.isNum(self.yMargin()); });
+  self.extraInfo = ko.observable("");
+  self.buildingId = ko.observable("");
+  self.municipalityAppId = ko.observable("");
+  self.section = ko.observable("");
+
 
   self.transparency = self.stampFields.transparency;
 
@@ -128,7 +133,11 @@ LUPAPISTE.StampModel = function(params) {
         files: _.map(self.selectedFiles(), "id"),
         xMargin: _.parseInt(self.xMargin(), 10),
         yMargin: _.parseInt(self.yMargin(), 10),
-        transparency: self.transparency()
+        transparency: self.transparency(),
+        extraInfo: self.extraInfo(),
+        buildingId: self.buildingId(),
+        muniAppId: self.municipalityAppId(),
+        section: self.section()
       })
       .success(self.started)
       .call();

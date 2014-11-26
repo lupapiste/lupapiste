@@ -395,7 +395,7 @@
     job))
 
 (defcommand stamp-attachments
-  {:parameters [:id timestamp text organization files xMargin yMargin]
+  {:parameters [:id timestamp text organization files xMargin yMargin extraInfo buildingId muniAppId section]
    :roles      [:authority]
    :states     [:submitted :sent :complement-needed :verdictGiven :constructionStarted :closed]
    :description "Stamps all attachments of given application"}
