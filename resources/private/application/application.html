@@ -1242,6 +1242,33 @@
     </div>
     <div id="boxes">
 
+      <div id="dialog-invite-foreman" class="window autosized">
+        <div class="dialog-header">
+          <p data-bind="ltext: 'application.parties.addForeman'"></p>
+          <p class="dialog-close close">X</p>
+        </div>
+        <!-- ko with: $root.foreman -->
+        <div class="dialog-content" data-bind="css: {pending: pending}">
+          <div class="pending">
+            <div class="ajax"></div>
+            <div data-bind="ltext: 'invite.foreman.pending'"></div>
+          </div>
+          <p data-bind="lhtml: 'invite.foreman.desc'" class="dialog-desc-wide"></p>
+          <form>
+            <label data-bind="ltext: 'userinfo.email'" class="form-label" for="invite-email"></label>
+            <input class="form-input text long" id="invite-email" type="text" data-bind="textInput: email" />
+            <div data-bind="visible: error" >
+              <div data-bind="text: error" class="context-error"></div>
+            </div>
+            <button class="btn btn-primary btn-dialog" data-test-id="application-invite-foreman" data-bind="click: submit, disable: disabled">
+              <span data-bind="ltext: 'application.inviteSend'"></span>
+              <em data-bind="visible: pending" class="button-loader"></em>
+            </button>
+          </form>
+        </div>
+        <!-- /ko -->
+      </div>
+
       <div id="dialog-valtuutus" class="window autosized">
         <div class="dialog-header">
           <p data-bind="ltext: 'application.addInvite'">Lis&auml;&auml; valtuutus</p>
