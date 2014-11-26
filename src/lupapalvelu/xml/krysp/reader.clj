@@ -100,8 +100,8 @@
 (defn wfs-krysp-url-with-service [server object-type filter]
   (str (wfs-krysp-url server object-type filter) "&service=WFS"))
 
-(defn building-xml [server id]
-  (let [url (wfs-krysp-url server building-type (property-equals rakennuksen-kiinteistotunnus id))]
+(defn building-xml [server property-id]
+  (let [url (wfs-krysp-url server building-type (property-equals rakennuksen-kiinteistotunnus property-id))]
     (debug "Get building: " url)
     (cr/get-xml url)))
 
