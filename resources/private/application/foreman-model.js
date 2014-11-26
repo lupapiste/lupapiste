@@ -28,7 +28,6 @@ LUPAPISTE.ForemanModel = function() {
     self.processing(true);
     self.pending(true);
     setTimeout(function() {
-      console.log("foo");
       self.processing(false);
       self.pending(false);
       LUPAPISTE.ModalDialog.close();
