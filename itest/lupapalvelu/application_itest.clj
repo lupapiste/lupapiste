@@ -1,6 +1,7 @@
 (ns lupapalvelu.application-itest
   (:require [midje.sweet :refer :all]
             [clojure.string :refer [join]]
+            [sade.strings :as ss]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.factlet  :refer :all]
             [lupapalvelu.operations :as operations]
@@ -297,6 +298,9 @@
         doc-after       (domain/get-document-by-name merged-app "rakennuksen-muuttaminen")]
         (get-in doc-before [:data :muutostyolaji :value]) => "muut muutosty\u00f6t"
         (get-in doc-after [:data :muutostyolaji :value]) => "muut muutosty\u00f6t"
+        (get-in doc-after [:data :rakennusnro :value]) => "001"
+        (get-in doc-after [:data :manuaalinen_rakennusnro :value]) => ss/blank?
+        (get-in doc-after [:data :valtakunnallinenNumero :value]) => "481123123A"
         (count (get-in doc-after [:data :huoneistot])) => 21
         (get-in doc-after [:data :kaytto :kayttotarkoitus :source]) => "krysp"))
 

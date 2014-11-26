@@ -229,6 +229,7 @@
         {:muutostyolaji                 ...notimplemented...
          :valtakunnallinenNumero        (get-text rakennus :rakennustunnus :valtakunnallinenNumero)
          :rakennusnro                   (get-text rakennus :rakennustunnus :rakennusnro)
+         :manuaalinen_rakennusnro       nil
          :jarjestysnumero               (get-text rakennus :rakennustunnus :jarjestysnumero)
          :kiinttun                      (get-text rakennus :rakennustunnus :kiinttun)
          :verkostoliittymat             (cr/all-of rakennus [:verkostoliittymat])
