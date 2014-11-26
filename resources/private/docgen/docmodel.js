@@ -641,6 +641,13 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     select.name = myPath;
     select.className = "form-input combobox long";
 
+    var otherKey = subSchema["other-key"];
+    if (otherKey) {
+      var pathToOther = path.slice(0, -1);
+      pathToOther.push(otherKey);
+      select.setAttribute("data-select-other-id", pathStrToID(pathToOther.join(".")));
+    }
+
     if (subSchema.readonly) {
       select.readOnly = true;
     } else {
@@ -667,6 +674,15 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }
     select.appendChild(option);
 
+    var otherOption = null;
+    if (otherKey) {
+      otherOption = document.createElement("option");
+      otherOption.value = "other";
+      otherOption.appendChild(document.createTextNode(loc("select-other")));
+      if (selectedOption === "other") otherOption.selected = "selected";
+      select.appendChild(otherOption);
+    }
+
     ajax
       .command("get-building-info-from-wfs", { id: self.appId })
       .success(function (data) {
@@ -680,7 +696,11 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
           if (selectedOption === name) {
             option.selected = "selected";
           }
+          if (otherOption) {
+            select.insertBefore(option, otherOption);
+          } else {
           select.appendChild(option);
+          }
         });
       })
       .error(function (e) {
