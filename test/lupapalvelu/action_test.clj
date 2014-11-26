@@ -73,7 +73,7 @@
                                      :states     [:open]}})
   (fact "invalid state"
         (invalid-state-in-application {:action "test-command" :data {:id "123"}} {:state "closed"})
-        => { :ok false :text "error.command-illegal-state"})
+        => (contains {:ok false, :text "error.command-illegal-state"}))
 
   (fact "valid state"
         (invalid-state-in-application {:action "test-command" :data {:id "123"}} {:state "open"})
