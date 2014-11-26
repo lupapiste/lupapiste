@@ -753,9 +753,11 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         var index = option$.val();
         var propertyId = option$.attr("data-propertyid") || "";
         var buildingId = option$.attr("data-buildingid") || "";
+        var nationalId = option$.attr("data-nationalid") || (buildingId.length === 10 ? buildingId : "");
+        var localId = option$.attr("data-localid") || (buildingId.length === 3 ? buildingId : "");
 
-        var paths = [basePath + ".jarjestysnumero", basePath + ".kiinttun", basePath + ".rakennusnro"];
-        var values = [index, propertyId, buildingId];
+        var paths = [basePath + ".jarjestysnumero", basePath + ".kiinttun", basePath + ".rakennusnro", basePath + ".valtakunnallinenNumero"];
+        var values = [index, propertyId, localId, nationalId];
 
         if (label) {
           label.appendChild(loader);
@@ -779,6 +781,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
           option.value = name;
           option.setAttribute("data-propertyid", building.propertyId || "");
           option.setAttribute("data-buildingid", building.buildingId || "");
+          option.setAttribute("data-localid", building.localId || "");
+          option.setAttribute("data-nationalid", building.nationalId || "");
           option.appendChild(document.createTextNode(util.buildingName(building)));
           if (selectedOption === name) {
             option.selected = "selected";
