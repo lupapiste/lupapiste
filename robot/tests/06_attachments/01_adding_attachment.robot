@@ -100,7 +100,7 @@ Signature icon is not visible
 Sign all attachments
   [Tags]  attachments
   Tab should be visible  attachments
-  Click enabled by test id  application-sign-attachments-btn
+  Click element  xpath=//div[@id="application-attachments-tab"]//div[@class="attachment-actions"]//button[@data-test-id="application-sign-attachments-btn"][1]
   Wait Until   Element should be visible  signAttachmentPassword
   Input text by test id  signAttachmentPassword  mikko123
   Click enabled by test id  do-sign-attachments

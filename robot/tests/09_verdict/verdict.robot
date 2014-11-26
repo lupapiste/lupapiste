@@ -89,7 +89,6 @@ Accordions in the Application Summary tab are closed
 
 Stamping page opens
   Open tab  attachments
-  Element should be visible  xpath=//section[@id='application']//button[@data-test-id='stamp-attachments-btn']
   Click enabled by test id  stamp-attachments-btn
   Wait Until  Element should be visible  stamping-container
 
