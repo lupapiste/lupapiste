@@ -294,6 +294,9 @@
     (.startsWith ovt "0037")  (finnish-ovt? ovt)
     :else                     (re-matches #"\d{4}.+" ovt)))
 
+(defn rakennusnumero? [s]
+  (and (not (nil? s)) (re-matches #"^\d{3}$" s)))
+
 (defn rakennustunnus? [s]
   (and (not (nil? s)) (re-matches #"^\d{9}[0-9A-FHJ-NPR-Y]$" s)))
 

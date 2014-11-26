@@ -72,7 +72,7 @@
 (defmethod subtype-validation :rakennusnumero [_ v]
   (cond
     (blank? v) nil
-    (re-matches #"^\d{3}$" v) nil
+    (util/rakennusnumero? v) nil
     :else [:warn "illegal-rakennusnumero"]))
 
 (defmethod subtype-validation :rakennustunnus [_ v]
