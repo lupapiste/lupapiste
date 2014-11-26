@@ -1,7 +1,8 @@
 (ns sade.util-test
   (:require [sade.util :refer :all]
             [midje.sweet :refer :all]
-            [schema.core :as sc]))
+            [schema.core :as sc])
+  (:import [org.apache.commons.io.output NullWriter]))
 
 
 (facts "strip-nils"
@@ -116,7 +117,9 @@
                               {:a [3 4 5]}]) => [6 9 12])
 
 (facts future*
-  (deref (future* (throw (Exception. "bang!")))) => (throws java.util.concurrent.ExecutionException "java.lang.Exception: bang!"))
+  (binding [*out* (NullWriter.)]
+    (deref (future* (throw (Exception. "bang!")))))
+  => (throws java.util.concurrent.ExecutionException "java.lang.Exception: bang!"))
 
 (facts missing-keys
   (missing-keys ...what-ever... nil)          => (throws AssertionError)
