@@ -1,0 +1,5 @@
+stamp.reference-info: Tunnustiedot
+stamp.text.extra: Lisäteksti
+stamp.id.building: Rakennustunnus
+stamp.id.application: Lupatunnus
+stamp.section: Pykälä

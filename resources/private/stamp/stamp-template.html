@@ -18,7 +18,7 @@
       </div>
 
       <script type="text/html" id="stamp-attachments-template">
-        <div>
+        <div class="stamp-info-container">
           <form id="stamp-info" class="clear">
             <fieldset class="col1">
               <legend data-bind="ltext: 'stamp.information'"></legend>
@@ -43,9 +43,34 @@
                         type="text"
                         class="form-input text"/
                      data-test-id="stamp-info-organization">
+
+              <label data-bind="ltext: 'stamp.text.extra'"></label>
+              <input data-bind="enable: status() === statusReady"
+                        type="text"
+                        class="form-input text"/
+                     data-test-id="stamp-info-extratext">
+            </fieldset>
+            <fieldset class="col2">
+              <legend>Tunnustiedot</legend>
+
+              <label data-bind="ltext: 'stamp.id.building'"></label>
+              <input data-bind="enable: status() === statusReady"
+                        type="text"
+                        class="form-input text"
+                     data-test-id="stamp-info-rakid"/>
+              <label data-bind="ltext: 'stamp.id.application'"></label>
+              <input data-bind="enable: status() === statusReady"
+                        type="text"
+                        class="form-input text"
+                     data-test-id="stamp-info-appid"/>
+              <label data-bind="ltext: 'stamp.section'"></label>
+              <input data-bind="enable: status() === statusReady"
+                        type="text"
+                        class="form-input text"
+                     data-test-id="stamp-info-section"/>
             </fieldset>
 
-            <fieldset class="col2">
+            <fieldset class="col3">
               <legend data-bind="ltext: 'stamp.margin'"></legend>
 
               <label data-bind="text: loc('stamp.xMargin') + ' (' + loc('unit.mm') + ')'"></label>

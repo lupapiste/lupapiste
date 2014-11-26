@@ -1843,19 +1843,23 @@ input[readonly]:focus, textarea[readonly]:focus {
 
 /* line 667, ../sass/partials/_forms.scss */
 #stamp-info {
-  width: 66%;
+  width: 100%;
 }
 /* line 670, ../sass/partials/_forms.scss */
 #stamp-info .col1 {
   float: left;
   padding-right: 12px;
-  width: 33%;
 }
-/* line 676, ../sass/partials/_forms.scss */
+/* line 675, ../sass/partials/_forms.scss */
 #stamp-info .col2 {
   float: left;
   padding-left: 12px;
-  width: 33%;
+  padding-right: 12px;
+}
+/* line 680, ../sass/partials/_forms.scss */
+#stamp-info .col3 {
+  float: left;
+  padding-left: 12px;
 }
 
 /* line 4, ../sass/partials/_tables.scss */
@@ -5174,18 +5178,22 @@ div.stamp-content {
 }
 
 /* line 10, ../sass/views/_stamping.scss */
+#stamping-component-container div.stamp-info-container {
+  overflow: auto;
+}
+/* line 13, ../sass/views/_stamping.scss */
 #stamping-component-container .invalid-margin {
   background: #f06464;
 }
-/* line 14, ../sass/views/_stamping.scss */
+/* line 17, ../sass/views/_stamping.scss */
 #stamping-component-container .stamp-status span {
   font-size: 18px;
 }
-/* line 17, ../sass/views/_stamping.scss */
+/* line 20, ../sass/views/_stamping.scss */
 #stamping-component-container .stamp-status .icon {
   margin-left: 6px;
 }
-/* line 21, ../sass/views/_stamping.scss */
+/* line 24, ../sass/views/_stamping.scss */
 #stamping-component-container .stamp-buttons {
   margin-top: 10px;
 }
