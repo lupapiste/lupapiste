@@ -293,7 +293,7 @@
         building-info   (command pena :get-building-info-from-wfs :id application-id) => ok?
         doc-before      (domain/get-document-by-name updated-app "rakennuksen-muuttaminen")
         building-id     (:buildingId (first (:data building-info)))
-        resp3           (command pena :merge-details-from-krysp :id application-id :documentId (:id doc-before) :collection "documents" :buildingId building-id) => ok?
+        resp3           (command pena :merge-details-from-krysp :id application-id :documentId (:id doc-before) :collection "documents" :buildingId building-id :path "buildingId") => ok?
         merged-app      (query-application pena application-id)
         doc-after       (domain/get-document-by-name merged-app "rakennuksen-muuttaminen")]
         (get-in doc-before [:data :muutostyolaji :value]) => "muut muutosty\u00f6t"
@@ -310,7 +310,7 @@
         doc             (domain/get-document-by-name app "purkaminen")
         building-info   (command pena :get-building-info-from-wfs :id application-id) => ok?
         building-id     (:buildingId (first (:data building-info)))
-        resp            (command pena :merge-details-from-krysp :id application-id :documentId (:id doc) :collection "documents" :buildingId building-id) => ok?
+        resp            (command pena :merge-details-from-krysp :id application-id :documentId (:id doc) :collection "documents" :buildingId building-id :path "buildingId") => ok?
         merged-app      (query-application pena application-id)
         doc-after       (domain/get-document-by-name merged-app "purkaminen")]
         (get-in doc-after [:data :mitat :kokonaisala :source]) => "krysp"
