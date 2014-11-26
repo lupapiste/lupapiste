@@ -219,12 +219,15 @@
 (defn ->rakennuksen-tiedot
   ([xml building-id]
     (let [stripped  (cr/strip-xml-namespaces xml)
-          rakennus  (select1 stripped [:rakennustieto :> (under [:rakennusnro (has-text building-id)])])]
+          rakennus  (or
+                      (select1 stripped [:rakennustieto :> (under [:valtakunnallinenNumero (has-text building-id)])])
+                      (select1 stripped [:rakennustieto :> (under [:rakennusnro (has-text building-id)])]))]
       (->rakennuksen-tiedot rakennus)))
   ([rakennus]
     (when rakennus
       (polished
         {:muutostyolaji                 ...notimplemented...
+         :valtakunnallinenNumero        (get-text rakennus :rakennustunnus :valtakunnallinenNumero)
          :rakennusnro                   (get-text rakennus :rakennustunnus :rakennusnro)
          :jarjestysnumero               (get-text rakennus :rakennustunnus :jarjestysnumero)
          :kiinttun                      (get-text rakennus :rakennustunnus :kiinttun)
