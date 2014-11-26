@@ -952,7 +952,7 @@
   {:parameters [id documentId buildingId collection]
    :input-validators [commands/validate-collection]
    :roles      [:applicant :authority]
-   :states     (action/all-application-states-but [:sent :verdictGiven :constructionStarted :closed :canceled])}   ;; TODO: Info state removed, ok?
+   :states     (action/all-application-states-but [:sent :verdictGiven :constructionStarted :closed :canceled])}
   [{created :created {:keys [organization propertyId] :as application} :application :as command}]
   (if-let [{url :url} (organization/get-krysp-wfs application)]
     (let [document     (commands/by-id application collection documentId)
@@ -970,7 +970,7 @@
 (defcommand get-building-info-from-wfs
   {:parameters [id]
    :roles      [:applicant :authority]
-   :states     (action/all-application-states-but [:sent :verdictGiven :constructionStarted :closed :canceled])}   ;; TODO: Info state removed, ok?
+   :states     (action/all-application-states-but [:sent :verdictGiven :constructionStarted :closed :canceled])}
   [{{:keys [organization propertyId] :as application} :application}]
   (if-let [{url :url} (organization/get-krysp-wfs application)]
     (let [kryspxml  (krysp/building-xml url propertyId)
