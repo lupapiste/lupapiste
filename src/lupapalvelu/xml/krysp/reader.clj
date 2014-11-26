@@ -218,6 +218,9 @@
 
 (def polished  (comp cr/index-maps cleanup cr/convert-booleans))
 
+(def empty-building-ids {:valtakunnallinenNumero ""
+                         :rakennusnro ""})
+
 (defn ->rakennuksen-tiedot
   ([xml building-id]
     (let [stripped  (cr/strip-xml-namespaces xml)

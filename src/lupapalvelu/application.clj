@@ -949,7 +949,7 @@
   (reduce (fn [r [k v]] (assoc r k (if (map? v) (add-value-metadata v meta-data) (assoc meta-data :value v)))) {} m))
 
 (defcommand merge-details-from-krysp
-  {:parameters [id documentId buildingId collection]
+  {:parameters [id documentId path buildingId collection]
    :input-validators [commands/validate-collection]
    :roles      [:applicant :authority]
    :states     (action/all-application-states-but [:sent :verdictGiven :constructionStarted :closed :canceled])}
@@ -957,13 +957,17 @@
   (if-let [{url :url} (organization/get-krysp-wfs application)]
     (let [document     (commands/by-id application collection documentId)
           schema       (schemas/get-schema (:schema-info document))
-          kryspxml     (krysp/building-xml url propertyId)
-          updates      (-> (or (krysp/->rakennuksen-tiedot kryspxml buildingId) {}) tools/unwrapped tools/path-vals)
+          clear-ids?   (or (ss/blank? buildingId) (= "other" buildingId))
+          base-updates (concat
+                         (commands/->model-updates [[path buildingId]])
+                         (tools/path-vals
+                           (if clear-ids?
+                             krysp/empty-building-ids
+                             (tools/unwrapped (krysp/->rakennuksen-tiedot (krysp/building-xml url propertyId) buildingId)))))
           ; Path should exist in schema!
-          updates      (filter (fn [[path _]] (model/find-by-name (:body schema) path)) updates)]
+          updates      (filter (fn [[path _]] (model/find-by-name (:body schema) path)) base-updates)]
       (infof "merging data into %s %s" (get-in document [:schema-info :name]) (:id document))
-      (when (seq updates)
-        (commands/persist-model-updates application collection document updates created :source "krysp"))
+      (commands/persist-model-updates application collection document updates created :source "krysp")
       (ok))
     (fail :error.no-legacy-available)))
 

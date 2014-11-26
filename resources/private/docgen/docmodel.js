@@ -657,9 +657,12 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
         var buildingId = target.value;
         ajax
-          .command("merge-details-from-krysp", { id: self.appId, documentId: self.docId, buildingId: buildingId, collection: self.getCollection() })
+          .command("merge-details-from-krysp",
+                   {id: self.appId, documentId: self.docId,
+                    path: myPath,
+                    buildingId: buildingId,
+                    collection: self.getCollection() })
           .success(function () {
-            save(event);
             repository.load(self.appId);
           })
           .call();
@@ -699,7 +702,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
           if (otherOption) {
             select.insertBefore(option, otherOption);
           } else {
-          select.appendChild(option);
+            select.appendChild(option);
           }
         });
       })
