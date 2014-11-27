@@ -45,7 +45,7 @@
                      data-test-id="stamp-info-organization">
 
               <label data-bind="ltext: 'stamp.text.extra'"></label>
-              <input data-bind="enable: status() === statusReady"
+              <input data-bind="value: extraInfo, enable: status() === statusReady"
                         type="text"
                         class="form-input text"/
                      data-test-id="stamp-info-extratext">
@@ -54,17 +54,19 @@
               <legend data-bind="ltext: 'stamp.reference-info'"></legend>
 
               <label data-bind="ltext: 'stamp.id.building'"></label>
-              <input data-bind="enable: status() === statusReady"
+              <input data-bind="textInput: buildingId, enable: status() === statusReady"
                         type="text"
                         class="form-input text"
                      data-test-id="stamp-info-rakid"/>
+
               <label data-bind="ltext: 'stamp.municipality.appid'"></label>
-              <input data-bind="enable: status() === statusReady"
+              <input data-bind="textInput: municipalityAppId, enable: status() === statusReady"
                         type="text"
                         class="form-input text"
                      data-test-id="stamp-info-muni-appid"/>
+
               <label data-bind="ltext: 'stamp.section'"></label>
-              <input data-bind="enable: status() === statusReady"
+              <input data-bind="textInput: section, enable: status() === statusReady"
                         type="text"
                         class="form-input text"
                      data-test-id="stamp-info-section"/>
