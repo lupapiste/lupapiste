@@ -238,6 +238,16 @@
   (fact (ovt? "003701902735") => truthy)
   (fact (ovt? "003710601555") => truthy))
 
+(facts "rakennustunnus?"
+  (fact (rakennustunnus? nil) => falsey)
+  (fact (rakennustunnus? "") => falsey)
+  (fact (rakennustunnus? "foo") => falsey)
+  (fact (rakennustunnus? "1a") => falsey)
+  (fact (rakennustunnus? "1A") => falsey)
+  (fact (rakennustunnus? "012345678A") => falsey)
+  (fact "SYKE sample" (rakennustunnus? "100012345A") => truthy)
+  (fact "VRK sample" (rakennustunnus? "123456789A") => truthy))
+
 (facts max-length
   (fact (sc/check (max-length 1) []) => nil)
   (fact (sc/check (max-length 1) [1]) => nil)

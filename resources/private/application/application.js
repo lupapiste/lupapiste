@@ -47,7 +47,6 @@
 
   var inviteModel = new LUPAPISTE.InviteModel();
   var verdictModel = new LUPAPISTE.VerdictsModel();
-  var stampModel = new LUPAPISTE.StampModel();
   var signingModel = new LUPAPISTE.SigningModel("#dialog-sign-attachments", true);
   var requestForStatementModel = new LUPAPISTE.RequestForStatementModel();
   var addPartyModel = new LUPAPISTE.AddPartyModel();
@@ -372,7 +371,6 @@
       neighborStatusModel: neighborStatusModel,
       requestForStatementModel: requestForStatementModel,
       sendNeighborEmailModel: sendNeighborEmailModel,
-      stampModel: stampModel,
       signingModel: signingModel,
       verdictModel: verdictModel,
       openInviteCompany: inviteCompanyModel.open.bind(inviteCompanyModel),

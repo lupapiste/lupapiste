@@ -123,7 +123,6 @@ var attachment = (function() {
     showAttachmentVersionHistory: ko.observable(),
     showHelp:        ko.observable(false),
     init:            ko.observable(false),
-    showPreview:     ko.observable(false),
 
     toggleHelp: function() {
       model.showHelp(!model.showHelp());
@@ -191,11 +190,6 @@ var attachment = (function() {
     toggleAttachmentVersionHistory: function() {
       model.showAttachmentVersionHistory(!model.showAttachmentVersionHistory());
     },
-
-    togglePreview: function() {
-      model.showPreview(!model.showPreview());
-      return true;
-    }
   };
 
   model.selectedOperationId = ko.observable();
@@ -323,8 +317,6 @@ var attachment = (function() {
     approveModel.setAttachmentId(attachmentId);
 
     model.showAttachmentVersionHistory(false);
-
-    model.showPreview(false);
 
     pageutil.hideAjaxWait();
     model.indicator(false);

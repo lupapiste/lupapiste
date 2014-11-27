@@ -38,8 +38,8 @@ var loc;
         }
       }
     } else {
-      debug("Missing localization key", key);
-      term = LUPAPISTE.config.mode === "dev" ? "$$NOT_FOUND$$" + key : "???";
+      error("Missing localization key", key);
+      term = LUPAPISTE.config.mode === "dev" ? "$$NOT_FOUND$$" + key : "";
     }
 
     return term;
