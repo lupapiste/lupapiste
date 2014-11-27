@@ -1,6 +1,7 @@
 legend {
+  font-size: $baseline * 0.9;
   font-family: $font-heading;
-  margin:0 0 $baseline;
+  margin:0 0 $marginM;
 }
 
 // Text fields
@@ -514,49 +515,6 @@ input[readonly], textarea[readonly] {
 
 }
 
-
-
-#dialog-stamp-attachments {
-  .stamp-margin {
-    table {
-      border: none;
-      tr {
-        background-color: white;
-      }
-      td {
-        padding: 2px;
-        input {
-          width: 95%;
-        }
-      }
-      td.label {
-        text-align: right;
-        padding-right: 3px;
-      }
-      .invalid-margin {
-        background: #f06464;
-      }
-    }
-  }
-  .stamp-files {
-    tr th:last-child {
-      width: 70px;
-    }
-    tfoot {
-      font-size: 10px;
-    }
-  }
-  .stamp-status {
-    span {
-      font-size: 18px;
-      color: #616161;
-    }
-  }
-  .stamp-buttons {
-    margin-top: 10px;
-  }
-}
-
 .form-approval-status {
   text-transform: none;
   width: 100%;
@@ -703,5 +661,21 @@ input[readonly], textarea[readonly] {
         opacity: 1;
       }
     }
+  }
+}
+
+#stamp-info {
+  width: 66%;
+
+  .col1 {
+    float: left;
+    padding-right: $marginM;
+    width: 33%;
+  }
+
+  .col2 {
+    float: left;
+    padding-left: $marginM;
+    width: 33%;
   }
 }

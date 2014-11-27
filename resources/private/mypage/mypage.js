@@ -25,6 +25,7 @@
     self.saved = ko.observable();
     self.firstName = ko.observable();
     self.lastName = ko.observable();
+    self.username = ko.observable();
     self.street = ko.observable();
     self.city = ko.observable();
     self.zip = ko.observable();
@@ -80,6 +81,7 @@
         .saved(false)
         .firstName(u.firstName)
         .lastName(u.lastName)
+        .username(u.username)
         .street(u.street)
         .city(u.city)
         .zip(u.zip)
@@ -121,9 +123,11 @@
          "allowDirectMarketing"]);
 
     self.updateUserName = function() {
-      $("#user-name")
-        .text(self.firstName() + " " + self.lastName())
-        .attr("data-test-role", self.role());
+      var username = self.username() || "";
+      if (self.firstName() || self.lastName()) {
+        username = self.firstName() + " " + self.lastName();
+      }
+      $("#user-name").text(username).attr("data-test-role", self.role());
       return self;
     };
 

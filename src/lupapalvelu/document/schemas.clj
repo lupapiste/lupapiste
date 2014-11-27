@@ -68,7 +68,8 @@
 (def henkilo-valitsin [{:name "userId" :type :personSelector :blacklist [:neighbor]}])
 
 (def rakennuksen-valitsin [{:name "rakennusnro" :type :buildingSelector :i18nkey "rakennusnro"}
-                           {:name "manuaalinen_rakennusnro" :type :string :subtype :rakennusnumero :i18nkey "manuaalinen_rakennusnro" :labelclass "really-long"}])
+                           {:name "manuaalinen_rakennusnro" :type :string :subtype :rakennusnumero :i18nkey "manuaalinen_rakennusnro" :labelclass "really-long"}
+                           {:name "valtakunnallinenNumero" :type :string  :subtype :rakennustunnus :hidden true}])
 
 (def uusi-rakennuksen-valitsin [{:name "jarjestysnumero" :type :newBuildingSelector :i18nkey "rakennusnro" :required true}
                                 {:name "rakennusnro" :type :string :subtype :rakennusnumero :hidden true}
