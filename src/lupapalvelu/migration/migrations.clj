@@ -590,16 +590,34 @@
      (let [applications (mongo/select collection)]
        (count (map #(mongo/update-by-id collection (:id %) (app-meta-fields/applicant-index-update %)) applications))))))
 
+(defn update-applications-array
+  "Updates an array k in every application by mapping the array with f.
+   Applications are fetched using the given query.
+   Return the number od applications updated."
+  [k f query]
+  {:pre [(keyword? k) (fn? f) (map? query)]}
+  (reduce + 0
+    (for [collection [:applications :submitted-applications]
+          application (mongo/select collection query {k 1})]
+      (mongo/update-n collection {:_id (:id application)} {$set {k (map f (k application))}}))))
+
 (defn- populate-buildingids-to-doc [doc]
   (let [rakennusnro (get-in doc [:data :rakennusnro])
         manuaalinen-rakennusnro (get-in doc [:data :manuaalinen_rakennusnro])]
     (cond
-      (-> manuaalinen-rakennusnro :value ss/blank? not) (update-in doc [:data] #(assoc % :buildingId {:value "other" (assoc manuaalinen-rakennusnro )}))
+      (-> manuaalinen-rakennusnro :value ss/blank? not) (update-in doc [:data] #(assoc % :buildingId (assoc manuaalinen-rakennusnro :value "other")))
       (:value rakennusnro) (update-in doc [:data] #(assoc % :buildingId rakennusnro))
       :else doc)))
 
 (defmigration populate-buildingids-to-docs
-  (reduce + 0
-    (for [collection [:applications :submitted-applications]
-          application (mongo/select collection {:documents {$elemMatch {$or [{:data.rakennusnro.value {$exists true}} {:data.manuaalinen_rakennusnro.value {$exists true}}]}}} {:documents 1})]
-      (mongo/update-n collection {:_id (:id application)} {$set {:documents (map populate-buildingids-to-doc (:documents application))}}))))
+  (update-applications-array
+    :documents
+    populate-buildingids-to-doc
+    {:documents {$elemMatch {$or [{:data.rakennusnro.value {$exists true}} {:data.manuaalinen_rakennusnro.value {$exists true}}]}}}))
+
+(defmigration populate-buildingids-to-buildings
+  (update-applications-array
+    :buildings
+    #(assoc % :localShortId (:buildingId %), :nationalId nil, :localId nil)
+    {:buildings.0 {$exists true}}))
+
