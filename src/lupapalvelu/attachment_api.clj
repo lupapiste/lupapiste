@@ -373,9 +373,10 @@
     (try (.delete temp-file) (catch Exception _))
     new-file-id))
 
-(defn- stamp-attachments! [file-infos {:keys [text created organization transparency job-id application] :as context}]
+(defn- stamp-attachments!
+  [file-infos {:keys [text created organization transparency job-id application extra-info building-id muni-app-id section] :as context}]
   {:pre [text organization (pos? created)]}
-  (let [stamp (stamper/make-stamp (ss/limit text 100) created (ss/limit organization 100) transparency)]
+  (let [stamp (stamper/make-stamp (ss/limit text 100) created (ss/limit organization 100) transparency extra-info building-id muni-app-id section)]
     (doseq [file-info (vals file-infos)]
       (try
         (debug "Stamping" (select-keys file-info [:attachment-id :contentType :fileId :filename :re-stamp?]))
@@ -416,7 +417,11 @@
               :now      (:created command)
               :x-margin (->long xMargin)
               :y-margin (->long yMargin)
-              :transparency (->long (or transparency 0))})))
+              :transparency (->long (or transparency 0))
+              :extra-info extraInfo
+              :building-id buildingId
+              :muni-app-id muniAppId
+              :section section})))
 
 (defquery stamp-attachments-job
   {:parameters [:job-id :version]
