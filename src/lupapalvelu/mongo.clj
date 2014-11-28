@@ -99,14 +99,24 @@
     (with-id (mc/find-one-as-map collection {:_id id} projection))))
 
 (defn select
-  "returns multiple entries by matching the monger query"
+  "Returns multiple entries by matching the monger query.
+   Cursor is snapshotted unless order-by clause is not defined"
   ([collection]
+    {:pre [collection]}
     (select collection {}))
   ([collection query]
-    (select collection query {}))
+    {:pre [collection query]}
+    (map with-id (query/with-collection (name collection)
+                   (query/find query)
+                   (query/snapshot))))
   ([collection query projection]
-    (map with-id (mc/find-maps collection query projection)))
+    {:pre [collection query projection]}
+    (map with-id (query/with-collection (name collection)
+                   (query/find query)
+                   (query/fields (if (map? projection) (keys projection) projection))
+                   (query/snapshot))))
   ([collection query projection order-by]
+    {:pre [collection query projection order-by]}
     (map with-id (query/with-collection (name collection)
                    (query/find query)
                    (query/fields (if (map? projection) (keys projection) projection))
