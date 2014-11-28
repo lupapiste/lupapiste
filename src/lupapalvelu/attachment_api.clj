@@ -376,7 +376,15 @@
 (defn- stamp-attachments!
   [file-infos {:keys [text created organization transparency job-id application extra-info building-id muni-app-id section] :as context}]
   {:pre [text organization (pos? created)]}
-  (let [stamp (stamper/make-stamp (ss/limit text 100) created (ss/limit organization 100) transparency extra-info building-id muni-app-id section)]
+  (let [stamp (stamper/make-stamp
+                (ss/limit text 100)
+                created
+                (ss/limit organization 100)
+                transparency
+                (ss/limit extra-info 100)
+                (ss/limit building-id 100)
+                (ss/limit muni-app-id 100)
+                (ss/limit section 100))]
     (doseq [file-info (vals file-infos)]
       (try
         (debug "Stamping" (select-keys file-info [:attachment-id :contentType :fileId :filename :re-stamp?]))
