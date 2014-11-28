@@ -78,11 +78,15 @@ LUPAPISTE.ForemanModel = function() {
         .pending(self.pending)
         .success(function(data) {
           // 3. invite foreman to new application
-          inviteToApplication(data.id, function() {
+          if (self.email()) {
+            inviteToApplication(data.id, function() {
+              linkToApplication(data.id);
+            }, function(err) {
+              self.error(loc(err.text));
+            });
+          } else {
             linkToApplication(data.id);
-          }, function(err) {
-            self.error(loc(err.text));
-          });
+          }
         })
         .error(function(err) {
           self.error(loc(err.text));
@@ -90,7 +94,11 @@ LUPAPISTE.ForemanModel = function() {
         .call();
     }
     // 1. invite foreman to current application (new role-parameter to invite command)
-    inviteToApplication(self.application.id, createApplication, createApplication)
+    if (self.email()) {
+      inviteToApplication(self.application.id, createApplication, createApplication)
+    } else {
+      createApplication();
+    }
     return false;
   }
 
