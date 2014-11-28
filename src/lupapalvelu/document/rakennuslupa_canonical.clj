@@ -315,6 +315,7 @@
                                                                 building-canonical (merge
                                                                                      (select-keys building [:jarjestysnumero :kiinttun])
                                                                                      (when-not (s/blank? (:rakennusnro building)) {:rakennusnro (:rakennusnro building)})
+                                                                                     (when-not (s/blank? (:valtakunnallinenNumero building)) {:valtakunnallinenNumero (:valtakunnallinenNumero building)})
                                                                                      {:katselmusOsittainen (get-in % [:tila :tila])
                                                                                       :kayttoonottoKytkin  (get-in % [:tila :kayttoonottava])})
                                                                 building-canonical (if (s/blank? (:kiinttun building-canonical))
