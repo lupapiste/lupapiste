@@ -26,6 +26,7 @@
                               :buildingId "481123123A"
                               :localShortId "001"
                               :nationalId "481123123A"
+                              :localId nil
                               :usage      "039 muut asuinkerrostalot"
                               :area "2682"
                               :index nil
@@ -35,6 +36,7 @@
         (second buildings) => {:propertyId "75300301050006"
                                :buildingId "478123123A"
                                :localShortId "002"
+                               :localId nil
                                :nationalId "478123123A"
                                :usage      "021 rivitalot"
                                :area "281"

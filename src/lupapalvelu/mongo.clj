@@ -116,7 +116,7 @@
                  (query/fields (if (map? projection) (keys projection) projection))
                  (query/snapshot))))
   ([collection query projection order-by]
-    {:pre [collection (map? query) (seq projection)(instance? clojure.lang.PersistentArrayMap order-by)]}
+    {:pre [collection (map? query) (seq projection) (instance? clojure.lang.PersistentArrayMap order-by)]}
     (map with-id (query/with-collection (name collection)
                    (query/find query)
                    (query/fields (if (map? projection) (keys projection) projection))
