@@ -132,15 +132,16 @@
 
 (defn- ->building-ids [id-container xml-no-ns]
   (let [national-id (get-text xml-no-ns id-container :valtakunnallinenNumero)
-        local-id (get-text xml-no-ns id-container :rakennusnro)]
-    {:propertyId (get-text xml-no-ns id-container :kiinttun)
-     :buildingId  (some #(when-not (ss/blank? %) %) [national-id local-id])
-     :nationalId  national-id
-     :localId     local-id
-     :index       (get-text xml-no-ns id-container :jarjestysnumero)
-     :usage       (or (get-text xml-no-ns :kayttotarkoitus) "")
-     :area        (get-text xml-no-ns :kokonaisala)
-     :created     (->> (get-text xml-no-ns :alkuHetki) cr/parse-datetime (cr/unparse-datetime :year))}))
+        local-short-id (get-text xml-no-ns id-container :rakennusnro)]
+    {:propertyId   (get-text xml-no-ns id-container :kiinttun)
+     :buildingId   (some #(when-not (ss/blank? %) %) [national-id local-short-id])
+     :nationalId   national-id
+     :localId      nil ; reserved for the next KRYSP schema version
+     :localShortId local-short-id
+     :index        (get-text xml-no-ns id-container :jarjestysnumero)
+     :usage        (or (get-text xml-no-ns :kayttotarkoitus) "")
+     :area         (get-text xml-no-ns :kokonaisala)
+     :created      (->> (get-text xml-no-ns :alkuHetki) cr/parse-datetime (cr/unparse-datetime :year))}))
 
 (defn ->buildings-summary [xml]
   (let [xml-no-ns (cr/strip-xml-namespaces xml)]
