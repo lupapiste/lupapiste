@@ -101,5 +101,4 @@ LUPAPISTE.ForemanModel = function() {
     }
     return false;
   }
-
 }
