@@ -416,7 +416,7 @@
                        (merge
                          (domain/application-query-for user)
                          {:infoRequest true})
-                       {:title 1 :auth 1 :location 1 :operations 1 :comments 1})
+                       [:title :auth :location :operations :comments])
 
         same-location-irs (filter
                             #(and (== x (-> % :location :x)) (== y (-> % :location :y)))
@@ -678,7 +678,7 @@
                                                               :infoRequest false
                                                               :permitType (:permitType application)
                                                               :operations.name {$nin ["ya-jatkoaika"]}})
-                  {:_id 1 :permitType 1 :address 1 :propertyId 1})
+                  [:permitType :address :propertyId])
         ;; add the text to show in the dropdown for selections
         enriched-results (map
                            (fn [r] (assoc r :text (str (:address r) ", " (:id r))))
