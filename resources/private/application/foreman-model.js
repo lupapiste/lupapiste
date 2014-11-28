@@ -12,12 +12,41 @@ LUPAPISTE.ForemanModel = function() {
   self.foremanApplications = ko.observableArray();
 
   self.refresh = function(application) {
+    function loadForemanApplications(applications) {
+      self.foremanApplications([]);
+      _.forEach(_.pluck(applications, "id"), function(id) {
+        ajax
+        .query("application", {id: id})
+        .success(function(app) {
+          var data = {"state": app.application.state,
+                      "id": app.application.id};
+          var docs = _.where(app.application.documents, {"schema-info": {"name": "tyonjohtaja"}});
+          _.forEach(docs, function(doc) {
+            var firstName =
+            data['firstname'] = doc.data.henkilotiedot ? doc.data.henkilotiedot.etunimi ? doc.data.henkilotiedot.etunimi.value : undefined : undefined;
+            data['lastname'] = doc.data.henkilotiedot ? doc.data.henkilotiedot.sukunimi ? doc.data.henkilotiedot.sukunimi.value : undefined : undefined;
+            data['email'] = doc.data.yhteystiedot ? doc.data.yhteystiedot.email ? doc.data.yhteystiedot.email.value : undefined : undefined;
+            self.foremanApplications.push(data);
+            // TODO sort array by id
+          });
+        })
+        .call();
+      })
+    }
+
     self.application = application;
-    self.foremanApplications(_.where(application.linkPermitData, { "operation": "tyonjohtajan-nimeaminen" }));
+    _.defer(function() {
+      loadForemanApplications(_.where(application.linkPermitData, { "operation": "tyonjohtajan-nimeaminen" }));
+    });
   }
 
   self.inviteForeman = function() {
     LUPAPISTE.ModalDialog.open('#dialog-invite-foreman')
+  }
+
+  self.openApplication = function(id) {
+    repository.load(id);
+    window.location.hash = "!/application/" + id;
   }
 
   self.submit = function(model) {

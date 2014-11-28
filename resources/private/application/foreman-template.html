@@ -4,12 +4,18 @@
   <section class="page container">
     <script type="text/html" id="application-foreman-template">
     <div>
-      <table class="invited-foremans" data-bind="foreach: foremanApplications">
-        <tr>
-        	<td></td>
-        </tr>
-      </table>
       <p data-bind="lhtml: 'help.AddForeman'"></p>
+      <ul class="invited-foremans" data-bind="foreach: foremanApplications">
+        <li class="foreman">
+          <span class="foreman-name" data-bind="text: $data.firstname"></span>
+          <span class="foreman-name" data-bind="text: $data.lastname"></span>
+          <span class="foreman-email" data-bind="text: $data.email ? '(' + $data.email + ')' : ''"></span>
+          <a data-bind="attr: {href: '#!/application/' + $data.id}">
+            <span class="foreman-application" data-bind="text: $data.id"></span>
+          </a>
+          <span class="foreman-state" data-bind="ltext: $data.state"></span>
+        </li>
+      </ul>
       <button class="btn-primary" data-bind="click: $data.inviteForeman, ltext: 'application.parties.addForeman'" data-test-id="invite-foreman-button"></button>
     </div>
     </script>
