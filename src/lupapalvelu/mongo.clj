@@ -105,18 +105,18 @@
     {:pre [collection]}
     (select collection {}))
   ([collection query]
-    {:pre [collection query]}
+    {:pre [collection (map? query)]}
     (map with-id (query/with-collection (name collection)
-                   (query/find query)
-                   (query/snapshot))))
+                 (query/find query)
+                 (query/snapshot))))
   ([collection query projection]
-    {:pre [collection query projection]}
+    {:pre [collection (map? query) (seq projection)]}
     (map with-id (query/with-collection (name collection)
-                   (query/find query)
-                   (query/fields (if (map? projection) (keys projection) projection))
-                   (query/snapshot))))
+                 (query/find query)
+                 (query/fields (if (map? projection) (keys projection) projection))
+                 (query/snapshot))))
   ([collection query projection order-by]
-    {:pre [collection query projection order-by]}
+    {:pre [collection (map? query) (seq projection)(instance? clojure.lang.PersistentArrayMap order-by)]}
     (map with-id (query/with-collection (name collection)
                    (query/find query)
                    (query/fields (if (map? projection) (keys projection) projection))
@@ -125,8 +125,10 @@
 (defn select-one
   "returns one entry by matching the monger query"
   ([collection query]
+    {:pre [(map? query)]}
     (with-id (mc/find-one-as-map collection query)))
   ([collection query projection]
+    {:pre [(map? query)]}
     (with-id (mc/find-one-as-map collection query projection))))
 
 (defn any?
