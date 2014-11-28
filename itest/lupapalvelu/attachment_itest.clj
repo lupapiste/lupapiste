@@ -200,7 +200,20 @@
         _ (upload-attachment sonja application-id attachment true :filename "dev-resources/VRK_Virhetarkistukset.pdf")
         application (query-application sonja application-id)
         comments (:comments application)
-        {job :job :as resp} (command sonja :stamp-attachments :id application-id :timestamp "" :text "OK" :organization "" :files [(:id attachment)] :xMargin 0 :yMargin 0)]
+        {job :job :as resp} (command
+                              sonja
+                              :stamp-attachments
+                              :id application-id
+                              :timestamp ""
+                              :text "OK"
+                              :organization ""
+                              :files [(:id attachment)]
+                              :xMargin 0
+                              :yMargin 0
+                              :extraInfo ""
+                              :buildingId ""
+                              :muniAppId ""
+                              :section "")]
 
     (fact "not stamped by default"
       (get-in (get-attachment-info application (:id attachment)) [:latestVersion :stamped]) => falsey)
@@ -225,7 +238,20 @@
         (:state attachment) => "ok")
 
       (facts "re-stamp"
-        (let [{job :job :as resp} (command sonja :stamp-attachments :id application-id :timestamp "" :text "OK" :organization "" :files [(:id attachment)] :xMargin 0 :yMargin 0)]
+        (let [{job :job :as resp} (command
+                              sonja
+                              :stamp-attachments
+                              :id application-id
+                              :timestamp ""
+                              :text "OK"
+                              :organization ""
+                              :files [(:id attachment)]
+                              :xMargin 0
+                              :yMargin 0
+                              :extraInfo ""
+                              :buildingId ""
+                              :muniAppId ""
+                              :section "")]
           resp => ok?
           ; Poll for 5 seconds
           (when-not (= "done" (:status job)) (poll-job (:id job) (:version job) 25))
