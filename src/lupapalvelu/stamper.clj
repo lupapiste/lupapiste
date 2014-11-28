@@ -76,7 +76,7 @@
       (.setFont font))
 
     (doseq [[i text] (util/indexed (butlast texts))]
-       (draw-text graphics text 22 (+ (* (inc i) line-height) 3)))
+       (draw-text graphics text (int (/ (- width (nth text-widths i)) 2)) (+ (* (inc i) line-height) 3)))
 
     (doto graphics
       (draw-text (last texts) (int (/ (- width (last text-widths)) 2)) (* (count texts) line-height))
