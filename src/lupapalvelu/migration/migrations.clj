@@ -589,3 +589,17 @@
    (for [collection [:applications :submitted-applications]]
      (let [applications (mongo/select collection)]
        (count (map #(mongo/update-by-id collection (:id %) (app-meta-fields/applicant-index-update %)) applications))))))
+
+(defn- populate-buildingids-to-doc [doc]
+  (let [rakennusnro (get-in doc [:data :rakennusnro])
+        manuaalinen-rakennusnro (get-in doc [:data :manuaalinen_rakennusnro])]
+    (cond
+      (-> manuaalinen-rakennusnro :value ss/blank? not) (update-in doc [:data] #(assoc % :buildingId {:value "other" (assoc manuaalinen-rakennusnro )}))
+      (:value rakennusnro) (update-in doc [:data] #(assoc % :buildingId rakennusnro))
+      :else doc)))
+
+(defmigration populate-buildingids-to-docs
+  (reduce + 0
+    (for [collection [:applications :submitted-applications]
+          application (mongo/select collection {:documents {$elemMatch {$or [{:data.rakennusnro.value {$exists true}} {:data.manuaalinen_rakennusnro.value {$exists true}}]}}} {:documents 1})]
+      (mongo/update-n collection {:_id (:id application)} {$set {:documents (map populate-buildingids-to-doc (:documents application))}}))))
