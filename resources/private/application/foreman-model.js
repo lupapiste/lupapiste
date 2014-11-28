@@ -65,7 +65,7 @@ LUPAPISTE.ForemanModel = function() {
     }
 
     function createApplication() {
-      // 2. create "työnjohtajan ilmoitus" application
+      // 2. create "tyonjohtajan ilmoitus" application
       ajax.command("create-application", { infoRequest: false,
                                            operation: "tyonjohtajan-nimeaminen",
                                            y: self.application.location.y,
