@@ -9,9 +9,11 @@ LUPAPISTE.ForemanModel = function() {
   self.disabled = ko.computed(function() {
     return self.email() && !util.isValidEmailAddress(self.email());
   });
+  self.foremanApplications = ko.observableArray();
 
   self.refresh = function(application) {
     self.application = application;
+    self.foremanApplications(_.where(application.linkPermitData, { "operation": "tyonjohtajan-nimeaminen" }));
   }
 
   self.inviteForeman = function() {
