@@ -126,7 +126,7 @@
   (mongo/select :users
     {:organizations (:organization app) :role "authority" :enabled true}
     {:firstName 1, :lastName 1}
-    {:lastName 1, :firstName 1}))
+    (array-map :lastName 1, :firstName 1)))
 
 (defquery application
   {:roles            [:applicant :authority]
