@@ -1,5 +1,0 @@
-application.parties.foreman: Työnjohtaja
-application.parties.addForeman: Nimeä työnjohtaja
-help.AddForeman: Työnjohtaja ilmoitetaan aina erillisellä ilmoituksella.<br/>Paina alla olevaan painiketta, jos haluat ilmoittaa työnjohtajan jo lupahakemuksen yhteydessaä.
-invite.foreman.desc: Voit kutsua työnjohtajan mukaan hankkeellesi antamalla hänen sähköpostiosoitteensa. Saatuaan kutsun, työnjohtaja voi tulla täyttämään tietonsa työnjohtajan ilmoitukselle. Samalla työnjohtaja saa oikeudet hoitaa rakentamisen aikaista asiointia hankkeellasi Lupapisteen kautta.<br>Jos et halua kutsua työnjohtajaa, voit jättää sähköpostiosoitteen tyhjäksi. Tällöin tarvitset työnjohtajalta valtakirjan työnjohtajan ilmoitusta varten.
-invite.foreman.pending: Luodaan työnjohtajan ilmoitusta
