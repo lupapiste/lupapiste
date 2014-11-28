@@ -13,7 +13,11 @@ var stamping = (function() {
       organization: null,
       xMargin: ko.observable("10"),
       yMargin: ko.observable("85"),
-      transparency: ko.observable()
+      transparency: ko.observable(),
+      extraInfo: ko.observable(""),
+      buildingId: ko.observable(""),
+      municipalityAppId: ko.observable(""),
+      section: ko.observable("")
     },
 
     cancelStamping: function() {
@@ -28,6 +32,22 @@ var stamping = (function() {
     }
   };
 
+  function setStampFields() {
+    if ( !model.stampFields.organization ) {
+      model.stampFields.organization = ko.observable(model.appModel.organizationName());
+    }
+
+    if ( _.isEmpty(model.stampFields.municipalityAppId()) && model.appModel.verdicts && !_.isEmpty(model.appModel.verdicts()) ) {
+        model.stampFields.municipalityAppId(_.first(model.appModel.verdicts())["kuntalupatunnus"]());
+    }
+
+    if ( _.isEmpty(model.stampFields.section()) && model.appModel.verdicts && !_.isEmpty(model.appModel.verdicts()) ) {
+      var verdict = ko.mapping.toJS(model.appModel.verdicts()[0]);
+      if ( verdict.paatokset[0] && verdict.paatokset[0].poytakirjat[0] && verdict.paatokset[0].poytakirjat[0].pykala ) {
+        model.stampFields.section("§ " + verdict.paatokset[0].poytakirjat[0].pykala);
+      }
+    }
+  };
 
   function initStamp(appModel) {
     model.appModel = appModel;
@@ -35,9 +55,7 @@ var stamping = (function() {
     model.authorization = authorization.create();
     model.authorization.refresh(model.appModel.id());
 
-    if ( !model.stampFields.organization ) {
-      model.stampFields.organization = ko.observable(model.appModel.organizationName());
-    }
+    setStampFields();
 
     window.location.hash='!/stamping/' + model.appModel.id();
   };
@@ -57,7 +75,8 @@ var stamping = (function() {
           ko.mapping.fromJS(application, {}, model.appModel);
 
           model.attachments = model.appModel.attachments();
-          model.stampFields.organization = ko.observable(model.appModel.organizationName());
+
+          setStampFields();
 
           model.stampingMode(true);
         });
