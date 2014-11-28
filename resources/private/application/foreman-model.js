@@ -27,7 +27,9 @@ LUPAPISTE.ForemanModel = function() {
             data['lastname'] = doc.data.henkilotiedot ? doc.data.henkilotiedot.sukunimi ? doc.data.henkilotiedot.sukunimi.value : undefined : undefined;
             data['email'] = doc.data.yhteystiedot ? doc.data.yhteystiedot.email ? doc.data.yhteystiedot.email.value : undefined : undefined;
             self.foremanApplications.push(data);
-            // TODO sort array by id
+            self.foremanApplications.sort(function(left, right) {
+              return left.id > right.id;
+            })
           });
         })
         .call();
