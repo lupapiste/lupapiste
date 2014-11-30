@@ -1,3 +1,4 @@
+/*jshint unused:false, strict: false */
 var DocModel = function(schema, doc, application, authorizationModel, options) {
   "use strict";
 
@@ -660,16 +661,31 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         var target = event.target;
 
         var buildingId = target.value;
+
+        function mergeFromWfs(overwriteWithBackendData) {
         ajax
           .command("merge-details-from-krysp",
                    {id: self.appId, documentId: self.docId,
                     path: myPath,
                     buildingId: buildingId,
+            overwrite: overwriteWithBackendData,
                     collection: self.getCollection() })
           .success(function () {
             repository.load(self.appId);
           })
           .call();
+        }
+
+        if (buildingId !== "" && buildingId !== "other") {
+          LUPAPISTE.ModalDialog.showDynamicYesNo(
+              loc("overwrite.confirm"),
+              loc("application.building.merge"),
+              {title: loc("yes"), fn: _.partial(mergeFromWfs, true)},
+              {title: loc("no"), fn: _.partial(mergeFromWfs, false)}
+          );
+        } else {
+          mergeFromWfs(false);
+        }
         return false;
       };
     }

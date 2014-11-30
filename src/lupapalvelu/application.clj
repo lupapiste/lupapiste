@@ -948,9 +948,17 @@
 (defn add-value-metadata [m meta-data]
   (reduce (fn [r [k v]] (assoc r k (if (map? v) (add-value-metadata v meta-data) (assoc meta-data :value v)))) {} m))
 
+(defn- load-building-data [url property-id building-id overwrite-all?]
+  (let [all-data (krysp/->rakennuksen-tiedot (krysp/building-xml url property-id) building-id)]
+    (if overwrite-all?
+      all-data
+      (select-keys all-data (keys krysp/empty-building-ids)))))
+
 (defcommand merge-details-from-krysp
-  {:parameters [id documentId path buildingId collection]
-   :input-validators [commands/validate-collection]
+  {:parameters [id documentId path buildingId overwrite collection]
+   :input-validators [commands/validate-collection
+                      (partial action/non-blank-parameters [:documentId :path])
+                      (partial action/boolean-parameters [:overwrite])]
    :roles      [:applicant :authority]
    :states     (action/all-application-states-but [:sent :verdictGiven :constructionStarted :closed :canceled])}
   [{created :created {:keys [organization propertyId] :as application} :application :as command}]
@@ -963,9 +971,9 @@
                          (tools/path-vals
                            (if clear-ids?
                              krysp/empty-building-ids
-                             (tools/unwrapped (krysp/->rakennuksen-tiedot (krysp/building-xml url propertyId) buildingId)))))
+                             (load-building-data url propertyId buildingId overwrite))))
           ; Path should exist in schema!
-          updates      (filter (fn [[path _]] (model/find-by-name (:body schema) path)) base-updates)]
+        updates      (filter (fn [[path _]] (model/find-by-name (:body schema) path)) base-updates)]
       (infof "merging data into %s %s" (get-in document [:schema-info :name]) (:id document))
       (commands/persist-model-updates application collection document updates created :source "krysp")
       (ok))
