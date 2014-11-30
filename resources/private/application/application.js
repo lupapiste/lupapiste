@@ -4,7 +4,7 @@
   var isInitializing = true;
   var currentId = null;
   var authorizationModel = authorization.create();
-  var applicationModel = new LUPAPISTE.ApplicationModel(authorizationModel);
+  var applicationModel = new LUPAPISTE.ApplicationModel();
   var changeLocationModel = new LUPAPISTE.ChangeLocationModel();
   var addLinkPermitModel = new LUPAPISTE.AddLinkPermitModel();
   var constructionStateChangeModel = new LUPAPISTE.ModalDatepickerModel();
