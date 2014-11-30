@@ -1,4 +1,5 @@
 LUPAPISTE.AddLinkPermitModel = function() {
+  "use strict";
   var self = this;
   self.dialogSelector = "#dialog-add-link-permit";
 

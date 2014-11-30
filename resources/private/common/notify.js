@@ -2,8 +2,8 @@ var notify = (function() {
   "use strict";
 
   var level = {
-    DEBUG : 'DEBUG',
-    DEPLOY : 'DEPLOY'
+    DEBUG : "DEBUG",
+    DEPLOY : "DEPLOY"
   };
   var env = {
     level : level.DEPLOY

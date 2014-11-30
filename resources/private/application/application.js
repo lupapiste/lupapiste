@@ -74,7 +74,7 @@
     if (isInitializing) { return; }
 
     // The right is validated in the back-end. This check is just to prevent error.
-    if (!authorizationModel.ok('assign-application')) { return; }
+    if (!authorizationModel.ok("assign-application")) { return; }
 
     var assigneeId = value ? value : null;
 
@@ -208,14 +208,14 @@
 
   function openTab(id) {
     // old conversation tab opens both info tab and side panel
-    if (id === 'conversation') {
-      id = 'info';
+    if (id === "conversation") {
+      id = "info";
       if (!$("#conversation-panel").is(":visible")) {
         $("#open-conversation-side-panel").click();
       }
     }
     if(tabFlow) {
-      $('html, body').animate({ scrollTop: $("#application-"+id+"-tab").offset().top}, 100);
+      $("html, body").animate({ scrollTop: $("#application-"+id+"-tab").offset().top}, 100);
     } else {
       $(".tab-content").hide();
       $("#application-"+id+"-tab").fadeIn();

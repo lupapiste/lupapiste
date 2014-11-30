@@ -23,9 +23,11 @@ var accordion = (function() {
       .addClass(state === "closed" ? "drill-right-white" : "drill-down-white");
 
     var complete = function() {
-      content.css('overflow', 'visible');
+      content.css("overflow", "visible");
       target.trigger("accordion-" + state);
-      if (done) { done(target); };
+      if (done) {
+        done(target);
+      }
     };
 
     content.attr("data-accordion-state", state);

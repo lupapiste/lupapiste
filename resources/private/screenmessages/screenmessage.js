@@ -1,3 +1,5 @@
+"use strict";
+
 if (typeof LUPAPISTE === "undefined") {
   var LUPAPISTE = {};
 }
@@ -43,7 +45,7 @@ LUPAPISTE.Screenmessage = new (function () {
   };
 
   self.hide = function(){
-    $('#sys-notification').hide();
+    $("#sys-notification").hide();
   };
 
 })();

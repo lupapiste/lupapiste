@@ -78,14 +78,20 @@ var users = (function($) {
     };
 
     self.redraw = function() { self.dataTable.fnDraw(true); };
-    self.redrawCallback = function(redraw) { if (redraw) self.redraw(); };
+    self.redrawCallback = function(redraw) {
+      if (redraw) {
+        self.redraw();
+      }
+    };
 
     self.table$.click(function(e) {
       var target = $(e.target),
           opName = target.attr("data-op"),
           op = _.find(opts.ops, function(op) { return op.name === opName; }),
           email = target.parent().parent().attr("data-user-email");
-      if (!op || !email) return false;
+      if (!op || !email) {
+        return false;
+      }
       LUPAPISTE.ModalDialog.showDynamicYesNo(
           loc(["users.op", op.name, "title"]),
           loc(["users.op", op.name, "message"], email),

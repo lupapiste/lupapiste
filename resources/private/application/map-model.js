@@ -19,10 +19,14 @@ LUPAPISTE.MapModel = function(authorizationModel) {
 
   var getOrCreateMap = function(kind) {
     if (kind === "application") {
-      if (!applicationMap) applicationMap = createMap("application-map");
+      if (!applicationMap) {
+        applicationMap = createMap("application-map");
+      }
       return applicationMap;
     } else if (kind === "inforequest") {
-      if (!inforequestMap) inforequestMap = createMap("inforequest-map");
+      if (!inforequestMap) {
+        inforequestMap = createMap("inforequest-map");
+      }
       return inforequestMap;
     } else if (kind === "inforequest-markers") {
       if (!inforequestMarkerMap) {
@@ -59,7 +63,7 @@ LUPAPISTE.MapModel = function(authorizationModel) {
       _.each(ir.comments, function(com) {
         var partComment = $("<div>").attr("class", "inforequest-comment");
 
-        var commentTitle         = com.type === "authority" ? loc('inforequest.answer.title') : loc('inforequest.question.title');
+        var commentTitle         = com.type === "authority" ? loc("inforequest.answer.title") : loc("inforequest.question.title");
         var commentTimestamp     = " (" +
                                    (com.type === "authority" ?
                                      com.name + " " + moment(com.time).format("D.M.YYYY HH:mm") :
@@ -96,15 +100,15 @@ LUPAPISTE.MapModel = function(authorizationModel) {
 
         // same location markers
         markerInfos.push({
-          x: data["sameLocation"][0].location.x,
-          y: data["sameLocation"][0].location.y,
+          x: data.sameLocation[0].location.x,
+          y: data.sameLocation[0].location.y,
           iconName: "sameLocation",
-          contents: formMarkerHtmlContents( data["sameLocation"] ),
-          isCluster: data["sameLocation"].length > 1 ? true : false
+          contents: formMarkerHtmlContents( data.sameLocation ),
+          isCluster: data.sameLocation.length > 1 ? true : false
         });
 
         // same operation markers
-        _.each(data["sameOperation"], function(ir) {
+        _.each(data.sameOperation, function(ir) {
           markerInfos.push({
             x: ir.location.x,
             y: ir.location.y,
@@ -115,7 +119,7 @@ LUPAPISTE.MapModel = function(authorizationModel) {
         });
 
         // other markers
-        _.each(data["others"], function(ir) {
+        _.each(data.others, function(ir) {
           markerInfos.push({
             x: ir.location.x,
             y: ir.location.y,
@@ -139,9 +143,9 @@ LUPAPISTE.MapModel = function(authorizationModel) {
     var y = location.y;
 
     if (x === 0 && y === 0) {
-      $('#application-map').css("display", "none");
+      $("#application-map").css("display", "none");
     } else {
-      $('#application-map').css("display", "inline-block");
+      $("#application-map").css("display", "inline-block");
     }
 
     drawings = application.drawings;

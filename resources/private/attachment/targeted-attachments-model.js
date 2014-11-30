@@ -1,4 +1,5 @@
 LUPAPISTE.TargetedAttachmentsModel = function(attachmentTarget, attachmentType, typeSelector) {
+  "use strict";
   var self = this;
   self.target = attachmentTarget;
   self.attachmentType = attachmentType;

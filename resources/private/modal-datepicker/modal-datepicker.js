@@ -1,4 +1,5 @@
 LUPAPISTE.ModalDatepickerModel = function() {
+  "use strict";
   var self = this;
   self.dialogSelector = "#dialog-modal-datepicker";
   self.datepickerSelector = "#modal-datepicker-date";
@@ -53,7 +54,7 @@ LUPAPISTE.ModalDatepickerModel = function() {
         self.errorMessage(null);
         self.dateObservable(null);
         if (self.config.checkIntegrationAvailability && !resp.integrationAvailable) {
-          LUPAPISTE.ModalDialog.showDynamicOk(loc('integration.title'), loc('integration.unavailable'));
+          LUPAPISTE.ModalDialog.showDynamicOk(loc("integration.title"), loc("integration.unavailable"));
         }
       })
       .error(self.onError)

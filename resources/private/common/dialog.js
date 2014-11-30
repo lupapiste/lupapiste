@@ -7,6 +7,7 @@ if (typeof LUPAPISTE === "undefined") {
 }
 
 (function($) {
+  "use strict";
 
   /**
    * Modal window prototype.
@@ -14,7 +15,6 @@ if (typeof LUPAPISTE === "undefined") {
    * @param {String}  Mask color: 'black' or 'white'
    */
   LUPAPISTE.Modal = function(maskId, maskColor) {
-    "use strict";
 
     var self = this;
     self.mask = undefined;
@@ -28,7 +28,7 @@ if (typeof LUPAPISTE === "undefined") {
         maskDiv.className = "mask " + self.maskColor;
         document.body.appendChild(maskDiv);
       }
-      self.mask = $('#' + self.maskId);
+      self.mask = $("#" + self.maskId);
       self.mask.click(self.close);
     };
 
@@ -71,24 +71,24 @@ if (typeof LUPAPISTE === "undefined") {
       if (e && typeof e.preventDefault === "function") {
         e.preventDefault();
       }
-      $('.window:visible').each(function() {
-        hub.send("dialog-close", {id : $(this).attr('id')});
+      $(".window:visible").each(function() {
+        hub.send("dialog-close", {id : $(this).attr("id")});
       });
-      $('#' + self.maskId + ', .window').hide();
+      $("#" + self.maskId + ", .window").hide();
     };
 
   };
 
-  LUPAPISTE.Modal.YesNoTemplate = '<div class="window autosized-yes-no">' +
-    '<div class="dialog-header"><p class="dialog-title"></p><p class="dialog-close close">X</p></div>' +
-    '<div class="dialog-content"><div class="dialog-user-content"></div>' +
-    '<button class="btn btn-primary btn-dialog close" data-test-id="confirm-yes"></button>' +
-    '<button class="btn btn-dialog close" data-test-id="confirm-no"></button></div></div>';
-  LUPAPISTE.Modal.OkTemplate = '<div class="window autosized-ok">' +
-  '<div class="dialog-header"><p class="dialog-title"></p><p class="dialog-close close">X</p></div>' +
-  '<div class="dialog-content dialog-content-low"><div class="dialog-user-content"></div>' +
-  '<div style="text-align:center"><button class="btn btn-primary btn-dialog" data-test-id="confirm-yes" style="position:relative"></button></div>' +
-  '</div></div>';
+  LUPAPISTE.Modal.YesNoTemplate = "<div class='window autosized-yes-no'>" +
+    "<div class='dialog-header'><p class='dialog-title'></p><p class='dialog-close close'>X</p></div>" +
+    "<div class='dialog-content'><div class='dialog-user-content'></div>" +
+    "<button class='btn btn-primary btn-dialog close' data-test-id='confirm-yes'></button>" +
+    "<button class='btn btn-dialog close' data-test-id='confirm-no'></button></div></div>";
+  LUPAPISTE.Modal.OkTemplate = "<div class='window autosized-ok'>" +
+  "<div class='dialog-header'><p class='dialog-title'></p><p class='dialog-close close'>X</p></div>" +
+  "<div class='dialog-content dialog-content-low'><div class='dialog-user-content'></div>" +
+  "<div style='text-align:center'><button class='btn btn-primary btn-dialog' data-test-id='confirm-yes' style='position:relative'></button></div>" +
+  "</div></div>";
 
   /**
    * Lupapiste Modal Dialog window.
@@ -105,7 +105,6 @@ if (typeof LUPAPISTE === "undefined") {
    *  - html: bind html instead of plain text. Default to false.
    */
   LUPAPISTE.ModalDialog.setDialogContent = function(dialog$, title, content, yesButton, noButton, renderOptions) {
-    "use strict";
     function bindButton(elem$, button) {
       if (elem$ && button) {
         elem$.unbind("click").text(button.title || "");
@@ -129,14 +128,12 @@ if (typeof LUPAPISTE === "undefined") {
   };
 
   LUPAPISTE.ModalDialog.newYesNoDialog = function(id, title, content, yesTitle, yesHandler, noTitle, noHandler) {
-    "use strict";
     var dialog$ = $(LUPAPISTE.Modal.YesNoTemplate).attr("id", id);
     LUPAPISTE.ModalDialog.setDialogContent(dialog$, title, content, {title: yesTitle, fn: yesHandler}, {title: noTitle, fn: noHandler});
     LUPAPISTE.ModalDialog.dynamicDialogs.push(dialog$);
     return dialog$;
   };
   LUPAPISTE.ModalDialog.newOkDialog = function(id, title, content, okTitle, okHandler) {
-    "use strict";
     var dialog$ = $(LUPAPISTE.Modal.OkTemplate).attr("id", id);
     LUPAPISTE.ModalDialog.setDialogContent(dialog$, title, content, {title: okTitle, fn: okHandler});
     LUPAPISTE.ModalDialog.dynamicDialogs.push(dialog$);
@@ -154,7 +151,6 @@ if (typeof LUPAPISTE === "undefined") {
    *  - fn
    */
   LUPAPISTE.ModalDialog.showDynamicYesNo = function(title, content, yesButton, noButton, renderOptions) {
-    "use strict";
     var dialog$ = $("#" + LUPAPISTE.ModalDialog.dynamicYesNoId);
     LUPAPISTE.ModalDialog.setDialogContent(dialog$, title, content, yesButton, noButton || {title: loc("no")}, renderOptions);
     LUPAPISTE.ModalDialog.open(dialog$);
@@ -166,7 +162,6 @@ if (typeof LUPAPISTE === "undefined") {
    *  - fn
    */
   LUPAPISTE.ModalDialog.showDynamicOk = function(title, content, okButton, renderOptions) {
-    "use strict";
     var dialog$ = $("#" + LUPAPISTE.ModalDialog.dynamicOkId);
     var button = okButton || {title: loc("button.ok"), fn: function() { LUPAPISTE.ModalDialog.close(); }};
     LUPAPISTE.ModalDialog.setDialogContent(dialog$, title, content, button, null, renderOptions);
@@ -178,8 +173,6 @@ if (typeof LUPAPISTE === "undefined") {
    * Initializes modal dialog elements
    */
   LUPAPISTE.ModalDialog.init = function() {
-    "use strict";
-
     this.createMask();
 
     _.each(LUPAPISTE.ModalDialog.dynamicDialogs, function(d) {
@@ -193,7 +186,7 @@ if (typeof LUPAPISTE === "undefined") {
     // references to modal window container element ID.
     $(".modal").click(function (e) {
       e.preventDefault();
-      var id = $(this).attr('data-window-id');
+      var id = $(this).attr("data-window-id");
       if (id) {
         LUPAPISTE.ModalDialog.open("#" + id);
       }
@@ -209,8 +202,6 @@ if (typeof LUPAPISTE === "undefined") {
   LUPAPISTE.ModalProgress.progressBarId = "ModalProgressBar";
 
   LUPAPISTE.ModalProgress.init = function() {
-    "use strict";
-
     this.createMask();
 
     // Create progress bar
@@ -233,10 +224,8 @@ if (typeof LUPAPISTE === "undefined") {
   };
 
   LUPAPISTE.ModalProgress.show = function() {
-    "use strict";
-
     this.open("#" + LUPAPISTE.ModalProgress.progressBarId);
-    this.getMask().unbind('click');
+    this.getMask().unbind("click");
   };
 
 })(jQuery);

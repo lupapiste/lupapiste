@@ -46,7 +46,9 @@
   };
 
   hub.onPageChange("users", function() {
-    if (!usersList) usersList = users.create($("#users .fancy-users-table"), usersTableConfig);
+    if (!usersList) {
+      usersList = users.create($("#users .fancy-users-table"), usersTableConfig);
+    }
   });
 
 

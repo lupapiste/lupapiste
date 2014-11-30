@@ -23,7 +23,7 @@ var stamping = (function() {
       model.attachments = null;
       model.authorization = null;
 
-      window.location.hash='!/application/' + id + '/attachments';
+      window.location.hash="!/application/" + id + "/attachments";
       repository.load(id);
     }
   };
@@ -39,10 +39,10 @@ var stamping = (function() {
       model.stampFields.organization = ko.observable(model.appModel.organizationName());
     }
 
-    window.location.hash='!/stamping/' + model.appModel.id();
-  };
+    window.location.hash="!/stamping/" + model.appModel.id();
+  }
 
-  hub.onPageChange('stamping', function(e) {
+  hub.onPageChange("stamping", function(e) {
     if ( pageutil.subPage() ) {
       if ( !model.appModel || model.appModel.id() !== pageutil.subPage() ) {
         // refresh
@@ -70,11 +70,11 @@ var stamping = (function() {
     }
   });
 
-  hub.subscribe('start-stamping', function(param) {
+  hub.subscribe("start-stamping", function(param) {
     initStamp(param.application);
   });
 
-  ko.components.register('stamping-component', {
+  ko.components.register("stamping-component", {
     viewModel: LUPAPISTE.StampModel,
     template: {element: "stamp-attachments-template"}
   });

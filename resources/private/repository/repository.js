@@ -67,7 +67,7 @@ var repository = (function() {
         var schema = findSchema(schemas, schemaInfo.name, schemaInfo.version);
         doc.schema = schema;
         doc.schema.info = _.merge(schemaInfo, doc.schema.info);
-      };
+      }
 
       function setOperation(application, doc) {
         var schemaInfo = doc["schema-info"];
@@ -77,7 +77,7 @@ var repository = (function() {
             schemaInfo.op = op;
           }
         }
-      };
+      }
 
       if (application) {
         _.each(application.documents || [], function(doc) {
@@ -86,12 +86,12 @@ var repository = (function() {
         });
         _.each(application.tasks || [], setSchema);
         _.each(application.comments || [], function(comment) {
-          if (comment.target && comment.target.type === 'attachment' && comment.target.id) {
+          if (comment.target && comment.target.type === "attachment" && comment.target.id) {
             var targetAttachment = _.find(application.attachments || [], function(attachment) {
               return attachment.id === comment.target.id;
             });
             if (targetAttachment) {
-              comment.target.attachmentType = loc(['attachmentType', targetAttachment.type['type-group'], targetAttachment.type['type-id']]);
+              comment.target.attachmentType = loc(["attachmentType", targetAttachment.type["type-group"], targetAttachment.type["type-id"]]);
               comment.target.attachmentId = targetAttachment.id;
             }
           }
@@ -104,12 +104,14 @@ var repository = (function() {
         if (_.isFunction(callback)) {
           callback(application);
         }
-      };
+      }
     });
   }
 
   function loaded(pages, f) {
-    if (!_.isFunction(f)) throw "f is not a function: f=" + f;
+    if (!_.isFunction(f)) {
+      throw "f is not a function: f=" + f;
+    }
     hub.subscribe("application-loaded", function(e) {
       if (_.contains(pages, pageutil.getPage())) {
         //TODO: passing details as 2nd param due to application.js hack (details contains the municipality persons)

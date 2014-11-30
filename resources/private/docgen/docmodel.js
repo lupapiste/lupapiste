@@ -50,9 +50,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   self.findHelpElement = function (e) {
     var event = getEvent(e);
     var input$ = $(event.target);
-    var help$ = input$.siblings('.form-help');
+    var help$ = input$.siblings(".form-help");
     if (!help$.length) {
-      help$ = input$.parent().siblings('.form-help');
+      help$ = input$.parent().siblings(".form-help");
     }
     if (!help$.length) {
       return false;
@@ -62,9 +62,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   self.findErrorElement = function (e) {
     var event = getEvent(e);
     var input$ = $(event.target);
-    var error$ = input$.siblings('.errorPanel');
+    var error$ = input$.siblings(".errorPanel");
     if (!error$.length) {
-      error$ = input$.parent().siblings('.errorPanel');
+      error$ = input$.parent().siblings(".errorPanel");
     }
     if (!error$.length) {
       return false;
@@ -527,7 +527,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var option = document.createElement("option");
     option.value = "";
     option.appendChild(document.createTextNode(loc("selectone")));
-    if (selectedOption === "") option.selected = "selected";
+    if (selectedOption === "") {
+      option.selected = "selected";
+    }
     select.appendChild(option);
 
     _(subSchema.body)
@@ -563,7 +565,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       option = document.createElement("option");
       option.value = "other";
       option.appendChild(document.createTextNode(loc("select-other")));
-      if (selectedOption === "other") option.selected = "selected";
+      if (selectedOption === "other") {
+        option.selected = "selected";
+      }
       select.appendChild(option);
     }
 
@@ -682,7 +686,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       otherOption = document.createElement("option");
       otherOption.value = "other";
       otherOption.appendChild(document.createTextNode(loc("select-other")));
-      if (selectedOption === "other") otherOption.selected = "selected";
+      if (selectedOption === "other") {
+        otherOption.selected = "selected";
+      }
       select.appendChild(otherOption);
     }
 
@@ -848,7 +854,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     });
 
     var label = document.createElement("label");
-    var locKey = ('person-selector');
+    var locKey = ("person-selector");
     label.className = "form-label form-label-select";
     label.innerHTML = loc(locKey);
     span.appendChild(label);
@@ -941,7 +947,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         elem.setAttribute("data-repeating-id", repeatingId);
         elem.setAttribute("data-repeating-id-" + repeatingId, id);
 
-        if (subSchema.repeating && !self.isDisabled && authorizationModel.ok('remove-document-data')) {
+        if (subSchema.repeating && !self.isDisabled && authorizationModel.ok("remove-document-data")) {
           var removeButton = document.createElement("span");
           removeButton.className = "icon remove-grey inline-right";
           removeButton.onclick = function () {
@@ -996,7 +1002,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
           models = subSchema.initiallyEmpty ? [] : [{}];
       }
 
-      var elements = undefined;
+      var elements;
 
       if (subSchema.type === "table") {
         elements = buildElements(models);
@@ -1226,9 +1232,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
   function disableBasedOnOptions() {
     if (!self.authorizationModel.ok(getUpdateCommand()) || options && options.disabled) {
-      $(self.element).find('input, textarea').attr("readonly", true).unbind("focus");
-      $(self.element).find('select, input[type=checkbox], input[type=radio]').attr("disabled", true);
-      $(self.element).find('button').hide();
+      $(self.element).find("input, textarea").attr("readonly", true).unbind("focus");
+      $(self.element).find("select, input[type=checkbox], input[type=radio]").attr("disabled", true);
+      $(self.element).find("button").hide();
     }
   }
 
@@ -1270,7 +1276,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     } else if (status === "ok") {
       showIndicator(indicator, "form-input-saved", "form.saved");
     } else if (status !== "ok") {
-      error("Unknown status:", status, "path:", path);
+      error("Unknown status:", status);
     }
     if (callback) { callback(); }
     // No return value or stoping the event propagation:
@@ -1338,7 +1344,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var descriptionInput = document.createElement("input");
     var iconSpan = document.createElement("span");
     var iconSpanDescription = document.createElement("span");
-    iconSpanDescription.appendChild(document.createTextNode(loc('edit')));
+    iconSpanDescription.appendChild(document.createTextNode(loc("edit")));
 
     // test ids
     if (options && options.dataTestSpecifiers) {
@@ -1373,11 +1379,11 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         iconSpan.appendChild(iconSpanDescription);
       }
 
-      ajax.command("update-op-description", {id: self.appId, 'op-id': operation.id, desc: value })
+      ajax.command("update-op-description", {id: self.appId, "op-id": operation.id, desc: value })
         .success(function() {
           var indicator = createIndicator(descriptionInput, "accordion-indicator");
           showIndicator(indicator, "accordion-input-saved", "form.saved");
-          hub.send("op-description-changed", {appId: self.appId, 'op-id': operation.id, 'op-desc': value});
+          hub.send("op-description-changed", {appId: self.appId, "op-id": operation.id, "op-desc": value});
         })
         .call();
 
@@ -1397,7 +1403,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       // trigger save on enter and esc keypress
       var event = getEvent(e);
       event.stopPropagation();
-      if (event.keyCode == 13 || event.keyCode == 27) {
+      if (event.keyCode === 13 || event.keyCode === 27) {
         $(descriptionInput).off("blur");
         descriptionInput.blur();
         saveInput();
@@ -1447,7 +1453,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     if (op) {
       title.appendChild(document.createTextNode(loc([op.name, "_group_label"])));
-      if (authorizationModel.ok('update-op-description')) {
+      if (authorizationModel.ok("update-op-description")) {
         title.appendChild(buildDescriptionElement(op));
       }
     } else {
@@ -1456,7 +1462,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     title.setAttribute("data-doc-id", self.docId);
     title.setAttribute("data-app-id", self.appId);
     title.onclick = accordion.click;
-    if (self.schema.info.removable && !self.isDisabled && authorizationModel.ok('remove-doc')) {
+    if (self.schema.info.removable && !self.isDisabled && authorizationModel.ok("remove-doc")) {
       var removeSpan =
         $("<span>")
           .addClass("icon remove inline-right")

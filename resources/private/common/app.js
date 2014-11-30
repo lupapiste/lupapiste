@@ -1,6 +1,7 @@
 var LUPAPISTE = LUPAPISTE || {};
 
 (function($) {
+  "use strict";
 
   /**
    * Prototype for Lupapiste Single Page Apps.
@@ -9,7 +10,6 @@ var LUPAPISTE = LUPAPISTE || {};
    * @param {Boolean} allowAnonymous  Allow all users to access the app. Default: require login.
    */
    LUPAPISTE.App = function (startPage, allowAnonymous, showUserMenu) {
-    "use strict";
 
     var self = this;
 
@@ -18,8 +18,8 @@ var LUPAPISTE = LUPAPISTE || {};
     self.session = undefined;
     self.allowAnonymous = allowAnonymous;
     self.showUserMenu = (showUserMenu !== undefined) ? showUserMenu : !allowAnonymous;
-    self.previousHash;
-    self.currentHash;
+    self.previousHash = undefined;
+    self.currentHash = undefined;
 
     /**
     * Window unload event handler

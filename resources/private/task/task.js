@@ -1,5 +1,5 @@
 var taskUtil = (function() {
-
+  "use strict";
   function getTaskName(task) {
     return task.taskname || loc([task.schema.info.name, "_group_label"]);
   }
@@ -9,7 +9,9 @@ var taskUtil = (function() {
     var prefix = task.schema.info.i18nprefix;
     var path = task.schema.info.i18npath;
     if (path && path.length) {
-      if (path[path.length - 1] !== "value") path.push("value");
+      if (path[path.length - 1] !== "value") {
+        path.push("value");
+      }
       var displayNameData = util.getIn(task.data || {}, path);
       if (displayNameData) {
         var key = prefix ? prefix + "." + displayNameData : displayNameData;
@@ -79,7 +81,7 @@ var taskPageController = (function() {
       .processing(processing)
       .success(function() {
         reload();
-        LUPAPISTE.ModalDialog.showDynamicOk(loc('integration.title'), loc('integration.success'));
+        LUPAPISTE.ModalDialog.showDynamicOk(loc("integration.title"), loc("integration.success"));
       })
       .error(function(e){
         reload();
