@@ -36,10 +36,10 @@ var users = (function($) {
 
     self.toOps = function(td, sData, oData, iRow, iCol) {
       var user = oData.user,
-          td = $(td);
+          td$ = $(td);
       _.each(opts.ops, function(op) {
         if (op.showFor(user)) {
-          td.append("[")
+          td$.append("[")
            .append($("<a>")
             .attr("href", "#")
             .attr("data-op", op.name)
