@@ -4,7 +4,6 @@
             [schema.core :as sc])
   (:import [org.apache.commons.io.output NullWriter]))
 
-
 (facts "strip-nils"
   (fact "Removes the whole key-value pair when value is nil"
     (strip-nils {:a 1 :b nil :c {:d 2 :e nil}}) => {:a 1 :c {:d 2}})
