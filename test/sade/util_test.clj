@@ -247,7 +247,7 @@
   (fact (rakennustunnus? "foo") => falsey)
   (fact (rakennustunnus? "1a") => falsey)
   (fact (rakennustunnus? "1A") => falsey)
-  (fact (rakennustunnus? "912345678A") => truthy)
+  (fact (rakennustunnus? "903048741J") => truthy)
   (fact "SYKE sample with a fixed checksum" (rakennustunnus? "100012345N") => truthy)
   (fact "VRK sample with a fixed checksum" (rakennustunnus? "1234567892") => truthy))
 
