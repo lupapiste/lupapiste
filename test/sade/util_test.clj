@@ -249,8 +249,8 @@
   (fact (rakennustunnus? "1a") => falsey)
   (fact (rakennustunnus? "1A") => falsey)
   (fact (rakennustunnus? "912345678A") => truthy)
-  (fact "SYKE sample" (rakennustunnus? "100012345A") => truthy)
-  (fact "VRK sample" (rakennustunnus? "123456789A") => truthy))
+  (fact "SYKE sample with a fixed checksum" (rakennustunnus? "100012345N") => truthy)
+  (fact "VRK sample with a fixed checksum" (rakennustunnus? "1234567892") => truthy))
 
 (facts max-length
   (fact (sc/check (max-length 1) []) => nil)
