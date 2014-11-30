@@ -158,7 +158,7 @@
           ajax
           .command("neighbor-add-owners", parameters)
           .complete(_.partial(repository.load, applicationId,
-                  function(v) {
+                  function() {
                       LUPAPISTE.ModalDialog.close();
                   }))
           .call();
@@ -179,7 +179,7 @@
               return person.nimi;
           }
       }
-      function convertOwner(owner, index) {
+      function convertOwner(owner) {
           var type = owner.henkilolaji,
               nameOfDeceased = null;
 
@@ -289,6 +289,7 @@
     repository.load(applicationId);
   });
 
+  /*jshint unused:false */
   repository.loaded(["neighbors"], function(application, applicationDetails) {
     if (applicationId === application.id) {
       model.init(application);

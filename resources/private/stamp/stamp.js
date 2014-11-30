@@ -42,7 +42,7 @@ var stamping = (function() {
     window.location.hash="!/stamping/" + model.appModel.id();
   }
 
-  hub.onPageChange("stamping", function(e) {
+  hub.onPageChange("stamping", function() {
     if ( pageutil.subPage() ) {
       if ( !model.appModel || model.appModel.id() !== pageutil.subPage() ) {
         // refresh
