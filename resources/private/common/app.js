@@ -176,7 +176,7 @@ var LUPAPISTE = LUPAPISTE || {};
       $(document.documentElement).keyup(function(event) { hub.send("keyup", event); });
 
       var logoHref = window.location.href;
-      if (self.startPage && !self.startPage.charAt(0) !== "/") {
+      if (self.startPage && self.startPage.charAt(0) !== "/") {
         logoHref = "#!/" + self.startPage;
       }
 
