@@ -663,17 +663,17 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         var buildingId = target.value;
 
         function mergeFromWfs(overwriteWithBackendData) {
-        ajax
+          ajax
           .command("merge-details-from-krysp",
-                   {id: self.appId, documentId: self.docId,
-                    path: myPath,
-                    buildingId: buildingId,
+              {id: self.appId, documentId: self.docId,
+            path: myPath,
+            buildingId: buildingId,
             overwrite: overwriteWithBackendData,
-                    collection: self.getCollection() })
-          .success(function () {
-            repository.load(self.appId);
-          })
-          .call();
+            collection: self.getCollection() })
+            .success(function () {
+              repository.load(self.appId);
+            })
+            .call();
         }
 
         if (buildingId !== "" && buildingId !== "other") {
@@ -937,7 +937,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   function removeData(id, doc, path) {
     ajax
       .command("remove-document-data", { doc: doc, id: id, path: path, collection: self.getCollection() })
-      .success(function (e) {
+      .success(function () {
         repository.load(id);
       })
       .call();
@@ -1276,7 +1276,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }
 
     setTimeout(function () {
-      i$.removeClass(className).fadeOut(200, function () { i$.remove; });
+      i$.removeClass(className).fadeOut(200, function () {});
     }, 4000);
   }
 
@@ -1409,8 +1409,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       $(descriptionSpan).removeClass("hidden");
     };
 
-    descriptionInput.onfocus = function(e) {
-      descriptionInput.onblur = function(e) {
+    descriptionInput.onfocus = function() {
+      descriptionInput.onblur = function() {
         saveInput();
       };
     };
