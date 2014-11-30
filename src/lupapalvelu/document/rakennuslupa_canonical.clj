@@ -90,20 +90,12 @@
                                             :saunoja (-> toimenpide :varusteet :saunoja)
                                             :vaestonsuoja (-> toimenpide :varusteet :vaestonsuoja)}
                                 :liitettyJatevesijarjestelmaanKytkin (true? (-> toimenpide :varusteet :liitettyJatevesijarjestelmaanKytkin))}
+                               (let [defaults {:jarjestysnumero nil, :kiinttun (:propertyId application)}
+                                     {:keys [rakennusnro valtakunnallinenNumero manuaalinen_rakennusnro]} toimenpide]
                                (cond
-                                 (-> toimenpide :manuaalinen_rakennusnro)
-                                 {:rakennustunnus {:rakennusnro (-> toimenpide :manuaalinen_rakennusnro)
-                                                   :jarjestysnumero nil
-                                                   :kiinttun (:propertyId application)}}
-                                 (-> toimenpide :rakennusnro)
-                                 {:rakennustunnus (assoc-when {:rakennusnro (-> toimenpide :rakennusnro)
-                                                               :jarjestysnumero nil
-                                                               :kiinttun (:propertyId application)}
-                                                              :valtakunnallinenNumero (-> toimenpide :valtakunnallinenNumero)
-                                                              )}
-                                 :default
-                                 {:rakennustunnus {:jarjestysnumero nil
-                                                   :kiinttun (:propertyId application)}})
+                                   manuaalinen_rakennusnro {:rakennustunnus (assoc defaults :rakennusnro manuaalinen_rakennusnro)}
+                                   rakennusnro {:rakennustunnus (util/assoc-when defaults :rakennusnro rakennusnro :valtakunnallinenNumero valtakunnallinenNumero)}
+                                   :default {:rakennustunnus defaults}))
                                (when kantava-rakennus-aine-map {:kantavaRakennusaine kantava-rakennus-aine-map})
                                (when lammonlahde-map {:lammonlahde lammonlahde-map})
                                (when julkisivu-map {:julkisivu julkisivu-map})
