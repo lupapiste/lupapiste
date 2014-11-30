@@ -302,7 +302,7 @@
 (defn vrk-checksum [^Long l]
   (nth vrk-checksum-chars (mod l 31)))
 
-(defn hetu-chacksum [^String hetu]
+(defn hetu-checksum [^String hetu]
   (vrk-checksum (Long/parseLong (str (subs hetu 0 6) (subs hetu 7 10)))))
 
 (defn- rakennustunnus-checksum [^String prt]
