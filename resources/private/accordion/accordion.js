@@ -1,3 +1,4 @@
+/*jshint unused:false */
 var accordion = (function() {
   "use strict";
 
