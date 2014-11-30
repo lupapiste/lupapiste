@@ -209,7 +209,7 @@
     (fact "xml is parsed" buildings => truthy)
     (fact "xml has 2 buildings" (count buildings) => 2)
     (fact "Kiinteistotunnus" (:propertyId (first buildings)) => "63845900130022")
-    (fact "Rakennustunnus" building1-id => "123456789A")
+    (fact "Rakennustunnus" building1-id => "1234567892")
     (fact "Kayttotarkoitus" (:usage (first buildings)) => "011 yhden asunnon talot")
     (fact "Alkuhetki year as created" (:created (first buildings)) => "2013")
     (let [building1  (dissoc (->rakennuksen-tiedot xml building1-id) :kiinttun)
@@ -350,7 +350,7 @@
     (:jarjestysnumero building1) => "31216"
     (:kiinttun building1) => "63820130310000"
     (:rakennusnro building1) => "123"
-    (:valtakunnallinenNumero building1) => "123456789A"))
+    (:valtakunnallinenNumero building1) => "1234567892"))
 
 (facts "wfs-krysp-url works correctly"
   (fact "without ? returns url with ?" (wfs-krysp-url "http://localhost" rakval-case-type (property-equals "test" "lp-1")) =>  "http://localhost?request=GetFeature&typeName=rakval%3ARakennusvalvontaAsia&filter=%3CPropertyIsEqualTo%3E%3CPropertyName%3Etest%3C%2FPropertyName%3E%3CLiteral%3Elp-1%3C%2FLiteral%3E%3C%2FPropertyIsEqualTo%3E")
