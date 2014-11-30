@@ -53,6 +53,7 @@
   var createTaskController = LUPAPISTE.createTaskController;
   var mapModel = new LUPAPISTE.MapModel(authorizationModel);
   var attachmentsTab = new LUPAPISTE.AttachmentsTabModel(applicationModel);
+  var foremanModel = new LUPAPISTE.ForemanModel();
 
   var authorities = ko.observableArray([]);
   var permitSubtypes = ko.observableArray([]);
@@ -137,6 +138,8 @@
 
       // Map
       mapModel.refresh(app);
+
+      foremanModel.refresh(app);
 
       // Operations
       applicationModel.operationsCount(_.map(_.countBy(app.operations, "name"), function(v, k) { return {name: k, count: v}; }));
@@ -365,6 +368,7 @@
       constructionStateChangeModel: constructionStateChangeModel,
       createTask: createTaskController,
       invite: inviteModel,
+      foreman: foremanModel,
       map: mapModel,
       neighbor: neighborActions,
       neighborStatusModel: neighborStatusModel,
