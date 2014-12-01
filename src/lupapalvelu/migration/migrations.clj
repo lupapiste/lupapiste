@@ -3,6 +3,7 @@
             [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]]
             [clojure.walk :as walk]
             [sade.util :refer [dissoc-in postwalk-map strip-nils]]
+            [sade.core :refer [def-]]
             [sade.strings :as ss]
             [lupapalvelu.migration.core :refer [defmigration]]
             [lupapalvelu.document.schemas :as schemas]
@@ -590,6 +591,41 @@
      (let [applications (mongo/select collection)]
        (count (map #(mongo/update-by-id collection (:id %) (app-meta-fields/applicant-index-update %)) applications))))))
 
+(def- operation-mappings
+  {:asuinrakennus         [:kerrostalo-rivitalo :pientalo]
+   :muu-uusi-rakentaminen [:muu-uusi-rakentaminen :teollisuusrakennus]
+   :laajentaminen         [:kerrostalo-rt-laaj :pientalo-laaj :vapaa-ajan-rakennus-laaj :talousrakennus-laaj :teollisuusrakennus-laaj :muu-rakennus-laaj]
+   :kayttotark-muutos     [:kayttotark-muutos :sisatila-muutos]
+   :muu-laajentaminen     [:linjasaneeraus]
+   :puun-kaataminen       [:puun-kaataminen :rak-valm-tyo]
+   :jatkoaika             [:raktyo-aloit-loppuunsaat]})
+
+(defn- copy-attachment-configs [old-op-attachments]
+  (reduce (fn [new-attachment-configs [old-op-key old-attachment-config]]
+            (if (old-op-key operation-mappings)
+              (let [attachment-config (mapcat (fn [op-key] [op-key old-attachment-config]) (old-op-key operation-mappings))]
+                (merge new-attachment-configs (apply hash-map attachment-config)))
+              new-attachment-configs)) {} old-op-attachments))
+
+(defn new-operations-attachments [old-operations-attachments]
+  (merge old-operations-attachments (copy-attachment-configs old-operations-attachments)))
+
+(defn new-selected-operations [old-ops]
+  (when-not (nil? old-ops) ; no old ops -> do not mark explicit new ops
+    (->> old-ops
+         (map (fn [op]
+                (if (operation-mappings op)
+                  (operation-mappings op)
+                  op)))
+         flatten)))
+
+(defmigration import-new-operations-for-organisations
+  (doseq [org (mongo/select :organizations {:scope.permitType "R"})]
+    (let [old-selected-operations (map keyword (:selected-operations org))
+          old-operations-attachments (:operations-attachments org)]
+      (organization/update-organization (:id org) {$set {:selected-operations    (new-selected-operations old-selected-operations)
+                                                         :operations-attachments (new-operations-attachments old-operations-attachments)}}))))
+
 (defn update-applications-array
   "Updates an array k in every application by mapping the array with f.
    Applications are fetched using the given query.
@@ -597,9 +633,9 @@
   [k f query]
   {:pre [(keyword? k) (fn? f) (map? query)]}
   (reduce + 0
-    (for [collection [:applications :submitted-applications]
-          application (mongo/select collection query {k 1})]
-      (mongo/update-n collection {:_id (:id application)} {$set {k (map f (k application))}}))))
+          (for [collection [:applications :submitted-applications]
+                application (mongo/select collection query {k 1})]
+            (mongo/update-n collection {:_id (:id application)} {$set {k (map f (k application))}}))))
 
 (defn- populate-buildingids-to-doc [doc]
   (let [rakennusnro (get-in doc [:data :rakennusnro])
@@ -610,14 +646,14 @@
       :else doc)))
 
 (defmigration populate-buildingids-to-docs
-  (update-applications-array
-    :documents
-    populate-buildingids-to-doc
-    {:documents {$elemMatch {$or [{:data.rakennusnro.value {$exists true}} {:data.manuaalinen_rakennusnro.value {$exists true}}]}}}))
+              (update-applications-array
+                :documents
+                populate-buildingids-to-doc
+                {:documents {$elemMatch {$or [{:data.rakennusnro.value {$exists true}} {:data.manuaalinen_rakennusnro.value {$exists true}}]}}}))
 
 (defmigration populate-buildingids-to-buildings
-  (update-applications-array
-    :buildings
-    #(assoc % :localShortId (:buildingId %), :nationalId nil, :localId nil)
-    {:buildings.0 {$exists true}}))
+              (update-applications-array
+                :buildings
+                #(assoc % :localShortId (:buildingId %), :nationalId nil, :localId nil)
+                {:buildings.0 {$exists true}}))
 
