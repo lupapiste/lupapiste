@@ -576,9 +576,9 @@
 
   ;; TODO: These let-bindings are repeated in do-create-application, merge th somehow
     (let [scope             (organization/resolve-organization-scope municipality permit-type organization)
-        info-request?     (boolean infoRequest)
-        open-inforequest? (and info-request? (:open-inforequest scope))
-        created-application (do-create-application command)]
+          info-request?     (boolean infoRequest)
+          open-inforequest? (and info-request? (:open-inforequest scope))
+          created-application (do-create-application command)]
 
       (insert-application created-application)
       (when open-inforequest?
