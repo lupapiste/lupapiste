@@ -293,6 +293,7 @@
         building-info   (command pena :get-building-info-from-wfs :id application-id) => ok?
         doc-before      (domain/get-document-by-name updated-app "rakennuksen-muuttaminen")
         building-id     (:buildingId (first (:data building-info)))
+
         resp3           (command pena :merge-details-from-krysp :id application-id :documentId (:id doc-before) :collection "documents" :buildingId building-id :path "buildingId" :overwrite true) => ok?
         merged-app      (query-application pena application-id)
         doc-after       (domain/get-document-by-name merged-app "rakennuksen-muuttaminen")]
@@ -302,7 +303,22 @@
         (get-in doc-after [:data :manuaalinen_rakennusnro :value]) => ss/blank?
         (get-in doc-after [:data :valtakunnallinenNumero :value]) => "481123123A"
         (count (get-in doc-after [:data :huoneistot])) => 21
-        (get-in doc-after [:data :kaytto :kayttotarkoitus :source]) => "krysp"))
+        (get-in doc-after [:data :kaytto :kayttotarkoitus :value]) => "039 muut asuinkerrostalot"
+        (get-in doc-after [:data :kaytto :kayttotarkoitus :source]) => "krysp"
+
+        (fact "Merging ID only"
+          (let [building-id-2   (:buildingId (second (:data building-info)))
+                _ (command pena :merge-details-from-krysp :id application-id :documentId (:id doc-before) :collection "documents" :buildingId building-id-2 :path "buildingId" :overwrite false) => ok?
+                merged-app      (query-application pena application-id)
+                doc-after-2       (domain/get-document-by-name merged-app "rakennuksen-muuttaminen")]
+
+            (fact "kayttotarkoitus remains the same"
+              (get-in doc-after-2 [:data :kaytto :kayttotarkoitus :value]) => "039 muut asuinkerrostalot")
+
+            (fact "ID has changed"
+              (get-in doc-after-2 [:data :valtakunnallinenNumero :value]) => "478123123A"
+              (get-in doc-after-2 [:data :rakennusnro :value]) => "002"
+              (get-in doc-after-2 [:data :manuaalinen_rakennusnro :value]) => ss/blank?)))))
 
 (fact* "Merging building information from KRYSP succeeds even if document schema does not have place for all the info"
   (let [application-id  (create-app-id pena :municipality sonja-muni :operation "purkaminen")
