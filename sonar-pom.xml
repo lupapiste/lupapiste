@@ -14,7 +14,7 @@
     <sonar.host.url>http://sonar.solita.fi/</sonar.host.url>
     <sonar.language>js</sonar.language>
     <!-- Exclude 3rd party libraries. -->
-    <sonar.exclusions>**/html5shiv*,**/jquery*,**/underscore.*,**/lodash.*,resources/private/knockout/*,**/openlayers*,**/moment.min.js</sonar.exclusions>
+    <sonar.exclusions>**/html5shiv*,**/jquery*,**/underscore.*,**/lodash*,resources/private/knockout/*,**/openlayers*,**/moment.min.js</sonar.exclusions>
   </properties>
   
   <build>
