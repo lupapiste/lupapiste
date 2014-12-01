@@ -680,7 +680,7 @@
                   (if-let [existing-application (mongo/by-id :applications lupapiste-tunnus)]
                     (if (domain/owner-or-writer? existing-application (:id user))
                       (ok :id lupapiste-tunnus)
-                      (fail :lupapiste-application-already-exists-but-unauthorized-to-access-it :id lupapiste-tunnus))
+                      (fail :error.lupapiste-application-already-exists-but-unauthorized-to-access-it :id lupapiste-tunnus))
                     ;; The xml message included lupapiste-id, but an application with that id is not found from database. This should never be the case.
                     (do
                       (error "Creating application from previous permit. Not able to find application id '" lupapiste-tunnus "' it includes from database.")
