@@ -1,5 +1,4 @@
 {
-  "globalstrict": true,
   "curly": true,
   "eqeqeq": true,
   "es3": true,
