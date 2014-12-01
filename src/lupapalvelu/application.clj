@@ -695,7 +695,8 @@
               (fail :error.previous-permit-found-from-backend-is-of-different-organization))
 
             ;; Sanomasta ei saatu purettua tietoa, esimerkiksi sanomassa ei kuitenkaan ollut asiatietoa annetulla kuntalupatunnuksella.
-            (fail :error.no-previous-permit-found-from-backend))))
+            (fail :error.no-previous-permit-found-from-backend)))
+
 
         ;; Annetulle kuntalupatunnukselle ei loytynyt sanomaa.
         (fail :error.no-previous-permit-found-from-backend)))))
@@ -1061,10 +1062,10 @@
   (reduce (fn [r [k v]] (assoc r k (if (map? v) (add-value-metadata v meta-data) (assoc meta-data :value v)))) {} m))
 
 (defn- load-building-data [url property-id building-id overwrite-all?]
-  (let [all-data (krysp/->rakennuksen-tiedot (krysp/building-xml url property-id) building-id)]
+  (let [all-data (krysp-reader/->rakennuksen-tiedot (krysp-reader/building-xml url property-id) building-id)]
     (if overwrite-all?
       all-data
-      (select-keys all-data (keys krysp/empty-building-ids)))))
+      (select-keys all-data (keys krysp-reader/empty-building-ids)))))
 
 (defcommand merge-details-from-krysp
   {:parameters [id documentId path buildingId overwrite collection]
