@@ -44,7 +44,7 @@ var stamping = (function() {
     if ( _.isEmpty(model.stampFields.section()) && model.appModel.verdicts && !_.isEmpty(model.appModel.verdicts()) ) {
       var verdict = ko.mapping.toJS(model.appModel.verdicts()[0]);
       if ( verdict.paatokset[0] && verdict.paatokset[0].poytakirjat[0] && verdict.paatokset[0].poytakirjat[0].pykala ) {
-        model.stampFields.section("§ " + verdict.paatokset[0].poytakirjat[0].pykala);
+        model.stampFields.section(verdict.paatokset[0].poytakirjat[0].pykala);
       }
     }
   };
