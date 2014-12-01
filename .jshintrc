@@ -61,13 +61,16 @@
     "attachmentUtils" : true,
     "DocModel" : true
   },
-  "exported": ["accordion","ajax","attachment","attachmentUtils","attachmentTypeSelect",
-"authorization","comments","currentUser","DocModel","docgen","expand",
-"features","gis","getEvent","hub","invites","loc","locationSearch",
-"vetuma",
-"notify","trace","debug","info","warn","error",    
-"LUPAPISTE",
-"municipalities","organizations","pageutil",
-"repository","RequestContext","taskUtil","taskPageController","tree",
-"user","users","util"]
+  "exported": 
+     ["accordion","ajax","attachment",
+      "attachmentUtils","attachmentTypeSelect",
+       "authorization","comments","currentUser",
+       "DocModel","docgen","expand", "features",
+       "gis","getEvent","hub","invites","loc",
+       "locationSearch","vetuma","notify",
+       "trace","debug","info","warn","error",    
+       "LUPAPISTE","municipalities","organizations",
+       "pageutil","repository","RequestContext",
+       "stamping","taskUtil","taskPageController",
+       "tree","user","users","util"]
 }
