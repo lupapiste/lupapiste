@@ -645,11 +645,7 @@
 ;                                      (:ensimmainen-rakennus app-info) (:ensimmainen-rakennus app-info)     ;; Tatako ei tarvita?
                                       )
                         command (update-in command [:data] merge {:infoRequest false :messages []} info-source)
-                        created-application (try
-                                              (do-create-application command manual-schema-datas)
-                                              (catch Exception e
-                                                ;; TODO: Jos tulee unauthorized, pitaako se valittaa sellaisenaan eteenpain? Ja muuten "permit-not-found"?
-                                                (fail! :error.no-previous-permit-found-from-backend)))
+                        created-application (do-create-application command manual-schema-datas)
                         ;;
                         ;; *** TODO: Aseta applicationille viitelupatiedot -> kts. app-infon :viitelupatiedot ***
                         ;;
