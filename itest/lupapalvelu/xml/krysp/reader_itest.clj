@@ -24,9 +24,9 @@
 
       (fact "first building has correct data"
         (first buildings) => {:propertyId "75300301050006"
-                              :buildingId "481123123A"
+                              :buildingId "481123123R"
                               :localShortId "001"
-                              :nationalId "481123123A"
+                              :nationalId "481123123R"
                               :localId nil
                               :usage      "039 muut asuinkerrostalot"
                               :area "2682"
@@ -35,10 +35,10 @@
 
       (fact "second building has correct data"
         (second buildings) => {:propertyId "75300301050006"
-                               :buildingId "478123123A"
+                               :buildingId "478123123J"
                                :localShortId "002"
                                :localId nil
-                               :nationalId "478123123A"
+                               :nationalId "478123123J"
                                :usage      "021 rivitalot"
                                :area "281"
                                :index nil
@@ -64,7 +64,7 @@
           (dissoc rakennus :huoneistot :rakennuksenOmistajat :kiinttun)
             => (just
                  {:rakennusnro "001"
-                  :valtakunnallinenNumero "481123123A"
+                  :valtakunnallinenNumero "481123123R"
                   :manuaalinen_rakennusnro ""
                   :verkostoliittymat {:viemariKytkin true
                                       :maakaasuKytkin false
