@@ -28,7 +28,7 @@ LUPAPISTE.SidePanelModel = function() {
     return self.showConversationPanel() || self.showNoticePanel();
   });
 
-  self.previousPage;
+  self.previousPage = undefined;
 
   var AuthorityInfo = function(id, firstName, lastName) {
     this.id = id;
@@ -102,9 +102,9 @@ LUPAPISTE.SidePanelModel = function() {
     } else {
       self.comment().isSelected(true);
     }
-    $('#conversation-panel').addClass("highlight-conversation");
+    $("#conversation-panel").addClass("highlight-conversation");
     setTimeout(function() {
-      $('#conversation-panel').removeClass("highlight-conversation");
+      $("#conversation-panel").removeClass("highlight-conversation");
     }, 2000);
   };
 
@@ -191,10 +191,13 @@ LUPAPISTE.SidePanelModel = function() {
 };
 
 $(function() {
+  "use strict";
   var sidePanel = new LUPAPISTE.SidePanelModel();
   $(document).keyup(function(e) {
     // esc hides the side panel
-    if (e.keyCode === 27) { sidePanel.closeSidePanel(); };
+    if (e.keyCode === 27) {
+      sidePanel.closeSidePanel();
+    }
   });
   $("#side-panel-template").applyBindings(sidePanel);
 });

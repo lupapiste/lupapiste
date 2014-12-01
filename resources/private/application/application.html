@@ -256,7 +256,7 @@
                   <span data-bind="text: unseenVerdicts" id="applicationUnseenVerdists" class="indicator"></span></span></a></li>
 
             <!-- In post-verdict states plus 'canceled' -->
-            <li data-bind="if: _.contains(['verdictGiven', 'constructionStarted', 'closed', 'canceled'], state()), css: {'active': $parent.selectedTabName() === 'applicationSummary'}">
+            <li data-bind="if: summaryAvailable(), css: {'active': $parent.selectedTabName() === 'applicationSummary'}">
               <a data-bind="click: changeTab" href="#" data-target="applicationSummary" data-test-id="application-open-applicationSummary-tab">
                 <span data-bind="ltext: 'application.applicationSummary'"></span></a></li>
 
@@ -367,6 +367,25 @@
             </div>
           </div>
           <p data-bind="lhtml: 'required.field.desc'"></p>
+          <!-- ko if: $root.application.permitType() === "R" -->
+          <div data-bind="if: features.enabled('foreman')">
+            <div class="feature">
+              <span class="legend">Tyonjohtajan nimeaminen</span>
+              <section class="accordion" id="accordion-application-foreman">
+                <h2 onclick="accordion.click(this)" data-test-id="accordion-application-foreman-header">
+                  <span class="icon toggle-icon drill-down-white"></span>
+                  <span data-bind="ltext: 'application.parties.foreman'"></span>
+                </h2>
+                <div class="accordion_content expanded" data-accordion-state="open">
+                  <div class="accordion-fields">
+                    <div data-bind="template: {name: 'application-foreman-template', data: $root.foreman}"></div>
+                  </div>
+                </div>
+              </section>
+            </div>
+          </div>
+          <!-- /ko -->
+
           <!-- docgen generated content: -->
           <div class="application_section">
             <div id="partiesDocgen" class="docgen-content">
@@ -1063,6 +1082,33 @@
       </div>
     </div>
     <div id="boxes">
+
+      <div id="dialog-invite-foreman" class="window autosized">
+        <div class="dialog-header">
+          <p data-bind="ltext: 'application.parties.addForeman'"></p>
+          <p class="dialog-close close">X</p>
+        </div>
+        <!-- ko with: $root.foreman -->
+        <div class="dialog-content" data-bind="css: {pending: pending}">
+          <div class="pending">
+            <div class="ajax"></div>
+            <div data-bind="ltext: 'invite.foreman.pending'"></div>
+          </div>
+          <p data-bind="lhtml: 'invite.foreman.desc'" class="dialog-desc-wide"></p>
+          <form>
+            <label data-bind="ltext: 'userinfo.email'" class="form-label" for="invite-foreman-email"></label>
+            <input class="form-input text long" id="invite-foreman-email" type="text" data-bind="textInput: email" />
+            <div data-bind="visible: error" >
+              <div data-bind="text: error" class="context-error"></div>
+            </div>
+            <button class="btn btn-primary btn-dialog" data-test-id="application-invite-foreman" data-bind="click: submit, disable: disabled">
+              <span data-bind="ltext: 'application.inviteSend'"></span>
+              <em data-bind="visible: pending" class="button-loader"></em>
+            </button>
+          </form>
+        </div>
+        <!-- /ko -->
+      </div>
 
       <div id="dialog-valtuutus" class="window autosized">
         <div class="dialog-header">

@@ -33,7 +33,8 @@
 
 
 (def- rakennustunnus
-  [{:tag :jarjestysnumero}
+  [{:tag :valtakunnallinenNumero}
+   {:tag :jarjestysnumero}
    {:tag :kiinttun}
    {:tag :rakennusnro}])
 

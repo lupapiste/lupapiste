@@ -71,11 +71,16 @@
   .dialog-desc {
     width: 300px;
   }
+
+  .dialog-desc-wide {
+    width: 450px;
+  }
+
   [type=submit], .btn, button {
     padding: 4px $marginL;
     min-width: $cols2;
     max-width: $cols3;
-    
+
   }
 
   .file-upload {
@@ -86,7 +91,30 @@
     padding: $marginM 0;
   }
 
+  div.pending {
+    display: none;
+  }
 }
+
+.dialog-content.pending {
+  div.pending {
+    background: #fff;
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    text-align: center;
+    z-index: 5000;
+    div.ajax {
+      background: url(/img/ajax-loader.gif) no-repeat center center;
+      margin: auto;
+      height: 160px;
+    }
+  }
+}
+
 .scrolling-content {
   overflow-y: scroll;
   max-height: 288px;
@@ -129,7 +157,7 @@
   .combobox{
     margin-bottom: 8px;
   }
-} 
+}
 
 #upload-dialog {
   .dialog-content {
