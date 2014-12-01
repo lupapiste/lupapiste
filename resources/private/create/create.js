@@ -90,7 +90,7 @@
         self.updateMunicipality(code);
         self.updateOrganizationDetails("aiemmalla-luvalla-hakeminen");
       } else {
-        if (code) { self.findOperations(code); }
+      if (code) { self.findOperations(code); }
         if (self.useManualEntry()) { self.updateMunicipality(code); }
       }
     });
@@ -160,7 +160,7 @@
     self.center = function(x, y, zoom) { if (self.map) { self.map.center(x, y, zoom); } return self; };
 
     self.addressOk = ko.computed(function() { return self.municipality() && !isBlank(self.addressString()); });
-    self.propertyIdOk = ko.computed(function(value) { return util.prop.isPropertyId(self.propertyId()) && !isBlank(self.propertyId());});
+    self.propertyIdOk = ko.computed(function() { return util.prop.isPropertyId(self.propertyId()) && !isBlank(self.propertyId());});
 
     //
     // Concurrency control:
@@ -370,10 +370,11 @@
             self.newApplicationsDisabled(d["new-applications-disabled"]);
             self.organization(d);
           })
-          .error(function(d) {
-            self.inforequestsDisabled(true);
-            self.newApplicationsDisabled(true);
-          })
+          .error(function() {
+              // TODO display error message?
+              model.inforequestsDisabled(true);
+              model.newApplicationsDisabled(true);
+            })
           .call();
       }
     };
@@ -498,13 +499,13 @@
   function initAutocomplete(id) {
     $(id)
     .keypress(function(e) { if (e.which === 13) { model.searchNow(); }}) // enter
-    .autocomplete({
-      source:     "/proxy/find-address",
-      delay:      500,
-      minLength:  3,
-      select:     model.autocompleteSelect
-    })
-    .data("ui-autocomplete")._renderItem = model.autocompleteRender;
+        .autocomplete({
+          source:     "/proxy/find-address",
+          delay:      500,
+          minLength:  3,
+          select:     model.autocompleteSelect
+        })
+        .data("ui-autocomplete")._renderItem = model.autocompleteRender;
   }
 
   $(function() {
