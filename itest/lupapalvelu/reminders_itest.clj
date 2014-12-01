@@ -117,7 +117,7 @@
    :started nil
    :closed nil
    :operations [{:id "534bf825299508fb3618455d"
-                 :name "asuinrakennus"
+                 :name "kerrostalo-rivitalo"
                  :created 1397487653097}]
    :infoRequest false
    :openInfoRequest false

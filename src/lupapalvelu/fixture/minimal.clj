@@ -512,10 +512,10 @@
                               :url "http://www.tampere.fi/asuminenjarakentaminen/rakennusvalvonta.html"}
                              {:name {:fi "Lomakkeet" :sv "Lomakkeet"}
                               :url "http://www.tampere.fi/asuminenjarakentaminen/rakennusvalvonta/lomakkeet.html"}]
-                     :operations-attachments {:asuinrakennus [[:paapiirustus :asemapiirros]
-                                                              [:paapiirustus :pohjapiirros]
-                                                              [:hakija :valtakirja]
-                                                              [:muut :vaestonsuojasuunnitelma]]
+                     :operations-attachments {:kerrostalo-rivitalo [[:paapiirustus :asemapiirros]
+                                                                    [:paapiirustus :pohjapiirros]
+                                                                    [:hakija :valtakirja]
+                                                                    [:muut :vaestonsuojasuunnitelma]]
                                               :vapaa-ajan-asuinrakennus [[:paapiirustus :pohjapiirros]
                                                                          [:hakija :ote_kauppa_ja_yhdistysrekisterista]
                                                                          [:muut :vaestonsuojasuunnitelma]

@@ -123,7 +123,7 @@
 (defn create-app-with-fn [f apikey & args]
   (let [args (->> args
                (apply hash-map)
-               (merge {:operation "asuinrakennus"
+               (merge {:operation "kerrostalo-rivitalo"
                        :propertyId "75312312341234"
                        :x 444444 :y 6666666
                        :address "foo 42, bar"

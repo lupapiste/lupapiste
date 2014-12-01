@@ -3,6 +3,7 @@
             [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]]
             [clojure.walk :as walk]
             [sade.util :refer [dissoc-in postwalk-map strip-nils]]
+            [sade.core :refer [def-]]
             [sade.strings :as ss]
             [lupapalvelu.migration.core :refer [defmigration]]
             [lupapalvelu.document.schemas :as schemas]
@@ -606,10 +607,10 @@
                 (merge new-attachment-configs (apply hash-map attachment-config)))
               new-attachment-configs)) {} old-op-attachments))
 
-(defn- new-operations-attachments [old-operations-attachments]
+(defn new-operations-attachments [old-operations-attachments]
   (merge old-operations-attachments (copy-attachment-configs old-operations-attachments)))
 
-(defn- new-selected-operations [old-ops]
+(defn new-selected-operations [old-ops]
   (when-not (nil? old-ops) ; no old ops -> do not mark explicit new ops
     (->> old-ops
          (map (fn [op]
