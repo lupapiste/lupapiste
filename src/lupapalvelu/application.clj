@@ -547,8 +547,8 @@
         scope             (organization/resolve-organization-scope municipality permit-type organization)
         organization-id   (:id organization)
         info-request?     (boolean infoRequest)
-        open-inforequest? (and info-request? (:open-inforequest scope))
-        id                (make-application-id municipality)]
+        open-inforequest? (and info-request? (:open-inforequest scope))]
+
     (when-not (or (user/applicant? user) (user-is-authority-in-organization? (:id user) organization-id))
       (unauthorized!))
     (when-not organization-id
@@ -558,7 +558,9 @@
         (fail! :error.inforequests-disabled))
       (when-not (:new-application-enabled scope)
         (fail! :error.new-applications-disabled)))
-    (make-application id operation x y address propertyId municipality organization info-request? open-inforequest? messages user created manual-schema-datas)))
+
+    (let [id (make-application-id municipality)]
+      (make-application id operation x y address propertyId municipality organization info-request? open-inforequest? messages user created manual-schema-datas))))
 
 ;; TODO: separate methods for inforequests & applications for clarity.
 (defcommand create-application
