@@ -33,7 +33,6 @@
     "debug": true,
     "pageutil": true,
     "accordion": true,
-    "docgen": true,
     "authorization": true,
     "municipalities": true,
     "organizations": true,
@@ -55,14 +54,20 @@
     "util": true,
     "invites": true,
     "tree": true,
-    "applicationsConfig": true,
-    "selectionTree": true,
-    "inforequestsConfig": true,
     "attachmentTypeSelect": true,
     "RequestContext": true,
     "taskUtil" : true,
     "taskPageController" : true,
     "attachmentUtils" : true,
     "DocModel" : true
-  }
+  },
+  "exported": ["accordion","ajax","attachment","attachmentUtils","attachmentTypeSelect",
+"authorization","comments","currentUser","DocModel","docgen","expand",
+"features","gis","getEvent","hub","invites","loc","locationSearch",
+"vetuma",
+"notify","trace","debug","info","warn","error",    
+"LUPAPISTE",
+"municipalities","organizations","pageutil",
+"repository","RequestContext","taskUtil","taskPageController","tree",
+"user","users","util"]
 }
