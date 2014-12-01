@@ -54,10 +54,22 @@
               <legend data-bind="ltext: 'stamp.reference-info'"></legend>
 
               <label data-bind="ltext: 'stamp.id.building'"></label>
+
+              <!-- ko if: showBuildingList -->
+              <select data-bind="options: buildingIdList,
+                                 optionsText: 'buildingId',
+                                 optionsCaption: loc('stamp.building.none'),
+                                 optionsValue: 'buildingId',
+                                 value: buildingId"
+                      data-test-id="stamp-info-rakid"></select>
+              <!-- /ko -->
+              <!-- ko ifnot: showBuildingList -->
               <input data-bind="textInput: buildingId, enable: status() === statusReady"
                         type="text"
                         class="form-input text"
                      data-test-id="stamp-info-rakid"/>
+              <!-- /ko -->
+
 
               <label data-bind="ltext: 'stamp.municipality.appid'"></label>
               <input data-bind="textInput: municipalityAppId, enable: status() === statusReady"

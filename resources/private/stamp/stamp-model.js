@@ -112,6 +112,10 @@ LUPAPISTE.StampModel = function(params) {
   self.municipalityAppId = self.stampFields.municipalityAppId;
   self.section = self.stampFields.section;
 
+  self.buildingIdList = self.stampFields.buildingIdList;
+  self.showBuildingList = ko.computed(function() {
+    return self.buildingIdList().length > 0;
+  });
 
   self.transparency = self.stampFields.transparency;
 

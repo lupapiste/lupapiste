@@ -17,7 +17,8 @@ var stamping = (function() {
       extraInfo: ko.observable(""),
       buildingId: ko.observable(""),
       municipalityAppId: ko.observable(""),
-      section: ko.observable("")
+      section: ko.observable(""),
+      buildingIdList: ko.observable("")
     },
 
     cancelStamping: function() {
@@ -46,6 +47,10 @@ var stamping = (function() {
       if ( verdict.paatokset[0] && verdict.paatokset[0].poytakirjat[0] && verdict.paatokset[0].poytakirjat[0].pykala ) {
         model.stampFields.section(verdict.paatokset[0].poytakirjat[0].pykala);
       }
+    }
+
+    if ( _.isEmpty(model.stampFields.buildingIdList()) && model.appModel.buildings ) {
+      model.stampFields.buildingIdList(model.appModel.buildings());
     }
   };
 

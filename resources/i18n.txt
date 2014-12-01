@@ -3,3 +3,4 @@ stamp.text.extra: Lisäteksti
 stamp.id.building: Rakennustunnus
 stamp.municipality.appid: Kuntalupatunnus
 stamp.section: Pykälä
+stamp.building.none: Ei rakennustunnusta
