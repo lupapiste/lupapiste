@@ -75,7 +75,6 @@
     };
 
     self.error = function(data) {
-      var error = data.text;
       self.inError(true);
       self.errorText("error."+data.text);
     };
