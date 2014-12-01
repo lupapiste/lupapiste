@@ -77,7 +77,7 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
     });
   };
 
-  self.copyOwnAttachments = function(model) {
+  self.copyOwnAttachments = function() {
     ajax.command("copy-user-attachments-to-application", {id: self.appModel.id()})
       .success(self.appModel.reload)
       .processing(self.appModel.processing)
