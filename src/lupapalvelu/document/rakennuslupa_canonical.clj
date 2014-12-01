@@ -302,9 +302,10 @@
                       (when task-id {:muuTunnustieto {:MuuTunnus {:tunnus task-id :sovellus "Lupapiste"}}}) ; v 2.1.3
                       (when (seq buildings)
                         {:rakennustunnus (let [building (-> buildings first :rakennus)]
-                                           (merge
+                                           (util/assoc-when
                                              (select-keys building [:jarjestysnumero :kiinttun])
-                                             (when-not (s/blank? (:rakennusnro building)) {:rakennusnro (:rakennusnro building)}))) ; v2.1.2
+                                             :rakennusnro (:rakennusnro building)
+                                             :valtakunnallinenNumero (:valtakunnallinenNumero building))) ; v2.1.2
                          :katselmuksenRakennustieto (map #(let [building (:rakennus %)
                                                                 building-canonical (merge
                                                                                      (select-keys building [:jarjestysnumero :kiinttun])

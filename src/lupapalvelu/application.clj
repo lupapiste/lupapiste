@@ -973,7 +973,7 @@
                              krysp/empty-building-ids
                              (load-building-data url propertyId buildingId overwrite))))
           ; Path should exist in schema!
-        updates      (filter (fn [[path _]] (model/find-by-name (:body schema) path)) base-updates)]
+          updates      (filter (fn [[path _]] (model/find-by-name (:body schema) path)) base-updates)]
       (infof "merging data into %s %s" (get-in document [:schema-info :name]) (:id document))
       (commands/persist-model-updates application collection document updates created :source "krysp")
       (ok))
