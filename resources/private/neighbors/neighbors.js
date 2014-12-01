@@ -207,8 +207,8 @@
     self.statusInit         = 0;
     self.statusEdit         = 2;
 
-    self.init = function(neighbor) {
-      var neighbor = neighbor || {},
+    self.init = function(n) {
+      var neighbor = n || {},
           owner = neighbor.owner || {},
           address = owner.address || {};
       return self
