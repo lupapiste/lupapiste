@@ -28,7 +28,7 @@ LUPAPISTE.SidePanelModel = function() {
     return self.showConversationPanel() || self.showNoticePanel();
   });
 
-  self.previousPage;
+  self.previousPage = undefined;
 
   var AuthorityInfo = function(id, firstName, lastName) {
     this.id = id;
@@ -51,6 +51,8 @@ LUPAPISTE.SidePanelModel = function() {
       switch(type) {
         case "attachment":
           self.mainConversation(false);
+          self.comment().refresh(application, false, {type: type, id: pageutil.lastSubPage()});
+          break;
         case "statement":
           self.comment().refresh(application, false, {type: type, id: pageutil.lastSubPage()});
           break;
@@ -81,7 +83,7 @@ LUPAPISTE.SidePanelModel = function() {
     self.refreshConversations(self.application());
   };
 
-  self.toggleConversationPanel = function(data, event) {
+  self.toggleConversationPanel = function() {
     self.showConversationPanel(!self.showConversationPanel());
     self.showNoticePanel(false);
     // Set focus to new comment textarea
@@ -102,18 +104,18 @@ LUPAPISTE.SidePanelModel = function() {
     } else {
       self.comment().isSelected(true);
     }
-    $('#conversation-panel').addClass("highlight-conversation");
+    $("#conversation-panel").addClass("highlight-conversation");
     setTimeout(function() {
-      $('#conversation-panel').removeClass("highlight-conversation");
+      $("#conversation-panel").removeClass("highlight-conversation");
     }, 2000);
   };
 
-  self.toggleNoticePanel = function(data, event) {
+  self.toggleNoticePanel = function() {
     self.showNoticePanel(!self.showNoticePanel());
     self.showConversationPanel(false);
   };
 
-  self.closeSidePanel = function(data, event) {
+  self.closeSidePanel = function() {
     if (self.showConversationPanel()) {
       self.toggleConversationPanel();
     }
@@ -191,10 +193,13 @@ LUPAPISTE.SidePanelModel = function() {
 };
 
 $(function() {
+  "use strict";
   var sidePanel = new LUPAPISTE.SidePanelModel();
   $(document).keyup(function(e) {
     // esc hides the side panel
-    if (e.keyCode === 27) { sidePanel.closeSidePanel(); };
+    if (e.keyCode === 27) {
+      sidePanel.closeSidePanel();
+    }
   });
   $("#side-panel-template").applyBindings(sidePanel);
 });

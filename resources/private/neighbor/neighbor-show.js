@@ -70,12 +70,11 @@
 
     self.fail = function(data) {
       // TODO: Show information about application not found, or closed, or sumthing.
-      info("fail", data);
+      error("fail", data);
       window.location.hash = "!/404";
     };
 
     self.error = function(data) {
-      var error = data.text;
       self.inError(true);
       self.errorText("error."+data.text);
     };
@@ -122,16 +121,16 @@
 
   function getAttachmentsByGroup(source) {
     var attachments = _.map(source, function(a) { a.latestVersion = _.last(a.versions || []); return a; });
-    var grouped = _.groupBy(attachments, function(attachment) { return attachment.type['type-group']; });
+    var grouped = _.groupBy(attachments, function(attachment) { return attachment.type["type-group"]; });
     return _.map(grouped, function(attachments, group) { return {group: group, attachments: attachments}; });
   }
   var model = new Model();
 
   hub.onPageChange("neighbor-show", function(e) {
     model.init(e);
-    vetuma($('#vetuma-neighbor'), function(user) {
+    vetuma($("#vetuma-neighbor"), function(user) {
       model.tupasUser(user);
-      $('html, body').animate({ scrollTop: 10000});
+      $("html, body").animate({ scrollTop: 10000});
     });
   });
 

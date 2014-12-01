@@ -50,9 +50,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   self.findHelpElement = function (e) {
     var event = getEvent(e);
     var input$ = $(event.target);
-    var help$ = input$.siblings('.form-help');
+    var help$ = input$.siblings(".form-help");
     if (!help$.length) {
-      help$ = input$.parent().siblings('.form-help');
+      help$ = input$.parent().siblings(".form-help");
     }
     if (!help$.length) {
       return false;
@@ -62,9 +62,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   self.findErrorElement = function (e) {
     var event = getEvent(e);
     var input$ = $(event.target);
-    var error$ = input$.siblings('.errorPanel');
+    var error$ = input$.siblings(".errorPanel");
     if (!error$.length) {
-      error$ = input$.parent().siblings('.errorPanel');
+      error$ = input$.parent().siblings(".errorPanel");
     }
     if (!error$.length) {
       return false;
@@ -527,7 +527,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var option = document.createElement("option");
     option.value = "";
     option.appendChild(document.createTextNode(loc("selectone")));
-    if (selectedOption === "") option.selected = "selected";
+    if (selectedOption === "") {
+      option.selected = "selected";
+    }
     select.appendChild(option);
 
     _(subSchema.body)
@@ -563,7 +565,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       option = document.createElement("option");
       option.value = "other";
       option.appendChild(document.createTextNode(loc("select-other")));
-      if (selectedOption === "other") option.selected = "selected";
+      if (selectedOption === "other") {
+        option.selected = "selected";
+      }
       select.appendChild(option);
     }
 
@@ -641,6 +645,13 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     select.name = myPath;
     select.className = "form-input combobox long";
 
+    var otherKey = subSchema["other-key"];
+    if (otherKey) {
+      var pathToOther = path.slice(0, -1);
+      pathToOther.push(otherKey);
+      select.setAttribute("data-select-other-id", pathStrToID(pathToOther.join(".")));
+    }
+
     if (subSchema.readonly) {
       select.readOnly = true;
     } else {
@@ -649,13 +660,31 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         var target = event.target;
 
         var buildingId = target.value;
-        ajax
-          .command("merge-details-from-krysp", { id: self.appId, documentId: self.docId, buildingId: buildingId, collection: self.getCollection() })
-          .success(function () {
-            save(event);
-            repository.load(self.appId);
-          })
-          .call();
+
+        function mergeFromWfs(overwriteWithBackendData) {
+          ajax
+          .command("merge-details-from-krysp",
+              {id: self.appId, documentId: self.docId,
+            path: myPath,
+            buildingId: buildingId,
+            overwrite: overwriteWithBackendData,
+            collection: self.getCollection() })
+            .success(function () {
+              repository.load(self.appId);
+            })
+            .call();
+        }
+
+        if (buildingId !== "" && buildingId !== "other") {
+          LUPAPISTE.ModalDialog.showDynamicYesNo(
+              loc("overwrite.confirm"),
+              loc("application.building.merge"),
+              {title: loc("yes"), fn: _.partial(mergeFromWfs, true)},
+              {title: loc("no"), fn: _.partial(mergeFromWfs, false)}
+          );
+        } else {
+          mergeFromWfs(false);
+        }
         return false;
       };
     }
@@ -666,6 +695,17 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       option.selected = "selected";
     }
     select.appendChild(option);
+
+    var otherOption = null;
+    if (otherKey) {
+      otherOption = document.createElement("option");
+      otherOption.value = "other";
+      otherOption.appendChild(document.createTextNode(loc("select-other")));
+      if (selectedOption === "other") {
+        otherOption.selected = "selected";
+      }
+      select.appendChild(otherOption);
+    }
 
     ajax
       .command("get-building-info-from-wfs", { id: self.appId })
@@ -680,7 +720,11 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
           if (selectedOption === name) {
             option.selected = "selected";
           }
-          select.appendChild(option);
+          if (otherOption) {
+            select.insertBefore(option, otherOption);
+          } else {
+            select.appendChild(option);
+          }
         });
       })
       .error(function (e) {
@@ -730,9 +774,13 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         var index = option$.val();
         var propertyId = option$.attr("data-propertyid") || "";
         var buildingId = option$.attr("data-buildingid") || "";
+        var nationalId = option$.attr("data-nationalid") || (buildingId.length === 10 ? buildingId : "");
+        var localShortId = option$.attr("data-localshortid") || (buildingId.length === 3 ? buildingId : "");
+        // TODO local id coming in the next KRYSP version
+        //var localId = option$.attr("data-localid") || "";
 
-        var paths = [basePath + ".jarjestysnumero", basePath + ".kiinttun", basePath + ".rakennusnro"];
-        var values = [index, propertyId, buildingId];
+        var paths = [basePath + ".jarjestysnumero", basePath + ".kiinttun", basePath + ".rakennusnro", basePath + ".valtakunnallinenNumero"];
+        var values = [index, propertyId, localShortId, nationalId];
 
         if (label) {
           label.appendChild(loader);
@@ -756,6 +804,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
           option.value = name;
           option.setAttribute("data-propertyid", building.propertyId || "");
           option.setAttribute("data-buildingid", building.buildingId || "");
+          option.setAttribute("data-localshortid", building.localShortId || "");
+          option.setAttribute("data-nationalid", building.nationalId || "");
+          option.setAttribute("data-localid", building.localId || "");
           option.appendChild(document.createTextNode(util.buildingName(building)));
           if (selectedOption === name) {
             option.selected = "selected";
@@ -818,7 +869,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     });
 
     var label = document.createElement("label");
-    var locKey = ('person-selector');
+    var locKey = ("person-selector");
     label.className = "form-label form-label-select";
     label.innerHTML = loc(locKey);
     span.appendChild(label);
@@ -885,7 +936,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   function removeData(id, doc, path) {
     ajax
       .command("remove-document-data", { doc: doc, id: id, path: path, collection: self.getCollection() })
-      .success(function (e) {
+      .success(function () {
         repository.load(id);
       })
       .call();
@@ -911,7 +962,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         elem.setAttribute("data-repeating-id", repeatingId);
         elem.setAttribute("data-repeating-id-" + repeatingId, id);
 
-        if (subSchema.repeating && !self.isDisabled && authorizationModel.ok('remove-document-data')) {
+        if (subSchema.repeating && !self.isDisabled && authorizationModel.ok("remove-document-data")) {
           var removeButton = document.createElement("span");
           removeButton.className = "icon remove-grey inline-right";
           removeButton.onclick = function () {
@@ -966,7 +1017,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
           models = subSchema.initiallyEmpty ? [] : [{}];
       }
 
-      var elements = undefined;
+      var elements;
 
       if (subSchema.type === "table") {
         elements = buildElements(models);
@@ -1196,9 +1247,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
   function disableBasedOnOptions() {
     if (!self.authorizationModel.ok(getUpdateCommand()) || options && options.disabled) {
-      $(self.element).find('input, textarea').attr("readonly", true).unbind("focus");
-      $(self.element).find('select, input[type=checkbox], input[type=radio]').attr("disabled", true);
-      $(self.element).find('button').hide();
+      $(self.element).find("input, textarea").attr("readonly", true).unbind("focus");
+      $(self.element).find("select, input[type=checkbox], input[type=radio]").attr("disabled", true);
+      $(self.element).find("button").hide();
     }
   }
 
@@ -1224,7 +1275,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }
 
     setTimeout(function () {
-      i$.removeClass(className).fadeOut(200, function () { i$.remove; });
+      i$.removeClass(className).fadeOut(200, function () {});
     }, 4000);
   }
 
@@ -1240,7 +1291,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     } else if (status === "ok") {
       showIndicator(indicator, "form-input-saved", "form.saved");
     } else if (status !== "ok") {
-      error("Unknown status:", status, "path:", path);
+      error("Unknown status:", status);
     }
     if (callback) { callback(); }
     // No return value or stoping the event propagation:
@@ -1308,7 +1359,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var descriptionInput = document.createElement("input");
     var iconSpan = document.createElement("span");
     var iconSpanDescription = document.createElement("span");
-    iconSpanDescription.appendChild(document.createTextNode(loc('edit')));
+    iconSpanDescription.appendChild(document.createTextNode(loc("edit")));
 
     // test ids
     if (options && options.dataTestSpecifiers) {
@@ -1343,11 +1394,11 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         iconSpan.appendChild(iconSpanDescription);
       }
 
-      ajax.command("update-op-description", {id: self.appId, 'op-id': operation.id, desc: value })
+      ajax.command("update-op-description", {id: self.appId, "op-id": operation.id, desc: value })
         .success(function() {
           var indicator = createIndicator(descriptionInput, "accordion-indicator");
           showIndicator(indicator, "accordion-input-saved", "form.saved");
-          hub.send("op-description-changed", {appId: self.appId, 'op-id': operation.id, 'op-desc': value});
+          hub.send("op-description-changed", {appId: self.appId, "op-id": operation.id, "op-desc": value});
         })
         .call();
 
@@ -1357,8 +1408,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       $(descriptionSpan).removeClass("hidden");
     };
 
-    descriptionInput.onfocus = function(e) {
-      descriptionInput.onblur = function(e) {
+    descriptionInput.onfocus = function() {
+      descriptionInput.onblur = function() {
         saveInput();
       };
     };
@@ -1367,7 +1418,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       // trigger save on enter and esc keypress
       var event = getEvent(e);
       event.stopPropagation();
-      if (event.keyCode == 13 || event.keyCode == 27) {
+      if (event.keyCode === 13 || event.keyCode === 27) {
         $(descriptionInput).off("blur");
         descriptionInput.blur();
         saveInput();
@@ -1417,7 +1468,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     if (op) {
       title.appendChild(document.createTextNode(loc([op.name, "_group_label"])));
-      if (authorizationModel.ok('update-op-description')) {
+      if (authorizationModel.ok("update-op-description")) {
         title.appendChild(buildDescriptionElement(op));
       }
     } else {
@@ -1426,7 +1477,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     title.setAttribute("data-doc-id", self.docId);
     title.setAttribute("data-app-id", self.appId);
     title.onclick = accordion.click;
-    if (self.schema.info.removable && !self.isDisabled && authorizationModel.ok('remove-doc')) {
+    if (self.schema.info.removable && !self.isDisabled && authorizationModel.ok("remove-doc")) {
       var removeSpan =
         $("<span>")
           .addClass("icon remove inline-right")

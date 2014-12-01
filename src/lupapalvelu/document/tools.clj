@@ -33,7 +33,7 @@
                         :vrk-name         "Ilkka"
                         :y-tunnus         "2341528-4"
                         :rakennusnumero   "001"
-                        :rakennustunnus   "123456789A"
+                        :rakennustunnus   "1234567892"
                         :ovt              "003712345678"
                         nil               "string"
                         :letter           (condp = (keyword case)
