@@ -23,7 +23,10 @@
 
       (fact "first building has correct data"
         (first buildings) => {:propertyId "75300301050006"
-                              :buildingId "001"
+                              :buildingId "481123123A"
+                              :localShortId "001"
+                              :nationalId "481123123A"
+                              :localId nil
                               :usage      "039 muut asuinkerrostalot"
                               :area "2682"
                               :index nil
@@ -31,7 +34,10 @@
 
       (fact "second building has correct data"
         (second buildings) => {:propertyId "75300301050006"
-                               :buildingId "002"
+                               :buildingId "478123123A"
+                               :localShortId "002"
+                               :localId nil
+                               :nationalId "478123123A"
                                :usage      "021 rivitalot"
                                :area "281"
                                :index nil
@@ -57,6 +63,8 @@
           (dissoc rakennus :huoneistot :rakennuksenOmistajat :kiinttun)
             => (just
                  {:rakennusnro "001"
+                  :valtakunnallinenNumero "481123123A"
+                  :manuaalinen_rakennusnro ""
                   :verkostoliittymat {:viemariKytkin true
                                       :maakaasuKytkin false
                                       :sahkoKytkin true
@@ -115,7 +123,7 @@
         (fact "first omistajat is mapped correctly"
           (:0 omistajat) =>
                     {:_selected "yritys"
-                     :yritys {:liikeJaYhteisoTunnus "1234567-9"
+                     :yritys {:liikeJaYhteisoTunnus "1234567-1"
                               :osoite {:katu "Testikatu 1 A 11477"
                                        :postinumero "00380"
                                        :postitoimipaikannimi "HELSINKI"}

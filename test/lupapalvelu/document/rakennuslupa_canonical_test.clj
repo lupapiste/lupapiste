@@ -256,7 +256,7 @@
    :data (conj
            common-rakennus
            {:rakennusnro {:value "001"}
-            :valtakunnallinenNumero {:value "123456789A"} 
+            :valtakunnallinenNumero {:value "1234567892"}
             :perusparannuskytkin {:value true}
             :muutostyolaji {:value "muut muutosty\u00f6t"}})})
 
@@ -821,7 +821,7 @@
     (fact "Toimenpiteen kuvaus" (-> muu-muutostyo :muuMuutosTyo :kuvaus) => "Muu rakennuksen muutosty\u00f6")
     (fact "Muu muutostyon perusparannuskytkin" (-> muu-muutostyo :muuMuutosTyo :perusparannusKytkin) => true)
     (fact "Muutostyon laji" (-> muu-muutostyo :muuMuutosTyo :muutostyonLaji) => "muut muutosty\u00f6t")
-    (fact "valtakunnallinenNumero" (-> muu-muutostyo :rakennustieto :Rakennus :rakennuksenTiedot :rakennustunnus :valtakunnallinenNumero) => "123456789A")
+    (fact "valtakunnallinenNumero" (-> muu-muutostyo :rakennustieto :Rakennus :rakennuksenTiedot :rakennustunnus :valtakunnallinenNumero) => "1234567892")
     (fact "muu muutostyon rakennuksen tunnus" (-> muu-muutostyo :rakennustieto :Rakennus :rakennuksenTiedot :rakennustunnus :jarjestysnumero) => 2)
     (fact "Laajennuksen kuvaus" (-> laajennus-t :laajennus :kuvaus) => "Rakennuksen laajentaminen tai korjaaminen")
     (fact "Laajennuksen rakennuksen tunnus" (-> laajennus-t :rakennustieto :Rakennus :rakennuksenTiedot :rakennustunnus :jarjestysnumero) => 3)
@@ -970,69 +970,72 @@
                 :kuntalupatunnus "2013-01"}]))
 
 (fl/facts* "Canonical model for aloitusilmoitus is correct"
-           (let [application application-rakennuslupa-verdict-given
-                 canonical (katselmus-canonical
-                             application
-                             "sv"
-                             "123"
-                             "Aloitusilmoitus 1"
-                             1354532324658
-                             [{:rakennus {:rakennusnro "002" :jarjestysnumero 1 :kiinttun "21111111111111"}}
-                              {:rakennus {:rakennusnro "003" :jarjestysnumero 3 :kiinttun "21111111111111"}}]
-                             authority-user-jussi
-                             "Aloitusilmoitus"
-                             :katselmus
-                             ;osittainen pitaja lupaehtona huomautukset lasnaolijat poikkeamat
-                             nil nil nil nil nil nil)
-                 Rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
-                 toimituksenTiedot (:toimituksenTiedot Rakennusvalvonta) => truthy
-                 kuntakoodi (:kuntakoodi toimituksenTiedot) => truthy
-                 rakennusvalvontaAsiatieto (:rakennusvalvontaAsiatieto Rakennusvalvonta) => truthy
-                 RakennusvalvontaAsia (:RakennusvalvontaAsia rakennusvalvontaAsiatieto) => truthy
-                 kasittelynTilatieto (:kasittelynTilatieto RakennusvalvontaAsia)
-                 Tilamuutos (-> kasittelynTilatieto last :Tilamuutos) => truthy
-                 tila (:tila Tilamuutos) => "p\u00e4\u00e4t\u00f6s toimitettu"
+  (let [application application-rakennuslupa-verdict-given
+        canonical (katselmus-canonical
+                    application
+                    "sv"
+                    "123"
+                    "Aloitusilmoitus 1"
+                    1354532324658
+                    [{:rakennus {:rakennusnro "002" :jarjestysnumero 1 :kiinttun "21111111111111" :valtakunnallinenNumero "1234567892"}}
+                     {:rakennus {:rakennusnro "003" :jarjestysnumero 3 :kiinttun "21111111111111" :valtakunnallinenNumero "1234567892"}}]
+                    authority-user-jussi
+                    "Aloitusilmoitus"
+                    :katselmus
+                    ;osittainen pitaja lupaehtona huomautukset lasnaolijat poikkeamat
+                    nil nil nil nil nil nil)
+        Rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
+        toimituksenTiedot (:toimituksenTiedot Rakennusvalvonta) => truthy
+        kuntakoodi (:kuntakoodi toimituksenTiedot) => truthy
+        rakennusvalvontaAsiatieto (:rakennusvalvontaAsiatieto Rakennusvalvonta) => truthy
+        RakennusvalvontaAsia (:RakennusvalvontaAsia rakennusvalvontaAsiatieto) => truthy
+        kasittelynTilatieto (:kasittelynTilatieto RakennusvalvontaAsia)
+        Tilamuutos (-> kasittelynTilatieto last :Tilamuutos) => truthy
+        tila (:tila Tilamuutos) => "p\u00e4\u00e4t\u00f6s toimitettu"
 
-                 luvanTunnisteTiedot (:luvanTunnisteTiedot RakennusvalvontaAsia) => truthy
-                 LupaTunnus (:LupaTunnus luvanTunnisteTiedot) => truthy
-                 muuTunnustieto (:muuTunnustieto LupaTunnus) => truthy
-                 mt (:MuuTunnus muuTunnustieto) => truthy
+        luvanTunnisteTiedot (:luvanTunnisteTiedot RakennusvalvontaAsia) => truthy
+        LupaTunnus (:LupaTunnus luvanTunnisteTiedot) => truthy
+        muuTunnustieto (:muuTunnustieto LupaTunnus) => truthy
+        mt (:MuuTunnus muuTunnustieto) => truthy
 
-                 tunnus (:tunnus mt) => "LP-753-2013-00001"
-                 sovellus (:sovellus mt) => "Lupapiste"
+        tunnus (:tunnus mt) => "LP-753-2013-00001"
+        sovellus (:sovellus mt) => "Lupapiste"
 
-                 osapuolettieto (:osapuolettieto RakennusvalvontaAsia) => truthy
-                 Osapuolet (:Osapuolet osapuolettieto) => truthy
-                 osapuolitieto (:osapuolitieto Osapuolet) => truthy
-                 Osapuoli (:Osapuoli osapuolitieto) => truthy
-                 kuntaRooliKoodi (:kuntaRooliKoodi Osapuoli) => "Ilmoituksen tekij\u00e4"
-                 henkilo (:henkilo Osapuoli) => truthy
-                 nimi (:nimi henkilo) => truthy
-                 etunimi (:etunimi nimi) => "Jussi"
-                 sukunimi (:sukunimi nimi) => "Viranomainen"
-                 osoite (:osoite henkilo) => truthy
-                 osoitenimi (-> osoite :osoitenimi :teksti) => "Katuosoite 1 a 1"
-                 puhelin (:puhelin henkilo) => "1231234567"
+        osapuolettieto (:osapuolettieto RakennusvalvontaAsia) => truthy
+        Osapuolet (:Osapuolet osapuolettieto) => truthy
+        osapuolitieto (:osapuolitieto Osapuolet) => truthy
+        Osapuoli (:Osapuoli osapuolitieto) => truthy
+        kuntaRooliKoodi (:kuntaRooliKoodi Osapuoli) => "Ilmoituksen tekij\u00e4"
+        henkilo (:henkilo Osapuoli) => truthy
+        nimi (:nimi henkilo) => truthy
+        etunimi (:etunimi nimi) => "Jussi"
+        sukunimi (:sukunimi nimi) => "Viranomainen"
+        osoite (:osoite henkilo) => truthy
+        osoitenimi (-> osoite :osoitenimi :teksti) => "Katuosoite 1 a 1"
+        puhelin (:puhelin henkilo) => "1231234567"
 
-                 katselmustieto (:katselmustieto RakennusvalvontaAsia) => truthy
-                 Katselmus (:Katselmus katselmustieto) => truthy
-                 rakennustunnus (:rakennustunnus Katselmus) => truthy
-                 jarjestysnumero (:jarjestysnumero rakennustunnus) => 1
-                 rakennusnumero (:rakennusnro rakennustunnus) => "002"
-                 kiinttun (:kiinttun rakennustunnus) => "21111111111111"]
+        katselmustieto (:katselmustieto RakennusvalvontaAsia) => truthy
+        Katselmus (:Katselmus katselmustieto) => truthy
+        rakennustunnus (:rakennustunnus Katselmus) => map?]
 
-             (:kayttotapaus RakennusvalvontaAsia) => "Aloitusilmoitus"
-             (:katselmuksenLaji Katselmus)  => "ei tiedossa"
-             (:tarkastuksenTaiKatselmuksenNimi Katselmus) => "Aloitusilmoitus 1"
-             (:pitoPvm Katselmus) => "2012-12-03"
+      (:jarjestysnumero rakennustunnus) => 1
+      (:valtakunnallinenNumero rakennustunnus) => "1234567892"
+      (:rakennusnro rakennustunnus) => "002"
+      (:kiinttun rakennustunnus) => "21111111111111"
 
-             (fact "KRYSP 2.1.3 data is present"
-               (get-in katselmustieto [:Katselmus :muuTunnustieto :MuuTunnus]) => {:tunnus "123" :sovellus "Lupapiste"}
-               (let [rakennukset (map :KatselmuksenRakennus (get-in katselmustieto [:Katselmus :katselmuksenRakennustieto]))]
-                 (fact "has 2 buildings" (count rakennukset) => 2)
-                 (fact "jarjestysnumero" (:jarjestysnumero (last rakennukset)) => 3)
-                 (fact "rakennusnro" (:rakennusnro (last rakennukset)) => "003")
-                 (fact "kiinttun" (:kiinttun (last rakennukset)) => "21111111111111")))))
+    (:kayttotapaus RakennusvalvontaAsia) => "Aloitusilmoitus"
+    (:katselmuksenLaji Katselmus)  => "ei tiedossa"
+    (:tarkastuksenTaiKatselmuksenNimi Katselmus) => "Aloitusilmoitus 1"
+    (:pitoPvm Katselmus) => "2012-12-03"
+
+    (fact "KRYSP 2.1.3 data is present"
+      (get-in katselmustieto [:Katselmus :muuTunnustieto :MuuTunnus]) => {:tunnus "123" :sovellus "Lupapiste"}
+      (let [rakennukset (map :KatselmuksenRakennus (get-in katselmustieto [:Katselmus :katselmuksenRakennustieto]))]
+        (fact "has 2 buildings" (count rakennukset) => 2)
+        (fact "jarjestysnumero" (:jarjestysnumero (last rakennukset)) => 3)
+        (fact "valtakunnallinenNumero" (:valtakunnallinenNumero (last rakennukset)) => "1234567892")
+        (fact "rakennusnro" (:rakennusnro (last rakennukset)) => "003")
+        (fact "kiinttun" (:kiinttun (last rakennukset)) => "21111111111111")))))
 
 (fl/facts* "Canonical model for erityissuunnitelma is correct"
   (let [application application-rakennuslupa-verdict-given

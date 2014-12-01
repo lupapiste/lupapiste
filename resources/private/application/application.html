@@ -256,7 +256,7 @@
                   <span data-bind="text: unseenVerdicts" id="applicationUnseenVerdists" class="indicator"></span></span></a></li>
 
             <!-- In post-verdict states plus 'canceled' -->
-            <li data-bind="if: _.contains(['verdictGiven', 'constructionStarted', 'closed', 'canceled'], state()), css: {'active': $parent.selectedTabName() === 'applicationSummary'}">
+            <li data-bind="if: summaryAvailable(), css: {'active': $parent.selectedTabName() === 'applicationSummary'}">
               <a data-bind="click: changeTab" href="#" data-target="applicationSummary" data-test-id="application-open-applicationSummary-tab">
                 <span data-bind="ltext: 'application.applicationSummary'"></span></a></li>
 

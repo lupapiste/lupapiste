@@ -1,12 +1,13 @@
 {
-  "globalstrict": true,
   "curly": true,
   "eqeqeq": true,
+  "es3": true,
   "immed": true,
   "indent": 2,
   "latedef": true,
   "newcap": true,
   "noarg": true,
+  "nonbsp": true,
   "noempty": true,
   "nonew": true,
   "undef": true,
@@ -17,8 +18,10 @@
   "node": true,
   "devel": true,
   "unused": true,
+  "quotmark" : "double",
   "globals": {
     "$": true,
+    "jQuery": true,
     "ko": true,
     "moment": true,
     "docgen": true,
@@ -57,6 +60,10 @@
     "selectionTree": true,
     "inforequestsConfig": true,
     "attachmentTypeSelect": true,
-    "RequestContext": true
+    "RequestContext": true,
+    "taskUtil" : true,
+    "taskPageController" : true,
+    "attachmentUtils" : true,
+    "DocModel" : true
   }
 }

@@ -181,7 +181,7 @@
       var value = ko.utils.unwrapObservable(valueAccessor());
 
       //handle date data
-      if (String(value).indexOf('/Date(') === 0) {
+      if (String(value).indexOf("/Date(") === 0) {
         value = new Date(parseInt(value.replace(/\/Date\((.*?)\)\//gi, "$1"), 10));
       }
 
@@ -269,7 +269,7 @@
         value(!value());
       });
     }
-  }
+  };
 
   $.fn.applyBindings = function(model) {
     if (!this.length) {

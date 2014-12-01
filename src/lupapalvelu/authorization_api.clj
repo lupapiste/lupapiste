@@ -24,10 +24,9 @@
   {:roles [:applicant :authority]}
   [{{:keys [id]} :user}]
   (let [common     {:auth {$elemMatch {:invite.user.id id}}}
-        projection (assoc common :_id 0)
-        filter     {$and [common {:state {$ne :canceled}}]}
-        data       (mongo/select :applications filter projection)
-        invites    (map :invite (mapcat :auth data))]
+        query      {$and [common {:state {$ne :canceled}}]}
+        data       (mongo/select :applications query [:auth])
+        invites    (filter #(= id (get-in % [:user :id])) (map :invite (mapcat :auth data)))]
     (ok :invites invites)))
 
 (defn- create-invite-model [command conf recipient]

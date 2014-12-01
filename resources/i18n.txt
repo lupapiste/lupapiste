@@ -1,0 +1,2 @@
+overwrite.confirm: Ylikirjoita tiedot?
+application.building.merge: Haetaanko tiedot kunnan rekisteristä? Jos samoja tietoja on jo täytetty lomakkeelle, ne ylikirjoitetaan rekisterissä olevilla tiedoilla.

@@ -24,7 +24,7 @@ var gis = (function() {
       controls: [ new OpenLayers.Control.Zoom(),
                   new OpenLayers.Control.Navigation({ zoomWheelEnabled: zoomWheelEnabled }) ]
     });
-    OpenLayers.ImgPath = '/theme/default/img/';
+    OpenLayers.ImgPath = "/theme/default/img/";
 
 
     // Layers
@@ -96,7 +96,7 @@ var gis = (function() {
     //       so that the old resolutions array [2000, 1000, 500, 200, 100, 50, 20, 10, 4, 2, 1, 0.5, 0.25]
     //       would work.
     //
-    self.map.events.register('zoomend', self.map, function (event) {
+    self.map.events.register("zoomend", self.map, function (event) {
       // hide marker contents div on the inforequest markers map, because marker clustering may have been divided or merged markers
       if (self.markerMapCloseCallback) {
         self.markerMapCloseCallback();
@@ -128,9 +128,9 @@ var gis = (function() {
         var iconPath = null;
         if (feature.cluster) {
           if (feature.cluster.length > 1) {
-            iconPath = iconLocMapping["cluster"];
+            iconPath = iconLocMapping.cluster;
           } else {
-            iconPath = feature.cluster[0].attributes.isCluster ? iconLocMapping["cluster"] : feature.cluster[0].style.externalGraphic;
+            iconPath = feature.cluster[0].attributes.isCluster ? iconLocMapping.cluster : feature.cluster[0].style.externalGraphic;
           }
         } else {
           iconPath = feature.style.externalGraphic;
@@ -155,16 +155,16 @@ var gis = (function() {
     };
 
     var stylemap = new OpenLayers.StyleMap({
-      'default': new OpenLayers.Style({
-        externalGraphic: '${extGraphic}',
-        graphicWidth:    '${graphicWidth}',
-        graphicHeight:   '${graphicHeight}',   //alt to pointRadius
-        graphicYOffset:  '${graphicYOffset}',
-        cursor:          'default'
+      "default": new OpenLayers.Style({
+        externalGraphic: "${extGraphic}",
+        graphicWidth:    "${graphicWidth}",
+        graphicHeight:   "${graphicHeight}",   //alt to pointRadius
+        graphicYOffset:  "${graphicYOffset}",
+        cursor:          "default"
       }, {
         context: context
       }),
-      'select': new OpenLayers.Style({
+      "select": new OpenLayers.Style({
         // This 'select' cannot be completely removed from here, because then the markers' select functionality
         // starts to act in an unwanted way: i.e. previously selected markers first dim and then disappear
         // on the following selections etc.
@@ -237,7 +237,7 @@ var gis = (function() {
         // was getting the error message "Uncaught TypeError: Cannot read property 'drawFeature' of null".
         onPopupClosed(self.selectedFeature);
       }
-    };
+    }
 
     function createPopup(feature, html) {
       var anchor = {
@@ -383,7 +383,9 @@ var gis = (function() {
           return memo;
         };
         var featureArray = _.reduce(drawings, addFeatureFn, []);
-        if (featureArray.length > 0) self.vectorLayer.addFeatures(featureArray);
+        if (featureArray.length > 0) {
+          self.vectorLayer.addFeatures(featureArray);
+        }
       }
       return self;
     };

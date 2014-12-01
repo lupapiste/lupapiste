@@ -16,7 +16,9 @@
     self.map = null;
 
     self.init = function(application) {
-      if (!self.map) self.map = gis.makeMap("neighbors-map", false).addClickHandler(self.click);
+      if (!self.map) {
+        self.map = gis.makeMap("neighbors-map", false).addClickHandler(self.click);
+      }
       var location = application.location,
           x = location.x,
           y = location.y;
@@ -74,7 +76,7 @@
       self.owners = ko.observableArray();
       self.propertyId = ko.observable();
       self.selectedOwners = ko.observableArray([]);
-      self.allSelected = ko.observable(false).extend({ notify: 'always' });;
+      self.allSelected = ko.observable(false).extend({ notify: "always" });
 
       function watchAllSelected() {
           allSelectedWatch = self.allSelected.subscribe(function(allSelected) {
@@ -85,7 +87,7 @@
               }
               watchSelectedOwners();
           });
-      };
+      }
       function watchSelectedOwners() {
           selectedOwnersWatch = self.selectedOwners.subscribe(function(newValue) {
               allSelectedWatch.dispose();
@@ -93,7 +95,7 @@
               self.allSelected(ownersLength > 0 && ownersLength === newValue.length);
               watchAllSelected();
           });
-      };
+      }
       watchAllSelected();
       watchSelectedOwners();
 
@@ -156,7 +158,7 @@
           ajax
           .command("neighbor-add-owners", parameters)
           .complete(_.partial(repository.load, applicationId,
-                  function(v) {
+                  function() {
                       LUPAPISTE.ModalDialog.close();
                   }))
           .call();
@@ -177,7 +179,7 @@
               return person.nimi;
           }
       }
-      function convertOwner(owner, index) {
+      function convertOwner(owner) {
           var type = owner.henkilolaji,
               nameOfDeceased = null;
 
@@ -243,8 +245,11 @@
 
     self.typeLabel = ko.computed(function() {
         var t = self.type();
-        if (t) return loc(['neighbors.owner.type', t]);
-        else return null;
+        if (t) {
+          return loc(["neighbors.owner.type", t]);
+        } else {
+          return null;
+        }
     }, self);
 
     self.editablePropertyId = ko.computed({
