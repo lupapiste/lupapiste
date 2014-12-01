@@ -51,6 +51,8 @@ LUPAPISTE.SidePanelModel = function() {
       switch(type) {
         case "attachment":
           self.mainConversation(false);
+          self.comment().refresh(application, false, {type: type, id: pageutil.lastSubPage()});
+          break;
         case "statement":
           self.comment().refresh(application, false, {type: type, id: pageutil.lastSubPage()});
           break;
@@ -81,7 +83,7 @@ LUPAPISTE.SidePanelModel = function() {
     self.refreshConversations(self.application());
   };
 
-  self.toggleConversationPanel = function(data, event) {
+  self.toggleConversationPanel = function() {
     self.showConversationPanel(!self.showConversationPanel());
     self.showNoticePanel(false);
     // Set focus to new comment textarea
@@ -108,12 +110,12 @@ LUPAPISTE.SidePanelModel = function() {
     }, 2000);
   };
 
-  self.toggleNoticePanel = function(data, event) {
+  self.toggleNoticePanel = function() {
     self.showNoticePanel(!self.showNoticePanel());
     self.showConversationPanel(false);
   };
 
-  self.closeSidePanel = function(data, event) {
+  self.closeSidePanel = function() {
     if (self.showConversationPanel()) {
       self.toggleConversationPanel();
     }

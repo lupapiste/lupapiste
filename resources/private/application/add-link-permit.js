@@ -74,7 +74,7 @@ LUPAPISTE.AddLinkPermitModel = function() {
     ajax.command("remove-link-permit-by-app-id", {id: self.removeAppId, linkPermitId: self.removeLinkPermitId})
       .processing(self.processing)
       .pending(self.pending)
-      .success(function(data) {
+      .success(function() {
         self.errorMessage(null);
         self.selectedLinkPermit("");
         self.kuntalupatunnus("");

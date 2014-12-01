@@ -109,7 +109,7 @@
     self.login = function() {
       ajax
         .command("impersonate-authority", {organizationId: self.organizationId, password: self.password()})
-        .success(function(d) {
+        .success(function() {
           window.location.href = "/app/fi/authority";
         })
         .call();

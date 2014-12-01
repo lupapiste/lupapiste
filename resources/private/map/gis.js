@@ -96,7 +96,7 @@ var gis = (function() {
     //       so that the old resolutions array [2000, 1000, 500, 200, 100, 50, 20, 10, 4, 2, 1, 0.5, 0.25]
     //       would work.
     //
-    self.map.events.register("zoomend", self.map, function (event) {
+    self.map.events.register("zoomend", self.map, function () {
       // hide marker contents div on the inforequest markers map, because marker clustering may have been divided or merged markers
       if (self.markerMapCloseCallback) {
         self.markerMapCloseCallback();
@@ -231,7 +231,7 @@ var gis = (function() {
       }
     }
 
-    function closePopup(e) {
+    function closePopup() {
       if (self.selectedFeature) {
         // If using here "self.selectControl.unselect(self.selectedFeature);" and doing this stuff in onUnselect,
         // was getting the error message "Uncaught TypeError: Cannot read property 'drawFeature' of null".

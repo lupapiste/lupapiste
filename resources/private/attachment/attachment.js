@@ -7,7 +7,6 @@ var attachment = (function() {
   var model = null;
 
   var authorizationModel = authorization.create();
-  var approveModel = new ApproveModel(authorizationModel);
   var signingModel = new LUPAPISTE.SigningModel("#dialog-sign-attachment", false);
 
   function deleteAttachmentFromServer() {
@@ -94,6 +93,8 @@ var attachment = (function() {
       return false;
     };
   }
+
+  var approveModel = new ApproveModel(authorizationModel);
 
   model = {
     id:   ko.observable(),

@@ -1,9 +1,9 @@
 var users = (function($) {
   "use strict";
 
-  function toLoc(data, type, row) { return loc(data); }
-  function toActive(data, type, row) { return loc(["users.data.enabled", data]); }
-  function toOrgs(data, type, row) { return data ? data.join(", ") : ""; }
+  function toLoc(data) { return loc(data); }
+  function toActive(data) { return loc(["users.data.enabled", data]); }
+  function toOrgs(data) { return data ? data.join(", ") : ""; }
   function rowCreated(row, data) { $(row).attr("data-user-email", data[0]); }
 
   function UsersModel(component, opts) {
@@ -33,7 +33,7 @@ var users = (function($) {
       search:         !opts.hideSearch
     };
 
-    self.toOps = function(td, sData, oData, iRow, iCol) {
+    self.toOps = function(td, sData, oData) {
       var user = oData.user,
           td$ = $(td);
       _.each(opts.ops, function(op) {

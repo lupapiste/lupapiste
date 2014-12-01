@@ -281,7 +281,7 @@
                 .filesize(f.size);
             },
             send: uploadModel.sending,
-            done: function(e, data) {
+            done: function() {
               uploadModel.done();
               LUPAPISTE.ModalDialog.close();
             },
