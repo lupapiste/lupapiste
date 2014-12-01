@@ -4,7 +4,7 @@
   var isInitializing = true;
   var currentId = null;
   var authorizationModel = authorization.create();
-  var applicationModel = new LUPAPISTE.ApplicationModel(authorizationModel);
+  var applicationModel = new LUPAPISTE.ApplicationModel();
   var changeLocationModel = new LUPAPISTE.ChangeLocationModel();
   var addLinkPermitModel = new LUPAPISTE.AddLinkPermitModel();
   var constructionStateChangeModel = new LUPAPISTE.ModalDatepickerModel();
@@ -47,13 +47,13 @@
 
   var inviteModel = new LUPAPISTE.InviteModel();
   var verdictModel = new LUPAPISTE.VerdictsModel();
-  var stampModel = new LUPAPISTE.StampModel();
   var signingModel = new LUPAPISTE.SigningModel("#dialog-sign-attachments", true);
   var requestForStatementModel = new LUPAPISTE.RequestForStatementModel();
   var addPartyModel = new LUPAPISTE.AddPartyModel();
   var createTaskController = LUPAPISTE.createTaskController;
   var mapModel = new LUPAPISTE.MapModel(authorizationModel);
   var attachmentsTab = new LUPAPISTE.AttachmentsTabModel(applicationModel);
+  var foremanModel = new LUPAPISTE.ForemanModel();
 
   var authorities = ko.observableArray([]);
   var permitSubtypes = ko.observableArray([]);
@@ -75,7 +75,7 @@
     if (isInitializing) { return; }
 
     // The right is validated in the back-end. This check is just to prevent error.
-    if (!authorizationModel.ok('assign-application')) { return; }
+    if (!authorizationModel.ok("assign-application")) { return; }
 
     var assigneeId = value ? value : null;
 
@@ -139,6 +139,8 @@
       // Map
       mapModel.refresh(app);
 
+      foremanModel.refresh(app);
+
       // Operations
       applicationModel.operationsCount(_.map(_.countBy(app.operations, "name"), function(v, k) { return {name: k, count: v}; }));
 
@@ -164,7 +166,6 @@
       var sortedNonpartyDocs = _.sortBy(nonpartyDocs, util.getDocumentOrder);
       var partyDocs = _.filter(app.documents, util.isPartyDoc);
       var sortedPartyDocs = _.sortBy(partyDocs, util.getDocumentOrder);
-      var allDocs = sortedNonpartyDocs.concat(sortedPartyDocs);
 
       var nonpartyDocErrors = _.map(sortedNonpartyDocs, function(doc) { return doc.validationErrors; });
       var partyDocErrors = _.map(sortedPartyDocs, function(doc) { return doc.validationErrors; });
@@ -172,9 +173,9 @@
       applicationModel.initValidationErrors(nonpartyDocErrors.concat(partyDocErrors));
 
       var devMode = LUPAPISTE.config.mode === "dev";
-      docgen.displayDocuments("#applicationDocgen", app, sortedNonpartyDocs, authorizationModel, {dataTestSpecifiers: devMode});
+      docgen.displayDocuments("#applicationDocgen", app, applicationModel.summaryAvailable() ? [] : sortedNonpartyDocs, authorizationModel, {dataTestSpecifiers: devMode});
       docgen.displayDocuments("#partiesDocgen",     app, sortedPartyDocs, authorizationModel, {dataTestSpecifiers: devMode});
-      docgen.displayDocuments("#applicationAndPartiesDocgen", app, allDocs, authorizationModel, {dataTestSpecifiers: false, accordionCollapsed: true});
+      docgen.displayDocuments("#applicationAndPartiesDocgen", app, applicationModel.summaryAvailable() ? sortedNonpartyDocs : [], authorizationModel, {dataTestSpecifiers: false, accordionCollapsed: true});
 
       // Indicators
       function sumDocIndicators(sum, doc) {
@@ -209,14 +210,14 @@
 
   function openTab(id) {
     // old conversation tab opens both info tab and side panel
-    if (id === 'conversation') {
-      id = 'info';
+    if (id === "conversation") {
+      id = "info";
       if (!$("#conversation-panel").is(":visible")) {
         $("#open-conversation-side-panel").click();
       }
     }
     if(tabFlow) {
-      $('html, body').animate({ scrollTop: $("#application-"+id+"-tab").offset().top}, 100);
+      $("html, body").animate({ scrollTop: $("#application-"+id+"-tab").offset().top}, 100);
     } else {
       $(".tab-content").hide();
       $("#application-"+id+"-tab").fadeIn();
@@ -367,12 +368,12 @@
       constructionStateChangeModel: constructionStateChangeModel,
       createTask: createTaskController,
       invite: inviteModel,
+      foreman: foremanModel,
       map: mapModel,
       neighbor: neighborActions,
       neighborStatusModel: neighborStatusModel,
       requestForStatementModel: requestForStatementModel,
       sendNeighborEmailModel: sendNeighborEmailModel,
-      stampModel: stampModel,
       signingModel: signingModel,
       verdictModel: verdictModel,
       openInviteCompany: inviteCompanyModel.open.bind(inviteCompanyModel),

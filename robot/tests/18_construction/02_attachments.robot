@@ -11,12 +11,12 @@ Sonja prepares the application
   Sonja logs in
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  pre-verdict-attachment-test${secs}
-  Create application the fast way  ${appname}  753  753-416-25-30  asuinrakennus
+  Create application the fast way  ${appname}  753  753-416-25-30  kerrostalo-rivitalo
   Submit application
   Open tab  verdict
   Fetch verdict
 
 Add post-verdict attachment
   Open tab  attachments
-  Add attachment  ${TXT_TESTFILE_PATH}  ${EMPTY}  Uusi asuinrakennus
+  Add attachment  ${TXT_TESTFILE_PATH}  ${EMPTY}  Asuinkerrostalon ja/tai rivitalon rakentaminen
   Wait Until  Element should be visible  xpath=//div[@data-test-id='application-post-attachments-table']//a[contains(., '${TXT_TESTFILE_NAME}')]

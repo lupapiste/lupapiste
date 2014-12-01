@@ -20,9 +20,9 @@ Mikko uploads CV
 Mikko copies his attachments to application
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  Omat-liitteet-${secs}
-  Create application the fast way  ${appname}  753  753-416-25-30  asuinrakennus
+  Create application the fast way  ${appname}  753  753-416-25-30  kerrostalo-rivitalo
   Open tab  attachments
-  Click enabled by test id  attachments-copy-own
+  Click element  xpath=//div[@id="application-attachments-tab"]//button[@data-test-id="attachments-copy-own"]
   Wait Until Page Contains  ${TXT_TESTFILE_NAME}
 
 Copy own attachments button is not shown to non-architect

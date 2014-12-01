@@ -123,7 +123,7 @@
 (defn create-app-with-fn [f apikey & args]
   (let [args (->> args
                (apply hash-map)
-               (merge {:operation "asuinrakennus"
+               (merge {:operation "kerrostalo-rivitalo"
                        :propertyId "75312312341234"
                        :x 444444 :y 6666666
                        :address "foo 42, bar"
@@ -336,21 +336,21 @@
   (let [uploadfile  (io/file filename)
         uri         (str (server-address) "/api/upload/attachment")
         resp        (http/post uri
-                      {:headers {"authorization" (str "apikey=" apikey)}
-                       :multipart [{:name "applicationId"  :content application-id}
-                                   {:name "Content/type"   :content "text/plain"}
-                                   {:name "attachmentType" :content (str
-                                                                      (:type-group attachment-type) "."
-                                                                      (:type-id attachment-type))}
-                                   {:name "attachmentId"   :content attachment-id}
-                                   {:name "upload"         :content uploadfile}]})]
+                               {:headers {"authorization" (str "apikey=" apikey)}
+                                :multipart [{:name "applicationId"  :content application-id}
+                                            {:name "Content/type"   :content "text/plain"}
+                                            {:name "attachmentType" :content (str
+                                                                               (:type-group attachment-type) "."
+                                                                               (:type-id attachment-type))}
+                                            {:name "attachmentId"   :content attachment-id}
+                                            {:name "upload"         :content uploadfile}]})]
     (if expect-to-succeed
       (facts "Upload succesfully"
-        (fact "Status code" (:status resp) => 302)
-        (fact "location"    (get-in resp [:headers "location"]) => "/html/pages/upload-ok.html"))
+             (fact "Status code" (:status resp) => 302)
+             (fact "location"    (get-in resp [:headers "location"]) => "/html/pages/upload-ok.html"))
       (facts "Upload should fail"
-        (fact "Status code" (:status resp) => 302)
-        (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/html/pages/upload-1.52.html") => 0)))))
+             (fact "Status code" (:status resp) => 302)
+             (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/html/pages/upload-1.52.html") => 0)))))
 
 (defn upload-attachment-to-target [apikey application-id attachment-id expect-to-succeed target-id target-type & [attachment-type]]
   {:pre [target-id target-type]}

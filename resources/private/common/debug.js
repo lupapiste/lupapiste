@@ -107,7 +107,7 @@ jQuery(function($) {
           .append($("<a>").attr("id", "debug-apply-minimal").attr("href", "#").text("municipality-test-users").click(function() { applyFixture("municipality-test-users"); })))
         .append($("<p>").text("Create:")
           .append($("<span>").attr("id", "debug-create-done").css("font-weight", "bold").hide())
-          .append($("<a>").attr("id", "debug-create-application").attr("href", "#").text("asuinrakennus").click(function() { createApplication("asuinrakennus"); })))
+          .append($("<a>").attr("id", "debug-create-application").attr("href", "#").text("asuinkerrostalo").click(function() { createApplication("kerrostalo-rivitalo"); })))
         .append($("<span>").attr("id", "debug-apply-done").css("font-weight", "bold").hide())
         .append($("<span>").text("Throttle web: "))
         .append($("<b>").addClass("dev-throttle-web").text("0"))

@@ -38,11 +38,11 @@
 
     self.reset = function(organizationScope) {
       self.organizationScope = organizationScope;
-      self.applicationEnabled(organizationScope['new-application-enabled'] || false);
-      self.inforequestEnabled(organizationScope['inforequest-enabled'] || false);
-      self.openInforequestEnabled(organizationScope['open-inforequest'] || false);
-      self.openInforequestEmail(organizationScope['open-inforequest-email'] || "");
-      self.opening(organizationScope['opening'] || "");
+      self.applicationEnabled(organizationScope["new-application-enabled"] || false);
+      self.inforequestEnabled(organizationScope["inforequest-enabled"] || false);
+      self.openInforequestEnabled(organizationScope["open-inforequest"] || false);
+      self.openInforequestEmail(organizationScope["open-inforequest-email"] || "");
+      self.opening(organizationScope.opening || "");
       self.processing(false);
       self.pending(false);
     };
@@ -109,7 +109,7 @@
     self.login = function() {
       ajax
         .command("impersonate-authority", {organizationId: self.organizationId, password: self.password()})
-        .success(function(d) {
+        .success(function() {
           window.location.href = "/app/fi/authority";
         })
         .call();

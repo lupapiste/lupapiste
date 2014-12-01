@@ -7,7 +7,8 @@
             [sade.env :as env]
             [sade.util :as util]
             [cheshire.core :as json]
-            [lupapalvelu.attachment :refer [attachment-types-osapuoli, attachment-scales, attachment-sizes]]))
+            [lupapalvelu.attachment :refer [attachment-types-osapuoli, attachment-scales, attachment-sizes]]
+            [lupapalvelu.attachment-api :refer [post-verdict-states]]))
 
 (def debugjs {:depends [:jquery]
               :js ["debug.js"]
@@ -27,7 +28,9 @@
                  :wannaJoinUrl      (env/value :oir :wanna-join-url)
                  :userAttachmentTypes (map #(str "osapuolet." (name %)) attachment-types-osapuoli)
                  :attachmentScales  attachment-scales
-                 :attachmentSizes   attachment-sizes}]
+                 :attachmentSizes   attachment-sizes
+                 :postVerdictStates post-verdict-states
+                 :stampableMimes    (filter identity (map mime/mime-types lupapalvelu.stamper/file-types))}]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
 
 (defn- loc->js []
@@ -120,8 +123,12 @@
                   :html ["signing-dialogs.html"]
                   :js ["signing-model.js" "verdict-signing-model.js"]}
 
+   :stamp        {:depends [:common-html]
+                  :html ["stamp-template.html"]
+                  :js ["stamp-model.js" "stamp.js"]}
+
    :attachment   {:depends [:common-html :repository :signing :side-panel]
-                  :js ["targeted-attachments-model.js" "attachment.js" "attachmentTypeSelect.js"]
+                  :js ["targeted-attachments-model.js" "attachment.js" "attachmentTypeSelect.js" "attachment-utils.js"]
                   :html ["targetted-attachments-template.html" "attachment.html" "upload.html"]}
 
    :task         {:depends [:common-html :attachment]
@@ -133,10 +140,10 @@
 
    :application  {:depends [:common-html :repository :tree :task :create-task :modal-datepicker :signing :invites :side-panel]
                   :js ["add-link-permit.js" "map-model.js" "change-location.js" "invite.js" "verdicts-model.js"
-                       "add-operation.js" "stamp-model.js" "request-statement-model.js" "add-party.js"
+                       "add-operation.js" "foreman-model.js" "request-statement-model.js" "add-party.js"
                        "attachments-tab-model.js" "application-model.js" "invite-company.js" "application.js"]
-                  :html ["add-link-permit.html" "application.html" "inforequest.html" "add-operation.html"
-                         "change-location.html" "invite-company.html"]}
+                  :html ["attachment-actions-template.html" "attachments-template.html" "add-link-permit.html" "application.html" "inforequest.html" "add-operation.html"
+                         "change-location.html" "invite-company.html" "foreman-template.html"]}
 
    :applications {:depends [:common-html :repository :invites]
                   :html ["applications.html"]
@@ -215,7 +222,7 @@
 
    :authority    {:depends [:common-html :authenticated :map :applications :notice :application
                             :statement :verdict :neighbors :docgen :create :mypage :user-menu :debug
-                            :company]
+                            :company :stamp]
                   :js ["authority.js" "integration-error.js"]
                   :html ["index.html" "integration-error.html"]}
 

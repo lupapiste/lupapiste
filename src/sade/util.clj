@@ -294,6 +294,26 @@
     (.startsWith ovt "0037")  (finnish-ovt? ovt)
     :else                     (re-matches #"\d{4}.+" ovt)))
 
+(defn rakennusnumero? [^String s]
+  (and (not (nil? s)) (re-matches #"^\d{3}$" s)))
+
+(def vrk-checksum-chars ["0" "1" "2" "3" "4" "5" "6" "7" "8" "9" "A" "B" "C" "D" "E" "F" "H" "J" "K" "L" "M" "N" "P" "R" "S" "T" "U" "V" "W" "X" "Y"])
+
+(defn vrk-checksum [^Long l]
+  (nth vrk-checksum-chars (mod l 31)))
+
+(defn hetu-checksum [^String hetu]
+  (vrk-checksum (Long/parseLong (str (subs hetu 0 6) (subs hetu 7 10)))))
+
+(defn- rakennustunnus-checksum [^String prt]
+  (vrk-checksum (Long/parseLong (subs prt 0 9))))
+
+(defn- rakennustunnus-checksum-matches? [^String prt]
+  (= (subs prt 9 10) (rakennustunnus-checksum prt)))
+
+(defn rakennustunnus? [^String prt]
+  (and (not (nil? prt)) (re-matches #"^\d{9}[0-9A-FHJ-NPR-Y]$" prt) (rakennustunnus-checksum-matches? prt)))
+
 ;;
 ;; Schema utils:
 ;;

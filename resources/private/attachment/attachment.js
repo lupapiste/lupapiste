@@ -63,10 +63,10 @@ var attachment = (function() {
       return att.state === state;
     };
 
-    self.isNotOk = function() { return !self.stateIs('ok');};
-    self.doesNotRequireUserAction = function() { return !self.stateIs('requires_user_action');};
-    self.isApprovable = function() { return self.authorizationModel.ok('approve-attachment'); };
-    self.isRejectable = function() { return self.authorizationModel.ok('reject-attachment'); };
+    self.isNotOk = function() { return !self.stateIs("ok");};
+    self.doesNotRequireUserAction = function() { return !self.stateIs("requires_user_action");};
+    self.isApprovable = function() { return self.authorizationModel.ok("approve-attachment"); };
+    self.isRejectable = function() { return self.authorizationModel.ok("reject-attachment"); };
 
     self.rejectAttachment = function() {
       var id = self.application.id;
@@ -119,7 +119,7 @@ var attachment = (function() {
     size:            ko.observable(),
     sizes:           ko.observableArray(LUPAPISTE.config.attachmentSizes),
     subscriptions:   [],
-    indicator:       ko.observable().extend({notify: 'always'}),
+    indicator:       ko.observable().extend({notify: "always"}),
     showAttachmentVersionHistory: ko.observable(),
     showHelp:        ko.observable(false),
     init:            ko.observable(false),
@@ -202,7 +202,7 @@ var attachment = (function() {
   });
 
   model.editable = ko.computed(function() {
-    var preVerdictStates = ['verdictGiven', 'constructionStarted', 'closed'];
+    var preVerdictStates = ["verdictGiven", "constructionStarted", "closed"];
     return _.contains(preVerdictStates, ko.unwrap(model.application.state)) ? currentUser.isAuthority() || _.contains(preVerdictStates, ko.unwrap(model.applicationState)) : true;
   });
 

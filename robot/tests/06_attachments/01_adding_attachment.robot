@@ -13,7 +13,7 @@ Mikko goes to empty attachments tab
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  attachments${secs}
   Mikko logs in
-  Create application the fast way  ${appname}  753  753-416-25-30  asuinrakennus
+  Create application the fast way  ${appname}  753  753-416-25-30  kerrostalo-rivitalo
   Open tab  attachments
 
 Download all attachments should be disabled
@@ -25,7 +25,7 @@ New attachment template button should not be visible for Mikko
 
 Mikko adds txt attachment without comment
   [Tags]  attachments
-  Add attachment  ${TXT_TESTFILE_PATH}  ${EMPTY}  Uusi asuinrakennus
+  Add attachment  ${TXT_TESTFILE_PATH}  ${EMPTY}  Asuinkerrostalon ja/tai rivitalon rakentaminen
   Application state should be  draft
   Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${TXT_TESTFILE_NAME}')]
 
@@ -37,7 +37,7 @@ Mikko deletes attachment immediately by using remove icon
 
 Mikko adds again txt attachment without comment
   [Tags]  attachments
-  Add attachment  ${TXT_TESTFILE_PATH}  ${EMPTY}  Uusi asuinrakennus
+  Add attachment  ${TXT_TESTFILE_PATH}  ${EMPTY}  Asuinkerrostalon ja/tai rivitalon rakentaminen
   Application state should be  draft
   Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${TXT_TESTFILE_NAME}')]
 
@@ -65,7 +65,7 @@ Mikko deletes attachment
 
 Mikko adds txt attachment with comment
   [Tags]  attachments
-  Add attachment  ${TXT_TESTFILE_PATH}  ${TXT_TESTFILE_DESCRIPTION}  Uusi asuinrakennus
+  Add attachment  ${TXT_TESTFILE_PATH}  ${TXT_TESTFILE_DESCRIPTION}  Asuinkerrostalon ja/tai rivitalon rakentaminen
 
 Mikko opens application to authorities
   Open to authorities  pliip
@@ -100,7 +100,7 @@ Signature icon is not visible
 Sign all attachments
   [Tags]  attachments
   Tab should be visible  attachments
-  Click enabled by test id  application-sign-attachments-btn
+  Click element  xpath=//div[@id="application-attachments-tab"]//div[@class="attachment-actions"]//button[@data-test-id="application-sign-attachments-btn"][1]
   Wait Until   Element should be visible  signAttachmentPassword
   Input text by test id  signAttachmentPassword  mikko123
   Click enabled by test id  do-sign-attachments

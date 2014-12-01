@@ -18,9 +18,9 @@
 
 (defn get-organizations
   ([]
-    (get-organizations {} {}))
+    (get-organizations {}))
   ([query]
-    (get-organizations query {}))
+    (mongo/select :organizations query))
   ([query projection]
     (mongo/select :organizations query projection)))
 
