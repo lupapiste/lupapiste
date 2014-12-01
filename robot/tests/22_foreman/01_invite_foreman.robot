@@ -17,7 +17,7 @@ Mikko invites foreman to application
   Open application  create-app  753-416-25-22
   Open tab  parties
   Click by test id  invite-foreman-button
-  Input Text  invite-email  teppo@example.com
+  Input Text  invite-foreman-email  teppo@example.com
   Click by test id  application-invite-foreman
   Element should contain  xpath=//*[@data-test-id='test-application-operation']  Asuinkerrostalon ja/tai rivitalon rakentaminen
   [Teardown]  logout
