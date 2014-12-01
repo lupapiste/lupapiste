@@ -24,7 +24,7 @@ LUPAPISTE.Screenmessage = new (function () {
 
   self.add = function(fi, sv) {
     ajax.command("screenmessages-add", {fi : fi, sv : sv})
-    .success(function(data) {
+    .success(function() {
       self.refresh();
     })
     .error(function(e) {
@@ -35,7 +35,7 @@ LUPAPISTE.Screenmessage = new (function () {
 
   self.reset = function() {
     ajax.command("screenmessages-reset")
-    .success(function(data) {
+    .success(function() {
       self.refresh();
     })
     .error(function(e) {

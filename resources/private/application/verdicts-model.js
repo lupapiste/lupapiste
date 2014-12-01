@@ -64,7 +64,7 @@ LUPAPISTE.VerdictsModel = function() {
     var applicationId = getApplicationId(bindings);
     LUPAPISTE.ModalDialog.showDynamicYesNo(loc("areyousure"), loc("verdict.confirmpublish"), {title: loc("yes"), fn: function() {
       ajax.command("publish-verdict", {id: applicationId, verdictId: verdict.id})
-        .success(function(d) {repository.load(applicationId, self.newPending);})
+        .success(function() {repository.load(applicationId, self.newPending);})
         .call();
       }});
   };
@@ -72,7 +72,7 @@ LUPAPISTE.VerdictsModel = function() {
   self.deleteVerdict = function(bindings) {
     LUPAPISTE.ModalDialog.showDynamicYesNo(loc("areyousure"), loc("verdict.confirmdelete"), {title: loc("yes"), fn: function() {
       ajax.command("delete-verdict", {id: self.applicationId, verdictId: bindings.id})
-        .success(function(d) {repository.load(self.applicationId);})
+        .success(function() {repository.load(self.applicationId);})
         .call();
       }});
   };
