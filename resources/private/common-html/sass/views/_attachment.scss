@@ -34,6 +34,12 @@ $previewHeight: 500px;
   }
 }
 
+.file-preview-content {
+  img, iframe {
+    border: 1px solid darken($lp-light-grey, 15%);
+  }
+}
+
 .file-preview-links {
   float: right;
 }
@@ -46,18 +52,23 @@ $previewHeight: 500px;
 }
 
 .attachment-file-versions {
-  display: none;
-  border-top: 1px solid darken($lp-light-grey, 15%);
-  border-bottom: 1px solid darken($lp-light-grey, 15%);
-  padding: $marginS 0;
-  th {
-    padding: $marginS;
+  margin-bottom: $marginM;
+  table {
+    margin: 0;
   }
-  td {
-    padding: $marginS;
-    max-width: 130px;
-    overflow: hidden;
-    text-overflow: ellipsis;
+
+  .attachment-file-versions-content {
+    display: none;
+    padding: $marginS 0;
+    th {
+      padding: $marginS;
+    }
+    td {
+      padding: $marginS;
+      max-width: 130px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
   }
 }
 

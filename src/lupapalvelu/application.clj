@@ -126,7 +126,7 @@
   (mongo/select :users
     {:organizations (:organization app) :role "authority" :enabled true}
     {:firstName 1, :lastName 1}
-    {:lastName 1, :firstName 1}))
+    (array-map :lastName 1, :firstName 1)))
 
 (defquery application
   {:roles            [:applicant :authority]
@@ -416,7 +416,7 @@
                        (merge
                          (domain/application-query-for user)
                          {:infoRequest true})
-                       {:title 1 :auth 1 :location 1 :operations 1 :comments 1})
+                       [:title :auth :location :operations :comments])
 
         same-location-irs (filter
                             #(and (== x (-> % :location :x)) (== y (-> % :location :y)))
@@ -531,7 +531,7 @@
                        :propertyId          property-id
                        :title               address
                        :auth                (if-let [company (some-> user :company :id c/find-company-by-id c/company->auth)]
-                                              (do (println "USER:" user) (println "COMP:" company) [owner company])
+                                              [owner company]
                                               [owner])
                        :comments            (map #(domain/->comment % {:type "application"} (:role user) user nil created [:applicant :authority]) messages)
                        :schema-version      (schemas/get-latest-schema-version)})]
@@ -678,7 +678,7 @@
                                                               :infoRequest false
                                                               :permitType (:permitType application)
                                                               :operations.name {$nin ["ya-jatkoaika"]}})
-                  {:_id 1 :permitType 1 :address 1 :propertyId 1})
+                  [:permitType :address :propertyId])
         ;; add the text to show in the dropdown for selections
         enriched-results (map
                            (fn [r] (assoc r :text (str (:address r) ", " (:id r))))
@@ -948,29 +948,41 @@
 (defn add-value-metadata [m meta-data]
   (reduce (fn [r [k v]] (assoc r k (if (map? v) (add-value-metadata v meta-data) (assoc meta-data :value v)))) {} m))
 
+(defn- load-building-data [url property-id building-id overwrite-all?]
+  (let [all-data (krysp/->rakennuksen-tiedot (krysp/building-xml url property-id) building-id)]
+    (if overwrite-all?
+      all-data
+      (select-keys all-data (keys krysp/empty-building-ids)))))
+
 (defcommand merge-details-from-krysp
-  {:parameters [id documentId buildingId collection]
-   :input-validators [commands/validate-collection]
+  {:parameters [id documentId path buildingId overwrite collection]
+   :input-validators [commands/validate-collection
+                      (partial action/non-blank-parameters [:documentId :path])
+                      (partial action/boolean-parameters [:overwrite])]
    :roles      [:applicant :authority]
-   :states     (action/all-application-states-but [:sent :verdictGiven :constructionStarted :closed :canceled])}   ;; TODO: Info state removed, ok?
+   :states     (action/all-application-states-but [:sent :verdictGiven :constructionStarted :closed :canceled])}
   [{created :created {:keys [organization propertyId] :as application} :application :as command}]
   (if-let [{url :url} (organization/get-krysp-wfs application)]
     (let [document     (commands/by-id application collection documentId)
           schema       (schemas/get-schema (:schema-info document))
-          kryspxml     (krysp/building-xml url propertyId)
-          updates      (-> (or (krysp/->rakennuksen-tiedot kryspxml buildingId) {}) tools/unwrapped tools/path-vals)
+          clear-ids?   (or (ss/blank? buildingId) (= "other" buildingId))
+          base-updates (concat
+                         (commands/->model-updates [[path buildingId]])
+                         (tools/path-vals
+                           (if clear-ids?
+                             krysp/empty-building-ids
+                             (load-building-data url propertyId buildingId overwrite))))
           ; Path should exist in schema!
-          updates      (filter (fn [[path _]] (model/find-by-name (:body schema) path)) updates)]
+          updates      (filter (fn [[path _]] (model/find-by-name (:body schema) path)) base-updates)]
       (infof "merging data into %s %s" (get-in document [:schema-info :name]) (:id document))
-      (when (seq updates)
-        (commands/persist-model-updates application collection document updates created :source "krysp"))
+      (commands/persist-model-updates application collection document updates created :source "krysp")
       (ok))
     (fail :error.no-legacy-available)))
 
 (defcommand get-building-info-from-wfs
   {:parameters [id]
    :roles      [:applicant :authority]
-   :states     (action/all-application-states-but [:sent :verdictGiven :constructionStarted :closed :canceled])}   ;; TODO: Info state removed, ok?
+   :states     (action/all-application-states-but [:sent :verdictGiven :constructionStarted :closed :canceled])}
   [{{:keys [organization propertyId] :as application} :application}]
   (if-let [{url :url} (organization/get-krysp-wfs application)]
     (let [kryspxml  (krysp/building-xml url propertyId)

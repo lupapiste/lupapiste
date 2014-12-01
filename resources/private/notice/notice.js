@@ -5,11 +5,11 @@ LUPAPISTE.NoticeModel = function() {
 
   self.applicationId = null;
   self.authorityNotice = ko.observable();
-  self.urgency = ko.observable('normal');
+  self.urgency = ko.observable("normal");
 
-  self.indicator = ko.observable().extend({notify: 'always'});
+  self.indicator = ko.observable().extend({notify: "always"});
 
-  self.availableUrgencyStates = ko.observableArray(['normal', 'urgent', 'pending']);
+  self.availableUrgencyStates = ko.observableArray(["normal", "urgent", "pending"]);
 
   var subscriptions = [];
 
@@ -20,7 +20,7 @@ LUPAPISTE.NoticeModel = function() {
           id: self.applicationId,
           urgency: value})
         .success(function() {
-          self.indicator('urgency');
+          self.indicator("urgency");
         })
         .call();
     }, 500)));
@@ -31,7 +31,7 @@ LUPAPISTE.NoticeModel = function() {
           id: self.applicationId,
           authorityNotice: value})
         .success(function() {
-          self.indicator('notice');
+          self.indicator("notice");
         })
         .call();
     }, 500)));

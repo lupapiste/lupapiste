@@ -34,12 +34,12 @@ var loc;
       if (!_.isEmpty(formatParams)) {
         formatParams = _.map(formatParams, String);
         for (var argIndex in formatParams) {
-          term = term.replace('{' + argIndex + '}', formatParams[argIndex]);
+          term = term.replace("{" + argIndex + "}", formatParams[argIndex]);
         }
       }
     } else {
-      debug("Missing localization key", key);
-      term = LUPAPISTE.config.mode === "dev" ? "$$NOT_FOUND$$" + key : "???";
+      error("Missing localization key", key);
+      term = LUPAPISTE.config.mode === "dev" ? "$$NOT_FOUND$$" + key : "";
     }
 
     return term;

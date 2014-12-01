@@ -25,6 +25,7 @@
     self.saved = ko.observable();
     self.firstName = ko.observable();
     self.lastName = ko.observable();
+    self.username = ko.observable();
     self.street = ko.observable();
     self.city = ko.observable();
     self.zip = ko.observable();
@@ -80,6 +81,7 @@
         .saved(false)
         .firstName(u.firstName)
         .lastName(u.lastName)
+        .username(u.username)
         .street(u.street)
         .city(u.city)
         .zip(u.zip)
@@ -121,9 +123,11 @@
          "allowDirectMarketing"]);
 
     self.updateUserName = function() {
-      $("#user-name")
-        .text(self.firstName() + " " + self.lastName())
-        .attr("data-test-role", self.role());
+      var username = self.username() || "";
+      if (self.firstName() || self.lastName()) {
+        username = self.firstName() + " " + self.lastName();
+      }
+      $("#user-name").text(username).attr("data-test-role", self.role());
       return self;
     };
 
@@ -135,7 +139,7 @@
     self.fileToRemove = null;
 
     self.remove = function(data) {
-      self.fileToRemove = data['attachment-id'];
+      self.fileToRemove = data["attachment-id"];
       LUPAPISTE.ModalDialog.showDynamicYesNo(
         loc("userinfo.architect.remove.title"),
         loc("userinfo.architect.remove.message"),
@@ -241,7 +245,9 @@
     });
 
     self.state.subscribe(function(value) {
-      if (value === self.stateDone) ownInfo.updateAttachments();
+      if (value === self.stateDone) {
+        ownInfo.updateAttachments();
+      }
     });
 
   }
@@ -275,7 +281,7 @@
                 .filesize(f.size);
             },
             send: uploadModel.sending,
-            done: function(e, data) {
+            done: function() {
               uploadModel.done();
               LUPAPISTE.ModalDialog.close();
             },
