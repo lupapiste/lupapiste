@@ -289,7 +289,6 @@
     repository.load(applicationId);
   });
 
-  /*jshint unused:false */
   repository.loaded(["neighbors"], function(application, applicationDetails) {
     if (applicationId === application.id) {
       model.init(application);

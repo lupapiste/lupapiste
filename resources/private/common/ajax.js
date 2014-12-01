@@ -1,4 +1,3 @@
-/*jshint unused:false */
 var ajax = (function($) {
   "use strict";
 

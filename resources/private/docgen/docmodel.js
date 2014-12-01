@@ -1,4 +1,3 @@
-/*jshint unused:false, strict: false */
 var DocModel = function(schema, doc, application, authorizationModel, options) {
   "use strict";
 

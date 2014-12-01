@@ -1,4 +1,3 @@
-/*jshint unused:false */
 var users = (function($) {
   "use strict";
 
