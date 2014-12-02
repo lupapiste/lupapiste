@@ -8,7 +8,7 @@ Resource       ../../common_resource.robot
 *** Test Cases ***
 
 Solita admin sees the list of organizations
-  Click link  [organizations]
+  Click link  Organisaatiot
   Wait until  Element Should be Visible  xpath=//table[@data-test-id="organizations-table"]
 
 Admin edits organization with id 753-R
@@ -52,7 +52,7 @@ Mikko creates an inforequest in Sipoo
 
 Admin impersonated Sipoo authority
   SolitaAdmin logs in
-  Click link  [organizations]
+  Click link  Organisaatiot
   Wait until  Element Should be Visible  xpath=//table[@data-test-id="organizations-table"]
   Click link  xpath=//a[@data-impersonate="753-R"]
   Wait Until  Element should be visible  login-as-password

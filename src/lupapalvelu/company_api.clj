@@ -25,7 +25,7 @@
 ;;
 
 (defquery company
-  {:roles [:anonymous]
+  {:roles [:applicant :authority]
    :input-validators [validate-user-is-admin-or-company-member]
    :parameters [company]}
   [{{:keys [users]} :data}]
@@ -33,18 +33,18 @@
       :users   (and users (c/find-company-users company))))
 
 (defquery companies
-  {:roles [:anonymous]}
+  {:roles [:applicant :authority :admin]}
   [_]
   (ok :companies (c/find-companies)))
 
 (defcommand company-update
-  {:roles [:anonymous]
+  {:roles [:applicant]
    :input-validators [validate-user-is-admin-or-company-member]
    :parameters [company updates]}
   (ok :company (c/update-company! company updates)))
 
 (defcommand company-user-update
-  {:roles [:anonymous]
+  {:roles [:applicant :admin]
    :parameters [user-id op value]}
   [{caller :user}]
   (let [target-user (u/get-user-by-id! user-id)]
@@ -58,7 +58,7 @@
     (ok)))
 
 (defquery company-invite-user
-  {:roles [:anonymous]
+  {:roles [:applicant]
    :input-validators [validate-user-is-admin-or-company-admin]
    :parameters [email]}
   [{caller :user}]
@@ -76,7 +76,7 @@
         (ok :result :invited)))))
 
 (defcommand company-add-user
-  {:roles [:anonymous]
+  {:roles [:applicant]
    :parameters [firstName lastName email]}
   [{user :user {:keys [admin]} :params}]
   (if-not (or (= (:role user) "admin")
@@ -94,3 +94,15 @@
   [{caller :user application :application}]
   (c/company-invite caller application company-id)
   (ok))
+
+(defcommand create-company
+  {:parameters [:name :y :address1 :address2 :po :zip email]
+   :input-validators [action/email-validator
+                      (partial action/non-blank-parameters [:name :y])]
+   :roles [:admin]}
+  [{data :data}]
+  (if-let [user (u/find-user {:email email, :role :applicant, :company.id {"$exists" false}})]
+    (let [company (c/create-company (select-keys data [:name :y :address1 :address2 :po :zip]))]
+      (u/update-user-by-email email {:company  {:id (:id company), :role :admin}})
+      (ok))
+    (fail :error.user-not-found)))
