@@ -5,4 +5,4 @@ stamp.kuntalupatunnus: Kuntalupatunnus
 stamp.section: Pykälä
 stamp.building.none: Ei rakennustunnusta
 stamp.start: Leimaa
-stamp.reset: Uusi leimaus
+stamp.reset: Jatka leimaamista
