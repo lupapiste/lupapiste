@@ -31,4 +31,4 @@ Foreman can see application
   Teppo logs in
   Go to page  applications
   Wait until  Element text should be  xpath=//table[@id='applications-list']//tr[@data-test-address='create-app'][1]/td[@data-test-col-name='operation']  Työnjohtajan nimeäminen
-  Wait until  Element text should be  xpath=//table[@id='applications-list']//tr[@data-test-address='create-app'][2]/td[@data-test-col-name='operation']  Asuinkerrostalon ja/tai rivitalon rakentaminen
+  Wait until  Element text should be  xpath=//table[@id='applications-list']//tr[@data-test-address='create-app'][2]/td[@data-test-col-name='operation']  Asuinkerrostalon tai rivitalon rakentaminen
