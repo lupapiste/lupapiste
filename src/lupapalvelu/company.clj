@@ -55,7 +55,8 @@
 (defn find-company
   "Returns company mathing the provided query, or nil"
   [q]
-  (some->> q (mongo/with-_id) (mongo/select-one :companies))) ; mongo/select-one return ANY FUCKING doc if query is nil. ANY...FUCKING....DOC...!!!!
+  (when (seq q)
+    (some->> q (mongo/with-_id) (mongo/select-one :companies))))
 
 (defn find-company!
   "Returns company mathing the provided query. Throws if not found."
