@@ -10,10 +10,8 @@ error.not-able-to-open-with-lupapiste-id-that-previous-permit-included: Haettu p
 error.more-prev-app-info-needed: Tarvitaan lisätietoja, jotta aiemmasta luvasta voidaan luoda hakemus Lupapisteeseen
 error.link-permit-already-having-us-as-link-permit: Et voi lisätä hakemusta viitteeksi hankkeelle, joka jo viittaa linkitettävään hakemukseen. Jos haluat muuttaa viitelinkityksen suuntaa, poista ensin vanha linkitys.
 
-operations.tree.aiemmalla-luvalla-hakeminen: Vanhan luvan avaaminen Lupapisteeseen
-
 aiemmalla-luvalla-hakeminen._group_label: Hankkeen kuvaus
-operations.aiemmalla-luvalla-hakeminen: Vanhan luvan avaaminen Lupapisteeseen
+operations.aiemmalla-luvalla-hakeminen: Rakennusvalvonnan luvan siirto Lupapisteeseen
 operations.aiemmalla-luvalla-hakeminen.desc: Voit siirtää aikaisemman, paperilla haetun lupasi Lupapisteeseen. Syötä alle siihen liittyvät tiedot.
 
 prev-permit-label-kuntalupatunnus: Anna lupatunnus:
@@ -25,6 +23,3 @@ prev-permit-label-municipality: Valitse luvan myöntänyt kunta:
 newRequest.newApplicationWithPrevPermit: Etsi lupa
 
 more-prev-app-info-needed-desc: Taustajärjestelmästä ei voitu noutaa kaikkea tarvittua tietoa kiinteistöstä. Syötä  kiinteistön katuosoite alla olevaan kenttään.
-
-more-prev-app-info-needed-message-title: Lisäinformaatiota tarvitaan
-more-prev-app-info-needed-message: Taustajärjestelmästä ei voitu noutaa kaikkea tarvittua tietoa kiinteistöstä. Voisitteko ystävällisesti syöttää katuosoitetiedon oheiseen kenttään.
