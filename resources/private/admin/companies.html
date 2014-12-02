@@ -11,6 +11,7 @@
             <tr>
               <th>Yritys</th>
               <th>Osoite</th>
+              <th>Postinumero</th>
               <th>Postitoimipaikka</th>
             </tr>
           </thead>
@@ -18,6 +19,7 @@
             <tr>
               <td data-bind="text: company.name"></td>
               <td><span data-bind="text: company.address1"></span>, <span data-bind="text: company.address2"></span></td>
+              <td data-bind="text: company.zip"></td>
               <td data-bind="text: company.po"></td>
             </tr>
           </tbody>
@@ -25,6 +27,23 @@
 
         <button class="btn btn-primary">Luo uusi yritys</button>
 
+      </div>
+      <div id="dialog-create-company" class="window autosized" data-bind="with: createCompanyModel">
+        <div class="dialog-header">
+          <p data-bind="ltext: 'loginframe.login'"></p>
+          <p class="dialog-close close">X</p>
+        </div>
+
+        <div class="dialog-content">
+          <div>
+          </div>
+
+          <button data-bind="ltext: 'loginframe.login'"
+                  data-test-id="create-company"
+                  class="btn btn-primary btn-dialog" ></button>
+
+          <a data-bind="ltext: 'cancel'" class="btn-dialog close" href="#"></a>
+        </div>
       </div>
     </section>
   </body>

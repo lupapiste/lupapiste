@@ -1,6 +1,15 @@
 ;(function() {
   "use strict";
 
+  function CreateCompanyModel() {
+    self.name = ko.observable("");
+
+    self.reset = function() {
+
+    }
+  }
+  var createCompanyModel = new CreateCompanyModel();
+
   function CompaniesModel() {
     var self = this;
 
@@ -24,7 +33,8 @@
 
   $(function() {
     $("#companies").applyBindings({
-      "companiesModel": companiesModel
+      companiesModel: companiesModel,
+      createCompanyModel: createCompanyModel
     });
   });
 
