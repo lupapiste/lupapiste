@@ -423,9 +423,9 @@ Select operation path by permit type
   ...  ELSE  Select operations path R
 
 Select operations path R
-  Click tree item by text  "Rakentaminen ja purkaminen sekä maisemaan vaikuttava toimenpide"
+  Click tree item by text  "Rakentaminen, purkaminen tai maisemaan vaikuttava toimenpide"
   Click tree item by text  "Uuden rakennuksen rakentaminen"
-  Click tree item by text  "Asuinkerrostalon ja/tai rivitalon rakentaminen"
+  Click tree item by text  "Asuinkerrostalon tai rivitalon rakentaminen"
 
 Select operations path YA kayttolupa
   Click tree item by text  "Yleiset alueet (Sijoittamissopimus, katulupa, alueiden käyttö)"

@@ -25,7 +25,7 @@ New attachment template button should not be visible for Mikko
 
 Mikko adds txt attachment without comment
   [Tags]  attachments
-  Add attachment  ${TXT_TESTFILE_PATH}  ${EMPTY}  Asuinkerrostalon ja/tai rivitalon rakentaminen
+  Add attachment  ${TXT_TESTFILE_PATH}  ${EMPTY}  Asuinkerrostalon tai rivitalon rakentaminen
   Application state should be  draft
   Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${TXT_TESTFILE_NAME}')]
 
@@ -37,7 +37,7 @@ Mikko deletes attachment immediately by using remove icon
 
 Mikko adds again txt attachment without comment
   [Tags]  attachments
-  Add attachment  ${TXT_TESTFILE_PATH}  ${EMPTY}  Asuinkerrostalon ja/tai rivitalon rakentaminen
+  Add attachment  ${TXT_TESTFILE_PATH}  ${EMPTY}  Asuinkerrostalon tai rivitalon rakentaminen
   Application state should be  draft
   Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${TXT_TESTFILE_NAME}')]
 
@@ -65,7 +65,7 @@ Mikko deletes attachment
 
 Mikko adds txt attachment with comment
   [Tags]  attachments
-  Add attachment  ${TXT_TESTFILE_PATH}  ${TXT_TESTFILE_DESCRIPTION}  Asuinkerrostalon ja/tai rivitalon rakentaminen
+  Add attachment  ${TXT_TESTFILE_PATH}  ${TXT_TESTFILE_DESCRIPTION}  Asuinkerrostalon tai rivitalon rakentaminen
 
 Mikko opens application to authorities
   Open to authorities  pliip
