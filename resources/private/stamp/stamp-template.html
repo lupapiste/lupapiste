@@ -53,29 +53,30 @@
             <fieldset class="col2">
               <legend data-bind="ltext: 'stamp.reference-info'"></legend>
 
-              <label data-bind="ltext: 'stamp.id.building'"></label>
+              <label data-bind="ltext: 'stamp.buildingid'"></label>
 
               <!-- ko if: showBuildingList -->
               <select data-bind="options: buildingIdList,
                                  optionsText: 'buildingId',
                                  optionsCaption: loc('stamp.building.none'),
                                  optionsValue: 'buildingId',
-                                 value: buildingId"
-                      data-test-id="stamp-info-rakid"></select>
+                                 value: buildingId.
+                                 enable: status() === statusReady"
+                      data-test-id="stamp-info-buildingid-list"></select>
               <!-- /ko -->
               <!-- ko ifnot: showBuildingList -->
               <input data-bind="textInput: buildingId, enable: status() === statusReady"
                         type="text"
                         class="form-input text"
-                     data-test-id="stamp-info-rakid"/>
+                     data-test-id="stamp-info-buildingid"/>
               <!-- /ko -->
 
 
-              <label data-bind="ltext: 'stamp.municipality.appid'"></label>
+              <label data-bind="ltext: 'stamp.kuntalupatunnus'"></label>
               <input data-bind="textInput: municipalityAppId, enable: status() === statusReady"
                         type="text"
                         class="form-input text"
-                     data-test-id="stamp-info-muni-appid"/>
+                     data-test-id="stamp-info-kuntalupatunnus"/>
 
               <label data-bind="ltext: 'stamp.section'"></label>
               <input data-bind="textInput: section, enable: status() === statusReady"
