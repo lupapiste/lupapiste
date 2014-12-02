@@ -588,6 +588,10 @@
         (catch Exception e (error e "KTJ data was not updated")))
       (ok :id (:id created-application)))))
 
+;;
+;; Application from previous permit
+;;
+
 (defcommand create-application-from-previous-permit
   {:parameters [:operation :x :y :address :propertyId :municipality :kuntalupatunnus]
    :roles      [:applicant :authority]
