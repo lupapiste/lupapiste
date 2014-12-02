@@ -5,9 +5,25 @@
     <script type="text/html" id="application-foreman-template">
     <div>
       <p data-bind="lhtml: 'help.AddForeman'"></p>
+      <ul class="invited-foremans" data-bind="foreach: foremanApplications" data-test-id="invited-foremans">
+        <li class="foreman">
+          <!-- ko if: $data.email -->
+          <span class="foreman-name" data-bind="fullName: $data"></span>
+          <span class="foreman-email" data-bind="text: $data.email ? '(' + $data.email + ')' : ''" data-test-id="foreman-email"></span>
+          <!-- /ko -->
+          <!-- ko ifnot: $data.email -->
+          <span class="foreman-name" data-bind="ltext: 'invite.foreman.notSent'"></span>
+          <span class="foreman-email"></span>
+          <!-- /ko -->
+          <a data-bind="attr: {href: '#!/application/' + $data.id}">
+            <span class="foreman-application" data-bind="text: $data.id"></span>
+          </a>
+          <span class="foreman-state" data-bind="ltext: $data.state"></span>
+        </li>
+      </ul>
       <button class="btn-primary" data-bind="click: $data.inviteForeman, ltext: 'application.parties.addForeman'" data-test-id="invite-foreman-button"></button>
     </div>
-    </script>
-  </section>
+    </div>
+  </script>
 </body>
 </html>

@@ -37,15 +37,10 @@
 (notifications/defemail :invite  {:recipients-fn :recipients
                                   :model-fn create-invite-model})
 
-(defcommand invite
-  {:parameters [id email title text documentName documentId path]
-   :input-validators [(partial action/non-blank-parameters [:email])
-                      action/email-validator]
-   :states     (action/all-application-states-but [:closed :canceled])
-   :roles      [:applicant :authority]
-   :notified   true}
-  [{:keys [created user application] :as command}]
-  (let [email (-> email ss/lower-case ss/trim)]
+
+(defn- create-invite [command id email title text documentName documentId path role]
+  (let [email (-> email ss/lower-case ss/trim)
+        {created :created user :user application :application} command]
     (if (domain/invite application email)
       (fail :invite.already-has-auth)
       (let [invited (user-api/get-or-create-user-by-email email user)
@@ -59,7 +54,7 @@
                      :email        email
                      :user         (user/summary invited)
                      :inviter      (user/summary user)}
-            writer  (user/user-in-role invited :writer)
+            writer  (user/user-in-role invited (keyword role))
             auth    (assoc writer :invite invite)]
         (if (domain/has-auth? application (:id invited))
           (fail :invite.already-has-auth)
@@ -71,16 +66,43 @@
             (notifications/notify! :invite (assoc command :recipients [invited]))
             (ok)))))))
 
+(defcommand invite
+  {:parameters [id email title text documentName documentId path]
+   :input-validators [(partial action/non-blank-parameters [:email])
+                      action/email-validator]
+   :states     (action/all-application-states-but [:closed :canceled])
+   :roles      [:applicant :authority]
+   :notified   true}
+  [command]
+  (create-invite command id email title text documentName documentId path "writer"))
+
+(defn- role-validator [{{role :role} :data}]
+  (when (not-any? #{(keyword role)} [:foreman])
+    (fail! :error.illegal-role :parameters role)))
+
+(defcommand invite-with-role
+  {:parameters [id email title text documentName documentId path role]
+   :input-validators [(partial action/non-blank-parameters [:email])
+                      action/email-validator
+                      role-validator]
+   :states     (action/all-application-states-but [:closed :canceled])
+   :roles      [:applicant :authority]
+   :notified   true}
+  [command]
+  (create-invite command id email title text documentName documentId path role))
+
 (defcommand approve-invite
   {:parameters [id]
    :roles      [:applicant]
    :states     (action/all-application-states-but [:closed :canceled])}
   [{:keys [created user application] :as command}]
   (when-let [my-invite (domain/invite application (:email user))]
-    (update-application command
-      {:auth {$elemMatch {:invite.user.id (:id user)}}}
-      {$set  {:modified created
-              :auth.$ (assoc (user/user-in-role user :writer) :inviteAccepted created)}})
+
+    (let [role (:role (domain/get-auth application (:id user)))]
+      (update-application command
+        {:auth {$elemMatch {:invite.user.id (:id user)}}}
+        {$set {:modified created
+               :auth.$   (assoc (user/user-in-role user role) :inviteAccepted created)}}))
     (when-let [document (domain/get-document-by-id application (:documentId my-invite))]
       ; Document can be undefined in invite or removed by the time invite is approved.
       ; It's not possible to combine Mongo writes here,
