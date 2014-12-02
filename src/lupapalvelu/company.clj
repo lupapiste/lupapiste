@@ -74,7 +74,7 @@
   (or (find-company-by-id id) (fail! :company.not-found)))
 
 (defn find-companies []
-  (mongo/select :companies {} [:name :address1 :po] (array-map :name 1)))
+  (mongo/select :companies {} [:name :address1 :address2 :po] (array-map :name 1)))
 
 (defn find-company-users [company-id]
   (u/get-users {:company.id company-id}))

@@ -10,14 +10,20 @@
           <thead>
             <tr>
               <th>Yritys</th>
+              <th>Osoite</th>
+              <th>Postitoimipaikka</th>
             </tr>
           </thead>
           <tbody data-bind="foreach: { data: companiesModel.companies, as: 'company' }">
             <tr>
               <td data-bind="text: company.name"></td>
+              <td><span data-bind="text: company.address1"></span>, <span data-bind="text: company.address2"></span></td>
+              <td data-bind="text: company.po"></td>
             </tr>
           </tbody>
         </table>
+
+        <button class="btn btn-primary">Luo uusi yritys</button>
 
       </div>
     </section>
