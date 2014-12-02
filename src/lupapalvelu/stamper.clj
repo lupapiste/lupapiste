@@ -75,12 +75,10 @@
       (.setComposite (AlphaComposite/getInstance AlphaComposite/SRC_OVER))
       (.setFont font))
 
-    (doseq [[i text] (util/indexed (butlast texts))]
+    (doseq [[i text] (util/indexed texts)]
        (draw-text graphics text (int (/ (- width (nth text-widths i)) 2)) (+ (* (inc i) line-height) 3)))
 
-    (doto graphics
-      (draw-text (last texts) (int (/ (- width (last text-widths)) 2)) (* (count texts) line-height))
-      (.dispose))
+    (.dispose graphics)
     image))
 
 ;;
