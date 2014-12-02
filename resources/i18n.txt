@@ -1,5 +1,5 @@
-applications.createWithPrevPermit.title: Aiemman lupasi siirto Lupapisteeseen
-applications.createWithPrevPermit.desc: Tällä toiminnolla voit siirtää aiemman lupa-asiasi Lupapisteeseen. Tällainen voi olla esimerkiksi aiempi paperilla hakemasi lupa.
+applications.createWithPrevPermit.title: Aiemman rakennusvalvonnan lupasi siirto Lupapisteeseen
+applications.createWithPrevPermit.desc: Tällä toiminnolla voit siirtää aiemman rakennusvalvonnan lupa-asiasi Lupapisteeseen. Tällainen voi olla esimerkiksi aiempi paperilla hakemasi lupa.
 newRequest.createWithPrevPermit: Aloita siirto
 newRequest.createNewWithPrevPermit: Siirrä aiempi lupasi Lupapisteeseen
 
