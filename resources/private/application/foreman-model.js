@@ -20,7 +20,6 @@ LUPAPISTE.ForemanModel = function() {
         .query("application", {id: id})
         .success(function(app) {
           var foreman = _.find(app.application.auth, {"role": "foreman"});
-          // var email = invite ? invite.username : app.application.auth.username;
           var data = {"state": app.application.state,
                       "id": app.application.id,
                       "email": foreman ? foreman.username : undefined,
