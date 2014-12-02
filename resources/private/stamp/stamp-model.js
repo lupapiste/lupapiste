@@ -139,7 +139,7 @@ LUPAPISTE.StampModel = function(params) {
         yMargin: _.parseInt(self.yMargin(), 10),
         transparency: self.transparency(),
         extraInfo: self.extraInfo(),
-        buildingId: self.buildingId(),
+        buildingId: self.buildingId() ? self.buildingId() : "",
         muniAppId: self.municipalityAppId(),
         section: self.section()
       })
