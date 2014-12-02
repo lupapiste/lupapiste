@@ -10,13 +10,13 @@ Resource        ../../common_resource.robot
 Setting maps enabled for these tests
   Set integration proxy on
 
-Operation tree does have 'Asuinkerrostalon ja/tai rivitalon rakentaminen' in it
+Operation tree does have 'Asuinkerrostalon tai rivitalon rakentaminen' in it
   Apply minimal fixture now
   Mikko logs in
   Go to operation tree  Latokuja 1, Sipoo  753  753-416-25-30
-  Click tree item by text  "Rakentaminen ja purkaminen sekä maisemaan vaikuttava toimenpide"
+  Click tree item by text  "Rakentaminen, purkaminen tai maisemaan vaikuttava toimenpide"
   Click tree item by text  "Uuden rakennuksen rakentaminen"
-  Set Suite Variable  ${element}  xpath=//section[@id='create-part-2']//div[@class='operation-tree tree-control']//span[contains(text(),'Asuinkerrostalon ja/tai rivitalon rakentaminen')]
+  Set Suite Variable  ${element}  xpath=//section[@id='create-part-2']//div[@class='operation-tree tree-control']//span[contains(text(),'Asuinkerrostalon tai rivitalon rakentaminen')]
   Wait until  Element should be visible  ${element}
   # for IE8
   Focus  ${element}
@@ -35,19 +35,19 @@ AuthAdmin removes 'Uuden rakennuksen rakentaminen' from selected operations
   Click by test id  authadmin-edit-selected-operations
 
   ${dialogPath} =  Set Variable  xpath=//div[@id='dialog-edit-selected-operations']
-  # Remove the 'Asuinkerrostalon ja/tai rivitalon rakentaminen' operation
-  Wait until  Element should be visible  ${dialogPath}//select[@class='selectm-target']//option[contains(text(),'Asuinkerrostalon ja/tai rivitalon rakentaminen')]
-  Click element  ${dialogPath}//select[@class='selectm-target']//option[contains(text(),'Asuinkerrostalon ja/tai rivitalon rakentaminen')]
+  # Remove the 'Asuinkerrostalon tai rivitalon rakentaminen' operation
+  Wait until  Element should be visible  ${dialogPath}//select[@class='selectm-target']//option[contains(text(),'Asuinkerrostalon tai rivitalon rakentaminen')]
+  Click element  ${dialogPath}//select[@class='selectm-target']//option[contains(text(),'Asuinkerrostalon tai rivitalon rakentaminen')]
   Click element  ${dialogPath}//button[@data-loc='selectm.remove']
   # Save
   Click element  ${dialogPath}//button[@data-loc='selectm.ok']
   Wait until  Element should not be visible  ${dialogPath}
   Logout
 
-Operation tree does not have 'Asuinkerrostalon ja/tai rivitalon rakentaminen' in it
+Operation tree does not have 'Asuinkerrostalon tai rivitalon rakentaminen' in it
   Mikko logs in
   Go to operation tree  Latokuja 1, Sipoo  753  753-416-25-30
-  Click tree item by text  "Rakentaminen ja purkaminen sekä maisemaan vaikuttava toimenpide"
+  Click tree item by text  "Rakentaminen, purkaminen tai maisemaan vaikuttava toimenpide"
   Click tree item by text  "Uuden rakennuksen rakentaminen"
 
    Wait Until  Page Should Not Contain  ${element}
