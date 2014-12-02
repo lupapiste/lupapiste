@@ -1,1 +1,1 @@
-;_.mixin(_.string.exports());
+_.mixin(_.string.exports());

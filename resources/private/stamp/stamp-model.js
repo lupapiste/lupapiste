@@ -78,8 +78,8 @@ LUPAPISTE.StampModel = function(params) {
   });
 
   // group attachments by operation
-  grouped['pre'] = attachmentUtils.getGroupByOperation(grouped['pre'], true, application.allowedAttachmentTypes);
-  grouped['post'] = attachmentUtils.getGroupByOperation(grouped['post'], true, application.allowedAttachmentTypes);
+  grouped['pre'] = attachmentUtils.getGroupByOperation(grouped['pre'], true, self.application.allowedAttachmentTypes);
+  grouped['post'] = attachmentUtils.getGroupByOperation(grouped['post'], true, self.application.allowedAttachmentTypes);
 
   // map files for stamping
   self.preFiles = ko.observableArray(_.map(grouped['pre'], mapAttachmentGroup));

@@ -2,9 +2,6 @@
   "use strict";
 
   var applicationId;
-  var model = new Model();
-  var editModel = new EditModel();
-  var ownersModel = new OwnersModel();
   var authorizationModel = authorization.create();
 
   function Model() {
@@ -207,8 +204,8 @@
     self.statusInit         = 0;
     self.statusEdit         = 2;
 
-    self.init = function(neighbor) {
-      var neighbor = neighbor || {},
+    self.init = function(n) {
+      var neighbor = n || {},
           owner = neighbor.owner || {},
           address = owner.address || {};
       return self
@@ -284,12 +281,16 @@
 
   }
 
+  var model = new Model();
+  var editModel = new EditModel();
+  var ownersModel = new OwnersModel();
+
   hub.onPageChange("neighbors", function(e) {
     applicationId = e.pagePath[0];
     repository.load(applicationId);
   });
 
-  repository.loaded(["neighbors"], function(application, applicationDetails) {
+  repository.loaded(["neighbors"], function(application) {
     if (applicationId === application.id) {
       model.init(application);
       authorizationModel.refresh(application);
