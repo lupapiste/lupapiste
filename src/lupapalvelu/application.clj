@@ -648,16 +648,9 @@
                                       )
                         command (update-in command [:data] merge {:infoRequest false :messages []} info-source)
                         created-application (do-create-application command manual-schema-datas)
-                        ;;
-                        ;; *** TODO: Aseta applicationille viitelupatiedot -> kts. app-infon :viitelupatiedot ***
-                        ;;
-
-                        ;;
-                        ;; TODO: Aseta applicationille viimeisin state?
-                        ;;
-                        ;; lupapalvelu.document.canonical-common/application-state-to-krysp-state kaanteisesti
-;                        (assoc created-application
-;                          :state (some #(when (= (-> app-info :viimeisin-tila :tila) (val %)) (first %)) lupapalvelu.document.canonical-common/application-state-to-krysp-state))
+                        ;; TODO: Aseta applicationille viimeisin state? (lupapalvelu.document.canonical-common/application-state-to-krysp-state kaanteisesti)
+;                        created-application (assoc created-application
+;                                              :state (some #(when (= (-> app-info :viimeisin-tila :tila) (val %)) (first %)) lupapalvelu.document.canonical-common/application-state-to-krysp-state))
 
                         ;; The application has to be inserted first, because it is assumed to be in the database when checking for verdicts (and their attachments).
                         _ (insert-application created-application)
