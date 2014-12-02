@@ -1,12 +1,30 @@
 ;(function() {
   "use strict";
 
+  var required = {required: true};
+  var notRequired = {required: false};
+
   function CreateCompanyModel() {
-    self.name = ko.observable("");
+    var self = this;
+    var fieldNames = ["name", "y", "address1", "address2", "po", "zip", "email"];
+
+    self.model = ko.validatedObservable({
+      // Company:
+      name:         ko.observable().extend(required),
+      y:            ko.observable().extend(required).extend({y: true}),
+      address1:     ko.observable().extend(notRequired),
+      address2:     ko.observable().extend(notRequired),
+      po:           ko.observable().extend(notRequired),
+      zip:          ko.observable().extend(notRequired),
+      // Signer:
+      email:        ko.observable().extend(required).extend({email: true})
+    });
 
     self.reset = function() {
-
-    }
+      _.each(fieldNames, function(k) {
+        self.model()[k](null);
+      });
+    };
   }
   var createCompanyModel = new CreateCompanyModel();
 
@@ -24,6 +42,11 @@
           self.companies(_.sortBy(d.companies, "name"));
         })
         .call();
+    };
+
+    self.create = function() {
+      createCompanyModel.reset();
+      LUPAPISTE.ModalDialog.open("#dialog-create-company");
     };
   }
 
