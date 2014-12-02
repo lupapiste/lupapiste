@@ -25,6 +25,3 @@ prev-permit-label-municipality: Kunta:
 newRequest.newApplicationWithPrevPermit: Etsi lupa
 
 more-prev-app-info-needed-desc: Taustajärjestelmästä ei voitu noutaa kaikkea tarvittua tietoa kiinteistöstä. Voisitteko ystävällisesti syöttää osoitetiedon alla olevaan kenttään.
-
-more-prev-app-info-needed-message-title: Lisäinformaatiota tarvitaan
-more-prev-app-info-needed-message: Taustajärjestelmästä ei voitu noutaa kaikkea tarvittua tietoa kiinteistöstä. Voisitteko ystävällisesti syöttää katuosoitetiedon oheiseen kenttään.

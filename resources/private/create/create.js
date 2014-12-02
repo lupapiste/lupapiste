@@ -464,10 +464,8 @@
           if (self.needMorePrevPermitInfo()) {
             notify.error(loc("error.dialog.title"), loc("info.no-previous-permit-found-from-backend"));
           } else {
-            notify.error(loc("more-prev-app-info-needed-message-title"), loc("more-prev-app-info-needed-message"));
             self.needMorePrevPermitInfo(true);
           }
-
         } else {
           notify.error(loc("error.dialog.title"), loc(d.text));
         }
