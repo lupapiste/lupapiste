@@ -143,19 +143,18 @@
             data-test-id="start-stamping">
           </button>
           <button data-bind="
-              ltext: 'stamp.cancel',
-              enable: status() === statusReady,
-              visible: status() <= statusReady,
+              ltext: 'stamp.reset',
+              visible: status() > statusRunning,
+              click: $parent.resetStamping"
+            class="btn btn-primary close"
+            data-test-id="stamp-ok">
+          </button>
+          <button data-bind="
+              ltext: 'application.return',
+              enable: status() !== statusStarting && status() !== statusRunning,
               click: $parent.cancelStamping"
             class="btn close"
             data-test-id="cancel-stamping">
-          </button>
-          <button data-bind="
-              ltext: 'stamp.ok',
-              visible: status() > statusRunning,
-              click: $parent.cancelStamping"
-            class="btn btn-primary close"
-            data-test-id="stamp-ok">
           </button>
         </div>
       </script>

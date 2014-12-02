@@ -30,6 +30,15 @@ var stamping = (function() {
 
       window.location.hash="!/application/" + id + "/attachments";
       repository.load(id);
+    },
+
+    resetStamping: function() {
+      model.stampingMode(false);
+      model.appModel = null;
+      model.attachments = null;
+      model.authorization = null;
+
+      hub.send("page-change", { pageId: "stamping" });
     }
   };
 
