@@ -1,3 +1,0 @@
-invite.foreman.notSent: Kutsua ei lähetetty
-foreman: Työnjohtaja
-error.illegal-role: Tuntematon rooli
