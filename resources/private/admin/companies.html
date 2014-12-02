@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <section class="page" id="companies">
+      <div class="container">
+
+        <h2>Yritykset</h2>
+
+        <table data-test-id="corporations-table">
+          <thead>
+            <tr>
+              <th>Yritys</th>
+            </tr>
+          </thead>
+          <tbody data-bind="foreach: { data: companiesModel.companies, as: 'company' }">
+            <tr>
+              <td data-bind="text: company.name"></td>
+            </tr>
+          </tbody>
+        </table>
+
+      </div>
+    </section>
+  </body>
+</html>

@@ -238,9 +238,9 @@
 
    :admin   {:depends [:common-html :authenticated :admins :map :mypage :user-menu :debug]
              :css ["admin.css"]
-             :js ["admin.js" "admin-users.js" "organizations.js" "corporations.js" "features.js" "actions.js" "screenmessages-list.js"]
+             :js ["admin.js" "admin-users.js" "organizations.js" "companies.js" "features.js" "actions.js" "screenmessages-list.js"]
              :html ["index.html" "admin.html"
-                    "admin-users.html" "organizations.html" "corporations.html" "features.html" "actions.html"
+                    "admin-users.html" "organizations.html" "companies.html" "features.html" "actions.html"
                     "screenmessages-list.html"]}
 
    :wordpress {:depends [:login :password-reset]}
