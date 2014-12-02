@@ -60,6 +60,12 @@ Sonja sees stamping info fields
   Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-xmargin"]
   Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-ymargin"]
   Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//select[@data-test-id="stamp-info-transparency"]
+  Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-extratext"]
+  Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-kuntalupatunnus"]
+  Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-section"]
+  ${BuildingInput} =  Run Keyword And Return Status  Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-buildingid"]
+  Run keyword Unless  ${BuildingInput}  Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//select[@data-test-id="stamp-info-buildingid-list"]
+
 
 Sonja inputs new stamping info values
   Input text by test id  stamp-info-text  ${STAMP_TEXT}
@@ -102,5 +108,5 @@ Select all files and start stamping
   Wait Until  Element text should be  xpath=//div[@id="stamping-container"]//span[@data-test-id="stamp-status-text"]  Leimaus valmis
 
 Return from stamping to attachments tab
-  Click element  xpath=//div[@id="stamping-container"]//button[@data-test-id="stamp-ok"]
+  Click element  xpath=//div[@id="stamping-container"]//button[@data-test-id="cancel-stamping"]
   Element should be visible  application-attachments-tab
