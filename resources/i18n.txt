@@ -10,10 +10,8 @@ error.not-able-to-open-with-lupapiste-id-that-previous-permit-included: Antamaas
 error.more-prev-app-info-needed: Tarvitaan lisätietoja, jotta aiemmasta luvasta voidaan luoda hakemus Lupapisteeseen
 error.link-permit-already-having-us-as-link-permit: Tämänhetkinen lupa on jo viitelupana luvalla, jota yrität lisätä. Viitelupalinkitys ei voi olla kaksisuuntainen.
 
-operations.tree.aiemmalla-luvalla-hakeminen: Vanhan luvan avaaminen Lupapisteeseen
-
 aiemmalla-luvalla-hakeminen._group_label: Hankkeen kuvaus
-operations.aiemmalla-luvalla-hakeminen: Vanhan luvan avaaminen Lupapisteeseen
+operations.aiemmalla-luvalla-hakeminen: Aiemman rakennusvalvonnan luvan avaaminen Lupapisteeseen
 operations.aiemmalla-luvalla-hakeminen.desc: Voit siirtää aikaisemman, paperilla haetun lupasi Lupapisteeseen. Syötä alle siihen liittyvät tiedot.
 
 prev-permit-label-kuntalupatunnus: Kuntalupatunnus:
