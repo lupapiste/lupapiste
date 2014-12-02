@@ -18,7 +18,7 @@ var stamping = (function() {
       buildingId: ko.observable(""),
       municipalityAppId: ko.observable(""),
       section: ko.observable(""),
-      buildingIdList: ko.observable("")
+      buildingIdList: ko.observableArray()
     },
 
     cancelStamping: function() {
@@ -38,18 +38,24 @@ var stamping = (function() {
       model.stampFields.organization = ko.observable(model.appModel.organizationName());
     }
 
-    if ( _.isEmpty(model.stampFields.municipalityAppId()) && model.appModel.verdicts && !_.isEmpty(model.appModel.verdicts()) ) {
-        model.stampFields.municipalityAppId(_.first(model.appModel.verdicts())["kuntalupatunnus"]());
+    if ( model.appModel.verdicts && !_.isEmpty(model.appModel.verdicts()) ) {
+      model.stampFields.municipalityAppId(_.first(model.appModel.verdicts())["kuntalupatunnus"]());
+    } else {
+      model.stampFields.municipalityAppId("");
     }
 
-    if ( _.isEmpty(model.stampFields.section()) && model.appModel.verdicts && !_.isEmpty(model.appModel.verdicts()) ) {
+    if ( model.appModel.verdicts && !_.isEmpty(model.appModel.verdicts()) ) {
       var verdict = ko.mapping.toJS(model.appModel.verdicts()[0]);
       if ( verdict.paatokset[0] && verdict.paatokset[0].poytakirjat[0] && verdict.paatokset[0].poytakirjat[0].pykala ) {
         model.stampFields.section(verdict.paatokset[0].poytakirjat[0].pykala);
+      } else {
+        model.stampFields.section("");
       }
+    } else {
+      model.stampFields.section("");
     }
 
-    if ( _.isEmpty(model.stampFields.buildingIdList()) && model.appModel.buildings ) {
+    if ( model.appModel.buildings ) {
       model.stampFields.buildingIdList(model.appModel.buildings());
     }
   };
@@ -74,7 +80,7 @@ var stamping = (function() {
         var appId = pageutil.subPage();
         repository.load(appId, null, function(application) {
           model.authorization = authorization.create();
-          model.appModel = new LUPAPISTE.ApplicationModel(model.authorization);
+          model.appModel = new LUPAPISTE.ApplicationModel();
           model.authorization.refresh(application);
 
           ko.mapping.fromJS(application, {}, model.appModel);
