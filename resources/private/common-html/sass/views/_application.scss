@@ -550,3 +550,24 @@
     padding-left: $marginS;
   }
 }
+
+.invited-foremans {
+  margin-bottom: $marginL;
+  .foreman {
+    display: table-row;
+    span {
+      display: table-cell;
+      padding-right: $marginS;
+    }
+  }
+  .foreman-name {
+  }
+  .foreman-state {
+    &:before {
+      content: "(";
+    }
+    &:after {
+      content: ")";
+    }
+  }
+}

@@ -38,7 +38,7 @@ Arto clicks on the marker and the marker contents window is opened
 The opened marker contents window has correct info about the inforequest
   ${first-app-id} =  Get Text  //section[@id='inforequest']//span[@data-test-id='inforequest-application-id']
   Set Suite Variable  ${first-app-id}
-  Verify info card by app id  ${first-app-id}  ${inforequest-first} - Mikko Intonen  Asuinkerrostalon ja/tai rivitalon rakentaminen  Jiihaa-first
+  Verify info card by app id  ${first-app-id}  ${inforequest-first} - Mikko Intonen  Asuinkerrostalon tai rivitalon rakentaminen  Jiihaa-first
 
 Arto clicks on the marker again and the marker contents window is closed
   Click element  xpath=//div[@id='inforequest-marker-map']//*[contains(@id, 'OpenLayers_Geometry_Point_')]

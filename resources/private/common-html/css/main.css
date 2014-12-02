@@ -4128,6 +4128,28 @@ span.icon_clear:before {
   padding-left: 6px;
 }
 
+/* line 554, ../sass/views/_application.scss */
+.invited-foremans {
+  margin-bottom: 24px;
+}
+/* line 556, ../sass/views/_application.scss */
+.invited-foremans .foreman {
+  display: table-row;
+}
+/* line 558, ../sass/views/_application.scss */
+.invited-foremans .foreman span {
+  display: table-cell;
+  padding-right: 6px;
+}
+/* line 566, ../sass/views/_application.scss */
+.invited-foremans .foreman-state:before {
+  content: "(";
+}
+/* line 569, ../sass/views/_application.scss */
+.invited-foremans .foreman-state:after {
+  content: ")";
+}
+
 /* line 1, ../sass/views/_create_application.scss */
 .ui-autocomplete-loading {
   background: white url("/img/ajax-loader-16.gif") right center no-repeat;
