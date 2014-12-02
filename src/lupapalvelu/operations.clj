@@ -802,8 +802,9 @@
       (operations-filtered filtering-fn false))))
 
 (defn selected-operations-for-organizations [organizations]
-  (let [orgs-with-selected-ops (filter #(:selected-operations %) organizations)
-        orgs-without-selected-ops (filter #(not (:selected-operations %)) organizations)
+  (let [filter-fn                 (fn [org] (seq (:selected-operations org)))
+        orgs-with-selected-ops    (filter filter-fn organizations)
+        orgs-without-selected-ops (remove filter-fn organizations)
         ;; Resolving operation tree for organizations with "selected-operations" defined in db
         op-trees-for-orgs-with-selected-ops (if-not (empty? orgs-with-selected-ops)
                                                     (let [selected-operations-arrays (map :selected-operations orgs-with-selected-ops)
