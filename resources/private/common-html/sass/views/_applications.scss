@@ -9,7 +9,7 @@
 .applications-empty-state {
   margin-top: $baseline;
   margin-right: $marginL * 3;
-  width: 90%;
+  width: 100%;
   min-height: 300px;
   div {
     display: inline-block;
@@ -21,12 +21,17 @@
     button {
       position: absolute;
       bottom: 12px;
-      left: 64px;
+      left: 0;
+      right: 0;
+      margin: 0 auto;
     }
+  }
+  .missing-wrapper {
+    width: 100%;
   }
   .missing-inforequest-box {
     padding-right: $marginL;
-    border-right: 1px solid $color-dark-bg;
+    border-right: 1px dotted $color-dark-bg;
     padding-bottom: 48px;
   }
   .missing-application-box {
@@ -36,7 +41,7 @@
   }
   .missing-prev-permit-box {
     padding-left: $marginL;
-    border-left: 1px solid $color-dark-bg;
+    border-left: 1px dotted $color-dark-bg;
     padding-bottom: 48px;
   }
 }
