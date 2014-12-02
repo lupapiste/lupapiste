@@ -19,11 +19,16 @@ Mikko invites foreman to application
   Click by test id  invite-foreman-button
   Input Text  invite-foreman-email  teppo@example.com
   Click by test id  application-invite-foreman
-  Element should contain  xpath=//*[@data-test-id='test-application-operation']  Asuinkerrostalon tai rivitalon rakentaminen
+  Wait until  Element should be visible  //section[@id='application']//span[@data-test-operation-id='tyonjohtajan-nimeaminen']
+
+Mikko sees sent invitation on the original application
+  Click by test id  test-application-app-linking-to-us
+  Open tab  parties
+  Wait until  Element text should be  xpath=//ul[@data-test-id='invited-foremans']//span[@data-test-id='foreman-email']  (teppo@example.com)
   [Teardown]  logout
 
 Foreman can see application
   Teppo logs in
   Go to page  applications
   Wait until  Element text should be  xpath=//table[@id='applications-list']//tr[@data-test-address='create-app'][1]/td[@data-test-col-name='operation']  Työnjohtajan nimeäminen
-  Wait until  Element text should be  xpath=//table[@id='applications-list']//tr[@data-test-address='create-app'][2]/td[@data-test-col-name='operation']  Asuinkerrostalon tai rivitalon rakentaminen
+  Wait until  Element text should be  xpath=//table[@id='applications-list']//tr[@data-test-address='create-app'][2]/td[@data-test-col-name='operation']  Asuinkerrostalon ja/tai rivitalon rakentaminen

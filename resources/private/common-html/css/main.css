@@ -2448,9 +2448,9 @@ table.attachments-template-table td.attachment-group-select a {
 }
 /* line 110, ../sass/partials/_modal.scss */
 .dialog-content.pending div.pending div.ajax {
+  background: url(/img/ajax-loader.gif) no-repeat center center;
   margin: auto;
   height: 160px;
-  background: url(/img/ajax-loader.gif) no-repeat center center;
 }
 
 /* line 118, ../sass/partials/_modal.scss */
@@ -4122,6 +4122,28 @@ span.icon_clear:before {
 /* line 549, ../sass/views/_application.scss */
 .requiredField-line .required-field-error-element-name {
   padding-left: 6px;
+}
+
+/* line 554, ../sass/views/_application.scss */
+.invited-foremans {
+  margin-bottom: 24px;
+}
+/* line 556, ../sass/views/_application.scss */
+.invited-foremans .foreman {
+  display: table-row;
+}
+/* line 558, ../sass/views/_application.scss */
+.invited-foremans .foreman span {
+  display: table-cell;
+  padding-right: 6px;
+}
+/* line 566, ../sass/views/_application.scss */
+.invited-foremans .foreman-state:before {
+  content: "(";
+}
+/* line 569, ../sass/views/_application.scss */
+.invited-foremans .foreman-state:after {
+  content: ")";
 }
 
 /* line 1, ../sass/views/_create_application.scss */
