@@ -10,6 +10,7 @@
           <thead>
             <tr>
               <th>Yritys</th>
+              <th>Y-tunnus</th>
               <th>Osoite</th>
               <th>Postinumero</th>
               <th>Postitoimipaikka</th>
@@ -18,7 +19,9 @@
           <tbody data-bind="foreach: { data: companiesModel.companies, as: 'company' }">
             <tr>
               <td data-bind="text: company.name"></td>
-              <td><span data-bind="text: company.address1"></span>, <span data-bind="text: company.address2"></span></td>
+              <td data-bind="text: company.y"></td>
+              <td><span data-bind="text: company.address1"></span>
+              <span data-bind="if: company.address2">, <span data-bind="text: company.address2"></span></span></td>
               <td data-bind="text: company.zip"></td>
               <td data-bind="text: company.po"></td>
             </tr>
@@ -58,13 +61,17 @@
             <input class="form-input text" data-bind="value: model().zip" data-test-id="register-company-zip" type="text"/>
           </div>
 
-          <h3>Pääkäyttäjä, oltava jo rekisteröitynyt!</h3>
+          <h3>Pääkäyttäjä, oltava jo rekisteröitynyt hakijaksi!</h3>
           <div>
             <label class="form-label tip" data-bind="ltext: 'register.company.form.email'"></label>
             <input class="form-input text" data-bind="textInput: model().email" data-test-id="register-company-email" type="text" placeholder="etu.suku@yritys.fi"/>
           </div>
 
-          <button data-bind="ltext: 'ok', enable: model.isValid"
+          <div data-bind="visible: errorMessage" >
+            <div data-bind="ltext: errorMessage" class="context-error"></div>
+          </div>
+
+          <button data-bind="ltext: 'ok', enable: model.isValid, click: save"
                   data-test-id="create-company"
                   class="btn btn-primary btn-dialog" ></button>
 

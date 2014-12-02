@@ -8,6 +8,8 @@
     var self = this;
     var fieldNames = ["name", "y", "address1", "address2", "po", "zip", "email"];
 
+    self.errorMessage = ko.observable();
+
     self.model = ko.validatedObservable({
       // Company:
       name:         ko.observable().extend(required),
@@ -21,9 +23,23 @@
     });
 
     self.reset = function() {
+      self.errorMessage();
       _.each(fieldNames, function(k) {
         self.model()[k](null);
       });
+    };
+
+    self.save = function() {
+      ajax.command("create-company", _.reduce(fieldNames, function(d, k) {
+          d[k] = self.model()[k](); return d;}, {}))
+        .success(function() {
+          hub.send("company-created");
+          LUPAPISTE.ModalDialog.close();
+        })
+        .error(function(e) {
+          self.errorMessage(e.text);
+        })
+        .call();
     };
   }
   var createCompanyModel = new CreateCompanyModel();
@@ -52,6 +68,7 @@
 
   var companiesModel = new CompaniesModel();
 
+  hub.subscribe("company-created", companiesModel.load);
   hub.onPageChange("companies", companiesModel.load);
 
   $(function() {
