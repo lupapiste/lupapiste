@@ -1,5 +1,5 @@
-applications.createWithPrevPermit.title: Aiemman rakennusvalvonnan lupasi siirto Lupapisteeseen
-applications.createWithPrevPermit.desc: Tällä toiminnolla voit siirtää aiemman rakennusvalvonnan lupa-asiasi Lupapisteeseen. Tällainen voi olla esimerkiksi aiempi paperilla hakemasi lupa.
+applications.createWithPrevPermit.title: Rakennusvalvonnan luvan siirto Lupapisteeseen
+applications.createWithPrevPermit.desc: Onko sinulla jo aiempi rakennusvalvonnan myöntämä lupa ja haluat siirtää rakentamisen aikaisen asioinnin Lupapisteeseen? Lupapiste mahdollistaa aikaisemman luvan siirron sähköiseen muotoon, jolloin voit toimittaa erityissuunnitelmat ja nimetä työnjohtajan Lupapisteessä.
 newRequest.createWithPrevPermit: Aloita siirto
 newRequest.createNewWithPrevPermit: Siirrä aiempi lupasi Lupapisteeseen
 
@@ -10,8 +10,10 @@ error.not-able-to-open-with-lupapiste-id-that-previous-permit-included: Antamaas
 error.more-prev-app-info-needed: Tarvitaan lisätietoja, jotta aiemmasta luvasta voidaan luoda hakemus Lupapisteeseen
 error.link-permit-already-having-us-as-link-permit: Tämänhetkinen lupa on jo viitelupana luvalla, jota yrität lisätä. Viitelupalinkitys ei voi olla kaksisuuntainen.
 
+operations.tree.aiemmalla-luvalla-hakeminen: Vanhan luvan avaaminen Lupapisteeseen
+
 aiemmalla-luvalla-hakeminen._group_label: Hankkeen kuvaus
-operations.aiemmalla-luvalla-hakeminen: Aiemman rakennusvalvonnan luvan avaaminen Lupapisteeseen
+operations.aiemmalla-luvalla-hakeminen: Vanhan luvan avaaminen Lupapisteeseen
 operations.aiemmalla-luvalla-hakeminen.desc: Voit siirtää aikaisemman, paperilla haetun lupasi Lupapisteeseen. Syötä alle siihen liittyvät tiedot.
 
 prev-permit-label-kuntalupatunnus: Kuntalupatunnus:
@@ -23,3 +25,6 @@ prev-permit-label-municipality: Kunta:
 newRequest.newApplicationWithPrevPermit: Etsi lupa
 
 more-prev-app-info-needed-desc: Taustajärjestelmästä ei voitu noutaa kaikkea tarvittua tietoa kiinteistöstä. Voisitteko ystävällisesti syöttää osoitetiedon alla olevaan kenttään.
+
+more-prev-app-info-needed-message-title: Lisäinformaatiota tarvitaan
+more-prev-app-info-needed-message: Taustajärjestelmästä ei voitu noutaa kaikkea tarvittua tietoa kiinteistöstä. Voisitteko ystävällisesti syöttää katuosoitetiedon oheiseen kenttään.
