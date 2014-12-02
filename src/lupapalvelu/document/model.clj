@@ -70,11 +70,7 @@
         [:err "illegal-hetu"]))))
 
 (defn- validate-hetu-checksum [hetu]
-  (let [number   (Long/parseLong (str (subs hetu 0 6) (subs hetu 7 10)))
-        n (mod number 31)
-        checksum  (nth ["0" "1" "2" "3" "4" "5" "6" "7" "8" "9" "A" "B" "C" "D" "E" "F" "H" "J" "K" "L" "M" "N" "P" "R" "S" "T" "U" "V" "W" "X" "Y"] n)
-        old-checksum (subs hetu 10 11)]
-    (when (not= checksum old-checksum) [:err "illegal-hetu"])))
+  (when (not= (subs hetu 10 11) (util/hetu-checksum hetu)) [:err "illegal-hetu"]))
 
 (defmethod validate-field :hetu [_ _ v]
   (cond
@@ -109,7 +105,14 @@
 ;; implement validator, the same as :select?
 (defmethod validate-field :radioGroup [_ elem v] nil)
 
-(defmethod validate-field :buildingSelector [_ elem v] (subtype/subtype-validation {:subtype :rakennusnumero} v))
+(defmethod validate-field :buildingSelector [_ elem v]
+  (cond
+    (ss/blank? v) nil
+    (= "other" v) nil
+    (util/rakennusnumero? v) nil
+    (util/rakennustunnus? v) nil
+    :else [:warn "illegal-rakennusnumero"]))
+
 (defmethod validate-field :newBuildingSelector [_ elem v] (subtype/subtype-validation {:subtype :number} v))
 
 (defmethod validate-field :personSelector [application elem v]

@@ -20,7 +20,7 @@ Mikko adds an operation
   Set animations off
   Click enabled by test id  add-operation
   Wait Until  Element Should Be Visible  add-operation
-  Wait and click  //section[@id="add-operation"]//div[@class="tree-content"]//*[text()="Rakentaminen ja purkaminen sekä maisemaan vaikuttava toimenpide"]
+  Wait and click  //section[@id="add-operation"]//div[@class="tree-content"]//*[text()="Rakentaminen, purkaminen tai maisemaan vaikuttava toimenpide"]
   Wait and click  //section[@id="add-operation"]//div[@class="tree-content"]//*[text()="Uuden rakennuksen rakentaminen"]
   Wait and click  //section[@id="add-operation"]//div[@class="tree-content"]//*[text()="Muun kuin edellä mainitun rakennuksen rakentaminen (liike-, toimisto-, opetus-, päiväkoti-, palvelu-, hoitolaitos- tai muu rakennus)"]
   Wait until  Element should be visible  xpath=//section[@id="add-operation"]//div[@class="tree-content"]//*[@data-test-id="add-operation-to-application"]
@@ -36,7 +36,7 @@ Mikko adds txt attachment without comment
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  attachments${secs}
   Open tab  attachments
-  Add attachment  ${TXT_TESTFILE_PATH}  ${EMPTY}  Asuinkerrostalon ja/tai rivitalon rakentaminen - Talo A
+  Add attachment  ${TXT_TESTFILE_PATH}  ${EMPTY}  Asuinkerrostalon tai rivitalon rakentaminen - Talo A
   Application state should be  draft
   Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${TXT_TESTFILE_NAME}')]
 

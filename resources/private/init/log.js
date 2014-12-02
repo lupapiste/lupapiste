@@ -2,7 +2,7 @@
   "use strict";
 
   function nop() {
-  };
+  }
 
   function filtered(page, message) {
     var pageFilter = /^(resource:\/|https:\/\/[a-z1-9]+\.checkpoint\.com\/)/;

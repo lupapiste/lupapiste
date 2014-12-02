@@ -77,7 +77,7 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
     });
   };
 
-  self.copyOwnAttachments = function(model) {
+  self.copyOwnAttachments = function() {
     ajax.command("copy-user-attachments-to-application", {id: self.appModel.id()})
       .success(self.appModel.reload)
       .processing(self.appModel.processing)
@@ -97,7 +97,7 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
             self.appModel.reload();
           })
           .error(function (e) {
-            LUPAPISTE.ModalDialog.showDynamicOk(loc("error.dialog.title"), loc(e.text));;
+            LUPAPISTE.ModalDialog.showDynamicOk(loc("error.dialog.title"), loc(e.text));
           })
           .processing(self.appModel.processing)
           .call();
@@ -107,7 +107,7 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
   };
 
   self.startStamping = function() {
-    hub.send('start-stamping', {application: self.appModel});
+    hub.send("start-stamping", {application: self.appModel});
   };
 
   self.attachmentTemplatesModel = new function() {
@@ -144,8 +144,8 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
   }();
 
   hub.subscribe("op-description-changed", function(e) {
-    var opid = e['op-id'];
-    var desc = e['op-desc'];
+    var opid = e["op-id"];
+    var desc = e["op-desc"];
 
     _.each(self.appModel.attachments(), function(attachment) {
       if ( ko.unwrap(attachment.op) && attachment.op.id() === opid ) {

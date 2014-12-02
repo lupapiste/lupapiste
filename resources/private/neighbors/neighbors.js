@@ -2,9 +2,6 @@
   "use strict";
 
   var applicationId;
-  var model = new Model();
-  var editModel = new EditModel();
-  var ownersModel = new OwnersModel();
   var authorizationModel = authorization.create();
 
   function Model() {
@@ -16,7 +13,9 @@
     self.map = null;
 
     self.init = function(application) {
-      if (!self.map) self.map = gis.makeMap("neighbors-map", false).addClickHandler(self.click);
+      if (!self.map) {
+        self.map = gis.makeMap("neighbors-map", false).addClickHandler(self.click);
+      }
       var location = application.location,
           x = location.x,
           y = location.y;
@@ -74,7 +73,7 @@
       self.owners = ko.observableArray();
       self.propertyId = ko.observable();
       self.selectedOwners = ko.observableArray([]);
-      self.allSelected = ko.observable(false).extend({ notify: 'always' });;
+      self.allSelected = ko.observable(false).extend({ notify: "always" });
 
       function watchAllSelected() {
           allSelectedWatch = self.allSelected.subscribe(function(allSelected) {
@@ -85,7 +84,7 @@
               }
               watchSelectedOwners();
           });
-      };
+      }
       function watchSelectedOwners() {
           selectedOwnersWatch = self.selectedOwners.subscribe(function(newValue) {
               allSelectedWatch.dispose();
@@ -93,7 +92,7 @@
               self.allSelected(ownersLength > 0 && ownersLength === newValue.length);
               watchAllSelected();
           });
-      };
+      }
       watchAllSelected();
       watchSelectedOwners();
 
@@ -156,7 +155,7 @@
           ajax
           .command("neighbor-add-owners", parameters)
           .complete(_.partial(repository.load, applicationId,
-                  function(v) {
+                  function() {
                       LUPAPISTE.ModalDialog.close();
                   }))
           .call();
@@ -177,7 +176,7 @@
               return person.nimi;
           }
       }
-      function convertOwner(owner, index) {
+      function convertOwner(owner) {
           var type = owner.henkilolaji,
               nameOfDeceased = null;
 
@@ -205,8 +204,8 @@
     self.statusInit         = 0;
     self.statusEdit         = 2;
 
-    self.init = function(neighbor) {
-      var neighbor = neighbor || {},
+    self.init = function(n) {
+      var neighbor = n || {},
           owner = neighbor.owner || {},
           address = owner.address || {};
       return self
@@ -243,8 +242,11 @@
 
     self.typeLabel = ko.computed(function() {
         var t = self.type();
-        if (t) return loc(['neighbors.owner.type', t]);
-        else return null;
+        if (t) {
+          return loc(["neighbors.owner.type", t]);
+        } else {
+          return null;
+        }
     }, self);
 
     self.editablePropertyId = ko.computed({
@@ -279,12 +281,16 @@
 
   }
 
+  var model = new Model();
+  var editModel = new EditModel();
+  var ownersModel = new OwnersModel();
+
   hub.onPageChange("neighbors", function(e) {
     applicationId = e.pagePath[0];
     repository.load(applicationId);
   });
 
-  repository.loaded(["neighbors"], function(application, applicationDetails) {
+  repository.loaded(["neighbors"], function(application) {
     if (applicationId === application.id) {
       model.init(application);
       authorizationModel.refresh(application);

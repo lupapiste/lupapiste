@@ -162,7 +162,7 @@
   var authorizationModel = authorization.create();
   var attachmentsModel = new AttachmentsModel();
 
-  repository.loaded(["statement"], function(application, applicationDetails) {
+  repository.loaded(["statement"], function(application) {
     if (applicationId === application.id) {
       authorizationModel.refresh(application, {statementId: statementId});
       statementModel.refresh(application);

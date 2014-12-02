@@ -7,7 +7,8 @@
             [lupapalvelu.server]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.user :as user]
-            [lupapalvelu.action :refer :all]))
+            [lupapalvelu.action :refer :all])
+  (:import [org.apache.commons.io.output NullWriter]))
 
 (defn returns [])
 
@@ -62,7 +63,8 @@
 (facts "Test general validation in command execution"
   (fact (execute {:action "test-command"}) =>        {:ok false :text "too busy"}
         (provided (returns)                =>        {:ok false :text "too busy"}))
-  (fact (execute {:action "test-command"}) =>        {:ok false :text "error.unknown"}
+  (fact (binding [*err* (NullWriter.)]
+          (execute {:action "test-command"})) =>        {:ok false :text "error.unknown"}
         (provided (returns)                =throws=> (Exception. "This was expected.")))
   (fact (execute {:action "test-command"}) =>        {:ok true}
         (provided (returns)                =>        nil)))
@@ -211,11 +213,13 @@
 
 (fact "fail! stops the press"
   (against-background (get-actions) => {:failing {:handler (fn [_] (fail! "kosh")) :roles [:anonymous]}})
-  (execute {:action "failing"}) => {:ok false :text "kosh"})
+  (binding [*err* (NullWriter.)]
+    (execute {:action "failing"})) => {:ok false :text "kosh"})
 
 (fact "exception details are not returned"
   (against-background (get-actions) => {:failing {:handler (fn [_] (throw (RuntimeException. "kosh"))) :roles [:anonymous]}})
-  (execute {:action "failing"}) => {:ok false :text "error.unknown"})
+  (binding [*err* (NullWriter.)]
+    (execute {:action "failing"})) => {:ok false :text "error.unknown"})
 
 (facts "non-blank-parameters"
   (non-blank-parameters nil {}) => nil
