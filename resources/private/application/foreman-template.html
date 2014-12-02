@@ -5,12 +5,11 @@
     <script type="text/html" id="application-foreman-template">
     <div>
       <p data-bind="lhtml: 'help.AddForeman'"></p>
-      <h3>Nimetyt työnjohtajat</h3>
-      <ul class="invited-foremans" data-bind="foreach: foremanApplications">
+      <ul class="invited-foremans" data-bind="foreach: foremanApplications" data-test-id="invited-foremans">
         <li class="foreman">
           <!-- ko if: $data.email -->
           <span class="foreman-name" data-bind="fullName: $data"></span>
-          <span class="foreman-email" data-bind="text: $data.email ? '(' + $data.email + ')' : ''"></span>
+          <span class="foreman-email" data-bind="text: $data.email ? '(' + $data.email + ')' : ''" data-test-id="foreman-email"></span>
           <!-- /ko -->
           <!-- ko ifnot: $data.email -->
           <span class="foreman-name" data-bind="ltext: 'invite.foreman.notSent'"></span>
