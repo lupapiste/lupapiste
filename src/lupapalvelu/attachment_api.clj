@@ -426,10 +426,10 @@
               :x-margin (->long xMargin)
               :y-margin (->long yMargin)
               :transparency (->long (or transparency 0))
-              :extra-info extraInfo
-              :building-id buildingId
-              :muni-app-id muniAppId
-              :section section})))
+              :extra-info (str extraInfo)
+              :building-id (str buildingId)
+              :muni-app-id (str muniAppId)
+              :section (str section)})))
 
 (defquery stamp-attachments-job
   {:parameters [:job-id :version]
