@@ -1,4 +1,4 @@
-LUPAPISTE.ForemanModel = function(authorizationModel) {
+LUPAPISTE.ForemanModel = function() {
   "use strict";
   var self = this;
 
@@ -29,31 +29,31 @@ LUPAPISTE.ForemanModel = function(authorizationModel) {
           self.foremanApplications.push(data);
           self.foremanApplications.sort(function(left, right) {
             return left.id > right.id;
-          })
+          });
         })
         .error(
           //  invited foreman can't always fetch applicants other foreman appications (if they are not invited to them also)
         )
         .call();
-      })
+      });
     }
 
     self.application = application;
     _.defer(function() {
       loadForemanApplications(_.where(application.linkPermitData, { "operation": "tyonjohtajan-nimeaminen" }));
     });
-  }
+  };
 
   self.inviteForeman = function() {
-    LUPAPISTE.ModalDialog.open('#dialog-invite-foreman')
-  }
+    LUPAPISTE.ModalDialog.open("#dialog-invite-foreman");
+  };
 
   self.openApplication = function(id) {
     repository.load(id);
     window.location.hash = "!/application/" + id;
-  }
+  };
 
-  self.submit = function(model) {
+  self.submit = function() {
     self.error(undefined);
 
     function inviteToApplication(id, cb, errorCb) {
@@ -94,7 +94,7 @@ LUPAPISTE.ForemanModel = function(authorizationModel) {
           window.location.hash = "!/application/" + id;
         })
         .error(function(err) {
-          self.error(loc(err.text))
+          self.error(loc(err.text));
         })
         .call();
       return false;
@@ -131,10 +131,10 @@ LUPAPISTE.ForemanModel = function(authorizationModel) {
     }
     // 1. invite foreman to current application (new role-parameter to invite command)
     if (self.email()) {
-      inviteToApplication(self.application.id, createApplication, createApplication)
+      inviteToApplication(self.application.id, createApplication, createApplication);
     } else {
       createApplication();
     }
     return false;
-  }
-}
+  };
+};

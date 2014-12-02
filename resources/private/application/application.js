@@ -53,7 +53,7 @@
   var createTaskController = LUPAPISTE.createTaskController;
   var mapModel = new LUPAPISTE.MapModel(authorizationModel);
   var attachmentsTab = new LUPAPISTE.AttachmentsTabModel(applicationModel);
-  var foremanModel = new LUPAPISTE.ForemanModel(authorizationModel);
+  var foremanModel = new LUPAPISTE.ForemanModel();
 
   var authorities = ko.observableArray([]);
   var permitSubtypes = ko.observableArray([]);
