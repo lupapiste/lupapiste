@@ -1,0 +1,3 @@
+invite.foreman.sent: Kutsu lähetetty
+foreman: Työnjohtaja
+error.illegal-role: Tuntematon rooli

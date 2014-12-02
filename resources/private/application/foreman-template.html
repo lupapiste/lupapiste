@@ -7,8 +7,7 @@
       <p data-bind="lhtml: 'help.AddForeman'"></p>
       <ul class="invited-foremans" data-bind="foreach: foremanApplications">
         <li class="foreman">
-          <span class="foreman-name" data-bind="text: $data.firstname"></span>
-          <span class="foreman-name" data-bind="text: $data.lastname"></span>
+          <span class="foreman-name" data-bind="fullName: $data"></span>
           <span class="foreman-email" data-bind="text: $data.email ? '(' + $data.email + ')' : ''"></span>
           <a data-bind="attr: {href: '#!/application/' + $data.id}">
             <span class="foreman-application" data-bind="text: $data.id"></span>

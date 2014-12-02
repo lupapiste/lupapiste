@@ -1,6 +1,7 @@
-LUPAPISTE.ForemanModel = function() {
+LUPAPISTE.ForemanModel = function(authorizationModel) {
   "use strict";
   var self = this;
+
   self.application = null;
   self.email = ko.observable();
   self.error = ko.observable();
@@ -12,26 +13,27 @@ LUPAPISTE.ForemanModel = function() {
   self.foremanApplications = ko.observableArray();
 
   self.refresh = function(application) {
-    function loadForemanApplications(applications) {
+    function loadForemanApplications(linkPermits) {
       self.foremanApplications([]);
-      _.forEach(_.pluck(applications, "id"), function(id) {
+      _.forEach(_.pluck(linkPermits, "id"), function(id) {
         ajax
         .query("application", {id: id})
         .success(function(app) {
+          var foreman = _.find(app.application.auth, {"role": "foreman"});
+          // var email = invite ? invite.username : app.application.auth.username;
           var data = {"state": app.application.state,
-                      "id": app.application.id};
-          var docs = _.where(app.application.documents, {"schema-info": {"name": "tyonjohtaja"}});
-          _.forEach(docs, function(doc) {
-            var firstName =
-            data['firstname'] = doc.data.henkilotiedot ? doc.data.henkilotiedot.etunimi ? doc.data.henkilotiedot.etunimi.value : undefined : undefined;
-            data['lastname'] = doc.data.henkilotiedot ? doc.data.henkilotiedot.sukunimi ? doc.data.henkilotiedot.sukunimi.value : undefined : undefined;
-            data['email'] = doc.data.yhteystiedot ? doc.data.yhteystiedot.email ? doc.data.yhteystiedot.email.value : undefined : undefined;
-            self.foremanApplications.push(data);
-            self.foremanApplications.sort(function(left, right) {
-              return left.id > right.id;
-            })
-          });
+                      "id": app.application.id,
+                      "email": foreman ? foreman.username : undefined,
+                      "firstName": foreman ? foreman.firstName : undefined,
+                      "lastName": foreman ? foreman.lastName : undefined};
+          self.foremanApplications.push(data);
+          self.foremanApplications.sort(function(left, right) {
+            return left.id > right.id;
+          })
         })
+        .error(
+          //  invited foreman can't always fetch applicants other foreman appications (if they are not invited to them also)
+        )
         .call();
       })
     }
@@ -59,13 +61,14 @@ LUPAPISTE.ForemanModel = function() {
         errorCb = cb;
       }
 
-      ajax.command("invite", { id: id,
+      ajax.command("invite-with-role", { id: id,
                                documentName: "",
                                documentId: "",
                                path: "",
                                email: self.email(),
                                title: "",
-                               text: "" })
+                               text: "",
+                               role: "foreman" })
         .processing(self.processing)
         .pending(self.pending)
         .success(function(data) {
