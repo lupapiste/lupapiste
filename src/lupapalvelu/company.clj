@@ -1,7 +1,6 @@
 (ns lupapalvelu.company
   (:require [taoensso.timbre :as timbre :refer [trace debug info infof warn warnf error fatal]]
             [monger.operators :refer :all]
-            [monger.query :as q]
             [schema.core :as sc]
             [sade.util :refer [min-length-string max-length-string y? ovt? fn-> fn->>]]
             [sade.env :as env]
@@ -74,9 +73,7 @@
   (or (find-company-by-id id) (fail! :company.not-found)))
 
 (defn find-companies []
-  (q/with-collection "companies"
-    (q/sort {:name 1})
-    (q/fields [:name :address1 :po])))
+  (mongo/select :companies {} [:name :address1 :po] (array-map :name 1)))
 
 (defn find-company-users [company-id]
   (u/get-users {:company.id company-id}))
