@@ -593,7 +593,7 @@
    :roles      [:applicant :authority]
    :notified   true ; OIR
    :input-validators [(partial action/non-blank-parameters [:operation :municipality])  ;; no :address included
-                      #_(partial property-id-parameters [:propertyId])
+                      #_(partial property-id-parameters [:propertyId])                  ;; voi olla nil tai sitten validi propertyId
                       operation-validator]}
   [{{:keys [operation x y address propertyId municipality kuntalupatunnus]} :data :keys [user created] :as command}]
 
@@ -643,8 +643,8 @@
                   ;; create the application
                   (let [info-source (cond
                                       rakennuspaikka-exists            (:rakennuspaikka app-info)
+;                                      (:ensimmainen-rakennus app-info) (:ensimmainen-rakennus app-info)     ;; TODO: Pitaisiko kayttaa taman propertyId:ta yms tietoja, kalilta annettujen sijaan (kts alla)?
                                       enough-info-from-parameters      {:x x :y y :address address :propertyId propertyId}
-;                                      (:ensimmainen-rakennus app-info) (:ensimmainen-rakennus app-info)     ;; Tatako ei tarvita?
                                       )
                         command (update-in command [:data] merge {:infoRequest false :messages []} info-source)
                         created-application (do-create-application command manual-schema-datas)
