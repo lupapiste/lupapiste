@@ -571,22 +571,22 @@
                       (partial property-id-parameters [:propertyId])
                       operation-validator]}
   [{{:keys [operation address municipality infoRequest]} :data :keys [user created] :as command}]
-  (let [permit-type (operations/permit-type-of-operation operation)
-        organization (organization/resolve-organization municipality permit-type)]
 
   ;; TODO: These let-bindings are repeated in do-create-application, merge th somehow
-    (let [scope             (organization/resolve-organization-scope municipality permit-type organization)
-          info-request?     (boolean infoRequest)
-          open-inforequest? (and info-request? (:open-inforequest scope))
-          created-application (do-create-application command)]
+  (let [permit-type (operations/permit-type-of-operation operation)
+        organization (organization/resolve-organization municipality permit-type)
+        scope             (organization/resolve-organization-scope municipality permit-type organization)
+        info-request?     (boolean infoRequest)
+        open-inforequest? (and info-request? (:open-inforequest scope))
+        created-application (do-create-application command)]
 
-      (insert-application created-application)
-      (when open-inforequest?
-        (open-inforequest/new-open-inforequest! created-application))
-      (try
-        (autofill-rakennuspaikka created-application created)
-        (catch Exception e (error e "KTJ data was not updated")))
-      (ok :id (:id created-application)))))
+    (insert-application created-application)
+    (when open-inforequest?
+      (open-inforequest/new-open-inforequest! created-application))
+    (try
+      (autofill-rakennuspaikka created-application created)
+      (catch Exception e (error e "KTJ data was not updated")))
+    (ok :id (:id created-application))))
 
 ;;
 ;; Application from previous permit
