@@ -198,9 +198,12 @@
     (ok :applications rows)))
 
 (defn- public-fields [{:keys [municipality submitted operations]}]
-  {:municipality municipality
-   :timestamp submitted
-   :operation (i18n/localize :fi "operations" (-> operations first :name))})
+  (let [op-name (-> operations first :name)]
+    {:municipality municipality
+    :timestamp submitted
+    :operation (i18n/localize :fi "operations" op-name)
+    :operationName {:fi (i18n/localize :fi "operations" op-name)
+                    :sv (i18n/localize :sv "operations" op-name)}}))
 
 (defquery latest-applications
   {:parameters []
