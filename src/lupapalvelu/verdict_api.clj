@@ -95,7 +95,7 @@
                               (when-not has-old-verdict-tasks {:tasks tasks})
                               (when extras-reader (extras-reader app-xml)))}]
           (update-application command updates)
-          {:verdicts verdicts-with-attachments :tasks tasks})))))
+          {:verdicts verdicts-with-attachments :tasks (get-in updates [$set :tasks])})))))
 
 (notifications/defemail :application-verdict
   {:subject-key    "verdict"
