@@ -19,19 +19,21 @@ LUPAPISTE.ForemanModel = function() {
         ajax
         .query("application", {id: id})
         .success(function(app) {
-          var foreman = _.find(app.application.auth, {"role": "foreman"});
-          var data = {"state": app.application.state,
-                      "id": app.application.id,
-                      "email": foreman ? foreman.username : undefined,
-                      "firstName": foreman ? foreman.firstName : undefined,
-                      "lastName": foreman ? foreman.lastName : undefined};
-          self.foremanApplications.push(data);
-          self.foremanApplications.sort(function(left, right) {
-            return left.id > right.id;
-          });
+          if (_.find(app.application.operations, {"name": "tyonjohtajan-nimeaminen"})) {
+            var foreman = _.find(app.application.auth, {"role": "foreman"});
+            var data = {"state": app.application.state,
+                        "id": app.application.id,
+                        "email": foreman ? foreman.username : undefined,
+                        "firstName": foreman ? foreman.firstName : undefined,
+                        "lastName": foreman ? foreman.lastName : undefined};
+            self.foremanApplications.push(data);
+            self.foremanApplications.sort(function(left, right) {
+              return left.id > right.id;
+            });
+          }
         })
         .error(
-          //  invited foreman can't always fetch applicants other foreman appications (if they are not invited to them also)
+          // invited foreman can't always fetch applicants other foreman appications (if they are not invited to them also)
         )
         .call();
       });
@@ -39,7 +41,7 @@ LUPAPISTE.ForemanModel = function() {
 
     self.application = application;
     _.defer(function() {
-      loadForemanApplications(_.where(application.linkPermitData, { "operation": "tyonjohtajan-nimeaminen" }));
+      loadForemanApplications(_.where(application.appsLinkingToUs));
     });
   };
 
@@ -59,7 +61,6 @@ LUPAPISTE.ForemanModel = function() {
       if (!errorCb) {
         errorCb = cb;
       }
-
       ajax.command("invite-with-role", { id: id,
                                documentName: "",
                                documentId: "",
@@ -105,9 +106,10 @@ LUPAPISTE.ForemanModel = function() {
         })
         .call();
     }
-    // 1. invite foreman to current application (new role-parameter to invite command)
+
+    // 1. invite foreman to current application
     if (self.email()) {
-      inviteToApplication(self.application.id, createApplication, createApplication);
+      inviteToApplication(self.application.id, createApplication);
     } else {
       createApplication();
     }
