@@ -50,7 +50,7 @@
       (select-keys krysp-config [:url :version])))))
 
 (defn- municipalities-with-organization []
-  (let [organizations (get-organizations {} {:scope 1 :krysp 1})]
+  (let [organizations (get-organizations {} [:scope :krysp])]
     {:all (distinct
             (for [{scopes :scope} organizations
                   {municipality :municipality} scopes]
