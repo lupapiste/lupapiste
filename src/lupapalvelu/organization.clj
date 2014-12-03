@@ -55,11 +55,12 @@
             (for [{scopes :scope} organizations
                   {municipality :municipality} scopes]
               municipality))
-     :with-backend (distinct
-                     (for [{scopes :scope :as org} organizations
-                           {municipality :municipality :as scope} scopes]
-                       (when (-> org :krysp (get (-> scope :permitType keyword)) :url s/blank? not)
-                         municipality)))}))
+     :with-backend (remove nil?
+                     (distinct
+                       (for [{scopes :scope :as org} organizations
+                             {municipality :municipality :as scope} scopes]
+                         (when (-> org :krysp (get (-> scope :permitType keyword)) :url s/blank? not)
+                           municipality))))}))
 
 (defn- organization-attachments
   "Returns a map where key is permit type, value is a list of attachment types for the permit type"
