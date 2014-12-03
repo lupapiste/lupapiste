@@ -46,7 +46,7 @@
 
 (defmethod validate-field :string [_ {:keys [max-len min-len] :as elem} v]
   (cond
-    (not= (type v) String) [:err "illegal-value:not-a-string"]
+    (not (string? v)) [:err "illegal-value:not-a-string"]
     (not (.canEncode (latin1-encoder) v)) [:warn "illegal-value:not-latin1-string"]
     (> (.length v) (or max-len default-max-len)) [:err "illegal-value:too-long"]
     (< (.length v) (or min-len 0)) [:warn "illegal-value:too-short"]
@@ -54,7 +54,7 @@
 
 (defmethod validate-field :text [_ elem v]
   (cond
-    (not= (type v) String) [:err "illegal-value:not-a-string"]
+    (not (string? v)) [:err "illegal-value:not-a-string"]
     (> (.length v) (or (:max-len elem) default-max-len)) [:err "illegal-value:too-long"]
     (< (.length v) (or (:min-len elem) 0)) [:warn "illegal-value:too-short"]))
 
@@ -116,10 +116,23 @@
 (defmethod validate-field :newBuildingSelector [_ elem v] (subtype/subtype-validation {:subtype :number} v))
 
 (defmethod validate-field :personSelector [application elem v]
-  (when-not (and
-              (not (ss/blank? v))
-              (domain/has-auth? application v)
-              (domain/no-pending-invites? application v))
+  (when-not (ss/blank? v)
+    (when-not (and
+                (domain/has-auth? application v)
+                (domain/no-pending-invites? application v))
+      [:err "application-does-not-have-given-auth"]))
+
+
+  #_(when (and
+          (not (ss/blank? v))
+          (or
+            (not (domain/has-auth? application v))
+            (not (domain/no-pending-invites? application v))))
+    [:err "application-does-not-have-given-auth"])
+  #_(when-not (and
+          (not (ss/blank? v))
+          (domain/has-auth? application v)
+          (domain/no-pending-invites? application v))
     [:err "application-does-not-have-given-auth"]))
 
 (defmethod validate-field nil [_ _ _]

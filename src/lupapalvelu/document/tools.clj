@@ -9,6 +9,15 @@
 (defn missing [element]
   (throw (UnsupportedOperationException. (str element))))
 
+(defn default-values [{:keys [name type body] :as element}]
+  (case (keyword type)
+    :radioGroup  (when (= name "_selected")
+                   (-> body first :name))
+    :checkbox    false
+    :string      ""
+    :text        ""
+    nil))
+
 (defn dummy-values [user-id {:keys [type subtype case name body] :as element}]
   (condp = (keyword type)
     :text             "text"
@@ -106,8 +115,7 @@
   ([schema]
     (create-document-data schema nil-values))
   ([schema f]
-    (->
-      schema
+    (-> schema
       (create f)
       flattened
       wrapped)))

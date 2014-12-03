@@ -460,16 +460,22 @@
         existing-documents    (:documents application)
         schema-version        (:schema-version application)
         make                  (fn [schema-name]
-                                {:id (mongo/create-id)
-                                 :schema-info (:info (schemas/get-schema schema-version schema-name))
-                                 :created created
-                                 :data (tools/timestamped
-                                         (condp = schema-name
-                                           op-schema-name           (schema-data-to-body (:schema-data op-info) application)
-                                           "yleiset-alueet-maksaja" (schema-data-to-body operations/schema-data-yritys-selected application)
-                                           "tyomaastaVastaava"      (schema-data-to-body operations/schema-data-yritys-selected application)
-                                           {})
-                                         created)})
+                                (let [schema (schemas/get-schema schema-version schema-name)]
+                                  {:id (mongo/create-id)
+                                  :schema-info (:info schema)
+                                  :created created
+                                  :data
+                                  (util/deep-merge
+                                    (tools/create-document-data schema tools/default-values)
+                                    (tools/timestamped
+                                      (condp = schema-name
+                                        op-schema-name           (schema-data-to-body (:schema-data op-info) application)
+                                        "yleiset-alueet-maksaja" (schema-data-to-body operations/schema-data-yritys-selected application)
+                                        "tyomaastaVastaava"      (schema-data-to-body operations/schema-data-yritys-selected application)
+                                        {})
+                                      created)
+                                    )
+                                  }))
         existing-schema-names (set (map (comp :name :schema-info) existing-documents))
         required-schema-names (remove existing-schema-names (:required op-info))
         required-docs         (map make required-schema-names)
@@ -479,9 +485,9 @@
     (if-not user
       new-docs
       (let [permit-type (keyword (permit/permit-type application))
-            hakija      (condp = permit-type
+            hakija      (case permit-type
                           :YA (assoc-in (make "hakija-ya") [:data :_selected :value] "yritys")
-                          (assoc-in (make "hakija") [:data :_selected :value] "henkilo"))]
+                          (make "hakija"))]
         (conj new-docs hakija)))))
 
 (defn- ->location [x y]
