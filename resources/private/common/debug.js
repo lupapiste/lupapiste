@@ -22,8 +22,7 @@ jQuery(function($) {
               municipality: municipality,
               operation: operation,
               x: "404369.304000",
-              y: "6693806.957000",
-              kuntalupatunnus: null },
+              y: "6693806.957000" },
       success: function() { $("#debug-create-done").text(" DONE!").show().delay(1000).fadeOut(); }
     });
     return false;
