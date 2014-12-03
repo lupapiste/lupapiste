@@ -90,7 +90,7 @@
         self.updateMunicipality(code);
         self.updateOrganizationDetails("aiemmalla-luvalla-hakeminen");
       } else {
-      if (code) { self.findOperations(code); }
+        if (code) { self.findOperations(code); }
         if (self.useManualEntry()) { self.updateMunicipality(code); }
       }
     });
