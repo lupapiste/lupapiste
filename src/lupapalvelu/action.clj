@@ -183,11 +183,10 @@
     (when (seq validators)
       (reduce #(or %1 (%2 command)) nil validators))))
 
-(defn invalid-state-in-application [command application]
+(defn invalid-state-in-application [command {state :state}]
   (when-let [valid-states (:states (meta-data command))]
-    (let [state (:state application)]
-      (when-not (.contains valid-states (keyword state))
-        (fail :error.command-illegal-state)))))
+    (when-not (.contains valid-states (keyword state))
+      (fail :error.command-illegal-state :state state))))
 
 (defn pre-checks-fail [command application]
   (when-let [pre-checks (:pre-checks (meta-data command))]

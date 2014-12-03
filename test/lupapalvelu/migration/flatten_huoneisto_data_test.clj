@@ -8,7 +8,7 @@
                                                  :name "uusiRakennus"
                                                  :approvable true
                                                  :op {:id "524128df03640915c932a642"
-                                                      :name "asuinrakennus"
+                                                      :name "kerrostalo-rivitalo"
                                                       :created 1380002015862}
                                                  :removable true}
                                    :created 1380002015862
@@ -28,7 +28,7 @@
                                                       :name "uusiRakennus"
                                                       :approvable true
                                                       :op {:id "524128df03640915c932a642"
-                                                           :name "asuinrakennus"
+                                                           :name "kerrostalo-rivitalo"
                                                            :created 1380002015862}
                                                       :removable true}
                                         :created 1380002015862

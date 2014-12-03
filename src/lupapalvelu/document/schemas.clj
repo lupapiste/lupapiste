@@ -67,10 +67,13 @@
 
 (def henkilo-valitsin [{:name "userId" :type :personSelector :blacklist [:neighbor]}])
 
-(def rakennuksen-valitsin [{:name "rakennusnro" :type :buildingSelector :i18nkey "rakennusnro"}
-                           {:name "manuaalinen_rakennusnro" :type :string :subtype :rakennusnumero :i18nkey "manuaalinen_rakennusnro" :labelclass "really-long"}])
+(def rakennuksen-valitsin [{:name "buildingId" :type :buildingSelector :i18nkey "rakennusnro" :other-key "manuaalinen_rakennusnro"}
+                           {:name "rakennusnro" :type :string :subtype :rakennusnumero :hidden true}
+                           {:name "manuaalinen_rakennusnro" :type :string :subtype :rakennusnumero :i18nkey "manuaalinen_rakennusnro" :labelclass "really-long"}
+                           {:name "valtakunnallinenNumero" :type :string  :subtype :rakennustunnus :hidden true}])
 
 (def uusi-rakennuksen-valitsin [{:name "jarjestysnumero" :type :newBuildingSelector :i18nkey "rakennusnro" :required true}
+                                {:name "valtakunnallinenNumero" :type :string  :subtype :rakennustunnus :hidden true}
                                 {:name "rakennusnro" :type :string :subtype :rakennusnumero :hidden true}
                                 {:name "kiinttun" :type :string :subtype :kiinteistotunnus :hidden true}])
 
@@ -342,12 +345,13 @@
                       :body huoneistoRow})
 
 (def yhden-asunnon-talot "011 yhden asunnon talot")
+(def rivitalot "021 rivitalot")
 (def vapaa-ajan-asuinrakennus "041 vapaa-ajan asuinrakennukset")
 (def talousrakennus "941 talousrakennukset")
 (def rakennuksen-kayttotarkoitus [{:name yhden-asunnon-talot}
                                   {:name "012 kahden asunnon talot"}
                                   {:name "013 muut erilliset talot"}
-                                  {:name "021 rivitalot"}
+                                  {:name rivitalot}
                                   {:name "022 ketjutalot"}
                                   {:name "032 luhtitalot"}
                                   {:name "039 muut asuinkerrostalot"}

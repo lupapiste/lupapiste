@@ -100,10 +100,12 @@
 (defn wfs-krysp-url-with-service [server object-type filter]
   (str (wfs-krysp-url server object-type filter) "&service=WFS"))
 
-(defn building-xml [server id]
-  (let [url (wfs-krysp-url server building-type (property-equals rakennuksen-kiinteistotunnus id))]
+(defn building-xml
+  "Returns clojure.xml map or an empty map if the data could not be downloaded."
+  [server property-id]
+  (let [url (wfs-krysp-url server building-type (property-equals rakennuksen-kiinteistotunnus property-id))]
     (debug "Get building: " url)
-    (cr/get-xml url)))
+    (or (cr/get-xml url) {})))
 
 (defn- application-xml [type-name id-path server id raw?]
   (let [url (wfs-krysp-url-with-service server type-name (property-equals id-path id))
@@ -129,12 +131,17 @@
 (permit/register-function permit/VVVL :xml-from-krysp vvvl-application-xml)
 
 (defn- ->building-ids [id-container xml-no-ns]
-  {:propertyId (get-text xml-no-ns id-container :kiinttun)
-  :buildingId  (get-text xml-no-ns id-container :rakennusnro)
-  :index       (get-text xml-no-ns id-container :jarjestysnumero)
-  :usage       (or (get-text xml-no-ns :kayttotarkoitus) "")
-  :area        (get-text xml-no-ns :kokonaisala)
-  :created     (->> (get-text xml-no-ns :alkuHetki) cr/parse-datetime (cr/unparse-datetime :year))})
+  (let [national-id (get-text xml-no-ns id-container :valtakunnallinenNumero)
+        local-short-id (get-text xml-no-ns id-container :rakennusnro)]
+    {:propertyId   (get-text xml-no-ns id-container :kiinttun)
+     :buildingId   (some #(when-not (ss/blank? %) %) [national-id local-short-id])
+     :nationalId   national-id
+     :localId      nil ; reserved for the next KRYSP schema version
+     :localShortId local-short-id
+     :index        (get-text xml-no-ns id-container :jarjestysnumero)
+     :usage        (or (get-text xml-no-ns :kayttotarkoitus) "")
+     :area         (get-text xml-no-ns :kokonaisala)
+     :created      (->> (get-text xml-no-ns :alkuHetki) cr/parse-datetime (cr/unparse-datetime :year))}))
 
 (defn ->buildings-summary [xml]
   (let [xml-no-ns (cr/strip-xml-namespaces xml)]
@@ -216,65 +223,73 @@
 
 (def polished  (comp cr/index-maps cleanup cr/convert-booleans))
 
+(def empty-building-ids {:valtakunnallinenNumero ""
+                         :rakennusnro ""})
+
 (defn ->rakennuksen-tiedot
   ([xml building-id]
     (let [stripped  (cr/strip-xml-namespaces xml)
-          rakennus  (select1 stripped [:rakennustieto :> (under [:rakennusnro (has-text building-id)])])]
+          rakennus  (or
+                      (select1 stripped [:rakennustieto :> (under [:valtakunnallinenNumero (has-text building-id)])])
+                      (select1 stripped [:rakennustieto :> (under [:rakennusnro (has-text building-id)])]))]
       (->rakennuksen-tiedot rakennus)))
   ([rakennus]
     (when rakennus
       (polished
-        {:muutostyolaji                 ...notimplemented...
-         :rakennusnro                   (get-text rakennus :rakennustunnus :rakennusnro)
-         :jarjestysnumero               (get-text rakennus :rakennustunnus :jarjestysnumero)
-         :kiinttun                      (get-text rakennus :rakennustunnus :kiinttun)
-         :verkostoliittymat             (cr/all-of rakennus [:verkostoliittymat])
-         :rakennuksenOmistajat          (->>
-                                          (select rakennus [:omistaja])
-                                          (map ->rakennuksen-omistaja))
-         :osoite {:kunta                (get-text rakennus :osoite :kunta)
-                  :lahiosoite           (get-text rakennus :osoite :osoitenimi :teksti)
-                  :osoitenumero         (get-text rakennus :osoite :osoitenumero)
-                  :osoitenumero2        (get-text rakennus :osoite :osoitenumero2)
-                  :jakokirjain          (get-text rakennus :osoite :jakokirjain)
-                  :jakokirjain2         (get-text rakennus :osoite :jakokirjain2)
-                  :porras               (get-text rakennus :osoite :porras)
-                  :huoneisto            (get-text rakennus :osoite :huoneisto)
-                  :postinumero          (get-text rakennus :osoite :postinumero)
-                  :postitoimipaikannimi (get-text rakennus :osoite :postitoimipaikannimi)}
-         :kaytto {:kayttotarkoitus      (get-text rakennus :kayttotarkoitus)
-                  :rakentajaTyyppi      (get-text rakennus :rakentajaTyyppi)}
-         :luokitus {:energialuokka      (get-text rakennus :energialuokka)
-                    :paloluokka         (get-text rakennus :paloluokka)}
-         :mitat {:kellarinpinta-ala     (get-text rakennus :kellarinpinta-ala)
-                 :kerrosala             (get-text rakennus :kerrosala)
-                 :kerrosluku            (get-text rakennus :kerrosluku)
-                 :kokonaisala           (get-text rakennus :kokonaisala)
-                 :tilavuus              (get-text rakennus :tilavuus)}
-         :rakenne {:julkisivu           (get-text rakennus :julkisivumateriaali)
-                   :kantavaRakennusaine (get-text rakennus :rakennusaine)
-                   :rakentamistapa      (get-text rakennus :rakentamistapa)}
-         :lammitys {:lammitystapa       (get-text rakennus :lammitystapa)
-                    :lammonlahde        (get-text rakennus :polttoaine)}
-                                        ; key :uima-altaita has been removed from lupapiste
-         :varusteet                     (-> (cr/all-of rakennus :varusteet)
-                                          (dissoc :uima-altaita)
-                                          (merge {:liitettyJatevesijarjestelmaanKytkin (get-text rakennus :liitettyJatevesijarjestelmaanKytkin)}))
-         :huoneistot (->>
-                       (select rakennus [:valmisHuoneisto])
-                       (map (fn [huoneisto]
-                              {:huoneistonumero (get-text huoneisto :huoneistonumero)
-                               :jakokirjain     (get-text huoneisto :jakokirjain)
-                               :porras          (get-text huoneisto :porras)
-                               :huoneistoTyyppi (get-text huoneisto :huoneistonTyyppi)
-                               :huoneistoala    (get-text huoneisto :huoneistoala)
-                               :huoneluku       (get-text huoneisto :huoneluku)
-                               :keittionTyyppi  (get-text huoneisto :keittionTyyppi)
-                               :WCKytkin                (get-text huoneisto :WCKytkin)
-                               :ammeTaiSuihkuKytkin     (get-text huoneisto :ammeTaiSuihkuKytkin)
-                               :lamminvesiKytkin        (get-text huoneisto :lamminvesiKytkin)
-                               :parvekeTaiTerassiKytkin (get-text huoneisto :parvekeTaiTerassiKytkin)
-                               :saunaKytkin             (get-text huoneisto :saunaKytkin)})))}))))
+        (util/assoc-when
+          {:muutostyolaji                 ...notimplemented...
+           :valtakunnallinenNumero        (ss/trim (get-text rakennus :rakennustunnus :valtakunnallinenNumero))
+           :rakennusnro                   (ss/trim (get-text rakennus :rakennustunnus :rakennusnro))
+           :manuaalinen_rakennusnro       ""
+           :jarjestysnumero               (get-text rakennus :rakennustunnus :jarjestysnumero)
+           :kiinttun                      (get-text rakennus :rakennustunnus :kiinttun)
+           :verkostoliittymat             (cr/all-of rakennus [:verkostoliittymat])
+
+           :osoite {:kunta                (get-text rakennus :osoite :kunta)
+                    :lahiosoite           (get-text rakennus :osoite :osoitenimi :teksti)
+                    :osoitenumero         (get-text rakennus :osoite :osoitenumero)
+                    :osoitenumero2        (get-text rakennus :osoite :osoitenumero2)
+                    :jakokirjain          (get-text rakennus :osoite :jakokirjain)
+                    :jakokirjain2         (get-text rakennus :osoite :jakokirjain2)
+                    :porras               (get-text rakennus :osoite :porras)
+                    :huoneisto            (get-text rakennus :osoite :huoneisto)
+                    :postinumero          (get-text rakennus :osoite :postinumero)
+                    :postitoimipaikannimi (get-text rakennus :osoite :postitoimipaikannimi)}
+           :kaytto {:kayttotarkoitus      (get-text rakennus :kayttotarkoitus)
+                    :rakentajaTyyppi      (get-text rakennus :rakentajaTyyppi)}
+           :luokitus {:energialuokka      (get-text rakennus :energialuokka)
+                      :paloluokka         (get-text rakennus :paloluokka)}
+           :mitat {:kellarinpinta-ala     (get-text rakennus :kellarinpinta-ala)
+                   :kerrosala             (get-text rakennus :kerrosala)
+                   :kerrosluku            (get-text rakennus :kerrosluku)
+                   :kokonaisala           (get-text rakennus :kokonaisala)
+                   :tilavuus              (get-text rakennus :tilavuus)}
+           :rakenne {:julkisivu           (get-text rakennus :julkisivumateriaali)
+                     :kantavaRakennusaine (get-text rakennus :rakennusaine)
+                     :rakentamistapa      (get-text rakennus :rakentamistapa)}
+           :lammitys {:lammitystapa       (get-text rakennus :lammitystapa)
+                      :lammonlahde        (get-text rakennus :polttoaine)}
+           :varusteet                     (-> (cr/all-of rakennus :varusteet)
+                                            (dissoc :uima-altaita) ; key :uima-altaita has been removed from lupapiste
+                                            (merge {:liitettyJatevesijarjestelmaanKytkin (get-text rakennus :liitettyJatevesijarjestelmaanKytkin)}))}
+
+          :rakennuksenOmistajat (->> (select rakennus [:omistaja]) (map ->rakennuksen-omistaja))
+          :huoneistot (->> (select rakennus [:valmisHuoneisto])
+                        (map (fn [huoneisto]
+                               {:huoneistonumero (get-text huoneisto :huoneistonumero)
+                                :jakokirjain     (get-text huoneisto :jakokirjain)
+                                :porras          (get-text huoneisto :porras)
+                                :huoneistoTyyppi (get-text huoneisto :huoneistonTyyppi)
+                                :huoneistoala    (get-text huoneisto :huoneistoala)
+                                :huoneluku       (get-text huoneisto :huoneluku)
+                                :keittionTyyppi  (get-text huoneisto :keittionTyyppi)
+                                :WCKytkin                (get-text huoneisto :WCKytkin)
+                                :ammeTaiSuihkuKytkin     (get-text huoneisto :ammeTaiSuihkuKytkin)
+                                :lamminvesiKytkin        (get-text huoneisto :lamminvesiKytkin)
+                                :parvekeTaiTerassiKytkin (get-text huoneisto :parvekeTaiTerassiKytkin)
+                                :saunaKytkin             (get-text huoneisto :saunaKytkin)}))))
+
+          ))))
 
 (defn ->buildings [xml]
   (map ->rakennuksen-tiedot (-> xml cr/strip-xml-namespaces (select [:Rakennus]))))

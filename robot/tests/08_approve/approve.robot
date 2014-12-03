@@ -10,7 +10,7 @@ Mikko creates an application
   Mikko logs in
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  approve-app${secs}
-  Create application the fast way  ${appname}  753  753-416-25-30  asuinrakennus
+  Create application the fast way  ${appname}  753  753-416-25-30  kerrostalo-rivitalo
   Execute Javascript  $("textarea[name='kuvaus']").val('Hieno hanke...').change();
   Execute Javascript  $("textarea[name='poikkeamat']").val('poikkeuksetta!').change();
 
@@ -24,7 +24,7 @@ Mikko can't approve application
 
 Mikko adds an attachment
   Open tab  attachments
-  Add attachment  ${TXT_TESTFILE_PATH}  ${EMPTY}  Uusi asuinrakennus
+  Add attachment  ${TXT_TESTFILE_PATH}  ${EMPTY}  Asuinkerrostalon tai rivitalon rakentaminen
   Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${TXT_TESTFILE_NAME}')]
 
 Mikko decides to submit application

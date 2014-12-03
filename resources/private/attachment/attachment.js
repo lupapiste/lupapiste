@@ -7,7 +7,6 @@ var attachment = (function() {
   var model = null;
 
   var authorizationModel = authorization.create();
-  var approveModel = new ApproveModel(authorizationModel);
   var signingModel = new LUPAPISTE.SigningModel("#dialog-sign-attachment", false);
 
   function deleteAttachmentFromServer() {
@@ -63,10 +62,10 @@ var attachment = (function() {
       return att.state === state;
     };
 
-    self.isNotOk = function() { return !self.stateIs('ok');};
-    self.doesNotRequireUserAction = function() { return !self.stateIs('requires_user_action');};
-    self.isApprovable = function() { return self.authorizationModel.ok('approve-attachment'); };
-    self.isRejectable = function() { return self.authorizationModel.ok('reject-attachment'); };
+    self.isNotOk = function() { return !self.stateIs("ok");};
+    self.doesNotRequireUserAction = function() { return !self.stateIs("requires_user_action");};
+    self.isApprovable = function() { return self.authorizationModel.ok("approve-attachment"); };
+    self.isRejectable = function() { return self.authorizationModel.ok("reject-attachment"); };
 
     self.rejectAttachment = function() {
       var id = self.application.id;
@@ -95,6 +94,8 @@ var attachment = (function() {
     };
   }
 
+  var approveModel = new ApproveModel(authorizationModel);
+
   model = {
     id:   ko.observable(),
     application: {
@@ -119,7 +120,7 @@ var attachment = (function() {
     size:            ko.observable(),
     sizes:           ko.observableArray(LUPAPISTE.config.attachmentSizes),
     subscriptions:   [],
-    indicator:       ko.observable().extend({notify: 'always'}),
+    indicator:       ko.observable().extend({notify: "always"}),
     showAttachmentVersionHistory: ko.observable(),
     showHelp:        ko.observable(false),
     init:            ko.observable(false),
@@ -202,7 +203,7 @@ var attachment = (function() {
   });
 
   model.editable = ko.computed(function() {
-    var preVerdictStates = ['verdictGiven', 'constructionStarted', 'closed'];
+    var preVerdictStates = ["verdictGiven", "constructionStarted", "closed"];
     return _.contains(preVerdictStates, ko.unwrap(model.application.state)) ? currentUser.isAuthority() || _.contains(preVerdictStates, ko.unwrap(model.applicationState)) : true;
   });
 
@@ -322,14 +323,19 @@ var attachment = (function() {
     model.indicator(false);
 
     authorizationModel.refresh(application, {attachmentId: attachmentId}, function() {
-      model.latestVersion() ? model.showHelp(false) : model.showHelp(true);
       model.init(true);
+      if (!model.latestVersion()) {
+        setTimeout(function() {
+          model.showHelp(true);
+        }, 1500);
+      }
     });
   }
 
   hub.onPageChange("attachment", function(e) {
     pageutil.showAjaxWait();
     model.init(false);
+    model.showHelp(false);
     applicationId = e.pagePath[0];
     attachmentId = e.pagePath[1];
     repository.load(applicationId);

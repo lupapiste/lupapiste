@@ -56,7 +56,7 @@
                          :number "19",
                          :name {:fi "Tampere" :sv "Tammerfors"}
                          :municipality "837"
-                         :location {:x "320193.034" :y "6825190.138"}}])))
+                         :location {:x "320187.869", :y "6825189.742"}}])))
 
 (facts "point-by-property-id"
   (let [property-id "09100200990013"
@@ -88,6 +88,36 @@
       (fact (:street body) => "Luhtaankatu")
       (fact (:number body) => #"\d")
       (fact (:fi (:name body)) => "Tampere"))))
+
+(facts "plan-urls-by-point-proxy"
+
+  (fact "Helsinki"
+    (let [response (plan-urls-by-point-proxy {:params {:x "395628" :y "6677704" :municipality "091"}})
+          body (json/decode (:body response) true)]
+      (first body) => {:id "8755"
+                       :kuntanro "91"
+                       :kaavanro "8755"
+                       :vahvistett_pvm "19.12.1985"
+                       :linkki "http://img.sito.fi/kaavamaaraykset/91/8755.pdf"
+                       :type "sito"}))
+
+  (fact "Mikkeli"
+    (let [response (plan-urls-by-point-proxy {:params {:x "533257.514" :y "6828489.823" :municipality "491"}})
+          body (json/decode (:body response) true)]
+
+      (first body) => {:id "1436"
+                       :kaavanro "12891"
+                       :kaavalaji "RKM"
+                       :kasitt_pvm "3/31/1989 12:00:00 AM"
+                       :linkki "http://194.111.49.141/asemakaavapdf/12891.pdf"
+                       :type "bentley"}
+
+      (second body) => {:id "1440"
+                        :kaavanro "12021"
+                        :kaavalaji "RK"
+                        :kasitt_pvm "6/1/1984 12:00:00 AM"
+                        :linkki "http://194.111.49.141/asemakaavapdf/12021.pdf"
+                        :type "bentley"})))
 
 (facts "geoserver-layers"
   (let [base-params {"FORMAT" "image/png"

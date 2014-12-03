@@ -1,6 +1,7 @@
 var LUPAPISTE = LUPAPISTE || {};
 
 (function($) {
+  "use strict";
 
   /**
    * Prototype for Lupapiste Single Page Apps.
@@ -9,7 +10,6 @@ var LUPAPISTE = LUPAPISTE || {};
    * @param {Boolean} allowAnonymous  Allow all users to access the app. Default: require login.
    */
    LUPAPISTE.App = function (startPage, allowAnonymous, showUserMenu) {
-    "use strict";
 
     var self = this;
 
@@ -18,8 +18,8 @@ var LUPAPISTE = LUPAPISTE || {};
     self.session = undefined;
     self.allowAnonymous = allowAnonymous;
     self.showUserMenu = (showUserMenu !== undefined) ? showUserMenu : !allowAnonymous;
-    self.previousHash;
-    self.currentHash;
+    self.previousHash = undefined;
+    self.currentHash = undefined;
 
     /**
     * Window unload event handler
@@ -71,10 +71,16 @@ var LUPAPISTE = LUPAPISTE || {};
       if (!self.allowAnonymous && self.session === undefined) {
         ajax.query("user")
           .success(function (e) {
-            self.session = true;
-            currentUser.set(e.user);
-            hub.send("login", e);
-            self.hashChanged();
+            if (e.user) {
+              self.session = true;
+              currentUser.set(e.user);
+              hub.send("login", e);
+              self.hashChanged();
+            } else {
+              error("User query did not return user, response: ", e);
+              self.session = false;
+              hub.send("logout", e);
+            }
           })
           .error(function (e) {
             self.session = false;
@@ -170,7 +176,7 @@ var LUPAPISTE = LUPAPISTE || {};
       $(document.documentElement).keyup(function(event) { hub.send("keyup", event); });
 
       var logoHref = window.location.href;
-      if (self.startPage && !self.startPage.charAt(0) !== "/") {
+      if (self.startPage && self.startPage.charAt(0) !== "/") {
         logoHref = "#!/" + self.startPage;
       }
 

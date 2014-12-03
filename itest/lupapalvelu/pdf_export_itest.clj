@@ -35,7 +35,7 @@
         test-property-id  "44400100100100"
         test-submitted    (clj-time.coerce/to-long "2014-01-01")
         test-authority    {:firstName "Erkki" :lastName "Testihenkilo"}
-        test-operations   [{:name "asuinrakennus"} {:name "aita"}]
+        test-operations   [{:name "kerrostalo-rivitalo"} {:name "aita"}]
 
         application (create-and-submit-application pena)
         _           (generate-documents application pena)
@@ -57,7 +57,7 @@
     (with-lang lang
       (fact "Test data assertions (just in case)"
         (loc (str "municipality." test-municipality)) => "Lohja"
-        (loc (str "operations.asuinrakennus")) => "Asuinrakennuksen rakentaminen"
+        (loc (str "operations.kerrostalo-rivitalo")) => "Asuinkerrostalon tai rivitalon rakentaminen"
         (loc (str "operations.aita")) => "Aidan rakentaminen")
 
       (pdf-export/generate application lang file)
@@ -73,7 +73,7 @@
         pdf-content => (contains "01.01.2014")
         pdf-content => (contains (:id application))
         pdf-content => (contains "Testihenkilo Erkki")
-        pdf-content => (contains "Asuinrakennuksen rakentaminen, Aidan rakentaminen")
+        pdf-content => (contains "Asuinkerrostalon tai rivitalon rakentaminen, Aidan rakentaminen")
 
         ; documents
         (doseq [doc-data documents-data]

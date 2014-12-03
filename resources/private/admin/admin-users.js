@@ -28,9 +28,9 @@
                .call();
            }},
           {name: "toAuthority",
-           showFor: function(user) {return user.enabled && user.role === "applicant";},
+           showFor: function(user) {return (user.enabled && user.role === "applicant") || user.role === "dummy";},
            operation: function(email, callback) {
-            ajax
+             ajax
                .command("applicant-to-authority", {email: email})
                .success(function() { callback(true); })
                .call();
@@ -46,7 +46,9 @@
   };
 
   hub.onPageChange("users", function() {
-    if (!usersList) usersList = users.create($("#users .fancy-users-table"), usersTableConfig);
+    if (!usersList) {
+      usersList = users.create($("#users .fancy-users-table"), usersTableConfig);
+    }
   });
 
 

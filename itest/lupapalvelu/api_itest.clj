@@ -9,7 +9,7 @@
   (feature? :disable-anti-csrf) => false)
 
 (fact "Disabled user must not be able to create an application!"
-  (raw-command dummy :create-application :operation "asuinrakennus"
+  (raw-command dummy :create-application :operation "kerrostalo-rivitalo"
     :propertyId "75312312341234"
     :x 444444 :y 6666666
     :address "foo 42, bar"

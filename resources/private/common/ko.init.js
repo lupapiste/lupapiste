@@ -181,7 +181,7 @@
       var value = ko.utils.unwrapObservable(valueAccessor());
 
       //handle date data
-      if (String(value).indexOf('/Date(') === 0) {
+      if (String(value).indexOf("/Date(") === 0) {
         value = new Date(parseInt(value.replace(/\/Date\((.*?)\)\//gi, "$1"), 10));
       }
 
@@ -258,6 +258,16 @@
         $(element).removeClass("drill-down-" + color);
         $(element).addClass("drill-right-" + color);
       }
+    }
+  };
+
+  ko.bindingHandlers.toggleClick = {
+    init: function(element, valueAccessor) {
+      var value = valueAccessor();
+
+      ko.utils.registerEventHandler(element, "click", function() {
+        value(!value());
+      });
     }
   };
 

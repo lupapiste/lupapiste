@@ -70,4 +70,9 @@
   (subtype-validation {:subtype :y-tunnus} "2341528-4") => nil?
   (subtype-validation {:subtype :y-tunnus} "2341528-1") => [:warn "illegal-y-tunnus"])
 
-
+(facts "Pysyva rakennustunnus"
+  (subtype-validation {:subtype :rakennustunnus} "") => nil?
+  (subtype-validation {:subtype :rakennustunnus} nil) => nil?
+  (subtype-validation {:subtype :rakennustunnus} "100012345N") => nil?
+  (subtype-validation {:subtype :rakennustunnus} "1234567892") => nil?
+  (subtype-validation {:subtype :rakennustunnus} "23456789A") => [:warn "illegal-rakennustunnus"])

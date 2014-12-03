@@ -30,7 +30,7 @@
 (fact "2.1.4: :tag is set" (has-tag rakennuslupa_to_krysp_214) => true)
 (fact "2.1.5: :tag is set" (has-tag rakennuslupa_to_krysp_215) => true)
 
-(defn- do-test [application validate-tyonjohtaja?]
+(defn- do-test [application validate-tyonjohtaja? validate-pysyva-tunnus?]
   (let [canonical (application-to-canonical application "fi")
         xml_212 (rakennuslupa-element-to-xml canonical "2.1.2")
         xml_213 (rakennuslupa-element-to-xml canonical "2.1.3")
@@ -65,7 +65,9 @@
             (xml/get-text tyonjohtaja_213 :patevyysvaatimusluokka) => "A"))
         (do
            tyonjohtaja_212 => nil
-           tyonjohtaja_213 => nil)))
+           tyonjohtaja_213 => nil))
+      (if validate-pysyva-tunnus?
+        (fact "pysyva rakennusmuero" (xml/get-text lp-xml_212 [:rakennustunnus :valtakunnallinenNumero]) => "1234567892")))
 
     (let [lp-xml_215 (cr/strip-xml-namespaces (xml/parse xml_215_s))]
       ; Address format has changed in 2.1.5
@@ -92,19 +94,21 @@
 (facts "Rakennusvalvonta type of permits to canonical and then to xml with schema validation"
 
   (fact "Rakennuslupa application -> canonical -> xml"
-    (do-test application-rakennuslupa true))
+    (do-test application-rakennuslupa true true))
 
   (fact "Ty\u00f6njohtaja application -> canonical -> xml"
-    (do-test application-tyonjohtajan-nimeaminen true))
+    (do-test application-tyonjohtajan-nimeaminen true false))
 
   (fact "Suunnittelija application -> canonical -> xml"
-    (do-test application-suunnittelijan-nimeaminen false))
+    (do-test application-suunnittelijan-nimeaminen false false))
 
   (fact "Aloitusoikeus -> canonical -> xml"
-    (do-test aloitusoikeus-hakemus false)))
+    (do-test aloitusoikeus-hakemus false false)))
 
 
-(let [application (assoc application-rakennuslupa :state "verdictGiven")
+(let [application (assoc application-rakennuslupa
+                    :state "verdictGiven"
+                    :buildings [{:index "1" :propertyId "09100200990013" :localShortId "001" :nationalId "1234567892"}])
       user        {:id "777777777777777777000017"
                    :email "jussi.viranomainen@tampere.fi"
                    :enabled true
@@ -128,7 +132,7 @@
         "Pohjakatselmus 1" ; task name
         "2.5.1974"
         [{:tila {:tila "osittainen" :kayttoonottava true}
-          :rakennus {:jarjestysnumero "1" :kiinttun "09100200990013" :rakennusnro "001"}}]
+          :rakennus {:jarjestysnumero "1" :kiinttun "09100200990013" :rakennusnro "001" :valtakunnallinenNumero "1234567892"}}]
         user
         "pohjakatselmus" ; katselmuksen-nimi
         :katselmus ;tyyppi

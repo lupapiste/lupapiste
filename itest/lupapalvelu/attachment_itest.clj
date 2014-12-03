@@ -15,13 +15,13 @@
   (get-attachment-by-id veikko application-id attachment-id) => (in-state? "requires_user_action"))
 
 (facts "attachments"
-  (let [{application-id :id :as response} (create-app pena :municipality veikko-muni :operation "asuinrakennus")]
+  (let [{application-id :id :as response} (create-app pena :municipality veikko-muni :operation "kerrostalo-rivitalo")]
 
     response => ok?
 
     (comment-application pena application-id true) => ok?
 
-    (fact "by default 4 attachments exist and are related to operation 'asuinrakennus'"
+    (fact "by default 4 attachments exist and are related to operation 'kerrostalo-rivitalo'"
       (let [application (query-application pena application-id)
             op-id (-> application :operations first :id)]
         (count (get-attachments-by-operation application op-id)) => 4))

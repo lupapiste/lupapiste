@@ -135,11 +135,14 @@
         resp (mongo/select :app-links {:link {$in [app-id]}})]
     (if (seq resp)
       ;; Link permit data was found
-      (let [convert-fn (fn [link-data]
+      (let [our-link-permits (filter #(= (:type ((keyword app-id) %)) "application") resp)
+            apps-linking-to-us (filter #(= (:type ((keyword app-id) %)) "linkpermit") resp)
+            convert-fn (fn [link-data]
                          (let [link-array (:link link-data)
-                               app-index (.indexOf link-array app-id)
-                               link-permit-id (link-array (if (zero? app-index) 1 0))
+                               link-permit-id ((if (-> link-array (.indexOf app-id) zero?) second first)
+                                                link-array)
                                link-permit-type (:linkpermittype ((keyword link-permit-id) link-data))]
+
                            (if (= (:type ((keyword app-id) link-data)) "application")
 
                              ;; TODO: Jos viiteluvan tyyppi on myos jatkolupa, niin sitten :operation pitaa hakea
@@ -150,9 +153,8 @@
                                                         (-> (mongo/by-id "applications" link-permit-id {:operations 1})
                                                           :operations first :name))]
                                {:id link-permit-id :type link-permit-type :operation link-permit-app-op})
-                             {:id link-permit-id})))
-            our-link-permits (filter #(= (:type ((keyword app-id) %)) "application") resp)
-            apps-linking-to-us (filter #(= (:type ((keyword app-id) %)) "linkpermit") resp)]
+
+                             {:id link-permit-id :type link-permit-type})))]
 
         (-> app
           (assoc :linkPermitData (when (seq our-link-permits)

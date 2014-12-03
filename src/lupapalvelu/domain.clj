@@ -98,12 +98,16 @@
 (defn has-auth? [{auth :auth} user-id]
   (or (some (partial = user-id) (map :id auth)) false))
 
+(defn get-auth [{auth :auth} user-id]
+  (some #(when (= (:id %) user-id) %) auth))
+
 (defn has-auth-role? [{auth :auth} user-id role]
   (has-auth? {:auth (get-auths-by-role {:auth auth} role)} user-id))
 
 (defn owner-or-writer? [application user-id]
   (or (has-auth-role? application user-id "owner")
-      (has-auth-role? application user-id "writer")))
+      (has-auth-role? application user-id "writer")
+      (has-auth-role? application user-id "foreman")))
 
 (defn validate-owner-or-writer
   "Validator: current user must be owner or writer.
