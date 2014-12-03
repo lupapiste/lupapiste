@@ -74,8 +74,8 @@
 
 (defn get-application-no-access-checking [query-or-id]
   {:pre [query-or-id]}
-  (let [query-part (if (map? query-or-id) query-or-id {:_id query-or-id})]
-    (mongo/select-one :applications query-part)))
+  (let [query (if (map? query-or-id) query-or-id {:_id query-or-id})]
+    (mongo/select-one :applications query)))
 
 ;;
 ;; authorization
