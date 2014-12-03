@@ -212,7 +212,7 @@
                               :yMargin 0
                               :extraInfo ""
                               :buildingId ""
-                              :muniAppId ""
+                              :kuntalupatunnus ""
                               :section "")
         file-id (get-in (:value job) [(-> job :value keys first) :fileId])]
 
@@ -254,7 +254,7 @@
                               :yMargin 0
                               :extraInfo ""
                               :buildingId ""
-                              :muniAppId ""
+                              :kuntalupatunnus ""
                               :section "")]
           resp => ok?
           ; Poll for 5 seconds
