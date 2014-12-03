@@ -120,20 +120,7 @@
     (when-not (and
                 (domain/has-auth? application v)
                 (domain/no-pending-invites? application v))
-      [:err "application-does-not-have-given-auth"]))
-
-
-  #_(when (and
-          (not (ss/blank? v))
-          (or
-            (not (domain/has-auth? application v))
-            (not (domain/no-pending-invites? application v))))
-    [:err "application-does-not-have-given-auth"])
-  #_(when-not (and
-          (not (ss/blank? v))
-          (domain/has-auth? application v)
-          (domain/no-pending-invites? application v))
-    [:err "application-does-not-have-given-auth"]))
+      [:err "application-does-not-have-given-auth"])))
 
 (defmethod validate-field nil [_ _ _]
   [:err "illegal-key"])
