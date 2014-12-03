@@ -843,6 +843,35 @@
     (insert-application continuation-app)
     (ok :id (:id continuation-app))))
 
+(defcommand create-foreman-application
+  {:parameters ["id"]
+   :roles [:applicant :authority]
+   :states action/all-application-states}
+  [{:keys [created user application] :as command}]
+  (let [foreman-app (do-create-application
+                      (assoc command :data {:operation "tyonjohtajan-nimeaminen"
+                                            :x (-> application :location :x)
+                                            :y (-> application :location :y)
+                                            :address (:address application)
+                                            :propertyId (:propertyId application)
+                                            :municipality (:municipality application)
+                                            :infoRequest false
+                                            :messages []}))
+
+        hankkeen-kuvaus (get-in (domain/get-document-by-name application "hankkeen-kuvaus") [:data :kuvaus :value])
+        hankkeen-kuvaus-doc (domain/get-document-by-name foreman-app "hankkeen-kuvaus-minimum")
+        hankkeen-kuvaus-doc (if hankkeen-kuvaus
+                              (assoc-in hankkeen-kuvaus-doc [:data :kuvaus :value] hankkeen-kuvaus)
+                              hankkeen-kuvaus-doc)
+
+        foreman-app (assoc foreman-app
+                      :documents [(domain/get-document-by-name application "hakija")
+                                  hankkeen-kuvaus-doc])]
+
+    (do-add-link-permit foreman-app (:id application))
+    (insert-application foreman-app)
+    (ok :id (:id foreman-app))))
+
 ;;
 ;; Inform construction started & ready
 ;;
