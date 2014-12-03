@@ -1970,14 +1970,6 @@ table.attachments-template-table td.attachment-group-select a {
   float: right;
 }
 
-/* line 1, ../sass/partials/_breadcrum.scss */
-.breadcrumb {
-  position: fixed;
-  margin-left: 24px;
-  top: 72px;
-  z-index: 1110;
-}
-
 /*Tab styles*/
 /* line 22, ../sass/partials/_tabs.scss */
 .tab-wrapper {
