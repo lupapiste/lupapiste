@@ -213,7 +213,8 @@
                               :extraInfo ""
                               :buildingId ""
                               :muniAppId ""
-                              :section "")]
+                              :section "")
+        file-id (get-in (:value job) [(-> job :value keys first) :fileId])]
 
     (fact "not stamped by default"
       (get-in (get-attachment-info application (:id attachment)) [:latestVersion :stamped]) => falsey)
@@ -223,6 +224,7 @@
 
     resp => ok?
     (fact "Job id is returned" (:id job) => truthy)
+    (fact "FileId is returned" file-id => truthy)
 
     ; Poll for 5 seconds
     (when-not (= "done" (:status job)) (poll-job (:id job) (:version job) 25))
@@ -236,6 +238,8 @@
 
       (fact "Attachment state is ok"
         (:state attachment) => "ok")
+
+      (fact "New fileid is in response" (get-in attachment [:latestVersion :fileId]) =not=> file-id)
 
       (facts "re-stamp"
         (let [{job :job :as resp} (command
