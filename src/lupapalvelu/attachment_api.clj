@@ -374,17 +374,13 @@
     new-file-id))
 
 (defn- stamp-attachments!
-  [file-infos {:keys [text created organization transparency job-id application extra-info building-id kuntalupatunnus section] :as context}]
-  {:pre [text organization (pos? created)]}
+  [file-infos {:keys [text created transparency job-id application info-fields] :as context}]
+  {:pre [text (pos? created)]}
   (let [stamp (stamper/make-stamp
                 (ss/limit text 100)
                 created
-                (ss/limit organization 100)
                 transparency
-                (ss/limit extra-info 100)
-                (ss/limit building-id 100)
-                (ss/limit kuntalupatunnus 100)
-                (ss/limit section 100))]
+                (map #(ss/limit % 100) info-fields))]
     (doseq [file-info (vals file-infos)]
       (try
         (debug "Stamping" (select-keys file-info [:attachment-id :contentType :fileId :filename :re-stamp?]))
@@ -414,10 +410,6 @@
              {:application application
               :user (:user command)
               :text (if-not (ss/blank? text) text (i18n/loc "stamp.verdict"))
-              :organization (if-not (ss/blank? organization)
-                              organization
-                              (let [org (organization/get-organization (:organization application))]
-                                (organization/get-organization-name org)))
               :created (cond
                          (number? timestamp) (long timestamp)
                          (ss/blank? timestamp) (:created command)
@@ -426,10 +418,15 @@
               :x-margin (->long xMargin)
               :y-margin (->long yMargin)
               :transparency (->long (or transparency 0))
-              :extra-info (str extraInfo)
-              :building-id (str buildingId)
-              :kuntalupatunnus (str kuntalupatunnus)
-              :section (str section)})))
+              :info-fields [(str buildingId)
+                            (str kuntalupatunnus)
+                            (str section)
+                            (str extraInfo)
+                            (if-not (ss/blank? organization)
+                              organization
+                              (let [org (organization/get-organization (:organization application))]
+                                (organization/get-organization-name org)))]
+              })))
 
 (defquery stamp-attachments-job
   {:parameters [:job-id :version]

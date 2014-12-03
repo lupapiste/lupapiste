@@ -43,18 +43,19 @@
   (.draw text g x y))
 
 (defn make-stamp
-  [^String verdict ^Long created ^String organization ^Integer transparency ^String extra-info ^String building-id ^String kuntalupatunnus ^String section]
-  (let [font (Font. "Courier" Font/BOLD 12)
+  [^String verdict ^Long created ^Integer transparency info-fields]
+  (let [fields (conj
+                 (vec
+                   (conj info-fields (str verdict \space (format "%td.%<tm.%<tY" (java.util.Date. created)))))
+                 "LUPAPISTE.fi")
+        font (Font. "Courier" Font/BOLD 12)
         frc (FontRenderContext. nil RenderingHints/VALUE_TEXT_ANTIALIAS_ON RenderingHints/VALUE_FRACTIONALMETRICS_ON)
         texts (remove nil?
-                (map (fn [text] (if (seq text) (TextLayout. ^String text font frc)))
-                  [(str verdict \space (format "%td.%<tm.%<tY" (java.util.Date. created)))
-                   building-id
-                   kuntalupatunnus
-                   section
-                   extra-info
-                   organization
-                   "LUPAPISTE.fi"]))
+                (map
+                  (fn [text]
+                    (if (seq text)
+                      (TextLayout. ^String text font frc)))
+                  fields))
         text-widths (map (fn [text] (-> text (.getPixelBounds nil 0 0) (.getWidth))) texts)
         line-height 22
         rect-height (+ (* (count texts) line-height) 10)
