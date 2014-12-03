@@ -376,7 +376,6 @@
 
     (fact "info contains the needed keys" (every? (partial contains info) info-keys))
 
-    (fact "id" id => "LP-186-2014-00290")
     (fact "kuntalupatunnus" kuntalupatunnus => "14-0241-R 3")
     (fact "municipality" municipality => "186")
     (fact "rakennusvalvontaasianKuvaus" rakennusvalvontaasianKuvaus => "Rakennetaan yksikerroksinen lautaverhottu omakotitalo jossa kytketty autokatos/ varasto.")
