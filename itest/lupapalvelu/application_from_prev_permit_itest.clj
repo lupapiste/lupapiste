@@ -75,17 +75,17 @@
         (create-app-from-prev-permit pena) => (contains {:ok true
                                                          :id "lupis-id"})
         (provided
-          (domain/owner-or-writer? anything anything) => true))
+          (domain/get-application-as anything anything) => {:id "lupis-id"}))
       ; 1 b: jos ei oikkia -> (fail :error.lupapiste-application-already-exists-but-unauthorized-to-access-it :id (:id app-with-verdict))
       (fact "does not have rights to the found app"
         (create-app-from-prev-permit pena) => (contains {:ok false
                                                          :id "lupis-id"
                                                          :text "error.lupapiste-application-already-exists-but-unauthorized-to-access-it"})
         (provided
-          (domain/owner-or-writer? anything anything) => false))
+          (domain/get-application-as anything anything) => nil))
       ;; patee molemmille yllaoleville
       (against-background
-        (domain/get-application anything) => {:id "lupis-id"}))
+        (domain/get-application-no-access-checking anything) => {:id "lupis-id"}))
 
     ; 2: jos taustajarjestelmasta ei saada xml-sisaltoa -> (fail :error.no-previous-permit-found-from-backend)
     (fact "no xml content received from backend with the kuntalupatunnus"
@@ -114,50 +114,33 @@
         (krysp-reader/get-app-info-from-message anything anything) => (dissoc example-app-info :rakennuspaikka)))
 
     ; 6) sanomassa tulee lupapiste-id
-    (facts "message includes lupapiste id"
-      ; 6 a: jota ei kuitenkaan ole jarjestelmassa -> (fail :error.not-able-to-open-with-lupapiste-id-that-previous-permit-included :id lupapiste-tunnus)
-      (fact "the lupapiste id is not found from database though"
+    (facts "message includes lupapiste id and app id found in the database"
+
+      ; 6 a: on jarjestelmassa, mutta kayttajalla ei oikkia sille -> (fail :error.lupapiste-application-already-exists-but-unauthorized-to-access-it :id lupapiste-tunnus)
+      (fact "we do not have permissions to application"
         (create-app-from-prev-permit pena
           :x "6707184.319"
           :y "393021.589"
           :address "Kylykuja 3"
           :propertyId "18600303560005") => (contains {:ok false
                                                       :id example-LP-tunnus
-                                                      :text "error.not-able-to-open-with-lupapiste-id-that-previous-permit-included"}))
+                                                      :text "error.lupapiste-application-already-exists-but-unauthorized-to-access-it"})
+        (provided
+          (domain/get-application-as anything anything) => nil))
 
-      (facts "app id found in the database"
-        ; 6 b: on jarjestelmassa, mutta kayttajalla ei oikkia sille -> (fail :error.lupapiste-application-already-exists-but-unauthorized-to-access-it :id lupapiste-tunnus)
-        (fact "we do not have permissions to application"
-          (create-app-from-prev-permit pena
-            :x "6707184.319"
-            :y "393021.589"
-            :address "Kylykuja 3"
-            :propertyId "18600303560005") => (contains {:ok false
-                                                        :id example-LP-tunnus
-                                                        :text "error.lupapiste-application-already-exists-but-unauthorized-to-access-it"})
-          (provided
-            (domain/owner-or-writer? anything anything) => false))
-
-        ; 6 c: on jarjestelmassa, ja kayttajalla on oikat sille     -> (ok :id lupapiste-tunnus)
-        (fact "got permissions for the application"
-          (create-app-from-prev-permit pena
-            :x "6707184.319"
-            :y "393021.589"
-            :address "Kylykuja 3"
-            :propertyId "18600303560005") => (contains {:ok true
-                                                        :id example-LP-tunnus})
-          (provided
-            (domain/owner-or-writer? anything anything) => true))
-
-        (against-background
-          (mongo/by-id :applications example-LP-tunnus) => {:id example-LP-tunnus} :times 1
-          (mongo/by-id :organizations "186-R") => {:krysp {:R {:url "http://localhost:8000/dev/krysp"
-                                                               :version "2.1.3"
-                                                               :ftpUser "dev_jarvenpaa"}}}))
+      ; 6 b: on jarjestelmassa, ja kayttajalla on oikat sille     -> (ok :id lupapiste-tunnus)
+      (fact "got permissions for the application"
+        (create-app-from-prev-permit pena
+          :x "6707184.319"
+          :y "393021.589"
+          :address "Kylykuja 3"
+          :propertyId "18600303560005") => (contains {:ok true
+                                                      :id example-LP-tunnus})
+        (provided
+          (domain/get-application-as anything anything) => {:id example-LP-tunnus}))
 
       (against-background
         (krysp-reader/get-app-info-from-message anything anything) => (assoc example-app-info :id example-LP-tunnus)))
-
 
     ; 7: do-create-application heittaa jonkin poikkeuksen -> (fail :error.no-previous-permit-found-from-backend)
     (fact "do-create-application fails with exception"

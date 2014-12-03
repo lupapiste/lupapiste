@@ -62,29 +62,20 @@
         (update-in [:tasks] (partial only-authority-sees user relates-to-draft))
         (filter-notice-from-application user)))))
 
-(defn get-application
-  ([]
-    (get-application {} {}))
-  ([query]
-    (get-application query {}))
-  ([query projection]
-    (mongo/select-one :applications query projection)))
-
-(defn get-application-as [application-id user]
-  {:pre [user]}
-  (filter-application-content-for
-    (get-application {$and [{:_id application-id} (application-query-for user)]})
-    user))
-
-(defn get-application-as-including-canceled [application-id user]
-  {:pre [user]}
-  (let [query-incl-canceleds (update-in (application-query-for user) [:state $nin] #(util/exclude-from-sequence % ["canceled"]))]
+(defn get-application-as [query-or-id user & include-canceled-apps?]
+  {:pre [query-or-id (map? user)]}
+  (let [query-id-part (if (map? query-or-id) query-or-id {:_id query-or-id})
+        query-user-part (if include-canceled-apps?
+                          (update-in (application-query-for user) [:state $nin] #(util/exclude-from-sequence % ["canceled"]))
+                          (application-query-for user))]
    (filter-application-content-for
-     (get-application {$and [{:_id application-id} query-incl-canceleds]})
+     (mongo/select-one :applications {$and [query-id-part query-user-part]})
      user)))
 
-(defn get-application-no-access-checking [application-id]
-  (get-application  {:_id application-id}))
+(defn get-application-no-access-checking [query-or-id]
+  {:pre [query-or-id]}
+  (let [query-part (if (map? query-or-id) query-or-id {:_id query-or-id})]
+    (mongo/select-one :applications query-part)))
 
 ;;
 ;; authorization

@@ -272,7 +272,7 @@
 
 (defn- update-link-permit-data-with-kuntalupatunnus-from-verdict [application]
   (let [link-permit-app-id (-> application :linkPermitData first :id)
-        verdicts (domain/get-application {:_id link-permit-app-id} {:verdicts 1})
+        verdicts (domain/get-application-no-access-checking link-permit-app-id)
         kuntalupatunnus (-> verdicts :verdicts first :kuntalupatunnus)]
     (if kuntalupatunnus
       (-> application
@@ -592,19 +592,43 @@
 ;; Application from previous permit
 ;;
 
+(defn- do-create-application-from-previous-permit [{:keys [user created] :as command} xml app-info info-source]
+  (let [asian-kuvaus (:rakennusvalvontaasianKuvaus app-info)
+        poikkeamat (:vahainenPoikkeaminen app-info)
+        manual-schema-datas {"hankkeen-kuvaus" (filter seq
+                                                 (conj []
+                                                   (when-not (ss/blank? asian-kuvaus) [["kuvaus"] asian-kuvaus])
+                                                   (when-not (ss/blank? poikkeamat)   [["poikkeamat"] poikkeamat])))}
+        command (update-in command [:data] merge {:infoRequest false :messages []} info-source)
+        created-application (do-create-application command manual-schema-datas)
+        ;; TODO: Aseta applicationille viimeisin state? (lupapalvelu.document.canonical-common/application-state-to-krysp-state kaanteisesti)
+;        created-application (assoc created-application
+;                              :state (some #(when (= (-> app-info :viimeisin-tila :tila) (val %)) (first %)) lupapalvelu.document.canonical-common/application-state-to-krysp-state))
+
+        ;; The application has to be inserted first, because it is assumed to be in the database when checking for verdicts (and their attachments).
+        _ (insert-application created-application)
+
+        ;; Update the hakija document    **** TODO: Hae taman sijaan sanomalta, kun Hakija-osapuoli saadaan sanoman mukana. ****
+        _ (if-let [document (domain/get-document-by-name created-application "hakija")]
+            (set-user-to-document created-application document (:id user) "henkilo" user created)
+            (fail! :error.document-not-found))
+
+        ;; attaches the new application, and its id to path [:data :id], into the command
+        command (merge command (application->command created-application))]
+    (verdict-api/do-check-for-verdict command xml)  ;; Get verdicts for the application
+    (:id created-application)))
+
 (defcommand create-application-from-previous-permit
   {:parameters [:operation :x :y :address :propertyId :municipality :kuntalupatunnus]
    :roles      [:applicant :authority]
    :notified   true ; OIR
    :input-validators [(partial action/non-blank-parameters [:operation :municipality])  ;; no :address included
-                      #_(partial property-id-parameters [:propertyId])                  ;; voi olla nil tai sitten validi propertyId
+                      ;; the propertyId parameter can be nil
+                      (fn [{{propertyId :propertyId} :data :as command}]
+                        (when (not (ss/blank? propertyId))
+                          (property-id-parameters [:propertyId] command)))
                       operation-validator]}
-  [{{:keys [operation x y address propertyId municipality kuntalupatunnus]} :data :keys [user created] :as command}]
-
-  ;;
-  ;; TODO: Pitaisiko propertyId ja address tarkistaa tassa?
-  ;;
-;  (when-not (ss/blank? propertyId) (property-id-parameters [:propertyId] propertyId))
+  [{{:keys [operation x y address propertyId municipality kuntalupatunnus]} :data :keys [user] :as command}]
 
   (let [permit-type (operations/permit-type-of-operation operation)
         organization (organization/resolve-organization municipality permit-type)]
@@ -612,88 +636,47 @@
     ;; Prevent creating many applications based on the same kuntalupatunnus:
     ;; Check if we have in database an application of same organization that has a verdict with the given kuntalupatunnus.
     ;; If so, open that application, otherwise go create a new application.
-    (if-let [app-with-verdict (domain/get-application {:organization (:id organization)
-                                                       :verdicts {$elemMatch {:kuntalupatunnus kuntalupatunnus}}})]
+    (if-let [app-with-verdict (domain/get-application-no-access-checking {:organization (:id organization)
+                                                                          :verdicts {$elemMatch {:kuntalupatunnus kuntalupatunnus}}})]
 
-      (if (domain/owner-or-writer? app-with-verdict (:id user))
+      (if-let [existing-app (domain/get-application-as (:id app-with-verdict) user)]
         (ok :id (:id app-with-verdict))
         (fail :error.lupapiste-application-already-exists-but-unauthorized-to-access-it :id (:id app-with-verdict)))
 
       ;; Fetch application from backing system with the provided kuntalupatunnus
-      (if-let [xml (krysp-fetch-api/get-application-xml
-                     {:id kuntalupatunnus :permitType permit-type :organization (:id organization)}
-                     false true)]
-
+      (let [xml (krysp-fetch-api/get-application-xml
+                  {:id kuntalupatunnus :permitType permit-type :organization (:id organization)}
+                  false true)]
+        (when-not xml (fail! :error.no-previous-permit-found-from-backend))  ;; Show error if could not receive the verdict message xml for the given kuntalupatunnus
         (let [enough-info-from-parameters (and
                                             (not (ss/blank? address)) (not (ss/blank? propertyId))
                                             (-> x util/->double pos?) (-> y util/->double pos?))
               app-info (krysp-reader/get-app-info-from-message xml kuntalupatunnus)
               rakennuspaikka-exists (and (:rakennuspaikka app-info) (every? #{:x :y :address :propertyId} (-> app-info :rakennuspaikka keys)))
-              lupapiste-tunnus (:id app-info)
-              asian-kuvaus (:rakennusvalvontaasianKuvaus app-info)
-              poikkeamat (:vahainenPoikkeaminen app-info)
-              manual-schema-datas {"hankkeen-kuvaus" (filter seq
-                                                       (conj []
-                                                         (when-not (ss/blank? asian-kuvaus) [["kuvaus"] asian-kuvaus])
-                                                         (when-not (ss/blank? poikkeamat)   [["poikkeamat"] poikkeamat])))}]
-          (if-not (empty? app-info)
+              lupapiste-tunnus (:id app-info)]
 
-             (if (= (:id organization) (:id (organization/resolve-organization (:municipality app-info) permit-type)))
+          ;; Could not extract info from verdict message xml
+          (when (empty? app-info)
+            (fail! :error.no-previous-permit-found-from-backend))
+          ;; Given organization and the organization in the verdict message xml differ from each other
+          (when-not (= (:id organization) (:id (organization/resolve-organization (:municipality app-info) permit-type)))
+            (fail! :error.previous-permit-found-from-backend-is-of-different-organization))
+          ;; We did not get the "rakennuspaikkatieto" element in the verdict xml message, so let's ask more needed info from user.
+          (when-not (or rakennuspaikka-exists enough-info-from-parameters)
+            (fail! :error.more-prev-app-info-needed :needMorePrevPermitInfo true))
 
-               (if (or rakennuspaikka-exists enough-info-from-parameters)
-
-                 (if (ss/blank? lupapiste-tunnus)
-
-                   ;; create the application
-                   (let [info-source (cond
-                                       rakennuspaikka-exists            (:rakennuspaikka app-info)
-;                                       (:ensimmainen-rakennus app-info) (:ensimmainen-rakennus app-info)     ;; TODO: Pitaisiko kayttaa taman propertyId:ta yms tietoja, kalilta annettujen sijaan (kts alla)?
-                                       enough-info-from-parameters      {:x x :y y :address address :propertyId propertyId}
-                                       )
-                         command (update-in command [:data] merge {:infoRequest false :messages []} info-source)
-                         created-application (do-create-application command manual-schema-datas)
-                         ;; TODO: Aseta applicationille viimeisin state? (lupapalvelu.document.canonical-common/application-state-to-krysp-state kaanteisesti)
-;                         created-application (assoc created-application
-;                                               :state (some #(when (= (-> app-info :viimeisin-tila :tila) (val %)) (first %)) lupapalvelu.document.canonical-common/application-state-to-krysp-state))
-
-                         ;; The application has to be inserted first, because it is assumed to be in the database when checking for verdicts (and their attachments).
-                         _ (insert-application created-application)
-
-                         ;; Update the hakija document
-                         _ (if-let [document (domain/get-document-by-name created-application "hakija")]
-                             (set-user-to-document created-application document (:id user) "henkilo" user created)
-                             (fail! :error.document-not-found))
-
-                         ;; attaches the new application, and its id to path [:data :id], into the command
-                         command (merge command (application->command created-application))
-                         ;; Get verdicts for the application
-                         _ (verdict-api/do-check-for-verdict command xml)]
-
-                     (ok :id (:id created-application)))
-
-
-                   ;; Jos ks. kuntalupatunnuksella on jo Lupapisteessa lupa, ja ks. henkilolla on sille oikeudet, avaa suoraan tama lupa.
-                   ;; Jos henkilolla ei ole oikeuksia talle luvalle, nayta virheilmoitus.
-                   (if-let [existing-application (mongo/by-id :applications lupapiste-tunnus)]
-                     (if (domain/owner-or-writer? existing-application (:id user))
-                       (ok :id lupapiste-tunnus)
-                       (fail :error.lupapiste-application-already-exists-but-unauthorized-to-access-it :id lupapiste-tunnus))
-                     ;; The xml message included lupapiste-id, but an application with that id is not found from database. This should never be the case.
-                     (do
-                       (error "Creating application from previous permit. Not able to find application id '" lupapiste-tunnus "' it includes from database.")
-                       (fail :error.not-able-to-open-with-lupapiste-id-that-previous-permit-included :id lupapiste-tunnus))))
-
-                 ;; If we did not get the "rakennuspaikkatieto" element in the verdict xml message,
-                 ;; let's ask more needed info from user
-                 (fail :error.more-prev-app-info-needed :needMorePrevPermitInfo true))
-
-               (fail :error.previous-permit-found-from-backend-is-of-different-organization))
-
-             ;; Sanomasta ei saatu purettua tietoa, esimerkiksi sanomassa ei kuitenkaan ollut asiatietoa annetulla kuntalupatunnuksella.
-             (fail :error.no-previous-permit-found-from-backend)))
-
-        ;; Annetulle kuntalupatunnukselle ei loytynyt sanomaa.
-        (fail :error.no-previous-permit-found-from-backend)))))
+          (if (ss/blank? lupapiste-tunnus)
+            ;; NO LUPAPISTE ID FOUND -> create the application
+            (let [info-source (cond
+                                rakennuspaikka-exists            (:rakennuspaikka app-info)
+;                                (:ensimmainen-rakennus app-info) (:ensimmainen-rakennus app-info)     ;; TODO: Pitaisiko kayttaa taman propertyId:ta yms tietoja, kalilta annettujen sijaan (kts alla)?
+                                enough-info-from-parameters      {:x x :y y :address address :propertyId propertyId})
+                  created-app-id (do-create-application-from-previous-permit command xml app-info info-source)]
+              (ok :id created-app-id))
+            ;; LUPAPISTE ID WAS FOUND -> open it if user has rights, otherwise show error
+            (if-let [existing-application (domain/get-application-as lupapiste-tunnus user)]
+              (ok :id lupapiste-tunnus)
+              (fail :error.lupapiste-application-already-exists-but-unauthorized-to-access-it :id lupapiste-tunnus))))))))
 
 (defn- add-operation-allowed? [_ application]
   (let [op (-> application :operations first :name keyword)
