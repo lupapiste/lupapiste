@@ -79,48 +79,25 @@ LUPAPISTE.ForemanModel = function() {
         .call();
     }
 
-    function linkToApplication(id) {
-      // 3. Link new application to current
-      ajax.command("add-link-permit", { id: self.application.id,
-                                        linkPermitId: id,
-                                        propertyId: self.application.propertyId })
-        .processing(self.processing)
-        .pending(self.pending)
-        .success(function() {
-          LUPAPISTE.ModalDialog.close();
-          // 4. open new application
-          repository.load(id);
-          window.location.hash = "!/application/" + id;
-        })
-        .error(function(err) {
-          self.error(loc(err.text));
-        })
-        .call();
-      return false;
-    }
-
     function createApplication() {
       // 2. create "tyonjohtajan ilmoitus" application
-      ajax.command("create-application", { infoRequest: false,
-                                           operation: "tyonjohtajan-nimeaminen",
-                                           y: self.application.location.y,
-                                           x: self.application.location.x,
-                                           address: self.application.address,
-                                           propertyId: self.application.propertyId,
-                                           messages: [],
-                                           municipality: self.application.municipality })
+      ajax.command("create-foreman-application", { id: self.application.id })
         .processing(self.processing)
         .pending(self.pending)
         .success(function(data) {
           // 3. invite foreman to new application
           if (self.email()) {
             inviteToApplication(data.id, function() {
-              linkToApplication(data.id);
+              LUPAPISTE.ModalDialog.close();
+              // 4. open new application
+              self.openApplication(data.id);
             }, function(err) {
               self.error(loc(err.text));
             });
           } else {
-            linkToApplication(data.id);
+            LUPAPISTE.ModalDialog.close();
+            // 4. open new application
+            self.openApplication(data.id);
           }
         })
         .error(function(err) {
