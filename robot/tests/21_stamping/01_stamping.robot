@@ -113,6 +113,7 @@ Select all files and start stamping
 Reset stamping, stamping page should be refreshed
   Click element  xpath=//div[@id="stamping-container"]//button[@data-test-id="stamp-reset"]
   Element should be visible  stamping-container
+  Element text should be  xpath=//div[@id="stamping-container"]//span[@data-test-id="stamp-status-text"]  Valmiina leimaamaan liitteet
   Xpath should match x times  //div[@id="stamping-container"]//tr[contains(@class,'selected')]  0
 
 Return from stamping to attachments tab
