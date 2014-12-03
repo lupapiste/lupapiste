@@ -380,7 +380,7 @@
     (fact "kuntalupatunnus" kuntalupatunnus => "14-0241-R 3")
     (fact "municipality" municipality => "186")
     (fact "rakennusvalvontaasianKuvaus" rakennusvalvontaasianKuvaus => "Rakennetaan yksikerroksinen lautaverhottu omakotitalo jossa kytketty autokatos/ varasto.")
-    (fact "vahainenPoikkeaminen" vahainenPoikkeaminen => "Poikekkaa meillä!")
+    (fact "vahainenPoikkeaminen" vahainenPoikkeaminen => "Poikekkaa meill\u00e4!")
 
     (facts "Rakennuspaikka"
       (let [{:keys [x y address propertyId] :as rakennuspaikka} (:rakennuspaikka info)]
