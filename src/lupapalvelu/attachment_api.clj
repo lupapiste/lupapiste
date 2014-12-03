@@ -374,7 +374,7 @@
     new-file-id))
 
 (defn- stamp-attachments!
-  [file-infos {:keys [text created organization transparency job-id application extra-info building-id muni-app-id section] :as context}]
+  [file-infos {:keys [text created organization transparency job-id application extra-info building-id kuntalupatunnus section] :as context}]
   {:pre [text organization (pos? created)]}
   (let [stamp (stamper/make-stamp
                 (ss/limit text 100)
@@ -383,7 +383,7 @@
                 transparency
                 (ss/limit extra-info 100)
                 (ss/limit building-id 100)
-                (ss/limit muni-app-id 100)
+                (ss/limit kuntalupatunnus 100)
                 (ss/limit section 100))]
     (doseq [file-info (vals file-infos)]
       (try
@@ -404,7 +404,7 @@
     job))
 
 (defcommand stamp-attachments
-  {:parameters [:id timestamp text organization files xMargin yMargin extraInfo buildingId muniAppId section]
+  {:parameters [:id timestamp text organization files xMargin yMargin extraInfo buildingId kuntalupatunnus section]
    :roles      [:authority]
    :states     [:submitted :sent :complement-needed :verdictGiven :constructionStarted :closed]
    :description "Stamps all attachments of given application"}
@@ -428,7 +428,7 @@
               :transparency (->long (or transparency 0))
               :extra-info (str extraInfo)
               :building-id (str buildingId)
-              :muni-app-id (str muniAppId)
+              :kuntalupatunnus (str kuntalupatunnus)
               :section (str section)})))
 
 (defquery stamp-attachments-job

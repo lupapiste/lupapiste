@@ -43,14 +43,14 @@
   (.draw text g x y))
 
 (defn make-stamp
-  [^String verdict ^Long created ^String organization ^Integer transparency ^String extra-info ^String building-id ^String muni-app-id ^String section]
+  [^String verdict ^Long created ^String organization ^Integer transparency ^String extra-info ^String building-id ^String kuntalupatunnus ^String section]
   (let [font (Font. "Courier" Font/BOLD 12)
         frc (FontRenderContext. nil RenderingHints/VALUE_TEXT_ANTIALIAS_ON RenderingHints/VALUE_FRACTIONALMETRICS_ON)
         texts (remove nil?
                 (map (fn [text] (if (seq text) (TextLayout. ^String text font frc)))
                   [(str verdict \space (format "%td.%<tm.%<tY" (java.util.Date. created)))
                    building-id
-                   muni-app-id
+                   kuntalupatunnus
                    section
                    extra-info
                    organization

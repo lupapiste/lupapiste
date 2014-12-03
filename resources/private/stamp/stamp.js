@@ -16,7 +16,7 @@ var stamping = (function() {
       transparency: ko.observable(),
       extraInfo: ko.observable(""),
       buildingId: ko.observable(""),
-      municipalityAppId: ko.observable(""),
+      kuntalupatunnus: ko.observable(""),
       section: ko.observable(""),
       buildingIdList: ko.observableArray()
     },
@@ -48,9 +48,9 @@ var stamping = (function() {
     }
 
     if ( model.appModel.verdicts && !_.isEmpty(model.appModel.verdicts()) ) {
-      model.stampFields.municipalityAppId(_.first(model.appModel.verdicts())["kuntalupatunnus"]());
+      model.stampFields.kuntalupatunnus(_.first(model.appModel.verdicts())["kuntalupatunnus"]());
     } else {
-      model.stampFields.municipalityAppId("");
+      model.stampFields.kuntalupatunnus("");
     }
 
     if ( model.appModel.verdicts && !_.isEmpty(model.appModel.verdicts()) ) {
