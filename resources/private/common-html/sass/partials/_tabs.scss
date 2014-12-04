@@ -50,7 +50,7 @@
         font-weight: bold;
         padding: 2px 6px;
         margin-right: 14px;
-      }      
+      }
       &:after {
         content: " ";
         display: inline-block;
@@ -139,7 +139,7 @@
   button.application-create {
     display: inline;
     margin-bottom: 0;
-    width: 340px;
+    width: 330px;
     @media all and (max-width: 1000px) {
       position: absolute;
       left: 8px;
