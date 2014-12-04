@@ -14,19 +14,19 @@
     var self = this;
 
     self.goPhase1 = function() {
-      window.location = "#!/create-part-1";
+      window.location.hash = "!/create-part-1";
       self.map.updateSize();
      };
 
 
     self.goPhase2 = function() {
-      window.location = "#!/create-part-2";
+      window.location.hash = "!/create-part-2";
       tree.reset(_.map(self.operations(), operations2tree));
       window.scrollTo(0, 0);
     };
 
     self.goPhase3 = function() {
-      window.location = "#!/create-part-3";
+      window.location.hash = "!/create-part-3";
       if (!self.inforequestsDisabled()) {
         window.scrollTo(0, 0);
       } else {
@@ -38,7 +38,7 @@
     };
 
      self.returnPhase2 = function() {
-      window.location = "#!/create-part-2";
+      window.location.hash = "!/create-part-2";
       window.scrollTo(0, 0);
     };
 
@@ -81,7 +81,7 @@
                                                   !isBlank(self.addressString()) &&
                                                   !isBlank(self.search()) &&
                                                   self.addressData() &&
-                                                  self.x() !== 0 && self.y() !== 0));   // TODO:
+                                                  self.x() !== 0 && self.y() !== 0));
     });
 
 
@@ -182,7 +182,6 @@
         .propertyId(null)
         .beginUpdateRequest()
         .searchPropertyId(x, y)
-//        .beginUpdateRequest()    // TODO: Tarvitseeko tahan valiin oman beginUpdateRequest()-kutsun?
         .searchAddress(x, y);
       return false;
     };
@@ -304,12 +303,11 @@
               .center(x, y, 13)
               .setXY(x, y)
               .addressData(data)
-//              .beginUpdateRequest()    // TODO: Tarvitseeko tahan valiin oman beginUpdateRequest()-kutsun?
               .searchPropertyId(x, y,
                 function(d) {
                   if (successCallback) { successCallback(result); } },  // Note: returning the result of the locationSearch.pointByAddress query
                 function(d) {
-                  if (errorCallback) { errorCallback(d); } });   // TODO: Mita pitaisi palauttaa taman parametrina?
+                  if (errorCallback) { errorCallback(d); } });   // TODO: Mita pitaisi palauttaa taman parametrina: "d" vai "result"?
           } else {
             if (errorCallback) {
               errorCallback(result); }  // TODO: Pitaisiko tassa kutsua successCallback?
@@ -414,7 +412,7 @@
       .pending(self.pending)
       .success(function(data) {
         setTimeout(self.clear, 0);
-        window.location = (infoRequest ? "#!/inforequest/" : "#!/application/") + data.id;
+        window.location.hash = (infoRequest ? "!/inforequest/" : "!/application/") + data.id;
       })
       .call();
 
@@ -453,7 +451,7 @@
       .pending(self.pending)
       .success(function(data) {
         setTimeout(self.clear, 0);
-        window.location = "#!/application/" + data.id;
+        window.location.hash = "!/application/" + data.id;
       })
       .error(function(d) {
         // If app creation failed because the "rakennuksen tiedot" data was not received in the xml message from municipality's backend,
