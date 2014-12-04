@@ -220,14 +220,20 @@
     function zoomer(level) { return function(item) { zoom(item, level); }; }
     function fillMunicipality(item) {
       self.search(", " + loc(["municipality", item.municipality]));
-      $("#create-search").caretToStart();
-      $("#prev-permit-address-search").caretToStart();
+      if (self.creatingAppWithPrevPermit) {
+        $("#prev-permit-address-search").caretToStart();
+      } else {
+        $("#create-search").caretToStart();
+      }
     }
     function fillAddress(item) {
       self.search(item.street + " " + item.number + ", " + loc(["municipality", item.municipality]));
       var addressEndIndex = item.street.length + item.number.toString().length + 1;
-      $("#create-search").caretTo(addressEndIndex);
-      $("#prev-permit-address-search").caretTo(addressEndIndex);
+      if (self.creatingAppWithPrevPermit) {
+        $("#prev-permit-address-search").caretTo(addressEndIndex);
+      } else {
+        $("#create-search").caretTo(addressEndIndex);
+      }
     }
 
     function selector(item) { return function(value) { return _.every(value[0], function(v, k) { return item[k] === v; }); }; }
