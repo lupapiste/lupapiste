@@ -5,14 +5,14 @@
             [lupapalvelu.domain :as domain]))
 
 (defn- invite [apikey application-id document-id doc-name email & [text]]
-  (command apikey :invite
+  (command apikey :invite-with-role
     :id application-id
     :email email
-    :title email
     :text  (or text email)
     :documentName doc-name
     :documentId document-id
-    :path ""))
+    :path ""
+    :role "writer"))
 
 (apply-remote-minimal)
 
@@ -33,7 +33,7 @@
         (:text (invite mikko application-id suunnittelija-doc "suunnittelija" "")) => "error.missing-parameters")
       (fact "Email contains whitespace"
         (:text (invite mikko application-id suunnittelija-doc "suunnittelija" "juha jokimaki@solita.fi")) => "error.email")
-      (fact "Email contains non-ascii chars"
+      (fact "Email contains non-ascii chars"ﬂ
         (:text (invite mikko application-id suunnittelija-doc "suunnittelija" "juha.jokim\u00e4ki@solita.fi")) => "error.email"))
 
     (fact "Teppo must not be able to invite himself!"
