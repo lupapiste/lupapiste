@@ -31,6 +31,8 @@
         updated-organization (query admin :organization-by-id :organizationId organization-id)
         updated-scope        (local-org-api/resolve-organization-scope (:municipality orig-scope) (:permitType orig-scope))]
 
+    resp => ok?
+
     (fact "inforequest-enabled" (:inforequest-enabled updated-scope) => (not (:inforequest-enabled orig-scope)))
     (fact "new-application-enabled" (:new-application-enabled updated-scope) => (not (:new-application-enabled orig-scope)))
     (fact "open-inforequest" (:open-inforequest updated-scope) => (not (:open-inforequest orig-scope)))
