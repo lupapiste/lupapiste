@@ -33,7 +33,7 @@
         (:text (invite mikko application-id suunnittelija-doc "suunnittelija" "")) => "error.missing-parameters")
       (fact "Email contains whitespace"
         (:text (invite mikko application-id suunnittelija-doc "suunnittelija" "juha jokimaki@solita.fi")) => "error.email")
-      (fact "Email contains non-ascii chars"ﬂ
+      (fact "Email contains non-ascii chars"
         (:text (invite mikko application-id suunnittelija-doc "suunnittelija" "juha.jokim\u00e4ki@solita.fi")) => "error.email"))
 
     (fact "Teppo must not be able to invite himself!"
