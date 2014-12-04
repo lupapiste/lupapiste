@@ -32,6 +32,8 @@
 (def maasto "https://ws.nls.fi/maasto/wfs")
 (def nearestfeature "https://ws.nls.fi/maasto/nearestfeature")
 
+(def wms-url (str (env/value :geoserver :host) (env/value :geoserver :wms :path)))
+
 (def- auth
   (let [conf (env/value :nls)]
     {:raster        [(:username (:raster conf))     (:password (:raster conf))]
@@ -329,9 +331,8 @@
   (first (xml-> layer :Name text)))
 
 (defn- plan-info-config [municipality]
-  (let [{:keys [host path]} (env/value :geoserver :wms)
-        k (keyword municipality)]
-    {:url    (or (env/value :plan-info k :url) (str host path))
+  (let [k (keyword municipality)]
+    {:url    (or (env/value :plan-info k :url) wms-url)
      :layers (or (env/value :plan-info k :layers) (str municipality "_asemakaavaindeksi"))
      :format (or (env/value :plan-info k :format) "application/vnd.ogc.gml")}))
 
@@ -390,6 +391,9 @@
      :vahvistett_pvm (first (xml-> feature :lupapiste:VAHVISTETT text))
      :linkki (first (xml-> feature :lupapiste:LINKKI text))
      :type "sito"}))
+
+
+
 ;;
 ;; Raster images:
 ;;
@@ -401,13 +405,10 @@
                :headers {"accept-encoding" (get-in request [:headers "accept-encoding"])}
                :basic-auth (:raster auth)
                :as :stream})
-      "wms" (let [{:keys [host path]} (env/value :geoserver :wms)
-                  wms-url (str host path)]
-              (assert (and host path))
-              (http/get wms-url
-                {:query-params (:params request)
-                 :headers {"accept-encoding" (get-in request [:headers "accept-encoding"])}
-                 :as :stream}))
+      "wms" (http/get wms-url
+              {:query-params (:params request)
+               :headers {"accept-encoding" (get-in request [:headers "accept-encoding"])}
+               :as :stream})
       "wmts" (let [{:keys [username password]} (env/value :wmts :raster)
                    url-part (case layer
                               "taustakartta" "maasto"

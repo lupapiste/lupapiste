@@ -202,7 +202,7 @@
   {:description "Applicant/application owner can sign an application's verdict"
    :parameters [id verdictId password]
    :states     [:verdictGiven :constructionStarted]
-   :pre-checks [domain/validate-owner-or-writer]
+   :pre-checks [domain/validate-owner-or-write-access]
    :roles      [:applicant :authority]}
   [{:keys [application created user] :as command}]
   (if (user/get-user-with-password (:username user) password)

@@ -12,13 +12,19 @@
 (defn- to-timestamp [yyyy-mm-dd]
   (coerce/to-long (coerce/from-string yyyy-mm-dd)))
 
-(testable-privates lupapalvelu.xml.krysp.reader ->standard-verdicts ->simple-verdicts)
+(testable-privates lupapalvelu.xml.krysp.reader ->standard-verdicts ->simple-verdicts pysyva-rakennustunnus)
 
 (fact "property-equals returns url-encoded data"
   (property-equals "_a_" "_b_") => "%3CPropertyIsEqualTo%3E%3CPropertyName%3E_a_%3C%2FPropertyName%3E%3CLiteral%3E_b_%3C%2FLiteral%3E%3C%2FPropertyIsEqualTo%3E")
 
 (fact "property-equals returns url-encoded xml-encoded data"
   (property-equals "<a>" "<b>") => "%3CPropertyIsEqualTo%3E%3CPropertyName%3E%26lt%3Ba%26gt%3B%3C%2FPropertyName%3E%3CLiteral%3E%26lt%3Bb%26gt%3B%3C%2FLiteral%3E%3C%2FPropertyIsEqualTo%3E")
+
+(facts "pysyva-rakennustunnus"
+  (fact (pysyva-rakennustunnus nil) => nil)
+  (fact (pysyva-rakennustunnus "") => nil)
+  (fact (pysyva-rakennustunnus "123456") => nil)
+  (fact (pysyva-rakennustunnus "1234567892") => "1234567892"))
 
 (facts "KRYSP verdict"
   (let [xml (xml/parse (slurp "resources/krysp/sample/verdict.xml"))

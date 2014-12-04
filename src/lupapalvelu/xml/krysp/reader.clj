@@ -131,11 +131,18 @@
 (permit/register-function permit/MAL :xml-from-krysp mal-application-xml)
 (permit/register-function permit/VVVL :xml-from-krysp vvvl-application-xml)
 
+(defn- pysyva-rakennustunnus
+  "Returns national building id or nil if the input was not valid"
+  [^String s]
+  (let [building-id (ss/trim s)]
+    (when (util/rakennustunnus? building-id)
+      building-id)))
+
 (defn- ->building-ids [id-container xml-no-ns]
-  (let [national-id (get-text xml-no-ns id-container :valtakunnallinenNumero)
+  (let [national-id (pysyva-rakennustunnus (get-text xml-no-ns id-container :valtakunnallinenNumero))
         local-short-id (get-text xml-no-ns id-container :rakennusnro)]
     {:propertyId   (get-text xml-no-ns id-container :kiinttun)
-     :buildingId   (some #(when-not (ss/blank? %) %) [national-id local-short-id])
+     :buildingId   (first (remove ss/blank? [national-id local-short-id]))
      :nationalId   national-id
      :localId      nil ; reserved for the next KRYSP schema version
      :localShortId local-short-id
@@ -239,7 +246,7 @@
       (polished
         (util/assoc-when
           {:muutostyolaji                 ...notimplemented...
-           :valtakunnallinenNumero        (ss/trim (get-text rakennus :rakennustunnus :valtakunnallinenNumero))
+           :valtakunnallinenNumero        (pysyva-rakennustunnus (get-text rakennus :rakennustunnus :valtakunnallinenNumero))
            :rakennusnro                   (ss/trim (get-text rakennus :rakennustunnus :rakennusnro))
            :manuaalinen_rakennusnro       ""
            :jarjestysnumero               (get-text rakennus :rakennustunnus :jarjestysnumero)
