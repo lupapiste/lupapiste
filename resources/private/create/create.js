@@ -431,7 +431,7 @@
     //
 
     self.clearForCreateAppWithPrevPermit = function() {
-      model.clear();
+      self.clear();
       self.creatingAppWithPrevPermit = true;
       self.operation("aiemmalla-luvalla-hakeminen");
     };
