@@ -359,7 +359,7 @@
    :states     [:draft :open]
    :notified   true
    :on-success (notify :application-state-change)
-   :pre-checks [domain/validate-owner-or-writer]}
+   :pre-checks [domain/validate-owner-or-write-access]}
   [{:keys [application created] :as command}]
   (or (validate-link-permits application)
       (do-submit command application created)))

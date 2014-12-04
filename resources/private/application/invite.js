@@ -36,13 +36,14 @@ LUPAPISTE.InviteModel = function() {
     var documentName = model.documentName();
     var documentId = model.documentId();
     var path = model.path();
-    ajax.command("invite", { id: self.applicationId,
-                             documentName: documentName,
-                             documentId: documentId,
-                             path: path,
-                             email: email,
-                             title: "uuden suunnittelijan lis\u00E4\u00E4minen",
-                             text: text})
+    ajax.command("invite-with-role",
+      { id: self.applicationId,
+        documentName: documentName,
+        documentId: documentId,
+        path: path,
+        email: email,
+        role: "writer",
+        text: text })
       .processing(self.processing)
       .pending(self.pending)
       .success(function() {
