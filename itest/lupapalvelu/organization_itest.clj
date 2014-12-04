@@ -29,7 +29,7 @@
                                :openInforequestEmail "someone@localhost"
                                :opening nil)
         updated-organization (query admin :organization-by-id :organizationId organization-id)
-        updated-scope        (local-org-api/resolve-organization-scope (:municipality orig-scope) (:permitType orig-scope))]
+        updated-scope        (local-org-api/resolve-organization-scope (:municipality orig-scope) (:permitType orig-scope) updated-organization)]
 
     resp => ok?
 
