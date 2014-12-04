@@ -10,7 +10,7 @@
 
   (fact "default"
     (let [{:keys [url layers format]} (plan-info-config "999")]
-      url => (str (env/value :geoserver :wms :host) (env/value :geoserver :wms :path))
+      url => (str (env/value :geoserver :host) (env/value :geoserver :wms :path))
       layers => "999_asemakaavaindeksi"
       format => "application/vnd.ogc.gml"))
 
