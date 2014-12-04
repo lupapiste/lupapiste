@@ -14,33 +14,6 @@
 
 (fixture/apply-fixture "minimal")
 
-#_(fact (user/change-password "veikko.viranomainen@tampere.fi" "passu") => nil
-     (provided (security/get-hash "passu" anything) => "hash"))
-
-
-#_(defn create-app-with-fn [f apikey & args]
-  (let [args (->> args
-               (apply hash-map)
-               (merge {:operation "asuinrakennus"
-                       :propertyId "75312312341234"
-                       :x 444444 :y 6666666
-                       :address "foo 42, bar"
-                       :municipality (or (muni-for-key apikey) sonja-muni)})
-               (mapcat seq))]
-    (apply f apikey :create-application args)))
-
-;ajax.command("create-application-from-previous-permit", {
-;        operation: self.operation(),
-;        y: self.y(),
-;        x: self.x(),
-;        address: self.addressString(),
-;        propertyId: util.prop.toDbFormat(self.propertyId()),
-;        municipality: self.municipality().id,
-;        kuntalupatunnus: self.kuntalupatunnusFromPrevPermit()
-;      })
-
-; (provided (cr/get-xml anything anything anything) => (xml/parse (slurp (clojure.java.io/resource "mml/yhteystiedot-KP.xml"))))
-
 (def- example-kuntalupatunnus "14-0241-R 3")
 (def- example-LP-tunnus "LP-186-2014-00290")
 
