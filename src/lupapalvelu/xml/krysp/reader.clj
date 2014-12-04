@@ -532,7 +532,7 @@
 ;           :toimenpidetieto toimenpidetieto
 ;           :asioimiskieli (cr/all-of asia [:lisatiedot :Lisatiedot :asioimiskieli])
           }
-          (when (and coord-array-Rakennuspaikka osoite-Rakennus kiinteistotunnus-Rakennus)
+          (when (and coord-array-Rakennus osoite-Rakennus kiinteistotunnus-Rakennus)
             {:ensimmainen-rakennus {:x (first coord-array-Rakennus)
                                     :y (second coord-array-Rakennus)
                                     :address osoite-Rakennus
