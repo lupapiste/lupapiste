@@ -595,6 +595,7 @@
 (defn- do-create-application-from-previous-permit [{:keys [user created] :as command} xml app-info info-source]
   (let [asian-kuvaus (:rakennusvalvontaasianKuvaus app-info)
         poikkeamat (:vahainenPoikkeaminen app-info)
+        ;; TODO: Add data manually for the Hakija document when info for that is receiced in the verdict xml message
         manual-schema-datas {"hankkeen-kuvaus" (filter seq
                                                  (conj []
                                                    (when-not (ss/blank? asian-kuvaus) [["kuvaus"] asian-kuvaus])
@@ -605,16 +606,12 @@
 ;        created-application (assoc created-application
 ;                              :state (some #(when (= (-> app-info :viimeisin-tila :tila) (val %)) (first %)) lupapalvelu.document.canonical-common/application-state-to-krysp-state))
 
-        ;; The application has to be inserted first, because it is assumed to be in the database when checking for verdicts (and their attachments).
-        _ (insert-application created-application)
-
-        ;; Update the hakija document    **** TODO: Hae taman sijaan sanomalta, kun Hakija-osapuoli saadaan sanoman mukana. ****
-        _ (if-let [document (domain/get-document-by-name created-application "hakija")]
-            (set-user-to-document created-application document (:id user) "henkilo" user created)
-            (fail! :error.document-not-found))
-
         ;; attaches the new application, and its id to path [:data :id], into the command
         command (merge command (application->command created-application))]
+
+    ;; The application has to be inserted first, because it is assumed to be in the database when checking for verdicts (and their attachments).
+    (insert-application created-application)
+
     (verdict-api/do-check-for-verdict command xml)  ;; Get verdicts for the application
     (:id created-application)))
 
