@@ -469,6 +469,11 @@
                                    (map #(-> (cr/all-of % [:Tilamuutos]) (cr/convert-keys-to-timestamps [:pvm])))
                                    (sort-by :pvm))
             viimeisin-tila (last kasittelynTilatiedot)
+            asioimiskieli (cr/all-of asia [:lisatiedot :Lisatiedot :asioimiskieli])
+            asioimiskieli-code (case asioimiskieli
+                                 "suomi"  "fi"
+                                 "ruotsi" "sv"
+                                 "fi")
             asianTiedot (cr/all-of asia [:asianTiedot :Asiantiedot])
 
             ;;
@@ -484,8 +489,9 @@
 
             ;; Rakennuspaikka
             Rakennuspaikka (cr/all-of asia [:rakennuspaikkatieto :Rakennuspaikka])
-            ;; TODO: Ruotsinkielinen osoite tulee kakkosena listalla. Otetaanko se mukaan?
-            osoite-Rakennuspaikka (-> Rakennuspaikka :osoite :osoitenimi :teksti (#(if (sequential? %) (first %) %)))
+            osoitteet-xml (select asia [:rakennuspaikkatieto :Rakennuspaikka :osoite :osoitenimi :teksti])
+            osoite-Rakennuspaikka (or (-> (select1 osoitteet-xml [(enlive/attr= :xml:lang asioimiskieli-code)]) cr/all-of)
+                                    (-> (select1 osoitteet-xml [(enlive/attr= :xml:lang "fi")]) cr/all-of))
             kiinteistotunnus-Rakennuspaikka (-> Rakennuspaikka :rakennuspaikanKiinteistotieto :RakennuspaikanKiinteisto :kiinteistotieto :Kiinteisto :kiinteistotunnus)
             coord-array-Rakennuspaikka (resolve-coordinates
                                          (select1 asia [:rakennuspaikkatieto :Rakennuspaikka :sijaintitieto :Sijainti :piste])
@@ -525,7 +531,7 @@
 ;           :viimeisin-tila viimeisin-tila
 ;           :rakennusten-tiedot (->buildings xml)
 ;           :toimenpidetieto toimenpidetieto
-;           :asioimiskieli (cr/all-of asia [:lisatiedot :Lisatiedot :asioimiskieli])
+;           :asioimiskieli asioimiskieli
           }
           (when (and coord-array-Rakennus osoite-Rakennus kiinteistotunnus-Rakennus)
             {:ensimmainen-rakennus {:x (first coord-array-Rakennus)
