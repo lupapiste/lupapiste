@@ -436,7 +436,7 @@
       self.operation("aiemmalla-luvalla-hakeminen");
     };
 
-    var doCreateApplicationWithPrevPermit = function() {
+    self.createApplicationWithPrevPermit = function() {
       if (self.newApplicationsDisabled()) {
         LUPAPISTE.ModalDialog.showDynamicOk(
             loc("new-applications-or-inforequests-disabled.dialog.title"),
@@ -475,22 +475,6 @@
         }
       })
       .call();
-    }
-
-    self.createApplicationWithPrevPermit = function() {
-      if (!self.needMorePrevPermitInfo()) {
-        doCreateApplicationWithPrevPermit();
-      } else {
-        //
-        // TODO: ovatko tarkastukset parempi olla napissa, tassa vai molemmissa?
-        //
-        if (!isBlank(self.kuntalupatunnusFromPrevPermit) && !isBlank(self.addressString()) &&
-            self.addressData() && self.propertyId() && self.x() !== 0 && self.y() !== 0 && self.municipality() ) {
-          doCreateApplicationWithPrevPermit();
-        } else {
-          notify.error(loc("error.dialog.title"), loc("info.no-previous-permit-found-from-backend"));
-        }
-      }
     };
 
   }();
