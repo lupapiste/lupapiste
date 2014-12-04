@@ -57,17 +57,15 @@
 ;; For building filters
 (def- yht-tunnus "yht:LupaTunnus/yht:muuTunnustieto/yht:MuuTunnus/yht:tunnus")
 (def- yht-kuntalupatunnus "yht:LupaTunnus/yht:kuntalupatunnus")
-(defn- tunnus-path [kuntalupatunnus?] (if kuntalupatunnus? yht-kuntalupatunnus yht-tunnus))
+(defn- tunnus-path [prefix kuntalupatunnus?] (str prefix (if kuntalupatunnus? yht-kuntalupatunnus yht-tunnus)))
+(def- asian-lp-lupatunnus (partial tunnus-path "rakval:luvanTunnisteTiedot/"))
+(def- poik-lp-lupatunnus  (partial tunnus-path "ppst:luvanTunnistetiedot/"))
+(def- yl-lp-lupatunnus    (partial tunnus-path "ymy:luvanTunnistetiedot/"))
+(def- mal-lp-lupatunnus   (partial tunnus-path "ymm:luvanTunnistetiedot/"))
+(def- vvvl-lp-lupatunnus  (partial tunnus-path "ymv:luvanTunnistetiedot/"))
+(def- ya-lp-lupatunnus    (partial tunnus-path "yak:luvanTunnisteTiedot/"))
 
-(def rakennuksen-kiinteistotunnus "rakval:rakennustieto/rakval:Rakennus/rakval:rakennuksenTiedot/rakval:rakennustunnus/rakval:kiinttun")
-
-(defn- asian-lp-lupatunnus [kuntalupatunnus?] (str "rakval:luvanTunnisteTiedot/" (tunnus-path kuntalupatunnus?)))
-(defn- poik-lp-lupatunnus  [kuntalupatunnus?] (str "ppst:luvanTunnistetiedot/" (tunnus-path kuntalupatunnus?)))
-(defn- yl-lp-lupatunnus    [kuntalupatunnus?] (str "ymy:luvanTunnistetiedot/" (tunnus-path kuntalupatunnus?)))
-(defn- mal-lp-lupatunnus   [kuntalupatunnus?] (str "ymm:luvanTunnistetiedot/" (tunnus-path kuntalupatunnus?)))
-(defn- vvvl-lp-lupatunnus  [kuntalupatunnus?] (str "ymv:luvanTunnistetiedot/" (tunnus-path kuntalupatunnus?)))
-(defn- yleisten-alueiden-lp-lupatunnus [kuntalupatunnus?] (str "yak:luvanTunnisteTiedot/" (tunnus-path kuntalupatunnus?)))
-
+(def- rakennuksen-kiinteistotunnus "rakval:rakennustieto/rakval:Rakennus/rakval:rakennuksenTiedot/rakval:rakennustunnus/rakval:kiinttun")
 
 (defn property-equals
   "Returns URL-encoded search parameter suitable for 'filter'"
@@ -85,7 +83,7 @@
         <wfs:Query typeName=\"yak:Sijoituslupa,yak:Kayttolupa,yak:Liikennejarjestelylupa,yak:Tyolupa\">
           <ogc:Filter>
             <ogc:PropertyIsEqualTo>
-                       <ogc:PropertyName>" (yleisten-alueiden-lp-lupatunnus kuntalupatunnus?) "</ogc:PropertyName>
+                       <ogc:PropertyName>" (ya-lp-lupatunnus kuntalupatunnus?) "</ogc:PropertyName>
                        <ogc:Literal>" id "</ogc:Literal>
             </ogc:PropertyIsEqualTo>
           </ogc:Filter>
@@ -122,9 +120,9 @@
 (defn mal-application-xml    [server id raw? kuntalupatunnus?] (application-xml mal-case-type (mal-lp-lupatunnus kuntalupatunnus?) server id raw?))
 (defn vvvl-application-xml   [server id raw? kuntalupatunnus?] (application-xml vvvl-case-type (vvvl-lp-lupatunnus kuntalupatunnus?) server id raw?))
 (defn ya-application-xml     [server id raw? kuntalupatunnus?] (let [options (post-body-for-ya-application id kuntalupatunnus?)
-                                                    credentials nil]
-                                                (debug "Get application: " server " with post body: " options )
-                                                (cr/get-xml-with-post server options credentials raw?)))
+                                                                     credentials nil]
+                                                                 (debug "Get application: " server " with post body: " options )
+                                                                 (cr/get-xml-with-post server options credentials raw?)))
 
 (permit/register-function permit/R  :xml-from-krysp rakval-application-xml)
 (permit/register-function permit/P  :xml-from-krysp poik-application-xml)
@@ -379,9 +377,6 @@
                     last
                     :hakemuksenTila
                     ss/lower-case)]
-    ;;
-    ;; TODO: Ovatko nama tilat validit?
-    ;;
     (when-not (#{nil "luonnos" "hakemus" "valmistelussa" "vastaanotettu" "tarkastettu, t\u00e4ydennyspyynt\u00f6"} app-state)
       (map (fn [paatos-xml-without-ns]
              (let [paatosdokumentinPvm-timestamp (cr/to-timestamp (get-text paatos-xml-without-ns :paatosdokumentinPvm))]
