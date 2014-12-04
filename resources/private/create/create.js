@@ -417,7 +417,7 @@
       .processing(self.processing)
       .pending(self.pending)
       .success(function(data) {
-        setTimeout(self.clear, 0);
+        self.clear();
         window.location.hash = (infoRequest ? "!/inforequest/" : "!/application/") + data.id;
       })
       .call();
@@ -456,7 +456,7 @@
       .processing(self.processing)
       .pending(self.pending)
       .success(function(data) {
-        setTimeout(self.clear, 0);
+        self.clear();
         window.location.hash = "!/application/" + data.id;
       })
       .error(function(d) {
