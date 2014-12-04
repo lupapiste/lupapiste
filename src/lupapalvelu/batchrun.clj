@@ -170,7 +170,7 @@
 
     (mongo/disconnect!)))
 
-(defn fetch-verdics []
+(defn fetch-verdicts []
   (let [orgs-with-wfs-url-defined-for-some-scope (organization/get-organizations
                                                    {$or [{:krysp.R.url {$exists true}}
                                                          {:krysp.YA.url {$exists true}}
@@ -198,9 +198,9 @@
               (logging/with-logging-context {:applicationId id}
                 (if-not (s/blank? url)
 
-                  (let [command (application->command app)
-                        resp (verdict-api/do-check-for-verdict command eraajo-user (now) (:application command))]
-                    (when (and (ok? resp) (:verdictCount resp) (pos? (:verdictCount resp)))
+                  (let [command (assoc (application->command app) :user eraajo-user :created (now))
+                        result (verdict-api/do-check-for-verdict command)]
+                    (when (-> result :verdicts count pos?)
                       ;; Print manually to events.log, because "normal" prints would be sent as emails to us.
                       (logging/log-event :info {:run-by "Automatic verdicts checking" :event "Found new verdict"})
                       (notifications/notify! :application-verdict command)))
@@ -214,5 +214,5 @@
 (defn check-for-verdicts [& args]
   (when (env/feature? :automatic-verdicts-checking)
     (mongo/connect!)
-    (fetch-verdics)
+    (fetch-verdicts)
     (mongo/disconnect!)))

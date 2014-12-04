@@ -554,13 +554,13 @@
           attachment-id (str application-id "." user-id "." attachment-id)]
       (when (zero? (mongo/count :applications {:_id application-id :attachments.id attachment-id}))
         (attachment/attach-file! {:application application
-                                  :attachment-id attachment-id
-                                  :attachment-type attachment-type
-                                  :content ((:content attachment))
-                                  :filename file-name
-                                  :content-type content-type
+                       :attachment-id attachment-id
+                       :attachment-type attachment-type
+                       :content ((:content attachment))
+                       :filename file-name
+                       :content-type content-type
                                   :size size
-                                  :created created
-                                  :user user
-                                  :locked false}))))
+                       :created created
+                       :user user
+                       :locked false}))))
   (ok))

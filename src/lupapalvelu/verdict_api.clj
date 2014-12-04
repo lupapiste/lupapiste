@@ -8,14 +8,14 @@
             [sade.core :refer [ok fail fail!]]
             [lupapalvelu.action :refer [defquery defcommand update-application notify boolean-parameters] :as action]
             [lupapalvelu.attachment :as attachment]
-            [lupapalvelu.application :as application]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.tasks :as tasks]
             [lupapalvelu.user :as user]
-            [lupapalvelu.xml.krysp.reader :as krysp])
+            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch-api]
+            [lupapalvelu.xml.krysp.reader :as krysp-reader])
   (:import [java.net URL]))
 
 ;;
@@ -74,24 +74,28 @@
 (defn- get-verdicts-with-attachments [application user timestamp xml]
   (let [permit-type (:permitType application)
         reader (permit/get-verdict-reader permit-type)
-        verdicts (krysp/->verdicts xml reader)]
+        verdicts (krysp-reader/->verdicts xml reader)]
     (filter seq (map (partial verdict-attachments application user timestamp) verdicts))))
 
-(defn do-check-for-verdict [command user created application]
-  (if-let [xml (application/get-application-xml application)]
+(defn do-check-for-verdict
+  ([command]
+    {:pre [(every? command [:application :user :created])]}
+    (when-let [app-xml (krysp-fetch-api/get-application-xml (:application command))]
+      (do-check-for-verdict command app-xml)))
+
+  ([{:keys [application user created] :as command} app-xml]
+    {:pre [(every? command [:application :user :created])]}
     (let [extras-reader (permit/get-verdict-extras-reader (:permitType application))]
-      (if-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created xml))]
+      (when-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created app-xml))]
         (let [has-old-verdict-tasks (some #(= "verdict" (get-in % [:source :type]))  (:tasks application))
               tasks (tasks/verdicts->tasks (assoc application :verdicts verdicts-with-attachments) created)
               updates {$set (merge {:verdicts verdicts-with-attachments
                                     :modified created
                                     :state    :verdictGiven}
                               (when-not has-old-verdict-tasks {:tasks tasks})
-                              (when extras-reader (extras-reader xml)))}]
+                              (when extras-reader (extras-reader app-xml)))}]
           (update-application command updates)
-          (ok :verdictCount (count verdicts-with-attachments) :taskCount (count (get-in updates [$set :tasks]))))
-        (fail :info.no-verdicts-found-from-backend)))
-    (fail :info.no-verdicts-found-from-backend)))
+          {:verdicts verdicts-with-attachments :tasks (get-in updates [$set :tasks])})))))
 
 (notifications/defemail :application-verdict
   {:subject-key    "verdict"
@@ -105,9 +109,12 @@
    :states     [:submitted :complement-needed :sent :verdictGiven] ; states reviewed 2013-09-17
    :roles      [:authority]
    :notified   true
-   :on-success  (notify :application-verdict)}
-  [{:keys [user created application] :as command}]
-  (do-check-for-verdict command user created application))
+   :on-success (notify :application-verdict)}
+  [command]
+  (if-let [result (do-check-for-verdict command)]
+    (ok :verdictCount (count (:verdicts result)) :taskCount (count (:tasks result)))
+    (fail :info.no-verdicts-found-from-backend)))
+
 
 ;;
 ;; Manual verdicts

@@ -91,7 +91,11 @@
   (get-metadata permit-type :verdict-extras-krysp-reader))
 
 (defn get-application-xml-getter [permit-type]
-  "Returns a function that fetches KRYSP XML from municipality backend. Function parameters: url, application-id."
+  "Returns a function that fetches KRYSP XML from municipality backend.
+   Function parameters: 1) url,
+                        2) id,
+                        3) optional boolean parameter: raw form
+                        4) optional boolean parameter: if true the id parameter is interpreted as kuntalupatunnus instead of application id."
   (get-metadata permit-type :xml-from-krysp))
 
 (defn permit-type
