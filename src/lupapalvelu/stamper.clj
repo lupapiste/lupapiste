@@ -42,33 +42,45 @@
 (defn draw-text [g text x y]
   (.draw text g x y))
 
-(defn make-stamp [^String verdict ^long created ^String municipality ^Integer transparency]
-  (let [font (Font. "Courier" Font/BOLD 12)
+(defn make-stamp
+  [^String verdict ^Long created ^Integer transparency info-fields]
+  (let [fields (conj
+                 (vec
+                   (conj info-fields (str verdict \space (format "%td.%<tm.%<tY" (java.util.Date. created)))))
+                 "LUPAPISTE.fi")
+        font (Font. "Courier" Font/BOLD 12)
         frc (FontRenderContext. nil RenderingHints/VALUE_TEXT_ANTIALIAS_ON RenderingHints/VALUE_FRACTIONALMETRICS_ON)
-        texts (map (fn [text] (TextLayout. ^String text font frc))
-                   [(str verdict \space (format "%td.%<tm.%<tY" (java.util.Date. created)))
-                    municipality
-                    "LUPAPISTE.fi"])
+        texts (remove nil?
+                (map
+                  (fn [text]
+                    (if (seq text)
+                      (TextLayout. ^String text font frc)))
+                  fields))
         text-widths (map (fn [text] (-> text (.getPixelBounds nil 0 0) (.getWidth))) texts)
+        line-height 22
+        rect-height (+ (* (count texts) line-height) 10)
+        qr-size 70
         width (int (+ (reduce max text-widths) 52))
-        height (int (+ 110 45))
-        i (BufferedImage. width height BufferedImage/TYPE_INT_ARGB)]
-    (doto (.createGraphics i)
+        height (int (+ qr-size rect-height 5))
+        image (BufferedImage. width height BufferedImage/TYPE_INT_ARGB)
+        graphics (.createGraphics image)]
+    (doto graphics
       (.setColor (Color. 255 255 255 (- 255 transparency)))
       (.fillRect 0 0 width height)
-      (.drawImage (qrcode (env/value :host) 70) (- width 70) (int 5) nil)
-      (.translate 0 70)
+      (.drawImage (qrcode (env/value :host) qr-size) (- width qr-size) (int 0) nil)
+      (.translate 0 qr-size)
       (.setStroke (BasicStroke. 2.0 BasicStroke/CAP_ROUND BasicStroke/JOIN_ROUND))
       (.setComposite (AlphaComposite/getInstance AlphaComposite/SRC))
       (.setColor (Color. 0 0 0 255))
-      (.drawRoundRect 10 10 (- width 20) 70 20 20)
+      (.drawRoundRect 10 2 (- width 20) rect-height 20 20)
       (.setComposite (AlphaComposite/getInstance AlphaComposite/SRC_OVER))
-      (.setFont font)
-      (draw-text (nth texts 0) 22 27)
-      (draw-text (nth texts 1) 22 48)
-      (draw-text (nth texts 2) (int (/ (- width (nth text-widths 2)) 2)) 70)
-      (.dispose))
-    i))
+      (.setFont font))
+
+    (doseq [[i text] (util/indexed texts)]
+       (draw-text graphics text (int (/ (- width (nth text-widths i)) 2)) (+ (* (inc i) line-height) 3)))
+
+    (.dispose graphics)
+    image))
 
 ;;
 ;; Stamp with provided image:
@@ -213,7 +225,7 @@
 (comment
 
   (defn- paint-component [g w h]
-    (let [i (make-stamp "hyv\u00E4ksytty" (System/currentTimeMillis) "Veikko Viranomainen" "SIPOO" 255)
+    (let [i (make-stamp "hyv\u00E4ksytty" (System/currentTimeMillis) "SIPOO" 128 "" "Rakennustunnus" "Kuntalupatunnus" "Pykala")
           iw (.getWidth i)
           ih (.getHeight i)]
       (.setColor g Color/GRAY)
