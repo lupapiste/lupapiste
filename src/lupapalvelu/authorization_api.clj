@@ -37,15 +37,17 @@
 (notifications/defemail :invite  {:recipients-fn :recipients
                                   :model-fn create-invite-model})
 
+(defn- valid-role [role]
+  (#{:writer :foreman} (keyword role)))
 
-(defn- create-invite [command id email title text documentName documentId path role]
+(defn- create-invite [command id email text documentName documentId path role]
+  {:pre [(valid-role role)]}
   (let [email (-> email ss/lower-case ss/trim)
         {created :created user :user application :application} command]
     (if (domain/invite application email)
       (fail :invite.already-has-auth)
       (let [invited (user-api/get-or-create-user-by-email email user)
-            invite  {:title        title
-                     :application  id
+            invite  {:application  id
                      :text         text
                      :path         path
                      :documentName documentName
@@ -66,22 +68,12 @@
             (notifications/notify! :invite (assoc command :recipients [invited]))
             (ok)))))))
 
-(defcommand invite
-  {:parameters [id email title text documentName documentId path]
-   :input-validators [(partial action/non-blank-parameters [:email])
-                      action/email-validator]
-   :states     (action/all-application-states-but [:closed :canceled])
-   :roles      [:applicant :authority]
-   :notified   true}
-  [command]
-  (create-invite command id email title text documentName documentId path "writer"))
-
 (defn- role-validator [{{role :role} :data}]
-  (when (not-any? #{(keyword role)} [:foreman])
+  (when-not (valid-role role)
     (fail! :error.illegal-role :parameters role)))
 
 (defcommand invite-with-role
-  {:parameters [id email title text documentName documentId path role]
+  {:parameters [id email text documentName documentId path role]
    :input-validators [(partial action/non-blank-parameters [:email])
                       action/email-validator
                       role-validator]
@@ -89,7 +81,7 @@
    :roles      [:applicant :authority]
    :notified   true}
   [command]
-  (create-invite command id email title text documentName documentId path role))
+  (create-invite command id email text documentName documentId path role))
 
 (defcommand approve-invite
   {:parameters [id]

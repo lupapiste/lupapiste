@@ -104,16 +104,16 @@
 (defn has-auth-role? [{auth :auth} user-id role]
   (has-auth? {:auth (get-auths-by-role {:auth auth} role)} user-id))
 
-(defn owner-or-writer? [application user-id]
+(defn owner-or-write-access? [application user-id]
   (or (has-auth-role? application user-id "owner")
       (has-auth-role? application user-id "writer")
       (has-auth-role? application user-id "foreman")))
 
-(defn validate-owner-or-writer
-  "Validator: current user must be owner or writer.
+(defn validate-owner-or-write-access
+  "Validator: current user must be owner or have write access.
    To be used in commands' :pre-checks vector."
   [command application]
-  (when-not (owner-or-writer? application (-> command :user :id))
+  (when-not (owner-or-write-access? application (-> command :user :id))
     unauthorized))
 
 ;;

@@ -242,7 +242,7 @@
   (let [meta-data (meta-data command)
         extra-auth-roles (set (:extra-auth-roles meta-data))]
     (when-not (or (extra-auth-roles :any)
-                  (domain/owner-or-writer? application (:id user))
+                  (domain/owner-or-write-access? application (:id user))
                   (and (= :authority (keyword (:role user))) ((set (:organizations user)) (:organization application)))
                   (some #(domain/has-auth-role? application (:id user) %) extra-auth-roles))
       unauthorized)))
