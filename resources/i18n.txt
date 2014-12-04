@@ -1,0 +1,8 @@
+stamp.reference-info: Tunnustiedot
+stamp.text.extra: Lisäteksti
+stamp.buildingid: Rakennustunnus
+stamp.kuntalupatunnus: Kuntalupatunnus
+stamp.section: Pykälä
+stamp.building.none: Ei rakennustunnusta
+stamp.start: Leimaa
+stamp.reset: Jatka leimaamista

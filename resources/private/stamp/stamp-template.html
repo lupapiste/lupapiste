@@ -18,7 +18,7 @@
       </div>
 
       <script type="text/html" id="stamp-attachments-template">
-        <div>
+        <div class="stamp-info-container">
           <form id="stamp-info" class="clear">
             <fieldset class="col1">
               <legend data-bind="ltext: 'stamp.information'"></legend>
@@ -43,9 +43,49 @@
                         type="text"
                         class="form-input text"/
                      data-test-id="stamp-info-organization">
+
+              <label data-bind="ltext: 'stamp.text.extra'"></label>
+              <input data-bind="value: extraInfo, enable: status() === statusReady"
+                        type="text"
+                        class="form-input text"/
+                     data-test-id="stamp-info-extratext">
+            </fieldset>
+            <fieldset class="col2">
+              <legend data-bind="ltext: 'stamp.reference-info'"></legend>
+
+              <label data-bind="ltext: 'stamp.buildingid'"></label>
+
+              <!-- ko if: showBuildingList -->
+              <select data-bind="options: buildingIdList,
+                                 optionsText: 'buildingId',
+                                 optionsCaption: loc('stamp.building.none'),
+                                 optionsValue: 'buildingId',
+                                 value: buildingId,
+                                 enable: status() === statusReady"
+                      data-test-id="stamp-info-buildingid-list"></select>
+              <!-- /ko -->
+              <!-- ko ifnot: showBuildingList -->
+              <input data-bind="textInput: buildingId, enable: status() === statusReady"
+                        type="text"
+                        class="form-input text"
+                     data-test-id="stamp-info-buildingid"/>
+              <!-- /ko -->
+
+
+              <label data-bind="ltext: 'stamp.kuntalupatunnus'"></label>
+              <input data-bind="textInput: kuntalupatunnus, enable: status() === statusReady"
+                        type="text"
+                        class="form-input text"
+                     data-test-id="stamp-info-kuntalupatunnus"/>
+
+              <label data-bind="ltext: 'stamp.section'"></label>
+              <input data-bind="textInput: section, enable: status() === statusReady"
+                        type="text"
+                        class="form-input text"
+                     data-test-id="stamp-info-section"/>
             </fieldset>
 
-            <fieldset class="col2">
+            <fieldset class="col3">
               <legend data-bind="ltext: 'stamp.margin'"></legend>
 
               <label data-bind="text: loc('stamp.xMargin') + ' (' + loc('unit.mm') + ')'"></label>
@@ -104,19 +144,18 @@
             data-test-id="start-stamping">
           </button>
           <button data-bind="
-              ltext: 'stamp.cancel',
-              enable: status() === statusReady,
-              visible: status() <= statusReady,
+              ltext: 'stamp.reset',
+              visible: status() > statusRunning,
+              click: $parent.resetStamping"
+            class="btn btn-primary close"
+            data-test-id="stamp-reset">
+          </button>
+          <button data-bind="
+              ltext: 'application.return',
+              enable: status() !== statusStarting && status() !== statusRunning,
               click: $parent.cancelStamping"
             class="btn close"
             data-test-id="cancel-stamping">
-          </button>
-          <button data-bind="
-              ltext: 'stamp.ok',
-              visible: status() > statusRunning,
-              click: $parent.cancelStamping"
-            class="btn btn-primary close"
-            data-test-id="stamp-ok">
           </button>
         </div>
       </script>

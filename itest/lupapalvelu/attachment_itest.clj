@@ -200,7 +200,21 @@
         _ (upload-attachment sonja application-id attachment true :filename "dev-resources/VRK_Virhetarkistukset.pdf")
         application (query-application sonja application-id)
         comments (:comments application)
-        {job :job :as resp} (command sonja :stamp-attachments :id application-id :timestamp "" :text "OK" :organization "" :files [(:id attachment)] :xMargin 0 :yMargin 0)]
+        {job :job :as resp} (command
+                              sonja
+                              :stamp-attachments
+                              :id application-id
+                              :timestamp ""
+                              :text "OK"
+                              :organization ""
+                              :files [(:id attachment)]
+                              :xMargin 0
+                              :yMargin 0
+                              :extraInfo ""
+                              :buildingId ""
+                              :kuntalupatunnus ""
+                              :section "")
+        file-id (get-in (:value job) [(-> job :value keys first) :fileId])]
 
     (fact "not stamped by default"
       (get-in (get-attachment-info application (:id attachment)) [:latestVersion :stamped]) => falsey)
@@ -210,6 +224,7 @@
 
     resp => ok?
     (fact "Job id is returned" (:id job) => truthy)
+    (fact "FileId is returned" file-id => truthy)
 
     ; Poll for 5 seconds
     (when-not (= "done" (:status job)) (poll-job (:id job) (:version job) 25))
@@ -224,8 +239,23 @@
       (fact "Attachment state is ok"
         (:state attachment) => "ok")
 
+      (fact "New fileid is in response" (get-in attachment [:latestVersion :fileId]) =not=> file-id)
+
       (facts "re-stamp"
-        (let [{job :job :as resp} (command sonja :stamp-attachments :id application-id :timestamp "" :text "OK" :organization "" :files [(:id attachment)] :xMargin 0 :yMargin 0)]
+        (let [{job :job :as resp} (command
+                              sonja
+                              :stamp-attachments
+                              :id application-id
+                              :timestamp ""
+                              :text "OK"
+                              :organization ""
+                              :files [(:id attachment)]
+                              :xMargin 0
+                              :yMargin 0
+                              :extraInfo ""
+                              :buildingId ""
+                              :kuntalupatunnus ""
+                              :section "")]
           resp => ok?
           ; Poll for 5 seconds
           (when-not (= "done" (:status job)) (poll-job (:id job) (:version job) 25))

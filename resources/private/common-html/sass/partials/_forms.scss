@@ -665,17 +665,20 @@ input[readonly], textarea[readonly] {
 }
 
 #stamp-info {
-  width: 66%;
+  width: 100%;
 
   .col1 {
     float: left;
     padding-right: $marginM;
-    width: 33%;
   }
 
   .col2 {
     float: left;
     padding-left: $marginM;
-    width: 33%;
+    padding-right: $marginM;
+  }
+  .col3 {
+    float: left;
+    padding-left: $marginM;
   }
 }

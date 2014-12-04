@@ -107,6 +107,15 @@ LUPAPISTE.StampModel = function(params) {
   self.xMarginOk = ko.computed(function() { return util.isNum(self.xMargin()); });
   self.yMargin = self.stampFields.yMargin;
   self.yMarginOk = ko.computed(function() { return util.isNum(self.yMargin()); });
+  self.extraInfo = self.stampFields.extraInfo;
+  self.buildingId = ko.observable("");
+  self.kuntalupatunnus = self.stampFields.kuntalupatunnus;
+  self.section = self.stampFields.section;
+
+  self.buildingIdList = self.stampFields.buildingIdList;
+  self.showBuildingList = ko.computed(function() {
+    return self.buildingIdList().length > 0;
+  });
 
   self.transparency = self.stampFields.transparency;
 
@@ -128,7 +137,11 @@ LUPAPISTE.StampModel = function(params) {
         files: _.map(self.selectedFiles(), "id"),
         xMargin: _.parseInt(self.xMargin(), 10),
         yMargin: _.parseInt(self.yMargin(), 10),
-        transparency: self.transparency()
+        transparency: self.transparency(),
+        extraInfo: self.extraInfo(),
+        buildingId: self.buildingId() ? self.buildingId() : "",
+        kuntalupatunnus: self.kuntalupatunnus(),
+        section: self.section()
       })
       .success(self.started)
       .call();
