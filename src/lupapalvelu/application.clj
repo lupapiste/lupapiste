@@ -484,11 +484,9 @@
         new-docs              (cons op-doc required-docs)]
     (if-not user
       new-docs
-      (let [permit-type (keyword (permit/permit-type application))
-            hakija      (case permit-type
-                          :YA (assoc-in (make "hakija-ya") [:data :_selected :value] "yritys")
-                          (make "hakija"))]
-        (conj new-docs hakija)))))
+      (conj new-docs (if (= permit/YA (permit/permit-type application))
+                       (make "hakija-ya")
+                       (make "hakija"))))))
 
 (defn- ->location [x y]
   {:x (util/->double x) :y (util/->double y)})

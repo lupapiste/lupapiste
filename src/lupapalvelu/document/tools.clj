@@ -9,10 +9,9 @@
 (defn missing [element]
   (throw (UnsupportedOperationException. (str element))))
 
-(defn default-values [{:keys [name type body] :as element}]
+(defn default-values [{:keys [type default]}]
   (case (keyword type)
-    :radioGroup  (when (= name "_selected")
-                   (-> body first :name))
+    :radioGroup  default
     :checkbox    false
     :string      ""
     :text        ""

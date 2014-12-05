@@ -43,7 +43,9 @@
   [& rest]
   (reduce
     (fn [a x]
-      (let [v (if (sequential? x) x (vector x))]
+      (let [v (if (sequential? x)
+                x
+                (vector x))]
         (concat a v)))
     [] rest))
 
@@ -154,15 +156,16 @@
                                         :body (body
                                                 verkkolaskutustieto)}))
 
-(def party (body
-             {:name select-one-of-key :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}]}
-             {:name "henkilo" :type :group :body henkilo}
-             {:name "yritys" :type :group :body yritys}))
+(defn- henkilo-yritys-select-group
+  [& {:keys [default henkilo-body yritys-body] :or {default "henkilo" henkilo-body henkilo yritys-body yritys}}]
+  (body
+    {:name select-one-of-key :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}] :default default}
+    {:name "henkilo" :type :group :body henkilo-body}
+    {:name "yritys" :type :group :body yritys-body}))
 
-(def party-with-required-hetu (body
-                                {:name select-one-of-key :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}]}
-                                {:name "henkilo" :type :group :body henkilo-with-required-hetu}
-                                {:name "yritys" :type :group :body yritys}))
+(def party (henkilo-yritys-select-group))
+(def ya-party (henkilo-yritys-select-group :default "yritys"))
+(def party-with-required-hetu (henkilo-yritys-select-group :henkilo-body henkilo-with-required-hetu))
 
 (def koulutusvalinta {:name "koulutusvalinta" :type :select :sortBy :displayname :i18nkey "koulutus"
                       :body [{:name "arkkitehti"}
@@ -744,7 +747,7 @@
             :type :party
             :subtype :hakija
             :after-update 'lupapalvelu.application-meta-fields/applicant-index-update}
-     :body (schema-body-without-element-by-name party turvakielto)}
+     :body (schema-body-without-element-by-name ya-party turvakielto)}
 
     {:info {:name "paasuunnittelija"
             :i18name "osapuoli"
