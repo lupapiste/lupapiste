@@ -15,8 +15,7 @@ tilusvaihto._group_label: Tilusvaihto
 
 operations.tree.rakennuksen-sijainti: Rakennuksen sijainnin merkitseminen
 operations.rakennuksen-sijainti: Rakennuksen sijainnin merkitseminen
-operations.rakennuksen-sijainti.desc: Rakennuksen paikan ja korkeusaseman maastoonmerkintä on tehtävä ennen rakentamiseen ryhtymistä. Merkintä tehdään asiakkaan tilauksesta sen jälkeen, kun rakennuslupa on lainvoimainen tai kun rakennuslupa on myönnetty ja vakuusmaksu rakennustöiden aloittamiseksi ennen rakennusluvan lainvoimaisuutta on maksettu. Rakennuksen sijainnin ja mitoituksen määrittämiseen käytetään rakennusluvassa hyväksyttyä asemapiirrosta. Maastoon merkitään suorakulmio, joka kuvaa rakennuksen uloimmat linjat sekä korkomerkit, ellei tilauksen yhteydessä ole muuta sovittu.
-
+operations.rakennuksen-sijainti.desc: Rakennuksen paikan ja korkeusaseman maastoonmerkintä on tehtävä ennen rakentamiseen ryhtymistä. Merkintä tehdään asiakkaan tilauksesta sen jälkeen, kun rakennuslupa on lainvoimainen tai kun rakennuslupa on myönnetty ja vakuusmaksu rakennustöiden aloittamiseksi ennen rakennusluvan lainvoimaisuutta on maksettu.<br /> <br />Rakennuksen sijainnin ja mitoituksen määrittämiseen käytetään rakennusluvassa hyväksyttyä asemapiirrosta. Maastoon merkitään suorakulmio, joka kuvaa rakennuksen uloimmat linjat sekä korkomerkit, ellei tilauksen yhteydessä ole muuta sovittu.
 rakennuksen-sijainti._group_label: Rakennuksen sijainnin merkitseminen
 
 tonttijaon-hakeminen._group_label: Tonttijakotomtindelning
@@ -54,3 +53,10 @@ operations.tree.yleiskaava-muutos: Yleiskaavamuutoksen hakeminen
 operations.yleiskaava-muutos: Yleiskaavamuutoksen hakeminen
 operations.yleiskaava-muutos.desc:
 yleiskaava-muutos._group_label: Yleiskaavamuutos
+
+operations.tontin-lohkominen: Tontin tai kiinteistön lohkominen
+operations.tontin-lohkominen.desc: <h3>Tontin lohkominen</h3>Asemakaava-alueella rakennuspaikat muodostetaan lohkomalla. Ennen lohkomista pitää kohteella olla tonttijako. Tontin lohkomisen yhteydessä voidaan asiakkaan hakemuksesta perustaa rasitteita tai tehdä tontinosan lunastaminen. <h3>Kiinteistön lohkominen</h3>
+operations.tree.tontin-lohkominen: Tontin tai kiinteistön lohkominen
+tontin-lohkominen._group_label: Tontin tai kiinteistön lohkominen
+
+
