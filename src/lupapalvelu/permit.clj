@@ -52,11 +52,11 @@
   {:subtypes       []
    :sftp-directory "/ymparisto"})
 
-(defpermit KM "Kiinteiston muodostus"
+(defpermit KT "Kiinteistotoimitus"
   {:subtypes       []
    :sftp-directory "/rakennus"})
 
-(defpermit MM "Maankäytön muutos"
+(defpermit MM "Maankayton muutos"
   {:subtypes       []
    :sftp-directory "/kaavat"})
 

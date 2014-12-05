@@ -179,7 +179,7 @@
         ["vesijohdosta-ja-viemarista" :vvvl-vesijohdosta-ja-viemarista]
         ["hulevesiviemarista" :vvvl-hulevesiviemarista]]]])])
 
-(def operation-tree-for-maanmittaus ; aka kiinteistotoimitus aka kiinteiston muodostus (KM)
+(def operation-tree-for-KT ; aka kiinteistotoimitus aka maanmittaustoimitukset
   ["maanmittaustoimitukset"
    [["tonttijaon-hakeminen" :tonttijaon-hakeminen]
     ["tonttijaon-muutoksen-hakeminen" :tonttijaon-muutoksen-hakeminen]
@@ -624,62 +624,62 @@
                                    :attachments []
                                    :add-operation-allowed false
                                    :link-permit-required false}
-    :tontin-lohkominen            {:schema "kiinteiston-muodostus"
-                                   :permit-type permit/KM
+    :tontin-lohkominen            {:schema "kiinteistotoimitus"
+                                   :permit-type permit/KT
                                    :required common-maanmittaus-schemas
                                    :attachments []
                                    :add-operation-allowed false
                                    :link-permit-required false}
-   :tilan-rekisteroiminen-tontiksi {:schema "kiinteiston-muodostus"
-                                   :permit-type permit/KM
+   :tilan-rekisteroiminen-tontiksi {:schema "kiinteistotoimitus"
+                                   :permit-type permit/KT
                                    :required common-maanmittaus-schemas
                                    :attachments []
                                    :add-operation-allowed false
                                    :link-permit-required false}
-   :yhdistaminen                  {:schema "kiinteiston-muodostus"
-                                   :permit-type permit/KM
+   :yhdistaminen                  {:schema "kiinteistotoimitus"
+                                   :permit-type permit/KT
                                    :required common-maanmittaus-schemas
                                    :attachments []
                                    :add-operation-allowed false
                                    :link-permit-required false}
-   :halkominen                    {:schema "kiinteiston-muodostus"
-                                   :permit-type permit/KM
+   :halkominen                    {:schema "kiinteistotoimitus"
+                                   :permit-type permit/KT
                                    :required common-maanmittaus-schemas
                                    :attachments []
                                    :add-operation-allowed false
                                    :link-permit-required false}
-   :rasitetoimitus                {:schema "kiinteiston-muodostus"
-                                   :permit-type permit/KM
+   :rasitetoimitus                {:schema "kiinteistotoimitus"
+                                   :permit-type permit/KT
                                    :required common-maanmittaus-schemas
                                    :attachments []
                                    :add-operation-allowed false
                                    :link-permit-required false}
-   :tilusvaihto                   {:schema "kiinteiston-muodostus"
-                                   :permit-type permit/KM
+   :tilusvaihto                   {:schema "kiinteistotoimitus"
+                                   :permit-type permit/KT
                                    :required common-maanmittaus-schemas
                                    :attachments []
                                    :add-operation-allowed false
                                    :link-permit-required false}
-    :rajankaynnin-hakeminen       {:schema "kiinteiston-muodostus"
-                                   :permit-type permit/KM
+    :rajankaynnin-hakeminen       {:schema "kiinteistotoimitus"
+                                   :permit-type permit/KT
                                    :required common-maanmittaus-schemas
                                    :attachments []
                                    :add-operation-allowed false
                                    :link-permit-required false}
-    :rajannayton-hakeminen        {:schema "kiinteiston-muodostus"
-                                   :permit-type permit/KM
+    :rajannayton-hakeminen        {:schema "kiinteistotoimitus"
+                                   :permit-type permit/KT
                                    :required common-maanmittaus-schemas
                                    :attachments []
                                    :add-operation-allowed false
                                    :link-permit-required false}
-    :rakennuksen-sijainti         {:schema "kiinteiston-muodostus"
-                                   :permit-type permit/KM
+    :rakennuksen-sijainti         {:schema "kiinteistotoimitus"
+                                   :permit-type permit/KT
                                    :required common-maanmittaus-schemas
                                    :attachments []
                                    :add-operation-allowed false
                                    :link-permit-required false}
-    :ya-lohkominen                {:schema "kiinteiston-muodostus"
-                                   :permit-type permit/KM
+    :ya-lohkominen                {:schema "kiinteistotoimitus"
+                                   :permit-type permit/KT
                                    :required common-maanmittaus-schemas
                                    :attachments []
                                    :add-operation-allowed false
