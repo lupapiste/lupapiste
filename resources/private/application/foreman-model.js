@@ -29,7 +29,7 @@ LUPAPISTE.ForemanModel = function() {
                         "lastName": foreman ? foreman.lastName : undefined};
             self.foremanApplications.push(data);
             self.foremanApplications.sort(function(left, right) {
-              return left.id > right.id;
+              return left.id.localeCompare(right.id);
             });
           }
         })
