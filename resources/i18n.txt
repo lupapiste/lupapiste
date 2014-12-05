@@ -66,3 +66,13 @@ yhdistaminen._group_label: Tontin tai kiinteistön yhdistäminen
 operations.halkominen: Tontin tai kiinteistön halkominen
 operations.tree.halkominen: Tontin tai kiinteistön halkominen
 halkominen._group_label: Tontin tai kiinteistön halkominen
+
+
+operations.tree.ya-lohkominen: Yleisten alueiden lohkominen	Styckningsförrättning av allmänt område
+operations.tree.ya-lohkomistoimituksen-hakeminen-kunta: Yleisten alueiden lohkomistoimituksen hakeminen (kunta hakijana)	Ansökan om styckningsförrättning av allmänt område(kommun som ansökande)
+operations.ya-lohkominen: Yleisten alueiden lohkominen	Styckningsförrättning av allmänt område
+operations.ya-lohkomistoimituksen-hakeminen-kunta	Yleisten alueiden lohkomistoimituksen hakeminen (kunta hakijana)	Ansökan om styckningsförrättning av allmänt område(kommun som ansökande)
+operations.ya-lohkominen.desc: Kunnan itse käynnistämä toimitus yleisen alueen lohkomiseksi. Toimitus ei sovellu kuntalaisten käyttöön.	Förrättning som kommunen själv upptagit för styckning av allmänt
+operations.ya-lohkomistoimituksen-hakeminen-kunta.desc	Kunnan itse käynnistämä toimitus yleisen alueen lohkomiseksi. Toimitus ei sovellu kuntalaisten käyttöön.	Förrättning som kommunen själv upptagit för styckning av allmänt
+ya-lohkominen._group_label	Yleisten alueiden lohkominen
+ya-lohkomistoimituksen-hakeminen-kunta._group_label	Yleisten alueiden lohkomistoimituksen hakeminen
