@@ -484,14 +484,14 @@
 
   function initAutocomplete(id) {
     $(id)
-    .keypress(function(e) { if (e.which === 13) { model.searchNow(); }}) // enter
-        .autocomplete({
-          source:     "/proxy/find-address",
-          delay:      500,
-          minLength:  3,
-          select:     model.autocompleteSelect
-        })
-        .data("ui-autocomplete")._renderItem = model.autocompleteRender;
+      .keypress(function(e) { if (e.which === 13) { model.searchNow(); }}) // enter
+      .autocomplete({
+        source:     "/proxy/find-address",
+        delay:      500,
+        minLength:  3,
+        select:     model.autocompleteSelect
+      })
+      .data("ui-autocomplete")._renderItem = model.autocompleteRender;
   }
 
   $(function() {
