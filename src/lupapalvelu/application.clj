@@ -6,6 +6,7 @@
             [clj-time.local :refer [local-now]]
             [clj-time.format :as tf]
             [monger.operators :refer :all]
+            [swiss.arrows :refer [-<>>]]
             [sade.env :as env]
             [sade.util :as util]
             [sade.strings :as ss]
@@ -16,7 +17,6 @@
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.notifications :as notifications]
-            [lupapalvelu.xml.krysp.reader :as krysp]
             [lupapalvelu.document.commands :as commands]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
@@ -26,7 +26,10 @@
             [lupapalvelu.operations :as operations]
             [lupapalvelu.tasks :as tasks]
             [lupapalvelu.permit :as permit]
+            [lupapalvelu.verdict-api :as verdict-api]
+            [lupapalvelu.xml.krysp.reader :as krysp-reader]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
+            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch-api]
             [lupapalvelu.xml.krysp.rakennuslupa-mapping :as rakennuslupa-mapping]
             [lupapalvelu.ktj :as ktj]
             [lupapalvelu.open-inforequest :as open-inforequest]
@@ -58,16 +61,8 @@
   (when (and y (not (<= 6610000 (util/->double y) 7779999)))
     (fail :error.illegal-coordinates)))
 
-;; Helpers
 
-(defn get-application-xml [{:keys [id permitType] :as application} & [raw?]]
-  (if-let [{url :url} (organization/get-krysp-wfs application)]
-    (if-let [fetch (permit/get-application-xml-getter permitType)]
-      (fetch url id raw?)
-      (do
-        (error "No fetch function for" permitType (:organization application))
-        (fail! :error.unknown)))
-    (fail! :error.no-legacy-available)))
+;; Helpers
 
 (defn set-user-to-document [application document user-id path current-user timestamp]
   {:pre [document]}
@@ -277,7 +272,7 @@
 
 (defn- update-link-permit-data-with-kuntalupatunnus-from-verdict [application]
   (let [link-permit-app-id (-> application :linkPermitData first :id)
-        verdicts (domain/get-application {:_id link-permit-app-id} {:verdicts 1})
+        verdicts (domain/get-application-no-access-checking link-permit-app-id)
         kuntalupatunnus (-> verdicts :verdicts first :kuntalupatunnus)]
     (if kuntalupatunnus
       (-> application
@@ -454,28 +449,34 @@
       {} schema-data)))
 
 ;; TODO: permit-type splitting.
-(defn- make-documents [user created op application]
+(defn- make-documents [user created op application & [manual-schema-datas]]
+  {:pre [(or (nil? manual-schema-datas) (map? manual-schema-datas))]}
+
   (let [op-info               (operations/operations (keyword (:name op)))
         op-schema-name        (:schema op-info)
-        existing-documents    (:documents application)
         schema-version        (:schema-version application)
+        default-schema-datas  (util/assoc-when {}
+                                op-schema-name           (:schema-data op-info)
+                                "yleiset-alueet-maksaja" operations/schema-data-yritys-selected
+                                "tyomaastaVastaava"      operations/schema-data-yritys-selected)
+        merged-schema-datas   (merge-with conj default-schema-datas manual-schema-datas)
         make                  (fn [schema-name]
                                 {:id (mongo/create-id)
                                  :schema-info (:info (schemas/get-schema schema-version schema-name))
                                  :created created
                                  :data (tools/timestamped
-                                         (condp = schema-name
-                                           op-schema-name           (schema-data-to-body (:schema-data op-info) application)
-                                           "yleiset-alueet-maksaja" (schema-data-to-body operations/schema-data-yritys-selected application)
-                                           "tyomaastaVastaava"      (schema-data-to-body operations/schema-data-yritys-selected application)
+                                         (if-let [schema-data (get-in merged-schema-datas [schema-name])]
+                                           (schema-data-to-body schema-data application)
                                            {})
                                          created)})
-        existing-schema-names (set (map (comp :name :schema-info) existing-documents))
-        required-schema-names (remove existing-schema-names (:required op-info))
-        required-docs         (map make required-schema-names)
         ;;The merge below: If :removable is set manually in schema's info, do not override it to true.
         op-doc                (update-in (make op-schema-name) [:schema-info] #(merge {:op op :removable true} %))
-        new-docs              (cons op-doc required-docs)]
+        new-docs (-<>> (:documents application)
+                   (map (comp :name :schema-info))  ;; existing schema names
+                   set
+                   (remove <> (:required op-info))  ;; required schema names
+                   (map make)                       ;; required docs
+                   (cons op-doc))]                  ;; new docs
     (if-not user
       new-docs
       (let [permit-type (keyword (permit/permit-type application))
@@ -505,7 +506,7 @@
 (defn- operation-validator [{{operation :operation} :data}]
   (when-not (operations/operations (keyword operation)) (fail :error.unknown-type)))
 
-(defn make-application [id operation x y address property-id municipality organization info-request? open-inforequest? messages user created]
+(defn make-application [id operation x y address property-id municipality organization info-request? open-inforequest? messages user created manual-schema-datas]
   (let [permit-type (operations/permit-type-of-operation operation)
         owner       (user/user-in-role user :owner :type :owner)
         op          (make-op operation created)
@@ -537,17 +538,17 @@
                        :schema-version      (schemas/get-latest-schema-version)})]
     (merge application (when-not info-request?
                          {:attachments (make-attachments created op organization state)
-                          :documents   (make-documents user created op application)}))))
+                          :documents   (make-documents user created op application manual-schema-datas)}))))
 
 (defn- do-create-application
-  [{{:keys [operation x y address propertyId municipality infoRequest messages]} :data :keys [user created] :as command}]
+  [{{:keys [operation x y address propertyId municipality infoRequest messages]} :data :keys [user created] :as command} & [manual-schema-datas]]
   (let [permit-type       (operations/permit-type-of-operation operation)
         organization      (organization/resolve-organization municipality permit-type)
-        scope             (organization/resolve-organization-scope organization municipality permit-type)
+        scope             (organization/resolve-organization-scope municipality permit-type organization)
         organization-id   (:id organization)
         info-request?     (boolean infoRequest)
-        open-inforequest? (and info-request? (:open-inforequest scope))
-        id                (make-application-id municipality)]
+        open-inforequest? (and info-request? (:open-inforequest scope))]
+
     (when-not (or (user/applicant? user) (user-is-authority-in-organization? (:id user) organization-id))
       (unauthorized!))
     (when-not organization-id
@@ -557,7 +558,9 @@
         (fail! :error.inforequests-disabled))
       (when-not (:new-application-enabled scope)
         (fail! :error.new-applications-disabled)))
-    (make-application id operation x y address propertyId municipality organization info-request? open-inforequest? messages user created)))
+
+    (let [id (make-application-id municipality)]
+      (make-application id operation x y address propertyId municipality organization info-request? open-inforequest? messages user created manual-schema-datas))))
 
 ;; TODO: separate methods for inforequests & applications for clarity.
 (defcommand create-application
@@ -570,20 +573,106 @@
   [{{:keys [operation address municipality infoRequest]} :data :keys [user created] :as command}]
 
   ;; TODO: These let-bindings are repeated in do-create-application, merge th somehow
-  (let [permit-type       (operations/permit-type-of-operation operation)
-        organization      (organization/resolve-organization municipality permit-type)
-        scope             (organization/resolve-organization-scope organization municipality permit-type)
+  (let [permit-type (operations/permit-type-of-operation operation)
+        organization (organization/resolve-organization municipality permit-type)
+        scope             (organization/resolve-organization-scope municipality permit-type organization)
         info-request?     (boolean infoRequest)
         open-inforequest? (and info-request? (:open-inforequest scope))
         created-application (do-create-application command)]
 
-      (insert-application created-application)
-      (when open-inforequest?
-        (open-inforequest/new-open-inforequest! created-application))
-      (try
-        (autofill-rakennuspaikka created-application created)
-        (catch Exception e (error e "KTJ data was not updated")))
-      (ok :id (:id created-application))))
+    (insert-application created-application)
+    (when open-inforequest?
+      (open-inforequest/new-open-inforequest! created-application))
+    (try
+      (autofill-rakennuspaikka created-application created)
+      (catch Exception e (error e "KTJ data was not updated")))
+    (ok :id (:id created-application))))
+
+;;
+;; Application from previous permit
+;;
+
+(defn- do-create-application-from-previous-permit [{:keys [user created] :as command} xml app-info info-source]
+  (let [asian-kuvaus (:rakennusvalvontaasianKuvaus app-info)
+        poikkeamat (:vahainenPoikkeaminen app-info)
+        ;; TODO: Add data manually for the Hakija document when info for that is receiced in the verdict xml message
+        manual-schema-datas {"hankkeen-kuvaus" (filter seq
+                                                 (conj []
+                                                   (when-not (ss/blank? asian-kuvaus) [["kuvaus"] asian-kuvaus])
+                                                   (when-not (ss/blank? poikkeamat)   [["poikkeamat"] poikkeamat])))}
+        command (update-in command [:data] merge {:infoRequest false :messages []} info-source)
+        created-application (do-create-application command manual-schema-datas)
+        ;; TODO: Aseta applicationille viimeisin state? (lupapalvelu.document.canonical-common/application-state-to-krysp-state kaanteisesti)
+;        created-application (assoc created-application
+;                              :state (some #(when (= (-> app-info :viimeisin-tila :tila) (val %)) (first %)) lupapalvelu.document.canonical-common/application-state-to-krysp-state))
+
+        ;; attaches the new application, and its id to path [:data :id], into the command
+        command (merge command (application->command created-application))]
+
+    ;; The application has to be inserted first, because it is assumed to be in the database when checking for verdicts (and their attachments).
+    (insert-application created-application)
+
+    (verdict-api/do-check-for-verdict command xml)  ;; Get verdicts for the application
+    (:id created-application)))
+
+(defcommand create-application-from-previous-permit
+  {:parameters [:operation :x :y :address :propertyId :municipality :kuntalupatunnus]
+   :roles      [:applicant :authority]
+   :input-validators [(partial action/non-blank-parameters [:operation :municipality])  ;; no :address included
+                      ;; the propertyId parameter can be nil
+                      (fn [{{propertyId :propertyId} :data :as command}]
+                        (when (not (ss/blank? propertyId))
+                          (property-id-parameters [:propertyId] command)))
+                      operation-validator]}
+  [{{:keys [operation x y address propertyId municipality kuntalupatunnus]} :data :keys [user] :as command}]
+
+  (let [permit-type (operations/permit-type-of-operation operation)
+        organization (organization/resolve-organization municipality permit-type)]
+
+    ;; Prevent creating many applications based on the same kuntalupatunnus:
+    ;; Check if we have in database an application of same organization that has a verdict with the given kuntalupatunnus.
+    ;; If so, open that application, otherwise go create a new application.
+    (if-let [app-with-verdict (domain/get-application-no-access-checking {:organization (:id organization)
+                                                                          :verdicts {$elemMatch {:kuntalupatunnus kuntalupatunnus}}})]
+
+      (if-let [existing-app (domain/get-application-as (:id app-with-verdict) user)]
+        (ok :id (:id app-with-verdict))
+        (fail :error.lupapiste-application-already-exists-but-unauthorized-to-access-it :id (:id app-with-verdict)))
+
+      ;; Fetch application from backing system with the provided kuntalupatunnus
+      (let [xml (krysp-fetch-api/get-application-xml
+                  {:id kuntalupatunnus :permitType permit-type :organization (:id organization)}
+                  false true)]
+        (when-not xml (fail! :error.no-previous-permit-found-from-backend))  ;; Show error if could not receive the verdict message xml for the given kuntalupatunnus
+        (let [enough-info-from-parameters (and
+                                            (not (ss/blank? address)) (not (ss/blank? propertyId))
+                                            (-> x util/->double pos?) (-> y util/->double pos?))
+              app-info (krysp-reader/get-app-info-from-message xml kuntalupatunnus)
+              rakennuspaikka-exists (and (:rakennuspaikka app-info) (every? #{:x :y :address :propertyId} (-> app-info :rakennuspaikka keys)))
+              lupapiste-tunnus (:id app-info)]
+
+          ;; Could not extract info from verdict message xml
+          (when (empty? app-info)
+            (fail! :error.no-previous-permit-found-from-backend))
+          ;; Given organization and the organization in the verdict message xml differ from each other
+          (when-not (= (:id organization) (:id (organization/resolve-organization (:municipality app-info) permit-type)))
+            (fail! :error.previous-permit-found-from-backend-is-of-different-organization))
+          ;; We did not get the "rakennuspaikkatieto" element in the verdict xml message, so let's ask more needed info from user.
+          (when-not (or rakennuspaikka-exists enough-info-from-parameters)
+            (fail! :error.more-prev-app-info-needed :needMorePrevPermitInfo true))
+
+          (if (ss/blank? lupapiste-tunnus)
+            ;; NO LUPAPISTE ID FOUND -> create the application
+            (let [info-source (cond
+                                rakennuspaikka-exists            (:rakennuspaikka app-info)
+;                                (:ensimmainen-rakennus app-info) (:ensimmainen-rakennus app-info)     ;; TODO: Pitaisiko kayttaa taman propertyId:ta yms tietoja, kalilta annettujen sijaan (kts alla)?
+                                enough-info-from-parameters      {:x x :y y :address address :propertyId propertyId})
+                  created-app-id (do-create-application-from-previous-permit command xml app-info info-source)]
+              (ok :id created-app-id))
+            ;; LUPAPISTE ID WAS FOUND -> open it if user has rights, otherwise show error
+            (if-let [existing-application (domain/get-application-as lupapiste-tunnus user)]
+              (ok :id lupapiste-tunnus)
+              (fail :error.lupapiste-application-already-exists-but-unauthorized-to-access-it :id lupapiste-tunnus))))))))
 
 (defn- add-operation-allowed? [_ application]
   (let [op (-> application :operations first :name keyword)
@@ -613,9 +702,7 @@
    :roles      [:applicant :authority]
    :states     [:draft :open :submitted :complement-needed]}
   [command]
-  (let [application (:application command)
-        app-command (application->command application)]
-    (update-application app-command {"operations" {$elemMatch {:id op-id}}} {$set {"operations.$.description" desc}})))
+  (update-application command {"operations" {$elemMatch {:id op-id}}} {$set {"operations.$.description" desc}}))
 
 (defcommand change-permit-sub-type
   {:parameters [id permitSubtype]
@@ -945,8 +1032,7 @@
 
 
 (defn- validate-new-applications-enabled [command {:keys [permitType municipality]}]
-  (let [org   (organization/resolve-organization municipality permitType)
-        scope (organization/resolve-organization-scope org municipality permitType)]
+  (let [scope (organization/resolve-organization-scope municipality permitType)]
     (when-not (= (:new-application-enabled scope) true)
       (fail :error.new-applications.disabled))))
 
@@ -978,10 +1064,10 @@
   (reduce (fn [r [k v]] (assoc r k (if (map? v) (add-value-metadata v meta-data) (assoc meta-data :value v)))) {} m))
 
 (defn- load-building-data [url property-id building-id overwrite-all?]
-  (let [all-data (krysp/->rakennuksen-tiedot (krysp/building-xml url property-id) building-id)]
+  (let [all-data (krysp-reader/->rakennuksen-tiedot (krysp-reader/building-xml url property-id) building-id)]
     (if overwrite-all?
       all-data
-      (select-keys all-data (keys krysp/empty-building-ids)))))
+      (select-keys all-data (keys krysp-reader/empty-building-ids)))))
 
 (defcommand merge-details-from-krysp
   {:parameters [id documentId path buildingId overwrite collection]
@@ -999,7 +1085,7 @@
                          (commands/->model-updates [[path buildingId]])
                          (tools/path-vals
                            (if clear-ids?
-                             krysp/empty-building-ids
+                             krysp-reader/empty-building-ids
                              (load-building-data url propertyId buildingId overwrite))))
           ; Path should exist in schema!
           updates      (filter (fn [[path _]] (model/find-by-name (:body schema) path)) base-updates)]
@@ -1014,7 +1100,7 @@
    :states     (action/all-application-states-but [:sent :verdictGiven :constructionStarted :closed :canceled])}
   [{{:keys [organization propertyId] :as application} :application}]
   (if-let [{url :url} (organization/get-krysp-wfs application)]
-    (let [kryspxml  (krysp/building-xml url propertyId)
-          buildings (krysp/->buildings-summary kryspxml)]
+    (let [kryspxml  (krysp-reader/building-xml url propertyId)
+          buildings (krysp-reader/->buildings-summary kryspxml)]
       (ok :data buildings))
     (fail :error.no-legacy-available)))

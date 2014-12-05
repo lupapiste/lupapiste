@@ -47,6 +47,7 @@ var loc;
 
   loc.supported = [];
   loc.currentLanguage = null;
+  loc.allTerms = {};
   loc.terms = {};
   loc.defaultLanguage = "fi";
 
@@ -61,10 +62,22 @@ var loc;
     return _.contains(loc.supported, lang) ? lang : loc.defaultLanguage;
   }
 
+  loc.setLanguage = function(lang) {
+    if (_.contains(loc.supported, lang)) {
+      loc.currentLanguage = lang;
+      loc.terms = loc.allTerms[loc.currentLanguage];
+    } else {
+      error("Unsupported language code", lang);
+    }
+  };
+
   loc.setTerms = function(newTerms) {
+    loc.allTerms = newTerms;
     loc.supported = _.keys(newTerms);
-    loc.currentLanguage = resolveLang();
-    loc.terms = newTerms[loc.currentLanguage];
+    if (!loc.currentLanguage) {
+      loc.currentLanguage = resolveLang();
+    }
+    loc.setLanguage(loc.currentLanguage);
   };
 
   loc.getErrorMessages = function() {
