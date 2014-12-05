@@ -192,7 +192,7 @@
     ["rajankaynnin-hakeminen" :rajankaynnin-hakeminen]
     ["rajannayton-hakeminen" :rajannayton-hakeminen]
     ["rakennuksen-sijainti" :rakennuksen-sijainti]
-    ["ya-lohkomistoimituksen-hakeminen-kunta" :ya-lohkomistoimituksen-hakeminen-kunta]]])
+    ["ya-lohkominen" :ya-lohkominen]]])
 
 (def operation-tree-for-MM
   ["maankayton-muutos" ; kaavat
@@ -612,14 +612,14 @@
                                    :attachments [:paapiirustus [:asemapiirros]]
                                    :add-operation-allowed true
                                    :link-permit-required false}
-     :tonttijaon-hakeminen        {:schema "kiinteiston-muodostus"
-                                   :permit-type permit/KM
+     :tonttijaon-hakeminen        {:schema "maankayton-muutos"
+                                   :permit-type permit/MM
                                    :required common-maanmittaus-schemas
                                    :attachments []
                                    :add-operation-allowed false
                                    :link-permit-required false}
-    :tonttijaon-muutoksen-hakeminen {:schema "kiinteiston-muodostus"
-                                   :permit-type permit/KM
+    :tonttijaon-muutoksen-hakeminen {:schema "maankayton-muutos"
+                                   :permit-type permit/MM
                                    :required common-maanmittaus-schemas
                                    :attachments []
                                    :add-operation-allowed false
@@ -678,7 +678,7 @@
                                    :attachments []
                                    :add-operation-allowed false
                                    :link-permit-required false}
-    :ya-lohkomistoimituksen-hakeminen-kunta {:schema "kiinteiston-muodostus"
+    :ya-lohkominen                {:schema "kiinteiston-muodostus"
                                    :permit-type permit/KM
                                    :required common-maanmittaus-schemas
                                    :attachments []
