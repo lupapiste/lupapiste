@@ -59,4 +59,10 @@ operations.tontin-lohkominen.desc: <h3>Tontin lohkominen</h3>Asemakaava-alueella
 operations.tree.tontin-lohkominen: Tontin tai kiinteistön lohkominen
 tontin-lohkominen._group_label: Tontin tai kiinteistön lohkominen
 
+operations.yhdistaminen: Tontin tai kiinteistön yhdistäminen
+operations.tree.yhdistaminen: Tontin tai kiinteistön yhdistäminen
+yhdistaminen._group_label: Tontin tai kiinteistön yhdistäminen
 
+operations.halkominen: Tontin tai kiinteistön halkominen
+operations.tree.halkominen: Tontin tai kiinteistön halkominen
+halkominen._group_label: Tontin tai kiinteistön halkominen
