@@ -297,9 +297,8 @@
       }
     };
 
-    self.searchPointByAddress = function(address, successCallback, errorCallback) {
-      locationSearch.pointByAddress(self.requestContext, address,
-        function(result) {
+    self.searchPointByAddress = function(address) {
+      locationSearch.pointByAddress(self.requestContext, address, function(result) {
           if (result.data && result.data.length > 0) {
             var data = result.data[0],
                 x = data.location.x,
@@ -309,20 +308,10 @@
               .center(x, y, 13)
               .setXY(x, y)
               .addressData(data)
-              .searchPropertyId(x, y,
-                function() {
-                  if (successCallback) { successCallback(result); } },  // Note: returning the result of the locationSearch.pointByAddress query
-                function(d) {
-                  if (errorCallback) { errorCallback(d); } });   // TODO: Mita pitaisi palauttaa taman parametrina: "d" vai "result"?
-          } else {
-            if (errorCallback) {
-              errorCallback(result); }  // TODO: Pitaisiko tassa kutsua successCallback?
+              .beginUpdateRequest()
+              .searchPropertyId(x, y);
           }
-        },
-        function(d) {
-          self.useManualEntry(true);
-          if (errorCallback) { errorCallback(d); }
-        });
+        }, _.partial(self.useManualEntry, true));
       return self;
     };
 
@@ -345,14 +334,8 @@
       return self;
     };
 
-    self.searchPropertyId = function(x, y, successCallback, errorCallback) {
-      locationSearch.propertyIdByPoint(self.requestContext, x, y,
-          function(d) {
-            self.propertyId(d);
-            if (successCallback) { successCallback(d); }
-          },
-          errorCallback
-          );
+    self.searchPropertyId = function(x, y) {
+      locationSearch.propertyIdByPoint(self.requestContext, x, y, self.propertyId);
       return self;
     };
 
