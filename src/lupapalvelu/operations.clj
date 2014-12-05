@@ -188,6 +188,7 @@
     ["yhdistaminen" :yhdistaminen]
     ["halkominen" :halkominen]
     ["rasitetoimitus" :rasitetoimitus]
+    ["tilusvaihto" :tilusvaihto]
     ["rajankaynnin-hakeminen" :rajankaynnin-hakeminen]
     ["rajannayton-hakeminen" :rajannayton-hakeminen]
     ["ya-lohkomistoimituksen-hakeminen-kunta" :ya-lohkomistoimituksen-hakeminen-kunta]]])
@@ -637,6 +638,12 @@
                                    :add-operation-allowed false
                                    :link-permit-required false}
    :rasitetoimitus                {:schema "kiinteiston-muodostus"
+                                   :permit-type permit/KM
+                                   :required common-maanmittaus-schemas
+                                   :attachments []
+                                   :add-operation-allowed false
+                                   :link-permit-required false}
+   :tilusvaihto                   {:schema "kiinteiston-muodostus"
                                    :permit-type permit/KM
                                    :required common-maanmittaus-schemas
                                    :attachments []

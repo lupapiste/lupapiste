@@ -1,1 +1,2 @@
 operations.tree.maanmittaustoimitukset: Maanmittaustoimitukset
+operations.tree.tilusvaihto: Tilusvaihto
