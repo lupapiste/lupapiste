@@ -179,7 +179,7 @@
         ["vesijohdosta-ja-viemarista" :vvvl-vesijohdosta-ja-viemarista]
         ["hulevesiviemarista" :vvvl-hulevesiviemarista]]]])])
 
-(def operation-tree-for-kiinteiston-muodostus
+(def operation-tree-for-maanmittaus
   ["kiinteiston-muodostus"
    [["tonttijaon-hakeminen" :tonttijaon-hakeminen]
     ["tonttijaon-muutoksen-hakeminen" :tonttijaon-muutoksen-hakeminen]
@@ -200,7 +200,7 @@
           [new-operation-tree-for-R]
           [operation-tree-for-R operation-tree-for-environment-R])
       ~@[operation-tree-for-P
-         (when (env/feature? :kiinteistonMuodostus) operation-tree-for-kiinteiston-muodostus)
+         (when (env/feature? :kiinteistonMuodostus) operation-tree-for-maanmittaus)
          (when (env/feature? :ymparisto) operation-tree-for-Y)
          operation-tree-for-YA]]))
 
@@ -728,7 +728,7 @@
                                    :attachments []
                                    :add-operation-allowed false
                                    :link-permit-required true}
-     
+
      :aiemmalla-luvalla-hakeminen {:schema "hankkeen-kuvaus"
                                    :permit-type permit/R
                                    :required []
