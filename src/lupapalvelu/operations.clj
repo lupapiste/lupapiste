@@ -180,7 +180,7 @@
         ["hulevesiviemarista" :vvvl-hulevesiviemarista]]]])])
 
 (def operation-tree-for-maanmittaus
-  ["kiinteiston-muodostus"
+  ["maanmittaustoimitukset"
    [["tonttijaon-hakeminen" :tonttijaon-hakeminen]
     ["tonttijaon-muutoksen-hakeminen" :tonttijaon-muutoksen-hakeminen]
     ["tontin-lohkominen" :tontin-lohkominen]
@@ -200,9 +200,9 @@
           [new-operation-tree-for-R]
           [operation-tree-for-R operation-tree-for-environment-R])
       ~@[operation-tree-for-P
-         (when (env/feature? :kiinteistonMuodostus) operation-tree-for-maanmittaus)
          (when (env/feature? :ymparisto) operation-tree-for-Y)
-         operation-tree-for-YA]]))
+         operation-tree-for-YA
+         (when (env/feature? :kiinteistonMuodostus) operation-tree-for-maanmittaus)]]))
 
 
 (def schema-data-yritys-selected [[["_selected" :value] "yritys"]])
