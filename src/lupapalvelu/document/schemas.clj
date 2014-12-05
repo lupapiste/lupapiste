@@ -722,6 +722,8 @@
     {:info {:name "kiinteiston-muodostus" :approvable true}
      :body (approvable-top-level-groups (body kuvaus))}
 
+    {:info {:name "maankayton-muutos" :approvable true}
+     :body (approvable-top-level-groups (body kuvaus))}
 
     {:info {:name "hakija"
             :i18name "osapuoli"

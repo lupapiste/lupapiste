@@ -56,6 +56,10 @@
   {:subtypes       []
    :sftp-directory "/rakennus"})
 
+(defpermit MM "Maankäytön muutos"
+  {:subtypes       []
+   :sftp-directory "/kaavat"})
+
 ;;
 ;; Helpers
 ;;
