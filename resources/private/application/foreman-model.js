@@ -11,6 +11,7 @@ LUPAPISTE.ForemanModel = function() {
     return self.email() && !util.isValidEmailAddress(self.email());
   });
   self.foremanApplications = ko.observableArray();
+  self.finished = ko.observable(false);
 
   self.refresh = function(application) {
     function loadForemanApplications(linkPermits) {
@@ -47,6 +48,7 @@ LUPAPISTE.ForemanModel = function() {
 
   self.inviteForeman = function() {
     self.email(undefined);
+    self.finished(false);
     LUPAPISTE.ModalDialog.open("#dialog-invite-foreman");
   };
 
@@ -89,16 +91,12 @@ LUPAPISTE.ForemanModel = function() {
           // 3. invite foreman to new application
           if (self.email()) {
             inviteToApplication(data.id, function() {
-              LUPAPISTE.ModalDialog.close();
-              // 4. open new application
-              self.openApplication(data.id);
+              self.finished(data.id);
             }, function(err) {
               self.error(err.text);
             });
           } else {
-            LUPAPISTE.ModalDialog.close();
-            // 4. open new application
-            self.openApplication(data.id);
+            self.finished(data.id);
           }
         })
         .error(function(err) {
@@ -115,4 +113,10 @@ LUPAPISTE.ForemanModel = function() {
     }
     return false;
   };
+
+  hub.subscribe({type: "dialog-close", id: "dialog-invite-foreman"}, function() {
+    if (self.application && self.finished()) {
+      repository.load(self.application.id);
+    }
+  });
 };

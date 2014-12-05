@@ -91,8 +91,22 @@
     padding: $marginM 0;
   }
 
-  div.pending {
+  div.pending, div.finished {
     display: none;
+  }
+}
+
+.dialog-content.finished {
+  div.finished {
+    background: #fff;
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    text-align: center;
+    z-index: 5000;
   }
 }
 

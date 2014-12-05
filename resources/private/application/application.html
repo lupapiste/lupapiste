@@ -1089,11 +1089,16 @@
           <p class="dialog-close close">X</p>
         </div>
         <!-- ko with: $root.foreman -->
-        <div class="dialog-content" data-bind="css: {pending: pending}">
+        <div class="dialog-content" data-bind="css: {pending: pending, finished: finished}">
+          <div class="finished">
+            <p data-bind="lhtml: 'invite.foreman.finished'"></p>
+            <button class="btn btn-primary" data-bind="ltext: 'button.ok', click: function() { openApplication(finished()); LUPAPISTE.ModalDialog.close(); }"></button>
+          </div>
           <div class="pending">
             <div class="ajax"></div>
             <div data-bind="ltext: 'invite.foreman.pending'"></div>
           </div>
+          <!-- ko ifnot: finished -->
           <p data-bind="lhtml: 'invite.foreman.desc'" class="dialog-desc-wide"></p>
           <form>
             <label data-bind="ltext: 'userinfo.email'" class="form-label" for="invite-foreman-email"></label>
@@ -1105,7 +1110,9 @@
               <span data-bind="ltext: 'application.inviteSend'"></span>
               <em data-bind="visible: pending" class="button-loader"></em>
             </button>
+            <a data-bind="ltext: 'cancel'" class="btn-dialog close cancel" onclick="window.parent.hub.send('upload-cancelled');return false;" href="#"></a>
           </form>
+          <!-- /ko -->
         </div>
         <!-- /ko -->
       </div>

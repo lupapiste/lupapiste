@@ -1,0 +1,1 @@
+invite.foreman.finished: Uusi hakemus luotiin onnistuneesti.<br>Siirrytään luotuun hakemukseen.
