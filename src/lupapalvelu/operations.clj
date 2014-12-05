@@ -193,6 +193,15 @@
     ["rajannayton-hakeminen" :rajannayton-hakeminen]
     ["ya-lohkomistoimituksen-hakeminen-kunta" :ya-lohkomistoimituksen-hakeminen-kunta]]])
 
+(def operation-tree-for-MM
+  ["maankayton-muutos" ; kaavat
+  [["asemakaava-laadinta" :asemakaava-laadinta]
+   ["asemakaava-muutos" :asemakaava-muutos]
+   ["ranta-asemakaava-laadinta" :ranta-asemakaava-laadinta]
+   ["ranta-asemakaava-muutos" :ranta-asemakaava-muutos]
+   ["yleiskaava-laadinta" :yleiskaava-laadinta]
+   ["yleiskaava-muutos" :yleiskaava-muutos]]])
+
 
 (def operation-tree
   (filterv identity
@@ -202,8 +211,9 @@
           [operation-tree-for-R operation-tree-for-environment-R])
       ~@[operation-tree-for-P
          (when (env/feature? :ymparisto) operation-tree-for-Y)
-         operation-tree-for-YA
-         (when (env/feature? :kiinteistonMuodostus) operation-tree-for-maanmittaus)]]))
+         operation-tree-for-YA]
+      ~@(when (env/feature? :kiinteistonMuodostus)
+          [operation-tree-for-maanmittaus operation-tree-for-MM])]))
 
 
 (def schema-data-yritys-selected [[["_selected" :value] "yritys"]])
@@ -762,6 +772,42 @@
                                   :attachments []
                                   :add-operation-allowed false
                                   :link-permit-required true}
+     :asemakaava-laadinta        {:schema "maankayton-muutos"
+                                  :permit-type permit/MM
+                                  :required common-maanmittaus-schemas
+                                  :attachments []
+                                  :add-operation-allowed false
+                                  :link-permit-required false}
+     :asemakaava-muutos          {:schema "maankayton-muutos"
+                                  :permit-type permit/MM
+                                  :required common-maanmittaus-schemas
+                                  :attachments []
+                                  :add-operation-allowed false
+                                  :link-permit-required false}
+     :ranta-asemakaava-laadinta  {:schema "maankayton-muutos"
+                                  :permit-type permit/MM
+                                  :required common-maanmittaus-schemas
+                                  :attachments []
+                                  :add-operation-allowed false
+                                  :link-permit-required false}
+     :ranta-asemakaava-muutos    {:schema "maankayton-muutos"
+                                  :permit-type permit/MM
+                                  :required common-maanmittaus-schemas
+                                  :attachments []
+                                  :add-operation-allowed false
+                                  :link-permit-required false}
+     :yleiskaava-laadinta        {:schema "maankayton-muutos"
+                                  :permit-type permit/MM
+                                  :required common-maanmittaus-schemas
+                                  :attachments []
+                                  :add-operation-allowed false
+                                  :link-permit-required false}
+     :yleiskaava-muutos          {:schema "maankayton-muutos"
+                                  :permit-type permit/MM
+                                  :required common-maanmittaus-schemas
+                                  :attachments []
+                                  :add-operation-allowed false
+                                  :link-permit-required false}
      }
     ya-operations
     yl-operations))
