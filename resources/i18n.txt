@@ -1,2 +1,50 @@
 operations.tree.maanmittaustoimitukset: Maanmittaustoimitukset
+operations.tree.kiinteiston-muodostus: Kiinteistön muodostusfastighetsbildning
+
+maanmittaustoimitukset._group_label: Perustelut
+kiinteiston-muodostus._group_label	Perustelut	motiveringar
+
+maanmittaustoimitukset.kuvaus: Perustelut
+kiinteiston-muodostus.kuvaus: Perustelutmotiveringar
+
+
 operations.tree.tilusvaihto: Tilusvaihto
+operations.tilusvaihto: Tilusvaihto
+operations.tilusvaihto.desc: Tiluksia vaihtamalla voidaan esimerkiksi poistaa kiinteistöjen rajoissa olevia haitallisia mutkia, korjata kiinteistörakennetta, jos tietä rakennettaessa tai valtaojaa oikaistaessa on jäänyt pieniä alueita tien tai ojan toiselle puolelle sekä sovittaa asemakaava-alueella omistusrajat rakennuspaikkojen rajoihin.
+tilusvaihto._group_label: Tilusvaihto
+
+tonttijaon-hakeminen._group_label: Tonttijakotomtindelning
+
+operations.tree.maankayton-muutos: Kaavan tai kaavamuutosten hakeminen
+maankayton-muutos._group_label: Perustelut
+maankayton-muutos.kuvaus: Perustelutmotiveringar
+
+operations.tree.asemakaava-laadinta: Asemakaavalaadinnan hakeminen
+operations.asemakaava-laadinta: Asemakaavalaadinnan hakeminen
+operations.asemakaava-laadinta.desc:
+asemakaava-laadinta._group_label: Asemakaavalaadinta
+
+operations.tree.asemakaava-muutos: Asemakaavamuutoksen hakeminen
+operations.asemakaava-muutos: Asemakaavamuutoksen hakeminen
+operations.asemakaava-muutos.desc:
+asemakaava-muutos._group_label: Asemakaavamuutos
+
+operations.tree.ranta-asemakaava-laadinta: Ranta-asemakaavalaadinnan hakeminen
+operations.ranta-asemakaava-laadinta: Ranta-asemakaavalaadinnan hakeminen
+operations.ranta-asemakaava-laadinta.desc:
+asemakaava-laadinta._group_label: Ranta-asemakaavalaadinta
+
+operations.tree.ranta-asemakaava-muutos: Ranta-asemakaavamuutoksen hakeminen
+operations.ranta-asemakaava-muutos: Ranta-asemakaavamuutoksen hakeminen
+operations.ranta-asemakaava-muutos.desc:
+ranta-asemakaava-muutos._group_label: Ranta-asemakaavamuutos
+
+operations.tree.yleiskaava-laadinta: Yleiskaavalaadinnan hakeminen
+operations.yleiskaava-laadinta: Yleiskaavalaadinnan hakeminen
+operations.yleiskaava-laadinta.desc:
+yleiskaava-laadinta._group_label: Yleiskaavalaadinta
+
+operations.tree.yleiskaava-muutos: Yleiskaavamuutoksen hakeminen
+operations.yleiskaava-muutos: Yleiskaavamuutoksen hakeminen
+operations.yleiskaava-muutos.desc:
+yleiskaava-muutos._group_label: Yleiskaavamuutos
