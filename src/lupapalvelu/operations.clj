@@ -191,6 +191,7 @@
     ["tilusvaihto" :tilusvaihto]
     ["rajankaynnin-hakeminen" :rajankaynnin-hakeminen]
     ["rajannayton-hakeminen" :rajannayton-hakeminen]
+    ["rakennuksen-sijainti" :rakennuksen-sijainti]
     ["ya-lohkomistoimituksen-hakeminen-kunta" :ya-lohkomistoimituksen-hakeminen-kunta]]])
 
 (def operation-tree-for-MM
@@ -666,6 +667,12 @@
                                    :add-operation-allowed false
                                    :link-permit-required false}
     :rajannayton-hakeminen        {:schema "kiinteiston-muodostus"
+                                   :permit-type permit/KM
+                                   :required common-maanmittaus-schemas
+                                   :attachments []
+                                   :add-operation-allowed false
+                                   :link-permit-required false}
+    :rakennuksen-sijainti         {:schema "kiinteiston-muodostus"
                                    :permit-type permit/KM
                                    :required common-maanmittaus-schemas
                                    :attachments []

@@ -13,6 +13,12 @@ operations.tilusvaihto: Tilusvaihto
 operations.tilusvaihto.desc: Tiluksia vaihtamalla voidaan esimerkiksi poistaa kiinteistöjen rajoissa olevia haitallisia mutkia, korjata kiinteistörakennetta, jos tietä rakennettaessa tai valtaojaa oikaistaessa on jäänyt pieniä alueita tien tai ojan toiselle puolelle sekä sovittaa asemakaava-alueella omistusrajat rakennuspaikkojen rajoihin.
 tilusvaihto._group_label: Tilusvaihto
 
+operations.tree.rakennuksen-sijainti: Rakennuksen sijainnin merkitseminen
+operations.rakennuksen-sijainti: Rakennuksen sijainnin merkitseminen
+operations.rakennuksen-sijainti.desc: Rakennuksen paikan ja korkeusaseman maastoonmerkintä on tehtävä ennen rakentamiseen ryhtymistä. Merkintä tehdään asiakkaan tilauksesta sen jälkeen, kun rakennuslupa on lainvoimainen tai kun rakennuslupa on myönnetty ja vakuusmaksu rakennustöiden aloittamiseksi ennen rakennusluvan lainvoimaisuutta on maksettu. Rakennuksen sijainnin ja mitoituksen määrittämiseen käytetään rakennusluvassa hyväksyttyä asemapiirrosta. Maastoon merkitään suorakulmio, joka kuvaa rakennuksen uloimmat linjat sekä korkomerkit, ellei tilauksen yhteydessä ole muuta sovittu.
+
+rakennuksen-sijainti._group_label: Rakennuksen sijainnin merkitseminen
+
 tonttijaon-hakeminen._group_label: Tonttijakotomtindelning
 
 operations.tree.maankayton-muutos: Kaavan tai kaavamuutosten hakeminen
@@ -32,7 +38,7 @@ asemakaava-muutos._group_label: Asemakaavamuutos
 operations.tree.ranta-asemakaava-laadinta: Ranta-asemakaavalaadinnan hakeminen
 operations.ranta-asemakaava-laadinta: Ranta-asemakaavalaadinnan hakeminen
 operations.ranta-asemakaava-laadinta.desc:
-asemakaava-laadinta._group_label: Ranta-asemakaavalaadinta
+ranta-asemakaava-laadinta._group_label: Ranta-asemakaavalaadinta
 
 operations.tree.ranta-asemakaava-muutos: Ranta-asemakaavamuutoksen hakeminen
 operations.ranta-asemakaava-muutos: Ranta-asemakaavamuutoksen hakeminen
