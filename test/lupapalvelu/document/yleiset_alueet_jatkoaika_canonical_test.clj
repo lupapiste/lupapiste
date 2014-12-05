@@ -15,9 +15,10 @@
                           :created 1386918874564
                           :name "ya-jatkoaika"})
 
-(def- link-permit-data {:id "LP-753-2013-00003"
-                                 :type "lupapistetunnus"
-                                 :operation "ya-katulupa-vesi-ja-viemarityot"})
+(def- link-permit-data {:lupapisteId "LP-753-2013-00003"
+                        :id "523"
+                        :type "kuntalupatunnus"
+                        :operation "ya-katulupa-vesi-ja-viemarityot"})
 
 (def- hankkeen-kuvaus-jatkoaika {:id "Hankkeen kuvaus"
                                           :schema-info {:name "hankkeen-kuvaus-jatkoaika" :version 1 :order 1}
@@ -88,6 +89,7 @@
         muuTunnustieto (:muuTunnustieto LupaTunnus) => truthy
         lp-muu-tunnus (:MuuTunnus (first muuTunnustieto)) => truthy
         viitelupatunnus (:MuuTunnus (second muuTunnustieto)) => truthy
+        kuntalupatunnus (:kuntalupatunnus LupaTunnus) => truthy
 
         Jatkoaika-kayttotarkoitus (:kayttotarkoitus Jatkoaika) => truthy
 
@@ -147,8 +149,10 @@
       (:sovellus lp-muu-tunnus) => "Lupapiste")
 
     (fact "Viitelupa"
-      (:tunnus viitelupatunnus) => (:id link-permit-data)
+      (:tunnus viitelupatunnus) => (:id link-permit-data) ; kuntalupatunnus
       (:sovellus viitelupatunnus) => "Viitelupa")
+
+    (fact "Kuntalupatunnus" kuntalupatunnus => (:id link-permit-data))
 
     (fact "Jatkoaika-kayttotarkoitus" Jatkoaika-kayttotarkoitus => (ya-operation-type-to-usage-description
                                                                      (keyword (:operation link-permit-data))))
