@@ -310,7 +310,7 @@
               .setXY(x, y)
               .addressData(data)
               .searchPropertyId(x, y,
-                function(d) {
+                function() {
                   if (successCallback) { successCallback(result); } },  // Note: returning the result of the locationSearch.pointByAddress query
                 function(d) {
                   if (errorCallback) { errorCallback(d); } });   // TODO: Mita pitaisi palauttaa taman parametrina: "d" vai "result"?

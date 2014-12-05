@@ -343,7 +343,7 @@
          (ok))
        (do
          (warnf "password reset request: unknown email: email=%s" email)
-         (fail :email-not-found))))))
+         (fail :error.email-not-found))))))
 
 (defmethod token/handle-token :password-reset [{data :data} {password :password}]
   (let [email (ss/lower-case (:email data))]
