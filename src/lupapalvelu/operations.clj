@@ -46,6 +46,7 @@
     ["Tyonjohtaja" :tyonjohtajan-nimeaminen]
     ["Suunnittelija" :suunnittelijan-nimeaminen]
     ["Jatkoaika" :jatkoaika]
+    ["aiemmalla-luvalla-hakeminen" :aiemmalla-luvalla-hakeminen]
     ["Aloitusoikeus" :aloitusoikeus]]])
 
 (def- operation-tree-for-environment-R
@@ -727,12 +728,21 @@
                                    :attachments []
                                    :add-operation-allowed false
                                    :link-permit-required true}
+     
+     :aiemmalla-luvalla-hakeminen {:schema "hankkeen-kuvaus"
+                                   :permit-type permit/R
+                                   :required []
+                                   :attachments []
+                                   :add-operation-allowed false
+                                   :link-permit-required false}
+
      :rak-valm-tyo                {:schema "maisematyo"
                                    :permit-type permit/R
                                    :required common-schemas
                                    :attachments [:paapiirustus [:asemapiirros]]
                                    :add-operation-allowed true
                                    :link-permit-required false}
+
      :aloitusoikeus               {:schema "aloitusoikeus"
                                    :permit-type permit/R
                                    :required ["maksaja"]

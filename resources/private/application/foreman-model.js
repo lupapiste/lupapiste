@@ -46,11 +46,11 @@ LUPAPISTE.ForemanModel = function() {
   };
 
   self.inviteForeman = function() {
+    self.email(undefined);
     LUPAPISTE.ModalDialog.open("#dialog-invite-foreman");
   };
 
   self.openApplication = function(id) {
-    repository.load(id);
     window.location.hash = "!/application/" + id;
   };
 
@@ -93,7 +93,7 @@ LUPAPISTE.ForemanModel = function() {
               // 4. open new application
               self.openApplication(data.id);
             }, function(err) {
-              self.error(loc(err.text));
+              self.error(err.text);
             });
           } else {
             LUPAPISTE.ModalDialog.close();
@@ -102,7 +102,7 @@ LUPAPISTE.ForemanModel = function() {
           }
         })
         .error(function(err) {
-          self.error(loc(err.text));
+          self.error(err.text);
         })
         .call();
     }

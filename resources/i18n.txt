@@ -1,0 +1,24 @@
+applications.createWithPrevPermit.title: Rakennusvalvonnan luvan siirto Lupapisteeseen
+applications.createWithPrevPermit.desc: Onko sinulla jo aiempi rakennusvalvonnan myöntämä lupa ja haluat siirtää rakentamisen aikaisen asioinnin Lupapisteeseen? Lupapiste mahdollistaa aikaisemman luvan siirron sähköiseen muotoon, jolloin voit toimittaa erityissuunnitelmat ja nimetä työnjohtajan Lupapisteessä.
+newRequest.createWithPrevPermit: Aloita siirto
+newRequest.createNewWithPrevPermit: Siirrä aiempi lupasi Lupapisteeseen
+
+error.no-previous-permit-found-from-backend: Annetulla lupatunnuksella ei löytynyt lupaa taustajärjestelmästä
+error.previous-permit-found-from-backend-is-of-different-organization: Syöttämääsi lupatunnusta ei löydy valitusta kunnasta. Ole hyvä ja tarkista valitsemasi lupatunnus ja kunta.
+error.lupapiste-application-already-exists-but-unauthorized-to-access-it: Kyseisellä tunnuksella on jo luotu Lupapisteeseen hanke, mutta sinulla ei ole oikeuksia siihen.
+error.more-prev-app-info-needed: Tarvitaan lisätietoja, jotta aiemmasta luvasta voidaan luoda hakemus Lupapisteeseen
+error.link-permit-already-having-us-as-link-permit: Et voi lisätä hakemusta viitteeksi hankkeelle, joka jo viittaa linkitettävään hakemukseen. Jos haluat muuttaa viitelinkityksen suuntaa, poista ensin vanha linkitys.
+
+aiemmalla-luvalla-hakeminen._group_label: Hankkeen kuvaus
+operations.aiemmalla-luvalla-hakeminen: Rakennusvalvonnan luvan siirto Lupapisteeseen
+operations.aiemmalla-luvalla-hakeminen.desc: Voit siirtää aikaisemman, paperilla haetun lupasi Lupapisteeseen. Syötä alle siihen liittyvät tiedot.
+
+prev-permit-label-kuntalupatunnus: Anna lupatunnus:
+prev-permit-placeholder-kuntalupatunnus: kuntalupatunnus
+prev-permit-label-address: Katuosoite:
+prev-permit-placeholder-address: katuosoite
+prev-permit-label-municipality: Valitse luvan myöntänyt kunta:
+
+newRequest.newApplicationWithPrevPermit: Etsi lupa
+
+more-prev-app-info-needed-desc: Taustajärjestelmästä ei voitu noutaa kaikkea tarvittua tietoa kiinteistöstä. Syötä  kiinteistön katuosoite alla olevaan kenttään.

@@ -1099,7 +1099,7 @@
             <label data-bind="ltext: 'userinfo.email'" class="form-label" for="invite-foreman-email"></label>
             <input class="form-input text long" id="invite-foreman-email" type="text" data-bind="textInput: email" />
             <div data-bind="visible: error" >
-              <div data-bind="text: error" class="context-error"></div>
+              <div data-bind="ltext: error" class="context-error"></div>
             </div>
             <button class="btn btn-primary btn-dialog" data-test-id="application-invite-foreman" data-bind="click: submit, disable: disabled">
               <span data-bind="ltext: 'application.inviteSend'"></span>

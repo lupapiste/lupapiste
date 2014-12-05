@@ -7,6 +7,7 @@
             [sade.email :as email]
             [sade.env :as env]
             [sade.core :refer [ok fail now]]
+            [sade.util :as util]
             [lupapalvelu.action :refer [defquery defcommand]]))
 
 ;;
@@ -78,7 +79,7 @@
                                                                                      {:tag :dt :content "Subject"}
                                                                                      {:tag :dd :attrs {:id "subject"} :content [(:subject msg)]}
                                                                                      {:tag :dt :content "Time"}
-                                                                                     {:tag :dd :attrs {:id "time"} :content [(:time msg)]}]}
+                                                                                     {:tag :dd :attrs {:id "time"} :content [(util/to-local-datetime (:time msg))]}]}
                                                                  {:tag :hr}]))))
       {:status 404 :body "No emails"}))
 

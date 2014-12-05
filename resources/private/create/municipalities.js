@@ -3,53 +3,36 @@ var municipalities = (function() {
 
   var municipalities = ko.observable();
   var municipalitiesById = ko.observable();
+  var municipalitiesWithBackendSystemById = ko.observable();
+  var municipalitiesWithBackendSystem = ko.observable();
 
-  function findById(id, callback, context) {
+  function findById(id, callback) {
     if (!_.isFunction(callback)) { throw "callback must be a function: " + callback; }
-    if (!id) {
-      callback.call(context, null);
-      return context;
-    }
-    var m = municipalitiesById()[id];
+    if (!id) { callback(null); }
     // TODO: Implement and use search to find municipality data for unsupported municipalities too.
-    callback.call(context, m);
-    return context;
+    callback( municipalitiesById()[id] );
   }
 
-  function findByLocation(x, y, callback, context) {
-    if (!_.isFunction(callback)) { throw "callback must be a function: " + callback; }
-    if (!x || !y) {
-      callback.call(context, null);
-      return context;
-    }
-    ajax
-      .query("municipality-by-location", {x: x, y: y})
-      .success(function(data) {
-        var m = data.municipality;
-        var s = municipalitiesById()[m.id];
-        if (s) {
-          m = s;
-        } else {
-          m.supported = false;
-        }
-        callback.call(context, m);
-      })
-      .call();
-    return context;
+  function reset(ms, msWithBackendInUse) {
+    var makeMsById = function(munis) {
+      return _.reduce(munis, function(d, m) {
+        d[m] = {supported: true, id: m, name: loc(["municipality", m])};
+        return d; }, {});
+    };
+    var sortMunis = function(munis) { return _.sortBy(_.values(munis), "name"); };
+    municipalitiesById( makeMsById(ms) );
+    municipalities( sortMunis(municipalitiesById()) );
+    municipalitiesWithBackendSystemById( makeMsById(msWithBackendInUse) );
+    municipalitiesWithBackendSystem( sortMunis(municipalitiesWithBackendSystemById()) );
   }
 
-  function reset(ms) {
-    municipalitiesById(_.reduce(ms, function(d, m) { d[m] = {supported: true, id: m}; return d; }, {}));
-    municipalities(_.sortBy(_.values(municipalitiesById()), function(m) { return loc(["municipality", m.id]); }));
-  }
-
-  function operationsForMunicipality(municipality, callback, context) {
+  // TODO: Use requestContext here, like in locationSearch component?
+  function operationsForMunicipality(municipality, callback) {
     if (!_.isFunction(callback)) { throw "callback must be a function: " + callback; }
     ajax
       .query("selected-operations-for-municipality", {municipality: municipality})
       .success(function(data) {
-        var operations = data.operations;
-        callback.call(context, operations);
+        callback(data.operations);
       })
       .call();
     }
@@ -57,7 +40,7 @@ var municipalities = (function() {
   function init() {
     ajax
       .query("municipalities-with-organization")
-      .success(function(data) { reset(data.municipalities); })
+      .success(function(data) { reset(data.municipalities, data.municipalitiesWithBackendInUse); })
       .call();
   }
 
@@ -70,6 +53,11 @@ var municipalities = (function() {
 
     municipalities: municipalities,
 
+    // Observable containing a list of supported municipalities that use a backing system,
+    // sorted alphabetically by name:
+
+    municipalitiesWithBackendSystem: municipalitiesWithBackendSystem,
+
     // Observable containing a map of municipalities keyed by
     // municipality id (id = string of three digits):
 
@@ -79,11 +67,6 @@ var municipalities = (function() {
     // Provided municipality has field "supported" set to true if municipality is supported:
 
     findById: findById,
-
-    // Find municipality by location. Calls callback with municipality. Provided municipality
-    // has field "supported" set to true if municipality is supported:
-
-    findByLocation: findByLocation,
 
     // Gets the operations supported in the municipality by all organizations
     operationsForMunicipality: operationsForMunicipality

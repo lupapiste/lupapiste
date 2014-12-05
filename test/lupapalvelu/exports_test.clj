@@ -20,7 +20,7 @@
     (difference (set every-kayttotarkoitus) (keyset @kayttotarkoitus-hinnasto))) => empty?)
 
 (fact "Uusi kerrostalo-rivitalo"
-  (let [application (app/make-application "LP-123" "kerrostalo-rivitalo" 0 0 "address" "01234567891234" "753" {:id "753-R"} false false [] {} 123)
+  (let [application (app/make-application "LP-123" "kerrostalo-rivitalo" 0 0 "address" "01234567891234" "753" {:id "753-R"} false false [] {} 123 nil)
         uusi-rakennus (domain/get-document-by-name application "uusiRakennus")]
 
     (fact "Default value '021 rivitalot' = B"

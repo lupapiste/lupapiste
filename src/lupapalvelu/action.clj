@@ -234,7 +234,7 @@
   "if :id parameter is present read application from command
    (pre-loaded) or load application for user."
   [{{id :id} :data user :user application :application}]
-  (and id user (or application (domain/get-application-as-including-canceled id user))))
+  (and id user (or application (domain/get-application-as id user true))))
 
 (defn- user-is-not-allowed-to-access?
   "Current user must be owner, authority or writer OR have some other supplied extra-auth-roles"
@@ -242,7 +242,7 @@
   (let [meta-data (meta-data command)
         extra-auth-roles (set (:extra-auth-roles meta-data))]
     (when-not (or (extra-auth-roles :any)
-                  (domain/owner-or-writer? application (:id user))
+                  (domain/owner-or-write-access? application (:id user))
                   (and (= :authority (keyword (:role user))) ((set (:organizations user)) (:organization application)))
                   (some #(domain/has-auth-role? application (:id user) %) extra-auth-roles))
       unauthorized)))

@@ -14,19 +14,19 @@
     var self = this;
 
     self.goPhase1 = function() {
-      window.location = "#!/create-part-1";
+      window.location.hash = "!/create-part-1";
       self.map.updateSize();
      };
 
 
     self.goPhase2 = function() {
-      window.location = "#!/create-part-2";
+      window.location.hash = "!/create-part-2";
       tree.reset(_.map(self.operations(), operations2tree));
       window.scrollTo(0, 0);
     };
 
     self.goPhase3 = function() {
-      window.location = "#!/create-part-3";
+      window.location.hash = "!/create-part-3";
       if (!self.inforequestsDisabled()) {
         window.scrollTo(0, 0);
       } else {
@@ -38,7 +38,7 @@
     };
 
      self.returnPhase2 = function() {
-      window.location = "#!/create-part-2";
+      window.location.hash = "!/create-part-2";
       window.scrollTo(0, 0);
     };
 
@@ -65,15 +65,40 @@
     self.inforequestsDisabled = ko.observable(false);
     self.newApplicationsDisabled = ko.observable(false);
     self.pending = ko.observable(false);
+    self.operation = ko.observable();
+    self.message = ko.observable("");
+    self.requestType = ko.observable();
 
-    self.municipalityCode.subscribe(function(code) {
-      if (code) { self.findOperations(code); }
-      if (self.useManualEntry()) { municipalities.findById(code, self.municipality); }
+    // Observables for creating new application from previous permit
+    self.creatingAppWithPrevPermit = false;
+    self.kuntalupatunnusFromPrevPermit = ko.observable(null);
+    self.needMorePrevPermitInfo = ko.observable(false);
+    self.creatingAppWithPrevPermitOk = ko.computed(function() {
+      return !self.processing() && !self.pending() &&
+             !isBlank(self.kuntalupatunnusFromPrevPermit()) &&
+             !isBlank(self.municipalityCode()) && self.municipality() &&
+             ( !self.needMorePrevPermitInfo() || (self.propertyId() &&
+                                                  !isBlank(self.addressString()) &&
+                                                  !isBlank(self.search()) &&
+                                                  self.addressData() &&
+                                                  self.x() !== 0 && self.y() !== 0));
     });
 
-    self.findMunicipality = function(code) {
+
+    self.municipalityCode.subscribe(function(code) {
+      if (self.creatingAppWithPrevPermit) {
+        self.updateMunicipality(code);
+        self.updateOrganizationDetails("aiemmalla-luvalla-hakeminen");
+      } else {
+        if (code) { self.findOperations(code); }
+        if (self.useManualEntry()) { self.updateMunicipality(code); }
+      }
+    });
+
+    self.updateMunicipality = function(code) {
       municipalities.findById(code, function(m) {
         self
+          .municipalityName(m ? m.name : null)
           .municipality(m)
           .municipalitySupported(m ? true : false);
       });
@@ -99,19 +124,15 @@
         var code = id ? util.zeropad(3, id.split("-")[0].substring(0, 3)) : null;
         self
           .municipalityCode(code)
-          .municipalityName(code ? loc(["municipality", code]) : null)
-          .findMunicipality(code, self.municipality);
+          .updateMunicipality(code, self.municipality);
       }
     });
-
-    self.operation = ko.observable();
-    self.message = ko.observable("");
-    self.requestType = ko.observable();
 
     self.clear = function() {
       var zoomLevel = 2;
       if (self.map) {
         self.map.clear();
+        self.map.updateSize();
       } else {
         self.map = gis
           .makeMap("create-map", false)
@@ -119,7 +140,7 @@
           .addClickHandler(self.click)
           .setPopupContentModel(self, "section#map-popup-content");
       }
-
+      self.creatingAppWithPrevPermit = false;
       return self
         .search("")
         .x(0)
@@ -129,7 +150,9 @@
         .propertyId(null)
         .municipalityCode(null)
         .message("")
-        .requestType(null);
+        .requestType(null)
+        .kuntalupatunnusFromPrevPermit(null)
+        .needMorePrevPermitInfo(false);
     };
 
     self.resetXY = function() { if (self.map) { self.map.clear(); } return self.x(0).y(0); };
@@ -197,11 +220,20 @@
     function zoomer(level) { return function(item) { zoom(item, level); }; }
     function fillMunicipality(item) {
       self.search(", " + loc(["municipality", item.municipality]));
-      $("#create-search").caretToStart();
+      if (self.creatingAppWithPrevPermit) {
+        $("#prev-permit-address-search").caretToStart();
+      } else {
+        $("#create-search").caretToStart();
+      }
     }
     function fillAddress(item) {
       self.search(item.street + " " + item.number + ", " + loc(["municipality", item.municipality]));
-      $("#create-search").caretTo(item.street.length + item.number.toString().length + 1);
+      var addressEndIndex = item.street.length + item.number.toString().length + 1;
+      if (self.creatingAppWithPrevPermit) {
+        $("#prev-permit-address-search").caretTo(addressEndIndex);
+      } else {
+        $("#create-search").caretTo(addressEndIndex);
+      }
     }
 
     function selector(item) { return function(value) { return _.every(value[0], function(v, k) { return item[k] === v; }); }; }
@@ -265,8 +297,9 @@
       }
     };
 
-    self.searchPointByAddress = function(address) {
-      locationSearch.pointByAddress(self.requestContext, address, function(result) {
+    self.searchPointByAddress = function(address, successCallback, errorCallback) {
+      locationSearch.pointByAddress(self.requestContext, address,
+        function(result) {
           if (result.data && result.data.length > 0) {
             var data = result.data[0],
                 x = data.location.x,
@@ -276,10 +309,20 @@
               .center(x, y, 13)
               .setXY(x, y)
               .addressData(data)
-              .beginUpdateRequest()
-              .searchPropertyId(x, y);
+              .searchPropertyId(x, y,
+                function(d) {
+                  if (successCallback) { successCallback(result); } },  // Note: returning the result of the locationSearch.pointByAddress query
+                function(d) {
+                  if (errorCallback) { errorCallback(d); } });   // TODO: Mita pitaisi palauttaa taman parametrina: "d" vai "result"?
+          } else {
+            if (errorCallback) {
+              errorCallback(result); }  // TODO: Pitaisiko tassa kutsua successCallback?
           }
-        }, _.partial(self.useManualEntry, true));
+        },
+        function(d) {
+          self.useManualEntry(true);
+          if (errorCallback) { errorCallback(d); }
+        });
       return self;
     };
 
@@ -302,14 +345,42 @@
       return self;
     };
 
-    self.searchPropertyId = function(x, y) {
-      locationSearch.propertyIdByPoint(self.requestContext, x, y, self.propertyId);
+    self.searchPropertyId = function(x, y, successCallback, errorCallback) {
+      locationSearch.propertyIdByPoint(self.requestContext, x, y,
+          function(d) {
+            self.propertyId(d);
+            if (successCallback) { successCallback(d); }
+          },
+          errorCallback
+          );
       return self;
     };
 
     self.searchAddress = function(x, y) {
       locationSearch.addressByPoint(self.requestContext, x, y, self.addressData);
       return self;
+    };
+
+    self.updateOrganizationDetails = function(operation) {
+      if (self.municipality() && operation) {
+        ajax
+          .query("organization-details", {
+            municipality: self.municipality().id,
+            operation: operation,
+            lang: loc.getCurrentLanguage()
+          })
+          .success(function(d) {
+            self.inforequestsDisabled(d["inforequests-disabled"]);
+            self.newApplicationsDisabled(d["new-applications-disabled"]);
+            self.organization(d);
+          })
+          .error(function() {
+              // TODO display error message?
+              model.inforequestsDisabled(true);
+              model.newApplicationsDisabled(true);
+            })
+          .call();
+      }
     };
 
     self.create = function(infoRequest) {
@@ -347,24 +418,89 @@
       .pending(self.pending)
       .success(function(data) {
         setTimeout(self.clear, 0);
-        window.location = (infoRequest ? "#!/inforequest/" : "#!/application/") + data.id;
+        window.location.hash = (infoRequest ? "!/inforequest/" : "!/application/") + data.id;
       })
       .call();
+
     };
     self.createApplication = self.create.bind(self, false);
     self.createInfoRequest = self.create.bind(self, true);
 
+    //
+    // For creating new application based on a previous permit
+    //
+
+    self.clearForCreateAppWithPrevPermit = function() {
+      self.clear();
+      self.creatingAppWithPrevPermit = true;
+      self.operation("aiemmalla-luvalla-hakeminen");
+    };
+
+    var doCreateApplicationWithPrevPermit = function() {
+      if (self.newApplicationsDisabled()) {
+        LUPAPISTE.ModalDialog.showDynamicOk(
+            loc("new-applications-or-inforequests-disabled.dialog.title"),
+            loc("new-applications-or-inforequests-disabled.new-applications-disabled"));
+        return;
+      }
+
+      ajax.command("create-application-from-previous-permit", {
+        operation: self.operation(),
+        y: self.y(),
+        x: self.x(),
+        address: self.addressString(),
+        propertyId: util.prop.toDbFormat(self.propertyId()),
+        municipality: self.municipality().id,
+        kuntalupatunnus: self.kuntalupatunnusFromPrevPermit()
+      })
+      .processing(self.processing)
+      .pending(self.pending)
+      .success(function(data) {
+        setTimeout(self.clear, 0);
+        window.location.hash = "!/application/" + data.id;
+      })
+      .error(function(d) {
+        // If app creation failed because the "rakennuksen tiedot" data was not received in the xml message from municipality's backend,
+        // then show user a prompt to fill up the address using autocomplete (that now appears),
+        // otherwise show user the original error message thrown.
+        // The original error is also shown after a request with additional address information about previous permit has has been made.
+        if (d.needMorePrevPermitInfo) {
+          if (self.needMorePrevPermitInfo()) {
+            notify.error(loc("error.dialog.title"), loc("info.no-previous-permit-found-from-backend"));
+          } else {
+            self.needMorePrevPermitInfo(true);
+          }
+        } else {
+          notify.error(loc("error.dialog.title"), loc(d.text));
+        }
+      })
+      .call();
+    }
+
+    self.createApplicationWithPrevPermit = function() {
+      if (!self.needMorePrevPermitInfo()) {
+        doCreateApplicationWithPrevPermit();
+      } else {
+        //
+        // TODO: ovatko tarkastukset parempi olla napissa, tassa vai molemmissa?
+        //
+        if (!isBlank(self.kuntalupatunnusFromPrevPermit) && !isBlank(self.addressString()) &&
+            self.addressData() && self.propertyId() && self.x() !== 0 && self.y() !== 0 && self.municipality() ) {
+          doCreateApplicationWithPrevPermit();
+        } else {
+          notify.error(loc("error.dialog.title"), loc("info.no-previous-permit-found-from-backend"));
+        }
+      }
+    };
+
   }();
 
   hub.onPageChange("create-part-1", model.clear);
+  hub.onPageChange("create-page-prev-permit", model.clearForCreateAppWithPrevPermit);
 
-  $(function() {
-    $("#create-part-1").applyBindings(model);
-    $("#create-part-2").applyBindings(model);
-    $("#create-part-3").applyBindings(model);
-
-    $("#create-search")
-        .keypress(function(e) { if (e.which === 13) { model.searchNow(); }})
+  function initAutocomplete(id) {
+    $(id)
+    .keypress(function(e) { if (e.which === 13) { model.searchNow(); }}) // enter
         .autocomplete({
           source:     "/proxy/find-address",
           delay:      500,
@@ -372,27 +508,23 @@
           select:     model.autocompleteSelect
         })
         .data("ui-autocomplete")._renderItem = model.autocompleteRender;
+  }
+
+  $(function() {
+    $("#create-part-1").applyBindings(model);
+    $("#create-part-2").applyBindings(model);
+    $("#create-part-3").applyBindings(model);
+    $("#create-page-prev-permit").applyBindings(model);
+
+    initAutocomplete("#create-search");
+    initAutocomplete("#prev-permit-address-search");  // TODO: Miten filtteroida autocomplete-tuloksista pois ne kunnat, joilla ei ole asetettuna taustajarjestelmaa?
 
     tree = $("#create-part-2 .operation-tree").selectTree({
       template: $("#create-templates"),
       onSelect: function(v) {
         if (v) {
           model.operation(v.op);
-          ajax.query("organization-details",
-              {municipality: model.municipality().id,
-               operation: v.op,
-               lang: loc.getCurrentLanguage()})
-            .success(function(d) {
-              model.inforequestsDisabled(d["inforequests-disabled"]);
-              model.newApplicationsDisabled(d["new-applications-disabled"]);
-              model.organization(d);
-            })
-            .error(function() {
-              // TODO display error message?
-              model.inforequestsDisabled(true);
-              model.newApplicationsDisabled(true);
-            })
-            .call();
+          model.updateOrganizationDetails(v.op);
         } else {
           model.operation(null);
           model.organization(null);
