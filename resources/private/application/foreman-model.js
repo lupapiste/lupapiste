@@ -27,9 +27,6 @@ LUPAPISTE.ForemanModel = function() {
                         "firstName": foreman ? foreman.firstName : undefined,
                         "lastName": foreman ? foreman.lastName : undefined};
             self.foremanApplications.push(data);
-            self.foremanApplications.sort(function(left, right) {
-              return left.id.localeCompare(right.id);
-            });
           });
         })
         .error(
