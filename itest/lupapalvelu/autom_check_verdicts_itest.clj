@@ -38,7 +38,7 @@
    (dummy-email-server/messages :reset true) ; Inbox zero
 
    (fact "checking verdicts and sending emails to the authorities related to the applications"
-     (count (batchrun/fetch-verdics)) => pos?)
+     (count (batchrun/fetch-verdicts)) => pos?)
 
    (fact "Verifying the sent emails"
      (Thread/sleep 100) ; batchrun includes a parallel operation

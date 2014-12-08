@@ -720,9 +720,11 @@
 
     {:info {:name "maisematyo" :approvable true}
      :body (approvable-top-level-groups maisematyo)}
-    {:info {:name "kiinteiston-muodostus" :approvable true}
+    {:info {:name "kiinteistotoimitus" :approvable true}
      :body (approvable-top-level-groups (body kuvaus))}
 
+    {:info {:name "maankayton-muutos" :approvable true}
+     :body (approvable-top-level-groups (body kuvaus))}
 
     {:info {:name "hakija"
             :i18name "osapuoli"

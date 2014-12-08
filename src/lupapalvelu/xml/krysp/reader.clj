@@ -1,5 +1,5 @@
 (ns lupapalvelu.xml.krysp.reader
-  (:require [taoensso.timbre :as timbre :refer [debug warn]]
+  (:require [taoensso.timbre :as timbre :refer [debug info warn error]]
             [clojure.string :as s]
             [clojure.walk :refer [postwalk prewalk]]
             [clj-time.format :as timeformat]
@@ -10,7 +10,8 @@
             [sade.util :as util]
             [sade.common-reader :as cr]
             [sade.strings :as ss]
-            [sade.core :refer :all]
+            [sade.coordinate :as coordinate]
+            [sade.core :refer [now def-]]
             [lupapalvelu.document.schemas :as schema]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.xml.krysp.verdict :as verdict]))
@@ -55,24 +56,24 @@
 
 ;; For building filters
 (def- yht-tunnus "yht:LupaTunnus/yht:muuTunnustieto/yht:MuuTunnus/yht:tunnus")
+(def- yht-kuntalupatunnus "yht:LupaTunnus/yht:kuntalupatunnus")
+(defn- tunnus-path [prefix kuntalupatunnus?] (str prefix (if kuntalupatunnus? yht-kuntalupatunnus yht-tunnus)))
+(def- asian-lp-lupatunnus (partial tunnus-path "rakval:luvanTunnisteTiedot/"))
+(def- poik-lp-lupatunnus  (partial tunnus-path "ppst:luvanTunnistetiedot/"))
+(def- yl-lp-lupatunnus    (partial tunnus-path "ymy:luvanTunnistetiedot/"))
+(def- mal-lp-lupatunnus   (partial tunnus-path "ymm:luvanTunnistetiedot/"))
+(def- vvvl-lp-lupatunnus  (partial tunnus-path "ymv:luvanTunnistetiedot/"))
+(def- ya-lp-lupatunnus    (partial tunnus-path "yak:luvanTunnisteTiedot/"))
 
-(def rakennuksen-kiinteistotunnus "rakval:rakennustieto/rakval:Rakennus/rakval:rakennuksenTiedot/rakval:rakennustunnus/rakval:kiinttun")
-(def asian-lp-lupatunnus (str "rakval:luvanTunnisteTiedot/" yht-tunnus))
-(def yleisten-alueiden-lp-lupatunnus (str "yak:luvanTunnisteTiedot/" yht-tunnus))
-(def poik-lp-lupatunnus  (str "ppst:luvanTunnistetiedot/" yht-tunnus))
-(def yl-lp-lupatunnus (str "ymy:luvanTunnistetiedot/" yht-tunnus))
-(def mal-lp-lupatunnus (str "ymm:luvanTunnistetiedot/" yht-tunnus))
-(def vvvl-lp-lupatunnus (str "ymv:luvanTunnistetiedot/" yht-tunnus))
-
+(def- rakennuksen-kiinteistotunnus "rakval:rakennustieto/rakval:Rakennus/rakval:rakennuksenTiedot/rakval:rakennustunnus/rakval:kiinttun")
 
 (defn property-equals
   "Returns URL-encoded search parameter suitable for 'filter'"
   [property value]
   (codec/url-encode (str "<PropertyIsEqualTo><PropertyName>" (escape-xml property) "</PropertyName><Literal>" (escape-xml value) "</Literal></PropertyIsEqualTo>")))
 
-(defn- post-body-for-ya-application [application-id]
-  {:body (str "<wfs:GetFeature
-      service=\"WFS\"
+(defn- post-body-for-ya-application [id kuntalupatunnus?]
+  {:body (str "<wfs:GetFeature service=\"WFS\"
         version=\"1.1.0\"
         outputFormat=\"GML2\"
         xmlns:yak=\"http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus\"
@@ -82,8 +83,8 @@
         <wfs:Query typeName=\"yak:Sijoituslupa,yak:Kayttolupa,yak:Liikennejarjestelylupa,yak:Tyolupa\">
           <ogc:Filter>
             <ogc:PropertyIsEqualTo>
-              <ogc:PropertyName>yak:luvanTunnisteTiedot/yht:LupaTunnus/yht:muuTunnustieto/yht:MuuTunnus/yht:tunnus</ogc:PropertyName>
-              <ogc:Literal>" application-id "</ogc:Literal>
+                       <ogc:PropertyName>" (ya-lp-lupatunnus kuntalupatunnus?) "</ogc:PropertyName>
+                       <ogc:Literal>" id "</ogc:Literal>
             </ogc:PropertyIsEqualTo>
           </ogc:Filter>
          </wfs:Query>
@@ -113,12 +114,12 @@
     (debug "Get application: " url)
     (cr/get-xml url credentials raw?)))
 
-(defn rakval-application-xml [server id raw?] (application-xml rakval-case-type asian-lp-lupatunnus server id raw?))
-(defn poik-application-xml   [server id raw?] (application-xml poik-case-type poik-lp-lupatunnus server id raw?))
-(defn yl-application-xml     [server id raw?] (application-xml yl-case-type yl-lp-lupatunnus server id raw?))
-(defn mal-application-xml    [server id raw?] (application-xml mal-case-type mal-lp-lupatunnus server id raw?))
-(defn vvvl-application-xml   [server id raw?] (application-xml vvvl-case-type vvvl-lp-lupatunnus server id raw?))
-(defn ya-application-xml     [server id raw?] (let [options (post-body-for-ya-application id)
+(defn rakval-application-xml [server id raw? kuntalupatunnus?] (application-xml rakval-case-type (asian-lp-lupatunnus kuntalupatunnus?) server id raw?))
+(defn poik-application-xml   [server id raw? kuntalupatunnus?] (application-xml poik-case-type (poik-lp-lupatunnus kuntalupatunnus?) server id raw?))
+(defn yl-application-xml     [server id raw? kuntalupatunnus?] (application-xml yl-case-type (yl-lp-lupatunnus kuntalupatunnus?) server id raw?))
+(defn mal-application-xml    [server id raw? kuntalupatunnus?] (application-xml mal-case-type (mal-lp-lupatunnus kuntalupatunnus?) server id raw?))
+(defn vvvl-application-xml   [server id raw? kuntalupatunnus?] (application-xml vvvl-case-type (vvvl-lp-lupatunnus kuntalupatunnus?) server id raw?))
+(defn ya-application-xml     [server id raw? kuntalupatunnus?] (let [options (post-body-for-ya-application id kuntalupatunnus?)
                                                     credentials nil]
                                                 (debug "Get application: " server " with post body: " options )
                                                 (cr/get-xml-with-post server options credentials raw?)))
@@ -130,11 +131,18 @@
 (permit/register-function permit/MAL :xml-from-krysp mal-application-xml)
 (permit/register-function permit/VVVL :xml-from-krysp vvvl-application-xml)
 
+(defn- pysyva-rakennustunnus
+  "Returns national building id or nil if the input was not valid"
+  [^String s]
+  (let [building-id (ss/trim (str s))]
+    (when (util/rakennustunnus? building-id)
+      building-id)))
+
 (defn- ->building-ids [id-container xml-no-ns]
-  (let [national-id (get-text xml-no-ns id-container :valtakunnallinenNumero)
+  (let [national-id (pysyva-rakennustunnus (get-text xml-no-ns id-container :valtakunnallinenNumero))
         local-short-id (get-text xml-no-ns id-container :rakennusnro)]
     {:propertyId   (get-text xml-no-ns id-container :kiinttun)
-     :buildingId   (some #(when-not (ss/blank? %) %) [national-id local-short-id])
+     :buildingId   (first (remove ss/blank? [national-id local-short-id]))
      :nationalId   national-id
      :localId      nil ; reserved for the next KRYSP schema version
      :localShortId local-short-id
@@ -238,7 +246,7 @@
       (polished
         (util/assoc-when
           {:muutostyolaji                 ...notimplemented...
-           :valtakunnallinenNumero        (ss/trim (get-text rakennus :rakennustunnus :valtakunnallinenNumero))
+           :valtakunnallinenNumero        (pysyva-rakennustunnus (get-text rakennus :rakennustunnus :valtakunnallinenNumero))
            :rakennusnro                   (ss/trim (get-text rakennus :rakennustunnus :rakennusnro))
            :manuaalinen_rakennusnro       ""
            :jarjestysnumero               (get-text rakennus :rakennustunnus :jarjestysnumero)
@@ -376,9 +384,6 @@
                     last
                     :hakemuksenTila
                     ss/lower-case)]
-    ;;
-    ;; TODO: Ovatko nama tilat validit?
-    ;;
     (when-not (#{nil "luonnos" "hakemus" "valmistelussa" "vastaanotettu" "tarkastettu, t\u00e4ydennyspyynt\u00f6"} app-state)
       (map (fn [paatos-xml-without-ns]
              (let [paatosdokumentinPvm-timestamp (cr/to-timestamp (get-text paatos-xml-without-ns :paatosdokumentinPvm))]
@@ -397,14 +402,18 @@
 (permit/register-function permit/MAL :verdict-krysp-reader ->simple-verdicts)
 (permit/register-function permit/VVVL :verdict-krysp-reader ->simple-verdicts)
 
+(defn- ->lp-tunnus [asia]
+  (or (get-text asia [:luvanTunnisteTiedot :LupaTunnus :muuTunnustieto :tunnus])
+      (get-text asia [:luvanTunnistetiedot :LupaTunnus :muuTunnustieto :tunnus])))
+
 (defn- ->kuntalupatunnus [asia]
-  {:kuntalupatunnus (or (get-text asia [:luvanTunnisteTiedot :LupaTunnus :kuntalupatunnus])
-                        (get-text asia [:luvanTunnistetiedot :LupaTunnus :kuntalupatunnus]))})
+  (or (get-text asia [:luvanTunnisteTiedot :LupaTunnus :kuntalupatunnus])
+      (get-text asia [:luvanTunnistetiedot :LupaTunnus :kuntalupatunnus])))
 
 (defn ->verdicts [xml ->function]
   (map
     (fn [asia]
-      (let [verdict-model (->kuntalupatunnus asia)
+      (let [verdict-model {:kuntalupatunnus (->kuntalupatunnus asia)}
             verdicts      (->> asia
                            (->function)
                            (cleanup)
@@ -420,3 +429,124 @@
       {:buildings summary})))
 
 (permit/register-function permit/R :verdict-extras-krysp-reader buildings-summary-for-application)
+
+
+;; Coordinates
+
+(def- to-projection "EPSG:3067")
+(def- allowed-projection-prefix "EPSG:")
+
+(defn- ->source-projection [xml path]
+  (let [source-projection-attr (select1-attribute-value xml path :srsName)                          ;; e.g. "urn:x-ogc:def:crs:EPSG:3879"
+        source-projection-point-dimension (-> (select1-attribute-value xml path :srsDimension) (util/->int false))]
+    (when (and source-projection-attr (= 2 source-projection-point-dimension))
+     (let [projection-name-index    (.lastIndexOf source-projection-attr allowed-projection-prefix) ;; find index of "EPSG:"
+           source-projection        (when (> projection-name-index -1)
+                                      (subs source-projection-attr projection-name-index))          ;; rip "EPSG:3879"
+           source-projection-number (subs source-projection (count allowed-projection-prefix))]
+       (if (util/->int source-projection-number false)              ;; make sure the stuff after "EPSG:" parses as an Integer
+         source-projection
+         (throw (Exception. (str "No coordinate source projection could be parsed from string '" source-projection-attr "'"))))))))
+
+(defn- resolve-coordinates [point-xml-with-ns point-str kuntalupatunnus]
+  (try
+    (when-let [source-projection (->source-projection point-xml-with-ns [:Point])]
+      (let [coords (ss/split point-str #" ")]
+        (coordinate/convert source-projection to-projection 3 coords)))
+    (catch Exception e (error e "Coordinate conversion failed for kuntalupatunnus " kuntalupatunnus))))
+
+;;
+;; Information parsed from verdict xml message for application creation
+;;
+(defn get-app-info-from-message [xml kuntalupatunnus]
+  (let [xml-no-ns (cr/strip-xml-namespaces xml)
+        kuntakoodi (-> (select1 xml-no-ns [:toimituksenTiedot :kuntakoodi]) cr/all-of)
+        asiat (enlive/select xml-no-ns case-elem-selector)
+        ;; Take first asia with given kuntalupatunnus. There should be only one. If there are many throw error.
+        asiat-with-kuntalupatunnus (filter #(when (= kuntalupatunnus (->kuntalupatunnus %)) %) asiat)]
+    (when (pos? (count asiat-with-kuntalupatunnus))
+      ;; There should be only one RakennusvalvontaAsia element in the message, even though Krysp makes multiple elements possible.
+      ;; Log an error if there were many. Use the first one anyway.
+      (when (> (count asiat-with-kuntalupatunnus) 1)
+        (error "Creating application from previous permit. More than one RakennusvalvontaAsia element were received in the xml message with kuntalupatunnus " kuntalupatunnus "."))
+
+      (let [asia (first asiat-with-kuntalupatunnus)
+            viitelupatiedot (map cr/all-of (select asia [:viitelupatieto :LupaTunnus]))
+            kasittelynTilatiedot (->> (select asia [:kasittelynTilatieto])
+                                   (map #(-> (cr/all-of % [:Tilamuutos]) (cr/convert-keys-to-timestamps [:pvm])))
+                                   (sort-by :pvm))
+            viimeisin-tila (last kasittelynTilatiedot)
+            asioimiskieli (cr/all-of asia [:lisatiedot :Lisatiedot :asioimiskieli])
+            asioimiskieli-code (case asioimiskieli
+                                 "suomi"  "fi"
+                                 "ruotsi" "sv"
+                                 "fi")
+            asianTiedot (cr/all-of asia [:asianTiedot :Asiantiedot])
+
+            ;;
+            ;; TODO: _Kvintus 5.11.2014_: Rakennuspaikka osoitteen ja sijainnin oikea lahde.
+            ;;       Referenssipiste ei osoita nyt talla hetkella oikeaan pisteeseen.
+            ;;
+            ;; Referenssipiste
+            referenssiPiste-xml (select1 asia [:referenssiPiste])
+            coord-array-referenssipiste (resolve-coordinates
+                                          referenssiPiste-xml
+                                          (cr/all-of referenssiPiste-xml [:Point :pos])
+                                          kuntalupatunnus)
+
+            ;; Rakennuspaikka
+            Rakennuspaikka (cr/all-of asia [:rakennuspaikkatieto :Rakennuspaikka])
+            osoitteet-xml (select asia [:rakennuspaikkatieto :Rakennuspaikka :osoite :osoitenimi :teksti])
+            osoite-Rakennuspaikka (or (-> (select1 osoitteet-xml [(enlive/attr= :xml:lang asioimiskieli-code)]) cr/all-of)
+                                    (-> (select1 osoitteet-xml [(enlive/attr= :xml:lang "fi")]) cr/all-of))
+            kiinteistotunnus-Rakennuspaikka (-> Rakennuspaikka :rakennuspaikanKiinteistotieto :RakennuspaikanKiinteisto :kiinteistotieto :Kiinteisto :kiinteistotunnus)
+            coord-array-Rakennuspaikka (resolve-coordinates
+                                         (select1 asia [:rakennuspaikkatieto :Rakennuspaikka :sijaintitieto :Sijainti :piste])
+                                         (-> Rakennuspaikka :sijaintitieto :Sijainti :piste :Point :pos)
+                                         kuntalupatunnus)
+
+            ;; Rakennus tai Rakennelma
+            toimenpidetieto (-> (select asia [:toimenpidetieto]) first cr/all-of)
+            Rakennus (or
+                       (-> toimenpidetieto :Toimenpide :rakennustieto :Rakennus)
+                       (-> toimenpidetieto :Toimenpide :rakennelmatieto :Rakennelma))
+            osoite-Rakennus (-> Rakennus :rakennuksenTiedot :osoite :osoitenimi :teksti)
+            kiinteistotunnus-Rakennus (-> Rakennus :rakennuksenTiedot :rakennustunnus :kiinttun)
+            coord-array-Rakennus (resolve-coordinates
+                                   (or
+                                     (select1 asia [:toimenpidetieto :Toimenpide :rakennustieto :Rakennus :sijaintitieto :Sijainti :piste])
+                                     (select1 asia [:toimenpidetieto :Toimenpide :rakennelmatieto :Rakennelma :sijaintitieto :Sijainti :piste]))
+                                   (-> Rakennus :sijaintitieto :Sijainti :piste :Point :pos)
+                                   kuntalupatunnus)
+
+            ;; Varaudu tallaiseen. Huomaa srsName ja pilkku koordinaattien valimerkkina! (kts. LP-734-2014-00001:n paatossanoma)
+;            <yht:pistesijainti>
+;              <gml:Point srsName="http://www.opengis.net/gml/srs/epsg.xml#3877">
+;                <gml:coordinates>23528933.213,6699629.937</gml:coordinates>
+;              </gml:Point>
+;            </yht:pistesijainti>
+            ]
+
+        (merge
+          {:id (->lp-tunnus asia)
+           :kuntalupatunnus (->kuntalupatunnus asia)
+           :municipality kuntakoodi
+           :rakennusvalvontaasianKuvaus (:rakennusvalvontaasianKuvaus asianTiedot)
+           :vahainenPoikkeaminen (:vahainenPoikkeaminen asianTiedot)
+;           :viitelupatiedot viitelupatiedot
+;           :kasittelynTilatiedot kasittelynTilatiedot
+;           :viimeisin-tila viimeisin-tila
+;           :rakennusten-tiedot (->buildings xml)
+;           :toimenpidetieto toimenpidetieto
+;           :asioimiskieli asioimiskieli
+          }
+          (when (and coord-array-Rakennus osoite-Rakennus kiinteistotunnus-Rakennus)
+            {:ensimmainen-rakennus {:x (first coord-array-Rakennus)
+                                    :y (second coord-array-Rakennus)
+                                    :address osoite-Rakennus
+                                    :propertyId kiinteistotunnus-Rakennus}})
+          (when (and coord-array-Rakennuspaikka osoite-Rakennuspaikka kiinteistotunnus-Rakennuspaikka)
+            {:rakennuspaikka {:x (first coord-array-Rakennuspaikka)
+                              :y (second coord-array-Rakennuspaikka)
+                              :address osoite-Rakennuspaikka
+                              :propertyId kiinteistotunnus-Rakennuspaikka}}))))))

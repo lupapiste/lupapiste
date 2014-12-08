@@ -50,11 +50,17 @@
       (select-keys krysp-config [:url :version])))))
 
 (defn- municipalities-with-organization []
-  (let [organizations (get-organizations {} {:scope 1})]
-    (distinct
-      (for [{scopes :scope} organizations
-            {municipality :municipality} scopes]
-        municipality))))
+  (let [organizations (get-organizations {} [:scope :krysp])]
+    {:all (distinct
+            (for [{scopes :scope} organizations
+                  {municipality :municipality} scopes]
+              municipality))
+     :with-backend (remove nil?
+                     (distinct
+                       (for [{scopes :scope :as org} organizations
+                             {municipality :municipality :as scope} scopes]
+                         (when (-> org :krysp (get (-> scope :permitType keyword)) :url s/blank? not)
+                           municipality))))}))
 
 (defn- organization-attachments
   "Returns a map where key is permit type, value is a list of attachment types for the permit type"
@@ -111,8 +117,12 @@
       (errorf "*** multiple organizations in scope of - municipality=%s, permit-type=%s -> %s" municipality permit-type (count organizations)))
     (first organizations)))
 
-(defn resolve-organization-scope [organization municipality permit-type]
-  (first (filter #(and (= municipality (:municipality %)) (= permit-type (:permitType %))) (:scope organization))))
+(defn resolve-organization-scope
+  ([municipality permit-type]
+    (let [organization (resolve-organization municipality permit-type)]
+      (resolve-organization-scope municipality permit-type organization)))
+  ([municipality permit-type organization]
+   (first (filter #(and (= municipality (:municipality %)) (= permit-type (:permitType %))) (:scope organization)))))
 
 ;;
 ;; Actions
@@ -193,7 +203,10 @@
   {:description "Returns a list of municipality IDs that are affiliated with Lupapiste."
    :roles [:applicant :authority]}
   [_]
-  (ok :municipalities (municipalities-with-organization)))
+  (let [munis (municipalities-with-organization)]
+    (ok
+      :municipalities (:all munis)
+      :municipalitiesWithBackendInUse (:with-backend munis))))
 
 (defquery municipality-active
   {:parameters [municipality]
@@ -244,13 +257,12 @@
   [_]
   (let [permit-type (:permit-type ((keyword operation) operations/operations))]
     (if-let [organization (resolve-organization municipality permit-type)]
-      (let [scope (resolve-organization-scope organization municipality permit-type)]
+      (let [scope (resolve-organization-scope municipality permit-type organization)]
         (ok
-         :inforequests-disabled (not (:inforequest-enabled scope))
-         :new-applications-disabled (not (:new-application-enabled scope))
-         :links (:links organization)
-         :attachmentsForOp (-> organization :operations-attachments ((keyword operation)))))
-
+          :inforequests-disabled (not (:inforequest-enabled scope))
+          :new-applications-disabled (not (:new-application-enabled scope))
+          :links (:links organization)
+          :attachmentsForOp (-> organization :operations-attachments ((keyword operation)))))
       (fail :municipalityNotSupported :municipality municipality :permitType permit-type))))
 
 (defcommand set-organization-selected-operations
