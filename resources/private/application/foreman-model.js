@@ -14,16 +14,15 @@ LUPAPISTE.ForemanModel = function() {
   self.finished = ko.observable(false);
 
   self.refresh = function(application) {
-    function loadForemanApplications(linkPermits) {
+    function loadForemanApplications(id) {
       self.foremanApplications([]);
-      _.forEach(_.pluck(linkPermits, "id"), function(id) {
-        ajax
-        .query("application", {id: id})
-        .success(function(app) {
-          if (_.find(app.application.operations, {"name": "tyonjohtajan-nimeaminen"})) {
-            var foreman = _.find(app.application.auth, {"role": "foreman"});
-            var data = {"state": app.application.state,
-                        "id": app.application.id,
+      ajax
+        .query("foreman-applications", {id: id})
+        .success(function(data) {
+          _.forEach(data.applications, function(app) {
+            var foreman = _.find(app.auth, {"role": "foreman"});
+            var data = {"state": app.state,
+                        "id": app.id,
                         "email": foreman ? foreman.username : undefined,
                         "firstName": foreman ? foreman.firstName : undefined,
                         "lastName": foreman ? foreman.lastName : undefined};
@@ -31,18 +30,17 @@ LUPAPISTE.ForemanModel = function() {
             self.foremanApplications.sort(function(left, right) {
               return left.id.localeCompare(right.id);
             });
-          }
+          });
         })
         .error(
           // invited foreman can't always fetch applicants other foreman appications (if they are not invited to them also)
         )
         .call();
-      });
     }
 
     self.application = application;
     _.defer(function() {
-      loadForemanApplications(_.where(application.appsLinkingToUs));
+      loadForemanApplications(application.id);
     });
   };
 
