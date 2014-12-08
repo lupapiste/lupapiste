@@ -1,0 +1,85 @@
+operations.tree.maanmittaustoimitukset: Maanmittaustoimitukset
+operations.tree.kiinteiston-muodostus: Kiinteistön muodostusfastighetsbildning
+
+maanmittaustoimitukset._group_label: Perustelut
+kiinteiston-muodostus._group_label	Perustelut	motiveringar
+
+maanmittaustoimitukset.kuvaus: Perustelut
+kiinteiston-muodostus.kuvaus: Perustelutmotiveringar
+
+kiinteistotoimitus._group_label: Perustelut
+kiinteistotoimitus.kuvaus: Perustelut
+
+
+operations.tree.tilusvaihto: Tilusvaihto
+operations.tilusvaihto: Tilusvaihto
+operations.tilusvaihto.desc: Tiluksia vaihtamalla voidaan esimerkiksi poistaa kiinteistöjen rajoissa olevia haitallisia mutkia, korjata kiinteistörakennetta, jos tietä rakennettaessa tai valtaojaa oikaistaessa on jäänyt pieniä alueita tien tai ojan toiselle puolelle sekä sovittaa asemakaava-alueella omistusrajat rakennuspaikkojen rajoihin.
+tilusvaihto._group_label: Tilusvaihto
+
+operations.tree.rakennuksen-sijainti: Rakennuksen sijainnin merkitseminen
+operations.rakennuksen-sijainti: Rakennuksen sijainnin merkitseminen
+operations.rakennuksen-sijainti.desc: Rakennuksen paikan ja korkeusaseman maastoonmerkintä on tehtävä ennen rakentamiseen ryhtymistä. Merkintä tehdään asiakkaan tilauksesta sen jälkeen, kun rakennuslupa on lainvoimainen tai kun rakennuslupa on myönnetty ja vakuusmaksu rakennustöiden aloittamiseksi ennen rakennusluvan lainvoimaisuutta on maksettu.<br /> <br />Rakennuksen sijainnin ja mitoituksen määrittämiseen käytetään rakennusluvassa hyväksyttyä asemapiirrosta. Maastoon merkitään suorakulmio, joka kuvaa rakennuksen uloimmat linjat sekä korkomerkit, ellei tilauksen yhteydessä ole muuta sovittu.
+rakennuksen-sijainti._group_label: Rakennuksen sijainnin merkitseminen
+
+tonttijaon-hakeminen._group_label: Tonttijakotomtindelning
+
+operations.tree.maankayton-muutos: Kaavan tai kaavamuutosten hakeminen
+maankayton-muutos._group_label: Perustelut
+maankayton-muutos.kuvaus: Perustelutmotiveringar
+
+operations.tree.asemakaava-laadinta: Asemakaavalaadinnan hakeminen
+operations.asemakaava-laadinta: Asemakaavalaadinnan hakeminen
+operations.asemakaava-laadinta.desc:
+asemakaava-laadinta._group_label: Asemakaavalaadinta
+
+operations.tree.asemakaava-muutos: Asemakaavamuutoksen hakeminen
+operations.asemakaava-muutos: Asemakaavamuutoksen hakeminen
+operations.asemakaava-muutos.desc:
+asemakaava-muutos._group_label: Asemakaavamuutos
+
+operations.tree.ranta-asemakaava-laadinta: Ranta-asemakaavalaadinnan hakeminen
+operations.ranta-asemakaava-laadinta: Ranta-asemakaavalaadinnan hakeminen
+operations.ranta-asemakaava-laadinta.desc:
+ranta-asemakaava-laadinta._group_label: Ranta-asemakaavalaadinta
+
+operations.tree.ranta-asemakaava-muutos: Ranta-asemakaavamuutoksen hakeminen
+operations.ranta-asemakaava-muutos: Ranta-asemakaavamuutoksen hakeminen
+operations.ranta-asemakaava-muutos.desc:
+ranta-asemakaava-muutos._group_label: Ranta-asemakaavamuutos
+
+operations.tree.yleiskaava-laadinta: Yleiskaavalaadinnan hakeminen
+operations.yleiskaava-laadinta: Yleiskaavalaadinnan hakeminen
+operations.yleiskaava-laadinta.desc:
+yleiskaava-laadinta._group_label: Yleiskaavalaadinta
+
+operations.tree.yleiskaava-muutos: Yleiskaavamuutoksen hakeminen
+operations.yleiskaava-muutos: Yleiskaavamuutoksen hakeminen
+operations.yleiskaava-muutos.desc:
+yleiskaava-muutos._group_label: Yleiskaavamuutos
+
+operations.tontin-lohkominen: Tontin tai kiinteistön lohkominen
+operations.tontin-lohkominen.desc: <h3>Tontin lohkominen</h3>Asemakaava-alueella rakennuspaikat muodostetaan lohkomalla. Ennen lohkomista pitää kohteella olla tonttijako. Tontin lohkomisen yhteydessä voidaan asiakkaan hakemuksesta perustaa rasitteita tai tehdä tontinosan lunastaminen. <h3>Kiinteistön lohkominen</h3>
+operations.tree.tontin-lohkominen: Tontin tai kiinteistön lohkominen
+tontin-lohkominen._group_label: Tontin tai kiinteistön lohkominen
+
+operations.yhdistaminen: Tontin tai kiinteistön yhdistäminen
+operations.tree.yhdistaminen: Tontin tai kiinteistön yhdistäminen
+yhdistaminen._group_label: Tontin tai kiinteistön yhdistäminen
+
+operations.halkominen: Tontin tai kiinteistön halkominen
+operations.tree.halkominen: Tontin tai kiinteistön halkominen
+halkominen._group_label: Tontin tai kiinteistön halkominen
+
+
+operations.tree.ya-lohkominen: Yleisten alueiden lohkominen	Styckningsförrättning av allmänt område
+operations.tree.ya-lohkomistoimituksen-hakeminen-kunta: Yleisten alueiden lohkomistoimituksen hakeminen (kunta hakijana)	Ansökan om styckningsförrättning av allmänt område(kommun som ansökande)
+operations.ya-lohkominen: Yleisten alueiden lohkominen	Styckningsförrättning av allmänt område
+operations.ya-lohkomistoimituksen-hakeminen-kunta	Yleisten alueiden lohkomistoimituksen hakeminen (kunta hakijana)	Ansökan om styckningsförrättning av allmänt område(kommun som ansökande)
+operations.ya-lohkominen.desc: Kunnan itse käynnistämä toimitus yleisen alueen lohkomiseksi. Toimitus ei sovellu kuntalaisten käyttöön.	Förrättning som kommunen själv upptagit för styckning av allmänt
+operations.ya-lohkomistoimituksen-hakeminen-kunta.desc	Kunnan itse käynnistämä toimitus yleisen alueen lohkomiseksi. Toimitus ei sovellu kuntalaisten käyttöön.	Förrättning som kommunen själv upptagit för styckning av allmänt
+ya-lohkominen._group_label	Yleisten alueiden lohkominen
+ya-lohkomistoimituksen-hakeminen-kunta._group_label	Yleisten alueiden lohkomistoimituksen hakeminen
+
+operations.rasitetoimitus.desc: Rasitteella tarkoitetaan kiinteistön oikeutta käyttää pysyvästi hyväkseen toisen kiinteistön aluetta. Rasitetoimituksessa kiinteistön hyväksi voidaan perustaa toisen kiinteistön alueelle pysyvänä rasitteena oikeus:<ul><li>Talousveden ottamiseen ja johtamiseen sekä vesijohdon ja siihen liittyvien laitteiden ja rakennelmien sijoittamiseen ja käyttämiseen</li><li>Veden johtamiseen maan kuivattamista varten</li>    <li>Viemärijohdon ja siihen liittyvien laitteiden ja rakennelmien sijoittamiseen ja käyttämiseen</li><li>Puhelin-, sähkö-, kaasu-, lämpö- tai muun sellaisen johdon sekä johtoihin liittyvien laitteiden ja rakennelmien sijoittamiseen ja käyttämiseen</li><li>Autojen pitämistä, venevalkamaa, laituria, uimapaikkaa, puutavaran varastointia, lastauspaikkaa ja kalastusta varten tarvittavan alueen käyttämiseen</li><li>Kiven, soran, hiekan, saven, turpeen tai muun näihin verrattavan maa-aineksen ottamiseen</li><li>Väestönsuojelua varten tarvittavien rakennelmien sijoittamiseen ja käyttämiseen</li><li>Kiinteistöjen yhteisen lämpökeskuksen tai jätteiden kokoamispaikan sijoittamiseen ja käyttämiseen</li><li>Kulkuyhteyttä varten tarvittavaan alueeseen asemakaava-alueella</li></ul>
+
+operations.rajannayton-hakeminen.desc: Rajannäyttö tarkoittaa epäselvän tontin tai kiinteistön rajan paikan merkintää esimerkiksi puupaaluilla maastoon. Rajanäyttö on maksullinen. Mikäli kadonneiden rajamerkkien paikalle halutaan viralliset rajamerkit, rajan paikka selvitetään ja vahvistetaan rajankäyntitoimituksella.
