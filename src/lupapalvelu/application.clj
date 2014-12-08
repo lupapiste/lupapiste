@@ -448,7 +448,6 @@
           (assoc-in body path val)))
       {} schema-data)))
 
-;; TODO: permit-type splitting.
 (defn- make-documents [user created op application & [manual-schema-datas]]
   {:pre [(or (nil? manual-schema-datas) (map? manual-schema-datas))]}
 
@@ -482,9 +481,7 @@
                    (cons op-doc))]                  ;; new docs
     (if-not user
       new-docs
-      (conj new-docs (if (= permit/YA (permit/permit-type application))
-                       (make "hakija-ya")
-                       (make "hakija"))))))
+      (conj new-docs (permit/get-applicant-doc-schema (permit/permit-type application))))))
 
 (defn- ->location [x y]
   {:x (util/->double x) :y (util/->double y)})

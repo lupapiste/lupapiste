@@ -26,39 +26,48 @@
 
 (defpermit R  "Rakennusluvat"
   {:subtypes         []
-   :sftp-directory   "/rakennus"})
+   :sftp-directory   "/rakennus"
+   :applicant-doc-schema "hakija"})
 
 (defpermit YA "Yleisten alueiden luvat"
-  {:subtypes         []
-   :sftp-directory   "/yleiset_alueet"})
+  {:subtypes             []
+   :sftp-directory       "/yleiset_alueet"
+   :applicant-doc-schema "hakija-ya"})
 
 (defpermit YI  "Ymparistoilmoitukset"
   {:subtypes       []
-   :sftp-directory "/ymparisto"})
+   :sftp-directory "/ymparisto"
+   :applicant-doc-schema "hakija"})
 
 (defpermit YL  "Ymparistolupa"
   {:subtypes       []
-   :sftp-directory "/ymparisto"})
+   :sftp-directory "/ymparisto"
+   :applicant-doc-schema "hakija"})
 
 (defpermit VVVL  "Vapautushakemus vesijohtoon ja viemariin liittymisesta"
   {:subtypes       []
-   :sftp-directory "/ymparisto"})
+   :sftp-directory "/ymparisto"
+   :applicant-doc-schema "hakija"})
 
 (defpermit P  "Poikkeusluvat"
   {:subtypes         [poikkeamislupa suunnittelutarveratkaisu]
-   :sftp-directory   "/poikkeusasiat"})
+   :sftp-directory   "/poikkeusasiat"
+   :applicant-doc-schema "hakija"})
 
 (defpermit MAL "Maa-ainesluvat"
   {:subtypes       []
-   :sftp-directory "/ymparisto"})
+   :sftp-directory "/ymparisto"
+   :applicant-doc-schema "hakija"})
 
 (defpermit KT "Kiinteistotoimitus"
   {:subtypes       []
-   :sftp-directory "/rakennus"})
+   :sftp-directory "/rakennus"
+   :applicant-doc-schema "hakija"})
 
 (defpermit MM "Maankayton muutos"
   {:subtypes       []
-   :sftp-directory "/kaavat"})
+   :sftp-directory "/kaavat"
+   :applicant-doc-schema "hakija"})
 
 ;;
 ;; Helpers
@@ -73,6 +82,9 @@
 
 (defn get-sftp-directory [permit-type]
   (get-metadata permit-type :sftp-directory))
+
+(defn get-applicant-doc-schema [permit-type]
+  (get-metadata permit-type :applicant-doc-schema))
 
 (defn get-application-mapper
   "Returns a function that maps application into KRYSP XML and saves the XML to disk."
