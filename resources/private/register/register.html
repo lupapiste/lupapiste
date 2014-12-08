@@ -5,7 +5,7 @@
     <div class="container">
 
       <h1 data-bind="ltext: 'register.header1'"></h1>
-      <p data-bind="ltext: 'register.info'" class="register-info"></p>
+      <p data-bind="html: loc('register.info')" class="register-info"></p>
       <div id="vetuma-register"></div>
       <div data-bind="if: isCancel">
         <div id="register-cancel" data-bind="ltext: 'register.cancel'" class="context-error"></div>
