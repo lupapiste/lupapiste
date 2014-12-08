@@ -32,7 +32,7 @@
 (defn- create-invite-model [command conf recipient]
   (assoc (notifications/create-app-model command conf recipient)
     :message (get-in command [:data :text])
-    :recipient-email (:email recipient)))
+    :recipient (:email recipient)))
 
 (notifications/defemail :invite  {:recipients-fn :recipients
                                   :model-fn create-invite-model})
