@@ -214,7 +214,7 @@
          (when (env/feature? :ymparisto) operation-tree-for-Y)
          operation-tree-for-YA]
       ~@(when (env/feature? :kiinteistonMuodostus)
-          [operation-tree-for-maanmittaus operation-tree-for-MM])]))
+          [operation-tree-for-KT operation-tree-for-MM])]))
 
 
 (def schema-data-yritys-selected [[["_selected" :value] "yritys"]])
