@@ -7,6 +7,9 @@ kiinteiston-muodostus._group_label	Perustelut	motiveringar
 maanmittaustoimitukset.kuvaus: Perustelut
 kiinteiston-muodostus.kuvaus: Perustelutmotiveringar
 
+kiinteistotoimitus._group_label: Perustelut
+kiinteistotoimitus.kuvaus: Perustelut
+
 
 operations.tree.tilusvaihto: Tilusvaihto
 operations.tilusvaihto: Tilusvaihto
