@@ -1949,25 +1949,34 @@ table.tasks thead tr:first-child td {
   padding-left: 0;
 }
 
-/* line 82, ../sass/partials/_tables.scss */
+/* line 81, ../sass/partials/_tables.scss */
+table.tasks .task-state {
+  width: 22px;
+}
+/* line 83, ../sass/partials/_tables.scss */
+table.tasks .task-state .icon {
+  margin: 12px 6px 6px 6px;
+}
+
+/* line 91, ../sass/partials/_tables.scss */
 table.attachments-template-table td.attachmentState {
   padding: 0 0 0 12px;
   white-space: nowrap;
 }
-/* line 86, ../sass/partials/_tables.scss */
+/* line 95, ../sass/partials/_tables.scss */
 table.attachments-template-table td.attachmentState .icon {
   margin: 6px;
   vertical-align: middle;
 }
-/* line 91, ../sass/partials/_tables.scss */
+/* line 100, ../sass/partials/_tables.scss */
 table.attachments-template-table td.attachment-type-group {
   padding-right: 0;
 }
-/* line 94, ../sass/partials/_tables.scss */
+/* line 103, ../sass/partials/_tables.scss */
 table.attachments-template-table td.attachment-type-id {
   padding-left: 0;
 }
-/* line 98, ../sass/partials/_tables.scss */
+/* line 107, ../sass/partials/_tables.scss */
 table.attachments-template-table td.attachment-group-select a {
   font-size: 15px;
   font-weight: normal;
