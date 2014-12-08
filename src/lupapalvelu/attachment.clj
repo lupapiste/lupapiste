@@ -224,7 +224,7 @@
           :pohjavesitutkimus
           :muu]])
 
-(def- attachment-types-KM
+(def- attachment-types-KT
   [:hakija [:valtakirja
             :virkatodistus
             :ote_kauppa_ja_yhdistysrekisterista]
@@ -269,7 +269,7 @@
       :YL attachment-types-YL
       :VVVL attachment-types-YI ;TODO quick fix to get test and qa work. Put correct attachment list here
       :MAL attachment-types-MAL
-      :KM attachment-types-KM
+      :KT attachment-types-KT
       (fail! (str "unsupported permit-type: " permit-type)))))
 
 (defn get-attachment-types-for-application
