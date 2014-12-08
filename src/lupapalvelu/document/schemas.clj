@@ -306,9 +306,7 @@
                    sijaisuus-tyonjohtaja))
 
 (def maksaja (body
-               {:name select-one-of-key :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}]}
-               {:name "henkilo" :type :group :body henkilo}
-               {:name "yritys" :type :group :body yritys-with-verkkolaskutustieto}
+               (henkilo-yritys-select-group :yritys-body yritys-with-verkkolaskutustieto)
                {:name "laskuviite" :type :string :max-len 30 :layout :full-width}))
 
 (def aloitusoikeus [{:name "kuvaus" :type :text :max-len 4000 :required true :layout :full-width}])
