@@ -1,14 +1,16 @@
 # Hei,
 
-Teid&auml;t halutaan lis&auml;t&auml; osapuoleksi lupahakemukselle.
+S&auml;hk&ouml;postiosoite [{{recipient-email}}]({{recipient-email}}) halutaan lis&auml;t&auml; osapuoleksi lupahakemukselle.
 
-Jos et ole viel&auml; Lupapisteen k&auml;ytt&auml;j&auml;, hakemuksen n&auml;keminen edellytt&auml;&auml; rekister&ouml;itymist&auml; palveluun mobiilivarmenteen tai verkkopankkitunnuksien avulla.
+Jos et ole viel&auml; Lupapisteen k&auml;ytt&auml;j&auml;, hakemuksen n&auml;keminen edellytt&auml;&auml; rekister&ouml;itymist&auml; palveluun mobiilivarmenteen tai verkkopankkitunnuksien avulla. Muistathan rekister&ouml;ity&auml; palveluun samalla s&auml;hk&ouml;postiosoitteella, johon kutsu on l&auml;hetetty.
 
 Hyv&auml;ksy&auml;ksesi roolin ja n&auml;hd&auml;ksesi hakemuksen tiedot klikkaa t&auml;st&auml;:
 
 {{link-fi}}
 
-Jos linkki ei toimi, kopioi osoite ja liitä se selaimen osoiteriville.
+Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville. Tarkista my&ouml;s, ett&auml; kutsuttu s&auml;hk&ouml;postiosoite [{{recipient-email}}]({{recipient-email}}) vastaa s&auml;hk&ouml;postiosoitetta, jolla olet palveluun rekister&ouml;itynyt.
+
+Ongelmatilanteissa ota yhteytt&auml; [tuki@lupapiste.fi](tuki@lupapiste.fi).
 
 
 ---
