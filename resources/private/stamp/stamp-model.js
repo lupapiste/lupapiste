@@ -46,14 +46,14 @@ LUPAPISTE.StampModel = function(params) {
   }
 
   function getSelectedAttachments(files) {
-    return _(files).pluck('attachments').flatten()
+    return _(files).pluck("attachments").flatten()
       .filter(function(f) {
           return f.selected();
       }).value();
   }
 
   function eachSelected(files) {
-    return _(files).pluck('attachments').flatten().every(function(f) {
+    return _(files).pluck("attachments").flatten().every(function(f) {
       return f.selected();
     });
   }
@@ -74,16 +74,16 @@ LUPAPISTE.StampModel = function(params) {
 
   // group by post/pre verdict attachments
   var grouped = _.groupBy(self.filteredFiles, function(a) {
-    return _.contains(LUPAPISTE.config.postVerdictStates, a.applicationState) ? 'post' : 'pre';
+    return _.contains(LUPAPISTE.config.postVerdictStates, a.applicationState) ? "post" : "pre";
   });
 
   // group attachments by operation
-  grouped['pre'] = attachmentUtils.getGroupByOperation(grouped['pre'], true, self.application.allowedAttachmentTypes);
-  grouped['post'] = attachmentUtils.getGroupByOperation(grouped['post'], true, self.application.allowedAttachmentTypes);
+  grouped.pre = attachmentUtils.getGroupByOperation(grouped.pre, true, self.application.allowedAttachmentTypes);
+  grouped.post = attachmentUtils.getGroupByOperation(grouped.post, true, self.application.allowedAttachmentTypes);
 
   // map files for stamping
-  self.preFiles = ko.observableArray(_.map(grouped['pre'], mapAttachmentGroup));
-  self.postFiles = ko.observableArray(_.map(grouped['post'], mapAttachmentGroup));
+  self.preFiles = ko.observableArray(_.map(grouped.pre, mapAttachmentGroup));
+  self.postFiles = ko.observableArray(_.map(grouped.post, mapAttachmentGroup));
 
   self.status = ko.observable(self.filteredFiles.length > 0 ? self.statusReady : self.statusNoFiles);
 
@@ -171,8 +171,8 @@ LUPAPISTE.StampModel = function(params) {
 
       self.jobVersion = update.version;
       _.each(update.value, function (data, attachmentId) {
-        var newStatus = data["status"];
-        var fileId = data["fileId"];
+        var newStatus = data.status;
+        var fileId = data.fileId;
         _(self.selectedFiles()).filter({id: attachmentId}).each(function(f) {
           f.status(newStatus);
           f.fileId(fileId);
@@ -197,8 +197,8 @@ LUPAPISTE.StampModel = function(params) {
 
   function selectAllFiles(value) {
     if ( self.status() < self.statusStarting ) {
-      _(self.preFiles()).pluck('attachments').flatten().each(function(f) { f.selected(value); });
-      _(self.postFiles()).pluck('attachments').flatten().each(function(f) { f.selected(value); });
+      _(self.preFiles()).pluck("attachments").flatten().each(function(f) { f.selected(value); });
+      _(self.postFiles()).pluck("attachments").flatten().each(function(f) { f.selected(value); });
     }
   }
 

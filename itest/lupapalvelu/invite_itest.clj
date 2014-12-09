@@ -5,14 +5,14 @@
             [lupapalvelu.domain :as domain]))
 
 (defn- invite [apikey application-id document-id doc-name email & [text]]
-  (command apikey :invite
+  (command apikey :invite-with-role
     :id application-id
     :email email
-    :title email
     :text  (or text email)
     :documentName doc-name
     :documentId document-id
-    :path ""))
+    :path ""
+    :role "writer"))
 
 (apply-remote-minimal)
 

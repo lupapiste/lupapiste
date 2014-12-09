@@ -168,8 +168,12 @@
 
 (defn- get-luvan-tunniste-tiedot [application]
   (let [base-id (update-in (lupatunnus application) [:LupaTunnus :muuTunnustieto] vector)
-        link-permits (map (fn [{id :id}] {:MuuTunnus {:tunnus id, :sovellus "Viitelupa"}}) (:linkPermitData application))]
-    (update-in base-id [:LupaTunnus :muuTunnustieto] #(into % link-permits))))
+        link-permits (map (fn [{id :id}] {:MuuTunnus {:tunnus id, :sovellus "Viitelupa"}}) (:linkPermitData application))
+        base-with-link (update-in base-id [:LupaTunnus :muuTunnustieto] #(into % link-permits))
+        kuntalupatunnus-link (some #(if (= (:type %) "kuntalupatunnus") {:kuntalupatunnus (:id %)}) (:linkPermitData application))]
+    (if kuntalupatunnus-link
+      (update-in base-with-link [:LupaTunnus] #(into % kuntalupatunnus-link))
+      base-with-link)))
 
 (defn- permits [application]
   ;;

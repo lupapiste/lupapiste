@@ -48,7 +48,7 @@ var stamping = (function() {
     }
 
     if ( model.appModel.verdicts && !_.isEmpty(model.appModel.verdicts()) ) {
-      model.stampFields.kuntalupatunnus(_.first(model.appModel.verdicts())["kuntalupatunnus"]());
+      model.stampFields.kuntalupatunnus(_.first(model.appModel.verdicts()).kuntalupatunnus());
     } else {
       model.stampFields.kuntalupatunnus("");
     }
@@ -67,7 +67,7 @@ var stamping = (function() {
     if ( model.appModel.buildings ) {
       model.stampFields.buildingIdList(model.appModel.buildings());
     }
-  };
+  }
 
   function initStamp(appModel) {
     model.appModel = appModel;

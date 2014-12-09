@@ -2141,7 +2141,7 @@ table.attachments-template-table td.attachment-group-select a {
 .radio-tabs button.application-create {
   display: inline;
   margin-bottom: 0;
-  width: 340px;
+  width: 330px;
 }
 @media all and (max-width: 1000px) {
   /* line 139, ../sass/partials/_tabs.scss */
@@ -3214,54 +3214,67 @@ ul.attachments-list li.mandatory-attachments {
 .applications-empty-state {
   margin-top: 24px;
   margin-right: 72px;
-  width: 90%;
+  width: 100%;
   min-height: 300px;
 }
 /* line 14, ../sass/views/_applications.scss */
-.applications-empty-state div {
+.applications-empty-state .app-type-box {
   display: inline-block;
-  width: 45%;
+  width: 32%;
+  height: 100%;
   margin: 12px auto;
   vertical-align: top;
-  height: 100%;
   position: relative;
 }
 /* line 21, ../sass/views/_applications.scss */
-.applications-empty-state div button {
+.applications-empty-state .app-type-box button {
   position: absolute;
   bottom: 12px;
-  left: 64px;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
 }
-/* line 27, ../sass/views/_applications.scss */
-.applications-empty-state .missing-inforequest-box {
-  padding-right: 24px;
-  border-right: 1px solid #888a8c;
-  padding-bottom: 48px;
+/* line 29, ../sass/views/_applications.scss */
+.applications-empty-state .missing-wrapper {
+  width: 100%;
 }
 /* line 32, ../sass/views/_applications.scss */
+.applications-empty-state .missing-inforequest-box {
+  padding-right: 24px;
+  border-right: 1px dotted #888a8c;
+  padding-bottom: 48px;
+}
+/* line 37, ../sass/views/_applications.scss */
 .applications-empty-state .missing-application-box {
   padding-left: 24px;
+  padding-right: 24px;
+  padding-bottom: 48px;
+}
+/* line 42, ../sass/views/_applications.scss */
+.applications-empty-state .missing-prev-permit-box {
+  padding-left: 24px;
+  border-left: 1px dotted #888a8c;
   padding-bottom: 48px;
 }
 
-/* line 38, ../sass/views/_applications.scss */
+/* line 49, ../sass/views/_applications.scss */
 #applications-list_paginate, .dataTables_paginate {
   display: inline-block;
   width: 16.25em;
   float: left;
 }
-/* line 42, ../sass/views/_applications.scss */
+/* line 53, ../sass/views/_applications.scss */
 #applications-list_paginate a, .dataTables_paginate a {
   border: 1px solid #dddddd;
   padding: 6px;
   cursor: pointer;
 }
-/* line 47, ../sass/views/_applications.scss */
+/* line 58, ../sass/views/_applications.scss */
 #applications-list_paginate .paginate_disabled_previous, #applications-list_paginate .paginate_disabled_next, .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .paginate_disabled_next {
   background: #f6f6f6;
   color: gray;
 }
-/* line 51, ../sass/views/_applications.scss */
+/* line 62, ../sass/views/_applications.scss */
 #applications-list_paginate .paginate_enabled_previous, #applications-list_paginate .paginate_enabled_next, .dataTables_paginate .paginate_enabled_previous, .dataTables_paginate .paginate_enabled_next {
   background: #ffffff;
   /* Old browsers */
@@ -3271,31 +3284,31 @@ ul.attachments-list li.mandatory-attachments {
   background: -webkit-linear-gradient(top, #ffffff 0%, #f3f3f3 50%, #ededed 51%, #ffffff 100%);
   background: linear-gradient(to bottom, #ffffff 0%, #f3f3f3 50%, #ededed 51%, #ffffff 100%);
 }
-/* line 55, ../sass/views/_applications.scss */
+/* line 66, ../sass/views/_applications.scss */
 #applications-list_paginate .paginate_disabled_previous, #applications-list_paginate .paginate_enabled_previous, .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .paginate_enabled_previous {
   margin-right: 12px;
 }
 
-/* line 60, ../sass/views/_applications.scss */
+/* line 71, ../sass/views/_applications.scss */
 #applications-list_length {
   width: 16.25em;
   position: absolute;
   left: 16.25em;
   bottom: -27px;
 }
-/* line 65, ../sass/views/_applications.scss */
+/* line 76, ../sass/views/_applications.scss */
 #applications-list_length select {
   width: 5.625em;
   margin-right: 6px;
 }
 
-/* line 71, ../sass/views/_applications.scss */
+/* line 82, ../sass/views/_applications.scss */
 .sorting, .sorting_asc, .sorting_desc {
   cursor: pointer;
   position: relative;
 }
 
-/* line 75, ../sass/views/_applications.scss */
+/* line 86, ../sass/views/_applications.scss */
 .sorting_asc:after {
   content: "";
   display: block;
@@ -3309,7 +3322,7 @@ ul.attachments-list li.mandatory-attachments {
   right: 2px;
 }
 
-/* line 86, ../sass/views/_applications.scss */
+/* line 97, ../sass/views/_applications.scss */
 .sorting_desc:after {
   content: "";
   display: block;
@@ -3323,7 +3336,7 @@ ul.attachments-list li.mandatory-attachments {
   right: 2px;
 }
 
-/* line 98, ../sass/views/_applications.scss */
+/* line 109, ../sass/views/_applications.scss */
 .dataTables_info {
   width: 16.25em;
   display: inline-block;
@@ -3332,30 +3345,30 @@ ul.attachments-list li.mandatory-attachments {
   bottom: 12px;
 }
 
-/* line 106, ../sass/views/_applications.scss */
+/* line 117, ../sass/views/_applications.scss */
 .invitations {
   margin-bottom: 24px;
 }
-/* line 109, ../sass/views/_applications.scss */
+/* line 120, ../sass/views/_applications.scss */
 .invitations .invitation span {
   margin-right: 12px;
 }
 
-/* line 116, ../sass/views/_applications.scss */
+/* line 127, ../sass/views/_applications.scss */
 .filter-controls div {
   display: inline-block;
   margin-bottom: 24px;
 }
-/* line 120, ../sass/views/_applications.scss */
+/* line 131, ../sass/views/_applications.scss */
 .filter-controls label {
   display: block;
 }
-/* line 123, ../sass/views/_applications.scss */
+/* line 134, ../sass/views/_applications.scss */
 .filter-controls select {
   display: block;
 }
 
-/* line 129, ../sass/views/_applications.scss */
+/* line 140, ../sass/views/_applications.scss */
 #applications-list .indicator-count {
   padding-left: 0;
   padding-right: 0;
@@ -3365,12 +3378,12 @@ ul.attachments-list li.mandatory-attachments {
   width: 22px;
   padding: 3px;
 }
-/* line 138, ../sass/views/_applications.scss */
+/* line 149, ../sass/views/_applications.scss */
 #applications-list div {
   padding-top: 3px;
   height: 30px;
 }
-/* line 139, ../sass/views/_applications.scss */
+/* line 150, ../sass/views/_applications.scss */
 #applications-list .urgent {
   background-image: url("/img/icons-sprite-1.12.png");
   background-repeat: no-repeat;
@@ -3378,7 +3391,7 @@ ul.attachments-list li.mandatory-attachments {
   height: 24px;
   width: 24px;
 }
-/* line 145, ../sass/views/_applications.scss */
+/* line 156, ../sass/views/_applications.scss */
 #applications-list .pending {
   background-image: url("/img/icons-sprite-1.12.png");
   background-repeat: no-repeat;
@@ -3386,7 +3399,7 @@ ul.attachments-list li.mandatory-attachments {
   width: 24px;
   height: 24px;
 }
-/* line 151, ../sass/views/_applications.scss */
+/* line 162, ../sass/views/_applications.scss */
 #applications-list .normal {
   background-image: url("/img/icons-sprite-1.12.png");
   background-repeat: no-repeat;
@@ -3394,21 +3407,21 @@ ul.attachments-list li.mandatory-attachments {
   width: 24px;
   height: 24px;
 }
-/* line 157, ../sass/views/_applications.scss */
+/* line 168, ../sass/views/_applications.scss */
 #applications-list .unseen-comments {
   background-image: url("/img/icons-sprite-1.12.png");
   background-repeat: no-repeat;
   background-position: 0 -4295px;
   width: 21px;
 }
-/* line 162, ../sass/views/_applications.scss */
+/* line 173, ../sass/views/_applications.scss */
 #applications-list .unseen-indicators {
   background-image: url("/img/icons-sprite-1.12.png");
   background-repeat: no-repeat;
   background-position: 0 -4597px;
   width: 25px;
 }
-/* line 167, ../sass/views/_applications.scss */
+/* line 178, ../sass/views/_applications.scss */
 #applications-list .unseen-attachments {
   background-image: url("/img/icons-sprite-1.12.png");
   background-repeat: no-repeat;
@@ -3416,25 +3429,25 @@ ul.attachments-list li.mandatory-attachments {
   width: 21px;
 }
 
-/* line 174, ../sass/views/_applications.scss */
+/* line 185, ../sass/views/_applications.scss */
 .clearable {
   position: relative;
   display: inline-block;
   vertical-align: bottom;
 }
 
-/* line 179, ../sass/views/_applications.scss */
+/* line 190, ../sass/views/_applications.scss */
 .applications-search {
   padding-right: 17px;
   /* add space for the 'x' icon*/
 }
 
-/* line 182, ../sass/views/_applications.scss */
+/* line 193, ../sass/views/_applications.scss */
 .applications-search::-ms-clear {
   display: none;
 }
 
-/* line 185, ../sass/views/_applications.scss */
+/* line 196, ../sass/views/_applications.scss */
 span.icon_clear {
   position: absolute;
   right: 12px;
@@ -3445,7 +3458,7 @@ span.icon_clear {
   font: bold 1em sans-serif;
   color: #38468F;
 }
-/* line 195, ../sass/views/_applications.scss */
+/* line 206, ../sass/views/_applications.scss */
 span.icon_clear:before {
   color: #f52;
 }
@@ -4240,25 +4253,32 @@ span.icon_clear:before {
   float: right;
 }
 
-/* line 68, ../sass/views/_create_application.scss */
+/* line 66, ../sass/views/_create_application.scss */
+.more-prev-app-info-needed-desc {
+  color: red;
+  margin-top: 24px;
+  margin-bottom: 0;
+}
+
+/* line 75, ../sass/views/_create_application.scss */
 .address-search {
   width: 22.5em;
   display: inline-block;
   height: 25px;
 }
 
-/* line 74, ../sass/views/_create_application.scss */
+/* line 81, ../sass/views/_create_application.scss */
 .create-application-details {
   width: 800px;
   height: 200px;
 }
 
-/* line 79, ../sass/views/_create_application.scss */
+/* line 86, ../sass/views/_create_application.scss */
 .create-application-form {
   display: inline-block;
 }
 
-/* line 83, ../sass/views/_create_application.scss */
+/* line 90, ../sass/views/_create_application.scss */
 .create-application-actions {
   width: 22.5em;
   display: inline-block;
@@ -4266,40 +4286,40 @@ span.icon_clear:before {
   vertical-align: bottom;
 }
 
-/* line 90, ../sass/views/_create_application.scss */
+/* line 97, ../sass/views/_create_application.scss */
 .btn-create-application {
   line-height: 60px;
 }
 
-/* line 94, ../sass/views/_create_application.scss */
+/* line 101, ../sass/views/_create_application.scss */
 .label-container {
   display: inline-block;
   width: 10em;
 }
 
-/* line 99, ../sass/views/_create_application.scss */
+/* line 106, ../sass/views/_create_application.scss */
 .create-group {
   margin-top: 24px;
   padding: 12px;
   border-radius: 3px;
   border: 1px solid #01BEF5;
 }
-/* line 105, ../sass/views/_create_application.scss */
+/* line 112, ../sass/views/_create_application.scss */
 .create-group label {
   display: inline-block;
 }
 
-/* line 109, ../sass/views/_create_application.scss */
+/* line 116, ../sass/views/_create_application.scss */
 .top-marginL {
   margin-top: 48px;
 }
 
-/* line 112, ../sass/views/_create_application.scss */
+/* line 119, ../sass/views/_create_application.scss */
 .bottom-marginM {
   margin-bottom: 12px !important;
 }
 
-/* line 116, ../sass/views/_create_application.scss */
+/* line 123, ../sass/views/_create_application.scss */
 #popup-id_close {
   background-image: url("/img/icons-sprite-1.12.png");
   background-repeat: no-repeat;
@@ -4308,19 +4328,19 @@ span.icon_clear:before {
   right: 4px !important;
 }
 
-/* line 122, ../sass/views/_create_application.scss */
+/* line 129, ../sass/views/_create_application.scss */
 #popup-id_contentDiv {
   padding: 0;
   width: 95% !important;
   overflow: hidden;
 }
 
-/* line 128, ../sass/views/_create_application.scss */
+/* line 135, ../sass/views/_create_application.scss */
 #popup-id_GroupDiv {
   padding: 8px;
 }
 
-/* line 131, ../sass/views/_create_application.scss */
+/* line 138, ../sass/views/_create_application.scss */
 #popup-id {
   background: white;
   color: black;
@@ -4329,7 +4349,7 @@ span.icon_clear:before {
   box-shadow: 2px 2px 1px #888888, 3px 3px 1px #888888;
   border: 1px solid #4f4f4f;
 }
-/* line 141, ../sass/views/_create_application.scss */
+/* line 148, ../sass/views/_create_application.scss */
 #popup-id:before {
   content: " ";
   display: block;
@@ -4342,7 +4362,7 @@ span.icon_clear:before {
   border-right: 51px solid #4f4f4f;
   border-bottom: 25px solid transparent;
 }
-/* line 153, ../sass/views/_create_application.scss */
+/* line 160, ../sass/views/_create_application.scss */
 #popup-id:after {
   content: " ";
   display: block;
