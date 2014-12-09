@@ -800,7 +800,7 @@
             :approvable true
             :order 2
             :type :location}
-     :body (schema-body-without-element-by-name rakennuspaikka "rantaKytkin" "hallintaperuste" "kaavanaste")}
+     :body (schema-body-without-element-by-name rakennuspaikka "rantaKytkin" "hallintaperuste" "kaavanaste" "kaavatilanne")}
 
     {:info {:name "aloitusoikeus" :removable false :approvable true}
      :body aloitusoikeus}
