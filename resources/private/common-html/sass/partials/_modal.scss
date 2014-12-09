@@ -100,13 +100,11 @@
   div.finished {
     background: #fff;
     display: block;
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    text-align: center;
+    text-align: left;
     z-index: 5000;
+  }
+  p {
+    margin-bottom: 0;
   }
 }
 
