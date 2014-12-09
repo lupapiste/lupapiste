@@ -1047,8 +1047,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
       var appender = function () {
         var parent$ = $(this).closest(".accordion-fields");
-        var count = parent$.children("*[data-repeating-id='" + repeatingId + "']").length;
-        while (parent$.children("*[data-repeating-id-" + repeatingId + "='" + count + "']").length) {
+        var count = parent$.find("*[data-repeating-id='" + repeatingId + "']").length;
+        while (parent$.find("*[data-repeating-id-" + repeatingId + "='" + count + "']").length) {
           count++;
         }
         var myModel = {};
@@ -1058,8 +1058,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
       var tableAppender = function () {
         var parent$ = $(this).closest(".accordion-fields").find("tbody");
-        var count = parent$.children("*[data-repeating-id='" + repeatingId + "']").length;
-        while (parent$.children("*[data-repeating-id-" + repeatingId + "='" + count + "']").length) {
+        var count = parent$.find("*[data-repeating-id='" + repeatingId + "']").length;
+        while (parent$.find("*[data-repeating-id-" + repeatingId + "='" + count + "']").length) {
           count++;
         }
         var myModel = {};
@@ -1069,8 +1069,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
       var copyElement = function() {
         var parent$ = $(this).closest(".accordion-fields").find("tbody");
-        var count = parent$.children("*[data-repeating-id='" + repeatingId + "']").length;
-        while (parent$.children("*[data-repeating-id-" + repeatingId + "='" + count + "']").length) {
+        var count = parent$.find("*[data-repeating-id='" + repeatingId + "']").length;
+        while (parent$.find("*[data-repeating-id-" + repeatingId + "='" + count + "']").length) {
           count++;
         }
         var lastItem$ = parent$.find("tr").last();
