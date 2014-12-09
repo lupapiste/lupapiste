@@ -148,7 +148,8 @@
                                        :child [{:tag :pintaAla}
                                                {:tag :kayttotarkoitusKoodi}]}]}
                              {:tag :rakennusoikeusYhteensa :ns "yht" }
-                             {:tag :uusiKytkin :ns "yht"}]})
+                             {:tag :uusiKytkin :ns "yht"}
+                             {:tag :kaavatilanne :ns "yht"}]})
 
 
 (def- henkilo-child [{:tag :nimi
