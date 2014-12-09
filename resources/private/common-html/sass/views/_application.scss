@@ -571,3 +571,22 @@
     }
   }
 }
+
+.tasks-foreman {
+  .foreman-state {
+    &:before {
+      content: "(";
+    }
+    &:after {
+      content: ")";
+    }
+  }
+  .add-foreman {
+    &:before {
+      content: "[";
+    }
+    &:after {
+      content: "]";
+    }
+  }
+}
