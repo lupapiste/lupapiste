@@ -136,7 +136,7 @@
           :permitSubtypes (permit/permit-subtypes (:permitType app))))
     (fail :error.not-found)))
 
-(defn- mapApplication [application]
+(defn- map-application [application]
   {:id (:id application)
    :state (:state application)
    :auth (:auth application)
@@ -155,8 +155,8 @@
           foreman-application-links (filter #(= (:apptype (first (:link %)) "tyonjohtajan-nimeaminen")) apps-linking-to-us)
           foreman-application-ids (map (fn [link] (first (:link link))) foreman-application-links)
           applications (mongo/select :applications {:_id {$in foreman-application-ids}})
-          mappedApplications (map (fn [app] (mapApplication app)) applications)]
-      (ok :applications (sort-by :id mappedApplications)))
+          mapped-applications (map (fn [app] (map-application app)) applications)]
+      (ok :applications (sort-by :id mapped-applications)))
     (fail :error.not-found)))
 
 (defn filter-repeating-party-docs [schema-version schema-names]
