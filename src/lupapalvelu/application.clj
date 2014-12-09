@@ -481,7 +481,7 @@
                    (cons op-doc))]                  ;; new docs
     (if-not user
       new-docs
-      (conj new-docs (permit/get-applicant-doc-schema (permit/permit-type application))))))
+      (conj new-docs (make (permit/get-applicant-doc-schema (permit/permit-type application)))))))
 
 (defn- ->location [x y]
   {:x (util/->double x) :y (util/->double y)})
