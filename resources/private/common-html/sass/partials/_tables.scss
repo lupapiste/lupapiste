@@ -77,6 +77,15 @@ table.tasks thead tr:first-child td {
   padding-left: 0
 }
 
+table.tasks {
+  .task-state {
+    width: 22px;
+    .icon {
+      margin: $marginM $marginS $marginS $marginS;
+    }
+  }
+}
+
 table.attachments-template-table {
   td {
     &.attachmentState {

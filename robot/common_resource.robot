@@ -486,9 +486,21 @@ Open the request
   Wait until  Click element  xpath=//table[@id='applications-list']//tr[@data-test-address='${address}']/td
   Wait for jQuery
 
+Open the request at index
+  [Arguments]  ${address}  ${index}
+  Go to page  applications
+  Wait until  Click element  xpath=//table[@id='applications-list']//tr[@data-test-address='${address}'][${index}]/td
+  Wait for jQuery
+
 Open application
   [Arguments]  ${address}  ${propertyId}
   Open the request  ${address}
+  Wait until  Element Should Be Visible  application
+  Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  ${propertyId}
+
+Open application at index
+  [Arguments]  ${address}  ${propertyId}  ${index}
+  Open the request at index  ${address}  ${index}
   Wait until  Element Should Be Visible  application
   Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  ${propertyId}
 
