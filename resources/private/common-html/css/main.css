@@ -4177,6 +4177,23 @@ span.icon_clear:before {
   content: ")";
 }
 
+/* line 577, ../sass/views/_application.scss */
+#tasks-foreman .foreman-state:before {
+  content: "(";
+}
+/* line 580, ../sass/views/_application.scss */
+#tasks-foreman .foreman-state:after {
+  content: ")";
+}
+/* line 585, ../sass/views/_application.scss */
+#tasks-foreman .add-foreman:before {
+  content: "[";
+}
+/* line 588, ../sass/views/_application.scss */
+#tasks-foreman .add-foreman:after {
+  content: "]";
+}
+
 /* line 1, ../sass/views/_create_application.scss */
 .ui-autocomplete-loading {
   background: white url("/img/ajax-loader-16.gif") right center no-repeat;

@@ -1,1 +1,3 @@
 invite.foreman.finished: Uusi hakemus luotiin onnistuneesti.<br>Siirrytään luotuun hakemukseen.
+application.parties.addOtherForeman: Nimeä muu työnjohtaja
+application.parties.addSubstituteForeman: Nimeä työnjohtajan sijainen
