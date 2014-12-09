@@ -180,27 +180,34 @@
   (some #(= elm %) seq))
 
 (defn- set-and-check-person [api-key application-id initial-document path]
-  (fact "initially there is no person data"
-       initial-document => truthy
-       (get-in initial-document [:data :henkilotiedot]) => nil)
+  (fact "new person is set"
+    (command api-key :set-user-to-document :id application-id :documentId (:id initial-document) :userId mikko-id :path (if (seq path) (join "." path) "")) => ok?
+    (let [updated-app (query-application mikko application-id)
+          update-doc (domain/get-document-by-id updated-app (:id initial-document))
+          schema-name  (get-in update-doc [:schema-info :name])
+          person-path  (into [] (concat [:data] (map keyword path) [:henkilotiedot]))
+          company-path (into [] (concat [:data] (map keyword path) [:yritys]))
+          experience-path (into [] (concat [:data] (map keyword path) [:patevyys]))
+          suunnittelija? (in? ["paasuunnittelija" "suunnittelija"] schema-name )]
+      (get-in update-doc (into person-path [:etunimi :value])) => "Mikko"
+      (get-in update-doc (into person-path [:sukunimi :value])) => "Intonen"
+      (get-in update-doc (into person-path [:hetu :value])) => "210281-****"
+      (get-in update-doc (into company-path [:yritysnimi :value])) => (if suunnittelija? "Yritys Oy" nil)
+      (get-in update-doc (into company-path [:liikeJaYhteisoTunnus :value])) => (if suunnittelija? "1234567-1" nil)
+      (get-in update-doc (into experience-path [:koulutus :value])) => (if suunnittelija? "Tutkinto" nil)
+      (get-in update-doc (into experience-path [:valmistumisvuosi :value])) => (if suunnittelija? "2000" nil)
+      (get-in update-doc (into experience-path [:fise :value])) => (if suunnittelija? "f" nil))))
 
-    (fact "new person is set"
-      (command api-key :set-user-to-document :id application-id :documentId (:id initial-document) :userId mikko-id :path (if (seq path) (join "." path) "")) => ok?
-      (let [updated-app (query-application mikko application-id)
-            update-doc (domain/get-document-by-id updated-app (:id initial-document))
-            schema-name  (get-in update-doc [:schema-info :name])
-            person-path  (into [] (concat [:data] (map keyword path) [:henkilotiedot]))
-            company-path (into [] (concat [:data] (map keyword path) [:yritys]))
-            experience-path (into [] (concat [:data] (map keyword path) [:patevyys]))
-            suunnittelija? (in? ["paasuunnittelija" "suunnittelija"] schema-name )]
-        (get-in update-doc (into person-path [:etunimi :value])) => "Mikko"
-        (get-in update-doc (into person-path [:sukunimi :value])) => "Intonen"
-        (get-in update-doc (into person-path [:hetu :value])) => "210281-****"
-        (get-in update-doc (into company-path [:yritysnimi :value])) => (if suunnittelija? "Yritys Oy" nil)
-        (get-in update-doc (into company-path [:liikeJaYhteisoTunnus :value])) => (if suunnittelija? "1234567-1" nil)
-        (get-in update-doc (into experience-path [:koulutus :value])) => (if suunnittelija? "Tutkinto" nil)
-        (get-in update-doc (into experience-path [:valmistumisvuosi :value])) => (if suunnittelija? "2000" nil)
-        (get-in update-doc (into experience-path [:fise :value])) => (if suunnittelija? "f" nil))))
+(defn- check-empty-person
+  ([document doc-path args]
+   (let [empty-person {:etunimi  {:value ""}
+                      :sukunimi {:value ""}
+                      :hetu     {:value nil}}
+         empty-person (merge empty-person args)]
+     document => truthy
+     (get-in document doc-path) => empty-person))
+  ([document doc-path] (check-empty-person document doc-path {}))
+  )
 
 (facts "Set user to document"
   (let [application   (create-and-submit-application mikko :municipality sonja-muni)
@@ -210,13 +217,19 @@
         hakija     (domain/get-document-by-name application "hakija")
         maksaja    (domain/get-document-by-name application "maksaja")]
 
+
+    (fact "initially person data is empty"
+      (check-empty-person paasuunnittelija [:data :henkilotiedot])
+      (check-empty-person hakija [:data :henkilo :henkilotiedot] {:turvakieltoKytkin {:value false}})
+      (check-empty-person maksaja [:data :henkilo :henkilotiedot] {:turvakieltoKytkin {:value false}}))
+
     (set-and-check-person mikko application-id paasuunnittelija [])
     (set-and-check-person mikko application-id hakija ["henkilo"])
     (set-and-check-person mikko application-id maksaja ["henkilo"])
 
     (fact "there is no suunnittelija"
        suunnittelija => truthy
-       (get-in suunnittelija [:data :henkilotiedot]) => nil)
+       (get-in suunnittelija [:data :henkilotiedot]) => {:etunimi {:value ""}, :hetu {:value nil}, :sukunimi {:value ""}})
 
     (let [doc-id (:id suunnittelija)
           code "RAK-rakennesuunnittelija"]

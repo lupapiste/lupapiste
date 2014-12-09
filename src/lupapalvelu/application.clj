@@ -471,7 +471,6 @@
           (assoc-in body path val)))
       {} schema-data)))
 
-;; TODO: permit-type splitting.
 (defn- make-documents [user created op application & [manual-schema-datas]]
   {:pre [(or (nil? manual-schema-datas) (map? manual-schema-datas))]}
 
@@ -484,14 +483,17 @@
                                 "tyomaastaVastaava"      operations/schema-data-yritys-selected)
         merged-schema-datas   (merge-with conj default-schema-datas manual-schema-datas)
         make                  (fn [schema-name]
-                                {:id (mongo/create-id)
-                                 :schema-info (:info (schemas/get-schema schema-version schema-name))
-                                 :created created
-                                 :data (tools/timestamped
-                                         (if-let [schema-data (get-in merged-schema-datas [schema-name])]
-                                           (schema-data-to-body schema-data application)
-                                           {})
-                                         created)})
+                                (let [schema (schemas/get-schema schema-version schema-name)]
+                                  {:id (mongo/create-id)
+                                   :schema-info (:info schema)
+                                   :created created
+                                   :data (util/deep-merge
+                                           (tools/create-document-data schema tools/default-values)
+                                           (tools/timestamped
+                                             (if-let [schema-data (get-in merged-schema-datas [schema-name])]
+                                               (schema-data-to-body schema-data application)
+                                               {})
+                                             created))}))
         ;;The merge below: If :removable is set manually in schema's info, do not override it to true.
         op-doc                (update-in (make op-schema-name) [:schema-info] #(merge {:op op :removable true} %))
         new-docs (-<>> (:documents application)
@@ -502,11 +504,7 @@
                    (cons op-doc))]                  ;; new docs
     (if-not user
       new-docs
-      (let [permit-type (keyword (permit/permit-type application))
-            hakija      (condp = permit-type
-                          :YA (assoc-in (make "hakija-ya") [:data :_selected :value] "yritys")
-                          (assoc-in (make "hakija") [:data :_selected :value] "henkilo"))]
-        (conj new-docs hakija)))))
+      (conj new-docs (make (permit/get-applicant-doc-schema (permit/permit-type application)))))))
 
 (defn- ->location [x y]
   {:x (util/->double x) :y (util/->double y)})
