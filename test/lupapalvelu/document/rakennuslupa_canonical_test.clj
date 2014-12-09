@@ -174,7 +174,7 @@
    :data {:kiinteisto {:tilanNimi {:value "Hiekkametsa"}
                        :maaraalaTunnus {:value ""}}
           :hallintaperuste {:value "oma"}
-          :kaavanaste {:value "yleis"}}})
+          :kaavatilanne {:value "oikeusvaikutteinen yleiskaava"}}})
 
 (def- common-rakennus
   {:rakennuksenOmistajat {:0 {:_selected {:value "henkilo"}
@@ -767,6 +767,7 @@
         RakennuspaikanKiinteistotieto (:RakennuspaikanKiinteisto rakennuspaikanKiinteistotieto) => truthy
         kiinteistotieto (:kiinteistotieto RakennuspaikanKiinteistotieto) => truthy
         Kiinteisto (:Kiinteisto kiinteistotieto) => truthy
+        kaavatilanne (:kaavatilanne rakennuspaikka) => truthy
         toimenpiteet(:toimenpidetieto rakennusvalvontaasia) => truthy
         toimenpide (:Toimenpide (nth toimenpiteet 1)) => truthy
         muu-muutostyo (:Toimenpide (nth toimenpiteet 0)) => truthy
@@ -789,9 +790,7 @@
         muuTunnustieto (:muuTunnustieto LupaTunnus) => truthy
         MuuTunnus (:MuuTunnus muuTunnustieto) => truthy
         kasittelynTilatieto (:kasittelynTilatieto rakennusvalvontaasia) => truthy]
-
     ;(clojure.pprint/pprint canonical)
-
     (fact "contains nil" (contains-value? canonical nil?) => falsey)
     (fact "paasuunnitelija" paasuunnitelija => (contains {:suunnittelijaRoolikoodi "p\u00e4\u00e4suunnittelija"}))
     (fact "Osapuolien maara" (+ (count suunnittelijat) (count tyonjohtajat) (count (:osapuolitieto osapuolet))) => 8)
@@ -801,6 +800,9 @@
     (fact "maaraalaTunnus" (:maaraAlaTunnus Kiinteisto) => nil)
     (fact "kokotilakytkin" (:kokotilaKytkin RakennuspaikanKiinteistotieto) => truthy)
     (fact "hallintaperuste" (:hallintaperuste RakennuspaikanKiinteistotieto) => "oma")
+    (facts "Kaavatilanne"
+      (fact "is 'oikeusvaikutteinen yleiskaava'" kaavatilanne => "oikeusvaikutteinen yleiskaava")
+      (fact "mapping has added correct :kaavanaste to canonical" (:kaavanaste rakennuspaikka) => "yleis"))
 
     (fact "Toimenpidetieto"  (count toimenpiteet) => 5)
     (fact "rakentajaTyyppi" (:rakentajatyyppi rakennus) => "muu")
