@@ -1056,7 +1056,7 @@
             <div class="feature">
               <span class="legend">Tyonjohtajan nimeaminen</span>
               <div>
-                <table id="tasks-foreman" class="tasks" data-bind="with: foremanTasks">
+                <table data-test-id="tasks-foreman" class="tasks-foreman" data-bind="with: foremanTasks">
                   <thead>
                     <tr><td colspan="4"><h2 data-bind="text: name" style="padding-top:1em"></h2></td></tr>
                     <tr>
@@ -1074,7 +1074,7 @@
                       <td>
                         <!-- ko if: $data.id -->
                         <span data-bind="fullName: $data"></span>
-                        <span data-bind="text: $data.email ? '(' + $data.email + ')' : ''"></span>
+                        <span data-test-id="tasks-foreman-email" data-bind="text: $data.email ? '(' + $data.email + ')' : ''"></span>
                         <!-- /ko -->
                         <!-- ko ifnot: $data.id -->
                         <a class="add-foreman" data-bind="click: function() {}">
