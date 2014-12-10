@@ -484,20 +484,22 @@
               id (:id doc)
               kaavatilanne (-> rakennuspaikka :kaavatilanne)
               kaavanaste (change-value-to-when (-> rakennuspaikka :kaavanaste) "eiKaavaa" "ei kaavaa")
-              rakennuspaikka-map
-              {:Rakennuspaikka
-               {:yksilointitieto id
-                :alkuHetki (to-xml-datetime (now))
-                :rakennuspaikanKiinteistotieto
-                {:RakennuspaikanKiinteisto
-                 {:kokotilaKytkin (s/blank? (-> kiinteisto :maaraalaTunnus))
-                  :hallintaperuste (-> rakennuspaikka :hallintaperuste)
-                  :kiinteistotieto {:Kiinteisto (merge {:tilannimi (-> kiinteisto :tilanNimi)
-                                                        :kiinteistotunnus (:propertyId application)
-                                                        :rantaKytkin (true? (-> kiinteisto :rantaKytkin))}
-                                                  (when (-> kiinteisto :maaraalaTunnus)
-                                                    {:maaraAlaTunnus (str "M" (-> kiinteisto :maaraalaTunnus))}))}}}}}
+              rakennuspaikka-map {:Rakennuspaikka
+                                  {:yksilointitieto id
+                                   :alkuHetki (to-xml-datetime (now))
+                                   :rakennuspaikanKiinteistotieto
+                                   {:RakennuspaikanKiinteisto
+                                    {:kokotilaKytkin (s/blank? (-> kiinteisto :maaraalaTunnus))
+                                     :hallintaperuste (-> rakennuspaikka :hallintaperuste)
+                                     :kiinteistotieto
+                                     {:Kiinteisto
+                                      (merge {:tilannimi (-> kiinteisto :tilanNimi)
+                                              :kiinteistotunnus (:propertyId application)
+                                              :rantaKytkin (true? (-> kiinteisto :rantaKytkin))}
+                                        (when (-> kiinteisto :maaraalaTunnus)
+                                          {:maaraAlaTunnus (str "M" (-> kiinteisto :maaraalaTunnus))}))}}}}}
               rakennuspaikka-map (deep-merge
+                                   rakennuspaikka-map
                                    (when kaavanaste
                                      (assoc-in rakennuspaikka-map [:Rakennuspaikka :kaavanaste] kaavanaste))
                                    (when kaavatilanne
