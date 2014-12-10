@@ -737,7 +737,15 @@
       (let [rakennuspaikka (assoc-in (first rakennuspaikka )[:data :kaavatilanne] "maakuntakaava")
             result (first (get-bulding-places [rakennuspaikka] application-rakennuslupa))]
 
-        (get-in result [:Rakennuspaikka :kaavanaste]) => "ei tiedossa"))))
+        (get-in result [:Rakennuspaikka :kaavanaste]) => "ei tiedossa"))
+
+    (fact "When kaavanaste/kaavatilanne are not in rakennuspaikka, they are not in canonical either"
+      (let [rakennuspaikka (dissoc-in rakennuspaikka [:Rakennuspaikka :kaavatilanne])
+            result (first (get-bulding-places [rakennuspaikka] application-rakennuslupa))]
+
+        (get-in result [:Rakennuspaikka]) => truthy
+        (get-in result [:Rakennuspaikka :kaavanaste]) => falsey
+        (get-in result [:Rakennuspaikka :kaavatilanne]) => falsey))))
 
 (fl/facts* "Canonical model is correct"
   (let [canonical (application-to-canonical application-rakennuslupa "sv") => truthy
