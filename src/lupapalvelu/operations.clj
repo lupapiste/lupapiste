@@ -104,6 +104,7 @@
     ["rakennustyo-muutostoimenpiteet"
      [["Suunnittelija" :suunnittelijan-nimeaminen]
       ["Tyonjohtaja" :tyonjohtajan-nimeaminen]
+      ["Tyonjohtaja" :tyonjohtajan-nimeaminen-v2]
       ["rak-valm-tyo" :rak-valm-tyo]
       ["Aloitusoikeus" :aloitusoikeus]
       ["raktyo-aloit-loppuunsaat" :raktyo-aloit-loppuunsaat]]]]])
@@ -735,6 +736,13 @@
      :tyonjohtajan-nimeaminen     {:schema "hankkeen-kuvaus-minimum"
                                    :permit-type permit/R
                                    :required ["tyonjohtaja" "maksaja"]
+                                   :attachments []
+                                   :add-operation-allowed false
+                                   :link-permit-required true}
+
+     :tyonjohtajan-nimeaminen-v2  {:schema "hankkeen-kuvaus-minimum"
+                                   :permit-type permit/R
+                                   :required ["tyonjohtaja-v2"]
                                    :attachments []
                                    :add-operation-allowed false
                                    :link-permit-required true}

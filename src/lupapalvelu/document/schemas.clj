@@ -305,8 +305,23 @@
                    {:name "patevyys" :type :group :body patevyys-tyonjohtaja}
                    sijaisuus-tyonjohtaja))
 
+(def ilmoitus-hakemus-valitsin {:name "ilmoitusHakemusValitsin" :i18nkey "tyonjohtaja.ilmoitusHakemusValitsin._group_label" :type :select :sortBy :displayname :required true :blacklist [:applicant]
+                                :body [{:name "ilmoitus" :i18nkey "tyonjohtaja.ilmoitusHakemusValitsin.ilmoitus"}
+                                       {:name "hakemus" :i18nkey "tyonjohtaja.ilmoitusHakemusValitsin.hakemus"}]})
+
+(def kuntaroolikoodi-tyonjohtaja-v2 [{:name "kuntaRoolikoodi"
+                                      :i18nkey "osapuoli.tyonjohtaja.kuntaRoolikoodi._group_label"
+                                      :type :select
+                                      :sortBy :displayname
+                                      :required true
+                                      :body [{:name "vastaava ty\u00F6njohtaja" :i18nkey "osapuoli.tyonjohtaja.kuntaRoolikoodi.vastaava ty\u00f6njohtaja"}
+                                             {:name "KVV-ty\u00F6njohtaja" :i18nkey "osapuoli.tyonjohtaja.kuntaRoolikoodi.KVV-ty\u00f6njohtaja"}
+                                             {:name "IV-ty\u00F6njohtaja" :i18nkey "osapuoli.tyonjohtaja.kuntaRoolikoodi.IV-ty\u00f6njohtaja"}
+                                             {:name "erityisalojen ty\u00F6njohtaja" :i18nkey "osapuoli.tyonjohtaja.kuntaRoolikoodi.erityisalojen ty\u00f6njohtaja"}]}])
+
 (def tyonjohtaja-v2 (body
-                      kuntaroolikoodi-tyonjohtaja
+                      ilmoitus-hakemus-valitsin
+                      kuntaroolikoodi-tyonjohtaja-v2
                       vastattavat-tyotehtavat-tyonjohtaja
                       vastuuaika-tyonjohtaja
                       henkilo-valitsin

@@ -1,0 +1,3 @@
+tyonjohtaja.ilmoitusHakemusValitsin._group_label: Ilmoitus vai hakemus
+tyonjohtaja.ilmoitusHakemusValitsin.ilmoitus: Ilmoitus
+tyonjohtaja.ilmoitusHakemusValitsin.hakemus: Hakemus
