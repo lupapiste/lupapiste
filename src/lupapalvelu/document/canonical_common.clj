@@ -279,18 +279,23 @@
 (defn- get-simple-yritys [{:keys [yritysnimi liikeJaYhteisoTunnus] :as yritys}]
   {:nimi yritysnimi, :liikeJaYhteisotunnus liikeJaYhteisoTunnus})
 
-(defn- get-yritys-data [{:keys [osoite yhteyshenkilo verkkolaskutustieto] :as yritys}]
+(defn get-verkkolaskutus [unwrapped-party-doc]
+  (let [yritys (get-in unwrapped-party-doc [:data :yritys] unwrapped-party-doc)
+        {:keys [ovtTunnus verkkolaskuTunnus valittajaTunnus]} (:verkkolaskutustieto yritys)]
+    (when-not (and (ss/blank? ovtTunnus) (ss/blank? verkkolaskuTunnus) (ss/blank? valittajaTunnus))
+      {:Verkkolaskutus {:ovtTunnus ovtTunnus
+                        :verkkolaskuTunnus verkkolaskuTunnus
+                        :valittajaTunnus valittajaTunnus}})))
+
+(defn- get-yritys-data [{:keys [osoite yhteyshenkilo] :as yritys}]
   (let [yhteystiedot (:yhteystiedot yhteyshenkilo)
-        postiosoite (get-simple-osoite osoite)]
-    (merge (get-simple-yritys yritys)
-           {:postiosoite postiosoite ; - 2.1.4
-            :postiosoitetieto {:postiosoite postiosoite} ; 2.1.5+
-            :puhelin (:puhelin yhteystiedot)
-            :sahkopostiosoite (:email yhteystiedot)}
-           (when verkkolaskutustieto
-             {:verkkolaskutustieto {:Verkkolaskutus {:ovtTunnus (-> verkkolaskutustieto :ovtTunnus)
-                                                    :verkkolaskuTunnus (-> verkkolaskutustieto :verkkolaskuTunnus)
-                                                    :valittajaTunnus (-> verkkolaskutustieto :valittajaTunnus)}}}))))
+        postiosoite (get-simple-osoite osoite)
+        yhteystiedot-canonical {:postiosoite postiosoite ; - 2.1.4
+                                :postiosoitetieto {:postiosoite postiosoite} ; 2.1.5+
+                                :puhelin (:puhelin yhteystiedot)
+                                :sahkopostiosoite (:email yhteystiedot)}
+        yritys-canonical (merge (get-simple-yritys yritys) yhteystiedot-canonical)]
+    (assoc-when yritys-canonical :verkkolaskutustieto (get-verkkolaskutus yritys))))
 
 (def- default-role "ei tiedossa")
 (defn- get-kuntaRooliKoodi [party party-type]
@@ -567,18 +572,13 @@
            :sahkopostiosoite (:email yhteystiedot))))
       )))
 
-(defn get-verkkolaskutustieto [unwrapped-party-doc]
-  (let [verkkolaskutustieto (get-in unwrapped-party-doc [:data :yritys :verkkolaskutustieto])]
-    (assoc-when {}
-      :Verkkolaskutus verkkolaskutustieto)))
-
 (defn get-maksajatiedot [unwrapped-party-doc]
   (merge
     (get-yhteystiedot unwrapped-party-doc)
     (not-empty
       (assoc-when {}
         :laskuviite (get-in unwrapped-party-doc [:data :laskuviite])
-        :verkkolaskutustieto (get-verkkolaskutustieto unwrapped-party-doc)))))
+        :verkkolaskutustieto (get-verkkolaskutus unwrapped-party-doc)))))
 
 (defn- get-pos [coordinates]
   {:pos (map #(str (-> % .x) " " (-> % .y)) coordinates)})

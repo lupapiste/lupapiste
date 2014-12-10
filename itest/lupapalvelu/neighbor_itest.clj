@@ -155,7 +155,7 @@
         (-> hakija-doc :data :henkilo :henkilotiedot :etunimi) => "Zebra"
         (-> hakija-doc :data :henkilo :henkilotiedot :sukunimi) => "Zorro"
         (-> hakija-doc :data :henkilo :henkilotiedot :hetu) => nil
-        (-> hakija-doc :data :henkilo :henkilotiedot :turvakieltoKytkin) => nil
+        (-> hakija-doc :data :henkilo :henkilotiedot :turvakieltoKytkin) => false
         (-> hakija-doc :data :henkilo :yhteystiedot  :puhelin) => nil
         (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :etunimi) => "Gustav"
         (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :sukunimi) => "Golem"

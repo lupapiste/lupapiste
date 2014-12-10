@@ -358,10 +358,10 @@
             self.organization(d);
           })
           .error(function() {
-              // TODO display error message?
-              model.inforequestsDisabled(true);
-              model.newApplicationsDisabled(true);
-            })
+            // TODO display error message?
+            self.inforequestsDisabled(true);
+            self.newApplicationsDisabled(true);
+          })
           .call();
       }
     };
