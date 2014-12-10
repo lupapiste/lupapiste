@@ -498,19 +498,14 @@
                                               :rantaKytkin (true? (-> kiinteisto :rantaKytkin))}
                                         (when (-> kiinteisto :maaraalaTunnus)
                                           {:maaraAlaTunnus (str "M" (-> kiinteisto :maaraalaTunnus))}))}}}}}
-              rakennuspaikka-map (deep-merge
-                                   rakennuspaikka-map
-                                   (when kaavanaste
-                                     (assoc-in rakennuspaikka-map [:Rakennuspaikka :kaavanaste] kaavanaste))
-                                   (when kaavatilanne
-                                     (if-not kaavanaste
-                                       (deep-merge
-                                         (assoc-in
-                                           rakennuspaikka-map [:Rakennuspaikka :kaavanaste]
-                                           (or (kaavatilanne-to-kaavanaste-mapping kaavatilanne) "ei tiedossa"))
-                                         (assoc-in rakennuspaikka-map [:Rakennuspaikka :kaavatilanne] kaavatilanne))
-                                       (assoc-in rakennuspaikka-map [:Rakennuspaikka :kaavatilanne] kaavatilanne))))]]
-    rakennuspaikka-map))
+              kaavatieto (merge
+                           (when kaavanaste {:kaavanaste kaavanaste})
+                           (when kaavatilanne
+                             (merge
+                               (if-not kaavanaste
+                                {:kaavanaste (or (kaavatilanne-to-kaavanaste-mapping kaavatilanne) "ei tiedossa")})
+                               {:kaavatilanne kaavatilanne})))]]
+    (assoc-when rakennuspaikka-map :Rakennuspaikka (-> rakennuspaikka-map :Rakennuspaikka (merge kaavatieto)))))
 
 ;; TODO lupatunnus type is always kuntalupatunnus?
 (defn get-viitelupatieto [link-permit-data]
