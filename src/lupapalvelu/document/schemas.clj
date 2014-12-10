@@ -305,6 +305,15 @@
                    {:name "patevyys" :type :group :body patevyys-tyonjohtaja}
                    sijaisuus-tyonjohtaja))
 
+(def tyonjohtaja-v2 (body
+                      kuntaroolikoodi-tyonjohtaja
+                      vastattavat-tyotehtavat-tyonjohtaja
+                      vastuuaika-tyonjohtaja
+                      henkilo-valitsin
+                      designer-basic
+                      {:name "patevyys" :type :group :body patevyys-tyonjohtaja}
+                      sijaisuus-tyonjohtaja))
+
 (def maksaja (body
                (henkilo-yritys-select-group :yritys-body yritys-with-verkkolaskutustieto)
                {:name "laskuviite" :type :string :max-len 30 :layout :full-width}))
@@ -774,6 +783,15 @@
             :approvable true
             :type :party}
      :body tyonjohtaja}
+
+    {:info {:name "tyonjohtaja-v2"
+            :i18name "osapuoli"
+            :order 5
+            :removable true
+            :repeating true
+            :approvable true
+            :type :party}
+     :body tyonjohtaja-v2}
 
     {:info {:name "maksaja"
             :i18name "osapuoli"
