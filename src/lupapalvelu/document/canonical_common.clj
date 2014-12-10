@@ -507,10 +507,10 @@
                            (when kaavanaste {:kaavanaste kaavanaste})
                            (when kaavatilanne
                              (merge
-                               (if-not kaavanaste
-                                {:kaavanaste (or (kaavatilanne-to-kaavanaste-mapping kaavatilanne) "ei tiedossa")})
-                               {:kaavatilanne kaavatilanne})))]]
-    (assoc-when rakennuspaikka-map :Rakennuspaikka (-> rakennuspaikka-map :Rakennuspaikka (merge kaavatieto)))))
+                               {:kaavatilanne kaavatilanne}
+                               (when-not kaavanaste
+                                 {:kaavanaste (or (kaavatilanne-to-kaavanaste-mapping kaavatilanne) "ei tiedossa")}))))]]
+    (update-in rakennuspaikka-map [:Rakennuspaikka] merge kaavatieto)))
 
 ;; TODO lupatunnus type is always kuntalupatunnus?
 (defn get-viitelupatieto [link-permit-data]
