@@ -1066,7 +1066,7 @@
                   <tbody data-bind="foreach: foremans">
                     <tr>
                       <td class="task-state">
-                        <span data-bind="attr: {'class': statusName + ' icon', 'data-test-state': $data.state}"></span>
+                        <span data-bind="attr: {'class': statusName + ' icon', 'data-test-state': $data.state, 'title': loc(['task', statusName, 'title'])}"></span>
                       </td>
                       <td>
                         <span data-bind="text: $data.name"></span>
