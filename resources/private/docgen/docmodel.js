@@ -211,7 +211,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     // Override style with layout option
     if (subSchema.layout) {
-      span.className = "form-entry form-" + subSchema.layout + " " + self.sizeClass;
+      span.className = "form-entry form-" + subSchema.layout + " " + sizeClass;
     }
 
     // durable field error panels
