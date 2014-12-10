@@ -1,16 +1,16 @@
 # Hei,
 
-Uusi kommentti lis&auml;tty keskusteluun: 
+Uusi kommentti lis&auml;tty keskusteluun:
 
 {{link-fi}}
 
-Jos linkki ei toimi, kopioi osoite ja liitä se selaimen osoiteriville.
+Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville.
 
 ---
 
 # Hej,
 
-En ny kommentar har inkommit till diskusionet: 
+En ny kommentar har inkommit till diskusionet:
 
 {{link-sv}}
 

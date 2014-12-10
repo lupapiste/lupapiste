@@ -1,9 +1,9 @@
 Hei {{name}},
 
-kiitos rekisteröitymisestäsi Lupapiste-palvelun käyttäjäksi rakentaja.fi:ssä. Lupapisteessä voit jättää rakennuslupiin liittyviä neuvontapyyntöjä kuntasi viranomaiselle sekä hoitaa lupa-asiointia yhdessä muiden hankkeesi osapuolten kanssa.
+kiitos rekister&ouml;itymisest&auml;si Lupapiste-palvelun k&auml;ytt&auml;j&auml;ksi rakentaja.fi:ss&auml;. Lupapisteess&auml; voit j&auml;tt&auml;&auml; rakennuslupiin liittyvi&auml; neuvontapyynt&ouml;j&auml; kuntasi viranomaiselle sek&auml; hoitaa lupa-asiointia yhdess&auml; muiden hankkeesi osapuolten kanssa.
 
-Vahvistathan rekisteröitymisesi ja tunnistaudu pankkitunnuksillasi:
+Vahvistathan rekister&ouml;itymisesi ja tunnistaudu pankkitunnuksillasi:
 
 {{link-fi}}
 
-Lupapisteeseen rekisteröityminen ei maksa mitään. Palvelun käyttöehdot voit lukea täältä: https://www.lupapiste.fi/kayttoehdot
+Lupapisteeseen rekister&ouml;ityminen ei maksa mit&auml;&auml;n. Palvelun k&auml;ytt&ouml;ehdot voit lukea t&auml;&auml;lt&auml;: https://www.lupapiste.fi/kayttoehdot

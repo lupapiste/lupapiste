@@ -15,18 +15,25 @@ Mikko opens an application
   Create application the fast way  ${appname}  753  ${propertyId}  kerrostalo-rivitalo
 
 # Testing the case that was fixed with hotfix/repeating-element-saving
-Mikko adds owner to the Uusirakennus document, and both owners are visible after page refresh
+# and later regression LUPA-1784
+Mikko adds three owners to the Uusirakennus document, and all owners are visible after page refresh
   Xpath Should Match X Times  //div[@id='application-info-tab']//div[@data-repeating-id="rakennuksenOmistajat"]  1
   Input text  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.0.henkilo.henkilotiedot.etunimi']  pikku
   Wait Until  Element Should Be Visible  //button[@id="rakennuksenOmistajat_append"]
   Execute Javascript  $("button[id='rakennuksenOmistajat_append']").click();
+  Execute Javascript  $("button[id='rakennuksenOmistajat_append']").click();
+  Execute Javascript  $("button[id='rakennuksenOmistajat_append']").click();
   Wait Until  Element Should Be Visible  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.1.henkilo.henkilotiedot.etunimi']
-  Input text  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.1.henkilo.henkilotiedot.etunimi']  ISO
-  Xpath Should Match X Times  //div[@id='application-info-tab']//div[@data-repeating-id="rakennuksenOmistajat"]  2
+  Input text  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.1.henkilo.henkilotiedot.etunimi']  ISO1
+  Input text  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.2.henkilo.henkilotiedot.etunimi']  ISO2
+  Input text  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.3.henkilo.henkilotiedot.etunimi']  ISO3
+  Xpath Should Match X Times  //div[@id='application-info-tab']//div[@data-repeating-id="rakennuksenOmistajat"]  4
   Reload Page
-  Wait Until  Xpath Should Match X Times  //div[@id='application-info-tab']//div[@data-repeating-id="rakennuksenOmistajat"]  2
+  Wait Until  Xpath Should Match X Times  //div[@id='application-info-tab']//div[@data-repeating-id="rakennuksenOmistajat"]  4
   Textfield Value Should Be  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.0.henkilo.henkilotiedot.etunimi']  pikku
-  Textfield Value Should Be  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.1.henkilo.henkilotiedot.etunimi']  ISO
+  Textfield Value Should Be  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.1.henkilo.henkilotiedot.etunimi']  ISO1
+  Textfield Value Should Be  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.2.henkilo.henkilotiedot.etunimi']  ISO2
+  Textfield Value Should Be  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.3.henkilo.henkilotiedot.etunimi']  ISO3
 
 Mikko removes apartment
   Wait Until  Element Should Be Visible  //div[@id='application-info-tab']//span[@data-test-class="delete-schemas.huoneistot"]

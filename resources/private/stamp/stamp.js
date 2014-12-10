@@ -13,7 +13,12 @@ var stamping = (function() {
       organization: null,
       xMargin: ko.observable("10"),
       yMargin: ko.observable("85"),
-      transparency: ko.observable()
+      transparency: ko.observable(),
+      extraInfo: ko.observable(""),
+      buildingId: ko.observable(""),
+      kuntalupatunnus: ko.observable(""),
+      section: ko.observable(""),
+      buildingIdList: ko.observableArray()
     },
 
     cancelStamping: function() {
@@ -25,9 +30,44 @@ var stamping = (function() {
 
       window.location.hash="!/application/" + id + "/attachments";
       repository.load(id);
+    },
+
+    resetStamping: function() {
+      model.stampingMode(false);
+      model.appModel = null;
+      model.attachments = null;
+      model.authorization = null;
+
+      hub.send("page-change", { pageId: "stamping" });
     }
   };
 
+  function setStampFields() {
+    if ( !model.stampFields.organization ) {
+      model.stampFields.organization = ko.observable(model.appModel.organizationName());
+    }
+
+    if ( model.appModel.verdicts && !_.isEmpty(model.appModel.verdicts()) ) {
+      model.stampFields.kuntalupatunnus(_.first(model.appModel.verdicts()).kuntalupatunnus());
+    } else {
+      model.stampFields.kuntalupatunnus("");
+    }
+
+    if ( model.appModel.verdicts && !_.isEmpty(model.appModel.verdicts()) ) {
+      var verdict = ko.mapping.toJS(model.appModel.verdicts()[0]);
+      if ( verdict.paatokset[0] && verdict.paatokset[0].poytakirjat[0] && verdict.paatokset[0].poytakirjat[0].pykala ) {
+        model.stampFields.section(verdict.paatokset[0].poytakirjat[0].pykala);
+      } else {
+        model.stampFields.section("");
+      }
+    } else {
+      model.stampFields.section("");
+    }
+
+    if ( model.appModel.buildings ) {
+      model.stampFields.buildingIdList(model.appModel.buildings());
+    }
+  }
 
   function initStamp(appModel) {
     model.appModel = appModel;
@@ -35,9 +75,7 @@ var stamping = (function() {
     model.authorization = authorization.create();
     model.authorization.refresh(model.appModel.id());
 
-    if ( !model.stampFields.organization ) {
-      model.stampFields.organization = ko.observable(model.appModel.organizationName());
-    }
+    setStampFields();
 
     window.location.hash="!/stamping/" + model.appModel.id();
   }
@@ -51,13 +89,14 @@ var stamping = (function() {
         var appId = pageutil.subPage();
         repository.load(appId, null, function(application) {
           model.authorization = authorization.create();
-          model.appModel = new LUPAPISTE.ApplicationModel(model.authorization);
+          model.appModel = new LUPAPISTE.ApplicationModel();
           model.authorization.refresh(application);
 
           ko.mapping.fromJS(application, {}, model.appModel);
 
           model.attachments = model.appModel.attachments();
-          model.stampFields.organization = ko.observable(model.appModel.organizationName());
+
+          setStampFields();
 
           model.stampingMode(true);
         });

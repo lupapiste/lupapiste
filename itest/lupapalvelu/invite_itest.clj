@@ -5,14 +5,14 @@
             [lupapalvelu.domain :as domain]))
 
 (defn- invite [apikey application-id document-id doc-name email & [text]]
-  (command apikey :invite
+  (command apikey :invite-with-role
     :id application-id
     :email email
-    :title email
     :text  (or text email)
     :documentName doc-name
     :documentId document-id
-    :path ""))
+    :path ""
+    :role "writer"))
 
 (apply-remote-minimal)
 
@@ -101,7 +101,7 @@
       (let [application  (query-application mikko application-id)
             first-hakija (domain/get-document-by-name application "hakija")]
         (:id first-hakija) =not=> hakija-doc
-        (get-in first-hakija [:data :henkilo :henkilotiedot :etunimi :value]) => nil
+        (get-in first-hakija [:data :henkilo :henkilotiedot :etunimi :value]) => ""
         (:applicant application ) => "Intonen Mikko"))
 
     (fact "Mikko sets Teppo as co-applicant"

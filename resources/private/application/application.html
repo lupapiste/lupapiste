@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <body>
   <section class="page" id="application">
     <div class="application_summary">
@@ -351,15 +351,15 @@
                   <button class="btn-primary"
                         data-test-id="application-invite-person"
                         data-bind="ltext: 'personSelector.invite',
-                                   visible: $root.authorization.ok('invite'),
-                                   enabled: $root.authorization.ok('invite')"
+                                   visible: $root.authorization.ok('invite-with-role'),
+                                   enabled: $root.authorization.ok('invite-with-role')"
                         onclick="$('#invite-document-name').val('').change();$('#invite-document-path').val('').change();$('#invite-document-id').val('').change();LUPAPISTE.ModalDialog.open('#dialog-valtuutus');return false;">
                   </button>
                   <button class="btn-primary"
                         data-test-id="company-invite"
                         data-bind="ltext: 'company-invite.invite',
-                                   visible: $root.authorization.ok('invite'),
-                                   enabled: $root.authorization.ok('invite'),
+                                   visible: $root.authorization.ok('invite-with-role'),
+                                   enabled: $root.authorization.ok('invite-with-role'),
                                    click: $root.openInviteCompany">
                   </button>
                 </div>
@@ -1052,6 +1052,51 @@
             </table>
           </div>
 
+          <div data-bind="if: features.enabled('foreman')">
+            <div class="feature">
+              <span class="legend">Tyonjohtajan nimeaminen</span>
+              <div>
+                <table data-test-id="tasks-foreman" class="tasks-foreman" data-bind="with: foremanTasks">
+                  <thead>
+                    <tr><td colspan="4"><h2 data-bind="text: name" style="padding-top:1em"></h2></td></tr>
+                    <tr>
+                      <th data-bind="ltext: 'application.taskState'"></th>
+                      <th colspan="3" data-bind="ltext: 'application.taskDisplayName'"></th>
+                  </thead>
+                  <tbody data-bind="foreach: foremans">
+                    <tr>
+                      <td class="task-state">
+                        <span data-bind="attr: {'class': statusName + ' icon', 'data-test-state': $data.state, 'title': loc(['task', statusName, 'title'])}"></span>
+                      </td>
+                      <td>
+                        <span data-bind="text: $data.name"></span>
+                      </td>
+                      <td>
+                        <!-- ko if: $data.id -->
+                        <span data-bind="fullName: $data"></span>
+                        <span data-test-id="tasks-foreman-email" data-bind="text: $data.email ? '(' + $data.email + ')' : ''"></span>
+                        <!-- /ko -->
+                        <!-- ko ifnot: $data.id -->
+                        <a class="add-foreman" data-bind="click: function() {}">
+                          <span data-bind="ltext: 'application.parties.addForeman'"></span>
+                        </a>
+                        <!-- /ko -->
+                      </td>
+                      <td>
+                        <a data-bind="attr: {href: '#!/application/' + $data.id}">
+                          <span class="foreman-application" data-bind="text: $data.id"></span>
+                        </a>
+                        <span class="foreman-state" data-bind="visible: $data.state, ltext: $data.state"></span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+                <button class="btn btn-primary" data-bind="ltext: 'application.parties.addOtherForeman'"></button>
+                <button class="btn btn-primary" data-bind="ltext: 'application.parties.addSubstituteForeman'"></button>
+              </div>
+            </div>
+          </div>
+
           <div>
             <table data-bind="foreach: taskGroups" class="tasks">
               <thead>
@@ -1089,23 +1134,33 @@
           <p class="dialog-close close">X</p>
         </div>
         <!-- ko with: $root.foreman -->
-        <div class="dialog-content" data-bind="css: {pending: pending}">
+        <div class="dialog-content" data-bind="css: {pending: pending, finished: finished}">
+          <div class="finished">
+            <p class="dialog-desc-wide" data-bind="lhtml: 'invite.foreman.finished'"></p>
+            <button data-test-id="application-invite-foreman-close-dialog"
+                    class="btn btn-dialog btn-primary"
+                    data-bind="ltext: 'button.ok', click: function() { openApplication(finished()); LUPAPISTE.ModalDialog.close(); }"></button>
+            <a class="btn btn-dialog" data-bind="ltext: 'application.return', click: function() { LUPAPISTE.ModalDialog.close(); }"></a>
+          </div>
           <div class="pending">
             <div class="ajax"></div>
             <div data-bind="ltext: 'invite.foreman.pending'"></div>
           </div>
+          <!-- ko ifnot: finished -->
           <p data-bind="lhtml: 'invite.foreman.desc'" class="dialog-desc-wide"></p>
           <form>
             <label data-bind="ltext: 'userinfo.email'" class="form-label" for="invite-foreman-email"></label>
-            <input class="form-input text long" id="invite-foreman-email" type="text" data-bind="textInput: email" />
+            <input class="form-input text long" id="invite-foreman-email" type="text" data-bind="textInput: email" autofocus></input>
             <div data-bind="visible: error" >
-              <div data-bind="text: error" class="context-error"></div>
+              <div data-bind="ltext: error" class="context-error"></div>
             </div>
             <button class="btn btn-primary btn-dialog" data-test-id="application-invite-foreman" data-bind="click: submit, disable: disabled">
               <span data-bind="ltext: 'application.inviteSend'"></span>
               <em data-bind="visible: pending" class="button-loader"></em>
             </button>
+            <a data-bind="ltext: 'cancel'" class="btn-dialog close cancel" onclick="window.parent.hub.send('upload-cancelled');return false;" href="#"></a>
           </form>
+          <!-- /ko -->
         </div>
         <!-- /ko -->
       </div>

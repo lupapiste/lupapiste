@@ -15,6 +15,7 @@ Set stamping info variables
   Set Suite Variable  ${STAMP_XMARGIN}  12
   Set Suite Variable  ${STAMP_YMARGIN}  88
   Set Suite Variable  ${STAMP_TRANSPARENCY_IDX}  2
+  Set Suite Variable  ${STAMP_EXTRATEXT}  Lisateksti
 
 Mikko creates application and goes to empty attachments tab
   ${secs} =  Get Time  epoch
@@ -60,6 +61,12 @@ Sonja sees stamping info fields
   Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-xmargin"]
   Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-ymargin"]
   Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//select[@data-test-id="stamp-info-transparency"]
+  Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-extratext"]
+  Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-kuntalupatunnus"]
+  Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-section"]
+  ${BuildingInput} =  Run Keyword And Return Status  Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-buildingid"]
+  Run keyword Unless  ${BuildingInput}  Element should be visible  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//select[@data-test-id="stamp-info-buildingid-list"]
+
 
 Sonja inputs new stamping info values
   Input text by test id  stamp-info-text  ${STAMP_TEXT}
@@ -67,17 +74,19 @@ Sonja inputs new stamping info values
   Input text by test id  stamp-info-organization  ${STAMP_ORGANIZATION}
   Input text by test id  stamp-info-xmargin  ${STAMP_XMARGIN}
   Input text by test id  stamp-info-ymargin  ${STAMP_YMARGIN}
+  Input text by test id  stamp-info-extratext  ${STAMP_EXTRATEXT}
 
 Sonja can go to attachments tab. When she returns, stamp info fields are persistent.
   Click element  xpath=//div[@id="stamping-container"]//a[@data-test-id="back-to-application-from-stamping"]
   Element should be visible  application-attachments-tab
   Click element  xpath=//div[@id="application-attachments-tab"]//button[@data-test-id="stamp-attachments-btn"]
-  Element should be visible  stamp-info  
+  Element should be visible  stamp-info
   Textfield value should be  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-text"]  ${STAMP_TEXT}
   Textfield value should be  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-date"]  ${STAMP_DATE}
   Textfield value should be  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-organization"]  ${STAMP_ORGANIZATION}
   Textfield value should be  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-xmargin"]  ${STAMP_XMARGIN}
   Textfield value should be  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-ymargin"]  ${STAMP_YMARGIN}
+  Textfield value should be  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-extratext"]  ${STAMP_EXTRATEXT}
   
 Sonja can toggle selection of attachments by group/all/none
   # Mikko uploaded 2 attachments belonging to operation "Uusi asuinrakennus" and 1 attachment to "Yleiset hankkeen liitteet"
@@ -94,13 +103,19 @@ Sonja can toggle selection of attachments by group/all/none
   
 Status of stamping is ready
   Element text should be  xpath=//div[@id="stamping-container"]//span[@data-test-id="stamp-status-text"]  Valmiina leimaamaan liitteet
-  
+
 Select all files and start stamping
   Click element  xpath=//div[@id="stamping-container"]//a[@data-test-id="stamp-select-all"]
   Click element  xpath=//div[@id="stamping-container"]//button[@data-test-id="start-stamping"]
   Xpath should match x times  //div[@id="stamping-container"]//span[@data-test-id="attachment-status-text"]  3
   Wait Until  Element text should be  xpath=//div[@id="stamping-container"]//span[@data-test-id="stamp-status-text"]  Leimaus valmis
 
+Reset stamping, stamping page should be refreshed
+  Click element  xpath=//div[@id="stamping-container"]//button[@data-test-id="stamp-reset"]
+  Element should be visible  stamping-container
+  Element text should be  xpath=//div[@id="stamping-container"]//span[@data-test-id="stamp-status-text"]  Valmiina leimaamaan liitteet
+  Xpath should match x times  //div[@id="stamping-container"]//tr[contains(@class,'selected')]  0
+
 Return from stamping to attachments tab
-  Click element  xpath=//div[@id="stamping-container"]//button[@data-test-id="stamp-ok"]
+  Click element  xpath=//div[@id="stamping-container"]//button[@data-test-id="cancel-stamping"]
   Element should be visible  application-attachments-tab

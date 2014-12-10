@@ -103,6 +103,47 @@
           <span data-bind="ltext: 'newRequest.newApplication'"></span><span class="icon add left-align"></span>
         </button>
       </div>
+
+    </div>
+
+  </section>
+
+
+  <section class="page" id="create-page-prev-permit">
+    <div class="container">
+      <h1 data-bind="text: loc(['operations', operation()])"></h1>
+      <div data-bind="html: loc(['operations', operation(), 'desc'])"></div>
+
+      <div>
+        <label data-bind="ltext: 'prev-permit-label-kuntalupatunnus'" class="form-label" for="prev-permit-kuntalupatunnus"></label>
+        <input data-bind="textInput: kuntalupatunnusFromPrevPermit"
+               id="prev-permit-kuntalupatunnus" data-test-id="test-prev-permit-kuntalupatunnus"
+               type="text" class="form-input text" autofocus="autofocus" />
+      </div>
+
+      <div data-bind="visible: !needMorePrevPermitInfo()">
+        <label data-bind="ltext: 'prev-permit-label-municipality'" class="form-label" for="prev-permit-municipality"></label>
+        <select data-bind="options: municipalities.municipalitiesWithBackendSystem,
+                           optionsText: function(m) { return loc(['municipality', m.id]); },
+                           optionsValue: 'id',
+                           value: municipalityCode,
+                           optionsCaption: loc('choose')"
+                id="prev-permit-municipality-select" data-test-id="test-prev-permit-municipality-select"
+                class="form-select form-input combobox">
+        </select>
+      </div>
+
+      <div data-bind="visible: needMorePrevPermitInfo">
+        <p class="more-prev-app-info-needed-desc" data-bind="ltext:'more-prev-app-info-needed-desc'"></p>
+        <label data-bind="ltext: 'prev-permit-label-address'" class="form-label" for="prev-permit-address-search"></label>
+        <input data-bind="textInput: search, attr: {placeholder: loc('create.placeholder')}"
+               id="prev-permit-address-search" type="text" class="form-input text" autofocus="autofocus" />
+      </div><br>
+      <button data-bind="click: createApplicationWithPrevPermit, enable: creatingAppWithPrevPermitOk"
+              data-test-id="test-prev-permit-create-button" id="prev-permit-create-button" class="btn btn-primary">
+        <em data-bind="visible: pending" class="button-loader"></em>
+        <span data-bind="ltext: 'newRequest.newApplicationWithPrevPermit'"></span><span class="icon search left-align"></span>
+      </button>
     </div>
 
   </section>

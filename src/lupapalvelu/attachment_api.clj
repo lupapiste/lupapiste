@@ -373,9 +373,14 @@
     (try (.delete temp-file) (catch Exception _))
     new-file-id))
 
-(defn- stamp-attachments! [file-infos {:keys [text created organization transparency job-id application] :as context}]
-  {:pre [text organization (pos? created)]}
-  (let [stamp (stamper/make-stamp (ss/limit text 100) created (ss/limit organization 100) transparency)]
+(defn- stamp-attachments!
+  [file-infos {:keys [text created transparency job-id application info-fields] :as context}]
+  {:pre [text (pos? created)]}
+  (let [stamp (stamper/make-stamp
+                (ss/limit text 100)
+                created
+                transparency
+                (map #(ss/limit % 100) info-fields))]
     (doseq [file-info (vals file-infos)]
       (try
         (debug "Stamping" (select-keys file-info [:attachment-id :contentType :fileId :filename :re-stamp?]))
@@ -395,7 +400,7 @@
     job))
 
 (defcommand stamp-attachments
-  {:parameters [:id timestamp text organization files xMargin yMargin]
+  {:parameters [:id timestamp text organization files xMargin yMargin extraInfo buildingId kuntalupatunnus section]
    :roles      [:authority]
    :states     [:submitted :sent :complement-needed :verdictGiven :constructionStarted :closed]
    :description "Stamps all attachments of given application"}
@@ -405,10 +410,6 @@
              {:application application
               :user (:user command)
               :text (if-not (ss/blank? text) text (i18n/loc "stamp.verdict"))
-              :organization (if-not (ss/blank? organization)
-                              organization
-                              (let [org (organization/get-organization (:organization application))]
-                                (organization/get-organization-name org)))
               :created (cond
                          (number? timestamp) (long timestamp)
                          (ss/blank? timestamp) (:created command)
@@ -416,7 +417,16 @@
               :now      (:created command)
               :x-margin (->long xMargin)
               :y-margin (->long yMargin)
-              :transparency (->long (or transparency 0))})))
+              :transparency (->long (or transparency 0))
+              :info-fields [(str buildingId)
+                            (str kuntalupatunnus)
+                            (str section)
+                            (str extraInfo)
+                            (if-not (ss/blank? organization)
+                              organization
+                              (let [org (organization/get-organization (:organization application))]
+                                (organization/get-organization-name org)))]
+              })))
 
 (defquery stamp-attachments-job
   {:parameters [:job-id :version]
@@ -429,7 +439,7 @@
   {:description "Designers can sign blueprints and other attachments. LUPA-1241"
    :parameters [:id attachmentIds password]
    :states     [:draft :open :submitted :sent :complement-needed :verdictGiven :constructionStarted]
-   :pre-checks [domain/validate-owner-or-writer
+   :pre-checks [domain/validate-owner-or-write-access
                 (fn [_ application]
                   (when-not (pos? (count (:attachments application)))
                     (fail :application.attachmentsEmpty)))]

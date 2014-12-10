@@ -11,46 +11,43 @@ LUPAPISTE.ForemanModel = function() {
     return self.email() && !util.isValidEmailAddress(self.email());
   });
   self.foremanApplications = ko.observableArray();
+  self.finished = ko.observable(false);
 
   self.refresh = function(application) {
-    function loadForemanApplications(linkPermits) {
+    function loadForemanApplications(id) {
       self.foremanApplications([]);
-      _.forEach(_.pluck(linkPermits, "id"), function(id) {
-        ajax
-        .query("application", {id: id})
-        .success(function(app) {
-          if (_.find(app.application.operations, {"name": "tyonjohtajan-nimeaminen"})) {
-            var foreman = _.find(app.application.auth, {"role": "foreman"});
-            var data = {"state": app.application.state,
-                        "id": app.application.id,
+      ajax
+        .query("foreman-applications", {id: id})
+        .success(function(data) {
+          _.forEach(data.applications, function(app) {
+            var foreman = _.find(app.auth, {"role": "foreman"});
+            var data = {"state": app.state,
+                        "id": app.id,
                         "email": foreman ? foreman.username : undefined,
                         "firstName": foreman ? foreman.firstName : undefined,
                         "lastName": foreman ? foreman.lastName : undefined};
             self.foremanApplications.push(data);
-            self.foremanApplications.sort(function(left, right) {
-              return left.id > right.id;
-            });
-          }
+          });
         })
         .error(
           // invited foreman can't always fetch applicants other foreman appications (if they are not invited to them also)
         )
         .call();
-      });
     }
 
     self.application = application;
     _.defer(function() {
-      loadForemanApplications(_.where(application.appsLinkingToUs));
+      loadForemanApplications(application.id);
     });
   };
 
   self.inviteForeman = function() {
+    self.email(undefined);
+    self.finished(false);
     LUPAPISTE.ModalDialog.open("#dialog-invite-foreman");
   };
 
   self.openApplication = function(id) {
-    repository.load(id);
     window.location.hash = "!/application/" + id;
   };
 
@@ -89,20 +86,16 @@ LUPAPISTE.ForemanModel = function() {
           // 3. invite foreman to new application
           if (self.email()) {
             inviteToApplication(data.id, function() {
-              LUPAPISTE.ModalDialog.close();
-              // 4. open new application
-              self.openApplication(data.id);
+              self.finished(data.id);
             }, function(err) {
-              self.error(loc(err.text));
+              self.error(err.text);
             });
           } else {
-            LUPAPISTE.ModalDialog.close();
-            // 4. open new application
-            self.openApplication(data.id);
+            self.finished(data.id);
           }
         })
         .error(function(err) {
-          self.error(loc(err.text));
+          self.error(err.text);
         })
         .call();
     }
@@ -115,4 +108,10 @@ LUPAPISTE.ForemanModel = function() {
     }
     return false;
   };
+
+  hub.subscribe({type: "dialog-close", id: "dialog-invite-foreman"}, function() {
+    if (self.application && self.finished()) {
+      repository.load(self.application.id);
+    }
+  });
 };

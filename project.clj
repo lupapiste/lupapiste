@@ -38,6 +38,7 @@
                  [fi.sito/oskari "0.9.41"]
                  [slingshot "0.10.3"]
                  [com.google.zxing/javase "2.2"]
+                 [org.geotoolkit/geotk-referencing "3.20-geoapi-3.0"]
                  [prismatic/schema "0.2.4"]
                  [cljts "0.2.0" :exclusions [xerces/xercesImpl]]
                  ; batik-js includes a built-in rhino, which breaks yuicompressor (it too has rhino built in)
