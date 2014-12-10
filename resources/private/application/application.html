@@ -1149,6 +1149,14 @@
           <!-- ko ifnot: finished -->
           <p data-bind="lhtml: 'invite.foreman.desc'" class="dialog-desc-wide"></p>
           <form>
+            <label for="foreman-role" data-bind="ltext: 'foreman.role'"></label>
+            <select name="foreman-role" class="form-input combobox long"
+                    data-bind="options: foremanRoles,
+                               optionsText: function(item) { return loc(item.i18nkey); },
+                               optionsValue: 'name',
+                               value: selectedRole,
+                               optionsCaption: loc('choose')"></select>
+
             <label data-bind="ltext: 'userinfo.email'" class="form-label" for="invite-foreman-email"></label>
             <input class="form-input text long" id="invite-foreman-email" type="text" data-bind="textInput: email" autofocus></input>
             <div data-bind="visible: error" >

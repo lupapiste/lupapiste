@@ -12,6 +12,8 @@ LUPAPISTE.ForemanModel = function() {
   });
   self.foremanApplications = ko.observableArray();
   self.finished = ko.observable(false);
+  self.foremanRoles = ko.observable(LUPAPISTE.config.foremanRoles);
+  self.selectedRole = ko.observable();
 
   self.refresh = function(application) {
     function loadForemanApplications(id) {
