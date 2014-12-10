@@ -715,32 +715,29 @@
     (fact (-> rakennus :rakennuksenTiedot :liitettyJatevesijarjestelmaanKytkin) => true)))
 
 (facts ":Rakennuspaikka with :kaavanaste/:kaavatilanne"
-  (fact "When kaavatilanne is set, also kaavanaste is added to canonical"
-    (let [documents (documents-by-type-without-blanks (tools/unwrapped application-rakennuslupa))
-          result (first (get-bulding-places (:rakennuspaikka documents) application-rakennuslupa))]
+  (let [rakennuspaikka (:rakennuspaikka (documents-by-type-without-blanks (tools/unwrapped application-rakennuslupa)))]
 
-      (get-in result [:Rakennuspaikka :kaavatilanne]) => truthy
-      (get-in result [:Rakennuspaikka :kaavanaste]) => truthy))
+    (fact "When kaavatilanne is set, also kaavanaste is added to canonical"
+      (let [result (first (get-bulding-places rakennuspaikka application-rakennuslupa))]
 
-  (fact "If only kaavanaste is set, kaavatilanne is not in canonical"
-    (let [rakpaik (assoc-in
-                    (dissoc-in rakennuspaikka [:data :kaavatilanne])
-                    [:data :kaavanaste]
-                    "yleis")
-          application (assoc application-rakennuslupa :documents [rakpaik])
-          documents (documents-by-type-without-blanks (tools/unwrapped application))
-          result (first (get-bulding-places (:rakennuspaikka documents) application))]
+        (get-in result [:Rakennuspaikka :kaavatilanne]) => truthy
+        (get-in result [:Rakennuspaikka :kaavanaste]) => truthy))
 
-      (get-in result [:Rakennuspaikka :kaavanaste]) => truthy
-      (get-in result [:Rakennuspaikka :kaavatilanne]) => falsey))
+    (fact "If only kaavanaste is set, kaavatilanne is not in canonical"
+      (let [rakennuspaikka (assoc-in
+                             (dissoc-in (first rakennuspaikka) [:data :kaavatilanne])
+                             [:data :kaavanaste]
+                             "yleis")
+            result (first (get-bulding-places [rakennuspaikka] application-rakennuslupa))]
 
-  (fact "When no mapping from kaavatilanne value to kaavanaste exists, kaavanaste should be 'ei tiedossa'"
-    (let [rakpaik (assoc-in rakennuspaikka [:data :kaavatilanne] "maakuntakaava")
-          application (assoc application-rakennuslupa :documents [rakpaik])
-          documents (documents-by-type-without-blanks (tools/unwrapped application))
-          result (first (get-bulding-places (:rakennuspaikka documents) application))]
+        (get-in result [:Rakennuspaikka :kaavanaste]) => truthy
+        (get-in result [:Rakennuspaikka :kaavatilanne]) => falsey))
 
-      (get-in result [:Rakennuspaikka :kaavanaste]) => "ei tiedossa")))
+    (fact "When no mapping from kaavatilanne value to kaavanaste exists, kaavanaste should be 'ei tiedossa'"
+      (let [rakennuspaikka (assoc-in (first rakennuspaikka )[:data :kaavatilanne] "maakuntakaava")
+            result (first (get-bulding-places [rakennuspaikka] application-rakennuslupa))]
+
+        (get-in result [:Rakennuspaikka :kaavanaste]) => "ei tiedossa"))))
 
 (fl/facts* "Canonical model is correct"
   (let [canonical (application-to-canonical application-rakennuslupa "sv") => truthy
