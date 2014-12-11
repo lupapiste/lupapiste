@@ -1,2 +1,0 @@
-application.statement.missing-from-prev-permit: Hakemukselle ei ole haettu lausuntopyyntöjä
-neighbors.missing-from-prev-permit: Hakemukselle ei ole haettu tiedotettavia osapuolia
