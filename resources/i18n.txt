@@ -1,7 +1,0 @@
-rakennuspaikka.kaavatilanne._group_label: Kaavatilanne
-rakennuspaikka.kaavatilanne.maakuntakaava: Maakuntakaava
-rakennuspaikka.kaavatilanne.oikeusvaikutteinen yleiskaava: Oikeusvaikutteinen yleiskaava
-rakennuspaikka.kaavatilanne.oikeusvaikutukseton yleiskaava: Oikeusvaikutukseton yleiskaava
-rakennuspaikka.kaavatilanne.asemakaava: Asemakaava
-rakennuspaikka.kaavatilanne.ranta-asemakaava: Ranta-asemakaava
-rakennuspaikka.kaavatilanne.ei kaavaa: Ei kaavaa
