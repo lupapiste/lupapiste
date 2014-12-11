@@ -73,10 +73,16 @@ LUPAPISTE.ForemanModel = function() {
   };
 
   self.inviteForeman = function(taskId) {
-    console.log("taskId", taskId);
-    self.taskId(taskId);
+    if (_.isString(taskId)) {
+      self.taskId(taskId);
+      var foremanTask = _.find(self.application.tasks, { "id": taskId });
+      if (foremanTask && foremanTask.taskname) {
+        self.selectedRole(foremanTask.taskname.toLowerCase());
+      }
+    }
     self.email(undefined);
     self.finished(false);
+    self.error(undefined);
     LUPAPISTE.ModalDialog.open("#dialog-invite-foreman");
   };
 
@@ -112,8 +118,9 @@ LUPAPISTE.ForemanModel = function() {
 
     function createApplication() {
       // 2. create "tyonjohtajan ilmoitus" application
-      ajax.command("create-foreman-application", { id: self.application.id,
-                                                   taskId: self.taskId() ? self.taskId() : "" })
+      ajax.command("create-foreman-application", { "id": self.application.id,
+                                                   "taskId": self.taskId() ? self.taskId() : "",
+                                                   "foremanRole": self.selectedRole() ? self.selectedRole() : "" })
         .processing(self.processing)
         .pending(self.pending)
         .success(function(data) {

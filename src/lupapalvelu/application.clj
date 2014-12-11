@@ -35,7 +35,8 @@
             [lupapalvelu.open-inforequest :as open-inforequest]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.application-meta-fields :as meta-fields]
-            [lupapalvelu.company :as c]))
+            [lupapalvelu.company :as c]
+            [clojure.string :as string]))
 
 ;; Notifications
 
@@ -954,7 +955,7 @@
   (some (fn [task] (when (= taskId (:id task)) task)) tasks))
 
 (defcommand create-foreman-application
-  {:parameters [id taskId]
+  {:parameters [id taskId foremanRole]
    :roles [:applicant :authority]
    :states action/all-application-states}
   [{:keys [created user application] :as command}]
@@ -976,11 +977,16 @@
                                (assoc-in hankkeen-kuvaus-doc [:data :kuvaus :value] hankkeen-kuvaus)
                                hankkeen-kuvaus-doc)
 
+        tyonjohtaja-doc      (domain/get-document-by-name foreman-app "tyonjohtaja")
+        tyonjohtaja-doc      (if-not (string/blank? foremanRole)
+                               (assoc-in tyonjohtaja-doc [:data :kuntaRoolikoodi :value] foremanRole)
+                               tyonjohtaja-doc)
+
         hakija-doc           (domain/get-document-by-name application "hakija")
 
         new-application-docs (->> (:documents foreman-app)
-                                  (remove #(#{"hankkeen-kuvaus-minimum" "hakija"} (-> % :schema-info :name)))
-                                  (concat [hakija-doc hankkeen-kuvaus-doc]))
+                                  (remove #(#{"hankkeen-kuvaus-minimum" "hakija" "tyonjohtaja"} (-> % :schema-info :name)))
+                                  (concat [hakija-doc hankkeen-kuvaus-doc tyonjohtaja-doc]))
 
         foreman-app (assoc foreman-app :documents new-application-docs)]
 
