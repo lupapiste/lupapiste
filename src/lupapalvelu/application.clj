@@ -632,8 +632,7 @@
 
     ;; The application has to be inserted first, because it is assumed to be in the database when checking for verdicts (and their attachments).
     (insert-application created-application)
-
-    (verdict-api/do-check-for-verdict command xml)  ;; Get verdicts for the application
+    (verdict-api/find-verdicts-from-xml command xml)  ;; Get verdicts for the application
     (:id created-application)))
 
 (defcommand create-application-from-previous-permit

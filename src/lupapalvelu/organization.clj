@@ -119,9 +119,11 @@
 
 (defn resolve-organization-scope
   ([municipality permit-type]
+    {:pre  [municipality (permit/valid-permit-type? permit-type)]}
     (let [organization (resolve-organization municipality permit-type)]
       (resolve-organization-scope municipality permit-type organization)))
   ([municipality permit-type organization]
+    {:pre  [municipality organization (permit/valid-permit-type? permit-type)]}
    (first (filter #(and (= municipality (:municipality %)) (= permit-type (:permitType %))) (:scope organization)))))
 
 ;;
@@ -153,6 +155,7 @@
    :parameters [permitType municipality
                 inforequestEnabled applicationEnabled openInforequestEnabled openInforequestEmail
                 opening]
+   :input-validators [permit/permit-type-validator]
    :roles [:admin]}
   [_]
   (mongo/update-by-query :organizations
@@ -303,10 +306,7 @@
 (defcommand set-krysp-endpoint
   {:parameters [url permitType version]
    :roles      [:authorityAdmin]
-   :input-validators [(fn [{{:keys [permitType]} :data}]
-                        (when-not (contains? (permit/permit-types) permitType)
-                          (warn "invalid permit type" permitType)
-                          (fail :error.missing-parameters :parameters [:permitType])))]}
+   :input-validators [permit/permit-type-validator]}
   [{{:keys [organizations] :as user} :user}]
   (if (or (s/blank? url) (krysp/wfs-is-alive? url))
     (mongo/update-by-id :organizations (first organizations) {$set {(str "krysp." permitType ".url") url

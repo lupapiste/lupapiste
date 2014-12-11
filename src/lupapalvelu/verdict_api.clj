@@ -77,25 +77,24 @@
         verdicts (krysp-reader/->verdicts xml reader)]
     (filter seq (map (partial verdict-attachments application user timestamp) verdicts))))
 
-(defn do-check-for-verdict
-  ([command]
-    {:pre [(every? command [:application :user :created])]}
-    (when-let [app-xml (krysp-fetch-api/get-application-xml (:application command))]
-      (do-check-for-verdict command app-xml)))
+(defn find-verdicts-from-xml [{:keys [application user created] :as command} app-xml]
+  {:pre [(every? command [:application :user :created]) app-xml]}
+  (let [extras-reader (permit/get-verdict-extras-reader (:permitType application))]
+    (when-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created app-xml))]
+      (let [has-old-verdict-tasks (some #(= "verdict" (get-in % [:source :type]))  (:tasks application))
+            tasks (tasks/verdicts->tasks (assoc application :verdicts verdicts-with-attachments) created)
+            updates {$set (merge {:verdicts verdicts-with-attachments
+                                  :modified created
+                                  :state    :verdictGiven}
+                            (when-not has-old-verdict-tasks {:tasks tasks})
+                            (when extras-reader (extras-reader app-xml)))}]
+        (update-application command updates)
+        {:verdicts verdicts-with-attachments :tasks (get-in updates [$set :tasks])}))))
 
-  ([{:keys [application user created] :as command} app-xml]
-    {:pre [(every? command [:application :user :created])]}
-    (let [extras-reader (permit/get-verdict-extras-reader (:permitType application))]
-      (when-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created app-xml))]
-        (let [has-old-verdict-tasks (some #(= "verdict" (get-in % [:source :type]))  (:tasks application))
-              tasks (tasks/verdicts->tasks (assoc application :verdicts verdicts-with-attachments) created)
-              updates {$set (merge {:verdicts verdicts-with-attachments
-                                    :modified created
-                                    :state    :verdictGiven}
-                              (when-not has-old-verdict-tasks {:tasks tasks})
-                              (when extras-reader (extras-reader app-xml)))}]
-          (update-application command updates)
-          {:verdicts verdicts-with-attachments :tasks (get-in updates [$set :tasks])})))))
+(defn do-check-for-verdict [command]
+  {:pre [(every? command [:application :user :created])]}
+  (when-let [app-xml (krysp-fetch-api/get-application-xml (:application command))]
+    (find-verdicts-from-xml command app-xml)))
 
 (notifications/defemail :application-verdict
   {:subject-key    "verdict"
