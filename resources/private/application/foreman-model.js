@@ -29,7 +29,7 @@ LUPAPISTE.ForemanModel = function() {
           _.forEach(data.applications, function(app) {
             var foreman = _.find(app.auth, {"role": "foreman"});
             var foremanDoc = _.find(app.documents, { "schema-info": { "name": "tyonjohtaja" } });
-            var name = foremanDoc ? foremanDoc.data.kuntaRoolikoodi ? foremanDoc.data.kuntaRoolikoodi.value : undefined : undefined;
+            var name = util.getIn(foremanDoc, ["data", "kuntaRoolikoodi", "value"]);
             var existingTask = _.find(foremanTasks, { "data": {"asiointitunnus": { "value": app.id } } });
 
             if (existingTask) {
@@ -37,11 +37,15 @@ LUPAPISTE.ForemanModel = function() {
               foremanTasks = _.without(foremanTasks, existingTask);
             }
 
+            var username  = util.getIn(foreman, ["username"]);
+            var firstname = util.getIn(foreman, ["firstName"]);
+            var lastname  = util.getIn(foreman, ["lastName"]);
+
             var data = {"state": app.state,
                         "id": app.id,
-                        "email": foreman ? foreman.username : undefined,
-                        "firstName": foreman ? foreman.firstName : undefined,
-                        "lastName": foreman ? foreman.lastName : undefined,
+                        "email":     username  ? username  : util.getIn(foremanDoc, ["data", "yhteystiedot", "email", "value"]),
+                        "firstName": firstname ? firstname : util.getIn(foremanDoc, ["data", "henkilotiedot", "etunimi", "value"]),
+                        "lastName":  lastname  ? lastname  : util.getIn(foremanDoc, ["data", "henkilotiedot", "sukunimi", "value"]),
                         "name": name,
                         "statusName": app.state === "verdictGiven" ? "ok" : "new" };
 
