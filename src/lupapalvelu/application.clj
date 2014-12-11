@@ -266,6 +266,19 @@
   (remove-app-links id)
   (ok))
 
+(defcommand cancel-application-authority
+  {:parameters [id text]
+   :roles      [:authority]
+   :notified   true
+   :on-success (notify :application-state-change)
+   :states     (conj action/all-application-states :info)}
+  [{:keys [created] :as command}]
+  (set-application-canceled command)
+  (remove-app-links id)
+  ;; TODO conversation message
+  (ok))
+
+
 (defcommand open-application
   {:parameters [id]
    :roles      [:applicant :authority]
