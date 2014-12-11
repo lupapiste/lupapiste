@@ -262,11 +262,8 @@
    :on-success (notify :application-state-change)
    :states     [:draft :info :open :submitted]}
   [{:keys [created] :as command}]
-  (update-application command
-    {$set {:modified created
-           :canceled created
-           :state    :canceled}})
-  (mongo/remove-many :app-links {:link {$in [id]}})
+  (set-application-canceled command)
+  (remove-app-links id)
   (ok))
 
 (defcommand open-application
