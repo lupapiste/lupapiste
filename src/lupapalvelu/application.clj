@@ -257,7 +257,7 @@
 
 (defcommand cancel-application
   {:parameters [id]
-   :roles      [:applicant :authority]
+   :roles      [:applicant]
    :notified   true
    :on-success (notify :application-state-change)
    :states     [:draft :info :open :submitted]}
