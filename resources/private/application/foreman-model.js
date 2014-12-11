@@ -11,9 +11,11 @@ LUPAPISTE.ForemanModel = function() {
     return self.email() && !util.isValidEmailAddress(self.email());
   });
   self.foremanApplications = ko.observableArray();
+  self.foremanTasks = ko.observableArray();
   self.finished = ko.observable(false);
   self.foremanRoles = ko.observable(LUPAPISTE.config.foremanRoles);
   self.selectedRole = ko.observable();
+  self.taskId = ko.observable();
 
   self.refresh = function(application) {
     function loadForemanApplications(id) {
@@ -21,15 +23,41 @@ LUPAPISTE.ForemanModel = function() {
       ajax
         .query("foreman-applications", {id: id})
         .success(function(data) {
+          var foremanTasks = _.where(self.application.tasks, { "schema-info": { "name": "task-vaadittu-tyonjohtaja" } });
+          var foremans = [];
+
           _.forEach(data.applications, function(app) {
             var foreman = _.find(app.auth, {"role": "foreman"});
+            var foremanDoc = _.find(app.documents, { "schema-info": { "name": "tyonjohtaja" } });
+            var name = foremanDoc ? foremanDoc.data.kuntaRoolikoodi ? foremanDoc.data.kuntaRoolikoodi.value : undefined : undefined;
+            var existingTask = _.find(foremanTasks, { "data": {"asiointitunnus": { "value": app.id } } });
+
+            if (existingTask) {
+              name = existingTask.taskname;
+              foremanTasks = _.without(foremanTasks, existingTask);
+            }
+
             var data = {"state": app.state,
                         "id": app.id,
                         "email": foreman ? foreman.username : undefined,
                         "firstName": foreman ? foreman.firstName : undefined,
-                        "lastName": foreman ? foreman.lastName : undefined};
+                        "lastName": foreman ? foreman.lastName : undefined,
+                        "name": name,
+                        "statusName": app.state === "verdictGiven" ? "ok" : "new" };
+
             self.foremanApplications.push(data);
+            foremans.push(data);
           });
+
+          _.forEach(foremanTasks, function(task) {
+            var data = { "name": task.taskname,
+                         "taskId": task.id,
+                         "statusName": "missing" };
+            foremans.push(data);
+          });
+
+          self.foremanTasks({ "name": loc(["task-vaadittu-tyonjohtaja", "_group_label"]),
+                              "foremans": foremans });
         })
         .error(
           // invited foreman can't always fetch applicants other foreman appications (if they are not invited to them also)
@@ -38,12 +66,15 @@ LUPAPISTE.ForemanModel = function() {
     }
 
     self.application = application;
+
     _.defer(function() {
       loadForemanApplications(application.id);
     });
   };
 
-  self.inviteForeman = function() {
+  self.inviteForeman = function(taskId) {
+    console.log("taskId", taskId);
+    self.taskId(taskId);
     self.email(undefined);
     self.finished(false);
     LUPAPISTE.ModalDialog.open("#dialog-invite-foreman");
@@ -81,7 +112,8 @@ LUPAPISTE.ForemanModel = function() {
 
     function createApplication() {
       // 2. create "tyonjohtajan ilmoitus" application
-      ajax.command("create-foreman-application", { id: self.application.id })
+      ajax.command("create-foreman-application", { id: self.application.id,
+                                                   taskId: self.taskId() ? self.taskId() : "" })
         .processing(self.processing)
         .pending(self.pending)
         .success(function(data) {
