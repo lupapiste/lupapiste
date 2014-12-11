@@ -1,2 +1,3 @@
 areyousure.cancel-application: Haluatko varmasti peruuttaa hakemuksen? Peruttua hakemusta ei voi avata uudelleen.
-application.cancel-reason: Peruutuksen syy
+application.canceled.reason: Peruutuksen syy
+application.canceled.text: Hakemus on peruutettu
