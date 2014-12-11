@@ -242,6 +242,19 @@
                :authority  (if assignee (user/summary assignee) (:authority domain/application-skeleton))}})
       (fail "error.user.not.found"))))
 
+;;
+;; Cancel
+;;
+
+(defn- set-application-canceled [{:keys [created] :as command}]
+  (update-application command
+    {$set {:modified created
+           :canceled created
+           :state    :canceled}}))
+
+(defn- remove-app-links [id]
+  (mongo/remove-many :app-links {:link {$in [id]}}))
+
 (defcommand cancel-application
   {:parameters [id]
    :roles      [:applicant :authority]
