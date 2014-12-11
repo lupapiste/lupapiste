@@ -231,7 +231,10 @@
       {:tag :osapuolettieto :child [mapping-common/osapuolet_211]})
     (update-in [:child] mapping-common/update-child-element
       [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :toimenpidetieto :Toimenpide :rakennustieto :Rakennus :rakennuksenTiedot]
-      #(update-in % [:child] conj {:tag :liitettyJatevesijarjestelmaanKytkin}))))
+      #(update-in % [:child] conj {:tag :liitettyJatevesijarjestelmaanKytkin}))
+    (update-in [:child] mapping-common/update-child-element
+      [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :rakennuspaikkatieto]
+      {:tag :rakennuspaikkatieto :child [mapping-common/rakennuspaikka_211]})))
 
 (def rakennuslupa_to_krysp_214
   (-> rakennuslupa_to_krysp_213
