@@ -297,9 +297,8 @@
       }
     };
 
-    self.searchPointByAddress = function(address, successCallback, errorCallback) {
-      locationSearch.pointByAddress(self.requestContext, address,
-        function(result) {
+    self.searchPointByAddress = function(address) {
+      locationSearch.pointByAddress(self.requestContext, address, function(result) {
           if (result.data && result.data.length > 0) {
             var data = result.data[0],
                 x = data.location.x,
@@ -309,20 +308,10 @@
               .center(x, y, 13)
               .setXY(x, y)
               .addressData(data)
-              .searchPropertyId(x, y,
-                function() {
-                  if (successCallback) { successCallback(result); } },  // Note: returning the result of the locationSearch.pointByAddress query
-                function(d) {
-                  if (errorCallback) { errorCallback(d); } });   // TODO: Mita pitaisi palauttaa taman parametrina: "d" vai "result"?
-          } else {
-            if (errorCallback) {
-              errorCallback(result); }  // TODO: Pitaisiko tassa kutsua successCallback?
+              .beginUpdateRequest()
+              .searchPropertyId(x, y);
           }
-        },
-        function(d) {
-          self.useManualEntry(true);
-          if (errorCallback) { errorCallback(d); }
-        });
+        }, _.partial(self.useManualEntry, true));
       return self;
     };
 
@@ -345,14 +334,8 @@
       return self;
     };
 
-    self.searchPropertyId = function(x, y, successCallback, errorCallback) {
-      locationSearch.propertyIdByPoint(self.requestContext, x, y,
-          function(d) {
-            self.propertyId(d);
-            if (successCallback) { successCallback(d); }
-          },
-          errorCallback
-          );
+    self.searchPropertyId = function(x, y) {
+      locationSearch.propertyIdByPoint(self.requestContext, x, y, self.propertyId);
       return self;
     };
 
@@ -417,7 +400,7 @@
       .processing(self.processing)
       .pending(self.pending)
       .success(function(data) {
-        setTimeout(self.clear, 0);
+        self.clear();
         window.location.hash = (infoRequest ? "!/inforequest/" : "!/application/") + data.id;
       })
       .call();
@@ -436,7 +419,7 @@
       self.operation("aiemmalla-luvalla-hakeminen");
     };
 
-    var doCreateApplicationWithPrevPermit = function() {
+    self.createApplicationWithPrevPermit = function() {
       if (self.newApplicationsDisabled()) {
         LUPAPISTE.ModalDialog.showDynamicOk(
             loc("new-applications-or-inforequests-disabled.dialog.title"),
@@ -456,7 +439,7 @@
       .processing(self.processing)
       .pending(self.pending)
       .success(function(data) {
-        setTimeout(self.clear, 0);
+        self.clear();
         window.location.hash = "!/application/" + data.id;
       })
       .error(function(d) {
@@ -477,22 +460,6 @@
       .call();
     };
 
-    self.createApplicationWithPrevPermit = function() {
-      if (!self.needMorePrevPermitInfo()) {
-        doCreateApplicationWithPrevPermit();
-      } else {
-        //
-        // TODO: ovatko tarkastukset parempi olla napissa, tassa vai molemmissa?
-        //
-        if (!isBlank(self.kuntalupatunnusFromPrevPermit) && !isBlank(self.addressString()) &&
-            self.addressData() && self.propertyId() && self.x() !== 0 && self.y() !== 0 && self.municipality() ) {
-          doCreateApplicationWithPrevPermit();
-        } else {
-          notify.error(loc("error.dialog.title"), loc("info.no-previous-permit-found-from-backend"));
-        }
-      }
-    };
-
   }();
 
   hub.onPageChange("create-part-1", model.clear);
@@ -500,14 +467,14 @@
 
   function initAutocomplete(id) {
     $(id)
-    .keypress(function(e) { if (e.which === 13) { model.searchNow(); }}) // enter
-        .autocomplete({
-          source:     "/proxy/find-address",
-          delay:      500,
-          minLength:  3,
-          select:     model.autocompleteSelect
-        })
-        .data("ui-autocomplete")._renderItem = model.autocompleteRender;
+      .keypress(function(e) { if (e.which === 13) { model.searchNow(); }}) // enter
+      .autocomplete({
+        source:     "/proxy/find-address",
+        delay:      500,
+        minLength:  3,
+        select:     model.autocompleteSelect
+      })
+      .data("ui-autocomplete")._renderItem = model.autocompleteRender;
   }
 
   $(function() {

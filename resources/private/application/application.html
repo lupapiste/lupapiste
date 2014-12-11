@@ -564,7 +564,7 @@
             </h2>
             <div class="accordion_content" data-accordion-state="closed">
               <div class="accordion-fields">
-                <div data-bind="template: {name: 'statements-template', data: {statements: $data.statements}}"></div>
+                <div data-bind="template: {name: 'statements-template', data: {statements: $data.statements, localisationKeys: {missing: 'application.statement.missing-from-prev-permit'}}}"></div>
               </div>
             </div>
           </section>
@@ -576,7 +576,7 @@
             </h2>
             <div class="accordion_content" data-accordion-state="closed">
               <div class="accordion-fields">
-                <div data-bind="template: {name: 'neighbors-template', data: {neighbors: $data.neighbors}}"></div>
+                <div data-bind="template: {name: 'neighbors-template', data: {neighbors: $data.neighbors, localisationKeys: {missing: 'neighbors.missing-from-prev-permit'}}}"></div>
               </div>
             </div>
           </section>
@@ -835,7 +835,7 @@
             <div class="tab-info" data-bind="slider: showStatementsInfoHelp">
               <p data-bind="lhtml: 'help.' + permitType() + '.statementsDesc'"></p>
             </div>
-            <div data-bind="template: {name: 'statements-template', data: {statements: $data.statements}}"></div>
+            <div data-bind="template: {name: 'statements-template', data: {statements: $data.statements, localisationKeys: {missing: 'application.statement.missing'}}}"></div>
             <button data-bind="click: $root.requestForStatementModel.openDialog, ltext: 'application.statement.add', visible: $root.authorization.ok('request-for-statement')"
                     class="btn btn-primary modal"
                     data-test-id="add-statement">
@@ -849,7 +849,7 @@
             <div class="tab-info" data-bind="slider: showNeighborsInfoHelp">
               <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.neighborsDesc'"></p>
             </div>
-            <div data-bind="template: {name: 'neighbors-template', data: {neighbors: $data.neighbors}}"></div>
+            <div data-bind="template: {name: 'neighbors-template', data: {neighbors: $data.neighbors, localisationKeys: {missing: 'neighbors.missing'}}}"></div>
 
             <button data-bind="click: $root.neighbor.manage, ltext: 'neighbors.manage', visible: $root.authorization.ok('neighbor-add')" class="btn btn-primary modal" data-test-id="manage-neighbors"></button>
           </div>
@@ -857,7 +857,7 @@
 
         <script type="text/html" id="statements-template">
           <div data-bind="ifnot: $data.statements && statements().length > 0">
-            <p data-bind="ltext: 'application.statement.missing'" data-test-id="application-no-statements"></p>
+            <p data-bind="ltext: $data.localisationKeys.missing" data-test-id="application-no-statements"></p>
           </div>
 
           <div data-bind="if: $data.statements && statements().length > 0">
@@ -893,7 +893,7 @@
 
         <script type="text/html" id="neighbors-template">
           <div data-bind="ifnot: neighbors() && neighbors().length > 0">
-            <p data-bind="ltext: 'neighbors.missing'" data-test-id="application-no-neigbors"></p>
+            <p data-bind="ltext: $data.localisationKeys.missing" data-test-id="application-no-neigbors"></p>
           </div>
 
           <div data-bind="if: neighbors() && neighbors().length > 0">
