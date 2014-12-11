@@ -191,6 +191,11 @@
             <span data-bind="ltext: 'application.cancelApplication'"></span>
             <span class="icon remove-grey left-align"></span>
           </button>
+          <button data-bind="click: cancelApplicationAuthority,    visible: $root.authorization.ok('cancel-application-authority'), enable: !processing() && $root.authorization.ok('cancel-application-authority')"
+                  data-test-id="application-cancel-authority-btn"  class="btn">
+            <span data-bind="ltext: 'application.cancelApplication'"></span>
+            <span class="icon remove-grey left-align"></span>
+          </button>
           <button data-bind="click: refreshKTJ,           visible: $root.authorization.ok('refresh-ktj'),            enable: !processing() && $root.authorization.ok('refresh-ktj')"     data-test-id="application-refresh-ktj-btn"  class="btn">
             <span data-bind="ltext: 'application.refreshKTJ'"></span>
             <span class="icon refresh-grey left-align"></span>
