@@ -951,8 +951,11 @@
     (insert-application continuation-app)
     (ok :id (:id continuation-app))))
 
+(defn find-by-id [taskId tasks]
+  (some (fn [task] (when (= taskId (:id task)) task)) tasks))
+
 (defcommand create-foreman-application
-  {:parameters ["id"]
+  {:parameters [id taskId]
    :roles [:applicant :authority]
    :states action/all-application-states}
   [{:keys [created user application] :as command}]
@@ -965,6 +968,8 @@
                                             :municipality (:municipality application)
                                             :infoRequest false
                                             :messages []}))
+
+        task                 (find-by-id taskId (:tasks application))
 
         hankkeen-kuvaus      (get-in (domain/get-document-by-name application "hankkeen-kuvaus") [:data :kuvaus :value])
         hankkeen-kuvaus-doc  (domain/get-document-by-name foreman-app "hankkeen-kuvaus-minimum")
@@ -982,6 +987,9 @@
 
     (do-add-link-permit foreman-app (:id application))
     (insert-application foreman-app)
+    (when task
+      (let [updates [[[:asiointitunnus] (:id foreman-app)]]]
+        (commands/persist-model-updates application "tasks" task updates created)))
     (ok :id (:id foreman-app))))
 
 ;;
