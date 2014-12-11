@@ -269,13 +269,22 @@
    :notified   true
    :on-success (notify :application-state-change)
    :states     (conj action/all-application-states :info)}
-  [{:keys [created] :as command}]
+  [{:keys [created application] :as command}]
   (update-application command
-    {$set {:modified created
+    (util/deep-merge
+      (lupapalvelu.comment/comment-mongo-update
+              (:state application)
+              text
+              {:type "application"}
+              (-> command :user :role)
+              false
+              (:user command)
+              nil
+              created)
+      {$set {:modified created
            :canceled created
-           :state    :canceled}})
+           :state    :canceled}}))
   (remove-app-links id)
-  ;; TODO conversation message
   (ok))
 
 
