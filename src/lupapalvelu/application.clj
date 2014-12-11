@@ -272,18 +272,22 @@
   [{:keys [created application] :as command}]
   (update-application command
     (util/deep-merge
-      (lupapalvelu.comment/comment-mongo-update
-              (:state application)
-              text
-              {:type "application"}
-              (-> command :user :role)
-              false
-              (:user command)
-              nil
-              created)
+      (when (seq text)
+        (lupapalvelu.comment/comment-mongo-update
+          (:state application)
+          (str
+            (i18n/loc "application.canceled.text") ". "
+            (i18n/loc "application.canceled.reason") ": "
+            text)
+          {:type "application"}
+          (-> command :user :role)
+          false
+          (:user command)
+          nil
+          created))
       {$set {:modified created
-           :canceled created
-           :state    :canceled}}))
+             :canceled created
+             :state    :canceled}}))
   (remove-app-links id)
   (ok))
 
