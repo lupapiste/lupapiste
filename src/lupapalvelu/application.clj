@@ -246,12 +246,6 @@
 ;; Cancel
 ;;
 
-(defn- set-application-canceled [{:keys [created] :as command}]
-  (update-application command
-    {$set {:modified created
-           :canceled created
-           :state    :canceled}}))
-
 (defn- remove-app-links [id]
   (mongo/remove-many :app-links {:link {$in [id]}}))
 
@@ -262,7 +256,10 @@
    :on-success (notify :application-state-change)
    :states     [:draft :info :open :submitted]}
   [{:keys [created] :as command}]
-  (set-application-canceled command)
+  (update-application command
+    {$set {:modified created
+           :canceled created
+           :state    :canceled}})
   (remove-app-links id)
   (ok))
 
@@ -273,7 +270,10 @@
    :on-success (notify :application-state-change)
    :states     (conj action/all-application-states :info)}
   [{:keys [created] :as command}]
-  (set-application-canceled command)
+  (update-application command
+    {$set {:modified created
+           :canceled created
+           :state    :canceled}})
   (remove-app-links id)
   ;; TODO conversation message
   (ok))
