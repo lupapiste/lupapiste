@@ -85,7 +85,9 @@
                         <span data-bind="fullName: user"></span>
                       </td>
                       <td>
-                        <a class="link-action" data-bind="click: $root.attachment.deleteVersion, ltext: 'remove', visible: $root.authorization.ok('delete-attachment-version') && $parent.editable"></a>
+                        <a class="link-action" data-bind="click: $root.attachment.deleteVersion,
+                                                          ltext: 'remove',
+                                                          visible: $root.authorization.ok('delete-attachment-version') && $parent.editable && authorized"></a>
                       </td>
                     </tr>
                   </tbody>
