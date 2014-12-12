@@ -203,8 +203,9 @@ var attachment = (function() {
   });
 
   model.editable = ko.computed(function() {
-    var preVerdictStates = ["verdictGiven", "constructionStarted", "closed"];
-    return _.contains(preVerdictStates, ko.unwrap(model.application.state)) ? currentUser.isAuthority() || _.contains(preVerdictStates, ko.unwrap(model.applicationState)) : true;
+    return _.contains(LUPAPISTE.config.postVerdictStates, ko.unwrap(model.application.state)) ?
+             currentUser.isAuthority() || _.contains(LUPAPISTE.config.postVerdictStates, ko.unwrap(model.applicationState)) :
+             true;
   });
 
 
