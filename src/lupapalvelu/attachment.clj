@@ -277,26 +277,27 @@
   {:pre [application]}
   (get-attachment-types-by-permit-type (:permitType application)))
 
-(defn make-attachment [now target locked applicationState op attachement-type & [attachment-id]]
+(defn make-attachment [now target required locked applicationState op attachment-type & [attachment-id]]
   {:id (or attachment-id (mongo/create-id))
-   :type attachement-type
+   :type attachment-type
    :modified now
    :locked locked
    :applicationState applicationState
    :state :requires_user_action
    :target target
+   :required required
    :op op
    :signatures []
    :versions []})
 
 (defn make-attachments
   "creates attachments with nil target"
-  [now applicationState attachement-types]
-  (map (partial make-attachment now nil false applicationState nil) attachement-types))
+  [now applicationState attachment-types]
+  (map (partial make-attachment now nil true false applicationState nil) attachment-types))
 
-(defn create-attachment [application attachement-type op now target locked & [attachment-id]]
+(defn create-attachment [application attachment-type op now target locked & [attachment-id]]
   {:pre [(map? application)]}
-  (let [attachment (make-attachment now target locked (:state application) op attachement-type attachment-id)]
+  (let [attachment (make-attachment now target false locked (:state application) op attachment-type attachment-id)]
     (update-application
       (application->command application)
       {$set {:modified now}
@@ -304,9 +305,9 @@
 
     (:id attachment)))
 
-(defn create-attachments [application attachement-types now]
+(defn create-attachments [application attachment-types now]
   {:pre [(map? application)]}
-  (let [attachments (make-attachments now (:state application) attachement-types)]
+  (let [attachments (make-attachments now (:state application) attachment-types)]
     (update-application
       (application->command application)
       {$set {:modified now}
@@ -413,7 +414,7 @@
              :attachments.$.latestVersion.size size
              :attachments.$.latestVersion.created now}})))
 
-(defn update-or-create-attachment
+(defn- update-or-create-attachment
   "If the attachment-id matches any old attachment, a new version will be added.
    Otherwise a new attachment is created."
   [{:keys [application attachment-id attachment-type op file-id filename content-type size comment-text created user target locked] :as options}]
