@@ -89,12 +89,12 @@
               </td>
               <td>
                 <span data-bind="click: $root.attachmentsTab.deleteSingleAttachment,
-                                clickBubble: false,
-                                visible: $root.authorization.ok('delete-attachment') && $parent.editable,
-                                enable: $root.authorization.ok('delete-attachment') && $parent.editable,
-                                attr: {'class': 'icon remove-grey',
-                                       'title': loc('attachment.delete'),
-                                       'data-test-icon': 'delete-' + type['type-group'] + '.' + type['type-id']}"></span>
+                                 clickBubble: false,
+                                 visible: $root.authorization.ok('delete-attachment') && $parent.editable && authorized,
+                                 enable: $root.authorization.ok('delete-attachment') && $parent.editable && authorized,
+                                 attr: {'class': 'icon remove-grey',
+                                        'title': loc('attachment.delete'),
+                                        'data-test-icon': 'delete-' + type['type-group'] + '.' + type['type-id']}"></span>
               </td>
             </tr>
             <!-- /ko -->
