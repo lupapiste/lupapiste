@@ -1104,12 +1104,14 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       if (subSchema.type === "table") {
         $(appendButton).click(tableAppender);
         var locKey = [self.schemaI18name, myPath.join("."), "copyLabel"];
-        if (subSchema.i18nkey) {
-          locKey = [subSchema.i18nkey, "copyLabel"];
+        if (subSchema.copybutton) {
+          if (subSchema.i18nkey) {
+            locKey = [subSchema.i18nkey, "copyLabel"];
+          }
+          var copyButton = makeButton(myPath.join("_") + "_copy", loc(locKey));
+          $(copyButton).click(copyElement);
+          buttonGroup.appendChild(copyButton);  
         }
-        var copyButton = makeButton(myPath.join("_") + "_copy", loc(locKey));
-        $(copyButton).click(copyElement);
-        buttonGroup.appendChild(copyButton);
       } else {
         $(appendButton).click(appender);
       }

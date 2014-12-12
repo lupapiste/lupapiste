@@ -957,7 +957,7 @@
    :states action/all-application-states}
   [{:keys [created user application] :as command}]
   (let [foreman-app (do-create-application
-                      (assoc command :data {:operation "tyonjohtajan-nimeaminen"
+                      (assoc command :data {:operation "tyonjohtajan-nimeaminen-v2"
                                             :x (-> application :location :x)
                                             :y (-> application :location :y)
                                             :address (:address application)

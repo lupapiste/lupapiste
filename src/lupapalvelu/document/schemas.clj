@@ -266,14 +266,17 @@
                                           {:name "ty\u00F6njohtaja" :i18nkey "osapuoli.tyonjohtaja.kuntaRoolikoodi.ty\u00f6njohtaja"}
                                           {:name "ei tiedossa" :i18nkey "osapuoli.kuntaRoolikoodi.ei tiedossa"}]}])
 
+(def patevyysvaatimusluokka
+  {:name "patevyysvaatimusluokka" :type :select :sortBy nil :required false
+   :body [{:name "AA"}
+          {:name "A"}
+          {:name "B"}
+          {:name "C"}
+          {:name "ei tiedossa"}]})
+
 (def patevyys-tyonjohtaja [koulutusvalinta
                            {:name "koulutus" :type :string :required false  :i18nkey "muukoulutus"}
-                           {:name "patevyysvaatimusluokka" :type :select :sortBy nil :required false
-                            :body [{:name "AA"}
-                                   {:name "A"}
-                                   {:name "B"}
-                                   {:name "C"}
-                                   {:name "ei tiedossa"}]}
+                           patevyysvaatimusluokka
                            {:name "valmistumisvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size "s" :required false}
                            {:name "kokemusvuodet" :type :string :subtype :number :min-len 1 :max-len 2 :size "s" :required false}
                            {:name "valvottavienKohteidenMaara" :i18nkey "tyonjohtaja.patevyys.valvottavienKohteidenMaara" :type :string :subtype :number :size "s" :required false}
@@ -319,15 +322,47 @@
                                              {:name "IV-ty\u00F6njohtaja" :i18nkey "osapuoli.tyonjohtaja.kuntaRoolikoodi.IV-ty\u00f6njohtaja"}
                                              {:name "erityisalojen ty\u00F6njohtaja" :i18nkey "osapuoli.tyonjohtaja.kuntaRoolikoodi.erityisalojen ty\u00f6njohtaja"}]}])
 
+
+(def tyonjohtaja-hanketieto {:name "tyonjohtajaHanketieto" :type :group
+                             :body [{:name "taysiaikainenOsaaikainen" :type :radioGroup :body [{:name "taysiaikainen"} {:name "osaaikainen"}] :default "taysiaikainen"}
+                                    {:name "hankeKesto" :type :string :size "s" :unit "kuukautta" :subtype :number :min 0 :max 9999999}
+                                    {:name "kaytettavaAika" :type :string :size "s" :unit "tuntiaviikko" :subtype :number :min 0 :max 168} ; 7*24 = 168h :)
+                                    {:name "kayntienMaara" :type :string :size "s" :unit "kpl" :subtype :number :min 0 :max 9999999}]})
+
+
+
+(def hanke-row
+  [{:name "luvanNumero" :type :string :size "m" :label false}
+   {:name "katuosoite" :type :string :size "m" :label false}
+   {:name "rakennustoimenpide" :type :string :size "l" :label false}
+   {:name "kokonaisala" :type :string :subtype :number :size "s" :label false}
+   {:name "vaihe" :type :select :size "t" :label false
+    :body [{:name "R"}
+           {:name "A"}
+           {:name "K"}]}
+   {:name "3kk" :type :string :subtype :number :size "t" :label false}
+   {:name "6kk" :type :string :subtype :number :size "t" :label false}
+   {:name "9kk" :type :string :subtype :number :size "t" :label false}
+   {:name "12kk" :type :string :subtype :number  :size "t" :label false}])
+
+(def muut-rakennushankeket-table {:name "muutHankkeet"
+                                  :type :table
+                                  :repeating true
+                                  :approvable true
+                                  :copybutton false
+                                  :body hanke-row
+                                  })
+
 (def tyonjohtaja-v2 (body
                       ilmoitus-hakemus-valitsin
                       kuntaroolikoodi-tyonjohtaja-v2
+                      patevyysvaatimusluokka
                       vastattavat-tyotehtavat-tyonjohtaja
-                      vastuuaika-tyonjohtaja
-                      henkilo-valitsin
-                      designer-basic
-                      {:name "patevyys" :type :group :body patevyys-tyonjohtaja}
-                      sijaisuus-tyonjohtaja))
+                      tyonjohtaja-hanketieto
+                      ; other projects -table (later?)
+                      muut-rakennushankeket-table
+                      henkilo-valitsin ; to be replaced with "fill out own info" -button?
+                      designer-basic))
 
 (def maksaja (body
                (henkilo-yritys-select-group :yritys-body yritys-with-verkkolaskutustieto)
@@ -367,6 +402,7 @@
                       :type :table
                       :repeating true
                       :approvable true
+                      :copybutton true
                       :body huoneistoRow})
 
 (def yhden-asunnon-talot "011 yhden asunnon talot")
@@ -802,8 +838,8 @@
     {:info {:name "tyonjohtaja-v2"
             :i18name "osapuoli"
             :order 5
-            :removable true
-            :repeating true
+            :removable false ; TODO: check these
+            :repeating false
             :approvable true
             :type :party}
      :body tyonjohtaja-v2}

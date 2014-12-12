@@ -1,3 +1,37 @@
 tyonjohtaja.ilmoitusHakemusValitsin._group_label: Ilmoitus vai hakemus
 tyonjohtaja.ilmoitusHakemusValitsin.ilmoitus: Ilmoitus
 tyonjohtaja.ilmoitusHakemusValitsin.hakemus: Hakemus
+
+osapuoli.patevyysvaatimusluokka._group_label: Tehtävien vaativuus
+osapuoli.patevyysvaatimusluokka.AA: Poikkeuksellisen vaativa
+osapuoli.patevyysvaatimusluokka.A: Vaativa
+osapuoli.patevyysvaatimusluokka.B: Tavanomainen
+osapuoli.patevyysvaatimusluokka.C: Vähänäinen
+osapuoli.patevyysvaatimusluokka.ei tiedossa: Ei tiedossa
+
+osapuoli.tyonjohtajaHanketieto._group_label: Toimii tässä rakennushankkeessa
+osapuoli.tyonjohtajaHanketieto.taysiaikainenOsaaikainen.taysiaikainen: Täysiaikaisena
+osapuoli.tyonjohtajaHanketieto.taysiaikainenOsaaikainen.osaaikainen: Osa-aikaisena
+osapuoli.tyonjohtajaHanketieto.hankeKesto: Rakennushankkeen kesto
+osapuoli.tyonjohtajaHanketieto.kaytettavaAika: Tehtäviin käytettävä aika
+osapuoli.tyonjohtajaHanketieto.kayntienMaara: Työmaakänytien määrä yhteensä
+
+osapuoli.muutHankkeet._group_label: Muut rakennushankkeet
+osapuoli.muutHankkeet.luvanNumero: Luvan numero
+osapuoli.muutHankkeet.katuosoite: Katuosoite
+osapuoli.muutHankkeet.rakennustoimenpide: Rakennustoimenpide
+osapuoli.muutHankkeet.kokonaisala: Kokonaisala
+osapuoli.muutHankkeet.vaihe: Vaihe
+osapuoli.muutHankkeet.3kk: 0-3kk
+osapuoli.muutHankkeet.6kk: 3-6kk
+osapuoli.muutHankkeet.9kk: 6-9kk
+osapuoli.muutHankkeet.12kk: 9-12kk
+
+osapuoli.muutHankkeet._append_label: Lisää rivi
+
+osapuoli.muutHankkeet.vaihe.A: A
+osapuoli.muutHankkeet.vaihe.R: R
+osapuoli.muutHankkeet.vaihe.K: K
+
+unit.kuukautta: kuukautta
+unit.tuntiaviikko: tuntia / viikko
