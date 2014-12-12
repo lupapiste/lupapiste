@@ -1128,7 +1128,7 @@
               <span data-bind="ltext: 'application.inviteSend'"></span>
               <em data-bind="visible: pending" class="button-loader"></em>
             </button>
-            <a data-bind="ltext: 'cancel'" class="btn-dialog close cancel" onclick="window.parent.hub.send('upload-cancelled');return false;" href="#"></a>
+            <a data-bind="ltext: 'cancel'" class="btn-dialog close cancel" href="#" data-test-id="cancel-foreman-dialog"></a>
           </form>
           <!-- /ko -->
         </div>

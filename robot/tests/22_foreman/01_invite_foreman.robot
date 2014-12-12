@@ -66,3 +66,16 @@ Mikko can see invited foremans on tasks list
   Open application at index  ${appname}  753-416-25-22  1
   Open tab  tasks
   Wait until  Element text should be  xpath=//table[@data-test-id='tasks-foreman']//span[@data-test-id='tasks-foreman-email']  (teppo@example.com)
+
+Mikko can start invite flow from tasks tab
+  Click enabled by test id  invite-other-foreman-button
+  Wait until  Element should be visible  //div[@id='dialog-invite-foreman']
+  Click enabled by test id  invite-substitute-foreman-button
+  Wait until  Element should be visible  //div[@id='dialog-invite-foreman']
+
+Mikko can invite additional foremans to application with verdict
+  Wait and click   xpath=//table[@data-test-id='tasks-foreman']//tr[@data-test-name='Ylitarkastaja']/td[@data-test-col-name='foreman-name-or-invite']/a
+  Input Text  invite-foreman-email  teppo@example.com
+  Click by test id  application-invite-foreman
+  Wait until  Click by test id  application-invite-foreman-close-dialog
+  Wait until  Element should be visible  //section[@id='application']//span[@data-test-operation-id='tyonjohtajan-nimeaminen']
