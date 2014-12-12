@@ -725,13 +725,20 @@
                       :body [{:name "oma"}
                              {:name "vuokra"}
                              {:name "ei tiedossa"}]}
-                     {:name "kaavanaste" :type :select :sortBy :displayname
+                     {:name "kaavanaste" :type :select :sortBy :displayname :hidden true
                       :body [{:name "asema"}
                              {:name "ranta"}
                              {:name "rakennus"}
                              {:name "yleis"}
                              {:name "ei kaavaa"}
-                             {:name "ei tiedossa"}]}])
+                             {:name "ei tiedossa"}]}
+                     {:name "kaavatilanne" :type :select :sortBy :displayname
+                      :body [{:name "maakuntakaava"}
+                             {:name "oikeusvaikutteinen yleiskaava"}
+                             {:name "oikeusvaikutukseton yleiskaava"}
+                             {:name "asemakaava"}
+                             {:name "ranta-asemakaava"}
+                             {:name "ei kaavaa"}]}])
 
 
 (defn- approvable-top-level-groups [v]
@@ -863,7 +870,7 @@
             :approvable true
             :order 2
             :type :location}
-     :body (schema-body-without-element-by-name rakennuspaikka "rantaKytkin" "hallintaperuste" "kaavanaste")}
+     :body (schema-body-without-element-by-name rakennuspaikka "rantaKytkin" "hallintaperuste" "kaavanaste" "kaavatilanne")}
 
     {:info {:name "aloitusoikeus" :removable false :approvable true}
      :body aloitusoikeus}

@@ -12,7 +12,8 @@
                                                                              "maaraalaTunnus"
                                                                              "rantaKytkin"
                                                                               "hallintaperuste"
-                                                                              "kaavanaste")
+                                                                              "kaavanaste"
+                                                                              "kaavatilanne")
                                                 {:name "kiinteistoonKuuluu" :type :group :repeating true
                                                  :body [{:name "rakennuksenTyypi" :type :select :sortBy :displayname
                                                          :body [{:name "El\u00e4insuoja"}

@@ -632,8 +632,7 @@
 
     ;; The application has to be inserted first, because it is assumed to be in the database when checking for verdicts (and their attachments).
     (insert-application created-application)
-
-    (verdict-api/do-check-for-verdict command xml)  ;; Get verdicts for the application
+    (verdict-api/find-verdicts-from-xml command xml)  ;; Get verdicts for the application
     (:id created-application)))
 
 (defcommand create-application-from-previous-permit
@@ -966,15 +965,19 @@
                                             :infoRequest false
                                             :messages []}))
 
-        hankkeen-kuvaus (get-in (domain/get-document-by-name application "hankkeen-kuvaus") [:data :kuvaus :value])
-        hankkeen-kuvaus-doc (domain/get-document-by-name foreman-app "hankkeen-kuvaus-minimum")
-        hankkeen-kuvaus-doc (if hankkeen-kuvaus
-                              (assoc-in hankkeen-kuvaus-doc [:data :kuvaus :value] hankkeen-kuvaus)
-                              hankkeen-kuvaus-doc)
+        hankkeen-kuvaus      (get-in (domain/get-document-by-name application "hankkeen-kuvaus") [:data :kuvaus :value])
+        hankkeen-kuvaus-doc  (domain/get-document-by-name foreman-app "hankkeen-kuvaus-minimum")
+        hankkeen-kuvaus-doc  (if hankkeen-kuvaus
+                               (assoc-in hankkeen-kuvaus-doc [:data :kuvaus :value] hankkeen-kuvaus)
+                               hankkeen-kuvaus-doc)
 
-        foreman-app (assoc foreman-app
-                      :documents [(domain/get-document-by-name application "hakija")
-                                  hankkeen-kuvaus-doc])]
+        hakija-doc           (domain/get-document-by-name application "hakija")
+
+        new-application-docs (->> (:documents foreman-app)
+                                  (remove #(#{"hankkeen-kuvaus-minimum" "hakija"} (-> % :schema-info :name)))
+                                  (concat [hakija-doc hankkeen-kuvaus-doc]))
+
+        foreman-app (assoc foreman-app :documents new-application-docs)]
 
     (do-add-link-permit foreman-app (:id application))
     (insert-application foreman-app)
