@@ -286,13 +286,8 @@ var attachment = (function() {
 
     $("#file-preview-iframe").attr("src","");
 
-    var enrichedVersions = _.map(attachment.versions, function(v) {
-      v.authorized = currentUser.get().role() === "authority" || currentUser.get().role() === v.user.role;
-      return v;
-    });
-    model.versions(enrichedVersions);
-
     model.latestVersion(attachment.latestVersion);
+    model.versions(attachment.versions);
     model.signatures(attachment.signatures || []);
     model.filename(attachment.filename);
     model.type(attachment.type);
