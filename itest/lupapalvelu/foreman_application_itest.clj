@@ -13,7 +13,7 @@
         {application-id :id} (create-app apikey
                                :operation "kerrostalo-rivitalo") => truthy
 
-        {foreman-application-id :id} (command apikey :create-foreman-application :id application-id) => truthy
+        {foreman-application-id :id} (command apikey :create-foreman-application :id application-id :taskId "" :foremanRole "") => truthy
 
         foreman-application (query-application apikey foreman-application-id)
         foreman-link-permit-data (first (foreman-application :linkPermitData))
