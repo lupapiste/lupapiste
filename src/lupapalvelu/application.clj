@@ -249,6 +249,20 @@
 (defn- remove-app-links [id]
   (mongo/remove-many :app-links {:link {$in [id]}}))
 
+(defcommand cancel-inforequest
+  {:parameters [id]
+   :roles      [:applicant :authority]
+   :notified   true
+   :on-success (notify :application-state-change)
+   :states     [:info]}
+  [{:keys [created] :as command}]
+  (update-application command
+    {$set {:modified created
+           :canceled created
+           :state    :canceled}})
+  (remove-app-links id)
+  (ok))
+
 (defcommand cancel-application
   {:parameters [id]
    :roles      [:applicant]
