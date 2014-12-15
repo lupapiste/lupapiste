@@ -37,15 +37,21 @@ LUPAPISTE.ForemanModel = function() {
               foremanTasks = _.without(foremanTasks, existingTask);
             }
 
-            var username  = util.getIn(foreman, ["username"]);
-            var firstname = util.getIn(foreman, ["firstName"]);
-            var lastname  = util.getIn(foreman, ["lastName"]);
+            var username  = util.getIn(foremanDoc, ["data", "yhteystiedot", "email", "value"]);
+            var firstname = util.getIn(foremanDoc, ["data", "henkilotiedot", "etunimi", "value"]);
+            var lastname  = util.getIn(foremanDoc, ["data", "henkilotiedot", "sukunimi", "value"]);
+
+            if (!(username || firstname || lastname)) {
+              username = util.getIn(foreman, ["username"]);
+              firstname = util.getIn(foreman, ["firstName"]);
+              lastname = util.getIn(foreman, ["lastName"]);
+            }
 
             var data = {"state": app.state,
                         "id": app.id,
-                        "email":     username  ? username  : util.getIn(foremanDoc, ["data", "yhteystiedot", "email", "value"]),
-                        "firstName": firstname ? firstname : util.getIn(foremanDoc, ["data", "henkilotiedot", "etunimi", "value"]),
-                        "lastName":  lastname  ? lastname  : util.getIn(foremanDoc, ["data", "henkilotiedot", "sukunimi", "value"]),
+                        "email":     username,
+                        "firstName": firstname,
+                        "lastName":  lastname,
                         "name": name,
                         "statusName": app.state === "verdictGiven" ? "ok" : "new" };
 
