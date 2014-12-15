@@ -153,7 +153,9 @@
     (let [application-id  (create-app-id sonja :municipality sonja-muni)]
       (fact "Sonja sees the application" (query sonja :application :id application-id) => ok?)
       (fact "Sonja can cancel the application"
-        (command sonja :cancel-application-authority :id application-id :text nil) => ok?)))
+        (let [r (command sonja :cancel-application-authority :id application-id :text nil)]
+          r => ok?
+          (fact "No comments exists from cancel" (-> r :application :comments count) => 0)))))
 
   (fact "Authority can cancel with reason text, which is added as comment"
     (let [application (create-and-submit-application mikko :municipality sonja-muni :address "Peruutustie 23")
