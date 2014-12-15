@@ -38,9 +38,11 @@
     (:text resp) => "error.inforequests-disabled"))
 
   (fact "Pena can cancel inforequest he created"
-    (let [{id :id :as resp} (create-app pena :infoRequest true :municipality sonja-muni)]
+    (let [resp (create-app pena :infoRequest true :municipality sonja-muni)]
       resp => ok?
-      (command pena :cancel-inforequest :id id => ok?))))
+      (command pena :cancel-inforequest :id (-> resp :application :id)) => ok?
+      (fact "Sonja is also allowed to cancel inforequest"
+        (allowed? :cancel-inforequest :id (-> resp :application :id))))))
 
 (facts "Open inforequest"
   ; Reset emails
