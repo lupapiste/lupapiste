@@ -1,0 +1,4 @@
+areyousure.cancel-application: Haluatko varmasti peruuttaa hakemuksen? Peruttua hakemusta ei voi avata uudelleen.
+application.canceled.reason: Peruutuksen syy
+application.canceled.text: Hakemus on peruutettu
+areyousure.cancel-inforequest: Haluatko varmasti peruuttaa neuvontapyynnön?

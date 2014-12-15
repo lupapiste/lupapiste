@@ -243,9 +243,30 @@
                :authority  (if assignee (user/summary assignee) (:authority domain/application-skeleton))}})
       (fail "error.user.not.found"))))
 
-(defcommand cancel-application
+;;
+;; Cancel
+;;
+
+(defn- remove-app-links [id]
+  (mongo/remove-many :app-links {:link {$in [id]}}))
+
+(defcommand cancel-inforequest
   {:parameters [id]
    :roles      [:applicant :authority]
+   :notified   true
+   :on-success (notify :application-state-change)
+   :states     [:info]}
+  [{:keys [created] :as command}]
+  (update-application command
+    {$set {:modified created
+           :canceled created
+           :state    :canceled}})
+  (remove-app-links id)
+  (ok))
+
+(defcommand cancel-application
+  {:parameters [id]
+   :roles      [:applicant]
    :notified   true
    :on-success (notify :application-state-change)
    :states     [:draft :info :open :submitted]}
@@ -254,8 +275,37 @@
     {$set {:modified created
            :canceled created
            :state    :canceled}})
-  (mongo/remove-many :app-links {:link {$in [id]}})
+  (remove-app-links id)
   (ok))
+
+(defcommand cancel-application-authority
+  {:parameters [id text]
+   :roles      [:authority]
+   :notified   true
+   :on-success (notify :application-state-change)
+   :states     (action/all-states-but [:canceled :closed :answered]) }
+  [{:keys [created application] :as command}]
+  (update-application command
+    (util/deep-merge
+      (when (seq text)
+        (lupapalvelu.comment/comment-mongo-update
+          (:state application)
+          (str
+            (i18n/loc "application.canceled.text") ". "
+            (i18n/loc "application.canceled.reason") ": "
+            text)
+          {:type "application"}
+          (-> command :user :role)
+          false
+          (:user command)
+          nil
+          created))
+      {$set {:modified created
+             :canceled created
+             :state    :canceled}}))
+  (remove-app-links id)
+  (ok))
+
 
 (defcommand open-application
   {:parameters [id]
