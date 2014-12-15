@@ -95,7 +95,7 @@
             <span data-bind="ltext: 'inforequest.convertToApplication'"></span>
             <span class="icon send left-align"></span>
           </button>
-          <button data-bind="click: cancelApplication,  visible: $root.authorization.ok('cancel-application') || $root.authorization.ok('cancel-application-authority')"  data-test-id="inforequest-cancel-btn"  class="btn">
+          <button data-bind="click: cancelInforequest,  visible: $root.authorization.ok('cancel-inforequest')"  data-test-id="inforequest-cancel-btn"  class="btn">
             <span data-bind="ltext: 'inforequest.cancelInforequest'"></span>
             <span class="icon remove-grey left-align"></span>
           </button>
@@ -175,7 +175,6 @@
       </div>
 
     </div>
-
   </section>
 </body>
 </html>
