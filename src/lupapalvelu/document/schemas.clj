@@ -345,7 +345,7 @@
    {:name "9kk" :type :string :subtype :number :size "t" :label false}
    {:name "12kk" :type :string :subtype :number  :size "t" :label false}])
 
-(def muut-rakennushankeket-table {:name "muutHankkeet"
+(def muut-rakennushankkeet-table {:name "muutHankkeet"
                                   :type :table
                                   :repeating true
                                   :approvable true
@@ -353,15 +353,18 @@
                                   :body hanke-row
                                   })
 
+;(def henkilo-valitsin [{:name "userId" :type :personSelector :blacklist [:neighbor]}])
+(def tayta-omat-tiedot-button {:name "fillMyInfo" :type :fillMyInfoButton})
+
 (def tyonjohtaja-v2 (body
                       ilmoitus-hakemus-valitsin
                       kuntaroolikoodi-tyonjohtaja-v2
                       patevyysvaatimusluokka
                       vastattavat-tyotehtavat-tyonjohtaja
                       tyonjohtaja-hanketieto
-                      ; other projects -table (later?)
-                      muut-rakennushankeket-table
-                      henkilo-valitsin ; to be replaced with "fill out own info" -button?
+                      muut-rakennushankkeet-table
+                      tayta-omat-tiedot-button
+                      ;henkilo-valitsin ; to be replaced with "fill out own info" -button? ^
                       designer-basic))
 
 (def maksaja (body

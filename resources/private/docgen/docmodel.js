@@ -819,7 +819,37 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return span;
   }
 
+  function buildFillMyInfoButton(subSchema, model, path) {
+    console.log("path: ", path)
+    var myPath = path.join(".");
+    var $span = $(makeEntrySpan(subSchema, myPath))
+      .addClass("fill-my-info-button");
+
+    var myNs = path.slice(0, path.length - 1).join(".");
+    console.log("myns: ", myNs);
+
+    $("<button>", {
+      "class": "btn-primary",
+      text: loc("fillMyInfoButton"), // path/myPath?
+      click: function (e) {
+        console.log("set-user-to-document params: ", { id: self.appId, documentId: self.docId, userId: currentUser.id(), path: myNs, collection: self.getCollection() });
+        ajax
+          .command("set-user-to-document", { id: self.appId, documentId: self.docId, userId: currentUser.id(), path: myNs, collection: self.getCollection() })
+          .success(function () {
+            save(getEvent(e), function () { repository.load(self.appId); });
+          })
+          .call();
+        return false;
+      }
+    })
+    .appendTo($span);
+
+
+    return $span[0];
+  }
+
   function buildPersonSelector(subSchema, model, path) {
+    console.log("personSelector path:", path)
     var myPath = path.join(".");
     var span = makeEntrySpan(subSchema, myPath);
     span.className = span.className + " personSelector";
@@ -835,6 +865,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       var target = event.target;
       var userId = target.value;
       if (!_.isEmpty(userId)) {
+        console.log("userId:", userId)
         ajax
         .command("set-user-to-document", { id: self.appId, documentId: self.docId, userId: userId, path: myNs, collection: self.getCollection() })
         .success(function () {
@@ -928,6 +959,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     element: buildElement,
     buildingSelector: buildBuildingSelector,
     newBuildingSelector: buildNewBuildingSelector,
+    fillMyInfoButton: buildFillMyInfoButton,
     personSelector: buildPersonSelector,
     table: buildTableRow,
     unknown: buildUnknown

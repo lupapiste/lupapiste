@@ -11,10 +11,11 @@
 
 (defn default-values [{:keys [type default]}]
   (case (keyword type)
-    :radioGroup  default
-    :checkbox    false
-    :string      ""
-    :text        ""
+    :radioGroup       default
+    :checkbox         false
+    :string           ""
+    :text             ""
+    :fillMyInfoButton nil
     nil))
 
 (defn dummy-values [user-id {:keys [type subtype case name body] :as element}]
@@ -29,6 +30,7 @@
     :buildingSelector "001"
     :newBuildingSelector "1"
     :hetu             "210281-9988"
+    :fillMyInfoButton nil
     :string           (condp = (keyword subtype)
                         :maaraala-tunnus   "0003"
                         :email            "example@example.com"
