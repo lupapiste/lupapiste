@@ -1,1 +1,4 @@
 foreman.role: Työnjohtajan rooli
+foreman.task.new.title: Työnjohtaja kutsuttu
+foreman.task.missing.title: Työnjohtajaa ei ole vielä nimetty
+foreman.task.ok.title: Työnjohtaja nimetty
