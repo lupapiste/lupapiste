@@ -268,7 +268,7 @@
    :roles      [:authority]
    :notified   true
    :on-success (notify :application-state-change)
-   :states     (conj action/all-application-states :info)}
+   :states     (action/all-states-but [:canceled :closed :answered]) }
   [{:keys [created application] :as command}]
   (update-application command
     (util/deep-merge
