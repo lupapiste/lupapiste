@@ -24,39 +24,39 @@
 
 (facts "find-addresses-proxy"
   (let [r (proxy-request mikko :find-address :term "piiriniitynkatu 9, tampere")]
-    (fact r => [{:kind "address"
-                 :type "street-number-city"
-                 :street "Piiriniitynkatu"
-                 :number "9"
-                 :municipality "837"
-                 :name {:fi "Tampere" :sv "Tammerfors"}
-                 :location {:x "320371.953" :y "6825180.72"}}]))
+    (fact r =contains=> [{:kind "address"
+                          :type "street-number-city"
+                          :street "Piiriniitynkatu"
+                          :number "9"
+                          :municipality "837"
+                          :name {:fi "Tampere" :sv "Tammerfors"}}])
+    (fact (-> r first :location keys) => (just #{:x :y})))
   (let [r (proxy-request mikko :find-address :term "piiriniitynkatu")]
-    (fact r => [{:kind "address"
-                 :type "street"
-                 :street "Piiriniitynkatu"
-                 :number "1"
-                 :name {:fi "Tampere" :sv "Tammerfors"}
-                 :municipality "837"
-                 :location {:x "320531.265" :y "6825180.25"}}]))
+    (fact r =contains=> [{:kind "address"
+                          :type "street"
+                          :street "Piiriniitynkatu"
+                          :number "1"
+                          :name {:fi "Tampere" :sv "Tammerfors"}
+                          :municipality "837"}])
+    (fact (-> r first :location keys) => (just #{:x :y})))
   (let [response (get-addresses-proxy {:params {:query "piiriniitynkatu 9, tampere"}})
         r (json/decode (:body response) true)]
     (fact (:query r) => "piiriniitynkatu 9, tampere")
     (fact (:suggestions r) => ["Piiriniitynkatu 9, Tampere"])
-    (fact (:data r) => [{:street "Piiriniitynkatu",
-                         :number "9",
-                         :name {:fi "Tampere" :sv "Tammerfors"}
-                         :municipality "837"
-                         :location {:x "320371.953" :y "6825180.72"}}]))
+    (fact (:data r) =contains=> [{:street "Piiriniitynkatu",
+                                  :number "9",
+                                  :name {:fi "Tampere" :sv "Tammerfors"}
+                                  :municipality "837"}])
+    (fact (-> r :data first :location keys) => (just #{:x :y})))
   (let [response (get-addresses-proxy {:params {:query "piiriniitynkatu 19, tampere"}})
         r (json/decode (:body response) true)]
     (fact (:query r) => "piiriniitynkatu 19, tampere")
     (fact (:suggestions r) => ["Piiriniitynkatu 19, Tampere"])
-    (fact (:data r) => [{:street "Piiriniitynkatu",
-                         :number "19",
-                         :name {:fi "Tampere" :sv "Tammerfors"}
-                         :municipality "837"
-                         :location {:x "320187.869", :y "6825189.742"}}])))
+    (fact (:data r) =contains=> [{:street "Piiriniitynkatu",
+                                  :number "19",
+                                  :name {:fi "Tampere" :sv "Tammerfors"}
+                                  :municipality "837"}])
+    (fact (-> r :data first :location keys) => (just #{:x :y}))))
 
 (facts "point-by-property-id"
   (let [property-id "09100200990013"
@@ -67,7 +67,7 @@
           data (:data body)]
       (fact data => vector?)
       (fact (count data) => 1)
-      (fact (first data) => {:x "385628.416", :y "6672187.492"}))))
+      (fact (keys (first data)) => (just #{:x :y})))))
 
 (facts "property-id-by-point"
   (let [x 385648
