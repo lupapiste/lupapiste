@@ -15,13 +15,15 @@
     (let [result (doc-result (contains? propeties :link-permit-required) op)]
       (fact result => (doc-check truthy)))))
 
-(facts "check that correct operations requires linkPermit"
-  (fact (:ya-jatkoaika link-permit-required-operations) => truthy)
-  (fact (:tyonjohtajan-nimeaminen link-permit-required-operations) => truthy)
-  (fact (:suunnittelijan-nimeaminen link-permit-required-operations) => truthy)
-  (fact (:jatkoaika link-permit-required-operations) => truthy)
-  (fact (:aloitusoikeus link-permit-required-operations) => truthy)
-  (fact (count link-permit-required-operations) => 6))
+(facts "check that correct operations require a linkPermit"
+  (fact "operation names"
+    (every? link-permit-required-operations [:ya-jatkoaika
+                                             :tyonjohtajan-nimeaminen
+                                             :suunnittelijan-nimeaminen
+                                             :jatkoaika
+                                             :aloitusoikeus
+                                             :raktyo-aloit-loppuunsaat]) => truthy)
+  (fact "operations count" (count link-permit-required-operations) => 6))
 
 (defn- check-leaf [pair]
   (fact (count pair) => 2)
