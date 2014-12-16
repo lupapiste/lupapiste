@@ -178,7 +178,7 @@
    :roles       [:authority]
    :states      (action/all-states-but [:answered :sent :closed :canceled])}
   [{application :application {attachment-types :attachmentTypes} :data created :created}]
-  (if-let [attachment-ids (attachment/create-attachments application attachment-types created)]
+  (if-let [attachment-ids (attachment/create-attachments application attachment-types created true)]
     (ok :applicationId (:id application) :attachmentIds attachment-ids)
     (fail :error.attachment-placeholder)))
 

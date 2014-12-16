@@ -460,7 +460,7 @@
 
 (defn- make-attachments [created operation organization applicationState & {:keys [target]}]
   (for [[type-group type-id] (organization/get-organization-attachments-for-operation organization operation)]
-    (attachment/make-attachment created target true false applicationState operation {:type-group type-group :type-id type-id})))
+    (attachment/make-attachment created target true false false applicationState operation {:type-group type-group :type-id type-id})))
 
 (defn- schema-data-to-body [schema-data application]
   (keywordize-keys
