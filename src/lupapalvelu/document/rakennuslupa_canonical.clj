@@ -245,6 +245,7 @@
                                         "tyonjohtajan-nimeaminen" "Uuden ty\u00f6njohtajan nime\u00e4minen"
                                         "suunnittelijan-nimeaminen" "Uuden suunnittelijan nime\u00e4minen"
                                         "jatkoaika" "Jatkoaikahakemus"
+                                        "raktyo-aloit-loppuunsaat" "Jatkoaikahakemus"
                                         "aloitusoikeus" "Uusi aloitusoikeus"
                                         (get-kayttotapaus documents toimenpiteet)))
                       :asianTiedot (get-asian-tiedot documents)
@@ -255,7 +256,8 @@
                     canonical)
         canonical (if-not (or (= operation-name "tyonjohtajan-nimeaminen")
                             (= operation-name "suunnittelijan-nimeaminen")
-                            (= operation-name "jatkoaika"))
+                            (= operation-name "jatkoaika")
+                            (= operation-name "raktyo-aloit-loppuunsaat"))
                     (update-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia]
                       util/assoc-when
                       :rakennuspaikkatieto (get-bulding-places (:rakennuspaikka documents) application)

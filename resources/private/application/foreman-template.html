@@ -2,28 +2,67 @@
 <html>
 <body>
   <section class="page container">
+
     <script type="text/html" id="application-foreman-template">
-    <div>
-      <p data-bind="lhtml: 'help.AddForeman'"></p>
-      <ul class="invited-foremans" data-bind="foreach: foremanApplications" data-test-id="invited-foremans">
-        <li class="foreman">
-          <!-- ko if: $data.email -->
-          <span class="foreman-name" data-bind="fullName: $data"></span>
-          <span class="foreman-email" data-bind="text: $data.email ? '(' + $data.email + ')' : ''" data-test-id="foreman-email"></span>
-          <!-- /ko -->
-          <!-- ko ifnot: $data.email -->
-          <span class="foreman-name" data-bind="ltext: 'invite.foreman.notSent'"></span>
-          <span class="foreman-email"></span>
-          <!-- /ko -->
-          <a data-bind="attr: {href: '#!/application/' + $data.id}">
-            <span class="foreman-application" data-bind="text: $data.id"></span>
-          </a>
-          <span class="foreman-state" data-bind="ltext: $data.state"></span>
-        </li>
-      </ul>
-      <button class="btn-primary" data-bind="click: $data.inviteForeman, ltext: 'application.parties.addForeman'" data-test-id="invite-foreman-button"></button>
-    </div>
-    </div>
-  </script>
+      <div>
+        <p data-bind="lhtml: 'help.AddForeman'"></p>
+        <ul class="invited-foremans" data-bind="foreach: foremanApplications" data-test-id="invited-foremans">
+          <li class="foreman">
+            <span class="foreman-name" data-bind="fullName: $data"></span>
+            <span class="foreman-email" data-bind="text: $data.email ? '(' + $data.email + ')' : ''" data-test-id="foreman-email"></span>
+            <a data-bind="attr: {href: '#!/application/' + $data.id}">
+              <span class="foreman-application" data-bind="text: $data.id"></span>
+            </a>
+            <span class="foreman-state" data-bind="ltext: $data.state"></span>
+          </li>
+        </ul>
+        <button class="btn-primary" data-bind="click: $data.inviteForeman, ltext: 'application.parties.addForeman'" data-test-id="invite-foreman-button"></button>
+      </div>
+      </div>
+    </script>
+
+    <script type="text/html" id="application-foreman-tasks-template">
+      <div>
+        <table data-test-id="tasks-foreman" class="tasks-foreman" data-bind="with: $data.foremanTasks">
+          <thead>
+            <tr><td colspan="4"><h2 data-bind="text: $data.name" style="padding-top:1em"></h2></td></tr>
+            <tr>
+              <th data-bind="ltext: 'application.taskState'"></th>
+              <th colspan="3" data-bind="ltext: 'application.taskDisplayName'"></th>
+          </thead>
+          <tbody data-bind="foreach: $data.foremans">
+            <tr data-bind="attr: {'data-test-name': $data.name}">
+              <td class="task-state">
+                <span data-bind="attr: {'class': statusName + ' icon', 'data-test-state': $data.state, 'title': loc(['foreman', 'task', statusName, 'title'])}"></span>
+              </td>
+              <td>
+                <span data-bind="text: $data.name"></span>
+              </td>
+              <td data-bind="attr: {'data-test-col-name': 'foreman-name-or-invite'}">
+                <!-- ko if: $data.id -->
+                <span data-bind="fullName: $data"></span>
+                <span data-test-id="tasks-foreman-email" data-bind="text: $data.email ? '(' + $data.email + ')' : ''"></span>
+                <!-- /ko -->
+                <!-- ko ifnot: $data.id -->
+                <a class="add-foreman" data-bind="click: function() { $parents[1].inviteForeman($data.taskId); }">
+                  <span data-bind="ltext: 'application.parties.addForeman'"></span>
+                </a>
+                <!-- /ko -->
+              </td>
+              <td>
+                <a data-bind="attr: {href: '#!/application/' + $data.id}">
+                  <span class="foreman-application" data-bind="text: $data.id"></span>
+                </a>
+                <span class="foreman-state" data-bind="visible: $data.state, ltext: $data.state"></span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <button class="btn btn-primary" data-test-id="invite-other-foreman-button" data-bind="ltext: 'application.parties.addOtherForeman', click: $data.inviteForeman"></button>
+        <button class="btn btn-primary" data-test-id="invite-substitute-foreman-button" data-bind="ltext: 'application.parties.addSubstituteForeman', click: $data.inviteForeman"></button>
+      </div>
+    </script>
+
+  </section>
 </body>
 </html>
