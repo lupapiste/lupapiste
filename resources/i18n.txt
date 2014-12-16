@@ -36,4 +36,4 @@ osapuoli.muutHankkeet.vaihe.K: K
 unit.kuukautta: kuukautta
 unit.tuntiaviikko: tuntia / viikko
 
-fillMyInfoButton: Täytä omilla tiedoilla
+fillInfoButton: Täytä omilla tiedoilla

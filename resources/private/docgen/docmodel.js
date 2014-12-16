@@ -820,32 +820,26 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   }
 
   function buildFillMyInfoButton(subSchema, model, path) {
-    console.log("path: ", path)
-    var myPath = path.join(".");
-    var $span = $(makeEntrySpan(subSchema, myPath))
-      .addClass("fill-my-info-button");
-
+    var span = makeEntrySpan(subSchema, path.join("."));
     var myNs = path.slice(0, path.length - 1).join(".");
-    console.log("myns: ", myNs);
 
-    $("<button>", {
-      "class": "btn-primary",
-      text: loc("fillMyInfoButton"), // path/myPath?
-      click: function (e) {
-        console.log("set-user-to-document params: ", { id: self.appId, documentId: self.docId, userId: currentUser.id(), path: myNs, collection: self.getCollection() });
-        ajax
-          .command("set-user-to-document", { id: self.appId, documentId: self.docId, userId: currentUser.id(), path: myNs, collection: self.getCollection() })
-          .success(function () {
-            repository.load(self.appId);
-          })
-          .call();
-        return false;
-      }
-    })
-    .appendTo($span);
+    var params = {
+      id: self.appId,
+      documentId: self.docId,
+      userId: currentUser.id(),
+      path: myNs,
+      collection: self.getCollection()
+    };
 
+    var paramsStr = _.map(_.keys(params), function(key) {
+      return key + ": " + key;
+    }).join(", ");
 
-    return $span[0];
+    $("<fill-info-button params=\"" + paramsStr + "\">")
+      .appendTo($(span))
+      .applyBindings(params);
+
+    return span;
   }
 
   function buildPersonSelector(subSchema, model, path) {
