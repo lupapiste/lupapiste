@@ -836,7 +836,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         ajax
           .command("set-user-to-document", { id: self.appId, documentId: self.docId, userId: currentUser.id(), path: myNs, collection: self.getCollection() })
           .success(function () {
-            save(getEvent(e), function () { repository.load(self.appId); });
+            repository.load(self.appId);
           })
           .call();
         return false;
