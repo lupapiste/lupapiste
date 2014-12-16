@@ -346,8 +346,8 @@
 
 (defn- update-link-permit-data-with-kuntalupatunnus-from-verdict [application]
   (let [link-permit-app-id (-> application :linkPermitData first :id)
-        verdicts (domain/get-application-no-access-checking link-permit-app-id)
-        kuntalupatunnus (-> verdicts :verdicts first :kuntalupatunnus)]
+        link-permit-app (domain/get-application-no-access-checking link-permit-app-id)
+        kuntalupatunnus (-> link-permit-app :verdicts first :kuntalupatunnus)]
     (if kuntalupatunnus
       (-> application
          (assoc-in [:linkPermitData 0 :lupapisteId] link-permit-app-id)
