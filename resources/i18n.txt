@@ -37,4 +37,10 @@ unit.kuukautta: kuukautta
 unit.tuntiaviikko: tuntia / viikko
 
 fillInfoButton: Täytä omilla tiedoilla
-tyonjohtaja.hyvaksynta: Hyväksytään vain tähän hankkeeseen
+
+tyonjohtaja.historia.hyvaksynta: Hyväksytään vain tähän hankkeeseen
+tyonjohtaja.historia.otsikko: Työnjohtajan historia
+tyonjohtaja.historia.kunta: Kunta
+tyonjohtaja.historia.vaativuus: Vaativuus
+tyonjohtaja.historia.vastuu: Vastuu
+tyonjohtaja.historia.hanke: Hanke
