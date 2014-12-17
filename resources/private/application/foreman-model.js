@@ -2,7 +2,7 @@ LUPAPISTE.ForemanModel = function() {
   "use strict";
   var self = this;
 
-  self.application = null;
+  self.application = ko.observable();
   self.email = ko.observable();
   self.error = ko.observable();
   self.processing = ko.observable();
@@ -16,6 +16,10 @@ LUPAPISTE.ForemanModel = function() {
   self.foremanRoles = ko.observable(LUPAPISTE.config.foremanRoles);
   self.selectedRole = ko.observable();
   self.taskId = ko.observable();
+  self.isVisible = ko.computed(function() {
+    return util.getIn(self, ["application", "permitType"]) === "R" &&
+      util.getIn(self, ["application", "operations", 0, "name"]) !== "tyonjohtajan-nimeaminen";
+  });
 
   self.refresh = function(application) {
     function loadForemanApplications(id) {
@@ -23,7 +27,7 @@ LUPAPISTE.ForemanModel = function() {
       ajax
         .query("foreman-applications", {id: id})
         .success(function(data) {
-          var foremanTasks = _.where(self.application.tasks, { "schema-info": { "name": "task-vaadittu-tyonjohtaja" } });
+          var foremanTasks = _.where(self.application().tasks, { "schema-info": { "name": "task-vaadittu-tyonjohtaja" } });
           var foremans = [];
 
           _.forEach(data.applications, function(app) {
@@ -75,7 +79,7 @@ LUPAPISTE.ForemanModel = function() {
         .call();
     }
 
-    self.application = application;
+    self.application(application);
 
     _.defer(function() {
       loadForemanApplications(application.id);
@@ -85,7 +89,7 @@ LUPAPISTE.ForemanModel = function() {
   self.inviteForeman = function(taskId) {
     if (_.isString(taskId)) {
       self.taskId(taskId);
-      var foremanTask = _.find(self.application.tasks, { "id": taskId });
+      var foremanTask = _.find(self.application().tasks, { "id": taskId });
       if (foremanTask && foremanTask.taskname) {
         self.selectedRole(foremanTask.taskname.toLowerCase());
       }
@@ -128,7 +132,7 @@ LUPAPISTE.ForemanModel = function() {
 
     function createApplication() {
       // 2. create "tyonjohtajan ilmoitus" application
-      ajax.command("create-foreman-application", { "id": self.application.id,
+      ajax.command("create-foreman-application", { "id": self.application().id,
                                                    "taskId": self.taskId() ? self.taskId() : "",
                                                    "foremanRole": self.selectedRole() ? self.selectedRole() : "" })
         .processing(self.processing)
@@ -153,7 +157,7 @@ LUPAPISTE.ForemanModel = function() {
 
     // 1. invite foreman to current application
     if (self.email()) {
-      inviteToApplication(self.application.id, createApplication);
+      inviteToApplication(self.application().id, createApplication);
     } else {
       createApplication();
     }
@@ -161,8 +165,8 @@ LUPAPISTE.ForemanModel = function() {
   };
 
   hub.subscribe({type: "dialog-close", id: "dialog-invite-foreman"}, function() {
-    if (self.application && self.finished()) {
-      repository.load(self.application.id);
+    if (self.application() && self.finished()) {
+      repository.load(self.application().id);
     }
   });
 };
