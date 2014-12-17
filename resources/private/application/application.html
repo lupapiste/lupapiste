@@ -380,7 +380,7 @@
             </div>
           </div>
 
-          <!-- ko if: $root.application.permitType() === "R" -->
+          <!-- ko if: $root.foreman.isVisible -->
           <div data-bind="if: features.enabled('foreman')">
             <div class="feature">
               <span class="legend">Tyonjohtajan nimeaminen</span>
