@@ -822,10 +822,19 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   function buildAuthorityAccept(subSchema, model, path) {
     var span = makeEntrySpan(subSchema, path.join("."));
 
-    $("<authority-accept-fields>")
+    var params = {
+      applicationId: self.appId
+    };
+    
+    // TODO: move to function
+    var paramsStr = _.map(_.keys(params), function(key) {
+      return key + ": " + key;
+    }).join(", ");
+    
+    $("<authority-accept-fields params=\"" + paramsStr + "\">")
       .addClass('form-table')
       .appendTo($(span))
-      .applyBindings();
+      .applyBindings(params);
 
     return span;
   }

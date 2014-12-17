@@ -142,6 +142,22 @@
    :auth (:auth application)
    :documents (filter #(= (get-in % [:schema-info :name]) "tyonjohtaja") (:documents application))})
 
+(defquery foreman-history
+  {:roles            [:applicant :authority] ; TODO: Needs to be restricted to only authority + specific extra auth roles
+   :states           action/all-states
+   :extra-auth-roles [:any]
+   :parameters       [:id]}
+  [{application :application user :user :as command}]
+  (if application
+    (let []
+
+      (ok :projects [{:municipality "Helsinki" :difficulty "A" :jobDescription "Vastaava työnjohtaja" :operation "Asuinrakennuksen rakentaminen"}
+                   {:municipality "Helsinki" :difficulty "A" :jobDescription "Vastaava työnjohtaja" :operation "Asuinrakennuksen rakentaminen"}
+                   {:municipality "Helsinki" :difficulty "A" :jobDescription "Vastaava työnjohtaja" :operation "Asuinrakennuksen rakentaminen"}
+                   {:municipality "Tampere" :difficulty "A" :jobDescription "Vastaava työnjohtaja" :operation "Asuinrakennuksen rakentaminen"}]))
+    (fail :error.not-found))
+  )
+
 (defquery foreman-applications
   {:roles            [:applicant :authority]
    :states           action/all-states

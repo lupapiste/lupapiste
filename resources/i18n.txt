@@ -37,7 +37,6 @@ unit.kuukautta: kuukautta
 unit.tuntiaviikko: tuntia / viikko
 
 fillInfoButton: Täytä omilla tiedoilla
-tyonjohtaja.hyvaksynta: Hyväksytään vain tähän hankkeeseen
 
 osapuoli.tyonjohtaja.vastattavatTyotehtavat.ivLaitoksenAsennustyo: Iv-laitoksen asennustyö
 osapuoli.tyonjohtaja.vastattavatTyotehtavat.ivLaitoksenKorjausJaMuutostyo: Iv-laitoksen korjaus- ja muutostyö
@@ -67,3 +66,9 @@ osapuoli.tyonjohtaja.vastattavatTyotehtavat.muutostyo: Muutostyö
 osapuoli.tyonjohtaja.vastattavatTyotehtavat.hissienJalkiasennus: Hissien jälkiasennus
 osapuoli.tyonjohtaja.vastattavatTyotehtavat.vesikatonKorjaustyo: Vesikaton korjaustyö
 osapuoli.tyonjohtaja.vastattavatTyotehtavat.pihamaajarjestelyt: Pihamaajärjestelyt
+tyonjohtaja.historia.hyvaksynta: Hyväksytään vain tähän hankkeeseen
+tyonjohtaja.historia.otsikko: Työnjohtajan historia
+tyonjohtaja.historia.kunta: Kunta
+tyonjohtaja.historia.vaativuus: Vaativuus
+tyonjohtaja.historia.vastuu: Vastuu
+tyonjohtaja.historia.hanke: Hanke
