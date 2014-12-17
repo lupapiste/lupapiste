@@ -285,7 +285,7 @@
    :applicationState applicationState
    :state :requires_user_action
    :target target
-   :required required?
+   :required required?       ;; true if the attachment is added from from template along with the operation, or when attachment is requested by authority
    :requested-by-authority requested-by-authority?
    :not-needed false
    :op op
