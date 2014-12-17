@@ -144,7 +144,7 @@
       // Operations
       applicationModel.operationsCount(_.map(_.countBy(app.operations, "name"), function(v, k) { return {name: k, count: v}; }));
 
-      attachmentsTab.refresh(applicationModel);
+      attachmentsTab.refresh(applicationModel, authorizationModel);
 
       // Statements
       requestForStatementModel.setApplicationId(app.id);

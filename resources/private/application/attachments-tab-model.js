@@ -40,8 +40,9 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
     self.showHelp(!self.showHelp());
   };
 
-  self.refresh = function(appModel) {
+  self.refresh = function(appModel, authorizationModel) {
     self.appModel = appModel;
+    self.authorizationModel = authorizationModel;
     var rawAttachments = ko.mapping.toJS(appModel.attachments);
 
     var preAttachments = getPreAttachments(rawAttachments);
