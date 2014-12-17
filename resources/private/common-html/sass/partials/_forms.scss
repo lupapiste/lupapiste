@@ -94,10 +94,15 @@ input[readonly], textarea[readonly] {
   width: 112px;
   min-height: 18px;
   display: none;
-  top: 0px;
-  right: 0px;
-  padding: 0 0 $marginS $marginL;
+  top: 20px;
+  right: 8px;
+  padding: $marginS $marginS $marginS $marginL;
   @include spite-bg;
+  background-color: white;
+  border: 1px solid $lp-light-grey;
+  border-radius: 4px;
+  box-shadow: 1px 1px 2px $lp-dark-grey;
+
 }
 
 .save-indicator {
@@ -131,15 +136,15 @@ input[readonly], textarea[readonly] {
 }
 
 .form-input-saved {
-  background-position: 4px -2496px;
+  background-position: 4px -2490px;
 }
 .form-input-warn
 {
-  background-position: 4px -3196px;
+  background-position: 4px -3190px;
 }
 .form-input-err
 {
-  background-position: 4px -2396px;
+  background-position: 4px -2390px;
 }
 
 
