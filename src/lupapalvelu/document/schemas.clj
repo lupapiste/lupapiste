@@ -322,6 +322,38 @@
                                              {:name "IV-ty\u00F6njohtaja" :i18nkey "osapuoli.tyonjohtaja.kuntaRoolikoodi.IV-ty\u00f6njohtaja"}
                                              {:name "erityisalojen ty\u00F6njohtaja" :i18nkey "osapuoli.tyonjohtaja.kuntaRoolikoodi.erityisalojen ty\u00f6njohtaja"}]}])
 
+(def vastattavat-tyotehtavat-tyonjohtaja-v2 [{:name "vastattavatTyotehtavat"
+                                              :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat._group_label"
+                                              :type :group
+                                              :layout :vertical
+                                              :body [{:name "ivLaitoksenAsennustyo" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.ivLaitoksenAsennustyo" :type :checkbox}
+                                                     {:name "ivLaitoksenKorjausJaMuutostyo" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.ivLaitoksenKorjausJaMuutostyo" :type :checkbox}
+                                                     {:name "ivLaitoksenAsennustyoIvLaitoksenKorjausJaMuutostyo" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.ivLaitoksenAsennustyoIvLaitoksenKorjausJaMuutostyo" :type :checkbox}
+                                                     {:name "ivLaitoksenKorjausJaMuutostyoIvLaitoksenAsennustyo" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.ivLaitoksenKorjausJaMuutostyoIvLaitoksenAsennustyo" :type :checkbox}
+                                                     {:name "ivLaitoksenAsennustyo12Krs" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.ivLaitoksenAsennustyo12Krs" :type :checkbox}
+                                                     {:name "ivLaitoksenAsennustyo" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.ivLaitoksenAsennustyo" :type :checkbox}
+                                                     {:name "sisapuolinenKvvTyo" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.sisapuolinenKvvTyo" :type :checkbox}
+                                                     {:name "ulkopuolinenKvvTyo" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.ulkopuolinenKvvTyo" :type :checkbox}
+                                                     {:name "sukitus" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.sukitus" :type :checkbox}
+                                                     {:name "maanrakennusKvvUlkopuoli" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.maanrakennusKvvUlkopuoli" :type :checkbox}
+                                                     {:name "rakennuksenMuutosJaKorjaustyo" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.rakennuksenMuutosJaKorjaustyo" :type :checkbox}
+                                                     {:name "uudisrakennustyoMaanrakennustoineen" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.uudisrakennustyoMaanrakennustoineen" :type :checkbox}
+                                                     {:name "uudisrakennustyoIlmanMaanrakennustoita" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.uudisrakennustyoIlmanMaanrakennustoita" :type :checkbox}
+                                                     {:name "linjasaneeraus" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.linjasaneeraus" :type :checkbox}
+                                                     {:name "maanrakennustyot" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.maanrakennustyot" :type :checkbox}
+                                                     {:name "rakennuksenPurkaminen" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.rakennuksenPurkaminen" :type :checkbox}
+                                                     {:name "paalutus" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.paalutus" :type :checkbox}
+                                                     {:name "kayttotarkoituksenMuutos" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.kayttotarkoituksenMuutos" :type :checkbox}
+                                                     {:name "markatilamuutos" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.markatilamuutos" :type :checkbox}
+                                                     {:name "taydentavatRakennustyot" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.taydentavatRakennustyot" :type :checkbox}
+                                                     {:name "vesijohtojenUusiminenJaViemareidenPinnoittaminen" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.vesijohtojenUusiminenJaViemareidenPinnoittaminen" :type :checkbox}
+                                                     {:name "peruslaatta" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.peruslaatta" :type :checkbox}
+                                                     {:name "alaslaskukatotLattiavalujaJaSisatyot" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.alaslaskukatotLattiavalujaJaSisatyot" :type :checkbox}
+                                                     {:name "hissinRakentaminen" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.hissinRakentaminen" :type :checkbox}
+                                                     {:name "muutostyo" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.muutostyo" :type :checkbox}
+                                                     {:name "hissienJalkiasennus" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.hissienJalkiasennus" :type :checkbox}
+                                                     {:name "vesikatonKorjaustyo" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.vesikatonKorjaustyo" :type :checkbox}
+                                                     {:name "pihamaajarjestelyt" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.pihamaajarjestelyt" :type :checkbox}]}])
 
 (def tyonjohtaja-hanketieto {:name "tyonjohtajaHanketieto" :type :group
                              :body [{:name "taysiaikainenOsaaikainen" :type :radioGroup :body [{:name "taysiaikainen"} {:name "osaaikainen"}] :default "taysiaikainen"}
@@ -362,7 +394,7 @@
                       ilmoitus-hakemus-valitsin
                       kuntaroolikoodi-tyonjohtaja-v2
                       patevyysvaatimusluokka
-                      vastattavat-tyotehtavat-tyonjohtaja
+                      vastattavat-tyotehtavat-tyonjohtaja-v2
                       tyonjohtaja-hanketieto
                       muut-rakennushankkeet-table
                       tayta-omat-tiedot-button
