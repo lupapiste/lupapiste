@@ -372,7 +372,15 @@
             </div>
           </div>
           <p data-bind="lhtml: 'required.field.desc'"></p>
-          <!-- ko if: $root.application.permitType() === "R" -->
+
+          <!-- docgen generated content: -->
+          <div class="application_section">
+            <div id="partiesDocgen" class="docgen-content">
+              <!-- This is where generated document will be placed. -->
+            </div>
+          </div>
+
+          <!-- ko if: $root.foreman.isVisible -->
           <div data-bind="if: features.enabled('foreman')">
             <div class="feature">
               <span class="legend">Tyonjohtajan nimeaminen</span>
@@ -390,13 +398,6 @@
             </div>
           </div>
           <!-- /ko -->
-
-          <!-- docgen generated content: -->
-          <div class="application_section">
-            <div id="partiesDocgen" class="docgen-content">
-              <!-- This is where generated document will be placed. -->
-            </div>
-          </div>
 
           <button
               data-bind="click: $parent.addPartyModel.init, ltext: 'application.addParty', visible: $parent.authorization.ok('create-doc')"
