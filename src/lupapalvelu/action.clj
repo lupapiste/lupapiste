@@ -248,7 +248,7 @@
       unauthorized)))
 
 (defn- not-authorized-to-application [command application]
-  (when-let [id (-> command :data :id)]
+  (when (-> command :data :id)
     (if-not application
       unauthorized
       (or
