@@ -4199,11 +4199,15 @@ span.icon_clear:before {
   content: "]";
 }
 
-/* line 595, ../sass/views/_application.scss */
+/* line 594, ../sass/views/_application.scss */
+.organization-links {
+  margin-bottom: 12px;
+}
+/* line 596, ../sass/views/_application.scss */
 .organization-links a {
   color: #333333;
 }
-/* line 597, ../sass/views/_application.scss */
+/* line 598, ../sass/views/_application.scss */
 .organization-links a:active, .organization-links a:visited, .organization-links a:hover {
   color: #333333;
 }
