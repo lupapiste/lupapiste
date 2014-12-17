@@ -283,13 +283,12 @@
           </div>
           <div style="width: 60%">
             <div class="organization-links" data-bind="visible: organizationLinks() && organizationLinks().length">
-              <div data-bind="ltext: 'organization.links'"></div>
-                <ul data-bind="foreach: organizationLinks">
-                  <li>
-                    <a data-bind="text: name[loc.getCurrentLanguage()], attr: {href: url}" href="#" target="_blank"></a>
-                  </li>
-                </ul>
-              </div>
+              <h3 data-bind="ltext: 'organization.links'"></h3>
+              <ul data-bind="foreach: organizationLinks">
+                <li>
+                  <a data-bind="text: name[loc.getCurrentLanguage()], attr: {href: url}" href="#" target="_blank"></a>
+                </li>
+              </ul>
             </div>
             <div data-bind="if: $root.authorization.ok('add-operation')">
               <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.AddOperations'"></p>
