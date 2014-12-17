@@ -2525,6 +2525,11 @@ table.attachments-template-table td.attachment-group-select a {
   padding-bottom: 0;
 }
 
+/* line 181, ../sass/partials/_modal.scss */
+#dialog-cancel-application div.application-cancel-text-content p {
+  margin-bottom: 0;
+}
+
 /*
   Bootstrap sets img width to 100% and that messes GoogleMaps and OpenLayers.
 */

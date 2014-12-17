@@ -174,7 +174,7 @@
    :data {:kiinteisto {:tilanNimi {:value "Hiekkametsa"}
                        :maaraalaTunnus {:value ""}}
           :hallintaperuste {:value "oma"}
-          :kaavanaste {:value "yleis"}}})
+          :kaavatilanne {:value "oikeusvaikutteinen yleiskaava"}}})
 
 (def- common-rakennus
   {:rakennuksenOmistajat {:0 {:_selected {:value "henkilo"}
@@ -714,6 +714,39 @@
         rakennus (get-rakennus toimenpide {:id "123" :created nil} (tools/unwrapped application-rakennuslupa))]
     (fact (-> rakennus :rakennuksenTiedot :liitettyJatevesijarjestelmaanKytkin) => true)))
 
+(facts ":Rakennuspaikka with :kaavanaste/:kaavatilanne"
+  (let [rakennuspaikka (:rakennuspaikka (documents-by-type-without-blanks (tools/unwrapped application-rakennuslupa)))]
+
+    (fact "When kaavatilanne is set, also kaavanaste is added to canonical"
+      (let [result (first (get-bulding-places rakennuspaikka application-rakennuslupa))]
+
+        (get-in result [:Rakennuspaikka :kaavatilanne]) => truthy
+        (get-in result [:Rakennuspaikka :kaavanaste]) => truthy))
+
+    (fact "If only kaavanaste is set, kaavatilanne is not in canonical"
+      (let [rakennuspaikka (assoc-in
+                             (dissoc-in (first rakennuspaikka) [:data :kaavatilanne])
+                             [:data :kaavanaste]
+                             "yleis")
+            result (first (get-bulding-places [rakennuspaikka] application-rakennuslupa))]
+
+        (get-in result [:Rakennuspaikka :kaavanaste]) => truthy
+        (get-in result [:Rakennuspaikka :kaavatilanne]) => falsey))
+
+    (fact "When no mapping from kaavatilanne value to kaavanaste exists, kaavanaste should be 'ei tiedossa'"
+      (let [rakennuspaikka (assoc-in (first rakennuspaikka )[:data :kaavatilanne] "maakuntakaava")
+            result (first (get-bulding-places [rakennuspaikka] application-rakennuslupa))]
+
+        (get-in result [:Rakennuspaikka :kaavanaste]) => "ei tiedossa"))
+
+    (fact "When kaavanaste/kaavatilanne are not in rakennuspaikka, they are not in canonical either"
+      (let [rakennuspaikka (dissoc-in rakennuspaikka [:Rakennuspaikka :kaavatilanne])
+            result (first (get-bulding-places [rakennuspaikka] application-rakennuslupa))]
+
+        (get-in result [:Rakennuspaikka]) => truthy
+        (get-in result [:Rakennuspaikka :kaavanaste]) => falsey
+        (get-in result [:Rakennuspaikka :kaavatilanne]) => falsey))))
+
 (fl/facts* "Canonical model is correct"
   (let [canonical (application-to-canonical application-rakennuslupa "sv") => truthy
         rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
@@ -767,6 +800,7 @@
         RakennuspaikanKiinteistotieto (:RakennuspaikanKiinteisto rakennuspaikanKiinteistotieto) => truthy
         kiinteistotieto (:kiinteistotieto RakennuspaikanKiinteistotieto) => truthy
         Kiinteisto (:Kiinteisto kiinteistotieto) => truthy
+        kaavatilanne (:kaavatilanne rakennuspaikka) => truthy
         toimenpiteet(:toimenpidetieto rakennusvalvontaasia) => truthy
         toimenpide (:Toimenpide (nth toimenpiteet 1)) => truthy
         muu-muutostyo (:Toimenpide (nth toimenpiteet 0)) => truthy
@@ -789,9 +823,7 @@
         muuTunnustieto (:muuTunnustieto LupaTunnus) => truthy
         MuuTunnus (:MuuTunnus muuTunnustieto) => truthy
         kasittelynTilatieto (:kasittelynTilatieto rakennusvalvontaasia) => truthy]
-
     ;(clojure.pprint/pprint canonical)
-
     (fact "contains nil" (contains-value? canonical nil?) => falsey)
     (fact "paasuunnitelija" paasuunnitelija => (contains {:suunnittelijaRoolikoodi "p\u00e4\u00e4suunnittelija"}))
     (fact "Osapuolien maara" (+ (count suunnittelijat) (count tyonjohtajat) (count (:osapuolitieto osapuolet))) => 8)
@@ -801,6 +833,9 @@
     (fact "maaraalaTunnus" (:maaraAlaTunnus Kiinteisto) => nil)
     (fact "kokotilakytkin" (:kokotilaKytkin RakennuspaikanKiinteistotieto) => truthy)
     (fact "hallintaperuste" (:hallintaperuste RakennuspaikanKiinteistotieto) => "oma")
+    (facts "Kaavatilanne"
+      (fact "is 'oikeusvaikutteinen yleiskaava'" kaavatilanne => "oikeusvaikutteinen yleiskaava")
+      (fact "mapping has added correct :kaavanaste to canonical" (:kaavanaste rakennuspaikka) => "yleis"))
 
     (fact "Toimenpidetieto"  (count toimenpiteet) => 5)
     (fact "rakentajaTyyppi" (:rakentajatyyppi rakennus) => "muu")

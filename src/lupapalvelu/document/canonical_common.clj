@@ -475,23 +475,42 @@
   (if (= value to_compare) new_val value))
 
 
+
+(def kaavatilanne-to-kaavanaste-mapping
+  {"oikeusvaikutteinen yleiskaava" "yleis"
+   "asemakaava" "asema"
+   "ranta-asemakaava" "ranta"
+   "ei kaavaa" "ei kaavaa"})
+
 (defn get-bulding-places [docs application]
   (for [doc docs
         :let [rakennuspaikka (:data doc)
               kiinteisto (:kiinteisto rakennuspaikka)
-              id (:id doc)]]
-    {:Rakennuspaikka
-     {:yksilointitieto id
-      :alkuHetki (to-xml-datetime (now))
-      :kaavanaste (change-value-to-when (-> rakennuspaikka :kaavanaste) "eiKaavaa" "ei kaavaa")
-      :rakennuspaikanKiinteistotieto {:RakennuspaikanKiinteisto
-                                      {:kokotilaKytkin (s/blank? (-> kiinteisto :maaraalaTunnus))
-                                       :hallintaperuste (-> rakennuspaikka :hallintaperuste)
-                                       :kiinteistotieto {:Kiinteisto (merge {:tilannimi (-> kiinteisto :tilanNimi)
-                                                                             :kiinteistotunnus (:propertyId application)
-                                                                             :rantaKytkin (true? (-> kiinteisto :rantaKytkin))}
-                                                         (when (-> kiinteisto :maaraalaTunnus)
-                                                           {:maaraAlaTunnus (str "M" (-> kiinteisto :maaraalaTunnus))}))}}}}}))
+              id (:id doc)
+              kaavatilanne (-> rakennuspaikka :kaavatilanne)
+              kaavanaste (change-value-to-when (-> rakennuspaikka :kaavanaste) "eiKaavaa" "ei kaavaa")
+              rakennuspaikka-map {:Rakennuspaikka
+                                  {:yksilointitieto id
+                                   :alkuHetki (to-xml-datetime (now))
+                                   :rakennuspaikanKiinteistotieto
+                                   {:RakennuspaikanKiinteisto
+                                    {:kokotilaKytkin (s/blank? (-> kiinteisto :maaraalaTunnus))
+                                     :hallintaperuste (-> rakennuspaikka :hallintaperuste)
+                                     :kiinteistotieto
+                                     {:Kiinteisto
+                                      (merge {:tilannimi (-> kiinteisto :tilanNimi)
+                                              :kiinteistotunnus (:propertyId application)
+                                              :rantaKytkin (true? (-> kiinteisto :rantaKytkin))}
+                                        (when (-> kiinteisto :maaraalaTunnus)
+                                          {:maaraAlaTunnus (str "M" (-> kiinteisto :maaraalaTunnus))}))}}}}}
+              kaavatieto (merge
+                           (when kaavanaste {:kaavanaste kaavanaste})
+                           (when kaavatilanne
+                             (merge
+                               {:kaavatilanne kaavatilanne}
+                               (when-not kaavanaste
+                                 {:kaavanaste (or (kaavatilanne-to-kaavanaste-mapping kaavatilanne) "ei tiedossa")}))))]]
+    (update-in rakennuspaikka-map [:Rakennuspaikka] merge kaavatieto)))
 
 ;; TODO lupatunnus type is always kuntalupatunnus?
 (defn get-viitelupatieto [link-permit-data]

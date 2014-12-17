@@ -83,9 +83,9 @@ Application is shown after login
 Sonja cancels the application
   Sonja logs in
   Open application  ${appname}  ${propertyId}
-  Wait Until  Element should be enabled  xpath=//*[@data-test-id='application-cancel-btn']
-  Click enabled by test id  application-cancel-btn
-  Confirm  dynamic-yes-no-confirm-dialog
+  Wait Until  Element should be enabled  xpath=//*[@data-test-id='application-cancel-authority-btn']
+  Click enabled by test id  application-cancel-authority-btn
+  Confirm  dialog-cancel-application
 
 
 *** Keywords ***
