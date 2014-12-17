@@ -590,3 +590,12 @@
     }
   }
 }
+
+.organization-links {
+  a {
+    color: $color-text;
+    &:active, &:visited, &:hover {
+      color: $color-text;
+    }
+  }
+}
