@@ -825,14 +825,14 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var params = {
       applicationId: self.appId
     };
-    
+
     // TODO: move to function
     var paramsStr = _.map(_.keys(params), function(key) {
       return key + ": " + key;
     }).join(", ");
-    
+
     $("<authority-accept-fields params=\"" + paramsStr + "\">")
-      .addClass('form-table')
+      .addClass("form-table")
       .appendTo($(span))
       .applyBindings(params);
 
@@ -1069,6 +1069,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         var div = document.createElement("div");
         div.className = "form-table";
         var table = document.createElement("table");
+        table.id = "table-" + subSchema.name;
         var tbody = document.createElement("tbody");
         table.appendChild(createTableHeader(models, myPath.join(".")));
         _.each(elements, function(element) {
@@ -1102,7 +1103,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       };
 
       var tableAppender = function () {
-        var parent$ = $(this).closest(".accordion-fields").find("tbody");
+        var parent$ = $(this).closest(".accordion-fields").find("#" + "table-" + subSchema.name + " tbody");
         var count = parent$.find("*[data-repeating-id='" + repeatingId + "']").length;
         while (parent$.find("*[data-repeating-id-" + repeatingId + "='" + count + "']").length) {
           count++;
@@ -1155,7 +1156,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
           }
           var copyButton = makeButton(myPath.join("_") + "_copy", loc(locKey));
           $(copyButton).click(copyElement);
-          buttonGroup.appendChild(copyButton);  
+          buttonGroup.appendChild(copyButton);
         }
       } else {
         $(appendButton).click(appender);
