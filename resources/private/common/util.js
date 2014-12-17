@@ -105,7 +105,7 @@ var util = (function($) {
     if (m && keyArray && keyArray.length > 0) {
       var key = keyArray[0];
       if (m.hasOwnProperty(key)) {
-        var val = m[key];
+        var val = ko.unwrap(m[key]);
         if (keyArray.length === 1) {
           return val;
         }
