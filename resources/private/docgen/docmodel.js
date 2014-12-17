@@ -819,6 +819,17 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return span;
   }
 
+  function buildAuthorityAccept(subSchema, model, path) {
+    var span = makeEntrySpan(subSchema, path.join("."));
+
+    $("<authority-accept-fields>")
+      .addClass('form-table')
+      .appendTo($(span))
+      .applyBindings();
+
+    return span;
+  }
+
   function buildFillMyInfoButton(subSchema, model, path) {
     var span = makeEntrySpan(subSchema, path.join("."));
     var myNs = path.slice(0, path.length - 1).join(".");
@@ -843,7 +854,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   }
 
   function buildPersonSelector(subSchema, model, path) {
-    console.log("personSelector path:", path)
     var myPath = path.join(".");
     var span = makeEntrySpan(subSchema, myPath);
     span.className = span.className + " personSelector";
@@ -859,7 +869,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       var target = event.target;
       var userId = target.value;
       if (!_.isEmpty(userId)) {
-        console.log("userId:", userId)
         ajax
         .command("set-user-to-document", { id: self.appId, documentId: self.docId, userId: userId, path: myNs, collection: self.getCollection() })
         .success(function () {
@@ -954,6 +963,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     buildingSelector: buildBuildingSelector,
     newBuildingSelector: buildNewBuildingSelector,
     fillMyInfoButton: buildFillMyInfoButton,
+    authorityAccept: buildAuthorityAccept,
     personSelector: buildPersonSelector,
     table: buildTableRow,
     unknown: buildUnknown

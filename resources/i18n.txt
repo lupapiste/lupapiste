@@ -37,3 +37,4 @@ unit.kuukautta: kuukautta
 unit.tuntiaviikko: tuntia / viikko
 
 fillInfoButton: Täytä omilla tiedoilla
+tyonjohtaja.hyvaksynta: Hyväksytään vain tähän hankkeeseen

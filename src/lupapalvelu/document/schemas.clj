@@ -356,6 +356,8 @@
 ;(def henkilo-valitsin [{:name "userId" :type :personSelector :blacklist [:neighbor]}])
 (def tayta-omat-tiedot-button {:name "fillMyInfo" :type :fillMyInfoButton})
 
+(def authority-acceptance {:name "authorityAccept" :type :authorityAccept})
+
 (def tyonjohtaja-v2 (body
                       ilmoitus-hakemus-valitsin
                       kuntaroolikoodi-tyonjohtaja-v2
@@ -365,7 +367,8 @@
                       muut-rakennushankkeet-table
                       tayta-omat-tiedot-button
                       ;henkilo-valitsin ; to be replaced with "fill out own info" -button? ^
-                      designer-basic))
+                      designer-basic
+                      authority-acceptance))
 
 (def maksaja (body
                (henkilo-yritys-select-group :yritys-body yritys-with-verkkolaskutustieto)

@@ -123,6 +123,7 @@
       [:err "application-does-not-have-given-auth"])))
 
 (defmethod validate-field :fillMyInfoButton [_ _ _] nil)
+(defmethod validate-field :authorityAccept [_ _ _] nil)
 
 (defmethod validate-field nil [_ _ _]
   [:err "illegal-key"])
