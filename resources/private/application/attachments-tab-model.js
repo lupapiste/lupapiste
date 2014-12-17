@@ -53,6 +53,24 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
     var preGrouped = attachmentUtils.getGroupByOperation(preAttachments, preGroupEditable, self.appModel.allowedAttachmentTypes());
     var postGrouped = attachmentUtils.getGroupByOperation(postAttachments, true, self.appModel.allowedAttachmentTypes());
 
+    // TODO: Tarviiko tassa viela tarkistaa commandi, vaikka html:ssa jo disabloidaan ominaisuus sen perusteella?
+    if (self.authorizationModel.ok("set-attachment-not-needed")) {
+      // The "not needed" functionality is only enabled for attachments in pre-verdict state, so here only going through "preGrouped"
+      var attArrays = _.pluck(preGrouped, 'attachments');
+      _.each(attArrays, function(attArray) {
+        _.each(attArray, function(att) {
+
+          att.notNeeded.subscribe(function(newValue) {
+            ajax.command("set-attachment-not-needed", {id: self.appModel.id(), attachmentId: att.id, notNeeded: newValue})
+            .success(self.appModel.reload)
+            .processing(self.appModel.processing)
+            .call();
+          });
+
+        });
+      });
+    }
+
     self.preAttachmentsByOperation(preGrouped);
     self.postAttachmentsByOperation(postGrouped);
 

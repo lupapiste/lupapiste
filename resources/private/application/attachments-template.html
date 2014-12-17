@@ -11,6 +11,8 @@
             <tr>
               <th data-bind="ltext: 'application.attachmentState'">Tila</th>
               <th colspan="2" data-bind="ltext: 'application.attachmentType'">Tyyppi</th>
+              <th data-bind="ltext: 'application.attachmentInfo'">Milloin tarvitaan</th>
+              <th data-bind="ltext: 'application.attachmentNotNeeded'">Ei tarpeellinen</th>
               <th data-bind="ltext: 'application.attachmentFile'">Tiedosto</th>
               <th data-bind="ltext: 'application.attachmentVersion'">Versio</th>
               <th data-bind="ltext: 'application.attachmentEditDate'">Muokattu</th>
@@ -62,6 +64,19 @@
                   <div class="attachment-content-desc"><span data-bind="text: $data.contents" data-test-id="attachment-contents"></span></div>
                 <!-- /ko -->
               </td>
+
+              <td class="attachment-info">
+                <span data-bind="text: loc(['attachmentType', type['type-group'], type['type-id'], 'info'])"></span>
+              </td>
+
+              <td class="attachment-not-needed">
+                <input type="checkbox" data-bind="checked: notNeeded,
+                                                  disable: $data.notNeededFieldDisabled() || !$root.authorization.ok('set-attachment-not-needed'),
+                                                  attr: {'data-test-id': 'attachment-not-needed' + type['type-group'] + '.' + type['type-id']},
+                                                  click: function(){return true;},
+                                                  clickBubble: false"></input>
+              </td>
+
               <td>
                 <span data-bind="if: $data.latestVersion">
                   <a href="#" data-bind="text: latestVersion.filename,

@@ -1,0 +1,4 @@
+application.attachmentInfo: Milloin tarvitaan
+application.attachmentNotNeeded: Ei tarpeellinen
+
+attachmentType.hakija.valtakirja.info: Jos hakemuksen tekee joku muu kuin hakija (kiinteistön omistaja) itse

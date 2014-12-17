@@ -287,6 +287,7 @@
    :target target
    :required required?
    :requested-by-authority requested-by-authority?
+   :not-needed false
    :op op
    :signatures []
    :versions []})

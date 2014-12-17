@@ -489,3 +489,22 @@
                           {$set {setKey v
                                  :attachments.$.modified (now)}})))
   (ok))
+
+;;
+;; Mark attachment as needed or not needed
+;;
+
+(defcommand set-attachment-not-needed
+  {:parameters [id attachmentId notNeeded]
+   :roles      [:applicant :authority]
+;   :extra-auth-roles [:statementGiver]                                                      ;; TODO: Ei sallita lausunnonantajille?
+   :states     (action/all-application-states-but [:submitted :sent :closed :canceled])}     ;; TODO: onko nama oikeat tilat?
+  [command]
+  (update-application command
+                      {:attachments {$elemMatch {:id attachmentId}}}
+                      {$set {:attachments.$.notNeeded notNeeded}})
+  (ok))
+
+
+
+
