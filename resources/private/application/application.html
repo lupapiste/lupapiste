@@ -282,6 +282,14 @@
             <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.applicationInfoDesc'"></p>
           </div>
           <div style="width: 60%">
+            <div class="organization-links" data-bind="visible: organizationLinks() && organizationLinks().length">
+              <h3 data-bind="ltext: 'organization.links'"></h3>
+              <ul data-bind="foreach: organizationLinks">
+                <li>
+                  <a data-bind="text: name[loc.getCurrentLanguage()], attr: {href: url}" href="#" target="_blank"></a>
+                </li>
+              </ul>
+            </div>
             <div data-bind="if: $root.authorization.ok('add-operation')">
               <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.AddOperations'"></p>
               <button data-bind="click: addOperation, enable: $root.authorization.ok('add-operation')" class="btn-primary">
@@ -372,7 +380,15 @@
             </div>
           </div>
           <p data-bind="lhtml: 'required.field.desc'"></p>
-          <!-- ko if: $root.application.permitType() === "R" -->
+
+          <!-- docgen generated content: -->
+          <div class="application_section">
+            <div id="partiesDocgen" class="docgen-content">
+              <!-- This is where generated document will be placed. -->
+            </div>
+          </div>
+
+          <!-- ko if: $root.foreman.isVisible -->
           <div data-bind="if: features.enabled('foreman')">
             <div class="feature">
               <span class="legend">Tyonjohtajan nimeaminen</span>
@@ -390,13 +406,6 @@
             </div>
           </div>
           <!-- /ko -->
-
-          <!-- docgen generated content: -->
-          <div class="application_section">
-            <div id="partiesDocgen" class="docgen-content">
-              <!-- This is where generated document will be placed. -->
-            </div>
-          </div>
 
           <button
               data-bind="click: $parent.addPartyModel.init, ltext: 'application.addParty', visible: $parent.authorization.ok('create-doc')"
