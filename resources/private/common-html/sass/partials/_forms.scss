@@ -281,6 +281,9 @@ input[readonly], textarea[readonly] {
   {
     border-bottom: none;
   }
+  table {
+    width: auto;
+  }
   .form-group {
     margin:$marginS;
   }
@@ -477,6 +480,7 @@ input[readonly], textarea[readonly] {
   .form-table .form-input {
     display: inline;
     margin: 0;
+    padding: 0 6px;
   }
 
   .form-table {
@@ -491,9 +495,14 @@ input[readonly], textarea[readonly] {
 
   .form-table .form-indicator {
     right: auto;
-    top: 3px;
-    min-height: 25px;
-    width: 25px;
+    top: 0;
+    height: 28px;
+    width: 28px;
+    padding: 0;
+  }
+
+  .form-table .form-input-saved {
+    background-position: 4px -2494px;
   }
 
   .form-table .form-entry {
