@@ -12,9 +12,9 @@
             [lupapalvelu.pdf-export :as pdf-export]))
 
 (def- rp-yht {"2.1.2" "2.1.0"
-                        "2.1.3" "2.1.1"
-                        "2.1.4" "2.1.2"
-                        "2.1.5" "2.1.3"})
+              "2.1.3" "2.1.1"
+              "2.1.4" "2.1.2"
+              "2.1.5" "2.1.3"})
 
 (def- ymp-yht {"2.1.2" "2.1.3"})
 
@@ -150,6 +150,7 @@
                              {:tag :rakennusoikeusYhteensa :ns "yht" }
                              {:tag :uusiKytkin :ns "yht"}]})
 
+(def rakennuspaikka_211 (update-in rakennuspaikka [:child] conj {:tag :kaavatilanne :ns "yht"}))
 
 (def- henkilo-child [{:tag :nimi
                                :child [{:tag :etunimi}

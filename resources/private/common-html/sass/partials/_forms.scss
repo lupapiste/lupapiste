@@ -94,10 +94,15 @@ input[readonly], textarea[readonly] {
   width: 112px;
   min-height: 18px;
   display: none;
-  top: 0px;
-  right: 0px;
-  padding: 0 0 $marginS $marginL;
+  top: 20px;
+  right: 8px;
+  padding: $marginS $marginS $marginS $marginL;
   @include spite-bg;
+  background-color: white;
+  border: 1px solid $lp-light-grey;
+  border-radius: 4px;
+  box-shadow: 1px 1px 2px $lp-dark-grey;
+
 }
 
 .save-indicator {
@@ -131,15 +136,15 @@ input[readonly], textarea[readonly] {
 }
 
 .form-input-saved {
-  background-position: 4px -2496px;
+  background-position: 4px -2490px;
 }
 .form-input-warn
 {
-  background-position: 4px -3196px;
+  background-position: 4px -3190px;
 }
 .form-input-err
 {
-  background-position: 4px -2396px;
+  background-position: 4px -2390px;
 }
 
 
@@ -271,6 +276,9 @@ input[readonly], textarea[readonly] {
   &:last-child
   {
     border-bottom: none;
+  }
+  table {
+    width: auto;
   }
   .form-group {
     margin:$marginS;
@@ -462,6 +470,7 @@ input[readonly], textarea[readonly] {
   .form-table .form-input {
     display: inline;
     margin: 0;
+    padding: 0 6px;
   }
 
   .form-table {
@@ -476,9 +485,14 @@ input[readonly], textarea[readonly] {
 
   .form-table .form-indicator {
     right: auto;
-    top: 3px;
-    min-height: 25px;
-    width: 25px;
+    top: 0;
+    height: 28px;
+    width: 28px;
+    padding: 0;
+  }
+
+  .form-table .form-input-saved {
+    background-position: 4px -2494px;
   }
 
   .form-table .form-entry {

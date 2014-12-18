@@ -1,7 +1,7 @@
 (ns lupapalvelu.permit
   (:require [lupapalvelu.domain :as domain]
             [sade.core :refer [fail]]
-            [taoensso.timbre :as timbre :refer [errorf]]))
+            [taoensso.timbre :as timbre :refer [errorf warn]]))
 
 (defonce ^:private permit-type-defs (atom {}))
 (defn permit-types [] @permit-type-defs)
@@ -9,8 +9,11 @@
 (def poikkeamislupa :poikkeamislupa)
 (def suunnittelutarveratkaisu :suunnittelutarveratkaisu)
 
+(defn valid-permit-type? [permit-type]
+  (contains? (permit-types) permit-type))
+
 (defn register-function [permit-type k f]
-  {:pre [(contains? (permit-types) permit-type)
+  {:pre [(valid-permit-type? permit-type)
          (keyword? k)
          (fn? f)]}
   (swap! permit-type-defs assoc-in [permit-type k] f))
@@ -123,6 +126,11 @@
 ;;
 ;; Validate
 ;;
+
+(defn permit-type-validator [{{:keys [permitType]} :data}]
+  (when-not (valid-permit-type? permitType)
+    (warn "invalid permit type" permitType)
+    (fail :error.missing-parameters :parameters [:permitType])))
 
 (defn validate-permit-type-is-not [validator-permit-type]
   (fn [_ application]

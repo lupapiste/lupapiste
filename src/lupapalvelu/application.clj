@@ -35,7 +35,8 @@
             [lupapalvelu.open-inforequest :as open-inforequest]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.application-meta-fields :as meta-fields]
-            [lupapalvelu.company :as c]))
+            [lupapalvelu.company :as c]
+            [clojure.string :as string]))
 
 ;; Notifications
 
@@ -242,9 +243,30 @@
                :authority  (if assignee (user/summary assignee) (:authority domain/application-skeleton))}})
       (fail "error.user.not.found"))))
 
-(defcommand cancel-application
+;;
+;; Cancel
+;;
+
+(defn- remove-app-links [id]
+  (mongo/remove-many :app-links {:link {$in [id]}}))
+
+(defcommand cancel-inforequest
   {:parameters [id]
    :roles      [:applicant :authority]
+   :notified   true
+   :on-success (notify :application-state-change)
+   :states     [:info]}
+  [{:keys [created] :as command}]
+  (update-application command
+    {$set {:modified created
+           :canceled created
+           :state    :canceled}})
+  (remove-app-links id)
+  (ok))
+
+(defcommand cancel-application
+  {:parameters [id]
+   :roles      [:applicant]
    :notified   true
    :on-success (notify :application-state-change)
    :states     [:draft :info :open :submitted]}
@@ -253,8 +275,37 @@
     {$set {:modified created
            :canceled created
            :state    :canceled}})
-  (mongo/remove-many :app-links {:link {$in [id]}})
+  (remove-app-links id)
   (ok))
+
+(defcommand cancel-application-authority
+  {:parameters [id text]
+   :roles      [:authority]
+   :notified   true
+   :on-success (notify :application-state-change)
+   :states     (action/all-states-but [:canceled :closed :answered]) }
+  [{:keys [created application] :as command}]
+  (update-application command
+    (util/deep-merge
+      (when (seq text)
+        (lupapalvelu.comment/comment-mongo-update
+          (:state application)
+          (str
+            (i18n/loc "application.canceled.text") ". "
+            (i18n/loc "application.canceled.reason") ": "
+            text)
+          {:type "application"}
+          (-> command :user :role)
+          false
+          (:user command)
+          nil
+          created))
+      {$set {:modified created
+             :canceled created
+             :state    :canceled}}))
+  (remove-app-links id)
+  (ok))
+
 
 (defcommand open-application
   {:parameters [id]
@@ -295,8 +346,8 @@
 
 (defn- update-link-permit-data-with-kuntalupatunnus-from-verdict [application]
   (let [link-permit-app-id (-> application :linkPermitData first :id)
-        verdicts (domain/get-application-no-access-checking link-permit-app-id)
-        kuntalupatunnus (-> verdicts :verdicts first :kuntalupatunnus)]
+        link-permit-app (domain/get-application-no-access-checking link-permit-app-id)
+        kuntalupatunnus (-> link-permit-app :verdicts first :kuntalupatunnus)]
     (if kuntalupatunnus
       (-> application
          (assoc-in [:linkPermitData 0 :lupapisteId] link-permit-app-id)
@@ -632,8 +683,7 @@
 
     ;; The application has to be inserted first, because it is assumed to be in the database when checking for verdicts (and their attachments).
     (insert-application created-application)
-
-    (verdict-api/do-check-for-verdict command xml)  ;; Get verdicts for the application
+    (verdict-api/find-verdicts-from-xml command xml)  ;; Get verdicts for the application
     (:id created-application)))
 
 (defcommand create-application-from-previous-permit
@@ -951,8 +1001,11 @@
     (insert-application continuation-app)
     (ok :id (:id continuation-app))))
 
+(defn find-by-id [taskId tasks]
+  (some (fn [task] (when (= taskId (:id task)) task)) tasks))
+
 (defcommand create-foreman-application
-  {:parameters ["id"]
+  {:parameters [id taskId foremanRole]
    :roles [:applicant :authority]
    :states action/all-application-states}
   [{:keys [created user application] :as command}]
@@ -966,22 +1019,32 @@
                                             :infoRequest false
                                             :messages []}))
 
+        task                 (find-by-id taskId (:tasks application))
+
         hankkeen-kuvaus      (get-in (domain/get-document-by-name application "hankkeen-kuvaus") [:data :kuvaus :value])
         hankkeen-kuvaus-doc  (domain/get-document-by-name foreman-app "hankkeen-kuvaus-minimum")
         hankkeen-kuvaus-doc  (if hankkeen-kuvaus
                                (assoc-in hankkeen-kuvaus-doc [:data :kuvaus :value] hankkeen-kuvaus)
                                hankkeen-kuvaus-doc)
 
+        tyonjohtaja-doc      (domain/get-document-by-name foreman-app "tyonjohtaja")
+        tyonjohtaja-doc      (if-not (string/blank? foremanRole)
+                               (assoc-in tyonjohtaja-doc [:data :kuntaRoolikoodi :value] foremanRole)
+                               tyonjohtaja-doc)
+
         hakija-doc           (domain/get-document-by-name application "hakija")
 
         new-application-docs (->> (:documents foreman-app)
-                                  (remove #(#{"hankkeen-kuvaus-minimum" "hakija"} (-> % :schema-info :name)))
-                                  (concat [hakija-doc hankkeen-kuvaus-doc]))
+                                  (remove #(#{"hankkeen-kuvaus-minimum" "hakija" "tyonjohtaja"} (-> % :schema-info :name)))
+                                  (concat [hakija-doc hankkeen-kuvaus-doc tyonjohtaja-doc]))
 
         foreman-app (assoc foreman-app :documents new-application-docs)]
 
     (do-add-link-permit foreman-app (:id application))
     (insert-application foreman-app)
+    (when task
+      (let [updates [[[:asiointitunnus] (:id foreman-app)]]]
+        (commands/persist-model-updates application "tasks" task updates created)))
     (ok :id (:id foreman-app))))
 
 ;;
