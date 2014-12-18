@@ -104,7 +104,6 @@
     ["rakennustyo-muutostoimenpiteet"
      [["Suunnittelija" :suunnittelijan-nimeaminen]
       ["Tyonjohtaja" :tyonjohtajan-nimeaminen]
-      ["Tyonjohtaja" :tyonjohtajan-nimeaminen-v2]
       ["rak-valm-tyo" :rak-valm-tyo]
       ["Aloitusoikeus" :aloitusoikeus]
       ["raktyo-aloit-loppuunsaat" :raktyo-aloit-loppuunsaat]]]]])
