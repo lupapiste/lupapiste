@@ -1,0 +1,79 @@
+tyonjohtaja.ilmoitusHakemusValitsin._group_label: Ilmoitus vai hakemus
+tyonjohtaja.ilmoitusHakemusValitsin.ilmoitus: Ilmoitus
+tyonjohtaja.ilmoitusHakemusValitsin.hakemus: Hakemus
+
+osapuoli.patevyysvaatimusluokka._group_label: Tehtävien vaativuus
+osapuoli.patevyysvaatimusluokka.AA: Poikkeuksellisen vaativa
+osapuoli.patevyysvaatimusluokka.A: Vaativa
+osapuoli.patevyysvaatimusluokka.B: Tavanomainen
+osapuoli.patevyysvaatimusluokka.C: Vähänäinen
+osapuoli.patevyysvaatimusluokka.ei tiedossa: Ei tiedossa
+
+osapuoli.tyonjohtajaHanketieto._group_label: Toimii tässä rakennushankkeessa
+osapuoli.tyonjohtajaHanketieto.taysiaikainenOsaaikainen.taysiaikainen: Täysiaikaisena
+osapuoli.tyonjohtajaHanketieto.taysiaikainenOsaaikainen.osaaikainen: Osa-aikaisena
+osapuoli.tyonjohtajaHanketieto.hankeKesto: Rakennushankkeen kesto
+osapuoli.tyonjohtajaHanketieto.kaytettavaAika: Tehtäviin käytettävä aika
+osapuoli.tyonjohtajaHanketieto.kayntienMaara: Työmaakänytien määrä yhteensä
+
+osapuoli.muutHankkeet._group_label: Muut rakennushankkeet
+osapuoli.muutHankkeet.luvanNumero: Luvan numero
+osapuoli.muutHankkeet.katuosoite: Katuosoite
+osapuoli.muutHankkeet.rakennustoimenpide: Rakennustoimenpide
+osapuoli.muutHankkeet.kokonaisala: Kokonaisala
+osapuoli.muutHankkeet.vaihe: Vaihe
+osapuoli.muutHankkeet.3kk: 0-3kk
+osapuoli.muutHankkeet.6kk: 3-6kk
+osapuoli.muutHankkeet.9kk: 6-9kk
+osapuoli.muutHankkeet.12kk: 9-12kk
+
+osapuoli.muutHankkeet._append_label: Lisää rivi
+
+osapuoli.muutHankkeet.vaihe.A: A
+osapuoli.muutHankkeet.vaihe.R: R
+osapuoli.muutHankkeet.vaihe.K: K
+
+unit.kuukautta: kuukautta
+unit.tuntiaviikko: tuntia / viikko
+
+fillInfoButton: Täytä omilla tiedoilla
+
+osapuoli.tyonjohtaja.vastattavatTyotehtavat.ivLaitoksenAsennustyo: Iv-laitoksen asennustyö
+osapuoli.tyonjohtaja.vastattavatTyotehtavat.ivLaitoksenKorjausJaMuutostyo: Iv-laitoksen korjaus- ja muutostyö
+osapuoli.tyonjohtaja.vastattavatTyotehtavat.ivLaitoksenAsennustyoIvLaitoksenKorjausJaMuutostyo: Iv-laitoksen asennustyö, Iv-laitoksen korjaus- ja muutostyö
+osapuoli.tyonjohtaja.vastattavatTyotehtavat.ivLaitoksenKorjausJaMuutostyoIvLaitoksenAsennustyo: Iv-laitoksen korjaus- ja muutostyö, Iv-laitoksen asennustyö
+osapuoli.tyonjohtaja.vastattavatTyotehtavat.ivLaitoksenAsennustyo12Krs: Iv-laitoksen asennustyö, 1.-2.krs
+osapuoli.tyonjohtaja.vastattavatTyotehtavat.ivLaitoksenAsennustyo: Iv-laitoksen asennustyö
+osapuoli.tyonjohtaja.vastattavatTyotehtavat.sisapuolinenKvvTyo: Sisäpuolinen KVV-työ
+osapuoli.tyonjohtaja.vastattavatTyotehtavat.ulkopuolinenKvvTyo: Ulkopuolinen KVV-työ
+osapuoli.tyonjohtaja.vastattavatTyotehtavat.sukitus: Sukitus
+osapuoli.tyonjohtaja.vastattavatTyotehtavat.maanrakennusKvvUlkopuoli: Maanrakennus, KVV- ulkopuoli
+osapuoli.tyonjohtaja.vastattavatTyotehtavat.rakennuksenMuutosJaKorjaustyo: Rakennuksen muutos- ja korjaustyö
+osapuoli.tyonjohtaja.vastattavatTyotehtavat.uudisrakennustyoMaanrakennustoineen: Uudisrakennustyö maanrakennustöineen
+osapuoli.tyonjohtaja.vastattavatTyotehtavat.uudisrakennustyoIlmanMaanrakennustoita: Uudisrakennustyö ilman maanrakennustöitä
+osapuoli.tyonjohtaja.vastattavatTyotehtavat.linjasaneeraus: Linjasaneeraus
+osapuoli.tyonjohtaja.vastattavatTyotehtavat.maanrakennustyot: Maanrakennustyöt
+osapuoli.tyonjohtaja.vastattavatTyotehtavat.rakennuksenPurkaminen: Rakennuksen purkaminen
+osapuoli.tyonjohtaja.vastattavatTyotehtavat.paalutus: Paalutus
+osapuoli.tyonjohtaja.vastattavatTyotehtavat.kayttotarkoituksenMuutos: Käyttötarkoituksen muutos
+osapuoli.tyonjohtaja.vastattavatTyotehtavat.markatilamuutos: Märkätilamuutos
+osapuoli.tyonjohtaja.vastattavatTyotehtavat.taydentavatRakennustyot: Täydentävät rakennustyöt
+osapuoli.tyonjohtaja.vastattavatTyotehtavat.vesijohtojenUusiminenJaViemareidenPinnoittaminen: Vesijohtojen uusiminen ja viemäreiden pinnoittaminen
+osapuoli.tyonjohtaja.vastattavatTyotehtavat.peruslaatta: Peruslaatta
+osapuoli.tyonjohtaja.vastattavatTyotehtavat.alaslaskukatotLattiavalujaJaSisatyot: Alaslaskukatot, lattiavaluja ja sisätyöt
+osapuoli.tyonjohtaja.vastattavatTyotehtavat.hissinRakentaminen: Hissin rakentaminen
+osapuoli.tyonjohtaja.vastattavatTyotehtavat.muutostyo: Muutostyö
+osapuoli.tyonjohtaja.vastattavatTyotehtavat.hissienJalkiasennus: Hissien jälkiasennus
+osapuoli.tyonjohtaja.vastattavatTyotehtavat.vesikatonKorjaustyo: Vesikaton korjaustyö
+osapuoli.tyonjohtaja.vastattavatTyotehtavat.pihamaajarjestelyt: Pihamaajärjestelyt
+tyonjohtaja.historia.hyvaksynta: Hyväksytään vain tähän hankkeeseen
+tyonjohtaja.historia.otsikko: Työnjohtajan historia
+tyonjohtaja.historia.kunta: Kunta
+tyonjohtaja.historia.vaativuus: Vaativuus
+tyonjohtaja.historia.vastuu: Vastuu
+tyonjohtaja.historia.hanke: Hanke
+
+tyonjohtaja-v2._group_label: Työnjohtajan nimeäminen
+operations.tyonjohtajan-nimeaminen-v2: Työnjohtajan nimeäminen
+tyonjohtajan-nimeaminen-v2._group_label: Työnjohtajan nimeäminen
+osapuoli.muutHankkeet.vaihe._group_label: Vaihe

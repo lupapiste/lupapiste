@@ -18,7 +18,7 @@ LUPAPISTE.ForemanModel = function() {
   self.taskId = ko.observable();
   self.isVisible = ko.computed(function() {
     return util.getIn(self, ["application", "permitType"]) === "R" &&
-      util.getIn(self, ["application", "operations", 0, "name"]) !== "tyonjohtajan-nimeaminen";
+      !/tyonjohtajan-nimeaminen/.test(util.getIn(self, ["application", "operations", 0, "name"]));
   });
 
   self.refresh = function(application) {

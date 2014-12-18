@@ -84,6 +84,11 @@
         margin: $marginM 0;
         padding-left: 0;
       }
+      authority-accept-fields {
+        h2 {
+          background: $lp-light-grey;
+        }
+      }
       h3 {
         margin-top: $marginM;
       }

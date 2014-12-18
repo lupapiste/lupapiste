@@ -299,5 +299,4 @@
     });
     return this;
   };
-
 })(jQuery);
