@@ -502,7 +502,7 @@
   [command]
   (update-application command
                       {:attachments {$elemMatch {:id attachmentId}}}
-                      {$set {:attachments.$.notNeeded notNeeded}})
+                      {$set {:attachments.$.not-needed notNeeded}})
   (ok))
 
 
