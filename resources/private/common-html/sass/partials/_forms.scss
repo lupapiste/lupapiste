@@ -448,11 +448,17 @@ input[readonly], textarea[readonly] {
   }
 
   .form-table td, .form-table th {
-    padding: 6px 6px;
+    padding: $marginS $marginM;
   }
 
-  .form-table td {
-    text-align: center;
+  #table-huoneistot, #table-muutHankkeet {
+    td, th {
+      padding: $marginS;
+    }
+
+    td {
+      text-align: center;
+    }
   }
 
   .form-table th:first-child {
@@ -689,5 +695,23 @@ input[readonly], textarea[readonly] {
   .col3 {
     float: left;
     padding-left: $marginM;
+  }
+}
+
+authority-accept-fields {
+  h2 {
+    background-color: transparent;
+  }
+  th.first {
+    width: 10%;
+  }
+  th.second {
+    width: 10%;
+  }
+  th.third {
+    width: 40%;
+  }
+  th.fourth {
+    width: 40%;
   }
 }

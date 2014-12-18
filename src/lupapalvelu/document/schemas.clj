@@ -372,10 +372,10 @@
     :body [{:name "R"}
            {:name "A"}
            {:name "K"}]}
-   {:name "3kk" :type :string :subtype :number :size "t" :label false}
-   {:name "6kk" :type :string :subtype :number :size "t" :label false}
-   {:name "9kk" :type :string :subtype :number :size "t" :label false}
-   {:name "12kk" :type :string :subtype :number  :size "t" :label false}])
+   {:name "3kk" :type :string :subtype :number :size "s" :label false}
+   {:name "6kk" :type :string :subtype :number :size "s" :label false}
+   {:name "9kk" :type :string :subtype :number :size "s" :label false}
+   {:name "12kk" :type :string :subtype :number  :size "s" :label false}])
 
 (def muut-rakennushankkeet-table {:name "muutHankkeet"
                                   :type :table
@@ -391,6 +391,7 @@
 (def authority-acceptance {:name "authorityAccept" :type :authorityAccept})
 
 (def tyonjohtaja-v2 (body
+                      authority-acceptance
                       ilmoitus-hakemus-valitsin
                       kuntaroolikoodi-tyonjohtaja-v2
                       patevyysvaatimusluokka
@@ -399,9 +400,7 @@
                       muut-rakennushankkeet-table
                       tayta-omat-tiedot-button
                       ;henkilo-valitsin ; to be replaced with "fill out own info" -button? ^
-                      designer-basic
-                      authority-acceptance
-                      ))
+                      designer-basic))
 
 (def maksaja (body
                (henkilo-yritys-select-group :yritys-body yritys-with-verkkolaskutustieto)

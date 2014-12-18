@@ -820,8 +820,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   }
 
   function buildAuthorityAccept(subSchema, model, path) {
-    var span = makeEntrySpan(subSchema, path.join("."));
-
     var params = {
       applicationId: self.appId
     };
@@ -831,16 +829,14 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       return key + ": " + key;
     }).join(", ");
 
-    $("<authority-accept-fields params=\"" + paramsStr + "\">")
+    return $("<authority-accept-fields>")
+      .attr("params", paramsStr)
       .addClass("form-table")
-      .appendTo($(span))
-      .applyBindings(params);
-
-    return span;
+      .applyBindings(params)
+      .get(0);
   }
 
   function buildFillMyInfoButton(subSchema, model, path) {
-    var span = makeEntrySpan(subSchema, path.join("."));
     var myNs = path.slice(0, path.length - 1).join(".");
 
     var params = {
@@ -855,11 +851,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       return key + ": " + key;
     }).join(", ");
 
-    $("<fill-info-button params=\"" + paramsStr + "\">")
-      .appendTo($(span))
-      .applyBindings(params);
-
-    return span;
+    return $("<fill-info-button params>")
+      .attr("params", paramsStr)
+      .applyBindings(params)
+      .get(0);
   }
 
   function buildPersonSelector(subSchema, model, path) {
