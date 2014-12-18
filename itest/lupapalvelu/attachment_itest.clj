@@ -21,10 +21,19 @@
 
     (comment-application pena application-id true) => ok?
 
-    (fact "by default 4 attachments exist and are related to operation 'kerrostalo-rivitalo'"
+    (facts "by default 4 attachments exist"
       (let [application (query-application pena application-id)
             op-id (-> application :operations first :id)]
-        (count (get-attachments-by-operation application op-id)) => 4))
+        (fact "the attachments are related to operation 'kerrostalo-rivitalo'"
+          (count (get-attachments-by-operation application op-id)) => 4)
+        (fact "the attachments have 'required', 'not-needed' and 'requested-by-authority' flags correctly set"
+          (every? (fn [a]
+                    (every? #{"required" "not-needed" "requested-by-authority"} a) => truthy
+                    (:required a) => true
+                    (:not-needed a) => false
+                    (:requested-by-authority a) => false)
+            (:attachments application)) => truthy
+          )))
 
     (let [resp (command veikko
                  :create-attachments
@@ -43,10 +52,12 @@
         (get-attachment-by-id veikko application-id (first attachment-ids)) => (contains
                                                                                  {:type {:type-group "paapiirustus" :type-id "asemapiirros"}
                                                                                   :state "requires_user_action"
+                                                                                  :requested-by-authority true
                                                                                   :versions []})
         (get-attachment-by-id veikko application-id (second attachment-ids)) => (contains
                                                                                   {:type {:type-group "paapiirustus" :type-id "pohjapiirros"}
                                                                                    :state "requires_user_action"
+                                                                                   :requested-by-authority true
                                                                                    :versions []}))
 
       (fact "uploading files"
@@ -120,7 +131,6 @@
 
 
       (fact "Pena change attachment metadata"
-
         (fact "Pena can change operation"
           (command pena :set-attachment-meta :id application-id :attachmentId (first attachment-ids) :meta {:op {:id "foo" :name "bar"}}) => ok?)
         (fact "Pena can change contents"
@@ -142,9 +152,6 @@
             contents => "foobart"
             size => "A4"
             scale => "1:500"))
-
-
-
         )
 
       (let [versioned-attachment (first (:attachments (query-application veikko application-id)))]
