@@ -108,6 +108,13 @@
       (resp/json (map feature-mapper (gfi-mapper response municipality)))
       (resp/status 503 "Service temporarily unavailable"))))
 
+(defn general-plan-urls-by-point-proxy [request]
+  (let [{x :x y :y} (:params request)
+        response (wfs/general-plan-info-by-point x y)]19
+    (if response
+      (resp/json (map wfs/general-plan-feature-to-feature-info (wfs/gfi-to-general-plan-features response)))
+      (resp/status 503 "Service temporarily unavailable"))))
+
 ;
 ; Utils:
 ;
@@ -141,5 +148,6 @@
                "get-address" get-addresses-proxy
                "property-info-by-wkt" property-info-by-wkt-proxy
                "wmscap" wms-capabilities-proxy
-               "plan-urls-by-point" plan-urls-by-point-proxy})
+               "plan-urls-by-point" plan-urls-by-point-proxy
+               "general-plan-urls-by-point" general-plan-urls-by-point-proxy})
 
