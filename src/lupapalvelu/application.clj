@@ -1043,7 +1043,7 @@
                                (assoc-in hankkeen-kuvaus-doc [:data :kuvaus :value] hankkeen-kuvaus)
                                hankkeen-kuvaus-doc)
 
-        tyonjohtaja-doc      (domain/get-document-by-name foreman-app "tyonjohtaja")
+        tyonjohtaja-doc      (domain/get-document-by-name foreman-app "tyonjohtaja-v2")
         tyonjohtaja-doc      (if-not (string/blank? foremanRole)
                                (assoc-in tyonjohtaja-doc [:data :kuntaRoolikoodi :value] foremanRole)
                                tyonjohtaja-doc)
@@ -1052,7 +1052,7 @@
 
         new-application-docs (->> (:documents foreman-app)
                                   (remove #(#{"hankkeen-kuvaus-minimum" "hakija" "tyonjohtaja"} (-> % :schema-info :name)))
-                                  (concat [hakija-doc hankkeen-kuvaus-doc tyonjohtaja-doc]))
+                                  (concat (remove nil? [hakija-doc hankkeen-kuvaus-doc tyonjohtaja-doc])))
 
         foreman-app (assoc foreman-app :documents new-application-docs)]
 
