@@ -72,3 +72,8 @@ tyonjohtaja.historia.kunta: Kunta
 tyonjohtaja.historia.vaativuus: Vaativuus
 tyonjohtaja.historia.vastuu: Vastuu
 tyonjohtaja.historia.hanke: Hanke
+
+tyonjohtaja-v2._group_label: Työnjohtajan nimeäminen
+operations.tyonjohtajan-nimeaminen-v2: Työnjohtajan nimeäminen
+tyonjohtajan-nimeaminen-v2._group_label: Työnjohtajan nimeäminen
+osapuoli.muutHankkeet.vaihe._group_label: Vaihe

@@ -143,6 +143,14 @@
    :auth (:auth application)
    :documents (filter #(= (get-in % [:schema-info :name]) "tyonjohtaja") (:documents application))})
 
+(defn- get-foreman-applications [foreman-application]
+  (let [foreman-doc  (first (filter #(= "tyonjohtaja-v2" (-> % :schema-info :name)) (:documents foreman-application)))
+        foreman-hetu (get-in foreman-doc [:data :henkilotiedot :hetu :value])
+        foreman-apps (mongo/select :applications {})
+        ]
+    )
+  )
+
 (defquery foreman-history
   {:roles            [:applicant :authority] ; TODO: Needs to be restricted to only authority + specific extra auth roles
    :states           action/all-states
@@ -150,12 +158,20 @@
    :parameters       [:id]}
   [{application :application user :user :as command}]
   (if application
-    (let []
+    (let [
 
-      (ok :projects [{:municipality "Helsinki" :difficulty "A" :jobDescription "Vastaava työnjohtaja" :operation "Asuinrakennuksen rakentaminen"}
-                   {:municipality "Helsinki" :difficulty "A" :jobDescription "Vastaava työnjohtaja" :operation "Asuinrakennuksen rakentaminen"}
-                   {:municipality "Helsinki" :difficulty "A" :jobDescription "Vastaava työnjohtaja" :operation "Asuinrakennuksen rakentaminen"}
-                   {:municipality "Tampere" :difficulty "A" :jobDescription "Vastaava työnjohtaja" :operation "Asuinrakennuksen rakentaminen"}]))
+
+          ;linked-apps      (mongo/select :app-links {:link {$in [application-id]}})
+          ;linked-apps      (filter #(= (get-in % [(keyword application-id) :type]) "linkpermit") linked-apps)
+          ;get-other-app-id (fn [app] (first (remove #{application-id} (:link app))))
+          ;get-app-type-fn  (fn [app] (get-in app [(keyword (get-other-app-id app)) :app-type]))
+          ;linked-apps      (filter #(re-matches #"^tyonjohtajan-nimeaminen.*" (get-app-type-fn %)) linked-apps)
+          ]
+
+      (ok :projects [{:municipality "Helsinki" :difficulty "A" :jobDescription "Vastaava tyonjohtaja" :operation "Asuinrakennuksen rakentaminen"}
+                   {:municipality "Helsinki" :difficulty "A" :jobDescription "Vastaava tyonjohtaja" :operation "Asuinrakennuksen rakentaminen"}
+                   {:municipality "Helsinki" :difficulty "A" :jobDescription "Vastaava tyonjohtaja" :operation "Asuinrakennuksen rakentaminen"}
+                   {:municipality "Tampere" :difficulty "A" :jobDescription "Vastaava tyonjohtaja" :operation "Asuinrakennuksen rakentaminen"}]))
     (fail :error.not-found))
   )
 
@@ -1051,7 +1067,7 @@
         hakija-doc           (domain/get-document-by-name application "hakija")
 
         new-application-docs (->> (:documents foreman-app)
-                                  (remove #(#{"hankkeen-kuvaus-minimum" "hakija" "tyonjohtaja"} (-> % :schema-info :name)))
+                                  (remove #(#{"hankkeen-kuvaus-minimum" "hakija" "tyonjohtaja-v2"} (-> % :schema-info :name)))
                                   (concat (remove nil? [hakija-doc hankkeen-kuvaus-doc tyonjohtaja-doc])))
 
         foreman-app (assoc foreman-app :documents new-application-docs)]

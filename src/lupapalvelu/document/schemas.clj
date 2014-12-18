@@ -400,7 +400,8 @@
                       tayta-omat-tiedot-button
                       ;henkilo-valitsin ; to be replaced with "fill out own info" -button? ^
                       designer-basic
-                      authority-acceptance))
+                      authority-acceptance
+                      ))
 
 (def maksaja (body
                (henkilo-yritys-select-group :yritys-body yritys-with-verkkolaskutustieto)

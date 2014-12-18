@@ -65,7 +65,7 @@
   (fact "Poikkeamis not requires" (is-link-permit-required {:operations [{:name "poikkeamis"}]}) => nil))
 
 (facts "Add operation allowed"
-  (let [not-allowed-for #{:raktyo-aloit-loppuunsaat :jatkoaika :aloitusoikeus :suunnittelijan-nimeaminen :tyonjohtajan-nimeaminen :tilan-rekisteroiminen-tontiksi :yhdistaminen :rajankaynnin-hakeminen
+  (let [not-allowed-for #{:raktyo-aloit-loppuunsaat :jatkoaika :aloitusoikeus :suunnittelijan-nimeaminen :tyonjohtajan-nimeaminen :tyonjohtajan-nimeaminen-v2 :tilan-rekisteroiminen-tontiksi :yhdistaminen :rajankaynnin-hakeminen
                           :tonttijaon-hakeminen :tontin-lohkominen :rasitetoimitus :tonttijaon-muutoksen-hakeminen :rajannayton-hakeminen :halkominen :aiemmalla-luvalla-hakeminen}
         error {:ok false :text "error.add-operation-not-allowed"}]
 
