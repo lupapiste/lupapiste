@@ -191,6 +191,11 @@
             <span data-bind="ltext: 'application.cancelApplication'"></span>
             <span class="icon remove-grey left-align"></span>
           </button>
+          <button data-bind="click: cancelApplicationAuthority,    visible: $root.authorization.ok('cancel-application-authority'), enable: !processing() && $root.authorization.ok('cancel-application-authority')"
+                  data-test-id="application-cancel-authority-btn"  class="btn">
+            <span data-bind="ltext: 'application.cancelApplication'"></span>
+            <span class="icon remove-grey left-align"></span>
+          </button>
           <button data-bind="click: refreshKTJ,           visible: $root.authorization.ok('refresh-ktj'),            enable: !processing() && $root.authorization.ok('refresh-ktj')"     data-test-id="application-refresh-ktj-btn"  class="btn">
             <span data-bind="ltext: 'application.refreshKTJ'"></span>
             <span class="icon refresh-grey left-align"></span>
@@ -277,6 +282,14 @@
             <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.applicationInfoDesc'"></p>
           </div>
           <div style="width: 60%">
+            <div class="organization-links" data-bind="visible: organizationLinks() && organizationLinks().length">
+              <h3 data-bind="ltext: 'organization.links'"></h3>
+              <ul data-bind="foreach: organizationLinks">
+                <li>
+                  <a data-bind="text: name[loc.getCurrentLanguage()], attr: {href: url}" href="#" target="_blank"></a>
+                </li>
+              </ul>
+            </div>
             <div data-bind="if: $root.authorization.ok('add-operation')">
               <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.AddOperations'"></p>
               <button data-bind="click: addOperation, enable: $root.authorization.ok('add-operation')" class="btn-primary">
@@ -367,7 +380,15 @@
             </div>
           </div>
           <p data-bind="lhtml: 'required.field.desc'"></p>
-          <!-- ko if: $root.application.permitType() === "R" -->
+
+          <!-- docgen generated content: -->
+          <div class="application_section">
+            <div id="partiesDocgen" class="docgen-content">
+              <!-- This is where generated document will be placed. -->
+            </div>
+          </div>
+
+          <!-- ko if: $root.foreman.isVisible -->
           <div data-bind="if: features.enabled('foreman')">
             <div class="feature">
               <span class="legend">Tyonjohtajan nimeaminen</span>
@@ -385,13 +406,6 @@
             </div>
           </div>
           <!-- /ko -->
-
-          <!-- docgen generated content: -->
-          <div class="application_section">
-            <div id="partiesDocgen" class="docgen-content">
-              <!-- This is where generated document will be placed. -->
-            </div>
-          </div>
 
           <button
               data-bind="click: $parent.addPartyModel.init, ltext: 'application.addParty', visible: $parent.authorization.ok('create-doc')"
@@ -1055,45 +1069,7 @@
           <div data-bind="if: features.enabled('foreman')">
             <div class="feature">
               <span class="legend">Tyonjohtajan nimeaminen</span>
-              <div>
-                <table data-test-id="tasks-foreman" class="tasks-foreman" data-bind="with: foremanTasks">
-                  <thead>
-                    <tr><td colspan="4"><h2 data-bind="text: name" style="padding-top:1em"></h2></td></tr>
-                    <tr>
-                      <th data-bind="ltext: 'application.taskState'"></th>
-                      <th colspan="3" data-bind="ltext: 'application.taskDisplayName'"></th>
-                  </thead>
-                  <tbody data-bind="foreach: foremans">
-                    <tr>
-                      <td class="task-state">
-                        <span data-bind="attr: {'class': statusName + ' icon', 'data-test-state': $data.state, 'title': loc(['task', statusName, 'title'])}"></span>
-                      </td>
-                      <td>
-                        <span data-bind="text: $data.name"></span>
-                      </td>
-                      <td>
-                        <!-- ko if: $data.id -->
-                        <span data-bind="fullName: $data"></span>
-                        <span data-test-id="tasks-foreman-email" data-bind="text: $data.email ? '(' + $data.email + ')' : ''"></span>
-                        <!-- /ko -->
-                        <!-- ko ifnot: $data.id -->
-                        <a class="add-foreman" data-bind="click: function() {}">
-                          <span data-bind="ltext: 'application.parties.addForeman'"></span>
-                        </a>
-                        <!-- /ko -->
-                      </td>
-                      <td>
-                        <a data-bind="attr: {href: '#!/application/' + $data.id}">
-                          <span class="foreman-application" data-bind="text: $data.id"></span>
-                        </a>
-                        <span class="foreman-state" data-bind="visible: $data.state, ltext: $data.state"></span>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-                <button class="btn btn-primary" data-bind="ltext: 'application.parties.addOtherForeman'"></button>
-                <button class="btn btn-primary" data-bind="ltext: 'application.parties.addSubstituteForeman'"></button>
-              </div>
+              <div data-bind="template: {name: 'application-foreman-tasks-template', data: $root.foreman}"></div>
             </div>
           </div>
 
@@ -1149,6 +1125,14 @@
           <!-- ko ifnot: finished -->
           <p data-bind="lhtml: 'invite.foreman.desc'" class="dialog-desc-wide"></p>
           <form>
+            <label for="foreman-role" data-bind="ltext: 'foreman.role'"></label>
+            <select name="foreman-role" class="form-input combobox long"
+                    data-bind="options: foremanRoles,
+                               optionsText: function(item) { return loc(item.i18nkey); },
+                               optionsValue: 'name',
+                               value: selectedRole,
+                               optionsCaption: loc('choose')"></select>
+
             <label data-bind="ltext: 'userinfo.email'" class="form-label" for="invite-foreman-email"></label>
             <input class="form-input text long" id="invite-foreman-email" type="text" data-bind="textInput: email" autofocus></input>
             <div data-bind="visible: error" >
@@ -1158,7 +1142,7 @@
               <span data-bind="ltext: 'application.inviteSend'"></span>
               <em data-bind="visible: pending" class="button-loader"></em>
             </button>
-            <a data-bind="ltext: 'cancel'" class="btn-dialog close cancel" onclick="window.parent.hub.send('upload-cancelled');return false;" href="#"></a>
+            <a data-bind="ltext: 'cancel'" class="btn-dialog close cancel" href="#" data-test-id="cancel-foreman-dialog"></a>
           </form>
           <!-- /ko -->
         </div>
@@ -1315,6 +1299,20 @@
 
           <button data-bind="ltext: 'neighbors.status-dialog.ok'" data-test-id="neighbor-status-ok" class="btn btn-primary btn-dialog close"></button>
 
+        </div>
+      </div>
+
+      <div id="dialog-cancel-application" class="window autosized">
+        <div class="dialog-header">
+          <p data-bind="ltext: 'application.cancelApplication'"></p>
+          <p class="dialog-close close">X</p>
+        </div>
+        <div class="dialog-content" data-bind="with: application">
+          <label data-bind="ltext: 'application.canceled.reason'"></label>
+          <textarea rows=10 class="form-input textarea really-long high" data-bind="textInput: cancelText"></textarea>
+          <div class='dialog-user-content application-cancel-text-content'></div>
+          <button class='btn btn-primary btn-dialog close' data-test-id='confirm-yes'></button>
+          <button class='btn btn-dialog close' data-test-id='confirm-no'></button>
         </div>
       </div>
 

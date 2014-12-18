@@ -97,6 +97,7 @@
 (defn- organization-meta [_ app]
   (let [org (organization/get-organization (:organization app))]
     {:name (organization/get-organization-name org)
+     :links (:links org)
      :requiredFieldsFillingObligatory (or (:app-required-fields-filling-obligatory org) false)}))
 
 (def post-verdict-states #{"verdictGiven" "constructionStarted" "closed"})
