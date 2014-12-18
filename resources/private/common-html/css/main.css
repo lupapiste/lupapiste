@@ -2154,6 +2154,12 @@ table.attachments-template-table td.attachment-group-select a {
   }
 }
 
+/* line 151, ../sass/partials/_tabs.scss */
+.missing-info-title {
+  margin-bottom: 6px;
+  margin-top: 24px;
+}
+
 /* line 1, ../sass/partials/_conversation.scss */
 .conversation-input {
   width: 100%;

@@ -170,7 +170,7 @@
       var nonpartyDocErrors = _.map(sortedNonpartyDocs, function(doc) { return doc.validationErrors; });
       var partyDocErrors = _.map(sortedPartyDocs, function(doc) { return doc.validationErrors; });
 
-      applicationModel.initValidationErrors(nonpartyDocErrors.concat(partyDocErrors));
+      applicationModel.updateMissingApplicationInfo(nonpartyDocErrors.concat(partyDocErrors));
 
       var devMode = LUPAPISTE.config.mode === "dev";
       docgen.displayDocuments("#applicationDocgen", app, applicationModel.summaryAvailable() ? [] : sortedNonpartyDocs, authorizationModel, {dataTestSpecifiers: devMode});

@@ -504,21 +504,23 @@
 
             <div class="clear spacerM"></div>
 
-            <!--  ko if:  !hasIncorrectlyFilledRequiredFields() -->
-              <h2 data-bind="ltext: 'application.allRequiredDataFilled'"></h2>
+            <!--  ko if:  !missingRequiredInfo() -->
+              <h2 class="missing-info-title"
+                  data-bind="ltext: 'application.allRequiredDataFilled'"></h2>
               <button class="btn btn-primary"
-                       data-test-id="application-submit-btn"
-                       data-bind="click: submitApplication,
-                                  visible: $root.authorization.ok('submit-application'),
-                                  enable: !processing() && !showInviteButtons() && (!requiredFieldsFillingObligatory() || !hasIncorrectlyFilledRequiredFields())">
-                 <span data-bind="ltext: 'application.submitApplication'"></span>
-                 <span class="icon send left-align"></span>
-               </button>
+                      data-test-id="application-submit-btn"
+                      data-bind="click: submitApplication,
+                                 visible: $root.authorization.ok('submit-application'),
+                                 enable: submitButtonEnabled">
+                <span data-bind="ltext: 'application.submitApplication'"></span>
+                <span class="icon send left-align"></span>
+              </button>
             <!-- /ko -->
 
-            <!--  ko if:  hasIncorrectlyFilledRequiredFields -->
-              <h2 data-bind="ltext: 'application.requiredDataMissing'"></h2>
-              <i class="error-text" data-bind="ltext: 'application.requiredDataDesc', visible: requiredFieldsFillingObligatory() && hasIncorrectlyFilledRequiredFields()"></i><br>
+            <!--  ko if:  missingRequiredInfo() -->
+              <h2 class="missing-info-title"
+                  data-bind="ltext: 'application.requiredDataMissing'"></h2>
+              <i class="error-text" data-bind="ltext: 'application.requiredDataDesc', visible: requiredFieldsFillingObligatory() && missingRequiredInfo()"></i><br>
               <button class="btn btn-primary"
                        data-test-id="application-submit-btn"
                        data-bind="click: submitApplication,
@@ -527,18 +529,38 @@
                  <span data-bind="ltext: 'application.submitApplication'"></span>
                  <span class="icon send left-align"></span>
                </button>
-                <!-- ko foreach: incorrectlyFilledRequiredFields -->
-                  <div data-bind="with: $data[0]">
-                    <h3 class="required-field-error-doc" data-bind="ltext: document.name + '._group_label'"></h3>
-                  </div>
-                  <!-- ko foreach: $data -->
+            <!-- /ko -->
+
+            <!--  ko if: hasIncorrectlyFilledRequiredFields() -->
+              <!-- ko foreach: incorrectlyFilledRequiredFields -->
+                <div data-bind="with: $data[0]">
+                  <h3 class="required-field-error-doc" data-bind="ltext: document.name + '._group_label'"></h3>
+                </div>
+                <!-- ko foreach: $data -->
+                <div class="requiredField-line">
+                  <span class="missing icon"></span>
+                  <span class="required-field-error-element-name" data-bind="ltext: element.locKey"></span>
+                  <a data-bind="click: $root.application.moveToIncorrectlyFilledRequiredField, ltext: 'view'" href="#"></a>
+                </div>
+                <!-- /ko -->
+              <!-- /ko -->
+            <!-- /ko -->
+
+            <!--  ko if: hasMissingRequiredAttachments() -->
+              <h2 class="missing-info-title"
+                  data-bind="ltext: 'application.missingRequiredAttachments'"></h2>
+              <!-- ko foreach: missingRequiredAttachments -->
+                <h3 class="required-field-error-doc"
+                    data-bind="text: loc(['attachmentType', $data[0], '_group_label'])"></h3>
+                <!-- ko foreach: $data[1] -->
                   <div class="requiredField-line">
                     <span class="missing icon"></span>
-                    <span class="required-field-error-element-name" data-bind="ltext: element.locKey"></span>
-                    <a data-bind="click: $root.application.moveToIncorrectlyFilledRequiredField, ltext: 'view'" href="#"></a>
+                    <span class="required-field-error-element-name"
+                          data-bind="text: loc(['attachmentType', type['type-group'](), type['type-id']()])"></span>
+                    <a data-bind="click: $root.application.moveToMissingRequiredAttachment, ltext: 'view'" href="#"></a>
                   </div>
-                  <!-- /ko -->
                 <!-- /ko -->
+              <!-- /ko -->
             <!-- /ko -->
           </div>
 
