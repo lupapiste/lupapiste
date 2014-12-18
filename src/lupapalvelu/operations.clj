@@ -739,6 +739,13 @@
                                    :add-operation-allowed false
                                    :link-permit-required true}
 
+     :tyonjohtajan-nimeaminen-v2  {:schema "hankkeen-kuvaus-minimum"
+                                   :permit-type permit/R
+                                   :required ["tyonjohtaja-v2"]
+                                   :attachments []
+                                   :add-operation-allowed false
+                                   :link-permit-required true}
+
      :suunnittelijan-nimeaminen   {:schema "hankkeen-kuvaus-minimum"
                                    :permit-type permit/R
                                    :required ["suunnittelija" "maksaja"]

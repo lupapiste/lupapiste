@@ -20,7 +20,7 @@ Mikko invites foreman to application
   Input Text  invite-foreman-email  teppo@example.com
   Click by test id  application-invite-foreman
   Wait until  Click by test id  application-invite-foreman-close-dialog
-  Wait until  Element should be visible  //section[@id='application']//span[@data-test-operation-id='tyonjohtajan-nimeaminen']
+  Wait until  Element should be visible  //section[@id='application']//span[@data-test-operation-id='tyonjohtajan-nimeaminen-v2']
 
 Mikko sees sent invitation on the original application
   Click by test id  test-application-link-permit-lupapistetunnus
@@ -78,4 +78,4 @@ Mikko can invite additional foremans to application with verdict
   Input Text  invite-foreman-email  teppo@example.com
   Click by test id  application-invite-foreman
   Wait until  Click by test id  application-invite-foreman-close-dialog
-  Wait until  Element should be visible  //section[@id='application']//span[@data-test-operation-id='tyonjohtajan-nimeaminen']
+  Wait until  Element should be visible  //section[@id='application']//span[@data-test-operation-id='tyonjohtajan-nimeaminen-v2']
