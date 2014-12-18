@@ -143,6 +143,7 @@
    :auth (:auth application)
    :documents (filter #(= (get-in % [:schema-info :name]) "tyonjohtaja") (:documents application))})
 
+;TODO unfinished
 (defn- get-foreman-applications [foreman-application]
   (let [foreman-doc  (first (filter #(= "tyonjohtaja-v2" (-> % :schema-info :name)) (:documents foreman-application)))
         foreman-hetu (get-in foreman-doc [:data :henkilotiedot :hetu :value])
@@ -151,6 +152,7 @@
     )
   )
 
+;TODO unfinished
 (defquery foreman-history
   {:roles            [:applicant :authority] ; TODO: Needs to be restricted to only authority + specific extra auth roles
    :states           action/all-states
@@ -159,8 +161,6 @@
   [{application :application user :user :as command}]
   (if application
     (let [
-
-
           ;linked-apps      (mongo/select :app-links {:link {$in [application-id]}})
           ;linked-apps      (filter #(= (get-in % [(keyword application-id) :type]) "linkpermit") linked-apps)
           ;get-other-app-id (fn [app] (first (remove #{application-id} (:link app))))
