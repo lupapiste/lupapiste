@@ -388,13 +388,14 @@
 ;(def henkilo-valitsin [{:name "userId" :type :personSelector :blacklist [:neighbor]}])
 (def tayta-omat-tiedot-button {:name "fillMyInfo" :type :fillMyInfoButton})
 
-(def authority-history {:name "authorityHistory" :type :authorityHistory})
+(def tyonjohtajan-historia {:name "authorityHistory" :type :authorityHistory})
 
-(def authority-acceptance (body
-                            authority-history))
+(def tyonjohtajan-hyvaksynta [{:name "tyonjohtajanHyvaksynta" :type :group
+                               :body [{:name "tyonjohtahanHyvaksynta" :type :checkbox :i18nkey "tyonjohtaja.historia.hyvaksynta"}
+                                      tyonjohtajan-historia]}])
 
 (def tyonjohtaja-v2 (body
-                      authority-acceptance
+                      tyonjohtajan-hyvaksynta
                       ilmoitus-hakemus-valitsin
                       kuntaroolikoodi-tyonjohtaja-v2
                       patevyysvaatimusluokka
