@@ -143,18 +143,19 @@
    :auth (:auth application)
    :documents (filter #(= (get-in % [:schema-info :name]) "tyonjohtaja") (:documents application))})
 
-;TODO unfinished
-(defn- get-foreman-project-applications [foreman-application]
-  ; 1. Hae foreman hetu
-  ; 2. Hae kaikki tyonjohtajan-nimeaminen(-v2) -hakemukset, joissa on tämä foreman hetu
-  ; 3. Hae ne hakemukset, joihin kohdan 2. hakemukset on linkitetty
-  ; 4. profit
-  (let [foreman-doc  (first (filter #(= "tyonjohtaja-v2" (-> % :schema-info :name)) (:documents foreman-application)))
-        foreman-hetu (get-in foreman-doc [:data :henkilotiedot :hetu :value])
-        foreman-apps (mongo/select :applications {})
-        ]
-    )
-  )
+(defn- get-foreman-project-applications
+  "Based on the passed foreman application, fetches all project applications that have the same foreman as in
+  the passed foreman application (personal id is used as key). Returns all the linked applications as a list"
+  [foreman-application]
+  (let [foreman-doc     (first (filter #(= "tyonjohtaja-v2" (-> % :schema-info :name)) (:documents foreman-application)))
+        foreman-hetu    (get-in foreman-doc [:data :henkilotiedot :hetu :value])
+        foreman-apps    (mongo/select :applications {"operations.name" "tyonjohtajan-nimeaminen-v2"
+                                                  :documents {$elemMatch {"schema-info.name" "tyonjohtaja-v2"
+                                                                          "data.henkilotiedot.hetu.value" foreman-hetu}}})
+        foreman-app-ids (map :id foreman-apps)
+        links           (mongo/select :app-links {:link {$in (map :id foreman-apps)}})
+        linked-app-ids  (remove (set foreman-app-ids) (distinct (mapcat #(:link %) links)))]
+    (mongo/select :applications {:_id {$in linked-app-ids}})))
 
 ;TODO unfinished
 (defquery foreman-history
@@ -164,13 +165,7 @@
    :parameters       [:id]}
   [{application :application user :user :as command}]
   (if application
-    (let [
-          ;linked-apps      (mongo/select :app-links {:link {$in [application-id]}})
-          ;linked-apps      (filter #(= (get-in % [(keyword application-id) :type]) "linkpermit") linked-apps)
-          ;get-other-app-id (fn [app] (first (remove #{application-id} (:link app))))
-          ;get-app-type-fn  (fn [app] (get-in app [(keyword (get-other-app-id app)) :app-type]))
-          ;linked-apps      (filter #(re-matches #"^tyonjohtajan-nimeaminen.*" (get-app-type-fn %)) linked-apps)
-          ]
+    (let []
 
       (ok :projects [{:municipality "Helsinki" :difficulty "A" :jobDescription "Vastaava tyonjohtaja" :operation "Asuinrakennuksen rakentaminen"}
                    {:municipality "Helsinki" :difficulty "A" :jobDescription "Vastaava tyonjohtaja" :operation "Asuinrakennuksen rakentaminen"}
