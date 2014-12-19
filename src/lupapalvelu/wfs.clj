@@ -459,5 +459,10 @@
                  {:query-params (:params request)
                   :headers {"accept-encoding" (get-in request [:headers "accept-encoding"])}
                   :basic-auth [username password]
-                  :as :stream})))))
+                  :as :stream}))
+      "plandocument" (let [id (read-string (get-in request [:params :id]))]
+                       (http/get (str "http://194.28.3.37/maarays/" id "x.pdf")
+              {:query-params (:params request)
+               :headers {"accept-encoding" (get-in request [:headers "accept-encoding"])}
+               :as :stream})))))
 

@@ -149,5 +149,6 @@
                "property-info-by-wkt" property-info-by-wkt-proxy
                "wmscap" wms-capabilities-proxy
                "plan-urls-by-point" plan-urls-by-point-proxy
-               "general-plan-urls-by-point" general-plan-urls-by-point-proxy})
+               "general-plan-urls-by-point" general-plan-urls-by-point-proxy
+               "plandocument" (cache (* 3 60 60 24) (secure wfs/raster-images "plandocument"))})
 
