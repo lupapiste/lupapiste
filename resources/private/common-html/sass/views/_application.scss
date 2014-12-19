@@ -591,12 +591,27 @@
   }
 }
 
-.organization-links {
-  margin-bottom: 12px;
-  a {
-    color: $color-text;
-    &:active, &:visited, &:hover {
+.operation-info {
+  width: 55%;
+  display: inline-block;
+  vertical-align: top;
+}
+.organizationLinks {
+  vertical-align: top;
+  width: 39%;
+  padding-left: $marginL*2;
+  display: inline-block;
+  .organization-links {
+    margin-bottom: 12px;
+    a {
       color: $color-text;
+      &:active, &:visited, &:hover {
+        color: $color-text;
+      }
     }
   }
+
 }
+
+
+
