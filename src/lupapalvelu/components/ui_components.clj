@@ -142,13 +142,13 @@
    :application  {:depends [:common-html :repository :tree :task :create-task :modal-datepicker :signing :invites :side-panel]
                   :js ["add-link-permit.js" "map-model.js" "change-location.js" "invite.js" "verdicts-model.js"
                        "add-operation.js" "foreman-model.js" "ui-components/fill-info-button/fill-info-model.js"
-                       "ui-components/authority-accept/authority-accept-model.js"
+                       "ui-components/authority-history/authority-history-model.js"
                        "request-statement-model.js" "add-party.js" "attachments-tab-model.js" "application-model.js"
                        "invite-company.js" "application.js"]
                   :html ["attachment-actions-template.html" "attachments-template.html" "add-link-permit.html" "application.html" "inforequest.html" "add-operation.html"
                          "change-location.html" "invite-company.html" "foreman-template.html"
                          "ui-components/fill-info-button/fill-info-button-template.html"
-                         "ui-components/authority-accept/authority-accept-template.html"]}
+                         "ui-components/authority-history/authority-history-template.html"]}
 
    :applications {:depends [:common-html :repository :invites]
                   :html ["applications.html"]

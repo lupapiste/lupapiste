@@ -388,7 +388,10 @@
 ;(def henkilo-valitsin [{:name "userId" :type :personSelector :blacklist [:neighbor]}])
 (def tayta-omat-tiedot-button {:name "fillMyInfo" :type :fillMyInfoButton})
 
-(def authority-acceptance {:name "authorityAccept" :type :authorityAccept})
+(def authority-history {:name "authorityHistory" :type :authorityHistory})
+
+(def authority-acceptance (body
+                            authority-history))
 
 (def tyonjohtaja-v2 (body
                       authority-acceptance

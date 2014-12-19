@@ -819,7 +819,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return span;
   }
 
-  function buildAuthorityAccept(subSchema, model, path) {
+  function buildAuthorityHistory(subSchema, model, path) {
     var params = {
       applicationId: self.appId
     };
@@ -829,7 +829,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       return key + ": " + key;
     }).join(", ");
 
-    return $("<authority-accept-fields>")
+    return $("<authority-history>")
       .attr("params", paramsStr)
       .addClass("form-table")
       .applyBindings(params)
@@ -967,7 +967,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     buildingSelector: buildBuildingSelector,
     newBuildingSelector: buildNewBuildingSelector,
     fillMyInfoButton: buildFillMyInfoButton,
-    authorityAccept: buildAuthorityAccept,
+    authorityHistory: buildAuthorityHistory,
     personSelector: buildPersonSelector,
     table: buildTableRow,
     unknown: buildUnknown
