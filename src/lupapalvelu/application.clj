@@ -144,7 +144,11 @@
    :documents (filter #(= (get-in % [:schema-info :name]) "tyonjohtaja") (:documents application))})
 
 ;TODO unfinished
-(defn- get-foreman-applications [foreman-application]
+(defn- get-foreman-project-applications [foreman-application]
+  ; 1. Hae foreman hetu
+  ; 2. Hae kaikki tyonjohtajan-nimeaminen(-v2) -hakemukset, joissa on tämä foreman hetu
+  ; 3. Hae ne hakemukset, joihin kohdan 2. hakemukset on linkitetty
+  ; 4. profit
   (let [foreman-doc  (first (filter #(= "tyonjohtaja-v2" (-> % :schema-info :name)) (:documents foreman-application)))
         foreman-hetu (get-in foreman-doc [:data :henkilotiedot :hetu :value])
         foreman-apps (mongo/select :applications {})
