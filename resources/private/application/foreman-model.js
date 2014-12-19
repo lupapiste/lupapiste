@@ -92,7 +92,11 @@ LUPAPISTE.ForemanModel = function() {
       var foremanTask = _.find(self.application().tasks, { "id": taskId });
       if (foremanTask && foremanTask.taskname) {
         self.selectedRole(foremanTask.taskname.toLowerCase());
+      } else {
+        self.selectedRole(undefined);
       }
+    } else {
+      self.selectedRole(undefined);
     }
     self.email(undefined);
     self.finished(false);
