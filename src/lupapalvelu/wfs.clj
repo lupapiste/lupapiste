@@ -7,7 +7,7 @@
             [clojure.data.zip.xml :refer [xml-> text attr=]]
             [sade.env :as env]
             [sade.xml]
-            [sade.strings :refer [starts-with-i]]
+            [sade.strings :refer [starts-with-i numeric?]]
             [sade.util :refer [future*] :as util]
             [sade.core :refer :all]))
 
@@ -460,9 +460,10 @@
                   :headers {"accept-encoding" (get-in request [:headers "accept-encoding"])}
                   :basic-auth [username password]
                   :as :stream}))
-      "plandocument" (let [id (read-string (get-in request [:params :id]))]
+      "plandocument" (let [id (get-in request [:params :id])]
+                       (assert (numeric? id))
                        (http/get (str "http://194.28.3.37/maarays/" id "x.pdf")
-              {:query-params (:params request)
-               :headers {"accept-encoding" (get-in request [:headers "accept-encoding"])}
-               :as :stream})))))
+                         {:query-params (:params request)
+                          :headers {"accept-encoding" (get-in request [:headers "accept-encoding"])}
+                          :as :stream})))))
 
