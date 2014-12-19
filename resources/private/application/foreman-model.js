@@ -95,6 +95,8 @@ LUPAPISTE.ForemanModel = function() {
       } else {
         self.selectedRole(undefined);
       }
+    } else {
+      self.selectedRole(undefined);
     }
     self.email(undefined);
     self.finished(false);
