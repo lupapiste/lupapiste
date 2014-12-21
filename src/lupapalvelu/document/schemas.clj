@@ -315,45 +315,47 @@
 (def kuntaroolikoodi-tyonjohtaja-v2 [{:name "kuntaRoolikoodi"
                                       :i18nkey "osapuoli.tyonjohtaja.kuntaRoolikoodi._group_label"
                                       :type :select
+                                      :emit [:filterByCode]
                                       :sortBy :displayname
                                       :required true
-                                      :body [{:name "vastaava ty\u00F6njohtaja" :i18nkey "osapuoli.tyonjohtaja.kuntaRoolikoodi.vastaava ty\u00f6njohtaja"}
-                                             {:name "KVV-ty\u00F6njohtaja" :i18nkey "osapuoli.tyonjohtaja.kuntaRoolikoodi.KVV-ty\u00f6njohtaja"}
-                                             {:name "IV-ty\u00F6njohtaja" :i18nkey "osapuoli.tyonjohtaja.kuntaRoolikoodi.IV-ty\u00f6njohtaja"}
-                                             {:name "erityisalojen ty\u00F6njohtaja" :i18nkey "osapuoli.tyonjohtaja.kuntaRoolikoodi.erityisalojen ty\u00f6njohtaja"}]}])
+                                      :body [{:name "vastaava ty\u00F6njohtaja" :code :vtj :i18nkey "osapuoli.tyonjohtaja.kuntaRoolikoodi.vastaava ty\u00f6njohtaja"}
+                                             {:name "KVV-ty\u00F6njohtaja" :code :kvv :i18nkey "osapuoli.tyonjohtaja.kuntaRoolikoodi.KVV-ty\u00f6njohtaja"}
+                                             {:name "IV-ty\u00F6njohtaja" :code :ivt :i18nkey "osapuoli.tyonjohtaja.kuntaRoolikoodi.IV-ty\u00f6njohtaja"}
+                                             {:name "erityisalojen ty\u00F6njohtaja" :code :vrt :i18nkey "osapuoli.tyonjohtaja.kuntaRoolikoodi.erityisalojen ty\u00f6njohtaja"}]}])
 
 (def vastattavat-tyotehtavat-tyonjohtaja-v2 [{:name "vastattavatTyotehtavat"
                                               :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat._group_label"
                                               :type :group
+                                              :listen [:filterByCode]
                                               :layout :vertical
-                                              :body [{:name "ivLaitoksenAsennustyo" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.ivLaitoksenAsennustyo" :type :checkbox}
-                                                     {:name "ivLaitoksenKorjausJaMuutostyo" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.ivLaitoksenKorjausJaMuutostyo" :type :checkbox}
-                                                     {:name "ivLaitoksenAsennustyoIvLaitoksenKorjausJaMuutostyo" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.ivLaitoksenAsennustyoIvLaitoksenKorjausJaMuutostyo" :type :checkbox}
-                                                     {:name "ivLaitoksenKorjausJaMuutostyoIvLaitoksenAsennustyo" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.ivLaitoksenKorjausJaMuutostyoIvLaitoksenAsennustyo" :type :checkbox}
-                                                     {:name "ivLaitoksenAsennustyo12Krs" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.ivLaitoksenAsennustyo12Krs" :type :checkbox}
-                                                     {:name "ivLaitoksenAsennustyo" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.ivLaitoksenAsennustyo" :type :checkbox}
-                                                     {:name "sisapuolinenKvvTyo" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.sisapuolinenKvvTyo" :type :checkbox}
-                                                     {:name "ulkopuolinenKvvTyo" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.ulkopuolinenKvvTyo" :type :checkbox}
-                                                     {:name "sukitus" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.sukitus" :type :checkbox}
-                                                     {:name "maanrakennusKvvUlkopuoli" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.maanrakennusKvvUlkopuoli" :type :checkbox}
-                                                     {:name "rakennuksenMuutosJaKorjaustyo" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.rakennuksenMuutosJaKorjaustyo" :type :checkbox}
-                                                     {:name "uudisrakennustyoMaanrakennustoineen" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.uudisrakennustyoMaanrakennustoineen" :type :checkbox}
-                                                     {:name "uudisrakennustyoIlmanMaanrakennustoita" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.uudisrakennustyoIlmanMaanrakennustoita" :type :checkbox}
-                                                     {:name "linjasaneeraus" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.linjasaneeraus" :type :checkbox}
-                                                     {:name "maanrakennustyot" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.maanrakennustyot" :type :checkbox}
-                                                     {:name "rakennuksenPurkaminen" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.rakennuksenPurkaminen" :type :checkbox}
-                                                     {:name "paalutus" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.paalutus" :type :checkbox}
-                                                     {:name "kayttotarkoituksenMuutos" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.kayttotarkoituksenMuutos" :type :checkbox}
-                                                     {:name "markatilamuutos" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.markatilamuutos" :type :checkbox}
-                                                     {:name "taydentavatRakennustyot" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.taydentavatRakennustyot" :type :checkbox}
-                                                     {:name "vesijohtojenUusiminenJaViemareidenPinnoittaminen" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.vesijohtojenUusiminenJaViemareidenPinnoittaminen" :type :checkbox}
-                                                     {:name "peruslaatta" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.peruslaatta" :type :checkbox}
-                                                     {:name "alaslaskukatotLattiavalujaJaSisatyot" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.alaslaskukatotLattiavalujaJaSisatyot" :type :checkbox}
-                                                     {:name "hissinRakentaminen" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.hissinRakentaminen" :type :checkbox}
-                                                     {:name "muutostyo" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.muutostyo" :type :checkbox}
-                                                     {:name "hissienJalkiasennus" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.hissienJalkiasennus" :type :checkbox}
-                                                     {:name "vesikatonKorjaustyo" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.vesikatonKorjaustyo" :type :checkbox}
-                                                     {:name "pihamaajarjestelyt" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.pihamaajarjestelyt" :type :checkbox}]}])
+                                              :body [{:name "ivLaitoksenAsennustyo" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.ivLaitoksenAsennustyo" :codes [:ivt] :type :checkbox}
+                                                     {:name "ivLaitoksenKorjausJaMuutostyo" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.ivLaitoksenKorjausJaMuutostyo" :codes [:ivt] :type :checkbox}
+                                                     {:name "ivLaitoksenAsennustyoIvLaitoksenKorjausJaMuutostyo" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.ivLaitoksenAsennustyoIvLaitoksenKorjausJaMuutostyo" :codes [:ivt] :type :checkbox}
+                                                     {:name "ivLaitoksenKorjausJaMuutostyoIvLaitoksenAsennustyo" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.ivLaitoksenKorjausJaMuutostyoIvLaitoksenAsennustyo" :codes [:ivt] :type :checkbox}
+                                                     {:name "ivLaitoksenAsennustyo12Krs" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.ivLaitoksenAsennustyo12Krs" :codes [:ivt] :type :checkbox}
+                                                     {:name "ivLaitoksenAsennustyo" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.ivLaitoksenAsennustyo" :codes [:ivt] :type :checkbox}
+                                                     {:name "sisapuolinenKvvTyo" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.sisapuolinenKvvTyo" :codes [:kvv] :type :checkbox}
+                                                     {:name "ulkopuolinenKvvTyo" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.ulkopuolinenKvvTyo" :codes [:kvv] :type :checkbox}
+                                                     {:name "sukitus" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.sukitus" :codes [:vrt] :type :checkbox}
+                                                     {:name "maanrakennusKvvUlkopuoli" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.maanrakennusKvvUlkopuoli" :codes [:vrt] :type :checkbox}
+                                                     {:name "rakennuksenMuutosJaKorjaustyo" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.rakennuksenMuutosJaKorjaustyo" :codes [:vtj] :type :checkbox}
+                                                     {:name "uudisrakennustyoMaanrakennustoineen" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.uudisrakennustyoMaanrakennustoineen" :codes [:vtj] :type :checkbox}
+                                                     {:name "uudisrakennustyoIlmanMaanrakennustoita" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.uudisrakennustyoIlmanMaanrakennustoita" :codes [:vtj] :type :checkbox}
+                                                     {:name "linjasaneeraus" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.linjasaneeraus" :codes [:vtj] :type :checkbox}
+                                                     {:name "maanrakennustyot" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.maanrakennustyot" :codes [:vtj] :type :checkbox}
+                                                     {:name "rakennuksenPurkaminen" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.rakennuksenPurkaminen" :codes [:vtj] :type :checkbox}
+                                                     {:name "paalutus" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.paalutus" :codes [:vtj] :type :checkbox}
+                                                     {:name "kayttotarkoituksenMuutos" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.kayttotarkoituksenMuutos" :codes [:vtj] :type :checkbox}
+                                                     {:name "markatilamuutos" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.markatilamuutos" :codes [:vtj] :type :checkbox}
+                                                     {:name "taydentavatRakennustyot" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.taydentavatRakennustyot" :codes [:vtj] :type :checkbox}
+                                                     {:name "vesijohtojenUusiminenJaViemareidenPinnoittaminen" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.vesijohtojenUusiminenJaViemareidenPinnoittaminen" :codes [:vtj] :type :checkbox}
+                                                     {:name "peruslaatta" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.peruslaatta" :codes [:vtj] :type :checkbox}
+                                                     {:name "alaslaskukatotLattiavalujaJaSisatyot" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.alaslaskukatotLattiavalujaJaSisatyot" :codes [:vtj] :type :checkbox}
+                                                     {:name "hissinRakentaminen" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.hissinRakentaminen" :codes [:vtj] :type :checkbox}
+                                                     {:name "muutostyo" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.muutostyo" :codes [:vtj] :type :checkbox}
+                                                     {:name "hissienJalkiasennus" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.hissienJalkiasennus" :codes [:vtj] :type :checkbox}
+                                                     {:name "vesikatonKorjaustyo" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.vesikatonKorjaustyo" :codes [:vtj] :type :checkbox}
+                                                     {:name "pihamaajarjestelyt" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.pihamaajarjestelyt" :codes [:vtj] :type :checkbox}]}])
 
 (def tyonjohtaja-hanketieto {:name "tyonjohtajaHanketieto" :type :group
                              :body [{:name "taysiaikainenOsaaikainen" :type :radioGroup :body [{:name "taysiaikainen"} {:name "osaaikainen"}] :default "taysiaikainen"}

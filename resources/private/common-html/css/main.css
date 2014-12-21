@@ -5492,7 +5492,7 @@ div.stamp-content {
 
 /* line 149, ../sass/main.scss */
 .hidden {
-  display: none;
+  display: none !important;
 }
 
 /* line 153, ../sass/main.scss */

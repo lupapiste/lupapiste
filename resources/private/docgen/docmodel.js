@@ -22,6 +22,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   self.eventData = { doc: doc.id, app: self.appId };
   self.propertyId = application.propertyId;
   self.isDisabled = options && options.disabled;
+  self.events = [];
 
   self.getMeta = function (path, m) {
     var meta = m ? m : self.meta;
@@ -109,6 +110,15 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       element.fadeOut("slow").css("display", "none");
     }
   };
+
+  // trigger stored events once
+  self.triggerEvents = function() {
+    _.forEach(self.events, function(event) {
+      hub.send(event.name, event.data);
+    });
+    self.events = [];
+  };
+
   // ID utilities
 
   function pathStrToID(pathStr) {
@@ -203,6 +213,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var sizeClass = self.sizeClasses[subSchema.size] || "";
     span.className = "form-entry " + sizeClass;
 
+    if (subSchema.codes) {
+      span.setAttribute("data-codes", subSchema.codes.join(" "));
+    }
 
     // Display text areas in a wide container
     if (subSchema.type === "text") {
@@ -514,8 +527,13 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     if (subSchema.readonly) {
       select.readOnly = true;
     } else {
-      select.onchange = save;
+      select.onchange = function(e) {
+        save(e);
+        emit(getEvent(e).target.value, subSchema);
+      };
     }
+
+    emitLater(selectedOption, subSchema);
 
     var otherKey = subSchema["other-key"];
     if (otherKey) {
@@ -596,8 +614,18 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     if (subSchema.approvable) {
       label.appendChild(self.makeApprovalButtons(path, myModel));
     }
-
     div.appendChild(partsDiv);
+
+    var listen = subSchema.listen;
+    _.forEach(listen, function(listenEvent) {
+      if (listenEvent === "filterByCode") {
+        $(div).find("[data-codes]").addClass("hidden");
+        hub.subscribe(listenEvent, function(event) {
+          $(div).find("[data-codes]").addClass("hidden");
+          $(div).find("[data-codes*='" + event.code + "']").removeClass("hidden");
+        });
+      }
+    });
     return div;
   }
 
@@ -1360,6 +1388,26 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }
 
     saveForReal(path, value, _.partial(afterSave, label, loader, indicator, callback));
+  }
+
+  function emitLater(value, subSchema) {
+    emit(value, subSchema, true);
+  }
+
+  function emit(value , subSchema, sendLater) {
+    if (subSchema.emit) {
+      _.forEach(subSchema.emit, function(event) {
+        if (event === "filterByCode") {
+          var schemaValue = _.find(subSchema.body, {name: value});
+          var code = schemaValue ? schemaValue.code : "";
+          if (sendLater) {
+            self.events.push({name: event, data: {code: code}});
+          } else {
+            hub.send(event, {code: code});
+          }
+        }
+      });
+    }
   }
 
   function removeDoc(e) {
