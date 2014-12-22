@@ -237,14 +237,14 @@
   {:parameters [:id type]
    :input-validators [(fn [{{type :type} :data}] (when-not (collections-to-be-seen type) (fail :error.unknown-type)))]
    :roles [:applicant :authority]
-   :states all-application-states}
+   :states action/all-application-states}
   [{:keys [data user created] :as command}]
   (update-application command {$set (mark-collection-seen-update user created type)}))
 
 (defcommand mark-everything-seen
   {:parameters [:id]
    :roles      [:authority]
-   :states     all-application-states}
+   :states     action/all-application-states}
   [{:keys [application user created] :as command}]
   (update-application command {$set (mark-indicators-seen-updates application user created)}))
 
