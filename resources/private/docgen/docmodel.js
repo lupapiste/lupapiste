@@ -1405,8 +1405,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         hub.send(event, {code: code});
       }
     },
-    valueChanged: function(event, value, subSchema, sendLater) {
-      hub.send(event, {name: subSchema.name, value: value});
+    hetuChanged: function(event, value, subSchema, sendLater) {
+      hub.send(event, {value: value});
     },
     emitUnknown: function(event, value, subSchema) {
       error("Unknown emitter event:", event);
