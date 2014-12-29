@@ -144,7 +144,7 @@
                     <span class="save-indicator" data-bind="saveIndicator: indicator, name: 'size'"></span>
                     <select data-test-id="attachment-size-select"
                             data-bind="options: sizes,
-                                       optionsText: function(item) {return item === 'muu' ? loc('select-other') : item},
+                                       optionsText: function(item) {return loc(item);},
                                        optionsCaption: loc('choose'),
                                        value: size,
                                        enable: $root.authorization.ok('set-attachment-meta') && editable"></select>

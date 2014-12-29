@@ -211,7 +211,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     // Override style with layout option
     if (subSchema.layout) {
-      span.className = "form-entry form-" + subSchema.layout + " " + self.sizeClass;
+      span.className = "form-entry form-" + subSchema.layout + " " + sizeClass;
     }
 
     // durable field error panels
@@ -819,6 +819,44 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return span;
   }
 
+  function buildAuthorityAccept(subSchema, model, path) {
+    var params = {
+      applicationId: self.appId
+    };
+
+    // TODO: move to function
+    var paramsStr = _.map(_.keys(params), function(key) {
+      return key + ": " + key;
+    }).join(", ");
+
+    return $("<authority-accept-fields>")
+      .attr("params", paramsStr)
+      .addClass("form-table")
+      .applyBindings(params)
+      .get(0);
+  }
+
+  function buildFillMyInfoButton(subSchema, model, path) {
+    var myNs = path.slice(0, path.length - 1).join(".");
+
+    var params = {
+      id: self.appId,
+      documentId: self.docId,
+      userId: currentUser.id(),
+      path: myNs,
+      collection: self.getCollection()
+    };
+
+    var paramsStr = _.map(_.keys(params), function(key) {
+      return key + ": " + key;
+    }).join(", ");
+
+    return $("<fill-info-button params>")
+      .attr("params", paramsStr)
+      .applyBindings(params)
+      .get(0);
+  }
+
   function buildPersonSelector(subSchema, model, path) {
     var myPath = path.join(".");
     var span = makeEntrySpan(subSchema, myPath);
@@ -928,6 +966,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     element: buildElement,
     buildingSelector: buildBuildingSelector,
     newBuildingSelector: buildNewBuildingSelector,
+    fillMyInfoButton: buildFillMyInfoButton,
+    authorityAccept: buildAuthorityAccept,
     personSelector: buildPersonSelector,
     table: buildTableRow,
     unknown: buildUnknown
@@ -1024,6 +1064,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         var div = document.createElement("div");
         div.className = "form-table";
         var table = document.createElement("table");
+        table.id = "table-" + subSchema.name;
         var tbody = document.createElement("tbody");
         table.appendChild(createTableHeader(models, myPath.join(".")));
         _.each(elements, function(element) {
@@ -1057,7 +1098,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       };
 
       var tableAppender = function () {
-        var parent$ = $(this).closest(".accordion-fields").find("tbody");
+        var parent$ = $(this).closest(".accordion-fields").find("#" + "table-" + subSchema.name + " tbody");
         var count = parent$.find("*[data-repeating-id='" + repeatingId + "']").length;
         while (parent$.find("*[data-repeating-id-" + repeatingId + "='" + count + "']").length) {
           count++;
@@ -1104,12 +1145,14 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       if (subSchema.type === "table") {
         $(appendButton).click(tableAppender);
         var locKey = [self.schemaI18name, myPath.join("."), "copyLabel"];
-        if (subSchema.i18nkey) {
-          locKey = [subSchema.i18nkey, "copyLabel"];
+        if (subSchema.copybutton) {
+          if (subSchema.i18nkey) {
+            locKey = [subSchema.i18nkey, "copyLabel"];
+          }
+          var copyButton = makeButton(myPath.join("_") + "_copy", loc(locKey));
+          $(copyButton).click(copyElement);
+          buttonGroup.appendChild(copyButton);
         }
-        var copyButton = makeButton(myPath.join("_") + "_copy", loc(locKey));
-        $(copyButton).click(copyElement);
-        buttonGroup.appendChild(copyButton);
       } else {
         $(appendButton).click(appender);
       }

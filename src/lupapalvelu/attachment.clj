@@ -268,9 +268,10 @@
       :YI attachment-types-YI
       :YL attachment-types-YL
       :VVVL attachment-types-YI ;TODO quick fix to get test and qa work. Put correct attachment list here
+      :MM attachment-types-KT ;TODO quick fix to get test and qa work. Put correct attachment list here
       :MAL attachment-types-MAL
       :KT attachment-types-KT
-      (fail! (str "unsupported permit-type: " permit-type)))))
+      (fail! (str "unsupported permit-type: " (name permit-type))))))
 
 (defn get-attachment-types-for-application
   [application]

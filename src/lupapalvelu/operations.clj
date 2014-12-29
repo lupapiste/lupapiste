@@ -613,13 +613,13 @@
                                    :add-operation-allowed true
                                    :link-permit-required false}
      :tonttijaon-hakeminen        {:schema "maankayton-muutos"
-                                   :permit-type permit/MM
+                                   :permit-type permit/KT
                                    :required common-maanmittaus-schemas
                                    :attachments []
                                    :add-operation-allowed false
                                    :link-permit-required false}
     :tonttijaon-muutoksen-hakeminen {:schema "maankayton-muutos"
-                                   :permit-type permit/MM
+                                   :permit-type permit/KT
                                    :required common-maanmittaus-schemas
                                    :attachments []
                                    :add-operation-allowed false
@@ -735,6 +735,13 @@
      :tyonjohtajan-nimeaminen     {:schema "hankkeen-kuvaus-minimum"
                                    :permit-type permit/R
                                    :required ["tyonjohtaja" "maksaja"]
+                                   :attachments []
+                                   :add-operation-allowed false
+                                   :link-permit-required true}
+
+     :tyonjohtajan-nimeaminen-v2  {:schema "hankkeen-kuvaus-minimum"
+                                   :permit-type permit/R
+                                   :required ["tyonjohtaja-v2"]
                                    :attachments []
                                    :add-operation-allowed false
                                    :link-permit-required true}
