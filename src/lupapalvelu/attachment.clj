@@ -295,8 +295,8 @@
 
 (defn make-attachments
   "creates attachments with nil target"
-  [now applicationState attachment-types requested-by-authority?]
-  (map (partial make-attachment now nil true requested-by-authority? false applicationState nil) attachment-types))
+  [now applicationState attachment-types locked? required? requested-by-authority?]
+  (map (partial make-attachment now nil required? requested-by-authority? locked? applicationState nil) attachment-types))
 
 (defn create-attachment [application attachment-type op now target locked? & [attachment-id]]
   {:pre [(map? application)]}
@@ -308,9 +308,9 @@
 
     (:id attachment)))
 
-(defn create-attachments [application attachment-types now requested-by-authority?]
+(defn create-attachments [application attachment-types now locked? required? requested-by-authority?]
   {:pre [(map? application)]}
-  (let [attachments (make-attachments now (:state application) attachment-types requested-by-authority?)]
+  (let [attachments (make-attachments now (:state application) attachment-types locked? required? requested-by-authority?)]
     (update-application
       (application->command application)
       {$set {:modified now}
