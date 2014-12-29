@@ -47,7 +47,8 @@ Mikko logs in, goes to attachments tab and sees all "not needed" checkboxes as e
   Mikko logs in
   Open application  submit-app  753-416-25-30
   Open tab  attachments
-  Element Should Be Visible  xpath=//table[@data-test-id='attachments-template-table']//input[@type='checkbox']
+  Wait Until  Element should be visible  xpath=//table[@data-test-id="attachments-template-table"]//td[contains(text(), 'Asuinkerrostalon tai rivitalon rakentaminen')]
+  Element should not be visible  xpath=//table[@data-test-id="attachments-template-table"]//td[contains(text(), 'Yleiset hankkeen liitteet')]
   Xpath Should Match X Times  //table[@data-test-id='attachments-template-table']//input[@notneeded='true']  0
 
 # - requiredFieldSummary-tabin Submit-napilla ei voi jattaa hakemusta, kun on puuttuvia tietoja
