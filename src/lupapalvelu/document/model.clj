@@ -123,7 +123,7 @@
       [:err "application-does-not-have-given-auth"])))
 
 (defmethod validate-field :fillMyInfoButton [_ _ _] nil)
-(defmethod validate-field :authorityHistory [_ _ _] nil)
+(defmethod validate-field :foremanHistory [_ _ _] nil)
 
 (defmethod validate-field nil [_ _ _]
   [:err "illegal-key"])

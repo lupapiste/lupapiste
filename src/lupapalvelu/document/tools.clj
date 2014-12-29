@@ -16,7 +16,7 @@
     :string           ""
     :text             ""
     :fillMyInfoButton nil
-    :authorityHistory nil
+    :foremanHistory nil
     nil))
 
 (defn dummy-values [user-id {:keys [type subtype case name body] :as element}]
@@ -32,7 +32,7 @@
     :newBuildingSelector "1"
     :hetu             "210281-9988"
     :fillMyInfoButton nil
-    :authorityHistory nil
+    :foremanHistory nil
     :string           (condp = (keyword subtype)
                         :maaraala-tunnus   "0003"
                         :email            "example@example.com"

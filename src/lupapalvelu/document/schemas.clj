@@ -390,7 +390,7 @@
 ;(def henkilo-valitsin [{:name "userId" :type :personSelector :blacklist [:neighbor]}])
 (def tayta-omat-tiedot-button {:name "fillMyInfo" :type :fillMyInfoButton})
 
-(def tyonjohtajan-historia {:name "authorityHistory" :type :authorityHistory})
+(def tyonjohtajan-historia {:name "foremanHistory" :type :foremanHistory})
 
 (def tyonjohtajan-hyvaksynta [{:name "tyonjohtajanHyvaksynta" :type :group
                                :body [{:name "tyonjohtahanHyvaksynta" :type :checkbox :i18nkey "tyonjohtaja.historia.hyvaksynta"}
