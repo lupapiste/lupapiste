@@ -851,7 +851,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return span;
   }
 
-  function buildAuthorityHistory(subSchema, model, path) {
+  function buildForemanHistory(subSchema, model, path) {
     var params = {
       applicationId: self.appId
     };
@@ -861,7 +861,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       return key + ": " + key;
     }).join(", ");
 
-    return $("<authority-history>")
+    return $("<foreman-history>")
       .attr("params", paramsStr)
       .addClass("form-table")
       .applyBindings(params)
@@ -999,7 +999,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     buildingSelector: buildBuildingSelector,
     newBuildingSelector: buildNewBuildingSelector,
     fillMyInfoButton: buildFillMyInfoButton,
-    authorityHistory: buildAuthorityHistory,
+    foremanHistory: buildForemanHistory,
     personSelector: buildPersonSelector,
     table: buildTableRow,
     unknown: buildUnknown
