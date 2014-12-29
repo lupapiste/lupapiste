@@ -1,12 +1,10 @@
 (ns sade.env
-  (:require [sade.util :refer :all]
-            [sade.strings :refer [numeric?]]
+  (:require [clojure.string :as s]
             [clojure.java.io :as io]
-            [clojure.string :as s]
             [clojure.walk :as walk]
-            [me.raynes.fs :as fs]
-            [monger.collection :as mc]
-            [swiss.arrows :refer :all])
+            [sade.core :refer [def-]]
+            [sade.util :as util]
+            [sade.strings :as ss])
   (:import [org.jasypt.encryption.pbe StandardPBEStringEncryptor]
            [org.jasypt.properties EncryptableProperties]))
 
@@ -23,6 +21,14 @@
 (defn- parse-target-env [buildinfo] (or (re-find #"[PRODEVTSQA]+" (or buildinfo "")) "local"))
 (def target-env (parse-target-env (:build-tag buildinfo)))
 
+(def- master-password
+  (or
+    (let [password-file (io/file (str (System/getProperty "user.home") (System/getProperty "file.separator") "application_master_password.txt"))]
+      (when (.exists password-file)
+        (s/trim-newline (slurp password-file))))
+    (System/getProperty "application.masterpassword")
+    (System/getenv "APPLICATION_MASTER_PASSWORD")))
+
 (defn- make-decryptor [password]
   (EncryptableProperties.
     (doto (StandardPBEStringEncryptor.)
@@ -33,7 +39,7 @@
   (cond
     (.equalsIgnoreCase "true" s) true
     (.equalsIgnoreCase "false" s) false
-    (numeric? s) (Long/parseLong s)
+    (ss/numeric? s) (Long/parseLong s)
     :else s))
 
 (defn- read-config [password in]
@@ -51,13 +57,12 @@
         (try (.close in) (catch Exception _))))))
 
 (defn- read-all-configs [& _]
-  (let [password (or (System/getProperty "lupapiste.masterpassword") (System/getenv "LUPAPISTE_MASTERPASSWORD") "lupapiste")]
-    (reduce deep-merge (map (partial read-config password)
+  (reduce util/deep-merge (map (partial read-config master-password)
                          [(io/resource "lupapiste.properties")
-                          (io/resource (str (s/lower-case target-env) ".properties"))
+                             (io/resource (str (ss/lower-case target-env) ".properties"))
                           (io/file "lupapiste.properties")
                           (io/file (System/getProperty "lupapiste.properties"))
-                          (io/file (System/getenv "LUPAPISTE_PROPERTIES"))]))))
+                             (io/file (System/getenv "LUPAPISTE_PROPERTIES"))])))
 
 (defonce ^:private config (atom (read-all-configs)))
 
