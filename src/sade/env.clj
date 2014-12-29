@@ -58,10 +58,10 @@
 
 (defn- read-all-configs [& _]
   (reduce util/deep-merge (map (partial read-config master-password)
-                         [(io/resource "lupapiste.properties")
+                            [(io/resource "lupapiste.properties")
                              (io/resource (str (ss/lower-case target-env) ".properties"))
-                          (io/file "lupapiste.properties")
-                          (io/file (System/getProperty "lupapiste.properties"))
+                             (io/file "lupapiste.properties")
+                             (io/file (System/getProperty "lupapiste.properties"))
                              (io/file (System/getenv "LUPAPISTE_PROPERTIES"))])))
 
 (defonce ^:private config (atom (read-all-configs)))
