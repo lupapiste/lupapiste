@@ -1,6 +1,8 @@
 (ns lupapalvelu.attachment-itest
   (:require [lupapalvelu.attachment :refer :all]
             [lupapalvelu.itest-util :refer :all]
+            [lupapalvelu.action :refer [update-application application->command]]
+            [monger.operators :refer :all]
             [midje.sweet :refer :all]))
 
 (defn- get-attachment-by-id [apikey application-id attachment-id]
@@ -154,7 +156,8 @@
             scale => "1:500"))
         )
 
-      (let [versioned-attachment (first (:attachments (query-application veikko application-id)))]
+      (let [application (query-application veikko application-id)
+            versioned-attachment (first (:attachments application))]
         (last-email) ; Inbox zero
         (fact "Meta"
           (get-in versioned-attachment [:latestVersion :version :major]) => 1
@@ -181,14 +184,22 @@
                (get-in ver-del-attachment [:latestVersion :version :major]) => 1
                (get-in ver-del-attachment [:latestVersion :version :minor]) => 0))
 
-           (fact "Delete attachment"
-             (command veikko :delete-attachment :id application-id
-               :attachmentId (:id versioned-attachment)) => ok?
-             (get-attachment-by-id veikko application-id (:id versioned-attachment)) => nil?)))))))
+           (fact "Applicant cannot delete attachment that is required"
+             (update-application
+               (application->command application)
+               {:attachments {$elemMatch {:id (:id versioned-attachment)}}}
+               {$set {:attachments.$.required true}})
+             (command pena :delete-attachment :id application-id :attachmentId (:id versioned-attachment)) => (contains {:ok false :text "error.unauthorized"}))
+
+           (fact "Authority deletes attachment"
+            (command veikko :delete-attachment :id application-id :attachmentId (:id versioned-attachment)) => ok?
+            (get-attachment-by-id veikko application-id (:id versioned-attachment)) => nil?)
+           ))))))
 
 (fact "pdf works with YA-lupa"
   (let [{application-id :id :as response} (create-app pena :municipality "753" :operation "ya-katulupa-vesi-ja-viemarityot")
         application (query-application pena application-id)]
+    response => ok?
     (:organization application) => "753-YA"
     pena => (allowed? :pdf-export :id application-id)
     (raw pena "pdf-export" :id application-id) => http200?))

@@ -41,6 +41,12 @@
 
 (def post-verdict-states #{:verdictGiven :constructionStarted :closed})
 
+(defn- attachment-deletable [application attachmentId userRole]
+  (let [attachment (attachment/get-attachment-info application attachmentId)]
+    (if (:required attachment)
+      (= (keyword userRole) :authority)
+      true)))
+
 (defn- attachment-editable-by-applicationState? [application attachmentId userRole]
   (or (ss/blank? attachmentId)
       (let [attachment (attachment/get-attachment-info application attachmentId)
@@ -193,6 +199,9 @@
    :extra-auth-roles [:statementGiver]
    :states      (action/all-states-but [:answered :sent :closed :canceled])}
   [{:keys [application user]}]
+
+  (when-not (attachment-deletable application attachmentId (:role user))
+    (fail! :error.unauthorized :desc "Only authority can delete attachment templates that are originally bound to the application, or have been manually added by authority."))
 
   (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
     (fail! :error.pre-verdict-attachment))
