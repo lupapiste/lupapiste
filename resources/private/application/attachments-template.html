@@ -74,7 +74,8 @@
               <td class="attachment-not-needed">
                 <input type="checkbox" data-bind="checked: notNeeded,
                                                   disable: $data.notNeededFieldDisabled() || !$root.authorization.ok('set-attachment-not-needed'),
-                                                  attr: {'data-test-id': ['attachment-not-needed', type['type-group'], type['type-id']].join('-')")},
+                                                  attr: {'data-test-id': ['attachment-not-needed', type['type-group'], type['type-id']].join('-'),
+                                                         'notneeded': notNeeded},
                                                   click: function(){return true;},
                                                   clickBubble: false"></input>
               </td>
