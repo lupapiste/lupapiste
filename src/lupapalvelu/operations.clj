@@ -613,13 +613,13 @@
                                    :add-operation-allowed true
                                    :link-permit-required false}
      :tonttijaon-hakeminen        {:schema "maankayton-muutos"
-                                   :permit-type permit/MM
+                                   :permit-type permit/KT
                                    :required common-maanmittaus-schemas
                                    :attachments []
                                    :add-operation-allowed false
                                    :link-permit-required false}
     :tonttijaon-muutoksen-hakeminen {:schema "maankayton-muutos"
-                                   :permit-type permit/MM
+                                   :permit-type permit/KT
                                    :required common-maanmittaus-schemas
                                    :attachments []
                                    :add-operation-allowed false
