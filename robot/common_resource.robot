@@ -415,6 +415,10 @@ Add attachment
   Unselect Frame
   Wait Until Page Contains  Muu liite
 
+Open attachment details with latest version check
+  [Arguments]  ${type}
+  Open attachment details  ${type}
+  Assert file latest version  ${TXT_TESTFILE_NAME}  1.0
 
 Open attachment details
   [Arguments]  ${type}
@@ -424,10 +428,14 @@ Open attachment details
   #Execute Javascript  window.scrollTo(0, $("[data-test-type='muut.muu']").position().top - 130);
   Focus  xpath=//a[@data-test-type="${type}"]
   Click element  xpath=//a[@data-test-type="${type}"]
+  Wait Until  Element Should Be Visible  xpath=//a[@data-test-id="back-to-application-from-attachment"]
+
+Assert file latest version
+  [Arguments]  ${name}  ${versionNumber}
   Wait Until  Element Should Be Visible  test-attachment-file-name
   Wait Until Page Contains  ${TXT_TESTFILE_NAME}
-  Element Text Should Be  test-attachment-file-name  ${TXT_TESTFILE_NAME}
-  Element Text Should Be  test-attachment-version  1.0
+  Element Text Should Be  test-attachment-file-name  ${name}
+  Element Text Should Be  test-attachment-version  ${versionNumber}
 
 
 Select operation path by permit type

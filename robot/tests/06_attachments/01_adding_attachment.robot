@@ -111,7 +111,7 @@ Signature icon is visible
   Wait Until  Element should be visible  xpath=//div[@id="application-attachments-tab"]//span[@data-test-icon="signed-rakennuspaikka.ote_alueen_peruskartasta"]
 
 Signature is visible
-  Open attachment details  rakennuspaikka.ote_alueen_peruskartasta
+  Open attachment details with latest version check  rakennuspaikka.ote_alueen_peruskartasta
   Wait Until  Xpath Should Match X Times  //section[@id="attachment"]//*/div[@data-bind="fullName: user"]  1
   Element text should be  xpath=//section[@id="attachment"]//*/div[@data-bind="fullName: user"]  Intonen Mikko
   Element text should be  xpath=//section[@id="attachment"]//*/span[@data-bind="version: version"]  1.0
