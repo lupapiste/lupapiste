@@ -4,7 +4,7 @@ Documentation   Sonja can't submit application
 Suite setup     Apply minimal fixture now
 Suite teardown  Logout
 Resource        ../../common_resource.robot
-Variables      ../06_attachments/variables.py
+Variables       ../06_attachments/variables.py
 
 *** Test Cases ***
 
@@ -81,7 +81,7 @@ Sonja sees that new attachment template is visible in attachments list
   Wait Until Element Is Visible  xpath=//div[@id="application-attachments-tab"]//a[@data-test-type="muut.muu"]
 
 # - Sonjan lisaaman liitepohjan "ei tarvita"-checkboxi on tyhja ja enabloituna
-For that template, the "not needed" checkbox as enabled and not selected
+For that template, the "not needed" checkbox is enabled and not selected
   Checkbox Should Not Be Selected  xpath=//table[@data-test-id='attachments-template-table']//input[@data-test-id='${attachment-not-needed-test-id-sonja}']
   Element should be enabled  xpath=//table[@data-test-id='attachments-template-table']//input[@data-test-id='${attachment-not-needed-test-id-sonja}']
   Logout
