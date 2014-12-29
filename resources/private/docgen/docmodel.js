@@ -173,7 +173,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return label;
   }
 
-  function makeInput(type, pathStr, value, extraClass, readonly) {
+  function makeInput(type, pathStr, value, extraClass, readonly, subSchema) {
     var input = document.createElement("input");
     input.id = pathStrToID(pathStr);
     input.name = self.docId + "." + pathStr;
@@ -191,9 +191,13 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     if (readonly) {
       input.readOnly = true;
     } else {
-      input.onchange = save;
+      input.onchange = function(e) {
+        save(e);
+        if (subSchema) {
+          emit(getEvent(e).target.value, subSchema);
+        }
+      };
     }
-
 
     if (type === "checkbox") {
       input.checked = value;
@@ -375,7 +379,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var inputType = (_.indexOf(supportedInputSubtypes, subSchema.subtype) > -1) ? subSchema.subtype : "text";
 
     var sizeClass = self.sizeClasses[subSchema.size] || "";
-    var input = makeInput(inputType, myPath, getModelValue(model, subSchema.name), sizeClass, subSchema.readonly);
+    var input = makeInput(inputType, myPath, getModelValue(model, subSchema.name), sizeClass, subSchema.readonly, subSchema);
     setMaxLen(input, subSchema);
 
     if (subSchema.label) {
@@ -1227,6 +1231,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
           $(elem).hide();
         }
         if (elem) {
+          // TODO can't really detect table cell from label key value
           if (!subSchema.label) {
             var td = document.createElement("td");
             td.appendChild(elem);
@@ -1390,24 +1395,35 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     saveForReal(path, value, _.partial(afterSave, label, loader, indicator, callback));
   }
 
-  function emitLater(value, subSchema) {
-    emit(value, subSchema, true);
-  }
+  var emitters = {
+    filterByCode: function(event, value, subSchema, sendLater) {
+      var schemaValue = _.find(subSchema.body, {name: value});
+      var code = schemaValue ? schemaValue.code : "";
+      if (sendLater) {
+        self.events.push({name: event, data: {code: code}});
+      } else {
+        hub.send(event, {code: code});
+      }
+    },
+    valueChanged: function(event, value, subSchema, sendLater) {
+      hub.send(event, {name: subSchema.name, value: value});
+    },
+    emitUnknown: function(event, value, subSchema) {
+      error("Unknown emitter event:", event);
+    }
+  };
 
   function emit(value , subSchema, sendLater) {
     if (subSchema.emit) {
       _.forEach(subSchema.emit, function(event) {
-        if (event === "filterByCode") {
-          var schemaValue = _.find(subSchema.body, {name: value});
-          var code = schemaValue ? schemaValue.code : "";
-          if (sendLater) {
-            self.events.push({name: event, data: {code: code}});
-          } else {
-            hub.send(event, {code: code});
-          }
-        }
+        var emitter = emitters[event] || emitters.emitUnknown;
+        emitter(event, value, subSchema, sendLater);
       });
     }
+  }
+
+  function emitLater(value, subSchema) {
+    emit(value, subSchema, true);
   }
 
   function removeDoc(e) {
