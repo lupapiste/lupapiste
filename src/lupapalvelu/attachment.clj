@@ -298,9 +298,9 @@
   [now applicationState attachment-types locked? required? requested-by-authority?]
   (map (partial make-attachment now nil required? requested-by-authority? locked? applicationState nil) attachment-types))
 
-(defn create-attachment [application attachment-type op now target locked? & [attachment-id]]
+(defn create-attachment [application attachment-type op now target locked? required? requested-by-authority? & [attachment-id]]
   {:pre [(map? application)]}
-  (let [attachment (make-attachment now target false false locked? (:state application) op attachment-type attachment-id)]
+  (let [attachment (make-attachment now target required? requested-by-authority? locked? (:state application) op attachment-type attachment-id)]
     (update-application
       (application->command application)
       {$set {:modified now}
@@ -315,6 +315,7 @@
       (application->command application)
       {$set {:modified now}
        $push {:attachments {$each attachments}}})
+
     (map :id attachments)))
 
 (defn- next-attachment-version [{major :major minor :minor} user]
@@ -420,12 +421,12 @@
 (defn- update-or-create-attachment
   "If the attachment-id matches any old attachment, a new version will be added.
    Otherwise a new attachment is created."
-  [{:keys [application attachment-id attachment-type op file-id filename content-type size comment-text created user target locked] :as options}]
+  [{:keys [application attachment-id attachment-type op file-id filename content-type size comment-text created user target locked required requested-by-authority] :as options}]
   {:pre [(map? application)]}
   (let [att-id (cond
-                 (ss/blank? attachment-id) (create-attachment application attachment-type op created target locked)
+                 (ss/blank? attachment-id) (create-attachment application attachment-type op created target locked required requested-by-authority)
                  (pos? (mongo/count :applications {:_id (:id application) :attachments.id attachment-id})) attachment-id
-                 :else (create-attachment application attachment-type op created target locked attachment-id))]
+                 :else (create-attachment application attachment-type op created target locked required requested-by-authority attachment-id))]
     (set-attachment-version (assoc options :attachment-id att-id :now created :stamped false))))
 
 (defn parse-attachment-type [attachment-type]
