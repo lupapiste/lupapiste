@@ -158,7 +158,7 @@
             <h2 data-bind="ltext: 'application.muncipality'"></h2>
             <p data-bind="text: loc(['municipality', municipality()])"></p>
           </div>
-          <!-- ko if: !showInviteButtons() -->
+          <!-- ko if: !hasInvites() -->
           <button data-bind="click: approveApplication,   visible: $root.authorization.ok('approve-application'),    enable: !processing() && $root.authorization.ok('approve-application')"    data-test-id="approve-application"     class="btn btn-primary">
             <span data-bind="ltext: 'application.approveApplication'"></span>
             <span class="icon approve left-align"></span>
@@ -205,7 +205,7 @@
             <span class="icon mark-seen left-align"></span>
           </button>
           <!-- /ko  -->
-          <!-- ko if: showInviteButtons -->
+          <!-- ko if: hasInvites -->
           <button data-bind="click: approveInvite" class="btn btn-primary btn-mini" data-test-id="accept-invite-button">
             <span data-bind="ltext: 'applications.approveInvite'"></span>
           </button>
@@ -284,7 +284,7 @@
             <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.applicationInfoDesc'"></p>
           </div>
           <div class="operation-info">
-            
+
             <div data-bind="if: $root.authorization.ok('add-operation')">
               <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.AddOperations'"></p>
               <button data-bind="click: addOperation, enable: $root.authorization.ok('add-operation')" class="btn-primary">
