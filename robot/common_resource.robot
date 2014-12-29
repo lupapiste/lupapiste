@@ -414,11 +414,6 @@ Add attachment
   Unselect Frame
   Wait Until Page Contains  Muu liite
 
-Open attachment details with latest version check
-  [Arguments]  ${type}
-  Open attachment details  ${type}
-  Assert file latest version  ${TXT_TESTFILE_NAME}  1.0
-
 Open attachment details
   [Arguments]  ${type}
   Open tab  attachments

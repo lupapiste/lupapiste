@@ -42,7 +42,8 @@ Mikko adds txt attachment without comment
 
 Mikko opens attachment details
   [Tags]  attachments
-  Open attachment details with latest version check  muut.muu
+  Open attachment details  muut.muu
+  Assert file latest version  ${TXT_TESTFILE_NAME}  1.0
 
 Mikko can change related operation
   Element should be visible  xpath=//select[@data-test-id='attachment-operation-select']
@@ -77,7 +78,8 @@ Mikko sees that his attachment is grouped by "Muun rakennuksen rakentaminen - Ta
   Element Text Should Be  xpath=(//div[@id="application-attachments-tab"]//tr[@class="attachment-group-header"])[last()]//td[@data-test-id="attachment-group-header-text"]  Muun kuin edellä mainitun rakennuksen rakentaminen (liike-, toimisto-, opetus-, päiväkoti-, palvelu-, hoitolaitos- tai muu rakennus) - Talo B
 
 Mikko opens attachment and sees that attachment label metadata is set
-  Open attachment details with latest version check  muut.muu
+  Open attachment details  muut.muu
+  Assert file latest version  ${TXT_TESTFILE_NAME}  1.0
   Page should contain  Muun rakennuksen rakentaminen
   Page should contain  B0
   Textfield Value Should Be  xpath=//input[@data-test-id='attachment-contents-input']  PuuCee
