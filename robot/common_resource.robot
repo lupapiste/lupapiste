@@ -437,6 +437,23 @@ Assert file latest version
   Element Text Should Be  test-attachment-file-name  ${name}
   Element Text Should Be  test-attachment-version  ${versionNumber}
 
+Add first attachment version
+  [Arguments]  ${path}
+  Wait Until     Element should be visible  xpath=//button[@id="add-new-attachment-version"]
+  Click Element  xpath=//button[@id="add-new-attachment-version"]
+  Wait Until     Element should be visible  xpath=//*[@id="uploadFrame"]
+  Select Frame   uploadFrame
+  Wait until     Element should be visible  test-save-new-attachment
+  Wait until     Page should contain element  xpath=//form[@id='attachmentUploadForm']/input[@type='file']
+  Focus          xpath=//form[@id='attachmentUploadForm']/input[@type='file']
+  Choose File    xpath=//form[@id='attachmentUploadForm']/input[@type='file']  ${path}
+  Wait Until     Page Should Not Contain  No file chosen
+  # Had to use 'Select Frame' another time to be able to use e.g. 'Element Should Be Enabled'
+  Select Frame   uploadFrame
+  Wait Until     Element Should Be Enabled  test-save-new-attachment
+  Click element  test-save-new-attachment
+  Unselect Frame
+  Wait until     Page should contain element  xpath=//div[@class='attachment-label']
 
 Select operation path by permit type
   [Arguments]  ${permitType}
