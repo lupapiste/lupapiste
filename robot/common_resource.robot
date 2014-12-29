@@ -407,7 +407,6 @@ Add attachment
   Wait until        Page should contain element  xpath=//form[@id='attachmentUploadForm']/input[@type='file']
   Focus             xpath=//form[@id='attachmentUploadForm']/input[@type='file']
   Choose File       xpath=//form[@id='attachmentUploadForm']/input[@type='file']  ${path}
-  Wait Until        Page Should Not Contain  No file chosen
   # Had to use 'Select Frame' another time to be able to use e.g. 'Element Should Be Enabled'
   Select Frame      uploadFrame
   Wait Until        Element Should Be Enabled  test-save-new-attachment
@@ -447,7 +446,6 @@ Add first attachment version
   Wait until     Page should contain element  xpath=//form[@id='attachmentUploadForm']/input[@type='file']
   Focus          xpath=//form[@id='attachmentUploadForm']/input[@type='file']
   Choose File    xpath=//form[@id='attachmentUploadForm']/input[@type='file']  ${path}
-  Wait Until     Page Should Not Contain  No file chosen
   # Had to use 'Select Frame' another time to be able to use e.g. 'Element Should Be Enabled'
   Select Frame   uploadFrame
   Wait Until     Element Should Be Enabled  test-save-new-attachment
