@@ -143,17 +143,23 @@
    :auth (:auth application)
    :documents (filter #(= (get-in % [:schema-info :name]) "tyonjohtaja") (:documents application))})
 
+(defn- get-foreman-hetu [foreman-application]
+  (let [foreman-doc     (first (filter #(= "tyonjohtaja-v2" (-> % :schema-info :name)) (:documents foreman-application)))]
+    (get-in foreman-doc [:data :henkilotiedot :hetu :value])))
+
+(defn- get-foreman-applications [foreman-application]
+  (let [foreman-hetu    (get-foreman-hetu foreman-application)]
+    (mongo/select :applications {"operations.name" "tyonjohtajan-nimeaminen-v2"
+                  :documents {$elemMatch {"schema-info.name" "tyonjohtaja-v2"
+                                          "data.henkilotiedot.hetu.value" foreman-hetu}}})))
+
 (defn- get-foreman-project-applications
   "Based on the passed foreman application, fetches all project applications that have the same foreman as in
   the passed foreman application (personal id is used as key). Returns all the linked applications as a list"
   [foreman-application]
-  (let [foreman-doc     (first (filter #(= "tyonjohtaja-v2" (-> % :schema-info :name)) (:documents foreman-application)))
-        foreman-hetu    (get-in foreman-doc [:data :henkilotiedot :hetu :value])
-        foreman-apps    (mongo/select :applications {"operations.name" "tyonjohtajan-nimeaminen-v2"
-                                                  :documents {$elemMatch {"schema-info.name" "tyonjohtaja-v2"
-                                                                          "data.henkilotiedot.hetu.value" foreman-hetu}}})
+  (let [foreman-apps    (get-foreman-applications foreman-application)
         foreman-app-ids (map :id foreman-apps)
-        links           (mongo/select :app-links {:link {$in (map :id foreman-apps)}})
+        links           (mongo/select :app-links {:link {$in foreman-app-ids}})
         linked-app-ids  (remove (set foreman-app-ids) (distinct (mapcat #(:link %) links)))]
     (mongo/select :applications {:_id {$in linked-app-ids}})))
 
@@ -165,8 +171,7 @@
    :parameters       [:id]}
   [{application :application user :user :as command}]
   (if application
-    (let []
-
+    (let [foreman-projects (get-foreman-project-applications application)]
       (ok :projects [{:municipality "Helsinki" :difficulty "A" :jobDescription "Vastaava tyonjohtaja" :operation "Asuinrakennuksen rakentaminen"}
                    {:municipality "Helsinki" :difficulty "A" :jobDescription "Vastaava tyonjohtaja" :operation "Asuinrakennuksen rakentaminen"}
                    {:municipality "Helsinki" :difficulty "A" :jobDescription "Vastaava tyonjohtaja" :operation "Asuinrakennuksen rakentaminen"}
