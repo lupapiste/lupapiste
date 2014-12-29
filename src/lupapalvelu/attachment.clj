@@ -287,7 +287,7 @@
    :state :requires_user_action
    :target target
    :required required?       ;; true if the attachment is added from from template along with the operation, or when attachment is requested by authority
-   :requested-by-authority requested-by-authority?
+   :requested-by-authority requested-by-authority?  ;; true when authority is adding a new attachment template by hand
    :not-needed false
    :op op
    :signatures []
