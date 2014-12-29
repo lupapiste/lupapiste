@@ -91,8 +91,8 @@ Change attachment type
   Wait Until  Element Should Not Be Visible  attachment-type-select-loader
   Click enabled by test id  confirm-yes
   Click element  xpath=//a[@data-test-id="back-to-application-from-attachment"]
-  Tab should be visible  attachments
-  Wait Until  Page Should Not Contain  xpath=//a[@data-test-type="muut.muu"]
+  Wait Until  Tab should be visible  attachments
+  Page Should Not Contain  xpath=//a[@data-test-type="muut.muu"]
 
 Signature icon is not visible
   Element should not be visible  xpath=//div[@id="application-attachments-tab"]//span[@data-test-icon="signed-rakennuspaikka.ote_alueen_peruskartasta"]
