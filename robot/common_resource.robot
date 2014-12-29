@@ -376,6 +376,19 @@ Do prepare new request
   Set animations on
 
 
+Add empty attachment template
+  [Arguments]  ${templateName}  ${topCategory}  ${subCategory}
+  Wait Until Element Is Visible  xpath=//div[@id="application-attachments-tab"]//button[@data-test-id="new-attachment-template-button"]
+  Click Element  xpath=//div[@id="application-attachments-tab"]//button[@data-test-id="new-attachment-template-button"]
+  Wait Until Element Is Visible  xpath=//div[@id="dialog-add-attachment-templates"]//input[@data-test-id="selectm-filter-input"]
+  Input Text  xpath=//div[@id="dialog-add-attachment-templates"]//input[@data-test-id="selectm-filter-input"]  ${subCategory}
+  List Should Have No Selections  xpath=//div[@id="dialog-add-attachment-templates"]//select[@data-test-id="selectm-source-list"]
+  Click Element  xpath=//div[@id="dialog-add-attachment-templates"]//select[@data-test-id="selectm-source-list"]//option[contains(text(), '${templateName}')]
+  Click Element  xpath=//div[@id="dialog-add-attachment-templates"]//button[@data-test-id="selectm-add"]
+  Click Element  xpath=//div[@id="dialog-add-attachment-templates"]//button[@data-test-id="selectm-ok"]
+  Wait Until  Element Should Not Be Visible  xpath=//div[@id="dialog-add-attachment-templates"]//input[@data-test-id="selectm-filter-input"]
+  Wait Until Element Is Visible  xpath=//div[@id="application-attachments-tab"]//a[@data-test-type="${topCategory}.${subCategory}"]
+
 Add attachment
   [Arguments]  ${path}  ${description}  ${operation}
 

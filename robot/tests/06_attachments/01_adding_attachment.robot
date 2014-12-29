@@ -146,17 +146,7 @@ Sonja goes to attachments tab
   Open tab  attachments
 
 Sonja adds new attachment template
-  Wait Until Element Is Visible  xpath=//div[@id="application-attachments-tab"]//button[@data-test-id="new-attachment-template-button"]
-  Click Element  xpath=//div[@id="application-attachments-tab"]//button[@data-test-id="new-attachment-template-button"]
-  Wait Until Element Is Visible  xpath=//div[@id="dialog-add-attachment-templates"]//input[@data-test-id="selectm-filter-input"]
-  Input Text  xpath=//div[@id="dialog-add-attachment-templates"]//input[@data-test-id="selectm-filter-input"]  muu
-  List Should Have No Selections  xpath=//div[@id="dialog-add-attachment-templates"]//select[@data-test-id="selectm-source-list"]
-  Click Element  xpath=//div[@id="dialog-add-attachment-templates"]//select[@data-test-id="selectm-source-list"]//option[contains(text(),'Muu liite')]
-  Click Element  xpath=//div[@id="dialog-add-attachment-templates"]//button[@data-test-id="selectm-add"]
-  Click Element  xpath=//div[@id="dialog-add-attachment-templates"]//button[@data-test-id="selectm-ok"]
-
-Attachment template dialog should not be visible
-  Wait Until  Element Should Not Be Visible  xpath=//div[@id="dialog-add-attachment-templates"]//input[@data-test-id="selectm-filter-input"]
+  Add empty attachment template  Muu liite  muut  muu
 
 Sonja sees that new attachment template is visible in attachments list
   Wait Until Element Is Visible  xpath=//div[@id="application-attachments-tab"]//a[@data-test-type="muut.muu"]
