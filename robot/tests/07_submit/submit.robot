@@ -93,16 +93,19 @@ Mikko logs back in and browses to the Attachments tab
   Open tab  attachments
   Wait Until  Element should be visible  xpath=//table[@data-test-id="attachments-template-table"]//td[contains(text(), 'Yleiset hankkeen liitteet')]
 
-# - klikkaa attachments-tabin jonkin liitteen "ei tarvita"-checkboxia
-Mikko selects the "not needed" checkbox of some other attachment template than the one of Sonja's
-  Checkbox Should Not Be Selected  xpath=//table[@data-test-id='attachments-template-table']//input[@data-test-id='${attachment-not-needed-test-id-hakija-valtakirja}']
-  Select Checkbox  xpath=//table[@data-test-id='attachments-template-table']//input[@data-test-id='${attachment-not-needed-test-id-hakija-valtakirja}']
-  Checkbox Should Be Selected  xpath=//table[@data-test-id='attachments-template-table']//input[@data-test-id='${attachment-not-needed-test-id-hakija-valtakirja}']
-
 # - Sonjan lisaaman liitepohjan "ei tarvita"-checkboxi on tyhja ja disabloituna
 For the added attachment template added by Sonja, Mikko sees the "not needed" checkbox as disabled and not selected
-  Checkbox Should Not Be Selected  xpath=//table[@data-test-id='attachments-template-table']//input[@data-test-id='${attachment-not-needed-test-id-sonja}']
-  Element should be disabled  xpath=//table[@data-test-id='attachments-template-table']//input[@data-test-id='${attachment-not-needed-test-id-sonja}']
+  ${checkbox-path-sonja} =  Set Variable  xpath=//table[@data-test-id='attachments-template-table']//input[@data-test-id='${attachment-not-needed-test-id-sonja}']
+  Element should be disabled  ${checkbox-path-sonja}
+  Checkbox Should Not Be Selected  ${checkbox-path-sonja}
+
+# - klikkaa attachments-tabin jonkin liitteen "ei tarvita"-checkboxia
+Mikko selects the "not needed" checkbox of some other attachment template than the one of Sonja's
+  ${checkbox-path-hakija-valtakirja} =  Set Variable  xpath=//table[@data-test-id='attachments-template-table']//input[@data-test-id='${attachment-not-needed-test-id-hakija-valtakirja}']
+  Element should be enabled  ${checkbox-path-hakija-valtakirja}
+  Checkbox Should Not Be Selected  ${checkbox-path-hakija-valtakirja}
+  Select Checkbox  ${checkbox-path-hakija-valtakirja}
+  Checkbox Should Be Selected  ${checkbox-path-hakija-valtakirja}
 
 # - attachments-tabilla syota liiteversio Sonjan lisaamalle liitepohjalle
 Mikko adds txt attachment to the attachment template added by Sonja
