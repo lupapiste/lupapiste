@@ -4,3 +4,4 @@ application.attachmentNotNeeded: Ei tarpeen
 application.missingRequiredAttachments: Puuttuvat pakolliset liitteet
 
 attachmentType.hakija.valtakirja.info: Jos hakemuksen tekee joku muu kuin hakija (kiinteistön omistaja) itse
+error.not-submittable.foreman-link: Viitteenä oleva lupahakemus täytyy jättää ennen työnjohtajan nimeämistä.
