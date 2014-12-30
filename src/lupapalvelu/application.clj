@@ -1,6 +1,6 @@
 (ns lupapalvelu.application
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error fatal]]
-            [clojure.string :refer [blank? join trim split]]
+            [clojure.string :refer [join split]]
             [clojure.walk :refer [keywordize-keys]]
             [clj-time.core :refer [year]]
             [clj-time.local :refer [local-now]]
@@ -35,8 +35,7 @@
             [lupapalvelu.open-inforequest :as open-inforequest]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.application-meta-fields :as meta-fields]
-            [lupapalvelu.company :as c]
-            [clojure.string :as string]))
+            [lupapalvelu.company :as c]))
 
 ;; Notifications
 
@@ -68,7 +67,7 @@
 (defn set-user-to-document [application document user-id path current-user timestamp]
   {:pre [document]}
   (when-not (ss/blank? user-id)
-    (let [path-arr     (if-not (blank? path) (split path #"\.") [])
+    (let [path-arr     (if-not (ss/blank? path) (split path #"\.") [])
           schema       (schemas/get-schema (:schema-info document))
           subject      (user/get-user-by-id user-id)
           with-hetu    (model/has-hetu? (:body schema) path-arr)
@@ -835,9 +834,9 @@
     (do
       (update-application command
         {$set {:location      (->location x y)
-               :address       (trim address)
+               :address       (ss/trim address)
                :propertyId    propertyId
-               :title         (trim address)
+               :title         (ss/trim address)
                :modified      created}})
       (try (autofill-rakennuspaikka (mongo/by-id :applications id) (now))
         (catch Exception e (error e "KTJ data was not updated."))))
@@ -1037,9 +1036,6 @@
     (insert-application continuation-app)
     (ok :id (:id continuation-app))))
 
-(defn find-by-id [taskId tasks]
-  (some (fn [task] (when (= taskId (:id task)) task)) tasks))
-
 (defcommand create-foreman-application
   {:parameters [id taskId foremanRole]
    :roles [:applicant :authority]
@@ -1055,7 +1051,7 @@
                                             :infoRequest false
                                             :messages []}))
 
-        task                 (find-by-id taskId (:tasks application))
+        task                 (util/find-by-id taskId (:tasks application))
 
         hankkeen-kuvaus      (get-in (domain/get-document-by-name application "hankkeen-kuvaus") [:data :kuvaus :value])
         hankkeen-kuvaus-doc  (domain/get-document-by-name foreman-app "hankkeen-kuvaus-minimum")
@@ -1064,7 +1060,7 @@
                                hankkeen-kuvaus-doc)
 
         tyonjohtaja-doc      (domain/get-document-by-name foreman-app "tyonjohtaja-v2")
-        tyonjohtaja-doc      (if-not (string/blank? foremanRole)
+        tyonjohtaja-doc      (if-not (ss/blank? foremanRole)
                                (assoc-in tyonjohtaja-doc [:data :kuntaRoolikoodi :value] foremanRole)
                                tyonjohtaja-doc)
 
