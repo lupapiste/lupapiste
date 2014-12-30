@@ -1,0 +1,1 @@
+error.not-submittable.foreman-link: Viitteenä oleva lupahakemus täytyy jättää ennen työnjohtajan nimeämistä.
