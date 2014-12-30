@@ -525,7 +525,7 @@
                        data-test-id="application-submit-btn"
                        data-bind="click: submitApplication,
                                   visible: $root.authorization.ok('submit-application'),
-                                  enable: !processing() && !showInviteButtons() && (!requiredFieldsFillingObligatory() || !hasIncorrectlyFilledRequiredFields())">
+                                  enable: !processing() && !showInviteButtons() && (!requiredFieldsFillingObligatory() || !hasIncorrectlyFilledRequiredFields()) && submittable">
                  <span data-bind="ltext: 'application.submitApplication'"></span>
                  <span class="icon send left-align"></span>
                </button>
@@ -538,7 +538,7 @@
                        data-test-id="application-submit-btn"
                        data-bind="click: submitApplication,
                                   visible: $root.authorization.ok('submit-application'),
-                                  enable: !processing() && !showInviteButtons() && (!requiredFieldsFillingObligatory() || !hasIncorrectlyFilledRequiredFields())">
+                                  enable: !processing() && !showInviteButtons() && (!requiredFieldsFillingObligatory() || !hasIncorrectlyFilledRequiredFields()) && submittable">
                  <span data-bind="ltext: 'application.submitApplication'"></span>
                  <span class="icon send left-align"></span>
                </button>
