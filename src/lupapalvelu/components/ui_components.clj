@@ -139,16 +139,21 @@
    :create-task  {:js ["create-task.js"]
                   :html ["create-task.html"]}
 
-   :application  {:depends [:common-html :repository :tree :task :create-task :modal-datepicker :signing :invites :side-panel]
+   :ui-components {:depends [:common-html]
+                   :js ["fill-info-button/fill-info-model.js"
+                        "foreman-history/foreman-history-model.js"
+                        "foreman-other-applications/foreman-other-applications-model.js"]
+                   :html ["fill-info-button/fill-info-button-template.html"
+                          "foreman-history/foreman-history-template.html"
+                          "foreman-other-applications/foreman-other-applications-template.html"]}
+
+   :application  {:depends [:common-html :repository :tree :task :create-task :modal-datepicker :signing :invites :side-panel :ui-components]
                   :js ["add-link-permit.js" "map-model.js" "change-location.js" "invite.js" "verdicts-model.js"
-                       "add-operation.js" "foreman-model.js" "ui-components/fill-info-button/fill-info-model.js"
-                       "ui-components/foreman-history/foreman-history-model.js"
+                       "add-operation.js" "foreman-model.js"
                        "request-statement-model.js" "add-party.js" "attachments-tab-model.js" "application-model.js"
                        "invite-company.js" "application.js"]
                   :html ["attachment-actions-template.html" "attachments-template.html" "add-link-permit.html" "application.html" "inforequest.html" "add-operation.html"
-                         "change-location.html" "invite-company.html" "foreman-template.html"
-                         "ui-components/fill-info-button/fill-info-button-template.html"
-                         "ui-components/foreman-history/foreman-history-template.html"]}
+                         "change-location.html" "invite-company.html" "foreman-template.html"]}
 
    :applications {:depends [:common-html :repository :invites]
                   :html ["applications.html"]
