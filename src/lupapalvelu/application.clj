@@ -110,9 +110,8 @@
 
 (defn- foreman-submittable? [application]
   (let [result (when-not (:submitted application)
-                 (when-let [link-data (:linkPermitData application)]
-                   (let [lupapiste-link (filter #(= (:type %) "lupapistetunnus") link-data)]
-                     (when (seq lupapiste-link) (link-permit-submitted? (-> lupapiste-link first :id))))))]
+                 (when-let [lupapiste-link (filter #(= (:type %) "lupapistetunnus") (:linkPermitData application))]
+                   (when (seq lupapiste-link) (link-permit-submitted? (-> lupapiste-link first :id)))))]
     (if (nil? result)
       true
       result)))
