@@ -133,6 +133,7 @@
     meta-fields/enrich-with-link-permit-data
     ((partial meta-fields/with-meta-fields user))
     without-system-keys
+    process-foreman-v2
     ((partial process-documents user))))
 
 (defn find-authorities-in-applications-organization [app]
