@@ -1,8 +1,6 @@
 (ns lupapalvelu.attachment-itest
   (:require [lupapalvelu.attachment :refer :all]
             [lupapalvelu.itest-util :refer :all]
-            [lupapalvelu.action :refer [update-application application->command]]
-            [monger.operators :refer :all]
             [midje.sweet :refer :all]))
 
 (defn- get-attachment-by-id [apikey application-id attachment-id]
@@ -133,6 +131,7 @@
 
 
       (fact "Pena change attachment metadata"
+
         (fact "Pena can change operation"
           (command pena :set-attachment-meta :id application-id :attachmentId (first attachment-ids) :meta {:op {:id "foo" :name "bar"}}) => ok?)
         (fact "Pena can change contents"
@@ -153,47 +152,42 @@
             (:name op) => "bar"
             contents => "foobart"
             size => "A4"
-            scale => "1:500"))
-        )
+            scale => "1:500")))
 
-      (let [application (query-application veikko application-id)
-            versioned-attachment (first (:attachments application))]
+      (let [versioned-attachment (first (:attachments (query-application veikko application-id)))]
         (last-email) ; Inbox zero
+
         (fact "Meta"
           (get-in versioned-attachment [:latestVersion :version :major]) => 1
           (get-in versioned-attachment [:latestVersion :version :minor]) => 0)
 
         (fact "Veikko upload a new version"
-         (upload-attachment veikko application-id versioned-attachment true)
-         (let [updated-attachment (get-attachment-by-id veikko application-id (:id versioned-attachment))]
-           (get-in updated-attachment [:latestVersion :version :major]) => 1
-           (get-in updated-attachment [:latestVersion :version :minor]) => 1
+          (upload-attachment veikko application-id versioned-attachment true)
+          (let [updated-attachment (get-attachment-by-id veikko application-id (:id versioned-attachment))]
+            (get-in updated-attachment [:latestVersion :version :major]) => 1
+            (get-in updated-attachment [:latestVersion :version :minor]) => 1
 
-           (fact "Pena receives email pointing to comment page"
-             (let [emails (sent-emails)
-                   email  (first emails)
-                   pena-email  (email-for "pena")]
-               (count emails) => 1
-               email => (partial contains-application-link-with-tab? application-id "conversation" "applicant")
-               (:to email) => (contains pena-email)))
+            (fact "Pena receives email pointing to comment page"
+              (let [emails (sent-emails)
+                    email  (first emails)
+                    pena-email  (email-for "pena")]
+                (count emails) => 1
+                email => (partial contains-application-link-with-tab? application-id "conversation" "applicant")
+                (:to email) => (contains pena-email)))
 
-           (fact "Delete version"
-             (command veikko :delete-attachment-version :id application-id
-               :attachmentId (:id versioned-attachment) :fileId (get-in updated-attachment [:latestVersion :fileId])) => ok?
-             (let [ver-del-attachment (get-attachment-by-id veikko application-id (:id versioned-attachment))]
-               (get-in ver-del-attachment [:latestVersion :version :major]) => 1
-               (get-in ver-del-attachment [:latestVersion :version :minor]) => 0))
+            (fact "Delete version"
+              (command veikko :delete-attachment-version :id application-id
+                :attachmentId (:id versioned-attachment) :fileId (get-in updated-attachment [:latestVersion :fileId])) => ok?
+              (let [ver-del-attachment (get-attachment-by-id veikko application-id (:id versioned-attachment))]
+                (get-in ver-del-attachment [:latestVersion :version :major]) => 1
+                (get-in ver-del-attachment [:latestVersion :version :minor]) => 0))
 
-           (fact "Applicant cannot delete attachment that is required"
-             (update-application
-               (application->command application)
-               {:attachments {$elemMatch {:id (:id versioned-attachment)}}}
-               {$set {:attachments.$.required true}})
-             (command pena :delete-attachment :id application-id :attachmentId (:id versioned-attachment)) => (contains {:ok false :text "error.unauthorized"}))
+            (fact "Applicant cannot delete attachment that is required"
+              (command pena :delete-attachment :id application-id :attachmentId (:id versioned-attachment)) => (contains {:ok false :text "error.unauthorized"}))
 
-           (fact "Authority deletes attachment"
-            (command veikko :delete-attachment :id application-id :attachmentId (:id versioned-attachment)) => ok?
-            (get-attachment-by-id veikko application-id (:id versioned-attachment)) => nil?)
+            (fact "Authority deletes attachment"
+              (command veikko :delete-attachment :id application-id :attachmentId (:id versioned-attachment)) => ok?
+              (get-attachment-by-id veikko application-id (:id versioned-attachment)) => nil?)
            ))))))
 
 (fact "pdf works with YA-lupa"
