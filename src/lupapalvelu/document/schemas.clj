@@ -380,7 +380,7 @@
    {:name "12kk" :type :string :subtype :number  :size "s" :label false}])
 
 (def muut-rakennushankkeet-table {:name "muutHankkeet"
-                                  :type :table
+                                  :type :foremanOtherApplications
                                   :repeating true
                                   :approvable true
                                   :copybutton false
