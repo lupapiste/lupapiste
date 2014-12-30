@@ -137,12 +137,6 @@
           :permitSubtypes (permit/permit-subtypes (:permitType app))))
     (fail :error.not-found)))
 
-(defn- map-application [application]
-  {:id (:id application)
-   :state (:state application)
-   :auth (:auth application)
-   :documents (filter #(= (get-in % [:schema-info :name]) "tyonjohtaja") (:documents application))})
-
 (defn- get-foreman-hetu [foreman-application]
   (let [foreman-doc     (first (filter #(= "tyonjohtaja-v2" (-> % :schema-info :name)) (:documents foreman-application)))]
     (get-in foreman-doc [:data :henkilotiedot :hetu :value])))
@@ -163,6 +157,36 @@
         linked-app-ids  (remove (set foreman-app-ids) (distinct (mapcat #(:link %) links)))]
     (mongo/select :applications {:_id {$in linked-app-ids}})))
 
+(defn- get-linked-app-operations [foreman-app-id link]
+  (let [other-id (first (remove #{foreman-app-id} (:link link)))
+        operations (get-in link [(keyword other-id) :apptypes])]
+    (i18n/loc (str "operations." (first operations)))
+    ;(join ", " (map #(i18n/loc (str "operations." %)) operations))
+    ))
+
+(defn- get-foreman-history-data [foreman-app]
+  (let [foreman-apps       (get-foreman-applications foreman-app)
+        links              (mongo/select :app-links {:link {$in (map :id foreman-apps)}})
+        ]
+    (map (fn [app]
+           (let [foreman-doc     (domain/get-document-by-name app "tyonjohtaja-v2")
+                 municipality    (i18n/loc (str "municipality." (:municipality app)))
+                 difficulty      (tools/unwrapped (get-in foreman-doc [:data :patevyysvaatimusluokka]))
+                 job-description (->> (tools/unwrapped (get-in foreman-doc [:data :kuntaRoolikoodi]))
+                                      (str "osapuoli.tyonjohtaja.kuntaRoolikoodi." )
+                                      (i18n/loc))
+                 ;relevant-links  (filter #(some #{(:id app)} (:link %)) links)
+                 relevant-link   (first (filter #(some #{(:id app)} (:link %)) links))
+
+                 ;operations      (join ", " (map (partial get-linked-app-operations (:id app)) relevant-links))
+                 operation       (get-linked-app-operations (:id app) relevant-link)
+                 ]
+             {:municipality municipality
+              :difficulty difficulty
+              :jobDescription job-description
+              :operation operation})) foreman-apps)
+    ))
+
 ;TODO unfinished
 (defquery foreman-history
   {:roles            [:applicant :authority] ; TODO: Needs to be restricted to only authority + specific extra auth roles
@@ -171,13 +195,21 @@
    :parameters       [:id]}
   [{application :application user :user :as command}]
   (if application
-    (let [foreman-projects (get-foreman-project-applications application)]
-      (ok :projects [{:municipality "Helsinki" :difficulty "A" :jobDescription "Vastaava tyonjohtaja" :operation "Asuinrakennuksen rakentaminen"}
-                   {:municipality "Helsinki" :difficulty "A" :jobDescription "Vastaava tyonjohtaja" :operation "Asuinrakennuksen rakentaminen"}
-                   {:municipality "Helsinki" :difficulty "A" :jobDescription "Vastaava tyonjohtaja" :operation "Asuinrakennuksen rakentaminen"}
-                   {:municipality "Tampere" :difficulty "A" :jobDescription "Vastaava tyonjohtaja" :operation "Asuinrakennuksen rakentaminen"}]))
+    (let [history-data (get-foreman-history-data application)]
+      (ok :projects history-data)
+      #_(ok :projects [{:municipality "Helsinki" :difficulty "A" :jobDescription "Vastaava tyonjohtaja" :operation "Asuinrakennuksen rakentaminen"}
+                     ; foreman-app             ;foreman-app    ;foreman-app                           ;project-app (+ missing link)
+                     {:municipality "Helsinki" :difficulty "A" :jobDescription "Vastaava tyonjohtaja" :operation "Asuinrakennuksen rakentaminen"}
+                     {:municipality "Helsinki" :difficulty "A" :jobDescription "Vastaava tyonjohtaja" :operation "Asuinrakennuksen rakentaminen"}
+                     {:municipality "Tampere" :difficulty "A" :jobDescription "Vastaava tyonjohtaja" :operation "Asuinrakennuksen rakentaminen"}]))
     (fail :error.not-found))
   )
+
+(defn- map-application [application]
+  {:id (:id application)
+   :state (:state application)
+   :auth (:auth application)
+   :documents (filter #(= (get-in % [:schema-info :name]) "tyonjohtaja") (:documents application))})
 
 (defquery foreman-applications
   {:roles            [:applicant :authority]
@@ -894,7 +926,10 @@
 (defn- do-add-link-permit [{:keys [id propertyId operations]} link-permit-id]
   {:pre [(mongo/valid-key? link-permit-id)
          (not= id link-permit-id)]}
-  (let [db-id (make-mongo-id-for-link-permit id link-permit-id)]
+  (let [db-id            (make-mongo-id-for-link-permit id link-permit-id)
+        is-lupapiste-app (.startsWith link-permit-id "LP-")
+        linked-app       (when is-lupapiste-app
+                           (domain/get-application-no-access-checking link-permit-id))]
     (mongo/update-by-id :app-links db-id
       {:_id  db-id
        :link [id link-permit-id]
@@ -902,9 +937,12 @@
                        :apptype (:name (first operations))
                        :propertyId propertyId}
        link-permit-id {:type "linkpermit"
-                       :linkpermittype (if (.startsWith link-permit-id "LP-")
+                       :linkpermittype (if is-lupapiste-app
                                          "lupapistetunnus"
-                                         "kuntalupatunnus")}}
+                                         "kuntalupatunnus")
+                       :apptypes (->> linked-app
+                                      (:operations)
+                                      (map :name))}}
       :upsert true)))
 
 (defn- validate-jatkolupa-zero-link-permits [_ application]
