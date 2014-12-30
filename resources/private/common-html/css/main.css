@@ -1885,23 +1885,23 @@ input[readonly]:focus, textarea[readonly]:focus {
 }
 
 /* line 707, ../sass/partials/_forms.scss */
-authority-history h2 {
+foreman-history h2 {
   background-color: #f6f6f6 !important;
 }
 /* line 710, ../sass/partials/_forms.scss */
-authority-history th.first {
+foreman-history th.first {
   width: 10%;
 }
 /* line 713, ../sass/partials/_forms.scss */
-authority-history th.second {
+foreman-history th.second {
   width: 10%;
 }
 /* line 716, ../sass/partials/_forms.scss */
-authority-history th.third {
+foreman-history th.third {
   width: 40%;
 }
 /* line 719, ../sass/partials/_forms.scss */
-authority-history th.fourth {
+foreman-history th.fourth {
   width: 40%;
 }
 
