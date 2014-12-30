@@ -839,7 +839,7 @@ footer .informations {
 }
 /* line 19, ../sass/partials/_footer.scss */
 footer .informations div {
-  width: 25%;
+  width: 33%;
   display: inline-block;
 }
 /* line 22, ../sass/partials/_footer.scss */
@@ -857,7 +857,7 @@ footer .informations .sade-information a, footer .informations .sade-information
 }
 /* line 35, ../sass/partials/_footer.scss */
 footer .informations .contact-information {
-  width: 49%;
+  width: 33%;
 }
 /* line 37, ../sass/partials/_footer.scss */
 footer .informations .contact-information div {
