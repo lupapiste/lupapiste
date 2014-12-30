@@ -851,21 +851,35 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return span;
   }
 
+  function paramsStr(params) {
+    return _.map(_.keys(params), function(key) {
+      return key + ": " + key;
+    }).join(", ");
+  }
+
+  function createComponent(name, params, classes) {
+    // createElement works with IE8
+    var element = document.createElement(name);
+    $(element)
+      .attr("params", paramsStr(params))
+      .addClass(classes)
+      .applyBindings(params);
+    return element;
+  }
+
   function buildForemanHistory(subSchema, model, path) {
     var params = {
       applicationId: self.appId
     };
+    return createComponent("foreman-history", params, "form-table");
+  }
 
-    // TODO: move to function
-    var paramsStr = _.map(_.keys(params), function(key) {
-      return key + ": " + key;
-    }).join(", ");
-
-    return $("<foreman-history>")
-      .attr("params", paramsStr)
-      .addClass("form-table")
-      .applyBindings(params)
-      .get(0);
+  function buildForemanOtherApplications(subSchema, model, path) {
+    var params = {
+      applicationId: self.appId,
+      hetu: undefined
+    }
+    return createComponent("foreman-other-applications", params, "form-table");
   }
 
   function buildFillMyInfoButton(subSchema, model, path) {
@@ -879,14 +893,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       collection: self.getCollection()
     };
 
-    var paramsStr = _.map(_.keys(params), function(key) {
-      return key + ": " + key;
-    }).join(", ");
-
-    return $("<fill-info-button params>")
-      .attr("params", paramsStr)
-      .applyBindings(params)
-      .get(0);
+    return createComponent("fill-info-button", params);
   }
 
   function buildPersonSelector(subSchema, model, path) {
@@ -1000,6 +1007,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     newBuildingSelector: buildNewBuildingSelector,
     fillMyInfoButton: buildFillMyInfoButton,
     foremanHistory: buildForemanHistory,
+    foremanOtherApplications: buildForemanOtherApplications,
     personSelector: buildPersonSelector,
     table: buildTableRow,
     unknown: buildUnknown
