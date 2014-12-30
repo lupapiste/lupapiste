@@ -1,5 +1,5 @@
 application.attachmentInfo: Milloin tarvitaan
-application.attachmentNotNeeded: Ei tarpeellinen
+application.attachmentNotNeeded: Ei tarpeen
 
 application.missingRequiredAttachments: Puuttuvat pakolliset liitteet
 
