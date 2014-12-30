@@ -119,7 +119,7 @@
 
 (defn- process-foreman-v2 [application]
   (if (= (-> application :operations first :name) "tyonjohtajan-nimeaminen-v2")
-    (assoc application :foreman-submittable (foreman-submittable? application))
+    (assoc application :submittable (foreman-submittable? application))
     application))
 
 (defn- process-documents [user {authority :authority :as application}]
