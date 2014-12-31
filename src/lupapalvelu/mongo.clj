@@ -308,12 +308,15 @@
   (mc/ensure-index :applications {:organization 1})
   (mc/ensure-index :applications {:auth.id 1})
   (mc/ensure-index :applications {:auth.invite.user.id 1} {:sparse true})
-  (mc/drop-index :activation "created-at_1") ; no such field "created-at"
+  (try
+    (mc/drop-index :activation "created-at_1") ; no such field "created-at"
+    (catch Exception _))
   (mc/ensure-index :activation {:email 1})
   (mc/drop-index :vetuma "created-at_1") ; expiration time has changed
   (mc/ensure-index :vetuma {:created-at 1} {:expireAfterSeconds (* 60 60 2)}) ; 2 h
   (mc/ensure-index :vetuma {:user.stamp 1})
   (mc/ensure-index :vetuma {:sessionid 1})
+  (mc/ensure-index :vetuma {:trid 1} {:unique true})
   (mc/ensure-index :organizations {:scope.municipality 1 :scope.permitType 1 })
   (mc/ensure-index :fs.chunks {:files_id 1 :n 1 })
   (mc/ensure-index :open-inforequest-token {:application-id 1})
