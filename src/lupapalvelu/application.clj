@@ -939,9 +939,10 @@
                        :linkpermittype (if is-lupapiste-app
                                          "lupapistetunnus"
                                          "kuntalupatunnus")
-                       :apptypes (->> linked-app
-                                      (:operations)
-                                      (map :name))}}
+                       :apptype (->> linked-app
+                                     (:operations)
+                                     (first)
+                                     (:name))}}
       :upsert true)))
 
 (defn- validate-jatkolupa-zero-link-permits [_ application]
