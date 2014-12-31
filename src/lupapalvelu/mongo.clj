@@ -310,7 +310,8 @@
   (mc/ensure-index :applications {:auth.invite.user.id 1} {:sparse true})
   (mc/ensure-index :activation {:created-at 1} {:expireAfterSeconds (* 60 60 24 7)})
   (mc/ensure-index :activation {:email 1})
-  (mc/ensure-index :vetuma {:created-at 1} {:expireAfterSeconds (* 60 30)})
+  (mc/drop-index :vetuma "created-at_1") ; expiration time has changed
+  (mc/ensure-index :vetuma {:created-at 1} {:expireAfterSeconds (* 60 60 2)}) ; 2 h
   (mc/ensure-index :vetuma {:user.stamp 1})
   (mc/ensure-index :vetuma {:sessionid 1})
   (mc/ensure-index :organizations {:scope.municipality 1 :scope.permitType 1 })
