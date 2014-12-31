@@ -308,7 +308,7 @@
   (mc/ensure-index :applications {:organization 1})
   (mc/ensure-index :applications {:auth.id 1})
   (mc/ensure-index :applications {:auth.invite.user.id 1} {:sparse true})
-  (mc/ensure-index :activation {:created-at 1} {:expireAfterSeconds (* 60 60 24 7)})
+  (mc/drop-index :activation "created-at_1") ; no such field "created-at"
   (mc/ensure-index :activation {:email 1})
   (mc/drop-index :vetuma "created-at_1") ; expiration time has changed
   (mc/ensure-index :vetuma {:created-at 1} {:expireAfterSeconds (* 60 60 2)}) ; 2 h
