@@ -100,13 +100,10 @@
           message: self.message()
         })
         .pending(self.saving)
-        .success(self.sendOk)
+        .success(function() {
+          self.done(true);
+        })
         .call();
-    };
-
-    self.sendOk = function() {
-      self.done(true);
-      // TODO: ... now what?
     };
   }
 
