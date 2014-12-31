@@ -363,30 +363,28 @@
                                     {:name "kaytettavaAika" :type :string :size "s" :unit "tuntiaviikko" :subtype :number :min 0 :max 168} ; 7*24 = 168h :)
                                     {:name "kayntienMaara" :type :string :size "s" :unit "kpl" :subtype :number :min 0 :max 9999999}]})
 
-
-
 (def hanke-row
-  [{:name "luvanNumero" :type :string :size "m" :label false}
-   {:name "katuosoite" :type :string :size "m" :label false}
-   {:name "rakennustoimenpide" :type :string :size "l" :label false}
-   {:name "kokonaisala" :type :string :subtype :number :size "s" :label false}
-   {:name "vaihe" :type :select :size "t" :label false
+  [{:name "luvanNumero" :type :string :size "m" :label false :uicomponent :string}
+   {:name "katuosoite" :type :string :size "m" :label false :uicomponent :string}
+   {:name "rakennustoimenpide" :type :string :size "l" :label false :uicomponent :string}
+   {:name "kokonaisala" :type :string :subtype :number :size "s" :label false :uicomponent :string}
+   {:name "vaihe" :type :select :size "t" :label false :uicomponent :select-component
     :body [{:name "R"}
            {:name "A"}
            {:name "K"}]}
-   {:name "3kk" :type :string :subtype :number :size "s" :label false}
-   {:name "6kk" :type :string :subtype :number :size "s" :label false}
-   {:name "9kk" :type :string :subtype :number :size "s" :label false}
-   {:name "12kk" :type :string :subtype :number  :size "s" :label false}])
+   {:name "3kk" :type :string :subtype :number :size "s" :label false :uicomponent :string}
+   {:name "6kk" :type :string :subtype :number :size "s" :label false :uicomponent :string}
+   {:name "9kk" :type :string :subtype :number :size "s" :label false :uicomponent :string}
+   {:name "12kk" :type :string :subtype :number  :size "s" :label false :uicomponent :string}])
 
 (def muut-rakennushankkeet-table {:name "muutHankkeet"
                                   :type :foremanOtherApplications
+                                  :uicomponent :hanke-table
                                   :repeating true
                                   :approvable true
                                   :copybutton false
                                   :listen [:hetuChanged]
-                                  :body hanke-row
-                                  })
+                                  :body hanke-row})
 
 ;(def henkilo-valitsin [{:name "userId" :type :personSelector :blacklist [:neighbor]}])
 (def tayta-omat-tiedot-button {:name "fillMyInfo" :type :fillMyInfoButton})

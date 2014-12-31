@@ -194,16 +194,28 @@
   };
 
   ko.bindingHandlers.saveIndicator = {
-    init: function(element) {
-      $(element).text(loc("form.saved"));
+    init: function(element, valueAccessor, allBindingsAccessor) {
+      var bindings = ko.utils.unwrapObservable(allBindingsAccessor());
+      if (bindings.label !== false) {
+        $(element).text(loc("form.saved"));
+      }
     },
     update: function(element, valueAccessor, allBindingsAccessor) {
       var value = ko.utils.unwrapObservable(valueAccessor());
       var bindings = ko.utils.unwrapObservable(allBindingsAccessor());
-      if (value === bindings.name) {
+      var type = ko.unwrap(bindings.type);
+      var name = bindings.name;
+      if (type) {
+        $(element).addClass("form-input-" + type);
+      }
+      if (value && value === name || value && name === undefined) {
         $(element).fadeIn(200);
         setTimeout(function() {
-          $(element).fadeOut(200);
+          $(element).fadeOut(200, function() {
+            if (type) {
+              $(element).removeClass("form-input-" + type);
+            }
+          });
         }, 4000);
       }
     }

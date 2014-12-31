@@ -874,11 +874,17 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return createComponent("foreman-history", params, "form-table");
   }
 
-  function buildForemanOtherApplications(subSchema, model, path) {
+  function buildForemanOtherApplications(subSchema, model, path, partOfChoice) {
     var params = {
       applicationId: self.appId,
-      hetu: undefined
-    }
+      documentId: self.docId,
+      hetu: undefined,
+      model: model[subSchema.name] || {},
+      subSchema: subSchema,
+      path: path,
+      partOfChoice: partOfChoice
+    };
+
     return createComponent("foreman-other-applications", params, "form-table");
   }
 
@@ -974,6 +980,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   }
 
   function buildTableRow(subSchema, model, path, partOfChoice) {
+    console.log("path", path);
     var myPath = path.join(".");
     var name = subSchema.name;
     var myModel = model[name] || {};
@@ -1091,7 +1098,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       return thead;
     }
 
-    if (subSchema.repeating) {
+    if (subSchema.repeating && !subSchema.uicomponent) {
       var models = model[myName];
       if (!models) {
           models = subSchema.initiallyEmpty ? [] : [{}];

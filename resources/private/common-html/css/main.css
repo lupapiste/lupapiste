@@ -5496,27 +5496,32 @@ div.stamp-content {
 }
 
 /* line 153, ../sass/main.scss */
+.inline {
+  display: inline;
+}
+
+/* line 157, ../sass/main.scss */
 .template {
   display: none;
 }
 
-/* line 157, ../sass/main.scss */
+/* line 161, ../sass/main.scss */
 #main-nav-bar {
   display: none;
 }
 
-/* line 161, ../sass/main.scss */
+/* line 165, ../sass/main.scss */
 .inert-table tbody tr:hover td,
 .inert-table tbody tr:hover th {
   background-color: #ffffff;
 }
 
-/* line 166, ../sass/main.scss */
+/* line 170, ../sass/main.scss */
 #application table input {
   margin: 0px;
 }
 
-/* line 170, ../sass/main.scss */
+/* line 174, ../sass/main.scss */
 .droparea {
   width: 150px;
   height: 100px;
@@ -5528,27 +5533,27 @@ div.stamp-content {
   display: table-cell;
 }
 
-/* line 181, ../sass/main.scss */
+/* line 185, ../sass/main.scss */
 .droparea-hover {
   border-color: #101010;
   color: #101010;
 }
 
 /* basic styles*/
-/* line 189, ../sass/main.scss */
+/* line 193, ../sass/main.scss */
 .table {
   font-size: 16px;
   line-height: 24px;
 }
 
 /* map zoomer fix */
-/* line 195, ../sass/main.scss */
+/* line 199, ../sass/main.scss */
 div.pzbDiv {
   right: 8px;
   top: 10px;
 }
 
-/* line 200, ../sass/main.scss */
+/* line 204, ../sass/main.scss */
 .dev-debug {
   z-index: 666;
   width: 146px;
@@ -5561,47 +5566,47 @@ div.pzbDiv {
   box-shadow: 3px 4px 7px;
   font-size: 0.8em;
 }
-/* line 212, ../sass/main.scss */
+/* line 216, ../sass/main.scss */
 .dev-debug p {
   margin-bottom: 4px;
 }
-/* line 214, ../sass/main.scss */
+/* line 218, ../sass/main.scss */
 .dev-debug p a {
   display: block;
 }
 
-/* line 220, ../sass/main.scss */
+/* line 224, ../sass/main.scss */
 #ui-datepicker-div {
   display: none;
 }
 
 /* find address and poi list: */
-/* line 225, ../sass/main.scss */
+/* line 229, ../sass/main.scss */
 .create-find {
   font-size: 12px;
 }
-/* line 227, ../sass/main.scss */
+/* line 231, ../sass/main.scss */
 .create-find .type {
   color: #555;
   font-style: italic;
 }
-/* line 230, ../sass/main.scss */
+/* line 234, ../sass/main.scss */
 .create-find .type:before {
   content: " (";
 }
-/* line 231, ../sass/main.scss */
+/* line 235, ../sass/main.scss */
 .create-find .type:after {
   content: ")";
 }
-/* line 234, ../sass/main.scss */
+/* line 238, ../sass/main.scss */
 .create-find .number:before {
   content: " ";
 }
-/* line 236, ../sass/main.scss */
+/* line 240, ../sass/main.scss */
 .create-find .municipality {
   color: #555;
 }
-/* line 238, ../sass/main.scss */
+/* line 242, ../sass/main.scss */
 .create-find .municipality:before {
   content: ", ";
 }
