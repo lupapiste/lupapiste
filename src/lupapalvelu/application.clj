@@ -170,8 +170,17 @@
            (let [foreman-doc     (domain/get-document-by-name app "tyonjohtaja-v2")
                  municipality    (i18n/loc (str "municipality." (:municipality app)))
                  difficulty      (tools/unwrapped (get-in foreman-doc [:data :patevyysvaatimusluokka]))
-                 job-description (->> (tools/unwrapped (get-in foreman-doc [:data :kuntaRoolikoodi]))
-                                      (str "osapuoli.tyonjohtaja.kuntaRoolikoodi." )
+                 difficulty      (->> (if (empty? difficulty)
+                                        "ei tiedossa"
+                                        difficulty)
+                                      (str "osapuoli.patevyysvaatimusluokka.")
+                                      (i18n/loc))
+                 foreman-role    (tools/unwrapped (get-in foreman-doc [:data :kuntaRoolikoodi]))
+                 foreman-role    (if (empty? foreman-role)
+                                   "ei_tiedossa"            ; TODO: ei_tiedossa -> ei tiedossa kun kaannos excelissa
+                                   foreman-role)
+                 job-description (->> foreman-role
+                                      (str "osapuoli.tyonjohtaja.kuntaRoolikoodi.")
                                       (i18n/loc))
                  ;relevant-links  (filter #(some #{(:id app)} (:link %)) links)
                  relevant-link   (first (filter #(some #{(:id app)} (:link %)) links))

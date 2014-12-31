@@ -104,7 +104,9 @@
   ([m k]
     (assert (keyword? k))
     (walk/postwalk
-      (fn [x] (if (and (map? x) (contains? x k)) (k x) x))
+      (fn [x] (if (and (map? x) (contains? x k))
+                (k x)
+                x))
       m)))
 
 (defn timestamped

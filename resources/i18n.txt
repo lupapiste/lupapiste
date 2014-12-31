@@ -1,1 +1,3 @@
 osapuoli.tyonjohtajanHyvaksynta._group_label:
+
+osapuoli.tyonjohtaja.kuntaRoolikoodi.ei_tiedossa: Ei tiedossa
