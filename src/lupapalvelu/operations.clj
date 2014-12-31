@@ -920,6 +920,11 @@
               (conj result operation)
               result)) #{} operations))
 
+(defn get-operation-metadata
+  "First form returns all metadata for operation. Second form returns value of given metadata."
+  ([operation] (operations (keyword operation)))
+  ([operation metadata] ((keyword metadata) (operations (keyword operation)))))
+
 (defn permit-type-of-operation [operation]
   (:permit-type (operations (keyword operation))))
 
