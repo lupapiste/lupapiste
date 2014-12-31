@@ -812,7 +812,7 @@
                                   :attachments []
                                   :add-operation-allowed false
                                   :link-permit-required true
-                                  :link-permit-verdict-required true}
+                                  :link-permit-verdict-required false}
 
     :suunnittelijan-nimeaminen   {:schema "hankkeen-kuvaus-minimum"
                                   :permit-type permit/R
