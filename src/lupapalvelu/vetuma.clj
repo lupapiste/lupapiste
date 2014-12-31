@@ -216,7 +216,7 @@
   (let [params       (:form-params (request/ring-request))
         status-param (get params "STATUS")
         trid         (get params "TRID")
-        data         (mongo/select-one :vetuma {:trid trid})
+        data         (mongo/select-one :vetuma {:sessionid (session-id) :trid trid})
         return-uri   (get-in data [:paths (keyword status)])
         return-uri   (or return-uri "/")]
 
