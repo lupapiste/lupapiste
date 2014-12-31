@@ -76,7 +76,7 @@
 
     self.error = function(data) {
       self.inError(true);
-      self.errorText("error."+data.text);
+      self.errorText(data.text);
     };
 
     self.attachments = ko.observableArray([]);
@@ -94,7 +94,6 @@
     self.inError = ko.observable(false);
     self.errorText = ko.observable("");
     self.tupasUser = ko.observable();
-    self.sendError = ko.observable();
 
     self.send = function() {
       ajax
@@ -108,8 +107,6 @@
         })
         .pending(self.saving)
         .success(self.sendOk)
-        .fail(self.fail)
-        .error(function(e) { self.sendError(e.text); })
         .call();
     };
 
