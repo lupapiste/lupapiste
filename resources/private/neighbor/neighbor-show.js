@@ -6,6 +6,13 @@
   function Model() {
     var self = this;
 
+    self.inError = ko.observable(false);
+    self.errorText = ko.observable("");
+    self.error = function(data) {
+      self.inError(true);
+      self.errorText(data.text);
+    };
+
     self.map = null;
 
     self.init = function(e) {
@@ -34,7 +41,6 @@
         .param("neighborId", self.neighborId())
         .param("token", self.token())
         .success(self.success)
-        .fail(self.fail)
         .error(self.error)
         .pending(self.pending)
         .call();
@@ -68,16 +74,6 @@
       return self;
     };
 
-    self.fail = function(data) {
-      // TODO: Show information about application not found, or closed, or sumthing.
-      error("fail", data);
-      window.location.hash = "!/404";
-    };
-
-    self.error = function(data) {
-      self.inError(true);
-      self.errorText(data.text);
-    };
 
     self.attachments = ko.observableArray([]);
     self.attachmentsByGroup = ko.observableArray();
@@ -91,8 +87,6 @@
     self.response = ko.observable();
     self.message = ko.observable();
     self.operationsCount = ko.observable();
-    self.inError = ko.observable(false);
-    self.errorText = ko.observable("");
     self.tupasUser = ko.observable();
 
     self.send = function() {
