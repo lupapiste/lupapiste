@@ -926,10 +926,10 @@
   ([operation metadata] ((keyword metadata) (operations (keyword operation)))))
 
 (defn permit-type-of-operation [operation]
-  (:permit-type (operations (keyword operation))))
+  (get-operation-metadata operation :permit-type))
 
 (defn- is-add-operation-allowed-for-operation [operation]
-  (:add-operation-allowed (operations (keyword operation))))
+  (get-operation-metadata operation :add-operation-allowed))
 
 (defn operations-filtered [filtering-fn only-addable?]
   (clojure.walk/postwalk
