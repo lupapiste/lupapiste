@@ -157,10 +157,9 @@
     (mongo/select :applications {:_id {$in linked-app-ids}})))
 
 (defn- get-linked-app-operations [foreman-app-id link]
-  (let [other-id (first (remove #{foreman-app-id} (:link link)))
-        operations (get-in link [(keyword other-id) :apptypes])]
-    (i18n/loc (str "operations." (first operations)))
-    ;(join ", " (map #(i18n/loc (str "operations." %)) operations))
+  (let [other-id  (first (remove #{foreman-app-id} (:link link)))
+        operation (get-in link [(keyword other-id) :apptype])]
+    (i18n/loc (str "operations." operation))
     ))
 
 (defn- get-foreman-history-data [foreman-app]
@@ -939,9 +938,10 @@
                        :linkpermittype (if is-lupapiste-app
                                          "lupapistetunnus"
                                          "kuntalupatunnus")
-                       :apptypes (->> linked-app
-                                      (:operations)
-                                      (map :name))}}
+                       :apptype (->> linked-app
+                                     (:operations)
+                                     (first)
+                                     (:name))}}
       :upsert true)))
 
 (defn- validate-jatkolupa-zero-link-permits [_ application]
