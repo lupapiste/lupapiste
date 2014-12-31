@@ -432,6 +432,7 @@
    :states     [:submitted :complement-needed]}
   [{:keys [application created user] :as command}]
   (let [jatkoaika-app? (= :ya-jatkoaika (-> application :operations first :name keyword))
+        foreman-app? (= :tyonjohtajan-nimeaminen-v2 (-> application :operations first :name keyword))
         app-updates (merge
                       {:modified created
                        :sent created
