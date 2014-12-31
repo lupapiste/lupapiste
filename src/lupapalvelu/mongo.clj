@@ -100,7 +100,7 @@
 
 (defn select
   "Returns multiple entries by matching the monger query.
-   Cursor is snapshotted unless order-by clause is not defined"
+   Cursor is snapshotted unless order-by clause is defined"
   ([collection]
     {:pre [collection]}
     (select collection {}))
