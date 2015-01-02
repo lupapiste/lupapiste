@@ -434,7 +434,7 @@
   (let [jatkoaika-app? (= :ya-jatkoaika (-> application :operations first :name keyword))
         foreman-app? (= :tyonjohtajan-nimeaminen-v2 (-> application :operations first :name keyword))
         foreman-notice? (when foreman-app?
-                          (= "ilmoitus" (-> (domain/get-document-by-name app1 "tyonjohtaja-v2") :data :ilmoitusHakemusValitsin :value)))
+                          (= "ilmoitus" (-> (domain/get-document-by-name application "tyonjohtaja-v2") :data :ilmoitusHakemusValitsin :value)))
         app-updates (merge
                       {:modified created
                        :sent created
