@@ -140,12 +140,17 @@
                   :html ["create-task.html"]}
 
    :ui-components {:depends [:common-html]
-                   :js ["fill-info-button/fill-info-model.js"
+                   :js ["ui-components.js"
+                        "fill-info-button/fill-info-model.js"
                         "foreman-history/foreman-history-model.js"
-                        "foreman-other-applications/foreman-other-applications-model.js"]
+                        "foreman-other-applications/foreman-other-applications-model.js"
+                        "string/string-model.js"
+                        "select/select-model.js"]
                    :html ["fill-info-button/fill-info-button-template.html"
                           "foreman-history/foreman-history-template.html"
-                          "foreman-other-applications/foreman-other-applications-template.html"]}
+                          "foreman-other-applications/foreman-other-applications-template.html"
+                          "string/string-template.html"
+                          "select/select-template.html"]}
 
    :application  {:depends [:common-html :repository :tree :task :create-task :modal-datepicker :signing :invites :side-panel :ui-components]
                   :js ["add-link-permit.js" "map-model.js" "change-location.js" "invite.js" "verdicts-model.js"

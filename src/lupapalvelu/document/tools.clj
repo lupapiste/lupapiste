@@ -17,7 +17,6 @@
     :text             ""
     :fillMyInfoButton nil
     :foremanHistory   nil
-    :foremanOtherApplications nil
     nil))
 
 (defn dummy-values [user-id {:keys [type subtype case name body] :as element}]
@@ -33,8 +32,7 @@
     :newBuildingSelector "1"
     :hetu             "210281-9988"
     :fillMyInfoButton nil
-    :foremanHistory nil
-    :foremanOtherApplications nil
+    :foremanHistory   nil
     :string           (condp = (keyword subtype)
                         :maaraala-tunnus   "0003"
                         :email            "example@example.com"
@@ -80,7 +78,7 @@
   (walk/prewalk
     #(if (map? %)
        (let [t (keyword (:type %))
-             v (if (#{:group :table} t) (group % t) (f %))]
+             v (if (#{:group :table :foremanOtherApplications} t) (group % t) (f %))]
          {(keyword (:name %)) v})
        %)
     body))

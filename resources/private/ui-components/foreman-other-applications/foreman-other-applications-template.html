@@ -5,10 +5,24 @@
     <script type="text/html" id="foreman-other-applications">
       <table>
         <thead>
-          <!-- TODO build table rows -->
+          <tr data-bind="foreach: params.subSchema.body">
+            <th data-bind="text: name"></th>
+          </tr>
         </thead>
-        <tbody></tbody>
+        <!-- TODO use as: for parents[xyz] -->
+        <tbody data-bind="foreach: items">
+          <tr data-bind="foreach: $parent.params.subSchema.body">
+            <td data-bind="component: {name: uicomponent,
+            params: {applicationId: $parents[1].params.applicationId,
+                     documentId: $parents[1].params.documentId,
+                     subSchema: $data,
+                     path: $parents[1].params.path,
+                     model: $parentContext.$data && $parentContext.$data[$data.name] ? $parentContext.$data[$data.name] : undefined,
+                     index: $parentContext.$index() }}"></td>
+          </tr>
+        </tbody>
       </table>
+      <button data-bind="click: addRow"></button>
     </script>
   </section>
 </body>
