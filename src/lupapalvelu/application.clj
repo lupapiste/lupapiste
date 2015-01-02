@@ -439,7 +439,7 @@
                       {:modified created
                        :sent created
                        :authority (if (seq (:authority application)) (:authority application) (user/summary user))} ; LUPA-1450
-                      (if jatkoaika-app?
+                      (if (or jatkoaika-app? foreman-notice?)
                         {:state :closed :closed created}
                         {:state :sent}))
         application (-> application
@@ -448,7 +448,7 @@
                          (update-link-permit-data-with-kuntalupatunnus-from-verdict %)
                          %))
                       (merge app-updates))
-        mongo-query (if jatkoaika-app?
+        mongo-query (if (or jatkoaika-app? foreman-notice?)
                       {:state {$in ["submitted" "complement-needed"]}}
                       {})
         indicator-updates (mark-indicators-seen-updates application user created)
