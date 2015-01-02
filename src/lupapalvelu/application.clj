@@ -105,6 +105,22 @@
 ;; Query application:
 ;;
 
+(defn- link-permit-submitted? [link-id]
+  (util/not-empty-or-nil? (:submitted (mongo/by-id "applications" link-id ["submitted"]))))
+
+(defn- foreman-submittable? [application]
+  (let [result (when-not (:submitted application)
+                 (when-let [lupapiste-link (filter #(= (:type %) "lupapistetunnus") (:linkPermitData application))]
+                   (when (seq lupapiste-link) (link-permit-submitted? (-> lupapiste-link first :id)))))]
+    (if (nil? result)
+      true
+      result)))
+
+(defn- process-foreman-v2 [application]
+  (if (= (-> application :operations first :name) "tyonjohtajan-nimeaminen-v2")
+    (assoc application :submittable (foreman-submittable? application))
+    application))
+
 (defn- process-documents [user {authority :authority :as application}]
   (let [validate (fn [doc] (assoc doc :validationErrors (model/validate application doc)))
         mask-person-ids (if-not (user/same-user? user authority) model/mask-person-ids identity)
@@ -116,6 +132,7 @@
     meta-fields/enrich-with-link-permit-data
     ((partial meta-fields/with-meta-fields user))
     without-system-keys
+    process-foreman-v2
     ((partial process-documents user))))
 
 (defn find-authorities-in-applications-organization [app]
@@ -237,14 +254,14 @@
   {:parameters [:id type]
    :input-validators [(fn [{{type :type} :data}] (when-not (collections-to-be-seen type) (fail :error.unknown-type)))]
    :roles [:applicant :authority]
-   :states (action/all-application-states-but [:canceled])}
+   :states action/all-application-states}
   [{:keys [data user created] :as command}]
   (update-application command {$set (mark-collection-seen-update user created type)}))
 
 (defcommand mark-everything-seen
   {:parameters [:id]
    :roles      [:authority]
-   :states     (action/all-application-states-but [:canceled])}
+   :states     action/all-application-states}
   [{:keys [application user created] :as command}]
   (update-application command {$set (mark-indicators-seen-updates application user created)}))
 
