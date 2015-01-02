@@ -646,14 +646,27 @@
       :else doc)))
 
 (defmigration populate-buildingids-to-docs
-              (update-applications-array
-                :documents
-                populate-buildingids-to-doc
-                {:documents {$elemMatch {$or [{:data.rakennusnro.value {$exists true}} {:data.manuaalinen_rakennusnro.value {$exists true}}]}}}))
+  (update-applications-array
+    :documents
+    populate-buildingids-to-doc
+    {:documents {$elemMatch {$or [{:data.rakennusnro.value {$exists true}} {:data.manuaalinen_rakennusnro.value {$exists true}}]}}}))
 
 (defmigration populate-buildingids-to-buildings
-              (update-applications-array
-                :buildings
-                #(assoc % :localShortId (:buildingId %), :nationalId nil, :localId nil)
-                {:buildings.0 {$exists true}}))
+  (update-applications-array
+    :buildings
+    #(assoc % :localShortId (:buildingId %), :nationalId nil, :localId nil)
+    {:buildings.0 {$exists true}}))
 
+(defmigration update-app-links-with-apptype
+  (doseq [app-link (mongo/select :app-links)]
+    (let [linkpermit-id (some
+                           (fn [[k v]]
+                             (when (= "linkpermit" (:type v))
+                               (name k)))
+                           app-link)
+          app           (first (mongo/select :applications {:_id linkpermit-id}))
+          apptype       (->> app :operations first :name)]
+        (mongo/update-by-id
+          :app-links
+          (:id app-link)
+          {$set {(str linkpermit-id ".apptype") apptype}}))))
