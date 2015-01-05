@@ -37,4 +37,18 @@
     (fact "All linked Foreman applications are returned in query"
       (let [applications (:applications foreman-applications)]
         (count applications) => 1
-        (:id (first applications)) => foreman-application-id))))
+        (:id (first applications)) => foreman-application-id))
+
+    (fact "Submit link-permit app"
+      (command apikey :submit-application :id application-id) => ok?)
+
+    (fact "Submit foreman-app"
+      (command apikey :submit-application :id foreman-application-id) => ok?)
+
+
+    (facts "approve foreman"
+      (let [_ (command sonja :approve-application :id application-id :lang "fi") => ok?
+            ; TODO no need to give verdict after implementing LUPA-1819
+            _ (give-verdict sonja application-id) => ok?]
+        (fact "when foreman application is of type 'ilmoitus', after approval its state is closed"
+          (command sonja :approve-application :id foreman-application-id :lang "fi") => ok?)))))
