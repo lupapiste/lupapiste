@@ -17,6 +17,9 @@
 
         foreman-application (query-application apikey foreman-application-id)
         foreman-link-permit-data (first (foreman-application :linkPermitData))
+        foreman-doc-idx (first (sade.util/positions #(= "tyonjohtaja-v2" (-> % :schema-info :name)) (:documents foreman-application)))
+        set-ilmoitus-hakemus-fn (fn [doc val] (assoc-in doc [:data :ilmoitusHakemusValitsin] val))
+        foreman-application-notice (update-in foreman-application [:documents foreman-doc-idx] set-ilmoitus-hakemus-fn "ilmoitus")
 
         application (query-application apikey application-id)
         link-to-application (first (application :appsLinkingToUs))
