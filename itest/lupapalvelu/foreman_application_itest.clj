@@ -51,4 +51,5 @@
             ; TODO no need to give verdict after implementing LUPA-1819
             _ (give-verdict sonja application-id) => ok?]
         (fact "when foreman application is of type 'ilmoitus', after approval its state is closed"
-          (command sonja :approve-application :id foreman-application-id :lang "fi") => ok?)))))
+          (command sonja :approve-application :id foreman-application-id :lang "fi") => ok?
+          (:state (query-application apikey foreman-application-id)) => "closed")))))
