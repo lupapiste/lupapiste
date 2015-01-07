@@ -4,7 +4,7 @@
             [clojure.string :as string]
             [noir.core :refer [defpage]]
             [noir.request :as request]
-            [noir.response :refer [redirect status json]]
+            [noir.response :as response]
             [hiccup.core :refer [html]]
             [hiccup.form :as form]
             [monger.operators :refer :all]
@@ -179,27 +179,32 @@
 
 (defpage "/api/vetuma" {:keys [success, cancel, error] :as data}
   (let [paths     {:success success :error error :cancel cancel}
-        sessionid (session-id)]
-    (if (non-local? paths)
-      (status 400 (format "invalid return paths: %s" paths))
-      (do
-        (mongo/update-one-and-return :vetuma {:sessionid sessionid} {:sessionid sessionid :paths paths :created-at (java.util.Date.)} :upsert true)
-        (html
-          (form/form-to [:post (:url (config))]
-            (map field (request-data (host :secure)))
-            (form/submit-button "submit")))))))
+        sessionid (session-id)
+        vetuma-request (request-data (host :secure))
+        trid      (vetuma-request "TRID")]
+
+    (if sessionid
+      (if (non-local? paths)
+       (response/status 400 (response/content-type "text/plain" "invalid return paths"))
+       (do
+         (mongo/update-one-and-return :vetuma {:sessionid sessionid :trid trid} {:sessionid sessionid :paths paths :trid trid :created-at (java.util.Date.)} :upsert true)
+         (html
+           (form/form-to [:post (:url (config))]
+             (map field vetuma-request)
+             (form/submit-button "submit")))))
+      (response/status 400 (response/content-type "test/plain" "Session not initialized")))))
 
 (defpage [:post "/api/vetuma"] []
-  (let [user (-> (:form-params (request/ring-request))
+  (let [form-params (:form-params (request/ring-request))
+        user (-> form-params
                logged
                parsed
                user-extracted
                logged)
-        data (mongo/update-one-and-return :vetuma {:sessionid (session-id)} {$set {:user user}})
-        uri  (get-in data [:paths :success])]
-    (if uri
-      (redirect uri)
-      (redirect (str (host) "/app/fi/welcome#!/register2")))))
+        trid (form-params "TRID")
+        data (mongo/update-one-and-return :vetuma {:sessionid (session-id) :trid trid} {$set {:user user}})
+        uri  (or (get-in data [:paths :success]) (str (host) "/app/fi/welcome#!/register2"))]
+    (response/redirect uri)))
 
 (def- error-status-codes
   ; From Vetuma_palvelun_kutsurajapinnan_maarittely_v3_0.pdf
@@ -208,9 +213,10 @@
    "FAILURE" "Kutsun palveleminen ep\u00e4onnistui jostain muusta syyst\u00e4 kuin siit\u00e4, ett\u00e4 taustapalvelu hylk\u00e4si suorittamisen."})
 
 (defpage [:any "/api/vetuma/:status"] {status :status}
-  (let [data         (mongo/select-one :vetuma {:sessionid (session-id)})
-        params       (:form-params (request/ring-request))
+  (let [params       (:form-params (request/ring-request))
         status-param (get params "STATUS")
+        trid         (get params "TRID")
+        data         (mongo/select-one :vetuma {:sessionid (session-id) :trid trid})
         return-uri   (get-in data [:paths (keyword status)])
         return-uri   (or return-uri "/")]
 
@@ -219,12 +225,12 @@
       "error"  (error "Vetuma failure, STATUS =" status-param "=" (get error-status-codes status-param) "Request parameters:" (keys-as-keywords params))
       (error "Unknown status:" status))
 
-    (redirect return-uri)))
+    (response/redirect return-uri)))
 
 (defpage "/api/vetuma/user" []
-  (let [data (mongo/select-one :vetuma {:sessionid (session-id)})
+  (let [data (last (mongo/select :vetuma {:sessionid (session-id), :user.stamp {$exists true}} [:user] {:created-at 1}))
         user (:user data)]
-    (json user)))
+    (response/json user)))
 
 ;;
 ;; public local api
@@ -251,4 +257,4 @@
           user  (select-keys data [:userid :firstname :lastname])
           user  (assoc user :stamp stamp)]
       (mongo/insert :vetuma {:user user :created-at (java.util.Date.)})
-      (json user))))
+      (response/json user))))

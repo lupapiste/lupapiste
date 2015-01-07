@@ -105,6 +105,22 @@
 ;; Query application:
 ;;
 
+(defn- link-permit-submitted? [link-id]
+  (util/not-empty-or-nil? (:submitted (mongo/by-id "applications" link-id ["submitted"]))))
+
+(defn- foreman-submittable? [application]
+  (let [result (when-not (:submitted application)
+                 (when-let [lupapiste-link (filter #(= (:type %) "lupapistetunnus") (:linkPermitData application))]
+                   (when (seq lupapiste-link) (link-permit-submitted? (-> lupapiste-link first :id)))))]
+    (if (nil? result)
+      true
+      result)))
+
+(defn- process-foreman-v2 [application]
+  (if (= (-> application :operations first :name) "tyonjohtajan-nimeaminen-v2")
+    (assoc application :submittable (foreman-submittable? application))
+    application))
+
 (defn- process-documents [user {authority :authority :as application}]
   (let [validate (fn [doc] (assoc doc :validationErrors (model/validate application doc)))
         mask-person-ids (if-not (user/same-user? user authority) model/mask-person-ids identity)
@@ -116,6 +132,7 @@
     meta-fields/enrich-with-link-permit-data
     ((partial meta-fields/with-meta-fields user))
     without-system-keys
+    process-foreman-v2
     ((partial process-documents user))))
 
 (defn find-authorities-in-applications-organization [app]
@@ -415,11 +432,14 @@
    :states     [:submitted :complement-needed]}
   [{:keys [application created user] :as command}]
   (let [jatkoaika-app? (= :ya-jatkoaika (-> application :operations first :name keyword))
+        foreman-app? (= :tyonjohtajan-nimeaminen-v2 (-> application :operations first :name keyword))
+        foreman-notice? (when foreman-app?
+                          (= "ilmoitus" (-> (domain/get-document-by-name application "tyonjohtaja-v2") :data :ilmoitusHakemusValitsin :value)))
         app-updates (merge
                       {:modified created
                        :sent created
                        :authority (if (seq (:authority application)) (:authority application) (user/summary user))} ; LUPA-1450
-                      (if jatkoaika-app?
+                      (if (or jatkoaika-app? foreman-notice?)
                         {:state :closed :closed created}
                         {:state :sent}))
         application (-> application
@@ -428,7 +448,7 @@
                          (update-link-permit-data-with-kuntalupatunnus-from-verdict %)
                          %))
                       (merge app-updates))
-        mongo-query (if jatkoaika-app?
+        mongo-query (if (or jatkoaika-app? foreman-notice?)
                       {:state {$in ["submitted" "complement-needed"]}}
                       {})
         indicator-updates (mark-indicators-seen-updates application user created)

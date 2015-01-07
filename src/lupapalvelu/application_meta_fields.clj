@@ -118,7 +118,8 @@
                    {:field :inPostVerdictState :fn in-post-verdict-state?}
                    {:field :applicantPhone :fn get-applicant-phone}
                    {:field :organizationMeta :fn organization-meta}
-                   {:field :neighbors :fn neighbors/normalize-neighbors}))
+                   {:field :neighbors :fn neighbors/normalize-neighbors}
+                   {:field :submittable :fn (fn [_ _] true)}))
 
 (defn- enrich-with-meta-fields [fields user app]
   (reduce (fn [app {field :field f :fn}] (assoc app field (f user app))) app fields))
