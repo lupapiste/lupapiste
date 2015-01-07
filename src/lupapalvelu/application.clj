@@ -159,40 +159,36 @@
 (defn- get-linked-app-operations [foreman-app-id link]
   (let [other-id  (first (remove #{foreman-app-id} (:link link)))
         operation (get-in link [(keyword other-id) :apptype])]
-    (i18n/loc (str "operations." operation))
-    ))
+    (i18n/loc (str "operations." operation))))
 
 (defn- get-foreman-history-data [foreman-app]
-  (let [foreman-apps       (get-foreman-applications foreman-app)
-        links              (mongo/select :app-links {:link {$in (map :id foreman-apps)}})
-        ]
-    (map (fn [app]
-           (let [foreman-doc     (domain/get-document-by-name app "tyonjohtaja-v2")
-                 municipality    (i18n/loc (str "municipality." (:municipality app)))
-                 difficulty      (tools/unwrapped (get-in foreman-doc [:data :patevyysvaatimusluokka]))
-                 difficulty      (->> (if (empty? difficulty)
-                                        "ei tiedossa"
-                                        difficulty)
-                                      (str "osapuoli.patevyysvaatimusluokka.")
-                                      (i18n/loc))
-                 foreman-role    (tools/unwrapped (get-in foreman-doc [:data :kuntaRoolikoodi]))
-                 foreman-role    (if (empty? foreman-role)
-                                   "ei_tiedossa"            ; TODO: ei_tiedossa -> ei tiedossa kun kaannos excelissa
-                                   foreman-role)
-                 job-description (->> foreman-role
-                                      (str "osapuoli.tyonjohtaja.kuntaRoolikoodi.")
-                                      (i18n/loc))
-                 ;relevant-links  (filter #(some #{(:id app)} (:link %)) links)
-                 relevant-link   (first (filter #(some #{(:id app)} (:link %)) links))
-
-                 ;operations      (join ", " (map (partial get-linked-app-operations (:id app)) relevant-links))
-                 operation       (get-linked-app-operations (:id app) relevant-link)
-                 ]
-             {:municipality municipality
-              :difficulty difficulty
-              :jobDescription job-description
-              :operation operation})) foreman-apps)
-    ))
+  (let [foreman-apps       (->> (get-foreman-applications foreman-app)
+                                (remove #(= (:id %) (:id foreman-app))))
+        links              (mongo/select :app-links {:link {$in (map :id foreman-apps)}})]
+    (map
+      (fn [app]
+        (let [foreman-doc     (domain/get-document-by-name app "tyonjohtaja-v2")
+              municipality    (i18n/loc (str "municipality." (:municipality app)))
+              difficulty      (tools/unwrapped (get-in foreman-doc [:data :patevyysvaatimusluokka]))
+              difficulty      (->> (if (empty? difficulty)
+                                     "ei tiedossa"
+                                     difficulty)
+                                   (str "osapuoli.patevyysvaatimusluokka.")
+                                   (i18n/loc))
+              foreman-role    (tools/unwrapped (get-in foreman-doc [:data :kuntaRoolikoodi]))
+              foreman-role    (if (empty? foreman-role)
+                                "ei_tiedossa"            ; TODO: ei_tiedossa -> ei tiedossa kun kaannos excelissa
+                                foreman-role)
+              job-description (->> foreman-role
+                                   (str "osapuoli.tyonjohtaja.kuntaRoolikoodi.")
+                                   (i18n/loc))
+              relevant-link   (first (filter #(some #{(:id app)} (:link %)) links))
+              operation       (get-linked-app-operations (:id app) relevant-link)]
+          {:municipality municipality
+           :difficulty difficulty
+           :jobDescription job-description
+           :operation operation}))
+      foreman-apps)))
 
 ;TODO unfinished
 (defquery foreman-history
@@ -202,13 +198,7 @@
    :parameters       [:id]}
   [{application :application user :user :as command}]
   (if application
-    (let [history-data (get-foreman-history-data application)]
-      (ok :projects history-data)
-      #_(ok :projects [{:municipality "Helsinki" :difficulty "A" :jobDescription "Vastaava tyonjohtaja" :operation "Asuinrakennuksen rakentaminen"}
-                     ; foreman-app             ;foreman-app    ;foreman-app                           ;project-app (+ missing link)
-                     {:municipality "Helsinki" :difficulty "A" :jobDescription "Vastaava tyonjohtaja" :operation "Asuinrakennuksen rakentaminen"}
-                     {:municipality "Helsinki" :difficulty "A" :jobDescription "Vastaava tyonjohtaja" :operation "Asuinrakennuksen rakentaminen"}
-                     {:municipality "Tampere" :difficulty "A" :jobDescription "Vastaava tyonjohtaja" :operation "Asuinrakennuksen rakentaminen"}]))
+    (ok :projects (get-foreman-history-data application))
     (fail :error.not-found))
   )
 
