@@ -193,5 +193,3 @@ attachmentType.ymparistokuormitus.selvitys_vakavaraisuudesta_vakuudesta.info: TO
 attachmentType.ymparistokuormitus.syntyvat_jatteet.info: TODO
 attachmentType.ymparistokuormitus.tiedot_pilaantuneesta_maaperasta.info: TODO
 
-
-error.not-submittable.foreman-link: Viitteenä oleva lupahakemus täytyy jättää ennen työnjohtajan nimeämistä.

@@ -4,7 +4,7 @@ vetuma = function(e$,success,urls) {
     .get("/api/vetuma/user")
     .raw(true)
     .success(function(user) {
-      if(user) {
+      if(user && user.userid) {
         if(success) {
           success(user);
         } else {
