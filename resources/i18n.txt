@@ -2,6 +2,8 @@ application.attachmentInfo: Milloin tarvitaan
 application.attachmentNotNeeded: Ei tarpeen
 
 application.missingRequiredAttachments: Puuttuvat pakolliset liitteet
+attachmentType.muut.energiatodistus: Energiatodistus
+attachmentType.muut.luonnos: Luonnos
 
 
 attachmentType.ennakkoluvat_ja_lausunnot.elyn_tai_kunnan_poikkeamapaatos.info: Jos hankkeessa on haettu ELY:n tai kunnan poikkeamispäätös muuten kuin Lupapisteen kautta
