@@ -58,6 +58,8 @@ attachmentType.laitosalue_sen_ymparisto.tiedot_toiminnan_sijaintipaikasta.info: 
 attachmentType.muut.asemapiirros_prosessien_paastolahteiden_sijainti.info: TODO
 
 attachmentType.muut.energiataloudellinen_selvitys.info: Aina uudisrakennushankkeissa (yli 50m2) tai kun kyseessä rakennuksen korjaaminen tai muuttaminen
+attachmentType.muut.energiatodistus.info: Aina uudisrakennushankkeissa (yli 50m2)
+attachmentType.muut.hulevesisuunnitelma.info: Jos rakennuspaikalla tehdään hulevesijärjestelyjä
 attachmentType.muut.ilmanvaihtosuunnitelma.info: Jos hankkeessa määräysten nojalla vaaditaan
 attachmentType.muut.ilmoitus_vaestonsuojasta.info: Jos hanke sisältää uuden tai korjattavan väestönsuojan
 attachmentType.muut.jatevesijarjestelman_rakennustapaseloste.info: Jos hankkeessa määräysten nojalla vaaditaan
@@ -130,6 +132,7 @@ attachmentType.paapiirustus.asemapiirros.info: Aina rakennushankkeen yhteydessä
 attachmentType.paapiirustus.julkisivupiirros.info: Aina rakennushankkeen yhteydessä
 attachmentType.paapiirustus.leikkauspiirros.info: Aina rakennushankkeen yhteydessä
 attachmentType.paapiirustus.pohjapiirros.info: Aina rakennushankkeen yhteydessä
+attachmentType.paapiirustus.yhdistelmapiirros.info: Kun useampia pääpiirroksia on yhdistetty yhteen piirrokseen
 
 attachmentType.paras_tekniikka_kaytanto.arvio_kaytannon_soveltamisesta.info: TODO
 attachmentType.paras_tekniikka_kaytanto.arvio_paastojen_vahentamistoimien_ristikkaisvaikutuksista.info: TODO
@@ -143,6 +146,7 @@ attachmentType.rakennuspaikan_hallinta.ote_asunto-osakeyhtion_kokouksen_poytakir
 attachmentType.rakennuspaikan_hallinta.rasitesopimus.info: Jos hanke edellyttää sopimista edellyttäviä järjestelyitä (rasite tms.)
 attachmentType.rakennuspaikan_hallinta.rasitustodistus.info: Jos kiinteistöön liittyy olemassa olevia rasitteita tai muita vastaavia  järjestelyitä
 attachmentType.rakennuspaikan_hallinta.todistus_erityisoikeuden_kirjaamisesta.info: Jos hankkeeseen liittyy kirjattavia erityisoikeuksia
+attachmentType.rakennuspaikan_hallinta.kiinteiston_lohkominen.info: Jos tonttia ei ole merkitty kiinteistörekisteriin
 
 attachmentType.rakennuspaikka.kiinteiston_vesi_ja_viemarilaitteiston_suunnitelma.info: Jos rakentamiseen liittyy vesi- ja viemärilaitteistoja
 attachmentType.rakennuspaikka.ote_alueen_peruskartasta.info: Viranomaisen vaatiessa peruskarttaote toimitettava
@@ -152,6 +156,7 @@ attachmentType.rakennuspaikka.ote_ranta-asemakaavasta.info: Jos hanke on ranta-a
 attachmentType.rakennuspaikka.ote_yleiskaavasta.info: Jos hanke on yleiskaava-alueella
 attachmentType.rakennuspaikka.rakennusoikeuslaskelma.info: Jos kiinteistöllä on olemassa olevaa rakennuskantaa
 attachmentType.rakennuspaikka.selvitys_rakennuspaikan_perustamis_ja_pohjaolosuhteista.info: Selvitys rakennuspaikan perustamis-  ja pohjaolosuhteista. Aina uudisrakennushankkeessa.
+attachmentType.rakennuspaikka.perustamistapalausunto.info: Aina uudisrakennushankkeessa
 attachmentType.rakennuspaikka.tonttikartta_tarvittaessa.info: Viranomaisen vaatiessa tonttikartta toimitettava
 
 attachmentType.rakentamisen_aikaiset.erityissuunnitelma.info: Hankkeeseen liittyvä erityissuunnitelma

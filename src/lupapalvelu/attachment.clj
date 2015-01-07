@@ -59,7 +59,8 @@
                              :ote_asunto-osakeyhtion_kokouksen_poytakirjasta
                              :rasitesopimus
                              :rasitustodistus
-                             :todistus_erityisoikeuden_kirjaamisesta]
+                             :todistus_erityisoikeuden_kirjaamisesta
+                             :kiinteiston_lohkominen]
    :rakennuspaikka [:kiinteiston_vesi_ja_viemarilaitteiston_suunnitelma
                     :ote_alueen_peruskartasta
                     :ote_asemakaavasta_jos_asemakaava_alueella
@@ -68,11 +69,13 @@
                     :ote_yleiskaavasta
                     :rakennusoikeuslaskelma
                     :selvitys_rakennuspaikan_perustamis_ja_pohjaolosuhteista
+                    :perustamistapalausunto
                     :tonttikartta_tarvittaessa]
    :paapiirustus [:asemapiirros
                   :pohjapiirros
                   :leikkauspiirros
-                  :julkisivupiirros]
+                  :julkisivupiirros
+                  :yhdistelmapiirros]
    :ennakkoluvat_ja_lausunnot [:elyn_tai_kunnan_poikkeamapaatos
                                :naapurien_suostumukset
                                :selvitys_naapurien_kuulemisesta
@@ -82,6 +85,8 @@
    :rakentamisen_aikaiset [:erityissuunnitelma]
    :osapuolet attachment-types-osapuoli
    :muut [:energiataloudellinen_selvitys
+          :energiatodistus
+          :hulevesisuunnitelma
           :ilmanvaihtosuunnitelma
           :ilmoitus_vaestonsuojasta
           :jatevesijarjestelman_rakennustapaseloste
@@ -125,6 +130,7 @@
           :valokuva
           :vesi_ja_viemariliitoslausunto_tai_kartta
           :vesikattopiirustus
+          :luonnos
           :ympariston_tietomalli_BIM
           :muu]])
 
