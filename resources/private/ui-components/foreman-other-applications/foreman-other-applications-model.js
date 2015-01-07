@@ -4,23 +4,27 @@ LUPAPISTE.ForemanOtherApplicationsModel = function(params) {
   self.params = params;
   self.items = ko.observableArray();
 
-  var body = self.params.subSchema.body;
-  var models = _.values(self.params.model);
-  var index = 0;
-  _.forEach(models, function(model) {
-    index += 1;
+  var createRow = function(model, index) {
     var row = [];
-    _.forEach(body, function(subSchema) {
+    _.forEach(self.params.subSchema.body, function(subSchema) {
       var item = {
         applicationId: self.params.applicationId,
+        documentId: self.params.documentId,
         path: self.params.path,
         index: index,
         schema: subSchema,
-        model: model[subSchema.name]
+        model: model ? model[subSchema.name] : undefined
       };
       row.push(item);
     });
-    self.items.push(row);
+    return row;
+  };
+
+  var models = _.values(self.params.model);
+  var index = 0;
+  _.forEach(models, function(model) {
+    self.items.push(createRow(model, index));
+    index += 1;
   });
 
   hub.subscribe("hetuChanged", function(data) {
@@ -28,9 +32,8 @@ LUPAPISTE.ForemanOtherApplicationsModel = function(params) {
   });
 
   self.addRow = function() {
-    self.items.push(undefined);
+    self.items.push(createRow(undefined, self.items().length));
   };
-
 };
 
 ko.components.register("foreman-other-applications", {
