@@ -12,7 +12,7 @@
 (defmethod handle-token :default [token-data params]
   (errorf "consumed token: token-type %s does not have handler: id=%s" (:token-type token-data) (:_id token-data)))
 
-(def- default-ttl (* 24 60 60 1000))
+(def- default-ttl (* 180 24 60 60 1000))
 
 (def make-token-id (partial security/random-password 48))
 
