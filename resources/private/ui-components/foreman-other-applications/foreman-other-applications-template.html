@@ -9,16 +9,10 @@
             <th data-bind="text: name"></th>
           </tr>
         </thead>
-        <!-- TODO use as: for parents[xyz] -->
-        <tbody data-bind="foreach: items">
-          <tr data-bind="foreach: $parent.params.subSchema.body">
-            <td data-bind="component: {name: uicomponent,
-            params: {applicationId: $parents[1].params.applicationId,
-                     documentId: $parents[1].params.documentId,
-                     subSchema: $data,
-                     path: $parents[1].params.path,
-                     model: $parentContext.$data && $parentContext.$data[$data.name] ? $parentContext.$data[$data.name] : undefined,
-                     index: $parentContext.$index() }}"></td>
+        <tbody data-bind="foreach: { data: items, as: 'row' }">
+          <tr data-bind="foreach: { data: row, as: 'column' }">
+            <td data-bind="component: { name: column.schema.uicomponent, params: column }">
+            </td>
           </tr>
         </tbody>
       </table>
