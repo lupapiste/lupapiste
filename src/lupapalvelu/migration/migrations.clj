@@ -13,7 +13,8 @@
             [lupapalvelu.organization :as organization]
             [lupapalvelu.application :as a]
             [lupapalvelu.application-meta-fields :as app-meta-fields]
-            [lupapalvelu.operations :as op]))
+            [lupapalvelu.operations :as op]
+            [sade.env :as env]))
 
 (defn drop-schema-data [document]
   (let [schema-info (-> document :schema :info (assoc :version 1))]
@@ -657,16 +658,18 @@
     #(assoc % :localShortId (:buildingId %), :nationalId nil, :localId nil)
     {:buildings.0 {$exists true}}))
 
-(defmigration update-app-links-with-apptype
-  (doseq [app-link (mongo/select :app-links)]
-    (let [linkpermit-id (some
-                           (fn [[k v]]
-                             (when (= "linkpermit" (:type v))
-                               (name k)))
-                           app-link)
-          app           (first (mongo/select :applications {:_id linkpermit-id}))
-          apptype       (->> app :operations first :name)]
-        (mongo/update-by-id
-          :app-links
-          (:id app-link)
-          {$set {(str linkpermit-id ".apptype") apptype}}))))
+
+(env/feature? :foreman
+  (defmigration update-app-links-with-apptype
+    (doseq [app-link (mongo/select :app-links)]
+      (let [linkpermit-id (some
+                             (fn [[k v]]
+                               (when (= "linkpermit" (:type v))
+                                 (name k)))
+                             app-link)
+            app           (first (mongo/select :applications {:_id linkpermit-id}))
+            apptype       (->> app :operations first :name)]
+          (mongo/update-by-id
+            :app-links
+            (:id app-link)
+            {$set {(str linkpermit-id ".apptype") apptype}})))))
