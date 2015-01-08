@@ -74,7 +74,7 @@ attachmentType.muut.kalliorakentamistekninen_suunnitelma.info: Jos on kyse kalli
 attachmentType.muut.katselmuksen_tai_tarkastuksen_poytakirja.info: Aina katselmukseen tai hakemukseen liittyen
 attachmentType.muut.kerrosalaselvitys.info: Mikäli ei ole esitetty pääpiirustuksissa
 attachmentType.muut.lammityslaitesuunnitelma.info: Jos hankkeessa määräysten nojalla vaaditaan
-attachmentType.muut.liikkumis_ja_esteettomyysselvitys.info: Aina, jos kyseessä on julkinen tila, sairaala tai hoitolaitos
+attachmentType.muut.liikkumis_ja_esteettomyysselvitys.info: Aina, jos kyseessä sairaala tai hoitolaitos. Muissa hankkeissa harkinnan mukaan.
 attachmentType.muut.lomarakennuksen_muutos_asuinrakennukseksi_selvitys_maaraysten_toteutumisesta.info: Selvitys määräysten toteutumisesta
 attachmentType.muut.merkki_ja_turvavalaistussuunnitelma.info: Jos hankkeessa määräysten nojalla vaaditaan
 attachmentType.muut.muu.info: Mikä tahansa muu hankkeeseen liittyvä asiakirja
@@ -83,7 +83,7 @@ attachmentType.muut.ote_alueen_peruskartasta_sijainti_paastolahteet_olennaiset_k
 
 attachmentType.muut.palotekninen_selvitys.info: Jos hankkeessa määräysten nojalla vaaditaan
 attachmentType.muut.paloturvallisuusselvitys.info: Jos hankkeessa määräysten nojalla vaaditaan
-attachmentType.muut.paloturvallisuussuunnitelma.info: Aina, jos kyseessä on julkinen tila, sairaala tai hoitolaitos
+attachmentType.muut.paloturvallisuussuunnitelma.info: Aina, jos kyseessä sairaala tai hoitolaitos. Muissa hankkeissa harkinnan mukaan.
 attachmentType.muut.piha_tai_istutussuunnitelma.info: Jos hankkeessa määräysten nojalla vaaditaan
 attachmentType.muut.pohjaveden_hallintasuunnitelma.info: Aina tärkeällä pohjavesialueella tai jos pohjavesiolosuhteilla on merkitystä rakentamiseen
 attachmentType.muut.pohjavesitutkimus.info: Jos hankkeessa määräysten nojalla vaaditaan
