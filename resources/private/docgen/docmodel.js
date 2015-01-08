@@ -981,7 +981,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   }
 
   function buildTableRow(subSchema, model, path, partOfChoice) {
-    console.log("path", path);
     var myPath = path.join(".");
     var name = subSchema.name;
     var myModel = model[name] || {};
