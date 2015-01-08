@@ -9,7 +9,7 @@
 (facts "operation-names"
   (operation-names "bil") => ["auto-katos"]
   (operation-names "grilli") => ["auto-katos"]
-  (operation-names "Ty\u00f6njohtaja") => ["tyonjohtajan-nimeaminen"]
+  (operation-names "Ty\u00f6njohtaja") => ["tyonjohtajan-nimeaminen-v2" "tyonjohtajan-nimeaminen"]
   (operation-names "ANNAN") => ["muu-uusi-rakentaminen" "muu-tontti-tai-kort-muutos" "ya-kayttolupa-muu-kayttolupa" "muu-laajentaminen" "muu-rakennus-laaj" "talousrakennus-laaj" "masto-tms" "muu-maisema-toimenpide" "varasto-tms" "sisatila-muutos"]
   (operation-names "S\u00e4hk\u00f6-, data ja muiden kaapelien sijoittaminen") => ["ya-sijoituslupa-sahko-data-ja-muiden-kaapelien-sijoittaminen"])
 

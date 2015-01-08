@@ -18,7 +18,7 @@ LUPAPISTE.ForemanModel = function() {
   self.taskId = ko.observable();
   self.isVisible = ko.computed(function() {
     return util.getIn(self, ["application", "permitType"]) === "R" &&
-      util.getIn(self, ["application", "operations", 0, "name"]) !== "tyonjohtajan-nimeaminen";
+      !/tyonjohtajan-nimeaminen/.test(util.getIn(self, ["application", "operations", 0, "name"]));
   });
 
   self.refresh = function(application) {
@@ -92,7 +92,11 @@ LUPAPISTE.ForemanModel = function() {
       var foremanTask = _.find(self.application().tasks, { "id": taskId });
       if (foremanTask && foremanTask.taskname) {
         self.selectedRole(foremanTask.taskname.toLowerCase());
+      } else {
+        self.selectedRole(undefined);
       }
+    } else {
+      self.selectedRole(undefined);
     }
     self.email(undefined);
     self.finished(false);

@@ -105,6 +105,22 @@
 ;; Query application:
 ;;
 
+(defn- link-permit-submitted? [link-id]
+  (util/not-empty-or-nil? (:submitted (mongo/by-id "applications" link-id ["submitted"]))))
+
+(defn- foreman-submittable? [application]
+  (let [result (when-not (:submitted application)
+                 (when-let [lupapiste-link (filter #(= (:type %) "lupapistetunnus") (:linkPermitData application))]
+                   (when (seq lupapiste-link) (link-permit-submitted? (-> lupapiste-link first :id)))))]
+    (if (nil? result)
+      true
+      result)))
+
+(defn- process-foreman-v2 [application]
+  (if (= (-> application :operations first :name) "tyonjohtajan-nimeaminen-v2")
+    (assoc application :submittable (foreman-submittable? application))
+    application))
+
 (defn- process-documents [user {authority :authority :as application}]
   (let [validate (fn [doc] (assoc doc :validationErrors (model/validate application doc)))
         mask-person-ids (if-not (user/same-user? user authority) model/mask-person-ids identity)
@@ -116,6 +132,7 @@
     meta-fields/enrich-with-link-permit-data
     ((partial meta-fields/with-meta-fields user))
     without-system-keys
+    process-foreman-v2
     ((partial process-documents user))))
 
 (defn find-authorities-in-applications-organization [app]
@@ -142,6 +159,38 @@
    :state (:state application)
    :auth (:auth application)
    :documents (filter #(= (get-in % [:schema-info :name]) "tyonjohtaja") (:documents application))})
+
+;TODO unfinished
+(defn- get-foreman-applications [foreman-application]
+  (let [foreman-doc  (first (filter #(= "tyonjohtaja-v2" (-> % :schema-info :name)) (:documents foreman-application)))
+        foreman-hetu (get-in foreman-doc [:data :henkilotiedot :hetu :value])
+        foreman-apps (mongo/select :applications {})
+        ]
+    )
+  )
+
+;TODO unfinished
+(defquery foreman-history
+  {:roles            [:applicant :authority] ; TODO: Needs to be restricted to only authority + specific extra auth roles
+   :states           action/all-states
+   :extra-auth-roles [:any]
+   :parameters       [:id]}
+  [{application :application user :user :as command}]
+  (if application
+    (let [
+          ;linked-apps      (mongo/select :app-links {:link {$in [application-id]}})
+          ;linked-apps      (filter #(= (get-in % [(keyword application-id) :type]) "linkpermit") linked-apps)
+          ;get-other-app-id (fn [app] (first (remove #{application-id} (:link app))))
+          ;get-app-type-fn  (fn [app] (get-in app [(keyword (get-other-app-id app)) :app-type]))
+          ;linked-apps      (filter #(re-matches #"^tyonjohtajan-nimeaminen.*" (get-app-type-fn %)) linked-apps)
+          ]
+
+      (ok :projects [{:municipality "Helsinki" :difficulty "A" :jobDescription "Vastaava tyonjohtaja" :operation "Asuinrakennuksen rakentaminen"}
+                   {:municipality "Helsinki" :difficulty "A" :jobDescription "Vastaava tyonjohtaja" :operation "Asuinrakennuksen rakentaminen"}
+                   {:municipality "Helsinki" :difficulty "A" :jobDescription "Vastaava tyonjohtaja" :operation "Asuinrakennuksen rakentaminen"}
+                   {:municipality "Tampere" :difficulty "A" :jobDescription "Vastaava tyonjohtaja" :operation "Asuinrakennuksen rakentaminen"}]))
+    (fail :error.not-found))
+  )
 
 (defquery foreman-applications
   {:roles            [:applicant :authority]
@@ -205,14 +254,14 @@
   {:parameters [:id type]
    :input-validators [(fn [{{type :type} :data}] (when-not (collections-to-be-seen type) (fail :error.unknown-type)))]
    :roles [:applicant :authority]
-   :states (action/all-application-states-but [:canceled])}
+   :states action/all-application-states}
   [{:keys [data user created] :as command}]
   (update-application command {$set (mark-collection-seen-update user created type)}))
 
 (defcommand mark-everything-seen
   {:parameters [:id]
    :roles      [:authority]
-   :states     (action/all-application-states-but [:canceled])}
+   :states     action/all-application-states}
   [{:keys [application user created] :as command}]
   (update-application command {$set (mark-indicators-seen-updates application user created)}))
 
@@ -383,11 +432,14 @@
    :states     [:submitted :complement-needed]}
   [{:keys [application created user] :as command}]
   (let [jatkoaika-app? (= :ya-jatkoaika (-> application :operations first :name keyword))
+        foreman-app? (= :tyonjohtajan-nimeaminen-v2 (-> application :operations first :name keyword))
+        foreman-notice? (when foreman-app?
+                          (= "ilmoitus" (-> (domain/get-document-by-name application "tyonjohtaja-v2") :data :ilmoitusHakemusValitsin :value)))
         app-updates (merge
                       {:modified created
                        :sent created
                        :authority (if (seq (:authority application)) (:authority application) (user/summary user))} ; LUPA-1450
-                      (if jatkoaika-app?
+                      (if (or jatkoaika-app? foreman-notice?)
                         {:state :closed :closed created}
                         {:state :sent}))
         application (-> application
@@ -396,7 +448,7 @@
                          (update-link-permit-data-with-kuntalupatunnus-from-verdict %)
                          %))
                       (merge app-updates))
-        mongo-query (if jatkoaika-app?
+        mongo-query (if (or jatkoaika-app? foreman-notice?)
                       {:state {$in ["submitted" "complement-needed"]}}
                       {})
         indicator-updates (mark-indicators-seen-updates application user created)
@@ -1010,7 +1062,7 @@
    :states action/all-application-states}
   [{:keys [created user application] :as command}]
   (let [foreman-app (do-create-application
-                      (assoc command :data {:operation "tyonjohtajan-nimeaminen"
+                      (assoc command :data {:operation "tyonjohtajan-nimeaminen-v2"
                                             :x (-> application :location :x)
                                             :y (-> application :location :y)
                                             :address (:address application)
@@ -1027,7 +1079,7 @@
                                (assoc-in hankkeen-kuvaus-doc [:data :kuvaus :value] hankkeen-kuvaus)
                                hankkeen-kuvaus-doc)
 
-        tyonjohtaja-doc      (domain/get-document-by-name foreman-app "tyonjohtaja")
+        tyonjohtaja-doc      (domain/get-document-by-name foreman-app "tyonjohtaja-v2")
         tyonjohtaja-doc      (if-not (string/blank? foremanRole)
                                (assoc-in tyonjohtaja-doc [:data :kuntaRoolikoodi :value] foremanRole)
                                tyonjohtaja-doc)
@@ -1035,8 +1087,8 @@
         hakija-doc           (domain/get-document-by-name application "hakija")
 
         new-application-docs (->> (:documents foreman-app)
-                                  (remove #(#{"hankkeen-kuvaus-minimum" "hakija" "tyonjohtaja"} (-> % :schema-info :name)))
-                                  (concat [hakija-doc hankkeen-kuvaus-doc tyonjohtaja-doc]))
+                                  (remove #(#{"hankkeen-kuvaus-minimum" "hakija" "tyonjohtaja-v2"} (-> % :schema-info :name)))
+                                  (concat (remove nil? [hakija-doc hankkeen-kuvaus-doc tyonjohtaja-doc])))
 
         foreman-app (assoc foreman-app :documents new-application-docs)]
 

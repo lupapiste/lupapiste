@@ -62,7 +62,6 @@
 
   var accordian = function(data, event) { accordion.toggle(event); };
 
-
   var AuthorityInfo = function(id, firstName, lastName) {
     this.id = id;
     this.firstName = firstName;
