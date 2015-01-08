@@ -255,6 +255,19 @@
     }
   };
 
+  ko.bindingHandlers.fader = {
+    update: function(element, valueAccessor, allBindingsAccessor) {
+      var value = ko.utils.unwrapObservable(valueAccessor());
+      var bindings = ko.utils.unwrapObservable(allBindingsAccessor());
+      var duration = bindings.duration || 100;
+      if (value) {
+        $(element).fadeIn(duration);
+      } else {
+        $(element).fadeOut(duration);
+      }
+    }
+  };
+
   ko.bindingHandlers.drill = {
     init: function(element) {
       $(element).addClass("icon");
