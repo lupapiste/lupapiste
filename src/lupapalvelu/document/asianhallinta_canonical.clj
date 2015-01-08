@@ -34,5 +34,7 @@
 ;; AsianTunnusVastaus, prefix: atr-
 
 
-(defn application-to-asianhallinta-canonical [application lang])
+(defn application-to-asianhallinta-canonical [application lang]
+  (let [application (tools/unwrapped application)]
+    (-> (assoc-in ua-root-element [:UusiAsia] (ua-get-asian-tyyppi application)))))
 
