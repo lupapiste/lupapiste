@@ -4,7 +4,7 @@
            [clojure.string :as s]))
 
 
-;; Uusi asia element
+;; Uusi asia element, Uusi asia functions prefixed with ua-
 
 (def uusi-asia {:UusiAsia
                 {:Tyyppi nil
@@ -18,6 +18,10 @@
                  :Asiointikieli nil
                  :Toimenpiteet nil
                  :Viiteluvat {:Viitelupa nil}}})
+
+(defn ua-root-element [application]
+  {:UusiAsia nil})
+
 
 (defn application-to-asianhallinta-canonical [application lang])
 
