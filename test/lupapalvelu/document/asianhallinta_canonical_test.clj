@@ -12,5 +12,7 @@
     (facts "Has (at least) required elements"
       (fact "UusiAsia" (keys (get-in canonical [:UusiAsia])) => (contains [:Tyyppi
                                                                            :Kuvaus
-                                                                           :Kuntanumero] :in-any-order)))))
+                                                                           :Kuntanumero
+                                                                           :Hakijat] :in-any-order))
+      (fact "First Hakija of Hakijat has Henkilo" (keys (:Hakija (first (get-in canonical [:UusiAsia :Hakijat])))) => (contains [:Henkilo])))))
 
