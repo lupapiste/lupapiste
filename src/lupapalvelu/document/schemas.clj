@@ -364,18 +364,18 @@
                                     {:name "kayntienMaara" :type :string :size "s" :unit "kpl" :subtype :number :min 0 :max 9999999}]})
 
 (def hanke-row
-  [{:name "luvanNumero" :type :string :size "m" :label false :uicomponent :string}
-   {:name "katuosoite" :type :string :size "m" :label false :uicomponent :string}
-   {:name "rakennustoimenpide" :type :string :size "l" :label false :uicomponent :string}
-   {:name "kokonaisala" :type :string :subtype :number :size "s" :label false :uicomponent :string}
-   {:name "vaihe" :type :select :size "t" :label false :uicomponent :select-component
+  [{:name "luvanNumero" :type :string :size "m" :label false :uicomponent :string :i18nkey "muutHankkeet.luvanNumero"}
+   {:name "katuosoite" :type :string :size "m" :label false :uicomponent :string :i18nkey "muutHankkeet.katuosoite"}
+   {:name "rakennustoimenpide" :type :string :size "l" :label false :uicomponent :string :i18nkey "muutHankkeet.rakennustoimenpide"}
+   {:name "kokonaisala" :type :string :subtype :number :size "s" :label false :uicomponent :string :i18nkey "muutHankkeet.kokonaisala"}
+   {:name "vaihe" :type :select :size "t" :label false :uicomponent :select-component :i18nkey "muutHankkeet.vaihe"
     :body [{:name "R"}
            {:name "A"}
            {:name "K"}]}
-   {:name "3kk" :type :string :subtype :number :size "s" :label false :uicomponent :string}
-   {:name "6kk" :type :string :subtype :number :size "s" :label false :uicomponent :string}
-   {:name "9kk" :type :string :subtype :number :size "s" :label false :uicomponent :string}
-   {:name "12kk" :type :string :subtype :number  :size "s" :label false :uicomponent :string}])
+   {:name "3kk" :type :string :subtype :number :size "s" :label false :uicomponent :string :i18nkey "muutHankkeet.3kk"}
+   {:name "6kk" :type :string :subtype :number :size "s" :label false :uicomponent :string :i18nkey "muutHankkeet.6kk"}
+   {:name "9kk" :type :string :subtype :number :size "s" :label false :uicomponent :string :i18nkey "muutHankkeet.9kk"}
+   {:name "12kk" :type :string :subtype :number  :size "s" :label false :uicomponent :string :i18nkey "muutHankkeet.12kk"}])
 
 (def muut-rakennushankkeet-table {:name "muutHankkeet"
                                   :type :foremanOtherApplications

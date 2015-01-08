@@ -3,10 +3,11 @@
 <body>
   <section class="page container">
     <script type="text/html" id="foreman-other-applications">
+      <label class="form-label form-label-table" data-bind="ltext: 'muutHankkeet.label'"></label>
       <table>
         <thead>
           <tr data-bind="foreach: params.subSchema.body">
-            <th data-bind="text: name"></th>
+            <th data-bind="ltext: i18nkey"></th>
           </tr>
         </thead>
         <tbody data-bind="foreach: { data: items, as: 'row' }">
@@ -16,7 +17,7 @@
           </tr>
         </tbody>
       </table>
-      <button data-bind="click: addRow"></button>
+      <button data-bind="ltext: 'muutHankkeet.addHanke', click: addRow"></button>
     </script>
   </section>
 </body>
