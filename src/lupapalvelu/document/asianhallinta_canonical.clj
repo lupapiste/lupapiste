@@ -21,9 +21,9 @@
 
 (def ua-root-element {:UusiAsia nil})
 
-(defn ua-get-asian-tyyppi [application]
+(defn ua-get-asian-tyyppi-string [application]
   ; KasiteltavaHakemus, TODO later: Tiedoksianto
-  {:Tyyppi "KasiteltavaHakemus"})
+  "KasiteltavaHakemus")
 
 ;; TaydennysAsiaan, prefix: ta-
 
@@ -36,5 +36,5 @@
 
 (defn application-to-asianhallinta-canonical [application lang]
   (let [application (tools/unwrapped application)]
-    (-> (assoc-in ua-root-element [:UusiAsia] (ua-get-asian-tyyppi application)))))
+    (-> (assoc-in ua-root-element [:UusiAsia :Tyyppi] (ua-get-asian-tyyppi-string application)))))
 
