@@ -19,9 +19,9 @@
                  :Toimenpiteet nil
                  :Viiteluvat {:Viitelupa nil}}})
 
-(def ua-root-element {:UusiAsia nil})
+(def ^:private ua-root-element {:UusiAsia nil})
 
-(defn ua-get-asian-tyyppi-string [application]
+(defn- ua-get-asian-tyyppi-string [application]
   ; KasiteltavaHakemus, TODO later: Tiedoksianto
   "KasiteltavaHakemus")
 
