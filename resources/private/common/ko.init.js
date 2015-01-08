@@ -261,9 +261,9 @@
       var bindings = ko.utils.unwrapObservable(allBindingsAccessor());
       var duration = bindings.duration || 100;
       if (value) {
-        $(element).fadeIn(duration);
+        $(element).fadeIn({duration: duration, queue: false});
       } else {
-        $(element).fadeOut(duration);
+        $(element).fadeOut({duration: duration, queue: false});
       }
     }
   };
