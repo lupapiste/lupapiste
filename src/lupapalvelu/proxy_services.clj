@@ -110,7 +110,7 @@
 
 (defn general-plan-urls-by-point-proxy [request]
   (let [{x :x y :y} (:params request)
-        response (wfs/general-plan-info-by-point x y)]19
+        response (wfs/general-plan-info-by-point x y)]
     (if response
       (resp/json (map wfs/general-plan-feature-to-feature-info (wfs/gfi-to-general-plan-features response)))
       (resp/status 503 "Service temporarily unavailable"))))
