@@ -36,5 +36,7 @@
 
 (defn application-to-asianhallinta-canonical [application lang]
   (let [application (tools/unwrapped application)]
-    (-> (assoc-in ua-root-element [:UusiAsia :Tyyppi] (ua-get-asian-tyyppi-string application)))))
+    (-> (assoc-in ua-root-element [:UusiAsia :Tyyppi] (ua-get-asian-tyyppi-string application))
+      (assoc-in [:UusiAsia :Kuvaus] (:title application))
+      (assoc-in [:UusiAsia :Kuntanumero] (:municipality application)))))
 
