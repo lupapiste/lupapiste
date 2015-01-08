@@ -13,9 +13,11 @@
                  :Hakijat nil
                  :Maksaja nil
                  :HakemusTunnus nil
-                 :VireilletuloPvm
-                 :Liitteet
-                 :Asiointikieli
-                 :Toimenpiteet
-                 :Viiteluvat}})
+                 :VireilletuloPvm nil
+                 :Liitteet nil
+                 :Asiointikieli nil
+                 :Toimenpiteet nil
+                 :Viiteluvat {:Viitelupa nil}}})
+
+(defn application-to-asianhallinta-canonical [application lang])
 
