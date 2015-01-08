@@ -10,6 +10,7 @@
             [lupapalvelu.action :refer [update-application application->command]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.token :as token]
+            [lupapalvelu.ttl :as ttl]
             [lupapalvelu.notifications :as notif]
             [lupapalvelu.user-api :as uapi]
             [lupapalvelu.user :as u])
@@ -169,7 +170,7 @@
                  :firstName (:name company)
                  :lastName  "")))
 
-(def company-invite-ttl (* 90 24 60 60 1000)) ; 90 days
+
 
 (defn company-invite [caller application company-id]
   {:pre [(map? caller) (map? application) (string? company-id)]}
@@ -180,7 +181,7 @@
                     :invite {:user {:id company-id}})
         admins    (find-company-admins company-id)
         application-id (:id application)
-        token-id  (token/make-token :accept-company-invitation nil {:caller caller, :company-id company-id, :application-id application-id} :auto-consume false :ttl company-invite-ttl)
+        token-id  (token/make-token :accept-company-invitation nil {:caller caller, :company-id company-id, :application-id application-id} :auto-consume false :ttl ttl/company-invite-ttl)
         update-count (update-application
                        (application->command application)
                        {:auth {$not {$elemMatch {:invite.user.id company-id}}}}
