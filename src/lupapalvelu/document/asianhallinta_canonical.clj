@@ -19,8 +19,8 @@
                  :Toimenpiteet nil
                  :Viiteluvat {:Viitelupa nil}}})
 
-(defn ua-root-element [application]
-  {:UusiAsia nil})
+(def ua-root-element {:UusiAsia nil})
+
 
 ;; TaydennysAsiaan, prefix: ta-
 
