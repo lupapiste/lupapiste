@@ -8,5 +8,9 @@
             [lupapalvelu.document.poikkeamis-canonical-test :as poikkeus-test]))
 
 (fl/facts* "UusiAsia canonical"
-  (let [canonical (ah/application-to-asianhallinta-canonical poikkeus-test/poikkari-hakemus "fi") => truthy]))
+  (let [canonical (ah/application-to-asianhallinta-canonical poikkeus-test/poikkari-hakemus "fi") => truthy]
+    (facts "Has (at least) required elements"
+      (fact "UusiAsia" (keys (get-in canonical [:UusiAsia])) => (contains [:Tyyppi
+                                                                           :Kuvaus
+                                                                           :Kuntanumero] :in-any-order)))))
 
