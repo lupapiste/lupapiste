@@ -41,6 +41,12 @@
 
 (def post-verdict-states #{:verdictGiven :constructionStarted :closed})
 
+(defn- attachment-deletable [application attachmentId userRole]
+  (let [attachment (attachment/get-attachment-info application attachmentId)]
+    (if (:required attachment)
+      (= (keyword userRole) :authority)
+      true)))
+
 (defn- attachment-editable-by-applicationState? [application attachmentId userRole]
   (or (ss/blank? attachmentId)
       (let [attachment (attachment/get-attachment-info application attachmentId)
@@ -178,7 +184,7 @@
    :roles       [:authority]
    :states      (action/all-states-but [:answered :sent :closed :canceled])}
   [{application :application {attachment-types :attachmentTypes} :data created :created}]
-  (if-let [attachment-ids (attachment/create-attachments application attachment-types created)]
+  (if-let [attachment-ids (attachment/create-attachments application attachment-types created false true true)]
     (ok :applicationId (:id application) :attachmentIds attachment-ids)
     (fail :error.attachment-placeholder)))
 
@@ -193,6 +199,9 @@
    :extra-auth-roles [:statementGiver]
    :states      (action/all-states-but [:answered :sent :closed :canceled])}
   [{:keys [application user]}]
+
+  (when-not (attachment-deletable application attachmentId (:role user))
+    (fail! :error.unauthorized :desc "Only authority can delete attachment templates that are originally bound to the application, or have been manually added by authority."))
 
   (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
     (fail! :error.pre-verdict-attachment))
@@ -317,17 +326,19 @@
       (fail! (:text validation-error))))
 
   (when-not (attachment/attach-file! {:application application
-                             :filename filename
-                             :size size
-                             :content tempfile
-                             :attachment-id attachmentId
-                             :attachment-type attachmentType
-                             :op op
-                             :comment-text text
-                             :target target
-                             :locked locked
-                             :user user
-                             :created created})
+                                      :filename filename
+                                      :size size
+                                      :content tempfile
+                                      :attachment-id attachmentId
+                                      :attachment-type attachmentType
+                                      :op op
+                                      :comment-text text
+                                      :target target
+                                      :locked locked
+                                      :required false
+                                      :requested-by-authority false
+                                      :user user
+                                      :created created})
     (fail :error.unknown)))
 
 
@@ -483,10 +494,24 @@
     (fail! :error.pre-verdict-attachment))
 
   (doseq [[k v] meta]
-    (let [keyStr (str "attachments.$." (name k))
-          setKey (keyword keyStr)]
+    (let [setKey (keyword (str "attachments.$." (name k)))]
       (update-application command
                           {:attachments {$elemMatch {:id attachmentId}}}
                           {$set {setKey v
                                  :attachments.$.modified (now)}})))
   (ok))
+
+;;
+;; Mark attachment as needed or not needed
+;;
+
+(defcommand set-attachment-not-needed
+  {:parameters [id attachmentId notNeeded]
+   :roles      [:applicant :authority]
+   :states     (action/all-application-states-but [:submitted :sent :closed :canceled])}     ;; TODO: onko nama oikeat tilat?
+  [command]
+  (update-application command
+                      {:attachments {$elemMatch {:id attachmentId}}}
+                      {$set {:attachments.$.not-needed notNeeded}})
+  (ok))
+

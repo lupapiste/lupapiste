@@ -70,27 +70,33 @@
     (attachment-latest-file-id application :attachment2) => :file2))
 
 (fact "make attachments"
-  (make-attachments 999 :draft [:a :b]) => (just
-                                             [{:id "123"
-                                               :locked false
-                                               :modified 999
-                                               :op nil
-                                               :state :requires_user_action
-                                               :target nil
-                                               :type :a
-                                               :applicationState :draft
-                                               :signatures []
-                                               :versions []}
-                                              {:id "123"
-                                               :locked false
-                                               :modified 999
-                                               :op nil
-                                               :state :requires_user_action
-                                               :target nil
-                                               :type :b
-                                               :applicationState :draft
-                                               :signatures []
-                                               :versions []}])
+  (make-attachments 999 :draft [:a :b] false true true) => (just
+                                                             [{:id "123"
+                                                               :locked false
+                                                               :modified 999
+                                                               :op nil
+                                                               :state :requires_user_action
+                                                               :target nil
+                                                               :type :a
+                                                               :applicationState :draft
+                                                               :signatures []
+                                                               :versions []
+                                                               :not-needed false
+                                                               :required true
+                                                               :requested-by-authority true}
+                                                              {:id "123"
+                                                               :locked false
+                                                               :modified 999
+                                                               :op nil
+                                                               :state :requires_user_action
+                                                               :target nil
+                                                               :type :b
+                                                               :applicationState :draft
+                                                               :signatures []
+                                                               :versions []
+                                                               :not-needed false
+                                                               :required true
+                                                               :requested-by-authority true}])
   (provided
     (mongo/create-id) => "123"))
 

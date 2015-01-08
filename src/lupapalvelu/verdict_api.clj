@@ -38,7 +38,6 @@
             attachment-id   urlhash
             attachment-type {:type-group "muut" :type-id "muu"}
             target          {:type "verdict" :id verdict-id :urlHash urlhash}
-            locked          true
             attachment-time (get-in pk [:liite :muokkausHetki] timestamp)]
         ; If the attachment-id, i.e., hash of the URL matches
         ; any old attachment, a new version will be added
@@ -50,7 +49,9 @@
                                     :attachment-id attachment-id
                                     :attachment-type attachment-type
                                     :target target
-                                    :locked locked
+                                    :required false
+                                    :requested-by-authority false
+                                    :locked true
                                     :user user
                                     :created attachment-time
                                     :state :ok})

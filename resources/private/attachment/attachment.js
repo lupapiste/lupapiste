@@ -103,27 +103,29 @@ var attachment = (function() {
       title:  ko.observable(),
       state:  ko.observable()
     },
-    applicationState: ko.observable(),
-    filename:         ko.observable(),
-    latestVersion:    ko.observable({}),
-    versions:         ko.observable([]),
-    signatures:       ko.observableArray([]),
-    type:             ko.observable(),
-    attachmentType:   ko.observable(),
+    applicationState:     ko.observable(),
+    authorized:           ko.observable(false),
+    filename:             ko.observable(),
+    latestVersion:        ko.observable({}),
+    versions:             ko.observable([]),
+    signatures:           ko.observableArray([]),
+    type:                 ko.observable(),
+    attachmentType:       ko.observable(),
     allowedAttachmentTypes: ko.observableArray([]),
-    previewDisabled: ko.observable(false),
-    operation:       ko.observable(),
+    previewDisabled:      ko.observable(false),
+    operation:            ko.observable(),
+    selectedOperationId:  ko.observable(),
     selectableOperations: ko.observableArray(),
-    contents:        ko.observable(),
-    scale:           ko.observable(),
-    scales:          ko.observableArray(LUPAPISTE.config.attachmentScales),
-    size:            ko.observable(),
-    sizes:           ko.observableArray(LUPAPISTE.config.attachmentSizes),
-    subscriptions:   [],
-    indicator:       ko.observable().extend({notify: "always"}),
+    contents:             ko.observable(),
+    scale:                ko.observable(),
+    scales:               ko.observableArray(LUPAPISTE.config.attachmentScales),
+    size:                 ko.observable(),
+    sizes:                ko.observableArray(LUPAPISTE.config.attachmentSizes),
+    subscriptions:        [],
+    indicator:            ko.observable().extend({notify: "always"}),
     showAttachmentVersionHistory: ko.observable(),
-    showHelp:        ko.observable(false),
-    init:            ko.observable(false),
+    showHelp:             ko.observable(false),
+    init:                 ko.observable(false),
 
     toggleHelp: function() {
       model.showHelp(!model.showHelp());
@@ -193,8 +195,6 @@ var attachment = (function() {
     }
   };
 
-  model.selectedOperationId = ko.observable();
-
   model.name = ko.computed(function() {
     if (model.attachmentType()) {
       return "attachmentType." + model.attachmentType();
@@ -203,9 +203,11 @@ var attachment = (function() {
   });
 
   model.editable = ko.computed(function() {
-    var preVerdictStates = ["verdictGiven", "constructionStarted", "closed"];
-    return _.contains(preVerdictStates, ko.unwrap(model.application.state)) ? currentUser.isAuthority() || _.contains(preVerdictStates, ko.unwrap(model.applicationState)) : true;
+    return _.contains(LUPAPISTE.config.postVerdictStates, ko.unwrap(model.application.state)) ?
+             currentUser.isAuthority() || _.contains(LUPAPISTE.config.postVerdictStates, ko.unwrap(model.applicationState)) :
+             true;
   });
+
 
   function saveLabelInformation(type, data) {
     data.id = applicationId;
@@ -285,6 +287,9 @@ var attachment = (function() {
     }
 
     $("#file-preview-iframe").attr("src","");
+
+    var isUserAuthorizedForAttachment = attachment.required ? currentUser.get().role() === "authority" : true;
+    model.authorized(isUserAuthorizedForAttachment);
 
     model.latestVersion(attachment.latestVersion);
     model.versions(attachment.versions);
