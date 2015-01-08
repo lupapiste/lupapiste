@@ -442,8 +442,8 @@ Add first attachment version
   Focus          xpath=//form[@id='attachmentUploadForm']/input[@type='file']
   Choose File    xpath=//form[@id='attachmentUploadForm']/input[@type='file']  ${path}
   # Had to use 'Select Frame' another time to be able to use e.g. 'Element Should Be Enabled'
-  Select Frame   uploadFrame
-  Wait Until     Element Should Be Enabled  test-save-new-attachment
+  # Select Frame   uploadFrame
+  # Wait Until     Element Should Be Enabled  test-save-new-attachment
   Click element  test-save-new-attachment
   Unselect Frame
   Wait until     Page should contain element  xpath=//div[@class='attachment-label']
