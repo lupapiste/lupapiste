@@ -882,7 +882,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       model: model[subSchema.name] || {},
       subSchema: subSchema,
       path: path,
-      partOfChoice: partOfChoice
+      partOfChoice: partOfChoice,
+      validationErrors: doc.validationErrors
     };
 
     return createComponent("foreman-other-applications", params, "form-table");

@@ -5,6 +5,10 @@ LUPAPISTE.ForemanOtherApplicationsModel = function(params) {
   self.items = ko.observableArray();
 
   var createRow = function(model, index) {
+    var res = _.filter(self.params.validationErrors, function(errors) {
+      return _.isEqual(errors.path[0], self.params.path[0]);
+    });
+
     var row = [];
     _.forEach(self.params.subSchema.body, function(subSchema) {
       var item = {
@@ -13,7 +17,8 @@ LUPAPISTE.ForemanOtherApplicationsModel = function(params) {
         path: self.params.path,
         index: index,
         schema: subSchema,
-        model: model ? model[subSchema.name] : undefined
+        model: model ? model[subSchema.name] : undefined,
+        validationErrors: res
       };
       row.push(item);
     });
