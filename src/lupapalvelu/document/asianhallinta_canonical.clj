@@ -46,12 +46,12 @@
             {:Henkilo (ua-get-henkilo hakija)}})))
 
 (defn- ua-get-maksaja [document]
-  (let [sel (get-in document [:data :_selected])
-        maksaja-map {:Laskuviite (get-in document [:data :laskuviite])
+  (let [sel (get-in document [:_selected])
+        maksaja-map {:Laskuviite (get-in document [:laskuviite])
                      :Verkkolaskutustieto (when (= "yritys" sel)
-                                            {:OVT-tunnus (get-in document [:data :yritys :verkkolaskutustieto :ovtTunnus])
-                                             :Verkkolaskutunnus (get-in document [:data :yritys :verkkolaskutustieto :verkkolaskuTunnus])
-                                             :Operaattoritunnus (get-in document [:data :yritys :verkkolaskutustieto :valittajaTunnus])})}]
+                                            {:OVT-tunnus (get-in document [:yritys :verkkolaskutustieto :ovtTunnus])
+                                             :Verkkolaskutunnus (get-in document [:yritys :verkkolaskutustieto :verkkolaskuTunnus])
+                                             :Operaattoritunnus (get-in document [:yritys :verkkolaskutustieto :valittajaTunnus])})}]
 
     (condp = sel
        "yritys" (assoc-in maksaja-map [:Yritys] nil)
@@ -73,4 +73,4 @@
       (assoc-in [:UusiAsia :Kuvaus] (:title application))
       (assoc-in [:UusiAsia :Kuntanumero] (:municipality application))
       (assoc-in [:UusiAsia :Hakijat] (ua-get-hakijat (:hakija documents)))
-      (assoc-in [:UusiAsia :Maksaja] (ua-get-maksaja (first (:maksaja documents)))))))
+      (assoc-in [:UusiAsia :Maksaja] (ua-get-maksaja (:data (first (:maksaja documents))))))))
