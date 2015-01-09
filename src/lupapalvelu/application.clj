@@ -190,17 +190,15 @@
            :operation operation}))
       foreman-apps)))
 
-;TODO unfinished
 (defquery foreman-history
-  {:roles            [:applicant :authority] ; TODO: Needs to be restricted to only authority + specific extra auth roles
+  {:roles            [:authority]
    :states           action/all-states
    :extra-auth-roles [:any]
    :parameters       [:id]}
   [{application :application user :user :as command}]
   (if application
     (ok :projects (get-foreman-history-data application))
-    (fail :error.not-found))
-  )
+    (fail :error.not-found)))
 
 (defn- map-application [application]
   {:id (:id application)

@@ -393,7 +393,7 @@
 (def tyonjohtajan-hyvaksynta [{:name "tyonjohtajanHyvaksynta"
                                :type :group
                                :whitelist [:authority]
-                               :body [{:name "tyonjohtahanHyvaksynta" :type :checkbox :i18nkey "tyonjohtaja.historia.hyvaksynta"}
+                               :body [{:name "tyonjohtajanHyvaksynta" :type :checkbox :i18nkey "tyonjohtaja.historia.hyvaksynta"}
                                       tyonjohtajan-historia]}])
 
 (def tyonjohtaja-v2 (body
