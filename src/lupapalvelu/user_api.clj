@@ -562,6 +562,5 @@
                                   :created created
                                   :user user
                                   :required false
-                                  :requested-by-authority false
                                   :locked false}))))
   (ok))
