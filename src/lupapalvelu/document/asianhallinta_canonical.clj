@@ -25,23 +25,25 @@
   ; KasiteltavaHakemus, TODO later: Tiedoksianto
   "KasiteltavaHakemus")
 
+(defn- ua-get-henkilo [data]
+  {:Etunimi (get-in data [:henkilo :henkilotiedot :etunimi])
+   :Sukunimi (get-in data [:henkilo :henkilotiedot :sukunimi])
+   :Yhteystiedot {
+                  :Jakeluosoite (get-in data [:henkilo :osoite :katu])
+                  :Postinumero (get-in data [:henkilo :osoite :postinumero])
+                  :Postitoimipaikka (get-in data [:henkilo :osoite :postitoimipaikannimi])
+                  :Maa "Suomi" ; TODO voiko olla muu?
+                  :Email (get-in data [:henkilo :yhteystiedot :email])
+                  :Puhelin (get-in data [:henkilo :yhteystiedot :puhelin])}
+   :Henkilotunnus (get-in data [:henkilo :henkilotiedot :hetu])
+   :VainSahkoinenAsiointi nil ; TODO tarviiko tätä ja Turvakieltoa?
+   :Turvakielto nil})
+
 (defn- ua-get-hakijat [documents]
   (for [hakija documents
         :let [hakija (:data hakija)]]
-    (merge {:Hakija
-            {:Henkilo
-             {:Etunimi (get-in hakija [:henkilo :henkilotiedot :etunimi])
-             :Sukunimi (get-in hakija [:henkilo :henkilotiedot :sukunimi])
-             :Yhteystiedot {
-              :Jakeluosoite (get-in hakija [:henkilo :osoite :katu])
-              :Postinumero (get-in hakija [:henkilo :osoite :postinumero])
-              :Postitoimipaikka (get-in hakija [:henkilo :osoite :postitoimipaikannimi])
-              :Maa "Suomi" ; TODO voiko olla muu?
-              :Email (get-in hakija [:henkilo :yhteystiedot :email])
-              :Puhelin (get-in hakija [:henkilo :yhteystiedot :puhelin])}
-             :Henkilotunnus (get-in hakija [:henkilo :henkilotiedot :hetu])
-             :VainSahkoinenAsiointi nil ; TODO tarviiko tätä ja Turvakieltoa?
-             :Turvakielto nil}}})))
+    (merge {:Hakija ; TODO yritys
+            {:Henkilo (ua-get-henkilo hakija)}})))
 
 (defn- ua-get-maksaja [document]
   (let [sel (get-in document [:data :_selected])]
