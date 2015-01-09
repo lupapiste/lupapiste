@@ -71,7 +71,7 @@
                                              :Operaattoritunnus (get-in document [:yritys :verkkolaskutustieto :valittajaTunnus])})}]
 
     (condp = sel
-       "yritys" (assoc-in maksaja-map [:Yritys] nil)
+       "yritys" (assoc-in maksaja-map [:Yritys] (ua-get-yritys document))
        "henkilo" (assoc-in maksaja-map [:Henkilo] (ua-get-henkilo document)))))
 
 ;; TaydennysAsiaan, prefix: ta-
