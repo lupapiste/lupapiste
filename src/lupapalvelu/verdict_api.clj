@@ -50,7 +50,6 @@
                                     :attachment-type attachment-type
                                     :target target
                                     :required false
-                                    :requested-by-authority false
                                     :locked true
                                     :user user
                                     :created attachment-time
