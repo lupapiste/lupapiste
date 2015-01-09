@@ -9,9 +9,6 @@ LUPAPISTE.ForemanOtherApplicationsModel = function(params) {
       return _.isEqual(errors.path[0], self.params.path[0]);
     });
 
-    var save = function() {
-    };
-
     var row = [];
     _.forEach(self.params.subSchema.body, function(subSchema) {
       var item = {
@@ -21,8 +18,7 @@ LUPAPISTE.ForemanOtherApplicationsModel = function(params) {
         index: index,
         schema: subSchema,
         model: model ? model[subSchema.name] : undefined,
-        validationErrors: res,
-        save: save
+        validationErrors: res
       };
       row.push(item);
     });
