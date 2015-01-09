@@ -43,6 +43,11 @@
    :VainSahkoinenAsiointi nil ; TODO tarviiko tätä ja Turvakieltoa?
    :Turvakielto nil})
 
+(defn- ua-get-yritys [data]
+  {:Nimi (get-in data [:yritys :yritysnimi])
+   :Ytunnus (get-in data [:yritys :liikeJaYhteisoTunnus])
+   :Yhteystiedot (ua-get-yhteystiedot (:yritys data))})
+
 (defn- ua-get-hakijat [documents]
   (for [hakija documents
         :let [hakija (:data hakija)]]
