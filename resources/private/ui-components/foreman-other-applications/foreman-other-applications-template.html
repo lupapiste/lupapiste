@@ -6,13 +6,20 @@
       <label class="form-label form-label-table" data-bind="ltext: 'muutHankkeet.label'"></label>
       <table>
         <thead>
-          <tr data-bind="foreach: params.subSchema.body">
+          <tr>
+            <!-- ko foreach: params.subSchema.body -->
             <th data-bind="ltext: i18nkey"></th>
+            <!-- /ko -->
+            <th></th>
           </tr>
         </thead>
         <tbody data-bind="foreach: { data: items, as: 'row' }">
-          <tr data-bind="foreach: { data: row, as: 'column' }">
-            <td data-bind="component: { name: column.schema.uicomponent, params: column }">
+          <tr>
+            <!-- ko foreach: { data: row, as: 'column' } -->
+            <td data-bind="component: { name: column.schema.uicomponent, params: column }"></td>
+            <!-- /ko -->
+            <td class="action-column">
+              <span class="icon remove-grey inline-right" data-bind="click: $parent.removeRow"></span>
             </td>
           </tr>
         </tbody>
