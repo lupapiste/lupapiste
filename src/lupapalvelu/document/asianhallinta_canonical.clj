@@ -26,6 +26,15 @@
   ; KasiteltavaHakemus, TODO later: Tiedoksianto
   "KasiteltavaHakemus")
 
+(defn- ua-get-yhteystiedot [data]
+  (util/strip-nils
+    {:Jakeluosoite (get-in data [:osoite :katu])
+     :Postinumero (get-in data [:osoite :postinumero])
+     :Postitoimipaikka (get-in data [:osoite :postitoimipaikannimi])
+     :Maa "Suomi" ; TODO voiko olla muu?
+     :Email (get-in data [:yhteystiedot :email])
+     :Puhelin (get-in data [:yhteystiedot :puhelin])}))
+
 (defn- ua-get-henkilo [data]
   {:Etunimi (get-in data [:henkilo :henkilotiedot :etunimi])
    :Sukunimi (get-in data [:henkilo :henkilotiedot :sukunimi])
