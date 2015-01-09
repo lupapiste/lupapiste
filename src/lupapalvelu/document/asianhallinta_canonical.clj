@@ -36,12 +36,13 @@
      :Puhelin (get-in data [:yhteystiedot :puhelin])}))
 
 (defn- ua-get-henkilo [data]
-  {:Etunimi (get-in data [:henkilo :henkilotiedot :etunimi])
-   :Sukunimi (get-in data [:henkilo :henkilotiedot :sukunimi])
-   :Yhteystiedot (ua-get-yhteystiedot (:henkilo data))
-   :Henkilotunnus (get-in data [:henkilo :henkilotiedot :hetu])
-   :VainSahkoinenAsiointi nil ; TODO tarviiko tätä ja Turvakieltoa?
-   :Turvakielto nil})
+  (util/strip-nils
+    {:Etunimi (get-in data [:henkilo :henkilotiedot :etunimi])
+     :Sukunimi (get-in data [:henkilo :henkilotiedot :sukunimi])
+     :Yhteystiedot (ua-get-yhteystiedot (:henkilo data))
+     :Henkilotunnus (get-in data [:henkilo :henkilotiedot :hetu])
+     :VainSahkoinenAsiointi nil ; TODO tarviiko tätä ja Turvakieltoa?
+     :Turvakielto nil}))
 
 (defn- ua-get-yritys [data]
   {:Nimi (get-in data [:yritys :yritysnimi])
