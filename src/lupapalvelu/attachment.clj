@@ -429,7 +429,7 @@
    Otherwise a new attachment is created."
   [{:keys [application attachment-id attachment-type op file-id filename content-type size comment-text created user target locked required] :as options}]
   {:pre [(map? application)]}
-  (let [requested-by-authority? (and (ss/blank? attachment-id) (= "authority" (-> options :user :role)))
+  (let [requested-by-authority? (and (ss/blank? attachment-id) (user/authority? (:user options)))
         att-id (cond
                  (ss/blank? attachment-id) (create-attachment application attachment-type op created target locked required requested-by-authority?)
                  (pos? (mongo/count :applications {:_id (:id application) :attachments.id attachment-id})) attachment-id
