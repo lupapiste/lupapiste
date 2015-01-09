@@ -110,12 +110,13 @@
         doc-mapper (comp mask-person-ids validate)]
     (update-in application [:documents] (partial map doc-mapper))))
 
+; TODO: add here the read-only -flag to data if whitelisted in data
 (defn- post-process-app [app user]
-  (-> app
+  (->> app
     meta-fields/enrich-with-link-permit-data
-    ((partial meta-fields/with-meta-fields user))
+    (meta-fields/with-meta-fields user)
     without-system-keys
-    ((partial process-documents user))))
+    (process-documents user)))
 
 (defn find-authorities-in-applications-organization [app]
   (mongo/select :users
