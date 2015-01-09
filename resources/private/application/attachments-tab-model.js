@@ -171,7 +171,7 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
       }
     });
 
-    self.refresh(self.appModel);
+    self.refresh(self.appModel, self.authorizationModel);
   });
 
 };
