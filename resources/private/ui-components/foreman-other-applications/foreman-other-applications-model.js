@@ -9,6 +9,9 @@ LUPAPISTE.ForemanOtherApplicationsModel = function(params) {
       return _.isEqual(errors.path[0], self.params.path[0]);
     });
 
+    var save = function() {
+    };
+
     var row = [];
     _.forEach(self.params.subSchema.body, function(subSchema) {
       var item = {
@@ -18,26 +21,26 @@ LUPAPISTE.ForemanOtherApplicationsModel = function(params) {
         index: index,
         schema: subSchema,
         model: model ? model[subSchema.name] : undefined,
-        validationErrors: res
+        validationErrors: res,
+        save: save
       };
       row.push(item);
     });
     return row;
   };
 
-  var models = _.values(self.params.model);
-  var index = 0;
-  _.forEach(models, function(model) {
-    self.items.push(createRow(model, index));
-    index += 1;
-  });
+  for (var key in self.params.model) {
+    self.items.push(createRow(self.params.model[key], key));
+  }
 
   hub.subscribe("hetuChanged", function(data) {
     // TODO fetch foreman other applications when hetu changes
   });
 
   self.addRow = function() {
-    self.items.push(createRow(undefined, self.items().length));
+    var lastItem = _.first(_.last(self.items()));
+    var index = lastItem && lastItem.index ? parseInt(lastItem.index) + 1 : 0;
+    self.items.push(createRow(undefined, index.toString()));
   };
 
   self.removeRow = function() {
