@@ -35,6 +35,12 @@
      :Email (get-in data [:yhteystiedot :email])
      :Puhelin (get-in data [:yhteystiedot :puhelin])}))
 
+(defn- ua-get-yhteyshenkilo [data]
+  (util/strip-nils
+    {:Etunimi (get-in data [:yhteyshenkilo :henkilotiedot :etunimi])
+     :Sukunimi (get-in data [:yhteyshenkilo :henkilotiedot :sukunimi])
+     :Yhteystiedot (ua-get-yhteystiedot (:yhteyshenkilo data))}))
+
 (defn- ua-get-henkilo [data]
   (util/strip-nils
     {:Etunimi (get-in data [:henkilo :henkilotiedot :etunimi])
@@ -47,7 +53,8 @@
 (defn- ua-get-yritys [data]
   {:Nimi (get-in data [:yritys :yritysnimi])
    :Ytunnus (get-in data [:yritys :liikeJaYhteisoTunnus])
-   :Yhteystiedot (ua-get-yhteystiedot (:yritys data))})
+   :Yhteystiedot (ua-get-yhteystiedot (:yritys data))
+   :Yhteyshenkilo (ua-get-yhteyshenkilo (:yritys data))})
 
 (defn- ua-get-hakijat [documents]
   (for [hakija documents
