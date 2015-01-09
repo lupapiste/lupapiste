@@ -336,7 +336,6 @@
                                       :target target
                                       :locked locked
                                       :required false
-                                      :requested-by-authority false
                                       :user user
                                       :created created})
     (fail :error.unknown)))
