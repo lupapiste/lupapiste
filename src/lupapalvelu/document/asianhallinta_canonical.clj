@@ -55,7 +55,7 @@
 
     (condp = sel
        "yritys" (assoc-in maksaja-map [:Yritys] nil)
-       "henkilo" (assoc-in maksaja-map [:Henkilo] nil))))
+       "henkilo" (assoc-in maksaja-map [:Henkilo] (ua-get-henkilo document)))))
 
 ;; TaydennysAsiaan, prefix: ta-
 
