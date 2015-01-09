@@ -16,5 +16,5 @@
                                                                            :Hakijat] :in-any-order))
       (fact "First Hakija of Hakijat has Henkilo" (keys (:Hakija (first (get-in canonical [:UusiAsia :Hakijat])))) => (contains [:Henkilo]))
       (fact "Maksaja is yritys, and has Laskuviite and Verkkolaskutustieto"
-        (get-in canonical [:UusiAsia :Maksaja]) => (contains [:Yritys :Laskuviite :Verkkolaskutustieto] :in-any-order)))))
+        (keys (get-in canonical [:UusiAsia :Maksaja])) => (contains [:Yritys :Laskuviite :Verkkolaskutustieto] :in-any-order)))))
 
