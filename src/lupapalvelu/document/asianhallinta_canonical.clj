@@ -46,15 +46,16 @@
             {:Henkilo (ua-get-henkilo hakija)}})))
 
 (defn- ua-get-maksaja [document]
-  (let [sel (get-in document [:data :_selected])]
-    {(condp = sel
-       "yritys" {}
-       "henkilo" {})
-     :Laskuviite (get-in document [:data :laskuviite])
-     :Verkkolaskutustieto (when (= "yritys" sel)
-                            {:OVT-tunnus (get-in document [:data :yritys :verkkolaskutustieto :ovtTunnus])
-                             :Verkkolaskutunnus (get-in document [:data :yritys :verkkolaskutustieto :verkkolaskuTunnus])
-                             :Operaattoritunnus (get-in document [:data :yritys :verkkolaskutustieto :valittajaTunnus])})}))
+  (let [sel (get-in document [:data :_selected])
+        maksaja-map {:Laskuviite (get-in document [:data :laskuviite])
+                     :Verkkolaskutustieto (when (= "yritys" sel)
+                                            {:OVT-tunnus (get-in document [:data :yritys :verkkolaskutustieto :ovtTunnus])
+                                             :Verkkolaskutunnus (get-in document [:data :yritys :verkkolaskutustieto :verkkolaskuTunnus])
+                                             :Operaattoritunnus (get-in document [:data :yritys :verkkolaskutustieto :valittajaTunnus])})}]
+
+    (condp = sel
+       "yritys" (assoc-in maksaja-map [:Yritys] nil)
+       "henkilo" (assoc-in maksaja-map [:Henkilo] nil))))
 
 ;; TaydennysAsiaan, prefix: ta-
 
