@@ -1,7 +1,8 @@
 (ns lupapalvelu.document.asianhallinta_canonical
   (require [lupapalvelu.document.canonical-common :refer :all]
            [lupapalvelu.document.tools :as tools]
-           [clojure.string :as s]))
+           [clojure.string :as s]
+           [sade.util :as util]))
 
 
 ;; UusiAsia, functions prefixed with ua-
