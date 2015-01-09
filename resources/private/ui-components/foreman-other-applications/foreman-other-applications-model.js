@@ -39,6 +39,10 @@ LUPAPISTE.ForemanOtherApplicationsModel = function(params) {
   self.addRow = function() {
     self.items.push(createRow(undefined, self.items().length));
   };
+
+  self.removeRow = function() {
+    // TODO remove row
+  };
 };
 
 ko.components.register("foreman-other-applications", {
