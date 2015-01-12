@@ -2,7 +2,7 @@
   (:require [monger.operators :refer :all]
             [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]]
             [clojure.walk :as walk]
-            [sade.util :refer [dissoc-in postwalk-map strip-nils]]
+            [sade.util :refer [dissoc-in postwalk-map strip-nils abs]]
             [sade.core :refer [def-]]
             [sade.strings :as ss]
             [lupapalvelu.migration.core :refer [defmigration]]
@@ -656,4 +656,17 @@
                 :buildings
                 #(assoc % :localShortId (:buildingId %), :nationalId nil, :localId nil)
                 {:buildings.0 {$exists true}}))
+
+(defn- set-new-attachment-flags [app-created attachment]
+  (if (< (abs (- (:modified attachment) app-created)) 100)    ;; inside 100 ms window, just in case
+    (assoc attachment :required true)
+    (assoc attachment :required false)))
+
+(defmigration required-flags-for-attachment-templates
+  (doseq [collection [:applications :submitted-applications]
+          application (mongo/select collection {"attachments.0" {$exists true}})]
+    (mongo/update-by-id :applications (:id application)
+      {$set {:attachments (map
+                            (partial set-new-attachment-flags (:created application))
+                            (:attachments application))}})))
 
