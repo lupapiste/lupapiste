@@ -44,3 +44,15 @@
    {:tag :Yritys :child yritys-type}
    {:tag :Laskuviite}
    {:tag :Verkkolaskutustieto :child verkkolaskutustieto-type}])
+
+(def metatieto-type
+  [{:tag :Avain}
+   {:tag :Arvo}])
+
+(def liite-type
+  [{:tag :Kuvaus}
+   {:tag :Tyyppi}
+   {:tag :LinkkiLiitteeseen}
+   {:tag :Luotu}
+   {:tag :Metatiedot :child metatieto-type}])
+
