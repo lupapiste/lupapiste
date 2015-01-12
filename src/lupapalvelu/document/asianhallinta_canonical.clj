@@ -108,4 +108,5 @@
       (assoc-in [:UusiAsia :Maksaja] (ua-get-maksaja (:data (first (:maksaja documents)))))
       (assoc-in [:UusiAsia :HakemusTunnus] (:id application))
       (assoc-in [:UusiAsia :VireilletuloPvm] (util/to-xml-date (:submitted application)))
-      (assoc-in [:UusiAsia :Liitteet] (ua-get-liitteet application)))))
+      (assoc-in [:UusiAsia :Liitteet] (ua-get-liitteet application))
+      (assoc-in [:UusiAsia :Asiointikieli] lang))))
