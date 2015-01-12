@@ -19,3 +19,9 @@
   (into yhteyshenkilo-type [{:tag :Henkilotunnus}
                             {:tag :VainSahkoinenAsiointi}
                             {:tag :Turvakielto}]))
+
+(def yritys-type
+  [{:tag :Nimi}
+   {:tag :Ytunnus}
+   {:tag :Yhteystidot :child yhteystiedot-type}
+   {:tag :Yhteyshenkilo :child yhteyshenkilo-type}])
