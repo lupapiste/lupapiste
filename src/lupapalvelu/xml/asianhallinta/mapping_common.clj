@@ -13,4 +13,9 @@
 (def yhteyshenkilo-type
   [{:tag :Etunimi}
    {:tag :Sukunimi}
-   {:tag :Yhteystiedot :child [yhteystiedot-type]}])
+   {:tag :Yhteystiedot :child yhteystiedot-type}])
+
+(def henkilo-type
+  (into yhteyshenkilo-type [{:tag :Henkilotunnus}
+                            {:tag :VainSahkoinenAsiointi}
+                            {:tag :Turvakielto}]))
