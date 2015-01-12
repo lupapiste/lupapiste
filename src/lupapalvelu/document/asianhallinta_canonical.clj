@@ -2,7 +2,8 @@
   (require [lupapalvelu.document.canonical-common :refer :all]
            [lupapalvelu.document.tools :as tools]
            [clojure.string :as s]
-           [sade.util :as util]))
+           [sade.util :as util]
+           [lupapalvelu.i18n :as i18n]))
 
 
 ;; UusiAsia, functions prefixed with ua-
