@@ -18,18 +18,19 @@
                                                                            :HakemusTunnus] :in-any-order))
       (fact "HakemusTunnus is LP-753-2013-00001" (get-in canonical [:UusiAsia :HakemusTunnus]) => "LP-753-2013-00001")
       (fact "First Hakija of Hakijat has Henkilo" (keys (:Hakija (first (get-in canonical [:UusiAsia :Hakijat])))) => (contains [:Henkilo]))
-      (fact "Maksaja is yritys, and has Laskuviite and Verkkolaskutustieto"
-        (keys (get-in canonical [:UusiAsia :Maksaja])) => (contains [:Yritys :Laskuviite :Verkkolaskutustieto]))
-      (fact "Maksaja is not Henkilo"
-        (keys (get-in canonical [:UusiAsia :Maksaja])) =not=> (contains [:Henkilo]))
-      (fact "Yritys keys"
-        (keys (get-in canonical [:UusiAsia :Maksaja :Yritys])) => (contains [:Nimi :Ytunnus :Yhteystiedot :Yhteyshenkilo]))
-      (fact "Yhteystiedot keys"
-        (keys (get-in canonical [:UusiAsia :Maksaja :Yritys :Yhteystiedot])) => (contains [:Jakeluosoite :Postinumero :Postitoimipaikka]))
-      (fact "Yhteyshenkilo keys"
-        (keys (get-in canonical [:UusiAsia :Maksaja :Yritys :Yhteyshenkilo])) => (contains [:Etunimi :Sukunimi :Yhteystiedot]))
-      (fact "Yhteyshenkilo yhteystiedot keys"
-        (keys (get-in canonical [:UusiAsia :Maksaja :Yritys :Yhteyshenkilo :Yhteystiedot])) => (contains [:Email :Puhelin]))
-      (fact "Verkkolaskutustieto keys"
-        (keys (get-in canonical [:UusiAsia :Maksaja :Verkkolaskutustieto])) => (contains [:OVT-tunnus :Verkkolaskutunnus :Operaattoritunnus])))))
+      (facts "Maksaja"
+        (fact "Maksaja is yritys, and has Laskuviite and Verkkolaskutustieto"
+          (keys (get-in canonical [:UusiAsia :Maksaja])) => (contains [:Yritys :Laskuviite :Verkkolaskutustieto]))
+        (fact "Maksaja is not Henkilo"
+          (keys (get-in canonical [:UusiAsia :Maksaja])) =not=> (contains [:Henkilo]))
+        (fact "Yritys keys"
+          (keys (get-in canonical [:UusiAsia :Maksaja :Yritys])) => (contains [:Nimi :Ytunnus :Yhteystiedot :Yhteyshenkilo]))
+        (fact "Yhteystiedot keys"
+          (keys (get-in canonical [:UusiAsia :Maksaja :Yritys :Yhteystiedot])) => (contains [:Jakeluosoite :Postinumero :Postitoimipaikka]))
+        (fact "Yhteyshenkilo keys"
+          (keys (get-in canonical [:UusiAsia :Maksaja :Yritys :Yhteyshenkilo])) => (contains [:Etunimi :Sukunimi :Yhteystiedot]))
+        (fact "Yhteyshenkilo yhteystiedot keys"
+          (keys (get-in canonical [:UusiAsia :Maksaja :Yritys :Yhteyshenkilo :Yhteystiedot])) => (contains [:Email :Puhelin]))
+        (fact "Verkkolaskutustieto keys"
+          (keys (get-in canonical [:UusiAsia :Maksaja :Verkkolaskutustieto])) => (contains [:OVT-tunnus :Verkkolaskutunnus :Operaattoritunnus]))))))
 
