@@ -30,3 +30,6 @@
   "Choice, Henkilo or Yritys"
   [{:tag :Henkilo :child henkilo-type}
    {:tag :Yritys :child yritys-type}])
+
+(def hakijat-type
+  [{:tag :Hakija :child hakija-type}])
