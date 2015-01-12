@@ -25,3 +25,8 @@
    {:tag :Ytunnus}
    {:tag :Yhteystidot :child yhteystiedot-type}
    {:tag :Yhteyshenkilo :child yhteyshenkilo-type}])
+
+(def hakija-type
+  "Choice, Henkilo or Yritys"
+  [{:tag :Henkilo :child henkilo-type}
+   {:tag :Yritys :child yritys-type}])
