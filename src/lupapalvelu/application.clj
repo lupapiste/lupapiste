@@ -141,8 +141,8 @@
   (let [foreman-doc     (first (filter #(= "tyonjohtaja-v2" (-> % :schema-info :name)) (:documents foreman-application)))]
     (get-in foreman-doc [:data :henkilotiedot :hetu :value])))
 
-(defn- get-foreman-applications [foreman-application]
-  (let [foreman-hetu    (get-foreman-hetu foreman-application)]
+(defn- get-foreman-applications [foreman-application & [foreman-hetu]]
+  (let [foreman-hetu (if foreman-hetu foreman-hetu (get-foreman-hetu foreman-application))]
     (mongo/select :applications {"operations.name" "tyonjohtajan-nimeaminen-v2"
                   :documents {$elemMatch {"schema-info.name" "tyonjohtaja-v2"
                                           "data.henkilotiedot.hetu.value" foreman-hetu}}})))
@@ -150,8 +150,8 @@
 (defn- get-foreman-project-applications
   "Based on the passed foreman application, fetches all project applications that have the same foreman as in
   the passed foreman application (personal id is used as key). Returns all the linked applications as a list"
-  [foreman-application]
-  (let [foreman-apps    (get-foreman-applications foreman-application)
+  [foreman-application foreman-hetu]
+  (let [foreman-apps    (get-foreman-applications foreman-application foreman-hetu)
         foreman-app-ids (map :id foreman-apps)
         links           (mongo/select :app-links {:link {$in foreman-app-ids}})
         linked-app-ids  (remove (set foreman-app-ids) (distinct (mapcat #(:link %) links)))]
@@ -161,6 +161,40 @@
   (let [other-id  (first (remove #{foreman-app-id} (:link link)))
         operation (get-in link [(keyword other-id) :apptype])]
     (i18n/loc (str "operations." operation))))
+
+(defn- map-foreman-other-applications [application timestamp]
+  (let [building-doc (domain/get-document-by-name application "uusiRakennus")
+        kokonaisala (get-in building-doc [:data :mitat :kokonaisala :value])
+        operation (get-in building-doc [:schema-info :op :name])]
+    {:luvanNumero {:value (:id application)
+                   :modified timestamp}
+     :katuosoite {:value (:address application)
+                  :modified timestamp}
+     :rakennustoimenpide {:value operation
+                          :modified timestamp}
+     :kokonaisala {:value kokonaisala
+                   :modified timestamp}
+     :autoupdated {:value true
+                   :modified timestamp}}))
+
+(defcommand update-foreman-other-applications
+          {:roles [:applicant :authority]
+           :states action/all-states
+           :parameters [:id foremanHetu]}
+          [{application :application user :user :as command}]
+          (when-let [foreman-applications (seq (get-foreman-project-applications application foremanHetu))]
+            (let [mapped-applications (map (fn [app] (map-foreman-other-applications app (:created command))) foreman-applications)
+                  tyonjohtaja-doc (domain/get-document-by-name application "tyonjohtaja-v2")
+                  muut-hankkeet (get-in tyonjohtaja-doc [:data :muutHankkeet])
+                  muut-hankkeet (select-keys muut-hankkeet (for [[k v] muut-hankkeet :when (not (get-in v [:autoupdated :value]))] k))
+                  muut-hankkeet (into [] (map (fn [[_ v]] v) muut-hankkeet))
+                  all-hankkeet (concat mapped-applications muut-hankkeet)
+                  all-hankkeet (into {} (map-indexed (fn [idx hanke] {(keyword (str idx)) hanke}) all-hankkeet))
+                  tyonjohtaja-doc (assoc-in tyonjohtaja-doc [:data :muutHankkeet] all-hankkeet)
+                  documents (:documents application)
+                  documents (map (fn [doc] (if (= (:id tyonjohtaja-doc) (:id doc)) tyonjohtaja-doc doc)) documents)]
+              (update-application command {$set {:documents documents}}))
+            (ok)))
 
 (defn- get-foreman-history-data [foreman-app]
   (let [foreman-apps       (->> (get-foreman-applications foreman-app)
