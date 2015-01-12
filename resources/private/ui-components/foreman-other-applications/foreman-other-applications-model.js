@@ -35,15 +35,12 @@ LUPAPISTE.ForemanOtherApplicationsModel = function(params) {
 
   for (var key in self.params.model) {
     var model = self.params.model[key];
-    if (model.autoupdated) {
+    if (util.getIn(model, ["autoupdated", "value"])) {
       self.autoupdatedRows.push(createRow(model, key));
     } else {
       self.rows.push(createRow(model, key));
     }
   }
-
-  console.log("rows", self.rows());
-  console.log("autorows", self.autoupdatedRows());
 
   hub.subscribe("hetuChanged", function(data) {
     ajax.command("update-foreman-other-applications", {id: self.params.applicationId, foremanHetu: data.value})
