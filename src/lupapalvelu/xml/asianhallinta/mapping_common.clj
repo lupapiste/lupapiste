@@ -33,3 +33,14 @@
 
 (def hakijat-type
   [{:tag :Hakija :child hakija-type}])
+
+(def verkkolaskutustieto-type
+  [{:tag :OVT-tunnus}
+   {:tag :Verkkolaskutunnus}
+   {:tag :Operaattoritunnus}])
+
+(def maksaja-type
+  [{:tag :Henkilo :child henkilo-type}
+   {:tag :Yritys :child yritys-type}
+   {:tag :Laskuviite}
+   {:tag :Verkkolaskutustieto :child verkkolaskutustieto-type}])
