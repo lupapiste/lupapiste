@@ -89,6 +89,11 @@
     (for [attachment attachments]
       (merge {:Liite (ua-get-liite attachment)}))))
 
+(defn- ua-get-toimenpiteet [{:keys [operations]} lang]
+  (for [op operations]
+    {:Toimenpide (i18n/localize lang "operations" (:name op) )}))
+
+
 ;; TaydennysAsiaan, prefix: ta-
 
 
@@ -109,4 +114,5 @@
       (assoc-in [:UusiAsia :HakemusTunnus] (:id application))
       (assoc-in [:UusiAsia :VireilletuloPvm] (util/to-xml-date (:submitted application)))
       (assoc-in [:UusiAsia :Liitteet] (ua-get-liitteet application))
-      (assoc-in [:UusiAsia :Asiointikieli] lang))))
+      (assoc-in [:UusiAsia :Asiointikieli] lang)
+      (assoc-in [:UusiAsia :Toimenpiteet] (ua-get-toimenpiteet application lang)))))
