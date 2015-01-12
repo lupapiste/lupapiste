@@ -119,6 +119,28 @@
                         :linkki "http://194.111.49.141/asemakaavapdf/12021.pdf"
                         :type "bentley"})))
 
+(facts "general-plan-urls-by-point-proxy"
+
+  (fact "Helsinki"
+    (let [response (general-plan-urls-by-point-proxy {:params {:x "395628" :y "6677704"}})
+          body (json/decode (:body response) true)]
+      (first body) => {:id "0912007"
+                       :nimi "Helsingin maanalainen kaava"
+                       :pvm "2010-12-08"
+                       :tyyppi "Kunnan hyv\u00e4ksym\u00e4"
+                       :oikeusvaik "Oikeusvaikutteinen"
+                       :lisatieto ""
+                       :linkki "http://194.28.3.37/maarays/0912007x.pdf"
+                       :type "yleiskaava"}
+      (second body) => {:id "0911001"
+                        :nimi "Helsingin yleiskaava 2002"
+                        :pvm "2003-11-26"
+                        :tyyppi "Kunnan hyv\u00e4ksym\u00e4"
+                        :oikeusvaik "Oikeusvaikutteinen"
+                        :lisatieto "Kaupungin toimittamasta aineistosta puuttuu etel\u00e4inen eli merellinen osa"
+                        :linkki "http://194.28.3.37/maarays/0911001x.pdf"
+                        :type "yleiskaava"})))
+
 (facts "geoserver-layers"
   (let [base-params {"FORMAT" "image/png"
                      "SERVICE" "WMS"
@@ -178,7 +200,9 @@
                    {"LAYERS" "taustakartta_20k"}
                    {"LAYERS" "taustakartta_40k"}
                    {"LAYERS" "ktj_kiinteistorajat" "TRANSPARENT" "TRUE"}
-                   {"LAYERS" "ktj_kiinteistotunnukset" "TRANSPARENT" "TRUE"}]]
+                   {"LAYERS" "ktj_kiinteistotunnukset" "TRANSPARENT" "TRUE"}
+                   {"LAYERS" "yleiskaava"}
+                   {"LAYERS" "yleiskaava_poikkeavat"}]]
       (let [request {:params (merge base-params layer)
                      :headers {"accept-encoding" "gzip, deflate"}}]
         (println "Checking" (get layer "LAYERS"))
@@ -188,3 +212,9 @@
   (http/get (str (server-address) "/proxy/wmscap")
     {:query-params {:v "428"}
      :throw-exceptions false}) => http200?)
+
+(fact "General plan documents"
+  (let [request {:params {:id "0911001"}
+                 :headers {"accept-encoding" "gzip, deflate"}}]
+    (println "Checking plandocument 0911001")
+    (wfs/raster-images request "plandocument") => http200?))
