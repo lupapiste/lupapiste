@@ -16,7 +16,8 @@
                                                                            :Hakijat
                                                                            :Maksaja
                                                                            :HakemusTunnus
-                                                                           :VireilletuloPvm] :in-any-order))
+                                                                           :VireilletuloPvm
+                                                                           :Liitteet] :in-any-order))
       (fact "HakemusTunnus is LP-753-2013-00001" (get-in canonical [:UusiAsia :HakemusTunnus]) => "LP-753-2013-00001")
       (fact "First Hakija of Hakijat has Henkilo" (keys (:Hakija (first (get-in canonical [:UusiAsia :Hakijat])))) => (contains [:Henkilo]))
       (facts "Maksaja"
@@ -35,5 +36,7 @@
         (fact "Verkkolaskutustieto keys"
           (keys (get-in canonical [:UusiAsia :Maksaja :Verkkolaskutustieto])) => (contains [:OVT-tunnus :Verkkolaskutunnus :Operaattoritunnus])))
       (fact "VireilletuloPvm is XML date"
-        (get-in canonical [:UusiAsia :VireilletuloPvm]) => #"\d{4}-\d{2}-\d{2}"))))
+        (get-in canonical [:UusiAsia :VireilletuloPvm]) => #"\d{4}-\d{2}-\d{2}")
+      (fact "Liitteet TODO" )
+      )))
 
