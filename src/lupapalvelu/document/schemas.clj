@@ -404,10 +404,9 @@
                       patevyysvaatimusluokka
                       vastattavat-tyotehtavat-tyonjohtaja-v2
                       tyonjohtaja-hanketieto
-                      muut-rakennushankkeet-table
                       tayta-omat-tiedot-button
-                      ;henkilo-valitsin ; to be replaced with "fill out own info" -button? ^
-                      designer-basic))
+                      designer-basic
+                      muut-rakennushankkeet-table))
 
 (def maksaja (body
                (henkilo-yritys-select-group :yritys-body yritys-with-verkkolaskutustieto)
