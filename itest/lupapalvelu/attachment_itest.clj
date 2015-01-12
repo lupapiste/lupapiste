@@ -26,12 +26,12 @@
             op-id (-> application :operations first :id)]
         (fact "the attachments are related to operation 'kerrostalo-rivitalo'"
           (count (get-attachments-by-operation application op-id)) => 4)
-        (fact "the attachments have 'required', 'not-needed' and 'requested-by-authority' flags correctly set"
+        (fact "the attachments have 'required', 'notNeeded' and 'requestedByAuthority' flags correctly set"
           (every? (fn [a]
-                    (every? #{"required" "not-needed" "requested-by-authority"} a) => truthy
+                    (every? #{"required" "notNeeded" "requestedByAuthority"} a) => truthy
                     (:required a) => true
-                    (:not-needed a) => false
-                    (:requested-by-authority a) => false)
+                    (:notNeeded a) => false
+                    (:requestedByAuthority a) => false)
             (:attachments application)) => truthy
           )))
 
@@ -52,12 +52,12 @@
         (get-attachment-by-id veikko application-id (first attachment-ids)) => (contains
                                                                                  {:type {:type-group "paapiirustus" :type-id "asemapiirros"}
                                                                                   :state "requires_user_action"
-                                                                                  :requested-by-authority true
+                                                                                  :requestedByAuthority true
                                                                                   :versions []})
         (get-attachment-by-id veikko application-id (second attachment-ids)) => (contains
                                                                                   {:type {:type-group "paapiirustus" :type-id "pohjapiirros"}
                                                                                    :state "requires_user_action"
-                                                                                   :requested-by-authority true
+                                                                                   :requestedByAuthority true
                                                                                    :versions []}))
 
       (fact "uploading files"

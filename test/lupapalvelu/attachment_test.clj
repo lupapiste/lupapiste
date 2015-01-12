@@ -81,9 +81,9 @@
                                                                :applicationState :draft
                                                                :signatures []
                                                                :versions []
-                                                               :not-needed false
+                                                               :notNeeded false
                                                                :required true
-                                                               :requested-by-authority true}
+                                                               :requestedByAuthority true}
                                                               {:id "123"
                                                                :locked false
                                                                :modified 999
@@ -94,9 +94,9 @@
                                                                :applicationState :draft
                                                                :signatures []
                                                                :versions []
-                                                               :not-needed false
+                                                               :notNeeded false
                                                                :required true
-                                                               :requested-by-authority true}])
+                                                               :requestedByAuthority true}])
   (provided
     (mongo/create-id) => "123"))
 
