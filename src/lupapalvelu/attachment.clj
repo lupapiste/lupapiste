@@ -284,7 +284,7 @@
   {:pre [application]}
   (get-attachment-types-by-permit-type (:permitType application)))
 
-(defn make-attachment [now target required? requested-by-authority? locked? applicationState op attachment-type & [attachment-id]]
+(defn make-attachment [now target required? requestedByAuthority? locked? applicationState op attachment-type & [attachment-id]]
   {:id (or attachment-id (mongo/create-id))
    :type attachment-type
    :modified now
@@ -293,20 +293,20 @@
    :state :requires_user_action
    :target target
    :required required?       ;; true if the attachment is added from from template along with the operation, or when attachment is requested by authority
-   :requested-by-authority requested-by-authority?  ;; true when authority is adding a new attachment template by hand
-   :not-needed false
+   :requestedByAuthority requestedByAuthority?  ;; true when authority is adding a new attachment template by hand
+   :notNeeded false
    :op op
    :signatures []
    :versions []})
 
 (defn make-attachments
   "creates attachments with nil target"
-  [now applicationState attachment-types locked? required? requested-by-authority?]
-  (map (partial make-attachment now nil required? requested-by-authority? locked? applicationState nil) attachment-types))
+  [now applicationState attachment-types locked? required? requestedByAuthority?]
+  (map (partial make-attachment now nil required? requestedByAuthority? locked? applicationState nil) attachment-types))
 
-(defn create-attachment [application attachment-type op now target locked? required? requested-by-authority? & [attachment-id]]
+(defn create-attachment [application attachment-type op now target locked? required? requestedByAuthority? & [attachment-id]]
   {:pre [(map? application)]}
-  (let [attachment (make-attachment now target required? requested-by-authority? locked? (:state application) op attachment-type attachment-id)]
+  (let [attachment (make-attachment now target required? requestedByAuthority? locked? (:state application) op attachment-type attachment-id)]
     (update-application
       (application->command application)
       {$set {:modified now}
@@ -314,9 +314,9 @@
 
     (:id attachment)))
 
-(defn create-attachments [application attachment-types now locked? required? requested-by-authority?]
+(defn create-attachments [application attachment-types now locked? required? requestedByAuthority?]
   {:pre [(map? application)]}
-  (let [attachments (make-attachments now (:state application) attachment-types locked? required? requested-by-authority?)]
+  (let [attachments (make-attachments now (:state application) attachment-types locked? required? requestedByAuthority?)]
     (update-application
       (application->command application)
       {$set {:modified now}
@@ -429,11 +429,11 @@
    Otherwise a new attachment is created."
   [{:keys [application attachment-id attachment-type op file-id filename content-type size comment-text created user target locked required] :as options}]
   {:pre [(map? application)]}
-  (let [requested-by-authority? (and (ss/blank? attachment-id) (user/authority? (:user options)))
+  (let [requestedByAuthority? (and (ss/blank? attachment-id) (user/authority? (:user options)))
         att-id (cond
-                 (ss/blank? attachment-id) (create-attachment application attachment-type op created target locked required requested-by-authority?)
+                 (ss/blank? attachment-id) (create-attachment application attachment-type op created target locked required requestedByAuthority?)
                  (pos? (mongo/count :applications {:_id (:id application) :attachments.id attachment-id})) attachment-id
-                 :else (create-attachment application attachment-type op created target locked required requested-by-authority? attachment-id))]
+                 :else (create-attachment application attachment-type op created target locked required requestedByAuthority? attachment-id))]
     (set-attachment-version (assoc options :attachment-id att-id :now created :stamped false))))
 
 (defn parse-attachment-type [attachment-type]
