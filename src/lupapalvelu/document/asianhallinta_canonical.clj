@@ -83,7 +83,7 @@
      :Metatiedot {:Avain "type"
                   :Arvo (get-in attachment [:type :type-id])}}))
 
-(defn- ua-get-liitteet [{:keys attachments}]
+(defn- ua-get-liitteet [{:keys [attachments]}]
   (when (seq attachments)
     (for [attachment attachments]
       (merge {:Liite (ua-get-liite attachment)}))))
