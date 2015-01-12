@@ -74,6 +74,20 @@
        "yritys" (assoc-in maksaja-map [:Yritys] (ua-get-yritys document))
        "henkilo" (assoc-in maksaja-map [:Henkilo] (ua-get-henkilo document)))))
 
+(defn- ua-get-liite [attachment]
+  (util/strip-nils
+    {:Kuvaus (get-in attachment [:latestVersion :filename])
+     :Tyyppi (get-in attachment [:latestVersion :contentType])
+     :LinkkiLiitteeseen (get-in attachment [:latestVersion :filename]) ;TODO
+     :Luotu (util/to-xml-date (:modified attachment))
+     :Metatiedot {:Avain "type"
+                  :Arvo (get-in attachment [:type :type-id])}}))
+
+(defn- ua-get-liitteet [{:keys attachments}]
+  (when (seq attachments)
+    (for [attachment attachments]
+      (merge {:Liite (ua-get-liite attachment)}))))
+
 ;; TaydennysAsiaan, prefix: ta-
 
 
@@ -92,4 +106,5 @@
       (assoc-in [:UusiAsia :Hakijat] (ua-get-hakijat (:hakija documents)))
       (assoc-in [:UusiAsia :Maksaja] (ua-get-maksaja (:data (first (:maksaja documents)))))
       (assoc-in [:UusiAsia :HakemusTunnus] (:id application))
-      (assoc-in [:UusiAsia :VireilletuloPvm] (util/to-xml-date (:submitted application))))))
+      (assoc-in [:UusiAsia :VireilletuloPvm] (util/to-xml-date (:submitted application)))
+      (assoc-in [:UusiAsia :Liitteet] (ua-get-liitteet application)))))
