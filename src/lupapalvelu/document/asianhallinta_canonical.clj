@@ -91,4 +91,5 @@
       (assoc-in [:UusiAsia :Kuntanumero] (:municipality application))
       (assoc-in [:UusiAsia :Hakijat] (ua-get-hakijat (:hakija documents)))
       (assoc-in [:UusiAsia :Maksaja] (ua-get-maksaja (:data (first (:maksaja documents)))))
-      (assoc-in [:UusiAsia :HakemusTunnus] (:id application)))))
+      (assoc-in [:UusiAsia :HakemusTunnus] (:id application))
+      (assoc-in [:UusiAsia :VireilletuloPvm] (util/to-xml-date (:submitted application))))))
