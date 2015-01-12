@@ -13,7 +13,10 @@
       (fact "UusiAsia" (keys (get-in canonical [:UusiAsia])) => (contains [:Tyyppi
                                                                            :Kuvaus
                                                                            :Kuntanumero
-                                                                           :Hakijat] :in-any-order))
+                                                                           :Hakijat
+                                                                           :Maksaja
+                                                                           :HakemusTunnus] :in-any-order))
+      (fact "HakemusTunnus is LP-753-2013-00001" (get-in canonical [:UusiAsia :HakemusTunnus]) => "LP-753-2013-00001")
       (fact "First Hakija of Hakijat has Henkilo" (keys (:Hakija (first (get-in canonical [:UusiAsia :Hakijat])))) => (contains [:Henkilo]))
       (fact "Maksaja is yritys, and has Laskuviite and Verkkolaskutustieto"
         (keys (get-in canonical [:UusiAsia :Maksaja])) => (contains [:Yritys :Laskuviite :Verkkolaskutustieto]))
