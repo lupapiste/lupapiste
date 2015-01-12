@@ -56,3 +56,12 @@
    {:tag :Luotu}
    {:tag :Metatiedot :child metatieto-type}])
 
+(def muu-tunnus-type
+  [{:tag :Tunnus}
+   {:tag :Sovellus}])
+
+(def viitelupa-type
+  "Choice, AsianTunnus or MuuTunnus"
+  [{:tag :AsianTunnus}
+   {:tag :MuuTunnus :child muu-tunnus-type}])
+
