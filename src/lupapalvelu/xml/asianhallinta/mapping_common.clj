@@ -54,7 +54,7 @@
    {:tag :Tyyppi}
    {:tag :LinkkiLiitteeseen}
    {:tag :Luotu}
-   {:tag :Metatiedot :child metatieto-type}])
+   {:tag :Metatiedot :child [{:tag :Metatieto :child metatieto-type}]}])
 
 (def muu-tunnus-type
   [{:tag :Tunnus}
