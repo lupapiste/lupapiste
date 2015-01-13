@@ -2,6 +2,7 @@
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error fatal]]
             [clojure.string :refer [join split]]
             [clojure.walk :refer [keywordize-keys]]
+            [clojure.zip :as zip]
             [clj-time.core :refer [year]]
             [clj-time.local :refer [local-now]]
             [clj-time.format :as tf]
@@ -126,6 +127,85 @@
         doc-mapper (comp mask-person-ids validate)]
     (update-in application [:documents] (partial map doc-mapper))))
 
+(defn schema-branch? [node]
+  (or
+    (seq? node)
+    (and
+      (map? node)
+      (contains? node :body))))
+
+(def schema-leaf?
+  (complement schema-branch?))
+
+(defn add-whitelist [node new-whitelist]
+  (println "old node" node)
+  (if (or (:whitelist node) (seq? node))
+    node
+    ((fn [node]
+      (let [new-node (assoc node :whitelist new-whitelist)]
+        (println "new node" new-node)
+        new-node
+        )) node)))
+
+(defn- schema-zipper [doc-schema]
+  (let [branch?  (fn [node]
+                   (and (map? node)
+                        (contains? node :body)))
+        children (fn [branch-node]
+                   (if (seq? branch-node)
+                     (vals branch-node)
+                     (:body branch-node)))
+        make-node (fn [node, children]
+                    (if (map? node)
+                      (assoc node :body children)
+                      node))]
+    (zip/zipper branch? children make-node doc-schema)))
+
+(defn- scan-schema [loc]
+  (let [node (zip/node loc)]
+    (when-not (zip/end? loc)
+      (println (type node) (schema-leaf? node) node)
+      (recur (zip/next loc)))))
+
+(defn- walk-schema [loc whitelist-state disabled-paths]
+  (let [node             (zip/node loc)
+        whitelist-state  (if (contains? node :whitelist)
+                           (:whitelist node)
+                           whitelist-state)
+
+        purge-whitelist? (and (schema-leaf? node) (not-empty whitelist-state))
+        disabled-paths   (if purge-whitelist?
+                           (conj disabled-paths (map :name (zip/path loc)))
+                           disabled-paths)
+        whitelist-state  (if purge-whitelist?
+                           nil
+                           whitelist-state)
+        ]
+    (println node whitelist-state disabled-paths)
+    (if (zip/end? loc)
+      disabled-paths
+      (recur (zip/next loc) whitelist-state disabled-paths)
+      ))
+  )
+
+(defn- traverse-document-schema [doc]
+  (let [doc-schema     (model/get-document-schema doc)
+        zip-root       (schema-zipper doc-schema)
+        disabled-paths (walk-schema zip-root nil nil)
+        ]
+    (println disabled-paths)
+    )
+  )
+
+(defn- enrich-docs-with-read-only-flags [app]
+  (let [docs (:documents app)
+
+        ]
+    app
+    )
+  #_(assoc app :documents (map (fn [doc] (assoc-in doc [:data :foobar] "BARFOO!!")) (:documents app)))
+  )
+
 ; TODO: add here the read-only -flag to data if whitelisted in data
 (defn- post-process-app [app user]
   (->> app
@@ -133,7 +213,8 @@
     (meta-fields/with-meta-fields user)
     without-system-keys
     process-foreman-v2
-    ((partial process-documents user))))
+    (process-documents user)
+    enrich-docs-with-read-only-flags))
 
 (defn find-authorities-in-applications-organization [app]
   (mongo/select :users
