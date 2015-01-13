@@ -145,6 +145,7 @@
                         "fill-info-button/fill-info-model.js"
                         "foreman-history/foreman-history-model.js"
                         "foreman-other-applications/foreman-other-applications-model.js"
+                        "input-model.js"
                         "string/string-model.js"
                         "select/select-model.js"
                         "checkbox/checkbox-model.js"]
