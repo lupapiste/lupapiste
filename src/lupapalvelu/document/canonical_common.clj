@@ -445,7 +445,7 @@
           {:sijaistettavaHlo sijaistettava-hlo})))))
 
 (defn- get-foremans [documents lang]
-  (get-parties-by-type documents :Tyonjohtaja :tyonjohtaja (partial get-tyonjohtaja-data lang)))
+  (get-parties-by-type documents :Tyonjohtaja :tyonjohtaja-v2 (partial get-tyonjohtaja-data lang)))
 
 (defn- get-neighbor [neighbor-name property-id]
   {:Naapuri {:henkilo neighbor-name
