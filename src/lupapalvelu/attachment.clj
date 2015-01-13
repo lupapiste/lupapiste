@@ -59,7 +59,8 @@
                              :ote_asunto-osakeyhtion_kokouksen_poytakirjasta
                              :rasitesopimus
                              :rasitustodistus
-                             :todistus_erityisoikeuden_kirjaamisesta]
+                             :todistus_erityisoikeuden_kirjaamisesta
+                             :kiinteiston_lohkominen]
    :rakennuspaikka [:kiinteiston_vesi_ja_viemarilaitteiston_suunnitelma
                     :ote_alueen_peruskartasta
                     :ote_asemakaavasta_jos_asemakaava_alueella
@@ -68,11 +69,13 @@
                     :ote_yleiskaavasta
                     :rakennusoikeuslaskelma
                     :selvitys_rakennuspaikan_perustamis_ja_pohjaolosuhteista
+                    :perustamistapalausunto
                     :tonttikartta_tarvittaessa]
    :paapiirustus [:asemapiirros
                   :pohjapiirros
                   :leikkauspiirros
-                  :julkisivupiirros]
+                  :julkisivupiirros
+                  :yhdistelmapiirros]
    :ennakkoluvat_ja_lausunnot [:elyn_tai_kunnan_poikkeamapaatos
                                :naapurien_suostumukset
                                :selvitys_naapurien_kuulemisesta
@@ -82,6 +85,8 @@
    :rakentamisen_aikaiset [:erityissuunnitelma]
    :osapuolet attachment-types-osapuoli
    :muut [:energiataloudellinen_selvitys
+          :energiatodistus
+          :hulevesisuunnitelma
           :ilmanvaihtosuunnitelma
           :ilmoitus_vaestonsuojasta
           :jatevesijarjestelman_rakennustapaseloste
@@ -125,6 +130,7 @@
           :valokuva
           :vesi_ja_viemariliitoslausunto_tai_kartta
           :vesikattopiirustus
+          :luonnos
           :ympariston_tietomalli_BIM
           :muu]])
 
@@ -268,35 +274,39 @@
       :YI attachment-types-YI
       :YL attachment-types-YL
       :VVVL attachment-types-YI ;TODO quick fix to get test and qa work. Put correct attachment list here
+      :MM attachment-types-KT ;TODO quick fix to get test and qa work. Put correct attachment list here
       :MAL attachment-types-MAL
       :KT attachment-types-KT
-      (fail! (str "unsupported permit-type: " permit-type)))))
+      (fail! (str "unsupported permit-type: " (name permit-type))))))
 
 (defn get-attachment-types-for-application
   [application]
   {:pre [application]}
   (get-attachment-types-by-permit-type (:permitType application)))
 
-(defn make-attachment [now target locked applicationState op attachement-type & [attachment-id]]
+(defn make-attachment [now target required? requestedByAuthority? locked? applicationState op attachment-type & [attachment-id]]
   {:id (or attachment-id (mongo/create-id))
-   :type attachement-type
+   :type attachment-type
    :modified now
-   :locked locked
+   :locked locked?
    :applicationState applicationState
    :state :requires_user_action
    :target target
+   :required required?       ;; true if the attachment is added from from template along with the operation, or when attachment is requested by authority
+   :requestedByAuthority requestedByAuthority?  ;; true when authority is adding a new attachment template by hand
+   :notNeeded false
    :op op
    :signatures []
    :versions []})
 
 (defn make-attachments
   "creates attachments with nil target"
-  [now applicationState attachement-types]
-  (map (partial make-attachment now nil false applicationState nil) attachement-types))
+  [now applicationState attachment-types locked? required? requestedByAuthority?]
+  (map (partial make-attachment now nil required? requestedByAuthority? locked? applicationState nil) attachment-types))
 
-(defn create-attachment [application attachement-type op now target locked & [attachment-id]]
+(defn create-attachment [application attachment-type op now target locked? required? requestedByAuthority? & [attachment-id]]
   {:pre [(map? application)]}
-  (let [attachment (make-attachment now target locked (:state application) op attachement-type attachment-id)]
+  (let [attachment (make-attachment now target required? requestedByAuthority? locked? (:state application) op attachment-type attachment-id)]
     (update-application
       (application->command application)
       {$set {:modified now}
@@ -304,13 +314,14 @@
 
     (:id attachment)))
 
-(defn create-attachments [application attachement-types now]
+(defn create-attachments [application attachment-types now locked? required? requestedByAuthority?]
   {:pre [(map? application)]}
-  (let [attachments (make-attachments now (:state application) attachement-types)]
+  (let [attachments (make-attachments now (:state application) attachment-types locked? required? requestedByAuthority?)]
     (update-application
       (application->command application)
       {$set {:modified now}
        $push {:attachments {$each attachments}}})
+
     (map :id attachments)))
 
 (defn- next-attachment-version [{major :major minor :minor} user]
@@ -413,15 +424,16 @@
              :attachments.$.latestVersion.size size
              :attachments.$.latestVersion.created now}})))
 
-(defn update-or-create-attachment
+(defn- update-or-create-attachment
   "If the attachment-id matches any old attachment, a new version will be added.
    Otherwise a new attachment is created."
-  [{:keys [application attachment-id attachment-type op file-id filename content-type size comment-text created user target locked] :as options}]
+  [{:keys [application attachment-id attachment-type op file-id filename content-type size comment-text created user target locked required] :as options}]
   {:pre [(map? application)]}
-  (let [att-id (cond
-                 (ss/blank? attachment-id) (create-attachment application attachment-type op created target locked)
+  (let [requestedByAuthority? (and (ss/blank? attachment-id) (user/authority? (:user options)))
+        att-id (cond
+                 (ss/blank? attachment-id) (create-attachment application attachment-type op created target locked required requestedByAuthority?)
                  (pos? (mongo/count :applications {:_id (:id application) :attachments.id attachment-id})) attachment-id
-                 :else (create-attachment application attachment-type op created target locked attachment-id))]
+                 :else (create-attachment application attachment-type op created target locked required requestedByAuthority? attachment-id))]
     (set-attachment-version (assoc options :attachment-id att-id :now created :stamped false))))
 
 (defn parse-attachment-type [attachment-type]

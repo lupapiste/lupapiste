@@ -40,8 +40,9 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
     self.showHelp(!self.showHelp());
   };
 
-  self.refresh = function(appModel) {
+  self.refresh = function(appModel, authorizationModel) {
     self.appModel = appModel;
+    self.authorizationModel = authorizationModel;
     var rawAttachments = ko.mapping.toJS(appModel.attachments);
 
     var preAttachments = getPreAttachments(rawAttachments);
@@ -51,6 +52,23 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
     var preGroupEditable = currentUser.isAuthority() || !_.contains(LUPAPISTE.config.postVerdictStates, appModel.state());
     var preGrouped = attachmentUtils.getGroupByOperation(preAttachments, preGroupEditable, self.appModel.allowedAttachmentTypes());
     var postGrouped = attachmentUtils.getGroupByOperation(postAttachments, true, self.appModel.allowedAttachmentTypes());
+
+    if (self.authorizationModel.ok("set-attachment-not-needed")) {
+      // The "not needed" functionality is only enabled for attachments in pre-verdict state, so here only going through "preGrouped"
+      var attArrays = _.pluck(preGrouped, 'attachments');
+      _.each(attArrays, function(attArray) {
+        _.each(attArray, function(att) {
+
+          att.notNeeded.subscribe(function(newValue) {
+            ajax.command("set-attachment-not-needed", {id: self.appModel.id(), attachmentId: att.id, notNeeded: newValue})
+            .success(self.appModel.reload)
+            .processing(self.appModel.processing)
+            .call();
+          });
+
+        });
+      });
+    }
 
     self.preAttachmentsByOperation(preGrouped);
     self.postAttachmentsByOperation(postGrouped);
@@ -153,7 +171,7 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
       }
     });
 
-    self.refresh(self.appModel);
+    self.refresh(self.appModel, self.authorizationModel);
   });
 
 };

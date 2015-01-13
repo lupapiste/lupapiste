@@ -92,6 +92,22 @@ table.tasks {
 }
 
 table.attachments-template-table {
+
+  .center {
+    text-align: center;
+  }
+
+  th {
+    padding-left: 6px;
+    padding-right: 6px;
+  }
+  th:first-child {
+    padding-left: 16px;
+  }
+  th:last-child {
+    padding-right: 16px;
+  }
+
   td {
     &.attachmentState {
       padding: 0 0 0 12px;
@@ -102,11 +118,9 @@ table.attachments-template-table {
         vertical-align: middle;
       }
     }
-    &.attachment-type-group {
-      padding-right: 0;
-    }
-    &.attachment-type-id {
-      padding-left: 0;
+    &.attachment-type-group, &.attachment-type-id, &.attachment-help-info, &.attachment-not-needed, &.attachment-file-info, &.attachment-file-changed {
+      padding-left: 6px;
+      padding-right: 6px;
     }
     &.attachment-group-select {
       a {
@@ -114,6 +128,13 @@ table.attachments-template-table {
         font-weight: normal;
         float: right;
       }
+    }
+    &.attachment-help-info {
+      max-width: 200px;
+      word-wrap: break-word;
+    }
+    &.attachment-file-info {
+      max-width: 230px;
     }
   }
 }

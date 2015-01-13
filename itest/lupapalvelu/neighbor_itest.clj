@@ -8,9 +8,9 @@
             [sade.util :refer [find-by-id]]
             [sade.util :refer [fn->]]))
 
-(defn invalid-token? [resp] (= resp {:ok false, :text "token-not-found"}))
-(defn invalid-response? [resp] (= (dissoc resp :response) {:ok false, :text "invalid-response"}))
-(defn invalid-vetuma? [resp] (= (dissoc resp :response) {:ok false, :text "invalid-vetuma-user"}))
+(defn invalid-token? [resp] (= resp {:ok false, :text "error.token-not-found"}))
+(defn invalid-response? [resp] (= (dissoc resp :response) {:ok false, :text "error.invalid-response"}))
+(defn invalid-vetuma? [resp] (= (dissoc resp :response) {:ok false, :text "error.invalid-vetuma-user"}))
 
 (facts "add neigbor with missing optional data"
   (let [application-id (create-app-id pena :municipality sonja-muni)]

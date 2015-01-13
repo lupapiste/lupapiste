@@ -36,8 +36,10 @@
               <button id="test-attachment-approve" data-bind="ltext: 'document.approve', click: approveAttachment, enable: isApprovable() && isNotOk(), visible: isApprovable()" class="btn btn-primary">Hyv&auml;ksy</button>
               <button id="test-attachment-reject" data-bind="ltext: 'attachment.reject', click: rejectAttachment, enable: isRejectable() && doesNotRequireUserAction(), visible: isRejectable()" class="btn btn-decline">Tarkennettavaa</button>
             </div>
-            <button data-test-id="change-attachment-type" data-bind="ltext: 'attachment.changeType', click: showChangeTypeDialog, visible: $root.authorization.ok('set-attachment-type') && editable"></button>
-            <button data-bind="ltext: 'attachment.delete', click: deleteAttachment, visible: $root.authorization.ok('delete-attachment') && editable" data-test-id="delete-attachment">Poista liite</button>
+            <button data-test-id="change-attachment-type"
+                    data-bind="ltext: 'attachment.changeType', click: showChangeTypeDialog, visible: $root.authorization.ok('set-attachment-type') && editable && authorized"></button>
+            <button data-test-id="delete-attachment"
+                    data-bind="ltext: 'attachment.delete', click: deleteAttachment, visible: $root.authorization.ok('delete-attachment') && editable && authorized">Poista liite</button>
           </div>
 
           <div class="clear"></div>
@@ -85,7 +87,9 @@
                         <span data-bind="fullName: user"></span>
                       </td>
                       <td>
-                        <a class="link-action" data-bind="click: $root.attachment.deleteVersion, ltext: 'remove', visible: $root.authorization.ok('delete-attachment-version') && $parent.editable"></a>
+                        <a class="link-action" data-bind="click: $root.attachment.deleteVersion,
+                                                          ltext: 'remove',
+                                                          visible: $root.authorization.ok('delete-attachment-version') && $parent.editable"></a>
                       </td>
                     </tr>
                   </tbody>
