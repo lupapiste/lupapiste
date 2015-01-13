@@ -3,7 +3,7 @@
             [lupapalvelu.components.core :as c]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mime :as mime]
-            [lupapalvelu.xml.krysp.validator :as validator]
+            [lupapalvelu.xml.validator :as validator]
             [sade.env :as env]
             [sade.util :as util]
             [cheshire.core :as json]

@@ -12,9 +12,9 @@
                                                                 rakennuslupa_to_krysp_214
                                                                 rakennuslupa_to_krysp_215
                                                                 save-katselmus-as-krysp]]
-            [lupapalvelu.xml.krysp.validator :refer [validate]]
+            [lupapalvelu.xml.validator :refer [validate]]
             [lupapalvelu.xml.krysp.canonical-to-krysp-xml-test-common :refer [has-tag]]
-            [lupapalvelu.xml.krysp.validator :refer :all :as validator]
+            [lupapalvelu.xml.validator :refer :all :as validator]
             [lupapalvelu.xml.emit :refer :all]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
