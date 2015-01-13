@@ -58,13 +58,15 @@
    :Yhteyshenkilo (ua-get-yhteyshenkilo (:yritys data))})
 
 (defn- ua-get-hakijat [documents]
-  (for [hakija documents
-        :let [hakija-data (:data hakija)
-              sel (get-in hakija-data [:_selected])]]
-    (merge {:Hakija
-            (condp = sel
-              "henkilo" {:Henkilo (ua-get-henkilo hakija-data)}
-              "yritys" {:Yritys (ua-get-yritys hakija-data)})})))
+  (when (seq documents)
+    {:Hakija (map
+               (fn [doc]
+                 (let [hakija-data (:data doc)
+                       sel (:_selected hakija-data)]
+                   (condp = sel
+                     "henkilo" {:Henkilo (ua-get-henkilo hakija-data)}
+                     "yritys" {:Yritys (ua-get-yritys hakija-data)})))
+               documents)}))
 
 (defn- ua-get-maksaja [document]
   (let [sel (get-in document [:_selected])
