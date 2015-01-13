@@ -14,8 +14,7 @@ LUPAPISTE.ForemanOtherApplicationsModel = function(params) {
     _.forEach(self.params.subSchema.body, function(subSchema) {
       var rowModel = model ? model[subSchema.name] : undefined;
       var readonly = false;
-      var readonlyFields = ["luvanNumero", "katuosoite", "rakennustoimenpide", "kokonaisala"];
-      if (_.contains(readonlyFields, subSchema.name)) {
+      if (_.contains(LUPAPISTE.config.foremanReadonlyFields, subSchema.name)) {
         readonly = util.getIn(model, ["autoupdated", "value"]) || false;
       }
       var item = {

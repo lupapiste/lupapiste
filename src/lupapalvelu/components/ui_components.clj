@@ -31,7 +31,8 @@
                  :attachmentSizes   attachment-sizes
                  :postVerdictStates post-verdict-states
                  :stampableMimes    (filter identity (map mime/mime-types lupapalvelu.stamper/file-types))
-                 :foremanRoles      (:body (first lupapalvelu.document.schemas/kuntaroolikoodi-tyonjohtaja))}]
+                 :foremanRoles      (:body (first lupapalvelu.document.schemas/kuntaroolikoodi-tyonjohtaja))
+                 :foremanReadonlyFields ["luvanNumero", "katuosoite", "rakennustoimenpide", "kokonaisala"]}]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
 
 (defn- loc->js []
