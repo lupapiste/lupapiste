@@ -4,6 +4,7 @@ LUPAPISTE.ForemanOtherApplicationsModel = function(params) {
   self.params = params;
   self.rows = ko.observableArray();
   self.autoupdatedRows = ko.observableArray();
+  self.initialized = ko.observable(false);
 
   var createRow = function(model, index) {
     var res = _.filter(self.params.validationErrors, function(errors) {
@@ -32,14 +33,18 @@ LUPAPISTE.ForemanOtherApplicationsModel = function(params) {
     return row;
   };
 
+  var rows = [];
+  var autoupdatedRows = [];
   for (var key in self.params.model) {
     var model = self.params.model[key];
     if (util.getIn(model, ["autoupdated", "value"])) {
-      self.autoupdatedRows.push(createRow(model, key));
+      autoupdatedRows.push(createRow(model, key));
     } else {
-      self.rows.push(createRow(model, key));
+      rows.push(createRow(model, key));
     }
   }
+  self.autoupdatedRows(autoupdatedRows);
+  self.rows(rows);
 
   hub.subscribe("hetuChanged", function(data) {
     ajax.command("update-foreman-other-applications", {id: self.params.applicationId, foremanHetu: data.value})
