@@ -70,11 +70,12 @@
 
 (defn- ua-get-maksaja [document]
   (let [sel (get-in document [:_selected])
-        maksaja-map {:Laskuviite (get-in document [:laskuviite])
-                     :Verkkolaskutustieto (when (= "yritys" sel)
-                                            {:OVT-tunnus (get-in document [:yritys :verkkolaskutustieto :ovtTunnus])
-                                             :Verkkolaskutunnus (get-in document [:yritys :verkkolaskutustieto :verkkolaskuTunnus])
-                                             :Operaattoritunnus (get-in document [:yritys :verkkolaskutustieto :valittajaTunnus])})}]
+        maksaja-map (util/strip-nils
+                      {:Laskuviite (get-in document [:laskuviite])
+                       :Verkkolaskutustieto (when (= "yritys" sel)
+                                              {:OVT-tunnus (get-in document [:yritys :verkkolaskutustieto :ovtTunnus])
+                                               :Verkkolaskutunnus (get-in document [:yritys :verkkolaskutustieto :verkkolaskuTunnus])
+                                               :Operaattoritunnus (get-in document [:yritys :verkkolaskutustieto :valittajaTunnus])})})]
 
     (condp = sel
        "yritys" (assoc-in maksaja-map [:Yritys] (ua-get-yritys document))
