@@ -161,37 +161,55 @@
                       node))]
     (zip/zipper branch? children make-node doc-schema)))
 
-(defn- scan-schema [loc]
+(defn- scan-schema "Helper for debugging" [loc]
   (let [node (zip/node loc)]
     (when-not (zip/end? loc)
       (println (type node) (schema-leaf? node) node)
       (recur (zip/next loc)))))
 
-(defn- walk-schema [loc whitelist-state disabled-paths]
-  (let [node             (zip/node loc)
-        whitelist-state  (if (contains? node :whitelist)
-                           (:whitelist node)
-                           whitelist-state)
+(defn- iterate-siblings [loc f]
+  (if (nil? (zip/right loc))
+    (-> (f loc)
+        zip/up)
+    (-> (f loc)
+        zip/right
+        (recur f))))
 
-        purge-whitelist? (and (schema-leaf? node) (not-empty whitelist-state))
-        disabled-paths   (if purge-whitelist?
-                           (conj disabled-paths (map :name (zip/path loc)))
-                           disabled-paths)
-        whitelist-state  (if purge-whitelist?
-                           nil
-                           whitelist-state)
-        ]
-    (println node whitelist-state disabled-paths)
+(defn- walk-schema
+  ([loc]
+    (walk-schema loc nil))
+  ([loc disabled-paths]
     (if (zip/end? loc)
       disabled-paths
-      (recur (zip/next loc) whitelist-state disabled-paths)
-      ))
-  )
+      (let [current-whitelist (:whitelist (zip/node loc))
+
+            should-propagate? (and
+                                (schema-branch? (zip/node loc))
+                                current-whitelist)
+
+            wl-iter-fn       (fn [child]
+                               (zip/edit child add-whitelist current-whitelist))
+
+            leftmost-child   (zip/down loc)
+            loc              (if should-propagate?
+                               (iterate-siblings leftmost-child wl-iter-fn)
+                               loc)
+
+            disabled-paths   (if (and
+                                   (schema-leaf? (zip/node loc))
+                                   (:whitelist (zip/node loc)))
+                               (conj
+                                 disabled-paths
+                                 (concat
+                                   (map :name (zip/path loc))
+                                   (:name (zip/node loc)))) ;TODO fix this plz
+                               disabled-paths)]
+        (recur (zip/next loc) disabled-paths)))))
 
 (defn- traverse-document-schema [doc]
   (let [doc-schema     (model/get-document-schema doc)
         zip-root       (schema-zipper doc-schema)
-        disabled-paths (walk-schema zip-root nil nil)
+        disabled-paths (walk-schema zip-root)
         ]
     (println disabled-paths)
     )
