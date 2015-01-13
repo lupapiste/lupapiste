@@ -59,8 +59,25 @@ LUPAPISTE.ForemanOtherApplicationsModel = function(params) {
     self.rows.push(createRow(undefined, index.toString()));
   };
 
-  self.removeRow = function() {
-    // TODO remove row
+  self.removeRow = function(row) {
+    var index = _.first(row).index;
+    var path = self.params.path.concat(index);
+
+    LUPAPISTE.ModalDialog.showDynamicYesNo(loc("document.delete.header"), loc("document.delete.message"),
+        { title: loc("yes"), fn: function () {
+          ajax
+            .command("remove-document-data", {
+              doc: self.params.documentId,
+              id: self.params.applicationId,
+              path: path,
+              collection: "documents"
+            })
+            .success(function() {
+              self.rows.remove(row);
+            })
+            .call();
+        } },
+        { title: loc("no") });
   };
 };
 
