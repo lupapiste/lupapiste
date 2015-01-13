@@ -59,9 +59,12 @@
 
 (defn- ua-get-hakijat [documents]
   (for [hakija documents
-        :let [hakija (:data hakija)]]
-    (merge {:Hakija ; TODO yritys
-            {:Henkilo (ua-get-henkilo hakija)}})))
+        :let [hakija-data (:data hakija)
+              sel (get-in hakija-data [:_selected])]]
+    (merge {:Hakija
+            (condp = sel
+              "henkilo" {:Henkilo (ua-get-henkilo hakija-data)}
+              "yritys" {:Yritys (ua-get-yritys hakija-data)})})))
 
 (defn- ua-get-maksaja [document]
   (let [sel (get-in document [:_selected])
