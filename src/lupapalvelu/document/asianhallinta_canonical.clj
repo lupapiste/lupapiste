@@ -91,12 +91,11 @@
 
 (defn- ua-get-liitteet [{:keys [attachments]}]
   (when (seq attachments)
-    (for [attachment attachments]
-      (merge {:Liite (ua-get-liite attachment)}))))
+    {:Liite (map ua-get-liite attachments)}))
 
 (defn- ua-get-toimenpiteet [{:keys [operations]} lang]
-  (for [op operations]
-    {:Toimenpide (i18n/localize lang "operations" (:name op) )}))
+  (when (seq operations)
+    {:Toimenpide (map #(i18n/localize lang "operations" (:name %)) operations)}))
 
 
 ;; TaydennysAsiaan, prefix: ta-
