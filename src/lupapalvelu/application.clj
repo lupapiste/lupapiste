@@ -243,7 +243,7 @@
       foreman-apps)))
 
 (defquery foreman-history
-  {:roles            [:authority]
+  {:roles            [:authority :applicant]
    :states           action/all-states
    :extra-auth-roles [:any]
    :parameters       [:id]}
