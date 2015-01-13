@@ -376,6 +376,19 @@ Do prepare new request
   Set animations on
 
 
+Add empty attachment template
+  [Arguments]  ${templateName}  ${topCategory}  ${subCategory}
+  Wait Until Element Is Visible  xpath=//div[@id="application-attachments-tab"]//button[@data-test-id="new-attachment-template-button"]
+  Click Element  xpath=//div[@id="application-attachments-tab"]//button[@data-test-id="new-attachment-template-button"]
+  Wait Until Element Is Visible  xpath=//div[@id="dialog-add-attachment-templates"]//input[@data-test-id="selectm-filter-input"]
+  Input Text  xpath=//div[@id="dialog-add-attachment-templates"]//input[@data-test-id="selectm-filter-input"]  ${subCategory}
+  List Should Have No Selections  xpath=//div[@id="dialog-add-attachment-templates"]//select[@data-test-id="selectm-source-list"]
+  Click Element  xpath=//div[@id="dialog-add-attachment-templates"]//select[@data-test-id="selectm-source-list"]//option[contains(text(), '${templateName}')]
+  Click Element  xpath=//div[@id="dialog-add-attachment-templates"]//button[@data-test-id="selectm-add"]
+  Click Element  xpath=//div[@id="dialog-add-attachment-templates"]//button[@data-test-id="selectm-ok"]
+  Wait Until  Element Should Not Be Visible  xpath=//div[@id="dialog-add-attachment-templates"]//input[@data-test-id="selectm-filter-input"]
+  Wait Until Element Is Visible  xpath=//div[@id="application-attachments-tab"]//a[@data-test-type="${topCategory}.${subCategory}"]
+
 Add attachment
   [Arguments]  ${path}  ${description}  ${operation}
 
@@ -384,20 +397,22 @@ Add attachment
   #Wait and click   xpath=//button[@data-test-id="add-attachment"]
   Execute Javascript  $('button[data-test-id="add-attachment"]').click();
 
-  Select Frame     uploadFrame
-  Wait until       Element should be visible  test-save-new-attachment
-  Wait until       Page should contain element  xpath=//form[@id='attachmentUploadForm']//option[@value='muut.muu']
+  Select Frame      uploadFrame
+  Wait until        Element should be visible  test-save-new-attachment
+  Wait until        Page should contain element  xpath=//form[@id='attachmentUploadForm']//option[@value='muut.muu']
   Select From List  attachmentType  muut.muu
-  Wait until       Page should contain element  xpath=//form[@id='attachmentUploadForm']//option[text()='${operation}']
+  Wait until        Page should contain element  xpath=//form[@id='attachmentUploadForm']//option[text()='${operation}']
   Select From List  attachmentOperation  ${operation}
-  Input text       text  ${description}
-  Wait until       Page should contain element  xpath=//form[@id='attachmentUploadForm']/input[@type='file']
-  Focus            xpath=//form[@id='attachmentUploadForm']/input[@type='file']
-  Choose File      xpath=//form[@id='attachmentUploadForm']/input[@type='file']  ${path}
-  Click element    test-save-new-attachment
+  Input text        text  ${description}
+  Wait until        Page should contain element  xpath=//form[@id='attachmentUploadForm']/input[@type='file']
+  Focus             xpath=//form[@id='attachmentUploadForm']/input[@type='file']
+  Choose File       xpath=//form[@id='attachmentUploadForm']/input[@type='file']  ${path}
+  # Had to use 'Select Frame' another time to be able to use e.g. 'Element Should Be Enabled'
+  # Select Frame      uploadFrame
+  # Wait Until        Element Should Be Enabled  test-save-new-attachment
+  Click element     test-save-new-attachment
   Unselect Frame
   Wait Until Page Contains  Muu liite
-
 
 Open attachment details
   [Arguments]  ${type}
@@ -407,11 +422,31 @@ Open attachment details
   #Execute Javascript  window.scrollTo(0, $("[data-test-type='muut.muu']").position().top - 130);
   Focus  xpath=//a[@data-test-type="${type}"]
   Click element  xpath=//a[@data-test-type="${type}"]
+  Wait Until  Element Should Be Visible  xpath=//a[@data-test-id="back-to-application-from-attachment"]
+
+Assert file latest version
+  [Arguments]  ${name}  ${versionNumber}
   Wait Until  Element Should Be Visible  test-attachment-file-name
   Wait Until Page Contains  ${TXT_TESTFILE_NAME}
-  Element Text Should Be  test-attachment-file-name  ${TXT_TESTFILE_NAME}
-  Element Text Should Be  test-attachment-version  1.0
+  Element Text Should Be  test-attachment-file-name  ${name}
+  Element Text Should Be  test-attachment-version  ${versionNumber}
 
+Add first attachment version
+  [Arguments]  ${path}
+  Wait Until     Element should be visible  xpath=//button[@id="add-new-attachment-version"]
+  Click Element  xpath=//button[@id="add-new-attachment-version"]
+  Wait Until     Element should be visible  xpath=//*[@id="uploadFrame"]
+  Select Frame   uploadFrame
+  Wait until     Element should be visible  test-save-new-attachment
+  Wait until     Page should contain element  xpath=//form[@id='attachmentUploadForm']/input[@type='file']
+  Focus          xpath=//form[@id='attachmentUploadForm']/input[@type='file']
+  Choose File    xpath=//form[@id='attachmentUploadForm']/input[@type='file']  ${path}
+  # Had to use 'Select Frame' another time to be able to use e.g. 'Element Should Be Enabled'
+  # Select Frame   uploadFrame
+  # Wait Until     Element Should Be Enabled  test-save-new-attachment
+  Click element  test-save-new-attachment
+  Unselect Frame
+  Wait until     Page should contain element  xpath=//div[@class='attachment-label']
 
 Select operation path by permit type
   [Arguments]  ${permitType}

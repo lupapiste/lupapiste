@@ -5,6 +5,7 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as user]
             [lupapalvelu.security :as security]
+            [lupapalvelu.ttl :as ttl]
             [sade.core :refer :all]))
 
 (defmulti handle-token (fn [token-data params] (:token-type token-data)))
@@ -12,11 +13,9 @@
 (defmethod handle-token :default [token-data params]
   (errorf "consumed token: token-type %s does not have handler: id=%s" (:token-type token-data) (:_id token-data)))
 
-(def- default-ttl (* 180 24 60 60 1000))
-
 (def make-token-id (partial security/random-password 48))
 
-(defn make-token [token-type user data & {:keys [ttl auto-consume] :or {ttl default-ttl auto-consume true}}]
+(defn make-token [token-type user data & {:keys [ttl auto-consume] :or {ttl ttl/default-ttl auto-consume true}}]
   (let [token-id (make-token-id)
         now (now)
         request (request/ring-request)]

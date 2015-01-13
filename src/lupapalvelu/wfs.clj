@@ -7,7 +7,7 @@
             [clojure.data.zip.xml :refer [xml-> text attr=]]
             [sade.env :as env]
             [sade.xml]
-            [sade.strings :refer [starts-with-i]]
+            [sade.strings :refer [starts-with-i numeric?]]
             [sade.util :refer [future*] :as util]
             [sade.core :refer :all]))
 
@@ -392,6 +392,46 @@
      :linkki (first (xml-> feature :lupapiste:LINKKI text))
      :type "sito"}))
 
+(defn general-plan-info-by-point [x y]
+  (let [bbox [(- (util/->double x) 128) (- (util/->double y) 128) (+ (util/->double x) 128) (+ (util/->double y) 128)]]
+    (:body (http/get wms-url
+             {:query-params {"REQUEST" "GetFeatureInfo"
+                             "EXCEPTIONS" "application/vnd.ogc.se_xml"
+                             "SERVICE" "WMS"
+                             "INFO_FORMAT" "application/vnd.ogc.gml"
+                             "QUERY_LAYERS" "yleiskaavaindeksi,yleiskaavaindeksi_poikkeavat"
+                             "FEATURE_COUNT" "50"
+                             "Layers" "yleiskaavaindeksi,yleiskaavaindeksi_poikkeavat"
+                             "WIDTH" "256"
+                             "HEIGHT" "256"
+                             "format" "image/png"
+                             "styles" ""
+                             "srs" "EPSG:3067"
+                             "version" "1.1.1"
+                             "x" "128"
+                             "y" "128"
+                             "BBOX" (s/join "," bbox)}}))))
+
+(defn gfi-to-general-plan-features [gfi]
+  (when gfi
+    (let [info (zip/xml-zip
+                 (xml/parse
+                   (java.io.ByteArrayInputStream. (.getBytes gfi "UTF-8"))
+                   startparse-sax-non-validating))]
+      (clojure.set/union 
+        (xml-> info :gml:featureMember :lupapiste:yleiskaavaindeksi)
+        (xml-> info :gml:featureMember :lupapiste:yleiskaavaindeksi_poikkeavat)))))
+
+(defn general-plan-feature-to-feature-info  [feature]
+  (when feature
+    {:id (first (xml-> feature :lupapiste:tunnus text))
+     :nimi (first (xml-> feature :lupapiste:nimi text))
+     :pvm (first (xml-> feature :lupapiste:pvm text))
+     :tyyppi (first (xml-> feature :lupapiste:tyyppi text))
+     :oikeusvaik (first (xml-> feature :lupapiste:oikeusvaik text))
+     :lisatieto (first (xml-> feature :lupapiste:lisatieto text))
+     :linkki (first (xml-> feature :lupapiste:linkki text))
+     :type "yleiskaava"}))
 
 
 ;;
@@ -419,5 +459,11 @@
                  {:query-params (:params request)
                   :headers {"accept-encoding" (get-in request [:headers "accept-encoding"])}
                   :basic-auth [username password]
-                  :as :stream})))))
+                  :as :stream}))
+      "plandocument" (let [id (get-in request [:params :id])]
+                       (assert (numeric? id))
+                       (http/get (str "http://194.28.3.37/maarays/" id "x.pdf")
+                         {:query-params (:params request)
+                          :headers {"accept-encoding" (get-in request [:headers "accept-encoding"])}
+                          :as :stream})))))
 

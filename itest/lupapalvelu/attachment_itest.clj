@@ -21,10 +21,19 @@
 
     (comment-application pena application-id true) => ok?
 
-    (fact "by default 4 attachments exist and are related to operation 'kerrostalo-rivitalo'"
+    (facts "by default 4 attachments exist"
       (let [application (query-application pena application-id)
             op-id (-> application :operations first :id)]
-        (count (get-attachments-by-operation application op-id)) => 4))
+        (fact "the attachments are related to operation 'kerrostalo-rivitalo'"
+          (count (get-attachments-by-operation application op-id)) => 4)
+        (fact "the attachments have 'required', 'notNeeded' and 'requestedByAuthority' flags correctly set"
+          (every? (fn [a]
+                    (every? #{"required" "notNeeded" "requestedByAuthority"} a) => truthy
+                    (:required a) => true
+                    (:notNeeded a) => false
+                    (:requestedByAuthority a) => false)
+            (:attachments application)) => truthy
+          )))
 
     (let [resp (command veikko
                  :create-attachments
@@ -43,10 +52,12 @@
         (get-attachment-by-id veikko application-id (first attachment-ids)) => (contains
                                                                                  {:type {:type-group "paapiirustus" :type-id "asemapiirros"}
                                                                                   :state "requires_user_action"
+                                                                                  :requestedByAuthority true
                                                                                   :versions []})
         (get-attachment-by-id veikko application-id (second attachment-ids)) => (contains
                                                                                   {:type {:type-group "paapiirustus" :type-id "pohjapiirros"}
                                                                                    :state "requires_user_action"
+                                                                                   :requestedByAuthority true
                                                                                    :versions []}))
 
       (fact "uploading files"
@@ -141,47 +152,48 @@
             (:name op) => "bar"
             contents => "foobart"
             size => "A4"
-            scale => "1:500"))
-
-
-
-        )
+            scale => "1:500")))
 
       (let [versioned-attachment (first (:attachments (query-application veikko application-id)))]
         (last-email) ; Inbox zero
+
         (fact "Meta"
           (get-in versioned-attachment [:latestVersion :version :major]) => 1
           (get-in versioned-attachment [:latestVersion :version :minor]) => 0)
 
         (fact "Veikko upload a new version"
-         (upload-attachment veikko application-id versioned-attachment true)
-         (let [updated-attachment (get-attachment-by-id veikko application-id (:id versioned-attachment))]
-           (get-in updated-attachment [:latestVersion :version :major]) => 1
-           (get-in updated-attachment [:latestVersion :version :minor]) => 1
+          (upload-attachment veikko application-id versioned-attachment true)
+          (let [updated-attachment (get-attachment-by-id veikko application-id (:id versioned-attachment))]
+            (get-in updated-attachment [:latestVersion :version :major]) => 1
+            (get-in updated-attachment [:latestVersion :version :minor]) => 1
 
-           (fact "Pena receives email pointing to comment page"
-             (let [emails (sent-emails)
-                   email  (first emails)
-                   pena-email  (email-for "pena")]
-               (count emails) => 1
-               email => (partial contains-application-link-with-tab? application-id "conversation" "applicant")
-               (:to email) => (contains pena-email)))
+            (fact "Pena receives email pointing to comment page"
+              (let [emails (sent-emails)
+                    email  (first emails)
+                    pena-email  (email-for "pena")]
+                (count emails) => 1
+                email => (partial contains-application-link-with-tab? application-id "conversation" "applicant")
+                (:to email) => (contains pena-email)))
 
-           (fact "Delete version"
-             (command veikko :delete-attachment-version :id application-id
-               :attachmentId (:id versioned-attachment) :fileId (get-in updated-attachment [:latestVersion :fileId])) => ok?
-             (let [ver-del-attachment (get-attachment-by-id veikko application-id (:id versioned-attachment))]
-               (get-in ver-del-attachment [:latestVersion :version :major]) => 1
-               (get-in ver-del-attachment [:latestVersion :version :minor]) => 0))
+            (fact "Delete version"
+              (command veikko :delete-attachment-version :id application-id
+                :attachmentId (:id versioned-attachment) :fileId (get-in updated-attachment [:latestVersion :fileId])) => ok?
+              (let [ver-del-attachment (get-attachment-by-id veikko application-id (:id versioned-attachment))]
+                (get-in ver-del-attachment [:latestVersion :version :major]) => 1
+                (get-in ver-del-attachment [:latestVersion :version :minor]) => 0))
 
-           (fact "Delete attachment"
-             (command veikko :delete-attachment :id application-id
-               :attachmentId (:id versioned-attachment)) => ok?
-             (get-attachment-by-id veikko application-id (:id versioned-attachment)) => nil?)))))))
+            (fact "Applicant cannot delete attachment that is required"
+              (command pena :delete-attachment :id application-id :attachmentId (:id versioned-attachment)) => (contains {:ok false :text "error.unauthorized"}))
+
+            (fact "Authority deletes attachment"
+              (command veikko :delete-attachment :id application-id :attachmentId (:id versioned-attachment)) => ok?
+              (get-attachment-by-id veikko application-id (:id versioned-attachment)) => nil?)
+           ))))))
 
 (fact "pdf works with YA-lupa"
   (let [{application-id :id :as response} (create-app pena :municipality "753" :operation "ya-katulupa-vesi-ja-viemarityot")
         application (query-application pena application-id)]
+    response => ok?
     (:organization application) => "753-YA"
     pena => (allowed? :pdf-export :id application-id)
     (raw pena "pdf-export" :id application-id) => http200?))
