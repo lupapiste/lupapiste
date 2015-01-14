@@ -151,12 +151,6 @@
                       node))]
     (zip/zipper branch? children make-node doc-schema)))
 
-(defn- scan-schema "Helper for debugging" [loc]
-  (let [node (zip/node loc)]
-    (when-not (zip/end? loc)
-      (println (type node) (schema-leaf? node) node)
-      (recur (zip/next loc)))))
-
 (defn- iterate-siblings-to-right [loc f]
   (if (nil? (zip/right loc))
     (-> (f loc)
