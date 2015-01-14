@@ -356,6 +356,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     input.onmouseout = self.hideHelp;
     span.appendChild(input);
 
+    if (model[subSchema.name].disabled) {
+      input.setAttribute("disabled", true);
+    }
+
     if (subSchema.label) {
       var label = makeLabel(subSchema, "checkbox", myPath);
       label.onmouseover = self.showHelp;
