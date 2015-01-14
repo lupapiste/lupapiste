@@ -674,13 +674,9 @@
         (update-in attachment [:versions] #(reduce merge-versions % new-versions)))
       attachment)))
 
-(defn- removed-versions [attachments-backup fs-file-ids]
-  (for [attachment attachments-backup]
-    (when-let [removed-file-ids (set (filter
-                                       (fn [v] (not (fs-file-ids (:fileId v))))
-                                       (:versions attachment)))]
-      (update-in attachment [:versions] #(remove (fn [v] (not (fs-file-ids (:fileId v)))) %))
-      )))
+(defn- removed-versions [attachments fs-file-ids]
+  (for [attachment attachments]
+    (update-in attachment [:versions] #(filter (fn [v] (fs-file-ids (:fileId v))) %))))
 
 (defmigration restore-attachments
   (when (pos? (mongo/count :applicationsBackup))
