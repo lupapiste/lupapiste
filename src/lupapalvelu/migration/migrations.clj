@@ -662,6 +662,31 @@
     (assoc attachment :required true)
     (assoc attachment :required false)))
 
+(defn- fixed-versions [attachments-backup updated-attachments]
+  (for [attachment attachments-backup
+        :let [updated-attachment (first (filter #(= (:id %) (:id attachment)) updated-attachments))]]
+    (if updated-attachment
+      (when-let [new-versions (filter (fn [v] (> (:created v) 1421190605547)) (:versions updated-attachment))]
+        (println (:id attachment) "has been updated, merge versions" (map :version new-versions) "to" (map :version (:versions attachment ))))
+      attachment)
+    )
+  )
+
+(defn- restore-attachments []
+  (doseq [id (map :id (mongo/select :submitted-applications {:_id {$in ["LP-078-2014-00003" " LP-753-2014-00145"]}} [:_id]))]
+    (let [attachments-backup (:attachments (mongo/select-one :applicationsBackup {:_id id} [:attachments]))
+          current-attachments (:attachments (mongo/select-one :applications {:_id id} [:attachments]))]
+      (let [updated-attachments (filter #(some (fn [v] (> (:created v) 1421190605547)) (:versions %)) current-attachments)]
+        (if (seq updated-attachments)
+          (let [merged (concat (fixed-versions attachments-backup updated-attachments) [ #_"TODO: liitteet jotka vain currentissa" ])]
+            (println (count merged)) ; trigger lazy eval
+            (println "TODO: merge" id))
+         ;(println "$set {:attachments attachments-backup")
+         ))
+      )
+    )
+  )
+
 (defmigration required-flags-for-attachment-templates-v2
   (doseq [collection [:applications :submitted-applications]
           application (mongo/select collection {"attachments.0" {$exists true}})]
