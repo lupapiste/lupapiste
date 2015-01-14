@@ -2,7 +2,7 @@
   (:require [monger.operators :refer :all]
             [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]]
             [clojure.walk :as walk]
-            [sade.util :refer [dissoc-in postwalk-map strip-nils]]
+            [sade.util :refer [dissoc-in postwalk-map strip-nils abs]]
             [sade.core :refer [def-]]
             [sade.strings :as ss]
             [lupapalvelu.migration.core :refer [defmigration]]
@@ -656,4 +656,50 @@
                 :buildings
                 #(assoc % :localShortId (:buildingId %), :nationalId nil, :localId nil)
                 {:buildings.0 {$exists true}}))
+
+(defn- set-new-attachment-flags [app-created attachment]
+  (if (< (abs (- (:modified attachment) app-created)) 100)    ;; inside 100 ms window, just in case
+    (assoc attachment :required true)
+    (assoc attachment :required false)))
+
+(defn- merge-versions [old-versions {:keys [user version] :as new-version}]
+  (let [next-ver (lupapalvelu.attachment/next-attachment-version (:version (last old-versions)) user)]
+    (concat old-versions [(assoc new-version :version next-ver)])))
+
+(defn- fixed-versions [attachments-backup updated-attachments]
+  (for [attachment attachments-backup
+        :let [updated-attachment (first (filter #(= (:id %) (:id attachment)) updated-attachments))]]
+    (if updated-attachment
+      (let [new-versions (filter (fn [v] (> (:created v) 1421190605547)) (:versions updated-attachment))
+            merged (update-in attachment [:versions] #(reduce merge-versions % new-versions))]
+
+        (println (:id attachment) "has been updated, merge versions" (map :version new-versions) "to" (map :version (:versions attachment)))
+        (println (map :version (:versions merged)))
+        )
+      attachment)
+    )
+  )
+
+(defn- restore-attachments []
+  (doseq [id (map :id (mongo/select :submitted-applications {:_id {$in ["LP-078-2014-00003","LP-078-2014-00005","LP-078-2014-00006","LP-078-2015-00002","LP-092-2014-00017","LP-092-2014-00125","LP-092-2014-00137","LP-092-2015-00018","LP-106-2014-00247","LP-109-2014-00015","LP-109-2014-00038","LP-186-2014-00311","LP-186-2014-00498","LP-186-2014-00557","LP-245-2015-00006","LP-444-2014-00094","LP-734-2014-00043","LP-753-2014-00145"]}} [:_id]))]
+    (let [attachments-backup (:attachments (mongo/select-one :applicationsBackup {:_id id} [:attachments]))
+          current-attachments (:attachments (mongo/select-one :applications {:_id id} [:attachments]))]
+      (let [updated-attachments (filter #(some (fn [v] (> (:created v) 1421190605547)) (:versions %)) current-attachments)]
+        (if (seq updated-attachments)
+          (let [merged (concat (fixed-versions attachments-backup updated-attachments) [ #_"TODO: liitteet jotka vain currentissa" ])]
+            (println (count merged)) ; trigger lazy eval
+            (println "TODO: merge" id))
+         ;(println "$set {:attachments attachments-backup")
+         ))
+      )
+    )
+  )
+
+(defmigration required-flags-for-attachment-templates-v2
+  (doseq [collection [:applications :submitted-applications]
+          application (mongo/select collection {"attachments.0" {$exists true}})]
+    (mongo/update-by-id collection (:id application)
+      {$set {:attachments (map
+                            (partial set-new-attachment-flags (:created application))
+                            (:attachments application))}})))
 

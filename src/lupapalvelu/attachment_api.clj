@@ -507,10 +507,10 @@
 (defcommand set-attachment-not-needed
   {:parameters [id attachmentId notNeeded]
    :roles      [:applicant :authority]
-   :states     (action/all-application-states-but [:submitted :sent :closed :canceled])}     ;; TODO: onko nama oikeat tilat?
+   :states     [:draft :open]}
   [command]
   (update-application command
                       {:attachments {$elemMatch {:id attachmentId}}}
-                      {$set {:attachments.$.not-needed notNeeded}})
+                      {$set {:attachments.$.notNeeded notNeeded}})
   (ok))
 

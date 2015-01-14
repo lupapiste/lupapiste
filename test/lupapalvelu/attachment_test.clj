@@ -34,7 +34,7 @@
   (fact (attachment-latest-version test-attachments "1")    => {:major 9, :minor 7})
   (fact (attachment-latest-version test-attachments "none") => nil?))
 
-(testable-privates lupapalvelu.attachment next-attachment-version allowed-attachment-types-contain?)
+(testable-privates lupapalvelu.attachment allowed-attachment-types-contain?)
 
 (facts "Facts about next-attachment-version"
   (fact (next-attachment-version {:major 1 :minor 1} {:role :authority})  => {:major 1 :minor 2})
@@ -81,9 +81,9 @@
                                                                :applicationState :draft
                                                                :signatures []
                                                                :versions []
-                                                               :not-needed false
+                                                               :notNeeded false
                                                                :required true
-                                                               :requested-by-authority true}
+                                                               :requestedByAuthority true}
                                                               {:id "123"
                                                                :locked false
                                                                :modified 999
@@ -94,9 +94,9 @@
                                                                :applicationState :draft
                                                                :signatures []
                                                                :versions []
-                                                               :not-needed false
+                                                               :notNeeded false
                                                                :required true
-                                                               :requested-by-authority true}])
+                                                               :requestedByAuthority true}])
   (provided
     (mongo/create-id) => "123"))
 
