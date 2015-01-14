@@ -9,7 +9,7 @@
 
 (fl/facts* "UusiAsia canonical"
   (let [canonical (ah/application-to-asianhallinta-canonical poikkeus-test/poikkari-hakemus "fi") => truthy]
-    (facts "Has (at least) required elements"
+    (facts "From poikkeus-test/poikkari-hakemus"
       (fact "UusiAsia" (keys (get-in canonical [:UusiAsia])) => (contains [:Tyyppi
                                                                            :Kuvaus
                                                                            :Kuntanumero
@@ -21,7 +21,7 @@
                                                                            :Asiointikieli
                                                                            :Toimenpiteet] :in-any-order))
       (fact "HakemusTunnus is LP-753-2013-00001" (get-in canonical [:UusiAsia :HakemusTunnus]) => "LP-753-2013-00001")
-      (fact "First Hakija of Hakijat has Henkilo" (keys (:Hakija (first (get-in canonical [:UusiAsia :Hakijat])))) => (contains [:Henkilo]))
+      (fact "First Hakija of Hakijat has Henkilo" (keys (first (get-in canonical [:UusiAsia :Hakijat :Hakija]))) => (contains [:Henkilo]))
       (facts "Maksaja"
         (fact "Maksaja is yritys, and has Laskuviite and Verkkolaskutustieto"
           (keys (get-in canonical [:UusiAsia :Maksaja])) => (contains [:Yritys :Laskuviite :Verkkolaskutustieto]))
@@ -35,11 +35,11 @@
           (keys (get-in canonical [:UusiAsia :Maksaja :Yritys :Yhteyshenkilo])) => (contains [:Etunimi :Sukunimi :Yhteystiedot]))
         (fact "Yhteyshenkilo yhteystiedot keys"
           (keys (get-in canonical [:UusiAsia :Maksaja :Yritys :Yhteyshenkilo :Yhteystiedot])) => (contains [:Email :Puhelin]))
-        (fact "Verkkolaskutustieto keys"
-          (keys (get-in canonical [:UusiAsia :Maksaja :Verkkolaskutustieto])) => (contains [:OVT-tunnus :Verkkolaskutunnus :Operaattoritunnus])))
+        (fact "Verkkolaskutustieto keys is nil"
+          (keys (get-in canonical [:UusiAsia :Maksaja :Verkkolaskutustieto])) => nil))
       (fact "VireilletuloPvm is XML date"
         (get-in canonical [:UusiAsia :VireilletuloPvm]) => #"\d{4}-\d{2}-\d{2}")
       (fact "Liitteet TODO" )
       (fact "Toimenpiteet"
-        (keys (first (get-in canonical [:UusiAsia :Toimenpiteet]))) => (contains [:Toimenpide])))))
+        (first (get-in canonical [:UusiAsia :Toimenpiteet :Toimenpide])) => string?))))
 
