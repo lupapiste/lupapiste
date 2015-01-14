@@ -32,7 +32,7 @@
     {:Jakeluosoite (get-in data [:osoite :katu])
      :Postinumero (get-in data [:osoite :postinumero])
      :Postitoimipaikka (get-in data [:osoite :postitoimipaikannimi])
-     :Maa "Suomi" ; TODO voiko olla muu?
+     :Maa nil ; TODO
      :Email (get-in data [:yhteystiedot :email])
      :Puhelin (get-in data [:yhteystiedot :puhelin])}))
 
