@@ -170,7 +170,8 @@
                   :js ["registration-models.js" "register.js"
                        "company-registration.js"]
                   :html ["register.html" "register2.html" "register3.html"
-                         "register-company.html" "register-company-success.html" "register-company-fail.html"]}
+                         "register-company.html" "register-company-success.html" "register-company-fail.html" 
+                         "register-company-account-type.html" "register-company-signing.html"]}
 
    :link-account {:depends [:register]
                   :js ["link-account.js"]
