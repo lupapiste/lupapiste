@@ -74,7 +74,7 @@
 
 (defn- ua-get-liite [attachment]
   (util/strip-nils
-    {:Kuvaus (get-in attachment [:latestVersion :filename])
+    {:Kuvaus (get-in attachment [:type :type-id])
      :Tyyppi (get-in attachment [:latestVersion :contentType])
      :LinkkiLiitteeseen (get-in attachment [:latestVersion :filename]) ;TODO
      :Luotu (util/to-xml-date (:modified attachment))
