@@ -473,6 +473,7 @@
           {:sijaistettavaHlo sijaistettava-hlo}))
       )))
 
+; TODO call both and merge
 (if (env/feature? :foreman)
   (defn- get-foremans [documents lang]
     (get-parties-by-type documents :Tyonjohtaja :tyonjohtaja-v2 (partial get-tyonjohtaja-v2-data lang)))
