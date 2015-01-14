@@ -137,16 +137,6 @@
 (def schema-leaf?
   (complement schema-branch?))
 
-(defn add-whitelist [node new-whitelist]
-  (println "old node" node)
-  (if (or (:whitelist node) (seq? node))
-    node
-    ((fn [node]
-      (let [new-node (assoc node :whitelist new-whitelist)]
-        (println "new node" new-node)
-        new-node
-        )) node)))
-
 (defn- schema-zipper [doc-schema]
   (let [branch?  (fn [node]
                    (and (map? node)
@@ -167,7 +157,7 @@
       (println (type node) (schema-leaf? node) node)
       (recur (zip/next loc)))))
 
-(defn- iterate-siblings [loc f]
+(defn- iterate-siblings-to-right [loc f]
   (if (nil? (zip/right loc))
     (-> (f loc)
         zip/up)
@@ -175,56 +165,63 @@
         zip/right
         (recur f))))
 
+(defn- get-root-path [loc]
+  (let [keyword-name (comp keyword :name)
+        root-path    (->> (zip/path loc)
+                          (mapv keyword-name)
+                          (filterv identity))
+        node-name    (-> (zip/node loc)
+                         keyword-name)]
+    (seq (conj root-path node-name))))
+
+(defn- add-whitelist-property [node new-whitelist]
+  (if-not (and (seq? node) (:whitelist node))
+    (assoc node :whitelist new-whitelist)
+    node))
+
 (defn- walk-schema
-  ([loc]
-    (walk-schema loc nil))
+  ([loc] (walk-schema loc nil))
   ([loc disabled-paths]
     (if (zip/end? loc)
       disabled-paths
-      (let [current-whitelist (:whitelist (zip/node loc))
+      (let [current-node      (zip/node loc)
+            current-whitelist (:whitelist current-node)
 
-            should-propagate? (and
-                                (schema-branch? (zip/node loc))
+            propagate-wl?     (and (schema-branch? current-node)
+                                   current-whitelist)
+
+            loc               (if propagate-wl?
+                                (iterate-siblings-to-right
+                                  (zip/down loc) ;leftmost-child, starting point
+                                  #(zip/edit % add-whitelist-property current-whitelist))
+                                loc)
+
+            whitelisted-leaf? (and
+                                (schema-leaf? current-node)
                                 current-whitelist)
-
-            wl-iter-fn       (fn [child]
-                               (zip/edit child add-whitelist current-whitelist))
-
-            leftmost-child   (zip/down loc)
-            loc              (if should-propagate?
-                               (iterate-siblings leftmost-child wl-iter-fn)
-                               loc)
-
-            disabled-paths   (if (and
-                                   (schema-leaf? (zip/node loc))
-                                   (:whitelist (zip/node loc)))
-                               (conj
-                                 disabled-paths
-                                 (concat
-                                   (map :name (zip/path loc))
-                                   (:name (zip/node loc)))) ;TODO fix this plz
-                               disabled-paths)]
+            disabled-paths    (if whitelisted-leaf?
+                                (conj disabled-paths [(get-root-path loc) current-whitelist])
+                                disabled-paths)]
         (recur (zip/next loc) disabled-paths)))))
 
-(defn- traverse-document-schema [doc]
-  (let [doc-schema     (model/get-document-schema doc)
-        zip-root       (schema-zipper doc-schema)
-        disabled-paths (walk-schema zip-root)
-        ]
-    (println disabled-paths)
-    )
-  )
+(defn- prefix-with [prefix coll]
+  (conj (seq coll) prefix))
 
-(defn- enrich-docs-with-read-only-flags [app]
-  (let [docs (:documents app)
+(defn- traverse-document-schema [user-role doc]
+  (let [doc-schema        (model/get-document-schema doc)
+        zip-root          (schema-zipper doc-schema)
+        whitelisted-paths (walk-schema zip-root)]
+    (reduce (fn [new-doc [path roles]]
+              (if-not (some #{user-role} roles)
+                (update-in new-doc (prefix-with :data path) merge {:disabled true})
+                new-doc))
+            doc
+            whitelisted-paths)))
 
-        ]
-    app
-    )
-  #_(assoc app :documents (map (fn [doc] (assoc-in doc [:data :foobar] "BARFOO!!")) (:documents app)))
-  )
+(defn- enrich-docs-with-read-only-flags [{user-role :role} app]
+  (let [mapper-fn (partial traverse-document-schema user-role)]
+    (update-in app [:documents] (partial map mapper-fn))))
 
-; TODO: add here the read-only -flag to data if whitelisted in data
 (defn- post-process-app [app user]
   (->> app
     meta-fields/enrich-with-link-permit-data
@@ -232,7 +229,7 @@
     without-system-keys
     process-foreman-v2
     (process-documents user)
-    enrich-docs-with-read-only-flags))
+    (enrich-docs-with-read-only-flags user)))
 
 (defn find-authorities-in-applications-organization [app]
   (mongo/select :users
