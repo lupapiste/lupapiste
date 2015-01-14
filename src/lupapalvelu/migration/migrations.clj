@@ -690,13 +690,15 @@
               current-attachments (:attachments (mongo/by-id :applications id [:attachments]))
               updated-attachments (filter #(some (fn [v] (> (get v :created 0) required-flags-migration-time)) (:versions %)) current-attachments)
 
-              new-attachments (remove restored-ids current-attachments)
+              new-attachments (filter
+                                (fn [a] (> (:modified a) required-flags-migration-time))
+                                (remove #(restored-ids (:id %)) current-attachments))
 
               attachments (if (seq updated-attachments)
                             (concat
                               (fixed-versions required-flags-migration-time attachments-backup updated-attachments)
                               new-attachments)
-                            attachments-backup)
+                            (concat attachments-backup new-attachments))
 
               removed (removed-versions attachments fs-file-ids)
               latest-versions-updated (map (fn [a] (assoc a :latestVersion (-> a :versions last))) removed)
