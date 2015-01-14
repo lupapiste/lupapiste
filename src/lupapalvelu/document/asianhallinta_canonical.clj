@@ -8,19 +8,6 @@
 
 ;; UusiAsia, functions prefixed with ua-
 
-(def uusi-asia {:UusiAsia
-                {:Tyyppi nil
-                 :Kuvaus nil
-                 :Kuntanumero nil
-                 :Hakijat nil
-                 :Maksaja nil
-                 :HakemusTunnus nil
-                 :VireilletuloPvm nil
-                 :Liitteet nil
-                 :Asiointikieli nil
-                 :Toimenpiteet nil
-                 :Viiteluvat {:Viitelupa nil}}})
-
 (def ^:private ua-root-element {:UusiAsia nil})
 
 (defn- ua-get-asian-tyyppi-string [application]
