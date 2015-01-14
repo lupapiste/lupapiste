@@ -201,7 +201,7 @@
 (defn- prefix-with [prefix coll]
   (conj (seq coll) prefix))
 
-(defn- traverse-document-schema [user-role doc]
+(defn- enrich-single-doc-disabled-flag [user-role doc]
   (let [doc-schema        (model/get-document-schema doc)
         zip-root          (schema-zipper doc-schema)
         whitelisted-paths (walk-schema zip-root)]
@@ -212,8 +212,8 @@
             doc
             whitelisted-paths)))
 
-(defn- enrich-docs-with-read-only-flags [{user-role :role} app]
-  (let [mapper-fn (partial traverse-document-schema user-role)]
+(defn- enrich-docs-disabled-flag [{user-role :role} app]
+  (let [mapper-fn (partial enrich-single-doc-disabled-flag user-role)]
     (update-in app [:documents] (partial map mapper-fn))))
 
 (defn- post-process-app [app user]
@@ -223,7 +223,7 @@
     without-system-keys
     process-foreman-v2
     (process-documents user)
-    (enrich-docs-with-read-only-flags user)))
+    (enrich-docs-disabled-flag user)))
 
 (defn find-authorities-in-applications-organization [app]
   (mongo/select :users
