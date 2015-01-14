@@ -206,7 +206,7 @@
         zip-root          (schema-zipper doc-schema)
         whitelisted-paths (walk-schema zip-root)]
     (reduce (fn [new-doc [path roles]]
-              (if-not (some #{user-role} roles)
+              (if-not (some #{(keyword user-role)} roles)
                 (update-in new-doc (prefix-with :data path) merge {:disabled true})
                 new-doc))
             doc
