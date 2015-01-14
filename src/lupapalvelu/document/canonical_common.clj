@@ -7,7 +7,8 @@
             [sade.core :refer :all]
             [lupapalvelu.i18n :refer [with-lang loc]]
             [cljts.geom :as geo]
-            [cljts.io :as jts]))
+            [cljts.io :as jts]
+            [sade.env :as env]))
 
 
 ; Empty String will be rendered as empty XML element
@@ -444,8 +445,39 @@
         (when-not (ss/blank? sijaistettava-hlo)
           {:sijaistettavaHlo sijaistettava-hlo})))))
 
-(defn- get-foremans [documents lang]
-  (get-parties-by-type documents :Tyonjohtaja :tyonjohtaja-v2 (partial get-tyonjohtaja-data lang)))
+(defn get-tyonjohtaja-v2-data [lang tyonjohtaja party-type]
+  (let [foremans (dissoc (get-suunnittelija-data tyonjohtaja party-type) :suunnittelijaRoolikoodi)
+        patevyys (:patevyys tyonjohtaja)
+        {:keys [alkamisPvm paattymisPvm] :as sijaistus} (:sijaistus tyonjohtaja)
+        rooli    (get-kuntaRooliKoodi tyonjohtaja :tyonjohtaja)]
+    (merge
+      foremans
+      {:tyonjohtajaRooliKoodi rooli
+       :vastattavatTyotehtavat (concat-tyotehtavat-to-string (:vastattavatTyotehtavat tyonjohtaja))
+       :patevyysvaatimusluokka (:patevyysvaatimusluokka tyonjohtaja)
+       ; TODO Patevyys information missing from v2 schema
+       ;:valmistumisvuosi (:valmistumisvuosi patevyys)
+       ;:kokemusvuodet (:kokemusvuodet patevyys)
+       ;:valvottavienKohteidenMaara (:valvottavienKohteidenMaara patevyys)
+       :tyonjohtajaHakemusKytkin (= "hakemus" (:ilmoitusHakemusValitsin tyonjohtaja))
+       ; TODO sijaistustiedot (etunimi sukunimi) missing from v2 schema
+       :sijaistustieto (get-sijaistustieto sijaistus rooli)
+       :tyonjohtajanHyvaksynta (:tyonjohtajanHyvaksynta tyonjohtaja)}
+      ; TODO alkamispvm paattymispvm is missing from v2 schema
+      (when-not (s/blank? alkamisPvm) {:alkamisPvm (to-xml-date-from-string alkamisPvm)})
+      (when-not (s/blank? paattymisPvm) {:paattymisPvm (to-xml-date-from-string paattymisPvm)})
+      (get-vastattava-tyotieto tyonjohtaja lang)
+      ; TODO sijaistustiedot missing from v2 schema
+      #_(let [sijaistettava-hlo (get-sijaistettava-hlo-214 sijaistus)]
+        (when-not (ss/blank? sijaistettava-hlo)
+          {:sijaistettavaHlo sijaistettava-hlo}))
+      )))
+
+(if (env/feature? :foreman)
+  (defn- get-foremans [documents lang]
+    (get-parties-by-type documents :Tyonjohtaja :tyonjohtaja-v2 (partial get-tyonjohtaja-v2-data lang)))
+  (defn- get-foremans [documents lang]
+    (get-parties-by-type documents :Tyonjohtaja :tyonjohtaja (partial get-tyonjohtaja-data lang))))
 
 (defn- get-neighbor [neighbor-name property-id]
   {:Naapuri {:henkilo neighbor-name
