@@ -698,7 +698,7 @@
         (let [new-attachments (remove restored-ids current-attachments)
               merged (concat (fixed-versions attachments-backup updated-attachments) new-attachments)
               removed (removed-versions merged current-attachments)
-              latest-versions-updated (map (fn [a] (assoc % :latestVersion (-> % :versions last))) removed)
+              latest-versions-updated (map (fn [a] (assoc a :latestVersion (-> a :versions last))) removed)
               ]
           (println (count merged))                  ; trigger lazy eval
           (println (count removed))                 ; trigger lazy eval
