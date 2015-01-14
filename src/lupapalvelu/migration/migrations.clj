@@ -662,7 +662,7 @@
     (assoc attachment :required true)
     (assoc attachment :required false)))
 
-(defmigration required-flags-for-attachment-templates
+(defmigration required-flags-for-attachment-templates-v2
   (doseq [collection [:applications :submitted-applications]
           application (mongo/select collection {"attachments.0" {$exists true}})]
     (mongo/update-by-id collection (:id application)
