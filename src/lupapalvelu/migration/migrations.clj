@@ -680,7 +680,7 @@
 
 (defmigration restore-attachments
   (when (pos? (mongo/count :applicationsBackup))
-    (let [fs-file-ids (set (map :id (mongo/select :fs.files {} [:_id])))
+    (let [fs-file-ids (set (map :id (mongo/select :fs.files)))
          required-flags-migration-time (:time (mongo/select-one :migrations {:name "required-flags-for-attachment-templates"}))]
 
       (doseq [id (map :id (mongo/select :submitted-applications {:_id {$in ["LP-078-2014-00003","LP-078-2014-00005","LP-078-2014-00006","LP-078-2015-00002","LP-092-2014-00017","LP-092-2014-00125","LP-092-2014-00137","LP-092-2015-00018","LP-106-2014-00247","LP-109-2014-00015","LP-109-2014-00038","LP-186-2014-00311","LP-186-2014-00498","LP-186-2014-00557","LP-245-2015-00006","LP-444-2014-00094","LP-734-2014-00043","LP-753-2014-00145"]}} [:_id]))]
