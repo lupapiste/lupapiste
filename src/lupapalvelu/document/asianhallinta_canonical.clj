@@ -86,7 +86,7 @@
 
 (defn- ua-get-toimenpiteet [{:keys [operations]} lang]
   (when (seq operations)
-    {:Toimenpide (map #(i18n/localize lang "operations" (:name %)) operations)}))
+    {:Toimenpide (map #(:name %) operations)}))
 
 
 ;; TaydennysAsiaan, prefix: ta-
