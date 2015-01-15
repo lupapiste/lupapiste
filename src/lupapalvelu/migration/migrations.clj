@@ -666,34 +666,47 @@
   (let [next-ver (lupapalvelu.attachment/next-attachment-version (:version (last old-versions)) user)]
     (concat old-versions [(assoc new-version :version next-ver)])))
 
-(defn- fixed-versions [attachments-backup updated-attachments]
+(defn- fixed-versions [required-flags-migration-time attachments-backup updated-attachments]
   (for [attachment attachments-backup
-        :let [updated-attachment (first (filter #(= (:id %) (:id attachment)) updated-attachments))]]
+        :let [updated-attachment (some #(when (= (:id %) (:id attachment)) %) updated-attachments)]]
     (if updated-attachment
-      (let [new-versions (filter (fn [v] (> (:created v) 1421190605547)) (:versions updated-attachment))
-            merged (update-in attachment [:versions] #(reduce merge-versions % new-versions))]
+      (let [new-versions (filter (fn [v] (> (get v :created 0) required-flags-migration-time)) (:versions updated-attachment))]
+        (update-in attachment [:versions] #(reduce merge-versions % new-versions)))
+      attachment)))
 
-        (println (:id attachment) "has been updated, merge versions" (map :version new-versions) "to" (map :version (:versions attachment)))
-        (println (map :version (:versions merged)))
-        )
-      attachment)
-    )
-  )
+(defn- removed-versions [attachments fs-file-ids]
+  (for [attachment attachments]
+    (update-in attachment [:versions] #(filter (fn [v] (fs-file-ids (:fileId v))) %))))
 
-(defn- restore-attachments []
-  (doseq [id (map :id (mongo/select :submitted-applications {:_id {$in ["LP-078-2014-00003","LP-078-2014-00005","LP-078-2014-00006","LP-078-2015-00002","LP-092-2014-00017","LP-092-2014-00125","LP-092-2014-00137","LP-092-2015-00018","LP-106-2014-00247","LP-109-2014-00015","LP-109-2014-00038","LP-186-2014-00311","LP-186-2014-00498","LP-186-2014-00557","LP-245-2015-00006","LP-444-2014-00094","LP-734-2014-00043","LP-753-2014-00145"]}} [:_id]))]
-    (let [attachments-backup (:attachments (mongo/select-one :applicationsBackup {:_id id} [:attachments]))
-          current-attachments (:attachments (mongo/select-one :applications {:_id id} [:attachments]))]
-      (let [updated-attachments (filter #(some (fn [v] (> (:created v) 1421190605547)) (:versions %)) current-attachments)]
-        (if (seq updated-attachments)
-          (let [merged (concat (fixed-versions attachments-backup updated-attachments) [ #_"TODO: liitteet jotka vain currentissa" ])]
-            (println (count merged)) ; trigger lazy eval
-            (println "TODO: merge" id))
-         ;(println "$set {:attachments attachments-backup")
-         ))
-      )
-    )
-  )
+(defmigration restore-attachments
+  (when (pos? (mongo/count :applicationsBackup))
+    (let [fs-file-ids (set (map :id (mongo/select :fs.files)))
+         required-flags-migration-time (:time (mongo/select-one :migrations {:name "required-flags-for-attachment-templates"}))]
+
+      (assert (pos? required-flags-migration-time))
+
+      (doseq [id (map :id (mongo/select :submitted-applications {} [:_id]))]
+        (let [attachments-backup (:attachments (mongo/by-id :applicationsBackup id [:attachments]))
+              restored-ids (set (map :id attachments-backup))
+
+              current-attachments (:attachments (mongo/by-id :applications id [:attachments]))
+              updated-attachments (filter #(some (fn [v] (> (get v :created 0) required-flags-migration-time)) (:versions %)) current-attachments)
+
+              new-attachments (filter
+                                (fn [a] (> (:modified a) required-flags-migration-time))
+                                (remove #(restored-ids (:id %)) current-attachments))
+
+              attachments (if (seq updated-attachments)
+                            (concat
+                              (fixed-versions required-flags-migration-time attachments-backup updated-attachments)
+                              new-attachments)
+                            (concat attachments-backup new-attachments))
+
+              removed (removed-versions attachments fs-file-ids)
+              latest-versions-updated (map (fn [a] (assoc a :latestVersion (-> a :versions last))) removed)
+              ]
+          (mongo/update-by-id :applications id {$set {:attachments latest-versions-updated}})
+          )))))
 
 (defmigration required-flags-for-attachment-templates-v2
   (doseq [collection [:applications :submitted-applications]
