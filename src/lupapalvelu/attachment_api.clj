@@ -91,12 +91,11 @@
 
   (let [attachments-wo-sent-timestamp (filter
                                         #(and
-                                           (pos? (-> % :versions count))
+                                           (-> % :versions count pos?)
                                            (or
                                              (not (:sent %))
                                              (> (-> % :versions last :created) (:sent %)))
-                                           (not= "statement" (-> % :target :type))
-                                           (not= "verdict" (-> % :target :type)))
+                                           (not (#{"verdict" "statement"} (-> % :target :type))))
                                         (:attachments application))]
     (if (pos? (count attachments-wo-sent-timestamp))
       (let [organization  (organization/get-organization (:organization application))
