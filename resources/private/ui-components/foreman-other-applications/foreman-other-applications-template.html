@@ -4,7 +4,7 @@
   <section class="page container">
     <script type="text/html" id="foreman-other-applications">
       <label class="form-label form-label-table" data-bind="ltext: 'muutHankkeet.label'"></label>
-      <table data-bind="visible: initialized">
+      <table>
         <thead>
           <tr>
             <!-- ko foreach: { data: params.subSchema.body, as: 'header' } -->
@@ -24,7 +24,7 @@
           </tr>
         </tbody>
 
-        <tbody data-bind="foreach: { data: rows, as: 'row', afterRender: _.debounce(function() {initialized(true)}, 100) }">
+        <tbody data-bind="foreach: { data: rows, as: 'row' }">
           <tr>
             <!-- ko foreach: { data: row, as: 'column' } -->
             <td data-bind="visible: !column.schema.hidden,
