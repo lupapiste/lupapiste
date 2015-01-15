@@ -324,7 +324,7 @@
 
     (map :id attachments)))
 
-(defn- next-attachment-version [{major :major minor :minor} user]
+(defn next-attachment-version [{major :major minor :minor} user]
   (let [major (or major 0)
         minor (or minor 0)]
     (if (user/authority? user)
