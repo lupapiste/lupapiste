@@ -275,13 +275,7 @@
                 (mapping-common/schemalocation "rakennusvalvonta" "2.1.6"))
       (update-in [:child] mapping-common/update-child-element
                  [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :osapuolettieto]
-                 {:tag :osapuolettieto :child [mapping-common/osapuolet_216]})
-      (update-in [:child] mapping-common/update-child-element
-                 [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :toimenpidetieto :Toimenpide :rakennelmatieto :Rakennelma :sijaintitieto]
-                 mapping-common/sijaintitieto_216)
-      (update-in [:child] mapping-common/update-child-element
-                 [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :toimenpidetieto :Toimenpide :rakennustieto :Rakennus :sijaintitieto]
-                 mapping-common/sijaintitieto_216)))
+                 {:tag :osapuolettieto :child [mapping-common/osapuolet_216]})))
 
 (defn- get-mapping [krysp-version]
   {:pre [krysp-version]}
