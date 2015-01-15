@@ -142,12 +142,12 @@
                    (and (map? node)
                         (contains? node :body)))
         children (fn [branch-node]
-                   (if (seq? branch-node)
+                   (if (seq? branch-node)                   ; TODO remove seq -> destruct body + assert
                      (vals branch-node)
                      (:body branch-node)))
         make-node (fn [node, children]
                     (if (map? node)
-                      (assoc node :body children)
+                      (assoc node :body children)           ; TODO just assoc + assert
                       node))]
     (zip/zipper branch? children make-node doc-schema)))
 
@@ -201,13 +201,19 @@
 (defn- prefix-with [prefix coll]
   (conj (seq coll) prefix))
 
+(defn update-in-repetable
+  ([m [k & ks] f & args]
+    (if ks
+      (assoc m k (apply update-in (get m k) ks f args))
+      (assoc m k (apply f (get m k) args)))))
+
 (defn- enrich-single-doc-disabled-flag [user-role doc]
   (let [doc-schema        (model/get-document-schema doc)
         zip-root          (schema-zipper doc-schema)
         whitelisted-paths (walk-schema zip-root)]
     (reduce (fn [new-doc [path roles]]
-              (if-not (some #{(keyword user-role)} roles)
-                (update-in new-doc (prefix-with :data path) merge {:disabled true})
+              (if-not ((set roles) (keyword user-role))
+                (update-in-repetable new-doc (prefix-with :data path) merge {:disabled true})
                 new-doc))
             doc
             whitelisted-paths)))
