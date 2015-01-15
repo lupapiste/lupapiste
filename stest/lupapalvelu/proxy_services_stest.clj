@@ -213,8 +213,7 @@
     {:query-params {:v "428"}
      :throw-exceptions false}) => http200?)
 
-; TODO Uncomment when access rights are resolved
-#_ (fact "General plan documents"
+(fact "General plan documents"
   (let [request {:params {:id "0911001"}
                  :headers {"accept-encoding" "gzip, deflate"}}]
     (println "Checking plandocument 0911001")
