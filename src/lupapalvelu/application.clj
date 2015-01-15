@@ -202,7 +202,6 @@
 
 (defn update-in-repeating
   ([m [k & ks] f & args]
-    (println "m:" m "k:" k "ks:" ks "args:" args)
     (if (every? (comp ss/numeric? name) (keys m))
       (apply hash-map (mapcat (fn [[repeat-k v]] [repeat-k (apply update-in-repeating v (conj ks k) f args)] ) m))
       (if ks
@@ -257,7 +256,9 @@
     (get-in foreman-doc [:data :henkilotiedot :hetu :value])))
 
 (defn- get-foreman-applications [foreman-application & [foreman-hetu]]
-  (let [foreman-hetu (if foreman-hetu foreman-hetu (get-foreman-hetu foreman-application))]
+  (let [foreman-hetu (if (ss/blank? foreman-hetu)
+                       (get-foreman-hetu foreman-application)
+                       foreman-hetu)]
     (mongo/select :applications {"operations.name" "tyonjohtajan-nimeaminen-v2"
                   :documents {$elemMatch {"schema-info.name" "tyonjohtaja-v2"
                                           "data.henkilotiedot.hetu.value" foreman-hetu}}})))
