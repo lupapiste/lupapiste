@@ -455,20 +455,16 @@
       {:tyonjohtajaRooliKoodi rooli
        :vastattavatTyotehtavat (concat-tyotehtavat-to-string (:vastattavatTyotehtavat tyonjohtaja))
        :patevyysvaatimusluokka (:patevyysvaatimusluokka tyonjohtaja)
-       ; TODO Patevyys information missing from v2 schema
-       ;:valmistumisvuosi (:valmistumisvuosi patevyys)
-       ;:kokemusvuodet (:kokemusvuodet patevyys)
-       ;:valvottavienKohteidenMaara (:valvottavienKohteidenMaara patevyys)
+       :valmistumisvuosi (:valmistumisvuosi patevyys)
+       :kokemusvuodet (:kokemusvuodet patevyys)
+       :valvottavienKohteidenMaara (:valvottavienKohteidenMaara patevyys)
        :tyonjohtajaHakemusKytkin (= "hakemus" (:ilmoitusHakemusValitsin tyonjohtaja))
-       ; TODO sijaistustiedot (etunimi sukunimi) missing from v2 schema
        :sijaistustieto (get-sijaistustieto sijaistus rooli)
        :vainTamaHankeKytkin (:tyonjohtajanHyvaksynta (:tyonjohtajanHyvaksynta tyonjohtaja))}
-      ; TODO alkamispvm paattymispvm is missing from v2 schema
       (when-not (s/blank? alkamisPvm) {:alkamisPvm (to-xml-date-from-string alkamisPvm)})
       (when-not (s/blank? paattymisPvm) {:paattymisPvm (to-xml-date-from-string paattymisPvm)})
       (get-vastattava-tyotieto tyonjohtaja lang)
-      ; TODO sijaistustiedot missing from v2 schema
-      #_(let [sijaistettava-hlo (get-sijaistettava-hlo-214 sijaistus)]
+      (let [sijaistettava-hlo (get-sijaistettava-hlo-214 sijaistus)]
         (when-not (ss/blank? sijaistettava-hlo)
           {:sijaistettavaHlo sijaistettava-hlo}))
       )))

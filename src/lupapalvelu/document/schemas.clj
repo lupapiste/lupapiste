@@ -285,6 +285,12 @@
                             :body [{:name "nimeaminen" :i18nkey "tyonjohtaja.patevyys.tyonjohtajaHakemusKytkin.nimeaminen"}
                                    {:name "hakemus" :i18nkey "tyonjohtaja.patevyys.tyonjohtajaHakemusKytkin.hakemus"}]}])
 
+(def patevyys-tyonjohtaja-v2 [koulutusvalinta
+                              {:name "koulutus" :type :string :required false  :i18nkey "muukoulutus"}
+                              {:name "valmistumisvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size "s" :required false}
+                              {:name "kokemusvuodet" :type :string :subtype :number :min-len 1 :max-len 2 :size "s" :required false}
+                              {:name "valvottavienKohteidenMaara" :i18nkey "tyonjohtaja.patevyys.valvottavienKohteidenMaara" :type :string :subtype :number :size "s" :required false}])
+
 ;; FIXME remove + migration
 (def vastuuaika-tyonjohtaja [{:name "vastuuaika"
                               :type :group
@@ -406,7 +412,9 @@
                       tyonjohtaja-hanketieto
                       tayta-omat-tiedot-button
                       designer-basic
-                      muut-rakennushankkeet-table))
+                      muut-rakennushankkeet-table
+                      {:name "patevyys" :type :group :body patevyys-tyonjohtaja-v2}
+                      sijaisuus-tyonjohtaja))
 
 (def maksaja (body
                (henkilo-yritys-select-group :yritys-body yritys-with-verkkolaskutustieto)

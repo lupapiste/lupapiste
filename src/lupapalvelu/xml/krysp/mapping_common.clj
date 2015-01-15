@@ -109,27 +109,12 @@
                                                        :child [{:tag :pos}]}]} ]}]}
                            {:tag :tyhja :ns "yht"}]})
 
-
-(def sijaintiType_216 (update-in sijantiType [:child]
-                                 conj {:tag :nimi :ns "yht"}
-                                 {:tag :kuvaus :ns "yht"}
-                                 {:tag :korkeusTaiSyvyys :ns "yht"}
-                                 {:tag :pintaAla :ns "yht"}))
-
 (defn sijaintitieto
   "Takes an optional xml namespace for Sijainti element"
   [& [xmlns]]
   {:tag :sijaintitieto
    :child [(merge
              sijantiType
-             (when xmlns {:ns xmlns}))]})
-
-(defn sijaintitieto_216
-  "Takes an optional xml namespace for Sijainti element"
-  [& [xmlns]]
-  {:tag :sijaintitieto
-   :child [(merge
-             sijaintiType_216
              (when xmlns {:ns xmlns}))]})
 
 (def- rakennusoikeudet [:tag :rakennusoikeudet
