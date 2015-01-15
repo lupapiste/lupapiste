@@ -4,7 +4,6 @@ LUPAPISTE.ForemanOtherApplicationsModel = function(params) {
   self.params = params;
   self.rows = ko.observableArray();
   self.autoupdatedRows = ko.observableArray();
-  self.initialized = ko.observable(false);
 
   var createRow = function(model, index) {
     var res = _.filter(self.params.validationErrors, function(errors) {
@@ -46,21 +45,22 @@ LUPAPISTE.ForemanOtherApplicationsModel = function(params) {
   self.autoupdatedRows(autoupdatedRows);
   self.rows(rows);
 
-  hub.subscribe("hetuChangedInBackend", function() {
+  self.subscriptionIds = [];
+  self.subscriptionIds.push(hub.subscribe("hetuChangedInBackend", function() {
     ajax.command("update-foreman-other-applications", {id: self.params.applicationId, foremanHetu: ""})
     .success(function() {
       repository.load(self.params.applicationId);
     })
     .call();
-  });
+  }));
 
-  hub.subscribe("hetuChanged", function(data) {
+  self.subscriptionIds.push(hub.subscribe("hetuChanged", function(data) {
     ajax.command("update-foreman-other-applications", {id: self.params.applicationId, foremanHetu: data.value})
     .success(function() {
       repository.load(self.params.applicationId);
     })
     .call();
-  });
+  }));
 
   self.addRow = function() {
     var lastItem = _.first(_.last(self.rows()));
@@ -92,6 +92,13 @@ LUPAPISTE.ForemanOtherApplicationsModel = function(params) {
         } },
         { title: loc("no") });
   };
+};
+
+LUPAPISTE.ForemanOtherApplicationsModel.prototype.dispose = function() {
+  "use strict";
+  _.forEach(this.subscriptionIds, function(id) {
+    hub.unsubscribe(id);
+  });
 };
 
 ko.components.register("foreman-other-applications", {
