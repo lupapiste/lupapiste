@@ -462,7 +462,7 @@
        :tyonjohtajaHakemusKytkin (= "hakemus" (:ilmoitusHakemusValitsin tyonjohtaja))
        ; TODO sijaistustiedot (etunimi sukunimi) missing from v2 schema
        :sijaistustieto (get-sijaistustieto sijaistus rooli)
-       :tyonjohtajanHyvaksynta (:tyonjohtajanHyvaksynta tyonjohtaja)}
+       :vainTamaHankeKytkin (:tyonjohtajanHyvaksynta (:tyonjohtajanHyvaksynta tyonjohtaja))}
       ; TODO alkamispvm paattymispvm is missing from v2 schema
       (when-not (s/blank? alkamisPvm) {:alkamisPvm (to-xml-date-from-string alkamisPvm)})
       (when-not (s/blank? paattymisPvm) {:paattymisPvm (to-xml-date-from-string paattymisPvm)})

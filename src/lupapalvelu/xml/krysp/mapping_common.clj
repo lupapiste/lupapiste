@@ -279,7 +279,7 @@
                              {:tag :paattymisPvm}]}]}
            {:tag :sijaistettavaHlo}]})
 
-(def tyonjohtaja_213 (update-in tyonjohtaja_212 [:child] update-child-element [:yritys] yritys_213))
+(def tyonjohtaja_213 (update-in tyonjohtaja_212 [:child] (comp vec update-child-element) [:yritys] yritys_213))
 
 (def tyonjohtaja_216 (update-in tyonjohtaja_213 [:child] conj {:tag :vainTamaHankeKytkin}))
 
