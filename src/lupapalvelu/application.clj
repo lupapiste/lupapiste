@@ -141,14 +141,13 @@
   (let [branch?  (fn [node]
                    (and (map? node)
                         (contains? node :body)))
-        children (fn [branch-node]
-                   (if (seq? branch-node)                   ; TODO remove seq -> destruct body + assert
-                     (vals branch-node)
-                     (:body branch-node)))
+        children (fn [{body :body :as branch-node}]
+                   (assert (map? branch-node) (str "Assertion failed in schema-zipper/children, expected node to be a map:" branch-node))
+                   (assert (not (empty? body)) (str "Assertion failed in schema-zipper/children, branch node to have children:" branch-node))
+                   body)
         make-node (fn [node, children]
-                    (if (map? node)
-                      (assoc node :body children)           ; TODO just assoc + assert
-                      node))]
+                    (assert (map? node) (str "Assertion failed in schema-zipper/make-node, expected node to be a map:" node))
+                    (assoc node :body children))]
     (zip/zipper branch? children make-node doc-schema)))
 
 (defn- iterate-siblings-to-right [loc f]
