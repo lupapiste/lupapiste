@@ -1,0 +1,2 @@
+attachment.label.verdictAttachment: Päätöksen liite
+attachment.set-attachment-as-verdict-attachment.error: Liitteen merkitseminen päätöksen liitteeksi epäonnistui
