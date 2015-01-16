@@ -44,38 +44,40 @@
     (mongo/select :applications {:_id {$in linked-app-ids}})))
 
 (defn- get-linked-app-operations [foreman-app-id link]
-  (let [other-id  (first (remove #{foreman-app-id} (:link link)))
-        operation (get-in link [(keyword other-id) :apptype])]
-    (i18n/loc (str "operations." operation))))
+  (let [other-id  (first (remove #{foreman-app-id} (:link link)))]
+    (get-in link [(keyword other-id) :apptype])))
+
+(defn- unwrap [wrapped-value]
+  (let [value (tools/unwrapped wrapped-value)]
+    (if (empty? value)
+      "ei tiedossa"            ; TODO: ei_tiedossa -> ei tiedossa kun kaannos excelissa
+      value)))
+
+(defn- loc-hashmap-vals [m]
+  (let [loc-fn (comp i18n/loc str)]
+    (into {} (for [[k [prefix v]] m]
+               [k (loc-fn prefix v)]))))
+
+(defn- get-history-data-from-app [app-links app]
+  (let [foreman-doc     (domain/get-document-by-name app "tyonjohtaja-v2")
+
+        municipality    (:municipality app)
+        difficulty      (unwrap (get-in foreman-doc [:data :patevyysvaatimusluokka]))
+        foreman-role    (unwrap (get-in foreman-doc [:data :kuntaRoolikoodi]))
+
+        relevant-link   (first (filter #(some #{(:id app)} (:link %)) app-links))
+        operation       (get-linked-app-operations (:id app) relevant-link)]
+
+    (loc-hashmap-vals {:municipality ["municipality." municipality]
+                       :difficulty ["osapuoli.patevyysvaatimusluokka." difficulty]
+                       :jobDescription ["osapuoli.tyonjohtaja.kuntaRoolikoodi." foreman-role]
+                       :operation ["operations." operation]})))
 
 (defn get-foreman-history-data [foreman-app]
   (let [foreman-apps       (->> (get-foreman-applications foreman-app)
                                 (remove #(= (:id %) (:id foreman-app))))
         links              (mongo/select :app-links {:link {$in (map :id foreman-apps)}})]
-    (map
-      (fn [app]
-        (let [foreman-doc     (domain/get-document-by-name app "tyonjohtaja-v2")
-              municipality    (i18n/loc (str "municipality." (:municipality app)))
-              difficulty      (tools/unwrapped (get-in foreman-doc [:data :patevyysvaatimusluokka]))
-              difficulty      (->> (if (empty? difficulty)
-                                     "ei tiedossa"
-                                     difficulty)
-                                   (str "osapuoli.patevyysvaatimusluokka.")
-                                   (i18n/loc))
-              foreman-role    (tools/unwrapped (get-in foreman-doc [:data :kuntaRoolikoodi]))
-              foreman-role    (if (empty? foreman-role)
-                                "ei_tiedossa"            ; TODO: ei_tiedossa -> ei tiedossa kun kaannos excelissa
-                                foreman-role)
-              job-description (->> foreman-role
-                                   (str "osapuoli.tyonjohtaja.kuntaRoolikoodi.")
-                                   (i18n/loc))
-              relevant-link   (first (filter #(some #{(:id app)} (:link %)) links))
-              operation       (get-linked-app-operations (:id app) relevant-link)]
-          {:municipality municipality
-           :difficulty difficulty
-           :jobDescription job-description
-           :operation operation}))
-      foreman-apps)))
+    (map (partial get-history-data-from-app links) foreman-apps)))
 
 (defn map-application [application]
   {:id (:id application)
