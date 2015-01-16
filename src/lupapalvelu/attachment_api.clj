@@ -122,16 +122,14 @@
    :roles      [:applicant :authority]
    :extra-auth-roles [:statementGiver]
    :states     (action/all-states-but [:answered :sent :closed :canceled])}
-  [{:keys [application user] :as command}]
+  [{:keys [application user created] :as command}]
 
   (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
     (fail! :error.pre-verdict-attachment))
 
   (let [attachment-type (attachment/parse-attachment-type attachmentType)]
     (if (attachment/allowed-attachment-type-for-application? application attachment-type)
-      (update-application command
-        {:attachments {$elemMatch {:id attachmentId}}}
-        {$set {:attachments.$.type attachment-type}})
+      (attachment/update-attachment-key command attachmentId :type attachment-type created true true)
       (do
         (errorf "attempt to set new attachment-type: [%s] [%s]: %s" id attachmentId attachment-type)
         (fail :error.attachmentTypeNotAllowed)))))
@@ -157,10 +155,7 @@
    :roles       [:authority]
    :states      (action/all-states-but [:answered :sent :closed :canceled])}
   [{:keys [created] :as command}]
-  (update-application command
-    {:attachments {$elemMatch {:id attachmentId}}}
-    {$set {:modified created
-           :attachments.$.state :ok}}))
+  (attachment/update-attachment-key command attachmentId :state :ok created true false))
 
 (defcommand reject-attachment
   {:description "Authority can reject attachment, requires user action."
@@ -168,10 +163,7 @@
    :roles       [:authority]
    :states      (action/all-states-but [:answered :sent :closed :canceled])}
   [{:keys [created] :as command}]
-  (update-application command
-    {:attachments {$elemMatch {:id attachmentId}}}
-    {$set {:modified created
-           :attachments.$.state :requires_user_action}}))
+  (attachment/update-attachment-key command attachmentId :state :requires_user_action created true false))
 
 ;;
 ;; Create
@@ -486,27 +478,21 @@
    :extra-auth-roles [:statementGiver]
    :states     (action/all-states-but [:answered :sent :closed :canceled])
    :input-validators [validate-meta validate-scale validate-size validate-operation]}
-  [{:keys [application user] :as command}]
+  [{:keys [application user created] :as command}]
 
   (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
     (fail! :error.pre-verdict-attachment))
 
   (doseq [[k v] meta]
-    (let [setKey (keyword (str "attachments.$." (name k)))]
-      (update-application command
-                          {:attachments {$elemMatch {:id attachmentId}}}
-                          {$set {setKey v
-                                 :attachments.$.modified (now)}})))
+    (attachment/update-attachment-key command attachmentId k v created true true))
   (ok))
 
 (defcommand set-attachment-not-needed
   {:parameters [id attachmentId notNeeded]
    :roles      [:applicant :authority]
    :states     [:draft :open]}
-  [command]
-  (update-application command
-                      {:attachments {$elemMatch {:id attachmentId}}}
-                      {$set {:attachments.$.notNeeded notNeeded}})
+  [{:keys [created] :as command}]
+  (attachment/update-attachment-key command attachmentId :notNeeded notNeeded created true false)
   (ok))
 
 ;; TODO: Tee tasta sellainen joka ottaa parametrina id-arrayn.
