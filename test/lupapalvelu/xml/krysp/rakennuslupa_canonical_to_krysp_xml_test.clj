@@ -46,6 +46,8 @@
     (fact "2.1.4: xml exist" xml_214 => truthy)
     (fact "2.1.5: xml exist" xml_215 => truthy)
 
+
+
     (let [lp-xml_212 (cr/strip-xml-namespaces (xml/parse xml_212_s))
           lp-xml_213 (cr/strip-xml-namespaces (xml/parse xml_213_s))
           tyonjohtaja_212 (xml/select1 lp-xml_212 [:osapuolettieto :Tyonjohtaja])
@@ -80,10 +82,6 @@
       (xml/get-text lp-xml_215 [:osapuolitieto :Osapuoli :yritys :verkkolaskutustieto :Verkkolaskutus :valittajaTunnus]) => "valittajatunnus-1234")
 
     ; Alla oleva tekee jo validoinnin, mutta annetaan olla tuossa alla viela validointi, jottei tule joku riko olemassa olevaa validointia
-    (mapping-to-krysp/save-application-as-krysp application "fi" application {:krysp {:R {:ftpUser "dev_sipoo" :version "2.1.2"}}})
-    (mapping-to-krysp/save-application-as-krysp application "fi" application {:krysp {:R {:ftpUser "dev_sipoo" :version "2.1.3"}}})
-    (mapping-to-krysp/save-application-as-krysp application "fi" application {:krysp {:R {:ftpUser "dev_sipoo" :version "2.1.4"}}})
-    (mapping-to-krysp/save-application-as-krysp application "fi" application {:krysp {:R {:ftpUser "dev_sipoo" :version "2.1.5"}}})
 
     (validator/validate xml_212_s (:permitType application) "2.1.2")
     (validator/validate xml_213_s (:permitType application) "2.1.3")

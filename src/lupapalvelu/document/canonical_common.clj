@@ -469,12 +469,10 @@
           {:sijaistettavaHlo sijaistettava-hlo}))
       )))
 
-; TODO call both and merge
-(if (env/feature? :foreman)
-  (defn- get-foremans [documents lang]
-    (get-parties-by-type documents :Tyonjohtaja :tyonjohtaja-v2 (partial get-tyonjohtaja-v2-data lang)))
-  (defn- get-foremans [documents lang]
-    (get-parties-by-type documents :Tyonjohtaja :tyonjohtaja (partial get-tyonjohtaja-data lang))))
+(defn- get-foremen [documents lang]
+  (if (contains? documents :tyonjohtaja)
+    (get-parties-by-type documents :Tyonjohtaja :tyonjohtaja (partial get-tyonjohtaja-data lang))
+    (get-parties-by-type documents :Tyonjohtaja :tyonjohtaja-v2 (partial get-tyonjohtaja-v2-data lang))))
 
 (defn- get-neighbor [neighbor-name property-id]
   {:Naapuri {:henkilo neighbor-name
@@ -497,7 +495,7 @@
     {:Osapuolet
      {:osapuolitieto (get-parties documents-by-types)
       :suunnittelijatieto (get-designers documents-by-types)
-      :tyonjohtajatieto (get-foremans documents-by-types lang)
+      :tyonjohtajatieto (get-foremen documents-by-types lang)
       :naapuritieto (get-neighbors neighbors)}}))
 
 (defn change-value-to-when [value to_compare new_val]

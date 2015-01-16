@@ -284,6 +284,10 @@
   {:tag :tyonjohtajatieto
    :child [tyonjohtaja_211]})
 
+(def tyonjohtajatieto_212
+  {:tag :tyonjohtajatieto
+   :child [tyonjohtaja_212]})
+
 (def tyonjohtajatieto_213
   {:tag :tyonjohtajatieto
    :child [tyonjohtaja_213]})
@@ -330,7 +334,7 @@
   {:tag :Osapuolet :ns "yht"
    :child [{:tag :osapuolitieto :child [osapuoli-body_211]}
            suunnittelijatieto_211
-           tyonjohtajatieto_211
+           tyonjohtajatieto_212
            naapuri]})
 
 (def osapuolet_213

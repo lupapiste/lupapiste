@@ -228,7 +228,7 @@
       katselmus_213)
     (update-in [:child] mapping-common/update-child-element
       [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :osapuolettieto]
-      {:tag :osapuolettieto :child [mapping-common/osapuolet_211]})
+      {:tag :osapuolettieto :child [mapping-common/osapuolet_213]})
     (update-in [:child] mapping-common/update-child-element
       [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :toimenpidetieto :Toimenpide :rakennustieto :Rakennus :rakennuksenTiedot]
       #(update-in % [:child] conj {:tag :liitettyJatevesijarjestelmaanKytkin}))
@@ -242,7 +242,7 @@
       (mapping-common/schemalocation "rakennusvalvonta" "2.1.4"))
     (update-in [:child] mapping-common/update-child-element
       [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :osapuolettieto]
-      {:tag :osapuolettieto :child [mapping-common/osapuolet_212]})))
+      {:tag :osapuolettieto :child [mapping-common/osapuolet_213]})))
 
 (def rakennuslupa_to_krysp_215
   (-> rakennuslupa_to_krysp_214
