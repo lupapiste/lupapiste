@@ -1,7 +1,8 @@
 (ns lupapalvelu.application
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error fatal]]
-            [clojure.string :refer [blank? join trim split]]
+            [clojure.string :refer [join split]]
             [clojure.walk :refer [keywordize-keys]]
+            [clojure.zip :as zip]
             [clj-time.core :refer [year]]
             [clj-time.local :refer [local-now]]
             [clj-time.format :as tf]
@@ -35,8 +36,7 @@
             [lupapalvelu.open-inforequest :as open-inforequest]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.application-meta-fields :as meta-fields]
-            [lupapalvelu.company :as c]
-            [clojure.string :as string]))
+            [lupapalvelu.company :as c]))
 
 ;; Notifications
 
@@ -68,7 +68,7 @@
 (defn set-user-to-document [application document user-id path current-user timestamp]
   {:pre [document]}
   (when-not (ss/blank? user-id)
-    (let [path-arr     (if-not (blank? path) (split path #"\.") [])
+    (let [path-arr     (if-not (ss/blank? path) (split path #"\.") [])
           schema       (schemas/get-schema (:schema-info document))
           subject      (user/get-user-by-id user-id)
           with-hetu    (model/has-hetu? (:body schema) path-arr)
@@ -106,7 +106,7 @@
 ;;
 
 (defn- link-permit-submitted? [link-id]
-  (util/not-empty-or-nil? (:submitted (mongo/by-id "applications" link-id ["submitted"]))))
+  (util/not-empty-or-nil? (:submitted (mongo/by-id "applications" link-id [:submitted]))))
 
 (defn- foreman-submittable? [application]
   (let [result (when-not (:submitted application)
@@ -127,18 +127,107 @@
         doc-mapper (comp mask-person-ids validate)]
     (update-in application [:documents] (partial map doc-mapper))))
 
+(defn schema-branch? [node]
+  (or
+    (seq? node)
+    (and
+      (map? node)
+      (contains? node :body))))
+
+(def schema-leaf?
+  (complement schema-branch?))
+
+(defn- schema-zipper [doc-schema]
+  (let [branch?  (fn [node]
+                   (and (map? node)
+                        (contains? node :body)))
+        children (fn [{body :body :as branch-node}]
+                   (assert (map? branch-node) (str "Assertion failed in schema-zipper/children, expected node to be a map:" branch-node))
+                   (assert (not (empty? body)) (str "Assertion failed in schema-zipper/children, branch node to have children:" branch-node))
+                   body)
+        make-node (fn [node, children]
+                    (assert (map? node) (str "Assertion failed in schema-zipper/make-node, expected node to be a map:" node))
+                    (assoc node :body children))]
+    (zip/zipper branch? children make-node doc-schema)))
+
+(defn- iterate-siblings-to-right [loc f]
+  (if (nil? (zip/right loc))
+    (-> (f loc)
+        zip/up)
+    (-> (f loc)
+        zip/right
+        (recur f))))
+
+(defn- get-root-path [loc]
+  (let [keyword-name (comp keyword :name)
+        root-path    (->> (zip/path loc)
+                          (mapv keyword-name)
+                          (filterv identity))
+        node-name    (-> (zip/node loc)
+                         keyword-name)]
+    (seq (conj root-path node-name))))
+
+(defn- add-whitelist-property [node new-whitelist]
+  (if-not (and (seq? node) (:whitelist node))
+    (assoc node :whitelist new-whitelist)
+    node))
+
+(defn- walk-schema
+  ([loc] (walk-schema loc nil))
+  ([loc disabled-paths]
+    (if (zip/end? loc)
+      disabled-paths
+      (let [current-node      (zip/node loc)
+            current-whitelist (:whitelist current-node)
+
+            propagate-wl?     (and (schema-branch? current-node)
+                                   current-whitelist)
+
+            loc               (if propagate-wl?
+                                (iterate-siblings-to-right
+                                  (zip/down loc) ;leftmost-child, starting point
+                                  #(zip/edit % add-whitelist-property current-whitelist))
+                                loc)
+
+            whitelisted-leaf? (and
+                                (schema-leaf? current-node)
+                                current-whitelist)
+            disabled-paths    (if whitelisted-leaf?
+                                (conj disabled-paths [(get-root-path loc) current-whitelist])
+                                disabled-paths)]
+        (recur (zip/next loc) disabled-paths)))))
+
+(defn- prefix-with [prefix coll]
+  (conj (seq coll) prefix))
+
+(defn- enrich-single-doc-disabled-flag [user-role doc]
+  (let [doc-schema        (model/get-document-schema doc)
+        zip-root          (schema-zipper doc-schema)
+        whitelisted-paths (walk-schema zip-root)]
+    (reduce (fn [new-doc [path roles]]
+              (if-not ((set roles) (keyword user-role))
+                (update-in-repeating new-doc (prefix-with :data path) merge {:disabled true})
+                new-doc))
+            doc
+            whitelisted-paths)))
+
+(defn- enrich-docs-disabled-flag [{user-role :role} app]
+  (let [mapper-fn (partial enrich-single-doc-disabled-flag user-role)]
+    (update-in app [:documents] (partial map mapper-fn))))
+
 (defn- post-process-app [app user]
-  (-> app
+  (->> app
     meta-fields/enrich-with-link-permit-data
-    ((partial meta-fields/with-meta-fields user))
+    (meta-fields/with-meta-fields user)
     without-system-keys
     process-foreman-v2
-    ((partial process-documents user))))
+    (process-documents user)
+    (enrich-docs-disabled-flag user)))
 
 (defn find-authorities-in-applications-organization [app]
   (mongo/select :users
     {:organizations (:organization app) :role "authority" :enabled true}
-    {:firstName 1, :lastName 1}
+    [:firstName :lastName]
     (array-map :lastName 1, :firstName 1)))
 
 (defquery application
@@ -152,61 +241,6 @@
       (ok :application (post-process-app app user)
           :authorities (find-authorities-in-applications-organization app)
           :permitSubtypes (permit/permit-subtypes (:permitType app))))
-    (fail :error.not-found)))
-
-(defn- map-application [application]
-  {:id (:id application)
-   :state (:state application)
-   :auth (:auth application)
-   :documents (filter #(= (get-in % [:schema-info :name]) "tyonjohtaja") (:documents application))})
-
-;TODO unfinished
-(defn- get-foreman-applications [foreman-application]
-  (let [foreman-doc  (first (filter #(= "tyonjohtaja-v2" (-> % :schema-info :name)) (:documents foreman-application)))
-        foreman-hetu (get-in foreman-doc [:data :henkilotiedot :hetu :value])
-        foreman-apps (mongo/select :applications {})
-        ]
-    )
-  )
-
-;TODO unfinished
-(defquery foreman-history
-  {:roles            [:applicant :authority] ; TODO: Needs to be restricted to only authority + specific extra auth roles
-   :states           action/all-states
-   :extra-auth-roles [:any]
-   :parameters       [:id]}
-  [{application :application user :user :as command}]
-  (if application
-    (let [
-          ;linked-apps      (mongo/select :app-links {:link {$in [application-id]}})
-          ;linked-apps      (filter #(= (get-in % [(keyword application-id) :type]) "linkpermit") linked-apps)
-          ;get-other-app-id (fn [app] (first (remove #{application-id} (:link app))))
-          ;get-app-type-fn  (fn [app] (get-in app [(keyword (get-other-app-id app)) :app-type]))
-          ;linked-apps      (filter #(re-matches #"^tyonjohtajan-nimeaminen.*" (get-app-type-fn %)) linked-apps)
-          ]
-
-      (ok :projects [{:municipality "Helsinki" :difficulty "A" :jobDescription "Vastaava tyonjohtaja" :operation "Asuinrakennuksen rakentaminen"}
-                   {:municipality "Helsinki" :difficulty "A" :jobDescription "Vastaava tyonjohtaja" :operation "Asuinrakennuksen rakentaminen"}
-                   {:municipality "Helsinki" :difficulty "A" :jobDescription "Vastaava tyonjohtaja" :operation "Asuinrakennuksen rakentaminen"}
-                   {:municipality "Tampere" :difficulty "A" :jobDescription "Vastaava tyonjohtaja" :operation "Asuinrakennuksen rakentaminen"}]))
-    (fail :error.not-found))
-  )
-
-(defquery foreman-applications
-  {:roles            [:applicant :authority]
-   :states           action/all-states
-   :extra-auth-roles [:any]
-   :parameters       [:id]}
-  [{application :application user :user :as command}]
-  (if application
-    (let [application-id (:id application)
-          app-link-resp (mongo/select :app-links {:link {$in [application-id]}})
-          apps-linking-to-us (filter #(= (:type ((keyword application-id) %)) "linkpermit") app-link-resp)
-          foreman-application-links (filter #(= (:apptype (first (:link %)) "tyonjohtajan-nimeaminen")) apps-linking-to-us)
-          foreman-application-ids (map (fn [link] (first (:link link))) foreman-application-links)
-          applications (mongo/select :applications {:_id {$in foreman-application-ids}})
-          mapped-applications (map (fn [app] (map-application app)) applications)]
-      (ok :applications (sort-by :id mapped-applications)))
     (fail :error.not-found)))
 
 (defn filter-repeating-party-docs [schema-version schema-names]
@@ -851,9 +885,9 @@
     (do
       (update-application command
         {$set {:location      (->location x y)
-               :address       (trim address)
+               :address       (ss/trim address)
                :propertyId    propertyId
-               :title         (trim address)
+               :title         (ss/trim address)
                :modified      created}})
       (try (autofill-rakennuspaikka (mongo/by-id :applications id) (now))
         (catch Exception e (error e "KTJ data was not updated."))))
@@ -910,7 +944,10 @@
 (defn- do-add-link-permit [{:keys [id propertyId operations]} link-permit-id]
   {:pre [(mongo/valid-key? link-permit-id)
          (not= id link-permit-id)]}
-  (let [db-id (make-mongo-id-for-link-permit id link-permit-id)]
+  (let [db-id            (make-mongo-id-for-link-permit id link-permit-id)
+        is-lupapiste-app (.startsWith link-permit-id "LP-")
+        linked-app       (when is-lupapiste-app
+                           (domain/get-application-no-access-checking link-permit-id))]
     (mongo/update-by-id :app-links db-id
       {:_id  db-id
        :link [id link-permit-id]
@@ -918,9 +955,13 @@
                        :apptype (:name (first operations))
                        :propertyId propertyId}
        link-permit-id {:type "linkpermit"
-                       :linkpermittype (if (.startsWith link-permit-id "LP-")
+                       :linkpermittype (if is-lupapiste-app
                                          "lupapistetunnus"
-                                         "kuntalupatunnus")}}
+                                         "kuntalupatunnus")
+                       :apptype (->> linked-app
+                                     (:operations)
+                                     (first)
+                                     (:name))}}
       :upsert true)))
 
 (defn- validate-jatkolupa-zero-link-permits [_ application]
@@ -1053,9 +1094,6 @@
     (insert-application continuation-app)
     (ok :id (:id continuation-app))))
 
-(defn find-by-id [taskId tasks]
-  (some (fn [task] (when (= taskId (:id task)) task)) tasks))
-
 (defcommand create-foreman-application
   {:parameters [id taskId foremanRole]
    :roles [:applicant :authority]
@@ -1071,7 +1109,7 @@
                                             :infoRequest false
                                             :messages []}))
 
-        task                 (find-by-id taskId (:tasks application))
+        task                 (util/find-by-id taskId (:tasks application))
 
         hankkeen-kuvaus      (get-in (domain/get-document-by-name application "hankkeen-kuvaus") [:data :kuvaus :value])
         hankkeen-kuvaus-doc  (domain/get-document-by-name foreman-app "hankkeen-kuvaus-minimum")
@@ -1080,7 +1118,7 @@
                                hankkeen-kuvaus-doc)
 
         tyonjohtaja-doc      (domain/get-document-by-name foreman-app "tyonjohtaja-v2")
-        tyonjohtaja-doc      (if-not (string/blank? foremanRole)
+        tyonjohtaja-doc      (if-not (ss/blank? foremanRole)
                                (assoc-in tyonjohtaja-doc [:data :kuntaRoolikoodi :value] foremanRole)
                                tyonjohtaja-doc)
 

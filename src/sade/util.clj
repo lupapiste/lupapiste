@@ -61,6 +61,10 @@
         (apply some-key m (rest ks))
         (m k)))))
 
+(defn find-by-id
+  "Return item from sequence col of maps where :id matches id."
+  [id col]
+  (some (fn [m] (when (= id (:id m)) m)) col))
 
 ; From clojure.contrib/seq
 

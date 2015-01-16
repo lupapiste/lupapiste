@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container">
+    <script type="text/html" id="foreman-history" class="form-table">
+      <h2 data-bind="ltext: 'tyonjohtaja.historia.otsikko'"></h2>
+      <table>
+        <thead>
+          <tr>
+            <th class="first"  data-bind="ltext: 'tyonjohtaja.historia.kunta'"></th>
+            <th class="second" data-bind="ltext: 'tyonjohtaja.historia.vaativuus'"></th>
+            <th class="third"  data-bind="ltext: 'tyonjohtaja.historia.vastuu'"></th>
+            <th class="fourth" data-bind="ltext: 'tyonjohtaja.historia.hanke'"></th>
+          </tr>
+        </thead>
+        <tbody data-bind="foreach: projects" >
+          <tr>
+            <td data-bind="text: municipality"></td>
+            <td data-bind="text: difficulty"></td>
+            <td data-bind="text: jobDescription"></td>
+            <td data-bind="text: operation"></td>
+          </tr>
+        </tbody>
+    </script>
+  </section>
+</body>
+</html>

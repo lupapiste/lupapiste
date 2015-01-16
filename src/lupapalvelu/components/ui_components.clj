@@ -31,7 +31,8 @@
                  :attachmentSizes   attachment-sizes
                  :postVerdictStates post-verdict-states
                  :stampableMimes    (filter identity (map mime/mime-types lupapalvelu.stamper/file-types))
-                 :foremanRoles      (:body (first lupapalvelu.document.schemas/kuntaroolikoodi-tyonjohtaja))}]
+                 :foremanRoles      (:body (first lupapalvelu.document.schemas/kuntaroolikoodi-tyonjohtaja))
+                 :foremanReadonlyFields ["luvanNumero", "katuosoite", "rakennustoimenpide", "kokonaisala"]}]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
 
 (defn- loc->js []
@@ -139,16 +140,29 @@
    :create-task  {:js ["create-task.js"]
                   :html ["create-task.html"]}
 
-   :application  {:depends [:common-html :repository :tree :task :create-task :modal-datepicker :signing :invites :side-panel]
+   :ui-components {:depends [:common-html]
+                   :js ["ui-components.js"
+                        "fill-info-button/fill-info-model.js"
+                        "foreman-history/foreman-history-model.js"
+                        "foreman-other-applications/foreman-other-applications-model.js"
+                        "input-model.js"
+                        "string/string-model.js"
+                        "select/select-model.js"
+                        "checkbox/checkbox-model.js"]
+                   :html ["fill-info-button/fill-info-button-template.html"
+                          "foreman-history/foreman-history-template.html"
+                          "foreman-other-applications/foreman-other-applications-template.html"
+                          "string/string-template.html"
+                          "select/select-template.html"
+                          "checkbox/checkbox-template.html"]}
+
+   :application  {:depends [:common-html :repository :tree :task :create-task :modal-datepicker :signing :invites :side-panel :ui-components]
                   :js ["add-link-permit.js" "map-model.js" "change-location.js" "invite.js" "verdicts-model.js"
-                       "add-operation.js" "foreman-model.js" "ui-components/fill-info-button/fill-info-model.js"
-                       "ui-components/authority-accept/authority-accept-model.js"
+                       "add-operation.js" "foreman-model.js"
                        "request-statement-model.js" "add-party.js" "attachments-tab-model.js" "application-model.js"
                        "invite-company.js" "application.js"]
                   :html ["attachment-actions-template.html" "attachments-template.html" "add-link-permit.html" "application.html" "inforequest.html" "add-operation.html"
-                         "change-location.html" "invite-company.html" "foreman-template.html"
-                         "ui-components/fill-info-button/fill-info-button-template.html"
-                         "ui-components/authority-accept/authority-accept-template.html"]}
+                         "change-location.html" "invite-company.html" "foreman-template.html"]}
 
    :applications {:depends [:common-html :repository :invites]
                   :html ["applications.html"]

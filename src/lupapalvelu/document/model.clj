@@ -123,7 +123,8 @@
       [:err "application-does-not-have-given-auth"])))
 
 (defmethod validate-field :fillMyInfoButton [_ _ _] nil)
-(defmethod validate-field :authorityAccept [_ _ _] nil)
+(defmethod validate-field :foremanHistory [_ _ _] nil)
+(defmethod validate-field :foremanOtherApplications [_ _ _] nil)
 
 (defmethod validate-field nil [_ _ _]
   [:err "illegal-key"])
@@ -329,7 +330,7 @@
       (true? (get-in document [:schema-info :approvable])))))
 
 (defn modifications-since-approvals
-  ([{:keys [schema-info data meta]}]
+  ([{:keys [schema-info data meta] :as document}]
     (let [schema (and schema-info (schemas/get-schema (:version schema-info) (:name schema-info)))
           timestamp (max (get-in meta [:_approved :timestamp] 0) (get-in meta [:_indicator_reset :timestamp] 0))]
       (modifications-since-approvals (:body schema) [] data meta (get-in schema [:info :approvable]) timestamp)))
@@ -341,9 +342,19 @@
                     current-approvable (or approvable-parent approvable)]
                 (if (or (= :group type) (= :table type))
                   (if repeating
-                    (reduce + 0 (map (fn [k] (modifications-since-approvals body (conj current-path k) data meta current-approvable (max-timestamp (conj current-path k)))) (keys (get-in data current-path))))
+                    (reduce + 0 (map (fn [k]
+                                       (modifications-since-approvals body (conj current-path k) data meta current-approvable (max-timestamp (conj current-path k))))
+                                     (keys (get-in data current-path))))
                     (modifications-since-approvals body current-path data meta current-approvable (max-timestamp current-path)))
-                  (if (and current-approvable (> (or (get-in data (conj current-path :modified)) 0) (max-timestamp current-path))) 1 0))))]
+                  (if (and
+                        current-approvable
+                        (>
+                          (or
+                            (get-in data (conj current-path :modified))
+                            0)
+                          (max-timestamp current-path)))
+                    1
+                    0))))]
       (reduce + 0 (map count-mods schema-body)))))
 
 (defn mark-approval-indicators-seen-update
@@ -383,7 +394,7 @@
                       (if (pred element v)
                         [k (emitter v)]
                         (when v
-                          (if (not= (keyword type) :group)
+                          (if (not= (keyword type) :group)  ;TODO: does this work with tables?
                             [k v]
                             [k (if repeating
                                  (into {} (map (fn [k2] [k2 (doc-walk body (conj current-path k2))]) (keys v)))

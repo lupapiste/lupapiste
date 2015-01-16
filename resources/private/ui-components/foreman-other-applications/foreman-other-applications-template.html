@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container">
+    <script type="text/html" id="foreman-other-applications">
+      <label class="form-label form-label-table" data-bind="ltext: 'muutHankkeet.label'"></label>
+      <table>
+        <thead>
+          <tr>
+            <!-- ko foreach: { data: params.subSchema.body, as: 'header' } -->
+            <th data-bind="visible: !header.hidden, ltext: header.i18nkey"></th>
+            <!-- /ko -->
+            <th></th>
+          </tr>
+        </thead>
+        <tbody data-bind="foreach: { data: autoupdatedRows, as: 'row' }">
+          <tr>
+            <!-- ko foreach: { data: row, as: 'column' } -->
+            <td data-bind="visible: !column.schema.hidden,
+                           component: { name: column.schema.uicomponent, params: column }"></td>
+            <!-- /ko -->
+            <td class="action-column">
+            </td>
+          </tr>
+        </tbody>
+
+        <tbody data-bind="foreach: { data: rows, as: 'row' }">
+          <tr>
+            <!-- ko foreach: { data: row, as: 'column' } -->
+            <td data-bind="visible: !column.schema.hidden,
+                           component: { name: column.schema.uicomponent, params: column }"></td>
+            <!-- /ko -->
+            <td class="action-column">
+              <span class="icon remove-grey inline-right" data-bind="click: $parent.removeRow"></span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <button data-bind="ltext: 'muutHankkeet.addHanke', click: addRow"></button>
+    </script>
+  </section>
+</body>
+</html>
