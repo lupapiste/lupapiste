@@ -50,7 +50,7 @@
 (defn- unwrap [wrapped-value]
   (let [value (tools/unwrapped wrapped-value)]
     (if (empty? value)
-      "ei tiedossa"            ; TODO: ei_tiedossa -> ei tiedossa kun kaannos excelissa
+      "ei_tiedossa"            ; TODO: ei_tiedossa -> ei tiedossa kun kaannos excelissa
       value)))
 
 (defn- loc-hashmap-vals [m]
