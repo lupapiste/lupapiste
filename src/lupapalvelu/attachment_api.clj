@@ -6,7 +6,7 @@
             [sade.strings :as ss]
             [sade.util :refer [future*]]
             [sade.core :refer [ok fail fail! now]]
-            [lupapalvelu.action :refer [defquery defcommand defraw update-application application->command notify] :as action]
+            [lupapalvelu.action :refer [defquery defcommand defraw update-application application->command notify boolean-parameters] :as action]
             [lupapalvelu.comment :as comment]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as user]
@@ -477,7 +477,7 @@
        (fail :error.password)))))
 
 ;;
-;; Label metadata
+;; Attachment metadata
 ;;
 
 (defcommand set-attachment-meta
@@ -499,10 +499,6 @@
                                  :attachments.$.modified (now)}})))
   (ok))
 
-;;
-;; Mark attachment as needed or not needed
-;;
-
 (defcommand set-attachment-not-needed
   {:parameters [id attachmentId notNeeded]
    :roles      [:applicant :authority]
@@ -512,4 +508,16 @@
                       {:attachments {$elemMatch {:id attachmentId}}}
                       {$set {:attachments.$.notNeeded notNeeded}})
   (ok))
+
+;; TODO: Tee tasta sellainen joka ottaa parametrina id-arrayn.
+(defcommand set-attachment-as-verdict-attachment
+  {:parameters [id attachmentId isVerdictAttachment]
+   :roles      [:authority]                                      ;; TODO: Hakijalle mahdolliseksi ?
+;   :extra-auth-roles [:statementGiver]                          ;; TODO: synkka ei lausunnonantajille ?
+   :states     (action/all-states-but [:closed :canceled])
+   :input-validators [(partial action/boolean-parameters [:isVerdictAttachment])]}
+  [{:keys [application created] :as command}]
+  (attachment/update-attachment-key command attachmentId :forPrinting isVerdictAttachment created true false)
+  (ok))
+
 
