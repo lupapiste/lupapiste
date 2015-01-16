@@ -106,7 +106,7 @@
 ;;
 
 (defn- link-permit-submitted? [link-id]
-  (util/not-empty-or-nil? (:submitted (mongo/by-id "applications" link-id ["submitted"]))))
+  (util/not-empty-or-nil? (:submitted (mongo/by-id "applications" link-id [:submitted]))))
 
 (defn- foreman-submittable? [application]
   (let [result (when-not (:submitted application)
@@ -227,7 +227,7 @@
 (defn find-authorities-in-applications-organization [app]
   (mongo/select :users
     {:organizations (:organization app) :role "authority" :enabled true}
-    {:firstName 1, :lastName 1}
+    [:firstName :lastName]
     (array-map :lastName 1, :firstName 1)))
 
 (defquery application

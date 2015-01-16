@@ -143,6 +143,7 @@ Sonja goes to conversation tab
 
 Sonja goes to attachments tab
   [Tags]  attachments
+  Wait Until  Element should be visible  xpath=//a[@data-test-id="back-to-application-from-attachment"]
   Click element  xpath=//a[@data-test-id="back-to-application-from-attachment"]
   Open tab  attachments
 

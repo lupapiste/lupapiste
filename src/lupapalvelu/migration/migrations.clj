@@ -679,6 +679,52 @@
     (assoc attachment :required true)
     (assoc attachment :required false)))
 
+(defn- merge-versions [old-versions {:keys [user version] :as new-version}]
+  (let [next-ver (lupapalvelu.attachment/next-attachment-version (:version (last old-versions)) user)]
+    (concat old-versions [(assoc new-version :version next-ver)])))
+
+(defn- fixed-versions [required-flags-migration-time attachments-backup updated-attachments]
+  (for [attachment attachments-backup
+        :let [updated-attachment (some #(when (= (:id %) (:id attachment)) %) updated-attachments)]]
+    (if updated-attachment
+      (let [new-versions (filter (fn [v] (> (get v :created 0) required-flags-migration-time)) (:versions updated-attachment))]
+        (update-in attachment [:versions] #(reduce merge-versions % new-versions)))
+      attachment)))
+
+(defn- removed-versions [attachments fs-file-ids]
+  (for [attachment attachments]
+    (update-in attachment [:versions] #(filter (fn [v] (fs-file-ids (:fileId v))) %))))
+
+(defmigration restore-attachments
+  (when (pos? (mongo/count :applicationsBackup))
+    (let [fs-file-ids (set (map :id (mongo/select :fs.files)))
+         required-flags-migration-time (:time (mongo/select-one :migrations {:name "required-flags-for-attachment-templates"}))]
+
+      (assert (pos? required-flags-migration-time))
+
+      (doseq [id (map :id (mongo/select :submitted-applications {} [:_id]))]
+        (let [attachments-backup (:attachments (mongo/by-id :applicationsBackup id [:attachments]))
+              restored-ids (set (map :id attachments-backup))
+
+              current-attachments (:attachments (mongo/by-id :applications id [:attachments]))
+              updated-attachments (filter #(some (fn [v] (> (get v :created 0) required-flags-migration-time)) (:versions %)) current-attachments)
+
+              new-attachments (filter
+                                (fn [a] (> (:modified a) required-flags-migration-time))
+                                (remove #(restored-ids (:id %)) current-attachments))
+
+              attachments (if (seq updated-attachments)
+                            (concat
+                              (fixed-versions required-flags-migration-time attachments-backup updated-attachments)
+                              new-attachments)
+                            (concat attachments-backup new-attachments))
+
+              removed (removed-versions attachments fs-file-ids)
+              latest-versions-updated (map (fn [a] (assoc a :latestVersion (-> a :versions last))) removed)
+              ]
+          (mongo/update-by-id :applications id {$set {:attachments latest-versions-updated}})
+          )))))
+
 (defmigration required-flags-for-attachment-templates-v2
   (doseq [collection [:applications :submitted-applications]
           application (mongo/select collection {"attachments.0" {$exists true}})]
@@ -686,3 +732,13 @@
       {$set {:attachments (map
                             (partial set-new-attachment-flags (:created application))
                             (:attachments application))}})))
+
+
+;;
+;; ****** NOTE! ******
+;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"
+;;  do not manually write like this
+;;     (doseq [collection [:applications :submitted-applications] ...)
+;;  but use the "update-applications-array" function existing in this namespace.
+;; *******************
+
