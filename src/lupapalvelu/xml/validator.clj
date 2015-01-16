@@ -91,7 +91,7 @@
    "2.1.3" common-validator-2_1_1
    "2.1.4" common-validator-2_1_2
    "2.1.5" common-validator-2_1_3
-   "ah-0.9" asianhallinta-validator})
+   "ah-1.0" asianhallinta-validator})
 
 (def- ymp-validators
   {"2.1.2" common-validator-2_1_3})
