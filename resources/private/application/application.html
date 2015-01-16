@@ -284,7 +284,7 @@
             <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.applicationInfoDesc'"></p>
           </div>
           <div class="operation-info">
-            
+
             <div data-bind="if: $root.authorization.ok('add-operation')">
               <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.AddOperations'"></p>
               <button data-bind="click: addOperation, enable: $root.authorization.ok('add-operation')" class="btn-primary">
@@ -314,7 +314,7 @@
           <p data-bind="lhtml: 'required.field.desc'"></p>
           <!-- docgen generated content: -->
           <div class="application_section">
-            <div id="applicationDocgen" class="docgen-content">
+            <div id="applicationDocgen" class="docgen-content" data-bind="ifnot: initializing">
               <!-- This is where generated document will be placed. -->
             </div>
           </div>
@@ -388,7 +388,7 @@
 
           <!-- docgen generated content: -->
           <div class="application_section">
-            <div id="partiesDocgen" class="docgen-content">
+            <div id="partiesDocgen" class="docgen-content" data-bind="ifnot: initializing">
               <!-- This is where generated document will be placed. -->
             </div>
           </div>
@@ -599,7 +599,7 @@
             <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.applicationSummaryDesc'"></p>
           </div>
           <div class="application_section">
-            <div id="applicationAndPartiesDocgen" class="docgen-content">
+            <div id="applicationAndPartiesDocgen" class="docgen-content" data-bind="ifnot: initializing">
               <!-- This is where the generated documents will be placed. -->
             </div>
           </div>

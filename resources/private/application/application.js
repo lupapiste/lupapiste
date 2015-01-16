@@ -125,6 +125,7 @@
 
       // Update observables
       ko.mapping.fromJS(app, {}, applicationModel);
+      applicationModel.init();
 
       // Invite
       inviteModel.setApplicationId(app.id);

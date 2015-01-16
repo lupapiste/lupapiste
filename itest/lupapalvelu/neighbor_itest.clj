@@ -5,7 +5,7 @@
             [clojure.string :as s]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.tools :as tools]
-            [lupapalvelu.neighbors :refer [find-by-id]]
+            [sade.util :refer [find-by-id]]
             [sade.util :refer [fn->]]))
 
 (defn invalid-token? [resp] (= resp {:ok false, :text "error.token-not-found"}))

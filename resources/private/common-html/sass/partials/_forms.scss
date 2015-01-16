@@ -703,9 +703,9 @@ input[readonly], textarea[readonly] {
   }
 }
 
-authority-accept-fields {
+foreman-history {
   h2 {
-    background-color: transparent;
+    background-color: $lp-light-grey !important;
   }
   th.first {
     width: 10%;

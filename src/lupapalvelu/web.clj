@@ -27,6 +27,7 @@
             [lupapalvelu.proxy-services :as proxy-services]
             [lupapalvelu.organization]
             [lupapalvelu.application :as application]
+            [lupapalvelu.foreman-api :as foreman-api]
             [lupapalvelu.pdf-export :as pdf-export]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.token :as token]

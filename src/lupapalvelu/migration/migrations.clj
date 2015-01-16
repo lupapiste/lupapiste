@@ -13,7 +13,8 @@
             [lupapalvelu.organization :as organization]
             [lupapalvelu.application :as a]
             [lupapalvelu.application-meta-fields :as app-meta-fields]
-            [lupapalvelu.operations :as op]))
+            [lupapalvelu.operations :as op]
+            [sade.env :as env]))
 
 (defn drop-schema-data [document]
   (let [schema-info (-> document :schema :info (assoc :version 1))]
@@ -646,16 +647,32 @@
       :else doc)))
 
 (defmigration populate-buildingids-to-docs
-              (update-applications-array
-                :documents
-                populate-buildingids-to-doc
-                {:documents {$elemMatch {$or [{:data.rakennusnro.value {$exists true}} {:data.manuaalinen_rakennusnro.value {$exists true}}]}}}))
+  (update-applications-array
+    :documents
+    populate-buildingids-to-doc
+    {:documents {$elemMatch {$or [{:data.rakennusnro.value {$exists true}} {:data.manuaalinen_rakennusnro.value {$exists true}}]}}}))
 
 (defmigration populate-buildingids-to-buildings
-              (update-applications-array
-                :buildings
-                #(assoc % :localShortId (:buildingId %), :nationalId nil, :localId nil)
-                {:buildings.0 {$exists true}}))
+  (update-applications-array
+    :buildings
+    #(assoc % :localShortId (:buildingId %), :nationalId nil, :localId nil)
+    {:buildings.0 {$exists true}}))
+
+
+(env/feature? :foreman
+  (defmigration update-app-links-with-apptype
+    (doseq [app-link (mongo/select :app-links)]
+      (let [linkpermit-id (some
+                             (fn [[k v]]
+                               (when (= "linkpermit" (:type v))
+                                 (name k)))
+                             app-link)
+            app           (first (mongo/select :applications {:_id linkpermit-id}))
+            apptype       (->> app :operations first :name)]
+          (mongo/update-by-id
+            :app-links
+            (:id app-link)
+            {$set {(str linkpermit-id ".apptype") apptype}})))))
 
 (defn- set-new-attachment-flags [app-created attachment]
   (if (< (abs (- (:modified attachment) app-created)) 100)    ;; inside 100 ms window, just in case
