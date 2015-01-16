@@ -200,14 +200,6 @@
 (defn- prefix-with [prefix coll]
   (conj (seq coll) prefix))
 
-(defn update-in-repeating
-  ([m [k & ks] f & args]
-    (if (every? (comp ss/numeric? name) (keys m))
-      (apply hash-map (mapcat (fn [[repeat-k v]] [repeat-k (apply update-in-repeating v (conj ks k) f args)] ) m))
-      (if ks
-        (assoc m k (apply update-in-repeating (get m k) ks f args))
-        (assoc m k (apply f (get m k) args))))))
-
 (defn- enrich-single-doc-disabled-flag [user-role doc]
   (let [doc-schema        (model/get-document-schema doc)
         zip-root          (schema-zipper doc-schema)
