@@ -25,11 +25,12 @@ Mikko adds an operation
   Wait and click  //section[@id="add-operation"]//div[@class="tree-content"]//*[text()="Muun kuin edellä mainitun rakennuksen rakentaminen (liike-, toimisto-, opetus-, päiväkoti-, palvelu-, hoitolaitos- tai muu rakennus)"]
   Wait until  Element should be visible  xpath=//section[@id="add-operation"]//div[@class="tree-content"]//*[@data-test-id="add-operation-to-application"]
   Click enabled by test id  add-operation-to-application
+  Wait until  Page should contain element  xpath=//section[@data-doc-type="uusiRakennus"][2]
 
 Mikko edits operation B description
   Wait and click  xpath=(//div[@id='application-info-tab']//span[@data-test-id='edit-op-description'])[last()]
   Execute Javascript  $("input[data-test-id='op-description-editor']:last").val("Talo B").change().blur();
-  Wait until  Page should contain  Tallennettu
+  Wait until  Element should be visible  xpath=//span[@class="op-description-wrapper"]//span[contains(@class,'accordion-input-saved')]
 
 Mikko adds txt attachment without comment
   [Tags]  attachments
