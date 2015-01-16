@@ -499,7 +499,6 @@
 (defcommand set-attachment-as-verdict-attachment
   {:parameters [id attachmentId isVerdictAttachment]
    :roles      [:authority]                                      ;; TODO: Hakijalle mahdolliseksi ?
-;   :extra-auth-roles [:statementGiver]                          ;; TODO: synkka ei lausunnonantajille ?
    :states     (action/all-states-but [:closed :canceled])
    :input-validators [(partial action/boolean-parameters [:isVerdictAttachment])]}
   [{:keys [application created] :as command}]
