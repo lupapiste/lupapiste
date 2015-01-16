@@ -716,3 +716,12 @@
                             (partial set-new-attachment-flags (:created application))
                             (:attachments application))}})))
 
+
+;;
+;; ****** NOTE! ******
+;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"
+;;  do not manually write like this
+;;     (doseq [collection [:applications :submitted-applications] ...)
+;;  but use the "update-applications-array" function existing in this namespace.
+;; *******************
+
