@@ -121,6 +121,7 @@ var attachment = (function() {
     scales:               ko.observableArray(LUPAPISTE.config.attachmentScales),
     size:                 ko.observable(),
     sizes:                ko.observableArray(LUPAPISTE.config.attachmentSizes),
+    isVerdictAttachment:  ko.observable(),
     subscriptions:        [],
     indicator:            ko.observable().extend({notify: "always"}),
     showAttachmentVersionHistory: ko.observable(),
@@ -265,6 +266,20 @@ var attachment = (function() {
         saveLabelInformation("operation", {meta: {op: op}});
       }
     }));
+
+    model.subscriptions.push(model.isVerdictAttachment.subscribe(function(isVerdictAttachment) {
+      ajax.command("set-attachment-as-verdict-attachment", { id: applicationId, attachmentId: attachmentId, isVerdictAttachment: isVerdictAttachment })
+        .success(function() {
+          repository.load(applicationId);
+        })
+        .error(function(e) {
+          error(e.text);
+          notify.error(loc("error.dialog.title"), loc("attachment.set-attachment-as-verdict-attachment.error"));
+          repository.load(applicationId);
+        })
+        .call();
+    }));
+
 
     applySubscription("contents");
     applySubscription("scale");
