@@ -223,25 +223,24 @@
                                          {:tag :kiinteistotunnus}
                                          {:tag :hallintasuhde}]}]})
 (def tyonjohtaja_211
-  {:tag :tyonjohtajatieto
-   :child [{:tag :Tyonjohtaja
-            :child [{:tag :tyonjohtajaRooliKoodi}
-                    {:tag :VRKrooliKoodi}
-                    henkilo
-                    yritys_211
-                    {:tag :patevyysvaatimusluokka}
-                    {:tag :koulutus}
-                    {:tag :valmistumisvuosi}
-                    {:tag :alkamisPvm}
-                    {:tag :paattymisPvm}
-                    {:tag :tyonjohtajaHakemusKytkin}
-                    {:tag :kokemusvuodet}
-                    {:tag :sijaistustieto
-                     :child [{:tag :Sijaistus
-                              :child [{:tag :sijaistettavaHlo}
-                                      {:tag :sijaistettavaRooli}
-                                      {:tag :alkamisPvm}
-                                      {:tag :paattymisPvm}]}]}]}]})
+  {:tag :Tyonjohtaja
+   :child [{:tag :tyonjohtajaRooliKoodi}
+           {:tag :VRKrooliKoodi}
+           henkilo
+           yritys_211
+           {:tag :patevyysvaatimusluokka}
+           {:tag :koulutus}
+           {:tag :valmistumisvuosi}
+           {:tag :alkamisPvm}
+           {:tag :paattymisPvm}
+           {:tag :tyonjohtajaHakemusKytkin}
+           {:tag :kokemusvuodet}
+           {:tag :sijaistustieto
+            :child [{:tag :Sijaistus
+                     :child [{:tag :sijaistettavaHlo}
+                             {:tag :sijaistettavaRooli}
+                             {:tag :alkamisPvm}
+                             {:tag :paattymisPvm}]}]}]})
 
 (def tyonjohtaja_212
   {:tag :Tyonjohtaja
@@ -266,7 +265,7 @@
 
 (def tyonjohtaja_213 (update-in tyonjohtaja_212 [:child] (comp vec update-child-element) [:yritys] yritys_213))
 
-(def tyonjohtaja_216 (update-in tyonjohtaja_213 [:child] conj {:tag :vainTamaHankeKytkin}))
+(def tyonjohtaja_215 (update-in tyonjohtaja_213 [:child] conj {:tag :vainTamaHankeKytkin}))
 
 (def tyonjohtajatieto
   {:tag :tyonjohtajatieto
@@ -291,6 +290,10 @@
 (def tyonjohtajatieto_213
   {:tag :tyonjohtajatieto
    :child [tyonjohtaja_213]})
+
+(def tyonjohtajatieto_215
+  {:tag :tyonjohtajatieto
+   :child [tyonjohtaja_215]})
 
 (def osapuolet
   {:tag :Osapuolet :ns "yht"
@@ -344,9 +347,9 @@
            tyonjohtajatieto_213
            naapuri]})
 
-(def osapuolet_216
+(def osapuolet_215
   (-> osapuolet_213
-      (update-in [:child] update-child-element [:tyonjohtajatieto :Tyonjohtaja] tyonjohtaja_216)))
+      (update-in [:child] update-child-element [:tyonjohtajatieto :Tyonjohtaja] tyonjohtaja_215)))
 
 (def tilamuutos
   {:tag :Tilamuutos :ns "yht"
