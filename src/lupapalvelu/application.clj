@@ -206,7 +206,7 @@
         whitelisted-paths (walk-schema zip-root)]
     (reduce (fn [new-doc [path roles]]
               (if-not ((set roles) (keyword user-role))
-                (update-in-repeating new-doc (prefix-with :data path) merge {:disabled true})
+                (util/update-in-repeating new-doc (prefix-with :data path) merge {:disabled true})
                 new-doc))
             doc
             whitelisted-paths)))
