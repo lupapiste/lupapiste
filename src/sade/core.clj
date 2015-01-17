@@ -1,6 +1,5 @@
 (ns sade.core
-  (:require [slingshot.slingshot :refer [throw+ try+]]
-            [sade.strings :as ss]))
+  (:require [slingshot.slingshot :refer [throw+ try+]]))
 
 (defn fail [text & args]
   (let [map-args (if (map? (first args)) (first args) (apply hash-map args))]
