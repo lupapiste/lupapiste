@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <section class="page" id="verdict-attachment-prints-order-dialogs" style="visibility: visible; display: block;">
+
+<!-- TODO -->
+      <div id="dialog-verdict-attachment-prints-order" class="window autosized">
+        <div data-bind="with: $root.verdictAttachmentPrintsOrderModel">
+
+          <div class="dialog-header">
+            <p data-bind="ltext: 'verdict.sign-dialog.header'"></p>
+            <p class="dialog-close close" data-test-id="verdict-signature-close-dialog">X</p>
+          </div>
+          <div class="dialog-content">
+            <p data-bind="ltext: 'verdict.sign-dialog.contentDescription'"></p>
+
+<!--             <label for="signVerdictPassword" data-bind="ltext: 'verdict.sign-dialog.verifyPassword'"class="form-label"></label> -->
+<!--             <input id="signVerdictPassword" data-test-id="sign-verdict-password" type="password" data-bind="textInput: password"class="form-input text"/> -->
+
+<!--             <div data-bind="if: errorMessage"> -->
+<!--               <div data-bind="ltext: errorMessage" class="context-error" data-test-id="verdict-signature-error-message"></div> -->
+<!--             </div> -->
+
+<!--             <button data-bind="click: sign, enable: authorizationModel.ok('sign-verdict') && password() && !processing()" class="btn btn-primary btn-dialog" data-test-id="do-sign-verdict"> -->
+<!--               <span data-bind="ltext: 'verdict.sign-dialog.signButton'"></span> -->
+<!--               <em data-bind="visible: pending" class="button-loader"></em> -->
+<!--             </button> -->
+
+            <a data-bind="ltext: 'cancel'" class="btn-dialog close cancel" href="#"></a>
+
+          </div>
+        </div>
+      </div>
+
+    </section>
+  </body>
+</html>

@@ -128,6 +128,10 @@
                   :html ["stamp-template.html"]
                   :js ["stamp-model.js" "stamp.js"]}
 
+   :verdict-attachment-prints {:depends [:common-html]
+                               :html ["verdict-attachment-prints-order-template.html"]
+                               :js ["verdict-attachment-prints-order-model.js"]}
+
    :attachment   {:depends [:common-html :repository :signing :side-panel]
                   :js ["targeted-attachments-model.js" "attachment.js" "attachmentTypeSelect.js" "attachment-utils.js"]
                   :html ["targetted-attachments-template.html" "attachment.html" "upload.html"]}
@@ -139,7 +143,7 @@
    :create-task  {:js ["create-task.js"]
                   :html ["create-task.html"]}
 
-   :application  {:depends [:common-html :repository :tree :task :create-task :modal-datepicker :signing :invites :side-panel]
+   :application  {:depends [:common-html :repository :tree :task :create-task :modal-datepicker :signing :invites :side-panel :verdict-attachment-prints]
                   :js ["add-link-permit.js" "map-model.js" "change-location.js" "invite.js" "verdicts-model.js"
                        "add-operation.js" "foreman-model.js" "ui-components/fill-info-button/fill-info-model.js"
                        "ui-components/authority-accept/authority-accept-model.js"
