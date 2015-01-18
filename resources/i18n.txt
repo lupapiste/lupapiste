@@ -1,2 +1,8 @@
 attachment.label.verdictAttachment: Päätöksen liite
-attachment.set-attachment-as-verdict-attachment.error: Liitteen merkitseminen päätöksen liitteeksi epäonnistui
+attachment.set-attachments-as-verdict-attachment.error: Liitteen merkitseminen päätöksen liitteeksi epäonnistui
+verdict.orderAttachmentPrints.button: Tilaa lupakuvat
+verdict.order-verdict-attachment-prints.ready: Kopiolaitokselta tilattiin {0} liitteen lupakuvien kopiot.
+verdict.order-verdict-attachment-prints.title: Lupakuvien tilaaminen kopiolaitokselta
+verdict.order-verdict-attachment-prints.submit: Tilaa
+order-verdict-attachment-prints-failed: Lupakuvien tilaaminen kopiolaitokselta epäonnistui
+no-kopiolaitos-email-defined: Lupakuvien tilaaminen epäonnistui. Kopiolaitoksen sähköpostiosoitetta ei ole määritelty organisaatiollenne.
