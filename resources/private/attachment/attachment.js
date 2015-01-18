@@ -268,13 +268,13 @@ var attachment = (function() {
     }));
 
     model.subscriptions.push(model.isVerdictAttachment.subscribe(function(isVerdictAttachment) {
-      ajax.command("set-attachment-as-verdict-attachment", { id: applicationId, attachmentId: attachmentId, isVerdictAttachment: isVerdictAttachment })
+      ajax.command("set-attachments-as-verdict-attachment", { id: applicationId, attachmentIds: [attachmentId], isVerdictAttachment: isVerdictAttachment })
         .success(function() {
           repository.load(applicationId);
         })
         .error(function(e) {
           error(e.text);
-          notify.error(loc("error.dialog.title"), loc("attachment.set-attachment-as-verdict-attachment.error"));
+          notify.error(loc("error.dialog.title"), loc("attachment.set-attachments-as-verdict-attachment.error"));
           repository.load(applicationId);
         })
         .call();
@@ -317,6 +317,7 @@ var attachment = (function() {
     model.contents(attachment.contents);
     model.scale(attachment.scale);
     model.size(attachment.size);
+    model.isVerdictAttachment(attachment.forPrinting);
     model.applicationState(attachment.applicationState);
 
     var type = attachment.type["type-group"] + "." + attachment.type["type-id"];

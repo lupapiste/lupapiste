@@ -495,14 +495,15 @@
   (attachment/update-attachment-key command attachmentId :notNeeded notNeeded created true false)
   (ok))
 
-;; TODO: Tee tasta sellainen joka ottaa parametrina id-arrayn.
-(defcommand set-attachment-as-verdict-attachment
-  {:parameters [id attachmentId isVerdictAttachment]
-   :roles      [:authority]                                      ;; TODO: Hakijalle mahdolliseksi ?
+(defcommand set-attachments-as-verdict-attachment
+  {:parameters [id attachmentIds isVerdictAttachment]
+   :roles      [:authority]
    :states     (action/all-states-but [:closed :canceled])
-   :input-validators [(partial action/boolean-parameters [:isVerdictAttachment])]}
-  [{:keys [application created] :as command}]
-  (attachment/update-attachment-key command attachmentId :forPrinting isVerdictAttachment created true false)
+   :input-validators [(partial action/boolean-parameters [:isVerdictAttachment])
+                      (partial action/vectorful-of-non-blank-parameters [:attachmentIds])]}
+  [{:keys [created] :as command}]
+  (doseq [attachment-id attachmentIds]
+    (attachment/update-attachment-key command attachment-id :forPrinting isVerdictAttachment created true false))
   (ok))
 
 
