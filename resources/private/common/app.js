@@ -13,6 +13,8 @@ var LUPAPISTE = LUPAPISTE || {};
 
     var self = this;
 
+    self.defaultTitle = document.title;
+
     self.startPage = startPage;
     self.currentPage = undefined;
     self.session = undefined;
@@ -53,6 +55,9 @@ var LUPAPISTE = LUPAPISTE || {};
         page.addClass("visible");
         window.scrollTo(0, 0);
         self.currentPage = pageId;
+
+        // Reset title. Pages can override title when they handle page-load event.
+        document.title = self.defaultTitle;
       }
 
       hub.send("page-load", { pageId: pageId, pagePath: pagePath, currentHash: "!/" + self.currentHash, previousHash: "!/" + self.previousHash });
