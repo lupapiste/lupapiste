@@ -216,3 +216,59 @@
       ; Throttle giving information about incorrect password
       (Thread/sleep 2000)
       (fail :error.password))))
+
+
+(defn- send-kopiolaitos-email [email-address attachments]
+  (let [ordered-count 10]
+    ;; TODO
+    ordered-count
+    ))
+
+;; TODO: Siirra tama organization-namespaceen
+(defn- get-kopiolaitos-email-address [{:keys [organization] :as application}]
+  ;; TODO: Hae organisaatiolta "kopiolaitos-email-address"
+  "pasiesko@example.com"
+  )
+
+(defn- do-order-verdict-attachment-prints [{:keys [application] :as command}]
+
+  ;; TODO: Hae organisaation kopiolaitoksen email-osoite.
+  ;; TODO: Laheta tilaus email.
+  (when-let [verdict-attachments (seq (filter :forPrinting (:attachments application)))]
+
+    (println "\n do-order-verdict-attachment-prints, verdict-attachments: ")
+    (clojure.pprint/pprint verdict-attachments)
+    (println "\n")
+
+    ;; TODO: Korvaa temp-arvot
+    (if-let [email-address (get-kopiolaitos-email-address application)]
+      (let [ordered-count (send-kopiolaitos-email email-address verdict-attachments)]
+        {:ordered-count ordered-count}
+        )
+
+      (fail! :no-kopiolaitos-email-defined)
+      )))
+
+;; TODO: Paivita description alla useaan kertaan tilaamisen osalta
+(defcommand order-verdict-attachment-prints
+  {:description "Orders prints of marked verdict attachments from copy institute.
+                 If the command is run more than once, the already ordered attachment copies are ordered again."
+   :parameters [:id]
+   :states     [:verdictGiven :constructionStarted]   ;; TODO: nama tilat ok?
+   :roles      [:authority]
+;   :notified   true
+;   :on-success (notify :application-verdict)
+   }
+  [command]
+
+  (println "\n command: ")
+  (clojure.pprint/pprint command)
+  (println "\n")
+
+  (if-let [result (do-order-verdict-attachment-prints command)]
+   (ok :verdictPrintCount (:ordered-count result))
+   (fail :order-verdict-attachment-prints-failed)))
+
+
+
+
