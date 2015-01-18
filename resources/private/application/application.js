@@ -263,6 +263,8 @@
     if (!currentId || (currentId === application.id)) {
       showApplication(applicationDetails);
     }
+
+    document.title = application.title + " -" +  window.lupapisteApp.defaultTitle;
   });
 
   function NeighborStatusModel() {
