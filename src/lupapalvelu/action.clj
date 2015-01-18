@@ -88,6 +88,11 @@
 (defn vector-parameters [params command]
   (filter-params-of-command params command (complement vector?) :error.non-vector-parameters))
 
+(defn vectorful-of-non-blank-parameters [params command]
+  (or
+    (vector-parameters params command)
+    (filter-params-of-command params command (partial some #(or (nil? %) (and (string? %) (s/blank? %)))) :error.vector-with-blank-parameters)))
+
 (defn boolean-parameters [params command]
   (filter-params-of-command params command #(not (instance? Boolean %)) :error.non-boolean-parameters))
 

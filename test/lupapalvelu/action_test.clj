@@ -231,6 +231,13 @@
   (non-blank-parameters [:foo :bar] {:data {:foo "" :bar " "}})  => (contains {:parameters [:foo :bar]})
   (non-blank-parameters [:foo :bar] {:data {:foo " " :bar "x"}}) => (contains {:parameters [:foo]}))
 
+(facts "vectorful-of-non-blank-parameters"
+  (vectorful-of-non-blank-parameters [:foo] {:data {:foo ["aa"]}})     => nil
+  (vectorful-of-non-blank-parameters [:foo] {:data {:foo ["aa" nil]}}) => {:ok false :text "error.vector-with-blank-parameters" :parameters [:foo]}
+  (vectorful-of-non-blank-parameters [:foo] {:data {:foo ["aa" ""]}})  => {:ok false :text "error.vector-with-blank-parameters" :parameters [:foo]}
+  (vectorful-of-non-blank-parameters [:foo :bar] {:data {:foo [nil] :bar [" "]}}) => {:ok false :text "error.vector-with-blank-parameters" :parameters [:foo :bar]}
+  (vectorful-of-non-blank-parameters [:foo :bar] {:data {:foo nil :bar " "}})     => {:ok false :text "error.non-vector-parameters"        :parameters [:foo :bar]})
+
 (facts "feature requirements"
  (against-background
    (get-actions) => {:test-command1 {:feature :abba :roles [:anonymous]}})
