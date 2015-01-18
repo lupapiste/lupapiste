@@ -68,6 +68,13 @@
     this.lastName = lastName;
   };
 
+  function updateWindowTitle() {
+    var title = util.getIn(applicationModel, ["_js", "title"]);
+    if (title) {
+      document.title = title + " -" +  window.lupapisteApp.defaultTitle;
+    }
+  }
+
     //FIXME: why is this?
   function updateAssignee(value) {
     // do not update assignee if page is still initializing
@@ -264,7 +271,7 @@
       showApplication(applicationDetails);
     }
 
-    document.title = application.title + " -" +  window.lupapisteApp.defaultTitle;
+    updateWindowTitle();
   });
 
   function NeighborStatusModel() {
