@@ -4,7 +4,6 @@ var stamping = (function() {
   var model = {
     stampingMode: ko.observable(false),
     authorization: null,
-
     appModel: null,
     attachments: null,
     stampFields: {
@@ -48,12 +47,9 @@ var stamping = (function() {
     }
 
     if ( model.appModel.verdicts && !_.isEmpty(model.appModel.verdicts()) ) {
+      // stampFields.kuntalupatunnus
       model.stampFields.kuntalupatunnus(_.first(model.appModel.verdicts()).kuntalupatunnus());
-    } else {
-      model.stampFields.kuntalupatunnus("");
-    }
-
-    if ( model.appModel.verdicts && !_.isEmpty(model.appModel.verdicts()) ) {
+      // stampFields.section
       var verdict = ko.mapping.toJS(model.appModel.verdicts()[0]);
       if ( verdict.paatokset[0] && verdict.paatokset[0].poytakirjat[0] && verdict.paatokset[0].poytakirjat[0].pykala ) {
         model.stampFields.section(verdict.paatokset[0].poytakirjat[0].pykala);
@@ -61,6 +57,7 @@ var stamping = (function() {
         model.stampFields.section("");
       }
     } else {
+      model.stampFields.kuntalupatunnus("");
       model.stampFields.section("");
     }
 
