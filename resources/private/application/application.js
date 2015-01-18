@@ -75,7 +75,7 @@
     }
   }
 
-    //FIXME: why is this?
+  //FIXME: why is this?
   function updateAssignee(value) {
     // do not update assignee if page is still initializing
     if (isInitializing) { return; }
@@ -253,6 +253,7 @@
     var tab = e.pagePath[1];
     if (newId === currentId && tab) {
       selectTab(tab);
+      updateWindowTitle();
     } else {
       pageutil.showAjaxWait();
       currentId = newId;
