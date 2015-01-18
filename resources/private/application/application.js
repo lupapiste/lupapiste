@@ -68,10 +68,11 @@
     this.lastName = lastName;
   };
 
-  function updateWindowTitle() {
-    var title = util.getIn(applicationModel, ["_js", "title"]);
+  function updateWindowTitle(newTitle) {
+    var title = newTitle || util.getIn(applicationModel, ["_js", "title"]);
+    console.log("updateWindowTitle", newTitle, title);
     if (title) {
-      document.title = title + " -" +  window.lupapisteApp.defaultTitle;
+      document.title = title + " - " +  window.lupapisteApp.defaultTitle;
     }
   }
 
@@ -251,9 +252,9 @@
   function initPage(kind, e) {
     var newId = e.pagePath[0];
     var tab = e.pagePath[1];
+    updateWindowTitle();
     if (newId === currentId && tab) {
       selectTab(tab);
-      updateWindowTitle();
     } else {
       pageutil.showAjaxWait();
       currentId = newId;
@@ -271,8 +272,7 @@
     if (!currentId || (currentId === application.id)) {
       showApplication(applicationDetails);
     }
-
-    updateWindowTitle();
+    updateWindowTitle(application.title);
   });
 
   function NeighborStatusModel() {
