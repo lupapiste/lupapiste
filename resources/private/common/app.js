@@ -56,6 +56,11 @@ var LUPAPISTE = LUPAPISTE || {};
       }
 
       hub.send("page-load", { pageId: pageId, pagePath: pagePath, currentHash: "!/" + self.currentHash, previousHash: "!/" + self.previousHash });
+
+      if (self.previousHash !== undefined) {
+        var previousPageId = self.previousHash.split("/")[0];
+        hub.send("page-unload", { pageId: previousPageId, currentHash: "!/" + self.currentHash, previousHash: "!/" + self.previousHash });
+      }
     };
 
     self.hashChanged = function () {

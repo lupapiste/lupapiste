@@ -56,16 +56,20 @@ var hub = (function() {
     return count;
   }
 
-  // Helper for common case:
+  // Helpers for page change events:
   function onPageLoad(pageId, listener, oneshot) {
     hub.subscribe({type: "page-load", pageId: pageId}, listener, oneshot);
+  }
+  function onPageUnload(pageId, listener, oneshot) {
+    hub.subscribe({type: "page-unload", pageId: pageId}, listener, oneshot);
   }
 
   return {
     subscribe:      subscribe,
     unsubscribe:    unsubscribe,
     send:           send,
-    onPageLoad:     onPageLoad
+    onPageLoad:     onPageLoad,
+    onPageUnload:   onPageUnload
   };
 
 })();
