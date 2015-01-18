@@ -38,7 +38,7 @@ var stamping = (function() {
       model.attachments = null;
       model.authorization = null;
 
-      hub.send("page-change", { pageId: "stamping" });
+      hub.send("page-load", { pageId: "stamping" });
     }
   };
 
@@ -80,7 +80,7 @@ var stamping = (function() {
     window.location.hash="!/stamping/" + model.appModel.id();
   }
 
-  hub.onPageChange("stamping", function() {
+  hub.onPageLoad("stamping", function() {
     if ( pageutil.subPage() ) {
       if ( !model.appModel || model.appModel.id() !== pageutil.subPage() ) {
         // refresh

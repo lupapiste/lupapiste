@@ -118,7 +118,7 @@
   }
   var loginAsModel = new LoginAsModel();
 
-  hub.onPageChange("organizations", organizationsModel.load);
+  hub.onPageLoad("organizations", organizationsModel.load);
 
   $(function() {
     $("#organizations").applyBindings({

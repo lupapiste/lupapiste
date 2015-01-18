@@ -131,7 +131,7 @@ var taskPageController = (function() {
     }
   });
 
-  hub.onPageChange("task", function(e) {
+  hub.onPageLoad("task", function(e) {
     var applicationId = e.pagePath[0];
     currentTaskId = e.pagePath[1];
     // Reload application only if needed

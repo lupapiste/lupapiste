@@ -45,7 +45,7 @@
         .call();
     };
 
-    hub.onPageChange("setpw", function(e) { self.token(e.pagePath[0]);});
+    hub.onPageLoad("setpw", function(e) { self.token(e.pagePath[0]);});
 
   }
 

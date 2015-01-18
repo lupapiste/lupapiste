@@ -191,7 +191,7 @@ LUPAPISTE.verdictPageController = (function($) {
     }
   });
 
-  hub.onPageChange("verdict", function(e) {
+  hub.onPageLoad("verdict", function(e) {
     var applicationId = e.pagePath[0];
     var verdictId = e.pagePath[1];
     // Reload application only if needed

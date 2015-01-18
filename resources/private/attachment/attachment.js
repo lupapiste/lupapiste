@@ -337,7 +337,7 @@ var attachment = (function() {
     });
   }
 
-  hub.onPageChange("attachment", function(e) {
+  hub.onPageLoad("attachment", function(e) {
     pageutil.showAjaxWait();
     model.init(false);
     model.showHelp(false);

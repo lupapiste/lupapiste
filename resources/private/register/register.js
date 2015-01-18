@@ -4,7 +4,7 @@
   var registrationModel = new LUPAPISTE.RegistrationModel("register-user", function() {window.location.hash = "!/register3";}, "#register-email-error");
   var statusModel = new LUPAPISTE.StatusModel();
 
-  hub.onPageChange("register", function() {
+  hub.onPageLoad("register", function() {
     var urlPrefix = "/app/" + loc.getCurrentLanguage() + "/welcome";
     $.get("/api/vetuma", {success: urlPrefix + "#!/register2",
                           cancel:  urlPrefix + "#!/register/cancel",
@@ -17,7 +17,7 @@
     statusModel.subPage(pageutil.subPage());
   });
 
-  hub.onPageChange("register2", function() {
+  hub.onPageLoad("register2", function() {
     registrationModel.reset();
     ajax.get("/api/vetuma/user")
       .raw(true)

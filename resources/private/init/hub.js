@@ -57,15 +57,15 @@ var hub = (function() {
   }
 
   // Helper for common case:
-  function onPageChange(pageId, listener, oneshot) {
-    hub.subscribe({type: "page-change", pageId: pageId}, listener, oneshot);
+  function onPageLoad(pageId, listener, oneshot) {
+    hub.subscribe({type: "page-load", pageId: pageId}, listener, oneshot);
   }
 
   return {
-    subscribe:        subscribe,
-    unsubscribe:      unsubscribe,
-    send:             send,
-    onPageChange:     onPageChange
+    subscribe:      subscribe,
+    unsubscribe:    unsubscribe,
+    send:           send,
+    onPageLoad:     onPageLoad
   };
 
 })();
