@@ -13,6 +13,10 @@ LUPAPISTE.ForemanHistoryModel = function (params) {
       // TODO: Error needs to be handled?
     })
     .call();
+
+  self.followAppLink = function(project) {
+    window.location.hash = "!/application/" + project.linkedAppId
+  };
 };
 
 ko.components.register("foreman-history", {
