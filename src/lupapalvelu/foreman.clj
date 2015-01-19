@@ -59,20 +59,22 @@
     (into {} (for [[k [prefix v]] m]
                [k (loc-fn prefix v)]))))
 
-(defn- get-history-data-from-app [app-links app]
-  (let [foreman-doc     (domain/get-document-by-name app "tyonjohtaja-v2")
+(defn- get-history-data-from-app [app-links foreman-app]
+  (let [foreman-doc     (domain/get-document-by-name foreman-app "tyonjohtaja-v2")
 
-        municipality    (:municipality app)
+        municipality    (:municipality foreman-app)
         difficulty      (unwrap (get-in foreman-doc [:data :patevyysvaatimusluokka]))
         foreman-role    (unwrap (get-in foreman-doc [:data :kuntaRoolikoodi]))
 
-        relevant-link   (first (filter #(some #{(:id app)} (:link %)) app-links))
-        operation       (get-linked-app-operations (:id app) relevant-link)]
+        relevant-link   (first (filter #(some #{(:id foreman-app)} (:link %)) app-links))
+        project-app-id  (first (remove #{(:id foreman-app)} (:link relevant-link)))
+        operation       (get-linked-app-operations (:id foreman-app) relevant-link)]
 
-    (loc-hashmap-vals {:municipality ["municipality." municipality]
-                       :difficulty ["osapuoli.patevyysvaatimusluokka." difficulty]
-                       :jobDescription ["osapuoli.tyonjohtaja.kuntaRoolikoodi." foreman-role]
-                       :operation ["operations." operation]})))
+    (merge (loc-hashmap-vals {:municipality ["municipality." municipality]
+                              :difficulty ["osapuoli.patevyysvaatimusluokka." difficulty]
+                              :jobDescription ["osapuoli.tyonjohtaja.kuntaRoolikoodi." foreman-role]
+                              :operation ["operations." operation]})
+           {:linkedAppId project-app-id})))
 
 (defn get-foreman-history-data [foreman-app]
   (let [foreman-apps       (->> (get-foreman-applications foreman-app)

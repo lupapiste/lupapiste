@@ -18,7 +18,7 @@
             <td data-bind="text: municipality"></td>
             <td data-bind="text: difficulty"></td>
             <td data-bind="text: jobDescription"></td>
-            <td data-bind="text: operation"></td>
+            <td><span data-bind="text: operation"></span> (<a href="#" data-bind="click: $parent.followAppLink, text: linkedAppId"></a>)</td>
           </tr>
         </tbody>
     </script>
