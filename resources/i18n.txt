@@ -1,3 +1,4 @@
+attachment.verdict-attachment: Päätöksen liite
 attachment.label.verdictAttachment: Päätöksen liite
 attachment.set-attachments-as-verdict-attachment.error: Liitteen merkitseminen päätöksen liitteeksi epäonnistui
 verdict.orderAttachmentPrints.button: Tilaa lupakuvat
