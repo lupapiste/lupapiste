@@ -98,6 +98,8 @@ var taskPageController = (function() {
     currentApplicationId = application.id;
     currentTaskId = taskId;
 
+    lupapisteApp.setTitle(application.title);
+
     attachmentsModel.refresh(application, {type: "task", id: currentTaskId});
 
     var t = _.find(application.tasks, function(task) {return task.id === currentTaskId;});

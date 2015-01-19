@@ -2,7 +2,7 @@ LUPAPISTE.verdictPageController = (function($) {
   "use strict";
 
   var currentApplicationId = null;
-  var currentApplication = null;
+  var currentApplication = {}; // initialized to empty map
   var currentVerdictId = null;
 
   function VerdictEditModel() {
@@ -178,6 +178,8 @@ LUPAPISTE.verdictPageController = (function($) {
     currentApplicationId = currentApplication.id;
     currentVerdictId = verdictId;
 
+    lupapisteApp.setTitle(application.title);
+
     authorizationModel.refresh(application);
     verdictModel.refresh(application, verdictId);
     attachmentsModel.refresh(application, target);
@@ -197,8 +199,11 @@ LUPAPISTE.verdictPageController = (function($) {
     // Reload application only if needed
     if (currentApplicationId !== applicationId) {
       repository.load(applicationId);
-    } else if (currentVerdictId !== verdictId){
-      refresh(currentApplication, authorities(), currentVerdictId);
+    } else {
+      lupapisteApp.setTitle(currentApplication.title);
+      if (currentVerdictId !== verdictId){
+        refresh(currentApplication, authorities(), currentVerdictId);
+      }
     }
     currentApplicationId = applicationId;
     currentVerdictId = verdictId;
