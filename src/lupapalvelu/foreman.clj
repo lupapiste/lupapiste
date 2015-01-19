@@ -37,7 +37,8 @@
   "Based on the passed foreman application, fetches all project applications that have the same foreman as in
   the passed foreman application (personal id is used as key). Returns all the linked applications as a list"
   [foreman-application foreman-hetu]
-  (let [foreman-apps    (get-foreman-applications foreman-application foreman-hetu)
+  (let [foreman-apps    (->> (get-foreman-applications foreman-application foreman-hetu)
+                             (remove #(= (:id %) (:id foreman-application))))
         foreman-app-ids (map :id foreman-apps)
         links           (mongo/select :app-links {:link {$in foreman-app-ids}})
         linked-app-ids  (remove (set foreman-app-ids) (distinct (mapcat #(:link %) links)))]
