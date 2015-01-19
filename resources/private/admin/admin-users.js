@@ -45,7 +45,7 @@
            }}]
   };
 
-  hub.onPageChange("users", function() {
+  hub.onPageLoad("users", function() {
     if (!usersList) {
       usersList = users.create($("#users .fancy-users-table"), usersTableConfig);
     }

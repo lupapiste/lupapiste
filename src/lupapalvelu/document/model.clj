@@ -49,14 +49,18 @@
     (not (string? v)) [:err "illegal-value:not-a-string"]
     (not (.canEncode (latin1-encoder) v)) [:warn "illegal-value:not-latin1-string"]
     (> (.length v) (or max-len default-max-len)) [:err "illegal-value:too-long"]
-    (< (.length v) (or min-len 0)) [:warn "illegal-value:too-short"]
+    (and
+      (> (.length v) 0)
+      (< (.length v) (or min-len 0))) [:warn "illegal-value:too-short"]
     :else (subtype/subtype-validation elem v)))
 
 (defmethod validate-field :text [_ elem v]
   (cond
     (not (string? v)) [:err "illegal-value:not-a-string"]
     (> (.length v) (or (:max-len elem) default-max-len)) [:err "illegal-value:too-long"]
-    (< (.length v) (or (:min-len elem) 0)) [:warn "illegal-value:too-short"]))
+    (and
+      (> (.length v) 0)
+      (< (.length v) (or (:min-len elem) 0))) [:warn "illegal-value:too-short"]))
 
 (defn- validate-hetu-date [hetu]
   (let [dateparsts (rest (re-find #"^(\d{2})(\d{2})(\d{2})([aA+-]).*" hetu))

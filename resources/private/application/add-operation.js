@@ -60,7 +60,7 @@
   }
   model = new Model();
 
-  hub.onPageChange("add-operation", function(e) {
+  hub.onPageLoad("add-operation", function(e) {
     var newId = e.pagePath[0];
     if (newId !== currentId) {
       currentId = newId;

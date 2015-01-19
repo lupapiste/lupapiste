@@ -356,7 +356,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     input.onmouseout = self.hideHelp;
     span.appendChild(input);
 
-    if (model[subSchema.name].disabled) {
+    if ( model[subSchema.name] && model[subSchema.name].disabled) {
       input.setAttribute("disabled", true);
     }
 

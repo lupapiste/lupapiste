@@ -114,7 +114,7 @@
   }
   var model = new Model();
 
-  hub.onPageChange("neighbor-show", function(e) {
+  hub.onPageLoad("neighbor-show", function(e) {
     model.init(e);
     vetuma($("#vetuma-neighbor"), function(user) {
       model.tupasUser(user);

@@ -462,8 +462,8 @@
 
   }();
 
-  hub.onPageChange("create-part-1", model.clear);
-  hub.onPageChange("create-page-prev-permit", model.clearForCreateAppWithPrevPermit);
+  hub.onPageLoad("create-part-1", model.clear);
+  hub.onPageLoad("create-page-prev-permit", model.clearForCreateAppWithPrevPermit);
 
   function initAutocomplete(id) {
     $(id)

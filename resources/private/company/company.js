@@ -309,7 +309,7 @@
 
   var company = new Company();
 
-  hub.onPageChange("company", function(e) { company.show(e.pagePath[0], e.pagePath[1]); });
+  hub.onPageLoad("company", function(e) { company.show(e.pagePath[0], e.pagePath[1]); });
 
   $(function() {
     $("#company-content").applyBindings(company);

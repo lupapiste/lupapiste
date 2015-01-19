@@ -96,7 +96,7 @@
     (validator/validate xml_214_s (:permitType application) "2.1.4")
     (validator/validate xml_215_s (:permitType application) "2.1.5")
     ; TODO patevyysvaatimusluokka enum ei tiedossa is now Ei tiedossa maybe mistake in xsd?
-    ;(validator/validate xml_216_s (:permitType application) "2.1.6")
+    (validator/validate xml_216_s (:permitType application) "2.1.6")
     ))
 
 (facts "Rakennusvalvonta type of permits to canonical and then to xml with schema validation"

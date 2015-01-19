@@ -55,7 +55,7 @@
   // Initialize:
   //
 
-  hub.onPageChange("login", recallMe);
+  hub.onPageLoad("login", recallMe);
 
   $(function() {
     recallMe();
