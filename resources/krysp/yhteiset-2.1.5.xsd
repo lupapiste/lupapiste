@@ -3708,7 +3708,7 @@ C vähäinen</xs:documentation>
 			<xs:enumeration value="A"/>
 			<xs:enumeration value="B"/>
 			<xs:enumeration value="C"/>
-			<xs:enumeration value="Ei tiedossa"/>
+			<xs:enumeration value="ei tiedossa"/>
 		</xs:restriction>
 	</xs:simpleType>
 </xs:schema>
