@@ -24,6 +24,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   self.isDisabled = options && options.disabled;
   self.events = [];
 
+  self.subscriptions = [];
+
   self.getMeta = function (path, m) {
     var meta = m ? m : self.meta;
     if (!path || !path.length) {
@@ -628,10 +630,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     _.forEach(listen, function(listenEvent) {
       if (listenEvent === "filterByCode") {
         $(div).find("[data-codes]").addClass("hidden");
-        hub.subscribe(listenEvent, function(event) {
+        self.subscriptions.push(hub.subscribe(listenEvent, function(event) {
           $(div).find("[data-codes]").addClass("hidden");
           $(div).find("[data-codes*='" + event.code + "']").removeClass("hidden");
-        });
+        }));
       }
     });
     return div;
@@ -1630,6 +1632,11 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return section;
   }
 
+  hub.subscribe("application-loaded", function() {
+    while (self.subscriptions.length > 0) {
+      hub.unsubscribe(self.subscriptions.pop());
+    }
+  }, true);
 
   self.element = buildElement();
   // If doc.validationErrors is truthy, i.e. doc includes ready evaluated errors,
