@@ -5,11 +5,11 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function(/*dialogSelector, confirm
 //  self.confirmSuccess = confirmSuccess;
   self.application = null;
 
+  self.processing = ko.observable(false);
+  self.pending = ko.observable(false);
 //  self.password = ko.observable("");
   self.attachments = ko.observable([]);
 //  self.selectedAttachments = ko.computed(function() { return _.filter(self.attachments(), function(a) {return a.selected();}); });
-//  self.processing = ko.observable(false);
-//  self.pending = ko.observable(false);
 //  self.errorMessage = ko.observable("");
 
 
