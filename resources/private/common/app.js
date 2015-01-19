@@ -24,6 +24,19 @@ var LUPAPISTE = LUPAPISTE || {};
     self.currentHash = undefined;
 
     /**
+     * Prepends given title to browser window title.
+     *
+     * @param {String} title
+     */
+    self.setTitle = function(title) {
+      if (title) {
+        document.title = title + " - " + self.defaultTitle;
+      } else {
+        document.title = self.defaultTitle;
+      }
+    };
+
+    /**
     * Window unload event handler
     */
     self.unload = function () {

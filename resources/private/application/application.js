@@ -69,11 +69,7 @@
   };
 
   function updateWindowTitle(newTitle) {
-    var title = newTitle || util.getIn(applicationModel, ["_js", "title"]);
-    console.log("updateWindowTitle", newTitle, title);
-    if (title) {
-      document.title = title + " - " +  window.lupapisteApp.defaultTitle;
-    }
+    lupapisteApp.setTitle(newTitle || util.getIn(applicationModel, ["_js", "title"]));
   }
 
   //FIXME: why is this?
