@@ -249,7 +249,6 @@
       (fail! :no-kopiolaitos-email-defined)
       )))
 
-;; TODO: Paivita description alla useaan kertaan tilaamisen osalta
 (defcommand order-verdict-attachment-prints
   {:description "Orders prints of marked verdict attachments from copy institute.
                  If the command is run more than once, the already ordered attachment copies are ordered again."
