@@ -1870,22 +1870,22 @@ input[readonly]:focus, textarea[readonly]:focus {
 }
 
 /* line 687, ../sass/partials/_forms.scss */
-#stamp-info {
+.three-col {
   width: 100%;
 }
 /* line 690, ../sass/partials/_forms.scss */
-#stamp-info .col1 {
+.three-col .col1 {
   float: left;
   padding-right: 12px;
 }
 /* line 695, ../sass/partials/_forms.scss */
-#stamp-info .col2 {
+.three-col .col2 {
   float: left;
   padding-left: 12px;
   padding-right: 12px;
 }
 /* line 700, ../sass/partials/_forms.scss */
-#stamp-info .col3 {
+.three-col .col3 {
   float: left;
   padding-left: 12px;
 }
