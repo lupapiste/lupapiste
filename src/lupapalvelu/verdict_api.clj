@@ -217,20 +217,9 @@
       (Thread/sleep 2000)
       (fail :error.password))))
 
-(defn- get-verdict-attachments-zip [attachments]
-  ; TODO refactor, copied from attachment_api/get-all-attachments
-  (let [temp-file (File/createTempFile "lupapiste.verdict-attachments." ".zip.tmp")]
-    (debugf "Created temporary zip file for verdict-attachments: %s" (.getAbsolutePath temp-file))
-    (with-open [out (io/output-stream temp-file)]
-      (let [zip (ZipOutputStream. out)]
-        (doseq [attachment attachments]
-          (append-attachment zip (-> attachment :versions last)))
-        (.finish zip)))
-    temp-file))
-
-
 (defn- send-kopiolaitos-email [email-address attachments]
-  (let [ordered-count 10]
+  (let [ordered-count 10
+        zip (attachment/get-all-attachments attachments)]
     ;; TODO
     ordered-count
     ))
