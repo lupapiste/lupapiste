@@ -60,9 +60,6 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function(/*dialogSelector, confirm
 
   self.init = function(bindings) {
     var app = ko.toJS(bindings.application);
-    console.log("bindings.application: ", bindings.application);
-    console.log("app: ", app);
-
     var attachments = _(app.attachments || []).filter(function(a) {return a.forPrinting && a.versions && a.versions.length;}).map(normalizeAttachment).value();
 
     self.application = app;
@@ -106,27 +103,5 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function(/*dialogSelector, confirm
     })
     .call();
   };
-
-
-//  self.sign = function() {
-//    self.errorMessage("");
-//    var id = self.application.id;
-//    var attachmentIds = _.map(self.selectedAttachments(), "id");
-//    if (attachmentIds && attachmentIds.length) {
-//      ajax.command("sign-attachments", {id: id, attachmentIds: attachmentIds, password: self.password()})
-//        .processing(self.processing)
-//        .pending(self.pending)
-//        .success(function() {
-//          self.password("");
-//          repository.load(id);
-//          LUPAPISTE.ModalDialog.close();
-//          if (self.confirmSuccess) {
-//            LUPAPISTE.ModalDialog.showDynamicOk(loc("application.signAttachments"), loc("signAttachment.ok"));
-//          }
-//        })
-//        .error(function(e) {self.errorMessage(e.text);})
-//        .call();
-//    }
-//  };
 
 };
