@@ -10,40 +10,44 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function(/*dialogSelector, confirm
 //  self.password = ko.observable("");
   self.attachments = ko.observable([]);
 //  self.selectedAttachments = ko.computed(function() { return _.filter(self.attachments(), function(a) {return a.selected();}); });
-//  self.errorMessage = ko.observable("");
+  self.errorMessage = ko.observable("");
 
   self.authorizationModel = authorization.create();
 
   function normalizeAttachment(a) {
-    var versions = _(a.versions).reverse().value(),
-        latestVersion = versions[0];
-
+    var versions = _(a.versions).reverse().value();
+    var latestVersion = versions[0];
     return {
       id:           a.id,
       type:         { "type-group": a.type["type-group"], "type-id": a.type["type-id"] },
-      contentType:  latestVersion.contentType,
+//      contentType:  latestVersion.contentType,
+      contents:     a.contents || loc(['attachmentType', a.type['type-group'], a.type['type-id']]),
       filename:     latestVersion.filename,
-      version:      { major: latestVersion.version.major, minor: latestVersion.version.minor },
-      size:         latestVersion.size,
-      selected:     ko.observable(true)
+//      version:      { major: latestVersion.version.major, minor: latestVersion.version.minor },
+//      size:         latestVersion.size,
+//      selected:     ko.observable(true)
+      orderAmount:  ko.observable("2")
     };
   }
 
   self.ok = ko.computed(function() {
-    return self.authorizationModel.ok('order-verdict-attachment-prints') /*&& password()*/ && !self.processing();
+    var attachmentOrderCountsAreNumbers = _.every(self.attachments(), function(a) {
+      return !_.isNaN(_.parseInt(a.orderAmount(), 10));
+    }, self);
+    return self.authorizationModel.ok('order-verdict-attachment-prints') && !self.processing() && attachmentOrderCountsAreNumbers;
   });
 
   // Open the dialog
 
   self.init = function(application) {
     var app = ko.toJS(application);
-    var attachments = _(app.attachments || []).filter(function(a) {return a.versions && a.versions.length;}).map(normalizeAttachment).value();
+    var attachments = _(app.attachments || []).filter(function(a) {return a.forPrinting && a.versions && a.versions.length;}).map(normalizeAttachment).value();
 
     self.application = app;
 //    self.password("");
 //    self.processing(false);
 //    self.pending(false);
-//    self.errorMessage("");
+    self.errorMessage("");
     self.attachments(attachments);
 
     self.authorizationModel.refresh(application.id);
@@ -55,7 +59,6 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function(/*dialogSelector, confirm
     LUPAPISTE.ModalDialog.open(self.dialogSelector);
   }
 
-
   self.orderAttachmentPrints = function(/*bindings*/) {
 //    console.log("verdict-model, orderAttachmentPrints, bindings: ", bindings);
     ajax.command("order-verdict-attachment-prints", {id: self.application.id})
@@ -65,10 +68,11 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function(/*dialogSelector, confirm
       var content = loc("verdict-attachment-prints-order.order-dialog.ready", d.verdictPrintCount);
       LUPAPISTE.ModalDialog.showDynamicOk(loc("verdict-attachment-prints-order.order-dialog.title"), content);
       pageutil.showAjaxWait();
-      repository.load(applicationId);
+      repository.load(self.application.id);
     })
     .error(function(d) {
-      LUPAPISTE.ModalDialog.showDynamicOk(loc("verdict-attachment-prints-order.order-dialog.title"), loc(d.text));
+//      LUPAPISTE.ModalDialog.showDynamicOk(loc("verdict-attachment-prints-order.order-dialog.title"), loc(d.text));
+      self.errorMessage(d.text);
     })
     .call();
   };
