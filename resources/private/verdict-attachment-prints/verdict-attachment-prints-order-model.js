@@ -72,7 +72,7 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function(/*dialogSelector, confirm
     self.ordererEmail("kirjaamo@rakennusvalvonta");   // TODO: Lisaa organisaatioille tama tieto, ja paakayttajalle muokkausmahdollisuus
     self.ordererPhone("09 1234 123");                 // TODO: Lisaa organisaatioille tama tieto, ja paakayttajalle muokkausmahdollisuus
     self.applicantName(app.applicant || "");
-    self.kuntalupatunnus("");                         // TODO: Mika tahan?  Hakemuksella voi olla useita kuntalupatunnuksia, eika me nyt eritella, mihin paatokseen liitteet liittyvat.
+    self.kuntalupatunnus((app.verdicts && app.verdicts[0] && app.verdicts[0].kuntalupatunnus) ? app.verdicts[0].kuntalupatunnus : "");
     self.propertyId(app.propertyId);
     self.lupapisteId(app.id);
     self.address(app.address);
@@ -88,20 +88,36 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function(/*dialogSelector, confirm
 
   self.orderAttachmentPrints = function(/*bindings*/) {
 //    console.log("verdict-model, orderAttachmentPrints, bindings: ", bindings);
-    ajax.command("order-verdict-attachment-prints", {id: self.application.id})
-    .processing(self.processing)
-    .pending(self.pending)
-    .success(function(d) {
-      var content = loc("verdict-attachment-prints-order.order-dialog.ready", d.verdictPrintCount);
-      LUPAPISTE.ModalDialog.showDynamicOk(loc("verdict-attachment-prints-order.order-dialog.title"), content);
-      pageutil.showAjaxWait();
-      repository.load(self.application.id);
-    })
-    .error(function(d) {
-//      LUPAPISTE.ModalDialog.showDynamicOk(loc("verdict-attachment-prints-order.order-dialog.title"), loc(d.text));
-      self.errorMessage(d.text);
-    })
-    .call();
+
+    var data = {
+      id: self.application.id,
+      attachments: self.attachments,
+      orderInfo: {
+        ordererOrganization: self.ordererOrganization,
+        ordererEmail: self.ordererEmail,
+        ordererPhone: self.ordererPhone,
+        applicantName: self.applicantName,
+        kuntalupatunnus: self.kuntalupatunnus,
+        propertyId: self.propertyId,
+        lupapisteId: self.lupapisteId,
+        address: self.address
+      }
+    };
+
+    ajax.command("order-verdict-attachment-prints", data)
+      .processing(self.processing)
+      .pending(self.pending)
+      .success(function(d) {
+        var content = loc("verdict-attachment-prints-order.order-dialog.ready", d.verdictPrintCount);
+        LUPAPISTE.ModalDialog.showDynamicOk(loc("verdict-attachment-prints-order.order-dialog.title"), content);
+        pageutil.showAjaxWait();
+        repository.load(self.application.id);
+      })
+      .error(function(d) {
+//        LUPAPISTE.ModalDialog.showDynamicOk(loc("verdict-attachment-prints-order.order-dialog.title"), loc(d.text));
+        self.errorMessage(d.text);
+      })
+      .call();
   };
 
 };
