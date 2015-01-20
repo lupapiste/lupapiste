@@ -92,13 +92,13 @@ LUPAPISTE.ForemanOtherApplicationsModel = function(params) {
         } },
         { title: loc("no") });
   };
-};
 
-LUPAPISTE.ForemanOtherApplicationsModel.prototype.dispose = function() {
-  "use strict";
-  _.forEach(this.subscriptionIds, function(id) {
-    hub.unsubscribe(id);
-  });
+  // unsubscribe hub listeners on application load
+  hub.subscribe("application-loaded", function() {
+    while (self.subscriptionIds.length > 0) {
+      hub.unsubscribe(self.subscriptionIds.pop());
+    }
+  }, true);
 };
 
 ko.components.register("foreman-other-applications", {
