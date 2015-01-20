@@ -252,16 +252,18 @@
 (defcommand order-verdict-attachment-prints
   {:description "Orders prints of marked verdict attachments from copy institute.
                  If the command is run more than once, the already ordered attachment copies are ordered again."
-   :parameters [:id]
+   :parameters [:id :attachments :orderInfo]
    :states     [:verdictGiven :constructionStarted]   ;; TODO: nama tilat ok?
    :roles      [:authority]
+   :input-validators [(partial action/vector-parameters [:attachments])
+                      (partial action/map-parameters [:orderInfo])]
 ;   :notified   true
 ;   :on-success (notify :application-verdict)
    }
   [command]
 
-  (println "\n command: ")
-  (clojure.pprint/pprint command)
+  (println "\n command data: ")
+  (clojure.pprint/pprint (:data command))
   (println "\n")
 
   (if-let [result (do-order-verdict-attachment-prints command)]
