@@ -18,14 +18,12 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.job :as job]
             [lupapalvelu.stamper :as stamper]
-            [lupapalvelu.pdf-export :as pdf-export]
             [lupapalvelu.statement :as statement]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
             [sade.util :as util]
             [lupapalvelu.domain :as domain])
-  (:import [java.util.zip ZipOutputStream ZipEntry]
-           [java.io File OutputStream FilterInputStream]))
+  (:import [java.io File]))
 
 ;; Validators
 
@@ -233,44 +231,6 @@
   [{{:keys [attachment-id]} :data user :user}]
   (attachment/output-attachment attachment-id true (partial attachment/get-attachment-as user)))
 
-(defn- append-gridfs-file [zip file-name file-id]
-  (when file-id
-    (.putNextEntry zip (ZipEntry. (ss/encode-filename (str file-id "_" file-name))))
-    (with-open [in ((:content (mongo/download file-id)))]
-      (io/copy in zip))))
-
-(defn- append-stream [zip file-name in]
-  (when in
-    (.putNextEntry zip (ZipEntry. (ss/encode-filename file-name)))
-    (io/copy in zip)))
-
-(defn- append-attachment [zip {:keys [filename fileId]}]
-  (append-gridfs-file zip filename fileId))
-
-(defn- get-all-attachments [application lang]
-  (let [temp-file (File/createTempFile "lupapiste.attachments." ".zip.tmp")]
-    (debugf "Created temporary zip file for attachments: %s" (.getAbsolutePath temp-file))
-    (with-open [out (io/output-stream temp-file)]
-      (let [zip (ZipOutputStream. out)]
-        ; Add all attachments:
-        (doseq [attachment (:attachments application)]
-          (append-attachment zip (-> attachment :versions last)))
-        ; Add submitted PDF, if exists:
-        (when-let [submitted-application (mongo/by-id :submitted-applications (:id application))]
-          (append-stream zip (i18n/loc "attachment.zip.pdf.filename.submitted") (pdf-export/generate submitted-application lang)))
-        ; Add current PDF:
-        (append-stream zip (i18n/loc "attachment.zip.pdf.filename.current") (pdf-export/generate application lang))
-        (.finish zip)))
-    temp-file))
-
-(defn- temp-file-input-stream [^File file]
-  (let [i (io/input-stream file)]
-    (proxy [FilterInputStream] [i]
-      (close []
-        (proxy-super close)
-        (when (= (io/delete-file file :could-not) :could-not)
-          (warnf "Could not delete temporary file: %s" (.getAbsolutePath file)))))))
-
 (defraw "download-all-attachments"
   {:parameters [:id]
    :roles      [:applicant :authority]
@@ -281,7 +241,7 @@
     {:status 200
        :headers {"Content-Type" "application/octet-stream"
                  "Content-Disposition" (str "attachment;filename=\"" (i18n/loc "attachment.zip.filename") "\"")}
-       :body (temp-file-input-stream (get-all-attachments application lang))}
+       :body (attachment/temp-file-input-stream (attachment/get-all-attachments (:attachments application) application lang))}
     {:status 404
      :headers {"Content-Type" "text/plain"}
      :body "404"}))

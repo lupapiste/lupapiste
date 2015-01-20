@@ -10,7 +10,12 @@
             [lupapalvelu.comment :as comment]
             [lupapalvelu.mongo :refer [$each] :as mongo]
             [lupapalvelu.user :as user]
-            [lupapalvelu.mime :as mime]))
+            [lupapalvelu.mime :as mime]
+            [lupapalvelu.pdf-export :as pdf-export]
+            [lupapalvelu.i18n :as i18n]
+            [clojure.java.io :as io])
+  (:import [java.util.zip ZipOutputStream ZipEntry]
+           [java.io File OutputStream FilterInputStream]))
 
 ;;
 ;; Metadata
@@ -559,4 +564,44 @@
 (defn get-attachments-by-operation
   [{:keys [attachments] :as application} op-id]
   (filter #(= (:id (:op %)) op-id) attachments))
+
+(defn- append-gridfs-file [zip file-name file-id]
+  (when file-id
+    (.putNextEntry zip (ZipEntry. (ss/encode-filename (str file-id "_" file-name))))
+    (with-open [in ((:content (mongo/download file-id)))]
+      (io/copy in zip))))
+
+(defn- append-stream [zip file-name in]
+  (when in
+    (.putNextEntry zip (ZipEntry. (ss/encode-filename file-name)))
+    (io/copy in zip)))
+
+(defn- append-attachment [zip {:keys [filename fileId]}]
+  (append-gridfs-file zip filename fileId))
+
+(defn get-all-attachments [attachments & [application lang]]
+  (let [temp-file (File/createTempFile "lupapiste.attachments." ".zip.tmp")]
+    (debugf "Created temporary zip file for attachments: %s" (.getAbsolutePath temp-file))
+    (with-open [out (io/output-stream temp-file)]
+      (let [zip (ZipOutputStream. out)]
+        ; Add all attachments:
+        (doseq [attachment attachments]
+          (append-attachment zip (-> attachment :versions last)))
+
+        (when (and application lang)
+          ; Add submitted PDF, if exists:
+          (when-let [submitted-application (mongo/by-id :submitted-applications (:id application))]
+            (append-stream zip (i18n/loc "attachment.zip.pdf.filename.submitted") (pdf-export/generate submitted-application lang)))
+          ; Add current PDF:
+          (append-stream zip (i18n/loc "attachment.zip.pdf.filename.current") (pdf-export/generate application lang)))
+        (.finish zip)))
+    temp-file))
+
+(defn temp-file-input-stream [^File file]
+  (let [i (io/input-stream file)]
+    (proxy [FilterInputStream] [i]
+      (close []
+        (proxy-super close)
+        (when (= (io/delete-file file :could-not) :could-not)
+          (warnf "Could not delete temporary file: %s" (.getAbsolutePath file)))))))
 
