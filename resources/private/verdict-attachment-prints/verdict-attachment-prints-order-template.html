@@ -48,50 +48,60 @@
 
             <h1 data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.orderInfo'"></h1>
 
-            <label for="printsOrderOrdererOrganization" data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.ordererOrganization'"class="form-label"></label>
-            <input id="printsOrderOrdererOrganization" type="text" data-bind="textInput: ordererOrganization"
-                   data-test-id="verdict-attachment-prints-order-orderer-organization" class="form-input text"/>
+            <form id="verdict-attachment-prints-order-info" class="clear three-col">
+              <fieldset class="col1">
+                <label for="printsOrderOrdererOrganization" data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.ordererOrganization'"class="form-label"></label>
+                <input id="printsOrderOrdererOrganization" type="text" data-bind="textInput: ordererOrganization"
+                       data-test-id="verdict-attachment-prints-order-orderer-organization" class="form-input text"/>
 
-            <label for="printsOrderOrdererOrganization" data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.ordererEmail'"class="form-label"></label>
-            <input id="printsOrderOrdererOrganization" type="text" data-bind="textInput: ordererEmail"
-                   data-test-id="verdict-attachment-prints-order-orderer-organization" class="form-input text"/>
+                <label for="printsOrderApplicantName" data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.applicantName'"class="form-label"></label>
+                <input id="printsOrderApplicantName" type="text" data-bind="textInput: applicantName"
+                       data-test-id="verdict-attachment-prints-order-applicant-name" class="form-input text"/>
 
-            <label for="printsOrderOrdererOrganization" data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.ordererPhone'"class="form-label"></label>
-            <input id="printsOrderOrdererOrganization" type="text" data-bind="textInput: ordererPhone"
-                   data-test-id="verdict-attachment-prints-order-orderer-organization" class="form-input text"/>
+                <label for="printsOrderLupapisteId" data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.lupapisteId'"class="form-label"></label>
+                <input id="printsOrderLupapisteId" type="text" data-bind="textInput: lupapisteId"
+                       data-test-id="verdict-attachment-prints-order-lupapisteId" class="form-input text"/>
+              </fieldset>
 
-            <label for="printsOrderOrdererOrganization" data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.applicantName'"class="form-label"></label>
-            <input id="printsOrderOrdererOrganization" type="text" data-bind="textInput: applicantName"
-                   data-test-id="verdict-attachment-prints-order-orderer-organization" class="form-input text"/>
+              <fieldset class="col2">
+                <label for="printsOrderOrdererEmail" data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.ordererEmail'"class="form-label"></label>
+                <input id="printsOrderOrdererEmail" type="text" data-bind="textInput: ordererEmail"
+                       data-test-id="verdict-attachment-prints-order-orderer-email" class="form-input text"/>
 
-            <label for="printsOrderOrdererOrganization" data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.kuntalupatunnus'"class="form-label"></label>
-            <input id="printsOrderOrdererOrganization" type="text" data-bind="textInput: kuntalupatunnus"
-                   data-test-id="verdict-attachment-prints-order-orderer-organization" class="form-input text"/>
+                <label for="printsOrderKuntalupatunnus" data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.kuntalupatunnus'"class="form-label"></label>
+                <input id="printsOrderKuntalupatunnus" type="text" data-bind="textInput: kuntalupatunnus"
+                       data-test-id="verdict-attachment-prints-order-kuntalupatunnus" class="form-input text"/>
 
-            <label for="printsOrderOrdererOrganization" data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.propertyId'"class="form-label"></label>
-            <input id="printsOrderOrdererOrganization" type="text" data-bind="textInput: propertyId"
-                   data-test-id="verdict-attachment-prints-order-orderer-organization" class="form-input text"/>
+                <label for="printsOrderAddress" data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.address'"class="form-label"></label>
+                <input id="printsOrderAddress" type="text" data-bind="textInput: address"
+                       data-test-id="verdict-attachment-prints-order-address" class="form-input text"/>
+              </fieldset>
 
-            <label for="printsOrderOrdererOrganization" data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.lupapisteId'"class="form-label"></label>
-            <input id="printsOrderOrdererOrganization" type="text" data-bind="textInput: lupapisteId"
-                   data-test-id="verdict-attachment-prints-order-orderer-organization" class="form-input text"/>
+              <fieldset class="col3">
+                <label for="printsOrderOrdererPhone" data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.ordererPhone'"class="form-label"></label>
+                <input id="printsOrderOrdererPhone" type="text" data-bind="textInput: ordererPhone"
+                       data-test-id="verdict-attachment-prints-order-orderer-phone" class="form-input text"/>
 
-            <label for="printsOrderOrdererOrganization" data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.address'"class="form-label"></label>
-            <input id="printsOrderOrdererOrganization" type="text" data-bind="textInput: address"
-                   data-test-id="verdict-attachment-prints-order-orderer-organization" class="form-input text"/>
+                <label for="printsOrderPropertyId" data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.propertyId'"class="form-label"></label>
+                <input id="printsOrderPropertyId" type="text" data-bind="textInput: propertyId"
+                       data-test-id="verdict-attachment-prints-order-propertyId" class="form-input text"/>
+              </fieldset>
+            </form>
 
 
-            <div data-bind="if: errorMessage" >
-              <div data-bind="ltext: errorMessage" class="context-error" data-test-id="verdict-attachment-prints-order-error-message"></div>
+            <div class="clear">
+              <div data-bind="if: errorMessage" >
+                <div data-bind="ltext: errorMessage" class="context-error" data-test-id="verdict-attachment-prints-order-error-message"></div>
+              </div>
+
+              <button data-bind="click: orderAttachmentPrints, enable: ok"
+                      class="btn btn-primary btn-dialog" data-test-id="do-verdict-attachment-prints">
+                <span data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.submit'"></span>
+                <em data-bind="visible: pending" class="button-loader"></em>
+              </button>
+
+              <a data-bind="ltext: 'cancel'" class="btn-dialog close cancel" href="#"></a>
             </div>
-
-            <button data-bind="click: orderAttachmentPrints, enable: ok"
-                    class="btn btn-primary btn-dialog" data-test-id="do-verdict-attachment-prints">
-              <span data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.submit'"></span>
-              <em data-bind="visible: pending" class="button-loader"></em>
-            </button>
-
-            <a data-bind="ltext: 'cancel'" class="btn-dialog close cancel" href="#"></a>
 
           </div>
         </div>
