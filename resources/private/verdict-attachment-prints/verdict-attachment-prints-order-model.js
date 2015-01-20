@@ -43,7 +43,7 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function(/*dialogSelector, confirm
     var attachmentOrderCountsAreNumbers = _.every(self.attachments(), function(a) {
       return !_.isNaN(_.parseInt(a.orderAmount(), 10));
     }, self);
-    return self.authorizationModel.ok('order-verdict-attachment-prints')
+    return self.authorizationModel.ok("order-verdict-attachment-prints")
            && !self.processing()
            && attachmentOrderCountsAreNumbers
            && !_.isEmpty(self.ordererOrganization())
