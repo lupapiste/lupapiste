@@ -52,8 +52,8 @@
                      [(or plain-body html-body)])
         attachments (when attachments
                       (for [attachment attachments]
-                       {:type :attachment
-                        :content attachment}))
+                        {:type :attachment
+                         :content attachment}))
         body       (if attachments
                      (into body attachments)
                      body)]
@@ -68,8 +68,8 @@
 
 (defn send-email-message
   "Sends email message using a template. Returns true if there is an error, false otherwise."
-  [to subject msg & attachments]
-  {:pre [subject msg]}
+  [to subject msg & [attachments]]
+  {:pre [subject msg (vector? attachments)]}
   (if-not (ss/blank? to)
     (let [[plain html] msg]
       (try
