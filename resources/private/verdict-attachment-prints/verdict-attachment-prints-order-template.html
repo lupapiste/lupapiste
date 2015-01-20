@@ -33,10 +33,7 @@
                     <td data-bind="text: loc(['attachmentType', type['type-group'], type['type-id']])"></td>
                     <td><label data-bind="text: contents"></label></td>
                     <td><label data-bind="text: filename"></label></td>
-                    <td>
-                      <!-- TODO: Maarita leveys -->
-                      <input style="width: 15px;" type="text" data-bind="textInput: orderAmount, attr: {id: 'orderAmount-' + id}" />
-                    </td>
+                    <td><input type="text" data-bind="textInput: orderAmount, attr: {id: 'orderAmount-' + id}" /></td>
 <!--                     <td> -->
 <!--                       <span data-bind="version: version"></span> -->
 <!--                     </td> -->
