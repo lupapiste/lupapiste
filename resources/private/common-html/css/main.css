@@ -4075,74 +4075,79 @@ span.icon_clear:before {
   margin-left: 360px;
 }
 
-/* line 408, ../sass/views/_application.scss */
+/* line 407, ../sass/views/_application.scss */
+#dialog-verdict-attachment-prints-order .dialog-content {
+  padding-left: 15px;
+}
+
+/* line 413, ../sass/views/_application.scss */
 .key-value-pair label {
   vertical-align: top;
   display: inline-block;
   width: 25%;
 }
-/* line 413, ../sass/views/_application.scss */
+/* line 418, ../sass/views/_application.scss */
 .key-value-pair .value {
   vertical-align: top;
   display: inline-block;
 }
 
-/* line 419, ../sass/views/_application.scss */
+/* line 424, ../sass/views/_application.scss */
 .inforequest-conversation {
   margin-top: 42px;
 }
-/* line 421, ../sass/views/_application.scss */
+/* line 426, ../sass/views/_application.scss */
 .inforequest-conversation h2 {
   border-bottom: 1px solid #c3c3c3;
 }
 
-/* line 426, ../sass/views/_application.scss */
+/* line 431, ../sass/views/_application.scss */
 .attachment-actions {
   margin-bottom: 24px;
 }
 
-/* line 430, ../sass/views/_application.scss */
+/* line 435, ../sass/views/_application.scss */
 .parties-list {
   width: 100%;
   margin-bottom: 6px;
 }
-/* line 433, ../sass/views/_application.scss */
+/* line 438, ../sass/views/_application.scss */
 .parties-list button {
   margin: 12px 0;
 }
-/* line 436, ../sass/views/_application.scss */
+/* line 441, ../sass/views/_application.scss */
 .parties-list .party {
   display: table-row;
 }
-/* line 438, ../sass/views/_application.scss */
+/* line 443, ../sass/views/_application.scss */
 .parties-list .party .person {
   display: table-cell;
   padding-right: 12px;
 }
-/* line 442, ../sass/views/_application.scss */
+/* line 447, ../sass/views/_application.scss */
 .parties-list .party .invite-state {
   display: table-cell;
   padding-right: 12px;
 }
-/* line 446, ../sass/views/_application.scss */
+/* line 451, ../sass/views/_application.scss */
 .parties-list .party .invite-action {
   display: table-cell;
   padding-right: 12px;
 }
 
-/* line 454, ../sass/views/_application.scss */
+/* line 459, ../sass/views/_application.scss */
 #inforequest-marker-map {
   width: 30%;
   height: 520px;
   float: right;
   z-index: 2;
 }
-/* line 459, ../sass/views/_application.scss */
+/* line 464, ../sass/views/_application.scss */
 #inforequest-marker-map image {
   cursor: pointer;
 }
 
-/* line 464, ../sass/views/_application.scss */
+/* line 469, ../sass/views/_application.scss */
 #inforequest-marker-map-contents {
   z-index: 2;
   right: 30%;
@@ -4158,66 +4163,66 @@ span.icon_clear:before {
   border: 1px solid #b5b5b5;
   box-shadow: 1px 1px 2px #828282;
 }
-/* line 479, ../sass/views/_application.scss */
+/* line 484, ../sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card {
   padding: 12px;
   z-index: 10000;
   border-top: 1px solid #b5b5b5;
   width: 100%;
 }
-/* line 485, ../sass/views/_application.scss */
+/* line 490, ../sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card h3 {
   font-size: 20px;
 }
-/* line 487, ../sass/views/_application.scss */
+/* line 492, ../sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card h3.operation-type {
   margin-bottom: 12px;
 }
-/* line 492, ../sass/views/_application.scss */
+/* line 497, ../sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card .timestamp {
   float: right;
   font-size: 14px;
 }
-/* line 496, ../sass/views/_application.scss */
+/* line 501, ../sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card a {
   color: #333333;
 }
-/* line 499, ../sass/views/_application.scss */
+/* line 504, ../sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card:first-child {
   border-top: none;
 }
-/* line 503, ../sass/views/_application.scss */
+/* line 508, ../sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card div {
   padding-bottom: 4px;
   margin-bottom: 8px;
   border-bottom: 1px solid #e8e8e8;
 }
-/* line 507, ../sass/views/_application.scss */
+/* line 512, ../sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card div:last-child {
   border-bottom: none;
   padding-bottom: 0px;
 }
-/* line 511, ../sass/views/_application.scss */
+/* line 516, ../sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card div blockquote {
   font-size: 16px;
 }
-/* line 514, ../sass/views/_application.scss */
+/* line 519, ../sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card div .comment-type {
   font-weight: 700;
 }
 
-/* line 523, ../sass/views/_application.scss */
+/* line 528, ../sass/views/_application.scss */
 .verdict-text {
   white-space: pre-line;
   width: 28.75em;
 }
 
-/* line 528, ../sass/views/_application.scss */
+/* line 533, ../sass/views/_application.scss */
 .required-field-error-doc {
   margin: 24px 0 6px;
 }
 
-/* line 532, ../sass/views/_application.scss */
+/* line 537, ../sass/views/_application.scss */
 .requiredField-line {
   margin-bottom: 6px;
   vertical-align: top;
@@ -4225,85 +4230,85 @@ span.icon_clear:before {
   padding: 6px;
   height: 24px;
 }
-/* line 538, ../sass/views/_application.scss */
+/* line 543, ../sass/views/_application.scss */
 .requiredField-line span, .requiredField-line a {
   vertical-align: top;
   line-height: 14px;
   max-height: 16px;
   display: table-cell;
 }
-/* line 544, ../sass/views/_application.scss */
+/* line 549, ../sass/views/_application.scss */
 .requiredField-line a {
   padding-left: 12px;
   font-size: 14px;
 }
-/* line 549, ../sass/views/_application.scss */
+/* line 554, ../sass/views/_application.scss */
 .requiredField-line .required-field-error-element-name {
   padding-left: 6px;
 }
 
-/* line 554, ../sass/views/_application.scss */
+/* line 559, ../sass/views/_application.scss */
 .invited-foremans {
   margin-bottom: 24px;
 }
-/* line 556, ../sass/views/_application.scss */
+/* line 561, ../sass/views/_application.scss */
 .invited-foremans .foreman {
   display: table-row;
 }
-/* line 558, ../sass/views/_application.scss */
+/* line 563, ../sass/views/_application.scss */
 .invited-foremans .foreman span {
   display: table-cell;
   padding-right: 6px;
 }
-/* line 566, ../sass/views/_application.scss */
+/* line 571, ../sass/views/_application.scss */
 .invited-foremans .foreman-state:before {
   content: "(";
 }
-/* line 569, ../sass/views/_application.scss */
+/* line 574, ../sass/views/_application.scss */
 .invited-foremans .foreman-state:after {
   content: ")";
 }
 
-/* line 577, ../sass/views/_application.scss */
+/* line 582, ../sass/views/_application.scss */
 .tasks-foreman .foreman-state:before {
   content: "(";
 }
-/* line 580, ../sass/views/_application.scss */
+/* line 585, ../sass/views/_application.scss */
 .tasks-foreman .foreman-state:after {
   content: ")";
 }
-/* line 585, ../sass/views/_application.scss */
+/* line 590, ../sass/views/_application.scss */
 .tasks-foreman .add-foreman:before {
   content: "[";
 }
-/* line 588, ../sass/views/_application.scss */
+/* line 593, ../sass/views/_application.scss */
 .tasks-foreman .add-foreman:after {
   content: "]";
 }
 
-/* line 594, ../sass/views/_application.scss */
+/* line 599, ../sass/views/_application.scss */
 .operation-info {
   width: 55%;
   display: inline-block;
   vertical-align: top;
 }
 
-/* line 599, ../sass/views/_application.scss */
+/* line 604, ../sass/views/_application.scss */
 .organizationLinks {
   vertical-align: top;
   width: 39%;
   padding-left: 48px;
   display: inline-block;
 }
-/* line 604, ../sass/views/_application.scss */
+/* line 609, ../sass/views/_application.scss */
 .organizationLinks .organization-links {
   margin-bottom: 12px;
 }
-/* line 606, ../sass/views/_application.scss */
+/* line 611, ../sass/views/_application.scss */
 .organizationLinks .organization-links a {
   color: #333333;
 }
-/* line 608, ../sass/views/_application.scss */
+/* line 613, ../sass/views/_application.scss */
 .organizationLinks .organization-links a:active, .organizationLinks .organization-links a:visited, .organizationLinks .organization-links a:hover {
   color: #333333;
 }

@@ -12,7 +12,8 @@
             <p class="dialog-close close" data-test-id="verdict-attachment-prints-order-close-dialog">X</p>
           </div>
           <div class="dialog-content">
-            <p data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.description'"></p>
+
+            <h3 data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.description'"></h2>
 
             <div class="print-order-files">
               <table>
@@ -48,17 +49,15 @@
               </table>
             </div>
 
+            <h1 data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.orderInfo'"></h1>
+
 <!-- ****** TODO ****** -->
 
 <!--             <label for="signVerdictPassword" data-bind="ltext: 'verdict.sign-dialog.verifyPassword'"class="form-label"></label> -->
 <!--             <input id="signVerdictPassword" data-test-id="sign-verdict-password" type="password" data-bind="textInput: password" class="form-input text"/> -->
 
-<!--             <div data-bind="if: errorMessage"> -->
-<!--               <div data-bind="ltext: errorMessage" class="context-error" data-test-id="verdict-signature-error-message"></div> -->
-<!--             </div> -->
-
             <div data-bind="if: errorMessage" >
-              <div data-bind="ltext: errorMessage" class="context-error"></div>
+              <div data-bind="ltext: errorMessage" class="context-error" data-test-id="verdict-attachment-prints-order-error-message"></div>
             </div>
 
             <button data-bind="click: orderAttachmentPrints, enable: ok"

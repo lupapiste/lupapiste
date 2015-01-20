@@ -6,6 +6,7 @@ verdict.orderAttachmentPrints.button: Tilaa lupakuvat
 verdict-attachment-prints-order.order-dialog.title: Lupakuvien tilaaminen kopiolaitokselta
 verdict-attachment-prints-order.order-dialog.orderCount: Sarjamäärä
 verdict-attachment-prints-order.order-dialog.description: Seuraavat päätöksen liitteiksi merkityt suunnitelmat lähetetään kopiolaitokselle tulostettavaksi:
+verdict-attachment-prints-order.order-dialog.orderInfo: Tilauksen tiedot
 verdict-attachment-prints-order.order-dialog.submit: Tilaa
 verdict-attachment-prints-order.order-dialog.ready: Kopiolaitokselta tilattiin {0} liitteen lupakuvien kopiot.
 
