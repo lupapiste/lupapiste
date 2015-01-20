@@ -48,7 +48,7 @@ var repository = (function() {
     }
   }
 
-  function load(id, pending, callback) {
+  function doLoad(id, pending, callback) {
     var loadingApp = ajax
       .query("application", {id: id})
       .pending(pending)
@@ -107,6 +107,12 @@ var repository = (function() {
       }
     });
   }
+
+  // debounce repository load
+  var load = _.debounce(
+    function(id, pending, callback) {
+      doLoad(id, pending, callback);
+    }, 250);
 
   function loaded(pages, f) {
     if (!_.isFunction(f)) {
