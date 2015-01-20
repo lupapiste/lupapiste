@@ -6,6 +6,7 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.core :refer [ok fail fail!]]
+            [sade.email :as email]
             [lupapalvelu.action :refer [defquery defcommand update-application notify boolean-parameters] :as action]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.domain :as domain]
@@ -221,6 +222,11 @@
   (let [ordered-count 10
         zip (attachment/get-all-attachments attachments)]
     ;; TODO
+;    (email/send-email-message
+;      "joni.hamalainen@solita.fi"
+;      "Tester"
+;      ["Teeest"]
+;      [(send-kopiolaitos-email nil (:attachments appis))])
     ordered-count
     ))
 
