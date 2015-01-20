@@ -43,13 +43,20 @@
 
 (defn send-mail
   "Send raw email message. Consider using send-email-message instead."
-  [to subject & {:keys [plain html]}]
+  [to subject & {:keys [plain html attachments]}]
   (assert (or plain html) "must provide some content")
   (let [plain-body (when plain {:content plain :type "text/plain; charset=utf-8"})
         html-body  (when html {:content html :type "text/html; charset=utf-8"})
         body       (if (and plain-body html-body)
                      [:alternative plain-body html-body]
-                     [(or plain-body html-body)])]
+                     [(or plain-body html-body)])
+        attachments (when attachments
+                      (for [attachment attachments]
+                        {:type :attachment
+                         :content attachment}))
+        body       (if attachments
+                     (into body attachments)
+                     body)]
     (deliver-email to subject body)))
 
 ;;
@@ -61,12 +68,12 @@
 
 (defn send-email-message
   "Sends email message using a template. Returns true if there is an error, false otherwise."
-  [to subject msg]
-  {:pre [subject msg]}
+  [to subject msg & [attachments]]
+  {:pre [subject msg (vector? attachments)]}
   (if-not (ss/blank? to)
     (let [[plain html] msg]
       (try
-        (send-mail to subject :plain plain :html html)
+        (send-mail to subject :plain plain :html html :attachments attachments)
         false
         (catch Exception e
           (error "Email failure:" e)
