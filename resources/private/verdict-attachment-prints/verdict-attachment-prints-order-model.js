@@ -77,7 +77,7 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function(/*dialogSelector, confirm
     self.lupapisteId(app.id);
     self.address(app.address);
 
-    self.authorizationModel.refresh(application.id);
+    self.authorizationModel.refresh(app.id);
   };
 
   self.openDialog = function(bindings) {
