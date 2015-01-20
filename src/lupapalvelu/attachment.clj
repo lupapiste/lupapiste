@@ -580,6 +580,7 @@
   (append-gridfs-file zip filename fileId))
 
 (defn get-all-attachments [attachments & [application lang]]
+  "Return attachments as zip file. If application and lang, application and submitted application PDF are included"
   (let [temp-file (File/createTempFile "lupapiste.attachments." ".zip.tmp")]
     (debugf "Created temporary zip file for attachments: %s" (.getAbsolutePath temp-file))
     (with-open [out (io/output-stream temp-file)]
