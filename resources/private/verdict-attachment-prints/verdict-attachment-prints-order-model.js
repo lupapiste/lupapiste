@@ -7,10 +7,19 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function(/*dialogSelector, confirm
 
   self.processing = ko.observable(false);
   self.pending = ko.observable(false);
+  self.errorMessage = ko.observable("");
 //  self.password = ko.observable("");
   self.attachments = ko.observable([]);
 //  self.selectedAttachments = ko.computed(function() { return _.filter(self.attachments(), function(a) {return a.selected();}); });
-  self.errorMessage = ko.observable("");
+
+  self.ordererOrganization = ko.observable("");
+  self.ordererEmail = ko.observable("");
+  self.ordererPhone = ko.observable("");
+  self.applicantName = ko.observable("");
+  self.kuntalupatunnus = ko.observable("");
+  self.propertyId = ko.observable("");
+  self.lupapisteId = ko.observable("");
+  self.address = ko.observable("");
 
   self.authorizationModel = authorization.create();
 
@@ -34,28 +43,49 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function(/*dialogSelector, confirm
     var attachmentOrderCountsAreNumbers = _.every(self.attachments(), function(a) {
       return !_.isNaN(_.parseInt(a.orderAmount(), 10));
     }, self);
-    return self.authorizationModel.ok('order-verdict-attachment-prints') && !self.processing() && attachmentOrderCountsAreNumbers;
+    return self.authorizationModel.ok('order-verdict-attachment-prints')
+           && !self.processing()
+           && attachmentOrderCountsAreNumbers
+           && !_.isEmpty(self.ordererOrganization())
+           && !_.isEmpty(self.ordererEmail())
+           && !_.isEmpty(self.ordererPhone())
+           && !_.isEmpty(self.applicantName())
+           && !_.isEmpty(self.kuntalupatunnus())
+           && !_.isEmpty(self.propertyId())
+           && !_.isEmpty(self.lupapisteId())
+           && !_.isEmpty(self.address());
   });
 
   // Open the dialog
 
-  self.init = function(application) {
-    var app = ko.toJS(application);
+  self.init = function(bindings) {
+    var app = ko.toJS(bindings.application);
+    console.log("bindings.application: ", bindings.application);
+    console.log("app: ", app);
+
     var attachments = _(app.attachments || []).filter(function(a) {return a.forPrinting && a.versions && a.versions.length;}).map(normalizeAttachment).value();
 
     self.application = app;
-//    self.password("");
-//    self.processing(false);
-//    self.pending(false);
+    self.processing(false);
+    self.pending(false);
     self.errorMessage("");
     self.attachments(attachments);
+
+    self.ordererOrganization(app.organizationName || "");
+    self.ordererEmail("kirjaamo@rakennusvalvonta");   // TODO: Lisaa organisaatioille tama tieto, ja paakayttajalle muokkausmahdollisuus
+    self.ordererPhone("09 1234 123");                 // TODO: Lisaa organisaatioille tama tieto, ja paakayttajalle muokkausmahdollisuus
+    self.applicantName(app.applicant || "");
+    self.kuntalupatunnus("");                         // TODO: Mika tahan?  Hakemuksella voi olla useita kuntalupatunnuksia, eika me nyt eritella, mihin paatokseen liitteet liittyvat.
+    self.propertyId(app.propertyId);
+    self.lupapisteId(app.id);
+    self.address(app.address);
 
     self.authorizationModel.refresh(application.id);
   };
 
   self.openDialog = function(bindings) {
     console.log("verdict-model, openDialog, bindings: ", bindings);
-    self.init(bindings.application);
+    self.init(bindings);
     LUPAPISTE.ModalDialog.open(self.dialogSelector);
   }
 

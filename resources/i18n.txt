@@ -7,6 +7,16 @@ verdict-attachment-prints-order.order-dialog.title: Lupakuvien tilaaminen kopiol
 verdict-attachment-prints-order.order-dialog.orderCount: Sarjamäärä
 verdict-attachment-prints-order.order-dialog.description: Seuraavat päätöksen liitteiksi merkityt suunnitelmat lähetetään kopiolaitokselle tulostettavaksi:
 verdict-attachment-prints-order.order-dialog.orderInfo: Tilauksen tiedot
+
+verdict-attachment-prints-order.order-dialog.ordererOrganization: Tilaaja
+verdict-attachment-prints-order.order-dialog.ordererEmail: Sähköposti
+verdict-attachment-prints-order.order-dialog.ordererPhone: Puhelinnumero
+verdict-attachment-prints-order.order-dialog.applicantName: Hakijan nimi
+verdict-attachment-prints-order.order-dialog.kuntalupatunnus: Lupatunnus
+verdict-attachment-prints-order.order-dialog.propertyId: Kiinteistötunnus
+verdict-attachment-prints-order.order-dialog.lupapisteId: Asiointitunnus
+verdict-attachment-prints-order.order-dialog.address: Rakennuspaikka
+
 verdict-attachment-prints-order.order-dialog.submit: Tilaa
 verdict-attachment-prints-order.order-dialog.ready: Kopiolaitokselta tilattiin {0} liitteen lupakuvien kopiot.
 
