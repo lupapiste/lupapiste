@@ -8,23 +8,26 @@
         <div data-bind="with: $root.verdictAttachmentPrintsOrderModel">
 
           <div class="dialog-header">
-            <p data-bind="ltext: 'verdict.sign-dialog.header'"></p>
-            <p class="dialog-close close" data-test-id="verdict-signature-close-dialog">X</p>
+            <p data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.title'"></p>
+            <p class="dialog-close close" data-test-id="verdict-attachment-prints-order-close-dialog">X</p>
           </div>
           <div class="dialog-content">
-            <p data-bind="ltext: 'verdict.sign-dialog.contentDescription'"></p>
+            <p data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.description'"></p>
+
+<!-- ****** TODO ****** -->
 
 <!--             <label for="signVerdictPassword" data-bind="ltext: 'verdict.sign-dialog.verifyPassword'"class="form-label"></label> -->
-<!--             <input id="signVerdictPassword" data-test-id="sign-verdict-password" type="password" data-bind="textInput: password"class="form-input text"/> -->
+<!--             <input id="signVerdictPassword" data-test-id="sign-verdict-password" type="password" data-bind="textInput: password" class="form-input text"/> -->
 
 <!--             <div data-bind="if: errorMessage"> -->
 <!--               <div data-bind="ltext: errorMessage" class="context-error" data-test-id="verdict-signature-error-message"></div> -->
 <!--             </div> -->
 
-<!--             <button data-bind="click: sign, enable: authorizationModel.ok('sign-verdict') && password() && !processing()" class="btn btn-primary btn-dialog" data-test-id="do-sign-verdict"> -->
-<!--               <span data-bind="ltext: 'verdict.sign-dialog.signButton'"></span> -->
-<!--               <em data-bind="visible: pending" class="button-loader"></em> -->
-<!--             </button> -->
+            <button data-bind="click: orderAttachmentPrints, enable: ok"
+                    class="btn btn-primary btn-dialog" data-test-id="do-verdict-attachment-prints">
+              <span data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.submit'"></span>
+              <em data-bind="visible: pending" class="button-loader"></em>
+            </button>
 
             <a data-bind="ltext: 'cancel'" class="btn-dialog close cancel" href="#"></a>
 

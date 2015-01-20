@@ -12,6 +12,7 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function(/*dialogSelector, confirm
 //  self.selectedAttachments = ko.computed(function() { return _.filter(self.attachments(), function(a) {return a.selected();}); });
 //  self.errorMessage = ko.observable("");
 
+  self.authorizationModel = authorization.create();
 
   function normalizeAttachment(a) {
     var versions = _(a.versions).reverse().value(),
@@ -28,6 +29,10 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function(/*dialogSelector, confirm
     };
   }
 
+  self.ok = ko.computed(function() {
+    return self.authorizationModel.ok('order-verdict-attachment-prints') /*&& password()*/ && !self.processing();
+  });
+
   // Open the dialog
 
   self.init = function(application) {
@@ -41,6 +46,7 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function(/*dialogSelector, confirm
 //    self.errorMessage("");
     self.attachments(attachments);
 
+    self.authorizationModel.refresh(application.id);
   };
 
   self.openDialog = function(bindings) {
@@ -56,13 +62,13 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function(/*dialogSelector, confirm
     .processing(self.processing)
     .pending(self.pending)
     .success(function(d) {
-      var content = loc("verdict.order-verdict-attachment-prints.ready", d.verdictPrintCount);
-      LUPAPISTE.ModalDialog.showDynamicOk(loc("verdict.order-verdict-attachment-prints.title"), content);
+      var content = loc("verdict-attachment-prints-order.order-dialog.ready", d.verdictPrintCount);
+      LUPAPISTE.ModalDialog.showDynamicOk(loc("verdict-attachment-prints-order.order-dialog.title"), content);
       pageutil.showAjaxWait();
       repository.load(applicationId);
     })
     .error(function(d) {
-      LUPAPISTE.ModalDialog.showDynamicOk(loc("verdict.order-verdict-attachment-prints.title"), loc(d.text));
+      LUPAPISTE.ModalDialog.showDynamicOk(loc("verdict-attachment-prints-order.order-dialog.title"), loc(d.text));
     })
     .call();
   };
