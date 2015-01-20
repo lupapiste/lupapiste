@@ -4080,7 +4080,7 @@ span.icon_clear:before {
   padding-left: 15px;
 }
 /* line 410, ../sass/views/_application.scss */
-#dialog-verdict-attachment-prints-order input[type="text"] {
+#dialog-verdict-attachment-prints-order .order-amount {
   width: 15px;
 }
 
