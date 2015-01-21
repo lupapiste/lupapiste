@@ -1,0 +1,49 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+  </head>
+  <body>
+    <h1>Tilauksen tiedot</h1>
+    <table>
+      <thead>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Tilaaja</td>
+          <td>Sähköposti</td>
+          <td>Puhelinumero</td>
+        </tr>
+        <tr>
+          <td>{{ordererOrganization}}</td>
+          <td>{{ordererEmail}}</td>
+          <td>{{ordererPhone}}</td>
+        </tr>
+        <tr>
+          <td colspan="3">Osoite</td>
+        </tr>
+        <tr>
+          <td colspan="3">{{ordererAddress}}</td>
+        </tr>
+        <tr>
+          <td>Hakijan nimi</td>
+          <td>Lupatunnus</td>
+          <td>Kiinteistötunnus</td>
+        </tr>
+        <tr>
+          <td>{{applicantName}}</td>
+          <td>{{kuntalupatunnus}}</td>
+          <td>{{propertyId}}</td>
+        </tr>
+        <tr>
+          <td>Asiointitunnus</td>
+          <td colspan="2">Rakennuspaikka</td>
+        </tr>
+        <tr>
+          <td>{{lupapisteId}}</td>
+          <td colspan="2">{{address}}</td>
+        </tr>
+      </tbody>
+    </table>
+
+  </body>
+</html>
