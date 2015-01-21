@@ -271,7 +271,9 @@
    :roles      [:authority]
    :input-validators [(partial action/non-blank-parameters [:lang])
                       (partial action/vector-parameters [:attachmentIds])
-                      (partial action/map-parameters [:orderInfo])]}
+                      (partial action/map-parameters [:orderInfo])]
+   ;; TODO: Poista, kun feature on kaytossa
+   :feature    :verdict-attachment-order}
   [command]
   (do-order-verdict-attachment-prints command)
   (ok))

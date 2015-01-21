@@ -460,7 +460,9 @@
    :roles      [:authority]
    :states     (action/all-states-but [:closed :canceled])
    :input-validators [(partial action/boolean-parameters [:isVerdictAttachment])
-                      (partial action/vectorful-of-non-blank-parameters [:attachmentIds])]}
+                      (partial action/vectorful-of-non-blank-parameters [:attachmentIds])]
+   ;; TODO: Poista, kun feature on kaytossa
+   :feature    :verdict-attachment-order}
   [{:keys [created] :as command}]
   (doseq [attachment-id attachmentIds]
     (attachment/update-attachment-key command attachment-id :forPrinting isVerdictAttachment created true false))
