@@ -52,8 +52,7 @@
                      [(or plain-body html-body)])
         attachments (when attachments
                       (for [attachment attachments]
-                        {:type :attachment
-                         :content attachment}))
+                        (assoc (select-keys attachment [:content :file-name]) :type :attachment)))
         body       (if attachments
                      (into body attachments)
                      body)]
@@ -67,9 +66,10 @@
 (declare apply-template)
 
 (defn send-email-message
-  "Sends email message using a template. Returns true if there is an error, false otherwise."
+  "Sends email message using a template. Returns true if there is an error, false otherwise.
+   Attachments as sequence of maps with keys :file-name and :content. :content as File object."
   [to subject msg & [attachments]]
-  {:pre [subject msg (vector? attachments)]}
+  {:pre [subject msg (or (nil? attachments) (and (sequential? attachments) (every? map? attachments)))]}
   (if-not (ss/blank? to)
     (let [[plain html] msg]
       (try
