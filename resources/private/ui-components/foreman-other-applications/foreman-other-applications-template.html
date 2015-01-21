@@ -24,6 +24,12 @@
           </tr>
         </tbody>
 
+        <tbody data-bind="visible: rows().length == 0">
+          <tr>
+            <td data-bind="attr: { colspan: params.subSchema.body.length }, text: loc('muutHankkeet.noRows')"></td>
+          </tr>
+        </tbody>
+
         <tbody data-bind="foreach: { data: rows, as: 'row' }">
           <tr>
             <!-- ko foreach: { data: row, as: 'column' } -->
