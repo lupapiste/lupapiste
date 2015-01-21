@@ -253,13 +253,17 @@
   "testi.suunnittelija@gmail.com"  ;; (organization/get-kopiolaitos-email organization)
   )
 
-(defn- do-order-verdict-attachment-prints [{{:keys [lang attachmentIds orderInfo]} :data application :application}]
+(defn- get-amount [attachmentIdsAndAmounts id]
+  (some #(when (= id (:id %)) (:amount %)) attachmentIdsAndAmounts))
+
+(defn- do-order-verdict-attachment-prints [{{:keys [lang attachmentIdsAndAmounts orderInfo]} :data application :application}]
   ;;
   ;; TODO: Hae organisaation kopiolaitoksen email-osoite.
-  ;; TODO: Laheta tilaus email.
   ;;
   (if-let [email-address (get-kopiolaitos-email-address application)]
-    (let [attachments (filterv #((set attachmentIds) (:id %)) (:attachments application))]
+    (let [attachmentIds (set (map :id attachmentIdsAndAmounts))
+          attachments (filterv #((set attachmentIds) (:id %)) (:attachments application))
+          attachments (map #(assoc % :amount (get-amount attachmentIdsAndAmounts (:id %))) attachments)]
       (if (send-kopiolaitos-email lang email-address attachments orderInfo)
         (ok)
        (fail! :kopiolaitos-email-sending-failed)))
@@ -268,11 +272,11 @@
 (defcommand order-verdict-attachment-prints
   {:description "Orders prints of marked verdict attachments from copy institute.
                  If the command is run more than once, the already ordered attachment copies are ordered again."
-   :parameters [:id :lang :attachmentIds :orderInfo]
-   :states     [:verdictGiven :constructionStarted]   ;; TODO: nama tilat ok?
+   :parameters [:id :lang :attachmentIdsAndAmounts :orderInfo]
+   :states     [:verdictGiven :constructionStarted]
    :roles      [:authority]
    :input-validators [(partial action/non-blank-parameters [:lang])
-                      (partial action/vector-parameters [:attachmentIds])
+                      (partial action/vector-parameters [:attachmentIdsAndAmounts])
                       (partial action/map-parameters [:orderInfo])]
    ;; TODO: Poista, kun feature on kaytossa
    :feature    :verdict-attachment-order}
