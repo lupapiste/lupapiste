@@ -242,7 +242,7 @@
       (not (email/send-email-message
            email-address
            email-subject
-           ["Test message content"]
+           (email/apply-template "kopiolaitos-order.html" orderInfo)
            [attachment]))
       (catch Exception e
         (fail! :kopiolaitos-email-sending-failed)))))
