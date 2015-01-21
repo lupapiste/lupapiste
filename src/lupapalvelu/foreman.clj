@@ -54,11 +54,6 @@
       "ei_tiedossa"            ; TODO: ei_tiedossa -> ei tiedossa kun kaannos excelissa
       value)))
 
-(defn- loc-hashmap-vals [m]
-  (let [loc-fn (comp i18n/loc str)]
-    (into {} (for [[k [prefix v]] m]
-               [k (loc-fn prefix v)]))))
-
 (defn- get-history-data-from-app [app-links foreman-app]
   (let [foreman-doc     (domain/get-document-by-name foreman-app "tyonjohtaja-v2")
 
