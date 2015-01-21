@@ -6,7 +6,7 @@
             [lupapalvelu.document.tools :as tools]
             [monger.operators :refer :all]))
 
-(defn map-foreman-other-applications [application timestamp]
+(defn other-project-document [application timestamp]
   (let [building-doc (domain/get-document-by-name application "uusiRakennus")
         kokonaisala (get-in building-doc [:data :mitat :kokonaisala :value])
         operation (get-in building-doc [:schema-info :op :name])]
@@ -82,8 +82,7 @@
         links              (mongo/select :app-links {:link {$in (map :id foreman-apps)}})]
     (map (partial get-history-data-from-app links) foreman-apps)))
 
-(defn map-application [application]
-  {:id (:id application)
-   :state (:state application)
-   :auth (:auth application)
-   :documents (filter #(= (get-in % [:schema-info :name]) "tyonjohtaja") (:documents application))})
+(defn foreman-application-info [application]
+  (-> (select-keys application [:id :state :auth :documents])
+      (update-in [:documents] (fn [docs] (filter #(= (get-in % [:schema-info :name]) "tyonjohtaja-v2") docs))))
+)
