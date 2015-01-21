@@ -151,10 +151,12 @@
                                        enable: $root.authorization.ok('set-attachment-meta') && editable"></select>
                   </div>
 
-                  <div class="col1 attachment-info-field">
-                    <label for="attachment-is-verdict-attachment" class="form-label" data-bind="ltext: 'attachment.label.verdictAttachment'"></label>
-                    <input type="checkbox" id="attachment-is-verdict-attachment" class="form-input" data-test-id="is-verdict-attachment"
-                           data-bind="checked: isVerdictAttachment, enable: $root.authorization.ok('set-attachments-as-verdict-attachment')"></input>
+                  <div class="col1 attachment-info-field" data-bind="if: features.enabled('verdict-attachment-order')">
+                    <div class="feature">
+                      <label for="attachment-is-verdict-attachment" class="form-label" data-bind="ltext: 'attachment.label.verdictAttachment'"></label>
+                      <input type="checkbox" id="attachment-is-verdict-attachment" class="form-input" data-test-id="is-verdict-attachment"
+                             data-bind="checked: isVerdictAttachment, enable: $root.authorization.ok('set-attachments-as-verdict-attachment')"></input>
+                    </div>
                   </div>
 
                 </div>

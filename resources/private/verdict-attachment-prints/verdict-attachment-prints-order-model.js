@@ -30,7 +30,7 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function(/*dialogSelector, confirm
       id:           a.id,
       type:         { "type-group": a.type["type-group"], "type-id": a.type["type-id"] },
 //      contentType:  latestVersion.contentType,
-      contents:     a.contents || loc(['attachmentType', a.type['type-group'], a.type['type-id']]),
+      contents:     a.contents || loc(["attachmentType", a.type["type-group"], a.type["type-id"]]),
       filename:     latestVersion.filename,
 //      version:      { major: latestVersion.version.major, minor: latestVersion.version.minor },
 //      size:         latestVersion.size,
@@ -43,17 +43,17 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function(/*dialogSelector, confirm
     var attachmentOrderCountsAreNumbers = _.every(self.attachments(), function(a) {
       return !_.isNaN(_.parseInt(a.orderAmount(), 10));
     }, self);
-    return self.authorizationModel.ok("order-verdict-attachment-prints")
-           && !self.processing()
-           && attachmentOrderCountsAreNumbers
-           && !_.isEmpty(self.ordererOrganization())
-           && !_.isEmpty(self.ordererEmail())
-           && !_.isEmpty(self.ordererPhone())
-           && !_.isEmpty(self.applicantName())
-           && !_.isEmpty(self.kuntalupatunnus())
-           && !_.isEmpty(self.propertyId())
-           && !_.isEmpty(self.lupapisteId())
-           && !_.isEmpty(self.address());
+    return self.authorizationModel.ok("order-verdict-attachment-prints") &&
+           !self.processing() &&
+           attachmentOrderCountsAreNumbers &&
+           !_.isEmpty(self.ordererOrganization()) &&
+           !_.isEmpty(self.ordererEmail()) &&
+           !_.isEmpty(self.ordererPhone()) &&
+           !_.isEmpty(self.applicantName()) &&
+           !_.isEmpty(self.kuntalupatunnus()) &&
+           !_.isEmpty(self.propertyId()) &&
+           !_.isEmpty(self.lupapisteId()) &&
+           !_.isEmpty(self.address());
   });
 
   // Open the dialog
@@ -81,40 +81,39 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function(/*dialogSelector, confirm
   };
 
   self.openDialog = function(bindings) {
-    console.log("verdict-model, openDialog, bindings: ", bindings);
     self.init(bindings);
     LUPAPISTE.ModalDialog.open(self.dialogSelector);
-  }
+  };
 
-  self.orderAttachmentPrints = function(/*bindings*/) {
-//    console.log("verdict-model, orderAttachmentPrints, bindings: ", bindings);
-
+  self.orderAttachmentPrints = function() {
+    // cannot replace the orderAmount observable itself, so need to create a new "amount" key
+    var attachmentIds = _.pluck(self.attachments(), "id");
     var data = {
       id: self.application.id,
-      attachments: self.attachments,
+      lang: loc.getCurrentLanguage(),
+      attachmentIds: attachmentIds,
       orderInfo: {
-        ordererOrganization: self.ordererOrganization,
-        ordererEmail: self.ordererEmail,
-        ordererPhone: self.ordererPhone,
-        applicantName: self.applicantName,
-        kuntalupatunnus: self.kuntalupatunnus,
-        propertyId: self.propertyId,
-        lupapisteId: self.lupapisteId,
-        address: self.address
+        ordererOrganization: self.ordererOrganization(),
+        ordererEmail: self.ordererEmail(),
+        ordererPhone: self.ordererPhone(),
+        applicantName: self.applicantName(),
+        kuntalupatunnus: self.kuntalupatunnus(),
+        propertyId: self.propertyId(),
+        lupapisteId: self.lupapisteId(),
+        address: self.address()
       }
     };
 
     ajax.command("order-verdict-attachment-prints", data)
       .processing(self.processing)
       .pending(self.pending)
-      .success(function(d) {
-        var content = loc("verdict-attachment-prints-order.order-dialog.ready", d.verdictPrintCount);
+      .success(function() {
+        var content = loc("verdict-attachment-prints-order.order-dialog.ready", attachmentIds.length);
         LUPAPISTE.ModalDialog.showDynamicOk(loc("verdict-attachment-prints-order.order-dialog.title"), content);
         pageutil.showAjaxWait();
         repository.load(self.application.id);
       })
       .error(function(d) {
-//        LUPAPISTE.ModalDialog.showDynamicOk(loc("verdict-attachment-prints-order.order-dialog.title"), loc(d.text));
         self.errorMessage(d.text);
       })
       .call();

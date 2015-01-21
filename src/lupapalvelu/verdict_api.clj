@@ -15,6 +15,7 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.tasks :as tasks]
             [lupapalvelu.user :as user]
+            [lupapalvelu.i18n :refer [with-lang loc]]
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch-api]
             [lupapalvelu.xml.krysp.reader :as krysp-reader])
   (:import [java.net URL]))
@@ -218,64 +219,62 @@
       (Thread/sleep 2000)
       (fail :error.password))))
 
-(defn- send-kopiolaitos-email [email-address attachments]
-  (let [ordered-count 10
-        zip (attachment/get-all-attachments attachments)]
-    ;; TODO
-;    (email/send-email-message
-;      "joni.hamalainen@solita.fi"
-;      "Tester"
-;      ["Teeest"]
-;      [(send-kopiolaitos-email nil (:attachments appis))])
-    ordered-count
-    ))
+(defn- send-kopiolaitos-email [lang email-address attachments orderInfo]
+
+  (println "\n send-kopiolaitos-email, lang: ")
+  (clojure.pprint/pprint lang)
+  (println "\n send-kopiolaitos-email, email-address: ")
+  (clojure.pprint/pprint email-address)
+  (println "\n send-kopiolaitos-email, attachments: ")
+  (clojure.pprint/pprint attachments)
+  (println "\n send-kopiolaitos-email, orderInfo: ")
+  (clojure.pprint/pprint orderInfo)
+  (println "\n")
+
+  (let [zip (attachment/get-all-attachments attachments)
+        email-subject (str (with-lang lang (loc :kopiolaitos-email-subject)) \space (:ordererOrganization orderInfo))
+        _ (println "\n send-kopiolaitos-email, email-subject: " email-subject "\n")
+        ]
+    ;; from email/send-email-message false = success, true = failure -> turn it other way around
+    (try
+      (not (email/send-email-message
+           email-address
+           email-subject
+           ["Test message content"]
+           [zip]))
+      (catch Exception e
+        (fail! :kopiolaitos-email-sending-failed)))))
 
 ;; TODO: Siirra tama organization-namespaceen
 (defn- get-kopiolaitos-email-address [{:keys [organization] :as application}]
   ;; TODO: Hae organisaatiolta "kopiolaitos-email-address"
-  "pasiesko@example.com"
+  "pasiesko@example.com"  ;; (organization/get-kopiolaitos-email organization)
   )
 
-(defn- do-order-verdict-attachment-prints [{:keys [application] :as command}]
-
+(defn- do-order-verdict-attachment-prints [{{:keys [lang attachmentIds orderInfo]} :data application :application}]
+  ;;
   ;; TODO: Hae organisaation kopiolaitoksen email-osoite.
   ;; TODO: Laheta tilaus email.
-  (when-let [verdict-attachments (seq (filter :forPrinting (:attachments application)))]
-
-    (println "\n do-order-verdict-attachment-prints, verdict-attachments: ")
-    (clojure.pprint/pprint verdict-attachments)
-    (println "\n")
-
-    ;; TODO: Korvaa temp-arvot
-    (if-let [email-address (get-kopiolaitos-email-address application)]
-      (let [ordered-count (send-kopiolaitos-email email-address verdict-attachments)]
-        {:ordered-count ordered-count}
-        )
-
-      (fail! :no-kopiolaitos-email-defined)
-      )))
+  ;;
+  (if-let [email-address (get-kopiolaitos-email-address application)]
+    (let [attachments (filterv #((set attachmentIds) (:id %)) (:attachments application))]
+      (if (send-kopiolaitos-email lang email-address attachments orderInfo)
+        (ok)
+       (fail! :kopiolaitos-email-sending-failed)))
+    (fail! :no-kopiolaitos-email-defined)))
 
 (defcommand order-verdict-attachment-prints
   {:description "Orders prints of marked verdict attachments from copy institute.
                  If the command is run more than once, the already ordered attachment copies are ordered again."
-   :parameters [:id :attachments :orderInfo]
+   :parameters [:id :lang :attachmentIds :orderInfo]
    :states     [:verdictGiven :constructionStarted]   ;; TODO: nama tilat ok?
    :roles      [:authority]
-   :input-validators [(partial action/vector-parameters [:attachments])
+   :input-validators [(partial action/non-blank-parameters [:lang])
+                      (partial action/vector-parameters [:attachmentIds])
                       (partial action/map-parameters [:orderInfo])]
-;   :notified   true
-;   :on-success (notify :application-verdict)
-   }
+   ;; TODO: Poista, kun feature on kaytossa
+   :feature    :verdict-attachment-order}
   [command]
-
-  (println "\n command data: ")
-  (clojure.pprint/pprint (:data command))
-  (println "\n")
-
-  (if-let [result (do-order-verdict-attachment-prints command)]
-   (ok :verdictPrintCount (:ordered-count result))
-   (fail :order-verdict-attachment-prints-failed)))
-
-
-
+  (do-order-verdict-attachment-prints command)
+  (ok))
 
