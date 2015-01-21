@@ -86,21 +86,21 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function(/*dialogSelector, confirm
     LUPAPISTE.ModalDialog.open(self.dialogSelector);
   };
 
-  self.orderAttachmentPrints = function(/*bindings*/) {
-//    console.log("verdict-model, orderAttachmentPrints, bindings: ", bindings);
-
+  self.orderAttachmentPrints = function() {
+    // cannot replace the orderAmount observable itself, so need to create a new "amount" key
+    var attachmentsWithAmounts = _.map(self.attachments(), function(a) { a.amount = ko.unwrap(a.orderAmount); return a; });
     var data = {
       id: self.application.id,
-      attachments: self.attachments,
+      attachments: attachmentsWithAmounts,
       orderInfo: {
-        ordererOrganization: self.ordererOrganization,
-        ordererEmail: self.ordererEmail,
-        ordererPhone: self.ordererPhone,
-        applicantName: self.applicantName,
-        kuntalupatunnus: self.kuntalupatunnus,
-        propertyId: self.propertyId,
-        lupapisteId: self.lupapisteId,
-        address: self.address
+        ordererOrganization: self.ordererOrganization(),
+        ordererEmail: self.ordererEmail(),
+        ordererPhone: self.ordererPhone(),
+        applicantName: self.applicantName(),
+        kuntalupatunnus: self.kuntalupatunnus(),
+        propertyId: self.propertyId(),
+        lupapisteId: self.lupapisteId(),
+        address: self.address()
       }
     };
 
@@ -114,7 +114,6 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function(/*dialogSelector, confirm
         repository.load(self.application.id);
       })
       .error(function(d) {
-//        LUPAPISTE.ModalDialog.showDynamicOk(loc("verdict-attachment-prints-order.order-dialog.title"), loc(d.text));
         self.errorMessage(d.text);
       })
       .call();
