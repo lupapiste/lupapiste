@@ -239,7 +239,9 @@
   (if app
     (let [app (assoc app :allowedAttachmentTypes (attachment/get-attachment-types-for-application app))]
       (ok :application (post-process-app app user)
-          :authorities (find-authorities-in-applications-organization app)
+          :authorities (if (user/authority? user)
+                         (find-authorities-in-applications-organization app)
+                         [])
           :permitSubtypes (permit/permit-subtypes (:permitType app))))
     (fail :error.not-found)))
 
