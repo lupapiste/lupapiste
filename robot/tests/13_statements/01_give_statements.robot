@@ -59,9 +59,11 @@ Sonja adds four statement persons to application
 
 Sonja can delete statement
   Open statement  3
+  Wait Until  Title Should Be  ${appname} - Lupapiste
   Wait and click  xpath=//*[@data-test-id='delete-statement']
   Confirm  dynamic-yes-no-confirm-dialog
   Wait until  Statement count is  3
+  Wait Until  Title Should Be  ${appname} - Lupapiste
 
 Sonja can't give statement to Ronjas statement
   Open statement  0
