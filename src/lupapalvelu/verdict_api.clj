@@ -228,15 +228,16 @@
   (clojure.pprint/pprint orderInfo)
   (println "\n")
 
-  (let [ordered-count 10
-        zip (attachment/get-all-attachments attachments)]
+  (let [zip (attachment/get-all-attachments attachments)]
     ;; TODO
-;    (email/send-email-message
-;      "joni.hamalainen@solita.fi"
-;      "Tester"
-;      ["Teeest"]
-;      [(send-kopiolaitos-email nil (:attachments appis))])
-    ordered-count
+    ;; from email/send-email-message false = success, true = failure -> turn it other way around
+    #_(not (email/send-email-message
+            "joni.hamalainen@solita.fi"
+            "Tester"
+            ["Teeest"]
+            [(send-kopiolaitos-email nil (:attachments appis))]))
+
+    true   ;; TODO: Remove this
     ))
 
 ;; TODO: Siirra tama organization-namespaceen
@@ -246,13 +247,14 @@
   )
 
 (defn- do-order-verdict-attachment-prints [{{:keys [attachments orderInfo]} :data application :application}]
-
+  ;;
   ;; TODO: Hae organisaation kopiolaitoksen email-osoite.
   ;; TODO: Laheta tilaus email.
-
+  ;;
   (if-let [email-address (get-kopiolaitos-email-address application)]
-    (let [ordered-count (send-kopiolaitos-email email-address attachments orderInfo)]
-      {:ordered-count (count attachments)})
+    (if (send-kopiolaitos-email email-address attachments orderInfo)
+      (ok)
+      (fail! :kopiolaitos-email-sending-failed))
     (fail! :no-kopiolaitos-email-defined)))
 
 (defcommand order-verdict-attachment-prints
@@ -262,20 +264,7 @@
    :states     [:verdictGiven :constructionStarted]   ;; TODO: nama tilat ok?
    :roles      [:authority]
    :input-validators [(partial action/vector-parameters [:attachments])
-                      (partial action/map-parameters [:orderInfo])]
-;   :notified   true
-;   :on-success (notify :application-verdict)
-   }
+                      (partial action/map-parameters [:orderInfo])]}
   [command]
-
-  (println "\n command data: ")
-  (clojure.pprint/pprint (:data command))
-  (println "\n")
-
-  (if-let [result (do-order-verdict-attachment-prints command)]
-    (ok :verdictPrintCount (:ordered-count result))
-    (fail :order-verdict-attachment-prints-failed)))
-
-
-
+  (do-order-verdict-attachment-prints command))
 

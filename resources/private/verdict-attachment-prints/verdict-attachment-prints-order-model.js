@@ -107,8 +107,8 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function(/*dialogSelector, confirm
     ajax.command("order-verdict-attachment-prints", data)
       .processing(self.processing)
       .pending(self.pending)
-      .success(function(d) {
-        var content = loc("verdict-attachment-prints-order.order-dialog.ready", d.verdictPrintCount);
+      .success(function() {
+        var content = loc("verdict-attachment-prints-order.order-dialog.ready", attachmentsWithAmounts.length);
         LUPAPISTE.ModalDialog.showDynamicOk(loc("verdict-attachment-prints-order.order-dialog.title"), content);
         pageutil.showAjaxWait();
         repository.load(self.application.id);

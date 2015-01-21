@@ -16,11 +16,10 @@ verdict-attachment-prints-order.order-dialog.kuntalupatunnus: Lupatunnus
 verdict-attachment-prints-order.order-dialog.propertyId: Kiinteistötunnus
 verdict-attachment-prints-order.order-dialog.lupapisteId: Asiointitunnus
 verdict-attachment-prints-order.order-dialog.address: Rakennuspaikka
-
 verdict-attachment-prints-order.order-dialog.submit: Tilaa
 verdict-attachment-prints-order.order-dialog.ready: Kopiolaitokselta tilattiin {0} liitteen lupakuvien kopiot.
 
-order-verdict-attachment-prints-failed: Lupakuvien tilaaminen kopiolaitokselta epäonnistui
 no-kopiolaitos-email-defined: Lupakuvien tilaaminen epäonnistui. Kopiolaitoksen sähköpostiosoitetta ei ole määritelty organisaatiollenne.
+kopiolaitos-email-sending-failed: Lupakuvien tilaaminen kopiolaitokselta epäonnistui sähköpostin lähettämisessä esiintyneen ongelman vuoksi.
 
 application.attachmentContents: Sisältö
