@@ -52,6 +52,7 @@ Sonja sees stamping button
 Sonja clicks stamp button, stamping page opens
   Click element  xpath=//div[@id="application-attachments-tab"]//button[@data-test-id="stamp-attachments-btn"]
   Wait Until  Element should be visible  stamping-container
+  Wait Until  Title Should Be  ${appname} - Lupapiste
 
 Sonja sees stamping info fields
   Element should be visible  stamp-info
