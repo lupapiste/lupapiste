@@ -13,6 +13,13 @@
             <th class="fourth" data-bind="ltext: 'tyonjohtaja.historia.hanke'"></th>
           </tr>
         </thead>
+
+        <tbody data-bind="visible: projects().length == 0">
+          <tr>
+            <td colspan="4" data-bind="text: loc('tyonjohtaja.noProjects')"></td>
+          </tr>
+        </tbody>
+
         <tbody data-bind="foreach: projects" >
           <tr>
             <td data-bind="text: loc(['municipality', municipality])"></td>
