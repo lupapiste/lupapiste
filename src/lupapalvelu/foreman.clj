@@ -22,13 +22,13 @@
                    :modified timestamp}}))
 
 (defn- get-foreman-hetu [foreman-application]
-  (let [foreman-doc     (first (filter #(= "tyonjohtaja-v2" (-> % :schema-info :name)) (:documents foreman-application)))]
+  (let [foreman-doc (domain/get-document-by-name foreman-application "tyonjohtaja-v2")]
     (get-in foreman-doc [:data :henkilotiedot :hetu :value])))
 
 (defn- get-foreman-applications [foreman-application & [foreman-hetu]]
   (when-let [foreman-hetu (if (ss/blank? foreman-hetu)
-                       (get-foreman-hetu foreman-application)
-                       foreman-hetu)]
+                            (get-foreman-hetu foreman-application)
+                            foreman-hetu)]
     (mongo/select :applications {"operations.name" "tyonjohtajan-nimeaminen-v2"
                                  :documents {$elemMatch {"schema-info.name" "tyonjohtaja-v2"
                                                          "data.henkilotiedot.hetu.value" foreman-hetu}}})))
@@ -65,12 +65,12 @@
         project-app-id  (first (remove #{(:id foreman-app)} (:link relevant-link)))
         operation       (get-linked-app-operations (:id foreman-app) relevant-link)]
 
-     {:municipality   municipality
-      :difficulty     difficulty
-      :jobDescription foreman-role
-      :operation      operation
-      :linkedAppId    project-app-id
-      :foremanAppId   (:id foreman-app)}))
+    {:municipality   municipality
+     :difficulty     difficulty
+     :jobDescription foreman-role
+     :operation      operation
+     :linkedAppId    project-app-id
+     :foremanAppId   (:id foreman-app)}))
 
 (defn get-foreman-history-data [foreman-app]
   (let [foreman-apps       (->> (get-foreman-applications foreman-app)
