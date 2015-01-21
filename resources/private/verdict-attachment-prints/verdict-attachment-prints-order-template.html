@@ -3,7 +3,6 @@
   <body>
     <section class="page" id="verdict-attachment-prints-order-dialogs" style="visibility: visible; display: block;">
 
-<!-- TODO -->
       <div id="dialog-verdict-attachment-prints-order" class="window autosized">
         <div data-bind="with: $root.verdictAttachmentPrintsOrderModel">
 
@@ -23,9 +22,6 @@
                     <th data-bind="ltext: 'application.attachmentContents'"></th>
                     <th data-bind="ltext: 'application.attachmentFile'"></th>
                     <th data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.orderCount'"></th>
-<!--                     <th data-bind="ltext: 'application.attachmentVersion'"></th> -->
-<!--                     <th data-bind="ltext: 'stamp.size'"></th> -->
-<!--                     <th data-bind="ltext: 'signAttachment.select'"></th> -->
                   </tr>
                 </thead>
                 <tbody data-bind="foreach: attachments">
@@ -34,13 +30,6 @@
                     <td><label data-bind="text: contents"></label></td>
                     <td><label data-bind="text: filename"></label></td>
                     <td><input type="text" data-bind="textInput: orderAmount, attr: {id: 'orderAmount-' + id}" class="order-amount" /></td>
-<!--                     <td> -->
-<!--                       <span data-bind="version: version"></span> -->
-<!--                     </td> -->
-<!--                     <td data-bind="size: size"></td> -->
-<!--                     <td style="text-align: center;"> -->
-<!--                       <input type="checkbox" data-bind="checked: selected, attr: {id: 'sign' + id}" /> -->
-<!--                     </td> -->
                   </tr>
                 </tbody>
               </table>
