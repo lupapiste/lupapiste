@@ -250,7 +250,7 @@
 ;; TODO: Siirra tama organization-namespaceen
 (defn- get-kopiolaitos-email-address [{:keys [organization] :as application}]
   ;; TODO: Hae organisaatiolta "kopiolaitos-email-address"
-  "pasiesko@example.com"  ;; (organization/get-kopiolaitos-email organization)
+  "testi.suunnittelija@gmail.com"  ;; (organization/get-kopiolaitos-email organization)
   )
 
 (defn- do-order-verdict-attachment-prints [{{:keys [lang attachmentIds orderInfo]} :data application :application}]
