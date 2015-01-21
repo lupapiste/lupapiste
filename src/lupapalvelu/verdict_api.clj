@@ -241,7 +241,7 @@
            email-address
            email-subject
            ["Test message content"]
-           attachments))
+           [zip]))
       (catch Exception e
         (fail! :kopiolaitos-email-sending-failed)))))
 
