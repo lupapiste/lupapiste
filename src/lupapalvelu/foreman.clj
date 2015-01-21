@@ -26,7 +26,7 @@
     (get-in foreman-doc [:data :henkilotiedot :hetu :value])))
 
 (defn- get-foreman-applications [foreman-application & [foreman-hetu]]
-  (let [foreman-hetu (if (ss/blank? foreman-hetu)
+  (when-let [foreman-hetu (if (ss/blank? foreman-hetu)
                        (get-foreman-hetu foreman-application)
                        foreman-hetu)]
     (mongo/select :applications {"operations.name" "tyonjohtajan-nimeaminen-v2"
