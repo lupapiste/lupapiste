@@ -66,9 +66,9 @@
         operation       (get-linked-app-operations (:id foreman-app) relevant-link)]
 
      {:municipality   municipality
-      :difficulty     (str "osapuoli.patevyysvaatimusluokka." difficulty)
-      :jobDescription (str "osapuoli.tyonjohtaja.kuntaRoolikoodi." foreman-role)
-      :operation      (str "operations." operation)
+      :difficulty     difficulty
+      :jobDescription foreman-role
+      :operation      operation
       :linkedAppId    project-app-id
       :foremanAppId   (:id foreman-app)}))
 
