@@ -8,7 +8,7 @@
   function Model() {
     var self = this;
 
-    self.application = null;
+    self.application = {};
 
     self.title = ko.observable();
     self.url = ko.observable();
@@ -19,7 +19,7 @@
     self.waitingOperations = ko.observable();
 
     self.clear = function() {
-      self.application = null;
+      self.application = {};
       return self.title("").url("").operations(null).operation(null).pending(false).waitingOperations(false);
     };
 
@@ -66,7 +66,10 @@
       currentId = newId;
       model.clear();
       repository.load(currentId);
+    } else {
+      lupapisteApp.setTitle(model.application.title);
     }
+
     if (tree) {
       tree.start();
     }
@@ -75,6 +78,7 @@
   repository.loaded(["add-operation"], function(application) {
     if (currentId === application.id) {
       model.init(application);
+      lupapisteApp.setTitle(application.title);
     }
   });
 

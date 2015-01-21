@@ -51,6 +51,7 @@
     "gis": true,
     "locationSearch": true,
     "LUPAPISTE": true,
+    "lupapisteApp" :true,
     "util": true,
     "invites": true,
     "tree": true,
@@ -72,5 +73,5 @@
        "LUPAPISTE","municipalities","organizations",
        "pageutil","repository","RequestContext",
        "stamping","taskUtil","taskPageController",
-       "tree","user","users","util"]
+       "tree","user","users","util", "lupapisteApp"]
 }

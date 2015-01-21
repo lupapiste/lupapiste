@@ -35,6 +35,7 @@ var taskPageController = (function() {
   "use strict";
 
   var currentApplicationId = null;
+  var currentApplicationTitle = null; // TODO read from global application instance after that has been implemented
   var currentTaskId = null;
   var task = ko.observable();
   var processing = ko.observable(false);
@@ -96,7 +97,10 @@ var taskPageController = (function() {
    */
   function refresh(application, taskId) {
     currentApplicationId = application.id;
+    currentApplicationTitle = application.title;
     currentTaskId = taskId;
+
+    lupapisteApp.setTitle(currentApplicationTitle);
 
     attachmentsModel.refresh(application, {type: "task", id: currentTaskId});
 
@@ -137,6 +141,8 @@ var taskPageController = (function() {
     // Reload application only if needed
     if (currentApplicationId !== applicationId) {
       repository.load(applicationId);
+    } else {
+      lupapisteApp.setTitle(currentApplicationTitle);
     }
     currentApplicationId = applicationId;
   });
