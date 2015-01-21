@@ -232,6 +232,8 @@
   (println "\n")
 
   (let [zip (attachment/get-all-attachments attachments)
+        zip-file-name "Lupakuvat.zip"
+        attachment {:content zip :file-name zip-file-name}
         email-subject (str (with-lang lang (loc :kopiolaitos-email-subject)) \space (:ordererOrganization orderInfo))
         _ (println "\n send-kopiolaitos-email, email-subject: " email-subject "\n")
         ]
@@ -241,7 +243,7 @@
            email-address
            email-subject
            ["Test message content"]
-           [zip]))
+           [attachment]))
       (catch Exception e
         (fail! :kopiolaitos-email-sending-failed)))))
 
