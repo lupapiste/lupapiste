@@ -81,17 +81,17 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function(/*dialogSelector, confirm
   };
 
   self.openDialog = function(bindings) {
-    console.log("verdict-model, openDialog, bindings: ", bindings);
     self.init(bindings);
     LUPAPISTE.ModalDialog.open(self.dialogSelector);
   };
 
   self.orderAttachmentPrints = function() {
     // cannot replace the orderAmount observable itself, so need to create a new "amount" key
-    var attachmentsWithAmounts = _.map(self.attachments(), function(a) { a.amount = ko.unwrap(a.orderAmount); return a; });
+    var attachmentIds = _.pluck(self.attachments(), "id");
     var data = {
       id: self.application.id,
-      attachments: attachmentsWithAmounts,
+      lang: loc.getCurrentLanguage(),
+      attachmentIds: attachmentIds,
       orderInfo: {
         ordererOrganization: self.ordererOrganization(),
         ordererEmail: self.ordererEmail(),
@@ -108,7 +108,7 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function(/*dialogSelector, confirm
       .processing(self.processing)
       .pending(self.pending)
       .success(function() {
-        var content = loc("verdict-attachment-prints-order.order-dialog.ready", attachmentsWithAmounts.length);
+        var content = loc("verdict-attachment-prints-order.order-dialog.ready", attachmentIds.length);
         LUPAPISTE.ModalDialog.showDynamicOk(loc("verdict-attachment-prints-order.order-dialog.title"), content);
         pageutil.showAjaxWait();
         repository.load(self.application.id);
