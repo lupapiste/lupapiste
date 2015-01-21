@@ -23,6 +23,26 @@ var LUPAPISTE = LUPAPISTE || {};
     self.previousHash = undefined;
     self.currentHash = undefined;
 
+    // Global models
+    self.models = [];
+
+    /**
+     * Get or set model object.
+     * @param {Object} name  Model name must be given
+     * @param {Object} model Optional model object to set
+     */
+    self.model = function(name, model) {
+      if (!name) {
+        throw "Model name must not be falsey!";
+      }
+
+      if (model !== undefined) {
+        self.models[name] = model;
+      }
+
+      return self.models[name];
+    };
+
     /**
      * Prepends given title to browser window title.
      *
