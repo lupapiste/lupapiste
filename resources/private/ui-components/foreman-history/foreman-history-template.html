@@ -15,10 +15,10 @@
         </thead>
         <tbody data-bind="foreach: projects" >
           <tr>
-            <td data-bind="text: municipality"></td>
-            <td data-bind="text: difficulty"></td>
-            <td data-bind="text: jobDescription"></td>
-            <td><span data-bind="text: operation"></span> (<a href="#" data-bind="click: $parent.followAppLink, text: linkedAppId"></a>)</td>
+            <td data-bind="text: loc(['municipality', municipality])"></td>
+            <td data-bind="ltext: difficulty"></td>
+            <td><span data-bind="ltext: jobDescription"></span> (<span href="#" data-bind="text: foremanAppId"></span>)</td>
+            <td><span data-bind="ltext: operation"></span> (<a href="#" data-bind="click: $parent.followAppLink, text: linkedAppId"></a>)</td>
           </tr>
         </tbody>
     </script>

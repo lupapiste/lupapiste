@@ -70,11 +70,12 @@
         project-app-id  (first (remove #{(:id foreman-app)} (:link relevant-link)))
         operation       (get-linked-app-operations (:id foreman-app) relevant-link)]
 
-    (merge (loc-hashmap-vals {:municipality ["municipality." municipality]
-                              :difficulty ["osapuoli.patevyysvaatimusluokka." difficulty]
-                              :jobDescription ["osapuoli.tyonjohtaja.kuntaRoolikoodi." foreman-role]
-                              :operation ["operations." operation]})
-           {:linkedAppId project-app-id})))
+     {:municipality   municipality
+      :difficulty     (str "osapuoli.patevyysvaatimusluokka." difficulty)
+      :jobDescription (str "osapuoli.tyonjohtaja.kuntaRoolikoodi." foreman-role)
+      :operation      (str "operations." operation)
+      :linkedAppId    project-app-id
+      :foremanAppId   (:id foreman-app)}))
 
 (defn get-foreman-history-data [foreman-app]
   (let [foreman-apps       (->> (get-foreman-applications foreman-app)

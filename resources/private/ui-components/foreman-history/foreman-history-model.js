@@ -15,7 +15,7 @@ LUPAPISTE.ForemanHistoryModel = function (params) {
     .call();
 
   self.followAppLink = function(project) {
-    window.location.hash = "!/application/" + project.linkedAppId
+    window.location.hash = "!/application/" + project.linkedAppId;
   };
 };
 
