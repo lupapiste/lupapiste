@@ -7,11 +7,13 @@ Variables      variables.py
 *** Test Cases ***
 
 Mikko creates application
+  ${secs} =  Get Time  epoch
+  Set Suite Variable  ${appname}  attachments${secs}
   Mikko logs in
-  Create application the fast way  application-papplication  753  753-416-25-30  kerrostalo-rivitalo
+  Create application the fast way  ${appname}  753  753-416-25-30  kerrostalo-rivitalo
 
 Mikko edits operation description
-  Open application  application-papplication  753-416-25-30
+  Open application  ${appname}  753-416-25-30
   Wait and click  xpath=//div[@id='application-info-tab']//span[@data-test-id='edit-op-description']
   Input text by test id  op-description-editor  Talo A
   Wait until  Page should contain  Tallennettu
@@ -34,8 +36,6 @@ Mikko edits operation B description
 
 Mikko adds txt attachment without comment
   [Tags]  attachments
-  ${secs} =  Get Time  epoch
-  Set Suite Variable  ${appname}  attachments${secs}
   Open tab  attachments
   Add attachment  ${TXT_TESTFILE_PATH}  ${EMPTY}  Asuinkerrostalon tai rivitalon rakentaminen - Talo A
   Application state should be  draft
@@ -45,6 +45,7 @@ Mikko opens attachment details
   [Tags]  attachments
   Open attachment details  muut.muu
   Assert file latest version  ${TXT_TESTFILE_NAME}  1.0
+  Title Should Be  ${appname} - Lupapiste
 
 Mikko can change related operation
   Element should be visible  xpath=//select[@data-test-id='attachment-operation-select']
@@ -66,7 +67,7 @@ Mikko can change contents
 
 Mikko logs in and goes to attachments tab
   Mikko logs in
-  Open application  application-papplication  753-416-25-30
+  Open application  ${appname}  753-416-25-30
   Open tab  attachments
 
 Mikko sees that contents metadata is visible in attachments list
