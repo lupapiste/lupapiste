@@ -294,6 +294,14 @@
   (update-organization (first organizations) {$set {:app-required-fields-filling-obligatory isObligatory}})
   (ok))
 
+(defcommand set-kopiolaitos-email
+  {:parameters [email]
+   :roles [:authorityAdmin]
+   :input-validators  [(partial non-blank-parameters [:email])]}
+  [{{:keys [organizations]} :user}]
+  (update-organization (first organizations) {$set {:kopiolaitosEmail email}})
+  (ok))
+
 (defquery krysp-config
   {:roles [:authorityAdmin]}
   [{{:keys [organizations]} :user}]
