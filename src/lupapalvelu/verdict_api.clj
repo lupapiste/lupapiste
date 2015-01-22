@@ -1,7 +1,8 @@
 (ns lupapalvelu.verdict-api
-  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error fatal]]
+  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn warnf error fatal]]
             [pandect.core :as pandect]
             [monger.operators :refer :all]
+            [clojure.java.io :as io :refer [delete-file]]
             [sade.http :as http]
             [sade.strings :as ss]
             [sade.util :as util]
@@ -244,6 +245,9 @@
            email-subject
            (email/apply-template "kopiolaitos-order.html" orderInfo)
            [attachment]))
+      (io/delete-file zip)
+      (catch java.io.IOException ioe
+        (warnf "Could not delete temporary zip file: %s" (.getAbsolutePath zip)))
       (catch Exception e
         (fail! :kopiolaitos-email-sending-failed)))))
 
