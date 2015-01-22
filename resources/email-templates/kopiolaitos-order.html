@@ -3,7 +3,6 @@
     <meta charset="utf-8" />
     <style>
     td, th { padding: 0.5em;}
-    td.heading { font-weight: bold;}
     </style>
   </head>
   <body>
@@ -15,9 +14,9 @@
       </thead>
       <tbody>
         <tr>
-          <td class="heading">Tilaaja</td>
-          <td class="heading">Sähköposti</td>
-          <td class="heading">Puhelinumero</td>
+          <th>Tilaaja</th>
+          <th>Sähköposti</th>
+          <th>Puhelinumero</th>
         </tr>
         <tr>
           <td>{{ordererOrganization}}</td>
@@ -25,15 +24,15 @@
           <td>{{ordererPhone}}</td>
         </tr>
         <tr>
-          <td class="heading" colspan="3">Osoite</td>
+          <th colspan="3">Osoite</th>
         </tr>
         <tr>
           <td colspan="3">{{ordererAddress}}</td>
         </tr>
         <tr>
-          <td class="heading">Hakijan nimi</td>
-          <td class="heading">Lupatunnus</td>
-          <td class="heading">Kiinteistötunnus</td>
+          <th>Hakijan nimi</th>
+          <th>Lupatunnus</th>
+          <th>Kiinteistötunnus</th>
         </tr>
         <tr>
           <td>{{applicantName}}</td>
@@ -41,8 +40,8 @@
           <td>{{propertyId}}</td>
         </tr>
         <tr>
-          <td class="heading">Asiointitunnus</td>
-          <td class="heading" colspan="2">Rakennuspaikka</td>
+          <th>Asiointitunnus</th>
+          <th colspan="2">Rakennuspaikka</th>
         </tr>
         <tr>
           <td>{{lupapisteId}}</td>
