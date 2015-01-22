@@ -137,28 +137,40 @@
           resp (query sipoo "organization-by-user") => ok?]
       (get-in resp [:organization :selectedOperations]) => {:R ["aita" "pientalo"]}))
 
-  (fact "An application query correctly returns the 'required fields filling obligatory' info in the organization meta data"
+  (fact "An application query correctly returns the 'required fields filling obligatory' and 'kopiolaitos-email' info in the organization meta data"
     (let [app-id (create-app-id pena :operation "kerrostalo-rivitalo" :municipality sonja-muni)
           app    (query-application pena app-id)
-          org    (query admin "organization-by-id" :organizationId  (:organization app))]
+          org    (query admin "organization-by-id" :organizationId  (:organization app))
+          kopiolaitos-email "kopiolaitos@example.com"]
 
-      (fact "when the 'app-required-fields-filling-obligatory' flag has not yet been set for organization in db"
-        (:app-required-fields-filling-obligatory org) => nil
-        (-> app :organizationMeta :requiredFieldsFillingObligatory) => false)
+;      (fact "the 'app-required-fields-filling-obligatory' and 'kopiolaitos-email' flags have not yet been set for organization in db"
+;        (:app-required-fields-filling-obligatory org) => nil
+;        (-> app :organizationMeta :requiredFieldsFillingObligatory) => false)
 
-      (command sipoo "set-organization-app-required-fields-filling-obligatory" :isObligatory false) => ok?
+;      (command sipoo "set-organization-app-required-fields-filling-obligatory" :isObligatory false) => ok?
+
       (let [app    (query-application pena app-id)
-            org    (query admin "organization-by-id" :organizationId  (:organization app))]
-        (fact "when the 'app-required-fields-filling-obligatory' flag set to False"
+            org    (query admin "organization-by-id" :organizationId  (:organization app))
+            organizationMeta (:organizationMeta app)]
+        (fact "the 'app-required-fields-filling-obligatory' is set to False"
           (:app-required-fields-filling-obligatory org) => false
-          (-> app :organizationMeta :requiredFieldsFillingObligatory) => false))
+          (:requiredFieldsFillingObligatory organizationMeta) => false)
+        (fact "the 'kopiolaitos-email' is set to nil"
+          (:kopiolaitos-email org) => nil
+          (:kopiolaitosEmail organizationMeta) => nil))
 
       (command sipoo "set-organization-app-required-fields-filling-obligatory" :isObligatory true) => ok?
+      (command sipoo "set-kopiolaitos-email" :email kopiolaitos-email) => ok?
+
       (let [app    (query-application pena app-id)
-            org    (query admin "organization-by-id" :organizationId  (:organization app))]
-        (fact "when the 'app-required-fields-filling-obligatory' flag set to True"
+            org    (query admin "organization-by-id" :organizationId  (:organization app))
+            organizationMeta (:organizationMeta app)]
+        (fact "the 'app-required-fields-filling-obligatory' flag is set to true value"
           (:app-required-fields-filling-obligatory org) => true
-          (-> app :organizationMeta :requiredFieldsFillingObligatory) => true)))))
+          (:requiredFieldsFillingObligatory organizationMeta) => true)
+        (fact "the 'kopiolaitos-email' flag is set to given email address"
+          (:kopiolaitos-email org) => kopiolaitos-email
+          (:kopiolaitosEmail organizationMeta) => kopiolaitos-email)))))
 
 (facts "municipality-active"
   (fact "only info requests enabled"
