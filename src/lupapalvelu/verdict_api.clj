@@ -234,7 +234,7 @@
 
   (let [zip (attachment/get-all-attachments attachments)
         zip-file-name "Lupakuvat.zip"
-        attachment {:content zip :file-name zip-file-name}
+        email-attachment {:content zip :file-name zip-file-name}
         email-subject (str (with-lang lang (loc :kopiolaitos-email-subject)) \space (:ordererOrganization orderInfo))
         _ (println "\n send-kopiolaitos-email, email-subject: " email-subject "\n")
         orderInfo (assoc orderInfo :ordererAddress (str "Testikatu 2, 00000 Helsinki, " (:ordererOrganization orderInfo)))]
@@ -244,7 +244,7 @@
            email-address
            email-subject
            (email/apply-template "kopiolaitos-order.html" orderInfo)
-           [attachment]))
+           [email-attachment]))
       (io/delete-file zip)
       (catch java.io.IOException ioe
         (warnf "Could not delete temporary zip file: %s" (.getAbsolutePath zip)))
