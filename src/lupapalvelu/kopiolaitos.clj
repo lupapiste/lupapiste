@@ -4,6 +4,7 @@
             [sade.core :refer [ok fail fail!]]
             [sade.email :as email]
             [lupapalvelu.attachment :as attachment]
+            [lupapalvelu.organization :as organization]
             [lupapalvelu.i18n :refer [with-lang loc]]))
 
 (defn- get-kopiolaitos-html-table-content [attachments lang]
@@ -71,11 +72,8 @@
       (catch Exception e
         (fail! :kopiolaitos-email-sending-failed)))))
 
-;; TODO: Siirra tama organization-namespaceen
 (defn- get-kopiolaitos-email-address [{:keys [organization] :as application}]
-  ;; TODO: Hae organisaatiolta "kopiolaitos-email-address"
-  "testi.suunnittelija@gmail.com"  ;; (organization/get-kopiolaitos-email organization)
-  )
+  (organization/with-organization organization :kopiolaitos-email))
 
 (defn- get-amount [attachmentIdsAndAmounts id]
   (some #(when (= id (:id %)) (:amount %)) attachmentIdsAndAmounts))
