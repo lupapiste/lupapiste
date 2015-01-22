@@ -35,6 +35,16 @@
     (ok :projects (foreman/get-foreman-history-data application))
     (fail :error.not-found)))
 
+(defquery reduced-foreman-history
+  {:roles            [:authority :applicant]
+   :states           action/all-states
+   :extra-auth-roles [:any]
+   :parameters       [:id]}
+  [{application :application user :user :as command}]
+  (if application
+    (ok :projects (foreman/get-foreman-reduced-history-data application))
+    (fail :error.not-found)))
+
 (defquery foreman-applications
   {:roles            [:applicant :authority]
    :states           action/all-states

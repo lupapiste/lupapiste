@@ -5,7 +5,7 @@ LUPAPISTE.ForemanHistoryModel = function (params) {
   self.projects = ko.observableArray([]);
 
   ajax
-    .query("foreman-history", {id: params.applicationId})
+    .query("reduced-foreman-history", {id: params.applicationId})
     .success(function (data) {
       self.projects(data.projects);
     })

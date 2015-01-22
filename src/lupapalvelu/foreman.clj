@@ -70,13 +70,38 @@
      :jobDescription foreman-role
      :operation      operation
      :linkedAppId    project-app-id
-     :foremanAppId   (:id foreman-app)}))
+     :foremanAppId   (:id foreman-app)
+     :created        (:created foreman-app)}))
 
 (defn get-foreman-history-data [foreman-app]
   (let [foreman-apps       (->> (get-foreman-applications foreman-app)
                                 (remove #(= (:id %) (:id foreman-app))))
         links              (mongo/select :app-links {:link {$in (map :id foreman-apps)}})]
     (map (partial get-history-data-from-app links) foreman-apps)))
+
+(defn- more-difficult-than [old new]
+  (let [old (:difficulty old)
+        new (:difficulty new)]
+    (if (nil? new)
+      false
+      (or
+        (nil? old)
+        (> (count new) (count old))                         ; because "AA" > "A" o_0
+        (pos? (compare old new))))))
+
+(defn- reduce-to-highlights [history-group]
+  (let [history-group (sort-by :created history-group)]
+    (reduce (fn [highlights group]
+              (if (more-difficult-than (first highlights) group)
+                (cons group highlights)
+                highlights))
+            nil
+            history-group)))
+
+(defn get-foreman-reduced-history-data [foreman-app]
+  (let [history-data    (get-foreman-history-data foreman-app)
+        grouped-history (group-by (juxt :municipality :jobDescription) history-data)]
+    (mapcat (fn [[_ group]] (reduce-to-highlights group)) grouped-history)))
 
 (defn foreman-application-info [application]
   (-> (select-keys application [:id :state :auth :documents])
