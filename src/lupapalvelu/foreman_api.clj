@@ -12,12 +12,12 @@
    :parameters [:id foremanHetu]}
   [{application :application user :user :as command}]
   (when-let [foreman-applications (seq (foreman/get-foreman-project-applications application foremanHetu))]
-    (let [mapped-applications (map (fn [app] (foreman/map-foreman-other-applications app (:created command))) foreman-applications)
+    (let [other-applications (map (fn [app] (foreman/other-project-document app (:created command))) foreman-applications)
           tyonjohtaja-doc (domain/get-document-by-name application "tyonjohtaja-v2")
           muut-hankkeet (get-in tyonjohtaja-doc [:data :muutHankkeet])
           muut-hankkeet (select-keys muut-hankkeet (for [[k v] muut-hankkeet :when (not (get-in v [:autoupdated :value]))] k))
           muut-hankkeet (into [] (map (fn [[_ v]] v) muut-hankkeet))
-          all-hankkeet (concat mapped-applications muut-hankkeet)
+          all-hankkeet (concat other-applications muut-hankkeet)
           all-hankkeet (into {} (map-indexed (fn [idx hanke] {(keyword (str idx)) hanke}) all-hankkeet))
           tyonjohtaja-doc (assoc-in tyonjohtaja-doc [:data :muutHankkeet] all-hankkeet)
           documents (:documents application)
@@ -48,6 +48,6 @@
           foreman-application-links (filter #(= (:apptype (first (:link %)) "tyonjohtajan-nimeaminen")) apps-linking-to-us)
           foreman-application-ids (map (fn [link] (first (:link link))) foreman-application-links)
           applications (mongo/select :applications {:_id {$in foreman-application-ids}})
-          mapped-applications (map (fn [app] (foreman/map-application app)) applications)]
+          mapped-applications (map (fn [app] (foreman/foreman-application-info app)) applications)]
       (ok :applications (sort-by :id mapped-applications)))
     (fail :error.not-found)))
