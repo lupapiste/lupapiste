@@ -220,6 +220,35 @@
       (Thread/sleep 2000)
       (fail :error.password))))
 
+(defn- get-kopiolaitos-html-table-content [attachments lang]
+  "Return attachments' type, content and amount as HTML table rows string."
+  (reduce
+    (fn [s att]
+      (let [att-map (merge (:type att) (select-keys att [:amount :contents]))
+            type-str (with-lang lang
+                       (loc
+                         (clojure.string/join
+                           "."
+                           ["attachmentType"
+                            (:type-group att-map)
+                            (:type-id att-map)])))
+            contents-str (or (:contents att-map) type-str)
+            amount-str (:amount att-map)]
+        (str s (format "<tr><td>%s</td><td>%s</td><td>%s</td></tr>"
+                 type-str
+                 contents-str
+                 amount-str)))) "" attachments))
+
+(def kopiolaitos-html-table-str
+  "<table><thead><tr>%s</tr></thead><tbody>%s</tbody></table>")
+
+(defn- get-kopiolaitos-html-table-header-str [lang]
+  (with-lang lang
+    (str
+      "<th>" (loc "application.attachmentType") "</th>"
+      "<th>" (loc "application.attachmentContents") "</th>"
+      "<th>" (loc "verdict-attachment-prints-order.order-dialog.orderCount") "</th>")))
+
 (defn- send-kopiolaitos-email [lang email-address attachments orderInfo]
 
   (println "\n send-kopiolaitos-email, lang: ")
