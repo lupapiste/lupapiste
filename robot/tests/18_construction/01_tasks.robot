@@ -39,6 +39,7 @@ Muut lupamaaraykset
 
 Add attachment to Aloituskokous
   Open task  Aloituskokous
+  Wait Until  Title Should Be  ${appname} - Lupapiste
   Click enabled by test id  add-targetted-attachment
   Select Frame     uploadFrame
   Wait until       Element should be visible  test-save-new-attachment

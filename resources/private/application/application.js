@@ -68,7 +68,11 @@
     this.lastName = lastName;
   };
 
-    //FIXME: why is this?
+  function updateWindowTitle(newTitle) {
+    lupapisteApp.setTitle(newTitle || util.getIn(applicationModel, ["_js", "title"]));
+  }
+
+  //FIXME: why is this?
   function updateAssignee(value) {
     // do not update assignee if page is still initializing
     if (isInitializing) { return; }
@@ -125,7 +129,6 @@
 
       // Update observables
       ko.mapping.fromJS(app, {}, applicationModel);
-      applicationModel.init();
 
       // Invite
       inviteModel.setApplicationId(app.id);
@@ -244,6 +247,7 @@
   function initPage(kind, e) {
     var newId = e.pagePath[0];
     var tab = e.pagePath[1];
+    updateWindowTitle();
     if (newId === currentId && tab) {
       selectTab(tab);
     } else {
@@ -263,6 +267,7 @@
     if (!currentId || (currentId === application.id)) {
       showApplication(applicationDetails);
     }
+    updateWindowTitle(application.title);
   });
 
   function NeighborStatusModel() {

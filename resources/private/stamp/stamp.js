@@ -88,6 +88,8 @@ var stamping = (function() {
 
         var appId = pageutil.subPage();
         repository.load(appId, null, function(application) {
+          lupapisteApp.setTitle(application.title);
+
           model.authorization = authorization.create();
           model.appModel = new LUPAPISTE.ApplicationModel();
           model.authorization.refresh(application);
@@ -102,6 +104,7 @@ var stamping = (function() {
         });
       } else { // appModel already initialized, show stamping
         model.stampingMode(true);
+        lupapisteApp.setTitle(model.appModel.title());
       }
     } else {
       error("No application ID provided for stamping");

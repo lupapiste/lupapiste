@@ -13,6 +13,8 @@ var LUPAPISTE = LUPAPISTE || {};
 
     var self = this;
 
+    self.defaultTitle = document.title;
+
     self.startPage = startPage;
     self.currentPage = undefined;
     self.session = undefined;
@@ -20,6 +22,39 @@ var LUPAPISTE = LUPAPISTE || {};
     self.showUserMenu = (showUserMenu !== undefined) ? showUserMenu : !allowAnonymous;
     self.previousHash = undefined;
     self.currentHash = undefined;
+
+    // Global models
+    self.models = [];
+
+    /**
+     * Get or set model object.
+     * @param {Object} name  Model name must be given
+     * @param {Object} model Optional model object to set
+     */
+    self.model = function(name, model) {
+      if (!name) {
+        throw "Model name must not be falsey!";
+      }
+
+      if (model !== undefined) {
+        self.models[name] = model;
+      }
+
+      return self.models[name];
+    };
+
+    /**
+     * Prepends given title to browser window title.
+     *
+     * @param {String} title
+     */
+    self.setTitle = function(title) {
+      if (title) {
+        document.title = title + " - " + self.defaultTitle;
+      } else {
+        document.title = self.defaultTitle;
+      }
+    };
 
     /**
     * Window unload event handler
@@ -53,6 +88,9 @@ var LUPAPISTE = LUPAPISTE || {};
         page.addClass("visible");
         window.scrollTo(0, 0);
         self.currentPage = pageId;
+
+        // Reset title. Pages can override title when they handle page-load event.
+        document.title = self.defaultTitle;
       }
 
       hub.send("page-load", { pageId: pageId, pagePath: pagePath, currentHash: "!/" + self.currentHash, previousHash: "!/" + self.previousHash });

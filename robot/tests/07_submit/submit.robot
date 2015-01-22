@@ -14,19 +14,16 @@ Mikko creates a new application
   Set Suite Variable  ${attachment-not-needed-test-id-hakija-valtakirja}  attachment-not-needed-hakija-valtakirja
   Set Suite Variable  ${attachment-not-needed-test-id-sonja}  attachment-not-needed-muut-muu
   Open to authorities  huba huba
+
+Mikko could submit application
+  Open tab  requiredFieldSummary
+  Wait Until  Element should be enabled  xpath=//*[@data-test-id='application-submit-btn']
   Logout
 
 Sonja can not submit application
   Sonja logs in
   Open application  submit-app  753-416-25-30
   Wait until  Element should not be visible  application-requiredFieldSummary-tab
-  Logout
-
-Mikko could submit application
-  Mikko logs in
-  Open application  submit-app  753-416-25-30
-  Open tab  requiredFieldSummary
-  Wait Until  Element should be enabled  xpath=//*[@data-test-id='application-submit-btn']
   Logout
 
 #
@@ -106,7 +103,7 @@ For the added attachment template added by Sonja, Mikko sees the "not needed" ch
 
 # - klikkaa attachments-tabin jonkin liitteen "ei tarvita"-checkboxia
 Mikko selects the "not needed" checkbox of some other attachment template than the one of Sonja's
-  ${checkbox-path-hakija-valtakirja} =  Set Variable  xpath=//table[@data-test-id='attachments-template-table']//input[@data-test-id='${attachment-not-needed-test-id-hakija-valtakirja}']
+  ${checkbox-path-hakija-valtakirja} =  Set Variable  xpath=//div[@id='application-attachments-tab']//table[@data-test-id='attachments-template-table']//input[@data-test-id='${attachment-not-needed-test-id-hakija-valtakirja}']
   Element should be enabled  ${checkbox-path-hakija-valtakirja}
   Checkbox Should Not Be Selected  ${checkbox-path-hakija-valtakirja}
   Select Checkbox  ${checkbox-path-hakija-valtakirja}
@@ -116,9 +113,9 @@ Mikko selects the "not needed" checkbox of some other attachment template than t
 Mikko adds txt attachment to the attachment template added by Sonja
   Open attachment details  muut.muu
   Add first attachment version  ${TXT_TESTFILE_PATH}
-  Click element  xpath=//a[@data-test-id="back-to-application-from-attachment"]
+  Click element  xpath=//section[@id="attachment"]//a[@data-test-id="back-to-application-from-attachment"]
   Wait Until  Tab should be visible  attachments
-  Page Should Not Contain  xpath=//a[@data-test-type="muut.muu"]
+  Page Should Not Contain  xpath=//div[@id="application-attachments-tab"]//a[@data-test-type="muut.muu"]
 
 # - tayta osapuolet-tabilla jokin puuttuva vaadittu kentta
 Mikko fills up first name for the hakija party in the parties tab

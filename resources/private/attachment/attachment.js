@@ -280,6 +280,9 @@ var attachment = (function() {
   function showAttachment(applicationDetails) {
     var application = applicationDetails.application;
     if (!applicationId || !attachmentId) { return; }
+
+    lupapisteApp.setTitle(application.title);
+
     var attachment = _.find(application.attachments, function(value) {return value.id === attachmentId;});
     if (!attachment) {
       error("Missing attachment: application:", applicationId, "attachment:", attachmentId);

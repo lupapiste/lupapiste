@@ -6,7 +6,7 @@
             [lupapalvelu.document.tools :as tools]
             [monger.operators :refer :all]))
 
-(defn map-foreman-other-applications [application timestamp]
+(defn other-project-document [application timestamp]
   (let [building-doc (domain/get-document-by-name application "uusiRakennus")
         kokonaisala (get-in building-doc [:data :mitat :kokonaisala :value])
         operation (get-in building-doc [:schema-info :op :name])]
@@ -22,13 +22,13 @@
                    :modified timestamp}}))
 
 (defn- get-foreman-hetu [foreman-application]
-  (let [foreman-doc     (first (filter #(= "tyonjohtaja-v2" (-> % :schema-info :name)) (:documents foreman-application)))]
+  (let [foreman-doc (domain/get-document-by-name foreman-application "tyonjohtaja-v2")]
     (get-in foreman-doc [:data :henkilotiedot :hetu :value])))
 
 (defn- get-foreman-applications [foreman-application & [foreman-hetu]]
-  (let [foreman-hetu (if (ss/blank? foreman-hetu)
-                       (get-foreman-hetu foreman-application)
-                       foreman-hetu)]
+  (when-let [foreman-hetu (if (ss/blank? foreman-hetu)
+                            (get-foreman-hetu foreman-application)
+                            foreman-hetu)]
     (mongo/select :applications {"operations.name" "tyonjohtajan-nimeaminen-v2"
                                  :documents {$elemMatch {"schema-info.name" "tyonjohtaja-v2"
                                                          "data.henkilotiedot.hetu.value" foreman-hetu}}})))
@@ -37,7 +37,8 @@
   "Based on the passed foreman application, fetches all project applications that have the same foreman as in
   the passed foreman application (personal id is used as key). Returns all the linked applications as a list"
   [foreman-application foreman-hetu]
-  (let [foreman-apps    (get-foreman-applications foreman-application foreman-hetu)
+  (let [foreman-apps    (->> (get-foreman-applications foreman-application foreman-hetu)
+                             (remove #(= (:id %) (:id foreman-application))))
         foreman-app-ids (map :id foreman-apps)
         links           (mongo/select :app-links {:link {$in foreman-app-ids}})
         linked-app-ids  (remove (set foreman-app-ids) (distinct (mapcat #(:link %) links)))]
@@ -53,25 +54,23 @@
       "ei_tiedossa"            ; TODO: ei_tiedossa -> ei tiedossa kun kaannos excelissa
       value)))
 
-(defn- loc-hashmap-vals [m]
-  (let [loc-fn (comp i18n/loc str)]
-    (into {} (for [[k [prefix v]] m]
-               [k (loc-fn prefix v)]))))
+(defn- get-history-data-from-app [app-links foreman-app]
+  (let [foreman-doc     (domain/get-document-by-name foreman-app "tyonjohtaja-v2")
 
-(defn- get-history-data-from-app [app-links app]
-  (let [foreman-doc     (domain/get-document-by-name app "tyonjohtaja-v2")
-
-        municipality    (:municipality app)
+        municipality    (:municipality foreman-app)
         difficulty      (unwrap (get-in foreman-doc [:data :patevyysvaatimusluokka]))
         foreman-role    (unwrap (get-in foreman-doc [:data :kuntaRoolikoodi]))
 
-        relevant-link   (first (filter #(some #{(:id app)} (:link %)) app-links))
-        operation       (get-linked-app-operations (:id app) relevant-link)]
+        relevant-link   (first (filter #(some #{(:id foreman-app)} (:link %)) app-links))
+        project-app-id  (first (remove #{(:id foreman-app)} (:link relevant-link)))
+        operation       (get-linked-app-operations (:id foreman-app) relevant-link)]
 
-    (loc-hashmap-vals {:municipality ["municipality." municipality]
-                       :difficulty ["osapuoli.patevyysvaatimusluokka." difficulty]
-                       :jobDescription ["osapuoli.tyonjohtaja.kuntaRoolikoodi." foreman-role]
-                       :operation ["operations." operation]})))
+    {:municipality   municipality
+     :difficulty     difficulty
+     :jobDescription foreman-role
+     :operation      operation
+     :linkedAppId    project-app-id
+     :foremanAppId   (:id foreman-app)}))
 
 (defn get-foreman-history-data [foreman-app]
   (let [foreman-apps       (->> (get-foreman-applications foreman-app)
@@ -79,8 +78,7 @@
         links              (mongo/select :app-links {:link {$in (map :id foreman-apps)}})]
     (map (partial get-history-data-from-app links) foreman-apps)))
 
-(defn map-application [application]
-  {:id (:id application)
-   :state (:state application)
-   :auth (:auth application)
-   :documents (filter #(= (get-in % [:schema-info :name]) "tyonjohtaja") (:documents application))})
+(defn foreman-application-info [application]
+  (-> (select-keys application [:id :state :auth :documents])
+      (update-in [:documents] (fn [docs] (filter #(= (get-in % [:schema-info :name]) "tyonjohtaja-v2") docs))))
+)

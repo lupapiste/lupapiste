@@ -32,7 +32,7 @@ LUPAPISTE.ForemanModel = function() {
 
           _.forEach(data.applications, function(app) {
             var foreman = _.find(app.auth, {"role": "foreman"});
-            var foremanDoc = _.find(app.documents, { "schema-info": { "name": "tyonjohtaja" } });
+            var foremanDoc = _.find(app.documents, { "schema-info": { "name": "tyonjohtaja-v2" } });
             var name = util.getIn(foremanDoc, ["data", "kuntaRoolikoodi", "value"]);
             var existingTask = _.find(foremanTasks, { "data": {"asiointitunnus": { "value": app.id } } });
 

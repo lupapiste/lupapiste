@@ -417,12 +417,13 @@ Add attachment
 Open attachment details
   [Arguments]  ${type}
   Open tab  attachments
-  Wait Until  Page Should Contain Element  xpath=//a[@data-test-type="${type}"]
+  ${path} =  Set Variable  xpath=//div[@id='application-attachments-tab']//a[@data-test-type="${type}"]
+  Wait Until  Page Should Contain Element  ${path}
   # Make sure the element is visible on browser view before clicking. Take header heigth into account.
   #Execute Javascript  window.scrollTo(0, $("[data-test-type='muut.muu']").position().top - 130);
-  Focus  xpath=//a[@data-test-type="${type}"]
-  Click element  xpath=//a[@data-test-type="${type}"]
-  Wait Until  Element Should Be Visible  xpath=//a[@data-test-id="back-to-application-from-attachment"]
+  Wait Until  Focus  ${path}
+  Wait Until  Click element  ${path}
+  Wait Until  Element Should Be Visible  xpath=//section[@id="attachment"]//a[@data-test-id="back-to-application-from-attachment"]
 
 Assert file latest version
   [Arguments]  ${name}  ${versionNumber}

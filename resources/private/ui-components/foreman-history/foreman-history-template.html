@@ -13,12 +13,19 @@
             <th class="fourth" data-bind="ltext: 'tyonjohtaja.historia.hanke'"></th>
           </tr>
         </thead>
+
+        <tbody data-bind="visible: projects().length == 0">
+          <tr>
+            <td colspan="4" data-bind="ltext: 'tyonjohtaja.noProjects'"></td>
+          </tr>
+        </tbody>
+
         <tbody data-bind="foreach: projects" >
           <tr>
-            <td data-bind="text: municipality"></td>
-            <td data-bind="text: difficulty"></td>
-            <td data-bind="text: jobDescription"></td>
-            <td data-bind="text: operation"></td>
+            <td data-bind="text: loc(['municipality', municipality])"></td>
+            <td data-bind="text: loc(['osapuoli.patevyysvaatimusluokka', difficulty])"></td>
+            <td><span data-bind="text: loc(['osapuoli.tyonjohtaja.kuntaRoolikoodi', jobDescription])"></span> (<span href="#" data-bind="text: foremanAppId"></span>)</td>
+            <td><span data-bind="text: loc(['operations', operation])"></span> (<a href="#" data-bind="click: $parent.followAppLink, text: linkedAppId"></a>)</td>
           </tr>
         </tbody>
     </script>
