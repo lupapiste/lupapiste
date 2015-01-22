@@ -127,6 +127,7 @@
 (defmethod ->str :br      [element] "")
 (defmethod ->str :hr      [element] "\n---------\n")
 (defmethod ->str :blockquote [element] (-> element :content ->str* (s/replace #"\n{2,}" "\n  ") (s/replace #"^\n" "  ")))
+(defmethod ->str :table      [element] "\n<pre>tahan table</pre>\n")
 
 ;;
 ;; HTML support:
