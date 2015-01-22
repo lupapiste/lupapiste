@@ -45,14 +45,15 @@
   (if (not (map? v)) [:err "illegal-value:not-a-map"]))
 
 (defmethod validate-field :string [_ {:keys [max-len min-len] :as elem} v]
-  (cond
-    (not (string? v)) [:err "illegal-value:not-a-string"]
-    (not (.canEncode (latin1-encoder) v)) [:warn "illegal-value:not-latin1-string"]
-    (> (.length v) (or max-len default-max-len)) [:err "illegal-value:too-long"]
-    (and
-      (> (.length v) 0)
-      (< (.length v) (or min-len 0))) [:warn "illegal-value:too-short"]
-    :else (subtype/subtype-validation elem v)))
+  (when-not (nil? v)
+    (cond
+      (not (string? v)) [:err "illegal-value:not-a-string"]
+      (not (.canEncode (latin1-encoder) v)) [:warn "illegal-value:not-latin1-string"]
+      (> (.length v) (or max-len default-max-len)) [:err "illegal-value:too-long"]
+      (and
+        (> (.length v) 0)
+        (< (.length v) (or min-len 0))) [:warn "illegal-value:too-short"]
+      :else (subtype/subtype-validation elem v))))
 
 (defmethod validate-field :text [_ elem v]
   (cond
