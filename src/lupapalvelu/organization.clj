@@ -299,7 +299,7 @@
    :roles [:authorityAdmin]
    :input-validators  [(partial non-blank-parameters [:email])]}
   [{{:keys [organizations]} :user}]
-  (update-organization (first organizations) {$set {:kopiolaitosEmail email}})
+  (update-organization (first organizations) {$set {:kopiolaitos-email email}})
   (ok))
 
 (defquery krysp-config
