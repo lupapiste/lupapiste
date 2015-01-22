@@ -361,7 +361,8 @@
                                                      {:name "muutostyo" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.muutostyo" :codes [:vtj] :type :checkbox}
                                                      {:name "hissienJalkiasennus" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.hissienJalkiasennus" :codes [:vtj] :type :checkbox}
                                                      {:name "vesikatonKorjaustyo" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.vesikatonKorjaustyo" :codes [:vtj] :type :checkbox}
-                                                     {:name "pihamaajarjestelyt" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.pihamaajarjestelyt" :codes [:vtj] :type :checkbox}]}])
+                                                     {:name "pihamaajarjestelyt" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.pihamaajarjestelyt" :codes [:vtj] :type :checkbox}
+                                                     {:name "muuMika" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.muuMika" :codes [:vtj :kvv :ivt :vrt] :type :string}]}])
 
 (def tyonjohtaja-hanketieto {:name "tyonjohtajaHanketieto" :type :group
                              :body [{:name "taysiaikainenOsaaikainen" :type :radioGroup :body [{:name "taysiaikainen"} {:name "osaaikainen"}] :default "taysiaikainen"}
