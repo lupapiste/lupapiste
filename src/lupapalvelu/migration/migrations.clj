@@ -722,6 +722,17 @@
     #(assoc % :forPrinting false)
     {:attachments.0 {$exists true}}))
 
+(defmigration app-required-fields-filling-obligatory
+ {:apply-when (pos? (mongo/count :organizations {:app-required-fields-filling-obligatory {$exists false}}))}
+ (doseq [organization (mongo/select :organizations {:app-required-fields-filling-obligatory {$exists false}})]
+   (mongo/update-by-id :organizations (:id organization)
+     {$set {:app-required-fields-filling-obligatory false}})))
+
+(defmigration kopiolaitos-email
+ {:apply-when (pos? (mongo/count :organizations {:kopiolaitos-email {$exists false}}))}
+ (doseq [organization (mongo/select :organizations {:kopiolaitos-email {$exists false}})]
+   (mongo/update-by-id :organizations (:id organization)
+     {$set {:kopiolaitos-email nil}})))
 
 ;;
 ;; ****** NOTE! ******
