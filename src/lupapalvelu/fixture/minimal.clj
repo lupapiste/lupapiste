@@ -423,7 +423,9 @@
                               :url "http://www.jarvenpaa.fi"}
                              {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
                               :url "http://www.jarvenpaa.fi/sivu/index.tmpl?sivu_id=182"}]
-                     :krysp {:R {:url local-krysp :version "2.1.3" :ftpUser "dev_jarvenpaa"}}}
+                     :krysp {:R {:url local-krysp :version "2.1.3" :ftpUser "dev_jarvenpaa"}}
+                     :app-required-fields-filling-obligatory false
+                     :kopiolaitos-email nil}
 
                     ;; Sipoo R
                     {:id "753-R"
@@ -463,7 +465,9 @@
                      :statementGivers [{:id "516560d6c2e6f603beb85147"
                                          :text "Paloviranomainen",
                                          :email "sonja.sibbo@sipoo.fi",
-                                         :name "Sonja Sibbo"}]}
+                                         :name "Sonja Sibbo"}]
+                     :app-required-fields-filling-obligatory false
+                     :kopiolaitos-email nil}
 
                     ;; Sipoo YA
                     ;; Keeping :inforequest-enabled true and :new-application-enabled true to allow krysp itests pass.
@@ -480,7 +484,9 @@
                                          :text "Paloviranomainen",
                                          :email "sonja.sibbo@sipoo.fi",
                                          :name "Sonja Sibbo"}]
-                     :operations-attachments ya-default-attachments-for-operations}
+                     :operations-attachments ya-default-attachments-for-operations
+                     :app-required-fields-filling-obligatory false
+                     :kopiolaitos-email nil}
 
                     ;; Kuopio YA
                     {:id "297-YA"
@@ -496,7 +502,9 @@
                                          :text "Paloviranomainen",
                                          :email "sonja.sibbo@sipoo.fi",
                                          :name "Sonja Sibbo"}]
-                     :operations-attachments ya-default-attachments-for-operations}
+                     :operations-attachments ya-default-attachments-for-operations
+                     :app-required-fields-filling-obligatory false
+                     :kopiolaitos-email nil}
 
 
                     ;; Tampere R
@@ -520,7 +528,9 @@
                                                                          [:hakija :ote_kauppa_ja_yhdistysrekisterista]
                                                                          [:muut :vaestonsuojasuunnitelma]
                                                                          [:muut :valaistussuunnitelma]]}
-                     :krysp {:R {:url local-krysp :version "2.1.4" :ftpUser "dev_tampere"}}}
+                     :krysp {:R {:url local-krysp :version "2.1.4" :ftpUser "dev_tampere"}}
+                     :app-required-fields-filling-obligatory false
+                     :kopiolaitos-email nil}
 
                     ;; Tampere YA
                     {:id "837-YA",
@@ -535,7 +545,9 @@
                                         :email "jussi.viranomainen@tampere.fi"
                                         :name "Jussi Viranomainen"}]
                      :krysp {:YA {:url local-krysp :ftpUser "dev_ya_tampere" :version "2.1.2"}}
-                     :operations-attachments ya-default-attachments-for-operations}
+                     :operations-attachments ya-default-attachments-for-operations
+                     :app-required-fields-filling-obligatory false
+                     :kopiolaitos-email nil}
 
                     ;; Porvoo R
                     {:id "638-R"
@@ -546,7 +558,9 @@
                      :links [{:name {:fi "Porvoo", :sv "Borg\u00e5"}
                               :url "http://www.porvoo.fi"}
                              {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
-                              :url "http://www.porvoo.fi/fi/haku/palveluhakemisto/?a=viewitem&itemid=1030"}]}
+                              :url "http://www.porvoo.fi/fi/haku/palveluhakemisto/?a=viewitem&itemid=1030"}]
+                     :app-required-fields-filling-obligatory false
+                     :kopiolaitos-email nil}
 
                     ;; Oulu R
                     {:id "564-R"
@@ -555,7 +569,9 @@
                      :links [{:name {:fi "Oulu", :sv "Ule\u00E5borg"}
                               :url "http://www.ouka.fi"}
                              {:name {:fi "Rakennusvalvonta", :sv "Fastigheter"}
-                              :url "http://oulu.ouka.fi/rakennusvalvonta/"}]}
+                              :url "http://oulu.ouka.fi/rakennusvalvonta/"}]
+                     :app-required-fields-filling-obligatory false
+                     :kopiolaitos-email nil}
 
                     ;; Naantali R
                     {:id "529-R"
@@ -568,12 +584,16 @@
                      :scope [{:municipality "069" :permitType "R" :inforequest-enabled true :new-application-enabled true}
                              {:municipality "317" :permitType "R" :inforequest-enabled true :new-application-enabled true}
                              {:municipality "626" :permitType "R" :inforequest-enabled true :new-application-enabled true}
-                             {:municipality "691" :permitType "R" :inforequest-enabled true :new-application-enabled true}]}
+                             {:municipality "691" :permitType "R" :inforequest-enabled true :new-application-enabled true}]
+                     :app-required-fields-filling-obligatory false
+                     :kopiolaitos-email nil}
 
                     ;; Mikkeli Y
                     {:id "491-Y"
                      :name {:fi "Mikkeli ymp\u00E4rist\u00F6toimi" :sv "S:t Michel ymp\u00E4rist\u00F6toimi"}
-                     :scope [{:municipality "491" :permitType "Y" :inforequest-enabled true :new-application-enabled true}]}
+                     :scope [{:municipality "491" :permitType "Y" :inforequest-enabled true :new-application-enabled true}]
+                     :app-required-fields-filling-obligatory false
+                     :kopiolaitos-email nil}
 
                     ;; Loppi R
                     ;; Organisation for municipality "Loppi" that uses the "neuvontapyynnon-avaus" system.
@@ -586,7 +606,9 @@
                               :inforequest-enabled true
                               :open-inforequest true
                               :open-inforequest-email "erajorma@example.com"}]
-                     :links []}
+                     :links []
+                     :app-required-fields-filling-obligatory false
+                     :kopiolaitos-email nil}
 
 
                     ;;
@@ -606,7 +628,9 @@
                      :statementGivers [{:id "516560d6c2e6f603beb85147"
                                          :text "Paloviranomainen",
                                          :email "sonja.sibbo@sipoo.fi",
-                                         :name "Sonja Sibbo"}]}
+                                         :name "Sonja Sibbo"}]
+                     :app-required-fields-filling-obligatory false
+                     :kopiolaitos-email nil}
 
                     ;; Sipoo R - Inforequests disabled
                     {:id "998-R-TESTI-2"
@@ -620,7 +644,9 @@
                      :statementGivers [{:id "516560d6c2e6f603beb85147"
                                          :text "Paloviranomainen",
                                          :email "sonja.sibbo@sipoo.fi",
-                                         :name "Sonja Sibbo"}]}
+                                         :name "Sonja Sibbo"}]
+                     :app-required-fields-filling-obligatory false
+                     :kopiolaitos-email nil}
 
                     ;; Sipoo R - Both new applications and inforequests disabled
                     {:id "999-R-TESTI-3"
@@ -634,7 +660,9 @@
                      :statementGivers [{:id "516560d6c2e6f603beb85147"
                                          :text "Paloviranomainen",
                                          :email "sonja.sibbo@sipoo.fi",
-                                         :name "Sonja Sibbo"}]}])
+                                         :name "Sonja Sibbo"}]
+                     :app-required-fields-filling-obligatory false
+                     :kopiolaitos-email nil}])
 
 (def companies [{:_id "solita",
                  :created 1412959886600
