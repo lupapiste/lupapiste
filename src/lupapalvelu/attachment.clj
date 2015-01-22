@@ -300,6 +300,7 @@
    :required required?       ;; true if the attachment is added from from template along with the operation, or when attachment is requested by authority
    :requestedByAuthority requestedByAuthority?  ;; true when authority is adding a new attachment template by hand
    :notNeeded false
+   :forPrinting false
    :op op
    :signatures []
    :versions []})
