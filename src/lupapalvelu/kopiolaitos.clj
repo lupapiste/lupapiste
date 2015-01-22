@@ -56,7 +56,7 @@
         html-table (format
                      kopiolaitos-html-table-str
                      (get-kopiolaitos-html-table-header-str lang)
-                     (print-kopiolaitos-html-content attachments lang))
+                     (get-kopiolaitos-html-table-content attachments lang))
         orderInfo (assoc orderInfo :contentsTable html-table)]
     ;; from email/send-email-message false = success, true = failure -> turn it other way around
     (try
