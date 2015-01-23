@@ -127,7 +127,10 @@
 (defmethod ->str :br      [element] "")
 (defmethod ->str :hr      [element] "\n---------\n")
 (defmethod ->str :blockquote [element] (-> element :content ->str* (s/replace #"\n{2,}" "\n  ") (s/replace #"^\n" "  ")))
-(defmethod ->str :table      [element] "\n<pre>tahan table</pre>\n")
+(defmethod ->str :table      [element] (str \newline (->str* (:content element)) \newline))
+(defmethod ->str :tr         [element] (let [contents (filter #(map? %) (:content element))]
+                                         (s/join \tab (map #(s/join (:content %)) contents))))
+
 
 ;;
 ;; HTML support:
