@@ -3,7 +3,6 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.document.tools :as tools]
             [monger.operators :refer :all]))
 
