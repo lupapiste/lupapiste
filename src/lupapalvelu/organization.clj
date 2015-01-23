@@ -302,6 +302,14 @@
   (update-organization (first organizations) {$set {:kopiolaitos-email email}})
   (ok))
 
+(defcommand set-kopiolaitos-orderer-email
+  {:parameters [email]
+   :roles [:authorityAdmin]
+   :input-validators  [(partial non-blank-parameters [:email])]}
+  [{{:keys [organizations]} :user}]
+  (update-organization (first organizations) {$set {:kopiolaitos-orderer-email email}})
+  (ok))
+
 (defquery krysp-config
   {:roles [:authorityAdmin]}
   [{{:keys [organizations]} :user}]
