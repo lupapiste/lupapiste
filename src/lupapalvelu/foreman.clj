@@ -1,6 +1,7 @@
 (ns lupapalvelu.foreman
   (:require [lupapalvelu.domain :as domain]
             [sade.strings :as ss]
+            [sade.core :refer [def-]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.document.tools :as tools]
@@ -79,20 +80,19 @@
         links              (mongo/select :app-links {:link {$in (map :id foreman-apps)}})]
     (map (partial get-history-data-from-app links) foreman-apps)))
 
-(defn- more-difficult-than [old new]
-  (let [old (:difficulty old)
-        new (:difficulty new)]
-    (if (nil? new)
-      false
-      (or
-        (nil? old)
-        (> (count new) (count old))                         ; because "AA" > "A" o_0
-        (pos? (compare old new))))))
+(def- difficulties ["AA" "A" "B" "C" "ei_tiedossa"])
+(defn- compare-difficulty [a b]
+  (let [a (:difficulty a)
+        b (:difficulty b)]
+    (cond
+      (nil? b) -1
+      (nil? a) 1
+      :else (- (.indexOf difficulties a) (.indexOf difficulties b)))))
 
 (defn- reduce-to-highlights [history-group]
   (let [history-group (sort-by :created history-group)]
     (reduce (fn [highlights group]
-              (if (more-difficult-than (first highlights) group)
+              (if (pos? (compare-difficulty (first highlights) group)) #_(more-difficult-than (first highlights) group)
                 (cons group highlights)
                 highlights))
             nil
