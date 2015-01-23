@@ -1,7 +1,7 @@
 (ns lupapalvelu.foreman
   (:require [lupapalvelu.domain :as domain]
             [sade.strings :as ss]
-            [sade.core :refer [def-]]
+            [sade.util :as util]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.document.tools :as tools]
@@ -52,7 +52,7 @@
 (defn- unwrap [wrapped-value]
   (let [value (tools/unwrapped wrapped-value)]
     (if (empty? value)
-      "ei_tiedossa"            ; TODO: ei_tiedossa -> ei tiedossa kun kaannos excelissa
+      "ei tiedossa"
       value)))
 
 (defn- get-history-data-from-app [app-links foreman-app]
@@ -80,19 +80,10 @@
         links              (mongo/select :app-links {:link {$in (map :id foreman-apps)}})]
     (map (partial get-history-data-from-app links) foreman-apps)))
 
-(def- difficulties ["AA" "A" "B" "C" "ei_tiedossa"])
-(defn- compare-difficulty [a b]
-  (let [a (:difficulty a)
-        b (:difficulty b)]
-    (cond
-      (nil? b) -1
-      (nil? a) 1
-      :else (- (.indexOf difficulties a) (.indexOf difficulties b)))))
-
 (defn- reduce-to-highlights [history-group]
   (let [history-group (sort-by :created history-group)]
     (reduce (fn [highlights group]
-              (if (pos? (compare-difficulty (first highlights) group)) #_(more-difficult-than (first highlights) group)
+              (if (pos? (util/compare-difficulty (first highlights) group))
                 (cons group highlights)
                 highlights))
             nil

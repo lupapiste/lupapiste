@@ -260,3 +260,11 @@
   (fact (sc/check (max-length-string 1) "a") => nil)
   (fact (sc/check (max-length-string 1) "ab") =not=> nil)
   (fact (sc/check (max-length-string 1) [1]) =not=> nil))
+
+(facts "comparing history item difficulties"
+  (fact "nil and item"          (compare-difficulty nil {:difficulty "A"})                => pos?)
+  (fact "item and nil"          (compare-difficulty {:difficulty "A"} nil)                => neg?)
+  (fact "old more difficult"    (compare-difficulty {:difficulty "A"} {:difficulty "B"})  => neg?)
+  (fact "new more difficult"    (compare-difficulty {:difficulty "B"} {:difficulty "A"})  => pos?)
+  (fact "tricky difficulty val" (compare-difficulty {:difficulty "A"} {:difficulty "AA"}) => pos?)
+  (fact "equality"              (compare-difficulty {:difficulty "B"} {:difficulty "B"})  => zero?))
