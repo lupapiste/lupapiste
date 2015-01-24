@@ -294,22 +294,6 @@
   (update-organization (first organizations) {$set {:app-required-fields-filling-obligatory isObligatory}})
   (ok))
 
-(defcommand set-kopiolaitos-email
-  {:parameters [email]
-   :roles [:authorityAdmin]
-   :input-validators  [(partial non-blank-parameters [:email])]}
-  [{{:keys [organizations]} :user}]
-  (update-organization (first organizations) {$set {:kopiolaitos-email email}})
-  (ok))
-
-(defcommand set-kopiolaitos-orderer-email
-  {:parameters [email]
-   :roles [:authorityAdmin]
-   :input-validators  [(partial non-blank-parameters [:email])]}
-  [{{:keys [organizations]} :user}]
-  (update-organization (first organizations) {$set {:kopiolaitos-orderer-email email}})
-  (ok))
-
 (defquery krysp-config
   {:roles [:authorityAdmin]}
   [{{:keys [organizations]} :user}]
@@ -328,6 +312,25 @@
     (mongo/update-by-id :organizations (first organizations) {$set {(str "krysp." permitType ".url") url
                                                                     (str "krysp." permitType ".version") version}})
     (fail :auth-admin.legacyNotResponding)))
+
+(defcommand set-kopiolaitos-info
+  {:parameters [kopiolaitosEmail kopiolaitosOrdererAddress]
+   :roles [:authorityAdmin]
+   :input-validators  [(partial non-blank-parameters [:kopiolaitosEmail :kopiolaitosOrdererAddress])]}
+  [{{:keys [organizations]} :user}]
+  (update-organization (first organizations) {$set {:kopiolaitos-email kopiolaitosEmail
+                                                    :kopiolaitos-orderer-address kopiolaitosOrdererAddress}})
+  (ok))
+
+(defquery kopiolaitos-config
+  {:roles [:authorityAdmin]}
+  [{{:keys [organizations]} :user}]
+  (let [organization-id (first organizations)]
+    (if-let [organization (get-organization organization-id)]
+      (ok
+        :kopiolaitos-email (:kopiolaitos-email organization)
+        :kopiolaitos-orderer-address (:kopiolaitos-orderer-address organization))
+      (fail :error.unknown-organization))))
 
 ;;
 ;; Helpers

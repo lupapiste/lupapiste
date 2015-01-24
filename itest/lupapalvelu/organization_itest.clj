@@ -142,7 +142,7 @@
           app    (query-application pena app-id)
           org    (query admin "organization-by-id" :organizationId  (:organization app))
           kopiolaitos-email "kopiolaitos@example.com"
-          kopiolaitos-orderer-email "kopiolaitos-orderer@example.com"]
+          kopiolaitos-orderer-address "kopiolaitos-orderer@example.com"]
 
 ;      (fact "the 'app-required-fields-filling-obligatory' and 'kopiolaitos-email' flags have not yet been set for organization in db"
 ;        (:app-required-fields-filling-obligatory org) => nil
@@ -159,13 +159,12 @@
         (fact "the 'kopiolaitos-email' is set to nil"
           (:kopiolaitos-email org) => nil
           (:kopiolaitosEmail organizationMeta) => nil)
-        (fact "the 'kopiolaitos-orderer-email' is set to nil"
-          (:kopiolaitos-orderer-email org) => nil
-          (:kopiolaitosOrdererEmail organizationMeta) => nil))
+        (fact "the 'kopiolaitos-orderer-address' is set to nil"
+          (:kopiolaitos-orderer-address org) => nil
+          (:kopiolaitosOrdererAddress organizationMeta) => nil))
 
       (command sipoo "set-organization-app-required-fields-filling-obligatory" :isObligatory true) => ok?
-      (command sipoo "set-kopiolaitos-email" :email kopiolaitos-email) => ok?
-      (command sipoo "set-kopiolaitos-orderer-email" :email kopiolaitos-orderer-email) => ok?
+      (command sipoo "set-kopiolaitos-info" :kopiolaitosEmail kopiolaitos-email :kopiolaitosOrdererAddress kopiolaitos-orderer-address) => ok?
 
       (let [app    (query-application pena app-id)
             org    (query admin "organization-by-id" :organizationId  (:organization app))
@@ -176,9 +175,9 @@
         (fact "the 'kopiolaitos-email' flag is set to given email address"
           (:kopiolaitos-email org) => kopiolaitos-email
           (:kopiolaitosEmail organizationMeta) => kopiolaitos-email)
-        (fact "the 'kopiolaitos-orderer-email' flag is set to given email address"
-          (:kopiolaitos-orderer-email org) => kopiolaitos-orderer-email
-          (:kopiolaitosOrdererEmail organizationMeta) => kopiolaitos-orderer-email)))))
+        (fact "the 'kopiolaitos-orderer-address' flag is set to given email address"
+          (:kopiolaitos-orderer-address org) => kopiolaitos-orderer-address
+          (:kopiolaitosOrdererAddress organizationMeta) => kopiolaitos-orderer-address)))))
 
 (facts "municipality-active"
   (fact "only info requests enabled"

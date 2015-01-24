@@ -24,4 +24,12 @@ application.attachmentContents: Sisältö
 no-kopiolaitos-email-defined: Lupakuvien tilaaminen epäonnistui. Kopiolaitoksen sähköpostiosoitetta ei ole määritelty organisaatiollenne.
 kopiolaitos-email-sending-failed: Lupakuvien tilaaminen kopiolaitokselta epäonnistui sähköpostin lähettämisessä esiintyneen ongelman vuoksi.
 
-kopiolaitos-email-subject: Lupakuvien tilaus Lupapisteen kautta: 
+kopiolaitos-email-subject: Lupakuvien tilaus Lupapisteen kautta:
+
+auth-admin.kopiolaitos-section.title: Lupakuvien tilaus kopiolaitokselta
+auth-admin.kopiolaitos-email.title: Kopiolaitoksen sähköpostiosoite
+auth-admin.kopiolaitos-orderer-address.title: Tilaajan postitusosoite
+auth-admin.setKopiolaitosInfo: Aseta kopiolaitoksen sähköpostiosoite ja lähettäjän postitusosoite
+auth-admin.setkopiolaitosInfo: Tiedot lähetettäväksi kopiolaitokselle
+auth-admin.kopiolaitosEmail: sähköpostiosoite@esimerkki.fi
+auth-admin.kopiolaitosOrdererAddress: Osoite 1 00100 Kunta
