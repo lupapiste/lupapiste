@@ -6,46 +6,45 @@
     </style>
   </head>
   <body>
-    <h3>Tilatut kuvat</h3>
+    <h1>Tilatut kuvat</h1>
     {{{contentsTable}}}
     <h1>Tilauksen tiedot</h1>
     <table>
-      <thead>
-      </thead>
       <tbody>
         <tr>
           <th>Tilaaja</th>
+          <td>{{ordererOrganization}}</td>
+        </tr>
           <th>S&auml;hk&ouml;posti</th>
-          <th>Puhelinumero</th>
+          <td>{{ordererEmail}}</td>
         </tr>
         <tr>
-          <td>{{ordererOrganization}}</td>
-          <td>{{ordererEmail}}</td>
+          <th>Puhelinumero</th>
           <td>{{ordererPhone}}</td>
         </tr>
         <tr>
-          <th colspan="3">Osoite</th>
-        </tr>
-        <tr>
-          <td colspan="3">{{ordererAddress}}</td>
+          <th>Osoite</th>
+          <td>{{ordererAddress}}</td>
         </tr>
         <tr>
           <th>Hakijan nimi</th>
-          <th>Lupatunnus</th>
-          <th>Kiinteist&ouml;tunnus</th>
+          <td>{{applicantName}}</td>
         </tr>
         <tr>
-          <td>{{applicantName}}</td>
+          <th>Lupatunnus</th>
           <td>{{kuntalupatunnus}}</td>
+        </tr>
+        <tr>
+          <th>Kiinteist&ouml;tunnus</th>
           <td>{{propertyId}}</td>
         </tr>
         <tr>
           <th>Asiointitunnus</th>
-          <th colspan="2">Rakennuspaikka</th>
+          <td>{{lupapisteId}}</td>
         </tr>
         <tr>
-          <td>{{lupapisteId}}</td>
-          <td colspan="2">{{address}}</td>
+          <th>Rakennuspaikka</th>
+          <td>{{address}}</td>
         </tr>
       </tbody>
     </table>
