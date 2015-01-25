@@ -1,6 +1,6 @@
 (ns lupapalvelu.kopiolaitos_api
   (:require [sade.core :refer [ok]]
-            [lupapalvelu.action :refer [defquery defcommand update-application notify boolean-parameters] :as action]
+            [lupapalvelu.action :refer [defquery defcommand update-application notify] :as action]
             [lupapalvelu.kopiolaitos :as kopiolaitos]))
 
 (defcommand order-verdict-attachment-prints
