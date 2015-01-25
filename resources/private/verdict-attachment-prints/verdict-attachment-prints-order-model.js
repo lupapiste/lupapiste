@@ -23,6 +23,23 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function(/*dialogSelector, confirm
 
   self.authorizationModel = authorization.create();
 
+  self.ok = ko.computed(function() {
+    var attachmentOrderCountsAreNumbers = _.every(self.attachments(), function(a) {
+      return !_.isNaN(_.parseInt(a.orderAmount(), 10));
+    }, self);
+    return self.authorizationModel.ok("order-verdict-attachment-prints") &&
+    !self.processing() &&
+    attachmentOrderCountsAreNumbers &&
+    !_.isEmpty(self.ordererOrganization()) &&
+    !_.isEmpty(self.ordererEmail()) &&
+    !_.isEmpty(self.ordererPhone()) &&
+    !_.isEmpty(self.applicantName()) &&
+    !_.isEmpty(self.kuntalupatunnus()) &&
+    !_.isEmpty(self.propertyId()) &&
+    !_.isEmpty(self.lupapisteId()) &&
+    !_.isEmpty(self.address());
+  });
+
   function normalizeAttachment(a) {
     var versions = _(a.versions).reverse().value();
     var latestVersion = versions[0];
@@ -38,23 +55,6 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function(/*dialogSelector, confirm
       orderAmount:  ko.observable("2")
     };
   }
-
-  self.ok = ko.computed(function() {
-    var attachmentOrderCountsAreNumbers = _.every(self.attachments(), function(a) {
-      return !_.isNaN(_.parseInt(a.orderAmount(), 10));
-    }, self);
-    return self.authorizationModel.ok("order-verdict-attachment-prints") &&
-           !self.processing() &&
-           attachmentOrderCountsAreNumbers &&
-           !_.isEmpty(self.ordererOrganization()) &&
-           !_.isEmpty(self.ordererEmail()) &&
-           !_.isEmpty(self.ordererPhone()) &&
-           !_.isEmpty(self.applicantName()) &&
-           !_.isEmpty(self.kuntalupatunnus()) &&
-           !_.isEmpty(self.propertyId()) &&
-           !_.isEmpty(self.lupapisteId()) &&
-           !_.isEmpty(self.address());
-  });
 
   // Open the dialog
 
