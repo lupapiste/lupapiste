@@ -15,7 +15,14 @@
             <h3 data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.description'"></h3>
 
             <div class="print-order-files">
-              <table>
+
+              <!-- Making table's tbody scrollable: -->
+              <!-- IE < 10 does not like giving a tbody a height.  The workaround here applies the scrolling to a wrapped <div>. -->
+              <!--[if lte IE 9]>
+              <div class="old_ie_wrapper">
+              <!--<![endif]-->
+
+              <table class="fixed-headers">
                 <thead>
                   <tr>
                     <th data-bind="ltext: 'application.attachmentType'"></th>
@@ -27,12 +34,17 @@
                 <tbody data-bind="foreach: attachments">
                   <tr>
                     <td data-bind="text: loc(['attachmentType', type['type-group'], type['type-id']])"></td>
-                    <td><label data-bind="text: contents"></label></td>
-                    <td><label data-bind="text: filename"></label></td>
-                    <td><input type="text" data-bind="textInput: orderAmount, attr: {id: 'orderAmount-' + id}" class="order-amount" /></td>
+                    <td data-bind="text: contents"></td>
+                    <td data-bind="text: filename"></td>
+                    <td class="center"><input type="text" data-bind="textInput: orderAmount, attr: {id: 'orderAmount-' + id}" class="order-amount" /></td>
                   </tr>
                 </tbody>
               </table>
+
+              <!--[if lte IE 9]>
+              </div>
+              <!--<![endif]-->
+
             </div>
 
             <h1 data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.orderInfo'"></h1>
