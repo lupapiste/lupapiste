@@ -728,11 +728,14 @@
    (mongo/update-by-id :organizations (:id organization)
      {$set {:app-required-fields-filling-obligatory false}})))
 
-(defmigration kopiolaitos-email
- {:apply-when (pos? (mongo/count :organizations {:kopiolaitos-email {$exists false}}))}
- (doseq [organization (mongo/select :organizations {:kopiolaitos-email {$exists false}})]
+(defmigration kopiolaitos-info
+ {:apply-when (pos? (mongo/count :organizations {$or [{:kopiolaitos-email {$exists false}}
+                                                      {:kopiolaitos-orderer-address {$exists false}}]}))}
+ (doseq [organization (mongo/select :organizations {$or [{:kopiolaitos-email {$exists false}}
+                                                         {:kopiolaitos-orderer-address {$exists false}}]})]
    (mongo/update-by-id :organizations (:id organization)
-     {$set {:kopiolaitos-email nil}})))
+     {$set {:kopiolaitos-email           (or (:kopiolaitos-email organization) nil)
+            :kopiolaitos-orderer-address (or (:kopiolaitos-orderer-address organization) nil)}})))
 
 ;;
 ;; ****** NOTE! ******
