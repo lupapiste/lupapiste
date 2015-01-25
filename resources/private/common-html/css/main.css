@@ -2053,6 +2053,7 @@ table.attachments-template-table td.attachment-help-info {
 /* line 131, ../sass/partials/_tables.scss */
 table.attachments-template-table td.attachment-file-info {
   max-width: 230px;
+  word-wrap: break-word;
 }
 
 /*Tab styles*/

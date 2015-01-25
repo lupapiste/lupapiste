@@ -130,6 +130,7 @@ table.attachments-template-table {
     }
     &.attachment-file-info {
       max-width: 230px;
+      word-wrap: break-word;
     }
   }
 }
