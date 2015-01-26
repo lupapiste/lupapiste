@@ -51,7 +51,7 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function() {
 
   self.init = function(bindings) {
     self.application = ko.toJS(bindings.application);
-    var orgMeta = self.application.organizationMeta;
+    var kopiolaitosMeta = self.application.organizationMeta.kopiolaitos;
     var attachments = _(self.application.attachments || [])
                       .filter(function(a) { return a.forPrinting && a.versions && a.versions.length; })
                       .map(enrichAttachment)
@@ -62,9 +62,9 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function() {
     self.errorMessage("");
 
     self.ordererOrganization(self.application.organizationName || "");
-    self.ordererAddress(orgMeta.kopiolaitos.kopiolaitosOrdererAddress || "" );
-    self.ordererEmail(orgMeta.kopiolaitos.kopiolaitosOrdererEmail || "");
-    self.ordererPhone(orgMeta.kopiolaitos.kopiolaitosOrdererPhone || "");
+    self.ordererAddress(kopiolaitosMeta.kopiolaitosOrdererAddress || "" );
+    self.ordererEmail(kopiolaitosMeta.kopiolaitosOrdererEmail || "");
+    self.ordererPhone(kopiolaitosMeta.kopiolaitosOrdererPhone || "");
     self.applicantName(self.application.applicant || "");
     self.kuntalupatunnus((self.application.verdicts && self.application.verdicts[0] && self.application.verdicts[0].kuntalupatunnus) ? self.application.verdicts[0].kuntalupatunnus : "");
     self.propertyId(self.application.propertyId);
