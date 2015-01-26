@@ -83,7 +83,8 @@
                                                                :versions []
                                                                :notNeeded false
                                                                :required true
-                                                               :requestedByAuthority true}
+                                                               :requestedByAuthority true
+                                                               :forPrinting false}
                                                               {:id "123"
                                                                :locked false
                                                                :modified 999
@@ -96,7 +97,8 @@
                                                                :versions []
                                                                :notNeeded false
                                                                :required true
-                                                               :requestedByAuthority true}])
+                                                               :requestedByAuthority true
+                                                               :forPrinting false}])
   (provided
     (mongo/create-id) => "123"))
 
