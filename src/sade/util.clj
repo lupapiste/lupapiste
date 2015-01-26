@@ -365,3 +365,6 @@
       (nil? b) -1
       (nil? a) 1
       :else (- (.indexOf difficulty-values a) (.indexOf difficulty-values b)))))
+
+(defn every-key-in-map? [target-map required-keys]
+  (every? (-> target-map keys set) required-keys))

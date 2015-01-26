@@ -381,7 +381,7 @@
 
    ])
 
-(def ya-default-attachments-for-operations {:ya-kayttolupa-tapahtumat                                          [[:muut :muu]]
+(def- ya-default-attachments-for-operations {:ya-kayttolupa-tapahtumat                                          [[:muut :muu]]
                                             :ya-kayttolupa-harrastustoiminnan-jarjestaminen                    [[:muut :muu]]
                                             :ya-kayttolupa-metsastys                                           [[:muut :muu]]
                                             :ya-kayttolupa-vesistoluvat                                        [[:muut :muu]]
@@ -412,7 +412,15 @@
                                             :ya-sijoituslupa-muu-sijoituslupa                                  [[:muut :muu]]
                                             :ya-jatkoaika                                                      [[:muut :muu]]})
 
-(def organizations [;; Jarvenpaa R
+(def- default-keys-for-organizations {:app-required-fields-filling-obligatory false
+                                      :kopiolaitos-email nil
+                                      :kopiolaitos-orderer-address nil
+                                      :kopiolaitos-orderer-email nil
+                                      :kopiolaitos-orderer-phone nil})
+
+(def organizations (map
+                     (partial merge default-keys-for-organizations)
+                     [;; Jarvenpaa R
                     {:id "186-R"
                      :name {:fi "J\u00E4rvenp\u00E4\u00E4n rakennusvalvonta"}
                      :scope [{:municipality "186"
@@ -634,7 +642,7 @@
                      :statementGivers [{:id "516560d6c2e6f603beb85147"
                                          :text "Paloviranomainen",
                                          :email "sonja.sibbo@sipoo.fi",
-                                         :name "Sonja Sibbo"}]}])
+                                         :name "Sonja Sibbo"}]}]))
 
 (def companies [{:_id "solita",
                  :created 1412959886600

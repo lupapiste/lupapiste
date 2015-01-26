@@ -231,6 +231,21 @@
   (non-blank-parameters [:foo :bar] {:data {:foo "" :bar " "}})  => (contains {:parameters [:foo :bar]})
   (non-blank-parameters [:foo :bar] {:data {:foo " " :bar "x"}}) => (contains {:parameters [:foo]}))
 
+(facts "vector-parameters-with-non-blank-items"
+  (vector-parameters-with-non-blank-items [:foo] {:data {:foo ["aa"]}})     => nil
+  (vector-parameters-with-non-blank-items [:foo] {:data {:foo ["aa" nil]}}) => {:ok false :text "error.vector-parameters-with-blank-items" :parameters [:foo]}
+  (vector-parameters-with-non-blank-items [:foo] {:data {:foo ["aa" ""]}})  => {:ok false :text "error.vector-parameters-with-blank-items" :parameters [:foo]}
+  (vector-parameters-with-non-blank-items [:foo :bar] {:data {:foo [nil] :bar [" "]}}) => {:ok false :text "error.vector-parameters-with-blank-items" :parameters [:foo :bar]}
+  (vector-parameters-with-non-blank-items [:foo :bar] {:data {:foo nil :bar " "}})     => {:ok false :text "error.non-vector-parameters"        :parameters [:foo :bar]})
+
+(facts "vector-parameters-with-map-items-with-required-keys"
+  (vector-parameters-with-map-items-with-required-keys [:foo] [:x :y] {:data {:foo [{:x "aa" :y nil}]}}) => nil
+  (vector-parameters-with-map-items-with-required-keys [:foo] [:x] {:data {:foo nil}})         => {:ok false :text "error.non-vector-parameters" :parameters [:foo]}
+  (vector-parameters-with-map-items-with-required-keys [:foo] [:x] {:data {:foo [nil]}})         => {:ok false :text "error.vector-parameters-with-items-missing-required-keys"
+                                                                                                     :parameters [:foo] :required-keys [:x]}
+  (vector-parameters-with-map-items-with-required-keys [:foo] [:x] {:data {:foo [{:y "aa"}]}}) => {:ok false :text "error.vector-parameters-with-items-missing-required-keys"
+                                                                                                   :parameters [:foo] :required-keys [:x]})
+
 (facts "feature requirements"
  (against-background
    (get-actions) => {:test-command1 {:feature :abba :roles [:anonymous]}})

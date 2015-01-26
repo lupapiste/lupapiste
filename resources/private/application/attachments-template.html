@@ -43,6 +43,11 @@
                                         'title': loc('attachment.stamped'),
                                         'data-test-icon': 'stamped-' + type['type-group'] + '.' + type['type-id']}">
                 </span>
+                <span data-bind="visible: $data.forPrinting,
+                                 attr: {'class': 'icon verdict-attachment',
+                                        'title': loc('attachment.verdict-attachment'),
+                                        'data-test-icon': 'verdict-attachment-' + type['type-group'] + '.' + type['type-id']}">
+                </span>
               </td>
               <td class="attachment-type-group">
                 <span data-bind="if: type">
