@@ -394,7 +394,7 @@
                                   :listen [:hetuChanged]
                                   :body hanke-row})
 
-(def tayta-omat-tiedot-button {:name "fillMyInfo" :type :fillMyInfoButton})
+(def tayta-omat-tiedot-button {:name "fillMyInfo" :type :fillMyInfoButton :whitelist [:applicant]})
 
 (def tyonjohtajan-historia {:name "foremanHistory" :type :foremanHistory})
 

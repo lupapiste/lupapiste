@@ -896,6 +896,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   }
 
   function buildFillMyInfoButton(subSchema, model, path) {
+    if (model.fillMyInfo && model.fillMyInfo.disabled) {
+      return;
+    }
+
     var myNs = path.slice(0, path.length - 1).join(".");
 
     var params = {
