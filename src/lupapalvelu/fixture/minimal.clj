@@ -414,7 +414,9 @@
 
 (def- default-keys-for-organizations {:app-required-fields-filling-obligatory false
                                       :kopiolaitos-email nil
-                                      :kopiolaitos-orderer-address nil})
+                                      :kopiolaitos-orderer-address nil
+                                      :kopiolaitos-orderer-email nil
+                                      :kopiolaitos-orderer-phone nil})
 
 (def organizations (map
                      (partial merge default-keys-for-organizations)
