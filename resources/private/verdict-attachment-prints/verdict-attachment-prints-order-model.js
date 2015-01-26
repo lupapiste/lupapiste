@@ -82,7 +82,7 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function() {
   self.orderAttachmentPrints = function() {
     // cannot replace the orderAmount observable itself, so need to create a new "amount" key
     _.forEach(self.attachments(), function(a) {
-      a.amount = ko.unwrap(a.orderAmount);
+      a.amount = a.orderAmount();
     });
     var data = {
       id: self.application.id,
