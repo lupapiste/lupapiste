@@ -314,12 +314,13 @@
     (fail :auth-admin.legacyNotResponding)))
 
 (defcommand set-kopiolaitos-info
-  {:parameters [kopiolaitosEmail kopiolaitosOrdererAddress]
-   :roles [:authorityAdmin]
-   :input-validators  [(partial non-blank-parameters [:kopiolaitosEmail :kopiolaitosOrdererAddress])]}
+  {:parameters [kopiolaitosEmail kopiolaitosOrdererAddress kopiolaitosOrdererPhone kopiolaitosOrdererEmail]
+   :roles [:authorityAdmin]}
   [{{:keys [organizations]} :user}]
   (update-organization (first organizations) {$set {:kopiolaitos-email kopiolaitosEmail
-                                                    :kopiolaitos-orderer-address kopiolaitosOrdererAddress}})
+                                                    :kopiolaitos-orderer-address kopiolaitosOrdererAddress
+                                                    :kopiolaitos-orderer-phone kopiolaitosOrdererPhone
+                                                    :kopiolaitos-orderer-email kopiolaitosOrdererEmail}})
   (ok))
 
 (defquery kopiolaitos-config
