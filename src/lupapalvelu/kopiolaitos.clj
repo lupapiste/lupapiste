@@ -41,7 +41,6 @@
         zip-file-name "Lupakuvat.zip"
         email-attachment {:content zip :file-name zip-file-name}
         email-subject (str (with-lang lang (loc :kopiolaitos-email-subject)) \space (:ordererOrganization orderInfo))
-        orderInfo (assoc orderInfo :ordererAddress (str "Testikatu 2, 00000 Helsinki, " (:ordererOrganization orderInfo)))
         html-table (format
                      kopiolaitos-html-table-str
                      (get-kopiolaitos-html-table-header-str lang)
