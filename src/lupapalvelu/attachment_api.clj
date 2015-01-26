@@ -6,7 +6,7 @@
             [sade.strings :as ss]
             [sade.util :refer [future*]]
             [sade.core :refer [ok fail fail! now]]
-            [lupapalvelu.action :refer [defquery defcommand defraw update-application application->command notify] :as action]
+            [lupapalvelu.action :refer [defquery defcommand defraw update-application application->command notify boolean-parameters] :as action]
             [lupapalvelu.comment :as comment]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as user]
@@ -18,14 +18,12 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.job :as job]
             [lupapalvelu.stamper :as stamper]
-            [lupapalvelu.pdf-export :as pdf-export]
             [lupapalvelu.statement :as statement]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
             [sade.util :as util]
             [lupapalvelu.domain :as domain])
-  (:import [java.util.zip ZipOutputStream ZipEntry]
-           [java.io File OutputStream FilterInputStream]))
+  (:import [java.io File]))
 
 ;; Validators
 
@@ -91,12 +89,11 @@
 
   (let [attachments-wo-sent-timestamp (filter
                                         #(and
-                                           (pos? (-> % :versions count))
+                                           (-> % :versions count pos?)
                                            (or
                                              (not (:sent %))
                                              (> (-> % :versions last :created) (:sent %)))
-                                           (not= "statement" (-> % :target :type))
-                                           (not= "verdict" (-> % :target :type)))
+                                           (not (#{"verdict" "statement"} (-> % :target :type))))
                                         (:attachments application))]
     (if (pos? (count attachments-wo-sent-timestamp))
       (let [organization  (organization/get-organization (:organization application))
@@ -123,16 +120,14 @@
    :roles      [:applicant :authority]
    :extra-auth-roles [:statementGiver]
    :states     (action/all-states-but [:answered :sent :closed :canceled])}
-  [{:keys [application user] :as command}]
+  [{:keys [application user created] :as command}]
 
   (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
     (fail! :error.pre-verdict-attachment))
 
   (let [attachment-type (attachment/parse-attachment-type attachmentType)]
     (if (attachment/allowed-attachment-type-for-application? application attachment-type)
-      (update-application command
-        {:attachments {$elemMatch {:id attachmentId}}}
-        {$set {:attachments.$.type attachment-type}})
+      (attachment/update-attachment-key command attachmentId :type attachment-type created true true)
       (do
         (errorf "attempt to set new attachment-type: [%s] [%s]: %s" id attachmentId attachment-type)
         (fail :error.attachmentTypeNotAllowed)))))
@@ -158,10 +153,7 @@
    :roles       [:authority]
    :states      (action/all-states-but [:answered :sent :closed :canceled])}
   [{:keys [created] :as command}]
-  (update-application command
-    {:attachments {$elemMatch {:id attachmentId}}}
-    {$set {:modified created
-           :attachments.$.state :ok}}))
+  (attachment/update-attachment-key command attachmentId :state :ok created true false))
 
 (defcommand reject-attachment
   {:description "Authority can reject attachment, requires user action."
@@ -169,10 +161,7 @@
    :roles       [:authority]
    :states      (action/all-states-but [:answered :sent :closed :canceled])}
   [{:keys [created] :as command}]
-  (update-application command
-    {:attachments {$elemMatch {:id attachmentId}}}
-    {$set {:modified created
-           :attachments.$.state :requires_user_action}}))
+  (attachment/update-attachment-key command attachmentId :state :requires_user_action created true false))
 
 ;;
 ;; Create
@@ -242,44 +231,6 @@
   [{{:keys [attachment-id]} :data user :user}]
   (attachment/output-attachment attachment-id true (partial attachment/get-attachment-as user)))
 
-(defn- append-gridfs-file [zip file-name file-id]
-  (when file-id
-    (.putNextEntry zip (ZipEntry. (ss/encode-filename (str file-id "_" file-name))))
-    (with-open [in ((:content (mongo/download file-id)))]
-      (io/copy in zip))))
-
-(defn- append-stream [zip file-name in]
-  (when in
-    (.putNextEntry zip (ZipEntry. (ss/encode-filename file-name)))
-    (io/copy in zip)))
-
-(defn- append-attachment [zip {:keys [filename fileId]}]
-  (append-gridfs-file zip filename fileId))
-
-(defn- get-all-attachments [application lang]
-  (let [temp-file (File/createTempFile "lupapiste.attachments." ".zip.tmp")]
-    (debugf "Created temporary zip file for attachments: %s" (.getAbsolutePath temp-file))
-    (with-open [out (io/output-stream temp-file)]
-      (let [zip (ZipOutputStream. out)]
-        ; Add all attachments:
-        (doseq [attachment (:attachments application)]
-          (append-attachment zip (-> attachment :versions last)))
-        ; Add submitted PDF, if exists:
-        (when-let [submitted-application (mongo/by-id :submitted-applications (:id application))]
-          (append-stream zip (i18n/loc "attachment.zip.pdf.filename.submitted") (pdf-export/generate submitted-application lang)))
-        ; Add current PDF:
-        (append-stream zip (i18n/loc "attachment.zip.pdf.filename.current") (pdf-export/generate application lang))
-        (.finish zip)))
-    temp-file))
-
-(defn- temp-file-input-stream [^File file]
-  (let [i (io/input-stream file)]
-    (proxy [FilterInputStream] [i]
-      (close []
-        (proxy-super close)
-        (when (= (io/delete-file file :could-not) :could-not)
-          (warnf "Could not delete temporary file: %s" (.getAbsolutePath file)))))))
-
 (defraw "download-all-attachments"
   {:parameters [:id]
    :roles      [:applicant :authority]
@@ -290,7 +241,7 @@
     {:status 200
        :headers {"Content-Type" "application/octet-stream"
                  "Content-Disposition" (str "attachment;filename=\"" (i18n/loc "attachment.zip.filename") "\"")}
-       :body (temp-file-input-stream (get-all-attachments application lang))}
+       :body (attachment/temp-file-input-stream (attachment/get-all-attachments (:attachments application) application lang))}
     {:status 404
      :headers {"Content-Type" "text/plain"}
      :body "404"}))
@@ -478,7 +429,7 @@
        (fail :error.password)))))
 
 ;;
-;; Label metadata
+;; Attachment metadata
 ;;
 
 (defcommand set-attachment-meta
@@ -487,30 +438,34 @@
    :extra-auth-roles [:statementGiver]
    :states     (action/all-states-but [:answered :sent :closed :canceled])
    :input-validators [validate-meta validate-scale validate-size validate-operation]}
-  [{:keys [application user] :as command}]
+  [{:keys [application user created] :as command}]
 
   (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
     (fail! :error.pre-verdict-attachment))
 
   (doseq [[k v] meta]
-    (let [setKey (keyword (str "attachments.$." (name k)))]
-      (update-application command
-                          {:attachments {$elemMatch {:id attachmentId}}}
-                          {$set {setKey v
-                                 :attachments.$.modified (now)}})))
+    (attachment/update-attachment-key command attachmentId k v created true true))
   (ok))
-
-;;
-;; Mark attachment as needed or not needed
-;;
 
 (defcommand set-attachment-not-needed
   {:parameters [id attachmentId notNeeded]
    :roles      [:applicant :authority]
    :states     [:draft :open]}
-  [command]
-  (update-application command
-                      {:attachments {$elemMatch {:id attachmentId}}}
-                      {$set {:attachments.$.notNeeded notNeeded}})
+  [{:keys [created] :as command}]
+  (attachment/update-attachment-key command attachmentId :notNeeded notNeeded created true false)
   (ok))
+
+(defcommand set-attachments-as-verdict-attachment
+  {:parameters [id attachmentIds isVerdictAttachment]
+   :roles      [:authority]
+   :states     (action/all-states-but [:closed :canceled])
+   :input-validators [(partial action/boolean-parameters [:isVerdictAttachment])
+                      (partial action/vector-parameters-with-non-blank-items [:attachmentIds])]
+   ;; TODO: Poista, kun feature on kaytossa
+   :feature    :verdict-attachment-order}
+  [{:keys [created] :as command}]
+  (doseq [attachment-id attachmentIds]
+    (attachment/update-attachment-key command attachment-id :forPrinting isVerdictAttachment created true false))
+  (ok))
+
 
