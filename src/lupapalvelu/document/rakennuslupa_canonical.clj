@@ -243,6 +243,7 @@
                                       "Rakentamisen aikainen muutos"
                                       (condp = operation-name
                                         "tyonjohtajan-nimeaminen" "Uuden ty\u00f6njohtajan nime\u00e4minen"
+                                        "tyonjohtajan-nimeaminen-v2" "Uuden ty\u00f6njohtajan nime\u00e4minen"
                                         "suunnittelijan-nimeaminen" "Uuden suunnittelijan nime\u00e4minen"
                                         "jatkoaika" "Jatkoaikahakemus"
                                         "raktyo-aloit-loppuunsaat" "Jatkoaikahakemus"
