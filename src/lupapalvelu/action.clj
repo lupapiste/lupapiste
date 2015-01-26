@@ -78,9 +78,16 @@
       (fail :error.application-not-found :id id))
     (fail :error.application-not-found :id nil)))
 
-(defn- filter-params-of-command [params command filter-fn error-message]
-  (when-let [non-matching (seq (filter #(filter-fn (get-in command [:data %])) params))]
-    (fail error-message :parameters (vec non-matching))))
+(defn- filter-params-of-command [params command filter-fn error-message & [extra-error-data]]
+  {:pre [(or (nil? extra-error-data) (map? extra-error-data))]}
+  (when-let [non-matching-params (seq (filter #(filter-fn (get-in command [:data %])) params))]
+    (println "\n non-matching-params: ")
+    (clojure.pprint/pprint non-matching-params)
+    (println "\n ")
+    (merge
+      (fail error-message :parameters (vec non-matching-params))
+      (when (or (nil? extra-error-data) (map? extra-error-data))  ;; sanity check.  Can this be made in a pre-check?
+        extra-error-data))))
 
 (defn non-blank-parameters [params command]
   (filter-params-of-command params command #(or (nil? %) (and (string? %) (s/blank? %))) :error.missing-parameters))
@@ -88,10 +95,18 @@
 (defn vector-parameters [params command]
   (filter-params-of-command params command (complement vector?) :error.non-vector-parameters))
 
-(defn vectorful-of-non-blank-parameters [params command]
+(defn vector-parameters-with-non-blank-items [params command]
   (or
     (vector-parameters params command)
-    (filter-params-of-command params command (partial some #(or (nil? %) (and (string? %) (s/blank? %)))) :error.vector-with-blank-parameters)))
+    (filter-params-of-command params command (partial some #(or (nil? %) (and (string? %) (s/blank? %)))) :error.vector-parameters-with-blank-items )))
+
+(defn vector-parameters-with-map-items-with-required-keys [params required-keys command]
+  (or
+    (vector-parameters params command)
+    (filter-params-of-command params command
+      (partial some #(not (and (map? %) (util/every-key-in-map? % required-keys))))
+      :error.vector-parameters-with-items-missing-required-keys
+      {:required-keys keys})))
 
 (defn boolean-parameters [params command]
   (filter-params-of-command params command #(not (instance? Boolean %)) :error.non-boolean-parameters))

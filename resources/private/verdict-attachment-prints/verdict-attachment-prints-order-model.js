@@ -40,37 +40,32 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function(/*dialogSelector, confirm
     !_.isEmpty(self.address());
   });
 
-  function normalizeAttachment(a) {
+  function enrichAttachment(a) {
     var versions = _(a.versions).reverse().value();
     var latestVersion = versions[0];
-    return {
-      id:           a.id,
-      type:         { "type-group": a.type["type-group"], "type-id": a.type["type-id"] },
-//      contentType:  latestVersion.contentType,
-      contents:     a.contents || loc(["attachmentType", a.type["type-group"], a.type["type-id"]]),
-      filename:     latestVersion.filename,
-//      version:      { major: latestVersion.version.major, minor: latestVersion.version.minor },
-//      size:         latestVersion.size,
-//      selected:     ko.observable(true)
-      orderAmount:  ko.observable("2")
-    };
+    a.filename = latestVersion.filename;
+    a.contents = a.contents || loc(["attachmentType", a.type["type-group"], a.type["type-id"]])
+    a.orderAmount = ko.observable("2");
+    return a;
   }
 
   // Open the dialog
 
   self.init = function(bindings) {
     var app = ko.toJS(bindings.application);
-    var attachments = _(app.attachments || []).filter(function(a) {return a.forPrinting && a.versions && a.versions.length;}).map(normalizeAttachment).value();
-
     self.application = app;
+    var attachments = _(app.attachments || [])
+                      .filter(function(a) { return a.forPrinting && a.versions && a.versions.length; })
+                      .map(enrichAttachment)
+                      .value();
+    self.attachments(attachments);
     self.processing(false);
     self.pending(false);
     self.errorMessage("");
-    self.attachments(attachments);
 
     self.ordererOrganization(app.organizationName || "");
-    self.ordererEmail("kirjaamo@rakennusvalvonta");   // TODO: Lisaa organisaatioille tama tieto, ja paakayttajalle muokkausmahdollisuus
-    self.ordererPhone("09 1234 123");                 // TODO: Lisaa organisaatioille tama tieto, ja paakayttajalle muokkausmahdollisuus
+    self.ordererEmail("kirjaamo@rakennusvalvonta.fi");   // TODO: Lisaa organisaatioille tama tieto, ja paakayttajalle muokkausmahdollisuus
+    self.ordererPhone("09 1234 123");                    // TODO: Lisaa organisaatioille tama tieto, ja paakayttajalle muokkausmahdollisuus
     self.applicantName(app.applicant || "");
     self.kuntalupatunnus((app.verdicts && app.verdicts[0] && app.verdicts[0].kuntalupatunnus) ? app.verdicts[0].kuntalupatunnus : "");
     self.propertyId(app.propertyId);
@@ -87,11 +82,13 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function(/*dialogSelector, confirm
 
   self.orderAttachmentPrints = function() {
     // cannot replace the orderAmount observable itself, so need to create a new "amount" key
-    var attachmentIdsAndAmounts = _.map(self.attachments(), function(a) { return { id: a.id, amount: ko.unwrap(a.orderAmount) }; });
+    _.forEach(self.attachments(), function(a) {
+      a.amount = ko.unwrap(a.orderAmount);
+    });
     var data = {
       id: self.application.id,
       lang: loc.getCurrentLanguage(),
-      attachmentIdsAndAmounts: attachmentIdsAndAmounts,
+      attachmentsWithAmounts: self.attachments(),
       orderInfo: {
         ordererOrganization: self.ordererOrganization(),
         ordererEmail: self.ordererEmail(),
@@ -108,12 +105,13 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function(/*dialogSelector, confirm
       .processing(self.processing)
       .pending(self.pending)
       .success(function() {
-        var content = loc("verdict-attachment-prints-order.order-dialog.ready", attachmentIdsAndAmounts.length);
+        var content = loc("verdict-attachment-prints-order.order-dialog.ready", self.attachments().length);
         LUPAPISTE.ModalDialog.showDynamicOk(loc("verdict-attachment-prints-order.order-dialog.title"), content);
         pageutil.showAjaxWait();
         repository.load(self.application.id);
       })
       .error(function(d) {
+        error(d);
         self.errorMessage(d.text);
       })
       .call();

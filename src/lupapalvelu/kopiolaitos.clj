@@ -62,10 +62,10 @@
     ;; from email/send-email-message false = success, true = failure -> turn it other way around
     (try
       (not (email/send-email-message
-           email-address
-           email-subject
-           (email/apply-template "kopiolaitos-order.html" orderInfo)
-           [email-attachment]))
+             email-address
+             email-subject
+             (email/apply-template "kopiolaitos-order.html" orderInfo)
+             [email-attachment]))
       (io/delete-file zip)
       (catch java.io.IOException ioe
         (warnf "Could not delete temporary zip file: %s" (.getAbsolutePath zip)))
@@ -75,18 +75,9 @@
 (defn- get-kopiolaitos-email-address [{:keys [organization] :as application}]
   (organization/with-organization organization :kopiolaitos-email))
 
-(defn- get-amount [attachmentIdsAndAmounts id]
-  (some #(when (= id (:id %)) (:amount %)) attachmentIdsAndAmounts))
-
-(defn do-order-verdict-attachment-prints [{{:keys [lang attachmentIdsAndAmounts orderInfo]} :data application :application}]
-  ;;
-  ;; TODO: Hae organisaation kopiolaitoksen email-osoite.
-  ;;
+(defn do-order-verdict-attachment-prints [{{:keys [lang attachmentsWithAmounts orderInfo]} :data application :application}]
   (if-let [email-address (get-kopiolaitos-email-address application)]
-    (let [attachmentIds (set (map :id attachmentIdsAndAmounts))
-          attachments (filterv #((set attachmentIds) (:id %)) (:attachments application))
-          attachments (map #(assoc % :amount (get-amount attachmentIdsAndAmounts (:id %))) attachments)]
-      (if (send-kopiolaitos-email lang email-address attachments orderInfo)
-        (ok)
-       (fail! :kopiolaitos-email-sending-failed)))
+    (if (send-kopiolaitos-email lang email-address attachmentsWithAmounts orderInfo)
+      (ok)
+      (fail! :kopiolaitos-email-sending-failed))
     (fail! :no-kopiolaitos-email-defined)))

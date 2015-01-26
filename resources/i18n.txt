@@ -33,3 +33,7 @@ auth-admin.setKopiolaitosInfo: Aseta kopiolaitoksen sähköpostiosoite ja lähet
 auth-admin.setkopiolaitosInfo: Tiedot lähetettäväksi kopiolaitokselle
 auth-admin.kopiolaitosEmail: sähköpostiosoite@esimerkki.fi
 auth-admin.kopiolaitosOrdererAddress: Osoite 1 00100 Kunta
+
+error.vector-parameters-with-blank-items: Listassa puuttuvia arvoja
+error.vector-parameters-with-items-missing-required-keys: Listan tiedot olivat puutteelliset
+error.kopiolaitos-print-order-invalid-parameters-content: Lupakuvien tilaaminen epäonnistui. Tilauksen tietosisältö oli virheellistä muotoa.

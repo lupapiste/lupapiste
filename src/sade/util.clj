@@ -344,3 +344,6 @@
   {:pre [(and (sequential? orig-seq) (sequential? exclude-seq))]}
   (let [exclude-set (set exclude-seq)]
     (remove #(exclude-set %) orig-seq)))
+
+(defn every-key-in-map? [target-map required-keys]
+  (every? (-> target-map keys set) required-keys))
