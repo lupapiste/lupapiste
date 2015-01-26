@@ -13,6 +13,7 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function(/*dialogSelector, confirm
 //  self.selectedAttachments = ko.computed(function() { return _.filter(self.attachments(), function(a) {return a.selected();}); });
 
   self.ordererOrganization = ko.observable("");
+  self.ordererAddress = ko.observable("");
   self.ordererEmail = ko.observable("");
   self.ordererPhone = ko.observable("");
   self.applicantName = ko.observable("");
@@ -64,6 +65,7 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function(/*dialogSelector, confirm
     self.errorMessage("");
 
     self.ordererOrganization(self.application.organizationName || "");
+    self.ordererAddress(orgMeta.kopiolaitos.kopiolaitosOrdererAddress || "" );
     self.ordererEmail(orgMeta.kopiolaitos.kopiolaitosOrdererEmail || "");
     self.ordererPhone(orgMeta.kopiolaitos.kopiolaitosOrdererPhone || "");
     self.applicantName(self.application.applicant || "");
@@ -91,6 +93,7 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function(/*dialogSelector, confirm
       attachmentsWithAmounts: self.attachments(),
       orderInfo: {
         ordererOrganization: self.ordererOrganization(),
+        ordererAddress: self.ordererAddress(),
         ordererEmail: self.ordererEmail(),
         ordererPhone: self.ordererPhone(),
         applicantName: self.applicantName(),

@@ -9,6 +9,7 @@ verdict-attachment-prints-order.order-dialog.description: Seuraavat päätöksen
 verdict-attachment-prints-order.order-dialog.orderInfo: Tilauksen tiedot
 
 verdict-attachment-prints-order.order-dialog.ordererOrganization: Tilaaja
+verdict-attachment-prints-order.order-dialog.ordererAddress: Toimitusosoite
 verdict-attachment-prints-order.order-dialog.ordererEmail: Sähköposti
 verdict-attachment-prints-order.order-dialog.ordererPhone: Puhelinnumero
 verdict-attachment-prints-order.order-dialog.applicantName: Hakijan nimi
