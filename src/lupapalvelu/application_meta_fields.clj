@@ -102,8 +102,7 @@
      :kopiolaitos {:kopiolaitosEmail (:kopiolaitos-email org)
                    :kopiolaitosOrdererAddress (:kopiolaitos-orderer-address org)
                    :kopiolaitosOrdererPhone (:kopiolaitos-orderer-phone org)
-                   :kopiolaitosOrdererEmail (:kopiolaitos-orderer-email org)}
-     }))
+                   :kopiolaitosOrdererEmail (:kopiolaitos-orderer-email org)}}))
 
 (def post-verdict-states #{"verdictGiven" "constructionStarted" "closed"})
 (defn- in-post-verdict-state? [_ app] (if (post-verdict-states (name (:state app))) true false))
