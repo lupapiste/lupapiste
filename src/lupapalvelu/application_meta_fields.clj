@@ -99,8 +99,11 @@
     {:name (organization/get-organization-name org)
      :links (:links org)
      :requiredFieldsFillingObligatory (:app-required-fields-filling-obligatory org)
-     :kopiolaitosEmail (:kopiolaitos-email org)
-     :kopiolaitosOrdererAddress (:kopiolaitos-orderer-address org)}))
+     :kopiolaitos {:kopiolaitosEmail (:kopiolaitos-email org)
+                   :kopiolaitosOrdererAddress (:kopiolaitos-orderer-address org)
+                   :kopiolaitosOrdererPhone (:kopiolaitos-orderer-phone org)
+                   :kopiolaitosOrdererEmail (:kopiolaitos-orderer-email org)}
+     }))
 
 (def post-verdict-states #{"verdictGiven" "constructionStarted" "closed"})
 (defn- in-post-verdict-state? [_ app] (if (post-verdict-states (name (:state app))) true false))
