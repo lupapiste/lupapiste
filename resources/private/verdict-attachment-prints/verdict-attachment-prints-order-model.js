@@ -64,8 +64,8 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function(/*dialogSelector, confirm
     self.errorMessage("");
 
     self.ordererOrganization(self.application.organizationName || "");
-    self.ordererEmail(orgMeta.kopiolaitosOrdererEmail || "");
-    self.ordererPhone(orgMeta.kopiolaitosOrdererEmail || "");
+    self.ordererEmail(orgMeta.kopiolaitos.kopiolaitosOrdererEmail || "");
+    self.ordererPhone(orgMeta.kopiolaitos.kopiolaitosOrdererPhone || "");
     self.applicantName(self.application.applicant || "");
     self.kuntalupatunnus((self.application.verdicts && self.application.verdicts[0] && self.application.verdicts[0].kuntalupatunnus) ? self.application.verdicts[0].kuntalupatunnus : "");
     self.propertyId(self.application.propertyId);
