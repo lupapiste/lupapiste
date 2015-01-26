@@ -19,11 +19,12 @@
   (fact "operation names"
     (every? link-permit-required-operations [:ya-jatkoaika
                                              :tyonjohtajan-nimeaminen
+                                             :tyonjohtajan-nimeaminen-v2
                                              :suunnittelijan-nimeaminen
                                              :jatkoaika
                                              :aloitusoikeus
                                              :raktyo-aloit-loppuunsaat]) => truthy)
-  (fact "operations count" (count link-permit-required-operations) => 7)) ;TODO: 6 -> because of tyonjohtajan-nimeaminen-v2
+  (fact "operations count" (count link-permit-required-operations) => 7))
 
 (defn- check-leaf [pair]
   (fact (count pair) => 2)

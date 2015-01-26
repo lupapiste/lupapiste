@@ -383,7 +383,7 @@
    {:name "6kk" :type :string :subtype :number :size "s" :label false :uicomponent :string :i18nkey "muutHankkeet.6kk"}
    {:name "9kk" :type :string :subtype :number :size "s" :label false :uicomponent :string :i18nkey "muutHankkeet.9kk"}
    {:name "12kk" :type :string :subtype :number  :size "s" :label false :uicomponent :string :i18nkey "muutHankkeet.12kk"}
-   {:name "autoupdated" :type :checkbox :hidden true :i18nkey "muutHankkeet.autoupdated" :uicomponent :checkbox}])
+   {:name "autoupdated" :type :checkbox :hidden true :i18nkey "muutHankkeet.autoupdated" :uicomponent :checkbox :whitelist [:none]}])
 
 (def muut-rakennushankkeet-table {:name "muutHankkeet"
                                   :type :foremanOtherApplications

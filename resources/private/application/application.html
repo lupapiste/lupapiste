@@ -1143,7 +1143,8 @@
           <p class="dialog-close close">X</p>
         </div>
         <!-- ko with: $root.foreman -->
-        <div class="dialog-content" data-bind="css: {pending: pending, finished: finished}">
+        <div class="dialog-content">
+          <!-- ko if: finished -->
           <div class="finished">
             <p class="dialog-desc-wide" data-bind="lhtml: 'invite.foreman.finished'"></p>
             <button data-test-id="application-invite-foreman-close-dialog"
@@ -1151,10 +1152,13 @@
                     data-bind="ltext: 'button.ok', click: function() { openApplication(finished()); LUPAPISTE.ModalDialog.close(); }"></button>
             <a class="btn btn-dialog" data-bind="ltext: 'application.return', click: function() { LUPAPISTE.ModalDialog.close(); }"></a>
           </div>
+          <!-- /ko -->
+          <!-- ko if: pending -->
           <div class="pending">
             <div class="ajax"></div>
             <div data-bind="ltext: 'invite.foreman.pending'"></div>
           </div>
+          <!-- /ko -->
           <!-- ko ifnot: finished -->
           <p data-bind="lhtml: 'invite.foreman.desc'" class="dialog-desc-wide"></p>
           <form>

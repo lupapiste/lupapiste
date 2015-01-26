@@ -1,8 +1,8 @@
 (ns lupapalvelu.foreman
   (:require [lupapalvelu.domain :as domain]
             [sade.strings :as ss]
+            [sade.util :as util]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.document.tools :as tools]
             [monger.operators :refer :all]))
 
@@ -51,7 +51,7 @@
 (defn- unwrap [wrapped-value]
   (let [value (tools/unwrapped wrapped-value)]
     (if (empty? value)
-      "ei_tiedossa"            ; TODO: ei_tiedossa -> ei tiedossa kun kaannos excelissa
+      "ei tiedossa"
       value)))
 
 (defn- get-history-data-from-app [app-links foreman-app]
@@ -70,13 +70,28 @@
      :jobDescription foreman-role
      :operation      operation
      :linkedAppId    project-app-id
-     :foremanAppId   (:id foreman-app)}))
+     :foremanAppId   (:id foreman-app)
+     :created        (:created foreman-app)}))
 
 (defn get-foreman-history-data [foreman-app]
   (let [foreman-apps       (->> (get-foreman-applications foreman-app)
                                 (remove #(= (:id %) (:id foreman-app))))
         links              (mongo/select :app-links {:link {$in (map :id foreman-apps)}})]
     (map (partial get-history-data-from-app links) foreman-apps)))
+
+(defn- reduce-to-highlights [history-group]
+  (let [history-group (sort-by :created history-group)]
+    (reduce (fn [highlights group]
+              (if (pos? (util/compare-difficulty (first highlights) group))
+                (cons group highlights)
+                highlights))
+            nil
+            history-group)))
+
+(defn get-foreman-reduced-history-data [foreman-app]
+  (let [history-data    (get-foreman-history-data foreman-app)
+        grouped-history (group-by (juxt :municipality :jobDescription) history-data)]
+    (mapcat (fn [[_ group]] (reduce-to-highlights group)) grouped-history)))
 
 (defn foreman-application-info [application]
   (-> (select-keys application [:id :state :auth :documents])
