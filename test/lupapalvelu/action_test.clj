@@ -233,9 +233,9 @@
 
 (facts "vector-parameters-with-non-blank-items"
   (vector-parameters-with-non-blank-items [:foo] {:data {:foo ["aa"]}})     => nil
-  (vector-parameters-with-non-blank-items [:foo] {:data {:foo ["aa" nil]}}) => {:ok false :text "error.vector-with-blank-parameters" :parameters [:foo]}
-  (vector-parameters-with-non-blank-items [:foo] {:data {:foo ["aa" ""]}})  => {:ok false :text "error.vector-with-blank-parameters" :parameters [:foo]}
-  (vector-parameters-with-non-blank-items [:foo :bar] {:data {:foo [nil] :bar [" "]}}) => {:ok false :text "error.vector-with-blank-parameters" :parameters [:foo :bar]}
+  (vector-parameters-with-non-blank-items [:foo] {:data {:foo ["aa" nil]}}) => {:ok false :text "error.vector-parameters-with-blank-items" :parameters [:foo]}
+  (vector-parameters-with-non-blank-items [:foo] {:data {:foo ["aa" ""]}})  => {:ok false :text "error.vector-parameters-with-blank-items" :parameters [:foo]}
+  (vector-parameters-with-non-blank-items [:foo :bar] {:data {:foo [nil] :bar [" "]}}) => {:ok false :text "error.vector-parameters-with-blank-items" :parameters [:foo :bar]}
   (vector-parameters-with-non-blank-items [:foo :bar] {:data {:foo nil :bar " "}})     => {:ok false :text "error.non-vector-parameters"        :parameters [:foo :bar]})
 
 (facts "feature requirements"
