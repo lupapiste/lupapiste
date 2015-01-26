@@ -47,9 +47,7 @@ var stamping = (function() {
     }
 
     if ( model.appModel.verdicts && !_.isEmpty(model.appModel.verdicts()) ) {
-      // stampFields.kuntalupatunnus
       model.stampFields.kuntalupatunnus(_.first(model.appModel.verdicts()).kuntalupatunnus());
-      // stampFields.section
       var verdict = ko.mapping.toJS(model.appModel.verdicts()[0]);
       if ( verdict.paatokset[0] && verdict.paatokset[0].poytakirjat[0] && verdict.paatokset[0].poytakirjat[0].pykala ) {
         model.stampFields.section(verdict.paatokset[0].poytakirjat[0].pykala);

@@ -1,16 +1,13 @@
-LUPAPISTE.VerdictAttachmentPrintsOrderModel = function(/*dialogSelector, confirmSuccess*/) {
+LUPAPISTE.VerdictAttachmentPrintsOrderModel = function() {
   "use strict";
   var self = this;
-  self.dialogSelector = "#dialog-verdict-attachment-prints-order"; //dialogSelector;
-//  self.confirmSuccess = confirmSuccess;
+  self.dialogSelector = "#dialog-verdict-attachment-prints-order";
   self.application = null;
 
   self.processing = ko.observable(false);
   self.pending = ko.observable(false);
   self.errorMessage = ko.observable("");
-//  self.password = ko.observable("");
   self.attachments = ko.observable([]);
-//  self.selectedAttachments = ko.computed(function() { return _.filter(self.attachments(), function(a) {return a.selected();}); });
 
   self.ordererOrganization = ko.observable("");
   self.ordererAddress = ko.observable("");
