@@ -52,9 +52,8 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function(/*dialogSelector, confirm
   // Open the dialog
 
   self.init = function(bindings) {
-    var app = ko.toJS(bindings.application);
-    self.application = app;
-    var attachments = _(app.attachments || [])
+    self.application = ko.toJS(bindings.application);
+    var attachments = _(self.application.attachments || [])
                       .filter(function(a) { return a.forPrinting && a.versions && a.versions.length; })
                       .map(enrichAttachment)
                       .value();
@@ -63,16 +62,16 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function(/*dialogSelector, confirm
     self.pending(false);
     self.errorMessage("");
 
-    self.ordererOrganization(app.organizationName || "");
+    self.ordererOrganization(self.application.organizationName || "");
     self.ordererEmail("kirjaamo@rakennusvalvonta.fi");   // TODO: Lisaa organisaatioille tama tieto, ja paakayttajalle muokkausmahdollisuus
     self.ordererPhone("09 1234 123");                    // TODO: Lisaa organisaatioille tama tieto, ja paakayttajalle muokkausmahdollisuus
-    self.applicantName(app.applicant || "");
-    self.kuntalupatunnus((app.verdicts && app.verdicts[0] && app.verdicts[0].kuntalupatunnus) ? app.verdicts[0].kuntalupatunnus : "");
-    self.propertyId(app.propertyId);
-    self.lupapisteId(app.id);
-    self.address(app.address);
+    self.applicantName(self.application.applicant || "");
+    self.kuntalupatunnus((self.application.verdicts && self.application.verdicts[0] && self.application.verdicts[0].kuntalupatunnus) ? self.application.verdicts[0].kuntalupatunnus : "");
+    self.propertyId(self.application.propertyId);
+    self.lupapisteId(self.application.id);
+    self.address(self.application.address);
 
-    self.authorizationModel.refresh(app.id);
+    self.authorizationModel.refresh(self.application.id);
   };
 
   self.openDialog = function(bindings) {
