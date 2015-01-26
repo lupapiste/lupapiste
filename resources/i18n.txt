@@ -37,3 +37,6 @@ auth-admin.kopiolaitosOrdererAddress: Osoite 1 00100 Kunta
 error.vector-parameters-with-blank-items: Listassa puuttuvia arvoja
 error.vector-parameters-with-items-missing-required-keys: Listan tiedot olivat puutteelliset
 error.kopiolaitos-print-order-invalid-parameters-content: Lupakuvien tilaaminen epäonnistui. Tilauksen tietosisältö oli virheellistä muotoa.
+auth-admin.kopiolaitos-orderer-email: rakennusvalvonta@kunta.fi
+auth-admin.kopiolaitos-orderer-email.title: Tilaajan sähköposti
+auth-admin.kopiolaitos-orderer-phone.title: Tilaajan puhelinnumero

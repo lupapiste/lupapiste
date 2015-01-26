@@ -314,12 +314,13 @@
     (fail :auth-admin.legacyNotResponding)))
 
 (defcommand set-kopiolaitos-info
-  {:parameters [kopiolaitosEmail kopiolaitosOrdererAddress]
-   :roles [:authorityAdmin]
-   :input-validators  [(partial non-blank-parameters [:kopiolaitosEmail :kopiolaitosOrdererAddress])]}
+  {:parameters [kopiolaitosEmail kopiolaitosOrdererAddress kopiolaitosOrdererPhone kopiolaitosOrdererEmail]
+   :roles [:authorityAdmin]}
   [{{:keys [organizations]} :user}]
   (update-organization (first organizations) {$set {:kopiolaitos-email kopiolaitosEmail
-                                                    :kopiolaitos-orderer-address kopiolaitosOrdererAddress}})
+                                                    :kopiolaitos-orderer-address kopiolaitosOrdererAddress
+                                                    :kopiolaitos-orderer-phone kopiolaitosOrdererPhone
+                                                    :kopiolaitos-orderer-email kopiolaitosOrdererEmail}})
   (ok))
 
 (defquery kopiolaitos-config
@@ -329,7 +330,9 @@
     (if-let [organization (get-organization organization-id)]
       (ok
         :kopiolaitos-email (:kopiolaitos-email organization)
-        :kopiolaitos-orderer-address (:kopiolaitos-orderer-address organization))
+        :kopiolaitos-orderer-address (:kopiolaitos-orderer-address organization)
+        :kopiolaitos-orderer-phone (:kopiolaitos-orderer-phone organization)
+        :kopiolaitos-orderer-email (:kopiolaitos-orderer-email organization))
       (fail :error.unknown-organization))))
 
 ;;
