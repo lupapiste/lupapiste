@@ -730,12 +730,18 @@
 
 (defmigration kopiolaitos-info
  {:apply-when (pos? (mongo/count :organizations {$or [{:kopiolaitos-email {$exists false}}
-                                                      {:kopiolaitos-orderer-address {$exists false}}]}))}
+                                                      {:kopiolaitos-orderer-address {$exists false}}
+                                                      {:kopiolaitos-orderer-email {$exists false}}
+                                                      {:kopiolaitos-orderer-phone {$exists false}}]}))}
  (doseq [organization (mongo/select :organizations {$or [{:kopiolaitos-email {$exists false}}
-                                                         {:kopiolaitos-orderer-address {$exists false}}]})]
+                                                         {:kopiolaitos-orderer-address {$exists false}}
+                                                         {:kopiolaitos-orderer-email {$exists false}}
+                                                         {:kopiolaitos-orderer-phone {$exists false}}]})]
    (mongo/update-by-id :organizations (:id organization)
      {$set {:kopiolaitos-email           (or (:kopiolaitos-email organization) nil)
-            :kopiolaitos-orderer-address (or (:kopiolaitos-orderer-address organization) nil)}})))
+            :kopiolaitos-orderer-address (or (:kopiolaitos-orderer-address organization) nil)
+            :kopiolaitos-orderer-email   (or (:kopiolaitos-orderer-email organization) nil)
+            :kopiolaitos-orderer-phone   (or (:kopiolaitos-orderer-phone organization) nil)}})))
 
 ;;
 ;; ****** NOTE! ******
