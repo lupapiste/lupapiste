@@ -330,7 +330,9 @@
     (if-let [organization (get-organization organization-id)]
       (ok
         :kopiolaitos-email (:kopiolaitos-email organization)
-        :kopiolaitos-orderer-address (:kopiolaitos-orderer-address organization))
+        :kopiolaitos-orderer-address (:kopiolaitos-orderer-address organization)
+        :kopiolaitos-orderer-phone (:kopiolaitos-orderer-phone organization)
+        :kopiolaitos-orderer-email (:kopiolaitos-orderer-email organization))
       (fail :error.unknown-organization))))
 
 ;;
