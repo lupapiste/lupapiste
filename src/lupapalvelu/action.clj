@@ -94,7 +94,9 @@
 (defn vector-parameters-with-non-blank-items [params command]
   (or
     (vector-parameters params command)
-    (filter-params-of-command params command (partial some #(or (nil? %) (and (string? %) (s/blank? %)))) :error.vector-parameters-with-blank-items )))
+    (filter-params-of-command params command
+      (partial some #(or (nil? %) (and (string? %) (s/blank? %))))
+      :error.vector-parameters-with-blank-items )))
 
 (defn vector-parameters-with-map-items-with-required-keys [params required-keys command]
   (or
