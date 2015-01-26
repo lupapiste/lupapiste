@@ -33,3 +33,6 @@ auth-admin.setKopiolaitosInfo: Aseta kopiolaitoksen sähköpostiosoite ja lähet
 auth-admin.setkopiolaitosInfo: Tiedot lähetettäväksi kopiolaitokselle
 auth-admin.kopiolaitosEmail: sähköpostiosoite@esimerkki.fi
 auth-admin.kopiolaitosOrdererAddress: Osoite 1 00100 Kunta
+auth-admin.kopiolaitos-orderer-email: rakennusvalvonta@kunta.fi
+auth-admin.kopiolaitos-orderer-email.title: Tilaajan sähköposti
+auth-admin.kopiolaitos-orderer-phone.title: Tilaajan puhelinnumero
