@@ -1,7 +1,7 @@
 (ns lupapalvelu.kopiolaitos
   (:require [taoensso.timbre :as timbre :refer [warnf]]
             [clojure.java.io :as io :refer [delete-file]]
-            [sade.core :refer [ok fail fail!]]
+            [sade.core :refer [ok fail fail! def-]]
             [sade.email :as email]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.organization :as organization]
@@ -26,7 +26,7 @@
                  contents-str
                  amount-str)))) "" attachments))
 
-(def kopiolaitos-html-table-str
+(def- kopiolaitos-html-table-str
   "<table><thead><tr>%s</tr></thead><tbody>%s</tbody></table>")
 
 (defn- get-kopiolaitos-html-table-header-str [lang]
@@ -36,9 +36,10 @@
       "<th>" (loc "application.attachmentContents") "</th>"
       "<th>" (loc "verdict-attachment-prints-order.order-dialog.orderCount") "</th>")))
 
+(def- zip-file-name "Lupakuvat.zip")
+
 (defn- send-kopiolaitos-email [lang email-address attachments orderInfo]
   (let [zip (attachment/get-all-attachments attachments)
-        zip-file-name "Lupakuvat.zip"
         email-attachment {:content zip :file-name zip-file-name}
         email-subject (str (with-lang lang (loc :kopiolaitos-email-subject)) \space (:ordererOrganization orderInfo))
         html-table (format
