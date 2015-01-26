@@ -37,30 +37,18 @@
       "<th>" (loc "verdict-attachment-prints-order.order-dialog.orderCount") "</th>")))
 
 (defn- send-kopiolaitos-email [lang email-address attachments orderInfo]
-
-  (println "\n send-kopiolaitos-email, lang: ")
-  (clojure.pprint/pprint lang)
-  (println "\n send-kopiolaitos-email, email-address: ")
-  (clojure.pprint/pprint email-address)
-  (println "\n send-kopiolaitos-email, attachments: ")
-  (clojure.pprint/pprint attachments)
-  (println "\n send-kopiolaitos-email, orderInfo: ")
-  (clojure.pprint/pprint orderInfo)
-  (println "\n")
-
   (let [zip (attachment/get-all-attachments attachments)
         zip-file-name "Lupakuvat.zip"
         email-attachment {:content zip :file-name zip-file-name}
         email-subject (str (with-lang lang (loc :kopiolaitos-email-subject)) \space (:ordererOrganization orderInfo))
-        _ (println "\n send-kopiolaitos-email, email-subject: " email-subject "\n")
         orderInfo (assoc orderInfo :ordererAddress (str "Testikatu 2, 00000 Helsinki, " (:ordererOrganization orderInfo)))
         html-table (format
                      kopiolaitos-html-table-str
                      (get-kopiolaitos-html-table-header-str lang)
                      (get-kopiolaitos-html-table-content attachments lang))
         orderInfo (assoc orderInfo :contentsTable html-table)]
-    ;; from email/send-email-message false = success, true = failure -> turn it other way around
     (try
+      ;; from email/send-email-message false = success, true = failure -> turn it other way around
       (not (email/send-email-message
              email-address
              email-subject
