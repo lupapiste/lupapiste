@@ -81,9 +81,6 @@
 (defn- filter-params-of-command [params command filter-fn error-message & [extra-error-data]]
   {:pre [(or (nil? extra-error-data) (map? extra-error-data))]}
   (when-let [non-matching-params (seq (filter #(filter-fn (get-in command [:data %])) params))]
-    (println "\n non-matching-params: ")
-    (clojure.pprint/pprint non-matching-params)
-    (println "\n ")
     (merge
       (fail error-message :parameters (vec non-matching-params))
       (when (or (nil? extra-error-data) (map? extra-error-data))  ;; sanity check.  Can this be made in a pre-check?
@@ -106,7 +103,7 @@
     (filter-params-of-command params command
       (partial some #(not (and (map? %) (util/every-key-in-map? % required-keys))))
       :error.vector-parameters-with-items-missing-required-keys
-      {:required-keys keys})))
+      {:required-keys required-keys})))
 
 (defn boolean-parameters [params command]
   (filter-params-of-command params command #(not (instance? Boolean %)) :error.non-boolean-parameters))
