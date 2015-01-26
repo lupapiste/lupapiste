@@ -416,7 +416,8 @@
                                       :kopiolaitos-email nil
                                       :kopiolaitos-orderer-address nil})
 
-(def organizations (map #(merge default-keys-for-organizations %)
+(def organizations (map
+                     (partial merge default-keys-for-organizations)
                      [;; Jarvenpaa R
                       {:id "186-R"
                        :name {:fi "J\u00E4rvenp\u00E4\u00E4n rakennusvalvonta"}
