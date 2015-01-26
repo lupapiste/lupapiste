@@ -53,6 +53,7 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function(/*dialogSelector, confirm
 
   self.init = function(bindings) {
     self.application = ko.toJS(bindings.application);
+    var orgMeta = self.application.organizationMeta;
     var attachments = _(self.application.attachments || [])
                       .filter(function(a) { return a.forPrinting && a.versions && a.versions.length; })
                       .map(enrichAttachment)
@@ -63,8 +64,8 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function(/*dialogSelector, confirm
     self.errorMessage("");
 
     self.ordererOrganization(self.application.organizationName || "");
-    self.ordererEmail("kirjaamo@rakennusvalvonta.fi");   // TODO: Lisaa organisaatioille tama tieto, ja paakayttajalle muokkausmahdollisuus
-    self.ordererPhone("09 1234 123");                    // TODO: Lisaa organisaatioille tama tieto, ja paakayttajalle muokkausmahdollisuus
+    self.ordererEmail(orgMeta.kopiolaitosOrdererEmail || "");
+    self.ordererPhone(orgMeta.kopiolaitosOrdererEmail || "");
     self.applicantName(self.application.applicant || "");
     self.kuntalupatunnus((self.application.verdicts && self.application.verdicts[0] && self.application.verdicts[0].kuntalupatunnus) ? self.application.verdicts[0].kuntalupatunnus : "");
     self.propertyId(self.application.propertyId);
