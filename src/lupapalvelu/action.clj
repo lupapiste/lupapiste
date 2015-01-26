@@ -83,8 +83,7 @@
   (when-let [non-matching-params (seq (filter #(filter-fn (get-in command [:data %])) params))]
     (merge
       (fail error-message :parameters (vec non-matching-params))
-      (when (or (nil? extra-error-data) (map? extra-error-data))  ;; sanity check.  Can this be made in a pre-check?
-        extra-error-data))))
+      extra-error-data)))
 
 (defn non-blank-parameters [params command]
   (filter-params-of-command params command #(or (nil? %) (and (string? %) (s/blank? %))) :error.missing-parameters))
