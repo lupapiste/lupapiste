@@ -1874,39 +1874,43 @@ input[readonly]:focus, textarea[readonly]:focus {
   width: 100%;
 }
 /* line 690, ../sass/partials/_forms.scss */
+.three-col .form-input {
+  width: 17.25em;
+}
+/* line 694, ../sass/partials/_forms.scss */
 .three-col .col1 {
   float: left;
   padding-right: 12px;
 }
-/* line 695, ../sass/partials/_forms.scss */
+/* line 699, ../sass/partials/_forms.scss */
 .three-col .col2 {
   float: left;
   padding-left: 12px;
   padding-right: 12px;
 }
-/* line 700, ../sass/partials/_forms.scss */
+/* line 704, ../sass/partials/_forms.scss */
 .three-col .col3 {
   float: left;
   padding-left: 12px;
 }
 
-/* line 707, ../sass/partials/_forms.scss */
+/* line 711, ../sass/partials/_forms.scss */
 foreman-history h2 {
   background-color: #f6f6f6 !important;
 }
-/* line 710, ../sass/partials/_forms.scss */
+/* line 714, ../sass/partials/_forms.scss */
 foreman-history th.first {
   width: 10%;
 }
-/* line 713, ../sass/partials/_forms.scss */
+/* line 717, ../sass/partials/_forms.scss */
 foreman-history th.second {
   width: 10%;
 }
-/* line 716, ../sass/partials/_forms.scss */
+/* line 720, ../sass/partials/_forms.scss */
 foreman-history th.third {
   width: 40%;
 }
-/* line 719, ../sass/partials/_forms.scss */
+/* line 723, ../sass/partials/_forms.scss */
 foreman-history th.fourth {
   width: 40%;
 }
