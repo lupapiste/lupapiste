@@ -256,6 +256,9 @@ Ronja logs in
 Sipoo logs in
   Authority-admin logs in  sipoo  sipoo  Simo Suurvisiiri
 
+Naantali logs in
+  Authority-admin logs in  admin@naantali.fi  naantali  Admin Naantali
+
 SolitaAdmin logs in
   Admin logs in  admin  admin  Admin Admin
   Wait until  Element should be visible  admin
