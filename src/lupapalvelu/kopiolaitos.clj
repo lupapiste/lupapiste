@@ -16,9 +16,7 @@
                        (loc
                          (clojure.string/join
                            "."
-                           ["attachmentType"
-                            (:type-group att-map)
-                            (:type-id att-map)])))
+                           ["attachmentType" (:type-group att-map) (:type-id att-map)])))
             contents-str (or (:contents att-map) type-str)
             amount-str (:amount att-map)]
         (str s (format "<tr><td>%s</td><td>%s</td><td>%s</td></tr>"
