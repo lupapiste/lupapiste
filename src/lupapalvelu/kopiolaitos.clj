@@ -47,12 +47,13 @@
         orderInfo (assoc orderInfo :contentsTable html-table)]
     (try
       ;; from email/send-email-message false = success, true = failure -> turn it other way around
-      (not (email/send-email-message
-             email-address
-             email-subject
-             (email/apply-template "kopiolaitos-order.html" orderInfo)
-             [email-attachment]))
-      (io/delete-file zip)
+      (let [sending-succeeded? (not (email/send-email-message
+                                      email-address
+                                      email-subject
+                                      (email/apply-template "kopiolaitos-order.html" orderInfo)
+                                      [email-attachment]))]
+        (io/delete-file zip)
+        sending-succeeded?)
       (catch java.io.IOException ioe
         (warnf "Could not delete temporary zip file: %s" (.getAbsolutePath zip)))
       (catch Exception e
