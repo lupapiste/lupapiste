@@ -409,14 +409,14 @@
         (error "Concurrency issue: Could not save attachment version meta data.")
         nil))))
 
-(defn update-attachment-key [command attachmentId k v now app-set-modified? attachment-set-modified?]
+(defn update-attachment-key [command attachmentId k v now & {:keys [set-app-modified? set-attachment-modified?] :or {set-app-modified? true set-attachment-modified? true}}]
   (let [update-key (->> (name k) (str "attachments.$.") keyword)]
     (update-application command
      {:attachments {$elemMatch {:id attachmentId}}}
      {$set (merge
              {update-key v}
-             (when app-set-modified? {:modified now})
-             (when attachment-set-modified? {:attachments.$.modified now}))})))
+             (when set-app-modified? {:modified now})
+             (when set-attachment-modified? {:attachments.$.modified now}))})))
 
 (defn update-latest-version-content [application attachment-id file-id size now]
   (let [attachment (get-attachment-info application attachment-id)
