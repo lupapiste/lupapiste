@@ -4783,21 +4783,26 @@ td.comment-text {
   height: 25px;
 }
 /* line 194, ../sass/views/_attachment.scss */
+.attachment-label input[type="checkbox"] {
+  display: inline-block;
+  width: 3.75em;
+}
+/* line 199, ../sass/views/_attachment.scss */
 .attachment-label select {
   display: block;
   width: 22.5em;
 }
-/* line 199, ../sass/views/_attachment.scss */
+/* line 204, ../sass/views/_attachment.scss */
 .attachment-label .attachment-info-field {
   margin-bottom: 6px;
 }
 
-/* line 204, ../sass/views/_attachment.scss */
+/* line 209, ../sass/views/_attachment.scss */
 .signatures {
   margin-top: 12px;
 }
 
-/* line 208, ../sass/views/_attachment.scss */
+/* line 213, ../sass/views/_attachment.scss */
 .signature-table {
   display: table;
   width: auto;
@@ -4805,7 +4810,7 @@ td.comment-text {
   margin-left: 6px;
 }
 
-/* line 215, ../sass/views/_attachment.scss */
+/* line 220, ../sass/views/_attachment.scss */
 .signature-row {
   display: table-row;
   width: auto;
@@ -4814,7 +4819,7 @@ td.comment-text {
   line-height: 27px;
 }
 
-/* line 223, ../sass/views/_attachment.scss */
+/* line 228, ../sass/views/_attachment.scss */
 .signature-cell {
   display: table-column;
   width: 200px;

@@ -191,6 +191,11 @@ td.comment-text {
     height: 25px;
   }
 
+  input[type="checkbox"] {
+    display: inline-block;
+    width: $cols1;
+  }
+
   select {
     display: block;
     width: $cols4;
