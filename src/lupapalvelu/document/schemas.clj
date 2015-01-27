@@ -925,7 +925,7 @@
             :type :location}
      :body (schema-body-without-element-by-name rakennuspaikka "rantaKytkin" "hallintaperuste" "kaavanaste" "kaavatilanne")}
 
-    {:info {:name "paatoksen-toimitus"
+    {:info {:name "paatoksen-toimitus-rakval"
             :removable false
             :approvable true
             :order 3}
