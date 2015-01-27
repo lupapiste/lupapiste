@@ -1,0 +1,2 @@
+paatoksen-toimitus-rakval._group_label: Päätöksen toimitus
+paatoksen-toimitus-rakval.toimitusosoite: Toimitusosoite
