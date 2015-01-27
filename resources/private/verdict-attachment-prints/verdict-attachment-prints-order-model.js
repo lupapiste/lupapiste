@@ -82,15 +82,20 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function() {
     LUPAPISTE.ModalDialog.open(self.dialogSelector);
   };
 
-  self.orderAttachmentPrints = function() {
-    // cannot replace the orderAmount observable itself, so need to create a new "amount" key
-    _.forEach(self.attachments(), function(a) {
+  // Send the prints order
+
+  function normalizeAttachments(attachments) {
+    return _.map(attachments, function(a) {
       a.amount = a.orderAmount();
+      return _.pick(a, ["forPrinting", "amount", "contents", "type", "versions", "filename"]);
     });
+  }
+
+  self.orderAttachmentPrints = function() {
     var data = {
       id: self.application.id,
       lang: loc.getCurrentLanguage(),
-      attachmentsWithAmounts: self.attachments(),
+      attachmentsWithAmounts: normalizeAttachments(self.attachments()),
       orderInfo: {
         ordererOrganization: self.ordererOrganization(),
         ordererAddress: self.ordererAddress(),
