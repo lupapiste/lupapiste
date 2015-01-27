@@ -23,19 +23,22 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function() {
 
   self.ok = ko.computed(function() {
     var attachmentOrderCountsAreNumbers = _.every(self.attachments(), function(a) {
-      return !_.isNaN(_.parseInt(a.orderAmount(), 10));
-    }, self);
+      return util.isNum(a.orderAmount());
+    });
+    var dialogFieldValues = [self.ordererOrganization(),
+                             self.ordererEmail(),
+                             self.ordererPhone(),
+                             self.applicantName(),
+                             self.kuntalupatunnus(),
+                             self.propertyId(),
+                             self.lupapisteId(),
+                             self.address()];
+    var nonEmptyFields = _.every(dialogFieldValues, function(v){ return !_.isEmpty(v); });
     return self.authorizationModel.ok("order-verdict-attachment-prints") &&
-    !self.processing() &&
-    attachmentOrderCountsAreNumbers &&
-    !_.isEmpty(self.ordererOrganization()) &&
-    (!_.isEmpty(self.ordererEmail()) && util.isValidEmailAddress(self.ordererEmail())) &&
-    !_.isEmpty(self.ordererPhone()) &&
-    !_.isEmpty(self.applicantName()) &&
-    !_.isEmpty(self.kuntalupatunnus()) &&
-    !_.isEmpty(self.propertyId()) &&
-    !_.isEmpty(self.lupapisteId()) &&
-    !_.isEmpty(self.address());
+           !self.processing() &&
+           attachmentOrderCountsAreNumbers &&
+           nonEmptyFields &&
+           util.isValidEmailAddress(self.ordererEmail());
   });
 
   function enrichAttachment(a) {
