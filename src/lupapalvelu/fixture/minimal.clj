@@ -418,8 +418,17 @@
                                       :kopiolaitos-orderer-email nil
                                       :kopiolaitos-orderer-phone nil})
 
+(def- default-keys-for-sipoo         {:app-required-fields-filling-obligatory false
+                                      :kopiolaitos-email "sipoo@example.com"
+                                      :kopiolaitos-orderer-address "Testikatu 2, 12345 Sipoo"
+                                      :kopiolaitos-orderer-email "tilaaja@example.com"
+                                      :kopiolaitos-orderer-phone "0501231234"})
+
 (def organizations (map
-                     (partial merge default-keys-for-organizations)
+                     (fn [org]
+                       (if (= (:id org) "753-R")
+                         (merge default-keys-for-sipoo org)
+                         (merge default-keys-for-organizations org)))
                      [;; Jarvenpaa R
                     {:id "186-R"
                      :name {:fi "J\u00E4rvenp\u00E4\u00E4n rakennusvalvonta"}
