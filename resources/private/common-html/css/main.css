@@ -4118,11 +4118,11 @@ span.icon_clear:before {
   display: block;
   overflow: auto;
   width: 100%;
-  height: 200px;
+  max-height: 200px;
 }
 /* line 450, ../sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .old_ie_wrapper {
-  height: 200px;
+  max-height: 200px;
   width: 800px;
   overflow-x: hidden;
   overflow-y: auto;
