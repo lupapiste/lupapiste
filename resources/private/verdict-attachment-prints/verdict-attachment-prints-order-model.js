@@ -29,7 +29,7 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function() {
     !self.processing() &&
     attachmentOrderCountsAreNumbers &&
     !_.isEmpty(self.ordererOrganization()) &&
-    !_.isEmpty(self.ordererEmail()) &&
+    (!_.isEmpty(self.ordererEmail()) && util.isValidEmailAddress(self.ordererEmail())) &&
     !_.isEmpty(self.ordererPhone()) &&
     !_.isEmpty(self.applicantName()) &&
     !_.isEmpty(self.kuntalupatunnus()) &&
