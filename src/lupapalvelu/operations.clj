@@ -222,7 +222,7 @@
 ; Operations must be the same as in the tree structure above.
 ; Mappings to schemas and attachments are currently random.
 
-(def- common-schemas ["hankkeen-kuvaus" "maksaja" "rakennuspaikka" "paasuunnittelija" "suunnittelija"])
+(def- common-schemas ["hankkeen-kuvaus" "paatoksen-toimitus" "maksaja" "rakennuspaikka" "paasuunnittelija" "suunnittelija"])
 
 (def- common-maanmittaus-schemas ["maksaja" "kiinteisto"])
 

@@ -925,6 +925,9 @@
             :type :location}
      :body (schema-body-without-element-by-name rakennuspaikka "rantaKytkin" "hallintaperuste" "kaavanaste" "kaavatilanne")}
 
+    {:info {:name "paatoksen-toimitus" :removable false :approvable true}
+     :body [{:name "toimitusosoite" :type :text :max-len 1000 :required true :layout :full-width}]}
+
     {:info {:name "aloitusoikeus" :removable false :approvable true}
      :body aloitusoikeus}
 
