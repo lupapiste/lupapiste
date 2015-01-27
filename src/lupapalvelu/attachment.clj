@@ -566,19 +566,16 @@
   [{:keys [attachments] :as application} op-id]
   (filter #(= (:id (:op %)) op-id) attachments))
 
-(defn- append-gridfs-file [zip file-name file-id]
-  (when file-id
-    (.putNextEntry zip (ZipEntry. (ss/encode-filename (str file-id "_" file-name))))
-    (with-open [in ((:content (mongo/download file-id)))]
+(defn- append-gridfs-file [zip {:keys [filename fileId]}]
+  (when fileId
+    (.putNextEntry zip (ZipEntry. (ss/encode-filename (str fileId "_" filename))))
+    (with-open [in ((:content (mongo/download fileId)))]
       (io/copy in zip))))
 
 (defn- append-stream [zip file-name in]
   (when in
     (.putNextEntry zip (ZipEntry. (ss/encode-filename file-name)))
     (io/copy in zip)))
-
-(defn- append-attachment [zip {:keys [filename fileId]}]
-  (append-gridfs-file zip filename fileId))
 
 (defn get-all-attachments [attachments & [application lang]]
   "Return attachments as zip file. If application and lang, application and submitted application PDF are included"
@@ -588,7 +585,7 @@
       (let [zip (ZipOutputStream. out)]
         ; Add all attachments:
         (doseq [attachment attachments]
-          (append-attachment zip (-> attachment :versions last)))
+          (append-gridfs-file zip (-> attachment :versions last)))
 
         (when (and application lang)
           ; Add submitted PDF, if exists:
