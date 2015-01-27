@@ -54,18 +54,22 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function() {
 
   self.init = function(bindings) {
     self.application = ko.toJS(bindings.application);
-    var kopiolaitosMeta = self.application.organizationMeta.kopiolaitos;
+    self.processing(false);
+    self.pending(false);
+    self.errorMessage("");
+
     var attachments = _(self.application.attachments || [])
                       .filter(function(a) { return a.forPrinting && a.versions && a.versions.length; })
                       .map(enrichAttachment)
                       .value();
     self.attachments(attachments);
-    self.processing(false);
-    self.pending(false);
-    self.errorMessage("");
 
-    self.ordererOrganization(self.application.organizationName || "");
-    self.ordererAddress(kopiolaitosMeta.kopiolaitosOrdererAddress || "" );
+    var kopiolaitosMeta = self.application.organizationMeta.kopiolaitos;
+    var currentUserName = currentUser.get().firstName() + " " + currentUser.get().lastName();
+    var ordererName = (self.application.organizationName || "") + ", " + currentUserName;
+
+    self.ordererOrganization(ordererName);
+    self.ordererAddress(kopiolaitosMeta.kopiolaitosOrdererAddress || "");
     self.ordererEmail(kopiolaitosMeta.kopiolaitosOrdererEmail || "");
     self.ordererPhone(kopiolaitosMeta.kopiolaitosOrdererPhone || "");
     self.applicantName(self.application.applicant || "");
