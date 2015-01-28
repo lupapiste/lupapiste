@@ -90,29 +90,19 @@
 
    :rakentamisen_aikaiset [:erityissuunnitelma]
    :osapuolet attachment-types-osapuoli
-   :muut [:aitapiirustus
-          :energiataloudellinen_selvitys
+   :muut [:energiataloudellinen_selvitys
           :energiatodistus
-          :haittaaineet
-          :hankeselvitys
           :hulevesisuunnitelma
-          :ikkunadetaljit
           :ilmanvaihtosuunnitelma
           :ilmoitus_vaestonsuojasta
           :jatevesijarjestelman_rakennustapaseloste
           :julkisivujen_varityssuunnitelma
           :kalliorakentamistekninen_suunnitelma
-          :karttaaineisto
           :katselmuksen_tai_tarkastuksen_poytakirja
           :kerrosalaselvitys
-          :kokoontumishuoneisto
-          :korjausrakentamisen_energiaselvitys
-          :lammityslaitesuunnitelma
           :liikkumis_ja_esteettomyysselvitys
           :lomarakennuksen_muutos_asuinrakennukseksi_selvitys_maaraysten_toteutumisesta
-          :luonnos
-          :maalampo_rakennettavuusselvitys
-          :mainoslaitesuunnitelma
+          :lammityslaitesuunnitelma
           :merkki_ja_turvavalaistussuunnitelma
           :palotekninen_selvitys
           :paloturvallisuusselvitys
@@ -141,14 +131,24 @@
           :selvitys_tontin_tai_rakennuspaikan_pintavesien_kasittelysta
           :sopimusjaljennos
           :suunnitelma_paloilmoitinjarjestelmista_ja_koneellisesta_savunpoistosta
-          :turvallisuusselvitys
           :vaestonsuojasuunnitelma
           :valaistussuunnitelma
           :valokuva
           :vesi_ja_viemariliitoslausunto_tai_kartta
           :vesikattopiirustus
-          :yhteistilat
           :ympariston_tietomalli_BIM
+          :aitapiirustus
+          :haittaaineet
+          :hankeselvitys
+          :ikkunadetaljit
+          :karttaaineisto
+          :kokoontumishuoneisto
+          :korjausrakentamisen_energiaselvitys
+          :maalampo_rakennettavuusselvitys
+          :mainoslaitesuunnitelma
+          :turvallisuusselvitys
+          :yhteistilat
+          :luonnos
           :muu]])
 
 (def- attachment-types-YA
