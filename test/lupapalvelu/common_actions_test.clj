@@ -28,7 +28,8 @@
                           :change-urgency
                           :add-authority-notice
                           :foreman-applications
-                          :foreman-history}
+                          :foreman-history
+                          :reduced-foreman-history}
         user {:id "user123" :organizations [] :role :applicant}
         application {:organization "999-R" :auth [{:id "user123" :role "statementGiver"}]}]
     (doseq [command (ca/foreach-action user {} application)

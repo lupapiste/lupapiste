@@ -493,7 +493,7 @@
             </div>
             <!-- /ko -->
 
-            <a data-bind="attr: {href: '/api/raw/download-all-attachments?id=' + $root.application.id() + '&lang=' + loc.getCurrentLanguage() }, visible: $root.application.hasAttachment, ltext: 'download-all'" data-test-id="application-download-all-attachement" href="#" target="_blank"></a>
+            <a data-bind="attr: {href: '/api/raw/download-all-attachments?id=' + $root.application.id() + '&lang=' + loc.getCurrentLanguage() }, visible: $root.application.hasAttachment, ltext: 'download-all'" data-test-id="application-download-all-attachments" href="#" target="_blank"></a>
 
           </div>
 
@@ -864,12 +864,27 @@
           </button>
 
           <button
-            data-bind="click: $root.verdictModel.checkVerdict, disable: $root.verdictModel.processing, visible: $root.authorization.ok('check-for-verdict')"
+            data-bind="click: $root.verdictModel.checkVerdict, visible: $root.authorization.ok('check-for-verdict'), disable: $root.verdictModel.processing"
             class="btn btn-primary modal"
             data-test-id="fetch-verdict">
             <em data-bind="visible: $root.verdictModel.pending" class="button-loader"></em>
             <span data-bind="ltext: 'verdict.fetch.button'"></span>
           </button>
+
+          <div data-bind="if: features.enabled('verdict-attachment-order') && $root.authorization.ok('order-verdict-attachment-prints')">
+            <div class="feature">
+              <button
+                data-bind="click: $root.verdictAttachmentPrintsOrderModel.openDialog,
+                           disable: $root.verdictModel.processing,
+                           visible: $root.authorization.ok('order-verdict-attachment-prints')"
+                class="btn btn-primary modal"
+                data-test-id="test-order-attachment-prints">
+                <em data-bind="visible: $root.verdictModel.pending" class="button-loader"></em>
+                <span data-bind="ltext: 'verdict.orderAttachmentPrints.button'"></span>
+              </button>
+            </div>
+          </div>
+
         </div>
 
         <!-- Statement tab -->

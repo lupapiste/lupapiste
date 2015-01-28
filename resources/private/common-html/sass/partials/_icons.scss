@@ -224,6 +224,11 @@
     height: 24px;
     background-position: 0px -5500px;
   }
+  &.verdict-attachment {
+    width: 8px;
+    height: 18px;
+    background-position: 0px -5900px;
+  }
 }
 
 [type=submit], .btn, button {
@@ -244,7 +249,7 @@
 }
 
 h1 .icon {
-	margin-right: 3px;
+  margin-right: 3px;
 }
 
 // jqueryUI datepicker

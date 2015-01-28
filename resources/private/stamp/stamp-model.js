@@ -26,10 +26,6 @@ LUPAPISTE.StampModel = function(params) {
     a.fileId = ko.observable(a.latestVersion.fileId);
   }
 
-  var transparencies = _.map([0,20,40,60,80], function(v) {
-    return {text: loc(["stamp.transparency", v.toString()]), value: Math.round(255 * v / 100.0)};
-  });
-
   function mapAttachmentGroup(group) {
     group.attachments = _(group.attachments).each(enhanceAttachment).value();
     return {
@@ -117,13 +113,16 @@ LUPAPISTE.StampModel = function(params) {
     return self.buildingIdList().length > 0;
   });
 
-  self.transparency = self.stampFields.transparency;
+  var transparencies = _.map([0,20,40,60,80], function(v) {
+    return {text: loc(["stamp.transparency", v.toString()]), value: Math.round(255 * v / 100.0)};
+  });
+  self.transparencies = transparencies;
 
+  self.transparency = self.stampFields.transparency;
   if ( !self.transparency() ) {
     self.transparency(transparencies[0].value);
   }
 
-  self.transparencies = transparencies;
 
 
   self.start = function() {

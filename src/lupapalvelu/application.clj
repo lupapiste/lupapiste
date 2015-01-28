@@ -905,7 +905,7 @@
    :roles      [:applicant :authority]
    :states     [:draft :open :submitted :complement-needed]
    :pre-checks [(fn [_ application]
-                  (when-not (is-link-permit-required application)
+                  (when-not (validate-link-permits application)
                     (fail :error.link-permit-not-required)))]})
 
 (defquery app-matches-for-link-permits
