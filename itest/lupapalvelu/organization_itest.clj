@@ -158,12 +158,18 @@
         (fact "the 'app-required-fields-filling-obligatory' is set to False"
           (:app-required-fields-filling-obligatory org) => false
           (:requiredFieldsFillingObligatory organizationMeta) => false)
-        (fact "the 'kopiolaitos-email' is set to nil"
-          (:kopiolaitos-email org) => nil
-          (get-in organizationMeta [:kopiolaitos :kopiolaitosEmail]) => nil)
-        (fact "the 'kopiolaitos-orderer-address' is set to nil"
-          (:kopiolaitos-orderer-address org) => nil
-          (get-in organizationMeta [:kopiolaitos :kopiolaitosOrdererAddress]) => nil))
+        (fact "the 'kopiolaitos-email' is set (from minimal)"
+          (:kopiolaitos-email org) => "sipoo@example.com"
+          (get-in organizationMeta [:kopiolaitos :kopiolaitosEmail]) => "sipoo@example.com")
+        (fact "the 'kopiolaitos-orderer-address' is set (from minimal)"
+          (:kopiolaitos-orderer-address org) => "Testikatu 2, 12345 Sipoo"
+          (get-in organizationMeta [:kopiolaitos :kopiolaitosOrdererAddress]) => "Testikatu 2, 12345 Sipoo")
+        (fact "the 'kopiolaitos-orderer-email' is set (from minimal)"
+          (:kopiolaitos-orderer-email org) => "tilaaja@example.com"
+          (get-in organizationMeta [:kopiolaitos :kopiolaitosOrdererEmail]) => "tilaaja@example.com")
+        (fact "the 'kopiolaitos-orderer-phone' is set (from minimal)"
+          (:kopiolaitos-orderer-phone org) => "0501231234"
+          (get-in organizationMeta [:kopiolaitos :kopiolaitosOrdererPhone]) => "0501231234"))
 
       (command sipoo "set-organization-app-required-fields-filling-obligatory" :isObligatory true) => ok?
       (command sipoo "set-kopiolaitos-info"
