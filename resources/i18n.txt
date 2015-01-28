@@ -1,1 +1,2 @@
 tyonjohtaja.historia.vainTamaHanke: Vain hanke
+tyonjohtaja.history.showAllProjects: Näytä kaikki hankkeet
