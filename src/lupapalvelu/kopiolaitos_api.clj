@@ -15,9 +15,7 @@
                       (fn [{{attachments :attachmentsWithAmounts} :data :as command}]
                         (when (some #(or (not (= true (:forPrinting %))) (nil? (util/->int (:amount %) nil))) attachments)
                           (fail :error.kopiolaitos-print-order-invalid-parameters-content)))
-                      (partial action/map-parameters [:orderInfo])]
-   ;; TODO: Poista, kun feature on kaytossa
-   :feature    :verdict-attachment-order}
+                      (partial action/map-parameters [:orderInfo])]}
   [command]
   (kopiolaitos/do-order-verdict-attachment-prints command)
   (ok))
