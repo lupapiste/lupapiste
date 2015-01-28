@@ -24,7 +24,6 @@
     (fn [s att]
       (let [att-map (merge att (:type att))
             file-name (str (-> att-map :versions last :fileId) "_" (:filename att-map))
-            _ (println "\n attachment file-name: " file-name "\n")
             type-str (with-lang lang
                        (loc
                          (clojure.string/join
