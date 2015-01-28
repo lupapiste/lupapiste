@@ -421,8 +421,6 @@
                (henkilo-yritys-select-group :yritys-body yritys-with-verkkolaskutustieto)
                {:name "laskuviite" :type :string :max-len 30 :layout :full-width}))
 
-(def aloitusoikeus [{:name "kuvaus" :type :text :max-len 4000 :required true :layout :full-width}])
-
 (def muutostapa {:name "muutostapa" :type :select :sortBy :displayname :required true :label false :i18nkey "huoneistot.muutostapa"
                  :body [{:name "poisto"}
                         {:name "lis\u00e4ys" :i18nkey "huoneistot.muutostapa.lisays"}
@@ -666,7 +664,9 @@
 (def rakennuksen-tiedot (conj rakennuksen-tiedot-ilman-huoneistoa huoneistotTable))
 
 
-(def rakennelma (body [{:name "kokonaisala" :type :string :size "s" :unit "m2" :subtype :number}] kuvaus))
+(def rakennelma (body
+                  [{:name "kokonaisala" :type :string :size "s" :unit "m2" :subtype :number}]
+                  kuvaus))
 (def maisematyo (body kuvaus))
 
 (def rakennuksen-omistajat [{:name "rakennuksenOmistajat"
@@ -925,8 +925,16 @@
             :type :location}
      :body (schema-body-without-element-by-name rakennuspaikka "rantaKytkin" "hallintaperuste" "kaavanaste" "kaavatilanne")}
 
+    {:info {:name "paatoksen-toimitus-rakval"
+            :removable false
+            :approvable true
+            :order 10}
+     :body (body
+             simple-osoite
+             tayta-omat-tiedot-button)}
+
     {:info {:name "aloitusoikeus" :removable false :approvable true}
-     :body aloitusoikeus}
+     :body (body kuvaus)}
 
     {:info {:name "lisatiedot"
             :order 100}

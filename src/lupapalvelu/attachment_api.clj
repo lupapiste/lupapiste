@@ -127,7 +127,7 @@
 
   (let [attachment-type (attachment/parse-attachment-type attachmentType)]
     (if (attachment/allowed-attachment-type-for-application? application attachment-type)
-      (attachment/update-attachment-key command attachmentId :type attachment-type created true true)
+      (attachment/update-attachment-key command attachmentId :type attachment-type created :set-app-modified? true :set-attachment-modified? true)
       (do
         (errorf "attempt to set new attachment-type: [%s] [%s]: %s" id attachmentId attachment-type)
         (fail :error.attachmentTypeNotAllowed)))))
@@ -153,7 +153,7 @@
    :roles       [:authority]
    :states      (action/all-states-but [:answered :sent :closed :canceled])}
   [{:keys [created] :as command}]
-  (attachment/update-attachment-key command attachmentId :state :ok created true false))
+  (attachment/update-attachment-key command attachmentId :state :ok created :set-app-modified? true :set-attachment-modified? false))
 
 (defcommand reject-attachment
   {:description "Authority can reject attachment, requires user action."
@@ -161,7 +161,7 @@
    :roles       [:authority]
    :states      (action/all-states-but [:answered :sent :closed :canceled])}
   [{:keys [created] :as command}]
-  (attachment/update-attachment-key command attachmentId :state :requires_user_action created true false))
+  (attachment/update-attachment-key command attachmentId :state :requires_user_action created :set-app-modified? true :set-attachment-modified? false))
 
 ;;
 ;; Create
@@ -444,7 +444,7 @@
     (fail! :error.pre-verdict-attachment))
 
   (doseq [[k v] meta]
-    (attachment/update-attachment-key command attachmentId k v created true true))
+    (attachment/update-attachment-key command attachmentId k v created :set-app-modified? true :set-attachment-modified? true))
   (ok))
 
 (defcommand set-attachment-not-needed
@@ -452,7 +452,7 @@
    :roles      [:applicant :authority]
    :states     [:draft :open]}
   [{:keys [created] :as command}]
-  (attachment/update-attachment-key command attachmentId :notNeeded notNeeded created true false)
+  (attachment/update-attachment-key command attachmentId :notNeeded notNeeded created :set-app-modified? true :set-attachment-modified? false)
   (ok))
 
 (defcommand set-attachments-as-verdict-attachment
@@ -465,7 +465,7 @@
    :feature    :verdict-attachment-order}
   [{:keys [created] :as command}]
   (doseq [attachment-id attachmentIds]
-    (attachment/update-attachment-key command attachment-id :forPrinting isVerdictAttachment created true false))
+    (attachment/update-attachment-key command attachment-id :forPrinting isVerdictAttachment created :set-app-modified? true :set-attachment-modified? false))
   (ok))
 
 

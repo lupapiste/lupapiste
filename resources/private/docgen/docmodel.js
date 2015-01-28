@@ -924,7 +924,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       var event = getEvent(e);
       var target = event.target;
       var userId = target.value;
-      if (!_.isEmpty(userId)) {
+      if (!_.isEmpty(_.trim(userId))) {
         ajax
         .command("set-user-to-document", { id: self.appId, documentId: self.docId, userId: userId, path: myNs, collection: self.getCollection() })
         .success(function () {
