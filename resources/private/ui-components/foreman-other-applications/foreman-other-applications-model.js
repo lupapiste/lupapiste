@@ -46,12 +46,14 @@ LUPAPISTE.ForemanOtherApplicationsModel = function(params) {
   self.rows(rows);
 
   self.subscriptionIds = [];
-  self.subscriptionIds.push(hub.subscribe("hetuChangedInBackend", function() {
-    ajax.command("update-foreman-other-applications", {id: self.params.applicationId, foremanHetu: ""})
-    .success(function() {
-      repository.load(self.params.applicationId);
-    })
-    .call();
+  self.subscriptionIds.push(hub.subscribe("documentChangedInBackend", function(data) {
+    if (data.documentName === self.params.documentName) {
+      ajax.command("update-foreman-other-applications", {id: self.params.applicationId, foremanHetu: ""})
+      .success(function() {
+        repository.load(self.params.applicationId);
+      })
+      .call();
+    }
   }));
 
   self.subscriptionIds.push(hub.subscribe("hetuChanged", function(data) {
