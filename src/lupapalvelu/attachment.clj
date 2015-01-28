@@ -77,6 +77,7 @@
                     :perustamistapalausunto
                     :tonttikartta_tarvittaessa]
    :paapiirustus [:asemapiirros
+                  :paapiirustus
                   :pohjapiirros
                   :leikkauspiirros
                   :julkisivupiirros
@@ -89,19 +90,29 @@
 
    :rakentamisen_aikaiset [:erityissuunnitelma]
    :osapuolet attachment-types-osapuoli
-   :muut [:energiataloudellinen_selvitys
+   :muut [:aitapiirustus
+          :energiataloudellinen_selvitys
           :energiatodistus
+          :haittaaineet
+          :hankeselvitys
           :hulevesisuunnitelma
+          :ikkunadetaljit
           :ilmanvaihtosuunnitelma
           :ilmoitus_vaestonsuojasta
           :jatevesijarjestelman_rakennustapaseloste
           :julkisivujen_varityssuunnitelma
           :kalliorakentamistekninen_suunnitelma
+          :karttaaineisto
           :katselmuksen_tai_tarkastuksen_poytakirja
           :kerrosalaselvitys
+          :kokoontumishuoneisto
+          :korjausrakentamisen_energiaselvitys
+          :lammityslaitesuunnitelma
           :liikkumis_ja_esteettomyysselvitys
           :lomarakennuksen_muutos_asuinrakennukseksi_selvitys_maaraysten_toteutumisesta
-          :lammityslaitesuunnitelma
+          :luonnos
+          :maalampo_rakennettavuusselvitys
+          :mainoslaitesuunnitelma
           :merkki_ja_turvavalaistussuunnitelma
           :palotekninen_selvitys
           :paloturvallisuusselvitys
@@ -130,12 +141,13 @@
           :selvitys_tontin_tai_rakennuspaikan_pintavesien_kasittelysta
           :sopimusjaljennos
           :suunnitelma_paloilmoitinjarjestelmista_ja_koneellisesta_savunpoistosta
+          :turvallisuusselvitys
           :vaestonsuojasuunnitelma
           :valaistussuunnitelma
           :valokuva
           :vesi_ja_viemariliitoslausunto_tai_kartta
           :vesikattopiirustus
-          :luonnos
+          :yhteistilat
           :ympariston_tietomalli_BIM
           :muu]])
 
