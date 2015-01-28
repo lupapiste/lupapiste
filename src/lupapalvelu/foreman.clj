@@ -50,7 +50,7 @@
 
 (defn- unwrap [wrapped-value]
   (let [value (tools/unwrapped wrapped-value)]
-    (if (empty? value)
+    (if (and (or (coll? value) (string? value)) (empty? value))
       "ei tiedossa"
       value)))
 
@@ -60,18 +60,23 @@
         municipality    (:municipality foreman-app)
         difficulty      (unwrap (get-in foreman-doc [:data :patevyysvaatimusluokka]))
         foreman-role    (unwrap (get-in foreman-doc [:data :kuntaRoolikoodi]))
+        limitedApproval (unwrap (get-in foreman-doc [:data :tyonjohtajanHyvaksynta :tyonjohtajanHyvaksynta]))
+        limitedApproval (if limitedApproval
+                          "yes"
+                          nil)
 
         relevant-link   (first (filter #(some #{(:id foreman-app)} (:link %)) app-links))
         project-app-id  (first (remove #{(:id foreman-app)} (:link relevant-link)))
         operation       (get-linked-app-operations (:id foreman-app) relevant-link)]
 
-    {:municipality   municipality
-     :difficulty     difficulty
-     :jobDescription foreman-role
-     :operation      operation
-     :linkedAppId    project-app-id
-     :foremanAppId   (:id foreman-app)
-     :created        (:created foreman-app)}))
+    {:municipality    municipality
+     :difficulty      difficulty
+     :jobDescription  foreman-role
+     :operation       operation
+     :limitedApproval limitedApproval
+     :linkedAppId     project-app-id
+     :foremanAppId    (:id foreman-app)
+     :created         (:created foreman-app)}))
 
 (defn get-foreman-history-data [foreman-app]
   (let [foreman-apps       (->> (get-foreman-applications foreman-app)
@@ -90,7 +95,7 @@
 
 (defn get-foreman-reduced-history-data [foreman-app]
   (let [history-data    (get-foreman-history-data foreman-app)
-        grouped-history (group-by (juxt :municipality :jobDescription) history-data)]
+        grouped-history (group-by (juxt :municipality :jobDescription :limitedApproval) history-data)]
     (mapcat (fn [[_ group]] (reduce-to-highlights group)) grouped-history)))
 
 (defn foreman-application-info [application]

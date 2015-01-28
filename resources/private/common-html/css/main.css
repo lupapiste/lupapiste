@@ -1894,15 +1894,19 @@ foreman-history th.first {
 }
 /* line 713, ../sass/partials/_forms.scss */
 foreman-history th.second {
-  width: 10%;
+  width: 15%;
 }
 /* line 716, ../sass/partials/_forms.scss */
 foreman-history th.third {
-  width: 40%;
+  width: 5%;
 }
 /* line 719, ../sass/partials/_forms.scss */
 foreman-history th.fourth {
-  width: 40%;
+  width: 25%;
+}
+/* line 722, ../sass/partials/_forms.scss */
+foreman-history th.fifth {
+  width: 45%;
 }
 
 /* line 4, ../sass/partials/_tables.scss */
