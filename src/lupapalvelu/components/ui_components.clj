@@ -129,6 +129,10 @@
                   :html ["stamp-template.html"]
                   :js ["stamp-model.js" "stamp.js"]}
 
+   :verdict-attachment-prints {:depends [:common-html]
+                               :html ["verdict-attachment-prints-order-template.html"]
+                               :js ["verdict-attachment-prints-order-model.js"]}
+
    :attachment   {:depends [:common-html :repository :signing :side-panel]
                   :js ["targeted-attachments-model.js" "attachment.js" "attachmentTypeSelect.js" "attachment-utils.js"]
                   :html ["targetted-attachments-template.html" "attachment.html" "upload.html"]}
@@ -156,7 +160,7 @@
                           "select/select-template.html"
                           "checkbox/checkbox-template.html"]}
 
-   :application  {:depends [:common-html :repository :tree :task :create-task :modal-datepicker :signing :invites :side-panel :ui-components]
+   :application  {:depends [:common-html :repository :tree :task :create-task :modal-datepicker :signing :invites :side-panel :verdict-attachment-prints :ui-components]
                   :js ["add-link-permit.js" "map-model.js" "change-location.js" "invite.js" "verdicts-model.js"
                        "add-operation.js" "foreman-model.js"
                        "request-statement-model.js" "add-party.js" "attachments-tab-model.js" "application-model.js"

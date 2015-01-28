@@ -43,13 +43,19 @@
 
 (defn send-mail
   "Send raw email message. Consider using send-email-message instead."
-  [to subject & {:keys [plain html]}]
+  [to subject & {:keys [plain html attachments]}]
   (assert (or plain html) "must provide some content")
   (let [plain-body (when plain {:content plain :type "text/plain; charset=utf-8"})
         html-body  (when html {:content html :type "text/html; charset=utf-8"})
         body       (if (and plain-body html-body)
                      [:alternative plain-body html-body]
-                     [(or plain-body html-body)])]
+                     [(or plain-body html-body)])
+        attachments (when attachments
+                      (for [attachment attachments]
+                        (assoc (select-keys attachment [:content :file-name]) :type :attachment)))
+        body       (if attachments
+                     (into body attachments)
+                     body)]
     (deliver-email to subject body)))
 
 ;;
@@ -60,13 +66,14 @@
 (declare apply-template)
 
 (defn send-email-message
-  "Sends email message using a template. Returns true if there is an error, false otherwise."
-  [to subject msg]
-  {:pre [subject msg]}
+  "Sends email message using a template. Returns true if there is an error, false otherwise.
+   Attachments as sequence of maps with keys :file-name and :content. :content as File object."
+  [to subject msg & [attachments]]
+  {:pre [subject msg (or (nil? attachments) (and (sequential? attachments) (every? map? attachments)))]}
   (if-not (ss/blank? to)
     (let [[plain html] msg]
       (try
-        (send-mail to subject :plain plain :html html)
+        (send-mail to subject :plain plain :html html :attachments attachments)
         false
         (catch Exception e
           (error "Email failure:" e)
@@ -120,6 +127,10 @@
 (defmethod ->str :br      [element] "")
 (defmethod ->str :hr      [element] "\n---------\n")
 (defmethod ->str :blockquote [element] (-> element :content ->str* (s/replace #"\n{2,}" "\n  ") (s/replace #"^\n" "  ")))
+(defmethod ->str :table      [element] (str \newline (->str* (filter map? (:content element))) \newline))
+(defmethod ->str :tr         [element] (let [contents (filter #(map? %) (:content element))]
+                                         (s/join \tab (map #(s/join (:content %)) contents))))
+
 
 ;;
 ;; HTML support:
