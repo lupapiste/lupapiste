@@ -929,7 +929,9 @@
             :removable false
             :approvable true
             :order 10}
-     :body [{:name "toimitusosoite" :type :text :max-len 200 :required true :layout :full-width}]}
+     :body (body
+             simple-osoite
+             tayta-omat-tiedot-button)}
 
     {:info {:name "aloitusoikeus" :removable false :approvable true}
      :body (body kuvaus)}
