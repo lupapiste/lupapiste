@@ -1,0 +1,1 @@
+verdict-attachment-prints-order.order-dialog.no-kopiolaitos-email-set: Tilausta ei voida lähettää, koska kopiolaitoksen sähköpostiosoite puuttuu järjestelmästä. Pyydä kuntasi pääkäyttäjää asettamaan osoite.
