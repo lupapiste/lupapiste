@@ -1,3 +1,31 @@
+modal-dialog {
+  .dialog {
+    position: fixed;
+    width: 980px;
+    right: 0;
+    left: 0;
+    margin: auto;
+    z-index: 9999;
+    padding: 10px;
+    background-color: #fff;
+    max-height: 700px;
+    .content {
+      overflow: auto;
+    }
+  }
+  .mask {
+    position: fixed;
+    display: block;
+    z-index: 9000;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background-color:#000;
+    opacity: 0.5;
+  }
+}
+
 /* Z-index of .mask must lower than .window */
 .mask {
   position:absolute;

@@ -1,0 +1,1 @@
+tyonjohtaja.history.showAllProjects: Näytä kaikki hankkeet

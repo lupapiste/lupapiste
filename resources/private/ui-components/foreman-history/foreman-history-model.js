@@ -2,6 +2,8 @@ LUPAPISTE.ForemanHistoryModel = function (params) {
   "use strict";
   var self = this;
 
+  self.showCompleteForemanHistory = ko.observable(false);
+
   self.projects = ko.observableArray([]);
 
   ajax
@@ -13,6 +15,10 @@ LUPAPISTE.ForemanHistoryModel = function (params) {
 
   self.followAppLink = function(project) {
     window.location.hash = "!/application/" + project.linkedAppId;
+  };
+
+  self.showAllProjects = function() {
+    hub.send("show-dialog", { contentName: "foreman-history", contentParams: params });
   };
 };
 
