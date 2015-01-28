@@ -1,5 +1,0 @@
-paatoksen-toimitus-rakval._group_label: Päätöksen toimitus
-paatoksen-toimitus-rakval.osoite._group_label: Mihin osoitteeseen haluat päätöksen toimitettavan
-paatoksen-toimitus-rakval.osoite.katu: Katuosoite
-paatoksen-toimitus-rakval.osoite.postinumero: Postinumero
-paatoksen-toimitus-rakval.osoite.postitoimipaikannimi: Postitoimipaikannimi
