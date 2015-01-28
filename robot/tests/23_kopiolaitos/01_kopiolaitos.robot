@@ -49,7 +49,7 @@ Sonja checks kopiolaitos infos before order
   Element should be visible  verdict-attachment-prints-order-info
 
   # Some input values come from organization data set in minimal fixture
-  Textfield value should be  xpath=//form[@id='verdict-attachment-prints-order-info']//input[@data-test-id='verdict-attachment-prints-order-orderer-organization']  Sipoon rakennusvalvonta
+  Textfield value should be  xpath=//form[@id='verdict-attachment-prints-order-info']//input[@data-test-id='verdict-attachment-prints-order-orderer-organization']  Sipoon rakennusvalvonta, Sonja Sibbo
   Textfield value should be  xpath=//form[@id='verdict-attachment-prints-order-info']//input[@data-test-id='verdict-attachment-prints-order-orderer-address']  Testikatu 2, 12345 Sipoo
   Textfield value should be  xpath=//form[@id='verdict-attachment-prints-order-info']//input[@data-test-id='verdict-attachment-prints-order-orderer-phone']  0501231234
   Textfield value should be  xpath=//form[@id='verdict-attachment-prints-order-info']//input[@data-test-id='verdict-attachment-prints-order-orderer-email']  tilaaja@example.com
