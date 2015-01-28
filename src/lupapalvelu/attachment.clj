@@ -77,6 +77,7 @@
                     :perustamistapalausunto
                     :tonttikartta_tarvittaessa]
    :paapiirustus [:asemapiirros
+                  :paapiirustus
                   :pohjapiirros
                   :leikkauspiirros
                   :julkisivupiirros
@@ -135,8 +136,19 @@
           :valokuva
           :vesi_ja_viemariliitoslausunto_tai_kartta
           :vesikattopiirustus
-          :luonnos
           :ympariston_tietomalli_BIM
+          :aitapiirustus
+          :haittaaineet
+          :hankeselvitys
+          :ikkunadetaljit
+          :karttaaineisto
+          :kokoontumishuoneisto
+          :korjausrakentamisen_energiaselvitys
+          :maalampo_rakennettavuusselvitys
+          :mainoslaitesuunnitelma
+          :turvallisuusselvitys
+          :yhteistilat
+          :luonnos
           :muu]])
 
 (def- attachment-types-YA
