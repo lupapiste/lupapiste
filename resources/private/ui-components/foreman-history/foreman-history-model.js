@@ -5,11 +5,15 @@ LUPAPISTE.ForemanHistoryModel = function (params) {
   self.showCompleteForemanHistory = ko.observable(false);
 
   self.params = params;
-  console.log("params", params);
   self.projects = ko.observableArray([]);
 
+  var endpoint = "reduced-foreman-history";
+  if (self.params.showAllProjects) {
+    endpoint = "foreman-history";
+  }
+
   ajax
-    .query("reduced-foreman-history", {id: params.applicationId})
+    .query(endpoint, {id: params.applicationId})
     .success(function (data) {
       self.projects(data.projects);
     })
