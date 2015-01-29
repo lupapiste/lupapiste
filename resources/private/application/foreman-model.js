@@ -73,9 +73,9 @@ LUPAPISTE.ForemanModel = function() {
           self.foremanTasks({ "name": loc(["task-vaadittu-tyonjohtaja", "_group_label"]),
                               "foremans": foremans });
         })
-        .error(
+        .error(function() {
           // invited foreman can't always fetch applicants other foreman appications (if they are not invited to them also)
-        )
+        })
         .call();
     }
 
