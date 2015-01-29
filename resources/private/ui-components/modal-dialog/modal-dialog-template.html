@@ -3,15 +3,19 @@
 <body>
   <section class="page container">
     <script type="text/html" id="modal-dialog-template">
+    <div data-bind="visible: false, documentEvent: {keypress: closeDialog, key: 27}"></div>
     <!-- ko if: showDialog -->
     <div class="mask" data-bind="click: closeDialog"></div>
     <div class="dialog" data-bind="style: {'max-height': dialogHeight() + 'px'}">
       <div class="header">
-        Header
+        <span class="title" data-bind="text: title"></span>
+        <span class="close" data-bind="click: closeDialog"></span>
       </div>
       <div id="modal-dialog-content" class="content" data-bind="component: {name: contentName, params: contentParams}"></div>
       <div class="footer">
-        Footer
+        <a href="#" class="cancel" data-bind="click: closeDialog">
+          <span data-bind="ltext: 'cancel'"></span>
+        </a>
       </div>
     </div>
     <!-- /ko -->

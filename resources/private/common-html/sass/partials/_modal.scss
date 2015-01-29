@@ -6,20 +6,42 @@ modal-dialog {
     left: 0;
     margin: auto;
     z-index: 9999;
-    padding: 10px;
+    padding: $marginM;
     background-color: #fff;
     height: 700px;
+    min-height: 150px;
     .content {
       overflow: auto;
       position: absolute;
-      top: 40px;
-      bottom: 40px;
-      left: 10px;
-      right: 10px;
+      top: 45px;
+      bottom: 70px;
+      left: $marginM;
+      right: $marginM;
     }
     .footer {
       position: absolute;
-      bottom: 10px;
+      bottom: $marginM;
+      right: $marginM;
+      left: $marginM;
+      .cancel {
+        float: right;
+        margin-right: $marginM;
+      }
+    }
+    .header {
+      padding: 2px 24px;
+      border-bottom: 1px solid;
+      font-size: 20px;
+      .title {
+      }
+      .close {
+        position: absolute;
+        right: $marginM;
+        cursor: pointer;
+        &:after {
+          content: "X";
+        }
+      }
     }
   }
   .mask {

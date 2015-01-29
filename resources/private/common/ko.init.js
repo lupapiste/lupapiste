@@ -315,6 +315,19 @@
     }
   };
 
+  ko.bindingHandlers.documentEvent = {
+    init: function(element, valueAccessor, allBindingsAccessor) {
+      var value = ko.utils.unwrapObservable(valueAccessor());
+      $(document).keyup(function(e) {
+        if (e.keyCode === value.key) {
+          if (value.keypress) {
+            value.keypress();
+          }
+        }
+      });
+    }
+  };
+
   $.fn.placeholderize = function() {
     this.find("input").each(function(i, element) {
       var e = $(element),

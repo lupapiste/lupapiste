@@ -6,6 +6,7 @@ LUPAPISTE.ModalDialogModel = function (params) {
   self.contentParams = ko.observable();
   self.windowWidth = ko.observable();
   self.windowHeight = ko.observable();
+  self.title = ko.observable();
 
   self.dialogWidth = ko.pureComputed(function() {
     return self.windowWidth() - 200;
@@ -25,6 +26,7 @@ LUPAPISTE.ModalDialogModel = function (params) {
     self.contentName(data.contentName);
     self.contentParams(data.contentParams);
     self.showDialog(true);
+    self.title(loc(data.titleLoc));
   });
 
   var setWindowSize = function(width, height) {
