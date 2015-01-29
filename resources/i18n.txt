@@ -1,2 +1,3 @@
 tyonjohtaja.historia.vainTamaHanke: Vain hanke
 tyonjohtaja.history.showAllProjects: Näytä kaikki hankkeet
+tyonjohtaja.muutHankkeet.ajantarve: Ajantarve tunneissa 3kk kohden
