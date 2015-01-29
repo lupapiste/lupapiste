@@ -930,7 +930,10 @@
             :approvable true
             :order 10}
      :body (body
+             [(update-in henkilotiedot-minimal [:body] (partial remove #(= turvakielto (:name %))))]
              simple-osoite
+             [{:name "yritys" :type :group
+               :body [{:name "yritysnimi" :type :string}]}]
              tayta-omat-tiedot-button)}
 
     {:info {:name "aloitusoikeus" :removable false :approvable true}
