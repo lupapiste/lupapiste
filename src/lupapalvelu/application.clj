@@ -65,7 +65,7 @@
 
 ;; Helpers
 
-(defn set-user-to-document [application document user-id path current-user timestamp]
+(defn do-set-user-to-document [application document user-id path current-user timestamp]
   {:pre [document]}
   (when-not (ss/blank? user-id)
     (let [path-arr     (if-not (ss/blank? path) (split path #"\.") [])
@@ -307,7 +307,7 @@
    :states     (action/all-states-but [:info :sent :verdictGiven :constructionStarted :closed :canceled])}
   [{:keys [user created application] :as command}]
   (if-let [document (domain/get-document-by-id application documentId)]
-    (set-user-to-document application document userId path user created)
+    (do-set-user-to-document application document userId path user created)
     (fail :error.document-not-found)))
 
 ;;

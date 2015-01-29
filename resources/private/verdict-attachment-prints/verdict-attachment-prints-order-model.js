@@ -9,6 +9,7 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function() {
   self.errorMessage = ko.observable("");
   self.attachments = ko.observable([]);
 
+  self.kopiolaitosEmail = ko.observable("");
   self.ordererOrganization = ko.observable("");
   self.ordererAddress = ko.observable("");
   self.ordererEmail = ko.observable("");
@@ -36,6 +37,7 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function() {
     var nonEmptyFields = _.every(dialogFieldValues, function(v){ return !_.isEmpty(v); });
     return self.authorizationModel.ok("order-verdict-attachment-prints") &&
            !self.processing() &&
+           !_.isEmpty(self.kopiolaitosEmail()) &&
            attachmentOrderCountsAreNumbers &&
            nonEmptyFields &&
            util.isValidEmailAddress(self.ordererEmail());
@@ -67,6 +69,11 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function() {
     var kopiolaitosMeta = self.application.organizationMeta.kopiolaitos;
     var currentUserName = currentUser.get().firstName() + " " + currentUser.get().lastName();
     var ordererName = (self.application.organizationName || "") + ", " + currentUserName;
+
+    self.kopiolaitosEmail(kopiolaitosMeta.kopiolaitosEmail || "");
+    if (_.isEmpty(self.kopiolaitosEmail())) {
+      self.errorMessage("verdict-attachment-prints-order.order-dialog.no-kopiolaitos-email-set");
+    }
 
     self.ordererOrganization(ordererName);
     self.ordererAddress(kopiolaitosMeta.kopiolaitosOrdererAddress || "");

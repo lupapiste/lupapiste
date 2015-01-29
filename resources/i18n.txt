@@ -1,0 +1,7 @@
+verdict-attachment-prints-order.order-dialog.no-kopiolaitos-email-set: Tilausta ei voida lähettää, koska kopiolaitoksen sähköpostiosoite puuttuu järjestelmästä. Pyydä kuntasi pääkäyttäjää asettamaan osoite.
+
+paatoksen-toimitus-rakval.henkilotiedot._group_label: Henkilötiedot
+paatoksen-toimitus-rakval.henkilotiedot.etunimi: Etunimi
+paatoksen-toimitus-rakval.henkilotiedot.sukunimi: Sukunimi
+paatoksen-toimitus-rakval.yritys._group_label: Yritys/yhteisö
+paatoksen-toimitus-rakval.yritys.yritysnimi: Nimi
