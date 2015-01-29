@@ -2,6 +2,7 @@
   (:require [lupapalvelu.domain :as domain]
             [sade.strings :as ss]
             [sade.util :as util]
+            [sade.core :refer [fail]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.tools :as tools]
             [monger.operators :refer :all]))
@@ -100,5 +101,6 @@
 
 (defn foreman-application-info [application]
   (-> (select-keys application [:id :state :auth :documents])
-      (update-in [:documents] (fn [docs] (filter #(= (get-in % [:schema-info :name]) "tyonjohtaja-v2") docs))))
-)
+      (update-in [:documents] (fn [docs] (filter #(= (get-in % [:schema-info :name]) "tyonjohtaja-v2") docs)))))
+
+(defn foreman-app? [application] (= :tyonjohtajan-nimeaminen-v2 (-> application :operations first :name keyword)))
