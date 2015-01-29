@@ -296,7 +296,7 @@
                                :lamminvesiKytkin        (get-text huoneisto :lamminvesiKytkin)
                                :parvekeTaiTerassiKytkin (get-text huoneisto :parvekeTaiTerassiKytkin)
                                :saunaKytkin             (get-text huoneisto :saunaKytkin)}))
-                        (partial sort-by (juxt :porras :huoneistonumero :jakokirjain))))))))
+                        (sort-by (juxt :porras :huoneistonumero :jakokirjain))))))))
 
 (defn ->buildings [xml]
   (map ->rakennuksen-tiedot (-> xml cr/strip-xml-namespaces (select [:Rakennus]))))
