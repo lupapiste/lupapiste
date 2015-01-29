@@ -13,7 +13,7 @@ LUPAPISTE.ModalDialogModel = function (params) {
   });
 
   self.dialogHeight = ko.pureComputed(function() {
-    return self.windowHeight() - 200;
+    return self.windowHeight() - 150;
   });
 
   self.closeDialog = function() {
