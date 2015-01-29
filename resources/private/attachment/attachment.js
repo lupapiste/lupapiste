@@ -121,6 +121,7 @@ var attachment = (function() {
     scales:               ko.observableArray(LUPAPISTE.config.attachmentScales),
     size:                 ko.observable(),
     sizes:                ko.observableArray(LUPAPISTE.config.attachmentSizes),
+    isVerdictAttachment:  ko.observable(),
     subscriptions:        [],
     indicator:            ko.observable().extend({notify: "always"}),
     showAttachmentVersionHistory: ko.observable(),
@@ -266,6 +267,20 @@ var attachment = (function() {
       }
     }));
 
+    model.subscriptions.push(model.isVerdictAttachment.subscribe(function(isVerdictAttachment) {
+      ajax.command("set-attachments-as-verdict-attachment", { id: applicationId, attachmentIds: [attachmentId], isVerdictAttachment: isVerdictAttachment })
+        .success(function() {
+          repository.load(applicationId);
+        })
+        .error(function(e) {
+          error(e.text);
+          notify.error(loc("error.dialog.title"), loc("attachment.set-attachments-as-verdict-attachment.error"));
+          repository.load(applicationId);
+        })
+        .call();
+    }));
+
+
     applySubscription("contents");
     applySubscription("scale");
     applySubscription("size");
@@ -280,6 +295,9 @@ var attachment = (function() {
   function showAttachment(applicationDetails) {
     var application = applicationDetails.application;
     if (!applicationId || !attachmentId) { return; }
+
+    lupapisteApp.setTitle(application.title);
+
     var attachment = _.find(application.attachments, function(value) {return value.id === attachmentId;});
     if (!attachment) {
       error("Missing attachment: application:", applicationId, "attachment:", attachmentId);
@@ -302,6 +320,7 @@ var attachment = (function() {
     model.contents(attachment.contents);
     model.scale(attachment.scale);
     model.size(attachment.size);
+    model.isVerdictAttachment(attachment.forPrinting);
     model.applicationState(attachment.applicationState);
 
     var type = attachment.type["type-group"] + "." + attachment.type["type-id"];
@@ -337,7 +356,7 @@ var attachment = (function() {
     });
   }
 
-  hub.onPageChange("attachment", function(e) {
+  hub.onPageLoad("attachment", function(e) {
     pageutil.showAjaxWait();
     model.init(false);
     model.showHelp(false);

@@ -38,7 +38,7 @@
 }
 
 @mixin spite-bg {
-  background-image: url('/img/icons-sprite-1.12.png');
+  background-image: url('/img/icons-sprite-1.13.png');
   background-repeat: no-repeat;
 }
 
@@ -113,6 +113,7 @@
 @import "views/_statement";
 @import "views/_mypage";
 @import "views/_admin";
+@import "views/_authority_admin";
 @import "views/_neighbor";
 @import "views/_register";
 @import "views/_login_frame";
@@ -147,7 +148,11 @@
 }
 
 .hidden {
-  display: none;
+  display: none !important;
+}
+
+.inline {
+  display: inline;
 }
 
 .template {

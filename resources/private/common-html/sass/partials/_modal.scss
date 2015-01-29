@@ -45,7 +45,6 @@
 /* Customize your modal window here, you can add background image too */
 
 .dialog-header {
-  height: 32px;
   padding: 2px $marginL;
   border-bottom: 1px solid;
   p {
@@ -61,7 +60,7 @@
   }
 }
 
-.dialog-content{
+.dialog-content {
   /* somewhat less than .autosized - .dialog-header */
   min-height: $baseline * 4;
   position: relative;
@@ -90,25 +89,20 @@
   .dialog-user-content {
     padding: $marginM 0;
   }
-
-  div.pending, div.finished {
-    display: none;
-  }
 }
 
-.dialog-content.finished {
+.dialog-content {
+  p {
+    margin-bottom: 0;
+  }
+
   div.finished {
     background: #fff;
     display: block;
     text-align: left;
     z-index: 5000;
   }
-  p {
-    margin-bottom: 0;
-  }
-}
 
-.dialog-content.pending {
   div.pending {
     background: #fff;
     display: block;

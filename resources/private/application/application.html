@@ -284,7 +284,7 @@
             <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.applicationInfoDesc'"></p>
           </div>
           <div class="operation-info">
-            
+
             <div data-bind="if: $root.authorization.ok('add-operation')">
               <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.AddOperations'"></p>
               <button data-bind="click: addOperation, enable: $root.authorization.ok('add-operation')" class="btn-primary">
@@ -493,7 +493,7 @@
             </div>
             <!-- /ko -->
 
-            <a data-bind="attr: {href: '/api/raw/download-all-attachments?id=' + $root.application.id() + '&lang=' + loc.getCurrentLanguage() }, visible: $root.application.hasAttachment, ltext: 'download-all'" data-test-id="application-download-all-attachement" href="#" target="_blank"></a>
+            <a data-bind="attr: {href: '/api/raw/download-all-attachments?id=' + $root.application.id() + '&lang=' + loc.getCurrentLanguage() }, visible: $root.application.hasAttachment, ltext: 'download-all'" data-test-id="application-download-all-attachments" href="#" target="_blank"></a>
 
           </div>
 
@@ -864,12 +864,23 @@
           </button>
 
           <button
-            data-bind="click: $root.verdictModel.checkVerdict, disable: $root.verdictModel.processing, visible: $root.authorization.ok('check-for-verdict')"
+            data-bind="click: $root.verdictModel.checkVerdict, visible: $root.authorization.ok('check-for-verdict'), disable: $root.verdictModel.processing"
             class="btn btn-primary modal"
             data-test-id="fetch-verdict">
             <em data-bind="visible: $root.verdictModel.pending" class="button-loader"></em>
             <span data-bind="ltext: 'verdict.fetch.button'"></span>
           </button>
+
+          <button
+            data-bind="click: $root.verdictAttachmentPrintsOrderModel.openDialog,
+                       disable: $root.verdictModel.processing,
+                       visible: $root.authorization.ok('order-verdict-attachment-prints')"
+            class="btn btn-primary modal"
+            data-test-id="test-order-attachment-prints">
+            <em data-bind="visible: $root.verdictModel.pending" class="button-loader"></em>
+            <span data-bind="ltext: 'verdict.orderAttachmentPrints.button'"></span>
+          </button>
+
         </div>
 
         <!-- Statement tab -->
@@ -1143,7 +1154,8 @@
           <p class="dialog-close close">X</p>
         </div>
         <!-- ko with: $root.foreman -->
-        <div class="dialog-content" data-bind="css: {pending: pending, finished: finished}">
+        <div class="dialog-content">
+          <!-- ko if: finished -->
           <div class="finished">
             <p class="dialog-desc-wide" data-bind="lhtml: 'invite.foreman.finished'"></p>
             <button data-test-id="application-invite-foreman-close-dialog"
@@ -1151,10 +1163,13 @@
                     data-bind="ltext: 'button.ok', click: function() { openApplication(finished()); LUPAPISTE.ModalDialog.close(); }"></button>
             <a class="btn btn-dialog" data-bind="ltext: 'application.return', click: function() { LUPAPISTE.ModalDialog.close(); }"></a>
           </div>
+          <!-- /ko -->
+          <!-- ko if: pending -->
           <div class="pending">
             <div class="ajax"></div>
             <div data-bind="ltext: 'invite.foreman.pending'"></div>
           </div>
+          <!-- /ko -->
           <!-- ko ifnot: finished -->
           <p data-bind="lhtml: 'invite.foreman.desc'" class="dialog-desc-wide"></p>
           <form>

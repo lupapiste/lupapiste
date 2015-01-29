@@ -19,7 +19,7 @@
 
   })();
 
-  hub.onPageChange("screenmessages", LUPAPISTE.Screenmessage.refresh);
+  hub.onPageLoad("screenmessages", LUPAPISTE.Screenmessage.refresh);
 
   $(function() {
     $("#screenmessages").applyBindings({

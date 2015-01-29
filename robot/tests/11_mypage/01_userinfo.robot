@@ -12,6 +12,7 @@ Mikko changes his name and experience
   Mikko logs in
   Click Element  user-name
   Wait for Page to Load  Mikko  Intonen
+  Title Should Be  Lupapiste
   Change Textfield Value  firstName  Mikko  Mika
   Change Textfield Value  lastName  Intonen  Intola
   Change Textfield Value  architect.degree  Tutkinto  Arkkitehti
@@ -19,7 +20,7 @@ Mikko changes his name and experience
   Change Textfield Value  architect.fise  f  fise
   Checkbox Should Not Be Selected  allowDirectMarketing
   Select Checkbox  allowDirectMarketing
-  
+
   Save User Data
   User should be logged in  Mika Intola
 

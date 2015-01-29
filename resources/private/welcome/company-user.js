@@ -56,7 +56,7 @@
         .call();
     };
 
-    hub.onPageChange("new-company-user", function(e) {
+    hub.onPageLoad("new-company-user", function(e) {
       self.reset().token(e.pagePath[0]);
       ajax
         .get("/api/token/" + self.token())
@@ -93,7 +93,7 @@
     this.pending  = ko.computed(function() { return this.result() === "pending"; }, this);
     this.ok       = ko.computed(function() { return this.result() === "ok"; }, this);
     this.fail     = ko.computed(function() { return this.result() === "fail"; }, this);
-    hub.onPageChange("invite-company-user", this.open.bind(this));
+    hub.onPageLoad("invite-company-user", this.open.bind(this));
   }
 
   InviteCompanyUser.prototype.open = function(e) {
@@ -111,7 +111,7 @@
     this.pending  = ko.computed(function() { return this.result() === "pending"; }, this);
     this.ok       = ko.computed(function() { return this.result() === "ok"; }, this);
     this.fail     = ko.computed(function() { return this.result() === "fail"; }, this);
-    hub.onPageChange("accept-company-invitation", this.open.bind(this));
+    hub.onPageLoad("accept-company-invitation", this.open.bind(this));
   }
 
   AcceptCompanyInvitation.prototype.open = function(e) {

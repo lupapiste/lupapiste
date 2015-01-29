@@ -34,7 +34,7 @@
   (fact (attachment-latest-version test-attachments "1")    => {:major 9, :minor 7})
   (fact (attachment-latest-version test-attachments "none") => nil?))
 
-(testable-privates lupapalvelu.attachment next-attachment-version allowed-attachment-types-contain?)
+(testable-privates lupapalvelu.attachment allowed-attachment-types-contain?)
 
 (facts "Facts about next-attachment-version"
   (fact (next-attachment-version {:major 1 :minor 1} {:role :authority})  => {:major 1 :minor 2})
@@ -83,7 +83,8 @@
                                                                :versions []
                                                                :notNeeded false
                                                                :required true
-                                                               :requestedByAuthority true}
+                                                               :requestedByAuthority true
+                                                               :forPrinting false}
                                                               {:id "123"
                                                                :locked false
                                                                :modified 999
@@ -96,7 +97,8 @@
                                                                :versions []
                                                                :notNeeded false
                                                                :required true
-                                                               :requestedByAuthority true}])
+                                                               :requestedByAuthority true
+                                                               :forPrinting false}])
   (provided
     (mongo/create-id) => "123"))
 
