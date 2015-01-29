@@ -4,16 +4,16 @@
   <section class="page container">
     <script type="text/html" id="modal-dialog-template">
     <!-- ko if: showDialog -->
-	  <div class="mask" data-bind="click: closeDialog"></div>
-    <div class="dialog">
+    <div class="mask" data-bind="click: closeDialog"></div>
+    <div class="dialog" data-bind="style: {'max-height': dialogHeight() + 'px'}">
       <div class="header">
-      	Header
+        Header
       </div>
-	    <div class="content" data-bind="component: {name: contentName, params: contentParams}"></div>
-	    <div class="footer">
-	    	Footer
-	    </div>
-	  </div>
+      <div id="modal-dialog-content" class="content" data-bind="component: {name: contentName, params: contentParams}"></div>
+      <div class="footer">
+        Footer
+      </div>
+    </div>
     <!-- /ko -->
     </script>
   </section>

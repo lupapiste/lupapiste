@@ -8,9 +8,18 @@ modal-dialog {
     z-index: 9999;
     padding: 10px;
     background-color: #fff;
-    max-height: 700px;
+    height: 700px;
     .content {
       overflow: auto;
+      position: absolute;
+      top: 40px;
+      bottom: 40px;
+      left: 10px;
+      right: 10px;
+    }
+    .footer {
+      position: absolute;
+      bottom: 10px;
     }
   }
   .mask {
