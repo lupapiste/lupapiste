@@ -99,7 +99,7 @@
       ; Document can be undefined in invite or removed by the time invite is approved.
       ; It's not possible to combine Mongo writes here,
       ; because only the last $elemMatch counts.
-      (a/set-user-to-document (domain/get-application-as id user) document (:id user) (:path my-invite) user created))))
+      (a/do-set-user-to-document (domain/get-application-as id user) document (:id user) (:path my-invite) user created))))
 
 (defn generate-remove-invalid-user-from-docs-updates [{docs :documents :as application}]
   (-<>> docs
