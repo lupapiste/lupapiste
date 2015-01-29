@@ -1,5 +1,5 @@
 (ns lupapalvelu.kopiolaitos
-  (:require [taoensso.timbre :as timbre :refer [warnf]]
+  (:require [taoensso.timbre :as timbre :refer [warnf info error]]
             [clojure.java.io :as io :refer [delete-file]]
             [sade.core :refer [ok fail fail! def-]]
             [sade.email :as email]
@@ -57,6 +57,9 @@
                                       email-subject
                                       (email/apply-template "kopiolaitos-order.html" orderInfo)
                                       [email-attachment]))]
+        (if sending-succeeded?
+          (info "Kopiolaitos email was sent successfully to" email-address "from" (:ordererOrganization orderInfo))
+          (error "Kopiolaitos email sending error to" email-address "from" (:ordererOrganization orderInfo)))
         (io/delete-file zip)
         sending-succeeded?)
       (catch java.io.IOException ioe
