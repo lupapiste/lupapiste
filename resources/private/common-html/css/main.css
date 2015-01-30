@@ -2433,7 +2433,7 @@ table.attachments-template-table td.attachment-file-info {
 }
 
 /* line 3, ../sass/partials/_modal.scss */
-modal-dialog .dialog {
+#modal-dialog .dialog {
   display: none;
   position: fixed;
   width: 980px;
@@ -2447,7 +2447,7 @@ modal-dialog .dialog {
   min-height: 150px;
 }
 /* line 15, ../sass/partials/_modal.scss */
-modal-dialog .dialog .content {
+#modal-dialog .dialog .content {
   overflow: auto;
   position: absolute;
   top: 52px;
@@ -2456,19 +2456,19 @@ modal-dialog .dialog .content {
   right: 12px;
 }
 /* line 23, ../sass/partials/_modal.scss */
-modal-dialog .dialog .footer {
+#modal-dialog .dialog .footer {
   position: absolute;
   bottom: 12px;
   right: 12px;
   left: 12px;
 }
 /* line 28, ../sass/partials/_modal.scss */
-modal-dialog .dialog .footer .cancel {
+#modal-dialog .dialog .footer .cancel {
   float: right;
   margin-right: 12px;
 }
 /* line 33, ../sass/partials/_modal.scss */
-modal-dialog .dialog .header {
+#modal-dialog .dialog .header {
   padding-top: 2px;
   padding-bottom: 4px;
   padding-left: 24px;
@@ -2476,21 +2476,21 @@ modal-dialog .dialog .header {
   font-size: 20px;
 }
 /* line 39, ../sass/partials/_modal.scss */
-modal-dialog .dialog .header .title {
+#modal-dialog .dialog .header .title {
   line-height: 24px;
 }
 /* line 42, ../sass/partials/_modal.scss */
-modal-dialog .dialog .header .close {
+#modal-dialog .dialog .header .close {
   position: absolute;
   right: 12px;
   cursor: pointer;
 }
 /* line 46, ../sass/partials/_modal.scss */
-modal-dialog .dialog .header .close:after {
+#modal-dialog .dialog .header .close:after {
   content: "X";
 }
 /* line 52, ../sass/partials/_modal.scss */
-modal-dialog .mask {
+#modal-dialog .mask {
   position: fixed;
   display: none;
   z-index: 9000;
@@ -2503,7 +2503,7 @@ modal-dialog .mask {
 }
 
 /* Z-index of .mask must lower than .window */
-/* line 66, ../sass/partials/_modal.scss */
+/* line 67, ../sass/partials/_modal.scss */
 .mask {
   position: absolute;
   z-index: 9000;
@@ -2511,16 +2511,16 @@ modal-dialog .mask {
   top: 0;
   left: 0;
 }
-/* line 72, ../sass/partials/_modal.scss */
+/* line 73, ../sass/partials/_modal.scss */
 .mask.black {
   background-color: #000;
 }
-/* line 75, ../sass/partials/_modal.scss */
+/* line 76, ../sass/partials/_modal.scss */
 .mask.white {
   background-color: #fff;
 }
 
-/* line 80, ../sass/partials/_modal.scss */
+/* line 81, ../sass/partials/_modal.scss */
 .window {
   position: fixed;
   display: none;
@@ -2529,12 +2529,12 @@ modal-dialog .mask {
   background: white;
   overflow: hidden;
 }
-/* line 87, ../sass/partials/_modal.scss */
+/* line 88, ../sass/partials/_modal.scss */
 .window.rounded {
   border-radius: 6px;
 }
 
-/* line 92, ../sass/partials/_modal.scss */
+/* line 93, ../sass/partials/_modal.scss */
 .autosized {
   min-width: 22.5em;
   min-height: 144px;
@@ -2542,14 +2542,14 @@ modal-dialog .mask {
   width: auto;
 }
 
-/* line 99, ../sass/partials/_modal.scss */
+/* line 100, ../sass/partials/_modal.scss */
 .autosized-yes-no {
   min-height: 144px;
   height: auto;
   width: 35em;
 }
 
-/* line 104, ../sass/partials/_modal.scss */
+/* line 105, ../sass/partials/_modal.scss */
 .autosized-ok {
   min-height: 120px;
   height: auto;
@@ -2557,18 +2557,18 @@ modal-dialog .mask {
 }
 
 /* Customize your modal window here, you can add background image too */
-/* line 111, ../sass/partials/_modal.scss */
+/* line 112, ../sass/partials/_modal.scss */
 .dialog-header {
   padding: 2px 24px;
   border-bottom: 1px solid;
 }
-/* line 114, ../sass/partials/_modal.scss */
+/* line 115, ../sass/partials/_modal.scss */
 .dialog-header p {
   margin: 0px;
   font-size: 20px;
   display: inline;
 }
-/* line 119, ../sass/partials/_modal.scss */
+/* line 120, ../sass/partials/_modal.scss */
 .dialog-header .dialog-close {
   position: absolute;
   right: 14px;
@@ -2576,7 +2576,7 @@ modal-dialog .mask {
   cursor: pointer;
 }
 
-/* line 127, ../sass/partials/_modal.scss */
+/* line 128, ../sass/partials/_modal.scss */
 .dialog-content {
   /* somewhat less than .autosized - .dialog-header */
   min-height: 96px;
@@ -2584,41 +2584,41 @@ modal-dialog .mask {
   margin: 12px 0;
   padding-bottom: 64px;
 }
-/* line 134, ../sass/partials/_modal.scss */
+/* line 135, ../sass/partials/_modal.scss */
 .dialog-content .dialog-desc {
   width: 300px;
 }
-/* line 138, ../sass/partials/_modal.scss */
+/* line 139, ../sass/partials/_modal.scss */
 .dialog-content .dialog-desc-wide {
   width: 450px;
 }
-/* line 142, ../sass/partials/_modal.scss */
+/* line 143, ../sass/partials/_modal.scss */
 .dialog-content [type=submit], .dialog-content .btn, .dialog-content button {
   padding: 4px 24px;
   min-width: 10em;
   max-width: 16.25em;
 }
-/* line 149, ../sass/partials/_modal.scss */
+/* line 150, ../sass/partials/_modal.scss */
 .dialog-content .file-upload {
   margin: 12px 0;
 }
-/* line 153, ../sass/partials/_modal.scss */
+/* line 154, ../sass/partials/_modal.scss */
 .dialog-content .dialog-user-content {
   padding: 12px 0;
 }
 
-/* line 159, ../sass/partials/_modal.scss */
+/* line 160, ../sass/partials/_modal.scss */
 .dialog-content p {
   margin-bottom: 0;
 }
-/* line 163, ../sass/partials/_modal.scss */
+/* line 164, ../sass/partials/_modal.scss */
 .dialog-content div.finished {
   background: #fff;
   display: block;
   text-align: left;
   z-index: 5000;
 }
-/* line 170, ../sass/partials/_modal.scss */
+/* line 171, ../sass/partials/_modal.scss */
 .dialog-content div.pending {
   background: #fff;
   display: block;
@@ -2630,69 +2630,69 @@ modal-dialog .mask {
   text-align: center;
   z-index: 5000;
 }
-/* line 180, ../sass/partials/_modal.scss */
+/* line 181, ../sass/partials/_modal.scss */
 .dialog-content div.pending div.ajax {
   background: url(/img/ajax-loader.gif) no-repeat center center;
   margin: auto;
   height: 160px;
 }
 
-/* line 188, ../sass/partials/_modal.scss */
+/* line 189, ../sass/partials/_modal.scss */
 .scrolling-content {
   overflow-y: scroll;
   max-height: 288px;
 }
 
-/* line 193, ../sass/partials/_modal.scss */
+/* line 194, ../sass/partials/_modal.scss */
 .dialog-content-low {
   min-height: 72px;
   padding-bottom: 0;
 }
 
-/* line 198, ../sass/partials/_modal.scss */
+/* line 199, ../sass/partials/_modal.scss */
 .with-map {
   display: table-row;
 }
-/* line 201, ../sass/partials/_modal.scss */
+/* line 202, ../sass/partials/_modal.scss */
 .with-map .map-container {
   padding: 0;
 }
-/* line 205, ../sass/partials/_modal.scss */
+/* line 206, ../sass/partials/_modal.scss */
 .with-map .btn-primary {
   left: auto;
   right: 260px;
   bottom: 5px;
 }
-/* line 209, ../sass/partials/_modal.scss */
+/* line 210, ../sass/partials/_modal.scss */
 .with-map a.btn-dialog {
   right: -70px;
   bottom: 10px;
   width: 100px;
 }
 
-/* line 216, ../sass/partials/_modal.scss */
+/* line 217, ../sass/partials/_modal.scss */
 .with-map > div {
   display: table-cell;
   vertical-align: top;
   padding-left: 12px;
 }
 
-/* line 222, ../sass/partials/_modal.scss */
+/* line 223, ../sass/partials/_modal.scss */
 .neighbors-message {
   margin: 12px;
 }
 
-/* line 227, ../sass/partials/_modal.scss */
+/* line 228, ../sass/partials/_modal.scss */
 #dialog-add-link-permit .combobox {
   margin-bottom: 8px;
 }
 
-/* line 233, ../sass/partials/_modal.scss */
+/* line 234, ../sass/partials/_modal.scss */
 #upload-dialog .dialog-content {
   padding-bottom: 0;
 }
 
-/* line 239, ../sass/partials/_modal.scss */
+/* line 240, ../sass/partials/_modal.scss */
 #dialog-cancel-application div.application-cancel-text-content p {
   margin-bottom: 0;
 }

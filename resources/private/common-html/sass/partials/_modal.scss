@@ -1,5 +1,5 @@
 // TODO knockout dialog to share same styles with legacy dialog
-modal-dialog {
+#modal-dialog {
   .dialog {
     display: none;
     position: fixed;
@@ -57,8 +57,9 @@ modal-dialog {
     right: 0;
     top: 0;
     bottom: 0;
-    background-color:#000;
+    background-color: #000;
     opacity: 0.5;
+    // filter: alpha(opacity=50);
   }
 }
 

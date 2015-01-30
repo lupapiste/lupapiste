@@ -7,7 +7,7 @@
     <div data-bind="visible: false, documentEvent: {keypress: closeDialog, key: 27}"></div>
     <!-- ko if: showDialog -->
     <div class="mask" data-bind="fader: dialogVisible, click: closeDialog"></div>
-    <div class="dialog" data-bind="fader: dialogVisible, duration: 600, style: {'max-height': dialogHeight() + 'px'}">
+    <div class="dialog" data-bind="fader: dialogVisible, duration: 1000, style: {'max-height': dialogHeight() + 'px'}">
       <div class="header">
         <span class="title" data-bind="text: title"></span>
         <span class="close" data-bind="click: closeDialog"></span>
