@@ -18,7 +18,7 @@
         (-> (:comments application) first :text) => "hello"))
 
     (fact "Veikko can not assign inforequest to himself"
-      (command veikko :assign-application :id id :assigneeId veikko-id) => unauthorized?)
+      (command veikko :assign-application :id id :assigneeId veikko-id) => not-accessible?)
 
     (fact "Sonja can assign inforequest to herself"
       (command sonja :assign-application :id id :assigneeId sonja-id) => ok?)

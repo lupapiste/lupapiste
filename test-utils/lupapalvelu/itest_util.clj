@@ -1,7 +1,7 @@
 (ns lupapalvelu.itest-util
   (:require [noir.request :refer [*request*]]
             [lupapalvelu.fixture.minimal :as minimal]
-            [sade.core :refer [fail! unauthorized]]
+            [sade.core :refer [fail! unauthorized not-accessible]]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
@@ -160,6 +160,7 @@
   (and (= ok false) (= text expected-text)))
 
 (def unauthorized? (partial expected-failure? (:text unauthorized)))
+(def not-accessible? (partial expected-failure? (:text not-accessible)))
 
 (fact "unauthorized?"
   (unauthorized? unauthorized) => true
