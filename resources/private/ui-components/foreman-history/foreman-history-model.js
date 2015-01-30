@@ -31,8 +31,3 @@ LUPAPISTE.ForemanHistoryModel = function (params) {
                               contentParams: newParams });
   };
 };
-
-ko.components.register("foreman-history", {
-  viewModel: LUPAPISTE.ForemanHistoryModel,
-  template: { element: "foreman-history"}
-});
