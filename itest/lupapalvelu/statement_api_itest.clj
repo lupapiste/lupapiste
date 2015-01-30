@@ -52,7 +52,7 @@
         (last-email) => truthy
 
         (fact "Initially Veikko does not have access to application"
-          (query veikko :application :id application-id) => unauthorized?)
+          (query veikko :application :id application-id) => not-accessible?)
 
         (let [application-before (query-application sonja application-id)
               resp (command sonja :request-for-statement :id application-id :personIds [statement-giver-veikko]) => ok?

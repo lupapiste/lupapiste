@@ -1,12 +1,13 @@
 (ns lupapalvelu.itest-util
   (:require [noir.request :refer [*request*]]
             [lupapalvelu.fixture.minimal :as minimal]
-            [sade.core :refer [fail! unauthorized]]
+            [sade.core :refer [fail! unauthorized not-accessible]]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.vetuma :as vetuma]
             [lupapalvelu.web :as web]
+            [lupapalvelu.domain :as domain]
             [sade.http :as http]
             [midje.sweet :refer :all]
             [cheshire.core :as json]
@@ -159,6 +160,7 @@
   (and (= ok false) (= text expected-text)))
 
 (def unauthorized? (partial expected-failure? (:text unauthorized)))
+(def not-accessible? (partial expected-failure? (:text not-accessible)))
 
 (fact "unauthorized?"
   (unauthorized? unauthorized) => true
@@ -464,3 +466,11 @@
 
 (defn give-local-verdict [apikey application-id & args]
   (apply give-verdict-with-fn local-command apikey application-id args))
+
+(defn create-foreman-application [project-app-id apikey userId role difficulty]
+  (let [{foreman-app-id :id} (command apikey :create-foreman-application :id project-app-id :taskId "" :foremanRole role)
+        foreman-app          (query-application apikey foreman-app-id)
+        foreman-doc          (domain/get-document-by-name foreman-app "tyonjohtaja-v2")]
+    (command apikey :set-user-to-document :id foreman-app-id :documentId (:id foreman-doc) :userId userId :path "" :collection "documents")
+    (command apikey :update-doc :id foreman-app-id :doc (:id foreman-doc) :updates [["patevyysvaatimusluokka" difficulty]])
+    foreman-app-id))

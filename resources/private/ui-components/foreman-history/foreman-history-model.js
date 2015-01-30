@@ -2,10 +2,18 @@ LUPAPISTE.ForemanHistoryModel = function (params) {
   "use strict";
   var self = this;
 
+  self.showCompleteForemanHistory = ko.observable(false);
+
+  self.params = params;
   self.projects = ko.observableArray([]);
 
+  var endpoint = "reduced-foreman-history";
+  if (self.params.showAllProjects) {
+    endpoint = "foreman-history";
+  }
+
   ajax
-    .query("reduced-foreman-history", {id: params.applicationId})
+    .query(endpoint, {id: params.applicationId})
     .success(function (data) {
       self.projects(data.projects);
     })
@@ -14,9 +22,12 @@ LUPAPISTE.ForemanHistoryModel = function (params) {
   self.followAppLink = function(project) {
     window.location.hash = "!/application/" + project.linkedAppId;
   };
-};
 
-ko.components.register("foreman-history", {
-  viewModel: LUPAPISTE.ForemanHistoryModel,
-  template: { element: "foreman-history"}
-});
+  self.showAllProjects = function() {
+    var newParams = params;
+    newParams.showAllProjects = true;
+    hub.send("show-dialog", { titleLoc: "tyonjohtaja.historia.otsikko",
+                              contentName: "foreman-history",
+                              contentParams: newParams });
+  };
+};
