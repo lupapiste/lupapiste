@@ -7,6 +7,11 @@
       <table data-test-id="foreman-other-applications-table">
         <thead>
           <tr>
+            <th colspan="5"></th>
+            <th colspan="4" data-bind="ltext: 'tyonjohtaja.muutHankkeet.ajantarve'"></th>
+            <th></th>
+          </tr>
+          <tr>
             <!-- ko foreach: { data: params.subSchema.body, as: 'header' } -->
             <th data-bind="visible: !header.hidden, ltext: header.i18nkey"></th>
             <!-- /ko -->

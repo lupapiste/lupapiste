@@ -3,7 +3,7 @@
 <body>
   <section class="page container">
     <script type="text/html" id="foreman-history" class="form-table">
-      <h2 data-bind="ltext: 'tyonjohtaja.historia.otsikko'"></h2>
+      <h2 data-bind="visible: !params.showAllProjects, ltext: 'tyonjohtaja.historia.otsikko'"></h2>
       <table>
         <thead>
           <tr>
@@ -17,7 +17,7 @@
 
         <tbody data-bind="visible: projects().length == 0">
           <tr>
-            <td colspan="4" data-bind="ltext: 'tyonjohtaja.noProjects'"></td>
+            <td colspan="5" data-bind="ltext: 'tyonjohtaja.noProjects'"></td>
           </tr>
         </tbody>
 
@@ -30,7 +30,12 @@
             <td><span data-bind="text: loc(['operations', operation])"></span> (<a href="#" data-bind="click: $parent.followAppLink, text: linkedAppId"></a>)</td>
           </tr>
         </tbody>
+      </table>
+      <a data-bind="visible: !params.showAllProjects, click: showAllProjects">
+        <span data-bind="ltext: 'tyonjohtaja.history.showAllProjects'"></span>
+      </a>
     </script>
+
   </section>
 </body>
 </html>
