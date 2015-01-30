@@ -3,6 +3,7 @@
             [clojure.java.io :as io :refer [delete-file]]
             [sade.core :refer [ok fail fail! def-]]
             [sade.email :as email]
+            [sade.strings :as ss]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.i18n :refer [with-lang loc]]))
@@ -68,7 +69,10 @@
         (fail! :kopiolaitos-email-sending-failed)))))
 
 (defn- get-kopiolaitos-email-address [{:keys [organization] :as application}]
-  (organization/with-organization organization :kopiolaitos-email))
+  (let [email (organization/with-organization organization :kopiolaitos-email)]
+    (if-not (ss/blank? email)
+      email
+      nil)))
 
 (defn do-order-verdict-attachment-prints [{{:keys [lang attachmentsWithAmounts orderInfo]} :data application :application}]
   (if-let [email-address (get-kopiolaitos-email-address application)]
