@@ -37,7 +37,7 @@
         (:text (invite mikko application-id suunnittelija-doc "suunnittelija" "juha.jokim\u00e4ki@solita.fi")) => "error.email"))
 
     (fact "Teppo must not be able to invite himself!"
-      (invite teppo application-id suunnittelija-doc "suunnittelija" (email-for-key teppo)) => unauthorized?)
+      (invite teppo application-id suunnittelija-doc "suunnittelija" (email-for-key teppo)) => not-accessible?)
 
 
     (fact "Mikko must be able to invite Teppo!"
@@ -54,11 +54,11 @@
         (get-in email [:body :plain]) => (contains "Hei, sinut on kustuttu")))
 
     (fact "Sonja must NOT be able to uninvite Teppo!"
-      (command sonja :remove-auth :id application-id :username (email-for-key teppo)) => unauthorized?
+      (command sonja :remove-auth :id application-id :username (email-for-key teppo)) => not-accessible?
       (count (:invites (query teppo :invites))) => 1)
 
     (fact "Mikko can't unsubscribe Teppo's notifications"
-      (command pena :unsubscribe-notifications :id application-id :username (email-for-key teppo)) => unauthorized?)
+      (command pena :unsubscribe-notifications :id application-id :username (email-for-key teppo)) => not-accessible?)
 
     (fact "Mikko must be able to uninvite Teppo!"
       (command mikko :remove-auth :id application-id :username (email-for-key teppo)) => ok?
@@ -123,7 +123,7 @@
       (command sonja :remove-auth :id application-id :username (email-for-key teppo)) => ok?)
 
     (fact "Teppo should NOT be able to do stuff."
-      (query teppo :allowed-actions :id application-id) => unauthorized?)
+      (query teppo :allowed-actions :id application-id) => not-accessible?)
 
     (fact "Teppo's user ID is removed from document but data not"
       (let [application  (query-application mikko application-id)

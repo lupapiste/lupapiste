@@ -58,7 +58,7 @@ Add työnjohtaja task
   Input text  create-task-name  Ylitarkastaja
   Click enabled by test id  create-task-save
   Wait until  Element should not be visible  dialog-create-task
-  Task count is  task-vaadittu-tyonjohtaja  1
+  Wait until  Xpath Should Match X Times  //table[@data-test-id="tasks-foreman"]/tbody/tr  1
   [Teardown]  logout
 
 Mikko can see invited foremans on tasks list
