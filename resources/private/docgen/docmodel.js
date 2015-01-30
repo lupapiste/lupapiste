@@ -528,6 +528,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     select.onmouseover = self.showHelp;
     select.onmouseout = self.hideHelp;
     select.setAttribute("data-docgen-path", myPath);
+    select.setAttribute("data-test-id", myPath);
 
     select.name = myPath;
     select.className = "form-input combobox " + (sizeClass || "");
