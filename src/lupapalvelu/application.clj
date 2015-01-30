@@ -36,7 +36,8 @@
             [lupapalvelu.open-inforequest :as open-inforequest]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.application-meta-fields :as meta-fields]
-            [lupapalvelu.company :as c]))
+            [lupapalvelu.company :as c]
+            [lupapalvelu.foreman :as foreman]))
 
 ;; Notifications
 
@@ -468,8 +469,7 @@
    :states     [:submitted :complement-needed]}
   [{:keys [application created user] :as command}]
   (let [jatkoaika-app? (= :ya-jatkoaika (-> application :operations first :name keyword))
-        foreman-app? (= :tyonjohtajan-nimeaminen-v2 (-> application :operations first :name keyword))
-        foreman-notice? (when foreman-app?
+        foreman-notice? (when foreman/foreman-app?
                           (= "ilmoitus" (-> (domain/get-document-by-name application "tyonjohtaja-v2") :data :ilmoitusHakemusValitsin :value)))
         app-updates (merge
                       {:modified created

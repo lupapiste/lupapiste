@@ -528,6 +528,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     select.onmouseover = self.showHelp;
     select.onmouseout = self.hideHelp;
     select.setAttribute("data-docgen-path", myPath);
+    select.setAttribute("data-test-id", myPath);
 
     select.name = myPath;
     select.className = "form-input combobox " + (sizeClass || "");
@@ -884,6 +885,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var params = {
       applicationId: self.appId,
       documentId: self.docId,
+      documentName: self.schemaName,
       hetu: undefined,
       model: model[subSchema.name] || {},
       subSchema: subSchema,
@@ -896,11 +898,16 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   }
 
   function buildFillMyInfoButton(subSchema, model, path) {
+    if (model.fillMyInfo && model.fillMyInfo.disabled) {
+      return;
+    }
+
     var myNs = path.slice(0, path.length - 1).join(".");
 
     var params = {
       id: self.appId,
       documentId: self.docId,
+      documentName: self.schemaName,
       userId: currentUser.id(),
       path: myNs,
       collection: self.getCollection()

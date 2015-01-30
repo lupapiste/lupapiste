@@ -150,15 +150,15 @@
                         "foreman-history/foreman-history-model.js"
                         "foreman-other-applications/foreman-other-applications-model.js"
                         "input-model.js"
-                        "string/string-model.js"
-                        "select/select-model.js"
-                        "checkbox/checkbox-model.js"]
+                        "modal-dialog/modal-dialog-model.js"
+                        "register-components.js"]
                    :html ["fill-info-button/fill-info-button-template.html"
                           "foreman-history/foreman-history-template.html"
                           "foreman-other-applications/foreman-other-applications-template.html"
                           "string/string-template.html"
                           "select/select-template.html"
-                          "checkbox/checkbox-template.html"]}
+                          "checkbox/checkbox-template.html"
+                          "modal-dialog/modal-dialog-template.html"]}
 
    :application  {:depends [:common-html :repository :tree :task :create-task :modal-datepicker :signing :invites :side-panel :verdict-attachment-prints :ui-components]
                   :js ["add-link-permit.js" "map-model.js" "change-location.js" "invite.js" "verdicts-model.js"

@@ -72,11 +72,16 @@
       (update-application command {$set {:documents documents}}))
     (ok)))
 
+(defn foreman-app-check [_ application]
+  (when-not (foreman/foreman-app? application)
+    (fail :error.not-foreman-app)))
+
 (defquery foreman-history
   {:roles            [:authority :applicant]
    :states           action/all-states
    :extra-auth-roles [:any]
-   :parameters       [:id]}
+   :parameters       [:id]
+   :pre-checks       [foreman-app-check]}
   [{application :application user :user :as command}]
   (if application
     (ok :projects (foreman/get-foreman-history-data application))
@@ -86,7 +91,8 @@
   {:roles            [:authority :applicant]
    :states           action/all-states
    :extra-auth-roles [:any]
-   :parameters       [:id]}
+   :parameters       [:id]
+   :pre-checks       [foreman-app-check]}
   [{application :application user :user :as command}]
   (if application
     (ok :projects (foreman/get-foreman-reduced-history-data application))

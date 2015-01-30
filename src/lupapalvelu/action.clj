@@ -268,7 +268,7 @@
 (defn- not-authorized-to-application [command application]
   (when (-> command :data :id)
     (if-not application
-      unauthorized
+      (fail :error.application-not-accessible)
       (or
         (invalid-state-in-application command application)
         (user-is-not-allowed-to-access? command application)))))
