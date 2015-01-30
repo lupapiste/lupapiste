@@ -3,7 +3,9 @@
             [midje.util :refer [testable-privates]]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.factlet :refer :all]
-            [lupapalvelu.kopiolaitos :refer :all]))
+            [lupapalvelu.kopiolaitos :refer :all]
+            [sade.crypt :as crypt])
+  (:import  [java.util.zip ZipInputStream]))
 
 (testable-privates lupapalvelu.kopiolaitos get-kopiolaitos-html-table)
 
@@ -73,6 +75,26 @@
             :lang "fi"
             :attachmentsWithAmounts (filter :forPrinting attachments-with-amount)
             :orderInfo order-info) => ok?)
+
+        (facts* "sent email was correct"
+          (let [email (last-email)
+                _ (:to email) => "sipoo@example.com"
+                zip-stream (-> email
+                             (get-in [:body :attachment])
+                             (crypt/str->bytes)
+                             (crypt/base64-decode)
+                             (clojure.java.io/input-stream)
+                             (ZipInputStream.))
+                to-zip-entries (fn [s result]
+                                 (if-let [entry (.getNextEntry s)]
+                                   (recur s (conj result (bean entry)))
+                                   result))
+                result (to-zip-entries zip-stream [])]
+
+            (fact "zip file has two files"
+              (count result) => 2)
+            (fact "filenames end with 'test-attachment.txt'"
+              (every? #(.endsWith (:name %) "test-attachment.txt") result) => true)))
 
         (fact "unsetting organization kopiolaitos-email leads to failure in kopiolaitos order"
           (command sipoo :set-kopiolaitos-info
