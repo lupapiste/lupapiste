@@ -872,19 +872,15 @@
             <span data-bind="ltext: 'verdict.fetch.button'"></span>
           </button>
 
-          <div data-bind="if: features.enabled('verdict-attachment-order') && $root.authorization.ok('order-verdict-attachment-prints')">
-            <div class="feature">
-              <button
-                data-bind="click: $root.verdictAttachmentPrintsOrderModel.openDialog,
-                           disable: $root.verdictModel.processing,
-                           visible: $root.authorization.ok('order-verdict-attachment-prints')"
-                class="btn btn-primary modal"
-                data-test-id="test-order-attachment-prints">
-                <em data-bind="visible: $root.verdictModel.pending" class="button-loader"></em>
-                <span data-bind="ltext: 'verdict.orderAttachmentPrints.button'"></span>
-              </button>
-            </div>
-          </div>
+          <button
+            data-bind="click: $root.verdictAttachmentPrintsOrderModel.openDialog,
+                       disable: $root.verdictModel.processing,
+                       visible: $root.authorization.ok('order-verdict-attachment-prints')"
+            class="btn btn-primary modal"
+            data-test-id="test-order-attachment-prints">
+            <em data-bind="visible: $root.verdictModel.pending" class="button-loader"></em>
+            <span data-bind="ltext: 'verdict.orderAttachmentPrints.button'"></span>
+          </button>
 
         </div>
 

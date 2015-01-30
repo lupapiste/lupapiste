@@ -3,7 +3,7 @@
             [midje.util :refer [testable-privates]]
             [clojure.walk :as walk]
             [cheshire.core :as json]
-            [lupapalvelu.onnistuu.crypt :as c]
+            [sade.crypt :as c]
             [lupapalvelu.onnistuu.process :refer :all]))
 
 ;

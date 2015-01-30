@@ -11,26 +11,28 @@
             [lupapalvelu.document.schemas :as schemas]))
 
 (defn- get-huoneisto-data [huoneistot]
-  (for [huoneisto (vals (into (sorted-map) huoneistot))
-        :let [huoneistonumero (-> huoneisto :huoneistonumero)
-              huoneistoPorras (-> huoneisto :porras)
-              jakokirjain (-> huoneisto :jakokirjain)]
-        :when (seq huoneisto)]
-    (merge {:muutostapa (-> huoneisto :muutostapa)
-            :huoneluku (-> huoneisto :huoneluku)
-            :keittionTyyppi (-> huoneisto :keittionTyyppi)
-            :huoneistoala (-> huoneisto :huoneistoala)
-            :varusteet {:WCKytkin (true? (-> huoneisto :WCKytkin))
-                        :ammeTaiSuihkuKytkin (true? (-> huoneisto :ammeTaiSuihkuKytkin))
-                        :saunaKytkin (true? (-> huoneisto :saunaKytkin))
-                        :parvekeTaiTerassiKytkin (true? (-> huoneisto :parvekeTaiTerassiKytkin))
-                        :lamminvesiKytkin (true? (-> huoneisto :lamminvesiKytkin))}
-            :huoneistonTyyppi (-> huoneisto :huoneistoTyyppi)}
-           (when (ss/numeric? huoneistonumero)
-             {:huoneistotunnus
-              (merge {:huoneistonumero (format "%03d" (util/->int (ss/remove-leading-zeros huoneistonumero)))}
-                     (when (not-empty huoneistoPorras) {:porras (ss/upper-case huoneistoPorras)})
-                     (when (not-empty jakokirjain) {:jakokirjain (ss/lower-case jakokirjain)}))}))))
+  (let [huoneistot (vals (into (sorted-map) huoneistot))
+        huoneistot (filter :muutostapa huoneistot)]
+    (for [huoneisto huoneistot
+         :let [huoneistonumero (-> huoneisto :huoneistonumero)
+               huoneistoPorras (-> huoneisto :porras)
+               jakokirjain (-> huoneisto :jakokirjain)]
+         :when (seq huoneisto)]
+     (merge {:muutostapa (-> huoneisto :muutostapa)
+             :huoneluku (-> huoneisto :huoneluku)
+             :keittionTyyppi (-> huoneisto :keittionTyyppi)
+             :huoneistoala (-> huoneisto :huoneistoala)
+             :varusteet {:WCKytkin (true? (-> huoneisto :WCKytkin))
+                         :ammeTaiSuihkuKytkin (true? (-> huoneisto :ammeTaiSuihkuKytkin))
+                         :saunaKytkin (true? (-> huoneisto :saunaKytkin))
+                         :parvekeTaiTerassiKytkin (true? (-> huoneisto :parvekeTaiTerassiKytkin))
+                         :lamminvesiKytkin (true? (-> huoneisto :lamminvesiKytkin))}
+             :huoneistonTyyppi (-> huoneisto :huoneistoTyyppi)}
+            (when (ss/numeric? huoneistonumero)
+              {:huoneistotunnus
+               (merge {:huoneistonumero (format "%03d" (util/->int (ss/remove-leading-zeros huoneistonumero)))}
+                      (when (not-empty huoneistoPorras) {:porras (ss/upper-case huoneistoPorras)})
+                      (when (not-empty jakokirjain) {:jakokirjain (ss/lower-case jakokirjain)}))})))))
 
 (defn- get-rakennuksen-omistaja [omistaja]
   (when-let [osapuoli (get-osapuoli-data omistaja :rakennuksenomistaja)]

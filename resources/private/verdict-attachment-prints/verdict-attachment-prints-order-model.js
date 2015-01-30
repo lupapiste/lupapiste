@@ -9,6 +9,7 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function() {
   self.errorMessage = ko.observable("");
   self.attachments = ko.observable([]);
 
+  self.kopiolaitosEmail = ko.observable("");
   self.ordererOrganization = ko.observable("");
   self.ordererAddress = ko.observable("");
   self.ordererEmail = ko.observable("");
@@ -23,19 +24,23 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function() {
 
   self.ok = ko.computed(function() {
     var attachmentOrderCountsAreNumbers = _.every(self.attachments(), function(a) {
-      return !_.isNaN(_.parseInt(a.orderAmount(), 10));
-    }, self);
+      return util.isNum(a.orderAmount());
+    });
+    var dialogFieldValues = [self.ordererOrganization(),
+                             self.ordererEmail(),
+                             self.ordererPhone(),
+                             self.applicantName(),
+                             self.kuntalupatunnus(),
+                             self.propertyId(),
+                             self.lupapisteId(),
+                             self.address()];
+    var nonEmptyFields = _.every(dialogFieldValues, function(v){ return !_.isEmpty(v); });
     return self.authorizationModel.ok("order-verdict-attachment-prints") &&
-    !self.processing() &&
-    attachmentOrderCountsAreNumbers &&
-    !_.isEmpty(self.ordererOrganization()) &&
-    !_.isEmpty(self.ordererEmail()) &&
-    !_.isEmpty(self.ordererPhone()) &&
-    !_.isEmpty(self.applicantName()) &&
-    !_.isEmpty(self.kuntalupatunnus()) &&
-    !_.isEmpty(self.propertyId()) &&
-    !_.isEmpty(self.lupapisteId()) &&
-    !_.isEmpty(self.address());
+           !self.processing() &&
+           !_.isEmpty(self.kopiolaitosEmail()) &&
+           attachmentOrderCountsAreNumbers &&
+           nonEmptyFields &&
+           util.isValidEmailAddress(self.ordererEmail());
   });
 
   function enrichAttachment(a) {
@@ -51,18 +56,27 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function() {
 
   self.init = function(bindings) {
     self.application = ko.toJS(bindings.application);
-    var kopiolaitosMeta = self.application.organizationMeta.kopiolaitos;
+    self.processing(false);
+    self.pending(false);
+    self.errorMessage("");
+
     var attachments = _(self.application.attachments || [])
                       .filter(function(a) { return a.forPrinting && a.versions && a.versions.length; })
                       .map(enrichAttachment)
                       .value();
     self.attachments(attachments);
-    self.processing(false);
-    self.pending(false);
-    self.errorMessage("");
 
-    self.ordererOrganization(self.application.organizationName || "");
-    self.ordererAddress(kopiolaitosMeta.kopiolaitosOrdererAddress || "" );
+    var kopiolaitosMeta = self.application.organizationMeta.kopiolaitos;
+    var currentUserName = currentUser.get().firstName() + " " + currentUser.get().lastName();
+    var ordererName = (self.application.organizationName || "") + ", " + currentUserName;
+
+    self.kopiolaitosEmail(kopiolaitosMeta.kopiolaitosEmail || "");
+    if (_.isEmpty(self.kopiolaitosEmail())) {
+      self.errorMessage("verdict-attachment-prints-order.order-dialog.no-kopiolaitos-email-set");
+    }
+
+    self.ordererOrganization(ordererName);
+    self.ordererAddress(kopiolaitosMeta.kopiolaitosOrdererAddress || "");
     self.ordererEmail(kopiolaitosMeta.kopiolaitosOrdererEmail || "");
     self.ordererPhone(kopiolaitosMeta.kopiolaitosOrdererPhone || "");
     self.applicantName(self.application.applicant || "");
@@ -79,15 +93,20 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function() {
     LUPAPISTE.ModalDialog.open(self.dialogSelector);
   };
 
-  self.orderAttachmentPrints = function() {
-    // cannot replace the orderAmount observable itself, so need to create a new "amount" key
-    _.forEach(self.attachments(), function(a) {
-      a.amount = ko.unwrap(a.orderAmount);
+  // Send the prints order
+
+  function normalizeAttachments(attachments) {
+    return _.map(attachments, function(a) {
+      a.amount = a.orderAmount();
+      return _.pick(a, ["forPrinting", "amount", "contents", "type", "versions", "filename"]);
     });
+  }
+
+  self.orderAttachmentPrints = function() {
     var data = {
       id: self.application.id,
       lang: loc.getCurrentLanguage(),
-      attachmentsWithAmounts: self.attachments(),
+      attachmentsWithAmounts: normalizeAttachments(self.attachments()),
       orderInfo: {
         ordererOrganization: self.ordererOrganization(),
         ordererAddress: self.ordererAddress(),

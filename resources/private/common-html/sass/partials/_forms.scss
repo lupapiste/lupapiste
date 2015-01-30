@@ -687,6 +687,10 @@ input[readonly], textarea[readonly] {
 .three-col {
   width: 100%;
 
+  .form-input {
+    width: 17.25em;
+  }
+
   .col1 {
     float: left;
     padding-right: $marginM;

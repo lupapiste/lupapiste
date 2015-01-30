@@ -444,12 +444,12 @@
       display: block;
       overflow: auto;
       width: 100%;
-      height: $table_body_height;
+      max-height: $table_body_height;
     }
   }
 
   .old_ie_wrapper {
-    height: $table_body_height;
+    max-height: $table_body_height;
     width: $table_width;
     overflow-x: hidden;
     overflow-y: auto;
