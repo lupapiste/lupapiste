@@ -7,6 +7,13 @@ LUPAPISTE.ModalDialogModel = function (params) {
   self.windowWidth = ko.observable();
   self.windowHeight = ko.observable();
   self.title = ko.observable();
+  self.dialogVisible = ko.observable(false);
+
+  self.showDialog.subscribe(function(show) {
+    _.delay(function(show) {
+      self.dialogVisible(show);
+    }, 100, show);
+  });
 
   self.dialogWidth = ko.pureComputed(function() {
     return self.windowWidth() - 200;
@@ -22,6 +29,7 @@ LUPAPISTE.ModalDialogModel = function (params) {
   };
 
   hub.subscribe("show-dialog", function(data) {
+    console.log("foobar");
     $("html").addClass("no-scroll");
     self.contentName(data.contentName);
     self.contentParams(data.contentParams);

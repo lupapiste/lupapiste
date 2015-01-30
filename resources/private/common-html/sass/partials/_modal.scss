@@ -1,5 +1,7 @@
+// TODO knockout dialog to share same styles with legacy dialog
 modal-dialog {
   .dialog {
+    display: none;
     position: fixed;
     width: 980px;
     right: 0;
@@ -29,10 +31,13 @@ modal-dialog {
       }
     }
     .header {
-      padding: 2px 24px;
+      padding-top: 2px;
+      padding-bottom: 4px;
+      padding-left: 24px;
       border-bottom: 1px solid;
       font-size: 20px;
       .title {
+        line-height: 24px;
       }
       .close {
         position: absolute;
@@ -46,7 +51,7 @@ modal-dialog {
   }
   .mask {
     position: fixed;
-    display: block;
+    display: none;
     z-index: 9000;
     left: 0;
     right: 0;
