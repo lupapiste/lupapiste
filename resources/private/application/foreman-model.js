@@ -27,6 +27,7 @@ LUPAPISTE.ForemanModel = function() {
       ajax
         .query("foreman-applications", {id: id})
         .success(function(data) {
+          // TODO query only foreman tasks
           var foremanTasks = _.where(self.application().tasks, { "schema-info": { "name": "task-vaadittu-tyonjohtaja" } });
           var foremans = [];
 

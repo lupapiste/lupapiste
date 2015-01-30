@@ -23,7 +23,8 @@ Rakentaminen tab opens
   Open tab  tasks
 
 Rakentaminen tab contains 9 tasks
-  Wait until  Xpath Should Match X Times  //div[@id='application-tasks-tab']//table[@data-bind="foreach: taskGroups"]/tbody/tr  9
+  Wait until  Xpath Should Match X Times  //div[@id='application-tasks-tab']//table[@data-bind="foreach: taskGroups"]/tbody/tr  6
+  Wait until  Xpath Should Match X Times  //table[@data-test-id="tasks-foreman"]/tbody/tr  3
 
 Katselmukset
   Wait Until  Page should contain  Kokoukset, katselmukset ja tarkastukset
@@ -31,7 +32,7 @@ Katselmukset
 
 Työnjohtajat
   Wait until  Page should contain  Työnjohtajat
-  Task count is  task-vaadittu-tyonjohtaja  3
+  Wait until  Xpath Should Match X Times  //table[@data-test-id="tasks-foreman"]/tbody/tr  3
 
 Muut lupamaaraykset
   Wait until  Page should contain  Muut lupamääräykset

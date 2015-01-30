@@ -19,17 +19,13 @@
   (fact "operation names"
     (let [ops [:ya-jatkoaika
                :tyonjohtajan-nimeaminen
+               :tyonjohtajan-nimeaminen-v2
                :suunnittelijan-nimeaminen
                :jatkoaika
                :aloitusoikeus
-               :raktyo-aloit-loppuunsaat]
-          ops (if (env/feature? :foreman)
-                (conj ops :tyonjohtajan-nimeaminen-v2)
-                ops)]
+               :raktyo-aloit-loppuunsaat]]
       (every? link-permit-required-operations ops) => truthy))
-  (fact "operations count" (count link-permit-required-operations) => (if (env/feature? :foreman)
-                                                                        7
-                                                                        6)))
+  (fact "operations count" (count link-permit-required-operations) => 7))
 
 (defn- check-leaf [pair]
   (fact (count pair) => 2)
