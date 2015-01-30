@@ -6,15 +6,15 @@ Resource        keywords.robot
 Suite Setup     Initialize
 
 *** Keywords ***
-Mikko creates and invites foreman to application
+Mikko creates an application and invites foreman
   Mikko creates new application
   Mikko invites foreman to application
 
 *** Test Cases ***
 Foreman sees his other foreman jobs
   Mikko logs in
-  Mikko creates and invites foreman to application
-  Mikko creates and invites foreman to application
+  Mikko creates an application and invites foreman
+  Mikko creates an application and invites foreman
 
   Foreman logs in
   Foreman applies personal information to the foreman application  0

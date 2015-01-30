@@ -96,7 +96,7 @@
     (execute {:action "test-command-auth" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => ok?)
 
   (fact "with incorrect authority error is returned"
-    (execute {:action "test-command-auth" :user {:id "user123" :organizations ["hanhivaara"] :role :authority} :data {:id "123"}}) => unauthorized))
+    (execute {:action "test-command-auth" :user {:id "user123" :organizations ["hanhivaara"] :role :authority} :data {:id "123"}}) => not-accessible))
 
 (facts "Access based on extra-auth-roles"
   (against-background

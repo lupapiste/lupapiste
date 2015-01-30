@@ -16,6 +16,8 @@
   ([] (fail! :error.unauthorized))
   ([desc] (fail! :error.unauthorized :desc desc)))
 
+(def not-accessible (fail :error.application-not-accessible))
+
 (defn ok? [m] (= (:ok m) true))
 
 (defn now [] (System/currentTimeMillis))

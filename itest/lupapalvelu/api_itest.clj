@@ -38,16 +38,16 @@
       (raw-query dummy :application :id id) => invalid-csrf-token?)
 
     (fact "Teppo must not see Mikko's application!"
-      (query teppo :application :id id) => unauthorized?)
+      (query teppo :application :id id) => not-accessible?)
 
     (fact "Mikko must be able to comment!"
       (comment-application mikko id true) => ok?)
 
     (fact "Teppo must not be able to comment!"
-      (comment-application teppo id false) => unauthorized?)
+      (comment-application teppo id false) => not-accessible?)
 
     (fact "Veikko must not be able to comment!"
-      (comment-application veikko id false) => unauthorized?)
+      (comment-application veikko id false) => not-accessible?)
 
     (fact "Sonja must be able to see the application!"
       (let [resp (query sonja :application :id id)]
@@ -63,7 +63,7 @@
       (command teppo :assign-application :id id :assigneeId teppo-id) => unauthorized?)
 
     (fact "Veikko must not be able to assign to himself!"
-      (command veikko :assign-application :id id :assigneeId veikko-id) => unauthorized?)
+      (command veikko :assign-application :id id :assigneeId veikko-id) => not-accessible?)
 
     (fact "Sonja must be able to assign to herself!"
       (command sonja :assign-application :id id :assigneeId sonja-id) => ok?)))

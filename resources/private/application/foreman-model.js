@@ -27,6 +27,7 @@ LUPAPISTE.ForemanModel = function() {
       ajax
         .query("foreman-applications", {id: id})
         .success(function(data) {
+          // TODO query only foreman tasks
           var foremanTasks = _.where(self.application().tasks, { "schema-info": { "name": "task-vaadittu-tyonjohtaja" } });
           var foremans = [];
 
@@ -73,9 +74,9 @@ LUPAPISTE.ForemanModel = function() {
           self.foremanTasks({ "name": loc(["task-vaadittu-tyonjohtaja", "_group_label"]),
                               "foremans": foremans });
         })
-        .error(
+        .error(function() {
           // invited foreman can't always fetch applicants other foreman appications (if they are not invited to them also)
-        )
+        })
         .call();
     }
 

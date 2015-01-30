@@ -659,20 +659,19 @@
     {:buildings.0 {$exists true}}))
 
 
-(env/feature? :foreman
-  (defmigration update-app-links-with-apptype
-    (doseq [app-link (mongo/select :app-links)]
-      (let [linkpermit-id (some
-                             (fn [[k v]]
-                               (when (= "linkpermit" (:type v))
-                                 (name k)))
-                             app-link)
-            app           (first (mongo/select :applications {:_id linkpermit-id}))
-            apptype       (->> app :operations first :name)]
-          (mongo/update-by-id
-            :app-links
-            (:id app-link)
-            {$set {(str linkpermit-id ".apptype") apptype}})))))
+(defmigration update-app-links-with-apptype
+              (doseq [app-link (mongo/select :app-links)]
+                (let [linkpermit-id (some
+                                      (fn [[k v]]
+                                        (when (= "linkpermit" (:type v))
+                                          (name k)))
+                                      app-link)
+                      app           (first (mongo/select :applications {:_id linkpermit-id}))
+                      apptype       (->> app :operations first :name)]
+                  (mongo/update-by-id
+                    :app-links
+                    (:id app-link)
+                    {$set {(str linkpermit-id ".apptype") apptype}}))))
 
 (defn- merge-versions [old-versions {:keys [user version] :as new-version}]
   (let [next-ver (lupapalvelu.attachment/next-attachment-version (:version (last old-versions)) user)]
