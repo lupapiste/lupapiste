@@ -43,7 +43,7 @@
       ["Rakennuksen jatevesijarjestelman uusiminen" :jatevesi]
       ["Muun rakennelman rakentaminen" :muu-rakentaminen]]]
     ["Rakennuksen purkaminen" :purkaminen]
-    ["Tyonjohtaja" :tyonjohtajan-nimeaminen]
+    ["Tyonjohtaja" :tyonjohtajan-nimeaminen-v2]
     ["Suunnittelija" :suunnittelijan-nimeaminen]
     ["Jatkoaika" :jatkoaika]
     ["aiemmalla-luvalla-hakeminen" :aiemmalla-luvalla-hakeminen]
@@ -103,7 +103,7 @@
       ["Muu maisemaa muuttava toimenpide" :muu-maisema-toimenpide]]]
     ["rakennustyo-muutostoimenpiteet"
      [["Suunnittelija" :suunnittelijan-nimeaminen]
-      ["Tyonjohtaja" :tyonjohtajan-nimeaminen]
+      ["Tyonjohtaja" :tyonjohtajan-nimeaminen-v2]
       ["rak-valm-tyo" :rak-valm-tyo]
       ["Aloitusoikeus" :aloitusoikeus]
       ["raktyo-aloit-loppuunsaat" :raktyo-aloit-loppuunsaat]]]]])
@@ -806,6 +806,14 @@
                                   :link-permit-required true
                                   :link-permit-verdict-required true}
 
+    :tyonjohtajan-nimeaminen-v2  {:schema "hankkeen-kuvaus-minimum"
+                                  :permit-type permit/R
+                                  :required ["tyonjohtaja-v2"]
+                                  :attachments []
+                                  :add-operation-allowed false
+                                  :link-permit-required true
+                                  :link-permit-verdict-required false}
+
     :suunnittelijan-nimeaminen   {:schema "hankkeen-kuvaus-minimum"
                                   :permit-type permit/R
                                   :required ["suunnittelija" "maksaja"]
@@ -895,14 +903,6 @@
                                  :link-permit-required false
                                  :link-permit-verdict-required false}
     }
-    (when (env/feature? :foreman)
-      {:tyonjohtajan-nimeaminen-v2  {:schema "hankkeen-kuvaus-minimum"
-                                     :permit-type permit/R
-                                     :required ["tyonjohtaja-v2"]
-                                     :attachments []
-                                     :add-operation-allowed false
-                                     :link-permit-required true
-                                     :link-permit-verdict-required false}})
     ya-operations
     yl-operations))
 
