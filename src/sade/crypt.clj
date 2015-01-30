@@ -1,4 +1,4 @@
-(ns lupapalvelu.onnistuu.crypt
+(ns sade.crypt
   (:require [crypto.random :as cr])
   (:import [org.bouncycastle.crypto BufferedBlockCipher]
            [org.bouncycastle.crypto.engines RijndaelEngine]
