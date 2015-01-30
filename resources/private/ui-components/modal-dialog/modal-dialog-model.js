@@ -29,7 +29,6 @@ LUPAPISTE.ModalDialogModel = function (params) {
   };
 
   hub.subscribe("show-dialog", function(data) {
-    console.log("foobar");
     $("html").addClass("no-scroll");
     self.contentName(data.contentName);
     self.contentParams(data.contentParams);
