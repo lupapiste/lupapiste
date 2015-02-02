@@ -25,7 +25,7 @@
             [lupapalvelu.verdict-api]
             [lupapalvelu.notice-api]
             [lupapalvelu.company-api]
-            [lupapalvelu.onnistuu]
+            [lupapalvelu.onnistuu-api]
             [lupapalvelu.kopiolaitos-api]
             [lupapalvelu.admin-api]
             [lupapalvelu.proxy-services]
