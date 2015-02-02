@@ -26,7 +26,7 @@
             [lupapalvelu.notice-api]
             [lupapalvelu.company-api]
             [lupapalvelu.onnistuu]
-            [lupapalvelu.kopiolaitos_api]
+            [lupapalvelu.kopiolaitos-api]
             [lupapalvelu.admin]
             [lupapalvelu.proxy-services]
             [lupapalvelu.exports-api]
