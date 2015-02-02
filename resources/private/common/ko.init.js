@@ -28,8 +28,6 @@
 
   ko.validation.rules.y = {
     validator: function(y) {
-      console.log("pling " + y);
-      console.log(_.isBlank(y) || util.isValidY(y));
       return _.isBlank(y) || util.isValidY(y);
     },
     message: loc("error.invalidY")
@@ -37,8 +35,6 @@
 
   ko.validation.rules.ovt = {
     validator: function(ovt) {
-      console.log("ovt " + ovt);
-      console.log(_.isBlank(ovt) || util.isValidOVT(ovt));
       return _.isBlank(ovt) || util.isValidOVT(ovt);
     },
     message: loc("error.invalidOVT")
