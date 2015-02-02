@@ -48,7 +48,7 @@ var LUPAPISTE = LUPAPISTE || {};
      *
      * @param {String} title
      */
-    self.setTitle2 = function(title) {
+    self.setTitle = function(title) {
       document.title = _.compact([title, self.defaultTitle]).join(" - ");
     };
 
