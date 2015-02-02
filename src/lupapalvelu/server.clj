@@ -33,7 +33,7 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.ua-compatible-header :as uach]
             [lupapalvelu.document.schema-repository]
-            [lupapalvelu.common-actions]
+            [lupapalvelu.actions-api]
             [lupapalvelu.migration.migration :as migration]
             [lupapalvelu.screenmessage]))
 
