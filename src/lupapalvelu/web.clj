@@ -28,7 +28,7 @@
             [lupapalvelu.organization]
             [lupapalvelu.application :as application]
             [lupapalvelu.foreman-api :as foreman-api]
-            [lupapalvelu.pdf-export :as pdf-export]
+            [lupapalvelu.pdf-export-api]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.token :as token]
             [lupapalvelu.activation :as activation]
