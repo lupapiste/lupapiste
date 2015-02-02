@@ -48,12 +48,8 @@ var LUPAPISTE = LUPAPISTE || {};
      *
      * @param {String} title
      */
-    self.setTitle = function(title) {
-      if (title) {
-        document.title = title + " - " + self.defaultTitle;
-      } else {
-        document.title = self.defaultTitle;
-      }
+    self.setTitle2 = function(title) {
+      document.title = _.compact([title, self.defaultTitle]).join(" - ");
     };
 
     /**
