@@ -4,7 +4,7 @@
              [lupapalvelu.test-util :refer :all]
              [lupapalvelu.application-search :refer :all]))
 
-(testable-privates lupapalvelu.application-search make-sort make-query operation-names)
+(testable-privates lupapalvelu.application-search make-sort operation-names)
 
 (facts "operation-names"
   (operation-names "bil") => ["auto-katos"]
