@@ -5274,7 +5274,7 @@ td.comment-text {
 }
 
 /* line 191, ../sass/views/_register.scss */
-.company-account-register button {
+.company-account-register button, .company-account-register .btn {
   font-size: 18px;
   text-shadow: none;
   height: 60px;
@@ -5306,44 +5306,67 @@ td.comment-text {
   border-left: 30px solid white;
   border-bottom: 15px solid transparent;
 }
+/* line 220, ../sass/views/_register.scss */
+.company-account-register .btn-primary:disabled:after {
+  border-left: 30px solid #888a8c;
+  color: #888a8c;
+}
 
-/* line 223, ../sass/views/_register.scss */
+/* line 228, ../sass/views/_register.scss */
+.register-contentbox {
+  background-color: #f1c8f8;
+  padding: 24px;
+}
+/* line 231, ../sass/views/_register.scss */
+.register-contentbox p, .register-contentbox h1 {
+  color: black;
+  width: 60%;
+}
+
+/* line 238, ../sass/views/_register.scss */
 #register-company .register-form {
   background-color: #f1c8f8;
+  padding: 6px;
 }
-/* line 225, ../sass/views/_register.scss */
+/* line 241, ../sass/views/_register.scss */
 #register-company .register-form .form-group {
   background-color: inherit;
   display: block;
   border: none;
+  padding: 0;
 }
-/* line 229, ../sass/views/_register.scss */
+/* line 246, ../sass/views/_register.scss */
 #register-company .register-form .form-group h2 {
   text-transform: uppercase;
   font-weight: 400;
   color: black;
 }
-/* line 234, ../sass/views/_register.scss */
+/* line 251, ../sass/views/_register.scss */
 #register-company .register-form .form-group .form-entry {
   width: 32%;
   box-sizing: border-box;
   padding-right: 24px;
   display: inline-block;
 }
-/* line 239, ../sass/views/_register.scss */
+/* line 256, ../sass/views/_register.scss */
 #register-company .register-form .form-group .form-entry .form-label {
   color: black;
 }
-/* line 241, ../sass/views/_register.scss */
+/* line 258, ../sass/views/_register.scss */
 #register-company .register-form .form-group .form-entry .form-label.tip {
   color: black;
 }
-/* line 245, ../sass/views/_register.scss */
+/* line 262, ../sass/views/_register.scss */
 #register-company .register-form .form-group .form-entry .form-input {
   height: 40px;
   width: 100%;
   border: none;
   box-shadow: none;
+}
+
+/* line 274, ../sass/views/_register.scss */
+#onnistuu-start-form {
+  display: inline-block;
 }
 
 /* line 2, ../sass/views/_login_frame.scss */

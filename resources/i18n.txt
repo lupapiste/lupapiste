@@ -15,3 +15,11 @@ register.company.account3.title: Yrityksen tili 30
 register.company.account3.price: 99€/kk
 register.company.account3.bullet1: Kaikki yrityksen lupa-asioinnit samassa työtilassa
 register.company.account3.bullet2: Kolmellekymmenelle käyttäjälle
+
+register.company.sign.info2: Varaa saataville henkilökohtaiset pankkitunnuksesi, joilla allekirjoitat sopimuksen.
+
+register.company.onnistuu.title: MIKÄ ON ONNISTUU.FI
+
+register.company.onnistuu.desc: Onnistuu.fi tarjoaa sähköisen, turvallisen  sopimuspalvelun, jossa voit allekirjoittaa sopimuksia pankkitunnuksilla tai mobiilivarmarmenteella. 
+
+register.company.onnistuu.poweredby: Palvelun tarjoaa Suomen Onlineallekirjoitus Oy.

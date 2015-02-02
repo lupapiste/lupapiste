@@ -188,7 +188,7 @@
 }
 
 .company-account-register {
-  button {
+  button, .btn {
     font-size: 18px;
     text-shadow: none;
     height: 60px;
@@ -216,16 +216,33 @@
       border-left: 30px solid white;
       border-bottom: 15px solid transparent;
     }
+    &:disabled {
+      &:after {
+        border-left: 30px solid $color-dark-bg;
+        color: $color-dark-bg;
+      }
+    }
+  }
+}
+
+.register-contentbox {
+  background-color: $lp-purple-light;
+  padding: $marginL;
+  p, h1 {
+    color: black;
+    width: 60%;
   }
 }
 
 #register-company {
   .register-form {
     background-color: $lp-purple-light;
+    padding: $marginS;
     .form-group {
       background-color: inherit;
       display: block;
       border: none;
+      padding: 0;
       h2 {
         text-transform: uppercase;
         font-weight: 400;
@@ -252,4 +269,8 @@
       }
     }
   }
+}
+
+#onnistuu-start-form {
+  display: inline-block;
 }
