@@ -19,6 +19,7 @@
             [sade.status :as status]
             [sade.strings :as ss]
             [lupapalvelu.action :refer [defcommand defquery] :as action]
+            [lupapalvelu.application-search-api]
             [lupapalvelu.features-api]
             [lupapalvelu.i18n :refer [*lang*] :as i18n]
             [lupapalvelu.user :as user]

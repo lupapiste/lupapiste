@@ -16,7 +16,6 @@
             [lupapalvelu.user-api]
             [lupapalvelu.mml.yhteystiedot-api]
             [lupapalvelu.operations]
-            [lupapalvelu.application-search]
             [lupapalvelu.attachment-api]
             [lupapalvelu.authorization-api]
             [lupapalvelu.comment-api]
