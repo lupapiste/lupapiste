@@ -14,7 +14,7 @@
     Based on http://necolas.github.com/normalize.css/
 */
 @import url(//fonts.googleapis.com/css?family=Source+Sans+Pro:200,300,400,600,700,200italic,300italic,400italic,600italic,700italic);
-/* line 6, ../sass/partials/_reset.scss */
+/* line 11, ../sass/partials/_reset.scss */
 html, body, div,
 span, object, iframe,
 h1, h2, h3, h4, h5, h6,
@@ -114,8 +114,8 @@ button, input[type="button"], input[type="reset"], input[type="submit"] {
 
 /* line 80, ../sass/partials/_reset.scss */
 input[type="checkbox"], input[type="radio"] {
-  -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
   box-sizing: border-box;
 }
 
@@ -218,8 +218,8 @@ body {
 
 /* line 44, ../sass/partials/_base.scss */
 .container {
-  -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
   box-sizing: border-box;
   padding: 12px 8px 0 8px;
   width: 100%;
@@ -376,11 +376,11 @@ i {
 /* LINKS */
 /* line 1, ../sass/partials/_links.scss */
 a {
-  color: #333;
+  color: #333333;
 }
 /* line 3, ../sass/partials/_links.scss */
 a:active, a:visited, a:hover {
-  color: #333;
+  color: #333333;
 }
 
 /*------------------------------------*\
@@ -941,7 +941,7 @@ footer #buildinfo {
 [type=submit]:hover, .btn:hover, button:hover {
   background: #dddddd;
 }
-/* line 36, ../sass/partials/_buttons.scss */
+/* line 38, ../sass/partials/_buttons.scss */
 [type=submit]:disabled, [type=submit][disabled=disabled], [type=submit].disabled, [type=submit]:disabled:hover, [type=submit][disabled=disabled]:hover, [type=submit].disabled:hover, [type=submit]:disabled:active, [type=submit][disabled=disabled]:active, [type=submit].disabled:active, .btn:disabled, .btn[disabled=disabled], .btn.disabled, .btn:disabled:hover, .btn[disabled=disabled]:hover, .btn.disabled:hover, .btn:disabled:active, .btn[disabled=disabled]:active, .btn.disabled:active, button:disabled, button[disabled=disabled], button.disabled, button:disabled:hover, button[disabled=disabled]:hover, button.disabled:hover, button:disabled:active, button[disabled=disabled]:active, button.disabled:active {
   color: #aaaaaa;
   -webkit-box-shadow: none;
@@ -1178,8 +1178,8 @@ legend {
   -ms-transition: border 125ms ease;
   -o-transition: border 125ms ease;
   transition: border 125ms ease;
-  -webkit-box-shadow: inset 0 2px 3px #dddddd, 0 1px 0 #fff;
-  box-shadow: inset 0 2px 3px #dddddd, 0 1px 0 #fff;
+  -webkit-box-shadow: inset 0 2px 3px #dddddd, 0 1px 0 white;
+  box-shadow: inset 0 2px 3px #dddddd, 0 1px 0 white;
 }
 /* line 31, ../sass/partials/_forms.scss */
 [type="text"]:hover, [type="email"]:hover, [type="tel"]:hover, [type="url"]:hover, [type="password"]:hover, select:hover, textarea:hover {
@@ -1188,7 +1188,7 @@ legend {
 /* line 35, ../sass/partials/_forms.scss */
 [type="text"]:focus, [type="email"]:focus, [type="tel"]:focus, [type="url"]:focus, [type="password"]:focus, select:focus, textarea:focus {
   border-color: #17c;
-  -webkit-box-shadow: inset 0 2px 4px #c3c3c3, 0 1px 0 #fff;
+  -webkit-box-shadow: inset 0 2px 4px #c3c3c3, 0 1px 0 white;
 }
 /* line 40, ../sass/partials/_forms.scss */
 [type="text"].error, [type="email"].error, [type="tel"].error, [type="url"].error, [type="password"].error, select.error, textarea.error {
@@ -1289,12 +1289,12 @@ input[readonly]:focus, textarea[readonly]:focus {
   background-position: 6px -2490px;
 }
 
-/* line 137, ../sass/partials/_forms.scss */
+/* line 138, ../sass/partials/_forms.scss */
 .form-input-warn {
   background-position: 6px -3190px;
 }
 
-/* line 141, ../sass/partials/_forms.scss */
+/* line 142, ../sass/partials/_forms.scss */
 .form-input-err {
   background-position: 6px -2390px;
 }
@@ -1449,7 +1449,7 @@ input[readonly]:focus, textarea[readonly]:focus {
   background: #f6f6f6;
   border-bottom: 1px solid #e9e9e9;
 }
-/* line 276, ../sass/partials/_forms.scss */
+/* line 277, ../sass/partials/_forms.scss */
 .form-group:last-child, .form-choice:last-child, .form-table:last-child {
   border-bottom: none;
 }
@@ -2144,9 +2144,10 @@ table.attachments-template-table td.attachment-file-info {
   content: " ";
   display: inline-block;
   border-right: 2px solid #828282;
+  -webkit-transform: skew(30deg, 5deg);
   -moz-transform: skew(30deg, 5deg);
   -ms-transform: skew(30deg, 5deg);
-  -webkit-transform: skew(30deg, 5deg);
+  -o-transform: skew(30deg, 5deg);
   transform: skew(30deg, 5deg);
   width: 10px;
   height: 13px;
@@ -2159,9 +2160,10 @@ table.attachments-template-table td.attachment-file-info {
   content: " ";
   display: inline-block;
   border-right: 2px solid #828282;
+  -webkit-transform: skew(-30deg, 5deg);
   -moz-transform: skew(-30deg, 5deg);
   -ms-transform: skew(-30deg, 5deg);
-  -webkit-transform: skew(-30deg, 5deg);
+  -o-transform: skew(-30deg, 5deg);
   transform: skew(-30deg, 5deg);
   width: 10px;
   height: 13px;
@@ -2217,7 +2219,7 @@ table.attachments-template-table td.attachment-file-info {
   padding: 8px 10px;
   text-decoration: none;
   background: #f6f6f6;
-  color: #333;
+  color: #333333;
   outline: none;
   /* Note: IE filters and border-radius don't mix */
   filter: none;
@@ -2264,8 +2266,8 @@ table.attachments-template-table td.attachment-file-info {
   width: 100%;
   display: block;
   margin: 24px 30px 24px 0;
-  -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
   box-sizing: border-box;
 }
 
@@ -2890,26 +2892,25 @@ table.attachments-template-table td.attachment-file-info {
   float: left;
   border: 1px solid #dddddd;
   display: block;
-  -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
   box-sizing: border-box;
   padding: 4px 0px 4px 12px;
   text-decoration: none;
   background: white;
-  color: #333;
+  color: #333333;
   width: 800px;
   cursor: pointer;
-  -moz-user-select: -moz-none;
-  -ms-user-select: none;
   -webkit-user-select: none;
+  -moz-user-select: none;
   user-select: none;
+  -webkit-transition-property: font-size;
   -moz-transition-property: font-size;
   -o-transition-property: font-size;
-  -webkit-transition-property: font-size;
   transition-property: font-size;
+  -webkit-transition-duration: 200ms;
   -moz-transition-duration: 200ms;
   -o-transition-duration: 200ms;
-  -webkit-transition-duration: 200ms;
   transition-duration: 200ms;
 }
 /* line 36, ../sass/partials/_tree.scss */
@@ -2957,7 +2958,7 @@ table.attachments-template-table td.attachment-file-info {
 }
 /* line 72, ../sass/partials/_tree.scss */
 .operation-tree .tree-last li a {
-  color: #333;
+  color: #333333;
 }
 /* line 76, ../sass/partials/_tree.scss */
 .operation-tree .tree-last div {
@@ -2993,8 +2994,8 @@ ul.attachments-list li.mandatory-attachments {
   z-index: 5;
   height: auto;
   margin-bottom: 6px;
-  -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
   box-sizing: border-box;
 }
 /* line 9, ../sass/partials/_accordion.scss */
@@ -3012,8 +3013,8 @@ ul.attachments-list li.mandatory-attachments {
   position: relative;
   width: 100%;
   padding-right: 0;
-  -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
   box-sizing: border-box;
 }
 /* line 24, ../sass/partials/_accordion.scss */
@@ -3122,14 +3123,14 @@ ul.attachments-list li.mandatory-attachments {
   background-position: 4px -2499px;
 }
 
-/* line 116, ../sass/partials/_accordion.scss */
+/* line 117, ../sass/partials/_accordion.scss */
 .accordion-input-warn {
   background-image: url("/img/icons-sprite-1.13.png");
   background-repeat: no-repeat;
   background-position: 4px -3199px;
 }
 
-/* line 121, ../sass/partials/_accordion.scss */
+/* line 122, ../sass/partials/_accordion.scss */
 .accordion-input-err {
   background-image: url("/img/icons-sprite-1.13.png");
   background-repeat: no-repeat;
@@ -3230,8 +3231,8 @@ ul.attachments-list li.mandatory-attachments {
 }
 /* line 24, ../sass/partials/_selectm.scss */
 .selectm input {
-  -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
   box-sizing: border-box;
   margin: 0px;
 }
@@ -3274,7 +3275,7 @@ ul.attachments-list li.mandatory-attachments {
 
 /* line 17, ../sass/views/_welcome.scss */
 .welcome_top {
-  background: #01BEF5 url("/img/top-bg.jpg");
+  background: #01bef5 url("/img/top-bg.jpg");
   margin-top: 48px;
   *zoom: 1;
 }
@@ -3457,11 +3458,11 @@ ul.attachments-list li.mandatory-attachments {
 #applications-list_paginate .paginate_enabled_previous, #applications-list_paginate .paginate_enabled_next, .dataTables_paginate .paginate_enabled_previous, .dataTables_paginate .paginate_enabled_next {
   background: #ffffff;
   /* Old browsers */
-  background: url('data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4gPHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJncmFkIiBncmFkaWVudFVuaXRzPSJvYmplY3RCb3VuZGluZ0JveCIgeDE9IjAuNSIgeTE9IjAuMCIgeDI9IjAuNSIgeTI9IjEuMCI+PHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iI2ZmZmZmZiIvPjxzdG9wIG9mZnNldD0iNTAlIiBzdG9wLWNvbG9yPSIjZjNmM2YzIi8+PHN0b3Agb2Zmc2V0PSI1MSUiIHN0b3AtY29sb3I9IiNlZGVkZWQiLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiNmZmZmZmYiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz48cmVjdCB4PSIwIiB5PSIwIiB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyYWQpIiAvPjwvc3ZnPiA=');
   background: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #ffffff), color-stop(50%, #f3f3f3), color-stop(51%, #ededed), color-stop(100%, #ffffff));
-  background: -moz-linear-gradient(top, #ffffff 0%, #f3f3f3 50%, #ededed 51%, #ffffff 100%);
   background: -webkit-linear-gradient(top, #ffffff 0%, #f3f3f3 50%, #ededed 51%, #ffffff 100%);
-  background: linear-gradient(to bottom, #ffffff 0%, #f3f3f3 50%, #ededed 51%, #ffffff 100%);
+  background: -moz-linear-gradient(top, #ffffff 0%, #f3f3f3 50%, #ededed 51%, #ffffff 100%);
+  background: -o-linear-gradient(top, #ffffff 0%, #f3f3f3 50%, #ededed 51%, #ffffff 100%);
+  background: linear-gradient(top, #ffffff 0%, #f3f3f3 50%, #ededed 51%, #ffffff 100%);
 }
 /* line 66, ../sass/views/_applications.scss */
 #applications-list_paginate .paginate_disabled_previous, #applications-list_paginate .paginate_enabled_previous, .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .paginate_enabled_previous {
@@ -3987,8 +3988,8 @@ span.icon_clear:before {
   padding: 24px 12px;
   margin-top: -42px;
   margin-bottom: 6px;
-  -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
   box-sizing: border-box;
 }
 /* line 256, ../sass/views/_application.scss */
@@ -4330,7 +4331,7 @@ span.icon_clear:before {
 }
 /* line 549, ../sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card a {
-  color: #333;
+  color: #333333;
 }
 /* line 552, ../sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card:first-child {
@@ -4451,11 +4452,11 @@ span.icon_clear:before {
 }
 /* line 659, ../sass/views/_application.scss */
 .organizationLinks .organization-links a {
-  color: #333;
+  color: #333333;
 }
 /* line 661, ../sass/views/_application.scss */
 .organizationLinks .organization-links a:active, .organizationLinks .organization-links a:visited, .organizationLinks .organization-links a:hover {
-  color: #333;
+  color: #333333;
 }
 
 /* line 1, ../sass/views/_create_application.scss */
@@ -4583,7 +4584,7 @@ span.icon_clear:before {
   margin-top: 24px;
   padding: 12px;
   border-radius: 3px;
-  border: 1px solid #01BEF5;
+  border: 1px solid #01bef5;
 }
 /* line 112, ../sass/views/_create_application.scss */
 .create-group label {
@@ -5085,7 +5086,7 @@ td.comment-text {
   margin: 24px 0;
 }
 
-/* line 10, ../sass/views/_register.scss */
+/* line 9, ../sass/views/_register.scss */
 .register-form .error-message, #pw-form .error-message {
   font-style: italic;
   color: red;
@@ -5093,32 +5094,256 @@ td.comment-text {
   bottom: 0;
   left: 0;
 }
-/* line 19, ../sass/views/_register.scss */
+/* line 18, ../sass/views/_register.scss */
 .register-form p, #pw-form p {
   margin-bottom: 8px;
 }
-/* line 23, ../sass/views/_register.scss */
+/* line 22, ../sass/views/_register.scss */
 .register-form .form-entry, #pw-form .form-entry {
   height: 78px;
 }
-/* line 25, ../sass/views/_register.scss */
+/* line 24, ../sass/views/_register.scss */
 .register-form .form-entry.register-checkbox, #pw-form .form-entry.register-checkbox {
   width: 100%;
   height: auto;
   min-height: 32px;
 }
-/* line 32, ../sass/views/_register.scss */
+/* line 31, ../sass/views/_register.scss */
 .register-form .register-error, #pw-form .register-error {
   position: relative;
 }
 
-/* line 39, ../sass/views/_register.scss */
+/* line 38, ../sass/views/_register.scss */
 #dialogRakentajafi .dialog-content {
   width: 400px;
 }
-/* line 41, ../sass/views/_register.scss */
+/* line 40, ../sass/views/_register.scss */
 #dialogRakentajafi .dialog-content p {
   margin-bottom: 12px;
+}
+
+/* line 47, ../sass/views/_register.scss */
+#account-type-selection .account-box {
+  width: 33%;
+  display: inline-block;
+  height: 400px;
+  position: relative;
+  padding: 24px;
+  cursor: pointer;
+  margin-bottom: 24px;
+}
+/* line 55, ../sass/views/_register.scss */
+#account-type-selection .account-box:hover {
+  background-color: #f1c8f8;
+}
+/* line 58, ../sass/views/_register.scss */
+#account-type-selection .account-box.selected {
+  background-color: #da6ded;
+}
+/* line 60, ../sass/views/_register.scss */
+#account-type-selection .account-box.selected .price {
+  color: white;
+}
+/* line 63, ../sass/views/_register.scss */
+#account-type-selection .account-box.selected .bullet {
+  border-top: 3px dotted white;
+}
+/* line 66, ../sass/views/_register.scss */
+#account-type-selection .account-box.selected:after {
+  content: " ";
+  background-image: url("/img/icons-sprite-1.13.png");
+  background-repeat: no-repeat;
+  width: 100px;
+  height: 100px;
+  background-position: 0px -6000px;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 24px;
+  margin-left: auto;
+  margin-right: auto;
+}
+/* line 80, ../sass/views/_register.scss */
+#account-type-selection .account-box label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+/* line 88, ../sass/views/_register.scss */
+#account-type-selection .account-box h4 {
+  font-size: 2em;
+  margin: 0 0 48px;
+  text-align: center;
+}
+/* line 93, ../sass/views/_register.scss */
+#account-type-selection .account-box .price {
+  font-size: 4em;
+  display: block;
+  text-align: center;
+  margin: 24px 0 48px;
+  color: #da6ded;
+  font-weight: bold;
+}
+/* line 101, ../sass/views/_register.scss */
+#account-type-selection .account-box .bullet {
+  display: block;
+  font-size: 1em;
+  padding: 12px;
+  text-align: center;
+  border-top: 3px dotted #da6ded;
+}
+/* line 108, ../sass/views/_register.scss */
+#account-type-selection .account-box input {
+  display: none;
+}
+
+/* line 115, ../sass/views/_register.scss */
+.register-progress {
+  padding: 0 24px;
+  height: 162px;
+}
+/* line 119, ../sass/views/_register.scss */
+.register-progress .register-phase {
+  display: inline-block;
+  width: 24%;
+  position: relative;
+  margin-bottom: 40px;
+  height: 100px;
+}
+/* line 126, ../sass/views/_register.scss */
+.register-progress .register-phase a {
+  text-decoration: none;
+  color: #da6ded;
+}
+/* line 131, ../sass/views/_register.scss */
+.register-progress .register-phase .phase-number {
+  width: 100px;
+  height: 100px;
+  border-radius: 50px;
+  color: #da6ded;
+  border: solid 3px #da6ded;
+  font-size: 3em;
+  display: block;
+  text-align: center;
+  padding: 30px 0;
+  font-weight: bold;
+  position: absolute;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  box-sizing: border-box;
+}
+/* line 150, ../sass/views/_register.scss */
+.register-progress .register-phase .phase-title {
+  font-weight: bold;
+  font-size: 1.4em;
+  margin-top: 12px;
+  text-align: center;
+  position: absolute;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  top: 88px;
+}
+/* line 164, ../sass/views/_register.scss */
+.register-progress .register-phase.active::after {
+  content: " ";
+  display: block;
+  position: absolute;
+  bottom: -56px;
+  margin: 0 auto;
+  width: 0;
+  height: 0;
+  border-left: 15px solid transparent;
+  border-right: 15px solid transparent;
+  border-top: 20px solid #da6ded;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+}
+/* line 182, ../sass/views/_register.scss */
+.register-progress .register-phase.done .phase-number {
+  background-color: #da6ded;
+  color: white;
+}
+
+/* line 191, ../sass/views/_register.scss */
+.company-account-register button {
+  font-size: 18px;
+  text-shadow: none;
+  height: 60px;
+  box-sizing: border-box;
+  text-align: left;
+  width: 240px;
+  margin-right: 24px;
+  background-color: #888a8c;
+  color: white;
+  position: relative;
+}
+/* line 203, ../sass/views/_register.scss */
+.company-account-register .btn-primary {
+  background-color: #da6ded;
+}
+/* line 205, ../sass/views/_register.scss */
+.company-account-register .btn-primary:hover {
+  background-color: #ce40e7;
+}
+/* line 208, ../sass/views/_register.scss */
+.company-account-register .btn-primary:after {
+  content: " ";
+  position: absolute;
+  width: 0;
+  height: 0;
+  right: 12px;
+  top: 15px;
+  border-top: 15px solid transparent;
+  border-left: 30px solid white;
+  border-bottom: 15px solid transparent;
+}
+
+/* line 223, ../sass/views/_register.scss */
+#register-company .register-form {
+  background-color: #f1c8f8;
+}
+/* line 225, ../sass/views/_register.scss */
+#register-company .register-form .form-group {
+  background-color: inherit;
+  display: block;
+  border: none;
+}
+/* line 229, ../sass/views/_register.scss */
+#register-company .register-form .form-group h2 {
+  text-transform: uppercase;
+  font-weight: 400;
+  color: black;
+}
+/* line 234, ../sass/views/_register.scss */
+#register-company .register-form .form-group .form-entry {
+  width: 32%;
+  box-sizing: border-box;
+  padding-right: 24px;
+  display: inline-block;
+}
+/* line 239, ../sass/views/_register.scss */
+#register-company .register-form .form-group .form-entry .form-label {
+  color: black;
+}
+/* line 241, ../sass/views/_register.scss */
+#register-company .register-form .form-group .form-entry .form-label.tip {
+  color: black;
+}
+/* line 245, ../sass/views/_register.scss */
+#register-company .register-form .form-group .form-entry .form-input {
+  height: 40px;
+  width: 100%;
+  border: none;
+  box-shadow: none;
 }
 
 /* line 2, ../sass/views/_login_frame.scss */
@@ -5324,7 +5549,7 @@ td.comment-text {
   padding-top: 3px;
   margin-left: -6px;
   margin-bottom: 4px;
-  color: #333;
+  color: #333333;
   text-shadow: none;
 }
 /* line 80, ../sass/views/_side_panel.scss */
@@ -5532,7 +5757,7 @@ td.comment-text {
 /* line 11, ../sass/views/_company.scss */
 #company-content .tabs-container li a {
   background-color: #f6f6f6;
-  color: #333;
+  color: #333333;
   text-decoration: none;
   display: inline-block;
   margin-right: 4px;
@@ -5716,7 +5941,7 @@ div.stamp-content {
   display: none;
 }
 
-/* line 167, ../sass/main.scss */
+/* line 168, ../sass/main.scss */
 .inert-table tbody tr:hover td,
 .inert-table tbody tr:hover th {
   background-color: #ffffff;

@@ -6,7 +6,6 @@
 }
 
 .register-form, #pw-form {
-
   .error-message {
     font-style: italic;
     color: red;
@@ -123,6 +122,12 @@
     position: relative;
     margin-bottom: 40px;
     height: $phase-number-radius * 2;
+
+    a {
+      text-decoration: none;
+      color: $lp-purple;
+    }
+
     .phase-number {
       width: $phase-number-radius * 2;
       height: $phase-number-radius * 2;
@@ -139,7 +144,8 @@
       right:0;
       margin-left:auto;
       margin-right:auto;
-      
+      box-sizing: border-box;
+
     }
     .phase-title {
       font-weight: bold;
@@ -183,13 +189,67 @@
 
 .company-account-register {
   button {
-    font-size: 16px;
+    font-size: 18px;
     text-shadow: none;
+    height: 60px;
+    box-sizing: border-box;
+    text-align: left;
+    width: 240px;
+    margin-right: $marginL;
+    background-color: $color-dark-bg;
+    color: white;
+    position: relative;
   }
   .btn-primary {
     background-color: $lp-purple;
     &:hover {
       background-color: darken($lp-purple, 10%);
+    }
+    &:after {
+      content: " ";
+      position: absolute;
+      width: 0;
+      height: 0;
+      right: 12px;
+      top: 15px;
+      border-top: 15px solid transparent;
+      border-left: 30px solid white;
+      border-bottom: 15px solid transparent;
+    }
+  }
+}
+
+#register-company {
+  .register-form {
+    background-color: $lp-purple-light;
+    .form-group {
+      background-color: inherit;
+      display: block;
+      border: none;
+      h2 {
+        text-transform: uppercase;
+        font-weight: 400;
+        color: black;
+      }
+      .form-entry {
+        width: 32%;
+        box-sizing: border-box;
+        padding-right: $marginL;
+        display: inline-block;
+        .form-label {
+          color: black;
+          &.tip {
+            color: black;
+          }
+        }
+        .form-input {
+          height: 40px;
+          width: 100%;
+          border: none;
+          box-shadow: none;
+        }
+
+      }
     }
   }
 }

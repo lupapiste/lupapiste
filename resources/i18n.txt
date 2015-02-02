@@ -1,0 +1,17 @@
+register.company.form.billing.address2: Osoite 2
+register.company.phase.1: Tilin valinta
+register.company.phase.2: Yrityksen tiedot
+register.company.phase.3: Tunnistautuminen
+register.company.phase.4: Aktivointi
+register.company.account1.title: Yrityksen tili 5
+register.company.account1.price: 59€/kk
+register.company.account1.bullet1: Kaikki yrityksen lupa-asioinnit samassa työtilassa
+register.company.account1.bullet2: Viidelle käyttäjälle
+register.company.account2.title: Yrityksen tili 15
+register.company.account2.price: 79€/kk
+register.company.account2.bullet1: Kaikki yrityksen lupa-asioinnit samassa työtilassa
+register.company.account2.bullet2: Viidelletoista käyttäjälle
+register.company.account3.title: Yrityksen tili 30
+register.company.account3.price: 99€/kk
+register.company.account3.bullet1: Kaikki yrityksen lupa-asioinnit samassa työtilassa
+register.company.account3.bullet2: Kolmellekymmenelle käyttäjälle
