@@ -2,13 +2,13 @@
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [clojure.set :refer [difference]]
-            [lupapalvelu.exports :refer [kayttotarkoitus-hinnasto price-classes-for-operation]]
+            [lupapalvelu.exports-api :refer [kayttotarkoitus-hinnasto price-classes-for-operation]]
             [lupapalvelu.application :as app]
             [lupapalvelu.operations :as ops]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.schemas :as schemas]))
 
-(testable-privates lupapalvelu.exports resolve-price-class)
+(testable-privates lupapalvelu.exports-api resolve-price-class)
 
 (def keyset (comp set keys))
 
