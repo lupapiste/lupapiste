@@ -112,10 +112,7 @@ LUPAPISTE.ForemanModel = function() {
   self.submit = function() {
     self.error(undefined);
 
-    function inviteToApplication(id, cb, errorCb) {
-      if (!errorCb) {
-        errorCb = cb;
-      }
+    function inviteToApplication(id, cb) {
       ajax.command("invite-with-role", { id: id,
                                documentName: "",
                                documentId: "",
@@ -130,7 +127,8 @@ LUPAPISTE.ForemanModel = function() {
           cb(data);
         })
         .error(function(err) {
-          errorCb(err);
+          // recipient might have already been invited
+          cb(err);
         })
         .call();
     }
@@ -147,8 +145,6 @@ LUPAPISTE.ForemanModel = function() {
           if (self.email()) {
             inviteToApplication(data.id, function() {
               self.finished(data.id);
-            }, function(err) {
-              self.error(err.text);
             });
           } else {
             self.finished(data.id);
