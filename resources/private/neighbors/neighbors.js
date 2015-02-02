@@ -285,7 +285,7 @@
   var editModel = new EditModel();
   var ownersModel = new OwnersModel();
 
-  hub.onPageChange("neighbors", function(e) {
+  hub.onPageLoad("neighbors", function(e) {
     applicationId = e.pagePath[0];
     repository.load(applicationId);
   });

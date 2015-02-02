@@ -14,19 +14,16 @@ Mikko creates a new application
   Set Suite Variable  ${attachment-not-needed-test-id-hakija-valtakirja}  attachment-not-needed-hakija-valtakirja
   Set Suite Variable  ${attachment-not-needed-test-id-sonja}  attachment-not-needed-muut-muu
   Open to authorities  huba huba
+
+Mikko could submit application
+  Open tab  requiredFieldSummary
+  Wait Until  Element should be enabled  xpath=//*[@data-test-id='application-submit-btn']
   Logout
 
 Sonja can not submit application
   Sonja logs in
   Open application  submit-app  753-416-25-30
   Wait until  Element should not be visible  application-requiredFieldSummary-tab
-  Logout
-
-Mikko could submit application
-  Mikko logs in
-  Open application  submit-app  753-416-25-30
-  Open tab  requiredFieldSummary
-  Wait Until  Element should be enabled  xpath=//*[@data-test-id='application-submit-btn']
   Logout
 
 #
@@ -36,10 +33,12 @@ Mikko could submit application
 # - Paakayttajalla (Sipoo) merkkaa puuttuvat tiedot pakollisiksi   ( data-test-id=required-fields-obligatory-enabled ) -> hakemuksen jattaminen ei onnistu
 Sipoo marks required fields obligatory
   Sipoo logs in
-  Wait until page contains element  xpath=//input[@data-test-id='required-fields-obligatory-enabled']
-  Checkbox Should Not Be Selected  required-fields-obligatory-enabled
-  Select Checkbox  required-fields-obligatory-enabled
-  Checkbox Should Be Selected  required-fields-obligatory-enabled
+  Wait until Element is visible  xpath=//input[@data-test-id='required-fields-obligatory-enabled']
+  Focus  xpath=//input[@id='required-fields-obligatory-enabled']
+  Checkbox Should Not Be Selected  id=required-fields-obligatory-enabled
+  Select Checkbox  id=required-fields-obligatory-enabled
+  Wait for jQuery
+  Wait Until  Checkbox Should Be Selected  id=required-fields-obligatory-enabled
   Logout
 
 # - (luo Mikolla uusi hakemus ->) hakemuksella ei rakseja "ei tarvita"-checkboxeissa, ja kaikki boxit ovat enabloituina
@@ -64,10 +63,13 @@ Mikko can not submit application with Submit button and there are items on the r
 # - Mene paakayttajalla (sipoo) merkkaamaan puuttuvat tiedot EI-pakollisiksi
 Sipoo marks required fields not obligatory
   Sipoo logs in
-  Wait until page contains element  xpath=//input[@data-test-id='required-fields-obligatory-enabled']
-  Checkbox Should Be Selected  required-fields-obligatory-enabled
-  Unselect Checkbox  required-fields-obligatory-enabled
-  Checkbox Should Not Be Selected  required-fields-obligatory-enabled
+  Wait until Element is visible  xpath=//input[@data-test-id='required-fields-obligatory-enabled']
+  Focus  xpath=//input[@id='required-fields-obligatory-enabled']
+  Checkbox Should Be Selected  id=required-fields-obligatory-enabled
+  Sleep  0.5s
+  Unselect Checkbox  id=required-fields-obligatory-enabled
+  Wait for jQuery
+  Wait Until  Checkbox Should Not Be Selected  id=required-fields-obligatory-enabled
   Logout
 
 # - Mene Sonjalla lisaamaan uusi liitepohja "Pyyda liite" -toiminnolla
@@ -101,7 +103,7 @@ For the added attachment template added by Sonja, Mikko sees the "not needed" ch
 
 # - klikkaa attachments-tabin jonkin liitteen "ei tarvita"-checkboxia
 Mikko selects the "not needed" checkbox of some other attachment template than the one of Sonja's
-  ${checkbox-path-hakija-valtakirja} =  Set Variable  xpath=//table[@data-test-id='attachments-template-table']//input[@data-test-id='${attachment-not-needed-test-id-hakija-valtakirja}']
+  ${checkbox-path-hakija-valtakirja} =  Set Variable  xpath=//div[@id='application-attachments-tab']//table[@data-test-id='attachments-template-table']//input[@data-test-id='${attachment-not-needed-test-id-hakija-valtakirja}']
   Element should be enabled  ${checkbox-path-hakija-valtakirja}
   Checkbox Should Not Be Selected  ${checkbox-path-hakija-valtakirja}
   Select Checkbox  ${checkbox-path-hakija-valtakirja}
@@ -111,9 +113,9 @@ Mikko selects the "not needed" checkbox of some other attachment template than t
 Mikko adds txt attachment to the attachment template added by Sonja
   Open attachment details  muut.muu
   Add first attachment version  ${TXT_TESTFILE_PATH}
-  Click element  xpath=//a[@data-test-id="back-to-application-from-attachment"]
+  Click element  xpath=//section[@id="attachment"]//a[@data-test-id="back-to-application-from-attachment"]
   Wait Until  Tab should be visible  attachments
-  Page Should Not Contain  xpath=//a[@data-test-type="muut.muu"]
+  Page Should Not Contain  xpath=//div[@id="application-attachments-tab"]//a[@data-test-type="muut.muu"]
 
 # - tayta osapuolet-tabilla jokin puuttuva vaadittu kentta
 Mikko fills up first name for the hakija party in the parties tab
@@ -122,12 +124,15 @@ Mikko fills up first name for the hakija party in the parties tab
   Wait until  Element should be visible  xpath=${hakija-etunimi-path}
   Input text  ${hakija-etunimi-path}  Elmeri
   Wait Until  Textfield value should be  xpath=${hakija-etunimi-path}  Elmeri
+  Focus  xpath=//div[@id='application-parties-tab']//section[@data-doc-type='hakija']//input[@data-docgen-path='henkilo.henkilotiedot.sukunimi']
+  Wait until  Element should be visible  xpath=//span[contains(@class,'form-input-saved')]
 
 #     -> ks liiteiden ja ks kentan virheilmoitukset katoavat requiredFieldSummary-tabilta
 The filled-up of the party info and added attachment cause corresponding items to disappear from the "missing required" list in the requiredFieldSummary tab
   Open tab  requiredFieldSummary
+  Wait for jQuery
   Wait Until  Element should be visible  xpath=//*[@data-test-id='application-submit-btn']
-  ${missingRequiredCountAfter} =  Evaluate  ${missingRequiredCount} - 1
+  ${missingRequiredCountAfter} =  Evaluate  ${missingRequiredCount} - 2
   Wait Until  Xpath Should Match X Times  //*[@class='requiredField-line']  ${missingRequiredCountAfter}
 
 # - hakemuksen jattaminen onnistuu nyt

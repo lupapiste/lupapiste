@@ -5,7 +5,7 @@
             [clojure.string :as s]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.tools :as tools]
-            [lupapalvelu.neighbors :refer [find-by-id]]
+            [sade.util :refer [find-by-id]]
             [sade.util :refer [fn->]]))
 
 (defn invalid-token? [resp] (= resp {:ok false, :text "error.token-not-found"}))
@@ -166,7 +166,7 @@
 
         (facts "random testing about content"
           (:comments application) => nil
-          (count (:documents application)) => 4 ; evil
+          (count (:documents application)) => 5 ; evil
 
           (fact "attachments"
             (fact "there are some attachments"

@@ -13,7 +13,7 @@
 (defn go []
   (println "Loading lupapalvelu.server...")
   (require 'lupapalvelu.server)
-  (println "Launhing server...")
+  (println "Launching server...")
   ((resolve 'lupapalvelu.server/-main)))
 
 (defn ktag

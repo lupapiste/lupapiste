@@ -173,7 +173,7 @@ LUPAPISTE.SidePanelModel = function() {
     }
   });
 
-  hub.subscribe({type: "page-change"}, function(data) {
+  hub.subscribe({type: "page-load"}, function(data) {
     if(_.contains(pages.concat("applications"), pageutil.getPage())) {
       refreshSidePanel(data.previousHash);
     }

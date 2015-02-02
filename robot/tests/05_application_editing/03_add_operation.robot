@@ -17,6 +17,7 @@ Mikko adds an operation
   Set animations off
   Click enabled by test id  add-operation
   Wait Until  Element Should Be Visible  add-operation
+  Wait Until  Title Should Be  ${appname} - Lupapiste
   Wait and click  //section[@id="add-operation"]//div[@class="tree-content"]//*[text()="Rakentaminen, purkaminen tai maisemaan vaikuttava toimenpide"]
   Wait and click  //section[@id="add-operation"]//div[@class="tree-content"]//*[text()="Uuden rakennuksen rakentaminen"]
   Wait and click  //section[@id="add-operation"]//div[@class="tree-content"]//*[text()="Muun kuin edellä mainitun rakennuksen rakentaminen (liike-, toimisto-, opetus-, päiväkoti-, palvelu-, hoitolaitos- tai muu rakennus)"]
@@ -30,6 +31,7 @@ Application contains two operations
 Add another operation
   Click enabled by test id  add-operation
   Wait Until  Element Should Be Visible  //section[@id="add-operation"]//div[@class="tree-content"]//*[text()="Rakentaminen, purkaminen tai maisemaan vaikuttava toimenpide"]
+  Title Should Be  ${appname} - Lupapiste
   Wait and click  //section[@id="add-operation"]//div[@class="tree-content"]//*[text()="Rakentaminen, purkaminen tai maisemaan vaikuttava toimenpide"]
   Wait and click  //section[@id="add-operation"]//div[@class="tree-content"]//*[text()="Uuden rakennuksen rakentaminen"]
   Wait and click  //section[@id="add-operation"]//div[@class="tree-content"]//*[text()="Vapaa-ajan asunnon tai saunarakennuksen rakentaminen"]

@@ -19,7 +19,7 @@
 
       <script type="text/html" id="stamp-attachments-template">
         <div class="stamp-info-container">
-          <form id="stamp-info" class="clear">
+          <form id="stamp-info" class="clear three-col">
             <fieldset class="col1">
               <legend data-bind="ltext: 'stamp.information'"></legend>
 
@@ -66,22 +66,22 @@
               <!-- /ko -->
               <!-- ko ifnot: showBuildingList -->
               <input data-bind="textInput: buildingId, enable: status() === statusReady"
-                        type="text"
-                        class="form-input text"
+                     type="text"
+                     class="form-input text"
                      data-test-id="stamp-info-buildingid"/>
               <!-- /ko -->
 
 
               <label data-bind="ltext: 'stamp.kuntalupatunnus'"></label>
               <input data-bind="textInput: kuntalupatunnus, enable: status() === statusReady"
-                        type="text"
-                        class="form-input text"
+                     type="text"
+                     class="form-input text"
                      data-test-id="stamp-info-kuntalupatunnus"/>
 
               <label data-bind="ltext: 'stamp.section'"></label>
               <input data-bind="textInput: section, enable: status() === statusReady"
-                        type="text"
-                        class="form-input text"
+                     type="text"
+                     class="form-input text"
                      data-test-id="stamp-info-section"/>
             </fieldset>
 

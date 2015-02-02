@@ -34,6 +34,10 @@ html {
     -ms-text-size-adjust: 100%;
 }
 
+html.no-scroll {
+  overflow: hidden;
+}
+
 body {
   min-width: 820px;
 }

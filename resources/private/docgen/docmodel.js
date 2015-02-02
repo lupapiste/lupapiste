@@ -22,6 +22,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   self.eventData = { doc: doc.id, app: self.appId };
   self.propertyId = application.propertyId;
   self.isDisabled = options && options.disabled;
+  self.events = [];
+
+  self.subscriptions = [];
 
   self.getMeta = function (path, m) {
     var meta = m ? m : self.meta;
@@ -109,6 +112,15 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       element.fadeOut("slow").css("display", "none");
     }
   };
+
+  // trigger stored events once
+  self.triggerEvents = function() {
+    _.forEach(self.events, function(event) {
+      hub.send(event.name, event.data);
+    });
+    self.events = [];
+  };
+
   // ID utilities
 
   function pathStrToID(pathStr) {
@@ -163,7 +175,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return label;
   }
 
-  function makeInput(type, pathStr, value, extraClass, readonly) {
+  function makeInput(type, pathStr, value, extraClass, readonly, subSchema) {
     var input = document.createElement("input");
     input.id = pathStrToID(pathStr);
     input.name = self.docId + "." + pathStr;
@@ -181,9 +193,13 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     if (readonly) {
       input.readOnly = true;
     } else {
-      input.onchange = save;
+      input.onchange = function(e) {
+        save(e);
+        if (subSchema) {
+          emit(getEvent(e).target.value, subSchema);
+        }
+      };
     }
-
 
     if (type === "checkbox") {
       input.checked = value;
@@ -203,6 +219,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var sizeClass = self.sizeClasses[subSchema.size] || "";
     span.className = "form-entry " + sizeClass;
 
+    if (subSchema.codes) {
+      span.setAttribute("data-codes", subSchema.codes.join(" "));
+    }
 
     // Display text areas in a wide container
     if (subSchema.type === "text") {
@@ -339,6 +358,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     input.onmouseout = self.hideHelp;
     span.appendChild(input);
 
+    if ( model[subSchema.name] && model[subSchema.name].disabled) {
+      input.setAttribute("disabled", true);
+    }
+
     if (subSchema.label) {
       var label = makeLabel(subSchema, "checkbox", myPath);
       label.onmouseover = self.showHelp;
@@ -362,7 +385,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var inputType = (_.indexOf(supportedInputSubtypes, subSchema.subtype) > -1) ? subSchema.subtype : "text";
 
     var sizeClass = self.sizeClasses[subSchema.size] || "";
-    var input = makeInput(inputType, myPath, getModelValue(model, subSchema.name), sizeClass, subSchema.readonly);
+    var input = makeInput(inputType, myPath, getModelValue(model, subSchema.name), sizeClass, subSchema.readonly, subSchema);
     setMaxLen(input, subSchema);
 
     if (subSchema.label) {
@@ -505,6 +528,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     select.onmouseover = self.showHelp;
     select.onmouseout = self.hideHelp;
     select.setAttribute("data-docgen-path", myPath);
+    select.setAttribute("data-test-id", myPath);
 
     select.name = myPath;
     select.className = "form-input combobox " + (sizeClass || "");
@@ -514,8 +538,13 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     if (subSchema.readonly) {
       select.readOnly = true;
     } else {
-      select.onchange = save;
+      select.onchange = function(e) {
+        save(e);
+        emit(getEvent(e).target.value, subSchema);
+      };
     }
+
+    emitLater(selectedOption, subSchema);
 
     var otherKey = subSchema["other-key"];
     if (otherKey) {
@@ -596,8 +625,18 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     if (subSchema.approvable) {
       label.appendChild(self.makeApprovalButtons(path, myModel));
     }
-
     div.appendChild(partsDiv);
+
+    var listen = subSchema.listen;
+    _.forEach(listen, function(listenEvent) {
+      if (listenEvent === "filterByCode") {
+        $(div).find("[data-codes]").addClass("hidden");
+        self.subscriptions.push(hub.subscribe(listenEvent, function(event) {
+          $(div).find("[data-codes]").addClass("hidden");
+          $(div).find("[data-codes*='" + event.code + "']").removeClass("hidden");
+        }));
+      }
+    });
     return div;
   }
 
@@ -819,42 +858,62 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return span;
   }
 
-  function buildAuthorityAccept(subSchema, model, path) {
+  function paramsStr(params) {
+    return _.map(_.keys(params), function(key) {
+      return key + ": " + key;
+    }).join(", ");
+  }
+
+  function createComponent(name, params, classes) {
+    // createElement works with IE8
+    var element = document.createElement(name);
+    $(element)
+      .attr("params", paramsStr(params))
+      .addClass(classes)
+      .applyBindings(params);
+    return element;
+  }
+
+  function buildForemanHistory(subSchema, model, path) {
     var params = {
       applicationId: self.appId
     };
+    return createComponent("foreman-history", params, "form-table");
+  }
 
-    // TODO: move to function
-    var paramsStr = _.map(_.keys(params), function(key) {
-      return key + ": " + key;
-    }).join(", ");
+  function buildForemanOtherApplications(subSchema, model, path, partOfChoice) {
+    var params = {
+      applicationId: self.appId,
+      documentId: self.docId,
+      documentName: self.schemaName,
+      hetu: undefined,
+      model: model[subSchema.name] || {},
+      subSchema: subSchema,
+      path: path,
+      partOfChoice: partOfChoice,
+      validationErrors: doc.validationErrors
+    };
 
-    return $("<authority-accept-fields>")
-      .attr("params", paramsStr)
-      .addClass("form-table")
-      .applyBindings(params)
-      .get(0);
+    return createComponent("foreman-other-applications", params, "form-table");
   }
 
   function buildFillMyInfoButton(subSchema, model, path) {
+    if (model.fillMyInfo && model.fillMyInfo.disabled) {
+      return;
+    }
+
     var myNs = path.slice(0, path.length - 1).join(".");
 
     var params = {
       id: self.appId,
       documentId: self.docId,
+      documentName: self.schemaName,
       userId: currentUser.id(),
       path: myNs,
       collection: self.getCollection()
     };
 
-    var paramsStr = _.map(_.keys(params), function(key) {
-      return key + ": " + key;
-    }).join(", ");
-
-    return $("<fill-info-button params>")
-      .attr("params", paramsStr)
-      .applyBindings(params)
-      .get(0);
+    return createComponent("fill-info-button", params);
   }
 
   function buildPersonSelector(subSchema, model, path) {
@@ -967,7 +1026,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     buildingSelector: buildBuildingSelector,
     newBuildingSelector: buildNewBuildingSelector,
     fillMyInfoButton: buildFillMyInfoButton,
-    authorityAccept: buildAuthorityAccept,
+    foremanHistory: buildForemanHistory,
+    foremanOtherApplications: buildForemanOtherApplications,
     personSelector: buildPersonSelector,
     table: buildTableRow,
     unknown: buildUnknown
@@ -1051,7 +1111,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       return thead;
     }
 
-    if (subSchema.repeating) {
+    if (subSchema.repeating && !subSchema.uicomponent) {
       var models = model[myName];
       if (!models) {
           models = subSchema.initiallyEmpty ? [] : [{}];
@@ -1199,6 +1259,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
           $(elem).hide();
         }
         if (elem) {
+          // TODO can't really detect table cell from label key value
           if (!subSchema.label) {
             var td = document.createElement("td");
             td.appendChild(elem);
@@ -1360,6 +1421,37 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }
 
     saveForReal(path, value, _.partial(afterSave, label, loader, indicator, callback));
+  }
+
+  var emitters = {
+    filterByCode: function(event, value, subSchema, sendLater) {
+      var schemaValue = _.find(subSchema.body, {name: value});
+      var code = schemaValue ? schemaValue.code : "";
+      if (sendLater) {
+        self.events.push({name: event, data: {code: code}});
+      } else {
+        hub.send(event, {code: code});
+      }
+    },
+    hetuChanged: function(event, value, subSchema, sendLater) {
+      hub.send(event, {value: value});
+    },
+    emitUnknown: function(event, value, subSchema) {
+      error("Unknown emitter event:", event);
+    }
+  };
+
+  function emit(value , subSchema, sendLater) {
+    if (subSchema.emit) {
+      _.forEach(subSchema.emit, function(event) {
+        var emitter = emitters[event] || emitters.emitUnknown;
+        emitter(event, value, subSchema, sendLater);
+      });
+    }
+  }
+
+  function emitLater(value, subSchema) {
+    emit(value, subSchema, true);
   }
 
   function removeDoc(e) {
@@ -1547,6 +1639,11 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return section;
   }
 
+  hub.subscribe("application-loaded", function() {
+    while (self.subscriptions.length > 0) {
+      hub.unsubscribe(self.subscriptions.pop());
+    }
+  }, true);
 
   self.element = buildElement();
   // If doc.validationErrors is truthy, i.e. doc includes ready evaluated errors,

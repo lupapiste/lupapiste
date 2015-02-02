@@ -684,8 +684,12 @@ input[readonly], textarea[readonly] {
   }
 }
 
-#stamp-info {
+.three-col {
   width: 100%;
+
+  .form-input {
+    width: 17.25em;
+  }
 
   .col1 {
     float: left;
@@ -703,20 +707,23 @@ input[readonly], textarea[readonly] {
   }
 }
 
-authority-accept-fields {
+foreman-history {
   h2 {
-    background-color: transparent;
+    background-color: $lp-light-grey !important;
   }
   th.first {
     width: 10%;
   }
   th.second {
-    width: 10%;
+    width: 15%;
   }
   th.third {
-    width: 40%;
+    width: 10%;
   }
   th.fourth {
-    width: 40%;
+    width: 20%;
+  }
+  th.fifth {
+    width: 45%;
   }
 }

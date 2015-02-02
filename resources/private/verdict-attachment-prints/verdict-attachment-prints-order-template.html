@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <section class="page" id="verdict-attachment-prints-order-dialogs" style="visibility: visible; display: block;">
+
+      <div id="dialog-verdict-attachment-prints-order" class="window autosized">
+        <div data-bind="with: $root.verdictAttachmentPrintsOrderModel">
+
+          <div class="dialog-header">
+            <p data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.title'"></p>
+            <p class="dialog-close close" data-test-id="verdict-attachment-prints-order-close-dialog">X</p>
+          </div>
+          <div class="dialog-content">
+
+            <h3 data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.description'"></h3>
+
+            <div class="print-order-files">
+
+              <!-- Making table's tbody scrollable: -->
+              <!-- IE < 10 does not like giving a tbody a height.  The workaround here applies the scrolling to a wrapped <div>. -->
+              <!--[if lte IE 9]>
+              <div class="old_ie_wrapper">
+              <!--<![endif]-->
+
+              <table class="fixed-headers">
+                <thead>
+                  <tr>
+                    <th data-bind="ltext: 'application.attachmentType'"></th>
+                    <th data-bind="ltext: 'application.attachmentContents'"></th>
+                    <th data-bind="ltext: 'application.attachmentFile'"></th>
+                    <th data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.orderCount'"></th>
+                  </tr>
+                </thead>
+                <tbody data-bind="foreach: attachments" data-test-id="verdict-attachments-tbody">
+                  <tr>
+                    <td data-bind="text: loc(['attachmentType', type['type-group'], type['type-id']])"></td>
+                    <td data-bind="text: contents"></td>
+                    <td data-bind="text: filename"></td>
+                    <td class="center"><input type="text" data-bind="textInput: orderAmount, attr: {id: 'orderAmount-' + id}" class="order-amount" /></td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <!--[if lte IE 9]>
+              </div>
+              <!--<![endif]-->
+
+            </div>
+
+            <h1 data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.orderInfo'"></h1>
+            <div>
+            <form id="verdict-attachment-prints-order-info" class="clear">
+              <fieldset class="three-col">
+              <h2 data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.legend.orderer'"></h2>
+                <div class="col1">
+                  <label for="printsOrderOrdererOrganization" data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.ordererOrganization'"class="form-label"></label>
+                  <input id="printsOrderOrdererOrganization" type="text" data-bind="textInput: ordererOrganization"
+                         data-test-id="verdict-attachment-prints-order-orderer-organization" class="form-input text"/>
+
+                  <label for="printsOrderOrdererAddress" data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.ordererAddress'"class="form-label"></label>
+                  <input id="printsOrderOrdererAddress" type="text" data-bind="textInput: ordererAddress"
+                         data-test-id="verdict-attachment-prints-order-orderer-address" class="form-input text"/>
+                </div>
+                <div class="col2">
+                  <label for="printsOrderOrdererEmail" data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.ordererEmail'"class="form-label"></label>
+                  <input id="printsOrderOrdererEmail" type="text" data-bind="textInput: ordererEmail"
+                         data-test-id="verdict-attachment-prints-order-orderer-email" class="form-input text"/>
+                </div>
+                <div class="col3">
+                  <label for="printsOrderOrdererPhone" data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.ordererPhone'"class="form-label"></label>
+                  <input id="printsOrderOrdererPhone" type="text" data-bind="textInput: ordererPhone"
+                         data-test-id="verdict-attachment-prints-order-orderer-phone" class="form-input text"/>
+                </div>
+              </fieldset>
+
+              <fieldset class="three-col">
+                <h2 data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.legend.application'"></h2>
+                <div class="col1">
+                  <label for="printsOrderApplicantName" data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.applicantName'"class="form-label"></label>
+                  <input id="printsOrderApplicantName" type="text" data-bind="textInput: applicantName"
+                         data-test-id="verdict-attachment-prints-order-applicant-name" class="form-input text"/>
+
+                  <label for="printsOrderLupapisteId" data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.lupapisteId'"class="form-label"></label>
+                  <input id="printsOrderLupapisteId" type="text" data-bind="textInput: lupapisteId"
+                         data-test-id="verdict-attachment-prints-order-lupapisteId" class="form-input text"/>
+                </div>
+                <div class="col2">
+                  <label for="printsOrderKuntalupatunnus" data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.kuntalupatunnus'"class="form-label"></label>
+                  <input id="printsOrderKuntalupatunnus" type="text" data-bind="textInput: kuntalupatunnus"
+                         data-test-id="verdict-attachment-prints-order-kuntalupatunnus" class="form-input text"/>
+
+                  <label for="printsOrderAddress" data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.address'"class="form-label"></label>
+                  <input id="printsOrderAddress" type="text" data-bind="textInput: address"
+                         data-test-id="verdict-attachment-prints-order-address" class="form-input text"/>
+                </div>
+                <div class="col3">
+                  <label for="printsOrderPropertyId" data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.propertyId'"class="form-label"></label>
+                  <input id="printsOrderPropertyId" type="text" data-bind="textInput: propertyId"
+                         data-test-id="verdict-attachment-prints-order-propertyId" class="form-input text"/>
+                </div>
+              </fieldset>
+            </form>
+          </div>
+
+            <div class="clear">
+              <div data-bind="if: errorMessage" >
+                <div data-bind="ltext: errorMessage" class="context-error" data-test-id="verdict-attachment-prints-order-error-message"></div>
+              </div>
+
+              <button data-bind="click: orderAttachmentPrints, enable: ok"
+                      class="btn btn-primary btn-dialog" data-test-id="test-order-verdict-attachment-prints">
+                <span data-bind="ltext: 'verdict-attachment-prints-order.order-dialog.submit'"></span>
+                <em data-bind="visible: pending" class="button-loader"></em>
+              </button>
+
+              <a data-bind="ltext: 'cancel'" class="btn-dialog close cancel" href="#"></a>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </section>
+  </body>
+</html>

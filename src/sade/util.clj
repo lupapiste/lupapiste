@@ -61,6 +61,18 @@
         (apply some-key m (rest ks))
         (m k)))))
 
+(defn find-by-id
+  "Return item from sequence col of maps where :id matches id."
+  [id col]
+  (some (fn [m] (when (= id (:id m)) m)) col))
+
+(defn update-in-repeating
+  ([m [k & ks] f & args]
+    (if (every? (comp ss/numeric? name) (keys m))
+      (apply hash-map (mapcat (fn [[repeat-k v]] [repeat-k (apply update-in-repeating v (conj ks k) f args)] ) m))
+      (if ks
+        (assoc m k (apply update-in-repeating (get m k) ks f args))
+        (assoc m k (apply f (get m k) args))))))
 
 ; From clojure.contrib/seq
 
@@ -344,3 +356,15 @@
   {:pre [(and (sequential? orig-seq) (sequential? exclude-seq))]}
   (let [exclude-set (set exclude-seq)]
     (remove #(exclude-set %) orig-seq)))
+
+(def difficulty-values ["AA" "A" "B" "C" "ei tiedossa"])    ;TODO: move this to schemas?
+(defn compare-difficulty [a b]                              ;TODO: make this function more generic by taking the key and comparison values as param? E.g. compare-against [a b key ref-values]
+  (let [a (:difficulty a)
+        b (:difficulty b)]
+    (cond
+      (nil? b) -1
+      (nil? a) 1
+      :else (- (.indexOf difficulty-values a) (.indexOf difficulty-values b)))))
+
+(defn every-key-in-map? [target-map required-keys]
+  (every? (-> target-map keys set) required-keys))

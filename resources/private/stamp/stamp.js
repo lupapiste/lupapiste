@@ -4,7 +4,6 @@ var stamping = (function() {
   var model = {
     stampingMode: ko.observable(false),
     authorization: null,
-
     appModel: null,
     attachments: null,
     stampFields: {
@@ -38,7 +37,7 @@ var stamping = (function() {
       model.attachments = null;
       model.authorization = null;
 
-      hub.send("page-change", { pageId: "stamping" });
+      hub.send("page-load", { pageId: "stamping" });
     }
   };
 
@@ -49,11 +48,6 @@ var stamping = (function() {
 
     if ( model.appModel.verdicts && !_.isEmpty(model.appModel.verdicts()) ) {
       model.stampFields.kuntalupatunnus(_.first(model.appModel.verdicts()).kuntalupatunnus());
-    } else {
-      model.stampFields.kuntalupatunnus("");
-    }
-
-    if ( model.appModel.verdicts && !_.isEmpty(model.appModel.verdicts()) ) {
       var verdict = ko.mapping.toJS(model.appModel.verdicts()[0]);
       if ( verdict.paatokset[0] && verdict.paatokset[0].poytakirjat[0] && verdict.paatokset[0].poytakirjat[0].pykala ) {
         model.stampFields.section(verdict.paatokset[0].poytakirjat[0].pykala);
@@ -61,6 +55,7 @@ var stamping = (function() {
         model.stampFields.section("");
       }
     } else {
+      model.stampFields.kuntalupatunnus("");
       model.stampFields.section("");
     }
 
@@ -80,7 +75,7 @@ var stamping = (function() {
     window.location.hash="!/stamping/" + model.appModel.id();
   }
 
-  hub.onPageChange("stamping", function() {
+  hub.onPageLoad("stamping", function() {
     if ( pageutil.subPage() ) {
       if ( !model.appModel || model.appModel.id() !== pageutil.subPage() ) {
         // refresh
@@ -88,6 +83,8 @@ var stamping = (function() {
 
         var appId = pageutil.subPage();
         repository.load(appId, null, function(application) {
+          lupapisteApp.setTitle(application.title);
+
           model.authorization = authorization.create();
           model.appModel = new LUPAPISTE.ApplicationModel();
           model.authorization.refresh(application);
@@ -102,6 +99,7 @@ var stamping = (function() {
         });
       } else { // appModel already initialized, show stamping
         model.stampingMode(true);
+        lupapisteApp.setTitle(model.appModel.title());
       }
     } else {
       error("No application ID provided for stamping");

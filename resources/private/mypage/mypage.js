@@ -256,7 +256,7 @@
   var pw = new Password();
   var uploadModel = new UploadModel();
 
-  hub.onPageChange("mypage", function() { ownInfo.clear(); pw.clear(); });
+  hub.onPageLoad("mypage", function() { ownInfo.clear(); pw.clear(); });
   hub.subscribe("login", function(e) { ownInfo.clear().init(e.user).updateUserName(); });
 
   $(function() {

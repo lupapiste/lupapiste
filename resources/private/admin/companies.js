@@ -69,7 +69,7 @@
   var companiesModel = new CompaniesModel();
 
   hub.subscribe("company-created", companiesModel.load);
-  hub.onPageChange("companies", companiesModel.load);
+  hub.onPageLoad("companies", companiesModel.load);
 
   $(function() {
     $("#companies").applyBindings({

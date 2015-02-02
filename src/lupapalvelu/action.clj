@@ -78,15 +78,33 @@
       (fail :error.application-not-found :id id))
     (fail :error.application-not-found :id nil)))
 
-(defn- filter-params-of-command [params command filter-fn error-message]
-  (when-let [non-matching (seq (filter #(filter-fn (get-in command [:data %])) params))]
-    (fail error-message :parameters (vec non-matching))))
+(defn- filter-params-of-command [params command filter-fn error-message & [extra-error-data]]
+  {:pre [(or (nil? extra-error-data) (map? extra-error-data))]}
+  (when-let [non-matching-params (seq (filter #(filter-fn (get-in command [:data %])) params))]
+    (merge
+      (fail error-message :parameters (vec non-matching-params))
+      extra-error-data)))
 
 (defn non-blank-parameters [params command]
   (filter-params-of-command params command #(or (nil? %) (and (string? %) (s/blank? %))) :error.missing-parameters))
 
 (defn vector-parameters [params command]
   (filter-params-of-command params command (complement vector?) :error.non-vector-parameters))
+
+(defn vector-parameters-with-non-blank-items [params command]
+  (or
+    (vector-parameters params command)
+    (filter-params-of-command params command
+      (partial some #(or (nil? %) (and (string? %) (s/blank? %))))
+      :error.vector-parameters-with-blank-items )))
+
+(defn vector-parameters-with-map-items-with-required-keys [params required-keys command]
+  (or
+    (vector-parameters params command)
+    (filter-params-of-command params command
+      (partial some #(not (and (map? %) (util/every-key-in-map? % required-keys))))
+      :error.vector-parameters-with-items-missing-required-keys
+      {:required-keys required-keys})))
 
 (defn boolean-parameters [params command]
   (filter-params-of-command params command #(not (instance? Boolean %)) :error.non-boolean-parameters))
@@ -250,7 +268,7 @@
 (defn- not-authorized-to-application [command application]
   (when (-> command :data :id)
     (if-not application
-      unauthorized
+      (fail :error.application-not-accessible)
       (or
         (invalid-state-in-application command application)
         (user-is-not-allowed-to-access? command application)))))

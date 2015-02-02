@@ -7,11 +7,13 @@ Variables      variables.py
 *** Test Cases ***
 
 Mikko creates application
+  ${secs} =  Get Time  epoch
+  Set Suite Variable  ${appname}  attachments${secs}
   Mikko logs in
-  Create application the fast way  application-papplication  753  753-416-25-30  kerrostalo-rivitalo
+  Create application the fast way  ${appname}  753  753-416-25-30  kerrostalo-rivitalo
 
 Mikko edits operation description
-  Open application  application-papplication  753-416-25-30
+  Open application  ${appname}  753-416-25-30
   Wait and click  xpath=//div[@id='application-info-tab']//span[@data-test-id='edit-op-description']
   Input text by test id  op-description-editor  Talo A
   Wait until  Page should contain  Tallennettu
@@ -25,16 +27,15 @@ Mikko adds an operation
   Wait and click  //section[@id="add-operation"]//div[@class="tree-content"]//*[text()="Muun kuin edellä mainitun rakennuksen rakentaminen (liike-, toimisto-, opetus-, päiväkoti-, palvelu-, hoitolaitos- tai muu rakennus)"]
   Wait until  Element should be visible  xpath=//section[@id="add-operation"]//div[@class="tree-content"]//*[@data-test-id="add-operation-to-application"]
   Click enabled by test id  add-operation-to-application
+  Wait until  Page should contain element  xpath=//section[@data-doc-type="uusiRakennus"][2]
 
 Mikko edits operation B description
   Wait and click  xpath=(//div[@id='application-info-tab']//span[@data-test-id='edit-op-description'])[last()]
   Execute Javascript  $("input[data-test-id='op-description-editor']:last").val("Talo B").change().blur();
-  Wait until  Page should contain  Tallennettu
+  Wait until  Element should be visible  xpath=//span[@class="op-description-wrapper"]//span[contains(@class,'accordion-input-saved')]
 
 Mikko adds txt attachment without comment
   [Tags]  attachments
-  ${secs} =  Get Time  epoch
-  Set Suite Variable  ${appname}  attachments${secs}
   Open tab  attachments
   Add attachment  ${TXT_TESTFILE_PATH}  ${EMPTY}  Asuinkerrostalon tai rivitalon rakentaminen - Talo A
   Application state should be  draft
@@ -44,6 +45,7 @@ Mikko opens attachment details
   [Tags]  attachments
   Open attachment details  muut.muu
   Assert file latest version  ${TXT_TESTFILE_NAME}  1.0
+  Title Should Be  ${appname} - Lupapiste
 
 Mikko can change related operation
   Element should be visible  xpath=//select[@data-test-id='attachment-operation-select']
@@ -65,7 +67,7 @@ Mikko can change contents
 
 Mikko logs in and goes to attachments tab
   Mikko logs in
-  Open application  application-papplication  753-416-25-30
+  Open application  ${appname}  753-416-25-30
   Open tab  attachments
 
 Mikko sees that contents metadata is visible in attachments list

@@ -96,6 +96,7 @@
                 </table>
               </div>
             </div>
+
             <div data-bind="if: latestVersion">
               <div class="attachment-label">
                 <h4 data-bind="with: latestVersion">
@@ -149,29 +150,36 @@
                                        value: size,
                                        enable: $root.authorization.ok('set-attachment-meta') && editable"></select>
                   </div>
+
+                  <div class="col1 attachment-info-field" data-bind="if: $root.authorization.ok('set-attachments-as-verdict-attachment')">
+                    <label for="attachment-is-verdict-attachment" class="form-label" data-bind="ltext: 'attachment.label.verdictAttachment'"></label>
+                    <input type="checkbox" id="attachment-is-verdict-attachment" class="form-input" data-test-id="is-verdict-attachment"
+                           data-bind="checked: isVerdictAttachment, enable: $root.authorization.ok('set-attachments-as-verdict-attachment')"></input>
+                  </div>
+
                 </div>
               </div>
-            </div>
 
-            <div class="signatures clear" data-bind="visible: latestVersion">
-              <h3 data-bind="ltext: 'attachment.signatures'"></h3>
-              <div class="signature-table" data-bind="if: signatures && signatures().length > 0">
-                <!-- ko foreach: signatures -->
-                  <div class="signature-row">
-                    <div class="signature-cell" data-bind="fullName: user"></div>
-                    <div class="signature-cell">
-                      <span data-bind="ltext: 'attachment.version'"></span>
-                      <span data-bind="version: version"></span>
+              <div class="signatures clear">
+                <h3 data-bind="ltext: 'attachment.signatures'"></h3>
+                <div class="signature-table" data-bind="if: signatures && signatures().length > 0">
+                  <!-- ko foreach: signatures -->
+                    <div class="signature-row">
+                      <div class="signature-cell" data-bind="fullName: user"></div>
+                      <div class="signature-cell">
+                        <span data-bind="ltext: 'attachment.version'"></span>
+                        <span data-bind="version: version"></span>
+                      </div>
+                      <div class="signature-cell" data-bind="dateTimeString: created"></div>
                     </div>
-                    <div class="signature-cell" data-bind="dateTimeString: created"></div>
-                  </div>
-                  <!-- /ko -->
+                    <!-- /ko -->
+                </div>
+                <button data-test-id="signLatestAttachmentVersion" class="btn-primary"
+                        data-bind="click: sign, visible: $root.authorization.ok('sign-attachments'), visible: versions().length && $root.authorization.ok('sign-attachments')">
+                    <span class="btn-label" data-bind="ltext: 'attachment.signLatest'"></span>
+                    <span class="icon signed-white left-align"></span>
+                </button>
               </div>
-              <button data-test-id="signLatestAttachmentVersion" class="btn-primary"
-                      data-bind="click: sign, visible: $root.authorization.ok('sign-attachments'), visible: versions().length && $root.authorization.ok('sign-attachments')">
-                  <span class="btn-label" data-bind="ltext: 'attachment.signLatest'"></span>
-                  <span class="icon signed-white left-align"></span>
-              </button>
             </div>
           </div>
 
