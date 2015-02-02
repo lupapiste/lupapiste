@@ -4,7 +4,7 @@ LUPAPISTE.StampModel = function(params) {
 
   function hasValidVersions(a) {
     // For stamped attachment, original version should exist
-    var versions = _(a.versions).reverse().value(),
+    var versions = _(a.versions).reverse().value();
     return versions[0].stamped ? (versions[1] ? true : false) : true;
   }
 
