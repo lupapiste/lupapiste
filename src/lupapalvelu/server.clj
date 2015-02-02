@@ -29,7 +29,7 @@
             [lupapalvelu.kopiolaitos_api]
             [lupapalvelu.admin]
             [lupapalvelu.proxy-services]
-            [lupapalvelu.exports]
+            [lupapalvelu.exports-api]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.ua-compatible-header :as uach]
             [lupapalvelu.document.schema-repository]
