@@ -27,7 +27,7 @@
             [lupapalvelu.company-api]
             [lupapalvelu.onnistuu]
             [lupapalvelu.kopiolaitos-api]
-            [lupapalvelu.admin]
+            [lupapalvelu.admin-api]
             [lupapalvelu.proxy-services]
             [lupapalvelu.exports-api]
             [lupapalvelu.i18n :as i18n]
