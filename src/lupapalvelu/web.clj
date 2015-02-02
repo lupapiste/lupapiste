@@ -34,7 +34,7 @@
             [lupapalvelu.activation :as activation]
             [lupapalvelu.logging :refer [with-logging-context]]
             [lupapalvelu.neighbors]
-            [lupapalvelu.idf.idf-server :as idf-server]))
+            [lupapalvelu.idf.idf-api :as idf-api]))
 
 ;;
 ;; Helpers
@@ -530,7 +530,7 @@
           email puhelin katuosoite postinumero postitoimipaikka
           suoramarkkinointilupa ammattilainen
           app id ts mac]}
-  (idf-server/handle-create-user-request etunimi sukunimi
+  (idf-api/handle-create-user-request etunimi sukunimi
           email puhelin katuosoite postinumero postitoimipaikka
           suoramarkkinointilupa ammattilainen
           app id ts mac))
