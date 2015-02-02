@@ -187,7 +187,7 @@
   }
 }
 
-.company-account-register {
+.company-account-register, .register-contentbox {
   button, .btn {
     font-size: 18px;
     text-shadow: none;
@@ -217,6 +217,8 @@
       border-bottom: 15px solid transparent;
     }
     &:disabled {
+      background-color: lighten($lp-purple, 10%);
+      color: $color-dark-bg;
       &:after {
         border-left: 30px solid $color-dark-bg;
         color: $color-dark-bg;
@@ -234,7 +236,7 @@
   }
 }
 
-#register-company {
+#register-company, #new-company-user {
   .register-form {
     background-color: $lp-purple-light;
     padding: $marginS;
