@@ -35,7 +35,7 @@
             [lupapalvelu.document.schema-repository]
             [lupapalvelu.actions-api]
             [lupapalvelu.migration.migration :as migration]
-            [lupapalvelu.screenmessage]))
+            [lupapalvelu.screenmessage-api]))
 
 (defn -main [& _]
   (infof "Build %s starting in %s mode" (:build-number env/buildinfo) (name env/mode))
