@@ -44,9 +44,7 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function() {
   });
 
   function enrichAttachment(a) {
-    var versions = _(a.versions).reverse().value();
-    var latestVersion = versions[0];
-    a.filename = latestVersion.filename;
+    a.filename = a.latestVersion.filename;
     a.contents = a.contents || loc(["attachmentType", a.type["type-group"], a.type["type-id"]])
     a.orderAmount = ko.observable("2");
     return a;
