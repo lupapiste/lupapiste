@@ -153,9 +153,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       if (listenEvent === "muutostapaChanged") {
         var prefix = path.split(".");
         prefix.pop();
-        hub.subscribe({type: listenEvent, path: prefix.join(".")}, function(event) {
+        self.subscriptions.push(hub.subscribe({type: listenEvent, path: prefix.join(".")}, function(event) {
           $(element).prop("disabled", _.isEmpty(event.value));
-        });
+        }));
       }
     });
   }
