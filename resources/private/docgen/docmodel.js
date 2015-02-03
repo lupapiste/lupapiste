@@ -141,6 +141,25 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return (options && options.collection) ? options.collection : "documents";
   };
 
+  function listen(subSchema, path, element) {
+    _.forEach(subSchema.listen, function(listenEvent) {
+      if (listenEvent === "filterByCode") {
+        $(element).find("[data-codes]").addClass("hidden");
+        self.subscriptions.push(hub.subscribe(listenEvent, function(event) {
+          $(element).find("[data-codes]").addClass("hidden");
+          $(element).find("[data-codes*='" + event.code + "']").removeClass("hidden");
+        }));
+      }
+      if (listenEvent === "muutostapaChanged") {
+        var prefix = path.split(".");
+        prefix.pop();
+        hub.subscribe({type: listenEvent, path: prefix.join(".")}, function(event) {
+          $(element).prop("disabled", _.isEmpty(event.value));
+        });
+      }
+    });
+  }
+
   function getUpdateCommand() {
     return (options && options.updateCommand) ? options.updateCommand : "update-doc";
   }
@@ -369,6 +388,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       span.appendChild(label);
     }
 
+    listen(subSchema, myPath, input);
+
     return span;
   }
 
@@ -387,6 +408,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var sizeClass = self.sizeClasses[subSchema.size] || "";
     var input = makeInput(inputType, myPath, getModelValue(model, subSchema.name), sizeClass, subSchema.readonly, subSchema);
     setMaxLen(input, subSchema);
+
+    listen(subSchema, myPath, input);
 
     if (subSchema.label) {
       span.appendChild(makeLabel(subSchema, partOfChoice ? "string-choice" : "string", myPath));
@@ -540,11 +563,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     } else {
       select.onchange = function(e) {
         save(e);
-        emit(getEvent(e).target.value, subSchema);
+        emit(getEvent(e).target, subSchema);
       };
     }
-
-    emitLater(selectedOption, subSchema);
 
     var otherKey = subSchema["other-key"];
     if (otherKey) {
@@ -600,6 +621,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       select.appendChild(option);
     }
 
+    listen(subSchema, myPath, select);
+
+    emitLater(select, subSchema);
+
     if (subSchema.label) {
       span.appendChild(makeLabel(subSchema, "select", myPath, true));
     }
@@ -627,16 +652,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }
     div.appendChild(partsDiv);
 
-    var listen = subSchema.listen;
-    _.forEach(listen, function(listenEvent) {
-      if (listenEvent === "filterByCode") {
-        $(div).find("[data-codes]").addClass("hidden");
-        self.subscriptions.push(hub.subscribe(listenEvent, function(event) {
-          $(div).find("[data-codes]").addClass("hidden");
-          $(div).find("[data-codes*='" + event.code + "']").removeClass("hidden");
-        }));
-      }
-    });
+    listen(subSchema, myPath, div);
     return div;
   }
 
@@ -1424,7 +1440,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   }
 
   var emitters = {
-    filterByCode: function(event, value, subSchema, sendLater) {
+    filterByCode: function(event, value, path, subSchema, sendLater) {
       var schemaValue = _.find(subSchema.body, {name: value});
       var code = schemaValue ? schemaValue.code : "";
       if (sendLater) {
@@ -1433,25 +1449,32 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         hub.send(event, {code: code});
       }
     },
-    hetuChanged: function(event, value, subSchema, sendLater) {
+    hetuChanged: function(event, value, path, subSchema, sendLater) {
       hub.send(event, {value: value});
     },
-    emitUnknown: function(event, value, subSchema) {
+    muutostapaChanged: function(event, value, path, subSchema, sendLater) {
+        var prefix = path.split(".");
+        prefix.pop();
+      hub.send(event, {path: prefix.join("."), value: value});
+    },
+    emitUnknown: function(event) {
       error("Unknown emitter event:", event);
     }
   };
 
-  function emit(value , subSchema, sendLater) {
+  function emit(target, subSchema, sendLater) {
+    var value = target.value;
+    var path = $(target).attr("data-docgen-path");
     if (subSchema.emit) {
       _.forEach(subSchema.emit, function(event) {
         var emitter = emitters[event] || emitters.emitUnknown;
-        emitter(event, value, subSchema, sendLater);
+        emitter(event, value, path, subSchema, sendLater);
       });
     }
   }
 
-  function emitLater(value, subSchema) {
-    emit(value, subSchema, true);
+  function emitLater(target, subSchema) {
+    emit(target, subSchema, true);
   }
 
   function removeDoc(e) {
