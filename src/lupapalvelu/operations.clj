@@ -356,7 +356,8 @@
     {:asuinrakennus               {:schema "uusiRakennus"
                                    :permit-type permit/R
                                    :schema-data [[["kaytto" "kayttotarkoitus"] schemas/yhden-asunnon-talot]
-                                                 [["huoneistot" "0" "huoneistonumero"] "000"]]
+                                                 [["huoneistot" "0" "huoneistonumero"] "000"]
+                                                 [["huoneistot" "0" "muutostapa" :value] "lis\u00e4ys"]]
                                    :required common-rakval-schemas
                                    :attachments uuden_rakennuksen_liitteet
                                    :add-operation-allowed true
@@ -365,7 +366,8 @@
      :kerrostalo-rivitalo         {:schema "uusiRakennus"
                                    :permit-type permit/R
                                    :schema-data [[["kaytto" "kayttotarkoitus"] schemas/rivitalot]
-                                                 [["huoneistot" "0" "huoneistonumero"] "000"]]
+                                                 [["huoneistot" "0" "huoneistonumero"] "000"]
+                                                 [["huoneistot" "0" "muutostapa" :value] "lis\u00e4ys"]]
                                    :required common-rakval-schemas
                                    :attachments uuden_rakennuksen_liitteet
                                    :add-operation-allowed true
@@ -374,7 +376,8 @@
      :pientalo                    {:schema "uusiRakennus"
                                    :permit-type permit/R
                                    :schema-data [[["kaytto" "kayttotarkoitus"] schemas/yhden-asunnon-talot]
-                                                 [["huoneistot" "0" "huoneistonumero"] "000"]]
+                                                 [["huoneistot" "0" "huoneistonumero"] "000"]
+                                                 [["huoneistot" "0" "muutostapa" :value] "lis\u00e4ys"]]
                                    :required common-rakval-schemas
                                    :attachments uuden_rakennuksen_liitteet
                                    :add-operation-allowed true
