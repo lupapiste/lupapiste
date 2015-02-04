@@ -169,8 +169,8 @@
                          "change-location.html" "invite-company.html" "foreman-template.html"]}
 
    :applications {:depends [:common-html :repository :invites]
-                  :html ["applications.html"]
-                  :js ["applications.js"]}
+                  :html ["applications-list.html"]
+                  :js ["applications-list.js"]}
 
    :statement    {:depends [:common-html :repository :side-panel]
                   :js ["statement.js"]
