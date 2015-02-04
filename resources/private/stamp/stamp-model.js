@@ -130,7 +130,7 @@ LUPAPISTE.StampModel = function(params) {
   }
 
   function getSection() {
-    return self.section() === "§" ? "" : self.section();
+    return self.section() === "\u00a7" ? "" : self.section();
   }
 
   self.start = function() {

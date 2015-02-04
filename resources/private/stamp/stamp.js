@@ -51,14 +51,14 @@ var stamping = (function() {
       var verdict = ko.mapping.toJS(model.appModel.verdicts()[0]);
       if ( verdict.paatokset[0] && verdict.paatokset[0].poytakirjat[0] && verdict.paatokset[0].poytakirjat[0].pykala ) {
         var pykala = verdict.paatokset[0].poytakirjat[0].pykala;
-        pykala = _.contains(pykala, "§") ? pykala : "§ " + pykala;
+        pykala = _.contains(pykala, "\u00a7") ? pykala : "\u00a7 " + pykala;
         model.stampFields.section(pykala);
       } else {
-        model.stampFields.section("§");
+        model.stampFields.section("\u00a7");
       }
     } else {
       model.stampFields.kuntalupatunnus("");
-      model.stampFields.section("§");
+      model.stampFields.section("\u00a7");
     }
 
     if ( model.appModel.buildings ) {
