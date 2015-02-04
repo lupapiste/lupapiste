@@ -81,35 +81,37 @@ var repository = (function() {
         }
       }
 
-      if (application && application.id === currentlyLoadingId) {
-        currentlyLoadingId = null;
+      if (application) {
+        if (application.id === currentlyLoadingId) {
+          currentlyLoadingId = null;
 
-        _.each(application.documents || [], function(doc) {
-          setOperation(application, doc);
-          setSchema(doc);
-        });
-        _.each(application.tasks || [], setSchema);
-        _.each(application.comments || [], function(comment) {
-          if (comment.target && comment.target.type === "attachment" && comment.target.id) {
-            var targetAttachment = _.find(application.attachments || [], function(attachment) {
-              return attachment.id === comment.target.id;
-            });
-            if (targetAttachment) {
-              comment.target.attachmentType = loc(["attachmentType", targetAttachment.type["type-group"], targetAttachment.type["type-id"]]);
-              comment.target.attachmentId = targetAttachment.id;
+          _.each(application.documents || [], function(doc) {
+            setOperation(application, doc);
+            setSchema(doc);
+          });
+          _.each(application.tasks || [], setSchema);
+          _.each(application.comments || [], function(comment) {
+            if (comment.target && comment.target.type === "attachment" && comment.target.id) {
+              var targetAttachment = _.find(application.attachments || [], function(attachment) {
+                return attachment.id === comment.target.id;
+              });
+              if (targetAttachment) {
+                comment.target.attachmentType = loc(["attachmentType", targetAttachment.type["type-group"], targetAttachment.type["type-id"]]);
+                comment.target.attachmentId = targetAttachment.id;
+              }
             }
+          });
+          _.each(application.attachments ||[], function(att) {
+            calculateAttachmentStateIndicators(att);
+            setAttachmentOperation(application.operations, att);
+          });
+          hub.send("application-loaded", {applicationDetails: loading});
+          if (_.isFunction(callback)) {
+            callback(application);
           }
-        });
-        _.each(application.attachments ||[], function(att) {
-          calculateAttachmentStateIndicators(att);
-          setAttachmentOperation(application.operations, att);
-        });
-        hub.send("application-loaded", {applicationDetails: loading});
-        if (_.isFunction(callback)) {
-          callback(application);
+        } else {
+          error("Concurrent loading issue, old id = " + currentlyLoadingId);
         }
-      } else {
-        error("No application or concurrent loading issue, old id = " + currentlyLoadingId);
       }
     });
   }
