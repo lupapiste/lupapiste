@@ -129,7 +129,9 @@ LUPAPISTE.StampModel = function(params) {
     self.transparency(transparencies[0].value);
   }
 
-
+  function getSection() {
+    return self.section() === "§" ? "" : self.section();
+  }
 
   self.start = function() {
     self.status(self.statusStarting);
@@ -146,7 +148,7 @@ LUPAPISTE.StampModel = function(params) {
         extraInfo: self.extraInfo(),
         buildingId: self.buildingId() ? self.buildingId() : "",
         kuntalupatunnus: self.kuntalupatunnus(),
-        section: self.section()
+        section: getSection()
       })
       .success(self.started)
       .call();
