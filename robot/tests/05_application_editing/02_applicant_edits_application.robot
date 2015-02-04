@@ -21,9 +21,11 @@ Mikko adds three owners to the Uusirakennus document, and all owners are visible
   Input text  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.0.henkilo.henkilotiedot.etunimi']  pikku
   Wait Until  Element Should Be Visible  //button[@id="rakennuksenOmistajat_append"]
   Execute Javascript  $("button[id='rakennuksenOmistajat_append']").click();
-  Execute Javascript  $("button[id='rakennuksenOmistajat_append']").click();
-  Execute Javascript  $("button[id='rakennuksenOmistajat_append']").click();
   Wait Until  Element Should Be Visible  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.1.henkilo.henkilotiedot.etunimi']
+  Execute Javascript  $("button[id='rakennuksenOmistajat_append']").click();
+  Wait Until  Element Should Be Visible  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.2.henkilo.henkilotiedot.etunimi']
+  Execute Javascript  $("button[id='rakennuksenOmistajat_append']").click();
+  Wait Until  Element Should Be Visible  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.3.henkilo.henkilotiedot.etunimi']
   Input text  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.1.henkilo.henkilotiedot.etunimi']  ISO1
   Input text  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.2.henkilo.henkilotiedot.etunimi']  ISO2
   Input text  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.3.henkilo.henkilotiedot.etunimi']  ISO3
@@ -34,6 +36,24 @@ Mikko adds three owners to the Uusirakennus document, and all owners are visible
   Textfield Value Should Be  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.1.henkilo.henkilotiedot.etunimi']  ISO1
   Textfield Value Should Be  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.2.henkilo.henkilotiedot.etunimi']  ISO2
   Textfield Value Should Be  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='rakennuksenOmistajat.3.henkilo.henkilotiedot.etunimi']  ISO3
+
+Huoneistot info for Uusirakennus is correct
+  Xpath Should Match X Times  //div[@id='application-info-tab']//tr[@data-repeating-id="huoneistot"]  1
+  Textfield Value Should Be  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='huoneistot.0.huoneistonumero']  000
+  List Selection Should Be  xpath=//select[@data-test-id="huoneistot.0.muutostapa"]  lis\u00e4ys
+
+  Element Should Be Visible  //button[@id="huoneistot_append"]
+  Execute Javascript  $("button[id='huoneistot_append']").click();
+  Wait Until  Element Should Be Visible  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//select[@data-test-id="huoneistot.1.muutostapa"]
+  Element Should Be Enabled  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//select[@data-test-id="huoneistot.1.muutostapa"]
+  List Selection Should Be  xpath=//select[@data-test-id="huoneistot.1.muutostapa"]  lis\u00e4ys
+
+  Select From List By Index  xpath=//select[@data-test-id="huoneistot.1.muutostapa"]  0
+  Huoneisto row items disabled except muutostapa
+  Reload Page
+  Wait Until  Element Should Be Visible  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//select[@data-test-id="huoneistot.1.muutostapa"]
+  Xpath Should Match X Times  //div[@id='application-info-tab']//tr[@data-repeating-id="huoneistot"]  2
+  Huoneisto row items disabled except muutostapa
 
 Mikko removes apartment
   Wait Until  Element Should Be Visible  //div[@id='application-info-tab']//span[@data-test-class="delete-schemas.huoneistot"]
@@ -95,3 +115,22 @@ Mikko decides to submit application
 Mikko still sees the submitted app in applications list
   Go to page  applications
   Request should be visible  ${newName}
+
+
+*** Keywords ***
+
+Huoneisto row items disabled except muutostapa
+  Element Should Be Disabled  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//select[@data-test-id="huoneistot.1.huoneistoTyyppi"]
+  Element Should Be Disabled  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//select[@data-test-id="huoneistot.1.keittionTyyppi"]
+  Element Should Be Disabled  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='huoneistot.1.porras']
+  Element Should Be Disabled  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='huoneistot.1.huoneistonumero']
+  Element Should Be Disabled  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='huoneistot.1.jakokirjain']
+  Element Should Be Disabled  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='huoneistot.1.huoneluku']
+  Element Should Be Disabled  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='huoneistot.1.huoneistoala']
+  Element Should Be Disabled  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='huoneistot.1.WCKytkin']
+  Element Should Be Disabled  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='huoneistot.1.ammeTaiSuihkuKytkin']
+  Element Should Be Disabled  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='huoneistot.1.saunaKytkin']
+  Element Should Be Disabled  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='huoneistot.1.parvekeTaiTerassiKytkin']
+  Element Should Be Disabled  //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//input[@data-docgen-path='huoneistot.1.lamminvesiKytkin']
+  Element Should Be Enabled   //div[@id='application-info-tab']//section[@data-doc-type='uusiRakennus']//select[@data-test-id="huoneistot.1.muutostapa"]
+
