@@ -170,7 +170,7 @@ if (typeof LUPAPISTE === "undefined") {
   };
 
   /**
-   * Initializes modal dialog elements
+   * Initializes dynamic modal dialog elements
    */
   LUPAPISTE.ModalDialog.init = function() {
     this.createMask();
@@ -179,18 +179,6 @@ if (typeof LUPAPISTE === "undefined") {
       if (!document.getElementById(d.attr("id"))) {
         $("body").append(d);
       }
-    });
-
-    // Register default opener:
-    // Click any element that has .modal class and data-windows-id that
-    // references to modal window container element ID.
-    $(".modal").click(function (e) {
-      e.preventDefault();
-      var id = $(this).attr("data-window-id");
-      if (id) {
-        LUPAPISTE.ModalDialog.open("#" + id);
-      }
-      return false;
     });
   };
 
