@@ -162,10 +162,9 @@
         </div>
 
         <button
-          class="btn modal"
+          class="btn"
           data-bind="ltext: 'application.attachmentsAdd', visible: $root.authorization.ok('upload-attachment'), enabled: $root.authorization.ok('upload-attachment'), click: application.newOtherAttachment"
-          data-test-id="add-inforequest-attachment"
-          data-window-id="upload-dialog"></button>
+          data-test-id="add-inforequest-attachment"></button>
 
         <div class="inforequest-conversation">
           <h2  data-bind="ltext: 'inforequest.comments'"></h2>

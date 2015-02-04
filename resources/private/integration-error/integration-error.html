@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+  <section class="page" id="integration-error-page" style="visibility: visible; display: block;">
+    <div id="integration-error-dialog" class="window autosized">
+      <div class="dialog-header">
+       <p data-bind="ltext: title"></p>
+       <p class="dialog-close close">X</p>
+      </div>
+      <div class="dialog-content">
+        <p class="" data-bind="ltext: text"></p>
+        <p class="" data-bind="if: details && details()"><textarea readonly="readonly" style="height: 200px;width:100%" data-bind="value:details"></textarea></p>
+      </div>
+      <div style="text-align:center"><button class="btn btn-primary btn-dialog close" data-test-id="integration-error-confirm" style="position:relative">OK</button></div>
+    </div>
+  </section>
+
+</body>
+</html>
