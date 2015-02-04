@@ -197,6 +197,7 @@
       isInitializing = false;
       pageutil.hideAjaxWait();
 
+      hub.send("application-model-updated", {applicationId: app.id});
     });
   }
 
@@ -265,11 +266,10 @@
   hub.onPageLoad("application", _.partial(initPage, "application"));
   hub.onPageLoad("inforequest", _.partial(initPage, "inforequest"));
 
-  repository.loaded(["application","inforequest","attachment","statement","neighbors","task","verdict"], function(application, applicationDetails) {
-    if (!currentId || (currentId === application.id)) {
-      showApplication(applicationDetails);
-    }
-    updateWindowTitle(application.title);
+// (["application","inforequest","attachment","statement","neighbors","task","verdict"]
+  hub.subscribe("application-loaded", function(e) {
+    showApplication(e.applicationDetails);
+    updateWindowTitle(e.applicationDetails.application.title);
   });
 
   function NeighborStatusModel() {
