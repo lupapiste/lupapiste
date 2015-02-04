@@ -613,7 +613,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
           option.selected = "selected";
         }
         select.appendChild(option);
-    });
+      })
+      .value();
 
     if (otherKey) {
       option = document.createElement("option");

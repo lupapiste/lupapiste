@@ -41,7 +41,7 @@
       initialized: ko.observable(false)
     };
 
-    _(self.filter).each(function(o) { o.subscribe(redraw); });
+    _(self.filter).each(function(o) { o.subscribe(redraw); }).value();
 
     self.searchField = ko.observable();
     self.searchField.subscribe(_.debounce(self.filter.search, 500));
