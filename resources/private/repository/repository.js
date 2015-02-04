@@ -1,6 +1,8 @@
 var repository = (function() {
   "use strict";
 
+  var currentlyLoadingId = null;
+
   var loadingSchemas = ajax
     .query("schemas")
     .error(function(e) { error("can't load schemas", e); })
@@ -79,7 +81,9 @@ var repository = (function() {
         }
       }
 
-      if (application) {
+      if (application && application.id === currentlyLoadingId) {
+        currentlyLoadingId = null;
+
         _.each(application.documents || [], function(doc) {
           setOperation(application, doc);
           setSchema(doc);
@@ -104,6 +108,8 @@ var repository = (function() {
         if (_.isFunction(callback)) {
           callback(application);
         }
+      } else {
+        error("No application or concurrent loading issue, old id = " + currentlyLoadingId);
       }
     });
   }
@@ -111,6 +117,10 @@ var repository = (function() {
   // debounce repository load
   var load = _.debounce(
     function(id, pending, callback) {
+      if (currentlyLoadingId) {
+        error("Concurrent application loading detected: old=" + currentlyLoadingId  + ", new=" + id);
+      }
+      currentlyLoadingId = id;
       doLoad(id, pending, callback);
     }, 250);
 
