@@ -13,6 +13,10 @@
         <span class="close" data-bind="click: closeDialog"></span>
       </div>
       <div id="modal-dialog-content" class="content" data-bind="component: {name: contentName, params: contentParams}"></div>
+
+      <button id="modal-dialog-submit-button"
+              data-bind="click: submitButtonFunc, ltext: submitButtonTitleLoc, visible: submitButtonFunc && submitButtonTitleLoc()">
+
       <div class="footer">
         <a href="#" class="cancel" data-bind="click: closeDialog">
           <span data-bind="ltext: 'cancel'"></span>
