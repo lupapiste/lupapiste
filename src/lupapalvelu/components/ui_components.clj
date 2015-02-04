@@ -46,7 +46,7 @@
    :cdn-fallback   {:js ["jquery-1.8.3.min.js" "jquery-ui-1.10.2.min.js" "jquery.dataTables.min.js"]}
    :jquery         {:js ["jquery.ba-hashchange.js" "jquery.metadata-2.1.js" "jquery.cookie.js" "jquery.caret.js"]}
    :jquery-upload  {:js ["jquery.ui.widget.js" "jquery.iframe-transport.js" "jquery.fileupload.js"]}
-   :knockout       {:js ["knockout-3.2.0.min.js" "knockout.mapping-2.4.1.js" "knockout.validation-2.0.0-pre.3.js" "knockout-repeat-2.0.0.js"]}
+   :knockout       {:js ["knockout-3.2.0.min.js" "knockout.mapping-2.4.1.js" "knockout.validation.min.js" "knockout-repeat-2.0.0.js"]}
    :lo-dash        {:js ["lodash-1.3.1.min.js"]}
    :underscore     {:depends [:lo-dash]
                     :js ["underscore.string.min.js" "underscore.string.init.js"]}
@@ -169,8 +169,8 @@
                          "change-location.html" "invite-company.html" "foreman-template.html"]}
 
    :applications {:depends [:common-html :repository :invites]
-                  :html ["applications.html"]
-                  :js ["applications.js"]}
+                  :html ["applications-list.html"]
+                  :js ["applications-list.js"]}
 
    :statement    {:depends [:common-html :repository :side-panel]
                   :js ["statement.js"]

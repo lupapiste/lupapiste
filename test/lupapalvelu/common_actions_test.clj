@@ -4,7 +4,7 @@
             [sade.core :refer :all]
             [lupapalvelu.test-util :refer :all]
             [lupapalvelu.action :refer :all]
-            [lupapalvelu.common-actions :as ca]))
+            [lupapalvelu.actions-api :as ca]))
 
 (testable-privates lupapalvelu.action user-is-not-allowed-to-access?)
 

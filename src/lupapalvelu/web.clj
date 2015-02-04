@@ -19,6 +19,8 @@
             [sade.status :as status]
             [sade.strings :as ss]
             [lupapalvelu.action :refer [defcommand defquery] :as action]
+            [lupapalvelu.application-search-api]
+            [lupapalvelu.features-api]
             [lupapalvelu.i18n :refer [*lang*] :as i18n]
             [lupapalvelu.user :as user]
             [lupapalvelu.singlepage :as singlepage]
@@ -28,13 +30,13 @@
             [lupapalvelu.organization]
             [lupapalvelu.application :as application]
             [lupapalvelu.foreman-api :as foreman-api]
-            [lupapalvelu.pdf-export :as pdf-export]
+            [lupapalvelu.pdf-export-api]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.token :as token]
             [lupapalvelu.activation :as activation]
             [lupapalvelu.logging :refer [with-logging-context]]
             [lupapalvelu.neighbors]
-            [lupapalvelu.idf.idf-server :as idf-server]))
+            [lupapalvelu.idf.idf-api :as idf-api]))
 
 ;;
 ;; Helpers
@@ -530,7 +532,7 @@
           email puhelin katuosoite postinumero postitoimipaikka
           suoramarkkinointilupa ammattilainen
           app id ts mac]}
-  (idf-server/handle-create-user-request etunimi sukunimi
+  (idf-api/handle-create-user-request etunimi sukunimi
           email puhelin katuosoite postinumero postitoimipaikka
           suoramarkkinointilupa ammattilainen
           app id ts mac))

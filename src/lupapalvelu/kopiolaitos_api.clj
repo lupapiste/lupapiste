@@ -1,4 +1,4 @@
-(ns lupapalvelu.kopiolaitos_api
+(ns lupapalvelu.kopiolaitos-api
   (:require [sade.core :refer [ok fail]]
             [sade.util :as util]
             [lupapalvelu.action :refer [defquery defcommand update-application notify] :as action]
