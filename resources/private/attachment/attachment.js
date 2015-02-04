@@ -333,9 +333,6 @@ var attachment = (function() {
     attachmentTypeSelect.initSelectList(selectList$, application.allowedAttachmentTypes, model.attachmentType());
     selectList$.change(function(e) {model.attachmentType($(e.target).val());});
 
-    model.application.id(applicationId);
-    model.application.title(application.title);
-    model.application.state(application.state);
     model.id = attachmentId;
 
     approveModel.setApplication(application);
