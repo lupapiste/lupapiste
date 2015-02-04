@@ -2,12 +2,18 @@ LUPAPISTE.StampModel = function(params) {
   "use strict";
   var self = this;
 
+  function hasValidVersions(a) {
+    // For stamped attachment, original version should exist
+    var versions = _(a.versions).reverse().value();
+    return versions[0].stamped ? (versions[1] ? true : false) : true;
+  }
+
   function stampableAttachment(a) {
     var ct = "";
     if (a.latestVersion) {
       ct = a.latestVersion.contentType;
     }
-    return _.contains(LUPAPISTE.config.stampableMimes, ct);
+    return _.contains(LUPAPISTE.config.stampableMimes, ct) && hasValidVersions(a);
   }
 
   function enhanceAttachment(a) {
@@ -123,7 +129,9 @@ LUPAPISTE.StampModel = function(params) {
     self.transparency(transparencies[0].value);
   }
 
-
+  function getSection() {
+    return self.section() === "\u00a7" ? "" : self.section();
+  }
 
   self.start = function() {
     self.status(self.statusStarting);
@@ -140,7 +148,7 @@ LUPAPISTE.StampModel = function(params) {
         extraInfo: self.extraInfo(),
         buildingId: self.buildingId() ? self.buildingId() : "",
         kuntalupatunnus: self.kuntalupatunnus(),
-        section: self.section()
+        section: getSection()
       })
       .success(self.started)
       .call();

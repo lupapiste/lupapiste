@@ -24,24 +24,7 @@ var LUPAPISTE = LUPAPISTE || {};
     self.currentHash = undefined;
 
     // Global models
-    self.models = [];
-
-    /**
-     * Get or set model object.
-     * @param {Object} name  Model name must be given
-     * @param {Object} model Optional model object to set
-     */
-    self.model = function(name, model) {
-      if (!name) {
-        throw "Model name must not be falsey!";
-      }
-
-      if (model !== undefined) {
-        self.models[name] = model;
-      }
-
-      return self.models[name];
-    };
+    self.models = {};
 
     /**
      * Prepends given title to browser window title.
@@ -49,11 +32,7 @@ var LUPAPISTE = LUPAPISTE || {};
      * @param {String} title
      */
     self.setTitle = function(title) {
-      if (title) {
-        document.title = title + " - " + self.defaultTitle;
-      } else {
-        document.title = self.defaultTitle;
-      }
+      document.title = _.compact([title, self.defaultTitle]).join(" - ");
     };
 
     /**
