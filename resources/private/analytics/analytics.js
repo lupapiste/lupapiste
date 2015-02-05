@@ -18,7 +18,7 @@
 
   hub.subscribe("page-load", function(e) {
     var nonIdParts = _.filter(e.pagePath, function(s) {
-      return !s.match(/^([a-z0-9]{24}|LP-\d{3}-\d{4}-\d{5})$/);
+      return !s.match(/^([a-z0-9]{24}|[a-zA-Z0-9]{48}|LP-\d{3}-\d{4}-\d{5})$/);
     });
     var page = ["", e.pageId].concat(nonIdParts).join("/");
     ga("send", "pageview", page);
