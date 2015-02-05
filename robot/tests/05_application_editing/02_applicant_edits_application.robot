@@ -57,9 +57,11 @@ Huoneistot info for Uusirakennus is correct
 
 Mikko removes apartment
   Wait Until  Element Should Be Visible  //div[@id='application-info-tab']//span[@data-test-class="delete-schemas.huoneistot"]
-  Execute Javascript  $("span[data-test-class='delete-schemas.huoneistot']").click();
+  Wait Until  Element Should Be Visible  xpath=//tr[@data-repeating-id-huoneistot='0']
+  Execute Javascript  $("tr[data-repeating-id-huoneistot='0']").find("span[data-test-class='delete-schemas.huoneistot']").click();
   Confirm  dynamic-yes-no-confirm-dialog
-  Wait Until  Element Should Not Be Visible  //div[@id='application-info-tab']//span[@data-test-class="delete-schemas.huoneistot"]
+  Wait Until  Element Should Not Be Visible  xpath=//tr[@data-repeating-id-huoneistot='0']
+  Xpath Should Match X Times  //div[@id='application-info-tab']//tr[@data-repeating-id="huoneistot"]  1
 
 Mikko goes to parties tab of an application
   Open tab  parties

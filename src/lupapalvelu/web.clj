@@ -30,6 +30,7 @@
             [lupapalvelu.organization]
             [lupapalvelu.application :as application]
             [lupapalvelu.foreman-api :as foreman-api]
+            [lupapalvelu.open-inforequest-api]
             [lupapalvelu.pdf-export-api]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.token :as token]

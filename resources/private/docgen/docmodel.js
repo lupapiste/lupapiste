@@ -151,8 +151,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         }));
       }
       if (listenEvent === "muutostapaChanged") {
-        var prefix = path.split(".");
-        prefix.pop();
+        var prefix = _.dropRight(path.split("."));
         self.subscriptions.push(hub.subscribe({type: listenEvent, path: prefix.join(".")}, function(event) {
           $(element).prop("disabled", _.isEmpty(event.value));
         }));
@@ -586,7 +585,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }
     select.appendChild(option);
 
-    _(subSchema.body)
+    var options = _(subSchema.body)
       .map(function(e) {
         var locKey = self.schemaI18name + "." + myPath.replace(/\.\d+\./g, ".") + "." + e.name;
         if (e.i18nkey) {
@@ -603,16 +602,17 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
           }
           // lo-dash API doc tells that the sort is stable, so returning a static value equals to no sorting
           return 0;
-      })
-      .forEach(function(e) {
-        var name = e[0];
-        var option = document.createElement("option");
-        option.value = name;
-        option.appendChild(document.createTextNode(e[1]));
-        if (selectedOption === name) {
-          option.selected = "selected";
-        }
-        select.appendChild(option);
+      }).value();
+
+    options.forEach(function(e) {
+      var name = e[0];
+      var option = document.createElement("option");
+      option.value = name;
+      option.appendChild(document.createTextNode(e[1]));
+      if (selectedOption === name) {
+        option.selected = "selected";
+      }
+      select.appendChild(option);
     });
 
     if (otherKey) {
@@ -1453,12 +1453,11 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         hub.send(event, {code: code});
       }
     },
-    hetuChanged: function(event, value, path, subSchema, sendLater) {
+    hetuChanged: function(event, value) {
       hub.send(event, {value: value});
     },
-    muutostapaChanged: function(event, value, path, subSchema, sendLater) {
-        var prefix = path.split(".");
-        prefix.pop();
+    muutostapaChanged: function(event, value, path) {
+      var prefix = _.dropRight(path.split("."));
       hub.send(event, {path: prefix.join("."), value: value});
     },
     emitUnknown: function(event) {

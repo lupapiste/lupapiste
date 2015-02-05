@@ -155,6 +155,7 @@
         locked: true,
         authority: currentUser.isAuthority()
       });
+      LUPAPISTE.ModalDialog.open("#upload-dialog");
     };
   }
 
