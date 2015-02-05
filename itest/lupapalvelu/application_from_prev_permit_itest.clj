@@ -7,7 +7,7 @@
             [lupapalvelu.factlet  :refer :all]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.fixture :as fixture]
+            [lupapalvelu.fixture.core :as fixture]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch-api]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]))
