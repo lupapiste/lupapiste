@@ -183,7 +183,7 @@ LUPAPISTE.StampModel = function(params) {
         _(self.selectedFiles()).filter({id: attachmentId}).each(function(f) {
           f.status(newStatus);
           f.fileId(fileId);
-        });
+        }).value();
       });
 
       if (update.status === "done") {
