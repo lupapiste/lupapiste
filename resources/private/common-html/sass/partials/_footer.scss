@@ -1,7 +1,8 @@
 footer {
-  margin-top: $marginL;
+  margin-top: $marginL*3;
   padding-top: $marginL;
   position: relative;
+  clear:both;
   color: white;
   background-color: $lp-dark-grey;
   height: auto;

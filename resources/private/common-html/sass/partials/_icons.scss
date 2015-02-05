@@ -2,6 +2,7 @@
 .icon, .icon-small, .icon-tiny, .icon-large, .ui-icon {
   display: inline-block;
   @include spite-bg;
+  overflow: hidden;
 }
 
 $spritegrid: 100px;
@@ -10,6 +11,7 @@ $spritegrid: 100px;
 .icon {
   height: 20px;
   width: 20px;
+  overflow: hidden;
   &.inline-left {
     margin-right: 6px;
     float: left;
