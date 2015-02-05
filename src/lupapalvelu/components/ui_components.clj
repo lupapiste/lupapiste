@@ -20,6 +20,7 @@
 
 (defn- conf []
   (let [js-conf {:maps              (env/value :maps)
+                 :analytics         (env/value :analytics)
                  :fileExtensions    mime/allowed-extensions
                  :passwordMinLength (env/value :password :minlength)
                  :mode              env/mode
@@ -47,7 +48,7 @@
    :jquery         {:js ["jquery.ba-hashchange.js" "jquery.metadata-2.1.js" "jquery.cookie.js" "jquery.caret.js"]}
    :jquery-upload  {:js ["jquery.ui.widget.js" "jquery.iframe-transport.js" "jquery.fileupload.js"]}
    :knockout       {:js ["knockout-3.2.0.min.js" "knockout.mapping-2.4.1.js" "knockout.validation.min.js" "knockout-repeat-2.0.0.js"]}
-   :lo-dash        {:js ["lodash-1.3.1.min.js"]}
+   :lo-dash        {:js ["lodash.min.js"]}
    :underscore     {:depends [:lo-dash]
                     :js ["underscore.string.min.js" "underscore.string.init.js"]}
    :moment         {:js ["moment.min.js"]}
@@ -85,6 +86,10 @@
                   :html ["404.html" "footer.html"]}
 
    ;; Components to be included in a SPA
+
+   :analytics    {:js ["analytics.js"]}
+
+   :global-models {:js ["application-model.js" "register-models.js"]}
 
    :screenmessages  {:js   ["screenmessage.js"]
                      :html ["screenmessage.html"]}
@@ -160,17 +165,17 @@
                           "checkbox/checkbox-template.html"
                           "modal-dialog/modal-dialog-template.html"]}
 
-   :application  {:depends [:common-html :repository :tree :task :create-task :modal-datepicker :signing :invites :side-panel :verdict-attachment-prints :ui-components]
+   :application  {:depends [:common-html :global-models :repository :tree :task :create-task :modal-datepicker :signing :invites :side-panel :verdict-attachment-prints :ui-components]
                   :js ["add-link-permit.js" "map-model.js" "change-location.js" "invite.js" "verdicts-model.js"
                        "add-operation.js" "foreman-model.js"
-                       "request-statement-model.js" "add-party.js" "attachments-tab-model.js" "application-model.js"
+                       "request-statement-model.js" "add-party.js" "attachments-tab-model.js"
                        "invite-company.js" "application.js"]
                   :html ["attachment-actions-template.html" "attachments-template.html" "add-link-permit.html" "application.html" "inforequest.html" "add-operation.html"
                          "change-location.html" "invite-company.html" "foreman-template.html"]}
 
    :applications {:depends [:common-html :repository :invites]
-                  :html ["applications.html"]
-                  :js ["applications.js"]}
+                  :html ["applications-list.html"]
+                  :js ["applications-list.js"]}
 
    :statement    {:depends [:common-html :repository :side-panel]
                   :js ["statement.js"]
@@ -228,6 +233,9 @@
                     :js ["password-reset.js"]
                     :html ["password-reset.html"]}
 
+   :integration-error {:js [ "integration-error.js"]
+                       :html ["integration-error.html"]}
+
    ;; Single Page Apps and standalone components:
    ;; (compare to auth-methods in web.clj)
 
@@ -238,46 +246,48 @@
                   :js ["upload.js"]
                   :css ["upload.css"]}
 
-   :applicant    {:depends [:common-html :authenticated :map :applications :application
-                            :statement :docgen :create :mypage :user-menu :debug
-                            :company]
-                  :js ["applicant.js"]
-                  :html ["index.html"]}
+   :applicant-app {:js ["applicant.js"]}
+   :applicant     {:depends [:applicant-app
+                             :common-html :authenticated :map :applications :application
+                             :statement :docgen :create :mypage :user-menu :debug
+                             :company :analytics]}
 
-   :authority    {:depends [:common-html :authenticated :map :applications :notice :application
-                            :statement :verdict :neighbors :docgen :create :mypage :user-menu :debug
-                            :company :stamp]
-                  :js ["authority.js" "integration-error.js"]
-                  :html ["index.html" "integration-error.html"]}
+   :authority-app {:js ["authority.js"]}
+   :authority     {:depends [:authority-app :common-html :authenticated :map :applications :notice :application
+                             :statement :verdict :neighbors :docgen :create :mypage :user-menu :debug
+                             :company :stamp :integration-error :analytics]}
 
-   :oir          {:depends [:common-html :authenticated :map :application :attachment
-                            :docgen :debug :notice]
-                  :js ["oir.js"]
-                  :css ["oir.css"]
-                  :html ["index.html"]}
+   :oir-app {:js ["oir.js"]}
+   :oir     {:depends [:oir-app :common-html :authenticated :map :application :attachment
+                       :docgen :debug :notice :analytics]
+             :css ["oir.css"]}
 
-   :authority-admin {:depends [:common-html :authenticated :admins :mypage :user-menu :debug]
-                     :js ["admin.js" schema-versions-by-permit-type]
-                     :html ["index.html" "admin.html"]}
+   :authority-admin-app {:js ["authority-admin.js"]}
+   :authority-admin     {:depends [:authority-admin-app :common-html :authenticated :admins :mypage :user-menu :debug :analytics]
+                         :js ["admin.js" schema-versions-by-permit-type]
+                         :html ["admin.html"]}
 
-   :admin   {:depends [:common-html :authenticated :admins :map :mypage :user-menu :debug]
-             :css ["admin.css"]
-             :js ["admin.js" "admin-users.js" "organizations.js" "companies.js" "features.js" "actions.js" "screenmessages-list.js"]
-             :html ["index.html" "admin.html"
-                    "admin-users.html" "organizations.html" "companies.html" "features.html" "actions.html"
-                    "screenmessages-list.html"]}
+   :admin-app {:js ["admin.js"]}
+   :admin     {:depends [:admin-app :common-html :authenticated :admins :map :mypage :user-menu :debug]
+               :css ["admin.css"]
+               :js ["admin-users.js" "organizations.js" "companies.js" "features.js" "actions.js" "screenmessages-list.js"]
+               :html ["index.html" "admin.html"
+                      "admin-users.html" "organizations.html" "companies.html" "features.html" "actions.html"
+                      "screenmessages-list.html"]}
 
    :wordpress {:depends [:login :password-reset]}
 
-   :welcome {:depends [:login :register :link-account :debug :user-menu :screenmessages :password-reset]
-             :js ["welcome.js" "company-user.js"]
+   :welcome-app {:js ["welcome.js"]}
+   :welcome {:depends [:welcome-app :login :register :link-account :debug :user-menu :screenmessages :password-reset :analytics]
+             :js ["company-user.js"]
              :html ["index.html" "login.html" "company-user.html"]}
 
    :oskari  {:css ["oskari.css"]}
 
-   :neighbor {:depends [:common-html :map :debug :docgen :debug :user-menu :screenmessages]
-              :html ["neighbor-show.html" "index.html"]
-              :js ["neighbor-app.js" "neighbor-show.js"]}})
+   :neighbor-app {:js ["neighbor-app.js"]}
+   :neighbor {:depends [:neighbor-app :common-html :map :debug :docgen :debug :user-menu :screenmessages :analytics]
+              :html ["neighbor-show.html"]
+              :js ["neighbor-show.js"]}})
 
 ; Make sure all dependencies are resolvable:
 (doseq [[component {dependencies :depends}] ui-components

@@ -278,12 +278,12 @@
 
     self.autocompleteSelect = function(e, data) {
       var item = data.item;
-      _(handlers).filter(selector(item)).map(toHandler).each(invoker(item));
+      _(handlers).filter(selector(item)).map(toHandler).each(invoker(item)).value();
       return false;
     };
 
     self.autocompleteRender = function(ul, data) {
-      var element = _(renderers).filter(selector(data)).first(1).map(toHandler).map(invoker(data)).value();
+      var element = _(renderers).filter(selector(data)).take(1).map(toHandler).map(invoker(data)).value();
       return $("<li>")
         .append(element)
         .appendTo(ul);

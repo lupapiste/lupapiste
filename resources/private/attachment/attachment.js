@@ -5,6 +5,7 @@ var attachment = (function() {
   var uploadingApplicationId = null;
   var attachmentId = null;
   var model = null;
+  var applicationModel = lupapisteApp.models.application;
 
   var authorizationModel = authorization.create();
   var signingModel = new LUPAPISTE.SigningModel("#dialog-sign-attachment", false);
@@ -98,11 +99,7 @@ var attachment = (function() {
 
   model = {
     id:   ko.observable(),
-    application: {
-      id:     ko.observable(),
-      title:  ko.observable(),
-      state:  ko.observable()
-    },
+    application: applicationModel,
     applicationState:     ko.observable(),
     authorized:           ko.observable(false),
     filename:             ko.observable(),
@@ -292,11 +289,14 @@ var attachment = (function() {
     }
   }
 
-  function showAttachment(applicationDetails) {
-    var application = applicationDetails.application;
+  function showAttachment() {
     if (!applicationId || !attachmentId) { return; }
 
+    var application = applicationModel._js;
+
     lupapisteApp.setTitle(application.title);
+
+    unsubscribe();
 
     var attachment = _.find(application.attachments, function(value) {return value.id === attachmentId;});
     if (!attachment) {
@@ -333,9 +333,6 @@ var attachment = (function() {
     attachmentTypeSelect.initSelectList(selectList$, application.allowedAttachmentTypes, model.attachmentType());
     selectList$.change(function(e) {model.attachmentType($(e.target).val());});
 
-    model.application.id(applicationId);
-    model.application.title(application.title);
-    model.application.state(application.state);
     model.id = attachmentId;
 
     approveModel.setApplication(application);
@@ -354,6 +351,8 @@ var attachment = (function() {
         }, 1500);
       }
     });
+
+    subscribe();
   }
 
   hub.onPageLoad("attachment", function(e) {
@@ -362,16 +361,15 @@ var attachment = (function() {
     model.showHelp(false);
     applicationId = e.pagePath[0];
     attachmentId = e.pagePath[1];
-    repository.load(applicationId);
-  });
 
-  repository.loaded(["attachment"], function(application, applicationDetails) {
-    if (applicationId === application.id) {
-      unsubscribe();
-      showAttachment(applicationDetails);
-      subscribe();
+    if (applicationModel._js.id !== applicationId) {
+      repository.load(applicationId);
+    } else {
+      showAttachment();
     }
   });
+
+  hub.subscribe("application-model-updated", showAttachment);
 
   function resetUploadIframe() {
     var originalUrl = $("#uploadFrame").attr("data-src");

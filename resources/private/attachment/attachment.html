@@ -50,7 +50,6 @@
                 <button
                     id="add-new-attachment-version"
                     class="btn-primary"
-                    data-window-id="upload-dialog"
                     data-bind="click: newAttachmentVersion, visible: $root.authorization.ok('upload-attachment') && editable">
                   <span data-bind="ltext: 'attachment.addVersion', visible: latestVersion"></span>
                   <span data-bind="ltext: 'attachment.addFile', visible: !latestVersion()"></span>
