@@ -8,7 +8,7 @@
             [sade.security-headers :as headers]
             [sade.email :as email]
             [sade.dummy-email-server]
-            [lupapalvelu.fixture :as fixture]
+            [lupapalvelu.fixture.fixture-api]
             [lupapalvelu.fixture.minimal]
             [lupapalvelu.fixture.municipality-test-users]
             [lupapalvelu.mongo :as mongo]
