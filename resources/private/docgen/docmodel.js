@@ -1466,9 +1466,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   };
 
   function emit(target, subSchema, sendLater) {
-    var value = target.value;
-    var path = $(target).attr("data-docgen-path");
     if (subSchema.emit) {
+      var value = target.value;
+      var path = $(target).attr("data-docgen-path");
       _.forEach(subSchema.emit, function(event) {
         var emitter = emitters[event] || emitters.emitUnknown;
         emitter(event, value, path, subSchema, sendLater);
