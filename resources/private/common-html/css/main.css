@@ -214,11 +214,9 @@ html.no-scroll {
 /* line 41, ../sass/partials/_base.scss */
 body {
   min-width: 820px;
-  min-height: 100%;
-  height: 100%;
 }
 
-/* line 46, ../sass/partials/_base.scss */
+/* line 44, ../sass/partials/_base.scss */
 .container {
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
@@ -229,41 +227,41 @@ body {
   margin: 24px auto 24px auto;
   position: relative;
 }
-/* line 53, ../sass/partials/_base.scss */
+/* line 51, ../sass/partials/_base.scss */
 .container .content {
   width: 100%;
 }
-/* line 56, ../sass/partials/_base.scss */
+/* line 54, ../sass/partials/_base.scss */
 .container .content-narrow {
   width: 68%;
 }
-/* line 60, ../sass/partials/_base.scss */
+/* line 58, ../sass/partials/_base.scss */
 .container .sidebar {
   width: 18%;
 }
 
-/* line 65, ../sass/partials/_base.scss */
+/* line 63, ../sass/partials/_base.scss */
 .page {
   display: none;
   margin-top: 0;
 }
 
-/* line 70, ../sass/partials/_base.scss */
+/* line 68, ../sass/partials/_base.scss */
 .clear {
   clear: both;
 }
 
-/* line 74, ../sass/partials/_base.scss */
+/* line 72, ../sass/partials/_base.scss */
 .spacerM {
   margin-bottom: 12px;
 }
 
-/* line 78, ../sass/partials/_base.scss */
+/* line 76, ../sass/partials/_base.scss */
 .right {
   float: right;
 }
 
-/* line 82, ../sass/partials/_base.scss */
+/* line 80, ../sass/partials/_base.scss */
 .left {
   float: left;
 }
@@ -395,158 +393,156 @@ a:active, a:visited, a:hover {
   display: inline-block;
   background-image: url("/img/icons-sprite-1.14.png");
   background-repeat: no-repeat;
-  overflow: hidden;
 }
 
-/* line 11, ../sass/partials/_icons.scss */
+/* line 8, ../sass/partials/_icons.scss */
 .icon {
   height: 20px;
   width: 20px;
-  overflow: hidden;
 }
-/* line 15, ../sass/partials/_icons.scss */
+/* line 11, ../sass/partials/_icons.scss */
 .icon.inline-left {
   margin-right: 6px;
   float: left;
   margin-top: 6px;
 }
-/* line 20, ../sass/partials/_icons.scss */
+/* line 16, ../sass/partials/_icons.scss */
 .icon.inline-right {
   margin-right: 6px;
   float: right;
   margin-top: 6px;
 }
-/* line 26, ../sass/partials/_icons.scss */
-.icon.document-white {
+/* line 22, ../sass/partials/_icons.scss */
+.icon.document-orange {
   background-position: 0px 0px;
-  width: 14px;
-  height: 18px;
+  width: 24px;
+  height: 24px;
 }
-/* line 31, ../sass/partials/_icons.scss */
-.icon.document-dark {
+/* line 27, ../sass/partials/_icons.scss */
+.icon.logout {
   background-position: 0px -100px;
-  width: 14px;
-  height: 18px;
+  width: 24px;
+  height: 24px;
 }
-/* line 36, ../sass/partials/_icons.scss */
-.icon.person-white {
+/* line 32, ../sass/partials/_icons.scss */
+.icon.person-orange {
   background-position: 0px -200px;
-  width: 18px;
-  height: 18px;
+  width: 24px;
+  height: 24px;
 }
-/* line 41, ../sass/partials/_icons.scss */
-.icon.person-dark {
+/* line 37, ../sass/partials/_icons.scss */
+.icon.drill-down-orange {
   background-position: 0px -300px;
   width: 18px;
   height: 18px;
 }
-/* line 46, ../sass/partials/_icons.scss */
+/* line 42, ../sass/partials/_icons.scss */
 .icon.drill-right-orange {
   background-position: 0px -400px;
   width: 12px;
   height: 12px;
 }
-/* line 51, ../sass/partials/_icons.scss */
+/* line 47, ../sass/partials/_icons.scss */
 .icon.drill-right-grey {
   background-position: 0px -500px;
   width: 12px;
   height: 12px;
 }
-/* line 56, ../sass/partials/_icons.scss */
+/* line 52, ../sass/partials/_icons.scss */
 .icon.drill-right-black {
   background-position: 0px -600px;
   width: 12px;
   height: 12px;
 }
-/* line 61, ../sass/partials/_icons.scss */
+/* line 57, ../sass/partials/_icons.scss */
 .icon.drill-right-white {
   background-position: 0px -700px;
   width: 12px;
   height: 12px;
 }
-/* line 66, ../sass/partials/_icons.scss */
+/* line 62, ../sass/partials/_icons.scss */
 .icon.drill-down-grey {
   background-position: 0px -800px;
   width: 12px;
   height: 12px;
 }
-/* line 71, ../sass/partials/_icons.scss */
+/* line 67, ../sass/partials/_icons.scss */
 .icon.drill-down-white {
   background-position: 0px -900px;
   width: 12px;
   height: 12px;
 }
-/* line 76, ../sass/partials/_icons.scss */
+/* line 72, ../sass/partials/_icons.scss */
 .icon.drill-down-black {
   background-position: 0px -5700px;
   width: 12px;
   height: 12px;
 }
-/* line 81, ../sass/partials/_icons.scss */
+/* line 77, ../sass/partials/_icons.scss */
 .icon.drill-left-grey {
   background-position: 0px -1600px;
   width: 12px;
   height: 12px;
 }
-/* line 86, ../sass/partials/_icons.scss */
+/* line 82, ../sass/partials/_icons.scss */
 .icon.drill-left-black {
   background-position: 0px -1700px;
   width: 12px;
   height: 12px;
 }
-/* line 91, ../sass/partials/_icons.scss */
+/* line 87, ../sass/partials/_icons.scss */
 .icon.drill-left-all-black {
   background-position: 0px -2000px;
   width: 10px;
   height: 12px;
 }
-/* line 96, ../sass/partials/_icons.scss */
+/* line 92, ../sass/partials/_icons.scss */
 .icon.drill-left-black-bigger {
   background-position: 0px -3100px;
   width: 12px;
   height: 12px;
 }
-/* line 101, ../sass/partials/_icons.scss */
+/* line 97, ../sass/partials/_icons.scss */
 .icon.add {
   background-position: 0px -2200px;
   width: 15px;
   height: 15px;
 }
-/* line 106, ../sass/partials/_icons.scss */
+/* line 102, ../sass/partials/_icons.scss */
 .icon.search {
   background-position: 0px -2300px;
   width: 14px;
   height: 14px;
 }
-/* line 111, ../sass/partials/_icons.scss */
+/* line 107, ../sass/partials/_icons.scss */
 .icon.missing {
   background-position: 0px -2400px;
   width: 16px;
   height: 16px;
 }
-/* line 116, ../sass/partials/_icons.scss */
+/* line 112, ../sass/partials/_icons.scss */
 .icon.ok {
   background-position: 0px -2500px;
   width: 16px;
   height: 16px;
 }
-/* line 121, ../sass/partials/_icons.scss */
+/* line 117, ../sass/partials/_icons.scss */
 .icon.info-indicator {
   background-position: 0px -2600px;
   width: 16px;
   height: 16px;
 }
-/* line 126, ../sass/partials/_icons.scss */
+/* line 122, ../sass/partials/_icons.scss */
 .icon.remove {
   background-position: 0px -2700px;
   width: 15px;
   height: 15px;
 }
-/* line 131, ../sass/partials/_icons.scss */
+/* line 127, ../sass/partials/_icons.scss */
 .icon.wait {
   background-position: 0px -2800px;
 }
-/* line 134, ../sass/partials/_icons.scss */
+/* line 130, ../sass/partials/_icons.scss */
 .icon.info-big {
   background-position: 0px -2900px;
   width: 30px;
@@ -554,132 +550,122 @@ a:active, a:visited, a:hover {
   margin-left: -6px;
   margin-bottom: -6px;
 }
-/* line 141, ../sass/partials/_icons.scss */
+/* line 137, ../sass/partials/_icons.scss */
 .icon.help {
   background-position: 0px -2900px;
   width: 30px;
   height: 32px;
 }
-/* line 146, ../sass/partials/_icons.scss */
+/* line 142, ../sass/partials/_icons.scss */
 .icon.new {
   background-position: 0px -3000px;
   width: 16px;
   height: 16px;
 }
-/* line 151, ../sass/partials/_icons.scss */
+/* line 147, ../sass/partials/_icons.scss */
 .icon.print {
   background-position: 0px -3500px;
   width: 16px;
   height: 15px;
 }
-/* line 156, ../sass/partials/_icons.scss */
+/* line 152, ../sass/partials/_icons.scss */
 .icon.send {
   background-position: 0px -3600px;
   height: 15px;
   width: 17px;
 }
-/* line 161, ../sass/partials/_icons.scss */
+/* line 157, ../sass/partials/_icons.scss */
 .icon.approve {
   background-position: 0px -3700px;
   height: 17px;
   width: 17px;
 }
-/* line 166, ../sass/partials/_icons.scss */
+/* line 162, ../sass/partials/_icons.scss */
 .icon.stamp {
   background-position: 0px -3800px;
   height: 16px;
   width: 16px;
 }
-/* line 171, ../sass/partials/_icons.scss */
+/* line 167, ../sass/partials/_icons.scss */
 .icon.add-grey {
   background-position: 0px -3900px;
   height: 16px;
   width: 16px;
 }
-/* line 176, ../sass/partials/_icons.scss */
+/* line 172, ../sass/partials/_icons.scss */
 .icon.complement {
   background-position: 0px -4000px;
   height: 16px;
   width: 16px;
 }
-/* line 181, ../sass/partials/_icons.scss */
+/* line 177, ../sass/partials/_icons.scss */
 .icon.remove-grey {
   background-position: 0px -4100px;
   cursor: pointer;
   height: 16px;
   width: 16px;
 }
-/* line 187, ../sass/partials/_icons.scss */
+/* line 183, ../sass/partials/_icons.scss */
 .icon.edit {
   background-position: 0px -4200px;
   cursor: pointer;
 }
-/* line 191, ../sass/partials/_icons.scss */
+/* line 187, ../sass/partials/_icons.scss */
 .icon.refresh-grey {
   background-position: 0px -4697px;
   width: 16px;
   height: 16px;
 }
-/* line 196, ../sass/partials/_icons.scss */
+/* line 192, ../sass/partials/_icons.scss */
 .icon.signed {
   background-position: 0px -4900px;
   width: 18px;
   height: 18px;
 }
-/* line 201, ../sass/partials/_icons.scss */
+/* line 197, ../sass/partials/_icons.scss */
 .icon.signed-white {
   background-position: 0px -5800px;
   width: 16px;
   height: 16px;
 }
-/* line 206, ../sass/partials/_icons.scss */
+/* line 202, ../sass/partials/_icons.scss */
 .icon.stamped {
   background-position: 0px -5000px;
   height: 18px;
   width: 18px;
 }
-/* line 211, ../sass/partials/_icons.scss */
+/* line 207, ../sass/partials/_icons.scss */
 .icon.transfered {
   background-position: 0px -5100px;
   height: 17px;
   width: 25px;
 }
-/* line 216, ../sass/partials/_icons.scss */
+/* line 212, ../sass/partials/_icons.scss */
 .icon.mark-seen {
   background-position: 0px -5200px;
   width: 25px;
   height: 15px;
 }
-/* line 221, ../sass/partials/_icons.scss */
+/* line 217, ../sass/partials/_icons.scss */
 .icon.urgent {
   width: 24px;
   height: 24px;
   background-position: 0px -5300px;
 }
-/* line 226, ../sass/partials/_icons.scss */
+/* line 222, ../sass/partials/_icons.scss */
 .icon.hold {
   width: 24px;
   height: 24px;
   background-position: 0px -5500px;
 }
-/* line 231, ../sass/partials/_icons.scss */
+/* line 227, ../sass/partials/_icons.scss */
 .icon.verdict-attachment {
   width: 8px;
   height: 18px;
   background-position: 0px -5900px;
 }
-/* line 236, ../sass/partials/_icons.scss */
-.icon.scroll-up {
-  background-position: 0px -6100px;
-  width: 24px;
-  height: 19px;
-}
-/* line 243, ../sass/partials/_icons.scss */
-.icon:hover {
-  background-position-x: -100px;
-}
 
-/* line 255, ../sass/partials/_icons.scss */
+/* line 235, ../sass/partials/_icons.scss */
 [type=submit] .icon.left-align, .btn .icon.left-align, button .icon.left-align {
   position: absolute;
   left: 12px;
@@ -687,7 +673,7 @@ a:active, a:visited, a:hover {
   top: 0;
   margin: auto;
 }
-/* line 262, ../sass/partials/_icons.scss */
+/* line 242, ../sass/partials/_icons.scss */
 [type=submit] .icon.right-align, .btn .icon.right-align, button .icon.right-align {
   position: absolute;
   right: 6px;
@@ -696,9 +682,23 @@ a:active, a:visited, a:hover {
   margin: auto;
 }
 
-/* line 271, ../sass/partials/_icons.scss */
+/* line 251, ../sass/partials/_icons.scss */
 h1 .icon {
   margin-right: 3px;
+}
+
+/* line 257, ../sass/partials/_icons.scss */
+.ui-icon.ui-icon-circle-triangle-w {
+  background-image: url("/img/icons-sprite-1.14.png");
+  background-repeat: no-repeat;
+  background-position: 2px -3097px;
+}
+
+/* line 262, ../sass/partials/_icons.scss */
+.ui-icon.ui-icon-circle-triangle-e {
+  background-image: url("/img/icons-sprite-1.14.png");
+  background-repeat: no-repeat;
+  background-position: 4px -597px;
 }
 
 /* NAV
@@ -709,8 +709,8 @@ nav {
   top: 0;
   z-index: 1100;
   background: #fff;
-  height: 72px;
-  padding-bottom: 6px;
+  height: 60px;
+  box-sizing: border-box;
   width: 100%;
 }
 /* line 10, ../sass/partials/_header.scss */
@@ -719,81 +719,50 @@ nav.nav-wrapper {
   max-width: 1280px;
   margin: 0 auto;
   position: relative;
+  background: #4f4f4f;
 }
-/* line 15, ../sass/partials/_header.scss */
+/* line 16, ../sass/partials/_header.scss */
 nav.nav-wrapper .brand {
-  margin-top: 6px;
-  margin-left: 8px;
   position: relative;
   width: 300px;
   display: inline-block;
-  height: 64px;
 }
-/* line 22, ../sass/partials/_header.scss */
+/* line 20, ../sass/partials/_header.scss */
+nav.nav-wrapper .brand .logo {
+  margin: 12px;
+}
+/* line 23, ../sass/partials/_header.scss */
 nav.nav-wrapper .brand a img {
-  width: 234px;
-  height: 50px;
+  width: 164px;
+  height: 35px;
+  margin: 12px;
 }
-/* line 26, ../sass/partials/_header.scss */
+/* line 28, ../sass/partials/_header.scss */
 nav.nav-wrapper .brand .change-language {
-  color: #4f4f4f;
+  color: #f57e23;
   text-decoration: none;
+  display: inline-block;
   position: absolute;
-  right: 63px;
-  bottom: 5px;
-}
-/* line 34, ../sass/partials/_header.scss */
-nav.nav-wrapper .header-menu {
-  position: absolute;
-  top: 0;
-  right: 0;
+  top: 20px;
+  left: 200px;
 }
 /* line 38, ../sass/partials/_header.scss */
-nav.nav-wrapper .header-menu .main-nav {
-  width: 16.25em;
-  background: #4f4f4f;
-  height: 72px;
-  margin-right: 6px;
+nav.nav-wrapper .header-menu {
   display: inline-block;
-}
-/* line 44, ../sass/partials/_header.scss */
-nav.nav-wrapper .header-menu .main-nav span {
-  color: white;
-  text-decoration: none;
-  position: absolute;
-  bottom: 12px;
-  left: 24px;
-  font-size: 1.1em;
-}
-/* line 52, ../sass/partials/_header.scss */
-nav.nav-wrapper .header-menu .main-nav .icon {
-  left: 6px;
-  bottom: 16px;
-}
-/* line 59, ../sass/partials/_header.scss */
-nav.nav-wrapper .header-menu .user-menu {
-  display: inline-block;
-  width: 16.25em;
-  background: #4f4f4f;
-  height: 72px;
-  position: relative;
-}
-/* line 66, ../sass/partials/_header.scss */
-nav.nav-wrapper .header-menu .user-menu #user-name {
-  text-decoration: underline;
-}
-/* line 70, ../sass/partials/_header.scss */
-nav.nav-wrapper .header-menu .user-menu a {
-  color: white;
-  text-decoration: none;
   float: right;
-  margin: 12px 6px 0 0;
-  max-height: 24px;
-  overflow: hidden;
 }
-/* line 78, ../sass/partials/_header.scss */
-nav.nav-wrapper .header-menu .user-menu a + a {
-  margin: 6px 6px 6px 10em;
+/* line 41, ../sass/partials/_header.scss */
+nav.nav-wrapper .header-menu .header-box {
+  display: inline-block;
+  padding: 12px;
+  height: 60px;
+}
+/* line 45, ../sass/partials/_header.scss */
+nav.nav-wrapper .header-menu .header-box a, nav.nav-wrapper .header-menu .header-box span {
+  color: white;
+  font-size: 16px;
+  text-decoration: none;
+  vertical-align: middle;
 }
 
 /* Side bar styles*/
@@ -838,51 +807,78 @@ nav.nav-wrapper .header-menu .user-menu a + a {
 
 /* line 1, ../sass/partials/_footer.scss */
 footer {
-  margin-top: 72px;
-  padding-top: 24px;
-  position: relative;
+  margin-top: 48px;
+  padding-top: 72px;
   clear: both;
-  color: white;
-  background-color: #4f4f4f;
+  position: relative;
+  color: #777;
+  font-size: 1em;
+  padding: 24px;
+  background-image: url("/img/lp-footer.png");
+  background-repeat: repeat-x;
+  background-position: right top;
+  background-color: #e7e9e6;
   height: auto;
 }
-/* line 10, ../sass/partials/_footer.scss */
+/* line 14, ../sass/partials/_footer.scss */
 footer .informations {
-  padding: 12px;
-  width: 100%;
+  position: relative;
+  width: 80%;
   max-width: 1280px;
-  margin: 0 auto 12px;
+  margin: 48px auto 12px;
 }
-/* line 15, ../sass/partials/_footer.scss */
-footer .informations .footer-box {
-  font-size: 16px;
-  vertical-align: top;
-  width: 24.5%;
+/* line 19, ../sass/partials/_footer.scss */
+footer .informations div {
+  width: 33%;
   display: inline-block;
-  padding-right: 24px;
-  box-sizing: border-box;
 }
 /* line 22, ../sass/partials/_footer.scss */
-footer .informations .footer-box h3 {
-  font-size: 18px;
-  font-weight: bold;
+footer .informations div div, footer .informations div a {
+  display: block;
 }
 /* line 26, ../sass/partials/_footer.scss */
-footer .informations .footer-box a {
-  color: #f57e23;
-  display: block;
+footer .informations .user-information, footer .informations sade-information {
+  margin-top: 128px;
 }
-/* line 31, ../sass/partials/_footer.scss */
-footer .informations .footer-box.sade-box a {
+/* line 30, ../sass/partials/_footer.scss */
+footer .informations .sade-information a, footer .informations .sade-information span {
   display: inline;
+  width: auto;
 }
-
+/* line 35, ../sass/partials/_footer.scss */
+footer .informations .contact-information {
+  width: 33%;
+}
+/* line 37, ../sass/partials/_footer.scss */
+footer .informations .contact-information div {
+  display: inline-block;
+  width: 42%;
+}
 /* line 40, ../sass/partials/_footer.scss */
-#buildinfo {
-  display: block;
-  background-color: black;
-  padding: 12px;
-  color: #595959;
+footer .informations .contact-information div div, footer .informations .contact-information div a {
+  width: 80%;
+}
+/* line 46, ../sass/partials/_footer.scss */
+footer a {
+  color: #222;
+}
+/* line 49, ../sass/partials/_footer.scss */
+footer p {
+  margin: 0;
+}
+/* line 52, ../sass/partials/_footer.scss */
+footer form label {
+  display: inline-block;
+  padding: 6px;
+  font-size: 16px;
+  line-height: 24px;
+  width: auto;
+}
+/* line 59, ../sass/partials/_footer.scss */
+footer #buildinfo {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
 }
 
 /*------------------------------------*\

@@ -20,6 +20,7 @@
 
 (defn- conf []
   (let [js-conf {:maps              (env/value :maps)
+                 :analytics         (env/value :analytics)
                  :fileExtensions    mime/allowed-extensions
                  :passwordMinLength (env/value :password :minlength)
                  :mode              env/mode
@@ -85,6 +86,8 @@
                   :html ["404.html" "footer.html"]}
 
    ;; Components to be included in a SPA
+
+   :analytics    {:js ["analytics.js"]}
 
    :global-models {:js ["application-model.js" "register-models.js"]}
 
@@ -246,20 +249,20 @@
    :applicant     {:depends [:applicant-app
                              :common-html :authenticated :map :applications :application
                              :statement :docgen :create :mypage :user-menu :debug
-                             :company]}
+                             :company :analytics]}
 
    :authority-app {:js ["authority.js"]}
    :authority     {:depends [:authority-app :common-html :authenticated :map :applications :notice :application
                              :statement :verdict :neighbors :docgen :create :mypage :user-menu :debug
-                             :company :stamp :integration-error]}
+                             :company :stamp :integration-error :analytics]}
 
    :oir-app {:js ["oir.js"]}
    :oir     {:depends [:oir-app :common-html :authenticated :map :application :attachment
-                       :docgen :debug :notice]
+                       :docgen :debug :notice :analytics]
              :css ["oir.css"]}
 
    :authority-admin-app {:js ["authority-admin.js"]}
-   :authority-admin     {:depends [:authority-admin-app :common-html :authenticated :admins :mypage :user-menu :debug]
+   :authority-admin     {:depends [:authority-admin-app :common-html :authenticated :admins :mypage :user-menu :debug :analytics]
                          :js ["admin.js" schema-versions-by-permit-type]
                          :html ["admin.html"]}
 
@@ -274,14 +277,14 @@
    :wordpress {:depends [:login :password-reset]}
 
    :welcome-app {:js ["welcome.js"]}
-   :welcome {:depends [:welcome-app :login :register :link-account :debug :user-menu :screenmessages :password-reset]
+   :welcome {:depends [:welcome-app :login :register :link-account :debug :user-menu :screenmessages :password-reset :analytics]
              :js ["company-user.js"]
              :html ["index.html" "login.html" "company-user.html"]}
 
    :oskari  {:css ["oskari.css"]}
 
    :neighbor-app {:js ["neighbor-app.js"]}
-   :neighbor {:depends [:neighbor-app :common-html :map :debug :docgen :debug :user-menu :screenmessages]
+   :neighbor {:depends [:neighbor-app :common-html :map :debug :docgen :debug :user-menu :screenmessages :analytics]
               :html ["neighbor-show.html"]
               :js ["neighbor-show.js"]}})
 
