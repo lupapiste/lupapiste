@@ -135,7 +135,7 @@
                                :html ["verdict-attachment-prints-order-template.html"]
                                :js ["verdict-attachment-prints-order-model.js"]}
 
-   :attachment   {:depends [:common-html :repository :application :signing :side-panel]
+   :attachment   {:depends [:common-html :repository :signing :side-panel]
                   :js ["targeted-attachments-model.js" "attachment.js" "attachmentTypeSelect.js" "attachment-utils.js"]
                   :html ["targetted-attachments-template.html" "attachment.html" "upload.html"]}
 
@@ -162,7 +162,7 @@
                           "checkbox/checkbox-template.html"
                           "modal-dialog/modal-dialog-template.html"]}
 
-   :application  {:depends [:common-html :global-models :repository :tree :create-task :modal-datepicker :signing :invites :side-panel :verdict-attachment-prints :ui-components]
+   :application  {:depends [:common-html :global-models :repository :tree :task :create-task :modal-datepicker :signing :invites :side-panel :verdict-attachment-prints :ui-components]
                   :js ["add-link-permit.js" "map-model.js" "change-location.js" "invite.js" "verdicts-model.js"
                        "add-operation.js" "foreman-model.js"
                        "request-statement-model.js" "add-party.js" "attachments-tab-model.js"
@@ -245,12 +245,12 @@
    :applicant-app {:js ["applicant.js"]}
    :applicant     {:depends [:applicant-app
                              :common-html :authenticated :map :applications :application
-                             :task :statement :docgen :create :mypage :user-menu :debug
+                             :statement :docgen :create :mypage :user-menu :debug
                              :company]}
 
    :authority-app {:js ["authority.js"]}
    :authority     {:depends [:authority-app :common-html :authenticated :map :applications :notice :application
-                             :task :statement :verdict :neighbors :docgen :create :mypage :user-menu :debug
+                             :statement :verdict :neighbors :docgen :create :mypage :user-menu :debug
                              :company :stamp :integration-error]}
 
    :oir-app {:js ["oir.js"]}

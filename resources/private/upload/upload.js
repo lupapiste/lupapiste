@@ -47,8 +47,10 @@ LUPAPISTE.Upload.loadTypes = function(applicationId) {
         LUPAPISTE.Upload.attachmentTypeGroups(_.map(d.attachmentTypes, function(v) {
           return {group: v[0], types: _.map(v[1], function(t) { return {name: t}; })};
         }));
+        var uploadForm$ = $("#attachmentUploadForm");
+        uploadForm$.applyBindings(LUPAPISTE.Upload);
         $("#initLoader").hide();
-        $("#attachmentUploadForm").show();
+        uploadForm$.show();
       })
       .call();
   }
@@ -98,8 +100,4 @@ LUPAPISTE.Upload.initFromURLParams = function() {
   }
 };
 
-$(function() {
-  "use strict";
-  LUPAPISTE.Upload.initFromURLParams();
-  $("#attachmentUploadForm").applyBindings(LUPAPISTE.Upload);
-});
+$(LUPAPISTE.Upload.initFromURLParams);
