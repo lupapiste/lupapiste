@@ -183,7 +183,7 @@ LUPAPISTE.StampModel = function(params) {
         _(self.selectedFiles()).filter({id: attachmentId}).each(function(f) {
           f.status(newStatus);
           f.fileId(fileId);
-        });
+        }).value();
       });
 
       if (update.status === "done") {
@@ -204,8 +204,8 @@ LUPAPISTE.StampModel = function(params) {
 
   function selectAllFiles(value) {
     if ( self.status() < self.statusStarting ) {
-      _(self.preFiles()).pluck("attachments").flatten().each(function(f) { f.selected(value); });
-      _(self.postFiles()).pluck("attachments").flatten().each(function(f) { f.selected(value); });
+      _(self.preFiles()).pluck("attachments").flatten().each(function(f) { f.selected(value); }).value();
+      _(self.postFiles()).pluck("attachments").flatten().each(function(f) { f.selected(value); }).value();
     }
   }
 
