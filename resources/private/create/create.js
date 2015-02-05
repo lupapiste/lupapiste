@@ -283,7 +283,7 @@
     };
 
     self.autocompleteRender = function(ul, data) {
-      var element = _(renderers).filter(selector(data)).first(1).map(toHandler).map(invoker(data)).value();
+      var element = _(renderers).filter(selector(data)).take(1).map(toHandler).map(invoker(data)).value();
       return $("<li>")
         .append(element)
         .appendTo(ul);
