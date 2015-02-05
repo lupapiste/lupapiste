@@ -2,7 +2,7 @@
   (:require [lupapalvelu.user :as user]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
-            [lupapalvelu.fixture :as fixture]
+            [lupapalvelu.fixture.core :as fixture]
             [midje.sweet :refer :all]))
 
 ;;

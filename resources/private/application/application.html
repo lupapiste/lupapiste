@@ -15,9 +15,10 @@
         </div>
         <div class="application_summary_info" data-bind="with: application">
           <h1><!-- <span data-bind="ltext: 'application.address'"></span>:  --><span data-bind="text: address" data-test-id="application-title" class="address"></span>
-          <a class="icon"
-             data-bind="ltext: 'edit.address', click: $root.changeLocationModel.changeLocation, visible: $root.authorization.ok('change-location')"
-             data-test-id="change-location-link"></a>
+          <a data-bind="click: $root.changeLocationModel.changeLocation, visible: $root.authorization.ok('change-location')"
+             data-test-id="change-location-link"> 
+             <span class="icon edit"></span>
+             <span data-bind="ltext: 'edit.address'"></span></a>
           </h1>
 
           <!-- State: -->
