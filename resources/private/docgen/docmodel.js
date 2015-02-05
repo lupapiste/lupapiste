@@ -214,7 +214,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       input.onchange = function(e) {
         save(e);
         if (subSchema) {
-          emit(getEvent(e).target.value, subSchema);
+          emit(getEvent(e).target, subSchema);
         }
       };
     }
