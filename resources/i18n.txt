@@ -1,0 +1,2 @@
+footer.conversation.title: Hankekohtainen neuvonta
+footer.conversation.desc: Hankkeen oman sivun oikeassa reunassa on KESKUSTELU-toiminto luvanhakijan, muiden osapuolten ja viranomaisen kesken.
