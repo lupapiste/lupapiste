@@ -278,7 +278,7 @@
 
     self.autocompleteSelect = function(e, data) {
       var item = data.item;
-      _(handlers).filter(selector(item)).map(toHandler).each(invoker(item));
+      _(handlers).filter(selector(item)).map(toHandler).each(invoker(item)).value();
       return false;
     };
 
