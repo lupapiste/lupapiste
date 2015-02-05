@@ -151,8 +151,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         }));
       }
       if (listenEvent === "muutostapaChanged") {
-        var prefix = path.split(".");
-        prefix.pop();
+        var prefix = _.dropRight(path.split("."));
         self.subscriptions.push(hub.subscribe({type: listenEvent, path: prefix.join(".")}, function(event) {
           $(element).prop("disabled", _.isEmpty(event.value));
         }));
@@ -1454,12 +1453,11 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         hub.send(event, {code: code});
       }
     },
-    hetuChanged: function(event, value, path, subSchema, sendLater) {
+    hetuChanged: function(event, value) {
       hub.send(event, {value: value});
     },
-    muutostapaChanged: function(event, value, path, subSchema, sendLater) {
-        var prefix = path.split(".");
-        prefix.pop();
+    muutostapaChanged: function(event, value, path) {
+      var prefix = _.dropRight(path.split("."));
       hub.send(event, {path: prefix.join("."), value: value});
     },
     emitUnknown: function(event) {
