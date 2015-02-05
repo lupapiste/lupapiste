@@ -585,7 +585,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }
     select.appendChild(option);
 
-    _(subSchema.body)
+    var options = _(subSchema.body)
       .map(function(e) {
         var locKey = self.schemaI18name + "." + myPath.replace(/\.\d+\./g, ".") + "." + e.name;
         if (e.i18nkey) {
@@ -602,18 +602,18 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
           }
           // lo-dash API doc tells that the sort is stable, so returning a static value equals to no sorting
           return 0;
-      })
-      .forEach(function(e) {
-        var name = e[0];
-        var option = document.createElement("option");
-        option.value = name;
-        option.appendChild(document.createTextNode(e[1]));
-        if (selectedOption === name) {
-          option.selected = "selected";
-        }
-        select.appendChild(option);
-      })
-      .value();
+      }).value();
+
+    options.forEach(function(e) {
+      var name = e[0];
+      var option = document.createElement("option");
+      option.value = name;
+      option.appendChild(document.createTextNode(e[1]));
+      if (selectedOption === name) {
+        option.selected = "selected";
+      }
+      select.appendChild(option);
+    });
 
     if (otherKey) {
       option = document.createElement("option");
