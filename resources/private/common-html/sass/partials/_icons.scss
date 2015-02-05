@@ -2,12 +2,16 @@
 .icon, .icon-small, .icon-tiny, .icon-large, .ui-icon {
   display: inline-block;
   @include spite-bg;
+  overflow: hidden;
 }
+
+$spritegrid: 100px;
 
 
 .icon {
   height: 20px;
   width: 20px;
+  overflow: hidden;
   &.inline-left {
     margin-right: 6px;
     float: left;
@@ -229,6 +233,22 @@
     height: 18px;
     background-position: 0px -5900px;
   }
+  &.scroll-up {
+    background-position: 0px -6100px;
+    width: 24px;
+    height: 19px;
+  }
+
+  //states
+  &:hover {
+    background-position-x: $spritegrid * -1; 
+  }
+  // &:active {
+  //   background-position-x: $spritegrid * -2; 
+  // }
+  // &:disabled {
+  //   background-position-x: $spritegrid * -3; 
+  // }
 }
 
 [type=submit], .btn, button {
@@ -254,12 +274,4 @@ h1 .icon {
 
 // jqueryUI datepicker
 
-.ui-icon.ui-icon-circle-triangle-w {
-  @include spite-bg;
-  background-position: 2px -3097px;
-}
 
-.ui-icon.ui-icon-circle-triangle-e {
-  @include spite-bg;
-  background-position: 4px -597px;
-}
