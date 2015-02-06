@@ -214,7 +214,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       input.onchange = function(e) {
         save(e);
         if (subSchema) {
-          emit(getEvent(e).target.value, subSchema);
+          emit(getEvent(e).target, subSchema);
         }
       };
     }
@@ -604,7 +604,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
           return 0;
       }).value();
 
-    options.forEach(function(e) {
+    _.forEach(options, function(e) {
       var name = e[0];
       var option = document.createElement("option");
       option.value = name;
@@ -933,7 +933,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       collection: self.getCollection()
     };
 
-    return createComponent("fill-info-button", params);
+    return createComponent("fill-info", params);
   }
 
   function buildPersonSelector(subSchema, model, path) {
@@ -1466,9 +1466,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   };
 
   function emit(target, subSchema, sendLater) {
-    var value = target.value;
-    var path = $(target).attr("data-docgen-path");
     if (subSchema.emit) {
+      var value = target.value;
+      var path = $(target).attr("data-docgen-path");
       _.forEach(subSchema.emit, function(event) {
         var emitter = emitters[event] || emitters.emitUnknown;
         emitter(event, value, path, subSchema, sendLater);

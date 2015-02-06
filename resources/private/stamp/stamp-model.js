@@ -187,7 +187,7 @@ LUPAPISTE.StampModel = function(params) {
       });
 
       if (update.status === "done") {
-        _(self.selectedFiles()).each(function(f) { f.stamped(true); });
+        _(self.selectedFiles()).each(function(f) { f.stamped(true); }).value();
         return self.status(self.statusDone);
       }
     }

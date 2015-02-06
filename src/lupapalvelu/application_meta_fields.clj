@@ -57,7 +57,7 @@
     (let [last-seen (get-in app [:_statements-seen-by (keyword (:id user))] 0)]
       (count (filter (fn [statement]
                        (and (> (or (:given statement) 0) last-seen)
-                            (not= (ss/lower-case (get-in statement [:person :email])) (ss/lower-case (:email user)))))
+                            (not= (user/canonize-email (get-in statement [:person :email])) (user/canonize-email (:email user)))))
                      (:statements app))))
     0))
 
