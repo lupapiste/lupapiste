@@ -604,7 +604,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
           return 0;
       }).value();
 
-    options.forEach(function(e) {
+    _.forEach(options, function(e) {
       var name = e[0];
       var option = document.createElement("option");
       option.value = name;
