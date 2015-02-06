@@ -151,13 +151,16 @@
 
    :ui-components {:depends [:common-html]
                    :js ["ui-components.js"
-                        "fill-info-button/fill-info-model.js"
+                        "fill-info/fill-info-model.js"
                         "foreman-history/foreman-history-model.js"
                         "foreman-other-applications/foreman-other-applications-model.js"
                         "input-model.js"
+                        "checkbox/checkbox-model.js"
+                        "select/select-model.js"
+                        "string/string-model.js"
                         "modal-dialog/modal-dialog-model.js"
                         "register-components.js"]
-                   :html ["fill-info-button/fill-info-button-template.html"
+                   :html ["fill-info/fill-info-template.html"
                           "foreman-history/foreman-history-template.html"
                           "foreman-other-applications/foreman-other-applications-template.html"
                           "string/string-template.html"
