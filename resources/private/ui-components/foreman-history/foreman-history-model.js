@@ -23,18 +23,11 @@ LUPAPISTE.ForemanHistoryModel = function (params) {
     window.location.hash = "!/application/" + project.linkedAppId;
   };
 
-  self.okButtonTest = function() {
-    console.log("entered okButtonTest");
-  };
-
   self.showAllProjects = function() {
     var newParams = params;
     newParams.showAllProjects = true;
     hub.send("show-dialog", { titleLoc: "tyonjohtaja.historia.otsikko",
                               contentName: "foreman-history",
-                              contentParams: newParams,
-                              submitButtonTitleLoc: "tyonjohtaja.history.ok",
-                              submitButtonFunc: self.okButtonTest
-                              });
+                              contentParams: newParams });
   };
 };
