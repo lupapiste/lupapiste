@@ -933,7 +933,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       collection: self.getCollection()
     };
 
-    return createComponent("fill-info-button", params);
+    return createComponent("fill-info", params);
   }
 
   function buildPersonSelector(subSchema, model, path) {

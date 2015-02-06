@@ -2,7 +2,7 @@
 <html>
 <body>
   <section class="page container">
-    <script type="text/html" id="foreman-other-applications">
+    <script type="text/html" id="foreman-other-applications-template">
       <label class="form-label form-label-table" data-bind="ltext: 'muutHankkeet.label'"></label>
       <table data-test-id="foreman-other-applications-table">
         <thead>
@@ -29,7 +29,7 @@
           </tr>
         </tbody>
 
-        <tbody data-bind="visible: rows().length == 0">
+        <tbody data-bind="visible: rows().length === 0 && autoupdatedRows().length === 0">
           <tr>
             <td data-bind="attr: { colspan: params.subSchema.body.length }, ltext: 'tyonjohtaja.noProjects'"></td>
           </tr>
