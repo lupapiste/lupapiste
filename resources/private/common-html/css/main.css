@@ -218,13 +218,17 @@ body {
   height: 100%;
 }
 /* line 45, ../sass/partials/_base.scss */
-body.applicant, body.authority, body.authority-admin {
+body.applicant, body.authority, body.authority-admin, body.welcome, body.admin {
   min-height: 100vh;
   padding-bottom: 270px;
   position: relative;
 }
+/* line 51, ../sass/partials/_base.scss */
+body.admin {
+  margin-top: 100px;
+}
 
-/* line 52, ../sass/partials/_base.scss */
+/* line 56, ../sass/partials/_base.scss */
 .container {
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
@@ -235,26 +239,26 @@ body.applicant, body.authority, body.authority-admin {
   margin: 24px auto 24px auto;
   position: relative;
 }
-/* line 59, ../sass/partials/_base.scss */
+/* line 63, ../sass/partials/_base.scss */
 .container .content {
   width: 100%;
 }
-/* line 62, ../sass/partials/_base.scss */
+/* line 66, ../sass/partials/_base.scss */
 .container .content-narrow {
   width: 68%;
 }
-/* line 66, ../sass/partials/_base.scss */
+/* line 70, ../sass/partials/_base.scss */
 .container .sidebar {
   width: 18%;
 }
 
-/* line 71, ../sass/partials/_base.scss */
+/* line 75, ../sass/partials/_base.scss */
 .page {
   display: none;
   margin-top: 60px;
 }
 
-/* line 76, ../sass/partials/_base.scss */
+/* line 80, ../sass/partials/_base.scss */
 .clear {
   *zoom: 1;
 }
@@ -268,17 +272,17 @@ body.applicant, body.authority, body.authority-admin {
   clear: both;
 }
 
-/* line 80, ../sass/partials/_base.scss */
+/* line 84, ../sass/partials/_base.scss */
 .spacerM {
   margin-bottom: 12px;
 }
 
-/* line 84, ../sass/partials/_base.scss */
+/* line 88, ../sass/partials/_base.scss */
 .right {
   float: right;
 }
 
-/* line 88, ../sass/partials/_base.scss */
+/* line 92, ../sass/partials/_base.scss */
 .left {
   float: left;
 }

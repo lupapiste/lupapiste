@@ -42,10 +42,14 @@ body {
   min-width: 820px;
   min-height: 100%;
   height: 100%;
-  &.applicant, &.authority, &.authority-admin {
+  &.applicant, &.authority, &.authority-admin, &.welcome, &.admin {
     min-height: 100vh;
     padding-bottom: 270px;
     position: relative;
+  }
+
+  &.admin {
+    margin-top: 100px;
   }
   
 }
