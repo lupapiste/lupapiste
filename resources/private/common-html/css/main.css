@@ -218,7 +218,7 @@ body {
   height: 100%;
 }
 /* line 45, ../sass/partials/_base.scss */
-body.applicant, body.authority {
+body.applicant, body.authority, body.authority-admin {
   min-height: 100vh;
   padding-bottom: 270px;
   position: relative;
@@ -256,6 +256,15 @@ body.applicant, body.authority {
 
 /* line 76, ../sass/partials/_base.scss */
 .clear {
+  *zoom: 1;
+}
+/* line 22, ../sass/main.scss */
+.clear:before, .clear:after {
+  content: "";
+  display: table;
+}
+/* line 26, ../sass/main.scss */
+.clear:after {
   clear: both;
 }
 
