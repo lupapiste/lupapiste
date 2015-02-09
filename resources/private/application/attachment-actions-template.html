@@ -38,6 +38,13 @@
               <span data-bind="ltext: 'application.attachmentsMoveToBackingSystem'"></span>
               <em data-bind="visible: appModel.pending" class="button-loader"></em>
           </button>
+
+          <select id="attachment-operation-select" class="form-input combobox"
+                  data-bind="options: attachmentsOperations,
+                             optionsText: function(item) { return loc('application.' + item); },
+                             value: attachmentsOperation,
+                             optionsCaption: loc('choose')"></select>
+
         </div>
       </script>
     </section>

@@ -15,6 +15,23 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
 
   self.showHelp = ko.observable(false);
 
+  self.attachmentsOperations = ko.observable(["attachmentsAdd",
+                                              "attachmentsCopyOwn",
+                                              "newAttachmentTemplates",
+                                              "stampAttachments",
+                                              "signAttachments",
+                                              "attachmentsMoveToBackingSystem"]);
+  self.attachmentsOperation = ko.observable();
+  self.attachmentsOperation.subscribe(function(selectedCommandName) {
+
+    if (selectedCommandName) {
+      console.log("selected command name: ", selectedCommandName);
+
+      // TODO: run selected command
+
+    }
+  });
+
   function getPreAttachments(source) {
     return _.filter(source, function(attachment) {
           return !_.contains(LUPAPISTE.config.postVerdictStates, attachment.applicationState);
