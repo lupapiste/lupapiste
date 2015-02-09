@@ -49,8 +49,9 @@
 
 .create-info-text {
   width: 20%;
-  float: left;
-  margin-right: $marginL;
+  display: inline-block;
+  padding-right: $marginL *2;
+  vertical-align: top;
 }
 
 .create-buttons {

@@ -217,8 +217,18 @@ body {
   min-height: 100%;
   height: 100%;
 }
+/* line 45, ../sass/partials/_base.scss */
+body.applicant, body.authority, body.authority-admin, body.welcome, body.admin {
+  min-height: 100vh;
+  padding-bottom: 270px;
+  position: relative;
+}
+/* line 51, ../sass/partials/_base.scss */
+body.admin {
+  margin-top: 100px;
+}
 
-/* line 46, ../sass/partials/_base.scss */
+/* line 56, ../sass/partials/_base.scss */
 .container {
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
@@ -229,41 +239,50 @@ body {
   margin: 24px auto 24px auto;
   position: relative;
 }
-/* line 53, ../sass/partials/_base.scss */
+/* line 63, ../sass/partials/_base.scss */
 .container .content {
   width: 100%;
 }
-/* line 56, ../sass/partials/_base.scss */
+/* line 66, ../sass/partials/_base.scss */
 .container .content-narrow {
   width: 68%;
 }
-/* line 60, ../sass/partials/_base.scss */
+/* line 70, ../sass/partials/_base.scss */
 .container .sidebar {
   width: 18%;
 }
 
-/* line 65, ../sass/partials/_base.scss */
+/* line 75, ../sass/partials/_base.scss */
 .page {
   display: none;
-  margin-top: 0;
+  margin-top: 60px;
 }
 
-/* line 70, ../sass/partials/_base.scss */
+/* line 80, ../sass/partials/_base.scss */
 .clear {
+  *zoom: 1;
+}
+/* line 22, ../sass/main.scss */
+.clear:before, .clear:after {
+  content: "";
+  display: table;
+}
+/* line 26, ../sass/main.scss */
+.clear:after {
   clear: both;
 }
 
-/* line 74, ../sass/partials/_base.scss */
+/* line 84, ../sass/partials/_base.scss */
 .spacerM {
   margin-bottom: 12px;
 }
 
-/* line 78, ../sass/partials/_base.scss */
+/* line 88, ../sass/partials/_base.scss */
 .right {
   float: right;
 }
 
-/* line 82, ../sass/partials/_base.scss */
+/* line 92, ../sass/partials/_base.scss */
 .left {
   float: left;
 }
@@ -712,33 +731,34 @@ nav {
   height: 60px;
   box-sizing: border-box;
   width: 100%;
+  background: #4f4f4f;
 }
-/* line 10, ../sass/partials/_header.scss */
-nav.nav-wrapper {
+/* line 11, ../sass/partials/_header.scss */
+nav .nav-wrapper {
   width: 100%;
   max-width: 1280px;
   margin: 0 auto;
   position: relative;
-  background: #4f4f4f;
+  box-sizing: border-box;
 }
-/* line 16, ../sass/partials/_header.scss */
-nav.nav-wrapper .brand {
+/* line 17, ../sass/partials/_header.scss */
+nav .nav-wrapper .brand {
   position: relative;
   width: 300px;
   display: inline-block;
 }
-/* line 20, ../sass/partials/_header.scss */
-nav.nav-wrapper .brand .logo {
+/* line 21, ../sass/partials/_header.scss */
+nav .nav-wrapper .brand .logo {
   margin: 12px;
 }
-/* line 23, ../sass/partials/_header.scss */
-nav.nav-wrapper .brand a img {
+/* line 24, ../sass/partials/_header.scss */
+nav .nav-wrapper .brand a img {
   width: 164px;
   height: 35px;
   margin: 12px;
 }
-/* line 28, ../sass/partials/_header.scss */
-nav.nav-wrapper .brand .change-language {
+/* line 29, ../sass/partials/_header.scss */
+nav .nav-wrapper .brand .change-language {
   color: #f57e23;
   text-decoration: none;
   display: inline-block;
@@ -746,19 +766,19 @@ nav.nav-wrapper .brand .change-language {
   top: 20px;
   left: 200px;
 }
-/* line 38, ../sass/partials/_header.scss */
-nav.nav-wrapper .header-menu {
+/* line 39, ../sass/partials/_header.scss */
+nav .nav-wrapper .header-menu {
   display: inline-block;
   float: right;
 }
-/* line 41, ../sass/partials/_header.scss */
-nav.nav-wrapper .header-menu .header-box {
+/* line 42, ../sass/partials/_header.scss */
+nav .nav-wrapper .header-menu .header-box {
   display: inline-block;
   padding: 12px;
   height: 60px;
 }
-/* line 45, ../sass/partials/_header.scss */
-nav.nav-wrapper .header-menu .header-box a, nav.nav-wrapper .header-menu .header-box span {
+/* line 46, ../sass/partials/_header.scss */
+nav .nav-wrapper .header-menu .header-box a, nav .nav-wrapper .header-menu .header-box span {
   color: white;
   font-size: 16px;
   text-decoration: none;
@@ -809,20 +829,22 @@ nav.nav-wrapper .header-menu .header-box a, nav.nav-wrapper .header-menu .header
 footer {
   margin-top: 72px;
   padding-top: 24px;
-  position: relative;
+  position: absolute;
   clear: both;
   color: white;
   background-color: #4f4f4f;
   height: auto;
+  bottom: 0;
+  width: 100%;
 }
-/* line 10, ../sass/partials/_footer.scss */
+/* line 12, ../sass/partials/_footer.scss */
 footer .informations {
   padding: 12px;
   width: 100%;
   max-width: 1280px;
   margin: 0 auto 12px;
 }
-/* line 15, ../sass/partials/_footer.scss */
+/* line 17, ../sass/partials/_footer.scss */
 footer .informations .footer-box {
   font-size: 16px;
   vertical-align: top;
@@ -831,22 +853,22 @@ footer .informations .footer-box {
   padding-right: 24px;
   box-sizing: border-box;
 }
-/* line 22, ../sass/partials/_footer.scss */
+/* line 24, ../sass/partials/_footer.scss */
 footer .informations .footer-box h3 {
   font-size: 18px;
   font-weight: bold;
 }
-/* line 26, ../sass/partials/_footer.scss */
+/* line 28, ../sass/partials/_footer.scss */
 footer .informations .footer-box a {
   color: #f57e23;
   display: block;
 }
-/* line 31, ../sass/partials/_footer.scss */
+/* line 33, ../sass/partials/_footer.scss */
 footer .informations .footer-box.sade-box a {
   display: inline;
 }
 
-/* line 40, ../sass/partials/_footer.scss */
+/* line 42, ../sass/partials/_footer.scss */
 #buildinfo {
   display: block;
   background-color: black;
@@ -2812,7 +2834,7 @@ table.attachments-template-table td.attachment-file-info {
 
 /* line 4, ../sass/partials/_tree.scss */
 .operation-tree {
-  float: right;
+  display: inline-block;
   margin-left: 24px;
   width: 800px;
   overflow: hidden;
@@ -4501,47 +4523,48 @@ span.icon_clear:before {
 /* line 50, ../sass/views/_create_application.scss */
 .create-info-text {
   width: 20%;
-  float: left;
-  margin-right: 24px;
+  display: inline-block;
+  padding-right: 48px;
+  vertical-align: top;
 }
 
-/* line 56, ../sass/views/_create_application.scss */
+/* line 57, ../sass/views/_create_application.scss */
 .create-buttons {
   float: right;
 }
 
-/* line 59, ../sass/views/_create_application.scss */
+/* line 60, ../sass/views/_create_application.scss */
 .create-content {
   width: 75%;
   float: right;
 }
 
-/* line 66, ../sass/views/_create_application.scss */
+/* line 67, ../sass/views/_create_application.scss */
 .more-prev-app-info-needed-desc {
   color: red;
   margin-top: 24px;
   margin-bottom: 0;
 }
 
-/* line 75, ../sass/views/_create_application.scss */
+/* line 76, ../sass/views/_create_application.scss */
 .address-search {
   width: 22.5em;
   display: inline-block;
   height: 25px;
 }
 
-/* line 81, ../sass/views/_create_application.scss */
+/* line 82, ../sass/views/_create_application.scss */
 .create-application-details {
   width: 800px;
   height: 200px;
 }
 
-/* line 86, ../sass/views/_create_application.scss */
+/* line 87, ../sass/views/_create_application.scss */
 .create-application-form {
   display: inline-block;
 }
 
-/* line 90, ../sass/views/_create_application.scss */
+/* line 91, ../sass/views/_create_application.scss */
 .create-application-actions {
   width: 22.5em;
   display: inline-block;
@@ -4549,40 +4572,40 @@ span.icon_clear:before {
   vertical-align: bottom;
 }
 
-/* line 97, ../sass/views/_create_application.scss */
+/* line 98, ../sass/views/_create_application.scss */
 .btn-create-application {
   line-height: 60px;
 }
 
-/* line 101, ../sass/views/_create_application.scss */
+/* line 102, ../sass/views/_create_application.scss */
 .label-container {
   display: inline-block;
   width: 10em;
 }
 
-/* line 106, ../sass/views/_create_application.scss */
+/* line 107, ../sass/views/_create_application.scss */
 .create-group {
   margin-top: 24px;
   padding: 12px;
   border-radius: 3px;
   border: 1px solid #01bef5;
 }
-/* line 112, ../sass/views/_create_application.scss */
+/* line 113, ../sass/views/_create_application.scss */
 .create-group label {
   display: inline-block;
 }
 
-/* line 116, ../sass/views/_create_application.scss */
+/* line 117, ../sass/views/_create_application.scss */
 .top-marginL {
   margin-top: 48px;
 }
 
-/* line 119, ../sass/views/_create_application.scss */
+/* line 120, ../sass/views/_create_application.scss */
 .bottom-marginM {
   margin-bottom: 12px !important;
 }
 
-/* line 123, ../sass/views/_create_application.scss */
+/* line 124, ../sass/views/_create_application.scss */
 #popup-id_close {
   background-image: url("/img/icons-sprite-1.14.png");
   background-repeat: no-repeat;
@@ -4591,19 +4614,19 @@ span.icon_clear:before {
   right: 4px !important;
 }
 
-/* line 129, ../sass/views/_create_application.scss */
+/* line 130, ../sass/views/_create_application.scss */
 #popup-id_contentDiv {
   padding: 0;
   width: 95% !important;
   overflow: hidden;
 }
 
-/* line 135, ../sass/views/_create_application.scss */
+/* line 136, ../sass/views/_create_application.scss */
 #popup-id_GroupDiv {
   padding: 8px;
 }
 
-/* line 138, ../sass/views/_create_application.scss */
+/* line 139, ../sass/views/_create_application.scss */
 #popup-id {
   background: white;
   color: black;
@@ -4612,7 +4635,7 @@ span.icon_clear:before {
   box-shadow: 2px 2px 1px #888888, 3px 3px 1px #888888;
   border: 1px solid #4f4f4f;
 }
-/* line 148, ../sass/views/_create_application.scss */
+/* line 149, ../sass/views/_create_application.scss */
 #popup-id:before {
   content: " ";
   display: block;
@@ -4625,7 +4648,7 @@ span.icon_clear:before {
   border-right: 51px solid #4f4f4f;
   border-bottom: 25px solid transparent;
 }
-/* line 160, ../sass/views/_create_application.scss */
+/* line 161, ../sass/views/_create_application.scss */
 #popup-id:after {
   content: " ";
   display: block;
@@ -4658,61 +4681,55 @@ span.icon_clear:before {
 /* line 17, ../sass/views/_attachment.scss */
 .file-preview {
   width: 100%;
-  float: left;
   position: relative;
 }
 
-/* line 23, ../sass/views/_attachment.scss */
+/* line 22, ../sass/views/_attachment.scss */
 .file-preview-image img {
   width: 100%;
   height: auto;
 }
 
-/* line 28, ../sass/views/_attachment.scss */
+/* line 27, ../sass/views/_attachment.scss */
 .file-preview-actions {
   position: absolute;
   bottom: 6px;
   right: 6px;
 }
-/* line 32, ../sass/views/_attachment.scss */
+/* line 31, ../sass/views/_attachment.scss */
 .file-preview-actions .btn {
   margin: 0;
 }
 
-/* line 38, ../sass/views/_attachment.scss */
+/* line 37, ../sass/views/_attachment.scss */
 .file-preview-content img, .file-preview-content iframe {
   border: 1px solid #d0d0d0;
 }
 
-/* line 43, ../sass/views/_attachment.scss */
-.file-preview-links {
-  float: right;
-}
-
-/* line 48, ../sass/views/_attachment.scss */
+/* line 46, ../sass/views/_attachment.scss */
 .file-preview-pdf iframe {
   width: 100%;
   height: 500px;
 }
 
-/* line 54, ../sass/views/_attachment.scss */
+/* line 52, ../sass/views/_attachment.scss */
 .attachment-file-versions {
   margin-bottom: 12px;
 }
-/* line 56, ../sass/views/_attachment.scss */
+/* line 54, ../sass/views/_attachment.scss */
 .attachment-file-versions table {
   margin: 0;
 }
-/* line 60, ../sass/views/_attachment.scss */
+/* line 58, ../sass/views/_attachment.scss */
 .attachment-file-versions .attachment-file-versions-content {
   display: none;
   padding: 6px 0;
 }
-/* line 63, ../sass/views/_attachment.scss */
+/* line 61, ../sass/views/_attachment.scss */
 .attachment-file-versions .attachment-file-versions-content th {
   padding: 6px;
 }
-/* line 66, ../sass/views/_attachment.scss */
+/* line 64, ../sass/views/_attachment.scss */
 .attachment-file-versions .attachment-file-versions-content td {
   padding: 6px;
   max-width: 130px;
@@ -4720,81 +4737,81 @@ span.icon_clear:before {
   text-overflow: ellipsis;
 }
 
-/* line 75, ../sass/views/_attachment.scss */
+/* line 73, ../sass/views/_attachment.scss */
 .attachment-file-conversation {
   width: 48%;
-  float: right;
 }
 
-/* line 80, ../sass/views/_attachment.scss */
+/* line 77, ../sass/views/_attachment.scss */
 .attachment-info {
   width: 100%;
 }
-/* line 83, ../sass/views/_attachment.scss */
+/* line 80, ../sass/views/_attachment.scss */
 .attachment-info .container {
   padding: 0;
   margin-top: 0;
 }
-/* line 88, ../sass/views/_attachment.scss */
+/* line 85, ../sass/views/_attachment.scss */
 .attachment-info .col1 {
-  float: left;
+  display: inline-block;
   padding-right: 12px;
-  width: 50%;
+  width: 49%;
+  vertical-align: top;
 }
-/* line 94, ../sass/views/_attachment.scss */
+/* line 92, ../sass/views/_attachment.scss */
 .attachment-info .col2 {
-  float: right;
+  display: inline-block;
   padding-left: 12px;
-  width: 50%;
+  width: 49%;
+  vertical-align: top;
 }
-/* line 100, ../sass/views/_attachment.scss */
+/* line 99, ../sass/views/_attachment.scss */
 .attachment-info .attachment-actions {
-  float: right;
   width: 16.25em;
+  position: absolute;
+  top: 0;
+  right: 0;
 }
-/* line 103, ../sass/views/_attachment.scss */
+/* line 104, ../sass/views/_attachment.scss */
 .attachment-info .attachment-actions button {
   width: 100%;
 }
 
-/* line 109, ../sass/views/_attachment.scss */
+/* line 110, ../sass/views/_attachment.scss */
 .attachment-info-header {
   overflow: auto;
-  width: 80%;
+  width: 100%;
+  display: block;
 }
-/* line 112, ../sass/views/_attachment.scss */
+/* line 114, ../sass/views/_attachment.scss */
 .attachment-info-header h1 {
-  float: left;
   line-height: normal;
+  display: inline-block;
+  max-width: 80%;
 }
-/* line 116, ../sass/views/_attachment.scss */
+/* line 119, ../sass/views/_attachment.scss */
 .attachment-info-header a {
-  float: left;
   margin-left: 48px;
 }
-/* line 120, ../sass/views/_attachment.scss */
+/* line 122, ../sass/views/_attachment.scss */
 .attachment-info-header .help {
   margin-left: 12px;
+  display: inline-block;
 }
 
-/* line 125, ../sass/views/_attachment.scss */
-.add-new-version {
-  float: right;
-}
-
-/* line 129, ../sass/views/_attachment.scss */
+/* line 131, ../sass/views/_attachment.scss */
 td.comment-text {
   vertical-align: top;
   text-align: left;
 }
 
-/* line 134, ../sass/views/_attachment.scss */
+/* line 136, ../sass/views/_attachment.scss */
 .new-attachment-version-details {
   display: block;
   font-style: italic;
 }
 
-/* line 139, ../sass/views/_attachment.scss */
+/* line 141, ../sass/views/_attachment.scss */
 .attachment-group-header {
   font-weight: bold;
   font-size: 1.5em;
@@ -4802,82 +4819,80 @@ td.comment-text {
   height: 50px;
   vertical-align: bottom;
 }
-/* line 145, ../sass/views/_attachment.scss */
+/* line 147, ../sass/views/_attachment.scss */
 .attachment-group-header td {
   padding: 6px 0;
 }
 
-/* line 150, ../sass/views/_attachment.scss */
+/* line 152, ../sass/views/_attachment.scss */
 .attachment-back {
-  text-align: center;
-  margin-right: 6px;
-  margin-left: 24px;
+  display: block;
+  height: 60px;
 }
-/* line 154, ../sass/views/_attachment.scss */
-.attachment-back .icon {
-  height: 15px;
-  margin-bottom: 3px;
+/* line 157, ../sass/views/_attachment.scss */
+.attachment-back a {
+  margin-right: 12px;
 }
 
-/* line 160, ../sass/views/_attachment.scss */
+/* line 162, ../sass/views/_attachment.scss */
 .inline-block {
   display: inline-block;
 }
 
-/* line 164, ../sass/views/_attachment.scss */
+/* line 166, ../sass/views/_attachment.scss */
 #attachment-type-select {
   margin-bottom: 24px;
 }
 
-/* line 168, ../sass/views/_attachment.scss */
+/* line 170, ../sass/views/_attachment.scss */
 .change-type {
   clear: both;
   display: block;
 }
 
-/* line 173, ../sass/views/_attachment.scss */
+/* line 175, ../sass/views/_attachment.scss */
 .attachment-label {
   margin-bottom: 12px;
   overflow: hidden;
 }
-/* line 177, ../sass/views/_attachment.scss */
+/* line 179, ../sass/views/_attachment.scss */
 .attachment-label .attachment-label-header {
   font-size: 0.85em;
   font-weight: 700;
   letter-spacing: 0.125em;
 }
-/* line 183, ../sass/views/_attachment.scss */
+/* line 185, ../sass/views/_attachment.scss */
 .attachment-label .attachment-label-header-item {
   margin-right: 24px;
 }
-/* line 187, ../sass/views/_attachment.scss */
+/* line 189, ../sass/views/_attachment.scss */
 .attachment-label input {
   display: block;
   margin: 0;
   width: 22em;
   height: 25px;
 }
-/* line 194, ../sass/views/_attachment.scss */
+/* line 196, ../sass/views/_attachment.scss */
 .attachment-label input[type="checkbox"] {
   display: inline-block;
   width: 3.75em;
 }
-/* line 199, ../sass/views/_attachment.scss */
+/* line 201, ../sass/views/_attachment.scss */
 .attachment-label select {
   display: block;
   width: 22.5em;
 }
-/* line 204, ../sass/views/_attachment.scss */
+/* line 206, ../sass/views/_attachment.scss */
 .attachment-label .attachment-info-field {
   margin-bottom: 6px;
 }
 
-/* line 209, ../sass/views/_attachment.scss */
+/* line 211, ../sass/views/_attachment.scss */
 .signatures {
   margin-top: 12px;
 }
 
-/* line 213, ../sass/views/_attachment.scss */
+/* line 215, ../sass/views/_attachment.scss */
 .signature-table {
   display: table;
   width: auto;
@@ -4885,7 +4900,7 @@ td.comment-text {
   margin-left: 6px;
 }
 
-/* line 220, ../sass/views/_attachment.scss */
+/* line 222, ../sass/views/_attachment.scss */
 .signature-row {
   display: table-row;
   width: auto;
@@ -4894,11 +4909,10 @@ td.comment-text {
   line-height: 27px;
 }
 
-/* line 228, ../sass/views/_attachment.scss */
+/* line 230, ../sass/views/_attachment.scss */
 .signature-cell {
   display: table-column;
   width: 200px;
-  float: left;
 }
 
 /* line 2, ../sass/views/_statement.scss */

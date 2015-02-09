@@ -15,7 +15,7 @@ Mikko goes to own page
   Title Should Be  Lupapiste
 
 There is no company info
-  Page should not contain  Yrityksen tiedot
+  Element should not be visible  //div[@data-test-id='my-company']
 
 Mikko changes his name and experience
   Change Textfield Value  firstName  Mikko  Mika
