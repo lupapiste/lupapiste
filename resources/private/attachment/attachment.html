@@ -1,4 +1,4 @@
-r<!DOCTYPE html>
+<!DOCTYPE html>
 <html >
 <body>
   <section class="page container" id="attachment" data-bind="with: attachment">
@@ -34,10 +34,10 @@ r<!DOCTYPE html>
             <p data-bind="lhtml: 'attachment.view.desc'"></p>
           </div>
 
-          
+
 
           <div class="attachment-actions">
-            
+
             <button data-test-id="change-attachment-type"
                     data-bind="ltext: 'attachment.changeType', click: showChangeTypeDialog, visible: $root.authorization.ok('set-attachment-type') && editable && authorized"></button>
             <button data-test-id="delete-attachment"
