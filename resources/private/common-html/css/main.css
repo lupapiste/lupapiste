@@ -5767,48 +5767,49 @@ div.pzbDiv {
   border: 1px solid black;
   box-shadow: 3px 4px 7px;
   font-size: 0.8em;
+  color: #333333;
 }
-/* line 218, ../sass/main.scss */
+/* line 219, ../sass/main.scss */
 .dev-debug p {
   margin-bottom: 4px;
 }
-/* line 220, ../sass/main.scss */
+/* line 221, ../sass/main.scss */
 .dev-debug p a {
   display: block;
 }
 
-/* line 226, ../sass/main.scss */
+/* line 227, ../sass/main.scss */
 #ui-datepicker-div {
   display: none;
 }
 
 /* find address and poi list: */
-/* line 231, ../sass/main.scss */
+/* line 232, ../sass/main.scss */
 .create-find {
   font-size: 12px;
 }
-/* line 233, ../sass/main.scss */
+/* line 234, ../sass/main.scss */
 .create-find .type {
   color: #555;
   font-style: italic;
 }
-/* line 236, ../sass/main.scss */
+/* line 237, ../sass/main.scss */
 .create-find .type:before {
   content: " (";
 }
-/* line 237, ../sass/main.scss */
+/* line 238, ../sass/main.scss */
 .create-find .type:after {
   content: ")";
 }
-/* line 240, ../sass/main.scss */
+/* line 241, ../sass/main.scss */
 .create-find .number:before {
   content: " ";
 }
-/* line 242, ../sass/main.scss */
+/* line 243, ../sass/main.scss */
 .create-find .municipality {
   color: #555;
 }
-/* line 244, ../sass/main.scss */
+/* line 245, ../sass/main.scss */
 .create-find .municipality:before {
   content: ", ";
 }
