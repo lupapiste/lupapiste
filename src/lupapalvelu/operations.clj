@@ -809,9 +809,9 @@
                                   :link-permit-required true
                                   :link-permit-verdict-required true}
 
-    :tyonjohtajan-nimeaminen-v2  {:schema "hankkeen-kuvaus-minimum"
+    :tyonjohtajan-nimeaminen-v2  {:schema "tyonjohtaja-v2"
                                   :permit-type permit/R
-                                  :required ["tyonjohtaja-v2"]
+                                  :required ["hankkeen-kuvaus-minimum"]
                                   :attachments []
                                   :add-operation-allowed false
                                   :link-permit-required true
