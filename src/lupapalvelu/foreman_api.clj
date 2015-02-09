@@ -28,7 +28,7 @@
         task                 (util/find-by-id taskId (:tasks application))
 
         hankkeen-kuvaus      (get-in (domain/get-document-by-name application "hankkeen-kuvaus") [:data :kuvaus :value])
-        hankkeen-kuvaus-doc  (domain/get-document-by-name foreman-app "hankkeen-kuvaus-minimum-non-removable")
+        hankkeen-kuvaus-doc  (domain/get-document-by-name foreman-app "hankkeen-kuvaus-minimum")
         hankkeen-kuvaus-doc  (if hankkeen-kuvaus
                                (assoc-in hankkeen-kuvaus-doc [:data :kuvaus :value] hankkeen-kuvaus)
                                hankkeen-kuvaus-doc)
@@ -41,7 +41,7 @@
         hakija-doc           (domain/get-document-by-name application "hakija")
 
         new-application-docs (->> (:documents foreman-app)
-                                  (remove #(#{"hankkeen-kuvaus-minimum-non-removable" "hakija" "tyonjohtaja-v2"} (-> % :schema-info :name)))
+                                  (remove #(#{"hankkeen-kuvaus-minimum" "hakija" "tyonjohtaja-v2"} (-> % :schema-info :name)))
                                   (concat (remove nil? [hakija-doc hankkeen-kuvaus-doc tyonjohtaja-doc])))
 
         foreman-app (assoc foreman-app :documents new-application-docs)]
