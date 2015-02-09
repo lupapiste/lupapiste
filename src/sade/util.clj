@@ -207,17 +207,17 @@
   (format-utc-timestamp timestamp "YYYY-MM-dd'T'HH:mm:ss"))
 
 (defn to-xml-date-from-string [^String date-as-string]
-  (when date-as-string
+  (when-not (ss/blank? date-as-string)
     (let [d (timeformat/parse-local-date (timeformat/formatter "dd.MM.YYYY" ) date-as-string)]
       (timeformat/unparse-local-date (timeformat/formatter "YYYY-MM-dd") d))))
 
 (defn to-xml-datetime-from-string [^String date-as-string]
-  (when date-as-string
+  (when-not (ss/blank? date-as-string)
     (let [d (timeformat/parse-local (timeformat/formatter "dd.MM.YYYY" ) date-as-string)]
       (timeformat/unparse-local-date (timeformat/formatter "YYYY-MM-dd'T'HH:mm:ssZ") d))))
 
 (defn to-millis-from-local-date-string [^String date-as-string]
-  (when date-as-string
+  (when-not (ss/blank? date-as-string)
     (let [d (timeformat/parse (timeformat/formatter "dd.MM.YYYY" ) date-as-string)]
       (tc/to-long d))))
 
