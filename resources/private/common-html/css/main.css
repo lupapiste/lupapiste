@@ -2834,7 +2834,7 @@ table.attachments-template-table td.attachment-file-info {
 
 /* line 4, ../sass/partials/_tree.scss */
 .operation-tree {
-  float: right;
+  display: inline-block;
   margin-left: 24px;
   width: 800px;
   overflow: hidden;
@@ -4523,47 +4523,48 @@ span.icon_clear:before {
 /* line 50, ../sass/views/_create_application.scss */
 .create-info-text {
   width: 20%;
-  float: left;
-  margin-right: 24px;
+  display: inline-block;
+  padding-right: 48px;
+  vertical-align: top;
 }
 
-/* line 56, ../sass/views/_create_application.scss */
+/* line 57, ../sass/views/_create_application.scss */
 .create-buttons {
   float: right;
 }
 
-/* line 59, ../sass/views/_create_application.scss */
+/* line 60, ../sass/views/_create_application.scss */
 .create-content {
   width: 75%;
   float: right;
 }
 
-/* line 66, ../sass/views/_create_application.scss */
+/* line 67, ../sass/views/_create_application.scss */
 .more-prev-app-info-needed-desc {
   color: red;
   margin-top: 24px;
   margin-bottom: 0;
 }
 
-/* line 75, ../sass/views/_create_application.scss */
+/* line 76, ../sass/views/_create_application.scss */
 .address-search {
   width: 22.5em;
   display: inline-block;
   height: 25px;
 }
 
-/* line 81, ../sass/views/_create_application.scss */
+/* line 82, ../sass/views/_create_application.scss */
 .create-application-details {
   width: 800px;
   height: 200px;
 }
 
-/* line 86, ../sass/views/_create_application.scss */
+/* line 87, ../sass/views/_create_application.scss */
 .create-application-form {
   display: inline-block;
 }
 
-/* line 90, ../sass/views/_create_application.scss */
+/* line 91, ../sass/views/_create_application.scss */
 .create-application-actions {
   width: 22.5em;
   display: inline-block;
@@ -4571,40 +4572,40 @@ span.icon_clear:before {
   vertical-align: bottom;
 }
 
-/* line 97, ../sass/views/_create_application.scss */
+/* line 98, ../sass/views/_create_application.scss */
 .btn-create-application {
   line-height: 60px;
 }
 
-/* line 101, ../sass/views/_create_application.scss */
+/* line 102, ../sass/views/_create_application.scss */
 .label-container {
   display: inline-block;
   width: 10em;
 }
 
-/* line 106, ../sass/views/_create_application.scss */
+/* line 107, ../sass/views/_create_application.scss */
 .create-group {
   margin-top: 24px;
   padding: 12px;
   border-radius: 3px;
   border: 1px solid #01bef5;
 }
-/* line 112, ../sass/views/_create_application.scss */
+/* line 113, ../sass/views/_create_application.scss */
 .create-group label {
   display: inline-block;
 }
 
-/* line 116, ../sass/views/_create_application.scss */
+/* line 117, ../sass/views/_create_application.scss */
 .top-marginL {
   margin-top: 48px;
 }
 
-/* line 119, ../sass/views/_create_application.scss */
+/* line 120, ../sass/views/_create_application.scss */
 .bottom-marginM {
   margin-bottom: 12px !important;
 }
 
-/* line 123, ../sass/views/_create_application.scss */
+/* line 124, ../sass/views/_create_application.scss */
 #popup-id_close {
   background-image: url("/img/icons-sprite-1.14.png");
   background-repeat: no-repeat;
@@ -4613,19 +4614,19 @@ span.icon_clear:before {
   right: 4px !important;
 }
 
-/* line 129, ../sass/views/_create_application.scss */
+/* line 130, ../sass/views/_create_application.scss */
 #popup-id_contentDiv {
   padding: 0;
   width: 95% !important;
   overflow: hidden;
 }
 
-/* line 135, ../sass/views/_create_application.scss */
+/* line 136, ../sass/views/_create_application.scss */
 #popup-id_GroupDiv {
   padding: 8px;
 }
 
-/* line 138, ../sass/views/_create_application.scss */
+/* line 139, ../sass/views/_create_application.scss */
 #popup-id {
   background: white;
   color: black;
@@ -4634,7 +4635,7 @@ span.icon_clear:before {
   box-shadow: 2px 2px 1px #888888, 3px 3px 1px #888888;
   border: 1px solid #4f4f4f;
 }
-/* line 148, ../sass/views/_create_application.scss */
+/* line 149, ../sass/views/_create_application.scss */
 #popup-id:before {
   content: " ";
   display: block;
@@ -4647,7 +4648,7 @@ span.icon_clear:before {
   border-right: 51px solid #4f4f4f;
   border-bottom: 25px solid transparent;
 }
-/* line 160, ../sass/views/_create_application.scss */
+/* line 161, ../sass/views/_create_application.scss */
 #popup-id:after {
   content: " ";
   display: block;
