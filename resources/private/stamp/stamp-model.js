@@ -2,10 +2,10 @@ LUPAPISTE.StampModel = function(params) {
   "use strict";
   var self = this;
 
-  function hasValidVersions(a) {
-    // For stamped attachment, original version should exist
-    var versions = _(a.versions).reverse().value();
-    return versions[0].stamped ? (versions[1] ? true : false) : true;
+  function allVersionsStamped(versions) {
+    return _.every(versions, function(v) {
+      return v.stamped;
+    })
   }
 
   function stampableAttachment(a) {
@@ -13,13 +13,14 @@ LUPAPISTE.StampModel = function(params) {
     if (a.latestVersion) {
       ct = a.latestVersion.contentType;
     }
-    return _.contains(LUPAPISTE.config.stampableMimes, ct) && hasValidVersions(a);
+
+    return !allVersionsStamped(a.versions) && _.contains(LUPAPISTE.config.stampableMimes, ct);
   }
 
   function enhanceAttachment(a) {
-    var versions = _(a.versions).reverse().value(),
-      restamp = versions[0].stamped,
-      selected = restamp ? versions[1] : versions[0];
+    var selected = _(_.dropRightWhile(a.versions, function(version) {
+      return version.stamped
+    })).last();
 
     a.contentType = selected.contentType;
     a.filename = selected.filename;
@@ -27,7 +28,7 @@ LUPAPISTE.StampModel = function(params) {
     a.size = selected.size;
     a.selected = ko.observable(false);
     a.status = ko.observable("");
-    a.restamp = restamp;
+    a.restamp = _(a.versions).last().stamped;
     a.stamped = ko.observable(a.stamped);
     a.fileId = ko.observable(a.latestVersion.fileId);
   }
