@@ -789,6 +789,12 @@
            :approvable true
            :order 1}
     :body [kuvaus]}
+   
+   {:info {:name "hankkeen-kuvaus-minimum-non-removable"
+           :approvable true
+           :removable false
+           :order 1}
+    :body [kuvaus]}
 
    {:info {:name "hankkeen-kuvaus"
            :approvable true
