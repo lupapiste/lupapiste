@@ -2,7 +2,7 @@ $tree-width: 800px;
 $tree-height: 320px;
 
 .operation-tree {
-  float: right;
+  display: inline-block;
   margin-left: $marginL;
   width: $tree-width;
   overflow: hidden;

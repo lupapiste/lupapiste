@@ -217,7 +217,7 @@
           [operation-tree-for-KT operation-tree-for-MM])]))
 
 
-(def schema-data-yritys-selected [[["_selected" :value] "yritys"]])
+(def schema-data-yritys-selected [[["_selected"] "yritys"]])
 
 ; Operations must be the same as in the tree structure above.
 ; Mappings to schemas and attachments are currently random.
@@ -357,7 +357,7 @@
                                    :permit-type permit/R
                                    :schema-data [[["kaytto" "kayttotarkoitus"] schemas/yhden-asunnon-talot]
                                                  [["huoneistot" "0" "huoneistonumero"] "000"]
-                                                 [["huoneistot" "0" "muutostapa" :value] "lis\u00e4ys"]]
+                                                 [["huoneistot" "0" "muutostapa"] "lis\u00e4ys"]]
                                    :required common-rakval-schemas
                                    :attachments uuden_rakennuksen_liitteet
                                    :add-operation-allowed true
@@ -367,7 +367,7 @@
                                    :permit-type permit/R
                                    :schema-data [[["kaytto" "kayttotarkoitus"] schemas/rivitalot]
                                                  [["huoneistot" "0" "huoneistonumero"] "000"]
-                                                 [["huoneistot" "0" "muutostapa" :value] "lis\u00e4ys"]]
+                                                 [["huoneistot" "0" "muutostapa"] "lis\u00e4ys"]]
                                    :required common-rakval-schemas
                                    :attachments uuden_rakennuksen_liitteet
                                    :add-operation-allowed true
@@ -377,7 +377,7 @@
                                    :permit-type permit/R
                                    :schema-data [[["kaytto" "kayttotarkoitus"] schemas/yhden-asunnon-talot]
                                                  [["huoneistot" "0" "huoneistonumero"] "000"]
-                                                 [["huoneistot" "0" "muutostapa" :value] "lis\u00e4ys"]]
+                                                 [["huoneistot" "0" "muutostapa"] "lis\u00e4ys"]]
                                    :required common-rakval-schemas
                                    :attachments uuden_rakennuksen_liitteet
                                    :add-operation-allowed true
@@ -809,9 +809,9 @@
                                   :link-permit-required true
                                   :link-permit-verdict-required true}
 
-    :tyonjohtajan-nimeaminen-v2  {:schema "hankkeen-kuvaus-minimum"
+    :tyonjohtajan-nimeaminen-v2  {:schema "tyonjohtaja-v2"
                                   :permit-type permit/R
-                                  :required ["tyonjohtaja-v2"]
+                                  :required ["hankkeen-kuvaus-minimum"]
                                   :attachments []
                                   :add-operation-allowed false
                                   :link-permit-required true

@@ -1,16 +1,16 @@
 (ns lupapalvelu.user
   (:require [taoensso.timbre :as timbre :refer [debug debugf info warn warnf]]
+            [clj-time.core :as time]
+            [clj-time.coerce :refer [to-date]]
             [monger.operators :refer :all]
             [monger.query :as query]
             [noir.session :as session]
             [camel-snake-kebab :as kebab]
+            [sade.core :refer [fail fail!]]
+            [sade.env :as env]
             [sade.strings :as ss]
             [sade.util :as util]
-            [sade.env :as env]
             [lupapalvelu.mongo :as mongo]
-            [sade.core :refer [fail fail!]]
-            [clj-time.core :as time]
-            [clj-time.coerce :refer [to-date]]
             [lupapalvelu.security :as security]))
 
 ;;
@@ -39,6 +39,8 @@
 (defn same-user? [{id1 :id} {id2 :id}]
   (= id1 id2))
 
+(def canonize-email (comp ss/lower-case ss/trim))
+
 ;;
 ;; ==============================================================================
 ;; Finding user data:
@@ -53,10 +55,10 @@
                   (dissoc :id))
                 query)
         query (if-let [username (:username query)]
-                (assoc query :username (ss/lower-case username))
+                (assoc query :username (canonize-email username))
                 query)
         query (if-let [email (:email query)]
-                (assoc query :email (ss/lower-case email))
+                (assoc query :email (canonize-email email))
                 query)
         query (if-let [organization (:organization query)]
                 (-> query
@@ -124,21 +126,21 @@
 
 (defn throttle-login? [username]
   {:pre [username]}
-  (mongo/any? :logins {:_id (ss/lower-case username)
+  (mongo/any? :logins {:_id (canonize-email username)
                        :failed-logins {$gte (env/value :login :allowed-failures)}
                        :locked {$gt (logins-lock-expires-date)}}))
 
 (defn login-failed [username]
   {:pre [username]}
   (mongo/remove-many :logins {:locked {$lte (logins-lock-expires-date)}})
-  (mongo/update :logins {:_id (ss/lower-case username)}
+  (mongo/update :logins {:_id (canonize-email username)}
                 {$set {:locked (java.util.Date.)}, $inc {:failed-logins 1}}
                 :multi false
                 :upsert true))
 
 (defn clear-logins [username]
   {:pre [username]}
-  (mongo/remove :logins (ss/lower-case username)))
+  (mongo/remove :logins (canonize-email username)))
 
 ;;
 ;; ==============================================================================
@@ -225,7 +227,7 @@
   "Add or replace users api key. User is identified by email. Returns apikey. If user is unknown throws an exception."
   [email]
   (let [apikey (security/random-password)
-        n      (mongo/update-n :users {:email (ss/lower-case email)} {$set {:private.apikey apikey}})]
+        n      (mongo/update-n :users {:email (canonize-email email)} {$set {:private.apikey apikey}})]
     (when-not (= n 1) (fail! :unknown-user :email email))
     apikey))
 
@@ -240,7 +242,7 @@
   [email password]
   (let [salt              (security/dispense-salt)
         hashed-password   (security/get-hash password salt)
-        email             (ss/lower-case email)
+        email             (canonize-email email)
         updated-user      (mongo/update-one-and-return :users
                             {:email email}
                             {$set {:private.password hashed-password
@@ -259,7 +261,7 @@
 ;;
 
 (defn update-user-by-email [email data]
-  (mongo/update :users {:email (ss/lower-case email)} {$set data}))
+  (mongo/update :users {:email (canonize-email email)} {$set data}))
 
 (defn update-organizations-of-authority-user [email new-organization]
   (let [old-orgs (:organizations (get-user-by-email email))]

@@ -95,6 +95,8 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
       typeSelector: true,
       opSelector: true
     });
+
+    LUPAPISTE.ModalDialog.open("#upload-dialog");
   };
 
   self.copyOwnAttachments = function() {

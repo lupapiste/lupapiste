@@ -38,7 +38,7 @@
 }
 
 @mixin spite-bg {
-  background-image: url('/img/icons-sprite-1.13.png');
+  background-image: url('/img/icons-sprite-1.14.png');
   background-repeat: no-repeat;
 }
 
@@ -214,6 +214,7 @@ div.pzbDiv {
   border: 1px solid black;
   box-shadow: 3px 4px 7px;
   font-size: 0.8em;
+  color: $color-text;
 
   p {
     margin-bottom: 4px;

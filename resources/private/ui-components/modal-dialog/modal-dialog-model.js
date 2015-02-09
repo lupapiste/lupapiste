@@ -4,6 +4,10 @@ LUPAPISTE.ModalDialogModel = function (params) {
   self.showDialog = ko.observable(false);
   self.contentName = ko.observable();
   self.contentParams = ko.observable();
+
+  self.submitButtonTitleLoc = ko.observable();
+  self.submitButtonFunc = null;
+
   self.windowWidth = ko.observable();
   self.windowHeight = ko.observable();
   self.title = ko.observable();
@@ -32,6 +36,10 @@ LUPAPISTE.ModalDialogModel = function (params) {
     $("html").addClass("no-scroll");
     self.contentName(data.contentName);
     self.contentParams(data.contentParams);
+
+    self.submitButtonTitleLoc(data.submitButtonTitleLoc);
+    self.submitButtonFunc = data.submitButtonFunc;
+
     self.showDialog(true);
     self.title(loc(data.titleLoc));
   });

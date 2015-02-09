@@ -42,7 +42,7 @@
 
 (defn- create-invite [command id email text documentName documentId path role]
   {:pre [(valid-role role)]}
-  (let [email (-> email ss/lower-case ss/trim)
+  (let [email (user/canonize-email email)
         {created :created user :user application :application} command]
     (if (domain/invite application email)
       (fail :invite.already-has-auth)
@@ -113,7 +113,7 @@
     (zipmap <> (repeat ""))))
 
 (defn- do-remove-auth [{application :application :as command} username]
-  (let [username (-> username ss/lower-case ss/trim)
+  (let [username (user/canonize-email username)
         user-pred #(when (and (= (:username %) username) (not= (:type %) "owner")) %)]
     (when (some user-pred (:auth application))
       (let [updated-app (update-in application [:auth] (fn [a] (remove user-pred a)))

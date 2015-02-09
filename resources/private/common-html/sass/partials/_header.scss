@@ -4,83 +4,53 @@ nav {
   top:0;
   z-index: 1100;
   background: #fff;
-  height: ($baseline * 3);
-  padding-bottom: $marginS;
+  height: 60px;
+  box-sizing: border-box;
   width: 100%;
-  &.nav-wrapper {
+  background: $lp-dark-grey;
+  .nav-wrapper {
     width: 100%;
     max-width: $application-max-width;
     margin: 0 auto;
     position: relative;
+    box-sizing: border-box;
     .brand {
-      margin-top: $marginS;
-      margin-left: 8px;
       position: relative;
       width: 300px;
       display: inline-block;
-        height: 64px;
+      .logo {
+        margin: 12px;
+      }
       a img {
-        width: 234px;
-        height: 50px;
+        width: 164px;
+        height: 35px;
+        margin: 12px;
       }
       .change-language {
-        color: $lp-dark-grey;
+        color: $lp-orange;
         text-decoration: none;
+        display: inline-block;
         position: absolute;
-        right: 63px;
-        bottom: 5px;
+        top: 20px;
+        left: 200px;
       }
     }
+
     .header-menu {
-      position: absolute;
-      top: 0;
-      right: 0;
-      .main-nav {
-        width:$cols3;
-        background: $lp-dark-grey;
-        height: ($baseline * 3);
-        margin-right: $marginS;
+      display: inline-block;
+      float: right;
+      .header-box {
         display: inline-block;
-        span {
+        padding: $marginM;
+        height: 60px;
+        a, span {
           color: white;
+          font-size: 16px;
           text-decoration: none;
-          position: absolute;
-          bottom: 12px;
-          left: $marginL;
-          font-size: 1.1em;
-        }
-        .icon {
-          left: $marginS;
-          bottom: 16px;
-        }
-
-      }
-
-      .user-menu {
-        display: inline-block;
-        width:$cols3;
-        background: $lp-dark-grey;
-        height: ($baseline * 3);
-        position: relative;
-
-        #user-name {
-          text-decoration: underline;
-        }
-
-        a {
-          color: white;
-          text-decoration: none;
-          float: right;
-          margin: $marginM $marginS 0 0;
-          max-height: 24px;
-          overflow: hidden;
-        }
-        a + a {
-          margin: $marginS $marginS $marginS $cols2;
+          vertical-align: middle;
         }
       }
     }
-    
   }
 }
 

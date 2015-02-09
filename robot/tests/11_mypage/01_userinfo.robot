@@ -8,11 +8,16 @@ Resource       ../../common_resource.robot
 
 ## For some strange reason, firstName and lastName fields are left blank.
 
-Mikko changes his name and experience
+Mikko goes to own page
   Mikko logs in
   Click Element  user-name
   Wait for Page to Load  Mikko  Intonen
   Title Should Be  Lupapiste
+
+There is no company info
+  Element should not be visible  //div[@data-test-id='my-company']
+
+Mikko changes his name and experience
   Change Textfield Value  firstName  Mikko  Mika
   Change Textfield Value  lastName  Intonen  Intola
   Change Textfield Value  architect.degree  Tutkinto  Arkkitehti
