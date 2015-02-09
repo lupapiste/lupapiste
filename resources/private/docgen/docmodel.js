@@ -910,6 +910,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       model: model[subSchema.name] || {},
       subSchema: subSchema,
       path: path,
+      schemaI18name: self.schemaI18name,
       partOfChoice: partOfChoice,
       validationErrors: doc.validationErrors
     };
