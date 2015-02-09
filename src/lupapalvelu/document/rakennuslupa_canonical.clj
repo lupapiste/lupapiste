@@ -326,7 +326,9 @@
                                                                                      building-canonical)]
                                                             {:KatselmuksenRakennus building-canonical}) buildings)}) ; v2.1.3
                       (when (:kuvaus huomautukset) {:huomautukset {:huomautus (reduce-kv
-                                                                                (fn [m k v] (assoc m k (util/to-xml-date-from-string v)))
+                                                                                (fn [m k v] (if-not (ss/blank? v)
+                                                                                              (assoc m k (util/to-xml-date-from-string v))
+                                                                                              m))
                                                                                 (select-keys huomautukset [:kuvaus :toteaja])
                                                                                 (select-keys huomautukset [:maaraAika :toteamisHetki]))}})))
         canonical {:Rakennusvalvonta
