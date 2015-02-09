@@ -54,4 +54,4 @@
                (query/fields [:municipality :submitted :operations])
                (query/sort {:submitted -1})
                (query/limit limit))]
-    (ok :applications (map search/public-fields apps))))
+    (ok :applications (->> apps (filter (comp seq :operations)) (map search/public-fields)))))
