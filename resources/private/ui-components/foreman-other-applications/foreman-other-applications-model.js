@@ -21,6 +21,7 @@ LUPAPISTE.ForemanOtherApplicationsModel = function(params) {
         applicationId: self.params.applicationId,
         documentId: self.params.documentId,
         path: self.params.path,
+        schemaI18name: self.params.schemaI18name,
         index: index,
         schema: subSchema,
         model: rowModel,
