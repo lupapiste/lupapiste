@@ -4,7 +4,7 @@
   var isInitializing = true;
   var currentId = null;
   var authorizationModel = authorization.create();
-  var applicationModel = new LUPAPISTE.ApplicationModel();
+  var applicationModel = lupapisteApp.models.application;
   var changeLocationModel = new LUPAPISTE.ChangeLocationModel();
   var addLinkPermitModel = new LUPAPISTE.AddLinkPermitModel();
   var constructionStateChangeModel = new LUPAPISTE.ModalDatepickerModel();
@@ -196,6 +196,7 @@
       isInitializing = false;
       pageutil.hideAjaxWait();
 
+      hub.send("application-model-updated", {applicationId: app.id});
     });
   }
 
@@ -264,11 +265,10 @@
   hub.onPageLoad("application", _.partial(initPage, "application"));
   hub.onPageLoad("inforequest", _.partial(initPage, "inforequest"));
 
-  repository.loaded(["application","inforequest","attachment","statement","neighbors","task","verdict"], function(application, applicationDetails) {
-    if (!currentId || (currentId === application.id)) {
-      showApplication(applicationDetails);
-    }
-    updateWindowTitle(application.title);
+// (["application","inforequest","attachment","statement","neighbors","task","verdict"]
+  hub.subscribe("application-loaded", function(e) {
+    showApplication(e.applicationDetails);
+    updateWindowTitle(e.applicationDetails.application.title);
   });
 
   function NeighborStatusModel() {

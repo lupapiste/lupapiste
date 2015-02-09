@@ -1,6 +1,6 @@
 (ns lupapalvelu.statement
-  (:require [sade.strings :as ss]
-            [sade.core :refer [fail]]))
+  (:require [sade.core :refer [fail]]
+            [lupapalvelu.user :as user]))
 
 ;;
 ;; Common
@@ -15,7 +15,7 @@
 
 (defn statement-owner [{{:keys [statementId]} :data {user-email :email} :user} application]
   (let [{{statement-email :email} :person} (get-statement application statementId)]
-    (when-not (= (ss/lower-case statement-email) (ss/lower-case user-email))
+    (when-not (= (user/canonize-email statement-email) (user/canonize-email user-email))
       (fail :error.not-statement-owner))))
 
 (defn statement-given? [application statementId]

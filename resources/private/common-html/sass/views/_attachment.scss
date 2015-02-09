@@ -16,7 +16,6 @@ $previewHeight: 500px;
 
 .file-preview {
   width: 100%;
-  float: left;
   position: relative;
 }
 
@@ -41,7 +40,6 @@ $previewHeight: 500px;
 }
 
 .file-preview-links {
-  float: right;
 }
 
 .file-preview-pdf {
@@ -74,7 +72,6 @@ $previewHeight: 500px;
 
 .attachment-file-conversation {
   width: 48%;
-  float: right;
 }
 
 .attachment-info {
@@ -86,20 +83,24 @@ $previewHeight: 500px;
   }
 
   .col1 {
-    float: left;
+    display: inline-block;
     padding-right: $marginM;
-    width: 50%;
+    width: 49%;
+    vertical-align: top;
   }
 
   .col2 {
-    float: right;
+    display: inline-block;
     padding-left: $marginM;
-    width: 50%;
+    width: 49%;
+    vertical-align: top;
   }
 
   .attachment-actions {
-    float: right;
     width: $cols3;
+    position: absolute;
+    top: 0;
+    right: 0;
     button {
       width: 100%;
     }
@@ -108,22 +109,23 @@ $previewHeight: 500px;
 
 .attachment-info-header {
   overflow: auto;
-  width: 80%;
+  width: 100%;
+  display: block;
   h1 {
-    float: left;
     line-height: normal;
+    display: inline-block;
+    max-width: 80%
   }
   a {
-    float: left;
     margin-left: $marginL * 2;
   }
   .help {
     margin-left: $marginM;
+    display: inline-block;
   }
 }
 
 .add-new-version {
-  float: right;
 }
 
 td.comment-text {
@@ -148,12 +150,12 @@ td.comment-text {
 }
 
 .attachment-back {
-  text-align: center;
-  margin-right: $marginS;
-  margin-left: $marginL;
-  .icon {
-    height: 15px;
-    margin-bottom: 3px;
+
+  display: block;
+  height: 60px;
+
+  a {
+    margin-right: $marginM;
   }
 }
 
@@ -228,5 +230,4 @@ td.comment-text {
 .signature-cell {
   display: table-column;
   width: 200px;
-  float: left;
 }

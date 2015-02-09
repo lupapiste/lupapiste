@@ -107,7 +107,8 @@
 ;;
 
 (defn add-user! [user company role]
-  (let [token-id (token/make-token :new-company-user nil {:user user, :company company, :role role} :auto-consume false)]
+  (let [user (update-in user [:email] u/canonize-email)
+        token-id (token/make-token :new-company-user nil {:user user, :company company, :role role} :auto-consume false)]
     (notif/notify! :new-company-user {:user       user
                                       :company    company
                                       :link-fi    (str (env/value :host) "/app/fi/welcome#!/new-company-user/" token-id)

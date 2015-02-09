@@ -1,6 +1,6 @@
 (ns lupapalvelu.fixture.minimal
   (:require [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.fixture :refer :all]
+            [lupapalvelu.fixture.core :refer :all]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.attachment :as attachment]
             [sade.core :refer :all]))

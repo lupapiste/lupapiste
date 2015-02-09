@@ -8,7 +8,7 @@
             [lupapalvelu.action :refer :all]
             [sade.dummy-email-server :as dummy-email-server]
             [sade.core :refer [def- now]]
-            [lupapalvelu.fixture :as fixture]
+            [lupapalvelu.fixture.core :as fixture]
             [lupapalvelu.batchrun :as batchrun]))
 
 (dummy-email-server/messages :reset true)  ;; clears inbox

@@ -214,9 +214,21 @@ html.no-scroll {
 /* line 41, ../sass/partials/_base.scss */
 body {
   min-width: 820px;
+  min-height: 100%;
+  height: 100%;
+}
+/* line 45, ../sass/partials/_base.scss */
+body.applicant, body.authority, body.authority-admin, body.welcome, body.admin {
+  min-height: 100vh;
+  padding-bottom: 270px;
+  position: relative;
+}
+/* line 51, ../sass/partials/_base.scss */
+body.admin {
+  margin-top: 100px;
 }
 
-/* line 44, ../sass/partials/_base.scss */
+/* line 56, ../sass/partials/_base.scss */
 .container {
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
@@ -227,41 +239,50 @@ body {
   margin: 24px auto 24px auto;
   position: relative;
 }
-/* line 51, ../sass/partials/_base.scss */
+/* line 63, ../sass/partials/_base.scss */
 .container .content {
   width: 100%;
 }
-/* line 54, ../sass/partials/_base.scss */
+/* line 66, ../sass/partials/_base.scss */
 .container .content-narrow {
   width: 68%;
 }
-/* line 58, ../sass/partials/_base.scss */
+/* line 70, ../sass/partials/_base.scss */
 .container .sidebar {
   width: 18%;
 }
 
-/* line 63, ../sass/partials/_base.scss */
+/* line 75, ../sass/partials/_base.scss */
 .page {
   display: none;
-  margin-top: 0;
+  margin-top: 60px;
 }
 
-/* line 68, ../sass/partials/_base.scss */
+/* line 80, ../sass/partials/_base.scss */
 .clear {
+  *zoom: 1;
+}
+/* line 22, ../sass/main.scss */
+.clear:before, .clear:after {
+  content: "";
+  display: table;
+}
+/* line 26, ../sass/main.scss */
+.clear:after {
   clear: both;
 }
 
-/* line 72, ../sass/partials/_base.scss */
+/* line 84, ../sass/partials/_base.scss */
 .spacerM {
   margin-bottom: 12px;
 }
 
-/* line 76, ../sass/partials/_base.scss */
+/* line 88, ../sass/partials/_base.scss */
 .right {
   float: right;
 }
 
-/* line 80, ../sass/partials/_base.scss */
+/* line 92, ../sass/partials/_base.scss */
 .left {
   float: left;
 }
@@ -391,158 +412,160 @@ a:active, a:visited, a:hover {
 /* line 2, ../sass/partials/_icons.scss */
 .icon, .icon-small, .icon-tiny, .icon-large, .ui-icon {
   display: inline-block;
-  background-image: url("/img/icons-sprite-1.13.png");
+  background-image: url("/img/icons-sprite-1.14.png");
   background-repeat: no-repeat;
+  overflow: hidden;
 }
 
-/* line 8, ../sass/partials/_icons.scss */
+/* line 11, ../sass/partials/_icons.scss */
 .icon {
   height: 20px;
   width: 20px;
+  overflow: hidden;
 }
-/* line 11, ../sass/partials/_icons.scss */
+/* line 15, ../sass/partials/_icons.scss */
 .icon.inline-left {
   margin-right: 6px;
   float: left;
   margin-top: 6px;
 }
-/* line 16, ../sass/partials/_icons.scss */
+/* line 20, ../sass/partials/_icons.scss */
 .icon.inline-right {
   margin-right: 6px;
   float: right;
   margin-top: 6px;
 }
-/* line 22, ../sass/partials/_icons.scss */
-.icon.document-white {
+/* line 26, ../sass/partials/_icons.scss */
+.icon.document-orange {
   background-position: 0px 0px;
-  width: 14px;
-  height: 18px;
+  width: 24px;
+  height: 24px;
 }
-/* line 27, ../sass/partials/_icons.scss */
-.icon.document-dark {
+/* line 31, ../sass/partials/_icons.scss */
+.icon.logout {
   background-position: 0px -100px;
-  width: 14px;
-  height: 18px;
+  width: 24px;
+  height: 24px;
 }
-/* line 32, ../sass/partials/_icons.scss */
-.icon.person-white {
+/* line 36, ../sass/partials/_icons.scss */
+.icon.person-orange {
   background-position: 0px -200px;
-  width: 18px;
-  height: 18px;
+  width: 24px;
+  height: 24px;
 }
-/* line 37, ../sass/partials/_icons.scss */
-.icon.person-dark {
+/* line 41, ../sass/partials/_icons.scss */
+.icon.drill-down-orange {
   background-position: 0px -300px;
   width: 18px;
   height: 18px;
 }
-/* line 42, ../sass/partials/_icons.scss */
+/* line 46, ../sass/partials/_icons.scss */
 .icon.drill-right-orange {
   background-position: 0px -400px;
   width: 12px;
   height: 12px;
 }
-/* line 47, ../sass/partials/_icons.scss */
+/* line 51, ../sass/partials/_icons.scss */
 .icon.drill-right-grey {
   background-position: 0px -500px;
   width: 12px;
   height: 12px;
 }
-/* line 52, ../sass/partials/_icons.scss */
+/* line 56, ../sass/partials/_icons.scss */
 .icon.drill-right-black {
   background-position: 0px -600px;
   width: 12px;
   height: 12px;
 }
-/* line 57, ../sass/partials/_icons.scss */
+/* line 61, ../sass/partials/_icons.scss */
 .icon.drill-right-white {
   background-position: 0px -700px;
   width: 12px;
   height: 12px;
 }
-/* line 62, ../sass/partials/_icons.scss */
+/* line 66, ../sass/partials/_icons.scss */
 .icon.drill-down-grey {
   background-position: 0px -800px;
   width: 12px;
   height: 12px;
 }
-/* line 67, ../sass/partials/_icons.scss */
+/* line 71, ../sass/partials/_icons.scss */
 .icon.drill-down-white {
   background-position: 0px -900px;
   width: 12px;
   height: 12px;
 }
-/* line 72, ../sass/partials/_icons.scss */
+/* line 76, ../sass/partials/_icons.scss */
 .icon.drill-down-black {
   background-position: 0px -5700px;
   width: 12px;
   height: 12px;
 }
-/* line 77, ../sass/partials/_icons.scss */
+/* line 81, ../sass/partials/_icons.scss */
 .icon.drill-left-grey {
   background-position: 0px -1600px;
   width: 12px;
   height: 12px;
 }
-/* line 82, ../sass/partials/_icons.scss */
+/* line 86, ../sass/partials/_icons.scss */
 .icon.drill-left-black {
   background-position: 0px -1700px;
   width: 12px;
   height: 12px;
 }
-/* line 87, ../sass/partials/_icons.scss */
+/* line 91, ../sass/partials/_icons.scss */
 .icon.drill-left-all-black {
   background-position: 0px -2000px;
   width: 10px;
   height: 12px;
 }
-/* line 92, ../sass/partials/_icons.scss */
+/* line 96, ../sass/partials/_icons.scss */
 .icon.drill-left-black-bigger {
   background-position: 0px -3100px;
   width: 12px;
   height: 12px;
 }
-/* line 97, ../sass/partials/_icons.scss */
+/* line 101, ../sass/partials/_icons.scss */
 .icon.add {
   background-position: 0px -2200px;
   width: 15px;
   height: 15px;
 }
-/* line 102, ../sass/partials/_icons.scss */
+/* line 106, ../sass/partials/_icons.scss */
 .icon.search {
   background-position: 0px -2300px;
   width: 14px;
   height: 14px;
 }
-/* line 107, ../sass/partials/_icons.scss */
+/* line 111, ../sass/partials/_icons.scss */
 .icon.missing {
   background-position: 0px -2400px;
   width: 16px;
   height: 16px;
 }
-/* line 112, ../sass/partials/_icons.scss */
+/* line 116, ../sass/partials/_icons.scss */
 .icon.ok {
   background-position: 0px -2500px;
   width: 16px;
   height: 16px;
 }
-/* line 117, ../sass/partials/_icons.scss */
+/* line 121, ../sass/partials/_icons.scss */
 .icon.info-indicator {
   background-position: 0px -2600px;
   width: 16px;
   height: 16px;
 }
-/* line 122, ../sass/partials/_icons.scss */
+/* line 126, ../sass/partials/_icons.scss */
 .icon.remove {
   background-position: 0px -2700px;
   width: 15px;
   height: 15px;
 }
-/* line 127, ../sass/partials/_icons.scss */
+/* line 131, ../sass/partials/_icons.scss */
 .icon.wait {
   background-position: 0px -2800px;
 }
-/* line 130, ../sass/partials/_icons.scss */
+/* line 134, ../sass/partials/_icons.scss */
 .icon.info-big {
   background-position: 0px -2900px;
   width: 30px;
@@ -550,122 +573,132 @@ a:active, a:visited, a:hover {
   margin-left: -6px;
   margin-bottom: -6px;
 }
-/* line 137, ../sass/partials/_icons.scss */
+/* line 141, ../sass/partials/_icons.scss */
 .icon.help {
   background-position: 0px -2900px;
   width: 30px;
   height: 32px;
 }
-/* line 142, ../sass/partials/_icons.scss */
+/* line 146, ../sass/partials/_icons.scss */
 .icon.new {
   background-position: 0px -3000px;
   width: 16px;
   height: 16px;
 }
-/* line 147, ../sass/partials/_icons.scss */
+/* line 151, ../sass/partials/_icons.scss */
 .icon.print {
   background-position: 0px -3500px;
   width: 16px;
   height: 15px;
 }
-/* line 152, ../sass/partials/_icons.scss */
+/* line 156, ../sass/partials/_icons.scss */
 .icon.send {
   background-position: 0px -3600px;
   height: 15px;
   width: 17px;
 }
-/* line 157, ../sass/partials/_icons.scss */
+/* line 161, ../sass/partials/_icons.scss */
 .icon.approve {
   background-position: 0px -3700px;
   height: 17px;
   width: 17px;
 }
-/* line 162, ../sass/partials/_icons.scss */
+/* line 166, ../sass/partials/_icons.scss */
 .icon.stamp {
   background-position: 0px -3800px;
   height: 16px;
   width: 16px;
 }
-/* line 167, ../sass/partials/_icons.scss */
+/* line 171, ../sass/partials/_icons.scss */
 .icon.add-grey {
   background-position: 0px -3900px;
   height: 16px;
   width: 16px;
 }
-/* line 172, ../sass/partials/_icons.scss */
+/* line 176, ../sass/partials/_icons.scss */
 .icon.complement {
   background-position: 0px -4000px;
   height: 16px;
   width: 16px;
 }
-/* line 177, ../sass/partials/_icons.scss */
+/* line 181, ../sass/partials/_icons.scss */
 .icon.remove-grey {
   background-position: 0px -4100px;
   cursor: pointer;
   height: 16px;
   width: 16px;
 }
-/* line 183, ../sass/partials/_icons.scss */
+/* line 187, ../sass/partials/_icons.scss */
 .icon.edit {
   background-position: 0px -4200px;
   cursor: pointer;
 }
-/* line 187, ../sass/partials/_icons.scss */
+/* line 191, ../sass/partials/_icons.scss */
 .icon.refresh-grey {
   background-position: 0px -4697px;
   width: 16px;
   height: 16px;
 }
-/* line 192, ../sass/partials/_icons.scss */
+/* line 196, ../sass/partials/_icons.scss */
 .icon.signed {
   background-position: 0px -4900px;
   width: 18px;
   height: 18px;
 }
-/* line 197, ../sass/partials/_icons.scss */
+/* line 201, ../sass/partials/_icons.scss */
 .icon.signed-white {
   background-position: 0px -5800px;
   width: 16px;
   height: 16px;
 }
-/* line 202, ../sass/partials/_icons.scss */
+/* line 206, ../sass/partials/_icons.scss */
 .icon.stamped {
   background-position: 0px -5000px;
   height: 18px;
   width: 18px;
 }
-/* line 207, ../sass/partials/_icons.scss */
+/* line 211, ../sass/partials/_icons.scss */
 .icon.transfered {
   background-position: 0px -5100px;
   height: 17px;
   width: 25px;
 }
-/* line 212, ../sass/partials/_icons.scss */
+/* line 216, ../sass/partials/_icons.scss */
 .icon.mark-seen {
   background-position: 0px -5200px;
   width: 25px;
   height: 15px;
 }
-/* line 217, ../sass/partials/_icons.scss */
+/* line 221, ../sass/partials/_icons.scss */
 .icon.urgent {
   width: 24px;
   height: 24px;
   background-position: 0px -5300px;
 }
-/* line 222, ../sass/partials/_icons.scss */
+/* line 226, ../sass/partials/_icons.scss */
 .icon.hold {
   width: 24px;
   height: 24px;
   background-position: 0px -5500px;
 }
-/* line 227, ../sass/partials/_icons.scss */
+/* line 231, ../sass/partials/_icons.scss */
 .icon.verdict-attachment {
   width: 8px;
   height: 18px;
   background-position: 0px -5900px;
 }
+/* line 236, ../sass/partials/_icons.scss */
+.icon.scroll-up {
+  background-position: 0px -6100px;
+  width: 24px;
+  height: 19px;
+}
+/* line 243, ../sass/partials/_icons.scss */
+.icon:hover {
+  background-position-x: -100px;
+}
 
-/* line 235, ../sass/partials/_icons.scss */
+/* line 255, ../sass/partials/_icons.scss */
 [type=submit] .icon.left-align, .btn .icon.left-align, button .icon.left-align {
   position: absolute;
   left: 12px;
@@ -673,7 +706,7 @@ a:active, a:visited, a:hover {
   top: 0;
   margin: auto;
 }
-/* line 242, ../sass/partials/_icons.scss */
+/* line 262, ../sass/partials/_icons.scss */
 [type=submit] .icon.right-align, .btn .icon.right-align, button .icon.right-align {
   position: absolute;
   right: 6px;
@@ -682,23 +715,9 @@ a:active, a:visited, a:hover {
   margin: auto;
 }
 
-/* line 251, ../sass/partials/_icons.scss */
+/* line 271, ../sass/partials/_icons.scss */
 h1 .icon {
   margin-right: 3px;
-}
-
-/* line 257, ../sass/partials/_icons.scss */
-.ui-icon.ui-icon-circle-triangle-w {
-  background-image: url("/img/icons-sprite-1.13.png");
-  background-repeat: no-repeat;
-  background-position: 2px -3097px;
-}
-
-/* line 262, ../sass/partials/_icons.scss */
-.ui-icon.ui-icon-circle-triangle-e {
-  background-image: url("/img/icons-sprite-1.13.png");
-  background-repeat: no-repeat;
-  background-position: 4px -597px;
 }
 
 /* NAV
@@ -709,91 +728,61 @@ nav {
   top: 0;
   z-index: 1100;
   background: #fff;
-  height: 72px;
-  padding-bottom: 6px;
+  height: 60px;
+  box-sizing: border-box;
   width: 100%;
+  background: #4f4f4f;
 }
-/* line 10, ../sass/partials/_header.scss */
-nav.nav-wrapper {
+/* line 11, ../sass/partials/_header.scss */
+nav .nav-wrapper {
   width: 100%;
   max-width: 1280px;
   margin: 0 auto;
   position: relative;
+  box-sizing: border-box;
 }
-/* line 15, ../sass/partials/_header.scss */
-nav.nav-wrapper .brand {
-  margin-top: 6px;
-  margin-left: 8px;
+/* line 17, ../sass/partials/_header.scss */
+nav .nav-wrapper .brand {
   position: relative;
   width: 300px;
   display: inline-block;
-  height: 64px;
 }
-/* line 22, ../sass/partials/_header.scss */
-nav.nav-wrapper .brand a img {
-  width: 234px;
-  height: 50px;
+/* line 21, ../sass/partials/_header.scss */
+nav .nav-wrapper .brand .logo {
+  margin: 12px;
 }
-/* line 26, ../sass/partials/_header.scss */
-nav.nav-wrapper .brand .change-language {
-  color: #4f4f4f;
+/* line 24, ../sass/partials/_header.scss */
+nav .nav-wrapper .brand a img {
+  width: 164px;
+  height: 35px;
+  margin: 12px;
+}
+/* line 29, ../sass/partials/_header.scss */
+nav .nav-wrapper .brand .change-language {
+  color: #f57e23;
   text-decoration: none;
-  position: absolute;
-  right: 63px;
-  bottom: 5px;
-}
-/* line 34, ../sass/partials/_header.scss */
-nav.nav-wrapper .header-menu {
-  position: absolute;
-  top: 0;
-  right: 0;
-}
-/* line 38, ../sass/partials/_header.scss */
-nav.nav-wrapper .header-menu .main-nav {
-  width: 16.25em;
-  background: #4f4f4f;
-  height: 72px;
-  margin-right: 6px;
   display: inline-block;
-}
-/* line 44, ../sass/partials/_header.scss */
-nav.nav-wrapper .header-menu .main-nav span {
-  color: white;
-  text-decoration: none;
   position: absolute;
-  bottom: 12px;
-  left: 24px;
-  font-size: 1.1em;
+  top: 20px;
+  left: 200px;
 }
-/* line 52, ../sass/partials/_header.scss */
-nav.nav-wrapper .header-menu .main-nav .icon {
-  left: 6px;
-  bottom: 16px;
-}
-/* line 59, ../sass/partials/_header.scss */
-nav.nav-wrapper .header-menu .user-menu {
+/* line 39, ../sass/partials/_header.scss */
+nav .nav-wrapper .header-menu {
   display: inline-block;
-  width: 16.25em;
-  background: #4f4f4f;
-  height: 72px;
-  position: relative;
-}
-/* line 66, ../sass/partials/_header.scss */
-nav.nav-wrapper .header-menu .user-menu #user-name {
-  text-decoration: underline;
-}
-/* line 70, ../sass/partials/_header.scss */
-nav.nav-wrapper .header-menu .user-menu a {
-  color: white;
-  text-decoration: none;
   float: right;
-  margin: 12px 6px 0 0;
-  max-height: 24px;
-  overflow: hidden;
 }
-/* line 78, ../sass/partials/_header.scss */
-nav.nav-wrapper .header-menu .user-menu a + a {
-  margin: 6px 6px 6px 10em;
+/* line 42, ../sass/partials/_header.scss */
+nav .nav-wrapper .header-menu .header-box {
+  display: inline-block;
+  padding: 12px;
+  height: 60px;
+}
+/* line 46, ../sass/partials/_header.scss */
+nav .nav-wrapper .header-menu .header-box a, nav .nav-wrapper .header-menu .header-box span {
+  color: white;
+  font-size: 16px;
+  text-decoration: none;
+  vertical-align: middle;
 }
 
 /* Side bar styles*/
@@ -838,78 +827,53 @@ nav.nav-wrapper .header-menu .user-menu a + a {
 
 /* line 1, ../sass/partials/_footer.scss */
 footer {
-  margin-top: 48px;
-  padding-top: 72px;
+  margin-top: 72px;
+  padding-top: 24px;
+  position: absolute;
   clear: both;
-  position: relative;
-  color: #777;
-  font-size: 1em;
-  padding: 24px;
-  background-image: url("/img/lp-footer.png");
-  background-repeat: repeat-x;
-  background-position: right top;
-  background-color: #e7e9e6;
+  color: white;
+  background-color: #4f4f4f;
   height: auto;
+  bottom: 0;
+  width: 100%;
 }
-/* line 14, ../sass/partials/_footer.scss */
+/* line 12, ../sass/partials/_footer.scss */
 footer .informations {
-  position: relative;
-  width: 80%;
+  padding: 12px;
+  width: 100%;
   max-width: 1280px;
-  margin: 48px auto 12px;
+  margin: 0 auto 12px;
 }
-/* line 19, ../sass/partials/_footer.scss */
-footer .informations div {
-  width: 33%;
+/* line 17, ../sass/partials/_footer.scss */
+footer .informations .footer-box {
+  font-size: 16px;
+  vertical-align: top;
+  width: 24.5%;
   display: inline-block;
+  padding-right: 24px;
+  box-sizing: border-box;
 }
-/* line 22, ../sass/partials/_footer.scss */
-footer .informations div div, footer .informations div a {
+/* line 24, ../sass/partials/_footer.scss */
+footer .informations .footer-box h3 {
+  font-size: 18px;
+  font-weight: bold;
+}
+/* line 28, ../sass/partials/_footer.scss */
+footer .informations .footer-box a {
+  color: #f57e23;
   display: block;
 }
-/* line 26, ../sass/partials/_footer.scss */
-footer .informations .user-information, footer .informations sade-information {
-  margin-top: 128px;
-}
-/* line 30, ../sass/partials/_footer.scss */
-footer .informations .sade-information a, footer .informations .sade-information span {
+/* line 33, ../sass/partials/_footer.scss */
+footer .informations .footer-box.sade-box a {
   display: inline;
-  width: auto;
 }
-/* line 35, ../sass/partials/_footer.scss */
-footer .informations .contact-information {
-  width: 33%;
-}
-/* line 37, ../sass/partials/_footer.scss */
-footer .informations .contact-information div {
-  display: inline-block;
-  width: 42%;
-}
-/* line 40, ../sass/partials/_footer.scss */
-footer .informations .contact-information div div, footer .informations .contact-information div a {
-  width: 80%;
-}
-/* line 46, ../sass/partials/_footer.scss */
-footer a {
-  color: #222;
-}
-/* line 49, ../sass/partials/_footer.scss */
-footer p {
-  margin: 0;
-}
-/* line 52, ../sass/partials/_footer.scss */
-footer form label {
-  display: inline-block;
-  padding: 6px;
-  font-size: 16px;
-  line-height: 24px;
-  width: auto;
-}
-/* line 59, ../sass/partials/_footer.scss */
-footer #buildinfo {
-  position: absolute;
-  right: 6px;
-  bottom: 6px;
+
+/* line 42, ../sass/partials/_footer.scss */
+#buildinfo {
+  display: block;
+  background-color: black;
+  padding: 12px;
+  color: #595959;
 }
 
 /*------------------------------------*\
@@ -1243,7 +1207,7 @@ input[readonly]:focus, textarea[readonly]:focus {
   top: 20px;
   right: 8px;
   padding: 6px 6px 6px 24px;
-  background-image: url("/img/icons-sprite-1.13.png");
+  background-image: url("/img/icons-sprite-1.14.png");
   background-repeat: no-repeat;
   background-color: white;
   border: 1px solid #f6f6f6;
@@ -1253,7 +1217,7 @@ input[readonly]:focus, textarea[readonly]:focus {
 
 /* line 106, ../sass/partials/_forms.scss */
 .save-indicator {
-  background-image: url("/img/icons-sprite-1.13.png");
+  background-image: url("/img/icons-sprite-1.14.png");
   background-repeat: no-repeat;
   background-position: 5px -2497px;
   padding-left: 27px;
@@ -1784,7 +1748,7 @@ input[readonly]:focus, textarea[readonly]:focus {
 /* line 584, ../sass/partials/_forms.scss */
 .form-help:before {
   content: " ";
-  background-image: url("/img/icons-sprite-1.13.png");
+  background-image: url("/img/icons-sprite-1.14.png");
   background-repeat: no-repeat;
   width: 16px;
   height: 16px;
@@ -1818,7 +1782,7 @@ input[readonly]:focus, textarea[readonly]:focus {
 /* line 614, ../sass/partials/_forms.scss */
 .form-full-width .form-help:before {
   content: " ";
-  background-image: url("/img/icons-sprite-1.13.png");
+  background-image: url("/img/icons-sprite-1.14.png");
   background-repeat: no-repeat;
   width: 16px;
   height: 16px;
@@ -1831,7 +1795,7 @@ input[readonly]:focus, textarea[readonly]:focus {
 /* line 628, ../sass/partials/_forms.scss */
 .approval-approved:after {
   content: " ";
-  background-image: url("/img/icons-sprite-1.13.png");
+  background-image: url("/img/icons-sprite-1.14.png");
   background-repeat: no-repeat;
   width: 18px;
   height: 18px;
@@ -1844,7 +1808,7 @@ input[readonly]:focus, textarea[readonly]:focus {
 /* line 640, ../sass/partials/_forms.scss */
 .approval-rejected:after {
   content: " ";
-  background-image: url("/img/icons-sprite-1.13.png");
+  background-image: url("/img/icons-sprite-1.14.png");
   background-repeat: no-repeat;
   width: 18px;
   height: 18px;
@@ -2823,7 +2787,7 @@ table.attachments-template-table td.attachment-file-info {
 .instructions:before {
   content: "";
   display: block;
-  background-image: url("/img/icons-sprite-1.13.png");
+  background-image: url("/img/icons-sprite-1.14.png");
   background-repeat: no-repeat;
   background-position: 0px -2900px;
   height: 32px;
@@ -2870,7 +2834,7 @@ table.attachments-template-table td.attachment-file-info {
 
 /* line 4, ../sass/partials/_tree.scss */
 .operation-tree {
-  float: right;
+  display: inline-block;
   margin-left: 24px;
   width: 800px;
   overflow: hidden;
@@ -3118,21 +3082,21 @@ ul.attachments-list li.mandatory-attachments {
 
 /* line 112, ../sass/partials/_accordion.scss */
 .accordion-input-saved {
-  background-image: url("/img/icons-sprite-1.13.png");
+  background-image: url("/img/icons-sprite-1.14.png");
   background-repeat: no-repeat;
   background-position: 4px -2499px;
 }
 
 /* line 117, ../sass/partials/_accordion.scss */
 .accordion-input-warn {
-  background-image: url("/img/icons-sprite-1.13.png");
+  background-image: url("/img/icons-sprite-1.14.png");
   background-repeat: no-repeat;
   background-position: 4px -3199px;
 }
 
 /* line 122, ../sass/partials/_accordion.scss */
 .accordion-input-err {
-  background-image: url("/img/icons-sprite-1.13.png");
+  background-image: url("/img/icons-sprite-1.14.png");
   background-repeat: no-repeat;
   background-position: 4px -2399px;
 }
@@ -3216,7 +3180,7 @@ ul.attachments-list li.mandatory-attachments {
 #sys-notification ul:before {
   content: "";
   display: block;
-  background-image: url("/img/icons-sprite-1.13.png");
+  background-image: url("/img/icons-sprite-1.14.png");
   background-repeat: no-repeat;
   background-position: 0px -4800px;
   height: 32px;
@@ -3532,7 +3496,7 @@ ul.attachments-list li.mandatory-attachments {
   content: "";
   display: block;
   position: absolute;
-  background-image: url("/img/icons-sprite-1.13.png");
+  background-image: url("/img/icons-sprite-1.14.png");
   background-repeat: no-repeat;
   background-position: 0px -3393px;
   height: 22px;
@@ -3546,7 +3510,7 @@ ul.attachments-list li.mandatory-attachments {
   content: "";
   display: block;
   position: absolute;
-  background-image: url("/img/icons-sprite-1.13.png");
+  background-image: url("/img/icons-sprite-1.14.png");
   background-repeat: no-repeat;
   background-position: 0px -3293px;
   height: 22px;
@@ -3604,7 +3568,7 @@ ul.attachments-list li.mandatory-attachments {
 }
 /* line 150, ../sass/views/_applications.scss */
 #applications-list .urgent {
-  background-image: url("/img/icons-sprite-1.13.png");
+  background-image: url("/img/icons-sprite-1.14.png");
   background-repeat: no-repeat;
   background-position: 0 -5300px;
   height: 24px;
@@ -3612,7 +3576,7 @@ ul.attachments-list li.mandatory-attachments {
 }
 /* line 156, ../sass/views/_applications.scss */
 #applications-list .pending {
-  background-image: url("/img/icons-sprite-1.13.png");
+  background-image: url("/img/icons-sprite-1.14.png");
   background-repeat: no-repeat;
   background-position: 0 -5500px;
   width: 24px;
@@ -3620,7 +3584,7 @@ ul.attachments-list li.mandatory-attachments {
 }
 /* line 162, ../sass/views/_applications.scss */
 #applications-list .normal {
-  background-image: url("/img/icons-sprite-1.13.png");
+  background-image: url("/img/icons-sprite-1.14.png");
   background-repeat: no-repeat;
   background-position: 0 -5600px;
   width: 24px;
@@ -3628,21 +3592,21 @@ ul.attachments-list li.mandatory-attachments {
 }
 /* line 168, ../sass/views/_applications.scss */
 #applications-list .unseen-comments {
-  background-image: url("/img/icons-sprite-1.13.png");
+  background-image: url("/img/icons-sprite-1.14.png");
   background-repeat: no-repeat;
   background-position: 0 -4295px;
   width: 21px;
 }
 /* line 173, ../sass/views/_applications.scss */
 #applications-list .unseen-indicators {
-  background-image: url("/img/icons-sprite-1.13.png");
+  background-image: url("/img/icons-sprite-1.14.png");
   background-repeat: no-repeat;
   background-position: 0 -4597px;
   width: 25px;
 }
 /* line 178, ../sass/views/_applications.scss */
 #applications-list .unseen-attachments {
-  background-image: url("/img/icons-sprite-1.13.png");
+  background-image: url("/img/icons-sprite-1.14.png");
   background-repeat: no-repeat;
   background-position: 0 -4496px;
   width: 21px;
@@ -4559,47 +4523,48 @@ span.icon_clear:before {
 /* line 50, ../sass/views/_create_application.scss */
 .create-info-text {
   width: 20%;
-  float: left;
-  margin-right: 24px;
+  display: inline-block;
+  padding-right: 48px;
+  vertical-align: top;
 }
 
-/* line 56, ../sass/views/_create_application.scss */
+/* line 57, ../sass/views/_create_application.scss */
 .create-buttons {
   float: right;
 }
 
-/* line 59, ../sass/views/_create_application.scss */
+/* line 60, ../sass/views/_create_application.scss */
 .create-content {
   width: 75%;
   float: right;
 }
 
-/* line 66, ../sass/views/_create_application.scss */
+/* line 67, ../sass/views/_create_application.scss */
 .more-prev-app-info-needed-desc {
   color: red;
   margin-top: 24px;
   margin-bottom: 0;
 }
 
-/* line 75, ../sass/views/_create_application.scss */
+/* line 76, ../sass/views/_create_application.scss */
 .address-search {
   width: 22.5em;
   display: inline-block;
   height: 25px;
 }
 
-/* line 81, ../sass/views/_create_application.scss */
+/* line 82, ../sass/views/_create_application.scss */
 .create-application-details {
   width: 800px;
   height: 200px;
 }
 
-/* line 86, ../sass/views/_create_application.scss */
+/* line 87, ../sass/views/_create_application.scss */
 .create-application-form {
   display: inline-block;
 }
 
-/* line 90, ../sass/views/_create_application.scss */
+/* line 91, ../sass/views/_create_application.scss */
 .create-application-actions {
   width: 22.5em;
   display: inline-block;
@@ -4607,61 +4572,61 @@ span.icon_clear:before {
   vertical-align: bottom;
 }
 
-/* line 97, ../sass/views/_create_application.scss */
+/* line 98, ../sass/views/_create_application.scss */
 .btn-create-application {
   line-height: 60px;
 }
 
-/* line 101, ../sass/views/_create_application.scss */
+/* line 102, ../sass/views/_create_application.scss */
 .label-container {
   display: inline-block;
   width: 10em;
 }
 
-/* line 106, ../sass/views/_create_application.scss */
+/* line 107, ../sass/views/_create_application.scss */
 .create-group {
   margin-top: 24px;
   padding: 12px;
   border-radius: 3px;
   border: 1px solid #01bef5;
 }
-/* line 112, ../sass/views/_create_application.scss */
+/* line 113, ../sass/views/_create_application.scss */
 .create-group label {
   display: inline-block;
 }
 
-/* line 116, ../sass/views/_create_application.scss */
+/* line 117, ../sass/views/_create_application.scss */
 .top-marginL {
   margin-top: 48px;
 }
 
-/* line 119, ../sass/views/_create_application.scss */
+/* line 120, ../sass/views/_create_application.scss */
 .bottom-marginM {
   margin-bottom: 12px !important;
 }
 
-/* line 123, ../sass/views/_create_application.scss */
+/* line 124, ../sass/views/_create_application.scss */
 #popup-id_close {
-  background-image: url("/img/icons-sprite-1.13.png");
+  background-image: url("/img/icons-sprite-1.14.png");
   background-repeat: no-repeat;
   background-position: 0px -4100px;
   top: 4px !important;
   right: 4px !important;
 }
 
-/* line 129, ../sass/views/_create_application.scss */
+/* line 130, ../sass/views/_create_application.scss */
 #popup-id_contentDiv {
   padding: 0;
   width: 95% !important;
   overflow: hidden;
 }
 
-/* line 135, ../sass/views/_create_application.scss */
+/* line 136, ../sass/views/_create_application.scss */
 #popup-id_GroupDiv {
   padding: 8px;
 }
 
-/* line 138, ../sass/views/_create_application.scss */
+/* line 139, ../sass/views/_create_application.scss */
 #popup-id {
   background: white;
   color: black;
@@ -4670,7 +4635,7 @@ span.icon_clear:before {
   box-shadow: 2px 2px 1px #888888, 3px 3px 1px #888888;
   border: 1px solid #4f4f4f;
 }
-/* line 148, ../sass/views/_create_application.scss */
+/* line 149, ../sass/views/_create_application.scss */
 #popup-id:before {
   content: " ";
   display: block;
@@ -4683,7 +4648,7 @@ span.icon_clear:before {
   border-right: 51px solid #4f4f4f;
   border-bottom: 25px solid transparent;
 }
-/* line 160, ../sass/views/_create_application.scss */
+/* line 161, ../sass/views/_create_application.scss */
 #popup-id:after {
   content: " ";
   display: block;
@@ -4716,61 +4681,55 @@ span.icon_clear:before {
 /* line 17, ../sass/views/_attachment.scss */
 .file-preview {
   width: 100%;
-  float: left;
   position: relative;
 }
 
-/* line 23, ../sass/views/_attachment.scss */
+/* line 22, ../sass/views/_attachment.scss */
 .file-preview-image img {
   width: 100%;
   height: auto;
 }
 
-/* line 28, ../sass/views/_attachment.scss */
+/* line 27, ../sass/views/_attachment.scss */
 .file-preview-actions {
   position: absolute;
   bottom: 6px;
   right: 6px;
 }
-/* line 32, ../sass/views/_attachment.scss */
+/* line 31, ../sass/views/_attachment.scss */
 .file-preview-actions .btn {
   margin: 0;
 }
 
-/* line 38, ../sass/views/_attachment.scss */
+/* line 37, ../sass/views/_attachment.scss */
 .file-preview-content img, .file-preview-content iframe {
   border: 1px solid #d0d0d0;
 }
 
-/* line 43, ../sass/views/_attachment.scss */
-.file-preview-links {
-  float: right;
-}
-
-/* line 48, ../sass/views/_attachment.scss */
+/* line 46, ../sass/views/_attachment.scss */
 .file-preview-pdf iframe {
   width: 100%;
   height: 500px;
 }
 
-/* line 54, ../sass/views/_attachment.scss */
+/* line 52, ../sass/views/_attachment.scss */
 .attachment-file-versions {
   margin-bottom: 12px;
 }
-/* line 56, ../sass/views/_attachment.scss */
+/* line 54, ../sass/views/_attachment.scss */
 .attachment-file-versions table {
   margin: 0;
 }
-/* line 60, ../sass/views/_attachment.scss */
+/* line 58, ../sass/views/_attachment.scss */
 .attachment-file-versions .attachment-file-versions-content {
   display: none;
   padding: 6px 0;
 }
-/* line 63, ../sass/views/_attachment.scss */
+/* line 61, ../sass/views/_attachment.scss */
 .attachment-file-versions .attachment-file-versions-content th {
   padding: 6px;
 }
-/* line 66, ../sass/views/_attachment.scss */
+/* line 64, ../sass/views/_attachment.scss */
 .attachment-file-versions .attachment-file-versions-content td {
   padding: 6px;
   max-width: 130px;
@@ -4778,81 +4737,81 @@ span.icon_clear:before {
   text-overflow: ellipsis;
 }
 
-/* line 75, ../sass/views/_attachment.scss */
+/* line 73, ../sass/views/_attachment.scss */
 .attachment-file-conversation {
   width: 48%;
-  float: right;
 }
 
-/* line 80, ../sass/views/_attachment.scss */
+/* line 77, ../sass/views/_attachment.scss */
 .attachment-info {
   width: 100%;
 }
-/* line 83, ../sass/views/_attachment.scss */
+/* line 80, ../sass/views/_attachment.scss */
 .attachment-info .container {
   padding: 0;
   margin-top: 0;
 }
-/* line 88, ../sass/views/_attachment.scss */
+/* line 85, ../sass/views/_attachment.scss */
 .attachment-info .col1 {
-  float: left;
+  display: inline-block;
   padding-right: 12px;
-  width: 50%;
+  width: 49%;
+  vertical-align: top;
 }
-/* line 94, ../sass/views/_attachment.scss */
+/* line 92, ../sass/views/_attachment.scss */
 .attachment-info .col2 {
-  float: right;
+  display: inline-block;
   padding-left: 12px;
-  width: 50%;
+  width: 49%;
+  vertical-align: top;
 }
-/* line 100, ../sass/views/_attachment.scss */
+/* line 99, ../sass/views/_attachment.scss */
 .attachment-info .attachment-actions {
-  float: right;
   width: 16.25em;
+  position: absolute;
+  top: 0;
+  right: 0;
 }
-/* line 103, ../sass/views/_attachment.scss */
+/* line 104, ../sass/views/_attachment.scss */
 .attachment-info .attachment-actions button {
   width: 100%;
 }
 
-/* line 109, ../sass/views/_attachment.scss */
+/* line 110, ../sass/views/_attachment.scss */
 .attachment-info-header {
   overflow: auto;
-  width: 80%;
+  width: 100%;
+  display: block;
 }
-/* line 112, ../sass/views/_attachment.scss */
+/* line 114, ../sass/views/_attachment.scss */
 .attachment-info-header h1 {
-  float: left;
   line-height: normal;
+  display: inline-block;
+  max-width: 80%;
 }
-/* line 116, ../sass/views/_attachment.scss */
+/* line 119, ../sass/views/_attachment.scss */
 .attachment-info-header a {
-  float: left;
   margin-left: 48px;
 }
-/* line 120, ../sass/views/_attachment.scss */
+/* line 122, ../sass/views/_attachment.scss */
 .attachment-info-header .help {
   margin-left: 12px;
+  display: inline-block;
 }
 
-/* line 125, ../sass/views/_attachment.scss */
-.add-new-version {
-  float: right;
-}
-
-/* line 129, ../sass/views/_attachment.scss */
+/* line 131, ../sass/views/_attachment.scss */
 td.comment-text {
   vertical-align: top;
   text-align: left;
 }
 
-/* line 134, ../sass/views/_attachment.scss */
+/* line 136, ../sass/views/_attachment.scss */
 .new-attachment-version-details {
   display: block;
   font-style: italic;
 }
 
-/* line 139, ../sass/views/_attachment.scss */
+/* line 141, ../sass/views/_attachment.scss */
 .attachment-group-header {
   font-weight: bold;
   font-size: 1.5em;
@@ -4860,82 +4819,80 @@ td.comment-text {
   height: 50px;
   vertical-align: bottom;
 }
-/* line 145, ../sass/views/_attachment.scss */
+/* line 147, ../sass/views/_attachment.scss */
 .attachment-group-header td {
   padding: 6px 0;
 }
 
-/* line 150, ../sass/views/_attachment.scss */
+/* line 152, ../sass/views/_attachment.scss */
 .attachment-back {
-  text-align: center;
-  margin-right: 6px;
-  margin-left: 24px;
+  display: block;
+  height: 60px;
 }
-/* line 154, ../sass/views/_attachment.scss */
-.attachment-back .icon {
-  height: 15px;
-  margin-bottom: 3px;
+/* line 157, ../sass/views/_attachment.scss */
+.attachment-back a {
+  margin-right: 12px;
 }
 
-/* line 160, ../sass/views/_attachment.scss */
+/* line 162, ../sass/views/_attachment.scss */
 .inline-block {
   display: inline-block;
 }
 
-/* line 164, ../sass/views/_attachment.scss */
+/* line 166, ../sass/views/_attachment.scss */
 #attachment-type-select {
   margin-bottom: 24px;
 }
 
-/* line 168, ../sass/views/_attachment.scss */
+/* line 170, ../sass/views/_attachment.scss */
 .change-type {
   clear: both;
   display: block;
 }
 
-/* line 173, ../sass/views/_attachment.scss */
+/* line 175, ../sass/views/_attachment.scss */
 .attachment-label {
   margin-bottom: 12px;
   overflow: hidden;
 }
-/* line 177, ../sass/views/_attachment.scss */
+/* line 179, ../sass/views/_attachment.scss */
 .attachment-label .attachment-label-header {
   font-size: 0.85em;
   font-weight: 700;
   letter-spacing: 0.125em;
 }
-/* line 183, ../sass/views/_attachment.scss */
+/* line 185, ../sass/views/_attachment.scss */
 .attachment-label .attachment-label-header-item {
   margin-right: 24px;
 }
-/* line 187, ../sass/views/_attachment.scss */
+/* line 189, ../sass/views/_attachment.scss */
 .attachment-label input {
   display: block;
   margin: 0;
   width: 22em;
   height: 25px;
 }
-/* line 194, ../sass/views/_attachment.scss */
+/* line 196, ../sass/views/_attachment.scss */
 .attachment-label input[type="checkbox"] {
   display: inline-block;
   width: 3.75em;
 }
-/* line 199, ../sass/views/_attachment.scss */
+/* line 201, ../sass/views/_attachment.scss */
 .attachment-label select {
   display: block;
   width: 22.5em;
 }
-/* line 204, ../sass/views/_attachment.scss */
+/* line 206, ../sass/views/_attachment.scss */
 .attachment-label .attachment-info-field {
   margin-bottom: 6px;
 }
 
-/* line 209, ../sass/views/_attachment.scss */
+/* line 211, ../sass/views/_attachment.scss */
 .signatures {
   margin-top: 12px;
 }
 
-/* line 213, ../sass/views/_attachment.scss */
+/* line 215, ../sass/views/_attachment.scss */
 .signature-table {
   display: table;
   width: auto;
@@ -4943,7 +4900,7 @@ td.comment-text {
   margin-left: 6px;
 }
 
-/* line 220, ../sass/views/_attachment.scss */
+/* line 222, ../sass/views/_attachment.scss */
 .signature-row {
   display: table-row;
   width: auto;
@@ -4952,11 +4909,10 @@ td.comment-text {
   line-height: 27px;
 }
 
-/* line 228, ../sass/views/_attachment.scss */
+/* line 230, ../sass/views/_attachment.scss */
 .signature-cell {
   display: table-column;
   width: 200px;
-  float: left;
 }
 
 /* line 2, ../sass/views/_statement.scss */
@@ -5356,7 +5312,7 @@ td.comment-text {
 }
 /* line 67, ../sass/views/_side_panel.scss */
 #side-panel .buttons .btn-conversation .unseen-comments, #side-panel .buttons .btn-notice .unseen-comments {
-  background-image: url("/img/icons-sprite-1.13.png");
+  background-image: url("/img/icons-sprite-1.14.png");
   background-repeat: no-repeat;
   background-position: 1px -5396px;
   width: 23px;
@@ -5415,7 +5371,7 @@ td.comment-text {
 }
 /* line 117, ../sass/views/_side_panel.scss */
 #side-panel .header .close-btn {
-  background-image: url("/img/icons-sprite-1.13.png");
+  background-image: url("/img/icons-sprite-1.14.png");
   background-repeat: no-repeat;
   width: 16px;
   height: 16px;
@@ -5516,7 +5472,7 @@ td.comment-text {
 }
 /* line 212, ../sass/views/_side_panel.scss */
 #side-panel .indicator .saved {
-  background-image: url("/img/icons-sprite-1.13.png");
+  background-image: url("/img/icons-sprite-1.14.png");
   background-repeat: no-repeat;
   float: left;
   background-position: 4px -2496px;
