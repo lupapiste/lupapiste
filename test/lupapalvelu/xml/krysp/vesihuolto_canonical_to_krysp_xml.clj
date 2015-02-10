@@ -4,7 +4,7 @@
             [lupapalvelu.document.vesihuolto-canonical-test :refer [vapautus-vesijohdosta-ja-viemarista-hakemus]]
             [lupapalvelu.xml.krysp.vesihuolto-mapping :refer [vesihuolto-to-krysp]]
             [lupapalvelu.xml.krysp.canonical-to-krysp-xml-test-common :refer [has-tag]]
-            [lupapalvelu.xml.krysp.validator :as validator]
+            [lupapalvelu.xml.validator :as validator]
             [lupapalvelu.xml.emit :refer :all]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]

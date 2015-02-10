@@ -46,7 +46,7 @@ Add katselmus
   Task count is  task-katselmus  3
   Click enabled by test id  verdict-new-task
   Wait until  Element should be visible  dialog-create-task
-  Select From List By Value  choose-task-type   task-katselmus
+  Wait until  Select From List By Value  choose-task-type   task-katselmus
   Input text  create-task-name  uus lupaehto
   Click enabled by test id  create-task-save
   Wait until  Element should not be visible  dialog-create-task

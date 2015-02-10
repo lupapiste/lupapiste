@@ -3,7 +3,7 @@
             [lupapalvelu.components.core :as c]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mime :as mime]
-            [lupapalvelu.xml.krysp.validator :as validator]
+            [lupapalvelu.xml.validator :as validator]
             [sade.env :as env]
             [sade.util :as util]
             [cheshire.core :as json]
@@ -40,7 +40,7 @@
   (str ";loc.setTerms(" (json/generate-string (i18n/get-localizations)) ");"))
 
 (defn- schema-versions-by-permit-type []
-  (str ";LUPAPISTE.config.kryspVersions = " (json/generate-string validator/supported-versions-by-permit-type) ";"))
+  (str ";LUPAPISTE.config.kryspVersions = " (json/generate-string validator/supported-krysp-versions-by-permit-type) ";"))
 
 (def ui-components
   {;; 3rd party libs
