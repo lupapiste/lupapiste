@@ -510,10 +510,20 @@ input[readonly], textarea[readonly] {
     height: 28px;
     width: 28px;
     padding: 0;
-  }
 
-  .form-table .form-input-saved {
-    background-position: 4px -2494px;
+    .icon {
+      position: absolute;
+      top: 0px;
+      left: 0px;
+      padding: 0;
+      margin: 0;
+    }
+
+    .form-input-saved {
+      .icon {
+        background-position: 4px -2494px;
+      }
+    }
   }
 
   .form-table .form-entry {
