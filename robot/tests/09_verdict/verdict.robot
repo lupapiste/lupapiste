@@ -38,7 +38,7 @@ Sonja creates verdict with adds comment
   Comment verdict  Myönnetään...
 
 Return to application and come back
-  Wait and click  xpath=//a[@data-test-id='return-from-verdict']
+  Click by test id  return-from-verdict
   Click enabled by test id  edit-verdict
 
 Add katselmus
