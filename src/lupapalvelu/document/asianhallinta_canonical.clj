@@ -64,9 +64,9 @@
                                                :Verkkolaskutunnus (get-in data [:yritys :verkkolaskutustieto :verkkolaskuTunnus])
                                                :Operaattoritunnus (get-in data [:yritys :verkkolaskutustieto :valittajaTunnus])})})]
 
-    (condp = sel
-       "yritys" (assoc-in maksaja-map [:Yritys] (ua-get-yritys document))
-       "henkilo" (assoc-in maksaja-map [:Henkilo] (ua-get-henkilo document)))))
+    (if (= sel "yritys")
+      (assoc-in maksaja-map [:Yritys] (ua-get-yritys data))
+      (assoc-in maksaja-map [:Henkilo] (ua-get-henkilo data)))))
 
 (defn- ua-get-metatiedot [attachment]
   (seq [{:Avain "type-group" :Arvo (get-in attachment [:type :type-group])}
