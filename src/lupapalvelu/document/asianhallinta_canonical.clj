@@ -76,7 +76,7 @@
   (util/strip-nils
     {:Kuvaus (get-in attachment [:type :type-id])
      :Tyyppi (get-in attachment [:latestVersion :contentType])
-     :LinkkiLiitteeseen (get-in attachment [:latestVersion :filename]) ;TODO
+     :LinkkiLiitteeseen (get-in attachment [:latestVersion :filename]) ;TODO resolvaus
      :Luotu (util/to-xml-date (:modified attachment))
      :Metatiedot {:Metatieto (ua-get-metatiedot attachment)}}))
 
@@ -86,7 +86,7 @@
 
 (defn- ua-get-toimenpiteet [{:keys [operations]} lang]
   (when (seq operations)
-    {:Toimenpide (map #(:name %) operations)}))
+    {:Toimenpide (map #(:name %) operations)})) ;TODO tarkemmat tiedot
 
 
 ;; TaydennysAsiaan, prefix: ta-
