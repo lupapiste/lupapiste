@@ -153,7 +153,7 @@ LUPAPISTE.ForemanModel = function() {
               docId: doc.id,
               docName: util.getIn(doc, ["schema-info", "name"]),
               path: "henkilo",
-              email: auth.username
+              email: util.getIn(auth, ["username"])
             };
           });
           var deferreds = [];
