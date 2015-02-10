@@ -880,7 +880,7 @@
     {:info {:name "tyonjohtaja-v2"
             :i18name "osapuoli"
             :order 5
-            :removable false ; TODO: check these
+            :removable false
             :repeating false
             :approvable true
             :type :party}
