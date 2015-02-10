@@ -7,6 +7,18 @@
       <div class="attachment-info">
         <div class="container">
 
+          <div class="attachment-back">
+            <a class="btn left-align btn-nav-back"
+               data-bind="click: function() { window.location.hash = '!/application/' + application.id() + '/attachments'; repository.load(application.id()); }"
+               data-test-id="back-to-application-from-attachment">
+              <span data-bind =" ltext: 'application.return'"></span>
+              <span class="icon drill-left-black-bigger left-align"></span>
+            </a>
+            <div data-bind="with: $root.approve">
+              <button id="test-attachment-approve" data-bind="ltext: 'document.approve', click: approveAttachment, enable: isApprovable() && isNotOk(), visible: isApprovable()" class="btn btn-primary">Hyv&auml;ksy</button>
+              <button id="test-attachment-reject" data-bind="ltext: 'attachment.reject', click: rejectAttachment, enable: isRejectable() && doesNotRequireUserAction(), visible: isRejectable()" class="btn btn-decline">Tarkennettavaa</button>
+            </div>
+          </div>
           <div class="attachment-info-header">
             <h1>
               <span data-bind="text: application.title"></span>: <span data-bind="ltext: name"></span>
@@ -22,27 +34,15 @@
             <p data-bind="lhtml: 'attachment.view.desc'"></p>
           </div>
 
-          <div class="clear">
-            <a class="btn left-align btn-nav-back"
-               data-bind="click: function() { window.location.hash = '!/application/' + application.id() + '/attachments'; repository.load(application.id()); }"
-               data-test-id="back-to-application-from-attachment">
-              <span data-bind =" ltext: 'application.return'"></span>
-              <span class="icon drill-left-black-bigger left-align"></span>
-            </a>
-          </div>
+
 
           <div class="attachment-actions">
-            <div data-bind="with: $root.approve">
-              <button id="test-attachment-approve" data-bind="ltext: 'document.approve', click: approveAttachment, enable: isApprovable() && isNotOk(), visible: isApprovable()" class="btn btn-primary">Hyv&auml;ksy</button>
-              <button id="test-attachment-reject" data-bind="ltext: 'attachment.reject', click: rejectAttachment, enable: isRejectable() && doesNotRequireUserAction(), visible: isRejectable()" class="btn btn-decline">Tarkennettavaa</button>
-            </div>
+
             <button data-test-id="change-attachment-type"
                     data-bind="ltext: 'attachment.changeType', click: showChangeTypeDialog, visible: $root.authorization.ok('set-attachment-type') && editable && authorized"></button>
             <button data-test-id="delete-attachment"
                     data-bind="ltext: 'attachment.delete', click: deleteAttachment, visible: $root.authorization.ok('delete-attachment') && editable && authorized">Poista liite</button>
           </div>
-
-          <div class="clear"></div>
 
           <div class="col1">
             <div class="attachment-file-versions">
@@ -50,7 +50,6 @@
                 <button
                     id="add-new-attachment-version"
                     class="btn-primary"
-                    data-window-id="upload-dialog"
                     data-bind="click: newAttachmentVersion, visible: $root.authorization.ok('upload-attachment') && editable">
                   <span data-bind="ltext: 'attachment.addVersion', visible: latestVersion"></span>
                   <span data-bind="ltext: 'attachment.addFile', visible: !latestVersion()"></span>
@@ -96,6 +95,7 @@
                 </table>
               </div>
             </div>
+
             <div data-bind="if: latestVersion">
               <div class="attachment-label">
                 <h4 data-bind="with: latestVersion">
@@ -149,29 +149,36 @@
                                        value: size,
                                        enable: $root.authorization.ok('set-attachment-meta') && editable"></select>
                   </div>
+
+                  <div class="col1 attachment-info-field" data-bind="if: $root.authorization.ok('set-attachments-as-verdict-attachment')">
+                    <label for="attachment-is-verdict-attachment" class="form-label" data-bind="ltext: 'attachment.label.verdictAttachment'"></label>
+                    <input type="checkbox" id="attachment-is-verdict-attachment" class="form-input" data-test-id="is-verdict-attachment"
+                           data-bind="checked: isVerdictAttachment, enable: $root.authorization.ok('set-attachments-as-verdict-attachment')"></input>
+                  </div>
+
                 </div>
               </div>
-            </div>
 
-            <div class="signatures clear" data-bind="visible: latestVersion">
-              <h3 data-bind="ltext: 'attachment.signatures'"></h3>
-              <div class="signature-table" data-bind="if: signatures && signatures().length > 0">
-                <!-- ko foreach: signatures -->
-                  <div class="signature-row">
-                    <div class="signature-cell" data-bind="fullName: user"></div>
-                    <div class="signature-cell">
-                      <span data-bind="ltext: 'attachment.version'"></span>
-                      <span data-bind="version: version"></span>
+              <div class="signatures clear">
+                <h3 data-bind="ltext: 'attachment.signatures'"></h3>
+                <div class="signature-table" data-bind="if: signatures && signatures().length > 0">
+                  <!-- ko foreach: signatures -->
+                    <div class="signature-row">
+                      <div class="signature-cell" data-bind="fullName: user"></div>
+                      <div class="signature-cell">
+                        <span data-bind="ltext: 'attachment.version'"></span>
+                        <span data-bind="version: version"></span>
+                      </div>
+                      <div class="signature-cell" data-bind="dateTimeString: created"></div>
                     </div>
-                    <div class="signature-cell" data-bind="dateTimeString: created"></div>
-                  </div>
-                  <!-- /ko -->
+                    <!-- /ko -->
+                </div>
+                <button data-test-id="signLatestAttachmentVersion" class="btn-primary"
+                        data-bind="click: sign, visible: $root.authorization.ok('sign-attachments'), visible: versions().length && $root.authorization.ok('sign-attachments')">
+                    <span class="btn-label" data-bind="ltext: 'attachment.signLatest'"></span>
+                    <span class="icon signed-white left-align"></span>
+                </button>
               </div>
-              <button data-test-id="signLatestAttachmentVersion" class="btn-primary"
-                      data-bind="click: sign, visible: $root.authorization.ok('sign-attachments'), visible: versions().length && $root.authorization.ok('sign-attachments')">
-                  <span class="btn-label" data-bind="ltext: 'attachment.signLatest'"></span>
-                  <span class="icon signed-white left-align"></span>
-              </button>
             </div>
           </div>
 

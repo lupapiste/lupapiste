@@ -16,7 +16,7 @@
 
   var actionsModel = new ActionsModel();
 
-  hub.onPageChange("actions", actionsModel.load);
+  hub.onPageLoad("actions", actionsModel.load);
 
   $(function() {
     $("#actions").applyBindings(actionsModel);

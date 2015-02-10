@@ -13,7 +13,8 @@
             [lupapalvelu.organization :as organization]
             [lupapalvelu.application :as a]
             [lupapalvelu.application-meta-fields :as app-meta-fields]
-            [lupapalvelu.operations :as op]))
+            [lupapalvelu.operations :as op]
+            [sade.env :as env]))
 
 (defn drop-schema-data [document]
   (let [schema-info (-> document :schema :info (assoc :version 1))]
@@ -629,7 +630,7 @@
 (defn update-applications-array
   "Updates an array k in every application by mapping the array with f.
    Applications are fetched using the given query.
-   Return the number od applications updated."
+   Return the number of applications updated."
   [k f query]
   {:pre [(keyword? k) (fn? f) (map? query)]}
   (reduce + 0
@@ -646,21 +647,31 @@
       :else doc)))
 
 (defmigration populate-buildingids-to-docs
-              (update-applications-array
-                :documents
-                populate-buildingids-to-doc
-                {:documents {$elemMatch {$or [{:data.rakennusnro.value {$exists true}} {:data.manuaalinen_rakennusnro.value {$exists true}}]}}}))
+  (update-applications-array
+    :documents
+    populate-buildingids-to-doc
+    {:documents {$elemMatch {$or [{:data.rakennusnro.value {$exists true}} {:data.manuaalinen_rakennusnro.value {$exists true}}]}}}))
 
 (defmigration populate-buildingids-to-buildings
-              (update-applications-array
-                :buildings
-                #(assoc % :localShortId (:buildingId %), :nationalId nil, :localId nil)
-                {:buildings.0 {$exists true}}))
+  (update-applications-array
+    :buildings
+    #(assoc % :localShortId (:buildingId %), :nationalId nil, :localId nil)
+    {:buildings.0 {$exists true}}))
 
-(defn- set-new-attachment-flags [app-created attachment]
-  (if (< (abs (- (:modified attachment) app-created)) 100)    ;; inside 100 ms window, just in case
-    (assoc attachment :required true)
-    (assoc attachment :required false)))
+
+(defmigration update-app-links-with-apptype
+              (doseq [app-link (mongo/select :app-links)]
+                (let [linkpermit-id (some
+                                      (fn [[k v]]
+                                        (when (= "linkpermit" (:type v))
+                                          (name k)))
+                                      app-link)
+                      app           (first (mongo/select :applications {:_id linkpermit-id}))
+                      apptype       (->> app :operations first :name)]
+                  (mongo/update-by-id
+                    :app-links
+                    (:id app-link)
+                    {$set {(str linkpermit-id ".apptype") apptype}}))))
 
 (defn- merge-versions [old-versions {:keys [user version] :as new-version}]
   (let [next-ver (lupapalvelu.attachment/next-attachment-version (:version (last old-versions)) user)]
@@ -708,11 +719,51 @@
           (mongo/update-by-id :applications id {$set {:attachments latest-versions-updated}})
           )))))
 
+
+(defn- is-attachment-added-on-application-creation [application attachment]
+  ;; inside 100 ms window, just in case
+  (< (abs (- (:modified attachment) (:created application))) 100))
+
 (defmigration required-flags-for-attachment-templates-v2
   (doseq [collection [:applications :submitted-applications]
           application (mongo/select collection {"attachments.0" {$exists true}})]
     (mongo/update-by-id collection (:id application)
       {$set {:attachments (map
-                            (partial set-new-attachment-flags (:created application))
+                            #(assoc % :required (is-attachment-added-on-application-creation application %))
                             (:attachments application))}})))
+
+(defmigration new-forPrinting-flag
+  (update-applications-array
+    :attachments
+    #(assoc % :forPrinting false)
+    {:attachments.0 {$exists true}}))
+
+(defmigration app-required-fields-filling-obligatory
+ {:apply-when (pos? (mongo/count :organizations {:app-required-fields-filling-obligatory {$exists false}}))}
+ (doseq [organization (mongo/select :organizations {:app-required-fields-filling-obligatory {$exists false}})]
+   (mongo/update-by-id :organizations (:id organization)
+     {$set {:app-required-fields-filling-obligatory false}})))
+
+(defmigration kopiolaitos-info
+ {:apply-when (pos? (mongo/count :organizations {$or [{:kopiolaitos-email {$exists false}}
+                                                      {:kopiolaitos-orderer-address {$exists false}}
+                                                      {:kopiolaitos-orderer-email {$exists false}}
+                                                      {:kopiolaitos-orderer-phone {$exists false}}]}))}
+ (doseq [organization (mongo/select :organizations {$or [{:kopiolaitos-email {$exists false}}
+                                                         {:kopiolaitos-orderer-address {$exists false}}
+                                                         {:kopiolaitos-orderer-email {$exists false}}
+                                                         {:kopiolaitos-orderer-phone {$exists false}}]})]
+   (mongo/update-by-id :organizations (:id organization)
+     {$set {:kopiolaitos-email           (or (:kopiolaitos-email organization) nil)
+            :kopiolaitos-orderer-address (or (:kopiolaitos-orderer-address organization) nil)
+            :kopiolaitos-orderer-email   (or (:kopiolaitos-orderer-email organization) nil)
+            :kopiolaitos-orderer-phone   (or (:kopiolaitos-orderer-phone organization) nil)}})))
+
+;;
+;; ****** NOTE! ******
+;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"
+;;  do not manually write like this
+;;     (doseq [collection [:applications :submitted-applications] ...)
+;;  but use the "update-applications-array" function existing in this namespace.
+;; *******************
 

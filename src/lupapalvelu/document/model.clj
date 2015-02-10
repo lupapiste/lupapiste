@@ -45,18 +45,23 @@
   (if (not (map? v)) [:err "illegal-value:not-a-map"]))
 
 (defmethod validate-field :string [_ {:keys [max-len min-len] :as elem} v]
-  (cond
-    (not (string? v)) [:err "illegal-value:not-a-string"]
-    (not (.canEncode (latin1-encoder) v)) [:warn "illegal-value:not-latin1-string"]
-    (> (.length v) (or max-len default-max-len)) [:err "illegal-value:too-long"]
-    (< (.length v) (or min-len 0)) [:warn "illegal-value:too-short"]
-    :else (subtype/subtype-validation elem v)))
+  (when-not (nil? v)
+    (cond
+      (not (string? v)) [:err "illegal-value:not-a-string"]
+      (not (.canEncode (latin1-encoder) v)) [:warn "illegal-value:not-latin1-string"]
+      (> (.length v) (or max-len default-max-len)) [:err "illegal-value:too-long"]
+      (and
+        (> (.length v) 0)
+        (< (.length v) (or min-len 0))) [:warn "illegal-value:too-short"]
+      :else (subtype/subtype-validation elem v))))
 
 (defmethod validate-field :text [_ elem v]
   (cond
     (not (string? v)) [:err "illegal-value:not-a-string"]
     (> (.length v) (or (:max-len elem) default-max-len)) [:err "illegal-value:too-long"]
-    (< (.length v) (or (:min-len elem) 0)) [:warn "illegal-value:too-short"]))
+    (and
+      (> (.length v) 0)
+      (< (.length v) (or (:min-len elem) 0))) [:warn "illegal-value:too-short"]))
 
 (defn- validate-hetu-date [hetu]
   (let [dateparsts (rest (re-find #"^(\d{2})(\d{2})(\d{2})([aA+-]).*" hetu))
@@ -123,7 +128,8 @@
       [:err "application-does-not-have-given-auth"])))
 
 (defmethod validate-field :fillMyInfoButton [_ _ _] nil)
-(defmethod validate-field :authorityAccept [_ _ _] nil)
+(defmethod validate-field :foremanHistory [_ _ _] nil)
+(defmethod validate-field :foremanOtherApplications [_ _ _] nil)
 
 (defmethod validate-field nil [_ _ _]
   [:err "illegal-key"])
@@ -329,7 +335,7 @@
       (true? (get-in document [:schema-info :approvable])))))
 
 (defn modifications-since-approvals
-  ([{:keys [schema-info data meta]}]
+  ([{:keys [schema-info data meta] :as document}]
     (let [schema (and schema-info (schemas/get-schema (:version schema-info) (:name schema-info)))
           timestamp (max (get-in meta [:_approved :timestamp] 0) (get-in meta [:_indicator_reset :timestamp] 0))]
       (modifications-since-approvals (:body schema) [] data meta (get-in schema [:info :approvable]) timestamp)))
@@ -341,9 +347,19 @@
                     current-approvable (or approvable-parent approvable)]
                 (if (or (= :group type) (= :table type))
                   (if repeating
-                    (reduce + 0 (map (fn [k] (modifications-since-approvals body (conj current-path k) data meta current-approvable (max-timestamp (conj current-path k)))) (keys (get-in data current-path))))
+                    (reduce + 0 (map (fn [k]
+                                       (modifications-since-approvals body (conj current-path k) data meta current-approvable (max-timestamp (conj current-path k))))
+                                     (keys (get-in data current-path))))
                     (modifications-since-approvals body current-path data meta current-approvable (max-timestamp current-path)))
-                  (if (and current-approvable (> (or (get-in data (conj current-path :modified)) 0) (max-timestamp current-path))) 1 0))))]
+                  (if (and
+                        current-approvable
+                        (>
+                          (or
+                            (get-in data (conj current-path :modified))
+                            0)
+                          (max-timestamp current-path)))
+                    1
+                    0))))]
       (reduce + 0 (map count-mods schema-body)))))
 
 (defn mark-approval-indicators-seen-update
@@ -383,7 +399,7 @@
                       (if (pred element v)
                         [k (emitter v)]
                         (when v
-                          (if (not= (keyword type) :group)
+                          (if (not= (keyword type) :group)  ;TODO: does this work with tables?
                             [k v]
                             [k (if repeating
                                  (into {} (map (fn [k2] [k2 (doc-walk body (conj current-path k2))]) (keys v)))

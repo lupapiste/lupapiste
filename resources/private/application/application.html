@@ -2,6 +2,7 @@
 <html>
 <body>
   <section class="page" id="application">
+    <div id="modal-dialog" data-bind="component {name: 'modal-dialog'}"></div>
     <div class="application_summary">
       <div class="container">
         <div class="application-map-container">
@@ -14,9 +15,10 @@
         </div>
         <div class="application_summary_info" data-bind="with: application">
           <h1><!-- <span data-bind="ltext: 'application.address'"></span>:  --><span data-bind="text: address" data-test-id="application-title" class="address"></span>
-          <a class="icon"
-             data-bind="ltext: 'edit.address', click: $root.changeLocationModel.changeLocation, visible: $root.authorization.ok('change-location')"
-             data-test-id="change-location-link"></a>
+          <a data-bind="click: $root.changeLocationModel.changeLocation, visible: $root.authorization.ok('change-location')"
+             data-test-id="change-location-link"> 
+             <span class="icon edit"></span>
+             <span data-bind="ltext: 'edit.address'"></span></a>
           </h1>
 
           <!-- State: -->
@@ -284,7 +286,7 @@
             <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.applicationInfoDesc'"></p>
           </div>
           <div class="operation-info">
-            
+
             <div data-bind="if: $root.authorization.ok('add-operation')">
               <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.AddOperations'"></p>
               <button data-bind="click: addOperation, enable: $root.authorization.ok('add-operation')" class="btn-primary">
@@ -394,22 +396,17 @@
           </div>
 
           <!-- ko if: $root.foreman.isVisible -->
-          <div data-bind="if: features.enabled('foreman')">
-            <div class="feature">
-              <span class="legend">Tyonjohtajan nimeaminen</span>
-              <section class="accordion" id="accordion-application-foreman">
-                <h2 onclick="accordion.click(this)" data-test-id="accordion-application-foreman-header">
-                  <span class="icon toggle-icon drill-down-white"></span>
-                  <span data-bind="ltext: 'application.parties.foreman'"></span>
-                </h2>
-                <div class="accordion_content expanded" data-accordion-state="open">
-                  <div class="accordion-fields">
-                    <div data-bind="template: {name: 'application-foreman-template', data: $root.foreman}"></div>
-                  </div>
-                </div>
-              </section>
+          <section class="accordion" id="accordion-application-foreman">
+            <h2 onclick="accordion.click(this)" data-test-id="accordion-application-foreman-header">
+              <span class="icon toggle-icon drill-down-white"></span>
+              <span data-bind="ltext: 'application.parties.foreman'"></span>
+            </h2>
+            <div class="accordion_content expanded" data-accordion-state="open">
+              <div class="accordion-fields">
+                <div data-bind="template: {name: 'application-foreman-template', data: $root.foreman}"></div>
+              </div>
             </div>
-          </div>
+          </section>
           <!-- /ko -->
 
           <button
@@ -493,7 +490,7 @@
             </div>
             <!-- /ko -->
 
-            <a data-bind="attr: {href: '/api/raw/download-all-attachments?id=' + $root.application.id() + '&lang=' + loc.getCurrentLanguage() }, visible: $root.application.hasAttachment, ltext: 'download-all'" data-test-id="application-download-all-attachement" href="#" target="_blank"></a>
+            <a data-bind="attr: {href: '/api/raw/download-all-attachments?id=' + $root.application.id() + '&lang=' + loc.getCurrentLanguage() }, visible: $root.application.hasAttachment, ltext: 'download-all'" data-test-id="application-download-all-attachments" href="#" target="_blank"></a>
 
           </div>
 
@@ -864,12 +861,23 @@
           </button>
 
           <button
-            data-bind="click: $root.verdictModel.checkVerdict, disable: $root.verdictModel.processing, visible: $root.authorization.ok('check-for-verdict')"
+            data-bind="click: $root.verdictModel.checkVerdict, visible: $root.authorization.ok('check-for-verdict'), disable: $root.verdictModel.processing"
             class="btn btn-primary modal"
             data-test-id="fetch-verdict">
             <em data-bind="visible: $root.verdictModel.pending" class="button-loader"></em>
             <span data-bind="ltext: 'verdict.fetch.button'"></span>
           </button>
+
+          <button
+            data-bind="click: $root.verdictAttachmentPrintsOrderModel.openDialog,
+                       disable: $root.verdictModel.processing,
+                       visible: $root.authorization.ok('order-verdict-attachment-prints')"
+            class="btn btn-primary modal"
+            data-test-id="test-order-attachment-prints">
+            <em data-bind="visible: $root.verdictModel.pending" class="button-loader"></em>
+            <span data-bind="ltext: 'verdict.orderAttachmentPrints.button'"></span>
+          </button>
+
         </div>
 
         <!-- Statement tab -->
@@ -1099,12 +1107,7 @@
             </table>
           </div>
 
-          <div data-bind="if: features.enabled('foreman')">
-            <div class="feature">
-              <span class="legend">Tyonjohtajan nimeaminen</span>
-              <div data-bind="template: {name: 'application-foreman-tasks-template', data: $root.foreman}"></div>
-            </div>
-          </div>
+          <div data-bind="template: {name: 'application-foreman-tasks-template', data: $root.foreman}"></div>
 
           <div>
             <table data-bind="foreach: taskGroups" class="tasks">
@@ -1143,7 +1146,8 @@
           <p class="dialog-close close">X</p>
         </div>
         <!-- ko with: $root.foreman -->
-        <div class="dialog-content" data-bind="css: {pending: pending, finished: finished}">
+        <div class="dialog-content">
+          <!-- ko if: finished -->
           <div class="finished">
             <p class="dialog-desc-wide" data-bind="lhtml: 'invite.foreman.finished'"></p>
             <button data-test-id="application-invite-foreman-close-dialog"
@@ -1151,10 +1155,13 @@
                     data-bind="ltext: 'button.ok', click: function() { openApplication(finished()); LUPAPISTE.ModalDialog.close(); }"></button>
             <a class="btn btn-dialog" data-bind="ltext: 'application.return', click: function() { LUPAPISTE.ModalDialog.close(); }"></a>
           </div>
+          <!-- /ko -->
+          <!-- ko if: pending -->
           <div class="pending">
             <div class="ajax"></div>
             <div data-bind="ltext: 'invite.foreman.pending'"></div>
           </div>
+          <!-- /ko -->
           <!-- ko ifnot: finished -->
           <p data-bind="lhtml: 'invite.foreman.desc'" class="dialog-desc-wide"></p>
           <form>

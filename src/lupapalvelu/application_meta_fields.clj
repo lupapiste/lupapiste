@@ -57,7 +57,7 @@
     (let [last-seen (get-in app [:_statements-seen-by (keyword (:id user))] 0)]
       (count (filter (fn [statement]
                        (and (> (or (:given statement) 0) last-seen)
-                            (not= (ss/lower-case (get-in statement [:person :email])) (ss/lower-case (:email user)))))
+                            (not= (user/canonize-email (get-in statement [:person :email])) (user/canonize-email (:email user)))))
                      (:statements app))))
     0))
 
@@ -98,7 +98,11 @@
   (let [org (organization/get-organization (:organization app))]
     {:name (organization/get-organization-name org)
      :links (:links org)
-     :requiredFieldsFillingObligatory (or (:app-required-fields-filling-obligatory org) false)}))
+     :requiredFieldsFillingObligatory (:app-required-fields-filling-obligatory org)
+     :kopiolaitos {:kopiolaitosEmail (:kopiolaitos-email org)
+                   :kopiolaitosOrdererAddress (:kopiolaitos-orderer-address org)
+                   :kopiolaitosOrdererPhone (:kopiolaitos-orderer-phone org)
+                   :kopiolaitosOrdererEmail (:kopiolaitos-orderer-email org)}}))
 
 (def post-verdict-states #{"verdictGiven" "constructionStarted" "closed"})
 (defn- in-post-verdict-state? [_ app] (if (post-verdict-states (name (:state app))) true false))

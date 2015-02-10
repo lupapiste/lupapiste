@@ -2,18 +2,25 @@ LUPAPISTE.StampModel = function(params) {
   "use strict";
   var self = this;
 
+  function allVersionsStamped(versions) {
+    return _.every(versions, function(v) {
+      return v.stamped;
+    })
+  }
+
   function stampableAttachment(a) {
     var ct = "";
     if (a.latestVersion) {
       ct = a.latestVersion.contentType;
     }
-    return _.contains(LUPAPISTE.config.stampableMimes, ct);
+
+    return !allVersionsStamped(a.versions) && _.contains(LUPAPISTE.config.stampableMimes, ct);
   }
 
   function enhanceAttachment(a) {
-    var versions = _(a.versions).reverse().value(),
-      restamp = versions[0].stamped,
-      selected = restamp ? versions[1] : versions[0];
+    var selected = _(_.dropRightWhile(a.versions, function(version) {
+      return version.stamped
+    })).last();
 
     a.contentType = selected.contentType;
     a.filename = selected.filename;
@@ -21,14 +28,10 @@ LUPAPISTE.StampModel = function(params) {
     a.size = selected.size;
     a.selected = ko.observable(false);
     a.status = ko.observable("");
-    a.restamp = restamp;
+    a.restamp = _(a.versions).last().stamped;
     a.stamped = ko.observable(a.stamped);
     a.fileId = ko.observable(a.latestVersion.fileId);
   }
-
-  var transparencies = _.map([0,20,40,60,80], function(v) {
-    return {text: loc(["stamp.transparency", v.toString()]), value: Math.round(255 * v / 100.0)};
-  });
 
   function mapAttachmentGroup(group) {
     group.attachments = _(group.attachments).each(enhanceAttachment).value();
@@ -117,14 +120,19 @@ LUPAPISTE.StampModel = function(params) {
     return self.buildingIdList().length > 0;
   });
 
-  self.transparency = self.stampFields.transparency;
+  var transparencies = _.map([0,20,40,60,80], function(v) {
+    return {text: loc(["stamp.transparency", v.toString()]), value: Math.round(255 * v / 100.0)};
+  });
+  self.transparencies = transparencies;
 
+  self.transparency = self.stampFields.transparency;
   if ( !self.transparency() ) {
     self.transparency(transparencies[0].value);
   }
 
-  self.transparencies = transparencies;
-
+  function getSection() {
+    return self.section() === "\u00a7" ? "" : self.section();
+  }
 
   self.start = function() {
     self.status(self.statusStarting);
@@ -141,7 +149,7 @@ LUPAPISTE.StampModel = function(params) {
         extraInfo: self.extraInfo(),
         buildingId: self.buildingId() ? self.buildingId() : "",
         kuntalupatunnus: self.kuntalupatunnus(),
-        section: self.section()
+        section: getSection()
       })
       .success(self.started)
       .call();
@@ -176,11 +184,11 @@ LUPAPISTE.StampModel = function(params) {
         _(self.selectedFiles()).filter({id: attachmentId}).each(function(f) {
           f.status(newStatus);
           f.fileId(fileId);
-        });
+        }).value();
       });
 
       if (update.status === "done") {
-        _(self.selectedFiles()).each(function(f) { f.stamped(true); });
+        _(self.selectedFiles()).each(function(f) { f.stamped(true); }).value();
         return self.status(self.statusDone);
       }
     }
@@ -197,8 +205,8 @@ LUPAPISTE.StampModel = function(params) {
 
   function selectAllFiles(value) {
     if ( self.status() < self.statusStarting ) {
-      _(self.preFiles()).pluck("attachments").flatten().each(function(f) { f.selected(value); });
-      _(self.postFiles()).pluck("attachments").flatten().each(function(f) { f.selected(value); });
+      _(self.preFiles()).pluck("attachments").flatten().each(function(f) { f.selected(value); }).value();
+      _(self.postFiles()).pluck("attachments").flatten().each(function(f) { f.selected(value); }).value();
     }
   }
 

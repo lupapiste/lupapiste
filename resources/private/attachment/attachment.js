@@ -5,6 +5,7 @@ var attachment = (function() {
   var uploadingApplicationId = null;
   var attachmentId = null;
   var model = null;
+  var applicationModel = lupapisteApp.models.application;
 
   var authorizationModel = authorization.create();
   var signingModel = new LUPAPISTE.SigningModel("#dialog-sign-attachment", false);
@@ -98,11 +99,7 @@ var attachment = (function() {
 
   model = {
     id:   ko.observable(),
-    application: {
-      id:     ko.observable(),
-      title:  ko.observable(),
-      state:  ko.observable()
-    },
+    application: applicationModel,
     applicationState:     ko.observable(),
     authorized:           ko.observable(false),
     filename:             ko.observable(),
@@ -121,6 +118,7 @@ var attachment = (function() {
     scales:               ko.observableArray(LUPAPISTE.config.attachmentScales),
     size:                 ko.observable(),
     sizes:                ko.observableArray(LUPAPISTE.config.attachmentSizes),
+    isVerdictAttachment:  ko.observable(),
     subscriptions:        [],
     indicator:            ko.observable().extend({notify: "always"}),
     showAttachmentVersionHistory: ko.observable(),
@@ -266,6 +264,20 @@ var attachment = (function() {
       }
     }));
 
+    model.subscriptions.push(model.isVerdictAttachment.subscribe(function(isVerdictAttachment) {
+      ajax.command("set-attachments-as-verdict-attachment", { id: applicationId, attachmentIds: [attachmentId], isVerdictAttachment: isVerdictAttachment })
+        .success(function() {
+          repository.load(applicationId);
+        })
+        .error(function(e) {
+          error(e.text);
+          notify.error(loc("error.dialog.title"), loc("attachment.set-attachments-as-verdict-attachment.error"));
+          repository.load(applicationId);
+        })
+        .call();
+    }));
+
+
     applySubscription("contents");
     applySubscription("scale");
     applySubscription("size");
@@ -277,9 +289,15 @@ var attachment = (function() {
     }
   }
 
-  function showAttachment(applicationDetails) {
-    var application = applicationDetails.application;
+  function showAttachment() {
     if (!applicationId || !attachmentId) { return; }
+
+    var application = applicationModel._js;
+
+    lupapisteApp.setTitle(application.title);
+
+    unsubscribe();
+
     var attachment = _.find(application.attachments, function(value) {return value.id === attachmentId;});
     if (!attachment) {
       error("Missing attachment: application:", applicationId, "attachment:", attachmentId);
@@ -302,6 +320,7 @@ var attachment = (function() {
     model.contents(attachment.contents);
     model.scale(attachment.scale);
     model.size(attachment.size);
+    model.isVerdictAttachment(attachment.forPrinting);
     model.applicationState(attachment.applicationState);
 
     var type = attachment.type["type-group"] + "." + attachment.type["type-id"];
@@ -314,9 +333,6 @@ var attachment = (function() {
     attachmentTypeSelect.initSelectList(selectList$, application.allowedAttachmentTypes, model.attachmentType());
     selectList$.change(function(e) {model.attachmentType($(e.target).val());});
 
-    model.application.id(applicationId);
-    model.application.title(application.title);
-    model.application.state(application.state);
     model.id = attachmentId;
 
     approveModel.setApplication(application);
@@ -335,24 +351,25 @@ var attachment = (function() {
         }, 1500);
       }
     });
+
+    subscribe();
   }
 
-  hub.onPageChange("attachment", function(e) {
+  hub.onPageLoad("attachment", function(e) {
     pageutil.showAjaxWait();
     model.init(false);
     model.showHelp(false);
     applicationId = e.pagePath[0];
     attachmentId = e.pagePath[1];
-    repository.load(applicationId);
-  });
 
-  repository.loaded(["attachment"], function(application, applicationDetails) {
-    if (applicationId === application.id) {
-      unsubscribe();
-      showAttachment(applicationDetails);
-      subscribe();
+    if (applicationModel._js.id !== applicationId) {
+      repository.load(applicationId);
+    } else {
+      showAttachment();
     }
   });
+
+  hub.subscribe("application-model-updated", showAttachment);
 
   function resetUploadIframe() {
     var originalUrl = $("#uploadFrame").attr("data-src");

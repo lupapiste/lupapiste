@@ -18,7 +18,7 @@
 
   var featuresModel = new FeaturesModel();
 
-  hub.onPageChange("features", featuresModel.load);
+  hub.onPageLoad("features", featuresModel.load);
 
   $(function() {
     $("#features").applyBindings(featuresModel);

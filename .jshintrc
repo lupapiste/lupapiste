@@ -26,6 +26,7 @@
     "docgen": true,
     "OpenLayers": false,
     "_": false,
+    "ga": true,
     "loc": true,
     "getEvent": true,
     "vetuma": true,
@@ -51,6 +52,7 @@
     "gis": true,
     "locationSearch": true,
     "LUPAPISTE": true,
+    "lupapisteApp" :true,
     "util": true,
     "invites": true,
     "tree": true,
@@ -66,11 +68,11 @@
       "attachmentUtils","attachmentTypeSelect",
        "authorization","comments","currentUser",
        "DocModel","docgen","expand", "features",
-       "gis","getEvent","hub","invites","loc",
+       "ga","gis","getEvent","hub","invites","loc",
        "locationSearch","vetuma","notify",
        "trace","debug","info","warn","error",    
        "LUPAPISTE","municipalities","organizations",
        "pageutil","repository","RequestContext",
        "stamping","taskUtil","taskPageController",
-       "tree","user","users","util"]
+       "tree","user","users","util", "lupapisteApp"]
 }

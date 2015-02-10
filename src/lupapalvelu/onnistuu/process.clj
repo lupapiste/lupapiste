@@ -14,7 +14,7 @@
             [sade.core :refer [ok]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :refer [random-password]]
-            [lupapalvelu.onnistuu.crypt :as crypt]
+            [sade.crypt :as crypt]
             [lupapalvelu.company :as c]
             [lupapalvelu.user-api :as u]))
 

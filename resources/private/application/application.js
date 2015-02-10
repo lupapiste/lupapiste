@@ -4,7 +4,7 @@
   var isInitializing = true;
   var currentId = null;
   var authorizationModel = authorization.create();
-  var applicationModel = new LUPAPISTE.ApplicationModel();
+  var applicationModel = lupapisteApp.models.application;
   var changeLocationModel = new LUPAPISTE.ChangeLocationModel();
   var addLinkPermitModel = new LUPAPISTE.AddLinkPermitModel();
   var constructionStateChangeModel = new LUPAPISTE.ModalDatepickerModel();
@@ -48,6 +48,7 @@
   var inviteModel = new LUPAPISTE.InviteModel();
   var verdictModel = new LUPAPISTE.VerdictsModel();
   var signingModel = new LUPAPISTE.SigningModel("#dialog-sign-attachments", true);
+  var verdictAttachmentPrintsOrderModel = new LUPAPISTE.VerdictAttachmentPrintsOrderModel();
   var requestForStatementModel = new LUPAPISTE.RequestForStatementModel();
   var addPartyModel = new LUPAPISTE.AddPartyModel();
   var createTaskController = LUPAPISTE.createTaskController;
@@ -68,7 +69,11 @@
     this.lastName = lastName;
   };
 
-    //FIXME: why is this?
+  function updateWindowTitle(newTitle) {
+    lupapisteApp.setTitle(newTitle || util.getIn(applicationModel, ["_js", "title"]));
+  }
+
+  //FIXME: why is this?
   function updateAssignee(value) {
     // do not update assignee if page is still initializing
     if (isInitializing) { return; }
@@ -191,6 +196,7 @@
       isInitializing = false;
       pageutil.hideAjaxWait();
 
+      hub.send("application-model-updated", {applicationId: app.id});
     });
   }
 
@@ -243,6 +249,7 @@
   function initPage(kind, e) {
     var newId = e.pagePath[0];
     var tab = e.pagePath[1];
+    updateWindowTitle();
     if (newId === currentId && tab) {
       selectTab(tab);
     } else {
@@ -255,13 +262,13 @@
     }
   }
 
-  hub.onPageChange("application", _.partial(initPage, "application"));
-  hub.onPageChange("inforequest", _.partial(initPage, "inforequest"));
+  hub.onPageLoad("application", _.partial(initPage, "application"));
+  hub.onPageLoad("inforequest", _.partial(initPage, "inforequest"));
 
-  repository.loaded(["application","inforequest","attachment","statement","neighbors","task","verdict"], function(application, applicationDetails) {
-    if (!currentId || (currentId === application.id)) {
-      showApplication(applicationDetails);
-    }
+// (["application","inforequest","attachment","statement","neighbors","task","verdict"]
+  hub.subscribe("application-loaded", function(e) {
+    showApplication(e.applicationDetails);
+    updateWindowTitle(e.applicationDetails.application.title);
   });
 
   function NeighborStatusModel() {
@@ -374,6 +381,7 @@
       requestForStatementModel: requestForStatementModel,
       sendNeighborEmailModel: sendNeighborEmailModel,
       signingModel: signingModel,
+      verdictAttachmentPrintsOrderModel: verdictAttachmentPrintsOrderModel,
       verdictModel: verdictModel,
       openInviteCompany: inviteCompanyModel.open.bind(inviteCompanyModel),
       attachmentsTab: attachmentsTab,
@@ -386,6 +394,10 @@
     $(addLinkPermitModel.dialogSelector).applyBindings({addLinkPermitModel: addLinkPermitModel});
     $(constructionStateChangeModel.dialogSelector).applyBindings({constructionStateChangeModel: constructionStateChangeModel});
     $(signingModel.dialogSelector).applyBindings({signingModel: signingModel, authorization: authorizationModel});
+    $(verdictAttachmentPrintsOrderModel.dialogSelector).applyBindings({
+      verdictAttachmentPrintsOrderModel: verdictAttachmentPrintsOrderModel,
+      authorization: authorizationModel
+    });
     $(inviteCompanyModel.selector).applyBindings(inviteCompanyModel);
     attachmentsTab.attachmentTemplatesModel.init();
   });

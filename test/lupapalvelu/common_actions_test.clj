@@ -4,7 +4,7 @@
             [sade.core :refer :all]
             [lupapalvelu.test-util :refer :all]
             [lupapalvelu.action :refer :all]
-            [lupapalvelu.common-actions :as ca]))
+            [lupapalvelu.actions-api :as ca]))
 
 (testable-privates lupapalvelu.action user-is-not-allowed-to-access?)
 
@@ -28,7 +28,8 @@
                           :change-urgency
                           :add-authority-notice
                           :foreman-applications
-                          :foreman-history}
+                          :foreman-history
+                          :reduced-foreman-history}
         user {:id "user123" :organizations [] :role :applicant}
         application {:organization "999-R" :auth [{:id "user123" :role "statementGiver"}]}]
     (doseq [command (ca/foreach-action user {} application)

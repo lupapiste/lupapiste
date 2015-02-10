@@ -15,7 +15,7 @@
     (compose-resource :js :welcome) => truthy)
 
   (fact "applicant"
-    (compose-resource :js :authority) => truthy)
+    (compose-resource :js :applicant) => truthy)
 
   (fact "authority"
     (compose-resource :js :authority) => truthy)

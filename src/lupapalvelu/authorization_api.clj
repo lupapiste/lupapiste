@@ -42,7 +42,7 @@
 
 (defn- create-invite [command id email text documentName documentId path role]
   {:pre [(valid-role role)]}
-  (let [email (-> email ss/lower-case ss/trim)
+  (let [email (user/canonize-email email)
         {created :created user :user application :application} command]
     (if (domain/invite application email)
       (fail :invite.already-has-auth)
@@ -99,7 +99,7 @@
       ; Document can be undefined in invite or removed by the time invite is approved.
       ; It's not possible to combine Mongo writes here,
       ; because only the last $elemMatch counts.
-      (a/set-user-to-document (domain/get-application-as id user) document (:id user) (:path my-invite) user created))))
+      (a/do-set-user-to-document (domain/get-application-as id user) document (:id user) (:path my-invite) user created))))
 
 (defn generate-remove-invalid-user-from-docs-updates [{docs :documents :as application}]
   (-<>> docs
@@ -113,7 +113,7 @@
     (zipmap <> (repeat ""))))
 
 (defn- do-remove-auth [{application :application :as command} username]
-  (let [username (-> username ss/lower-case ss/trim)
+  (let [username (user/canonize-email username)
         user-pred #(when (and (= (:username %) username) (not= (:type %) "owner")) %)]
     (when (some user-pred (:auth application))
       (let [updated-app (update-in application [:auth] (fn [a] (remove user-pred a)))

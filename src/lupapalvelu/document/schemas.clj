@@ -115,7 +115,7 @@
                             :type :group
                             :body [{:name "etunimi" :type :string :subtype :vrk-name :required true}
                                    {:name "sukunimi" :type :string :subtype :vrk-name :required true}
-                                   {:name "hetu" :type :hetu :max-len 11 :required true :blacklist [:neighbor turvakielto]}
+                                   {:name "hetu" :type :hetu :max-len 11 :required true :blacklist [:neighbor turvakielto] :emit [:hetuChanged]}
                                    {:name turvakielto :type :checkbox :blacklist [turvakielto]}]})
 
 (def henkilo (body
@@ -285,6 +285,12 @@
                             :body [{:name "nimeaminen" :i18nkey "tyonjohtaja.patevyys.tyonjohtajaHakemusKytkin.nimeaminen"}
                                    {:name "hakemus" :i18nkey "tyonjohtaja.patevyys.tyonjohtajaHakemusKytkin.hakemus"}]}])
 
+(def patevyys-tyonjohtaja-v2 [koulutusvalinta
+                              {:name "koulutus" :type :string :required false  :i18nkey "muukoulutus"}
+                              {:name "valmistumisvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size "s" :required false}
+                              {:name "kokemusvuodet" :type :string :subtype :number :min-len 1 :max-len 2 :size "s" :required false}
+                              {:name "valvottavienKohteidenMaara" :i18nkey "tyonjohtaja.patevyys.valvottavienKohteidenMaara" :type :string :subtype :number :size "s" :required false}])
+
 ;; FIXME remove + migration
 (def vastuuaika-tyonjohtaja [{:name "vastuuaika"
                               :type :group
@@ -315,45 +321,30 @@
 (def kuntaroolikoodi-tyonjohtaja-v2 [{:name "kuntaRoolikoodi"
                                       :i18nkey "osapuoli.tyonjohtaja.kuntaRoolikoodi._group_label"
                                       :type :select
+                                      :emit [:filterByCode]
                                       :sortBy :displayname
                                       :required true
-                                      :body [{:name "vastaava ty\u00F6njohtaja" :i18nkey "osapuoli.tyonjohtaja.kuntaRoolikoodi.vastaava ty\u00f6njohtaja"}
-                                             {:name "KVV-ty\u00F6njohtaja" :i18nkey "osapuoli.tyonjohtaja.kuntaRoolikoodi.KVV-ty\u00f6njohtaja"}
-                                             {:name "IV-ty\u00F6njohtaja" :i18nkey "osapuoli.tyonjohtaja.kuntaRoolikoodi.IV-ty\u00f6njohtaja"}
-                                             {:name "erityisalojen ty\u00F6njohtaja" :i18nkey "osapuoli.tyonjohtaja.kuntaRoolikoodi.erityisalojen ty\u00f6njohtaja"}]}])
+                                      :body [{:name "vastaava ty\u00F6njohtaja" :code :vtj :i18nkey "osapuoli.tyonjohtaja.kuntaRoolikoodi.vastaava ty\u00f6njohtaja"}
+                                             {:name "KVV-ty\u00F6njohtaja" :code :kvv :i18nkey "osapuoli.tyonjohtaja.kuntaRoolikoodi.KVV-ty\u00f6njohtaja"}
+                                             {:name "IV-ty\u00F6njohtaja" :code :ivt :i18nkey "osapuoli.tyonjohtaja.kuntaRoolikoodi.IV-ty\u00f6njohtaja"}
+                                             {:name "erityisalojen ty\u00F6njohtaja" :code :vrt :i18nkey "osapuoli.tyonjohtaja.kuntaRoolikoodi.erityisalojen ty\u00f6njohtaja"}]}])
 
 (def vastattavat-tyotehtavat-tyonjohtaja-v2 [{:name "vastattavatTyotehtavat"
                                               :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat._group_label"
                                               :type :group
+                                              :listen [:filterByCode]
                                               :layout :vertical
-                                              :body [{:name "ivLaitoksenAsennustyo" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.ivLaitoksenAsennustyo" :type :checkbox}
-                                                     {:name "ivLaitoksenKorjausJaMuutostyo" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.ivLaitoksenKorjausJaMuutostyo" :type :checkbox}
-                                                     {:name "ivLaitoksenAsennustyoIvLaitoksenKorjausJaMuutostyo" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.ivLaitoksenAsennustyoIvLaitoksenKorjausJaMuutostyo" :type :checkbox}
-                                                     {:name "ivLaitoksenKorjausJaMuutostyoIvLaitoksenAsennustyo" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.ivLaitoksenKorjausJaMuutostyoIvLaitoksenAsennustyo" :type :checkbox}
-                                                     {:name "ivLaitoksenAsennustyo12Krs" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.ivLaitoksenAsennustyo12Krs" :type :checkbox}
-                                                     {:name "ivLaitoksenAsennustyo" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.ivLaitoksenAsennustyo" :type :checkbox}
-                                                     {:name "sisapuolinenKvvTyo" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.sisapuolinenKvvTyo" :type :checkbox}
-                                                     {:name "ulkopuolinenKvvTyo" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.ulkopuolinenKvvTyo" :type :checkbox}
-                                                     {:name "sukitus" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.sukitus" :type :checkbox}
-                                                     {:name "maanrakennusKvvUlkopuoli" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.maanrakennusKvvUlkopuoli" :type :checkbox}
-                                                     {:name "rakennuksenMuutosJaKorjaustyo" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.rakennuksenMuutosJaKorjaustyo" :type :checkbox}
-                                                     {:name "uudisrakennustyoMaanrakennustoineen" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.uudisrakennustyoMaanrakennustoineen" :type :checkbox}
-                                                     {:name "uudisrakennustyoIlmanMaanrakennustoita" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.uudisrakennustyoIlmanMaanrakennustoita" :type :checkbox}
-                                                     {:name "linjasaneeraus" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.linjasaneeraus" :type :checkbox}
-                                                     {:name "maanrakennustyot" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.maanrakennustyot" :type :checkbox}
-                                                     {:name "rakennuksenPurkaminen" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.rakennuksenPurkaminen" :type :checkbox}
-                                                     {:name "paalutus" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.paalutus" :type :checkbox}
-                                                     {:name "kayttotarkoituksenMuutos" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.kayttotarkoituksenMuutos" :type :checkbox}
-                                                     {:name "markatilamuutos" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.markatilamuutos" :type :checkbox}
-                                                     {:name "taydentavatRakennustyot" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.taydentavatRakennustyot" :type :checkbox}
-                                                     {:name "vesijohtojenUusiminenJaViemareidenPinnoittaminen" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.vesijohtojenUusiminenJaViemareidenPinnoittaminen" :type :checkbox}
-                                                     {:name "peruslaatta" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.peruslaatta" :type :checkbox}
-                                                     {:name "alaslaskukatotLattiavalujaJaSisatyot" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.alaslaskukatotLattiavalujaJaSisatyot" :type :checkbox}
-                                                     {:name "hissinRakentaminen" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.hissinRakentaminen" :type :checkbox}
-                                                     {:name "muutostyo" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.muutostyo" :type :checkbox}
-                                                     {:name "hissienJalkiasennus" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.hissienJalkiasennus" :type :checkbox}
-                                                     {:name "vesikatonKorjaustyo" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.vesikatonKorjaustyo" :type :checkbox}
-                                                     {:name "pihamaajarjestelyt" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.pihamaajarjestelyt" :type :checkbox}]}])
+                                              :body [{:name "ivLaitoksenAsennustyo" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.ivLaitoksenAsennustyo" :codes [:ivt] :type :checkbox}
+                                                     {:name "ivLaitoksenKorjausJaMuutostyo" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.ivLaitoksenKorjausJaMuutostyo" :codes [:ivt] :type :checkbox}
+                                                     {:name "sisapuolinenKvvTyo" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.sisapuolinenKvvTyo" :codes [:kvv] :type :checkbox}
+                                                     {:name "ulkopuolinenKvvTyo" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.ulkopuolinenKvvTyo" :codes [:kvv] :type :checkbox}
+                                                     {:name "rakennuksenMuutosJaKorjaustyo" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.rakennuksenMuutosJaKorjaustyo" :codes [:vtj] :type :checkbox}
+                                                     {:name "uudisrakennustyoMaanrakennustoineen" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.uudisrakennustyoMaanrakennustoineen" :codes [:vtj] :type :checkbox}
+                                                     {:name "uudisrakennustyoIlmanMaanrakennustoita" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.uudisrakennustyoIlmanMaanrakennustoita" :codes [:vtj] :type :checkbox}
+                                                     {:name "linjasaneeraus" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.linjasaneeraus" :codes [:vtj] :type :checkbox}
+                                                     {:name "maanrakennustyot" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.maanrakennustyot" :codes [:vtj] :type :checkbox}
+                                                     {:name "rakennuksenPurkaminen" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.rakennuksenPurkaminen" :codes [:vtj] :type :checkbox}
+                                                     {:name "muuMika" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.muuMika" :codes [:vtj :kvv :ivt :vrt] :type :string}]}])
 
 (def tyonjohtaja-hanketieto {:name "tyonjohtajaHanketieto" :type :group
                              :body [{:name "taysiaikainenOsaaikainen" :type :radioGroup :body [{:name "taysiaikainen"} {:name "osaaikainen"}] :default "taysiaikainen"}
@@ -361,78 +352,82 @@
                                     {:name "kaytettavaAika" :type :string :size "s" :unit "tuntiaviikko" :subtype :number :min 0 :max 168} ; 7*24 = 168h :)
                                     {:name "kayntienMaara" :type :string :size "s" :unit "kpl" :subtype :number :min 0 :max 9999999}]})
 
-
-
 (def hanke-row
-  [{:name "luvanNumero" :type :string :size "m" :label false}
-   {:name "katuosoite" :type :string :size "m" :label false}
-   {:name "rakennustoimenpide" :type :string :size "l" :label false}
-   {:name "kokonaisala" :type :string :subtype :number :size "s" :label false}
-   {:name "vaihe" :type :select :size "t" :label false
-    :body [{:name "R"}
-           {:name "A"}
-           {:name "K"}]}
-   {:name "3kk" :type :string :subtype :number :size "s" :label false}
-   {:name "6kk" :type :string :subtype :number :size "s" :label false}
-   {:name "9kk" :type :string :subtype :number :size "s" :label false}
-   {:name "12kk" :type :string :subtype :number  :size "s" :label false}])
+  [{:name "luvanNumero" :type :string :size "m" :label false :uicomponent :string :i18nkey "muutHankkeet.luvanNumero"}
+   {:name "katuosoite" :type :string :size "m" :label false :uicomponent :string :i18nkey "muutHankkeet.katuosoite"}
+   {:name "rakennustoimenpide" :type :string :size "l" :label false :uicomponent :string :i18nkey "muutHankkeet.rakennustoimenpide"}
+   {:name "kokonaisala" :type :string :subtype :number :size "s" :label false :uicomponent :string :i18nkey "muutHankkeet.kokonaisala"}
+   {:name "vaihe" :type :select :size "t" :label false :uicomponent :select-component :i18nkey "muutHankkeet.vaihe"
+    :body [{:name "R" :i18nkey "muutHankkeet.R"}
+           {:name "A" :i18nkey "muutHankkeet.A"}
+           {:name "K" :i18nkey "muutHankkeet.K"}]}
+   {:name "3kk" :type :string :subtype :number :size "s" :label false :uicomponent :string :i18nkey "muutHankkeet.3kk"}
+   {:name "6kk" :type :string :subtype :number :size "s" :label false :uicomponent :string :i18nkey "muutHankkeet.6kk"}
+   {:name "9kk" :type :string :subtype :number :size "s" :label false :uicomponent :string :i18nkey "muutHankkeet.9kk"}
+   {:name "12kk" :type :string :subtype :number  :size "s" :label false :uicomponent :string :i18nkey "muutHankkeet.12kk"}
+   {:name "autoupdated" :type :checkbox :hidden true :i18nkey "muutHankkeet.autoupdated" :uicomponent :checkbox :whitelist [:none]}])
 
 (def muut-rakennushankkeet-table {:name "muutHankkeet"
-                                  :type :table
+                                  :type :foremanOtherApplications
+                                  :uicomponent :hanke-table
                                   :repeating true
                                   :approvable true
                                   :copybutton false
-                                  :body hanke-row
-                                  })
+                                  :listen [:hetuChanged]
+                                  :body hanke-row})
 
-;(def henkilo-valitsin [{:name "userId" :type :personSelector :blacklist [:neighbor]}])
-(def tayta-omat-tiedot-button {:name "fillMyInfo" :type :fillMyInfoButton})
+(def tayta-omat-tiedot-button {:name "fillMyInfo" :type :fillMyInfoButton :whitelist [:applicant]})
 
-(def authority-acceptance {:name "authorityAccept" :type :authorityAccept})
+(def tyonjohtajan-historia {:name "foremanHistory" :type :foremanHistory})
+
+(def tyonjohtajan-hyvaksynta [{:name "tyonjohtajanHyvaksynta"
+                               :type :group
+                               :whitelist [:authority]
+                               :body [{:name "tyonjohtajanHyvaksynta" :type :checkbox :i18nkey "tyonjohtaja.historia.hyvaksynta"}
+                                      tyonjohtajan-historia]}])
 
 (def tyonjohtaja-v2 (body
-                      authority-acceptance
+                      tyonjohtajan-hyvaksynta
                       ilmoitus-hakemus-valitsin
                       kuntaroolikoodi-tyonjohtaja-v2
                       patevyysvaatimusluokka
                       vastattavat-tyotehtavat-tyonjohtaja-v2
                       tyonjohtaja-hanketieto
-                      muut-rakennushankkeet-table
                       tayta-omat-tiedot-button
-                      ;henkilo-valitsin ; to be replaced with "fill out own info" -button? ^
-                      designer-basic))
+                      designer-basic
+                      muut-rakennushankkeet-table
+                      {:name "patevyys" :type :group :body patevyys-tyonjohtaja-v2}
+                      sijaisuus-tyonjohtaja))
 
 (def maksaja (body
                (henkilo-yritys-select-group :yritys-body yritys-with-verkkolaskutustieto)
                {:name "laskuviite" :type :string :max-len 30 :layout :full-width}))
 
-(def aloitusoikeus [{:name "kuvaus" :type :text :max-len 4000 :required true :layout :full-width}])
-
-(def muutostapa {:name "muutostapa" :type :select :sortBy :displayname :required true :label false :i18nkey "huoneistot.muutostapa"
+(def muutostapa {:name "muutostapa" :type :select :sortBy :displayname :required true :label false :i18nkey "huoneistot.muutostapa" :emit [:muutostapaChanged]
                  :body [{:name "poisto"}
                         {:name "lis\u00e4ys" :i18nkey "huoneistot.muutostapa.lisays"}
                         {:name "muutos"}]})
 
-(def huoneistoRow [{:name "huoneistoTyyppi" :type :select :sortBy :displayname :label false :i18nkey "huoneistot.huoneistoTyyppi"
+(def huoneistoRow [{:name "huoneistoTyyppi" :type :select :sortBy :displayname :label false :i18nkey "huoneistot.huoneistoTyyppi" :listen [:muutostapaChanged]
                    :body [{:name "asuinhuoneisto"}
                           {:name "toimitila"}
                           {:name "ei tiedossa" :i18nkey "huoneistot.huoneistoTyyppi.eiTiedossa"}]}
-                   {:name "porras" :type :string :subtype :letter :case :upper :max-len 1 :size "t" :label false :i18nkey "huoneistot.porras"}
-                   {:name "huoneistonumero" :type :string :subtype :number :min-len 1 :max-len 3 :size "s" :required true :label false :i18nkey "huoneistot.huoneistonumero"}
-                   {:name "jakokirjain" :type :string :subtype :letter :case :lower :max-len 1 :size "t" :label false :i18nkey "huoneistot.jakokirjain"}
-                   {:name "huoneluku" :type :string :subtype :number :min 1 :max 99 :required true :size "t" :label false :i18nkey "huoneistot.huoneluku"}
-                   {:name "keittionTyyppi" :type :select :sortBy :displayname :required true :label false :i18nkey "huoneistot.keittionTyyppi"
+                   {:name "porras" :type :string :subtype :letter :case :upper :max-len 1 :size "t" :label false :i18nkey "huoneistot.porras" :listen [:muutostapaChanged]}
+                   {:name "huoneistonumero" :type :string :subtype :number :min-len 1 :max-len 3 :size "s" :required true :label false :i18nkey "huoneistot.huoneistonumero" :listen [:muutostapaChanged]}
+                   {:name "jakokirjain" :type :string :subtype :letter :case :lower :max-len 1 :size "t" :label false :i18nkey "huoneistot.jakokirjain" :listen [:muutostapaChanged]}
+                   {:name "huoneluku" :type :string :subtype :number :min 1 :max 99 :required true :size "t" :label false :i18nkey "huoneistot.huoneluku" :listen [:muutostapaChanged]}
+                   {:name "keittionTyyppi" :type :select :sortBy :displayname :required true :label false :i18nkey "huoneistot.keittionTyyppi" :listen [:muutostapaChanged]
                     :body [{:name "keittio"}
                            {:name "keittokomero"}
                            {:name "keittotila"}
                            {:name "tupakeittio"}
                            {:name "ei tiedossa" :i18nkey "huoneistot.keittionTyyppi.eiTiedossa"}]}
-                   {:name "huoneistoala" :type :string :subtype :number :size "s" :min 1 :max 9999999 :required true :label false :i18nkey "huoneistot.huoneistoala"}
-                   {:name "WCKytkin" :type :checkbox :label false :i18nkey "huoneistot.WCKytkin"}
-                   {:name "ammeTaiSuihkuKytkin" :type :checkbox :label false :i18nkey "huoneistot.ammeTaiSuihkuKytkin"}
-                   {:name "saunaKytkin" :type :checkbox :label false :i18nkey "huoneistot.saunaKytkin"}
-                   {:name "parvekeTaiTerassiKytkin" :type :checkbox :label false :i18nkey "huoneistot.parvekeTaiTerassiKytkin"}
-                   {:name "lamminvesiKytkin" :type :checkbox :label false :i18nkey "huoneistot.lamminvesiKytkin"}
+                   {:name "huoneistoala" :type :string :subtype :number :size "s" :min 1 :max 9999999 :required true :label false :i18nkey "huoneistot.huoneistoala" :listen [:muutostapaChanged]}
+                   {:name "WCKytkin" :type :checkbox :label false :i18nkey "huoneistot.WCKytkin" :listen [:muutostapaChanged]}
+                   {:name "ammeTaiSuihkuKytkin" :type :checkbox :label false :i18nkey "huoneistot.ammeTaiSuihkuKytkin" :listen [:muutostapaChanged]}
+                   {:name "saunaKytkin" :type :checkbox :label false :i18nkey "huoneistot.saunaKytkin" :listen [:muutostapaChanged]}
+                   {:name "parvekeTaiTerassiKytkin" :type :checkbox :label false :i18nkey "huoneistot.parvekeTaiTerassiKytkin" :listen [:muutostapaChanged]}
+                   {:name "lamminvesiKytkin" :type :checkbox :label false :i18nkey "huoneistot.lamminvesiKytkin" :listen [:muutostapaChanged]}
                    muutostapa])
 
 (def huoneistotTable {:name "huoneistot"
@@ -651,7 +646,9 @@
 (def rakennuksen-tiedot (conj rakennuksen-tiedot-ilman-huoneistoa huoneistotTable))
 
 
-(def rakennelma (body [{:name "kokonaisala" :type :string :size "s" :unit "m2" :subtype :number}] kuvaus))
+(def rakennelma (body
+                  [{:name "kokonaisala" :type :string :size "s" :unit "m2" :subtype :number}]
+                  kuvaus))
 (def maisematyo (body kuvaus))
 
 (def rakennuksen-omistajat [{:name "rakennuksenOmistajat"
@@ -883,7 +880,7 @@
     {:info {:name "tyonjohtaja-v2"
             :i18name "osapuoli"
             :order 5
-            :removable false ; TODO: check these
+            :removable false
             :repeating false
             :approvable true
             :type :party}
@@ -910,8 +907,19 @@
             :type :location}
      :body (schema-body-without-element-by-name rakennuspaikka "rantaKytkin" "hallintaperuste" "kaavanaste" "kaavatilanne")}
 
+    {:info {:name "paatoksen-toimitus-rakval"
+            :removable false
+            :approvable true
+            :order 10}
+     :body (body
+             [(update-in henkilotiedot-minimal [:body] (partial remove #(= turvakielto (:name %))))]
+             simple-osoite
+             [{:name "yritys" :type :group
+               :body [{:name "yritysnimi" :type :string}]}]
+             tayta-omat-tiedot-button)}
+
     {:info {:name "aloitusoikeus" :removable false :approvable true}
-     :body aloitusoikeus}
+     :body (body kuvaus)}
 
     {:info {:name "lisatiedot"
             :order 100}

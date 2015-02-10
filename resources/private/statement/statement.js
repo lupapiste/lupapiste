@@ -155,6 +155,7 @@
         locked: true,
         authority: currentUser.isAuthority()
       });
+      LUPAPISTE.ModalDialog.open("#upload-dialog");
     };
   }
 
@@ -170,7 +171,7 @@
     }
   });
 
-  hub.onPageChange("statement", function(e) {
+  hub.onPageLoad("statement", function(e) {
     statementModel.clear();
     applicationId = e.pagePath[0];
     statementId = e.pagePath[1];

@@ -59,6 +59,7 @@
         white-space: nowrap;
       }
       a {
+        color: white;
         font-size: $font-size-body;
         text-transform: none;
         padding-left: 32px;
@@ -401,7 +402,59 @@
       margin-left: 360px;
     }
   }
+}
 
+#dialog-verdict-attachment-prints-order {
+  .dialog-content {
+    padding-left: 15px;
+  }
+  .order-amount {
+    width: 15px;
+  }
+
+  // With these, making table's attachment list scrollable
+
+  $table_body_height: 200px;
+  $table_width: 800px;
+  $column_one_width: 200px;
+  $column_two_width: 200px;
+  $column_three_width: 300px;
+  $column_four_width: 100px;
+
+  .fixed-headers {
+    width: $table_width;
+    table-layout: fixed;
+
+    .center {
+      text-align: center;
+    }
+
+    td:nth-child(1), th:nth-child(1) { min-width: $column_one_width; }
+    td:nth-child(2), th:nth-child(2) { min-width: $column_two_width; }
+    td:nth-child(3), th:nth-child(3) { width: $column_three_width; }
+    td:nth-child(4), th:nth-child(4) { width: $column_four_width; }
+
+    thead {
+      tr {
+        display: block;
+        position: relative;
+      }
+    }
+    tbody {
+      display: block;
+      overflow: auto;
+      width: 100%;
+      max-height: $table_body_height;
+    }
+  }
+
+  .old_ie_wrapper {
+    max-height: $table_body_height;
+    width: $table_width;
+    overflow-x: hidden;
+    overflow-y: auto;
+    tbody { height: auto; }
+  }
 }
 
 .key-value-pair {

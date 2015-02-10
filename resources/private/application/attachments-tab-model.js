@@ -59,9 +59,11 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
       _.each(attArrays, function(attArray) {
         _.each(attArray, function(att) {
 
+          // reload application also when error occurs so that model and db dont get out of sync
           att.notNeeded.subscribe(function(newValue) {
             ajax.command("set-attachment-not-needed", {id: self.appModel.id(), attachmentId: att.id, notNeeded: newValue})
             .success(self.appModel.reload)
+            .error(self.appModel.reload)
             .processing(self.appModel.processing)
             .call();
           });
@@ -93,6 +95,8 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
       typeSelector: true,
       opSelector: true
     });
+
+    LUPAPISTE.ModalDialog.open("#upload-dialog");
   };
 
   self.copyOwnAttachments = function() {

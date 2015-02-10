@@ -16,6 +16,7 @@ var docgen = (function () {
     _.each(documents, function (doc) {
       var schema = doc.schema;
       var docModel = new DocModel(schema, doc, application, authorizationModel, options);
+      docModel.triggerEvents();
 
       docgenDiv.append(docModel.element);
 

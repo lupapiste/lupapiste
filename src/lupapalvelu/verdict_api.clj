@@ -1,5 +1,5 @@
 (ns lupapalvelu.verdict-api
-  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error fatal]]
+  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn warnf error fatal]]
             [pandect.core :as pandect]
             [monger.operators :refer :all]
             [sade.http :as http]

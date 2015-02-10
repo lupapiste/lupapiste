@@ -17,7 +17,7 @@ Mikko goes to empty attachments tab
   Open tab  attachments
 
 Download all attachments should be disabled
-  Wait Until  Element should not be visible   xpath=//a[@data-test-id="application-download-all-attachement"]
+  Wait Until  Element should not be visible   xpath=//a[@data-test-id="application-download-all-attachments"]
 
 New attachment template button should not be visible for Mikko
   [Tags]  attachments
@@ -42,7 +42,7 @@ Mikko adds again txt attachment without comment
   Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${TXT_TESTFILE_NAME}')]
 
 Download all attachments should be enabled
-  Wait Until  Element should be visible   xpath=//a[@data-test-id="application-download-all-attachement"]
+  Wait Until  Element should be visible   xpath=//a[@data-test-id="application-download-all-attachments"]
 
 Mikko opens attachment details
   [Tags]  attachments
@@ -143,6 +143,7 @@ Sonja goes to conversation tab
 
 Sonja goes to attachments tab
   [Tags]  attachments
+  Wait Until  Element should be visible  xpath=//a[@data-test-id="back-to-application-from-attachment"]
   Click element  xpath=//a[@data-test-id="back-to-application-from-attachment"]
   Open tab  attachments
 

@@ -47,7 +47,7 @@
   [{{:keys [organizations]} :user}]
   (let [organization-id (first organizations)
         organization    (organization/get-organization organization-id)
-        email           (ss/lower-case email)
+        email           (user/canonize-email email)
         statement-giver-id (mongo/create-id)]
     (if-let [user (user/get-user-by-email email)]
       (do

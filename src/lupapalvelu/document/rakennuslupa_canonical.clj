@@ -11,26 +11,28 @@
             [lupapalvelu.document.schemas :as schemas]))
 
 (defn- get-huoneisto-data [huoneistot]
-  (for [huoneisto (vals (into (sorted-map) huoneistot))
-        :let [huoneistonumero (-> huoneisto :huoneistonumero)
-              huoneistoPorras (-> huoneisto :porras)
-              jakokirjain (-> huoneisto :jakokirjain)]
-        :when (seq huoneisto)]
-    (merge {:muutostapa (-> huoneisto :muutostapa)
-            :huoneluku (-> huoneisto :huoneluku)
-            :keittionTyyppi (-> huoneisto :keittionTyyppi)
-            :huoneistoala (-> huoneisto :huoneistoala)
-            :varusteet {:WCKytkin (true? (-> huoneisto :WCKytkin))
-                        :ammeTaiSuihkuKytkin (true? (-> huoneisto :ammeTaiSuihkuKytkin))
-                        :saunaKytkin (true? (-> huoneisto :saunaKytkin))
-                        :parvekeTaiTerassiKytkin (true? (-> huoneisto :parvekeTaiTerassiKytkin))
-                        :lamminvesiKytkin (true? (-> huoneisto :lamminvesiKytkin))}
-            :huoneistonTyyppi (-> huoneisto :huoneistoTyyppi)}
-           (when (ss/numeric? huoneistonumero)
-             {:huoneistotunnus
-              (merge {:huoneistonumero (format "%03d" (util/->int (ss/remove-leading-zeros huoneistonumero)))}
-                     (when (not-empty huoneistoPorras) {:porras (ss/upper-case huoneistoPorras)})
-                     (when (not-empty jakokirjain) {:jakokirjain (ss/lower-case jakokirjain)}))}))))
+  (let [huoneistot (vals (into (sorted-map) huoneistot))
+        huoneistot (filter :muutostapa huoneistot)]
+    (for [huoneisto huoneistot
+         :let [huoneistonumero (-> huoneisto :huoneistonumero)
+               huoneistoPorras (-> huoneisto :porras)
+               jakokirjain (-> huoneisto :jakokirjain)]
+         :when (seq huoneisto)]
+     (merge {:muutostapa (-> huoneisto :muutostapa)
+             :huoneluku (-> huoneisto :huoneluku)
+             :keittionTyyppi (-> huoneisto :keittionTyyppi)
+             :huoneistoala (-> huoneisto :huoneistoala)
+             :varusteet {:WCKytkin (true? (-> huoneisto :WCKytkin))
+                         :ammeTaiSuihkuKytkin (true? (-> huoneisto :ammeTaiSuihkuKytkin))
+                         :saunaKytkin (true? (-> huoneisto :saunaKytkin))
+                         :parvekeTaiTerassiKytkin (true? (-> huoneisto :parvekeTaiTerassiKytkin))
+                         :lamminvesiKytkin (true? (-> huoneisto :lamminvesiKytkin))}
+             :huoneistonTyyppi (-> huoneisto :huoneistoTyyppi)}
+            (when (ss/numeric? huoneistonumero)
+              {:huoneistotunnus
+               (merge {:huoneistonumero (format "%03d" (util/->int (ss/remove-leading-zeros huoneistonumero)))}
+                      (when (not-empty huoneistoPorras) {:porras (ss/upper-case huoneistoPorras)})
+                      (when (not-empty jakokirjain) {:jakokirjain (ss/lower-case jakokirjain)}))})))))
 
 (defn- get-rakennuksen-omistaja [omistaja]
   (when-let [osapuoli (get-osapuoli-data omistaja :rakennuksenomistaja)]
@@ -243,6 +245,7 @@
                                       "Rakentamisen aikainen muutos"
                                       (condp = operation-name
                                         "tyonjohtajan-nimeaminen" "Uuden ty\u00f6njohtajan nime\u00e4minen"
+                                        "tyonjohtajan-nimeaminen-v2" "Uuden ty\u00f6njohtajan nime\u00e4minen"
                                         "suunnittelijan-nimeaminen" "Uuden suunnittelijan nime\u00e4minen"
                                         "jatkoaika" "Jatkoaikahakemus"
                                         "raktyo-aloit-loppuunsaat" "Jatkoaikahakemus"
@@ -323,7 +326,9 @@
                                                                                      building-canonical)]
                                                             {:KatselmuksenRakennus building-canonical}) buildings)}) ; v2.1.3
                       (when (:kuvaus huomautukset) {:huomautukset {:huomautus (reduce-kv
-                                                                                (fn [m k v] (assoc m k (util/to-xml-date-from-string v)))
+                                                                                (fn [m k v] (if-not (ss/blank? v)
+                                                                                              (assoc m k (util/to-xml-date-from-string v))
+                                                                                              m))
                                                                                 (select-keys huomautukset [:kuvaus :toteaja])
                                                                                 (select-keys huomautukset [:maaraAika :toteamisHetki]))}})))
         canonical {:Rakennusvalvonta

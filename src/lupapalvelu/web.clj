@@ -18,7 +18,9 @@
             [sade.util :as util]
             [sade.status :as status]
             [sade.strings :as ss]
-            [lupapalvelu.action :refer [defcommand defquery] :as action]
+            [lupapalvelu.action :as action]
+            [lupapalvelu.application-search-api]
+            [lupapalvelu.features-api]
             [lupapalvelu.i18n :refer [*lang*] :as i18n]
             [lupapalvelu.user :as user]
             [lupapalvelu.singlepage :as singlepage]
@@ -27,13 +29,16 @@
             [lupapalvelu.proxy-services :as proxy-services]
             [lupapalvelu.organization]
             [lupapalvelu.application :as application]
-            [lupapalvelu.pdf-export :as pdf-export]
+            [lupapalvelu.foreman-api :as foreman-api]
+            [lupapalvelu.open-inforequest-api]
+            [lupapalvelu.pdf-export-api]
+            [lupapalvelu.logging-api]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.token :as token]
             [lupapalvelu.activation :as activation]
             [lupapalvelu.logging :refer [with-logging-context]]
             [lupapalvelu.neighbors]
-            [lupapalvelu.idf.idf-server :as idf-server]))
+            [lupapalvelu.idf.idf-api :as idf-api]))
 
 ;;
 ;; Helpers
@@ -299,18 +304,6 @@
 (defjson "/api/hashbang" []
   (ok :bang (session/get! :hashbang "")))
 
-(defcommand "frontend-error"
-  {:roles [:anonymous]}
-  [{{:keys [page message]} :data {:keys [email]} :user {:keys [user-agent]} :web}]
-  (let [limit    1000
-        sanitize (partial lupapalvelu.logging/sanitize limit)
-        sanitized-page (sanitize (or page "(unknown)"))
-        user           (or (ss/lower-case email) "(anonymous)")
-        sanitized-ua   (sanitize user-agent)
-        sanitized-msg  (sanitize (str message))]
-    (errorf "FRONTEND: %s [%s] got an error on page %s: %s"
-            user sanitized-ua sanitized-page sanitized-msg)))
-
 ;;
 ;; Login/logout:
 ;;
@@ -529,7 +522,7 @@
           email puhelin katuosoite postinumero postitoimipaikka
           suoramarkkinointilupa ammattilainen
           app id ts mac]}
-  (idf-server/handle-create-user-request etunimi sukunimi
+  (idf-api/handle-create-user-request etunimi sukunimi
           email puhelin katuosoite postinumero postitoimipaikka
           suoramarkkinointilupa ammattilainen
           app id ts mac))

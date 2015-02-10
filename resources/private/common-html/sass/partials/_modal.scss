@@ -1,3 +1,68 @@
+// TODO knockout dialog to share same styles with legacy dialog
+#modal-dialog {
+  .dialog {
+    display: none;
+    position: fixed;
+    width: 980px;
+    right: 0;
+    left: 0;
+    margin: auto;
+    z-index: 9999;
+    padding: $marginM;
+    background-color: #fff;
+    height: 700px;
+    min-height: 150px;
+    .content {
+      overflow: auto;
+      position: absolute;
+      top: 52px;
+      bottom: 70px;
+      left: $marginM;
+      right: $marginM;
+    }
+    .footer {
+      position: absolute;
+      bottom: $marginM;
+      right: $marginM;
+      left: $marginM;
+      .cancel {
+        float: right;
+        margin-right: $marginM;
+      }
+    }
+    .header {
+      padding-top: 2px;
+      padding-bottom: 4px;
+      padding-left: 24px;
+      border-bottom: 1px solid;
+      font-size: 20px;
+      .title {
+        line-height: 24px;
+      }
+      .close {
+        position: absolute;
+        right: $marginM;
+        cursor: pointer;
+        &:after {
+          content: "X";
+        }
+      }
+    }
+  }
+  .mask {
+    position: fixed;
+    display: none;
+    z-index: 9000;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background-color: #000;
+    opacity: 0.5;
+    // filter: alpha(opacity=50);
+  }
+}
+
 /* Z-index of .mask must lower than .window */
 .mask {
   position:absolute;
@@ -45,7 +110,6 @@
 /* Customize your modal window here, you can add background image too */
 
 .dialog-header {
-  height: 32px;
   padding: 2px $marginL;
   border-bottom: 1px solid;
   p {
@@ -61,7 +125,7 @@
   }
 }
 
-.dialog-content{
+.dialog-content {
   /* somewhat less than .autosized - .dialog-header */
   min-height: $baseline * 4;
   position: relative;
@@ -90,25 +154,20 @@
   .dialog-user-content {
     padding: $marginM 0;
   }
-
-  div.pending, div.finished {
-    display: none;
-  }
 }
 
-.dialog-content.finished {
+.dialog-content {
+  p {
+    margin-bottom: 0;
+  }
+
   div.finished {
     background: #fff;
     display: block;
     text-align: left;
     z-index: 5000;
   }
-  p {
-    margin-bottom: 0;
-  }
-}
 
-.dialog-content.pending {
   div.pending {
     background: #fff;
     display: block;

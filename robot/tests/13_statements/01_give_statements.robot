@@ -40,7 +40,8 @@ New applications does not have statements
 
 Sonja sees indicators from pre-filled fields
   Sonja logs in
-  Wait Until  Element text should be  xpath=//table[@id='applications-list']//tr[@data-test-address='${appname}']//div[@class='unseen-indicators']  2
+  # The unseen changes count includes changes in "Rakennuksen kayttotarkoitus" and "Huoneistotiedot".
+  Wait Until  Element text should be  xpath=//table[@id='applications-list']//tr[@data-test-address='${appname}']//div[@class='unseen-indicators']  3
 
 Sonja adds four statement persons to application
   Open application  ${appname}  753-416-25-22
@@ -59,9 +60,11 @@ Sonja adds four statement persons to application
 
 Sonja can delete statement
   Open statement  3
+  Wait Until  Title Should Be  ${appname} - Lupapiste
   Wait and click  xpath=//*[@data-test-id='delete-statement']
   Confirm  dynamic-yes-no-confirm-dialog
   Wait until  Statement count is  3
+  Wait Until  Title Should Be  ${appname} - Lupapiste
 
 Sonja can't give statement to Ronjas statement
   Open statement  0
@@ -113,7 +116,7 @@ Veikko from Tampere can give verdict to own statement
 
 Sonja can see statement indicator
   Sonja logs in
-  Wait Until  Element text should be  xpath=//table[@id='applications-list']//tr[@data-test-address='${appname}']//div[@class='unseen-indicators']  3
+  Wait Until  Element text should be  xpath=//table[@id='applications-list']//tr[@data-test-address='${appname}']//div[@class='unseen-indicators']  4
 
 # add attachment
 

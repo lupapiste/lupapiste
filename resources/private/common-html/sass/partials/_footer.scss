@@ -1,64 +1,48 @@
 footer {
-  margin-top: $marginL *2;
-  padding-top: $marginL *3;
+  margin-top: $marginL*3;
+  padding-top: $marginL;
+  position: absolute;
   clear:both;
-  position: relative;
-  color:#777;
-  font-size:1em;
-  padding:$baseline;
-  background-image: url('/img/lp-footer.png');
-  background-repeat:repeat-x;
-  background-position:right top;
-  background-color: rgb(231,233,230);
+  color: white;
+  background-color: $lp-dark-grey;
   height: auto;
+  bottom: 0;
+  width: 100%;
+  
   .informations {
-    position: relative;
-    width: 80%;
+    padding: $marginM;
+    width: 100%;
     max-width: $application-max-width;
-    margin: 48px auto $marginM;
-    div {
-      width: 33%;
+    margin: 0 auto $marginM;
+    .footer-box {
+      font-size: 16px;
+      vertical-align: top;
+      width: 24.5%;
       display: inline-block;
-      div, a {
-        display: block;
+      padding-right: $marginL;
+      box-sizing: border-box;
+      h3 {
+        font-size: 18px;
+        font-weight: bold;
       }
-    }
-    .user-information, sade-information {
-      margin-top: 128px;
-    }
-    .sade-information {
-      a, span {
-        display: inline;
-        width: auto;
+      a {
+       color: $lp-orange;
+       display: block;
       }
-    }
-    .contact-information {
-      width: 33%;
-      div {
-        display: inline-block;
-        width: 42%;
-        div, a {
-          width: 80%;
+      &.sade-box {
+        a {
+          display: inline;
         }
       }
+
     }
   }
-  a {
-   color:#222;
-  }
-  p {
-    margin:0;
-  }
-  form label {
-    display:  inline-block;
-    padding: 6px;
-    font-size: 16px;
-    line-height: $baseline;
-    width: auto;
-  }
-  #buildinfo {
-    position: absolute;
-    right: $marginS;
-    bottom: $marginS;
-  }
 }
+  
+#buildinfo {
+  display: block;
+  background-color: black;
+  padding: $marginM;
+  color: $grey-text;
+}
+

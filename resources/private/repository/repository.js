@@ -1,6 +1,8 @@
 var repository = (function() {
   "use strict";
 
+  var currentlyLoadingId = null;
+
   var loadingSchemas = ajax
     .query("schemas")
     .error(function(e) { error("can't load schemas", e); })
@@ -48,7 +50,7 @@ var repository = (function() {
     }
   }
 
-  function load(id, pending, callback) {
+  function doLoad(id, pending, callback) {
     var loadingApp = ajax
       .query("application", {id: id})
       .pending(pending)
@@ -80,33 +82,49 @@ var repository = (function() {
       }
 
       if (application) {
-        _.each(application.documents || [], function(doc) {
-          setOperation(application, doc);
-          setSchema(doc);
-        });
-        _.each(application.tasks || [], setSchema);
-        _.each(application.comments || [], function(comment) {
-          if (comment.target && comment.target.type === "attachment" && comment.target.id) {
-            var targetAttachment = _.find(application.attachments || [], function(attachment) {
-              return attachment.id === comment.target.id;
-            });
-            if (targetAttachment) {
-              comment.target.attachmentType = loc(["attachmentType", targetAttachment.type["type-group"], targetAttachment.type["type-id"]]);
-              comment.target.attachmentId = targetAttachment.id;
+        if (application.id === currentlyLoadingId) {
+          currentlyLoadingId = null;
+
+          _.each(application.documents || [], function(doc) {
+            setOperation(application, doc);
+            setSchema(doc);
+          });
+          _.each(application.tasks || [], setSchema);
+          _.each(application.comments || [], function(comment) {
+            if (comment.target && comment.target.type === "attachment" && comment.target.id) {
+              var targetAttachment = _.find(application.attachments || [], function(attachment) {
+                return attachment.id === comment.target.id;
+              });
+              if (targetAttachment) {
+                comment.target.attachmentType = loc(["attachmentType", targetAttachment.type["type-group"], targetAttachment.type["type-id"]]);
+                comment.target.attachmentId = targetAttachment.id;
+              }
             }
+          });
+          _.each(application.attachments ||[], function(att) {
+            calculateAttachmentStateIndicators(att);
+            setAttachmentOperation(application.operations, att);
+          });
+          hub.send("application-loaded", {applicationDetails: loading});
+          if (_.isFunction(callback)) {
+            callback(application);
           }
-        });
-        _.each(application.attachments ||[], function(att) {
-          calculateAttachmentStateIndicators(att);
-          setAttachmentOperation(application.operations, att);
-        });
-        hub.send("application-loaded", {applicationDetails: loading});
-        if (_.isFunction(callback)) {
-          callback(application);
+        } else {
+          error("Concurrent loading issue, old id = " + currentlyLoadingId);
         }
       }
     });
   }
+
+  // debounce repository load
+  var load = _.debounce(
+    function(id, pending, callback) {
+      if (currentlyLoadingId) {
+        error("Concurrent application loading detected: old=" + currentlyLoadingId  + ", new=" + id);
+      }
+      currentlyLoadingId = id;
+      doLoad(id, pending, callback);
+    }, 250);
 
   function loaded(pages, f) {
     if (!_.isFunction(f)) {
