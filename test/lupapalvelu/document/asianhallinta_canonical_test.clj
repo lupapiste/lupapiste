@@ -10,6 +10,7 @@
 (fl/facts* "UusiAsia canonical"
   (let [canonical (ah/application-to-asianhallinta-canonical poikkeus-test/poikkari-hakemus "fi") => truthy]
     (facts "From poikkeus-test/poikkari-hakemus"
+      (fact "UusiAsia not empty" (:UusiAsia canonical) => seq)
       (fact "UusiAsia" (keys (get-in canonical [:UusiAsia])) => (contains [:Tyyppi
                                                                            :Kuvaus
                                                                            :Kuntanumero
