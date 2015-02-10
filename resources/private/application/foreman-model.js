@@ -112,15 +112,15 @@ LUPAPISTE.ForemanModel = function() {
   self.submit = function() {
     self.error(undefined);
 
-    function inviteToApplication(id, cb) {
+    function inviteToApplication(id, email, role, cb) {
       ajax.command("invite-with-role", { id: id,
                                documentName: "",
                                documentId: "",
                                path: "",
-                               email: self.email(),
+                               email: email,
                                title: "",
                                text: "",
-                               role: "foreman" })
+                               role: role })
         .processing(self.processing)
         .pending(self.pending)
         .success(function(data) {
@@ -133,6 +133,24 @@ LUPAPISTE.ForemanModel = function() {
         .call();
     }
 
+    function inviteHakijat(id) {
+      var hakijaDocs = _.where(self.application().documents, {"schema-info": {"name": "hakija"}});
+      var hakijat = _.map(hakijaDocs, function(doc) {
+        return util.getIn(doc, ["data", "henkilo", "userId", "value"]);
+      });
+      var invitees = _.filter(self.application().auth, function(a) {
+        return _.contains(hakijat, a.id);
+      });
+      var deferreds = [];
+      _.forEach(invitees, function(invitee) {
+        deferreds.push(inviteToApplication(id, invitee.username, "writer", function(){}));
+      });
+      $.when.apply($, deferreds)
+      .then(function() {
+        self.finished(id);
+      });
+    }
+
     function createApplication() {
       // 2. create "tyonjohtajan ilmoitus" application
       ajax.command("create-foreman-application", { "id": self.application().id,
@@ -143,11 +161,11 @@ LUPAPISTE.ForemanModel = function() {
         .success(function(data) {
           // 3. invite foreman to new application
           if (self.email()) {
-            inviteToApplication(data.id, function() {
-              self.finished(data.id);
+            inviteToApplication(data.id, self.email(), "foreman", function() {
+              inviteHakijat(data.id);
             });
           } else {
-            self.finished(data.id);
+            inviteHakijat(data.id);
           }
         })
         .error(function(err) {
@@ -158,7 +176,7 @@ LUPAPISTE.ForemanModel = function() {
 
     // 1. invite foreman to current application
     if (self.email()) {
-      inviteToApplication(self.application().id, createApplication);
+      inviteToApplication(self.application().id, self.email(), "foreman", createApplication);
     } else {
       createApplication();
     }
