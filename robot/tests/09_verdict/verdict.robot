@@ -38,7 +38,7 @@ Sonja creates verdict with adds comment
   Comment verdict  Myönnetään...
 
 Return to application and come back
-  Wait and click  xpath=//a[@data-test-id='return-from-verdict']
+  Click by test id  return-from-verdict
   Click enabled by test id  edit-verdict
 
 Add katselmus
@@ -46,7 +46,7 @@ Add katselmus
   Task count is  task-katselmus  3
   Click enabled by test id  verdict-new-task
   Wait until  Element should be visible  dialog-create-task
-  Select From List By Value  choose-task-type   task-katselmus
+  Wait until  Select From List By Value  choose-task-type   task-katselmus
   Input text  create-task-name  uus lupaehto
   Click enabled by test id  create-task-save
   Wait until  Element should not be visible  dialog-create-task

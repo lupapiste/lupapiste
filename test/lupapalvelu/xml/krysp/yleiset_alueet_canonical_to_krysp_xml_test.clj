@@ -8,7 +8,7 @@
             [lupapalvelu.xml.emit :refer :all]
             [lupapalvelu.xml.krysp.yleiset-alueet-mapping :refer [get-yleiset-alueet-krysp-mapping yleisetalueet-element-to-xml]]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :refer :all :as mapping-to-krysp]
-            [lupapalvelu.xml.krysp.validator :refer :all :as validator]
+            [lupapalvelu.xml.validator :refer :all :as validator]
             [lupapalvelu.xml.krysp.canonical-to-krysp-xml-test-common :refer :all :as xml-test-common]
             [lupapalvelu.xml.krysp.mapping-common :refer :all :as mapping-common]
             [lupapalvelu.document.canonical-common :refer [ya-operation-type-to-schema-name-key]]

@@ -95,12 +95,41 @@ input[readonly], textarea[readonly] {
   display: none;
   top: 20px;
   right: 8px;
-  padding: $marginS $marginS $marginS $marginL;
-  @include spite-bg;
+  padding: $marginS; 
   background-color: white;
   border: 1px solid $lp-light-grey;
-  border-radius: 4px;
   box-shadow: 1px 1px 2px $lp-dark-grey;
+
+  .icon {
+    @include spite-bg;
+    display: none;
+    height: 24px;
+    width: 24px;
+    vertical-align: top;
+  }
+  .text {
+    display: inline-block;
+    vertical-align: top;
+  }
+  &.form-input-saved {
+    .icon {
+      background-position: 6px -2496px;
+      display: inline-block;
+    }
+    
+  }
+  &.form-input-warn {
+    .icon {
+      background-position: 6px -3190px;
+      display: inline-block;
+    }
+  }
+  &.form-input-err {
+    .icon {
+      background-position: 6px -2390px;
+      display: inline-block;
+    }
+  }
 }
 
 .save-indicator {
@@ -130,20 +159,6 @@ input[readonly], textarea[readonly] {
     }
   }
 }
-
-.form-input-saved {
-  background-position: 6px -2490px;
-}
-.form-input-warn
-{
-  background-position: 6px -3190px;
-}
-.form-input-err
-{
-  background-position: 6px -2390px;
-}
-
-
 
 .form-entry {
   display: inline-block;
@@ -495,10 +510,20 @@ input[readonly], textarea[readonly] {
     height: 28px;
     width: 28px;
     padding: 0;
-  }
 
-  .form-table .form-input-saved {
-    background-position: 4px -2494px;
+    .icon {
+      position: absolute;
+      top: 0px;
+      left: 0px;
+      padding: 0;
+      margin: 0;
+    }
+
+    .form-input-saved {
+      .icon {
+        background-position: 4px -2494px;
+      }
+    }
   }
 
   .form-table .form-entry {
