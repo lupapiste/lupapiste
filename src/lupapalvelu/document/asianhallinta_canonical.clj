@@ -55,14 +55,14 @@
                      {:Henkilo (ua-get-henkilo hakija-data)})))
                documents)}))
 
-(defn- ua-get-maksaja [document]
-  (let [sel (get-in document [:_selected])
+(defn- ua-get-maksaja [{data :data}]
+  (let [sel (:_selected data)
         maksaja-map (util/strip-nils
-                      {:Laskuviite (get-in document [:laskuviite])
+                      {:Laskuviite (:laskuviite data)
                        :Verkkolaskutustieto (when (= "yritys" sel)
-                                              {:OVT-tunnus (get-in document [:yritys :verkkolaskutustieto :ovtTunnus])
-                                               :Verkkolaskutunnus (get-in document [:yritys :verkkolaskutustieto :verkkolaskuTunnus])
-                                               :Operaattoritunnus (get-in document [:yritys :verkkolaskutustieto :valittajaTunnus])})})]
+                                              {:OVT-tunnus (get-in data [:yritys :verkkolaskutustieto :ovtTunnus])
+                                               :Verkkolaskutunnus (get-in data [:yritys :verkkolaskutustieto :verkkolaskuTunnus])
+                                               :Operaattoritunnus (get-in data [:yritys :verkkolaskutustieto :valittajaTunnus])})})]
 
     (condp = sel
        "yritys" (assoc-in maksaja-map [:Yritys] (ua-get-yritys document))
