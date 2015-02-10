@@ -123,6 +123,9 @@
 (def supported-versions-by-permit-type
   (reduce (fn [m [permit-type validators]] (assoc m permit-type (keys validators))) {} schema-validators))
 
+(def supported-krysp-versions-by-permit-type
+  (reduce (fn [m [k versions]] (assoc m k (filter #(Character/isDigit (.charAt % 0)) versions))) {} supported-versions-by-permit-type))
+
 (defn validate
   "Throws an exception if the markup is invalid"
   [xml permit-type schema-version]
