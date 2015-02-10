@@ -105,22 +105,35 @@
   width: 112px;
   min-height: 18px;
   display: none;
-  padding: 0 0 0 $marginL;
+  padding: 0 $marginL 0 0;
   margin-left: $marginM;
+
+  .icon {
+    display: none;
+    @include spite-bg;
+  }
+  &.accordion-input-saved {
+    .icon {
+      display: inline-block;
+      background-position: 4px -2499px;
+      border-right: none;
+    }
+  }
+  &.accordion-input-warn {
+    .icon {
+      display: inline-block;
+      background-position: 4px -3199px;
+      border-right: none;
+    }
+  }
+  &.accordion-input-err {
+    .icon {
+      display: inline-block;
+      background-position: 4px -2399px;
+      border-right: none;
+    }
+  }
 }
 
-.accordion-input-saved {
-  @include spite-bg;
-  background-position: 4px -2499px;
-}
-.accordion-input-warn
-{
-  @include spite-bg;
-  background-position: 4px -3199px;
-}
-.accordion-input-err
-{
-  @include spite-bg;
-  background-position: 4px -2399px;
-}
+
 

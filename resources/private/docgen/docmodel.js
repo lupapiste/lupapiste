@@ -1383,7 +1383,13 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var parent$ = $(eventTarget.parentNode);
     parent$.find("." + className).remove();
     var indicator = document.createElement("span");
+    var icon = document.createElement("span");
+    var text = document.createElement("span");
+    text.className = "text";
+    icon.className = "icon";
     indicator.className = className;
+    indicator.appendChild(text);
+    indicator.appendChild(icon);
     parent$.append(indicator);
     return indicator;
   }
@@ -1396,7 +1402,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       // disable indicator text for table element
       i$.addClass(className).fadeIn(200);
     } else {
-      i$.addClass(className).text(loc(locKey)).fadeIn(200);
+      i$.children(".text").text(loc(locKey));
+      i$.addClass(className).fadeIn(200);
     }
 
     setTimeout(function () {
