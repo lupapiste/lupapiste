@@ -20,4 +20,6 @@
     (fact "Validator for Asianhallinta exists"
       ((keyword permit-type) validator/supported-versions-by-permit-type) => (contains schema-version))
     (fact "Validate UusiAsia XML"
-      (validator/validate xml-s (:permitType poikkeus-test/poikkari-hakemus) schema-version) => nil)))
+      (validator/validate xml-s (:permitType poikkeus-test/poikkari-hakemus) schema-version) => nil)
+    ; TODO check xml elements, ie deep elements, document values with _selected are correct in xml etc..
+    ))
