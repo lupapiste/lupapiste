@@ -50,9 +50,9 @@
                (fn [doc]
                  (let [hakija-data (:data doc)
                        sel (:_selected hakija-data)]
-                   (condp = sel
-                     "henkilo" {:Henkilo (ua-get-henkilo hakija-data)}
-                     "yritys" {:Yritys (ua-get-yritys hakija-data)})))
+                   (if (= sel "yritys")
+                     {:Yritys (ua-get-yritys hakija-data)}
+                     {:Henkilo (ua-get-henkilo hakija-data)})))
                documents)}))
 
 (defn- ua-get-maksaja [document]
