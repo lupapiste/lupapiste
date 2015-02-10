@@ -55,6 +55,7 @@ var repository = (function() {
       .query("application", {id: id})
       .pending(pending)
       .error(function(e) {
+        currentlyLoadingId = null;
         error("Application " + id + " not found", e);
         LUPAPISTE.ModalDialog.open("#dialog-application-load-error");
       })

@@ -8,7 +8,7 @@
             [sade.core :refer :all]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.xml.krysp.validator :as validator]
+            [lupapalvelu.xml.validator :as validator]
             [lupapalvelu.pdf-export :as pdf-export]))
 
 (def- rp-yht {"2.1.2" "2.1.0"

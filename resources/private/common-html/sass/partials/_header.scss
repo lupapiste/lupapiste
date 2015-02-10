@@ -7,12 +7,13 @@ nav {
   height: 60px;
   box-sizing: border-box;
   width: 100%;
-  &.nav-wrapper {
+  background: $lp-dark-grey;
+  .nav-wrapper {
     width: 100%;
     max-width: $application-max-width;
     margin: 0 auto;
     position: relative;
-    background: $lp-dark-grey;
+    box-sizing: border-box;
     .brand {
       position: relative;
       width: 300px;

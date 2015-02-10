@@ -1,6 +1,6 @@
 (function(i,s,o,g,r,a,m) {
   "use strict";
-  if (LUPAPISTE.config.analytics.id) {
+  if (LUPAPISTE.config.analytics && LUPAPISTE.config.analytics.id) {
     i.GoogleAnalyticsObject=r;
     i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments);};
     i[r].l=1*new Date();

@@ -290,7 +290,11 @@ var attachment = (function() {
   }
 
   function showAttachment() {
-    if (!applicationId || !attachmentId) { return; }
+    if (!applicationId || !attachmentId ||
+        applicationId !== pageutil.subPage() ||
+        attachmentId !== pageutil.lastSubPage()) {
+      return;
+    }
 
     var application = applicationModel._js;
 
@@ -355,12 +359,12 @@ var attachment = (function() {
     subscribe();
   }
 
-  hub.onPageLoad("attachment", function(e) {
+  hub.onPageLoad("attachment", function() {
     pageutil.showAjaxWait();
     model.init(false);
     model.showHelp(false);
-    applicationId = e.pagePath[0];
-    attachmentId = e.pagePath[1];
+    applicationId = pageutil.subPage();
+    attachmentId = pageutil.lastSubPage();
 
     if (applicationModel._js.id !== applicationId) {
       repository.load(applicationId);

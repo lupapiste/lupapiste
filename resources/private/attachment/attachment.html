@@ -7,6 +7,18 @@
       <div class="attachment-info">
         <div class="container">
 
+          <div class="attachment-back">
+            <a class="btn left-align btn-nav-back"
+               data-bind="click: function() { window.location.hash = '!/application/' + application.id() + '/attachments'; repository.load(application.id()); }"
+               data-test-id="back-to-application-from-attachment">
+              <span data-bind =" ltext: 'application.return'"></span>
+              <span class="icon drill-left-black-bigger left-align"></span>
+            </a>
+            <div data-bind="with: $root.approve">
+              <button id="test-attachment-approve" data-bind="ltext: 'document.approve', click: approveAttachment, enable: isApprovable() && isNotOk(), visible: isApprovable()" class="btn btn-primary">Hyv&auml;ksy</button>
+              <button id="test-attachment-reject" data-bind="ltext: 'attachment.reject', click: rejectAttachment, enable: isRejectable() && doesNotRequireUserAction(), visible: isRejectable()" class="btn btn-decline">Tarkennettavaa</button>
+            </div>
+          </div>
           <div class="attachment-info-header">
             <h1>
               <span data-bind="text: application.title"></span>: <span data-bind="ltext: name"></span>
@@ -22,27 +34,15 @@
             <p data-bind="lhtml: 'attachment.view.desc'"></p>
           </div>
 
-          <div class="clear">
-            <a class="btn left-align btn-nav-back"
-               data-bind="click: function() { window.location.hash = '!/application/' + application.id() + '/attachments'; repository.load(application.id()); }"
-               data-test-id="back-to-application-from-attachment">
-              <span data-bind =" ltext: 'application.return'"></span>
-              <span class="icon drill-left-black-bigger left-align"></span>
-            </a>
-          </div>
+
 
           <div class="attachment-actions">
-            <div data-bind="with: $root.approve">
-              <button id="test-attachment-approve" data-bind="ltext: 'document.approve', click: approveAttachment, enable: isApprovable() && isNotOk(), visible: isApprovable()" class="btn btn-primary">Hyv&auml;ksy</button>
-              <button id="test-attachment-reject" data-bind="ltext: 'attachment.reject', click: rejectAttachment, enable: isRejectable() && doesNotRequireUserAction(), visible: isRejectable()" class="btn btn-decline">Tarkennettavaa</button>
-            </div>
+
             <button data-test-id="change-attachment-type"
                     data-bind="ltext: 'attachment.changeType', click: showChangeTypeDialog, visible: $root.authorization.ok('set-attachment-type') && editable && authorized"></button>
             <button data-test-id="delete-attachment"
                     data-bind="ltext: 'attachment.delete', click: deleteAttachment, visible: $root.authorization.ok('delete-attachment') && editable && authorized">Poista liite</button>
           </div>
-
-          <div class="clear"></div>
 
           <div class="col1">
             <div class="attachment-file-versions">

@@ -125,7 +125,7 @@
             </tbody>
           </table>
           <div data-bind="visible: isAdmin">
-            <button data-bind="click: openNewUser, ltext: 'register.company.add-user.open'" class="btn btn-primary"></button>
+            <button data-bind="click: openNewUser, ltext: 'register.company.add-user.open'" class="btn btn-primary" data-test-id="company-add-user"></button>
           </div>
         </div>
 
@@ -171,10 +171,10 @@
 
          <form>
           <label data-bind="ltext: 'company.user.email'" class="form-label tip"></label>
-          <input data-bind="textInput: email, enable: emailEnabled" class="form-input" type="text" placeholder="etunimi.sukunimi@osoite.fi"/>
+          <input data-bind="textInput: email, enable: emailEnabled" class="form-input" type="text" data-test-id="company-new-user-email"/>
 
           <div data-bind="visible: showSearchEmail">
-            <button data-bind="enable: canSearchUser, click: searchUser" type="submit" class="btn btn-dialog btn-primary">
+            <button data-bind="enable: canSearchUser, click: searchUser" type="submit" class="btn btn-dialog btn-primary" data-test-id="company-search-email">
               <span data-bind="ltext: 'register.company.add-user.searchUser'"></span>
               <em data-bind="visible: pending" class="button-loader" style="position: relative;"></em>
             </button>
@@ -194,13 +194,13 @@
           <button data-bind="ltext: 'ok'" class="btn btn-dialog close"></button>
         </div>
 
-        <form data-bind="visible: showUserDetails">
+        <form data-bind="visible: showUserDetails" id="companyUserDetails">
 
           <label data-bind="ltext: 'company.user.firstName'" class="form-label tip"></label>
-          <input data-bind="textInput: firstName" class="form-input" type="text" placeholder="Etunimi"/>
+          <input data-bind="textInput: firstName" class="form-input" type="text" data-test-id="company-new-user-firstname"/>
 
           <label data-bind="ltext: 'company.user.lastName'" class="form-label tip"></label>
-          <input data-bind="textInput: lastName" class="form-input" type="text" placeholder="Sukunimi"/>
+          <input data-bind="textInput: lastName" class="form-input" type="text" data-test-id="company-new-user-lastname"/>
 
           <input data-bind="checked: admin" class="form-input" type="checkbox" id="register.company.add-user.admin"></input>
           <label data-bind="ltext: 'register.company.add-user.admin'" class="form-label" for="register.company.add-user.admin"></label>
@@ -213,13 +213,13 @@
           </div>
 
           <div data-bind="visible: done">
-            <h3 data-bind="ltext: 'register.company.add-user.done.header'"></h3>
+            <h3 data-bind="ltext: 'register.company.add-user.done.header'" id="testCompanyAddUserDone"></h3>
             <p data-bind="ltext: 'register.company.add-user.done.message'"></p>
             <p data-bind="ltext: 'register.company.add-user.done.canClose'"></p>
           </div>
 
           <div>
-            <button data-bind="enable: canSubmit, click: submit, ltext: 'register.company.add-user.submit'" type="submit" class="btn btn-dialog btn-primary"></button>
+            <button data-bind="enable: canSubmit, click: submit, ltext: 'register.company.add-user.submit'" type="submit" class="btn btn-dialog btn-primary" data-test-id="company-user-submit"></button>
             <button data-bind="enable: canClose, ltext: 'close'" class="btn btn-dialog close"></button>
           </div>
         </form>
