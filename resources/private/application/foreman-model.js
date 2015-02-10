@@ -113,15 +113,19 @@ LUPAPISTE.ForemanModel = function() {
     self.error(undefined);
 
     function inviteToApplication(params, cb) {
-      // TODO merge default params
-      ajax.command("invite-with-role", { id: params.id,
-                               documentName: params.documentName,
-                               documentId: params.documentId,
-                               path: params.path,
-                               email: params.email,
-                               title: "",
-                               text: "",
-                               role: params.role })
+      var defaults = {
+        id: "",
+        documentName: "",
+        documentId: "",
+        path: "",
+        email: "",
+        title: "",
+        text: "",
+        role: ""
+      };
+      params = _.merge(defaults, params);
+
+      ajax.command("invite-with-role", params)
         .processing(self.processing)
         .pending(self.pending)
         .success(function(data) {
@@ -136,11 +140,8 @@ LUPAPISTE.ForemanModel = function() {
     }
 
     function inviteHakijat(id) {
-      ajax.query("application", {id: id})
-      .success(function(response) {
-        // TODO refactor to separate function
+      function doInvite(response) {
         if (response.ok) {
-          console.log("app", response.application);
           var hakijaDocs = _.where(response.application.documents, {"schema-info": {"name": "hakija"}});
           var hakijat = _.map(hakijaDocs, function(doc) {
             var userId = util.getIn(doc, ["data", "henkilo", "userId", "value"]);
@@ -164,7 +165,8 @@ LUPAPISTE.ForemanModel = function() {
                 documentName: hakija.docName,
                 path: hakija.path,
                 email: hakija.email,
-                role: "writer"}, function(){}));
+                role: "writer"
+              }, function(){}));
             }
           });
           $.when.apply($, deferreds)
@@ -172,7 +174,10 @@ LUPAPISTE.ForemanModel = function() {
             self.finished(id);
           });
         }
-      })
+      }
+
+      ajax.query("application", {id: id})
+      .success(doInvite)
       .error(function(err) {
         error("Unable to load foreman application:", id, err);
       })
@@ -191,9 +196,6 @@ LUPAPISTE.ForemanModel = function() {
           if (self.email()) {
             inviteToApplication({
                 id: data.id,
-                documentId: "",
-                documentName: "",
-                path: "",
                 email: self.email(),
                 role: "foreman"
               }, function() {
@@ -213,9 +215,6 @@ LUPAPISTE.ForemanModel = function() {
     if (self.email()) {
       inviteToApplication({
                 id: self.application().id,
-                documentId: "",
-                documentName: "",
-                path: "",
                 email: self.email(),
                 role: "foreman"
               }, createApplication);
