@@ -6,7 +6,7 @@
             [lupapalvelu.document.poikkeamis-canonical-test :refer [poikkari-hakemus]]
             [lupapalvelu.xml.emit :refer [element-to-xml]]
             [lupapalvelu.xml.krysp.poikkeamis-mapping :as mapping]
-            [lupapalvelu.xml.krysp.validator :as  validator]
+            [lupapalvelu.xml.validator :as  validator]
             [clojure.data.xml :refer :all]
             [sade.xml :as xml]
             [sade.common-reader :as cr]))
