@@ -225,7 +225,7 @@
 (comment
 
   (defn- paint-component [g w h]
-    (let [i (make-stamp "hyv\u00E4ksytty" (System/currentTimeMillis) "SIPOO" 128 "" "Rakennustunnus" "Kuntalupatunnus" "Pykala")
+    (let [i (make-stamp "hyv\u00E4ksytty" (System/currentTimeMillis) 128 ["SIPOO" "" "Rakennustunnus" "Kuntalupatunnus" "Pykala"])
           iw (.getWidth i)
           ih (.getHeight i)]
       (.setColor g Color/GRAY)
@@ -258,11 +258,11 @@
 
   ; Run this in REPL and check that every new file has been stamped
   (let [d "problematic-pdfs"
-        my-stamp (make-stamp "OK" 0 "Solita Oy" 0)]
-    (doseq [f (remove #(.endsWith % "-leima.pdf") (fs/list-dir d))]
+        my-stamp (make-stamp "OK" 0 0 ["Solita Oy"])]
+    (doseq [f (remove #(.endsWith (.getName %) "-leima.pdf") (fs/list-dir d))]
       (println f)
-      (with-open [my-in  (io/input-stream (str d "/" f))
-                  my-out (io/output-stream (str d "/" f "-leima.pdf"))]
+      (with-open [my-in  (io/input-stream (str f))
+                  my-out (io/output-stream (str f "-leima.pdf"))]
         (try
           (stamp-pdf my-stamp my-in my-out 10 100 0)
           (catch Throwable t (error t))))))

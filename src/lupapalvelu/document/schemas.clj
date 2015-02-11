@@ -403,7 +403,7 @@
                (henkilo-yritys-select-group :yritys-body yritys-with-verkkolaskutustieto)
                {:name "laskuviite" :type :string :max-len 30 :layout :full-width}))
 
-(def muutostapa {:name "muutostapa" :type :select :sortBy :displayname :required true :label false :i18nkey "huoneistot.muutostapa" :emit [:muutostapaChanged]
+(def muutostapa {:name "muutostapa" :type :select :sortBy :displayname :label false :i18nkey "huoneistot.muutostapa" :emit [:muutostapaChanged]
                  :body [{:name "poisto"}
                         {:name "lis\u00e4ys" :i18nkey "huoneistot.muutostapa.lisays"}
                         {:name "muutos"}]})

@@ -1175,7 +1175,7 @@
 
 (defcommand convert-to-application
   {:parameters [id]
-   :roles      [:applicant]
+   :roles      [:applicant :authority]
    :states     action/all-inforequest-states
    :pre-checks [validate-new-applications-enabled]}
   [{:keys [user created application] :as command}]
@@ -1190,7 +1190,7 @@
              :documents (make-documents user created op application)
              :modified created}
        $push {:attachments {$each (make-attachments created op organization (:state application))}}})
-    (try (autofill-rakennuspaikka application (now))
+    (try (autofill-rakennuspaikka application created)
       (catch Exception e (error e "KTJ data was not updated")))))
 
 ;;
