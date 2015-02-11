@@ -1175,7 +1175,7 @@
 
 (defcommand convert-to-application
   {:parameters [id]
-   :roles      [:applicant]
+   :roles      [:applicant :authority]
    :states     action/all-inforequest-states
    :pre-checks [validate-new-applications-enabled]}
   [{:keys [user created application] :as command}]
