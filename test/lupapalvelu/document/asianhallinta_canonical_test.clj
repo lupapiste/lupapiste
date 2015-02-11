@@ -42,5 +42,7 @@
         (get-in canonical [:UusiAsia :VireilletuloPvm]) => #"\d{4}-\d{2}-\d{2}")
       (fact "Liitteet TODO" )
       (fact "Toimenpiteet"
-        (first (get-in canonical [:UusiAsia :Toimenpiteet :Toimenpide])) => string?))))
+        (first (get-in canonical [:UusiAsia :Toimenpiteet :Toimenpide])) => string?)
+      (fact "Asiointikieli"
+        (get-in canonical [:UusiAsia :Asiointikieli]) => "fi"))))
 
