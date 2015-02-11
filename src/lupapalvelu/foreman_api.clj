@@ -10,7 +10,7 @@
             [sade.util :as util]
             [monger.operators :refer :all]))
 
-(defn cleanupHakijaDoc [doc]
+(defn cleanup-hakija-doc [doc]
   (-> doc
       (assoc :id (mongo/create-id))
       (assoc-in [:data :henkilo :userId] {:value nil})))
@@ -44,7 +44,7 @@
                                tyonjohtaja-doc)
 
         hakija-docs          (domain/get-documents-by-name application "hakija")
-        hakija-docs          (map cleanupHakijaDoc hakija-docs)
+        hakija-docs          (map cleanup-hakija-doc hakija-docs)
 
         new-application-docs (->> (:documents foreman-app)
                                   (remove #(#{"hankkeen-kuvaus-minimum" "hakija" "tyonjohtaja-v2"} (-> % :schema-info :name)))
