@@ -38,8 +38,9 @@
                                (assoc-in tyonjohtaja-doc [:data :kuntaRoolikoodi :value] foremanRole)
                                tyonjohtaja-doc)
 
-        hakija-docs           (domain/get-documents-by-name application "hakija")
-
+        hakija-docs          (domain/get-documents-by-name application "hakija")
+        hakija-docs          (map #(assoc % :id (mongo/create-id)) hakija-docs)
+        
         new-application-docs (->> (:documents foreman-app)
                                   (remove #(#{"hankkeen-kuvaus-minimum" "hakija" "tyonjohtaja-v2"} (-> % :schema-info :name)))
                                   (concat (remove nil? [hakija-docs hankkeen-kuvaus-doc tyonjohtaja-doc]))
