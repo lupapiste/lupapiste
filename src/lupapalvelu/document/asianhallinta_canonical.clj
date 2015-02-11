@@ -87,9 +87,14 @@
   (when (seq attachments)
     {:Liite (map ua-get-liite attachments)}))
 
+(defn- ua-get-toimenpide [operation lang]
+  (util/strip-nils
+    {:ToimenpideTunnus (:name operation)
+     :ToimenpideTeksti (i18n/with-lang lang (i18n/loc "operations" (:name operation)))}))
+
 (defn- ua-get-toimenpiteet [{:keys [operations]} lang]
   (when (seq operations)
-    {:Toimenpide (map #(:name %) operations)})) ;TODO tarkemmat tiedot
+    {:Toimenpide (map #(-> % (ua-get-toimenpide lang)) operations)})) ;TODO tarkemmat tiedot
 
 (defn- ua-get-sijaintipiste [{:keys [location]}]
   {:Sijaintipiste (str (:x location) " " (:y location))})
