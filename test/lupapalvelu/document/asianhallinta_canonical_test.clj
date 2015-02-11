@@ -8,19 +8,22 @@
             [lupapalvelu.document.poikkeamis-canonical-test :as poikkeus-test]))
 
 (fl/facts* "UusiAsia canonical"
-  (let [canonical (ah/application-to-asianhallinta-canonical poikkeus-test/poikkari-hakemus "fi") => truthy]
-    (facts "From poikkeus-test/poikkari-hakemus"
+  (let [canonical (ah/application-to-asianhallinta-canonical poikkeus-test/poikkari-hakemus "fi") => truthy
+        application poikkeus-test/poikkari-hakemus]
+    (facts "UusiAsia canonical from poikkeus-test/poikkari-hakemus"
       (fact "UusiAsia not empty" (:UusiAsia canonical) => seq)
-      (fact "UusiAsia" (keys (get-in canonical [:UusiAsia])) => (contains [:Tyyppi
-                                                                           :Kuvaus
-                                                                           :Kuntanumero
-                                                                           :Hakijat
-                                                                           :Maksaja
-                                                                           :HakemusTunnus
-                                                                           :VireilletuloPvm
-                                                                           :Liitteet
-                                                                           :Asiointikieli
-                                                                           :Toimenpiteet] :in-any-order))
+      (fact "UusiAsia keys" (keys (get-in canonical [:UusiAsia])) => (contains [:Tyyppi
+                                                                                :Kuvaus
+                                                                                :Kuntanumero
+                                                                                :Hakijat
+                                                                                :Maksaja
+                                                                                :HakemusTunnus
+                                                                                :VireilletuloPvm
+                                                                                :Liitteet
+                                                                                :Asiointikieli
+                                                                                :Toimenpiteet
+                                                                                :Sijainti
+                                                                                :Kiinteistotunnus] :in-any-order))
       (fact "HakemusTunnus is LP-753-2013-00001" (get-in canonical [:UusiAsia :HakemusTunnus]) => "LP-753-2013-00001")
       (fact "First Hakija of Hakijat has Henkilo" (keys (first (get-in canonical [:UusiAsia :Hakijat :Hakija]))) => (contains [:Henkilo]))
       (facts "Maksaja"
@@ -44,5 +47,9 @@
       (fact "Toimenpiteet"
         (first (get-in canonical [:UusiAsia :Toimenpiteet :Toimenpide])) => string?)
       (fact "Asiointikieli"
-        (get-in canonical [:UusiAsia :Asiointikieli]) => "fi"))))
+        (get-in canonical [:UusiAsia :Asiointikieli]) => "fi")
+      (fact "Sijainti is correct"
+        (get-in canonical [:UusiAsia :Sijainti :Sijaintipiste]) => (str (-> application :location :x) " " (-> application :location :y)))
+      (fact "Kiinteistotunnus is human readable"
+        (get-in canonical [:UusiAsia :Kiinteistotunnus]) => (sade.util/to-human-readable-property-id (:propertyId application))))))
 
