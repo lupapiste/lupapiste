@@ -21,7 +21,7 @@
      :Postitoimipaikka (get-in data [:osoite :postitoimipaikannimi])
      :Maa nil ; TODO
      :Email (get-in data [:yhteystiedot :email])
-     :Puhelin (get-in data [:yhteystiedot :puhelin])}))
+     :Puhelinnumero (get-in data [:yhteystiedot :puhelin])}))
 
 (defn- ua-get-yhteyshenkilo [data]
   (util/strip-nils
