@@ -113,4 +113,6 @@
       (assoc-in [:UusiAsia :VireilletuloPvm] (util/to-xml-date (:submitted application)))
       (assoc-in [:UusiAsia :Liitteet] (ua-get-liitteet application))
       (assoc-in [:UusiAsia :Asiointikieli] lang)
-      (assoc-in [:UusiAsia :Toimenpiteet] (ua-get-toimenpiteet application lang)))))
+      (assoc-in [:UusiAsia :Toimenpiteet] (ua-get-toimenpiteet application lang))
+      (assoc-in [:UusiAsia :Sijainti] (ua-get-sijaintipiste application))
+      (assoc-in [:UusiAsia :Kiinteistotunnus] (util/to-human-readable-property-id (:propertyId application))))))
