@@ -31,11 +31,14 @@
     (.setSystemId ss (str "classpath:" filename))
     ss))
 
-(def- public-schema-sources
+(def- xml-sources
   ["www.w3.org/2001/xml.xsd"
-   "www.w3.org/1999/xlink.xsd"
-   "schemas.opengis.net/gml/3.1.1/smil/smil20.xsd"
-   "schemas.opengis.net/gml/3.1.1/base/gml.xsd"])
+   "www.w3.org/1999/xlink.xsd"])
+
+(def- public-schema-sources
+  (conj xml-sources
+    "schemas.opengis.net/gml/3.1.1/smil/smil20.xsd"
+    "schemas.opengis.net/gml/3.1.1/base/gml.xsd"))
 
 (def- yht-2_1_0
   (conj public-schema-sources
@@ -79,9 +82,7 @@
             "krysp/ilmoitukset-2.2.0.xsd"))
 
 (def- asianhallinta
-  ["www.w3.org/2001/xml.xsd"
-   "www.w3.org/1999/xlink.xsd"
-   "asianhallinta/asianhallinta.xsd"])
+   (conj xml-sources "asianhallinta/asianhallinta.xsd"))
 
 (defn- create-validator [schemas]
   (.newValidator (.newSchema schema-factory (into-array (map stream-source schemas)))))
