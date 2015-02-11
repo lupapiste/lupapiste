@@ -257,7 +257,7 @@
       frame))
 
   ; Run this in REPL and check that every new file has been stamped
-  (let [d "problematic-pdfs/liitteet-1"
+  (let [d "problematic-pdfs"
         my-stamp (make-stamp "OK" 0 0 ["Solita Oy"])]
     (doseq [f (remove #(.endsWith (.getName %) "-leima.pdf") (fs/list-dir d))]
       (println f)
