@@ -3,7 +3,7 @@
             [lupapalvelu.document.maa-aines-canonical :refer [maa-aines-canonical]]
             [lupapalvelu.document.maa-aines-canonical-test :refer [application]]
             [lupapalvelu.xml.krysp.maa-aines-mapping :refer [maa-aines_to_krysp]]
-            [lupapalvelu.xml.krysp.validator :as validator]
+            [lupapalvelu.xml.validator :as validator]
             [lupapalvelu.xml.emit :refer :all]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
