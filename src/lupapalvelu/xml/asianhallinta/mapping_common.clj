@@ -65,3 +65,7 @@
   [{:tag :AsianTunnus}
    {:tag :MuuTunnus :child muu-tunnus-type}])
 
+(def toimenpide-type
+  [{:tag :ToimenpideTunnus}
+   {:tag :ToimenpideTeksti}])
+
