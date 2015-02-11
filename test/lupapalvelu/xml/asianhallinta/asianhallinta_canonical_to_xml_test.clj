@@ -16,7 +16,7 @@
         xml (element-to-xml canonical ua-mapping/uusi-asia) => truthy
         xml-s (xml/indent-str xml) => truthy
         permit-type (:permitType poikkeus-test/poikkari-hakemus)
-        schema-version "ah-1.0"]
+        schema-version "ah-1.1"]
     (fact "Validator for Asianhallinta exists"
       ((keyword permit-type) validator/supported-versions-by-permit-type) => (contains schema-version))
     (fact "Validate UusiAsia XML"
