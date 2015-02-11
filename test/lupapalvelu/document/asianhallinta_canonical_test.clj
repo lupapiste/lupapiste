@@ -12,33 +12,33 @@
         application poikkeus-test/poikkari-hakemus]
     (facts "UusiAsia canonical from poikkeus-test/poikkari-hakemus"
       (fact "UusiAsia not empty" (:UusiAsia canonical) => seq)
-      (fact "UusiAsia keys" (keys (get-in canonical [:UusiAsia])) => (contains [:Tyyppi
-                                                                                :Kuvaus
-                                                                                :Kuntanumero
-                                                                                :Hakijat
-                                                                                :Maksaja
-                                                                                :HakemusTunnus
-                                                                                :VireilletuloPvm
-                                                                                :Liitteet
-                                                                                :Asiointikieli
-                                                                                :Toimenpiteet
-                                                                                :Sijainti
-                                                                                :Kiinteistotunnus] :in-any-order))
+      (fact "UusiAsia keys" (keys (get-in canonical [:UusiAsia])) => (just [:Tyyppi
+                                                                            :Kuvaus
+                                                                            :Kuntanumero
+                                                                            :Hakijat
+                                                                            :Maksaja
+                                                                            :HakemusTunnus
+                                                                            :VireilletuloPvm
+                                                                            :Liitteet
+                                                                            :Asiointikieli
+                                                                            :Toimenpiteet
+                                                                            :Sijainti
+                                                                            :Kiinteistotunnus] :in-any-order))
       (fact "HakemusTunnus is LP-753-2013-00001" (get-in canonical [:UusiAsia :HakemusTunnus]) => "LP-753-2013-00001")
-      (fact "First Hakija of Hakijat has Henkilo" (keys (first (get-in canonical [:UusiAsia :Hakijat :Hakija]))) => (contains [:Henkilo]))
+      (fact "First Hakija of Hakijat has Henkilo" (keys (first (get-in canonical [:UusiAsia :Hakijat :Hakija]))) => (just [:Henkilo]))
       (facts "Maksaja"
         (fact "Maksaja is yritys, and has Laskuviite and Verkkolaskutustieto"
-          (keys (get-in canonical [:UusiAsia :Maksaja])) => (contains [:Yritys :Laskuviite :Verkkolaskutustieto]))
+          (keys (get-in canonical [:UusiAsia :Maksaja])) => (just [:Yritys :Laskuviite :Verkkolaskutustieto]))
         (fact "Maksaja is not Henkilo"
           (keys (get-in canonical [:UusiAsia :Maksaja])) =not=> (contains [:Henkilo]))
         (fact "Yritys keys"
-          (keys (get-in canonical [:UusiAsia :Maksaja :Yritys])) => (contains [:Nimi :Ytunnus :Yhteystiedot :Yhteyshenkilo]))
+          (keys (get-in canonical [:UusiAsia :Maksaja :Yritys])) => (just [:Nimi :Ytunnus :Yhteystiedot :Yhteyshenkilo]))
         (fact "Yhteystiedot keys"
-          (keys (get-in canonical [:UusiAsia :Maksaja :Yritys :Yhteystiedot])) => (contains [:Jakeluosoite :Postinumero :Postitoimipaikka]))
+          (keys (get-in canonical [:UusiAsia :Maksaja :Yritys :Yhteystiedot])) => (just [:Jakeluosoite :Postinumero :Postitoimipaikka]))
         (fact "Yhteyshenkilo keys"
-          (keys (get-in canonical [:UusiAsia :Maksaja :Yritys :Yhteyshenkilo])) => (contains [:Etunimi :Sukunimi :Yhteystiedot]))
+          (keys (get-in canonical [:UusiAsia :Maksaja :Yritys :Yhteyshenkilo])) => (just [:Etunimi :Sukunimi :Yhteystiedot]))
         (fact "Yhteyshenkilo yhteystiedot keys"
-          (keys (get-in canonical [:UusiAsia :Maksaja :Yritys :Yhteyshenkilo :Yhteystiedot])) => (contains [:Email :Puhelin]))
+          (keys (get-in canonical [:UusiAsia :Maksaja :Yritys :Yhteyshenkilo :Yhteystiedot])) => (just [:Email :Puhelin]))
         (fact "Verkkolaskutustieto keys is nil"
           (keys (get-in canonical [:UusiAsia :Maksaja :Verkkolaskutustieto])) => nil))
       (fact "VireilletuloPvm is XML date"
