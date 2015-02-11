@@ -88,6 +88,10 @@
   (when (seq operations)
     {:Toimenpide (map #(:name %) operations)})) ;TODO tarkemmat tiedot
 
+(defn- ua-get-sijaintipiste [{:keys [location]}]
+  {:Sijaintipiste (str (:x location) " " (:y location))})
+
+
 
 ;; TaydennysAsiaan, prefix: ta-
 
