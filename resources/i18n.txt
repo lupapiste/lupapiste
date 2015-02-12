@@ -1,0 +1,1 @@
+huoneistot.groupHelpText: Täytä taulukon huoneistoista kohteena olevien huoneistojen tiedot ja merkitse huoneiston riville viimeiseen kenttään muutos. Lisäohjeita saat viemällä hiiren kyseisen kentän päälle.

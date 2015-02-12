@@ -661,6 +661,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var label = makeLabel(subSchema, "group", myPath, true);
     div.appendChild(label);
 
+    var groupHelpText = makeGroupHelpTextSpan(subSchema);
+    div.appendChild(groupHelpText);
+
     if (subSchema.approvable) {
       label.appendChild(self.makeApprovalButtons(path, myModel));
     }
