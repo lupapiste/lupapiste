@@ -256,6 +256,7 @@
    :data (conj
            common-rakennus
            {:rakennusnro {:value "001"}
+            :buildingId {:value "000"}
             :valtakunnallinenNumero {:value "1234567892"}
             :perusparannuskytkin {:value true}
             :muutostyolaji {:value "muut muutosty\u00f6t"}})})
@@ -269,6 +270,7 @@
    :data (conj
            common-rakennus
            {:rakennusnro {:value "001"}
+            :buildingId {:value "000"}
             :manuaalinen_rakennusnro {:value "002"}
             :laajennuksen-tiedot {:perusparannuskytkin {:value true}
                                   :mitat {:tilavuus {:value "1500"}
@@ -294,6 +296,7 @@
                                 (dissoc :varusteet)
                                 (dissoc :luokitus))
                               {:rakennusnro {:value "001"}
+                               :buildingId {:value "000"}
                                :poistumanAjankohta {:value "17.04.2013"},
                                :poistumanSyy {:value "tuhoutunut"}})})
 
