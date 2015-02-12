@@ -91,6 +91,7 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel) {
   self.attachmentsOperation.subscribe(function(selectedCommandName) {
     if (selectedCommandName) {
       attachmentsOperationsMapping[selectedCommandName].clickCommand();
+      self.attachmentsOperation(undefined);
     }
   });
 
