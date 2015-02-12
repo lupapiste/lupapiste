@@ -19,8 +19,8 @@
                  [crypto-random "1.2.0" :exclusions [commons-codec]]
                  [clj-http "0.7.8" :exclusions [commons-codec]]
                  [camel-snake-kebab "0.1.2"]
-                 [org.bouncycastle/bcpkix-jdk15on "1.51"]
-                 [pandect "0.3.4" :exclusions [org.bouncycastle/bcprov-jdk15on]]
+                 [org.bouncycastle/bcprov-jdk15on "1.46"]
+                 [pandect "0.3.0" :exclusions [org.bouncycastle/bcprov-jdk15on]]
                  [clj-time "0.8.0"]
                  [org.apache.commons/commons-lang3 "3.3.2"] ; Already a dependency but required explicitly
                  [commons-io/commons-io "2.4"]
