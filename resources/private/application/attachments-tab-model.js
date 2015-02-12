@@ -1,36 +1,16 @@
-LUPAPISTE.AttachmentsTabModel = function(appModel) {
+LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel) {
   "use strict";
 
   var self = this;
 
   self.appModel = appModel;
+  self.signingModel = signingModel;
 
   self.preAttachmentsByOperation = ko.observableArray();
   self.postAttachmentsByOperation = ko.observableArray();
-
-  self.unsentAttachmentsNotFound = ko.observable(false);
-  self.sendUnsentAttachmentsButtonDisabled = ko.computed(function() {
-    return self.appModel.pending() || self.appModel.processing() || self.unsentAttachmentsNotFound();
-  });
-
   self.showHelp = ko.observable(false);
-
-  self.attachmentsOperations = ko.observable(["attachmentsAdd",
-                                              "attachmentsCopyOwn",
-                                              "newAttachmentTemplates",
-                                              "stampAttachments",
-                                              "signAttachments",
-                                              "attachmentsMoveToBackingSystem"]);
   self.attachmentsOperation = ko.observable();
-  self.attachmentsOperation.subscribe(function(selectedCommandName) {
-
-    if (selectedCommandName) {
-      console.log("selected command name: ", selectedCommandName);
-
-      // TODO: run selected command
-
-    }
-  });
+  self.attachmentsOperations = ko.observable([]);
 
   function getPreAttachments(source) {
     return _.filter(source, function(attachment) {
@@ -52,6 +32,67 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
              (!a.target || (a.target.type !== "statement" && a.target.type !== "verdict"));
     });
   }
+
+  var attachmentsOperationsMapping = {
+      "attachmentsAdd": {
+        command: "upload-attachment",
+        clickCommand: function() {
+          return self.newAttachment();
+        }
+      },
+      "attachmentsCopyOwn": {
+        command: "copy-user-attachments-to-application",
+        clickCommand: function() {
+          return self.copyOwnAttachments();
+        }
+      },
+      "newAttachmentTemplates": {
+        command: "create-attachments",
+        clickCommand: function() {
+          return self.attachmentTemplatesModel.show();
+        }
+      },
+      "stampAttachments": {
+        command: "stamp-attachments",
+        clickCommand: function() {
+          return self.startStamping();
+        }
+      },
+      "signAttachments": {
+        command: "sign-attachments",
+        clickCommand: function() {
+          return self.signingModel.init(self.appModel)
+        }
+      },
+      "attachmentsMoveToBackingSystem": {
+        command: "move-attachments-to-backing-system",
+        clickCommand: function() {
+          return self.sendUnsentAttachmentsToBackingSystem();
+        },
+        visibleFunc: function (rawAttachments) {
+          return !unsentAttachmentFound(rawAttachments);
+        }
+      }
+  };
+
+  function updatedAttachmentsOperations(rawAttachments) {
+    var commands = [];
+    _.forEach(_.keys(attachmentsOperationsMapping), function(k) {
+      var operationData = attachmentsOperationsMapping[k];
+      var visibleFuncResult = (operationData && operationData.visibleFunc) ? operationData.visibleFunc(rawAttachments) : true;
+      var isOptionVisible = self.authorizationModel ? self.authorizationModel.ok(operationData.command) && visibleFuncResult : false;
+      if (isOptionVisible){
+        commands.push(k);
+      }
+    });
+    return commands;
+  }
+
+  self.attachmentsOperation.subscribe(function(selectedCommandName) {
+    if (selectedCommandName) {
+      attachmentsOperationsMapping[selectedCommandName].clickCommand();
+    }
+  });
 
   self.toggleHelp = function() {
     self.showHelp(!self.showHelp());
@@ -91,8 +132,8 @@ LUPAPISTE.AttachmentsTabModel = function(appModel) {
 
     self.preAttachmentsByOperation(preGrouped);
     self.postAttachmentsByOperation(postGrouped);
-
-    self.unsentAttachmentsNotFound(!unsentAttachmentFound(rawAttachments));
+    self.attachmentsOperation(undefined);
+    self.attachmentsOperations(updatedAttachmentsOperations(rawAttachments));
   };
 
   self.sendUnsentAttachmentsToBackingSystem = function() {
