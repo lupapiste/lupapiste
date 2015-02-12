@@ -68,11 +68,11 @@ Mikko does not see the cancelled inforequest
 Mikko waits until the first inforequest is answered
   Logout
 
-Authority can not convert the inforequest to application
+Authority can convert the inforequest to application
   Sonja logs in
   Open inforequest  ${inforequest-handling}  ${propertyId}
   Wait until  Inforequest state is  Avoin
-  Element should not be visible  //*[@data-test-id='inforequest-convert-to-application']
+  Element should be visible  //*[@data-test-id='inforequest-convert-to-application']
 
 Authority adds a comment marking inforequest answered
   Wait until  Page should contain element  //section[@id='inforequest']//button[@data-test-id='comment-request-mark-answered']

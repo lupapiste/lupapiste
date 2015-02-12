@@ -142,6 +142,7 @@ $spritegrid: 100px;
     background-position: 0px -2900px;
     width: 30px;
     height:32px;
+    overflow: visible;
   }
   &.new {
     background-position: 0px -3000px;
@@ -241,13 +242,13 @@ $spritegrid: 100px;
 
   //states
   &:hover {
-    background-position-x: $spritegrid * -1; 
+    background-position-x: $spritegrid * -1;
   }
   // &:active {
-  //   background-position-x: $spritegrid * -2; 
+  //   background-position-x: $spritegrid * -2;
   // }
   // &:disabled {
-  //   background-position-x: $spritegrid * -3; 
+  //   background-position-x: $spritegrid * -3;
   // }
 }
 
