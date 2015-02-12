@@ -50,6 +50,10 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function() {
     return a;
   }
 
+  function printableAttachment(a) {
+    return a.forPrinting && a.versions && a.versions.length;
+  }
+
   // Open the dialog
 
   self.init = function(bindings) {
@@ -59,7 +63,7 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function() {
     self.errorMessage("");
 
     var attachments = _(self.application.attachments || [])
-                      .filter(function(a) { return a.forPrinting && a.versions && a.versions.length; })
+                      .filter(printableAttachment)
                       .map(enrichAttachment)
                       .value();
     self.attachments(attachments);
