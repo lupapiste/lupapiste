@@ -38,14 +38,15 @@
         (fact "Yhteyshenkilo keys"
           (keys (get-in canonical [:UusiAsia :Maksaja :Yritys :Yhteyshenkilo])) => (just [:Etunimi :Sukunimi :Yhteystiedot]))
         (fact "Yhteyshenkilo yhteystiedot keys"
-          (keys (get-in canonical [:UusiAsia :Maksaja :Yritys :Yhteyshenkilo :Yhteystiedot])) => (just [:Email :Puhelin]))
+          (keys (get-in canonical [:UusiAsia :Maksaja :Yritys :Yhteyshenkilo :Yhteystiedot])) => (just [:Email :Puhelinnumero]))
         (fact "Verkkolaskutustieto keys is nil"
           (keys (get-in canonical [:UusiAsia :Maksaja :Verkkolaskutustieto])) => nil))
       (fact "VireilletuloPvm is XML date"
         (get-in canonical [:UusiAsia :VireilletuloPvm]) => #"\d{4}-\d{2}-\d{2}")
       (fact "Liitteet TODO" )
       (fact "Toimenpiteet"
-        (first (get-in canonical [:UusiAsia :Toimenpiteet :Toimenpide])) => string?)
+        (let [op (first (get-in canonical [:UusiAsia :Toimenpiteet :Toimenpide]))]
+          (keys op) => (just [:ToimenpideTunnus :ToimenpideTeksti])))
       (fact "Asiointikieli"
         (get-in canonical [:UusiAsia :Asiointikieli]) => "fi")
       (fact "Sijainti is correct"
