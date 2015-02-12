@@ -1,0 +1,4 @@
+application.select-verdicts-attachments: Valitse päätöksen liitteet
+verdict-attachments-multiselect.mark-selected-as-verdict-attachments: Merkitse valitut päätöksen liitteiksi
+verdict-attachments-multiselect.select-all: Valitse kaikki
+verdict-attachments-multiselect.select-none: Poista kaikki valinnat
