@@ -433,6 +433,7 @@
 (def huoneistotTable {:name "huoneistot"
                       :i18nkey "huoneistot"
                       :type :table
+                      :group-help "foobar"
                       :repeating true
                       :approvable true
                       :copybutton true
