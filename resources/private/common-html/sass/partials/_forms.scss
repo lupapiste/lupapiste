@@ -95,7 +95,7 @@ input[readonly], textarea[readonly] {
   display: none;
   top: 20px;
   right: 8px;
-  padding: $marginS; 
+  padding: $marginS;
   background-color: white;
   border: 1px solid $lp-light-grey;
   box-shadow: 1px 1px 2px $lp-dark-grey;
@@ -116,7 +116,7 @@ input[readonly], textarea[readonly] {
       background-position: 6px -2496px;
       display: inline-block;
     }
-    
+
   }
   &.form-input-warn {
     .icon {
@@ -491,7 +491,6 @@ input[readonly], textarea[readonly] {
   .form-table .form-input {
     display: inline;
     margin: 0;
-    padding: 0 6px;
   }
 
   .form-table {
