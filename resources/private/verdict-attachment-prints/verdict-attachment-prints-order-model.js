@@ -45,7 +45,7 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function() {
 
   function enrichAttachment(a) {
     a.filename = a.latestVersion.filename;
-    a.contents = a.contents || loc(["attachmentType", a.type["type-group"], a.type["type-id"]])
+    a.contents = a.contents || loc(["attachmentType", a.type["type-group"], a.type["type-id"]]);
     a.orderAmount = ko.observable("2");
     return a;
   }
