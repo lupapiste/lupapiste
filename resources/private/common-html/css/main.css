@@ -1,4 +1,5 @@
-/*!
+@import url(//fonts.googleapis.com/css?family=Source+Sans+Pro:200,300,400,600,700,200italic,300italic,400italic,600italic,700italic);
+/*
  * ajk's Hot New Template
  * Made by ajk (ajk.fi)
  */
@@ -13,7 +14,6 @@
     CSS Reset by ajk (http://ajk.im/)
     Based on http://necolas.github.com/normalize.css/
 */
-@import url(//fonts.googleapis.com/css?family=Source+Sans+Pro:200,300,400,600,700,200italic,300italic,400italic,600italic,700italic);
 /* line 11, ../sass/partials/_reset.scss */
 html, body, div,
 span, object, iframe,
@@ -172,7 +172,7 @@ hr {
   display: block;
   height: 1px;
   border: 0;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid #dddddd;
 }
 
 /* line 131, ../sass/partials/_reset.scss */
@@ -892,9 +892,9 @@ footer .informations .footer-box.sade-box a {
   font-weight: 400;
   width: 16.25em;
   margin: 0 0 6px;
-  padding: .25em 1.125em;
+  padding: 0.25em 1.125em;
   text-decoration: none;
-  text-shadow: 0px 1px 0px #fff;
+  text-shadow: 0px 1px 0px white;
   border: none;
   color: #303030;
   position: relative;
@@ -1646,7 +1646,7 @@ input[readonly]:focus, textarea[readonly]:focus {
 .docgen-content .form-table th {
   vertical-align: bottom;
   border-style: solid;
-  border-left: 1px solid #ffffff;
+  border-left: 1px solid white;
   border-top: none;
   border-bottom: none;
   border-right: none;
@@ -1656,15 +1656,15 @@ input[readonly]:focus, textarea[readonly]:focus {
   display: inline;
   margin: 0;
 }
-/* line 498, ../sass/partials/_forms.scss */
+/* line 497, ../sass/partials/_forms.scss */
 .docgen-content .form-table .form-input .text {
   height: 25px;
 }
-/* line 503, ../sass/partials/_forms.scss */
+/* line 502, ../sass/partials/_forms.scss */
 .docgen-content .form-table .form-input.combobox, .docgen-content select {
   width: 10em;
 }
-/* line 507, ../sass/partials/_forms.scss */
+/* line 506, ../sass/partials/_forms.scss */
 .docgen-content .form-table .form-indicator {
   right: auto;
   top: 0;
@@ -1672,7 +1672,7 @@ input[readonly]:focus, textarea[readonly]:focus {
   width: 28px;
   padding: 0;
 }
-/* line 514, ../sass/partials/_forms.scss */
+/* line 513, ../sass/partials/_forms.scss */
 .docgen-content .form-table .form-indicator .icon {
   position: absolute;
   top: 0px;
@@ -1680,65 +1680,65 @@ input[readonly]:focus, textarea[readonly]:focus {
   padding: 0;
   margin: 0;
 }
-/* line 523, ../sass/partials/_forms.scss */
+/* line 522, ../sass/partials/_forms.scss */
 .docgen-content .form-table .form-indicator .form-input-saved .icon {
   background-position: 4px -2494px;
 }
-/* line 529, ../sass/partials/_forms.scss */
+/* line 528, ../sass/partials/_forms.scss */
 .docgen-content .form-table .form-entry {
   display: block;
   width: 100%;
   min-width: 50px;
   min-height: 30px;
 }
-/* line 536, ../sass/partials/_forms.scss */
+/* line 535, ../sass/partials/_forms.scss */
 .docgen-content .form-table .errorPanel {
   top: 38px;
 }
-/* line 540, ../sass/partials/_forms.scss */
+/* line 539, ../sass/partials/_forms.scss */
 .docgen-content .form-table .form-help {
   bottom: 45px;
 }
-/* line 545, ../sass/partials/_forms.scss */
+/* line 544, ../sass/partials/_forms.scss */
 .docgen-content .button-group .btn {
   margin-right: 10px;
 }
 
-/* line 552, ../sass/partials/_forms.scss */
+/* line 551, ../sass/partials/_forms.scss */
 .kiintun-and-maaraalatunnus .form-maaraala {
   display: inline;
 }
-/* line 555, ../sass/partials/_forms.scss */
+/* line 554, ../sass/partials/_forms.scss */
 .kiintun-and-maaraalatunnus .form-input.text {
   display: inline;
   width: 48px;
   margin: 0 4px;
 }
 
-/* line 563, ../sass/partials/_forms.scss */
+/* line 562, ../sass/partials/_forms.scss */
 .form-approval-status {
   text-transform: none;
   width: 100%;
   display: block;
   min-height: 32px;
 }
-/* line 569, ../sass/partials/_forms.scss */
+/* line 568, ../sass/partials/_forms.scss */
 .form-approval-status.empty {
   display: none;
   height: 0;
 }
-/* line 574, ../sass/partials/_forms.scss */
+/* line 573, ../sass/partials/_forms.scss */
 .form-approval-status .form-buttons {
   display: inline-block;
   text-align: right;
   float: right;
 }
-/* line 578, ../sass/partials/_forms.scss */
+/* line 577, ../sass/partials/_forms.scss */
 .form-approval-status .form-buttons .btn {
   margin: 0 6px 6px 0;
 }
 
-/* line 585, ../sass/partials/_forms.scss */
+/* line 584, ../sass/partials/_forms.scss */
 .form-help {
   min-height: 100px;
   padding: 6px 24px 6px 6px;
@@ -1752,7 +1752,7 @@ input[readonly]:focus, textarea[readonly]:focus {
   z-index: 11000;
   box-shadow: 2px 2px 3px #4f4f4f;
 }
-/* line 597, ../sass/partials/_forms.scss */
+/* line 596, ../sass/partials/_forms.scss */
 .form-help:after {
   content: " ";
   width: 0;
@@ -1765,7 +1765,7 @@ input[readonly]:focus, textarea[readonly]:focus {
   border-right: 14px solid transparent;
   border-top: 14px solid #4f4f4f;
 }
-/* line 609, ../sass/partials/_forms.scss */
+/* line 608, ../sass/partials/_forms.scss */
 .form-help:before {
   content: " ";
   background-image: url("/img/icons-sprite-1.14.png");
@@ -1778,14 +1778,14 @@ input[readonly]:focus, textarea[readonly]:focus {
   right: 6px;
 }
 
-/* line 621, ../sass/partials/_forms.scss */
+/* line 620, ../sass/partials/_forms.scss */
 .form-full-width .form-help {
   top: 4px;
   left: 85%;
   bottom: auto;
   width: 55%;
 }
-/* line 626, ../sass/partials/_forms.scss */
+/* line 625, ../sass/partials/_forms.scss */
 .form-full-width .form-help:after {
   content: " ";
   width: 0;
@@ -1799,7 +1799,7 @@ input[readonly]:focus, textarea[readonly]:focus {
   border-bottom: 14px solid transparent;
   border-right: 14px solid #4f4f4f;
 }
-/* line 639, ../sass/partials/_forms.scss */
+/* line 638, ../sass/partials/_forms.scss */
 .form-full-width .form-help:before {
   content: " ";
   background-image: url("/img/icons-sprite-1.14.png");
@@ -1812,7 +1812,7 @@ input[readonly]:focus, textarea[readonly]:focus {
   right: 6px;
 }
 
-/* line 653, ../sass/partials/_forms.scss */
+/* line 652, ../sass/partials/_forms.scss */
 .approval-approved:after {
   content: " ";
   background-image: url("/img/icons-sprite-1.14.png");
@@ -1825,7 +1825,7 @@ input[readonly]:focus, textarea[readonly]:focus {
   vertical-align: text-bottom;
 }
 
-/* line 665, ../sass/partials/_forms.scss */
+/* line 664, ../sass/partials/_forms.scss */
 .approval-rejected:after {
   content: " ";
   background-image: url("/img/icons-sprite-1.14.png");
@@ -1838,12 +1838,12 @@ input[readonly]:focus, textarea[readonly]:focus {
   vertical-align: text-bottom;
 }
 
-/* line 681, ../sass/partials/_forms.scss */
+/* line 680, ../sass/partials/_forms.scss */
 #neighbor-show [type="checkbox"]:disabled {
   position: relative;
   visibility: hidden;
 }
-/* line 684, ../sass/partials/_forms.scss */
+/* line 683, ../sass/partials/_forms.scss */
 #neighbor-show [type="checkbox"]:disabled:checked {
   visibility: visible;
   opacity: 1;
@@ -1857,63 +1857,63 @@ input[readonly]:focus, textarea[readonly]:focus {
   background: #f6f6f6 url(https://cdn2.iconfinder.com/data/icons/flat-ui-icons-24-px/24/checkmark-24-512.png) center center no-repeat;
   background-size: 12px 12px;
 }
-/* line 701, ../sass/partials/_forms.scss */
+/* line 700, ../sass/partials/_forms.scss */
 #neighbor-show [type="radio"]:disabled {
   position: relative;
   visibility: hidden;
 }
-/* line 704, ../sass/partials/_forms.scss */
+/* line 703, ../sass/partials/_forms.scss */
 #neighbor-show [type="radio"]:disabled:checked {
   visibility: visible;
   opacity: 1;
 }
 
-/* line 712, ../sass/partials/_forms.scss */
+/* line 711, ../sass/partials/_forms.scss */
 .three-col {
   width: 100%;
 }
-/* line 715, ../sass/partials/_forms.scss */
+/* line 714, ../sass/partials/_forms.scss */
 .three-col .form-input {
   width: 17.25em;
 }
-/* line 719, ../sass/partials/_forms.scss */
+/* line 718, ../sass/partials/_forms.scss */
 .three-col .col1 {
   float: left;
   padding-right: 12px;
 }
-/* line 724, ../sass/partials/_forms.scss */
+/* line 723, ../sass/partials/_forms.scss */
 .three-col .col2 {
   float: left;
   padding-left: 12px;
   padding-right: 12px;
 }
-/* line 729, ../sass/partials/_forms.scss */
+/* line 728, ../sass/partials/_forms.scss */
 .three-col .col3 {
   float: left;
   padding-left: 12px;
 }
 
-/* line 736, ../sass/partials/_forms.scss */
+/* line 735, ../sass/partials/_forms.scss */
 foreman-history h2 {
   background-color: #f6f6f6 !important;
 }
-/* line 739, ../sass/partials/_forms.scss */
+/* line 738, ../sass/partials/_forms.scss */
 foreman-history th.first {
   width: 10%;
 }
-/* line 742, ../sass/partials/_forms.scss */
+/* line 741, ../sass/partials/_forms.scss */
 foreman-history th.second {
   width: 15%;
 }
-/* line 745, ../sass/partials/_forms.scss */
+/* line 744, ../sass/partials/_forms.scss */
 foreman-history th.third {
   width: 10%;
 }
-/* line 748, ../sass/partials/_forms.scss */
+/* line 747, ../sass/partials/_forms.scss */
 foreman-history th.fourth {
   width: 20%;
 }
-/* line 751, ../sass/partials/_forms.scss */
+/* line 750, ../sass/partials/_forms.scss */
 foreman-history th.fifth {
   width: 45%;
 }
@@ -2166,7 +2166,7 @@ table.attachments-template-table td.attachment-file-info {
 
 /* line 88, ../sass/partials/_tabs.scss */
 .tabs-content-container {
-  border: 1px solid #ccc;
+  border: 1px solid #cccccc;
   border-top: none;
   padding: 10px;
   width: 400px;
@@ -2721,7 +2721,7 @@ table.attachments-template-table td.attachment-file-info {
 /* line 1, ../sass/partials/_errors.scss */
 .context-error {
   color: #f00;
-  border: 1px solid #f00;
+  border: 1px solid red;
   border-radius: 3px;
   padding: 6px;
   margin: 12px 0;
@@ -4934,7 +4934,7 @@ td.comment-text {
 
 /* line 230, ../sass/views/_attachment.scss */
 .signature-cell {
-  display: table-column;
+  display: table-cell;
   width: 200px;
 }
 
@@ -5144,7 +5144,7 @@ td.comment-text {
 #login h1 {
   margin-bottom: 1em;
   color: #f59c00;
-  font-family: 'Dosis', sans-serif;
+  font-family: "Dosis", sans-serif;
   word-spacing: 0.1em;
   line-height: 1em;
   font-size: 25px;
@@ -5615,17 +5615,17 @@ div.stamp-content {
 /* line 3, ../sass/partials/_other.scss */
 .hide {
   visibility: hidden;
-  width: 0 !important;
-  height: 0 !important;
-  line-height: 0 !important;
-  padding: 0 !important;
-  margin: 0 !important;
+  width: 0!important;
+  height: 0!important;
+  line-height: 0!important;
+  padding: 0!important;
+  margin: 0!important;
 }
 
 /* Pretty &amp; s */
 /* line 13, ../sass/partials/_other.scss */
 .amp {
-  font-family: 'Goudy Old Style', Baskerville, Palatino, 'Palatino Linotype', 'Book Antiqua', serif;
+  font-family: "Goudy Old Style", Baskerville, Palatino, "Palatino Linotype", "Book Antiqua", serif;
   font-style: italic;
 }
 
