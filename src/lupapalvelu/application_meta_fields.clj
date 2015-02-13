@@ -12,6 +12,12 @@
             [sade.env :as env]
             [sade.strings :as ss]))
 
+(def post-verdict-states #{:verdictGiven :constructionStarted :closed})
+
+(def post-sent-states (conj post-verdict-states :sent))
+
+(defn in-post-verdict-state? [_ app] (contains? post-verdict-states (keyword (:state app))))
+
 (defn- applicant-name-from-auth [application]
   (let [owner (first (domain/get-auths-by-role application :owner))
         {first-name :firstName last-name :lastName} owner]
@@ -103,9 +109,6 @@
                    :kopiolaitosOrdererAddress (:kopiolaitos-orderer-address org)
                    :kopiolaitosOrdererPhone (:kopiolaitos-orderer-phone org)
                    :kopiolaitosOrdererEmail (:kopiolaitos-orderer-email org)}}))
-
-(def post-verdict-states #{"verdictGiven" "constructionStarted" "closed"})
-(defn- in-post-verdict-state? [_ app] (if (post-verdict-states (name (:state app))) true false))
 
 (defn- indicator-sum [_ app]
   (apply + (map (fn [[k v]] (if (#{:documentModifications :unseenStatements :unseenVerdicts} k) v 0)) app)))
