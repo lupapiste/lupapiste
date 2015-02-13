@@ -22,7 +22,8 @@
             [lupapalvelu.mime :as mime]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
             [sade.util :as util]
-            [lupapalvelu.domain :as domain])
+            [lupapalvelu.domain :as domain]
+            [lupapalvelu.application-meta-fields :as meta-fields])
   (:import [java.io File]))
 
 ;; Validators
@@ -37,8 +38,6 @@
           (state-set (keyword state)))
     (fail :error.non-authority-viewing-application-in-verdictgiven-state)))
 
-(def post-verdict-states #{:verdictGiven :constructionStarted :closed})
-
 (defn- attachment-deletable [application attachmentId userRole]
   (let [attachment (attachment/get-attachment-info application attachmentId)]
     (if (:required attachment)
@@ -50,8 +49,8 @@
       (let [attachment (attachment/get-attachment-info application attachmentId)
             attachmentApplicationState (keyword (:applicationState attachment))
             currentState (keyword (:state application))]
-        (or (not (post-verdict-states currentState))
-            (post-verdict-states attachmentApplicationState)
+        (or (not (meta-fields/post-verdict-states currentState))
+            (meta-fields/post-verdict-states attachmentApplicationState)
             (= (keyword userRole) :authority)))))
 
 (defn- validate-meta [{{meta :meta} :data}]

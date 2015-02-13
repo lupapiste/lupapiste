@@ -23,7 +23,7 @@
 (def yritys-type
   [{:tag :Nimi}
    {:tag :Ytunnus}
-   {:tag :Yhteystidot :child yhteystiedot-type}
+   {:tag :Yhteystiedot :child yhteystiedot-type}
    {:tag :Yhteyshenkilo :child yhteyshenkilo-type}])
 
 (def hakija-type
@@ -64,4 +64,8 @@
   "Choice, AsianTunnus or MuuTunnus"
   [{:tag :AsianTunnus}
    {:tag :MuuTunnus :child muu-tunnus-type}])
+
+(def toimenpide-type
+  [{:tag :ToimenpideTunnus}
+   {:tag :ToimenpideTeksti}])
 
