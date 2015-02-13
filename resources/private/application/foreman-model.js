@@ -27,55 +27,10 @@ LUPAPISTE.ForemanModel = function() {
       ajax
         .query("foreman-applications", {id: id})
         .success(function(data) {
-          // TODO query only foreman tasks
-          var foremanTasks = _.where(self.application().tasks, { "schema-info": { "name": "task-vaadittu-tyonjohtaja" } });
-          var foremans = [];
-
-          _.forEach(data.applications, function(app) {
-            var foreman = _.find(app.auth, {"role": "foreman"});
-            var foremanDoc = _.find(app.documents, { "schema-info": { "name": "tyonjohtaja-v2" } });
-            var name = util.getIn(foremanDoc, ["data", "kuntaRoolikoodi", "value"]);
-            var existingTask = _.find(foremanTasks, { "data": {"asiointitunnus": { "value": app.id } } });
-
-            if (existingTask) {
-              name = existingTask.taskname;
-              foremanTasks = _.without(foremanTasks, existingTask);
-            }
-
-            var username  = util.getIn(foremanDoc, ["data", "yhteystiedot", "email", "value"]);
-            var firstname = util.getIn(foremanDoc, ["data", "henkilotiedot", "etunimi", "value"]);
-            var lastname  = util.getIn(foremanDoc, ["data", "henkilotiedot", "sukunimi", "value"]);
-
-            if (!(username || firstname || lastname)) {
-              username = util.getIn(foreman, ["username"]);
-              firstname = util.getIn(foreman, ["firstName"]);
-              lastname = util.getIn(foreman, ["lastName"]);
-            }
-
-            var data = {"state": app.state,
-                        "id": app.id,
-                        "email":     username,
-                        "firstName": firstname,
-                        "lastName":  lastname,
-                        "name": name,
-                        "statusName": app.state === "verdictGiven" ? "ok" : "new" };
-
-            self.foremanApplications.push(data);
-            foremans.push(data);
-          });
-
-          _.forEach(foremanTasks, function(task) {
-            var data = { "name": task.taskname,
-                         "taskId": task.id,
-                         "statusName": "missing" };
-            foremans.push(data);
-          });
-
-          self.foremanTasks({ "name": loc(["task-vaadittu-tyonjohtaja", "_group_label"]),
-                              "foremans": foremans });
+          console.log("data", data);
         })
         .error(function() {
-          // invited foreman can't always fetch applicants other foreman appications (if they are not invited to them also)
+          // noop
         })
         .call();
     }
