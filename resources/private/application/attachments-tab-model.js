@@ -58,6 +58,12 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel) {
           return self.startStamping();
         }
       },
+      "markVerdictAttachments": {
+        command: "set-attachments-as-verdict-attachment",
+        clickCommand: function() {
+          return self.startMarkingVerdictAttachments();
+        }
+      },
       "signAttachments": {
         command: "sign-attachments",
         clickCommand: function() {
@@ -189,6 +195,10 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel) {
 
   self.startStamping = function() {
     hub.send("start-stamping", {application: self.appModel});
+  };
+
+  self.startMarkingVerdictAttachments = function() {
+    hub.send("start-marking-verdict-attachments", {application: self.appModel});
   };
 
   self.attachmentTemplatesModel = new function() {
