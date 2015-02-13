@@ -879,13 +879,19 @@
       {$set {:permitSubtype permitSubtype
              :modified      created}})))
 
+(defn authority-if-post-verdict-state [{user :user} {state :state}]
+  (when-not (or (user/authority? user)
+                (contains? action/pre-verdict-states (keyword state)))
+    (fail :error.unauthorized)))
+
 (defcommand change-location
   {:parameters [id x y address propertyId]
    :roles      [:applicant :authority]
-   :states     [:draft :info :answered :open :submitted :complement-needed]
+   :states     [:draft :info :answered :open :submitted :complement-needed :verdictGiven :constructionStarted]
    :input-validators [(partial action/non-blank-parameters [:address])
                       (partial property-id-parameters [:propertyId])
-                      validate-x validate-y]}
+                      validate-x validate-y]
+   :pre-checks [authority-if-post-verdict-state]}
   [{:keys [created application] :as command}]
   (if (= (:municipality application) (organization/municipality-by-propertyId propertyId))
     (do
