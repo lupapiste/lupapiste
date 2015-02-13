@@ -1,1 +1,0 @@
-error.link-permit-app-not-in-post-sent-state:  Viitelupahakemusta ei ole vielä siirretty taustajärjestelmään
