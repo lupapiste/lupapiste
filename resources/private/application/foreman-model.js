@@ -22,11 +22,40 @@ LUPAPISTE.ForemanModel = function() {
   });
 
   self.refresh = function(application) {
+    function foremanApplications(applications) {
+      _.forEach(applications, function(app) {
+        var foreman = _.find(app.auth, {"role": "foreman"});
+        var foremanDoc = _.find(app.documents, { "schema-info": { "name": "tyonjohtaja-v2" } });
+        var name = util.getIn(foremanDoc, ["data", "kuntaRoolikoodi", "value"]);
+
+        var username  = util.getIn(foremanDoc, ["data", "yhteystiedot", "email", "value"]);
+        var firstname = util.getIn(foremanDoc, ["data", "henkilotiedot", "etunimi", "value"]);
+        var lastname  = util.getIn(foremanDoc, ["data", "henkilotiedot", "sukunimi", "value"]);
+
+        if (!(username || firstname || lastname)) {
+          username = util.getIn(foreman, ["username"]);
+          firstname = util.getIn(foreman, ["firstName"]);
+          lastname = util.getIn(foreman, ["lastName"]);
+        }
+
+        var data = {"state": app.state,
+                    "id": app.id,
+                    "email":     username,
+                    "firstName": firstname,
+                    "lastName":  lastname,
+                    "name": name,
+                    "statusName": app.state === "verdictGiven" ? "ok" : "new" };
+
+        self.foremanApplications.push(data);
+      });
+    }
+
     function loadForemanApplications(id) {
       self.foremanApplications([]);
       ajax
         .query("foreman-applications", {id: id})
         .success(function(data) {
+          foremanApplications(data.applications);
           console.log("data", data);
         })
         .error(function() {
