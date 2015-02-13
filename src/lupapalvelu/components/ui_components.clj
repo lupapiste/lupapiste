@@ -8,7 +8,8 @@
             [sade.util :as util]
             [cheshire.core :as json]
             [lupapalvelu.attachment :refer [attachment-types-osapuoli, attachment-scales, attachment-sizes]]
-            [lupapalvelu.attachment-api :refer [post-verdict-states]]))
+            [lupapalvelu.application-meta-fields :refer [post-verdict-states]]
+            [lupapalvelu.stamper :refer [file-types]]))
 
 (def debugjs {:depends [:jquery]
               :js ["debug.js"]
@@ -31,7 +32,7 @@
                  :attachmentScales  attachment-scales
                  :attachmentSizes   attachment-sizes
                  :postVerdictStates post-verdict-states
-                 :stampableMimes    (filter identity (map mime/mime-types lupapalvelu.stamper/file-types))
+                 :stampableMimes    (filter identity (map mime/mime-types file-types))
                  :foremanRoles      (:body (first lupapalvelu.document.schemas/kuntaroolikoodi-tyonjohtaja))
                  :foremanReadonlyFields ["luvanNumero", "katuosoite", "rakennustoimenpide", "kokonaisala"]}]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
