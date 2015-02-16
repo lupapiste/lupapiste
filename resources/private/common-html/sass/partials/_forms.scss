@@ -584,7 +584,7 @@ input[readonly], textarea[readonly] {
 .form-help {
   min-height: 100px;
   padding: $marginS $marginL $marginS $marginS;
-  width: 300px;
+  width: 350px;
   background: $lp-dark-grey;
   color: white;
   display: none;
@@ -593,6 +593,7 @@ input[readonly], textarea[readonly] {
   left: 0;
   z-index: 11000;
   box-shadow: 2px 2px 3px $lp-dark-grey;
+  text-align: left;
   &:after {
     content: " ";
     width: 0;
