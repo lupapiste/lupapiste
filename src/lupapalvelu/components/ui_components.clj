@@ -83,7 +83,7 @@
 
    :common-html  {:depends [:selectm-html]
                   :css ["css/main.css" "jquery-ui.css"]
-                  :scss ["scss/main.scss"]
+                  :scss ["sass/main.scss"]
                   :html ["404.html" "footer.html"]}
 
    ;; Components to be included in a SPA

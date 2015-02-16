@@ -54,13 +54,12 @@
   (let [stream (ByteArrayOutputStream.)]
     (with-open [out (io/writer stream)]
       (doseq [src (c/get-resources ui-components kind component)]
-        (cond
-          (fn? src)      (.write (write-header kind out (str "fn: " (fn-name src))) (src))
-          (= kind :scss) (.write out (scss->css (-> src c/path)))
-          :else (with-open [in (-> src c/path io/resource io/input-stream io/reader)]
-                  (if (or (ss/contains src "debug") (ss/contains src ".min."))
-                    (IOUtils/copy in (write-header kind out src))
-                    (minified kind in (write-header kind out src)))))))
+        (if (fn? src)
+          (.write (write-header kind out (str "fn: " (fn-name src))) (src))
+          (with-open [in (-> src c/path io/resource io/input-stream io/reader)]
+            (if (or (ss/contains src "debug") (ss/contains src ".min."))
+              (IOUtils/copy in (write-header kind out src))
+              (minified kind in (write-header kind out src)))))))
     (.toByteArray stream)))
 
 (defn parse-html-resource [c resource]
@@ -117,8 +116,16 @@
       (.write out (ss/utf8-bytes element)))
     (-> out (.toString (.name ss/utf8)) (compress-html) (ss/utf8-bytes))))
 
+(defn compose-scss [component]
+  (let [stream (ByteArrayOutputStream.)]
+    (with-open [out (io/writer stream)]
+      (doseq [src (c/get-resources ui-components :scss component)]
+        (.write out (scss->css (str "resources/" (-> src c/path))))))
+    (.toByteArray stream)))
+
 (defn compose [kind component]
   (tracef "Compose %s%s" component kind)
-  (if (= :html kind)
-    (compose-html component)
+  (case kind
+    :html (compose-html component)
+    :css  (compose-scss component)
     (compose-resource kind component)))
