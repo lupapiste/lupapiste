@@ -1028,7 +1028,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   }
 
   function buildTableRow(subSchema, model, path, partOfChoice) {
-    console.log(subSchema)
     var myPath = path.join(".");
     var name = subSchema.name;
     var myModel = model[name] || {};
@@ -1169,7 +1168,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
         var label = makeLabel(subSchema, "table", myPath.join("."), true);
         div.appendChild(label);
-        
+
         var groupHelpText = makeGroupHelpTextSpan(subSchema)
         div.appendChild(groupHelpText);
 
