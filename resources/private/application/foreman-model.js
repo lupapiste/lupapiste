@@ -11,7 +11,7 @@ LUPAPISTE.ForemanModel = function() {
     return self.email() && !util.isValidEmailAddress(self.email());
   });
   self.foremanApplications = ko.observableArray();
-  self.foremanTasks = ko.observableArray();
+  self.foremanTasks = ko.observableArray([]);
   self.finished = ko.observable(false);
   self.foremanRoles = ko.observable(LUPAPISTE.config.foremanRoles);
   self.selectedRole = ko.observable();
@@ -50,6 +50,21 @@ LUPAPISTE.ForemanModel = function() {
       });
     }
 
+    function loadForemanTasks() {
+      console.log("loadForemanTasks");
+      var foremanTasks = _.where(self.application().tasks, { "schema-info": { "name": "task-vaadittu-tyonjohtaja" } });
+      console.log(foremanTasks);
+      var foremans = [];
+      _.forEach(foremanTasks, function(task) {
+        var data = { "name": task.taskname,
+                     "taskId": task.id,
+                     "statusName": "missing" };
+        foremans.push(data);
+      });
+      self.foremanTasks({ "name": loc(["task-vaadittu-tyonjohtaja", "_group_label"]),
+                          "foremans": foremans });
+    }
+
     function loadForemanApplications(id) {
       self.foremanApplications([]);
       ajax
@@ -68,6 +83,7 @@ LUPAPISTE.ForemanModel = function() {
 
     _.defer(function() {
       loadForemanApplications(application.id);
+      loadForemanTasks();
     });
   };
 
