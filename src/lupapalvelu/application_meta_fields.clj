@@ -16,7 +16,7 @@
 
 (def post-sent-states (conj post-verdict-states :sent))
 
-(defn in-post-verdict-state? [_ app] (if (post-verdict-states (name (:state app))) true false))
+(defn in-post-verdict-state? [_ app] (contains? post-verdict-states (keyword (:state app))))
 
 (defn- applicant-name-from-auth [application]
   (let [owner (first (domain/get-auths-by-role application :owner))

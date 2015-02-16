@@ -1,5 +1,6 @@
 (ns lupapalvelu.domain
-  (:require [taoensso.timbre :as timbre :refer [trace debug info warn warnf error fatal]]
+  (:require [clojure.set :refer [difference]]
+            [taoensso.timbre :as timbre :refer [trace debug info warn warnf error fatal]]
             [monger.operators :refer :all]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as user]
@@ -66,7 +67,7 @@
   {:pre [query-or-id (map? user)]}
   (let [query-id-part (if (map? query-or-id) query-or-id {:_id query-or-id})
         query-user-part (if include-canceled-apps?
-                          (update-in (application-query-for user) [:state $nin] #(util/exclude-from-sequence % ["canceled"]))
+                          (update-in (application-query-for user) [:state $nin] #(difference (set %) #{"canceled"}))
                           (application-query-for user))]
    (filter-application-content-for
      (mongo/select-one :applications {$and [query-id-part query-user-part]})
