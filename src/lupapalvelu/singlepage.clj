@@ -7,6 +7,7 @@
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.core :refer :all]
+            [sade.scss-compiler :refer [scss->css]]
             [lupapalvelu.components.core :as c])
   (:import [java.io ByteArrayOutputStream ByteArrayInputStream]
            [java.util.zip GZIPOutputStream]
@@ -53,12 +54,13 @@
   (let [stream (ByteArrayOutputStream.)]
     (with-open [out (io/writer stream)]
       (doseq [src (c/get-resources ui-components kind component)]
-        (if (fn? src)
-          (.write (write-header kind out (str "fn: " (fn-name src))) (src))
-          (with-open [in (-> src c/path io/resource io/input-stream io/reader)]
-            (if (or (ss/contains src "debug") (ss/contains src ".min."))
-              (IOUtils/copy in (write-header kind out src))
-              (minified kind in (write-header kind out src)))))))
+        (cond
+          (fn? src)      (.write (write-header kind out (str "fn: " (fn-name src))) (src))
+          (= kind :scss) (.write out (scss->css (-> src c/path)))
+          :else (with-open [in (-> src c/path io/resource io/input-stream io/reader)]
+                  (if (or (ss/contains src "debug") (ss/contains src ".min."))
+                    (IOUtils/copy in (write-header kind out src))
+                    (minified kind in (write-header kind out src)))))))
     (.toByteArray stream)))
 
 (defn parse-html-resource [c resource]
