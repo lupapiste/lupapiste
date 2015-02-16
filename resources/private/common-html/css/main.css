@@ -4934,7 +4934,7 @@ td.comment-text {
 
 /* line 230, ../sass/views/_attachment.scss */
 .signature-cell {
-  display: table-column;
+  display: table-cell;
   width: 200px;
 }
 

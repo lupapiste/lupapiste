@@ -21,7 +21,7 @@
      :Postitoimipaikka (get-in data [:osoite :postitoimipaikannimi])
      :Maa nil ; TODO
      :Email (get-in data [:yhteystiedot :email])
-     :Puhelin (get-in data [:yhteystiedot :puhelin])}))
+     :Puhelinnumero (get-in data [:yhteystiedot :puhelin])}))
 
 (defn- ua-get-yhteyshenkilo [data]
   (util/strip-nils
@@ -69,8 +69,11 @@
       (assoc-in maksaja-map [:Henkilo] (ua-get-henkilo data)))))
 
 (defn- ua-get-metatiedot [attachment]
-  (seq [{:Avain "type-group" :Arvo (get-in attachment [:type :type-group])}
-        {:Avain "type-id"    :Arvo (get-in attachment [:type :type-id])}]))
+  (let [op-name (get-in attachment [:op :name])]
+    (remove nil? [{:Avain "type-group" :Arvo (get-in attachment [:type :type-group])}
+                  {:Avain "type-id"    :Arvo (get-in attachment [:type :type-id])}
+                  (when op-name
+                    {:Avain "operation" :Arvo op-name})])))
 
 (defn- ua-get-liite [attachment]
   (util/strip-nils
@@ -84,9 +87,18 @@
   (when (seq attachments)
     {:Liite (map ua-get-liite attachments)}))
 
+(defn- ua-get-toimenpide [operation lang]
+  (util/strip-nils
+    {:ToimenpideTunnus (:name operation)
+     :ToimenpideTeksti (i18n/with-lang lang (i18n/loc "operations" (:name operation)))}))
+
 (defn- ua-get-toimenpiteet [{:keys [operations]} lang]
   (when (seq operations)
-    {:Toimenpide (map #(:name %) operations)})) ;TODO tarkemmat tiedot
+    {:Toimenpide (map #(-> % (ua-get-toimenpide lang)) operations)})) ;TODO tarkemmat tiedot
+
+(defn- ua-get-sijaintipiste [{:keys [location]}]
+  {:Sijaintipiste (str (:x location) " " (:y location))})
+
 
 
 ;; TaydennysAsiaan, prefix: ta-
@@ -109,4 +121,6 @@
       (assoc-in [:UusiAsia :VireilletuloPvm] (util/to-xml-date (:submitted application)))
       (assoc-in [:UusiAsia :Liitteet] (ua-get-liitteet application))
       (assoc-in [:UusiAsia :Asiointikieli] lang)
-      (assoc-in [:UusiAsia :Toimenpiteet] (ua-get-toimenpiteet application lang)))))
+      (assoc-in [:UusiAsia :Toimenpiteet] (ua-get-toimenpiteet application lang))
+      (assoc-in [:UusiAsia :Sijainti] (ua-get-sijaintipiste application))
+      (assoc-in [:UusiAsia :Kiinteistotunnus] (util/to-human-readable-property-id (:propertyId application))))))

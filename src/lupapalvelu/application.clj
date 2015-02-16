@@ -439,10 +439,14 @@
          (assoc-in [:linkPermitData 0 :lupapisteId] link-permit-app-id)
          (assoc-in [:linkPermitData 0 :id] kuntalupatunnus)
          (assoc-in [:linkPermitData 0 :type] "kuntalupatunnus"))
-      (do
-        (error "Not able to get a kuntalupatunnus for the application  " (:id application) " from it's link permit's (" link-permit-app-id ") verdict."
-               " Associated Link-permit data: " (:linkPermitData application))
-        (fail! :error.kuntalupatunnus-not-available-from-verdict)))))
+      (if (and (foreman/foreman-app? application) (some #{(keyword (:state link-permit-app))} meta-fields/post-sent-states))
+        application
+        (do
+          (error "Not able to get a kuntalupatunnus for the application  " (:id application) " from it's link permit's (" link-permit-app-id ") verdict."
+                 " Associated Link-permit data: " (:linkPermitData application))
+          (if (foreman/foreman-app? application)
+            (fail! :error.link-permit-app-not-in-post-sent-state)
+            (fail! :error.kuntalupatunnus-not-available-from-verdict)))))))
 
 (defn- organization-has-ftp-user? [organization application]
   (not (ss/blank? (get-in organization [:krysp (keyword (permit/permit-type application)) :ftpUser]))))
@@ -875,13 +879,19 @@
       {$set {:permitSubtype permitSubtype
              :modified      created}})))
 
+(defn authority-if-post-verdict-state [{user :user} {state :state}]
+  (when-not (or (user/authority? user)
+                (contains? action/pre-verdict-states (keyword state)))
+    (fail :error.unauthorized)))
+
 (defcommand change-location
   {:parameters [id x y address propertyId]
    :roles      [:applicant :authority]
-   :states     [:draft :info :answered :open :submitted :complement-needed]
+   :states     [:draft :info :answered :open :submitted :complement-needed :verdictGiven :constructionStarted]
    :input-validators [(partial action/non-blank-parameters [:address])
                       (partial property-id-parameters [:propertyId])
-                      validate-x validate-y]}
+                      validate-x validate-y]
+   :pre-checks [authority-if-post-verdict-state]}
   [{:keys [created application] :as command}]
   (if (= (:municipality application) (organization/municipality-by-propertyId propertyId))
     (do
