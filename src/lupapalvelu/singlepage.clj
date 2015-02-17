@@ -120,7 +120,7 @@
   (let [stream (ByteArrayOutputStream.)]
     (with-open [out (io/writer stream)]
       (doseq [src (c/get-resources ui-components :scss component)]
-        (.write out (scss->css (str "resources/" (-> src c/path))))))
+        (.write out (scss->css (.getPath (-> src c/path io/resource))))))
     (.toByteArray stream)))
 
 (defn compose [kind component]
