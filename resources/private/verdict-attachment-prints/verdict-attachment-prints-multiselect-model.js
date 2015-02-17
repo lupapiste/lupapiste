@@ -31,6 +31,12 @@ LUPAPISTE.VerdictAttachmentsMultiselectModel = function(params) {
       }).value();
     }
 
+    function getNonSelectedAttachments(files) {
+      return _(files).pluck("attachments").flatten().filter(function(f) {
+        return !f.forPrinting();
+      }).value();
+    }
+
     function eachSelected(files) {
       return _(files).pluck("attachments").flatten().every(function(f) {
         return f.forPrinting();
@@ -60,6 +66,10 @@ LUPAPISTE.VerdictAttachmentsMultiselectModel = function(params) {
       return getSelectedAttachments(self.preFiles()).concat(getSelectedAttachments(self.postFiles()));
     });
 
+    self.nonSelectedFiles = ko.computed(function() {
+      return getNonSelectedAttachments(self.preFiles()).concat(getNonSelectedAttachments(self.postFiles()));
+    });
+
     self.allSelected = ko.computed(function() {
       return eachSelected(self.preFiles()) && eachSelected(self.postFiles());
     });
@@ -69,21 +79,22 @@ LUPAPISTE.VerdictAttachmentsMultiselectModel = function(params) {
       var id = self.application.id();
       ajax.command("set-attachments-as-verdict-attachment", {
         id: id,
-        attachmentIds: _.map(self.selectedFiles(), "id"),
-        isVerdictAttachment: true //isVerdictAttachment   // TODO: reset the other files
+        selectedAttachmentIds: _.map(self.selectedFiles(), "id"),
+        unSelectedAttachmentIds: _.map(self.nonSelectedFiles(), "id")
       })
       .success(function() {
         repository.load(id);
         return false;
       })
-//      .error(function(e) {
-//        error(e.text);
-//        notify.error(loc("error.dialog.title"), loc("attachment.set-attachments-as-verdict-attachment.error"));
-//        repository.load(id);
-//      })
+      .error(function(e) {
+        error(e.text);
+        notify.error(loc("error.dialog.title"), loc("attachment.set-attachments-as-verdict-attachment.error"));
+        repository.load(id);
+      })
       .call();
       return false;
     };
+
 
     self.selectRow = function(row) {
         row.forPrinting(!row.forPrinting());
