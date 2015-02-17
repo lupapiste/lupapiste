@@ -2,6 +2,7 @@
   (:require [taoensso.timbre :as timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal fatalf]]
             [clojure.set :as set]
             [clojure.string :as s]
+            [clojure.set :refer [difference union]]
             [slingshot.slingshot :refer [try+]]
             [sade.dns :as dns]
             [sade.env :as env]
@@ -51,19 +52,22 @@
 
 ;; State helpers
 
-(def all-application-states [:draft :open :submitted :sent :complement-needed
-                             :verdictGiven :constructionStarted :closed :canceled])
-(def all-inforequest-states [:info :answered])
-(def all-states             (concat all-application-states all-inforequest-states))
+(def all-application-states #{:draft :open :submitted :sent :complement-needed
+                              :verdictGiven :constructionStarted :closed :canceled})
+(def all-inforequest-states #{:info :answered})
+(def all-states             (union all-application-states all-inforequest-states))
+
+(def pre-verdict-states #{:draft :info :answered :open :submitted :complement-needed})
+(def post-verdict-states (difference all-application-states pre-verdict-states))
 
 (defn all-states-but [drop-states-array]
-  (vec (util/exclude-from-sequence all-states drop-states-array)))
+  (difference all-states (set drop-states-array)))
 
 (defn all-application-states-but [drop-states-array]
-  (vec (util/exclude-from-sequence all-application-states drop-states-array)))
+  (difference all-application-states (set drop-states-array)))
 
 (defn all-inforequest-states-but [drop-states-array]
-  (vec (util/exclude-from-sequence all-inforequest-states drop-states-array)))
+  (difference all-inforequest-states (set drop-states-array)))
 
 ;; Notificator
 

@@ -1655,17 +1655,16 @@ input[readonly]:focus, textarea[readonly]:focus {
 .docgen-content .form-table .form-input {
   display: inline;
   margin: 0;
-  padding: 0 6px;
 }
-/* line 498, ../sass/partials/_forms.scss */
+/* line 497, ../sass/partials/_forms.scss */
 .docgen-content .form-table .form-input .text {
   height: 25px;
 }
-/* line 503, ../sass/partials/_forms.scss */
+/* line 502, ../sass/partials/_forms.scss */
 .docgen-content .form-table .form-input.combobox, .docgen-content select {
   width: 10em;
 }
-/* line 507, ../sass/partials/_forms.scss */
+/* line 506, ../sass/partials/_forms.scss */
 .docgen-content .form-table .form-indicator {
   right: auto;
   top: 0;
@@ -1673,7 +1672,7 @@ input[readonly]:focus, textarea[readonly]:focus {
   width: 28px;
   padding: 0;
 }
-/* line 514, ../sass/partials/_forms.scss */
+/* line 513, ../sass/partials/_forms.scss */
 .docgen-content .form-table .form-indicator .icon {
   position: absolute;
   top: 0px;
@@ -1681,69 +1680,69 @@ input[readonly]:focus, textarea[readonly]:focus {
   padding: 0;
   margin: 0;
 }
-/* line 523, ../sass/partials/_forms.scss */
+/* line 522, ../sass/partials/_forms.scss */
 .docgen-content .form-table .form-indicator .form-input-saved .icon {
   background-position: 4px -2494px;
 }
-/* line 529, ../sass/partials/_forms.scss */
+/* line 528, ../sass/partials/_forms.scss */
 .docgen-content .form-table .form-entry {
   display: block;
   width: 100%;
   min-width: 50px;
   min-height: 30px;
 }
-/* line 536, ../sass/partials/_forms.scss */
+/* line 535, ../sass/partials/_forms.scss */
 .docgen-content .form-table .errorPanel {
   top: 38px;
 }
-/* line 540, ../sass/partials/_forms.scss */
+/* line 539, ../sass/partials/_forms.scss */
 .docgen-content .form-table .form-help {
   bottom: 45px;
 }
-/* line 545, ../sass/partials/_forms.scss */
+/* line 544, ../sass/partials/_forms.scss */
 .docgen-content .button-group .btn {
   margin-right: 10px;
 }
 
-/* line 552, ../sass/partials/_forms.scss */
+/* line 551, ../sass/partials/_forms.scss */
 .kiintun-and-maaraalatunnus .form-maaraala {
   display: inline;
 }
-/* line 555, ../sass/partials/_forms.scss */
+/* line 554, ../sass/partials/_forms.scss */
 .kiintun-and-maaraalatunnus .form-input.text {
   display: inline;
   width: 48px;
   margin: 0 4px;
 }
 
-/* line 563, ../sass/partials/_forms.scss */
+/* line 562, ../sass/partials/_forms.scss */
 .form-approval-status {
   text-transform: none;
   width: 100%;
   display: block;
   min-height: 32px;
 }
-/* line 569, ../sass/partials/_forms.scss */
+/* line 568, ../sass/partials/_forms.scss */
 .form-approval-status.empty {
   display: none;
   height: 0;
 }
-/* line 574, ../sass/partials/_forms.scss */
+/* line 573, ../sass/partials/_forms.scss */
 .form-approval-status .form-buttons {
   display: inline-block;
   text-align: right;
   float: right;
 }
-/* line 578, ../sass/partials/_forms.scss */
+/* line 577, ../sass/partials/_forms.scss */
 .form-approval-status .form-buttons .btn {
   margin: 0 6px 6px 0;
 }
 
-/* line 585, ../sass/partials/_forms.scss */
+/* line 584, ../sass/partials/_forms.scss */
 .form-help {
   min-height: 100px;
   padding: 6px 24px 6px 6px;
-  width: 300px;
+  width: 350px;
   background: #4f4f4f;
   color: white;
   display: none;
@@ -1752,6 +1751,7 @@ input[readonly]:focus, textarea[readonly]:focus {
   left: 0;
   z-index: 11000;
   box-shadow: 2px 2px 3px #4f4f4f;
+  text-align: left;
 }
 /* line 597, ../sass/partials/_forms.scss */
 .form-help:after {
@@ -4935,7 +4935,7 @@ td.comment-text {
 
 /* line 230, ../sass/views/_attachment.scss */
 .signature-cell {
-  display: table-column;
+  display: table-cell;
   width: 200px;
 }
 

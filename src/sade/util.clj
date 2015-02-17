@@ -350,13 +350,6 @@
 (defn max-length-string [max-len]
   (sc/both sc/Str (max-length max-len)))
 
-(defn exclude-from-sequence
-  "Removes the items in the sequential given as the second parameter from the sequential given as the first parameter"
-  [orig-seq exclude-seq]
-  {:pre [(and (sequential? orig-seq) (sequential? exclude-seq))]}
-  (let [exclude-set (set exclude-seq)]
-    (remove #(exclude-set %) orig-seq)))
-
 (def difficulty-values ["AA" "A" "B" "C" "ei tiedossa"])    ;TODO: move this to schemas?
 (defn compare-difficulty [a b]                              ;TODO: make this function more generic by taking the key and comparison values as param? E.g. compare-against [a b key ref-values]
   (let [a (:difficulty a)
