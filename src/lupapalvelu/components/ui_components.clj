@@ -69,8 +69,7 @@
 
    :selectm      {:js ["selectm.js"]}
 
-   :selectm-html {:html ["selectm.html"]
-                  :css ["selectm.css"]}
+   :selectm-html {:html ["selectm.html"]}
 
    :expanded-content  {:depends [:jquery]
                        :js ["expanded-content.js"]}
@@ -82,7 +81,8 @@
                        "statuses.js" "statusmodel.js" "authorization.js" "vetuma.js"]}
 
    :common-html  {:depends [:selectm-html]
-                  :css ["css/main.css" "jquery-ui.css"]
+                  :css ["jquery-ui.css"]
+                  :scss ["sass/main.scss"]
                   :html ["404.html" "footer.html"]}
 
    ;; Components to be included in a SPA
@@ -100,8 +100,7 @@
 
    :mypage       {:depends [:common-html]
                   :js ["mypage.js"]
-                  :html ["mypage.html"]
-                  :css ["mypage.css"]}
+                  :html ["mypage.html"]}
 
    :user-menu     {:html ["nav.html"]}
 
@@ -120,11 +119,9 @@
                   :js ["repository.js"]}
 
    :tree         {:js ["tree.js"]
-                  :html ["tree.html"]
-                  :css ["tree.css"]}
+                  :html ["tree.html"]}
 
-   :accordion    {:js ["accordion.js"]
-                  :css ["accordion.css"]}
+   :accordion    {:js ["accordion.js"]}
 
    :signing      {:depends [:common-html]
                   :html ["signing-dialogs.html"]
@@ -209,8 +206,7 @@
 
    :create       {:depends [:common-html]
                   :js ["municipalities.js" "create.js"]
-                  :html ["create.html"]
-                  :css ["create.css"]}
+                  :html ["create.html"]}
 
    :iframe       {:depends [:common-html]
                   :css ["iframe.css"]}
@@ -222,8 +218,7 @@
                   :html ["users.html"]}
 
    :company      {:js ["company.js"]
-                  :html ["company.html"]
-                  :css ["company.css"]}
+                  :html ["company.html"]}
 
    :admins       {:depends [:users]}
 
