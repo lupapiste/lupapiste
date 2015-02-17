@@ -11,13 +11,13 @@
 
 #sys-notification {
   color: white;
-  min-height: 56px;
-  line-height: 56px;
+  min-height: 50px;
   background-color: $lp-dark-grey;
   position: relative;
   background:  fade-out($lp-dark-grey, 0.1);
   background: $lp-dark-grey \9; /* IE 8 and below */
   border: 1px solid darken($lp-dark-grey, 10%);
+  margin-top: $marginS;
 
   ul {
     list-style: none;
@@ -30,6 +30,7 @@
     }
 
     li {
+      padding: 16px $marginL;
       &:last-child {
         margin-bottom: 0px;
       }
@@ -37,7 +38,7 @@
   }
   span {
     float: right;
-    margin-right: $marginM;
+    margin: 16px $marginM;
     cursor: pointer;
     font-size: 1.8em;
   }
