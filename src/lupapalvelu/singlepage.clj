@@ -127,5 +127,5 @@
   (tracef "Compose %s%s" component kind)
   (case kind
     :html (compose-html component)
-    :css  (compose-scss component)
-    (compose-resource kind component)))
+    :css  (byte-array (concat (compose-scss component) (compose-resource kind component)))
+    :js   (compose-resource kind component)))
