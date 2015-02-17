@@ -9,6 +9,9 @@
             [lupapalvelu.pdf-export :as pdf-export]
             [lupapalvelu.xml.validator :as validator]))
 
+(defn get-file-name-on-server [file-id file-name]
+  (str file-id "_" (ss/encode-filename file-name)))
+
 (defn get-submitted-filename [application-id]
   (str  application-id "_submitted_application.pdf"))
 

@@ -434,9 +434,6 @@
            %))
       children)))
 
-(defn get-file-name-on-server [file-id file-name]
-  (str file-id "_" (ss/encode-filename file-name)))
-
 (defn statements-ids-with-status [lausuntotieto]
   (reduce
     (fn [r l]
@@ -479,7 +476,7 @@
   (let [type "Lausunto"
         title (str (:title application) ": " type "-" (:id attachment))
         file-id (get-in attachment [:latestVersion :fileId])
-        attachment-file-name (get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
+        attachment-file-name (writer/get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
         link (str begin-of-link attachment-file-name)
         meta (get-attachment-meta attachment)]
     {:Liite (get-Liite title link attachment type file-id attachment-file-name meta)}))
@@ -504,7 +501,7 @@
                    :let [type (get-in attachment [:type :type-id])
                          attachment-title (str title ": " type "-" (:id attachment))
                          file-id (get-in attachment [:latestVersion :fileId])
-                         attachment-file-name (get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
+                         attachment-file-name (writer/get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
                          link (str begin-of-link attachment-file-name)
                          meta (get-attachment-meta attachment)]]
                {:Liite (get-Liite attachment-title link attachment type file-id attachment-file-name meta)})))
