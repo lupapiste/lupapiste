@@ -4,7 +4,8 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.document.maa-aines-canonical :as maa-aines-canonical]
             [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
-            [lupapalvelu.xml.emit :refer [element-to-xml]]))
+            [lupapalvelu.xml.emit :refer [element-to-xml]]
+            [lupapalvelu.xml.disk-writer :as writer]))
 
 (def maaAineslupaAsia
   [mapping-common/yksilointitieto
@@ -82,7 +83,7 @@
                     attachments)
         xml (element-to-xml canonical maa-aines_to_krysp)]
 
-    (mapping-common/write-to-disk
+    (writer/write-to-disk
       application
       attachments
       statement-attachments

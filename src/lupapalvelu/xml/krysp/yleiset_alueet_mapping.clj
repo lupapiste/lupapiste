@@ -6,7 +6,8 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.document.canonical-common :refer [ya-operation-type-to-schema-name-key]]
             [lupapalvelu.document.yleiset-alueet-canonical :as ya-canonical]
-            [lupapalvelu.xml.emit :refer [element-to-xml]]))
+            [lupapalvelu.xml.emit :refer [element-to-xml]]
+            [lupapalvelu.xml.disk-writer :as writer]))
 
 ;; Tags changed in "yritys-child-modified":
 ;; :kayntiosoite -> :kayntiosoitetieto
@@ -245,7 +246,7 @@
                     attachments)
         xml (yleisetalueet-element-to-xml canonical lupa-name-key krysp-version)]
 
-    (mapping-common/write-to-disk
+    (writer/write-to-disk
       application
       attachments
       statement-attachments
@@ -267,4 +268,4 @@
           canonical (ya-canonical/jatkoaika-to-canonical application lang)
           xml (yleisetalueet-element-to-xml canonical lupa-name-key krysp-version)]
 
-      (mapping-common/write-to-disk application nil nil xml krysp-version output-dir)))
+      (writer/write-to-disk application nil nil xml krysp-version output-dir)))

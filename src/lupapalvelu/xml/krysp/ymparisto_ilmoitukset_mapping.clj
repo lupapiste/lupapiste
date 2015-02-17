@@ -3,7 +3,8 @@
     [lupapalvelu.xml.emit :refer [element-to-xml]]
     [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
     [lupapalvelu.document.ymparisto-ilmoitukset-canonical :as ct]
-    [lupapalvelu.permit :as permit]))
+    [lupapalvelu.permit :as permit]
+    [lupapalvelu.xml.disk-writer :as writer]))
 
 (def ilmoitus_to_krysp
   {:tag :Ilmoitukset
@@ -74,7 +75,7 @@
                     attachments)
         xml (element-to-xml canonical ilmoitus_to_krysp)]
 
-    (mapping-common/write-to-disk
+    (writer/write-to-disk
       application
       attachments
       statement-attachments

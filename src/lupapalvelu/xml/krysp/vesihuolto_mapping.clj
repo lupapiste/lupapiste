@@ -3,7 +3,8 @@
     [lupapalvelu.xml.emit :refer [element-to-xml]]
     [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
     [lupapalvelu.permit :as permit]
-    [lupapalvelu.document.vesihuolto-canonical :as vesihuolto-canonical]))
+    [lupapalvelu.document.vesihuolto-canonical :as vesihuolto-canonical]
+    [lupapalvelu.xml.disk-writer :as writer]))
 
 (def vesihuolto-to-krysp {:tag :Vesihuoltolaki :ns "ymv"
                           :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation "ymparisto/vesihuoltolaki" "2.1.3")
@@ -69,7 +70,7 @@
                     attachments)
         xml (element-to-xml canonical vesihuolto-to-krysp)]
 
-    (mapping-common/write-to-disk
+    (writer/write-to-disk
       application
       attachments
       statement-attachments

@@ -3,7 +3,8 @@
             [lupapalvelu.permit :as permit]
             [sade.util :refer :all]
             [lupapalvelu.document.poikkeamis-canonical :refer [poikkeus-application-to-canonical]]
-            [lupapalvelu.xml.emit :refer [element-to-xml]]))
+            [lupapalvelu.xml.emit :refer [element-to-xml]]
+            [lupapalvelu.xml.disk-writer :as writer]))
 
 (def kerrosalatieto {:tag :kerrosalatieto :child [{:tag :kerrosala :child [{:tag :pintaAla}
                                                   {:tag :paakayttotarkoitusKoodi}]}]})
@@ -118,7 +119,7 @@
                     attachments)
         xml (element-to-xml canonical (get-mapping krysp-version))]
 
-    (mapping-common/write-to-disk
+    (writer/write-to-disk
       application
       attachments
       statement-attachments

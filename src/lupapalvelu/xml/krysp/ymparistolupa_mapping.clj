@@ -5,7 +5,8 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.document.ymparistolupa-canonical :as ymparistolupa-canonical]
             [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
-            [lupapalvelu.xml.emit :refer [element-to-xml]]))
+            [lupapalvelu.xml.emit :refer [element-to-xml]]
+            [lupapalvelu.xml.disk-writer :as writer]))
 
 (def toiminta-aika-children [{:tag :alkuHetki} ; time
                              {:tag :loppuHetki} ; time
@@ -95,7 +96,7 @@
                     attachments)
         xml (element-to-xml canonical ymparistolupa_to_krysp)]
 
-    (mapping-common/write-to-disk
+    (writer/write-to-disk
       application
       attachments
       statement-attachments
