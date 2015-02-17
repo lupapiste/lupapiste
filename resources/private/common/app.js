@@ -212,9 +212,7 @@ var LUPAPISTE = LUPAPISTE || {};
 
       if (LUPAPISTE.Screenmessage) {
         LUPAPISTE.Screenmessage.refresh();
-        $("#sys-notification").applyBindings({
-          screenMessage: LUPAPISTE.Screenmessage
-        });
+        model.screenMessage = LUPAPISTE.Screenmessage;
       }
 
       $("nav").applyBindings(model).css("visibility", "visible");
