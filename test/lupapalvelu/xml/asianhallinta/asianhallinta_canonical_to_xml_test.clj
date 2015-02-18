@@ -74,6 +74,6 @@
               (sxml/get-text maksaja [:Yhteyshenkilo :Yhteystiedot :Email]) => (get-in maksaja-doc [:data :yritys :yhteyshenkilo :yhteystiedot :email]))))
         (fact "Liitteet elements"
           (let [liitteet (sxml/select xml-parsed [:UusiAsia :Liitteet])]
-            liitteet => truthy))))
+            liitteet => seq))))
     ; TODO check xml elements, ie deep elements, document values with _selected are correct in xml etc..
     ))
