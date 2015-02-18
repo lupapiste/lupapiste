@@ -5,7 +5,8 @@
             [lupapalvelu.document.tools :as tools]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
-            [lupapalvelu.document.poikkeamis-canonical-test :as poikkeus-test]))
+            [lupapalvelu.document.poikkeamis-canonical-test :as poikkeus-test]
+            [sade.strings :as ss]))
 
 (fl/facts* "UusiAsia canonical"
   (let [canonical (ah/application-to-asianhallinta-canonical poikkeus-test/poikkari-hakemus "fi") => truthy
@@ -51,5 +52,41 @@
       (fact "Sijainti is correct"
         (get-in canonical [:UusiAsia :Sijainti :Sijaintipiste]) => (str (-> application :location :x) " " (-> application :location :y)))
       (fact "Kiinteistotunnus is human readable"
-        (get-in canonical [:UusiAsia :Kiinteistotunnus]) => (sade.util/to-human-readable-property-id (:propertyId application))))))
+        (get-in canonical [:UusiAsia :Kiinteistotunnus]) => (sade.util/to-human-readable-property-id (:propertyId application))))
+
+    (facts "Canonical with attachments"
+      (let [begin-of-link "sftp://localhost/test/"
+            attachments [{:id :attachment1
+                          :type {:type-group "paapiirustus"
+                                 :type-id    "asemapiirros"}
+                          :latestVersion {:version { :major 1 :minor 0 }
+                                          :fileId "file321"
+                                          :filename "asemapiirros.pdf"
+                                          :contentType "application/pdf"}
+                          :modified 1424248442767}
+                         {:id :attachment2
+                          :type {:type-group "hakija"
+                                 :type-id    "valtakirja"}
+                          :latestVersion {:version { :major 1 :minor 0 }
+                                          :fileId "file123"
+                                          :filename "valtakirja.pdf"
+                                          :contentType "application/pdf"}
+                          :modified 1424248442767}
+                         {:id :attachment3
+                          :type {:type-group "paapiirustus"
+                                 :type-id    "pohjapiirros"}
+                          :versions []}]
+            application-with-attachments (assoc poikkeus-test/poikkari-hakemus :attachments attachments)
+            canonical-attachments (ah/get-attachments-as-canonical application-with-attachments begin-of-link)]
+
+        (fact "Canonical has correct count of attachments"
+          (count canonical-attachments) => 2)
+        (fact "attachment has correct keys"
+          (keys (first canonical-attachments)) => (just [:Kuvaus :Tyyppi :LinkkiLiitteeseen :Luotu :Metatiedot]))
+        (fact "All attachments have 'begin-of-link' prefix"
+          (every? #(-> % :LinkkiLiitteeseen (ss/starts-with begin-of-link)) canonical-attachments) => true)
+        (fact "filenames are in format 'fileId_filename'"
+          (let [att1 (first attachments)
+                canon-att1 (first canonical-attachments)]
+            (ss/suffix (:LinkkiLiitteeseen canon-att1) "/") => (str (-> att1 :latestVersion :fileId) "_" (-> att1 :latestVersion :filename))))))))
 
