@@ -111,6 +111,22 @@
                 link (str begin-of-link attachment-file-name)]]
       (ua-get-liite attachment link))))
 
+(defn get-submitted-application-pdf [{:keys [id submitted]} begin-of-link]
+  {:Kuvaus "Vireille tullut hakemus"
+   :Tyyppi "application/pdf"
+   :LinkkiLiitteeseen (str begin-of-link (writer/get-submitted-filename id))
+   :Luotu (util/to-xml-datetime submitted)
+   :Metatiedot {:Metatieto [{:Avain "type-group" :Arvo "hakemus"}
+                            {:Avain "type-id"    :Arvo "hakemus_vireilletullessa"}]}})
+
+(defn get-current-application-pdf [{:keys [id]} begin-of-link]
+  {:Kuvaus "J\u00e4rjestelm\u00e4\u00e4n siirrett\u00e4ess\u00e4"
+   :Tyyppi "application/pdf"
+   :LinkkiLiitteeseen (str begin-of-link (writer/get-current-filename id))
+   :Luotu (util/to-xml-datetime (sade.core/now))
+   :Metatiedot {:Metatieto [{:Avain "type-group" :Arvo "hakemus"}
+                            {:Avain "type-id"    :Arvo "hakemus_jarjestelmaan_siirrettaessa"}]}})
+
 ;; TaydennysAsiaan, prefix: ta-
 
 
