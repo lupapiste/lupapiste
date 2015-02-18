@@ -1960,7 +1960,7 @@ tr.stamp-attachment-row:hover {
   background-color: #b9febe;
 }
 /* line 38, ../sass/partials/_tables.scss */
-tr.stamp-attachment-row td.attachment-file span.attachment-file-name {
+tr.stamp-attachment-row td.attachment-file-info span.attachment-file-name {
   display: block;
 }
 
@@ -2063,13 +2063,23 @@ table.attachments-template-table td.attachment-group-select a {
   float: right;
 }
 /* line 134, ../sass/partials/_tables.scss */
+table.attachments-template-table td.attachment-type-group, table.attachments-template-table td.attachment-type-id {
+  max-width: 150px;
+  word-wrap: break-word;
+}
+/* line 138, ../sass/partials/_tables.scss */
 table.attachments-template-table td.attachment-help-info {
   max-width: 200px;
   word-wrap: break-word;
 }
-/* line 138, ../sass/partials/_tables.scss */
-table.attachments-template-table td.attachment-file-info {
+/* line 142, ../sass/partials/_tables.scss */
+table.attachments-template-table td.attachment-file-info, table.attachments-template-table td.attachment-file-changed {
   max-width: 230px;
+  word-wrap: break-word;
+}
+/* line 146, ../sass/partials/_tables.scss */
+table.attachments-template-table td.attachment-version-info {
+  max-width: 60px;
   word-wrap: break-word;
 }
 
