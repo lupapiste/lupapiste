@@ -4,6 +4,7 @@
             [clojure.data.xml :refer [emit indent-str]]
             [clojure.java.io :as io]
             [sade.core :refer :all]
+            [sade.strings :as ss]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.pdf-export :as pdf-export]
