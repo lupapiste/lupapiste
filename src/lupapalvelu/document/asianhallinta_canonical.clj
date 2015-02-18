@@ -1,6 +1,7 @@
 (ns lupapalvelu.document.asianhallinta_canonical
   (require [lupapalvelu.document.canonical-common :refer :all]
            [lupapalvelu.document.tools :as tools]
+           [lupapalvelu.xml.disk-writer :as writer]
            [clojure.string :as s]
            [sade.util :as util]
            [lupapalvelu.i18n :as i18n]))
@@ -87,9 +88,7 @@
 (defn- ua-get-sijaintipiste [{:keys [location]}]
   {:Sijaintipiste (str (:x location) " " (:y location))})
 
-;; Public
-
-(defn ua-get-liite [attachment link]
+(defn- ua-get-liite [attachment link]
   "Return attachment in canonical format, with provided link as LinkkiLiitteeseen"
   (util/strip-nils
     {:Kuvaus (get-in attachment [:type :type-id])
@@ -98,6 +97,19 @@
      :Luotu (util/to-xml-date (:modified attachment))
      :Metatiedot {:Metatieto (ua-get-metatiedot attachment)}}))
 
+;; Public
+
+(defn get-attachments-as-canonical [{:keys [attachments]} begin-of-link & [target]]
+  (not-empty
+    (for [attachment attachments
+          :when (and (:latestVersion attachment)
+                  (not= "statement" (-> attachment :target :type))
+                  (not= "verdict" (-> attachment :target :type))
+                  (or (nil? target) (= target (:target attachment))))
+          :let [file-id (get-in attachment [:latestVersion :fileId])
+                attachment-file-name (writer/get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
+                link (str begin-of-link attachment-file-name)]]
+      (ua-get-liite attachment link))))
 
 ;; TaydennysAsiaan, prefix: ta-
 
