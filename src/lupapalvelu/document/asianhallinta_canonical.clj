@@ -75,14 +75,6 @@
                   (when op-name
                     {:Avain "operation" :Arvo op-name})])))
 
-(defn- ua-get-liite [attachment]
-  (util/strip-nils
-    {:Kuvaus (get-in attachment [:type :type-id])
-     :Tyyppi (get-in attachment [:latestVersion :contentType])
-     :LinkkiLiitteeseen (get-in attachment [:latestVersion :filename]) ;TODO resolvaus
-     :Luotu (util/to-xml-date (:modified attachment))
-     :Metatiedot {:Metatieto (ua-get-metatiedot attachment)}}))
-
 (defn- ua-get-toimenpide [operation lang]
   (util/strip-nils
     {:ToimenpideTunnus (:name operation)
@@ -95,12 +87,16 @@
 (defn- ua-get-sijaintipiste [{:keys [location]}]
   {:Sijaintipiste (str (:x location) " " (:y location))})
 
+;; Public
 
-; Attachments are called from mapping where begin-of-link is known
-
-(defn ua-get-liitteet [{:keys [attachments]}]
-  (when (seq attachments)
-    {:Liite (map ua-get-liite attachments)}))
+(defn ua-get-liite [attachment link]
+  "Return attachment in canonical format, with provided link as LinkkiLiitteeseen"
+  (util/strip-nils
+    {:Kuvaus (get-in attachment [:type :type-id])
+     :Tyyppi (get-in attachment [:latestVersion :contentType])
+     :LinkkiLiitteeseen link
+     :Luotu (util/to-xml-date (:modified attachment))
+     :Metatiedot {:Metatieto (ua-get-metatiedot attachment)}}))
 
 
 ;; TaydennysAsiaan, prefix: ta-
