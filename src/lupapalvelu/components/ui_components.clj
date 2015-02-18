@@ -1,5 +1,6 @@
 (ns lupapalvelu.components.ui-components
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
+            [clojure.java.io :as io]
             [lupapalvelu.components.core :as c]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mime :as mime]
@@ -81,7 +82,7 @@
                        "statuses.js" "statusmodel.js" "authorization.js" "vetuma.js"]}
 
    :common-html  {:depends [:selectm-html]
-                  :css ["jquery-ui.css"]
+                  :css ["css/main.css" "jquery-ui.css"]
                   :scss ["sass/main.scss"]
                   :html ["404.html" "footer.html"]}
 
@@ -296,9 +297,6 @@
 
 ; Make sure that all resources are available:
 (doseq [c (keys ui-components)
-        r (mapcat #(c/component-resources ui-components % c) [:js :html :css])]
-  (if (not (fn? r))
-    (let [resource (.getResourceAsStream (clojure.lang.RT/baseLoader) (c/path r))]
-      (if resource
-        (.close resource)
-        (throw (Exception. (str "Resource missing: " r)))))))
+        r (mapcat #(c/component-resources ui-components % c) [:js :html :css :scss])]
+  (when-not (or (fn? r) (io/resource (c/path r)))
+    (throw (Exception. (str "Resource missing: " r)))))
