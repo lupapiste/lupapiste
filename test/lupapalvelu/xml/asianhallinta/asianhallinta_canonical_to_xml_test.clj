@@ -13,11 +13,35 @@
             [sade.common-reader :as reader]
             [sade.xml :as sxml]))
 
+(def attachments [{:id :attachment1
+                   :type {:type-group "paapiirustus"
+                          :type-id    "asemapiirros"}
+                   :latestVersion {:version { :major 1 :minor 0 }
+                                   :fileId "file321"
+                                   :filename "asemapiirros.pdf"
+                                   :contentType "application/pdf"}
+                   :modified 1424248442767}
+                  {:id :attachment2
+                   :type {:type-group "hakija"
+                          :type-id    "valtakirja"}
+                   :latestVersion {:version { :major 1 :minor 0 }
+                                   :fileId "file123"
+                                   :filename "valtakirja.pdf"
+                                   :contentType "application/pdf"}
+                   :modified 1424248442767}
+                  {:id :attachment3
+                   :type {:type-group "paapiirustus"
+                          :type-id    "pohjapiirros"}
+                   :versions []}])
+
 (fact ":tag is set for UusiAsia" (has-tag ua-mapping/uusi-asia) => true)
 
 (fl/facts* "UusiAsia xml from poikkeus"
-  (let [application    poikkeus-test/poikkari-hakemus
+  (let [application    (assoc poikkeus-test/poikkari-hakemus :attachments attachments)
         canonical      (ah/application-to-asianhallinta-canonical application "fi") => truthy
+        canonical      (assoc-in canonical
+                         [:UusiAsia :Liitteet :Liite]
+                         (ah/get-attachments-as-canonical application "sftp://localhost/test/"))
         xml            (element-to-xml canonical ua-mapping/uusi-asia) => truthy
         xml-s          (xml/indent-str xml) => truthy
         permit-type    (:permitType application)
@@ -47,6 +71,9 @@
               (sxml/get-text maksaja [:Yhteyshenkilo :Sukunimi]) => (get-in maksaja-doc [:data :yritys :yhteyshenkilo :henkilotiedot :sukunimi])
               (sxml/get-text maksaja [:Yhteyshenkilo :Yhteystiedot :Puhelinnumero]) => (get-in maksaja-doc [:data :yritys :yhteyshenkilo :yhteystiedot :puhelin])
               (sxml/get-text maksaja [:Yhteyshenkilo :Yhteystiedot :Email]) => (get-in maksaja-doc [:data :yritys :yhteyshenkilo :yhteystiedot :email])
-              (sxml/get-text maksaja [:Yhteyshenkilo :Yhteystiedot :Email]) => (get-in maksaja-doc [:data :yritys :yhteyshenkilo :yhteystiedot :email]))))))
+              (sxml/get-text maksaja [:Yhteyshenkilo :Yhteystiedot :Email]) => (get-in maksaja-doc [:data :yritys :yhteyshenkilo :yhteystiedot :email]))))
+        (fact "Liitteet elements"
+          (let [liitteet (sxml/select xml-parsed [:UusiAsia :Liitteet])]
+            liitteet => truthy))))
     ; TODO check xml elements, ie deep elements, document values with _selected are correct in xml etc..
     ))
