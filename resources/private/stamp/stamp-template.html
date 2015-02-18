@@ -190,24 +190,29 @@
               <td class="attachmentState">
 
                 <span data-bind="attr: {'class': statusName + ' icon',
-                                'data-test-state': state,
-                                'data-test-type': type['type-group'] + '.' + type['type-id'],
-                                'title': loc(statusName + '.title')}">
+                                        'data-test-state': state,
+                                        'data-test-type': type['type-group'] + '.' + type['type-id'],
+                                        'title': loc(statusName + '.title')}">
                 </span>
                 <span data-bind="visible:$data.signed,
                                  attr: {'class': 'icon signed',
-                                 'title': loc('attachment.signed'),
-                                 'data-test-icon': 'signed-' + type['type-group'] + '.' + type['type-id']}">
+                                        'title': loc('attachment.signed'),
+                                        'data-test-icon': 'signed-' + type['type-group'] + '.' + type['type-id']}">
                 </span>
                 <span data-bind="visible:$data.isSent,
                                  attr: {'class': 'icon transfered',
-                                 'title': loc('application.attachmentSentDate') + ' ' + $data.sentDateString,
-                                 'data-test-icon': 'transfered-' + type['type-group'] + '.' + type['type-id']}">
+                                        'title': loc('application.attachmentSentDate') + ' ' + $data.sentDateString,
+                                        'data-test-icon': 'transfered-' + type['type-group'] + '.' + type['type-id']}">
                 </span>
                 <span data-bind="visible:$data.stamped,
                                  attr: {'class': 'icon stamped',
-                                 'title': loc('attachment.stamped'),
-                                 'data-test-icon': 'stamped-' + type['type-group'] + '.' + type['type-id']}">
+                                        'title': loc('attachment.stamped'),
+                                        'data-test-icon': 'stamped-' + type['type-group'] + '.' + type['type-id']}">
+                </span>
+                 <span data-bind="visible: $data.forPrinting,
+                                 attr: {'class': 'icon verdict-attachment',
+                                        'title': loc('attachment.verdict-attachment'),
+                                        'data-test-icon': 'verdict-attachment-' + type['type-group'] + '.' + type['type-id']}">
                 </span>
               </td>
               <td class="attachment-type-group">
