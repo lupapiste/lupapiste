@@ -401,6 +401,8 @@
                                    :link-permit-verdict-required false}
      :julkinen-rakennus           {:schema "uusiRakennus"
                                    :permit-type permit/R
+                                   :schema-data [[["huoneistot" "0" "huoneistonumero"] "000"]
+                                                 [["huoneistot" "0" "muutostapa"] "lis\u00e4ys"]]
                                    :required common-rakval-schemas
                                    :attachments uuden_rakennuksen_liitteet
                                    :add-operation-allowed true
@@ -415,6 +417,8 @@
                                    :link-permit-verdict-required false}
      :muu-uusi-rakentaminen       {:schema "uusiRakennus"
                                    :permit-type permit/R
+                                   :schema-data [[["huoneistot" "0" "huoneistonumero"] "000"]
+                                                 [["huoneistot" "0" "muutostapa"] "lis\u00e4ys"]]
                                    :required common-rakval-schemas
                                    :attachments uuden_rakennuksen_liitteet
                                    :add-operation-allowed true
