@@ -82,7 +82,7 @@
                        "statuses.js" "statusmodel.js" "authorization.js" "vetuma.js"]}
 
    :common-html  {:depends [:selectm-html]
-                  :css ["jquery-ui.css"]
+                  :css ["css/main.css" "jquery-ui.css"]
                   :scss ["sass/main.scss"]
                   :html ["404.html" "footer.html"]}
 
