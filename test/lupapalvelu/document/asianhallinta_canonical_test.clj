@@ -19,7 +19,6 @@
                                                                             :Maksaja
                                                                             :HakemusTunnus
                                                                             :VireilletuloPvm
-                                                                            :Liitteet
                                                                             :Asiointikieli
                                                                             :Toimenpiteet
                                                                             :Sijainti
