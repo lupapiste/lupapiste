@@ -83,10 +83,6 @@
      :Luotu (util/to-xml-date (:modified attachment))
      :Metatiedot {:Metatieto (ua-get-metatiedot attachment)}}))
 
-(defn- ua-get-liitteet [{:keys [attachments]}]
-  (when (seq attachments)
-    {:Liite (map ua-get-liite attachments)}))
-
 (defn- ua-get-toimenpide [operation lang]
   (util/strip-nils
     {:ToimenpideTunnus (:name operation)
@@ -100,6 +96,12 @@
   {:Sijaintipiste (str (:x location) " " (:y location))})
 
 
+; Attachments are called from mapping where begin-of-link is known
+
+(defn ua-get-liitteet [{:keys [attachments]}]
+  (when (seq attachments)
+    {:Liite (map ua-get-liite attachments)}))
+
 
 ;; TaydennysAsiaan, prefix: ta-
 
@@ -111,6 +113,7 @@
 
 
 (defn application-to-asianhallinta-canonical [application lang]
+  "Return canonical, does not contain attachments"
   (let [documents (tools/unwrapped (documents-by-type-without-blanks application))]
     (-> (assoc-in ua-root-element [:UusiAsia :Tyyppi] (ua-get-asian-tyyppi-string application))
       (assoc-in [:UusiAsia :Kuvaus] (:title application))
@@ -119,7 +122,6 @@
       (assoc-in [:UusiAsia :Maksaja] (ua-get-maksaja (first (:maksaja documents))))
       (assoc-in [:UusiAsia :HakemusTunnus] (:id application))
       (assoc-in [:UusiAsia :VireilletuloPvm] (util/to-xml-date (:submitted application)))
-      (assoc-in [:UusiAsia :Liitteet] (ua-get-liitteet application))
       (assoc-in [:UusiAsia :Asiointikieli] lang)
       (assoc-in [:UusiAsia :Toimenpiteet] (ua-get-toimenpiteet application lang))
       (assoc-in [:UusiAsia :Sijainti] (ua-get-sijaintipiste application))
