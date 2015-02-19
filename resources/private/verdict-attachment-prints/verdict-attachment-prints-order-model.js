@@ -101,7 +101,7 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function() {
   };
 
   self.openDialog = function(bindings) {
-    self.init(bindings.application);
+    self.refresh(bindings.application);
     LUPAPISTE.ModalDialog.open(self.dialogSelector);
   };
 
