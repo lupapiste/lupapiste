@@ -43,15 +43,25 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function() {
            util.isValidEmailAddress(self.ordererEmail());
   });
 
-  function enrichAttachment(a) {
+
+  // Helper functions
+
+  var enrichAttachment = function(a) {
     a.filename = a.latestVersion.filename;
     a.contents = a.contents || loc(["attachmentType", a.type["type-group"], a.type["type-id"]]);
     a.orderAmount = ko.observable("2");
     return a;
   }
 
-  function printableAttachment(a) {
+  var printableAttachment = function(a) {
     return a.forPrinting && a.versions && a.versions.length;
+  }
+
+  var normalizeAttachments = function(attachments) {
+    return _.map(attachments, function(a) {
+      a.amount = a.orderAmount();
+      return _.pick(a, ["forPrinting", "amount", "contents", "type", "versions", "filename"]);
+    });
   }
 
   // Open the dialog
@@ -97,12 +107,6 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function() {
 
   // Send the prints order
 
-  function normalizeAttachments(attachments) {
-    return _.map(attachments, function(a) {
-      a.amount = a.orderAmount();
-      return _.pick(a, ["forPrinting", "amount", "contents", "type", "versions", "filename"]);
-    });
-  }
 
   self.orderAttachmentPrints = function() {
     var data = {
