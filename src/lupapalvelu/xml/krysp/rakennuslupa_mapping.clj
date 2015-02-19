@@ -392,7 +392,7 @@
                     attachments-canonical)
 
         xml (element-to-xml canonical (get-mapping krysp-version))
-        attachments-for-write (mapping-common/attachment-details-from-canonical attachments-canonicalc)]
+        attachments-for-write (mapping-common/attachment-details-from-canonical attachments-canonical)]
 
     (writer/write-to-disk application attachments-for-write xml krysp-version output-dir)))
 
