@@ -29,14 +29,18 @@
 (defn write-attachments [attachments output-dir]
   (doseq [attachment attachments]
     (let [file-id (:fileId attachment)
-          filename (:filename attachment)
+          filename (get-file-name-on-server file-id (:filename attachment))
           attachment-file (mongo/download file-id)
           content (:content attachment-file)
           attachment-file-name (str output-dir "/" filename)
           attachment-file (io/file attachment-file-name)]
-      (with-open [out (io/output-stream attachment-file)
-                  in (content)]
-        (io/copy in out)))))
+      (if (nil? content)
+        (do
+          (info "Content for attachment file-id " file-id " is nil")
+          (fail! :error.attachment.no-content))
+        (with-open [out (io/output-stream attachment-file)
+                    in (content)]
+          (io/copy in out))))))
 
 (defn- write-application-pdf-versions [output-dir application submitted-application lang]
   (let [id (:id application)
