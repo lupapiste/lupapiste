@@ -43,6 +43,10 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function() {
            util.isValidEmailAddress(self.ordererEmail());
   });
 
+  self.printsOrderButtonTitle = ko.computed(function () {
+    return self.attachments().length ? loc("verdict-attachment-prints-order.order-dialog.title") : loc("verdict-attachment-prints-order.verdict-attachments-selected");
+  });
+
 
   // Helper functions
 
