@@ -1,7 +1,0 @@
-application.markVerdictAttachments: Merkitse päätöksen liitteet
-application.select-verdict-attachments: Valitse päätöksen liitteet
-verdict-attachments-multiselect.mark-selected-as-verdict-attachments: Merkitse valitut päätöksen liitteiksi
-verdict-attachments-multiselect.select-all: Valitse kaikki
-verdict-attachments-multiselect.select-none: Poista kaikki valinnat
-
-verdict-attachment-prints-order.verdict-attachments-selected: Et voi tilata lupakuvia, ellet ole valinnut yhtään päätöksen liitettä
