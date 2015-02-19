@@ -526,3 +526,11 @@
   (let [attachments (for [statement statement-attachments] (vals statement))]
     (reduce concat (reduce concat attachments))))
 
+(defn attachment-details-from-canonical [attachments]
+  "Returns attachment details as map from canonical"
+  (map
+    (fn [a]
+      {:fileId (get-in a [:Liite :fileId])
+       :filename (get-in a [:Liite :filename])})
+    attachments))
+
