@@ -527,7 +527,7 @@
     (reduce concat (reduce concat attachments))))
 
 (defn attachment-details-from-canonical [attachments]
-  "Returns attachment details as map from canonical"
+  "Returns sequence of attachment details as maps from canonical"
   (map
     (fn [a]
       {:fileId (get-in a [:Liite :fileId])
