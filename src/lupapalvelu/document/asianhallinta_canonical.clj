@@ -115,7 +115,7 @@
   {:Kuvaus "Vireille tullut hakemus"
    :Tyyppi "application/pdf"
    :LinkkiLiitteeseen (str begin-of-link (writer/get-submitted-filename id))
-   :Luotu (util/to-xml-datetime submitted)
+   :Luotu (util/to-xml-date submitted)
    :Metatiedot {:Metatieto [{:Avain "type-group" :Arvo "hakemus"}
                             {:Avain "type-id"    :Arvo "hakemus_vireilletullessa"}]}})
 
@@ -123,7 +123,7 @@
   {:Kuvaus "J\u00e4rjestelm\u00e4\u00e4n siirrett\u00e4ess\u00e4"
    :Tyyppi "application/pdf"
    :LinkkiLiitteeseen (str begin-of-link (writer/get-current-filename id))
-   :Luotu (util/to-xml-datetime (sade.core/now))
+   :Luotu (util/to-xml-date (sade.core/now))
    :Metatiedot {:Metatieto [{:Avain "type-group" :Arvo "hakemus"}
                             {:Avain "type-id"    :Arvo "hakemus_jarjestelmaan_siirrettaessa"}]}})
 
