@@ -460,11 +460,11 @@
    :states     (action/all-states-but [:closed :canceled])
    :input-validators [(partial action/vector-parameters-with-non-blank-items [:selectedAttachmentIds :unSelectedAttachmentIds])]}
   [{:keys [application created] :as command}]
+  ; FIXME tarkastus ettei selected ja unselected listoissa ole duplikaatteja tai molemmissa samoja
   (let [updates-fn  (fn [ids k v] (mongo/generate-array-updates :attachments (:attachments application) #((set ids) (:id %)) k v))]
     (update-application command {$set (merge
                                         (updates-fn selectedAttachmentIds :modified created)
-                                        (updates-fn selectedAttachmentIds :forPrinting true))})
-    (update-application command {$set (merge
+                                        (updates-fn selectedAttachmentIds :forPrinting true)
                                         (updates-fn unSelectedAttachmentIds :modified created)
                                         (updates-fn unSelectedAttachmentIds :forPrinting false))})
     (ok)))

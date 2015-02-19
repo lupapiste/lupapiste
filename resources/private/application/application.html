@@ -1116,7 +1116,19 @@
           <div>
             <table data-bind="foreach: taskGroups" class="tasks">
               <thead>
-                <tr><td colspan="3"><h2 data-bind="text: name" style="padding-top:1em"></h2></td></tr>
+                <tr>
+                  <td colspan="3">
+                    <h2 data-bind="text: name" style="padding-top:1em"></h2>
+                    <div class="task-legend">
+                      <span class="ok icon"></span>
+                      <span data-bind="ltext: 'task.ok.title'"></span>
+                    </div>
+                    <div class="task-legend">
+                      <span class="missing icon"></span>
+                      <span data-bind="ltext: 'task.missing.title'"></span>
+                    </div>
+                  </td>
+                </tr>
                 <tr>
                   <th data-bind="ltext: 'application.taskState'"></th>
                   <th data-bind="ltext: 'application.taskDisplayName'"></th>
