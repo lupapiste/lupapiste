@@ -1,7 +1,8 @@
 (ns lupapalvelu.xml.krysp.mapping-common
   (:require [sade.strings :as ss]
             [sade.util :refer :all]
-            [sade.core :refer :all]))
+            [sade.core :refer :all]
+            [lupapalvelu.xml.disk-writer :as writer]))
 
 (def- rp-yht {"2.1.2" "2.1.0"
               "2.1.3" "2.1.1"
