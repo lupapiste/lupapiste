@@ -24,7 +24,7 @@ LUPAPISTE.ApplicationModel = function() {
     return self.organizationMeta() ? self.organizationMeta().links() : "";
   });
   self.organizationName = ko.computed(function() {
-    return self.organizationMeta() ? self.organizationMeta().name() : [];
+    return self.organizationMeta() ? self.organizationMeta().name() : "";
   });
   self.requiredFieldsFillingObligatory = ko.computed(function() {
     return self.organizationMeta() ? self.organizationMeta().requiredFieldsFillingObligatory() : false;

@@ -455,14 +455,16 @@
   (ok))
 
 (defcommand set-attachments-as-verdict-attachment
-  {:parameters [id attachmentIds isVerdictAttachment]
+  {:parameters [:id selectedAttachmentIds unSelectedAttachmentIds]
    :roles      [:authority]
    :states     (action/all-states-but [:closed :canceled])
-   :input-validators [(partial action/boolean-parameters [:isVerdictAttachment])
-                      (partial action/vector-parameters-with-non-blank-items [:attachmentIds])]}
-  [{:keys [created] :as command}]
-  (doseq [attachment-id attachmentIds]
-    (attachment/update-attachment-key command attachment-id :forPrinting isVerdictAttachment created :set-app-modified? true :set-attachment-modified? false))
-  (ok))
-
-
+   :input-validators [(partial action/vector-parameters-with-non-blank-items [:selectedAttachmentIds :unSelectedAttachmentIds])]}
+  [{:keys [application created] :as command}]
+  (let [updates-fn  (fn [ids k v] (mongo/generate-array-updates :attachments (:attachments application) #((set ids) (:id %)) k v))]
+    (update-application command {$set (merge
+                                        (updates-fn selectedAttachmentIds :modified created)
+                                        (updates-fn selectedAttachmentIds :forPrinting true))})
+    (update-application command {$set (merge
+                                        (updates-fn unSelectedAttachmentIds :modified created)
+                                        (updates-fn unSelectedAttachmentIds :forPrinting false))})
+    (ok)))

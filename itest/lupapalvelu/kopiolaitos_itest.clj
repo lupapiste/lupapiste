@@ -23,12 +23,10 @@
         _ (command pena :submit-application :id app-id)
         app (query-application pena app-id)]
     (fact* "Sonja sets two attachments to be verdict attachments"
-      (command
-        sonja
-        :set-attachments-as-verdict-attachment
+      (command sonja :set-attachments-as-verdict-attachment
         :id app-id
-        :attachmentIds (map :id (take 2 (:attachments app)))
-        :isVerdictAttachment true) => ok?
+        :selectedAttachmentIds (map :id (take 2 (:attachments app)))
+        :unSelectedAttachmentIds []) => ok?
       (let [app (query-application sonja app-id) => map?
             attachments (get-in app [:attachments]) => sequential?]
         (fact "Two attachments have forPrinting flags set to true"
