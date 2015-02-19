@@ -133,8 +133,10 @@
                   :js ["stamp-model.js" "stamp.js"]}
 
    :verdict-attachment-prints {:depends [:common-html]
-                               :html ["verdict-attachment-prints-order-template.html"]
-                               :js ["verdict-attachment-prints-order-model.js"]}
+                               :html ["verdict-attachment-prints-order-template.html"
+                                      "verdict-attachment-prints-multiselect.html"]
+                               :js ["verdict-attachment-prints-order-model.js"
+                                    "verdict-attachment-prints-multiselect-model.js"]}
 
    :attachment   {:depends [:common-html :repository :signing :side-panel]
                   :js ["targeted-attachments-model.js" "attachment.js" "attachmentTypeSelect.js" "attachment-utils.js"]

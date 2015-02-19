@@ -460,15 +460,19 @@
             <span class="icon stamped"></span>
             <span data-bind="ltext: 'attachment.stamped'"></span>
           </div>
+          <div class="attachment-legend">
+            <span class="icon verdict-attachment"></span>
+            <span data-bind="ltext: 'attachment.verdict-attachment'"></span>
+          </div>
 
 
           <div data-bind="if: preAttachmentsByOperation().length == 0 && postAttachmentsByOperation().length == 0">
             <i data-bind="ltext: 'application.attachmentsEmpty'" data-test-id="application-attachments-no-attachments"></i>
           </div>
 
-          <div class="attachment-actions" data-bind="visible: (!$root.application.inPostVerdictState() && preAttachmentsByOperation().length > 0)
-                                                              || ($root.application.inPostVerdictState() && postAttachmentsByOperation().length > 0),
-                                                     template: {name: 'attachment-actions-template'}"></div>
+          <div data-bind="visible: (!$root.application.inPostVerdictState() && preAttachmentsByOperation().length > 0) ||
+                                   ($root.application.inPostVerdictState() && postAttachmentsByOperation().length > 0),
+                          template: {name: 'attachment-actions-template'}"></div>
 
           <div>
             <div data-bind="if: postAttachmentsByOperation().length > 0" data-test-id="application-post-attachments-table">
@@ -481,7 +485,7 @@
             </div>
             <!-- /ko -->
 
-            <div class="attachment-actions" data-bind="template: {name: 'attachment-actions-template'}"></div>
+            <div data-bind="template: {name: 'attachment-actions-template'}"></div>
 
             <!-- ko if: $root.application.inPostVerdictState() -->
             <div data-bind="if: preAttachmentsByOperation().length > 0" data-test-id="application-pre-attachments-table">
@@ -868,12 +872,12 @@
             <span data-bind="ltext: 'verdict.fetch.button'"></span>
           </button>
 
-          <button
-            data-bind="click: $root.verdictAttachmentPrintsOrderModel.openDialog,
-                       disable: $root.verdictModel.processing,
-                       visible: $root.authorization.ok('order-verdict-attachment-prints')"
-            class="btn btn-primary modal"
-            data-test-id="test-order-attachment-prints">
+          <button data-bind="click: $root.verdictAttachmentPrintsOrderModel.openDialog,
+                             enable: !$root.verdictModel.processing() && $root.verdictAttachmentPrintsOrderModel.attachments().length,
+                             visible: $root.authorization.ok('order-verdict-attachment-prints'),
+                             attr: {'title': $root.verdictAttachmentPrintsOrderModel.printsOrderButtonTitle}"
+                  class="btn btn-primary modal"
+                  data-test-id="test-order-attachment-prints">
             <em data-bind="visible: $root.verdictModel.pending" class="button-loader"></em>
             <span data-bind="ltext: 'verdict.orderAttachmentPrints.button'"></span>
           </button>

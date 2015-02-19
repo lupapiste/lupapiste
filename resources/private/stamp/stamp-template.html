@@ -190,26 +190,26 @@
               <td class="attachmentState">
 
                 <span data-bind="attr: {'class': statusName + ' icon',
-                                        'data-test-state': state,
-                                        'data-test-type': type['type-group'] + '.' + type['type-id'],
-                                        'title': loc(statusName + '.title')}">
+                                'data-test-state': state,
+                                'data-test-type': type['type-group'] + '.' + type['type-id'],
+                                'title': loc(statusName + '.title')}">
                 </span>
                 <span data-bind="visible:$data.signed,
                                  attr: {'class': 'icon signed',
-                                        'title': loc('attachment.signed'),
-                                        'data-test-icon': 'signed-' + type['type-group'] + '.' + type['type-id']}">
+                                 'title': loc('attachment.signed'),
+                                 'data-test-icon': 'signed-' + type['type-group'] + '.' + type['type-id']}">
                 </span>
                 <span data-bind="visible:$data.isSent,
                                  attr: {'class': 'icon transfered',
-                                        'title': loc('application.attachmentSentDate') + ' ' + $data.sentDateString,
-                                        'data-test-icon': 'transfered-' + type['type-group'] + '.' + type['type-id']}">
+                                 'title': loc('application.attachmentSentDate') + ' ' + $data.sentDateString,
+                                 'data-test-icon': 'transfered-' + type['type-group'] + '.' + type['type-id']}">
                 </span>
                 <span data-bind="visible:$data.stamped,
                                  attr: {'class': 'icon stamped',
-                                        'title': loc('attachment.stamped'),
-                                        'data-test-icon': 'stamped-' + type['type-group'] + '.' + type['type-id']}">
+                                 'title': loc('attachment.stamped'),
+                                 'data-test-icon': 'stamped-' + type['type-group'] + '.' + type['type-id']}">
                 </span>
-                 <span data-bind="visible: $data.forPrinting,
+                <span data-bind="visible: $data.forPrinting,
                                  attr: {'class': 'icon verdict-attachment',
                                         'title': loc('attachment.verdict-attachment'),
                                         'data-test-icon': 'verdict-attachment-' + type['type-group'] + '.' + type['type-id']}">
@@ -232,7 +232,7 @@
                   </span>
                   <div class="attachment-content-desc" data-bind="if: $data.contents"><span data-bind="text: $data.contents" data-test-id="attachment-contents"></span></div>
               </td>
-              <td class="attachment-file">
+              <td class="attachment-file-info">
                 <span data-bind="if: $data.latestVersion">
                   <a href="#" data-bind="text: latestVersion.filename,
                                          attr: {href: '/api/raw/download-attachment?attachment-id=' + fileId(),
@@ -246,12 +246,12 @@
                 <a data-bind="ltext: 'application.attachmentsAddList', attr: {href: '#!/attachment/' + $root.application.id() + '/' + id, 'data-test-type': type['type-group'] + '.' + type['type-id']}"></a>
                 <!-- /ko -->
               </td>
-              <td>
+              <td class="attachment-version-info">
                 <span data-bind="if: $data.latestVersion">
                   <span data-bind="version: latestVersion.version"></span>
                 </span>
               </td>
-              <td>
+              <td class="attachment-file-changed">
                 <span data-bind="if: $data.latestVersion">
                   <span data-bind="dateString: modified"></span>
                   <span data-bind="fullName: latestVersion.user"></span>
