@@ -1,3 +1,4 @@
 error.organization.scope-not-found: Konfiguraatio puuttuu
 error.integration.casemanagement-version-wrong-form:
 error.integration.casemanagement-version-missing:
+error.attachment.no-content: Liitetiedostoa ei löydy
