@@ -248,8 +248,7 @@
 
     (writer/write-to-disk
       application
-      attachments
-      statement-attachments
+      (concat attachments (mapping-common/flatten-statement-attachments statement-attachments))
       xml
       krysp-version
       output-dir
@@ -268,4 +267,4 @@
           canonical (ya-canonical/jatkoaika-to-canonical application lang)
           xml (yleisetalueet-element-to-xml canonical lupa-name-key krysp-version)]
 
-      (writer/write-to-disk application nil nil xml krysp-version output-dir)))
+      (writer/write-to-disk application nil xml krysp-version output-dir)))

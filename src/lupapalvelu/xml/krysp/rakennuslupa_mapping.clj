@@ -333,7 +333,7 @@
 
         xml (element-to-xml canonical (get-mapping krysp-version))]
 
-    (writer/write-to-disk application all-canonical-attachments nil xml krysp-version output-dir)))
+    (writer/write-to-disk application all-canonical-attachments xml krysp-version output-dir)))
 
 (defn save-katselmus-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
@@ -392,7 +392,7 @@
 
         xml (element-to-xml canonical (get-mapping krysp-version))]
 
-    (writer/write-to-disk application attachments nil xml krysp-version output-dir)))
+    (writer/write-to-disk application attachments xml krysp-version output-dir)))
 
 (defn- map-tyonjohtaja-patevyysvaatimusluokka [canonical]
   (update-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :osapuolettieto :Osapuolet :tyonjohtajatieto]
@@ -453,8 +453,7 @@
 
     (writer/write-to-disk
       application
-      attachments
-      statement-attachments
+      (concat attachments (mapping-common/flatten-statement-attachments statement-attachments))
       xml
       krysp-version
       output-dir

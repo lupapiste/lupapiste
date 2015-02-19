@@ -522,3 +522,7 @@
       canonical
       statement-attachments)))
 
+(defn flatten-statement-attachments [statement-attachments]
+  (let [attachments (for [statement statement-attachments] (vals statement))]
+    (reduce concat (reduce concat attachments))))
+

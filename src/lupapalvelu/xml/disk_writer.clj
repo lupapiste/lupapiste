@@ -38,14 +38,6 @@
                   in (content)]
         (io/copy in out)))))
 
-(defn- flatten-statement-attachments [statement-attachments]
-  (let [attachments (for [statement statement-attachments] (vals statement))]
-    (reduce concat (reduce concat attachments))))
-
-(defn write-statement-attachments [statement-attachments output-dir]
-  (let [attachments (flatten-statement-attachments statement-attachments)]
-    (write-attachments attachments output-dir)))
-
 (defn- write-application-pdf-versions [output-dir application submitted-application lang]
   (let [id (:id application)
         submitted-file (io/file (str output-dir "/" (get-submitted-filename id)))
@@ -56,7 +48,7 @@
 (defn write-to-disk
   "Writes XML string to disk and copies attachments from database. XML is validated before writing.
    Returns a sequence of attachment fileIds that were written to disk."
-  [application attachments statement-attachments xml krysp-version output-dir & [submitted-application lang]]
+  [application attachments xml krysp-version output-dir & [submitted-application lang]]
   {:pre [(string? output-dir)]
    :post [%]}
 
@@ -82,7 +74,6 @@
 
 
     (write-attachments attachments output-dir)
-    (write-statement-attachments statement-attachments output-dir)
 
     (when (and submitted-application lang)
       (write-application-pdf-versions output-dir application submitted-application lang))
@@ -91,6 +82,6 @@
     (fs/rename tempfile outfile))
 
   (->>
-    (concat attachments (flatten-statement-attachments statement-attachments))
+    attachments
     (map #(get-in % [:Liite :fileId]))
     (filter identity)))

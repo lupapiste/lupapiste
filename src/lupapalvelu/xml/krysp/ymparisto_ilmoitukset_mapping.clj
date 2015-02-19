@@ -77,8 +77,7 @@
 
     (writer/write-to-disk
       application
-      attachments
-      statement-attachments
+      (concat attachments (mapping-common/flatten-statement-attachments statement-attachments))
       xml
       krysp-version
       output-dir
