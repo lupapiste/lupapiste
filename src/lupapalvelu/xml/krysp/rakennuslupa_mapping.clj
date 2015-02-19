@@ -331,9 +331,10 @@
                        (assoc-in % [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto :Katselmus :katselmuspoytakirja] canonical-pk)
                        %)))
 
-        xml (element-to-xml canonical (get-mapping krysp-version))]
+        xml (element-to-xml canonical (get-mapping krysp-version))
+        attachments-for-write (mapping-common/attachment-details-from-canonical all-canonical-attachments)]
 
-    (writer/write-to-disk application all-canonical-attachments xml krysp-version output-dir)))
+    (writer/write-to-disk application attachments-for-write xml krysp-version output-dir)))
 
 (defn save-katselmus-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
@@ -390,9 +391,10 @@
                     [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto]
                     attachments-canonical)
 
-        xml (element-to-xml canonical (get-mapping krysp-version))]
+        xml (element-to-xml canonical (get-mapping krysp-version))
+        attachments-for-write (mapping-common/attachment-details-from-canonical attachments-canonicalc)]
 
-    (writer/write-to-disk application attachments-canonical xml krysp-version output-dir)))
+    (writer/write-to-disk application attachments-for-write xml krysp-version output-dir)))
 
 (defn- map-tyonjohtaja-patevyysvaatimusluokka [canonical]
   (update-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :osapuolettieto :Osapuolet :tyonjohtajatieto]
@@ -449,11 +451,13 @@
                     canonical-with-statement-attachments
                     [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto]
                     attachments-with-generated-pdfs)
-        xml (rakennuslupa-element-to-xml canonical krysp-version)]
+        xml (rakennuslupa-element-to-xml canonical krysp-version)
+        all-canonical-attachments (concat attachments-canonical (mapping-common/flatten-statement-attachments statement-attachments))
+        attachments-for-write (mapping-common/attachment-details-from-canonical all-canonical-attachments)]
 
     (writer/write-to-disk
       application
-      (concat attachments-canonical (mapping-common/flatten-statement-attachments statement-attachments))
+      attachments-for-write
       xml
       krysp-version
       output-dir

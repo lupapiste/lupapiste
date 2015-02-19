@@ -117,11 +117,13 @@
                     canonical-with-statement-attachments
                     (conj krysp-polku :liitetieto)
                     attachments-canonical)
-        xml (element-to-xml canonical (get-mapping krysp-version))]
+        xml (element-to-xml canonical (get-mapping krysp-version))
+        all-canonical-attachments (concat attachments-canonical (mapping-common/flatten-statement-attachments statement-attachments))
+        attachments-for-write (mapping-common/attachment-details-from-canonical all-canonical-attachments)]
 
     (writer/write-to-disk
       application
-      (concat attachments-canonical (mapping-common/flatten-statement-attachments statement-attachments))
+      attachments-for-write
       xml
       krysp-version
       output-dir

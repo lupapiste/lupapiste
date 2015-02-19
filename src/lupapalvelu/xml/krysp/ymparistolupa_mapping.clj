@@ -94,11 +94,13 @@
                     canonical-with-statement-attachments
                     [:Ymparistoluvat :ymparistolupatieto :Ymparistolupa :liitetieto]
                     attachments-canonical)
-        xml (element-to-xml canonical ymparistolupa_to_krysp)]
+        xml (element-to-xml canonical ymparistolupa_to_krysp)
+        all-canonical-attachments (concat attachments-canonical (mapping-common/flatten-statement-attachments statement-attachments))
+        attachments-for-write (mapping-common/attachment-details-from-canonical all-canonical-attachments)]
 
     (writer/write-to-disk
       application
-      (concat attachments-canonical (mapping-common/flatten-statement-attachments statement-attachments))
+      attachments-for-write
       xml
       krysp-version
       output-dir

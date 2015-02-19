@@ -68,11 +68,13 @@
                     canonical-with-statement-attachments
                     [:Vesihuoltolaki :vapautukset :Vapautus :liitetieto]
                     attachments-canonical)
-        xml (element-to-xml canonical vesihuolto-to-krysp)]
+        xml (element-to-xml canonical vesihuolto-to-krysp)
+        all-canonical-attachments (concat attachments-canonical (mapping-common/flatten-statement-attachments statement-attachments))
+        attachments-for-write (mapping-common/attachment-details-from-canonical all-canonical-attachments)]
 
     (writer/write-to-disk
       application
-      (concat attachments-canonical (mapping-common/flatten-statement-attachments statement-attachments))
+      attachments-for-write
       xml
       krysp-version
       output-dir

@@ -244,11 +244,13 @@
                     canonical-with-statement-attachments
                     [:YleisetAlueet :yleinenAlueAsiatieto lupa-name-key :liitetieto]
                     attachments-canonical)
-        xml (yleisetalueet-element-to-xml canonical lupa-name-key krysp-version)]
+        xml (yleisetalueet-element-to-xml canonical lupa-name-key krysp-version)
+        all-canonical-attachments (concat attachments-canonical (mapping-common/flatten-statement-attachments statement-attachments))
+        attachments-for-write (mapping-common/attachment-details-from-canonical all-canonical-attachments)]
 
     (writer/write-to-disk
       application
-      (concat attachments-canonical (mapping-common/flatten-statement-attachments statement-attachments))
+      attachments-for-write
       xml
       krysp-version
       output-dir

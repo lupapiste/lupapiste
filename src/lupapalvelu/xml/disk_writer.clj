@@ -28,8 +28,8 @@
 
 (defn write-attachments [attachments output-dir]
   (doseq [attachment attachments]
-    (let [file-id (get-in attachment [:Liite :fileId])
-          filename (get-in attachment [:Liite :filename])
+    (let [file-id (:fileId attachment)
+          filename (:filename attachment)
           attachment-file (mongo/download file-id)
           content (:content attachment-file)
           attachment-file-name (str output-dir "/" filename)
@@ -83,5 +83,5 @@
 
   (->>
     attachments
-    (map #(get-in % [:Liite :fileId]))
+    (map :fileId)
     (filter identity)))
