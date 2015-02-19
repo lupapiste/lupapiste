@@ -150,6 +150,8 @@
 
       attachmentsTab.refresh(applicationModel, authorizationModel);
 
+      verdictAttachmentPrintsOrderModel.refresh(applicationModel);
+
       // Statements
       requestForStatementModel.setApplicationId(app.id);
 

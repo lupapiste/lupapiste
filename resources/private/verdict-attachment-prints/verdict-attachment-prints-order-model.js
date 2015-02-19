@@ -66,8 +66,8 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function() {
 
   // Open the dialog
 
-  self.init = function(bindings) {
-    self.application = ko.toJS(bindings.application);
+  self.refresh = function(applicationModel) {
+    self.application = ko.toJS(applicationModel);
     self.processing(false);
     self.pending(false);
     self.errorMessage("");
@@ -78,7 +78,7 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function() {
                       .value();
     self.attachments(attachments);
 
-    var kopiolaitosMeta = self.application.organizationMeta.kopiolaitos;
+    var kopiolaitosMeta = ko.unwrap(self.application.organizationMeta).kopiolaitos;
     var currentUserName = currentUser.get().firstName() + " " + currentUser.get().lastName();
     var ordererName = (self.application.organizationName || "") + ", " + currentUserName;
 
@@ -101,7 +101,7 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function() {
   };
 
   self.openDialog = function(bindings) {
-    self.init(bindings);
+    self.init(bindings.application);
     LUPAPISTE.ModalDialog.open(self.dialogSelector);
   };
 
