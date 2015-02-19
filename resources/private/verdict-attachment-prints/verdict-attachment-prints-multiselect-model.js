@@ -83,6 +83,7 @@ LUPAPISTE.VerdictAttachmentsMultiselectModel = function(params) {
         unSelectedAttachmentIds: _.map(self.nonSelectedFiles(), "id")
       })
       .success(function() {
+        window.location.hash = "!/application/" + id + "/attachments";
         repository.load(id);
         return false;
       })
