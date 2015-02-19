@@ -1148,7 +1148,7 @@ legend {
   -webkit-box-shadow: inset 0 2px 3px #dddddd, 0 1px 0 white;
   box-shadow: inset 0 2px 3px #dddddd, 0 1px 0 white;
 }
-/* line 31, ../sass/partials/_forms.scss */
+/* line 32, ../sass/partials/_forms.scss */
 [type="text"]:hover, [type="email"]:hover, [type="tel"]:hover, [type="url"]:hover, [type="password"]:hover, select:hover, textarea:hover {
   border-color: #b5b5b5;
 }
