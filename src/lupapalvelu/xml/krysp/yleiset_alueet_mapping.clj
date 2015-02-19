@@ -231,7 +231,7 @@
   (let [lupa-name-key (ya-operation-type-to-schema-name-key
                         (-> application :operations first :name keyword))
         canonical-without-attachments (ya-canonical/application-to-canonical application lang)
-        attachments (mapping-common/get-attachments-as-canonical application begin-of-link)
+        attachments-canonical (mapping-common/get-attachments-as-canonical application begin-of-link)
         statement-given-ids (mapping-common/statements-ids-with-status
                               (get-in canonical-without-attachments
                                 [:YleisetAlueet :yleinenAlueAsiatieto lupa-name-key :lausuntotieto]))
@@ -243,12 +243,12 @@
         canonical (assoc-in
                     canonical-with-statement-attachments
                     [:YleisetAlueet :yleinenAlueAsiatieto lupa-name-key :liitetieto]
-                    attachments)
+                    attachments-canonical)
         xml (yleisetalueet-element-to-xml canonical lupa-name-key krysp-version)]
 
     (writer/write-to-disk
       application
-      (concat attachments (mapping-common/flatten-statement-attachments statement-attachments))
+      (concat attachments-canonical (mapping-common/flatten-statement-attachments statement-attachments))
       xml
       krysp-version
       output-dir

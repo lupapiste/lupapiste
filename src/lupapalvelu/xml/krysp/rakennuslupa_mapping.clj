@@ -385,14 +385,14 @@
   [application lang krysp-version output-dir begin-of-link]
   (let [canonical-without-attachments (unsent-attachments-to-canonical application lang)
 
-        attachments (mapping-common/get-attachments-as-canonical application begin-of-link)
+        attachments-canonical (mapping-common/get-attachments-as-canonical application begin-of-link)
         canonical (assoc-in canonical-without-attachments
                     [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto]
-                    attachments)
+                    attachments-canonical)
 
         xml (element-to-xml canonical (get-mapping krysp-version))]
 
-    (writer/write-to-disk application attachments xml krysp-version output-dir)))
+    (writer/write-to-disk application attachments-canonical xml krysp-version output-dir)))
 
 (defn- map-tyonjohtaja-patevyysvaatimusluokka [canonical]
   (update-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :osapuolettieto :Osapuolet :tyonjohtajatieto]
@@ -427,8 +427,8 @@
                               (get-in canonical-without-attachments
                                 [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto]))
         statement-attachments (mapping-common/get-statement-attachments-as-canonical application begin-of-link statement-given-ids)
-        attachments (mapping-common/get-attachments-as-canonical application begin-of-link)
-        attachments-with-generated-pdfs (conj attachments
+        attachments-canonical (mapping-common/get-attachments-as-canonical application begin-of-link)
+        attachments-with-generated-pdfs (conj attachments-canonical
                                           {:Liite
                                            {:kuvaus "Vireille tullut hakemus"
                                             :linkkiliitteeseen (str begin-of-link (writer/get-submitted-filename (:id application)))
@@ -453,7 +453,7 @@
 
     (writer/write-to-disk
       application
-      (concat attachments (mapping-common/flatten-statement-attachments statement-attachments))
+      (concat attachments-canonical (mapping-common/flatten-statement-attachments statement-attachments))
       xml
       krysp-version
       output-dir

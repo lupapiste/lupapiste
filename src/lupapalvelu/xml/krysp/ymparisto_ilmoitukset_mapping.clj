@@ -67,17 +67,17 @@
         statement-given-ids (mapping-common/statements-ids-with-status
                               (get-in canonical-without-attachments krysp-polku-lausuntoon))
         statement-attachments (mapping-common/get-statement-attachments-as-canonical application begin-of-link statement-given-ids)
-        attachments (mapping-common/get-attachments-as-canonical application begin-of-link)
+        attachments-canonical (mapping-common/get-attachments-as-canonical application begin-of-link)
         canonical-with-statement-attachments (mapping-common/add-statement-attachments canonical-without-attachments statement-attachments krysp-polku-lausuntoon)
         canonical (assoc-in
                     canonical-with-statement-attachments
                     [:Ilmoitukset :melutarina :Melutarina :liitetieto]
-                    attachments)
+                    attachments-canonical)
         xml (element-to-xml canonical ilmoitus_to_krysp)]
 
     (writer/write-to-disk
       application
-      (concat attachments (mapping-common/flatten-statement-attachments statement-attachments))
+      (concat attachments-canonical (mapping-common/flatten-statement-attachments statement-attachments))
       xml
       krysp-version
       output-dir

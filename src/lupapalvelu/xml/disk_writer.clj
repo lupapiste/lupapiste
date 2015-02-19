@@ -48,7 +48,7 @@
 (defn write-to-disk
   "Writes XML string to disk and copies attachments from database. XML is validated before writing.
    Returns a sequence of attachment fileIds that were written to disk."
-  [application attachments xml krysp-version output-dir & [submitted-application lang]]
+  [application attachments xml schema-version output-dir & [submitted-application lang]]
   {:pre [(string? output-dir)]
    :post [%]}
 
@@ -58,9 +58,9 @@
         xml-s      (indent-str xml)]
 
     (try
-      (validator/validate xml-s (permit/permit-type application) krysp-version)
+      (validator/validate xml-s (permit/permit-type application) schema-version)
       (catch org.xml.sax.SAXParseException e
-       (info e "Invalid KRYSP XML message")
+       (info e "Invalid XML message")
        (fail! :error.integration.send :details (.getMessage e))))
 
     (fs/mkdirs output-dir)
