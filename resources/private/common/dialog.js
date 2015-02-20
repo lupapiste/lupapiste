@@ -29,13 +29,13 @@ if (typeof LUPAPISTE === "undefined") {
         document.body.appendChild(maskDiv);
       }
       self.mask = $("#" + self.maskId);
-      self.mask.click(function() {
+      self.mask.click(function(e) {
         var closeOnClick = true;
         $(".window:visible").each(function(index, element) {
           closeOnClick = closeOnClick && !$(element).data("no-interrupts");
         });
         if (closeOnClick) {
-          self.close();
+          self.close(e);
         }
       });
     };
