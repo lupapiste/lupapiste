@@ -11,7 +11,7 @@ Mikko uploads CV
   Mikko logs in
   Click Element  user-name
   Wait for Page to Load  Mikko  Intonen
-  Click enabled by test id  add-attachment
+  Click enabled by test id  test-add-architect-attachment
   Select From List  attachmentType  osapuolet.cv
   Choose File      xpath=//input[@type='file']  ${TXT_TESTFILE_PATH}
   Click enabled by test id  userinfo-upload-ok
