@@ -35,10 +35,12 @@
       <p class="tab-info" data-bind="ltext: 'newRequest.create.desc'"></p>
       <form class="tree-intend">
         <h3 data-bind="ltext: 'newRequest.messageTitle'"></h3>
+        <p data-bind="ltext: 'newRequest.inforequestMessage'"></p>
         <textarea
             class="form-input tree-width"
-            data-bind="attr: {placeholder: loc('newRequest.inforequestMessage')}, textInput: message"
+            data-bind="textInput: message"
             rows="3"
+            autofocus="autofocus"
             data-test-id="create-inforequest-message">
         </textarea>
         <button
