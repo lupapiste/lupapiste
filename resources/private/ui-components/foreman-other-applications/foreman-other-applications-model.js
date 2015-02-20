@@ -71,7 +71,7 @@ LUPAPISTE.ForemanOtherApplicationsModel = function(params) {
     if (_.isEmpty(self.rows())) {
       lastItem = _.first(_.last(self.autoupdatedRows()));
     }
-    var index = lastItem && lastItem.index ? parseInt(lastItem.index) + 1 : 0;
+    var index = lastItem && lastItem.index ? parseInt(lastItem.index, 10) + 1 : 0;
     self.rows.push(createRow(undefined, index.toString()));
   };
 

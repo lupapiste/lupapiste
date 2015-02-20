@@ -67,7 +67,7 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel) {
       "signAttachments": {
         command: "sign-attachments",
         clickCommand: function() {
-          return self.signingModel.init(self.appModel)
+          return self.signingModel.init(self.appModel);
         }
       },
       "attachmentsMoveToBackingSystem": {
@@ -120,7 +120,7 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel) {
 
     if (self.authorizationModel.ok("set-attachment-not-needed")) {
       // The "not needed" functionality is only enabled for attachments in pre-verdict state, so here only going through "preGrouped"
-      var attArrays = _.pluck(preGrouped, 'attachments');
+      var attArrays = _.pluck(preGrouped, "attachments");
       _.each(attArrays, function(attArray) {
         _.each(attArray, function(att) {
 
