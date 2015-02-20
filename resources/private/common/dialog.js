@@ -2,9 +2,7 @@
  * Lupapiste Modal Window module.
  * The modal container element must have 'window' CSS class.
  */
-if (typeof LUPAPISTE === "undefined") {
-  var LUPAPISTE = {};
-}
+var LUPAPISTE = LUPAPISTE || {};
 
 (function($) {
   "use strict";
@@ -41,6 +39,9 @@ if (typeof LUPAPISTE === "undefined") {
     };
 
     self.getMask = function() {
+      if (!self.mask) {
+        self.createMask();
+      }
       return self.mask;
     };
 
@@ -57,7 +58,7 @@ if (typeof LUPAPISTE === "undefined") {
           maskHeight = $(document).height(),
           maskWidth = winWidth;
 
-      self.mask
+      self.getMask()
         .css({"width": maskWidth, "height": maskHeight})
         .fadeTo("fast", 0.5);
 
@@ -154,6 +155,12 @@ if (typeof LUPAPISTE === "undefined") {
   LUPAPISTE.ModalDialog.newYesNoDialog(LUPAPISTE.ModalDialog.dynamicYesNoId);
   LUPAPISTE.ModalDialog.newOkDialog(LUPAPISTE.ModalDialog.dynamicOkId);
 
+  function buttonFallback(button) {
+    if (button && typeof button.fn === "function") {
+      button.fn();
+    }
+  }
+
   /**
    * Expected keys on yesButton and noButton:
    *  - title
@@ -161,8 +168,15 @@ if (typeof LUPAPISTE === "undefined") {
    */
   LUPAPISTE.ModalDialog.showDynamicYesNo = function(title, content, yesButton, noButton, renderOptions) {
     var dialog$ = $("#" + LUPAPISTE.ModalDialog.dynamicYesNoId);
-    LUPAPISTE.ModalDialog.setDialogContent(dialog$, title, content, yesButton, noButton || {title: loc("no")}, renderOptions);
-    LUPAPISTE.ModalDialog.open(dialog$);
+    var no = noButton || {title: loc("no")};
+    if (dialog$.length) {
+      LUPAPISTE.ModalDialog.setDialogContent(dialog$, title, content, yesButton, no, renderOptions);
+      LUPAPISTE.ModalDialog.open(dialog$);
+    } else if (window.confirm(content)) {
+      buttonFallback(yesButton);
+    } else {
+      buttonFallback(no);
+    }
     return dialog$;
   };
   /**
@@ -173,8 +187,13 @@ if (typeof LUPAPISTE === "undefined") {
   LUPAPISTE.ModalDialog.showDynamicOk = function(title, content, okButton, renderOptions) {
     var dialog$ = $("#" + LUPAPISTE.ModalDialog.dynamicOkId);
     var button = okButton || {title: loc("button.ok"), fn: function() { LUPAPISTE.ModalDialog.close(); }};
-    LUPAPISTE.ModalDialog.setDialogContent(dialog$, title, content, button, null, renderOptions);
-    LUPAPISTE.ModalDialog.open(dialog$);
+    if (dialog$.length) {
+      LUPAPISTE.ModalDialog.setDialogContent(dialog$, title, content, button, null, renderOptions);
+      LUPAPISTE.ModalDialog.open(dialog$);
+    } else {
+      alert(content);
+      buttonFallback(button);
+    }
     return dialog$;
   };
 
