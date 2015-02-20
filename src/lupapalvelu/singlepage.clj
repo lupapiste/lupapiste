@@ -7,7 +7,6 @@
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.core :refer :all]
-            [sade.scss-compiler :refer [scss->css]]
             [lupapalvelu.components.core :as c])
   (:import [java.io ByteArrayOutputStream ByteArrayInputStream]
            [java.util.zip GZIPOutputStream]
@@ -116,16 +115,8 @@
       (.write out (ss/utf8-bytes element)))
     (-> out (.toString (.name ss/utf8)) (compress-html) (ss/utf8-bytes))))
 
-(defn compose-scss [component]
-  (let [stream (ByteArrayOutputStream.)]
-    (with-open [out (io/writer stream)]
-      (doseq [src (c/get-resources ui-components :scss component)]
-        (.write out (scss->css (.getPath (-> src c/path io/resource))))))
-    (.toByteArray stream)))
-
 (defn compose [kind component]
   (tracef "Compose %s%s" component kind)
-  (case kind
-    :html (compose-html component)
-    :css  (compose-resource kind component) #_(byte-array (concat (compose-scss component) (compose-resource kind component)))
-    :js   (compose-resource kind component)))
+  (if (= :html kind)
+    (compose-html component)
+    (compose-resource kind component)))

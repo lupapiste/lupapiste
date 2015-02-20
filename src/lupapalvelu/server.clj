@@ -8,6 +8,7 @@
             [sade.security-headers :as headers]
             [sade.email :as email]
             [sade.dummy-email-server]
+            [scss-compiler.core :as scss]
             [lupapalvelu.fixture.fixture-api]
             [lupapalvelu.fixture.minimal]
             [lupapalvelu.fixture.municipality-test-users]
@@ -62,6 +63,9 @@
   (server/add-middleware web/anti-csrf)
   (server/add-middleware web/authentication)
   (server/add-middleware web/session-timeout)
+
+  (scss/initialize :gempath "resources/gems")
+
   (env/in-dev
     (warn "*** Instrumenting performance monitoring")
     (require 'lupapalvelu.perf-mon)
