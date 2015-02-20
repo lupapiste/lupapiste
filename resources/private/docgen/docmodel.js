@@ -1171,7 +1171,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         var label = makeLabel(subSchema, "table", myPath.join("."), true);
         div.appendChild(label);
 
-        var groupHelpText = makeGroupHelpTextSpan(subSchema)
+        var groupHelpText = makeGroupHelpTextSpan(subSchema);
         div.appendChild(groupHelpText);
 
         if (subSchema.approvable) {

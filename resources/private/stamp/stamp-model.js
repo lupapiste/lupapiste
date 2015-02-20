@@ -5,7 +5,7 @@ LUPAPISTE.StampModel = function(params) {
   function allVersionsStamped(versions) {
     return _.every(versions, function(v) {
       return v.stamped;
-    })
+    });
   }
 
   function stampableAttachment(a) {
@@ -19,7 +19,7 @@ LUPAPISTE.StampModel = function(params) {
 
   function enhanceAttachment(a) {
     var selected = _(_.dropRightWhile(a.versions, function(version) {
-      return version.stamped
+      return version.stamped;
     })).last();
 
     a.contentType = selected.contentType;
