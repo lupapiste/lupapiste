@@ -164,7 +164,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     span.className = "group-help-text";
 
     var locKey = schema["group-help"];
-    span.innerHTML = loc(locKey);
+    if (locKey) {
+      span.innerHTML = loc(locKey);
+    }
 
     return span;
   }
