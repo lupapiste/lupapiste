@@ -288,6 +288,16 @@
   }
 }
 
+.task-legend {
+  span {
+    display: inline-block;
+  }
+  span + span {
+      margin-top: 9px;
+      vertical-align: top;
+  }
+}
+
 .ajax-loading-mask {
   display: none;
   position: absolute;
@@ -626,6 +636,10 @@
 }
 
 .tasks-foreman {
+  thead tr:first-child td {
+    padding-left: 0
+  }
+
   .foreman-state {
     &:before {
       content: "(";
