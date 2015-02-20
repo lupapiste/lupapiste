@@ -379,6 +379,11 @@ Do prepare new request
   Set animations on
 
 
+Select attachment operation option from dropdown
+  [Arguments]  ${optionName}
+  Wait until  Element should be visible  xpath=//select[@data-test-id="attachment-operations-select-lower"]
+  Select From List By Value  xpath=//select[@data-test-id="attachment-operations-select-lower"]  ${optionName}
+
 Add empty attachment template
   [Arguments]  ${templateName}  ${topCategory}  ${subCategory}
   Wait until  Element should be visible  attachment-operation-select
@@ -396,6 +401,7 @@ Add attachment
   [Arguments]  ${path}  ${description}  ${operation}
   Wait until        Element should be visible  attachment-operation-select
   Select From List By Value  attachment-operation-select  attachmentsAdd
+  Wait until  Element should be visible  upload-dialog
 
   Select Frame      uploadFrame
   Wait until        Element should be visible  test-save-new-attachment

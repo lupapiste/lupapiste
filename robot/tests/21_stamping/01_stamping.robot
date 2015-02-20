@@ -33,7 +33,7 @@ Mikko adds PDF attachment without comment
   Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${PDF_TESTFILE_NAME3}')]
 
 Mikko does not see stamping button
-  Wait until  Page should not contain element  xpath=//select[@id='attachment-operation-select']//option[@value='stampAttachments']
+  Wait until  Page should not contain element  xpath=//select[@data-test-id="attachment-operations-select-lower"]//option[@value='stampAttachments']
 
 Mikko submits application for authority
   Submit application
@@ -47,11 +47,10 @@ Sonja goes to attachments tab
   Open tab  attachments
 
 Sonja sees stamping button
-  Wait until  Page should contain element  xpath=//select[@id='attachment-operation-select']//option[@value='stampAttachments']
+  Wait until  Page should contain element  xpath=//select[@data-test-id="attachment-operations-select-lower"]//option[@value='stampAttachments']
 
 Sonja clicks stamp button, stamping page opens
-  Wait until  Element should be visible  attachment-operation-select
-  Select From List By Value  attachment-operation-select  stampAttachments
+  Select attachment operation option from dropdown  stampAttachments
   Wait Until  Element should be visible  stamping-container
   Wait Until  Title Should Be  ${appname} - Lupapiste
 
@@ -81,8 +80,7 @@ Sonja inputs new stamping info values
 Sonja can go to attachments tab. When she returns, stamp info fields are persistent.
   Click element  xpath=//div[@id="stamping-container"]//a[@data-test-id="back-to-application-from-stamping"]
   Element should be visible  application-attachments-tab
-  Wait until  Element should be visible  attachment-operation-select
-  Select From List By Value  attachment-operation-select  stampAttachments
+  Select attachment operation option from dropdown  stampAttachments
   Element should be visible  stamp-info
   Textfield value should be  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-text"]  ${STAMP_TEXT}
   Textfield value should be  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-date"]  ${STAMP_DATE}
