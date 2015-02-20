@@ -88,7 +88,6 @@ LUPAPISTE.VerdictAttachmentsMultiselectModel = function(params) {
         return false;
       })
       .error(function(e) {
-        error(e.text);
         notify.error(loc("error.dialog.title"), loc("attachment.set-attachments-as-verdict-attachment.error"));
         repository.load(id);
       })
