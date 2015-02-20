@@ -144,12 +144,19 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel) {
   };
 
   self.sendUnsentAttachmentsToBackingSystem = function() {
-    ajax
-      .command("move-attachments-to-backing-system", {id: self.appModel.id(), lang: loc.getCurrentLanguage()})
+    var doSendAttachments = function() {
+      ajax.command("move-attachments-to-backing-system", {id: self.appModel.id(), lang: loc.getCurrentLanguage()})
       .success(self.appModel.reload)
       .processing(self.appModel.processing)
       .pending(self.appModel.pending)
       .call();
+    };
+    LUPAPISTE.ModalDialog.showDynamicYesNo(
+      loc("application.attachmentsMoveToBackingSystem"),
+      loc("application.attachmentsMoveToBackingSystem.confirmationMessage"),
+      {title: loc("yes"), fn: doSendAttachments},
+      {title: loc("no")}
+    );
   };
 
   self.newAttachment = function() {
@@ -160,16 +167,23 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel) {
       typeSelector: true,
       opSelector: true
     });
-
     LUPAPISTE.ModalDialog.open("#upload-dialog");
   };
 
   self.copyOwnAttachments = function() {
-    ajax.command("copy-user-attachments-to-application", {id: self.appModel.id()})
-      .success(self.appModel.reload)
-      .processing(self.appModel.processing)
-      .call();
-    return false;
+    var doSendAttachments = function() {
+      ajax.command("copy-user-attachments-to-application", {id: self.appModel.id()})
+        .success(self.appModel.reload)
+        .processing(self.appModel.processing)
+        .call();
+      return false;
+    };
+    LUPAPISTE.ModalDialog.showDynamicYesNo(
+      loc("application.attachmentsCopyOwn"),
+      loc("application.attachmentsCopyOwn.confirmationMessage"),
+      {title: loc("yes"), fn: doSendAttachments},
+      {title: loc("no")}
+    );
   };
 
   self.deleteSingleAttachment = function(a) {
