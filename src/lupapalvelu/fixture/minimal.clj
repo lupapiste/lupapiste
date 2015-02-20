@@ -641,7 +641,7 @@
                                 :inforequest-enabled true
                                 :municipality "297"
                                 :permitType "R"
-                                :caseManagement {:ftpUser "ah_kuopio" :enabled true :version "1.1"}}]
+                                :caseManagement {:ftpUser "dev_ah_kuopio" :enabled true :version "1.1"}}]
                        :links [{:name
                                 {:fi "Rakentamisen sähköiset lupapalvelut Kuopiossa"
                                  :sv "Rakentamisen sähköiset lupapalvelut Kuopiossa"}
