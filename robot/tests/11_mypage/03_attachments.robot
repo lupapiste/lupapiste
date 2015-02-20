@@ -22,7 +22,9 @@ Mikko copies his attachments to application
   Set Suite Variable  ${appname}  Omat-liitteet-${secs}
   Create application the fast way  ${appname}  753  753-416-25-30  kerrostalo-rivitalo
   Open tab  attachments
-  Click element  xpath=//div[@id="application-attachments-tab"]//button[@data-test-id="attachments-copy-own"]
+  Wait until  Element should be visible  attachment-operation-select
+  Select From List By Value  attachment-operation-select  attachmentsCopyOwn
+  Confirm  dynamic-yes-no-confirm-dialog
   Wait Until Page Contains  ${TXT_TESTFILE_NAME}
 
 Copy own attachments button is not shown to non-architect
@@ -32,7 +34,7 @@ Copy own attachments button is not shown to non-architect
   Save User Data
   Go Back
   Reload Page
-  Wait Until  Element should not be visible  xpath=//button[@data-test-id='attachments-copy-own']
+  Wait until  Page should contain element  xpath=//select[@id='attachment-operation-select']//option[@value='attachmentsCopyOwn']
 
 #Name should have changed in Swedish page too
 #  Click link  xpath=//*[@data-test-id='lang-sv']

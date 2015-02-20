@@ -90,7 +90,8 @@ Accordions in the Application Summary tab are closed
 
 Stamping page opens, verdict details can be seen
   Open tab  attachments
-  Click enabled by test id  stamp-attachments-btn
+  Wait until  Element should be visible  attachment-operation-select
+  Select From List By Value  attachment-operation-select  stampAttachments
   Wait Until  Element should be visible  stamping-container
   Textfield value should be  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-kuntalupatunnus"]  2013-01
   Page should contain element  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//select[@data-test-id="stamp-info-buildingid-list"]

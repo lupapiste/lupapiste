@@ -21,7 +21,7 @@ Download all attachments should be disabled
 
 New attachment template button should not be visible for Mikko
   [Tags]  attachments
-  Element should not be visible  xpath=//div[@id="application-attachments-tab"]//button[@data-test-id="new-attachment-template-button"]
+  Page should not contain element  xpath=//select[@id='attachment-operation-select']//option[@value='newAttachmentTemplates']
 
 Mikko adds txt attachment without comment
   [Tags]  attachments
@@ -100,7 +100,8 @@ Signature icon is not visible
 Sign all attachments
   [Tags]  attachments
   Tab should be visible  attachments
-  Click element  xpath=//div[@id="application-attachments-tab"]//div[@class="attachment-actions"]//button[@data-test-id="application-sign-attachments-btn"][1]
+  Wait until  Element should be visible  attachment-operation-select
+  Select From List By Value  attachment-operation-select  signAttachments
   Wait Until   Element should be visible  signAttachmentPassword
   Input text by test id  signAttachmentPassword  mikko123
   Click enabled by test id  do-sign-attachments

@@ -381,8 +381,8 @@ Do prepare new request
 
 Add empty attachment template
   [Arguments]  ${templateName}  ${topCategory}  ${subCategory}
-  Wait Until Element Is Visible  xpath=//div[@id="application-attachments-tab"]//button[@data-test-id="new-attachment-template-button"]
-  Click Element  xpath=//div[@id="application-attachments-tab"]//button[@data-test-id="new-attachment-template-button"]
+  Wait until  Element should be visible  attachment-operation-select
+  Select From List By Value  attachment-operation-select  newAttachmentTemplates
   Wait Until Element Is Visible  xpath=//div[@id="dialog-add-attachment-templates"]//input[@data-test-id="selectm-filter-input"]
   Input Text  xpath=//div[@id="dialog-add-attachment-templates"]//input[@data-test-id="selectm-filter-input"]  ${subCategory}
   List Should Have No Selections  xpath=//div[@id="dialog-add-attachment-templates"]//select[@data-test-id="selectm-source-list"]
@@ -394,11 +394,8 @@ Add empty attachment template
 
 Add attachment
   [Arguments]  ${path}  ${description}  ${operation}
-
-  # Go home Selenium, you're drunk! Why the fuck are you clicking the 'process-previous' button?
-  # Must I do everything manually??
-  #Wait and click   xpath=//button[@data-test-id="add-attachment"]
-  Execute Javascript  $('button[data-test-id="add-attachment"]').click();
+  Wait until        Element should be visible  attachment-operation-select
+  Select From List By Value  attachment-operation-select  attachmentsAdd
 
   Select Frame      uploadFrame
   Wait until        Element should be visible  test-save-new-attachment
