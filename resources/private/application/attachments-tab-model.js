@@ -174,22 +174,22 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel) {
 
   self.deleteSingleAttachment = function(a) {
     var attId = _.isFunction(a.id) ? a.id() : a.id;
+    var doDelete = function() {
+      ajax.command("delete-attachment", {id: self.appModel.id(), attachmentId: attId})
+        .success(function() {
+          self.appModel.reload();
+        })
+        .error(function (e) {
+          LUPAPISTE.ModalDialog.showDynamicOk(loc("error.dialog.title"), loc(e.text));
+        })
+        .processing(self.appModel.processing)
+        .call();
+      return false;
+    };
     LUPAPISTE.ModalDialog.showDynamicYesNo(
       loc("attachment.delete.header"),
       loc("attachment.delete.message"),
-      {title: loc("yes"),
-       fn: function() {
-        ajax.command("delete-attachment", {id: self.appModel.id(), attachmentId: attId})
-          .success(function() {
-            self.appModel.reload();
-          })
-          .error(function (e) {
-            LUPAPISTE.ModalDialog.showDynamicOk(loc("error.dialog.title"), loc(e.text));
-          })
-          .processing(self.appModel.processing)
-          .call();
-        return false;
-      }},
+      {title: loc("yes"), fn: doDelete},
       {title: loc("no")});
   };
 
