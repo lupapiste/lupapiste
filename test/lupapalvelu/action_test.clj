@@ -39,7 +39,7 @@
 (facts "Test missing-fields"
   (fact (missing-fields {:data {:foo "Foo" :bar "Bar"}} {:parameters [:foo :bar]}) => empty?)
   (fact (missing-fields {:data {:foo "Foo" :bozo "Bozo"}} {:parameters [:foo :bar]}) => (contains "bar"))
-  (fact (missing-fields {:data {}} {:parameters [:foo :bar]}) => (contains "foo" "bar"))
+  (fact (missing-fields {:data {}} {:parameters [:foo :bar]}) => (just ["foo" "bar"] :in-any-order))
   (fact (missing-fields {:data {:foo "Foo"}} {}) => empty?)
   (fact (missing-fields {:data {:foo "Foo" "_" "Bar"}} {:parameters [:foo]}) => empty?))
 

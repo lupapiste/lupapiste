@@ -24,12 +24,12 @@
 
 (def operation-index
   (reduce
-    (fn [ops [k _]]
+    (fn [ops k]
       (let [localizations (map #(i18n/localize % "operations" (name k)) ["fi" "sv"])
             normalized (map normalize-operation-name localizations)]
         (conj ops {:op (name k) :locs (remove ss/blank? normalized)})))
     []
-    operations/operations))
+    (keys operations/operations)))
 
 (defn- operation-names [filter-search]
   (let [normalized (normalize-operation-name filter-search)]
