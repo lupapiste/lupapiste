@@ -7,7 +7,7 @@
             [lupapalvelu.document.yleiset-alueet-canonical :refer [application-to-canonical]]
             [lupapalvelu.document.canonical-test-common :as ctc]
             [lupapalvelu.document.tools :as tools]
-            [sade.util :refer :all]
+            [sade.util :as util]
             [sade.core :refer :all]))
 
 
@@ -198,17 +198,17 @@
         match-fn-2 #(= "Haetaan kausilupaa" (-> % :LupakohtainenLisatieto :selitysteksti))
         haetaan-kausilupaa-Lisatieto-2 (:LupakohtainenLisatieto (first (filter match-fn-2 lisatieto-vec-2))) => falsey]
 
-    (fact "contains nil" (contains-value? canonical nil?) => falsey)
+    (fact "contains nil" (util/contains-value? canonical nil?) => falsey)
 
     (fact "lupatunnus"
       (count muu-tunnustieto) => 1
       (-> muu-tunnustieto first :MuuTunnus :tunnus) => (:id mainostus-application)
       (-> muu-tunnustieto first :MuuTunnus :sovellus) => "Lupapiste")
 
-    (fact "Kasittelytieto-muutosHetki" (:muutosHetki Kasittelytieto) => (to-xml-datetime (:modified mainostus-application)))
+    (fact "Kasittelytieto-muutosHetki" (:muutosHetki Kasittelytieto) => (util/to-xml-datetime (:modified mainostus-application)))
     (fact "Kasittelytieto-hakemuksenTila" (:hakemuksenTila Kasittelytieto) => "vireill\u00e4")
     (fact "Kasittelytieto-asiatunnus" (:asiatunnus Kasittelytieto) => (:id mainostus-application))
-    (fact "Kasittelytieto-paivaysPvm" (:paivaysPvm Kasittelytieto) => (to-xml-date (:opened mainostus-application)))
+    (fact "Kasittelytieto-paivaysPvm" (:paivaysPvm Kasittelytieto) => (util/to-xml-date (:opened mainostus-application)))
     (fact "Kasittelytieto-kasittelija-etunimi" (:etunimi Kasittelytieto-kasittelija-nimi) => (:firstName sonja))
     (fact "Kasittelytieto-kasittelija-sukunimi" (:sukunimi Kasittelytieto-kasittelija-nimi) => (:lastName sonja))
 
@@ -282,15 +282,15 @@
 
     ;; alku-/loppupvm
     ;;   Mainostustapahtuma
-    (fact "alkuPvm mainostustapahtuma" alkuPvm => (to-xml-date-from-string (-> tapahtuma-info :data :mainostus-tapahtuma-valinta :mainostus-alkaa-pvm :value)))
-    (fact "loppuPvm mainostustapahtuma" loppuPvm => (to-xml-date-from-string (-> tapahtuma-info :data :mainostus-tapahtuma-valinta :mainostus-paattyy-pvm :value)))
+    (fact "alkuPvm mainostustapahtuma" alkuPvm => (util/to-xml-date-from-string (-> tapahtuma-info :data :mainostus-tapahtuma-valinta :mainostus-alkaa-pvm :value)))
+    (fact "loppuPvm mainostustapahtuma" loppuPvm => (util/to-xml-date-from-string (-> tapahtuma-info :data :mainostus-tapahtuma-valinta :mainostus-paattyy-pvm :value)))
     ;;   Viitoitustapahtuma
-    (fact "alkuPvm viitoitustapahtuma" alkuPvm-2 => (to-xml-date-from-string (-> tapahtuma-info :data :viitoitus-tapahtuma-valinta :tapahtuma-aika-alkaa-pvm :value)))
-    (fact "loppuPvm viitoitustapahtuma" loppuPvm-2 => (to-xml-date-from-string (-> tapahtuma-info :data :viitoitus-tapahtuma-valinta :tapahtuma-aika-paattyy-pvm :value)))
+    (fact "alkuPvm viitoitustapahtuma" alkuPvm-2 => (util/to-xml-date-from-string (-> tapahtuma-info :data :viitoitus-tapahtuma-valinta :tapahtuma-aika-alkaa-pvm :value)))
+    (fact "loppuPvm viitoitustapahtuma" loppuPvm-2 => (util/to-xml-date-from-string (-> tapahtuma-info :data :viitoitus-tapahtuma-valinta :tapahtuma-aika-paattyy-pvm :value)))
 
     ;; Toimintajakso, mainostuksen alku- ja loppuhetki
-    (fact "mainostustapahtuma-alku-pvm" mainostustapahtuma-alku-pvm => (to-xml-datetime-from-string (-> tapahtuma-info :data :mainostus-tapahtuma-valinta :tapahtuma-aika-alkaa-pvm :value)))
-    (fact "mainostustapahtuma-loppu-pvm" mainostustapahtuma-loppu-pvm => (to-xml-datetime-from-string (-> tapahtuma-info :data :mainostus-tapahtuma-valinta :tapahtuma-aika-paattyy-pvm :value)))
+    (fact "mainostustapahtuma-alku-pvm" mainostustapahtuma-alku-pvm => (util/to-xml-datetime-from-string (-> tapahtuma-info :data :mainostus-tapahtuma-valinta :tapahtuma-aika-alkaa-pvm :value)))
+    (fact "mainostustapahtuma-loppu-pvm" mainostustapahtuma-loppu-pvm => (util/to-xml-datetime-from-string (-> tapahtuma-info :data :mainostus-tapahtuma-valinta :tapahtuma-aika-paattyy-pvm :value)))
 
     ;; Lisatiedot
     (fact "tapahtuman-nimi" tapahtuman-nimi => (-> tapahtuma-info :data :mainostus-tapahtuma-valinta :tapahtuman-nimi :value))

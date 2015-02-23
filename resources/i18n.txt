@@ -1,0 +1,2 @@
+application.attachmentsMoveToBackingSystem.confirmationMessage: Haluatko lähettää liitteet taustajärjestelmään?
+application.attachmentsCopyOwn.confirmationMessage: Haluatko kopioida liitteesi hakemukselle?

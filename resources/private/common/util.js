@@ -97,6 +97,11 @@ var util = (function($) {
 
   $.fn.ajaxMask = function(on) { return on ? this.ajaxMaskOn() : this.ajaxMaskOff(); };
 
+  function autofocus(baseElem$) {
+    var base$ = baseElem$ || $("body");
+    return base$.find("[autofocus]:visible:first").focus();
+  }
+
   function isNum(s) {
     return s && s.match(/^\s*\d+\s*$/) !== null;
   }
@@ -196,6 +201,7 @@ var util = (function($) {
     buildingName: buildingName,
     nop:          nop,
     constantly:   function(value) { return function() { return value; }; },
+    autofocus:    autofocus,
     isNum:        isNum,
     getIn:        getIn,
         locKeyFromDocPath: locKeyFromDocPath,

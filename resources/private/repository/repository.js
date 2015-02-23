@@ -2,6 +2,7 @@ var repository = (function() {
   "use strict";
 
   var currentlyLoadingId = null;
+  var currentQuery = null;
 
   var loadingSchemas = ajax
     .query("schemas")
@@ -50,17 +51,20 @@ var repository = (function() {
     }
   }
 
+  function loadingErrorHandler(id, e) {
+    currentlyLoadingId = null;
+    error("Application " + id + " not found", e);
+    LUPAPISTE.ModalDialog.open("#dialog-application-load-error");
+  }
+
   function doLoad(id, pending, callback) {
-    var loadingApp = ajax
+    currentQuery = ajax
       .query("application", {id: id})
       .pending(pending)
-      .error(function(e) {
-        currentlyLoadingId = null;
-        error("Application " + id + " not found", e);
-        LUPAPISTE.ModalDialog.open("#dialog-application-load-error");
-      })
+      .error(_.partial(loadingErrorHandler, id))
+      .fail(_.partial(loadingErrorHandler, id))
       .call();
-    $.when(loadingSchemas, loadingApp).then(function(schemasResponse, loadingResponse) {
+    $.when(loadingSchemas, currentQuery).then(function(schemasResponse, loadingResponse) {
       var schemas = schemasResponse[0].schemas,
           loading = loadingResponse[0],
           application = loading.application;
@@ -121,11 +125,11 @@ var repository = (function() {
   var load = _.debounce(
     function(id, pending, callback) {
       if (currentlyLoadingId) {
-        error("Concurrent application loading detected: old=" + currentlyLoadingId  + ", new=" + id);
+        currentQuery.abort();
       }
       currentlyLoadingId = id;
       doLoad(id, pending, callback);
-    }, 250);
+    }, 250, true);
 
   function loaded(pages, f) {
     if (!_.isFunction(f)) {
