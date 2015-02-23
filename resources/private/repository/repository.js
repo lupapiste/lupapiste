@@ -121,15 +121,18 @@ var repository = (function() {
     });
   }
 
-  // debounce repository load
-  var load = _.debounce(
-    function(id, pending, callback) {
-      if (currentlyLoadingId) {
-        currentQuery.abort();
-      }
-      currentlyLoadingId = id;
-      doLoad(id, pending, callback);
-    }, 250, true);
+  function load(id, pending, callback) {
+    if (window.location.hash.indexOf(id) === -1) {
+      // Application is not visible, do not load
+      return;
+    }
+
+    if (currentlyLoadingId) {
+      currentQuery.abort();
+    }
+    currentlyLoadingId = id;
+    doLoad(id, pending, callback);
+  }
 
   function loaded(pages, f) {
     if (!_.isFunction(f)) {
