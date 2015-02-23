@@ -81,7 +81,7 @@ Sonja can go to attachments tab. When she returns, stamp info fields are persist
   Click element  xpath=//div[@id="stamping-container"]//a[@data-test-id="back-to-application-from-stamping"]
   Element should be visible  application-attachments-tab
   Select attachment operation option from dropdown  stampAttachments
-  Element should be visible  stamp-info
+  Wait Until  Element should be visible  stamp-info
   Textfield value should be  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-text"]  ${STAMP_TEXT}
   Textfield value should be  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-date"]  ${STAMP_DATE}
   Textfield value should be  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-organization"]  ${STAMP_ORGANIZATION}
