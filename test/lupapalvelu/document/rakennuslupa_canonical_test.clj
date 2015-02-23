@@ -165,7 +165,7 @@
 
 (def- tyonjohtajan-sijaistus-blank-dates
   (-> tyonjohtaja
-    (dissoc-in [:data :sijaistus :alkamisPvm])
+    (util/dissoc-in [:data :sijaistus :alkamisPvm])
     (assoc-in  [:data :sijaistus :paattymisPvm :value] "")))
 
 (def- rakennuspaikka
@@ -728,7 +728,7 @@
 
     (fact "If only kaavanaste is set, kaavatilanne is not in canonical"
       (let [rakennuspaikka (assoc-in
-                             (dissoc-in (first rakennuspaikka) [:data :kaavatilanne])
+                             (util/dissoc-in (first rakennuspaikka) [:data :kaavatilanne])
                              [:data :kaavanaste]
                              "yleis")
             result (first (get-bulding-places [rakennuspaikka] application-rakennuslupa))]
@@ -743,7 +743,7 @@
         (get-in result [:Rakennuspaikka :kaavanaste]) => "ei tiedossa"))
 
     (fact "When kaavanaste/kaavatilanne are not in rakennuspaikka, they are not in canonical either"
-      (let [rakennuspaikka (dissoc-in rakennuspaikka [:Rakennuspaikka :kaavatilanne])
+      (let [rakennuspaikka (util/dissoc-in rakennuspaikka [:Rakennuspaikka :kaavatilanne])
             result (first (get-bulding-places [rakennuspaikka] application-rakennuslupa))]
 
         (get-in result [:Rakennuspaikka]) => truthy
