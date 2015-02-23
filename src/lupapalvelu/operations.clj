@@ -1,6 +1,5 @@
 (ns lupapalvelu.operations
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
-            [sade.util :refer :all]
             [sade.env :as env]
             [sade.core :refer :all]
             [lupapalvelu.action :refer [defquery]]

@@ -4,7 +4,7 @@
             [clojure.data.xml :refer [emit indent-str]]
             [me.raynes.fs :as fs]
             [sade.strings :as ss]
-            [sade.util :refer :all]
+            [sade.util :as util]
             [sade.core :refer :all]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.permit :as permit]
@@ -462,7 +462,7 @@
 (defn get-Liite [title link attachment type file-id filename & [meta]]
   {:kuvaus title
    :linkkiliitteeseen link
-   :muokkausHetki (to-xml-datetime (:modified attachment))
+   :muokkausHetki (util/to-xml-datetime (:modified attachment))
    :versionumero 1
    :tyyppi type
    :metatietotieto meta
@@ -482,7 +482,7 @@
                    (= (get-in % [:version :minor]) (get-in latestVersion [:version :minor]))))
          (map #(let [firstName (get-in %2 [:user :firstName])
                      lastName (get-in %2 [:user :lastName])
-                     created (to-xml-datetime (:created %2))
+                     created (util/to-xml-datetime (:created %2))
                      count %1]
                 [(get-metatieto (str "allekirjoittaja_" count) (str firstName " " lastName))
                  (get-metatieto (str "allekirjoittajaAika_" count) created)]) (range))
@@ -500,9 +500,9 @@
 
 (defn get-statement-attachments-as-canonical [application begin-of-link allowed-statement-ids]
   (let [statement-attachments-by-id (group-by
-                                      (fn-> :target :id keyword)
+                                      (util/fn-> :target :id keyword)
                                       (filter
-                                        (fn-> :target :type (= "statement"))
+                                        (util/fn-> :target :type (= "statement"))
                                         (:attachments application)))
         canonical-attachments (for [id allowed-statement-ids]
                                 {(keyword id) (for [attachment ((keyword id) statement-attachments-by-id)]

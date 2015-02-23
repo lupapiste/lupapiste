@@ -6,7 +6,7 @@
             [lupapalvelu.xml.emit :refer :all]
             [lupapalvelu.xml.krysp.rakennuslupa-mapping :refer :all]
             [lupapalvelu.factlet :as fl]
-            [sade.util :refer :all]
+            [sade.util :as util]
             [sade.core :refer :all]
             [clojure.data.xml :refer :all]
             [clj-time.core :refer [date-time]]
@@ -18,8 +18,8 @@
 ;;
 
 (facts "Date format"
-  (fact (to-xml-date (date-time 2012 1 14)) => "2012-01-14")
-  (fact (to-xml-date (date-time 2012 2 29)) => "2012-02-29"))
+  (fact (util/to-xml-date (date-time 2012 1 14)) => "2012-01-14")
+  (fact (util/to-xml-date (date-time 2012 2 29)) => "2012-02-29"))
 
 (def- municipality 753)
 
@@ -827,7 +827,7 @@
         MuuTunnus (:MuuTunnus muuTunnustieto) => truthy
         kasittelynTilatieto (:kasittelynTilatieto rakennusvalvontaasia) => truthy]
     ;(clojure.pprint/pprint canonical)
-    (fact "contains nil" (contains-value? canonical nil?) => falsey)
+    (fact "contains nil" (util/contains-value? canonical nil?) => falsey)
     (fact "paasuunnitelija" paasuunnitelija => (contains {:suunnittelijaRoolikoodi "p\u00e4\u00e4suunnittelija"}))
     (fact "Osapuolien maara" (+ (count suunnittelijat) (count tyonjohtajat) (count (:osapuolitieto osapuolet))) => 8)
     (fact "rakennuspaikkojen maara" (count rakennuspaikkatiedot) => 1)
