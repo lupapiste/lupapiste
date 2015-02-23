@@ -51,15 +51,18 @@ var repository = (function() {
     }
   }
 
+  function loadingErrorHandler(id, e) {
+    currentlyLoadingId = null;
+    error("Application " + id + " not found", e);
+    LUPAPISTE.ModalDialog.open("#dialog-application-load-error");
+  }
+
   function doLoad(id, pending, callback) {
     currentQuery = ajax
       .query("application", {id: id})
       .pending(pending)
-      .error(function(e) {
-        currentlyLoadingId = null;
-        error("Application " + id + " not found", e);
-        LUPAPISTE.ModalDialog.open("#dialog-application-load-error");
-      })
+      .error(_.partial(loadingErrorHandler, id))
+      .fail(_.partial(loadingErrorHandler, id))
       .call();
     $.when(loadingSchemas, currentQuery).then(function(schemasResponse, loadingResponse) {
       var schemas = schemasResponse[0].schemas,
