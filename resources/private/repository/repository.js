@@ -62,7 +62,11 @@ var repository = (function() {
       .query("application", {id: id})
       .pending(pending)
       .error(_.partial(loadingErrorHandler, id))
-      .fail(_.partial(loadingErrorHandler, id))
+      .fail(function (jqXHR) {
+        if (jqXHR && jqXHR.status > 0) {
+          loadingErrorHandler(id, jqXHR);
+        }
+      })
       .call();
     $.when(loadingSchemas, currentQuery).then(function(schemasResponse, loadingResponse) {
       var schemas = schemasResponse[0].schemas,
