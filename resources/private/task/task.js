@@ -119,7 +119,7 @@ var taskPageController = (function() {
       t.reject = _.partial(runTaskCommand, "reject-task");
       authorizationModel.refreshWithCallback({id: currentApplicationId}, function() {
         t.approvable = authorizationModel.ok("approve-task") && (t.state === "requires_user_action" || t.state === "requires_authority_action");
-        t.rejectable = authorizationModel.ok("reject-task") && (t.state === "requires_authority_action" || t.state === "ok");
+        t.rejectable = authorizationModel.ok("reject-task");
         t.sendable = authorizationModel.ok("send-task") && (t.state === "sent" || t.state === "ok");
         t.sendTask = sendTask;
         t.statusName = LUPAPISTE.statuses[t.state] || "unknown";
