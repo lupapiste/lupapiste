@@ -45,7 +45,7 @@ Application is submitted
 
 Application is approved and given a verdict
   Sonja logs in
-  Open application  ${appname}  753-416-25-22
+  Open application at index  ${appname}  753-416-25-22  1
   Click enabled by test id  approve-application
   Open tab  verdict
   Submit empty verdict
