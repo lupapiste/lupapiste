@@ -56,7 +56,7 @@ Mikko opens attachment details
   Title Should Be  ${appname} - Lupapiste
 
 Mikko can change related operation
-  Element should be visible  xpath=//select[@data-test-id="attachment-operations-select-lower"]
+  Element should be visible  xpath=//select[@data-test-id="attachment-operation-select"]
   Select From List  xpath=//select[@data-test-id='attachment-operation-select']  Muun rakennuksen rakentaminen - Talo B
 
 Mikko can change size

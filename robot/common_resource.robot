@@ -386,8 +386,7 @@ Select attachment operation option from dropdown
 
 Add empty attachment template
   [Arguments]  ${templateName}  ${topCategory}  ${subCategory}
-  Wait until  Element should be visible  attachment-operation-select
-  Select From List By Value  attachment-operation-select  newAttachmentTemplates
+  Select attachment operation option from dropdown  newAttachmentTemplates
   Wait Until Element Is Visible  xpath=//div[@id="dialog-add-attachment-templates"]//input[@data-test-id="selectm-filter-input"]
   Input Text  xpath=//div[@id="dialog-add-attachment-templates"]//input[@data-test-id="selectm-filter-input"]  ${subCategory}
   List Should Have No Selections  xpath=//div[@id="dialog-add-attachment-templates"]//select[@data-test-id="selectm-source-list"]
@@ -399,8 +398,7 @@ Add empty attachment template
 
 Add attachment
   [Arguments]  ${path}  ${description}  ${operation}
-  Wait until        Element should be visible  attachment-operation-select
-  Select From List By Value  attachment-operation-select  attachmentsAdd
+  Select attachment operation option from dropdown  attachmentsAdd
   Wait until  Element should be visible  upload-dialog
 
   Select Frame      uploadFrame
