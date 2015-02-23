@@ -296,7 +296,7 @@ Click by test id
 Click enabled by test id
   [Arguments]  ${id}
   ${path} =   Set Variable  xpath=//*[@data-test-id='${id}']
-  Wait until  Page Should Contain Element  ${path}
+  Wait Until  Element Should Be Visible  ${path}
   Wait Until  Element Should Be Enabled  ${path}
   Click by test id  ${id}
 
@@ -373,7 +373,11 @@ Do prepare new request
   Execute Javascript  $("div[id='popup-id'] input[data-test-id='create-address']").val("${address}").change();
 
   Set animations off
-  Click enabled by test id  create-continue
+
+  ${path} =   Set Variable  xpath=//div[@id="popup-id"]//button[@data-test-id="create-continue"]
+  Wait until  Element should be enabled  ${path}
+  Click element  ${path}
+
   Select operation path by permit type  ${permitType}
   Wait until  Element should be visible  xpath=//section[@id="create-part-2"]//div[@class="tree-content"]//*[@data-test-id="create-application"]
   Set animations on
