@@ -172,7 +172,7 @@ var LUPAPISTE = LUPAPISTE || {};
     if (dialog$.length) {
       LUPAPISTE.ModalDialog.setDialogContent(dialog$, title, content, yesButton, no, renderOptions);
       LUPAPISTE.ModalDialog.open(dialog$);
-    } else if (window.confirm(content)) {
+    } else if (confirm(content)) {
       buttonFallback(yesButton);
     } else {
       buttonFallback(no);
