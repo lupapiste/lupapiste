@@ -51,25 +51,28 @@ var LUPAPISTE = LUPAPISTE || {};
       if (pageId !== self.currentPage) {
         $(".page").removeClass("visible");
 
-        var page = $("#" + pageId);
-        if (page.length === 0) {
+        var page$ = $("#" + pageId);
+        if (page$.length === 0) {
           pageId = self.startPage;
           pagePath = [];
-          page = $("#" + pageId);
+          page$ = $("#" + pageId);
         }
 
-        if (page.length === 0) {
+        if (page$.length === 0) {
           // Something is seriously wrong, even startPage was not found
           error("Unknown page " + pageId + " and failed to default to " + self.startPage);
           return;
         }
 
-        page.addClass("visible");
+        page$.addClass("visible");
         window.scrollTo(0, 0);
         self.currentPage = pageId;
 
         // Reset title. Pages can override title when they handle page-load event.
         document.title = self.defaultTitle;
+
+        // Set focus on the first field
+        util.autofocus(page$);
       }
 
       hub.send("page-load", { pageId: pageId, pagePath: pagePath, currentHash: "!/" + self.currentHash, previousHash: "!/" + self.previousHash });
@@ -212,9 +215,7 @@ var LUPAPISTE = LUPAPISTE || {};
 
       if (LUPAPISTE.Screenmessage) {
         LUPAPISTE.Screenmessage.refresh();
-        $("#sys-notification").applyBindings({
-          screenMessage: LUPAPISTE.Screenmessage
-        });
+        model.screenMessage = LUPAPISTE.Screenmessage;
       }
 
       $("nav").applyBindings(model).css("visibility", "visible");

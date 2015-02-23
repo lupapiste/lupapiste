@@ -7,7 +7,7 @@
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.yleiset-alueet-canonical :refer [jatkoaika-to-canonical]]
             [lupapalvelu.document.canonical-test-common :as ctc]
-            [sade.util :refer :all]
+            [sade.util :as util]
             [sade.core :refer :all]))
 
 
@@ -135,12 +135,12 @@
         pinta-ala (:pintaala Jatkoaika) => falsey]
 
 
-    (fact "contains nil" (contains-value? canonical nil?) => falsey)
+    (fact "contains nil" (util/contains-value? canonical nil?) => falsey)
 
-    (fact "Kasittelytieto-muutosHetki" (:muutosHetki Kasittelytieto) => (to-xml-datetime (:modified jatkoaika-application)))
+    (fact "Kasittelytieto-muutosHetki" (:muutosHetki Kasittelytieto) => (util/to-xml-datetime (:modified jatkoaika-application)))
     (fact "Kasittelytieto-hakemuksenTila" (:hakemuksenTila Kasittelytieto) => "vireill\u00e4")
     (fact "Kasittelytieto-asiatunnus" (:asiatunnus Kasittelytieto) => (:id jatkoaika-application))
-    (fact "Kasittelytieto-paivaysPvm" (:paivaysPvm Kasittelytieto) => (to-xml-date (:opened jatkoaika-application)))
+    (fact "Kasittelytieto-paivaysPvm" (:paivaysPvm Kasittelytieto) => (util/to-xml-date (:opened jatkoaika-application)))
     (fact "Kasittelytieto-kasittelija-etunimi" (:etunimi Kasittelytieto-kasittelija-nimi) => (:firstName sonja))
     (fact "Kasittelytieto-kasittelija-sukunimi" (:sukunimi Kasittelytieto-kasittelija-nimi) => (:lastName sonja))
 
@@ -214,7 +214,7 @@
     ;;  *** TODO: Testaa paperisen version casea. ***
     ;;
     (fact "Lisaaika-perustelu" perustelu => (-> hankkeen-kuvaus-jatkoaika :data :kuvaus :value))
-    (fact "Lisaaika-alkuPvm" alkuPvm => (to-xml-date-from-string (-> tyoaika-jatkoaika :data :tyoaika-alkaa-pvm :value)))
-    (fact "Lisaaika-loppuPvm" loppuPvm => (to-xml-date-from-string (-> tyoaika-jatkoaika :data :tyoaika-paattyy-pvm :value)))
+    (fact "Lisaaika-alkuPvm" alkuPvm => (util/to-xml-date-from-string (-> tyoaika-jatkoaika :data :tyoaika-alkaa-pvm :value)))
+    (fact "Lisaaika-loppuPvm" loppuPvm => (util/to-xml-date-from-string (-> tyoaika-jatkoaika :data :tyoaika-paattyy-pvm :value)))
     ))
 

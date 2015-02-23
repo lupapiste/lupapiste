@@ -5,7 +5,7 @@ LUPAPISTE.StampModel = function(params) {
   function allVersionsStamped(versions) {
     return _.every(versions, function(v) {
       return v.stamped;
-    })
+    });
   }
 
   function stampableAttachment(a) {
@@ -19,14 +19,14 @@ LUPAPISTE.StampModel = function(params) {
 
   function enhanceAttachment(a) {
     var selected = _(_.dropRightWhile(a.versions, function(version) {
-      return version.stamped
+      return version.stamped;
     })).last();
 
     a.contentType = selected.contentType;
     a.filename = selected.filename;
     a.version = {major: selected.version.major, minor: selected.version.minor};
     a.size = selected.size;
-    a.selected = ko.observable(false);
+    a.selected = ko.observable(a.forPrinting);
     a.status = ko.observable("");
     a.restamp = _(a.versions).last().stamped;
     a.stamped = ko.observable(a.stamped);

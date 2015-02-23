@@ -19,8 +19,8 @@
                             {:name "ac" :type :string :min-len 2 :max-len 3}
                             {:name "b" :type :group
                              :body [{:name "ba" :type :string :min-len 2}
-                                    {:name "bb" :type :boolean}]}
-                            {:name "c" :type :list
+                                    {:name "bb" :type :checkbox}]}
+                            {:name "c" :type :group
                              :body [{:name "ca" :type :string}
                                     {:name "cb" :type :checkbox}]}
                             {:name "d" :type :select :sortBy :displayname
@@ -38,10 +38,10 @@
   (fact (find-by-name (:body schema) ["a"])          => (-> schema :body first))
   (fact (find-by-name (:body schema) ["a" :b])       => {:name "b" :type :group
                                                          :body [{:name "ba" :type :string :min-len 2}
-                                                                {:name "bb" :type :boolean}]})
+                                                                {:name "bb" :type :checkbox}]})
   (fact (find-by-name (:body schema) ["a" "aa"])     => {:name "aa" :type :string})
-  (fact (find-by-name (:body schema) ["a" "b" "bb"]) => {:name "bb" :type :boolean})
-  (fact (find-by-name (:body schema) [:a :b :bb])    => {:name "bb" :type :boolean})
+  (fact (find-by-name (:body schema) ["a" "b" "bb"]) => {:name "bb" :type :checkbox})
+  (fact (find-by-name (:body schema) [:a :b :bb])    => {:name "bb" :type :checkbox})
   (fact (find-by-name (:body schema) ["a" "b" "bc"]) => nil))
 
 ;; Tests for internals:
@@ -146,7 +146,7 @@
   (with-timestamp some-time
     (let [document (new-document schema-with-repetition ..now..)]
       (fact "Single value contains no nested sections"
-        (apply-update document [:single :1 :single2] "foo") => (invalid-with? schema-with-repetition [:err "illegal-key"]))
+        (apply-update (util/dissoc-in document [:data :single]) [:single :1 :single2] "foo") => (invalid-with? schema-with-repetition [:err "illegal-key"]))
 
       (fact "Repeating section happy case"
         (apply-update document [:repeats :1 :single2] "foo") => (valid-against? schema-with-repetition))
@@ -186,75 +186,71 @@
       document => missing-required-fields?
 
       (-> document
-        (apply-update [:a :b :aa] " ")
-        (apply-update [:a :b :ab] " ")) => missing-required-fields?
+          (apply-update [:a :b :aa] "value")
+          (apply-update [:a :b :ab] "value")) => missing-required-fields?
 
       (-> document
-        (apply-update [:a :b :aa] "value")
-        (apply-update [:a :b :ab] "value")) => (valid-against? schema-with-required)
+          (apply-update [:a :b :aa] "value")
+          (apply-update [:a :b :ab] "value")
+          (apply-update [:a :c :0 :raa] "value")) => missing-required-fields?
 
       (-> document
-        (apply-update [:a :b :aa] "value")
-        (apply-update [:a :b :ab] "value")
-        (apply-update [:a :c :0 :raa] "value")) => missing-required-fields?
+          (apply-update [:a :b :aa] "value")
+          (apply-update [:a :b :ab] "value")
+          (apply-update [:a :c :0 :rab] "value")
+          (apply-update [:a :c :6 :rab] "value")) => missing-required-fields?
 
       (-> document
-        (apply-update [:a :b :aa] "value")
-        (apply-update [:a :b :ab] "value")
-        (apply-update [:a :c :0 :rab] "value")
-        (apply-update [:a :c :6 :rab] "value")) => (valid-against? schema-with-required)
+          (apply-update [:a :b :aa] "value")
+          (apply-update [:a :b :ab] "value")
+          (apply-update [:a :c :0 :rab] "value")
+          (apply-update [:a :d :0 :d2 :0 :od1] "value")) => missing-required-fields?
 
       (-> document
-        (apply-update [:a :b :aa] "value")
-        (apply-update [:a :b :ab] "value")
-        (apply-update [:a :c :0 :rab] "value")
-        (apply-update [:a :d :0 :d2 :0 :od1] "value")) => missing-required-fields?
+          (apply-update [:a :b :aa] "value")
+          (apply-update [:a :b :ab] "value")
+          (apply-update [:a :c :0 :rab] "value")
+          (apply-update [:a :d :0 :d2 :0 :od1] "value")
+          (apply-update [:a :d :0 :d2 :0 :od2] "value")) => missing-required-fields?
 
       (-> document
-        (apply-update [:a :b :aa] "value")
-        (apply-update [:a :b :ab] "value")
-        (apply-update [:a :c :0 :rab] "value")
-        (apply-update [:a :d :0 :d2 :0 :od1] "value")
-        (apply-update [:a :d :0 :d2 :0 :od2] "value")) => missing-required-fields?
+          (apply-update [:a :b :aa] "value")
+          (apply-update [:a :b :ab] "value")
+          (apply-update [:a :c :0 :rab] "value")
+          (apply-update [:a :d :0 :d2 :0 :od1] "value")
+          (apply-update [:a :d :0 :d2 :0 :rd] "value")
+          (apply-update [:a :d :0 :d2 :0 :od2] "value")) => (valid-against? schema-with-required)
 
       (-> document
-        (apply-update [:a :b :aa] "value")
-        (apply-update [:a :b :ab] "value")
-        (apply-update [:a :c :0 :rab] "value")
-        (apply-update [:a :d :0 :d2 :0 :od1] "value")
-        (apply-update [:a :d :0 :d2 :0 :rd] "value")
-        (apply-update [:a :d :0 :d2 :0 :od2] "value")) => (valid-against? schema-with-required)
+          (apply-update [:a :b :aa] "value")
+          (apply-update [:a :b :ab] "value")
+          (apply-update [:a :c :0 :rab] "value")
+          (apply-update [:a :d :0 :d2 :0 :od1] "value")
+          (apply-update [:a :d :0 :d2 :0 :rd] "value")
+          (apply-update [:a :d :1 :d2 :6 :rd] "value")) => (valid-against? schema-with-required)))
 
-      (-> document
-        (apply-update [:a :b :aa] "value")
-        (apply-update [:a :b :ab] "value")
-        (apply-update [:a :c :0 :rab] "value")
-        (apply-update [:a :d :0 :d2 :0 :od1] "value")
-        (apply-update [:a :d :0 :d2 :0 :rd] "value")
-        (apply-update [:a :d :1 :d2 :6 :rd] "value")) => (valid-against? schema-with-required))))
+  (facts "with real schemas - required fields for henkilo hakija"
+    (with-timestamp some-time
+      (let [document (-> (new-document (schemas/get-schema (schemas/get-latest-schema-version) "hakija") ..now..)
+                         (apply-update [:_selected] "henkilo")
+                         (apply-update [:henkilo :henkilotiedot :etunimi] "Tauno")
+                         (apply-update [:henkilo :henkilotiedot :sukunimi] "Palo")
+                         (apply-update [:henkilo :henkilotiedot :hetu] "230470-658B")
+                         (apply-update [:henkilo :osoite :katu] "katu")
+                         (apply-update [:henkilo :osoite :postinumero] "12345")
+                         (apply-update [:henkilo :osoite :postitoimipaikannimi] "Demola")
+                         (apply-update [:henkilo :yhteystiedot :email] "tauno@example.com")
+                         (apply-update [:henkilo :yhteystiedot :puhelin] "050"))]
 
-(facts "with real schemas - required fields for henkilo hakija"
-  (with-timestamp some-time
-    (let [document (-> (new-document (schemas/get-schema (schemas/get-latest-schema-version) "hakija") ..now..)
-                   (apply-update [:_selected] "henkilo")
-                   (apply-update [:henkilo :henkilotiedot :etunimi] "Tauno")
-                   (apply-update [:henkilo :henkilotiedot :sukunimi] "Palo")
-                   (apply-update [:henkilo :henkilotiedot :hetu] "230470-658B")
-                   (apply-update [:henkilo :osoite :katu] "katu")
-                   (apply-update [:henkilo :osoite :postinumero] "12345")
-                   (apply-update [:henkilo :osoite :postitoimipaikannimi] "Demola")
-                   (apply-update [:henkilo :yhteystiedot :email] "tauno@example.com")
-                   (apply-update [:henkilo :yhteystiedot :puhelin] "050"))]
-
-      document => valid?
-      (-> document
-        (apply-update [:_selected])) => valid?
-      (-> document
-        (apply-update [:henkilo :osoite :katu])) => missing-required-fields?
-      (-> document
-        (apply-update [:henkilo :osoite :postinumero])) => missing-required-fields?
-      (-> document
-        (apply-update [:henkilo :osoite :postitoimipaikannimi])) => missing-required-fields?)))
+        document => valid?
+        (-> document
+            (apply-update [:_selected])) => valid?
+        (-> document
+            (apply-update [:henkilo :osoite :katu])) => missing-required-fields?
+        (-> document
+            (apply-update [:henkilo :osoite :postinumero])) => missing-required-fields?
+        (-> document
+            (apply-update [:henkilo :osoite :postitoimipaikannimi])) => missing-required-fields?))))
 
 (facts "with real schemas - required fields for yritys hakija"
   (with-timestamp some-time

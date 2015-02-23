@@ -1,5 +1,6 @@
 (ns lupapalvelu.attachment-api
   (:require [clojure.java.io :as io]
+            [clojure.set :refer [intersection]]
             [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn warnf error errorf fatal]]
             [monger.operators :refer :all]
             [swiss.arrows :refer [-<> -<>>]]
@@ -438,10 +439,8 @@
    :states     (action/all-states-but [:answered :sent :closed :canceled])
    :input-validators [validate-meta validate-scale validate-size validate-operation]}
   [{:keys [application user created] :as command}]
-
   (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
     (fail! :error.pre-verdict-attachment))
-
   (doseq [[k v] meta]
     (attachment/update-attachment-key command attachmentId k v created :set-app-modified? true :set-attachment-modified? true))
   (ok))
@@ -455,14 +454,21 @@
   (ok))
 
 (defcommand set-attachments-as-verdict-attachment
-  {:parameters [id attachmentIds isVerdictAttachment]
+  {:parameters [:id selectedAttachmentIds unSelectedAttachmentIds]
    :roles      [:authority]
    :states     (action/all-states-but [:closed :canceled])
-   :input-validators [(partial action/boolean-parameters [:isVerdictAttachment])
-                      (partial action/vector-parameters-with-non-blank-items [:attachmentIds])]}
-  [{:keys [created] :as command}]
-  (doseq [attachment-id attachmentIds]
-    (attachment/update-attachment-key command attachment-id :forPrinting isVerdictAttachment created :set-app-modified? true :set-attachment-modified? false))
-  (ok))
-
-
+   :input-validators [(partial action/vector-parameters-with-non-blank-items [:selectedAttachmentIds :unSelectedAttachmentIds])
+                      (fn [{{:keys [selectedAttachmentIds unSelectedAttachmentIds]} :data}]
+                        (when (seq (intersection (set selectedAttachmentIds) (set unSelectedAttachmentIds)))
+                          (error "setting verdict attachments, overlapping ids in: " selectedAttachmentIds unSelectedAttachmentIds)
+                          (fail :error.select-verdict-attachments.overlapping-ids)))]}
+  [{:keys [application created] :as command}]
+  (let [updates-fn  (fn [ids k v] (mongo/generate-array-updates :attachments (:attachments application) #((set ids) (:id %)) k v))]
+    (when (or (seq selectedAttachmentIds) (seq unSelectedAttachmentIds))
+      (update-application command {$set (merge
+                                          (updates-fn (concat selectedAttachmentIds unSelectedAttachmentIds) :modified created)
+                                          (when (seq selectedAttachmentIds)
+                                            (updates-fn selectedAttachmentIds   :forPrinting true))
+                                          (when (seq unSelectedAttachmentIds)
+                                            (updates-fn unSelectedAttachmentIds :forPrinting false)))}))
+    (ok)))

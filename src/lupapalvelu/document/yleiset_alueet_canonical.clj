@@ -1,15 +1,15 @@
 (ns lupapalvelu.document.yleiset-alueet-canonical
   (:require [lupapalvelu.document.canonical-common :refer :all]
             [lupapalvelu.document.tools :as tools]
-            [sade.util :refer :all]
+            [sade.util :as util]
             [sade.core :refer :all]
             [clojure.walk :as walk]))
 
 (defn get-kasittelytieto [application]
-  {:Kasittelytieto {:muutosHetki (to-xml-datetime (:modified application))
+  {:Kasittelytieto {:muutosHetki (util/to-xml-datetime (:modified application))
                     :hakemuksenTila (application-state-to-krysp-state (keyword (:state application)))
                     :asiatunnus (:id application)
-                    :paivaysPvm (to-xml-date (state-timestamp application))
+                    :paivaysPvm (util/to-xml-date (state-timestamp application))
                     :kasittelija (let [handler (:authority application)]
                                    (if (seq handler)
                                      {:henkilotieto {:Henkilo {:nimi {:etunimi  (:firstName handler)
@@ -17,9 +17,9 @@
                                      empty-tag))}})
 
 (defn- get-postiosoite [yritys]
-  (let [teksti (assoc-when {} :teksti (-> yritys :osoite :katu))]
+  (let [teksti (util/assoc-when {} :teksti (-> yritys :osoite :katu))]
     (not-empty
-      (assoc-when {}
+      (util/assoc-when {}
         :osoitenimi teksti
         :postinumero (-> yritys :osoite :postinumero)
         :postitoimipaikannimi (-> yritys :osoite :postitoimipaikannimi)))))
@@ -27,7 +27,7 @@
 (defn- get-yritys [yritys]
   (let [postiosoite (get-postiosoite yritys)
         yritys-basic (not-empty
-                       (assoc-when {}
+                       (util/assoc-when {}
                          :nimi (-> yritys :yritysnimi)
                          :liikeJaYhteisotunnus (-> yritys :liikeJaYhteisoTunnus)))]
     (if postiosoite
@@ -42,7 +42,7 @@
   ;; Henkilo-tyyppisella hakijalla kaikki kulkee henkilotiedon alla.
   (let [hakija (not-empty
                  (if (= "yritys" (:_selected hakija-doc))
-                   (let [yritys (deep-merge (:yritys (get-osapuoli-data hakija-doc :hakija ))
+                   (let [yritys (util/deep-merge (:yritys (get-osapuoli-data hakija-doc :hakija ))
                                   (get-yritys (:yritys hakija-doc)))
                          henkilo (get-henkilo (-> hakija-doc :yritys :yhteyshenkilo))]
                      (when (and yritys henkilo)
@@ -54,9 +54,9 @@
       (update-in hakija [:Osapuoli] merge {:rooliKoodi "hakija"}))))
 
 (defn- get-vastuuhenkilo-osoitetieto [osoite]
-  (let [osoitenimi (assoc-when {} :teksti (-> osoite :katu))
+  (let [osoitenimi (util/assoc-when {} :teksti (-> osoite :katu))
         osoite (not-empty
-                 (assoc-when {}
+                 (util/assoc-when {}
                    :osoitenimi osoitenimi
                    :postinumero (-> osoite :postinumero)
                    :postitoimipaikannimi (-> osoite :postitoimipaikannimi)))]
@@ -66,14 +66,14 @@
   (let [content (not-empty
                   (if (= type "yritys")
                     ;; yritys-tyyppinen vastuuhenkilo
-                    (assoc-when {}
+                    (util/assoc-when {}
                       :sukunimi (-> vastuuhenkilo :yritys :yhteyshenkilo :henkilotiedot :sukunimi)
                       :etunimi (-> vastuuhenkilo :yritys :yhteyshenkilo :henkilotiedot :etunimi)
                       :osoitetieto (get-vastuuhenkilo-osoitetieto (-> vastuuhenkilo :yritys :osoite))
                       :puhelinnumero (-> vastuuhenkilo :yritys :yhteyshenkilo :yhteystiedot :puhelin)
                       :sahkopostiosoite (-> vastuuhenkilo :yritys :yhteyshenkilo :yhteystiedot :email))
                     ;; henkilo-tyyppinen vastuuhenkilo
-                    (assoc-when {}
+                    (util/assoc-when {}
                       :sukunimi (-> vastuuhenkilo :henkilo :henkilotiedot :sukunimi)
                       :etunimi (-> vastuuhenkilo :henkilo :henkilotiedot :etunimi)
                       :osoitetieto (get-vastuuhenkilo-osoitetieto (-> vastuuhenkilo :henkilo :osoite))
@@ -89,7 +89,7 @@
       (merge
         {:Vastuuhenkilo vastuuhenkilo}
         (when (= "yritys" type)
-          (when-let [yritys (deep-merge (:yritys (get-osapuoli-data tyomaasta-vastaava :tyomaastaVastaava ))
+          (when-let [yritys (util/deep-merge (:yritys (get-osapuoli-data tyomaasta-vastaava :tyomaastaVastaava ))
                                   (get-yritys (:yritys tyomaasta-vastaava)))]
             {:Osapuoli {:yritystieto {:Yritys yritys}
                         :rooliKoodi "ty\u00f6nsuorittaja"}}))))))
@@ -100,7 +100,7 @@
                ;; yritys-tyyppinen hakija/maksaja, siirretaan yritysosa omaksi osapuolekseen
                (let [vastuuhenkilo-roolikoodi (if is-maksaja-doc "maksajan vastuuhenkil\u00f6" "hankkeen vastuuhenkil\u00f6")
                      vastuuhenkilo (get-vastuuhenkilo doc "yritys" vastuuhenkilo-roolikoodi)
-                     yritys (deep-merge (:yritys (get-osapuoli-data doc :tyomaastaVastaava ))
+                     yritys (util/deep-merge (:yritys (get-osapuoli-data doc :tyomaastaVastaava ))
                                         (get-yritys (:yritys doc)))]
                  (when (and vastuuhenkilo yritys)
                    {:Vastuuhenkilo vastuuhenkilo
@@ -114,8 +114,8 @@
                                           {:rooliKoodi "hakija"})))))
 
 (defn- get-mainostus-alku-loppu-hetki [mainostus-viitoitus-tapahtuma]
-  {:Toimintajakso {:alkuHetki (to-xml-datetime-from-string (:tapahtuma-aika-alkaa-pvm mainostus-viitoitus-tapahtuma))
-                   :loppuHetki (to-xml-datetime-from-string (:tapahtuma-aika-paattyy-pvm mainostus-viitoitus-tapahtuma))}})
+  {:Toimintajakso {:alkuHetki (util/to-xml-datetime-from-string (:tapahtuma-aika-alkaa-pvm mainostus-viitoitus-tapahtuma))
+                   :loppuHetki (util/to-xml-datetime-from-string (:tapahtuma-aika-paattyy-pvm mainostus-viitoitus-tapahtuma))}})
 
 (defn- get-mainostus-viitoitus-lisatiedot [mainostus-viitoitus-tapahtuma]
   [{:LupakohtainenLisatieto
@@ -129,9 +129,9 @@
       {:selitysteksti "Haetaan kausilupaa" :arvo arvo})}])
 
 (defn- get-construction-ready-info [application]
-  {:kayttojaksotieto {:Kayttojakso {:alkuHetki (to-xml-datetime (:started application))
-                                    :loppuHetki (to-xml-datetime (:closed application))}}
-   :valmistumisilmoitusPvm (to-xml-date (now))})
+  {:kayttojaksotieto {:Kayttojakso {:alkuHetki (util/to-xml-datetime (:started application))
+                                    :loppuHetki (util/to-xml-datetime (:closed application))}}
+   :valmistumisilmoitusPvm (util/to-xml-date (now))})
 
 
 ;; Configs
@@ -208,22 +208,22 @@
         ;;       Mainostuslupa's mainostusaika is put into alku-pvm and loppu-pvm, and tapahtuma-aika into toimintajaksotieto.
         ;;       On the contrary, Viitoituslupa's tapahtuma-aika is put into alku-pvm and loppu-pvm.
         alku-pvm (if (:dummy-alku-and-loppu-pvm config)
-                   (to-xml-date (:submitted application))
+                   (util/to-xml-date (:submitted application))
                    (if (:mainostus-viitoitus-tapahtuma-pvm config)
                      (or
-                       (to-xml-date-from-string (-> main-viit-tapahtuma :mainostus-alkaa-pvm))
-                       (to-xml-date-from-string (-> main-viit-tapahtuma :tapahtuma-aika-alkaa-pvm)))
-                     (to-xml-date-from-string (-> tyoaika-doc :tyoaika-alkaa-pvm))))
+                       (util/to-xml-date-from-string (-> main-viit-tapahtuma :mainostus-alkaa-pvm))
+                       (util/to-xml-date-from-string (-> main-viit-tapahtuma :tapahtuma-aika-alkaa-pvm)))
+                     (util/to-xml-date-from-string (-> tyoaika-doc :tyoaika-alkaa-pvm))))
         loppu-pvm (if (:dummy-alku-and-loppu-pvm config)
-                    (to-xml-date (:modified application))
+                    (util/to-xml-date (:modified application))
                     (if (:mainostus-viitoitus-tapahtuma-pvm config)
                       (or
-                        (to-xml-date-from-string (-> main-viit-tapahtuma :mainostus-paattyy-pvm))
-                        (to-xml-date-from-string (-> main-viit-tapahtuma :tapahtuma-aika-paattyy-pvm)))
-                      (to-xml-date-from-string (-> tyoaika-doc :tyoaika-paattyy-pvm))))
+                        (util/to-xml-date-from-string (-> main-viit-tapahtuma :mainostus-paattyy-pvm))
+                        (util/to-xml-date-from-string (-> main-viit-tapahtuma :tapahtuma-aika-paattyy-pvm)))
+                      (util/to-xml-date-from-string (-> tyoaika-doc :tyoaika-paattyy-pvm))))
         maksaja (get-yritys-and-henkilo (-> documents-by-type :yleiset-alueet-maksaja first :data) "maksaja")
         maksajatieto-2-1-3 (get-maksajatiedot (-> documents-by-type :yleiset-alueet-maksaja first))
-        maksajatieto (when maksaja {:Maksaja (deep-merge maksajatieto-2-1-3 (:Osapuoli maksaja))})
+        maksajatieto (when maksaja {:Maksaja (util/deep-merge maksajatieto-2-1-3 (:Osapuoli maksaja))})
         tyomaasta-vastaava (when (:tyomaasta-vastaava config)
                              (get-tyomaasta-vastaava (-> documents-by-type :tyomaastaVastaava first :data)))
         ;; If tyomaasta-vastaava does not have :osapuolitieto, we filter the resulting nil out.
@@ -285,7 +285,7 @@
                                   {:toimintajaksotieto (get-mainostus-alku-loppu-hetki main-viit-tapahtuma)})
                                 (when (:closed application)
                                   (get-construction-ready-info application)))}]
-    (strip-nils body)))
+    (util/strip-nils body)))
 
 (defn application-to-canonical
   "Transforms application mongodb-document to canonical model."
@@ -313,12 +313,12 @@
 
         tyoaika-doc (-> documents-by-type :tyo-aika-for-jatkoaika first :data)
         alku-pvm (if-let [tyoaika-alkaa-value (-> tyoaika-doc :tyoaika-alkaa-pvm)]
-                   (to-xml-date-from-string tyoaika-alkaa-value)
-                   (to-xml-date (:submitted application)))
-        loppu-pvm (to-xml-date-from-string (-> tyoaika-doc :tyoaika-paattyy-pvm))
+                   (util/to-xml-date-from-string tyoaika-alkaa-value)
+                   (util/to-xml-date (:submitted application)))
+        loppu-pvm (util/to-xml-date-from-string (-> tyoaika-doc :tyoaika-paattyy-pvm))
         maksaja (get-yritys-and-henkilo (-> documents-by-type :yleiset-alueet-maksaja first :data) "maksaja")
         maksajatieto-2-1-3 (get-maksajatiedot (-> documents-by-type :yleiset-alueet-maksaja first))
-        maksajatieto (when maksaja {:Maksaja (deep-merge maksajatieto-2-1-3 (:Osapuoli maksaja))})
+        maksajatieto (when maksaja {:Maksaja (util/deep-merge maksajatieto-2-1-3 (:Osapuoli maksaja))})
         osapuolitieto (vec (filter :Osapuoli [hakija]))
         vastuuhenkilotieto (vec (filter :Vastuuhenkilo [;hakija
                                                         maksaja]))

@@ -374,10 +374,10 @@
 (defn new-document
   "Creates an empty document out of schema"
   [schema created]
-  {:id           (mongo/create-id)
-   :created      created
-   :schema-info  (:info schema)
-   :data         {}})
+  {:id          (mongo/create-id)
+   :created     created
+   :schema-info (:info schema)
+   :data        (tools/create-document-data schema tools/default-values)})
 
 ;;
 ;; Convert data

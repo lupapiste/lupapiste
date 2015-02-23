@@ -159,6 +159,18 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     });
   }
 
+  function makeGroupHelpTextSpan(schema) {
+    var span = document.createElement("span");
+    span.className = "group-help-text";
+
+    var locKey = schema["group-help"];
+    if (locKey) {
+      span.innerHTML = loc(locKey);
+    }
+
+    return span;
+  }
+
   function getUpdateCommand() {
     return (options && options.updateCommand) ? options.updateCommand : "update-doc";
   }
@@ -650,6 +662,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     var label = makeLabel(subSchema, "group", myPath, true);
     div.appendChild(label);
+
+    var groupHelpText = makeGroupHelpTextSpan(subSchema);
+    div.appendChild(groupHelpText);
 
     if (subSchema.approvable) {
       label.appendChild(self.makeApprovalButtons(path, myModel));
@@ -1155,6 +1170,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
         var label = makeLabel(subSchema, "table", myPath.join("."), true);
         div.appendChild(label);
+
+        var groupHelpText = makeGroupHelpTextSpan(subSchema);
+        div.appendChild(groupHelpText);
+
         if (subSchema.approvable) {
           div.appendChild(self.makeApprovalButtons(path, models));
         }
