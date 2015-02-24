@@ -25,7 +25,22 @@
                                                                             :Sijainti
                                                                             :Kiinteistotunnus] :in-any-order))
       (fact "HakemusTunnus is LP-753-2013-00001" (get-in canonical [:UusiAsia :HakemusTunnus]) => "LP-753-2013-00001")
+      (fact "Kuvaus" (get-in canonical [:UusiAsia :Kuvaus]) => "S\u00f6derkullantie 146")
+      (fact "Kuntanumero" (get-in canonical [:UusiAsia :Kuntanumero]) => "753")
       (fact "First Hakija of Hakijat has Henkilo" (keys (first (get-in canonical [:UusiAsia :Hakijat :Hakija]))) => (just [:Henkilo]))
+      (fl/facts* "Hakija"
+        (let [hakijat (get-in canonical [:UusiAsia :Hakijat :Hakija]) => truthy
+              data    (tools/unwrapped (get-in application [:documents 0 :data :henkilo])) => truthy
+              henkilo (get-in (first hakijat) [:Henkilo])]
+          (fact "First Hakija of Hakijat has only Henkilo" (keys (first hakijat)) => (just [:Henkilo]))
+          (fact "Etunimi" (:Etunimi henkilo) => (get-in data [:henkilotiedot :etunimi]))
+          (fact "Sukunimi" (:Sukunimi henkilo) => (get-in data [:henkilotiedot :sukunimi]))
+          (fact "Jakeluosoite" (get-in henkilo [:Yhteystiedot :Jakeluosoite]) => (get-in data [:osoite :katu]))
+          (fact "Postinumero" (get-in henkilo [:Yhteystiedot :Postinumero]) => (get-in data [:osoite :postinumero]))
+          (fact "Postitoimipaikka" (get-in henkilo [:Yhteystiedot :Postitoimipaikka]) => (get-in data [:osoite :postitoimipaikannimi]))
+          (fact "Email" (get-in henkilo [:Yhteystiedot :Email]) => (get-in data [:yhteystiedot :email]))
+          (fact "Puhelinnumero" (get-in henkilo [:Yhteystiedot :Puhelinnumero]) => (get-in data [:yhteystiedot :puhelin]))
+          (fact "Hetu" (get-in henkilo [:Henkilotunnus]) => (get-in data [:henkilotiedot :hetu]))))
       (facts "Maksaja"
         (fact "Maksaja is yritys, and has Laskuviite and Verkkolaskutustieto"
           (keys (get-in canonical [:UusiAsia :Maksaja])) => (just [:Yritys :Laskuviite :Verkkolaskutustieto]))
