@@ -58,12 +58,13 @@
 
 (defn- ua-get-maksaja [{data :data}]
   (let [sel (:_selected data)
-        maksaja-map (util/strip-nils
-                      {:Laskuviite (:laskuviite data)
-                       :Verkkolaskutustieto (when (= "yritys" sel)
-                                              {:OVT-tunnus (get-in data [:yritys :verkkolaskutustieto :ovtTunnus])
-                                               :Verkkolaskutunnus (get-in data [:yritys :verkkolaskutustieto :verkkolaskuTunnus])
-                                               :Operaattoritunnus (get-in data [:yritys :verkkolaskutustieto :valittajaTunnus])})})]
+        maksaja-map (util/strip-empty-maps
+                      (util/strip-nils
+                        {:Laskuviite (:laskuviite data)
+                         :Verkkolaskutustieto (when (= "yritys" sel)
+                                                {:OVT-tunnus (get-in data [:yritys :verkkolaskutustieto :ovtTunnus])
+                                                 :Verkkolaskutunnus (get-in data [:yritys :verkkolaskutustieto :verkkolaskuTunnus])
+                                                 :Operaattoritunnus (get-in data [:yritys :verkkolaskutustieto :valittajaTunnus])})}))]
 
     (if (= sel "yritys")
       (assoc-in maksaja-map [:Yritys] (ua-get-yritys data))
