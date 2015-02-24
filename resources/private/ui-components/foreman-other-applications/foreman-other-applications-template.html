@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container">
+    <script type="text/html" id="foreman-other-applications-template">
+      <label class="form-label form-label-table" data-bind="ltext: 'muutHankkeet.label'"></label>
+      <table data-test-id="foreman-other-applications-table">
+        <thead>
+          <tr>
+            <th colspan="5"></th>
+            <th colspan="4" data-bind="ltext: 'tyonjohtaja.muutHankkeet.ajantarve'"></th>
+            <th></th>
+          </tr>
+          <tr>
+            <!-- ko foreach: { data: params.subSchema.body, as: 'header' } -->
+            <th data-bind="visible: !header.hidden, ltext: header.i18nkey"></th>
+            <!-- /ko -->
+            <th></th>
+          </tr>
+        </thead>
+        <tbody data-bind="foreach: { data: autoupdatedRows, as: 'row' }">
+          <tr>
+            <!-- ko foreach: { data: row, as: 'column' } -->
+            <td data-bind="visible: !column.schema.hidden,
+                           component: { name: column.schema.uicomponent, params: column }"></td>
+            <!-- /ko -->
+            <td class="action-column">
+            </td>
+          </tr>
+        </tbody>
+
+        <tbody data-bind="visible: rows().length === 0 && autoupdatedRows().length === 0">
+          <tr>
+            <td data-bind="attr: { colspan: params.subSchema.body.length }, ltext: 'tyonjohtaja.noProjects'"></td>
+          </tr>
+        </tbody>
+
+        <tbody data-bind="foreach: { data: rows, as: 'row' }">
+          <tr>
+            <!-- ko foreach: { data: row, as: 'column' } -->
+            <td data-bind="visible: !column.schema.hidden,
+                           component: { name: column.schema.uicomponent, params: column },
+                           attr: { 'data-test-col-name': column.schema.name }"></td>
+            <!-- /ko -->
+            <td class="action-column">
+              <span class="icon remove-grey inline-right" data-bind="click: $parent.removeRow"></span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <button data-bind="ltext: 'muutHankkeet.addHanke', click: addRow"></button>
+    </script>
+  </section>
+</body>
+</html>

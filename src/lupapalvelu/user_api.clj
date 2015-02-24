@@ -21,6 +21,7 @@
             [lupapalvelu.user :as user]
             [lupapalvelu.idf.idf-client :as idf]
             [lupapalvelu.token :as token]
+            [lupapalvelu.ttl :as ttl]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.attachment :as attachment]))
 
@@ -120,7 +121,7 @@
   true)
 
 (defn- create-new-user-entity [user-data]
-  (let [email (-> user-data :email ss/lower-case ss/trim)]
+  (let [email (user/canonize-email (:email user-data))]
     (-> user-data
         (select-keys [:email :username :role :firstName :lastName :personId
                       :phone :city :street :zip :enabled :organization
@@ -208,15 +209,14 @@
       (do
         (notify-new-authority user caller)
         (ok :id (:id user) :user user))
-      (let [token-ttl (* 7 24 60 60 1000)
-            token (token/make-token :password-reset caller {:email (:email user)} :ttl token-ttl)]
+      (let [token (token/make-token :password-reset caller {:email (:email user)} :ttl ttl/create-user-token-ttl)]
         (ok :id (:id user)
           :user user
           :linkFi (str (env/value :host) "/app/fi/welcome#!/setpw/" token)
           :linkSv (str (env/value :host) "/app/sv/welcome#!/setpw/" token))))))
 
 (defn get-or-create-user-by-email [email current-user]
-  (let [email (ss/lower-case email)]
+  (let [email (user/canonize-email email)]
     (or
       (user/get-user-by-email email)
       (create-new-user current-user {:email email :role "dummy"}))))
@@ -249,7 +249,7 @@
 (defcommand update-user
   {:roles [:applicant :authority :authorityAdmin :admin]}
   [{caller :user user-data :data}]
-  (let [email     (ss/lower-case (or (:email user-data) (:email caller)))
+  (let [email     (user/canonize-email (or (:email user-data) (:email caller)))
         user-data (assoc user-data :email email)]
     (validate-update-user! caller user-data)
     (if (= 1 (mongo/update-n :users {:email email} {$set (select-keys user-data user-data-editable-fields)}))
@@ -264,10 +264,10 @@
    :roles [:admin]
    :input-validators [(partial action/non-blank-parameters [:email])
                       action/email-validator]
-   :description "Changes applicant account into authority"}
+   :description "Changes applicant or dummy account into authority"}
   [_]
   (let [user (user/get-user-by-email email)]
-    (if (= "applicant" (:role user))
+    (if (#{"dummy" "applicant"} (:role user))
       (mongo/update :users {:email email} {$set {:role "authority"}})
       (fail :error.user-not-found))))
 
@@ -286,7 +286,7 @@
                       action/email-validator]
    :roles            [:authorityAdmin]}
   [{caller :user}]
-  (let [email            (ss/lower-case email)
+  (let [email            (user/canonize-email email)
         new-organization (first (:organizations caller))
         update-count     (mongo/update-n :users {:email email, :role "authority"}
                            {({"add" $addToSet "remove" $pull} operation) {:organizations new-organization}})]
@@ -332,21 +332,20 @@
                       action/email-validator]
    :notified      true}
   [_]
-  (let [email (ss/lower-case (ss/trim email))]
+  (let [email (user/canonize-email email)]
     (infof "Password reset request: email=%s" email)
     (let [user (mongo/select-one :users {:email email})]
       (if (and user (not= "dummy" (:role user)))
-       (let [token-ttl (* 24 60 60 1000)
-             token (token/make-token :password-reset nil {:email email} :ttl token-ttl)]
+       (let [token (token/make-token :password-reset nil {:email email} :ttl ttl/reset-password-token-ttl)]
          (infof "password reset request: email=%s, token=%s" email token)
          (notifications/notify! :reset-password {:data {:email email :token token}})
          (ok))
        (do
          (warnf "password reset request: unknown email: email=%s" email)
-         (fail :email-not-found))))))
+         (fail :error.email-not-found))))))
 
 (defmethod token/handle-token :password-reset [{data :data} {password :password}]
-  (let [email (ss/lower-case (:email data))]
+  (let [email (user/canonize-email (:email data))]
     (user/change-password email password)
     (infof "password reset performed: email=%s" email)
     (resp/status 200 (resp/json {:ok true}))))
@@ -361,7 +360,7 @@
                       action/email-validator]
    :roles         [:admin]}
   [_]
-  (let [email (ss/lower-case email)
+  (let [email (user/canonize-email email)
        enabled (contains? #{true "true"} enabled)]
    (infof "%s user: email=%s" (if enabled "enable" "disable") email)
    (if (= 1 (mongo/update-n :users {:email email} {$set {:enabled enabled}}))
@@ -423,7 +422,7 @@
                       action/email-validator]}
   [{data :data}]
   (let [vetuma-data (vetuma/get-user stamp)
-        email (-> email ss/lower-case ss/trim)]
+        email (user/canonize-email email)]
     (when-not vetuma-data (fail! :error.create-user))
     (try
       (infof "Registering new user: %s - details from vetuma: %s" (dissoc data :password) vetuma-data)
@@ -447,7 +446,7 @@
                       action/email-validator]}
   [{data :data}]
   (let [vetuma-data (vetuma/get-user stamp)
-        email (-> email ss/lower-case ss/trim)
+        email (user/canonize-email email)
         token (token/get-token tokenId)]
     (when-not (and vetuma-data
                 (= (:token-type token) :activate-linked-account)
@@ -562,5 +561,6 @@
                                   :size size
                                   :created created
                                   :user user
+                                  :required false
                                   :locked false}))))
   (ok))

@@ -6,6 +6,13 @@
   function Model() {
     var self = this;
 
+    self.inError = ko.observable(false);
+    self.errorText = ko.observable("");
+    self.error = function(data) {
+      self.inError(true);
+      self.errorText(data.text);
+    };
+
     self.map = null;
 
     self.init = function(e) {
@@ -34,7 +41,6 @@
         .param("neighborId", self.neighborId())
         .param("token", self.token())
         .success(self.success)
-        .fail(self.fail)
         .error(self.error)
         .pending(self.pending)
         .call();
@@ -68,17 +74,6 @@
       return self;
     };
 
-    self.fail = function(data) {
-      // TODO: Show information about application not found, or closed, or sumthing.
-      info("fail", data);
-      window.location.hash = "!/404";
-    };
-
-    self.error = function(data) {
-      var error = data.text;
-      self.inError(true);
-      self.errorText("error."+data.text);
-    };
 
     self.attachments = ko.observableArray([]);
     self.attachmentsByGroup = ko.observableArray();
@@ -92,10 +87,7 @@
     self.response = ko.observable();
     self.message = ko.observable();
     self.operationsCount = ko.observable();
-    self.inError = ko.observable(false);
-    self.errorText = ko.observable("");
     self.tupasUser = ko.observable();
-    self.sendError = ko.observable();
 
     self.send = function() {
       ajax
@@ -108,30 +100,25 @@
           message: self.message()
         })
         .pending(self.saving)
-        .success(self.sendOk)
-        .fail(self.fail)
-        .error(function(e) { self.sendError(e.text); })
+        .success(function() {
+          self.done(true);
+        })
         .call();
-    };
-
-    self.sendOk = function() {
-      self.done(true);
-      // TODO: ... now what?
     };
   }
 
   function getAttachmentsByGroup(source) {
     var attachments = _.map(source, function(a) { a.latestVersion = _.last(a.versions || []); return a; });
-    var grouped = _.groupBy(attachments, function(attachment) { return attachment.type['type-group']; });
+    var grouped = _.groupBy(attachments, function(attachment) { return attachment.type["type-group"]; });
     return _.map(grouped, function(attachments, group) { return {group: group, attachments: attachments}; });
   }
   var model = new Model();
 
-  hub.onPageChange("neighbor-show", function(e) {
+  hub.onPageLoad("neighbor-show", function(e) {
     model.init(e);
-    vetuma($('#vetuma-neighbor'), function(user) {
+    vetuma($("#vetuma-neighbor"), function(user) {
       model.tupasUser(user);
-      $('html, body').animate({ scrollTop: 10000});
+      $("html, body").animate({ scrollTop: 10000});
     });
   });
 

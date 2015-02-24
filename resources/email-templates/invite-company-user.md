@@ -1,15 +1,15 @@
 # Hei {{user.firstName}} {{user.lastName}},
 
-Sinut on kutsuttu [Lupapiste.fi](https://lupapiste.fi) palveluun yrityksen **{{company.name}}** tilin käyttäjäksi.
+Sinut on kutsuttu [Lupapiste.fi](https://lupapiste.fi) palveluun yrityksen **{{company.name}}** tilin k&auml;ytt&auml;j&auml;ksi.
 
-{{company.name}} yritystilin käyttäjänä pääset näkemään ja käsittelemään kaikkia {{company.name}} yrityksen hakemuksia.
-Samoin uudet hakemukset jotka teet Lupapaiste palvelussa ovat yrityksen muiden käyttäjien nähtävissä ja käsiteltävissä.
+{{company.name}} yritystilin k&auml;ytt&auml;j&auml;n&auml; p&auml;&auml;set n&auml;kem&auml;&auml;n ja k&auml;sittelem&auml;&auml;n kaikkia {{company.name}} yrityksen hakemuksia.
+Samoin uudet hakemukset jotka teet Lupapaiste palvelussa ovat yrityksen muiden k&auml;ytt&auml;jien n&auml;ht&auml;viss&auml; ja k&auml;sitelt&auml;viss&auml;.
 
-Mikäli halluat liittää tilisi {{company.name}} tiliin, klikkaa alla olevaa linkkiä:
+Mik&auml;li haluat liitt&auml;&auml; tilisi {{company.name}} tiliin, klikkaa alla olevaa linkki&auml;:
 
   [{{ok-fi}}]({{ok-fi}})
 
-Jos linkki ei toimi, kopioi osoite ja liitä se selaimen osoiteriville.
+Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville.
 
 ---
 

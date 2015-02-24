@@ -7,7 +7,8 @@
             [lupapalvelu.server]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.user :as user]
-            [lupapalvelu.action :refer :all]))
+            [lupapalvelu.action :refer :all])
+  (:import [org.apache.commons.io.output NullWriter]))
 
 (defn returns [])
 
@@ -38,7 +39,7 @@
 (facts "Test missing-fields"
   (fact (missing-fields {:data {:foo "Foo" :bar "Bar"}} {:parameters [:foo :bar]}) => empty?)
   (fact (missing-fields {:data {:foo "Foo" :bozo "Bozo"}} {:parameters [:foo :bar]}) => (contains "bar"))
-  (fact (missing-fields {:data {}} {:parameters [:foo :bar]}) => (contains "foo" "bar"))
+  (fact (missing-fields {:data {}} {:parameters [:foo :bar]}) => (just ["foo" "bar"] :in-any-order))
   (fact (missing-fields {:data {:foo "Foo"}} {}) => empty?)
   (fact (missing-fields {:data {:foo "Foo" "_" "Bar"}} {:parameters [:foo]}) => empty?))
 
@@ -62,7 +63,8 @@
 (facts "Test general validation in command execution"
   (fact (execute {:action "test-command"}) =>        {:ok false :text "too busy"}
         (provided (returns)                =>        {:ok false :text "too busy"}))
-  (fact (execute {:action "test-command"}) =>        {:ok false :text "error.unknown"}
+  (fact (binding [*err* (NullWriter.)]
+          (execute {:action "test-command"})) =>        {:ok false :text "error.unknown"}
         (provided (returns)                =throws=> (Exception. "This was expected.")))
   (fact (execute {:action "test-command"}) =>        {:ok true}
         (provided (returns)                =>        nil)))
@@ -73,7 +75,7 @@
                                      :states     [:open]}})
   (fact "invalid state"
         (invalid-state-in-application {:action "test-command" :data {:id "123"}} {:state "closed"})
-        => { :ok false :text "error.command-illegal-state"})
+        => (contains {:ok false, :text "error.command-illegal-state"}))
 
   (fact "valid state"
         (invalid-state-in-application {:action "test-command" :data {:id "123"}} {:state "open"})
@@ -84,8 +86,8 @@
     (get-actions) => {:test-command-auth {:parameters [:id]
                                           :roles      [:authority]
                                           :states     all-states}}
-    (domain/get-application-as-including-canceled "123" {:id "user123" :organizations ["ankkalinna"] :role :authority}) =>  {:state "submitted" :organization "ankkalinna"}
-    (domain/get-application-as-including-canceled "123" {:id "user123" :organizations ["hanhivaara"] :role :authority}) =>  nil)
+    (domain/get-application-as "123" {:id "user123" :organizations ["ankkalinna"] :role :authority} true) =>  {:state "submitted" :organization "ankkalinna"}
+    (domain/get-application-as "123" {:id "user123" :organizations ["hanhivaara"] :role :authority} true) =>  nil)
 
   (fact "regular user is not authority"
     (execute {:action "test-command-auth" :user {:id "user123"} :data {:id "123"}}) => unauthorized)
@@ -94,7 +96,7 @@
     (execute {:action "test-command-auth" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => ok?)
 
   (fact "with incorrect authority error is returned"
-    (execute {:action "test-command-auth" :user {:id "user123" :organizations ["hanhivaara"] :role :authority} :data {:id "123"}}) => unauthorized))
+    (execute {:action "test-command-auth" :user {:id "user123" :organizations ["hanhivaara"] :role :authority} :data {:id "123"}}) => not-accessible))
 
 (facts "Access based on extra-auth-roles"
   (against-background
@@ -109,27 +111,27 @@
                                             :roles [:anonymous]
                                             :states all-states
                                             :extra-auth-roles [:any]}}
-    (domain/get-application-as-including-canceled "123" {:id "some1" :organizations ["999-R"] :role :authority}) => {:organization "999-R"
-                                                                                                                     :state "submitted"
-                                                                                                                     :auth [{:id "user123" :role "someRole"}]}
+    (domain/get-application-as "123" {:id "some1" :organizations ["999-R"] :role :authority} true) => {:organization "999-R"
+                                                                                                       :state "submitted"
+                                                                                                       :auth [{:id "user123" :role "someRole"}]}
 
-    (domain/get-application-as-including-canceled "123" {:id "some1" :organizations ["999-R"] :role :applicant}) => {:organization "999-R" :state "submitted" :auth []}
+    (domain/get-application-as "123" {:id "some1" :organizations ["999-R"] :role :applicant} true) => {:organization "999-R" :state "submitted" :auth []}
 
-    (domain/get-application-as-including-canceled "123" {:id "user123" :organizations [] :role :authority}) =>  {:organization "999-R"
-                                                                                                                 :state "submitted"
-                                                                                                                 :auth [{:id "user123" :role "someRole"}]}
+    (domain/get-application-as "123" {:id "user123" :organizations [] :role :authority} true) =>  {:organization "999-R"
+                                                                                                   :state "submitted"
+                                                                                                   :auth [{:id "user123" :role "someRole"}]}
 
-    (domain/get-application-as-including-canceled "123" {:id "user234" :organizations [] :role :authority}) =>  {:organization "999-R"
-                                                                                                                 :state "submitted"
-                                                                                                                 :auth [{:id "user234" :role "otherRole"}]}
+    (domain/get-application-as "123" {:id "user234" :organizations [] :role :authority} true) =>  {:organization "999-R"
+                                                                                                   :state "submitted"
+                                                                                                   :auth [{:id "user234" :role "otherRole"}]}
 
-    (domain/get-application-as-including-canceled "123" {:id "user345" :organizations [] :role :authority}) =>  {:organization "999-R"
-                                                                                                                 :state "submitted"
-                                                                                                                 :auth [{:id "user345" :role "writer"}]}
+    (domain/get-application-as "123" {:id "user345" :organizations [] :role :authority} true) =>  {:organization "999-R"
+                                                                                                   :state "submitted"
+                                                                                                   :auth [{:id "user345" :role "writer"}]}
 
-    (domain/get-application-as-including-canceled "123" {:id "user456" :organizations [] :role :authority}) =>  {:organization "999-R"
-                                                                                                                 :state "submitted"
-                                                                                                                 :auth [{:id "user456" :role "3rdRole"}]}
+    (domain/get-application-as "123" {:id "user456" :organizations [] :role :authority} true) =>  {:organization "999-R"
+                                                                                                   :state "submitted"
+                                                                                                   :auth [{:id "user456" :role "3rdRole"}]}
     )
 
   (fact "Authority from same org has access"
@@ -165,7 +167,7 @@
     (get-actions) => {:test-command1 {:pre-checks [(constantly (fail "FAIL"))] :roles [:authority]}
                       :test-command2 {:pre-checks [(constantly nil)] :roles [:authority]}
                       :test-command3 {:pre-checks [(constantly nil) (constantly nil) (constantly (fail "FAIL"))] :roles [:authority]}}
-    (domain/get-application-as-including-canceled "123" {:id "user123" :organizations ["ankkalinna"] :role :authority}) =>  {:organization "ankkalinna" :state "submitted"})
+    (domain/get-application-as "123" {:id "user123" :organizations ["ankkalinna"] :role :authority} true) =>  {:organization "ankkalinna" :state "submitted"})
 
   (fact (execute {:action "test-command1" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => {:ok false :text "FAIL"})
   (fact (execute {:action "test-command2" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => ok?)
@@ -176,7 +178,7 @@
     (get-actions) => {:test-command1 {:input-validators [(constantly (fail "FAIL"))] :roles [:authority]}
                       :test-command2 {:input-validators [(constantly nil)] :roles [:authority]}
                       :test-command3 {:input-validators [(constantly nil) (constantly nil) (constantly (fail "FAIL"))] :roles [:authority]}}
-    (domain/get-application-as-including-canceled "123" {:id "user123" :organizations ["ankkalinna"] :role :authority}) =>  {:organization "ankkalinna" :state "submitted"})
+    (domain/get-application-as "123" {:id "user123" :organizations ["ankkalinna"] :role :authority} true) =>  {:organization "ankkalinna" :state "submitted"})
 
   (fact (execute {:action "test-command1" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => {:ok false :text "FAIL"})
   (fact (execute {:action "test-command2" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => ok?)
@@ -185,7 +187,7 @@
 (facts "Input-validator is not run during auth check"
   (against-background
     (get-actions) => {:test-command1 {:input-validators [(constantly (fail "FAIL"))]:roles [:authority]}}
-    (domain/get-application-as-including-canceled "123" {:id "user123" :organizations ["ankkalinna"] :role :authority}) =>  {:organization "ankkalinna" :state "submitted"})
+    (domain/get-application-as "123" {:id "user123" :organizations ["ankkalinna"] :role :authority} true) =>  {:organization "ankkalinna" :state "submitted"})
   (validate {:action "test-command1" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => ok?)
 
 (facts "Defined querys work only in query pipelines"
@@ -211,11 +213,13 @@
 
 (fact "fail! stops the press"
   (against-background (get-actions) => {:failing {:handler (fn [_] (fail! "kosh")) :roles [:anonymous]}})
-  (execute {:action "failing"}) => {:ok false :text "kosh"})
+  (binding [*err* (NullWriter.)]
+    (execute {:action "failing"})) => {:ok false :text "kosh"})
 
 (fact "exception details are not returned"
   (against-background (get-actions) => {:failing {:handler (fn [_] (throw (RuntimeException. "kosh"))) :roles [:anonymous]}})
-  (execute {:action "failing"}) => {:ok false :text "error.unknown"})
+  (binding [*err* (NullWriter.)]
+    (execute {:action "failing"})) => {:ok false :text "error.unknown"})
 
 (facts "non-blank-parameters"
   (non-blank-parameters nil {}) => nil
@@ -226,6 +230,21 @@
   (non-blank-parameters [:foo :bar] {:data {:foo nil}})          => (contains {:parameters [:foo :bar]})
   (non-blank-parameters [:foo :bar] {:data {:foo "" :bar " "}})  => (contains {:parameters [:foo :bar]})
   (non-blank-parameters [:foo :bar] {:data {:foo " " :bar "x"}}) => (contains {:parameters [:foo]}))
+
+(facts "vector-parameters-with-non-blank-items"
+  (vector-parameters-with-non-blank-items [:foo] {:data {:foo ["aa"]}})     => nil
+  (vector-parameters-with-non-blank-items [:foo] {:data {:foo ["aa" nil]}}) => {:ok false :text "error.vector-parameters-with-blank-items" :parameters [:foo]}
+  (vector-parameters-with-non-blank-items [:foo] {:data {:foo ["aa" ""]}})  => {:ok false :text "error.vector-parameters-with-blank-items" :parameters [:foo]}
+  (vector-parameters-with-non-blank-items [:foo :bar] {:data {:foo [nil] :bar [" "]}}) => {:ok false :text "error.vector-parameters-with-blank-items" :parameters [:foo :bar]}
+  (vector-parameters-with-non-blank-items [:foo :bar] {:data {:foo nil :bar " "}})     => {:ok false :text "error.non-vector-parameters"        :parameters [:foo :bar]})
+
+(facts "vector-parameters-with-map-items-with-required-keys"
+  (vector-parameters-with-map-items-with-required-keys [:foo] [:x :y] {:data {:foo [{:x "aa" :y nil}]}}) => nil
+  (vector-parameters-with-map-items-with-required-keys [:foo] [:x] {:data {:foo nil}})         => {:ok false :text "error.non-vector-parameters" :parameters [:foo]}
+  (vector-parameters-with-map-items-with-required-keys [:foo] [:x] {:data {:foo [nil]}})         => {:ok false :text "error.vector-parameters-with-items-missing-required-keys"
+                                                                                                     :parameters [:foo] :required-keys [:x]}
+  (vector-parameters-with-map-items-with-required-keys [:foo] [:x] {:data {:foo [{:y "aa"}]}}) => {:ok false :text "error.vector-parameters-with-items-missing-required-keys"
+                                                                                                   :parameters [:foo] :required-keys [:x]})
 
 (facts "feature requirements"
  (against-background

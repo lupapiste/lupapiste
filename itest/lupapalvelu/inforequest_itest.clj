@@ -18,7 +18,7 @@
         (-> (:comments application) first :text) => "hello"))
 
     (fact "Veikko can not assign inforequest to himself"
-      (command veikko :assign-application :id id :assigneeId veikko-id) => unauthorized?)
+      (command veikko :assign-application :id id :assigneeId veikko-id) => not-accessible?)
 
     (fact "Sonja can assign inforequest to herself"
       (command sonja :assign-application :id id :assigneeId sonja-id) => ok?)
@@ -35,7 +35,14 @@
   (fact "Pena cannot create app for organization that has inforequests disabled"
   (let [resp  (create-app pena :infoRequest true :municipality "998")]
     resp =not=> ok?
-    (:text resp) => "error.inforequests-disabled")))
+    (:text resp) => "error.inforequests-disabled"))
+
+  (fact "Pena can cancel inforequest he created"
+    (let [resp (create-app pena :infoRequest true :municipality sonja-muni)]
+      resp => ok?
+      (command pena :cancel-inforequest :id (-> resp :application :id)) => ok?
+      (fact "Sonja is also allowed to cancel inforequest"
+        (allowed? :cancel-inforequest :id (-> resp :application :id))))))
 
 (facts "Open inforequest"
   ; Reset emails

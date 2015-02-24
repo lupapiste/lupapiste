@@ -5,6 +5,7 @@
             [cheshire.core :as json]
             [sade.http :as http]
             [sade.util :as util]
+            [sade.strings :as ss]
             [sade.xml :as xml]
             [lupapalvelu.factlet :refer [fact* facts*]]
             [lupapalvelu.itest-util :refer [->cookie-store server-address decode-response
@@ -15,7 +16,7 @@
             [lupapalvelu.vetuma :as vetuma]
             ))
 
-(testable-privates lupapalvelu.vetuma mac-of)
+(testable-privates lupapalvelu.vetuma mac-of keys-as-keywords)
 
 (def vetuma-endpoint (str (server-address) "/api/vetuma"))
 
@@ -28,16 +29,19 @@
                                  :error "/error"}})
 
 (defn- vetuma-init [request-opts]
+  ; Request welcome page and query features to init session
+  (http/get (str (server-address) "/app/wi/welcome") request-opts)
+  (http/get (str (server-address) "/api/query/features") request-opts)
   (http/get vetuma-endpoint (merge request-opts token-query)))
 
-(defn- vetuma-finish [request-opts]
-  (let [base-post (assoc (zipmap vetuma/response-mac-keys (repeat "0"))
-                    :trid "123456"
-                    :subjectdata "etunimi=Jukka, sukunimi=Palmu"
-                    :extradata "HETU=123456-7890"
-                    :userid "123456-7890"
-                    :vtjdata "<VTJHenkiloVastaussanoma/>")
-         mac (mac-of (assoc base-post :key (:key (vetuma/config))) vetuma/response-mac-keys)
+(defn- vetuma-finish [request-opts trid]
+  (let [base-post (assoc (zipmap (map (comp ss/upper-case name) vetuma/response-mac-keys) (repeat "0"))
+                    "TRID" trid
+                    "SUBJECTDATA" "ETUNIMI=Jukka, SUKUNIMI=Palmu"
+                    "EXTRADATA" "HETU=123456-7890"
+                    "USERID" "123456-7890"
+                    "VTJDATA" "<VTJHenkiloVastaussanoma/>")
+         mac (mac-of (assoc (keys-as-keywords base-post) :key (:key (vetuma/config))) vetuma/response-mac-keys)
          vetuma-post (assoc base-post :mac mac)]
     (http/post vetuma-endpoint (assoc request-opts :form-params vetuma-post))))
 
@@ -65,18 +69,20 @@
                :throw-exceptions false}
        resp (vetuma-init params) => http200?
        body (:body resp) => (contains "***REMOVED***1")
-       form (xml/parse body)]
+       form (xml/parse body)
+       trid (xml/select1-attribute-value form [(e/attr= :id "TRID")] :value)]
 
+   (fact "Form contains transaction ID" trid =not=> ss/blank?)
    (fact "Form contains standard error url" (xml/select1-attribute-value form [(e/attr= :id "ERRURL")] :value) => (contains "/api/vetuma/error"))
    (fact "Form contains standard cancel url" (xml/select1-attribute-value form [(e/attr= :id "CANURL")] :value) => (contains "/api/vetuma/cancel"))
 
    (fact "Vetuma redirect"
-     (let [resp (vetuma-finish params)  => http302?]
+     (let [resp (vetuma-finish params trid)  => http302?]
          (get-in resp [:headers "location"]) => (contains (get-in token-query [:query-params :success]))))
 
    (last-email) ; Inbox zero
 
-   (let [vetuma-data (decode-body (http/get (str (server-address) "/api/vetuma/user")))
+   (let [vetuma-data (decode-body (http/get (str (server-address) "/api/vetuma/user") params))
          stamp (:stamp vetuma-data) => string?
          person-id (:userid vetuma-data) => string?
          new-user-email "jukka@example.com"
@@ -113,10 +119,11 @@
      (fact "Register again with the same email"
        (last-email) ; Inbox zero
        (swap! store (constantly {})) ; clear cookies
-       (vetuma-init params)
-       (vetuma-finish params)
+       (let [resp (vetuma-init params)
+             trid (-> resp :body xml/parse (xml/select1-attribute-value [(e/attr= :id "TRID")] :value))]
+         (vetuma-finish params trid))
 
-       (let [stamp (:stamp (decode-body (http/get (str (server-address) "/api/vetuma/user")))) => string?
+       (let [stamp (:stamp (decode-body (http/get (str (server-address) "/api/vetuma/user") params))) => string?
              new-user-email "jukka@example.com"
              new-user-pw "salasana"
              new-user-phone2 "046"

@@ -1,0 +1,58 @@
+#ui-datepicker-div {
+  background: $lp-light-grey;
+  border: 1px solid darken($lp-light-grey, 10%);
+  padding: $marginS;
+  box-shadow: 2px 2px 3px #888888;
+  z-index: 100000 !important;
+
+  .ui-datepicker-prev {
+  }
+  .ui-datepicker-next {
+  }
+  .ui-datepicker-month {
+    font-size: 0.7em;
+    height: 28px;
+  }
+  .ui-datepicker-year {
+    font-size: 0.7em;
+    height: 28px;
+  }
+  .ui-datepicker-header {
+    height: 36px;
+  }
+  .ui-datepicker-year , .ui-datepicker-month {
+    vertical-align: top;
+  }
+  .ui-icon.ui-icon-circle-triangle-w {
+    position: relative;
+
+    &:after {
+      position: absolute;
+      content: " ";
+      display: block;
+      top: 3px;
+      left: 0;
+      width: 0;
+      height: 0;
+      border-top: 5px solid transparent;
+      border-right: 10px solid black;
+      border-bottom: 5px solid transparent;
+    }
+  }
+  .ui-icon.ui-icon-circle-triangle-e {
+    position: relative;
+
+    &:after {
+      position: absolute;
+      content: " ";
+      display: block;
+      top: 3px;
+      left: 0;
+      width: 0;
+      height: 0;
+      border-top: 5px solid transparent;
+      border-left: 10px solid black;
+      border-bottom: 5px solid transparent;
+    }
+  }
+}

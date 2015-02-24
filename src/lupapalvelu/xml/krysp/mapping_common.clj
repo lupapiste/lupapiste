@@ -4,17 +4,18 @@
             [clojure.data.xml :refer [emit indent-str]]
             [me.raynes.fs :as fs]
             [sade.strings :as ss]
-            [sade.util :refer :all]
+            [sade.util :as util]
             [sade.core :refer :all]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.permit :as permit]
-            [lupapalvelu.xml.krysp.validator :as validator]
+            [lupapalvelu.xml.validator :as validator]
             [lupapalvelu.pdf-export :as pdf-export]))
 
 (def- rp-yht {"2.1.2" "2.1.0"
-                        "2.1.3" "2.1.1"
-                        "2.1.4" "2.1.2"
-                        "2.1.5" "2.1.3"})
+              "2.1.3" "2.1.1"
+              "2.1.4" "2.1.2"
+              "2.1.5" "2.1.3"
+              "2.1.6" "2.1.5"})
 
 (def- ymp-yht {"2.1.2" "2.1.3"})
 
@@ -150,6 +151,7 @@
                              {:tag :rakennusoikeusYhteensa :ns "yht" }
                              {:tag :uusiKytkin :ns "yht"}]})
 
+(def rakennuspaikka_211 (update-in rakennuspaikka [:child] conj {:tag :kaavatilanne :ns "yht"}))
 
 (def- henkilo-child [{:tag :nimi
                                :child [{:tag :etunimi}
@@ -220,6 +222,78 @@
                                  :child [{:tag :henkilo}
                                          {:tag :kiinteistotunnus}
                                          {:tag :hallintasuhde}]}]})
+(def tyonjohtaja_211
+  {:tag :Tyonjohtaja
+   :child [{:tag :tyonjohtajaRooliKoodi}
+           {:tag :VRKrooliKoodi}
+           henkilo
+           yritys_211
+           {:tag :patevyysvaatimusluokka}
+           {:tag :koulutus}
+           {:tag :valmistumisvuosi}
+           {:tag :alkamisPvm}
+           {:tag :paattymisPvm}
+           {:tag :tyonjohtajaHakemusKytkin}
+           {:tag :kokemusvuodet}
+           {:tag :sijaistustieto
+            :child [{:tag :Sijaistus
+                     :child [{:tag :sijaistettavaHlo}
+                             {:tag :sijaistettavaRooli}
+                             {:tag :alkamisPvm}
+                             {:tag :paattymisPvm}]}]}]})
+
+(def tyonjohtaja_212
+  {:tag :Tyonjohtaja
+   :child [{:tag :tyonjohtajaRooliKoodi}
+           {:tag :VRKrooliKoodi}
+           henkilo
+           yritys_211
+           {:tag :patevyysvaatimusluokka}
+           {:tag :koulutus}
+           {:tag :valmistumisvuosi}
+           {:tag :alkamisPvm}
+           {:tag :paattymisPvm}
+           ;{:tag :valvottavienKohteidenMaara}  ;; Tama tulossa kryspiin -> TODO: Ota sitten kayttoon!
+           {:tag :tyonjohtajaHakemusKytkin}
+           {:tag :kokemusvuodet}
+           {:tag :vastattavaTyotieto
+            :child [{:tag :VastattavaTyo
+                     :child [{:tag :vastattavaTyo} ; string
+                             {:tag :alkamisPvm} ; date
+                             {:tag :paattymisPvm}]}]}
+           {:tag :sijaistettavaHlo}]})
+
+(def tyonjohtaja_213 (update-in tyonjohtaja_212 [:child] (comp vec update-child-element) [:yritys] yritys_213))
+
+(def tyonjohtaja_215 (update-in tyonjohtaja_213 [:child] conj {:tag :vainTamaHankeKytkin}))
+
+(def tyonjohtajatieto
+  {:tag :tyonjohtajatieto
+   :child [{:tag :Tyonjohtaja
+            :child [{:tag :tyonjohtajaRooliKoodi}
+                    {:tag :VRKrooliKoodi}
+                    henkilo
+                    yritys_211
+                    {:tag :patevyysvaatimusluokka}
+                    {:tag :koulutus}
+                    {:tag :valmistumisvuosi}
+                    {:tag :tyonjohtajaHakemusKytkin}]}]})
+
+(def tyonjohtajatieto_211
+  {:tag :tyonjohtajatieto
+   :child [tyonjohtaja_211]})
+
+(def tyonjohtajatieto_212
+  {:tag :tyonjohtajatieto
+   :child [tyonjohtaja_212]})
+
+(def tyonjohtajatieto_213
+  {:tag :tyonjohtajatieto
+   :child [tyonjohtaja_213]})
+
+(def tyonjohtajatieto_215
+  {:tag :tyonjohtajatieto
+   :child [tyonjohtaja_215]})
 
 (def osapuolet
   {:tag :Osapuolet :ns "yht"
@@ -234,16 +308,7 @@
                              {:tag :patevyysvaatimusluokka}
                              {:tag :koulutus}
                              ]}]}
-           {:tag :tyonjohtajatieto
-            :child [{:tag :Tyonjohtaja
-                     :child [{:tag :tyonjohtajaRooliKoodi}
-                             {:tag :VRKrooliKoodi}
-                             henkilo
-                             yritys_211
-                             {:tag :patevyysvaatimusluokka}
-                             {:tag :koulutus}
-                             {:tag :valmistumisvuosi}
-                             {:tag :tyonjohtajaHakemusKytkin}]}]}
+           tyonjohtajatieto
            naapuri]})
 
 (def suunnittelijatieto_211
@@ -265,59 +330,26 @@
   {:tag :Osapuolet :ns "yht"
    :child [{:tag :osapuolitieto :child [osapuoli-body_211]}
            suunnittelijatieto_211
-           {:tag :tyonjohtajatieto
-            :child [{:tag :Tyonjohtaja
-                     :child [{:tag :tyonjohtajaRooliKoodi}
-                             {:tag :VRKrooliKoodi}
-                             henkilo
-                             yritys_211
-                             {:tag :patevyysvaatimusluokka}
-                             {:tag :koulutus}
-                             {:tag :valmistumisvuosi}
-                             {:tag :alkamisPvm}
-                             {:tag :paattymisPvm}
-                             {:tag :tyonjohtajaHakemusKytkin}
-                             {:tag :kokemusvuodet}
-                             {:tag :sijaistustieto
-                              :child [{:tag :Sijaistus
-                                       :child [{:tag :sijaistettavaHlo}
-                                               {:tag :sijaistettavaRooli}
-                                               {:tag :alkamisPvm}
-                                               {:tag :paattymisPvm}]}]}]}]}
+           tyonjohtajatieto_211
            naapuri]})
 
 (def osapuolet_212
   {:tag :Osapuolet :ns "yht"
    :child [{:tag :osapuolitieto :child [osapuoli-body_211]}
            suunnittelijatieto_211
-           {:tag :tyonjohtajatieto
-            :child [{:tag :Tyonjohtaja
-                     :child [{:tag :tyonjohtajaRooliKoodi}
-                             {:tag :VRKrooliKoodi}
-                             henkilo
-                             yritys_211
-                             {:tag :patevyysvaatimusluokka}
-                             {:tag :koulutus}
-                             {:tag :valmistumisvuosi}
-                             {:tag :alkamisPvm}
-                             {:tag :paattymisPvm}
-                             ;{:tag :valvottavienKohteidenMaara}  ;; Tama tulossa kryspiin -> TODO: Ota sitten kayttoon!
-                             {:tag :tyonjohtajaHakemusKytkin}
-                             {:tag :kokemusvuodet}
-                             {:tag :vastattavaTyotieto
-                              :child [{:tag :VastattavaTyo
-                                       :child [{:tag :vastattavaTyo} ; string
-                                               {:tag :alkamisPvm} ; date
-                                               {:tag :paattymisPvm}]}]}
-                             {:tag :sijaistettavaHlo}]}]}
+           tyonjohtajatieto_212
            naapuri]})
 
 (def osapuolet_213
-  (-> osapuolet_212
-    (update-in [:child] update-child-element [:osapuolitieto] {:tag :osapuolitieto :child [osapuoli-body_213]})
-    (update-in [:child] update-child-element [:suunnittelijatieto] suunnittelijatieto_213)
-    (update-in [:child] update-child-element [:tyonjohtajatieto :Tyonjohtaja :yritys] yritys_213)))
+  {:tag :Osapuolet :ns "yht"
+   :child [{:tag :osapuolitieto :child [osapuoli-body_213]}
+           suunnittelijatieto_213
+           tyonjohtajatieto_213
+           naapuri]})
 
+(def osapuolet_215
+  (-> osapuolet_213
+      (update-in [:child] update-child-element [:tyonjohtajatieto :Tyonjohtaja] tyonjohtaja_215)))
 
 (def tilamuutos
   {:tag :Tilamuutos :ns "yht"
@@ -430,7 +462,7 @@
 (defn get-Liite [title link attachment type file-id filename & [meta]]
   {:kuvaus title
    :linkkiliitteeseen link
-   :muokkausHetki (to-xml-datetime (:modified attachment))
+   :muokkausHetki (util/to-xml-datetime (:modified attachment))
    :versionumero 1
    :tyyppi type
    :metatietotieto meta
@@ -450,7 +482,7 @@
                    (= (get-in % [:version :minor]) (get-in latestVersion [:version :minor]))))
          (map #(let [firstName (get-in %2 [:user :firstName])
                      lastName (get-in %2 [:user :lastName])
-                     created (to-xml-datetime (:created %2))
+                     created (util/to-xml-datetime (:created %2))
                      count %1]
                 [(get-metatieto (str "allekirjoittaja_" count) (str firstName " " lastName))
                  (get-metatieto (str "allekirjoittajaAika_" count) created)]) (range))
@@ -468,9 +500,9 @@
 
 (defn get-statement-attachments-as-canonical [application begin-of-link allowed-statement-ids]
   (let [statement-attachments-by-id (group-by
-                                      (fn-> :target :id keyword)
+                                      (util/fn-> :target :id keyword)
                                       (filter
-                                        (fn-> :target :type (= "statement"))
+                                        (util/fn-> :target :type (= "statement"))
                                         (:attachments application)))
         canonical-attachments (for [id allowed-statement-ids]
                                 {(keyword id) (for [attachment ((keyword id) statement-attachments-by-id)]

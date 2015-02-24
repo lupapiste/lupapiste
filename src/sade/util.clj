@@ -1,4 +1,5 @@
 (ns sade.util
+  (:refer-clojure :exclude [pos? neg? zero?])
   (:require [clojure.walk :refer [postwalk prewalk]]
             [clojure.string :refer [join]]
             [sade.strings :refer [numeric? decimal-number?] :as ss]
@@ -6,6 +7,27 @@
             [clj-time.coerce :as tc]
             [schema.core :as sc])
   (:import [org.joda.time LocalDateTime]))
+
+;;
+;; Nil-safe number utilities
+;;
+
+(defn pos?
+  "Like clojure.core/pos?, but nil returns false instead of NPE"
+  [n]
+  (if n (clojure.core/pos? n) false))
+
+(defn neg?
+  "Like clojure.core/neg?, but nil returns false instead of NPE"
+  [n]
+  (if n (clojure.core/neg? n) false))
+
+(defn zero?
+  "Like clojure.core/zero?, but nil returns false instead of NPE"
+  [n]
+  (if n (clojure.core/zero? n) false))
+
+;; Map utilities
 
 (defn postwalk-map
   "traverses m and applies f to all maps within"
@@ -61,6 +83,18 @@
         (apply some-key m (rest ks))
         (m k)))))
 
+(defn find-by-id
+  "Return item from sequence col of maps where :id matches id."
+  [id col]
+  (some (fn [m] (when (= id (:id m)) m)) col))
+
+(defn update-in-repeating
+  ([m [k & ks] f & args]
+    (if (every? (comp ss/numeric? name) (keys m))
+      (apply hash-map (mapcat (fn [[repeat-k v]] [repeat-k (apply update-in-repeating v (conj ks k) f args)] ) m))
+      (if ks
+        (assoc m k (apply update-in-repeating (get m k) ks f args))
+        (assoc m k (apply f (get m k) args))))))
 
 ; From clojure.contrib/seq
 
@@ -170,6 +204,11 @@
          ()
          required-keys)))
 
+(defn- format-utc-timestamp [^Long timestamp ^String fmt]
+  (when timestamp
+    (let [dt (tc/from-long timestamp)]
+      (timeformat/unparse (timeformat/formatter fmt) dt))))
+
 (defn- local-date-time [^Long timestamp]
   (LocalDateTime. timestamp))
 
@@ -184,29 +223,28 @@
       (timeformat/unparse-local (timeformat/formatter "dd.MM.yyyy HH:mm") dt))))
 
 (defn to-xml-date [^Long timestamp]
-  (when timestamp
-    (let [dt (tc/from-long timestamp)]
-      (timeformat/unparse (timeformat/formatter "YYYY-MM-dd") dt))))
+  (format-utc-timestamp timestamp "YYYY-MM-dd"))
 
 (defn to-xml-datetime [^Long timestamp]
-  (when timestamp
-    (let [dt (tc/from-long timestamp)]
-      (timeformat/unparse (timeformat/formatter "YYYY-MM-dd'T'HH:mm:ss") dt))))
+  (format-utc-timestamp timestamp "YYYY-MM-dd'T'HH:mm:ss"))
 
 (defn to-xml-date-from-string [^String date-as-string]
-  (when date-as-string
+  (when-not (ss/blank? date-as-string)
     (let [d (timeformat/parse-local-date (timeformat/formatter "dd.MM.YYYY" ) date-as-string)]
       (timeformat/unparse-local-date (timeformat/formatter "YYYY-MM-dd") d))))
 
 (defn to-xml-datetime-from-string [^String date-as-string]
-  (when date-as-string
+  (when-not (ss/blank? date-as-string)
     (let [d (timeformat/parse-local (timeformat/formatter "dd.MM.YYYY" ) date-as-string)]
       (timeformat/unparse-local-date (timeformat/formatter "YYYY-MM-dd'T'HH:mm:ssZ") d))))
 
 (defn to-millis-from-local-date-string [^String date-as-string]
-  (when date-as-string
+  (when-not (ss/blank? date-as-string)
     (let [d (timeformat/parse (timeformat/formatter "dd.MM.YYYY" ) date-as-string)]
       (tc/to-long d))))
+
+(defn to-RFC1123-datetime [^Long timestamp]
+  (format-utc-timestamp timestamp "EEE, dd MMM yyyy HH:mm:ss 'GMT'"))
 
 (def time-pattern #"^([012]?[0-9]):([0-5]?[0-9])(:([0-5][0-9])(\.(\d))?)?$")
 
@@ -290,6 +328,26 @@
     (.startsWith ovt "0037")  (finnish-ovt? ovt)
     :else                     (re-matches #"\d{4}.+" ovt)))
 
+(defn rakennusnumero? [^String s]
+  (and (not (nil? s)) (re-matches #"^\d{3}$" s)))
+
+(def vrk-checksum-chars ["0" "1" "2" "3" "4" "5" "6" "7" "8" "9" "A" "B" "C" "D" "E" "F" "H" "J" "K" "L" "M" "N" "P" "R" "S" "T" "U" "V" "W" "X" "Y"])
+
+(defn vrk-checksum [^Long l]
+  (nth vrk-checksum-chars (mod l 31)))
+
+(defn hetu-checksum [^String hetu]
+  (vrk-checksum (Long/parseLong (str (subs hetu 0 6) (subs hetu 7 10)))))
+
+(defn- rakennustunnus-checksum [^String prt]
+  (vrk-checksum (Long/parseLong (subs prt 0 9))))
+
+(defn- rakennustunnus-checksum-matches? [^String prt]
+  (= (subs prt 9 10) (rakennustunnus-checksum prt)))
+
+(defn rakennustunnus? [^String prt]
+  (and (not (nil? prt)) (re-matches #"^\d{9}[0-9A-FHJ-NPR-Y]$" prt) (rakennustunnus-checksum-matches? prt)))
+
 ;;
 ;; Schema utils:
 ;;
@@ -314,9 +372,14 @@
 (defn max-length-string [max-len]
   (sc/both sc/Str (max-length max-len)))
 
-(defn exclude-from-sequence
-  "Removes the items in the sequential given as the second parameter from the sequential given as the first parameter"
-  [orig-seq exclude-seq]
-  {:pre [(and (sequential? orig-seq) (sequential? exclude-seq))]}
-  (let [exclude-set (set exclude-seq)]
-    (remove #(exclude-set %) orig-seq)))
+(def difficulty-values ["AA" "A" "B" "C" "ei tiedossa"])    ;TODO: move this to schemas?
+(defn compare-difficulty [a b]                              ;TODO: make this function more generic by taking the key and comparison values as param? E.g. compare-against [a b key ref-values]
+  (let [a (:difficulty a)
+        b (:difficulty b)]
+    (cond
+      (nil? b) -1
+      (nil? a) 1
+      :else (- (.indexOf difficulty-values a) (.indexOf difficulty-values b)))))
+
+(defn every-key-in-map? [target-map required-keys]
+  (every? (-> target-map keys set) required-keys))

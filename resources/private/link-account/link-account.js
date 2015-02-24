@@ -43,7 +43,7 @@
         });
   }
 
-  hub.onPageChange("link-account", function() {
+  hub.onPageLoad("link-account", function() {
     var token = getToken();
     var urlPrefix = "/app/" + loc.getCurrentLanguage() + "/welcome";
 
@@ -69,7 +69,7 @@
     statusModel.subPage(pageutil.lastSubPage());
   });
 
-  hub.onPageChange("link-account-2", function() {
+  hub.onPageLoad("link-account-2", function() {
     var token = getToken();
     registrationModel.reset();
     ajax.get("/api/vetuma/user")

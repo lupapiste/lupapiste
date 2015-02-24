@@ -1,6 +1,7 @@
 var LUPAPISTE = LUPAPISTE || {};
 
 (function($) {
+  "use strict";
 
   /**
    * Prototype for Lupapiste Single Page Apps.
@@ -9,17 +10,30 @@ var LUPAPISTE = LUPAPISTE || {};
    * @param {Boolean} allowAnonymous  Allow all users to access the app. Default: require login.
    */
    LUPAPISTE.App = function (startPage, allowAnonymous, showUserMenu) {
-    "use strict";
 
     var self = this;
+
+    self.defaultTitle = document.title;
 
     self.startPage = startPage;
     self.currentPage = undefined;
     self.session = undefined;
     self.allowAnonymous = allowAnonymous;
     self.showUserMenu = (showUserMenu !== undefined) ? showUserMenu : !allowAnonymous;
-    self.previousHash;
-    self.currentHash;
+    self.previousHash = undefined;
+    self.currentHash = undefined;
+
+    // Global models
+    self.models = {};
+
+    /**
+     * Prepends given title to browser window title.
+     *
+     * @param {String} title
+     */
+    self.setTitle = function(title) {
+      document.title = _.compact([title, self.defaultTitle]).join(" - ");
+    };
 
     /**
     * Window unload event handler
@@ -37,25 +51,36 @@ var LUPAPISTE = LUPAPISTE || {};
       if (pageId !== self.currentPage) {
         $(".page").removeClass("visible");
 
-        var page = $("#" + pageId);
-        if (page.length === 0) {
+        var page$ = $("#" + pageId);
+        if (page$.length === 0) {
           pageId = self.startPage;
           pagePath = [];
-          page = $("#" + pageId);
+          page$ = $("#" + pageId);
         }
 
-        if (page.length === 0) {
+        if (page$.length === 0) {
           // Something is seriously wrong, even startPage was not found
           error("Unknown page " + pageId + " and failed to default to " + self.startPage);
           return;
         }
 
-        page.addClass("visible");
+        page$.addClass("visible");
         window.scrollTo(0, 0);
         self.currentPage = pageId;
+
+        // Reset title. Pages can override title when they handle page-load event.
+        document.title = self.defaultTitle;
+
+        // Set focus on the first field
+        util.autofocus(page$);
       }
 
-      hub.send("page-change", { pageId: pageId, pagePath: pagePath, currentHash: "!/" + self.currentHash, previousHash: "!/" + self.previousHash });
+      hub.send("page-load", { pageId: pageId, pagePath: pagePath, currentHash: "!/" + self.currentHash, previousHash: "!/" + self.previousHash });
+
+      if (self.previousHash !== undefined) {
+        var previousPageId = self.previousHash.split("/")[0];
+        hub.send("page-unload", { pageId: previousPageId, currentHash: "!/" + self.currentHash, previousHash: "!/" + self.previousHash });
+      }
     };
 
     self.hashChanged = function () {
@@ -71,10 +96,16 @@ var LUPAPISTE = LUPAPISTE || {};
       if (!self.allowAnonymous && self.session === undefined) {
         ajax.query("user")
           .success(function (e) {
-            self.session = true;
-            currentUser.set(e.user);
-            hub.send("login", e);
-            self.hashChanged();
+            if (e.user) {
+              self.session = true;
+              currentUser.set(e.user);
+              hub.send("login", e);
+              self.hashChanged();
+            } else {
+              error("User query did not return user, response: ", e);
+              self.session = false;
+              hub.send("logout", e);
+            }
           })
           .error(function (e) {
             self.session = false;
@@ -170,7 +201,7 @@ var LUPAPISTE = LUPAPISTE || {};
       $(document.documentElement).keyup(function(event) { hub.send("keyup", event); });
 
       var logoHref = window.location.href;
-      if (self.startPage && !self.startPage.charAt(0) !== "/") {
+      if (self.startPage && self.startPage.charAt(0) !== "/") {
         logoHref = "#!/" + self.startPage;
       }
 
@@ -184,9 +215,7 @@ var LUPAPISTE = LUPAPISTE || {};
 
       if (LUPAPISTE.Screenmessage) {
         LUPAPISTE.Screenmessage.refresh();
-        $("#sys-notification").applyBindings({
-          screenMessage: LUPAPISTE.Screenmessage
-        });
+        model.screenMessage = LUPAPISTE.Screenmessage;
       }
 
       $("nav").applyBindings(model).css("visibility", "visible");

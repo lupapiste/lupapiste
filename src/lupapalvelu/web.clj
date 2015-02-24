@@ -13,14 +13,15 @@
             [noir.response :as resp]
             [noir.session :as session]
             [noir.cookies :as cookies]
+            [sade.core :refer [ok fail now def-] :as core]
             [sade.env :as env]
             [sade.util :as util]
             [sade.status :as status]
             [sade.strings :as ss]
-            [sade.core :refer [def-]]
-            [sade.core :refer [ok fail now] :as core]
-            [lupapalvelu.action :refer [defcommand defquery] :as action]
-            [lupapalvelu.i18n :refer [*lang*]]
+            [lupapalvelu.action :as action]
+            [lupapalvelu.application-search-api]
+            [lupapalvelu.features-api]
+            [lupapalvelu.i18n :refer [*lang*] :as i18n]
             [lupapalvelu.user :as user]
             [lupapalvelu.singlepage :as singlepage]
             [lupapalvelu.user :as user]
@@ -28,13 +29,16 @@
             [lupapalvelu.proxy-services :as proxy-services]
             [lupapalvelu.organization]
             [lupapalvelu.application :as application]
-            [lupapalvelu.pdf-export :as pdf-export]
+            [lupapalvelu.foreman-api :as foreman-api]
+            [lupapalvelu.open-inforequest-api]
+            [lupapalvelu.pdf-export-api]
+            [lupapalvelu.logging-api]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.token :as token]
             [lupapalvelu.activation :as activation]
             [lupapalvelu.logging :refer [with-logging-context]]
             [lupapalvelu.neighbors]
-            [lupapalvelu.idf.idf-server :as idf-server]))
+            [lupapalvelu.idf.idf-api :as idf-api]))
 
 ;;
 ;; Helpers
@@ -187,9 +191,9 @@
 ;; Web UI:
 ;;
 
-(def- build-number (:build-number env/buildinfo))
+(def- build-ts (let [ts (:time env/buildinfo)] (if (pos? ts) ts (now))))
 
-(def etag (str "\"" build-number "\""))
+(def last-modified (util/to-RFC1123-datetime build-ts))
 
 (def content-type {:html "text/html; charset=utf-8"
                    :js   "application/javascript; charset=utf-8"
@@ -197,6 +201,7 @@
 
 (def auth-methods {:init anyone
                    :cdn-fallback anyone
+                   :common anyone
                    :hashbang anyone
                    :upload logged-in?
                    :applicant applicant?
@@ -205,7 +210,6 @@
                    :authority-admin authority-admin?
                    :admin admin?
                    :wordpress anyone
-                   :login-frame anyone
                    :welcome anyone
                    :oskari anyone
                    :neighbor anyone})
@@ -215,14 +219,14 @@
     {"Cache-Control" "no-cache"}
     (if (= :html resource-type)
       {"Cache-Control" "no-cache"
-       "ETag"          etag}
+       "Last-Modified" last-modified}
       {"Cache-Control" "public, max-age=864000"
        "Vary"          "Accept-Encoding"
-       "ETag"          etag})))
+       "Last-Modified" last-modified})))
 
 (def- never-cache #{:hashbang})
 
-(def default-lang "fi")
+(def default-lang (name i18n/default-lang))
 
 (def- compose
   (if (env/feature? :no-cache)
@@ -232,8 +236,8 @@
 (defn- single-resource [resource-type app failure]
   (let [request (request/ring-request)]
     (if ((auth-methods app nobody) request)
-     ; Check If-None-Match header, see cache-headers above
-     (if (or (never-cache app) (s/blank? build-number) (not= (get-in request [:headers "if-none-match"]) etag))
+     ; Check If-Modified-Since header, see cache-headers above
+     (if (or (never-cache app) (env/feature? :no-cache) (not= (get-in request [:headers "if-modified-since"]) last-modified))
        (->>
          (java.io.ByteArrayInputStream. (compose resource-type app))
          (resp/content-type (resource-type content-type))
@@ -245,9 +249,10 @@
 
 ;; CSS & JS
 (defpage [:get ["/app/:build/:app.:res-type" :res-type #"(css|js)"]] {build :build app :app res-type :res-type}
-  (if (= build build-number)
-    (single-resource (keyword res-type) (keyword app) unauthorized)
-    (resp/redirect (str "/app/" build-number "/" app "." res-type ))))
+  (let [build-number (:build-number env/buildinfo)]
+    (if (= build build-number)
+     (single-resource (keyword res-type) (keyword app) unauthorized)
+     (resp/redirect (str "/app/" build-number "/" app "." res-type )))))
 
 ;; Single Page App HTML
 (def apps-pattern
@@ -276,7 +281,7 @@
     (->> (s/replace-first v "%21" "!") (re-matches #"^[#!/]{0,3}(.*)") second)))
 
 (defn- save-hashbang-on-client []
-  (resp/set-headers {"Cache-Control" "no-cache", "ETag" "\"none\""}
+  (resp/set-headers {"Cache-Control" "no-cache", "Last-Modified" (util/to-RFC1123-datetime 0)}
     (single-resource :html :hashbang unauthorized)))
 
 (defn serve-app [app hashbang lang]
@@ -298,18 +303,6 @@
 
 (defjson "/api/hashbang" []
   (ok :bang (session/get! :hashbang "")))
-
-(defcommand "frontend-error"
-  {:roles [:anonymous]}
-  [{{:keys [page message]} :data {:keys [email]} :user {:keys [user-agent]} :web}]
-  (let [limit    1000
-        sanitize (partial lupapalvelu.logging/sanitize limit)
-        sanitized-page (sanitize (or page "(unknown)"))
-        user           (or (ss/lower-case email) "(anonymous)")
-        sanitized-ua   (sanitize user-agent)
-        sanitized-msg  (sanitize (str message))]
-    (errorf "FRONTEND: %s [%s] got an error on page %s: %s"
-            user sanitized-ua sanitized-page sanitized-msg)))
 
 ;;
 ;; Login/logout:
@@ -428,7 +421,7 @@
         result (execute-command "upload-attachment" upload-data request)]
     (if (core/ok? result)
       (resp/redirect "/html/pages/upload-ok.html")
-      (resp/redirect (str (hiccup.util/url "/html/pages/upload-1.47.html"
+      (resp/redirect (str (hiccup.util/url "/html/pages/upload-1.56.html"
                                         (-> (:params request)
                                           (dissoc :upload)
                                           (dissoc ring.middleware.anti-forgery/token-key)
@@ -529,7 +522,7 @@
           email puhelin katuosoite postinumero postitoimipaikka
           suoramarkkinointilupa ammattilainen
           app id ts mac]}
-  (idf-server/handle-create-user-request etunimi sukunimi
+  (idf-api/handle-create-user-request etunimi sukunimi
           email puhelin katuosoite postinumero postitoimipaikka
           suoramarkkinointilupa ammattilainen
           app id ts mac))
@@ -542,15 +535,21 @@
 (defpage [:get ["/dev/:status"  :status #"[45]0\d"]] {status :status} (resp/status (util/->int status) status))
 
 (when (env/feature? :dummy-krysp)
-  (defpage "/dev/krysp" {typeName :typeName r :request}
+  (defpage "/dev/krysp" {typeName :typeName r :request filter :filter}
     (if-not (s/blank? typeName)
-      (let [xmls {"rakval:ValmisRakennus"       "krysp/sample/building.xml"
+      (let [filter-type-name (-> filter sade.xml/parse (sade.common-reader/all-of [:PropertyIsEqualTo :PropertyName]))
+            xmls {"rakval:ValmisRakennus"       "krysp/sample/building.xml"
                   "rakval:RakennusvalvontaAsia" "krysp/sample/verdict.xml"
                   "ymy:Ymparistolupa"           "krysp/sample/verdict-yl.xml"
                   "ymm:MaaAineslupaAsia"        "krysp/sample/verdict-mal.xml"
                   "ymv:Vapautus"                "krysp/sample/verdict-vvvl.xml"
                   "ppst:Poikkeamisasia,ppst:Suunnittelutarveasia" "krysp/sample/poikkari-verdict-cgi.xml"}]
-        (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource (xmls typeName)))))
+        ;; Use different sample xml for rakval query with kuntalupatunnus type of filter.
+        (if (and
+              (= "rakval:RakennusvalvontaAsia" typeName)
+              (= "rakval:luvanTunnisteTiedot/yht:LupaTunnus/yht:kuntalupatunnus" filter-type-name))
+          (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource "krysp/sample/verdict-rakval-from-kuntalupatunnus-query.xml")))
+          (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource (xmls typeName))))))
       (when (= r "GetCapabilities")
         (resp/content-type "application/xml; charset=utf-8" (slurp (io/resource "krysp/sample/capabilities.xml"))))))
 

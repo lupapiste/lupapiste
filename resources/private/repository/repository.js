@@ -1,6 +1,9 @@
 var repository = (function() {
   "use strict";
 
+  var currentlyLoadingId = null;
+  var currentQuery = null;
+
   var loadingSchemas = ajax
     .query("schemas")
     .error(function(e) { error("can't load schemas", e); })
@@ -48,16 +51,24 @@ var repository = (function() {
     }
   }
 
-  function load(id, pending, callback) {
-    var loadingApp = ajax
+  function loadingErrorHandler(id, e) {
+    currentlyLoadingId = null;
+    error("Application " + id + " not found", e);
+    LUPAPISTE.ModalDialog.open("#dialog-application-load-error");
+  }
+
+  function doLoad(id, pending, callback) {
+    currentQuery = ajax
       .query("application", {id: id})
       .pending(pending)
-      .error(function(e) {
-        error("Application " + id + " not found", e);
-        LUPAPISTE.ModalDialog.open("#dialog-application-load-error");
+      .error(_.partial(loadingErrorHandler, id))
+      .fail(function (jqXHR) {
+        if (jqXHR && jqXHR.status > 0) {
+          loadingErrorHandler(id, jqXHR);
+        }
       })
       .call();
-    $.when(loadingSchemas, loadingApp).then(function(schemasResponse, loadingResponse) {
+    $.when(loadingSchemas, currentQuery).then(function(schemasResponse, loadingResponse) {
       var schemas = schemasResponse[0].schemas,
           loading = loadingResponse[0],
           application = loading.application;
@@ -67,7 +78,7 @@ var repository = (function() {
         var schema = findSchema(schemas, schemaInfo.name, schemaInfo.version);
         doc.schema = schema;
         doc.schema.info = _.merge(schemaInfo, doc.schema.info);
-      };
+      }
 
       function setOperation(application, doc) {
         var schemaInfo = doc["schema-info"];
@@ -77,39 +88,60 @@ var repository = (function() {
             schemaInfo.op = op;
           }
         }
-      };
+      }
 
       if (application) {
-        _.each(application.documents || [], function(doc) {
-          setOperation(application, doc);
-          setSchema(doc);
-        });
-        _.each(application.tasks || [], setSchema);
-        _.each(application.comments || [], function(comment) {
-          if (comment.target && comment.target.type === 'attachment' && comment.target.id) {
-            var targetAttachment = _.find(application.attachments || [], function(attachment) {
-              return attachment.id === comment.target.id;
-            });
-            if (targetAttachment) {
-              comment.target.attachmentType = loc(['attachmentType', targetAttachment.type['type-group'], targetAttachment.type['type-id']]);
-              comment.target.attachmentId = targetAttachment.id;
+        if (application.id === currentlyLoadingId) {
+          currentlyLoadingId = null;
+
+          _.each(application.documents || [], function(doc) {
+            setOperation(application, doc);
+            setSchema(doc);
+          });
+          _.each(application.tasks || [], setSchema);
+          _.each(application.comments || [], function(comment) {
+            if (comment.target && comment.target.type === "attachment" && comment.target.id) {
+              var targetAttachment = _.find(application.attachments || [], function(attachment) {
+                return attachment.id === comment.target.id;
+              });
+              if (targetAttachment) {
+                comment.target.attachmentType = loc(["attachmentType", targetAttachment.type["type-group"], targetAttachment.type["type-id"]]);
+                comment.target.attachmentId = targetAttachment.id;
+              }
             }
+          });
+          _.each(application.attachments ||[], function(att) {
+            calculateAttachmentStateIndicators(att);
+            setAttachmentOperation(application.operations, att);
+          });
+          hub.send("application-loaded", {applicationDetails: loading});
+          if (_.isFunction(callback)) {
+            callback(application);
           }
-        });
-        _.each(application.attachments ||[], function(att) {
-          calculateAttachmentStateIndicators(att);
-          setAttachmentOperation(application.operations, att);
-        });
-        hub.send("application-loaded", {applicationDetails: loading});
-        if (_.isFunction(callback)) {
-          callback(application);
+        } else {
+          error("Concurrent loading issue, old id = " + currentlyLoadingId);
         }
-      };
+      }
     });
   }
 
+  function load(id, pending, callback) {
+    if (window.location.hash.indexOf(id) === -1) {
+      // Application is not visible, do not load
+      return;
+    }
+
+    if (currentlyLoadingId) {
+      currentQuery.abort();
+    }
+    currentlyLoadingId = id;
+    doLoad(id, pending, callback);
+  }
+
   function loaded(pages, f) {
-    if (!_.isFunction(f)) throw "f is not a function: f=" + f;
+    if (!_.isFunction(f)) {
+      throw "f is not a function: f=" + f;
+    }
     hub.subscribe("application-loaded", function(e) {
       if (_.contains(pages, pageutil.getPage())) {
         //TODO: passing details as 2nd param due to application.js hack (details contains the municipality persons)

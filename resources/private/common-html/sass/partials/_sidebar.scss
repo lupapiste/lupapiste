@@ -1,0 +1,33 @@
+/* Side bar styles*/
+.action-bar-button {
+  width: 150px;
+  margin: 4px;
+  }
+
+.action-bar {
+  position: fixed;
+  top: 450px;
+  right: 30px;
+
+  width: 20%;
+  @media only screen and (width) {
+    width: $cols3;
+  }
+}
+
+.instructions {
+  background-color: white;
+  box-shadow: 2px 2px 1px #888888;
+  display: inline-block;
+  margin: $marginS 0 $marginS $marginS;
+  padding: $marginM;
+  position: relative;
+  border: 1px solid darken($lp-light-grey, 5%);
+}
+
+.sidebar {
+  /* Default width for browsers that don't support media queries */
+  width: 20%;
+  float: right;
+  z-index: 2;
+}

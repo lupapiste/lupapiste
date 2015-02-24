@@ -4,8 +4,9 @@
             [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.document.tools :as tools]
-            [sade.util :refer :all]
             [sade.core :refer :all]
+            [sade.util :as util]
+            [sade.strings :as ss]
             [lupapalvelu.document.rakennuslupa_canonical :refer [application-to-canonical
                                                                  katselmus-canonical
                                                                  unsent-attachments-to-canonical]]
@@ -33,7 +34,8 @@
 
 
 (def- rakennustunnus
-  [{:tag :jarjestysnumero}
+  [{:tag :valtakunnallinenNumero}
+   {:tag :jarjestysnumero}
    {:tag :kiinttun}
    {:tag :rakennusnro}])
 
@@ -229,7 +231,10 @@
       {:tag :osapuolettieto :child [mapping-common/osapuolet_211]})
     (update-in [:child] mapping-common/update-child-element
       [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :toimenpidetieto :Toimenpide :rakennustieto :Rakennus :rakennuksenTiedot]
-      #(update-in % [:child] conj {:tag :liitettyJatevesijarjestelmaanKytkin}))))
+      #(update-in % [:child] conj {:tag :liitettyJatevesijarjestelmaanKytkin}))
+    (update-in [:child] mapping-common/update-child-element
+      [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :rakennuspaikkatieto]
+      {:tag :rakennuspaikkatieto :child [mapping-common/rakennuspaikka_211]})))
 
 (def rakennuslupa_to_krysp_214
   (-> rakennuslupa_to_krysp_213
@@ -264,6 +269,14 @@
       [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :toimenpidetieto :Toimenpide :rakennustieto]
       {:tag :rakennustieto :child [rakennus_215]})))
 
+(def rakennuslupa_to_krysp_216
+  (-> rakennuslupa_to_krysp_215
+      (assoc-in [:attr :xsi:schemaLocation]
+                (mapping-common/schemalocation "rakennusvalvonta" "2.1.6"))
+      (update-in [:child] mapping-common/update-child-element
+                 [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :osapuolettieto]
+                 {:tag :osapuolettieto :child [mapping-common/osapuolet_215]})))
+
 (defn- get-mapping [krysp-version]
   {:pre [krysp-version]}
   (case (name krysp-version)
@@ -271,6 +284,7 @@
     "2.1.3" rakennuslupa_to_krysp_213
     "2.1.4" rakennuslupa_to_krysp_214
     "2.1.5" rakennuslupa_to_krysp_215
+    "2.1.6" rakennuslupa_to_krysp_216
     (throw (IllegalArgumentException. (str "Unsupported KRYSP version " krysp-version)))))
 
 (defn- write-application-pdf-versions [output-dir application submitted-application lang]
@@ -330,11 +344,18 @@
 (defn save-katselmus-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
   [application katselmus user lang krysp-version output-dir begin-of-link]
-  (let [data (tools/unwrapped (:data katselmus))
-        {:keys [katselmuksenLaji vaadittuLupaehtona]} data
+  (let [find-national-id (fn [{:keys [kiinttun rakennusnro]}]
+                           (:nationalId (some #(when (and (= (:propertyId %)) (= rakennusnro (:localShortId %))) %) (:buildings application))))
+        data (tools/unwrapped (:data katselmus))
+        {:keys [katselmuksenLaji vaadittuLupaehtona rakennus]} data
         {:keys [pitoPvm pitaja lasnaolijat poikkeamat tila]} (:katselmus data)
         huomautukset (-> data :katselmus :huomautukset)
-        buildings    (-> data :rakennus vals)]
+        buildings    (map
+                       (fn [{rakennus :rakennus :as b}]
+                         (if (ss/blank? (:valtakunnallinenNumero rakennus))
+                           (assoc-in b [:rakennus :valtakunnallinenNumero] (find-national-id rakennus))
+                           b))
+                       (vals rakennus))]
     (save-katselmus-xml
       application
       lang
@@ -358,10 +379,11 @@
 
 (permit/register-function permit/R :review-krysp-mapper save-katselmus-as-krysp)
 
-(defn save-aloitusilmoitus-as-krysp [application lang output-dir started {:keys [index buildingId propertyId] :as building} user krysp-version]
+(defn save-aloitusilmoitus-as-krysp [application lang output-dir started {:keys [index localShortId nationalId propertyId] :as building} user krysp-version]
   (let [building-id {:rakennus {:jarjestysnumero index
                                 :kiinttun        propertyId
-                                :rakennusnro     buildingId}}]
+                                :rakennusnro     localShortId
+                                :valtakunnallinenNumero nationalId}}]
     (save-katselmus-xml application lang output-dir nil "Aloitusilmoitus" started [building-id] user "Aloitusilmoitus" :katselmus nil nil nil nil nil nil krysp-version nil nil)))
 
 (defn save-unsent-attachments-as-krysp
@@ -416,13 +438,13 @@
                                           {:Liite
                                            {:kuvaus "Vireille tullut hakemus"
                                             :linkkiliitteeseen (str begin-of-link (mapping-common/get-submitted-filename (:id application)))
-                                            :muokkausHetki (to-xml-datetime (:submitted application))
+                                            :muokkausHetki (util/to-xml-datetime (:submitted application))
                                             :versionumero 1
                                             :tyyppi "hakemus_vireilletullessa"}}
                                           {:Liite
                                            {:kuvaus "K\u00e4sittelyj\u00e4rjestelm\u00e4\u00e4n siirrett\u00e4ess\u00e4"
                                             :linkkiliitteeseen (str begin-of-link (mapping-common/get-current-filename (:id application)))
-                                            :muokkausHetki (to-xml-datetime (now))
+                                            :muokkausHetki (util/to-xml-datetime (now))
                                             :versionumero 1
                                             :tyyppi "hakemus_taustajarjestelmaan_siirrettaessa"}})
         canonical-with-statement-attachments  (mapping-common/add-statement-attachments

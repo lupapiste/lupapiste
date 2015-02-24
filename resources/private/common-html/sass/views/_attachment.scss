@@ -1,0 +1,233 @@
+/* attachments */
+
+#attachment.container {
+  padding-right: 0;
+}
+
+.attachment-iframe{
+  height: 450px;
+  width: 600px;
+  border:0;
+  overflow: hidden;
+}
+/*style="*/
+
+$previewHeight: 500px;
+
+.file-preview {
+  width: 100%;
+  position: relative;
+}
+
+.file-preview-image img {
+  width: 100%;
+  height: auto;
+}
+
+.file-preview-actions {
+  position: absolute;
+  bottom: $marginS;
+  right: $marginS;
+  .btn{
+    margin: 0;
+  }
+}
+
+.file-preview-content {
+  img, iframe {
+    border: 1px solid darken($lp-light-grey, 15%);
+  }
+}
+
+.file-preview-links {
+}
+
+.file-preview-pdf {
+  iframe {
+    width: 100%;
+    height: $previewHeight;
+  }
+}
+
+.attachment-file-versions {
+  margin-bottom: $marginM;
+  table {
+    margin: 0;
+  }
+
+  .attachment-file-versions-content {
+    display: none;
+    padding: $marginS 0;
+    th {
+      padding: $marginS;
+    }
+    td {
+      padding: $marginS;
+      max-width: 130px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+}
+
+.attachment-file-conversation {
+  width: 48%;
+}
+
+.attachment-info {
+  width: 100%;
+
+  .container {
+    padding: 0;
+    margin-top: 0;
+  }
+
+  .col1 {
+    display: inline-block;
+    padding-right: $marginM;
+    width: 49%;
+    vertical-align: top;
+  }
+
+  .col2 {
+    display: inline-block;
+    padding-left: $marginM;
+    width: 49%;
+    vertical-align: top;
+  }
+
+  .attachment-actions {
+    width: $cols3;
+    position: absolute;
+    top: 0;
+    right: 0;
+    button {
+      width: 100%;
+    }
+  }
+}
+
+.attachment-info-header {
+  overflow: auto;
+  width: 100%;
+  display: block;
+  h1 {
+    line-height: normal;
+    display: inline-block;
+    max-width: 80%
+  }
+  a {
+    margin-left: $marginL * 2;
+  }
+  .help {
+    margin-left: $marginM;
+    display: inline-block;
+  }
+}
+
+.add-new-version {
+}
+
+td.comment-text {
+  vertical-align: top;
+  text-align: left;
+}
+
+.new-attachment-version-details {
+  display: block;
+  font-style: italic;
+}
+
+.attachment-group-header {
+  font-weight:bold;
+  font-size: 1.5em;
+  background: white !important;
+  height:50px;
+  vertical-align:bottom;
+  td {
+    padding: $marginS 0;
+  }
+}
+
+.attachment-back {
+
+  display: block;
+  height: 60px;
+
+  a {
+    margin-right: $marginM;
+  }
+}
+
+.inline-block {
+  display: inline-block;
+}
+
+#attachment-type-select {
+  margin-bottom: $marginL;
+}
+
+.change-type {
+  clear: both;
+  display: block;
+}
+
+.attachment-label {
+  margin-bottom: $marginM;
+  overflow: hidden;
+
+  .attachment-label-header {
+    font-size: 0.85em;
+    font-weight: 700;
+    letter-spacing: 0.125em;
+  }
+
+  .attachment-label-header-item {
+    margin-right: $marginL;
+  }
+
+  input {
+    display: block;
+    margin: 0;
+    width: $cols4 - 0.5em;
+    height: 25px;
+  }
+
+  input[type="checkbox"] {
+    display: inline-block;
+    width: $cols1;
+  }
+
+  select {
+    display: block;
+    width: $cols4;
+  }
+
+  .attachment-info-field {
+    margin-bottom: $marginS;
+  }
+}
+
+.signatures {
+  margin-top: $marginM;
+}
+
+.signature-table {
+  display: table;
+  width: auto;
+  margin-bottom: $marginM;
+  margin-left: $marginS;
+}
+
+.signature-row {
+  display: table-row;
+  width: auto;
+  clear: both;
+  margin-bottom: $marginS;
+  line-height: 27px;
+}
+
+.signature-cell {
+  display: table-cell;
+  width: 200px;
+}

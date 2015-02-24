@@ -256,6 +256,9 @@ Ronja logs in
 Sipoo logs in
   Authority-admin logs in  sipoo  sipoo  Simo Suurvisiiri
 
+Naantali logs in
+  Authority-admin logs in  admin@naantali.fi  naantali  Admin Naantali
+
 SolitaAdmin logs in
   Admin logs in  admin  admin  Admin Admin
   Wait until  Element should be visible  admin
@@ -293,7 +296,7 @@ Click by test id
 Click enabled by test id
   [Arguments]  ${id}
   ${path} =   Set Variable  xpath=//*[@data-test-id='${id}']
-  Wait until  Page Should Contain Element  ${path}
+  Wait Until  Element Should Be Visible  ${path}
   Wait Until  Element Should Be Enabled  ${path}
   Click by test id  ${id}
 
@@ -370,48 +373,89 @@ Do prepare new request
   Execute Javascript  $("div[id='popup-id'] input[data-test-id='create-address']").val("${address}").change();
 
   Set animations off
-  Click enabled by test id  create-continue
+
+  ${path} =   Set Variable  xpath=//div[@id="popup-id"]//button[@data-test-id="create-continue"]
+  Wait until  Element should be enabled  ${path}
+  Click element  ${path}
+
   Select operation path by permit type  ${permitType}
   Wait until  Element should be visible  xpath=//section[@id="create-part-2"]//div[@class="tree-content"]//*[@data-test-id="create-application"]
   Set animations on
 
 
+Select attachment operation option from dropdown
+  [Arguments]  ${optionName}
+  Wait until  Element should be visible  xpath=//select[@data-test-id="attachment-operations-select-lower"]
+  Select From List By Value  xpath=//select[@data-test-id="attachment-operations-select-lower"]  ${optionName}
+
+Add empty attachment template
+  [Arguments]  ${templateName}  ${topCategory}  ${subCategory}
+  Select attachment operation option from dropdown  newAttachmentTemplates
+  Wait Until Element Is Visible  xpath=//div[@id="dialog-add-attachment-templates"]//input[@data-test-id="selectm-filter-input"]
+  Input Text  xpath=//div[@id="dialog-add-attachment-templates"]//input[@data-test-id="selectm-filter-input"]  ${subCategory}
+  List Should Have No Selections  xpath=//div[@id="dialog-add-attachment-templates"]//select[@data-test-id="selectm-source-list"]
+  Click Element  xpath=//div[@id="dialog-add-attachment-templates"]//select[@data-test-id="selectm-source-list"]//option[contains(text(), '${templateName}')]
+  Click Element  xpath=//div[@id="dialog-add-attachment-templates"]//button[@data-test-id="selectm-add"]
+  Click Element  xpath=//div[@id="dialog-add-attachment-templates"]//button[@data-test-id="selectm-ok"]
+  Wait Until  Element Should Not Be Visible  xpath=//div[@id="dialog-add-attachment-templates"]//input[@data-test-id="selectm-filter-input"]
+  Wait Until Element Is Visible  xpath=//div[@id="application-attachments-tab"]//a[@data-test-type="${topCategory}.${subCategory}"]
+
 Add attachment
   [Arguments]  ${path}  ${description}  ${operation}
+  Select attachment operation option from dropdown  attachmentsAdd
+  Wait until  Element should be visible  upload-dialog
 
-  # Go home Selenium, you're drunk! Why the fuck are you clicking the 'process-previous' button?
-  # Must I do everything manually??
-  #Wait and click   xpath=//button[@data-test-id="add-attachment"]
-  Execute Javascript  $('button[data-test-id="add-attachment"]').click();
-
-  Select Frame     uploadFrame
-  Wait until       Element should be visible  test-save-new-attachment
-  Wait until       Page should contain element  xpath=//form[@id='attachmentUploadForm']//option[@value='muut.muu']
+  Select Frame      uploadFrame
+  Wait until        Element should be visible  test-save-new-attachment
+  Wait until        Page should contain element  xpath=//form[@id='attachmentUploadForm']//option[@value='muut.muu']
   Select From List  attachmentType  muut.muu
-  Wait until       Page should contain element  xpath=//form[@id='attachmentUploadForm']//option[text()='${operation}']
+  Wait until        Page should contain element  xpath=//form[@id='attachmentUploadForm']//option[text()='${operation}']
   Select From List  attachmentOperation  ${operation}
-  Input text       text  ${description}
-  Wait until       Page should contain element  xpath=//form[@id='attachmentUploadForm']/input[@type='file']
-  Focus            xpath=//form[@id='attachmentUploadForm']/input[@type='file']
-  Choose File      xpath=//form[@id='attachmentUploadForm']/input[@type='file']  ${path}
-  Click element    test-save-new-attachment
+  Input text        text  ${description}
+  Wait until        Page should contain element  xpath=//form[@id='attachmentUploadForm']/input[@type='file']
+  Focus             xpath=//form[@id='attachmentUploadForm']/input[@type='file']
+  Choose File       xpath=//form[@id='attachmentUploadForm']/input[@type='file']  ${path}
+  # Had to use 'Select Frame' another time to be able to use e.g. 'Element Should Be Enabled'
+  # Select Frame      uploadFrame
+  # Wait Until        Element Should Be Enabled  test-save-new-attachment
+  Click element     test-save-new-attachment
   Unselect Frame
   Wait Until Page Contains  Muu liite
-
 
 Open attachment details
   [Arguments]  ${type}
   Open tab  attachments
-  Wait Until  Page Should Contain Element  xpath=//a[@data-test-type="${type}"]
+  ${path} =  Set Variable  xpath=//div[@id='application-attachments-tab']//a[@data-test-type="${type}"]
+  Wait Until  Page Should Contain Element  ${path}
   # Make sure the element is visible on browser view before clicking. Take header heigth into account.
   #Execute Javascript  window.scrollTo(0, $("[data-test-type='muut.muu']").position().top - 130);
-  Focus  xpath=//a[@data-test-type="${type}"]
-  Click element  xpath=//a[@data-test-type="${type}"]
+  Wait Until  Focus  ${path}
+  Wait Until  Click element  ${path}
+  Wait Until  Element Should Be Visible  xpath=//section[@id="attachment"]//a[@data-test-id="back-to-application-from-attachment"]
+
+Assert file latest version
+  [Arguments]  ${name}  ${versionNumber}
   Wait Until  Element Should Be Visible  test-attachment-file-name
   Wait Until Page Contains  ${TXT_TESTFILE_NAME}
-  Element Text Should Be  test-attachment-file-name  ${TXT_TESTFILE_NAME}
-  Element Text Should Be  test-attachment-version  1.0
+  Element Text Should Be  test-attachment-file-name  ${name}
+  Element Text Should Be  test-attachment-version  ${versionNumber}
 
+Add first attachment version
+  [Arguments]  ${path}
+  Wait Until     Element should be visible  xpath=//button[@id="add-new-attachment-version"]
+  Click Element  xpath=//button[@id="add-new-attachment-version"]
+  Wait Until     Element should be visible  xpath=//*[@id="uploadFrame"]
+  Select Frame   uploadFrame
+  Wait until     Element should be visible  test-save-new-attachment
+  Wait until     Page should contain element  xpath=//form[@id='attachmentUploadForm']/input[@type='file']
+  Focus          xpath=//form[@id='attachmentUploadForm']/input[@type='file']
+  Choose File    xpath=//form[@id='attachmentUploadForm']/input[@type='file']  ${path}
+  # Had to use 'Select Frame' another time to be able to use e.g. 'Element Should Be Enabled'
+  # Select Frame   uploadFrame
+  # Wait Until     Element Should Be Enabled  test-save-new-attachment
+  Click element  test-save-new-attachment
+  Unselect Frame
+  Wait until     Page should contain element  xpath=//div[@class='attachment-label']
 
 Select operation path by permit type
   [Arguments]  ${permitType}
@@ -423,9 +467,9 @@ Select operation path by permit type
   ...  ELSE  Select operations path R
 
 Select operations path R
-  Click tree item by text  "Rakentaminen ja purkaminen (talot, grillikatokset, autotallit, remontointi)"
-  Click tree item by text  "Uuden rakennuksen rakentaminen (mökit, omakotitalot, saunat, julkiset rakennukset)"
-  Click tree item by text  "Asuinrakennuksen rakentaminen"
+  Click tree item by text  "Rakentaminen, purkaminen tai maisemaan vaikuttava toimenpide"
+  Click tree item by text  "Uuden rakennuksen rakentaminen"
+  Click tree item by text  "Asuinkerrostalon tai rivitalon rakentaminen"
 
 Select operations path YA kayttolupa
   Click tree item by text  "Yleiset alueet (Sijoittamissopimus, katulupa, alueiden käyttö)"
@@ -486,9 +530,21 @@ Open the request
   Wait until  Click element  xpath=//table[@id='applications-list']//tr[@data-test-address='${address}']/td
   Wait for jQuery
 
+Open the request at index
+  [Arguments]  ${address}  ${index}
+  Go to page  applications
+  Wait until  Click element  xpath=//table[@id='applications-list']//tr[@data-test-address='${address}'][${index}]/td
+  Wait for jQuery
+
 Open application
   [Arguments]  ${address}  ${propertyId}
   Open the request  ${address}
+  Wait until  Element Should Be Visible  application
+  Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  ${propertyId}
+
+Open application at index
+  [Arguments]  ${address}  ${propertyId}  ${index}
+  Open the request at index  ${address}  ${index}
   Wait until  Element Should Be Visible  application
   Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  ${propertyId}
 

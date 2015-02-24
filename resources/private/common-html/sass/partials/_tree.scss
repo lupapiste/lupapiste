@@ -1,0 +1,97 @@
+$tree-width: 800px;
+$tree-height: 320px;
+
+.operation-tree {
+  display: inline-block;
+  margin-left: $marginL;
+  width: $tree-width;
+  overflow: hidden;
+  .tree-title {
+    color: white;
+    background: $lp-dark-grey;
+    padding: 5px 0px 3px 10px;
+  }
+  .tree-breadcrumbs {
+
+  }
+  .tree-content {
+    width: 80000px;
+  }
+  .tree-link {
+    margin: 0;
+    width: $tree-width;
+    float: left;
+    border: 1px solid darken($lp-light-grey, 10%);
+    display: block;
+    @include box-sizing(border-box);
+    padding: 4px 0px 4px 12px;
+    text-decoration: none;
+    background: white;
+    color: $color-text;
+    width: $tree-width;
+    cursor: pointer;
+    @include user-select(none);
+    @include transition-property(font-size);
+    @include transition-duration(200ms);
+    &:HOVER {
+      background: $lp-light-grey;
+    }
+    span {
+      width: $tree-width - 22px;
+    }
+    span.icon {
+      width: 20px;
+    }
+  }
+  .tree-nav {
+    .tree-back {
+      min-width: $cols1 * 1.5;
+      display: inline-block;
+      margin: $marginL $marginL 0 30px;
+      height: 30px;
+    }
+    .tree-start {
+      min-width: $cols1 * 1.5;
+      display: inline-block;
+      margin: $marginL $marginL 0 30px;
+      height: 30px;
+    }
+  }
+  .tree-page {
+    position: relative;
+    float: left;
+  }
+  .tree-last {
+    width: 90%;
+    padding: $baseline $marginL;
+    width: $tree-width;
+    float: left;
+    text-align: left;
+    li {
+      list-style-type: none;
+      a {
+        color: $color-text;
+      }
+    }
+    div {
+      width: 90%;
+      margin-top: $marginS;
+    }
+    button {
+      margin-top: $baseline;
+      font-size:14px;
+      width: 18em;
+    }
+  }
+}
+
+.tree-width  {
+  width: $tree-width;
+  height: $baseline * 5;
+}
+ul.attachments-list {
+  list-style-type: circle;
+  li.mandatory-attachments {
+    list-style-type:circle;
+  }
+}

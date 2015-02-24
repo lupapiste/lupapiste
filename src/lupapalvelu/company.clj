@@ -1,7 +1,6 @@
 (ns lupapalvelu.company
   (:require [taoensso.timbre :as timbre :refer [trace debug info infof warn warnf error fatal]]
             [monger.operators :refer :all]
-            [monger.query :as q]
             [schema.core :as sc]
             [sade.util :refer [min-length-string max-length-string y? ovt? fn-> fn->>]]
             [sade.env :as env]
@@ -11,6 +10,7 @@
             [lupapalvelu.action :refer [update-application application->command]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.token :as token]
+            [lupapalvelu.ttl :as ttl]
             [lupapalvelu.notifications :as notif]
             [lupapalvelu.user-api :as uapi]
             [lupapalvelu.user :as u])
@@ -56,7 +56,8 @@
 (defn find-company
   "Returns company mathing the provided query, or nil"
   [q]
-  (some->> q (mongo/with-_id) (mongo/select-one :companies))) ; mongo/select-one return ANY FUCKING doc if query is nil. ANY...FUCKING....DOC...!!!!
+  (when (seq q)
+    (some->> q (mongo/with-_id) (mongo/select-one :companies))))
 
 (defn find-company!
   "Returns company mathing the provided query. Throws if not found."
@@ -74,9 +75,7 @@
   (or (find-company-by-id id) (fail! :company.not-found)))
 
 (defn find-companies []
-  (q/with-collection "companies"
-    (q/sort {:name 1})
-    (q/fields [:name :address1 :po])))
+  (mongo/select :companies {} [:name :y :address1 :address2 :zip :po] (array-map :name 1)))
 
 (defn find-company-users [company-id]
   (u/get-users {:company.id company-id}))
@@ -108,7 +107,8 @@
 ;;
 
 (defn add-user! [user company role]
-  (let [token-id (token/make-token :new-company-user nil {:user user, :company company, :role role} :auto-consume false)]
+  (let [user (update-in user [:email] u/canonize-email)
+        token-id (token/make-token :new-company-user nil {:user user, :company company, :role role} :auto-consume false)]
     (notif/notify! :new-company-user {:user       user
                                       :company    company
                                       :link-fi    (str (env/value :host) "/app/fi/welcome#!/new-company-user/" token-id)
@@ -171,6 +171,8 @@
                  :firstName (:name company)
                  :lastName  "")))
 
+
+
 (defn company-invite [caller application company-id]
   {:pre [(map? caller) (map? application) (string? company-id)]}
   (let [company   (find-company! {:id company-id})
@@ -180,7 +182,7 @@
                     :invite {:user {:id company-id}})
         admins    (find-company-admins company-id)
         application-id (:id application)
-        token-id  (token/make-token :accept-company-invitation nil {:caller caller, :company-id company-id, :application-id application-id} :auto-consume false)
+        token-id  (token/make-token :accept-company-invitation nil {:caller caller, :company-id company-id, :application-id application-id} :auto-consume false :ttl ttl/company-invite-ttl)
         update-count (update-application
                        (application->command application)
                        {:auth {$not {$elemMatch {:invite.user.id company-id}}}}

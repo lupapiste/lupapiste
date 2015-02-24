@@ -34,7 +34,7 @@
   (fact (attachment-latest-version test-attachments "1")    => {:major 9, :minor 7})
   (fact (attachment-latest-version test-attachments "none") => nil?))
 
-(testable-privates lupapalvelu.attachment next-attachment-version allowed-attachment-types-contain?)
+(testable-privates lupapalvelu.attachment allowed-attachment-types-contain?)
 
 (facts "Facts about next-attachment-version"
   (fact (next-attachment-version {:major 1 :minor 1} {:role :authority})  => {:major 1 :minor 2})
@@ -70,27 +70,35 @@
     (attachment-latest-file-id application :attachment2) => :file2))
 
 (fact "make attachments"
-  (make-attachments 999 :draft [:a :b]) => (just
-                                             [{:id "123"
-                                               :locked false
-                                               :modified 999
-                                               :op nil
-                                               :state :requires_user_action
-                                               :target nil
-                                               :type :a
-                                               :applicationState :draft
-                                               :signatures []
-                                               :versions []}
-                                              {:id "123"
-                                               :locked false
-                                               :modified 999
-                                               :op nil
-                                               :state :requires_user_action
-                                               :target nil
-                                               :type :b
-                                               :applicationState :draft
-                                               :signatures []
-                                               :versions []}])
+  (make-attachments 999 :draft [:a :b] false true true) => (just
+                                                             [{:id "123"
+                                                               :locked false
+                                                               :modified 999
+                                                               :op nil
+                                                               :state :requires_user_action
+                                                               :target nil
+                                                               :type :a
+                                                               :applicationState :draft
+                                                               :signatures []
+                                                               :versions []
+                                                               :notNeeded false
+                                                               :required true
+                                                               :requestedByAuthority true
+                                                               :forPrinting false}
+                                                              {:id "123"
+                                                               :locked false
+                                                               :modified 999
+                                                               :op nil
+                                                               :state :requires_user_action
+                                                               :target nil
+                                                               :type :b
+                                                               :applicationState :draft
+                                                               :signatures []
+                                                               :versions []
+                                                               :notNeeded false
+                                                               :required true
+                                                               :requestedByAuthority true
+                                                               :forPrinting false}])
   (provided
     (mongo/create-id) => "123"))
 

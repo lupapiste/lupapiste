@@ -8,7 +8,7 @@
             [lupapalvelu.action :refer :all]
             [sade.dummy-email-server :as dummy-email-server]
             [sade.core :refer [def- now]]
-            [lupapalvelu.fixture :as fixture]
+            [lupapalvelu.fixture.core :as fixture]
             [lupapalvelu.batchrun :as batchrun]))
 
 (dummy-email-server/messages :reset true)  ;; clears inbox
@@ -117,7 +117,7 @@
    :started nil
    :closed nil
    :operations [{:id "534bf825299508fb3618455d"
-                 :name "asuinrakennus"
+                 :name "kerrostalo-rivitalo"
                  :created 1397487653097}]
    :infoRequest false
    :openInfoRequest false

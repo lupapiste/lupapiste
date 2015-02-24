@@ -6,6 +6,7 @@
             [lupapalvelu.wfs :as wfs]
             [lupapalvelu.find-address :as find-address]
             [clojure.data.zip.xml :refer :all]
+            [sade.env :as env]
             [sade.util :refer [dissoc-in select]]))
 
 ;;
@@ -24,12 +25,12 @@
 (defn get-addresses [street number city]
   (wfs/post wfs/maasto
     (wfs/query {"typeName" "oso:Osoitenimi"}
-      (wfs/sort-by ["oso:katunumero"])
-      (wfs/filter
-        (wfs/and
+      (wfs/ogc-sort-by ["oso:katunumero"])
+      (wfs/ogc-filter
+        (wfs/ogc-and
           (wfs/property-is-like "oso:katunimi"     street)
           (wfs/property-is-like "oso:katunumero"   number)
-          (wfs/or
+          (wfs/ogc-or
             (wfs/property-is-like "oso:kuntanimiFin" city)
             (wfs/property-is-like "oso:kuntanimiSwe" city)))))))
 
@@ -101,10 +102,24 @@
       (resp/status 503 "Service temporarily unavailable"))))
 
 (defn plan-urls-by-point-proxy [request]
-  (let [{x :x y :y} (:params request)
-        response (wfs/plan-info-by-point x y)]
+  (let [{x :x y :y municipality :municipality} (:params request)
+        response (wfs/plan-info-by-point x y municipality)
+        k (keyword municipality)
+        gfi-mapper (if-let [f-name (env/value :plan-info k :gfi-mapper)]
+                     (resolve (symbol f-name))
+                     wfs/gfi-to-features-sito)
+        feature-mapper (if-let [f-name (env/value :plan-info k :feature-mapper)]
+                         (resolve (symbol f-name))
+                         wfs/feature-to-feature-info-sito)]
     (if response
-      (resp/json (map wfs/feature-to-feature-info (wfs/gfi-to-features response)))
+      (resp/json (map feature-mapper (gfi-mapper response municipality)))
+      (resp/status 503 "Service temporarily unavailable"))))
+
+(defn general-plan-urls-by-point-proxy [request]
+  (let [{x :x y :y} (:params request)
+        response (wfs/general-plan-info-by-point x y)]
+    (if response
+      (resp/json (map wfs/general-plan-feature-to-feature-info (wfs/gfi-to-general-plan-features response)))
       (resp/status 503 "Service temporarily unavailable"))))
 
 ;
@@ -141,5 +156,7 @@
                "get-address" get-addresses-proxy
                "property-info-by-wkt" property-info-by-wkt-proxy
                "wmscap" wms-capabilities-proxy
-               "plan-urls-by-point" plan-urls-by-point-proxy})
+               "plan-urls-by-point" plan-urls-by-point-proxy
+               "general-plan-urls-by-point" general-plan-urls-by-point-proxy
+               "plandocument" (cache (* 3 60 60 24) (secure wfs/raster-images "plandocument"))})
 

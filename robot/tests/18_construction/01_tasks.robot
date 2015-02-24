@@ -11,7 +11,7 @@ Sonja prepares the application
   Sonja logs in
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  Taskitesti${secs}
-  Create application the fast way  ${appname}  753  753-416-25-30  asuinrakennus
+  Create application the fast way  ${appname}  753  753-416-25-30  kerrostalo-rivitalo
   Submit application
   Open tab  verdict
   Fetch verdict
@@ -23,7 +23,8 @@ Rakentaminen tab opens
   Open tab  tasks
 
 Rakentaminen tab contains 9 tasks
-  Wait until  Xpath Should Match X Times  //div[@id='application-tasks-tab']//table[@data-bind="foreach: taskGroups"]/tbody/tr  9
+  Wait until  Xpath Should Match X Times  //div[@id='application-tasks-tab']//table[@data-bind="foreach: taskGroups"]/tbody/tr  6
+  Wait until  Xpath Should Match X Times  //table[@data-test-id="tasks-foreman"]/tbody/tr  3
 
 Katselmukset
   Wait Until  Page should contain  Kokoukset, katselmukset ja tarkastukset
@@ -31,7 +32,7 @@ Katselmukset
 
 Työnjohtajat
   Wait until  Page should contain  Työnjohtajat
-  Task count is  task-vaadittu-tyonjohtaja  3
+  Wait until  Xpath Should Match X Times  //table[@data-test-id="tasks-foreman"]/tbody/tr  3
 
 Muut lupamaaraykset
   Wait until  Page should contain  Muut lupamääräykset
@@ -39,6 +40,7 @@ Muut lupamaaraykset
 
 Add attachment to Aloituskokous
   Open task  Aloituskokous
+  Wait Until  Title Should Be  ${appname} - Lupapiste
   Click enabled by test id  add-targetted-attachment
   Select Frame     uploadFrame
   Wait until       Element should be visible  test-save-new-attachment
@@ -48,7 +50,7 @@ Add attachment to Aloituskokous
   Wait Until Page Contains  ${TXT_TESTFILE_NAME}
 
 Aloituskokous requires action
-  Wait until  Xpath Should Match X Times  //section[@id='task']/h1/span[@data-test-state="requires_authority_action"]  1
+  Wait until  Xpath Should Match X Times  //section[@id='task']/h1/span[@data-test-state="requires_user_action"]  1
 
 Reject Aloituskokous
   Click enabled by test id  reject-task

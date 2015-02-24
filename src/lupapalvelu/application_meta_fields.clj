@@ -12,6 +12,12 @@
             [sade.env :as env]
             [sade.strings :as ss]))
 
+(def post-verdict-states #{:verdictGiven :constructionStarted :closed})
+
+(def post-sent-states (conj post-verdict-states :sent))
+
+(defn in-post-verdict-state? [_ app] (contains? post-verdict-states (keyword (:state app))))
+
 (defn- applicant-name-from-auth [application]
   (let [owner (first (domain/get-auths-by-role application :owner))
         {first-name :firstName last-name :lastName} owner]
@@ -57,7 +63,7 @@
     (let [last-seen (get-in app [:_statements-seen-by (keyword (:id user))] 0)]
       (count (filter (fn [statement]
                        (and (> (or (:given statement) 0) last-seen)
-                            (not= (ss/lower-case (get-in statement [:person :email])) (ss/lower-case (:email user)))))
+                            (not= (user/canonize-email (get-in statement [:person :email])) (user/canonize-email (:email user)))))
                      (:statements app))))
     0))
 
@@ -97,10 +103,12 @@
 (defn- organization-meta [_ app]
   (let [org (organization/get-organization (:organization app))]
     {:name (organization/get-organization-name org)
-     :requiredFieldsFillingObligatory (or (:app-required-fields-filling-obligatory org) false)}))
-
-(def post-verdict-states #{"verdictGiven" "constructionStarted" "closed"})
-(defn- in-post-verdict-state? [_ app] (if (post-verdict-states (name (:state app))) true false))
+     :links (:links org)
+     :requiredFieldsFillingObligatory (:app-required-fields-filling-obligatory org)
+     :kopiolaitos {:kopiolaitosEmail (:kopiolaitos-email org)
+                   :kopiolaitosOrdererAddress (:kopiolaitos-orderer-address org)
+                   :kopiolaitosOrdererPhone (:kopiolaitos-orderer-phone org)
+                   :kopiolaitosOrdererEmail (:kopiolaitos-orderer-email org)}}))
 
 (defn- indicator-sum [_ app]
   (apply + (map (fn [[k v]] (if (#{:documentModifications :unseenStatements :unseenVerdicts} k) v 0)) app)))
@@ -117,7 +125,8 @@
                    {:field :inPostVerdictState :fn in-post-verdict-state?}
                    {:field :applicantPhone :fn get-applicant-phone}
                    {:field :organizationMeta :fn organization-meta}
-                   {:field :neighbors :fn neighbors/normalize-neighbors}))
+                   {:field :neighbors :fn neighbors/normalize-neighbors}
+                   {:field :submittable :fn (fn [_ _] true)}))
 
 (defn- enrich-with-meta-fields [fields user app]
   (reduce (fn [app {field :field f :fn}] (assoc app field (f user app))) app fields))
@@ -135,11 +144,14 @@
         resp (mongo/select :app-links {:link {$in [app-id]}})]
     (if (seq resp)
       ;; Link permit data was found
-      (let [convert-fn (fn [link-data]
+      (let [our-link-permits (filter #(= (:type ((keyword app-id) %)) "application") resp)
+            apps-linking-to-us (filter #(= (:type ((keyword app-id) %)) "linkpermit") resp)
+            convert-fn (fn [link-data]
                          (let [link-array (:link link-data)
-                               app-index (.indexOf link-array app-id)
-                               link-permit-id (link-array (if (zero? app-index) 1 0))
+                               link-permit-id ((if (-> link-array (.indexOf app-id) zero?) second first)
+                                                link-array)
                                link-permit-type (:linkpermittype ((keyword link-permit-id) link-data))]
+
                            (if (= (:type ((keyword app-id) link-data)) "application")
 
                              ;; TODO: Jos viiteluvan tyyppi on myos jatkolupa, niin sitten :operation pitaa hakea
@@ -150,9 +162,8 @@
                                                         (-> (mongo/by-id "applications" link-permit-id {:operations 1})
                                                           :operations first :name))]
                                {:id link-permit-id :type link-permit-type :operation link-permit-app-op})
-                             {:id link-permit-id})))
-            our-link-permits (filter #(= (:type ((keyword app-id) %)) "application") resp)
-            apps-linking-to-us (filter #(= (:type ((keyword app-id) %)) "linkpermit") resp)]
+
+                             {:id link-permit-id :type link-permit-type})))]
 
         (-> app
           (assoc :linkPermitData (when (seq our-link-permits)

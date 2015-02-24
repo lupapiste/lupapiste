@@ -1,8 +1,8 @@
 (ns sade.util-test
   (:require [sade.util :refer :all]
             [midje.sweet :refer :all]
-            [schema.core :as sc]))
-
+            [schema.core :as sc])
+  (:import [org.apache.commons.io.output NullWriter]))
 
 (facts "strip-nils"
   (fact "Removes the whole key-value pair when value is nil"
@@ -116,7 +116,10 @@
                               {:a [3 4 5]}]) => [6 9 12])
 
 (facts future*
-  (deref (future* (throw (Exception. "bang!")))) => (throws java.util.concurrent.ExecutionException "java.lang.Exception: bang!"))
+  (binding [*out* (NullWriter.)
+            *err* (NullWriter.)]
+    (deref (future* (throw (Exception. "bang!")))))
+  => (throws java.util.concurrent.ExecutionException "java.lang.Exception: bang!"))
 
 (facts missing-keys
   (missing-keys ...what-ever... nil)          => (throws AssertionError)
@@ -238,6 +241,16 @@
   (fact (ovt? "003701902735") => truthy)
   (fact (ovt? "003710601555") => truthy))
 
+(facts "rakennustunnus?"
+  (fact (rakennustunnus? nil) => falsey)
+  (fact (rakennustunnus? "") => falsey)
+  (fact (rakennustunnus? "foo") => falsey)
+  (fact (rakennustunnus? "1a") => falsey)
+  (fact (rakennustunnus? "1A") => falsey)
+  (fact (rakennustunnus? "903048741J") => truthy)
+  (fact "SYKE sample with a fixed checksum" (rakennustunnus? "100012345N") => truthy)
+  (fact "VRK sample with a fixed checksum" (rakennustunnus? "1234567892") => truthy))
+
 (facts max-length
   (fact (sc/check (max-length 1) []) => nil)
   (fact (sc/check (max-length 1) [1]) => nil)
@@ -247,3 +260,11 @@
   (fact (sc/check (max-length-string 1) "a") => nil)
   (fact (sc/check (max-length-string 1) "ab") =not=> nil)
   (fact (sc/check (max-length-string 1) [1]) =not=> nil))
+
+(facts "comparing history item difficulties"
+  (fact "nil and item"          (compare-difficulty nil {:difficulty "A"})                => pos?)
+  (fact "item and nil"          (compare-difficulty {:difficulty "A"} nil)                => neg?)
+  (fact "old more difficult"    (compare-difficulty {:difficulty "A"} {:difficulty "B"})  => neg?)
+  (fact "new more difficult"    (compare-difficulty {:difficulty "B"} {:difficulty "A"})  => pos?)
+  (fact "tricky difficulty val" (compare-difficulty {:difficulty "A"} {:difficulty "AA"}) => pos?)
+  (fact "equality"              (compare-difficulty {:difficulty "B"} {:difficulty "B"})  => zero?))

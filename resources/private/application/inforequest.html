@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <body>
   <section class="page" id="inforequest">
 
@@ -95,7 +95,7 @@
             <span data-bind="ltext: 'inforequest.convertToApplication'"></span>
             <span class="icon send left-align"></span>
           </button>
-          <button data-bind="click: cancelApplication,  visible: $root.authorization.ok('cancel-application')"  data-test-id="inforequest-cancel-btn"  class="btn">
+          <button data-bind="click: cancelInforequest,  visible: $root.authorization.ok('cancel-inforequest')"  data-test-id="inforequest-cancel-btn"  class="btn">
             <span data-bind="ltext: 'inforequest.cancelInforequest'"></span>
             <span class="icon remove-grey left-align"></span>
           </button>
@@ -162,10 +162,9 @@
         </div>
 
         <button
-          class="btn modal"
+          class="btn"
           data-bind="ltext: 'application.attachmentsAdd', visible: $root.authorization.ok('upload-attachment'), enabled: $root.authorization.ok('upload-attachment'), click: application.newOtherAttachment"
-          data-test-id="add-inforequest-attachment"
-          data-window-id="upload-dialog"></button>
+          data-test-id="add-inforequest-attachment"></button>
 
         <div class="inforequest-conversation">
           <h2  data-bind="ltext: 'inforequest.comments'"></h2>
@@ -175,7 +174,6 @@
       </div>
 
     </div>
-
   </section>
 </body>
 </html>

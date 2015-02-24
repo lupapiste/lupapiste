@@ -1,0 +1,209 @@
+.application-row {
+  cursor: pointer;
+}
+
+.inforequest-row {
+  cursor: pointer;
+}
+
+.applications-empty-state {
+  margin-top: $baseline;
+  margin-right: $marginL * 3;
+  width: 100%;
+  min-height: 300px;
+  .app-type-box {
+    display: inline-block;
+    width: 32%;
+    height: 100%;
+    margin: $marginM auto;
+    vertical-align: top;
+    position: relative;
+    button {
+      position: absolute;
+      bottom: 12px;
+      left: 0;
+      right: 0;
+      margin: 0 auto;
+    }
+  }
+  .missing-wrapper {
+    width: 100%;
+  }
+  .missing-inforequest-box {
+    padding-right: $marginL;
+    border-right: 1px dotted $color-dark-bg;
+    padding-bottom: 48px;
+  }
+  .missing-application-box {
+    padding-left: $marginL;
+    padding-right: $marginL;
+    padding-bottom: 48px;
+  }
+  .missing-prev-permit-box {
+    padding-left: $marginL;
+    border-left: 1px dotted $color-dark-bg;
+    padding-bottom: 48px;
+  }
+}
+
+#applications-list_paginate, .dataTables_paginate {
+  display: inline-block;
+  width: $cols3;
+  float: left;
+  a {
+    border: 1px solid darken($lp-light-grey, 10%);
+    padding: $marginS;
+    cursor: pointer;
+  }
+  .paginate_disabled_previous, .paginate_disabled_next {
+    background: $lp-light-grey;
+    color: lighten($color-text, 30%);
+  }
+  .paginate_enabled_previous, .paginate_enabled_next {
+    background: #ffffff; /* Old browsers */
+    @include background( linear-gradient(top, #ffffff 0%, #f3f3f3 50%, #ededed 51%, #ffffff 100%));
+  }
+  .paginate_disabled_previous, .paginate_enabled_previous {
+    margin-right: $marginM;
+  }
+}
+
+#applications-list_length {
+  width: $cols3;
+  position: absolute;
+  left: $cols3;
+  bottom: -27px;
+  select {
+    width: $cols1*1.5;
+    margin-right: $marginS;
+  }
+}
+
+.sorting, .sorting_asc, .sorting_desc {
+  cursor: pointer;
+  position: relative;
+}
+.sorting_asc:after {
+  content:"";
+  display: block;
+  position: absolute;
+  @include spite-bg;
+  background-position: 0px -3393px;
+  height:22px;
+  width: 10px;
+  top: 7px;
+  right: 2px;
+}
+.sorting_desc:after {
+  content:"";
+  display: block;
+  position: absolute;
+  @include spite-bg;
+  background-position: 0px -3293px;
+  height:22px;
+  width: 10px;
+  top: 7px;
+  right: 2px;
+}
+
+.dataTables_info {
+  width: $cols3;
+  display: inline-block;
+  position: absolute;
+  left: 0;
+  bottom: $baseline * 0.5;
+}
+
+.invitations {
+  margin-bottom: $baseline;
+  .invitation {
+    span {
+      margin-right: $marginM;
+    }
+  }
+
+}
+.filter-controls {
+  div {
+    display: inline-block;
+    margin-bottom: $marginL;
+  }
+  label {
+    display: block;
+  }
+  select {
+    display: block;
+  }
+}
+
+#applications-list {
+  .indicator-count {
+    padding-left: 0;
+    padding-right: 0;
+    font-weight: bold;
+    color: #fff;
+    text-align: center;
+    width: 22px;
+    padding: 3px;
+  }
+  div {padding-top: 3px; height: 30px;}
+  .urgent {
+    @include spite-bg;
+    background-position: 0 -5300px;
+    height: 24px;
+    width: 24px;
+  }
+  .pending {
+    @include spite-bg;
+    background-position: 0 -5500px;
+    width: 24px;
+    height: 24px;
+  }
+  .normal {
+    @include spite-bg;
+    background-position: 0 -5600px;
+    width: 24px;
+    height: 24px;
+  }
+  .unseen-comments {
+    @include spite-bg;
+    background-position: 0 -4295px;
+    width: 21px;
+  }
+  .unseen-indicators {
+    @include spite-bg;
+    background-position: 0 -4597px;
+    width: 25px;
+  }
+  .unseen-attachments {
+    @include spite-bg;
+    background-position: 0 -4496px;
+    width: 21px;
+  }
+}
+
+.clearable{
+    position:relative;
+    display: inline-block;
+    vertical-align: bottom;
+}
+.applications-search {
+    padding-right:17px; /* add space for the 'x' icon*/
+}
+.applications-search::-ms-clear {
+    display: none;
+}
+span.icon_clear {
+    position:absolute;
+    right: 12px;
+    top: 8px;
+    display:none;
+
+    /* now go with the styling */
+    cursor:pointer;
+    font: bold 1em sans-serif;
+    color:#38468F;
+    &:before {
+     color:#f52;
+    }
+}

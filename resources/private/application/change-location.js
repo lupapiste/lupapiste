@@ -1,11 +1,14 @@
 LUPAPISTE.ChangeLocationModel = function() {
+  "use strict";
+
   var self = this;
   self.dialogSelector = "#dialog-change-location";
 
   var _map = null;
 
   self.map = function() {
-    if (!_map) _map = gis
+    if (!_map) {
+      _map = gis
         .makeMap("change-location-map", false)
         .center(404168, 6693765, 13)
         .addClickHandler(function(x, y) {
@@ -18,6 +21,7 @@ LUPAPISTE.ChangeLocationModel = function() {
             .searchAddress(x, y);
           return false;
         });
+    }
     return _map;
   };
 

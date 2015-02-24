@@ -7,6 +7,7 @@
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.core :refer :all]
+            [sade.scss-compiler :refer [scss->css]]
             [lupapalvelu.components.core :as c])
   (:import [java.io ByteArrayOutputStream ByteArrayInputStream]
            [java.util.zip GZIPOutputStream]
@@ -56,7 +57,7 @@
         (if (fn? src)
           (.write (write-header kind out (str "fn: " (fn-name src))) (src))
           (with-open [in (-> src c/path io/resource io/input-stream io/reader)]
-            (if (ss/contains src ".min.")
+            (if (or (ss/contains src "debug") (ss/contains src ".min."))
               (IOUtils/copy in (write-header kind out src))
               (minified kind in (write-header kind out src)))))))
     (.toByteArray stream)))
@@ -87,7 +88,8 @@
                   (enlive/transform [:nav] (enlive/content (map :content nav)))
                   (enlive/transform [:section] (enlive/content page))
                   (enlive/transform [:footer] (enlive/content (map :content footer)))
-                  (enlive/transform [:script] (fn [e] (if (= (-> e :attrs :src) "inject") (assoc-in e [:attrs :src] (resource-url component :js)) e)))
+                  (enlive/transform [:script] (fn [e] (if (= (-> e :attrs :src) "inject-common") (assoc-in e [:attrs :src] (resource-url :common :js)) e)))
+                  (enlive/transform [:script] (fn [e] (if (= (-> e :attrs :src) "inject-app") (assoc-in e [:attrs :src] (resource-url component :js)) e)))
                   (enlive/transform [:link] (fn [e] (if (= (-> e :attrs :href) "inject") (assoc-in e [:attrs :href] (resource-url component :css)) e)))
                   (enlive/transform [:#buildinfo] (enlive/content buildinfo-summary)))))
 
@@ -114,8 +116,16 @@
       (.write out (ss/utf8-bytes element)))
     (-> out (.toString (.name ss/utf8)) (compress-html) (ss/utf8-bytes))))
 
+(defn compose-scss [component]
+  (let [stream (ByteArrayOutputStream.)]
+    (with-open [out (io/writer stream)]
+      (doseq [src (c/get-resources ui-components :scss component)]
+        (.write out (scss->css (.getPath (-> src c/path io/resource))))))
+    (.toByteArray stream)))
+
 (defn compose [kind component]
   (tracef "Compose %s%s" component kind)
-  (if (= :html kind)
-    (compose-html component)
-    (compose-resource kind component)))
+  (case kind
+    :html (compose-html component)
+    :css  (compose-resource kind component) #_(byte-array (concat (compose-scss component) (compose-resource kind component)))
+    :js   (compose-resource kind component)))

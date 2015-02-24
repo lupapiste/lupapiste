@@ -2,6 +2,7 @@
   (:require [taoensso.timbre :as timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal fatalf]]
             [clojure.set :as set]
             [clojure.string :as s]
+            [clojure.set :refer [difference union]]
             [slingshot.slingshot :refer [try+]]
             [sade.dns :as dns]
             [sade.env :as env]
@@ -51,19 +52,22 @@
 
 ;; State helpers
 
-(def all-application-states [:draft :open :submitted :sent :complement-needed
-                             :verdictGiven :constructionStarted :closed :canceled])
-(def all-inforequest-states [:info :answered])
-(def all-states             (concat all-application-states all-inforequest-states))
+(def all-application-states #{:draft :open :submitted :sent :complement-needed
+                              :verdictGiven :constructionStarted :closed :canceled})
+(def all-inforequest-states #{:info :answered})
+(def all-states             (union all-application-states all-inforequest-states))
+
+(def pre-verdict-states #{:draft :info :answered :open :submitted :complement-needed})
+(def post-verdict-states (difference all-application-states pre-verdict-states))
 
 (defn all-states-but [drop-states-array]
-  (vec (util/exclude-from-sequence all-states drop-states-array)))
+  (difference all-states (set drop-states-array)))
 
 (defn all-application-states-but [drop-states-array]
-  (vec (util/exclude-from-sequence all-application-states drop-states-array)))
+  (difference all-application-states (set drop-states-array)))
 
 (defn all-inforequest-states-but [drop-states-array]
-  (vec (util/exclude-from-sequence all-inforequest-states drop-states-array)))
+  (difference all-inforequest-states (set drop-states-array)))
 
 ;; Notificator
 
@@ -78,15 +82,33 @@
       (fail :error.application-not-found :id id))
     (fail :error.application-not-found :id nil)))
 
-(defn- filter-params-of-command [params command filter-fn error-message]
-  (when-let [non-matching (seq (filter #(filter-fn (get-in command [:data %])) params))]
-    (fail error-message :parameters (vec non-matching))))
+(defn- filter-params-of-command [params command filter-fn error-message & [extra-error-data]]
+  {:pre [(or (nil? extra-error-data) (map? extra-error-data))]}
+  (when-let [non-matching-params (seq (filter #(filter-fn (get-in command [:data %])) params))]
+    (merge
+      (fail error-message :parameters (vec non-matching-params))
+      extra-error-data)))
 
 (defn non-blank-parameters [params command]
   (filter-params-of-command params command #(or (nil? %) (and (string? %) (s/blank? %))) :error.missing-parameters))
 
 (defn vector-parameters [params command]
   (filter-params-of-command params command (complement vector?) :error.non-vector-parameters))
+
+(defn vector-parameters-with-non-blank-items [params command]
+  (or
+    (vector-parameters params command)
+    (filter-params-of-command params command
+      (partial some #(or (nil? %) (and (string? %) (s/blank? %))))
+      :error.vector-parameters-with-blank-items )))
+
+(defn vector-parameters-with-map-items-with-required-keys [params required-keys command]
+  (or
+    (vector-parameters params command)
+    (filter-params-of-command params command
+      (partial some #(not (and (map? %) (util/every-key-in-map? % required-keys))))
+      :error.vector-parameters-with-items-missing-required-keys
+      {:required-keys required-keys})))
 
 (defn boolean-parameters [params command]
   (filter-params-of-command params command #(not (instance? Boolean %)) :error.non-boolean-parameters))
@@ -183,11 +205,10 @@
     (when (seq validators)
       (reduce #(or %1 (%2 command)) nil validators))))
 
-(defn invalid-state-in-application [command application]
+(defn invalid-state-in-application [command {state :state}]
   (when-let [valid-states (:states (meta-data command))]
-    (let [state (:state application)]
-      (when-not (.contains valid-states (keyword state))
-        (fail :error.command-illegal-state)))))
+    (when-not (.contains valid-states (keyword state))
+      (fail :error.command-illegal-state :state state))))
 
 (defn pre-checks-fail [command application]
   (when-let [pre-checks (:pre-checks (meta-data command))]
@@ -235,7 +256,7 @@
   "if :id parameter is present read application from command
    (pre-loaded) or load application for user."
   [{{id :id} :data user :user application :application}]
-  (and id user (or application (domain/get-application-as-including-canceled id user))))
+  (and id user (or application (domain/get-application-as id user true))))
 
 (defn- user-is-not-allowed-to-access?
   "Current user must be owner, authority or writer OR have some other supplied extra-auth-roles"
@@ -243,15 +264,15 @@
   (let [meta-data (meta-data command)
         extra-auth-roles (set (:extra-auth-roles meta-data))]
     (when-not (or (extra-auth-roles :any)
-                  (domain/owner-or-writer? application (:id user))
+                  (domain/owner-or-write-access? application (:id user))
                   (and (= :authority (keyword (:role user))) ((set (:organizations user)) (:organization application)))
                   (some #(domain/has-auth-role? application (:id user) %) extra-auth-roles))
       unauthorized)))
 
 (defn- not-authorized-to-application [command application]
-  (when-let [id (-> command :data :id)]
+  (when (-> command :data :id)
     (if-not application
-      unauthorized
+      (fail :error.application-not-accessible)
       (or
         (invalid-state-in-application command application)
         (user-is-not-allowed-to-access? command application)))))
@@ -343,6 +364,9 @@
 (def- supported-action-meta-data-keys (set (keys supported-action-meta-data)))
 
 (defn register-action [action-type action-name meta-data line ns-str handler]
+
+  ;(assert (.endsWith ns-str "-api") (str "Actions must be defined in *-api namespaces"))
+
   (assert (every? supported-action-meta-data-keys (keys meta-data)) (str (keys meta-data)))
   (assert (seq (:roles meta-data)) (str "You must define :roles meta data for " action-name ". Use :roles [:anonymous] to grant access to anyone."))
   (assert (if (some #(= % :id) (:parameters meta-data)) (seq (:states meta-data)) true)

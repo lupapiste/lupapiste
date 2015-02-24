@@ -28,7 +28,19 @@ LUPAPISTE.SidePanelModel = function() {
     return self.showConversationPanel() || self.showNoticePanel();
   });
 
-  self.previousPage;
+  self.previousPage = undefined;
+
+  function setHeight(newHeight) {
+    $("#side-panel .content-wrapper").height(newHeight);
+  }
+
+  function calculateHeight() {
+    var top = $("#side-panel").css("top");
+    var offset = _.parseInt(top.replace(/px/, ""), 10);
+    var margin = 20; // extra 20px margin looks nice
+    var newHeight = $(window).height() - offset - margin;
+    setHeight(newHeight);
+  }
 
   var AuthorityInfo = function(id, firstName, lastName) {
     this.id = id;
@@ -51,6 +63,8 @@ LUPAPISTE.SidePanelModel = function() {
       switch(type) {
         case "attachment":
           self.mainConversation(false);
+          self.comment().refresh(application, false, {type: type, id: pageutil.lastSubPage()});
+          break;
         case "statement":
           self.comment().refresh(application, false, {type: type, id: pageutil.lastSubPage()});
           break;
@@ -81,19 +95,25 @@ LUPAPISTE.SidePanelModel = function() {
     self.refreshConversations(self.application());
   };
 
-  self.toggleConversationPanel = function(data, event) {
+  self.toggleConversationPanel = function() {
     self.showConversationPanel(!self.showConversationPanel());
     self.showNoticePanel(false);
     // Set focus to new comment textarea
     self.comment().isSelected(self.showConversationPanel());
 
-    setTimeout(function() {
-      // Mark comments seen after a second
-      if (self.applicationId() && self.authorization.ok("mark-seen")) {
-        ajax.command("mark-seen", {id: self.applicationId(), type: "comments"})
+    if (self.showConversationPanel()) {
+      calculateHeight();
+
+      setTimeout(function() {
+        // Mark comments seen after a second
+        if (self.applicationId() && self.authorization.ok("mark-seen")) {
+          ajax.command("mark-seen", {id: self.applicationId(), type: "comments"})
           .success(function() {self.unseenComments(0);})
           .call();
-      }}, 1000);
+        }}, 1000);
+    } else {
+      setHeight(0);
+    }
   };
 
   self.highlightConversation = function() {
@@ -102,24 +122,31 @@ LUPAPISTE.SidePanelModel = function() {
     } else {
       self.comment().isSelected(true);
     }
-    $('#conversation-panel').addClass("highlight-conversation");
+    $("#conversation-panel").addClass("highlight-conversation");
     setTimeout(function() {
-      $('#conversation-panel').removeClass("highlight-conversation");
+      $("#conversation-panel").removeClass("highlight-conversation");
     }, 2000);
   };
 
-  self.toggleNoticePanel = function(data, event) {
+  self.toggleNoticePanel = function() {
     self.showNoticePanel(!self.showNoticePanel());
     self.showConversationPanel(false);
+
+    if (self.showNoticePanel()) {
+      calculateHeight();
+    } else {
+      setHeight(0);
+    }
   };
 
-  self.closeSidePanel = function(data, event) {
+  self.closeSidePanel = function() {
     if (self.showConversationPanel()) {
       self.toggleConversationPanel();
     }
     if (self.showNoticePanel()) {
       self.toggleNoticePanel();
     }
+    setHeight(0);
   };
 
   self.toggleHelp = function() {
@@ -171,7 +198,7 @@ LUPAPISTE.SidePanelModel = function() {
     }
   });
 
-  hub.subscribe({type: "page-change"}, function(data) {
+  hub.subscribe({type: "page-load"}, function(data) {
     if(_.contains(pages.concat("applications"), pageutil.getPage())) {
       refreshSidePanel(data.previousHash);
     }
@@ -191,10 +218,13 @@ LUPAPISTE.SidePanelModel = function() {
 };
 
 $(function() {
+  "use strict";
   var sidePanel = new LUPAPISTE.SidePanelModel();
   $(document).keyup(function(e) {
     // esc hides the side panel
-    if (e.keyCode === 27) { sidePanel.closeSidePanel(); };
+    if (e.keyCode === 27) {
+      sidePanel.closeSidePanel();
+    }
   });
   $("#side-panel-template").applyBindings(sidePanel);
 });

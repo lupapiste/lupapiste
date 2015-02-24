@@ -155,6 +155,7 @@
         locked: true,
         authority: currentUser.isAuthority()
       });
+      LUPAPISTE.ModalDialog.open("#upload-dialog");
     };
   }
 
@@ -162,7 +163,7 @@
   var authorizationModel = authorization.create();
   var attachmentsModel = new AttachmentsModel();
 
-  repository.loaded(["statement"], function(application, applicationDetails) {
+  repository.loaded(["statement"], function(application) {
     if (applicationId === application.id) {
       authorizationModel.refresh(application, {statementId: statementId});
       statementModel.refresh(application);
@@ -170,7 +171,7 @@
     }
   });
 
-  hub.onPageChange("statement", function(e) {
+  hub.onPageLoad("statement", function(e) {
     statementModel.clear();
     applicationId = e.pagePath[0];
     statementId = e.pagePath[1];

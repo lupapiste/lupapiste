@@ -7,7 +7,10 @@
             [sade.email :as email]
             [sade.env :as env]
             [sade.core :refer [ok fail now]]
-            [lupapalvelu.action :refer [defquery defcommand]]))
+            [sade.util :as util]
+            [lupapalvelu.action :refer [defquery defcommand]]
+            [sade.crypt :as crypt])
+  (:import [org.apache.commons.io IOUtils]))
 
 ;;
 ;; Dummy email server:
@@ -19,12 +22,22 @@
 
   (defonce sent-messages (atom []))
 
+  (defn attachment-as-base64-str [file]
+    (with-open [i (io/input-stream file)]
+      (-> i
+        (IOUtils/toByteArray)
+        (crypt/base64-encode)
+        (crypt/bytes->str))))
+
   (defn parse-body [body {content-type :type content :content}]
     (if (and content-type content)
-      (assoc body (condp = content-type
-                    "text/plain; charset=utf-8" :plain
-                    "text/html; charset=utf-8"  :html
-                    content-type) content)
+      (let [attachment (when (= :attachment content-type)
+                         (attachment-as-base64-str content))
+            content (or attachment content)]
+        (assoc body (condp = content-type
+                      "text/plain; charset=utf-8" :plain
+                      "text/html; charset=utf-8"  :html
+                      content-type) content))
       body))
 
   (defn deliver-email [to subject body]
@@ -78,7 +91,7 @@
                                                                                      {:tag :dt :content "Subject"}
                                                                                      {:tag :dd :attrs {:id "subject"} :content [(:subject msg)]}
                                                                                      {:tag :dt :content "Time"}
-                                                                                     {:tag :dd :attrs {:id "time"} :content [(:time msg)]}]}
+                                                                                     {:tag :dd :attrs {:id "time"} :content [(util/to-local-datetime (:time msg))]}]}
                                                                  {:tag :hr}]))))
       {:status 404 :body "No emails"}))
 

@@ -1,5 +1,5 @@
 (ns lupapalvelu.verdict-api
-  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error fatal]]
+  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn warnf error fatal]]
             [pandect.core :as pandect]
             [monger.operators :refer :all]
             [sade.http :as http]
@@ -8,14 +8,14 @@
             [sade.core :refer [ok fail fail!]]
             [lupapalvelu.action :refer [defquery defcommand update-application notify boolean-parameters] :as action]
             [lupapalvelu.attachment :as attachment]
-            [lupapalvelu.application :as application]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.tasks :as tasks]
             [lupapalvelu.user :as user]
-            [lupapalvelu.xml.krysp.reader :as krysp])
+            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch-api]
+            [lupapalvelu.xml.krysp.reader :as krysp-reader])
   (:import [java.net URL]))
 
 ;;
@@ -38,7 +38,6 @@
             attachment-id   urlhash
             attachment-type {:type-group "muut" :type-id "muu"}
             target          {:type "verdict" :id verdict-id :urlHash urlhash}
-            locked          true
             attachment-time (get-in pk [:liite :muokkausHetki] timestamp)]
         ; If the attachment-id, i.e., hash of the URL matches
         ; any old attachment, a new version will be added
@@ -50,7 +49,8 @@
                                     :attachment-id attachment-id
                                     :attachment-type attachment-type
                                     :target target
-                                    :locked locked
+                                    :required false
+                                    :locked true
                                     :user user
                                     :created attachment-time
                                     :state :ok})
@@ -74,24 +74,27 @@
 (defn- get-verdicts-with-attachments [application user timestamp xml]
   (let [permit-type (:permitType application)
         reader (permit/get-verdict-reader permit-type)
-        verdicts (krysp/->verdicts xml reader)]
+        verdicts (krysp-reader/->verdicts xml reader)]
     (filter seq (map (partial verdict-attachments application user timestamp) verdicts))))
 
-(defn do-check-for-verdict [command user created application]
-  (if-let [xml (application/get-application-xml application)]
-    (let [extras-reader (permit/get-verdict-extras-reader (:permitType application))]
-      (if-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created xml))]
-        (let [has-old-verdict-tasks (some #(= "verdict" (get-in % [:source :type]))  (:tasks application))
-              tasks (tasks/verdicts->tasks (assoc application :verdicts verdicts-with-attachments) created)
-              updates {$set (merge {:verdicts verdicts-with-attachments
-                                    :modified created
-                                    :state    :verdictGiven}
-                              (when-not has-old-verdict-tasks {:tasks tasks})
-                              (when extras-reader (extras-reader xml)))}]
-          (update-application command updates)
-          (ok :verdictCount (count verdicts-with-attachments) :taskCount (count (get-in updates [$set :tasks]))))
-        (fail :info.no-verdicts-found-from-backend)))
-    (fail :info.no-verdicts-found-from-backend)))
+(defn find-verdicts-from-xml [{:keys [application user created] :as command} app-xml]
+  {:pre [(every? command [:application :user :created]) app-xml]}
+  (let [extras-reader (permit/get-verdict-extras-reader (:permitType application))]
+    (when-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created app-xml))]
+      (let [has-old-verdict-tasks (some #(= "verdict" (get-in % [:source :type]))  (:tasks application))
+            tasks (tasks/verdicts->tasks (assoc application :verdicts verdicts-with-attachments) created)
+            updates {$set (merge {:verdicts verdicts-with-attachments
+                                  :modified created
+                                  :state    :verdictGiven}
+                            (when-not has-old-verdict-tasks {:tasks tasks})
+                            (when extras-reader (extras-reader app-xml)))}]
+        (update-application command updates)
+        {:verdicts verdicts-with-attachments :tasks (get-in updates [$set :tasks])}))))
+
+(defn do-check-for-verdict [command]
+  {:pre [(every? command [:application :user :created])]}
+  (when-let [app-xml (krysp-fetch-api/get-application-xml (:application command))]
+    (find-verdicts-from-xml command app-xml)))
 
 (notifications/defemail :application-verdict
   {:subject-key    "verdict"
@@ -105,9 +108,12 @@
    :states     [:submitted :complement-needed :sent :verdictGiven] ; states reviewed 2013-09-17
    :roles      [:authority]
    :notified   true
-   :on-success  (notify :application-verdict)}
-  [{:keys [user created application] :as command}]
-  (do-check-for-verdict command user created application))
+   :on-success (notify :application-verdict)}
+  [command]
+  (if-let [result (do-check-for-verdict command)]
+    (ok :verdictCount (count (:verdicts result)) :taskCount (count (:tasks result)))
+    (fail :info.no-verdicts-found-from-backend)))
+
 
 ;;
 ;; Manual verdicts
@@ -195,7 +201,7 @@
   {:description "Applicant/application owner can sign an application's verdict"
    :parameters [id verdictId password]
    :states     [:verdictGiven :constructionStarted]
-   :pre-checks [domain/validate-owner-or-writer]
+   :pre-checks [domain/validate-owner-or-write-access]
    :roles      [:applicant :authority]}
   [{:keys [application created user] :as command}]
   (if (user/get-user-with-password (:username user) password)

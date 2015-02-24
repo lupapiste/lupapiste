@@ -56,7 +56,7 @@
 
     (facts "by operation name"
       (fact "no matches" (search "vaihtolavan sijoittaminen") => no-results?)
-      (fact "one match" (search "Muun  rakennuksen:   rakentaminen") => id-matches?))
+      (fact "one match" (search "Muun kuin edell\u00e4 mainitun rakennuksen rakentaminen") => id-matches?))
 
     (fact "Submitted application is returned by latest-applications"
       (let [resp (query pena :latest-applications)
@@ -66,8 +66,8 @@
         (count applications) => 1
         (fact "Contains only public information: municipality, operation and timestamp"
           (:municipality application) => sonja-muni
-          (:operation application) => "Muun rakennuksen rakentaminen"
+          (get-in application [:operationName :fi]) => "Muun kuin edell\u00e4 mainitun rakennuksen rakentaminen (liike-, toimisto-, opetus-, p\u00e4iv\u00e4koti-, palvelu-, hoitolaitos- tai muu rakennus)"
+          (get-in application [:operationName :sv]) => seq
           (:timestamp application) => pos?
-          (count (keys application)) => 3)))
+          (count (keys application)) => 4)))
     ))
-

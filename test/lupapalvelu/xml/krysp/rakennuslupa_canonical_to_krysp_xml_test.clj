@@ -11,10 +11,11 @@
                                                                 rakennuslupa_to_krysp_213
                                                                 rakennuslupa_to_krysp_214
                                                                 rakennuslupa_to_krysp_215
+                                                                rakennuslupa_to_krysp_216
                                                                 save-katselmus-as-krysp]]
-            [lupapalvelu.xml.krysp.validator :refer [validate]]
+            [lupapalvelu.xml.validator :refer [validate]]
             [lupapalvelu.xml.krysp.canonical-to-krysp-xml-test-common :refer [has-tag]]
-            [lupapalvelu.xml.krysp.validator :refer :all :as validator]
+            [lupapalvelu.xml.validator :refer :all :as validator]
             [lupapalvelu.xml.emit :refer :all]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
@@ -29,27 +30,35 @@
 (fact "2.1.3: :tag is set" (has-tag rakennuslupa_to_krysp_213) => true)
 (fact "2.1.4: :tag is set" (has-tag rakennuslupa_to_krysp_214) => true)
 (fact "2.1.5: :tag is set" (has-tag rakennuslupa_to_krysp_215) => true)
+(fact "2.1.6: :tag is set" (has-tag rakennuslupa_to_krysp_216) => true)
 
-(defn- do-test [application validate-tyonjohtaja?]
+(defn- do-test [application validate-tyonjohtaja? validate-pysyva-tunnus?]
   (let [canonical (application-to-canonical application "fi")
         xml_212 (rakennuslupa-element-to-xml canonical "2.1.2")
         xml_213 (rakennuslupa-element-to-xml canonical "2.1.3")
         xml_214 (rakennuslupa-element-to-xml canonical "2.1.4")
         xml_215 (rakennuslupa-element-to-xml canonical "2.1.5")
+        xml_216 (rakennuslupa-element-to-xml canonical "2.1.6")
         xml_212_s (indent-str xml_212)
         xml_213_s (indent-str xml_213)
         xml_214_s (indent-str xml_214)
-        xml_215_s (indent-str xml_215)]
+        xml_215_s (indent-str xml_215)
+        xml_216_s (indent-str xml_216)]
 
     (fact "2.1.2: xml exist" xml_212 => truthy)
     (fact "2.1.3: xml exist" xml_213 => truthy)
     (fact "2.1.4: xml exist" xml_214 => truthy)
     (fact "2.1.5: xml exist" xml_215 => truthy)
+    (fact "2.1.6: xml exist" xml_216 => truthy)
+
+
 
     (let [lp-xml_212 (cr/strip-xml-namespaces (xml/parse xml_212_s))
           lp-xml_213 (cr/strip-xml-namespaces (xml/parse xml_213_s))
+          lp-xml_216 (cr/strip-xml-namespaces (xml/parse xml_216_s))
           tyonjohtaja_212 (xml/select1 lp-xml_212 [:osapuolettieto :Tyonjohtaja])
-          tyonjohtaja_213 (xml/select1 lp-xml_213 [:osapuolettieto :Tyonjohtaja])]
+          tyonjohtaja_213 (xml/select1 lp-xml_213 [:osapuolettieto :Tyonjohtaja])
+          tyonjohtaja_216 (xml/select1 lp-xml_216 [:osapuolettieto :Tyonjohtaja])]
 
       (fact "saapumisPvm"
         (let [expected (sade.util/to-xml-date (:submitted application))]
@@ -65,7 +74,10 @@
             (xml/get-text tyonjohtaja_213 :patevyysvaatimusluokka) => "A"))
         (do
            tyonjohtaja_212 => nil
-           tyonjohtaja_213 => nil)))
+           tyonjohtaja_213 => nil
+           tyonjohtaja_216 => nil))
+      (if validate-pysyva-tunnus?
+        (fact "pysyva rakennusmuero" (xml/get-text lp-xml_212 [:rakennustunnus :valtakunnallinenNumero]) => "1234567892")))
 
     (let [lp-xml_215 (cr/strip-xml-namespaces (xml/parse xml_215_s))]
       ; Address format has changed in 2.1.5
@@ -78,33 +90,33 @@
       (xml/get-text lp-xml_215 [:osapuolitieto :Osapuoli :yritys :verkkolaskutustieto :Verkkolaskutus :valittajaTunnus]) => "valittajatunnus-1234")
 
     ; Alla oleva tekee jo validoinnin, mutta annetaan olla tuossa alla viela validointi, jottei tule joku riko olemassa olevaa validointia
-    (mapping-to-krysp/save-application-as-krysp application "fi" application {:krysp {:R {:ftpUser "dev_sipoo" :version "2.1.2"}}})
-    (mapping-to-krysp/save-application-as-krysp application "fi" application {:krysp {:R {:ftpUser "dev_sipoo" :version "2.1.3"}}})
-    (mapping-to-krysp/save-application-as-krysp application "fi" application {:krysp {:R {:ftpUser "dev_sipoo" :version "2.1.4"}}})
-    (mapping-to-krysp/save-application-as-krysp application "fi" application {:krysp {:R {:ftpUser "dev_sipoo" :version "2.1.5"}}})
 
     (validator/validate xml_212_s (:permitType application) "2.1.2")
     (validator/validate xml_213_s (:permitType application) "2.1.3")
     (validator/validate xml_214_s (:permitType application) "2.1.4")
-    (validator/validate xml_215_s (:permitType application) "2.1.5")))
-
+    (validator/validate xml_215_s (:permitType application) "2.1.5")
+    ; TODO patevyysvaatimusluokka enum ei tiedossa is now Ei tiedossa maybe mistake in xsd?
+    (validator/validate xml_216_s (:permitType application) "2.1.6")
+    ))
 
 (facts "Rakennusvalvonta type of permits to canonical and then to xml with schema validation"
 
   (fact "Rakennuslupa application -> canonical -> xml"
-    (do-test application-rakennuslupa true))
+    (do-test application-rakennuslupa true true))
 
   (fact "Ty\u00f6njohtaja application -> canonical -> xml"
-    (do-test application-tyonjohtajan-nimeaminen true))
+    (do-test application-tyonjohtajan-nimeaminen true false))
 
   (fact "Suunnittelija application -> canonical -> xml"
-    (do-test application-suunnittelijan-nimeaminen false))
+    (do-test application-suunnittelijan-nimeaminen false false))
 
   (fact "Aloitusoikeus -> canonical -> xml"
-    (do-test aloitusoikeus-hakemus false)))
+    (do-test aloitusoikeus-hakemus false false)))
 
 
-(let [application (assoc application-rakennuslupa :state "verdictGiven")
+(let [application (assoc application-rakennuslupa
+                    :state "verdictGiven"
+                    :buildings [{:index "1" :propertyId "09100200990013" :localShortId "001" :nationalId "1234567892"}])
       user        {:id "777777777777777777000017"
                    :email "jussi.viranomainen@tampere.fi"
                    :enabled true
@@ -128,7 +140,7 @@
         "Pohjakatselmus 1" ; task name
         "2.5.1974"
         [{:tila {:tila "osittainen" :kayttoonottava true}
-          :rakennus {:jarjestysnumero "1" :kiinttun "09100200990013" :rakennusnro "001"}}]
+          :rakennus {:jarjestysnumero "1" :kiinttun "09100200990013" :rakennusnro "001" :valtakunnallinenNumero "1234567892"}}]
         user
         "pohjakatselmus" ; katselmuksen-nimi
         :katselmus ;tyyppi

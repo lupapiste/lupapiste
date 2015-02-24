@@ -13,8 +13,8 @@ Mikko creates two new inforequests
   Set Suite Variable  ${inforequest-cancelling}  ir-c${secs}
   Set Suite Variable  ${newName}  ${inforequest-cancelling}-edit
   Set Suite Variable  ${propertyId}  753-416-25-30
-  Create inforequest the fast way  ${inforequest-handling}  360603.153  6734222.95  753  ${propertyId}  asuinrakennus  Jiihaa
-  Create inforequest the fast way  ${inforequest-cancelling}  360603.153  6734222.95  753  ${propertyId}  asuinrakennus  Jiihaa
+  Create inforequest the fast way  ${inforequest-handling}  360603.153  6734222.95  753  ${propertyId}  kerrostalo-rivitalo  Jiihaa
+  Create inforequest the fast way  ${inforequest-cancelling}  360603.153  6734222.95  753  ${propertyId}  kerrostalo-rivitalo  Jiihaa
   Logout
 
 Authority assigns an inforequest to herself
@@ -68,11 +68,11 @@ Mikko does not see the cancelled inforequest
 Mikko waits until the first inforequest is answered
   Logout
 
-Authority can not convert the inforequest to application
+Authority can convert the inforequest to application
   Sonja logs in
   Open inforequest  ${inforequest-handling}  ${propertyId}
   Wait until  Inforequest state is  Avoin
-  Element should not be visible  //*[@data-test-id='inforequest-convert-to-application']
+  Element should be visible  //*[@data-test-id='inforequest-convert-to-application']
 
 Authority adds a comment marking inforequest answered
   Wait until  Page should contain element  //section[@id='inforequest']//button[@data-test-id='comment-request-mark-answered']

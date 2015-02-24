@@ -1,11 +1,8 @@
 (ns lupapalvelu.open-inforequest
   (:require [taoensso.timbre :as timbre :refer [infof info error]]
             [monger.operators :refer :all]
-            [noir.session :as session]
-            [noir.response :as resp]
             [sade.env :as env]
             [sade.core :refer [now fail fail!]]
-            [lupapalvelu.action :refer [defraw]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.security :refer [random-password]]
@@ -41,7 +38,7 @@
 (defn new-open-inforequest! [{application-id :id organization-id :organization municipality :municipality permit-type :permitType :as application}]
   {:pre [application-id organization-id municipality permit-type]}
   (let [organization    (organization/get-organization organization-id)
-        scope           (organization/resolve-organization-scope organization municipality permit-type)
+        scope           (organization/resolve-organization-scope municipality permit-type organization)
         email           (:open-inforequest-email scope)
         token-id        (random-password 48)]
     (when-not organization (fail! :error.unknown-organization))
@@ -57,28 +54,3 @@
     (notifications/notify! :open-inforequest-invite {:data {:email email :token-id token-id}
                                                      :application application})
     true))
-
-(defn- make-user [token]
-  (let [organization-id (:organization-id token)
-        email (:email token)]
-    {:id (str "oir-" organization-id "-" email)
-     :email email
-     :enabled true
-     :role "authority"
-     :oir true
-     :organizations [organization-id]
-     :firstName ""
-     :lastName email
-     :phone ""
-     :username email}))
-
-(defraw openinforequest
-  {:roles [:anonymous]}
-  [{{token-id :token-id} :data lang :lang}]
-  (info "open-inforequest: open:" token-id lang)
-  (let [token (mongo/by-id :open-inforequest-token token-id)
-        url   (str (env/value :host) "/app/" (name lang) "/oir#!/inforequest/" (:application-id token))]
-    (when-not token (fail! :error.unknown-open-inforequest-token))
-    (mongo/update-by-id :open-inforequest-token token-id {$set {:last-used (now)}})
-    (session/put! :user (make-user token))
-    (resp/redirect url)))

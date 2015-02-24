@@ -1,6 +1,6 @@
 (defproject lupapalvelu "0.1.0-SNAPSHOT"
   :description "lupapalvelu"
-  :dependencies [[org.clojure/clojure "1.5.1"]
+  :dependencies [[org.clojure/clojure "1.6.0"]
                  [org.clojure/data.zip "0.1.1"]
                  [org.clojure/data.xml "0.0.8"]
                  [org.clojure/tools.nrepl "0.2.6"]
@@ -19,8 +19,8 @@
                  [crypto-random "1.2.0" :exclusions [commons-codec]]
                  [clj-http "0.7.8" :exclusions [commons-codec]]
                  [camel-snake-kebab "0.1.2"]
-                 [org.bouncycastle/bcpkix-jdk15on "1.51"]
-                 [pandect "0.3.4" :exclusions [org.bouncycastle/bcprov-jdk15on]]
+                 [org.bouncycastle/bcprov-jdk15on "1.46"]
+                 [pandect "0.3.0" :exclusions [org.bouncycastle/bcprov-jdk15on]]
                  [clj-time "0.8.0"]
                  [org.apache.commons/commons-lang3 "3.3.2"] ; Already a dependency but required explicitly
                  [commons-io/commons-io "2.4"]
@@ -35,14 +35,17 @@
                  [ontodev/excel "0.2.3" :exclusions [xml-apis]]
                  [com.googlecode.htmlcompressor/htmlcompressor "1.5.2"]
                  [com.yahoo.platform.yui/yuicompressor "2.4.8" :exclusions [rhino/js]] ; http://jira.xwiki.org/browse/XWIKI-6148?focusedCommentId=59523#comment-59523
-                 [fi.sito/oskari "0.9.38"]
+                 [fi.sito/oskari "0.9.43"]
                  [slingshot "0.10.3"]
                  [com.google.zxing/javase "2.2"]
+                 [org.geotoolkit/geotk-referencing "3.20-geoapi-3.0"]
                  [prismatic/schema "0.2.4"]
                  [cljts "0.2.0" :exclusions [xerces/xercesImpl]]
                  ; batik-js includes a built-in rhino, which breaks yuicompressor (it too has rhino built in)
                  ; xalan excluded just to avoid bloat, presumably XSLT is not needed
-                 [clj-pdf "1.11.21" :exclusions [xalan org.apache.xmlgraphics/batik-js]]]
+                 [clj-pdf "1.11.21" :exclusions [xalan org.apache.xmlgraphics/batik-js]]
+                 [org.jruby/jruby-complete "1.7.10"]
+                 [zweikopf "1.0.0" :exclusions [org.jruby/jruby-complete]]]
   :profiles {:dev {:dependencies [[midje "1.6.3"]
                                   [ring-mock "0.1.5"]
                                   [clj-ssh "0.5.7"]

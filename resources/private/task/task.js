@@ -1,5 +1,5 @@
 var taskUtil = (function() {
-
+  "use strict";
   function getTaskName(task) {
     return task.taskname || loc([task.schema.info.name, "_group_label"]);
   }
@@ -9,7 +9,9 @@ var taskUtil = (function() {
     var prefix = task.schema.info.i18nprefix;
     var path = task.schema.info.i18npath;
     if (path && path.length) {
-      if (path[path.length - 1] !== "value") path.push("value");
+      if (path[path.length - 1] !== "value") {
+        path.push("value");
+      }
       var displayNameData = util.getIn(task.data || {}, path);
       if (displayNameData) {
         var key = prefix ? prefix + "." + displayNameData : displayNameData;
@@ -33,6 +35,7 @@ var taskPageController = (function() {
   "use strict";
 
   var currentApplicationId = null;
+  var currentApplicationTitle = null; // TODO read from global application instance after that has been implemented
   var currentTaskId = null;
   var task = ko.observable();
   var processing = ko.observable(false);
@@ -79,7 +82,7 @@ var taskPageController = (function() {
       .processing(processing)
       .success(function() {
         reload();
-        LUPAPISTE.ModalDialog.showDynamicOk(loc('integration.title'), loc('integration.success'));
+        LUPAPISTE.ModalDialog.showDynamicOk(loc("integration.title"), loc("integration.success"));
       })
       .error(function(e){
         reload();
@@ -94,7 +97,10 @@ var taskPageController = (function() {
    */
   function refresh(application, taskId) {
     currentApplicationId = application.id;
+    currentApplicationTitle = application.title;
     currentTaskId = taskId;
+
+    lupapisteApp.setTitle(currentApplicationTitle);
 
     attachmentsModel.refresh(application, {type: "task", id: currentTaskId});
 
@@ -113,7 +119,7 @@ var taskPageController = (function() {
       t.reject = _.partial(runTaskCommand, "reject-task");
       authorizationModel.refreshWithCallback({id: currentApplicationId}, function() {
         t.approvable = authorizationModel.ok("approve-task") && (t.state === "requires_user_action" || t.state === "requires_authority_action");
-        t.rejectable = authorizationModel.ok("reject-task") && (t.state === "requires_authority_action" || t.state === "ok");
+        t.rejectable = authorizationModel.ok("reject-task");
         t.sendable = authorizationModel.ok("send-task") && (t.state === "sent" || t.state === "ok");
         t.sendTask = sendTask;
         t.statusName = LUPAPISTE.statuses[t.state] || "unknown";
@@ -129,12 +135,14 @@ var taskPageController = (function() {
     }
   });
 
-  hub.onPageChange("task", function(e) {
+  hub.onPageLoad("task", function(e) {
     var applicationId = e.pagePath[0];
     currentTaskId = e.pagePath[1];
     // Reload application only if needed
     if (currentApplicationId !== applicationId) {
       repository.load(applicationId);
+    } else {
+      lupapisteApp.setTitle(currentApplicationTitle);
     }
     currentApplicationId = applicationId;
   });

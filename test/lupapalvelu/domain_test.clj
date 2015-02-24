@@ -28,6 +28,11 @@
     (fact (get-document-by-type application "location") => {:id 1 :data "jee" :schema-info {:name "kukka" :type "location"}})
     (fact (get-document-by-type application :not-gona-found) => nil)))
 
+(facts "get by type works when schema type is keyword (from schemas.clj), LUPA-1801"
+  (let [application {:documents [{:id 1 :data "jee" :schema-info {:name "kukka" :type :location}}]}]
+    (fact (get-document-by-type application :location) => {:id 1 :data "jee" :schema-info {:name "kukka" :type :location}})
+    (fact (get-document-by-type application "location") => {:id 1 :data "jee" :schema-info {:name "kukka" :type :location}})))
+
 (facts "invites"
   (let [invite1 {:email "abba@example.com"}
         invite2 {:email "kiss@example.com"}

@@ -14,7 +14,7 @@
       <button class="attachment-delete inline-block" data-bind="ltext: 'statement.delete', click: $root.statementModel.openDeleteDialog, visible: $root.authorization.ok('delete-statement'), enable: $root.authorization.ok('delete-statement')" data-test-id="delete-statement">Poista lausunto</button>
       <div data-bind="with: application">
         <a class="btn btn-nav-back inline-block" data-test-id="statement-return" data-bind="attr: {href: '#!/application/' + id() + '/statement' }">
-          <span data-bind ="ltext: 'attachment.return'"></span>
+          <span data-bind ="ltext: 'application.return'"></span>
           <span class="icon drill-left-black-bigger left-align"></span>
         </a>
       </div>
@@ -56,10 +56,9 @@
         </div>
 
         <button
-          class="btn modal"
+          class="btn"
           data-bind="ltext: 'application.attachmentsAdd', visible: canAddAttachment() && $root.authorization.ok('give-statement'), enabled: canAddAttachment() && $root.authorization.ok('give-statement'), click: newAttachment"
-          data-test-id="add-statement-attachment"
-          data-window-id="upload-dialog">
+          data-test-id="add-statement-attachment">
         </button>
       </div>
 

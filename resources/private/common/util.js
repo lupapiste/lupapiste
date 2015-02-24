@@ -80,7 +80,7 @@ var util = (function($) {
       .addClass("ajax-loading-mask")
       .append($("<div>")
           .addClass("content")
-          .append($('<img src="/img/ajax-loader.gif" class="ajax-loader" width="66" height="66">'))
+          .append($("<img src=\"/img/ajax-loader.gif\" class=\"ajax-loader\" width=\"66\" height=\"66\">"))
           .append($("<div>").text(loc("sending"))))
       .fadeIn();
   }
@@ -97,6 +97,11 @@ var util = (function($) {
 
   $.fn.ajaxMask = function(on) { return on ? this.ajaxMaskOn() : this.ajaxMaskOff(); };
 
+  function autofocus(baseElem$) {
+    var base$ = baseElem$ || $("body");
+    return base$.find("[autofocus]:visible:first").focus();
+  }
+
   function isNum(s) {
     return s && s.match(/^\s*\d+\s*$/) !== null;
   }
@@ -105,7 +110,7 @@ var util = (function($) {
     if (m && keyArray && keyArray.length > 0) {
       var key = keyArray[0];
       if (m.hasOwnProperty(key)) {
-        var val = m[key];
+        var val = ko.unwrap(m[key]);
         if (keyArray.length === 1) {
           return val;
         }
@@ -196,6 +201,7 @@ var util = (function($) {
     buildingName: buildingName,
     nop:          nop,
     constantly:   function(value) { return function() { return value; }; },
+    autofocus:    autofocus,
     isNum:        isNum,
     getIn:        getIn,
         locKeyFromDocPath: locKeyFromDocPath,

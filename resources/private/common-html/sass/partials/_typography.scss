@@ -1,0 +1,51 @@
+@import url(//fonts.googleapis.com/css?family=Source+Sans+Pro:200,300,400,600,700,200italic,300italic,400italic,600italic,700italic);
+$font-body: 'Source Sans Pro', sans-serif;
+$font-heading: 'Source Sans Pro', sans-serif;
+$font-size-body: 15px;
+
+@mixin engraved{ text-shadow: 0px 1px 0px rgba(255,255,255,.3), 0px -1px 0px rgba(0,0,0,.7);}
+
+body {
+  font-family: $font-body;
+  font-size: $font-size-body;
+  line-height: $baseline;
+  margin-bottom: $baseline;
+  color: $grey-text;
+}
+
+p {
+  color: #616161;
+  margin-bottom: $baseline;
+  line-height: $baseline;
+}
+
+h1 {
+  font-family: $font-heading;
+  font-weight: normal;
+  font-size: $baseline;
+  line-height: $baseline *2;
+  margin-bottom: $marginS;
+  text-transform: uppercase;
+  color: $grey-text;
+
+}
+
+h2 {
+  font-size: $baseline * 0.9;
+  font-family: $font-heading;
+  margin-bottom: $marginS;
+}
+
+h3 {
+  font-size: $baseline * 0.75;
+  font-family: $font-heading;
+  font-weight: normal;
+  margin-bottom: $marginS;
+}
+i {
+  margin-bottom: $marginM;
+}
+
+.error-text {
+  color: $error-text;
+}

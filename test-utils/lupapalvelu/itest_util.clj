@@ -1,12 +1,13 @@
 (ns lupapalvelu.itest-util
   (:require [noir.request :refer [*request*]]
             [lupapalvelu.fixture.minimal :as minimal]
-            [sade.core :refer [fail! unauthorized]]
+            [sade.core :refer [fail! unauthorized not-accessible]]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.vetuma :as vetuma]
             [lupapalvelu.web :as web]
+            [lupapalvelu.domain :as domain]
             [sade.http :as http]
             [midje.sweet :refer :all]
             [cheshire.core :as json]
@@ -123,7 +124,7 @@
 (defn create-app-with-fn [f apikey & args]
   (let [args (->> args
                (apply hash-map)
-               (merge {:operation "asuinrakennus"
+               (merge {:operation "kerrostalo-rivitalo"
                        :propertyId "75312312341234"
                        :x 444444 :y 6666666
                        :address "foo 42, bar"
@@ -159,6 +160,7 @@
   (and (= ok false) (= text expected-text)))
 
 (def unauthorized? (partial expected-failure? (:text unauthorized)))
+(def not-accessible? (partial expected-failure? (:text not-accessible)))
 
 (fact "unauthorized?"
   (unauthorized? unauthorized) => true
@@ -336,21 +338,21 @@
   (let [uploadfile  (io/file filename)
         uri         (str (server-address) "/api/upload/attachment")
         resp        (http/post uri
-                      {:headers {"authorization" (str "apikey=" apikey)}
-                       :multipart [{:name "applicationId"  :content application-id}
-                                   {:name "Content/type"   :content "text/plain"}
-                                   {:name "attachmentType" :content (str
-                                                                      (:type-group attachment-type) "."
-                                                                      (:type-id attachment-type))}
-                                   {:name "attachmentId"   :content attachment-id}
-                                   {:name "upload"         :content uploadfile}]})]
+                               {:headers {"authorization" (str "apikey=" apikey)}
+                                :multipart [{:name "applicationId"  :content application-id}
+                                            {:name "Content/type"   :content "text/plain"}
+                                            {:name "attachmentType" :content (str
+                                                                               (:type-group attachment-type) "."
+                                                                               (:type-id attachment-type))}
+                                            {:name "attachmentId"   :content attachment-id}
+                                            {:name "upload"         :content uploadfile}]})]
     (if expect-to-succeed
       (facts "Upload succesfully"
-        (fact "Status code" (:status resp) => 302)
-        (fact "location"    (get-in resp [:headers "location"]) => "/html/pages/upload-ok.html"))
+             (fact "Status code" (:status resp) => 302)
+             (fact "location"    (get-in resp [:headers "location"]) => "/html/pages/upload-ok.html"))
       (facts "Upload should fail"
-        (fact "Status code" (:status resp) => 302)
-        (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/html/pages/upload-1.47.html") => 0)))))
+             (fact "Status code" (:status resp) => 302)
+             (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/html/pages/upload-1.56.html") => 0)))))
 
 (defn upload-attachment-to-target [apikey application-id attachment-id expect-to-succeed target-id target-type & [attachment-type]]
   {:pre [target-id target-type]}
@@ -375,7 +377,7 @@
         (fact "location"    (get-in resp [:headers "location"]) => "/html/pages/upload-ok.html"))
       (facts "Statement upload should fail"
         (fact "Status code" (:status resp) => 302)
-        (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/html/pages/upload-1.47.html") => 0)))))
+        (fact "location"    (.indexOf (get-in resp [:headers "location"]) "/html/pages/upload-1.56.html") => 0)))))
 
 (defn upload-attachment-for-statement [apikey application-id attachment-id expect-to-succeed statement-id]
   (upload-attachment-to-target apikey application-id attachment-id expect-to-succeed statement-id "statement"))
@@ -464,3 +466,11 @@
 
 (defn give-local-verdict [apikey application-id & args]
   (apply give-verdict-with-fn local-command apikey application-id args))
+
+(defn create-foreman-application [project-app-id apikey userId role difficulty]
+  (let [{foreman-app-id :id} (command apikey :create-foreman-application :id project-app-id :taskId "" :foremanRole role)
+        foreman-app          (query-application apikey foreman-app-id)
+        foreman-doc          (domain/get-document-by-name foreman-app "tyonjohtaja-v2")]
+    (command apikey :set-user-to-document :id foreman-app-id :documentId (:id foreman-doc) :userId userId :path "" :collection "documents")
+    (command apikey :update-doc :id foreman-app-id :doc (:id foreman-doc) :updates [["patevyysvaatimusluokka" difficulty]])
+    foreman-app-id))

@@ -8,6 +8,7 @@
 (testable-privates lupapalvelu.xml.krysp.reader ->standard-verdicts ->simple-verdicts)
 
 (def id "75300301050006")
+(def kuntalupatunnus "14-0241-R 3")
 
 (def local-krysp  (str (server-address) "/dev/krysp"))
 
@@ -23,7 +24,10 @@
 
       (fact "first building has correct data"
         (first buildings) => {:propertyId "75300301050006"
-                              :buildingId "001"
+                              :buildingId "481123123R"
+                              :localShortId "001"
+                              :nationalId "481123123R"
+                              :localId nil
                               :usage      "039 muut asuinkerrostalot"
                               :area "2682"
                               :index nil
@@ -31,7 +35,10 @@
 
       (fact "second building has correct data"
         (second buildings) => {:propertyId "75300301050006"
-                               :buildingId "002"
+                               :buildingId "478123123J"
+                               :localShortId "002"
+                               :localId nil
+                               :nationalId "478123123J"
                                :usage      "021 rivitalot"
                                :area "281"
                                :index nil
@@ -57,6 +64,8 @@
           (dissoc rakennus :huoneistot :rakennuksenOmistajat :kiinttun)
             => (just
                  {:rakennusnro "001"
+                  :valtakunnallinenNumero "481123123R"
+                  :manuaalinen_rakennusnro ""
                   :verkostoliittymat {:viemariKytkin true
                                       :maakaasuKytkin false
                                       :sahkoKytkin true
@@ -98,12 +107,11 @@
         (fact "there are 21 huoneisto" (count (keys huoneistot)) => 21)
 
         (fact "first huoneisto is mapped correctly"
-          (:0 huoneistot) => {:huoneistonumero "016"
-                              :jakokirjain     "a"
+          (:0 huoneistot) => {:huoneistonumero "001"
                               :porras "A"
                               :huoneistoTyyppi "asuinhuoneisto"
-                              :huoneistoala "86", :huoneluku "3"
-                              :keittionTyyppi "keittio"
+                              :huoneistoala "52", :huoneluku "2"
+                              :keittionTyyppi "keittokomero"
                               :ammeTaiSuihkuKytkin true
                               :lamminvesiKytkin true
                               :parvekeTaiTerassiKytkin true
@@ -115,25 +123,30 @@
         (fact "first omistajat is mapped correctly"
           (:0 omistajat) =>
                     {:_selected "yritys"
-                     :yritys {:liikeJaYhteisoTunnus "1234567-9"
+                     :yritys {:liikeJaYhteisoTunnus "1234567-1"
                               :osoite {:katu "Testikatu 1 A 11477"
                                        :postinumero "00380"
                                        :postitoimipaikannimi "HELSINKI"}
                               :yritysnimi "Testiyritys 11477"}})))))
 
-(fact "converting rakval verdict krysp to lupapiste domain model"
-  (let [xml (rakval-application-xml local-krysp id false)]
+(fact "converting rakval verdict krysp to lupapiste domain model, using lupapistetunnus"
+  (let [xml (rakval-application-xml local-krysp id false false)]
     xml => truthy
     (count (->verdicts xml ->standard-verdicts)) => 2))
 
+(fact "converting rakval verdict krysp to lupapiste domain model, using kuntalupatunnus"
+  (let [xml (rakval-application-xml local-krysp kuntalupatunnus false true)]
+    xml => truthy
+    (count (->verdicts xml ->standard-verdicts)) => 1))
+
 (fact "converting poikkeamis verdict krysp to lupapiste domain model"
-  (let [xml (poik-application-xml local-krysp id false)]
+  (let [xml (poik-application-xml local-krysp id false false)]
     xml => truthy
     (count (->verdicts xml ->standard-verdicts)) => 1))
 
 
 (fact "converting ya-verdict krysp to lupapiste domain model"
-  (let [xml (ya-application-xml local-krysp id false)]
+  (let [xml (ya-application-xml local-krysp id false false)]
     xml => truthy
     (count (->verdicts xml ->simple-verdicts)) => 1))
 
@@ -145,7 +158,7 @@
       (fact "Application XML getter is set up" getter => fn?)
       (fact "Verdict reader is set ip" reader => fn?)
 
-      (let [xml (getter local-krysp id false)
+      (let [xml (getter local-krysp id false false)
             cases (->verdicts xml reader)]
         (fact "xml is parsed" cases => truthy)
         (fact "xml has 1 cases" (count cases) => 1)

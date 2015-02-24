@@ -1,0 +1,58 @@
+
+nav {
+  position: fixed;
+  top:0;
+  z-index: 1100;
+  background: #fff;
+  height: 60px;
+  box-sizing: border-box;
+  width: 100%;
+  background: $lp-dark-grey;
+  .nav-wrapper {
+    width: 100%;
+    max-width: $application-max-width;
+    margin: 0 auto;
+    position: relative;
+    box-sizing: border-box;
+    .brand {
+      position: relative;
+      width: 300px;
+      display: inline-block;
+      .logo {
+        margin: 12px;
+      }
+      a img {
+        float: left;
+        width: 164px;
+        height: 35px;
+        margin: 12px;
+      }
+      .change-language {
+        color: $lp-orange;
+        text-decoration: none;
+        display: inline-block;
+        position: absolute;
+        top: 20px;
+        left: 200px;
+      }
+    }
+
+    .header-menu {
+      display: inline-block;
+      float: right;
+      .header-box {
+        display: inline-block;
+        padding: $marginM;
+        height: 60px;
+        a, span {
+          color: white;
+          font-size: 16px;
+          text-decoration: none;
+          vertical-align: middle;
+        }
+      }
+    }
+  }
+}
+
+

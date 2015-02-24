@@ -34,12 +34,12 @@ var loc;
       if (!_.isEmpty(formatParams)) {
         formatParams = _.map(formatParams, String);
         for (var argIndex in formatParams) {
-          term = term.replace('{' + argIndex + '}', formatParams[argIndex]);
+          term = term.replace("{" + argIndex + "}", formatParams[argIndex]);
         }
       }
     } else {
-      debug("Missing localization key", key);
-      term = LUPAPISTE.config.mode === "dev" ? "$$NOT_FOUND$$" + key : "???";
+      error("Missing localization key", key);
+      term = LUPAPISTE.config.mode === "dev" ? "$$NOT_FOUND$$" + key : "";
     }
 
     return term;
@@ -47,6 +47,7 @@ var loc;
 
   loc.supported = [];
   loc.currentLanguage = null;
+  loc.allTerms = {};
   loc.terms = {};
   loc.defaultLanguage = "fi";
 
@@ -54,17 +55,39 @@ var loc;
     return loc.terms[joinTermArray(key)] !== undefined;
   };
 
-  function resolveLang() {
+  function resolveLangFromUrl() {
     var url = window.parent ? window.parent.location.pathname : location.pathname;
     var langEndI = url.indexOf("/", 5);
-    var lang = langEndI > 0 ? url.substring(5, langEndI) : null;
+    return langEndI > 0 ? url.substring(5, langEndI) : null;
+  }
+
+  function resolveLangFromDocument() {
+    var htmlRoot = document.getElementsByTagName("html")[0];
+    return htmlRoot ? htmlRoot.lang : null;
+  }
+
+  function resolveLang() {
+    var langFromDocument = resolveLangFromDocument();
+    var lang = langFromDocument ? langFromDocument : resolveLangFromUrl();
     return _.contains(loc.supported, lang) ? lang : loc.defaultLanguage;
   }
 
+  loc.setLanguage = function(lang) {
+    if (_.contains(loc.supported, lang)) {
+      loc.currentLanguage = lang;
+      loc.terms = loc.allTerms[loc.currentLanguage];
+    } else {
+      error("Unsupported language code", lang);
+    }
+  };
+
   loc.setTerms = function(newTerms) {
+    loc.allTerms = newTerms;
     loc.supported = _.keys(newTerms);
-    loc.currentLanguage = resolveLang();
-    loc.terms = newTerms[loc.currentLanguage];
+    if (!loc.currentLanguage) {
+      loc.currentLanguage = resolveLang();
+    }
+    loc.setLanguage(loc.currentLanguage);
   };
 
   loc.getErrorMessages = function() {

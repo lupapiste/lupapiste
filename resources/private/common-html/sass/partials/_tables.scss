@@ -1,0 +1,151 @@
+// Default table
+//
+// Styleguide 4.1
+table {
+  width:100%;
+  margin-bottom: $marginL;
+}
+
+th {
+  background: darken($lp-light-grey, 10%);
+  font-family: $font-heading;
+  font-size: 0.85em;
+  font-weight: 700;
+  letter-spacing: 0.125em;
+}
+
+tr {
+  background: white;
+  border-bottom: 1px solid darken($lp-light-grey, 5%);;
+  &:nth-child(even) {
+    background: darken($lp-light-grey, .5%);
+  }
+  &.attachment-row {
+    cursor: pointer;
+
+    td:last-child {
+      text-align: right;
+    }
+  }
+  &.stamp-attachment-row {
+    &.selected {
+      background-color: $lp-light-green;
+    }
+    &:hover {
+      background-color: $lp-light-green;
+    }
+    td.attachment-file-info {
+      span.attachment-file-name {
+        display: block;
+      }
+    }
+  }
+}
+
+th, td {
+  padding:6px 16px;
+  text-align:left;
+  &.btn{
+    margin-bottom: 0px;
+  }
+  .icon {
+    margin: $marginM $marginM $marginS $marginM;
+  }
+}
+
+th.action-column, td.action-column {
+  .icon {
+    margin: 0;
+  }
+}
+
+tbody {
+  color: #555;
+  font-size: 0.875em;
+  td {
+    vertical-align:middle;
+  }
+}
+
+
+.dataTables_wrapper {
+  position: relative;
+}
+.table-filter {
+  float: right;
+  position: absolute;
+  top: -$marginL*1.5;
+  right: 0;
+}
+
+table.tasks thead tr:first-child td {
+  padding-left: 0
+}
+
+table.tasks {
+  .task-state {
+    width: 22px;
+    .icon {
+      margin: $marginM $marginS $marginS $marginS;
+    }
+  }
+}
+
+table.attachments-template-table {
+
+  margin-bottom: 0;
+
+  .center {
+    text-align: center;
+  }
+
+  th {
+    padding-left: 6px;
+    padding-right: 6px;
+  }
+  th:first-child {
+    padding-left: 16px;
+  }
+  th:last-child {
+    padding-right: 16px;
+  }
+
+  td {
+    &.attachmentState {
+      padding: 0 0 0 12px;
+      white-space: nowrap;
+
+      .icon {
+        margin: $marginS;
+        vertical-align: middle;
+      }
+    }
+    &.attachment-type-group, &.attachment-type-id, &.attachment-help-info, &.attachment-not-needed, &.attachment-file-info, &.attachment-file-changed {
+      padding-left: 6px;
+      padding-right: 6px;
+    }
+    &.attachment-group-select {
+      a {
+        font-size: $font-size-body;
+        font-weight: normal;
+        float: right;
+      }
+    }
+    &.attachment-type-group, &.attachment-type-id {
+      max-width: 150px;
+      word-wrap: break-word;
+    }
+    &.attachment-help-info {
+      max-width: 200px;
+      word-wrap: break-word;
+    }
+    &.attachment-file-info, &.attachment-file-changed {
+      max-width: 230px;
+      word-wrap: break-word;
+    }
+    &.attachment-version-info {
+      max-width: 60px;
+      word-wrap: break-word;
+    }
+  }
+}

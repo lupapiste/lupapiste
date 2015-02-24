@@ -22,6 +22,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   self.eventData = { doc: doc.id, app: self.appId };
   self.propertyId = application.propertyId;
   self.isDisabled = options && options.disabled;
+  self.events = [];
+
+  self.subscriptions = [];
 
   self.getMeta = function (path, m) {
     var meta = m ? m : self.meta;
@@ -50,9 +53,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   self.findHelpElement = function (e) {
     var event = getEvent(e);
     var input$ = $(event.target);
-    var help$ = input$.siblings('.form-help');
+    var help$ = input$.siblings(".form-help");
     if (!help$.length) {
-      help$ = input$.parent().siblings('.form-help');
+      help$ = input$.parent().siblings(".form-help");
     }
     if (!help$.length) {
       return false;
@@ -62,9 +65,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   self.findErrorElement = function (e) {
     var event = getEvent(e);
     var input$ = $(event.target);
-    var error$ = input$.siblings('.errorPanel');
+    var error$ = input$.siblings(".errorPanel");
     if (!error$.length) {
-      error$ = input$.parent().siblings('.errorPanel');
+      error$ = input$.parent().siblings(".errorPanel");
     }
     if (!error$.length) {
       return false;
@@ -109,6 +112,15 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       element.fadeOut("slow").css("display", "none");
     }
   };
+
+  // trigger stored events once
+  self.triggerEvents = function() {
+    _.forEach(self.events, function(event) {
+      hub.send(event.name, event.data);
+    });
+    self.events = [];
+  };
+
   // ID utilities
 
   function pathStrToID(pathStr) {
@@ -128,6 +140,36 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   self.getCollection = function() {
     return (options && options.collection) ? options.collection : "documents";
   };
+
+  function listen(subSchema, path, element) {
+    _.forEach(subSchema.listen, function(listenEvent) {
+      if (listenEvent === "filterByCode") {
+        $(element).find("[data-codes]").addClass("hidden");
+        self.subscriptions.push(hub.subscribe(listenEvent, function(event) {
+          $(element).find("[data-codes]").addClass("hidden");
+          $(element).find("[data-codes*='" + event.code + "']").removeClass("hidden");
+        }));
+      }
+      if (listenEvent === "muutostapaChanged") {
+        var prefix = _.dropRight(path.split("."));
+        self.subscriptions.push(hub.subscribe({type: listenEvent, path: prefix.join(".")}, function(event) {
+          $(element).prop("disabled", _.isEmpty(event.value));
+        }));
+      }
+    });
+  }
+
+  function makeGroupHelpTextSpan(schema) {
+    var span = document.createElement("span");
+    span.className = "group-help-text";
+
+    var locKey = schema["group-help"];
+    if (locKey) {
+      span.innerHTML = loc(locKey);
+    }
+
+    return span;
+  }
 
   function getUpdateCommand() {
     return (options && options.updateCommand) ? options.updateCommand : "update-doc";
@@ -163,7 +205,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return label;
   }
 
-  function makeInput(type, pathStr, value, extraClass, readonly) {
+  function makeInput(type, pathStr, value, extraClass, readonly, subSchema) {
     var input = document.createElement("input");
     input.id = pathStrToID(pathStr);
     input.name = self.docId + "." + pathStr;
@@ -181,9 +223,13 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     if (readonly) {
       input.readOnly = true;
     } else {
-      input.onchange = save;
+      input.onchange = function(e) {
+        save(e);
+        if (subSchema) {
+          emit(getEvent(e).target, subSchema);
+        }
+      };
     }
-
 
     if (type === "checkbox") {
       input.checked = value;
@@ -203,6 +249,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var sizeClass = self.sizeClasses[subSchema.size] || "";
     span.className = "form-entry " + sizeClass;
 
+    if (subSchema.codes) {
+      span.setAttribute("data-codes", subSchema.codes.join(" "));
+    }
 
     // Display text areas in a wide container
     if (subSchema.type === "text") {
@@ -211,7 +260,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     // Override style with layout option
     if (subSchema.layout) {
-      span.className = "form-entry form-" + subSchema.layout + " " + self.sizeClass;
+      span.className = "form-entry form-" + subSchema.layout + " " + sizeClass;
     }
 
     // durable field error panels
@@ -339,12 +388,18 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     input.onmouseout = self.hideHelp;
     span.appendChild(input);
 
+    if ( model[subSchema.name] && model[subSchema.name].disabled) {
+      input.setAttribute("disabled", true);
+    }
+
     if (subSchema.label) {
       var label = makeLabel(subSchema, "checkbox", myPath);
       label.onmouseover = self.showHelp;
       label.onmouseout = self.hideHelp;
       span.appendChild(label);
     }
+
+    listen(subSchema, myPath, input);
 
     return span;
   }
@@ -362,8 +417,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var inputType = (_.indexOf(supportedInputSubtypes, subSchema.subtype) > -1) ? subSchema.subtype : "text";
 
     var sizeClass = self.sizeClasses[subSchema.size] || "";
-    var input = makeInput(inputType, myPath, getModelValue(model, subSchema.name), sizeClass, subSchema.readonly);
+    var input = makeInput(inputType, myPath, getModelValue(model, subSchema.name), sizeClass, subSchema.readonly, subSchema);
     setMaxLen(input, subSchema);
+
+    listen(subSchema, myPath, input);
 
     if (subSchema.label) {
       span.appendChild(makeLabel(subSchema, partOfChoice ? "string-choice" : "string", myPath));
@@ -496,6 +553,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   function buildSelect(subSchema, model, path) {
     var myPath = path.join(".");
     var select = document.createElement("select");
+    // Set default value of "muutostapa" field to "Lisays" when adding a new huoneisto.
+    if (subSchema.name === "muutostapa" && _.isEmpty(_.keys(model))) {
+      model[subSchema.name] = {value: "lis\u00e4ys"};
+    }
     var selectedOption = getModelValue(model, subSchema.name);
     var span = makeEntrySpan(subSchema, myPath);
     var sizeClass = self.sizeClasses[subSchema.size] || "";
@@ -505,6 +566,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     select.onmouseover = self.showHelp;
     select.onmouseout = self.hideHelp;
     select.setAttribute("data-docgen-path", myPath);
+    select.setAttribute("data-test-id", myPath);
 
     select.name = myPath;
     select.className = "form-input combobox " + (sizeClass || "");
@@ -514,7 +576,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     if (subSchema.readonly) {
       select.readOnly = true;
     } else {
-      select.onchange = save;
+      select.onchange = function(e) {
+        save(e);
+        emit(getEvent(e).target, subSchema);
+      };
     }
 
     var otherKey = subSchema["other-key"];
@@ -527,10 +592,12 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var option = document.createElement("option");
     option.value = "";
     option.appendChild(document.createTextNode(loc("selectone")));
-    if (selectedOption === "") option.selected = "selected";
+    if (selectedOption === "") {
+      option.selected = "selected";
+    }
     select.appendChild(option);
 
-    _(subSchema.body)
+    var options = _(subSchema.body)
       .map(function(e) {
         var locKey = self.schemaI18name + "." + myPath.replace(/\.\d+\./g, ".") + "." + e.name;
         if (e.i18nkey) {
@@ -547,25 +614,32 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
           }
           // lo-dash API doc tells that the sort is stable, so returning a static value equals to no sorting
           return 0;
-      })
-      .forEach(function(e) {
-        var name = e[0];
-        var option = document.createElement("option");
-        option.value = name;
-        option.appendChild(document.createTextNode(e[1]));
-        if (selectedOption === name) {
-          option.selected = "selected";
-        }
-        select.appendChild(option);
+      }).value();
+
+    _.forEach(options, function(e) {
+      var name = e[0];
+      var option = document.createElement("option");
+      option.value = name;
+      option.appendChild(document.createTextNode(e[1]));
+      if (selectedOption === name) {
+        option.selected = "selected";
+      }
+      select.appendChild(option);
     });
 
     if (otherKey) {
       option = document.createElement("option");
       option.value = "other";
       option.appendChild(document.createTextNode(loc("select-other")));
-      if (selectedOption === "other") option.selected = "selected";
+      if (selectedOption === "other") {
+        option.selected = "selected";
+      }
       select.appendChild(option);
     }
+
+    listen(subSchema, myPath, select);
+
+    emitLater(select, subSchema);
 
     if (subSchema.label) {
       span.appendChild(makeLabel(subSchema, "select", myPath, true));
@@ -589,11 +663,15 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var label = makeLabel(subSchema, "group", myPath, true);
     div.appendChild(label);
 
+    var groupHelpText = makeGroupHelpTextSpan(subSchema);
+    div.appendChild(groupHelpText);
+
     if (subSchema.approvable) {
       label.appendChild(self.makeApprovalButtons(path, myModel));
     }
-
     div.appendChild(partsDiv);
+
+    listen(subSchema, myPath, div);
     return div;
   }
 
@@ -641,6 +719,13 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     select.name = myPath;
     select.className = "form-input combobox long";
 
+    var otherKey = subSchema["other-key"];
+    if (otherKey) {
+      var pathToOther = path.slice(0, -1);
+      pathToOther.push(otherKey);
+      select.setAttribute("data-select-other-id", pathStrToID(pathToOther.join(".")));
+    }
+
     if (subSchema.readonly) {
       select.readOnly = true;
     } else {
@@ -649,13 +734,31 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         var target = event.target;
 
         var buildingId = target.value;
-        ajax
-          .command("merge-details-from-krysp", { id: self.appId, documentId: self.docId, buildingId: buildingId, collection: self.getCollection() })
-          .success(function () {
-            save(event);
-            repository.load(self.appId);
-          })
-          .call();
+
+        function mergeFromWfs(overwriteWithBackendData) {
+          ajax
+          .command("merge-details-from-krysp",
+              {id: self.appId, documentId: self.docId,
+            path: myPath,
+            buildingId: buildingId,
+            overwrite: overwriteWithBackendData,
+            collection: self.getCollection() })
+            .success(function () {
+              repository.load(self.appId);
+            })
+            .call();
+        }
+
+        if (buildingId !== "" && buildingId !== "other") {
+          LUPAPISTE.ModalDialog.showDynamicYesNo(
+              loc("overwrite.confirm"),
+              loc("application.building.merge"),
+              {title: loc("yes"), fn: _.partial(mergeFromWfs, true)},
+              {title: loc("no"), fn: _.partial(mergeFromWfs, false)}
+          );
+        } else {
+          mergeFromWfs(false);
+        }
         return false;
       };
     }
@@ -666,6 +769,17 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       option.selected = "selected";
     }
     select.appendChild(option);
+
+    var otherOption = null;
+    if (otherKey) {
+      otherOption = document.createElement("option");
+      otherOption.value = "other";
+      otherOption.appendChild(document.createTextNode(loc("select-other")));
+      if (selectedOption === "other") {
+        otherOption.selected = "selected";
+      }
+      select.appendChild(otherOption);
+    }
 
     ajax
       .command("get-building-info-from-wfs", { id: self.appId })
@@ -680,7 +794,11 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
           if (selectedOption === name) {
             option.selected = "selected";
           }
-          select.appendChild(option);
+          if (otherOption) {
+            select.insertBefore(option, otherOption);
+          } else {
+            select.appendChild(option);
+          }
         });
       })
       .error(function (e) {
@@ -730,9 +848,13 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         var index = option$.val();
         var propertyId = option$.attr("data-propertyid") || "";
         var buildingId = option$.attr("data-buildingid") || "";
+        var nationalId = option$.attr("data-nationalid") || (buildingId.length === 10 ? buildingId : "");
+        var localShortId = option$.attr("data-localshortid") || (buildingId.length === 3 ? buildingId : "");
+        // TODO local id coming in the next KRYSP version
+        //var localId = option$.attr("data-localid") || "";
 
-        var paths = [basePath + ".jarjestysnumero", basePath + ".kiinttun", basePath + ".rakennusnro"];
-        var values = [index, propertyId, buildingId];
+        var paths = [basePath + ".jarjestysnumero", basePath + ".kiinttun", basePath + ".rakennusnro", basePath + ".valtakunnallinenNumero"];
+        var values = [index, propertyId, localShortId, nationalId];
 
         if (label) {
           label.appendChild(loader);
@@ -756,6 +878,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
           option.value = name;
           option.setAttribute("data-propertyid", building.propertyId || "");
           option.setAttribute("data-buildingid", building.buildingId || "");
+          option.setAttribute("data-localshortid", building.localShortId || "");
+          option.setAttribute("data-nationalid", building.nationalId || "");
+          option.setAttribute("data-localid", building.localId || "");
           option.appendChild(document.createTextNode(util.buildingName(building)));
           if (selectedOption === name) {
             option.selected = "selected";
@@ -766,6 +891,65 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     span.appendChild(makeLabel(subSchema, "select", myPath));
     span.appendChild(select);
     return span;
+  }
+
+  function paramsStr(params) {
+    return _.map(_.keys(params), function(key) {
+      return key + ": " + key;
+    }).join(", ");
+  }
+
+  function createComponent(name, params, classes) {
+    // createElement works with IE8
+    var element = document.createElement(name);
+    $(element)
+      .attr("params", paramsStr(params))
+      .addClass(classes)
+      .applyBindings(params);
+    return element;
+  }
+
+  function buildForemanHistory(subSchema, model, path) {
+    var params = {
+      applicationId: self.appId
+    };
+    return createComponent("foreman-history", params, "form-table");
+  }
+
+  function buildForemanOtherApplications(subSchema, model, path, partOfChoice) {
+    var params = {
+      applicationId: self.appId,
+      documentId: self.docId,
+      documentName: self.schemaName,
+      hetu: undefined,
+      model: model[subSchema.name] || {},
+      subSchema: subSchema,
+      path: path,
+      schemaI18name: self.schemaI18name,
+      partOfChoice: partOfChoice,
+      validationErrors: doc.validationErrors
+    };
+
+    return createComponent("foreman-other-applications", params, "form-table");
+  }
+
+  function buildFillMyInfoButton(subSchema, model, path) {
+    if (model.fillMyInfo && model.fillMyInfo.disabled) {
+      return;
+    }
+
+    var myNs = path.slice(0, path.length - 1).join(".");
+
+    var params = {
+      id: self.appId,
+      documentId: self.docId,
+      documentName: self.schemaName,
+      userId: currentUser.id(),
+      path: myNs,
+      collection: self.getCollection()
+    };
+
+    return createComponent("fill-info", params);
   }
 
   function buildPersonSelector(subSchema, model, path) {
@@ -818,7 +1002,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     });
 
     var label = document.createElement("label");
-    var locKey = ('person-selector');
+    var locKey = ("person-selector");
     label.className = "form-label form-label-select";
     label.innerHTML = loc(locKey);
     span.appendChild(label);
@@ -877,6 +1061,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     element: buildElement,
     buildingSelector: buildBuildingSelector,
     newBuildingSelector: buildNewBuildingSelector,
+    fillMyInfoButton: buildFillMyInfoButton,
+    foremanHistory: buildForemanHistory,
+    foremanOtherApplications: buildForemanOtherApplications,
     personSelector: buildPersonSelector,
     table: buildTableRow,
     unknown: buildUnknown
@@ -885,7 +1072,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   function removeData(id, doc, path) {
     ajax
       .command("remove-document-data", { doc: doc, id: id, path: path, collection: self.getCollection() })
-      .success(function (e) {
+      .success(function () {
         repository.load(id);
       })
       .call();
@@ -911,7 +1098,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         elem.setAttribute("data-repeating-id", repeatingId);
         elem.setAttribute("data-repeating-id-" + repeatingId, id);
 
-        if (subSchema.repeating && !self.isDisabled && authorizationModel.ok('remove-document-data')) {
+        if (subSchema.repeating && !self.isDisabled && authorizationModel.ok("remove-document-data")) {
           var removeButton = document.createElement("span");
           removeButton.className = "icon remove-grey inline-right";
           removeButton.onclick = function () {
@@ -960,19 +1147,20 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       return thead;
     }
 
-    if (subSchema.repeating) {
+    if (subSchema.repeating && !subSchema.uicomponent) {
       var models = model[myName];
       if (!models) {
           models = subSchema.initiallyEmpty ? [] : [{}];
       }
 
-      var elements = undefined;
+      var elements;
 
       if (subSchema.type === "table") {
         elements = buildElements(models);
         var div = document.createElement("div");
         div.className = "form-table";
         var table = document.createElement("table");
+        table.id = "table-" + subSchema.name;
         var tbody = document.createElement("tbody");
         table.appendChild(createTableHeader(models, myPath.join(".")));
         _.each(elements, function(element) {
@@ -982,6 +1170,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
         var label = makeLabel(subSchema, "table", myPath.join("."), true);
         div.appendChild(label);
+
+        var groupHelpText = makeGroupHelpTextSpan(subSchema);
+        div.appendChild(groupHelpText);
+
         if (subSchema.approvable) {
           div.appendChild(self.makeApprovalButtons(path, models));
         }
@@ -996,8 +1188,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
       var appender = function () {
         var parent$ = $(this).closest(".accordion-fields");
-        var count = parent$.children("*[data-repeating-id='" + repeatingId + "']").length;
-        while (parent$.children("*[data-repeating-id-" + repeatingId + "='" + count + "']").length) {
+        var count = parent$.find("*[data-repeating-id='" + repeatingId + "']").length;
+        while (parent$.find("*[data-repeating-id-" + repeatingId + "='" + count + "']").length) {
           count++;
         }
         var myModel = {};
@@ -1006,9 +1198,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       };
 
       var tableAppender = function () {
-        var parent$ = $(this).closest(".accordion-fields").find("tbody");
-        var count = parent$.children("*[data-repeating-id='" + repeatingId + "']").length;
-        while (parent$.children("*[data-repeating-id-" + repeatingId + "='" + count + "']").length) {
+        var parent$ = $(this).closest(".accordion-fields").find("#" + "table-" + subSchema.name + " tbody");
+        var count = parent$.find("*[data-repeating-id='" + repeatingId + "']").length;
+        while (parent$.find("*[data-repeating-id-" + repeatingId + "='" + count + "']").length) {
           count++;
         }
         var myModel = {};
@@ -1018,8 +1210,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
       var copyElement = function() {
         var parent$ = $(this).closest(".accordion-fields").find("tbody");
-        var count = parent$.children("*[data-repeating-id='" + repeatingId + "']").length;
-        while (parent$.children("*[data-repeating-id-" + repeatingId + "='" + count + "']").length) {
+        var count = parent$.find("*[data-repeating-id='" + repeatingId + "']").length;
+        while (parent$.find("*[data-repeating-id-" + repeatingId + "='" + count + "']").length) {
           count++;
         }
         var lastItem$ = parent$.find("tr").last();
@@ -1053,12 +1245,14 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       if (subSchema.type === "table") {
         $(appendButton).click(tableAppender);
         var locKey = [self.schemaI18name, myPath.join("."), "copyLabel"];
-        if (subSchema.i18nkey) {
-          locKey = [subSchema.i18nkey, "copyLabel"];
+        if (subSchema.copybutton) {
+          if (subSchema.i18nkey) {
+            locKey = [subSchema.i18nkey, "copyLabel"];
+          }
+          var copyButton = makeButton(myPath.join("_") + "_copy", loc(locKey));
+          $(copyButton).click(copyElement);
+          buttonGroup.appendChild(copyButton);
         }
-        var copyButton = makeButton(myPath.join("_") + "_copy", loc(locKey));
-        $(copyButton).click(copyElement);
-        buttonGroup.appendChild(copyButton);
       } else {
         $(appendButton).click(appender);
       }
@@ -1105,6 +1299,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
           $(elem).hide();
         }
         if (elem) {
+          // TODO can't really detect table cell from label key value
           if (!subSchema.label) {
             var td = document.createElement("td");
             td.appendChild(elem);
@@ -1196,9 +1391,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
   function disableBasedOnOptions() {
     if (!self.authorizationModel.ok(getUpdateCommand()) || options && options.disabled) {
-      $(self.element).find('input, textarea').attr("readonly", true).unbind("focus");
-      $(self.element).find('select, input[type=checkbox], input[type=radio]').attr("disabled", true);
-      $(self.element).find('button').hide();
+      $(self.element).find("input, textarea").attr("readonly", true).unbind("focus");
+      $(self.element).find("select, input[type=checkbox], input[type=radio]").attr("disabled", true);
+      $(self.element).find("button").hide();
     }
   }
 
@@ -1207,7 +1402,13 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var parent$ = $(eventTarget.parentNode);
     parent$.find("." + className).remove();
     var indicator = document.createElement("span");
+    var icon = document.createElement("span");
+    var text = document.createElement("span");
+    text.className = "text";
+    icon.className = "icon";
     indicator.className = className;
+    indicator.appendChild(text);
+    indicator.appendChild(icon);
     parent$.append(indicator);
     return indicator;
   }
@@ -1220,11 +1421,12 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       // disable indicator text for table element
       i$.addClass(className).fadeIn(200);
     } else {
-      i$.addClass(className).text(loc(locKey)).fadeIn(200);
+      i$.children(".text").text(loc(locKey));
+      i$.addClass(className).fadeIn(200);
     }
 
     setTimeout(function () {
-      i$.removeClass(className).fadeOut(200, function () { i$.remove; });
+      i$.removeClass(className).fadeOut(200, function () {});
     }, 4000);
   }
 
@@ -1240,7 +1442,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     } else if (status === "ok") {
       showIndicator(indicator, "form-input-saved", "form.saved");
     } else if (status !== "ok") {
-      error("Unknown status:", status, "path:", path);
+      error("Unknown status:", status);
     }
     if (callback) { callback(); }
     // No return value or stoping the event propagation:
@@ -1268,6 +1470,43 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     saveForReal(path, value, _.partial(afterSave, label, loader, indicator, callback));
   }
 
+  var emitters = {
+    filterByCode: function(event, value, path, subSchema, sendLater) {
+      var schemaValue = _.find(subSchema.body, {name: value});
+      var code = schemaValue ? schemaValue.code : "";
+      if (sendLater) {
+        self.events.push({name: event, data: {code: code}});
+      } else {
+        hub.send(event, {code: code});
+      }
+    },
+    hetuChanged: function(event, value) {
+      hub.send(event, {value: value});
+    },
+    muutostapaChanged: function(event, value, path) {
+      var prefix = _.dropRight(path.split("."));
+      hub.send(event, {path: prefix.join("."), value: value});
+    },
+    emitUnknown: function(event) {
+      error("Unknown emitter event:", event);
+    }
+  };
+
+  function emit(target, subSchema, sendLater) {
+    if (subSchema.emit) {
+      var value = target.value;
+      var path = $(target).attr("data-docgen-path");
+      _.forEach(subSchema.emit, function(event) {
+        var emitter = emitters[event] || emitters.emitUnknown;
+        emitter(event, value, path, subSchema, sendLater);
+      });
+    }
+  }
+
+  function emitLater(target, subSchema) {
+    emit(target, subSchema, true);
+  }
+
   function removeDoc(e) {
     var n$ = $(e.target).parent();
     while (!n$.is("section")) {
@@ -1275,9 +1514,11 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }
     var op = self.schema.info.op;
 
-    var documentName = loc([self.schemaI18name, "_group_label"]);
+    var documentName = "";
     if (op) {
       documentName = loc([op.name, "_group_label"]);
+    } else {
+      documentName = loc([self.schema.info.name, "_group_label"]);
     }
 
     function onRemovalConfirmed() {
@@ -1306,7 +1547,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var descriptionInput = document.createElement("input");
     var iconSpan = document.createElement("span");
     var iconSpanDescription = document.createElement("span");
-    iconSpanDescription.appendChild(document.createTextNode(loc('edit')));
+    iconSpanDescription.appendChild(document.createTextNode(loc("edit")));
 
     // test ids
     if (options && options.dataTestSpecifiers) {
@@ -1341,11 +1582,11 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         iconSpan.appendChild(iconSpanDescription);
       }
 
-      ajax.command("update-op-description", {id: self.appId, 'op-id': operation.id, desc: value })
+      ajax.command("update-op-description", {id: self.appId, "op-id": operation.id, desc: value })
         .success(function() {
           var indicator = createIndicator(descriptionInput, "accordion-indicator");
           showIndicator(indicator, "accordion-input-saved", "form.saved");
-          hub.send("op-description-changed", {appId: self.appId, 'op-id': operation.id, 'op-desc': value});
+          hub.send("op-description-changed", {appId: self.appId, "op-id": operation.id, "op-desc": value});
         })
         .call();
 
@@ -1355,8 +1596,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       $(descriptionSpan).removeClass("hidden");
     };
 
-    descriptionInput.onfocus = function(e) {
-      descriptionInput.onblur = function(e) {
+    descriptionInput.onfocus = function() {
+      descriptionInput.onblur = function() {
         saveInput();
       };
     };
@@ -1365,7 +1606,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       // trigger save on enter and esc keypress
       var event = getEvent(e);
       event.stopPropagation();
-      if (event.keyCode == 13 || event.keyCode == 27) {
+      if (event.keyCode === 13 || event.keyCode === 27) {
         $(descriptionInput).off("blur");
         descriptionInput.blur();
         saveInput();
@@ -1415,7 +1656,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     if (op) {
       title.appendChild(document.createTextNode(loc([op.name, "_group_label"])));
-      if (authorizationModel.ok('update-op-description')) {
+      if (authorizationModel.ok("update-op-description")) {
         title.appendChild(buildDescriptionElement(op));
       }
     } else {
@@ -1424,7 +1665,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     title.setAttribute("data-doc-id", self.docId);
     title.setAttribute("data-app-id", self.appId);
     title.onclick = accordion.click;
-    if (self.schema.info.removable && !self.isDisabled && authorizationModel.ok('remove-doc')) {
+    if (self.schema.info.removable && !self.isDisabled && authorizationModel.ok("remove-doc")) {
       var removeSpan =
         $("<span>")
           .addClass("icon remove inline-right")
@@ -1451,6 +1692,11 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return section;
   }
 
+  hub.subscribe("application-loaded", function() {
+    while (self.subscriptions.length > 0) {
+      hub.unsubscribe(self.subscriptions.pop());
+    }
+  }, true);
 
   self.element = buildElement();
   // If doc.validationErrors is truthy, i.e. doc includes ready evaluated errors,

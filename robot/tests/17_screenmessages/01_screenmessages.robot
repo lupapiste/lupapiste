@@ -44,7 +44,7 @@ Finally, admin clears all screenmessages
   Solita Admin goes to screen messages view of admin page
   Click enabled by test id  test-delete-screenmessage
   Wait until  Element should not be visible  xpath=//li[@data-test-id="test-screenmessage"]
-  Logout
+  [Teardown]  logout
 
 *** Keywords ***
 
@@ -55,7 +55,7 @@ Verify fields of the screenmessages view
 
 Solita Admin goes to screen messages view of admin page
   SolitaAdmin logs in
-  Click link  [screen messages]
+  Click link  Ennakkoilmoitukset
   Wait until  Element Should be Visible  xpath=//table[@data-test-id="test-screenmessages-table"]
   Verify fields of the screenmessages view
 
@@ -69,4 +69,3 @@ Check displayed screenmessage in both languages
   Wait For Condition  return $("[data-test-id='test-screenmessage']").text() == ${sv};
   Click link  xpath=//*[@data-test-id='lang-fi']
   Wait Until  Page Should Contain  På svenska
-

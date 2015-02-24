@@ -18,9 +18,9 @@
 
 (defn get-organizations
   ([]
-    (get-organizations {} {}))
+    (get-organizations {}))
   ([query]
-    (get-organizations query {}))
+    (mongo/select :organizations query))
   ([query projection]
     (mongo/select :organizations query projection)))
 
@@ -50,11 +50,17 @@
       (select-keys krysp-config [:url :version])))))
 
 (defn- municipalities-with-organization []
-  (let [organizations (get-organizations {} {:scope 1})]
-    (distinct
-      (for [{scopes :scope} organizations
-            {municipality :municipality} scopes]
-        municipality))))
+  (let [organizations (get-organizations {} [:scope :krysp])]
+    {:all (distinct
+            (for [{scopes :scope} organizations
+                  {municipality :municipality} scopes]
+              municipality))
+     :with-backend (remove nil?
+                     (distinct
+                       (for [{scopes :scope :as org} organizations
+                             {municipality :municipality :as scope} scopes]
+                         (when (-> org :krysp (get (-> scope :permitType keyword)) :url s/blank? not)
+                           municipality))))}))
 
 (defn- organization-attachments
   "Returns a map where key is permit type, value is a list of attachment types for the permit type"
@@ -111,8 +117,14 @@
       (errorf "*** multiple organizations in scope of - municipality=%s, permit-type=%s -> %s" municipality permit-type (count organizations)))
     (first organizations)))
 
-(defn resolve-organization-scope [organization municipality permit-type]
-  (first (filter #(and (= municipality (:municipality %)) (= permit-type (:permitType %))) (:scope organization))))
+(defn resolve-organization-scope
+  ([municipality permit-type]
+    {:pre  [municipality (permit/valid-permit-type? permit-type)]}
+    (let [organization (resolve-organization municipality permit-type)]
+      (resolve-organization-scope municipality permit-type organization)))
+  ([municipality permit-type organization]
+    {:pre  [municipality organization (permit/valid-permit-type? permit-type)]}
+   (first (filter #(and (= municipality (:municipality %)) (= permit-type (:permitType %))) (:scope organization)))))
 
 ;;
 ;; Actions
@@ -143,6 +155,7 @@
    :parameters [permitType municipality
                 inforequestEnabled applicationEnabled openInforequestEnabled openInforequestEmail
                 opening]
+   :input-validators [permit/permit-type-validator]
    :roles [:admin]}
   [_]
   (mongo/update-by-query :organizations
@@ -193,7 +206,10 @@
   {:description "Returns a list of municipality IDs that are affiliated with Lupapiste."
    :roles [:applicant :authority]}
   [_]
-  (ok :municipalities (municipalities-with-organization)))
+  (let [munis (municipalities-with-organization)]
+    (ok
+      :municipalities (:all munis)
+      :municipalitiesWithBackendInUse (:with-backend munis))))
 
 (defquery municipality-active
   {:parameters [municipality]
@@ -244,13 +260,12 @@
   [_]
   (let [permit-type (:permit-type ((keyword operation) operations/operations))]
     (if-let [organization (resolve-organization municipality permit-type)]
-      (let [scope (resolve-organization-scope organization municipality permit-type)]
+      (let [scope (resolve-organization-scope municipality permit-type organization)]
         (ok
-         :inforequests-disabled (not (:inforequest-enabled scope))
-         :new-applications-disabled (not (:new-application-enabled scope))
-         :links (:links organization)
-         :attachmentsForOp (-> organization :operations-attachments ((keyword operation)))))
-
+          :inforequests-disabled (not (:inforequest-enabled scope))
+          :new-applications-disabled (not (:new-application-enabled scope))
+          :links (:links organization)
+          :attachmentsForOp (-> organization :operations-attachments ((keyword operation)))))
       (fail :municipalityNotSupported :municipality municipality :permitType permit-type))))
 
 (defcommand set-organization-selected-operations
@@ -291,15 +306,34 @@
 (defcommand set-krysp-endpoint
   {:parameters [url permitType version]
    :roles      [:authorityAdmin]
-   :input-validators [(fn [{{:keys [permitType]} :data}]
-                        (when-not (contains? (permit/permit-types) permitType)
-                          (warn "invalid permit type" permitType)
-                          (fail :error.missing-parameters :parameters [:permitType])))]}
+   :input-validators [permit/permit-type-validator]}
   [{{:keys [organizations] :as user} :user}]
   (if (or (s/blank? url) (krysp/wfs-is-alive? url))
     (mongo/update-by-id :organizations (first organizations) {$set {(str "krysp." permitType ".url") url
                                                                     (str "krysp." permitType ".version") version}})
     (fail :auth-admin.legacyNotResponding)))
+
+(defcommand set-kopiolaitos-info
+  {:parameters [kopiolaitosEmail kopiolaitosOrdererAddress kopiolaitosOrdererPhone kopiolaitosOrdererEmail]
+   :roles [:authorityAdmin]}
+  [{{:keys [organizations]} :user}]
+  (update-organization (first organizations) {$set {:kopiolaitos-email kopiolaitosEmail
+                                                    :kopiolaitos-orderer-address kopiolaitosOrdererAddress
+                                                    :kopiolaitos-orderer-phone kopiolaitosOrdererPhone
+                                                    :kopiolaitos-orderer-email kopiolaitosOrdererEmail}})
+  (ok))
+
+(defquery kopiolaitos-config
+  {:roles [:authorityAdmin]}
+  [{{:keys [organizations]} :user}]
+  (let [organization-id (first organizations)]
+    (if-let [organization (get-organization organization-id)]
+      (ok
+        :kopiolaitos-email (:kopiolaitos-email organization)
+        :kopiolaitos-orderer-address (:kopiolaitos-orderer-address organization)
+        :kopiolaitos-orderer-phone (:kopiolaitos-orderer-phone organization)
+        :kopiolaitos-orderer-email (:kopiolaitos-orderer-email organization))
+      (fail :error.unknown-organization))))
 
 ;;
 ;; Helpers

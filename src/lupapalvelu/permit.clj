@@ -1,7 +1,7 @@
 (ns lupapalvelu.permit
   (:require [lupapalvelu.domain :as domain]
             [sade.core :refer [fail]]
-            [taoensso.timbre :as timbre :refer [errorf]]))
+            [taoensso.timbre :as timbre :refer [errorf warn]]))
 
 (defonce ^:private permit-type-defs (atom {}))
 (defn permit-types [] @permit-type-defs)
@@ -9,8 +9,11 @@
 (def poikkeamislupa :poikkeamislupa)
 (def suunnittelutarveratkaisu :suunnittelutarveratkaisu)
 
+(defn valid-permit-type? [permit-type]
+  (contains? (permit-types) permit-type))
+
 (defn register-function [permit-type k f]
-  {:pre [(contains? (permit-types) permit-type)
+  {:pre [(valid-permit-type? permit-type)
          (keyword? k)
          (fn? f)]}
   (swap! permit-type-defs assoc-in [permit-type k] f))
@@ -26,35 +29,48 @@
 
 (defpermit R  "Rakennusluvat"
   {:subtypes         []
-   :sftp-directory   "/rakennus"})
+   :sftp-directory   "/rakennus"
+   :applicant-doc-schema "hakija"})
 
 (defpermit YA "Yleisten alueiden luvat"
-  {:subtypes         []
-   :sftp-directory   "/yleiset_alueet"})
+  {:subtypes             []
+   :sftp-directory       "/yleiset_alueet"
+   :applicant-doc-schema "hakija-ya"})
 
 (defpermit YI  "Ymparistoilmoitukset"
   {:subtypes       []
-   :sftp-directory "/ymparisto"})
+   :sftp-directory "/ymparisto"
+   :applicant-doc-schema "hakija"})
 
 (defpermit YL  "Ymparistolupa"
   {:subtypes       []
-   :sftp-directory "/ymparisto"})
+   :sftp-directory "/ymparisto"
+   :applicant-doc-schema "hakija"})
 
 (defpermit VVVL  "Vapautushakemus vesijohtoon ja viemariin liittymisesta"
   {:subtypes       []
-   :sftp-directory "/ymparisto"})
+   :sftp-directory "/ymparisto"
+   :applicant-doc-schema "hakija"})
 
 (defpermit P  "Poikkeusluvat"
   {:subtypes         [poikkeamislupa suunnittelutarveratkaisu]
-   :sftp-directory   "/poikkeusasiat"})
+   :sftp-directory   "/poikkeusasiat"
+   :applicant-doc-schema "hakija"})
 
 (defpermit MAL "Maa-ainesluvat"
   {:subtypes       []
-   :sftp-directory "/ymparisto"})
+   :sftp-directory "/ymparisto"
+   :applicant-doc-schema "hakija"})
 
-(defpermit KM "Kiinteiston muodostus"
+(defpermit KT "Kiinteistotoimitus"
   {:subtypes       []
-   :sftp-directory "/rakennus"})
+   :sftp-directory "/rakennus"
+   :applicant-doc-schema "hakija"})
+
+(defpermit MM "Maankayton muutos"
+  {:subtypes       []
+   :sftp-directory "/kaavat"
+   :applicant-doc-schema "hakija"})
 
 ;;
 ;; Helpers
@@ -69,6 +85,9 @@
 
 (defn get-sftp-directory [permit-type]
   (get-metadata permit-type :sftp-directory))
+
+(defn get-applicant-doc-schema [permit-type]
+  (get-metadata permit-type :applicant-doc-schema))
 
 (defn get-application-mapper
   "Returns a function that maps application into KRYSP XML and saves the XML to disk."
@@ -91,7 +110,11 @@
   (get-metadata permit-type :verdict-extras-krysp-reader))
 
 (defn get-application-xml-getter [permit-type]
-  "Returns a function that fetches KRYSP XML from municipality backend. Function parameters: url, application-id."
+  "Returns a function that fetches KRYSP XML from municipality backend.
+   Function parameters: 1) url,
+                        2) id,
+                        3) optional boolean parameter: raw form
+                        4) optional boolean parameter: if true the id parameter is interpreted as kuntalupatunnus instead of application id."
   (get-metadata permit-type :xml-from-krysp))
 
 (defn permit-type
@@ -103,6 +126,11 @@
 ;;
 ;; Validate
 ;;
+
+(defn permit-type-validator [{{:keys [permitType]} :data}]
+  (when-not (valid-permit-type? permitType)
+    (warn "invalid permit type" permitType)
+    (fail :error.missing-parameters :parameters [:permitType])))
 
 (defn validate-permit-type-is-not [validator-permit-type]
   (fn [_ application]

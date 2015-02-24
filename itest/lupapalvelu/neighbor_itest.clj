@@ -5,12 +5,12 @@
             [clojure.string :as s]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.tools :as tools]
-            [lupapalvelu.neighbors :refer [find-by-id]]
+            [sade.util :refer [find-by-id]]
             [sade.util :refer [fn->]]))
 
-(defn invalid-token? [resp] (= resp {:ok false, :text "token-not-found"}))
-(defn invalid-response? [resp] (= (dissoc resp :response) {:ok false, :text "invalid-response"}))
-(defn invalid-vetuma? [resp] (= (dissoc resp :response) {:ok false, :text "invalid-vetuma-user"}))
+(defn invalid-token? [resp] (= resp {:ok false, :text "error.token-not-found"}))
+(defn invalid-response? [resp] (= (dissoc resp :response) {:ok false, :text "error.invalid-response"}))
+(defn invalid-vetuma? [resp] (= (dissoc resp :response) {:ok false, :text "error.invalid-vetuma-user"}))
 
 (facts "add neigbor with missing optional data"
   (let [application-id (create-app-id pena :municipality sonja-muni)]
@@ -155,7 +155,7 @@
         (-> hakija-doc :data :henkilo :henkilotiedot :etunimi) => "Zebra"
         (-> hakija-doc :data :henkilo :henkilotiedot :sukunimi) => "Zorro"
         (-> hakija-doc :data :henkilo :henkilotiedot :hetu) => nil
-        (-> hakija-doc :data :henkilo :henkilotiedot :turvakieltoKytkin) => nil
+        (-> hakija-doc :data :henkilo :henkilotiedot :turvakieltoKytkin) => false
         (-> hakija-doc :data :henkilo :yhteystiedot  :puhelin) => nil
         (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :etunimi) => "Gustav"
         (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :sukunimi) => "Golem"
@@ -166,7 +166,7 @@
 
         (facts "random testing about content"
           (:comments application) => nil
-          (count (:documents application)) => 4 ; evil
+          (count (:documents application)) => 5 ; evil
 
           (fact "attachments"
             (fact "there are some attachments"

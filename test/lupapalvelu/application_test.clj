@@ -65,16 +65,17 @@
   (fact "Poikkeamis not requires" (is-link-permit-required {:operations [{:name "poikkeamis"}]}) => nil))
 
 (facts "Add operation allowed"
-  (let [not-allowed-for #{:jatkoaika :aloitusoikeus :suunnittelijan-nimeaminen :tyonjohtajan-nimeaminen :tilan-rekisteroiminen-tontiksi :yhdistaminen :rajankaynnin-hakeminen
-                          :tonttijaon-hakeminen :tontin-lohkominen :rasitetoimitus :tonttijaon-muutoksen-hakeminen :rajannayton-hakeminen :halkominen}
+  (let [not-allowed-for #{:raktyo-aloit-loppuunsaat :jatkoaika :aloitusoikeus :suunnittelijan-nimeaminen :tyonjohtajan-nimeaminen :tyonjohtajan-nimeaminen-v2 :tilan-rekisteroiminen-tontiksi :yhdistaminen :rajankaynnin-hakeminen
+                          :tonttijaon-hakeminen :tontin-lohkominen :rasitetoimitus :tonttijaon-muutoksen-hakeminen :rajannayton-hakeminen :halkominen :aiemmalla-luvalla-hakeminen}
         error {:ok false :text "error.add-operation-not-allowed"}]
+
     (doseq [operation lupapalvelu.operations/operations]
-      (let [op (first operation)
-            type (-> operation second :permit-type)
+      (let [[op {permit-type :permit-type}] operation
             application {:operations [{:name (name op)}] :permitSubtype nil}
             operation-allowed (doc-result (add-operation-allowed? nil application) op)]
-        (if (or (not= type "R") (not-allowed-for op))
+        (if (or (not= permit-type "R") (not-allowed-for op))
           (fact "Add operation not allowed" operation-allowed => (doc-check = error))
           (fact "Add operation allowed" operation-allowed => (doc-check nil?)))))
+
     (fact "Add operation not allowed for :muutoslupa"
-          (add-operation-allowed? nil {:operations [{:name "asuinrakennus"}] :permitSubtype :muutoslupa}) => error)))
+      (add-operation-allowed? nil {:operations [{:name "kerrostalo-rivitalo"}] :permitSubtype :muutoslupa}) => error)))

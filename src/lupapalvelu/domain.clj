@@ -1,5 +1,6 @@
 (ns lupapalvelu.domain
-  (:require [taoensso.timbre :as timbre :refer [trace debug info warn warnf error fatal]]
+  (:require [clojure.set :refer [difference]]
+            [taoensso.timbre :as timbre :refer [trace debug info warn warnf error fatal]]
             [monger.operators :refer :all]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as user]
@@ -62,29 +63,20 @@
         (update-in [:tasks] (partial only-authority-sees user relates-to-draft))
         (filter-notice-from-application user)))))
 
-(defn get-application
-  ([]
-    (get-application {} {}))
-  ([query]
-    (get-application query {}))
-  ([query projection]
-    (mongo/select-one :applications query projection)))
-
-(defn get-application-as [application-id user]
-  {:pre [user]}
-  (filter-application-content-for
-    (get-application {$and [{:_id application-id} (application-query-for user)]})
-    user))
-
-(defn get-application-as-including-canceled [application-id user]
-  {:pre [user]}
-  (let [query-incl-canceleds (update-in (application-query-for user) [:state $nin] #(util/exclude-from-sequence % ["canceled"]))]
+(defn get-application-as [query-or-id user & include-canceled-apps?]
+  {:pre [query-or-id (map? user)]}
+  (let [query-id-part (if (map? query-or-id) query-or-id {:_id query-or-id})
+        query-user-part (if include-canceled-apps?
+                          (update-in (application-query-for user) [:state $nin] #(difference (set %) #{"canceled"}))
+                          (application-query-for user))]
    (filter-application-content-for
-     (get-application {$and [{:_id application-id} query-incl-canceleds]})
+     (mongo/select-one :applications {$and [query-id-part query-user-part]})
      user)))
 
-(defn get-application-no-access-checking [application-id]
-  (get-application  {:_id application-id}))
+(defn get-application-no-access-checking [query-or-id]
+  {:pre [query-or-id]}
+  (let [query (if (map? query-or-id) query-or-id {:_id query-or-id})]
+    (mongo/select-one :applications query)))
 
 ;;
 ;; authorization
@@ -98,18 +90,22 @@
 (defn has-auth? [{auth :auth} user-id]
   (or (some (partial = user-id) (map :id auth)) false))
 
+(defn get-auth [{auth :auth} user-id]
+  (some #(when (= (:id %) user-id) %) auth))
+
 (defn has-auth-role? [{auth :auth} user-id role]
   (has-auth? {:auth (get-auths-by-role {:auth auth} role)} user-id))
 
-(defn owner-or-writer? [application user-id]
+(defn owner-or-write-access? [application user-id]
   (or (has-auth-role? application user-id "owner")
-      (has-auth-role? application user-id "writer")))
+      (has-auth-role? application user-id "writer")
+      (has-auth-role? application user-id "foreman")))
 
-(defn validate-owner-or-writer
-  "Validator: current user must be owner or writer.
+(defn validate-owner-or-write-access
+  "Validator: current user must be owner or have write access.
    To be used in commands' :pre-checks vector."
   [command application]
-  (when-not (owner-or-writer? application (-> command :user :id))
+  (when-not (owner-or-write-access? application (-> command :user :id))
     unauthorized))
 
 ;;
@@ -124,12 +120,12 @@
 (defn get-documents-by-name
   "returns document from application by schema name"
   [{documents :documents} schema-name]
-  (filter (comp (partial = (name schema-name)) :name :schema-info) documents))
+  (filter (comp (partial = (keyword schema-name)) keyword :name :schema-info) documents))
 
 (defn get-documents-by-type
   "returns document from application by schema type"
   [{documents :documents} schema-type]
-  (filter (comp (partial = (name schema-type)) :type :schema-info) documents))
+  (filter (comp (partial = (keyword schema-type)) keyword :type :schema-info) documents))
 
 (defn get-document-by-name
   "returns first document from application by schema name"

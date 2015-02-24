@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <body>
   <section class="page container" id="mypage">
 
@@ -82,7 +82,7 @@
             </div>
           </div>
 
-        <div data-bind="visible: companyShow">
+        <div data-bind="visible: companyShow" data-test-id="my-company">
           <div class="form-group">
             <h2 data-bind="ltext: 'userInfo.company.title'"></h2>
 
@@ -97,8 +97,8 @@
               <label data-bind="ltext: 'userInfo.company.y'" class="form-label"></label>
               <span data-bind="text: company.y" class="form-input"></span>
 
-              <a data-bind="attr: {href: '#!/company/' + company.id()}, ltext: 'mypage.companyAccount.editInfo'" href="#" class="btn btn-primary"></a>
-              <a data-bind="attr: {href: '#!/company/' + company.id() + '/users/'}, ltext: 'mypage.companyAccount.editUsers'" href="#" class="btn btn-primary"></a>
+              <a data-bind="attr: {href: '#!/company/' + company.id()}, ltext: 'mypage.companyAccount.editInfo'" href="#" class="btn btn-primary" data-test-id="company-edit-info"></a>
+              <a data-bind="attr: {href: '#!/company/' + company.id() + '/users/'}, ltext: 'mypage.companyAccount.editUsers'" href="#" class="btn btn-primary" data-test-id="company-edit-users"></a>
             </div>
 
           </div>
@@ -164,7 +164,7 @@
                 </tbody>
               </table>
               <button
-                data-bind="click: add, ltext: 'userinfo.architect.attachments.add'" data-test-id="add-attachment"></button>
+                data-bind="click: add, ltext: 'userinfo.architect.attachments.add'" data-test-id="test-add-architect-attachment"></button>
             </div>
           </div>
         </div>

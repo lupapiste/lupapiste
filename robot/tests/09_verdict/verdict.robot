@@ -11,7 +11,7 @@ Mikko want to build Olutteltta
   Mikko logs in
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  Olutteltta${secs}
-  Create application the fast way  ${appname}  753  753-416-25-30  asuinrakennus
+  Create application the fast way  ${appname}  753  753-416-25-30  kerrostalo-rivitalo
 
 The verdict tab is not visible
   Element should not be visible  application-verdict-tab
@@ -33,11 +33,12 @@ Sonja fetches verdict from municipality KRYSP service
 
 Sonja creates verdict with adds comment
   Go to give new verdict
+  Title Should Be  ${appname} - Lupapiste
   Input verdict  123567890  6  01.05.2018  01.06.2018  Kaarina Krysp III
   Comment verdict  Myönnetään...
 
 Return to application and come back
-  Wait and click  xpath=//a[@data-test-id='return-from-verdict']
+  Click by test id  return-from-verdict
   Click enabled by test id  edit-verdict
 
 Add katselmus
@@ -45,7 +46,7 @@ Add katselmus
   Task count is  task-katselmus  3
   Click enabled by test id  verdict-new-task
   Wait until  Element should be visible  dialog-create-task
-  Select From List By Value  choose-task-type   task-katselmus
+  Wait until  Select From List By Value  choose-task-type   task-katselmus
   Input text  create-task-name  uus lupaehto
   Click enabled by test id  create-task-save
   Wait until  Element should not be visible  dialog-create-task
@@ -80,23 +81,26 @@ Correct tab opening elements are visible
 
 Accordions in the Application Summary tab are closed
   Open tab  applicationSummary
-  Xpath Should Match X Times  //div[@id='application-applicationSummary-tab']//section[@class='accordion']//div[@data-accordion-state='closed']  9
+  Xpath Should Match X Times  //div[@id='application-applicationSummary-tab']//section[@class='accordion']//div[@data-accordion-state='closed']  6
   Xpath Should Match X Times  //div[@id='application-applicationSummary-tab']//section[@class='accordion']//div[@data-accordion-state='open']  0
   Click by test id  accordion-application-summary-statements-header
-  Xpath Should Match X Times  //div[@id='application-applicationSummary-tab']//section[@class='accordion']//div[@data-accordion-state='closed']  8
+  Xpath Should Match X Times  //div[@id='application-applicationSummary-tab']//section[@class='accordion']//div[@data-accordion-state='closed']  5
   Xpath Should Match X Times  //div[@id='application-applicationSummary-tab']//section[@class='accordion']//div[@data-accordion-state='open']  1
   Element should be visible  //div[@id='application-applicationSummary-tab']//section[@id='accordion-application-summary-statements']//div[@class='accordion_content']
 
-Stamping dialog opens
+Stamping page opens, verdict details can be seen
   Open tab  attachments
-  Element should be visible  xpath=//section[@id='application']//button[@data-test-id='application-stamp-btn']
-  Click enabled by test id  application-stamp-btn
-  Wait Until  Element should be visible  dialog-stamp-attachments
+  Select attachment operation option from dropdown  stampAttachments
+  Wait Until  Element should be visible  stamping-container
+  Textfield value should be  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-kuntalupatunnus"]  2013-01
+  Page should contain element  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//select[@data-test-id="stamp-info-buildingid-list"]
+  Should not be empty  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-section"]
 
 Stamp attachments
+  Click element  xpath=//div[@id="stamping-container"]//a[@data-test-id="stamp-select-all"]
   Click enabled by test id   start-stamping
-  Click enabled by test id   application-stamp-dialdog-ok
-  Wait Until  Element should not be visible  dialog-stamp-attachments
+  Click enabled by test id   cancel-stamping
+  Wait Until  Element should not be visible  stamping-container
   [Teardown]  Logout
 
 Mikko sees that the application has verdicts

@@ -1,0 +1,48 @@
+footer {
+  margin-top: $marginL*3;
+  padding-top: $marginL;
+  position: absolute;
+  clear:both;
+  color: white;
+  background-color: $lp-dark-grey;
+  height: auto;
+  bottom: 0;
+  width: 100%;
+  
+  .informations {
+    padding: $marginM;
+    width: 100%;
+    max-width: $application-max-width;
+    margin: 0 auto $marginM;
+    .footer-box {
+      font-size: 16px;
+      vertical-align: top;
+      width: 24.5%;
+      display: inline-block;
+      padding-right: $marginL;
+      box-sizing: border-box;
+      h3 {
+        font-size: 18px;
+        font-weight: bold;
+      }
+      a {
+       color: $lp-orange;
+       display: block;
+      }
+      &.sade-box {
+        a {
+          display: inline;
+        }
+      }
+
+    }
+  }
+}
+  
+#buildinfo {
+  display: block;
+  background-color: black;
+  padding: $marginM;
+  color: $grey-text;
+}
+

@@ -7,7 +7,6 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.core :refer :all]
-            [lupapalvelu.action :refer [defquery] :as action]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :as i18n]
@@ -25,12 +24,12 @@
 
 (def operation-index
   (reduce
-    (fn [ops [k _]]
+    (fn [ops k]
       (let [localizations (map #(i18n/localize % "operations" (name k)) ["fi" "sv"])
             normalized (map normalize-operation-name localizations)]
         (conj ops {:op (name k) :locs (remove ss/blank? normalized)})))
     []
-    operations/operations))
+    (keys operations/operations)))
 
 (defn- operation-names [filter-search]
   (let [normalized (normalize-operation-name filter-search)]
@@ -93,7 +92,7 @@
     (re-matches util/property-id-pattern filter-search) {:propertyId (util/to-property-id filter-search)}
     :else (make-free-text-query filter-search)))
 
-(defn- make-query [query {:keys [filter-search filter-kind filter-state filter-user filter-username]} user]
+(defn make-query [query {:keys [filter-search filter-kind filter-state filter-user filter-username]} user]
   {$and
    (filter seq
      [query
@@ -160,57 +159,12 @@
      :sEcho                 echo}))
 
 
-;;
-;; Service point for jQuery dataTables:
-;;
+(defn public-fields [{:keys [municipality submitted operations]}]
+  (let [op-name (-> operations first :name)]
+    {:municipality municipality
+     :timestamp submitted
+     :operation (i18n/localize :fi "operations" op-name)
+     :operationName {:fi (i18n/localize :fi "operations" op-name)
+                     :sv (i18n/localize :sv "operations" op-name)}}))
 
-(defquery applications-for-datatables
-  {:parameters [params]
-   :roles      [:applicant :authority]}
-  [{user :user}]
-  (ok :data (applications-for-user user params)))
 
-;;
-;; Regular query for integrations
-;;
-
-(defn- localize-application [application]
-  (let [op-name (fn [op lang] (i18n/localize lang "operations" (:name op)))]
-    (-> application
-      (update-in [:operations] #(map (fn [op] (assoc op :displayNameFi (op-name op "fi") :displayNameSv (op-name op "sv"))) %))
-      (assoc
-        :stateNameFi (i18n/localize "fi" (:state application))
-        :stateNameSv (i18n/localize "sv" (:state application))))))
-
-(defquery applications
-  {:parameters []
-   :roles      [:applicant :authority]}
-  [{user :user data :data}]
-  (let [user-query (domain/basic-application-query-for user)
-        query (make-query user-query data user)
-        fields (concat [:id :location :infoRequest :address :municipality :operations :drawings :permitType] (filter keyword? col-sources))
-        apps (mongo/select :applications query (zipmap fields (repeat 1)))
-        rows (map #(-> %
-                     (domain/filter-application-content-for user)
-                     (select-keys fields) ; filters empty lists from previous step
-                     localize-application)
-               apps)]
-    (ok :applications rows)))
-
-(defn- public-fields [{:keys [municipality submitted operations]}]
-  {:municipality municipality
-   :timestamp submitted
-   :operation (i18n/localize :fi "operations" (-> operations first :name))})
-
-(defquery latest-applications
-  {:parameters []
-   :roles      [:anonymous]}
-  [_]
-  (let [query {:submitted {$ne nil}}
-        limit 5
-        apps (query/with-collection "applications"
-               (query/find query)
-               (query/fields [:municipality :submitted :operations])
-               (query/sort {:submitted -1})
-               (query/limit limit))]
-    (ok :applications (map public-fields apps))))

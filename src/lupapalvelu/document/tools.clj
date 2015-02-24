@@ -9,6 +9,16 @@
 (defn missing [element]
   (throw (UnsupportedOperationException. (str element))))
 
+(defn default-values [{:keys [type default]}]
+  (case (keyword type)
+    :radioGroup       default
+    :checkbox         false
+    :string           ""
+    :text             ""
+    :fillMyInfoButton nil
+    :foremanHistory   nil
+    nil))
+
 (defn dummy-values [user-id {:keys [type subtype case name body] :as element}]
   (condp = (keyword type)
     :text             "text"
@@ -21,6 +31,8 @@
     :buildingSelector "001"
     :newBuildingSelector "1"
     :hetu             "210281-9988"
+    :fillMyInfoButton nil
+    :foremanHistory   nil
     :string           (condp = (keyword subtype)
                         :maaraala-tunnus   "0003"
                         :email            "example@example.com"
@@ -33,6 +45,7 @@
                         :vrk-name         "Ilkka"
                         :y-tunnus         "2341528-4"
                         :rakennusnumero   "001"
+                        :rakennustunnus   "1234567892"
                         :ovt              "003712345678"
                         nil               "string"
                         :letter           (condp = (keyword case)
@@ -65,7 +78,7 @@
   (walk/prewalk
     #(if (map? %)
        (let [t (keyword (:type %))
-             v (if (#{:group :table} t) (group % t) (f %))]
+             v (if (#{:group :table :foremanOtherApplications} t) (group % t) (f %))]
          {(keyword (:name %)) v})
        %)
     body))
@@ -89,7 +102,9 @@
   ([m k]
     (assert (keyword? k))
     (walk/postwalk
-      (fn [x] (if (and (map? x) (contains? x k)) (k x) x))
+      (fn [x] (if (and (map? x) (contains? x k))
+                (k x)
+                x))
       m)))
 
 (defn timestamped
@@ -105,8 +120,7 @@
   ([schema]
     (create-document-data schema nil-values))
   ([schema f]
-    (->
-      schema
+    (-> schema
       (create f)
       flattened
       wrapped)))

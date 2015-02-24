@@ -11,7 +11,7 @@ Mikko creates an application
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  assign-to-me${secs}
   Set Suite Variable  ${propertyId}  753-416-25-30
-  Create application the fast way  ${appname}  753  ${propertyId}  asuinrakennus
+  Create application the fast way  ${appname}  753  ${propertyId}  kerrostalo-rivitalo
   Open to authorities  hojo-hojo
   Element should not be visible  applicationUnseenComments
 
@@ -83,9 +83,9 @@ Application is shown after login
 Sonja cancels the application
   Sonja logs in
   Open application  ${appname}  ${propertyId}
-  Wait Until  Element should be enabled  xpath=//*[@data-test-id='application-cancel-btn']
-  Click enabled by test id  application-cancel-btn
-  Confirm  dynamic-yes-no-confirm-dialog
+  Wait Until  Element should be enabled  xpath=//*[@data-test-id='application-cancel-authority-btn']
+  Click enabled by test id  application-cancel-authority-btn
+  Confirm  dialog-cancel-application
 
 
 *** Keywords ***

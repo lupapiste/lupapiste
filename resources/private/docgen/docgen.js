@@ -16,6 +16,7 @@ var docgen = (function () {
     _.each(documents, function (doc) {
       var schema = doc.schema;
       var docModel = new DocModel(schema, doc, application, authorizationModel, options);
+      docModel.triggerEvents();
 
       docgenDiv.append(docModel.element);
 
@@ -23,7 +24,7 @@ var docgen = (function () {
         docModel.showValidationResults(doc.validationErrors);
       }
 
-      if (schema.info.repeating && !isDisabled && authorizationModel.ok('create-doc')) {
+      if (schema.info.repeating && !isDisabled && authorizationModel.ok("create-doc")) {
 
         var btn = $("<button>", {"id": schema.info.name + "_append_btn", "class": "btn block"})
           .text(loc(schema.info.name + "._append_label"))

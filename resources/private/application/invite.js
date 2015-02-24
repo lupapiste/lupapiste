@@ -1,10 +1,11 @@
 LUPAPISTE.InviteModel = function() {
+  "use strict";
   var self = this;
 
   self.applicationId = null;
   self.email = ko.observable();
   self.path = ko.observable();
-  self.text = ko.observable(loc('invite.default-text'));
+  self.text = ko.observable(loc("invite.default-text"));
   self.documentName = ko.observable();
   self.documentId = ko.observable();
   self.error = ko.observable();
@@ -24,7 +25,7 @@ LUPAPISTE.InviteModel = function() {
     self.documentName(undefined);
     self.documentId(undefined);
     self.path(undefined);
-    self.text(loc('invite.default-text'));
+    self.text(loc("invite.default-text"));
     self.error(undefined);
   };
 
@@ -35,13 +36,14 @@ LUPAPISTE.InviteModel = function() {
     var documentName = model.documentName();
     var documentId = model.documentId();
     var path = model.path();
-    ajax.command("invite", { id: self.applicationId,
-                             documentName: documentName,
-                             documentId: documentId,
-                             path: path,
-                             email: email,
-                             title: "uuden suunnittelijan lis\u00E4\u00E4minen",
-                             text: text})
+    ajax.command("invite-with-role",
+      { id: self.applicationId,
+        documentName: documentName,
+        documentId: documentId,
+        path: path,
+        email: email,
+        role: "writer",
+        text: text })
       .processing(self.processing)
       .pending(self.pending)
       .success(function() {

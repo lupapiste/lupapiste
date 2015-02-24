@@ -16,9 +16,9 @@
     (q/sort {:time 1})))
 
 (def- execution-name {:pre "pre-condition"
-                               :post "post-condition"
-                               :apply-when "apply-when"
-                               :fn "execution"})
+                      :post "post-condition"
+                      :apply-when "apply-when"
+                      :fn "execution"})
 
 (defn- call-execute [execution-type m]
   (when-let [f (execution-type m)]

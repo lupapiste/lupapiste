@@ -13,19 +13,19 @@ Mikko goes to empty attachments tab
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  attachments${secs}
   Mikko logs in
-  Create application the fast way  ${appname}  753  753-416-25-30  asuinrakennus
+  Create application the fast way  ${appname}  753  753-416-25-30  kerrostalo-rivitalo
   Open tab  attachments
 
 Download all attachments should be disabled
-  Wait Until  Element should not be visible   xpath=//a[@data-test-id="application-download-all-attachement"]
+  Wait Until  Element should not be visible   xpath=//a[@data-test-id="application-download-all-attachments"]
 
 New attachment template button should not be visible for Mikko
   [Tags]  attachments
-  Element should not be visible  xpath=//div[@id="application-attachments-tab"]//button[@data-test-id="new-attachment-template-button"]
+  Page should not contain element  xpath=//select[@data-test-id="attachment-operations-select-lower"]//option[@value='newAttachmentTemplates']
 
 Mikko adds txt attachment without comment
   [Tags]  attachments
-  Add attachment  ${TXT_TESTFILE_PATH}  ${EMPTY}  Uusi asuinrakennus
+  Add attachment  ${TXT_TESTFILE_PATH}  ${EMPTY}  Asuinkerrostalon tai rivitalon rakentaminen
   Application state should be  draft
   Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${TXT_TESTFILE_NAME}')]
 
@@ -37,12 +37,12 @@ Mikko deletes attachment immediately by using remove icon
 
 Mikko adds again txt attachment without comment
   [Tags]  attachments
-  Add attachment  ${TXT_TESTFILE_PATH}  ${EMPTY}  Uusi asuinrakennus
+  Add attachment  ${TXT_TESTFILE_PATH}  ${EMPTY}  Asuinkerrostalon tai rivitalon rakentaminen
   Application state should be  draft
   Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${TXT_TESTFILE_NAME}')]
 
 Download all attachments should be enabled
-  Wait Until  Element should be visible   xpath=//a[@data-test-id="application-download-all-attachement"]
+  Wait Until  Element should be visible   xpath=//a[@data-test-id="application-download-all-attachments"]
 
 Mikko opens attachment details
   [Tags]  attachments
@@ -65,7 +65,7 @@ Mikko deletes attachment
 
 Mikko adds txt attachment with comment
   [Tags]  attachments
-  Add attachment  ${TXT_TESTFILE_PATH}  ${TXT_TESTFILE_DESCRIPTION}  Uusi asuinrakennus
+  Add attachment  ${TXT_TESTFILE_PATH}  ${TXT_TESTFILE_DESCRIPTION}  Asuinkerrostalon tai rivitalon rakentaminen
 
 Mikko opens application to authorities
   Open to authorities  pliip
@@ -91,8 +91,8 @@ Change attachment type
   Wait Until  Element Should Not Be Visible  attachment-type-select-loader
   Click enabled by test id  confirm-yes
   Click element  xpath=//a[@data-test-id="back-to-application-from-attachment"]
-  Tab should be visible  attachments
-  Wait Until  Page Should Not Contain  xpath=//a[@data-test-type="muut.muu"]
+  Wait Until  Tab should be visible  attachments
+  Page Should Not Contain  xpath=//a[@data-test-type="muut.muu"]
 
 Signature icon is not visible
   Element should not be visible  xpath=//div[@id="application-attachments-tab"]//span[@data-test-icon="signed-rakennuspaikka.ote_alueen_peruskartasta"]
@@ -100,7 +100,7 @@ Signature icon is not visible
 Sign all attachments
   [Tags]  attachments
   Tab should be visible  attachments
-  Click enabled by test id  application-sign-attachments-btn
+  Select attachment operation option from dropdown  signAttachments
   Wait Until   Element should be visible  signAttachmentPassword
   Input text by test id  signAttachmentPassword  mikko123
   Click enabled by test id  do-sign-attachments
@@ -112,6 +112,7 @@ Signature icon is visible
 
 Signature is visible
   Open attachment details  rakennuspaikka.ote_alueen_peruskartasta
+  Assert file latest version  ${TXT_TESTFILE_NAME}  1.0
   Wait Until  Xpath Should Match X Times  //section[@id="attachment"]//*/div[@data-bind="fullName: user"]  1
   Element text should be  xpath=//section[@id="attachment"]//*/div[@data-bind="fullName: user"]  Intonen Mikko
   Element text should be  xpath=//section[@id="attachment"]//*/span[@data-bind="version: version"]  1.0
@@ -142,21 +143,12 @@ Sonja goes to conversation tab
 
 Sonja goes to attachments tab
   [Tags]  attachments
+  Wait Until  Element should be visible  xpath=//a[@data-test-id="back-to-application-from-attachment"]
   Click element  xpath=//a[@data-test-id="back-to-application-from-attachment"]
   Open tab  attachments
 
 Sonja adds new attachment template
-  Wait Until Element Is Visible  xpath=//div[@id="application-attachments-tab"]//button[@data-test-id="new-attachment-template-button"]
-  Click Element  xpath=//div[@id="application-attachments-tab"]//button[@data-test-id="new-attachment-template-button"]
-  Wait Until Element Is Visible  xpath=//div[@id="dialog-add-attachment-templates"]//input[@data-test-id="selectm-filter-input"]
-  Input Text  xpath=//div[@id="dialog-add-attachment-templates"]//input[@data-test-id="selectm-filter-input"]  muu
-  List Should Have No Selections  xpath=//div[@id="dialog-add-attachment-templates"]//select[@data-test-id="selectm-source-list"]
-  Click Element  xpath=//div[@id="dialog-add-attachment-templates"]//select[@data-test-id="selectm-source-list"]//option[contains(text(),'Muu liite')]
-  Click Element  xpath=//div[@id="dialog-add-attachment-templates"]//button[@data-test-id="selectm-add"]
-  Click Element  xpath=//div[@id="dialog-add-attachment-templates"]//button[@data-test-id="selectm-ok"]
-
-Attachment template dialog should not be visible
-  Wait Until  Element Should Not Be Visible  xpath=//div[@id="dialog-add-attachment-templates"]//input[@data-test-id="selectm-filter-input"]
+  Add empty attachment template  Muu liite  muut  muu
 
 Sonja sees that new attachment template is visible in attachments list
   Wait Until Element Is Visible  xpath=//div[@id="application-attachments-tab"]//a[@data-test-type="muut.muu"]

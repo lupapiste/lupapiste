@@ -146,21 +146,23 @@
 
     (count buildings) => 3
 
-    (:buildingId building1) => "101"
+    (:buildingId building1) => "123456001M"
     (:propertyId building1) => "18601234567890"
     (:index building1) => "1"
     (:usage building1) => "039 muut asuinkerrostalot"
     (:area building1) => "2000"
     (:created building1) => "2013"
 
-    (:buildingId building2) => "102"
+    (:buildingId building2) => "123456002N"
     (:propertyId building2) => "18601234567891"
     (:index building2) => "2"
     (:usage building2) => "719 muut varastorakennukset"
     (:area building2) => "20"
     (:created building2) => "2013"
 
-    (:buildingId building3) => "103"
+    (fact "Building 3 does not have permanent ID"
+      (:buildingId building3) => "103")
+
     (:propertyId building3) => "18601234567892"
     (:index building3) => "3"
     (fact "kayttotarkoitus is never nil" (:usage building3) => "")

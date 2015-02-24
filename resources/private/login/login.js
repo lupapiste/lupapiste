@@ -22,7 +22,7 @@
   function login() {
     var username = _.trim($("#login-username").val());
     var password = $("#login-password").val();
-    $("#login-message").text("").css('display', 'none');
+    $("#login-message").text("").css("display", "none");
 
     if (rememberMe()) {
       $.cookie(rememberMeCookieName, username.toLowerCase(), { expires: 365, path: "/", secure: LUPAPISTE.config.cookie.secure});
@@ -48,14 +48,14 @@
   }
 
   hub.subscribe("login-failure", function(e) {
-    $("#login-message").text(loc(e.text)).css('display', 'block');
+    $("#login-message").text(loc(e.text)).css("display", "block");
   });
 
   //
   // Initialize:
   //
 
-  hub.onPageChange("login", recallMe);
+  hub.onPageLoad("login", recallMe);
 
   $(function() {
     recallMe();

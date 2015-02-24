@@ -181,7 +181,7 @@
       var value = ko.utils.unwrapObservable(valueAccessor());
 
       //handle date data
-      if (String(value).indexOf('/Date(') === 0) {
+      if (String(value).indexOf("/Date(") === 0) {
         value = new Date(parseInt(value.replace(/\/Date\((.*?)\)\//gi, "$1"), 10));
       }
 
@@ -194,16 +194,28 @@
   };
 
   ko.bindingHandlers.saveIndicator = {
-    init: function(element) {
-      $(element).text(loc("form.saved"));
+    init: function(element, valueAccessor, allBindingsAccessor) {
+      var bindings = ko.utils.unwrapObservable(allBindingsAccessor());
+      if (bindings.label !== false) {
+        $(element).text(loc("form.saved"));
+      }
     },
     update: function(element, valueAccessor, allBindingsAccessor) {
       var value = ko.utils.unwrapObservable(valueAccessor());
       var bindings = ko.utils.unwrapObservable(allBindingsAccessor());
-      if (value === bindings.name) {
+      var type = ko.unwrap(bindings.type);
+      var name = bindings.name;
+      if (type) {
+        $(element).addClass("form-input-" + type);
+      }
+      if (value && value === name || value && name === undefined) {
         $(element).fadeIn(200);
         setTimeout(function() {
-          $(element).fadeOut(200);
+          $(element).fadeOut(200, function() {
+            if (type) {
+              $(element).removeClass("form-input-" + type);
+            }
+          });
         }, 4000);
       }
     }
@@ -243,6 +255,19 @@
     }
   };
 
+  ko.bindingHandlers.fader = {
+    update: function(element, valueAccessor, allBindingsAccessor) {
+      var value = ko.utils.unwrapObservable(valueAccessor());
+      var bindings = ko.utils.unwrapObservable(allBindingsAccessor());
+      var duration = bindings.duration || 100;
+      if (value) {
+        $(element).fadeIn({duration: duration, queue: false});
+      } else {
+        $(element).fadeOut({duration: duration, queue: false});
+      }
+    }
+  };
+
   ko.bindingHandlers.drill = {
     init: function(element) {
       $(element).addClass("icon");
@@ -258,6 +283,16 @@
         $(element).removeClass("drill-down-" + color);
         $(element).addClass("drill-right-" + color);
       }
+    }
+  };
+
+  ko.bindingHandlers.toggleClick = {
+    init: function(element, valueAccessor) {
+      var value = valueAccessor();
+
+      ko.utils.registerEventHandler(element, "click", function() {
+        value(!value());
+      });
     }
   };
 
@@ -280,6 +315,19 @@
     }
   };
 
+  ko.bindingHandlers.documentEvent = {
+    init: function(element, valueAccessor, allBindingsAccessor) {
+      var value = ko.utils.unwrapObservable(valueAccessor());
+      $(document).keyup(function(e) {
+        if (e.keyCode === value.key) {
+          if (value.keypress) {
+            value.keypress();
+          }
+        }
+      });
+    }
+  };
+
   $.fn.placeholderize = function() {
     this.find("input").each(function(i, element) {
       var e = $(element),
@@ -289,5 +337,4 @@
     });
     return this;
   };
-
 })(jQuery);

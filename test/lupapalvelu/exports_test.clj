@@ -2,13 +2,13 @@
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [clojure.set :refer [difference]]
-            [lupapalvelu.exports :refer [kayttotarkoitus-hinnasto price-classes-for-operation]]
+            [lupapalvelu.exports-api :refer [kayttotarkoitus-hinnasto price-classes-for-operation]]
             [lupapalvelu.application :as app]
             [lupapalvelu.operations :as ops]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.schemas :as schemas]))
 
-(testable-privates lupapalvelu.exports resolve-price-class)
+(testable-privates lupapalvelu.exports-api resolve-price-class)
 
 (def keyset (comp set keys))
 
@@ -19,13 +19,13 @@
   (let [every-kayttotarkoitus (map :name schemas/rakennuksen-kayttotarkoitus)]
     (difference (set every-kayttotarkoitus) (keyset @kayttotarkoitus-hinnasto))) => empty?)
 
-(fact "Uusi asuinrakennus"
-  (let [application (app/make-application "LP-123" "asuinrakennus" 0 0 "address" "01234567891234" "753" {:id "753-R"} false false [] {} 123)
+(fact "Uusi kerrostalo-rivitalo"
+  (let [application (app/make-application "LP-123" "kerrostalo-rivitalo" 0 0 "address" "01234567891234" "753" {:id "753-R"} false false [] {} 123 nil)
         uusi-rakennus (domain/get-document-by-name application "uusiRakennus")]
 
-    (fact "Default value '011 yhden asunnon talot' = C"
+    (fact "Default value '021 rivitalot' = B"
       (let [op (resolve-price-class application (first (:operations application)))]
-        (:priceClass op) => "C"))
+        (:priceClass op) => "B"))
 
     (fact "Missing value defaults to C"
       (let [doc (assoc-in uusi-rakennus [:data :kaytto :kayttotarkoitus] {})
