@@ -11,6 +11,7 @@
             [lupapalvelu.xml.validator :as validator]
             [clojure.data.xml :as xml]
             [sade.common-reader :as reader]
+            [sade.strings :as ss]
             [sade.xml :as sxml]))
 
 (def attachments [{:id :attachment1
@@ -43,10 +44,11 @@
         canonical      (assoc-in canonical
                          [:UusiAsia :Liitteet :Liite]
                          (ah/get-attachments-as-canonical application "sftp://localhost/test/"))
-        xml            (element-to-xml canonical ua-mapping/uusi-asia) => truthy
+        schema-version "ah-1.1"
+        mapping        (ua-mapping/get-mapping (ss/suffix schema-version "-"))
+        xml            (element-to-xml canonical mapping) => truthy
         xml-s          (xml/indent-str xml) => truthy
         permit-type    (:permitType application)
-        schema-version "ah-1.1"
         docs           (common/documents-by-type-without-blanks (tools/unwrapped application))]
     (fact "Validator for Asianhallinta exists"
       ((keyword permit-type) validator/supported-versions-by-permit-type) => (contains schema-version))
@@ -54,6 +56,11 @@
       (validator/validate xml-s permit-type schema-version) => nil)
     (facts "XML elements"
       (let [xml-parsed (reader/strip-xml-namespaces (sxml/parse xml-s))]
+        (fact "Attributes for UusiAsia"
+          (fact "xmlns:ah"
+            (sxml/select1-attribute-value xml-parsed [:UusiAsia] :xmlns:ah) => "http://www.lupapiste.fi/asianhallinta")
+          (fact "version"
+            (sxml/select1-attribute-value xml-parsed [:UusiAsia] :version) => (ss/suffix schema-version "-")))
 
         (fact "Maksaja is Yritys, Henkilo is not present"
           (let [maksaja (sxml/select xml-parsed [:UusiAsia :Maksaja :Yritys])
@@ -73,8 +80,12 @@
               (sxml/get-text maksaja [:Yhteyshenkilo :Yhteystiedot :Puhelinnumero]) => (get-in maksaja-data [:yritys :yhteyshenkilo :yhteystiedot :puhelin])
               (sxml/get-text maksaja [:Yhteyshenkilo :Yhteystiedot :Email]) => (get-in maksaja-data [:yritys :yhteyshenkilo :yhteystiedot :email])
               (sxml/get-text maksaja [:Yhteyshenkilo :Yhteystiedot :Email]) => (get-in maksaja-data [:yritys :yhteyshenkilo :yhteystiedot :email]))))
-        (fact "Liitteet elements"
-          (let [liitteet (sxml/select xml-parsed [:UusiAsia :Liitteet])]
-            liitteet => seq))))
+        (facts "Liitteet elements"
+          (let [liitteet (sxml/select1 xml-parsed [:UusiAsia :Liitteet])
+                att1 (first (:content liitteet))
+                att2 (second (:content liitteet))]
+            liitteet => truthy
+            (fact "Two Liite elements" (count (:content liitteet)) => 2)
+            ))))
     ; TODO check xml elements, ie deep elements, document values with _selected are correct in xml etc..
     ))
