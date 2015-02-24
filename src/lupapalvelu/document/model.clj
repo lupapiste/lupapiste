@@ -103,12 +103,13 @@
 (defmethod validate-field :select [_ {:keys [body other-key]} v]
   (let [accepted-values (set (map :name body))
         accepted-values (if other-key (conj accepted-values "other") accepted-values)]
-    (when-not (or (ss/blank? v) (contains? accepted-values v))
+    (when-not (or (ss/blank? v) (accepted-values v))
       [:warn "illegal-value:select"])))
 
-;; FIXME https://support.solita.fi/browse/LUPA-1453
-;; implement validator, the same as :select?
-(defmethod validate-field :radioGroup [_ elem v] nil)
+(defmethod validate-field :radioGroup [_ {body :body} v]
+  (let [accepted-values (set (map :name body))]
+    (when-not (or (ss/blank? v) (accepted-values v))
+      [:warn "illegal-value:select"])))
 
 (defmethod validate-field :buildingSelector [_ elem v]
   (cond
