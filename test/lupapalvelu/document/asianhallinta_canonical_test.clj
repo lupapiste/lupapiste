@@ -10,6 +10,11 @@
             [sade.strings :as ss]
             [sade.util :as util]))
 
+(defn- has-attachment-types [meta]
+  (fact "type-group and type-id"
+    (:Avain (first meta)) => "type-group"
+    (:Avain (second meta)) => "type-id"))
+
 (fl/facts* "UusiAsia canonical"
   (let [canonical (ah/application-to-asianhallinta-canonical poikkeus-test/poikkari-hakemus "fi") => truthy
         application poikkeus-test/poikkari-hakemus]
@@ -110,6 +115,7 @@
                                           :fileId "file123"
                                           :filename "valtakirja.pdf"
                                           :contentType "application/pdf"}
+                          :op {:name "poikkeamis"}
                           :modified 1424248442767}
                          {:id :attachment3
                           :type {:type-group "paapiirustus"
@@ -117,7 +123,6 @@
                           :versions []}]
             application-with-attachments (assoc poikkeus-test/poikkari-hakemus :attachments attachments)
             canonical-attachments (ah/get-attachments-as-canonical application-with-attachments begin-of-link)]
-
         (fact "Canonical has correct count of attachments"
           (count canonical-attachments) => 2)
         (fact "attachment has correct keys"
@@ -127,5 +132,12 @@
         (fact "filenames are in format 'fileId_filename'"
           (let [att1 (first attachments)
                 canon-att1 (first canonical-attachments)]
-            (ss/suffix (:LinkkiLiitteeseen canon-att1) "/") => (str (-> att1 :latestVersion :fileId) "_" (-> att1 :latestVersion :filename))))))))
+            (ss/suffix (:LinkkiLiitteeseen canon-att1) "/") => (str (-> att1 :latestVersion :fileId) "_" (-> att1 :latestVersion :filename))))
+        (facts "Metatiedot"
+          (let [metas (map #(get-in % [:Metatiedot :Metatieto]) canonical-attachments)]
+            (fact "All have type-group and type-id keys"
+              (doseq [meta metas]
+                (has-attachment-types meta)))
+            (fact "Second attachment has operation meta"
+              (last (second metas)) => {:Avain "operation" :Arvo (get-in attachments [1 :op :name])})))))))
 
