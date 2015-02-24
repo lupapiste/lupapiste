@@ -3,6 +3,8 @@ var LUPAPISTE = LUPAPISTE || {};
 (function($) {
   "use strict";
 
+  var startPageHref = window.location.href;
+
   /**
    * Prototype for Lupapiste Single Page Apps.
    *
@@ -77,7 +79,7 @@ var LUPAPISTE = LUPAPISTE || {};
 
       hub.send("page-load", { pageId: pageId, pagePath: pagePath, currentHash: "!/" + self.currentHash, previousHash: "!/" + self.previousHash });
 
-      if (self.previousHash !== undefined) {
+      if (self.previousHash !== self.currentHash) {
         var previousPageId = self.previousHash.split("/")[0];
         hub.send("page-unload", { pageId: previousPageId, currentHash: "!/" + self.currentHash, previousHash: "!/" + self.previousHash });
       }
@@ -200,16 +202,27 @@ var LUPAPISTE = LUPAPISTE || {};
 
       $(document.documentElement).keyup(function(event) { hub.send("keyup", event); });
 
-      var logoHref = window.location.href;
-      if (self.startPage && self.startPage.charAt(0) !== "/") {
-        logoHref = "#!/" + self.startPage;
+      function openStartPage() {
+        if (self.startPage && self.startPage.charAt(0) !== "/") {
+          if (self.currentHash === self.startPage) {
+            // trigger start page re-rendering
+            self.previousHash = self.currentHash;
+            self.openPage([self.startPage]);
+          } else {
+            // open normally
+            window.location.hash = "!/" + self.startPage;
+          }
+        } else {
+          // fallback
+          window.location.href = startPageHref;
+        }
       }
 
       var model = {
         languages: loc.getSupportedLanguages(),
         currentLanguage: loc.getCurrentLanguage(),
         changeLanguage: function(lang) {hub.send("change-lang", { lang: lang });},
-        logoHref: logoHref,
+        openStartPage: openStartPage,
         showUserMenu: self.showUserMenu
       };
 
