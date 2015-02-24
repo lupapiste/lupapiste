@@ -29,7 +29,7 @@
 (defn- write-attachments [attachments output-dir]
   (doseq [attachment attachments]
     (let [file-id (:fileId attachment)
-          filename (get-file-name-on-server file-id (:filename attachment))
+          filename (:filename attachment)
           attachment-file (mongo/download file-id)
           content (:content attachment-file)
           attachment-file-name (str output-dir "/" filename)
