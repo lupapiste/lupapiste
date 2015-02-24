@@ -20,15 +20,6 @@
     :private {:password "$2a$10$WHPur/hjvaOTlm41VFjtjuPI5hBoIMm8Y1p2vL4KqRi7QUvHMS1Ie"
               :apikey "5087ba34c2e667024fbd5992"}}
 
-   ;; Admin
-   {:id "505718b0aa24a1c901e6ba24"
-    :enabled true
-    :firstName "Judge"
-    :lastName "Dread"
-    :email "judge.dread@example.com"
-    :role "admin"
-    :private {:apikey "505718b0aa24a1c901e6ba24"}}
-
    ;; ETL export user: solita-etl / solita-etl
    {:id "solita-etl"
     :username "solita-etl"
