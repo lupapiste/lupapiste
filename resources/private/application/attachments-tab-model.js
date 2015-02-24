@@ -76,7 +76,7 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel) {
           return self.sendUnsentAttachmentsToBackingSystem();
         },
         visibleFunc: function (rawAttachments) {
-          return !unsentAttachmentFound(rawAttachments);
+          return unsentAttachmentFound(rawAttachments);
         }
       }
   };
