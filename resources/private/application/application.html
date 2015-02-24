@@ -460,15 +460,24 @@
             <span class="icon stamped"></span>
             <span data-bind="ltext: 'attachment.stamped'"></span>
           </div>
+          <div class="attachment-legend">
+            <span class="icon verdict-attachment"></span>
+            <span data-bind="ltext: 'attachment.verdict-attachment'"></span>
+          </div>
 
 
           <div data-bind="if: preAttachmentsByOperation().length == 0 && postAttachmentsByOperation().length == 0">
             <i data-bind="ltext: 'application.attachmentsEmpty'" data-test-id="application-attachments-no-attachments"></i>
           </div>
 
-          <div class="attachment-actions" data-bind="visible: (!$root.application.inPostVerdictState() && preAttachmentsByOperation().length > 0)
-                                                              || ($root.application.inPostVerdictState() && postAttachmentsByOperation().length > 0),
-                                                     template: {name: 'attachment-actions-template'}"></div>
+          <div class="attachment-actions"
+               data-bind="visible: (!$root.application.inPostVerdictState() && preAttachmentsByOperation().length > 0) ||
+                                   ($root.application.inPostVerdictState() && postAttachmentsByOperation().length > 0),
+                          template: {name: 'attachment-actions-template',
+                                     data: {appModel: $data.appModel,
+                                            attachmentsOperation: $data.attachmentsOperation,
+                                            attachmentsOperations: $data.attachmentsOperations,
+                                            testId: 'upper'}}"></div>
 
           <div>
             <div data-bind="if: postAttachmentsByOperation().length > 0" data-test-id="application-post-attachments-table">
@@ -481,7 +490,12 @@
             </div>
             <!-- /ko -->
 
-            <div class="attachment-actions" data-bind="template: {name: 'attachment-actions-template'}"></div>
+            <div class="attachment-actions"
+                 data-bind="template: {name: 'attachment-actions-template',
+                                       data: {appModel: $data.appModel,
+                                              attachmentsOperation: $data.attachmentsOperation,
+                                              attachmentsOperations: $data.attachmentsOperations,
+                                              testId: 'lower'}}"></div>
 
             <!-- ko if: $root.application.inPostVerdictState() -->
             <div data-bind="if: preAttachmentsByOperation().length > 0" data-test-id="application-pre-attachments-table">
@@ -868,12 +882,12 @@
             <span data-bind="ltext: 'verdict.fetch.button'"></span>
           </button>
 
-          <button
-            data-bind="click: $root.verdictAttachmentPrintsOrderModel.openDialog,
-                       disable: $root.verdictModel.processing,
-                       visible: $root.authorization.ok('order-verdict-attachment-prints')"
-            class="btn btn-primary modal"
-            data-test-id="test-order-attachment-prints">
+          <button data-bind="click: $root.verdictAttachmentPrintsOrderModel.openDialog,
+                             enable: !$root.verdictModel.processing() && $root.verdictAttachmentPrintsOrderModel.attachments().length,
+                             visible: $root.authorization.ok('order-verdict-attachment-prints'),
+                             attr: {'title': $root.verdictAttachmentPrintsOrderModel.printsOrderButtonTitle}"
+                  class="btn btn-primary modal"
+                  data-test-id="test-order-attachment-prints">
             <em data-bind="visible: $root.verdictModel.pending" class="button-loader"></em>
             <span data-bind="ltext: 'verdict.orderAttachmentPrints.button'"></span>
           </button>
@@ -1112,7 +1126,19 @@
           <div>
             <table data-bind="foreach: taskGroups" class="tasks">
               <thead>
-                <tr><td colspan="3"><h2 data-bind="text: name" style="padding-top:1em"></h2></td></tr>
+                <tr>
+                  <td colspan="3">
+                    <h2 data-bind="text: name" style="padding-top:1em"></h2>
+                    <div class="task-legend">
+                      <span class="ok icon"></span>
+                      <span data-bind="ltext: 'task.ok.title'"></span>
+                    </div>
+                    <div class="task-legend">
+                      <span class="missing icon"></span>
+                      <span data-bind="ltext: 'task.missing.title'"></span>
+                    </div>
+                  </td>
+                </tr>
                 <tr>
                   <th data-bind="ltext: 'application.taskState'"></th>
                   <th data-bind="ltext: 'application.taskDisplayName'"></th>

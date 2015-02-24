@@ -86,16 +86,16 @@
                             {:name "postinumero" :type :string :subtype :zip :size "s" :required true}
                             {:name "postitoimipaikannimi" :type :string :subtype :vrk-address :size "m" :required true}]}])
 
-(def full-osoite [{:name "osoite"
+(def rakennuksen-osoite [{:name "osoite"
                    :type :group
                    :body [{:name "kunta" :type :string}
                           {:name "lahiosoite" :type :string}
                           {:name "osoitenumero" :type :string :subtype :number :min 0 :max 9999}
                           {:name "osoitenumero2" :type :string}
-                          {:name "jakokirjain" :type :string :subtype :letter :case :lower :max-len 1 :size "s"}
-                          {:name "jakokirjain2" :type :string :size "s"}
-                          {:name "porras" :type :string :subtype :letter :case :upper :max-len 1 :size "s"}
-                          {:name "huoneisto" :type :string :size "s"}
+                          {:name "jakokirjain" :type :string :subtype :letter :case :lower :max-len 1 :size "s" :hidden true :readonly true}
+                          {:name "jakokirjain2" :type :string :size "s" :hidden true :readonly true}
+                          {:name "porras" :type :string :subtype :letter :case :upper :max-len 1 :size "s" :hidden true :readonly true}
+                          {:name "huoneisto" :type :string :size "s" :hidden true :readonly true}
                           {:name "postinumero" :type :string :subtype :zip :size "s"}
                           {:name "postitoimipaikannimi" :type :string :size "m"}]}])
 
@@ -688,19 +688,19 @@
 (def olemassaoleva-rakennus (body
                               rakennuksen-valitsin
                               rakennuksen-omistajat
-                              full-osoite
+                              rakennuksen-osoite
                               rakennuksen-tiedot))
 
 (def olemassaoleva-rakennus-ei-huoneistoja (body
                                              rakennuksen-valitsin
                                              rakennuksen-omistajat
-                                             full-osoite
+                                             rakennuksen-osoite
                                              rakennuksen-tiedot-ilman-huoneistoa))
 
 (def olemassaoleva-rakennus-ei-huoneistoja-ei-ominaisuus-tietoja
   (body rakennuksen-valitsin
         rakennuksen-omistajat
-        full-osoite
+        rakennuksen-osoite
         rakennuksen-tiedot-ilman-huoneistoa-ilman-ominaisuustietoja))
 
 

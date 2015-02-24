@@ -20,15 +20,18 @@
    :roles [:applicant :authority]
    :states action/all-application-states}
   [{:keys [created user application] :as command}]
-  (let [foreman-app (application/do-create-application
-                      (assoc command :data {:operation "tyonjohtajan-nimeaminen-v2"
-                                            :x (-> application :location :x)
-                                            :y (-> application :location :y)
-                                            :address (:address application)
-                                            :propertyId (:propertyId application)
-                                            :municipality (:municipality application)
-                                            :infoRequest false
-                                            :messages []}))
+  (let [original-open? (util/pos? (:opened application))
+        foreman-app (-> (application/do-create-application
+                         (assoc command :data {:operation "tyonjohtajan-nimeaminen-v2"
+                                               :x (-> application :location :x)
+                                               :y (-> application :location :y)
+                                               :address (:address application)
+                                               :propertyId (:propertyId application)
+                                               :municipality (:municipality application)
+                                               :infoRequest false
+                                               :messages []}))
+                      (assoc :state (if original-open? :open :draft))
+                      (assoc :opened (if original-open? created nil)))
 
         task                 (util/find-by-id taskId (:tasks application))
 
