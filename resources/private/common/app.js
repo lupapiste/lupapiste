@@ -18,12 +18,12 @@ var LUPAPISTE = LUPAPISTE || {};
     self.defaultTitle = document.title;
 
     self.startPage = startPage;
-    self.currentPage = undefined;
+    self.currentPage = "";
     self.session = undefined;
     self.allowAnonymous = allowAnonymous;
     self.showUserMenu = (showUserMenu !== undefined) ? showUserMenu : !allowAnonymous;
-    self.previousHash = undefined;
-    self.currentHash = undefined;
+    self.previousHash = "";
+    self.currentHash = "";
 
     // Global models
     self.models = {};
