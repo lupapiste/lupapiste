@@ -633,7 +633,7 @@
 
 
                       ;; Kuopio R, has case management (asianhallinta) enabled
-                      {:_id "297-R"
+                      {:id "297-R"
                        :name {:fi "Kuopio rakennusvalvonta" :sv "Kuopio byggnadstillsyn"}
                        :scope [{:open-inforequest-email nil
                                 :open-inforequest false
