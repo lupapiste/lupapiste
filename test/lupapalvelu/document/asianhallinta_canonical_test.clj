@@ -3,10 +3,12 @@
             [lupapalvelu.document.asianhallinta_canonical :as ah]
             [lupapalvelu.document.canonical-test-common :as ctc]
             [lupapalvelu.document.tools :as tools]
+            [lupapalvelu.i18n :as i18n]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [lupapalvelu.document.poikkeamis-canonical-test :as poikkeus-test]
-            [sade.strings :as ss]))
+            [sade.strings :as ss]
+            [sade.util :as util]))
 
 (fl/facts* "UusiAsia canonical"
   (let [canonical (ah/application-to-asianhallinta-canonical poikkeus-test/poikkari-hakemus "fi") => truthy
@@ -73,10 +75,17 @@
 
       (fact "VireilletuloPvm is XML date"
         (get-in canonical [:UusiAsia :VireilletuloPvm]) => #"\d{4}-\d{2}-\d{2}")
-      (fact "Liitteet TODO" )
+      (fact "VireilletuloPvm same as from doc"
+        (get-in canonical [:UusiAsia :VireilletuloPvm]) => (util/to-xml-date (:submitted application)))
+
       (fact "Toimenpiteet"
-        (let [op (first (get-in canonical [:UusiAsia :Toimenpiteet :Toimenpide]))]
-          (keys op) => (just [:ToimenpideTunnus :ToimenpideTeksti])))
+        (let [ops (get-in canonical [:UusiAsia :Toimenpiteet :Toimenpide])
+              op (first ops)]
+          (count ops) => 1
+          (keys op) => (just [:ToimenpideTunnus :ToimenpideTeksti])
+          (:ToimenpideTunnus op) => (get-in application [:operations 0 :name])
+          (:ToimenpideTeksti op) => (i18n/localize "fi" (str "operations." (get-in application [:operations 0 :name])))))
+
       (fact "Asiointikieli"
         (get-in canonical [:UusiAsia :Asiointikieli]) => "fi")
       (fact "Sijainti is correct"
