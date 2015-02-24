@@ -643,8 +643,8 @@
                                 :permitType "R"
                                 :caseManagement {:ftpUser "dev_ah_kuopio" :enabled true :version "1.1"}}]
                        :links [{:name
-                                {:fi "Rakentamisen sähköiset lupapalvelut Kuopiossa"
-                                 :sv "Rakentamisen sähköiset lupapalvelut Kuopiossa"}
+                                {:fi "Rakentamisen s\u00E4hk\u00F6iset lupapalvelut Kuopiossa"
+                                 :sv "Rakentamisen s\u00E4hk\u00F6iset lupapalvelut Kuopiossa"}
                                 :url
                                 "http://www.kuopio.fi/web/tontit-ja-rakentaminen/rakentamisen-sahkoiset-lupapalvelut"}
                                {:name
