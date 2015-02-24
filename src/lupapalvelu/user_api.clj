@@ -65,11 +65,13 @@
 ;; ==============================================================================
 ;;
 
+(defn- reset-link [lang token]
+  (str (env/value :host) "/app/" lang "/welcome#!/setpw/" token))
+
 ;; Emails
 (def- base-email-conf
   {:model-fn      (fn [{{token :token} :data} conf recipient]
-                    {:link-fi (str (env/value :host) "/app/fi/welcome#!/setpw/" token)
-                     :link-sv (str (env/value :host) "/app/sv/welcome#!/setpw/" token)})})
+                {:link-fi (reset-link "fi" token), :link-sv (reset-link "sv" token)})})
 
 (notifications/defemail :invite-authority
   (assoc base-email-conf :subject-key "authority-invite.title" :recipients-fn notifications/from-user))
@@ -325,6 +327,14 @@
         (Thread/sleep 2000)
         (fail :mypage.old-password-does-not-match)))))
 
+(defn reset-password [{:keys [email role] :as user}]
+  (assert (and email role (not= "dummy" role)) "Can't reset dummy user's password")
+
+  (let [token (token/make-token :password-reset nil {:email email} :ttl ttl/reset-password-token-ttl)]
+    (infof "password reset request: email=%s, token=%s" email token)
+    (notifications/notify! :reset-password {:data {:email email :token token}})
+    token))
+
 (defcommand reset-password
   {:parameters    [email]
    :roles [:anonymous]
@@ -332,17 +342,26 @@
                       action/email-validator]
    :notified      true}
   [_]
-  (let [email (user/canonize-email email)]
-    (infof "Password reset request: email=%s" email)
-    (let [user (mongo/select-one :users {:email email})]
+  (let [user (user/get-user-by-email email) ]
       (if (and user (not= "dummy" (:role user)))
-       (let [token (token/make-token :password-reset nil {:email email} :ttl ttl/reset-password-token-ttl)]
-         (infof "password reset request: email=%s, token=%s" email token)
-         (notifications/notify! :reset-password {:data {:email email :token token}})
+      (do
+        (reset-password user)
          (ok))
        (do
          (warnf "password reset request: unknown email: email=%s" email)
-         (fail :error.email-not-found))))))
+        (fail :error.email-not-found)))))
+
+(defcommand admin-reset-password
+  {:parameters    [email]
+   :roles [:admin]
+   :input-validators [(partial action/non-blank-parameters [:email])
+                      action/email-validator]
+   :notified      true}
+  [_]
+  (let [user (user/get-user-by-email email) ]
+    (if (and user (not= "dummy" (:role user)))
+      (ok :link (reset-link "fi" (reset-password user)))
+      (fail :error.email-not-found))))
 
 (defmethod token/handle-token :password-reset [{data :data} {password :password}]
   (let [email (user/canonize-email (:email data))]
