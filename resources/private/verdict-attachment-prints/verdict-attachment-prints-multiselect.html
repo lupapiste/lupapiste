@@ -60,8 +60,8 @@
         <table class="table attachments-template-table">
           <tbody data-bind="foreach: $data">
             <tr class="attachment-group-header" data-bind="attr: {'data-test-id': $data.groupName}">
-              <td data-bind="text: name" colspan="4" data-test-id="attachment-group-header-text"></td>
-              <td colspan="3" class="attachment-group-select">
+              <td data-bind="text: name" colspan="5" data-test-id="attachment-group-header-text"></td>
+              <td colspan="2" class="attachment-group-select">
                 <!-- ko ifnot: isGroupSelected -->
                 <a href="#" data-bind="ltext: 'attachments.group.select', click: $parents[1].toggleGroupSelect"
                             data-test-id="attachments-group-select"></a>
