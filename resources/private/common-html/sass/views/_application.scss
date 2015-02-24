@@ -486,8 +486,11 @@
   }
 }
 
-.attachment-actions {
+.attachments-actions {
   margin-bottom: $marginL;
+  h3 {
+    margin-top: 12px;
+  }
 }
 
 .parties-list {

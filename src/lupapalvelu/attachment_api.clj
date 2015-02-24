@@ -81,8 +81,7 @@
 (defcommand move-attachments-to-backing-system
   {:parameters [id lang]
    :roles      [:authority]
-   :pre-checks [(partial if-not-authority-states-must-match #{:verdictGiven})
-                (permit/validate-permit-type-is permit/R)]
+   :pre-checks [(permit/validate-permit-type-is permit/R)]
    :states     [:verdictGiven :constructionStarted]
    :description "Sends such attachments to backing system that are not yet sent."}
   [{:keys [created application] :as command}]
