@@ -71,11 +71,12 @@
       (assoc-in maksaja-map [:Henkilo] (ua-get-henkilo data)))))
 
 (defn- ua-get-metatiedot [attachment]
-  (let [op-name (get-in attachment [:op :name])]
-    (remove nil? [{:Avain "type-group" :Arvo (get-in attachment [:type :type-group])}
-                  {:Avain "type-id"    :Arvo (get-in attachment [:type :type-id])}
-                  (when op-name
-                    {:Avain "operation" :Arvo op-name})])))
+  (let [op-name (get-in attachment [:op :name])
+        type-group (get-in attachment [:type :type-group])
+        type-id (get-in attachment [:type :type-id])]
+    (remove nil? [(when type-group {:Avain "type-group" :Arvo type-group})
+                  (when type-id    {:Avain "type-id"    :Arvo type-id})
+                  (when op-name    {:Avain "operation" :Arvo op-name})])))
 
 (defn- ua-get-toimenpide [operation lang]
   (util/strip-nils
