@@ -26,7 +26,7 @@
     (pdf-export/generate submitted-application lang submitted-file)
     (pdf-export/generate application lang current-file)))
 
-(defn write-attachments [attachments output-dir]
+(defn- write-attachments [attachments output-dir]
   (doseq [attachment attachments]
     (let [file-id (:fileId attachment)
           filename (get-file-name-on-server file-id (:filename attachment))
