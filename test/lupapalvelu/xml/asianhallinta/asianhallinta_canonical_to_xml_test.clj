@@ -28,6 +28,7 @@
                                    :fileId "file123"
                                    :filename "valtakirja.pdf"
                                    :contentType "application/pdf"}
+                   :op {:name "poikkeaminen"}
                    :modified 1424248442767}
                   {:id :attachment3
                    :type {:type-group "paapiirustus"
@@ -56,22 +57,22 @@
 
         (fact "Maksaja is Yritys, Henkilo is not present"
           (let [maksaja (sxml/select xml-parsed [:UusiAsia :Maksaja :Yritys])
-                maksaja-doc (first (:maksaja docs))]
+                maksaja-data (:data (first (:maksaja docs)))]
 
             maksaja =not=> empty?
             (sxml/select xml-parsed [:UusiAsia :Maksaja :Henkilo]) => empty?
 
             (fact "<Yritys> fields are same as in application"
-              (sxml/get-text maksaja [:Nimi]) => (get-in maksaja-doc [:data :yritys :yritysnimi])
-              (sxml/get-text maksaja [:Ytunnus]) => (get-in maksaja-doc [:data :yritys :liikeJaYhteisoTunnus])
-              (sxml/get-text maksaja [:Yhteystiedot :Jakeluosoite]) => (get-in maksaja-doc [:data :yritys :osoite :katu])
-              (sxml/get-text maksaja [:Yhteystiedot :Postinumero]) => (get-in maksaja-doc [:data :yritys :osoite :postinumero])
-              (sxml/get-text maksaja [:Yhteystiedot :Postitoimipaikka]) => (get-in maksaja-doc [:data :yritys :osoite :postitoimipaikannimi])
-              (sxml/get-text maksaja [:Yhteyshenkilo :Etunimi]) => (get-in maksaja-doc [:data :yritys :yhteyshenkilo :henkilotiedot :etunimi])
-              (sxml/get-text maksaja [:Yhteyshenkilo :Sukunimi]) => (get-in maksaja-doc [:data :yritys :yhteyshenkilo :henkilotiedot :sukunimi])
-              (sxml/get-text maksaja [:Yhteyshenkilo :Yhteystiedot :Puhelinnumero]) => (get-in maksaja-doc [:data :yritys :yhteyshenkilo :yhteystiedot :puhelin])
-              (sxml/get-text maksaja [:Yhteyshenkilo :Yhteystiedot :Email]) => (get-in maksaja-doc [:data :yritys :yhteyshenkilo :yhteystiedot :email])
-              (sxml/get-text maksaja [:Yhteyshenkilo :Yhteystiedot :Email]) => (get-in maksaja-doc [:data :yritys :yhteyshenkilo :yhteystiedot :email]))))
+              (sxml/get-text maksaja [:Nimi]) => (get-in maksaja-data [:yritys :yritysnimi])
+              (sxml/get-text maksaja [:Ytunnus]) => (get-in maksaja-data [:yritys :liikeJaYhteisoTunnus])
+              (sxml/get-text maksaja [:Yhteystiedot :Jakeluosoite]) => (get-in maksaja-data [:yritys :osoite :katu])
+              (sxml/get-text maksaja [:Yhteystiedot :Postinumero]) => (get-in maksaja-data [:yritys :osoite :postinumero])
+              (sxml/get-text maksaja [:Yhteystiedot :Postitoimipaikka]) => (get-in maksaja-data [:yritys :osoite :postitoimipaikannimi])
+              (sxml/get-text maksaja [:Yhteyshenkilo :Etunimi]) => (get-in maksaja-data [:yritys :yhteyshenkilo :henkilotiedot :etunimi])
+              (sxml/get-text maksaja [:Yhteyshenkilo :Sukunimi]) => (get-in maksaja-data [:yritys :yhteyshenkilo :henkilotiedot :sukunimi])
+              (sxml/get-text maksaja [:Yhteyshenkilo :Yhteystiedot :Puhelinnumero]) => (get-in maksaja-data [:yritys :yhteyshenkilo :yhteystiedot :puhelin])
+              (sxml/get-text maksaja [:Yhteyshenkilo :Yhteystiedot :Email]) => (get-in maksaja-data [:yritys :yhteyshenkilo :yhteystiedot :email])
+              (sxml/get-text maksaja [:Yhteyshenkilo :Yhteystiedot :Email]) => (get-in maksaja-data [:yritys :yhteyshenkilo :yhteystiedot :email]))))
         (fact "Liitteet elements"
           (let [liitteet (sxml/select xml-parsed [:UusiAsia :Liitteet])]
             liitteet => seq))))
