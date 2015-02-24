@@ -27,7 +27,7 @@
       (fact "HakemusTunnus is LP-753-2013-00001" (get-in canonical [:UusiAsia :HakemusTunnus]) => "LP-753-2013-00001")
       (fact "Kuvaus" (get-in canonical [:UusiAsia :Kuvaus]) => "S\u00f6derkullantie 146")
       (fact "Kuntanumero" (get-in canonical [:UusiAsia :Kuntanumero]) => "753")
-      (fact "First Hakija of Hakijat has Henkilo" (keys (first (get-in canonical [:UusiAsia :Hakijat :Hakija]))) => (just [:Henkilo]))
+
       (fl/facts* "Hakija"
         (let [hakijat (get-in canonical [:UusiAsia :Hakijat :Hakija]) => truthy
               data    (tools/unwrapped (get-in application [:documents 0 :data :henkilo])) => truthy
@@ -41,21 +41,36 @@
           (fact "Email" (get-in henkilo [:Yhteystiedot :Email]) => (get-in data [:yhteystiedot :email]))
           (fact "Puhelinnumero" (get-in henkilo [:Yhteystiedot :Puhelinnumero]) => (get-in data [:yhteystiedot :puhelin]))
           (fact "Hetu" (get-in henkilo [:Henkilotunnus]) => (get-in data [:henkilotiedot :hetu]))))
+
       (facts "Maksaja"
-        (fact "Maksaja is yritys, and has Laskuviite and Verkkolaskutustieto"
-          (keys (get-in canonical [:UusiAsia :Maksaja])) => (just [:Yritys :Laskuviite :Verkkolaskutustieto]))
-        (fact "Maksaja is not Henkilo"
-          (keys (get-in canonical [:UusiAsia :Maksaja])) =not=> (contains [:Henkilo]))
-        (fact "Yritys keys"
-          (keys (get-in canonical [:UusiAsia :Maksaja :Yritys])) => (just [:Nimi :Ytunnus :Yhteystiedot :Yhteyshenkilo]))
-        (fact "Yhteystiedot keys"
-          (keys (get-in canonical [:UusiAsia :Maksaja :Yritys :Yhteystiedot])) => (just [:Jakeluosoite :Postinumero :Postitoimipaikka]))
-        (fact "Yhteyshenkilo keys"
-          (keys (get-in canonical [:UusiAsia :Maksaja :Yritys :Yhteyshenkilo])) => (just [:Etunimi :Sukunimi :Yhteystiedot]))
-        (fact "Yhteyshenkilo yhteystiedot keys"
-          (keys (get-in canonical [:UusiAsia :Maksaja :Yritys :Yhteyshenkilo :Yhteystiedot])) => (just [:Email :Puhelinnumero]))
-        (fact "Verkkolaskutustieto keys is nil"
-          (keys (get-in canonical [:UusiAsia :Maksaja :Verkkolaskutustieto])) => nil))
+        (let [maksaja (get-in canonical [:UusiAsia :Maksaja])
+              data    (tools/unwrapped (get-in application [:documents 4 :data]))
+              yritys  (:Yritys maksaja)]
+          (fact "Maksaja is yritys, and has Laskuviite and Verkkolaskutustieto"
+            (keys maksaja) => (just [:Yritys :Laskuviite]))
+          (fact "Maksaja is not Henkilo"
+            (keys keys) =not=> (contains [:Henkilo]))
+          (facts "Yritys"
+            (fact "Nimi" (:Nimi yritys) => (get-in data [:yritys :yritysnimi]))
+            (fact "Ytunnus" (:Ytunnus yritys) => (get-in data [:yritys :liikeJaYhteisoTunnus]))
+            (fact "Jakeluosoite" (get-in yritys [:Yhteystiedot :Jakeluosoite]) => (get-in data [:yritys :osoite :katu]))
+            (fact "Postinumero" (get-in yritys [:Yhteystiedot :Postinumero]) => (get-in data [:yritys :osoite :postinumero]))
+            (fact "Postitoimipaikka" (get-in yritys [:Yhteystiedot :Postitoimipaikka]) => (get-in data [:yritys :osoite :postitoimipaikannimi]))
+            (fact "Yhteyshenkilo Etunimi" (get-in yritys [:Yhteyshenkilo :Etunimi]) => (get-in data [:yritys :yhteyshenkilo :henkilotiedot :etunimi]))
+            (fact "Yhteyshenkilo Sukunimi" (get-in yritys [:Yhteyshenkilo :Sukunimi]) => (get-in data [:yritys :yhteyshenkilo :henkilotiedot :sukunimi]))
+            (fact "Yhteyshenkilo Email" (get-in yritys [:Yhteyshenkilo :Yhteystiedot :Email]) => (get-in data [:yritys :yhteyshenkilo :yhteystiedot :email]))
+            (fact "Yhteyshenkilo Puhelinnumero" (get-in yritys [:Yhteyshenkilo :Yhteystiedot :Puhelinnumero]) => (get-in data [:yritys :yhteyshenkilo :yhteystiedot :puhelin]))
+            (fact "Laskuviite" (:Laskuviite maksaja) => (:laskuviite data))
+            (fact "Verkkolaskutustieto does not exists" (:Verkkolaskutustieto maksaja) => falsey))
+          (fact "Yhteystiedot keys"
+            (keys (get-in canonical [:UusiAsia :Maksaja :Yritys :Yhteystiedot])) => (just [:Jakeluosoite :Postinumero :Postitoimipaikka]))
+          (fact "Yhteyshenkilo keys"
+            (keys (get-in canonical [:UusiAsia :Maksaja :Yritys :Yhteyshenkilo])) => (just [:Etunimi :Sukunimi :Yhteystiedot]))
+          (fact "Yhteyshenkilo yhteystiedot keys"
+            (keys (get-in canonical [:UusiAsia :Maksaja :Yritys :Yhteyshenkilo :Yhteystiedot])) => (just [:Email :Puhelinnumero]))
+          (fact "Verkkolaskutustieto keys is nil"
+            (keys (get-in canonical [:UusiAsia :Maksaja :Verkkolaskutustieto])) => nil)))
+
       (fact "VireilletuloPvm is XML date"
         (get-in canonical [:UusiAsia :VireilletuloPvm]) => #"\d{4}-\d{2}-\d{2}")
       (fact "Liitteet TODO" )
