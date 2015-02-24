@@ -55,18 +55,18 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function() {
     a.contents = a.contents || loc(["attachmentType", a.type["type-group"], a.type["type-id"]]);
     a.orderAmount = ko.observable("2");
     return a;
-  }
+  };
 
   var printableAttachment = function(a) {
     return a.forPrinting && a.versions && a.versions.length;
-  }
+  };
 
   var normalizeAttachments = function(attachments) {
     return _.map(attachments, function(a) {
       a.amount = a.orderAmount();
       return _.pick(a, ["forPrinting", "amount", "contents", "type", "versions", "filename"]);
     });
-  }
+  };
 
   // Open the dialog
 
