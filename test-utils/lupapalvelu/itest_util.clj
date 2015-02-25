@@ -62,6 +62,10 @@
 (def raktark-jarvenpaa (apikey-for "rakennustarkastaja@jarvenpaa.fi"))
 (def jarvenpaa-muni    (muni-for "rakennustarkastaja@jarvenpaa.fi"))
 (def arto       (apikey-for "arto"))
+(def kuopio     (apikey-for "kuopio-r"))
+(def velho      (apikey-for "velho"))
+(def velho-muni (muni-for "velho"))
+(def velho-id   (id-for "velho"))
 
 (defn server-address [] (System/getProperty "target_server" "http://localhost:8000"))
 

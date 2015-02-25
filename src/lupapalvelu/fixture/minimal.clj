@@ -130,7 +130,8 @@
     :street "Katuosoite 2 a 4"
     :zip "33456"
     :city "Kuopio"
-    :private {:password "$2a$10$me2UOXOUfEbseJeLUBde8u2rlqOwHuqxbFT00q70QEvTpskHKol2m"}}
+    :private {:password "$2a$10$me2UOXOUfEbseJeLUBde8u2rlqOwHuqxbFT00q70QEvTpskHKol2m"
+              :apikey   "e1vshYravGWKA1QXL3NeWMmyzzBJmcgq6IUqKZmh"}}
 
    ;; Kuopio R-paakayttaja:  kuopio-r / kuopio
 
@@ -142,11 +143,12 @@
     :username "kuopio-r"
     :street "Paapankuja 12"
     :phone "0102030405"
-    :email "kuopio-r"
+    :email "kuopio-r@kuopio.fi"
     :role "authorityAdmin"
     :zip "10203"
     :organizations ["297-R"]
-    :private {:password "$2a$10$YceveAiQXbeUs65B4FZ6lez/itf0UEXooHcZlygI2WnQGhF0dJ1jO"}}
+    :private {:password "$2a$10$YceveAiQXbeUs65B4FZ6lez/itf0UEXooHcZlygI2WnQGhF0dJ1jO"
+              :apikey   "lhIqT1YwOMH8HuiCGcjBtGggfeRaxZL5OUNd3r4u"}}
 
    ;; Sipoo
 
