@@ -6,6 +6,7 @@
             [lupapalvelu.document.asianhallinta_canonical :as ah]
             [lupapalvelu.document.canonical-common :as common]
             [lupapalvelu.document.poikkeamis-canonical-test :as poikkeus-test]
+            [lupapalvelu.document.canonical-test-common :as ctc]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.xml.asianhallinta.uusi_asia_mapping :as ua-mapping]
             [lupapalvelu.xml.disk-writer :as writer]
@@ -168,3 +169,36 @@
           (sxml/get-text xml-parsed [:UusiAsia :Kiinteistotunnus]) => (util/to-human-readable-property-id (:propertyId application)))))
     ; TODO check xml elements, ie deep elements, document values with _selected are correct in xml etc..
     ))
+
+(fl/facts* "Application with two multiple documents (Hakija, Maksaja)"
+  (let [application    (assoc poikkeus-test/poikkari-hakemus :attachments attachments)
+        henkilomaksaja (assoc-in ctc/henkilomaksaja [:schema-info :name] "maksaja")
+        application    (assoc application :documents (conj (:documents application) ctc/yrityshakija henkilomaksaja))
+        canonical      (ah/application-to-asianhallinta-canonical application "fi") => truthy
+        canonical      (assoc-in canonical
+                         [:UusiAsia :Liitteet :Liite]
+                         (ah/get-attachments-as-canonical application (get-begin-of-link)))
+        schema-version "ah-1.1"
+        mapping        (ua-mapping/get-mapping (ss/suffix schema-version "-"))
+        xml            (element-to-xml canonical mapping) => truthy
+        permit-type    (:permitType application)
+        docs           (common/documents-by-type-without-blanks (tools/unwrapped application)) => truthy
+        xml-parsed     (reader/strip-xml-namespaces (sxml/parse (xml/indent-str xml))) => truthy]
+
+    (fact "Hakija"
+      (let [hakijat (sxml/select xml-parsed [:UusiAsia :Hakijat :Hakija])
+            hakijat-data (:hakija docs)]
+        (fact "Corrent count" (count hakijat) => (count hakijat-data))
+        (fact "First Hakija is Henkilo, second is Yritys"
+          (-> hakijat first :content first :tag) => :Henkilo
+          (-> hakijat second :content first :tag) => :Yritys)
+        (fact "Yritys has Yhteyshenkilo"
+          (sxml/get-text hakijat [:Hakija :Yritys :Yhteyshenkilo]) => not-empty)))
+
+    (fact "Only one Maksaja in XML"
+      (count (:maksaja docs)) => 2
+      (count (sxml/select xml-parsed [:UusiAsia :Maksaja])) => 1)
+
+    (fact "Maksaja is Yritys 1743842-0 (first)"
+      (sxml/get-text xml-parsed [:UusiAsia :Maksaja :Yritys :Ytunnus]) => (get-in docs [:maksaja 0 :data :yritys :liikeJaYhteisoTunnus]))))
+
