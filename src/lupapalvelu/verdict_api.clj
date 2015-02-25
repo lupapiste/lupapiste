@@ -159,19 +159,26 @@
       {:verdicts {$elemMatch {:id verdictId}}}
       {$set {(str "verdicts.$") verdict}})))
 
+(defn- publish-verdict [{timestamp :created :as command} {:keys [id kuntalupatunnus]}]
+  (if-not (ss/blank? kuntalupatunnus)
+    (do
+      (update-application command
+        {:verdicts {$elemMatch {:id id}}}
+        {$set {:modified timestamp
+               :state    :verdictGiven
+               :verdicts.$.draft false}})
+      (ok))
+    (fail :error.no-verdict-municipality-id)))
+
 (defcommand publish-verdict
   {:parameters [id verdictId]
    :states     [:submitted :complement-needed :sent :verdictGiven]
    :notified   true
    :on-success (notify :application-verdict)
    :roles      [:authority]}
-  [{:keys [application created] :as command}]
+  [{:keys [application] :as command}]
   (if-let [verdict (find-verdict application verdictId)]
-    (update-application command
-      {:verdicts {$elemMatch {:id verdictId}}}
-      {$set {:modified created
-             :state    :verdictGiven
-             :verdicts.$.draft false}})
+    (publish-verdict command verdict)
     (fail :error.unknown)))
 
 (defcommand delete-verdict
