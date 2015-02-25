@@ -26,7 +26,7 @@
     (query pena :users) =not=> ok?)
 
   ; It's not nice to test the number of users, but... well, this is relly easy:
-  (fact (-> (query admin :users :role "admin") :users count) => 2)
+  (fact (-> (query admin :users :role "admin") :users count) => 1)
   (fact (-> (query admin :users :organization "753-R") :users count) => 3)
   (fact (-> (query admin :users :role "authority" :organization "753-R") :users count) => 2))
 
@@ -65,7 +65,7 @@
   (fact "newly created authority receives mail"
     (let [email (last-email)]
       (:to email) => "foo@example.com"
-      (:subject email) => "Lupapiste.fi: Kutsu Lupapiste.fi palvelun viranomaisk\u00e4ytt\u00e4j\u00e4ksi"
+      (:subject email) => "Lupapiste.fi: Kutsu Lupapiste-palvelun viranomaisk\u00e4ytt\u00e4j\u00e4ksi"
       (get-in email [:body :plain]) => (contains "/app/fi/welcome#!/setpw/"))))
 
 ;;
@@ -107,7 +107,7 @@
 
     (let [email (last-email)]
       (:to email) => (contains "tonja.sibbo@sipoo.fi")
-      (:subject email) => "Lupapiste.fi: Kutsu Lupapiste.fi palvelun viranomaisk\u00e4ytt\u00e4j\u00e4ksi"
+      (:subject email) => "Lupapiste.fi: Kutsu Lupapiste-palvelun viranomaisk\u00e4ytt\u00e4j\u00e4ksi"
       (get-in email [:body :plain]) => (contains "/app/fi/welcome#!/setpw/"))))
 
 

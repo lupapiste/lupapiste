@@ -99,7 +99,7 @@ var util = (function($) {
 
   function autofocus(baseElem$) {
     var base$ = baseElem$ || $("body");
-    return base$.find("[autofocus]:visible:first").focus();
+    return base$.find("[autofocus]:enabled:visible:first").focus();
   }
 
   function isNum(s) {
