@@ -328,7 +328,7 @@
          (check-sent-reminder-email
            "pena@example.com"
            "Lupapiste.fi: Naapurikuja 3 - Muistutus aktiivisesta hakemuksesta"
-           "Sinulla on Lupapiste.fi-palvelussa aktiivinen lupahakemus")
+           "Sinulla on Lupapiste-palvelussa aktiivinen lupahakemus")
          )))
 
    (fact "the \"reminder-sent\" timestamp already exists"
@@ -343,7 +343,7 @@
        (check-sent-reminder-email
          "pena@example.com"
          "Lupapiste.fi: Naapurikuja 3 - Muistutus aktiivisesta hakemuksesta"
-         "Sinulla on Lupapiste.fi-palvelussa aktiivinen lupahakemus")
+         "Sinulla on Lupapiste-palvelussa aktiivinen lupahakemus")
        )))
 
  )

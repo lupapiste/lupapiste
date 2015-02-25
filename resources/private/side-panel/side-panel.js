@@ -206,6 +206,10 @@ LUPAPISTE.SidePanelModel = function() {
     if(_.contains(pages, pageutil.getPage())) {
       $("#side-panel-template").addClass("visible");
     }
+
+    if (self.sidePanelVisible()) {
+      calculateHeight();
+    }
   });
 
   repository.loaded(pages, function(application, applicationDetails) {
