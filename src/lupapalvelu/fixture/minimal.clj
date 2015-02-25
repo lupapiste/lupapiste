@@ -643,6 +643,13 @@
                                 :inforequest-enabled true
                                 :municipality "297"
                                 :permitType "R"
+                                :caseManagement {:ftpUser "dev_ah_kuopio" :enabled true :version "1.1"}}
+                               {:open-inforequest-email nil
+                                :open-inforequest false
+                                :new-application-enabled true
+                                :inforequest-enabled true
+                                :municipality "297"
+                                :permitType "P"
                                 :caseManagement {:ftpUser "dev_ah_kuopio" :enabled true :version "1.1"}}]
                        :links [{:name
                                 {:fi "Rakentamisen s\u00E4hk\u00F6iset lupapalvelut Kuopiossa"
