@@ -1,18 +1,28 @@
 (ns lupapalvelu.xml.asianhallinta.asianhallinta_canonical_to_xml_test
   (:require [lupapalvelu.factlet :as fl]
             [midje.sweet :refer :all]
+            [midje.util :as mu]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.asianhallinta_canonical :as ah]
             [lupapalvelu.document.canonical-common :as common]
-            [lupapalvelu.xml.asianhallinta.uusi_asia_mapping :as ua-mapping]
-            [lupapalvelu.xml.krysp.canonical-to-krysp-xml-test-common :refer [has-tag]]
             [lupapalvelu.document.poikkeamis-canonical-test :as poikkeus-test]
+            [lupapalvelu.xml.asianhallinta.uusi_asia_mapping :as ua-mapping]
+            [lupapalvelu.xml.disk-writer :as writer]
+            [lupapalvelu.xml.krysp.canonical-to-krysp-xml-test-common :refer [has-tag]]
             [lupapalvelu.xml.emit :refer [element-to-xml]]
             [lupapalvelu.xml.validator :as validator]
             [clojure.data.xml :as xml]
             [sade.common-reader :as reader]
             [sade.strings :as ss]
+            [sade.util :as util]
             [sade.xml :as sxml]))
+
+(mu/testable-privates lupapalvelu.xml.asianhallinta.asianhallinta get-begin-of-link)
+
+(defn- has-attachment-types [meta]
+  (fact "type-group and type-id"
+    (:Avain (sxml/get-text (first meta) )) => "type-group"
+    (:Avain (second meta)) => "type-id"))
 
 (def attachments [{:id :attachment1
                    :type {:type-group "paapiirustus"
@@ -43,7 +53,7 @@
         canonical      (ah/application-to-asianhallinta-canonical application "fi") => truthy
         canonical      (assoc-in canonical
                          [:UusiAsia :Liitteet :Liite]
-                         (ah/get-attachments-as-canonical application "sftp://localhost/test/"))
+                         (ah/get-attachments-as-canonical application (get-begin-of-link)))
         schema-version "ah-1.1"
         mapping        (ua-mapping/get-mapping (ss/suffix schema-version "-"))
         xml            (element-to-xml canonical mapping) => truthy
@@ -61,6 +71,7 @@
             (sxml/select1-attribute-value xml-parsed [:UusiAsia] :xmlns:ah) => "http://www.lupapiste.fi/asianhallinta")
           (fact "version"
             (sxml/select1-attribute-value xml-parsed [:UusiAsia] :version) => (ss/suffix schema-version "-")))
+
 
         (fact "Maksaja is Yritys, Henkilo is not present"
           (let [maksaja (sxml/select xml-parsed [:UusiAsia :Maksaja :Yritys])
@@ -80,12 +91,54 @@
               (sxml/get-text maksaja [:Yhteyshenkilo :Yhteystiedot :Puhelinnumero]) => (get-in maksaja-data [:yritys :yhteyshenkilo :yhteystiedot :puhelin])
               (sxml/get-text maksaja [:Yhteyshenkilo :Yhteystiedot :Email]) => (get-in maksaja-data [:yritys :yhteyshenkilo :yhteystiedot :email])
               (sxml/get-text maksaja [:Yhteyshenkilo :Yhteystiedot :Email]) => (get-in maksaja-data [:yritys :yhteyshenkilo :yhteystiedot :email]))))
+
+
         (facts "Liitteet elements"
           (let [liitteet (sxml/select1 xml-parsed [:UusiAsia :Liitteet])
-                att1 (first (:content liitteet))
-                att2 (second (:content liitteet))]
+                liit1 (first (:content liitteet))
+                liit2 (second (:content liitteet))]
             liitteet => truthy
             (fact "Two Liite elements" (count (:content liitteet)) => 2)
+            (facts "1st Liite"
+              (fact "Kuvaus" (sxml/get-text liit1 [:Kuvaus]) => (get-in attachments [0 :type :type-id]))
+              (fact "Tyyppi" (sxml/get-text liit1 [:Tyyppi]) => (get-in attachments [0 :latestVersion :contentType]))
+              (fact "LinkkiLiitteeseen"
+                (sxml/get-text liit1 [:LinkkiLiitteeseen]) => (str
+                                                                (get-begin-of-link)
+                                                                (writer/get-file-name-on-server
+                                                                  (get-in attachments [0 :latestVersion :fileId])
+                                                                  (get-in attachments [0 :latestVersion :filename]))))
+              (fact "Luotu" (sxml/get-text liit1 [:Luotu]) => (util/to-xml-date (get-in attachments [0 :modified])))
+              (fact "Metatieto"
+                (let [metas (:content (sxml/select1 liit1 [:Metatiedot]))]
+                  (count metas) => 2
+                  (fact "Type checks"
+                    (sxml/get-text (:content (first metas)) [:Avain]) => "type-group"
+                    (sxml/get-text (:content (first metas)) [:Arvo]) => (get-in attachments [0 :type :type-group])
+                    (sxml/get-text (:content (second metas)) [:Avain]) => "type-id"
+                    (sxml/get-text (:content (second metas)) [:Arvo]) => (get-in attachments [0 :type :type-id])))))
+
+            (facts "2nd Liite"
+              (fact "Kuvaus" (sxml/get-text liit2 [:Kuvaus]) => (get-in attachments [1 :type :type-id]))
+              (fact "Tyyppi" (sxml/get-text liit2 [:Tyyppi]) => (get-in attachments [1 :latestVersion :contentType]))
+              (fact "LinkkiLiitteeseen"
+                (sxml/get-text liit2 [:LinkkiLiitteeseen]) => (str
+                                                                (get-begin-of-link)
+                                                                (writer/get-file-name-on-server
+                                                                  (get-in attachments [1 :latestVersion :fileId])
+                                                                  (get-in attachments [1 :latestVersion :filename]))))
+              (fact "Luotu" (sxml/get-text liit2 [:Luotu]) => (util/to-xml-date (get-in attachments [1 :modified])))
+              (fact "Metatieto"
+                (let [metas (:content (sxml/select1 liit2 [:Metatiedot]))]
+                  (count metas) => 3 ; has also operation meta
+                  (fact "Type checks"
+                    (sxml/get-text (:content (first metas)) [:Avain]) => "type-group"
+                    (sxml/get-text (:content (first metas)) [:Arvo]) => (get-in attachments [1 :type :type-group])
+                    (sxml/get-text (:content (second metas)) [:Avain]) => "type-id"
+                    (sxml/get-text (:content (second metas)) [:Arvo]) => (get-in attachments [1 :type :type-id]))
+                  (fact "Operation meta check"
+                    (sxml/get-text (:content (last metas)) [:Avain]) => "operation"
+                    (sxml/get-text (:content (last metas)) [:Arvo]) => (get-in attachments [1 :op :name])))))
             ))))
     ; TODO check xml elements, ie deep elements, document values with _selected are correct in xml etc..
     ))
