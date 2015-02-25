@@ -6,6 +6,7 @@
             [lupapalvelu.document.asianhallinta_canonical :as ah]
             [lupapalvelu.document.canonical-common :as common]
             [lupapalvelu.document.poikkeamis-canonical-test :as poikkeus-test]
+            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.xml.asianhallinta.uusi_asia_mapping :as ua-mapping]
             [lupapalvelu.xml.disk-writer :as writer]
             [lupapalvelu.xml.krysp.canonical-to-krysp-xml-test-common :refer [has-tag]]
@@ -60,18 +61,21 @@
         xml-s          (xml/indent-str xml) => truthy
         permit-type    (:permitType application)
         docs           (common/documents-by-type-without-blanks (tools/unwrapped application))]
+
     (fact "Validator for Asianhallinta exists"
       ((keyword permit-type) validator/supported-versions-by-permit-type) => (contains schema-version))
+
     (fact "Validate UusiAsia XML"
       (validator/validate xml-s permit-type schema-version) => nil)
-    (facts "XML elements"
+
+    (facts "UusiAsia XML elements"
       (let [xml-parsed (reader/strip-xml-namespaces (sxml/parse xml-s))]
+
         (fact "Attributes for UusiAsia"
           (fact "xmlns:ah"
             (sxml/select1-attribute-value xml-parsed [:UusiAsia] :xmlns:ah) => "http://www.lupapiste.fi/asianhallinta")
           (fact "version"
             (sxml/select1-attribute-value xml-parsed [:UusiAsia] :version) => (ss/suffix schema-version "-")))
-
 
         (fact "Maksaja is Yritys, Henkilo is not present"
           (let [maksaja (sxml/select xml-parsed [:UusiAsia :Maksaja :Yritys])
@@ -92,6 +96,12 @@
               (sxml/get-text maksaja [:Yhteyshenkilo :Yhteystiedot :Email]) => (get-in maksaja-data [:yritys :yhteyshenkilo :yhteystiedot :email])
               (sxml/get-text maksaja [:Yhteyshenkilo :Yhteystiedot :Email]) => (get-in maksaja-data [:yritys :yhteyshenkilo :yhteystiedot :email]))))
 
+        (fact "Hakija"
+          (let [hakijat (sxml/select xml-parsed [:UusiAsia :Hakijat])
+                hakijat-data (:hakija docs)]
+            (fact "Corrent count" (count (sxml/select hakijat [:Hakija])) => (count hakijat-data))
+            (fact "Hakija is Henkilo, not yritys"
+              (:tag (sxml/get-text hakijat [:Hakija])) => :Henkilo)))
 
         (facts "Liitteet elements"
           (let [liitteet (sxml/select1 xml-parsed [:UusiAsia :Liitteet])
@@ -138,7 +148,18 @@
                     (sxml/get-text (:content (second metas)) [:Arvo]) => (get-in attachments [1 :type :type-id]))
                   (fact "Operation meta check"
                     (sxml/get-text (:content (last metas)) [:Avain]) => "operation"
-                    (sxml/get-text (:content (last metas)) [:Arvo]) => (get-in attachments [1 :op :name])))))
-            ))))
+                    (sxml/get-text (:content (last metas)) [:Arvo]) => (get-in attachments [1 :op :name])))))))
+
+        (facts "Toimenpiteet"
+          (let [operations (sxml/select1 xml-parsed [:UusiAsia :Toimenpiteet])
+                op         (sxml/get-text xml-parsed [:UusiAsia :Toimenpiteet])
+                ttunnus    (-> op :content first)
+                tteksti    (-> op :content second)]
+            (count (:content operations)) => 1
+            (fact "Toimenpide has ToimenpideTunnus and ToimenpideTeksti"
+              (sxml/get-text op [:Toimenpide :ToimenpideTunnus]) => (get-in application [:operations 0 :name])
+              (sxml/get-text op [:Toimenpide :ToimenpideTeksti]) => (i18n/localize "fi"
+                                                                      (str "operations."
+                                                                        (get-in application [:operations 0 :name]))))))))
     ; TODO check xml elements, ie deep elements, document values with _selected are correct in xml etc..
     ))
