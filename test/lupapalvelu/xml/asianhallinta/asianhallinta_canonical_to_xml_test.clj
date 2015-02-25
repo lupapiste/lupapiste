@@ -160,6 +160,11 @@
               (sxml/get-text op [:Toimenpide :ToimenpideTunnus]) => (get-in application [:operations 0 :name])
               (sxml/get-text op [:Toimenpide :ToimenpideTeksti]) => (i18n/localize "fi"
                                                                       (str "operations."
-                                                                        (get-in application [:operations 0 :name]))))))))
+                                                                        (get-in application [:operations 0 :name]))))))
+
+        (fact "Sijainti"
+          (sxml/get-text xml-parsed [:UusiAsia :Sijainti :Sijaintipiste]) => (str (get-in application [:location :x]) " " (get-in application [:location :y])))
+        (fact "Kiinteistotunnus"
+          (sxml/get-text xml-parsed [:UusiAsia :Kiinteistotunnus]) => (util/to-human-readable-property-id (:propertyId application)))))
     ; TODO check xml elements, ie deep elements, document values with _selected are correct in xml etc..
     ))
