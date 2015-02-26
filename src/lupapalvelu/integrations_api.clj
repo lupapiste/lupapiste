@@ -14,6 +14,7 @@
             [lupapalvelu.foreman :as foreman]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as organization]
+            [lupapalvelu.operations :as operations]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.user :as user]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
@@ -151,11 +152,15 @@
 ;; Asianhallinta
 ;;
 
+(defn- has-asianhallinta-operation? [{{:keys [operations]} :application}]
+  (operations/get-operation-metadata (:name (first operations)) :asianhallinta))
+
 (defcommand application-to-asianhallinta
   {:parameters [id lang]
    :roles      [:authority]
    :notified   true
    :on-success (notify :application-state-change)
+   :pre-checks has-asianhallinta-operation?
    :states     [:submitted :complement-needed]}
   [{:keys [application created user]:as command}]
   (let [submitted-application (mongo/by-id :submitted-applications id)
