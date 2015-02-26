@@ -29,15 +29,13 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.verdict-api :as verdict-api]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
-            [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch-api]
-            [lupapalvelu.xml.krysp.rakennuslupa-mapping :as rakennuslupa-mapping]
             [lupapalvelu.ktj :as ktj]
             [lupapalvelu.open-inforequest :as open-inforequest]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.company :as c]
-            [lupapalvelu.foreman :as foreman]))
+            [lupapalvelu.comment :as comment]))
 
 ;; Notifications
 
@@ -108,7 +106,7 @@
   {:pre [(collections-to-be-seen collection) id timestamp]}
   {(str "_" collection "-seen-by." id) timestamp})
 
-(defn- mark-indicators-seen-updates [application user timestamp]
+(defn mark-indicators-seen-updates [application user timestamp]
   (merge
     (apply merge (map (partial mark-collection-seen-update user timestamp) collections-to-be-seen))
     (when (user/authority? user) (model/mark-approval-indicators-seen-update application timestamp))
@@ -386,7 +384,7 @@
   (update-application command
     (util/deep-merge
       (when (seq text)
-        (lupapalvelu.comment/comment-mongo-update
+        (comment/comment-mongo-update
           (:state application)
           (str
             (i18n/loc "application.canceled.text") ". "
