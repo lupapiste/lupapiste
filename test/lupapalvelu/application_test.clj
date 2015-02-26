@@ -16,7 +16,7 @@
     ..application.. =contains=> {:id ..id..}
     (mongo/update-by-query :applications {:_id ..id..} ..changes..) => 1))
 
-(testable-privates lupapalvelu.application validate-x validate-y add-operation-allowed? mark-indicators-seen-updates)
+(testable-privates lupapalvelu.application validate-x validate-y add-operation-allowed? is-link-permit-required)
 
 (facts "coordinate validation"
   (validate-x {:data {:x nil}}) => nil
