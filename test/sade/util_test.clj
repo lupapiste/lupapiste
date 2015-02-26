@@ -1,4 +1,5 @@
 (ns sade.util-test
+  (:refer-clojure :exclude [pos? neg? zero?])
   (:require [sade.util :refer :all]
             [midje.sweet :refer :all]
             [schema.core :as sc])
