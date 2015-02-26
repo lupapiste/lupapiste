@@ -172,5 +172,5 @@
         indicator-updates (application/mark-indicators-seen-updates application user created)
         file-ids (ah/save-as-asianhallinta application lang submitted-application organization) ; Writes to disk
         attachments-updates (or (attachment/create-sent-timestamp-update-statements (:attachments application) file-ids created) {})]
-    (update-application command mongo-query {$set (merge app-updates attachments-updates indicator-updates)})
+    (update-application command {$set (merge app-updates attachments-updates indicator-updates)})
     (ok)))
