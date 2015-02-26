@@ -658,7 +658,8 @@
                        :krysp {:R
                                {:ftpUser "dev_kuopio"
                                 :url "http://localhost:8000/dev/krysp"
-                                :version "2.1.5"}}}
+                                :version "2.1.5"}}
+                       :operations-attachments {:poikkeamis [[:paapiirustus :asemapiirros]]}}
                       ;;
                       ;; Testeissa kaytettavia organisaatioita
                       ;;
