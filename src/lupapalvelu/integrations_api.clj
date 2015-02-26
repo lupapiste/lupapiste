@@ -152,7 +152,7 @@
 ;; Asianhallinta
 ;;
 
-(defn- has-asianhallinta-operation? [{{:keys [operations]} :application}]
+(defn- has-asianhallinta-operation? [_ {:keys [operations]}]
   (operations/get-operation-metadata (:name (first operations)) :asianhallinta))
 
 (defcommand application-to-asianhallinta
@@ -160,7 +160,7 @@
    :roles      [:authority]
    :notified   true
    :on-success (notify :application-state-change)
-   :pre-checks has-asianhallinta-operation?
+   :pre-checks [has-asianhallinta-operation?]
    :states     [:submitted :complement-needed]}
   [{:keys [application created user]:as command}]
   (let [submitted-application (mongo/by-id :submitted-applications id)
