@@ -266,7 +266,7 @@
                                     :add-operation-allowed false
                                     :link-permit-required false
                                     :link-permit-verdict-required false
-                                    :asianhallinta false})
+                                    :asianhallinta true})
 
 (def- ya-kayttolupa-general {:schema "tyoaika"
                                       :permit-type permit/YA
@@ -288,7 +288,7 @@
                                         :add-operation-allowed false
                                         :link-permit-required false
                                         :link-permit-verdict-required false
-                                        :asianhallinta false})
+                                        :asianhallinta true})
 
 (def ya-operations
   {:ya-kayttolupa-tapahtumat                                          ya-kayttolupa-general
@@ -337,7 +337,7 @@
                                            :add-operation-allowed false
                                            :link-permit-required true
                                            :link-permit-verdict-required true
-                                           :asianhallinta false}})
+                                           :asianhallinta true}})
 
 (def- ymparistolupa-attachments []) ; TODO
 (def- ymparistolupa-operation
@@ -815,7 +815,7 @@
                                    :add-operation-allowed false
                                    :link-permit-required false
                                    :link-permit-verdict-required false
-                                   :asianhallinta false}
+                                   :asianhallinta true}
      :meluilmoitus                {:schema "meluilmoitus"
                                    :permit-type permit/YI
                                    :required ["ymp-ilm-kesto"]
@@ -823,7 +823,7 @@
                                    :add-operation-allowed false
                                    :link-permit-required false
                                    :link-permit-verdict-required false
-                                   :asianhallinta false}
+                                   :asianhallinta true}
      ;     :pima                        {:schema "pima"
      ;                                   :permit-type permit/YL ; TODO
      ;                                   :required ["ymp-ilm-kesto-mini"]
@@ -947,7 +947,7 @@
                                  :add-operation-allowed false
                                  :link-permit-required false
                                  :link-permit-verdict-required false
-                                 :asianhallinta false}
+                                 :asianhallinta true}
     :asemakaava-muutos          {:schema "maankayton-muutos"
                                  :permit-type permit/MM
                                  :required common-maanmittaus-schemas
@@ -955,7 +955,7 @@
                                  :add-operation-allowed false
                                  :link-permit-required false
                                  :link-permit-verdict-required false
-                                 :asianhallinta false}
+                                 :asianhallinta true}
     :ranta-asemakaava-laadinta  {:schema "maankayton-muutos"
                                  :permit-type permit/MM
                                  :required common-maanmittaus-schemas
@@ -963,7 +963,7 @@
                                  :add-operation-allowed false
                                  :link-permit-required false
                                  :link-permit-verdict-required false
-                                 :asianhallinta false}
+                                 :asianhallinta true}
     :ranta-asemakaava-muutos    {:schema "maankayton-muutos"
                                  :permit-type permit/MM
                                  :required common-maanmittaus-schemas
@@ -971,7 +971,7 @@
                                  :add-operation-allowed false
                                  :link-permit-required false
                                  :link-permit-verdict-required false
-                                 :asianhallinta false}
+                                 :asianhallinta true}
     :yleiskaava-laadinta        {:schema "maankayton-muutos"
                                  :permit-type permit/MM
                                  :required common-maanmittaus-schemas
@@ -979,7 +979,7 @@
                                  :add-operation-allowed false
                                  :link-permit-required false
                                  :link-permit-verdict-required false
-                                 :asianhallinta false}
+                                 :asianhallinta true}
     :yleiskaava-muutos          {:schema "maankayton-muutos"
                                  :permit-type permit/MM
                                  :required common-maanmittaus-schemas
@@ -987,7 +987,7 @@
                                  :add-operation-allowed false
                                  :link-permit-required false
                                  :link-permit-verdict-required false
-                                 :asianhallinta false}
+                                 :asianhallinta true}
     }
     ya-operations
     yl-operations))
