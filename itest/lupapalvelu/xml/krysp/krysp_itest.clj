@@ -6,6 +6,7 @@
             [clj-ssh.cli :as ssh-cli]
             [clj-ssh.ssh :as ssh]
             [midje.sweet :refer :all]
+            [midje.util :refer [testable-privates]]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.document.model :refer [default-max-len]]
@@ -40,6 +41,8 @@
   (:import [java.net URI]))
 
 (apply-remote-minimal)
+
+(testable-privates lupapalvelu.application is-link-permit-required)
 
 (defn- populate-task [{:keys [id tasks]} task-id apikey]
   (let [task (some #(when (= (:id %) task-id) %) tasks)
@@ -106,7 +109,7 @@
     (query-application pena application-id)))
 
 (defn- generate-link-permit [{id :id :as application} apikey]
-  (when (ns-app/is-link-permit-required application)
+  (when (is-link-permit-required application)
     (fact "Lisataan hakemukselle viitelupa" (command apikey :add-link-permit :id id :linkPermitId "Kuntalupatunnus 123") => ok?)))
 
 (defn- get-local-filename [directory file-prefix]

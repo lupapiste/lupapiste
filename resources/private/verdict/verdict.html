@@ -27,19 +27,19 @@
 
     <div>
       <form>
-        <label class="form-label" data-bind="ltext: 'verdict.id'"></label><br/>
+        <label class="form-label" data-bind="ltext: 'verdict.id', css: {tip: !backendId()}"></label><br/>
         <input type="text" class="form-input long" data-bind="attr: {placeholder: loc('verdict.id.hint')}, value: backendId, disable: !$root.authorization.ok('save-verdict-draft')" id="backend-id"></input>
 
-        <label for="verdict-type-select" class="form-label" data-bind="ltext: 'verdict.status'"></label><br/>
+        <label for="verdict-type-select" class="form-label" data-bind="ltext: 'verdict.status', css: {tip: !status()}"></label><br/>
         <select id="verdict-type-select" class="form-input combobox" data-bind="options: statuses, optionsText: function(item) { return loc('verdict.status.'+item);}, value: status, optionsCaption: loc('choose'), disable: !$root.authorization.ok('save-verdict-draft')"></select>
 
-        <label class="form-label" data-bind="ltext: 'verdict.name'"></label><br/>
+        <label class="form-label" data-bind="ltext: 'verdict.name', css: {tip: !name()}"></label><br/>
         <input type="text" class="form-input long" data-bind="value: name, disable: !$root.authorization.ok('save-verdict-draft')" id="verdict-name"></input>
 
-        <label class="form-label" data-bind="ltext: 'verdict.given'"></label><br/>
+        <label class="form-label" data-bind="ltext: 'verdict.given', css: {tip: !given()}"></label><br/>
         <input type="text" class="form-input long" data-bind="datepicker: given, disable: !$root.authorization.ok('save-verdict-draft')" id="verdict-given"></input>
 
-        <label class="form-label" data-bind="ltext: 'verdict.official'"></label><br/>
+        <label class="form-label" data-bind="ltext: 'verdict.official', css: {tip: !official()}"></label><br/>
         <input type="text" class="form-input long" data-bind="datepicker: official, disable: !$root.authorization.ok('save-verdict-draft')" id="verdict-official"></input>
 
         <label class="form-label" data-bind="ltext: 'verdict.text'"></label><br/>

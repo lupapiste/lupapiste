@@ -710,10 +710,26 @@ Go to give new verdict
   Wait Until  Element Should Be Visible  backend-id
   Wait Until  Element Should Be Enabled  backend-id
 
+Input verdict
+  [Arguments]  ${backend-id}  ${verdict-type-select-value}  ${verdict-given-date}  ${verdict-official-date}  ${verdict-giver-name}
+  ## Disable date picker
+  Execute JavaScript  $(".hasDatepicker").unbind("focus");
+  Input text  backend-id  ${backend-id}
+  Select From List By Value  verdict-type-select  ${verdict-type-select-value}
+  Input text  verdict-given  ${verdict-given-date}
+  Input text  verdict-official  ${verdict-official-date}
+  Input text  verdict-name  ${verdict-giver-name}
+  ## Trigger change manually
+  Execute JavaScript  $("#backend-id").change();
+  Execute JavaScript  $("#verdict-type-select").change();
+  Execute JavaScript  $("#verdict-given").change();
+  Execute JavaScript  $("#verdict-official").change();
+  Execute JavaScript  $("#verdict-name").change();
+
 Submit empty verdict
   Go to give new verdict
-  Go back
-  Click enabled by test id  publish-verdict
+  Input verdict  -  6  01.05.2018  01.06.2018  -
+  Click enabled by test id  verdict-publish
   Confirm  dynamic-yes-no-confirm-dialog
   Wait until  Application state should be  verdictGiven
 
