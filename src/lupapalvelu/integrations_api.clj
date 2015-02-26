@@ -154,6 +154,8 @@
 (defcommand application-to-asianhallinta
   {:parameters [id lang]
    :roles      [:authority]
+   :notified   true
+   :on-success (notify :application-state-change)
    :states     [:submitted :complement-needed]}
   [{:keys [application created user]:as command}]
   (let [submitted-application (mongo/by-id :submitted-applications id)
