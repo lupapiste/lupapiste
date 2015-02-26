@@ -3,6 +3,7 @@
             [clojure.string :as s]
             [monger.operators :refer :all]
             [sade.core :refer [ok fail fail!]]
+            [sade.strings :as ss]
             [lupapalvelu.action :refer [defquery defcommand non-blank-parameters vector-parameters boolean-parameters]]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.xml.krysp.reader :as krysp]
@@ -345,3 +346,7 @@
     (do
       (debugf "organization '%s' not found with id." id)
       (fail :error.organization-not-found))))
+
+(defn has-ftp-user? [organization permit-type]
+  (not (ss/blank? (get-in organization [:krysp (keyword permit-type) :ftpUser]))))
+
