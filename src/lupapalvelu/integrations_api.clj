@@ -18,6 +18,7 @@
             [lupapalvelu.user :as user]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
+            [lupapalvelu.xml.asianhallinta.asianhallinta :as ah]
             [sade.core :refer :all]
             [sade.strings :as ss]))
 
@@ -145,3 +146,24 @@
           buildings (krysp-reader/->buildings-summary kryspxml)]
       (ok :data buildings))
     (fail :error.no-legacy-available)))
+
+;;
+;; Asianhallinta
+;;
+
+(defcommand application-to-asianhallinta
+  {:parameters [id lang]
+   :roles      [:authority]
+   :states     [:submitted :complement-needed]}
+  [{:keys [application created user]:as command}]
+  (let [submitted-application (mongo/by-id :submitted-applications id)
+        app-updates {:modified created
+                     :sent created
+                     :authority (if (seq (:authority application)) (:authority application) (user/summary user))
+                     :state :sent}
+        organization (organization/get-organization (:organization application))
+        indicator-updates (application/mark-indicators-seen-updates application user created)
+        file-ids (ah/save-as-asianhallinta application lang submitted-application organization) ; Writes to disk
+        attachments-updates (or (attachment/create-sent-timestamp-update-statements (:attachments application) file-ids created) {})]
+    (update-application command mongo-query {$set (merge app-updates attachments-updates indicator-updates)})
+    (ok)))
