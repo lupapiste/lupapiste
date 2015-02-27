@@ -19,7 +19,7 @@
             [sade.util :as util]
             [sade.xml :as sxml]))
 
-(mu/testable-privates lupapalvelu.xml.asianhallinta.asianhallinta-core get-begin-of-link)
+(mu/testable-privates lupapalvelu.xml.asianhallinta.asianhallinta-core begin-of-link)
 
 (defn- has-attachment-types [meta]
   (fact "type-group and type-id"
@@ -55,7 +55,7 @@
         canonical      (ah/application-to-asianhallinta-canonical application "fi") => truthy
         canonical      (assoc-in canonical
                          [:UusiAsia :Liitteet :Liite]
-                         (ah/get-attachments-as-canonical application (get-begin-of-link)))
+                         (ah/get-attachments-as-canonical application begin-of-link))
         schema-version "ah-1.1"
         mapping        (ua-mapping/get-mapping (ss/suffix schema-version "-"))
         xml            (element-to-xml canonical mapping) => truthy
@@ -118,7 +118,7 @@
               (fact "Tyyppi" (sxml/get-text liit1 [:Tyyppi]) => (get-in attachments [0 :latestVersion :contentType]))
               (fact "LinkkiLiitteeseen"
                 (sxml/get-text liit1 [:LinkkiLiitteeseen]) => (str
-                                                                (get-begin-of-link)
+                                                                begin-of-link
                                                                 (writer/get-file-name-on-server
                                                                   (get-in attachments [0 :latestVersion :fileId])
                                                                   (get-in attachments [0 :latestVersion :filename]))))
@@ -137,7 +137,7 @@
               (fact "Tyyppi" (sxml/get-text liit2 [:Tyyppi]) => (get-in attachments [1 :latestVersion :contentType]))
               (fact "LinkkiLiitteeseen"
                 (sxml/get-text liit2 [:LinkkiLiitteeseen]) => (str
-                                                                (get-begin-of-link)
+                                                                begin-of-link
                                                                 (writer/get-file-name-on-server
                                                                   (get-in attachments [1 :latestVersion :fileId])
                                                                   (get-in attachments [1 :latestVersion :filename]))))
@@ -178,7 +178,7 @@
         canonical      (ah/application-to-asianhallinta-canonical application "fi") => truthy
         canonical      (assoc-in canonical
                          [:UusiAsia :Liitteet :Liite]
-                         (ah/get-attachments-as-canonical application (get-begin-of-link)))
+                         (ah/get-attachments-as-canonical application begin-of-link))
         schema-version "ah-1.1"
         mapping        (ua-mapping/get-mapping (ss/suffix schema-version "-"))
         xml            (element-to-xml canonical mapping) => truthy
