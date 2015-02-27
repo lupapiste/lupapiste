@@ -205,7 +205,7 @@
           suunnittelija? (in? ["paasuunnittelija" "suunnittelija"] schema-name )]
       (get-in update-doc (into person-path [:etunimi :value])) => "Mikko"
       (get-in update-doc (into person-path [:sukunimi :value])) => "Intonen"
-      (get-in update-doc (into person-path [:hetu :value])) => "210281-****"
+      (get-in update-doc (into person-path [:hetu :value])) => "******-****"
       (get-in update-doc (into company-path [:yritysnimi :value])) => (if suunnittelija? "Yritys Oy" nil)
       (get-in update-doc (into company-path [:liikeJaYhteisoTunnus :value])) => (if suunnittelija? "1234567-1" nil)
       (get-in update-doc (into experience-path [:koulutus :value])) => (if suunnittelija? "Tutkinto" nil)
@@ -273,13 +273,16 @@
               updated-suunnittelija (domain/get-document-by-id updated-app doc-id)]
           (get-in updated-suunnittelija [:data :henkilotiedot :etunimi :value]) => "Mikko"
           (get-in updated-suunnittelija [:data :henkilotiedot :sukunimi :value]) => "Intonen"
-          (get-in updated-suunnittelija [:data :henkilotiedot :hetu :value]) => "210281-****"
           (get-in updated-suunnittelija [:data :yritys :yritysnimi :value]) => "Yritys Oy"
           (get-in updated-suunnittelija [:data :yritys :liikeJaYhteisoTunnus :value]) => "1234567-1"
           (get-in updated-suunnittelija [:data :patevyys :koulutusvalinta :value]) => nil
           (get-in updated-suunnittelija [:data :patevyys :koulutus :value]) => "Tutkinto"
           (get-in updated-suunnittelija [:data :patevyys :valmistumisvuosi :value]) => "2000"
           (get-in updated-suunnittelija [:data :patevyys :fise :value]) => "f"
+
+          (fact "applicant sees fully masked person id"
+            (get-in updated-suunnittelija [:data :henkilotiedot :hetu :value]) => "******-****")
+
           (fact "suunnittelija kuntaroolikoodi is preserved (LUPA-774)"
             (get-in updated-suunnittelija [:data :kuntaRoolikoodi :value]) => code)))
 
@@ -301,7 +304,7 @@
           (:authority app) => (contains {:id sonja-id})
           (get-in suunnittelija [:data :henkilotiedot :hetu :value]) => "210281-0002"))
 
-      (fact "Ronja still does not see the person ID"
+      (fact "Ronja still does not see the full person ID"
         (let [app (query-application ronja application-id)
               suunnittelija (domain/get-document-by-id app doc-id)]
           (:authority app) => (contains {:id sonja-id})

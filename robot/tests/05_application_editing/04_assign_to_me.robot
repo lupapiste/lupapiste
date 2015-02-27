@@ -18,7 +18,9 @@ Mikko creates an application
 Mikko sets himself as the applicant
   Open tab  parties
   Select From List  henkilo.userId  Intonen Mikko
-  Wait Until  Textfield value should be  xpath=//div[@id='application-parties-tab']//input[@data-docgen-path='henkilo.henkilotiedot.hetu']  210281-****
+
+Person ID is fully masked
+  Wait Until  Textfield value should be  xpath=//div[@id='application-parties-tab']//input[@data-docgen-path='henkilo.henkilotiedot.hetu']  ******-****
 
 # LUPA-23
 Mikko could add an operation
