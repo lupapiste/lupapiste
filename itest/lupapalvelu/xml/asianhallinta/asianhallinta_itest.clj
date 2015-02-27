@@ -1,10 +1,18 @@
 (ns lupapalvelu.xml.asianhallinta.asianhallinta-itest
-  (:require [midje.sweet :refer :all]
+  (:require [clojure.java.io :as io]
+            [clojure.data.xml :as xml]
+            [midje.sweet :refer :all]
+            [midje.util :refer [testable-privates]]
             [lupapalvelu.factlet :as fl]
             [lupapalvelu.itest-util :refer :all]
-            [lupapalvelu.organization :as organization]))
+            [lupapalvelu.organization :as organization]
+            [lupapalvelu.xml.asianhallinta.asianhallinta :as ah]
+            [lupapalvelu.xml.validator :as validator]
+            [sade.env :as env]))
 
 (apply-remote-minimal)
+
+(testable-privates lupapalvelu.xml.asianhallinta.asianhallinta resolve-output-directory resolve-ah-version)
 
 (fl/facts* "Asianhallinta itest"
   (facts "UusiAsia from poikkeamis application"
@@ -23,10 +31,46 @@
       (upload-attachment-to-all-placeholders pena application)
 
       (command pena :submit-application :id app-id) => ok?
+      (fact "Pena can't move application to asianhallinta"
+        (command pena :application-to-asianhallinta :id app-id :lang "fi") => unauthorized?)
 
       (command velho :application-to-asianhallinta :id app-id :lang "fi") => ok?
 
-      (let [updated-application (query-application velho app-id)])
+      (let [updated-application (query-application velho app-id)
+            email (last-email)]
+
+        (:to email) => (contains (email-for-key pena))
+        (:subject email) => (contains "hakemuksen tila muuttunut")
+        (get-in email [:body :plain]) => (contains "K\u00e4sittelyss\u00e4")
+
+
+        (fact "Application is sent and timestamp is there"
+          (:state updated-application) => "sent"
+          (:sent updated-application) => number?)
+
+        (fact "Attachments have sent timestamp"
+          (every? #(-> % :sent number?) (:attachments updated-application)) => true)
+
+        (facts "XML file"
+          (let [output-dir (str (resolve-output-directory scope) "/")
+                target-file-name (str "target/Downloaded-" (:id application) ".xml")
+                filename-starts-with (:id application)
+                xml-file (if get-files-from-sftp-server?
+                           (io/file (get-file-from-server
+                                      (get-in scope [:caseManagement :ftpUser])
+                                      (subs (env/value :fileserver-address) 7)
+                                      filename-starts-with
+                                      target-file-name
+                                      (str ah/ah-from-dir "/")))
+                           (io/file (get-local-filename output-dir filename-starts-with)))
+                xml-as-string (slurp xml-file)
+                xml (xml/parse (io/reader xml-file))]
+
+            (fact "Correctly named xml file is created" (.exists xml-file) => true)
+
+            (fact "XML file is valid" ;; Validate again??
+              (validator/validate xml-as-string (:permitType application) (str "ah-" (resolve-ah-version scope))))
+            )))
       ))
 
 
