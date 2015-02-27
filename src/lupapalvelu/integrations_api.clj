@@ -153,7 +153,7 @@
 ;;
 
 (defn- has-asianhallinta-operation [_ {:keys [operations]}]
-  (when-not (operations/get-operation-metadata (:name (first operations)) :asianhallinta)))
+  (when-not (operations/get-operation-metadata (:name (first operations)) :asianhallinta) false))
 
 (defcommand application-to-asianhallinta
   {:parameters [id lang]
