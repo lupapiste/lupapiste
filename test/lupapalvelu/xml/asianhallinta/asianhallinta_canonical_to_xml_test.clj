@@ -109,7 +109,10 @@
                 liit1 (first (:content liitteet))
                 liit2 (second (:content liitteet))]
             liitteet => truthy
-            (fact "Two Liite elements" (count (:content liitteet)) => 2)
+            (fact "Two Liite elements"
+              (count (:content liitteet)) => 2
+              (count (:content liitteet)) => (count (get-in canonical [:UusiAsia :Liitteet :Liite])))
+
             (facts "1st Liite"
               (fact "Kuvaus" (sxml/get-text liit1 [:Kuvaus]) => (get-in attachments [0 :type :type-id]))
               (fact "Tyyppi" (sxml/get-text liit1 [:Tyyppi]) => (get-in attachments [0 :latestVersion :contentType]))
@@ -166,9 +169,7 @@
         (fact "Sijainti"
           (sxml/get-text xml-parsed [:UusiAsia :Sijainti :Sijaintipiste]) => (str (get-in application [:location :x]) " " (get-in application [:location :y])))
         (fact "Kiinteistotunnus"
-          (sxml/get-text xml-parsed [:UusiAsia :Kiinteistotunnus]) => (util/to-human-readable-property-id (:propertyId application)))))
-    ; TODO check xml elements, ie deep elements, document values with _selected are correct in xml etc..
-    ))
+          (sxml/get-text xml-parsed [:UusiAsia :Kiinteistotunnus]) => (util/to-human-readable-property-id (:propertyId application)))))))
 
 (fl/facts* "Application with two multiple documents (Hakija, Maksaja)"
   (let [application    (assoc poikkeus-test/poikkari-hakemus :attachments attachments)
