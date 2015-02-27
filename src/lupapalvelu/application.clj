@@ -132,12 +132,19 @@
     (assoc application :submittable (foreman-submittable? application))
     application))
 
+(defn- person-id-masker-for-user [user {authority :authority :as application}]
+  (cond
+    (user/same-user? user authority) identity
+    (user/authority? user) model/mask-person-id-ending
+    :else (comp model/mask-person-id-birthday model/mask-person-id-ending)))
+
+(defn with-masked-person-ids [application user]
+  (let [mask-person-ids  (person-id-masker-for-user user application)]
+    (update-in application [:documents] (partial map mask-person-ids))))
+
 (defn- process-documents [user {authority :authority :as application}]
   (let [validate (fn [doc] (assoc doc :validationErrors (model/validate application doc)))
-        mask-person-ids (cond
-                          (user/same-user? user authority) identity
-                          (user/authority? user) model/mask-person-id-ending
-                          :else (comp model/mask-person-id-birthday model/mask-person-id-ending))
+        mask-person-ids  (person-id-masker-for-user user application)
         doc-mapper (comp mask-person-ids validate)]
     (update-in application [:documents] (partial map doc-mapper))))
 
