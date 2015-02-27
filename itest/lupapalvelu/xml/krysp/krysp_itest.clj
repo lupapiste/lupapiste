@@ -34,7 +34,7 @@
             [sade.env :as env]
             [sade.xml :as xml]
             [sade.util :as util]
-            [sade.core :refer [def-]]
+            [sade.core :refer [def- now]]
             [lupapalvelu.application :as ns-app])
   (:import [java.net URI]))
 
@@ -146,7 +146,7 @@
         output-dir  (str "target/" sftp-user permit-type-dir "/")
         local-file  (str output-dir (:id application) ".xml")
         sftp-server (subs (env/value :fileserver-address) 7)
-        target-file-name (str "target/Downloaded-" (:id application) ".xml")
+        target-file-name (str "target/Downloaded-" (:id application) "-" (now) ".xml")
         filename-starts-with (:id application)
         xml-file (if get-files-from-sftp-server?
                    (io/file (get-file-from-server

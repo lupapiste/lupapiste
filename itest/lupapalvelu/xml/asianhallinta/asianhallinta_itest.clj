@@ -6,17 +6,18 @@
             [lupapalvelu.factlet :as fl]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.organization :as organization]
-            [lupapalvelu.xml.asianhallinta.asianhallinta :as ah]
+            [lupapalvelu.xml.asianhallinta.asianhallinta-core :as ah]
             [lupapalvelu.xml.validator :as validator]
             [sade.core :refer [now]]
             [sade.env :as env]
             [sade.strings :as ss]
-            [sade.xml :as sxml])
+            [sade.xml :as sxml]
+            [sade.util :as util])
   (:import [java.net URI]))
 
 (apply-remote-minimal)
 
-(testable-privates lupapalvelu.xml.asianhallinta.asianhallinta resolve-output-directory resolve-ah-version)
+(testable-privates lupapalvelu.xml.asianhallinta.asianhallinta-core resolve-output-directory resolve-ah-version)
 (testable-privates lupapalvelu.xml.asianhallinta.uusi_asia_mapping attachments-for-write)
 
 (fl/facts* "Asianhallinta itest"
@@ -51,14 +52,14 @@
 
         (fact "Application is sent and timestamp is there"
           (:state updated-application) => "sent"
-          (:sent updated-application) => (roughly (now)))
+          (:sent updated-application) => util/pos?)
 
         (fact "Attachments have sent timestamp"
-          (every? #(-> % :sent number?) (:attachments updated-application)) => true)
+          (every? #(-> % :sent util/pos?) (:attachments updated-application)) => true)
 
         (facts "XML file"
           (let [output-dir (str (resolve-output-directory scope) "/")
-                target-file-name (str "target/Downloaded-" (:id application) ".xml")
+                target-file-name (str "target/Downloaded-" (:id application) "-" (now) ".xml")
                 filename-starts-with (:id application)
                 xml-file (if get-files-from-sftp-server?
                            (io/file (get-file-from-server
@@ -117,4 +118,4 @@
                     :address "Suusaarenkierto 44") => truthy
           app (query-application pena app-id)]
       (command pena :submit-application :id app-id) => ok?
-      (command velho :application-to-asianhallinta :id app-id :lang "fi") =not=> ok?)))
+      (command velho :application-to-asianhallinta :id app-id :lang "fi") => (partial expected-failure? "error.operations.asianhallinta-disabled"))))
