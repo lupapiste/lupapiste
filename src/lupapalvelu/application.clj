@@ -25,7 +25,6 @@
             [lupapalvelu.user :as user]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.operations :as operations]
-            [lupapalvelu.tasks :as tasks]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.verdict-api :as verdict-api]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
