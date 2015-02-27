@@ -21,7 +21,8 @@
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
             [lupapalvelu.xml.asianhallinta.asianhallinta-core :as ah]
             [sade.core :refer :all]
-            [sade.strings :as ss]))
+            [sade.strings :as ss]
+            [sade.util :as util]))
 
 ;;
 ;; Application approval
@@ -89,7 +90,7 @@
         do-update (fn [attachments-updates]
                     (update-application command
                       mongo-query
-                      {$set (merge app-updates attachments-updates indicator-updates)})
+                      {$set (util/deep-merge app-updates attachments-updates indicator-updates)})
                     (ok :integrationAvailable (not (nil? attachments-updates))))]
 
     (do-approve application created id lang jatkoaika-app? do-update)))
@@ -153,7 +154,8 @@
 ;;
 
 (defn- has-asianhallinta-operation [_ {:keys [operations]}]
-  (when-not (operations/get-operation-metadata (:name (first operations)) :asianhallinta) false))
+  (when-not (operations/get-operation-metadata (:name (first operations)) :asianhallinta)
+    (fail! :error.operations.asianhallinta-disabled)))
 
 (defcommand application-to-asianhallinta
   {:parameters [id lang]
@@ -172,5 +174,5 @@
         indicator-updates (application/mark-indicators-seen-updates application user created)
         file-ids (ah/save-as-asianhallinta application lang submitted-application organization) ; Writes to disk
         attachments-updates (or (attachment/create-sent-timestamp-update-statements (:attachments application) file-ids created) {})]
-    (update-application command {$set (merge app-updates attachments-updates indicator-updates)})
+    (update-application command {$set (util/deep-merge app-updates attachments-updates indicator-updates)})
     (ok)))
