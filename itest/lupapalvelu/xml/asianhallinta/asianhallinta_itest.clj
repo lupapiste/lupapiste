@@ -107,4 +107,14 @@
                 (sxml/get-text operations [:ToimenpideTunnus]) => (-> updated-application :operations first :name))))))))
 
 
-  (fact "Can't create asianhallinta with non-asianhallinta operation"))
+  (fact "Can't create asianhallinta with non-asianhallinta operation"
+    (let [app-id (create-app-id
+                    pena
+                    :municipality velho-muni
+                    :operation "asuinrakennus"
+                    :propertyId "29703401070010"
+                    :y 6965051.2333374 :x 535179.5
+                    :address "Suusaarenkierto 44") => truthy
+          app (query-application pena app-id)]
+      (command pena :submit-application :id app-id) => ok?
+      (command velho :application-to-asianhallinta :id app-id :lang "fi") =not=> ok?)))

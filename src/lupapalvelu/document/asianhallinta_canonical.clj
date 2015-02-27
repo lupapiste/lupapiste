@@ -85,7 +85,7 @@
 
 (defn- ua-get-toimenpiteet [{:keys [operations]} lang]
   (when (seq operations)
-    {:Toimenpide (map #(-> % (ua-get-toimenpide lang)) operations)})) ;TODO tarkemmat tiedot
+    {:Toimenpide (map #(-> % (ua-get-toimenpide lang)) operations)}))
 
 (defn- ua-get-sijaintipiste [{:keys [location]}]
   {:Sijaintipiste (str (:x location) " " (:y location))})
