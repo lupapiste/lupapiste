@@ -8,11 +8,16 @@
             [lupapalvelu.organization :as organization]
             [lupapalvelu.xml.asianhallinta.asianhallinta :as ah]
             [lupapalvelu.xml.validator :as validator]
-            [sade.env :as env]))
+            [sade.core :refer [now]]
+            [sade.env :as env]
+            [sade.strings :as ss]
+            [sade.xml :as sxml])
+  (:import [java.net URI]))
 
 (apply-remote-minimal)
 
 (testable-privates lupapalvelu.xml.asianhallinta.asianhallinta resolve-output-directory resolve-ah-version)
+(testable-privates lupapalvelu.xml.asianhallinta.uusi_asia_mapping attachments-for-write)
 
 (fl/facts* "Asianhallinta itest"
   (facts "UusiAsia from poikkeamis application"
@@ -46,7 +51,7 @@
 
         (fact "Application is sent and timestamp is there"
           (:state updated-application) => "sent"
-          (:sent updated-application) => number?)
+          (:sent updated-application) => (roughly (now)))
 
         (fact "Attachments have sent timestamp"
           (every? #(-> % :sent number?) (:attachments updated-application)) => true)
@@ -69,9 +74,37 @@
             (fact "Correctly named xml file is created" (.exists xml-file) => true)
 
             (fact "XML file is valid" ;; Validate again??
-              (validator/validate xml-as-string (:permitType application) (str "ah-" (resolve-ah-version scope))))
-            )))
-      ))
+              (validator/validate xml-as-string (:permitType updated-application) (str "ah-" (resolve-ah-version scope))))
+
+            (fact "Application IDs match"
+              (sxml/get-text xml [:UusiAsia :HakemusTunnus]) => (:id updated-application))
+
+            (fact "Attachments are correct"
+              (let [xml-attachments (sxml/select xml [:UusiAsia :Liitteet :Liite])
+                    writed-attachments (attachments-for-write updated-application)
+                    last-link (sxml/get-text (last xml-attachments) [:LinkkiLiitteeseen])
+                    filename (last (ss/split last-link #"/"))
+                    linkki-as-uri (URI. last-link)
+                    attachment-file (if get-files-from-sftp-server?
+                                      (get-file-from-server
+                                        (get-in scope [:caseManagement :ftpUser])
+                                        (.getHost linkki-as-uri)
+                                        (.getPath linkki-as-uri)
+                                        (str "target/Downloaded-" filename))
+                                      (str output-dir filename))
+                    attachment-string (slurp attachment-file)]
+
+                (count xml-attachments) => (+ (count (:attachments updated-application)) 2) ; 2 x Genereated PDFs
+
+                (fact "Filename in XML and filename written to disk are the same"
+                  filename => (-> writed-attachments first :filename))
+
+                (fact "Filename content is correct" attachment-string => "This is test file for file upload in itest.")))
+
+            (fact "Operations are correct"
+              (let [operations (sxml/select xml [:UusiAsia :Toimenpiteet :Toimenpide])]
+                (count operations) => (count (:operations updated-application))
+                (sxml/get-text operations [:ToimenpideTunnus]) => (-> updated-application :operations first :name))))))))
 
 
   (fact "Can't create asianhallinta with non-asianhallinta operation"))
