@@ -432,18 +432,6 @@ LUPAPISTE.ApplicationModel = function() {
       .call();
   };
 
-  function extractRequiredErrors(errors) {
-    var errs = _.map(errors, function(errArray) {
-      return _.filter(errArray, function(err) {
-        return err.result[1] === "illegal-value:required";
-      });
-    });
-    errs = _.filter(errs, function(errArray) {
-      return errArray.length > 0;
-    });
-    return errs;
-  }
-
   self.goToTabPosition = function(targetTab, targetId) {
     if (targetTab === "requiredFieldSummary") {
       ajax
@@ -501,7 +489,7 @@ LUPAPISTE.ApplicationModel = function() {
   }
 
   self.updateMissingApplicationInfo = function(errors) {
-    self.incorrectlyFilledRequiredFields(extractRequiredErrors(errors));
+    self.incorrectlyFilledRequiredFields(util.extractRequiredErrors(errors));
     self.missingRequiredAttachments(extractMissingAttachments(self.attachments()));
   };
 
