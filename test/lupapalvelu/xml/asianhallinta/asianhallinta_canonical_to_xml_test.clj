@@ -19,7 +19,7 @@
             [sade.util :as util]
             [sade.xml :as sxml]))
 
-(mu/testable-privates lupapalvelu.xml.asianhallinta.asianhallinta get-begin-of-link)
+(mu/testable-privates lupapalvelu.xml.asianhallinta.asianhallinta-core get-begin-of-link)
 
 (defn- has-attachment-types [meta]
   (fact "type-group and type-id"
