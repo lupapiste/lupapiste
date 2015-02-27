@@ -239,11 +239,11 @@
   [{:keys [application user lang]}]
   (if application
     (let [attachments (:attachments application)
-          app (a/with-masked-person-ids application user)]
+          application (a/with-masked-person-ids application user)]
       {:status 200
         :headers {"Content-Type" "application/octet-stream"
                   "Content-Disposition" (str "attachment;filename=\"" (i18n/loc "attachment.zip.filename") "\"")}
-        :body (attachment/temp-file-input-stream (attachment/get-all-attachments attachments app lang))})
+        :body (attachment/temp-file-input-stream (attachment/get-all-attachments attachments application lang))})
     {:status 404
      :headers {"Content-Type" "text/plain"}
      :body "404"}))
