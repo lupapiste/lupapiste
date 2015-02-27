@@ -226,8 +226,7 @@
 ;; <-- For enrich-docs-disabled-flag
 
 (defn- enrich-docs-disabled-flag [{user-role :role} app]
-  (let [mapper-fn (partial enrich-single-doc-disabled-flag user-role)]
-    (update-in app [:documents] (partial map mapper-fn))))
+  (update-in app [:documents] (partial map (partial enrich-single-doc-disabled-flag user-role))))
 
 (defn- post-process-app [app user]
   (->> app
