@@ -431,11 +431,18 @@
     document
     (tools/deep-find data (keyword schemas/turvakielto))))
 
-(defn mask-person-ids
+(defn mask-person-id-ending
   "Replaces last characters of person IDs with asterisks (e.g., 010188-123A -> 010188-****)"
   [document & [initial-path]]
   (let [mask-if (fn [{type :type} {hetu :value}] (and (= (keyword type) :hetu) hetu (> (count hetu) 7)))
         do-mask (fn [{hetu :value :as v}] (assoc v :value (str (subs hetu 0 7) "****")))]
+    (convert-document-data mask-if do-mask document initial-path)))
+
+(defn mask-person-id-birthday
+  "Replaces first characters of person IDs with asterisks (e.g., 010188-123A -> ******-123A)"
+  [document & [initial-path]]
+  (let [mask-if (fn [{type :type} {hetu :value}] (and (= (keyword type) :hetu) hetu (pos? (count hetu))))
+        do-mask (fn [{hetu :value :as v}] (assoc v :value (str "******" (ss/substring hetu 6 11))))]
     (convert-document-data mask-if do-mask document initial-path)))
 
 (defn has-hetu?

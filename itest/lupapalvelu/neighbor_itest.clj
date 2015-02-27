@@ -130,11 +130,11 @@
 
        (-> hakija-doc :data :henkilo :henkilotiedot :etunimi) => "Zebra"
        (-> hakija-doc :data :henkilo :henkilotiedot :sukunimi) => "Zorro"
-       (-> hakija-doc :data :henkilo :henkilotiedot :hetu) => "080599-****"
+       (-> hakija-doc :data :henkilo :henkilotiedot :hetu) => "******-****"
        (-> hakija-doc :data :henkilo :yhteystiedot  :puhelin) => "040-1234567"
        (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :etunimi) => "Gustav"
        (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :sukunimi) => "Golem"
-       (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :hetu) => "080588-****"
+       (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :hetu) => "******-****"
        (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :henkilotiedot :turvakieltoKytkin) => true
        (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :osoite :katu) => "Katuosoite"
        (-> uusirak-doc :data :rakennuksenOmistajat :0 :henkilo :yhteystiedot :puhelin) => "040-2345678"))
