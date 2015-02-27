@@ -19,13 +19,6 @@
 (defn get-current-filename [application-id]
   (str application-id "_current_application.pdf"))
 
-(defn- write-application-pdf-versions [output-dir application submitted-application lang]
-  (let [id (:id application)
-        submitted-file (io/file (str output-dir "/" (get-submitted-filename id)))
-        current-file (io/file (str output-dir "/" (get-current-filename id)))]
-    (pdf-export/generate submitted-application lang submitted-file)
-    (pdf-export/generate application lang current-file)))
-
 (defn- write-attachments [attachments output-dir]
   (doseq [attachment attachments]
     (let [file-id (:fileId attachment)
@@ -71,7 +64,6 @@
     (try
       (with-open [out-file-stream (io/writer tempfile)]
         (emit xml out-file-stream))
-      ;; this has to be called before calling "with-open" below
       (catch java.io.FileNotFoundException e
         (error e (.getMessage e))
         (fail! :error.sftp.user.does.not.exist :details (.getMessage e))))
@@ -88,4 +80,4 @@
   (->>
     attachments
     (map :fileId)
-    (filter identity)))
+    (remove nil?)))
