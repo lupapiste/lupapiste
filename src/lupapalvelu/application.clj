@@ -295,7 +295,7 @@
   [{application :application}]
   (let [documents (:documents application)
         initialOp (:name (first (:operations application)))
-        original-schema-names (:required ((keyword initialOp) operations/operations))
+        original-schema-names (-> initialOp keyword operations/operations :required)
         original-party-documents (filter-repeating-party-docs (:schema-version application) original-schema-names)]
     (ok :partyDocumentNames (conj original-party-documents "hakija"))))
 
