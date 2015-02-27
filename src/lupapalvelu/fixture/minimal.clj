@@ -633,8 +633,7 @@
                                 :new-application-enabled true
                                 :inforequest-enabled true
                                 :municipality "297"
-                                :permitType "R"
-                                :caseManagement {:ftpUser "dev_ah_kuopio" :enabled true :version "1.1"}}
+                                :permitType "R"}
                                {:open-inforequest-email nil
                                 :open-inforequest false
                                 :new-application-enabled true
