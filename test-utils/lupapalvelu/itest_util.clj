@@ -9,13 +9,16 @@
             [lupapalvelu.web :as web]
             [lupapalvelu.domain :as domain]
             [sade.http :as http]
+            [sade.env :as env]
             [midje.sweet :refer :all]
             [cheshire.core :as json]
             [clojure.walk :refer [keywordize-keys]]
             [clojure.java.io :as io]
             [clojure.string :as s]
             [swiss.arrows :refer [-<>>]]
-            [taoensso.timbre :as timbre :refer (trace debug info warn error fatal)])
+            [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
+            [clj-ssh.cli :as ssh-cli]
+            [clj-ssh.ssh :as ssh])
   (:import org.apache.http.client.CookieStore
            org.apache.http.cookie.Cookie))
 
@@ -68,6 +71,8 @@
 (def velho-id   (id-for "velho"))
 
 (defn server-address [] (System/getProperty "target_server" "http://localhost:8000"))
+
+(def get-files-from-sftp-server? (= (s/upper-case env/target-env) "DEV"))
 
 (defn decode-response [resp]
   (update-in resp [:body] (comp keywordize-keys json/decode)))
@@ -478,3 +483,37 @@
     (command apikey :set-user-to-document :id foreman-app-id :documentId (:id foreman-doc) :userId userId :path "" :collection "documents")
     (command apikey :update-doc :id foreman-app-id :doc (:id foreman-doc) :updates [["patevyysvaatimusluokka" difficulty]])
     foreman-app-id))
+
+;; File actions
+
+
+(defn get-local-filename [directory file-prefix]
+  (let [files (sort-by #(.lastModified %) > (file-seq (io/file directory)))]
+    (str directory (some #(when (and (.startsWith (.getName %) file-prefix) (.endsWith (.getName %) ".xml"))
+                            (.getName %)) files))))
+
+(def dev-password "Lupapiste")
+
+(defn get-file-from-server
+  ([user server file-to-get target-file-name]
+    (timbre/info "sftp" (str user "@" server ":" file-to-get) target-file-name)
+    (ssh-cli/sftp server :get file-to-get target-file-name :username user :password dev-password :strict-host-key-checking :no)
+    target-file-name)
+  ([user server file-prefix target-file-name path-to-file]
+    (try
+      (let [agent (ssh/ssh-agent {})
+           session (ssh/session agent server {:username user :password dev-password :strict-host-key-checking :no})]
+       (ssh/with-connection session
+         (let [channel (ssh/ssh-sftp session)]
+           (ssh/with-channel-connection channel
+             (timbre/info "sftp: ls" path-to-file)
+             (let [filename (some #(when (and (.startsWith (.getFilename %) file-prefix) (.endsWith (.getFilename %) ".xml"))
+                                     (.getFilename %))
+                              (sort-by #(.getMTime (.getAttrs %)) > (ssh/sftp channel {} :ls path-to-file)))
+                   file-to-get (str path-to-file filename)]
+               (timbre/info "sftp: get" file-to-get)
+               (ssh/sftp channel {} :get file-to-get target-file-name)
+               (timbre/info "sftp: done.")
+               target-file-name)))))
+      (catch com.jcraft.jsch.JSchException e
+        (error e (str "SSH connection " user "@" server))))))

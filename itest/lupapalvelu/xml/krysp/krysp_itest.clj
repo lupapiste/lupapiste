@@ -3,8 +3,6 @@
             [clojure.string :as s]
             [clojure.java.io :as io]
             [clojure.data.xml :refer :all]
-            [clj-ssh.cli :as ssh-cli]
-            [clj-ssh.ssh :as ssh]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [lupapalvelu.itest-util :refer :all]
@@ -111,39 +109,6 @@
 (defn- generate-link-permit [{id :id :as application} apikey]
   (when (is-link-permit-required application)
     (fact "Lisataan hakemukselle viitelupa" (command apikey :add-link-permit :id id :linkPermitId "Kuntalupatunnus 123") => ok?)))
-
-(defn- get-local-filename [directory file-prefix]
-  (let [files (sort-by #(.lastModified %) > (file-seq (io/file directory)))]
-    (str directory (some #(when (and (.startsWith (.getName %) file-prefix) (.endsWith (.getName %) ".xml"))
-                            (.getName %)) files))))
-
-(def- dev-password "Lupapiste")
-
-(defn- get-file-from-server
-  ([user server file-to-get target-file-name]
-    (timbre/info "sftp" (str user "@" server ":" file-to-get) target-file-name)
-    (ssh-cli/sftp server :get file-to-get target-file-name :username user :password dev-password :strict-host-key-checking :no)
-    target-file-name)
-  ([user server file-prefix target-file-name path-to-file]
-    (try
-      (let [agent (ssh/ssh-agent {})
-           session (ssh/session agent server {:username user :password dev-password :strict-host-key-checking :no})]
-       (ssh/with-connection session
-         (let [channel (ssh/ssh-sftp session)]
-           (ssh/with-channel-connection channel
-             (timbre/info "sftp: ls" path-to-file)
-             (let [filename (some #(when (and (.startsWith (.getFilename %) file-prefix) (.endsWith (.getFilename %) ".xml"))
-                                     (.getFilename %))
-                              (sort-by #(.getMTime (.getAttrs %)) > (ssh/sftp channel {} :ls path-to-file)))
-                   file-to-get (str path-to-file filename)]
-               (timbre/info "sftp: get" file-to-get)
-               (ssh/sftp channel {} :get file-to-get target-file-name)
-               (timbre/info "sftp: done.")
-               target-file-name)))))
-      (catch com.jcraft.jsch.JSchException e
-        (error e (str "SSH connection " user "@" server))))))
-
-(def- get-files-from-sftp-server? (= (s/upper-case env/target-env) "DEV"))
 
 (defn- validate-attachment [liite expected-type application]
   (let [permit-type (keyword (permit/permit-type application))
