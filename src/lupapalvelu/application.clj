@@ -138,14 +138,19 @@
         doc-mapper (comp mask-person-ids validate)]
     (update-in application [:documents] (partial map doc-mapper))))
 
-(defn schema-branch? [node]
+(defn- process-tasks [application]
+  (update-in application [:tasks] (partial map #(assoc % :validationErrors (model/validate application %)))))
+
+;; For enrich-docs-disabled-flag -->
+
+(defn- schema-branch? [node]
   (or
     (seq? node)
     (and
       (map? node)
       (contains? node :body))))
 
-(def schema-leaf?
+(def- schema-leaf?
   (complement schema-branch?))
 
 (defn- schema-zipper [doc-schema]
@@ -190,16 +195,12 @@
       disabled-paths
       (let [current-node      (zip/node loc)
             current-whitelist (:whitelist current-node)
-
-            propagate-wl?     (and (schema-branch? current-node)
-                                   current-whitelist)
-
+            propagate-wl?     (and (schema-branch? current-node) current-whitelist)
             loc               (if propagate-wl?
                                 (iterate-siblings-to-right
                                   (zip/down loc) ;leftmost-child, starting point
                                   #(zip/edit % add-whitelist-property current-whitelist))
                                 loc)
-
             whitelisted-leaf? (and
                                 (schema-leaf? current-node)
                                 current-whitelist)
@@ -222,6 +223,8 @@
             doc
             whitelisted-paths)))
 
+;; <-- For enrich-docs-disabled-flag
+
 (defn- enrich-docs-disabled-flag [{user-role :role} app]
   (let [mapper-fn (partial enrich-single-doc-disabled-flag user-role)]
     (update-in app [:documents] (partial map mapper-fn))))
@@ -233,6 +236,7 @@
     without-system-keys
     process-foreman-v2
     (process-documents user)
+    process-tasks
     (enrich-docs-disabled-flag user)))
 
 (defn find-authorities-in-applications-organization [app]
