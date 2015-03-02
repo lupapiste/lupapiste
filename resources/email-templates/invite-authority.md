@@ -1,8 +1,8 @@
 # Hei,
 
-Sinut on kutsuttu viranomaiseksi Lupapiste.fi palveluun. Oheisen linkin kautta p&auml;&auml;set valitsemaan itsellesi salasanan palveluun.
+Sinut on kutsuttu viranomaiseksi Lupapiste-palveluun. Oheisen linkin kautta p&auml;&auml;set valitsemaan itsellesi salasanan palveluun.
 
-Jatka klikkaamalla linkki&auml;: 
+Jatka klikkaamalla linkki&auml;:
 
 {{link-fi}}
 
@@ -12,9 +12,9 @@ Tervetuloa.
 
 --
 
-Hej, 
+Hej,
 
-du &auml;r i egenskap av myndighetsperson inbjuden till e-tj&auml;nsten Lupapiste.fi. Genom vidst&&aring;;ende l&auml;nk kan du v&auml;lja ett l&ouml;senord till tj&auml;nsten. 
+du &auml;r i egenskap av myndighetsperson inbjuden till e-tj&auml;nsten Lupapiste. Genom vidst&&aring;;ende l&auml;nk kan du v&auml;lja ett l&ouml;senord till tj&auml;nsten.
 
 Forts&auml;tt genom att klicka p&aring; l&auml;nken
 

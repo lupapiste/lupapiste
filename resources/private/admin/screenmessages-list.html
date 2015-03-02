@@ -14,8 +14,7 @@
               </tr>
             </thead>
             <tbody data-bind="foreach: $root.screenmessages.messages">
-              <!--   TODO: Tee uusi "message-row" "user-row":n tilalle. Missa user-row on maaritelty?  -->
-              <tr class="user-row">
+              <tr class="message-row">
                 <td data-bind="dateTimeString: added"></td>
                 <td data-bind="text: fi"></td>
                 <td data-bind="text: sv"></td>

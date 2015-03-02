@@ -78,9 +78,23 @@ var users = (function($) {
     };
 
     self.redraw = function() { self.dataTable.fnDraw(true); };
-    self.redrawCallback = function(redraw) {
-      if (redraw) {
+    self.redrawCallback = function(results) {
+      if (results) {
         self.redraw();
+      }
+
+      var resultText = "";
+      if (_.isObject(results)) {
+        _.forOwn(results, function(value, key) {
+          if (key !== "ok") {
+            resultText += key + " = " + value;
+          }
+        });
+      }
+      if (resultText !== "") {
+        resultText = "<textarea rows='10' style='width:100%' readonly='readonly'>" + resultText + "</textarea>";
+        var title = results.ok ? "Toiminnon tulokset" : loc("error.unknown");
+        LUPAPISTE.ModalDialog.showDynamicOk(title, resultText, undefined, {html: true});
       }
     };
 

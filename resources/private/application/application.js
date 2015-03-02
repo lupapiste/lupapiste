@@ -257,7 +257,6 @@
     } else {
       pageutil.showAjaxWait();
       currentId = newId;
-      mapModel.updateMapSize(kind);
       repository.load(currentId, applicationModel.pending, function(application) {
         selectTab(tab || (application.inPostVerdictState ? "tasks" : "info"));
       });
