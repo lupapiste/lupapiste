@@ -35,7 +35,6 @@ LUPAPISTE.MapModel = function(authorizationModel) {
       // TODO: Try to find true root cause for above bug.
       //
 //      if (!inforequestMarkerMap) {
-        console.log("getOrCreateMap, creating marker map");
         inforequestMarkerMap = createMap("inforequest-marker-map");
 
         inforequestMarkerMap.setMarkerClickCallback(
