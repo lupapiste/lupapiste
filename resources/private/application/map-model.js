@@ -29,7 +29,12 @@ LUPAPISTE.MapModel = function(authorizationModel) {
       }
       return inforequestMap;
     } else if (kind === "inforequest-markers") {
-      if (!inforequestMarkerMap) {
+      //
+      // For unknown reason, marker map initialized incorrectly when coming to inforequest view from application view
+      // (https://issues.solita.fi/browse/LPK-79). Fixing this for now by always building new marker map.
+      // TODO: Try to find true root cause for above bug.
+      //
+//      if (!inforequestMarkerMap) {
         console.log("getOrCreateMap, creating marker map");
         inforequestMarkerMap = createMap("inforequest-marker-map");
 
@@ -44,7 +49,7 @@ LUPAPISTE.MapModel = function(authorizationModel) {
         inforequestMarkerMap.setMarkerMapCloseCallback(
           function() { $("#inforequest-marker-map-contents").html("").hide(); }
         );
-      }
+//      }
       return inforequestMarkerMap;
     } else {
       throw "Unknown kind: " + kind;

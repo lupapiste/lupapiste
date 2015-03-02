@@ -107,7 +107,9 @@
 
     <div class="container">
 
-      <div data-bind="visible: $root.authorization.ok('inforequest-markers')" class="related-map">
+      <!-- Cannot use ko's "visible" binding here because Openlayers would then try to incorrectly initialize the map. -->
+      <!-- Then accessing inforequest with applicant user fails with "Cannot read property 'w' of null". -->
+      <div data-bind="if: $root.authorization.ok('inforequest-markers')" class="related-map">
         <div id="inforequest-marker-map" class="map map-large"></div>
         <div id="inforequest-marker-map-contents"></div>
       </div>
