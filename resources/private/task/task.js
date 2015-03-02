@@ -40,6 +40,7 @@ var taskPageController = (function() {
   var task = ko.observable();
   var processing = ko.observable(false);
   var pending = ko.observable(false);
+  var taskSubmitOk = ko.observable(false);
 
   var authorizationModel = authorization.create();
   var attachmentsModel = new LUPAPISTE.TargetedAttachmentsModel({type: "task"}, "muut.muu", true);
@@ -105,12 +106,8 @@ var taskPageController = (function() {
     attachmentsModel.refresh(application, {type: "task", id: currentTaskId});
 
     var t = _.find(application.tasks, function(task) {return task.id === currentTaskId;});
-    if (!t) {
-      $("#taskDocgen").empty();
-      task(null);
-      error("Task not found", currentApplicationId, currentTaskId);
-      notify.error(loc("error.dialog.title"), loc("error.task-not-found"));
-    } else {
+
+    if (t) {
       t.displayName = taskUtil.longDisplayName(t, application);
       t.applicationId = currentApplicationId;
       t.deleteTask = deleteTask;
@@ -120,12 +117,22 @@ var taskPageController = (function() {
       authorizationModel.refreshWithCallback({id: currentApplicationId}, function() {
         t.approvable = authorizationModel.ok("approve-task") && (t.state === "requires_user_action" || t.state === "requires_authority_action");
         t.rejectable = authorizationModel.ok("reject-task");
-        t.sendable = authorizationModel.ok("send-task") && (t.state === "sent" || t.state === "ok");
         t.sendTask = sendTask;
         t.statusName = LUPAPISTE.statuses[t.state] || "unknown";
         task(t);
-        docgen.displayDocuments("#taskDocgen", application, [t], authorizationModel, {collection: "tasks", updateCommand: "update-task", validate: true});
+
+        var requiredErrors = util.extractRequiredErrors([t.validationErrors]);
+        taskSubmitOk(authorizationModel.ok("send-task") && (t.state === "sent" || t.state === "ok") && !requiredErrors.length);
+
+        var options = {collection: "tasks", updateCommand: "update-task", validate: true};
+        docgen.displayDocuments("#taskDocgen", application, [t], authorizationModel, options);
       });
+
+    } else {
+      $("#taskDocgen").empty();
+      task(null);
+      error("Task not found", currentApplicationId, currentTaskId);
+      notify.error(loc("error.dialog.title"), loc("error.task-not-found"));
     }
   }
 
@@ -147,13 +154,25 @@ var taskPageController = (function() {
     currentApplicationId = applicationId;
   });
 
+  hub.subscribe("update-task-success", function(e) {
+    if (task() && currentApplicationId === e.appId && currentTaskId === e.documentId) {
+      if (!e.results && !e.results.length) {
+        taskSubmitOk(true);
+      } else {
+        var requiredErrors = util.extractRequiredErrors([e.results]);
+        taskSubmitOk(authorizationModel.ok("send-task") && (task().state === "sent" || task().state === "ok") && !requiredErrors.length);
+      }
+    }
+  });
+
   $(function() {
     $("#task").applyBindings({
       task: task,
       pending: pending,
       processing: processing,
       authorization: authorizationModel,
-      attachmentsModel: attachmentsModel
+      attachmentsModel: attachmentsModel,
+      taskSubmitOk: taskSubmitOk
     });
   });
 

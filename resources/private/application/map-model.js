@@ -156,9 +156,9 @@ LUPAPISTE.MapModel = function(authorizationModel) {
       map.drawDrawings(drawings, {}, drawStyle);
     }
     if (application.infoRequest) {
-      map = getOrCreateMap("inforequest-markers");
-      map.clear().center(x, y, 14);
-      setRelevantMarkersOntoMarkerMap(map, currentAppId, x, y);
+      var irMarkersMap = getOrCreateMap("inforequest-markers");
+      irMarkersMap.clear().center(x, y, 14);
+      setRelevantMarkersOntoMarkerMap(irMarkersMap, currentAppId, x, y);
     }
   };
 
