@@ -151,15 +151,14 @@ LUPAPISTE.MapModel = function(authorizationModel) {
     drawings = application.drawings;
 
     var map = getOrCreateMap(application.infoRequest ? "inforequest" : "application");
-    map.clear().center(x, y, 14).add({x: x, y: y});
+    map.clear().updateSize().center(x, y, 14).add({x: x, y: y});
     if (drawings) {
       map.drawDrawings(drawings, {}, drawStyle);
     }
     if (application.infoRequest) {
       var irMarkersMap = getOrCreateMap("inforequest-markers");
-      irMarkersMap.clear().center(x, y, 14);
+      irMarkersMap.clear().updateSize().center(x, y, 14);
       setRelevantMarkersOntoMarkerMap(irMarkersMap, currentAppId, x, y);
-      self.updateMapSize("inforequest");
     }
   };
 
