@@ -40,17 +40,19 @@ Foreman can see application
 Application is submitted
   Mikko logs in
   Open application at index  ${appname}  753-416-25-22  2
+  Element should contain  xpath=//*[@data-test-id='test-application-operation']  Asuinkerrostalon tai rivitalon rakentaminen
   Submit application
   [Teardown]  logout
 
 Application is approved and given a verdict
   Sonja logs in
-  Open application  ${appname}  753-416-25-22
+  Open application at index  ${appname}  753-416-25-22  1
+  Element should contain  xpath=//*[@data-test-id='test-application-operation']  Asuinkerrostalon tai rivitalon rakentaminen
   Click enabled by test id  approve-application
   Open tab  verdict
   Submit empty verdict
 
-Add työnjohtaja task
+Add työnjohtaja task to original application
   Open tab  tasks
   Click enabled by test id  application-new-task
   Wait until  Element should be visible  dialog-create-task
@@ -58,7 +60,7 @@ Add työnjohtaja task
   Input text  create-task-name  Ylitarkastaja
   Click enabled by test id  create-task-save
   Wait until  Element should not be visible  dialog-create-task
-  Wait until  Xpath Should Match X Times  //table[@data-test-id="tasks-foreman"]/tbody/tr  1
+  Wait until  Xpath Should Match X Times  //table[@data-test-id="tasks-foreman"]/tbody/tr  2
   [Teardown]  logout
 
 Mikko can see invited foremans on tasks list
@@ -70,11 +72,14 @@ Mikko can see invited foremans on tasks list
 Mikko can start invite flow from tasks tab
   Click enabled by test id  invite-other-foreman-button
   Wait until  Element should be visible  //div[@id='dialog-invite-foreman']
+  Click by test id  cancel-foreman-dialog
   Click enabled by test id  invite-substitute-foreman-button
   Wait until  Element should be visible  //div[@id='dialog-invite-foreman']
+  Click by test id  cancel-foreman-dialog
 
 Mikko can invite additional foremans to application with verdict
   Wait and click   xpath=//table[@data-test-id='tasks-foreman']//tr[@data-test-name='Ylitarkastaja']/td[@data-test-col-name='foreman-name-or-invite']/a
+  Wait until  Element should be visible  invite-foreman-email
   Input Text  invite-foreman-email  teppo@example.com
   Click by test id  application-invite-foreman
   Wait until  Click by test id  application-invite-foreman-close-dialog

@@ -19,9 +19,10 @@ Mikko goes to empty attachments tab
 Download all attachments should be disabled
   Wait Until  Element should not be visible   xpath=//a[@data-test-id="application-download-all-attachments"]
 
-New attachment template button should not be visible for Mikko
+Dropdown options for attachment actions should look correct for Mikko
   [Tags]  attachments
-  Element should not be visible  xpath=//div[@id="application-attachments-tab"]//button[@data-test-id="new-attachment-template-button"]
+  Page should not contain element  xpath=//select[@data-test-id="attachment-operations-select-lower"]//option[@value='newAttachmentTemplates']
+  Page should not contain element  xpath=//select[@data-test-id="attachment-operations-select-lower"]//option[@value='attachmentsMoveToBackingSystem']
 
 Mikko adds txt attachment without comment
   [Tags]  attachments
@@ -41,7 +42,7 @@ Mikko adds again txt attachment without comment
   Application state should be  draft
   Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${TXT_TESTFILE_NAME}')]
 
-Download all attachments should be enabled
+"Download all attachments" should be enabled
   Wait Until  Element should be visible   xpath=//a[@data-test-id="application-download-all-attachments"]
 
 Mikko opens attachment details
@@ -100,7 +101,7 @@ Signature icon is not visible
 Sign all attachments
   [Tags]  attachments
   Tab should be visible  attachments
-  Click element  xpath=//div[@id="application-attachments-tab"]//div[@class="attachment-actions"]//button[@data-test-id="application-sign-attachments-btn"][1]
+  Select attachment operation option from dropdown  signAttachments
   Wait Until   Element should be visible  signAttachmentPassword
   Input text by test id  signAttachmentPassword  mikko123
   Click enabled by test id  do-sign-attachments

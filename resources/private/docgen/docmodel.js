@@ -159,6 +159,18 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     });
   }
 
+  function makeGroupHelpTextSpan(schema) {
+    var span = document.createElement("span");
+    span.className = "group-help-text";
+
+    var locKey = schema["group-help"];
+    if (locKey) {
+      span.innerHTML = loc(locKey);
+    }
+
+    return span;
+  }
+
   function getUpdateCommand() {
     return (options && options.updateCommand) ? options.updateCommand : "update-doc";
   }
@@ -650,6 +662,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     var label = makeLabel(subSchema, "group", myPath, true);
     div.appendChild(label);
+
+    var groupHelpText = makeGroupHelpTextSpan(subSchema);
+    div.appendChild(groupHelpText);
 
     if (subSchema.approvable) {
       label.appendChild(self.makeApprovalButtons(path, myModel));
@@ -1155,6 +1170,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
         var label = makeLabel(subSchema, "table", myPath.join("."), true);
         div.appendChild(label);
+
+        var groupHelpText = makeGroupHelpTextSpan(subSchema);
+        div.appendChild(groupHelpText);
+
         if (subSchema.approvable) {
           div.appendChild(self.makeApprovalButtons(path, models));
         }
@@ -1324,14 +1343,15 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var updates = _.zip(
         _.map(p, function(path) {return path.replace(new RegExp("^" + self.docId + "."), "");}),
         v);
+    var updateCommand = getUpdateCommand();
 
     ajax
-      .command(getUpdateCommand(), { doc: self.docId, id: self.appId, updates: updates, collection: self.getCollection() })
-    // Server returns empty array (all ok), or array containing an array with three
-    // elements: [key status message]. Here we use just the status.
+      .command(updateCommand, { doc: self.docId, id: self.appId, updates: updates, collection: self.getCollection() })
+      // Server returns empty array (all ok), or array containing an array with three
+      // elements: [key status message]. Here we use just the status.
       .success(function (e) {
         var status = (e.results.length === 0) ? "ok" : e.results[0].result[0];
-        callback(status, e.results);
+        callback(updateCommand, status, e.results);
       })
       .error(function (e) { error(e); callback("err"); })
       .fail(function (e) { error(e); callback("err"); })
@@ -1411,7 +1431,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }, 4000);
   }
 
-  function afterSave(label, loader, indicator, callback, status, results) {
+  function afterSave(label, loader, indicator, callback, updateCommand, status, results) {
     self.showValidationResults(results);
     if (label) {
       label.removeChild(loader);
@@ -1425,8 +1445,14 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     } else if (status !== "ok") {
       error("Unknown status:", status);
     }
+
+    // Send updated event
+    var eventType = updateCommand + "-success";
+    hub.send(eventType, {appId: self.appId, documentId: self.docId, status: status, results: results});
+
+
     if (callback) { callback(); }
-    // No return value or stoping the event propagation:
+    // No return value or stopping the event propagation:
     // That would prevent moving to the next field with tab key in IE8.
   }
 

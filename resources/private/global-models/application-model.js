@@ -24,7 +24,7 @@ LUPAPISTE.ApplicationModel = function() {
     return self.organizationMeta() ? self.organizationMeta().links() : "";
   });
   self.organizationName = ko.computed(function() {
-    return self.organizationMeta() ? self.organizationMeta().name() : [];
+    return self.organizationMeta() ? self.organizationMeta().name() : "";
   });
   self.requiredFieldsFillingObligatory = ko.computed(function() {
     return self.organizationMeta() ? self.organizationMeta().requiredFieldsFillingObligatory() : false;
@@ -59,7 +59,7 @@ LUPAPISTE.ApplicationModel = function() {
     var tasks = ko.toJS(self.tasks) || [];
     // TODO query without foreman tasks
     tasks = _.filter(tasks, function(task) {
-      return task['schema-info'].name !== "task-vaadittu-tyonjohtaja";
+      return task["schema-info"].name !== "task-vaadittu-tyonjohtaja";
     });
     var schemaInfos = _.reduce(tasks, function(m, task){
       var info = task.schema.info;
@@ -432,18 +432,6 @@ LUPAPISTE.ApplicationModel = function() {
       .call();
   };
 
-  function extractRequiredErrors(errors) {
-    var errs = _.map(errors, function(errArray) {
-      return _.filter(errArray, function(err) {
-        return err.result[1] === "illegal-value:required";
-      });
-    });
-    errs = _.filter(errs, function(errArray) {
-      return errArray.length > 0;
-    });
-    return errs;
-  }
-
   self.goToTabPosition = function(targetTab, targetId) {
     if (targetTab === "requiredFieldSummary") {
       ajax
@@ -482,7 +470,7 @@ LUPAPISTE.ApplicationModel = function() {
 
   self.moveToMissingRequiredAttachment = function(fieldInfo) {
     var targetTab = "attachments";
-    var targetId = 'attachment-row-' + fieldInfo.type['type-group']() + '-' + fieldInfo.type['type-id']();
+    var targetId = "attachment-row-" + fieldInfo.type["type-group"]() + "-" + fieldInfo.type["type-id"]();
     self.goToTabPosition(targetTab, targetId);
   };
 
@@ -493,7 +481,7 @@ LUPAPISTE.ApplicationModel = function() {
       var versionsExist = a.versions() && a.versions().length;
       return required && !notNeeded && !versionsExist;
     });
-    missingAttachments = _.groupBy(missingAttachments, function(a){ return a.type['type-group']() });
+    missingAttachments = _.groupBy(missingAttachments, function(a){ return a.type["type-group"](); });
     missingAttachments = _.map(_.keys(missingAttachments), function(k) {
       return [k, missingAttachments[k]];
     });
@@ -501,7 +489,7 @@ LUPAPISTE.ApplicationModel = function() {
   }
 
   self.updateMissingApplicationInfo = function(errors) {
-    self.incorrectlyFilledRequiredFields(extractRequiredErrors(errors));
+    self.incorrectlyFilledRequiredFields(util.extractRequiredErrors(errors));
     self.missingRequiredAttachments(extractMissingAttachments(self.attachments()));
   };
 

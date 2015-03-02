@@ -74,5 +74,5 @@ Go to operation tree
   Wait Until  List Selection Should Be  xpath=//div[@id='popup-id']//select[@data-test-id='create-municipality-select']  ${municipality}
   Execute Javascript  $("div[id='popup-id'] input[data-test-id='create-address']").val("${address}").change();
   Set animations off
-  Click enabled by test id  create-continue
+  Click by test id  create-continue
 

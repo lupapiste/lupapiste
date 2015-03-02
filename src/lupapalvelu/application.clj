@@ -25,19 +25,16 @@
             [lupapalvelu.user :as user]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.operations :as operations]
-            [lupapalvelu.tasks :as tasks]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.verdict-api :as verdict-api]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
-            [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch-api]
-            [lupapalvelu.xml.krysp.rakennuslupa-mapping :as rakennuslupa-mapping]
             [lupapalvelu.ktj :as ktj]
             [lupapalvelu.open-inforequest :as open-inforequest]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.company :as c]
-            [lupapalvelu.foreman :as foreman]))
+            [lupapalvelu.comment :as comment]))
 
 ;; Notifications
 
@@ -64,7 +61,19 @@
     (fail :error.illegal-coordinates)))
 
 
+(declare is-link-permit-required)
+(defn validate-link-permits [application]
+  (let [application (meta-fields/enrich-with-link-permit-data application)
+        linkPermits (-> application :linkPermitData count)]
+    (when (and (is-link-permit-required application) (= 0 linkPermits))
+      (fail :error.permit-must-have-link-permit))))
+
+
 ;; Helpers
+
+(defn- is-link-permit-required [application]
+  (or (= :muutoslupa (keyword (:permitSubtype application)))
+      (some #(operations/link-permit-required-operations (keyword (:name %))) (:operations application))))
 
 (defn do-set-user-to-document [application document user-id path current-user timestamp]
   {:pre [document]}
@@ -96,7 +105,7 @@
   {:pre [(collections-to-be-seen collection) id timestamp]}
   {(str "_" collection "-seen-by." id) timestamp})
 
-(defn- mark-indicators-seen-updates [application user timestamp]
+(defn mark-indicators-seen-updates [application user timestamp]
   (merge
     (apply merge (map (partial mark-collection-seen-update user timestamp) collections-to-be-seen))
     (when (user/authority? user) (model/mark-approval-indicators-seen-update application timestamp))
@@ -122,20 +131,35 @@
     (assoc application :submittable (foreman-submittable? application))
     application))
 
+(defn- person-id-masker-for-user [user {authority :authority :as application}]
+  (cond
+    (user/same-user? user authority) identity
+    (user/authority? user) model/mask-person-id-ending
+    :else (comp model/mask-person-id-birthday model/mask-person-id-ending)))
+
+(defn with-masked-person-ids [application user]
+  (let [mask-person-ids  (person-id-masker-for-user user application)]
+    (update-in application [:documents] (partial map mask-person-ids))))
+
 (defn- process-documents [user {authority :authority :as application}]
   (let [validate (fn [doc] (assoc doc :validationErrors (model/validate application doc)))
-        mask-person-ids (if-not (user/same-user? user authority) model/mask-person-ids identity)
+        mask-person-ids  (person-id-masker-for-user user application)
         doc-mapper (comp mask-person-ids validate)]
     (update-in application [:documents] (partial map doc-mapper))))
 
-(defn schema-branch? [node]
+(defn- process-tasks [application]
+  (update-in application [:tasks] (partial map #(assoc % :validationErrors (model/validate application %)))))
+
+;; For enrich-docs-disabled-flag -->
+
+(defn- schema-branch? [node]
   (or
     (seq? node)
     (and
       (map? node)
       (contains? node :body))))
 
-(def schema-leaf?
+(def- schema-leaf?
   (complement schema-branch?))
 
 (defn- schema-zipper [doc-schema]
@@ -180,16 +204,12 @@
       disabled-paths
       (let [current-node      (zip/node loc)
             current-whitelist (:whitelist current-node)
-
-            propagate-wl?     (and (schema-branch? current-node)
-                                   current-whitelist)
-
+            propagate-wl?     (and (schema-branch? current-node) current-whitelist)
             loc               (if propagate-wl?
                                 (iterate-siblings-to-right
                                   (zip/down loc) ;leftmost-child, starting point
                                   #(zip/edit % add-whitelist-property current-whitelist))
                                 loc)
-
             whitelisted-leaf? (and
                                 (schema-leaf? current-node)
                                 current-whitelist)
@@ -212,9 +232,10 @@
             doc
             whitelisted-paths)))
 
+;; <-- For enrich-docs-disabled-flag
+
 (defn- enrich-docs-disabled-flag [{user-role :role} app]
-  (let [mapper-fn (partial enrich-single-doc-disabled-flag user-role)]
-    (update-in app [:documents] (partial map mapper-fn))))
+  (update-in app [:documents] (partial map (partial enrich-single-doc-disabled-flag user-role))))
 
 (defn- post-process-app [app user]
   (->> app
@@ -223,6 +244,7 @@
     without-system-keys
     process-foreman-v2
     (process-documents user)
+    process-tasks
     (enrich-docs-disabled-flag user)))
 
 (defn find-authorities-in-applications-organization [app]
@@ -283,7 +305,7 @@
   [{application :application}]
   (let [documents (:documents application)
         initialOp (:name (first (:operations application)))
-        original-schema-names (:required ((keyword initialOp) operations/operations))
+        original-schema-names (-> initialOp keyword operations/operations :required)
         original-party-documents (filter-repeating-party-docs (:schema-version application) original-schema-names)]
     (ok :partyDocumentNames (conj original-party-documents "hakija"))))
 
@@ -374,7 +396,7 @@
   (update-application command
     (util/deep-merge
       (when (seq text)
-        (lupapalvelu.comment/comment-mongo-update
+        (comment/comment-mongo-update
           (:state application)
           (str
             (i18n/loc "application.canceled.text") ". "
@@ -416,89 +438,6 @@
     {$set {:modified created
            :complementNeeded created
            :state :complement-needed}}))
-
-
-;; Application approval
-
-(defn is-link-permit-required [application]
-  (or (= :muutoslupa (keyword (:permitSubtype application)))
-      (some #(operations/link-permit-required-operations (keyword (:name %))) (:operations application))))
-
-(defn- validate-link-permits [application]
-  (let [application (meta-fields/enrich-with-link-permit-data application)
-        linkPermits (-> application :linkPermitData count)]
-    (when (and (is-link-permit-required application) (= 0 linkPermits))
-      (fail :error.permit-must-have-link-permit))))
-
-(defn- update-link-permit-data-with-kuntalupatunnus-from-verdict [application]
-  (let [link-permit-app-id (-> application :linkPermitData first :id)
-        link-permit-app (domain/get-application-no-access-checking link-permit-app-id)
-        kuntalupatunnus (-> link-permit-app :verdicts first :kuntalupatunnus)]
-    (if kuntalupatunnus
-      (-> application
-         (assoc-in [:linkPermitData 0 :lupapisteId] link-permit-app-id)
-         (assoc-in [:linkPermitData 0 :id] kuntalupatunnus)
-         (assoc-in [:linkPermitData 0 :type] "kuntalupatunnus"))
-      (if (and (foreman/foreman-app? application) (some #{(keyword (:state link-permit-app))} meta-fields/post-sent-states))
-        application
-        (do
-          (error "Not able to get a kuntalupatunnus for the application  " (:id application) " from it's link permit's (" link-permit-app-id ") verdict."
-                 " Associated Link-permit data: " (:linkPermitData application))
-          (if (foreman/foreman-app? application)
-            (fail! :error.link-permit-app-not-in-post-sent-state)
-            (fail! :error.kuntalupatunnus-not-available-from-verdict)))))))
-
-(defn- organization-has-ftp-user? [organization application]
-  (not (ss/blank? (get-in organization [:krysp (keyword (permit/permit-type application)) :ftpUser]))))
-
-(defn- do-approve [application created id lang jatkoaika-app? do-rest-fn]
-  (let [organization (organization/get-organization (:organization application))]
-    (if (organization-has-ftp-user? organization application)
-      (or
-        (validate-link-permits application)
-        (let [sent-file-ids (if jatkoaika-app?
-                              (mapping-to-krysp/save-jatkoaika-as-krysp application lang organization)
-                              (let [submitted-application (mongo/by-id :submitted-applications id)]
-                                (mapping-to-krysp/save-application-as-krysp application lang submitted-application organization)))
-              attachments-updates (or (attachment/create-sent-timestamp-update-statements (:attachments application) sent-file-ids created) {})]
-          (do-rest-fn attachments-updates)))
-      ;; SFTP user not defined for the organization -> let the approve command pass
-      (do-rest-fn nil))))
-
-(defcommand approve-application
-  {:parameters [id lang]
-   :roles      [:authority]
-   :notified   true
-   :on-success (notify :application-state-change)
-   :states     [:submitted :complement-needed]}
-  [{:keys [application created user] :as command}]
-  (let [jatkoaika-app? (= :ya-jatkoaika (-> application :operations first :name keyword))
-        foreman-notice? (when foreman/foreman-app?
-                          (= "ilmoitus" (-> (domain/get-document-by-name application "tyonjohtaja-v2") :data :ilmoitusHakemusValitsin :value)))
-        app-updates (merge
-                      {:modified created
-                       :sent created
-                       :authority (if (seq (:authority application)) (:authority application) (user/summary user))} ; LUPA-1450
-                      (if (or jatkoaika-app? foreman-notice?)
-                        {:state :closed :closed created}
-                        {:state :sent}))
-        application (-> application
-                      meta-fields/enrich-with-link-permit-data
-                      (#(if (= "lupapistetunnus" (-> % :linkPermitData first :type))
-                         (update-link-permit-data-with-kuntalupatunnus-from-verdict %)
-                         %))
-                      (merge app-updates))
-        mongo-query (if (or jatkoaika-app? foreman-notice?)
-                      {:state {$in ["submitted" "complement-needed"]}}
-                      {})
-        indicator-updates (mark-indicators-seen-updates application user created)
-        do-update (fn [attachments-updates]
-                    (update-application command
-                      mongo-query
-                      {$set (merge app-updates attachments-updates indicator-updates)})
-                    (ok :integrationAvailable (not (nil? attachments-updates))))]
-
-    (do-approve application created id lang jatkoaika-app? do-update)))
 
 
 (defn- do-submit [command application created]
@@ -840,7 +779,7 @@
 (defn- add-operation-allowed? [_ application]
   (let [op (-> application :operations first :name keyword)
         permitSubType (keyword (:permitSubtype application))]
-    (when-not (and (or (nil? op) (:add-operation-allowed (op operations/operations)))
+    (when-not (and (or (nil? op) (:add-operation-allowed (operations/operations op)))
                    (not= permitSubType :muutoslupa))
       (fail :error.add-operation-not-allowed))))
 
@@ -879,13 +818,19 @@
       {$set {:permitSubtype permitSubtype
              :modified      created}})))
 
+(defn authority-if-post-verdict-state [{user :user} {state :state}]
+  (when-not (or (user/authority? user)
+                (contains? action/pre-verdict-states (keyword state)))
+    (fail :error.unauthorized)))
+
 (defcommand change-location
   {:parameters [id x y address propertyId]
    :roles      [:applicant :authority]
-   :states     [:draft :info :answered :open :submitted :complement-needed]
+   :states     [:draft :info :answered :open :submitted :complement-needed :verdictGiven :constructionStarted]
    :input-validators [(partial action/non-blank-parameters [:address])
                       (partial property-id-parameters [:propertyId])
-                      validate-x validate-y]}
+                      validate-x validate-y]
+   :pre-checks [authority-if-post-verdict-state]}
   [{:keys [created application] :as command}]
   (if (= (:municipality application) (organization/municipality-by-propertyId propertyId))
     (do
@@ -1100,77 +1045,6 @@
     (insert-application continuation-app)
     (ok :id (:id continuation-app))))
 
-;;
-;; Inform construction started & ready
-;;
-
-(defcommand inform-construction-started
-  {:parameters ["id" startedTimestampStr]
-   :roles      [:applicant :authority]
-   :states     [:verdictGiven]
-   :notified   true
-   :on-success (notify :application-state-change)
-   :pre-checks [(permit/validate-permit-type-is permit/YA)]
-   :input-validators [(partial action/non-blank-parameters [:startedTimestampStr])]}
-  [{:keys [user created] :as command}]
-  (let [timestamp (util/to-millis-from-local-date-string startedTimestampStr)]
-    (update-application command {$set {:modified created
-                                       :started timestamp
-                                       :startedBy (select-keys user [:id :firstName :lastName])
-                                       :state  :constructionStarted}}))
-  (ok))
-
-(defcommand inform-building-construction-started
-  {:parameters ["id" buildingIndex startedDate lang]
-   :roles      [:NONE] ;FIXME rakentamisen aikaisen toimminan yhteydessa korjataan oikeae
-   :states     [:verdictGiven :constructionStarted]
-   :notified   true
-   :pre-checks [(permit/validate-permit-type-is permit/R)]
-   :input-validators [(partial action/non-blank-parameters [:buildingIndex :startedDate :lang])]}
-  [{:keys [user created application] :as command}]
-  (let [timestamp     (util/to-millis-from-local-date-string startedDate)
-        app-updates   (merge
-                        {:modified created}
-                        (when (= "verdictGiven" (:state application))
-                          {:started created
-                           :state  :constructionStarted}))
-        application   (merge application app-updates)
-        organization  (organization/get-organization (:organization application))
-        ftp-user?     (organization-has-ftp-user? organization application)
-        building      (or
-                        (some #(when (= (str buildingIndex) (:index %)) %) (:buildings application))
-                        (fail! :error.unknown-building))]
-    (when ftp-user?
-      (mapping-to-krysp/save-aloitusilmoitus-as-krysp application lang organization timestamp building user))
-    (update-application command
-      {:buildings {$elemMatch {:index (:index building)}}}
-      {$set (merge app-updates {:buildings.$.constructionStarted timestamp
-                                :buildings.$.startedBy (select-keys user [:id :firstName :lastName])})})
-    (when (= "verdictGiven" (:state application))
-      (notifications/notify! :application-state-change command))
-    (ok :integrationAvailable ftp-user?)))
-
-(defcommand inform-construction-ready
-  {:parameters ["id" readyTimestampStr lang]
-   :roles      [:applicant :authority]
-   :states     [:constructionStarted]
-   :on-success (notify :application-state-change)
-   :pre-checks [(permit/validate-permit-type-is permit/YA)]
-   :input-validators [(partial action/non-blank-parameters [:readyTimestampStr])]}
-  [{:keys [user created application] :as command}]
-  (let [timestamp     (util/to-millis-from-local-date-string readyTimestampStr)
-        app-updates   {:modified created
-                       :closed timestamp
-                       :closedBy (select-keys user [:id :firstName :lastName])
-                       :state :closed}
-        application   (merge application app-updates)
-        organization  (organization/get-organization (:organization application))
-        ftp-user?     (organization-has-ftp-user? organization application)]
-    (when ftp-user?
-      (mapping-to-krysp/save-application-as-krysp application lang application organization))
-    (update-application command {$set app-updates})
-    (ok :integrationAvailable ftp-user?)))
-
 
 (defn- validate-new-applications-enabled [command {:keys [permitType municipality]}]
   (let [scope (organization/resolve-organization-scope municipality permitType)]
@@ -1197,51 +1071,3 @@
     (try (autofill-rakennuspaikka application created)
       (catch Exception e (error e "KTJ data was not updated")))))
 
-;;
-;; krysp enrichment
-;;
-
-(defn add-value-metadata [m meta-data]
-  (reduce (fn [r [k v]] (assoc r k (if (map? v) (add-value-metadata v meta-data) (assoc meta-data :value v)))) {} m))
-
-(defn- load-building-data [url property-id building-id overwrite-all?]
-  (let [all-data (krysp-reader/->rakennuksen-tiedot (krysp-reader/building-xml url property-id) building-id)]
-    (if overwrite-all?
-      all-data
-      (select-keys all-data (keys krysp-reader/empty-building-ids)))))
-
-(defcommand merge-details-from-krysp
-  {:parameters [id documentId path buildingId overwrite collection]
-   :input-validators [commands/validate-collection
-                      (partial action/non-blank-parameters [:documentId :path])
-                      (partial action/boolean-parameters [:overwrite])]
-   :roles      [:applicant :authority]
-   :states     (action/all-application-states-but [:sent :verdictGiven :constructionStarted :closed :canceled])}
-  [{created :created {:keys [organization propertyId] :as application} :application :as command}]
-  (if-let [{url :url} (organization/get-krysp-wfs application)]
-    (let [document     (commands/by-id application collection documentId)
-          schema       (schemas/get-schema (:schema-info document))
-          clear-ids?   (or (ss/blank? buildingId) (= "other" buildingId))
-          base-updates (concat
-                         (commands/->model-updates [[path buildingId]])
-                         (tools/path-vals
-                           (if clear-ids?
-                             krysp-reader/empty-building-ids
-                             (load-building-data url propertyId buildingId overwrite))))
-          ; Path should exist in schema!
-          updates      (filter (fn [[path _]] (model/find-by-name (:body schema) path)) base-updates)]
-      (infof "merging data into %s %s" (get-in document [:schema-info :name]) (:id document))
-      (commands/persist-model-updates application collection document updates created :source "krysp")
-      (ok))
-    (fail :error.no-legacy-available)))
-
-(defcommand get-building-info-from-wfs
-  {:parameters [id]
-   :roles      [:applicant :authority]
-   :states     (action/all-application-states-but [:sent :verdictGiven :constructionStarted :closed :canceled])}
-  [{{:keys [organization propertyId] :as application} :application}]
-  (if-let [{url :url} (organization/get-krysp-wfs application)]
-    (let [kryspxml  (krysp-reader/building-xml url propertyId)
-          buildings (krysp-reader/->buildings-summary kryspxml)]
-      (ok :data buildings))
-    (fail :error.no-legacy-available)))

@@ -103,12 +103,13 @@
 (defmethod validate-field :select [_ {:keys [body other-key]} v]
   (let [accepted-values (set (map :name body))
         accepted-values (if other-key (conj accepted-values "other") accepted-values)]
-    (when-not (or (ss/blank? v) (contains? accepted-values v))
+    (when-not (or (ss/blank? v) (accepted-values v))
       [:warn "illegal-value:select"])))
 
-;; FIXME https://support.solita.fi/browse/LUPA-1453
-;; implement validator, the same as :select?
-(defmethod validate-field :radioGroup [_ elem v] nil)
+(defmethod validate-field :radioGroup [_ {body :body} v]
+  (let [accepted-values (set (map :name body))]
+    (when-not (or (ss/blank? v) (accepted-values v))
+      [:warn "illegal-value:select"])))
 
 (defmethod validate-field :buildingSelector [_ elem v]
   (cond
@@ -374,10 +375,10 @@
 (defn new-document
   "Creates an empty document out of schema"
   [schema created]
-  {:id           (mongo/create-id)
-   :created      created
-   :schema-info  (:info schema)
-   :data         {}})
+  {:id          (mongo/create-id)
+   :created     created
+   :schema-info (:info schema)
+   :data        (tools/create-document-data schema tools/default-values)})
 
 ;;
 ;; Convert data
@@ -430,11 +431,18 @@
     document
     (tools/deep-find data (keyword schemas/turvakielto))))
 
-(defn mask-person-ids
+(defn mask-person-id-ending
   "Replaces last characters of person IDs with asterisks (e.g., 010188-123A -> 010188-****)"
   [document & [initial-path]]
   (let [mask-if (fn [{type :type} {hetu :value}] (and (= (keyword type) :hetu) hetu (> (count hetu) 7)))
         do-mask (fn [{hetu :value :as v}] (assoc v :value (str (subs hetu 0 7) "****")))]
+    (convert-document-data mask-if do-mask document initial-path)))
+
+(defn mask-person-id-birthday
+  "Replaces first characters of person IDs with asterisks (e.g., 010188-123A -> ******-123A)"
+  [document & [initial-path]]
+  (let [mask-if (fn [{type :type} {hetu :value}] (and (= (keyword type) :hetu) hetu (pos? (count hetu))))
+        do-mask (fn [{hetu :value :as v}] (assoc v :value (str "******" (ss/substring hetu 6 11))))]
     (convert-document-data mask-if do-mask document initial-path)))
 
 (defn has-hetu?

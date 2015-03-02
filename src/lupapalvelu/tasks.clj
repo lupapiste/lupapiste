@@ -57,7 +57,7 @@
     :body [{:name "maarays" :type :text :max-len 4000 :readonly true :layout :full-width}
            {:name "kuvaus"  :type :text :max-len 4000 :layout :full-width}]}])
 
-(defn new-task [schema-name task-name data {:keys [created assignee] :as meta} source]
+(defn new-task [schema-name task-name data {:keys [created assignee state] :as meta :or {state :requires_user_action}} source]
   {:pre [schema-name
          source
          (or (map? data) (nil? data))]}
@@ -68,7 +68,7 @@
                (if (> (.length task-name) task-name-max-len)
                  (str (ss/substring task-name 0 (- task-name-max-len 3)) "...")
                  task-name))
-   :state (if (user/applicant? assignee) :requires_user_action :requires_authority_action)
+   :state state
    :data (when data (-> data tools/wrapped (tools/timestamped created)))
    :assignee (select-keys assignee [:id :firstName :lastName])
    :duedate nil

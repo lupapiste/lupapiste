@@ -1,5 +1,6 @@
 (ns lupapalvelu.attachment-api
   (:require [clojure.java.io :as io]
+            [clojure.set :refer [intersection]]
             [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn warnf error errorf fatal]]
             [monger.operators :refer :all]
             [swiss.arrows :refer [-<> -<>>]]
@@ -12,6 +13,7 @@
             [lupapalvelu.user :as user]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.permit :as permit]
+            [lupapalvelu.application :as a]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.open-inforequest :as open-inforequest]
@@ -80,8 +82,7 @@
 (defcommand move-attachments-to-backing-system
   {:parameters [id lang]
    :roles      [:authority]
-   :pre-checks [(partial if-not-authority-states-must-match #{:verdictGiven})
-                (permit/validate-permit-type-is permit/R)]
+   :pre-checks [(permit/validate-permit-type-is permit/R)]
    :states     [:verdictGiven :constructionStarted]
    :description "Sends such attachments to backing system that are not yet sent."}
   [{:keys [created application] :as command}]
@@ -235,12 +236,14 @@
    :roles      [:applicant :authority]
    :states     action/all-states
    :extra-auth-roles [:statementGiver]}
-  [{:keys [application lang]}]
+  [{:keys [application user lang]}]
   (if application
-    {:status 200
-       :headers {"Content-Type" "application/octet-stream"
-                 "Content-Disposition" (str "attachment;filename=\"" (i18n/loc "attachment.zip.filename") "\"")}
-       :body (attachment/temp-file-input-stream (attachment/get-all-attachments (:attachments application) application lang))}
+    (let [attachments (:attachments application)
+          application (a/with-masked-person-ids application user)]
+      {:status 200
+        :headers {"Content-Type" "application/octet-stream"
+                  "Content-Disposition" (str "attachment;filename=\"" (i18n/loc "attachment.zip.filename") "\"")}
+        :body (attachment/temp-file-input-stream (attachment/get-all-attachments attachments application lang))})
     {:status 404
      :headers {"Content-Type" "text/plain"}
      :body "404"}))
@@ -438,10 +441,8 @@
    :states     (action/all-states-but [:answered :sent :closed :canceled])
    :input-validators [validate-meta validate-scale validate-size validate-operation]}
   [{:keys [application user created] :as command}]
-
   (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
     (fail! :error.pre-verdict-attachment))
-
   (doseq [[k v] meta]
     (attachment/update-attachment-key command attachmentId k v created :set-app-modified? true :set-attachment-modified? true))
   (ok))
@@ -455,14 +456,21 @@
   (ok))
 
 (defcommand set-attachments-as-verdict-attachment
-  {:parameters [id attachmentIds isVerdictAttachment]
+  {:parameters [:id selectedAttachmentIds unSelectedAttachmentIds]
    :roles      [:authority]
    :states     (action/all-states-but [:closed :canceled])
-   :input-validators [(partial action/boolean-parameters [:isVerdictAttachment])
-                      (partial action/vector-parameters-with-non-blank-items [:attachmentIds])]}
-  [{:keys [created] :as command}]
-  (doseq [attachment-id attachmentIds]
-    (attachment/update-attachment-key command attachment-id :forPrinting isVerdictAttachment created :set-app-modified? true :set-attachment-modified? false))
-  (ok))
-
-
+   :input-validators [(partial action/vector-parameters-with-non-blank-items [:selectedAttachmentIds :unSelectedAttachmentIds])
+                      (fn [{{:keys [selectedAttachmentIds unSelectedAttachmentIds]} :data}]
+                        (when (seq (intersection (set selectedAttachmentIds) (set unSelectedAttachmentIds)))
+                          (error "setting verdict attachments, overlapping ids in: " selectedAttachmentIds unSelectedAttachmentIds)
+                          (fail :error.select-verdict-attachments.overlapping-ids)))]}
+  [{:keys [application created] :as command}]
+  (let [updates-fn  (fn [ids k v] (mongo/generate-array-updates :attachments (:attachments application) #((set ids) (:id %)) k v))]
+    (when (or (seq selectedAttachmentIds) (seq unSelectedAttachmentIds))
+      (update-application command {$set (merge
+                                          (updates-fn (concat selectedAttachmentIds unSelectedAttachmentIds) :modified created)
+                                          (when (seq selectedAttachmentIds)
+                                            (updates-fn selectedAttachmentIds   :forPrinting true))
+                                          (when (seq unSelectedAttachmentIds)
+                                            (updates-fn unSelectedAttachmentIds :forPrinting false)))}))
+    (ok)))

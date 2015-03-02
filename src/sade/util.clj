@@ -1,4 +1,5 @@
 (ns sade.util
+  (:refer-clojure :exclude [pos? neg? zero?])
   (:require [clojure.walk :refer [postwalk prewalk]]
             [clojure.string :refer [join]]
             [sade.strings :refer [numeric? decimal-number?] :as ss]
@@ -6,6 +7,27 @@
             [clj-time.coerce :as tc]
             [schema.core :as sc])
   (:import [org.joda.time LocalDateTime]))
+
+;;
+;; Nil-safe number utilities
+;;
+
+(defn pos?
+  "Like clojure.core/pos?, but nil returns false instead of NPE"
+  [n]
+  (if n (clojure.core/pos? n) false))
+
+(defn neg?
+  "Like clojure.core/neg?, but nil returns false instead of NPE"
+  [n]
+  (if n (clojure.core/neg? n) false))
+
+(defn zero?
+  "Like clojure.core/zero?, but nil returns false instead of NPE"
+  [n]
+  (if n (clojure.core/zero? n) false))
+
+;; Map utilities
 
 (defn postwalk-map
   "traverses m and applies f to all maps within"
@@ -349,13 +371,6 @@
 
 (defn max-length-string [max-len]
   (sc/both sc/Str (max-length max-len)))
-
-(defn exclude-from-sequence
-  "Removes the items in the sequential given as the second parameter from the sequential given as the first parameter"
-  [orig-seq exclude-seq]
-  {:pre [(and (sequential? orig-seq) (sequential? exclude-seq))]}
-  (let [exclude-set (set exclude-seq)]
-    (remove #(exclude-set %) orig-seq)))
 
 (def difficulty-values ["AA" "A" "B" "C" "ei tiedossa"])    ;TODO: move this to schemas?
 (defn compare-difficulty [a b]                              ;TODO: make this function more generic by taking the key and comparison values as param? E.g. compare-against [a b key ref-values]

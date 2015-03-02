@@ -90,7 +90,7 @@ Accordions in the Application Summary tab are closed
 
 Stamping page opens, verdict details can be seen
   Open tab  attachments
-  Click enabled by test id  stamp-attachments-btn
+  Select attachment operation option from dropdown  stampAttachments
   Wait Until  Element should be visible  stamping-container
   Textfield value should be  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//input[@data-test-id="stamp-info-kuntalupatunnus"]  2013-01
   Page should contain element  xpath=//div[@id="stamping-container"]//form[@id="stamp-info"]//select[@data-test-id="stamp-info-buildingid-list"]
@@ -139,22 +139,6 @@ Verdict is given
 Verdict count is
   [Arguments]  ${amount}
   Wait until  Xpath Should Match X Times  //div[@id="application-verdict-tab"]//h2[@class="application_section_header"]  ${amount}
-
-Input verdict
-  [Arguments]  ${backend-id}  ${verdict-type-select-value}  ${verdict-given-date}  ${verdict-official-date}  ${verdict-giver-name}
-  ## Disable date picker
-  Execute JavaScript  $(".hasDatepicker").unbind("focus");
-  Input text  backend-id  ${backend-id}
-  Select From List By Value  verdict-type-select  ${verdict-type-select-value}
-  Input text  verdict-given  ${verdict-given-date}
-  Input text  verdict-official  ${verdict-official-date}
-  Input text  verdict-name  ${verdict-giver-name}
-  ## Trigger change manually
-  Execute JavaScript  $("#backend-id").change();
-  Execute JavaScript  $("#verdict-type-select").change();
-  Execute JavaScript  $("#verdict-given").change();
-  Execute JavaScript  $("#verdict-official").change();
-  Execute JavaScript  $("#verdict-name").change();
 
 Comment verdict
   [Arguments]  ${message}

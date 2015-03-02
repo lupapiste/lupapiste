@@ -97,6 +97,11 @@ var util = (function($) {
 
   $.fn.ajaxMask = function(on) { return on ? this.ajaxMaskOn() : this.ajaxMaskOff(); };
 
+  function autofocus(baseElem$) {
+    var base$ = baseElem$ || $("body");
+    return base$.find("[autofocus]:enabled:visible:first").focus();
+  }
+
   function isNum(s) {
     return s && s.match(/^\s*\d+\s*$/) !== null;
   }
@@ -178,6 +183,19 @@ var util = (function($) {
     return isValidFinnishOVT(ovt) || isValidNonFinnishOVT(ovt);
   }
 
+  function extractRequiredErrors(errors) {
+    var errs = _.map(errors, function(errArray) {
+      return _.filter(errArray, function(err) {
+        var ret = _.includes(err.result, "illegal-value:required");
+        return ret;
+      });
+    });
+    errs = _.filter(errs, function(errArray) {
+      return errArray.length > 0;
+    });
+    return errs;
+  }
+
   return {
     zeropad:             zeropad,
     fluentify:           fluentify,
@@ -196,12 +214,14 @@ var util = (function($) {
     buildingName: buildingName,
     nop:          nop,
     constantly:   function(value) { return function() { return value; }; },
+    autofocus:    autofocus,
     isNum:        isNum,
     getIn:        getIn,
         locKeyFromDocPath: locKeyFromDocPath,
     getDocumentOrder: getDocumentOrder,
     isPartyDoc: isPartyDoc,
-    isNotPartyDoc: isNotPartyDoc
+    isNotPartyDoc: isNotPartyDoc,
+    extractRequiredErrors: extractRequiredErrors
   };
 
 })(jQuery);
