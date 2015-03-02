@@ -11,7 +11,7 @@
             <span class="icon drill-left-black-bigger left-align"></span>
           </a>
         </div>
-        <div class="stamp-content" data-bind="if: stampingMode">
+        <div class="attachment-multiselect-content" data-bind="if: stampingMode">
           <h1 data-bind="ltext: 'application.stampAttachments'"></h1>
           <div id="stamping-component-container" data-bind="component: {name: 'stamping-component', params: {application: appModel, attachments: attachments, stampFields: stampFields}}"></div>
         </div>
@@ -134,7 +134,7 @@
           <span class="missing icon" data-bind="visible: status() === statusNoFiles"></span>
         </div>
 
-        <div class="stamp-buttons">
+        <div class="attachment-multiselect-buttons">
           <button data-bind="
               click: start,
               ltext: 'stamp.start',
@@ -164,8 +164,8 @@
         <table class="table attachments-template-table">
           <tbody data-bind="foreach: $data">
             <tr class="attachment-group-header" data-bind="attr: {'data-test-id': $data.groupName}">
-              <td data-bind="text: name" colspan="4" data-test-id="attachment-group-header-text"></td>
-              <td colspan="3" class="attachment-group-select">
+              <td data-bind="text: name" colspan="5" data-test-id="attachment-group-header-text"></td>
+              <td colspan="2" class="attachment-group-select">
                 <!-- ko ifnot: groupSelected -->
                 <a href="#" data-bind="ltext: 'attachments.group.select', click: $parents[1].toggleGroupSelect, visible: $parents[1].status() < $parents[1].statusRunning"
                             data-test-id="attachments-group-select"></a>
@@ -186,7 +186,7 @@
             </tr>
 
             <!-- ko foreach: attachments -->
-            <tr class="attachment-row stamp-attachment-row" data-bind="click: $parents[2].selectRow, clickBubble: false, css: {selected: selected}">
+            <tr class="attachment-row attachment-multiselect-row" data-bind="click: $parents[2].selectRow, clickBubble: false, css: {selected: selected}">
               <td class="attachmentState">
 
                 <span data-bind="attr: {'class': statusName + ' icon',

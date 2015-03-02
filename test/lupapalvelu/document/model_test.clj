@@ -622,10 +622,21 @@
         (get-in stripped-uusirakennus [:data :rakennuksenOmistajat :3]) => (:data stripped-hakija)))))
 
 (facts "hetu-mask"
-  (let [masked (mask-person-ids hakija)]
-    (get-in masked [:data :henkilo :henkilotiedot :etunimi :value]) => (get-in hakija [:data :henkilo :henkilotiedot :etunimi :value])
-    (get-in masked [:data :henkilo :henkilotiedot :hetu]) => truthy
-    (get-in masked [:data :henkilo :henkilotiedot :hetu :value]) => "010203-****"))
+  (fact "ending is masked"
+    (let [masked (mask-person-id-ending hakija)]
+      (get-in masked [:data :henkilo :henkilotiedot :hetu]) => truthy
+      (get-in masked [:data :henkilo :henkilotiedot :hetu :value]) => "010203-****"
+      (fact "non-related field is not changed"
+        (get-in masked [:data :henkilo :henkilotiedot :etunimi :value]) => (get-in hakija [:data :henkilo :henkilotiedot :etunimi :value]))))
+  (fact "birthday is masked"
+    (let [masked (mask-person-id-birthday hakija)]
+      (get-in masked [:data :henkilo :henkilotiedot :hetu]) => truthy
+      (get-in masked [:data :henkilo :henkilotiedot :hetu :value]) => "******-040A"
+      (fact "non-related field is not changed"
+        (get-in masked [:data :henkilo :henkilotiedot :etunimi :value]) => (get-in hakija [:data :henkilo :henkilotiedot :etunimi :value]))))
+  (fact "combination"
+    (let [masked (-> hakija mask-person-id-ending mask-person-id-birthday)]
+      (get-in masked [:data :henkilo :henkilotiedot :hetu :value]) => "******-****")))
 
 (facts
   (fact "all fields are mapped"

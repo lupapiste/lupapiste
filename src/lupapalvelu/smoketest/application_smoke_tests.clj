@@ -1,6 +1,7 @@
 (ns lupapalvelu.smoketest.application-smoke-tests
   (:require [lupapalvelu.smoketest.core :refer [defmonster]]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.action :as action]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.server] ; ensure all namespaces are loaded
             ))
@@ -60,7 +61,7 @@
         (:id application)))))
 
 (defn- schemas-have-ops [apps]
-  (let [app-ids-with-invalid-docs (filter identity (map application-schemas-have-ops apps))]
+  (let [app-ids-with-invalid-docs (remove nil? (map application-schemas-have-ops apps))]
     (when (seq app-ids-with-invalid-docs)
       {:ok false :results (into [] app-ids-with-invalid-docs)})))
 
@@ -87,6 +88,27 @@
 
 (defmonster municipality-is-set
   (nil-property :municipality))
+
+(defn timestamp-is-set [ts-key states]
+  (if-let [results (seq (remove nil? (map #(when (and (states (keyword (:state %))) (nil? (ts-key %))) (:id %)) @applications)))]
+    {:ok false :results results}
+    {:ok true}))
+
+(defmonster opened-timestamp
+  (timestamp-is-set :opened (action/all-states-but [:draft :canceled])))
+
+(defmonster submitted-timestamp
+  (timestamp-is-set :submitted (action/all-application-states-but [:canceled :draft :open])))
+
+; Fails with 255 applications
+;(defmonster canceled-timestamp
+;  (timestamp-is-set :canceled #{:canceled}))
+
+(defmonster sent-timestamp
+  (timestamp-is-set :sent #{:sent :complement-needed}))
+
+(defmonster closed-timestamp
+  (timestamp-is-set :closed #{:closed}))
 
 ;; task source is set
 

@@ -14,7 +14,7 @@
     Based on http://necolas.github.com/normalize.css/
 */
 @import url(//fonts.googleapis.com/css?family=Source+Sans+Pro:200,300,400,600,700,200italic,300italic,400italic,600italic,700italic);
-/* line 11, ../sass/partials/_reset.scss */
+/* line 6, ../sass/partials/_reset.scss */
 html, body, div,
 span, object, iframe,
 h1, h2, h3, h4, h5, h6,
@@ -114,8 +114,8 @@ button, input[type="button"], input[type="reset"], input[type="submit"] {
 
 /* line 80, ../sass/partials/_reset.scss */
 input[type="checkbox"], input[type="radio"] {
-  -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
   box-sizing: border-box;
 }
 
@@ -231,8 +231,8 @@ body.admin {
 
 /* line 57, ../sass/partials/_base.scss */
 .container {
-  -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
   box-sizing: border-box;
   padding: 12px 8px 0 8px;
   width: 100%;
@@ -398,11 +398,11 @@ i {
 /* LINKS */
 /* line 1, ../sass/partials/_links.scss */
 a {
-  color: #333333;
+  color: #333;
 }
 /* line 3, ../sass/partials/_links.scss */
 a:active, a:visited, a:hover {
-  color: #333333;
+  color: #333;
 }
 
 /*------------------------------------*\
@@ -908,7 +908,7 @@ footer .informations .footer-box.sade-box a {
 [type=submit]:hover, .btn:hover, button:hover {
   background: #dddddd;
 }
-/* line 38, ../sass/partials/_buttons.scss */
+/* line 36, ../sass/partials/_buttons.scss */
 [type=submit]:disabled, [type=submit][disabled=disabled], [type=submit].disabled, [type=submit]:disabled:hover, [type=submit][disabled=disabled]:hover, [type=submit].disabled:hover, [type=submit]:disabled:active, [type=submit][disabled=disabled]:active, [type=submit].disabled:active, .btn:disabled, .btn[disabled=disabled], .btn.disabled, .btn:disabled:hover, .btn[disabled=disabled]:hover, .btn.disabled:hover, .btn:disabled:active, .btn[disabled=disabled]:active, .btn.disabled:active, button:disabled, button[disabled=disabled], button.disabled, button:disabled:hover, button[disabled=disabled]:hover, button.disabled:hover, button:disabled:active, button[disabled=disabled]:active, button.disabled:active {
   color: #aaaaaa;
   -webkit-box-shadow: none;
@@ -1145,8 +1145,8 @@ legend {
   -ms-transition: border 125ms ease;
   -o-transition: border 125ms ease;
   transition: border 125ms ease;
-  -webkit-box-shadow: inset 0 2px 3px #dddddd, 0 1px 0 white;
-  box-shadow: inset 0 2px 3px #dddddd, 0 1px 0 white;
+  -webkit-box-shadow: inset 0 2px 3px #dddddd, 0 1px 0 #fff;
+  box-shadow: inset 0 2px 3px #dddddd, 0 1px 0 #fff;
 }
 /* line 31, ../sass/partials/_forms.scss */
 [type="text"]:hover, [type="email"]:hover, [type="tel"]:hover, [type="url"]:hover, [type="password"]:hover, select:hover, textarea:hover {
@@ -1155,7 +1155,7 @@ legend {
 /* line 35, ../sass/partials/_forms.scss */
 [type="text"]:focus, [type="email"]:focus, [type="tel"]:focus, [type="url"]:focus, [type="password"]:focus, select:focus, textarea:focus {
   border-color: #17c;
-  -webkit-box-shadow: inset 0 2px 4px #c3c3c3, 0 1px 0 white;
+  -webkit-box-shadow: inset 0 2px 4px #c3c3c3, 0 1px 0 #fff;
 }
 /* line 40, ../sass/partials/_forms.scss */
 [type="text"].error, [type="email"].error, [type="tel"].error, [type="url"].error, [type="password"].error, select.error, textarea.error {
@@ -1427,7 +1427,7 @@ input[readonly]:focus, textarea[readonly]:focus {
   background: #f6f6f6;
   border-bottom: 1px solid #e9e9e9;
 }
-/* line 292, ../sass/partials/_forms.scss */
+/* line 291, ../sass/partials/_forms.scss */
 .form-group:last-child, .form-choice:last-child, .form-table:last-child {
   border-bottom: none;
 }
@@ -1953,15 +1953,15 @@ tr.attachment-row td:last-child {
   text-align: right;
 }
 /* line 31, ../sass/partials/_tables.scss */
-tr.stamp-attachment-row.selected {
+tr.attachment-multiselect-row.selected {
   background-color: #b9febe;
 }
 /* line 34, ../sass/partials/_tables.scss */
-tr.stamp-attachment-row:hover {
+tr.attachment-multiselect-row:hover {
   background-color: #b9febe;
 }
 /* line 38, ../sass/partials/_tables.scss */
-tr.stamp-attachment-row td.attachment-file-info span.attachment-file-name {
+tr.attachment-multiselect-row td.attachment-file-info span.attachment-file-name {
   display: block;
 }
 
@@ -2144,10 +2144,9 @@ table.attachments-template-table td.attachment-version-info {
   content: " ";
   display: inline-block;
   border-right: 2px solid #828282;
-  -webkit-transform: skew(30deg, 5deg);
   -moz-transform: skew(30deg, 5deg);
   -ms-transform: skew(30deg, 5deg);
-  -o-transform: skew(30deg, 5deg);
+  -webkit-transform: skew(30deg, 5deg);
   transform: skew(30deg, 5deg);
   width: 10px;
   height: 13px;
@@ -2160,10 +2159,9 @@ table.attachments-template-table td.attachment-version-info {
   content: " ";
   display: inline-block;
   border-right: 2px solid #828282;
-  -webkit-transform: skew(-30deg, 5deg);
   -moz-transform: skew(-30deg, 5deg);
   -ms-transform: skew(-30deg, 5deg);
-  -o-transform: skew(-30deg, 5deg);
+  -webkit-transform: skew(-30deg, 5deg);
   transform: skew(-30deg, 5deg);
   width: 10px;
   height: 13px;
@@ -2219,7 +2217,7 @@ table.attachments-template-table td.attachment-version-info {
   padding: 8px 10px;
   text-decoration: none;
   background: #f6f6f6;
-  color: #333333;
+  color: #333;
   outline: none;
   /* Note: IE filters and border-radius don't mix */
   filter: none;
@@ -2266,8 +2264,8 @@ table.attachments-template-table td.attachment-version-info {
   width: 100%;
   display: block;
   margin: 24px 30px 24px 0;
-  -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
   box-sizing: border-box;
 }
 
@@ -2892,25 +2890,26 @@ table.attachments-template-table td.attachment-version-info {
   float: left;
   border: 1px solid #dddddd;
   display: block;
-  -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
   box-sizing: border-box;
   padding: 4px 0px 4px 12px;
   text-decoration: none;
   background: white;
-  color: #333333;
+  color: #333;
   width: 800px;
   cursor: pointer;
+  -moz-user-select: -moz-none;
+  -ms-user-select: none;
   -webkit-user-select: none;
-  -moz-user-select: none;
   user-select: none;
-  -webkit-transition-property: font-size;
   -moz-transition-property: font-size;
   -o-transition-property: font-size;
+  -webkit-transition-property: font-size;
   transition-property: font-size;
-  -webkit-transition-duration: 200ms;
   -moz-transition-duration: 200ms;
   -o-transition-duration: 200ms;
+  -webkit-transition-duration: 200ms;
   transition-duration: 200ms;
 }
 /* line 36, ../sass/partials/_tree.scss */
@@ -2958,7 +2957,7 @@ table.attachments-template-table td.attachment-version-info {
 }
 /* line 72, ../sass/partials/_tree.scss */
 .operation-tree .tree-last li a {
-  color: #333333;
+  color: #333;
 }
 /* line 76, ../sass/partials/_tree.scss */
 .operation-tree .tree-last div {
@@ -2994,8 +2993,8 @@ ul.attachments-list li.mandatory-attachments {
   z-index: 5;
   height: auto;
   margin-bottom: 6px;
-  -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
   box-sizing: border-box;
 }
 /* line 9, ../sass/partials/_accordion.scss */
@@ -3013,8 +3012,8 @@ ul.attachments-list li.mandatory-attachments {
   position: relative;
   width: 100%;
   padding-right: 0;
-  -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
   box-sizing: border-box;
 }
 /* line 24, ../sass/partials/_accordion.scss */
@@ -3282,8 +3281,8 @@ ul.attachments-list li.mandatory-attachments {
 }
 /* line 24, ../sass/partials/_selectm.scss */
 .selectm input {
-  -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
   box-sizing: border-box;
   margin: 0px;
 }
@@ -3326,7 +3325,7 @@ ul.attachments-list li.mandatory-attachments {
 
 /* line 17, ../sass/views/_welcome.scss */
 .welcome_top {
-  background: #01bef5 url("/img/top-bg.jpg");
+  background: #01BEF5 url("/img/top-bg.jpg");
   margin-top: 48px;
   *zoom: 1;
 }
@@ -3504,11 +3503,11 @@ ul.attachments-list li.mandatory-attachments {
 #applications-list_paginate .paginate_enabled_previous, #applications-list_paginate .paginate_enabled_next, .dataTables_paginate .paginate_enabled_previous, .dataTables_paginate .paginate_enabled_next {
   background: #ffffff;
   /* Old browsers */
+  background: url('data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4gPHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJncmFkIiBncmFkaWVudFVuaXRzPSJvYmplY3RCb3VuZGluZ0JveCIgeDE9IjAuNSIgeTE9IjAuMCIgeDI9IjAuNSIgeTI9IjEuMCI+PHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iI2ZmZmZmZiIvPjxzdG9wIG9mZnNldD0iNTAlIiBzdG9wLWNvbG9yPSIjZjNmM2YzIi8+PHN0b3Agb2Zmc2V0PSI1MSUiIHN0b3AtY29sb3I9IiNlZGVkZWQiLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiNmZmZmZmYiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz48cmVjdCB4PSIwIiB5PSIwIiB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyYWQpIiAvPjwvc3ZnPiA=');
   background: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #ffffff), color-stop(50%, #f3f3f3), color-stop(51%, #ededed), color-stop(100%, #ffffff));
-  background: -webkit-linear-gradient(top, #ffffff 0%, #f3f3f3 50%, #ededed 51%, #ffffff 100%);
   background: -moz-linear-gradient(top, #ffffff 0%, #f3f3f3 50%, #ededed 51%, #ffffff 100%);
-  background: -o-linear-gradient(top, #ffffff 0%, #f3f3f3 50%, #ededed 51%, #ffffff 100%);
-  background: linear-gradient(top, #ffffff 0%, #f3f3f3 50%, #ededed 51%, #ffffff 100%);
+  background: -webkit-linear-gradient(top, #ffffff 0%, #f3f3f3 50%, #ededed 51%, #ffffff 100%);
+  background: linear-gradient(to bottom, #ffffff 0%, #f3f3f3 50%, #ededed 51%, #ffffff 100%);
 }
 /* line 66, ../sass/views/_applications.scss */
 #applications-list_paginate .paginate_disabled_previous, #applications-list_paginate .paginate_enabled_previous, .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .paginate_enabled_previous {
@@ -4034,8 +4033,8 @@ span.icon_clear:before {
   padding: 24px 12px;
   margin-top: -42px;
   margin-bottom: 6px;
-  -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
   box-sizing: border-box;
 }
 /* line 256, ../sass/views/_application.scss */
@@ -4310,50 +4309,51 @@ span.icon_clear:before {
 /* line 491, ../sass/views/_application.scss */
 .attachments-actions h3 {
   margin-top: 12px;
+  font-weight: bold;
 }
 
-/* line 496, ../sass/views/_application.scss */
+/* line 497, ../sass/views/_application.scss */
 .parties-list {
   width: 100%;
   margin-bottom: 6px;
 }
-/* line 499, ../sass/views/_application.scss */
+/* line 500, ../sass/views/_application.scss */
 .parties-list button {
   margin: 12px 0;
 }
-/* line 502, ../sass/views/_application.scss */
+/* line 503, ../sass/views/_application.scss */
 .parties-list .party {
   display: table-row;
 }
-/* line 504, ../sass/views/_application.scss */
+/* line 505, ../sass/views/_application.scss */
 .parties-list .party .person {
   display: table-cell;
   padding-right: 12px;
 }
-/* line 508, ../sass/views/_application.scss */
+/* line 509, ../sass/views/_application.scss */
 .parties-list .party .invite-state {
   display: table-cell;
   padding-right: 12px;
 }
-/* line 512, ../sass/views/_application.scss */
+/* line 513, ../sass/views/_application.scss */
 .parties-list .party .invite-action {
   display: table-cell;
   padding-right: 12px;
 }
 
-/* line 520, ../sass/views/_application.scss */
+/* line 521, ../sass/views/_application.scss */
 #inforequest-marker-map {
   width: 30%;
   height: 520px;
   float: right;
   z-index: 2;
 }
-/* line 525, ../sass/views/_application.scss */
+/* line 526, ../sass/views/_application.scss */
 #inforequest-marker-map image {
   cursor: pointer;
 }
 
-/* line 530, ../sass/views/_application.scss */
+/* line 531, ../sass/views/_application.scss */
 #inforequest-marker-map-contents {
   z-index: 2;
   right: 30%;
@@ -4369,66 +4369,66 @@ span.icon_clear:before {
   border: 1px solid #b5b5b5;
   box-shadow: 1px 1px 2px #828282;
 }
-/* line 545, ../sass/views/_application.scss */
+/* line 546, ../sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card {
   padding: 12px;
   z-index: 10000;
   border-top: 1px solid #b5b5b5;
   width: 100%;
 }
-/* line 551, ../sass/views/_application.scss */
+/* line 552, ../sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card h3 {
   font-size: 20px;
 }
-/* line 553, ../sass/views/_application.scss */
+/* line 554, ../sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card h3.operation-type {
   margin-bottom: 12px;
 }
-/* line 558, ../sass/views/_application.scss */
+/* line 559, ../sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card .timestamp {
   float: right;
   font-size: 14px;
 }
-/* line 562, ../sass/views/_application.scss */
+/* line 563, ../sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card a {
-  color: #333333;
+  color: #333;
 }
-/* line 565, ../sass/views/_application.scss */
+/* line 566, ../sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card:first-child {
   border-top: none;
 }
-/* line 569, ../sass/views/_application.scss */
+/* line 570, ../sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card div {
   padding-bottom: 4px;
   margin-bottom: 8px;
   border-bottom: 1px solid #e8e8e8;
 }
-/* line 573, ../sass/views/_application.scss */
+/* line 574, ../sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card div:last-child {
   border-bottom: none;
   padding-bottom: 0px;
 }
-/* line 577, ../sass/views/_application.scss */
+/* line 578, ../sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card div blockquote {
   font-size: 16px;
 }
-/* line 580, ../sass/views/_application.scss */
+/* line 581, ../sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card div .comment-type {
   font-weight: 700;
 }
 
-/* line 589, ../sass/views/_application.scss */
+/* line 590, ../sass/views/_application.scss */
 .verdict-text {
   white-space: pre-line;
   width: 28.75em;
 }
 
-/* line 594, ../sass/views/_application.scss */
+/* line 595, ../sass/views/_application.scss */
 .required-field-error-doc {
   margin: 24px 0 6px;
 }
 
-/* line 598, ../sass/views/_application.scss */
+/* line 599, ../sass/views/_application.scss */
 .requiredField-line {
   margin-bottom: 6px;
   vertical-align: top;
@@ -4436,91 +4436,91 @@ span.icon_clear:before {
   padding: 6px;
   height: 24px;
 }
-/* line 604, ../sass/views/_application.scss */
+/* line 605, ../sass/views/_application.scss */
 .requiredField-line span, .requiredField-line a {
   vertical-align: top;
   line-height: 14px;
   max-height: 16px;
   display: table-cell;
 }
-/* line 610, ../sass/views/_application.scss */
+/* line 611, ../sass/views/_application.scss */
 .requiredField-line a {
   padding-left: 12px;
   font-size: 14px;
 }
-/* line 615, ../sass/views/_application.scss */
+/* line 616, ../sass/views/_application.scss */
 .requiredField-line .required-field-error-element-name {
   padding-left: 6px;
 }
 
-/* line 620, ../sass/views/_application.scss */
+/* line 621, ../sass/views/_application.scss */
 .invited-foremans {
   margin-bottom: 24px;
 }
-/* line 622, ../sass/views/_application.scss */
+/* line 623, ../sass/views/_application.scss */
 .invited-foremans .foreman {
   display: table-row;
 }
-/* line 624, ../sass/views/_application.scss */
+/* line 625, ../sass/views/_application.scss */
 .invited-foremans .foreman span {
   display: table-cell;
   padding-right: 6px;
 }
-/* line 632, ../sass/views/_application.scss */
+/* line 633, ../sass/views/_application.scss */
 .invited-foremans .foreman-state:before {
   content: "(";
 }
-/* line 635, ../sass/views/_application.scss */
+/* line 636, ../sass/views/_application.scss */
 .invited-foremans .foreman-state:after {
   content: ")";
 }
 
-/* line 642, ../sass/views/_application.scss */
+/* line 643, ../sass/views/_application.scss */
 .tasks-foreman thead tr:first-child td {
   padding-left: 0;
 }
-/* line 647, ../sass/views/_application.scss */
+/* line 648, ../sass/views/_application.scss */
 .tasks-foreman .foreman-state:before {
   content: "(";
 }
-/* line 650, ../sass/views/_application.scss */
+/* line 651, ../sass/views/_application.scss */
 .tasks-foreman .foreman-state:after {
   content: ")";
 }
-/* line 655, ../sass/views/_application.scss */
+/* line 656, ../sass/views/_application.scss */
 .tasks-foreman .add-foreman:before {
   content: "[";
 }
-/* line 658, ../sass/views/_application.scss */
+/* line 659, ../sass/views/_application.scss */
 .tasks-foreman .add-foreman:after {
   content: "]";
 }
 
-/* line 664, ../sass/views/_application.scss */
+/* line 665, ../sass/views/_application.scss */
 .operation-info {
   width: 55%;
   display: inline-block;
   vertical-align: top;
 }
 
-/* line 669, ../sass/views/_application.scss */
+/* line 670, ../sass/views/_application.scss */
 .organizationLinks {
   vertical-align: top;
   width: 39%;
   padding-left: 48px;
   display: inline-block;
 }
-/* line 674, ../sass/views/_application.scss */
+/* line 675, ../sass/views/_application.scss */
 .organizationLinks .organization-links {
   margin-bottom: 12px;
 }
-/* line 676, ../sass/views/_application.scss */
+/* line 677, ../sass/views/_application.scss */
 .organizationLinks .organization-links a {
-  color: #333333;
+  color: #333;
 }
-/* line 678, ../sass/views/_application.scss */
+/* line 679, ../sass/views/_application.scss */
 .organizationLinks .organization-links a:active, .organizationLinks .organization-links a:visited, .organizationLinks .organization-links a:hover {
-  color: #333333;
+  color: #333;
 }
 
 /* line 1, ../sass/views/_create_application.scss */
@@ -4649,7 +4649,7 @@ span.icon_clear:before {
   margin-top: 24px;
   padding: 12px;
   border-radius: 3px;
-  border: 1px solid #01bef5;
+  border: 1px solid #01BEF5;
 }
 /* line 113, ../sass/views/_create_application.scss */
 .create-group label {
@@ -5316,7 +5316,7 @@ td.comment-text {
   color: #fff;
   position: fixed;
   right: -500px;
-  top: 159px;
+  top: 59px;
   box-sizing: border-box;
 }
 /* line 28, ../sass/views/_side_panel.scss */
@@ -5379,7 +5379,7 @@ td.comment-text {
   padding-top: 3px;
   margin-left: -6px;
   margin-bottom: 4px;
-  color: #333333;
+  color: #333;
   text-shadow: none;
 }
 /* line 78, ../sass/views/_side_panel.scss */
@@ -5587,7 +5587,7 @@ td.comment-text {
 /* line 11, ../sass/views/_company.scss */
 #company-content .tabs-container li a {
   background-color: #f6f6f6;
-  color: #333333;
+  color: #333;
   text-decoration: none;
   display: inline-block;
   margin-right: 4px;
@@ -5606,40 +5606,40 @@ td.comment-text {
   padding: 8px;
 }
 
-/* line 1, ../sass/views/_stamping.scss */
+/* line 1, ../sass/views/_attachment_multiselect.scss */
 div.nav-back-container {
   overflow: auto;
 }
 
-/* line 5, ../sass/views/_stamping.scss */
-div.stamp-content {
+/* line 5, ../sass/views/_attachment_multiselect.scss */
+div.attachment-multiselect-content {
   margin-top: 24px;
 }
+/* line 8, ../sass/views/_attachment_multiselect.scss */
+div.attachment-multiselect-content .attachment-multiselect-buttons {
+  margin-top: 10px;
+}
 
-/* line 10, ../sass/views/_stamping.scss */
+/* line 15, ../sass/views/_attachment_multiselect.scss */
 #stamping-component-container div.stamp-info-container {
   overflow: auto;
 }
-/* line 13, ../sass/views/_stamping.scss */
-#stamping-component-container .invalid-margin {
-  background: #f06464;
-}
-/* line 17, ../sass/views/_stamping.scss */
+/* line 19, ../sass/views/_attachment_multiselect.scss */
 #stamping-component-container .stamp-status span {
   font-size: 18px;
 }
-/* line 20, ../sass/views/_stamping.scss */
+/* line 22, ../sass/views/_attachment_multiselect.scss */
 #stamping-component-container .stamp-status .icon {
   margin-left: 6px;
 }
-/* line 24, ../sass/views/_stamping.scss */
-#stamping-component-container .stamp-buttons {
-  margin-top: 10px;
-}
-/* line 28, ../sass/views/_stamping.scss */
+/* line 27, ../sass/views/_attachment_multiselect.scss */
 #stamping-component-container form#stamp-info select {
   display: block;
   margin: 2px 6px 6px 0;
+}
+/* line 31, ../sass/views/_attachment_multiselect.scss */
+#stamping-component-container form#stamp-info .invalid-margin {
+  background: #f06464;
 }
 
 /*------------------------------------*\
@@ -5771,7 +5771,7 @@ div.stamp-content {
   display: none;
 }
 
-/* line 168, ../sass/main.scss */
+/* line 167, ../sass/main.scss */
 .inert-table tbody tr:hover td,
 .inert-table tbody tr:hover th {
   background-color: #ffffff;
@@ -5826,7 +5826,7 @@ div.pzbDiv {
   border: 1px solid black;
   box-shadow: 3px 4px 7px;
   font-size: 0.8em;
-  color: #333333;
+  color: #333;
 }
 /* line 219, ../sass/main.scss */
 .dev-debug p {

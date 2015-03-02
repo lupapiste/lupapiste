@@ -29,7 +29,13 @@ LUPAPISTE.MapModel = function(authorizationModel) {
       }
       return inforequestMap;
     } else if (kind === "inforequest-markers") {
-      if (!inforequestMarkerMap) {
+      //
+      // For unknown reason, marker map initialized incorrectly when coming to inforequest view from application view
+      // (https://issues.solita.fi/browse/LPK-79). Fixing this for now by always building new marker map.
+      // TODO: Try to find true root cause for above bug.
+      //
+//      if (!inforequestMarkerMap) {
+        console.log("getOrCreateMap, creating marker map");
         inforequestMarkerMap = createMap("inforequest-marker-map");
 
         inforequestMarkerMap.setMarkerClickCallback(
@@ -43,7 +49,7 @@ LUPAPISTE.MapModel = function(authorizationModel) {
         inforequestMarkerMap.setMarkerMapCloseCallback(
           function() { $("#inforequest-marker-map-contents").html("").hide(); }
         );
-      }
+//      }
       return inforequestMarkerMap;
     } else {
       throw "Unknown kind: " + kind;
@@ -151,19 +157,22 @@ LUPAPISTE.MapModel = function(authorizationModel) {
     drawings = application.drawings;
 
     var map = getOrCreateMap(application.infoRequest ? "inforequest" : "application");
-    map.clear().center(x, y, 14).add({x: x, y: y});
+    map.clear().updateSize().center(x, y, 14).add({x: x, y: y});
     if (drawings) {
       map.drawDrawings(drawings, {}, drawStyle);
     }
     if (application.infoRequest) {
-      map = getOrCreateMap("inforequest-markers");
-      map.clear().center(x, y, 14);
-      setRelevantMarkersOntoMarkerMap(map, currentAppId, x, y);
+      var irMarkersMap = getOrCreateMap("inforequest-markers");
+      irMarkersMap.clear().updateSize().center(x, y, 14);
+      setRelevantMarkersOntoMarkerMap(irMarkersMap, currentAppId, x, y);
     }
   };
 
   self.updateMapSize = function(kind) {
     getOrCreateMap(kind).updateSize();
+    if (kind === "inforequest") {
+      getOrCreateMap("inforequest-markers").updateSize();
+    }
   };
 
 

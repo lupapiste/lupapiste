@@ -31,8 +31,14 @@ LUPAPISTE.VerdictsModel = function() {
         paatos.poytakirjat = poytakirjat;
         paatos.signatures = verdict.signatures;
         paatos.verdict = verdict;
-        return paatos;});
+        return paatos;
+      });
       verdict.paatokset = paatokset;
+
+      var pk = util.getIn(paatokset, [0, "poytakirjat", 0]) || {};
+      var dates = util.getIn(paatokset, [0, "paivamaarat"]) || {};
+      verdict.canBePublished = verdict.kuntalupatunnus && pk.status && pk.paatoksentekija && dates.anto && dates.lainvoimainen;
+
       return verdict;
     });
 
