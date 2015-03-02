@@ -1,5 +1,6 @@
 (ns lupapalvelu.server
-  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal tracef debugf infof warnf errorf fatalf]]
+  (:require [clojure.java.io :as io]
+            [taoensso.timbre :as timbre :refer [trace debug info warn error fatal tracef debugf infof warnf errorf fatalf]]
             [noir.server :as server]
             [lupapalvelu.logging]
             [lupapalvelu.web :as web]
@@ -64,7 +65,8 @@
   (server/add-middleware web/authentication)
   (server/add-middleware web/session-timeout)
 
-  (scss/initialize :gempath "resources/gems")
+  (when-let [gemsdir (io/resource "gems")]
+    (scss/initialize :gempath (.getPath gemsdir)))
 
   (env/in-dev
     (warn "*** Instrumenting performance monitoring")
