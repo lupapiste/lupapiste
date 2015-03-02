@@ -107,7 +107,7 @@
 
     <div class="container">
 
-      <div data-bind="if: $root.authorization.ok('inforequest-markers')" class="related-map">
+      <div data-bind="visible: $root.authorization.ok('inforequest-markers')" class="related-map">
         <div id="inforequest-marker-map" class="map map-large"></div>
         <div id="inforequest-marker-map-contents"></div>
       </div>
