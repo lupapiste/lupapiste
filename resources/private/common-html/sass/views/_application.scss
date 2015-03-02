@@ -393,27 +393,6 @@
   }
 }
 
-#dialog-stamp-attachments {
-  .dialog-content {
-    max-height: 500px;
-    overflow-y: scroll;
-    .btn-dialog {
-      position: relative;
-      width: 10em;
-      margin-left: 6px;
-    }
-    .stamp-files {
-      a {
-        font-size: 13px;
-        display: inline-block;
-      }
-    }
-    .select-all {
-      margin-left: 360px;
-    }
-  }
-}
-
 #dialog-verdict-attachment-prints-order {
   .dialog-content {
     padding-left: 15px;
