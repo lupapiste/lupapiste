@@ -640,6 +640,10 @@
 }
 
 .tasks-foreman {
+  .form-input {
+    display: inline-block;
+  }
+
   thead tr:first-child td {
     padding-left: 0
   }

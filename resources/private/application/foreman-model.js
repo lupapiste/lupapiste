@@ -38,13 +38,17 @@ LUPAPISTE.ForemanModel = function() {
           lastname = util.getIn(foreman, ["lastName"]);
         }
 
-        var data = {"state": app.state,
-                    "id": app.id,
-                    "email":     username,
-                    "firstName": firstname,
-                    "lastName":  lastname,
-                    "name": name,
-                    "statusName": app.state === "verdictGiven" ? "ok" : "new" };
+        var data = {"state":      app.state,
+                    "id":         app.id,
+                    "email":      username,
+                    "firstName":  firstname,
+                    "lastName":   lastname,
+                    "name":       name,
+                    "statusName": app.state === "verdictGiven" ? "ok" : "new"};
+
+        data.displayName = ko.pureComputed(function() {
+          return data.firstName + ' ' + data.lastName + ' (' + data.name + ')';
+        });
 
         self.foremanApplications.push(data);
       });
@@ -59,6 +63,12 @@ LUPAPISTE.ForemanModel = function() {
         var data = { "name": task.taskname,
                      "taskId": task.id,
                      "statusName": "missing" };
+        data.selectedForeman = ko.observable();
+
+        data.selectedForeman.subscribe(function(val) {
+          console.log("selected", val, data.taskId);
+        });
+
         foremans.push(data);
       });
       self.foremanTasks({ "name": loc(["task-vaadittu-tyonjohtaja", "_group_label"]),

@@ -56,6 +56,16 @@
                 <span data-bind="text: $data.name"></span>
               </td>
               <td data-bind="attr: {'data-test-col-name': 'foreman-name-or-invite'}">
+                <select
+                  name="foreman-selection"
+                  class="form-input combobox long"
+                  data-bind="options: $parents[1].foremanApplications,
+                             optionsText: 'displayName',
+                             optionsValue: 'id',
+                             optionsCaption: loc('choose'),
+                             value: $data.selectedForeman">
+                </select>
+
                 <!-- ko if: $data.id -->
                 <span data-bind="fullName: $data"></span>
                 <span data-test-id="tasks-foreman-email" data-bind="text: $data.email ? '(' + $data.email + ')' : ''"></span>
