@@ -3,6 +3,8 @@ var LUPAPISTE = LUPAPISTE || {};
 (function($) {
   "use strict";
 
+  var startPageHref = window.location.href;
+
   /**
    * Prototype for Lupapiste Single Page Apps.
    *
@@ -16,12 +18,12 @@ var LUPAPISTE = LUPAPISTE || {};
     self.defaultTitle = document.title;
 
     self.startPage = startPage;
-    self.currentPage = undefined;
+    self.currentPage = "";
     self.session = undefined;
     self.allowAnonymous = allowAnonymous;
     self.showUserMenu = (showUserMenu !== undefined) ? showUserMenu : !allowAnonymous;
-    self.previousHash = undefined;
-    self.currentHash = undefined;
+    self.previousHash = "";
+    self.currentHash = "";
 
     // Global models
     self.models = {};
@@ -51,30 +53,33 @@ var LUPAPISTE = LUPAPISTE || {};
       if (pageId !== self.currentPage) {
         $(".page").removeClass("visible");
 
-        var page = $("#" + pageId);
-        if (page.length === 0) {
+        var page$ = $("#" + pageId);
+        if (page$.length === 0) {
           pageId = self.startPage;
           pagePath = [];
-          page = $("#" + pageId);
+          page$ = $("#" + pageId);
         }
 
-        if (page.length === 0) {
+        if (page$.length === 0) {
           // Something is seriously wrong, even startPage was not found
           error("Unknown page " + pageId + " and failed to default to " + self.startPage);
           return;
         }
 
-        page.addClass("visible");
+        page$.addClass("visible");
         window.scrollTo(0, 0);
         self.currentPage = pageId;
 
         // Reset title. Pages can override title when they handle page-load event.
         document.title = self.defaultTitle;
+
+        // Set focus on the first field
+        util.autofocus(page$);
       }
 
       hub.send("page-load", { pageId: pageId, pagePath: pagePath, currentHash: "!/" + self.currentHash, previousHash: "!/" + self.previousHash });
 
-      if (self.previousHash !== undefined) {
+      if (self.previousHash !== self.currentHash) {
         var previousPageId = self.previousHash.split("/")[0];
         hub.send("page-unload", { pageId: previousPageId, currentHash: "!/" + self.currentHash, previousHash: "!/" + self.previousHash });
       }
@@ -197,16 +202,27 @@ var LUPAPISTE = LUPAPISTE || {};
 
       $(document.documentElement).keyup(function(event) { hub.send("keyup", event); });
 
-      var logoHref = window.location.href;
-      if (self.startPage && self.startPage.charAt(0) !== "/") {
-        logoHref = "#!/" + self.startPage;
+      function openStartPage() {
+        if (self.startPage && self.startPage.charAt(0) !== "/") {
+          if (self.currentHash === self.startPage) {
+            // trigger start page re-rendering
+            self.previousHash = self.currentHash;
+            self.openPage([self.startPage]);
+          } else {
+            // open normally
+            window.location.hash = "!/" + self.startPage;
+          }
+        } else {
+          // fallback
+          window.location.href = startPageHref;
+        }
       }
 
       var model = {
         languages: loc.getSupportedLanguages(),
         currentLanguage: loc.getCurrentLanguage(),
         changeLanguage: function(lang) {hub.send("change-lang", { lang: lang });},
-        logoHref: logoHref,
+        openStartPage: openStartPage,
         showUserMenu: self.showUserMenu
       };
 

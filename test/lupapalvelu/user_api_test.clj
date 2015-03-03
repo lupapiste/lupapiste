@@ -114,9 +114,9 @@
     (-> (create-new-user-entity {:email "email" :foo "bar"}) :foo) => nil)
 
   (facts "apikey is created"
-    (fact (-> (create-new-user-entity  {:email ..anything.. :apikey "true"}) :private :apikey) => string?)
-    (fact (-> (create-new-user-entity {:email ..anything.. :apikey "false"}) :private) => {})
-    (fact (-> (create-new-user-entity {:email ..anything.. :apikey "foo"}) :private :apikey) => "foo")))
+    (fact (-> (create-new-user-entity  {:email "..anything.." :apikey "true"}) :private :apikey) => string?)
+    (fact (-> (create-new-user-entity {:email "..anything.." :apikey "false"}) :private) => {})
+    (fact (-> (create-new-user-entity {:email "..anything.." :apikey "foo"}) :private :apikey) => "foo")))
 
 ;;
 ;; ==============================================================================

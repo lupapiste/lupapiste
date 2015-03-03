@@ -13,6 +13,7 @@
             [lupapalvelu.user :as user]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.permit :as permit]
+            [lupapalvelu.application :as a]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.open-inforequest :as open-inforequest]
@@ -81,8 +82,7 @@
 (defcommand move-attachments-to-backing-system
   {:parameters [id lang]
    :roles      [:authority]
-   :pre-checks [(partial if-not-authority-states-must-match #{:verdictGiven})
-                (permit/validate-permit-type-is permit/R)]
+   :pre-checks [(permit/validate-permit-type-is permit/R)]
    :states     [:verdictGiven :constructionStarted]
    :description "Sends such attachments to backing system that are not yet sent."}
   [{:keys [created application] :as command}]
@@ -236,12 +236,14 @@
    :roles      [:applicant :authority]
    :states     action/all-states
    :extra-auth-roles [:statementGiver]}
-  [{:keys [application lang]}]
+  [{:keys [application user lang]}]
   (if application
-    {:status 200
-       :headers {"Content-Type" "application/octet-stream"
-                 "Content-Disposition" (str "attachment;filename=\"" (i18n/loc "attachment.zip.filename") "\"")}
-       :body (attachment/temp-file-input-stream (attachment/get-all-attachments (:attachments application) application lang))}
+    (let [attachments (:attachments application)
+          application (a/with-masked-person-ids application user)]
+      {:status 200
+        :headers {"Content-Type" "application/octet-stream"
+                  "Content-Disposition" (str "attachment;filename=\"" (i18n/loc "attachment.zip.filename") "\"")}
+        :body (attachment/temp-file-input-stream (attachment/get-all-attachments attachments application lang))})
     {:status 404
      :headers {"Content-Type" "text/plain"}
      :body "404"}))

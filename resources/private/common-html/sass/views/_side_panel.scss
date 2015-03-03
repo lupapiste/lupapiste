@@ -23,8 +23,6 @@
   position: fixed;
   right: -500px;
   top: 59px;
-  height: 100%;
-  padding-bottom: 59px;
   box-sizing: border-box;
 
   .comment-controls {
@@ -36,7 +34,6 @@
 
   .buttons {
     float: left;
-    margin-top: 100px;
     .btn-conversation, .btn-notice {
       box-shadow: 1px 1px 3px darken($lp-dark-grey, 10%);
       padding: 1em;

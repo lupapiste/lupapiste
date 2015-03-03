@@ -76,7 +76,7 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel) {
           return self.sendUnsentAttachmentsToBackingSystem();
         },
         visibleFunc: function (rawAttachments) {
-          return !unsentAttachmentFound(rawAttachments);
+          return unsentAttachmentFound(rawAttachments);
         }
       }
   };
@@ -144,12 +144,19 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel) {
   };
 
   self.sendUnsentAttachmentsToBackingSystem = function() {
-    ajax
-      .command("move-attachments-to-backing-system", {id: self.appModel.id(), lang: loc.getCurrentLanguage()})
+    var doSendAttachments = function() {
+      ajax.command("move-attachments-to-backing-system", {id: self.appModel.id(), lang: loc.getCurrentLanguage()})
       .success(self.appModel.reload)
       .processing(self.appModel.processing)
       .pending(self.appModel.pending)
       .call();
+    };
+    LUPAPISTE.ModalDialog.showDynamicYesNo(
+      loc("application.attachmentsMoveToBackingSystem"),
+      loc("application.attachmentsMoveToBackingSystem.confirmationMessage"),
+      {title: loc("yes"), fn: doSendAttachments},
+      {title: loc("no")}
+    );
   };
 
   self.newAttachment = function() {
@@ -160,36 +167,43 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel) {
       typeSelector: true,
       opSelector: true
     });
-
     LUPAPISTE.ModalDialog.open("#upload-dialog");
   };
 
   self.copyOwnAttachments = function() {
-    ajax.command("copy-user-attachments-to-application", {id: self.appModel.id()})
-      .success(self.appModel.reload)
-      .processing(self.appModel.processing)
-      .call();
-    return false;
+    var doSendAttachments = function() {
+      ajax.command("copy-user-attachments-to-application", {id: self.appModel.id()})
+        .success(self.appModel.reload)
+        .processing(self.appModel.processing)
+        .call();
+      return false;
+    };
+    LUPAPISTE.ModalDialog.showDynamicYesNo(
+      loc("application.attachmentsCopyOwn"),
+      loc("application.attachmentsCopyOwn.confirmationMessage"),
+      {title: loc("yes"), fn: doSendAttachments},
+      {title: loc("no")}
+    );
   };
 
   self.deleteSingleAttachment = function(a) {
     var attId = _.isFunction(a.id) ? a.id() : a.id;
+    var doDelete = function() {
+      ajax.command("delete-attachment", {id: self.appModel.id(), attachmentId: attId})
+        .success(function() {
+          self.appModel.reload();
+        })
+        .error(function (e) {
+          LUPAPISTE.ModalDialog.showDynamicOk(loc("error.dialog.title"), loc(e.text));
+        })
+        .processing(self.appModel.processing)
+        .call();
+      return false;
+    };
     LUPAPISTE.ModalDialog.showDynamicYesNo(
       loc("attachment.delete.header"),
       loc("attachment.delete.message"),
-      {title: loc("yes"),
-       fn: function() {
-        ajax.command("delete-attachment", {id: self.appModel.id(), attachmentId: attId})
-          .success(function() {
-            self.appModel.reload();
-          })
-          .error(function (e) {
-            LUPAPISTE.ModalDialog.showDynamicOk(loc("error.dialog.title"), loc(e.text));
-          })
-          .processing(self.appModel.processing)
-          .call();
-        return false;
-      }},
+      {title: loc("yes"), fn: doDelete},
       {title: loc("no")});
   };
 

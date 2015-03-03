@@ -472,7 +472,11 @@
 
           <div data-bind="visible: (!$root.application.inPostVerdictState() && preAttachmentsByOperation().length > 0) ||
                                    ($root.application.inPostVerdictState() && postAttachmentsByOperation().length > 0),
-                          template: {name: 'attachment-actions-template'}"></div>
+                          template: {name: 'attachment-actions-template',
+                                     data: {appModel: $data.appModel,
+                                            attachmentsOperation: $data.attachmentsOperation,
+                                            attachmentsOperations: $data.attachmentsOperations,
+                                            testId: 'upper'}}"></div>
 
           <div>
             <div data-bind="if: postAttachmentsByOperation().length > 0" data-test-id="application-post-attachments-table">
@@ -485,7 +489,11 @@
             </div>
             <!-- /ko -->
 
-            <div data-bind="template: {name: 'attachment-actions-template'}"></div>
+            <div data-bind="template: {name: 'attachment-actions-template',
+                                       data: {appModel: $data.appModel,
+                                              attachmentsOperation: $data.attachmentsOperation,
+                                              attachmentsOperations: $data.attachmentsOperations,
+                                              testId: 'lower'}}"></div>
 
             <!-- ko if: $root.application.inPostVerdictState() -->
             <div data-bind="if: preAttachmentsByOperation().length > 0" data-test-id="application-pre-attachments-table">
@@ -675,7 +683,7 @@
                       <div class="btn-container right-align"  data-bind="if: $data.draft" >
                         <button data-bind="visible: $root.authorization.ok('save-verdict-draft'), click: function() {$root.verdictModel.openVerdict($root, $data);}, ltext: 'edit'"
                                 class="btn btn-primary" data-test-id="edit-verdict"></button>
-                        <button data-bind="visible: $root.authorization.ok('publish-verdict'), click: function() {$root.verdictModel.publishVerdict($root, $data);}, ltext: 'verdict.submit'"
+                        <button data-bind="visible: $root.authorization.ok('publish-verdict'), enable: $data.canBePublished, click: function() {$root.verdictModel.publishVerdict($root, $data);}, ltext: 'verdict.submit'"
                                 class="btn btn-primary" data-test-id="publish-verdict"></button>
                       </div>
                     </div>

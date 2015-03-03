@@ -468,9 +468,9 @@ tr { background: white; border-bottom: 1px solid #e9e9e9; }
 tr:nth-child(even) { background: whitesmoke; }
 tr.attachment-row { cursor: pointer; }
 tr.attachment-row td:last-child { text-align: right; }
-tr.stamp-attachment-row.selected { background-color: #b9febe; }
-tr.stamp-attachment-row:hover { background-color: #b9febe; }
-tr.stamp-attachment-row td.attachment-file-info span.attachment-file-name { display: block; }
+tr.attachment-multiselect-row.selected { background-color: #b9febe; }
+tr.attachment-multiselect-row:hover { background-color: #b9febe; }
+tr.attachment-multiselect-row td.attachment-file-info span.attachment-file-name { display: block; }
 
 th, td { padding: 6px 16px; text-align: left; }
 th.btn, td.btn { margin-bottom: 0px; }
@@ -787,8 +787,6 @@ ul.attachments-list li.mandatory-attachments { list-style-type: circle; }
 
 .welcome_logo { position: absolute; top: 48px; padding: 24px; }
 
-.todo.welcome_section { display: none; }
-
 .application-row { cursor: pointer; }
 
 .inforequest-row { cursor: pointer; }
@@ -976,7 +974,8 @@ span.icon_clear:before { color: #f52; }
 .inforequest-conversation { margin-top: 42px; }
 .inforequest-conversation h2 { border-bottom: 1px solid #c3c3c3; }
 
-.attachment-actions { margin-bottom: 24px; }
+.attachments-actions { margin-bottom: 24px; }
+.attachments-actions h3 { margin-top: 12px; font-weight: bold; }
 
 .parties-list { width: 100%; margin-bottom: 6px; }
 .parties-list button { margin: 12px 0; }
@@ -1230,10 +1229,10 @@ td.comment-text { vertical-align: top; text-align: left; }
 
 #side-panel-template { margin: 0; padding: 0; }
 
-#side-panel { z-index: 2001; color: #fff; position: fixed; right: -500px; top: 59px; height: 100%; padding-bottom: 59px; box-sizing: border-box; }
+#side-panel { z-index: 2001; color: #fff; position: fixed; right: -500px; top: 59px; box-sizing: border-box; }
 #side-panel .comment-controls { margin-left: 0; }
 #side-panel .comment-controls .mark-answered { margin-left: 0; }
-#side-panel .buttons { float: left; margin-top: 100px; }
+#side-panel .buttons { float: left; }
 #side-panel .buttons .btn-conversation, #side-panel .buttons .btn-notice { box-shadow: 1px 1px 3px #363636; padding: 1em; outline: none; background: rgba(245, 126, 35, 0.9); background: #f9b785 \9; /* IE 8 and below */ width: 40px; text-align: center; text-transform: uppercase; display: block; border-radius: 5px 0 0 5px; color: #fff; text-shadow: 0px 1px 0px #4f4f4f; font-weight: bold; border: 1px solid #db650a; border-right: 0; word-break: break-all; clear: both; float: right; }
 #side-panel .buttons .btn-conversation span, #side-panel .buttons .btn-notice span { display: block; }
 #side-panel .buttons .btn-conversation .btn-title, #side-panel .buttons .btn-notice .btn-title { -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; word-break: break-all; max-width: 12px; letter-spacing: 2px; }
@@ -1281,14 +1280,14 @@ td.comment-text { vertical-align: top; text-align: left; }
 
 div.nav-back-container { overflow: auto; }
 
-div.stamp-content { margin-top: 24px; }
+div.attachment-multiselect-content { margin-top: 24px; }
+div.attachment-multiselect-content .attachment-multiselect-buttons { margin-top: 10px; }
 
 #stamping-component-container div.stamp-info-container { overflow: auto; }
-#stamping-component-container .invalid-margin { background: #f06464; }
 #stamping-component-container .stamp-status span { font-size: 18px; }
 #stamping-component-container .stamp-status .icon { margin-left: 6px; }
-#stamping-component-container .stamp-buttons { margin-top: 10px; }
 #stamping-component-container form#stamp-info select { display: block; margin: 2px 6px 6px 0; }
+#stamping-component-container form#stamp-info .invalid-margin { background: #f06464; }
 
 /*------------------------------------*\ OTHER
 \*------------------------------------*/

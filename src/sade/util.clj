@@ -1,4 +1,5 @@
 (ns sade.util
+  (:refer-clojure :exclude [pos? neg? zero?])
   (:require [clojure.walk :refer [postwalk prewalk]]
             [clojure.string :refer [join]]
             [sade.strings :refer [numeric? decimal-number?] :as ss]
@@ -6,6 +7,27 @@
             [clj-time.coerce :as tc]
             [schema.core :as sc])
   (:import [org.joda.time LocalDateTime]))
+
+;;
+;; Nil-safe number utilities
+;;
+
+(defn pos?
+  "Like clojure.core/pos?, but nil returns false instead of NPE"
+  [n]
+  (if n (clojure.core/pos? n) false))
+
+(defn neg?
+  "Like clojure.core/neg?, but nil returns false instead of NPE"
+  [n]
+  (if n (clojure.core/neg? n) false))
+
+(defn zero?
+  "Like clojure.core/zero?, but nil returns false instead of NPE"
+  [n]
+  (if n (clojure.core/zero? n) false))
+
+;; Map utilities
 
 (defn postwalk-map
   "traverses m and applies f to all maps within"
