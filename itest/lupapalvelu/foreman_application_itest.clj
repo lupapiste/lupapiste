@@ -39,6 +39,20 @@
     (fact "Submit foreman-app"
       (command apikey :submit-application :id foreman-application-id) => ok?)
 
+    (fact "Link foreman application to task"
+      (let [apikey                       mikko
+            application (create-and-submit-application apikey)
+            _ (command sonja :check-for-verdict :id (:id application))
+            application (query-application apikey (:id application))
+            {foreman-application-id :id} (command apikey :create-foreman-application :id (:id application) :taskId "" :foremanRole "")
+            tasks (:tasks application)
+            foreman-task (first (filter #(= (get-in % [:schema-info :name]) "task-vaadittu-tyonjohtaja") tasks))]
+        (command apikey :update-foreman-task :id (:id application) :taskId (:id foreman-task) :foremanAppId foreman-application-id) => ok?
+        (let [app (query-application apikey (:id application))
+              updated-tasks (:tasks app)
+              updated-foreman-task (first (filter #(= (get-in % [:schema-info :name]) "task-vaadittu-tyonjohtaja") updated-tasks))]
+          (get-in updated-foreman-task [:data :asiointitunnus :value]) => foreman-application-id)))
+
     (facts "approve foreman"
       (let [_ (command sonja :approve-application :id application-id :lang "fi") => ok?
             ; TODO no need to give verdict after implementing LUPA-1819

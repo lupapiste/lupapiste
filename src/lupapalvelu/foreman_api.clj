@@ -82,6 +82,17 @@
       (update-application command {$set {:documents documents}}))
     (ok)))
 
+(defcommand update-foreman-task
+  {:roles [:applicant :authority]
+   :states action/all-states
+   :parameters [id taskId foremanAppId]}
+  [{:keys [created application] :as command}]
+  (let [task (util/find-by-id taskId (:tasks application))]
+    (if task
+      (let [updates [[[:asiointitunnus] foremanAppId]]]
+        (commands/persist-model-updates application "tasks" task updates created))
+      (fail :error.not-found))))
+
 (defn foreman-app-check [_ application]
   (when-not (foreman/foreman-app? application)
     (fail :error.not-foreman-app)))
