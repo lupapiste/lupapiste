@@ -205,17 +205,6 @@
       (sxml/get-text xml-parsed [:UusiAsia :Maksaja :Yritys :Ytunnus]) => (get-in docs [:maksaja 0 :data :yritys :liikeJaYhteisoTunnus]))))
 
 
-#_(defn- attachments-for-write [{:keys [attachments]} & [target]]
-  (for [attachment attachments
-        :when (and (:latestVersion attachment)
-                (not= "statement" (-> attachment :target :type))
-                (not= "verdict" (-> attachment :target :type))
-                (or (nil? target) (= target (:target attachment))))
-        :let [fileId (-> attachment :latestVersion :fileId)]]
-    {:fileId fileId
-     :filename (writer/get-file-name-on-server fileId (get-in attachment [:latestVersion :filename]))}))
-
-
 (facts "Unit tests - attachments-for-write"
 
   (fact "FileId and filename are returned"
