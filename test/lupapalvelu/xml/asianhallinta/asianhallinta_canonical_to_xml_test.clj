@@ -9,6 +9,7 @@
             [lupapalvelu.document.poikkeamis-canonical-test :as poikkeus-test]
             [lupapalvelu.document.canonical-test-common :as ctc]
             [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.xml.asianhallinta.asianhallinta-core]
             [lupapalvelu.xml.asianhallinta.uusi_asia_mapping :as ua-mapping]
             [lupapalvelu.xml.disk-writer :as writer]
             [lupapalvelu.xml.krysp.canonical-to-krysp-xml-test-common :refer [has-tag]]
