@@ -118,4 +118,17 @@
                     :address "Suusaarenkierto 44") => truthy
           app (query-application pena app-id)]
       (command pena :submit-application :id app-id) => ok?
-      (command velho :application-to-asianhallinta :id app-id :lang "fi") => (partial expected-failure? "error.operations.asianhallinta-disabled"))))
+      (command velho :application-to-asianhallinta :id app-id :lang "fi") => (partial expected-failure? "error.operations.asianhallinta-disabled")))
+
+  (fact "If asianhallinta is not set error occurs"
+    (let [app-id (create-app-id
+                    pena
+                    :municipality sonja-muni
+                    :operation "poikkeamis"
+                    :propertyId "75312312341234"
+                    :x 444444 :y 6666666
+                    :address "foo 42, bar") => truthy
+          app (query-application pena app-id)]
+      (command pena :submit-application :id app-id) => ok?
+      (command sonja :application-to-asianhallinta :id app-id :lang "fi") => (partial expected-failure? "error.integration.asianhallinta-disabled"))))
+
