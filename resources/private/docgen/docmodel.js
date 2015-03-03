@@ -1343,17 +1343,18 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var updates = _.zip(
         _.map(p, function(path) {return path.replace(new RegExp("^" + self.docId + "."), "");}),
         v);
+    var updateCommand = getUpdateCommand();
 
     ajax
-      .command(getUpdateCommand(), { doc: self.docId, id: self.appId, updates: updates, collection: self.getCollection() })
-    // Server returns empty array (all ok), or array containing an array with three
-    // elements: [key status message]. Here we use just the status.
+      .command(updateCommand, { doc: self.docId, id: self.appId, updates: updates, collection: self.getCollection() })
+      // Server returns empty array (all ok), or array containing an array with three
+      // elements: [key status message]. Here we use just the status.
       .success(function (e) {
         var status = (e.results.length === 0) ? "ok" : e.results[0].result[0];
-        callback(status, e.results);
+        callback(updateCommand, status, e.results);
       })
-      .error(function (e) { error(e); callback("err"); })
-      .fail(function (e) { error(e); callback("err"); })
+      .error(function (e) { error(e); callback(updateCommand, "err"); })
+      .fail(function (e) { error(e); callback(updateCommand, "err"); })
       .call();
   }
 
@@ -1430,7 +1431,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }, 4000);
   }
 
-  function afterSave(label, loader, indicator, callback, status, results) {
+  function afterSave(label, loader, indicator, callback, updateCommand, status, results) {
     self.showValidationResults(results);
     if (label) {
       label.removeChild(loader);
@@ -1444,8 +1445,14 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     } else if (status !== "ok") {
       error("Unknown status:", status);
     }
+
+    // Send updated event
+    var eventType = updateCommand + "-success";
+    hub.send(eventType, {appId: self.appId, documentId: self.docId, status: status, results: results});
+
+
     if (callback) { callback(); }
-    // No return value or stoping the event propagation:
+    // No return value or stopping the event propagation:
     // That would prevent moving to the next field with tab key in IE8.
   }
 

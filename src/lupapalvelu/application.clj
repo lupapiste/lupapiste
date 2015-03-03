@@ -25,7 +25,6 @@
             [lupapalvelu.user :as user]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.operations :as operations]
-            [lupapalvelu.tasks :as tasks]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.verdict-api :as verdict-api]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
@@ -148,14 +147,19 @@
         doc-mapper (comp mask-person-ids validate)]
     (update-in application [:documents] (partial map doc-mapper))))
 
-(defn schema-branch? [node]
+(defn- process-tasks [application]
+  (update-in application [:tasks] (partial map #(assoc % :validationErrors (model/validate application %)))))
+
+;; For enrich-docs-disabled-flag -->
+
+(defn- schema-branch? [node]
   (or
     (seq? node)
     (and
       (map? node)
       (contains? node :body))))
 
-(def schema-leaf?
+(def- schema-leaf?
   (complement schema-branch?))
 
 (defn- schema-zipper [doc-schema]
@@ -200,16 +204,12 @@
       disabled-paths
       (let [current-node      (zip/node loc)
             current-whitelist (:whitelist current-node)
-
-            propagate-wl?     (and (schema-branch? current-node)
-                                   current-whitelist)
-
+            propagate-wl?     (and (schema-branch? current-node) current-whitelist)
             loc               (if propagate-wl?
                                 (iterate-siblings-to-right
                                   (zip/down loc) ;leftmost-child, starting point
                                   #(zip/edit % add-whitelist-property current-whitelist))
                                 loc)
-
             whitelisted-leaf? (and
                                 (schema-leaf? current-node)
                                 current-whitelist)
@@ -232,9 +232,10 @@
             doc
             whitelisted-paths)))
 
+;; <-- For enrich-docs-disabled-flag
+
 (defn- enrich-docs-disabled-flag [{user-role :role} app]
-  (let [mapper-fn (partial enrich-single-doc-disabled-flag user-role)]
-    (update-in app [:documents] (partial map mapper-fn))))
+  (update-in app [:documents] (partial map (partial enrich-single-doc-disabled-flag user-role))))
 
 (defn- post-process-app [app user]
   (->> app
@@ -243,6 +244,7 @@
     without-system-keys
     process-foreman-v2
     (process-documents user)
+    process-tasks
     (enrich-docs-disabled-flag user)))
 
 (defn find-authorities-in-applications-organization [app]
@@ -303,7 +305,7 @@
   [{application :application}]
   (let [documents (:documents application)
         initialOp (:name (first (:operations application)))
-        original-schema-names (:required ((keyword initialOp) operations/operations))
+        original-schema-names (-> initialOp keyword operations/operations :required)
         original-party-documents (filter-repeating-party-docs (:schema-version application) original-schema-names)]
     (ok :partyDocumentNames (conj original-party-documents "hakija"))))
 
@@ -777,7 +779,7 @@
 (defn- add-operation-allowed? [_ application]
   (let [op (-> application :operations first :name keyword)
         permitSubType (keyword (:permitSubtype application))]
-    (when-not (and (or (nil? op) (:add-operation-allowed (op operations/operations)))
+    (when-not (and (or (nil? op) (:add-operation-allowed (operations/operations op)))
                    (not= permitSubType :muutoslupa))
       (fail :error.add-operation-not-allowed))))
 

@@ -77,7 +77,7 @@
           <tbody data-bind="foreach: tasks">
             <tr data-bind="attr: {'data-test-type': schema.info.name}">
               <td data-bind="text: displayName"></td>
-              <td><a href="#" data-bind="click: deleteTask, ltext: 'remove'"></a></td>
+              <td><a href="#" data-bind="click: deleteTask, ltext: 'remove', visible: $root.authorization.ok('delete-task')"></a></td>
             </tr>
           </tbody>
         </table>

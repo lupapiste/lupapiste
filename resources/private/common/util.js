@@ -183,6 +183,19 @@ var util = (function($) {
     return isValidFinnishOVT(ovt) || isValidNonFinnishOVT(ovt);
   }
 
+  function extractRequiredErrors(errors) {
+    var errs = _.map(errors, function(errArray) {
+      return _.filter(errArray, function(err) {
+        var ret = _.includes(err.result, "illegal-value:required");
+        return ret;
+      });
+    });
+    errs = _.filter(errs, function(errArray) {
+      return errArray.length > 0;
+    });
+    return errs;
+  }
+
   return {
     zeropad:             zeropad,
     fluentify:           fluentify,
@@ -207,7 +220,8 @@ var util = (function($) {
         locKeyFromDocPath: locKeyFromDocPath,
     getDocumentOrder: getDocumentOrder,
     isPartyDoc: isPartyDoc,
-    isNotPartyDoc: isNotPartyDoc
+    isNotPartyDoc: isNotPartyDoc,
+    extractRequiredErrors: extractRequiredErrors
   };
 
 })(jQuery);
