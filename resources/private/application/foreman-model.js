@@ -3,6 +3,10 @@ LUPAPISTE.ForemanModel = function() {
   var self = this;
 
   self.application = ko.observable();
+  self.inPostVerdictState = ko.pureComputed(function() {
+    var app = ko.unwrap(self.application);
+    return app ? app.inPostVerdictState : false;
+  });
   self.email = ko.observable();
   self.error = ko.observable();
   self.processing = ko.observable();
@@ -27,6 +31,7 @@ LUPAPISTE.ForemanModel = function() {
   });
 
   self.refresh = function(application) {
+    console.log("app", application);
     function foremanApplications(applications) {
       _.forEach(applications, function(app) {
         var foreman = _.find(app.auth, {"role": "foreman"});
@@ -73,7 +78,7 @@ LUPAPISTE.ForemanModel = function() {
       console.log("loadForemanTasks");
       var foremanTasks = _.where(self.application().tasks, { "schema-info": { "name": "task-vaadittu-tyonjohtaja" } });
       console.log(foremanTasks);
-      var foremans = [];
+      var foremen = [];
       _.forEach(foremanTasks, function(task) {
         var data = { "name": task.taskname,
                      "taskId": task.id,
@@ -84,10 +89,10 @@ LUPAPISTE.ForemanModel = function() {
           console.log("selected", val, data.taskId);
         });
 
-        foremans.push(data);
+        foremen.push(data);
       });
       self.foremanTasks({ "name": loc(["task-vaadittu-tyonjohtaja", "_group_label"]),
-                          "foremans": foremans });
+                          "foremen": foremen });
     }
 
     function loadForemanApplications(id) {
