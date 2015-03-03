@@ -11,6 +11,7 @@ LUPAPISTE.ForemanModel = function() {
     return self.email() && !util.isValidEmailAddress(self.email());
   });
   self.foremanApplications = ko.observableArray();
+  self.selectedForeman = ko.observable();
   self.foremanTasks = ko.observableArray([]);
   self.finished = ko.observable(false);
   self.foremanRoles = ko.observable(LUPAPISTE.config.foremanRoles);
@@ -19,6 +20,10 @@ LUPAPISTE.ForemanModel = function() {
   self.isVisible = ko.computed(function() {
     return util.getIn(self, ["application", "permitType"]) === "R" &&
       !/tyonjohtajan-nimeaminen/.test(util.getIn(self, ["application", "operations", 0, "name"]));
+  });
+
+  self.selectedForeman.subscribe(function(val) {
+    console.log("selectedForeman in foreman model", val);
   });
 
   self.refresh = function(application) {
@@ -47,7 +52,17 @@ LUPAPISTE.ForemanModel = function() {
                     "statusName": app.state === "verdictGiven" ? "ok" : "new"};
 
         data.displayName = ko.pureComputed(function() {
-          return data.firstName + ' ' + data.lastName + ' (' + data.name + ')';
+          var output = "";
+          var name = data.firstName ? data.firstName : ""
+          name += data.lastName ? " " + data.lastName : "";
+          output = name;
+          if (_.isEmpty(output)) {
+            output = data.id;
+          }
+          if (data.name) {
+            output += ' (' + data.name + ')';
+          }
+          return output;
         });
 
         self.foremanApplications.push(data);
