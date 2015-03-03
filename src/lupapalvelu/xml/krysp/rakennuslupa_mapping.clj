@@ -11,7 +11,8 @@
                                                                  katselmus-canonical
                                                                  unsent-attachments-to-canonical]]
             [lupapalvelu.xml.emit :refer [element-to-xml]]
-            [lupapalvelu.pdf-export :as pdf-export]))
+            [lupapalvelu.pdf-export :as pdf-export]
+            [lupapalvelu.xml.disk-writer :as writer]))
 
 ;RakVal
 
@@ -287,13 +288,6 @@
     "2.1.6" rakennuslupa_to_krysp_216
     (throw (IllegalArgumentException. (str "Unsupported KRYSP version " krysp-version)))))
 
-(defn- write-application-pdf-versions [output-dir application submitted-application lang]
-  (let [id (:id application)
-        submitted-file (io/file (str output-dir "/" (mapping-common/get-submitted-filename id)))
-        current-file (io/file (str output-dir "/" (mapping-common/get-current-filename id)))]
-    (pdf-export/generate submitted-application lang submitted-file)
-    (pdf-export/generate application lang current-file)))
-
 (defn- save-katselmus-xml [application
                            lang
                            output-dir
@@ -337,9 +331,10 @@
                        (assoc-in % [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto :Katselmus :katselmuspoytakirja] canonical-pk)
                        %)))
 
-        xml (element-to-xml canonical (get-mapping krysp-version))]
+        xml (element-to-xml canonical (get-mapping krysp-version))
+        attachments-for-write (mapping-common/attachment-details-from-canonical all-canonical-attachments)]
 
-    (mapping-common/write-to-disk application all-canonical-attachments nil xml krysp-version output-dir)))
+    (writer/write-to-disk application attachments-for-write xml krysp-version output-dir)))
 
 (defn save-katselmus-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."
@@ -391,14 +386,15 @@
   [application lang krysp-version output-dir begin-of-link]
   (let [canonical-without-attachments (unsent-attachments-to-canonical application lang)
 
-        attachments (mapping-common/get-attachments-as-canonical application begin-of-link)
+        attachments-canonical (mapping-common/get-attachments-as-canonical application begin-of-link)
         canonical (assoc-in canonical-without-attachments
                     [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto]
-                    attachments)
+                    attachments-canonical)
 
-        xml (element-to-xml canonical (get-mapping krysp-version))]
+        xml (element-to-xml canonical (get-mapping krysp-version))
+        attachments-for-write (mapping-common/attachment-details-from-canonical attachments-canonical)]
 
-    (mapping-common/write-to-disk application attachments nil xml krysp-version output-dir)))
+    (writer/write-to-disk application attachments-for-write xml krysp-version output-dir)))
 
 (defn- map-tyonjohtaja-patevyysvaatimusluokka [canonical]
   (update-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :osapuolettieto :Osapuolet :tyonjohtajatieto]
@@ -433,17 +429,17 @@
                               (get-in canonical-without-attachments
                                 [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :lausuntotieto]))
         statement-attachments (mapping-common/get-statement-attachments-as-canonical application begin-of-link statement-given-ids)
-        attachments (mapping-common/get-attachments-as-canonical application begin-of-link)
-        attachments-with-generated-pdfs (conj attachments
+        attachments-canonical (mapping-common/get-attachments-as-canonical application begin-of-link)
+        attachments-with-generated-pdfs (conj attachments-canonical
                                           {:Liite
                                            {:kuvaus "Vireille tullut hakemus"
-                                            :linkkiliitteeseen (str begin-of-link (mapping-common/get-submitted-filename (:id application)))
+                                            :linkkiliitteeseen (str begin-of-link (writer/get-submitted-filename (:id application)))
                                             :muokkausHetki (util/to-xml-datetime (:submitted application))
                                             :versionumero 1
                                             :tyyppi "hakemus_vireilletullessa"}}
                                           {:Liite
                                            {:kuvaus "K\u00e4sittelyj\u00e4rjestelm\u00e4\u00e4n siirrett\u00e4ess\u00e4"
-                                            :linkkiliitteeseen (str begin-of-link (mapping-common/get-current-filename (:id application)))
+                                            :linkkiliitteeseen (str begin-of-link (writer/get-current-filename (:id application)))
                                             :muokkausHetki (util/to-xml-datetime (now))
                                             :versionumero 1
                                             :tyyppi "hakemus_taustajarjestelmaan_siirrettaessa"}})
@@ -455,12 +451,13 @@
                     canonical-with-statement-attachments
                     [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto]
                     attachments-with-generated-pdfs)
-        xml (rakennuslupa-element-to-xml canonical krysp-version)]
+        xml (rakennuslupa-element-to-xml canonical krysp-version)
+        all-canonical-attachments (concat attachments-canonical (mapping-common/flatten-statement-attachments statement-attachments))
+        attachments-for-write (mapping-common/attachment-details-from-canonical all-canonical-attachments)]
 
-    (mapping-common/write-to-disk
+    (writer/write-to-disk
       application
-      attachments
-      statement-attachments
+      attachments-for-write
       xml
       krysp-version
       output-dir
