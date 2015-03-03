@@ -1,0 +1,6 @@
+error.organization.scope-not-found: Konfiguraatio puuttuu
+error.integration.asianhallinta-version-wrong-form:
+error.integration.asianhallinta-version-missing:
+error.attachment.no-content: Liitetiedostoa ei löydy
+error.integration.asianhallinta-disabled: Asianhallinta-liittymää ei ole otettu käyttöön organisaatiossa
+error.operations.asianhallinta-disabled: Valittua toimenpidettä ei voida siirtää asianhallintajärjestelmään

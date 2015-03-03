@@ -107,6 +107,40 @@
     :organizations ["297-YA"]
     :private {:password "$2a$10$YceveAiQXbeUs65B4FZ6lez/itf0UEXooHcZlygI2WnQGhF0dJ1jO"}}
 
+
+   ;; Velho Viranomainen - Kuopio R viranomaien:  velho / velho
+   {:id "77777777777777777700645"
+    :email "velho.viranomainen@kuopio.fi"
+    :enabled true
+    :role "authority"
+    :username "velho"
+    :organizations ["297-R"]
+    :firstName "Velho"
+    :lastName "Viranomainen"
+    :phone "1231234567"
+    :street "Katuosoite 2 a 4"
+    :zip "33456"
+    :city "Kuopio"
+    :private {:password "$2a$10$me2UOXOUfEbseJeLUBde8u2rlqOwHuqxbFT00q70QEvTpskHKol2m"
+              :apikey   "e1vshYravGWKA1QXL3NeWMmyzzBJmcgq6IUqKZmh"}}
+
+   ;; Kuopio R-paakayttaja:  kuopio-r / kuopio
+
+   {:id "297-R"
+    :enabled true
+    :lastName "Kuopio"
+    :firstName "Paakayttaja-R"
+    :city "Kuopio"
+    :username "kuopio-r"
+    :street "Paapankuja 12"
+    :phone "0102030405"
+    :email "kuopio-r@kuopio.fi"
+    :role "authorityAdmin"
+    :zip "10203"
+    :organizations ["297-R"]
+    :private {:password "$2a$10$YceveAiQXbeUs65B4FZ6lez/itf0UEXooHcZlygI2WnQGhF0dJ1jO"
+              :apikey   "lhIqT1YwOMH8HuiCGcjBtGggfeRaxZL5OUNd3r4u"}}
+
    ;; Sipoo
 
    ;; Simo Sippo - Sipoon R paakayttaja:  sipoo / sipoo
@@ -591,6 +625,40 @@
                        :links []}
 
 
+                      ;; Kuopio R, has case management (asianhallinta) enabled
+                      {:id "297-R"
+                       :name {:fi "Kuopio rakennusvalvonta" :sv "Kuopio byggnadstillsyn"}
+                       :scope [{:open-inforequest-email nil
+                                :open-inforequest false
+                                :new-application-enabled true
+                                :inforequest-enabled true
+                                :municipality "297"
+                                :permitType "R"}
+                               {:open-inforequest-email nil
+                                :open-inforequest false
+                                :new-application-enabled true
+                                :inforequest-enabled true
+                                :municipality "297"
+                                :permitType "P"
+                                :caseManagement {:ftpUser "dev_ah_kuopio" :enabled true :version "1.1"}}]
+                       :links [{:name
+                                {:fi "Rakentamisen s\u00E4hk\u00F6iset lupapalvelut Kuopiossa"
+                                 :sv "Rakentamisen s\u00E4hk\u00F6iset lupapalvelut Kuopiossa"}
+                                :url
+                                "http://www.kuopio.fi/web/tontit-ja-rakentaminen/rakentamisen-sahkoiset-lupapalvelut"}
+                               {:name
+                                {:fi "Kuopion alueellinen rakennusvalvonta"
+                                 :sv "Kuopion alueellinen rakennusvalvonta"}
+                                :url "http://www.kuopio.fi/web/tontit-ja-rakentaminen/rakennusvalvonta"}
+                               {:name
+                                {:fi "Kuopion kaupunki"
+                                 :sv "Kuopion kaupunki"}
+                                :url "http://www.kuopio.fi"}]
+                       :krysp {:R
+                               {:ftpUser "dev_kuopio"
+                                :url "http://localhost:8000/dev/krysp"
+                                :version "2.1.5"}}
+                       :operations-attachments {:poikkeamis [[:paapiirustus :asemapiirros]]}}
                       ;;
                       ;; Testeissa kaytettavia organisaatioita
                       ;;
