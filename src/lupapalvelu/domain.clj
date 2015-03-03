@@ -244,6 +244,7 @@
    :submitted                nil ; timestamp
    :tasks                    []
    :title                    ""
+   :transfers                []
    :urgency                  "normal"
    :verdicts                 []})
 
