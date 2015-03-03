@@ -9,7 +9,8 @@
             [sade.util :as util]
             [cheshire.core :as json]
             [lupapalvelu.attachment :refer [attachment-types-osapuoli, attachment-scales, attachment-sizes]]
-            [lupapalvelu.stamper :refer [file-types]]))
+            [lupapalvelu.stamper :refer [file-types]]
+            [scss-compiler.core :as scss]))
 
 (def debugjs {:depends [:jquery]
               :js ["debug.js"]
@@ -42,6 +43,11 @@
 
 (defn- schema-versions-by-permit-type []
   (str ";LUPAPISTE.config.kryspVersions = " (json/generate-string validator/supported-krysp-versions-by-permit-type) ";"))
+
+(defn- main-style-file [css-file-path scss-file-path]
+  (if-let [main-css-file (io/resource (c/path css-file-path))]
+    (slurp main-css-file)
+    (scss/scss->css (.getPath (-> scss-file-path c/path io/resource)))))
 
 (def ui-components
   {;; 3rd party libs
@@ -82,8 +88,7 @@
                        "statuses.js" "statusmodel.js" "authorization.js" "vetuma.js"]}
 
    :common-html  {:depends [:selectm-html]
-                  :css ["css/main.css" "jquery-ui.css"]
-                  :scss ["sass/main.scss"]
+                  :css [(partial main-style-file "common-html/css/main.css" "common-html/sass/main.scss") "jquery-ui.css"]
                   :html ["404.html" "footer.html"]}
 
    ;; Components to be included in a SPA
