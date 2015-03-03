@@ -53,7 +53,7 @@
                              [lein-buildid "0.2.0"]
                              [lein-nitpicker "0.4.0"]
                              [lein-hgnotes "0.2.0-SNAPSHOT"]
-                             [lein-scss-compiler "0.1.1"]]
+                             [lein-scss-compiler "0.1.2"]]
                    :resource-paths ["dev-resources"]
                    :source-paths ["dev-src" "test-utils"]
                    :jvm-opts ["-Djava.awt.headless=true"
