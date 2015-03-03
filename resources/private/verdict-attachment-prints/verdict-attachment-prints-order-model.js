@@ -135,6 +135,7 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function() {
       .processing(self.processing)
       .pending(self.pending)
       .success(function() {
+        LUPAPISTE.ModalDialog.close();  // close the prints ordering dialog first
         var content = loc("verdict-attachment-prints-order.order-dialog.ready", self.attachments().length);
         LUPAPISTE.ModalDialog.showDynamicOk(loc("verdict-attachment-prints-order.order-dialog.title"), content);
         pageutil.showAjaxWait();
