@@ -36,8 +36,8 @@
      :Sukunimi (get-in data [:henkilo :henkilotiedot :sukunimi])
      :Yhteystiedot (ua-get-yhteystiedot (:henkilo data))
      :Henkilotunnus (get-in data [:henkilo :henkilotiedot :hetu])
-     :VainSahkoinenAsiointi nil ; TODO tarviiko tata ja Turvakieltoa?
-     :Turvakielto nil}))
+     :VainSahkoinenAsiointi nil ; TODO tarviiko tata
+     :Turvakielto (get-in data [:henkilo :henkilotiedot :turvakieltoKytkin])}))
 
 (defn- ua-get-yritys [data]
   {:Nimi (get-in data [:yritys :yritysnimi])

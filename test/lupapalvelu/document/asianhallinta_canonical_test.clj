@@ -40,6 +40,8 @@
               data    (tools/unwrapped (get-in application [:documents 0 :data :henkilo])) => truthy
               henkilo (get-in (first hakijat) [:Henkilo])]
           (fact "First Hakija of Hakijat has only Henkilo" (keys (first hakijat)) => (just [:Henkilo]))
+          (fact "Henkilo expected fields"
+            (keys henkilo) => (just [:Etunimi :Sukunimi :Yhteystiedot :Henkilotunnus :Turvakielto]))
           (fact "Etunimi" (:Etunimi henkilo) => (get-in data [:henkilotiedot :etunimi]))
           (fact "Sukunimi" (:Sukunimi henkilo) => (get-in data [:henkilotiedot :sukunimi]))
           (fact "Jakeluosoite" (get-in henkilo [:Yhteystiedot :Jakeluosoite]) => (get-in data [:osoite :katu]))
@@ -47,7 +49,8 @@
           (fact "Postitoimipaikka" (get-in henkilo [:Yhteystiedot :Postitoimipaikka]) => (get-in data [:osoite :postitoimipaikannimi]))
           (fact "Email" (get-in henkilo [:Yhteystiedot :Email]) => (get-in data [:yhteystiedot :email]))
           (fact "Puhelinnumero" (get-in henkilo [:Yhteystiedot :Puhelinnumero]) => (get-in data [:yhteystiedot :puhelin]))
-          (fact "Hetu" (get-in henkilo [:Henkilotunnus]) => (get-in data [:henkilotiedot :hetu]))))
+          (fact "Hetu" (get-in henkilo [:Henkilotunnus]) => (get-in data [:henkilotiedot :hetu]))
+          (fact "Turvakielto" (get-in henkilo [:Turvakielto]) => (get-in data [:henkilotiedot :turvakieltoKytkin]))))
 
       (facts "Maksaja"
         (let [maksaja (get-in canonical [:UusiAsia :Maksaja])
