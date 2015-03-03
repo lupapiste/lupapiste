@@ -14,12 +14,15 @@
             [lupapalvelu.foreman :as foreman]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as organization]
+            [lupapalvelu.operations :as operations]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.user :as user]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
+            [lupapalvelu.xml.asianhallinta.asianhallinta-core :as ah]
             [sade.core :refer :all]
-            [sade.strings :as ss]))
+            [sade.strings :as ss]
+            [sade.util :as util]))
 
 ;;
 ;; Application approval
@@ -87,7 +90,7 @@
         do-update (fn [attachments-updates]
                     (update-application command
                       mongo-query
-                      {$set (merge app-updates attachments-updates indicator-updates)})
+                      {$set (util/deep-merge app-updates attachments-updates indicator-updates)})
                     (ok :integrationAvailable (not (nil? attachments-updates))))]
 
     (do-approve application created id lang jatkoaika-app? do-update)))
@@ -145,3 +148,31 @@
           buildings (krysp-reader/->buildings-summary kryspxml)]
       (ok :data buildings))
     (fail :error.no-legacy-available)))
+
+;;
+;; Asianhallinta
+;;
+
+(defn- has-asianhallinta-operation [_ {:keys [operations]}]
+  (when-not (operations/get-operation-metadata (:name (first operations)) :asianhallinta)
+    (fail! :error.operations.asianhallinta-disabled)))
+
+(defcommand application-to-asianhallinta
+  {:parameters [id lang]
+   :roles      [:authority]
+   :notified   true
+   :on-success (notify :application-state-change)
+   :pre-checks [has-asianhallinta-operation]
+   :states     [:submitted :complement-needed]}
+  [{:keys [application created user]:as command}]
+  (let [submitted-application (mongo/by-id :submitted-applications id)
+        app-updates {:modified created
+                     :sent created
+                     :authority (if (seq (:authority application)) (:authority application) (user/summary user))
+                     :state :sent}
+        organization (organization/get-organization (:organization application))
+        indicator-updates (application/mark-indicators-seen-updates application user created)
+        file-ids (ah/save-as-asianhallinta application lang submitted-application organization) ; Writes to disk
+        attachments-updates (or (attachment/create-sent-timestamp-update-statements (:attachments application) file-ids created) {})]
+    (update-application command {$set (util/deep-merge app-updates attachments-updates indicator-updates)})
+    (ok)))
