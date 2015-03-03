@@ -1,5 +1,6 @@
 (ns lupapalvelu.xml.asianhallinta.asianhallinta_canonical_to_xml_test
-  (:require [lupapalvelu.factlet :as fl]
+  (:require [clojure.data.xml :as xml]
+            [lupapalvelu.factlet :as fl]
             [midje.sweet :refer :all]
             [midje.util :as mu]
             [lupapalvelu.document.tools :as tools]
@@ -13,13 +14,13 @@
             [lupapalvelu.xml.krysp.canonical-to-krysp-xml-test-common :refer [has-tag]]
             [lupapalvelu.xml.emit :refer [element-to-xml]]
             [lupapalvelu.xml.validator :as validator]
-            [clojure.data.xml :as xml]
             [sade.common-reader :as reader]
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.xml :as sxml]))
 
 (mu/testable-privates lupapalvelu.xml.asianhallinta.asianhallinta-core begin-of-link)
+(mu/testable-privates lupapalvelu.xml.asianhallinta.uusi_asia_mapping attachments-for-write)
 
 (defn- has-attachment-types [meta]
   (fact "type-group and type-id"
@@ -202,4 +203,47 @@
 
     (fact "Maksaja is Yritys 1743842-0 (first)"
       (sxml/get-text xml-parsed [:UusiAsia :Maksaja :Yritys :Ytunnus]) => (get-in docs [:maksaja 0 :data :yritys :liikeJaYhteisoTunnus]))))
+
+
+#_(defn- attachments-for-write [{:keys [attachments]} & [target]]
+  (for [attachment attachments
+        :when (and (:latestVersion attachment)
+                (not= "statement" (-> attachment :target :type))
+                (not= "verdict" (-> attachment :target :type))
+                (or (nil? target) (= target (:target attachment))))
+        :let [fileId (-> attachment :latestVersion :fileId)]]
+    {:fileId fileId
+     :filename (writer/get-file-name-on-server fileId (get-in attachment [:latestVersion :filename]))}))
+
+
+(facts "Unit tests - attachments-for-write"
+
+  (fact "FileId and filename are returned"
+    (every? #(= (keys %) '(:fileId :filename)) (attachments-for-write {:attachments attachments})) => true)
+
+  (fact "Only latestVersions are returned"
+    (let [for-write-ids (set (map :fileId (attachments-for-write {:attachments attachments})))]
+      (some #(= % (-> attachments first :latestVersion :fileId)) for-write-ids) => true
+      (some #(= % (-> attachments second :latestVersion :fileId)) for-write-ids) => true
+      (some #(= % (-> attachments (nth 2) :latestVersion :fileId)) for-write-ids) => falsey))
+
+  (facts "Statement and verdict targets are not included"
+
+    (fact "Statement"
+      (let [attachments (assoc-in attachments [0 :target :type] "statement")
+           for-write-ids (set (map :fileId (attachments-for-write {:attachments attachments})))]
+       (some #(= % (-> attachments first :latestVersion :fileId)) for-write-ids) => falsey
+       (some #(= % (-> attachments second :latestVersion :fileId)) for-write-ids) => true))
+
+    (fact "Verdict"
+      (let [attachments (assoc-in attachments [1 :target :type] "verdict")
+           for-write-ids (set (map :fileId (attachments-for-write {:attachments attachments})))]
+       (some #(= % (-> attachments first :latestVersion :fileId)) for-write-ids) => true
+       (some #(= % (-> attachments second :latestVersion :fileId)) for-write-ids) => falsey))
+
+    (fact "Both"
+      (let [attachments (assoc-in attachments [0 :target :type] "verdict")
+            attachments (assoc-in attachments [1 :target :type] "statement")]
+       (attachments-for-write {:attachments attachments}) => empty?))))
+
 
