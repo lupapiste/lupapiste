@@ -3,3 +3,4 @@ error.integration.casemanagement-version-wrong-form:
 error.integration.casemanagement-version-missing:
 error.attachment.no-content: Liitetiedostoa ei löydy
 error.integration.casemanagement-disabled: Asianhallinta-liittymää ei ole otettu käyttöön organisaatiossa
+error.operations.asianhallinta-disabled: Valittua toimenpidettä ei voida siirtää asianhallintajärjestelmään
