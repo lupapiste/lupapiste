@@ -66,11 +66,11 @@
                              value: $data.selectedForeman">
                 </select>
 
-                <!-- ko if: $data.id -->
+                <!-- ko if: $data.selectedForeman -->
                 <span data-bind="fullName: $data"></span>
                 <span data-test-id="tasks-foreman-email" data-bind="text: $data.email ? '(' + $data.email + ')' : ''"></span>
                 <!-- /ko -->
-                <!-- ko ifnot: $data.id -->
+                <!-- ko ifnot: $data.selectedForeman -->
                 <a class="add-foreman" data-bind="click: function() { $parents[1].inviteForeman($data.taskId); }">
                   <span data-bind="ltext: 'application.parties.addForeman'"></span>
                 </a>
