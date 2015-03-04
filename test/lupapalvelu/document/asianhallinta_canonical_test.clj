@@ -44,7 +44,8 @@
                                                                             :Asiointikieli
                                                                             :Toimenpiteet
                                                                             :Sijainti
-                                                                            :Kiinteistotunnus] :in-any-order))
+                                                                            :Kiinteistotunnus
+                                                                            :Viiteluvat] :in-any-order))
       (fact "HakemusTunnus is LP-753-2013-00001" (get-in canonical [:UusiAsia :HakemusTunnus]) => "LP-753-2013-00001")
       (fact "Kuvaus" (get-in canonical [:UusiAsia :Kuvaus]) => "S\u00f6derkullantie 146")
       (fact "Kuntanumero" (get-in canonical [:UusiAsia :Kuntanumero]) => "753")

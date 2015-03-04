@@ -87,6 +87,15 @@
   (when (seq operations)
     {:Toimenpide (map #(-> % (ua-get-toimenpide lang)) operations)}))
 
+(defn- ua-get-viitelupa [linkPermit]
+  (util/strip-nils
+    {:MuuTunnus {:Tunnus (:id linkPermit)
+                 :Sovellus (:type linkPermit)}}))
+
+(defn- ua-get-viiteluvat [{:keys [linkPermitData]}]
+  (when (seq linkPermitData)
+    {:Viitelupa (map #(-> % (ua-get-viitelupa)) linkPermitData)}))
+
 (defn- ua-get-sijaintipiste [{:keys [location]}]
   {:Sijaintipiste (str (:x location) " " (:y location))})
 
@@ -151,4 +160,5 @@
       (assoc-in [:UusiAsia :Asiointikieli] lang)
       (assoc-in [:UusiAsia :Toimenpiteet] (ua-get-toimenpiteet application lang))
       (assoc-in [:UusiAsia :Sijainti] (ua-get-sijaintipiste application))
-      (assoc-in [:UusiAsia :Kiinteistotunnus] (util/to-human-readable-property-id (:propertyId application))))))
+      (assoc-in [:UusiAsia :Kiinteistotunnus] (util/to-human-readable-property-id (:propertyId application)))
+      (assoc-in [:UusiAsia :Viiteluvat] (ua-get-viiteluvat application)))))
