@@ -890,6 +890,11 @@
             <span data-bind="ltext: 'verdict.orderAttachmentPrints.button'"></span>
           </button>
 
+          <a data-bind="click: $root.verdictAttachmentPrintsOrderHistoryModel.openPrintsOrderHistoryDialog,
+                        ltext: 'application.printsOrderHistory',
+                        visible: $root.authorization.ok('order-verdict-attachment-prints')"
+             href="#" data-test-id="test-open-prints-order-history"></a>
+
         </div>
 
         <!-- Statement tab -->
