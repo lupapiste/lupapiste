@@ -7,6 +7,7 @@
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [lupapalvelu.document.poikkeamis-canonical-test :as poikkeus-test]
+            [lupapalvelu.document.rakennuslupa_canonical-test :as rakennus-test]
             [sade.strings :as ss]
             [sade.util :as util]))
 
@@ -14,6 +15,19 @@
   (fact "type-group and type-id"
     (:Avain (first meta)) => "type-group"
     (:Avain (second meta)) => "type-id"))
+
+(fl/facts* "UusiAsia canonical with link permit"
+  (let [canonical   (ah/application-to-asianhallinta-canonical rakennus-test/application-tyonjohtajan-nimeaminen "fi") => truthy
+        application rakennus-test/application-tyonjohtajan-nimeaminen]
+    (fact "Viiteluvat"
+      (let [links        (get-in canonical [:UusiAsia :Viiteluvat :Viitelupa])
+            link         (first links)]
+        (count links) => 1
+        (keys link) => (just [:MuuTunnus])
+        (let [link (get-in link [:MuuTunnus])]
+          (keys link) => (just [:Tunnus :Sovellus])
+          (:Tunnus link) => (get-in application [:linkPermitData 0 :id])
+          (:Sovellus link) => (get-in application [:linkPermitData 0 :type]))))))
 
 (fl/facts* "UusiAsia canonical"
   (let [canonical (ah/application-to-asianhallinta-canonical poikkeus-test/poikkari-hakemus "fi") => truthy
