@@ -155,7 +155,7 @@
 
 (defn- has-asianhallinta-operation [_ {:keys [operations]}]
   (when-not (operations/get-operation-metadata (:name (first operations)) :asianhallinta)
-    (fail! :error.operations.asianhallinta-disabled)))
+    (fail :error.operations.asianhallinta-disabled)))
 
 (defcommand application-to-asianhallinta
   {:parameters [id lang]
