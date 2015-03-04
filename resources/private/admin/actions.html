@@ -6,9 +6,10 @@
 
         <h2>Toiminnot joita ei ole testattu</h2>
 
-        <ul data-bind="foreach: uncalledActions">
-          <li data-bind="text: $data"></li>
-        </ul>
+        <p>
+        <span data-bind="text: uncalledActions" data-test-id="uncalled-actions"></span>
+        (<span data-bind="text: uncalledActionsCount" data-test-id="uncalled-actions-count"></span>)
+        </p>
 
         <h2>Kaikki toiminnot</h2>
         <table>

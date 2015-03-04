@@ -6,6 +6,7 @@
 
     self.actions = ko.observable();
     self.uncalledActions = ko.observable();
+    self.uncalledActionsCount = ko.observable(-1);
 
     self.load = function() {
       ajax
@@ -15,7 +16,9 @@
 
       ajax.get("/system/action-counters").success(function(e){
         var uncalled = _.pick(e, function(c) {return c === 0;});
-        self.uncalledActions(_.keys(uncalled));
+        var keys = _.keys(uncalled);
+        self.uncalledActionsCount(keys.length);
+        self.uncalledActions(keys.join(", "));
         }).raw(true).call();
 
     };
