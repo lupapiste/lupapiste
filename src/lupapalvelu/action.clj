@@ -333,7 +333,7 @@
 (defn execute [{action :action :as command}]
   (let [response (run command execute-validators true)]
     (debug action "->" (:ok response))
-    (swap! actions update-in [(keyword action) :call-count] inc)
+    (swap! actions update-in [(keyword action) :call-count] #(if % (inc %) 1))
     response))
 
 (defn validate [command]
