@@ -330,14 +330,11 @@
         (when execute? (log/log-event :error command))
         (fail :error.unknown)))))
 
-(defmacro logged [command & body]
-  `(let [response# (do ~@body)]
-     (debug (:action ~command) "->" (:ok response#))
-     response#))
-
-(defn execute [command]
-  (logged command
-    (run command execute-validators true)))
+(defn execute [{action :action :as command}]
+  (let [response (run command execute-validators true)]
+    (debug action "->" (:ok response))
+    (swap! actions update-in [(keyword action) :call-count] inc)
+    response))
 
 (defn validate [command]
   (run command authorize-validators false))
@@ -379,7 +376,8 @@
       (merge meta-data {:type action-type
                         :ns ns-str
                         :line line
-                        :handler handler}))))
+                        :handler handler
+                        :call-count 0}))))
 
 (defmacro defaction [form-meta action-type action-name & args]
   (let [doc-string  (when (string? (first args)) (first args))
