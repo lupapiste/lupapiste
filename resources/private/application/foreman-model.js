@@ -108,9 +108,10 @@ LUPAPISTE.ForemanModel = function() {
           ajax
             .command("link-foreman-task", { id: self.application().id,
                                             taskId: data.taskId,
-                                            foremanAppId: val })
+                                            foremanAppId: val ? val : ""})
             .success(function(data) {
               console.log("success");
+              repository.load(self.application().id);
             })
             .error(function() {
               console.log("error");
