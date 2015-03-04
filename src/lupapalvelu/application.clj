@@ -61,19 +61,18 @@
     (fail :error.illegal-coordinates)))
 
 
-(declare is-link-permit-required)
+(defn- is-link-permit-required [application]
+  (or (= :muutoslupa (keyword (:permitSubtype application)))
+      (some #(operations/link-permit-required-operations (keyword (:name %))) (:operations application))))
+
 (defn validate-link-permits [application]
   (let [application (meta-fields/enrich-with-link-permit-data application)
         linkPermits (-> application :linkPermitData count)]
-    (when (and (is-link-permit-required application) (= 0 linkPermits))
+    (when (and (is-link-permit-required application) (zero? linkPermits))
       (fail :error.permit-must-have-link-permit))))
 
 
 ;; Helpers
-
-(defn- is-link-permit-required [application]
-  (or (= :muutoslupa (keyword (:permitSubtype application)))
-      (some #(operations/link-permit-required-operations (keyword (:name %))) (:operations application))))
 
 (defn do-set-user-to-document [application document user-id path current-user timestamp]
   {:pre [document]}
@@ -778,9 +777,9 @@
 
 (defn- add-operation-allowed? [_ application]
   (let [op (-> application :operations first :name keyword)
-        permitSubType (keyword (:permitSubtype application))]
+        permit-subtype (keyword (:permitSubtype application))]
     (when-not (and (or (nil? op) (:add-operation-allowed (operations/operations op)))
-                   (not= permitSubType :muutoslupa))
+                   (not= permit-subtype :muutoslupa))
       (fail :error.add-operation-not-allowed))))
 
 (defcommand add-operation
