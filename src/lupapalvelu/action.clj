@@ -361,9 +361,12 @@
 (def- supported-action-meta-data-keys (set (keys supported-action-meta-data)))
 
 (defn register-action [action-type action-name meta-data line ns-str handler]
+  {:pre [action-type action-name meta line handler]}
 
   ;(assert (.endsWith ns-str "-api") (str "Actions must be defined in *-api namespaces"))
 
+  (assert (not (ss/blank? (name action-type))))
+  (assert (not (ss/blank? (name action-name))))
   (assert (every? supported-action-meta-data-keys (keys meta-data)) (str (keys meta-data)))
   (assert (seq (:roles meta-data)) (str "You must define :roles meta data for " action-name ". Use :roles [:anonymous] to grant access to anyone."))
   (assert (if (some #(= % :id) (:parameters meta-data)) (seq (:states meta-data)) true)
