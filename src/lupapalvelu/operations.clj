@@ -809,7 +809,7 @@
                                     :link-permit-verdict-required false
                                     :asianhallinta false}
      :poikkeamis                  {:schema "rakennushanke"
-                                   :permit-type "P"
+                                   :permit-type permit/P
                                    :required  (conj common-poikkeamis-schemas "suunnittelutarveratkaisun-lisaosa")
                                    :attachments [:paapiirustus [:asemapiirros]]
                                    :add-operation-allowed false

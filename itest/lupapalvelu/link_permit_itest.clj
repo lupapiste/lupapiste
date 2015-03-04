@@ -32,11 +32,6 @@
         create-jatkoaika-resp     (command apikey :create-continuation-period-permit :id verdict-given-application-id) => ok?
         jatkoaika-application-id  (:id create-jatkoaika-resp)
         jatkoaika-application     (query-application apikey jatkoaika-application-id) => truthy
-        _                         (command apikey :submit-application :id jatkoaika-application-id) => ok?
-        _                         (generate-documents jatkoaika-application apikey)
-        _                         (command apikey :approve-application :id jatkoaika-application-id :lang "fi") => ok?
-        jatkoaika-application     (query-application apikey jatkoaika-application-id) => truthy
-        _                         (:state jatkoaika-application) => "closed"
 
         ;; App 4 - old submitted application
         submitted-application     (create-and-submit-application apikey
@@ -52,6 +47,23 @@
                                     :address "Paatoskuja 15"
                                     :operation "ya-katulupa-vesi-ja-viemarityot") => truthy
         test-application-id       (:id test-application)]
+
+    (fact "New ya-jatkoaika requires link permit"
+      (let [new-application-id (create-app-id apikey :operation "ya-jatkoaika") ]
+        (query apikey :link-permit-required :id new-application-id) => ok?))
+
+    (fact "ya-jatkoaika has a link permit"
+      (count (:linkPermitData jatkoaika-application)) => 1
+
+      (fact "so a link permit is no longer required"
+        (query apikey :link-permit-required :id jatkoaika-application-id) => fail?))
+
+    (fact "approving ya-jatkoaika leads to closed state"
+      (command apikey :submit-application :id jatkoaika-application-id) => ok?
+      (generate-documents jatkoaika-application apikey)
+      (command apikey :approve-application :id jatkoaika-application-id :lang "fi") => ok?
+      (:state (query-application apikey jatkoaika-application-id)) => "closed")
+
 
     ;;
     ;; The "matches", i.e. the contents of the dropdown selection component in the link-permit dialog
