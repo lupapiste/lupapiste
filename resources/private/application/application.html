@@ -1192,7 +1192,7 @@
             <!-- ko if: inPostVerdictState && !taskId() -->
             <select name="foreman-selection"
                     class="form-input combobox long"
-                    data-bind="options: foremanApplications,
+                    data-bind="options: selectableForemen,
                                optionsText: 'displayName',
                                optionsValue: 'id',
                                optionsCaption: loc('foreman.newForeman'),

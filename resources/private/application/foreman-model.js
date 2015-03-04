@@ -25,6 +25,12 @@ LUPAPISTE.ForemanModel = function() {
     return util.getIn(self, ["application", "permitType"]) === "R" &&
       !/tyonjohtajan-nimeaminen/.test(util.getIn(self, ["application", "operations", 0, "name"]));
   });
+  self.linkedForemanApps = ko.observableArray();
+  self.selectableForemen = ko.pureComputed(function() {
+    return _.filter(self.foremanApplications(), function(app) {
+      return !_.contains(self.linkedForemanApps(), app.id);
+    });
+  });
 
   self.selectedForeman.subscribe(function(val) {
     console.log("selectedForeman in foreman model", val);
@@ -64,7 +70,7 @@ LUPAPISTE.ForemanModel = function() {
             output = data.id;
           }
           if (data.name) {
-            output += ' (' + data.name + ')';
+            output += ' (' + loc(['osapuoli.tyonjohtaja.kuntaRoolikoodi', data.name]) + ')';
           }
           return output;
         });
@@ -85,6 +91,7 @@ LUPAPISTE.ForemanModel = function() {
         }
       });
 
+      self.linkedForemanApps(asiointitunnukset);
       _.forEach(foremanTasks, function(task) {
         var asiointitunnus = util.getIn(task, ["data", "asiointitunnus", "value"])
         var linkedForemanApp = _.findWhere(self.foremanApplications(), { 'id': asiointitunnus});
@@ -106,6 +113,7 @@ LUPAPISTE.ForemanModel = function() {
                                             foremanAppId: val ? val : ""})
             .success(function(data) {
               // tallennettu-indikaattori
+              self.finished(true);
               repository.load(self.application().id);
             })
             .error(function() {
@@ -260,7 +268,21 @@ LUPAPISTE.ForemanModel = function() {
     }
 
     if (self.selectedForeman()) {
-      linkForeman();
+      ajax
+        .command("link-foreman-task", { id: self.application().id,
+                                        taskId: self.taskId() ? self.taskId() : "",
+                                        foremanAppId: self.selectedForeman()})
+        .processing(self.processing)
+        .pending(self.pending)
+        .success(function(data) {
+          // tallennettu-indikaattori
+          console.log("success");
+        })
+        .error(function() {
+          console.log("error");
+        })
+        .call();
+
     } else {
       // 1. invite foreman to current application
       if (self.email()) {
