@@ -59,7 +59,7 @@
                 <select
                   name="foreman-selection"
                   class="form-input combobox long"
-                  data-bind="options: $parents[1].foremanApplications,
+                  data-bind="options: $data.selectableForemen,
                              optionsText: 'displayName',
                              optionsValue: 'id',
                              optionsCaption: loc('choose'),

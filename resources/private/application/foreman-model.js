@@ -79,11 +79,31 @@ LUPAPISTE.ForemanModel = function() {
       var foremanTasks = _.where(self.application().tasks, { "schema-info": { "name": "task-vaadittu-tyonjohtaja" } });
       console.log(foremanTasks);
       var foremen = [];
+      var asiointitunnukset = [];
+
       _.forEach(foremanTasks, function(task) {
+        var asiointitunnus = util.getIn(task, ["data", "asiointitunnus", "value"]);
+        if (asiointitunnus) {
+          asiointitunnukset.push(asiointitunnus);
+        }
+      });
+
+      _.forEach(foremanTasks, function(task) {
+        var asiointitunnus = util.getIn(task, ["data", "asiointitunnus", "value"])
+        // TODO selectable foremans in different array
         var data = { "name": task.taskname,
                      "taskId": task.id,
-                     "statusName": "missing" };
-        data.selectedForeman = ko.observable();
+                     "statusName": "missing",
+                     "selectedForeman": ko.observable(asiointitunnus),
+                     "selectableForemen": ko.observableArray()};
+
+        data.selectableForemen(_.filter(self.foremanApplications(), function(app) {
+          console.log("app", app, asiointitunnukset);
+          return !_.contains(asiointitunnukset, app.id) || app.id === asiointitunnus;
+        }));
+        // if (asiointitunnus) {
+        //   self.selectableForemen.push({id: asiointitunnus});
+        // }
 
         data.selectedForeman.subscribe(function(val) {
           console.log("selected", val, data.taskId);
@@ -101,7 +121,7 @@ LUPAPISTE.ForemanModel = function() {
         .query("foreman-applications", {id: id})
         .success(function(data) {
           foremanApplications(data.applications);
-          console.log("data", data);
+          loadForemanTasks();
         })
         .error(function() {
           // noop
@@ -113,7 +133,6 @@ LUPAPISTE.ForemanModel = function() {
 
     _.defer(function() {
       loadForemanApplications(application.id);
-      loadForemanTasks();
     });
   };
 
@@ -132,8 +151,13 @@ LUPAPISTE.ForemanModel = function() {
     self.email(undefined);
     self.finished(false);
     self.error(undefined);
+    self.selectedForeman(undefined);
     LUPAPISTE.ModalDialog.open("#dialog-invite-foreman");
   };
+
+  self.linkForeman = function(taskId, foremanId) {
+    console.log("foofaa");
+  }
 
   self.openApplication = function(id) {
     window.location.hash = "!/application/" + id;
@@ -230,15 +254,19 @@ LUPAPISTE.ForemanModel = function() {
         .call();
     }
 
-    // 1. invite foreman to current application
-    if (self.email()) {
-      inviteToApplication({
-                id: self.application().id,
-                email: self.email(),
-                role: "foreman"
-              }, createApplication);
+    if (self.selectedForeman()) {
+      console.log("link foreman");
     } else {
-      createApplication();
+      // 1. invite foreman to current application
+      if (self.email()) {
+        inviteToApplication({
+                  id: self.application().id,
+                  email: self.email(),
+                  role: "foreman"
+                }, createApplication);
+      } else {
+        createApplication();
+      }
     }
     return false;
   };
