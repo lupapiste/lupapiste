@@ -7,6 +7,7 @@
             [lupapalvelu.document.asianhallinta_canonical :as ah]
             [lupapalvelu.document.canonical-common :as common]
             [lupapalvelu.document.poikkeamis-canonical-test :as poikkeus-test]
+            [lupapalvelu.document.rakennuslupa_canonical-test :as rakennus-test]
             [lupapalvelu.document.canonical-test-common :as ctc]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.xml.asianhallinta.core]
@@ -51,6 +52,25 @@
                    :versions []}])
 
 (fact ":tag is set for UusiAsia" (has-tag ua-mapping/uusi-asia) => true)
+
+(fl/facts*
+  "UusiAsia xml from foreman application"
+  (let [application rakennus-test/application-tyonjohtajan-nimeaminen
+        canonical      (ah/application-to-asianhallinta-canonical application "fi") => truthy
+        schema-version "ah-1.1"
+        mapping        (ua-mapping/get-mapping (ss/suffix schema-version "-"))
+        xml            (element-to-xml canonical mapping) => truthy
+        xml-s          (xml/indent-str xml) => truthy
+        xml-parsed     (reader/strip-xml-namespaces (sxml/parse xml-s))]
+    (facts "Viiteluvat"
+           (let [links    (sxml/select1 xml-parsed [:UusiAsia :Viiteluvat :MuuTunnus])
+                 link     (sxml/get-text xml-parsed [:UusiAsia :Viiteluvat :MuuTunnus])
+                 tunnus   (-> link :content first)
+                 sovellus (-> link :content second)]
+             (count (:content links)) => 1
+             (fact "Viitelupa has Tunnus and Sovellus"
+                   (sxml/get-text link [:Viitelupa :Tunnus]) => (get-in application [:operations 0 :id])
+                   (sxml/get-text link [:Viitelupa :Sovellus]) => (get-in application [:operations 0 :type]))))))
 
 (fl/facts* "UusiAsia xml from poikkeus"
   (let [application    (assoc poikkeus-test/poikkari-hakemus :attachments attachments)
