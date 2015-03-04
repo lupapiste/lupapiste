@@ -276,7 +276,7 @@ LUPAPISTE.ForemanModel = function() {
         .pending(self.pending)
         .success(function(data) {
           // tallennettu-indikaattori
-          console.log("success");
+          self.finished(self.application().id);
         })
         .error(function() {
           console.log("error");
