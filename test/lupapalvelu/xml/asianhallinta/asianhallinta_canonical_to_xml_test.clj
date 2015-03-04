@@ -9,7 +9,7 @@
             [lupapalvelu.document.poikkeamis-canonical-test :as poikkeus-test]
             [lupapalvelu.document.canonical-test-common :as ctc]
             [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.xml.asianhallinta.asianhallinta-core]
+            [lupapalvelu.xml.asianhallinta.core]
             [lupapalvelu.xml.asianhallinta.uusi_asia_mapping :as ua-mapping]
             [lupapalvelu.xml.disk-writer :as writer]
             [lupapalvelu.xml.krysp.canonical-to-krysp-xml-test-common :refer [has-tag]]
@@ -20,7 +20,7 @@
             [sade.util :as util]
             [sade.xml :as sxml]))
 
-(mu/testable-privates lupapalvelu.xml.asianhallinta.asianhallinta-core begin-of-link)
+(mu/testable-privates lupapalvelu.xml.asianhallinta.core begin-of-link)
 (mu/testable-privates lupapalvelu.xml.asianhallinta.uusi_asia_mapping attachments-for-write)
 
 (defn- has-attachment-types [meta]

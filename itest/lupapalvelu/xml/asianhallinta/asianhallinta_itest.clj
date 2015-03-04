@@ -6,7 +6,7 @@
             [lupapalvelu.factlet :as fl]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.organization :as organization]
-            [lupapalvelu.xml.asianhallinta.asianhallinta-core :as ah]
+            [lupapalvelu.xml.asianhallinta.core :as ah]
             [lupapalvelu.xml.validator :as validator]
             [sade.core :refer [now]]
             [sade.env :as env]
@@ -17,7 +17,7 @@
 
 (apply-remote-minimal)
 
-(testable-privates lupapalvelu.xml.asianhallinta.asianhallinta-core resolve-output-directory resolve-ah-version)
+(testable-privates lupapalvelu.xml.asianhallinta.core resolve-output-directory resolve-ah-version)
 (testable-privates lupapalvelu.xml.asianhallinta.uusi_asia_mapping attachments-for-write)
 
 (fl/facts* "Asianhallinta itest"

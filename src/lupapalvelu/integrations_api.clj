@@ -19,7 +19,7 @@
             [lupapalvelu.user :as user]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
-            [lupapalvelu.xml.asianhallinta.asianhallinta-core :as ah]
+            [lupapalvelu.xml.asianhallinta.core :as ah]
             [sade.core :refer :all]
             [sade.strings :as ss]
             [sade.util :as util]))
