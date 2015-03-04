@@ -4,7 +4,13 @@
     <section class="page" id="actions">
       <div class="container">
 
-        <h2>Toiminnot</h2>
+        <h2>Toiminnot joita ei ole testattu</h2>
+
+        <ul data-bind="foreach: uncalledActions">
+          <li data-bind="text: $data"></li>
+        </ul>
+
+        <h2>Kaikki toiminnot</h2>
         <table>
           <thead>
             <tr>
