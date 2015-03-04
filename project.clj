@@ -44,7 +44,7 @@
                  ; batik-js includes a built-in rhino, which breaks yuicompressor (it too has rhino built in)
                  ; xalan excluded just to avoid bloat, presumably XSLT is not needed
                  [clj-pdf "1.11.21" :exclusions [xalan org.apache.xmlgraphics/batik-js]]
-                 [scss-compiler "0.1.1"]]
+                 [scss-compiler "0.1.2"]]
   :profiles {:dev {:dependencies [[midje "1.6.3"]
                                   [ring-mock "0.1.5"]
                                   [clj-ssh "0.5.7"]
@@ -53,7 +53,7 @@
                              [lein-buildid "0.2.0"]
                              [lein-nitpicker "0.4.0"]
                              [lein-hgnotes "0.2.0-SNAPSHOT"]
-                             [lein-scss-compiler "0.1.3-SNAPSHOT"]]
+                             [lein-scss-compiler "0.1.4"]]
                    :resource-paths ["dev-resources"]
                    :source-paths ["dev-src" "test-utils"]
                    :jvm-opts ["-Djava.awt.headless=true"

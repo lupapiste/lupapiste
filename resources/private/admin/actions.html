@@ -4,7 +4,14 @@
     <section class="page" id="actions">
       <div class="container">
 
-        <h2>Toiminnot</h2>
+        <h2>Toiminnot joita ei ole testattu</h2>
+
+        <p>
+        <span data-bind="text: uncalledActions" data-test-id="uncalled-actions"></span>
+        (<span data-bind="text: uncalledActionsCount" data-test-id="uncalled-actions-count"></span>)
+        </p>
+
+        <h2>Kaikki toiminnot</h2>
         <table>
           <thead>
             <tr>

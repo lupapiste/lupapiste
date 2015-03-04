@@ -1,6 +1,7 @@
 (ns lupapalvelu.document.asianhallinta_canonical
   (require [lupapalvelu.document.canonical-common :refer :all]
            [lupapalvelu.document.tools :as tools]
+           [lupapalvelu.xml.disk-writer :as writer]
            [clojure.string :as s]
            [sade.util :as util]
            [lupapalvelu.i18n :as i18n]))
@@ -35,8 +36,8 @@
      :Sukunimi (get-in data [:henkilo :henkilotiedot :sukunimi])
      :Yhteystiedot (ua-get-yhteystiedot (:henkilo data))
      :Henkilotunnus (get-in data [:henkilo :henkilotiedot :hetu])
-     :VainSahkoinenAsiointi nil ; TODO tarviiko tata ja Turvakieltoa?
-     :Turvakielto nil}))
+     :VainSahkoinenAsiointi nil ; TODO tarviiko tata
+     :Turvakielto (get-in data [:henkilo :henkilotiedot :turvakieltoKytkin])}))
 
 (defn- ua-get-yritys [data]
   {:Nimi (get-in data [:yritys :yritysnimi])
@@ -57,35 +58,25 @@
 
 (defn- ua-get-maksaja [{data :data}]
   (let [sel (:_selected data)
-        maksaja-map (util/strip-nils
-                      {:Laskuviite (:laskuviite data)
-                       :Verkkolaskutustieto (when (= "yritys" sel)
-                                              {:OVT-tunnus (get-in data [:yritys :verkkolaskutustieto :ovtTunnus])
-                                               :Verkkolaskutunnus (get-in data [:yritys :verkkolaskutustieto :verkkolaskuTunnus])
-                                               :Operaattoritunnus (get-in data [:yritys :verkkolaskutustieto :valittajaTunnus])})})]
+        maksaja-map (util/strip-empty-maps
+                      (util/strip-nils
+                        {:Laskuviite (:laskuviite data)
+                         :Verkkolaskutustieto (when (= "yritys" sel)
+                                                {:OVT-tunnus (get-in data [:yritys :verkkolaskutustieto :ovtTunnus])
+                                                 :Verkkolaskutunnus (get-in data [:yritys :verkkolaskutustieto :verkkolaskuTunnus])
+                                                 :Operaattoritunnus (get-in data [:yritys :verkkolaskutustieto :valittajaTunnus])})}))]
 
     (if (= sel "yritys")
       (assoc-in maksaja-map [:Yritys] (ua-get-yritys data))
       (assoc-in maksaja-map [:Henkilo] (ua-get-henkilo data)))))
 
 (defn- ua-get-metatiedot [attachment]
-  (let [op-name (get-in attachment [:op :name])]
-    (remove nil? [{:Avain "type-group" :Arvo (get-in attachment [:type :type-group])}
-                  {:Avain "type-id"    :Arvo (get-in attachment [:type :type-id])}
-                  (when op-name
-                    {:Avain "operation" :Arvo op-name})])))
-
-(defn- ua-get-liite [attachment]
-  (util/strip-nils
-    {:Kuvaus (get-in attachment [:type :type-id])
-     :Tyyppi (get-in attachment [:latestVersion :contentType])
-     :LinkkiLiitteeseen (get-in attachment [:latestVersion :filename]) ;TODO resolvaus
-     :Luotu (util/to-xml-date (:modified attachment))
-     :Metatiedot {:Metatieto (ua-get-metatiedot attachment)}}))
-
-(defn- ua-get-liitteet [{:keys [attachments]}]
-  (when (seq attachments)
-    {:Liite (map ua-get-liite attachments)}))
+  (let [op-name (get-in attachment [:op :name])
+        type-group (get-in attachment [:type :type-group])
+        type-id (get-in attachment [:type :type-id])]
+    (remove nil? [(when type-group {:Avain "type-group" :Arvo type-group})
+                  (when type-id    {:Avain "type-id"    :Arvo type-id})
+                  (when op-name    {:Avain "operation" :Arvo op-name})])))
 
 (defn- ua-get-toimenpide [operation lang]
   (util/strip-nils
@@ -94,12 +85,49 @@
 
 (defn- ua-get-toimenpiteet [{:keys [operations]} lang]
   (when (seq operations)
-    {:Toimenpide (map #(-> % (ua-get-toimenpide lang)) operations)})) ;TODO tarkemmat tiedot
+    {:Toimenpide (map #(-> % (ua-get-toimenpide lang)) operations)}))
 
 (defn- ua-get-sijaintipiste [{:keys [location]}]
   {:Sijaintipiste (str (:x location) " " (:y location))})
 
+(defn- ua-get-liite [attachment link]
+  "Return attachment in canonical format, with provided link as LinkkiLiitteeseen"
+  (util/strip-nils
+    {:Kuvaus (get-in attachment [:type :type-id])
+     :Tyyppi (get-in attachment [:latestVersion :contentType])
+     :LinkkiLiitteeseen link
+     :Luotu (util/to-xml-date (:modified attachment))
+     :Metatiedot {:Metatieto (ua-get-metatiedot attachment)}}))
 
+;; Public
+
+(defn get-attachments-as-canonical [{:keys [attachments]} begin-of-link & [target]]
+  (not-empty
+    (for [attachment attachments
+          :when (and (:latestVersion attachment)
+                  (not= "statement" (-> attachment :target :type))
+                  (not= "verdict" (-> attachment :target :type))
+                  (or (nil? target) (= target (:target attachment))))
+          :let [file-id (get-in attachment [:latestVersion :fileId])
+                attachment-file-name (writer/get-file-name-on-server file-id (get-in attachment [:latestVersion :filename]))
+                link (str begin-of-link attachment-file-name)]]
+      (ua-get-liite attachment link))))
+
+(defn get-submitted-application-pdf [{:keys [id submitted]} begin-of-link]
+  {:Kuvaus "Vireille tullut hakemus"
+   :Tyyppi "application/pdf"
+   :LinkkiLiitteeseen (str begin-of-link (writer/get-submitted-filename id))
+   :Luotu (util/to-xml-date submitted)
+   :Metatiedot {:Metatieto [{:Avain "type-group" :Arvo "hakemus"}
+                            {:Avain "type-id"    :Arvo "hakemus_vireilletullessa"}]}})
+
+(defn get-current-application-pdf [{:keys [id]} begin-of-link]
+  {:Kuvaus "J\u00e4rjestelm\u00e4\u00e4n siirrett\u00e4ess\u00e4"
+   :Tyyppi "application/pdf"
+   :LinkkiLiitteeseen (str begin-of-link (writer/get-current-filename id))
+   :Luotu (util/to-xml-date (sade.core/now))
+   :Metatiedot {:Metatieto [{:Avain "type-group" :Arvo "hakemus"}
+                            {:Avain "type-id"    :Arvo "hakemus_jarjestelmaan_siirrettaessa"}]}})
 
 ;; TaydennysAsiaan, prefix: ta-
 
@@ -111,6 +139,7 @@
 
 
 (defn application-to-asianhallinta-canonical [application lang]
+  "Return canonical, does not contain attachments"
   (let [documents (tools/unwrapped (documents-by-type-without-blanks application))]
     (-> (assoc-in ua-root-element [:UusiAsia :Tyyppi] (ua-get-asian-tyyppi-string application))
       (assoc-in [:UusiAsia :Kuvaus] (:title application))
@@ -119,7 +148,6 @@
       (assoc-in [:UusiAsia :Maksaja] (ua-get-maksaja (first (:maksaja documents))))
       (assoc-in [:UusiAsia :HakemusTunnus] (:id application))
       (assoc-in [:UusiAsia :VireilletuloPvm] (util/to-xml-date (:submitted application)))
-      (assoc-in [:UusiAsia :Liitteet] (ua-get-liitteet application))
       (assoc-in [:UusiAsia :Asiointikieli] lang)
       (assoc-in [:UusiAsia :Toimenpiteet] (ua-get-toimenpiteet application lang))
       (assoc-in [:UusiAsia :Sijainti] (ua-get-sijaintipiste application))

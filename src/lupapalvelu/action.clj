@@ -330,14 +330,11 @@
         (when execute? (log/log-event :error command))
         (fail :error.unknown)))))
 
-(defmacro logged [command & body]
-  `(let [response# (do ~@body)]
-     (debug (:action ~command) "->" (:ok response#))
-     response#))
-
-(defn execute [command]
-  (logged command
-    (run command execute-validators true)))
+(defn execute [{action :action :as command}]
+  (let [response (run command execute-validators true)]
+    (debug action "->" (:ok response))
+    (swap! actions update-in [(keyword action) :call-count] #(if % (inc %) 1))
+    response))
 
 (defn validate [command]
   (run command authorize-validators false))
@@ -364,9 +361,12 @@
 (def- supported-action-meta-data-keys (set (keys supported-action-meta-data)))
 
 (defn register-action [action-type action-name meta-data line ns-str handler]
+  {:pre [action-type action-name meta line handler]}
 
   ;(assert (.endsWith ns-str "-api") (str "Actions must be defined in *-api namespaces"))
 
+  (assert (not (ss/blank? (name action-type))))
+  (assert (not (ss/blank? (name action-name))))
   (assert (every? supported-action-meta-data-keys (keys meta-data)) (str (keys meta-data)))
   (assert (seq (:roles meta-data)) (str "You must define :roles meta data for " action-name ". Use :roles [:anonymous] to grant access to anyone."))
   (assert (if (some #(= % :id) (:parameters meta-data)) (seq (:states meta-data)) true)
@@ -379,7 +379,8 @@
       (merge meta-data {:type action-type
                         :ns ns-str
                         :line line
-                        :handler handler}))))
+                        :handler handler
+                        :call-count 0}))))
 
 (defmacro defaction [form-meta action-type action-name & args]
   (let [doc-string  (when (string? (first args)) (first args))
