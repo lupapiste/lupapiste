@@ -47,7 +47,7 @@
             {foreman-application-id :id} (command apikey :create-foreman-application :id (:id application) :taskId "" :foremanRole "")
             tasks (:tasks application)
             foreman-task (first (filter #(= (get-in % [:schema-info :name]) "task-vaadittu-tyonjohtaja") tasks))]
-        (command apikey :update-foreman-task :id (:id application) :taskId (:id foreman-task) :foremanAppId foreman-application-id) => ok?
+        (command apikey :link-foreman-task :id (:id application) :taskId (:id foreman-task) :foremanAppId foreman-application-id) => ok?
         (let [app (query-application apikey (:id application))
               updated-tasks (:tasks app)
               updated-foreman-task (first (filter #(= (get-in % [:schema-info :name]) "task-vaadittu-tyonjohtaja") updated-tasks))]

@@ -82,7 +82,7 @@
       (update-application command {$set {:documents documents}}))
     (ok)))
 
-(defcommand update-foreman-task
+(defcommand link-foreman-task
   {:roles [:applicant :authority]
    :states action/all-states
    :parameters [id taskId foremanAppId]}

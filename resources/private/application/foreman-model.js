@@ -56,6 +56,8 @@ LUPAPISTE.ForemanModel = function() {
                     "name":       name,
                     "statusName": app.state === "verdictGiven" ? "ok" : "new"};
 
+        console.log("data.id", data.id);
+
         data.displayName = ko.pureComputed(function() {
           var output = "";
           var name = data.firstName ? data.firstName : ""
@@ -98,15 +100,23 @@ LUPAPISTE.ForemanModel = function() {
                      "selectableForemen": ko.observableArray()};
 
         data.selectableForemen(_.filter(self.foremanApplications(), function(app) {
-          console.log("app", app, asiointitunnukset);
           return !_.contains(asiointitunnukset, app.id) || app.id === asiointitunnus;
         }));
-        // if (asiointitunnus) {
-        //   self.selectableForemen.push({id: asiointitunnus});
-        // }
 
         data.selectedForeman.subscribe(function(val) {
           console.log("selected", val, data.taskId);
+          ajax
+            .command("link-foreman-task", { id: self.application().id,
+                                            taskId: data.taskId,
+                                            foremanAppId: val })
+            .success(function(data) {
+              console.log("success");
+            })
+            .error(function() {
+              console.log("error");
+              // tallennettu indikaattori
+            })
+            .call();
         });
 
         foremen.push(data);
