@@ -1,1 +1,1 @@
-tooltip.approveApplication: TEsti
+signAttachment.description: Voit allekirjoittaa suunnitelmat Lupapisteessä sähköisesti.<br/>Tämä vastaa perinteistä suunnitelmiin tehtävää allekirjoitusta.<br/><b>Pääsuunnittelijat allekirjoittavat piirrokset.</b>

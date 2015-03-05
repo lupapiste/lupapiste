@@ -84,8 +84,8 @@ Sonja sees that new attachment template is visible in attachments list
 
 # - Sonjan lisaaman liitepohjan "ei tarvita"-checkboxi on tyhja ja enabloituna
 For that template, the "not needed" checkbox is enabled and not selected
-  Checkbox Should Not Be Selected  xpath=//table[@data-test-id='attachments-template-table']//input[@data-test-id='${attachment-not-needed-test-id-sonja}']
-  Element should be enabled  xpath=//table[@data-test-id='attachments-template-table']//input[@data-test-id='${attachment-not-needed-test-id-sonja}']
+  Checkbox Should Not Be Selected  xpath=//div[@id="application-attachments-tab"]//table[@data-test-id='attachments-template-table']//input[@data-test-id='${attachment-not-needed-test-id-sonja}']
+  Element should be enabled  xpath=//div[@id="application-attachments-tab"]//table[@data-test-id='attachments-template-table']//input[@data-test-id='${attachment-not-needed-test-id-sonja}']
   Logout
 
 # - Mikolla takaisin hakemukselle ja attachments tabille
@@ -93,21 +93,25 @@ Mikko logs back in and browses to the Attachments tab
   Mikko logs in
   Open application  submit-app  753-416-25-30
   Open tab  attachments
-  Wait Until  Element should be visible  xpath=//table[@data-test-id="attachments-template-table"]//td[contains(text(), 'Yleiset hankkeen liitteet')]
+  Wait Until  Page should contain element  xpath=//div[@id="application-attachments-tab"]//table[@data-test-id="attachments-template-table"]//td
+  Wait Until  Element should be visible  xpath=//div[@id="application-attachments-tab"]//table[@data-test-id="attachments-template-table"]//td[contains(text(), 'Yleiset hankkeen liitteet')]
 
 # - Sonjan lisaaman liitepohjan "ei tarvita"-checkboxi on tyhja ja disabloituna
 For the added attachment template added by Sonja, Mikko sees the "not needed" checkbox as disabled and not selected
-  ${checkbox-path-sonja} =  Set Variable  xpath=//table[@data-test-id='attachments-template-table']//input[@data-test-id='${attachment-not-needed-test-id-sonja}']
+  ${checkbox-path-sonja} =  Set Variable  //div[@id="application-attachments-tab"]//table[@data-test-id='attachments-template-table']//input[@data-test-id='${attachment-not-needed-test-id-sonja}']
+  Wait Until  Xpath Should Match X Times  ${checkbox-path-sonja}  1
   Element should be disabled  ${checkbox-path-sonja}
   Checkbox Should Not Be Selected  ${checkbox-path-sonja}
 
 # - klikkaa attachments-tabin jonkin liitteen "ei tarvita"-checkboxia
 Mikko selects the "not needed" checkbox of some other attachment template than the one of Sonja's
-  ${checkbox-path-hakija-valtakirja} =  Set Variable  xpath=//div[@id='application-attachments-tab']//table[@data-test-id='attachments-template-table']//input[@data-test-id='${attachment-not-needed-test-id-hakija-valtakirja}']
+  ${checkbox-path-hakija-valtakirja} =  Set Variable  //div[@id='application-attachments-tab']//table[@data-test-id='attachments-template-table']//input[@data-test-id='${attachment-not-needed-test-id-hakija-valtakirja}']
+  Wait Until  Xpath Should Match X Times  ${checkbox-path-hakija-valtakirja}  1
+  Wait Until  Element should be visible  ${checkbox-path-hakija-valtakirja}
   Element should be enabled  ${checkbox-path-hakija-valtakirja}
   Checkbox Should Not Be Selected  ${checkbox-path-hakija-valtakirja}
   Select Checkbox  ${checkbox-path-hakija-valtakirja}
-  Checkbox Should Be Selected  ${checkbox-path-hakija-valtakirja}
+  Wait Until  Checkbox Should Be Selected  ${checkbox-path-hakija-valtakirja}
 
 # - attachments-tabilla syota liiteversio Sonjan lisaamalle liitepohjalle
 Mikko adds txt attachment to the attachment template added by Sonja
