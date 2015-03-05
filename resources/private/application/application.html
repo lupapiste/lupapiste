@@ -894,7 +894,7 @@
 
           <a data-bind="click: $root.verdictAttachmentPrintsOrderHistoryModel.openPrintsOrderHistoryDialog,
                         ltext: 'application.printsOrderHistory',
-                        visible: $root.authorization.ok('order-verdict-attachment-prints')"
+                        visible: $root.authorization.ok('order-verdict-attachment-prints') && $root.verdictAttachmentPrintsOrderHistoryModel.historyItems().length"
              href="#" data-test-id="test-open-prints-order-history"></a>
 
         </div>

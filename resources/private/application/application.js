@@ -152,6 +152,7 @@
       attachmentsTab.refresh(applicationModel, authorizationModel);
 
       verdictAttachmentPrintsOrderModel.refresh(applicationModel);
+      verdictAttachmentPrintsOrderHistoryModel.refresh(applicationModel);
 
       // Statements
       requestForStatementModel.setApplicationId(app.id);
