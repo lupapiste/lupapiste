@@ -98,19 +98,16 @@
   (fact "with incorrect authority error is returned"
     (execute {:action "test-command-auth" :user {:id "user123" :organizations ["hanhivaara"] :role :authority} :data {:id "123"}}) => not-accessible))
 
-(facts "Access based on extra-auth-roles"
+(facts "Access based on user-authz-roles"
   (against-background
     (get-actions) => {:test-command-auth {:parameters [:id]
                                           :user-roles #{:authority}
                                           :states all-states
-                                          :extra-auth-roles [:someRole]}
-                      :without-extra-roles {:parameters [:id]
+                                          :user-authz-roles #{:someRole}}
+                      :with-default-roles {:parameters [:id]
                                             :user-roles #{:authority}
-                                            :states all-states}
-                      :with-any-extra-role {:parameters [:id]
-                                            :user-roles #{:anonymous}
                                             :states all-states
-                                            :extra-auth-roles [:any]}}
+                                            :user-authz-roles default-authz-writer-roles}}
     (domain/get-application-as "123" {:id "some1" :organizations ["999-R"] :role :authority} true) => {:organization "999-R"
                                                                                                        :state "submitted"
                                                                                                        :auth [{:id "user123" :role "someRole"}]}
@@ -147,13 +144,11 @@
     (execute {:action "test-command-auth" :user {:id "user234" :organizations [] :role :authority} :data {:id "123"}}) => unauthorized)
 
   (fact "Authority with no org and writer role in auth array has access"
-    (execute {:action "without-extra-roles" :user {:id "user345" :organizations [] :role :authority} :data {:id "123"}}) => ok?)
+    (execute {:action "with-default-roles" :user {:id "user345" :organizations [] :role :authority} :data {:id "123"}}) => ok?)
 
   (fact "Authority with no org and non-writer role in auth array has no access"
-    (execute {:action "without-extra-roles" :user {:id "user456" :organizations [] :role :authority} :data {:id "123"}}) => unauthorized)
+    (execute {:action "with-default-roles" :user {:id "user456" :organizations [] :role :authority} :data {:id "123"}}) => unauthorized)
 
-  (fact "Any extra-auth-role allowed"
-    (execute {:action "with-any-extra-role" :user {:id "user456" :organizations [] :role :authority} :data {:id "123"}}) => ok?)
   )
 
 (facts "Parameter validation"

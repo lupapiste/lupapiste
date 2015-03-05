@@ -22,7 +22,7 @@
 
 (defquery "allowed-actions"
  {:user-roles #{:anonymous}
-  :extra-auth-roles [:any]}
+  :user-authz-roles action/all-authz-roles}
  [{:keys [data user application]}]
  (let [results  (map validated (foreach-action user data application))
        filtered (if (env/dev-mode?)
