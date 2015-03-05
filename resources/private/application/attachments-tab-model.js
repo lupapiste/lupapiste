@@ -77,8 +77,6 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel, verdictAttachme
           return self.authorizationModel.ok('order-verdict-attachment-prints') && self.verdictAttachmentPrintsOrderModel.attachments().length;
         }
       },
-
-
       "signAttachments": {
         loc: loc("application.signAttachments"),
         clickCommand: function() {
