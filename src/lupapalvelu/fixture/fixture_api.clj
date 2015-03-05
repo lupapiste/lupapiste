@@ -11,7 +11,7 @@
 
   (defquery apply-fixture
     {:parameters [:name]
-     :roles [:anonymous]}
+     :user-roles #{:anonymous}}
     [{{:keys [name]} :data}]
     (require (symbol (str "lupapalvelu.fixture." name)))
     (if (exists? name)

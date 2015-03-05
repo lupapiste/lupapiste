@@ -5,7 +5,7 @@
             [lupapalvelu.logging :as logging]))
 
 (defcommand "frontend-error"
-  {:roles [:anonymous]}
+  {:user-roles #{:anonymous}}
   [{{:keys [page message]} :data {:keys [email]} :user {:keys [user-agent]} :web}]
   (let [limit          1000
         sanitize       (partial logging/sanitize limit)

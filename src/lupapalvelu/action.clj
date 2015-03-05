@@ -159,11 +159,10 @@
 (defn missing-fields [{data :data} {parameters :parameters}]
   (map name (set/difference (set parameters) (set (keys data)))))
 
-(defn- has-required-role [command {roles :roles :as meta-data}]
-  {:pre [roles]}
-  (let [user-role      (-> command :user :role keyword)
-        roles-required (if (set? roles) roles (set roles))]
-    (or (roles-required :anonymous) (roles-required user-role))))
+(defn- has-required-user-role [command {user-roles :user-roles :as meta-data}]
+  {:pre [(set? user-roles)]}
+  (let [user-role (-> command :user :role keyword)]
+    (or (user-roles :anonymous) (user-roles user-role))))
 
 (defn meta-data [{command :action}]
   ((get-actions) (keyword command)))
@@ -184,7 +183,7 @@
     (fail :error.invalid-type)))
 
 (defn missing-roles [command]
-  (when-not (has-required-role command (meta-data command))
+  (when-not (has-required-user-role command (meta-data command))
     (tracef "command '%s' is unauthorized for role '%s'" (:action command) (-> command :user :role))
     unauthorized))
 
@@ -345,7 +344,7 @@
 
 (def supported-action-meta-data
   {:parameters  "Vector of parameters. Parameters can be keywords or symbols. Symbols will be available in the action body. If a parameter is missing from request, an error will be raised."
-   :roles       "Vector of role keywords."
+   :user-roles  "Set of user role keywords."
    :extra-auth-roles  "Vector of role keywords."
    :description "Documentation string."
    :notified    "Boolean. Documents that the action will be sending (email) notifications."
@@ -368,11 +367,15 @@
   (assert (not (ss/blank? (name action-type))))
   (assert (not (ss/blank? (name action-name))))
   (assert (every? supported-action-meta-data-keys (keys meta-data)) (str (keys meta-data)))
-  (assert (seq (:roles meta-data)) (str "You must define :roles meta data for " action-name ". Use :roles [:anonymous] to grant access to anyone."))
   (assert (if (some #(= % :id) (:parameters meta-data)) (seq (:states meta-data)) true)
     (str "You must define :states meta data for " action-name " if action has the :id parameter (i.e. application is attached to the action)."))
 
-  (let [action-keyword (keyword action-name)]
+  (let [action-keyword (keyword action-name)
+        user-roles (:user-roles meta-data)]
+
+    (assert (seq user-roles) (str "You must define :user-roles meta data for " action-name ". Use :user-roles #{:anonymous}] to grant access to anyone."))
+    (assert (and (set? user-roles) (every? keyword? user-roles)) ":user-roles must be a set of keywords")
+
     (tracef "registering %s: '%s' (%s:%s)" (name action-type) action-name ns-str line)
     (swap! actions assoc
       action-keyword
@@ -387,7 +390,6 @@
         args        (if doc-string (rest args) args)
         meta-data   (when (map? (first args)) (first args))
         args        (if meta-data (rest args) args)
-        meta-data   (update-in (or meta-data {}) [:roles] set)
         bindings    (when (vector? (first args)) (first args))
         body        (if bindings (rest args) args)
         bindings    (or bindings ['_])

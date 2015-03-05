@@ -151,7 +151,7 @@
     :submitted     (when (= "aiemmalla-luvalla-hakeminen" (:name op)) (:created application))))
 
 (defexport export-applications
-  {:roles [:trusted-etl]}
+  {:user-roles #{:trusted-etl}}
   [{{ts :modifiedAfterTimestampMillis} :data user :user}]
   (let [query (merge
                 (domain/application-query-for user)
@@ -168,6 +168,6 @@
     (ok :applications applications)))
 
 (defexport export-organizations
-  {:roles [:trusted-etl]}
+  {:user-roles #{:trusted-etl}}
   [_]
   (export :organizations {} [:name :scope]))

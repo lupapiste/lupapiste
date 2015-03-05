@@ -22,7 +22,7 @@
      :username email}))
 
 (defraw openinforequest
-  {:roles [:anonymous]}
+  {:user-roles #{:anonymous}}
   [{{token-id :token-id} :data lang :lang created :created}]
   (assert created)
   (let [token (mongo/by-id :open-inforequest-token token-id)

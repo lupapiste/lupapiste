@@ -21,7 +21,7 @@
 ;;
 
 (defquery invites
-  {:roles [:applicant :authority]}
+  {:user-roles #{:applicant :authority}}
   [{{:keys [id]} :user}]
   (let [common     {:auth {$elemMatch {:invite.user.id id}}}
         query      {$and [common {:state {$ne :canceled}}]}
@@ -78,14 +78,14 @@
                       action/email-validator
                       role-validator]
    :states     (action/all-application-states-but [:closed :canceled])
-   :roles      [:applicant :authority]
+   :user-roles #{:applicant :authority}
    :notified   true}
   [command]
   (create-invite command id email text documentName documentId path role))
 
 (defcommand approve-invite
   {:parameters [id]
-   :roles      [:applicant]
+   :user-roles #{:applicant}
    :states     (action/all-application-states-but [:closed :canceled])}
   [{:keys [created user application] :as command}]
   (when-let [my-invite (domain/invite application (:email user))]
@@ -127,7 +127,7 @@
 
 (defcommand decline-invitation
   {:parameters [:id]
-   :roles [:applicant :authority]
+   :user-roles #{:applicant :authority}
    :states     (action/all-application-states-but [:canceled])}
   [command]
   (do-remove-auth command (get-in command [:user :email])))
@@ -139,7 +139,7 @@
 (defcommand remove-auth
   {:parameters [:id username]
    :input-validators [(partial action/non-blank-parameters [:username])]
-   :roles      [:applicant :authority]
+   :user-roles #{:applicant :authority}
    :states     (action/all-application-states-but [:canceled])}
   [command]
   (do-remove-auth command username))
@@ -155,14 +155,14 @@
 
 (defcommand unsubscribe-notifications
   {:parameters [:id :username]
-   :roles [:applicant :authority]
+   :user-roles #{:applicant :authority}
    :states all-application-states}
   [command]
   (manage-unsubscription command true))
 
 (defcommand subscribe-notifications
   {:parameters [:id :username]
-   :roles [:applicant :authority]
+   :user-roles #{:applicant :authority}
    :states all-application-states}
   [command]
   (manage-unsubscription command false))

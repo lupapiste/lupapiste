@@ -17,7 +17,7 @@
 
 (defcommand create-foreman-application
   {:parameters [id taskId foremanRole]
-   :roles [:applicant :authority]
+   :user-roles #{:applicant :authority}
    :states action/all-application-states}
   [{:keys [created user application] :as command}]
   (let [original-open? (util/pos? (:opened application))
@@ -64,7 +64,7 @@
     (ok :id (:id foreman-app))))
 
 (defcommand update-foreman-other-applications
-  {:roles [:applicant :authority]
+  {:user-roles #{:applicant :authority}
    :states action/all-states
    :parameters [:id foremanHetu]}
   [{application :application user :user :as command}]
@@ -87,7 +87,7 @@
     (fail :error.not-foreman-app)))
 
 (defquery foreman-history
-  {:roles            [:authority :applicant]
+  {:user-roles #{:authority :applicant}
    :states           action/all-states
    :extra-auth-roles [:any]
    :parameters       [:id]
@@ -98,7 +98,7 @@
     (fail :error.not-found)))
 
 (defquery reduced-foreman-history
-  {:roles            [:authority :applicant]
+  {:user-roles #{:authority :applicant}
    :states           action/all-states
    :extra-auth-roles [:any]
    :parameters       [:id]
@@ -109,7 +109,7 @@
     (fail :error.not-found)))
 
 (defquery foreman-applications
-  {:roles            [:applicant :authority]
+  {:user-roles #{:applicant :authority}
    :states           action/all-states
    :extra-auth-roles [:any]
    :parameters       [:id]}

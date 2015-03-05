@@ -15,7 +15,7 @@
 
 (defcommand inform-construction-started
   {:parameters ["id" startedTimestampStr]
-   :roles      [:applicant :authority]
+   :user-roles #{:applicant :authority}
    :states     [:verdictGiven]
    :notified   true
    :on-success (notify :application-state-change)
@@ -32,7 +32,7 @@
 (comment
   (defcommand inform-building-construction-started
        {:parameters ["id" buildingIndex startedDate lang]
-        :roles      [:NONE] ;FIXME rakentamisen aikaisen toimminan yhteydessa korjataan oikeae
+        :user-roles #{:NONE} ;FIXME rakentamisen aikaisen toimminan yhteydessa korjataan oikeae
         :states     [:verdictGiven :constructionStarted]
         :notified   true
         :pre-checks [(permit/validate-permit-type-is permit/R)]
@@ -62,7 +62,7 @@
 
 (defcommand inform-construction-ready
   {:parameters ["id" readyTimestampStr lang]
-   :roles      [:applicant :authority]
+   :user-roles #{:applicant :authority}
    :states     [:constructionStarted]
    :on-success (notify :application-state-change)
    :pre-checks [(permit/validate-permit-type-is permit/YA)]
