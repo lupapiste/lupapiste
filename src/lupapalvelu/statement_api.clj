@@ -21,7 +21,7 @@
 ;;
 
 (defquery get-organizations-statement-givers
-  {:roles [:authorityAdmin]}
+  {:user-roles #{:authorityAdmin}}
   [{{:keys [organizations]} :user}]
   (let [organization (organization/get-organization (first organizations))
         permitPersons (or (:statementGivers organization) [])]
@@ -43,7 +43,7 @@
    :input-validators [(partial action/non-blank-parameters [:email])
                       action/email-validator]
    :notified   true
-   :roles      [:authorityAdmin]}
+   :user-roles #{:authorityAdmin}}
   [{{:keys [organizations]} :user}]
   (let [organization-id (first organizations)
         organization    (organization/get-organization organization-id)
@@ -62,7 +62,7 @@
 
 (defcommand delete-statement-giver
   {:parameters [personId]
-   :roles      [:authorityAdmin]}
+   :user-roles #{:authorityAdmin}}
   [{{:keys [organizations]} :user}]
   (organization/update-organization (first organizations) {$pull {:statementGivers {:id personId}}}))
 
@@ -72,7 +72,7 @@
 
 (defquery get-statement-givers
   {:parameters [:id]
-   :roles [:authority]
+   :user-roles #{:authority}
    :states action/all-application-states}
   [{application :application}]
   (let [organization (organization/get-organization (:organization application))
@@ -81,7 +81,7 @@
 
 (defcommand should-see-unsubmitted-statements
   {:description "Pseudo command for UI authorization logic"
-   :roles [:authority] :extra-auth-roles [:statementGiver]} [_])
+   :user-roles #{:authority} :extra-auth-roles [:statementGiver]} [_])
 
 (notifications/defemail :request-statement
   {:recipients-fn  :recipients
@@ -90,7 +90,7 @@
 
 (defcommand request-for-statement
   {:parameters  [id personIds]
-   :roles       [:authority]
+   :user-roles #{:authority}
    :states      [:draft :open :submitted :complement-needed]
    :notified    true
    :description "Adds statement-requests to the application and ensures permission to all new users."}
@@ -120,7 +120,7 @@
 (defcommand delete-statement
   {:parameters [id statementId]
    :states     [:draft :open :submitted :complement-needed]
-   :roles      [:authority]}
+   :user-roles #{:authority}}
   [command]
   (update-application command {$pull {:statements {:id statementId} :auth {:statementId statementId}}}))
 
@@ -129,7 +129,7 @@
    :pre-checks  [statement-exists statement-owner #_statement-not-given]
    :input-validators [(fn [{{status :status} :data}] (when-not (#{"yes", "no", "condition"} status) (fail :error.missing-parameters)))]
    :states      [:draft :open :submitted :complement-needed]
-   :roles       [:authority]
+   :user-roles #{:authority}
    :extra-auth-roles [:statementGiver]
    :notified    true
    :on-success  [(fn [command _] (notifications/notify! :new-comment command))]

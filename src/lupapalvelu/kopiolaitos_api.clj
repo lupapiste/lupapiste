@@ -9,7 +9,7 @@
                  If the command is run more than once, the already ordered attachment copies are ordered again."
    :parameters [:id :lang :attachmentsWithAmounts :orderInfo]
    :states     [:verdictGiven :constructionStarted]
-   :roles      [:authority]
+   :user-roles #{:authority}
    :input-validators [(partial action/non-blank-parameters [:lang])
                       (partial action/vector-parameters-with-map-items-with-required-keys [:attachmentsWithAmounts] [:forPrinting :amount])
                       (fn [{{attachments :attachmentsWithAmounts} :data :as command}]

@@ -10,7 +10,7 @@
 
 (defcommand change-urgency
   {:parameters [id urgency]
-   :roles [:authority]
+   :user-roles #{:authority}
    :states action/all-states
    :extra-auth-roles [:statementGiver]
    :input-validators [validate-urgency]}
@@ -21,6 +21,6 @@
   {:parameters [id authorityNotice]
    :states action/all-states
    :extra-auth-roles [:statementGiver]
-   :roles [:authority]}
+   :user-roles #{:authority}}
   [command]
   (update-application command {$set {:authorityNotice authorityNotice}}))

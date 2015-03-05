@@ -56,8 +56,7 @@
                              [lein-scss-compiler "0.1.4"]]
                    :resource-paths ["dev-resources"]
                    :source-paths ["dev-src" "test-utils"]
-                   :jvm-opts ["-Djava.awt.headless=true"
-                              "-Xmx1G" "-XX:MaxPermSize=256M"]}
+                   :jvm-opts ["-Djava.awt.headless=true" "-Xmx1G"]}
              :uberjar  {:source-paths ["main-src"]
                         :main lupapalvelu.main
                         :jar-exclusions [#"gems/.*"]
@@ -65,7 +64,7 @@
              :itest    {:test-paths ^:replace ["itest"]}
              :stest    {:test-paths ^:replace ["stest"]}
              :alltests {:source-paths ["test" "itest" "stest"]
-                        :jvm-opts ["-Xmx1G" "-XX:MaxPermSize=256M"]}
+                        :jvm-opts ["-Djava.awt.headless=true" "-Xmx1G"]}
              :lupadev  {:jvm-opts ["-Dtarget_server=https://www-dev.lupapiste.fi" "-Djava.awt.headless=true"]}
              :lupatest {:jvm-opts ["-Dtarget_server=https://www-test.lupapiste.fi" "-Djava.awt.headless=true"]}}
   :nitpicker {:exts ["clj" "js" "html"]
