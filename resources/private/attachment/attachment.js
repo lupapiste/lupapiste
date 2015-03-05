@@ -6,6 +6,7 @@ var attachment = (function() {
   var attachmentId = null;
   var model = null;
   var applicationModel = lupapisteApp.models.application;
+  var attachmentGroup = null;
 
   var authorizationModel = authorization.create();
   var signingModel = new LUPAPISTE.SigningModel("#dialog-sign-attachment", false);
@@ -172,6 +173,43 @@ var attachment = (function() {
       LUPAPISTE.ModalDialog.open("#dialog-confirm-delete-attachment");
     },
 
+    previousAttachment: function() {
+      console.log("prev");
+      var group = _.find(model.preGrouped.concat(model.postGrouped), function(g) {
+        return _.find(g.attachments, function(att) {
+          return att.id === model.id();
+        }) !== undefined;
+      });
+
+      var attachments = group.attachments;
+      var index = _.findIndex(attachments, function(att) {
+        return att.id === model.id();
+      });
+      console.log("previous", attachments, model.id(), index);
+      if (index > 0) {
+        var previousId = attachments[index - 1].id;
+        window.location.hash = "!/attachment/"+applicationId+"/" + previousId;
+      }
+    },
+
+    nextAttachment: function() {
+      var group = _.find(model.preGrouped.concat(model.postGrouped), function(g) {
+        return _.find(g.attachments, function(att) {
+          return att.id === model.id();
+        }) !== undefined;
+      });
+
+      var attachments = group.attachments;
+      var index = _.findIndex(attachments, function(att) {
+        return att.id === model.id();
+      });
+      console.log("next", attachments, model.id(), index);
+      if (index + 1 < attachments.length) {
+        var nextId = attachments[index + 1].id;
+        window.location.hash = "!/attachment/"+applicationId+"/" + nextId;
+      }
+    },
+
     showChangeTypeDialog: function() {
       LUPAPISTE.ModalDialog.open("#change-type-dialog");
     },
@@ -205,7 +243,6 @@ var attachment = (function() {
              currentUser.isAuthority() || _.contains(LUPAPISTE.config.postVerdictStates, ko.unwrap(model.applicationState)) :
              true;
   });
-
 
   function saveLabelInformation(type, data) {
     data.id = applicationId;
@@ -341,7 +378,7 @@ var attachment = (function() {
     attachmentTypeSelect.initSelectList(selectList$, application.allowedAttachmentTypes, model.attachmentType());
     selectList$.change(function(e) {model.attachmentType($(e.target).val());});
 
-    model.id = attachmentId;
+    model.id(attachmentId);
 
     approveModel.setApplication(application);
     approveModel.setAttachmentId(attachmentId);
@@ -356,9 +393,17 @@ var attachment = (function() {
       if (!model.latestVersion()) {
         setTimeout(function() {
           model.showHelp(true);
-        }, 1500);
+        }, 50);
       }
     });
+
+    var rawAttachments = ko.mapping.toJS(model.application.attachments());
+
+    var preAttachments = attachmentUtils.getPreAttachments(rawAttachments);
+    var postAttachments = attachmentUtils.getPostAttachments(rawAttachments);
+
+    model.preGrouped = attachmentUtils.getGroupByOperation(preAttachments, true, model.application.allowedAttachmentTypes());
+    model.postGrouped = attachmentUtils.getGroupByOperation(postAttachments, true, model.application.allowedAttachmentTypes());
 
     subscribe();
   }
