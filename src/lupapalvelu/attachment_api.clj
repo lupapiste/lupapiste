@@ -372,7 +372,7 @@
                            (number? timestamp) (long timestamp)
                            (ss/blank? timestamp) (:created command)
                            :else (->long timestamp))
-        stamp-timestamp (if (zero? parsed-timestamp) (:created command))]
+        stamp-timestamp (if (zero? parsed-timestamp) (:created command) parsed-timestamp)]
     (ok :job (make-stamp-job
               (key-by :attachment-id (map ->file-info (attachment/get-attachments-infos application files)))
               {:application application
