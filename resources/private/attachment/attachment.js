@@ -6,6 +6,7 @@ var attachment = (function() {
   var attachmentId = null;
   var model = null;
   var applicationModel = lupapisteApp.models.application;
+  var attachmentGroup = null;
 
   var authorizationModel = authorization.create();
   var signingModel = new LUPAPISTE.SigningModel("#dialog-sign-attachment", false);
@@ -124,6 +125,8 @@ var attachment = (function() {
     showAttachmentVersionHistory: ko.observable(),
     showHelp:             ko.observable(false),
     init:                 ko.observable(false),
+    groupAttachments:     ko.observableArray(),
+    groupIndex:           ko.observable(),
 
     toggleHelp: function() {
       model.showHelp(!model.showHelp());
@@ -172,6 +175,20 @@ var attachment = (function() {
       LUPAPISTE.ModalDialog.open("#dialog-confirm-delete-attachment");
     },
 
+    previousAttachment: function() {
+      var previousId = util.getIn(model.groupAttachments(), [model.groupIndex() - 1, "id"]);
+      if (previousId) {
+        window.location.hash = "!/attachment/"+applicationId+"/" + previousId;
+      }
+    },
+
+    nextAttachment: function() {
+      var nextId = util.getIn(model.groupAttachments(), [model.groupIndex() + 1, "id"]);
+      if (nextId) {
+        window.location.hash = "!/attachment/"+applicationId+"/" + nextId;
+      }
+    },
+
     showChangeTypeDialog: function() {
       LUPAPISTE.ModalDialog.open("#change-type-dialog");
     },
@@ -206,6 +223,13 @@ var attachment = (function() {
              true;
   });
 
+  model.previousAttachmentPresent = ko.pureComputed(function() {
+    return model.groupIndex() > 0;
+  });
+
+  model.nextAttachmentPresent = ko.pureComputed(function() {
+    return model.groupIndex() < model.groupAttachments().length - 1;
+  });
 
   function saveLabelInformation(type, data) {
     data.id = applicationId;
@@ -341,7 +365,7 @@ var attachment = (function() {
     attachmentTypeSelect.initSelectList(selectList$, application.allowedAttachmentTypes, model.attachmentType());
     selectList$.change(function(e) {model.attachmentType($(e.target).val());});
 
-    model.id = attachmentId;
+    model.id(attachmentId);
 
     approveModel.setApplication(application);
     approveModel.setAttachmentId(attachmentId);
@@ -356,9 +380,28 @@ var attachment = (function() {
       if (!model.latestVersion()) {
         setTimeout(function() {
           model.showHelp(true);
-        }, 1500);
+        }, 50);
       }
     });
+
+    var rawAttachments = ko.mapping.toJS(model.application.attachments());
+
+    var preAttachments = attachmentUtils.getPreAttachments(rawAttachments);
+    var postAttachments = attachmentUtils.getPostAttachments(rawAttachments);
+
+    var preGrouped = attachmentUtils.getGroupByOperation(preAttachments, true, model.application.allowedAttachmentTypes());
+    var postGrouped = attachmentUtils.getGroupByOperation(postAttachments, true, model.application.allowedAttachmentTypes());
+
+    var group = _.find(preGrouped.concat(postGrouped), function(g) {
+      return _.find(g.attachments, function(att) {
+        return att.id === model.id();
+      }) !== undefined;
+    });
+
+    model.groupAttachments(group.attachments);
+    model.groupIndex(_.findIndex(model.groupAttachments(), function(att) {
+      return att.id === model.id();
+    }));
 
     subscribe();
   }
