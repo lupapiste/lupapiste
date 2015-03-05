@@ -10,6 +10,7 @@
                   data-bind="enable: !appModel.processing() && !appModel.pending(),
                              options: attachmentsOperations,
                              optionsText: 'loc',
+                             optionsValue: 'name',
                              value: attachmentsOperation,
                              optionsCaption: loc('choose'),
                              attr: {'data-test-id': 'attachment-operations-select-' + testId}">
