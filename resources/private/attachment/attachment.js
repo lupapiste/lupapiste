@@ -125,6 +125,8 @@ var attachment = (function() {
     showAttachmentVersionHistory: ko.observable(),
     showHelp:             ko.observable(false),
     init:                 ko.observable(false),
+    groupAttachments:     ko.observableArray(),
+    groupIndex:           ko.observable(),
 
     toggleHelp: function() {
       model.showHelp(!model.showHelp());
@@ -174,39 +176,20 @@ var attachment = (function() {
     },
 
     previousAttachment: function() {
-      console.log("prev");
-      var group = _.find(model.preGrouped.concat(model.postGrouped), function(g) {
-        return _.find(g.attachments, function(att) {
-          return att.id === model.id();
-        }) !== undefined;
-      });
-
-      var attachments = group.attachments;
-      var index = _.findIndex(attachments, function(att) {
-        return att.id === model.id();
-      });
-      console.log("previous", attachments, model.id(), index);
-      if (index > 0) {
-        var previousId = attachments[index - 1].id;
-        window.location.hash = "!/attachment/"+applicationId+"/" + previousId;
-      }
+      console.log("previous", model.groupAttachments(), model.id(), model.groupIndex());
+        var previousId = util.getIn(model.groupAttachments(), [model.groupIndex() - 1, "id"]);
+        if (previousId) {
+          window.location.hash = "!/attachment/"+applicationId+"/" + previousId;
+        }
     },
 
     nextAttachment: function() {
-      var group = _.find(model.preGrouped.concat(model.postGrouped), function(g) {
-        return _.find(g.attachments, function(att) {
-          return att.id === model.id();
-        }) !== undefined;
-      });
-
-      var attachments = group.attachments;
-      var index = _.findIndex(attachments, function(att) {
-        return att.id === model.id();
-      });
-      console.log("next", attachments, model.id(), index);
-      if (index + 1 < attachments.length) {
-        var nextId = attachments[index + 1].id;
-        window.location.hash = "!/attachment/"+applicationId+"/" + nextId;
+      console.log("next", model.groupAttachments(), model.id(), model.groupIndex());
+      if (model.groupIndex() + 1 < model.groupAttachments().length) {
+        var nextId = util.getIn(model.groupAttachments(), [model.groupIndex() + 1, "id"]);
+        if (nextId) {
+          window.location.hash = "!/attachment/"+applicationId+"/" + nextId;
+        }
       }
     },
 
@@ -242,6 +225,14 @@ var attachment = (function() {
     return _.contains(LUPAPISTE.config.postVerdictStates, ko.unwrap(model.application.state)) ?
              currentUser.isAuthority() || _.contains(LUPAPISTE.config.postVerdictStates, ko.unwrap(model.applicationState)) :
              true;
+  });
+
+  model.previousAttachmentPresent = ko.pureComputed(function() {
+    return model.groupIndex() > 0;
+  });
+
+  model.nextAttachmentPresent = ko.pureComputed(function() {
+    return model.groupIndex() < model.groupAttachments().length - 1;
   });
 
   function saveLabelInformation(type, data) {
@@ -402,8 +393,19 @@ var attachment = (function() {
     var preAttachments = attachmentUtils.getPreAttachments(rawAttachments);
     var postAttachments = attachmentUtils.getPostAttachments(rawAttachments);
 
-    model.preGrouped = attachmentUtils.getGroupByOperation(preAttachments, true, model.application.allowedAttachmentTypes());
-    model.postGrouped = attachmentUtils.getGroupByOperation(postAttachments, true, model.application.allowedAttachmentTypes());
+    var preGrouped = attachmentUtils.getGroupByOperation(preAttachments, true, model.application.allowedAttachmentTypes());
+    var postGrouped = attachmentUtils.getGroupByOperation(postAttachments, true, model.application.allowedAttachmentTypes());
+
+    var group = _.find(preGrouped.concat(postGrouped), function(g) {
+      return _.find(g.attachments, function(att) {
+        return att.id === model.id();
+      }) !== undefined;
+    });
+
+    model.groupAttachments(group.attachments);
+    model.groupIndex(_.findIndex(model.groupAttachments(), function(att) {
+      return att.id === model.id();
+    }));
 
     subscribe();
   }
