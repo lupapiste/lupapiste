@@ -1,10 +1,11 @@
-LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel) {
+LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel, verdictAttachmentPrintsOrderModel) {
   "use strict";
 
   var self = this;
 
   self.appModel = appModel;
   self.signingModel = signingModel;
+  self.verdictAttachmentPrintsOrderModel = verdictAttachmentPrintsOrderModel;
 
   self.preAttachmentsByOperation = ko.observableArray();
   self.postAttachmentsByOperation = ko.observableArray();
@@ -79,6 +80,17 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel) {
           return self.authorizationModel.ok("set-attachments-as-verdict-attachment") && self.appModel.hasAttachment();
         }
       },
+      "orderVerdictAttachments": {
+        loc: loc("verdict.orderAttachmentPrints.button"),
+        clickCommand: function() {
+          self.verdictAttachmentPrintsOrderModel.openDialog({application: self.appModel});
+        },
+        visibleFn: function (rawAttachments) {
+          return self.authorizationModel.ok('order-verdict-attachment-prints') && self.verdictAttachmentPrintsOrderModel.attachments().length;
+        }
+      },
+
+
       "signAttachments": {
         loc: loc("application.signAttachments"),
         clickCommand: function() {
@@ -137,8 +149,8 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel) {
   self.refresh = function(appModel, authorizationModel) {
     self.appModel = appModel;
     self.authorizationModel = authorizationModel;
-    var rawAttachments = ko.mapping.toJS(appModel.attachments);
 
+    var rawAttachments = ko.mapping.toJS(appModel.attachments);
     var preAttachments = getPreAttachments(rawAttachments);
     var postAttachments = getPostAttachments(rawAttachments);
 
