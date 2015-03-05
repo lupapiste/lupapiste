@@ -121,9 +121,9 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel, verdictAttachme
     return commands;
   }
 
-  self.attachmentsOperation.subscribe(function(op) {
-    if (op && op.name) {
-      attachmentsOperationsMapping[op.name].clickCommand();
+  self.attachmentsOperation.subscribe(function(opName) {
+    if (opName) {
+      attachmentsOperationsMapping[opName].clickCommand();
       self.attachmentsOperation(undefined);
     }
   });
