@@ -478,7 +478,6 @@
                                             attachmentsOperations: $data.attachmentsOperations,
                                             testId: 'upper'}}"></div>
 
-          <div>
             <div data-bind="if: postAttachmentsByOperation().length > 0" data-test-id="application-post-attachments-table">
               <h1><span data-bind="ltext: 'application.attachments.post-verdict'"></span></h1>
               <div class="clear" data-bind="template: {name: 'attachments-template-op', data: postAttachmentsByOperation()}"></div>
@@ -501,10 +500,6 @@
               <div class="clear" data-bind="template: {name: 'attachments-template-op', data: preAttachmentsByOperation()}"></div>
             </div>
             <!-- /ko -->
-
-            <a data-bind="attr: {href: '/api/raw/download-all-attachments?id=' + $root.application.id() + '&lang=' + loc.getCurrentLanguage() }, visible: $root.application.hasAttachment, ltext: 'download-all'" data-test-id="application-download-all-attachments" href="#" target="_blank"></a>
-
-          </div>
 
           <div class="process-nav">
             <a class="btn process-next btn-nav-forward" data-bind="click: $root.application.nextTab" href="#" data-target="requiredFieldSummary">
