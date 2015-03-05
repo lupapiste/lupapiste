@@ -368,28 +368,30 @@
    :states     [:submitted :sent :complement-needed :verdictGiven :constructionStarted :closed]
    :description "Stamps all attachments of given application"}
   [{application :application {transparency :transparency} :data :as command}]
-  (ok :job (make-stamp-job
-             (key-by :attachment-id (map ->file-info (attachment/get-attachments-infos application files)))
-             {:application application
-              :user (:user command)
-              :text (if-not (ss/blank? text) text (i18n/loc "stamp.verdict"))
-              :created (cond
-                         (number? timestamp) (long timestamp)
-                         (ss/blank? timestamp) (:created command)
-                         :else (->long timestamp))
-              :now      (:created command)
-              :x-margin (->long xMargin)
-              :y-margin (->long yMargin)
-              :transparency (->long (or transparency 0))
-              :info-fields [(str buildingId)
-                            (str kuntalupatunnus)
-                            (str section)
-                            (str extraInfo)
-                            (if-not (ss/blank? organization)
-                              organization
-                              (let [org (organization/get-organization (:organization application))]
-                                (organization/get-organization-name org)))]
-              })))
+  (let [parsed-timestamp (cond
+                           (number? timestamp) (long timestamp)
+                           (ss/blank? timestamp) (:created command)
+                           :else (->long timestamp))
+        stamp-timestamp (if (zero? parsed-timestamp) (:created command))]
+    (ok :job (make-stamp-job
+              (key-by :attachment-id (map ->file-info (attachment/get-attachments-infos application files)))
+              {:application application
+               :user (:user command)
+               :text (if-not (ss/blank? text) text (i18n/loc "stamp.verdict"))
+               :created  stamp-timestamp
+               :now      (:created command)
+               :x-margin (->long xMargin)
+               :y-margin (->long yMargin)
+               :transparency (->long (or transparency 0))
+               :info-fields [(str buildingId)
+                             (str kuntalupatunnus)
+                             (str section)
+                             (str extraInfo)
+                             (if-not (ss/blank? organization)
+                               organization
+                               (let [org (organization/get-organization (:organization application))]
+                                 (organization/get-organization-name org)))]
+               }))))
 
 (defquery stamp-attachments-job
   {:parameters [:job-id :version]
