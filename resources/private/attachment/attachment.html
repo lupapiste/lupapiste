@@ -39,18 +39,18 @@
             </div>
 
             <div class="attachment-actions">
+              <button data-bind="enable: previousAttachmentPresent, click: previousAttachment">
+                <span data-bind="ltext: 'previous'"></span>
+                <span class="icon drill-left-black-bigger left-align"></span>
+              </button>
+              <button data-bind="enable: nextAttachmentPresent, click: nextAttachment">
+                <span data-bind="ltext: 'next'"></span>
+                <span class="icon drill-right-black left-align"></span>
+              </button>
               <button data-test-id="change-attachment-type"
                       data-bind="ltext: 'attachment.changeType', click: showChangeTypeDialog, visible: $root.authorization.ok('set-attachment-type') && editable && authorized"></button>
               <button data-test-id="delete-attachment"
                       data-bind="ltext: 'attachment.delete', click: deleteAttachment, visible: $root.authorization.ok('delete-attachment') && editable && authorized">Poista liite</button>
-              <button>
-                <span data-bind="ltext: 'previous', click: previousAttachment"></span>
-                <span class="icon drill-left-black-bigger left-align"></span>
-              </button>
-              <button>
-                <span data-bind="ltext: 'next', click: nextAttachment"></span>
-                <span class="icon drill-right-black left-align"></span>
-              </button>
             </div>
           </div>
 
