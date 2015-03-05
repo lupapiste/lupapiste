@@ -113,8 +113,8 @@ $previewHeight: 500px;
   display: block;
   h1 {
     line-height: normal;
-    display: inline-block;
-    max-width: 80%
+    max-width: 80%;
+    float: left;
   }
   a {
     margin-left: $marginL * 2;
