@@ -29,23 +29,30 @@ Sonja logs in
 
 Sonja sets attachment to be a verdict attachment
   Open tab  attachments
+  Wait Until  Page should contain element  xpath=//select[@data-test-id="attachment-operations-select-lower"]//option[@value='markVerdictAttachments']
+  Page should not contain element  xpath=//select[@data-test-id="attachment-operations-select-lower"]//option[@value='orderVerdictAttachments']
   Open attachment details  muut.muu
   Checkbox should not be selected  xpath=//section[@id='attachment']//input[@data-test-id='is-verdict-attachment']
   Select checkbox  xpath=//section[@id='attachment']//input[@data-test-id='is-verdict-attachment']
   Click by test id  back-to-application-from-attachment
+  Wait Until  Page should contain element  xpath=//select[@data-test-id="attachment-operations-select-lower"]//option[@value='markVerdictAttachments']
+  Page should not contain element  xpath=//select[@data-test-id="attachment-operations-select-lower"]//option[@value='orderVerdictAttachments']
 
 Sonja gives verdict
   Open tab  verdict
   Fetch verdict
   Wait until  Element text should be  xpath=//div[@id='application-verdict-tab']//span[@data-test-id='given-verdict-id-0']  2013-01
 
+An option to order verdict attachments has appeared into the Toiminnot dropdown in the Attachments tab
+  Open tab  attachments
+  Wait Until  Page should contain element  xpath=//select[@data-test-id="attachment-operations-select-lower"]//option[@value='orderVerdictAttachments']
+
 Sonja checks kopiolaitos infos before order
+  Open tab  verdict
   Wait Until  Element should be visible  xpath=//div[@id='application-verdict-tab']
   Click by test id  test-order-attachment-prints
   Wait Until  Element should be visible  dialog-verdict-attachment-prints-order
-
   Wait Until  Xpath should match x times  //div[@id='dialog-verdict-attachment-prints-order']//tbody[@data-test-id='verdict-attachments-tbody']//tr  1
-
   Element should be visible  verdict-attachment-prints-order-info
 
   # Some input values come from organization data set in minimal fixture
