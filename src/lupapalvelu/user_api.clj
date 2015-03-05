@@ -32,12 +32,12 @@
 ;;
 
 (defquery user
-  {:roles [:applicant :authority :authorityAdmin :admin]}
+  {:user-roles #{:applicant :authority :authorityAdmin :admin}}
   [{user :user}]
   (ok :user user))
 
 (defquery users
-  {:roles [:admin :authorityAdmin]}
+  {:user-roles #{:admin :authorityAdmin}}
   [{{:keys [role organizations]} :user data :data}]
   (ok :users (map user/non-private (-> data
                                      (set/rename-keys {:userId :id})
@@ -50,12 +50,12 @@
 (env/in-dev
   (defquery user-by-email
     {:parameters [email]
-     :roles [:admin]}
+     :user-roles #{:admin}}
     [_]
     (ok :user (user/get-user-by-email email))))
 
 (defcommand users-for-datatables
-  {:roles [:admin :authorityAdmin]}
+  {:user-roles #{:admin :authorityAdmin}}
   [{caller :user {params :params} :data}]
   (ok :data (user/users-for-datatables caller params)))
 
@@ -203,7 +203,7 @@
   {:parameters [:email role]
    :input-validators [(partial action/non-blank-parameters [:email])
                       action/email-validator]
-   :roles      [:admin :authorityAdmin]}
+   :user-roles #{:admin :authorityAdmin}}
   [{user-data :data caller :user}]
   (let [user (create-new-user caller user-data :send-email false)]
     (infof "Added a new user: role=%s, email=%s, organizations=%s" (:role user) (:email user) (:organizations user))
@@ -249,7 +249,7 @@
     true))
 
 (defcommand update-user
-  {:roles [:applicant :authority :authorityAdmin :admin]}
+  {:user-roles #{:applicant :authority :authorityAdmin :admin}}
   [{caller :user user-data :data}]
   (let [email     (user/canonize-email (or (:email user-data) (:email caller)))
         user-data (assoc user-data :email email)]
@@ -263,7 +263,7 @@
 
 (defcommand applicant-to-authority
   {:parameters [email]
-   :roles [:admin]
+   :user-roles #{:admin}
    :input-validators [(partial action/non-blank-parameters [:email])
                       action/email-validator]
    :description "Changes applicant or dummy account into authority"}
@@ -286,7 +286,7 @@
    :input-validators [valid-organization-operation?
                       (partial action/non-blank-parameters [:email :firstName :lastName])
                       action/email-validator]
-   :roles            [:authorityAdmin]}
+   :user-roles #{:authorityAdmin}}
   [{caller :user}]
   (let [email            (user/canonize-email email)
         new-organization (first (:organizations caller))
@@ -313,7 +313,7 @@
 
 (defcommand change-passwd
   {:parameters [oldPassword newPassword]
-   :roles [:applicant :authority :authorityAdmin :admin]}
+   :user-roles #{:applicant :authority :authorityAdmin :admin}}
   [{{user-id :id :as user} :user}]
   (let [user-data (mongo/by-id :users user-id)]
     (if (security/check-password oldPassword (-> user-data :private :password))
@@ -337,7 +337,7 @@
 
 (defcommand reset-password
   {:parameters    [email]
-   :roles [:anonymous]
+   :user-roles #{:anonymous}
    :input-validators [(partial action/non-blank-parameters [:email])
                       action/email-validator]
    :notified      true}
@@ -353,7 +353,7 @@
 
 (defcommand admin-reset-password
   {:parameters    [email]
-   :roles [:admin]
+   :user-roles #{:admin}
    :input-validators [(partial action/non-blank-parameters [:email])
                       action/email-validator]
    :notified      true}
@@ -377,7 +377,7 @@
   {:parameters    [email enabled]
    :input-validators [(partial action/non-blank-parameters [:email])
                       action/email-validator]
-   :roles         [:admin]}
+   :user-roles #{:admin}}
   [_]
   (let [email (user/canonize-email email)
        enabled (contains? #{true "true"} enabled)]
@@ -395,7 +395,7 @@
 
 (defcommand login
   {:parameters [username password]
-   :roles [:anonymous]}
+   :user-roles #{:anonymous}}
   [_]
   (if (user/throttle-login? username)
     (do
@@ -418,7 +418,7 @@
 
 (defcommand impersonate-authority
   {:parameters [organizationId password]
-   :roles [:admin]
+   :user-roles #{:admin}
    :input-validators [(partial action/non-blank-parameters [:organizationId])]
    :description "Changes admin session into authority session with access to given organization"}
   [{user :user}]
@@ -436,7 +436,7 @@
 
 (defcommand register-user
   {:parameters [stamp email password street zip city phone]
-   :roles [:anonymous]
+   :user-roles #{:anonymous}
    :input-validators [(partial action/non-blank-parameters [:email :password :stamp :street :zip :city :phone])
                       action/email-validator]}
   [{data :data}]
@@ -460,7 +460,7 @@
 
 (defcommand confirm-account-link
   {:parameters [stamp tokenId email password street zip city phone]
-   :roles [:anonymous]
+   :user-roles #{:anonymous}
    :input-validators [(partial action/non-blank-parameters [:tokenId :password])
                       action/email-validator]}
   [{data :data}]
@@ -484,7 +484,7 @@
 
 (defcommand retry-rakentajafi
   {:parameters [email]
-   :roles [:admin]
+   :user-roles #{:admin}
    :input-validators [(partial action/non-blank-parameters [:email])
                       action/email-validator]
    :description "Admin can retry sending data to rakentaja.fi, if account is not linked"}
@@ -503,7 +503,7 @@
 ;;
 
 (defquery user-attachments
-  {:roles [:applicant :authority :authorityAdmin :admin]}
+  {:user-roles #{:applicant :authority :authorityAdmin :admin}}
   [{user :user}]
   (ok :attachments (:attachments user)))
 
@@ -536,7 +536,7 @@
 
 (defraw download-user-attachment
   {:parameters [attachment-id]
-   :roles [:applicant]}
+   :user-roles #{:applicant}}
   [{user :user}]
   (when-not user (throw+ {:status 401 :body "forbidden"}))
   (if-let [attachment (mongo/download-find {:id attachment-id :metadata.user-id (:id user)})]
@@ -550,7 +550,7 @@
 
 (defcommand remove-user-attachment
   {:parameters [attachment-id]
-   :roles [:applicant]}
+   :user-roles #{:applicant}}
   [{user :user}]
   (info "Removing user attachment: attachment-id:" attachment-id)
   (mongo/update-by-id :users (:id user) {$pull {:attachments {:attachment-id attachment-id}}})
@@ -560,7 +560,7 @@
 
 (defcommand copy-user-attachments-to-application
   {:parameters [id]
-   :roles      [:applicant]
+   :user-roles #{:applicant}
    :states     [:draft :open :submitted :complement-needed]
    :pre-checks [(fn [command application] (not (-> command :user :architect)))]}
   [{application :application user :user}]

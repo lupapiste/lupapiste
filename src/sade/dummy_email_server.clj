@@ -65,12 +65,12 @@
       (clojure.pprint/pprint message)))
 
   (defquery "sent-emails"
-    {:roles [:anonymous]}
+    {:user-roles #{:anonymous}}
     [{{reset :reset :or {reset false}} :data}]
     (ok :messages (messages :reset reset)))
 
   (defquery "last-email"
-    {:roles [:anonymous]}
+    {:user-roles #{:anonymous}}
     [{{reset :reset :or {reset true}} :data}]
     (ok :message (last (messages :reset reset))))
 

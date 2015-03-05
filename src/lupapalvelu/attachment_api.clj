@@ -81,7 +81,7 @@
 
 (defcommand move-attachments-to-backing-system
   {:parameters [id lang]
-   :roles      [:authority]
+   :user-roles #{:authority}
    :pre-checks [(permit/validate-permit-type-is permit/R)]
    :states     [:verdictGiven :constructionStarted]
    :description "Sends such attachments to backing system that are not yet sent."}
@@ -110,14 +110,14 @@
 (defquery attachment-types
   {:parameters [:id]
    :extra-auth-roles [:statementGiver]
-   :roles      [:applicant :authority]
+   :user-roles #{:applicant :authority}
    :states     action/all-states}
   [{application :application}]
   (ok :attachmentTypes (attachment/get-attachment-types-for-application application)))
 
 (defcommand set-attachment-type
   {:parameters [id attachmentId attachmentType]
-   :roles      [:applicant :authority]
+   :user-roles #{:applicant :authority}
    :extra-auth-roles [:statementGiver]
    :states     (action/all-states-but [:answered :sent :closed :canceled])}
   [{:keys [application user created] :as command}]
@@ -138,7 +138,7 @@
 (defquery attachment-operations
   {:parameters [:id]
    :extra-auth-roles [:statementGiver]
-   :roles [:applicant :authority]
+   :user-roles #{:applicant :authority}
    :states action/all-states}
   [{application :application}]
   (ok :operations (:operations application)))
@@ -150,7 +150,7 @@
 (defcommand approve-attachment
   {:description "Authority can approve attachment, moves to ok"
    :parameters  [id attachmentId]
-   :roles       [:authority]
+   :user-roles #{:authority}
    :states      (action/all-states-but [:answered :sent :closed :canceled])}
   [{:keys [created] :as command}]
   (attachment/update-attachment-key command attachmentId :state :ok created :set-app-modified? true :set-attachment-modified? false))
@@ -158,7 +158,7 @@
 (defcommand reject-attachment
   {:description "Authority can reject attachment, requires user action."
    :parameters  [id attachmentId]
-   :roles       [:authority]
+   :user-roles #{:authority}
    :states      (action/all-states-but [:answered :sent :closed :canceled])}
   [{:keys [created] :as command}]
   (attachment/update-attachment-key command attachmentId :state :requires_user_action created :set-app-modified? true :set-attachment-modified? false))
@@ -170,7 +170,7 @@
 (defcommand create-attachments
   {:description "Authority can set a placeholder for an attachment"
    :parameters  [:id :attachmentTypes]
-   :roles       [:authority]
+   :user-roles #{:authority}
    :states      (action/all-states-but [:answered :sent :closed :canceled])}
   [{application :application {attachment-types :attachmentTypes} :data created :created}]
   (if-let [attachment-ids (attachment/create-attachments application attachment-types created false true true)]
@@ -184,7 +184,7 @@
 (defcommand delete-attachment
   {:description "Delete attachement with all it's versions. Does not delete comments. Non-atomic operation: first deletes files, then updates document."
    :parameters  [id attachmentId]
-   :roles       [:applicant :authority]
+   :user-roles #{:applicant :authority}
    :extra-auth-roles [:statementGiver]
    :states      (action/all-states-but [:answered :sent :closed :canceled])}
   [{:keys [application user]}]
@@ -201,7 +201,7 @@
 (defcommand delete-attachment-version
   {:description   "Delete attachment version. Is not atomic: first deletes file, then removes application reference."
    :parameters  [:id attachmentId fileId]
-   :roles       [:applicant :authority]
+   :user-roles #{:applicant :authority}
    :extra-auth-roles [:statementGiver]
    :states      (action/all-states-but [:answered :sent :closed :canceled])}
   [{:keys [application user]}]
@@ -219,21 +219,21 @@
 
 (defraw "view-attachment"
   {:parameters [:attachment-id]
-   :roles      [:applicant :authority]
+   :user-roles #{:applicant :authority}
    :extra-auth-roles [:statementGiver]}
   [{{:keys [attachment-id]} :data user :user}]
   (attachment/output-attachment attachment-id false (partial attachment/get-attachment-as user)))
 
 (defraw "download-attachment"
   {:parameters [:attachment-id]
-   :roles      [:applicant :authority]
+   :user-roles #{:applicant :authority}
    :extra-auth-roles [:statementGiver]}
   [{{:keys [attachment-id]} :data user :user}]
   (attachment/output-attachment attachment-id true (partial attachment/get-attachment-as user)))
 
 (defraw "download-all-attachments"
   {:parameters [:id]
-   :roles      [:applicant :authority]
+   :user-roles #{:applicant :authority}
    :states     action/all-states
    :extra-auth-roles [:statementGiver]}
   [{:keys [application user lang]}]
@@ -255,7 +255,7 @@
 
 (defcommand upload-attachment
   {:parameters [id attachmentId attachmentType op filename tempfile size]
-   :roles      [:applicant :authority]
+   :user-roles #{:applicant :authority}
    :extra-auth-roles [:statementGiver]
    :pre-checks [attachment-is-not-locked
                 (partial if-not-authority-states-must-match #{:sent})]
@@ -364,7 +364,7 @@
 
 (defcommand stamp-attachments
   {:parameters [:id timestamp text organization files xMargin yMargin extraInfo buildingId kuntalupatunnus section]
-   :roles      [:authority]
+   :user-roles #{:authority}
    :states     [:submitted :sent :complement-needed :verdictGiven :constructionStarted :closed]
    :description "Stamps all attachments of given application"}
   [{application :application {transparency :transparency} :data :as command}]
@@ -393,7 +393,7 @@
 
 (defquery stamp-attachments-job
   {:parameters [:job-id :version]
-   :roles      [:authority]
+   :user-roles #{:authority}
    :description "Returns state of stamping job"}
   [{{job-id :job-id version :version timeout :timeout :or {version "0" timeout "10000"}} :data}]
   (assoc (job/status job-id (->long version) (->long timeout)) :ok true))
@@ -406,7 +406,7 @@
                 (fn [_ application]
                   (when-not (pos? (count (:attachments application)))
                     (fail :application.attachmentsEmpty)))]
-   :roles      [:applicant :authority]}
+   :user-roles #{:applicant :authority}}
   [{application :application u :user :as command}]
   (when (seq attachmentIds)
     (if (user/get-user-with-password (:username u) password)
@@ -436,7 +436,7 @@
 
 (defcommand set-attachment-meta
   {:parameters [id attachmentId meta]
-   :roles      [:applicant :authority]
+   :user-roles #{:applicant :authority}
    :extra-auth-roles [:statementGiver]
    :states     (action/all-states-but [:answered :sent :closed :canceled])
    :input-validators [validate-meta validate-scale validate-size validate-operation]}
@@ -449,7 +449,7 @@
 
 (defcommand set-attachment-not-needed
   {:parameters [id attachmentId notNeeded]
-   :roles      [:applicant :authority]
+   :user-roles #{:applicant :authority}
    :states     [:draft :open]}
   [{:keys [created] :as command}]
   (attachment/update-attachment-key command attachmentId :notNeeded notNeeded created :set-app-modified? true :set-attachment-modified? false)
@@ -457,7 +457,7 @@
 
 (defcommand set-attachments-as-verdict-attachment
   {:parameters [:id selectedAttachmentIds unSelectedAttachmentIds]
-   :roles      [:authority]
+   :user-roles #{:authority}
    :states     (action/all-states-but [:closed :canceled])
    :input-validators [(partial action/vector-parameters-with-non-blank-items [:selectedAttachmentIds :unSelectedAttachmentIds])
                       (fn [{{:keys [selectedAttachmentIds unSelectedAttachmentIds]} :data}]

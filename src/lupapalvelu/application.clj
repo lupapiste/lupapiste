@@ -253,7 +253,7 @@
     (array-map :lastName 1, :firstName 1)))
 
 (defquery application
-  {:roles            [:applicant :authority]
+  {:user-roles #{:applicant :authority}
    :states           action/all-states
    :extra-auth-roles [:any]
    :parameters       [:id]}
@@ -299,7 +299,7 @@
 
 (defquery party-document-names
   {:parameters [:id]
-   :roles      [:applicant :authority]
+   :user-roles #{:applicant :authority}
    :states     action/all-application-states}
   [{application :application}]
   (let [documents (:documents application)
@@ -311,21 +311,21 @@
 (defcommand mark-seen
   {:parameters [:id type]
    :input-validators [(fn [{{type :type} :data}] (when-not (collections-to-be-seen type) (fail :error.unknown-type)))]
-   :roles [:applicant :authority]
+   :user-roles #{:applicant :authority}
    :states action/all-application-states}
   [{:keys [data user created] :as command}]
   (update-application command {$set (mark-collection-seen-update user created type)}))
 
 (defcommand mark-everything-seen
   {:parameters [:id]
-   :roles      [:authority]
+   :user-roles #{:authority}
    :states     action/all-application-states}
   [{:keys [application user created] :as command}]
   (update-application command {$set (mark-indicators-seen-updates application user created)}))
 
 (defcommand set-user-to-document
   {:parameters [id documentId userId path]
-   :roles      [:applicant :authority]
+   :user-roles #{:applicant :authority}
    :states     (action/all-states-but [:info :sent :verdictGiven :constructionStarted :closed :canceled])}
   [{:keys [user created application] :as command}]
   (if-let [document (domain/get-document-by-id application documentId)]
@@ -339,7 +339,7 @@
 (defcommand assign-application
   {:parameters  [:id assigneeId]
    :pre-checks  [open-inforequest/not-open-inforequest-user-validator]
-   :roles       [:authority]
+   :user-roles #{:authority}
    :states      (action/all-states-but [:draft :closed :canceled])}
   [{:keys [user created application] :as command}]
   (let [assignee (user/find-user {:_id assigneeId :enabled true
@@ -359,7 +359,7 @@
 
 (defcommand cancel-inforequest
   {:parameters [id]
-   :roles      [:applicant :authority]
+   :user-roles #{:applicant :authority}
    :notified   true
    :on-success (notify :application-state-change)
    :states     [:info]}
@@ -373,7 +373,7 @@
 
 (defcommand cancel-application
   {:parameters [id]
-   :roles      [:applicant]
+   :user-roles #{:applicant}
    :notified   true
    :on-success (notify :application-state-change)
    :states     [:draft :info :open :submitted]}
@@ -387,7 +387,7 @@
 
 (defcommand cancel-application-authority
   {:parameters [id text]
-   :roles      [:authority]
+   :user-roles #{:authority}
    :notified   true
    :on-success (notify :application-state-change)
    :states     (action/all-states-but [:canceled :closed :answered]) }
@@ -416,7 +416,7 @@
 
 (defcommand open-application
   {:parameters [id]
-   :roles      [:applicant :authority]
+   :user-roles #{:applicant :authority}
    :notified   true
    :on-success (notify :application-state-change)
    :states     [:draft]}
@@ -428,7 +428,7 @@
 
 (defcommand request-for-complement
   {:parameters [:id]
-   :roles      [:authority]
+   :user-roles #{:authority}
    :notified   true
    :on-success (notify :application-state-change)
    :states     [:sent]}
@@ -454,7 +454,7 @@
 
 (defcommand submit-application
   {:parameters [id]
-   :roles      [:applicant :authority]
+   :user-roles #{:applicant :authority}
    :states     [:draft :open]
    :notified   true
    :on-success (notify :application-state-change)
@@ -465,7 +465,7 @@
 
 (defcommand refresh-ktj
   {:parameters [:id]
-   :roles      [:authority]
+   :user-roles #{:authority}
    :states     action/all-states}
   [{:keys [application created]}]
   (try (autofill-rakennuspaikka application created)
@@ -473,7 +473,7 @@
 
 (defcommand save-application-drawings
   {:parameters [:id drawings]
-   :roles      [:applicant :authority]
+   :user-roles #{:applicant :authority}
    :states     [:draft :info :answered :open :submitted :complement-needed]}
   [{:keys [created] :as command}]
   (when (sequential? drawings)
@@ -505,7 +505,7 @@
 
 (defquery inforequest-markers
   {:parameters [id lang x y]
-   :roles      [:authority]
+   :user-roles #{:authority}
    :states     action/all-inforequest-states
    :input-validators [(partial action/non-blank-parameters [:x :y])]}
   [{:keys [application user]}]
@@ -667,7 +667,7 @@
 ;; TODO: separate methods for inforequests & applications for clarity.
 (defcommand create-application
   {:parameters [:operation :x :y :address :propertyId :municipality]
-   :roles      [:applicant :authority]
+   :user-roles #{:applicant :authority}
    :notified   true ; OIR
    :input-validators [(partial action/non-blank-parameters [:operation :address :municipality])
                       (partial property-id-parameters [:propertyId])
@@ -718,7 +718,7 @@
 
 (defcommand create-application-from-previous-permit
   {:parameters [:operation :x :y :address :propertyId :municipality :kuntalupatunnus]
-   :roles      [:applicant :authority]
+   :user-roles #{:applicant :authority}
    :input-validators [(partial action/non-blank-parameters [:operation :municipality])  ;; no :address included
                       ;; the propertyId parameter can be nil
                       (fn [{{propertyId :propertyId} :data :as command}]
@@ -784,7 +784,7 @@
 
 (defcommand add-operation
   {:parameters [id operation]
-   :roles      [:applicant :authority]
+   :user-roles #{:applicant :authority}
    :states     [:draft :open :submitted :complement-needed]
    :input-validators [operation-validator]
    :pre-checks [add-operation-allowed?]}
@@ -800,14 +800,14 @@
 
 (defcommand update-op-description
   {:parameters [id op-id desc]
-   :roles      [:applicant :authority]
+   :user-roles #{:applicant :authority}
    :states     [:draft :open :submitted :complement-needed]}
   [command]
   (update-application command {"operations" {$elemMatch {:id op-id}}} {$set {"operations.$.description" desc}}))
 
 (defcommand change-permit-sub-type
   {:parameters [id permitSubtype]
-   :roles      [:applicant :authority]
+   :user-roles #{:applicant :authority}
    :states     [:draft :open :submitted :complement-needed]
    :pre-checks [permit/validate-permit-has-subtypes]}
   [{:keys [application created] :as command}]
@@ -824,7 +824,7 @@
 
 (defcommand change-location
   {:parameters [id x y address propertyId]
-   :roles      [:applicant :authority]
+   :user-roles #{:applicant :authority}
    :states     [:draft :info :answered :open :submitted :complement-needed :verdictGiven :constructionStarted]
    :input-validators [(partial action/non-blank-parameters [:address])
                       (partial property-id-parameters [:propertyId])
@@ -850,7 +850,7 @@
 (defquery link-permit-required
   {:description "Dummy command for UI logic: returns falsey if link permit is not required."
    :parameters [:id]
-   :roles      [:applicant :authority]
+   :user-roles #{:applicant :authority}
    :states     [:draft :open :submitted :complement-needed]
    :pre-checks [(fn [_ application]
                   (when-not (validate-link-permits application)
@@ -858,7 +858,7 @@
 
 (defquery app-matches-for-link-permits
   {:parameters [id]
-   :roles      [:applicant :authority]
+   :user-roles #{:applicant :authority}
    :states     (action/all-application-states-but [:sent :closed :canceled])}
   [{{:keys [propertyId] :as application} :application user :user :as command}]
   (let [application (meta-fields/enrich-with-link-permit-data application)
@@ -933,7 +933,7 @@
 
 (defcommand add-link-permit
   {:parameters ["id" linkPermitId]
-   :roles      [:applicant :authority]
+   :user-roles #{:applicant :authority}
    :states     (action/all-application-states-but [:sent :closed :canceled]);; Pitaako olla myos 'sent'-tila?
    :pre-checks [validate-jatkolupa-zero-link-permits
                 validate-link-permit-id]
@@ -945,7 +945,7 @@
 
 (defcommand remove-link-permit-by-app-id
   {:parameters [id linkPermitId]
-   :roles      [:applicant :authority]
+   :user-roles #{:applicant :authority}
    :states     [:draft :open :submitted :complement-needed :verdictGiven :constructionStarted]}   ;; Pitaako olla myos 'sent'-tila?
   [{application :application}]
   (if (mongo/remove :app-links (make-mongo-id-for-link-permit id linkPermitId))
@@ -959,7 +959,7 @@
 
 (defcommand create-change-permit
   {:parameters ["id"]
-   :roles      [:applicant :authority]
+   :user-roles #{:applicant :authority}
    :states     [:verdictGiven :constructionStarted]
    :pre-checks [(permit/validate-permit-type-is permit/R)]}
   [{:keys [created user application] :as command}]
@@ -1008,7 +1008,7 @@
 
 (defcommand create-continuation-period-permit
   {:parameters ["id"]
-   :roles      [:applicant :authority]
+   :user-roles #{:applicant :authority}
    :states     [:verdictGiven :constructionStarted]
    :pre-checks [(permit/validate-permit-type-is permit/YA) validate-not-jatkolupa-app]}
   [{:keys [created user application] :as command}]
@@ -1052,7 +1052,7 @@
 
 (defcommand convert-to-application
   {:parameters [id]
-   :roles      [:applicant :authority]
+   :user-roles #{:applicant :authority}
    :states     action/all-inforequest-states
    :pre-checks [validate-new-applications-enabled]}
   [{:keys [user created application] :as command}]
