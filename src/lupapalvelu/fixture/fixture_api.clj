@@ -9,9 +9,6 @@
 
 (in-dev
 
-  (defquery fixtures {:roles [:anonymous]} [_]
-    (ok :fixtures (keys @fixtures)))
-
   (defquery apply-fixture
     {:parameters [:name]
      :roles [:anonymous]}
