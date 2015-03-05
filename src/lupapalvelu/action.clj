@@ -72,7 +72,7 @@
 ;; Role helpers
 
 (def all-authz-writer-roles #{:owner :writer :statementGiver :foreman})
-(def all-authz-roles (union all-writer-roles #{:reader}))
+(def all-authz-roles (union all-authz-writer-roles #{:reader}))
 
 ;; Notificator
 
