@@ -176,20 +176,16 @@ var attachment = (function() {
     },
 
     previousAttachment: function() {
-      console.log("previous", model.groupAttachments(), model.id(), model.groupIndex());
-        var previousId = util.getIn(model.groupAttachments(), [model.groupIndex() - 1, "id"]);
-        if (previousId) {
-          window.location.hash = "!/attachment/"+applicationId+"/" + previousId;
-        }
+      var previousId = util.getIn(model.groupAttachments(), [model.groupIndex() - 1, "id"]);
+      if (previousId) {
+        window.location.hash = "!/attachment/"+applicationId+"/" + previousId;
+      }
     },
 
     nextAttachment: function() {
-      console.log("next", model.groupAttachments(), model.id(), model.groupIndex());
-      if (model.groupIndex() + 1 < model.groupAttachments().length) {
-        var nextId = util.getIn(model.groupAttachments(), [model.groupIndex() + 1, "id"]);
-        if (nextId) {
-          window.location.hash = "!/attachment/"+applicationId+"/" + nextId;
-        }
+      var nextId = util.getIn(model.groupAttachments(), [model.groupIndex() + 1, "id"]);
+      if (nextId) {
+        window.location.hash = "!/attachment/"+applicationId+"/" + nextId;
       }
     },
 
