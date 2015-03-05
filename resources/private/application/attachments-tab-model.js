@@ -12,18 +12,6 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel) {
   self.attachmentsOperation = ko.observable();
   self.attachmentsOperations = ko.observable([]);
 
-  function getPreAttachments(source) {
-    return _.filter(source, function(attachment) {
-          return !_.contains(LUPAPISTE.config.postVerdictStates, attachment.applicationState);
-      });
-  }
-
-  function getPostAttachments(source) {
-    return _.filter(source, function(attachment) {
-          return _.contains(LUPAPISTE.config.postVerdictStates, attachment.applicationState);
-      });
-  }
-
   function unsentAttachmentFound(attachments) {
     return _.some(attachments, function(a) {
       var lastVersion = _.last(a.versions);
@@ -110,12 +98,13 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel) {
     self.authorizationModel = authorizationModel;
     var rawAttachments = ko.mapping.toJS(appModel.attachments);
 
-    var preAttachments = getPreAttachments(rawAttachments);
-    var postAttachments = getPostAttachments(rawAttachments);
+    var preAttachments = attachmentUtils.getPreAttachments(rawAttachments);
+    var postAttachments = attachmentUtils.getPostAttachments(rawAttachments);
 
     // pre verdict attachments are not editable after verdict has been given
     var preGroupEditable = currentUser.isAuthority() || !_.contains(LUPAPISTE.config.postVerdictStates, appModel.state());
     var preGrouped = attachmentUtils.getGroupByOperation(preAttachments, preGroupEditable, self.appModel.allowedAttachmentTypes());
+
     var postGrouped = attachmentUtils.getGroupByOperation(postAttachments, true, self.appModel.allowedAttachmentTypes());
 
     if (self.authorizationModel.ok("set-attachment-not-needed")) {
