@@ -27,7 +27,7 @@ Sonja logs in
   Sonja logs in
   Open application  ${appname}  753-416-25-30
 
-Sonja sets attachment to be for verdict
+Sonja sets attachment to be a verdict attachment
   Open tab  attachments
   Open attachment details  muut.muu
   Checkbox should not be selected  xpath=//section[@id='attachment']//input[@data-test-id='is-verdict-attachment']
