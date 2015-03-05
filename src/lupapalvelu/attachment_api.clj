@@ -1,6 +1,6 @@
 (ns lupapalvelu.attachment-api
   (:require [clojure.java.io :as io]
-            [clojure.set :refer [intersection]]
+            [clojure.set :refer [intersection union]]
             [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn warnf error errorf fatal]]
             [monger.operators :refer :all]
             [swiss.arrows :refer [-<> -<>>]]
@@ -109,7 +109,7 @@
 
 (defquery attachment-types
   {:parameters [:id]
-   :extra-auth-roles [:statementGiver]
+   :user-authz-roles action/all-authz-roles
    :user-roles #{:applicant :authority}
    :states     action/all-states}
   [{application :application}]
@@ -118,7 +118,7 @@
 (defcommand set-attachment-type
   {:parameters [id attachmentId attachmentType]
    :user-roles #{:applicant :authority}
-   :extra-auth-roles [:statementGiver]
+   :user-authz-roles action/all-authz-writer-roles
    :states     (action/all-states-but [:answered :sent :closed :canceled])}
   [{:keys [application user created] :as command}]
 
@@ -137,7 +137,7 @@
 
 (defquery attachment-operations
   {:parameters [:id]
-   :extra-auth-roles [:statementGiver]
+   :user-authz-roles action/all-authz-roles
    :user-roles #{:applicant :authority}
    :states action/all-states}
   [{application :application}]
@@ -185,7 +185,7 @@
   {:description "Delete attachement with all it's versions. Does not delete comments. Non-atomic operation: first deletes files, then updates document."
    :parameters  [id attachmentId]
    :user-roles #{:applicant :authority}
-   :extra-auth-roles [:statementGiver]
+   :user-authz-roles action/all-authz-writer-roles
    :states      (action/all-states-but [:answered :sent :closed :canceled])}
   [{:keys [application user]}]
 
@@ -202,7 +202,7 @@
   {:description   "Delete attachment version. Is not atomic: first deletes file, then removes application reference."
    :parameters  [:id attachmentId fileId]
    :user-roles #{:applicant :authority}
-   :extra-auth-roles [:statementGiver]
+   :user-authz-roles action/all-authz-writer-roles
    :states      (action/all-states-but [:answered :sent :closed :canceled])}
   [{:keys [application user]}]
 
@@ -220,14 +220,14 @@
 (defraw "view-attachment"
   {:parameters [:attachment-id]
    :user-roles #{:applicant :authority}
-   :extra-auth-roles [:statementGiver]}
+   :user-authz-roles action/all-authz-roles}
   [{{:keys [attachment-id]} :data user :user}]
   (attachment/output-attachment attachment-id false (partial attachment/get-attachment-as user)))
 
 (defraw "download-attachment"
   {:parameters [:attachment-id]
    :user-roles #{:applicant :authority}
-   :extra-auth-roles [:statementGiver]}
+   :user-authz-roles action/all-authz-roles}
   [{{:keys [attachment-id]} :data user :user}]
   (attachment/output-attachment attachment-id true (partial attachment/get-attachment-as user)))
 
@@ -235,7 +235,7 @@
   {:parameters [:id]
    :user-roles #{:applicant :authority}
    :states     action/all-states
-   :extra-auth-roles [:statementGiver]}
+   :user-authz-roles action/all-authz-roles}
   [{:keys [application user lang]}]
   (if application
     (let [attachments (:attachments application)
@@ -256,7 +256,7 @@
 (defcommand upload-attachment
   {:parameters [id attachmentId attachmentType op filename tempfile size]
    :user-roles #{:applicant :authority}
-   :extra-auth-roles [:statementGiver]
+   :user-authz-roles action/all-authz-writer-roles
    :pre-checks [attachment-is-not-locked
                 (partial if-not-authority-states-must-match #{:sent})]
    :input-validators [(fn [{{size :size} :data}] (when-not (pos? size) (fail :error.select-file)))
@@ -396,6 +396,7 @@
 (defquery stamp-attachments-job
   {:parameters [:job-id :version]
    :user-roles #{:authority}
+   :user-authz-roles action/default-authz-writer-roles
    :description "Returns state of stamping job"}
   [{{job-id :job-id version :version timeout :timeout :or {version "0" timeout "10000"}} :data}]
   (assoc (job/status job-id (->long version) (->long timeout)) :ok true))
@@ -439,7 +440,7 @@
 (defcommand set-attachment-meta
   {:parameters [id attachmentId meta]
    :user-roles #{:applicant :authority}
-   :extra-auth-roles [:statementGiver]
+   :user-authz-roles action/all-authz-writer-roles
    :states     (action/all-states-but [:answered :sent :closed :canceled])
    :input-validators [validate-meta validate-scale validate-size validate-operation]}
   [{:keys [application user created] :as command}]

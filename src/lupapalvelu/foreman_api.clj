@@ -89,7 +89,7 @@
 (defquery foreman-history
   {:user-roles #{:authority :applicant}
    :states           action/all-states
-   :extra-auth-roles [:any]
+   :user-authz-roles action/all-authz-roles
    :parameters       [:id]
    :pre-checks       [foreman-app-check]}
   [{application :application user :user :as command}]
@@ -100,7 +100,7 @@
 (defquery reduced-foreman-history
   {:user-roles #{:authority :applicant}
    :states           action/all-states
-   :extra-auth-roles [:any]
+   :user-authz-roles action/all-authz-roles
    :parameters       [:id]
    :pre-checks       [foreman-app-check]}
   [{application :application user :user :as command}]
@@ -111,7 +111,7 @@
 (defquery foreman-applications
   {:user-roles #{:applicant :authority}
    :states           action/all-states
-   :extra-auth-roles [:any]
+   :user-authz-roles action/all-authz-roles
    :parameters       [:id]}
   [{application :application user :user :as command}]
   (if application

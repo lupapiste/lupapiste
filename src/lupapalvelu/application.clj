@@ -255,7 +255,7 @@
 (defquery application
   {:user-roles #{:applicant :authority}
    :states           action/all-states
-   :extra-auth-roles [:any]
+   :user-authz-roles action/all-authz-roles
    :parameters       [:id]}
   [{app :application user :user}]
   (if app

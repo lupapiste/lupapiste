@@ -10,6 +10,7 @@
             [sade.strings :as ss]
             [sade.core :refer :all]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.user :as user]
             [lupapalvelu.logging :as log]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.domain :as domain]))
@@ -71,8 +72,10 @@
 
 ;; Role helpers
 
+(def default-authz-writer-roles #{:owner :writer})
+(def default-authz-reader-roles (conj default-authz-writer-roles :reader))
 (def all-authz-writer-roles #{:owner :writer :statementGiver :foreman})
-(def all-authz-roles (union all-authz-writer-roles #{:reader}))
+(def all-authz-roles (conj all-authz-writer-roles :reader))
 
 ;; Notificator
 
@@ -262,16 +265,34 @@
   [{{id :id} :data user :user application :application}]
   (and id user (or application (domain/get-application-as id user true))))
 
+(defn- user-authz? [command-meta-data application user]
+  (let [allowed-roles (get command-meta-data :user-authz-roles #{})]
+    (when-let [role-in-app (keyword (:role (domain/get-auth application (:id user))))]
+     (allowed-roles role-in-app))))
+
+(defn- organization-authz? [command-meta-data application user]
+  (and (user/authority? user) ((set (:organizations user)) (:organization application))))
+
+(defn- company-authz? [command-meta-data application user]
+  (domain/has-auth? application (get-in user [:company :id])))
+
 (defn- user-is-not-allowed-to-access?
-  "Current user must be owner, authority or writer OR have some other supplied extra-auth-roles"
+  "Current user must have correct role in application.auth, work in the organization or company that has been invited"
   [{user :user :as command} application]
-  (let [meta-data (meta-data command)
-        extra-auth-roles (set (:extra-auth-roles meta-data))]
-    (when-not (or (extra-auth-roles :any)
-                  (domain/owner-or-write-access? application (:id user))
-                  (and (= :authority (keyword (:role user))) ((set (:organizations user)) (:organization application)))
-                  (some #(domain/has-auth-role? application (:id user) %) extra-auth-roles))
-      unauthorized)))
+  (let [meta-data (meta-data command)]
+    (when-not (or
+                (user-authz? meta-data application user)
+                (organization-authz? meta-data application user)
+                (company-authz? meta-data application user))
+
+     unauthorized)
+      #_(let [meta-data (meta-data command)
+         extra-auth-roles (set (:extra-auth-roles meta-data))]
+         (when-not (or (extra-auth-roles :any)
+                     (domain/owner-or-write-access? application (:id user))
+                     (and (= :authority (keyword (:role user))) ((set (:organizations user)) (:organization application)))
+                     (some #(domain/has-auth-role? application (:id user) %) extra-auth-roles))
+           unauthorized))))
 
 (defn- not-authorized-to-application [command application]
   (when (-> command :data :id)
@@ -347,10 +368,15 @@
 ;; Register actions
 ;;
 
+(def default-user-authz {:query default-authz-reader-roles
+                         :export default-authz-reader-roles
+                         :command default-authz-writer-roles
+                         :raw default-authz-writer-roles})
+
 (def supported-action-meta-data
   {:parameters  "Vector of parameters. Parameters can be keywords or symbols. Symbols will be available in the action body. If a parameter is missing from request, an error will be raised."
    :user-roles  "Set of user role keywords."
-   :extra-auth-roles  "Vector of role keywords."
+   :user-authz-roles  "Set of application context role keywords."
    :description "Documentation string."
    :notified    "Boolean. Documents that the action will be sending (email) notifications."
    :pre-checks  "Vector of functions."
@@ -375,20 +401,27 @@
   (assert (if (some #(= % :id) (:parameters meta-data)) (seq (:states meta-data)) true)
     (str "You must define :states meta data for " action-name " if action has the :id parameter (i.e. application is attached to the action)."))
 
+
   (let [action-keyword (keyword action-name)
-        user-roles (:user-roles meta-data)]
+        {:keys [user-roles user-authz-roles]} meta-data]
 
     (assert (seq user-roles) (str "You must define :user-roles meta data for " action-name ". Use :user-roles #{:anonymous}] to grant access to anyone."))
     (assert (and (set? user-roles) (every? keyword? user-roles)) ":user-roles must be a set of keywords")
 
+  (when user-authz-roles
+    (assert (and (set? user-authz-roles) (every? keyword? user-authz-roles)) ":user-authz-roles must be a set of keywords"))
+
     (tracef "registering %s: '%s' (%s:%s)" (name action-type) action-name ns-str line)
     (swap! actions assoc
       action-keyword
-      (merge meta-data {:type action-type
-                        :ns ns-str
-                        :line line
-                        :handler handler
-                        :call-count 0}))))
+      (merge
+        {:user-authz-roles (default-user-authz action-type)}
+        meta-data
+        {:type action-type
+         :ns ns-str
+         :line line
+         :handler handler
+         :call-count 0}))))
 
 (defmacro defaction [form-meta action-type action-name & args]
   (let [doc-string  (when (string? (first args)) (first args))

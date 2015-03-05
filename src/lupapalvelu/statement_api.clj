@@ -73,15 +73,18 @@
 (defquery get-statement-givers
   {:parameters [:id]
    :user-roles #{:authority}
+   :user-authz-roles action/default-authz-writer-roles
    :states action/all-application-states}
   [{application :application}]
   (let [organization (organization/get-organization (:organization application))
         permitPersons (or (:statementGivers organization) [])]
     (ok :data permitPersons)))
 
-(defcommand should-see-unsubmitted-statements
-  {:description "Pseudo command for UI authorization logic"
-   :user-roles #{:authority} :extra-auth-roles [:statementGiver]} [_])
+(defquery should-see-unsubmitted-statements
+  {:description "Pseudo query for UI authorization logic"
+   :user-roles #{:authority}
+   :user-authz-roles #{:statementGiver}}
+  [_])
 
 (notifications/defemail :request-statement
   {:recipients-fn  :recipients
@@ -130,7 +133,7 @@
    :input-validators [(fn [{{status :status} :data}] (when-not (#{"yes", "no", "condition"} status) (fail :error.missing-parameters)))]
    :states      [:draft :open :submitted :complement-needed]
    :user-roles #{:authority}
-   :extra-auth-roles [:statementGiver]
+   :user-authz-roles #{:statementGiver}
    :notified    true
    :on-success  [(fn [command _] (notifications/notify! :new-comment command))]
    :description "authrority-roled statement owners can give statements - notifies via comment."}
