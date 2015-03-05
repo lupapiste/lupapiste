@@ -69,6 +69,11 @@
 (defn all-inforequest-states-but [drop-states-array]
   (difference all-inforequest-states (set drop-states-array)))
 
+;; Role helpers
+
+(def all-authz-writer-roles #{:owner :writer :statementGiver :foreman})
+(def all-authz-roles (union all-writer-roles #{:reader}))
+
 ;; Notificator
 
 (defn notify [notification]
