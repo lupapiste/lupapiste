@@ -50,6 +50,12 @@ An option to order verdict attachments has appeared into the Toiminnot dropdown 
   Open tab  attachments
   Wait Until  Page should contain element  xpath=//div[@id="application-attachments-tab"]//select[@data-test-id="attachment-operations-select-lower"]//option[@value='orderVerdictAttachments']
 
+The print order dialog can be opened by selecting from the dropdown
+  Select attachment operation option from dropdown  orderVerdictAttachments
+  Wait Until  Element should be visible  dialog-verdict-attachment-prints-order
+  Click Link  xpath=//*[@data-test-id='test-order-verdict-attachment-prints-cancel']
+  Wait until  Element should not be visible  xpath=//div[@id='dynamic-ok-confirm-dialog']
+
 Sonja opens the kopiolaitos order dialog on Verdict tab
   Open tab  verdict
   Wait Until  Element should be visible  xpath=//div[@id='application-verdict-tab']
