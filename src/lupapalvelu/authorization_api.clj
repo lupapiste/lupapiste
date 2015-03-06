@@ -41,24 +41,23 @@
   (#{:writer :foreman} (keyword role)))
 
 
-
-(defn- send-invite! [command id email text documentName documentId path role]
+(defn- send-invite! [command id email text document-name document-id path role]
   {:pre [(valid-role role)]}
   (let [email (user/canonize-email email)
-        {created :created user :user application :application} command]
+        {timestamp :created inviter :user application :application} command]
     (if (domain/invite application email)
       (fail :invite.already-has-auth)
-      (let [invited (user-api/get-or-create-user-by-email email user)
+      (let [invited (user-api/get-or-create-user-by-email email inviter)
             invite  {:application  id
                      :text         text
                      :path         path
-                     :documentName documentName
-                     :documentId   documentId
-                     :created      created
+                     :documentName document-name
+                     :documentId   document-id
+                     :created      timestamp
                      :email        email
                      :role         role
                      :user         (user/summary invited)
-                     :inviter      (user/summary user)}
+                     :inviter      (user/summary inviter)}
             auth    (assoc (user/user-in-role invited :reader) :invite invite)]
         (if (domain/has-auth? application (:id invited))
           (fail :invite.already-has-auth)
@@ -66,7 +65,7 @@
             (update-application command
               {:auth {$not {$elemMatch {:invite.user.username email}}}}
               {$push {:auth     auth}
-               $set  {:modified created}})
+               $set  {:modified timestamp}})
             (notifications/notify! :invite (assoc command :recipients [invited]))
             (ok)))))))
 
