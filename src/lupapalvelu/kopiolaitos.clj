@@ -1,10 +1,12 @@
 (ns lupapalvelu.kopiolaitos
   (:require [taoensso.timbre :as timbre :refer [warnf info error]]
             [clojure.java.io :as io :refer [delete-file]]
+            [monger.operators :refer :all]
             [sade.core :refer [ok fail fail! def-]]
             [sade.email :as email]
             [sade.strings :as ss]
             [lupapalvelu.attachment :as attachment]
+            [lupapalvelu.action :as action]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.i18n :refer [with-lang loc]]))
 
@@ -24,7 +26,7 @@
   (reduce
     (fn [s att]
       (let [att-map (merge att (:type att))
-            file-name (str (-> att-map :versions last :fileId) "_" (:filename att-map))
+            file-name (str (:fileId att-map) "_" (:filename att-map))
             type-str (with-lang lang
                        (loc
                          (clojure.string/join
@@ -74,9 +76,19 @@
       email
       nil)))
 
-(defn do-order-verdict-attachment-prints [{{:keys [lang attachmentsWithAmounts orderInfo]} :data application :application}]
+(defn do-order-verdict-attachment-prints [{{:keys [lang attachmentsWithAmounts orderInfo]} :data application :application created :created user :user :as command}]
   (if-let [email-address (get-kopiolaitos-email-address application)]
     (if (send-kopiolaitos-email lang email-address attachmentsWithAmounts orderInfo)
-      (ok)
+      (let [order {:type "verdict-attachment-print-order"
+                   :user (select-keys user [:id :role :firstName :lastName])
+                   :timestamp created
+                   :orderInfo orderInfo}
+            normalize-attachment-for-db (fn [attachment]
+                                          (select-keys attachment [:id :fileId :amount :filename :contents :type]))
+            order-with-normalized-attachments (assoc order :attachments (map normalize-attachment-for-db attachmentsWithAmounts))]
+        (action/update-application command
+          {$push {:transfers order-with-normalized-attachments}
+           $set {:modified created}})
+        (ok))
       (fail! :kopiolaitos-email-sending-failed))
     (fail! :no-kopiolaitos-email-defined)))
