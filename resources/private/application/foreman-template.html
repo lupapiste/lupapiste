@@ -67,8 +67,6 @@
                              value: $data.selectedForeman">
                 </select>
 
-                <span data-bind="fullName: $data"></span>
-                <span data-test-id="tasks-foreman-email" data-bind="text: $data.email ? '(' + $data.email + ')' : ''"></span>
                 <a class="add-foreman" data-bind="click: function() { $parents[1].inviteForeman($data.taskId); }">
                   <span data-bind="ltext: 'application.parties.addForeman'"></span>
                 </a>

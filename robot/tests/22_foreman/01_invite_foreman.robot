@@ -60,16 +60,13 @@ Add työnjohtaja task to original application
   Input text  create-task-name  Ylitarkastaja
   Click enabled by test id  create-task-save
   Wait until  Element should not be visible  dialog-create-task
-  Wait until  Xpath Should Match X Times  //table[@data-test-id="tasks-foreman"]/tbody/tr  2
+  Wait until  Xpath Should Match X Times  //table[@data-test-id="tasks-foreman"]/tbody/tr  1
   [Teardown]  logout
 
-Mikko can see invited foremans on tasks list
+Mikko can start invite flow from tasks tab
   Mikko logs in
   Open application at index  ${appname}  753-416-25-22  1
   Open tab  tasks
-  Wait until  Element text should be  xpath=//table[@data-test-id='tasks-foreman']//span[@data-test-id='tasks-foreman-email']  (teppo@example.com)
-
-Mikko can start invite flow from tasks tab
   Click enabled by test id  invite-other-foreman-button
   Wait until  Element should be visible  //div[@id='dialog-invite-foreman']
   Click by test id  cancel-foreman-dialog
