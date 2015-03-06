@@ -1189,15 +1189,6 @@
           <!-- ko ifnot: finished -->
           <form>
             <label for="foreman-selection" data-bind="ltext: 'foreman.selectForeman'"></label>
-            <!-- ko if: inPostVerdictState && !taskId() -->
-            <select name="foreman-selection"
-                    class="form-input combobox long"
-                    data-bind="options: selectableForemen,
-                               optionsText: 'displayName',
-                               optionsValue: 'id',
-                               optionsCaption: loc('foreman.newForeman'),
-                               value: selectedForeman"></select>
-            <!-- /ko -->
             <!-- ko ifnot: selectedForeman -->
             <p data-bind="lhtml: 'invite.foreman.desc'" class="dialog-desc-wide"></p>
             <label for="foreman-role" data-bind="ltext: 'foreman.role'"></label>
