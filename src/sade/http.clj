@@ -1,5 +1,6 @@
 (ns sade.http
-  (:require [clj-http.client :as http]
+  (:require [taoensso.timbre :as timbre :refer [warn error]]
+            [clj-http.client :as http]
             [sade.env :as env])
   (:refer-clojure :exclude [get]))
 
@@ -10,8 +11,15 @@
                       :else (throw (IllegalArgumentException. "uneven number of options")))]
     (merge (env/value :http-client) options-map)))
 
+(defn- logged-call [f uri options]
+  (try
+    (f uri options)
+    (catch Exception e
+      (error (str uri " - " (.getMessage e)))
+      (throw e))))
+
 (defn get [uri & options]
-  (http/get uri (apply merge-to-defaults options)))
+  (logged-call http/get uri (apply merge-to-defaults options)))
 
 (defn post [uri & options]
-  (http/post uri (apply merge-to-defaults options)))
+  (logged-call http/post uri (apply merge-to-defaults options)))

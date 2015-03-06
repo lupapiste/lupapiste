@@ -2,7 +2,7 @@
   (:require [monger.operators :refer :all]
             [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]]
             [clojure.walk :as walk]
-            [sade.util :refer [dissoc-in postwalk-map strip-nils abs]]
+            [sade.util :refer [dissoc-in postwalk-map strip-nils abs] :as util]
             [sade.core :refer [def-]]
             [sade.strings :as ss]
             [lupapalvelu.migration.core :refer [defmigration]]
@@ -429,10 +429,6 @@
                :open-inforequest-email ""}
        $set {:scope new-scopes}}))))
 
-(defmigration cleanup-activation-collection-v2
-  (let [users (map :email (mongo/select :users {} {:email 1}))]
-    (mongo/remove-many :activation {:email {$nin users}})))
-
 (defmigration generate-verdict-ids
   (doseq [application (mongo/select :applications {"verdicts.0" {$exists true}} {:verdicts 1, :attachments 1})]
     (let [verdicts (map #(assoc % :id (mongo/create-id)) (:verdicts application))
@@ -758,6 +754,20 @@
             :kopiolaitos-orderer-address (or (:kopiolaitos-orderer-address organization) nil)
             :kopiolaitos-orderer-email   (or (:kopiolaitos-orderer-email organization) nil)
             :kopiolaitos-orderer-phone   (or (:kopiolaitos-orderer-phone organization) nil)}})))
+
+(def known-good-domains #{"luukku.com" "suomi24.fi" "turku.fi" "kolumbus.fi"
+                          "gmail.fi" "gmail.com" "aol.com" "sweco.fi" "me.com"
+                          "hotmail.com" "fimnet.fi" "hotmail.fi"
+                          "welho.com" "parkano.fi" "rautjarvi.fi" "lupapiste.fi"
+                          "elisanet.fi" "elisa.fi" "yit.fi" "jarvenpaa.fi" "jippii.fi"})
+
+(defmigration cleanup-activation-collection-v3
+  (let [active-emails (map :email (mongo/select :users {:enabled true, :role "applicant"} {:email 1}))]
+    (mongo/remove-many :activation {:email {$in active-emails}}))
+  (doseq [{:keys [id email]} (mongo/select :activation)]
+    (let [known-domain (known-good-domains (ss/suffix email "@"))]
+      (when (or (.endsWith email ".f") (and (not known-domain) (not (sade.dns/valid-mx-domain? email))))
+       (mongo/remove :activation id)))))
 
 ;;
 ;; ****** NOTE! ******

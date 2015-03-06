@@ -19,30 +19,42 @@
               <button id="test-attachment-reject" data-bind="ltext: 'attachment.reject', click: rejectAttachment, enable: isRejectable() && doesNotRequireUserAction(), visible: isRejectable()" class="btn btn-decline">Tarkennettavaa</button>
             </div>
           </div>
-          <div class="attachment-info-header">
-            <h1>
-              <span data-bind="text: application.title"></span>: <span data-bind="ltext: name"></span>
-              <span data-bind="if: latestVersion">
-                <span data-bind="ltext: 'attachment.version'">versio</span>
-                <span id="test-attachment-version" data-bind="version: latestVersion().version">0.0</span>
-              </span>
-            </h1>
-            <span class="icon help" data-bind="click: toggleHelp, css: {expanded: showHelp}"></span>
+
+          <div>
+            <div class="attachment-info-wrapper">
+              <div class="attachment-info-header">
+                <h1>
+                  <span data-bind="text: application.title"></span>: <span data-bind="ltext: name"></span>
+                  <span data-bind="if: latestVersion">
+                    <span data-bind="ltext: 'attachment.version'">versio</span>
+                    <span id="test-attachment-version" data-bind="version: latestVersion().version">0.0</span>
+                  </span>
+                </h1>
+                <span class="icon help" data-bind="click: toggleHelp, css: {expanded: showHelp}"></span>
+              </div>
+
+              <div class="tab-info" data-bind="slider: showHelp">
+                <p data-bind="lhtml: 'attachment.view.desc'"></p>
+              </div>
+            </div>
+
+            <div class="attachment-actions">
+              <button data-bind="enable: previousAttachmentPresent, click: previousAttachment">
+                <span data-bind="ltext: 'previous'"></span>
+                <span class="icon drill-left-black-bigger left-align"></span>
+              </button>
+              <button data-bind="enable: nextAttachmentPresent, click: nextAttachment">
+                <span data-bind="ltext: 'next'"></span>
+                <span class="icon drill-right-black left-align"></span>
+              </button>
+              <button data-test-id="change-attachment-type"
+                      data-bind="ltext: 'attachment.changeType', click: showChangeTypeDialog, visible: $root.authorization.ok('set-attachment-type') && editable && authorized"></button>
+              <button data-test-id="delete-attachment"
+                      data-bind="ltext: 'attachment.delete', click: deleteAttachment, visible: $root.authorization.ok('delete-attachment') && editable && authorized">Poista liite</button>
+            </div>
           </div>
 
-          <div class="tab-info" data-bind="slider: showHelp">
-            <p data-bind="lhtml: 'attachment.view.desc'"></p>
-          </div>
-
-
-
-          <div class="attachment-actions">
-            <button data-test-id="change-attachment-type"
-                    data-bind="ltext: 'attachment.changeType', click: showChangeTypeDialog, visible: $root.authorization.ok('set-attachment-type') && editable && authorized"></button>
-            <button data-test-id="delete-attachment"
-                    data-bind="ltext: 'attachment.delete', click: deleteAttachment, visible: $root.authorization.ok('delete-attachment') && editable && authorized">Poista liite</button>
-          </div>
-
+          <div class="clear"></div>
           <div class="col1">
             <div class="attachment-file-versions">
               <div class="btn-container">

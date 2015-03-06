@@ -109,7 +109,7 @@
 
 (defquery get-link-account-token
   {:parameters [tokenId]
-   :roles [:anonymous]}
+   :user-roles #{:anonymous}}
   [_]
   (ok :data
     (let [skeleton {:email "" :phone ""}

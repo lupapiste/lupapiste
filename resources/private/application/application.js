@@ -49,11 +49,12 @@
   var verdictModel = new LUPAPISTE.VerdictsModel();
   var signingModel = new LUPAPISTE.SigningModel("#dialog-sign-attachments", true);
   var verdictAttachmentPrintsOrderModel = new LUPAPISTE.VerdictAttachmentPrintsOrderModel();
+  var verdictAttachmentPrintsOrderHistoryModel = new LUPAPISTE.VerdictAttachmentPrintsOrderHistoryModel();
   var requestForStatementModel = new LUPAPISTE.RequestForStatementModel();
   var addPartyModel = new LUPAPISTE.AddPartyModel();
   var createTaskController = LUPAPISTE.createTaskController;
   var mapModel = new LUPAPISTE.MapModel(authorizationModel);
-  var attachmentsTab = new LUPAPISTE.AttachmentsTabModel(applicationModel, signingModel);
+  var attachmentsTab = new LUPAPISTE.AttachmentsTabModel(applicationModel, signingModel, verdictAttachmentPrintsOrderModel);
   var foremanModel = new LUPAPISTE.ForemanModel();
 
   var authorities = ko.observableArray([]);
@@ -148,9 +149,10 @@
       // Operations
       applicationModel.operationsCount(_.map(_.countBy(app.operations, "name"), function(v, k) { return {name: k, count: v}; }));
 
-      attachmentsTab.refresh(applicationModel, authorizationModel);
-
       verdictAttachmentPrintsOrderModel.refresh(applicationModel);
+      verdictAttachmentPrintsOrderHistoryModel.refresh(applicationModel);
+
+      attachmentsTab.refresh(applicationModel, authorizationModel);
 
       // Statements
       requestForStatementModel.setApplicationId(app.id);
@@ -266,7 +268,6 @@
   hub.onPageLoad("application", _.partial(initPage, "application"));
   hub.onPageLoad("inforequest", _.partial(initPage, "inforequest"));
 
-// (["application","inforequest","attachment","statement","neighbors","task","verdict"]
   hub.subscribe("application-loaded", function(e) {
     showApplication(e.applicationDetails);
     updateWindowTitle(e.applicationDetails.application.title);
@@ -383,6 +384,7 @@
       sendNeighborEmailModel: sendNeighborEmailModel,
       signingModel: signingModel,
       verdictAttachmentPrintsOrderModel: verdictAttachmentPrintsOrderModel,
+      verdictAttachmentPrintsOrderHistoryModel: verdictAttachmentPrintsOrderHistoryModel,
       verdictModel: verdictModel,
       openInviteCompany: inviteCompanyModel.open.bind(inviteCompanyModel),
       attachmentsTab: attachmentsTab,
@@ -398,6 +400,9 @@
     $(verdictAttachmentPrintsOrderModel.dialogSelector).applyBindings({
       verdictAttachmentPrintsOrderModel: verdictAttachmentPrintsOrderModel,
       authorization: authorizationModel
+    });
+    $(verdictAttachmentPrintsOrderHistoryModel.dialogSelector).applyBindings({
+      verdictAttachmentPrintsOrderHistoryModel: verdictAttachmentPrintsOrderHistoryModel
     });
     $(inviteCompanyModel.selector).applyBindings(inviteCompanyModel);
     attachmentsTab.attachmentTemplatesModel.init();

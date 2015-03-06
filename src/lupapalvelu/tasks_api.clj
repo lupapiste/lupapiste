@@ -39,7 +39,7 @@
 
 (defcommand create-task
   {:parameters [id taskName schemaName]
-   :roles      [:authority]
+   :user-roles #{:authority}
    :states     [:draft :open :submitted :sent :complement-needed :verdictGiven :constructionStarted]}
   [{:keys [created application user data] :as command}]
   (when-not (some #(let [{:keys [name type]} (:info %)] (and (= name schemaName ) (= type :task))) (tasks/task-schemas application))
@@ -53,7 +53,7 @@
 (defcommand delete-task
   {:parameters [id taskId]
    :input-validators [(partial non-blank-parameters [:id :taskId])]
-   :roles      [:authority]
+   :user-roles #{:authority}
    :states     [:draft :open :submitted :sent :complement-needed :verdictGiven :constructionStarted]}
   [{created :created :as command}]
   (assert-task-state-in [:requires_user_action :requires_authority_action :ok] command)
@@ -65,7 +65,7 @@
   {:description "Authority can approve task, moves to ok"
    :parameters  [id taskId]
    :input-validators [(partial non-blank-parameters [:id :taskId])]
-   :roles       [:authority]
+   :user-roles #{:authority}
    :states      [:draft :open :submitted :sent :complement-needed :verdictGiven :constructionStarted]}
   [command]
   (assert-task-state-in [:requires_user_action :requires_authority_action] command)
@@ -75,7 +75,7 @@
   {:description "Authority can reject task, requires user action."
    :parameters  [id taskId]
    :input-validators [(partial non-blank-parameters [:id :taskId])]
-   :roles       [:authority]
+   :user-roles #{:authority}
    :states      [:draft :open :submitted :sent :complement-needed :verdictGiven :constructionStarted]}
   [command]
   (assert-task-state-in [:ok :requires_user_action :requires_authority_action] command)
@@ -86,7 +86,7 @@
    :parameters  [id taskId lang]
    :input-validators [(partial non-blank-parameters [:id :taskId :lang])]
    :pre-checks  [(permit/validate-permit-type-is permit/R)] ; KRYPS mapping currently implemented only for R
-   :roles       [:authority]
+   :user-roles #{:authority}
    :states      [:draft :open :submitted :sent :complement-needed :verdictGiven :constructionStarted]}
   [{application :application user :user created :created :as command}]
   (assert-task-state-in [:ok :sent] command)
@@ -100,7 +100,7 @@
 (defquery task-types-for-application
   {:description "Returns a list of allowed schema names for current application and user"
    :parameters [:id]
-   :roles      [:authority]
+   :user-roles #{:authority}
    :states     action/all-states}
   [{application :application}]
   (ok :schemas (map (comp :name :info) (sort-by (comp :order :info) (tasks/task-schemas application)))))
