@@ -39,7 +39,9 @@ LUPAPISTE.ForemanModel = function() {
   self.refresh = function(application) {
     function foremanApplications(applications) {
       _.forEach(applications, function(app) {
-        var foreman = _.find(app.auth, {"role": "foreman"});
+        var foreman = _.find(app.auth, function(f) {
+          return f.role === "foreman" || util.getIn(f, ["invite", "role"]) === "foreman";
+        });
         var foremanDoc = _.find(app.documents, { "schema-info": { "name": "tyonjohtaja-v2" } });
         var name = util.getIn(foremanDoc, ["data", "kuntaRoolikoodi", "value"]);
 
