@@ -1,1 +1,0 @@
-admin.converted.inforequests: Muunnettiin {0} neuvontapyyntöä tavallisiksi.
