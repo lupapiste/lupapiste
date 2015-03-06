@@ -1,5 +1,6 @@
 (ns lupapalvelu.comment-api
-  (:require [monger.operators :refer :all]
+  (:require [clojure.set :refer [union]]
+            [monger.operators :refer :all]
             [sade.env :as env]
             [sade.util :as util]
             [sade.core :refer [ok fail fail!]]
@@ -50,7 +51,7 @@
   {:parameters [id text target roles]
    :user-roles #{:applicant :authority}
    :states     (action/all-states-but [:canceled])
-   :extra-auth-roles [:statementGiver]
+   :user-authz-roles action/all-authz-writer-roles
    :pre-checks [applicant-cant-set-to]
    :input-validators [validate-comment-target
                       (partial action/map-parameters [:target])

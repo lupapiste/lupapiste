@@ -9,7 +9,7 @@
           <div id="application-map" class="map map-large" style="width: 320px; height: 280px;"></div>
           <div class="application-map-actions" data-bind="with: application">
             <!-- ko if: location() -->
-              <a data-bind="click: openOskariMap" class="map-search-button icon search"></a>
+              <a data-bind="click: openOskariMap, ltext:'map.open'" class="map-search-button" ></a>
             <!-- /ko -->
           </div>
         </div>
@@ -161,7 +161,11 @@
             <p data-bind="text: loc(['municipality', municipality()])"></p>
           </div>
           <!-- ko if: !hasInvites() -->
-          <button data-bind="click: approveApplication,   visible: $root.authorization.ok('approve-application'),    enable: !processing() && $root.authorization.ok('approve-application')"    data-test-id="approve-application"     class="btn btn-primary">
+          <button data-bind="click: approveApplication,   
+                              visible: $root.authorization.ok('approve-application'),    
+                              enable: !processing() && $root.authorization.ok('approve-application'), attr: {'title': loc('tooltip.approveApplication'}"    
+                  data-test-id="approve-application"     
+                  class="btn btn-primary">
             <span data-bind="ltext: 'application.approveApplication'"></span>
             <span class="icon approve left-align"></span>
           </button>

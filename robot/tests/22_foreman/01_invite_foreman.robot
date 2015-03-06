@@ -1,7 +1,6 @@
 *** Settings ***
 
 Documentation   Mikko creates a new application
-Suite teardown  Logout
 Resource        ../../common_resource.robot
 
 *** Test Cases ***
@@ -84,3 +83,4 @@ Mikko can invite additional foremans to application with verdict
   Click by test id  application-invite-foreman
   Wait until  Click by test id  application-invite-foreman-close-dialog
   Wait until  Element should be visible  //section[@id='application']//span[@data-test-operation-id='tyonjohtajan-nimeaminen-v2']
+  [Teardown]  logout
