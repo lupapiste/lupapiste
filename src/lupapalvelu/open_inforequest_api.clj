@@ -50,7 +50,7 @@
              :infoRequest true} ", " {$set {:openInfoRequest false}} ")")
   (let [n (mongo/update-by-query :applications
             {:organization organizationId
-             :infoRequest true}
+             :openInfoRequest true}
             {$set {:openInfoRequest false}})]
     (mongo/remove-many :open-inforequest-token {:organization-id organizationId})
     (ok :n n)))
