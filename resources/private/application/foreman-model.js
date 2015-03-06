@@ -63,19 +63,17 @@ LUPAPISTE.ForemanModel = function() {
                     "displayRole": name ? loc(['osapuoli.tyonjohtaja.kuntaRoolikoodi', name]) : ""};
 
         data.displayName = ko.pureComputed(function() {
-          var output = "";
-          var name = data.firstName ? data.firstName : ""
-          name += data.lastName ? " " + data.lastName : "";
-          output = name;
-          if (_.isEmpty(output)) {
-            output = data.id;
-          }
-          if (data.name) {
-            output += ' (' + data.displayName + ')';
+          var output = data.id;
+          if (data.firstName || data.lastName) {
+            output += " - ";
+            output += data.lastName ? data.lastName : "";
+            if (data.lastName) {
+              output += " ";
+            }
+            output += data.firstName ? data.firstName : ""
           }
           return output;
         });
-
         self.foremanApplications.push(data);
       });
     }
