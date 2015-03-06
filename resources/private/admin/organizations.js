@@ -13,7 +13,11 @@
     };
 
     self.convertOpenInforequests = function() {
-      debug(self.organization().id());
+      ajax.command("convert-to-normal-inforequests", {organizationId: self.organization().id()})
+        .success(function(resp) {
+          var msg = loc("admin.converted.inforequests", resp.n);
+          LUPAPISTE.ModalDialog.showDynamicOk(loc("infoRequests"), msg);})
+        .call();
     };
 
     self.openInfoRequests = ko.pureComputed(function() {
