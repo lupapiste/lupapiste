@@ -336,13 +336,6 @@
         :kopiolaitos-orderer-email (:kopiolaitos-orderer-email organization))
       (fail :error.unknown-organization))))
 
-(defquery asianhallinta-config
-  {:roles [:authorityAdmin]}
-  [{{:keys [organizations]} :user}]
-  (let [organization-id (first organizations)]
-    (if-let [{:keys [scope]} (get-organization organization-id)]
-      (ok :scope scope)
-      (fail :error.unknown-organization))))
 
 ;;
 ;; Helpers
