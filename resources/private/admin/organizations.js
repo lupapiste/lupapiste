@@ -1,47 +1,6 @@
 ;(function() {
   "use strict";
 
-  function OrganizationModel() {
-    var self = this;
-    self.organization = ko.observable({});
-
-    self.open = function(organization) {
-      self.organization(organization);
-      window.location.hash = "!/organization";
-      return false;
-    };
-
-    self.convertOpenInforequests = function() {
-      console.log(self.organization().id);
-    };
-
-    self.openInfoRequests = ko.pureComputed(function() {
-      return _.reduce(self.organization().scope, function(result, s) {return result || s["open-inforequest"];}, false);
-    });
-  }
-
-  var organizationModel = new OrganizationModel();
-
-  function OrganizationsModel(orgModel) {
-    var self = this;
-
-    self.organizations = ko.observableArray([]);
-    self.pending = ko.observable();
-
-    self.load = function() {
-      ajax
-        .query("organizations")
-        .pending(self.pending)
-        .success(function(d) {
-          var organizations = _.map(d.organizations, function(o) {o.open = _.partial(orgModel.open, o); return o;});
-          self.organizations(_.sortBy(organizations, function(o) { return o.name[loc.getCurrentLanguage()]; }));
-        })
-        .call();
-    };
-  }
-
-  var organizationsModel = new OrganizationsModel(organizationModel);
-
   function EditOrganizationScopeModel() {
     var self = this;
     self.dialogSelector = "#dialog-edit-organization-scope";
@@ -117,6 +76,52 @@
 
   var editOrganizationScopeModel = new EditOrganizationScopeModel();
 
+  function OrganizationModel() {
+    var self = this;
+    self.organization = ko.observable({});
+
+    self.open = function(organization) {
+      // date picker needs an obervable
+      self.organization(ko.mapping.fromJS(organization));
+      window.location.hash = "!/organization";
+      return false;
+    };
+
+    self.convertOpenInforequests = function() {
+      console.log(self.organization().id);
+    };
+
+    self.openInfoRequests = ko.pureComputed(function() {
+      return _.reduce(self.organization().scope, function(result, s) {return result || s["open-inforequest"];}, false);
+    });
+
+    self.saveRow = function(scope) {
+      console.log(ko.mapping.toJS(scope));
+    };
+  }
+
+  var organizationModel = new OrganizationModel();
+
+  function OrganizationsModel(orgModel) {
+    var self = this;
+
+    self.organizations = ko.observableArray([]);
+    self.pending = ko.observable();
+
+    self.load = function() {
+      ajax
+        .query("organizations")
+        .pending(self.pending)
+        .success(function(d) {
+          var organizations = _.map(d.organizations, function(o) {o.open = _.partial(orgModel.open, o); return o;});
+          self.organizations(_.sortBy(organizations, function(o) { return o.name[loc.getCurrentLanguage()]; }));
+        })
+        .call();
+    };
+  }
+
+  var organizationsModel = new OrganizationsModel(organizationModel);
+
   function LoginAsModel() {
     var self = this;
     self.password = ko.observable("");
@@ -139,8 +144,6 @@
     };
   }
   var loginAsModel = new LoginAsModel();
-
-
 
   hub.onPageLoad("organizations", organizationsModel.load);
 
