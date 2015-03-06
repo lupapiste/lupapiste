@@ -4,8 +4,6 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.application :as application]
-            [lupapalvelu.application-meta-fields :as meta-fields]
-            [lupapalvelu.tasks :as tasks]
             [lupapalvelu.document.commands :as commands]
             [sade.core :refer :all]
             [sade.strings :as ss]
@@ -21,7 +19,7 @@
   {:parameters [id taskId foremanRole]
    :roles [:applicant :authority]
    :states action/all-application-states}
-  [{:keys [created user application data] :as command}]
+  [{:keys [created user application] :as command}]
   (let [original-open? (util/pos? (:opened application))
         foreman-app (-> (application/do-create-application
                          (assoc command :data {:operation "tyonjohtajan-nimeaminen-v2"
@@ -60,17 +58,6 @@
 
     (application/do-add-link-permit foreman-app (:id application))
     (application/insert-application foreman-app)
-
-    ; TODO is this sane?
-    (if (and (some #{(keyword (:state application))} meta-fields/post-sent-states) (not task))
-      (let [task (tasks/new-task "task-vaadittu-tyonjohtaja" foremanRole {} {:created created :assignee user} {:type :authority :id (:id user)})]
-        (update-application command
-                            {$push {:tasks task}
-                             $set {:modified created}})
-        (when task
-          (let [updates [[[:asiointitunnus] (:id foreman-app)]]]
-            (commands/persist-model-updates application "tasks" task updates created)))))
-
     (when task
       (let [updates [[[:asiointitunnus] (:id foreman-app)]]]
         (commands/persist-model-updates application "tasks" task updates created)))
@@ -99,22 +86,12 @@
   {:roles [:applicant :authority]
    :states action/all-states
    :parameters [id taskId foremanAppId]}
-  [{:keys [created application user] :as command}]
+  [{:keys [created application] :as command}]
   (let [task (util/find-by-id taskId (:tasks application))]
     (if task
       (let [updates [[[:asiointitunnus] foremanAppId]]]
         (commands/persist-model-updates application "tasks" task updates created))
-      (let []
-        ; TODO is this sane?
-        (if (and (some #{(keyword (:state application))} meta-fields/post-sent-states) (not task))
-          (let [task (tasks/new-task "task-vaadittu-tyonjohtaja" "foobar" {} {:created created :assignee user} {:type :authority :id (:id user)})]
-            (update-application command
-                                {$push {:tasks task}
-                                 $set {:modified created}})
-            (when task
-              (let [updates [[[:asiointitunnus] foremanAppId]]]
-                (commands/persist-model-updates application "tasks" task updates created)))))
-        ))))
+      (fail :error.not-found))))
 
 (defn foreman-app-check [_ application]
   (when-not (foreman/foreman-app? application)
