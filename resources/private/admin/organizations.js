@@ -1,7 +1,28 @@
 ;(function() {
   "use strict";
 
-  function OrganizationsModel() {
+  function OrganizationModel() {
+    var self = this;
+    self.organization = ko.observable({});
+
+    self.open = function(organization) {
+      self.organization(organization);
+      window.location.hash = "!/organization";
+      return false;
+    };
+
+    self.convertOpenInforequests = function() {
+      console.log(self.organization().id);
+    };
+
+    self.openInfoRequests = ko.pureComputed(function() {
+      return _.reduce(self.organization().scope, function(result, s) {return result || s["open-inforequest"];}, false);
+    });
+  }
+
+  var organizationModel = new OrganizationModel();
+
+  function OrganizationsModel(orgModel) {
     var self = this;
 
     self.organizations = ko.observableArray([]);
@@ -12,17 +33,18 @@
         .query("organizations")
         .pending(self.pending)
         .success(function(d) {
-          self.organizations(_.sortBy(d.organizations, function(d) { return d.name[loc.getCurrentLanguage()]; }));
+          var organizations = _.map(d.organizations, function(o) {o.open = _.partial(orgModel.open, o); return o;});
+          self.organizations(_.sortBy(organizations, function(o) { return o.name[loc.getCurrentLanguage()]; }));
         })
         .call();
     };
   }
 
-  var organizationsModel = new OrganizationsModel();
+  var organizationsModel = new OrganizationsModel(organizationModel);
 
-  function EditOrganizationModel() {
+  function EditOrganizationScopeModel() {
     var self = this;
-    self.dialogSelector = "#dialog-edit-organization";
+    self.dialogSelector = "#dialog-edit-organization-scope";
     self.errorMessage = ko.observable(null);
 
     // Model
@@ -93,7 +115,7 @@
 
   }
 
-  var editOrganizationModel = new EditOrganizationModel();
+  var editOrganizationScopeModel = new EditOrganizationScopeModel();
 
   function LoginAsModel() {
     var self = this;
@@ -118,14 +140,17 @@
   }
   var loginAsModel = new LoginAsModel();
 
+
+
   hub.onPageLoad("organizations", organizationsModel.load);
 
   $(function() {
     $("#organizations").applyBindings({
       "organizationsModel": organizationsModel,
-      "editOrganizationModel": editOrganizationModel,
+      "editOrganizationScopeModel": editOrganizationScopeModel,
       "loginAsModel": loginAsModel
     });
+    $("#organization").applyBindings({organizationModel:organizationModel});
   });
 
 })();

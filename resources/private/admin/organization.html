@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <section class="page" id="organization">
+      <div class="container">
+        <a class="btn btn-nav-back" href="#!/organizations">Organisaatiolistaus</a>
+
+        <div data-bind="with: organizationModel">
+          <h2 data-bind="text: util.getIn($data, ['organization', 'name', loc.getCurrentLanguage()])"></h2>
+
+          <button data-bind="visible: openInfoRequests, click: convertOpenInforequests" class="btn btn-primary">Muuta avoimet neuvontapyynnöt tavallisiksi</button>
+
+        </div>
+      </div>
+    </section>
+  </body>
+</html>
