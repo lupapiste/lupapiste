@@ -36,7 +36,9 @@
                  :stampableMimes    (filter identity (map mime/mime-types file-types))
                  :foremanRoles      (:body (first lupapalvelu.document.schemas/kuntaroolikoodi-tyonjohtaja))
                  :foremanReadonlyFields ["luvanNumero", "katuosoite", "rakennustoimenpide", "kokonaisala"]
-                 :asianhallintaVersions validator/supported-asianhallinta-versions-by-permit-type}]
+                 :asianhallintaVersions (util/convert-values ; asianhallinta versions have "ah-" prefix
+                                          validator/supported-asianhallinta-versions-by-permit-type 
+                                          (partial map #(sade.strings/suffix % "-")))}]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
 
 (defn- loc->js []
