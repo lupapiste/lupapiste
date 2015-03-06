@@ -1,81 +1,6 @@
 ;(function() {
   "use strict";
 
-  function EditOrganizationScopeModel() {
-    var self = this;
-    self.dialogSelector = "#dialog-edit-organization-scope";
-    self.errorMessage = ko.observable(null);
-
-    // Model
-
-    self.organizationScope = null;
-    self.applicationEnabled = ko.observable(false);
-    self.inforequestEnabled = ko.observable(false);
-    self.openInforequestEnabled = ko.observable(false);
-    self.openInforequestEmail = ko.observable("");
-    self.opening = ko.observable("");
-    self.processing = ko.observable();
-    self.pending = ko.observable();
-
-    self.reset = function(organizationScope) {
-      self.organizationScope = organizationScope;
-      self.applicationEnabled(organizationScope["new-application-enabled"] || false);
-      self.inforequestEnabled(organizationScope["inforequest-enabled"] || false);
-      self.openInforequestEnabled(organizationScope["open-inforequest"] || false);
-      self.openInforequestEmail(organizationScope["open-inforequest-email"] || "");
-      self.opening(organizationScope.opening || "");
-      self.processing(false);
-      self.pending(false);
-    };
-
-    self.ok = ko.computed(function() {
-      return true;
-    });
-
-    // Open the dialog
-
-    self.open = function(organizationScope) {
-      self.reset(organizationScope);
-      LUPAPISTE.ModalDialog.open(self.dialogSelector);
-    };
-
-    self.onSuccess = function() {
-      self.errorMessage(null);
-      LUPAPISTE.ModalDialog.close();
-      organizationsModel.load();
-    };
-
-    self.onError = function(resp) {
-      self.errorMessage(resp.text);
-    };
-
-    self.updateOrganization = function() {
-      var opening = self.opening();
-      var openingMills = null;
-      if (opening) {
-        openingMills = new Date(opening).getTime();
-      }
-
-      var data = {permitType: self.organizationScope.permitType,
-                  municipality: self.organizationScope.municipality,
-                  inforequestEnabled: self.inforequestEnabled(),
-                  applicationEnabled: self.applicationEnabled(),
-                  openInforequestEnabled: self.openInforequestEnabled(),
-                  openInforequestEmail: self.openInforequestEmail(),
-                  opening: openingMills};
-      ajax.command("update-organization", data)
-        .processing(self.processing)
-        .pending(self.pending)
-        .success(self.onSuccess)
-        .error(self.onError)
-        .call();
-      return false;
-    };
-
-  }
-
-  var editOrganizationScopeModel = new EditOrganizationScopeModel();
-
   function OrganizationModel() {
     var self = this;
     self.organization = ko.observable({});
@@ -88,15 +13,35 @@
     };
 
     self.convertOpenInforequests = function() {
-      console.log(self.organization().id);
+      debug(self.organization().id());
     };
 
     self.openInfoRequests = ko.pureComputed(function() {
-      return _.reduce(self.organization().scope, function(result, s) {return result || s["open-inforequest"];}, false);
+      return self.organization().scope && _.reduce(self.organization().scope(), function(result, s) {return result || s["open-inforequest"]();}, false);
     });
 
-    self.saveRow = function(scope) {
-      console.log(ko.mapping.toJS(scope));
+    self.saveRow = function(s) {
+      var scope = ko.mapping.toJS(s);
+
+      var openingMills = null;
+      if (scope.opening) {
+        openingMills = new Date(scope.opening).getTime();
+      }
+
+      var data = {permitType: scope.permitType,
+                  municipality: scope.municipality,
+                  inforequestEnabled: scope["inforequest-enabled"],
+                  applicationEnabled: scope["new-application-enabled"],
+                  openInforequestEnabled: scope["open-inforequest"],
+                  openInforequestEmail: scope["open-inforequest-email"],
+                  opening: openingMills};
+
+      ajax.command("update-organization", data)
+        .success(function() {LUPAPISTE.ModalDialog.showDynamicOk(util.getIn(self.organization(), ['name', loc.getCurrentLanguage()]), loc("saved"));})
+        .call();
+      return false;
+
+
     };
   }
 
@@ -150,7 +95,6 @@
   $(function() {
     $("#organizations").applyBindings({
       "organizationsModel": organizationsModel,
-      "editOrganizationScopeModel": editOrganizationScopeModel,
       "loginAsModel": loginAsModel
     });
     $("#organization").applyBindings({organizationModel:organizationModel});
