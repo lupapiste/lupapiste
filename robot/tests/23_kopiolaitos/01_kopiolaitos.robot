@@ -44,7 +44,7 @@ Sonja gives verdict
 
 Sonja opens the kopiolaitos order dialog
   Wait Until  Element should be visible  xpath=//div[@id='application-verdict-tab']
-  Element should not be visible  xpath=//a[@data-test-id='test-open-prints-order-history']
+  Element should not be visible  xpath=//div[@id="application-verdict-tab"]//a[@data-test-id='test-open-prints-order-history']
   Click by test id  test-order-attachment-prints
   Wait Until  Element should be visible  dialog-verdict-attachment-prints-order
   Wait Until  Xpath should match x times  //div[@id='dialog-verdict-attachment-prints-order']//tbody[@data-test-id='verdict-attachments-tbody']//tr  1
@@ -71,7 +71,7 @@ Sonja sends the kopiolaitos order
   Wait until  Element should not be visible  xpath=//div[@id='dynamic-ok-confirm-dialog']
 
 Sonja opens the kopiolaitos order history dialog
-  Wait until  Element should be visible  //a[@data-test-id='test-open-prints-order-history']
+  Wait until  Element should be visible  xpath=//div[@id="application-verdict-tab"]//a[@data-test-id='test-open-prints-order-history']
   Click by test id  test-open-prints-order-history
   Wait Until  Element should be visible  dialog-verdict-attachment-prints-order-history
   Element should be visible  //div[@id='dialog-verdict-attachment-prints-order-history']//button[@data-test-id='verdict-attachment-prints-history-ok']
@@ -95,6 +95,6 @@ Mikko still does not see the prints history link
   Mikko logs in
   Open application  ${appname}  753-416-25-30
   Open tab  verdict
-  Wait Until  Element should not be visible  xpath=//a[@data-test-id='test-open-prints-order-history']
+  Wait Until  Element should not be visible  xpath=//div[@id="application-verdict-tab"]//a[@data-test-id='test-open-prints-order-history']
 
 
