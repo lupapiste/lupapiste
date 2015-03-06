@@ -72,9 +72,9 @@
 
 ;; Role helpers
 
-(def default-authz-writer-roles #{:owner :writer})
+(def default-authz-writer-roles #{:owner :writer :foreman})
 (def default-authz-reader-roles (conj default-authz-writer-roles :reader))
-(def all-authz-writer-roles #{:owner :writer :statementGiver :foreman})
+(def all-authz-writer-roles (conj default-authz-writer-roles :statementGiver))
 (def all-authz-roles (conj all-authz-writer-roles :reader))
 
 ;; Notificator
