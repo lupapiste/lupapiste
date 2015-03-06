@@ -88,7 +88,13 @@
         (count emails) => 1
         (:to (first emails)) => (contains (email-for-key mikko))))
 
-    (fact "Teppo must be able to accept Teppo's invite"
+    (fact "Teppo can read Mikko's application before accepting"
+      (query teppo :application :id application-id) => ok?)
+
+    (fact "Teppo can not comment on Mikko's application before accepting the invite"
+      (comment-application teppo application-id true) => unauthorized?)
+
+    (fact "Teppo must be able to accept Mikko's invite"
       (command teppo :approve-invite :id application-id) => ok?
       (count (:invites (query teppo :invites))) => 0)
 
