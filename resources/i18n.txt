@@ -1,0 +1,2 @@
+kopiolaitos-invalid-email: Lupakuvien tilaaminen kopiolaitokselta epäonnistui epäkelvon kohdeosoitteen vuoksi. Pyydä organisaatiosi pääkäyttäjää tarkistamaan sähköpostiosoite.
+kopiolaitos-email-sending-failed-with-emails: Lupakuvatilauksen lähettäminen osoitteeseen '{0}' epäonnistui sähköpostin lähettämisessä esiintyneen ongelman vuoksi.
