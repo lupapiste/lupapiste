@@ -63,14 +63,14 @@
         xml-s          (xml/indent-str xml) => truthy
         xml-parsed     (reader/strip-xml-namespaces (sxml/parse xml-s))]
     (facts "Viiteluvat"
-           (let [links    (sxml/select1 xml-parsed [:UusiAsia :Viiteluvat :MuuTunnus])
-                 link     (sxml/get-text xml-parsed [:UusiAsia :Viiteluvat :MuuTunnus])
-                 tunnus   (-> link :content first)
-                 sovellus (-> link :content second)]
-             (count (:content links)) => 1
-             (fact "Viitelupa has Tunnus and Sovellus"
-                   (sxml/get-text link [:Viitelupa :Tunnus]) => (get-in application [:operations 0 :id])
-                   (sxml/get-text link [:Viitelupa :Sovellus]) => (get-in application [:operations 0 :type]))))))
+      (let [links    (sxml/select1 xml-parsed [:UusiAsia :Viiteluvat])]
+        (count (sxml/children links)) => 1
+        (fact "Viiteluvat has MuuTunnus > (Tunnus and Sovellus)"
+          (let [wrapper  (sxml/select1 links [:Viitelupa :MuuTunnus])
+                tunnus   (sxml/get-text wrapper [:Tunnus]) #_(-> link :content first)
+                sovellus (sxml/get-text wrapper [:Sovellus])]
+            tunnus => (get-in application [:linkPermitData 0 :id])
+            sovellus => (get-in application [:linkPermitData 0 :type])))))))
 
 (fl/facts* "UusiAsia xml from poikkeus"
   (let [application    (assoc poikkeus-test/poikkari-hakemus :attachments attachments)
