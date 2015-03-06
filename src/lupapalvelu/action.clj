@@ -168,9 +168,9 @@
   (map name (set/difference (set parameters) (set (keys data)))))
 
 (defn- has-required-user-role [command {user-roles :user-roles :as meta-data}]
-  {:pre [(set? user-roles)]}
-  (let [user-role (-> command :user :role keyword)]
-    (or (user-roles :anonymous) (user-roles user-role))))
+  (let [allowed-roles (or user-roles #{})
+        user-role (-> command :user :role keyword)]
+    (or (allowed-roles :anonymous) (allowed-roles user-role))))
 
 (defn meta-data [{command :action}]
   ((get-actions) (keyword command)))
