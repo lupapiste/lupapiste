@@ -1,7 +1,9 @@
 (ns lupapalvelu.asianhallinta-config-api
   "Configuration API for asianhallinta"
   (:require [sade.core :refer :all]
+            [monger.operators :refer :all]
             [lupapalvelu.action :refer [defcommand defquery] :as action]
+            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as org]))
 
 
@@ -16,5 +18,9 @@
 (defcommand save-asianhallinta-config
   {:parameters [permitType municipality enabled version]
    :roles [:authorityAdmin]}
-  [command]
+  [{{:keys [organizations]} :user}]
+  (mongo/update-by-query :organizations
+      {:scope {$elemMatch {:permitType permitType :municipality municipality}}}
+      {$set {:scope.$.caseManagement.enabled enabled
+             :scope.$.caseManagement.version version}})
   (ok))
