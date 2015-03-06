@@ -463,6 +463,10 @@
 }
 
 #dialog-verdict-attachment-prints-order-history {
+  .history-dialog-description {
+    margin-bottom: $marginM;
+  }
+
   .history-items {
     margin-top: $marginS;
     overflow-y: auto;
