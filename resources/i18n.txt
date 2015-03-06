@@ -1,3 +1,0 @@
-application.printsOrderHistory: Avaa lupakuvien tilaushistoria
-verdict-attachment-prints-order-history.dialog.title: Lupakuvien tilaushistoria
-verdict-attachment-prints-order-history.dialog.description: Seuraavat päätöksen liitteiksi merkityt suunnitelmat on lähetetty kopiolaitokselle tulostettavaksi:
