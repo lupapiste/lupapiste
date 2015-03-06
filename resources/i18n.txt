@@ -1,0 +1,11 @@
+kopiolaitos-order-email.titles.orderedPrints: Tilatut kuvat
+kopiolaitos-order-email.titles.orderDetails: Tilauksen tiedot
+kopiolaitos-order-email.titles.ordererOrganization: Tilaaja
+kopiolaitos-order-email.titles.ordererEmail: Sähköposti
+kopiolaitos-order-email.titles.ordererPhone: Puhelinumero
+kopiolaitos-order-email.titles.ordererAddress: Osoite
+kopiolaitos-order-email.titles.applicantName: Hakijan nimi
+kopiolaitos-order-email.titles.kuntalupatunnus: Lupatunnus
+kopiolaitos-order-email.titles.propertyId: Kiinteistötunnus
+kopiolaitos-order-email.titles.lupapisteId: Asiointitunnus
+kopiolaitos-order-email.titles.address: Rakennuspaikka

@@ -48,11 +48,24 @@
 
 (def- zip-file-name "Lupakuvat.zip")
 
+(defn- get-kopiolaitos-order-email-titles [lang]
+  (with-lang lang {:orderedPrints       (loc "kopiolaitos-order-email.titles.orderedPrints")
+                   :orderDetails        (loc "kopiolaitos-order-email.titles.orderDetails")
+                   :ordererOrganization (loc "kopiolaitos-order-email.titles.ordererOrganization")
+                   :ordererEmail        (loc "kopiolaitos-order-email.titles.ordererEmail")
+                   :ordererPhone        (loc "kopiolaitos-order-email.titles.ordererPhone")
+                   :ordererAddress      (loc "kopiolaitos-order-email.titles.ordererAddress")
+                   :kuntalupatunnus     (loc "kopiolaitos-order-email.titles.kuntalupatunnus")
+                   :propertyId          (loc "kopiolaitos-order-email.titles.propertyId")
+                   :lupapisteId         (loc "kopiolaitos-order-email.titles.lupapisteId")
+                   :address             (loc "kopiolaitos-order-email.titles.address")}))
+
 (defn- send-kopiolaitos-email [lang email-address attachments orderInfo]
   (let [zip (attachment/get-all-attachments attachments)
         email-attachment {:content zip :file-name zip-file-name}
         email-subject (str (with-lang lang (loc :kopiolaitos-email-subject)) \space (:ordererOrganization orderInfo))
-        orderInfo (assoc orderInfo :contentsTable (get-kopiolaitos-html-table lang attachments))]
+        orderInfo (merge orderInfo {:titles (get-kopiolaitos-order-email-titles lang)
+                                    :contentsTable (get-kopiolaitos-html-table lang attachments)})]
     (try
       ;; from email/send-email-message false = success, true = failure -> turn it other way around
       (let [sending-succeeded? (not (email/send-email-message
