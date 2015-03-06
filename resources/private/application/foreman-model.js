@@ -53,13 +53,14 @@ LUPAPISTE.ForemanModel = function() {
           lastname = util.getIn(foreman, ["lastName"]);
         }
 
-        var data = {"state":      app.state,
-                    "id":         app.id,
-                    "email":      username,
-                    "firstName":  firstname,
-                    "lastName":   lastname,
-                    "name":       name,
-                    "statusName": app.state === "verdictGiven" ? "ok" : "new"};
+        var data = {"state":       app.state,
+                    "id":          app.id,
+                    "email":       username,
+                    "firstName":   firstname,
+                    "lastName":    lastname,
+                    "name":        name,
+                    "statusName":  app.state === "verdictGiven" ? "ok" : "new",
+                    "displayRole": name ? loc(['osapuoli.tyonjohtaja.kuntaRoolikoodi', name]) : ""};
 
         data.displayName = ko.pureComputed(function() {
           var output = "";
@@ -70,7 +71,7 @@ LUPAPISTE.ForemanModel = function() {
             output = data.id;
           }
           if (data.name) {
-            output += ' (' + loc(['osapuoli.tyonjohtaja.kuntaRoolikoodi', data.name]) + ')';
+            output += ' (' + data.displayName + ')';
           }
           return output;
         });

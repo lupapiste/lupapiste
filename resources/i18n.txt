@@ -1,2 +1,3 @@
 foreman.selectForeman:  Valitse työnjohtaja
 foreman.newForeman:  Uusi työnjohtaja
+foreman.requiredForemen:  Vaaditut työnjohtajat
