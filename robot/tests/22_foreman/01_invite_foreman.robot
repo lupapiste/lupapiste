@@ -20,6 +20,8 @@ Mikko invites foreman to application
   Click by test id  application-invite-foreman
   Wait until  Click by test id  application-invite-foreman-close-dialog
   Wait until  Element should be visible  //section[@id='application']//span[@data-test-operation-id='tyonjohtajan-nimeaminen-v2']
+  ${foremanAppId} =  Get Text  xpath=//section[@id='application']//span[@data-test-id='application-id']
+  Set Suite Variable  ${foremanAppId}  ${foremanAppId}
 
 Mikko sees sent invitation on the original application
   Click by test id  test-application-link-permit-lupapistetunnus
@@ -62,10 +64,13 @@ Add työnjohtaja task to original application
   Wait until  Xpath Should Match X Times  //table[@data-test-id="tasks-foreman"]/tbody/tr  1
   [Teardown]  logout
 
-Mikko can start invite flow from tasks tab
+Mikko can link existing foreman application to foreman task
   Mikko logs in
   Open application at index  ${appname}  753-416-25-22  1
   Open tab  tasks
+  Select From List By Value  foreman-selection  ${foremanAppId}
+
+Mikko can start invite flow from tasks tab
   Click enabled by test id  invite-other-foreman-button
   Wait until  Element should be visible  //div[@id='dialog-invite-foreman']
   Click by test id  cancel-foreman-dialog
