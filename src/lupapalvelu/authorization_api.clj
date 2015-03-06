@@ -29,18 +29,20 @@
         invites    (filter #(= id (get-in % [:user :id])) (map :invite (mapcat :auth data)))]
     (ok :invites invites)))
 
-(defn- create-invite-model [command conf recipient]
+(defn- create-invite-email-model [command conf recipient]
   (assoc (notifications/create-app-model command conf recipient)
     :message (get-in command [:data :text])
     :recipient-email (:email recipient)))
 
 (notifications/defemail :invite  {:recipients-fn :recipients
-                                  :model-fn create-invite-model})
+                                  :model-fn create-invite-email-model})
 
 (defn- valid-role [role]
   (#{:writer :foreman} (keyword role)))
 
-(defn- create-invite [command id email text documentName documentId path role]
+
+
+(defn- send-invite! [command id email text documentName documentId path role]
   {:pre [(valid-role role)]}
   (let [email (user/canonize-email email)
         {created :created user :user application :application} command]
@@ -81,7 +83,7 @@
    :user-roles #{:applicant :authority}
    :notified   true}
   [command]
-  (create-invite command id email text documentName documentId path role))
+  (send-invite! command id email text documentName documentId path role))
 
 (defcommand approve-invite
   {:parameters [id]
