@@ -161,10 +161,10 @@
             <p data-bind="text: loc(['municipality', municipality()])"></p>
           </div>
           <!-- ko if: !hasInvites() -->
-          <button data-bind="click: approveApplication,   
-                              visible: $root.authorization.ok('approve-application'),    
-                              enable: !processing() && $root.authorization.ok('approve-application'), attr: {'title': loc('tooltip.approveApplication'}"    
-                  data-test-id="approve-application"     
+          <button data-bind="click: approveApplication,
+                              visible: $root.authorization.ok('approve-application'),
+                              enable: !processing() && $root.authorization.ok('approve-application'), attr: {'title': loc('tooltip.approveApplication'}"
+                  data-test-id="approve-application"
                   class="btn btn-primary">
             <span data-bind="ltext: 'application.approveApplication'"></span>
             <span class="icon approve left-align"></span>
@@ -482,33 +482,28 @@
                                             attachmentsOperations: $data.attachmentsOperations,
                                             testId: 'upper'}}"></div>
 
-          <div>
-            <div data-bind="if: postAttachmentsByOperation().length > 0" data-test-id="application-post-attachments-table">
-              <h1><span data-bind="ltext: 'application.attachments.post-verdict'"></span></h1>
-              <div class="clear" data-bind="template: {name: 'attachments-template-op', data: postAttachmentsByOperation()}"></div>
-            </div>
-            <!-- ko if: !$root.application.inPostVerdictState() -->
-            <div data-bind="if: preAttachmentsByOperation().length > 0" data-test-id="application-pre-attachments-table">
-              <div class="clear" data-bind="template: {name: 'attachments-template-op', data: preAttachmentsByOperation()}"></div>
-            </div>
-            <!-- /ko -->
-
-            <div data-bind="template: {name: 'attachment-actions-template',
-                                       data: {appModel: $data.appModel,
-                                              attachmentsOperation: $data.attachmentsOperation,
-                                              attachmentsOperations: $data.attachmentsOperations,
-                                              testId: 'lower'}}"></div>
-
-            <!-- ko if: $root.application.inPostVerdictState() -->
-            <div data-bind="if: preAttachmentsByOperation().length > 0" data-test-id="application-pre-attachments-table">
-              <h1><span data-bind="ltext: 'application.attachments.pre-verdict'"></span></h1>
-              <div class="clear" data-bind="template: {name: 'attachments-template-op', data: preAttachmentsByOperation()}"></div>
-            </div>
-            <!-- /ko -->
-
-            <a data-bind="attr: {href: '/api/raw/download-all-attachments?id=' + $root.application.id() + '&lang=' + loc.getCurrentLanguage() }, visible: $root.application.hasAttachment, ltext: 'download-all'" data-test-id="application-download-all-attachments" href="#" target="_blank"></a>
-
+          <div data-bind="if: postAttachmentsByOperation().length > 0" data-test-id="application-post-attachments-table">
+            <h1><span data-bind="ltext: 'application.attachments.post-verdict'"></span></h1>
+            <div class="clear" data-bind="template: {name: 'attachments-template-op', data: postAttachmentsByOperation()}"></div>
           </div>
+          <!-- ko if: !$root.application.inPostVerdictState() -->
+          <div data-bind="if: preAttachmentsByOperation().length > 0" data-test-id="application-pre-attachments-table">
+            <div class="clear" data-bind="template: {name: 'attachments-template-op', data: preAttachmentsByOperation()}"></div>
+          </div>
+          <!-- /ko -->
+
+          <div data-bind="template: {name: 'attachment-actions-template',
+                                     data: {appModel: $data.appModel,
+                                            attachmentsOperation: $data.attachmentsOperation,
+                                            attachmentsOperations: $data.attachmentsOperations,
+                                            testId: 'lower'}}"></div>
+
+          <!-- ko if: $root.application.inPostVerdictState() -->
+          <div data-bind="if: preAttachmentsByOperation().length > 0" data-test-id="application-pre-attachments-table">
+            <h1><span data-bind="ltext: 'application.attachments.pre-verdict'"></span></h1>
+            <div class="clear" data-bind="template: {name: 'attachments-template-op', data: preAttachmentsByOperation()}"></div>
+          </div>
+          <!-- /ko -->
 
           <div class="process-nav">
             <a class="btn process-next btn-nav-forward" data-bind="click: $root.application.nextTab" href="#" data-target="requiredFieldSummary">
@@ -893,6 +888,11 @@
             <em data-bind="visible: $root.verdictModel.pending" class="button-loader"></em>
             <span data-bind="ltext: 'verdict.orderAttachmentPrints.button'"></span>
           </button>
+
+          <a data-bind="click: $root.verdictAttachmentPrintsOrderHistoryModel.openPrintsOrderHistoryDialog,
+                        ltext: 'application.printsOrderHistory',
+                        visible: $root.authorization.ok('order-verdict-attachment-prints') && $root.verdictAttachmentPrintsOrderHistoryModel.historyItems().length"
+             href="#" data-test-id="test-open-prints-order-history"></a>
 
         </div>
 

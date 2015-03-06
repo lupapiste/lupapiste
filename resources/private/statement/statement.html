@@ -45,7 +45,10 @@
                 </td>
                 <td>
                 </td>
-                <td><a data-bind="ltext: 'remove', click: _.partial($root.attachmentsModel.deleteAttachment, $parent.id), visible: $root.attachmentsModel.canDeleteAttachment($parent) && $root.authorization.ok('give-statement'),  enable: $root.attachmentsModel.canDeleteAttachment($parent) && $root.authorization.ok('give-statement')" ></a></td>
+                <td><a data-bind="ltext: 'remove',
+                                  click: _.partial($root.attachmentsModel.deleteAttachment, $parent.id),
+                                  visible: $root.attachmentsModel.canDeleteAttachment($parent) && $root.authorization.ok('give-statement'),
+                                  enable: $root.attachmentsModel.canDeleteAttachment($parent) && $root.authorization.ok('give-statement')" ></a></td>
               </tr>
             </tbody>
           </table>
