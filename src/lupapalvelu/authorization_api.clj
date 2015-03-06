@@ -54,10 +54,10 @@
                      :documentId   documentId
                      :created      created
                      :email        email
+                     :role         role
                      :user         (user/summary invited)
                      :inviter      (user/summary user)}
-            writer  (user/user-in-role invited (keyword role))
-            auth    (assoc writer :invite invite)]
+            auth    (assoc (user/user-in-role invited :reader) :invite invite)]
         (if (domain/has-auth? application (:id invited))
           (fail :invite.already-has-auth)
           (do
@@ -86,11 +86,12 @@
 (defcommand approve-invite
   {:parameters [id]
    :user-roles #{:applicant}
+   :user-authz-roles action/all-authz-roles
    :states     (action/all-application-states-but [:closed :canceled])}
   [{:keys [created user application] :as command}]
   (when-let [my-invite (domain/invite application (:email user))]
 
-    (let [role (:role (domain/get-auth application (:id user)))]
+    (let [role (or (:role my-invite) (:role (domain/get-auth application (:id user))))]
       (update-application command
         {:auth {$elemMatch {:invite.user.id (:id user)}}}
         {$set {:modified created
@@ -128,6 +129,7 @@
 (defcommand decline-invitation
   {:parameters [:id]
    :user-roles #{:applicant :authority}
+   :user-authz-roles action/all-authz-roles
    :states     (action/all-application-states-but [:canceled])}
   [command]
   (do-remove-auth command (get-in command [:user :email])))
