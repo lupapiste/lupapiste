@@ -62,11 +62,11 @@
       (fail :invite.already-has-auth)
       (let [invited (user-api/get-or-create-user-by-email email inviter)
             auth    (create-invite-auth inviter invited application-id text document-name document-id path role timestamp)]
-            (update-application command
+        (update-application command
           {:auth {$not {$elemMatch {:invite.user.username (:email invited)}}}}
-              {$push {:auth     auth}
-               $set  {:modified timestamp}})
-            (notifications/notify! :invite (assoc command :recipients [invited]))
+          {$push {:auth     auth}
+           $set  {:modified timestamp}})
+        (notifications/notify! :invite (assoc command :recipients [invited]))
         (ok)))))
 
 (defn- role-validator [{{role :role} :data}]
@@ -87,7 +87,7 @@
 (defcommand approve-invite
   {:parameters [id]
    :user-roles #{:applicant}
-   :user-authz-roles action/all-authz-roles
+   :user-authz-roles action/default-authz-reader-roles
    :states     (action/all-application-states-but [:closed :canceled])}
   [{:keys [created user application] :as command}]
   (when-let [my-invite (domain/invite application (:email user))]
@@ -130,7 +130,7 @@
 (defcommand decline-invitation
   {:parameters [:id]
    :user-roles #{:applicant :authority}
-   :user-authz-roles action/all-authz-roles
+   :user-authz-roles action/default-authz-reader-roles
    :states     (action/all-application-states-but [:canceled])}
   [command]
   (do-remove-auth command (get-in command [:user :email])))
