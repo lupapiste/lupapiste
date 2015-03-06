@@ -37,7 +37,7 @@
                   opening: openingMills};
 
       ajax.command("update-organization", data)
-        .success(function() {LUPAPISTE.ModalDialog.showDynamicOk(util.getIn(self.organization(), ['name', loc.getCurrentLanguage()]), loc("saved"));})
+        .success(function() {LUPAPISTE.ModalDialog.showDynamicOk(util.getIn(self.organization(), ["name", loc.getCurrentLanguage()]), loc("saved"));})
         .call();
       return false;
 
