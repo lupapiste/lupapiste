@@ -1,10 +1,11 @@
-LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel) {
+LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel, verdictAttachmentPrintsOrderModel) {
   "use strict";
 
   var self = this;
 
   self.appModel = appModel;
   self.signingModel = signingModel;
+  self.verdictAttachmentPrintsOrderModel = verdictAttachmentPrintsOrderModel;
 
   self.preAttachmentsByOperation = ko.observableArray();
   self.postAttachmentsByOperation = ko.observableArray();
@@ -23,48 +24,84 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel) {
 
   var attachmentsOperationsMapping = {
       "attachmentsAdd": {
-        command: "upload-attachment",
+        loc: loc("application.attachmentsAdd"),
         clickCommand: function() {
           return self.newAttachment();
+        },
+        visibleFn: function (rawAttachments) {
+          return self.authorizationModel.ok("upload-attachment");
         }
       },
       "attachmentsCopyOwn": {
-        command: "copy-user-attachments-to-application",
+        loc: loc("application.attachmentsCopyOwn"),
         clickCommand: function() {
           return self.copyOwnAttachments();
+        },
+        visibleFn: function (rawAttachments) {
+          return self.authorizationModel.ok("copy-user-attachments-to-application");
         }
       },
       "newAttachmentTemplates": {
-        command: "create-attachments",
+        loc: loc("application.newAttachmentTemplates"),
         clickCommand: function() {
           return self.attachmentTemplatesModel.show();
+        },
+        visibleFn: function (rawAttachments) {
+          return self.authorizationModel.ok("create-attachments");
         }
       },
       "stampAttachments": {
-        command: "stamp-attachments",
+        loc: loc("application.stampAttachments"),
         clickCommand: function() {
           return self.startStamping();
+        },
+        visibleFn: function (rawAttachments) {
+          return self.authorizationModel.ok("stamp-attachments") && self.appModel.hasAttachment();
         }
       },
       "markVerdictAttachments": {
-        command: "set-attachments-as-verdict-attachment",
+        loc: loc("application.markVerdictAttachments"),
         clickCommand: function() {
           return self.startMarkingVerdictAttachments();
+        },
+        visibleFn: function (rawAttachments) {
+          return self.authorizationModel.ok("set-attachments-as-verdict-attachment") && self.appModel.hasAttachment();
+        }
+      },
+      "orderVerdictAttachments": {
+        loc: loc("verdict.orderAttachmentPrints.button"),
+        clickCommand: function() {
+          self.verdictAttachmentPrintsOrderModel.openDialog({application: self.appModel});
+        },
+        visibleFn: function (rawAttachments) {
+          return self.authorizationModel.ok('order-verdict-attachment-prints') && self.verdictAttachmentPrintsOrderModel.attachments().length;
         }
       },
       "signAttachments": {
-        command: "sign-attachments",
+        loc: loc("application.signAttachments"),
         clickCommand: function() {
           return self.signingModel.init(self.appModel);
+        },
+        visibleFn: function (rawAttachments) {
+          return self.authorizationModel.ok("sign-attachments") && self.appModel.hasAttachment();
         }
       },
       "attachmentsMoveToBackingSystem": {
-        command: "move-attachments-to-backing-system",
+        loc: loc("application.attachmentsMoveToBackingSystem"),
         clickCommand: function() {
           return self.sendUnsentAttachmentsToBackingSystem();
         },
-        visibleFunc: function (rawAttachments) {
-          return unsentAttachmentFound(rawAttachments);
+        visibleFn: function (rawAttachments) {
+          return self.authorizationModel.ok("move-attachments-to-backing-system") && self.appModel.hasAttachment() && unsentAttachmentFound(rawAttachments);
+        }
+      },
+      "downloadAll": {
+        loc: loc("download-all"),
+        clickCommand: function() {
+          window.location = "/api/raw/download-all-attachments?id=" + self.appModel.id() + "&lang=" + loc.getCurrentLanguage();
+        },
+        visibleFn: function (rawAttachments) {
+          return self.appModel.hasAttachment();
         }
       }
   };
@@ -73,18 +110,20 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel) {
     var commands = [];
     _.forEach(_.keys(attachmentsOperationsMapping), function(k) {
       var operationData = attachmentsOperationsMapping[k];
-      var visibleFuncResult = (operationData && operationData.visibleFunc) ? operationData.visibleFunc(rawAttachments) : true;
-      var isOptionVisible = self.authorizationModel ? self.authorizationModel.ok(operationData.command) && visibleFuncResult : false;
-      if (isOptionVisible){
-        commands.push(k);
+      if (!operationData) { error("Invalid attachment operations action: " + k); return [];}
+      if (!operationData.visibleFn) { error("No visibility resolving method defined for attachment operations action: " + k); return [];}
+
+      var isOptionVisible = (self.authorizationModel) ? operationData.visibleFn(rawAttachments) : false;
+      if (isOptionVisible) {
+        commands.push({name: k, loc: operationData.loc});
       }
     });
     return commands;
   }
 
-  self.attachmentsOperation.subscribe(function(selectedCommandName) {
-    if (selectedCommandName) {
-      attachmentsOperationsMapping[selectedCommandName].clickCommand();
+  self.attachmentsOperation.subscribe(function(opName) {
+    if (opName) {
+      attachmentsOperationsMapping[opName].clickCommand();
       self.attachmentsOperation(undefined);
     }
   });
@@ -96,8 +135,8 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel) {
   self.refresh = function(appModel, authorizationModel) {
     self.appModel = appModel;
     self.authorizationModel = authorizationModel;
-    var rawAttachments = ko.mapping.toJS(appModel.attachments);
 
+    var rawAttachments = ko.mapping.toJS(appModel.attachments);
     var preAttachments = attachmentUtils.getPreAttachments(rawAttachments);
     var postAttachments = attachmentUtils.getPostAttachments(rawAttachments);
 

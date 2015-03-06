@@ -27,8 +27,10 @@ Sonja logs in
   Sonja logs in
   Open application  ${appname}  753-416-25-30
 
-Sonja sets attachment to be for verdict
+Sonja sets attachment to be a verdict attachment
   Open tab  attachments
+  Wait Until  Page should contain element  xpath=//div[@id="application-attachments-tab"]//select[@data-test-id="attachment-operations-select-lower"]//option[@value='markVerdictAttachments']
+  Page should not contain element  xpath=//div[@id="application-attachments-tab"]//select[@data-test-id="attachment-operations-select-lower"]//option[@value='orderVerdictAttachments']
   Open attachment details  muut.muu
   Checkbox should not be selected  xpath=//section[@id='attachment']//input[@data-test-id='is-verdict-attachment']
   Select checkbox  xpath=//section[@id='attachment']//input[@data-test-id='is-verdict-attachment']
@@ -36,13 +38,26 @@ Sonja sets attachment to be for verdict
 Sonja sets contents description for the attachment
   Input text by test id  attachment-contents-input  Muu muu muu liite
   Click by test id  back-to-application-from-attachment
+  Wait Until  Page should contain element  xpath=//div[@id="application-attachments-tab"]//select[@data-test-id="attachment-operations-select-lower"]//option[@value='markVerdictAttachments']
+  Page should not contain element  xpath=//div[@id="application-attachments-tab"]//select[@data-test-id="attachment-operations-select-lower"]//option[@value='orderVerdictAttachments']
 
 Sonja gives verdict
   Open tab  verdict
   Fetch verdict
   Wait until  Element text should be  xpath=//div[@id='application-verdict-tab']//span[@data-test-id='given-verdict-id-0']  2013-01
 
-Sonja opens the kopiolaitos order dialog
+An option to order verdict attachments has appeared into the Toiminnot dropdown in the Attachments tab
+  Open tab  attachments
+  Wait Until  Page should contain element  xpath=//div[@id="application-attachments-tab"]//select[@data-test-id="attachment-operations-select-lower"]//option[@value='orderVerdictAttachments']
+
+The print order dialog can be opened by selecting from the dropdown
+  Select attachment operation option from dropdown  orderVerdictAttachments
+  Wait Until  Element should be visible  dialog-verdict-attachment-prints-order
+  Click Link  xpath=//*[@data-test-id='test-order-verdict-attachment-prints-cancel']
+  Wait until  Element should not be visible  xpath=//div[@id='dynamic-ok-confirm-dialog']
+
+Sonja opens the kopiolaitos order dialog on Verdict tab
+  Open tab  verdict
   Wait Until  Element should be visible  xpath=//div[@id='application-verdict-tab']
   Element should not be visible  xpath=//div[@id="application-verdict-tab"]//a[@data-test-id='test-open-prints-order-history']
   Click by test id  test-order-attachment-prints
