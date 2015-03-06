@@ -49,6 +49,7 @@
   var verdictModel = new LUPAPISTE.VerdictsModel();
   var signingModel = new LUPAPISTE.SigningModel("#dialog-sign-attachments", true);
   var verdictAttachmentPrintsOrderModel = new LUPAPISTE.VerdictAttachmentPrintsOrderModel();
+  var verdictAttachmentPrintsOrderHistoryModel = new LUPAPISTE.VerdictAttachmentPrintsOrderHistoryModel();
   var requestForStatementModel = new LUPAPISTE.RequestForStatementModel();
   var addPartyModel = new LUPAPISTE.AddPartyModel();
   var createTaskController = LUPAPISTE.createTaskController;
@@ -151,6 +152,7 @@
       attachmentsTab.refresh(applicationModel, authorizationModel);
 
       verdictAttachmentPrintsOrderModel.refresh(applicationModel);
+      verdictAttachmentPrintsOrderHistoryModel.refresh(applicationModel);
 
       // Statements
       requestForStatementModel.setApplicationId(app.id);
@@ -266,7 +268,6 @@
   hub.onPageLoad("application", _.partial(initPage, "application"));
   hub.onPageLoad("inforequest", _.partial(initPage, "inforequest"));
 
-// (["application","inforequest","attachment","statement","neighbors","task","verdict"]
   hub.subscribe("application-loaded", function(e) {
     showApplication(e.applicationDetails);
     updateWindowTitle(e.applicationDetails.application.title);
@@ -383,6 +384,7 @@
       sendNeighborEmailModel: sendNeighborEmailModel,
       signingModel: signingModel,
       verdictAttachmentPrintsOrderModel: verdictAttachmentPrintsOrderModel,
+      verdictAttachmentPrintsOrderHistoryModel: verdictAttachmentPrintsOrderHistoryModel,
       verdictModel: verdictModel,
       openInviteCompany: inviteCompanyModel.open.bind(inviteCompanyModel),
       attachmentsTab: attachmentsTab,
@@ -398,6 +400,9 @@
     $(verdictAttachmentPrintsOrderModel.dialogSelector).applyBindings({
       verdictAttachmentPrintsOrderModel: verdictAttachmentPrintsOrderModel,
       authorization: authorizationModel
+    });
+    $(verdictAttachmentPrintsOrderHistoryModel.dialogSelector).applyBindings({
+      verdictAttachmentPrintsOrderHistoryModel: verdictAttachmentPrintsOrderHistoryModel
     });
     $(inviteCompanyModel.selector).applyBindings(inviteCompanyModel);
     attachmentsTab.attachmentTemplatesModel.init();

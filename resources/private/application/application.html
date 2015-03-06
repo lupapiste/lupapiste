@@ -506,7 +506,9 @@
             </div>
             <!-- /ko -->
 
-            <a data-bind="attr: {href: '/api/raw/download-all-attachments?id=' + $root.application.id() + '&lang=' + loc.getCurrentLanguage() }, visible: $root.application.hasAttachment, ltext: 'download-all'" data-test-id="application-download-all-attachments" href="#" target="_blank"></a>
+            <a data-bind="attr: {href: '/api/raw/download-all-attachments?id=' + $root.application.id() + '&lang=' + loc.getCurrentLanguage() },
+                          visible: $root.application.hasAttachment, ltext: 'download-all'"
+               data-test-id="application-download-all-attachments" href="#" target="_blank"></a>
 
           </div>
 
@@ -893,6 +895,11 @@
             <em data-bind="visible: $root.verdictModel.pending" class="button-loader"></em>
             <span data-bind="ltext: 'verdict.orderAttachmentPrints.button'"></span>
           </button>
+
+          <a data-bind="click: $root.verdictAttachmentPrintsOrderHistoryModel.openPrintsOrderHistoryDialog,
+                        ltext: 'application.printsOrderHistory',
+                        visible: $root.authorization.ok('order-verdict-attachment-prints') && $root.verdictAttachmentPrintsOrderHistoryModel.historyItems().length"
+             href="#" data-test-id="test-open-prints-order-history"></a>
 
         </div>
 
