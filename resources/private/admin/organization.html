@@ -23,22 +23,22 @@
               </thead>
               <tbody data-bind="if: $data">
                 <tr >
-                  <td data-bind="attr: {'data-test-id': 'inforequest-enabled-' + $data.municipality + '-' + $data.permitType}">
+                  <td data-bind="attr: {'data-test-id': 'inforequest-enabled-' + $data.municipality() + '-' + $data.permitType()}">
                     <input type="checkbox" data-bind="checked: $data['inforequest-enabled']" class="form-input" ></input>
                   </td>
-                  <td data-bind="attr: {'data-test-id': 'application-enabled-' + $data.municipality + '-' + $data.permitType}">
+                  <td data-bind="attr: {'data-test-id': 'application-enabled-' + $data.municipality() + '-' + $data.permitType()}">
                     <input type="checkbox" data-bind="checked: $data['new-application-enabled']" class="form-input" ></input>
                   </td>
-                  <td data-bind="attr: {'data-test-id': 'open-inforequest-' + $data.municipality + '-' + $data.permitType}">
+                  <td data-bind="attr: {'data-test-id': 'open-inforequest-' + $data.municipality() + '-' + $data.permitType()}">
                     <input type="checkbox" data-bind="checked: $data['open-inforequest']" class="form-input" ></input>
                   </td>
-                  <td data-bind="attr: {'data-test-id': 'open-inforequest-email-' + $data.municipality + '-' + $data.permitType}">
-                    <input type="text" data-bind="value: $data['open-inforequest-email']" class="form-input" id="open-inforequest-email" data-test-id="open-inforequest-email"></input>
+                  <td data-bind="">
+                    <input type="text" data-bind="value: $data['open-inforequest-email'], attr: {'data-test-id': 'open-inforequest-email-' + $data.municipality() + '-' + $data.permitType()}" class="form-input" ></input>
                   </td>
-                  <td data-bind="attr: {'data-test-id': 'opening-' + $data.municipality + '-' + $data.permitType}">
+                  <td data-bind="attr: {'data-test-id': 'opening-' + $data.municipality() + '-' + $data.permitType()}">
                     <input type="text" data-bind="datepicker: $data['opening']" class="form-input"></input>
                   </td>
-                  <td><button class="btn btn-primary btn-narrow" data-bind="click: $root.organizationModel.saveRow">Tallenna</button></td>
+                  <td><button class="btn btn-primary btn-narrow" data-bind="click: $root.organizationModel.saveRow, attr: {'data-test-id': 'save-' + $data.municipality() + '-' + $data.permitType()}">Tallenna</button></td>
                 </tr>
               </tbody>
             </table>
