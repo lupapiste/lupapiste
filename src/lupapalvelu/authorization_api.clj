@@ -40,14 +40,14 @@
 (defn- valid-role [role]
   (#{:writer :foreman} (keyword role)))
 
-(defn- create-invite-auth [inviter invited application-id email text document-name document-id path role timestamp]
+(defn- create-invite-auth [inviter invited application-id text document-name document-id path role timestamp]
   (let [invite {:application  application-id
                 :text         text
                 :path         path
                 :documentName document-name
                 :documentId   document-id
                 :created      timestamp
-                :email        email
+                :email        (:email invited)
                 :role         role
                 :user         (user/summary invited)
                 :inviter      (user/summary inviter)}]
@@ -56,20 +56,18 @@
 (defn- send-invite! [command application-id email text document-name document-id path role]
   {:pre [(valid-role role)]}
   (let [email (user/canonize-email email)
-        {timestamp :created inviter :user application :application} command]
-    (if (domain/invite application email)
-      (fail! :invite.already-has-auth)
+        {timestamp :created inviter :user application :application} command
+        existing-user (user/get-user-by-email email)]
+    (if (or (domain/invite application email) (domain/has-auth? application (:id existing-user)))
+      (fail :invite.already-has-auth)
       (let [invited (user-api/get-or-create-user-by-email email inviter)
-            auth    (create-invite-auth inviter invited application-id email text document-name document-id path role timestamp)]
-        (if (domain/has-auth? application (:id invited))
-          (fail! :invite.already-has-auth)
-          (do
+            auth    (create-invite-auth inviter invited application-id text document-name document-id path role timestamp)]
             (update-application command
-              {:auth {$not {$elemMatch {:invite.user.username email}}}}
+          {:auth {$not {$elemMatch {:invite.user.username (:email invited)}}}}
               {$push {:auth     auth}
                $set  {:modified timestamp}})
             (notifications/notify! :invite (assoc command :recipients [invited]))
-            (ok)))))))
+        (ok)))))
 
 (defn- role-validator [{{role :role} :data}]
   (when-not (valid-role role)
