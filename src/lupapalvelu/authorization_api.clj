@@ -40,27 +40,29 @@
 (defn- valid-role [role]
   (#{:writer :foreman} (keyword role)))
 
+(defn- create-invite-auth [inviter invited application-id email text document-name document-id path role timestamp]
+  (let [invite {:application  application-id
+                :text         text
+                :path         path
+                :documentName document-name
+                :documentId   document-id
+                :created      timestamp
+                :email        email
+                :role         role
+                :user         (user/summary invited)
+                :inviter      (user/summary inviter)}]
+    (assoc (user/user-in-role invited :reader) :invite invite)))
 
-(defn- send-invite! [command id email text document-name document-id path role]
+(defn- send-invite! [command application-id email text document-name document-id path role]
   {:pre [(valid-role role)]}
   (let [email (user/canonize-email email)
         {timestamp :created inviter :user application :application} command]
     (if (domain/invite application email)
-      (fail :invite.already-has-auth)
+      (fail! :invite.already-has-auth)
       (let [invited (user-api/get-or-create-user-by-email email inviter)
-            invite  {:application  id
-                     :text         text
-                     :path         path
-                     :documentName document-name
-                     :documentId   document-id
-                     :created      timestamp
-                     :email        email
-                     :role         role
-                     :user         (user/summary invited)
-                     :inviter      (user/summary inviter)}
-            auth    (assoc (user/user-in-role invited :reader) :invite invite)]
+            auth    (create-invite-auth inviter invited application-id email text document-name document-id path role timestamp)]
         (if (domain/has-auth? application (:id invited))
-          (fail :invite.already-has-auth)
+          (fail! :invite.already-has-auth)
           (do
             (update-application command
               {:auth {$not {$elemMatch {:invite.user.username email}}}}
