@@ -100,8 +100,13 @@
             <span class="application_summary_text">
             <select data-bind="options: $root.permitSubtypes, value: $root.application.permitSubtype,
                                enable: $root.authorization.ok('change-permit-sub-type'),
-                               optionsText: function(item) {return loc('permitSubtype.' + item); }">
+                               optionsText: function(item) {return loc('permitSubtype.' + item); }"
+                    id="permitSubtypeSelect">
             </select>
+            <span id="permitSubtypeSaveIndicator" class="form-indicator form-input-saved" style="position: relative;top:0;left:0;color:#595959">
+              <span class="icon"></span>
+              <span data-bind="ltext: 'form.saved'"></span>
+            </span>
             </span>
           </div>
           <!-- /ko -->
