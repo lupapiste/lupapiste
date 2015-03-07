@@ -80,15 +80,16 @@ Mikko goes to parties tab of an application
   Open tab  parties
 
 Mikko unsubscribes notifications
-  Xpath Should Match X Times  //div[@id='application-parties-tab']//a[contains(text(),'Peruuta sähköposti-ilmoitukset')]  1
-  Click Link   Peruuta sähköposti-ilmoitukset
-  Wait Until  Element should not be visible  xpath=//div[@id='application-parties-tab']//a[contains(text(),'Peruuta sähköposti-ilmoitukset')]
-  Wait Until  Element should be visible  xpath=//div[@id='application-parties-tab']//a[contains(text(),'Tilaa sähköposti-ilmoitukset')]
+  Xpath Should Match X Times  //div[@id='application-parties-tab']//a[@data-test-id='unsubscribeNotifications']  1
+  Wait Until  Element should be visible  xpath=//div[@id='application-parties-tab']//a[@data-test-id='unsubscribeNotifications']
+  Click by test id  unsubscribeNotifications
+  Wait Until  Element should not be visible  xpath=//div[@id='application-parties-tab']//a[@data-test-id='unsubscribeNotifications']
+  Wait Until  Element should be visible  xpath=//div[@id='application-parties-tab']//a[@data-test-id='subscribeNotifications']
 
 Mikko subscribes notifications
-  Click Link  Tilaa sähköposti-ilmoitukset
-  Wait Until  Element should not be visible  xpath=//div[@id='application-parties-tab']//a[contains(text(),'Tilaa sähköposti-ilmoitukset')]
-  Wait Until  Element should be visible  xpath=//div[@id='application-parties-tab']//a[contains(text(),'Peruuta sähköposti-ilmoitukset')]
+  Click by test id  subscribeNotifications
+  Wait Until  Element should not be visible  xpath=//div[@id='application-parties-tab']//a[@data-test-id='subscribeNotifications']
+  Wait Until  Element should be visible  xpath=//div[@id='application-parties-tab']//a[@data-test-id='unsubscribeNotifications']
 
 Mikko decides to delete maksaja
   Set Suite Variable  ${maksajaXpath}  //section[@id='application']//div[@id='application-parties-tab']//section[@data-doc-type='maksaja']

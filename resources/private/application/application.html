@@ -371,8 +371,12 @@
                       </span>
                       <a class="invite-action" href="#" data-bind="ltext: 'application.remove-auth', click: $root.application.removeAuth, visible: $root.application.isNotOwner($data)"></a>
                       <!-- ko if: $root.application.canSubscribe($data) -->
-                      <a class="invite-action" href="#" data-bind="visible: $data.unsubscribed && $data.unsubscribed(), click: $root.application.subscribeNotifications, ltext: 'subscribeNotifications'"></a>
-                      <a class="invite-action" href="#" data-bind="visible: !$data.unsubscribed || !$data.unsubscribed(), click: $root.application.unsubscribeNotifications, ltext: 'unsubscribeNotifications'"></a>
+                      <a class="invite-action" href="#"
+                         data-test-id="subscribeNotifications"
+                         data-bind="visible: $data.unsubscribed && $data.unsubscribed(), click: $root.application.subscribeNotifications, ltext: 'subscribeNotifications'"></a>
+                      <a class="invite-action" href="#"
+                         data-test-id="unsubscribeNotifications"
+                         data-bind="visible: !$data.unsubscribed || !$data.unsubscribed(), click: $root.application.unsubscribeNotifications, ltext: 'unsubscribeNotifications'"></a>
                       <!-- /ko -->
                     </li>
                   </ul>
