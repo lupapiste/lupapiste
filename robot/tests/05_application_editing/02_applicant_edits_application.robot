@@ -112,13 +112,13 @@ Mikko adds party maksaja using dialog
 Mikko adds party hakija using button
   Set Suite Variable  ${hakijaXpath}  //section[@id='application']//div[@id='application-parties-tab']//section[@data-doc-type='hakija']
   Wait until  Xpath Should Match X Times  ${hakijaXpath}  1
-  Click element  hakija_append_btn
+  Click enabled by test id  hakija_append_btn
   Wait until  Xpath Should Match X Times  ${hakijaXpath}  2
 
 Mikko changes application address
   Page should not contain  ${newName}
   Element should be visible  xpath=//section[@id='application']//a[@data-test-id='change-location-link']
-  Click element  xpath=//section[@id='application']//a[@data-test-id='change-location-link']
+  Click by test id  change-location-link
   Input text by test id  application-new-address  ${newName}
   Click enabled by test id  change-location-save
   Wait Until  Page should contain  ${newName}
