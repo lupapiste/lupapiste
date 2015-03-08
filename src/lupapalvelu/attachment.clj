@@ -251,10 +251,21 @@
   [:hakija [:valtakirja
             :virkatodistus
             :ote_kauppa_ja_yhdistysrekisterista]
+   :kartat [:rasitesopimuksen_liitekartta
+            :liitekartta]
    :kiinteiston_hallinta [:jaljennos_perunkirjasta
                           :rasitesopimus
-                          :rasitesopimuksen_liitekartta
-                          :ote_asunto-osakeyhtion_kokouksen_poytakirjasta]
+                          :ote_asunto-osakeyhtion_kokouksen_poytakirjasta
+                          :sukuselvitys
+                          :testamentti
+                          :saantokirja
+                          :tilusvaihtosopimus
+                          :jakosopimus
+                          :kaupparekisteriote
+                          :yhtiojarjestys
+                          :ote_osakeyhtion_yhtiokokouksen_poytakirjasta
+                          :ote_osakeyhtion_hallituksen_kokouksen_poytakirjasta
+                          ]
    :muut [:muu]])
 
 ;;
