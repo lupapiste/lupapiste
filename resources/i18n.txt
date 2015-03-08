@@ -1,0 +1,17 @@
+applications.application: Hakemus
+applications.applications: Hakemukset
+applications.empty.new-application:  Luo uusi hakemus
+applications.missing.application.title: Hakemus
+buildingPermit: Hakemus
+new-applications-or-inforequests-disabled.both-disabled: Et voi jättää tähän toimenpiteeseen liittyvää neuvontapyyntöä tai hakemusta Lupapisteen kautta. Näin tehdäksesi ota yhteyttä kuntasi viranomaiseen.
+new-applications-or-inforequests-disabled.new-applications-disabled: Et voi jättää tähän toimenpiteeseen liittyvää hakemusta Lupapisteen kautta. Jättääksesi hakemuksen ota yhteyttä kuntasi viranomaiseen.
+newRequest.newApplication: Tee hakemus
+
+operations.tree.rajankaynnin-hakeminen:	Rajankäynnin hakeminen
+operations.tree.rajannayton-hakeminen:	Rajannäytön hakeminen
+
+rajankaynnin-hakeminen._group_label: Rajankäynnin hakeminen
+rajannayton-hakeminen._group_label:	Rajannäytön hakeminen
+
+
+
