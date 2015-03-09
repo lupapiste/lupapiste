@@ -8,7 +8,7 @@
 
 (defraw admin-download-application-xml
   {:parameters [applicationId]
-   :roles      [:admin]}
+   :user-roles #{:admin}}
   [_]
   (if-let [application (domain/get-application-no-access-checking applicationId)]
     {:status 200

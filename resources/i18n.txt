@@ -1,0 +1,31 @@
+applications.application: Hakemus
+applications.applications: Hakemukset
+applications.empty.new-application:  Luo uusi hakemus
+applications.missing.application.title: Hakemus
+buildingPermit: Hakemus
+new-applications-or-inforequests-disabled.both-disabled: Et voi jättää tähän toimenpiteeseen liittyvää neuvontapyyntöä tai hakemusta Lupapisteen kautta. Näin tehdäksesi ota yhteyttä kuntasi viranomaiseen.
+new-applications-or-inforequests-disabled.new-applications-disabled: Et voi jättää tähän toimenpiteeseen liittyvää hakemusta Lupapisteen kautta. Jättääksesi hakemuksen ota yhteyttä kuntasi viranomaiseen.
+newRequest.newApplication: Tee hakemus
+
+operations.tree.rajankaynnin-hakeminen:	Rajankäynnin hakeminen
+operations.tree.rajannayton-hakeminen:	Rajannäytön hakeminen
+
+rajankaynnin-hakeminen._group_label: Rajankäynnin hakeminen
+rajannayton-hakeminen._group_label:	Rajannäytön hakeminen
+
+
+attachmentType.kartat.liitekartta: Liitekartta
+attachmentType.kiinteiston_hallinta.sukuselvitys: Sukuselvitys
+attachmentType.kiinteiston_hallinta.testamentti: Testamentti
+attachmentType.kiinteiston_hallinta.saantokirja: Saantokirja
+attachmentType.kiinteiston_hallinta.tilusvaihtosopimus: Tilusvaihtosopimus
+attachmentType.kiinteiston_hallinta.jakosopimus: Jakosopimus
+attachmentType.kartat.rasitesopimuksen_liitekartta: Rasitesopimuksen liitekartta
+
+attachmentType.kiinteiston_hallinta.kaupparekisteriote: Kaupparekisteriote
+attachmentType.kiinteiston_hallinta.yhtiojarjestys: Yhtiöjärjestys
+attachmentType.kiinteiston_hallinta.ote_osakeyhtion_yhtiokokouksen_poytakirjasta: Ote osakeyhtiö yhtiökokouksen pöytäkirjasta
+attachmentType.kiinteiston_hallinta.ote_osakeyhtion_hallituksen_kokouksen_poytakirjasta: Ote osakeyhtiön hallituksen kokouksen pöytäkirjasta
+
+
+

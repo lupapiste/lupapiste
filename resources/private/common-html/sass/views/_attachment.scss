@@ -98,12 +98,19 @@ $previewHeight: 500px;
 
   .attachment-actions {
     width: $cols3;
-    position: absolute;
-    top: 0;
-    right: 0;
+    float: right;
+    margin-top: -60px;
     button {
       width: 100%;
     }
+  }
+}
+
+.attachment-info-wrapper {
+  float: left;
+  width: 80%;
+  .tab-info {
+    width: 80%;
   }
 }
 
@@ -113,8 +120,8 @@ $previewHeight: 500px;
   display: block;
   h1 {
     line-height: normal;
-    display: inline-block;
-    max-width: 80%
+    max-width: 80%;
+    float: left;
   }
   a {
     margin-left: $marginL * 2;

@@ -29,12 +29,7 @@ LUPAPISTE.MapModel = function(authorizationModel) {
       }
       return inforequestMap;
     } else if (kind === "inforequest-markers") {
-      //
-      // For unknown reason, marker map initialized incorrectly when coming to inforequest view from application view
-      // (https://issues.solita.fi/browse/LPK-79). Fixing this for now by always building new marker map.
-      // TODO: Try to find true root cause for above bug.
-      //
-//      if (!inforequestMarkerMap) {
+      if (!inforequestMarkerMap) {
         inforequestMarkerMap = createMap("inforequest-marker-map");
 
         inforequestMarkerMap.setMarkerClickCallback(
@@ -48,7 +43,7 @@ LUPAPISTE.MapModel = function(authorizationModel) {
         inforequestMarkerMap.setMarkerMapCloseCallback(
           function() { $("#inforequest-marker-map-contents").html("").hide(); }
         );
-//      }
+      }
       return inforequestMarkerMap;
     } else {
       throw "Unknown kind: " + kind;
@@ -161,9 +156,27 @@ LUPAPISTE.MapModel = function(authorizationModel) {
       map.drawDrawings(drawings, {}, drawStyle);
     }
     if (application.infoRequest) {
-      var irMarkersMap = getOrCreateMap("inforequest-markers");
-      irMarkersMap.clear().updateSize().center(x, y, 14);
-      setRelevantMarkersOntoMarkerMap(irMarkersMap, currentAppId, x, y);
+
+      // Marker map visibility handling [https://issues.solita.fi/browse/LPK-79].
+      // In html, could not hide "#inforequest-marker-map" with knockout's "visible" binding, because Openlayers would then try to incorrectly initialize the map.
+      // Then, when accessing inforequest with applicant user, loading of the map fails with "Cannot read property 'w' of null".
+      // ->  Resolution: hiding the map with jQuery
+      //
+      // Other option that could be used here, instead of jQuery show/hide:
+      // - re-constructing the map every time  -> remember to call destroy() for the previous map before contructing the new one,
+      //   to prevent duplicate maps from generating into html.
+      //   I.e. call "if (inforequestMarkerMap) inforequestMarkerMap.clear().destroy();" (create a forwarding destroy() method to gis.js)
+      //   But this is even uglier than the jQuery option.
+      //
+      if (authorizationModel.ok('inforequest-markers')) {
+        var irMarkersMap = getOrCreateMap("inforequest-markers");
+        irMarkersMap.clear().updateSize().center(x, y, 14);
+        setRelevantMarkersOntoMarkerMap(irMarkersMap, currentAppId, x, y);
+        $("#inforequest-marker-map").show();
+      } else {
+        $("#inforequest-marker-map").hide();
+      }
+
     }
   };
 

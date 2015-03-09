@@ -9,7 +9,7 @@
           <div id="application-map" class="map map-large" style="width: 320px; height: 280px;"></div>
           <div class="application-map-actions" data-bind="with: application">
             <!-- ko if: location() -->
-              <a data-bind="click: openOskariMap" class="map-search-button icon search"></a>
+              <a data-bind="click: openOskariMap, ltext:'map.open'" class="map-search-button" ></a>
             <!-- /ko -->
           </div>
         </div>
@@ -100,8 +100,13 @@
             <span class="application_summary_text">
             <select data-bind="options: $root.permitSubtypes, value: $root.application.permitSubtype,
                                enable: $root.authorization.ok('change-permit-sub-type'),
-                               optionsText: function(item) {return loc('permitSubtype.' + item); }">
+                               optionsText: function(item) {return loc('permitSubtype.' + item); }"
+                    id="permitSubtypeSelect">
             </select>
+            <span id="permitSubtypeSaveIndicator" class="form-indicator form-input-saved" style="position: relative;top:0;left:0;color:#595959">
+              <span data-bind="ltext: 'form.saved'"></span>
+              <span class="icon"></span>
+            </span>
             </span>
           </div>
           <!-- /ko -->
@@ -161,7 +166,11 @@
             <p data-bind="text: loc(['municipality', municipality()])"></p>
           </div>
           <!-- ko if: !hasInvites() -->
-          <button data-bind="click: approveApplication,   visible: $root.authorization.ok('approve-application'),    enable: !processing() && $root.authorization.ok('approve-application')"    data-test-id="approve-application"     class="btn btn-primary">
+          <button data-bind="click: approveApplication,
+                              visible: $root.authorization.ok('approve-application'),
+                              enable: !processing() && $root.authorization.ok('approve-application'), attr: {'title': loc('tooltip.approveApplication'}"
+                  data-test-id="approve-application"
+                  class="btn btn-primary">
             <span data-bind="ltext: 'application.approveApplication'"></span>
             <span class="icon approve left-align"></span>
           </button>
@@ -362,8 +371,12 @@
                       </span>
                       <a class="invite-action" href="#" data-bind="ltext: 'application.remove-auth', click: $root.application.removeAuth, visible: $root.application.isNotOwner($data)"></a>
                       <!-- ko if: $root.application.canSubscribe($data) -->
-                      <a class="invite-action" href="#" data-bind="visible: $data.unsubscribed && $data.unsubscribed(), click: $root.application.subscribeNotifications, ltext: 'subscribeNotifications'"></a>
-                      <a class="invite-action" href="#" data-bind="visible: !$data.unsubscribed || !$data.unsubscribed(), click: $root.application.unsubscribeNotifications, ltext: 'unsubscribeNotifications'"></a>
+                      <a class="invite-action" href="#"
+                         data-test-id="subscribeNotifications"
+                         data-bind="visible: $data.unsubscribed && $data.unsubscribed(), click: $root.application.subscribeNotifications, ltext: 'subscribeNotifications'"></a>
+                      <a class="invite-action" href="#"
+                         data-test-id="unsubscribeNotifications"
+                         data-bind="visible: !$data.unsubscribed || !$data.unsubscribed(), click: $root.application.unsubscribeNotifications, ltext: 'unsubscribeNotifications'"></a>
                       <!-- /ko -->
                     </li>
                   </ul>
@@ -478,33 +491,28 @@
                                             attachmentsOperations: $data.attachmentsOperations,
                                             testId: 'upper'}}"></div>
 
-          <div>
-            <div data-bind="if: postAttachmentsByOperation().length > 0" data-test-id="application-post-attachments-table">
-              <h1><span data-bind="ltext: 'application.attachments.post-verdict'"></span></h1>
-              <div class="clear" data-bind="template: {name: 'attachments-template-op', data: postAttachmentsByOperation()}"></div>
-            </div>
-            <!-- ko if: !$root.application.inPostVerdictState() -->
-            <div data-bind="if: preAttachmentsByOperation().length > 0" data-test-id="application-pre-attachments-table">
-              <div class="clear" data-bind="template: {name: 'attachments-template-op', data: preAttachmentsByOperation()}"></div>
-            </div>
-            <!-- /ko -->
-
-            <div data-bind="template: {name: 'attachment-actions-template',
-                                       data: {appModel: $data.appModel,
-                                              attachmentsOperation: $data.attachmentsOperation,
-                                              attachmentsOperations: $data.attachmentsOperations,
-                                              testId: 'lower'}}"></div>
-
-            <!-- ko if: $root.application.inPostVerdictState() -->
-            <div data-bind="if: preAttachmentsByOperation().length > 0" data-test-id="application-pre-attachments-table">
-              <h1><span data-bind="ltext: 'application.attachments.pre-verdict'"></span></h1>
-              <div class="clear" data-bind="template: {name: 'attachments-template-op', data: preAttachmentsByOperation()}"></div>
-            </div>
-            <!-- /ko -->
-
-            <a data-bind="attr: {href: '/api/raw/download-all-attachments?id=' + $root.application.id() + '&lang=' + loc.getCurrentLanguage() }, visible: $root.application.hasAttachment, ltext: 'download-all'" data-test-id="application-download-all-attachments" href="#" target="_blank"></a>
-
+          <div data-bind="if: postAttachmentsByOperation().length > 0" data-test-id="application-post-attachments-table">
+            <h1><span data-bind="ltext: 'application.attachments.post-verdict'"></span></h1>
+            <div class="clear" data-bind="template: {name: 'attachments-template-op', data: postAttachmentsByOperation()}"></div>
           </div>
+          <!-- ko if: !$root.application.inPostVerdictState() -->
+          <div data-bind="if: preAttachmentsByOperation().length > 0" data-test-id="application-pre-attachments-table">
+            <div class="clear" data-bind="template: {name: 'attachments-template-op', data: preAttachmentsByOperation()}"></div>
+          </div>
+          <!-- /ko -->
+
+          <div data-bind="template: {name: 'attachment-actions-template',
+                                     data: {appModel: $data.appModel,
+                                            attachmentsOperation: $data.attachmentsOperation,
+                                            attachmentsOperations: $data.attachmentsOperations,
+                                            testId: 'lower'}}"></div>
+
+          <!-- ko if: $root.application.inPostVerdictState() -->
+          <div data-bind="if: preAttachmentsByOperation().length > 0" data-test-id="application-pre-attachments-table">
+            <h1><span data-bind="ltext: 'application.attachments.pre-verdict'"></span></h1>
+            <div class="clear" data-bind="template: {name: 'attachments-template-op', data: preAttachmentsByOperation()}"></div>
+          </div>
+          <!-- /ko -->
 
           <div class="process-nav">
             <a class="btn process-next btn-nav-forward" data-bind="click: $root.application.nextTab" href="#" data-target="requiredFieldSummary">
@@ -889,6 +897,11 @@
             <em data-bind="visible: $root.verdictModel.pending" class="button-loader"></em>
             <span data-bind="ltext: 'verdict.orderAttachmentPrints.button'"></span>
           </button>
+
+          <a data-bind="click: $root.verdictAttachmentPrintsOrderHistoryModel.openPrintsOrderHistoryDialog,
+                        ltext: 'application.printsOrderHistory',
+                        visible: $root.authorization.ok('order-verdict-attachment-prints') && $root.verdictAttachmentPrintsOrderHistoryModel.historyItems().length"
+             href="#" data-test-id="test-open-prints-order-history"></a>
 
         </div>
 

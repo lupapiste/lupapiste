@@ -6,6 +6,6 @@
 (defquery owners
   {:parameters [propertyId]
    :pre-checks [disallow-impersonation]
-   :roles      [:authority]}
+   :user-roles #{:authority}}
   [_]
   (ok :owners (get-owners propertyId)))

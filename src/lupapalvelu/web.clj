@@ -350,8 +350,9 @@
 ;; FROM SADE
 ;;
 
-(defjson "/system/ping" [] {:ok true})
+(defjson "/system/ping" [] (ok))
 (defjson "/system/status" [] (status/status))
+(defjson "/system/action-counters" [] (reduce (fn [m [k v]] (assoc m k (:call-count v))) {} (action/get-actions)))
 
 (def activation-route (str (env/value :activation :path) ":activation-key"))
 (defpage activation-route {key :activation-key}

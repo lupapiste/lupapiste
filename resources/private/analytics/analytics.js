@@ -24,4 +24,11 @@
     ga("send", "pageview", page);
   });
 
+  hub.subscribe("track-click", function(e) {
+    //debug(e);
+    // hub.send("track-click", {category:"x", label:"y", event:"z"});
+  });
+
 })(window,document,"script","//www.google-analytics.com/analytics.js","ga");
+
+
