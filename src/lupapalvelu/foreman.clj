@@ -27,12 +27,13 @@
     (get-in foreman-doc [:data :henkilotiedot :hetu :value])))
 
 (defn- get-foreman-applications [foreman-application & [foreman-hetu]]
-  (when-let [foreman-hetu (if (ss/blank? foreman-hetu)
-                            (get-foreman-hetu foreman-application)
-                            foreman-hetu)]
-    (mongo/select :applications {"operations.name" "tyonjohtajan-nimeaminen-v2"
-                                 :documents {$elemMatch {"schema-info.name" "tyonjohtaja-v2"
-                                                         "data.henkilotiedot.hetu.value" foreman-hetu}}})))
+  (let [foreman-hetu (if (ss/blank? foreman-hetu)
+                       (get-foreman-hetu foreman-application)
+                       foreman-hetu)]
+    (when-not (ss/blank? foreman-hetu)
+      (mongo/select :applications {"operations.name" "tyonjohtajan-nimeaminen-v2"
+                                   :documents        {$elemMatch {"schema-info.name"              "tyonjohtaja-v2"
+                                                                  "data.henkilotiedot.hetu.value" foreman-hetu}}}))))
 
 (defn get-foreman-project-applications
   "Based on the passed foreman application, fetches all project applications that have the same foreman as in
