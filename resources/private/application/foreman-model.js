@@ -31,6 +31,8 @@ LUPAPISTE.ForemanModel = function() {
     });
   });
 
+  self.indicator = ko.observable();
+
   self.refresh = function(application) {
     function foremanApplications(applications) {
       _.forEach(applications, function(app) {
@@ -99,7 +101,8 @@ LUPAPISTE.ForemanModel = function() {
                      "taskId": task.id,
                      "statusName": linkedForemanApp ? linkedForemanApp.statusName : "missing",
                      "selectedForeman": ko.observable(_.isEmpty(asiointitunnus) ? undefined : asiointitunnus),
-                     "selectableForemen": ko.observableArray()};
+                     "selectableForemen": ko.observableArray(),
+                     "indicator": ko.observable()};
 
         data.selectableForemen(_.filter(self.foremanApplications(), function(app) {
           return !_.contains(asiointitunnukset, app.id) || app.id === asiointitunnus;
@@ -110,12 +113,12 @@ LUPAPISTE.ForemanModel = function() {
             .command("link-foreman-task", { id: self.application().id,
                                             taskId: data.taskId,
                                             foremanAppId: val ? val : ""})
-            .success(function(data) {
-              // tallennettu-indikaattori
-              self.finished(true);
+            .success(function(res) {
+              self.indicator("saved");
               repository.load(self.application().id);
             })
             .error(function(err) {
+              self.indicator("err");
               self.error(err.text);
             })
             .call();
