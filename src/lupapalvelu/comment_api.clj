@@ -41,7 +41,7 @@
   (when-not (#{"application", "attachment", "statement", "verdict"} (:type target))
     (fail :error.unknown-type)))
 
-(defquery can-target-comment-to-authority
+(defcommand can-target-comment-to-authority
   {:description "Dummy command for UI logic"
    :user-roles #{:authority}
    :states      (action/all-states-but [:canceled])})
