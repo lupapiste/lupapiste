@@ -85,7 +85,6 @@
 (defcommand link-foreman-task
   {:user-roles #{:applicant :authority}
    :states action/all-states
-   :user-authz-roles action/all-authz-roles
    :parameters [id taskId foremanAppId]}
   [{:keys [created application] :as command}]
   (let [task (util/find-by-id taskId (:tasks application))]
