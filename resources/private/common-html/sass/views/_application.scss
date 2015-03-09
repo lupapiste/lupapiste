@@ -656,6 +656,16 @@
 }
 
 .tasks-foreman {
+  .form-input {
+    display: inline-block;
+  }
+
+  .form-input.combobox, select {
+    &.long {
+     width: $cols7;
+    }
+  }
+
   thead tr:first-child td {
     padding-left: 0
   }
