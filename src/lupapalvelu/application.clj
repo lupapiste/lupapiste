@@ -615,6 +615,7 @@
                       info-request?          :info
                       (user/authority? user) :open
                       :else                  :draft)
+        comment-target (if open-inforequest? [:applicant :authority :oirAuthority] [:applicant :authority])
         application (merge domain/application-skeleton
                       {:id                  id
                        :created             created
@@ -635,7 +636,7 @@
                        :auth                (if-let [company (some-> user :company :id c/find-company-by-id c/company->auth)]
                                               [owner company]
                                               [owner])
-                       :comments            (map #(domain/->comment % {:type "application"} (:role user) user nil created [:applicant :authority]) messages)
+                       :comments            (map #(domain/->comment % {:type "application"} (:role user) user nil created comment-target) messages)
                        :schema-version      (schemas/get-latest-schema-version)})]
     (merge application (when-not info-request?
                          {:attachments (make-attachments created op organization state)
