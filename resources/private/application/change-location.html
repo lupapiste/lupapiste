@@ -16,20 +16,23 @@
             </div>
 
             <div>
-              <label class="form-label" data-bind ="ltext: 'newRequest.propertyId'"></label>
-              <input data-bind="textInput: propertyId, readonly: !currentUser.isAuthority()" data-test-id="application-new-propertyid" type="text" maxlength="20" class="form-input text long"></input>
+              <form data-bind="submit: saveNewLocation">
+                <label class="form-label" data-bind ="ltext: 'newRequest.propertyId'"></label>
+                <input data-bind="textInput: propertyId, readonly: !currentUser.isAuthority()" data-test-id="application-new-propertyid"
+                       type="text" maxlength="20" class="form-input text long" ></input>
 
-              <label class="form-label" data-bind ="ltext: 'newRequest.address'"></label>
-              <input data-bind="textInput: address" data-test-id="application-new-address" type="text" maxlength="100" class="form-input text long"></input>
+                <label class="form-label" data-bind ="ltext: 'newRequest.address'"></label>
+                <input data-bind="textInput: address" data-test-id="application-new-address" type="text" maxlength="100" class="form-input text long" autofocus="autofocus"></input>
 
-              <div data-bind="if: errorMessage" ><div data-bind="ltext: errorMessage" class="context-error"></div></div>
+                <div data-bind="if: errorMessage" ><div data-bind="ltext: errorMessage" class="context-error"></div></div>
 
-              <button data-bind="click: saveNewLocation, enable: ok, disable: processing" class="btn btn-primary btn-dialog" data-test-id="change-location-save">
-                <span data-bind="ltext: 'save'"></span>
-                <em data-bind="visible: pending" class="button-loader"></em>
-              </button>
+                <button type="submit" data-bind="click: saveNewLocation, enable: ok, disable: processing" class="btn btn-primary btn-dialog" data-test-id="change-location-save">
+                  <span data-bind="ltext: 'save'"></span>
+                  <em data-bind="visible: pending" class="button-loader"></em>
+                </button>
 
-              <a data-bind="ltext: 'cancel'" class="btn-dialog close" href="#"></a>
+                <a data-bind="ltext: 'cancel'" class="btn-dialog close" href="#"></a>
+              </form>
             </div>
 
           </div>

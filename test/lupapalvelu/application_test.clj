@@ -62,7 +62,8 @@
 (facts "is-link-permit-required works correctly"
   (fact "Muutoslupa requires" (is-link-permit-required {:permitSubtype "muutoslupa"}) => truthy)
   (fact "Aloitusilmoitus requires" (is-link-permit-required {:operations [{:name "aloitusoikeus"}]}) => truthy)
-  (fact "Poikkeamis not requires" (is-link-permit-required {:operations [{:name "poikkeamis"}]}) => nil))
+  (fact "Poikkeamis not requires" (is-link-permit-required {:operations [{:name "poikkeamis"}]}) => falsey)
+  (fact "ya-jatkoaika requires" (is-link-permit-required {:operations [{:name "ya-jatkoaika"}]}) => truthy))
 
 (facts "Add operation allowed"
   (let [not-allowed-for #{:raktyo-aloit-loppuunsaat :jatkoaika :aloitusoikeus :suunnittelijan-nimeaminen :tyonjohtajan-nimeaminen :tyonjohtajan-nimeaminen-v2 :tilan-rekisteroiminen-tontiksi :yhdistaminen :rajankaynnin-hakeminen
