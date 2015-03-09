@@ -31,8 +31,9 @@
                     :address "Suusaarenkierto 44") => truthy
           application (query-application pena app-id) => truthy
           organization (organization/resolve-organization velho-muni (:permitType application)) => truthy
-          scope  (organization/resolve-organization-scope velho-muni (:permitType application) organization) => truthy
-          config (:caseManagement scope) => truthy]
+          scope  (organization/resolve-organization-scope velho-muni (:permitType application) organization) => truthy]
+      (:caseManagement scope) => truthy
+
       (generate-documents application pena)
       (upload-attachment-to-all-placeholders pena application)
 
@@ -105,7 +106,12 @@
             (fact "Operations are correct"
               (let [operations (sxml/select xml [:UusiAsia :Toimenpiteet :Toimenpide])]
                 (count operations) => (count (:operations updated-application))
-                (sxml/get-text operations [:ToimenpideTunnus]) => (-> updated-application :operations first :name))))))))
+                (sxml/get-text operations [:ToimenpideTunnus]) => (-> updated-application :operations first :name)))
+            (fact
+              "Link permits are correct"
+              (let [links (sxml/select xml [:UusiAsia :Viiteluvat :Viitelupa :MuuTunnus])]
+                (>pprint links)
+                )))))))
 
 
   (fact "Can't create asianhallinta with non-asianhallinta operation"
