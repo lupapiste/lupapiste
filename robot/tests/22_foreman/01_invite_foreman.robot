@@ -2,6 +2,7 @@
 
 Documentation   Mikko creates a new application
 Resource        ../../common_resource.robot
+Resource        keywords.robot
 
 *** Test Cases ***
 
@@ -54,14 +55,9 @@ Application is approved and given a verdict
   Submit empty verdict
 
 Add työnjohtaja task to original application
-  Open tab  tasks
-  Click enabled by test id  application-new-task
-  Wait until  Element should be visible  dialog-create-task
-  Select From List By Value  choose-task-type   task-vaadittu-tyonjohtaja
-  Input text  create-task-name  Ylitarkastaja
-  Click enabled by test id  create-task-save
-  Wait until  Element should not be visible  dialog-create-task
-  Wait until  Xpath Should Match X Times  //table[@data-test-id="tasks-foreman"]/tbody/tr  1
+  Add työnjohtaja task to current application  Ylitarkastaja
+  Add työnjohtaja task to current application  Alitarkastaja
+  Wait until  Xpath Should Match X Times  //table[@data-test-id="tasks-foreman"]/tbody/tr  2
   [Teardown]  logout
 
 Mikko can link existing foreman application to foreman task
@@ -79,7 +75,7 @@ Mikko can start invite flow from tasks tab
   Click by test id  cancel-foreman-dialog
 
 Mikko can invite additional foremans to application with verdict
-  Wait and click   xpath=//table[@data-test-id='tasks-foreman']//tr[@data-test-name='Ylitarkastaja']/td[@data-test-col-name='foreman-name-or-invite']/a
+  Wait and click   xpath=//table[@data-test-id='tasks-foreman']//tr[@data-test-name='Alitarkastaja']/td[@data-test-col-name='foreman-name-or-invite']/a
   Wait until  Element should be visible  invite-foreman-email
   Input Text  invite-foreman-email  teppo@example.com
   Click by test id  application-invite-foreman
