@@ -338,7 +338,6 @@
 
 (defcommand assign-application
   {:parameters  [:id assigneeId]
-   :pre-checks  [open-inforequest/not-open-inforequest-user-validator]
    :user-roles #{:authority}
    :states      (action/all-states-but [:draft :closed :canceled])}
   [{:keys [user created application] :as command}]

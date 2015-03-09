@@ -44,8 +44,7 @@
 (defquery can-target-comment-to-authority
   {:description "Dummy command for UI logic"
    :user-roles #{:authority}
-   :states      (action/all-states-but [:canceled])
-   :pre-checks  [open-inforequest/not-open-inforequest-user-validator]})
+   :states      (action/all-states-but [:canceled])})
 
 (defcommand add-comment
   {:parameters [id text target roles]
