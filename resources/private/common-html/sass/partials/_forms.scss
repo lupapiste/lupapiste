@@ -107,6 +107,7 @@ input[readonly], textarea[readonly] {
     height: 24px;
     width: 24px;
     vertical-align: top;
+    margin: 0;
   }
   .text {
     display: inline-block;
@@ -134,11 +135,6 @@ input[readonly], textarea[readonly] {
 }
 
 .save-indicator {
-  @include spite-bg;
-  background-position: 5px -2497px;
-  padding-left: 27px;
-  float: right;
-  display: none;
 }
 
 .errorPanel {
