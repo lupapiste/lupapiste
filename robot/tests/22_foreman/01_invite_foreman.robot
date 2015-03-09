@@ -2,6 +2,7 @@
 
 Documentation   Mikko creates a new application
 Resource        ../../common_resource.robot
+Resource        keywords.robot
 
 *** Test Cases ***
 
@@ -20,6 +21,8 @@ Mikko invites foreman to application
   Click by test id  application-invite-foreman
   Wait until  Click by test id  application-invite-foreman-close-dialog
   Wait until  Element should be visible  //section[@id='application']//span[@data-test-operation-id='tyonjohtajan-nimeaminen-v2']
+  ${foremanAppId} =  Get Text  xpath=//section[@id='application']//span[@data-test-id='application-id']
+  Set Suite Variable  ${foremanAppId}  ${foremanAppId}
 
 Mikko sees sent invitation on the original application
   Click by test id  test-application-link-permit-lupapistetunnus
@@ -52,21 +55,16 @@ Application is approved and given a verdict
   Submit empty verdict
 
 Add työnjohtaja task to original application
-  Open tab  tasks
-  Click enabled by test id  application-new-task
-  Wait until  Element should be visible  dialog-create-task
-  Select From List By Value  choose-task-type   task-vaadittu-tyonjohtaja
-  Input text  create-task-name  Ylitarkastaja
-  Click enabled by test id  create-task-save
-  Wait until  Element should not be visible  dialog-create-task
+  Add työnjohtaja task to current application  Ylitarkastaja
+  Add työnjohtaja task to current application  Alitarkastaja
   Wait until  Xpath Should Match X Times  //table[@data-test-id="tasks-foreman"]/tbody/tr  2
   [Teardown]  logout
 
-Mikko can see invited foremans on tasks list
+Mikko can link existing foreman application to foreman task
   Mikko logs in
   Open application at index  ${appname}  753-416-25-22  1
   Open tab  tasks
-  Wait until  Element text should be  xpath=//table[@data-test-id='tasks-foreman']//span[@data-test-id='tasks-foreman-email']  (teppo@example.com)
+  Select From List By Value  foreman-selection  ${foremanAppId}
 
 Mikko can start invite flow from tasks tab
   Click enabled by test id  invite-other-foreman-button
@@ -77,7 +75,7 @@ Mikko can start invite flow from tasks tab
   Click by test id  cancel-foreman-dialog
 
 Mikko can invite additional foremans to application with verdict
-  Wait and click   xpath=//table[@data-test-id='tasks-foreman']//tr[@data-test-name='Ylitarkastaja']/td[@data-test-col-name='foreman-name-or-invite']/a
+  Wait and click   xpath=//table[@data-test-id='tasks-foreman']//tr[@data-test-name='Alitarkastaja']/td[@data-test-col-name='foreman-name-or-invite']/a
   Wait until  Element should be visible  invite-foreman-email
   Input Text  invite-foreman-email  teppo@example.com
   Click by test id  application-invite-foreman

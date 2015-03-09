@@ -4485,49 +4485,57 @@ span.icon_clear:before {
 }
 
 /* line 659, ../sass/views/_application.scss */
+.tasks-foreman .form-input {
+  display: inline-block;
+}
+/* line 664, ../sass/views/_application.scss */
+.tasks-foreman .form-input.combobox.long, .tasks-foreman select.long {
+  width: 41.25em;
+}
+/* line 669, ../sass/views/_application.scss */
 .tasks-foreman thead tr:first-child td {
   padding-left: 0;
 }
-/* line 664, ../sass/views/_application.scss */
+/* line 674, ../sass/views/_application.scss */
 .tasks-foreman .foreman-state:before {
   content: "(";
 }
-/* line 667, ../sass/views/_application.scss */
+/* line 677, ../sass/views/_application.scss */
 .tasks-foreman .foreman-state:after {
   content: ")";
 }
-/* line 672, ../sass/views/_application.scss */
+/* line 682, ../sass/views/_application.scss */
 .tasks-foreman .add-foreman:before {
   content: "[";
 }
-/* line 675, ../sass/views/_application.scss */
+/* line 685, ../sass/views/_application.scss */
 .tasks-foreman .add-foreman:after {
   content: "]";
 }
 
-/* line 681, ../sass/views/_application.scss */
+/* line 691, ../sass/views/_application.scss */
 .operation-info {
   width: 55%;
   display: inline-block;
   vertical-align: top;
 }
 
-/* line 686, ../sass/views/_application.scss */
+/* line 696, ../sass/views/_application.scss */
 .organizationLinks {
   vertical-align: top;
   width: 39%;
   padding-left: 48px;
   display: inline-block;
 }
-/* line 691, ../sass/views/_application.scss */
+/* line 701, ../sass/views/_application.scss */
 .organizationLinks .organization-links {
   margin-bottom: 12px;
 }
-/* line 693, ../sass/views/_application.scss */
+/* line 703, ../sass/views/_application.scss */
 .organizationLinks .organization-links a {
   color: #333;
 }
-/* line 695, ../sass/views/_application.scss */
+/* line 705, ../sass/views/_application.scss */
 .organizationLinks .organization-links a:active, .organizationLinks .organization-links a:visited, .organizationLinks .organization-links a:hover {
   color: #333;
 }
