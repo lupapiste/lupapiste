@@ -68,7 +68,8 @@
                              value: $data.selectedForeman">
                 </select>
 
-                <a class="add-foreman" data-bind="click: function() { $parents[1].inviteForeman($data.taskId); }">
+                <a class="add-foreman" data-bind="visible: !$data.selectedForeman(),
+                                                  click: function() { $parents[1].inviteForeman($data.taskId); }">
                   <span data-bind="ltext: 'application.parties.addForeman'"></span>
                 </a>
               </td>
