@@ -32,7 +32,7 @@
     (case (keyword (:role user))
       :applicant {:state {$nin ["canceled"]}}
       :authority {:state {$nin ["draft" "canceled"]}}
-      :oirAuthority {:state {$in ["info" "answered"]}}
+      :oirAuthority {:state {$in ["info" "answered"]} :openInfoRequest true}
       {})))
 
 (defn- only-authority-sees [user checker items]
