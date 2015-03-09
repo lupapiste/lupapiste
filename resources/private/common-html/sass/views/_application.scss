@@ -400,6 +400,11 @@
     margin-left: 15px;
   }
 
+  .context-error {
+    max-width: 820px;
+    word-wrap: break-word;
+  }
+
   // With these, making table's attachment list scrollable
 
   $table_body_height: 200px;
