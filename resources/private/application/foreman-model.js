@@ -62,14 +62,16 @@ LUPAPISTE.ForemanModel = function() {
         data.displayName = ko.pureComputed(function() {
           var output = data.id;
           if (data.firstName || data.lastName) {
-            output += " - ";
+            output += " ";
             output += data.lastName ? data.lastName : "";
             if (data.lastName) {
               output += " ";
             }
             output += data.firstName ? data.firstName : ""
           }
-          output += " (" + data.displayRole + ")";
+          if (data.displayRole) {
+            output += " (" + data.displayRole + ")";
+          }
           return output;
         });
         self.foremanApplications.push(data);
@@ -164,10 +166,6 @@ LUPAPISTE.ForemanModel = function() {
     self.error(undefined);
     LUPAPISTE.ModalDialog.open("#dialog-invite-foreman");
   };
-
-  self.linkForeman = function(taskId, foremanId) {
-    console.log("link foreman");
-  }
 
   self.openApplication = function(id) {
     window.location.hash = "!/application/" + id;
