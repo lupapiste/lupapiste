@@ -453,7 +453,7 @@
 (defcommand set-attachment-not-needed
   {:parameters [id attachmentId notNeeded]
    :user-roles #{:applicant :authority}
-   :states     [:draft :open]}
+   :states     [:draft :open :submitted]}
   [{:keys [created] :as command}]
   (attachment/update-attachment-key command attachmentId :notNeeded notNeeded created :set-app-modified? true :set-attachment-modified? false)
   (ok))

@@ -18,4 +18,8 @@ Poikkari default subtype = poikkeamislupa
 Change permit subtype
   Select From List By Value  permitSubtypeSelect  suunnittelutarveratkaisu
   Wait Until Element Is Visible  permitSubtypeSaveIndicator
+  Go to page  applications
+  Open application  ${appname}  753-416-25-33
+  Wait Until  Page Should Contain  Poikkeamisen hakeminen
+  List Selection Should Be  permitSubtypeSelect  suunnittelutarveratkaisu
   [Teardown]  Logout
