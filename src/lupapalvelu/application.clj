@@ -253,7 +253,7 @@
     (array-map :lastName 1, :firstName 1)))
 
 (defquery application
-  {:user-roles #{:applicant :authority}
+  {:user-roles #{:applicant :authority :oirAuthority}
    :states           action/all-states
    :user-authz-roles action/all-authz-roles
    :parameters       [:id]}

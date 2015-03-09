@@ -49,7 +49,7 @@
 
 (defcommand add-comment
   {:parameters [id text target roles]
-   :user-roles #{:applicant :authority}
+   :user-roles #{:applicant :authority :oirAuthority}
    :states     (action/all-states-but [:canceled])
    :user-authz-roles action/all-authz-writer-roles
    :pre-checks [applicant-cant-set-to]

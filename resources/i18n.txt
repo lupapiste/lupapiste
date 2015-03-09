@@ -27,5 +27,5 @@ attachmentType.kiinteiston_hallinta.yhtiojarjestys: Yhtiöjärjestys
 attachmentType.kiinteiston_hallinta.ote_osakeyhtion_yhtiokokouksen_poytakirjasta: Ote osakeyhtiö yhtiökokouksen pöytäkirjasta
 attachmentType.kiinteiston_hallinta.ote_osakeyhtion_hallituksen_kokouksen_poytakirjasta: Ote osakeyhtiön hallituksen kokouksen pöytäkirjasta
 
-
+oirAuthority: Viranomainen
 
