@@ -15,7 +15,6 @@ LUPAPISTE.ForemanModel = function() {
     return self.email() && !util.isValidEmailAddress(self.email());
   });
   self.foremanApplications = ko.observableArray();
-  self.selectedForeman = ko.observable();
   self.foremanTasks = ko.observableArray([]);
   self.finished = ko.observable(false);
   self.foremanRoles = ko.observable(LUPAPISTE.config.foremanRoles);
@@ -30,10 +29,6 @@ LUPAPISTE.ForemanModel = function() {
     return _.filter(self.foremanApplications(), function(app) {
       return !_.contains(self.linkedForemanApps(), app.id);
     });
-  });
-
-  self.selectedForeman.subscribe(function(val) {
-    console.log("selectedForeman in foreman model", val);
   });
 
   self.refresh = function(application) {
@@ -74,6 +69,7 @@ LUPAPISTE.ForemanModel = function() {
             }
             output += data.firstName ? data.firstName : ""
           }
+          output += " (" + data.displayRole + ")";
           return output;
         });
         self.foremanApplications.push(data);
@@ -117,8 +113,8 @@ LUPAPISTE.ForemanModel = function() {
               self.finished(true);
               repository.load(self.application().id);
             })
-            .error(function() {
-              console.log("error");
+            .error(function(err) {
+              self.error(err.text);
             })
             .call();
         });
@@ -166,7 +162,6 @@ LUPAPISTE.ForemanModel = function() {
     self.email(undefined);
     self.finished(false);
     self.error(undefined);
-    self.selectedForeman(undefined);
     LUPAPISTE.ModalDialog.open("#dialog-invite-foreman");
   };
 
@@ -269,34 +264,17 @@ LUPAPISTE.ForemanModel = function() {
         .call();
     }
 
-    if (self.selectedForeman()) {
-      ajax
-        .command("link-foreman-task", { id: self.application().id,
-                                        taskId: self.taskId() ? self.taskId() : "",
-                                        foremanAppId: self.selectedForeman()})
-        .processing(self.processing)
-        .pending(self.pending)
-        .success(function(data) {
-          // tallennettu-indikaattori
-          self.finished(self.application().id);
-        })
-        .error(function() {
-          console.log("error");
-        })
-        .call();
-
+    // 1. invite foreman to current application
+    if (self.email()) {
+      inviteToApplication({
+                id: self.application().id,
+                email: self.email(),
+                role: "foreman"
+              }, createApplication);
     } else {
-      // 1. invite foreman to current application
-      if (self.email()) {
-        inviteToApplication({
-                  id: self.application().id,
-                  email: self.email(),
-                  role: "foreman"
-                }, createApplication);
-      } else {
-        createApplication();
-      }
+      createApplication();
     }
+
     return false;
   };
 

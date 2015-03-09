@@ -1201,8 +1201,6 @@
           <!-- /ko -->
           <!-- ko ifnot: finished -->
           <form>
-            <label for="foreman-selection" data-bind="ltext: 'foreman.selectForeman'"></label>
-            <!-- ko ifnot: selectedForeman -->
             <p data-bind="lhtml: 'invite.foreman.desc'" class="dialog-desc-wide"></p>
             <label for="foreman-role" data-bind="ltext: 'foreman.role'"></label>
             <select name="foreman-role" class="form-input combobox long"
@@ -1214,7 +1212,6 @@
 
             <label data-bind="ltext: 'userinfo.email'" class="form-label" for="invite-foreman-email"></label>
             <input class="form-input text long" id="invite-foreman-email" type="text" data-bind="textInput: email" autofocus></input>
-            <!-- /ko -->
             <div data-bind="visible: error" >
               <div data-bind="ltext: error" class="context-error"></div>
             </div>
