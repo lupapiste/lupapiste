@@ -29,15 +29,19 @@
     self.edit   = function(neighbor) {
       editModel.init(neighbor).edit().openEdit();
     };
+
     self.add    = function() {
       editModel.init().edit().openEdit();
     };
+
     self.click  = function(x, y) {
       ownersModel.init().search(x, y).openOwners();
     };
+
     self.done = function() {
       window.location.hash = "!/application/" + applicationId + "/statement";
     };
+
     self.remove = function(neighbor) {
       self.neighborId(neighbor.id);
       LUPAPISTE.ModalDialog.showDynamicYesNo(
@@ -62,10 +66,10 @@
     var self = this;
 
     self.status = ko.observable();
-    self.statusInit             = 0;
-    self.statusSearchPropertyId = 1;
-    self.statusSearchOwners     = 2;
-    self.statusSelectOwners     = 3;
+    self.statusInit                   = 0;
+    self.statusSearchPropertyId       = 1;
+    self.statusSearchOwners           = 2;
+    self.statusSelectOwners           = 3;
     self.statusOwnersSearchFailed     = 4;
     self.statusPropertyIdSearchFailed = 5;
 
@@ -120,7 +124,6 @@
     };
 
     self.ownersFound = function(data) {
-      console.log("owners", data);
       return self.owners(_.map(data.owners, convertOwner)).status(self.statusSelectOwners);
     };
 
@@ -209,6 +212,7 @@
       var neighbor = n || {},
           owner = neighbor.owner || {},
           address = owner.address || {};
+
       return self
         .status(self.statusInit)
         .id(applicationId)
@@ -242,26 +246,25 @@
     self.pending = ko.observable(false);
 
     self.typeLabel = ko.computed(function() {
-        var t = self.type();
-        if (t) {
-          return loc(["neighbors.owner.type", t]);
-        } else {
-          return null;
-        }
+      var t = self.type();
+      if (t) {
+        return loc(["neighbors.owner.type", t]);
+      } else {
+        return null;
+      }
     }, self);
 
     self.editablePropertyId = ko.computed({
-        read: function() {
-            return util.prop.toHumanFormat(self.propertyId());
-        },
-        write: function(newValue) {
-          if (util.prop.isPropertyId(newValue)) {
-            self.propertyId(util.prop.toDbFormat(newValue));
-          }
-        },
-        owner: self
+      read: function() {
+        return util.prop.toHumanFormat(self.propertyId());
+      },
+      write: function(newValue) {
+        if (util.prop.isPropertyId(newValue)) {
+          self.propertyId(util.prop.toDbFormat(newValue));
+        }
+      },
+      owner: self
     });
-
 
     self.propertyIdOk = ko.computed(function() { return util.prop.isPropertyId(self.propertyId()); });
     self.emailOk = ko.computed(function() { return _.isBlank(self.email()) || util.isValidEmailAddress(self.email()); });
@@ -279,7 +282,6 @@
         .call();
       return self;
     };
-
   }
 
   var model = new Model();
