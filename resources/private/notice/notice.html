@@ -6,7 +6,7 @@
 
       <div class="application-urgency">
         <label data-bind="ltext: 'notice.urgency'"></label>
-        <span class="save-indicator" data-bind="saveIndicator: indicator, name: 'urgency', type:'saved'"></span>
+        <span data-bind="saveIndicator: indicator, name: 'urgency'"></span>
         <select data-test-id="notice-urgency-select" data-bind="options: availableUrgencyStates,
                            value: urgency,
                            optionsText: function(item) {
@@ -20,7 +20,7 @@
           <span data-bind="ltext: 'notice.prompt'"/>
           <span class="notice-prompt-info" data-bind="ltext: 'notice.prompt.info'"/>
         </label>
-        <span data-bind="saveIndicator: indicator, name: 'notice', type:'saved'"></span>
+        <span data-bind="saveIndicator: indicator, name: 'notice'"></span>
       </div>
 
       <div class="textarea-wrapper">

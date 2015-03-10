@@ -114,11 +114,11 @@ LUPAPISTE.ForemanModel = function() {
                                             taskId: data.taskId,
                                             foremanAppId: val ? val : ""})
             .success(function(res) {
-              self.indicator("saved");
+              self.indicator({type: "saved"});
               repository.load(self.application().id);
             })
             .error(function(err) {
-              self.indicator("err");
+              self.indicator({type: "err"});
               self.error(err.text);
             })
             .call();

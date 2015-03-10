@@ -207,18 +207,21 @@
     update: function(element, valueAccessor, allBindingsAccessor) {
       var value = ko.utils.unwrapObservable(valueAccessor());
       var bindings = ko.utils.unwrapObservable(allBindingsAccessor());
-      var type = ko.unwrap(bindings.type);
       var name = bindings.name;
-      if (type) {
-        $(element).addClass("form-input-" + type);
+      var type = value ? (value.type ? ko.unwrap(value.type) : "saved") : undefined;
+      var valueName = value ? ko.unwrap(value.name) : undefined;
+
+      if (_.isString(value)) {
+        valueName = value;
       }
-      if (value && value === name || value && name === undefined) {
+
+      $(element).addClass("form-input-" + type);
+
+      if (value && valueName === name || value && name === undefined) {
         $(element).fadeIn(200);
         setTimeout(function() {
           $(element).fadeOut(200, function() {
-            if (type) {
-              $(element).removeClass("form-input-" + type);
-            }
+            $(element).removeClass("form-input-" + type);
           });
         }, 4000);
       }
