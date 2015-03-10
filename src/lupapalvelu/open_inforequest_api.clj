@@ -14,7 +14,7 @@
     {:id (str "oir-" organization-id "-" email)
      :email email
      :enabled true
-     :role "authority"
+     :role "oirAuthority"
      :oir true
      :organizations [organization-id]
      :firstName ""
@@ -46,8 +46,6 @@
                             (fail :error.command-illegal-state)) ; too lazy to come up with new error msg...
                           (fail :error.unknown-organization)))]}
   [_]
-  (println "dp.applications.update(" {:orgazation organizationId
-             :infoRequest true} ", " {$set {:openInfoRequest false}} ")")
   (let [n (mongo/update-by-query :applications
             {:organization organizationId
              :openInfoRequest true}
