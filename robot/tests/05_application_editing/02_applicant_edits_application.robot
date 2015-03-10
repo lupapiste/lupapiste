@@ -63,19 +63,33 @@ Mikko removes apartment
   Wait Until  Element Should Not Be Visible  xpath=//tr[@data-repeating-id-huoneistot='0']
   Xpath Should Match X Times  //div[@id='application-info-tab']//tr[@data-repeating-id="huoneistot"]  1
 
+Mikko can't set "other" building material
+  Wait Until  Element should be visible  //section[@id='application']//div[@id='application-info-tab']//select[@data-docgen-path='rakenne.kantavaRakennusaine']
+  Wait Until  Element should not be visible  //section[@id='application']//div[@id='application-info-tab']//input[@data-docgen-path='rakenne.muuRakennusaine']
+
+Mikko selects building material 'other':
+  Select From List  //section[@id='application']//div[@id='application-info-tab']//select[@name='rakenne.kantavaRakennusaine']  other
+  Wait Until  Element should be visible  //section[@id='application']//div[@id='application-info-tab']//input[@data-docgen-path='rakenne.muuRakennusaine']
+  Input text  //section[@id='application']//div[@id='application-info-tab']//input[@data-docgen-path='rakenne.muuRakennusaine']  Purukumilla ajattelin
+
+On the second thought, set material to 'puu':
+  Select From List  //section[@id='application']//div[@id='application-info-tab']//select[@name='rakenne.kantavaRakennusaine']  puu
+  Wait Until  Element should not be visible  //section[@id='application']//div[@id='application-info-tab']//input[@data-docgen-path='rakenne.muuRakennusaine']
+
 Mikko goes to parties tab of an application
   Open tab  parties
 
 Mikko unsubscribes notifications
-  Xpath Should Match X Times  //div[@id='application-parties-tab']//a[contains(text(),'Peruuta sähköposti-ilmoitukset')]  1
-  Click Link   Peruuta sähköposti-ilmoitukset
-  Wait Until  Element should not be visible  xpath=//div[@id='application-parties-tab']//a[contains(text(),'Peruuta sähköposti-ilmoitukset')]
-  Wait Until  Element should be visible  xpath=//div[@id='application-parties-tab']//a[contains(text(),'Tilaa sähköposti-ilmoitukset')]
+  Xpath Should Match X Times  //div[@id='application-parties-tab']//a[@data-test-id='unsubscribeNotifications']  1
+  Wait Until  Element should be visible  xpath=//div[@id='application-parties-tab']//a[@data-test-id='unsubscribeNotifications']
+  Click by test id  unsubscribeNotifications
+  Wait Until  Element should not be visible  xpath=//div[@id='application-parties-tab']//a[@data-test-id='unsubscribeNotifications']
+  Wait Until  Element should be visible  xpath=//div[@id='application-parties-tab']//a[@data-test-id='subscribeNotifications']
 
 Mikko subscribes notifications
-  Click Link  Tilaa sähköposti-ilmoitukset
-  Wait Until  Element should not be visible  xpath=//div[@id='application-parties-tab']//a[contains(text(),'Tilaa sähköposti-ilmoitukset')]
-  Wait Until  Element should be visible  xpath=//div[@id='application-parties-tab']//a[contains(text(),'Peruuta sähköposti-ilmoitukset')]
+  Click by test id  subscribeNotifications
+  Wait Until  Element should not be visible  xpath=//div[@id='application-parties-tab']//a[@data-test-id='subscribeNotifications']
+  Wait Until  Element should be visible  xpath=//div[@id='application-parties-tab']//a[@data-test-id='unsubscribeNotifications']
 
 Mikko decides to delete maksaja
   Set Suite Variable  ${maksajaXpath}  //section[@id='application']//div[@id='application-parties-tab']//section[@data-doc-type='maksaja']
@@ -98,13 +112,13 @@ Mikko adds party maksaja using dialog
 Mikko adds party hakija using button
   Set Suite Variable  ${hakijaXpath}  //section[@id='application']//div[@id='application-parties-tab']//section[@data-doc-type='hakija']
   Wait until  Xpath Should Match X Times  ${hakijaXpath}  1
-  Click element  hakija_append_btn
+  Click enabled by test id  hakija_append_btn
   Wait until  Xpath Should Match X Times  ${hakijaXpath}  2
 
 Mikko changes application address
   Page should not contain  ${newName}
   Element should be visible  xpath=//section[@id='application']//a[@data-test-id='change-location-link']
-  Click element  xpath=//section[@id='application']//a[@data-test-id='change-location-link']
+  Click by test id  change-location-link
   Input text by test id  application-new-address  ${newName}
   Click enabled by test id  change-location-save
   Wait Until  Page should contain  ${newName}

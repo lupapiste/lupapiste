@@ -196,8 +196,12 @@
   ko.bindingHandlers.saveIndicator = {
     init: function(element, valueAccessor, allBindingsAccessor) {
       var bindings = ko.utils.unwrapObservable(allBindingsAccessor());
+      var text$ = $("<span>").addClass("text");
+      $(element).addClass('form-indicator');
+      $(element).append(text$);
+      $(element).append($("<span>").addClass("icon"));
       if (bindings.label !== false) {
-        $(element).text(loc("form.saved"));
+        text$.text(loc("form.saved"));
       }
     },
     update: function(element, valueAccessor, allBindingsAccessor) {

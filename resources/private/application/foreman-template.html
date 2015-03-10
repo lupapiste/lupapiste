@@ -8,6 +8,7 @@
         <p data-bind="lhtml: 'help.AddForeman'"></p>
         <ul class="invited-foremans" data-bind="foreach: foremanApplications" data-test-id="invited-foremans">
           <li class="foreman">
+            <span class="foreman-role" data-bind="text: $data.displayRole"></span>
             <span class="foreman-name" data-bind="fullName: $data"></span>
             <span class="foreman-email" data-bind="text: $data.email ? '(' + $data.email + ')' : ''" data-test-id="foreman-email"></span>
             <a data-bind="attr: {href: '#!/application/' + $data.id}">
@@ -25,7 +26,10 @@
       <div>
         <table data-test-id="tasks-foreman" class="tasks-foreman" data-bind="with: $data.foremanTasks">
           <thead>
-            <tr><td colspan="4"><h2 data-bind="text: $data.name" style="padding-top:1em"></h2>
+            <tr>
+              <td colspan="4">
+                <h2 data-bind="ltext: 'foreman.requiredForemen'" style="padding-top:1em"></h2>
+                <span class="save-indicator" data-bind="saveIndicator: $parent.indicator, type: 'saved'"></span>
                 <div class="task-legend">
                   <span class="ok icon"></span>
                   <span data-bind="ltext: 'foreman.task.ok.title'"></span>
@@ -42,9 +46,10 @@
             </tr>
             <tr>
               <th data-bind="ltext: 'application.taskState'"></th>
-              <th colspan="3" data-bind="ltext: 'application.taskDisplayName'"></th>
+              <th colspan="3" data-bind="ltext: 'osapuoli.tyonjohtaja.kuntaRoolikoodi._group_label'"></th>
+            </tr>
           </thead>
-          <tbody data-bind="foreach: $data.foremans">
+          <tbody data-bind="foreach: $data.foremen">
             <tr data-bind="attr: {'data-test-name': $data.name}">
               <td class="task-state">
                 <span data-bind="attr: {'class': statusName + ' icon', 'data-test-state': $data.state, 'title': loc(['foreman', 'task', statusName, 'title'])}"></span>
@@ -53,15 +58,21 @@
                 <span data-bind="text: $data.name"></span>
               </td>
               <td data-bind="attr: {'data-test-col-name': 'foreman-name-or-invite'}">
-                <!-- ko if: $data.id -->
-                <span data-bind="fullName: $data"></span>
-                <span data-test-id="tasks-foreman-email" data-bind="text: $data.email ? '(' + $data.email + ')' : ''"></span>
-                <!-- /ko -->
-                <!-- ko ifnot: $data.id -->
-                <a class="add-foreman" data-bind="click: function() { $parents[1].inviteForeman($data.taskId); }">
+                <select
+                  id="foreman-selection"
+                  name="foreman-selection"
+                  class="form-input combobox long"
+                  data-bind="options: $data.selectableForemen,
+                             optionsText: 'displayName',
+                             optionsValue: 'id',
+                             optionsCaption: loc('choose'),
+                             value: $data.selectedForeman">
+                </select>
+
+                <a class="add-foreman" data-bind="visible: !$data.selectedForeman(),
+                                                  click: function() { $parents[1].inviteForeman($data.taskId); }">
                   <span data-bind="ltext: 'application.parties.addForeman'"></span>
                 </a>
-                <!-- /ko -->
               </td>
               <td>
                 <a data-bind="attr: {href: '#!/application/' + $data.id}">

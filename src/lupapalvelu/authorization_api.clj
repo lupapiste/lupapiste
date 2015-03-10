@@ -21,7 +21,7 @@
 ;;
 
 (defquery invites
-  {:roles [:applicant :authority]}
+  {:user-roles #{:applicant :authority}}
   [{{:keys [id]} :user}]
   (let [common     {:auth {$elemMatch {:invite.user.id id}}}
         query      {$and [common {:state {$ne :canceled}}]}
@@ -29,44 +29,45 @@
         invites    (filter #(= id (get-in % [:user :id])) (map :invite (mapcat :auth data)))]
     (ok :invites invites)))
 
-(defn- create-invite-model [command conf recipient]
+(defn- create-invite-email-model [command conf recipient]
   (assoc (notifications/create-app-model command conf recipient)
     :message (get-in command [:data :text])
     :recipient-email (:email recipient)))
 
 (notifications/defemail :invite  {:recipients-fn :recipients
-                                  :model-fn create-invite-model})
+                                  :model-fn create-invite-email-model})
 
 (defn- valid-role [role]
   (#{:writer :foreman} (keyword role)))
 
-(defn- create-invite [command id email text documentName documentId path role]
+(defn- create-invite-auth [inviter invited application-id text document-name document-id path role timestamp]
+  (let [invite {:application  application-id
+                :text         text
+                :path         path
+                :documentName document-name
+                :documentId   document-id
+                :created      timestamp
+                :email        (:email invited)
+                :role         role
+                :user         (user/summary invited)
+                :inviter      (user/summary inviter)}]
+    (assoc (user/user-in-role invited :reader) :invite invite)))
+
+(defn- send-invite! [command application-id email text document-name document-id path role]
   {:pre [(valid-role role)]}
   (let [email (user/canonize-email email)
-        {created :created user :user application :application} command]
-    (if (domain/invite application email)
+        {timestamp :created inviter :user application :application} command
+        existing-user (user/get-user-by-email email)]
+    (if (or (domain/invite application email) (domain/has-auth? application (:id existing-user)))
       (fail :invite.already-has-auth)
-      (let [invited (user-api/get-or-create-user-by-email email user)
-            invite  {:application  id
-                     :text         text
-                     :path         path
-                     :documentName documentName
-                     :documentId   documentId
-                     :created      created
-                     :email        email
-                     :user         (user/summary invited)
-                     :inviter      (user/summary user)}
-            writer  (user/user-in-role invited (keyword role))
-            auth    (assoc writer :invite invite)]
-        (if (domain/has-auth? application (:id invited))
-          (fail :invite.already-has-auth)
-          (do
-            (update-application command
-              {:auth {$not {$elemMatch {:invite.user.username email}}}}
-              {$push {:auth     auth}
-               $set  {:modified created}})
-            (notifications/notify! :invite (assoc command :recipients [invited]))
-            (ok)))))))
+      (let [invited (user-api/get-or-create-user-by-email email inviter)
+            auth    (create-invite-auth inviter invited application-id text document-name document-id path role timestamp)]
+        (update-application command
+          {:auth {$not {$elemMatch {:invite.user.username (:email invited)}}}}
+          {$push {:auth     auth}
+           $set  {:modified timestamp}})
+        (notifications/notify! :invite (assoc command :recipients [invited]))
+        (ok)))))
 
 (defn- role-validator [{{role :role} :data}]
   (when-not (valid-role role)
@@ -78,19 +79,20 @@
                       action/email-validator
                       role-validator]
    :states     (action/all-application-states-but [:closed :canceled])
-   :roles      [:applicant :authority]
+   :user-roles #{:applicant :authority}
    :notified   true}
   [command]
-  (create-invite command id email text documentName documentId path role))
+  (send-invite! command id email text documentName documentId path role))
 
 (defcommand approve-invite
   {:parameters [id]
-   :roles      [:applicant]
+   :user-roles #{:applicant}
+   :user-authz-roles action/default-authz-reader-roles
    :states     (action/all-application-states-but [:closed :canceled])}
   [{:keys [created user application] :as command}]
   (when-let [my-invite (domain/invite application (:email user))]
 
-    (let [role (:role (domain/get-auth application (:id user)))]
+    (let [role (or (:role my-invite) (:role (domain/get-auth application (:id user))))]
       (update-application command
         {:auth {$elemMatch {:invite.user.id (:id user)}}}
         {$set {:modified created
@@ -127,7 +129,8 @@
 
 (defcommand decline-invitation
   {:parameters [:id]
-   :roles [:applicant :authority]
+   :user-roles #{:applicant :authority}
+   :user-authz-roles action/default-authz-reader-roles
    :states     (action/all-application-states-but [:canceled])}
   [command]
   (do-remove-auth command (get-in command [:user :email])))
@@ -139,7 +142,7 @@
 (defcommand remove-auth
   {:parameters [:id username]
    :input-validators [(partial action/non-blank-parameters [:username])]
-   :roles      [:applicant :authority]
+   :user-roles #{:applicant :authority}
    :states     (action/all-application-states-but [:canceled])}
   [command]
   (do-remove-auth command username))
@@ -155,14 +158,14 @@
 
 (defcommand unsubscribe-notifications
   {:parameters [:id :username]
-   :roles [:applicant :authority]
+   :user-roles #{:applicant :authority}
    :states all-application-states}
   [command]
   (manage-unsubscription command true))
 
 (defcommand subscribe-notifications
   {:parameters [:id :username]
-   :roles [:applicant :authority]
+   :user-roles #{:applicant :authority}
    :states all-application-states}
   [command]
   (manage-unsubscription command false))

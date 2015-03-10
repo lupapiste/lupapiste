@@ -17,17 +17,30 @@
 ;; local api
 ;;
 
+(def scope-skeleton
+  {:permitType nil
+   :municipality nil
+   :inforequest-enabled false
+   :new-application-enabled false
+   :open-inforequest false
+   :open-inforequest-email ""
+   :opening nil})
+
+(defn- with-scope-defaults [org]
+  (when (seq org)
+    (update-in org [:scope] #(map (fn [s] (merge scope-skeleton s)) %))))
+
 (defn get-organizations
   ([]
     (get-organizations {}))
   ([query]
-    (mongo/select :organizations query))
+    (map with-scope-defaults (mongo/select :organizations query)))
   ([query projection]
-    (mongo/select :organizations query projection)))
+    (map with-scope-defaults (mongo/select :organizations query projection))))
 
 (defn get-organization [id]
   {:pre [(not (s/blank? id))]}
-  (mongo/by-id :organizations id))
+  (with-scope-defaults (mongo/by-id :organizations id)))
 
 (defn update-organization [id changes]
   {:pre [(not (s/blank? id))]}
@@ -132,14 +145,14 @@
 ;;
 
 (defquery users-in-same-organizations
-  {:roles [:authority]}
+  {:user-roles #{:authority}}
   [{user :user}]
   ;; TODO toimiiko jos jompi kumpi user on kahdessa organisaatiossa?
   (ok :users (map user/summary (mongo/select :users {:organizations {$in (:organizations user)}}))))
 
 (defquery organization-by-user
   {:description "Lists all organization users by organization."
-   :roles [:authorityAdmin]}
+   :user-roles #{:authorityAdmin}}
   [{{:keys [organizations]} :user}]
   (let [orgs (get-organizations {:_id {$in organizations}})
         organization (first orgs)
@@ -157,7 +170,7 @@
                 inforequestEnabled applicationEnabled openInforequestEnabled openInforequestEmail
                 opening]
    :input-validators [permit/permit-type-validator]
-   :roles [:admin]}
+   :user-roles #{:admin}}
   [_]
   (mongo/update-by-query :organizations
       {:scope {$elemMatch {:permitType permitType :municipality municipality}}}
@@ -171,7 +184,7 @@
 (defcommand add-organization-link
   {:description "Adds link to organization."
    :parameters [url nameFi nameSv]
-   :roles [:authorityAdmin]}
+   :user-roles #{:authorityAdmin}}
   [{{:keys [organizations]} :user}]
   (update-organization (first organizations) {$push {:links {:name {:fi nameFi :sv nameSv} :url url}}})
   (ok))
@@ -179,7 +192,7 @@
 (defcommand update-organization-link
   {:description "Updates organization link."
    :parameters [url nameFi nameSv index]
-   :roles [:authorityAdmin]}
+   :user-roles #{:authorityAdmin}}
   [{{:keys [organizations]} :user}]
   (update-organization (first organizations) {$set {(str "links." index) {:name {:fi nameFi :sv nameSv} :url url}}})
   (ok))
@@ -187,25 +200,25 @@
 (defcommand remove-organization-link
   {:description "Removes organization link."
    :parameters [nameFi nameSv url]
-   :roles [:authorityAdmin]}
+   :user-roles #{:authorityAdmin}}
   [{{:keys [organizations]} :user}]
   (update-organization (first organizations) {$pull {:links {:name {:fi nameFi :sv nameSv} :url url}}})
   (ok))
 
 (defquery organizations
-  {:roles [:admin]}
+  {:user-roles #{:admin}}
   [_]
   (ok :organizations (get-organizations)))
 
 (defquery organization-by-id
   {:parameters [organizationId]
-   :roles [:admin]}
+   :user-roles #{:admin}}
   [_]
   (get-organization organizationId))
 
 (defquery municipalities-with-organization
   {:description "Returns a list of municipality IDs that are affiliated with Lupapiste."
-   :roles [:applicant :authority]}
+   :user-roles #{:applicant :authority}}
   [_]
   (let [munis (municipalities-with-organization)]
     (ok
@@ -214,7 +227,7 @@
 
 (defquery municipality-active
   {:parameters [municipality]
-   :roles      [:anonymous]}
+   :user-roles #{:anonymous}}
   [_]
   (let [organizations (get-organizations {:scope.municipality municipality})
         scopes (->> organizations
@@ -229,7 +242,7 @@
 (defquery all-operations-for-organization
   {:description "Returns operations that match the permit types of the organization whose id is given as parameter"
    :parameters [organizationId]
-   :roles [:authorityAdmin]
+   :user-roles #{:authorityAdmin}
    :input-validators [(partial non-blank-parameters [:organizationId])]}
   (when-let [org (get-organization organizationId)]
     (ok :operations (operations/organization-operations org))))
@@ -238,7 +251,7 @@
   {:description "Returns selected operations of all the organizations who have a scope with the given municipality.
                  If a \"permitType\" parameter is given, returns selected operations for only that organization (the municipality + permitType combination)."
    :parameters [:municipality]
-   :roles [:applicant :authority :authorityAdmin]
+   :user-roles #{:applicant :authority :authorityAdmin}
    :input-validators [(partial non-blank-parameters [:municipality])]}
   [{{:keys [municipality permitType]} :data}]
   (when-let [organizations (resolve-organizations municipality permitType)]
@@ -247,7 +260,7 @@
 (defquery addable-operations
   {:description "returns operations addable for the application whose id is given as parameter"
    :parameters  [:id]
-   :roles       [:applicant :authority]
+   :user-roles #{:applicant :authority}
    :states      [:draft :open :submitted :complement-needed]}
   [{{:keys [organization permitType]} :application}]
   (when-let [org (get-organization organization)]
@@ -257,7 +270,7 @@
 (defquery organization-details
   {:description "Resolves organization based on municipality and selected operation."
    :parameters [municipality operation]
-   :roles [:applicant :authority]}
+   :user-roles #{:applicant :authority}}
   [_]
   (let [permit-type (:permit-type ((keyword operation) operations/operations))]
     (if-let [organization (resolve-organization municipality permit-type)]
@@ -271,7 +284,7 @@
 
 (defcommand set-organization-selected-operations
   {:parameters [operations]
-   :roles [:authorityAdmin]
+   :user-roles #{:authorityAdmin}
    :input-validators  [(partial non-blank-parameters [:operations])
                        (partial vector-parameters [:operations])]}
   [{{:keys [organizations]} :user}]
@@ -280,7 +293,7 @@
 
 (defcommand organization-operations-attachments
   {:parameters [operation attachments]
-   :roles [:authorityAdmin]}
+   :user-roles #{:authorityAdmin}}
   [{{:keys [organizations]} :user}]
   ; FIXME: validate operation and attachments
   (update-organization (first organizations) {$set {(str "operations-attachments." operation) attachments}})
@@ -288,7 +301,7 @@
 
 (defcommand set-organization-app-required-fields-filling-obligatory
   {:parameters [isObligatory]
-   :roles [:authorityAdmin]
+   :user-roles #{:authorityAdmin}
    :input-validators  [(partial non-blank-parameters [:isObligatory])
                        (partial boolean-parameters [:isObligatory])]}
   [{{:keys [organizations]} :user}]
@@ -296,7 +309,7 @@
   (ok))
 
 (defquery krysp-config
-  {:roles [:authorityAdmin]}
+  {:user-roles #{:authorityAdmin}}
   [{{:keys [organizations]} :user}]
   (let [organization-id (first organizations)]
     (if-let [organization (get-organization organization-id)]
@@ -306,7 +319,7 @@
 
 (defcommand set-krysp-endpoint
   {:parameters [url permitType version]
-   :roles      [:authorityAdmin]
+   :user-roles #{:authorityAdmin}
    :input-validators [permit/permit-type-validator]}
   [{{:keys [organizations] :as user} :user}]
   (if (or (s/blank? url) (krysp/wfs-is-alive? url))
@@ -316,7 +329,7 @@
 
 (defcommand set-kopiolaitos-info
   {:parameters [kopiolaitosEmail kopiolaitosOrdererAddress kopiolaitosOrdererPhone kopiolaitosOrdererEmail]
-   :roles [:authorityAdmin]}
+   :user-roles #{:authorityAdmin}}
   [{{:keys [organizations]} :user}]
   (update-organization (first organizations) {$set {:kopiolaitos-email kopiolaitosEmail
                                                     :kopiolaitos-orderer-address kopiolaitosOrdererAddress
@@ -325,7 +338,7 @@
   (ok))
 
 (defquery kopiolaitos-config
-  {:roles [:authorityAdmin]}
+  {:user-roles #{:authorityAdmin}}
   [{{:keys [organizations]} :user}]
   (let [organization-id (first organizations)]
     (if-let [organization (get-organization organization-id)]

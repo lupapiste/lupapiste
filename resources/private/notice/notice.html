@@ -3,20 +3,25 @@
 <body>
   <section class="page container" id="notices">
     <script type="text/html" id="notice-template">
+
       <div class="application-state">
         <label data-bind="ltext: 'notice.urgency'"></label>
-        <span class="save-indicator" data-bind="saveIndicator: indicator, name: 'urgency'"></span>
+        <span class="save-indicator" data-bind="saveIndicator: indicator, name: 'urgency', type:'saved'"></span>
         <select data-test-id="notice-urgency-select" data-bind="options: availableUrgencyStates,
                            value: urgency,
                            optionsText: function(item) {
                              return loc(['notice', 'urgency', item]);
                            }"></select>
       </div>
-      <label>
-        <span data-bind="ltext: 'notice.prompt'"/>
-        (<span data-bind="ltext: 'notice.prompt.info'"/>):
-      </label>
-      <span class="save-indicator" data-bind="saveIndicator: indicator, name: 'notice'"></span>
+
+      <div style="position: relative;">
+        <label>
+          <span data-bind="ltext: 'notice.prompt'"/>
+          (<span data-bind="ltext: 'notice.prompt.info'"/>):
+        </label>
+        <span class="save-indicator" data-bind="saveIndicator: indicator, name: 'notice', type:'saved'"></span>
+      </div>
+
       <div class="textarea-wrapper">
         <textarea
           data-bind="attr: {placeholder: loc('comment.placeholder')}, textInput: authorityNotice"

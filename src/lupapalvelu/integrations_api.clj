@@ -28,10 +28,12 @@
 ;; Application approval
 ;;
 
+; TODO needs refactoring
 (defn- update-link-permit-data-with-kuntalupatunnus-from-verdict [application]
   (let [link-permit-app-id (-> application :linkPermitData first :id)
         link-permit-app (domain/get-application-no-access-checking link-permit-app-id)
         kuntalupatunnus (-> link-permit-app :verdicts first :kuntalupatunnus)]
+    ; TODO why we check only link permit data on index 0?
     (if kuntalupatunnus
       (-> application
          (assoc-in [:linkPermitData 0 :lupapisteId] link-permit-app-id)
@@ -62,7 +64,7 @@
 
 (defcommand approve-application
   {:parameters [id lang]
-   :roles      [:authority]
+   :user-roles #{:authority}
    :notified   true
    :on-success (notify :application-state-change)
    :states     [:submitted :complement-needed]}
@@ -114,7 +116,7 @@
    :input-validators [commands/validate-collection
                       (partial action/non-blank-parameters [:documentId :path])
                       (partial action/boolean-parameters [:overwrite])]
-   :roles      [:applicant :authority]
+   :user-roles #{:applicant :authority}
    :states     (action/all-application-states-but [:sent :verdictGiven :constructionStarted :closed :canceled])}
   [{created :created {:keys [organization propertyId] :as application} :application :as command}]
   (if-let [{url :url} (organization/get-krysp-wfs application)]
@@ -140,7 +142,7 @@
 
 (defcommand get-building-info-from-wfs
   {:parameters [id]
-   :roles      [:applicant :authority]
+   :user-roles #{:applicant :authority}
    :states     (action/all-application-states-but [:sent :verdictGiven :constructionStarted :closed :canceled])}
   [{{:keys [organization propertyId] :as application} :application}]
   (if-let [{url :url} (organization/get-krysp-wfs application)]
@@ -159,7 +161,7 @@
 
 (defcommand application-to-asianhallinta
   {:parameters [id lang]
-   :roles      [:authority]
+   :user-roles #{:authority}
    :notified   true
    :on-success (notify :application-state-change)
    :pre-checks [has-asianhallinta-operation]

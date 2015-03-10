@@ -33,13 +33,15 @@ LUPAPISTE.ChangeLocationModel = function() {
   self.y = 0;
   self.address = ko.observable("");
   self.propertyId = ko.observable("");
+  self.propertyIdValidated = ko.observable(true);
   self.propertyIdAutoUpdated = true;
   self.errorMessage = ko.observable(null);
   self.processing = ko.observable();
   self.pending = ko.observable();
 
+
   self.ok = ko.computed(function() {
-    return util.prop.isPropertyId(self.propertyId()) && self.address();
+    return util.prop.isPropertyId(self.propertyId()) && self.address() && self.propertyIdValidated();
   });
 
   self.drawLocation = function() {
@@ -68,6 +70,7 @@ LUPAPISTE.ChangeLocationModel = function() {
     self.center(14);
     self.processing(false);
     self.pending(false);
+    self.propertyIdValidated(true);
   };
 
   //
@@ -100,6 +103,7 @@ LUPAPISTE.ChangeLocationModel = function() {
         self.beginUpdateRequest().searchPointByPropertyId(id);
       }
       self.propertyIdAutoUpdated = false;
+      self.propertyIdValidated(false);
     }
   });
 
@@ -116,13 +120,15 @@ LUPAPISTE.ChangeLocationModel = function() {
   };
 
   self.saveNewLocation = function() {
-    var data = {id: self.id, x: self.x, y: self.y, address: self.address(), propertyId: util.prop.toDbFormat(self.propertyId())};
-    ajax.command("change-location", data)
-      .processing(self.processing)
-      .pending(self.pending)
-      .success(self.onSuccess)
-      .error(self.onError)
-      .call();
+    if (self.ok()) {
+      var data = {id: self.id, x: self.x, y: self.y, address: self.address(), propertyId: util.prop.toDbFormat(self.propertyId())};
+      ajax.command("change-location", data)
+        .processing(self.processing)
+        .pending(self.pending)
+        .success(self.onSuccess)
+        .error(self.onError)
+        .call();
+    }
     return false;
   };
 
@@ -141,6 +147,7 @@ LUPAPISTE.ChangeLocationModel = function() {
         if (result.data && result.data.length > 0) {
           self.setXY(result.data[0].x, result.data[0].y);
           self.center();
+          self.propertyIdValidated(true);
         } else {
           self.errorMessage("error.invalid-property-id");
         }
@@ -151,6 +158,7 @@ LUPAPISTE.ChangeLocationModel = function() {
   self.searchPropertyId = function(x, y) {
     locationSearch.propertyIdByPoint(self.requestContext, x, y, function(id) {
       self.propertyId(id);
+      self.propertyIdValidated(true);
     });
     return self;
   };

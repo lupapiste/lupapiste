@@ -96,6 +96,7 @@ input[readonly], textarea[readonly] {
   top: 20px;
   right: 8px;
   padding: $marginS;
+  color: $grey-text;
   background-color: white;
   border: 1px solid $lp-light-grey;
   box-shadow: 1px 1px 2px $lp-dark-grey;
@@ -106,6 +107,7 @@ input[readonly], textarea[readonly] {
     height: 24px;
     width: 24px;
     vertical-align: top;
+    margin: 0;
   }
   .text {
     display: inline-block;
@@ -133,11 +135,6 @@ input[readonly], textarea[readonly] {
 }
 
 .save-indicator {
-  @include spite-bg;
-  background-position: 5px -2497px;
-  padding-left: 27px;
-  float: right;
-  display: none;
 }
 
 .errorPanel {

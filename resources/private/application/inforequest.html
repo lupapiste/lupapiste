@@ -9,7 +9,7 @@
           <div id="inforequest-map" class="map map-large" style="width: 320px; height: 280px;"></div>
           <div class="application-map-actions" data-bind="with: application">
             <!-- ko if: location() -->
-              <a data-bind="click: openOskariMap" class="map-search-button icon search"></a>
+              <a data-bind="click: openOskariMap, ltext:'map.open'" class="map-search-button" ></a>
             <!-- /ko -->
           </div>
         </div>
@@ -107,9 +107,7 @@
 
     <div class="container">
 
-      <!-- Cannot use ko's "visible" binding here because Openlayers would then try to incorrectly initialize the map. -->
-      <!-- Then accessing inforequest with applicant user fails with "Cannot read property 'w' of null". -->
-      <div data-bind="if: $root.authorization.ok('inforequest-markers')" class="related-map">
+      <div class="related-map">
         <div id="inforequest-marker-map" class="map map-large"></div>
         <div id="inforequest-marker-map-contents"></div>
       </div>
