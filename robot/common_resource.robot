@@ -259,6 +259,9 @@ Sipoo logs in
 Naantali logs in
   Authority-admin logs in  admin@naantali.fi  naantali  Admin Naantali
 
+Kuopio logs in
+  Authority-admin logs in  kuopio-r  kuopio  Paakayttaja-R Kuopio
+
 SolitaAdmin logs in
   Admin logs in  admin  admin  Admin Admin
   Wait until  Element should be visible  admin
