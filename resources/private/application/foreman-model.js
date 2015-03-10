@@ -59,7 +59,7 @@ LUPAPISTE.ForemanModel = function() {
                     "lastName":    lastname,
                     "name":        name,
                     "statusName":  app.state === "verdictGiven" ? "ok" : "new",
-                    "displayRole": name ? loc(['osapuoli.tyonjohtaja.kuntaRoolikoodi', name]) : ""};
+                    "displayRole": name ? loc(["osapuoli.tyonjohtaja.kuntaRoolikoodi", name]) : ""};
 
         data.displayName = ko.pureComputed(function() {
           var output = data.id;
@@ -69,7 +69,7 @@ LUPAPISTE.ForemanModel = function() {
             if (data.lastName) {
               output += " ";
             }
-            output += data.firstName ? data.firstName : ""
+            output += data.firstName ? data.firstName : "";
           }
           if (data.displayRole) {
             output += " (" + data.displayRole + ")";
@@ -94,8 +94,8 @@ LUPAPISTE.ForemanModel = function() {
 
       self.linkedForemanApps(asiointitunnukset);
       _.forEach(foremanTasks, function(task) {
-        var asiointitunnus = util.getIn(task, ["data", "asiointitunnus", "value"])
-        var linkedForemanApp = _.findWhere(self.foremanApplications(), { 'id': asiointitunnus});
+        var asiointitunnus = util.getIn(task, ["data", "asiointitunnus", "value"]);
+        var linkedForemanApp = _.findWhere(self.foremanApplications(), { "id": asiointitunnus});
 
         var data = { "name": task.taskname,
                      "taskId": task.id,
@@ -113,12 +113,12 @@ LUPAPISTE.ForemanModel = function() {
             .command("link-foreman-task", { id: self.application().id,
                                             taskId: data.taskId,
                                             foremanAppId: val ? val : ""})
-            .success(function(res) {
-              self.indicator("saved");
+            .success(function() {
+              self.indicator({type: "saved"});
               repository.load(self.application().id);
             })
             .error(function(err) {
-              self.indicator("err");
+              self.indicator({type: "err"});
               self.error(err.text);
             })
             .call();
