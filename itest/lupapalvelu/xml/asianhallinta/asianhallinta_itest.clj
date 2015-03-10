@@ -132,3 +132,36 @@
       (command pena :submit-application :id app-id) => ok?
       (command sonja :application-to-asianhallinta :id app-id :lang "fi") => (partial expected-failure? "error.integration.asianhallinta-disabled"))))
 
+(facts "Auth admin configs"
+  (fact "Pena can't use asianhallinta configure query & command"
+    (query pena "asianhallinta-config") => unauthorized?
+    (command pena "save-asianhallinta-config" :permitType "P" :municipality sonja-muni :enabled true :version "1.3") => unauthorized?)
+  (fact "Sonja can't use asianhallinta configure query & command"
+    (query sonja "asianhallinta-config") => unauthorized?
+    (command sonja "save-asianhallinta-config" :permitType "P" :municipality sonja-muni :enabled true :version "1.3") => unauthorized?)
+       
+  (fact "Sipoo auth admin can query asianhallinta-config, response has scope, but no caseManagement"
+    (let [resp (query sipoo "asianhallinta-config")
+          scope (:scope resp)]
+      resp => ok?
+      scope => truthy
+      (some :caseManagement scope) => nil?))
+       
+  (facts "Kuopio auth admin"
+    (fact "query asianhallinta-config, response has scope with one caseManagement"
+      (let [resp      (query kuopio "asianhallinta-config")
+            ah-config (some :caseManagement (:scope resp))]
+        resp => ok?
+        ah-config => {:enabled true :ftpUser "dev_ah_kuopio" :version "1.1"}))
+    (fact "admin can disable asianhallinta using command"
+      (command kuopio "save-asianhallinta-config" :permitType "P" :municipality velho-muni :enabled false :version "1.1")
+      (let [resp (query kuopio "asianhallinta-config")
+            ah-config (some :caseManagement (:scope resp))]
+        (:enabled ah-config) => false))
+    (fact "admin can enable asianhallinta and change version using command"
+      (command kuopio "save-asianhallinta-config" :permitType "P" :municipality velho-muni :enabled true :version "lol")
+        (let [resp (query kuopio "asianhallinta-config")
+              ah-config (some :caseManagement (:scope resp))]
+          (:enabled ah-config) => true
+          (:version ah-config) => "lol"))))
+
