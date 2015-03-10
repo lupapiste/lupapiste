@@ -66,7 +66,7 @@
   (let [to-user   (and to (or (user/get-user-by-id to) (fail! :to-is-not-id-of-any-user-in-system)))
         ensured-visibility (if (seq roles)
                              (remove nil? (conj (set roles) (:role user) (:role to-user)))
-                             #{:authority :applicant})]
+                             #{:authority :applicant :oirAuthority})]
     (update-application command
       (util/deep-merge
         (comment/comment-mongo-update (:state application) text target (:role user) mark-answered user to-user created ensured-visibility)
