@@ -32,7 +32,7 @@
 ;;
 
 (defquery user
-  {:user-roles #{:applicant :authority :authorityAdmin :admin}}
+  {:user-roles #{:applicant :authority :oirAuthority :authorityAdmin :admin}}
   [{user :user}]
   (ok :user user))
 

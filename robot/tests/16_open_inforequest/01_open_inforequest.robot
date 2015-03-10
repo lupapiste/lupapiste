@@ -24,10 +24,11 @@ Email is sent to Loppi rakennusvalvonta
 
 Loppi auth clicks the link in email
   Execute Javascript  document.getElementsByTagName("a")[0].click()
-  Wait until  User role should be  authority
+  Wait until  User role should be  oirAuthority
   Wait until  Element text should be  //section[@id='inforequest']//span[@data-test-id='inforequest-application-applicant']  Intonen Mikko
   User nav menu is not visible
   Wait Until  Title Should Be  ${appname} - Lupapiste
-  Element should be visible  //h2[@data-test-id='wanna-join']
+  Wait until  Element should be visible  //h2[@data-test-id='wanna-join']
   Element should not be visible  //select[@id='inforequest-assignee-select']
   Element should not be visible  //select[@data-test-id='application-assigneed-authority']
+  Page should contain  Jiihaa
