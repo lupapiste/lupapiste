@@ -46,6 +46,11 @@
    :user-roles #{:authority}
    :states      (action/all-states-but [:canceled])})
 
+(defcommand can-mark-answered
+  {:description "Dummy command for UI logic"
+   :user-roles #{:authority :oirAuthority}
+   :states      #{:info}})
+
 (defcommand add-comment
   {:parameters [id text target roles]
    :user-roles #{:applicant :authority :oirAuthority}
