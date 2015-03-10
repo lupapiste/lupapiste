@@ -8,7 +8,7 @@
 
 
 (defquery asianhallinta-config
-  {:roles [:authorityAdmin]}
+  {:user-roles #{:authorityAdmin}}
   [{{:keys [organizations]} :user}]
   (let [organization-id (first organizations)]
     (if-let [{:keys [scope]} (org/get-organization organization-id)]
@@ -17,7 +17,7 @@
 
 (defcommand save-asianhallinta-config
   {:parameters [permitType municipality enabled version]
-   :roles [:authorityAdmin]}
+   :user-roles #{:authorityAdmin}}
   [{{:keys [organizations]} :user}]
   (mongo/update-by-query :organizations
       {:scope {$elemMatch {:permitType permitType :municipality municipality}}}
