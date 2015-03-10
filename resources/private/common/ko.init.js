@@ -197,7 +197,7 @@
     init: function(element, valueAccessor, allBindingsAccessor) {
       var bindings = ko.utils.unwrapObservable(allBindingsAccessor());
       var text$ = $("<span>").addClass("text");
-      $(element).addClass('form-indicator');
+      $(element).addClass("form-indicator");
       $(element).append(text$);
       $(element).append($("<span>").addClass("icon"));
       if (bindings.label !== false) {
@@ -323,7 +323,7 @@
   };
 
   ko.bindingHandlers.documentEvent = {
-    init: function(element, valueAccessor, allBindingsAccessor) {
+    init: function(element, valueAccessor) {
       var value = ko.utils.unwrapObservable(valueAccessor());
       $(document).keyup(function(e) {
         if (e.keyCode === value.key) {
