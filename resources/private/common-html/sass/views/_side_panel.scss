@@ -166,10 +166,14 @@
   #notice-panel {
     height: 100%;
 
-    .application-state {
+    .application-urgency {
       position: relative;
       margin-bottom: $marginS;
       width: 215px;
+    }
+
+    .application-notices {
+      position: relative;
     }
 
     .icon.urgent {
