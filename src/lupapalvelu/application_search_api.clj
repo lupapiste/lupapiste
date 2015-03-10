@@ -12,7 +12,7 @@
 (defquery applications-for-datatables
   {:description "Service point for jQuery dataTables"
    :parameters [params]
-   :roles      [:applicant :authority]}
+   :user-roles #{:applicant :authority}}
   [{user :user}]
   (ok :data (search/applications-for-user user params)))
 
@@ -28,7 +28,7 @@
 (defquery applications
   {:description "Query for integrations"
    :parameters []
-   :roles      [:applicant :authority]}
+   :user-roles #{:applicant :authority}}
   [{user :user data :data}]
   (let [user-query (domain/basic-application-query-for user)
         query (search/make-query user-query data user)
@@ -45,7 +45,7 @@
 (defquery latest-applications
   {:description "Query for public website"
    :parameters []
-   :roles      [:anonymous]}
+   :user-roles #{:anonymous}}
   [_]
   (let [query {:submitted {$ne nil}}
         limit 5

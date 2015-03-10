@@ -1,5 +1,6 @@
 (ns lupapalvelu.attachment-api
   (:require [clojure.java.io :as io]
+            [clojure.set :refer [intersection union]]
             [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn warnf error errorf fatal]]
             [monger.operators :refer :all]
             [swiss.arrows :refer [-<> -<>>]]
@@ -12,6 +13,7 @@
             [lupapalvelu.user :as user]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.permit :as permit]
+            [lupapalvelu.application :as a]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.open-inforequest :as open-inforequest]
@@ -79,9 +81,8 @@
 
 (defcommand move-attachments-to-backing-system
   {:parameters [id lang]
-   :roles      [:authority]
-   :pre-checks [(partial if-not-authority-states-must-match #{:verdictGiven})
-                (permit/validate-permit-type-is permit/R)]
+   :user-roles #{:authority}
+   :pre-checks [(permit/validate-permit-type-is permit/R)]
    :states     [:verdictGiven :constructionStarted]
    :description "Sends such attachments to backing system that are not yet sent."}
   [{:keys [created application] :as command}]
@@ -108,16 +109,16 @@
 
 (defquery attachment-types
   {:parameters [:id]
-   :extra-auth-roles [:statementGiver]
-   :roles      [:applicant :authority]
+   :user-authz-roles action/all-authz-roles
+   :user-roles #{:applicant :authority}
    :states     action/all-states}
   [{application :application}]
   (ok :attachmentTypes (attachment/get-attachment-types-for-application application)))
 
 (defcommand set-attachment-type
   {:parameters [id attachmentId attachmentType]
-   :roles      [:applicant :authority]
-   :extra-auth-roles [:statementGiver]
+   :user-roles #{:applicant :authority}
+   :user-authz-roles action/all-authz-writer-roles
    :states     (action/all-states-but [:answered :sent :closed :canceled])}
   [{:keys [application user created] :as command}]
 
@@ -136,8 +137,8 @@
 
 (defquery attachment-operations
   {:parameters [:id]
-   :extra-auth-roles [:statementGiver]
-   :roles [:applicant :authority]
+   :user-authz-roles action/all-authz-roles
+   :user-roles #{:applicant :authority}
    :states action/all-states}
   [{application :application}]
   (ok :operations (:operations application)))
@@ -149,7 +150,7 @@
 (defcommand approve-attachment
   {:description "Authority can approve attachment, moves to ok"
    :parameters  [id attachmentId]
-   :roles       [:authority]
+   :user-roles #{:authority}
    :states      (action/all-states-but [:answered :sent :closed :canceled])}
   [{:keys [created] :as command}]
   (attachment/update-attachment-key command attachmentId :state :ok created :set-app-modified? true :set-attachment-modified? false))
@@ -157,7 +158,7 @@
 (defcommand reject-attachment
   {:description "Authority can reject attachment, requires user action."
    :parameters  [id attachmentId]
-   :roles       [:authority]
+   :user-roles #{:authority}
    :states      (action/all-states-but [:answered :sent :closed :canceled])}
   [{:keys [created] :as command}]
   (attachment/update-attachment-key command attachmentId :state :requires_user_action created :set-app-modified? true :set-attachment-modified? false))
@@ -169,7 +170,7 @@
 (defcommand create-attachments
   {:description "Authority can set a placeholder for an attachment"
    :parameters  [:id :attachmentTypes]
-   :roles       [:authority]
+   :user-roles #{:authority}
    :states      (action/all-states-but [:answered :sent :closed :canceled])}
   [{application :application {attachment-types :attachmentTypes} :data created :created}]
   (if-let [attachment-ids (attachment/create-attachments application attachment-types created false true true)]
@@ -183,8 +184,8 @@
 (defcommand delete-attachment
   {:description "Delete attachement with all it's versions. Does not delete comments. Non-atomic operation: first deletes files, then updates document."
    :parameters  [id attachmentId]
-   :roles       [:applicant :authority]
-   :extra-auth-roles [:statementGiver]
+   :user-roles #{:applicant :authority}
+   :user-authz-roles action/all-authz-writer-roles
    :states      (action/all-states-but [:answered :sent :closed :canceled])}
   [{:keys [application user]}]
 
@@ -200,8 +201,8 @@
 (defcommand delete-attachment-version
   {:description   "Delete attachment version. Is not atomic: first deletes file, then removes application reference."
    :parameters  [:id attachmentId fileId]
-   :roles       [:applicant :authority]
-   :extra-auth-roles [:statementGiver]
+   :user-roles #{:applicant :authority}
+   :user-authz-roles action/all-authz-writer-roles
    :states      (action/all-states-but [:answered :sent :closed :canceled])}
   [{:keys [application user]}]
 
@@ -218,29 +219,31 @@
 
 (defraw "view-attachment"
   {:parameters [:attachment-id]
-   :roles      [:applicant :authority]
-   :extra-auth-roles [:statementGiver]}
+   :user-roles #{:applicant :authority}
+   :user-authz-roles action/all-authz-roles}
   [{{:keys [attachment-id]} :data user :user}]
   (attachment/output-attachment attachment-id false (partial attachment/get-attachment-as user)))
 
 (defraw "download-attachment"
   {:parameters [:attachment-id]
-   :roles      [:applicant :authority]
-   :extra-auth-roles [:statementGiver]}
+   :user-roles #{:applicant :authority}
+   :user-authz-roles action/all-authz-roles}
   [{{:keys [attachment-id]} :data user :user}]
   (attachment/output-attachment attachment-id true (partial attachment/get-attachment-as user)))
 
 (defraw "download-all-attachments"
   {:parameters [:id]
-   :roles      [:applicant :authority]
+   :user-roles #{:applicant :authority}
    :states     action/all-states
-   :extra-auth-roles [:statementGiver]}
-  [{:keys [application lang]}]
+   :user-authz-roles action/all-authz-roles}
+  [{:keys [application user lang]}]
   (if application
-    {:status 200
-       :headers {"Content-Type" "application/octet-stream"
-                 "Content-Disposition" (str "attachment;filename=\"" (i18n/loc "attachment.zip.filename") "\"")}
-       :body (attachment/temp-file-input-stream (attachment/get-all-attachments (:attachments application) application lang))}
+    (let [attachments (:attachments application)
+          application (a/with-masked-person-ids application user)]
+      {:status 200
+        :headers {"Content-Type" "application/octet-stream"
+                  "Content-Disposition" (str "attachment;filename=\"" (i18n/loc "attachment.zip.filename") "\"")}
+        :body (attachment/temp-file-input-stream (attachment/get-all-attachments attachments application lang))})
     {:status 404
      :headers {"Content-Type" "text/plain"}
      :body "404"}))
@@ -252,8 +255,8 @@
 
 (defcommand upload-attachment
   {:parameters [id attachmentId attachmentType op filename tempfile size]
-   :roles      [:applicant :authority]
-   :extra-auth-roles [:statementGiver]
+   :user-roles #{:applicant :authority}
+   :user-authz-roles action/all-authz-writer-roles
    :pre-checks [attachment-is-not-locked
                 (partial if-not-authority-states-must-match #{:sent})]
    :input-validators [(fn [{{size :size} :data}] (when-not (pos? size) (fail :error.select-file)))
@@ -361,36 +364,39 @@
 
 (defcommand stamp-attachments
   {:parameters [:id timestamp text organization files xMargin yMargin extraInfo buildingId kuntalupatunnus section]
-   :roles      [:authority]
+   :user-roles #{:authority}
    :states     [:submitted :sent :complement-needed :verdictGiven :constructionStarted :closed]
    :description "Stamps all attachments of given application"}
   [{application :application {transparency :transparency} :data :as command}]
-  (ok :job (make-stamp-job
-             (key-by :attachment-id (map ->file-info (attachment/get-attachments-infos application files)))
-             {:application application
-              :user (:user command)
-              :text (if-not (ss/blank? text) text (i18n/loc "stamp.verdict"))
-              :created (cond
-                         (number? timestamp) (long timestamp)
-                         (ss/blank? timestamp) (:created command)
-                         :else (->long timestamp))
-              :now      (:created command)
-              :x-margin (->long xMargin)
-              :y-margin (->long yMargin)
-              :transparency (->long (or transparency 0))
-              :info-fields [(str buildingId)
-                            (str kuntalupatunnus)
-                            (str section)
-                            (str extraInfo)
-                            (if-not (ss/blank? organization)
-                              organization
-                              (let [org (organization/get-organization (:organization application))]
-                                (organization/get-organization-name org)))]
-              })))
+  (let [parsed-timestamp (cond
+                           (number? timestamp) (long timestamp)
+                           (ss/blank? timestamp) (:created command)
+                           :else (->long timestamp))
+        stamp-timestamp (if (zero? parsed-timestamp) (:created command) parsed-timestamp)]
+    (ok :job (make-stamp-job
+              (key-by :attachment-id (map ->file-info (attachment/get-attachments-infos application files)))
+              {:application application
+               :user (:user command)
+               :text (if-not (ss/blank? text) text (i18n/loc "stamp.verdict"))
+               :created  stamp-timestamp
+               :now      (:created command)
+               :x-margin (->long xMargin)
+               :y-margin (->long yMargin)
+               :transparency (->long (or transparency 0))
+               :info-fields [(str buildingId)
+                             (str kuntalupatunnus)
+                             (str section)
+                             (str extraInfo)
+                             (if-not (ss/blank? organization)
+                               organization
+                               (let [org (organization/get-organization (:organization application))]
+                                 (organization/get-organization-name org)))]
+               }))))
 
 (defquery stamp-attachments-job
   {:parameters [:job-id :version]
-   :roles      [:authority]
+   :user-roles #{:authority}
+   :user-authz-roles action/default-authz-writer-roles
    :description "Returns state of stamping job"}
   [{{job-id :job-id version :version timeout :timeout :or {version "0" timeout "10000"}} :data}]
   (assoc (job/status job-id (->long version) (->long timeout)) :ok true))
@@ -403,7 +409,7 @@
                 (fn [_ application]
                   (when-not (pos? (count (:attachments application)))
                     (fail :application.attachmentsEmpty)))]
-   :roles      [:applicant :authority]}
+   :user-roles #{:applicant :authority}}
   [{application :application u :user :as command}]
   (when (seq attachmentIds)
     (if (user/get-user-with-password (:username u) password)
@@ -433,36 +439,41 @@
 
 (defcommand set-attachment-meta
   {:parameters [id attachmentId meta]
-   :roles      [:applicant :authority]
-   :extra-auth-roles [:statementGiver]
+   :user-roles #{:applicant :authority}
+   :user-authz-roles action/all-authz-writer-roles
    :states     (action/all-states-but [:answered :sent :closed :canceled])
    :input-validators [validate-meta validate-scale validate-size validate-operation]}
   [{:keys [application user created] :as command}]
-
   (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
     (fail! :error.pre-verdict-attachment))
-
   (doseq [[k v] meta]
     (attachment/update-attachment-key command attachmentId k v created :set-app-modified? true :set-attachment-modified? true))
   (ok))
 
 (defcommand set-attachment-not-needed
   {:parameters [id attachmentId notNeeded]
-   :roles      [:applicant :authority]
-   :states     [:draft :open]}
+   :user-roles #{:applicant :authority}
+   :states     [:draft :open :submitted]}
   [{:keys [created] :as command}]
   (attachment/update-attachment-key command attachmentId :notNeeded notNeeded created :set-app-modified? true :set-attachment-modified? false)
   (ok))
 
 (defcommand set-attachments-as-verdict-attachment
-  {:parameters [id attachmentIds isVerdictAttachment]
-   :roles      [:authority]
+  {:parameters [:id selectedAttachmentIds unSelectedAttachmentIds]
+   :user-roles #{:authority}
    :states     (action/all-states-but [:closed :canceled])
-   :input-validators [(partial action/boolean-parameters [:isVerdictAttachment])
-                      (partial action/vector-parameters-with-non-blank-items [:attachmentIds])]}
-  [{:keys [created] :as command}]
-  (doseq [attachment-id attachmentIds]
-    (attachment/update-attachment-key command attachment-id :forPrinting isVerdictAttachment created :set-app-modified? true :set-attachment-modified? false))
-  (ok))
-
-
+   :input-validators [(partial action/vector-parameters-with-non-blank-items [:selectedAttachmentIds :unSelectedAttachmentIds])
+                      (fn [{{:keys [selectedAttachmentIds unSelectedAttachmentIds]} :data}]
+                        (when (seq (intersection (set selectedAttachmentIds) (set unSelectedAttachmentIds)))
+                          (error "setting verdict attachments, overlapping ids in: " selectedAttachmentIds unSelectedAttachmentIds)
+                          (fail :error.select-verdict-attachments.overlapping-ids)))]}
+  [{:keys [application created] :as command}]
+  (let [updates-fn  (fn [ids k v] (mongo/generate-array-updates :attachments (:attachments application) #((set ids) (:id %)) k v))]
+    (when (or (seq selectedAttachmentIds) (seq unSelectedAttachmentIds))
+      (update-application command {$set (merge
+                                          (updates-fn (concat selectedAttachmentIds unSelectedAttachmentIds) :modified created)
+                                          (when (seq selectedAttachmentIds)
+                                            (updates-fn selectedAttachmentIds   :forPrinting true))
+                                          (when (seq unSelectedAttachmentIds)
+                                            (updates-fn unSelectedAttachmentIds :forPrinting false)))}))
+    (ok)))

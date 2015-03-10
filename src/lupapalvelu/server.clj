@@ -1,5 +1,6 @@
 (ns lupapalvelu.server
-  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal tracef debugf infof warnf errorf fatalf]]
+  (:require [clojure.java.io :as io]
+            [taoensso.timbre :as timbre :refer [trace debug info warn error fatal tracef debugf infof warnf errorf fatalf]]
             [noir.server :as server]
             [lupapalvelu.logging]
             [lupapalvelu.web :as web]
@@ -8,6 +9,7 @@
             [sade.security-headers :as headers]
             [sade.email :as email]
             [sade.dummy-email-server]
+            [scss-compiler.core :as scss]
             [lupapalvelu.fixture.fixture-api]
             [lupapalvelu.fixture.minimal]
             [lupapalvelu.fixture.municipality-test-users]
@@ -34,7 +36,9 @@
             [lupapalvelu.document.schema-repository-api]
             [lupapalvelu.actions-api]
             [lupapalvelu.migration.migration :as migration]
-            [lupapalvelu.screenmessage-api]))
+            [lupapalvelu.screenmessage-api]
+            [lupapalvelu.integrations-api]
+            [lupapalvelu.construction-api]))
 
 (defn -main [& _]
   (infof "Build %s starting in %s mode" (:build-number env/buildinfo) (name env/mode))
@@ -62,6 +66,10 @@
   (server/add-middleware web/anti-csrf)
   (server/add-middleware web/authentication)
   (server/add-middleware web/session-timeout)
+
+  (when-let [gemsdir (io/resource "gems")]
+    (scss/initialize :gempath (.getPath gemsdir)))
+
   (env/in-dev
     (warn "*** Instrumenting performance monitoring")
     (require 'lupapalvelu.perf-mon)

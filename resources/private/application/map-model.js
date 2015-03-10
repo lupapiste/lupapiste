@@ -151,19 +151,40 @@ LUPAPISTE.MapModel = function(authorizationModel) {
     drawings = application.drawings;
 
     var map = getOrCreateMap(application.infoRequest ? "inforequest" : "application");
-    map.clear().center(x, y, 14).add({x: x, y: y});
+    map.clear().updateSize().center(x, y, 14).add({x: x, y: y});
     if (drawings) {
       map.drawDrawings(drawings, {}, drawStyle);
     }
     if (application.infoRequest) {
-      map = getOrCreateMap("inforequest-markers");
-      map.clear().center(x, y, 14);
-      setRelevantMarkersOntoMarkerMap(map, currentAppId, x, y);
+
+      // Marker map visibility handling [https://issues.solita.fi/browse/LPK-79].
+      // In html, could not hide "#inforequest-marker-map" with knockout's "visible" binding, because Openlayers would then try to incorrectly initialize the map.
+      // Then, when accessing inforequest with applicant user, loading of the map fails with "Cannot read property 'w' of null".
+      // ->  Resolution: hiding the map with jQuery
+      //
+      // Other option that could be used here, instead of jQuery show/hide:
+      // - re-constructing the map every time  -> remember to call destroy() for the previous map before contructing the new one,
+      //   to prevent duplicate maps from generating into html.
+      //   I.e. call "if (inforequestMarkerMap) inforequestMarkerMap.clear().destroy();" (create a forwarding destroy() method to gis.js)
+      //   But this is even uglier than the jQuery option.
+      //
+      if (authorizationModel.ok('inforequest-markers')) {
+        var irMarkersMap = getOrCreateMap("inforequest-markers");
+        irMarkersMap.clear().updateSize().center(x, y, 14);
+        setRelevantMarkersOntoMarkerMap(irMarkersMap, currentAppId, x, y);
+        $("#inforequest-marker-map").show();
+      } else {
+        $("#inforequest-marker-map").hide();
+      }
+
     }
   };
 
   self.updateMapSize = function(kind) {
     getOrCreateMap(kind).updateSize();
+    if (kind === "inforequest") {
+      getOrCreateMap("inforequest-markers").updateSize();
+    }
   };
 
 

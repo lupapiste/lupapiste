@@ -31,7 +31,7 @@ Katselmukset
   Task count is  task-katselmus  3
 
 Työnjohtajat
-  Wait until  Page should contain  Työnjohtajat
+  Wait until  Page should contain  Vaaditut työnjohtajat
   Wait until  Xpath Should Match X Times  //table[@data-test-id="tasks-foreman"]/tbody/tr  3
 
 Muut lupamaaraykset
@@ -50,7 +50,7 @@ Add attachment to Aloituskokous
   Wait Until Page Contains  ${TXT_TESTFILE_NAME}
 
 Aloituskokous requires action
-  Wait until  Xpath Should Match X Times  //section[@id='task']/h1/span[@data-test-state="requires_authority_action"]  1
+  Wait until  Xpath Should Match X Times  //section[@id='task']/h1/span[@data-test-state="requires_user_action"]  1
 
 Reject Aloituskokous
   Click enabled by test id  reject-task
@@ -109,7 +109,7 @@ Add katselmus
   Task count is  task-katselmus  3
   Open task  uus muu tarkastus
 
-Verify post-verdict attachmens - Aloituskokous
+Verify post-verdict attachments - Aloituskokous
   Click by test id  back-to-application-from-task
   Wait until  Element should be visible  xpath=//a[@data-test-id='application-open-attachments-tab']
   Open tab  attachments

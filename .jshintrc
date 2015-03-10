@@ -54,6 +54,7 @@
     "LUPAPISTE": true,
     "lupapisteApp" :true,
     "util": true,
+    "uiComponents": true,
     "invites": true,
     "tree": true,
     "attachmentTypeSelect": true,
@@ -74,5 +75,6 @@
        "LUPAPISTE","municipalities","organizations",
        "pageutil","repository","RequestContext",
        "stamping","taskUtil","taskPageController",
-       "tree","user","users","util", "lupapisteApp"]
+       "tree", "uiComponents",
+       "user","users","util", "lupapisteApp"]
 }

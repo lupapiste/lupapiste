@@ -1,5 +1,6 @@
 (ns lupapalvelu.components.ui-components
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
+            [clojure.java.io :as io]
             [lupapalvelu.components.core :as c]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mime :as mime]
@@ -8,7 +9,8 @@
             [sade.util :as util]
             [cheshire.core :as json]
             [lupapalvelu.attachment :refer [attachment-types-osapuoli, attachment-scales, attachment-sizes]]
-            [lupapalvelu.stamper :refer [file-types]]))
+            [lupapalvelu.stamper :refer [file-types]]
+            [scss-compiler.core :as scss]))
 
 (def debugjs {:depends [:jquery]
               :js ["debug.js"]
@@ -41,6 +43,11 @@
 
 (defn- schema-versions-by-permit-type []
   (str ";LUPAPISTE.config.kryspVersions = " (json/generate-string validator/supported-krysp-versions-by-permit-type) ";"))
+
+(defn- main-style-file [css-file-path scss-file-path]
+  (if-let [main-css-file (io/resource (c/path css-file-path))]
+    (slurp main-css-file)
+    (scss/scss->css (.getPath (-> scss-file-path c/path io/resource)))))
 
 (def ui-components
   {;; 3rd party libs
@@ -81,8 +88,7 @@
                        "statuses.js" "statusmodel.js" "authorization.js" "vetuma.js"]}
 
    :common-html  {:depends [:selectm-html]
-                  :css ["jquery-ui.css"]
-                  :scss ["sass/main.scss"]
+                  :css [(partial main-style-file "common-html/css/main.css" "common-html/sass/main.scss") "jquery-ui.css"]
                   :html ["404.html" "footer.html"]}
 
    ;; Components to be included in a SPA
@@ -132,11 +138,15 @@
                   :js ["stamp-model.js" "stamp.js"]}
 
    :verdict-attachment-prints {:depends [:common-html]
-                               :html ["verdict-attachment-prints-order-template.html"]
-                               :js ["verdict-attachment-prints-order-model.js"]}
+                               :html ["verdict-attachment-prints-order-template.html"
+                                      "verdict-attachment-prints-order-history-template.html"
+                                      "verdict-attachment-prints-multiselect.html"]
+                               :js ["verdict-attachment-prints-order-model.js"
+                                    "verdict-attachment-prints-order-history-model.js"
+                                    "verdict-attachment-prints-multiselect-model.js"]}
 
    :attachment   {:depends [:common-html :repository :signing :side-panel]
-                  :js ["targeted-attachments-model.js" "attachment.js" "attachmentTypeSelect.js" "attachment-utils.js"]
+                  :js ["targeted-attachments-model.js" "attachment-utils.js" "attachment.js" "attachmentTypeSelect.js"]
                   :html ["targetted-attachments-template.html" "attachment.html" "upload.html"]}
 
    :task         {:depends [:common-html :attachment]
@@ -270,7 +280,7 @@
    :admin     {:depends [:admin-app :common-html :authenticated :admins :map :mypage :user-menu :debug]
                :css ["admin.css"]
                :js ["admin-users.js" "organizations.js" "companies.js" "features.js" "actions.js" "screenmessages-list.js"]
-               :html ["index.html" "admin.html"
+               :html ["index.html" "admin.html" "organization.html"
                       "admin-users.html" "organizations.html" "companies.html" "features.html" "actions.html"
                       "screenmessages-list.html"]}
 
@@ -296,9 +306,6 @@
 
 ; Make sure that all resources are available:
 (doseq [c (keys ui-components)
-        r (mapcat #(c/component-resources ui-components % c) [:js :html :css])]
-  (if (not (fn? r))
-    (let [resource (.getResourceAsStream (clojure.lang.RT/baseLoader) (c/path r))]
-      (if resource
-        (.close resource)
-        (throw (Exception. (str "Resource missing: " r)))))))
+        r (mapcat #(c/component-resources ui-components % c) [:js :html :css :scss])]
+  (when-not (or (fn? r) (io/resource (c/path r)))
+    (throw (Exception. (str "Resource missing: " r)))))

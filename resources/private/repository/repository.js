@@ -2,6 +2,7 @@ var repository = (function() {
   "use strict";
 
   var currentlyLoadingId = null;
+  var currentQuery = null;
 
   var loadingSchemas = ajax
     .query("schemas")
@@ -50,17 +51,24 @@ var repository = (function() {
     }
   }
 
+  function loadingErrorHandler(id, e) {
+    currentlyLoadingId = null;
+    error("Application " + id + " not found", e);
+    LUPAPISTE.ModalDialog.open("#dialog-application-load-error");
+  }
+
   function doLoad(id, pending, callback) {
-    var loadingApp = ajax
+    currentQuery = ajax
       .query("application", {id: id})
       .pending(pending)
-      .error(function(e) {
-        currentlyLoadingId = null;
-        error("Application " + id + " not found", e);
-        LUPAPISTE.ModalDialog.open("#dialog-application-load-error");
+      .error(_.partial(loadingErrorHandler, id))
+      .fail(function (jqXHR) {
+        if (jqXHR && jqXHR.status > 0) {
+          loadingErrorHandler(id, jqXHR);
+        }
       })
       .call();
-    $.when(loadingSchemas, loadingApp).then(function(schemasResponse, loadingResponse) {
+    $.when(loadingSchemas, currentQuery).then(function(schemasResponse, loadingResponse) {
       var schemas = schemasResponse[0].schemas,
           loading = loadingResponse[0],
           application = loading.application;
@@ -117,15 +125,18 @@ var repository = (function() {
     });
   }
 
-  // debounce repository load
-  var load = _.debounce(
-    function(id, pending, callback) {
-      if (currentlyLoadingId) {
-        error("Concurrent application loading detected: old=" + currentlyLoadingId  + ", new=" + id);
-      }
-      currentlyLoadingId = id;
-      doLoad(id, pending, callback);
-    }, 250);
+  function load(id, pending, callback) {
+    if (window.location.hash.indexOf(id) === -1) {
+      // Application is not visible, do not load
+      return;
+    }
+
+    if (currentlyLoadingId) {
+      currentQuery.abort();
+    }
+    currentlyLoadingId = id;
+    doLoad(id, pending, callback);
+  }
 
   function loaded(pages, f) {
     if (!_.isFunction(f)) {

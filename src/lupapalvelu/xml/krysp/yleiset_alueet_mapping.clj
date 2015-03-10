@@ -1,12 +1,12 @@
 (ns lupapalvelu.xml.krysp.yleiset-alueet-mapping
   (:require [lupapalvelu.xml.krysp.mapping-common :as mapping-common]
-            [sade.util :refer :all]
             [sade.core :refer :all]
             [clojure.walk :as walk]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.document.canonical-common :refer [ya-operation-type-to-schema-name-key]]
             [lupapalvelu.document.yleiset-alueet-canonical :as ya-canonical]
-            [lupapalvelu.xml.emit :refer [element-to-xml]]))
+            [lupapalvelu.xml.emit :refer [element-to-xml]]
+            [lupapalvelu.xml.disk-writer :as writer]))
 
 ;; Tags changed in "yritys-child-modified":
 ;; :kayntiosoite -> :kayntiosoitetieto
@@ -230,7 +230,7 @@
   (let [lupa-name-key (ya-operation-type-to-schema-name-key
                         (-> application :operations first :name keyword))
         canonical-without-attachments (ya-canonical/application-to-canonical application lang)
-        attachments (mapping-common/get-attachments-as-canonical application begin-of-link)
+        attachments-canonical (mapping-common/get-attachments-as-canonical application begin-of-link)
         statement-given-ids (mapping-common/statements-ids-with-status
                               (get-in canonical-without-attachments
                                 [:YleisetAlueet :yleinenAlueAsiatieto lupa-name-key :lausuntotieto]))
@@ -242,13 +242,14 @@
         canonical (assoc-in
                     canonical-with-statement-attachments
                     [:YleisetAlueet :yleinenAlueAsiatieto lupa-name-key :liitetieto]
-                    attachments)
-        xml (yleisetalueet-element-to-xml canonical lupa-name-key krysp-version)]
+                    attachments-canonical)
+        xml (yleisetalueet-element-to-xml canonical lupa-name-key krysp-version)
+        all-canonical-attachments (concat attachments-canonical (mapping-common/flatten-statement-attachments statement-attachments))
+        attachments-for-write (mapping-common/attachment-details-from-canonical all-canonical-attachments)]
 
-    (mapping-common/write-to-disk
+    (writer/write-to-disk
       application
-      attachments
-      statement-attachments
+      attachments-for-write
       xml
       krysp-version
       output-dir
@@ -267,4 +268,4 @@
           canonical (ya-canonical/jatkoaika-to-canonical application lang)
           xml (yleisetalueet-element-to-xml canonical lupa-name-key krysp-version)]
 
-      (mapping-common/write-to-disk application nil nil xml krysp-version output-dir)))
+      (writer/write-to-disk application nil xml krysp-version output-dir)))

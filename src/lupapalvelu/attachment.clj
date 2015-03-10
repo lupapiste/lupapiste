@@ -251,10 +251,21 @@
   [:hakija [:valtakirja
             :virkatodistus
             :ote_kauppa_ja_yhdistysrekisterista]
+   :kartat [:rasitesopimuksen_liitekartta
+            :liitekartta]
    :kiinteiston_hallinta [:jaljennos_perunkirjasta
                           :rasitesopimus
-                          :rasitesopimuksen_liitekartta
-                          :ote_asunto-osakeyhtion_kokouksen_poytakirjasta]
+                          :ote_asunto-osakeyhtion_kokouksen_poytakirjasta
+                          :sukuselvitys
+                          :testamentti
+                          :saantokirja
+                          :tilusvaihtosopimus
+                          :jakosopimus
+                          :kaupparekisteriote
+                          :yhtiojarjestys
+                          :ote_osakeyhtion_yhtiokokouksen_poytakirjasta
+                          :ote_osakeyhtion_hallituksen_kokouksen_poytakirjasta
+                          ]
    :muut [:muu]])
 
 ;;
@@ -424,11 +435,11 @@
 (defn update-attachment-key [command attachmentId k v now & {:keys [set-app-modified? set-attachment-modified?] :or {set-app-modified? true set-attachment-modified? true}}]
   (let [update-key (->> (name k) (str "attachments.$.") keyword)]
     (update-application command
-     {:attachments {$elemMatch {:id attachmentId}}}
-     {$set (merge
-             {update-key v}
-             (when set-app-modified? {:modified now})
-             (when set-attachment-modified? {:attachments.$.modified now}))})))
+      {:attachments {$elemMatch {:id attachmentId}}}
+      {$set (merge
+              {update-key v}
+              (when set-app-modified? {:modified now})
+              (when set-attachment-modified? {:attachments.$.modified now}))})))
 
 (defn update-latest-version-content [application attachment-id file-id size now]
   (let [attachment (get-attachment-info application attachment-id)

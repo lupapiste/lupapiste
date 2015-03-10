@@ -23,6 +23,7 @@
                             {:name "c" :type :group
                              :body [{:name "ca" :type :string}
                                     {:name "cb" :type :checkbox}]}
+                            {:name "partytype" :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}] :default "henkilo"}
                             {:name "d" :type :select :sortBy :displayname
                              :body [{:name "A"}
                                     {:name "B"}
@@ -122,6 +123,16 @@
       (apply-update document [:a :d] "A") => (valid-against? schema)
       (apply-update document [:a :d] "")  => (valid-against? schema)
       (apply-update document [:a :d] "D") => (invalid-with? schema [:warn "illegal-value:select"]))))
+
+(facts "Radio group"
+  (with-timestamp some-time
+    (let [document (new-document schema ..now..)]
+      (facts "valid cases"
+        (apply-update document [:a :partytype] "henkilo") => (valid-against? schema)
+        (apply-update document [:a :partytype] "yritys") => (valid-against? schema)
+        (apply-update document [:a :partytype] "")  => (valid-against? schema))
+      (fact "invalid value"
+        (apply-update document [:a :partytype] "neither") => (invalid-with? schema [:warn "illegal-value:select"])))))
 
 (facts "with real schemas - important field for paasuunnittelija"
   (with-timestamp some-time
@@ -611,10 +622,21 @@
         (get-in stripped-uusirakennus [:data :rakennuksenOmistajat :3]) => (:data stripped-hakija)))))
 
 (facts "hetu-mask"
-  (let [masked (mask-person-ids hakija)]
-    (get-in masked [:data :henkilo :henkilotiedot :etunimi :value]) => (get-in hakija [:data :henkilo :henkilotiedot :etunimi :value])
-    (get-in masked [:data :henkilo :henkilotiedot :hetu]) => truthy
-    (get-in masked [:data :henkilo :henkilotiedot :hetu :value]) => "010203-****"))
+  (fact "ending is masked"
+    (let [masked (mask-person-id-ending hakija)]
+      (get-in masked [:data :henkilo :henkilotiedot :hetu]) => truthy
+      (get-in masked [:data :henkilo :henkilotiedot :hetu :value]) => "010203-****"
+      (fact "non-related field is not changed"
+        (get-in masked [:data :henkilo :henkilotiedot :etunimi :value]) => (get-in hakija [:data :henkilo :henkilotiedot :etunimi :value]))))
+  (fact "birthday is masked"
+    (let [masked (mask-person-id-birthday hakija)]
+      (get-in masked [:data :henkilo :henkilotiedot :hetu]) => truthy
+      (get-in masked [:data :henkilo :henkilotiedot :hetu :value]) => "******-040A"
+      (fact "non-related field is not changed"
+        (get-in masked [:data :henkilo :henkilotiedot :etunimi :value]) => (get-in hakija [:data :henkilo :henkilotiedot :etunimi :value]))))
+  (fact "combination"
+    (let [masked (-> hakija mask-person-id-ending mask-person-id-birthday)]
+      (get-in masked [:data :henkilo :henkilotiedot :hetu :value]) => "******-****")))
 
 (facts
   (fact "all fields are mapped"

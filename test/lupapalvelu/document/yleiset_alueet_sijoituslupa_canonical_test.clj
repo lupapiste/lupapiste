@@ -7,7 +7,7 @@
             [lupapalvelu.document.canonical-common :refer :all]
             [lupapalvelu.document.yleiset-alueet-canonical :refer [application-to-canonical]]
             [lupapalvelu.document.tools :as tools]
-            [sade.util :refer :all]
+            [sade.util :as util]
             [sade.core :refer :all]))
 
 
@@ -147,16 +147,16 @@
 
         pinta-ala (:pintaala Sijoituslupa) => falsey]
 
-    (fact "contains nil" (contains-value? canonical nil?) => falsey)
+    (fact "contains nil" (util/contains-value? canonical nil?) => falsey)
     (fact "lupatunnus"
       (count muu-tunnustieto) => 1
       (-> muu-tunnustieto first :MuuTunnus :tunnus) => (:id sijoituslupa-application)
       (-> muu-tunnustieto first :MuuTunnus :sovellus) => "Lupapiste")
 
-    (fact "Kasittelytieto-muutosHetki" (:muutosHetki Kasittelytieto) => (to-xml-datetime (:modified sijoituslupa-application)))
+    (fact "Kasittelytieto-muutosHetki" (:muutosHetki Kasittelytieto) => (util/to-xml-datetime (:modified sijoituslupa-application)))
     (fact "Kasittelytieto-hakemuksenTila" (:hakemuksenTila Kasittelytieto) => "vireill\u00e4")
     (fact "Kasittelytieto-asiatunnus" (:asiatunnus Kasittelytieto) => (:id sijoituslupa-application))
-    (fact "Kasittelytieto-paivaysPvm" (:paivaysPvm Kasittelytieto) => (to-xml-date (:opened sijoituslupa-application)))
+    (fact "Kasittelytieto-paivaysPvm" (:paivaysPvm Kasittelytieto) => (util/to-xml-date (:opened sijoituslupa-application)))
     (fact "Kasittelytieto-kasittelija-etunimi" (:etunimi Kasittelytieto-kasittelija-nimi) => (:firstName sonja))
     (fact "Kasittelytieto-kasittelija-sukunimi" (:sukunimi Kasittelytieto-kasittelija-nimi) => (:lastName sonja))
 

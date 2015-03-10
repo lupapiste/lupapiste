@@ -5,38 +5,44 @@
   background-position: 0px -4800px;
   height:32px;
   width: 30px;
-  margin: 17px $marginS $marginS $marginS;
+  margin: $marginM $marginM $marginS $marginM;
   float: left;
 }
 
 #sys-notification {
-  margin-bottom: $marginS;
-  box-shadow: 2px 1px 3px $lp-dark-grey, 3px 2px 4px $lp-light-grey;
   color: white;
-  min-height: 56px;
+  min-height: 50px;
   background-color: $lp-dark-grey;
+  position: relative;
+  background:  fade-out($lp-dark-grey, 0.1);
+  background: $lp-dark-grey \9; /* IE 8 and below */
+  border: 1px solid darken($lp-dark-grey, 10%);
+  box-sizing: border-box;
 
   ul {
     list-style: none;
     font-size: 1.2em;
     padding-left: 0;
-    
+    vertical-align: middle;
+
     &:before {
      @include message-icon;
     }
 
     li {
-      
-      padding: $marginM;
-
+      padding: 16px 0;
+      margin-left: $marginL;
+      margin-right: $marginL;
+      border-bottom: 1px dotted darken($lp-dark-grey, 10%);
       &:last-child {
         margin-bottom: 0px;
+        border-bottom: none;
       }
     }
   }
   span {
     float: right;
-    margin: $marginM $marginL $marginM $marginM;
+    margin: 16px $marginM;
     cursor: pointer;
     font-size: 1.8em;
   }

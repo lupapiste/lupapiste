@@ -1,6 +1,6 @@
 (defproject lupapalvelu "0.1.0-SNAPSHOT"
   :description "lupapalvelu"
-  :dependencies [[org.clojure/clojure "1.5.1"]
+  :dependencies [[org.clojure/clojure "1.6.0"]
                  [org.clojure/data.zip "0.1.1"]
                  [org.clojure/data.xml "0.0.8"]
                  [org.clojure/tools.nrepl "0.2.6"]
@@ -44,8 +44,7 @@
                  ; batik-js includes a built-in rhino, which breaks yuicompressor (it too has rhino built in)
                  ; xalan excluded just to avoid bloat, presumably XSLT is not needed
                  [clj-pdf "1.11.21" :exclusions [xalan org.apache.xmlgraphics/batik-js]]
-                 [org.jruby/jruby-complete "1.7.10"]
-                 [zweikopf "1.0.0" :exclusions [org.jruby/jruby-complete]]]
+                 [scss-compiler "0.1.2"]]
   :profiles {:dev {:dependencies [[midje "1.6.3"]
                                   [ring-mock "0.1.5"]
                                   [clj-ssh "0.5.7"]
@@ -53,17 +52,19 @@
                    :plugins [[lein-midje "3.1.1"]
                              [lein-buildid "0.2.0"]
                              [lein-nitpicker "0.4.0"]
-                             [lein-hgnotes "0.2.0-SNAPSHOT"]]
+                             [lein-hgnotes "0.2.0-SNAPSHOT"]
+                             [lein-scss-compiler "0.1.4"]]
                    :resource-paths ["dev-resources"]
                    :source-paths ["dev-src" "test-utils"]
-                   :jvm-opts ["-Djava.awt.headless=true"
-                              "-Xmx1G" "-XX:MaxPermSize=256M"]}
+                   :jvm-opts ["-Djava.awt.headless=true" "-Xmx1G"]}
              :uberjar  {:source-paths ["main-src"]
-                        :main lupapalvelu.main}
+                        :main lupapalvelu.main
+                        :jar-exclusions [#"gems/.*"]
+                        :uberjar-exclusions [#"gems/.*"]}
              :itest    {:test-paths ^:replace ["itest"]}
              :stest    {:test-paths ^:replace ["stest"]}
              :alltests {:source-paths ["test" "itest" "stest"]
-                        :jvm-opts ["-Xmx1G" "-XX:MaxPermSize=256M"]}
+                        :jvm-opts ["-Djava.awt.headless=true" "-Xmx1G"]}
              :lupadev  {:jvm-opts ["-Dtarget_server=https://www-dev.lupapiste.fi" "-Djava.awt.headless=true"]}
              :lupatest {:jvm-opts ["-Dtarget_server=https://www-test.lupapiste.fi" "-Djava.awt.headless=true"]}}
   :nitpicker {:exts ["clj" "js" "html"]
@@ -75,6 +76,7 @@
   :plugin-repositories [["solita-archiva" {:url "http://mvn.solita.fi/archiva/repository/solita"
                                            :checksum :ignore}]]
   :aliases {"integration" ["with-profile" "dev,itest" "midje"]
+            "stest"       ["with-profile" "dev,stest" "midje"]
             "verify"      ["with-profile" "dev,alltests" "do" "nitpicker," "midje"]}
   :main ^:skip-aot lupapalvelu.server
   :repl-options {:init-ns lupapalvelu.server}

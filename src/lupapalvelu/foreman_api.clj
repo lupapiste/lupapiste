@@ -17,18 +17,21 @@
 
 (defcommand create-foreman-application
   {:parameters [id taskId foremanRole]
-   :roles [:applicant :authority]
+   :user-roles #{:applicant :authority}
    :states action/all-application-states}
   [{:keys [created user application] :as command}]
-  (let [foreman-app (application/do-create-application
-                      (assoc command :data {:operation "tyonjohtajan-nimeaminen-v2"
-                                            :x (-> application :location :x)
-                                            :y (-> application :location :y)
-                                            :address (:address application)
-                                            :propertyId (:propertyId application)
-                                            :municipality (:municipality application)
-                                            :infoRequest false
-                                            :messages []}))
+  (let [original-open? (util/pos? (:opened application))
+        foreman-app (-> (application/do-create-application
+                         (assoc command :data {:operation "tyonjohtajan-nimeaminen-v2"
+                                               :x (-> application :location :x)
+                                               :y (-> application :location :y)
+                                               :address (:address application)
+                                               :propertyId (:propertyId application)
+                                               :municipality (:municipality application)
+                                               :infoRequest false
+                                               :messages []}))
+                      (assoc :state (if original-open? :open :draft))
+                      (assoc :opened (if original-open? created nil)))
 
         task                 (util/find-by-id taskId (:tasks application))
 
@@ -61,7 +64,7 @@
     (ok :id (:id foreman-app))))
 
 (defcommand update-foreman-other-applications
-  {:roles [:applicant :authority]
+  {:user-roles #{:applicant :authority}
    :states action/all-states
    :parameters [:id foremanHetu]}
   [{application :application user :user :as command}]
@@ -79,14 +82,25 @@
       (update-application command {$set {:documents documents}}))
     (ok)))
 
+(defcommand link-foreman-task
+  {:user-roles #{:applicant :authority}
+   :states action/all-states
+   :parameters [id taskId foremanAppId]}
+  [{:keys [created application] :as command}]
+  (let [task (util/find-by-id taskId (:tasks application))]
+    (if task
+      (let [updates [[[:asiointitunnus] foremanAppId]]]
+        (commands/persist-model-updates application "tasks" task updates created))
+      (fail :error.not-found))))
+
 (defn foreman-app-check [_ application]
   (when-not (foreman/foreman-app? application)
     (fail :error.not-foreman-app)))
 
 (defquery foreman-history
-  {:roles            [:authority :applicant]
+  {:user-roles #{:authority :applicant}
    :states           action/all-states
-   :extra-auth-roles [:any]
+   :user-authz-roles action/all-authz-roles
    :parameters       [:id]
    :pre-checks       [foreman-app-check]}
   [{application :application user :user :as command}]
@@ -95,9 +109,9 @@
     (fail :error.not-found)))
 
 (defquery reduced-foreman-history
-  {:roles            [:authority :applicant]
+  {:user-roles #{:authority :applicant}
    :states           action/all-states
-   :extra-auth-roles [:any]
+   :user-authz-roles action/all-authz-roles
    :parameters       [:id]
    :pre-checks       [foreman-app-check]}
   [{application :application user :user :as command}]
@@ -106,9 +120,9 @@
     (fail :error.not-found)))
 
 (defquery foreman-applications
-  {:roles            [:applicant :authority]
+  {:user-roles #{:applicant :authority}
    :states           action/all-states
-   :extra-auth-roles [:any]
+   :user-authz-roles action/all-authz-roles
    :parameters       [:id]}
   [{application :application user :user :as command}]
   (if application
