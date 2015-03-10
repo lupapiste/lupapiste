@@ -3,10 +3,19 @@
             [lupapalvelu.itest-util :refer :all]))
 
 (fact "adding comments"
-  (let [{:keys [id state]}  (create-and-submit-application pena)]
+  (let [id  (create-app-id pena)]
 
-    (fact "...to a submitted application"
-      state => "submitted")
+    (fact "authority can not see the application, yet anyway"
+      (query sonja :application :id id) => not-accessible?)
+
+    (fact "applicant asks for help"
+      (command pena :open-application :id id) => ok?)
+
+    (fact "application is now in open state"
+      (:state (query-application pena id)) => "open")
+
+    (fact "authority can now see the application"
+      (query sonja :application :id id) => ok?)
 
     (fact "applicant can't comment with to"
       (command pena :can-target-comment-to-authority :id id) => fail?
