@@ -130,38 +130,66 @@
                     :address "foo 42, bar") => truthy
           app (query-application pena app-id)]
       (command pena :submit-application :id app-id) => ok?
-      (command sonja :application-to-asianhallinta :id app-id :lang "fi") => (partial expected-failure? "error.integration.asianhallinta-disabled"))))
+      (command sonja :application-to-asianhallinta :id app-id :lang "fi") => (partial expected-failure? "error.integration.asianhallinta-disabled")))
 
-(facts "Auth admin configs"
-  (fact "Pena can't use asianhallinta configure query & command"
-    (query pena "asianhallinta-config") => unauthorized?
-    (command pena "save-asianhallinta-config" :permitType "P" :municipality sonja-muni :enabled true :version "1.3") => unauthorized?)
-  (fact "Sonja can't use asianhallinta configure query & command"
-    (query sonja "asianhallinta-config") => unauthorized?
-    (command sonja "save-asianhallinta-config" :permitType "P" :municipality sonja-muni :enabled true :version "1.3") => unauthorized?)
-       
-  (fact "Sipoo auth admin can query asianhallinta-config, response has scope, but no caseManagement"
-    (let [resp (query sipoo "asianhallinta-config")
-          scope (:scope resp)]
-      resp => ok?
-      scope => truthy
-      (some :caseManagement scope) => nil?))
-       
-  (facts "Kuopio auth admin"
-    (fact "query asianhallinta-config, response has scope with one caseManagement"
-      (let [resp      (query kuopio "asianhallinta-config")
-            ah-config (some :caseManagement (:scope resp))]
-        resp => ok?
-        ah-config => {:enabled true :ftpUser "dev_ah_kuopio" :version "1.1"}))
-    (fact "admin can disable asianhallinta using command"
-      (command kuopio "save-asianhallinta-config" :permitType "P" :municipality velho-muni :enabled false :version "1.1")
-      (let [resp (query kuopio "asianhallinta-config")
-            ah-config (some :caseManagement (:scope resp))]
-        (:enabled ah-config) => false))
-    (fact "admin can enable asianhallinta and change version using command"
-      (command kuopio "save-asianhallinta-config" :permitType "P" :municipality velho-muni :enabled true :version "lol")
-        (let [resp (query kuopio "asianhallinta-config")
-              ah-config (some :caseManagement (:scope resp))]
-          (:enabled ah-config) => true
-          (:version ah-config) => "lol"))))
-
+	(facts "Auth admin configs"
+	  (fact "Pena can't use asianhallinta configure query & command"
+	    (query pena "asianhallinta-config") => unauthorized?
+	    (command pena "save-asianhallinta-config" :permitType "P" :municipality sonja-muni :enabled true :version "1.3") => unauthorized?)
+	  (fact "Sonja can't use asianhallinta configure query & command"
+	    (query sonja "asianhallinta-config") => unauthorized?
+	    (command sonja "save-asianhallinta-config" :permitType "P" :municipality sonja-muni :enabled true :version "1.3") => unauthorized?)
+	       
+	  (fact "Sipoo auth admin can query asianhallinta-config, response has scope, but no caseManagement"
+	    (let [resp (query sipoo "asianhallinta-config")
+	          scope (:scope resp)]
+	      resp => ok?
+	      scope => truthy
+	      (some :caseManagement scope) => nil?))
+	       
+	  (facts "Kuopio auth admin"
+	    (fact "query asianhallinta-config, response has scope with one caseManagement"
+	      (let [resp      (query kuopio "asianhallinta-config")
+	            ah-config (some :caseManagement (:scope resp))]
+	        resp => ok?
+	        ah-config => {:enabled true :ftpUser "dev_ah_kuopio" :version "1.1"}))
+	    (fact "admin can disable asianhallinta using command"
+	      (command kuopio "save-asianhallinta-config" :permitType "P" :municipality velho-muni :enabled false :version "1.1")
+	      (let [resp (query kuopio "asianhallinta-config")
+	            ah-config (some :caseManagement (:scope resp))]
+	        (:enabled ah-config) => false))
+	    (fact "admin can enable asianhallinta and change version using command"
+	      (command kuopio "save-asianhallinta-config" :permitType "P" :municipality velho-muni :enabled true :version "lol")
+	        (let [resp (query kuopio "asianhallinta-config")
+	              ah-config (some :caseManagement (:scope resp))]
+	          (:enabled ah-config) => true
+	          (:version ah-config) => "lol"))))
+	
+	(fact "Fail when organization has unsupported version selected"
+	 (let [app-id (create-app-id
+	                 pena
+	                 :municipality velho-muni
+	                 :operation "poikkeamis"
+	                 :propertyId "29703401070010"
+	                 :y 6965051.2333374 :x 535179.5
+	                 :address "Suusaarenkierto 44") => truthy
+	       app (query-application pena app-id)]
+	   (command pena :submit-application :id app-id) => ok?
+	   (command velho :application-to-asianhallinta :id app-id :lang "fi") => (partial 
+	                                                                            expected-failure? 
+	                                                                            "error.integration.asianhallinta-version-wrong-form")))
+	
+	(fact "Fail when organization has version missing"
+	 (let [_ (command kuopio "save-asianhallinta-config" :permitType "P" :municipality velho-muni :enabled true :version false)
+	       app-id (create-app-id
+	                 pena
+	                 :municipality velho-muni
+	                 :operation "poikkeamis"
+	                 :propertyId "29703401070010"
+	                 :y 6965051.2333374 :x 535179.5
+	                 :address "Suusaarenkierto 44") => truthy
+	       app (query-application pena app-id)]
+	   (command pena :submit-application :id app-id) => ok?
+	   (command velho :application-to-asianhallinta :id app-id :lang "fi") => (partial
+	                                                                            expected-failure?
+	                                                                            "error.integration.asianhallinta-version-missing"))))
