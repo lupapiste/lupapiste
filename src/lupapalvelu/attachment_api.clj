@@ -110,14 +110,14 @@
 (defquery attachment-types
   {:parameters [:id]
    :user-authz-roles action/all-authz-roles
-   :user-roles #{:applicant :authority}
+   :user-roles #{:applicant :authority :oirAuthority}
    :states     action/all-states}
   [{application :application}]
   (ok :attachmentTypes (attachment/get-attachment-types-for-application application)))
 
 (defcommand set-attachment-type
   {:parameters [id attachmentId attachmentType]
-   :user-roles #{:applicant :authority}
+   :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles action/all-authz-writer-roles
    :states     (action/all-states-but [:answered :sent :closed :canceled])}
   [{:keys [application user created] :as command}]
@@ -138,7 +138,7 @@
 (defquery attachment-operations
   {:parameters [:id]
    :user-authz-roles action/all-authz-roles
-   :user-roles #{:applicant :authority}
+   :user-roles #{:applicant :authority :oirAuthority}
    :states action/all-states}
   [{application :application}]
   (ok :operations (:operations application)))
@@ -170,7 +170,7 @@
 (defcommand create-attachments
   {:description "Authority can set a placeholder for an attachment"
    :parameters  [:id :attachmentTypes]
-   :user-roles #{:authority}
+   :user-roles #{:authority :oirAuthority}
    :states      (action/all-states-but [:answered :sent :closed :canceled])}
   [{application :application {attachment-types :attachmentTypes} :data created :created}]
   (if-let [attachment-ids (attachment/create-attachments application attachment-types created false true true)]
@@ -184,7 +184,7 @@
 (defcommand delete-attachment
   {:description "Delete attachement with all it's versions. Does not delete comments. Non-atomic operation: first deletes files, then updates document."
    :parameters  [id attachmentId]
-   :user-roles #{:applicant :authority}
+   :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles action/all-authz-writer-roles
    :states      (action/all-states-but [:answered :sent :closed :canceled])}
   [{:keys [application user]}]
@@ -201,7 +201,7 @@
 (defcommand delete-attachment-version
   {:description   "Delete attachment version. Is not atomic: first deletes file, then removes application reference."
    :parameters  [:id attachmentId fileId]
-   :user-roles #{:applicant :authority}
+   :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles action/all-authz-writer-roles
    :states      (action/all-states-but [:answered :sent :closed :canceled])}
   [{:keys [application user]}]
@@ -219,21 +219,21 @@
 
 (defraw "view-attachment"
   {:parameters [:attachment-id]
-   :user-roles #{:applicant :authority}
+   :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles action/all-authz-roles}
   [{{:keys [attachment-id]} :data user :user}]
   (attachment/output-attachment attachment-id false (partial attachment/get-attachment-as user)))
 
 (defraw "download-attachment"
   {:parameters [:attachment-id]
-   :user-roles #{:applicant :authority}
+   :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles action/all-authz-roles}
   [{{:keys [attachment-id]} :data user :user}]
   (attachment/output-attachment attachment-id true (partial attachment/get-attachment-as user)))
 
 (defraw "download-all-attachments"
   {:parameters [:id]
-   :user-roles #{:applicant :authority}
+   :user-roles #{:applicant :authority :oirAuthority}
    :states     action/all-states
    :user-authz-roles action/all-authz-roles}
   [{:keys [application user lang]}]
@@ -255,7 +255,7 @@
 
 (defcommand upload-attachment
   {:parameters [id attachmentId attachmentType op filename tempfile size]
-   :user-roles #{:applicant :authority}
+   :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles action/all-authz-writer-roles
    :pre-checks [attachment-is-not-locked
                 (partial if-not-authority-states-must-match #{:sent})]
