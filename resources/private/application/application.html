@@ -175,8 +175,9 @@
             <span class="icon approve left-align"></span>
           </button>
           <button data-bind="click: toAsianhallinta,
-                             visible: $root.authorization.ok('application-to-asianhallinta'),
-                             enable: !processing() && $root.authorization.ok('application-to-asianhallinta'), attr: {'title': loc('tooltip.toAsianhallinta')}"
+                             visible: $root.authorization.ok('application-to-asianhallinta') && asianhallintaEnabled,
+                             enable: !processing() && $root.authorization.ok('application-to-asianhallinta') && asianhallintaEnabled,
+                             attr: {'title': loc('tooltip.toAsianhallinta')}"
                   data-test-id="to-asianhallinta"
                   class="btn btn-primary">
             <span data-bind="ltext: 'application.toAsianhallinta'"></span>

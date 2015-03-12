@@ -20,6 +20,9 @@ LUPAPISTE.ApplicationModel = function() {
   self.location = ko.observable();
   self.municipality = ko.observable();
   self.organizationMeta = ko.observable();
+  self.asianhallintaEnabled = ko.computed(function() {
+    return self.organizationMeta() ? self.organizationMeta().asianhallinta() : false;
+  });
   self.organizationLinks = ko.computed(function() {
     return self.organizationMeta() ? self.organizationMeta().links() : "";
   });
