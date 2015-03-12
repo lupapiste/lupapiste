@@ -332,6 +332,11 @@
     (get-in doc-after [:data :kaytto :kayttotarkoitus :value]) => "039 muut asuinkerrostalot"
     (get-in doc-after [:data :kaytto :kayttotarkoitus :source]) => "krysp"
 
+    (fact "KRYSP data is stored in source value field"
+      (get-in doc-before [:data :mitat :tilavuus :sourceValue]) => nil
+      (get-in doc-after [:data :mitat :tilavuus :sourceValue]) => "8240"
+      (get-in doc-after [:data :mitat :tilavuus :value]) => "8240")
+
     (fact "Merging ID only"
       (let [building-id-2 (:buildingId (second (:data building-info)))
             _ (command pena :merge-details-from-krysp :id application-id :documentId (:id doc-before) :collection "documents" :buildingId building-id-2 :path "buildingId" :overwrite false) => ok?
