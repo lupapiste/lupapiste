@@ -62,13 +62,19 @@
             :lang "fi"
             :attachmentsWithAmounts nil
             :orderInfo order-info) => fail?)
+        (fact
+          "without attachment versions order fails"
+          (command sonja :order-verdict-attachment-prints
+            :id app-id
+            :lang "fi"
+            :attachmentsWithAmounts (map #(dissoc % :versions) (filter :forPrinting attachments-with-amount))
+            :orderInfo order-info) => fail?)
         (fact "attachments without needed attachment key (amount) results in fail"
           (command sonja :order-verdict-attachment-prints
             :id app-id
             :lang "fi"
             :attachmentsWithAmounts (:attachments app)
             :orderInfo order-info) => (and fail? (contains {:required-keys ["forPrinting" "amount"]})))
-
         (fact "fail when all attachments for command don't have forPriting set to 'true'"
           (command sonja :order-verdict-attachment-prints
             :id app-id
