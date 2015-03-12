@@ -166,30 +166,30 @@
 	          (:version ah-config) => "lol"))))
 	
 	(fact "Fail when organization has unsupported version selected"
-	 (let [app-id (create-app-id
-	                 pena
-	                 :municipality velho-muni
-	                 :operation "poikkeamis"
-	                 :propertyId "29703401070010"
-	                 :y 6965051.2333374 :x 535179.5
-	                 :address "Suusaarenkierto 44") => truthy
-	       app (query-application pena app-id)]
-	   (command pena :submit-application :id app-id) => ok?
-	   (command velho :application-to-asianhallinta :id app-id :lang "fi") => (partial 
-	                                                                            expected-failure? 
-	                                                                            "error.integration.asianhallinta-version-wrong-form")))
+	  (let [app-id (create-app-id
+	                  pena
+	                  :municipality velho-muni
+	                  :operation "poikkeamis"
+	                  :propertyId "29703401070010"
+	                  :y 6965051.2333374 :x 535179.5
+	                  :address "Suusaarenkierto 44") => truthy
+	        app (query-application pena app-id)]
+	    (command pena :submit-application :id app-id) => ok?
+	    (command velho :application-to-asianhallinta :id app-id :lang "fi") => (partial 
+	                                                                             expected-failure? 
+	                                                                             "error.integration.asianhallinta-version-wrong-form")))
 	
 	(fact "Fail when organization has version missing"
-	 (let [_ (command kuopio "save-asianhallinta-config" :permitType "P" :municipality velho-muni :enabled true :version false)
-	       app-id (create-app-id
-	                 pena
-	                 :municipality velho-muni
-	                 :operation "poikkeamis"
-	                 :propertyId "29703401070010"
-	                 :y 6965051.2333374 :x 535179.5
-	                 :address "Suusaarenkierto 44") => truthy
-	       app (query-application pena app-id)]
-	   (command pena :submit-application :id app-id) => ok?
-	   (command velho :application-to-asianhallinta :id app-id :lang "fi") => (partial
-	                                                                            expected-failure?
-	                                                                            "error.integration.asianhallinta-version-missing"))))
+	  (let [_ (command kuopio "save-asianhallinta-config" :permitType "P" :municipality velho-muni :enabled true :version false)
+	        app-id (create-app-id
+	                  pena
+	                  :municipality velho-muni
+	                  :operation "poikkeamis"
+	                  :propertyId "29703401070010"
+	                  :y 6965051.2333374 :x 535179.5
+	                  :address "Suusaarenkierto 44") => truthy
+	        app (query-application pena app-id)]
+	    (command pena :submit-application :id app-id) => ok?
+	    (command velho :application-to-asianhallinta :id app-id :lang "fi") => (partial
+	                                                                             expected-failure?
+	                                                                             "error.integration.asianhallinta-version-missing"))))
