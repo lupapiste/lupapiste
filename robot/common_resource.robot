@@ -247,6 +247,9 @@ Arto logs in
 Veikko logs in
   Authority logs in  veikko  veikko  Veikko Viranomainen
 
+Velho logs in
+  Authority logs in  velho  velho  Velho Viranomainen
+
 Sonja logs in
   Authority logs in  sonja  sonja  Sonja Sibbo
 
