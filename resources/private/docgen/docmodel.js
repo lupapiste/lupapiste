@@ -211,7 +211,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       $(input).removeClass("source-value-changed");
     } else if (sourceValue && sourceValue !== value){
       $(input).addClass("source-value-changed");
-      input.title = loc("sourceValue") + ": " + (localizedSourceValue ? localizedSourceValue : sourceValue);
+      input.title = _.escapeHTML(loc("sourceValue") + ": " + (localizedSourceValue ? localizedSourceValue : sourceValue));
     }
   }
 
