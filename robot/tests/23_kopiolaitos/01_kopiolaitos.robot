@@ -85,6 +85,13 @@ Sonja sends the kopiolaitos order
   Confirm  dynamic-ok-confirm-dialog
   Wait until  Element should not be visible  xpath=//div[@id='dynamic-ok-confirm-dialog']
 
+Sonja checks that email was sent
+  Open last email
+  Page Should Contain  Sipoon rakennusvalvonta, Sonja Sibbo
+  Page Should Contain  tilaaja@example.com
+  Page Should Contain  ${TXT_TESTFILE_NAME}
+  Go Back
+
 Sonja opens the kopiolaitos order history dialog
   Wait until  Element should be visible  xpath=//div[@id="application-verdict-tab"]//a[@data-test-id='test-open-prints-order-history']
   Click by test id  test-open-prints-order-history
@@ -111,5 +118,4 @@ Mikko still does not see the prints history link
   Open application  ${appname}  753-416-25-30
   Open tab  verdict
   Wait Until  Element should not be visible  xpath=//div[@id="application-verdict-tab"]//a[@data-test-id='test-open-prints-order-history']
-
 
