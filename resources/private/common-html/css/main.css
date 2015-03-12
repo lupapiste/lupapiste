@@ -1242,12 +1242,12 @@ input[readonly]:focus, textarea[readonly]:focus {
 }
 /* line 128, ../sass/partials/_forms.scss */
 .form-indicator.form-input-warn .icon {
-  background-position: 6px -3190px;
+  background-position: 6px -3196px;
   display: inline-block;
 }
 /* line 134, ../sass/partials/_forms.scss */
 .form-indicator.form-input-err .icon {
-  background-position: 6px -2390px;
+  background-position: 6px -2396px;
   display: inline-block;
 }
 
