@@ -205,7 +205,11 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return label;
   }
 
-  function makeInput(type, pathStr, value, extraClass, readonly, subSchema) {
+  function makeInput(type, pathStr, modelOrValue, subSchema) {
+    var value = _.isObject(modelOrValue) ? getModelValue(modelOrValue, subSchema.name) : modelOrValue;
+    var extraClass = self.sizeClasses[subSchema.size] || "";
+    var readonly = subSchema.readonly;
+
     var input = document.createElement("input");
     input.id = pathStrToID(pathStr);
     input.name = self.docId + "." + pathStr;
@@ -227,7 +231,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         save(e, function() {
           if (subSchema) {
            emit(getEvent(e).target, subSchema);
-          }  
+          }
         });
       };
     }
@@ -384,7 +388,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   function buildCheckbox(subSchema, model, path) {
     var myPath = path.join(".");
     var span = makeEntrySpan(subSchema, myPath);
-    var input = makeInput("checkbox", myPath, getModelValue(model, subSchema.name), subSchema.readonly);
+    var input = makeInput("checkbox", myPath, model, subSchema);
     input.onmouseover = self.showHelp;
     input.onmouseout = self.hideHelp;
     span.appendChild(input);
@@ -417,8 +421,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var supportedInputSubtypes = ["email", "time"];
     var inputType = (_.indexOf(supportedInputSubtypes, subSchema.subtype) > -1) ? subSchema.subtype : "text";
 
-    var sizeClass = self.sizeClasses[subSchema.size] || "";
-    var input = makeInput(inputType, myPath, getModelValue(model, subSchema.name), sizeClass, subSchema.readonly, subSchema);
+    var input = makeInput(inputType, myPath, model, subSchema);
     setMaxLen(input, subSchema);
 
     listen(subSchema, myPath, input);
@@ -693,7 +696,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     $.each(subSchema.body, function (i, o) {
       var pathForId = myPath + "." + o.name;
-      var input = makeInput("radio", myPath, o.name, subSchema.readonly);
+      var input = makeInput("radio", myPath, o.name, subSchema);
       input.id = pathStrToID(pathForId);
       input.checked = o.name === myModel;
 
