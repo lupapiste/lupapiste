@@ -205,17 +205,17 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return label;
   }
 
-  function makeInput(type, pathStr, modelOrValue, subSchema) {
-    var sourceValueChanged = function(input, value, sourceValue) {
-      if (sourceValue && sourceValue === value) {
-        input.removeAttribute("title");
-        $(input).removeClass("source-value-changed");
-      } else if (sourceValue && sourceValue !== value){
-        $(input).addClass("source-value-changed");
-        input.title = loc("sourceValue") + ": " + sourceValue;
-      }
-    };
+  function sourceValueChanged(input, value, sourceValue, localizedSourceValue) {
+    if (sourceValue && sourceValue === value) {
+      input.removeAttribute("title");
+      $(input).removeClass("source-value-changed");
+    } else if (sourceValue && sourceValue !== value){
+      $(input).addClass("source-value-changed");
+      input.title = loc("sourceValue") + ": " + (localizedSourceValue ? localizedSourceValue : sourceValue);
+    }
+  }
 
+  function makeInput(type, pathStr, modelOrValue, subSchema) {
     var value = _.isObject(modelOrValue) ? getModelValue(modelOrValue, subSchema.name) : modelOrValue;
     var sourceValue = _.isObject(modelOrValue) ? getModelSourceValue(modelOrValue, subSchema.name) : undefined;
     var extraClass = self.sizeClasses[subSchema.size] || "";
@@ -580,6 +580,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       model[subSchema.name] = {value: "lis\u00e4ys"};
     }
     var selectedOption = getModelValue(model, subSchema.name);
+    var sourceValue = getModelSourceValue(model, subSchema.name);
     var span = makeEntrySpan(subSchema, myPath);
     var sizeClass = self.sizeClasses[subSchema.size] || "";
 
@@ -594,15 +595,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     select.className = "form-input combobox " + (sizeClass || "");
 
     select.id = pathStrToID(myPath);
-
-    if (subSchema.readonly) {
-      select.readOnly = true;
-    } else {
-      select.onchange = function(e) {
-        save(e);
-        emit(getEvent(e).target, subSchema);
-      };
-    }
 
     var otherKey = subSchema["other-key"];
     if (otherKey) {
@@ -657,6 +649,22 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         option.selected = "selected";
       }
       select.appendChild(option);
+    }
+
+    var locSelectedOption = _.find(options, function(o) {
+      return o[0] === sourceValue;
+    });
+
+    sourceValueChanged(select, selectedOption, sourceValue, locSelectedOption ? locSelectedOption[1] : undefined);
+
+    if (subSchema.readonly) {
+      select.readOnly = true;
+    } else {
+      select.onchange = function(e) {
+        sourceValueChanged(select, select.value, sourceValue, locSelectedOption ? locSelectedOption[1] : undefined);
+        save(e);
+        emit(getEvent(e).target, subSchema);
+      };
     }
 
     listen(subSchema, myPath, select);
