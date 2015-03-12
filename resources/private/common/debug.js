@@ -111,7 +111,7 @@ jQuery(function($) {
         .append($("<p>").text("Create:")
           .append($("<span>").attr("id", "debug-create-done").css("font-weight", "bold").hide())
           .append($("<a>").attr("id", "debug-create-application").attr("href", "#").text("R/asuinkerrostalo").click(function() { createApplication("kerrostalo-rivitalo"); }))
-          .append($("<a>").attr("id", "debug-create-application").attr("href", "#").text("R/sisätilojen muutos").click(function() { createApplication("sisatila-muutos"); }))
+          .append($("<a>").attr("id", "debug-create-application").attr("href", "#").text("R/sisatilojen muutos").click(function() { createApplication("sisatila-muutos"); }))
           .append($("<a>").attr("id", "debug-create-application").attr("href", "#").text("YA/katulupa").click(function() { createApplication("ya-katulupa-vesi-ja-viemarityot"); }))))
         .append($("<span>").attr("id", "debug-apply-done").css("font-weight", "bold").hide())
         .append($("<span>").text("Throttle web: "))
