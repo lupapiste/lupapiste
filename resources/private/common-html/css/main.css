@@ -1921,6 +1921,13 @@ foreman-history th.fifth {
   width: 45%;
 }
 
+/* line 753, ../sass/partials/_forms.scss */
+.indicator-wrapper {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
 /* line 4, ../sass/partials/_tables.scss */
 table {
   width: 100%;

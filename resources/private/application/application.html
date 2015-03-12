@@ -168,10 +168,19 @@
           <!-- ko if: !hasInvites() -->
           <button data-bind="click: approveApplication,
                               visible: $root.authorization.ok('approve-application'),
-                              enable: !processing() && $root.authorization.ok('approve-application'), attr: {'title': loc('tooltip.approveApplication'}"
+                              enable: !processing() && $root.authorization.ok('approve-application'), attr: {'title': loc('tooltip.approveApplication')}"
                   data-test-id="approve-application"
                   class="btn btn-primary">
             <span data-bind="ltext: 'application.approveApplication'"></span>
+            <span class="icon approve left-align"></span>
+          </button>
+          <button data-bind="click: toAsianhallinta,
+                             visible: $root.authorization.ok('application-to-asianhallinta') && asianhallintaEnabled,
+                             enable: !processing() && $root.authorization.ok('application-to-asianhallinta') && asianhallintaEnabled,
+                             attr: {'title': loc('tooltip.toAsianhallinta')}"
+                  data-test-id="to-asianhallinta"
+                  class="btn btn-primary">
+            <span data-bind="ltext: 'application.toAsianhallinta'"></span>
             <span class="icon approve left-align"></span>
           </button>
           <button data-bind="click: requestForComplement, visible: $root.authorization.ok('request-for-complement'), enable: !processing() && $root.authorization.ok('request-for-complement')" data-test-id="request-for-complement">

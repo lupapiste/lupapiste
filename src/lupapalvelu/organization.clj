@@ -349,6 +349,7 @@
         :kopiolaitos-orderer-email (:kopiolaitos-orderer-email organization))
       (fail :error.unknown-organization))))
 
+
 ;;
 ;; Helpers
 ;;
