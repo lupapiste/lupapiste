@@ -521,14 +521,21 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     input.setAttribute("cols", subSchema.cols || "40");
     setMaxLen(input, subSchema);
 
+    input.className = "form-input textarea";
+    var value = getModelValue(model, subSchema.name);
+    input.value = value;
+    var sourceValue = _.isObject(model) ? getModelSourceValue(model, subSchema.name) : undefined;
+
+    sourceValueChanged(input, value, sourceValue);
+
     if (subSchema.readonly) {
       input.readOnly = true;
     } else {
-      input.onchange = save;
+      input.onchange = function(e) {
+        sourceValueChanged(input, input.value, sourceValue);
+        save(e);
+      };
     }
-
-    input.className = "form-input textarea";
-    input.value = getModelValue(model, subSchema.name);
 
     if (subSchema.label) {
       span.appendChild(makeLabel(subSchema, "text", myPath));
