@@ -1,2 +1,0 @@
-sourceValue:  Taustajärjestelmästä tullut arvo
-selected:  Valittu
