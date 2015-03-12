@@ -206,7 +206,18 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   }
 
   function makeInput(type, pathStr, modelOrValue, subSchema) {
+    var sourceValueChanged = function(input, value, sourceValue) {
+      if (sourceValue && sourceValue === value) {
+        input.removeAttribute("title");
+        $(input).removeClass("source-value-changed");
+      } else if (sourceValue && sourceValue !== value){
+        $(input).addClass("source-value-changed");
+        input.title = loc("sourceValue") + ": " + sourceValue;
+      }
+    };
+
     var value = _.isObject(modelOrValue) ? getModelValue(modelOrValue, subSchema.name) : modelOrValue;
+    var sourceValue = _.isObject(modelOrValue) ? getModelSourceValue(modelOrValue, subSchema.name) : undefined;
     var extraClass = self.sizeClasses[subSchema.size] || "";
     var readonly = subSchema.readonly;
 
@@ -224,10 +235,13 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     input.className = "form-input " + type + " " + (extraClass || "");
 
+    sourceValueChanged(input, value, sourceValue);
+
     if (readonly) {
       input.readOnly = true;
     } else {
       input.onchange = function(e) {
+        sourceValueChanged(input, input.value, sourceValue);
         save(e, function() {
           if (subSchema) {
            emit(getEvent(e).target, subSchema);
@@ -480,6 +494,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
   function getModelValue(model, name) {
     return model[name] ? model[name].value : "";
+  }
+
+  function getModelSourceValue(model, name) {
+    return model[name] ? model[name].sourceValue : "";
   }
 
   function buildText(subSchema, model, path) {

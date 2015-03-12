@@ -37,6 +37,10 @@ legend {
     -webkit-box-shadow: inset 0 2px 4px darken($lp-light-grey, 20%), 0 1px 0 #fff;
   }
   // newbies
+  &.source-value-changed {
+    border-color: $lp-green;
+    border-width: 1px;
+  }
   &.error {
     border-color:red;
     border-width: 3px;
