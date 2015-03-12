@@ -1,3 +1,4 @@
 auth-admin.asianhallinta-config: Asianhallinta
 auth-admin.asianhallinta-enabled: Asianhallinta käytössä
 auth-admin.version: Versio
+error.sftp.user-not-set: Tiedonsiirtokäyttäjää ei ole asetettu
