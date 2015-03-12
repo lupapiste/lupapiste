@@ -102,6 +102,7 @@
 
 (def applicant? (partial in-role? :applicant))
 (def authority? (partial in-role? :authority))
+(def oir? (partial in-role? :oirAuthority))
 (def authority-admin? (partial in-role? :authorityAdmin))
 (def admin? (partial in-role? :admin))
 (defn- anyone [_] true)
@@ -206,7 +207,7 @@
                    :upload logged-in?
                    :applicant applicant?
                    :authority authority?
-                   :oir authority?
+                   :oir oir?
                    :authority-admin authority-admin?
                    :admin admin?
                    :wordpress anyone

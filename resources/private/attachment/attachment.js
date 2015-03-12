@@ -6,7 +6,6 @@ var attachment = (function() {
   var attachmentId = null;
   var model = null;
   var applicationModel = lupapisteApp.models.application;
-  var attachmentGroup = null;
 
   var authorizationModel = authorization.create();
   var signingModel = new LUPAPISTE.SigningModel("#dialog-sign-attachment", false);

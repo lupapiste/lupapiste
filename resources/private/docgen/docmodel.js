@@ -224,10 +224,11 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       input.readOnly = true;
     } else {
       input.onchange = function(e) {
-        save(e);
-        if (subSchema) {
-          emit(getEvent(e).target, subSchema);
-        }
+        save(e, function() {
+          if (subSchema) {
+           emit(getEvent(e).target, subSchema);
+          }  
+        });
       };
     }
 

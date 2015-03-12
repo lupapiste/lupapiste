@@ -114,7 +114,7 @@ Mikko fills up first name for the hakija party in the parties tab
   Open tab  parties
   ${hakija-etunimi-path} =  Set Variable  //div[@id='application-parties-tab']//section[@data-doc-type='hakija']//input[@data-docgen-path='henkilo.henkilotiedot.etunimi']
   Wait until  Element should be visible  xpath=${hakija-etunimi-path}
-  Input text  ${hakija-etunimi-path}  Elmeri
+  Execute Javascript  $('#application-parties-tab').find('section[data-doc-type="hakija"]').find('input[data-docgen-path="henkilo.henkilotiedot.etunimi"]').val("Elmeri").change().blur();
   Wait Until  Textfield value should be  xpath=${hakija-etunimi-path}  Elmeri
   Focus  xpath=//div[@id='application-parties-tab']//section[@data-doc-type='hakija']//input[@data-docgen-path='henkilo.henkilotiedot.sukunimi']
   Wait until  Element should be visible  xpath=//span[contains(@class,'form-input-saved')]

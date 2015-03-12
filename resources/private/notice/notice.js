@@ -20,10 +20,10 @@ LUPAPISTE.NoticeModel = function() {
           id: self.applicationId,
           urgency: value})
         .success(function() {
-          self.indicator({name: "urgency", type: 'saved'});
+          self.indicator({name: "urgency", type: "saved"});
         })
         .error(function() {
-          self.indicator({name: "urgency", type: 'err'});
+          self.indicator({name: "urgency", type: "err"});
         })
         .call();
     }, 500)));
@@ -34,10 +34,10 @@ LUPAPISTE.NoticeModel = function() {
           id: self.applicationId,
           authorityNotice: value})
         .success(function() {
-          self.indicator({name: "notice", type: 'saved'});
+          self.indicator({name: "notice", type: "saved"});
         })
         .error(function() {
-          self.indicator({name: "urgency", type: 'err'});
+          self.indicator({name: "urgency", type: "err"});
         })
         .call();
     }, 500)));
