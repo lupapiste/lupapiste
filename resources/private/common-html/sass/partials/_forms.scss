@@ -38,11 +38,10 @@ legend {
   }
   // newbies
   &.source-value-changed {
-    border-color: $lp-green;
-    border-width: 1px;
+    border: 1px solid $lp-green;
   }
   &.error {
-    border-color:red;
+    border-color: red;
     border-width: 3px;
   }
   &.warn {
@@ -256,14 +255,17 @@ input[readonly], textarea[readonly] {
   display: inline-block;
   vertical-align: bottom;
   margin: 0 $marginS 2px $marginS;
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   padding: 0;
   &.error {
     outline: 3px solid red;
   }
   &.warning {
     outline: 3px solid $lp-orange;
+  }
+  &.source-value-changed {
+    outline: 1px solid $lp-green;
   }
 }
 

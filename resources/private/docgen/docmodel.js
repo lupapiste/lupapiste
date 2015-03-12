@@ -235,13 +235,15 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     input.className = "form-input " + type + " " + (extraClass || "");
 
-    sourceValueChanged(input, value, sourceValue);
-
     if (readonly) {
       input.readOnly = true;
     } else {
       input.onchange = function(e) {
-        sourceValueChanged(input, input.value, sourceValue);
+        if (type === "checkbox") {
+          sourceValueChanged(input, input.checked, sourceValue, loc("selected"));
+        } else {
+          sourceValueChanged(input, input.value, sourceValue);
+        }
         save(e, function() {
           if (subSchema) {
            emit(getEvent(e).target, subSchema);
@@ -252,8 +254,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     if (type === "checkbox") {
       input.checked = value;
+      sourceValueChanged(input, value, sourceValue, loc("selected"));
     } else {
       input.value = value || "";
+      sourceValueChanged(input, value, sourceValue);
     }
     return input;
   }

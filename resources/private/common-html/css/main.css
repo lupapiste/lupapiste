@@ -1159,36 +1159,35 @@ legend {
 }
 /* line 40, ../sass/partials/_forms.scss */
 [type="text"].source-value-changed, [type="email"].source-value-changed, [type="tel"].source-value-changed, [type="url"].source-value-changed, [type="password"].source-value-changed, select.source-value-changed, textarea.source-value-changed {
-  border-color: #04c714;
-  border-width: 1px;
+  border: 1px solid #04c714;
 }
-/* line 44, ../sass/partials/_forms.scss */
+/* line 43, ../sass/partials/_forms.scss */
 [type="text"].error, [type="email"].error, [type="tel"].error, [type="url"].error, [type="password"].error, select.error, textarea.error {
   border-color: red;
   border-width: 3px;
 }
-/* line 48, ../sass/partials/_forms.scss */
+/* line 47, ../sass/partials/_forms.scss */
 [type="text"].warn, [type="email"].warn, [type="tel"].warn, [type="url"].warn, [type="password"].warn, select.warn, textarea.warn {
   border-color: red;
   border-width: 3px;
 }
-/* line 52, ../sass/partials/_forms.scss */
+/* line 51, ../sass/partials/_forms.scss */
 [type="text"].tip, [type="email"].tip, [type="tel"].tip, [type="url"].tip, [type="password"].tip, select.tip, textarea.tip {
   border-color: #f79b54;
   border-width: 1px;
 }
 
-/* line 61, ../sass/partials/_forms.scss */
+/* line 60, ../sass/partials/_forms.scss */
 select {
   margin: 0;
 }
 
-/* line 69, ../sass/partials/_forms.scss */
+/* line 68, ../sass/partials/_forms.scss */
 label + label {
   margin-left: 15px;
 }
 
-/* line 73, ../sass/partials/_forms.scss */
+/* line 72, ../sass/partials/_forms.scss */
 input[readonly], textarea[readonly] {
   background: none;
   border: none;
@@ -1201,12 +1200,12 @@ input[readonly], textarea[readonly] {
   box-shadow: none;
   border-radius: 0;
 }
-/* line 88, ../sass/partials/_forms.scss */
+/* line 87, ../sass/partials/_forms.scss */
 input[readonly]:focus, textarea[readonly]:focus {
   -webkit-box-shadow: none;
 }
 
-/* line 95, ../sass/partials/_forms.scss */
+/* line 94, ../sass/partials/_forms.scss */
 .form-indicator {
   z-index: 12000;
   position: absolute;
@@ -1221,7 +1220,7 @@ input[readonly]:focus, textarea[readonly]:focus {
   box-shadow: 1px 1px 2px #4f4f4f;
   white-space: nowrap;
 }
-/* line 109, ../sass/partials/_forms.scss */
+/* line 108, ../sass/partials/_forms.scss */
 .form-indicator .icon {
   background-image: url("/img/icons-sprite-1.14.png");
   background-repeat: no-repeat;
@@ -1231,28 +1230,28 @@ input[readonly]:focus, textarea[readonly]:focus {
   vertical-align: top;
   margin: 0;
 }
-/* line 117, ../sass/partials/_forms.scss */
+/* line 116, ../sass/partials/_forms.scss */
 .form-indicator .text {
   display: inline-block;
   vertical-align: top;
 }
-/* line 122, ../sass/partials/_forms.scss */
+/* line 121, ../sass/partials/_forms.scss */
 .form-indicator.form-input-saved .icon {
   background-position: 6px -2496px;
   display: inline-block;
 }
-/* line 129, ../sass/partials/_forms.scss */
+/* line 128, ../sass/partials/_forms.scss */
 .form-indicator.form-input-warn .icon {
   background-position: 6px -3190px;
   display: inline-block;
 }
-/* line 135, ../sass/partials/_forms.scss */
+/* line 134, ../sass/partials/_forms.scss */
 .form-indicator.form-input-err .icon {
   background-position: 6px -2390px;
   display: inline-block;
 }
 
-/* line 145, ../sass/partials/_forms.scss */
+/* line 144, ../sass/partials/_forms.scss */
 .errorPanel {
   z-index: 10000;
   position: absolute;
@@ -1265,17 +1264,17 @@ input[readonly]:focus, textarea[readonly]:focus {
   background-color: white;
   border: 1px solid red;
 }
-/* line 156, ../sass/partials/_forms.scss */
+/* line 155, ../sass/partials/_forms.scss */
 .errorPanel span {
   display: block;
   padding-top: 6px;
 }
-/* line 159, ../sass/partials/_forms.scss */
+/* line 158, ../sass/partials/_forms.scss */
 .errorPanel span:first-child {
   padding-top: 0;
 }
 
-/* line 165, ../sass/partials/_forms.scss */
+/* line 164, ../sass/partials/_forms.scss */
 .form-entry {
   display: inline-block;
   margin-right: 6px;
@@ -1283,38 +1282,38 @@ input[readonly]:focus, textarea[readonly]:focus {
   min-height: 48px;
   vertical-align: top;
 }
-/* line 172, ../sass/partials/_forms.scss */
+/* line 171, ../sass/partials/_forms.scss */
 .form-entry label {
   display: inline-block;
 }
-/* line 175, ../sass/partials/_forms.scss */
+/* line 174, ../sass/partials/_forms.scss */
 .form-entry button {
   display: inline-block;
 }
-/* line 178, ../sass/partials/_forms.scss */
+/* line 177, ../sass/partials/_forms.scss */
 .form-entry .form-input {
   margin-right: 36px;
 }
 
-/* line 183, ../sass/partials/_forms.scss */
+/* line 182, ../sass/partials/_forms.scss */
 .form-full-width {
   width: 60%;
 }
-/* line 185, ../sass/partials/_forms.scss */
+/* line 184, ../sass/partials/_forms.scss */
 .form-full-width .form-help {
   right: -350px;
 }
-/* line 188, ../sass/partials/_forms.scss */
+/* line 187, ../sass/partials/_forms.scss */
 .form-full-width .form-label {
   width: 90%;
 }
 
-/* line 193, ../sass/partials/_forms.scss */
+/* line 192, ../sass/partials/_forms.scss */
 .form-single-line {
   display: block;
 }
 
-/* line 200, ../sass/partials/_forms.scss */
+/* line 199, ../sass/partials/_forms.scss */
 .form-label {
   font-size: 16px;
   line-height: 24px;
@@ -1323,38 +1322,38 @@ input[readonly]:focus, textarea[readonly]:focus {
   vertical-align: bottom;
 }
 
-/* line 208, ../sass/partials/_forms.scss */
+/* line 207, ../sass/partials/_forms.scss */
 .form-label.tip {
   color: #f57e23;
 }
-/* line 211, ../sass/partials/_forms.scss */
+/* line 210, ../sass/partials/_forms.scss */
 .form-label.tip:after {
   content: "*";
   display: inline;
 }
 
-/* line 216, ../sass/partials/_forms.scss */
+/* line 215, ../sass/partials/_forms.scss */
 .form-label.warn {
   color: red;
   font-weight: bold;
 }
-/* line 219, ../sass/partials/_forms.scss */
+/* line 218, ../sass/partials/_forms.scss */
 .form-label.warn:after {
   content: "!";
   display: inline;
 }
 
-/* line 226, ../sass/partials/_forms.scss */
+/* line 225, ../sass/partials/_forms.scss */
 .form-container {
   margin-top: 24px;
   padding: 24px;
 }
-/* line 229, ../sass/partials/_forms.scss */
+/* line 228, ../sass/partials/_forms.scss */
 .form-container label {
   display: inline-block;
 }
 
-/* line 234, ../sass/partials/_forms.scss */
+/* line 233, ../sass/partials/_forms.scss */
 .form-input {
   height: 22px;
   line-height: 24px;
@@ -1362,52 +1361,56 @@ input[readonly]:focus, textarea[readonly]:focus {
   width: 16.25em;
   display: block;
 }
-/* line 241, ../sass/partials/_forms.scss */
+/* line 240, ../sass/partials/_forms.scss */
 .form-input.long {
   width: 28.75em;
 }
 
-/* line 246, ../sass/partials/_forms.scss */
+/* line 245, ../sass/partials/_forms.scss */
 .form-add {
   display: block;
 }
 
-/* line 250, ../sass/partials/_forms.scss */
+/* line 249, ../sass/partials/_forms.scss */
 .form-input.file {
   height: 24px;
 }
 
-/* line 254, ../sass/partials/_forms.scss */
+/* line 253, ../sass/partials/_forms.scss */
 .form-input.checkbox, [type="checkbox"], .form-input.radio, [type="radio"] {
   width: auto;
   display: inline-block;
   vertical-align: bottom;
   margin: 0 6px 2px 6px;
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   padding: 0;
 }
-/* line 262, ../sass/partials/_forms.scss */
+/* line 261, ../sass/partials/_forms.scss */
 .form-input.checkbox.error, [type="checkbox"].error, .form-input.radio.error, [type="radio"].error {
   outline: 3px solid red;
 }
-/* line 265, ../sass/partials/_forms.scss */
+/* line 264, ../sass/partials/_forms.scss */
 .form-input.checkbox.warning, [type="checkbox"].warning, .form-input.radio.warning, [type="radio"].warning {
   outline: 3px solid #f57e23;
 }
+/* line 267, ../sass/partials/_forms.scss */
+.form-input.checkbox.source-value-changed, [type="checkbox"].source-value-changed, .form-input.radio.source-value-changed, [type="radio"].source-value-changed {
+  outline: 1px solid #04c714;
+}
 
-/* line 270, ../sass/partials/_forms.scss */
+/* line 272, ../sass/partials/_forms.scss */
 .form-input.combobox, select {
   width: 16.25em;
   height: 30px;
   padding: 4px;
 }
-/* line 274, ../sass/partials/_forms.scss */
+/* line 276, ../sass/partials/_forms.scss */
 .form-input.combobox.long, select.long {
   width: 28.75em;
 }
 
-/* line 279, ../sass/partials/_forms.scss */
+/* line 281, ../sass/partials/_forms.scss */
 .form-input.other {
   display: inline;
   margin-top: -40px;
@@ -1415,7 +1418,7 @@ input[readonly]:focus, textarea[readonly]:focus {
   width: 16.25em;
 }
 
-/* line 285, ../sass/partials/_forms.scss */
+/* line 287, ../sass/partials/_forms.scss */
 .form-group, .form-choice, .form-table {
   overflow: visible;
   border-radius: 3px;
@@ -1425,74 +1428,74 @@ input[readonly]:focus, textarea[readonly]:focus {
   background: #f6f6f6;
   border-bottom: 1px solid #e9e9e9;
 }
-/* line 293, ../sass/partials/_forms.scss */
+/* line 295, ../sass/partials/_forms.scss */
 .form-group:last-child, .form-choice:last-child, .form-table:last-child {
   border-bottom: none;
 }
-/* line 297, ../sass/partials/_forms.scss */
+/* line 299, ../sass/partials/_forms.scss */
 .form-group table, .form-choice table, .form-table table {
   width: auto;
 }
-/* line 300, ../sass/partials/_forms.scss */
+/* line 302, ../sass/partials/_forms.scss */
 .form-group .form-group, .form-choice .form-group, .form-table .form-group {
   margin: 6px;
 }
-/* line 303, ../sass/partials/_forms.scss */
+/* line 305, ../sass/partials/_forms.scss */
 .form-group .form-input, .form-choice .form-input, .form-table .form-input {
   display: block;
 }
-/* line 306, ../sass/partials/_forms.scss */
+/* line 308, ../sass/partials/_forms.scss */
 .form-group .form-input.checkbox, .form-group .form-input.radio, .form-choice .form-input.checkbox, .form-choice .form-input.radio, .form-table .form-input.checkbox, .form-table .form-input.radio {
   margin: 0 6px 2px 0;
   display: inline-block;
 }
-/* line 310, ../sass/partials/_forms.scss */
+/* line 312, ../sass/partials/_forms.scss */
 .form-group .form-label-checkbox, .form-choice .form-label-checkbox, .form-table .form-label-checkbox {
   vertical-align: middle;
   width: 262px;
   margin-right: 4px;
 }
-/* line 315, ../sass/partials/_forms.scss */
+/* line 317, ../sass/partials/_forms.scss */
 .form-group .form-label-group, .form-group .form-label-table, .form-choice .form-label-group, .form-choice .form-label-table, .form-table .form-label-group, .form-table .form-label-table {
   width: 100%;
   display: block;
   text-transform: uppercase;
   font-family: "Source Sans Pro", sans-serif;
 }
-/* line 321, ../sass/partials/_forms.scss */
+/* line 323, ../sass/partials/_forms.scss */
 .form-group .form-entry, .form-choice .form-entry, .form-table .form-entry {
   display: inline-block;
   width: 300px;
   min-height: 48px;
 }
 
-/* line 328, ../sass/partials/_forms.scss */
+/* line 330, ../sass/partials/_forms.scss */
 .form-choice .form-entry {
   display: inline-block;
   min-width: 45%;
 }
-/* line 331, ../sass/partials/_forms.scss */
+/* line 333, ../sass/partials/_forms.scss */
 .form-choice .form-entry .form-input {
   display: inline-block;
 }
-/* line 334, ../sass/partials/_forms.scss */
+/* line 336, ../sass/partials/_forms.scss */
 .form-choice .form-entry .form-input.textarea {
   height: 72px;
   width: 80%;
 }
-/* line 338, ../sass/partials/_forms.scss */
+/* line 340, ../sass/partials/_forms.scss */
 .form-choice .form-entry .form-indicator {
   top: 0;
 }
 
-/* line 343, ../sass/partials/_forms.scss */
+/* line 345, ../sass/partials/_forms.scss */
 .form-info {
   display: inline;
   color: red;
   margin: 12px;
 }
 
-/* line 349, ../sass/partials/_forms.scss */
+/* line 351, ../sass/partials/_forms.scss */
 .form-error {
   display: inline;
   color: red;
@@ -1500,56 +1503,56 @@ input[readonly]:focus, textarea[readonly]:focus {
   font-weight: bold;
 }
 
-/* line 356, ../sass/partials/_forms.scss */
+/* line 358, ../sass/partials/_forms.scss */
 .form-input-warn {
   font-weight: bold;
 }
 
-/* line 360, ../sass/partials/_forms.scss */
+/* line 362, ../sass/partials/_forms.scss */
 .form-input-err {
   font-weight: bold;
 }
 
-/* line 364, ../sass/partials/_forms.scss */
+/* line 366, ../sass/partials/_forms.scss */
 .form-input.textarea {
   height: 168px;
   width: 80%;
 }
 
-/* line 369, ../sass/partials/_forms.scss */
+/* line 371, ../sass/partials/_forms.scss */
 .form-input-and-unit {
   display: block;
   margin-right: 12px;
 }
 
-/* line 373, ../sass/partials/_forms.scss */
+/* line 375, ../sass/partials/_forms.scss */
 .form-input-and-unit .form-input {
   display: inline-block;
   margin-right: 12px;
 }
 
-/* line 380, ../sass/partials/_forms.scss */
+/* line 382, ../sass/partials/_forms.scss */
 .form-input.tiny {
   width: 1.875em;
 }
 
-/* line 384, ../sass/partials/_forms.scss */
+/* line 386, ../sass/partials/_forms.scss */
 .form-input.short {
   width: 3.75em;
 }
 
-/* line 388, ../sass/partials/_forms.scss */
+/* line 390, ../sass/partials/_forms.scss */
 .form-input.medium {
   width: 10em;
 }
 
-/* line 393, ../sass/partials/_forms.scss */
+/* line 395, ../sass/partials/_forms.scss */
 .docgen-content {
   transition: width 600ms;
   -webkit-transition: width 600ms;
   /* Safari */
 }
-/* line 397, ../sass/partials/_forms.scss */
+/* line 399, ../sass/partials/_forms.scss */
 .docgen-content .form-choice .form-entry {
   min-height: 38px;
   display: inline-block;
@@ -1558,90 +1561,90 @@ input[readonly]:focus, textarea[readonly]:focus {
   margin-top: 8px;
   height: auto;
 }
-/* line 404, ../sass/partials/_forms.scss */
+/* line 406, ../sass/partials/_forms.scss */
 .docgen-content .form-choice .form-entry label {
   vertical-align: top;
   width: 90%;
 }
-/* line 408, ../sass/partials/_forms.scss */
+/* line 410, ../sass/partials/_forms.scss */
 .docgen-content .form-choice .form-entry input {
   vertical-align: text-top;
 }
-/* line 411, ../sass/partials/_forms.scss */
+/* line 413, ../sass/partials/_forms.scss */
 .docgen-content .form-choice .form-entry .form-input-and-unit {
   display: inline-block;
   margin-right: 12px;
 }
-/* line 414, ../sass/partials/_forms.scss */
+/* line 416, ../sass/partials/_forms.scss */
 .docgen-content .form-choice .form-entry .form-input-and-unit input {
   width: 3.75em;
 }
-/* line 420, ../sass/partials/_forms.scss */
+/* line 422, ../sass/partials/_forms.scss */
 .docgen-content .form-entry {
   min-width: 300px;
   min-height: 64px;
 }
-/* line 424, ../sass/partials/_forms.scss */
+/* line 426, ../sass/partials/_forms.scss */
 .docgen-content .form-entry.long {
   min-width: 480px;
 }
-/* line 427, ../sass/partials/_forms.scss */
+/* line 429, ../sass/partials/_forms.scss */
 .docgen-content .form-entry.personSelector {
   width: auto;
 }
-/* line 429, ../sass/partials/_forms.scss */
+/* line 431, ../sass/partials/_forms.scss */
 .docgen-content .form-entry.personSelector label {
   display: block;
 }
-/* line 433, ../sass/partials/_forms.scss */
+/* line 435, ../sass/partials/_forms.scss */
 .docgen-content .form-entry.personSelector .form-input {
   display: inline-block;
 }
-/* line 439, ../sass/partials/_forms.scss */
+/* line 441, ../sass/partials/_forms.scss */
 .docgen-content .form-entry.radioGroup {
   min-height: 32px;
 }
-/* line 442, ../sass/partials/_forms.scss */
+/* line 444, ../sass/partials/_forms.scss */
 .docgen-content .form-full-width {
   width: 80%;
 }
-/* line 445, ../sass/partials/_forms.scss */
+/* line 447, ../sass/partials/_forms.scss */
 .docgen-content .form-group {
   overflow: visible;
 }
-/* line 450, ../sass/partials/_forms.scss */
+/* line 452, ../sass/partials/_forms.scss */
 .docgen-content .form-group .form-entry .form-label-string-choice, .docgen-content .form-group .form-entry .form-label-select, .docgen-content .form-group .form-entry .form-label-date {
   vertical-align: text-bottom;
 }
-/* line 454, ../sass/partials/_forms.scss */
+/* line 456, ../sass/partials/_forms.scss */
 .docgen-content .form-group .form-entry.personSelector .form-label-select {
   bottom: 80px;
 }
-/* line 459, ../sass/partials/_forms.scss */
+/* line 461, ../sass/partials/_forms.scss */
 .docgen-content .long {
   width: 16.25em;
 }
-/* line 462, ../sass/partials/_forms.scss */
+/* line 464, ../sass/partials/_forms.scss */
 .docgen-content .really-long {
   width: 28.75em;
 }
-/* line 466, ../sass/partials/_forms.scss */
+/* line 468, ../sass/partials/_forms.scss */
 .docgen-content .form-table td, .docgen-content .form-table th {
   padding: 6px 12px;
 }
-/* line 471, ../sass/partials/_forms.scss */
+/* line 473, ../sass/partials/_forms.scss */
 .docgen-content #table-huoneistot td, .docgen-content #table-huoneistot th, .docgen-content #table-muutHankkeet td, .docgen-content #table-muutHankkeet th {
   padding: 6px;
 }
-/* line 475, ../sass/partials/_forms.scss */
+/* line 477, ../sass/partials/_forms.scss */
 .docgen-content #table-huoneistot td, .docgen-content #table-muutHankkeet td {
   text-align: center;
 }
-/* line 480, ../sass/partials/_forms.scss */
+/* line 482, ../sass/partials/_forms.scss */
 .docgen-content .form-table th:first-child {
   border-left: none;
 }
-/* line 484, ../sass/partials/_forms.scss */
+/* line 486, ../sass/partials/_forms.scss */
 .docgen-content .form-table th {
   vertical-align: bottom;
   border-style: solid;
@@ -1650,20 +1653,20 @@ input[readonly]:focus, textarea[readonly]:focus {
   border-bottom: none;
   border-right: none;
 }
-/* line 493, ../sass/partials/_forms.scss */
+/* line 495, ../sass/partials/_forms.scss */
 .docgen-content .form-table .form-input {
   display: inline;
   margin: 0;
 }
-/* line 499, ../sass/partials/_forms.scss */
+/* line 501, ../sass/partials/_forms.scss */
 .docgen-content .form-table .form-input .text {
   height: 25px;
 }
-/* line 504, ../sass/partials/_forms.scss */
+/* line 506, ../sass/partials/_forms.scss */
 .docgen-content .form-table .form-input.combobox, .docgen-content select {
   width: 10em;
 }
-/* line 508, ../sass/partials/_forms.scss */
+/* line 510, ../sass/partials/_forms.scss */
 .docgen-content .form-table .form-indicator {
   right: auto;
   top: 0;
@@ -1671,7 +1674,7 @@ input[readonly]:focus, textarea[readonly]:focus {
   width: 28px;
   padding: 0;
 }
-/* line 515, ../sass/partials/_forms.scss */
+/* line 517, ../sass/partials/_forms.scss */
 .docgen-content .form-table .form-indicator .icon {
   position: absolute;
   top: 0px;
@@ -1679,65 +1682,65 @@ input[readonly]:focus, textarea[readonly]:focus {
   padding: 0;
   margin: 0;
 }
-/* line 524, ../sass/partials/_forms.scss */
+/* line 526, ../sass/partials/_forms.scss */
 .docgen-content .form-table .form-indicator .form-input-saved .icon {
   background-position: 4px -2494px;
 }
-/* line 530, ../sass/partials/_forms.scss */
+/* line 532, ../sass/partials/_forms.scss */
 .docgen-content .form-table .form-entry {
   display: block;
   width: 100%;
   min-width: 50px;
   min-height: 30px;
 }
-/* line 537, ../sass/partials/_forms.scss */
+/* line 539, ../sass/partials/_forms.scss */
 .docgen-content .form-table .errorPanel {
   top: 38px;
 }
-/* line 541, ../sass/partials/_forms.scss */
+/* line 543, ../sass/partials/_forms.scss */
 .docgen-content .form-table .form-help {
   bottom: 45px;
 }
-/* line 546, ../sass/partials/_forms.scss */
+/* line 548, ../sass/partials/_forms.scss */
 .docgen-content .button-group .btn {
   margin-right: 10px;
 }
 
-/* line 553, ../sass/partials/_forms.scss */
+/* line 555, ../sass/partials/_forms.scss */
 .kiintun-and-maaraalatunnus .form-maaraala {
   display: inline;
 }
-/* line 556, ../sass/partials/_forms.scss */
+/* line 558, ../sass/partials/_forms.scss */
 .kiintun-and-maaraalatunnus .form-input.text {
   display: inline;
   width: 48px;
   margin: 0 4px;
 }
 
-/* line 564, ../sass/partials/_forms.scss */
+/* line 566, ../sass/partials/_forms.scss */
 .form-approval-status {
   text-transform: none;
   width: 100%;
   display: block;
   min-height: 32px;
 }
-/* line 570, ../sass/partials/_forms.scss */
+/* line 572, ../sass/partials/_forms.scss */
 .form-approval-status.empty {
   display: none;
   height: 0;
 }
-/* line 575, ../sass/partials/_forms.scss */
+/* line 577, ../sass/partials/_forms.scss */
 .form-approval-status .form-buttons {
   display: inline-block;
   text-align: right;
   float: right;
 }
-/* line 579, ../sass/partials/_forms.scss */
+/* line 581, ../sass/partials/_forms.scss */
 .form-approval-status .form-buttons .btn {
   margin: 0 6px 6px 0;
 }
 
-/* line 586, ../sass/partials/_forms.scss */
+/* line 588, ../sass/partials/_forms.scss */
 .form-help {
   min-height: 100px;
   padding: 6px 24px 6px 6px;
@@ -1752,7 +1755,7 @@ input[readonly]:focus, textarea[readonly]:focus {
   box-shadow: 2px 2px 3px #4f4f4f;
   text-align: left;
 }
-/* line 599, ../sass/partials/_forms.scss */
+/* line 601, ../sass/partials/_forms.scss */
 .form-help:after {
   content: " ";
   width: 0;
@@ -1765,7 +1768,7 @@ input[readonly]:focus, textarea[readonly]:focus {
   border-right: 14px solid transparent;
   border-top: 14px solid #4f4f4f;
 }
-/* line 611, ../sass/partials/_forms.scss */
+/* line 613, ../sass/partials/_forms.scss */
 .form-help:before {
   content: " ";
   background-image: url("/img/icons-sprite-1.14.png");
@@ -1778,14 +1781,14 @@ input[readonly]:focus, textarea[readonly]:focus {
   right: 6px;
 }
 
-/* line 623, ../sass/partials/_forms.scss */
+/* line 625, ../sass/partials/_forms.scss */
 .form-full-width .form-help {
   top: 4px;
   left: 85%;
   bottom: auto;
   width: 55%;
 }
-/* line 628, ../sass/partials/_forms.scss */
+/* line 630, ../sass/partials/_forms.scss */
 .form-full-width .form-help:after {
   content: " ";
   width: 0;
@@ -1799,7 +1802,7 @@ input[readonly]:focus, textarea[readonly]:focus {
   border-bottom: 14px solid transparent;
   border-right: 14px solid #4f4f4f;
 }
-/* line 641, ../sass/partials/_forms.scss */
+/* line 643, ../sass/partials/_forms.scss */
 .form-full-width .form-help:before {
   content: " ";
   background-image: url("/img/icons-sprite-1.14.png");
@@ -1812,7 +1815,7 @@ input[readonly]:focus, textarea[readonly]:focus {
   right: 6px;
 }
 
-/* line 655, ../sass/partials/_forms.scss */
+/* line 657, ../sass/partials/_forms.scss */
 .approval-approved:after {
   content: " ";
   background-image: url("/img/icons-sprite-1.14.png");
@@ -1825,7 +1828,7 @@ input[readonly]:focus, textarea[readonly]:focus {
   vertical-align: text-bottom;
 }
 
-/* line 667, ../sass/partials/_forms.scss */
+/* line 669, ../sass/partials/_forms.scss */
 .approval-rejected:after {
   content: " ";
   background-image: url("/img/icons-sprite-1.14.png");
@@ -1838,12 +1841,12 @@ input[readonly]:focus, textarea[readonly]:focus {
   vertical-align: text-bottom;
 }
 
-/* line 683, ../sass/partials/_forms.scss */
+/* line 685, ../sass/partials/_forms.scss */
 #neighbor-show [type="checkbox"]:disabled {
   position: relative;
   visibility: hidden;
 }
-/* line 686, ../sass/partials/_forms.scss */
+/* line 688, ../sass/partials/_forms.scss */
 #neighbor-show [type="checkbox"]:disabled:checked {
   visibility: visible;
   opacity: 1;
@@ -1857,63 +1860,63 @@ input[readonly]:focus, textarea[readonly]:focus {
   background: #f6f6f6 url(https://cdn2.iconfinder.com/data/icons/flat-ui-icons-24-px/24/checkmark-24-512.png) center center no-repeat;
   background-size: 12px 12px;
 }
-/* line 703, ../sass/partials/_forms.scss */
+/* line 705, ../sass/partials/_forms.scss */
 #neighbor-show [type="radio"]:disabled {
   position: relative;
   visibility: hidden;
 }
-/* line 706, ../sass/partials/_forms.scss */
+/* line 708, ../sass/partials/_forms.scss */
 #neighbor-show [type="radio"]:disabled:checked {
   visibility: visible;
   opacity: 1;
 }
 
-/* line 714, ../sass/partials/_forms.scss */
+/* line 716, ../sass/partials/_forms.scss */
 .three-col {
   width: 100%;
 }
-/* line 717, ../sass/partials/_forms.scss */
+/* line 719, ../sass/partials/_forms.scss */
 .three-col .form-input {
   width: 17.25em;
 }
-/* line 721, ../sass/partials/_forms.scss */
+/* line 723, ../sass/partials/_forms.scss */
 .three-col .col1 {
   float: left;
   padding-right: 12px;
 }
-/* line 726, ../sass/partials/_forms.scss */
+/* line 728, ../sass/partials/_forms.scss */
 .three-col .col2 {
   float: left;
   padding-left: 12px;
   padding-right: 12px;
 }
-/* line 731, ../sass/partials/_forms.scss */
+/* line 733, ../sass/partials/_forms.scss */
 .three-col .col3 {
   float: left;
   padding-left: 12px;
 }
 
-/* line 738, ../sass/partials/_forms.scss */
+/* line 740, ../sass/partials/_forms.scss */
 foreman-history h2 {
   background-color: #f6f6f6 !important;
 }
-/* line 741, ../sass/partials/_forms.scss */
+/* line 743, ../sass/partials/_forms.scss */
 foreman-history th.first {
   width: 10%;
 }
-/* line 744, ../sass/partials/_forms.scss */
+/* line 746, ../sass/partials/_forms.scss */
 foreman-history th.second {
   width: 15%;
 }
-/* line 747, ../sass/partials/_forms.scss */
+/* line 749, ../sass/partials/_forms.scss */
 foreman-history th.third {
   width: 10%;
 }
-/* line 750, ../sass/partials/_forms.scss */
+/* line 752, ../sass/partials/_forms.scss */
 foreman-history th.fourth {
   width: 20%;
 }
-/* line 753, ../sass/partials/_forms.scss */
+/* line 755, ../sass/partials/_forms.scss */
 foreman-history th.fifth {
   width: 45%;
 }
