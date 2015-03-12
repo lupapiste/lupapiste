@@ -38,7 +38,7 @@ legend {
   }
   // newbies
   &.source-value-changed {
-    border: 1px solid $lp-green;
+    border: 2px solid $lp-green;
   }
   &.error {
     border-color: red;
@@ -265,7 +265,7 @@ input[readonly], textarea[readonly] {
     outline: 3px solid $lp-orange;
   }
   &.source-value-changed {
-    outline: 1px solid $lp-green;
+    outline: 2px solid $lp-green;
   }
 }
 

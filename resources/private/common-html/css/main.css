@@ -1159,7 +1159,7 @@ legend {
 }
 /* line 40, ../sass/partials/_forms.scss */
 [type="text"].source-value-changed, [type="email"].source-value-changed, [type="tel"].source-value-changed, [type="url"].source-value-changed, [type="password"].source-value-changed, select.source-value-changed, textarea.source-value-changed {
-  border: 1px solid #04c714;
+  border: 2px solid #04c714;
 }
 /* line 43, ../sass/partials/_forms.scss */
 [type="text"].error, [type="email"].error, [type="tel"].error, [type="url"].error, [type="password"].error, select.error, textarea.error {
@@ -1396,7 +1396,7 @@ input[readonly]:focus, textarea[readonly]:focus {
 }
 /* line 267, ../sass/partials/_forms.scss */
 .form-input.checkbox.source-value-changed, [type="checkbox"].source-value-changed, .form-input.radio.source-value-changed, [type="radio"].source-value-changed {
-  outline: 1px solid #04c714;
+  outline: 2px solid #04c714;
 }
 
 /* line 272, ../sass/partials/_forms.scss */
