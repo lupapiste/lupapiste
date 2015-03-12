@@ -20,6 +20,9 @@ LUPAPISTE.ApplicationModel = function() {
   self.location = ko.observable();
   self.municipality = ko.observable();
   self.organizationMeta = ko.observable();
+  self.asianhallintaEnabled = ko.computed(function() {
+    return self.organizationMeta() ? self.organizationMeta().asianhallinta() : false;
+  });
   self.organizationLinks = ko.computed(function() {
     return self.organizationMeta() ? self.organizationMeta().links() : "";
   });
@@ -495,5 +498,15 @@ LUPAPISTE.ApplicationModel = function() {
 
   self.toggleHelp = function(param) {
     self[param](!self[param]());
+  };
+
+  self.toAsianhallinta = function() {
+    ajax.command("application-to-asianhallinta", {id: self.id(), lang: loc.getCurrentLanguage()})
+      .success(function() {
+        self.reload();
+      })
+      .error(function(e) {LUPAPISTE.showIntegrationError("integration.asianhallinta.title", e.text, e.details);})
+      .processing(self.processing)
+      .call();
   };
 };
