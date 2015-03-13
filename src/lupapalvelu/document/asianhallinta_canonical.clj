@@ -87,14 +87,18 @@
   (when (seq operations)
     {:Toimenpide (map #(-> % (ua-get-toimenpide lang)) operations)}))
 
+(def- viitelupa-mapping
+  {"kuntalupatunnus" "Taustajärjestelmä"
+   "lupapistetunnus" "Lupapiste"})
+
 (defn- ua-get-viitelupa [linkPermit]
   (util/strip-nils
     {:MuuTunnus {:Tunnus (:id linkPermit)
-                 :Sovellus (:type linkPermit)}}))
+                 :Sovellus ((:type linkPermit) viitelupa-mapping)}}))
 
 (defn- ua-get-viiteluvat [{:keys [linkPermitData]}]
   (when (seq linkPermitData)
-    {:Viitelupa (map #(-> % (ua-get-viitelupa)) linkPermitData)}))
+    {:Viitelupa (map ua-get-viitelupa linkPermitData)}))
 
 (defn- ua-get-sijaintipiste [{:keys [location]}]
   {:Sijaintipiste (str (:x location) " " (:y location))})
@@ -150,6 +154,7 @@
 (defn application-to-asianhallinta-canonical [application lang]
   "Return canonical, does not contain attachments"
   (let [documents (tools/unwrapped (documents-by-type-without-blanks application))]
+    (clojure.pprint/pprint (ua-get-viiteluvat application))
     (-> (assoc-in ua-root-element [:UusiAsia :Tyyppi] (ua-get-asian-tyyppi-string application))
       (assoc-in [:UusiAsia :Kuvaus] (:title application))
       (assoc-in [:UusiAsia :Kuntanumero] (:municipality application))
