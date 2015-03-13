@@ -167,7 +167,8 @@
    :pre-checks [has-asianhallinta-operation]
    :states     [:submitted :complement-needed]}
   [{:keys [application created user]:as command}]
-  (let [submitted-application (mongo/by-id :submitted-applications id)
+  (let [application (meta-fields/enrich-with-link-permit-data application)
+        submitted-application (mongo/by-id :submitted-applications id)
         app-updates {:modified created
                      :sent created
                      :authority (if (seq (:authority application)) (:authority application) (user/summary user))
