@@ -20,6 +20,7 @@
                  {$or [{:auth.id (:id user)} {:auth.id company-id}]}
                  {:auth.id (:id user)})
     :authority {$or [{:organization {$in (:organizations user)}} {:auth.id (:id user)}]}
+    :oirAuthority {:organization {$in (:organizations user)}}
     :trusted-etl {}
     (do
       (warnf "invalid role to get applications: user-id: %s, role: %s" (:id user) (:role user))
@@ -31,6 +32,7 @@
     (case (keyword (:role user))
       :applicant {:state {$nin ["canceled"]}}
       :authority {:state {$nin ["draft" "canceled"]}}
+      :oirAuthority {:state {$in ["info" "answered"]} :openInfoRequest true}
       {})))
 
 (defn- only-authority-sees [user checker items]
@@ -244,6 +246,7 @@
    :submitted                nil ; timestamp
    :tasks                    []
    :title                    ""
+   :transfers                []
    :urgency                  "normal"
    :verdicts                 []})
 

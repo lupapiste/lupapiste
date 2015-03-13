@@ -31,7 +31,7 @@
     (select-keys user [:id :username :firstName :lastName :role])))
 
 (defn authority? [{role :role}]
-  (= :authority (keyword role)))
+  (#{:authority :oirAuthority} (keyword role)))
 
 (defn applicant? [{role :role}]
   (= :applicant (keyword role)))
@@ -192,9 +192,10 @@
 
 (defn applicationpage-for [role]
   (let [s (name role)]
-    (if (or (ss/blank? s) (= s "dummy"))
-     "applicant"
-     (kebab/->kebab-case s))))
+    (cond
+      (or (ss/blank? s) (= s "dummy")) "applicant"
+      (= s "oirAuthority") "oir"
+      :else (kebab/->kebab-case s))))
 
 (defn user-in-role [user role & params]
   (merge (apply hash-map params) (assoc (summary user) :role role)))

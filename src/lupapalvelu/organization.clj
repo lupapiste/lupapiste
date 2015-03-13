@@ -17,17 +17,30 @@
 ;; local api
 ;;
 
+(def scope-skeleton
+  {:permitType nil
+   :municipality nil
+   :inforequest-enabled false
+   :new-application-enabled false
+   :open-inforequest false
+   :open-inforequest-email ""
+   :opening nil})
+
+(defn- with-scope-defaults [org]
+  (when (seq org)
+    (update-in org [:scope] #(map (fn [s] (merge scope-skeleton s)) %))))
+
 (defn get-organizations
   ([]
     (get-organizations {}))
   ([query]
-    (mongo/select :organizations query))
+    (map with-scope-defaults (mongo/select :organizations query)))
   ([query projection]
-    (mongo/select :organizations query projection)))
+    (map with-scope-defaults (mongo/select :organizations query projection))))
 
 (defn get-organization [id]
   {:pre [(not (s/blank? id))]}
-  (mongo/by-id :organizations id))
+  (with-scope-defaults (mongo/by-id :organizations id)))
 
 (defn update-organization [id changes]
   {:pre [(not (s/blank? id))]}
@@ -335,6 +348,7 @@
         :kopiolaitos-orderer-phone (:kopiolaitos-orderer-phone organization)
         :kopiolaitos-orderer-email (:kopiolaitos-orderer-email organization))
       (fail :error.unknown-organization))))
+
 
 ;;
 ;; Helpers

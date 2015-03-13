@@ -1,6 +1,7 @@
 (ns lupapalvelu.permit
   (:require [lupapalvelu.domain :as domain]
             [sade.core :refer [fail]]
+            [sade.util :as util]
             [taoensso.timbre :as timbre :refer [errorf warn]]))
 
 (defonce ^:private permit-type-defs (atom {}))
@@ -25,7 +26,7 @@
 (defmacro defpermit [permit-name description m]
   `(do
      (def ~permit-name ~(str description) ~(str permit-name))
-     (swap! permit-type-defs assoc ~permit-name ~m)))
+     (swap! permit-type-defs util/deep-merge {~permit-name ~m})))
 
 (defpermit R  "Rakennusluvat"
   {:subtypes         []

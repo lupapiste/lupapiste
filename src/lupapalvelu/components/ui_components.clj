@@ -35,7 +35,10 @@
                  :postVerdictStates lupapalvelu.application-meta-fields/post-verdict-states
                  :stampableMimes    (filter identity (map mime/mime-types file-types))
                  :foremanRoles      (:body (first lupapalvelu.document.schemas/kuntaroolikoodi-tyonjohtaja))
-                 :foremanReadonlyFields ["luvanNumero", "katuosoite", "rakennustoimenpide", "kokonaisala"]}]
+                 :foremanReadonlyFields ["luvanNumero", "katuosoite", "rakennustoimenpide", "kokonaisala"]
+                 :asianhallintaVersions (util/convert-values ; asianhallinta versions have "ah-" prefix
+                                          validator/supported-asianhallinta-versions-by-permit-type 
+                                          (partial map #(sade.strings/suffix % "ah-")))}]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
 
 (defn- loc->js []
@@ -139,8 +142,10 @@
 
    :verdict-attachment-prints {:depends [:common-html]
                                :html ["verdict-attachment-prints-order-template.html"
+                                      "verdict-attachment-prints-order-history-template.html"
                                       "verdict-attachment-prints-multiselect.html"]
                                :js ["verdict-attachment-prints-order-model.js"
+                                    "verdict-attachment-prints-order-history-model.js"
                                     "verdict-attachment-prints-multiselect-model.js"]}
 
    :attachment   {:depends [:common-html :repository :signing :side-panel]
@@ -278,7 +283,7 @@
    :admin     {:depends [:admin-app :common-html :authenticated :admins :map :mypage :user-menu :debug]
                :css ["admin.css"]
                :js ["admin-users.js" "organizations.js" "companies.js" "features.js" "actions.js" "screenmessages-list.js"]
-               :html ["index.html" "admin.html"
+               :html ["index.html" "admin.html" "organization.html"
                       "admin-users.html" "organizations.html" "companies.html" "features.html" "actions.html"
                       "screenmessages-list.html"]}
 

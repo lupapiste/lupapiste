@@ -389,56 +389,60 @@
   }
 }
 
-#dialog-stamp-attachments {
-  .dialog-content {
-    max-height: 500px;
-    overflow-y: scroll;
-    .btn-dialog {
-      position: relative;
-      width: 10em;
-      margin-left: 6px;
-    }
-    .stamp-files {
-      a {
-        font-size: 13px;
-        display: inline-block;
-      }
-    }
-    .select-all {
-      margin-left: 360px;
-    }
-  }
-}
-
-#dialog-verdict-attachment-prints-order {
+#dialog-verdict-attachment-prints-order, #dialog-verdict-attachment-prints-order-history {
   .dialog-content {
     padding-left: 15px;
   }
   .order-amount {
-    width: 15px;
+    width: 18px;
+  }
+  .btn-prints-dialog-ok {
+    margin-left: 15px;
+  }
+
+  .context-error {
+    max-width: 820px;
+    word-wrap: break-word;
   }
 
   // With these, making table's attachment list scrollable
 
   $table_body_height: 200px;
-  $table_width: 800px;
+  $table_width: 820px;
   $column_one_width: 200px;
   $column_two_width: 200px;
   $column_three_width: 300px;
-  $column_four_width: 100px;
+  $column_four_width: 120px;
 
   .fixed-headers {
     width: $table_width;
     table-layout: fixed;
+    margin-right: 20px;
 
     .center {
       text-align: center;
     }
 
-    td:nth-child(1), th:nth-child(1) { min-width: $column_one_width; }
-    td:nth-child(2), th:nth-child(2) { min-width: $column_two_width; }
-    td:nth-child(3), th:nth-child(3) { width: $column_three_width; }
-    td:nth-child(4), th:nth-child(4) { width: $column_four_width; }
+    td {
+      word-wrap: break-word;
+    }
+
+    td:nth-child(1), th:nth-child(1) {
+      width: $column_one_width;
+      max-width: $column_one_width;
+    }
+    td:nth-child(2), th:nth-child(2) {
+      width: $column_two_width;
+      max-width: $column_two_width;
+    }
+    td:nth-child(3), th:nth-child(3) {
+      width: $column_three_width;
+      max-width: $column_three_width;
+    }
+    td:nth-child(4), th:nth-child(4) {
+      width: $column_four_width;
+      max-width: $column_four_width;
+    }
 
     thead {
       tr {
@@ -460,6 +464,22 @@
     overflow-x: hidden;
     overflow-y: auto;
     tbody { height: auto; }
+  }
+}
+
+#dialog-verdict-attachment-prints-order-history {
+  .history-dialog-description {
+    margin-bottom: $marginM;
+  }
+
+  .history-items {
+    margin-top: $marginS;
+    overflow-y: auto;
+    max-height: 500px;
+
+    .history-item {
+      margin: $marginS 0;
+    }
   }
 }
 
@@ -636,6 +656,18 @@
 }
 
 .tasks-foreman {
+  position: relative;
+
+  .form-input {
+    display: inline-block;
+  }
+
+  .form-input.combobox, select {
+    &.long {
+     width: $cols7;
+    }
+  }
+
   thead tr:first-child td {
     padding-left: 0
   }

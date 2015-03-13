@@ -472,11 +472,6 @@
       (when-not (= tasks (:tasks application))
         (mongo/update-by-id :applications (:id application) {$set {:tasks tasks}})))))
 
-(defmigration comment-roles
-  (doseq [application (mongo/select :applications {"comments.0" {$exists true}} {:comments 1})]
-    (mongo/update-by-id :applications (:id application)
-      {$set (mongo/generate-array-updates :comments (:comments application) (constantly true) :roles [:applicant :authority])})))
-
 (defmigration unify-attachment-latest-version
   (doseq [application (mongo/select :applications {"state" {$in ["sent", "verdictGiven" "complement-needed", "constructionStarted"]}} {:attachments 1})
           {:keys [latestVersion] :as attachment} (:attachments application)]
@@ -768,6 +763,12 @@
     (let [known-domain (known-good-domains (ss/suffix email "@"))]
       (when (or (.endsWith email ".f") (and (not known-domain) (not (sade.dns/valid-mx-domain? email))))
        (mongo/remove :activation id)))))
+
+(defmigration comment-roles-v2
+  (update-applications-array
+    :comments
+    #(if (= (:roles %) ["applicant" "authority"]) (assoc % :roles [:applicant :authority :oirAuthority]) %)
+    {"comments.0" {$exists true}, :openInfoRequest true}))
 
 ;;
 ;; ****** NOTE! ******

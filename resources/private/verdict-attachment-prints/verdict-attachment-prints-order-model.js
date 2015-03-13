@@ -52,6 +52,7 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function() {
 
   var enrichAttachment = function(a) {
     a.filename = a.latestVersion.filename;
+    a.fileId = a.latestVersion.fileId;
     a.contents = a.contents || loc(["attachmentType", a.type["type-group"], a.type["type-id"]]);
     a.orderAmount = ko.observable("2");
     return a;
@@ -64,7 +65,7 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function() {
   var normalizeAttachments = function(attachments) {
     return _.map(attachments, function(a) {
       a.amount = a.orderAmount();
-      return _.pick(a, ["forPrinting", "amount", "contents", "type", "versions", "filename"]);
+      return _.pick(a, ["id", "forPrinting", "amount", "contents", "type", "fileId", "filename", "versions"]);
     });
   };
 
@@ -134,6 +135,7 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function() {
       .processing(self.processing)
       .pending(self.pending)
       .success(function() {
+        LUPAPISTE.ModalDialog.close();  // close the prints ordering dialog first
         var content = loc("verdict-attachment-prints-order.order-dialog.ready", self.attachments().length);
         LUPAPISTE.ModalDialog.showDynamicOk(loc("verdict-attachment-prints-order.order-dialog.title"), content);
         pageutil.showAjaxWait();

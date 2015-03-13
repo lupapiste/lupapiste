@@ -1,9 +1,12 @@
 (ns lupapalvelu.inforequest-itest
   (:require [midje.sweet  :refer :all]
             [lupapalvelu.itest-util :refer :all]
+            [sade.http :as http]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.schemas :as schemas]))
+
+(apply-remote-minimal)
 
 (facts "inforequest workflow"
   (let [{id :id :as resp} (create-app pena :messages ["hello"] :infoRequest true :municipality sonja-muni)]
@@ -23,10 +26,16 @@
     (fact "Sonja can assign inforequest to herself"
       (command sonja :assign-application :id id :assigneeId sonja-id) => ok?)
 
+    (fact "Sonja can mark inforequest answered"
+      (command sonja :can-mark-answered :id id) => ok?)
+
     (fact "When Commenting on inforequest marks it answered"
       (query-application pena id)    => (in-state? :info)
       (comment-application sonja id false) => ok?
       (query-application pena id)    => (in-state? :answered))
+
+    (fact "Sonja can no longer mark inforequest answered"
+      (command sonja :can-mark-answered :id id) => fail?)
 
     (fact "Pena can convert-to-application"
       (command pena :convert-to-application :id id) => ok?))
@@ -49,7 +58,13 @@
   (last-email)
 
   (let [application-id (create-app-id pena :municipality "433" :infoRequest true :address "OIR")
-        application    (query-application pena application-id)]
+        application    (query-application pena application-id)
+        email          (last-email)
+        [url token lang] (re-find #"(?sm)/api/raw/openinforequest\?token-id=([A-Za-z0-9-]+)&lang=([a-z]{2})" (get-in email [:body :plain] ""))
+        store (atom {})
+        params {:cookie-store (->cookie-store store)
+                :follow-redirects false
+                :throw-exceptions false}]
 
     (fact "Inforequest was created"
       (:infoRequest application) => true)
@@ -58,11 +73,14 @@
       (:openInfoRequest application) => true)
 
     (fact "Auhtority receives email about the new oir"
-      (let [email          (last-email)
-           [_ token lang] (re-find #"(?sm)/api/raw/openinforequest\?token-id=([A-Za-z0-9-]+)&lang=([a-z]{2})" (get-in email [:body :plain] ""))]
-       (:to email) => "erajorma@example.com"
-       (:subject email) => "Lupapiste.fi: OIR - Neuvontapyynt\u00f6"
-       (count token) => pos?))
+      (:to email) => "erajorma@example.com"
+      (:subject email) => "Lupapiste.fi: OIR - Neuvontapyynt\u00f6"
+      (count token) => pos?)
+
+    (fact "Clicking the link redirects to oir page"
+      (let [expected-location (str (server-address) "/app/fi/oir#!/inforequest/")
+           resp (http/get (str (server-address) url) params)]
+       (get-in resp [:headers "location"]) =>  #(sade.strings/starts-with % expected-location)))
 
     (comment-application pena application-id false) => ok?
 
@@ -71,6 +89,32 @@
            [_ token lang] (re-find #"(?sm)/api/raw/openinforequest\?token-id=([A-Za-z0-9-]+)&lang=([a-z]{2})" (get-in email [:body :plain] ""))]
        (:to email) => "erajorma@example.com"
        (:subject email) => "Lupapiste.fi: OIR - Neuvontapyynt\u00f6"
-       (count token) => pos?)))
+       (count token) => pos?))
 
+    (fact "Admin can not convert inforequests to normal yet"
+      (command admin :convert-to-normal-inforequests :organizationId (:organization application)) => fail?)
+
+    (fact "Admin disables open inforequests"
+      (command admin :update-organization
+        :permitType (:permitType application)
+        :municipality (:municipality application)
+        :inforequestEnabled true
+        :applicationEnabled false
+        :openInforequestEnabled false
+        :openInforequestEmail  "erajorma@example.com"
+        :opening nil) => ok?)
+
+    (fact "Admin converts inforequests to normal"
+      (let [resp (command admin :convert-to-normal-inforequests :organizationId (:organization application))]
+        resp => ok?
+        (:n resp) => 1))
+
+    (fact "Token no longer works"
+      (http/get (str (server-address) url) params) => http404?)
+
+    (fact "Application is no longer oir"
+      (let [application (query-application pena application-id)]
+        (:infoRequest application) => true
+        (:openInfoRequest application) => false))
+    )
   )
