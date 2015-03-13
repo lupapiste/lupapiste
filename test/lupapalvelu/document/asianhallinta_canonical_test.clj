@@ -8,6 +8,7 @@
             [midje.util :refer [testable-privates]]
             [lupapalvelu.document.poikkeamis-canonical-test :as poikkeus-test]
             [lupapalvelu.document.rakennuslupa_canonical-test :as rakennus-test]
+            [sade.core :refer :all]
             [sade.strings :as ss]
             [sade.util :as util]))
 
@@ -16,9 +17,11 @@
     (:Avain (first meta)) => "type-group"
     (:Avain (second meta)) => "type-id"))
 
-(fl/facts* "UusiAsia canonical with link permit"
-  (let [canonical   (ah/application-to-asianhallinta-canonical rakennus-test/application-tyonjohtajan-nimeaminen "fi") => truthy
-        application rakennus-test/application-tyonjohtajan-nimeaminen]
+(def- link-permit-data-kuntalupatunnus {:id "123-123-123-123" :type "kuntalupatunnus"})
+
+(fl/facts* "UusiAsia canonical with Lupapiste link permit"
+  (let [canonical   (ah/application-to-asianhallinta-canonical rakennus-test/application-suunnittelijan-nimeaminen "fi") => truthy
+        application rakennus-test/application-suunnittelijan-nimeaminen]
     (fact "Viiteluvat"
       (let [links        (get-in canonical [:UusiAsia :Viiteluvat :Viitelupa])
             link         (first links)]
@@ -27,7 +30,25 @@
         (let [link (get-in link [:MuuTunnus])]
           (keys link) => (just [:Tunnus :Sovellus])
           (:Tunnus link) => (get-in application [:linkPermitData 0 :id])
-          (:Sovellus link) => (get-in application [:linkPermitData 0 :type]))))))
+          (:Sovellus link) => "Lupapiste")))))
+
+(fl/facts* "UusiAsia canonical with two link permits"
+  (let [application (update-in rakennus-test/application-suunnittelijan-nimeaminen [:linkPermitData] conj link-permit-data-kuntalupatunnus)
+        canonical   (ah/application-to-asianhallinta-canonical application "fi") => truthy]
+    (fact "Viiteluvat"
+      (let [links (get-in canonical [:UusiAsia :Viiteluvat :Viitelupa])
+            link1 (first links)
+            link2 (second links)        ]
+        (count links) => 2
+        (keys link1) => (just [:MuuTunnus])
+        (let [link1 (get-in link1 [:MuuTunnus])]
+          (keys link1) => (just [:Tunnus :Sovellus])
+          (:Tunnus link1) => (get-in application [:linkPermitData 0 :id])
+          (:Sovellus link1) => "Lupapiste")
+        (let [link2 (get-in link2 [:MuuTunnus])]
+          (keys link2) => (just [:Tunnus :Sovellus])
+          (:Tunnus link2) => (get-in application [:linkPermitData 1 :id])
+          (:Sovellus link2) => "Taustajärjestelmä")))))
 
 (fl/facts* "UusiAsia canonical"
   (let [canonical (ah/application-to-asianhallinta-canonical poikkeus-test/poikkari-hakemus "fi") => truthy
