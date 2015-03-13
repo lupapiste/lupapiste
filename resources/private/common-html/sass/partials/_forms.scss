@@ -37,8 +37,11 @@ legend {
     -webkit-box-shadow: inset 0 2px 4px darken($lp-light-grey, 20%), 0 1px 0 #fff;
   }
   // newbies
+  &.source-value-changed {
+    border: 2px solid $lp-green;
+  }
   &.error {
-    border-color:red;
+    border-color: red;
     border-width: 3px;
   }
   &.warn {
@@ -100,6 +103,7 @@ input[readonly], textarea[readonly] {
   background-color: white;
   border: 1px solid $lp-light-grey;
   box-shadow: 1px 1px 2px $lp-dark-grey;
+  white-space: nowrap;
 
   .icon {
     @include spite-bg;
@@ -107,6 +111,7 @@ input[readonly], textarea[readonly] {
     height: 24px;
     width: 24px;
     vertical-align: top;
+    margin: 0;
   }
   .text {
     display: inline-block;
@@ -121,24 +126,19 @@ input[readonly], textarea[readonly] {
   }
   &.form-input-warn {
     .icon {
-      background-position: 6px -3190px;
+      background-position: 6px -3196px;
       display: inline-block;
     }
   }
   &.form-input-err {
     .icon {
-      background-position: 6px -2390px;
+      background-position: 6px -2396px;
       display: inline-block;
     }
   }
 }
 
 .save-indicator {
-  @include spite-bg;
-  background-position: 5px -2497px;
-  padding-left: 27px;
-  float: right;
-  display: none;
 }
 
 .errorPanel {
@@ -255,14 +255,17 @@ input[readonly], textarea[readonly] {
   display: inline-block;
   vertical-align: bottom;
   margin: 0 $marginS 2px $marginS;
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   padding: 0;
   &.error {
     outline: 3px solid red;
   }
   &.warning {
     outline: 3px solid $lp-orange;
+  }
+  &.source-value-changed {
+    outline: 2px solid $lp-green;
   }
 }
 
@@ -752,4 +755,10 @@ foreman-history {
   th.fifth {
     width: 45%;
   }
+}
+
+.indicator-wrapper {
+  position: relative;
+  display: inline-block;
+  width: 100%;
 }

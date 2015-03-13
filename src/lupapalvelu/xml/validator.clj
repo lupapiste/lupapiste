@@ -127,6 +127,9 @@
 (def supported-krysp-versions-by-permit-type
   (reduce (fn [m [k versions]] (assoc m k (filter #(Character/isDigit (.charAt % 0)) versions))) {} supported-versions-by-permit-type))
 
+(def supported-asianhallinta-versions-by-permit-type
+  (reduce (fn [m [k versions]] (assoc m k (filter #(s/starts-with % "ah") versions))) {} supported-versions-by-permit-type))
+
 (defn validate
   "Throws an exception if the markup is invalid"
   [xml permit-type schema-version]
