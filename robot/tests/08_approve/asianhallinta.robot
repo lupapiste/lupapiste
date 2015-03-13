@@ -92,3 +92,4 @@ Velho logs in, sets Mikko as maksaja and moves application to asianhallinta
   Wait Until  Textfield Value Should Be  //section[@data-doc-type="maksaja"]//input[@data-docgen-path="henkilo.henkilotiedot.etunimi"]  Mikko
   Click by test id  to-asianhallinta
   Wait until  Application state should be  sent
+  [Teardown]  logout
