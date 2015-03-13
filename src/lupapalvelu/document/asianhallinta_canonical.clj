@@ -155,7 +155,6 @@
 (defn application-to-asianhallinta-canonical [application lang]
   "Return canonical, does not contain attachments"
   (let [documents (tools/unwrapped (documents-by-type-without-blanks application))]
-    (clojure.pprint/pprint (ua-get-viiteluvat application))
     (-> (assoc-in ua-root-element [:UusiAsia :Tyyppi] (ua-get-asian-tyyppi-string application))
       (assoc-in [:UusiAsia :Kuvaus] (:title application))
       (assoc-in [:UusiAsia :Kuntanumero] (:municipality application))
