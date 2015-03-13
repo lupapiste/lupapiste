@@ -3,6 +3,7 @@
            [lupapalvelu.document.tools :as tools]
            [lupapalvelu.xml.disk-writer :as writer]
            [clojure.string :as s]
+           [sade.core :refer :all]
            [sade.util :as util]
            [lupapalvelu.i18n :as i18n]))
 
@@ -94,7 +95,7 @@
 (defn- ua-get-viitelupa [linkPermit]
   (util/strip-nils
     {:MuuTunnus {:Tunnus (:id linkPermit)
-                 :Sovellus ((:type linkPermit) viitelupa-mapping)}}))
+                 :Sovellus (viitelupa-mapping (:type linkPermit))}}))
 
 (defn- ua-get-viiteluvat [{:keys [linkPermitData]}]
   (when (seq linkPermitData)
