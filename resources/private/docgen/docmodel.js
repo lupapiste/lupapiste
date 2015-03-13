@@ -442,6 +442,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var input = makeInput(inputType, myPath, model, subSchema);
     setMaxLen(input, subSchema);
 
+    if ( model[subSchema.name] && model[subSchema.name].disabled) {
+      input.setAttribute("disabled", true);
+    }
+
     listen(subSchema, myPath, input);
 
     if (subSchema.label) {
@@ -590,6 +594,11 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     if (subSchema.name === "muutostapa" && _.isEmpty(_.keys(model))) {
       model[subSchema.name] = {value: "lis\u00e4ys"};
     }
+
+    if ( model[subSchema.name] && model[subSchema.name].disabled) {
+      select.setAttribute("disabled", true);
+    }
+
     var selectedOption = getModelValue(model, subSchema.name);
     var sourceValue = getModelSourceValue(model, subSchema.name);
     var span = makeEntrySpan(subSchema, myPath);
