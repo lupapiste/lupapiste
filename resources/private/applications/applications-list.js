@@ -46,8 +46,14 @@
     self.searchField = ko.observable();
     self.searchField.subscribe(_.debounce(self.filter.search, 500));
 
-    self.create = function() { window.location = "#!/create-part-1"; };
-    self.createWithPrevPermit = function() { window.location = "#!/create-page-prev-permit"; };
+    self.create = function() {
+      ga('send', 'event', 'Applications', 'create'); 
+      window.location = "#!/create-part-1";
+      };
+    self.createWithPrevPermit = function() { 
+      ga('send', 'event', 'Applications', 'createWithPrevPermit');
+      window.location = "#!/create-page-prev-permit";
+      };
 
     self.found = function(total, matched) {
       self.total(total);
@@ -85,6 +91,7 @@
     };
 
     var acceptDecline = function(applicationId) {
+      ga('send', 'event', 'Applications', 'declineInvite');
         return function() {
             ajax
             .command("decline-invitation", {id: applicationId})
@@ -104,6 +111,7 @@
     };
 
     self.radioTabClick = function(model,event) {
+      ga('send', 'event', 'Applications', 'radio');
       var $target = $(event.target);
       $(".radio-label").removeClass("checked");
       $($target).addClass("checked");
@@ -178,6 +186,7 @@
   }
 
   function open(e) {
+    ga('send', 'event', 'Applications', 'openApplication');
     var $target = $(e.target);
 
     var tab = "";
