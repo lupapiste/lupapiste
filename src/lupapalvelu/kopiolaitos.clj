@@ -79,9 +79,10 @@
                                     :contentsTable (get-kopiolaitos-html-table lang attachments)})
         email-msg (email/apply-template "kopiolaitos-order.html" orderInfo)
         sending-results (try
-                          (map
-                            (partial do-send-email orderInfo email-subject email-msg email-attachment)
-                            email-addresses)
+                          (doall
+                            (map
+                              (partial do-send-email orderInfo email-subject email-msg email-attachment)
+                              email-addresses))
                           (catch Exception e
                             (fail! :kopiolaitos-email-sending-failed)))
         results-failed-emails (remove :sending-succeeded sending-results)]
