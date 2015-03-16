@@ -310,20 +310,17 @@
 ;;
 
 (defn- logout! []
-  (session/clear!)
-  (cookies/put! :anti-csrf-token {:value "delete" :path "/" :expires "Thu, 01-Jan-1970 00:00:01 GMT"}))
+  (cookies/put! :anti-csrf-token {:value "delete" :path "/" :expires "Thu, 01-Jan-1970 00:00:01 GMT"})
+  {:session nil})
 
 (defjson [:post "/api/logout"] []
-  (logout!)
-  (ok))
+  (merge (logout!) (ok)))
 
 (defpage "/logout" []
-  (logout!)
-  (redirect-after-logout))
+  (merge (logout!) (redirect-after-logout)))
 
 (defpage [:get ["/app/:lang/logout" :lang #"[a-z]{2}"]] {lang :lang}
-  (logout!)
-  (redirect-after-logout))
+  (merge (logout!) (redirect-after-logout)))
 
 ;; Login via saparate URL outside anti-csrf
 (defjson [:post "/api/login"] {username :username :as params}
