@@ -500,13 +500,17 @@
 
 (defn session-timeout-handler [handler request]
   (let [now (now)
-        expires (session/get :expires now)
-        expired? (< expires now)]
+        request-session (:session request)
+        expires (get request-session :expires now)
+        expired? (< expires now)
+        response (handler request)
+        response-session (:session response)
+        logout? (and (contains? response :session) (nil? response-session))]
     (if expired?
-      (session/clear!)
-      (if (re-find #"^/api/(command|query|raw|datatables|upload)/" (:uri request))
-        (session/put! :expires (+ now (get-session-timeout request)))))
-    (handler request)))
+      (assoc response :session nil)
+      (if (and (not logout?) (re-find #"^/api/(command|query|raw|datatables|upload)/" (:uri request) ))
+        (assoc response :session (merge (or response-session request-session) {:expires (+ now (get-session-timeout request))}))
+        response))))
 
 (defn session-timeout [handler]
   (fn [request] (session-timeout-handler handler request)))
