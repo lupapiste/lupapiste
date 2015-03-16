@@ -438,7 +438,7 @@ LUPAPISTE.ApplicationModel = function() {
   self.goToTabPosition = function(targetTab, targetId) {
     if (targetTab === "requiredFieldSummary") {
       ajax
-        .command("fetch-validation-errors", {id: self.id()})
+        .query("fetch-validation-errors", {id: self.id()})
         .success(function (data) {
           self.updateMissingApplicationInfo(data.results);
         })
