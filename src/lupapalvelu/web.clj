@@ -18,6 +18,7 @@
             [sade.util :as util]
             [sade.status :as status]
             [sade.strings :as ss]
+            [sade.session :as ssess]
             [lupapalvelu.action :as action]
             [lupapalvelu.application-search-api]
             [lupapalvelu.features-api]
@@ -510,13 +511,11 @@
         request-session (:session request)
         expires (get request-session :expires now)
         expired? (< expires now)
-        response (handler request)
-        response-session (:session response)
-        logout? (and (contains? response :session) (nil? response-session))]
+        response (handler request)]
     (if expired?
       (assoc response :session nil)
-      (if (and (not logout?) (re-find #"^/api/(command|query|raw|datatables|upload)/" (:uri request) ))
-        (assoc response :session (merge (or response-session request-session) {:expires (+ now (get-session-timeout request))}))
+      (if (re-find #"^/api/(command|query|raw|datatables|upload)/" (:uri request))
+        (ssess/merge-to-session request response {:expires (+ now (get-session-timeout request))})
         response))))
 
 (defn session-timeout [handler]
