@@ -174,8 +174,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   function makeSectionHelpTextSpan(schema) {
     var span = document.createElement("span");
     span.className = "group-help-text";
-
-    var locKey = schema["section-help"];
+    var locKey = schema.info["section-help"];
     if (locKey) {
       span.innerHTML = loc(locKey);
     }

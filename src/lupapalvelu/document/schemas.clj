@@ -837,7 +837,7 @@
             :approvable true
             :type :party
             :subtype :hakija
-            :section-help "huoneistot.groupHelpText"
+            :section-help "party.section.help"
             :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
             }
      :body party}
@@ -850,6 +850,7 @@
             :approvable true
             :type :party
             :subtype :hakija
+            :section-help "party.section.help"
             :after-update 'lupapalvelu.application-meta-fields/applicant-index-update}
      :body (schema-body-without-element-by-name ya-party turvakielto)}
 
