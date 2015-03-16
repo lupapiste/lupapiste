@@ -363,22 +363,26 @@
    "989"
    "992"])
 
+(defn ymp-org [kuntano base-scope]
+  (let [org-id (str kuntano "-YMP")]
+    {:_id org-id
+     :name {:fi (str (lupapalvelu.i18n/localize "fi" (str "municipality." kuntano)) " ymp\u00e4rist\u00f6toimi")
+            :sv (str (lupapalvelu.i18n/localize "sv" (str "municipality." kuntano)) " ymp\u00e4rist\u00f6toimi")}
+     :scope [(merge base-scope {:municipality kuntano :permitType "YI"})
+             (merge base-scope {:municipality kuntano :permitType "YL"})
+             (merge base-scope {:municipality kuntano :permitType "VVVL"})
+             (merge base-scope {:municipality kuntano :permitType "MAL"})]
+     :links []}))
+
 (defn generate-ymp! []
   (doseq [kuntano kuntakoodit]
     (let [org-id (str kuntano "-YMP")
           email  (str "ymp-admin@" kuntano ".fi")
-          org {:_id org-id
-               :name {:fi (str (lupapalvelu.i18n/localize "fi" (str "municipality." kuntano)) " ymp\u00e4rist\u00f6toimi")}
-               :scope [{:municipality kuntano :permitType "YI" :inforequest-enabled true :new-application-enabled true}
-                       {:municipality kuntano :permitType "YL" :inforequest-enabled true :new-application-enabled true}
-                       {:municipality kuntano :permitType "VVVL" :inforequest-enabled true :new-application-enabled true}
-                       {:municipality kuntano :permitType "MAL" :inforequest-enabled true :new-application-enabled true}]
-               :links []
-               :krysp {:YI {:url "http://localhost:8000/dev/krysp" :version "2.1.1" :ftpUser nil}
-                       :YL {:url "http://localhost:8000/dev/krysp" :version "2.1.1" :ftpUser nil}
-                       :VVVL {:url "http://localhost:8000/dev/krysp" :version "2.1.1" :ftpUser nil}
-                       :MAL {:url "http://localhost:8000/dev/krysp" :version "2.1.1" :ftpUser nil}}}
-          ]
+          org (assoc (ymp-org kuntano {:inforequest-enabled true :new-application-enabled true})
+                :krysp {:YI {:url "http://localhost:8000/dev/krysp" :version "2.1.1" :ftpUser nil}
+                        :YL {:url "http://localhost:8000/dev/krysp" :version "2.1.1" :ftpUser nil}
+                        :VVVL {:url "http://localhost:8000/dev/krysp" :version "2.1.1" :ftpUser nil}
+                        :MAL {:url "http://localhost:8000/dev/krysp" :version "2.1.1" :ftpUser nil}})]
       (mongo/insert :organizations org)
       (user-api/create-new-user
         {:role "admin"}
