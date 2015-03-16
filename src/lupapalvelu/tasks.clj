@@ -38,16 +38,16 @@
                            {:name "kayttoonottava" :type :checkbox}]}]}
            {:name "katselmus" :type :group
             :body
-            [{:name "pitoPvm" :type :date}
-            {:name "pitaja" :type :string}
-            {:name "huomautukset" :type :group
-             :body [{:name "kuvaus" :required true :type :text :max-len 4000}
-                    {:name "maaraAika" :type :date}
-                    {:name "toteaja" :type :string}
-                    {:name "toteamisHetki" :type :date}]}
-            {:name "lasnaolijat" :type :text :max-len 4000 :layout :full-width}
-            {:name "poikkeamat" :type :text :max-len 4000 :layout :full-width}
-            {:name "tila" :type :select :sortBy :displayname :body [{:name "osittainen"} {:name "lopullinen"}]}]}]}
+            [{:name "pitoPvm" :type :date :required true}
+             {:name "pitaja" :type :string}
+             {:name "huomautukset" :type :group
+              :body [{:name "kuvaus" :required true :type :text :max-len 4000}
+                     {:name "maaraAika" :type :date}
+                     {:name "toteaja" :type :string}
+                     {:name "toteamisHetki" :type :date}]}
+             {:name "lasnaolijat" :type :text :max-len 4000 :layout :full-width}
+             {:name "poikkeamat" :type :text :max-len 4000 :layout :full-width}
+             {:name "tila" :type :select :sortBy :displayname :body [{:name "osittainen"} {:name "lopullinen"}]}]}]}
 
    {:info {:name "task-vaadittu-tyonjohtaja" :type :task :order 10}
     :body [{:name "osapuolena" :type :checkbox}

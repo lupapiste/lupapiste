@@ -26,10 +26,16 @@
     (fact "Sonja can assign inforequest to herself"
       (command sonja :assign-application :id id :assigneeId sonja-id) => ok?)
 
+    (fact "Sonja can mark inforequest answered"
+      (command sonja :can-mark-answered :id id) => ok?)
+
     (fact "When Commenting on inforequest marks it answered"
       (query-application pena id)    => (in-state? :info)
       (comment-application sonja id false) => ok?
       (query-application pena id)    => (in-state? :answered))
+
+    (fact "Sonja can no longer mark inforequest answered"
+      (command sonja :can-mark-answered :id id) => fail?)
 
     (fact "Pena can convert-to-application"
       (command pena :convert-to-application :id id) => ok?))

@@ -88,3 +88,15 @@ Foreman can see the first related construction info on the second foreman applic
 Foreman logs in
   Logout
   Teppo logs in
+
+Add työnjohtaja task to current application
+  [Arguments]  ${role}
+  Open tab  tasks
+  Click enabled by test id  application-new-task
+  Wait until  Element should be visible  dialog-create-task
+  Select From List By Value  choose-task-type   task-vaadittu-tyonjohtaja
+  Input text  create-task-name  ${role}
+  Click enabled by test id  create-task-save
+  Wait until  Element should not be visible  dialog-create-task
+
+

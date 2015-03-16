@@ -539,6 +539,15 @@
                    {:name "kerrosluku" :type :string :size "s" :subtype :number :min 0 :max 50}
                    {:name "kellarinpinta-ala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}]})
 
+(def mitat-muutos {:name "mitat"
+                        :type :group
+                        :whitelist [:authority]
+                        :body [{:name "tilavuus" :type :string :size "s" :unit "m3" :subtype :number :min 1 :max 9999999}
+                               {:name "kerrosala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}
+                               {:name "kokonaisala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}
+                               {:name "kerrosluku" :type :string :size "s" :subtype :number :min 0 :max 50}
+                               {:name "kellarinpinta-ala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}]})
+
 (def rakenne {:name "rakenne"
               :type :group
               :body [{:name "rakentamistapa" :type :select :sortBy :displayname :required true
@@ -640,11 +649,25 @@
                                           varusteet
                                           luokitus])
 
+(def rakennuksen-tiedot-ilman-huoneistoa-muutos [kaytto
+                                                 mitat-muutos
+                                                 rakenne
+                                                 lammitys
+                                                 verkostoliittymat
+                                                 varusteet
+                                                 luokitus])
+
 (def rakennuksen-tiedot-ilman-huoneistoa-ilman-ominaisuustietoja [kaytto
                                                                   rakenne
                                                                   mitat])
 
+(def rakennuksen-tiedot-ilman-huoneistoa-ilman-ominaisuustietoja-muutos [kaytto
+                                                                         rakenne
+                                                                         mitat-muutos])
+
 (def rakennuksen-tiedot (conj rakennuksen-tiedot-ilman-huoneistoa huoneistotTable))
+
+(def rakennuksen-tiedot-muutos (conj rakennuksen-tiedot-ilman-huoneistoa-muutos huoneistotTable))
 
 
 (def rakennelma (body
@@ -691,11 +714,23 @@
                               rakennuksen-osoite
                               rakennuksen-tiedot))
 
+(def olemassaoleva-rakennus-muutos (body
+                                     rakennuksen-valitsin
+                                     rakennuksen-omistajat
+                                     rakennuksen-osoite
+                                     rakennuksen-tiedot-muutos))
+
 (def olemassaoleva-rakennus-ei-huoneistoja (body
                                              rakennuksen-valitsin
                                              rakennuksen-omistajat
                                              rakennuksen-osoite
                                              rakennuksen-tiedot-ilman-huoneistoa))
+
+(def olemassaoleva-rakennus-ei-huoneistoja-muutos (body
+                                                    rakennuksen-valitsin
+                                                    rakennuksen-omistajat
+                                                    rakennuksen-osoite
+                                                    rakennuksen-tiedot-ilman-huoneistoa-muutos))
 
 (def olemassaoleva-rakennus-ei-huoneistoja-ei-ominaisuus-tietoja
   (body rakennuksen-valitsin
@@ -703,18 +738,35 @@
         rakennuksen-osoite
         rakennuksen-tiedot-ilman-huoneistoa-ilman-ominaisuustietoja))
 
+(def olemassaoleva-rakennus-ei-huoneistoja-ei-ominaisuus-tietoja-muutos
+  (body rakennuksen-valitsin
+        rakennuksen-omistajat
+        rakennuksen-osoite
+        rakennuksen-tiedot-ilman-huoneistoa-ilman-ominaisuustietoja-muutos))
 
 (def rakennuksen-muuttaminen-ei-huoneistoja (body
-                                               muutostyonlaji
-                                               olemassaoleva-rakennus-ei-huoneistoja))
+                                              muutostyonlaji
+                                              olemassaoleva-rakennus-ei-huoneistoja))
+
+(def rakennuksen-muuttaminen-ei-huoneistoja-muutos (body
+                                                     muutostyonlaji
+                                                     olemassaoleva-rakennus-ei-huoneistoja-muutos))
 
 (def rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuus-tietoja (body
-                                               muutostyonlaji
-                                               olemassaoleva-rakennus-ei-huoneistoja-ei-ominaisuus-tietoja))
+                                                                    muutostyonlaji
+                                                                    olemassaoleva-rakennus-ei-huoneistoja-ei-ominaisuus-tietoja))
+
+(def rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuus-tietoja-muutos (body
+                                                                    muutostyonlaji
+                                                                    olemassaoleva-rakennus-ei-huoneistoja-ei-ominaisuus-tietoja-muutos))
 
 (def rakennuksen-muuttaminen (body
                                muutostyonlaji
                                olemassaoleva-rakennus))
+
+(def rakennuksen-muuttaminen-muutos (body
+                               muutostyonlaji
+                               olemassaoleva-rakennus-muutos))
 
 (def rakennuksen-laajentaminen (body [{:name "laajennuksen-tiedot"
                                        :type :group
@@ -804,13 +856,13 @@
     :body (body rakennuksen-omistajat (approvable-top-level-groups rakennuksen-tiedot-ilman-huoneistoa))}
 
    {:info {:name "rakennuksen-muuttaminen-ei-huoneistoja" :i18name "rakennuksen-muuttaminen" :approvable true}
-     :body (approvable-top-level-groups rakennuksen-muuttaminen-ei-huoneistoja)}
+     :body (approvable-top-level-groups [rakennuksen-muuttaminen-ei-huoneistoja rakennuksen-muuttaminen-ei-huoneistoja-muutos])}
 
    {:info {:name "rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia" :i18name "rakennuksen-muuttaminen" :approvable true}
-     :body (approvable-top-level-groups rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuus-tietoja)}
+     :body (approvable-top-level-groups rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuus-tietoja-muutos)}
 
    {:info {:name "rakennuksen-muuttaminen" :approvable true}
-     :body (approvable-top-level-groups rakennuksen-muuttaminen)}
+     :body (approvable-top-level-groups rakennuksen-muuttaminen-muutos)}
 
     {:info {:name "rakennuksen-laajentaminen" :approvable true}
      :body (approvable-top-level-groups rakennuksen-laajentaminen)}

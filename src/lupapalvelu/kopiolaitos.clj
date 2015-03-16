@@ -71,6 +71,7 @@
     {:email-address address :sending-succeeded sending-succeeded?}))
 
 (defn- send-kopiolaitos-email [lang email-addresses attachments orderInfo]
+  {:pre [(every? #(pos? (count (:versions %))) attachments)]}
   (let [zip (attachment/get-all-attachments attachments)
         email-attachment {:content zip :file-name zip-file-name}
         email-subject (str (with-lang lang
@@ -88,7 +89,7 @@
         results-failed-emails (remove :sending-succeeded sending-results)]
 
     (try
-      (io/delete-file zip)
+        (io/delete-file zip)
       (catch java.io.IOException ioe
         (warnf "Could not delete temporary zip file: %s" (.getAbsolutePath zip))))
 
@@ -97,8 +98,8 @@
         (fail! :kopiolaitos-email-sending-failed-with-emails :failedEmails failed-email-addresses-str)))))
 
 (defn- get-kopiolaitos-email-addresses [{:keys [organization] :as application}]
-    (let [email (organization/with-organization organization :kopiolaitos-email)]
-      (if-not (ss/blank? email)
+  (let [email (organization/with-organization organization :kopiolaitos-email)]
+    (if-not (ss/blank? email)
         (let [emails (->> (ss/split email #"(,|;)") (map ss/trim) set)]
           ;; action/email-validator returns nil if email was valid
           (when (some #(action/email-validator :email {:data {:email %}}) emails)

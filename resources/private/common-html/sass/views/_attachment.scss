@@ -5,7 +5,7 @@
 }
 
 .attachment-iframe{
-  height: 450px;
+  height: 530px;
   width: 600px;
   border:0;
   overflow: hidden;
@@ -212,6 +212,7 @@ td.comment-text {
 
   .attachment-info-field {
     margin-bottom: $marginS;
+    position: relative;
   }
 }
 

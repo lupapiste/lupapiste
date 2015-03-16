@@ -253,7 +253,7 @@
     (array-map :lastName 1, :firstName 1)))
 
 (defquery application
-  {:user-roles #{:applicant :authority}
+  {:user-roles #{:applicant :authority :oirAuthority}
    :states           action/all-states
    :user-authz-roles action/all-authz-roles
    :parameters       [:id]}
@@ -311,14 +311,14 @@
 (defcommand mark-seen
   {:parameters [:id type]
    :input-validators [(fn [{{type :type} :data}] (when-not (collections-to-be-seen type) (fail :error.unknown-type)))]
-   :user-roles #{:applicant :authority}
+   :user-roles #{:applicant :authority :oirAuthority}
    :states action/all-application-states}
   [{:keys [data user created] :as command}]
   (update-application command {$set (mark-collection-seen-update user created type)}))
 
 (defcommand mark-everything-seen
   {:parameters [:id]
-   :user-roles #{:authority}
+   :user-roles #{:authority :oirAuthority}
    :states     action/all-application-states}
   [{:keys [application user created] :as command}]
   (update-application command {$set (mark-indicators-seen-updates application user created)}))
@@ -338,7 +338,6 @@
 
 (defcommand assign-application
   {:parameters  [:id assigneeId]
-   :pre-checks  [open-inforequest/not-open-inforequest-user-validator]
    :user-roles #{:authority}
    :states      (action/all-states-but [:draft :closed :canceled])}
   [{:keys [user created application] :as command}]
@@ -359,7 +358,7 @@
 
 (defcommand cancel-inforequest
   {:parameters [id]
-   :user-roles #{:applicant :authority}
+   :user-roles #{:applicant :authority :oirAuthority}
    :notified   true
    :on-success (notify :application-state-change)
    :states     [:info]}
@@ -473,7 +472,7 @@
 
 (defcommand save-application-drawings
   {:parameters [:id drawings]
-   :user-roles #{:applicant :authority}
+   :user-roles #{:applicant :authority :oirAuthority}
    :states     [:draft :info :answered :open :submitted :complement-needed]}
   [{:keys [created] :as command}]
   (when (sequential? drawings)
@@ -505,7 +504,7 @@
 
 (defquery inforequest-markers
   {:parameters [id lang x y]
-   :user-roles #{:authority}
+   :user-roles #{:authority :oirAuthority}
    :states     action/all-inforequest-states
    :input-validators [(partial action/non-blank-parameters [:x :y])]}
   [{:keys [application user]}]
@@ -616,6 +615,7 @@
                       info-request?          :info
                       (user/authority? user) :open
                       :else                  :draft)
+        comment-target (if open-inforequest? [:applicant :authority :oirAuthority] [:applicant :authority])
         application (merge domain/application-skeleton
                       {:id                  id
                        :created             created
@@ -636,7 +636,7 @@
                        :auth                (if-let [company (some-> user :company :id c/find-company-by-id c/company->auth)]
                                               [owner company]
                                               [owner])
-                       :comments            (map #(domain/->comment % {:type "application"} (:role user) user nil created [:applicant :authority]) messages)
+                       :comments            (map #(domain/->comment % {:type "application"} (:role user) user nil created comment-target) messages)
                        :schema-version      (schemas/get-latest-schema-version)})]
     (merge application (when-not info-request?
                          {:attachments (make-attachments created op organization state)
@@ -824,7 +824,7 @@
 
 (defcommand change-location
   {:parameters [id x y address propertyId]
-   :user-roles #{:applicant :authority}
+   :user-roles #{:applicant :authority :oirAuthority}
    :states     [:draft :info :answered :open :submitted :complement-needed :verdictGiven :constructionStarted]
    :input-validators [(partial action/non-blank-parameters [:address])
                       (partial property-id-parameters [:propertyId])

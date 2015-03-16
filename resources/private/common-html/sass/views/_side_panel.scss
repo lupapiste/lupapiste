@@ -31,9 +31,9 @@
       margin-left: 0;
     }
   }
-
   .buttons {
     float: left;
+    margin-top: $marginM;
     .btn-conversation, .btn-notice {
       box-shadow: 1px 1px 3px darken($lp-dark-grey, 10%);
       padding: 1em;
@@ -44,7 +44,6 @@
       text-align: center;
       text-transform: uppercase;
       display: block;
-      border-radius: 5px 0 0 5px;
       color: #fff;
       text-shadow: 0px 1px 0px $lp-dark-grey;
       font-weight: bold;
@@ -167,14 +166,14 @@
   #notice-panel {
     height: 100%;
 
-    .application-state {
-      padding-bottom: 20px;
-      label {
-        &:after {
-          content: ":";
-          vertical-align: bottom;
-        }
-      }
+    .application-urgency {
+      position: relative;
+      margin-bottom: $marginS;
+      width: 215px;
+    }
+
+    .application-notices {
+      position: relative;
     }
 
     .icon.urgent {
@@ -192,7 +191,7 @@
     }
     .textarea-wrapper {
       position: absolute;
-      top: 80px;
+      top: 86px;
       left: 0;
       right: 0;
       bottom: 0;
@@ -201,17 +200,15 @@
       height: 100%;
       margin: 0;
     }
-  }
 
-  .indicator {
-    float: left;
-    margin-top: 3px;
-    margin-left: 5px;
-    .saved {
-      @include spite-bg;
-      float: left;
-      background-position: 4px -2496px;
-      padding: 0 0 6px 24px;
+    .notice-prompt-info {
+      &:before {
+        content: "(";
+      }
+      &:after {
+        content: ")";
+      }
+
     }
   }
 }

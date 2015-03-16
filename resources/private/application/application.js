@@ -94,12 +94,16 @@
   function updatePermitSubtype(value){
     if (isInitializing) { return; }
 
+    var element = $("#permitSubtypeSaveIndicator");
+    element.stop().hide();
+
     ajax.command("change-permit-sub-type", {id: currentId, permitSubtype: value})
     .success(function() {
       authorizationModel.refresh(currentId);
-      })
-    .error(function(data) {
-      LUPAPISTE.ModalDialog.showDynamicOk(loc("error.dialog.title"), loc(data.text) + ": " + data.id);
+      element.stop().show();
+      setTimeout(function() {
+        element.fadeOut("slow");
+      }, 2000);
     })
     .call();
   }

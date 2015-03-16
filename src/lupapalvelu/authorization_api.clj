@@ -21,7 +21,7 @@
 ;;
 
 (defquery invites
-  {:user-roles #{:applicant :authority}}
+  {:user-roles #{:applicant :authority :oirAuthority}}
   [{{:keys [id]} :user}]
   (let [common     {:auth {$elemMatch {:invite.user.id id}}}
         query      {$and [common {:state {$ne :canceled}}]}

@@ -100,8 +100,13 @@
             <span class="application_summary_text">
             <select data-bind="options: $root.permitSubtypes, value: $root.application.permitSubtype,
                                enable: $root.authorization.ok('change-permit-sub-type'),
-                               optionsText: function(item) {return loc('permitSubtype.' + item); }">
+                               optionsText: function(item) {return loc('permitSubtype.' + item); }"
+                    id="permitSubtypeSelect">
             </select>
+            <span id="permitSubtypeSaveIndicator" class="form-indicator form-input-saved" style="position: relative;top:0;left:0;color:#595959">
+              <span data-bind="ltext: 'form.saved'"></span>
+              <span class="icon"></span>
+            </span>
             </span>
           </div>
           <!-- /ko -->
@@ -163,10 +168,19 @@
           <!-- ko if: !hasInvites() -->
           <button data-bind="click: approveApplication,
                               visible: $root.authorization.ok('approve-application'),
-                              enable: !processing() && $root.authorization.ok('approve-application'), attr: {'title': loc('tooltip.approveApplication'}"
+                              enable: !processing() && $root.authorization.ok('approve-application'), attr: {'title': loc('tooltip.approveApplication')}"
                   data-test-id="approve-application"
                   class="btn btn-primary">
             <span data-bind="ltext: 'application.approveApplication'"></span>
+            <span class="icon approve left-align"></span>
+          </button>
+          <button data-bind="click: toAsianhallinta,
+                             visible: $root.authorization.ok('application-to-asianhallinta') && asianhallintaEnabled,
+                             enable: !processing() && $root.authorization.ok('application-to-asianhallinta') && asianhallintaEnabled,
+                             attr: {'title': loc('tooltip.toAsianhallinta')}"
+                  data-test-id="to-asianhallinta"
+                  class="btn btn-primary">
+            <span data-bind="ltext: 'application.toAsianhallinta'"></span>
             <span class="icon approve left-align"></span>
           </button>
           <button data-bind="click: requestForComplement, visible: $root.authorization.ok('request-for-complement'), enable: !processing() && $root.authorization.ok('request-for-complement')" data-test-id="request-for-complement">
@@ -366,8 +380,12 @@
                       </span>
                       <a class="invite-action" href="#" data-bind="ltext: 'application.remove-auth', click: $root.application.removeAuth, visible: $root.application.isNotOwner($data)"></a>
                       <!-- ko if: $root.application.canSubscribe($data) -->
-                      <a class="invite-action" href="#" data-bind="visible: $data.unsubscribed && $data.unsubscribed(), click: $root.application.subscribeNotifications, ltext: 'subscribeNotifications'"></a>
-                      <a class="invite-action" href="#" data-bind="visible: !$data.unsubscribed || !$data.unsubscribed(), click: $root.application.unsubscribeNotifications, ltext: 'unsubscribeNotifications'"></a>
+                      <a class="invite-action" href="#"
+                         data-test-id="subscribeNotifications"
+                         data-bind="visible: $data.unsubscribed && $data.unsubscribed(), click: $root.application.subscribeNotifications, ltext: 'subscribeNotifications'"></a>
+                      <a class="invite-action" href="#"
+                         data-test-id="unsubscribeNotifications"
+                         data-bind="visible: !$data.unsubscribed || !$data.unsubscribed(), click: $root.application.unsubscribeNotifications, ltext: 'unsubscribeNotifications'"></a>
                       <!-- /ko -->
                     </li>
                   </ul>
@@ -1191,8 +1209,8 @@
           </div>
           <!-- /ko -->
           <!-- ko ifnot: finished -->
-          <p data-bind="lhtml: 'invite.foreman.desc'" class="dialog-desc-wide"></p>
           <form>
+            <p data-bind="lhtml: 'invite.foreman.desc'" class="dialog-desc-wide"></p>
             <label for="foreman-role" data-bind="ltext: 'foreman.role'"></label>
             <select name="foreman-role" class="form-input combobox long"
                     data-bind="options: foremanRoles,

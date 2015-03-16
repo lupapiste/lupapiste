@@ -31,7 +31,7 @@ Katselmukset
   Task count is  task-katselmus  3
 
 Työnjohtajat
-  Wait until  Page should contain  Työnjohtajat
+  Wait until  Page should contain  Vaaditut työnjohtajat
   Wait until  Xpath Should Match X Times  //table[@data-test-id="tasks-foreman"]/tbody/tr  3
 
 Muut lupamaaraykset

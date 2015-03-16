@@ -6,7 +6,6 @@ var attachment = (function() {
   var attachmentId = null;
   var model = null;
   var applicationModel = lupapisteApp.models.application;
-  var attachmentGroup = null;
 
   var authorizationModel = authorization.create();
   var signingModel = new LUPAPISTE.SigningModel("#dialog-sign-attachment", false);
@@ -231,16 +230,17 @@ var attachment = (function() {
     return model.groupIndex() < model.groupAttachments().length - 1;
   });
 
-  function saveLabelInformation(type, data) {
+  function saveLabelInformation(name, data) {
     data.id = applicationId;
     data.attachmentId = attachmentId;
     ajax
       .command("set-attachment-meta", data)
       .success(function() {
-        model.indicator(type);
+        model.indicator({name: name, type: "saved"});
       })
       .error(function(e) {
         error(e.text);
+        model.indicator({name: name, type: "err"});
       })
       .call();
   }
