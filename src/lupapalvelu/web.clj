@@ -50,7 +50,14 @@
   `(let [[m# p#] (if (string? ~path) [:get ~path] ~path)]
      (swap! apis conj {(keyword m#) p#})
      (defpage ~path ~params
-       (resp/json (do ~@content)))))
+       (let [response-data# (do ~@content)
+             response-session# (:session response-data#)]
+         (if (contains? response-data# :session)
+           (-> response-data#
+             (dissoc :session)
+             resp/json
+             (assoc :session response-session#))
+           (resp/json response-data#))))))
 
 (defjson "/system/apis" [] @apis)
 
