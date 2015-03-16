@@ -65,7 +65,7 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function() {
   var normalizeAttachments = function(attachments) {
     return _.map(attachments, function(a) {
       a.amount = a.orderAmount();
-      return _.pick(a, ["id", "forPrinting", "amount", "contents", "type", "fileId", "filename"]);
+      return _.pick(a, ["id", "forPrinting", "amount", "contents", "type", "fileId", "filename", "versions"]);
     });
   };
 
