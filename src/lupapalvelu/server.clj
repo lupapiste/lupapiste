@@ -2,6 +2,7 @@
   (:require [clojure.java.io :as io]
             [taoensso.timbre :as timbre :refer [trace debug info warn error fatal tracef debugf infof warnf errorf fatalf]]
             [noir.server :as server]
+            [ring.middleware.session.cookie :as session]
             [lupapalvelu.logging]
             [lupapalvelu.web :as web]
             [lupapalvelu.vetuma]
@@ -89,6 +90,7 @@
     (server/start env/port {:mode env/mode
                             :ns 'lupapalvelu.web
                             :jetty-options jetty-opts
+                            :session-store (session/cookie-store {:key "1234567890123456"}) ; TODO read key using env
                             :session-cookie-attrs (env/value :cookie)}))
   "server running")
 
