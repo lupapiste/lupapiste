@@ -1,6 +1,6 @@
 Hei {{name}},
 
-kiitos rekister&ouml;itymisest&auml;si Lupapiste-palvelun k&auml;ytt&auml;j&auml;ksi rakentaja.fi:ss&auml;. Lupapisteess&auml; voit j&auml;tt&auml;&auml; rakennuslupiin liittyvi&auml; neuvontapyynt&ouml;j&auml; kuntasi viranomaiselle sek&auml; hoitaa lupa-asiointia yhdess&auml; muiden hankkeesi osapuolten kanssa.
+kiitos rekister&ouml;itymisest&auml;si Lupapiste-palvelun k&auml;ytt&auml;j&auml;ksi rakentaja.fi:ss&auml;. Lupapisteess&auml; voit j&auml;tt&auml;&auml; rakennuslupiin liittyvi&auml; kysymyksi&auml; kuntasi viranomaiselle sek&auml; hoitaa lupa-asiointia yhdess&auml; muiden hankkeesi osapuolten kanssa. Vuorokauden ymp&auml;ri.
 
 Vahvistathan rekister&ouml;itymisesi ja tunnistaudu pankkitunnuksillasi:
 

@@ -65,6 +65,17 @@
       }
     }
 
+    #state-infotext {
+      width: 100%;
+      background-color: $lp-dark-grey;
+      font-size: 0.8em;
+      font-style: italic;
+
+      p {
+        width: 100%;
+      }
+    }
+
     .link-permit {
       display: block;
     }
@@ -711,6 +722,7 @@
   }
 
 }
+
 
 
 

@@ -10,3 +10,9 @@ Mik&auml;li haluat liitt&auml;&auml; tilisi {{company.name}} tiliin, klikkaa all
   [{{ok-fi}}]({{ok-fi}})
 
 Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville.
+
+Kysytt&auml;v&auml;&auml; palvelun k&auml;yt&ouml;st&auml;? Tutustu Lupapisteen ohjesivustoon [https://www.lupapiste.fi/ohjeet] (https://www.lupapiste.fi/ohjeet) sek&auml; yleisesti esitettyihin kysymyksiin  [https://www.lupapiste.fi/usein-kysytyt-kysymykset] (https://www.lupapiste.fi/usein-kysytyt-kysymykset).
+
+Ongelmatilanteissa ota yhteytt&auml; [tuki@lupapiste.fi](tuki@lupapiste.fi).
+
+Toivottavasti viihdyt palvelumme parissa!

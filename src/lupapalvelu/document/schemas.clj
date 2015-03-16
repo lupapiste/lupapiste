@@ -837,6 +837,7 @@
             :approvable true
             :type :party
             :subtype :hakija
+            :section-help "huoneistot.groupHelpText"
             :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
             }
      :body party}

@@ -1,6 +1,6 @@
 # Hei,
 
-S&auml;hk&ouml;postiosoite [{{recipient-email}}]({{recipient-email}}) halutaan lis&auml;t&auml; osapuoleksi lupahakemukselle.
+S&auml;hk&ouml;postiosoite [{{recipient-email}}]({{recipient-email}}) halutaan lis&auml;t&auml; osapuoleksi lupahakemukselle Lupapisteeseen. Lupapisteess&auml; voidaan hoitaa rakentamiseen liittyv&auml;&auml; lupa-asiointia yhdess&auml; hankkeen osapuolten kesken. Vuorokauden ymp&auml;ri.
 
 Jos et ole viel&auml; Lupapisteen k&auml;ytt&auml;j&auml;, hakemuksen n&auml;keminen edellytt&auml;&auml; rekister&ouml;itymist&auml; palveluun mobiilivarmenteen tai verkkopankkitunnuksien avulla. Muistathan rekister&ouml;ity&auml; palveluun samalla s&auml;hk&ouml;postiosoitteella, johon kutsu on l&auml;hetetty.
 
