@@ -4,7 +4,6 @@
             [clj-time.coerce :refer [to-date]]
             [monger.operators :refer :all]
             [monger.query :as query]
-            [noir.session :as session]
             [camel-snake-kebab :as kebab]
             [sade.core :refer [fail fail!]]
             [sade.env :as env]
@@ -29,6 +28,13 @@
   [user]
   (when user
     (select-keys user [:id :username :firstName :lastName :role])))
+
+(defn session-summary
+  "Returns common information about the user to be stored in session or nil"
+  [user]
+  (when user
+    (select-keys user [:id :username :firstName :lastName :role :email :organizations])))
+
 
 (defn authority? [{role :role}]
   (#{:authority :oirAuthority} (keyword role)))
@@ -209,14 +215,6 @@
 (defn current-user
   "fetches the current user from session"
   [request] (:user request ))
-
-(defn refresh-user!
-  "Loads user information from db and saves it to session. Call this after you make changes to user information."
-  [user-id]
-  {:pre [user-id]}
-  (when-let [user (get-user-by-id user-id)]
-    (debug "user session refresh successful, username:" (:username user))
-    (session/put! :user user)))
 
 ;;
 ;; ==============================================================================

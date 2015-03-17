@@ -1,9 +1,9 @@
 (ns lupapalvelu.open-inforequest-api
   (:require [monger.operators :refer :all]
-            [noir.session :as session]
             [noir.response :as resp]
             [sade.core :refer [ok fail fail!]]
             [sade.env :as env]
+            [sade.session :as ssess]
             [lupapalvelu.action :refer [defraw defcommand] :as action]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.mongo :as mongo]))
@@ -24,15 +24,14 @@
 
 (defraw openinforequest
   {:user-roles #{:anonymous}}
-  [{{token-id :token-id} :data lang :lang created :created}]
+  [{{token-id :token-id} :data lang :lang created :created :as command}]
   (assert created)
   (let [token (mongo/by-id :open-inforequest-token token-id)
         url   (str (env/value :host) "/app/" (name lang) "/oir#!/inforequest/" (:application-id token))]
     (if token
       (do
         (mongo/update-by-id :open-inforequest-token token-id {$set {:last-used created}})
-        (session/put! :user (make-user token))
-        (resp/redirect url))
+        (ssess/merge-to-session command (resp/redirect url) {:user (make-user token)}))
       (resp/status 404 "Not found"))))
 
 (defcommand convert-to-normal-inforequests

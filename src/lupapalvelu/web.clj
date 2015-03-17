@@ -362,9 +362,8 @@
   (if-let [user (activation/activate-account key)]
     (do
       (infof "User account '%s' activated, auto-logging in the user" (:username user))
-      (session/put! :user user)
       (let [application-page (user/applicationpage-for (:role user))]
-        (redirect default-lang application-page)))
+        (ssess/merge-to-session (request/ring-request) (redirect default-lang application-page) (user/session-summary user))))
     (do
       (warnf "Invalid user account activation attempt with key '%s', possible hacking attempt?" key)
       (landing-page))))
@@ -389,7 +388,7 @@
   (fn [request]
     (let [api-key (get-apikey request)
           api-key-auth (when-not (ss/blank? api-key) (user/get-user-with-apikey api-key))
-          session-user (session/get :user)]
+          session-user (get-in request [:session :user])]
       (handler (assoc request :user (or api-key-auth session-user))))))
 
 (defn- logged-in-with-apikey? [request]
@@ -501,7 +500,7 @@
 ;;
 
 (defn get-session-timeout [request]
-  (get-in request [:session :noir :user :session-timeout] (.toMillis java.util.concurrent.TimeUnit/HOURS 4)))
+  (get-in request [:session :user :session-timeout] (.toMillis java.util.concurrent.TimeUnit/HOURS 4)))
 
 (defn session-timeout-handler [handler request]
   (let [now (now)

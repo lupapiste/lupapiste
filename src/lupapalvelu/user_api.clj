@@ -3,7 +3,6 @@
             [clojure.set :as set]
             [noir.request :as request]
             [noir.response :as resp]
-            [noir.session :as session]
             [noir.core :refer [defpage]]
             [slingshot.slingshot :refer [throw+]]
             [monger.operators :refer :all]
@@ -12,6 +11,7 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.core :refer :all]
+            [sade.session :as ssess]
             [lupapalvelu.action :refer [defquery defcommand defraw] :as action]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.activation :as activation]
@@ -252,14 +252,13 @@
 
 (defcommand update-user
   {:user-roles #{:applicant :authority :authorityAdmin :admin}}
-  [{caller :user user-data :data}]
+  [{caller :user user-data :data :as command}]
   (let [email     (user/canonize-email (or (:email user-data) (:email caller)))
         user-data (assoc user-data :email email)]
     (validate-update-user! caller user-data)
     (if (= 1 (mongo/update-n :users {:email email} {$set (select-keys user-data user-data-editable-fields)}))
-      (do
-        (when (= email (:email caller))
-          (user/refresh-user! (:id caller)))
+      (if (= email (:email caller))
+        (ssess/merge-to-session command (ok) {:user (user/session-summary (user/get-user-by-id (:id caller)))})
         (ok))
       (fail :not-found :email email))))
 
@@ -407,9 +406,11 @@
       (do
         (info "login successful, username:" username)
         (user/clear-logins username)
-        (session/put! :user user)
         (if-let [application-page (user/applicationpage-for (:role user))]
-          (ok :user user :applicationpage application-page)
+          (ssess/merge-to-session
+            command
+            (ok :user (user/non-private user) :applicationpage application-page)
+            {:user (user/session-summary user)})
           (do
             (error "Unknown user role:" (:role user))
             (fail :error.login))))
@@ -426,8 +427,7 @@
   [{user :user :as command}]
   (if (user/get-user-with-password (:username user) password)
     (let [imposter (assoc user :impersonating true :role "authority" :organizations [organizationId])]
-      (session/put! :user imposter)
-      (ok))
+      (ssess/merge-to-session command (ok) {:user (user/session-summary user)}))
     (fail :error.login)))
 
 ;;
@@ -529,7 +529,6 @@
 
     (mongo/upload attachment-id filename content-type tempfile :user-id (:id user))
     (mongo/update-by-id :users (:id user) {$push {:attachments file-info}})
-    (user/refresh-user! (:id user))
 
     (->> (assoc file-info :ok true)
       (resp/json)
@@ -556,7 +555,6 @@
   [{user :user}]
   (info "Removing user attachment: attachment-id:" attachment-id)
   (mongo/update-by-id :users (:id user) {$pull {:attachments {:attachment-id attachment-id}}})
-  (user/refresh-user! (:id user))
   (mongo/delete-file {:id attachment-id :metadata.user-id (:id user)})
   (ok))
 
