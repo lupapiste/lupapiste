@@ -27,8 +27,10 @@
 (defn- copy-id [handler request]
   (let [session-id (get-in request [:session :id] (str (UUID/randomUUID)))]
     (with-logging-context {:sessionId session-id}
-      (let [response (handler (assoc-in request [:session :id] session-id))]
-        (merge-to-session request response {:id session-id})))))
+      (when-let [response (handler (assoc-in request [:session :id] session-id))]
+        (if-not (get-in request [:session :id])
+          (merge-to-session request response {:id session-id})
+          response)))))
 
 (defn session-id-to-mdc
   "Ring middleware. Sets 'sessionId' mdc-key with ring session id."
