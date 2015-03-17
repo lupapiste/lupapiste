@@ -268,7 +268,6 @@
                         :VVVL vesihuolto-to-krysp)
               xml (element-to-xml canonical mapping)
               xml-s (indent-str xml)]
-          (fact "contains nil" (util/contains-value? canonical nil?) => falsey)
           (fact "xml exists" xml => truthy)))
 
       (fact "Application is not assigned"
