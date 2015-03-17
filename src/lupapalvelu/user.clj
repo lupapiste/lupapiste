@@ -33,7 +33,7 @@
   "Returns common information about the user to be stored in session or nil"
   [user]
   (when user
-    (select-keys user [:id :username :firstName :lastName :role :email :organizations :company])))
+    (select-keys user [:id :username :firstName :lastName :role :email :organizations :company :architect])))
 
 (defn virtual-user?
   "True if user exists only in session, not in database"
