@@ -71,7 +71,6 @@
     {:email-address address :sending-succeeded sending-succeeded?}))
 
 (defn- send-kopiolaitos-email [lang email-addresses attachments orderInfo]
-  {:pre [(every? #(pos? (count (:versions %))) attachments)]}
   (let [zip (attachment/get-all-attachments attachments)
         email-attachment {:content zip :file-name zip-file-name}
         email-subject (str (with-lang lang

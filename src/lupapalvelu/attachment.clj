@@ -600,8 +600,10 @@
     (.putNextEntry zip (ZipEntry. (ss/encode-filename file-name)))
     (io/copy in zip)))
 
-(defn get-all-attachments [attachments & [application lang]]
-  "Return attachments as zip file. If application and lang, application and submitted application PDF are included"
+(defn get-all-attachments
+  "Returns attachments as zip file. If application and lang, application and submitted application PDF are included."
+  [attachments & [application lang]]
+  {:pre [(every? #(pos? (count (:versions %))) attachments)]}
   (let [temp-file (File/createTempFile "lupapiste.attachments." ".zip.tmp")]
     (debugf "Created temporary zip file for attachments: %s" (.getAbsolutePath temp-file))
     (with-open [out (io/output-stream temp-file)]
