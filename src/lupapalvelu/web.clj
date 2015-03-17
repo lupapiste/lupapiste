@@ -136,6 +136,7 @@
 (defn enriched [m request]
   (merge m {:user (user/current-user request)
             :lang *lang*
+            :session (:session request)
             :web  (web-stuff request)}))
 
 (defn execute [action]
