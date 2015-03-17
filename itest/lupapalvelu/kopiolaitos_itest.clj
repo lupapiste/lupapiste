@@ -15,13 +15,13 @@
 
 (fact "Sonja sets default values for organization kopiolaitos info"
   (command sipoo :set-kopiolaitos-info
-    :kopiolaitosEmail "sipoo@example.com"
+    :kopiolaitosEmail "sipoo@example.com;sipoo2@example.com"
     :kopiolaitosOrdererAddress "Testikatu 2, 12345 Sipoo"
     :kopiolaitosOrdererPhone "0501231234"
     :kopiolaitosOrdererEmail "tilaaja@example.com") => ok?
 
   (query sipoo :kopiolaitos-config) => {:ok true
-                                        :kopiolaitos-email "sipoo@example.com"
+                                        :kopiolaitos-email "sipoo@example.com;sipoo2@example.com"
                                         :kopiolaitos-orderer-address "Testikatu 2, 12345 Sipoo"
                                         :kopiolaitos-orderer-email "tilaaja@example.com"
                                         :kopiolaitos-orderer-phone "0501231234"})
