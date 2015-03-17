@@ -34,7 +34,9 @@
 (defquery user
   {:user-roles #{:applicant :authority :oirAuthority :authorityAdmin :admin}}
   [{user :user}]
-  (ok :user user))
+  (if-let [full-user (user/get-user-by-id (:id user))]
+    (ok :user (user/non-private full-user))
+    (fail)))
 
 (defquery users
   {:user-roles #{:admin :authorityAdmin}}
@@ -396,7 +398,7 @@
 (defcommand login
   {:parameters [username password]
    :user-roles #{:anonymous}}
-  [_]
+  [command]
   (if (user/throttle-login? username)
     (do
       (info "login throttled, username:" username)
@@ -421,7 +423,7 @@
    :user-roles #{:admin}
    :input-validators [(partial action/non-blank-parameters [:organizationId])]
    :description "Changes admin session into authority session with access to given organization"}
-  [{user :user}]
+  [{user :user :as command}]
   (if (user/get-user-with-password (:username user) password)
     (let [imposter (assoc user :impersonating true :role "authority" :organizations [organizationId])]
       (session/put! :user imposter)
