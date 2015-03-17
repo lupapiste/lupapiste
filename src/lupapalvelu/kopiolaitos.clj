@@ -6,13 +6,11 @@
             [sade.strings :as ss]
             [sade.core :refer [ok fail fail! def-]]
             [sade.email :as email]
+            [sade.util :as util]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.action :as action]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.i18n :refer [with-lang loc]]))
-
-(def- zip-file-name "Lupakuvat.zip")
-(def- email-address-separation-regexp #"(,|;)")
 
 
 ;; Email contents generation
@@ -70,6 +68,8 @@
 
 ;; Sending the email
 
+(def- zip-file-name "Lupakuvat.zip")
+
 (defn- do-send-email [orderInfo subject message attachment address]
   ;; from email/send-email-message false = success, true = failure -> turn it other way around
   (let [sending-succeeded? (not (email/send-email-message address subject message [attachment]))]
@@ -96,16 +96,13 @@
                                   []
                                   email-addresses)
 
-                                (catch Exception _
-                                  (fail! :kopiolaitos-email-sending-failed))
-
                                 (finally
                                   ;; If coming to finally-clause with an exception thrown, and io/delete-file also throws exception,
                                   ;; the previous exception (kopiolaitos-email-sending-failed) will still be thrown, as wanted here.
                                   (try
                                     (io/delete-file zip)
-                                    (catch Exception _
-                                      (warnf "Could not delete temporary zip file: %s" (.getAbsolutePath zip))))))]
+                                    (catch Exception e
+                                      (warnf e "Could not delete temporary zip file: %s" (.getAbsolutePath zip))))))]
 
     (when (-> results-failed-emails count pos?)
       (fail! :kopiolaitos-email-sending-failed-with-emails :failedEmails (s/join "," results-failed-emails)))))
@@ -113,13 +110,10 @@
 
 ;; Resolving kopiolaitos emails set by the authority admin of the organization
 
-(defn- separate-emails [email-str regexp]
-  (->> (ss/split email-str regexp) (map ss/trim) set))
-
 (defn- get-kopiolaitos-email-addresses [organization-id]
   (let [email (organization/with-organization organization-id :kopiolaitos-email)]
     (if-not (ss/blank? email)
-      (let [emails (separate-emails email email-address-separation-regexp)]
+      (let [emails (util/separate-emails email)]
         ;; action/email-validator returns nil if email was valid
         (when (some #(action/email-validator :email {:data {:email %}}) emails)
           (fail! :kopiolaitos-invalid-email))
