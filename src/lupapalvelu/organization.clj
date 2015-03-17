@@ -333,8 +333,7 @@
 (defcommand set-kopiolaitos-info
   {:parameters [kopiolaitosEmail kopiolaitosOrdererAddress kopiolaitosOrdererPhone kopiolaitosOrdererEmail]
    :user-roles #{:authorityAdmin}
-   :input-validators [(partial non-blank-parameters [:kopiolaitosEmail :kopiolaitosOrdererAddress :kopiolaitosOrdererPhone :kopiolaitosOrdererEmail])
-                      (fn [{{email-str :kopiolaitosEmail} :data :as command}]
+   :input-validators [(fn [{{email-str :kopiolaitosEmail} :data :as command}]
                         (let [emails (util/separate-emails email-str)]
                           ;; action/email-validator returns nil if email was valid
                           (when (some #(email-validator :email {:data {:email %}}) emails)
