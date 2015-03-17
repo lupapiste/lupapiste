@@ -11,6 +11,12 @@
             [lupapalvelu.organization :as organization]
             [lupapalvelu.i18n :refer [with-lang loc]]))
 
+(def- zip-file-name "Lupakuvat.zip")
+(def- email-address-separation-regexp #"(,|;)")
+
+
+;; Email contents generation
+
 (def- kopiolaitos-html-table-str
   "<table><thead><tr>%s</tr></thead><tbody>%s</tbody></table>")
 
@@ -47,8 +53,6 @@
     (get-kopiolaitos-html-table-header-str lang)
     (get-kopiolaitos-html-table-content lang attachments)))
 
-(def- zip-file-name "Lupakuvat.zip")
-
 ;; To be applied to email template, along with the orderInfo.
 (defn- get-kopiolaitos-order-email-titles [lang]
   (with-lang lang {:orderedPrints       (loc "kopiolaitos-order-email.titles.orderedPrints")
@@ -61,6 +65,9 @@
                    :propertyId          (loc "kopiolaitos-order-email.titles.propertyId")
                    :lupapisteId         (loc "kopiolaitos-order-email.titles.lupapisteId")
                    :address             (loc "kopiolaitos-order-email.titles.address")}))
+
+
+;; Sending the email
 
 (defn- do-send-email [orderInfo subject message attachment address]
   ;; from email/send-email-message false = success, true = failure -> turn it other way around
@@ -96,18 +103,27 @@
       (let [failed-email-addresses-str (->> results-failed-emails (map :email-address) (s/join ","))]
         (fail! :kopiolaitos-email-sending-failed-with-emails :failedEmails failed-email-addresses-str)))))
 
-(defn- get-kopiolaitos-email-addresses [{:keys [organization] :as application}]
-  (let [email (organization/with-organization organization :kopiolaitos-email)]
+
+;; Resolving kopiolaitos emails set by the authority admin of the organization
+
+(defn- separate-emails [email-str regexp]
+  (->> (ss/split email-str regexp) (map ss/trim) set))
+
+(defn- get-kopiolaitos-email-addresses [organization-id]
+  (let [email (organization/with-organization organization-id :kopiolaitos-email) #_"jari.asp@solita.fi, jari.asp@examplegfdsghdfgsdg.com;  jartse@gmail.com"]
     (if-not (ss/blank? email)
-        (let [emails (->> (ss/split email #"(,|;)") (map ss/trim) set)]
-          ;; action/email-validator returns nil if email was valid
-          (when (some #(action/email-validator :email {:data {:email %}}) emails)
-            (fail! :kopiolaitos-invalid-email))
-          emails)
+      (let [emails (separate-emails email email-address-separation-regexp)]
+        ;; action/email-validator returns nil if email was valid
+        (when (some #(action/email-validator :email {:data {:email %}}) emails)
+          (fail! :kopiolaitos-invalid-email))
+        emails)
       nil)))
 
+
+;; Send the the prints order
+
 (defn do-order-verdict-attachment-prints [{{:keys [lang attachmentsWithAmounts orderInfo]} :data application :application created :created user :user :as command}]
-  (if-let [email-addresses (get-kopiolaitos-email-addresses application)]
+  (if-let [email-addresses (get-kopiolaitos-email-addresses (:organization application))]
     (do
       (send-kopiolaitos-email lang email-addresses attachmentsWithAmounts orderInfo)
       (let [order {:type "verdict-attachment-print-order"
