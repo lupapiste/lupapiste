@@ -13,6 +13,7 @@
   separate-emails
   get-kopiolaitos-email-addresses)
 
+
 (fact "Sonja sets default values for organization kopiolaitos info"
   (command sipoo :set-kopiolaitos-info
     :kopiolaitosEmail "sipoo@example.com;sipoo2@example.com"
@@ -45,6 +46,7 @@
           (count (filter :forPrinting attachments)) => 2)))
 
     (command sonja :check-for-verdict :id app-id) => ok?
+    (last-email)  ;; Inbox reset
 
     (fact "Order prints"
       (let [app (query-application sonja app-id)
@@ -92,25 +94,29 @@
             :attachmentsWithAmounts (filter :forPrinting attachments-with-amount)
             :orderInfo order-info) => ok?)
 
-        (facts* "sent email was correct"
-          (let [email (last-email)
-                _ (:to email) => "sipoo@example.com"
-                zip-stream (-> email
-                             (get-in [:body :attachment])
-                             (crypt/str->bytes)
-                             (crypt/base64-decode)
-                             (clojure.java.io/input-stream)
-                             (ZipInputStream.))
-                to-zip-entries (fn [s result]
-                                 (if-let [entry (.getNextEntry s)]
-                                   (recur s (conj result (bean entry)))
-                                   result))
-                result (to-zip-entries zip-stream [])]
+        (facts* "sent emails were correct"
+          (let [sent-emails (sent-emails)]  ;; resets sent emails list
+            (count sent-emails) => 2
+            (map :to sent-emails) => (just #{"sipoo@example.com" "sipoo2@example.com"})
 
-            (fact "zip file has two files"
-              (count result) => 2)
-            (fact "filenames end with 'test-attachment.txt'"
-              (every? #(.endsWith (:name %) "test-attachment.txt") result) => true)))
+            (fact "check attachment contents of both sent emails"
+              (doseq [email sent-emails]
+                (let [zip-stream (-> email
+                                   (get-in [:body :attachment])
+                                   (crypt/str->bytes)
+                                   (crypt/base64-decode)
+                                   (clojure.java.io/input-stream)
+                                   (ZipInputStream.))
+                      to-zip-entries (fn [s result]
+                                       (if-let [entry (.getNextEntry s)]
+                                         (recur s (conj result (bean entry)))
+                                         result))
+                      result (to-zip-entries zip-stream [])]
+
+                  (fact "zip file has two files"
+                    (count result) => 2)
+                  (fact "filenames end with 'test-attachment.txt'"
+                    (every? #(.endsWith (:name %) "test-attachment.txt") result) => true))))))
 
         (fact "unsetting organization kopiolaitos-email leads to failure in kopiolaitos order"
           (command sipoo :set-kopiolaitos-info
