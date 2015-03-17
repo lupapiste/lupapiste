@@ -61,6 +61,7 @@
                    :ordererEmail        (loc "kopiolaitos-order-email.titles.ordererEmail")
                    :ordererPhone        (loc "kopiolaitos-order-email.titles.ordererPhone")
                    :ordererAddress      (loc "kopiolaitos-order-email.titles.ordererAddress")
+                   :applicantName       (loc "kopiolaitos-order-email.titles.applicantName")
                    :kuntalupatunnus     (loc "kopiolaitos-order-email.titles.kuntalupatunnus")
                    :propertyId          (loc "kopiolaitos-order-email.titles.propertyId")
                    :lupapisteId         (loc "kopiolaitos-order-email.titles.lupapisteId")
