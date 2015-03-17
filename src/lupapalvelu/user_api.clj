@@ -509,7 +509,9 @@
 (defquery user-attachments
   {:user-roles #{:applicant :authority :authorityAdmin :admin}}
   [{user :user}]
-  (ok :attachments (:attachments user)))
+  (if-let [current-user (user/get-user-by-id (:id user))]
+    (ok :attachments (:attachments current-user))
+    (fail :error.user-not-found)))
 
 (defpage [:post "/api/upload/user-attachment"] {[{:keys [tempfile filename content-type size]}] :files attachmentType :attachmentType}
   (let [user              (user/current-user (request/ring-request))
