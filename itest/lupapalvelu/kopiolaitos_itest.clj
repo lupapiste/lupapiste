@@ -5,12 +5,12 @@
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.kopiolaitos :refer :all]
             [lupapalvelu.organization :as organization]
+            [sade.util :as util]
             [sade.crypt :as crypt])
   (:import  [java.util.zip ZipInputStream]))
 
 (testable-privates lupapalvelu.kopiolaitos
   get-kopiolaitos-html-table
-  separate-emails
   get-kopiolaitos-email-addresses)
 
 
@@ -143,14 +143,14 @@
 
   (facts "separating emails from the kopiolaitos email addresses"
     (fact "same email multiple times plus different separator chars"
-      (separate-emails "pena.bulkki@example.com,pena.bulkki@example.com" email-address-separation-regexp) => #{"pena.bulkki@example.com"})
+      (util/separate-emails "pena.bulkki@example.com,pena.bulkki@example.com") => #{"pena.bulkki@example.com"})
 
     (fact "different separator chars"
-      (separate-emails "pena.bulkki@example.com, pena.bulkkinen@example.com;mikko.alakesko@example.com" email-address-separation-regexp)
+      (util/separate-emails "pena.bulkki@example.com, pena.bulkkinen@example.com;mikko.alakesko@example.com")
         => #{"pena.bulkki@example.com" "pena.bulkkinen@example.com" "mikko.alakesko@example.com"})
 
     (fact "one email"
-      (separate-emails "pena.bulkki@example.com" email-address-separation-regexp) => #{"pena.bulkki@example.com"}))
+      (util/separate-emails "pena.bulkki@example.com") => #{"pena.bulkki@example.com"}))
 
   (fact "one kopiolaitos email is invalid"
     (get-kopiolaitos-email-addresses sonja-muni) => (throws Exception #"kopiolaitos-invalid-email")
