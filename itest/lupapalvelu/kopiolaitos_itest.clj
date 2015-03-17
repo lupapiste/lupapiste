@@ -5,6 +5,7 @@
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.kopiolaitos :refer :all]
             [lupapalvelu.organization :as organization]
+            [lupapalvelu.i18n :refer [with-lang loc]]
             [sade.util :as util]
             [sade.crypt :as crypt])
   (:import  [java.util.zip ZipInputStream]))
@@ -57,7 +58,13 @@
 
     (fact "Order prints"
       (let [app (query-application sonja app-id)
-            attachments-with-amount (map #(assoc % :amount "2") (:attachments app))
+            attachments-with-amount (map
+                                      #(assoc %
+                                         :amount   "2"
+                                         :filename (-> % :latestVersion :filename)
+                                         :fileId   (-> % :latestVersion :fileId)
+                                         :contents (with-lang "fi" (or (:contents %) (loc (str "attachmentType." (-> % :type :type-group) "." (-> % :type :type-id))))))
+                                      (:attachments app))
             order-info {:ordererOrganization "Testi"
                         :ordererAddress      "Testikuja 2"
                         :ordererPhone        "12345"
