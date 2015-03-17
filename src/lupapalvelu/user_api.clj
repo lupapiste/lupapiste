@@ -34,9 +34,11 @@
 (defquery user
   {:user-roles #{:applicant :authority :oirAuthority :authorityAdmin :admin}}
   [{user :user}]
-  (if-let [full-user (user/get-user-by-id (:id user))]
-    (ok :user (user/non-private full-user))
-    (fail)))
+  (if (user/virtual-user? user)
+    (ok :user user)
+    (if-let [full-user (user/get-user-by-id (:id user))]
+     (ok :user (user/non-private full-user))
+     (fail))))
 
 (defquery users
   {:user-roles #{:admin :authorityAdmin}}

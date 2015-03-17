@@ -25,7 +25,6 @@
 (defraw openinforequest
   {:user-roles #{:anonymous}}
   [{{token-id :token-id} :data lang :lang created :created :as command}]
-  (assert created)
   (let [token (mongo/by-id :open-inforequest-token token-id)
         url   (str (env/value :host) "/app/" (name lang) "/oir#!/inforequest/" (:application-id token))]
     (if token
