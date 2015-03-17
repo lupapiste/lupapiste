@@ -33,7 +33,7 @@
   "Returns common information about the user to be stored in session or nil"
   [user]
   (when user
-    (select-keys user [:id :username :firstName :lastName :role :email :organizations])))
+    (select-keys user [:id :username :firstName :lastName :role :email :organizations :company])))
 
 
 (defn authority? [{role :role}]
