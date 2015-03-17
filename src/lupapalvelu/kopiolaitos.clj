@@ -85,23 +85,29 @@
         orderInfo (merge orderInfo {:titles (get-kopiolaitos-order-email-titles lang)
                                     :contentsTable (get-kopiolaitos-html-table lang attachments)})
         email-msg (email/apply-template "kopiolaitos-order.html" orderInfo)
-        sending-results (try
-                          (doall
-                            (map
-                              (partial do-send-email orderInfo email-subject email-msg email-attachment)
-                              email-addresses))
-                          (catch Exception e
-                            (fail! :kopiolaitos-email-sending-failed)))
-        results-failed-emails (remove :sending-succeeded sending-results)]
+        results-failed-emails (try
+                                (reduce
+                                  (fn [failed addr]
+                                    (let [res (do-send-email orderInfo email-subject email-msg email-attachment addr)]
+                                      (if (:sending-succeeded res)
+                                        failed
+                                        (conj failed (:email-address res)))))
+                                  []
+                                  email-addresses)
 
-    (try
-        (io/delete-file zip)
-      (catch java.io.IOException ioe
-        (warnf "Could not delete temporary zip file: %s" (.getAbsolutePath zip))))
+                                (catch Exception _
+                                  (fail! :kopiolaitos-email-sending-failed))
+
+                                (finally
+                                  ;; If coming to finally-clause with an exception thrown, and io/delete-file also throws exception,
+                                  ;; the previous exception (kopiolaitos-email-sending-failed) will still be thrown, as wanted here.
+                                  (try
+                                    (io/delete-file zip)
+                                    (catch Exception _
+                                      (warnf "Could not delete temporary zip file: %s" (.getAbsolutePath zip))))))]
 
     (when (-> results-failed-emails count pos?)
-      (let [failed-email-addresses-str (->> results-failed-emails (map :email-address) (s/join ","))]
-        (fail! :kopiolaitos-email-sending-failed-with-emails :failedEmails failed-email-addresses-str)))))
+      (fail! :kopiolaitos-email-sending-failed-with-emails :failedEmails (s/join "," results-failed-emails)))))
 
 
 ;; Resolving kopiolaitos emails set by the authority admin of the organization
@@ -110,7 +116,7 @@
   (->> (ss/split email-str regexp) (map ss/trim) set))
 
 (defn- get-kopiolaitos-email-addresses [organization-id]
-  (let [email (organization/with-organization organization-id :kopiolaitos-email) #_"jari.asp@solita.fi, jari.asp@examplegfdsghdfgsdg.com;  jartse@gmail.com"]
+  (let [email (organization/with-organization organization-id :kopiolaitos-email)]
     (if-not (ss/blank? email)
       (let [emails (separate-emails email email-address-separation-regexp)]
         ;; action/email-validator returns nil if email was valid
