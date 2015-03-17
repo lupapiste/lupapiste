@@ -97,8 +97,6 @@
                                   email-addresses)
 
                                 (finally
-                                  ;; If coming to finally-clause with an exception thrown, and io/delete-file also throws exception,
-                                  ;; the previous exception (kopiolaitos-email-sending-failed) will still be thrown, as wanted here.
                                   (try
                                     (io/delete-file zip)
                                     (catch Exception e
