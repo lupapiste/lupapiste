@@ -171,6 +171,17 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return span;
   }
 
+  function makeSectionHelpTextSpan(schema) {
+    var span = document.createElement("span");
+    span.className = "group-help-text";
+    var locKey = schema.info["section-help"];
+    if (locKey) {
+      span.innerHTML = loc(locKey);
+    }
+
+    return span;
+  }
+
   function getUpdateCommand() {
     return (options && options.updateCommand) ? options.updateCommand : "update-doc";
   }
@@ -1743,6 +1754,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     sectionContainer.className = "accordion_content" + (accordionCollapsed ? "" : " expanded");
     sectionContainer.setAttribute("data-accordion-state", (accordionCollapsed ? "closed" : "open"));
     sectionContainer.id = "document-" + self.docId;
+
+    var sectionHelpText = makeSectionHelpTextSpan(self.schema);
+    sectionContainer.appendChild(sectionHelpText);
 
     appendElements(elements, self.schema, self.model, []);
 
