@@ -4,20 +4,33 @@
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.kopiolaitos :refer :all]
+            [lupapalvelu.organization :as organization]
+            [lupapalvelu.i18n :refer [with-lang loc]]
+            [sade.util :as util]
             [sade.crypt :as crypt])
   (:import  [java.util.zip ZipInputStream]))
 
-(testable-privates lupapalvelu.kopiolaitos get-kopiolaitos-html-table)
+(testable-privates lupapalvelu.kopiolaitos
+  get-kopiolaitos-html-table
+  get-kopiolaitos-email-addresses)
+
+
+(fact "Setting invalid kopiolaitos email fails"
+  (command sipoo :set-kopiolaitos-info
+    :kopiolaitosEmail "sipoo.nodomain"
+    :kopiolaitosOrdererAddress "Testikatu 2, 12345 Sipoo"
+    :kopiolaitosOrdererPhone "0501231234"
+    :kopiolaitosOrdererEmail "tilaaja@example.com") => (partial expected-failure? "error.set-kopiolaitos-info.invalid-email"))
 
 (fact "Sonja sets default values for organization kopiolaitos info"
   (command sipoo :set-kopiolaitos-info
-    :kopiolaitosEmail "sipoo@example.com"
+    :kopiolaitosEmail "sipoo@example.com;sipoo2@example.com"
     :kopiolaitosOrdererAddress "Testikatu 2, 12345 Sipoo"
     :kopiolaitosOrdererPhone "0501231234"
     :kopiolaitosOrdererEmail "tilaaja@example.com") => ok?
 
   (query sipoo :kopiolaitos-config) => {:ok true
-                                        :kopiolaitos-email "sipoo@example.com"
+                                        :kopiolaitos-email "sipoo@example.com;sipoo2@example.com"
                                         :kopiolaitos-orderer-address "Testikatu 2, 12345 Sipoo"
                                         :kopiolaitos-orderer-email "tilaaja@example.com"
                                         :kopiolaitos-orderer-phone "0501231234"})
@@ -36,15 +49,22 @@
         :unSelectedAttachmentIds []) => ok?
 
       (let [app (query-application sonja app-id) => map?
-            attachments (get-in app [:attachments]) => sequential?]
+            attachments (:attachments app) => sequential?]
         (fact "Two attachments have forPrinting flags set to true"
           (count (filter :forPrinting attachments)) => 2)))
 
     (command sonja :check-for-verdict :id app-id) => ok?
+    (last-email)  ;; Inbox reset
 
     (fact "Order prints"
       (let [app (query-application sonja app-id)
-            attachments-with-amount (map #(assoc % :amount "2") (:attachments app))
+            attachments-with-amount (map
+                                      #(assoc %
+                                         :amount   "2"
+                                         :filename (-> % :latestVersion :filename)
+                                         :fileId   (-> % :latestVersion :fileId)
+                                         :contents (with-lang "fi" (or (:contents %) (loc (str "attachmentType." (-> % :type :type-group) "." (-> % :type :type-id))))))
+                                      (:attachments app))
             order-info {:ordererOrganization "Testi"
                         :ordererAddress      "Testikuja 2"
                         :ordererPhone        "12345"
@@ -80,7 +100,7 @@
             :id app-id
             :lang "fi"
             :attachmentsWithAmounts (:attachments app)
-            :orderInfo order-info) => (and fail? (contains {:required-keys ["forPrinting" "amount"]})))
+            :orderInfo order-info) => (and fail? (contains {:required-keys ["forPrinting" "amount" "versions"]})))
         (fact "fail when all attachments for command don't have forPriting set to 'true'"
           (command sonja :order-verdict-attachment-prints
             :id app-id
@@ -94,25 +114,29 @@
             :attachmentsWithAmounts (filter :forPrinting attachments-with-amount)
             :orderInfo order-info) => ok?)
 
-        (facts* "sent email was correct"
-          (let [email (last-email)
-                _ (:to email) => "sipoo@example.com"
-                zip-stream (-> email
-                             (get-in [:body :attachment])
-                             (crypt/str->bytes)
-                             (crypt/base64-decode)
-                             (clojure.java.io/input-stream)
-                             (ZipInputStream.))
-                to-zip-entries (fn [s result]
-                                 (if-let [entry (.getNextEntry s)]
-                                   (recur s (conj result (bean entry)))
-                                   result))
-                result (to-zip-entries zip-stream [])]
+        (facts* "sent emails were correct"
+          (let [sent-emails (sent-emails)]  ;; resets sent emails list
+            (count sent-emails) => 2
+            (map :to sent-emails) => (just #{"sipoo@example.com" "sipoo2@example.com"})
 
-            (fact "zip file has two files"
-              (count result) => 2)
-            (fact "filenames end with 'test-attachment.txt'"
-              (every? #(.endsWith (:name %) "test-attachment.txt") result) => true)))
+            (fact "check attachment contents of both sent emails"
+              (doseq [email sent-emails]
+                (let [zip-stream (-> email
+                                   (get-in [:body :attachment])
+                                   (crypt/str->bytes)
+                                   (crypt/base64-decode)
+                                   (clojure.java.io/input-stream)
+                                   (ZipInputStream.))
+                      to-zip-entries (fn [s result]
+                                       (if-let [entry (.getNextEntry s)]
+                                         (recur s (conj result (bean entry)))
+                                         result))
+                      result (to-zip-entries zip-stream [])]
+
+                  (fact "zip file has two files"
+                    (count result) => 2)
+                  (fact "filenames end with 'test-attachment.txt'"
+                    (every? #(.endsWith (:name %) "test-attachment.txt") result) => true))))))
 
         (fact "unsetting organization kopiolaitos-email leads to failure in kopiolaitos order"
           (command sipoo :set-kopiolaitos-info
@@ -125,3 +149,25 @@
             :lang "fi"
             :attachmentsWithAmounts (filter :forPrinting attachments-with-amount)
             :orderInfo order-info) => (partial expected-failure? "no-kopiolaitos-email-defined"))))))
+
+
+;; Testing the support for multiple email addresses
+
+(facts "multiple emails concatenated as one kopiolaitos email address"
+
+  (facts "separating emails from the kopiolaitos email addresses"
+    (fact "same email multiple times plus different separator chars"
+      (util/separate-emails "pena.bulkki@example.com,pena.bulkki@example.com") => #{"pena.bulkki@example.com"})
+
+    (fact "different separator chars"
+      (util/separate-emails "pena.bulkki@example.com, pena.bulkkinen@example.com;mikko.alakesko@example.com")
+        => #{"pena.bulkki@example.com" "pena.bulkkinen@example.com" "mikko.alakesko@example.com"})
+
+    (fact "one email"
+      (util/separate-emails "pena.bulkki@example.com") => #{"pena.bulkki@example.com"}))
+
+  (fact "one kopiolaitos email is invalid"
+    (get-kopiolaitos-email-addresses sonja-muni) => (throws Exception #"kopiolaitos-invalid-email")
+    (provided
+      (organization/with-organization sonja-muni :kopiolaitos-email) => "pena.bulkki@example.com;mikko.nodomain")))
+
