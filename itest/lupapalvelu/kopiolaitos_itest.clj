@@ -74,7 +74,7 @@
             :id app-id
             :lang "fi"
             :attachmentsWithAmounts (:attachments app)
-            :orderInfo order-info) => (and fail? (contains {:required-keys ["forPrinting" "amount"]})))
+            :orderInfo order-info) => (and fail? (contains {:required-keys ["forPrinting" "amount" "versions"]})))
         (fact "fail when all attachments for command don't have forPriting set to 'true'"
           (command sonja :order-verdict-attachment-prints
             :id app-id

@@ -11,9 +11,13 @@
    :states     [:verdictGiven :constructionStarted]
    :user-roles #{:authority}
    :input-validators [(partial action/non-blank-parameters [:lang])
-                      (partial action/vector-parameters-with-map-items-with-required-keys [:attachmentsWithAmounts] [:forPrinting :amount])
+                      (partial action/vector-parameters-with-map-items-with-required-keys [:attachmentsWithAmounts] [:forPrinting :amount :versions])
                       (fn [{{attachments :attachmentsWithAmounts} :data :as command}]
-                        (when (some #(or (not (= true (:forPrinting %))) (nil? (util/->int (:amount %) nil))) attachments)
+                        (when (some #(or
+                                       (not (= true (:forPrinting %)))
+                                       (nil? (util/->int (:amount %) nil))
+                                       (empty? (:versions %)))
+                                attachments)
                           (fail :error.kopiolaitos-print-order-invalid-parameters-content)))
                       (partial action/map-parameters [:orderInfo])]}
   [command]
