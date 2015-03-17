@@ -11,11 +11,12 @@
    :states     [:verdictGiven :constructionStarted]
    :user-roles #{:authority}
    :input-validators [(partial action/non-blank-parameters [:lang])
+                      (partial action/map-parameters-with-required-keys [:orderInfo]
+                        [:address :ordererPhone :kuntalupatunnus :ordererEmail :ordererAddress :ordererOrganization :applicantName :propertyId :lupapisteId])
                       (partial action/vector-parameters-with-map-items-with-required-keys [:attachmentsWithAmounts] [:forPrinting :amount])
-                      (fn [{{attachments :attachmentsWithAmounts} :data :as command}]
+                      (fn [{{attachments :attachmentsWithAmounts} :data}]
                         (when (some #(or (not (= true (:forPrinting %))) (nil? (util/->int (:amount %) nil))) attachments)
-                          (fail :error.kopiolaitos-print-order-invalid-parameters-content)))
-                      (partial action/map-parameters [:orderInfo])]}
+                          (fail :error.kopiolaitos-print-order-invalid-parameters-content)))]}
   [command]
   (kopiolaitos/do-order-verdict-attachment-prints command)
   (ok))
