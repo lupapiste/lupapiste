@@ -37,8 +37,10 @@
 
 (defn virtual-user?
   "True if user exists only in session, not in database"
-  [{role :role}]
-  (contains? #{:oirAuthority} (keyword role)))
+  [{:keys [role impersonating]}]
+  (or
+    impersonating
+    (contains? #{:oirAuthority} (keyword role))))
 
 (defn authority? [{role :role}]
   (#{:authority :oirAuthority} (keyword role)))
