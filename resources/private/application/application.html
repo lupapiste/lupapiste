@@ -35,6 +35,9 @@
               <span data-bind="ltext: 'canceled', attr: {'title' : loc('canceled.title')}" class="canceled-box"></span>
             </div>
           </div>
+          <div data-bind="if: $root.application.state() == 'draft'" id="state-infotext">
+            <p data-bind="lhtml: 'application.state.draft.help'"></p>
+          </div>
 
           <!-- Property ID: -->
           <div>
@@ -168,10 +171,19 @@
           <!-- ko if: !hasInvites() -->
           <button data-bind="click: approveApplication,
                               visible: $root.authorization.ok('approve-application'),
-                              enable: !processing() && $root.authorization.ok('approve-application'), attr: {'title': loc('tooltip.approveApplication'}"
+                              enable: !processing() && $root.authorization.ok('approve-application'), attr: {'title': loc('tooltip.approveApplication')}"
                   data-test-id="approve-application"
                   class="btn btn-primary">
             <span data-bind="ltext: 'application.approveApplication'"></span>
+            <span class="icon approve left-align"></span>
+          </button>
+          <button data-bind="click: toAsianhallinta,
+                             visible: $root.authorization.ok('application-to-asianhallinta') && asianhallintaEnabled,
+                             enable: !processing() && $root.authorization.ok('application-to-asianhallinta') && asianhallintaEnabled,
+                             attr: {'title': loc('tooltip.toAsianhallinta')}"
+                  data-test-id="to-asianhallinta"
+                  class="btn btn-primary">
+            <span data-bind="ltext: 'application.toAsianhallinta'"></span>
             <span class="icon approve left-align"></span>
           </button>
           <button data-bind="click: requestForComplement, visible: $root.authorization.ok('request-for-complement'), enable: !processing() && $root.authorization.ok('request-for-complement')" data-test-id="request-for-complement">
@@ -293,6 +305,9 @@
           </div>
           <div class="tab-info" data-bind="slider: showApplicationInfoHelp">
             <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.applicationInfoDesc'"></p>
+          </div>
+          <div data-bind="if: $root.application.state() == 'draft'">
+            <p data-bind="lhtml: 'application.state.draft.help'"></p>
           </div>
           <div class="operation-info">
 
@@ -662,7 +677,13 @@
           <div class="tab-info" data-bind="slider: application.showVerdictInfoHelp">
             <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.verdictDesc'"></p>
           </div>
+
+
+          
           <div data-bind="if: $root.verdictModel.verdicts()">
+            <div data-bind="ifnot: $root.verdictModel.verdicts().length">
+              <p data-bind="lhtml: 'application.verdictDesc'"></p>
+            </div>
             <div class="application_section" data-bind="foreach: $root.verdictModel.verdicts">
 
               <h2 class="application_section_header">

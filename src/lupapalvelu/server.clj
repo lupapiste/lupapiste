@@ -38,7 +38,8 @@
             [lupapalvelu.migration.migration :as migration]
             [lupapalvelu.screenmessage-api]
             [lupapalvelu.integrations-api]
-            [lupapalvelu.construction-api]))
+            [lupapalvelu.construction-api]
+            [lupapalvelu.asianhallinta-config-api]))
 
 (defn -main [& _]
   (infof "Build %s starting in %s mode" (:build-number env/buildinfo) (name env/mode))

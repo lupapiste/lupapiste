@@ -171,6 +171,17 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return span;
   }
 
+  function makeSectionHelpTextSpan(schema) {
+    var span = document.createElement("span");
+    span.className = "group-help-text";
+    var locKey = schema.info["section-help"];
+    if (locKey) {
+      span.innerHTML = loc(locKey);
+    }
+
+    return span;
+  }
+
   function getUpdateCommand() {
     return (options && options.updateCommand) ? options.updateCommand : "update-doc";
   }
@@ -205,7 +216,22 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return label;
   }
 
-  function makeInput(type, pathStr, value, extraClass, readonly, subSchema) {
+  function sourceValueChanged(input, value, sourceValue, localizedSourceValue) {
+    if (sourceValue && sourceValue === value) {
+      input.removeAttribute("title");
+      $(input).removeClass("source-value-changed");
+    } else if (sourceValue && sourceValue !== value){
+      $(input).addClass("source-value-changed");
+      input.title = _.escapeHTML(loc("sourceValue") + ": " + (localizedSourceValue ? localizedSourceValue : sourceValue));
+    }
+  }
+
+  function makeInput(type, pathStr, modelOrValue, subSchema) {
+    var value = _.isObject(modelOrValue) ? getModelValue(modelOrValue, subSchema.name) : modelOrValue;
+    var sourceValue = _.isObject(modelOrValue) ? getModelSourceValue(modelOrValue, subSchema.name) : undefined;
+    var extraClass = self.sizeClasses[subSchema.size] || "";
+    var readonly = subSchema.readonly;
+
     var input = document.createElement("input");
     input.id = pathStrToID(pathStr);
     input.name = self.docId + "." + pathStr;
@@ -224,18 +250,25 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       input.readOnly = true;
     } else {
       input.onchange = function(e) {
+        if (type === "checkbox") {
+          sourceValueChanged(input, input.checked, sourceValue, loc("selected"));
+        } else {
+          sourceValueChanged(input, input.value, sourceValue);
+        }
         save(e, function() {
           if (subSchema) {
            emit(getEvent(e).target, subSchema);
-          }  
+          }
         });
       };
     }
 
     if (type === "checkbox") {
       input.checked = value;
+      sourceValueChanged(input, value, sourceValue, loc("selected"));
     } else {
       input.value = value || "";
+      sourceValueChanged(input, value, sourceValue);
     }
     return input;
   }
@@ -301,6 +334,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
           text += " " + moment(approval.timestamp).format("D.M.YYYY HH:mm") + ")";
         }
         statusContainer$.text(text);
+        statusContainer$.removeClass(function(index, css) {
+          return _.filter(css.split(" "), function(c) { return _.includes(c, "approval-"); }).join(" ");
+        });
         statusContainer$.addClass("approval-" + approval.value);
         approvalContainer$.removeClass("empty");
       }
@@ -384,7 +420,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   function buildCheckbox(subSchema, model, path) {
     var myPath = path.join(".");
     var span = makeEntrySpan(subSchema, myPath);
-    var input = makeInput("checkbox", myPath, getModelValue(model, subSchema.name), subSchema.readonly);
+    var input = makeInput("checkbox", myPath, model, subSchema);
     input.onmouseover = self.showHelp;
     input.onmouseout = self.hideHelp;
     span.appendChild(input);
@@ -417,9 +453,12 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var supportedInputSubtypes = ["email", "time"];
     var inputType = (_.indexOf(supportedInputSubtypes, subSchema.subtype) > -1) ? subSchema.subtype : "text";
 
-    var sizeClass = self.sizeClasses[subSchema.size] || "";
-    var input = makeInput(inputType, myPath, getModelValue(model, subSchema.name), sizeClass, subSchema.readonly, subSchema);
+    var input = makeInput(inputType, myPath, model, subSchema);
     setMaxLen(input, subSchema);
+
+    if ( model[subSchema.name] && model[subSchema.name].disabled) {
+      input.setAttribute("disabled", true);
+    }
 
     listen(subSchema, myPath, input);
 
@@ -479,6 +518,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return model[name] ? model[name].value : "";
   }
 
+  function getModelSourceValue(model, name) {
+    return model[name] ? model[name].sourceValue : "";
+  }
+
   function buildText(subSchema, model, path) {
     var myPath = path.join(".");
     var input = document.createElement("textarea");
@@ -496,14 +539,21 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     input.setAttribute("cols", subSchema.cols || "40");
     setMaxLen(input, subSchema);
 
+    input.className = "form-input textarea";
+    var value = getModelValue(model, subSchema.name);
+    input.value = value;
+    var sourceValue = _.isObject(model) ? getModelSourceValue(model, subSchema.name) : undefined;
+
+    sourceValueChanged(input, value, sourceValue);
+
     if (subSchema.readonly) {
       input.readOnly = true;
     } else {
-      input.onchange = save;
+      input.onchange = function(e) {
+        sourceValueChanged(input, input.value, sourceValue);
+        save(e);
+      };
     }
-
-    input.className = "form-input textarea";
-    input.value = getModelValue(model, subSchema.name);
 
     if (subSchema.label) {
       span.appendChild(makeLabel(subSchema, "text", myPath));
@@ -558,7 +608,13 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     if (subSchema.name === "muutostapa" && _.isEmpty(_.keys(model))) {
       model[subSchema.name] = {value: "lis\u00e4ys"};
     }
+
+    if ( model[subSchema.name] && model[subSchema.name].disabled) {
+      select.setAttribute("disabled", true);
+    }
+
     var selectedOption = getModelValue(model, subSchema.name);
+    var sourceValue = getModelSourceValue(model, subSchema.name);
     var span = makeEntrySpan(subSchema, myPath);
     var sizeClass = self.sizeClasses[subSchema.size] || "";
 
@@ -573,15 +629,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     select.className = "form-input combobox " + (sizeClass || "");
 
     select.id = pathStrToID(myPath);
-
-    if (subSchema.readonly) {
-      select.readOnly = true;
-    } else {
-      select.onchange = function(e) {
-        save(e);
-        emit(getEvent(e).target, subSchema);
-      };
-    }
 
     var otherKey = subSchema["other-key"];
     if (otherKey) {
@@ -636,6 +683,22 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         option.selected = "selected";
       }
       select.appendChild(option);
+    }
+
+    var locSelectedOption = _.find(options, function(o) {
+      return o[0] === sourceValue;
+    });
+
+    sourceValueChanged(select, selectedOption, sourceValue, locSelectedOption ? locSelectedOption[1] : undefined);
+
+    if (subSchema.readonly) {
+      select.readOnly = true;
+    } else {
+      select.onchange = function(e) {
+        sourceValueChanged(select, select.value, sourceValue, locSelectedOption ? locSelectedOption[1] : undefined);
+        save(e);
+        emit(getEvent(e).target, subSchema);
+      };
     }
 
     listen(subSchema, myPath, select);
@@ -693,7 +756,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     $.each(subSchema.body, function (i, o) {
       var pathForId = myPath + "." + o.name;
-      var input = makeInput("radio", myPath, o.name, subSchema.readonly);
+      var input = makeInput("radio", myPath, o.name, subSchema);
       input.id = pathStrToID(pathForId);
       input.checked = o.name === myModel;
 
@@ -1691,6 +1754,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     sectionContainer.className = "accordion_content" + (accordionCollapsed ? "" : " expanded");
     sectionContainer.setAttribute("data-accordion-state", (accordionCollapsed ? "closed" : "open"));
     sectionContainer.id = "document-" + self.docId;
+
+    var sectionHelpText = makeSectionHelpTextSpan(self.schema);
+    sectionContainer.appendChild(sectionHelpText);
 
     appendElements(elements, self.schema, self.model, []);
 

@@ -1,6 +1,6 @@
 # Hei,
 
-Sinulle on osoitettu uusi viesti keskustelussa
+Sinulle on osoitettu uusi viesti keskustelussa. P&auml;&auml;set n&auml;kem&auml;&auml;n viestin sek&auml; vastaamaan siihen hankkeen keskusteluketjun kautta.
 
 {{link-fi}}
 

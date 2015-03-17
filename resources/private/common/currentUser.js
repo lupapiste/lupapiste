@@ -21,6 +21,7 @@ var currentUser = (function() {
     get: function() { return user; },
     isAuthority: function() { return user.role() === "authority"; },
     isApplicant: function() { return user.role() === "applicant"; },
+    isCompanyUser: ko.pureComputed( function() { return !_.isEmpty(ko.unwrap(user.company.id)); }),
     id: function() { return user.id(); }
   };
 
