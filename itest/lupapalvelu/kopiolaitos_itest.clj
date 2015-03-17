@@ -14,6 +14,13 @@
   get-kopiolaitos-email-addresses)
 
 
+(fact "Setting invalid kopiolaitos email fails"
+  (command sipoo :set-kopiolaitos-info
+    :kopiolaitosEmail "sipoo.nodomain"
+    :kopiolaitosOrdererAddress "Testikatu 2, 12345 Sipoo"
+    :kopiolaitosOrdererPhone "0501231234"
+    :kopiolaitosOrdererEmail "tilaaja@example.com") => (partial expected-failure? "error.set-kopiolaitos-info.invalid-email"))
+
 (fact "Sonja sets default values for organization kopiolaitos info"
   (command sipoo :set-kopiolaitos-info
     :kopiolaitosEmail "sipoo@example.com;sipoo2@example.com"
