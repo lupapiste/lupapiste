@@ -155,6 +155,12 @@
 ;; Asianhallinta
 ;;
 
+(defn- fetch-kuntalupatunnus [application]
+  (let [link-permit-app-id (-> application :linkPermitData first :id)
+        link-permit-app (domain/get-application-no-access-checking link-permit-app-id)
+        kuntalupatunnus (-> link-permit-app :verdicts first :kuntalupatunnus)]
+    kuntalupatunnus))
+
 (defn- has-asianhallinta-operation [_ {:keys [operations]}]
   (when-not (operations/get-operation-metadata (:name (first operations)) :asianhallinta)
     (fail :error.operations.asianhallinta-disabled)))
