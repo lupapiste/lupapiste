@@ -156,10 +156,8 @@
 ;;
 
 (defn- fetch-kuntalupatunnus [application]
-  (let [link-permit-app-id (-> application :linkPermitData first :id)
-        link-permit-app (domain/get-application-no-access-checking link-permit-app-id)
-        kuntalupatunnus (-> link-permit-app :verdicts first :kuntalupatunnus)]
-    kuntalupatunnus))
+  (when-let [link-permit-app (application/get-link-permit-app application)]
+    (-> link-permit-app :verdicts first :kuntalupatunnus)))
 
 (defn- has-asianhallinta-operation [_ {:keys [operations]}]
   (when-not (operations/get-operation-metadata (:name (first operations)) :asianhallinta)
@@ -174,6 +172,12 @@
    :states     [:submitted :complement-needed]}
   [{:keys [application created user]:as command}]
   (let [application (meta-fields/enrich-with-link-permit-data application)
+        application (if-let [kuntalupatunnus (fetch-kuntalupatunnus application)]
+                      (update-in application 
+                                 [:linkPermitData] 
+                                 conj {:id kuntalupatunnus
+                                       :type "kuntalupatunnus"})
+                      application)
         submitted-application (mongo/by-id :submitted-applications id)
         app-updates {:modified created
                      :sent created
