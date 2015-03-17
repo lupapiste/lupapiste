@@ -90,7 +90,7 @@
     (server/start env/port {:mode env/mode
                             :ns 'lupapalvelu.web
                             :jetty-options jetty-opts
-                            :session-store (session/cookie-store {:key "1234567890123456"}) ; TODO read key using env
+                            :session-store (session/cookie-store #_{:key "1234567890123456"}) ; TODO read key from file
                             :session-cookie-attrs (env/value :cookie)}))
   "server running")
 
