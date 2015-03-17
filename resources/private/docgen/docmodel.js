@@ -323,6 +323,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
           text += " " + moment(approval.timestamp).format("D.M.YYYY HH:mm") + ")";
         }
         statusContainer$.text(text);
+        statusContainer$.removeClass(function(index, css) {
+          return _.filter(css.split(" "), function(c) { return _.includes(c, "approval-"); }).join(" ");
+        });
         statusContainer$.addClass("approval-" + approval.value);
         approvalContainer$.removeClass("empty");
       }
