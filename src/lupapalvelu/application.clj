@@ -110,6 +110,13 @@
     (when (user/authority? user) (model/mark-approval-indicators-seen-update application timestamp))
     (when (user/authority? user) {:_attachment_indicator_reset timestamp})))
 
+(defn get-link-permit-app [{:keys [linkPermitData]} & query]
+  "Return associated link-permit application. By default first is returned. When provided, query will be used instead."
+  (when linkPermitData
+    (if query
+      (domain/get-application-no-access-checking query)
+      (domain/get-application-no-access-checking (-> linkPermitData first :id)))))
+
 ;;
 ;; Query application:
 ;;
