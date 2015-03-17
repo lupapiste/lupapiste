@@ -427,7 +427,7 @@
   [{user :user :as command}]
   (if (user/get-user-with-password (:username user) password)
     (let [imposter (assoc user :impersonating true :role "authority" :organizations [organizationId])]
-      (ssess/merge-to-session command (ok) {:user (user/session-summary user)}))
+      (ssess/merge-to-session command (ok) {:user imposter}))
     (fail :error.login)))
 
 ;;
