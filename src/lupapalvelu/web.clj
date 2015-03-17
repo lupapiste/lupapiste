@@ -296,9 +296,9 @@
 (defn serve-app [app hashbang lang]
   ; hashbangs are not sent to server, query-parameter hashbang used to store where the user wanted to go, stored on server, reapplied on login
   (if-let [hashbang (->hashbang hashbang)]
-    (do
-      (session/put! :hashbang hashbang)
-      (single-resource :html (keyword app) (redirect-to-frontpage lang)))
+    (ssess/merge-to-session
+      (request/ring-request) (single-resource :html (keyword app) (redirect-to-frontpage lang))
+      {:hashbang hashbang})
     ; If current user has no access to the app, save hashbang using JS on client side.
     ; The next call will then be handled by the "true branch" above.
     (single-resource :html (keyword app) (save-hashbang-on-client))))
@@ -311,7 +311,7 @@
   (serve-app app hashbang lang))
 
 (defjson "/api/hashbang" []
-  (ok :bang (session/get! :hashbang "")))
+  (ok :bang (get-in (request/ring-request) [:session :hashbang] "")))
 
 ;;
 ;; Login/logout:
