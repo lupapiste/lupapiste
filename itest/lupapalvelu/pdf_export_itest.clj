@@ -6,8 +6,10 @@
             [lupapalvelu.i18n :refer [with-lang loc]]
             [sade.util :as util]
             [midje.sweet :refer :all]
-            [pdfboxing.text :as pdfbox]))
+            [pdfboxing.text :as pdfbox]
+            [lupapalvelu.mongo :as mongo]))
 
+(mongo/connect!)
 (apply-remote-minimal)
 
 (defn- localize-value [value]
