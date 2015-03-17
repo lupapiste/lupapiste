@@ -49,13 +49,19 @@
                         :ordererAddress      "Testikuja 2"
                         :ordererPhone        "12345"
                         :ordererEmail        "test@example.com"
-                        :contentsTable       (get-kopiolaitos-html-table "fi" attachments-with-amount)
                         :applicantName       "Hakija"
                         :kuntalupatunnus     "2013-1"
                         :propertyId          "32131654"
                         :lupapisteId         (:id app)
-                        :address             (:title app)}]
+                        :address             (:title app)
+                        :contentsTable       (get-kopiolaitos-html-table "fi" attachments-with-amount)}]
 
+        (fact "with invalid orderInfo order fails"
+          (command sonja :order-verdict-attachment-prints
+            :id app-id
+            :lang "fi"
+            :attachmentsWithAmounts nil
+            :orderInfo (dissoc order-info :applicantName)) => fail?)
         (fact "without attachments order fails"
           (command sonja :order-verdict-attachment-prints
             :id app-id
