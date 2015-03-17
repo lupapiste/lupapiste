@@ -90,16 +90,12 @@
 (defn user-agent [request]
   (str (get-in request [:headers "user-agent"])))
 
-(defn sessionId [request]
-  (get-in request [:cookies "ring-session" :value]))
-
 (defn client-ip [request]
   (or (get-in request [:headers "x-real-ip"]) (get-in request [:remote-addr])))
 
 (defn- web-stuff [request]
   {:user-agent (user-agent request)
    :client-ip  (client-ip request)
-   :sessionId  (sessionId request)
    :host       (host request)})
 
 (defn- logged-in? [request]
