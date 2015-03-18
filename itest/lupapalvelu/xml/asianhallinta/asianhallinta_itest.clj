@@ -124,7 +124,7 @@
           _ (command velho :save-verdict-draft :id link-app-id :verdictId verdict-id :backendId "KLTunnus1" :status 42 :name "Paatoksen antaja" :given 123 :official 124 :text "" :agreement false :section "") => ok?
           _ (command velho :publish-verdict :id link-app-id :verdictId verdict-id) => ok?
           manual-link "Another kuntalupatunnus"
-          
+
           app-id (create-app-id ; Actual app for asianhallinta
                          pena
                          :municipality velho-muni
@@ -135,14 +135,14 @@
           application (query-application pena app-id) => truthy          
           organization (organization/resolve-organization velho-muni (:permitType application)) => truthy
           scope  (organization/resolve-organization-scope velho-muni (:permitType application) organization) => truthy]
-      
+
       (generate-documents application pena)
       (command pena :submit-application :id app-id) => ok?
       (command pena :add-link-permit :id app-id :linkPermitId link-app-id) ; link-app-id has verdict with kuntalupatunnus
       (command pena :add-link-permit :id app-id :linkPermitId manual-link) ; manual kuntalupatunnus
-      
+
       (command velho :application-to-asianhallinta :id app-id :lang "fi") => ok?
-      
+
       (facts "XML file"
         (let [output-dir (str (resolve-output-directory scope) "/")
               target-file-name (str "target/Downloaded-" app-id "-" (now) ".xml")
@@ -159,11 +159,31 @@
               xml (xml/parse (io/reader xml-file))]
           (fact "XML file is valid"
             (validator/validate xml-as-string (:permitType application) (str "ah-" (resolve-ah-version scope))))
-      
+
           (fact "Viiteluvat elements"
             (let [contents (sxml/select xml [:UusiAsia :Viiteluvat :Viitelupa])]
-              
-              (fact "Three link permits are present" (count contents) => 3)))))))
+              (fact "Three link permits are present" (count contents) => 3)
+
+              (fact "One is link to LP application" 
+                (some 
+                  #(and 
+                    (= link-app-id (sxml/get-text % [:Viitelupa :MuuTunnus :Tunnus]))
+                    (= "Lupapiste" (sxml/get-text % [:Viitelupa :MuuTunnus :Sovellus]))) 
+                  contents) => truthy)
+
+              (fact "One is link to link-permit's verdict" 
+                (some 
+                  #(and 
+                    (= "KLTunnus1" (sxml/get-text % [:Viitelupa :MuuTunnus :Tunnus]))
+                    (= "Taustajärjestelmä" (sxml/get-text % [:Viitelupa :MuuTunnus :Sovellus]))) 
+                  contents) => truthy)
+
+              (fact "One is link to manual link" 
+                (some 
+                  #(and 
+                    (= manual-link (sxml/get-text % [:Viitelupa :MuuTunnus :Tunnus]))
+                    (= "Taustajärjestelmä" (sxml/get-text % [:Viitelupa :MuuTunnus :Sovellus]))) 
+                  contents) => truthy)))))))
 
 
   (fact "Can't create asianhallinta with non-asianhallinta operation"
