@@ -66,7 +66,7 @@
   (server/add-middleware headers/session-id-to-mdc)
   (server/add-middleware headers/add-security-headers)
   (server/add-middleware web/anti-csrf)
-  (server/add-middleware web/authentication)
+  (server/add-middleware web/wrap-authentication)
   (server/add-middleware web/session-timeout)
 
   (when-let [gemsdir (io/resource "gems")]

@@ -381,15 +381,29 @@
   (let [authorization (get-in request [:headers "authorization"])]
     (parse "apikey" authorization)))
 
-(defn authentication
+(defn- authentication [handler request]
+  (let [api-key (get-apikey request)
+        api-key-auth (when-not (ss/blank? api-key) (user/get-user-with-apikey api-key))
+        session-user (get-in request [:session :user])
+        expires (:expires session-user)
+        expired? (and expires (< expires (now)))
+        updated-user (and expired? (user/get-user {:id (:id session-user), :enabled true}))
+        user (or api-key-auth updated-user session-user)]
+    (debug "expires" expires)
+    (if (and expired? (not updated-user))
+      (resp/status 401 "Unauthorized")
+      (let [response (handler (assoc request :user user))]
+        (if (and response updated-user)
+          (do
+            (debug "User data had expired, updating session")
+            (ssess/merge-to-session request response {:user (user/session-summary updated-user)}))
+          response)))))
+
+(defn wrap-authentication
   "Middleware that adds :user to request. If request has apikey authentication header then
    that is used for authentication. If not, then use user information from session."
   [handler]
-  (fn [request]
-    (let [api-key (get-apikey request)
-          api-key-auth (when-not (ss/blank? api-key) (user/get-user-with-apikey api-key))
-          session-user (get-in request [:session :user])]
-      (handler (assoc request :user (or api-key-auth session-user))))))
+  (fn [request] (authentication handler request)))
 
 (defn- logged-in-with-apikey? [request]
   (and (get-apikey request) (logged-in? request)))

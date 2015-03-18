@@ -5,7 +5,7 @@
             [monger.operators :refer :all]
             [monger.query :as query]
             [camel-snake-kebab :as kebab]
-            [sade.core :refer [fail fail!]]
+            [sade.core :refer [fail fail! now]]
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.util :as util]
@@ -32,8 +32,9 @@
 (defn session-summary
   "Returns common information about the user to be stored in session or nil"
   [user]
-  (when user
-    (select-keys user [:id :username :firstName :lastName :role :email :organizations :company :architect])))
+  (some-> user
+    (select-keys [:id :username :firstName :lastName :role :email :organizations :company :architect])
+    (assoc :expires (+ (now) (.toMillis java.util.concurrent.TimeUnit/SECONDS 5)))))
 
 (defn virtual-user?
   "True if user exists only in session, not in database"
