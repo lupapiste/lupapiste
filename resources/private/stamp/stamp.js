@@ -109,6 +109,13 @@ var stamping = (function() {
     }
   });
 
+  hub.onPageUnload("stamping", function() {
+    model.stampingMode(false);
+    model.appModel = null;
+    model.attachments = null;
+    model.authorization = null;
+  });
+
   hub.subscribe("start-stamping", function(param) {
     initStamp(param.application);
   });

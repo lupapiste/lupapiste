@@ -1,6 +1,7 @@
 var gis = (function() {
   "use strict";
 
+  OpenLayers.ImgPath = "/theme/default/img/";
 
   var iconDefaultPath  = "/img/map-marker-big.png";
   var iconLocMapping = {
@@ -24,8 +25,6 @@ var gis = (function() {
       controls: [ new OpenLayers.Control.Zoom(),
                   new OpenLayers.Control.Navigation({ zoomWheelEnabled: zoomWheelEnabled }) ]
     });
-    OpenLayers.ImgPath = "/theme/default/img/";
-
 
     // Layers
 

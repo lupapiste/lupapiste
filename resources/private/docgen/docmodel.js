@@ -171,6 +171,17 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return span;
   }
 
+  function makeSectionHelpTextSpan(schema) {
+    var span = document.createElement("span");
+    span.className = "group-help-text";
+    var locKey = schema.info["section-help"];
+    if (locKey) {
+      span.innerHTML = loc(locKey);
+    }
+
+    return span;
+  }
+
   function getUpdateCommand() {
     return (options && options.updateCommand) ? options.updateCommand : "update-doc";
   }
@@ -323,6 +334,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
           text += " " + moment(approval.timestamp).format("D.M.YYYY HH:mm") + ")";
         }
         statusContainer$.text(text);
+        statusContainer$.removeClass(function(index, css) {
+          return _.filter(css.split(" "), function(c) { return _.includes(c, "approval-"); }).join(" ");
+        });
         statusContainer$.addClass("approval-" + approval.value);
         approvalContainer$.removeClass("empty");
       }
@@ -441,6 +455,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     var input = makeInput(inputType, myPath, model, subSchema);
     setMaxLen(input, subSchema);
+
+    if ( model[subSchema.name] && model[subSchema.name].disabled) {
+      input.setAttribute("disabled", true);
+    }
 
     listen(subSchema, myPath, input);
 
@@ -590,6 +608,11 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     if (subSchema.name === "muutostapa" && _.isEmpty(_.keys(model))) {
       model[subSchema.name] = {value: "lis\u00e4ys"};
     }
+
+    if ( model[subSchema.name] && model[subSchema.name].disabled) {
+      select.setAttribute("disabled", true);
+    }
+
     var selectedOption = getModelValue(model, subSchema.name);
     var sourceValue = getModelSourceValue(model, subSchema.name);
     var span = makeEntrySpan(subSchema, myPath);
@@ -1731,6 +1754,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     sectionContainer.className = "accordion_content" + (accordionCollapsed ? "" : " expanded");
     sectionContainer.setAttribute("data-accordion-state", (accordionCollapsed ? "closed" : "open"));
     sectionContainer.id = "document-" + self.docId;
+
+    var sectionHelpText = makeSectionHelpTextSpan(self.schema);
+    sectionContainer.appendChild(sectionHelpText);
 
     appendElements(elements, self.schema, self.model, []);
 

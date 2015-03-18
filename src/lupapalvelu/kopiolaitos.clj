@@ -1,14 +1,19 @@
 (ns lupapalvelu.kopiolaitos
   (:require [taoensso.timbre :as timbre :refer [warnf info error]]
-            [clojure.java.io :as io :refer [delete-file]]
             [monger.operators :refer :all]
+            [clojure.java.io :as io :refer [delete-file]]
+            [clojure.string :as s]
+            [sade.strings :as ss]
             [sade.core :refer [ok fail fail! def-]]
             [sade.email :as email]
-            [sade.strings :as ss]
+            [sade.util :as util]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.action :as action]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.i18n :refer [with-lang loc]]))
+
+
+;; Email contents generation
 
 (def- kopiolaitos-html-table-str
   "<table><thead><tr>%s</tr></thead><tbody>%s</tbody></table>")
@@ -29,7 +34,7 @@
             file-name (str (:fileId att-map) "_" (:filename att-map))
             type-str (with-lang lang
                        (loc
-                         (clojure.string/join
+                         (s/join
                            "."
                            ["attachmentType" (:type-group att-map) (:type-id att-map)])))
             contents-str (or (:contents att-map) type-str)]
@@ -46,8 +51,7 @@
     (get-kopiolaitos-html-table-header-str lang)
     (get-kopiolaitos-html-table-content lang attachments)))
 
-(def- zip-file-name "Lupakuvat.zip")
-
+;; To be applied to email template, along with the orderInfo.
 (defn- get-kopiolaitos-order-email-titles [lang]
   (with-lang lang {:orderedPrints       (loc "kopiolaitos-order-email.titles.orderedPrints")
                    :orderDetails        (loc "kopiolaitos-order-email.titles.orderDetails")
@@ -55,44 +59,72 @@
                    :ordererEmail        (loc "kopiolaitos-order-email.titles.ordererEmail")
                    :ordererPhone        (loc "kopiolaitos-order-email.titles.ordererPhone")
                    :ordererAddress      (loc "kopiolaitos-order-email.titles.ordererAddress")
+                   :applicantName       (loc "kopiolaitos-order-email.titles.applicantName")
                    :kuntalupatunnus     (loc "kopiolaitos-order-email.titles.kuntalupatunnus")
                    :propertyId          (loc "kopiolaitos-order-email.titles.propertyId")
                    :lupapisteId         (loc "kopiolaitos-order-email.titles.lupapisteId")
                    :address             (loc "kopiolaitos-order-email.titles.address")}))
 
-(defn- send-kopiolaitos-email [lang email-address attachments orderInfo]
-  {:pre [(every? #(pos? (count (:versions %))) attachments)]}
+
+;; Sending the email
+
+(def- zip-file-name "Lupakuvat.zip")
+
+(defn- do-send-email [orderInfo subject message attachment address]
+  ;; from email/send-email-message false = success, true = failure -> turn it other way around
+  (let [sending-succeeded? (not (email/send-email-message address subject message [attachment]))]
+    (if sending-succeeded?
+      (info "Kopiolaitos email was sent successfully to" address "from" (:ordererOrganization orderInfo))
+      (error "Kopiolaitos email sending error to" address "from" (:ordererOrganization orderInfo)))
+    {:email-address address :sending-succeeded sending-succeeded?}))
+
+(defn- send-kopiolaitos-email [lang email-addresses attachments orderInfo]
   (let [zip (attachment/get-all-attachments attachments)
         email-attachment {:content zip :file-name zip-file-name}
-        email-subject (str (with-lang lang (loc :kopiolaitos-email-subject)) \space (:ordererOrganization orderInfo))
+        email-subject (str (with-lang lang
+                             (loc :kopiolaitos-email-subject)) \space (:ordererOrganization orderInfo))
         orderInfo (merge orderInfo {:titles (get-kopiolaitos-order-email-titles lang)
-                                    :contentsTable (get-kopiolaitos-html-table lang attachments)})]
-    (try
-      ;; from email/send-email-message false = success, true = failure -> turn it other way around
-      (let [sending-succeeded? (not (email/send-email-message
-                                      email-address
-                                      email-subject
-                                      (email/apply-template "kopiolaitos-order.html" orderInfo)
-                                      [email-attachment]))]
-        (if sending-succeeded?
-          (info "Kopiolaitos email was sent successfully to" email-address "from" (:ordererOrganization orderInfo))
-          (error "Kopiolaitos email sending error to" email-address "from" (:ordererOrganization orderInfo)))
-        (io/delete-file zip)
-        sending-succeeded?)
-      (catch java.io.IOException ioe
-        (warnf "Could not delete temporary zip file: %s" (.getAbsolutePath zip)))
-      (catch Exception e
-        (fail! :kopiolaitos-email-sending-failed)))))
+                                    :contentsTable (get-kopiolaitos-html-table lang attachments)})
+        email-msg (email/apply-template "kopiolaitos-order.html" orderInfo)
+        results-failed-emails (try
+                                (reduce
+                                  (fn [failed addr]
+                                    (let [res (do-send-email orderInfo email-subject email-msg email-attachment addr)]
+                                      (if (:sending-succeeded res)
+                                        failed
+                                        (conj failed (:email-address res)))))
+                                  []
+                                  email-addresses)
 
-(defn- get-kopiolaitos-email-address [{:keys [organization] :as application}]
-  (let [email (organization/with-organization organization :kopiolaitos-email)]
+                                (finally
+                                  (try
+                                    (io/delete-file zip)
+                                    (catch Exception e
+                                      (warnf e "Could not delete temporary zip file: %s" (.getAbsolutePath zip))))))]
+
+    (when (-> results-failed-emails count pos?)
+      (fail! :kopiolaitos-email-sending-failed-with-emails :failedEmails (s/join "," results-failed-emails)))))
+
+
+;; Resolving kopiolaitos emails set by the authority admin of the organization
+
+(defn- get-kopiolaitos-email-addresses [organization-id]
+  (let [email (organization/with-organization organization-id :kopiolaitos-email)]
     (if-not (ss/blank? email)
-      email
+      (let [emails (util/separate-emails email)]
+        ;; action/email-validator returns nil if email was valid
+        (when (some #(action/email-validator :email {:data {:email %}}) emails)
+          (fail! :kopiolaitos-invalid-email))
+        emails)
       nil)))
 
+
+;; Send the the prints order
+
 (defn do-order-verdict-attachment-prints [{{:keys [lang attachmentsWithAmounts orderInfo]} :data application :application created :created user :user :as command}]
-  (if-let [email-address (get-kopiolaitos-email-address application)]
-    (if (send-kopiolaitos-email lang email-address attachmentsWithAmounts orderInfo)
+  (if-let [email-addresses (get-kopiolaitos-email-addresses (:organization application))]
+    (do
+      (send-kopiolaitos-email lang email-addresses attachmentsWithAmounts orderInfo)
       (let [order {:type "verdict-attachment-print-order"
                    :user (select-keys user [:id :role :firstName :lastName])
                    :timestamp created
@@ -103,6 +135,5 @@
         (action/update-application command
           {$push {:transfers order-with-normalized-attachments}
            $set {:modified created}})
-        (ok))
-      (fail! :kopiolaitos-email-sending-failed))
+        (ok)))
     (fail! :no-kopiolaitos-email-defined)))

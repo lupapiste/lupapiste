@@ -267,4 +267,14 @@
           (stamp-pdf my-stamp my-in my-out 10 100 0)
           (catch Throwable t (error t))))))
 
+  ; This REPL-snippet can be used to read metadata from a given pdf. Data is written to target/pdf-metadata-output.txt
+  (let [fpath       "problematic-pdfs/pohjapiirros.pdf"
+        output-path "target/pdf-metadata-output.txt"]
+    (with-open [in (io/input-stream fpath)
+                reader (PdfReader. in)
+                out (io/output-stream output-path)]
+      (.write out (.getMetadata reader))
+      ;(prn (.getInfo reader)) ; Sometimes PDF-metadata can be stored in the info dictionary
+      ))
+
   )

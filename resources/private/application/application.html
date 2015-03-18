@@ -35,6 +35,9 @@
               <span data-bind="ltext: 'canceled', attr: {'title' : loc('canceled.title')}" class="canceled-box"></span>
             </div>
           </div>
+          <div data-bind="if: $root.application.state() == 'draft'" id="state-infotext">
+            <p data-bind="lhtml: 'application.state.draft.help'"></p>
+          </div>
 
           <!-- Property ID: -->
           <div>
@@ -302,6 +305,9 @@
           </div>
           <div class="tab-info" data-bind="slider: showApplicationInfoHelp">
             <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.applicationInfoDesc'"></p>
+          </div>
+          <div data-bind="if: $root.application.state() == 'draft'">
+            <p data-bind="lhtml: 'application.state.draft.help'"></p>
           </div>
           <div class="operation-info">
 
@@ -671,7 +677,13 @@
           <div class="tab-info" data-bind="slider: application.showVerdictInfoHelp">
             <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.verdictDesc'"></p>
           </div>
+
+
+          
           <div data-bind="if: $root.verdictModel.verdicts()">
+            <div data-bind="ifnot: $root.verdictModel.verdicts().length">
+              <p data-bind="lhtml: 'application.verdictDesc'"></p>
+            </div>
             <div class="application_section" data-bind="foreach: $root.verdictModel.verdicts">
 
               <h2 class="application_section_header">

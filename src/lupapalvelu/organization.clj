@@ -4,7 +4,8 @@
             [monger.operators :refer :all]
             [sade.core :refer [ok fail fail!]]
             [sade.strings :as ss]
-            [lupapalvelu.action :refer [defquery defcommand non-blank-parameters vector-parameters boolean-parameters]]
+            [sade.util :as util]
+            [lupapalvelu.action :refer [defquery defcommand non-blank-parameters vector-parameters boolean-parameters email-validator]]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.xml.krysp.reader :as krysp]
             [lupapalvelu.mongo :as mongo]
@@ -24,11 +25,13 @@
    :new-application-enabled false
    :open-inforequest false
    :open-inforequest-email ""
-   :opening nil})
+   :opening nil
+   :caseManagement {:enabled false
+                    :version "1.1"}})
 
 (defn- with-scope-defaults [org]
   (when (seq org)
-    (update-in org [:scope] #(map (fn [s] (merge scope-skeleton s)) %))))
+    (update-in org [:scope] #(map (fn [s] (util/deep-merge scope-skeleton s)) %))))
 
 (defn get-organizations
   ([]
@@ -329,7 +332,12 @@
 
 (defcommand set-kopiolaitos-info
   {:parameters [kopiolaitosEmail kopiolaitosOrdererAddress kopiolaitosOrdererPhone kopiolaitosOrdererEmail]
-   :user-roles #{:authorityAdmin}}
+   :user-roles #{:authorityAdmin}
+   :input-validators [(fn [{{email-str :kopiolaitosEmail} :data :as command}]
+                        (let [emails (util/separate-emails email-str)]
+                          ;; action/email-validator returns nil if email was valid
+                          (when (some #(email-validator :email {:data {:email %}}) emails)
+                            (fail :error.set-kopiolaitos-info.invalid-email))))]}
   [{{:keys [organizations]} :user}]
   (update-organization (first organizations) {$set {:kopiolaitos-email kopiolaitosEmail
                                                     :kopiolaitos-orderer-address kopiolaitosOrdererAddress

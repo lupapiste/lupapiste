@@ -218,28 +218,36 @@
       (query sonja "asianhallinta-config") => unauthorized?
       (command sonja "save-asianhallinta-config" :permitType "P" :municipality sonja-muni :enabled true :version "1.3") => unauthorized?)
 
-    (fact "Sipoo auth admin can query asianhallinta-config, response has scope, but no caseManagement"
+    (fact "Sipoo auth admin can query asianhallinta-config, response has scope, caseManagement with skeleton values"
       (let [resp (query sipoo "asianhallinta-config")
             scope (:scope resp)]
         resp => ok?
         scope => truthy
-        (some :caseManagement scope) => nil?))
+        (every? #(= {:enabled false :version "1.1"} %) (map :caseManagement scope)) => true))
 
     (facts "Kuopio auth admin"
-      (fact "query asianhallinta-config, response has scope with one caseManagement"
+      (fact "query asianhallinta-config, response has scope with one caseManagement having FTP user"
         (let [resp      (query kuopio "asianhallinta-config")
-              ah-config (some :caseManagement (:scope resp))]
+              ah-config (some #(when (-> % :caseManagement :ftpUser) (:caseManagement %)) (:scope resp))]
           resp => ok?
           ah-config => {:enabled true :ftpUser "dev_ah_kuopio" :version "1.1"}))
       (fact "admin can disable asianhallinta using command"
         (command kuopio "save-asianhallinta-config" :permitType "P" :municipality velho-muni :enabled false :version "1.1")
         (let [resp (query kuopio "asianhallinta-config")
-              ah-config (some :caseManagement (:scope resp))]
+              ah-config (some #(when (and 
+                                       (= (:municipality %) velho-muni)
+                                       (= (:permitType %) "P")) 
+                                 (:caseManagement %)) 
+                              (:scope resp))]
           (:enabled ah-config) => false))
       (fact "admin can enable asianhallinta and change version using command"
         (command kuopio "save-asianhallinta-config" :permitType "P" :municipality velho-muni :enabled true :version "lol")
           (let [resp (query kuopio "asianhallinta-config")
-                ah-config (some :caseManagement (:scope resp))]
+                ah-config (some #(when (and 
+                                       (= (:municipality %) velho-muni)
+                                       (= (:permitType %) "P")) 
+                                 (:caseManagement %)) 
+                              (:scope resp))]
             (:enabled ah-config) => true
             (:version ah-config) => "lol"))))
 

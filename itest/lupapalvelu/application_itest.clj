@@ -3,8 +3,11 @@
             [clojure.string :refer [join]]
             [sade.strings :as ss]
             [lupapalvelu.itest-util :refer :all]
-            [lupapalvelu.factlet  :refer :all]
-            [lupapalvelu.domain :as domain]))
+            [lupapalvelu.factlet :refer :all]
+            [lupapalvelu.domain :as domain]
+            [lupapalvelu.mongo :as mongo]))
+
+(mongo/connect!)
 
 (apply-remote-minimal)
 

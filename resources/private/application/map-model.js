@@ -151,7 +151,13 @@ LUPAPISTE.MapModel = function(authorizationModel) {
     drawings = application.drawings;
 
     var map = getOrCreateMap(application.infoRequest ? "inforequest" : "application");
-    map.clear().updateSize().center(x, y, 14).add({x: x, y: y});
+
+    // In some cases, e.g. in location {x: 461586.443, y: 7472906.0969994}
+    // map is initialized to wrong size in IE 11.
+    // Workaround: initialize different zoom level and zoom into correct level.
+    map.clear().updateSize().center(x, y, 3).add({x: x, y: y});
+    map.zoomTo(14);
+
     if (drawings) {
       map.drawDrawings(drawings, {}, drawStyle);
     }

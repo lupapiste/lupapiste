@@ -135,7 +135,7 @@
         self.map.updateSize();
       } else {
         self.map = gis
-          .makeMap("create-map", false)
+          .makeMap("create-map", true)
           .center(404168, 7205000, zoomLevel)
           .addClickHandler(self.click)
           .setPopupContentModel(self, "section#map-popup-content");
@@ -199,7 +199,7 @@
     };
 
     var zoomLevelEnum = {
-      "540": 6,
+      "540": 9,
       "550": 7,
       "560": 9
     };
