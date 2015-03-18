@@ -39,6 +39,7 @@ LUPAPISTE.ForemanModel = function() {
         var foreman = _.find(app.auth, function(f) {
           return f.role === "foreman" || util.getIn(f, ["invite", "role"]) === "foreman";
         });
+
         var foremanDoc = _.find(app.documents, { "schema-info": { "name": "tyonjohtaja-v2" } });
         var name = util.getIn(foremanDoc, ["data", "kuntaRoolikoodi", "value"]);
 
@@ -186,25 +187,31 @@ LUPAPISTE.ForemanModel = function() {
         email: "",
         title: "",
         text: "",
-        role: ""
+        role: "",
+        appAuth: []
       };
       params = _.merge(defaults, params);
 
-      ajax.command("invite-with-role", params)
-        .processing(self.processing)
-        .pending(self.pending)
-        .success(function(data) {
-          cb(data);
-        })
-        .error(function(err) {
-          // recipient might have already been invited
-          error("Unable to invite user:", params.email, err);
-          cb(err);
-        })
-        .call();
+      // check if invitee is already authenticated (or invited)
+      if (!_.find(params.appAuth, {username: params.email})) {
+        ajax.command("invite-with-role", params)
+          .processing(self.processing)
+          .pending(self.pending)
+          .success(function(data) {
+            cb(data);
+          })
+          .error(function(err) {
+            // recipient might have already been invited
+            error("Unable to invite user:", params.email, err);
+            cb(err);
+          })
+          .call();
+      } else {
+        cb();
+      }
     }
 
-    function inviteHakijat(id) {
+    function inviteHakijat(id, auth) {
       var hakijaDocs = _.where(self.application().documents, {"schema-info": {"name": "hakija"}});
       var hakijat = _.map(hakijaDocs, function(doc) {
         var userId = util.getIn(doc, ["data", "henkilo", "userId", "value"]);
@@ -228,7 +235,8 @@ LUPAPISTE.ForemanModel = function() {
             documentName: hakija.docName,
             path: hakija.path,
             email: hakija.email,
-            role: "writer"
+            role: "writer",
+            appAuth: auth
           }, function(){}));
         }
       });
@@ -251,12 +259,13 @@ LUPAPISTE.ForemanModel = function() {
             inviteToApplication({
                 id: data.id,
                 email: self.email(),
-                role: "foreman"
+                role: "foreman",
+                appAuth: data.auth
               }, function() {
-                inviteHakijat(data.id);
+                inviteHakijat(data.id, data.auth);
             });
           } else {
-            inviteHakijat(data.id);
+            inviteHakijat(data.id, data.auth);
           }
         })
         .error(function(err) {
@@ -270,7 +279,8 @@ LUPAPISTE.ForemanModel = function() {
       inviteToApplication({
                 id: self.application().id,
                 email: self.email(),
-                role: "foreman"
+                role: "foreman",
+                appAuth: self.application().auth
               }, createApplication);
     } else {
       createApplication();
