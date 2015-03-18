@@ -76,7 +76,17 @@
     (require 'clojure.tools.nrepl.server)
     ((resolve 'clojure.tools.nrepl.server/start-server) :port 9090)))
 
+(defn read-session-key []
+  {:post [(or (nil? %) (= (count %) 16))]}
+  (let [keyfile (io/file "sessionkey")]
+    (when (.exists keyfile)
+      (with-open [in (io/input-stream keyfile)
+                  out (java.io.ByteArrayOutputStream.)]
+        (io/copy in out)
+        (into-array Byte/TYPE (take 16 (.toByteArray out)))))))
+
 (defn- start-jetty! []
+  (if (nil? @jetty)
   (let [jetty-opts (into
                      {:max-threads 250}
                      (when (env/feature? :ssl)
@@ -87,12 +97,13 @@
         noir-opts {:mode env/mode
                    :ns 'lupapalvelu.web
                    :jetty-options jetty-opts
-                   :session-store (session/cookie-store #_{:key "1234567890123456"}) ; TODO read key from file
+                     :session-store (session/cookie-store {:key (read-session-key)})
                    :session-cookie-attrs (env/value :cookie)}
         starting  (double (now))]
     (reset! jetty (server/start env/port noir-opts))
     (infof "Jetty startup took %.3f seconds" (/ (- (now) starting) 1000))
-    "server running"))
+      "server running")
+    (warn "Server already started!")))
 
 (defn- stop-jetty! []
   (when-not (nil? @jetty) (swap! jetty server/stop)))
