@@ -1,10 +1,14 @@
 # Hei,
 
-Vaihda salasanasi oheisesta linkist&auml;
+Voit vaihtaa salasanasi oheisen linkin kautta:
 
 {{link-fi}}
 
+Huomioithan, että linkki on voimassa ainoastaan 24 tuntia!
+
 Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville.
+
+Ongelmatilanteissa ota yhteytt&auml; [tuki@lupapiste.fi](tuki@lupapiste.fi).
 
 ---
 

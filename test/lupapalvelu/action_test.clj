@@ -236,10 +236,16 @@
 (facts "vector-parameters-with-map-items-with-required-keys"
   (vector-parameters-with-map-items-with-required-keys [:foo] [:x :y] {:data {:foo [{:x "aa" :y nil}]}}) => nil
   (vector-parameters-with-map-items-with-required-keys [:foo] [:x] {:data {:foo nil}})         => {:ok false :text "error.non-vector-parameters" :parameters [:foo]}
-  (vector-parameters-with-map-items-with-required-keys [:foo] [:x] {:data {:foo [nil]}})         => {:ok false :text "error.vector-parameters-with-items-missing-required-keys"
-                                                                                                     :parameters [:foo] :required-keys [:x]}
+  (vector-parameters-with-map-items-with-required-keys [:foo] [:x] {:data {:foo [nil]}})       => {:ok false :text "error.vector-parameters-with-items-missing-required-keys"
+                                                                                                   :parameters [:foo] :required-keys [:x]}
   (vector-parameters-with-map-items-with-required-keys [:foo] [:x] {:data {:foo [{:y "aa"}]}}) => {:ok false :text "error.vector-parameters-with-items-missing-required-keys"
                                                                                                    :parameters [:foo] :required-keys [:x]})
+
+(fact "map-parameters-with-required-keys"
+  (map-parameters-with-required-keys [:foo] [:x :y] {:data {:foo {:x "aa" :y nil}}}) => nil
+  (map-parameters-with-required-keys [:foo] [:x] {:data {}})                         => {:ok false :text "error.unknown-type" :parameters [:foo]}
+  (map-parameters-with-required-keys [:foo] [:x] {:data {:foo nil}})                 => {:ok false :text "error.unknown-type" :parameters [:foo]}
+  (map-parameters-with-required-keys [:foo] [:x] {:data {:foo {:y "aa"}}})           => {:ok false :text "error.map-parameters-with-required-keys" :parameters [:foo] :required-keys [:x]})
 
 (facts "feature requirements"
  (against-background
