@@ -19,7 +19,7 @@
             [lupapalvelu.user :as user]
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
-            [lupapalvelu.xml.asianhallinta.asianhallinta-core :as ah]
+            [lupapalvelu.xml.asianhallinta.core :as ah]
             [sade.core :refer :all]
             [sade.strings :as ss]
             [sade.util :as util]))
@@ -155,6 +155,11 @@
 ;; Asianhallinta
 ;;
 
+(defn- fetch-linked-kuntalupatunnus [application]
+  "Fetch kuntalupatunnus from application's link permit's verdicts"
+  (when-let [link-permit-app (application/get-link-permit-app application)]
+    (-> link-permit-app :verdicts first :kuntalupatunnus)))
+
 (defn- has-asianhallinta-operation [_ {:keys [operations]}]
   (when-not (operations/get-operation-metadata (:name (first operations)) :asianhallinta)
     (fail :error.operations.asianhallinta-disabled)))
@@ -167,7 +172,14 @@
    :pre-checks [has-asianhallinta-operation]
    :states     [:submitted :complement-needed]}
   [{:keys [application created user]:as command}]
-  (let [submitted-application (mongo/by-id :submitted-applications id)
+  (let [application (meta-fields/enrich-with-link-permit-data application)
+        application (if-let [kuntalupatunnus (fetch-linked-kuntalupatunnus application)]
+                      (update-in application 
+                                 [:linkPermitData] 
+                                 conj {:id kuntalupatunnus
+                                       :type "kuntalupatunnus"})
+                      application)
+        submitted-application (mongo/by-id :submitted-applications id)
         app-updates {:modified created
                      :sent created
                      :authority (if (seq (:authority application)) (:authority application) (user/summary user))
