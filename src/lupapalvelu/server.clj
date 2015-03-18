@@ -3,6 +3,7 @@
             [taoensso.timbre :as timbre :refer [trace debug info warn error fatal tracef debugf infof warnf errorf fatalf]]
             [noir.core :refer [defpage]]
             [noir.server :as server]
+            [noir.response :as response]
             [ring.middleware.session.cookie :as session]
             [sade.core :refer [now]]
             [sade.env :as env]
@@ -112,14 +113,17 @@
 (defn- stop-jetty! []
   (when-not (nil? @jetty) (swap! jetty server/stop)))
 
-(defpage "/system/hot-restart" []
-  (util/future*
-    (Thread/yield)
-    (info "Reloading env and restarting Jetty")
-    (env/reload!)
-    (stop-jetty!)
-    (start-jetty!))
-  "OK")
+(defpage "/internal/hot-restart" []
+  (if (#{"127.0.0.1" "0:0:0:0:0:0:0:1"} (:remote-addr (noir.request/ring-request)))
+    (do
+      (util/future*
+        (Thread/yield)
+        (info "Reloading env and restarting Jetty")
+        (env/reload!)
+        (stop-jetty!)
+        (start-jetty!))
+      (response/status 200 "OK"))
+    (response/status 401 "Unauthorized")))
 
 (defn -main [& _]
   (infof "Build %s starting in %s mode" (:build-number env/buildinfo) (name env/mode))
