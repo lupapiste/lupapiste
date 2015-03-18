@@ -1,6 +1,7 @@
 (ns lupapalvelu.server
   (:require [clojure.java.io :as io]
             [taoensso.timbre :as timbre :refer [trace debug info warn error fatal tracef debugf infof warnf errorf fatalf]]
+            [noir.core :refer [defpage]]
             [noir.server :as server]
             [ring.middleware.session.cookie :as session]
             [sade.core :refer [now]]
@@ -8,6 +9,7 @@
             [sade.security-headers :as headers]
             [sade.email :as email]
             [sade.dummy-email-server]
+            [sade.util :as util]
             [lupapalvelu.logging]
             [lupapalvelu.web :as web]
             [lupapalvelu.vetuma]
@@ -87,26 +89,35 @@
 
 (defn- start-jetty! []
   (if (nil? @jetty)
-  (let [jetty-opts (into
-                     {:max-threads 250}
-                     (when (env/feature? :ssl)
-                       {:ssl? true
-                        :ssl-port 8443
-                        :keystore "./keystore"
-                        :key-password "lupapiste"}))
-        noir-opts {:mode env/mode
-                   :ns 'lupapalvelu.web
-                   :jetty-options jetty-opts
+    (let [jetty-opts (into
+                       {:max-threads 250}
+                       (when (env/feature? :ssl)
+                         {:ssl? true
+                          :ssl-port 8443
+                          :keystore "./keystore"
+                          :key-password "lupapiste"}))
+          noir-opts {:mode env/mode
+                     :ns 'lupapalvelu.web
+                     :jetty-options jetty-opts
                      :session-store (session/cookie-store {:key (read-session-key)})
-                   :session-cookie-attrs (env/value :cookie)}
-        starting  (double (now))]
-    (reset! jetty (server/start env/port noir-opts))
-    (infof "Jetty startup took %.3f seconds" (/ (- (now) starting) 1000))
+                     :session-cookie-attrs (env/value :cookie)}
+          starting  (double (now))]
+      (reset! jetty (server/start env/port noir-opts))
+      (infof "Jetty startup took %.3f seconds" (/ (- (now) starting) 1000))
       "server running")
     (warn "Server already started!")))
 
 (defn- stop-jetty! []
   (when-not (nil? @jetty) (swap! jetty server/stop)))
+
+(defpage "/system/hot-restart" []
+  (util/future*
+    (Thread/yield)
+    (info "Reloading env and restarting Jetty")
+    (env/reload!)
+    (stop-jetty!)
+    (start-jetty!))
+  "OK")
 
 (defn -main [& _]
   (infof "Build %s starting in %s mode" (:build-number env/buildinfo) (name env/mode))
