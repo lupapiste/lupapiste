@@ -3,13 +3,14 @@
             [taoensso.timbre :as timbre :refer [trace debug info warn error fatal tracef debugf infof warnf errorf fatalf]]
             [noir.server :as server]
             [ring.middleware.session.cookie :as session]
-            [lupapalvelu.logging]
-            [lupapalvelu.web :as web]
-            [lupapalvelu.vetuma]
+            [sade.core :refer [now]]
             [sade.env :as env]
             [sade.security-headers :as headers]
             [sade.email :as email]
             [sade.dummy-email-server]
+            [lupapalvelu.logging]
+            [lupapalvelu.web :as web]
+            [lupapalvelu.vetuma]
             [scss-compiler.core :as scss]
             [lupapalvelu.fixture.fixture-api]
             [lupapalvelu.fixture.minimal]
@@ -42,15 +43,9 @@
             [lupapalvelu.construction-api]
             [lupapalvelu.asianhallinta-config-api]))
 
-(defn -main [& _]
-  (infof "Build %s starting in %s mode" (:build-number env/buildinfo) (name env/mode))
-  (infof "Running on %s version %s (%s) [%s], trustStore is %s"
-    (System/getProperty "java.vm.name")
-    (System/getProperty "java.runtime.version")
-    (System/getProperty "java.vm.info")
-    (if (java.awt.GraphicsEnvironment/isHeadless) "headless" "headful")
-    (System/getProperty "javax.net.ssl.trustStore"))
-  (info "Running on Clojure" (clojure-version))
+(defonce jetty (atom nil))
+
+(defn- init! []
   (mongo/connect!)
 
   (migration/update!)
@@ -79,19 +74,40 @@
   (when (env/feature? :nrepl)
     (warn "*** Starting nrepl")
     (require 'clojure.tools.nrepl.server)
-    ((resolve 'clojure.tools.nrepl.server/start-server) :port 9090))
+    ((resolve 'clojure.tools.nrepl.server/start-server) :port 9090)))
+
+(defn- start-jetty! []
   (let [jetty-opts (into
                      {:max-threads 250}
                      (when (env/feature? :ssl)
                        {:ssl? true
                         :ssl-port 8443
                         :keystore "./keystore"
-                        :key-password "lupapiste"}))]
-    (server/start env/port {:mode env/mode
-                            :ns 'lupapalvelu.web
-                            :jetty-options jetty-opts
-                            :session-store (session/cookie-store #_{:key "1234567890123456"}) ; TODO read key from file
-                            :session-cookie-attrs (env/value :cookie)}))
-  "server running")
+                        :key-password "lupapiste"}))
+        noir-opts {:mode env/mode
+                   :ns 'lupapalvelu.web
+                   :jetty-options jetty-opts
+                   :session-store (session/cookie-store #_{:key "1234567890123456"}) ; TODO read key from file
+                   :session-cookie-attrs (env/value :cookie)}
+        starting  (double (now))]
+    (reset! jetty (server/start env/port noir-opts))
+    (infof "Jetty startup took %.3f seconds" (/ (- (now) starting) 1000))
+    "server running"))
+
+(defn- stop-jetty! []
+  (when-not (nil? @jetty) (swap! jetty server/stop)))
+
+(defn -main [& _]
+  (infof "Build %s starting in %s mode" (:build-number env/buildinfo) (name env/mode))
+  (infof "Running on %s version %s (%s) [%s], trustStore is %s"
+    (System/getProperty "java.vm.name")
+    (System/getProperty "java.runtime.version")
+    (System/getProperty "java.vm.info")
+    (if (java.awt.GraphicsEnvironment/isHeadless) "headless" "headful")
+    (System/getProperty "javax.net.ssl.trustStore"))
+  (info "Running on Clojure" (clojure-version))
+
+  (init!)
+  (start-jetty!))
 
 "server ready to start"
