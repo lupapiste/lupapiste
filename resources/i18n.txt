@@ -1,1 +1,0 @@
-mitat-muutos.help: Viranomainen muuttaa rakennukset mittatiedot tarvittaessa.
