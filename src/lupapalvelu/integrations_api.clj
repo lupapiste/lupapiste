@@ -155,7 +155,8 @@
 ;; Asianhallinta
 ;;
 
-(defn- fetch-kuntalupatunnus [application]
+(defn- fetch-linked-kuntalupatunnus [application]
+  "Fetch kuntalupatunnus from application's link permit's verdicts"
   (when-let [link-permit-app (application/get-link-permit-app application)]
     (-> link-permit-app :verdicts first :kuntalupatunnus)))
 
@@ -172,7 +173,7 @@
    :states     [:submitted :complement-needed]}
   [{:keys [application created user]:as command}]
   (let [application (meta-fields/enrich-with-link-permit-data application)
-        application (if-let [kuntalupatunnus (fetch-kuntalupatunnus application)]
+        application (if-let [kuntalupatunnus (fetch-linked-kuntalupatunnus application)]
                       (update-in application 
                                  [:linkPermitData] 
                                  conj {:id kuntalupatunnus
