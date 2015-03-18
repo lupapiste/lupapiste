@@ -541,6 +541,7 @@
 
 (def mitat-muutos {:name "mitat"
                         :type :group
+                        :group-help "mitat-muutos.help"
                         :whitelist [:authority]
                         :body [{:name "tilavuus" :type :string :size "s" :unit "m3" :subtype :number :min 1 :max 9999999}
                                {:name "kerrosala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}
