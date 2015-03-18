@@ -386,7 +386,7 @@
         api-key-auth (when-not (ss/blank? api-key) (user/get-user-with-apikey api-key))
         session-user (get-in request [:session :user])
         expires (:expires session-user)
-        expired? (and expires (< expires (now)))
+        expired? (and expires (not (user/virtual-user? session-user)) (< expires (now)))
         updated-user (and expired? (user/get-user {:id (:id session-user), :enabled true}))
         user (or api-key-auth updated-user session-user)]
     (if (and expired? (not updated-user))
