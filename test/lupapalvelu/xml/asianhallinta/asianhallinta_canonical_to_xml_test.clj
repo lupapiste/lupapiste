@@ -99,7 +99,7 @@
           (sxml/get-text (first content) [:Tunnus]) => (get-in application [:linkPermitData 0 :id])
           (sxml/get-text (first content) [:Sovellus]) => "Lupapiste"
           (sxml/get-text (second content) [:Tunnus]) => (get-in application [:linkPermitData 1 :id])
-          (sxml/get-text (second content) [:Sovellus]) => "Taustajärjestelmä")))))
+          (sxml/get-text (second content) [:Sovellus]) => "Taustaj\u00E4rjestelm\u00E4")))))
 
 (fl/facts* "UusiAsia xml from poikkeus"
   (let [application    (assoc poikkeus-test/poikkari-hakemus :attachments attachments)

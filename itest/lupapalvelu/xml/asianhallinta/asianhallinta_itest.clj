@@ -175,14 +175,14 @@
                 (some 
                   #(and 
                     (= "KLTunnus1" (sxml/get-text % [:Viitelupa :MuuTunnus :Tunnus]))
-                    (= "Taustajärjestelmä" (sxml/get-text % [:Viitelupa :MuuTunnus :Sovellus]))) 
+                    (= "Taustaj\u00E4rjestelm\u00E4" (sxml/get-text % [:Viitelupa :MuuTunnus :Sovellus]))) 
                   contents) => truthy)
 
               (fact "One is link to manual link" 
                 (some 
                   #(and 
                     (= manual-link (sxml/get-text % [:Viitelupa :MuuTunnus :Tunnus]))
-                    (= "Taustajärjestelmä" (sxml/get-text % [:Viitelupa :MuuTunnus :Sovellus]))) 
+                    (= "Taustaj\u00E4rjestelm\u00E4" (sxml/get-text % [:Viitelupa :MuuTunnus :Sovellus]))) 
                   contents) => truthy)))))))
 
 

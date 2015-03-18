@@ -89,7 +89,7 @@
     {:Toimenpide (map #(-> % (ua-get-toimenpide lang)) operations)}))
 
 (def- viitelupa-mapping
-  {"kuntalupatunnus" "Taustajärjestelmä"
+  {"kuntalupatunnus" "Taustaj\u00E4rjestelm\u00E4"
    "lupapistetunnus" "Lupapiste"})
 
 (defn- ua-get-viitelupa [linkPermit]

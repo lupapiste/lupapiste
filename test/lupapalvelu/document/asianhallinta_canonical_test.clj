@@ -48,7 +48,7 @@
         (let [link2 (get-in link2 [:MuuTunnus])]
           (keys link2) => (just [:Tunnus :Sovellus])
           (:Tunnus link2) => (get-in application [:linkPermitData 1 :id])
-          (:Sovellus link2) => "Taustajärjestelmä")))))
+          (:Sovellus link2) => "Taustaj\u00E4rjestelm\u00E4")))))
 
 (fl/facts* "UusiAsia canonical"
   (let [canonical (ah/application-to-asianhallinta-canonical poikkeus-test/poikkari-hakemus "fi") => truthy
