@@ -110,6 +110,11 @@
     (when (user/authority? user) (model/mark-approval-indicators-seen-update application timestamp))
     (when (user/authority? user) {:_attachment_indicator_reset timestamp})))
 
+(defn get-link-permit-app [{:keys [linkPermitData]}]
+  "Return associated (first lupapistetunnus) link-permit application."
+  (when-let [link (some #(when (= (:type %) "lupapistetunnus") %) linkPermitData)]
+    (domain/get-application-no-access-checking (:id link))))
+
 ;;
 ;; Query application:
 ;;

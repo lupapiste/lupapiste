@@ -6,7 +6,7 @@
             [lupapalvelu.factlet :as fl]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.organization :as organization]
-            [lupapalvelu.xml.asianhallinta.asianhallinta-core :as ah]
+            [lupapalvelu.xml.asianhallinta.core :as ah]
             [lupapalvelu.xml.validator :as validator]
             [sade.core :refer [now]]
             [sade.env :as env]
@@ -17,7 +17,7 @@
 
 (apply-remote-minimal)
 
-(testable-privates lupapalvelu.xml.asianhallinta.asianhallinta-core resolve-output-directory resolve-ah-version)
+(testable-privates lupapalvelu.xml.asianhallinta.core resolve-output-directory resolve-ah-version)
 (testable-privates lupapalvelu.xml.asianhallinta.uusi_asia_mapping attachments-for-write)
 
 (fl/facts* "Asianhallinta itest"
@@ -31,8 +31,9 @@
                     :address "Suusaarenkierto 44") => truthy
           application (query-application pena app-id) => truthy
           organization (organization/resolve-organization velho-muni (:permitType application)) => truthy
-          scope  (organization/resolve-organization-scope velho-muni (:permitType application) organization) => truthy
-          config (:caseManagement scope) => truthy]
+          scope  (organization/resolve-organization-scope velho-muni (:permitType application) organization) => truthy]
+      (keys (:caseManagement scope)) => (just [:ftpUser :version :enabled])
+
       (generate-documents application pena)
       (upload-attachment-to-all-placeholders pena application)
 
@@ -59,8 +60,8 @@
 
         (facts "XML file"
           (let [output-dir (str (resolve-output-directory scope) "/")
-                target-file-name (str "target/Downloaded-" (:id application) "-" (now) ".xml")
-                filename-starts-with (:id application)
+                target-file-name (str "target/Downloaded-" app-id "-" (now) ".xml")
+                filename-starts-with app-id
                 xml-file (if get-files-from-sftp-server?
                            (io/file (get-file-from-server
                                       (get-in scope [:caseManagement :ftpUser])
@@ -74,7 +75,7 @@
 
             (fact "Correctly named xml file is created" (.exists xml-file) => true)
 
-            (fact "XML file is valid" ;; Validate again??
+            (fact "XML file is valid"
               (validator/validate xml-as-string (:permitType updated-application) (str "ah-" (resolve-ah-version scope))))
 
             (fact "Application IDs match"
@@ -105,7 +106,84 @@
             (fact "Operations are correct"
               (let [operations (sxml/select xml [:UusiAsia :Toimenpiteet :Toimenpide])]
                 (count operations) => (count (:operations updated-application))
-                (sxml/get-text operations [:ToimenpideTunnus]) => (-> updated-application :operations first :name))))))))
+                (sxml/get-text operations [:ToimenpideTunnus]) => (-> updated-application :operations first :name)))
+            
+            (fact "Link permits do not exist" (sxml/select xml [:UusiAsia :Viiteluvat]) => empty?))))))
+  
+  (facts "UusiAsia with link permits"
+    (let [link-app-id (create-app-id
+                         pena
+                         :municipality velho-muni
+                         :operation "asuinrakennus"
+                         :propertyId "29703401070010"
+                         :y 6965051.2333374 :x 535179.5
+                         :address "Suusaarenkierto 44") => truthy
+          _ (command pena :submit-application :id link-app-id) => ok?
+          new-verdict-resp (command velho :new-verdict-draft :id link-app-id) => ok?
+          verdict-id (:verdictId new-verdict-resp) => truthy
+          _ (command velho :save-verdict-draft :id link-app-id :verdictId verdict-id :backendId "KLTunnus1" :status 42 :name "Paatoksen antaja" :given 123 :official 124 :text "" :agreement false :section "") => ok?
+          _ (command velho :publish-verdict :id link-app-id :verdictId verdict-id) => ok?
+          manual-link "Another kuntalupatunnus"
+
+          app-id (create-app-id ; Actual app for asianhallinta
+                         pena
+                         :municipality velho-muni
+                         :operation "poikkeamis"
+                         :propertyId "29703401070010"
+                         :y 6965051.2333374 :x 535179.5
+                         :address "Suusaarenkierto 44")
+          application (query-application pena app-id) => truthy          
+          organization (organization/resolve-organization velho-muni (:permitType application)) => truthy
+          scope  (organization/resolve-organization-scope velho-muni (:permitType application) organization) => truthy]
+
+      (generate-documents application pena)
+      (command pena :submit-application :id app-id) => ok?
+      (command pena :add-link-permit :id app-id :linkPermitId link-app-id) ; link-app-id has verdict with kuntalupatunnus
+      (command pena :add-link-permit :id app-id :linkPermitId manual-link) ; manual kuntalupatunnus
+
+      (command velho :application-to-asianhallinta :id app-id :lang "fi") => ok?
+
+      (facts "XML file"
+        (let [output-dir (str (resolve-output-directory scope) "/")
+              target-file-name (str "target/Downloaded-" app-id "-" (now) ".xml")
+              filename-starts-with app-id
+              xml-file (if get-files-from-sftp-server?
+                         (io/file (get-file-from-server
+                                    (get-in scope [:caseManagement :ftpUser])
+                                    (subs (env/value :fileserver-address) 7)
+                                    filename-starts-with
+                                    target-file-name
+                                    (str ah/ah-from-dir "/")))
+                         (io/file (get-local-filename output-dir filename-starts-with)))
+              xml-as-string (slurp xml-file)
+              xml (xml/parse (io/reader xml-file))]
+          (fact "XML file is valid"
+            (validator/validate xml-as-string (:permitType application) (str "ah-" (resolve-ah-version scope))))
+
+          (fact "Viiteluvat elements"
+            (let [contents (sxml/select xml [:UusiAsia :Viiteluvat :Viitelupa])]
+              (fact "Three link permits are present" (count contents) => 3)
+
+              (fact "One is link to LP application" 
+                (some 
+                  #(and 
+                    (= link-app-id (sxml/get-text % [:Viitelupa :MuuTunnus :Tunnus]))
+                    (= "Lupapiste" (sxml/get-text % [:Viitelupa :MuuTunnus :Sovellus]))) 
+                  contents) => truthy)
+
+              (fact "One is link to link-permit's verdict" 
+                (some 
+                  #(and 
+                    (= "KLTunnus1" (sxml/get-text % [:Viitelupa :MuuTunnus :Tunnus]))
+                    (= "Taustaj\u00E4rjestelm\u00E4" (sxml/get-text % [:Viitelupa :MuuTunnus :Sovellus]))) 
+                  contents) => truthy)
+
+              (fact "One is link to manual link" 
+                (some 
+                  #(and 
+                    (= manual-link (sxml/get-text % [:Viitelupa :MuuTunnus :Tunnus]))
+                    (= "Taustaj\u00E4rjestelm\u00E4" (sxml/get-text % [:Viitelupa :MuuTunnus :Sovellus]))) 
+                  contents) => truthy)))))))
 
 
   (fact "Can't create asianhallinta with non-asianhallinta operation"

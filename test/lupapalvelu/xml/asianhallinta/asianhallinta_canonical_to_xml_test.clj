@@ -7,20 +7,22 @@
             [lupapalvelu.document.asianhallinta_canonical :as ah]
             [lupapalvelu.document.canonical-common :as common]
             [lupapalvelu.document.poikkeamis-canonical-test :as poikkeus-test]
+            [lupapalvelu.document.rakennuslupa_canonical-test :as rakennus-test]
             [lupapalvelu.document.canonical-test-common :as ctc]
             [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.xml.asianhallinta.asianhallinta-core]
+            [lupapalvelu.xml.asianhallinta.core]
             [lupapalvelu.xml.asianhallinta.uusi_asia_mapping :as ua-mapping]
             [lupapalvelu.xml.disk-writer :as writer]
             [lupapalvelu.xml.krysp.canonical-to-krysp-xml-test-common :refer [has-tag]]
             [lupapalvelu.xml.emit :refer [element-to-xml]]
             [lupapalvelu.xml.validator :as validator]
             [sade.common-reader :as reader]
+            [sade.core :refer :all]
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.xml :as sxml]))
 
-(mu/testable-privates lupapalvelu.xml.asianhallinta.asianhallinta-core begin-of-link)
+(mu/testable-privates lupapalvelu.xml.asianhallinta.core begin-of-link)
 (mu/testable-privates lupapalvelu.xml.asianhallinta.uusi_asia_mapping attachments-for-write)
 
 (defn- has-attachment-types [meta]
@@ -50,7 +52,54 @@
                           :type-id    "pohjapiirros"}
                    :versions []}])
 
+(def- link-permit-data-kuntalupatunnus {:id "123-123-123-123" :type "kuntalupatunnus"})
+
 (fact ":tag is set for UusiAsia" (has-tag ua-mapping/uusi-asia) => true)
+
+(fl/facts*
+  "UusiAsia xml from suunnittelija application"
+  (let [application    rakennus-test/application-suunnittelijan-nimeaminen
+        canonical      (ah/application-to-asianhallinta-canonical application "fi") => truthy
+        schema-version "ah-1.1"
+        mapping        (ua-mapping/get-mapping (ss/suffix schema-version "-"))
+        xml            (element-to-xml canonical mapping) => truthy
+        xml-s          (xml/indent-str xml) => truthy
+        xml-parsed     (reader/strip-xml-namespaces (sxml/parse xml-s))]
+
+    (fact "Validate UusiAsia XML"
+      (validator/validate xml-s (:permitType application) schema-version) => nil)
+    
+    (facts "Viiteluvat"
+      (let [links    (sxml/select1 xml-parsed [:UusiAsia :Viiteluvat])]
+        (count (sxml/children links)) => 1
+        (fact "Viiteluvat has MuuTunnus > (Tunnus and Sovellus)"
+          (let [wrapper  (sxml/select1 links [:Viitelupa :MuuTunnus])
+                tunnus   (sxml/get-text wrapper [:Tunnus]) #_(-> link :content first)
+                sovellus (sxml/get-text wrapper [:Sovellus])]
+            tunnus => (get-in application [:linkPermitData 0 :id])
+            sovellus => "Lupapiste"))))))
+
+(fl/facts*
+  "UusiAsia xml from application with two link permits"
+  (let [application    (update-in rakennus-test/application-suunnittelijan-nimeaminen [:linkPermitData] conj link-permit-data-kuntalupatunnus)
+        canonical      (ah/application-to-asianhallinta-canonical application "fi") => truthy
+        schema-version "ah-1.1"
+        mapping        (ua-mapping/get-mapping (ss/suffix schema-version "-"))
+        xml            (element-to-xml canonical mapping) => truthy
+        xml-s          (xml/indent-str xml) => truthy
+        xml-parsed     (reader/strip-xml-namespaces (sxml/parse xml-s))]
+    (fact "Validate UusiAsia XML"
+      (validator/validate xml-s (:permitType application) schema-version) => nil)
+    
+    (facts "Viiteluvat"
+      (let [links    (sxml/select1 xml-parsed [:UusiAsia :Viiteluvat])
+            content  (sxml/children links)]
+        (count content) => 2
+        (fact "Both have Tunnus and Sovellus"
+          (sxml/get-text (first content) [:Tunnus]) => (get-in application [:linkPermitData 0 :id])
+          (sxml/get-text (first content) [:Sovellus]) => "Lupapiste"
+          (sxml/get-text (second content) [:Tunnus]) => (get-in application [:linkPermitData 1 :id])
+          (sxml/get-text (second content) [:Sovellus]) => "Taustaj\u00E4rjestelm\u00E4")))))
 
 (fl/facts* "UusiAsia xml from poikkeus"
   (let [application    (assoc poikkeus-test/poikkari-hakemus :attachments attachments)
