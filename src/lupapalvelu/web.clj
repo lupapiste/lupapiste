@@ -389,14 +389,11 @@
         expired? (and expires (< expires (now)))
         updated-user (and expired? (user/get-user {:id (:id session-user), :enabled true}))
         user (or api-key-auth updated-user session-user)]
-    (debug "expires" expires)
     (if (and expired? (not updated-user))
       (resp/status 401 "Unauthorized")
       (let [response (handler (assoc request :user user))]
         (if (and response updated-user)
-          (do
-            (debug "User data had expired, updating session")
-            (ssess/merge-to-session request response {:user (user/session-summary updated-user)}))
+          (ssess/merge-to-session request response {:user (user/session-summary updated-user)})
           response)))))
 
 (defn wrap-authentication

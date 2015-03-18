@@ -34,7 +34,7 @@
   [user]
   (some-> user
     (select-keys [:id :username :firstName :lastName :role :email :organizations :company :architect])
-    (assoc :expires (+ (now) (.toMillis java.util.concurrent.TimeUnit/SECONDS 5)))))
+    (assoc :expires (+ (now) (.toMillis java.util.concurrent.TimeUnit/MINUTES 5)))))
 
 (defn virtual-user?
   "True if user exists only in session, not in database"
