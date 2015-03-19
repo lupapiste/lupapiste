@@ -43,9 +43,19 @@
           langs-but-default (disj (set langs) (name default-lang))]
       (reduce (partial process-row langs-but-default) {} data))))
 
+(def- localizations (atom nil))
 (def- excel-data (future (load-excel)))
 
-(defn get-localizations [] @excel-data)
+(defn reload! []
+  (reset! localizations @excel-data))
+
+(defn- get-or-load-localizations []
+  (if-not @localizations
+    (reload!)
+    @localizations))
+
+(defn get-localizations []
+  (get-or-load-localizations))
 
 (def languages (-> (get-localizations) keys set))
 
@@ -100,24 +110,16 @@
     {}
     lines))
 
-(env/in-dev
-
-  ;;
-  ;; Re-define get-localizations so that i18n.txt is always loaded and merged to excel data.
-  ;;
-
-  (defn- load-add-ons []
-    (when-let [in (io/resource "i18n.txt")]
-      (with-open [in (io/reader in)]
-        (read-lines (line-seq in)))))
-
-  (defn get-localizations []
-    (update-in @excel-data [default-lang] merge (load-add-ons))))
-
 (defn- load-add-ons []
   (when-let [in (io/resource "i18n.txt")]
     (with-open [in (io/reader in)]
       (read-lines (line-seq in)))))
 
-(defn get-localizations []
-  (update-in @excel-data [default-lang] merge (load-add-ons)))
+(env/in-dev
+  ;;
+  ;; Re-define get-localizations so that i18n.txt is always loaded and merged to excel data.
+  ;;
+  (defn get-localizations []
+    (let [lz (get-or-load-localizations)]
+      (update-in lz [default-lang] merge (load-add-ons)))))
+
