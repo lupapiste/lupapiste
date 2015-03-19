@@ -121,6 +121,8 @@
         (env/reload!)
         (info "Reloaded env, restarting Jetty...")
         (stop-jetty!)
+        (mongo/disconnect!)
+        (mongo/connect!)
         (start-jetty!))
       (response/status 200 "OK"))
     (response/status 401 "Unauthorized")))
