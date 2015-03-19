@@ -679,7 +679,6 @@
           </div>
 
 
-          
           <div data-bind="if: $root.verdictModel.verdicts()">
             <div data-bind="ifnot: $root.verdictModel.verdicts().length">
               <p data-bind="lhtml: 'application.verdictDesc'"></p>
@@ -719,7 +718,7 @@
 
                     <div class="accordion-fields">
                       <div class="verdict-info-fields">
-                        <div class="verdict-signature-fields" data-bind="visible: !$parent.draft">
+                        <div class="verdict-signature-fields" data-bind="visible: !$parent.draft && $parent.sopimus">
                           <h3 data-bind="ltext: 'verdict.signatures'"></h3>
 
                           <div data-bind="foreach: $data.signatures">
