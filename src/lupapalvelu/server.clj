@@ -118,10 +118,18 @@
     (do
       (util/future*
         (Thread/yield)
-        (info "Reloading env and restarting Jetty")
         (env/reload!)
+        (info "Reloaded env, restarting Jetty...")
         (stop-jetty!)
         (start-jetty!))
+      (response/status 200 "OK"))
+    (response/status 401 "Unauthorized")))
+
+(defpage "/internal/reload" []
+  (if (#{"127.0.0.1" "0:0:0:0:0:0:0:1"} (:remote-addr (noir.request/ring-request)))
+    (do
+      (env/reload!)
+      (info "Reloaded env.")
       (response/status 200 "OK"))
     (response/status 401 "Unauthorized")))
 
