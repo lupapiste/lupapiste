@@ -163,7 +163,7 @@
     `[
       ~@[operation-tree-for-R]
       ~@[operation-tree-for-P
-         (when (env/feature? :ymparisto) operation-tree-for-Y)
+         operation-tree-for-Y
          operation-tree-for-YA]
       ~@(when (env/feature? :kiinteistonMuodostus)
           [operation-tree-for-KT operation-tree-for-MM])]))
@@ -1017,13 +1017,13 @@
                                                 (operations-filtered filtering-fn false))
                                               [])
         ;; Operation tree for organizations with no "selected-operations" defined in db
-        op-trees-for-orgs-without-selected-ops (if-not (empty? orgs-without-selected-ops)
+        #_op-trees-for-orgs-without-selected-ops (if-not (empty? orgs-without-selected-ops)
                                                  (-> orgs-without-selected-ops
                                                    (#(map organization-operations %))
                                                    (#(apply concat %)))
                                                  [])]
     (sort-operation-tree
-      (concat op-trees-for-orgs-with-selected-ops op-trees-for-orgs-without-selected-ops))))
+      (concat op-trees-for-orgs-with-selected-ops #_op-trees-for-orgs-without-selected-ops))))
 
 (defn addable-operations [selected-operations permit-type]
   (let [selected-operations (set selected-operations)
