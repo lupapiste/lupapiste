@@ -119,7 +119,8 @@
       (util/future*
         (Thread/yield)
         (env/reload!)
-        (info "Reloaded env, restarting Jetty...")
+        (i18n/reload!)
+        (info "Reloaded env and i18n, restarting Jetty...")
         (stop-jetty!)
         (mongo/disconnect!)
         (mongo/connect!)
@@ -131,7 +132,8 @@
   (if (#{"127.0.0.1" "0:0:0:0:0:0:0:1"} (:remote-addr (noir.request/ring-request)))
     (do
       (env/reload!)
-      (info "Reloaded env.")
+      (i18n/reload!)
+      (info "Reloaded env and i18n.")
       (response/status 200 "OK"))
     (response/status 401 "Unauthorized")))
 
