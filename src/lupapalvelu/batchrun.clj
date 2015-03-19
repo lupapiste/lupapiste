@@ -219,7 +219,13 @@
 
 
 (defn fetch-asianhallinta-verdicts []
-  nil)
+  (let [ah-organizations (mongo/select :organizations 
+                                       {"scope.caseManagement.ftpUser" {$exists true}}
+                                       {"scope.caseManagement.ftpUser" 1})
+        ftp-users (remove nil? 
+                    (for [org ah-organizations
+                         scope (:scope org)]
+                      (get-in scope [:caseManagement :ftpUser])))]))
 
 (defn check-for-asianhallinta-verdicts []
   (when (env/feature? :automatic-verdicts-checking)
