@@ -216,3 +216,13 @@
     (mongo/connect!)
     (fetch-verdicts)
     (mongo/disconnect!)))
+
+
+(defn fetch-asianhallinta-verdicts []
+  nil)
+
+(defn check-for-asianhallinta-verdicts []
+  (when (env/feature? :automatic-verdicts-checking)
+    (mongo/connect!)
+    (fetch-asianhallinta-verdicts)
+    (mongo/disconnect!)))
