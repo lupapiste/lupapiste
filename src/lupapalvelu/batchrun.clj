@@ -225,7 +225,13 @@
         ftp-users (remove nil? 
                     (for [org ah-organizations
                          scope (:scope org)]
-                      (get-in scope [:caseManagement :ftpUser])))]))
+                      (get-in scope [:caseManagement :ftpUser])))]
+    (doseq [user ftp-users
+            :let [path (str 
+                         (env/value :outgoing-directory) "/"
+                         user "/"
+                         "asianhallinta/to_lupapiste/")]]
+      (println path))))
 
 (defn check-for-asianhallinta-verdicts []
   (when (env/feature? :automatic-verdicts-checking)
