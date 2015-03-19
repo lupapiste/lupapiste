@@ -5335,11 +5335,12 @@ td.comment-text {
 
 /* line 21, ../sass/views/_verdict.scss */
 .verdict-signature-fields {
+  overflow-y: hidden;
   float: right;
   margin-right: 5em;
   width: 240px;
 }
-/* line 25, ../sass/views/_verdict.scss */
+/* line 26, ../sass/views/_verdict.scss */
 .verdict-signature-fields .value {
   float: right;
 }
