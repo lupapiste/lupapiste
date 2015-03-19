@@ -1,5 +1,7 @@
 (ns sade.security-headers
-  (:require [lupapalvelu.logging :refer [with-logging-context]]))
+  (:require [lupapalvelu.logging :refer [with-logging-context]]
+            [sade.session :refer [merge-to-session]])
+  (:import java.util.UUID))
 
 (defn add-security-headers
   "Ring middleware.
@@ -22,10 +24,15 @@
           ; site as frames. This defends against clickjacking attacks.
           (assoc-in [:headers "X-Frame-Options"] "sameorigin"))))))
 
+(defn- copy-id [handler request]
+  (let [session-id (get-in request [:session :id] (str (UUID/randomUUID)))]
+    (with-logging-context {:session-id session-id}
+      (when-let [response (handler (assoc-in request [:session :id] session-id))]
+        (if-not (get-in request [:session :id])
+          (merge-to-session request response {:id session-id})
+          response)))))
+
 (defn session-id-to-mdc
-  "Ring middleware. Sets 'sessionId' mdc-key with ring-sessionId."
+  "Ring middleware. Sets 'session-id' mdc-key with ring session id."
   [handler]
-  (fn [request]
-    (let [sessionId (get-in request [:cookies "ring-session" :value])]
-      (with-logging-context {:sessionId sessionId}
-        (handler request)))))
+  (fn [request] (copy-id handler request)))

@@ -18,6 +18,7 @@
             [sade.util :as util]
             [sade.status :as status]
             [sade.strings :as ss]
+            [sade.session :as ssess]
             [lupapalvelu.action :as action]
             [lupapalvelu.application-search-api]
             [lupapalvelu.features-api]
@@ -50,7 +51,14 @@
   `(let [[m# p#] (if (string? ~path) [:get ~path] ~path)]
      (swap! apis conj {(keyword m#) p#})
      (defpage ~path ~params
-       (resp/json (do ~@content)))))
+       (let [response-data# (do ~@content)
+             response-session# (:session response-data#)]
+         (if (contains? response-data# :session)
+           (-> response-data#
+             (dissoc :session)
+             resp/json
+             (assoc :session response-session#))
+           (resp/json response-data#))))))
 
 (defjson "/system/apis" [] @apis)
 
@@ -82,16 +90,12 @@
 (defn user-agent [request]
   (str (get-in request [:headers "user-agent"])))
 
-(defn sessionId [request]
-  (get-in request [:cookies "ring-session" :value]))
-
 (defn client-ip [request]
   (or (get-in request [:headers "x-real-ip"]) (get-in request [:remote-addr])))
 
 (defn- web-stuff [request]
   {:user-agent (user-agent request)
    :client-ip  (client-ip request)
-   :sessionId  (sessionId request)
    :host       (host request)})
 
 (defn- logged-in? [request]
@@ -132,6 +136,7 @@
 (defn enriched [m request]
   (merge m {:user (user/current-user request)
             :lang *lang*
+            :session (:session request)
             :web  (web-stuff request)}))
 
 (defn execute [action]
@@ -288,9 +293,9 @@
 (defn serve-app [app hashbang lang]
   ; hashbangs are not sent to server, query-parameter hashbang used to store where the user wanted to go, stored on server, reapplied on login
   (if-let [hashbang (->hashbang hashbang)]
-    (do
-      (session/put! :hashbang hashbang)
-      (single-resource :html (keyword app) (redirect-to-frontpage lang)))
+    (ssess/merge-to-session
+      (request/ring-request) (single-resource :html (keyword app) (redirect-to-frontpage lang))
+      {:hashbang hashbang})
     ; If current user has no access to the app, save hashbang using JS on client side.
     ; The next call will then be handled by the "true branch" above.
     (single-resource :html (keyword app) (save-hashbang-on-client))))
@@ -303,27 +308,24 @@
   (serve-app app hashbang lang))
 
 (defjson "/api/hashbang" []
-  (ok :bang (session/get! :hashbang "")))
+  (ok :bang (get-in (request/ring-request) [:session :hashbang] "")))
 
 ;;
 ;; Login/logout:
 ;;
 
 (defn- logout! []
-  (session/clear!)
-  (cookies/put! :anti-csrf-token {:value "delete" :path "/" :expires "Thu, 01-Jan-1970 00:00:01 GMT"}))
+  (cookies/put! :anti-csrf-token {:value "delete" :path "/" :expires "Thu, 01-Jan-1970 00:00:01 GMT"})
+  {:session nil})
 
 (defjson [:post "/api/logout"] []
-  (logout!)
-  (ok))
+  (merge (logout!) (ok)))
 
 (defpage "/logout" []
-  (logout!)
-  (redirect-after-logout))
+  (merge (logout!) (redirect-after-logout)))
 
 (defpage [:get ["/app/:lang/logout" :lang #"[a-z]{2}"]] {lang :lang}
-  (logout!)
-  (redirect-after-logout))
+  (merge (logout!) (redirect-after-logout)))
 
 ;; Login via saparate URL outside anti-csrf
 (defjson [:post "/api/login"] {username :username :as params}
@@ -360,9 +362,8 @@
   (if-let [user (activation/activate-account key)]
     (do
       (infof "User account '%s' activated, auto-logging in the user" (:username user))
-      (session/put! :user user)
       (let [application-page (user/applicationpage-for (:role user))]
-        (redirect default-lang application-page)))
+        (ssess/merge-to-session (request/ring-request) (redirect default-lang application-page) (user/session-summary user))))
     (do
       (warnf "Invalid user account activation attempt with key '%s', possible hacking attempt?" key)
       (landing-page))))
@@ -380,15 +381,26 @@
   (let [authorization (get-in request [:headers "authorization"])]
     (parse "apikey" authorization)))
 
-(defn authentication
+(defn- authentication [handler request]
+  (let [api-key (get-apikey request)
+        api-key-auth (when-not (ss/blank? api-key) (user/get-user-with-apikey api-key))
+        session-user (get-in request [:session :user])
+        expires (:expires session-user)
+        expired? (and expires (not (user/virtual-user? session-user)) (< expires (now)))
+        updated-user (and expired? (user/get-user {:id (:id session-user), :enabled true}))
+        user (or api-key-auth updated-user session-user)]
+    (if (and expired? (not updated-user))
+      (resp/status 401 "Unauthorized")
+      (let [response (handler (assoc request :user user))]
+        (if (and response updated-user)
+          (ssess/merge-to-session request response {:user (user/session-summary updated-user)})
+          response)))))
+
+(defn wrap-authentication
   "Middleware that adds :user to request. If request has apikey authentication header then
    that is used for authentication. If not, then use user information from session."
   [handler]
-  (fn [request]
-    (let [api-key (get-apikey request)
-          api-key-auth (when-not (ss/blank? api-key) (user/get-user-with-apikey api-key))
-          session-user (session/get :user)]
-      (handler (assoc request :user (or api-key-auth session-user))))))
+  (fn [request] (authentication handler request)))
 
 (defn- logged-in-with-apikey? [request]
   (and (get-apikey request) (logged-in? request)))
@@ -499,17 +511,19 @@
 ;;
 
 (defn get-session-timeout [request]
-  (get-in request [:session :noir :user :session-timeout] (.toMillis java.util.concurrent.TimeUnit/HOURS 4)))
+  (get-in request [:session :user :session-timeout] (.toMillis java.util.concurrent.TimeUnit/HOURS 4)))
 
 (defn session-timeout-handler [handler request]
   (let [now (now)
-        expires (session/get :expires now)
-        expired? (< expires now)]
+        request-session (:session request)
+        expires (get request-session :expires now)
+        expired? (< expires now)
+        response (handler request)]
     (if expired?
-      (session/clear!)
+      (assoc response :session nil)
       (if (re-find #"^/api/(command|query|raw|datatables|upload)/" (:uri request))
-        (session/put! :expires (+ now (get-session-timeout request)))))
-    (handler request)))
+        (ssess/merge-to-session request response {:expires (+ now (get-session-timeout request))})
+        response))))
 
 (defn session-timeout [handler]
   (fn [request] (session-timeout-handler handler request)))
