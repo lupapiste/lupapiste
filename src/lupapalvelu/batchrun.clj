@@ -1,5 +1,6 @@
 (ns lupapalvelu.batchrun
   (:require [taoensso.timbre :refer [error]]
+            [me.raynes.fs :as fs]
             [clojure.java.io :as io]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.neighbors :as neighbors]
@@ -15,6 +16,7 @@
             [lupapalvelu.verdict-api :as verdict-api]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.xml.krysp.reader :as krysp]
+            [lupapalvelu.xml.asianhallinta.verdict :as ah-verdict]
             [lupapalvelu.action :refer :all]
             [sade.util :as util]
             [sade.env :as env]
@@ -236,7 +238,13 @@
                   #(re-matches #".+\.zip$" (.getName %))
                   (-> path io/file (.listFiles) seq))]
       
-      (println user " - " zip))))
+      ; (println user " - " zip)
+      (fs/mkdirs (str path "archive"))
+      (fs/mkdirs (str path "error"))
+      (let [result {:ok truee} #_(ah-verdict/process-ah-verdict (.getPath zip) user)]
+        (if (ok? result)
+          (fs/rename zip (io/file (str path "archive/" (.getName zip))))
+          (fs/rename zip (io/file (str path "error/" (.getName zip)))))))))
 
 (defn check-for-asianhallinta-verdicts []
   (when (env/feature? :automatic-verdicts-checking)
