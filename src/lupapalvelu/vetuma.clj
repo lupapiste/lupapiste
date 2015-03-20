@@ -154,7 +154,7 @@
 ;; Web stuff
 ;;
 
-(defn session-id [] (get-in (request/ring-request) [:cookies "ring-session" :value]))
+(defn session-id [] (get-in (request/ring-request) [:session :id]))
 
 (defn- field [[k v]]
   (form/hidden-field k v))

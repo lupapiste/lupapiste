@@ -3,7 +3,6 @@
             [clojure.set :as set]
             [noir.request :as request]
             [noir.response :as resp]
-            [noir.session :as session]
             [noir.core :refer [defpage]]
             [slingshot.slingshot :refer [throw+]]
             [monger.operators :refer :all]
@@ -12,6 +11,7 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.core :refer :all]
+            [sade.session :as ssess]
             [lupapalvelu.action :refer [defquery defcommand defraw] :as action]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.activation :as activation]
@@ -34,7 +34,11 @@
 (defquery user
   {:user-roles #{:applicant :authority :oirAuthority :authorityAdmin :admin}}
   [{user :user}]
-  (ok :user user))
+  (if (user/virtual-user? user)
+    (ok :user user)
+    (if-let [full-user (user/get-user-by-id (:id user))]
+     (ok :user (dissoc full-user :private :personId))
+     (fail))))
 
 (defquery users
   {:user-roles #{:admin :authorityAdmin}}
@@ -250,14 +254,13 @@
 
 (defcommand update-user
   {:user-roles #{:applicant :authority :authorityAdmin :admin}}
-  [{caller :user user-data :data}]
+  [{caller :user user-data :data :as command}]
   (let [email     (user/canonize-email (or (:email user-data) (:email caller)))
         user-data (assoc user-data :email email)]
     (validate-update-user! caller user-data)
     (if (= 1 (mongo/update-n :users {:email email} {$set (select-keys user-data user-data-editable-fields)}))
-      (do
-        (when (= email (:email caller))
-          (user/refresh-user! (:id caller)))
+      (if (= email (:email caller))
+        (ssess/merge-to-session command (ok) {:user (user/session-summary (user/get-user-by-id (:id caller)))})
         (ok))
       (fail :not-found :email email))))
 
@@ -396,7 +399,7 @@
 (defcommand login
   {:parameters [username password]
    :user-roles #{:anonymous}}
-  [_]
+  [command]
   (if (user/throttle-login? username)
     (do
       (info "login throttled, username:" username)
@@ -405,9 +408,11 @@
       (do
         (info "login successful, username:" username)
         (user/clear-logins username)
-        (session/put! :user user)
         (if-let [application-page (user/applicationpage-for (:role user))]
-          (ok :user user :applicationpage application-page)
+          (ssess/merge-to-session
+            command
+            (ok :user (user/non-private user) :applicationpage application-page)
+            {:user (user/session-summary user)})
           (do
             (error "Unknown user role:" (:role user))
             (fail :error.login))))
@@ -421,11 +426,10 @@
    :user-roles #{:admin}
    :input-validators [(partial action/non-blank-parameters [:organizationId])]
    :description "Changes admin session into authority session with access to given organization"}
-  [{user :user}]
+  [{user :user :as command}]
   (if (user/get-user-with-password (:username user) password)
     (let [imposter (assoc user :impersonating true :role "authority" :organizations [organizationId])]
-      (session/put! :user imposter)
-      (ok))
+      (ssess/merge-to-session command (ok) {:user imposter}))
     (fail :error.login)))
 
 ;;
@@ -505,7 +509,9 @@
 (defquery user-attachments
   {:user-roles #{:applicant :authority :authorityAdmin :admin}}
   [{user :user}]
-  (ok :attachments (:attachments user)))
+  (if-let [current-user (user/get-user-by-id (:id user))]
+    (ok :attachments (:attachments current-user))
+    (fail :error.user-not-found)))
 
 (defpage [:post "/api/upload/user-attachment"] {[{:keys [tempfile filename content-type size]}] :files attachmentType :attachmentType}
   (let [user              (user/current-user (request/ring-request))
@@ -527,7 +533,6 @@
 
     (mongo/upload attachment-id filename content-type tempfile :user-id (:id user))
     (mongo/update-by-id :users (:id user) {$push {:attachments file-info}})
-    (user/refresh-user! (:id user))
 
     (->> (assoc file-info :ok true)
       (resp/json)
@@ -554,7 +559,6 @@
   [{user :user}]
   (info "Removing user attachment: attachment-id:" attachment-id)
   (mongo/update-by-id :users (:id user) {$pull {:attachments {:attachment-id attachment-id}}})
-  (user/refresh-user! (:id user))
   (mongo/delete-file {:id attachment-id :metadata.user-id (:id user)})
   (ok))
 
