@@ -363,7 +363,7 @@
     (do
       (infof "User account '%s' activated, auto-logging in the user" (:username user))
       (let [application-page (user/applicationpage-for (:role user))]
-        (ssess/merge-to-session (request/ring-request) (redirect default-lang application-page) (user/session-summary user))))
+        (ssess/merge-to-session (request/ring-request) (redirect default-lang application-page) {:user (user/session-summary user)})))
     (do
       (warnf "Invalid user account activation attempt with key '%s', possible hacking attempt?" key)
       (landing-page))))
