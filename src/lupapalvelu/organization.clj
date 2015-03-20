@@ -107,7 +107,7 @@
                                      (fn [[name op]]
                                        (and
                                          (= %2 (:permit-type op))
-                                         (or (empty? selected-operations) (selected-operations name))))
+                                         (selected-operations name)))
                                      operations/operations))]
          (if operation-names (assoc %1 %2 operation-names) %1))
        %1)
