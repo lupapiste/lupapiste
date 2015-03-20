@@ -1,5 +1,6 @@
 (ns lupapalvelu.batchrun
   (:require [taoensso.timbre :refer [error]]
+            [clojure.java.io :as io]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.neighbors :as neighbors]
             [lupapalvelu.open-inforequest :as inforequest]
@@ -230,8 +231,12 @@
             :let [path (str 
                          (env/value :outgoing-directory) "/"
                          user "/"
-                         "asianhallinta/to_lupapiste/")]]
-      (println path))))
+                         "asianhallinta/to_lupapiste/")]
+            zip (filter
+                  #(re-matches #".+\.zip$" (.getName %))
+                  (-> path io/file (.listFiles) seq))]
+      
+      (println user " - " zip))))
 
 (defn check-for-asianhallinta-verdicts []
   (when (env/feature? :automatic-verdicts-checking)
