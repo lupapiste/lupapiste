@@ -302,7 +302,7 @@
    :add-operation-allowed false
    :link-permit-required false
    :link-permit-verdict-required false
-   :asianhallinta false})
+   :asianhallinta true})
 
 (def yl-operations
   {:yl-uusi-toiminta ymparistolupa-operation
@@ -789,7 +789,7 @@
                                   :attachments []
                                   :link-permit-required false
                                   :link-permit-verdict-required false
-                                  :asianhallinta false}
+                                  :asianhallinta true}
     :vvvl-vesijohdosta           {:schema "talousvedet"
                                   :permit-type permit/VVVL
                                   :required common-vvvl-schemas
@@ -797,7 +797,7 @@
                                   :add-operation-allowed false
                                   :link-permit-required false
                                   :link-permit-verdict-required false
-                                  :asianhallinta false}
+                                  :asianhallinta true}
     :vvvl-viemarista             {:schema "jatevedet"
                                   :permit-type permit/VVVL
                                   :required common-vvvl-schemas
@@ -805,7 +805,7 @@
                                   :add-operation-allowed false
                                   :link-permit-required false
                                   :link-permit-verdict-required false
-                                  :asianhallinta false}
+                                  :asianhallinta true}
     :vvvl-vesijohdosta-ja-viemarista {:schema "talousvedet"
                                       :permit-type permit/VVVL
                                       :required (conj common-vvvl-schemas "jatevedet")
@@ -813,7 +813,7 @@
                                       :add-operation-allowed false
                                       :link-permit-required false
                                       :link-permit-verdict-required false
-                                      :asianhallinta false}
+                                      :asianhallinta true}
     :vvvl-hulevesiviemarista    {:schema "hulevedet"
                                  :permit-type permit/VVVL
                                  :required common-vvvl-schemas
@@ -821,7 +821,7 @@
                                  :add-operation-allowed false
                                  :link-permit-required false
                                  :link-permit-verdict-required false
-                                 :asianhallinta false}
+                                 :asianhallinta true}
 
     :tyonjohtajan-nimeaminen     {:schema "hankkeen-kuvaus-minimum"
                                   :permit-type permit/R
@@ -1032,3 +1032,7 @@
                                   (= (name permit-type) (permit-type-of-operation node))))]
     (sort-operation-tree
       (operations-filtered filtering-fn true))))
+
+(comment
+  ; operations (keys) with asianhallinta enabled
+  (keys (into {} (filter (fn [[k v]] (:asianhallinta v)) operations))))
