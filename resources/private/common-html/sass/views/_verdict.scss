@@ -1,28 +1,29 @@
 #verdict {
 
-	section {
-	 margin-top: $marginL;
-	 h2 {
-	   margin-bottom: 0;
-	 }
-	}
+  section {
+   margin-top: $marginL;
+   h2 {
+     margin-bottom: 0;
+   }
+  }
 
-	.attachments h3 {
-	  /* emulate h2 */
-	  font-size: $baseline * 0.9;
+  .attachments h3 {
+    /* emulate h2 */
+    font-size: $baseline * 0.9;
     font-weight: bold;
-	}
+  }
 }
 
 .verdict-info-fields {
-	overflow: auto;
+  overflow: auto;
 }
 
 .verdict-signature-fields {
+  overflow-y: hidden;
   float: right;
   margin-right: 5em;
-  width: 240px;        
+  width: 240px;
   .value {
-  	float: right;
+    float: right;
   }
 }

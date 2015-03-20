@@ -112,22 +112,24 @@ Mikko sees that the application has verdicts
   Verdict is given  123567890  2
 
 Mikko tries to sign the verdict with wrong password
-  Click Element  xpath=//button[@data-test-id='sign-verdict-button']
-  Input Text  xpath=//input[@data-test-id='sign-verdict-password']  wrong_password
-  Click Element  xpath=//Button[@data-test-id='do-sign-verdict']
-  Wait Until  Element should be visible  xpath=//div[@data-test-id='verdict-signature-error-message']
-  Click Element  xpath=//p[@data-test-id='verdict-signature-close-dialog']
+  Click Element  xpath=//div[@data-test-id='given-verdict-id-2-content']//button[@data-test-id='sign-verdict-button']
+  Wait Until Element Is Visible  xpath=//input[@data-test-id='sign-verdict-password']
+  Input Text  xpath=//div[@id='dialog-sign-verdict']//input[@data-test-id='sign-verdict-password']  wrong_password
+  Click Element  xpath=//div[@id='dialog-sign-verdict']//button[@data-test-id='do-sign-verdict']
+  Wait Until  Element should be visible  xpath=//div[@id='dialog-sign-verdict']//div[@data-test-id='verdict-signature-error-message']
+  Click Element  xpath=//div[@id='dialog-sign-verdict']//p[@data-test-id='verdict-signature-close-dialog']
 
 Mikko signs the verdict
-  Element should be visible  xpath=//div[@data-test-id='verdict-signature-ui']
-  Click Element  xpath=//button[@data-test-id='sign-verdict-button']
-  Wait Until Element Is Visible  xpath=//input[@data-test-id='sign-verdict-password']
-  Input Text  xpath=//input[@data-test-id='sign-verdict-password']  mikko123
-  Click Element  xpath=//Button[@data-test-id='do-sign-verdict']
-  Wait Until  Element should be visible  xpath=//div[@data-test-id='verdict-signature-listing']
-  Element should not be visible  xpath=//div[@data-test-id='verdict-signature-ui']
-  Element should Contain  xpath=//div[@data-test-id='verdict-signature-listing']  Intonen Mikko
-  Element should Contain  xpath=//div[@data-test-id='verdict-signature-listing']  ${CURRENT_DATE}
+  Wait until  Element should be visible  xpath=//div[@data-test-id='given-verdict-id-2-content']//div[@data-test-id='verdict-signature-ui']
+  Element should not be visible  xpath=//div[@data-test-id='given-verdict-id-0-content']//div[@data-test-id='verdict-signature-ui']
+  Click Element  xpath=//div[@data-test-id='given-verdict-id-2-content']//button[@data-test-id='sign-verdict-button']
+  Wait Until Element Is Visible  xpath=//div[@id='dialog-sign-verdict']//input[@data-test-id='sign-verdict-password']
+  Input Text  xpath=//div[@id='dialog-sign-verdict']//input[@data-test-id='sign-verdict-password']  mikko123
+  Click Element  xpath=//div[@id='dialog-sign-verdict']//button[@data-test-id='do-sign-verdict']
+  Wait Until  Element should be visible  xpath=//div[@data-test-id='given-verdict-id-2-content']//div[@data-test-id='verdict-signature-listing']
+  Element should not be visible  xpath=//div[@data-test-id='given-verdict-id-2-content']//div[@data-test-id='verdict-signature-ui']
+  Element should Contain  xpath=//div[@data-test-id='given-verdict-id-2-content']//div[@data-test-id='verdict-signature-listing']  Intonen Mikko
+  Element should Contain  xpath=//div[@data-test-id='given-verdict-id-2-content']//div[@data-test-id='verdict-signature-listing']  ${CURRENT_DATE}
 
 *** Keywords ***
 

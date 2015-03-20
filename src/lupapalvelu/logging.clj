@@ -17,11 +17,11 @@
      (do ~@body)))
 
 (defn- log-prefix [{:keys [level timestamp ns]}]
-  (let [{:keys [sessionId applicationId userId]} context]
+  (let [{:keys [session-id applicationId userId]} context]
     (str
       (-> level name s/upper-case)
       \space timestamp \space
-      \[ sessionId \] \space
+      \[ session-id \] \space
       \[ applicationId \] \space
       \[ userId \] \space
       ns)))
