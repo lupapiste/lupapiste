@@ -467,7 +467,8 @@
                                {:municipality "753" :permitType "YL" :inforequest-enabled true :new-application-enabled true}
                                {:municipality "753" :permitType "MAL" :inforequest-enabled true :new-application-enabled true}
                                {:municipality "753" :permitType "VVVL" :inforequest-enabled true :new-application-enabled true}
-                               {:municipality "753" :permitType "KT" :inforequest-enabled true :new-application-enabled true}]
+                               {:municipality "753" :permitType "KT" :inforequest-enabled true :new-application-enabled true}
+                               {:municipality "753" :permitType "MM" :inforequest-enabled true :new-application-enabled true}]
                        :links [{:name {:fi "Sipoo", :sv "Sibbo"}
                                 :url "http://sipoo.fi"}
                                {:name {:fi "Rakennusvalvonta", :sv "Rakennusvalvonta"}
