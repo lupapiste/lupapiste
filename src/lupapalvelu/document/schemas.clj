@@ -883,6 +883,7 @@
      :body (approvable-top-level-groups (body kuvaus))}
 
     {:info {:name "hakija"
+            :group-help "hakija.group.help"
             :i18name "osapuoli"
             :order 3
             :removable true
