@@ -425,9 +425,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     input.onmouseout = self.hideHelp;
     span.appendChild(input);
 
-    if ( model[subSchema.name] && model[subSchema.name].disabled) {
-      input.setAttribute("disabled", true);
-    }
+    $(input).prop("disabled", getModelDisabled(model, subSchema.name));
 
     if (subSchema.label) {
       var label = makeLabel(subSchema, "checkbox", myPath);
@@ -456,9 +454,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var input = makeInput(inputType, myPath, model, subSchema);
     setMaxLen(input, subSchema);
 
-    if ( model[subSchema.name] && model[subSchema.name].disabled) {
-      input.setAttribute("disabled", true);
-    }
+    $(input).prop("disabled", getModelDisabled(model, subSchema.name));
 
     listen(subSchema, myPath, input);
 
@@ -520,6 +516,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
   function getModelSourceValue(model, name) {
     return util.getIn(model, [name, "sourceValue"]);
+  }
+
+  function getModelDisabled(model, name) {
+    return util.getIn(model, [name, "disabled"], false);
   }
 
   function buildText(subSchema, model, path) {
@@ -609,9 +609,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       model[subSchema.name] = {value: "lis\u00e4ys"};
     }
 
-    if ( model[subSchema.name] && model[subSchema.name].disabled) {
-      select.setAttribute("disabled", true);
-    }
+    $(select).prop("disabled", getModelDisabled(model, subSchema.name));
 
     var selectedOption = getModelValue(model, subSchema.name);
     var sourceValue = getModelSourceValue(model, subSchema.name);
