@@ -775,8 +775,10 @@
                                                          {:selected-operations {$exists false}},
                                                          {:selected-operations nil}]})]
        (doseq [organization organizations]
-         (mongo/update-by-id :organizations (:id organization)
-                             {$set {:selected-operations (keys op/operations)}}))
+         (let [org-permit-types (set (map :permitType (:scope organization)))
+               operations (map first (filter (fn [[_ v]] (org-permit-types (name (:permit-type v))))  op/operations))]
+              (mongo/update-by-id :organizations (:id organization)
+                                  {$set {:selected-operations operations}})))
     ))
 ;;
 ;; ****** NOTE! ******
