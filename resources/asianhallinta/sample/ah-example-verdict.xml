@@ -11,7 +11,12 @@
     <ah:Liite>
         <ah:Kuvaus>Liitteen kuvaus</ah:Kuvaus>
         <ah:Tyyppi>Liitteen tyyppi</ah:Tyyppi>
-        <ah:LinkkiLiitteeseen>sftp://foo/bar/baz/liite.pdf</ah:LinkkiLiitteeseen>
+        <ah:LinkkiLiitteeseen>sftp://foo/bar/baz/liite1.pdf</ah:LinkkiLiitteeseen>
+    </ah:Liite>
+    <ah:Liite>
+        <ah:Kuvaus>Liitteen kuvaus</ah:Kuvaus>
+        <ah:Tyyppi>Liitteen tyyppi</ah:Tyyppi>
+        <ah:LinkkiLiitteeseen>sftp://foo/bar/baz/liite2.pdf</ah:LinkkiLiitteeseen>
     </ah:Liite>
   </ah:Liitteet>
 </ah:AsianPaatos>

@@ -17,8 +17,6 @@
       (fsc/unzip path-to-zip tmp-dir)
       tmp-dir)))
 
-
-
 (defn process-ah-verdict [path-to-zip ftp-user]
   (try
     (let [unzipped-path (unzip-file path-to-zip)
@@ -29,11 +27,15 @@
         (error-and-fail! (str "Expected to find one xml, found " (count xmls)) :error.integration.asianhallinta-too-many-xmls))
 
       ; parse XML
-      (let [parsed-xml (-> (first xmls) slurp xml/parse reader/strip-xml-namespaces xml/xml->edn)]
-        ; path must contain all attachments referenced in xml
-        )
-
-
+      (let [parsed-xml (-> (first xmls) slurp xml/parse reader/strip-xml-namespaces xml/xml->edn)
+            attachments (get-in parsed-xml [:AsianPaatos :Liitteet])
+            attachments (reader/ensure-sequential attachments :Liite)
+            attachments (:Liite attachments)
+            attachment-paths (map :LinkkiLiitteeseen attachments)
+            attachment-paths (map fs/base-name attachment-paths)]
+        (doseq [filename attachment-paths]
+          (when-not (fs/find-files unzipped-path filename)
+            (error-and-fail! (str "Attachment referenced in XML was not present in zip: " filename) :error.integration.asianhallinta-missing-attachment))))
 
       (ok))
     (catch Exception e
