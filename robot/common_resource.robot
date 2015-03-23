@@ -725,6 +725,7 @@ Input verdict
   Input text  verdict-given  ${verdict-given-date}
   Input text  verdict-official  ${verdict-official-date}
   Input text  verdict-name  ${verdict-giver-name}
+  Select Checkbox  verdict-agreement
   ## Trigger change manually
   Execute JavaScript  $("#backend-id").change();
   Execute JavaScript  $("#verdict-type-select").change();

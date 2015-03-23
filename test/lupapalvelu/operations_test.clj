@@ -104,15 +104,13 @@
       (operations-filtered filtering-fn false) => [["Poikkeusluvat ja suunnittelutarveratkaisut" :poikkeamis]]))
 
 
-  (when (env/feature? :ymparisto)
-    (fact "meluilmoitus"
-      (let [filtering-fn (fn [node] (= "YI" (permit-type-of-operation node)))]
-        (operations-filtered filtering-fn false) => [["Ymp\u00e4rist\u00f6luvat" [["Meluilmoitus" :meluilmoitus]]]])))
+  (fact "meluilmoitus"
+    (let [filtering-fn (fn [node] (= "YI" (permit-type-of-operation node)))]
+      (operations-filtered filtering-fn false) => [["Ymp\u00e4rist\u00f6luvat" [["Meluilmoitus" :meluilmoitus]]]]))
 
-  (when (env/feature? :ymparisto)
-    (fact "ymparistolupa"
-      (let [filtering-fn (fn [node] (= "YL" (permit-type-of-operation node)))]
-        (operations-filtered filtering-fn false) => [["Ymp\u00e4rist\u00f6luvat"
-                                                      [["ympariston-pilaantumisen-vaara" [["uusi-toiminta" :yl-uusi-toiminta]
-                                                                                          ["olemassa-oleva-toiminta" :yl-olemassa-oleva-toiminta]
-                                                                                          ["toiminnan-muutos" :yl-toiminnan-muutos]]]]]]))))
+  (fact "ymparistolupa"
+    (let [filtering-fn (fn [node] (= "YL" (permit-type-of-operation node)))]
+      (operations-filtered filtering-fn false) => [["Ymp\u00e4rist\u00f6luvat"
+                                                    [["ympariston-pilaantumisen-vaara" [["uusi-toiminta" :yl-uusi-toiminta]
+                                                                                        ["olemassa-oleva-toiminta" :yl-olemassa-oleva-toiminta]
+                                                                                        ["toiminnan-muutos" :yl-toiminnan-muutos]]]]]])))
