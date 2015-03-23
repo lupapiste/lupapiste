@@ -771,8 +771,13 @@
     {"comments.0" {$exists true}, :openInfoRequest true}))
 
 (defmigration select-all-operations-for-organizatio-if-none-selected
-  (let [organizations (mongo/select :organizations {$or [{:selected-operations {$size 0}}, {:selected-operations {$exists false}}, {:selected-operations nil}]})]
-       (>pprint (count organizations))))
+  (let [organizations (mongo/select :organizations {$or [{:selected-operations {$size 0}},
+                                                         {:selected-operations {$exists false}},
+                                                         {:selected-operations nil}]})]
+       (doseq [organization organizations]
+         (mongo/update-by-id :organizations (:id organization)
+                             {$set {:selected-operations (keys op/operations)}}))
+    ))
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"
