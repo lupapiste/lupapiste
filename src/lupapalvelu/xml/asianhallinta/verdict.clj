@@ -27,12 +27,14 @@
         (error-and-fail! (str "Expected to find one xml, found " (count xmls)) :error.integration.asianhallinta-wrong-number-of-xmls))
 
       ; parse XML
-      (let [parsed-xml (-> (first xmls) slurp xml/parse reader/strip-xml-namespaces xml/xml->edn)
-            attachments (get-in parsed-xml [:AsianPaatos :Liitteet])
-            attachments (reader/ensure-sequential attachments :Liite)
-            attachments (:Liite attachments)
-            attachment-paths (map :LinkkiLiitteeseen attachments)
-            attachment-paths (map fs/base-name attachment-paths)]
+      (let [parsed-xml       (-> (first xmls) slurp xml/parse reader/strip-xml-namespaces xml/xml->edn)
+            attachments      (-> (get-in parsed-xml [:AsianPaatos :Liitteet])
+                                 (reader/ensure-sequential :Liite)
+                                 :Liite)
+            attachment-paths (->> attachments
+                                  (map :LinkkiLiitteeseen)
+                                  (map fs/base-name))
+            ]
         (doseq [filename attachment-paths]
           (when (empty? (fs/find-files unzipped-path (re-pattern filename)))
             (error-and-fail! (str "Attachment referenced in XML was not present in zip: " filename) :error.integration.asianhallinta-missing-attachment))))
