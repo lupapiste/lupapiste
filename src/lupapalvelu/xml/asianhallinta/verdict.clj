@@ -1,7 +1,7 @@
 (ns lupapalvelu.xml.asianhallinta.verdict
-  (:require [clojure.string :as s]
-            [clojure.java.io :as io]
-            [sade.core :refer [ok fail fail!] :as sade]
+  (:require [sade.core :refer [ok fail fail!]]
+            [sade.common-reader :as reader]
+            [sade.xml :as xml]
             [taoensso.timbre :refer [error warn]]
             [me.raynes.fs :as fs]
             [me.raynes.fs.compression :as fsc]))
@@ -29,9 +29,12 @@
         (error-and-fail! (str "Expected to find one xml, found " (count xmls)) :error.integration.asianhallinta-too-many-xmls))
 
       ; parse XML
-      ; xml should be valid (but not must)
+      (let [parsed-xml (-> (first xmls) slurp xml/parse reader/strip-xml-namespaces xml/xml->edn)]
+        ; path must contain all attachments referenced in xml
+        )
 
-      ; path must contain all attachments referenced in xml
+
+
       (ok))
     (catch Exception e
       (if-let [error-key (some-> e ex-data :object :text)]
