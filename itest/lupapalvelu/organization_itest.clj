@@ -71,61 +71,7 @@
                               [["Uuden rakennuksen rakentaminen"
                                 [["pientalo" "pientalo"]]]
                                ["Rakennelman rakentaminen"
-                                [["Aita" "aita"]]]]]
-                             ["yleisten-alueiden-luvat"
-                              [["sijoituslupa"
-                                [["pysyvien-maanalaisten-rakenteiden-sijoittaminen"
-                                  [["vesi-ja-viemarijohtojen-sijoittaminen"
-                                    "ya-sijoituslupa-vesi-ja-viemarijohtojen-sijoittaminen"]
-                                   ["maalampoputkien-sijoittaminen"
-                                    "ya-sijoituslupa-maalampoputkien-sijoittaminen"]
-                                   ["kaukolampoputkien-sijoittaminen"
-                                    "ya-sijoituslupa-kaukolampoputkien-sijoittaminen"]
-                                   ["sahko-data-ja-muiden-kaapelien-sijoittaminen"
-                                    "ya-sijoituslupa-sahko-data-ja-muiden-kaapelien-sijoittaminen"]
-                                   ["rakennuksen-tai-sen-osan-sijoittaminen"
-                                    "ya-sijoituslupa-rakennuksen-tai-sen-osan-sijoittaminen"]]]
-                                 ["pysyvien-maanpaallisten-rakenteiden-sijoittaminen"
-                                  [["ilmajohtojen-sijoittaminen"
-                                    "ya-sijoituslupa-ilmajohtojen-sijoittaminen"]
-                                   ["muuntamoiden-sijoittaminen"
-                                    "ya-sijoituslupa-muuntamoiden-sijoittaminen"]
-                                   ["jatekatoksien-sijoittaminen"
-                                    "ya-sijoituslupa-jatekatoksien-sijoittaminen"]
-                                   ["leikkipaikan-tai-koiratarhan-sijoittaminen"
-                                    "ya-sijoituslupa-leikkipaikan-tai-koiratarhan-sijoittaminen"]
-                                   ["rakennuksen-pelastuspaikan-sijoittaminen"
-                                    "ya-sijoituslupa-rakennuksen-pelastuspaikan-sijoittaminen"]]]
-                                 ["muu-sijoituslupa" "ya-sijoituslupa-muu-sijoituslupa"]]]
-                               ["katulupa"
-                                [["kaivaminen-yleisilla-alueilla"
-                                  [["vesi-ja-viemarityot" "ya-katulupa-vesi-ja-viemarityot"]
-                                   ["maalampotyot" "ya-katulupa-maalampotyot"]
-                                   ["kaukolampotyot" "ya-katulupa-kaukolampotyot"]
-                                   ["kaapelityot" "ya-katulupa-kaapelityot"]
-                                   ["kiinteiston-johto-kaapeli-ja-putkiliitynnat"
-                                    "ya-katulupa-kiinteiston-johto-kaapeli-ja-putkiliitynnat"]]]
-                                 ["liikennealueen-rajaaminen-tyokayttoon"
-                                  [["nostotyot" "ya-kayttolupa-nostotyot"]
-                                   ["vaihtolavat" "ya-kayttolupa-vaihtolavat"]
-                                   ["kattolumien-pudotustyot"
-                                    "ya-kayttolupa-kattolumien-pudotustyot"]
-                                   ["muu-liikennealuetyo" "ya-kayttolupa-muu-liikennealuetyo"]]]
-                                 ["yleisen-alueen-rajaaminen-tyomaakayttoon"
-                                  [["talon-julkisivutyot" "ya-kayttolupa-talon-julkisivutyot"]
-                                   ["talon-rakennustyot" "ya-kayttolupa-talon-rakennustyot"]
-                                   ["muu-tyomaakaytto" "ya-kayttolupa-muu-tyomaakaytto"]]]]]
-                               ["kayttolupa"
-                                [["tapahtumat" "ya-kayttolupa-tapahtumat"]
-                                 ["harrastustoiminnan-jarjestaminen"
-                                  "ya-kayttolupa-harrastustoiminnan-jarjestaminen"]
-                                 ["mainokset" "ya-kayttolupa-mainostus-ja-viitoitus"]
-                                 ["metsastys" "ya-kayttolupa-metsastys"]
-                                 ["vesistoluvat" "ya-kayttolupa-vesistoluvat"]
-                                 ["terassit" "ya-kayttolupa-terassit"]
-                                 ["kioskit" "ya-kayttolupa-kioskit"]
-                                 ["muu-kayttolupa" "ya-kayttolupa-muu-kayttolupa"]]]
-                               ["jatkoaika" "ya-jatkoaika"]]]]))
+                                [["Aita" "aita"]]]]]]))
 
   (fact* "Query selected operations"
     (let [id   (create-app-id pena :operation "kerrostalo-rivitalo" :municipality sonja-muni)
