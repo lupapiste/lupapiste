@@ -32,14 +32,19 @@
   (try
     (let [unzipped-path (unzip-file path-to-zip)
           xmls (fs/find-files unzipped-path #".*xml$")]
-      ; path must contain one xml
+      ; path must contain exactly one xml
       (when-not (= (count xmls) 1)
         (error-and-fail! (str "Expected to find one xml, found " (count xmls)) :error.integration.asianhallinta-wrong-number-of-xmls))
 
       ; parse XML
       (let [parsed-xml       (-> (first xmls) slurp xml/parse reader/strip-xml-namespaces xml/xml->edn)]
         ; Check that all referenced attachments were included in zip
-        (ensure-attachments-present! unzipped-path parsed-xml))
+        (ensure-attachments-present! unzipped-path parsed-xml)
+
+        ; Create verdict
+        ; Create attachments
+        ; Save attachment file to attachment (gridfs)
+        )
 
       (ok))
     (catch Exception e
