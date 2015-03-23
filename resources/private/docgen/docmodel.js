@@ -251,7 +251,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     } else {
       input.onchange = function(e) {
         if (type === "checkbox") {
-          sourceValueChanged(input, input.checked, sourceValue, loc("selected"));
+          sourceValueChanged(input, input.checked, sourceValue, sourceValue ? loc("selected") : loc("notSelected"));
         } else {
           sourceValueChanged(input, input.value, sourceValue);
         }
@@ -265,7 +265,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     if (type === "checkbox") {
       input.checked = value;
-      sourceValueChanged(input, value, sourceValue, loc("selected"));
+      sourceValueChanged(input, value, sourceValue, sourceValue ? loc("selected") : loc("notSelected"));
     } else {
       input.value = value || "";
       sourceValueChanged(input, value, sourceValue);
