@@ -2,7 +2,7 @@
   (:require [sade.core :refer [ok fail fail!]]
             [sade.common-reader :as reader]
             [sade.xml :as xml]
-            [taoensso.timbre :refer [error warn]]
+            [taoensso.timbre :refer [error]]
             [me.raynes.fs :as fs]
             [me.raynes.fs.compression :as fsc]))
 
@@ -17,27 +17,29 @@
       (fsc/unzip path-to-zip tmp-dir)
       tmp-dir)))
 
+(defn- ensure-attachments-present! [unzipped-path parsed-xml]
+  (let [attachments      (-> (get-in parsed-xml [:AsianPaatos :Liitteet])
+                             (reader/ensure-sequential :Liite)
+                             :Liite)
+        attachment-paths (->> attachments
+                              (map :LinkkiLiitteeseen)
+                              (map fs/base-name))]
+    (doseq [filename attachment-paths]
+      (when (empty? (fs/find-files unzipped-path (re-pattern filename)))
+        (error-and-fail! (str "Attachment referenced in XML was not present in zip: " filename) :error.integration.asianhallinta-missing-attachment)))))
+
 (defn process-ah-verdict [path-to-zip ftp-user]
   (try
     (let [unzipped-path (unzip-file path-to-zip)
           xmls (fs/find-files unzipped-path #".*xml$")]
-
       ; path must contain one xml
       (when-not (= (count xmls) 1)
         (error-and-fail! (str "Expected to find one xml, found " (count xmls)) :error.integration.asianhallinta-wrong-number-of-xmls))
 
       ; parse XML
-      (let [parsed-xml       (-> (first xmls) slurp xml/parse reader/strip-xml-namespaces xml/xml->edn)
-            attachments      (-> (get-in parsed-xml [:AsianPaatos :Liitteet])
-                                 (reader/ensure-sequential :Liite)
-                                 :Liite)
-            attachment-paths (->> attachments
-                                  (map :LinkkiLiitteeseen)
-                                  (map fs/base-name))
-            ]
-        (doseq [filename attachment-paths]
-          (when (empty? (fs/find-files unzipped-path (re-pattern filename)))
-            (error-and-fail! (str "Attachment referenced in XML was not present in zip: " filename) :error.integration.asianhallinta-missing-attachment))))
+      (let [parsed-xml       (-> (first xmls) slurp xml/parse reader/strip-xml-namespaces xml/xml->edn)]
+        ; Check that all referenced attachments were included in zip
+        (ensure-attachments-present! unzipped-path parsed-xml))
 
       (ok))
     (catch Exception e
