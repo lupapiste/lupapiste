@@ -13,6 +13,7 @@
             [sade.coordinate :as coordinate]
             [sade.core :refer [now def-]]
             [lupapalvelu.document.schemas :as schema]
+            [lupapalvelu.document.tools :as tools]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.xml.krysp.verdict :as verdict]))
 
@@ -243,60 +244,67 @@
       (->rakennuksen-tiedot rakennus)))
   ([rakennus]
     (when rakennus
-      (polished
-        (util/assoc-when
-          {:muutostyolaji                 ...notimplemented...
-           :valtakunnallinenNumero        (pysyva-rakennustunnus (get-text rakennus :rakennustunnus :valtakunnallinenNumero))
-           :rakennusnro                   (ss/trim (get-text rakennus :rakennustunnus :rakennusnro))
-           :manuaalinen_rakennusnro       ""
-           :jarjestysnumero               (get-text rakennus :rakennustunnus :jarjestysnumero)
-           :kiinttun                      (get-text rakennus :rakennustunnus :kiinttun)
-           :verkostoliittymat             (cr/all-of rakennus [:verkostoliittymat])
+      (util/deep-merge
+        (->
+          {:body schema/rakennuksen-muuttaminen}
+          (tools/create-unwrapped-data tools/default-values)
+          ; Dissoc values that are not read
+          (dissoc :buildingId :muutostyolaji :perusparannuskytkin)
+          (util/dissoc-in [:huoneistot :0 :muutostapa]))
+        (polished
+          (util/assoc-when
+            {:muutostyolaji                 ...notimplemented...
+             :valtakunnallinenNumero        (pysyva-rakennustunnus (get-text rakennus :rakennustunnus :valtakunnallinenNumero))
+             :rakennusnro                   (ss/trim (get-text rakennus :rakennustunnus :rakennusnro))
+             :manuaalinen_rakennusnro       ""
+             :jarjestysnumero               (get-text rakennus :rakennustunnus :jarjestysnumero)
+             :kiinttun                      (get-text rakennus :rakennustunnus :kiinttun)
+             :verkostoliittymat             (cr/all-of rakennus [:verkostoliittymat])
 
-           :osoite {:kunta                (get-text rakennus :osoite :kunta)
-                    :lahiosoite           (get-text rakennus :osoite :osoitenimi :teksti)
-                    :osoitenumero         (get-text rakennus :osoite :osoitenumero)
-                    :osoitenumero2        (get-text rakennus :osoite :osoitenumero2)
-                    :jakokirjain          (get-text rakennus :osoite :jakokirjain)
-                    :jakokirjain2         (get-text rakennus :osoite :jakokirjain2)
-                    :porras               (get-text rakennus :osoite :porras)
-                    :huoneisto            (get-text rakennus :osoite :huoneisto)
-                    :postinumero          (get-text rakennus :osoite :postinumero)
-                    :postitoimipaikannimi (get-text rakennus :osoite :postitoimipaikannimi)}
-           :kaytto {:kayttotarkoitus      (get-text rakennus :kayttotarkoitus)
-                    :rakentajaTyyppi      (get-text rakennus :rakentajaTyyppi)}
-           :luokitus {:energialuokka      (get-text rakennus :energialuokka)
-                      :paloluokka         (get-text rakennus :paloluokka)}
-           :mitat {:kellarinpinta-ala     (get-text rakennus :kellarinpinta-ala)
-                   :kerrosala             (get-text rakennus :kerrosala)
-                   :kerrosluku            (get-text rakennus :kerrosluku)
-                   :kokonaisala           (get-text rakennus :kokonaisala)
-                   :tilavuus              (get-text rakennus :tilavuus)}
-           :rakenne {:julkisivu           (get-text rakennus :julkisivumateriaali)
-                     :kantavaRakennusaine (get-text rakennus :rakennusaine)
-                     :rakentamistapa      (get-text rakennus :rakentamistapa)}
-           :lammitys {:lammitystapa       (get-text rakennus :lammitystapa)
-                      :lammonlahde        (get-text rakennus :polttoaine)}
-           :varusteet                     (-> (cr/all-of rakennus :varusteet)
-                                            (dissoc :uima-altaita) ; key :uima-altaita has been removed from lupapiste
-                                            (merge {:liitettyJatevesijarjestelmaanKytkin (get-text rakennus :liitettyJatevesijarjestelmaanKytkin)}))}
+             :osoite {:kunta                (get-text rakennus :osoite :kunta)
+                      :lahiosoite           (get-text rakennus :osoite :osoitenimi :teksti)
+                      :osoitenumero         (get-text rakennus :osoite :osoitenumero)
+                      :osoitenumero2        (get-text rakennus :osoite :osoitenumero2)
+                      :jakokirjain          (get-text rakennus :osoite :jakokirjain)
+                      :jakokirjain2         (get-text rakennus :osoite :jakokirjain2)
+                      :porras               (get-text rakennus :osoite :porras)
+                      :huoneisto            (get-text rakennus :osoite :huoneisto)
+                      :postinumero          (get-text rakennus :osoite :postinumero)
+                      :postitoimipaikannimi (get-text rakennus :osoite :postitoimipaikannimi)}
+             :kaytto {:kayttotarkoitus      (get-text rakennus :kayttotarkoitus)
+                      :rakentajaTyyppi      (get-text rakennus :rakentajaTyyppi)}
+             :luokitus {:energialuokka      (get-text rakennus :energialuokka)
+                        :paloluokka         (get-text rakennus :paloluokka)}
+             :mitat {:kellarinpinta-ala     (get-text rakennus :kellarinpinta-ala)
+                     :kerrosala             (get-text rakennus :kerrosala)
+                     :kerrosluku            (get-text rakennus :kerrosluku)
+                     :kokonaisala           (get-text rakennus :kokonaisala)
+                     :tilavuus              (get-text rakennus :tilavuus)}
+             :rakenne {:julkisivu           (get-text rakennus :julkisivumateriaali)
+                       :kantavaRakennusaine (get-text rakennus :rakennusaine)
+                       :rakentamistapa      (get-text rakennus :rakentamistapa)}
+             :lammitys {:lammitystapa       (get-text rakennus :lammitystapa)
+                        :lammonlahde        (get-text rakennus :polttoaine)}
+             :varusteet                     (-> (cr/all-of rakennus :varusteet)
+                                              (dissoc :uima-altaita) ; key :uima-altaita has been removed from lupapiste
+                                              (merge {:liitettyJatevesijarjestelmaanKytkin (get-text rakennus :liitettyJatevesijarjestelmaanKytkin)}))}
 
-          :rakennuksenOmistajat (->> (select rakennus [:omistaja]) (map ->rakennuksen-omistaja))
-          :huoneistot (->> (select rakennus [:valmisHuoneisto])
-                        (map (fn [huoneisto]
-                              {:huoneistonumero (get-text huoneisto :huoneistonumero)
-                               :jakokirjain     (get-text huoneisto :jakokirjain)
-                               :porras          (get-text huoneisto :porras)
-                               :huoneistoTyyppi (get-text huoneisto :huoneistonTyyppi)
-                               :huoneistoala    (get-text huoneisto :huoneistoala)
-                               :huoneluku       (get-text huoneisto :huoneluku)
-                               :keittionTyyppi  (get-text huoneisto :keittionTyyppi)
-                               :WCKytkin                (get-text huoneisto :WCKytkin)
-                               :ammeTaiSuihkuKytkin     (get-text huoneisto :ammeTaiSuihkuKytkin)
-                               :lamminvesiKytkin        (get-text huoneisto :lamminvesiKytkin)
-                               :parvekeTaiTerassiKytkin (get-text huoneisto :parvekeTaiTerassiKytkin)
-                               :saunaKytkin             (get-text huoneisto :saunaKytkin)}))
-                        (sort-by (juxt :porras :huoneistonumero :jakokirjain))))))))
+            :rakennuksenOmistajat (->> (select rakennus [:omistaja]) (map ->rakennuksen-omistaja))
+            :huoneistot (->> (select rakennus [:valmisHuoneisto])
+                          (map (fn [huoneisto]
+                                {:huoneistonumero (get-text huoneisto :huoneistonumero)
+                                 :jakokirjain     (get-text huoneisto :jakokirjain)
+                                 :porras          (get-text huoneisto :porras)
+                                 :huoneistoTyyppi (get-text huoneisto :huoneistonTyyppi)
+                                 :huoneistoala    (get-text huoneisto :huoneistoala)
+                                 :huoneluku       (get-text huoneisto :huoneluku)
+                                 :keittionTyyppi  (get-text huoneisto :keittionTyyppi)
+                                 :WCKytkin                (get-text huoneisto :WCKytkin)
+                                 :ammeTaiSuihkuKytkin     (get-text huoneisto :ammeTaiSuihkuKytkin)
+                                 :lamminvesiKytkin        (get-text huoneisto :lamminvesiKytkin)
+                                 :parvekeTaiTerassiKytkin (get-text huoneisto :parvekeTaiTerassiKytkin)
+                                 :saunaKytkin             (get-text huoneisto :saunaKytkin)}))
+                          (sort-by (juxt :porras :huoneistonumero :jakokirjain)))))))))
 
 (defn ->buildings [xml]
   (map ->rakennuksen-tiedot (-> xml cr/strip-xml-namespaces (select [:Rakennus]))))
