@@ -241,7 +241,7 @@
       ; (println user " - " zip)
       (fs/mkdirs (str path "archive"))
       (fs/mkdirs (str path "error"))
-      (let [result {:ok truee} #_(ah-verdict/process-ah-verdict (.getPath zip) user)]
+      (let [result {:ok true} #_(ah-verdict/process-ah-verdict (.getPath zip) user)]
         (if (ok? result)
           (fs/rename zip (io/file (str path "archive/" (.getName zip))))
           (fs/rename zip (io/file (str path "error/" (.getName zip)))))))))
