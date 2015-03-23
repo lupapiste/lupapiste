@@ -582,10 +582,17 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       value: value
     });
 
+    var sourceValue = getModelSourceValue(model, subSchema.name);
+
+    sourceValueChanged(input.get(0), value, sourceValue);
+
     if (subSchema.readonly) {
       input.attr("readonly", true);
     } else {
-      input.datepicker($.datepicker.regional[lang]).change(save);
+      input.datepicker($.datepicker.regional[lang]).change(function(e) {
+        sourceValueChanged(input.get(0), input.val(), sourceValue);
+        save(e);
+      });
     }
     input.appendTo(span);
 
