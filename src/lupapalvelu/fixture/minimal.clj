@@ -519,7 +519,10 @@
                                            :text "Paloviranomainen",
                                            :email "sonja.sibbo@sipoo.fi",
                                            :name "Sonja Sibbo"}]
-                       :selected-operations (map first (filter (fn [[_ v]] (= "YA" (:permit-type v))) operations/operations))
+                       :selected-operations [:ya-katulupa-vesi-ja-viemarityot
+                                             :ya-sijoituslupa-vesi-ja-viemarijohtojen-sijoittaminen
+                                             :ya-kayttolupa-mainostus-ja-viitoitus
+                                             :ya-kayttolupa-terassit]
                        :operations-attachments ya-default-attachments-for-operations}
 
                       ;; Kuopio YA
