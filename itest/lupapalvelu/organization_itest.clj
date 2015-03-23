@@ -65,12 +65,20 @@
     (let [resp (query sipoo "selected-operations-for-municipality" :municipality "753")]
       resp => ok?
 
-      ;; Received the two selected R operations plus all the YA operations.
-      (:operations resp) => [["Rakentaminen ja purkaminen"
-                              [["Uuden rakennuksen rakentaminen"
-                                [["pientalo" "pientalo"]]]
-                               ["Rakennelman rakentaminen"
-                                [["Aita" "aita"]]]]]]))
+      ;; Received the two selected R operations plus 4 YA operations.
+      (:operations resp) =>  [["Rakentaminen ja purkaminen"
+                               [["Uuden rakennuksen rakentaminen"
+                                 [["pientalo" "pientalo"]]]
+                                ["Rakennelman rakentaminen"
+                                 [["Aita" "aita"]]]]]
+                              ["yleisten-alueiden-luvat"
+                               [["sijoituslupa"
+                                 [["pysyvien-maanalaisten-rakenteiden-sijoittaminen"
+                                   [["vesi-ja-viemarijohtojen-sijoittaminen" "ya-sijoituslupa-vesi-ja-viemarijohtojen-sijoittaminen"]]]]]
+                                ["katulupa" [["kaivaminen-yleisilla-alueilla"
+                                              [["vesi-ja-viemarityot" "ya-katulupa-vesi-ja-viemarityot"]]]]]
+                                ["kayttolupa" [["mainokset" "ya-kayttolupa-mainostus-ja-viitoitus"]
+                                               ["terassit" "ya-kayttolupa-terassit"]]]]]]))
 
   (fact* "Query selected operations"
     (let [id   (create-app-id pena :operation "kerrostalo-rivitalo" :municipality sonja-muni)
