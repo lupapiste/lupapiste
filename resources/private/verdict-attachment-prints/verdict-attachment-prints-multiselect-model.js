@@ -181,6 +181,10 @@ var verdictAttachmentsMarking = (function() {
     }
   });
 
+  hub.onPageUnload("verdict-attachments-select", function() {
+    model.selectingMode(false);
+  });
+
   hub.subscribe("start-marking-verdict-attachments", function(param) {
     initMarking(param.application);
   });

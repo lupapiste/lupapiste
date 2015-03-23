@@ -2,7 +2,7 @@
   (:refer-clojure :exclude [pos? neg? zero?])
   (:require [clojure.walk :refer [postwalk prewalk]]
             [clojure.string :refer [join]]
-            [sade.strings :refer [numeric? decimal-number?] :as ss]
+            [sade.strings :refer [numeric? decimal-number? trim] :as ss]
             [clj-time.format :as timeformat]
             [clj-time.coerce :as tc]
             [schema.core :as sc])
@@ -383,3 +383,7 @@
 
 (defn every-key-in-map? [target-map required-keys]
   (every? (-> target-map keys set) required-keys))
+
+(defn separate-emails [^String email-str]
+  (->> (ss/split email-str #"[,;]") (map ss/trim) set))
+

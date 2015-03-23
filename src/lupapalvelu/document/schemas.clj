@@ -541,6 +541,7 @@
 
 (def mitat-muutos {:name "mitat"
                         :type :group
+                        :group-help "mitat-muutos.help"
                         :whitelist [:authority]
                         :body [{:name "tilavuus" :type :string :size "s" :unit "m3" :subtype :number :min 1 :max 9999999}
                                {:name "kerrosala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}
@@ -882,6 +883,7 @@
      :body (approvable-top-level-groups (body kuvaus))}
 
     {:info {:name "hakija"
+            :group-help "hakija.group.help"
             :i18name "osapuoli"
             :order 3
             :removable true

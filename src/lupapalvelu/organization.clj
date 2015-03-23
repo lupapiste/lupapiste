@@ -5,7 +5,7 @@
             [sade.core :refer [ok fail fail!]]
             [sade.strings :as ss]
             [sade.util :as util]
-            [lupapalvelu.action :refer [defquery defcommand non-blank-parameters vector-parameters boolean-parameters]]
+            [lupapalvelu.action :refer [defquery defcommand non-blank-parameters vector-parameters boolean-parameters email-validator]]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.xml.krysp.reader :as krysp]
             [lupapalvelu.mongo :as mongo]
@@ -99,7 +99,7 @@
 
 (defn- selected-operations-with-permit-types
   "Returns a map where key is permit type, value is a list of operations for the permit type"
-  [{scope :scope selected-ops :selected-operations :as organization}]
+  [{scope :scope selected-ops :selected-operations}]
   (reduce
     #(if-not (get-in %1 [%2])
        (let [selected-operations (set (map keyword selected-ops))
@@ -107,7 +107,7 @@
                                      (fn [[name op]]
                                        (and
                                          (= %2 (:permit-type op))
-                                         (or (empty? selected-operations) (selected-operations name))))
+                                         (selected-operations name)))
                                      operations/operations))]
          (if operation-names (assoc %1 %2 operation-names) %1))
        %1)
@@ -332,7 +332,12 @@
 
 (defcommand set-kopiolaitos-info
   {:parameters [kopiolaitosEmail kopiolaitosOrdererAddress kopiolaitosOrdererPhone kopiolaitosOrdererEmail]
-   :user-roles #{:authorityAdmin}}
+   :user-roles #{:authorityAdmin}
+   :input-validators [(fn [{{email-str :kopiolaitosEmail} :data :as command}]
+                        (let [emails (util/separate-emails email-str)]
+                          ;; action/email-validator returns nil if email was valid
+                          (when (some #(email-validator :email {:data {:email %}}) emails)
+                            (fail :error.set-kopiolaitos-info.invalid-email))))]}
   [{{:keys [organizations]} :user}]
   (update-organization (first organizations) {$set {:kopiolaitos-email kopiolaitosEmail
                                                     :kopiolaitos-orderer-address kopiolaitosOrdererAddress

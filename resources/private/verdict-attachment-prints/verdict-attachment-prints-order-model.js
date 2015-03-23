@@ -6,7 +6,7 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function() {
 
   self.processing = ko.observable(false);
   self.pending = ko.observable(false);
-  self.errorMessage = ko.observable("");
+  self.errorMessage = ko.observable();
   self.attachments = ko.observable([]);
 
   self.kopiolaitosEmail = ko.observable("");
@@ -75,7 +75,7 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function() {
     self.application = ko.toJS(applicationModel);
     self.processing(false);
     self.pending(false);
-    self.errorMessage("");
+    self.errorMessage(null);
 
     var attachments = _(self.application.attachments || [])
                       .filter(printableAttachment)
@@ -89,7 +89,7 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function() {
 
     self.kopiolaitosEmail(kopiolaitosMeta.kopiolaitosEmail || "");
     if (_.isEmpty(self.kopiolaitosEmail())) {
-      self.errorMessage("verdict-attachment-prints-order.order-dialog.no-kopiolaitos-email-set");
+      self.errorMessage(loc("verdict-attachment-prints-order.order-dialog.no-kopiolaitos-email-set"));
     }
 
     self.ordererOrganization(ordererName);
@@ -143,7 +143,11 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function() {
       })
       .error(function(d) {
         error(d);
-        self.errorMessage(d.text);
+        if (d.failedEmails) {
+          self.errorMessage(loc(d.text, d.failedEmails));
+        } else {
+          self.errorMessage(loc(d.text));
+        }
       })
       .call();
   };
