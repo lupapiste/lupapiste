@@ -99,7 +99,7 @@
 
 (defn- selected-operations-with-permit-types
   "Returns a map where key is permit type, value is a list of operations for the permit type"
-  [{scope :scope selected-ops :selected-operations :as organization}]
+  [{scope :scope selected-ops :selected-operations}]
   (reduce
     #(if-not (get-in %1 [%2])
        (let [selected-operations (set (map keyword selected-ops))
@@ -107,7 +107,7 @@
                                      (fn [[name op]]
                                        (and
                                          (= %2 (:permit-type op))
-                                         (or (empty? selected-operations) (selected-operations name))))
+                                         (selected-operations name)))
                                      operations/operations))]
          (if operation-names (assoc %1 %2 operation-names) %1))
        %1)
