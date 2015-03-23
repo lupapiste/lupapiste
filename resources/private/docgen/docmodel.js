@@ -217,10 +217,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   }
 
   function sourceValueChanged(input, value, sourceValue, localizedSourceValue) {
-    if (sourceValue && sourceValue === value) {
+    if (sourceValue === value) {
       input.removeAttribute("title");
       $(input).removeClass("source-value-changed");
-    } else if (sourceValue && sourceValue !== value){
+    } else if (sourceValue !== undefined && sourceValue !== value){
       $(input).addClass("source-value-changed");
       input.title = _.escapeHTML(loc("sourceValue") + ": " + (localizedSourceValue ? localizedSourceValue : sourceValue));
     }
@@ -251,7 +251,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     } else {
       input.onchange = function(e) {
         if (type === "checkbox") {
-          sourceValueChanged(input, input.checked, sourceValue, loc("selected"));
+          sourceValueChanged(input, input.checked, sourceValue, sourceValue ? loc("selected") : loc("notSelected"));
         } else {
           sourceValueChanged(input, input.value, sourceValue);
         }
@@ -265,7 +265,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     if (type === "checkbox") {
       input.checked = value;
-      sourceValueChanged(input, value, sourceValue, loc("selected"));
+      sourceValueChanged(input, value, sourceValue, sourceValue ? loc("selected") : loc("notSelected"));
     } else {
       input.value = value || "";
       sourceValueChanged(input, value, sourceValue);
@@ -515,11 +515,11 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   }
 
   function getModelValue(model, name) {
-    return model[name] ? model[name].value : "";
+    return util.getIn(model, [name, "value"], "");
   }
 
   function getModelSourceValue(model, name) {
-    return model[name] ? model[name].sourceValue : "";
+    return util.getIn(model, [name, "sourceValue"]);
   }
 
   function buildText(subSchema, model, path) {
