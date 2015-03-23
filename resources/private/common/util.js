@@ -114,7 +114,7 @@ var util = (function($) {
         if (keyArray.length === 1) {
           return val;
         }
-        return getIn(val, keyArray.splice(1, keyArray.length - 1));
+        return getIn(val, keyArray.splice(1, keyArray.length - 1), defaultValue);
       }
     }
     return defaultValue;
