@@ -217,10 +217,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   }
 
   function sourceValueChanged(input, value, sourceValue, localizedSourceValue) {
-    if (sourceValue && sourceValue === value) {
+    if (sourceValue === value) {
       input.removeAttribute("title");
       $(input).removeClass("source-value-changed");
-    } else if (sourceValue && sourceValue !== value){
+    } else if (sourceValue !== undefined && sourceValue !== value){
       $(input).addClass("source-value-changed");
       input.title = _.escapeHTML(loc("sourceValue") + ": " + (localizedSourceValue ? localizedSourceValue : sourceValue));
     }
@@ -251,7 +251,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     } else {
       input.onchange = function(e) {
         if (type === "checkbox") {
-          sourceValueChanged(input, input.checked, sourceValue, loc("selected"));
+          sourceValueChanged(input, input.checked, sourceValue, sourceValue ? loc("selected") : loc("notSelected"));
         } else {
           sourceValueChanged(input, input.value, sourceValue);
         }
@@ -265,7 +265,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     if (type === "checkbox") {
       input.checked = value;
-      sourceValueChanged(input, value, sourceValue, loc("selected"));
+      sourceValueChanged(input, value, sourceValue, sourceValue ? loc("selected") : loc("notSelected"));
     } else {
       input.value = value || "";
       sourceValueChanged(input, value, sourceValue);
@@ -425,9 +425,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     input.onmouseout = self.hideHelp;
     span.appendChild(input);
 
-    if ( model[subSchema.name] && model[subSchema.name].disabled) {
-      input.setAttribute("disabled", true);
-    }
+    $(input).prop("disabled", getModelDisabled(model, subSchema.name));
 
     if (subSchema.label) {
       var label = makeLabel(subSchema, "checkbox", myPath);
@@ -456,9 +454,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var input = makeInput(inputType, myPath, model, subSchema);
     setMaxLen(input, subSchema);
 
-    if ( model[subSchema.name] && model[subSchema.name].disabled) {
-      input.setAttribute("disabled", true);
-    }
+    $(input).prop("disabled", getModelDisabled(model, subSchema.name));
 
     listen(subSchema, myPath, input);
 
@@ -515,11 +511,15 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   }
 
   function getModelValue(model, name) {
-    return model[name] ? model[name].value : "";
+    return util.getIn(model, [name, "value"], "");
   }
 
   function getModelSourceValue(model, name) {
-    return model[name] ? model[name].sourceValue : "";
+    return util.getIn(model, [name, "sourceValue"]);
+  }
+
+  function getModelDisabled(model, name) {
+    return util.getIn(model, [name, "disabled"], false);
   }
 
   function buildText(subSchema, model, path) {
@@ -582,10 +582,17 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       value: value
     });
 
+    var sourceValue = getModelSourceValue(model, subSchema.name);
+
+    sourceValueChanged(input.get(0), value, sourceValue);
+
     if (subSchema.readonly) {
       input.attr("readonly", true);
     } else {
-      input.datepicker($.datepicker.regional[lang]).change(save);
+      input.datepicker($.datepicker.regional[lang]).change(function(e) {
+        sourceValueChanged(input.get(0), input.val(), sourceValue);
+        save(e);
+      });
     }
     input.appendTo(span);
 
@@ -609,9 +616,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       model[subSchema.name] = {value: "lis\u00e4ys"};
     }
 
-    if ( model[subSchema.name] && model[subSchema.name].disabled) {
-      select.setAttribute("disabled", true);
-    }
+    $(select).prop("disabled", getModelDisabled(model, subSchema.name));
 
     var selectedOption = getModelValue(model, subSchema.name);
     var sourceValue = getModelSourceValue(model, subSchema.name);
