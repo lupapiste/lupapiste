@@ -313,7 +313,7 @@
           (:authority app) => (contains {:id sonja-id})
           (get-in suunnittelija [:data :henkilotiedot :hetu :value]) => "210281-****")))))
 
-(fact* "Merging building information from KRYSP does not overwrite the rest of the document"
+(fact* "Merging building information from KRYSP does not overwrite muutostyolaji"
   (let [application-id (create-app-id pena :municipality sonja-muni :operation "kayttotark-muutos")
         app (query-application pena application-id)
         rakmuu-doc (domain/get-document-by-name app "rakennuksen-muuttaminen")
