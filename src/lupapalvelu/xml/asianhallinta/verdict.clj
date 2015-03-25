@@ -4,7 +4,8 @@
             [sade.xml :as xml]
             [taoensso.timbre :refer [error]]
             [me.raynes.fs :as fs]
-            [me.raynes.fs.compression :as fsc]))
+            [me.raynes.fs.compression :as fsc]
+            [lupapalvelu.domain :as domain]))
 
 (defn- error-and-fail! [error-msg fail-key]
   (error error-msg)
@@ -37,11 +38,22 @@
         (error-and-fail! (str "Expected to find one xml, found " (count xmls)) :error.integration.asianhallinta-wrong-number-of-xmls))
 
       ; parse XML
-      (let [parsed-xml       (-> (first xmls) slurp xml/parse reader/strip-xml-namespaces xml/xml->edn)]
+      (let [parsed-xml (-> (first xmls) slurp xml/parse reader/strip-xml-namespaces xml/xml->edn)]
         ; Check that all referenced attachments were included in zip
         (ensure-attachments-present! unzipped-path parsed-xml)
 
         ; Create verdict
+        ; -> fetch application
+        (let [application-id (get-in parsed-xml [:AsianPaatos :HakemusTunnus])
+              application    (domain/get-application-no-access-checking application-id)]
+
+          )
+
+        ; -> check ftp-user has right to modify app
+        ; -> convert app->command
+        ; -> build update clause
+        ; -> update-application
+
         ; Create attachments
         ; Save attachment file to attachment (gridfs)
         )
@@ -50,4 +62,5 @@
     (catch Exception e
       (if-let [error-key (some-> e ex-data :object :text)]
         (fail error-key)
-        (fail :error.unknown)))))
+        (prn e)
+        #_(fail :error.unknown)))))
