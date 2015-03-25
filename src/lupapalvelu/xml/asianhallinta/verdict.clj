@@ -5,7 +5,8 @@
             [taoensso.timbre :refer [error]]
             [me.raynes.fs :as fs]
             [me.raynes.fs.compression :as fsc]
-            [lupapalvelu.domain :as domain]))
+            [lupapalvelu.domain :as domain]
+            [lupapalvelu.organization :as org]))
 
 (defn- error-and-fail! [error-msg fail-key]
   (error error-msg)
@@ -45,9 +46,13 @@
         ; Create verdict
         ; -> fetch application
         (let [application-id (get-in parsed-xml [:AsianPaatos :HakemusTunnus])
-              application    (domain/get-application-no-access-checking application-id)]
-
-          )
+              application    (domain/get-application-no-access-checking application-id)
+              municipality   (:municipality application)
+              permit-type    (:permitType application)
+              org-scope      (org/resolve-organization-scope municipality permit-type)
+              ]
+          (when-not (= ftp-user (get-in org-scope [:caseManagement :ftpUser]))
+            (error-and-fail! (str "FTP user " ftp-user " is not allowed to make changes to application " application-id) :error.integration.asianhallinta.unauthorized)))
 
         ; -> check ftp-user has right to modify app
         ; -> convert app->command
