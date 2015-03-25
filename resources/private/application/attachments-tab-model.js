@@ -89,7 +89,7 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel, verdictAttachme
       "attachmentsMoveToBackingSystem": {
         loc: loc("application.attachmentsMoveToBackingSystem"),
         clickCommand: function() {
-          return self.sendUnsentAttachmentsToBackingSystem();
+          return self.startMovingAttachmentsToBackingSystem();
         },
         visibleFn: function (rawAttachments) {
           return self.authorizationModel.ok("move-attachments-to-backing-system") && self.appModel.hasAttachment() && unsentAttachmentFound(rawAttachments);
@@ -171,20 +171,8 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel, verdictAttachme
     self.attachmentsOperations(updatedAttachmentsOperations(rawAttachments));
   };
 
-  self.sendUnsentAttachmentsToBackingSystem = function() {
-    var doSendAttachments = function() {
-      ajax.command("move-attachments-to-backing-system", {id: self.appModel.id(), lang: loc.getCurrentLanguage()})
-      .success(self.appModel.reload)
-      .processing(self.appModel.processing)
-      .pending(self.appModel.pending)
-      .call();
-    };
-    LUPAPISTE.ModalDialog.showDynamicYesNo(
-      loc("application.attachmentsMoveToBackingSystem"),
-      loc("application.attachmentsMoveToBackingSystem.confirmationMessage"),
-      {title: loc("yes"), fn: doSendAttachments},
-      {title: loc("no")}
-    );
+  self.startMovingAttachmentsToBackingSystem = function() {
+    hub.send("start-moving-attachments-to-backing-system");
   };
 
   self.newAttachment = function() {
