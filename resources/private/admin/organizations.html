@@ -33,8 +33,8 @@
                   [<a href="#" data-bind="click: $root.loginAsModel.open, ltext: 'loginframe.login', attr: {'data-impersonate': organization.id}"></a>]
                 </td>
               <!-- /ko -->
-              <td data-bind="text: $data.municipality"></td>
-              <td data-bind="text: $data.permitType"></td>
+              <td><abbr data-bind="text: $data.municipality, attr: {'title': loc(['municipality',$data.municipality])}"></abbr></td>
+              <td><abbr data-bind="text: $data.permitType, attr: {'title':loc($data.permitType)}"></abbr></td>
               <td data-bind="text: $data['inforequest-enabled'] || false, attr: {'data-test-id': 'inforequest-enabled-' + $data.municipality + '-' + $data.permitType}"></td>
               <td data-bind="text: $data['new-application-enabled'] || false, attr: {'data-test-id': 'application-enabled-' + $data.municipality + '-' + $data.permitType}"></td>
               <td data-bind="text: $data['open-inforequest'] || false, attr: {'data-test-id': 'open-inforequest-' + $data.municipality + '-' + $data.permitType}"></td>
