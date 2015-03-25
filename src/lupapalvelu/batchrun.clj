@@ -223,7 +223,7 @@
 (defn- get-asianhallinta-ftp-users [organizations]
   (remove
     nil?
-    (for [org ah-organizations
+    (for [org organizations
           scope (:scope org)]
       (get-in scope [:caseManagement :ftpUser]))))
 
