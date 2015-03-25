@@ -51,9 +51,14 @@
   };
 
   function filterAttachments(attachments) {
-    return _.filter(attachments, function(a) {
-      return (a.versions.length > 0 && (!a.sent || _.last(a.versions).created > a.sent) && !(_.includes(["verdict", "statement"], util.getIn(a, ["target", "type"]))));
-    });
+    return _(attachments)
+      .filter(function(a) {
+        return (a.versions.length > 0 && (!a.sent || _.last(a.versions).created > a.sent) && !(_.includes(["verdict", "statement"], util.getIn(a, ["target", "type"]))));
+      })
+      .each(function(a) {
+        a.selected = true;
+      })
+      .value();
   }
 
   function init(appModel) {
