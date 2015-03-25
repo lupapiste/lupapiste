@@ -29,12 +29,20 @@
   (when user
     (select-keys user [:id :username :firstName :lastName :role])))
 
+; Temporary mapping to generate orgAuth key from organizations.
+; TODO remove this after data model has been migrated
+(defn with-org-auth [{:keys [organizations role] :as user}]
+  (if (#{:authority :authorityAdmin} (keyword role))
+    (assoc user :orgAuthz (map (fn [org-id] {:org org-id :role role}) organizations))
+    user))
+
 (defn session-summary
   "Returns common information about the user to be stored in session or nil"
   [user]
   (some-> user
     (select-keys [:id :username :firstName :lastName :role :email :organizations :company :architect])
-    (assoc :expires (+ (now) (.toMillis java.util.concurrent.TimeUnit/MINUTES 5)))))
+    (assoc :expires (+ (now) (.toMillis java.util.concurrent.TimeUnit/MINUTES 5)))
+    with-org-auth))
 
 (defn virtual-user?
   "True if user exists only in session, not in database"
