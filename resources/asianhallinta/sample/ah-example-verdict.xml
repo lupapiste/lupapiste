@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ah:AsianPaatos version="" xmlns:ah="http://www.lupapiste.fi/asianhallinta" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.lupapiste.fi/asianhallinta asianhallinta.xsd">
   <ah:HakemusTunnus>LP-297-2015-00001</ah:HakemusTunnus>
-  <ah:AsianTunnus>2015-1234</ah:AsianTunnus>
+  <ah:AsianTunnus>2015-1234</ah:AsianTunnus> <!-- -> Kuntalupatunnus -->
   <ah:PaatoksenTunnus>12345678</ah:PaatoksenTunnus>
   <ah:PaatoksenPvm>2015-01-01</ah:PaatoksenPvm>
-  <ah:PaatosKoodi>1</ah:PaatosKoodi>
+  <ah:PaatosKoodi>myönnetty</ah:PaatosKoodi>
   <ah:PaatoksenTekija>Pena Panaani</ah:PaatoksenTekija>
-  <ah:Pykala>??</ah:Pykala>
+  <ah:Pykala>§987</ah:Pykala>
   <ah:Liitteet>
     <ah:Liite>
         <ah:Kuvaus>Liitteen kuvaus</ah:Kuvaus>

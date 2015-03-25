@@ -74,7 +74,7 @@
           (let [new-verdict   (build-verdict parsed-xml)
                 command       (action/application->command application)
                 update-clause {$push {:verdicts new-verdict}}]
-            #_(action/update-application command update-clause)
+            (action/update-application command update-clause)
             ))
           ; Create attachments
           ; Save attachment file to attachment (gridfs)
