@@ -231,10 +231,7 @@
   (let [ah-organizations (mongo/select :organizations
                                        {"scope.caseManagement.ftpUser" {$exists true}}
                                        {"scope.caseManagement.ftpUser" 1})
-        ftp-users (remove nil?
-                    (for [org ah-organizations
-                         scope (:scope org)]
-                      (get-in scope [:caseManagement :ftpUser])))]
+        ftp-users (get-asianhallinta-ftp-users ah-organizations)]
     (doseq [user ftp-users
             :let [path (str
                          (env/value :outgoing-directory) "/"
@@ -244,14 +241,12 @@
                   #(re-matches #".+\.zip$" (.getName %))
                   (-> path io/file (.listFiles) seq))]
 
-      ; (println user " - " zip)
-      (when (seq zip)
-        (fs/mkdirs (str path "archive"))
-        (fs/mkdirs (str path "error"))
-        (let [result {:ok true} #_(ah-verdict/process-ah-verdict (.getPath zip) user)]
-          (if (ok? result)
-            (fs/rename zip (io/file (str path "archive/" (.getName zip))))
-            (fs/rename zip (io/file (str path "error/" (.getName zip))))))))))
+      (fs/mkdirs (str path "archive"))
+      (fs/mkdirs (str path "error"))
+      (let [result {:ok true} #_(ah-verdict/process-ah-verdict (.getPath zip) user)]
+        (if (ok? result)
+          (fs/rename zip (io/file (str path "archive/" (.getName zip))))
+          (fs/rename zip (io/file (str path "error/" (.getName zip)))))))))
 
 (defn check-for-asianhallinta-verdicts []
   (when (env/feature? :automatic-verdicts-checking)
