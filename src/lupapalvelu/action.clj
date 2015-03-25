@@ -72,6 +72,8 @@
 
 ;; Role helpers
 
+(def all-authenticated-user-roles #{:applicant :authority :oirAuthority :authorityAdmin :admin})
+
 (def default-authz-writer-roles #{:owner :writer :foreman})
 (def default-authz-reader-roles (conj default-authz-writer-roles :reader))
 (def all-authz-writer-roles (conj default-authz-writer-roles :statementGiver))
