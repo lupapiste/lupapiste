@@ -13,7 +13,7 @@
         ajax.command("move-attachments-to-backing-system", {
           id: id,
           lang: loc.getCurrentLanguage(),
-          selectedAttachmentIds: selectedAttachmentsIds
+          attachmentIds: selectedAttachmentsIds
         })
         .success(function() {
           window.location.hash = "!/application/" + id + "/attachments";

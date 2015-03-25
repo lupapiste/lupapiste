@@ -80,26 +80,27 @@
 ;;
 
 (defcommand move-attachments-to-backing-system
-  {:parameters [id lang]
+  {:parameters [id lang attachmentIds]
    :user-roles #{:authority}
    :pre-checks [(permit/validate-permit-type-is permit/R)]
    :states     [:verdictGiven :constructionStarted]
-   :description "Sends such attachments to backing system that are not yet sent."}
+   :description "Sends such selected attachments to backing system that are not yet sent."}
   [{:keys [created application] :as command}]
 
   (let [attachments-wo-sent-timestamp (filter
                                         #(and
-                                           (-> % :versions count pos?)
-                                           (or
-                                             (not (:sent %))
-                                             (> (-> % :versions last :created) (:sent %)))
-                                           (not (#{"verdict" "statement"} (-> % :target :type))))
+                                          (-> % :versions count pos?)
+                                          (or
+                                            (not (:sent %))
+                                            (> (-> % :versions last :created) (:sent %)))
+                                          (not (#{"verdict" "statement"} (-> % :target :type)))
+                                          (some #{(:id %)} attachmentIds))
                                         (:attachments application))]
     (if (pos? (count attachments-wo-sent-timestamp))
       (let [organization  (organization/get-organization (:organization application))
             sent-file-ids (mapping-to-krysp/save-unsent-attachments-as-krysp (assoc application :attachments attachments-wo-sent-timestamp) lang organization)
             data-argument (attachment/create-sent-timestamp-update-statements (:attachments application) sent-file-ids created)]
-        (update-application command {$set data-argument})
+           (update-application command {$set data-argument})
         (ok))
       (fail :error.sending-unsent-attachments-failed))))
 
