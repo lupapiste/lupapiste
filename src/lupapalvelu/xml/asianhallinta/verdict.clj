@@ -1,12 +1,14 @@
 (ns lupapalvelu.xml.asianhallinta.verdict
-  (:require [sade.core :refer [ok fail fail!]]
+  (:require [sade.core :refer [ok fail fail!] :as core]
             [sade.common-reader :as reader]
             [sade.xml :as xml]
             [taoensso.timbre :refer [error]]
             [me.raynes.fs :as fs]
             [me.raynes.fs.compression :as fsc]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.organization :as org]))
+            [lupapalvelu.organization :as org]
+            [lupapalvelu.action :as action]
+            [lupapalvelu.mongo :as mongo]))
 
 (defn- error-and-fail! [error-msg fail-key]
   (error error-msg)
@@ -30,6 +32,17 @@
       (when (empty? (fs/find-files unzipped-path (re-pattern filename)))
         (error-and-fail! (str "Attachment referenced in XML was not present in zip: " filename) :error.integration.asianhallinta-missing-attachment)))))
 
+(defn- build-verdict [parsed-xml]
+  {:id (mongo/create-id)
+   :kuntalupatunnus "konkatenoi asiantunnus + paatoksentunnus for now"
+   :timestamp (core/now)
+   :paatokset [{:paivamaarat {:anto "kaiva xmlsta"}
+                :poytakirjat [{:paatoksentekija "kaiva xml"
+                               :paatospvm "kaiva xml"
+                               :pykala "kaiva xml"
+                               :paatoskoodi "kaiva xml"
+                               }]}]})
+
 (defn process-ah-verdict [path-to-zip ftp-user]
   (try
     (let [unzipped-path (unzip-file path-to-zip)
@@ -46,16 +59,20 @@
         ; Create verdict
         ; -> fetch application
         (let [application-id (get-in parsed-xml [:AsianPaatos :HakemusTunnus])
-              application    (domain/get-application-no-access-checking application-id)
-              org-scope      (org/resolve-organization-scope (:municipality application) (:permitType application))]
-
-          (when-not (= ftp-user (get-in org-scope [:caseManagement :ftpUser]))
-            (error-and-fail! (str "FTP user " ftp-user " is not allowed to make changes to application " application-id) :error.integration.asianhallinta.unauthorized)))
+              application (domain/get-application-no-access-checking application-id)
+              org-scope (org/resolve-organization-scope (:municipality application) (:permitType application))
+              command (action/application->command application)
+              verdict (build-verdict parsed-xml)]
 
           ; -> check ftp-user has right to modify app
-          ; -> convert app->command
+          (when-not (= ftp-user (get-in org-scope [:caseManagement :ftpUser]))
+            (error-and-fail! (str "FTP user " ftp-user " is not allowed to make changes to application " application-id) :error.integration.asianhallinta.unauthorized))
+
+          (build-verdict parsed-xml)
+
           ; -> build update clause
           ; -> update-application
+          )
 
           ; Create attachments
           ; Save attachment file to attachment (gridfs)
