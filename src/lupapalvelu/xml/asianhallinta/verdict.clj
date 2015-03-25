@@ -5,6 +5,7 @@
             [taoensso.timbre :refer [error]]
             [me.raynes.fs :as fs]
             [me.raynes.fs.compression :as fsc]
+            [monger.operators :refer :all]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.organization :as org]
             [lupapalvelu.action :as action]
@@ -34,16 +35,16 @@
       (when (empty? (fs/find-files unzipped-path (re-pattern filename)))
         (error-and-fail! (str "Attachment referenced in XML was not present in zip: " filename) :error.integration.asianhallinta-missing-attachment)))))
 
-(defn- build-verdict [{:keys [AsianPaatos] :as parsed}]
-  (prn AsianPaatos)
+(defn- build-verdict [{:keys [AsianPaatos]}]
   {:id              (mongo/create-id)
    :kuntalupatunnus (:AsianTunnus AsianPaatos)
    :timestamp (core/now)
-   :paatokset [{:paivamaarat {:anto (cr/to-timestamp (:PaatoksenPvm AsianPaatos))}
-                :poytakirjat [{:paatoksentekija (:PaatoksenTekija AsianPaatos)
-                               :paatospvm       (cr/to-timestamp (:PaatoksenPvm AsianPaatos))
-                               :pykala          (:Pykala AsianPaatos)
-                               :paatoskoodi     (:PaatosKoodi AsianPaatos)}]}]})
+   :paatokset [{:paatostunnus (:PaatoksenTunnus AsianPaatos)
+                :paivamaarat  {:anto (cr/to-timestamp (:PaatoksenPvm AsianPaatos))}
+                :poytakirjat  [{:paatoksentekija (:PaatoksenTekija AsianPaatos)
+                                :paatospvm       (cr/to-timestamp (:PaatoksenPvm AsianPaatos))
+                                :pykala          (:Pykala AsianPaatos)
+                                :paatoskoodi     (:PaatosKoodi AsianPaatos)}]}]})
 
 (defn process-ah-verdict [path-to-zip ftp-user]
   (try
@@ -62,20 +63,19 @@
         ; -> fetch application
         (let [application-id (get-in parsed-xml [:AsianPaatos :HakemusTunnus])
               application (domain/get-application-no-access-checking application-id)
-              org-scope (org/resolve-organization-scope (:municipality application) (:permitType application))
-              command (action/application->command application)
-              verdict (build-verdict parsed-xml)]
+              org-scope (org/resolve-organization-scope (:municipality application) (:permitType application))]
 
           ; -> check ftp-user has right to modify app
           (when-not (= ftp-user (get-in org-scope [:caseManagement :ftpUser]))
             (error-and-fail! (str "FTP user " ftp-user " is not allowed to make changes to application " application-id) :error.integration.asianhallinta.unauthorized))
 
-          (build-verdict parsed-xml)
-
           ; -> build update clause
           ; -> update-application
-          )
-
+          (let [new-verdict   (build-verdict parsed-xml)
+                command       (action/application->command application)
+                update-clause {$push {:verdicts new-verdict}}]
+            #_(action/update-application command update-clause)
+            ))
           ; Create attachments
           ; Save attachment file to attachment (gridfs)
         )
