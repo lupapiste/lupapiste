@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ah:AsianPaatos version="" xmlns:ah="http://www.lupapiste.fi/asianhallinta" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.lupapiste.fi/asianhallinta asianhallinta.xsd">
-  <ah:HakemusTunnus>LP-123-2015-00055</ah:HakemusTunnus>
+  <ah:HakemusTunnus>LP-297-2015-00001</ah:HakemusTunnus>
   <ah:AsianTunnus>2015-1234</ah:AsianTunnus>
   <ah:PaatoksenTunnus>??</ah:PaatoksenTunnus>
   <ah:PaatoksenPvm>2015-01-01</ah:PaatoksenPvm>
