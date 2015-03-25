@@ -8,7 +8,9 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.organization :as org]
             [lupapalvelu.action :as action]
-            [lupapalvelu.mongo :as mongo]))
+            [lupapalvelu.mongo :as mongo]
+            [clojure.string :as s]
+            [sade.common-reader :as cr]))
 
 (defn- error-and-fail! [error-msg fail-key]
   (error error-msg)
@@ -32,16 +34,17 @@
       (when (empty? (fs/find-files unzipped-path (re-pattern filename)))
         (error-and-fail! (str "Attachment referenced in XML was not present in zip: " filename) :error.integration.asianhallinta-missing-attachment)))))
 
-(defn- build-verdict [parsed-xml]
-  {:id (mongo/create-id)
-   :kuntalupatunnus "konkatenoi asiantunnus + paatoksentunnus for now"
-   :timestamp (core/now)
-   :paatokset [{:paivamaarat {:anto "kaiva xmlsta"}
-                :poytakirjat [{:paatoksentekija "kaiva xml"
-                               :paatospvm "kaiva xml"
-                               :pykala "kaiva xml"
-                               :paatoskoodi "kaiva xml"
-                               }]}]})
+(defn- build-verdict [{:keys [AsianPaatos] :as parsed}]
+  (prn AsianPaatos)
+  {:id              (mongo/create-id)
+   :kuntalupatunnus (s/join "/" ((juxt :AsianTunnus :PaatoksenTunnus) AsianPaatos))
+   :timestamp       (core/now)
+   :paatokset       [{:paivamaarat {:anto (cr/to-timestamp (:PaatoksenPvm AsianPaatos))}
+                      :poytakirjat [{:paatoksentekija (:PaatoksenTekija AsianPaatos)
+                                     :paatospvm       (cr/to-timestamp (:PaatoksenPvm AsianPaatos))
+                                     :pykala          (:Pykala AsianPaatos)
+                                     :paatoskoodi     (:PaatosKoodi AsianPaatos)
+                                     }]}]})
 
 (defn process-ah-verdict [path-to-zip ftp-user]
   (try
