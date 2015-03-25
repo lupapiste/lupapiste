@@ -620,12 +620,6 @@
                                {:municipality "691" :permitType "R" :inforequest-enabled true :new-application-enabled true}]
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))}
 
-                      ;; Mikkeli Y
-                      {:id "491-Y"
-                       :name {:fi "Mikkeli ymp\u00E4rist\u00F6toimi" :sv "S:t Michel ymp\u00E4rist\u00F6toimi"}
-                       :scope [{:municipality "491" :permitType "Y" :inforequest-enabled true :new-application-enabled true}]
-                       :selected-operations (map first (filter (fn [[_ v]] (#{"Y"} (name (:permit-type v)))) operations/operations))}
-
                       ;; Loppi R
                       ;; Organisation for municipality "Loppi" that uses the "neuvontapyynnon-avaus" system.
                       ;; Nice address for testing "Ojatie 1, Loppi"
