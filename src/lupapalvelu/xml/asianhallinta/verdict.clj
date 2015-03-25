@@ -37,14 +37,13 @@
 (defn- build-verdict [{:keys [AsianPaatos] :as parsed}]
   (prn AsianPaatos)
   {:id              (mongo/create-id)
-   :kuntalupatunnus (s/join "/" ((juxt :AsianTunnus :PaatoksenTunnus) AsianPaatos))
-   :timestamp       (core/now)
-   :paatokset       [{:paivamaarat {:anto (cr/to-timestamp (:PaatoksenPvm AsianPaatos))}
-                      :poytakirjat [{:paatoksentekija (:PaatoksenTekija AsianPaatos)
-                                     :paatospvm       (cr/to-timestamp (:PaatoksenPvm AsianPaatos))
-                                     :pykala          (:Pykala AsianPaatos)
-                                     :paatoskoodi     (:PaatosKoodi AsianPaatos)
-                                     }]}]})
+   :kuntalupatunnus (:AsianTunnus AsianPaatos)
+   :timestamp (core/now)
+   :paatokset [{:paivamaarat {:anto (cr/to-timestamp (:PaatoksenPvm AsianPaatos))}
+                :poytakirjat [{:paatoksentekija (:PaatoksenTekija AsianPaatos)
+                               :paatospvm       (cr/to-timestamp (:PaatoksenPvm AsianPaatos))
+                               :pykala          (:Pykala AsianPaatos)
+                               :paatoskoodi     (:PaatosKoodi AsianPaatos)}]}]})
 
 (defn process-ah-verdict [path-to-zip ftp-user]
   (try
