@@ -220,6 +220,12 @@
     (fetch-verdicts)
     (mongo/disconnect!)))
 
+(defn- get-asianhallinta-ftp-users [organizations]
+  (remove
+    nil?
+    (for [org ah-organizations
+          scope (:scope org)]
+      (get-in scope [:caseManagement :ftpUser]))))
 
 (defn fetch-asianhallinta-verdicts []
   (let [ah-organizations (mongo/select :organizations
