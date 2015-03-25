@@ -32,7 +32,7 @@
 ;;
 
 (defquery user
-  {:user-roles #{:applicant :authority :oirAuthority :authorityAdmin :admin}}
+  {:user-roles action/all-authenticated-user-roles}
   [{user :user}]
   (if (user/virtual-user? user)
     (ok :user user)
