@@ -47,20 +47,18 @@
         ; -> fetch application
         (let [application-id (get-in parsed-xml [:AsianPaatos :HakemusTunnus])
               application    (domain/get-application-no-access-checking application-id)
-              municipality   (:municipality application)
-              permit-type    (:permitType application)
-              org-scope      (org/resolve-organization-scope municipality permit-type)
-              ]
+              org-scope      (org/resolve-organization-scope (:municipality application) (:permitType application))]
+
           (when-not (= ftp-user (get-in org-scope [:caseManagement :ftpUser]))
             (error-and-fail! (str "FTP user " ftp-user " is not allowed to make changes to application " application-id) :error.integration.asianhallinta.unauthorized)))
 
-        ; -> check ftp-user has right to modify app
-        ; -> convert app->command
-        ; -> build update clause
-        ; -> update-application
+          ; -> check ftp-user has right to modify app
+          ; -> convert app->command
+          ; -> build update clause
+          ; -> update-application
 
-        ; Create attachments
-        ; Save attachment file to attachment (gridfs)
+          ; Create attachments
+          ; Save attachment file to attachment (gridfs)
         )
 
       (ok))
