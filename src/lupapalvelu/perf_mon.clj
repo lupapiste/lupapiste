@@ -39,7 +39,7 @@
   (or (get-in request [:query-params "npm"]) (get-in request [:headers "npm"])))
 
 ;;
-;; Performance minitoring:
+;; Performance monitoring:
 ;;
 
 (defn wrap-perf-mon [f f-name]
@@ -127,7 +127,7 @@
       (reset! throttle (to-long value))
       (->> {id value} (resp/json) (resp/status 200)))))
 
-(defpage [:post "/perfmon/browser-timing"] {timing :timing}
+(defpage [:post "/api/perfmon/browser-timing"] {timing :timing}
   (let [user-agent (-> (request/ring-request) :headers (get "user-agent"))]
     (mc/insert "perf-mon-timing"
       {:ts (java.util.Date.)

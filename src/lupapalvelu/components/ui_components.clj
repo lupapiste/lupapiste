@@ -74,6 +74,10 @@
 
    :mockjax      (if (env/dev-mode?) mockjax {})
 
+   :perfmon      {:depends [:jquery]
+                  :js ["perfmon.js"]
+                  :name "common"}
+
    :i18n         {:depends [:jquery :underscore]
                   :js ["loc.js" loc->js]}
 
@@ -261,26 +265,26 @@
    :applicant-app {:js ["applicant.js"]}
    :applicant     {:depends [:applicant-app
                              :common-html :authenticated :map :applications :application
-                             :statement :docgen :create :mypage :user-menu :debug
+                             :statement :docgen :create :mypage :user-menu :debug :perfmon
                              :company :analytics]}
 
    :authority-app {:js ["authority.js"]}
    :authority     {:depends [:authority-app :common-html :authenticated :map :applications :notice :application
-                             :statement :verdict :neighbors :docgen :create :mypage :user-menu :debug
+                             :statement :verdict :neighbors :docgen :create :mypage :user-menu :debug :perfmon
                              :company :stamp :integration-error :analytics]}
 
    :oir-app {:js ["oir.js"]}
    :oir     {:depends [:oir-app :common-html :authenticated :map :application :attachment
-                       :docgen :debug :notice :analytics]
+                       :docgen :debug :perfmon :notice :analytics]
              :css ["oir.css"]}
 
    :authority-admin-app {:js ["authority-admin.js"]}
-   :authority-admin     {:depends [:authority-admin-app :common-html :authenticated :admins :mypage :user-menu :debug :analytics]
+   :authority-admin     {:depends [:authority-admin-app :common-html :authenticated :admins :mypage :user-menu :debug :perfmon :analytics]
                          :js ["admin.js" schema-versions-by-permit-type]
                          :html ["admin.html"]}
 
    :admin-app {:js ["admin.js"]}
-   :admin     {:depends [:admin-app :common-html :authenticated :admins :map :mypage :user-menu :debug]
+   :admin     {:depends [:admin-app :common-html :authenticated :admins :map :mypage :user-menu :debug :perfmon]
                :css ["admin.css"]
                :js ["admin-users.js" "organizations.js" "companies.js" "features.js" "actions.js" "screenmessages-list.js"]
                :html ["index.html" "admin.html" "organization.html"
@@ -290,14 +294,14 @@
    :wordpress {:depends [:login :password-reset]}
 
    :welcome-app {:js ["welcome.js"]}
-   :welcome {:depends [:welcome-app :login :register :link-account :debug :user-menu :screenmessages :password-reset :analytics]
+   :welcome {:depends [:welcome-app :login :register :link-account :debug :perfmon :user-menu :screenmessages :password-reset :analytics]
              :js ["company-user.js"]
              :html ["index.html" "login.html" "company-user.html"]}
 
    :oskari  {:css ["oskari.css"]}
 
    :neighbor-app {:js ["neighbor-app.js"]}
-   :neighbor {:depends [:neighbor-app :common-html :map :debug :docgen :debug :user-menu :screenmessages :analytics]
+   :neighbor {:depends [:neighbor-app :common-html :map :debug :docgen :debug :perfmon :user-menu :screenmessages :analytics]
               :html ["neighbor-show.html"]
               :js ["neighbor-show.js"]}})
 
