@@ -220,4 +220,8 @@
   (fact "scalar value as attachments parameter is not ok"
     (command sipoo :organization-operations-attachments :operation "pientalo" :attachments "") => (partial expected-failure? "error.non-vector-parameters"))
 
-  )
+  (fact "Invalid attachment is rejected"
+    (command sipoo :organization-operations-attachments :operation "pientalo" :attachments ["foo"]) => (partial expected-failure? "error.unknown-attachment-type"))
+
+  (fact "Valid attachment is ok"
+    (command sipoo :organization-operations-attachments :operation "pientalo" :attachments ["muu"]) => ok?))

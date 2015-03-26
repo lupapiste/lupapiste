@@ -231,13 +231,17 @@
    :user-roles #{:authorityAdmin}
    :input-validators [(partial non-blank-parameters [:operation])
                       (partial vector-parameters [:attachments])
-                      (fn [{{:keys [operation]} :data, user :user}]
+                      (fn [{{:keys [operation attachments]} :data, user :user}]
                         (let [organization (o/get-organization (authority-admins-organization-id user))
-                              selected-operations (set (:selected-operations organization))]
-                          (when-not (selected-operations operation) (fail :error.unknown-operation))))
-                      (fn [{{attachments :attachments} :data}]
-                        ; FIXME: attachments
-                        )]}
+                              selected-operations (set (:selected-operations organization))
+                              permit-types (set (map :permitType (:scope organization)))
+                              attachment-types (->> permit-types
+                                                 (map (comp attachments/attachment-ids-from-tree attachments/get-attachment-types-by-permit-type))
+                                                 flatten
+                                                 set)]
+                          (cond
+                            (not (selected-operations operation)) (fail :error.unknown-operation)
+                            (not (every? attachment-types (map keyword attachments))) (fail :error.unknown-attachment-type))))]}
   [{user :user}]
   (o/update-organization (authority-admins-organization-id user) {$set {(str "operations-attachments." operation) attachments}})
   (ok))

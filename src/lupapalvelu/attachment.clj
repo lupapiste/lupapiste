@@ -268,17 +268,19 @@
                           ]
    :muut [:muu]])
 
+(defn attachment-ids-from-tree [tree]
+  {:pre [(seq? tree)]}
+  (flatten (map second (partition 2 tree))))
+
 (def all-attachment-type-ids
-  (flatten
-    (map second
-      (partition 2
-        (concat
-          attachment-types-R
-          attachment-types-YA
-          attachment-types-YI
-          attachment-types-YL
-          attachment-types-MAL
-          attachment-types-KT)))))
+  (attachment-ids-from-tree
+    (concat
+      attachment-types-R
+      attachment-types-YA
+      attachment-types-YI
+      attachment-types-YL
+      attachment-types-MAL
+      attachment-types-KT)))
 
 ;;
 ;; Api
