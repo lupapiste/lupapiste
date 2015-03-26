@@ -4,7 +4,7 @@
             [monger.operators :refer :all]
             [sade.core :refer [ok fail fail!]]
             [sade.util :as util]
-            [lupapalvelu.action :refer [defquery defcommand non-blank-parameters vector-parameters boolean-parameters email-validator]]
+            [lupapalvelu.action :refer [defquery defcommand non-blank-parameters vector-parameters boolean-parameters number-parameters email-validator]]
             [lupapalvelu.xml.krysp.reader :as krysp]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as user]
@@ -109,7 +109,8 @@
 (defcommand add-organization-link
   {:description "Adds link to organization."
    :parameters [url nameFi nameSv]
-   :user-roles #{:authorityAdmin}}
+   :user-roles #{:authorityAdmin}
+   :input-validators [(partial non-blank-parameters [:url :nameFi :nameSv])]}
   [{{:keys [organizations]} :user}]
   (o/update-organization (first organizations) {$push {:links {:name {:fi nameFi :sv nameSv} :url url}}})
   (ok))
@@ -117,15 +118,18 @@
 (defcommand update-organization-link
   {:description "Updates organization link."
    :parameters [url nameFi nameSv index]
-   :user-roles #{:authorityAdmin}}
+   :user-roles #{:authorityAdmin}
+   :input-validators [(partial non-blank-parameters [:url :nameFi :nameSv :index])
+                      (partial number-parameters [:index])]}
   [{{:keys [organizations]} :user}]
   (o/update-organization (first organizations) {$set {(str "links." index) {:name {:fi nameFi :sv nameSv} :url url}}})
   (ok))
 
 (defcommand remove-organization-link
   {:description "Removes organization link."
-   :parameters [nameFi nameSv url]
-   :user-roles #{:authorityAdmin}}
+   :parameters [url nameFi nameSv]
+   :user-roles #{:authorityAdmin}
+   :input-validators [(partial non-blank-parameters [:url :nameFi :nameSv])]}
   [{{:keys [organizations]} :user}]
   (o/update-organization (first organizations) {$pull {:links {:name {:fi nameFi :sv nameSv} :url url}}})
   (ok))
@@ -218,7 +222,8 @@
 
 (defcommand organization-operations-attachments
   {:parameters [operation attachments]
-   :user-roles #{:authorityAdmin}}
+   :user-roles #{:authorityAdmin}
+   :input-validators []}
   [{{:keys [organizations]} :user}]
   ; FIXME: validate operation and attachments
   (o/update-organization (first organizations) {$set {(str "operations-attachments." operation) attachments}})
@@ -262,9 +267,9 @@
                             (fail :error.set-kopiolaitos-info.invalid-email))))]}
   [{{:keys [organizations]} :user}]
   (o/update-organization (first organizations) {$set {:kopiolaitos-email kopiolaitosEmail
-                                                    :kopiolaitos-orderer-address kopiolaitosOrdererAddress
-                                                    :kopiolaitos-orderer-phone kopiolaitosOrdererPhone
-                                                    :kopiolaitos-orderer-email kopiolaitosOrdererEmail}})
+                                                      :kopiolaitos-orderer-address kopiolaitosOrdererAddress
+                                                      :kopiolaitos-orderer-phone kopiolaitosOrdererPhone
+                                                      :kopiolaitos-orderer-email kopiolaitosOrdererEmail}})
   (ok))
 
 (defquery kopiolaitos-config
