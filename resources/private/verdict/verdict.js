@@ -167,7 +167,7 @@ LUPAPISTE.verdictPageController = (function($) {
   }
 
   var verdictModel = new VerdictEditModel();
-  var authorizationModel = authorization.create();
+  var authorizationModel = lupapisteApp.models.applicationAuthzModel;
   var attachmentsModel = new LUPAPISTE.TargetedAttachmentsModel({}, "muut.muu");
   var createTaskController = LUPAPISTE.createTaskController;
   var authorities = ko.observableArray([]);
@@ -180,7 +180,6 @@ LUPAPISTE.verdictPageController = (function($) {
 
     lupapisteApp.setTitle(application.title);
 
-    authorizationModel.refresh(application);
     verdictModel.refresh(application, verdictId);
     attachmentsModel.refresh(application, target);
     createTaskController.reset(currentApplicationId, target);
