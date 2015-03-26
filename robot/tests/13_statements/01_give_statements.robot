@@ -131,8 +131,6 @@ Return from statement
 
 Open statement
   [Arguments]  ${number}
-  # FIXME: for some weird reason xpath query gets stuck
-  Sleep  1
   Wait and Click  xpath=//div[@id='application-statement-tab']//a[@data-test-id='open-statement-${number}']
   Wait until  element should be visible  statement-type-select
 
