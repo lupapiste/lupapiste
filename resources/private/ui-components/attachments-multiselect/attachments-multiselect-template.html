@@ -7,11 +7,15 @@
         <h1 data-bind="visible: params.title, text: params.title"></h1>
         <div class="clear">
             <div data-bind="if: postFiles().length > 0">
-              <h2><span data-bind="text: 'application.attachments.post-verdict'"></span></h1>
+              <h2>
+                <span data-bind="text: 'application.attachments.post-verdict'"></span>
+              </h2>
               <div class="clear" data-bind="template: {name: 'attachments-multiselect-table', data: postFiles()}"></div>
             </div>
             <div data-bind="if: preFiles().length > 0">
-              <h2><span data-bind="ltext: 'application.attachments.pre-verdict'"></span></h1>
+              <h2>
+                <span data-bind="ltext: 'application.attachments.pre-verdict'"></span>
+              </h2>
               <div class="clear" data-bind="template: {name: 'attachments-multiselect-table', data: preFiles()}"></div>
             </div>
           <div class="right">
@@ -25,11 +29,10 @@
         </div>
 
         <div class="attachment-multiselect-buttons">
-          <button data-bind="
-              click: start,
-              ltext: params.okLoc,
-              enable: $parent.authorization.ok('set-attachments-as-verdict-attachment'),
-              clickBubble: false"
+          <button data-bind="click: start,
+                             ltext: params.okLoc,
+                             enable: $parent.authorization.ok('set-attachments-as-verdict-attachment'),
+                             clickBubble: false"
             class="btn btn-primary"
             data-test-id="mark-selected-as-verdict-attachments">
           </button>
@@ -66,24 +69,23 @@
             </tr>
 
             <!-- ko foreach: attachments -->
-            <tr class="attachment-row attachment-multiselect-row" data-bind="click: $parents[2].selectRow, clickBubble: false, css: {selected: selected}">
+            <tr class="attachment-row attachment-multiselect-row" data-bind="click: $parents[2].selectRow,
+                                                                             clickBubble: false,
+                                                                             css: {selected: selected}">
               <td class="attachmentState">
 
                 <span data-bind="attr: {'class': statusName + ' icon',
                                         'data-test-state': state,
                                         'data-test-type': type['type-group'] + '.' + type['type-id'],
-                                        'title': loc(statusName + '.title')}">
-                </span>
+                                        'title': loc(statusName + '.title')}"></span>
                 <span data-bind="visible: $data.signed,
                                  attr: {'class': 'icon signed',
                                         'title': loc('attachment.signed'),
-                                        'data-test-icon': 'signed-' + type['type-group'] + '.' + type['type-id']}">
-                </span>
+                                        'data-test-icon': 'signed-' + type['type-group'] + '.' + type['type-id']}"></span>
                 <span data-bind="visible: $data.isSent,
                                  attr: {'class': 'icon transfered',
                                         'title': loc('application.attachmentSentDate') + ' ' + $data.sentDateString,
-                                        'data-test-icon': 'transfered-' + type['type-group'] + '.' + type['type-id']}">
-                </span>
+                                        'data-test-icon': 'transfered-' + type['type-group'] + '.' + type['type-id']}"></span>
               </td>
               <td class="attachment-type-group">
                   <span data-bind="if: type">
@@ -100,7 +102,9 @@
                   <span data-bind="if: !type">
                     <i data-bind="ltext: 'attachment.noName'"></i>
                   </span>
-                  <div class="attachment-content-desc" data-bind="if: $data.contents"><span data-bind="text: $data.contents" data-test-id="attachment-contents"></span></div>
+                  <div class="attachment-content-desc" data-bind="if: $data.contents">
+                    <span data-bind="text: $data.contents" data-test-id="attachment-contents"></span>
+                  </div>
               </td>
               <td class="attachment-help-info">
                 <span data-bind="text: loc(['attachmentType', type['type-group'], type['type-id'], 'info'])"></span>
@@ -111,12 +115,13 @@
                                          attr: {href: '/api/raw/download-attachment?attachment-id=' + $data.latestVersion.fileId,
                                                 title: loc('download')},
                                          click: function() {return true;},
-                                         clickBubble: false"></a><br/>
+                                         clickBubble: false"></a>
+                  <br/>
                   <i data-bind="ltext: latestVersion.contentType"></i>
                   <i data-bind="size: latestVersion.size"></i>
                 </span>
                 <!-- ko ifnot: $data.latestVersion -->
-                <a data-bind="ltext: 'application.attachmentsAddList', attr: {href: '#!/attachment/' + $root.application.id() + '/' + id, 'data-test-type': type['type-group'] + '.' + type['type-id']}"></a>
+                <a data-bind="ltext: 'application.attachmentsAddList', attr: {href: '#!/attachment/' + application.id + '/' + id, 'data-test-type': type['type-group'] + '.' + type['type-id']}"></a>
                 <!-- /ko -->
               </td>
               <td class="attachment-file-changed">
@@ -129,7 +134,6 @@
                 <input type="checkbox" data-bind="checked: $data.selected, click: function() {return true;}, clickBubble: false" />
               </td>
             </tr>
-
             <!-- /ko -->
           </tbody>
         </table>

@@ -2,7 +2,9 @@ LUPAPISTE.AttachmentsMultiselectModel = function(params) {
   "use strict";
 
   var self = this;
+
   self.params = params;
+  self.application = lupapisteApp.models.application;
 
   function markableAttachment(a) {
     return a.versions && a.versions.length;
@@ -20,7 +22,7 @@ LUPAPISTE.AttachmentsMultiselectModel = function(params) {
       groupName: group.groupName,
       groupDesc: group.groupDesc,
       name: group.name,
-      isGroupSelected: ko.computed(function() {
+      isGroupSelected: ko.pureComputed(function() {
         return _.every(group.attachments, function(a) {
           return a.selected();
         });
@@ -46,8 +48,6 @@ LUPAPISTE.AttachmentsMultiselectModel = function(params) {
     });
   }
 
-  self.application = lupapisteApp.models.application;
-
   self.filteredFiles = _(self.params.attachments).filter(markableAttachment).value();
 
   // group by post/pre verdict attachments
@@ -63,21 +63,20 @@ LUPAPISTE.AttachmentsMultiselectModel = function(params) {
   self.preFiles = ko.observableArray(_.map(grouped.pre, mapAttachmentGroup));
   self.postFiles = ko.observableArray(_.map(grouped.post, mapAttachmentGroup));
 
-  self.selectedFiles = ko.computed(function() {
+  self.selectedFiles = ko.pureComputed(function() {
     return getSelectedAttachments(self.preFiles()).concat(getSelectedAttachments(self.postFiles()));
   });
 
-  self.nonSelectedFiles = ko.computed(function() {
+  self.nonSelectedFiles = ko.pureComputed(function() {
     return getNonSelectedAttachments(self.preFiles()).concat(getNonSelectedAttachments(self.postFiles()));
   });
 
-  self.allSelected = ko.computed(function() {
+  self.allSelected = ko.pureComputed(function() {
     return eachSelected(self.preFiles()) && eachSelected(self.postFiles());
   });
 
   self.start = function() {
     params.saveFn(_.map(self.selectedFiles(), "id"));
-    return false;
   };
 
   self.selectRow = function(row) {
@@ -95,7 +94,7 @@ LUPAPISTE.AttachmentsMultiselectModel = function(params) {
   self.toggleGroupSelect = function(group) {
     var sel = group.isGroupSelected();
     _.each(group.attachments, function(a) {
-        a.selected(!sel);
+      a.selected(!sel);
     });
   };
 };

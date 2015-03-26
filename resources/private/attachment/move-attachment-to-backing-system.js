@@ -8,31 +8,28 @@
     filteredAttachments: undefined,
 
     doMoveAttachmetsToBackingSystem: function(selectedAttachmentsIds) {
-      return function() {
-        var id = model.appModel.id();
-        ajax.command("move-attachments-to-backing-system", {
-          id: id,
-          lang: loc.getCurrentLanguage(),
-          attachmentIds: selectedAttachmentsIds
-        })
-        .success(function() {
-          window.location.hash = "!/application/" + id + "/attachments";
-          repository.load(id);
-        })
-        .error(function() {
-          // Correct error message
-          notify.error(loc("error.dialog.title"), loc("attachment.set-attachments-as-verdict-attachment.error"));
-          repository.load(id);
-        })
-        .call();
-      };
+      var id = model.appModel.id();
+      ajax.command("move-attachments-to-backing-system", {
+        id: id,
+        lang: loc.getCurrentLanguage(),
+        attachmentIds: selectedAttachmentsIds
+      })
+      .success(function() {
+        window.location.hash = "!/application/" + id + "/attachments";
+        repository.load(id);
+      })
+      .error(function() {
+        notify.error(loc("error.dialog.title"), loc("move-attachments-to-backing-system.error"));
+        repository.load(id);
+      })
+      .call();
     },
 
     moveAttachmetsToBackingSystem: function(selectedAttachmentsIds) {
       LUPAPISTE.ModalDialog.showDynamicYesNo(
         loc("application.attachmentsMoveToBackingSystem"),
         loc("application.attachmentsMoveToBackingSystem.confirmationMessage"),
-        {title: loc("yes"), fn: model.doMoveAttachmetsToBackingSystem(selectedAttachmentsIds)},
+        {title: loc("yes"), fn: _.partial(model.doMoveAttachmetsToBackingSystem, selectedAttachmentsIds)},
         {title: loc("no")}
       );
     },
@@ -44,7 +41,6 @@
       model.filteredAttachments = undefined;
       model.authorization = undefined;
 
-      // TODO hardcoded back link
       window.location.hash="!/application/" + id + "/attachments";
       repository.load(id);
     }
