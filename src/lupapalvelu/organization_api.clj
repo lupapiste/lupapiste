@@ -17,6 +17,9 @@
 ;; local api
 ;;
 
+(defn authority-admins-organization-id [user]
+  (-> user :organizations first))
+
 (defn- municipalities-with-organization []
   (let [organizations (o/get-organizations {} [:scope :krysp])]
     {:all (distinct
@@ -111,8 +114,8 @@
    :parameters [url nameFi nameSv]
    :user-roles #{:authorityAdmin}
    :input-validators [(partial non-blank-parameters [:url :nameFi :nameSv])]}
-  [{{:keys [organizations]} :user}]
-  (o/update-organization (first organizations) {$push {:links {:name {:fi nameFi :sv nameSv} :url url}}})
+  [{user :user}]
+  (o/update-organization (authority-admins-organization-id user) {$push {:links {:name {:fi nameFi :sv nameSv} :url url}}})
   (ok))
 
 (defcommand update-organization-link
@@ -121,8 +124,8 @@
    :user-roles #{:authorityAdmin}
    :input-validators [(partial non-blank-parameters [:url :nameFi :nameSv :index])
                       (partial number-parameters [:index])]}
-  [{{:keys [organizations]} :user}]
-  (o/update-organization (first organizations) {$set {(str "links." index) {:name {:fi nameFi :sv nameSv} :url url}}})
+  [{user :user}]
+  (o/update-organization (authority-admins-organization-id user) {$set {(str "links." index) {:name {:fi nameFi :sv nameSv} :url url}}})
   (ok))
 
 (defcommand remove-organization-link
@@ -130,8 +133,8 @@
    :parameters [url nameFi nameSv]
    :user-roles #{:authorityAdmin}
    :input-validators [(partial non-blank-parameters [:url :nameFi :nameSv])]}
-  [{{:keys [organizations]} :user}]
-  (o/update-organization (first organizations) {$pull {:links {:name {:fi nameFi :sv nameSv} :url url}}})
+  [{user :user}]
+  (o/update-organization (authority-admins-organization-id user) {$pull {:links {:name {:fi nameFi :sv nameSv} :url url}}})
   (ok))
 
 (defquery organizations
@@ -215,18 +218,28 @@
   {:parameters [operations]
    :user-roles #{:authorityAdmin}
    :input-validators  [(partial non-blank-parameters [:operations])
-                       (partial vector-parameters [:operations])]}
-  [{{:keys [organizations]} :user}]
-  (o/update-organization (first organizations) {$set {:selected-operations operations}})
+                       (partial vector-parameters [:operations])
+                       (fn [{{:keys [operations]} :data}]
+                         (when-not (every? (->> operations/operations keys (map name) set) operations)
+                           (fail :error.unknown-operation)))]}
+  [{user :user}]
+  (o/update-organization (authority-admins-organization-id user) {$set {:selected-operations operations}})
   (ok))
 
 (defcommand organization-operations-attachments
   {:parameters [operation attachments]
    :user-roles #{:authorityAdmin}
-   :input-validators []}
-  [{{:keys [organizations]} :user}]
-  ; FIXME: validate operation and attachments
-  (o/update-organization (first organizations) {$set {(str "operations-attachments." operation) attachments}})
+   :input-validators [(partial non-blank-parameters [:operation])
+                      (partial vector-parameters [:attachments])
+                      (fn [{{:keys [operation]} :data, user :user}]
+                        (let [organization (o/get-organization (authority-admins-organization-id user))
+                              selected-operations (set (:selected-operations organization))]
+                          (when-not (selected-operations operation) (fail :error.unknown-operation))))
+                      (fn [{{attachments :attachments} :data}]
+                        ; FIXME: attachments
+                        )]}
+  [{user :user}]
+  (o/update-organization (authority-admins-organization-id user) {$set {(str "operations-attachments." operation) attachments}})
   (ok))
 
 (defcommand set-organization-app-required-fields-filling-obligatory
@@ -234,14 +247,14 @@
    :user-roles #{:authorityAdmin}
    :input-validators  [(partial non-blank-parameters [:isObligatory])
                        (partial boolean-parameters [:isObligatory])]}
-  [{{:keys [organizations]} :user}]
-  (o/update-organization (first organizations) {$set {:app-required-fields-filling-obligatory isObligatory}})
+  [{user :user}]
+  (o/update-organization (authority-admins-organization-id user) {$set {:app-required-fields-filling-obligatory isObligatory}})
   (ok))
 
 (defquery krysp-config
   {:user-roles #{:authorityAdmin}}
-  [{{:keys [organizations]} :user}]
-  (let [organization-id (first organizations)]
+  [{user :user}]
+  (let [organization-id (authority-admins-organization-id user)]
     (if-let [organization (o/get-organization organization-id)]
       (let [empty-confs (zipmap (map (comp keyword :permitType) (:scope organization)) (repeat {}))]
         (ok :krysp (merge empty-confs (:krysp organization))))
@@ -251,9 +264,9 @@
   {:parameters [url permitType version]
    :user-roles #{:authorityAdmin}
    :input-validators [permit/permit-type-validator]}
-  [{{:keys [organizations] :as user} :user}]
+  [{user :user}]
   (if (or (s/blank? url) (krysp/wfs-is-alive? url))
-    (mongo/update-by-id :organizations (first organizations) {$set {(str "krysp." permitType ".url") url
+    (mongo/update-by-id :organizations (authority-admins-organization-id user) {$set {(str "krysp." permitType ".url") url
                                                                     (str "krysp." permitType ".version") version}})
     (fail :auth-admin.legacyNotResponding)))
 
@@ -265,17 +278,18 @@
                           ;; action/email-validator returns nil if email was valid
                           (when (some #(email-validator :email {:data {:email %}}) emails)
                             (fail :error.set-kopiolaitos-info.invalid-email))))]}
-  [{{:keys [organizations]} :user}]
-  (o/update-organization (first organizations) {$set {:kopiolaitos-email kopiolaitosEmail
-                                                      :kopiolaitos-orderer-address kopiolaitosOrdererAddress
-                                                      :kopiolaitos-orderer-phone kopiolaitosOrdererPhone
-                                                      :kopiolaitos-orderer-email kopiolaitosOrdererEmail}})
+  [{user :user}]
+  (o/update-organization (authority-admins-organization-id user)
+    {$set {:kopiolaitos-email kopiolaitosEmail
+           :kopiolaitos-orderer-address kopiolaitosOrdererAddress
+           :kopiolaitos-orderer-phone kopiolaitosOrdererPhone
+           :kopiolaitos-orderer-email kopiolaitosOrdererEmail}})
   (ok))
 
 (defquery kopiolaitos-config
   {:user-roles #{:authorityAdmin}}
-  [{{:keys [organizations]} :user}]
-  (let [organization-id (first organizations)]
+  [{user :user}]
+  (let [organization-id (authority-admins-organization-id user)]
     (if-let [organization (o/get-organization organization-id)]
       (ok
         :kopiolaitos-email (:kopiolaitos-email organization)

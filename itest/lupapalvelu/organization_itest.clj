@@ -208,3 +208,16 @@
       (:applications m) => empty?
       (:infoRequests m) => empty?
       (:opening m) => [{:permitType "R", :opening 123}])))
+
+
+(facts "organization-operations-attachments"
+  (fact "Invalid operation is rejected"
+    (command sipoo :organization-operations-attachments :operation "foo" :attachments []) => (partial expected-failure? "error.unknown-operation"))
+
+  (fact "Empty attachments array is ok"
+    (command sipoo :organization-operations-attachments :operation "pientalo" :attachments []) => ok?)
+
+  (fact "scalar value as attachments parameter is not ok"
+    (command sipoo :organization-operations-attachments :operation "pientalo" :attachments "") => (partial expected-failure? "error.non-vector-parameters"))
+
+  )
