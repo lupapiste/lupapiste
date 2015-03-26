@@ -44,7 +44,8 @@
             [lupapalvelu.screenmessage-api]
             [lupapalvelu.integrations-api]
             [lupapalvelu.construction-api]
-            [lupapalvelu.asianhallinta-config-api]))
+            [lupapalvelu.asianhallinta-config-api]
+            [lupapalvelu.perf-mon :as perf-mon]))
 
 (defonce jetty (atom nil))
 
@@ -72,8 +73,7 @@
 
   (env/in-dev
     (warn "*** Instrumenting performance monitoring")
-    (require 'lupapalvelu.perf-mon)
-    ((resolve 'lupapalvelu.perf-mon/init)))
+    (perf-mon/init))
   (when (env/feature? :nrepl)
     (warn "*** Starting nrepl")
     (require 'clojure.tools.nrepl.server)
