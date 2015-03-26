@@ -37,7 +37,7 @@
                  :foremanRoles      (:body (first lupapalvelu.document.schemas/kuntaroolikoodi-tyonjohtaja))
                  :foremanReadonlyFields ["luvanNumero", "katuosoite", "rakennustoimenpide", "kokonaisala"]
                  :asianhallintaVersions (util/convert-values ; asianhallinta versions have "ah-" prefix
-                                          validator/supported-asianhallinta-versions-by-permit-type 
+                                          validator/supported-asianhallinta-versions-by-permit-type
                                           (partial map #(sade.strings/suffix % "ah-")))}]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
 
@@ -297,7 +297,7 @@
    :oskari  {:css ["oskari.css"]}
 
    :neighbor-app {:js ["neighbor-app.js"]}
-   :neighbor {:depends [:neighbor-app :common-html :map :debug :docgen :debug :user-menu :screenmessages :analytics]
+   :neighbor {:depends [:neighbor-app :common-html :global-models :map :debug :docgen :debug :user-menu :screenmessages :analytics]
               :html ["neighbor-show.html"]
               :js ["neighbor-show.js"]}})
 
