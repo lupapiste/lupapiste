@@ -204,11 +204,12 @@
    ;; Oulu
 
    ;; Olli Ule\u00E5borg - Oulun lupa-arkkitehti:  olli / olli
+   ;; Viranomaisena myos Naantalissa
    {:id "777777777777777777000034"
      :email "olli.uleaborg@ouka.fi"
      :enabled true
      :role "authority"
-     :organizations ["564-R"]
+     :organizations ["564-R" "529-R"]
      :firstName "Olli"
      :lastName "Ule\u00E5borg"
      :phone "121212"
@@ -230,11 +231,12 @@
     :private {:password "$2a$10$4pvNDXk2g5XgxT.whx1Ua.RKkAoyjOb8C91r7aBMrgf7zNPMjhizq"
               :apikey "a0ac77ecd2e6c2ea6e73f83f"}}
    ;; rakennustarkastaja@naantali.fi / naantali
+   ;; Viranomainen myos Jarvenpaassa
    {:id "50ac77ecd2e6c2ea6e73f840"
     :email "rakennustarkastaja@naantali.fi"
     :enabled true
     :role "authority"
-    :organizations ["529-R"]
+    :organizations ["529-R" "186-R"]
     :firstName "Rakennustarkastaja"
     :lastName "Naantali"
     :username "rakennustarkastaja@naantali.fi"

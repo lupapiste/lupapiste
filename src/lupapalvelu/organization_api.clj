@@ -72,8 +72,8 @@
 (defquery users-in-same-organizations
   {:user-roles #{:authority}}
   [{user :user}]
-  ;; TODO toimiiko jos jompi kumpi user on kahdessa organisaatiossa?
-  (ok :users (map user/summary (mongo/select :users {:organizations {$in (:organizations user)}}))))
+  (let [users (mongo/select :users {:role "authority", :organizations {$in (:organizations user)}})]
+    (ok :users (map user/summary users))))
 
 (defquery organization-by-user
   {:description "Lists all organization users by organization."
