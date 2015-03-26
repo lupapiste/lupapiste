@@ -118,10 +118,6 @@ LUPAPISTE.ApplicationModel = function() {
 
   self.targetTab = ko.observable({tab: undefined, id: undefined});
 
-  self.currentTab = ko.pureComputed(function() {
-    return self.targetTab().tab;
-  });
-
   self.updateInvites = function() {
     invites.getInvites(function(data) {
       self.invites(_.filter(data.invites, function(invite) {
@@ -477,7 +473,6 @@ LUPAPISTE.ApplicationModel = function() {
   self.moveToMissingRequiredAttachment = function(fieldInfo) {
     var targetId = "attachment-row-" + fieldInfo.type["type-group"]() + "-" + fieldInfo.type["type-id"]();
     self.targetTab({tab: "attachments", id: targetId});
-
   };
 
   function extractMissingAttachments(attachments) {
