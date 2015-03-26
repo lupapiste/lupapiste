@@ -3,6 +3,7 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel, verdictAttachme
 
   var self = this;
 
+  self.authorizationModel = lupapisteApp.models.applicationAuthzModel;
   self.appModel = appModel;
   self.signingModel = signingModel;
   self.verdictAttachmentPrintsOrderModel = verdictAttachmentPrintsOrderModel;
@@ -132,9 +133,8 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel, verdictAttachme
     self.showHelp(!self.showHelp());
   };
 
-  self.refresh = function(appModel, authorizationModel) {
+  self.refresh = function(appModel) {
     self.appModel = appModel;
-    self.authorizationModel = authorizationModel;
 
     var rawAttachments = ko.mapping.toJS(appModel.attachments);
     var preAttachments = attachmentUtils.getPreAttachments(rawAttachments);
@@ -286,7 +286,7 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel, verdictAttachme
       }
     });
 
-    self.refresh(self.appModel, self.authorizationModel);
+    self.refresh(self.appModel);
   });
 
 };
