@@ -66,7 +66,7 @@
             (finally
               (let [end (System/nanoTime)]
                 (mc/insert "perf-mon"
-                           {:ts (System/currentTimeMillis)
+                           {:ts (java.util.Date.)
                             :duration (- end start)
                             :uri (get request :uri)
                             :user (get-in request [:session :user :username])
