@@ -28,7 +28,7 @@
             [lupapalvelu.user :as user]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.proxy-services :as proxy-services]
-            [lupapalvelu.organization]
+            [lupapalvelu.organization-api]
             [lupapalvelu.application :as application]
             [lupapalvelu.foreman-api :as foreman-api]
             [lupapalvelu.open-inforequest-api]
