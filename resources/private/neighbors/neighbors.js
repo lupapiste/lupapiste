@@ -2,7 +2,6 @@
   "use strict";
 
   var applicationId;
-  var authorizationModel = authorization.create();
 
   function Model() {
     var self = this;
@@ -296,7 +295,6 @@
   repository.loaded(["neighbors"], function(application) {
     if (applicationId === application.id) {
       model.init(application);
-      authorizationModel.refresh(application);
     }
   });
 
