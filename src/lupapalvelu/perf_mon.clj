@@ -130,7 +130,7 @@
 (defpage [:post "/perfmon/browser-timing"] {timing :timing}
   (let [user-agent (-> (request/ring-request) :headers (get "user-agent"))]
     (mc/insert "perf-mon-timing"
-      {:ts (System/currentTimeMillis)
+      {:ts (java.util.Date.)
        :ua user-agent
        :timing timing}
       WriteConcern/NONE))
