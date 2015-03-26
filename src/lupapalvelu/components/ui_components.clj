@@ -98,7 +98,7 @@
 
    :analytics    {:js ["analytics.js"]}
 
-   :global-models {:js ["application-model.js" "register-models.js"]}
+   :global-models {:js ["root-model.js" "application-model.js" "register-models.js"]}
 
    :screenmessages  {:js   ["screenmessage.js"]
                      :html ["screenmessage.html"]}
