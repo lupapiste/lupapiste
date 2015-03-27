@@ -28,7 +28,10 @@
       (command sonja :assign-application :id id :assigneeId sonja-id) => ok?)
 
     (fact "Sonja can mark inforequest answered"
-      (command sonja :can-mark-answered :id id) => ok?)
+      (command sonja :can-mark-answered :id id) => ok?
+
+      (fact "Pena did not get email because there was no message"
+        (last-email) => nil?))
 
     (fact "When Commenting on inforequest marks it answered"
       (query-application pena id)    => (in-state? :info)
