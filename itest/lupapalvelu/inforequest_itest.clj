@@ -7,6 +7,7 @@
             [lupapalvelu.document.schemas :as schemas]))
 
 (apply-remote-minimal)
+(last-email)
 
 (facts "inforequest workflow"
   (let [{id :id :as resp} (create-app pena :messages ["hello"] :infoRequest true :municipality sonja-muni)]
@@ -47,11 +48,11 @@
     (:text resp) => "error.inforequests-disabled"))
 
   (fact "Pena can cancel inforequest he created"
-    (let [resp (create-app pena :infoRequest true :municipality sonja-muni)]
+    (let [{application-id :id :as resp} (create-app pena :infoRequest true :municipality sonja-muni)]
       resp => ok?
-      (command pena :cancel-inforequest :id (-> resp :application :id)) => ok?
+      (command pena :cancel-inforequest :id application-id) => ok?
       (fact "Sonja is also allowed to cancel inforequest"
-        (allowed? :cancel-inforequest :id (-> resp :application :id))))))
+        (allowed? :cancel-inforequest :id application-id)))))
 
 (facts "Open inforequest"
   ; Reset emails
