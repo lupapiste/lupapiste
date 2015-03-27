@@ -3,7 +3,7 @@
 
   var isInitializing = true;
   var currentId = null;
-  var authorizationModel = authorization.create();
+  var authorizationModel = lupapisteApp.models.authModel;
   var applicationModel = lupapisteApp.models.application;
   var changeLocationModel = new LUPAPISTE.ChangeLocationModel();
   var addLinkPermitModel = new LUPAPISTE.AddLinkPermitModel();
@@ -156,7 +156,7 @@
       verdictAttachmentPrintsOrderModel.refresh(applicationModel);
       verdictAttachmentPrintsOrderHistoryModel.refresh(applicationModel);
 
-      attachmentsTab.refresh(applicationModel, authorizationModel);
+      attachmentsTab.refresh(applicationModel);
 
       // Statements
       requestForStatementModel.setApplicationId(app.id);
