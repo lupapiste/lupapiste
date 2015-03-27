@@ -14,7 +14,7 @@ LUPAPISTE.SidePanelModel = function() {
   self.showConversationPanel = ko.observable(false);
   self.showNoticePanel = ko.observable(false);
   self.unseenComments = ko.observable();
-  self.authorization = authorization.create();
+  self.authorization = lupapisteApp.models.authModel;
   self.comment = ko.observable(comments.create());
   self.permitType = ko.observable();
   self.authorities = ko.observableArray([]);
@@ -214,9 +214,7 @@ LUPAPISTE.SidePanelModel = function() {
 
   repository.loaded(pages, function(application, applicationDetails) {
     if (!unsentMessage) {
-      self.authorization.refreshWithCallback({id: applicationDetails.application.id}, function() {
-        self.refresh(application, applicationDetails.authorities);
-      });
+      self.refresh(application, applicationDetails.authorities);
     }
   });
 };

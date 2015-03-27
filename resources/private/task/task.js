@@ -42,7 +42,7 @@ var taskPageController = (function() {
   var pending = ko.observable(false);
   var taskSubmitOk = ko.observable(false);
 
-  var authorizationModel = authorization.create();
+  var authorizationModel = lupapisteApp.models.authModel;
   var attachmentsModel = new LUPAPISTE.TargetedAttachmentsModel({type: "task"}, "muut.muu", true);
 
   function reload() {
@@ -114,19 +114,17 @@ var taskPageController = (function() {
       t.returnToApplication = returnToApplication;
       t.approve = _.partial(runTaskCommand, "approve-task");
       t.reject = _.partial(runTaskCommand, "reject-task");
-      authorizationModel.refreshWithCallback({id: currentApplicationId}, function() {
-        t.approvable = authorizationModel.ok("approve-task") && (t.state === "requires_user_action" || t.state === "requires_authority_action");
-        t.rejectable = authorizationModel.ok("reject-task");
-        t.sendTask = sendTask;
-        t.statusName = LUPAPISTE.statuses[t.state] || "unknown";
-        task(t);
+      t.approvable = authorizationModel.ok("approve-task") && (t.state === "requires_user_action" || t.state === "requires_authority_action");
+      t.rejectable = authorizationModel.ok("reject-task");
+      t.sendTask = sendTask;
+      t.statusName = LUPAPISTE.statuses[t.state] || "unknown";
+      task(t);
 
-        var requiredErrors = util.extractRequiredErrors([t.validationErrors]);
-        taskSubmitOk(authorizationModel.ok("send-task") && (t.state === "sent" || t.state === "ok") && !requiredErrors.length);
+      var requiredErrors = util.extractRequiredErrors([t.validationErrors]);
+      taskSubmitOk(authorizationModel.ok("send-task") && (t.state === "sent" || t.state === "ok") && !requiredErrors.length);
 
-        var options = {collection: "tasks", updateCommand: "update-task", validate: true};
-        docgen.displayDocuments("#taskDocgen", application, [t], authorizationModel, options);
-      });
+      var options = {collection: "tasks", updateCommand: "update-task", validate: true};
+      docgen.displayDocuments("#taskDocgen", application, [t], authorizationModel, options);
 
     } else {
       $("#taskDocgen").empty();

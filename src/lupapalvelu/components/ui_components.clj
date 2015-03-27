@@ -37,7 +37,7 @@
                  :foremanRoles      (:body (first lupapalvelu.document.schemas/kuntaroolikoodi-tyonjohtaja))
                  :foremanReadonlyFields ["luvanNumero", "katuosoite", "rakennustoimenpide", "kokonaisala"]
                  :asianhallintaVersions (util/convert-values ; asianhallinta versions have "ah-" prefix
-                                          validator/supported-asianhallinta-versions-by-permit-type 
+                                          validator/supported-asianhallinta-versions-by-permit-type
                                           (partial map #(sade.strings/suffix % "ah-")))}]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
 
@@ -98,7 +98,7 @@
 
    :analytics    {:js ["analytics.js"]}
 
-   :global-models {:js ["application-model.js" "register-models.js"]}
+   :global-models {:js ["root-model.js" "application-model.js" "register-models.js"]}
 
    :screenmessages  {:js   ["screenmessage.js"]
                      :html ["screenmessage.html"]}
@@ -149,8 +149,8 @@
                                     "verdict-attachment-prints-multiselect-model.js"]}
 
    :attachment   {:depends [:common-html :repository :signing :side-panel]
-                  :js ["targeted-attachments-model.js" "attachment-utils.js" "attachment.js" "attachmentTypeSelect.js"]
-                  :html ["targetted-attachments-template.html" "attachment.html" "upload.html"]}
+                  :js ["targeted-attachments-model.js" "attachment-utils.js" "attachment.js" "attachmentTypeSelect.js" "move-attachment-to-backing-system.js"]
+                  :html ["targetted-attachments-template.html" "attachment.html" "upload.html" "move-attachment-to-backing-system.html"]}
 
    :task         {:depends [:common-html :attachment]
                   :js ["task.js"]
@@ -170,6 +170,7 @@
                         "select/select-model.js"
                         "string/string-model.js"
                         "modal-dialog/modal-dialog-model.js"
+                        "attachments-multiselect/attachments-multiselect-model.js"
                         "register-components.js"]
                    :html ["fill-info/fill-info-template.html"
                           "foreman-history/foreman-history-template.html"
@@ -178,7 +179,8 @@
                           "string/string-template.html"
                           "select/select-template.html"
                           "checkbox/checkbox-template.html"
-                          "modal-dialog/modal-dialog-template.html"]}
+                          "modal-dialog/modal-dialog-template.html"
+                          "attachments-multiselect/attachments-multiselect-template.html"]}
 
    :application  {:depends [:common-html :global-models :repository :tree :task :create-task :modal-datepicker :signing :invites :side-panel :verdict-attachment-prints :ui-components]
                   :js ["add-link-permit.js" "map-model.js" "change-location.js" "invite.js" "verdicts-model.js"
@@ -297,7 +299,7 @@
    :oskari  {:css ["oskari.css"]}
 
    :neighbor-app {:js ["neighbor-app.js"]}
-   :neighbor {:depends [:neighbor-app :common-html :map :debug :docgen :debug :user-menu :screenmessages :analytics]
+   :neighbor {:depends [:neighbor-app :common-html :global-models :map :debug :docgen :debug :user-menu :screenmessages :analytics]
               :html ["neighbor-show.html"]
               :js ["neighbor-show.js"]}})
 
