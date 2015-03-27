@@ -234,8 +234,8 @@
                       (fn [{{:keys [operation attachments]} :data, user :user}]
                         (let [organization (o/get-organization (authority-admins-organization-id user))
                               selected-operations (set (:selected-operations organization))
-                              permit-types (set (map :permitType (:scope organization)))
-                              allowed-types (reduce #(concat %1 (attachment/get-attachment-types-by-permit-type %2)) [] permit-types)
+                              permit-type (get-in operations/operations [(keyword operation) :permit-type] )
+                              allowed-types (when permit-type (attachment/get-attachment-types-by-permit-type permit-type))
                               attachment-types (map (fn [[group id]] {:type-group group :type-id id}) attachments)]
                           (cond
                             (not (selected-operations operation)) (fail :error.unknown-operation)
