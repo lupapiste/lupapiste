@@ -28,9 +28,11 @@ Admin removes Pohjapiirros template and adds Rasitustodistus template
   # Add Rasitusatodistus
   Click element  xpath=//div[@id='dialog-edit-attachments']//select[@class='selectm-source']//option[contains(text(),'Rasitustodistus')]
   Click element  xpath=//div[@id='dialog-edit-attachments']//button[@data-loc='selectm.add']
+  Wait until  Element should be visible  xpath=//select[@data-test-id='selectm-target-list']//option[contains(text(),'Rasitustodistus')]
   # Remove Pohjapiirros
   Click element  xpath=//div[@id='dialog-edit-attachments']//select[@class='selectm-target']//option[contains(text(),'Pohjapiirros')]
   Click element  xpath=//div[@id='dialog-edit-attachments']//button[@data-loc='selectm.remove']
+  Wait until  Element should not be visible  xpath=//select[@data-test-id='selectm-target-list']//option[contains(text(),'Pohjapiirros')]
   # Save
   Click element  xpath=//div[@id='dialog-edit-attachments']//button[@data-loc='selectm.ok']
   Wait until  Element should not be visible  xpath=//div[@id='dialog-edit-attachments']

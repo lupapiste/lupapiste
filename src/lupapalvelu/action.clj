@@ -123,6 +123,9 @@
 (defn boolean-parameters [params command]
   (filter-params-of-command params command #(not (instance? Boolean %)) :error.non-boolean-parameters))
 
+(defn number-parameters [params command]
+  (filter-params-of-command params command #(not (number? %)) :error.illegal-number))
+
 (defn map-parameters [params command]
   (filter-params-of-command params command (complement map?) :error.unknown-type))
 

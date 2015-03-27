@@ -2,8 +2,7 @@
 <html>
 <body>
   <section class="page container" id="neighbors">
-
-    <div id="neighbors-content">
+    <div id="neighbors-content" data-bind="if: lupapisteApp.models.rootVMO.currentPage() === 'neighbors'">
 
       <div class="map map-large" id="neighbors-map"></div>
 
@@ -48,7 +47,7 @@
 
     </div>
 
-    <div id="dialog-select-owners" class="window autosized">
+    <div id="dialog-select-owners" class="window autosized" data-bind="if: lupapisteApp.models.rootVMO.currentPage() === 'neighbors'">
       <div class="dialog-header">
         <p data-bind="ltext: 'neighbor.owners.title'"></p>
         <p class="dialog-close close">X</p>
@@ -107,7 +106,7 @@
       </div>
     </div>
 
-    <div id="dialog-edit-neighbor" class="window autosized">
+    <div id="dialog-edit-neighbor" class="window autosized" data-bind="if: lupapisteApp.models.rootVMO.currentPage() === 'neighbors'">
       <div class="dialog-header">
         <p data-bind="ltext: 'neighbors.edit.title'"></p>
         <p class="dialog-close close">X</p>
@@ -159,7 +158,6 @@
 
       </div>
     </div>
-
   </section>
 
 </body>

@@ -37,7 +37,7 @@
   (if (user/virtual-user? user)
     (ok :user user)
     (if-let [full-user (user/get-user-by-id (:id user))]
-     (ok :user (dissoc full-user :private :personId))
+     (ok :user (user/with-org-auth (dissoc full-user :private :personId)))
      (fail))))
 
 (defquery users
