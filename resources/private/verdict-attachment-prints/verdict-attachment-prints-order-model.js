@@ -20,7 +20,7 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function() {
   self.lupapisteId = ko.observable("");
   self.address = ko.observable("");
 
-  self.authorizationModel = lupapisteApp.models.applicationAuthzModel;
+  self.authorizationModel = lupapisteApp.models.authModel;
 
   self.ok = ko.computed(function() {
     var attachmentOrderCountsAreNumbers = _.every(self.attachments(), function(a) {

@@ -42,7 +42,7 @@ var taskPageController = (function() {
   var pending = ko.observable(false);
   var taskSubmitOk = ko.observable(false);
 
-  var authorizationModel = lupapisteApp.models.applicationAuthzModel;
+  var authorizationModel = lupapisteApp.models.authModel;
   var attachmentsModel = new LUPAPISTE.TargetedAttachmentsModel({type: "task"}, "muut.muu", true);
 
   function reload() {

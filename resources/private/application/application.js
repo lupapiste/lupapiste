@@ -3,7 +3,7 @@
 
   var isInitializing = true;
   var currentId = null;
-  var authorizationModel = lupapisteApp.models.applicationAuthzModel;
+  var authorizationModel = lupapisteApp.models.authModel;
   var applicationModel = lupapisteApp.models.application;
   var changeLocationModel = new LUPAPISTE.ChangeLocationModel();
   var addLinkPermitModel = new LUPAPISTE.AddLinkPermitModel();

@@ -145,7 +145,7 @@ var verdictAttachmentsMarking = (function() {
   function initMarking(appModel) {
     model.appModel = appModel;
     model.attachments = model.appModel.attachments();
-    model.authorization = lupapisteApp.models.applicationAuthzModel;
+    model.authorization = lupapisteApp.models.authModel;
 
     window.location.hash="!/verdict-attachments-select/" + model.appModel.id();
   }
@@ -160,7 +160,7 @@ var verdictAttachmentsMarking = (function() {
         repository.load(appId, null, function(application) {
           lupapisteApp.setTitle(application.title);
 
-          model.authorization = lupapisteApp.models.applicationAuthzModel;
+          model.authorization = lupapisteApp.models.authModel;
           model.appModel = lupapisteApp.models.application;
 
           ko.mapping.fromJS(application, {}, model.appModel);
