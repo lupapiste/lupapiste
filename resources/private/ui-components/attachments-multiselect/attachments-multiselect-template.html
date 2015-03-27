@@ -86,6 +86,11 @@
                                  attr: {'class': 'icon transfered',
                                         'title': loc('application.attachmentSentDate') + ' ' + $data.sentDateString,
                                         'data-test-icon': 'transfered-' + type['type-group'] + '.' + type['type-id']}"></span>
+                <span data-bind="visible: $data.forPrinting,
+                                 attr: {'class': 'icon verdict-attachment',
+                                        'title': loc('attachment.verdict-attachment'),
+                                        'data-test-icon': 'verdict-attachment-' + type['type-group'] + '.' + type['type-id']}">
+
               </td>
               <td class="attachment-type-group">
                   <span data-bind="if: type">
