@@ -10,7 +10,6 @@ Mikko creates an application
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  poik-${secs}
   Create application the fast way  ${appname}  753  753-416-25-33  poikkeamis
-  Wait Until  Page Should Contain  Poikkeamisen hakeminen
 
 Poikkari default subtype = poikkeamislupa
   List Selection Should Be  permitSubtypeSelect  poikkeamislupa
@@ -20,6 +19,5 @@ Change permit subtype
   Wait Until Element Is Visible  permitSubtypeSaveIndicator
   Go to page  applications
   Open application  ${appname}  753-416-25-33
-  Wait Until  Page Should Contain  Poikkeamisen hakeminen
   List Selection Should Be  permitSubtypeSelect  suunnittelutarveratkaisu
   [Teardown]  Logout

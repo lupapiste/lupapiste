@@ -4,6 +4,7 @@
             [sade.env :as env]
             [sade.util :as util]
             [sade.core :refer [ok fail fail!]]
+            [sade.strings :as ss]
             [lupapalvelu.action :refer [defquery defcommand update-application notify] :as action]
             [lupapalvelu.comment :as comment]
             [lupapalvelu.notifications :as notifications]
@@ -61,8 +62,9 @@
                       (partial action/map-parameters [:target])
                       (partial action/vector-parameters [:roles])]
    :notified   true
-   :on-success [(notify :new-comment)
-                (fn [{data :data :as command} _]
+   :on-success [(fn [{data :data :as command} _]
+                  (when-not (ss/blank? (:text data))
+                    (notifications/notify! :new-comment command))
                   (when-let [to-user (and (:to data) (user/get-user-by-id (:to data)))]
                     ;; LUPA-407
                     (notifications/notify! :application-targeted-comment (assoc command :user to-user))))

@@ -1,8 +1,6 @@
 ;(function() {
   "use strict";
 
-  var authorizationModel = authorization.create();
-
   function Model() {
     var self = this;
 
@@ -60,8 +58,8 @@
       var sortedPartyDocs = _.sortBy(partyDocs, util.getDocumentOrder);
       var options = {disabled: true, validate: false};
 
-      docgen.displayDocuments("#neighborDocgen", a, sortedNonpartyDocs, authorizationModel, options);
-      docgen.displayDocuments("#neighborPartiesDocgen", a, sortedPartyDocs, authorizationModel, options);
+      docgen.displayDocuments("#neighborDocgen", a, sortedNonpartyDocs, lupapisteApp.models.authModel, options);
+      docgen.displayDocuments("#neighborPartiesDocgen", a, sortedPartyDocs, lupapisteApp.models.authModel, options);
 
       self.attachmentsByGroup(getAttachmentsByGroup(a.attachments));
       self.attachments(_.map(a.attachments || [], function(a) {
