@@ -41,6 +41,26 @@ Sonja sets contents description for the attachment
   Wait Until  Page should contain element  xpath=//div[@id="application-attachments-tab"]//select[@data-test-id="attachment-operations-select-lower"]//option[@value='markVerdictAttachments']
   Page should not contain element  xpath=//div[@id="application-attachments-tab"]//select[@data-test-id="attachment-operations-select-lower"]//option[@value='orderVerdictAttachments']
 
+Sonja disables verdict attachment using multiselect view
+  Select attachment operation option from dropdown  markVerdictAttachments
+  Wait Until  Element should be visible  xpath=//section[@id="verdict-attachments-select"]//h1[1]
+  Locator Should Match X Times  xpath=//section[@id="verdict-attachments-select"]//table//tr[contains(@class, 'attachment-row')]  1
+  Click element  xpath=//section[@id="verdict-attachments-select"]//table//tr[contains(@class, 'attachment-row')]
+  Click by test id  multiselect-action-button
+
+There should be no verdict attachments
+  Wait until  Element should not be visible  xpath=//div[@id="application-attachments-tab"]//span[@data-test-icon="verdict-attachment-muut.muu"]
+
+Sonja marks one attachment as verdict attachment using multiselect view
+  Select attachment operation option from dropdown  markVerdictAttachments
+  Wait Until  Element should be visible  xpath=//section[@id="verdict-attachments-select"]//h1[1]
+  Locator Should Match X Times  xpath=//section[@id="verdict-attachments-select"]//table//tr[contains(@class, 'attachment-row')]  1
+  Click element  xpath=//section[@id="verdict-attachments-select"]//table//tr[contains(@class, 'attachment-row')]
+  Click by test id  multiselect-action-button
+
+There should be now one verdict attachment
+  Wait until  Element should be visible  xpath=//div[@id="application-attachments-tab"]//span[@data-test-icon="verdict-attachment-muut.muu"]
+
 Sonja gives verdict
   Open tab  verdict
   Fetch verdict

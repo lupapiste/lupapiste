@@ -30,11 +30,10 @@
 
         <div class="attachment-multiselect-buttons">
           <button data-bind="click: start,
-                             ltext: params.okLoc,
-                             enable: $parent.authorization.ok('set-attachments-as-verdict-attachment'),
+                             ltext: params.okLoc
                              clickBubble: false"
             class="btn btn-primary"
-            data-test-id="mark-selected-as-verdict-attachments">
+            data-test-id="multiselect-action-button">
           </button>
           <button data-bind="ltext: 'application.return', click: $parent.cancelSelecting"
             class="btn close"
