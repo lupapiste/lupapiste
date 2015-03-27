@@ -128,7 +128,7 @@
 
 (defcommand set-attachment-type
   {:parameters [id attachmentId attachmentType]
-   :input-validators [(partial action/non-blank-parameters [:id :attachmentId :attachmentType])] ; TODO
+   :input-validators [(partial action/non-blank-parameters [:id :attachmentId :attachmentType])]
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles action/all-authz-writer-roles
    :states     (action/all-states-but [:answered :sent :closed :canceled])}
@@ -138,7 +138,7 @@
     (fail! :error.pre-verdict-attachment))
 
   (let [attachment-type (attachment/parse-attachment-type attachmentType)]
-    (if (allowed-attachment-type-for-application? application attachment-type)
+    (if (allowed-attachment-type-for-application? attachment-type application)
       (attachment/update-attachment-key command attachmentId :type attachment-type created :set-app-modified? true :set-attachment-modified? true)
       (do
         (errorf "attempt to set new attachment-type: [%s] [%s]: %s" id attachmentId attachment-type)
