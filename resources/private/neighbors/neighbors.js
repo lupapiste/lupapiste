@@ -302,7 +302,7 @@
 
   $(function() {
     $("#neighbors-content").applyBindings(model);
-    $("#dialog-edit-neighbor").applyBindings(editModel).find("form").placeholderize();
+    $("#dialog-edit-neighbor").applyBindings(editModel);
     $("#dialog-select-owners").applyBindings(ownersModel);
   });
 
