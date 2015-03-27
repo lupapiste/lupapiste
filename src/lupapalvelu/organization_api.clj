@@ -10,7 +10,7 @@
             [lupapalvelu.user :as user]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.operations :as operations]
-            [lupapalvelu.attachment :as attachments]
+            [lupapalvelu.attachment :as attachment]
             [lupapalvelu.organization :as o]))
 
 ;;
@@ -36,7 +36,7 @@
 (defn- organization-attachments
   "Returns a map where key is permit type, value is a list of attachment types for the permit type"
   [{scope :scope}]
-  (reduce #(assoc %1 %2 (attachments/get-attachment-types-by-permit-type %2)) {} (map (comp keyword :permitType) scope)))
+  (reduce #(assoc %1 %2 (attachment/get-attachment-types-by-permit-type %2)) {} (map (comp keyword :permitType) scope)))
 
 (defn- organization-operations-with-attachments
   "Returns a map where key is permit type, value is a list of operations for the permit type"
@@ -235,13 +235,11 @@
                         (let [organization (o/get-organization (authority-admins-organization-id user))
                               selected-operations (set (:selected-operations organization))
                               permit-types (set (map :permitType (:scope organization)))
-                              attachment-types (->> permit-types
-                                                 (map (comp attachments/attachment-ids-from-tree attachments/get-attachment-types-by-permit-type))
-                                                 flatten
-                                                 set)]
+                              allowed-types (reduce #(concat %1 (attachment/get-attachment-types-by-permit-type %2)) [] permit-types)
+                              attachment-types (map (fn [[group id]] {:type-group group :type-id id}) attachments)]
                           (cond
                             (not (selected-operations operation)) (fail :error.unknown-operation)
-                            (not (every? attachment-types (map keyword attachments))) (fail :error.unknown-attachment-type))))]}
+                            (not (every? (partial attachment/allowed-attachment-types-contain? allowed-types) attachment-types)) (fail :error.unknown-attachment-type))))]}
   [{user :user}]
   (o/update-organization (authority-admins-organization-id user) {$set {(str "operations-attachments." operation) attachments}})
   (ok))

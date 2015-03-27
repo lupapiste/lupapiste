@@ -75,6 +75,16 @@
     (when (and size (not (contains? (set attachment/attachment-sizes) (keyword size))))
       (fail :error.illegal-attachment-size :parameters size))))
 
+(defn allowed-attachment-type-for-application? [attachment-type application]
+  {:pre [(map? attachment-type)]}
+  (let [allowed-types (attachment/get-attachment-types-for-application application)]
+    (attachment/allowed-attachment-types-contain? allowed-types attachment-type)))
+
+(defn- validate-attachment-type [{{attachment-type :attachmentType} :data} application]
+  (when attachment-type
+    (when-not (allowed-attachment-type-for-application? attachment-type application)
+      (fail :error.illegal-attachment-type))))
+
 ;;
 ;; KRYSP
 ;;
@@ -118,6 +128,7 @@
 
 (defcommand set-attachment-type
   {:parameters [id attachmentId attachmentType]
+   :input-validators [(partial action/non-blank-parameters [:id :attachmentId :attachmentType])] ; TODO
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles action/all-authz-writer-roles
    :states     (action/all-states-but [:answered :sent :closed :canceled])}
@@ -127,11 +138,11 @@
     (fail! :error.pre-verdict-attachment))
 
   (let [attachment-type (attachment/parse-attachment-type attachmentType)]
-    (if (attachment/allowed-attachment-type-for-application? application attachment-type)
+    (if (allowed-attachment-type-for-application? application attachment-type)
       (attachment/update-attachment-key command attachmentId :type attachment-type created :set-app-modified? true :set-attachment-modified? true)
       (do
         (errorf "attempt to set new attachment-type: [%s] [%s]: %s" id attachmentId attachment-type)
-        (fail :error.attachmentTypeNotAllowed)))))
+        (fail :error.illegal-attachment-type)))))
 ;;
 ;; Operations
 ;;
@@ -151,6 +162,7 @@
 (defcommand approve-attachment
   {:description "Authority can approve attachment, moves to ok"
    :parameters  [id attachmentId]
+   :input-validators [(partial action/non-blank-parameters [:attachmentId])]
    :user-roles #{:authority}
    :states      (action/all-states-but [:answered :sent :closed :canceled])}
   [{:keys [created] :as command}]
@@ -159,6 +171,7 @@
 (defcommand reject-attachment
   {:description "Authority can reject attachment, requires user action."
    :parameters  [id attachmentId]
+   :input-validators [(partial action/non-blank-parameters [:attachmentId])]
    :user-roles #{:authority}
    :states      (action/all-states-but [:answered :sent :closed :canceled])}
   [{:keys [created] :as command}]
@@ -170,12 +183,14 @@
 
 (defcommand create-attachments
   {:description "Authority can set a placeholder for an attachment"
-   :parameters  [:id :attachmentTypes]
+   :parameters  [id attachmentTypes]
+   :input-validators [(partial action/vector-parameters-with-non-blank-items [:attachmentTypes])]
+; FIXME type validation
    :user-roles #{:authority :oirAuthority}
    :states      (action/all-states-but [:answered :sent :closed :canceled])}
   [{application :application {attachment-types :attachmentTypes} :data created :created}]
-  (if-let [attachment-ids (attachment/create-attachments application attachment-types created false true true)]
-    (ok :applicationId (:id application) :attachmentIds attachment-ids)
+  (if-let [attachment-ids (attachment/create-attachments application attachmentTypes created false true true)]
+    (ok :applicationId id :attachmentIds attachment-ids)
     (fail :error.attachment-placeholder)))
 
 ;;
@@ -185,6 +200,7 @@
 (defcommand delete-attachment
   {:description "Delete attachement with all it's versions. Does not delete comments. Non-atomic operation: first deletes files, then updates document."
    :parameters  [id attachmentId]
+   :input-validators [(partial action/non-blank-parameters [:attachmentId])]
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles action/all-authz-writer-roles
    :states      (action/all-states-but [:answered :sent :closed :canceled])}
@@ -202,6 +218,7 @@
 (defcommand delete-attachment-version
   {:description   "Delete attachment version. Is not atomic: first deletes file, then removes application reference."
    :parameters  [:id attachmentId fileId]
+   :input-validators [(partial action/non-blank-parameters [:attachmentId :fileId])]
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles action/all-authz-writer-roles
    :states      (action/all-states-but [:answered :sent :closed :canceled])}
@@ -220,6 +237,7 @@
 
 (defraw "view-attachment"
   {:parameters [:attachment-id]
+   :input-validators [(partial action/non-blank-parameters [:attachment-id])]
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles action/all-authz-roles}
   [{{:keys [attachment-id]} :data user :user}]
@@ -227,6 +245,7 @@
 
 (defraw "download-attachment"
   {:parameters [:attachment-id]
+   :input-validators [(partial action/non-blank-parameters [:attachment-id])]
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles action/all-authz-roles}
   [{{:keys [attachment-id]} :data user :user}]
@@ -259,8 +278,15 @@
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles action/all-authz-writer-roles
    :pre-checks [attachment-is-not-locked
-                (partial if-not-authority-states-must-match #{:sent})]
-   :input-validators [(fn [{{size :size} :data}] (when-not (pos? size) (fail :error.select-file)))
+                (partial if-not-authority-states-must-match #{:sent})
+                (fn [{{attachment-id :attachmentId} :data, user :user} application]
+                  (when attachment-id
+                    (when-not (attachment-editable-by-applicationState? application attachment-id (:role user))
+                      (fail :error.pre-verdict-attachment))))
+                validate-attachment-type]
+   :input-validators [(partial action/non-blank-parameters [:id :attachmentType :filename])
+                      (partial action/map-parameters-with-required-keys [:attachmentType] [:type-id :type-group])
+                      (fn [{{size :size} :data}] (when-not (pos? size) (fail :error.select-file)))
                       (fn [{{filename :filename} :data}] (when-not (mime/allowed-file? filename) (fail :error.illegal-file-type)))]
    :states     (action/all-states-but [:closed :canceled])
    :notified   true
@@ -268,12 +294,6 @@
                 open-inforequest/notify-on-comment]
    :description "Reads :tempfile parameter, which is a java.io.File set by ring"}
   [{:keys [created user application] {:keys [text target locked]} :data :as command}]
-
-  (when-not (attachment/allowed-attachment-type-for-application? application attachmentType)
-    (fail! :error.illegal-attachment-type))
-
-  (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
-    (fail! :error.pre-verdict-attachment))
 
   (when (= (:type target) "statement")
     (when-let [validation-error (statement/statement-owner (assoc-in command [:data :statementId] (:id target)) application)]
@@ -365,6 +385,7 @@
 
 (defcommand stamp-attachments
   {:parameters [:id timestamp text organization files xMargin yMargin extraInfo buildingId kuntalupatunnus section]
+   :input-validators [(partial action/vector-parameters-with-non-blank-items [:files])]
    :user-roles #{:authority}
    :states     [:submitted :sent :complement-needed :verdictGiven :constructionStarted :closed]
    :description "Stamps all attachments of given application"}
@@ -396,6 +417,7 @@
 
 (defquery stamp-attachments-job
   {:parameters [:job-id :version]
+   :input-validators [(partial action/non-blank-parameters [:job-id :version])]
    :user-roles #{:authority}
    :user-authz-roles action/default-authz-writer-roles
    :description "Returns state of stamping job"}
@@ -405,6 +427,8 @@
 (defcommand sign-attachments
   {:description "Designers can sign blueprints and other attachments. LUPA-1241"
    :parameters [:id attachmentIds password]
+   :input-validators [(partial action/non-blank-parameters [:password])
+                      (partial action/vector-parameters-with-non-blank-items [:attachmentIds])]
    :states     [:draft :open :submitted :sent :complement-needed :verdictGiven :constructionStarted]
    :pre-checks [domain/validate-owner-or-write-access
                 (fn [_ application]
@@ -443,7 +467,8 @@
    :user-roles #{:applicant :authority}
    :user-authz-roles action/all-authz-writer-roles
    :states     (action/all-states-but [:answered :sent :closed :canceled])
-   :input-validators [validate-meta validate-scale validate-size validate-operation]}
+   :input-validators [(partial action/non-blank-parameters [:attachmentId])
+                      validate-meta validate-scale validate-size validate-operation]}
   [{:keys [application user created] :as command}]
   (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
     (fail! :error.pre-verdict-attachment))
@@ -453,6 +478,8 @@
 
 (defcommand set-attachment-not-needed
   {:parameters [id attachmentId notNeeded]
+   :input-validators [(partial action/non-blank-parameters [:attachmentId])
+                      (partial action/boolean-parameters [:notNeeded])]
    :user-roles #{:applicant :authority}
    :states     [:draft :open :submitted]}
   [{:keys [created] :as command}]
