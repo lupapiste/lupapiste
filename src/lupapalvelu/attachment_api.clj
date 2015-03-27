@@ -184,8 +184,11 @@
 (defcommand create-attachments
   {:description "Authority can set a placeholder for an attachment"
    :parameters  [id attachmentTypes]
-   :input-validators [(partial action/vector-parameters-with-non-blank-items [:attachmentTypes])]
-; FIXME type validation
+
+   :pre-checks [(fn [{{attachment-types :attachmentTypes} :data} application]
+                  (when (and attachment-types (not (every? #(allowed-attachment-type-for-application? % application) attachment-types)))
+                    (fail :error.unknown-attachment-type)))]
+   :input-validators [(partial action/vector-parameters [:attachmentTypes])]
    :user-roles #{:authority :oirAuthority}
    :states      (action/all-states-but [:answered :sent :closed :canceled])}
   [{application :application {attachment-types :attachmentTypes} :data created :created}]
