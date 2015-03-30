@@ -220,7 +220,7 @@
       self.text(loc(["applications", colId]));
     });
 
-    ko.applyBindings(model, $("#applications")[0]);
+    $("#applications").applyBindings(model);
 
     var dataTableConfig = {
         bProcessing:      true, // don't hide this, it brakes layout.
