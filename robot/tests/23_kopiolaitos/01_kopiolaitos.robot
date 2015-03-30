@@ -44,7 +44,7 @@ Sonja sets contents description for the attachment
 Sonja disables verdict attachment using multiselect view
   Select attachment operation option from dropdown  markVerdictAttachments
   Wait Until  Element should be visible  xpath=//section[@id="verdict-attachments-select"]//h1[1]
-  Xpath Should Match X Times  xpath=//section[@id="verdict-attachments-select"]//table//tr[contains(@class, 'attachment-row')]  1
+  Xpath Should Match X Times  //section[@id="verdict-attachments-select"]//table//tr[contains(@class, 'attachment-row')]  1
   Click element  xpath=//section[@id="verdict-attachments-select"]//table//tr[contains(@class, 'attachment-row')]
   Click by test id  multiselect-action-button
 
@@ -54,7 +54,7 @@ There should be no verdict attachments
 Sonja marks one attachment as verdict attachment using multiselect view
   Select attachment operation option from dropdown  markVerdictAttachments
   Wait Until  Element should be visible  xpath=//section[@id="verdict-attachments-select"]//h1[1]
-  Xpath Should Match X Times  xpath=//section[@id="verdict-attachments-select"]//table//tr[contains(@class, 'attachment-row')]  1
+  Xpath Should Match X Times  //section[@id="verdict-attachments-select"]//table//tr[contains(@class, 'attachment-row')]  1
   Click element  xpath=//section[@id="verdict-attachments-select"]//table//tr[contains(@class, 'attachment-row')]
   Click by test id  multiselect-action-button
 
