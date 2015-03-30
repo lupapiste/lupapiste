@@ -60,7 +60,7 @@
   function init(appModel) {
     model.appModel = appModel;
     model.filteredAttachments = filterAttachments(ko.mapping.toJS(appModel.attachments()));
-    model.authorization = lupapisteApp.models.authModel;
+    model.authorization = lupapisteApp.models.applicationAuthModel;
 
     window.location.hash="!/move-attachments-to-backing-system-select/" + model.appModel.id();
   }
@@ -75,7 +75,7 @@
         repository.load(appId, null, function(application) {
           lupapisteApp.setTitle(application.title);
 
-          model.authorization = lupapisteApp.models.authModel;
+          model.authorization = lupapisteApp.models.applicationAuthModel;
           model.appModel = lupapisteApp.models.application;
 
           ko.mapping.fromJS(application, {}, model.appModel);

@@ -3,7 +3,7 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel, verdictAttachme
 
   var self = this;
 
-  self.authorizationModel = lupapisteApp.models.authModel;
+  self.authorizationModel = lupapisteApp.models.applicationAuthModel;
   self.appModel = appModel;
   self.signingModel = signingModel;
   self.verdictAttachmentPrintsOrderModel = verdictAttachmentPrintsOrderModel;
