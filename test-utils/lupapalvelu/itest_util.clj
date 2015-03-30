@@ -344,12 +344,13 @@
     (facts "Signed succesfully"
       (fact "Status code" (:status resp) => 200))))
 
-(defn upload-attachment [apikey application-id {attachment-id :id attachment-type :type} expect-to-succeed & {:keys [filename] :or {filename "dev-resources/test-attachment.txt"}}]
+(defn upload-attachment [apikey application-id {attachment-id :id attachment-type :type} expect-to-succeed & {:keys [filename text] :or {filename "dev-resources/test-attachment.txt", text ""}}]
   (let [uploadfile  (io/file filename)
         uri         (str (server-address) "/api/upload/attachment")
         resp        (http/post uri
                                {:headers {"authorization" (str "apikey=" apikey)}
                                 :multipart [{:name "applicationId"  :content application-id}
+                                            {:name "text"           :content text}
                                             {:name "Content/type"   :content "text/plain"}
                                             {:name "attachmentType" :content (str
                                                                                (:type-group attachment-type) "."
