@@ -780,6 +780,11 @@
               (mongo/update-by-id :organizations (:id organization)
                                   {$set {:selected-operations operations}})))
     ))
+
+(defmigration user-organization-cleanup
+  {:apply-when (pos? (mongo/count :users {:organization {$exists true}}))}
+  (mongo/update-by-query :users {:organization {$exists true}} {$unset {:organization 0}}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"

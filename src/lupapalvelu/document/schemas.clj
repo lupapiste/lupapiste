@@ -365,7 +365,8 @@
    {:name "6kk" :type :string :subtype :number :size "s" :label false :uicomponent :string :i18nkey "muutHankkeet.6kk"}
    {:name "9kk" :type :string :subtype :number :size "s" :label false :uicomponent :string :i18nkey "muutHankkeet.9kk"}
    {:name "12kk" :type :string :subtype :number  :size "s" :label false :uicomponent :string :i18nkey "muutHankkeet.12kk"}
-   {:name "autoupdated" :type :checkbox :hidden true :i18nkey "muutHankkeet.autoupdated" :uicomponent :checkbox :whitelist [:none]}])
+   {:name "autoupdated" :type :checkbox :hidden true :i18nkey "muutHankkeet.autoupdated" :uicomponent :checkbox :whitelist {:roles [:none]
+                                                                                                                            :otherwise :disabled}}])
 
 (def muut-rakennushankkeet-table {:name "muutHankkeet"
                                   :type :foremanOtherApplications
@@ -376,13 +377,14 @@
                                   :listen [:hetuChanged]
                                   :body hanke-row})
 
-(def tayta-omat-tiedot-button {:name "fillMyInfo" :type :fillMyInfoButton :whitelist [:applicant]})
+(def tayta-omat-tiedot-button {:name "fillMyInfo" :type :fillMyInfoButton :whitelist {:roles [:applicant] :otherwise :disabled}})
 
 (def tyonjohtajan-historia {:name "foremanHistory" :type :foremanHistory})
 
 (def tyonjohtajan-hyvaksynta [{:name "tyonjohtajanHyvaksynta"
                                :type :group
-                               :whitelist [:authority]
+                               :whitelist {:roles [:authority]
+                                           :otherwise :hidden}
                                :body [{:name "tyonjohtajanHyvaksynta" :type :checkbox :i18nkey "tyonjohtaja.historia.hyvaksynta"}
                                       tyonjohtajan-historia]}])
 
@@ -540,14 +542,15 @@
                    {:name "kellarinpinta-ala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}]})
 
 (def mitat-muutos {:name "mitat"
-                        :type :group
-                        :group-help "mitat-muutos.help"
-                        :whitelist [:authority]
-                        :body [{:name "tilavuus" :type :string :size "s" :unit "m3" :subtype :number :min 1 :max 9999999}
-                               {:name "kerrosala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}
-                               {:name "kokonaisala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}
-                               {:name "kerrosluku" :type :string :size "s" :subtype :number :min 0 :max 50}
-                               {:name "kellarinpinta-ala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}]})
+                   :type :group
+                   :group-help "mitat-muutos.help"
+                   :whitelist {:roles [:authority]
+                               :otherwise :disabled}
+                   :body [{:name "tilavuus" :type :string :size "s" :unit "m3" :subtype :number :min 1 :max 9999999}
+                          {:name "kerrosala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}
+                          {:name "kokonaisala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}
+                          {:name "kerrosluku" :type :string :size "s" :subtype :number :min 0 :max 50}
+                          {:name "kellarinpinta-ala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}]})
 
 (def rakenne {:name "rakenne"
               :type :group

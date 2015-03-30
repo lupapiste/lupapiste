@@ -76,7 +76,7 @@ LUPAPISTE.AttachmentsMultiselectModel = function(params) {
   });
 
   self.start = function() {
-    params.saveFn(_.map(self.selectedFiles(), "id"));
+    params.saveFn(_.map(self.selectedFiles(), "id"), _.map(self.nonSelectedFiles(), "id"));
   };
 
   self.selectRow = function(row) {
