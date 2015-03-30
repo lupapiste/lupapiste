@@ -8,7 +8,7 @@
         <div class="clear">
             <div data-bind="if: postFiles().length > 0">
               <h2>
-                <span data-bind="text: 'application.attachments.post-verdict'"></span>
+                <span data-bind="ltext: 'application.attachments.post-verdict'"></span>
               </h2>
               <div class="clear" data-bind="template: {name: 'attachments-multiselect-table', data: postFiles()}"></div>
             </div>
@@ -30,11 +30,11 @@
 
         <div class="attachment-multiselect-buttons">
           <button data-bind="click: start,
-                             ltext: params.okLoc,
-                             enable: $parent.authorization.ok('set-attachments-as-verdict-attachment'),
-                             clickBubble: false"
+                             ltext: params.okLoc
+                             clickBubble: false,
+                             enable: $parent.authorization.ok(params.authKey)"
             class="btn btn-primary"
-            data-test-id="mark-selected-as-verdict-attachments">
+            data-test-id="multiselect-action-button">
           </button>
           <button data-bind="ltext: 'application.return', click: $parent.cancelSelecting"
             class="btn close"
@@ -86,6 +86,11 @@
                                  attr: {'class': 'icon transfered',
                                         'title': loc('application.attachmentSentDate') + ' ' + $data.sentDateString,
                                         'data-test-icon': 'transfered-' + type['type-group'] + '.' + type['type-id']}"></span>
+                <span data-bind="visible: $data.forPrinting,
+                                 attr: {'class': 'icon verdict-attachment',
+                                        'title': loc('attachment.verdict-attachment'),
+                                        'data-test-icon': 'verdict-attachment-' + type['type-group'] + '.' + type['type-id']}">
+
               </td>
               <td class="attachment-type-group">
                   <span data-bind="if: type">

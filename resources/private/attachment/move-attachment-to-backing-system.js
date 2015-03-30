@@ -103,6 +103,6 @@
   });
 
   $(function() {
-    $("#attachment-multiselect-container").applyBindings(model);
+    $("#move-attachments-to-backing-system-select").applyBindings(model);
   });
 })();
