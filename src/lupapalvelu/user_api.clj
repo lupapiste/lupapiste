@@ -19,6 +19,7 @@
             [lupapalvelu.vetuma :as vetuma]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.user :as user]
+            [lupapalvelu.organization :as organization]
             [lupapalvelu.idf.idf-client :as idf]
             [lupapalvelu.token :as token]
             [lupapalvelu.ttl :as ttl]
@@ -94,6 +95,7 @@
   (let [password         (:password user-data)
         user-role        (keyword (:role user-data))
         caller-role      (keyword (:role caller))
+        organization-id  (or (:organization user-data) (-> user-data :organizations first))
         admin?           (= caller-role :admin)
         authorityAdmin?  (= caller-role :authorityAdmin)]
 
@@ -120,6 +122,9 @@
 
     (when (and password (not (security/valid-password? password)))
       (fail! :password-too-short :desc "password specified, but it's not valid"))
+
+    (when (and organization-id (not (organization/get-organization organization-id)))
+      (fail! :error.organization-not-found))
 
     (when (and (:apikey user-data) (not admin?))
       (fail! :error.unauthorized :desc "only admin can create create users with apikey")))
@@ -198,8 +203,7 @@
                    caller
                    {:email email :role :authority :organization new-organization :enabled true
                     :firstName firstName :lastName lastName}
-                   :send-email false)
-        ]
+                   :send-email false)]
     (infof "invitation for new authority user: email=%s, organization=%s" email new-organization)
     (notify-new-authority new-user caller)
     (ok :operation "invited")))
