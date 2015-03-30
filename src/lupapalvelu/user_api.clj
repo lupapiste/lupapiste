@@ -129,21 +129,22 @@
 (defn- create-new-user-entity [user-data]
   (let [email (user/canonize-email (:email user-data))]
     (-> user-data
-        (select-keys [:email :username :role :firstName :lastName :personId
-                      :phone :city :street :zip :enabled :organization
-                      :allowDirectMarketing :architect :company])
-        (as-> user-data (merge {:firstName "" :lastName "" :username email} user-data))
-        (assoc
-          :email email
-          :enabled (= "true" (str (:enabled user-data)))
-          :organizations (if (:organization user-data) [(:organization user-data)] [])
-          :private (merge {}
-                          (when (:password user-data)
-                            {:password (security/get-hash (:password user-data))})
-                          (when (and (:apikey user-data) (not= "false" (:apikey user-data)))
-                            {:apikey (if (and (env/dev-mode?) (not (#{"true" "false"} (:apikey user-data))))
-                                       (:apikey user-data)
-                                       (security/random-password))}))))))
+      (dissoc :organization)
+      (select-keys [:email :username :role :firstName :lastName :personId
+                    :phone :city :street :zip :enabled :organization
+                    :allowDirectMarketing :architect :company])
+      (as-> user-data (merge {:firstName "" :lastName "" :username email} user-data))
+      (assoc
+        :email email
+        :enabled (= "true" (str (:enabled user-data)))
+        :organizations (if (:organization user-data) [(:organization user-data)] [])
+        :private (merge {}
+                   (when (:password user-data)
+                     {:password (security/get-hash (:password user-data))})
+                   (when (and (:apikey user-data) (not= "false" (:apikey user-data)))
+                     {:apikey (if (and (env/dev-mode?) (not (#{"true" "false"} (:apikey user-data))))
+                                (:apikey user-data)
+                                (security/random-password))}))))))
 
 ;;
 ;; TODO: Ylimaaraisen "send-email"-parametrin sijaan siirra mailin lahetys pois
