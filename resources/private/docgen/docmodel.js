@@ -1148,7 +1148,11 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   }
 
   function build(subSchema, model, path, partOfChoice) {
-    if (subSchema.hidden || model[subSchema.name]["whitelist-action"] === "hidden" ) {
+    // Do not create hidden whitelisted elements
+    var schemaBranchHidden = util.getIn(subSchema, ["whitelist", "otherwise"]) === "hidden";
+    var schemaLeafHidden = model[subSchema.name]["whitelist-action"] === "hidden";
+
+    if (subSchema.hidden || schemaLeafHidden || schemaBranchHidden) {
       return;
     }
 
