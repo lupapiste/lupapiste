@@ -52,11 +52,11 @@
           <span data-bind="ltext: 'request.create'"></span><span class="icon add left-align"></span>
         </button>
 
-<!-- TODO: Poista 2 alla olevaa divia kun "app-from-prev-permit"-feature flagi on kaytossa -->
-        <div data-bind="if: features.enabled('app-from-prev-permit')" class="application-create" style="display: inline;">
+<!-- TODO: Poista 2 alla olevaa divia, kun "app-from-prev-permit"-feature flagi ei ole enaa kaytossa -->
+        <div data-bind="if: features.enabled('app-from-prev-permit') && authorizationModel.ok('create-application-from-previous-permit')" class="application-create" style="display: inline;">
           <div class="feature" style="display: inline;">
             <button
-              data-bind="click: createWithPrevPermit"
+              data-bind="click: createWithPrevPermit, visible: authorizationModel.ok('create-application-from-previous-permit')"
               data-test-id="applications-create-new-with-prev-permit"
               class="btn-primary application-create">
               <span data-bind="ltext: 'newRequest.createNewWithPrevPermit'"></span><span class="icon add left-align"></span>

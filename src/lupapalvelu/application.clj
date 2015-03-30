@@ -730,7 +730,7 @@
 
 (defcommand create-application-from-previous-permit
   {:parameters [:operation :x :y :address :propertyId :municipality :kuntalupatunnus]
-   :user-roles #{:applicant :authority}
+   :user-roles #{:authority}
    :input-validators [(partial action/non-blank-parameters [:operation :municipality])  ;; no :address included
                       ;; the propertyId parameter can be nil
                       (fn [{{propertyId :propertyId} :data :as command}]

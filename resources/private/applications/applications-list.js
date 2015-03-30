@@ -17,6 +17,8 @@
   function ApplicationsModel() {
     var self = this;
 
+    self.authorizationModel = lupapisteApp.models.globalAuthModel;
+
     self.userIsAdmin = ko.observable(false);
     self.total       = ko.observable(0);
     self.showFilterControls = ko.computed(function() {
