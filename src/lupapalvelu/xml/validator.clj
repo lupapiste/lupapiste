@@ -108,17 +108,20 @@
    "ah-1.1" asianhallinta-validator})
 
 (def- ymp-validators
-  {"2.1.2" common-validator-2_1_3})
+  {"2.1.2" common-validator-2_1_3
+   "ah-1.1" asianhallinta-validator})
 
 (def- schema-validators
   {:R   rp-validators
    :P   rp-validators
    :YA  {"2.1.2" common-validator-2_1_0
          "2.1.3" common-validator-2_1_3
+         "ah-1.1" asianhallinta-validator
          }
    :YI  ymp-validators
    :MAL ymp-validators
-   :VVVL {"2.1.3" common-validator-2_1_3}
+   :VVVL {"2.1.3" common-validator-2_1_3
+          "ah-1.1" asianhallinta-validator}
    :YL  ymp-validators})
 
 (def supported-versions-by-permit-type
