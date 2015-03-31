@@ -96,6 +96,15 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel, verdictAttachme
           return self.authorizationModel.ok("move-attachments-to-backing-system") && self.appModel.hasAttachment() && unsentAttachmentFound(rawAttachments);
         }
       },
+      "attachmentsMoveToCaseManagement": {
+        loc: loc("application.attachmentsMoveToCaseManagement"),
+        clickCommand: function() {
+          return self.startMovingAttachmentsToCaseManagement();
+        },
+        visibleFn: function (rawAttachments) {
+          return self.authorizationModel.ok("move-attachments-to-backing-system") && self.appModel.hasAttachment() && unsentAttachmentFound(rawAttachments);
+        }
+      },
       "downloadAll": {
         loc: loc("download-all"),
         clickCommand: function() {
@@ -173,6 +182,10 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel, verdictAttachme
 
   self.startMovingAttachmentsToBackingSystem = function() {
     hub.send("start-moving-attachments-to-backing-system");
+  };
+
+  self.startMovingAttachmentsToCaseManagement = function() {
+    hub.send("start-moving-attachments-to-case-management");
   };
 
   self.newAttachment = function() {
