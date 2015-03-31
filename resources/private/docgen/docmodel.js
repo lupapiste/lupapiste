@@ -1149,8 +1149,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
   function build(subSchema, model, path, partOfChoice) {
     // Do not create hidden whitelisted elements
-    var schemaBranchHidden = util.getIn(subSchema, ["whitelist", "otherwise"]) === "hidden";
-    var schemaLeafHidden = model[subSchema.name]["whitelist-action"] === "hidden";
+    var whitelistedRoles = util.getIn(subSchema, ["whitelist", "roles"]);
+    var schemaBranchHidden = util.getIn(subSchema, ["whitelist", "otherwise"]) === "hidden" && !_.contains(whitelistedRoles, currentUser.get().role());
+    var schemaLeafHidden = util.getIn(model, [subSchema.name, "whitelist"]) === "hidden";
 
     if (subSchema.hidden || schemaLeafHidden || schemaBranchHidden) {
       return;
