@@ -104,23 +104,18 @@
                 command       (action/application->command application)
                 new-verdict   (reduce (fn [verdict attachment]
                                         (let [attachment-id (pandect/sha1 (:LinkkiLiitteeseen attachment))]
-                                          (prn attachment-id)
                                           (insert-attachment!
                                             application
                                             attachment
                                             unzipped-path
                                             (:id new-verdict)
                                             attachment-id)
-                                          (assoc-in verdict [:paatokset 0 :poytakirjat 0 :urlHash] attachment-id)))
+                                          (assoc-in verdict [:paatokset 0 :poytakirjat 0 :urlHash] attachment-id))) ; TODO: this is b0rken. Poytakirja should be copied for each attachment. Works only for one attachment
                                       new-verdict
                                       attachments)
                 update-clause {$push {:verdicts new-verdict}}] ; TODO: Should update modified? can you use $push then?
-            (action/update-application command update-clause)))
-
-          ; Save attachment file to attachment (gridfs)
-        )
-
-      (ok))
+            (action/update-application command update-clause)
+            (ok)))))
     (catch Exception e
       (if-let [error-key (some-> e ex-data :object :text)]
         (fail error-key)
