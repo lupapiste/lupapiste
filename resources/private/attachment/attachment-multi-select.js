@@ -9,8 +9,7 @@ LUPAPISTE.AttachmentMultiSelect = function() {
     appModel: undefined,
     filteredAttachments: undefined,
 
-    doMoveAttachmetsToBackingSystem: undefined,
-    moveAttachmetsToBackingSystem: undefined,
+    moveAttachmets: undefined,
 
     cancelSelecting: function() {
       var id = self.model.appModel.id();

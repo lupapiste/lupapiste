@@ -1,37 +1,36 @@
 (function() {
   "use strict";
 
-  var pageName = "move-attachments-to-backing-system-select";
-
+  var pageName  = "move-attachments-to-backing-system-select";
   var eventName = "start-moving-attachments-to-backing-system";
-
+  var command   = "move-attachments-to-backing-system";
   var multiSelect = _.extend(new LUPAPISTE.AttachmentMultiSelect(), {});
 
-  multiSelect.hash = "!/move-attachments-to-backing-system-select/";
+  multiSelect.hash = "!/" + pageName + "/";
 
-  multiSelect.model.doMoveAttachmetsToBackingSystem = function(selectedAttachmentsIds) {
-      var id = multiSelect.model.appModel.id();
-      ajax.command("move-attachments-to-backing-system", {
-        id: id,
-        lang: loc.getCurrentLanguage(),
-        attachmentIds: selectedAttachmentsIds
-      })
-      .success(function() {
-        window.location.hash = "!/application/" + id + "/attachments";
-        repository.load(id);
-      })
-      .error(function() {
-        notify.error(loc("error.dialog.title"), loc("move-attachments-to-backing-system.error"));
-        repository.load(id);
-      })
-      .call();
-    };
+  var doMoveAttachmetsToBackingSystem = function(selectedAttachmentsIds) {
+    var id = multiSelect.model.appModel.id();
+    ajax.command(command, {
+      id: id,
+      lang: loc.getCurrentLanguage(),
+      attachmentIds: selectedAttachmentsIds
+    })
+    .success(function() {
+      window.location.hash = "!/application/" + id + "/attachments";
+      repository.load(id);
+    })
+    .error(function() {
+      notify.error(loc("error.dialog.title"), loc(command + ".error"));
+      repository.load(id);
+    })
+    .call();
+  };
 
-  multiSelect.model.moveAttachmetsToBackingSystem = function(selectedAttachmentsIds) {
+  multiSelect.model.moveAttachmets = function(selectedAttachmentsIds) {
     LUPAPISTE.ModalDialog.showDynamicYesNo(
       loc("application.attachmentsMoveToBackingSystem"),
       loc("application.attachmentsMoveToBackingSystem.confirmationMessage"),
-      {title: loc("yes"), fn: _.partial(multiSelect.model.doMoveAttachmetsToBackingSystem, selectedAttachmentsIds)},
+      {title: loc("yes"), fn: _.partial(doMoveAttachmetsToBackingSystem, selectedAttachmentsIds)},
       {title: loc("no")}
     );
   };
