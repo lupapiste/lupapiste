@@ -519,7 +519,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   }
 
   function getModelDisabled(model, name) {
-    return util.getIn(model, [name, "disabled"], false);
+    return util.getIn(model, [name, "whitelist-action"]) === "disabled";
   }
 
   function buildText(subSchema, model, path) {
@@ -1148,7 +1148,11 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   }
 
   function build(subSchema, model, path, partOfChoice) {
-    if (subSchema.hidden) {
+    // Do not create hidden whitelisted elements
+    var schemaBranchHidden = util.getIn(subSchema, ["whitelist", "otherwise"]) === "hidden";
+    var schemaLeafHidden = util.getIn(model, [subSchema.name, "whitelist"]) === "hidden";
+
+    if (subSchema.hidden || schemaLeafHidden || schemaBranchHidden) {
       return;
     }
 

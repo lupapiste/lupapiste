@@ -229,9 +229,9 @@
   (let [doc-schema        (model/get-document-schema doc)
         zip-root          (schema-zipper doc-schema)
         whitelisted-paths (walk-schema zip-root)]
-    (reduce (fn [new-doc [path roles]]
-              (if-not ((set roles) (keyword user-role))
-                (util/update-in-repeating new-doc (prefix-with :data path) merge {:disabled true})
+    (reduce (fn [new-doc [path whitelist]]
+              (if-not ((set (:roles whitelist)) (keyword user-role))
+                (util/update-in-repeating new-doc (prefix-with :data path) merge {:whitelist-action (:otherwise whitelist)})
                 new-doc))
             doc
             whitelisted-paths)))
@@ -363,6 +363,7 @@
 
 (defcommand cancel-inforequest
   {:parameters [id]
+   :input-validators [(partial action/non-blank-parameters [:id])]
    :user-roles #{:applicant :authority :oirAuthority}
    :notified   true
    :on-success (notify :application-state-change)
@@ -377,6 +378,7 @@
 
 (defcommand cancel-application
   {:parameters [id]
+   :input-validators [(partial action/non-blank-parameters [:id])]
    :user-roles #{:applicant}
    :notified   true
    :on-success (notify :application-state-change)
@@ -391,6 +393,7 @@
 
 (defcommand cancel-application-authority
   {:parameters [id text]
+   :input-validators [(partial action/non-blank-parameters [:id])]
    :user-roles #{:authority}
    :notified   true
    :on-success (notify :application-state-change)
@@ -420,6 +423,7 @@
 
 (defcommand open-application
   {:parameters [id]
+   :input-validators [(partial action/non-blank-parameters [:id])]
    :user-roles #{:applicant :authority}
    :notified   true
    :on-success (notify :application-state-change)
@@ -432,6 +436,7 @@
 
 (defcommand request-for-complement
   {:parameters [:id]
+   :input-validators [(partial action/non-blank-parameters [:id])]
    :user-roles #{:authority}
    :notified   true
    :on-success (notify :application-state-change)
@@ -458,6 +463,7 @@
 
 (defcommand submit-application
   {:parameters [id]
+   :input-validators [(partial action/non-blank-parameters [:id])]
    :user-roles #{:applicant :authority}
    :states     [:draft :open]
    :notified   true
@@ -477,6 +483,7 @@
 
 (defcommand save-application-drawings
   {:parameters [:id drawings]
+   :input-validators [(partial action/non-blank-parameters [:id])]
    :user-roles #{:applicant :authority :oirAuthority}
    :states     [:draft :info :answered :open :submitted :complement-needed]}
   [{:keys [created] :as command}]
@@ -511,7 +518,7 @@
   {:parameters [id lang x y]
    :user-roles #{:authority :oirAuthority}
    :states     action/all-inforequest-states
-   :input-validators [(partial action/non-blank-parameters [:x :y])]}
+   :input-validators [(partial action/non-blank-parameters [:id :x :y])]}
   [{:keys [application user]}]
   (let [x (util/->double x)
         y (util/->double y)

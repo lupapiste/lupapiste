@@ -331,7 +331,9 @@
 
       (give-verdict sonja application-id) => ok?
       (upload-attachment sonja application-id first-attachment true)
-      (command sonja :move-attachments-to-backing-system :id application-id :lang "fi") => ok?
+
+      (let [application (query-application sonja application-id) => truthy]
+        (command sonja :move-attachments-to-backing-system :id application-id :lang "fi" :attachmentIds (get-attachment-ids application)) => ok?)
 
       (let [application (query-application sonja application-id) => truthy]
         (get-in application [:attachments 0 :sent]) => pos?

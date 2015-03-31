@@ -69,8 +69,7 @@ var stamping = (function() {
   function initStamp(appModel) {
     model.appModel = appModel;
     model.attachments = model.appModel.attachments();
-    model.authorization = authorization.create();
-    model.authorization.refresh(model.appModel.id());
+    model.authorization = lupapisteApp.models.applicationAuthModel;
 
     setStampFields();
 
@@ -87,9 +86,8 @@ var stamping = (function() {
         repository.load(appId, null, function(application) {
           lupapisteApp.setTitle(application.title);
 
-          model.authorization = authorization.create();
-          model.appModel = new LUPAPISTE.ApplicationModel();
-          model.authorization.refresh(application);
+          model.authorization = lupapisteApp.models.applicationAuthModel;
+          model.appModel = lupapisteApp.models.application;
 
           ko.mapping.fromJS(application, {}, model.appModel);
 

@@ -7,6 +7,40 @@
 
 (apply-remote-minimal)
 
+(facts* "users-in-same-organizations"
+  (let [naantali (apikey-for "rakennustarkastaja@naantali.fi")
+        jarvenpaa (apikey-for "rakennustarkastaja@jarvenpaa.fi")
+        oulu (apikey-for "olli")
+
+        naantali-user (query naantali :user) => ok?
+        jarvenpaa-user (query jarvenpaa :user) => ok?
+        oulu-user (query oulu :user) => ok?]
+
+    ; Meta
+    (fact "naantali user in naantali & jarvenpaa orgs"
+      (->> naantali-user :user :orgAuthz (map :org)) => ["529-R" "186-R"])
+    (fact "jarvenpaa just jarvenpaa"
+      (->> jarvenpaa-user :user :orgAuthz (map :org)) => ["186-R"])
+    (fact "oulu user in oulu & naantali orgs"
+      (->> oulu-user :user :orgAuthz (map :org)) => ["564-R" "529-R"])
+
+
+    (let [naantali-sees (:users (query naantali :users-in-same-organizations))
+          jarvenpaa-sees (:users (query jarvenpaa :users-in-same-organizations))
+          oulu-sees (:users (query oulu :users-in-same-organizations))]
+
+      (fact "naantali user sees other users in naantali & jarvenpaa (but not admin)"
+        (map :username naantali-sees) =>
+        (contains ["rakennustarkastaja@naantali.fi" "lupasihteeri@naantali.fi" "rakennustarkastaja@jarvenpaa.fi" "lupasihteeri@jarvenpaa.fi" "olli"] :in-any-order))
+
+      (fact "jarvenpaa just jarvenpaa users (incl. Mr. Naantali but not admin)"
+        (map :username jarvenpaa-sees) =>
+        (contains ["rakennustarkastaja@jarvenpaa.fi" "lupasihteeri@jarvenpaa.fi" "rakennustarkastaja@naantali.fi"] :in-any-order))
+
+      (fact "oulu user sees other users in oulu & naantali"
+        (map :username oulu-sees) =>
+        (contains ["olli" "rakennustarkastaja@naantali.fi" "lupasihteeri@naantali.fi"] :in-any-order)))))
+
 (fact* "Organization details query works"
  (let [resp  (query pena "organization-details" :municipality "753" :operation "kerrostalo-rivitalo" :lang "fi") => ok?]
    (count (:attachmentsForOp resp )) => pos?
@@ -174,3 +208,20 @@
       (:applications m) => empty?
       (:infoRequests m) => empty?
       (:opening m) => [{:permitType "R", :opening 123}])))
+
+
+(facts "organization-operations-attachments"
+  (fact "Invalid operation is rejected"
+    (command sipoo :organization-operations-attachments :operation "foo" :attachments []) => (partial expected-failure? "error.unknown-operation"))
+
+  (fact "Empty attachments array is ok"
+    (command sipoo :organization-operations-attachments :operation "pientalo" :attachments []) => ok?)
+
+  (fact "scalar value as attachments parameter is not ok"
+    (command sipoo :organization-operations-attachments :operation "pientalo" :attachments "") => (partial expected-failure? "error.non-vector-parameters"))
+
+  (fact "Invalid attachment is rejected"
+    (command sipoo :organization-operations-attachments :operation "pientalo" :attachments [["foo" "muu"]]) => (partial expected-failure? "error.unknown-attachment-type"))
+
+  (fact "Valid attachment is ok"
+    (command sipoo :organization-operations-attachments :operation "pientalo" :attachments [["muut" "muu"]]) => ok?))

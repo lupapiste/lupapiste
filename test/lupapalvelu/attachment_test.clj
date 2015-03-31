@@ -34,8 +34,6 @@
   (fact (attachment-latest-version test-attachments "1")    => {:major 9, :minor 7})
   (fact (attachment-latest-version test-attachments "none") => nil?))
 
-(testable-privates lupapalvelu.attachment allowed-attachment-types-contain?)
-
 (facts "Facts about next-attachment-version"
   (fact (next-attachment-version {:major 1 :minor 1} {:role :authority})  => {:major 1 :minor 2})
   (fact (next-attachment-version {:major 1 :minor 1} {:role :dude})       => {:major 2 :minor 0})
@@ -116,3 +114,20 @@
   (facts "create-sent-timestamp-update-statements"
     (create-sent-timestamp-update-statements attachments ["12" "23"] 123) => {"attachments.1.sent" 123
                                                                               "attachments.2.sent" 123}))
+
+(fact "attachment type IDs are unique"
+  (let [known-duplicates (set (conj attachment-types-osapuoli
+                                :ote_asunto-osakeyhtion_kokouksen_poytakirjasta
+                                :ote_alueen_peruskartasta
+                                :ote_asemakaavasta
+                                :ote_kauppa_ja_yhdistysrekisterista
+                                :asemapiirros
+                                :ote_yleiskaavasta
+                                :jaljennos_perunkirjasta
+                                :valokuva :rasitesopimus
+                                :valtakirja
+                                :muu))
+        all-except-commons (remove known-duplicates all-attachment-type-ids)
+        all-unique (set all-except-commons)]
+
+    (count all-except-commons) => (count all-unique)))

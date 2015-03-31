@@ -72,6 +72,8 @@
 
 ;; Role helpers
 
+(def all-authenticated-user-roles #{:applicant :authority :oirAuthority :authorityAdmin :admin})
+
 (def default-authz-writer-roles #{:owner :writer :foreman})
 (def default-authz-reader-roles (conj default-authz-writer-roles :reader))
 (def all-authz-writer-roles (conj default-authz-writer-roles :statementGiver))
@@ -120,6 +122,9 @@
 
 (defn boolean-parameters [params command]
   (filter-params-of-command params command #(not (instance? Boolean %)) :error.non-boolean-parameters))
+
+(defn number-parameters [params command]
+  (filter-params-of-command params command (complement number?) :error.illegal-number))
 
 (defn map-parameters [params command]
   (filter-params-of-command params command (complement map?) :error.unknown-type))
