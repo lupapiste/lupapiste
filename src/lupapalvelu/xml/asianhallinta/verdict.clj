@@ -24,11 +24,8 @@
       (fsc/unzip path-to-zip tmp-dir)
       tmp-dir)))
 
-(defn- ensure-attachments-present! [unzipped-path parsed-xml]
-  (let [attachments      (-> (get-in parsed-xml [:AsianPaatos :Liitteet])
-                             (reader/ensure-sequential :Liite)
-                             :Liite)
-        attachment-paths (->> attachments
+(defn- ensure-attachments-present! [unzipped-path attachments]
+  (let [attachment-paths (->> attachments
                               (map :LinkkiLiitteeseen)
                               (map fs/base-name))]
     (doseq [filename attachment-paths]
@@ -55,9 +52,12 @@
         (error-and-fail! (str "Expected to find one xml, found " (count xmls)) :error.integration.asianhallinta-wrong-number-of-xmls))
 
       ; parse XML
-      (let [parsed-xml (-> (first xmls) slurp xml/parse reader/strip-xml-namespaces xml/xml->edn)]
+      (let [parsed-xml (-> (first xmls) slurp xml/parse reader/strip-xml-namespaces xml/xml->edn)
+            attachments (-> (get-in parsed-xml [:AsianPaatos :Liitteet])
+                            (reader/ensure-sequential :Liite)
+                            :Liite)]
         ; Check that all referenced attachments were included in zip
-        (ensure-attachments-present! unzipped-path parsed-xml)
+        (ensure-attachments-present! unzipped-path attachments)
 
         ; Create verdict
         ; -> fetch application
@@ -74,9 +74,21 @@
           (let [new-verdict   (build-verdict parsed-xml)
                 command       (action/application->command application)
                 update-clause {$push {:verdicts new-verdict}}]
-            (action/update-application command update-clause)
-            ))
+            (action/update-application command update-clause))
+
           ; Create attachments
+          ; 1. add poytakirja to verdict
+          ; 2. add attachment to application (target type "verdict", "urlhash" matching verdict urlHash. id generated?)
+          ; 3. make attachment point to poytakirja ()
+          (doseq [attachment attachments]
+            (prn attachment)
+
+            )
+
+          )
+
+
+
           ; Save attachment file to attachment (gridfs)
         )
 
