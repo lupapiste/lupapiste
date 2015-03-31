@@ -70,7 +70,7 @@
         <p data-bind="html: missingDesc"></p>
         <div class="missing-wrapper">
 
-          <div class="missing-inforequest-box app-type-box">
+          <div class="missing-inforequest-box app-type-box" data-bind="css: {'app-type-box-wide': !authorizationModel.ok('create-application-from-previous-permit')}">
             <h2 data-bind="ltext: 'applications.missing.inforequest.title'"></h2>
             <p data-bind="ltext: 'applications.missing.inforequest.desc'"></p>
             <button
@@ -81,7 +81,7 @@
             </button>
           </div>
 
-          <div class="missing-application-box app-type-box">
+          <div class="missing-application-box app-type-box" data-bind="css: {'app-type-box-wide': !authorizationModel.ok('create-application-from-previous-permit')}">
             <h2 data-bind="ltext: 'applications.missing.application.title'"></h2>
             <p data-bind="ltext: 'applications.missing.application.desc'"></p>
             <button
@@ -92,10 +92,11 @@
             </button>
           </div>
 
-<!-- TODO: Poista 2 allaolevaa divia, kun "app-from-prev-permit"-feature flagi on kaytossa, ja korvaa explisiittinen "app-type-box"-class scss:ssa pelkalla div-maarityksella -->
-        <div data-bind="if: features.enabled('app-from-prev-permit')" class="app-type-box">
+<!-- TODO: Poista 2 allaolevaa divia, kun "app-from-prev-permit"-feature flagia ei ole enaa kaytossa, ja korvaa explisiittinen "app-type-box"-class scss:ssa pelkalla div-maarityksella -->
+        <div data-bind="if: features.enabled('app-from-prev-permit') && authorizationModel.ok('create-application-from-previous-permit')" class="app-type-box">
           <div class="feature">
-              <div class="missing-prev-permit-box">    <!-- Lisaa talle class "app-type-box", kun "app-from-prev-permit"-feature flagi poistetaan-->
+              <!-- Lisaa talle diville class "app-type-box", kun "app-from-prev-permit"-feature flagi poistetaan-->
+              <div class="missing-prev-permit-box" data-bind="visible: authorizationModel.ok('create-application-from-previous-permit')">
                 <h2 data-bind="ltext: 'applications.createWithPrevPermit.title'"></h2>
                 <p data-bind="ltext: 'applications.createWithPrevPermit.desc'"></p>
                 <button
