@@ -2,6 +2,7 @@
   (:require [sade.core :refer [ok fail fail!] :as core]
             [sade.common-reader :as reader]
             [sade.xml :as xml]
+            [pandect.core :as pandect]
             [taoensso.timbre :refer [error]]
             [me.raynes.fs :as fs]
             [me.raynes.fs.compression :as fsc]
@@ -11,7 +12,8 @@
             [lupapalvelu.action :as action]
             [lupapalvelu.mongo :as mongo]
             [clojure.string :as s]
-            [sade.common-reader :as cr]))
+            [sade.common-reader :as cr]
+            [lupapalvelu.attachment :as attachment]))
 
 (defn- error-and-fail! [error-msg fail-key]
   (error error-msg)
@@ -43,6 +45,33 @@
                                 :pykala          (:Pykala AsianPaatos)
                                 :paatoskoodi     (:PaatosKoodi AsianPaatos)}]}]})
 
+(defn- insert-attachment! [application attachment unzipped-path verdict-id attachment-id]
+  (prn attachment)
+  (let [filename (fs/base-name (:LinkkiLiitteeseen attachment))
+        file     (fs/file (s/join "/" [unzipped-path filename]))
+        file-size (.length file)
+        orgs      (lupapalvelu.organization/resolve-organizations
+                    (:municipality application)
+                    (:permitType application))
+        eraajo-user {:id "-"
+                     :enabled true
+                     :lastName "Er\u00e4ajo"
+                     :firstName "Lupapiste"
+                     :role "authority"
+                     :organizations (map :id orgs)}]
+    (attachment/attach-file! {:application application
+                              :filename filename
+                              :size file-size
+                              :content file
+                              :attachment-id attachment-id
+                              :attachment-type {:type-group "muut" :type-id "muu"}
+                              :target {:type "verdict" :id attachment-id}
+                              :required false
+                              :locked true
+                              :user eraajo-user
+                              :created (core/now)
+                              :state :ok})))
+
 (defn process-ah-verdict [path-to-zip ftp-user]
   (try
     (let [unzipped-path (unzip-file path-to-zip)
@@ -73,21 +102,20 @@
           ; -> update-application
           (let [new-verdict   (build-verdict parsed-xml)
                 command       (action/application->command application)
-                update-clause {$push {:verdicts new-verdict}}]
-            (action/update-application command update-clause))
-
-          ; Create attachments
-          ; 1. add poytakirja to verdict
-          ; 2. add attachment to application (target type "verdict", "urlhash" matching verdict urlHash. id generated?)
-          ; 3. make attachment point to poytakirja ()
-          (doseq [attachment attachments]
-            (prn attachment)
-
-            )
-
-          )
-
-
+                new-verdict   (reduce (fn [verdict attachment]
+                                        (let [attachment-id (pandect/sha1 (:LinkkiLiitteeseen attachment))]
+                                          (prn attachment-id)
+                                          (insert-attachment!
+                                            application
+                                            attachment
+                                            unzipped-path
+                                            (:id new-verdict)
+                                            attachment-id)
+                                          (assoc-in verdict [:paatokset 0 :poytakirjat 0 :urlHash] attachment-id)))
+                                      new-verdict
+                                      attachments)
+                update-clause {$push {:verdicts new-verdict}}] ; TODO: Should update modified? can you use $push then?
+            (action/update-application command update-clause)))
 
           ; Save attachment file to attachment (gridfs)
         )
@@ -96,5 +124,4 @@
     (catch Exception e
       (if-let [error-key (some-> e ex-data :object :text)]
         (fail error-key)
-        (prn e)
-        #_(fail :error.unknown)))))
+        (fail :error.unknown)))))
