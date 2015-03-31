@@ -125,8 +125,10 @@
 
       <div data-bind="visible: !needMorePrevPermitInfo()">
         <label data-bind="ltext: 'prev-permit-label-municipality'" class="form-label" for="prev-permit-municipality"></label>
-        <select data-bind="options: municipalities.municipalitiesWithBackendSystem,
-                           optionsText: function(m) { return loc(['municipality', m.id]); },
+        <select data-bind="options: organizationOptions,
+                           optionsText: function(org) {
+                             return util.getIn(org, ['name', loc.getCurrentLanguage()]);
+                           },
                            optionsValue: 'id',
                            value: municipalityCode,
                            optionsCaption: loc('choose')"

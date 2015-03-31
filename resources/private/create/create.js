@@ -71,6 +71,7 @@
 
     // Observables for creating new application from previous permit
     self.creatingAppWithPrevPermit = false;
+    self.organizationOptions = ko.observable([]);
     self.kuntalupatunnusFromPrevPermit = ko.observable(null);
     self.needMorePrevPermitInfo = ko.observable(false);
     self.creatingAppWithPrevPermitOk = ko.computed(function() {
@@ -83,7 +84,6 @@
                                                   self.addressData() &&
                                                   self.x() !== 0 && self.y() !== 0));
     });
-
 
     self.municipalityCode.subscribe(function(code) {
       if (self.creatingAppWithPrevPermit) {
@@ -152,6 +152,7 @@
         .message("")
         .requestType(null)
         .kuntalupatunnusFromPrevPermit(null)
+        .organizationOptions([])
         .needMorePrevPermitInfo(false);
     };
 
@@ -417,6 +418,15 @@
       self.clear();
       self.creatingAppWithPrevPermit = true;
       self.operation("aiemmalla-luvalla-hakeminen");
+
+      // TODO: nyt kovakoodattu permitType -> pitaisiko hakea jostain muualta, esim permit-type-select-valinta?
+      ajax.query("user-organizations-for-permit-type", {permitType: "R"})
+        .processing(self.processing)
+        .pending(self.pending)
+        .success(function(data) {
+          self.organizationOptions(data.organizations);
+        })
+        .call();
     };
 
     self.createApplicationWithPrevPermit = function() {
