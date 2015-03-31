@@ -8,7 +8,7 @@
 
   multiSelect.hash = "!/" + pageName + "/";
 
-  var doMoveAttachmetsToBackingSystem = function(selectedAttachmentsIds) {
+  var doMoveAttachmets = function(selectedAttachmentsIds) {
     var id = multiSelect.model.appModel.id();
     ajax.command(command, {
       id: id,
@@ -20,7 +20,7 @@
       repository.load(id);
     })
     .error(function() {
-      notify.error(loc("error.dialog.title"), loc(command + ".error"));
+      notify.error(loc("error.dialog.title"), loc("application.attachmentsMoveToBackingSystem.error"));
       repository.load(id);
     })
     .call();
@@ -30,7 +30,7 @@
     LUPAPISTE.ModalDialog.showDynamicYesNo(
       loc("application.attachmentsMoveToBackingSystem"),
       loc("application.attachmentsMoveToBackingSystem.confirmationMessage"),
-      {title: loc("yes"), fn: _.partial(doMoveAttachmetsToBackingSystem, selectedAttachmentsIds)},
+      {title: loc("yes"), fn: _.partial(doMoveAttachmets, selectedAttachmentsIds)},
       {title: loc("no")}
     );
   };
