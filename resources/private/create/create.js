@@ -413,7 +413,7 @@
     // For creating new application based on a previous permit
     //
 
-    self.clearForCreateAppWithPrevPermit = function() {
+    self.initCreateAppWithPrevPermit = function() {
       self.clear();
       self.creatingAppWithPrevPermit = true;
       self.operation("aiemmalla-luvalla-hakeminen");
@@ -463,7 +463,7 @@
   }();
 
   hub.onPageLoad("create-part-1", model.clear);
-  hub.onPageLoad("create-page-prev-permit", model.clearForCreateAppWithPrevPermit);
+  hub.onPageLoad("create-page-prev-permit", model.initCreateAppWithPrevPermit);
 
   function initAutocomplete(id) {
     $(id)
