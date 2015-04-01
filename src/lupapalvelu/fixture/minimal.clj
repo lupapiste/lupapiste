@@ -534,7 +534,7 @@
                                 :permitType "YA"
                                 :inforequest-enabled true
                                 :new-application-enabled true
-                                :caseManagement {:ftpUser "dev_ah_kuopio" :enabled true :version "1.1"}}}]
+                                :caseManagement {:ftpUser "dev_ah_kuopio" :enabled true :version "1.1"}}]
                        :links [{:name {:fi "Kuopio", :sv "Kuopio"}
                                 :url "http://www.kuopio.fi"}]
                        :krysp {:YA {:url local-krysp :version "2.1.2" :ftpUser "dev_ya_kuopio"}}
