@@ -124,16 +124,14 @@
       </div>
 
       <div data-bind="visible: !needMorePrevPermitInfo()">
-        <label data-bind="ltext: 'prev-permit-label-municipality'" class="form-label" for="prev-permit-municipality"></label>
-        <select data-bind="options: organizationOptions,
-                           optionsText: function(org) {
-                             return util.getIn(org, ['name', loc.getCurrentLanguage()]);
-                           },
+        <label data-bind="ltext: 'prev-permit-label-organization'" class="form-label" for="prev-permit-organization-select"></label>
+        <select id="prev-permit-organization-select" data-test-id="test-prev-permit-organization-select"
+                class="form-select form-input combobox"
+                data-bind="options: organizationOptions,
+                           optionsText: function(org) { return util.getIn(org, ['name', loc.getCurrentLanguage()]); },
                            optionsValue: 'id',
-                           value: municipalityCode,
-                           optionsCaption: loc('choose')"
-                id="prev-permit-municipality-select" data-test-id="test-prev-permit-municipality-select"
-                class="form-select form-input combobox">
+                           value: selectedPrevPermitOrganization,
+                           optionsCaption: loc('choose')">
         </select>
       </div>
 
