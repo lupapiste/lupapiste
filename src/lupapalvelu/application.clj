@@ -744,15 +744,15 @@
 
     ;; Prevent creating many applications based on the same kuntalupatunnus:
     ;; Check if we have in database an application of same organization that has a verdict with the given kuntalupatunnus.
-    ;; If so, open that application, otherwise go create a new application.
     (if-let [app-with-verdict (domain/get-application-no-access-checking {:organization (:id organization)
                                                                           :verdicts {$elemMatch {:kuntalupatunnus kuntalupatunnus}}})]
 
+      ;; Found an application of same organization that has a verdict with the given kuntalupatunnus. Open it if user has rights, otherwise show error.
       (if-let [existing-app (domain/get-application-as (:id app-with-verdict) user)]
         (ok :id (:id app-with-verdict))
         (fail :error.lupapiste-application-already-exists-but-unauthorized-to-access-it :id (:id app-with-verdict)))
 
-      ;; Fetch application from backing system with the provided kuntalupatunnus
+      ;; Fetch data needed for application creation from backing system with the provided kuntalupatunnus
       (let [xml (krysp-fetch-api/get-application-xml
                   {:id kuntalupatunnus :permitType permit-type :organization (:id organization)}
                   false true)]
