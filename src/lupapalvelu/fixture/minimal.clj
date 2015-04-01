@@ -209,7 +209,7 @@
      :email "olli.uleaborg@ouka.fi"
      :enabled true
      :role "authority"
-     :organizations ["564-R" "529-R"]
+     :organizations ["564-R" "529-R" "564-YMP"]
      :firstName "Olli"
      :lastName "Ule\u00E5borg"
      :phone "121212"
@@ -673,6 +673,20 @@
                                 :version "2.1.5"}}
                        :operations-attachments {:poikkeamis [[:paapiirustus :asemapiirros]]}
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R" "P"} (name (:permit-type v)))) operations/operations))}
+
+                      ;;
+                      ;; Ymparisto organisaatiot
+                      ;;
+                      {:id "564-YMP"
+                       :name {:fi "Oulun ymparisto"}
+                       :scope [{:municipality "564" :permitType "YI" :inforequest-enabled true :new-application-enabled true :caseManagement {:ftpUser "dev_ah_oulu" :enabled true :version "1.1"}}
+                               {:municipality "564" :permitType "YL" :inforequest-enabled true :new-application-enabled true :caseManagement {:ftpUser "dev_ah_oulu" :enabled true :version "1.1"}}
+                               {:municipality "564" :permitType "MAL" :inforequest-enabled true :new-application-enabled true :caseManagement {:ftpUser "dev_ah_oulu" :enabled true :version "1.1"}}
+                               {:municipality "564" :permitType "VVVL" :inforequest-enabled true :new-application-enabled true :caseManagement {:ftpUser "dev_ah_oulu" :enabled true :version "1.1"}}]
+                       :links [{:name {:fi "Oulu", :sv "Ule\u00E5borg"}
+                                :url "http://www.ouka.fi"}]
+                       :selected-operations (map first (filter (fn [[_ v]] (#{"YI" "YL" "MAL" "VVVL"} (name (:permit-type v)))) operations/operations))}
+
                       ;;
                       ;; Testeissa kaytettavia organisaatioita
                       ;;
