@@ -202,10 +202,16 @@
       (upload-attachment-to-all-placeholders pena application)
       (command pena :submit-application :id app-id) => ok?
       (command velho :application-to-asianhallinta :id app-id :lang "fi") => ok?
-      (Thread/sleep 1000) ;wait for a while so that TaydennysAsiaan xml gets later timestamp in fs and gets loaded later in the test (atleast on mac)
-      (let [versioned-attachment (first (:attachments (query-application velho (:id application))))]
-        (upload-attachment velho (:id application) versioned-attachment true)
-        (command velho :attachments-to-asianhallinta :id app-id :attachmentIds [(:id versioned-attachment)] :lang "fi") => ok?)
+
+      (Thread/sleep 1000) ;wait for a while so that TaydennysAsiaan xml gets later timestamp in fs and gets loaded later in the test (problem atleast with mac)
+
+      (fact "Unable to send attachment which is already sent"
+        (command velho :attachments-to-asianhallinta :id app-id :attachmentIds [(:id (first (:attachments application)))] :lang "fi") =not=> ok?)
+
+      (fact "Able to send attachment with new file version"
+        (let [versioned-attachment (first (:attachments (query-application velho (:id application))))]
+          (upload-attachment velho (:id application) versioned-attachment true)
+          (command velho :attachments-to-asianhallinta :id app-id :attachmentIds [(:id versioned-attachment)] :lang "fi") => ok?))
 
       (facts "XML file"
         (let [updated-application (query-application pena app-id) => truthy
