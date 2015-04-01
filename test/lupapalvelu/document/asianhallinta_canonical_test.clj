@@ -178,5 +178,12 @@
               (doseq [meta metas]
                 (has-attachment-types meta)))
             (fact "Second attachment has operation meta"
-              (last (second metas)) => {:Avain "operation" :Arvo (get-in attachments [1 :op :name])})))))))
+              (last (second metas)) => {:Avain "operation" :Arvo (get-in attachments [1 :op :name])}))))))
 
+  (fl/facts* "TaydennysAsiaan canonical"
+             (let [application poikkeus-test/poikkari-hakemus
+                   canonical (ah/application-to-asianhallinta-taydennys-asiaan-canonical application) => truthy]
+               (facts "TaydennysAsiaan canonical from poikkeus-test/poikkari-hakemus"
+                 (fact "TaydennysAsiaan not empty" (:TaydennysAsiaan canonical) => seq)
+                 (fact "TaydennysAsiaan keys" (keys (get-in canonical [:TaydennysAsiaan])) => (just [:HakemusTunnus] :in-any-order))
+                 (fact "HakemusTunnus is LP-753-2013-00001" (get-in canonical [:TaydennysAsiaan :HakemusTunnus]) => "LP-753-2013-00001")))))
