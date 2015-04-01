@@ -199,11 +199,12 @@
                      :type "kuntalupatunnus"})
     application))
 
+; TODO allow only when application is already sent to asianhallinta
 (defcommand attachments-to-asianhallinta
   {:parameters [id lang attachmentIds]
    :user-roles #{:authority}
    :pre-checks [has-asianhallinta-operation]
-   :states     [:verdictGiven :constructionStarted :sent]
+   :states     [:verdictGiven :sent]
    :description "Sends such selected attachments to backing system that are not yet sent."}
   [{:keys [created application user] :as command}]
 
