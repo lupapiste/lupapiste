@@ -787,7 +787,7 @@
               (ok :id created-app-id))
             ;; LUPAPISTE ID WAS FOUND -> open it if user has rights, otherwise show error
             (if-let [existing-application (domain/get-application-as lupapiste-tunnus user)]
-              (ok :id existing-application)
+              (ok :id (:id existing-application))
               (fail :error.lupapiste-application-already-exists-but-unauthorized-to-access-it :id lupapiste-tunnus))))))))
 
 (defn- add-operation-allowed? [_ application]
