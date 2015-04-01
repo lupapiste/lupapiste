@@ -161,7 +161,7 @@
                                  :type-id    "pohjapiirros"}
                           :versions []}]
             application-with-attachments (assoc poikkeus-test/poikkari-hakemus :attachments attachments)
-            canonical-attachments (ah/get-attachments-as-canonical application-with-attachments begin-of-link)]
+            canonical-attachments (ah/get-attachments-as-canonical (:attachments application-with-attachments) begin-of-link)]
         (fact "Canonical has correct count of attachments"
           (count canonical-attachments) => 2)
         (fact "attachment has correct keys"

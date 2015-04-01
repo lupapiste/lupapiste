@@ -190,3 +190,37 @@
         attachments-updates (or (attachment/create-sent-timestamp-update-statements (:attachments application) file-ids created) {})]
     (update-application command {$set (util/deep-merge app-updates attachments-updates indicator-updates)})
     (ok)))
+
+(defn- update-kuntalupatunnus [application]
+  (if-let [kuntalupatunnus (fetch-linked-kuntalupatunnus application)]
+    (update-in application
+               [:linkPermitData]
+               conj {:id kuntalupatunnus
+                     :type "kuntalupatunnus"})
+    application))
+
+(defcommand attachments-to-asianhallinta
+  {:parameters [id lang attachmentIds]
+   :user-roles #{:authority}
+   :pre-checks [has-asianhallinta-operation]
+   :states     [:verdictGiven :constructionStarted :sent]
+   :description "Sends such selected attachments to backing system that are not yet sent."}
+  [{:keys [created application user] :as command}]
+
+  (let [attachments-wo-sent-timestamp (filter
+                                        #(and
+                                          (-> % :versions count pos?)
+                                          (or
+                                            (not (:sent %))
+                                            (> (-> % :versions last :created) (:sent %)))
+                                          (not (#{"verdict" "statement"} (-> % :target :type)))
+                                          (some #{(:id %)} attachmentIds))
+                                        (:attachments application))]
+       (if (pos? (count attachments-wo-sent-timestamp))
+         (let [application (meta-fields/enrich-with-link-permit-data application)
+               application (update-kuntalupatunnus application)
+               sent-file-ids (ah/save-as-asianhallinta-asian-taydennys application attachments-wo-sent-timestamp lang)
+               data-argument (attachment/create-sent-timestamp-update-statements (:attachments application) sent-file-ids created)]
+              (update-application command {$set data-argument})
+              (ok))
+         (fail :error.sending-unsent-attachments-failed))))

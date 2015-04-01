@@ -18,7 +18,7 @@
 (apply-remote-minimal)
 
 (testable-privates lupapalvelu.xml.asianhallinta.core resolve-output-directory resolve-ah-version)
-(testable-privates lupapalvelu.xml.asianhallinta.uusi_asia_mapping attachments-for-write)
+(testable-privates lupapalvelu.xml.asianhallinta.asianhallinta_mapping attachments-for-write)
 
 (fl/facts* "Asianhallinta itest"
   (facts "UusiAsia from poikkeamis application"
@@ -83,7 +83,7 @@
 
             (fact "Attachments are correct"
               (let [xml-attachments (sxml/select xml [:UusiAsia :Liitteet :Liite])
-                    writed-attachments (attachments-for-write updated-application)
+                    writed-attachments (attachments-for-write (:attachments updated-application))
                     last-link (sxml/get-text (last xml-attachments) [:LinkkiLiitteeseen])
                     filename (last (ss/split last-link #"/"))
                     linkki-as-uri (URI. last-link)
