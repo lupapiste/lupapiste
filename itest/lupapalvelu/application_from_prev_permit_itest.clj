@@ -30,7 +30,7 @@
                (mapcat seq))]
     (apply local-command apikey :create-application-from-previous-permit args)))
 
-(fact* "Creating new application based on a prev permit"
+(facts "Creating new application based on a prev permit"
 
   (let [example-xml (xml/parse (slurp (io/resource "../resources/krysp/sample/verdict-rakval-from-kuntalupatunnus-query.xml")))
         example-app-info (krysp-reader/get-app-info-from-message example-xml example-kuntalupatunnus)]
