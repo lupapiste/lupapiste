@@ -754,7 +754,7 @@
 
       ;; Found an application of same organization that has a verdict with the given kuntalupatunnus. Open it if user has rights, otherwise show error.
       (if-let [existing-app (domain/get-application-as (:id app-with-verdict) user)]
-        (ok :id (:id app-with-verdict))
+        (ok :id (:id existing-app))
         (fail :error.lupapiste-application-already-exists-but-unauthorized-to-access-it :id (:id app-with-verdict)))
 
       ;; Fetch xml data needed for application creation from backing system with the provided kuntalupatunnus.
@@ -788,7 +788,7 @@
               (ok :id created-app-id))
             ;; LUPAPISTE ID WAS FOUND -> open it if user has rights, otherwise show error
             (if-let [existing-application (domain/get-application-as lupapiste-tunnus user)]
-              (ok :id lupapiste-tunnus)
+              (ok :id existing-application)
               (fail :error.lupapiste-application-already-exists-but-unauthorized-to-access-it :id lupapiste-tunnus))))))))
 
 (defn- add-operation-allowed? [_ application]
