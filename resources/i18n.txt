@@ -1,4 +1,4 @@
-application.attachmentsMoveToCaseManagement:  Siirrä liitteet asiainhallintaan
-application.attachmentsMoveToCaseManagement.confirmationMessage:  Haluatko lähettää liitteet asiainhallintaan?
-application.attachmentsMoveToCaseManagement.error:  Virhe siirrettäessä liitteitä asiainhallintaan
+application.attachmentsMoveToCaseManagement:  Siirrä liitteet asianhallintaan
+application.attachmentsMoveToCaseManagement.confirmationMessage:  Haluatko lähettää liitteet asianhallintaan?
+application.attachmentsMoveToCaseManagement.error:  Virhe siirrettäessä liitteitä asianhallintaan
 application.attachmentsMoveToBackingSystem.error:  Virhe siirrettäessä liitteitä taustajärjestelmään
