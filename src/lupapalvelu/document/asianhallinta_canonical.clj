@@ -169,6 +169,6 @@
       (assoc-in [:UusiAsia :Kiinteistotunnus] (util/to-human-readable-property-id (:propertyId application)))
       (assoc-in [:UusiAsia :Viiteluvat] (ua-get-viiteluvat application)))))
 
-(defn application-to-asianhallinta-taydennys-asiaan-canonical [application attachments lang]
+(defn application-to-asianhallinta-taydennys-asiaan-canonical [application]
   "Return TaydennysAsiaan canonical"
   (-> (assoc-in ta-root-element [:TaydennysAsiaan :HakemusTunnus] (:id application))))
