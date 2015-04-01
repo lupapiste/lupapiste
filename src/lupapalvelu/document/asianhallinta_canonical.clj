@@ -68,8 +68,8 @@
                                                  :Operaattoritunnus (get-in data [:yritys :verkkolaskutustieto :valittajaTunnus])})}))]
 
     (if (= sel "yritys")
-      (assoc-in maksaja-map [:Yritys] (ua-get-yritys data))
-      (assoc-in maksaja-map [:Henkilo] (ua-get-henkilo data)))))
+      (util/strip-empty-maps (assoc-in maksaja-map [:Yritys] (ua-get-yritys data)))
+      (util/strip-empty-maps (assoc-in maksaja-map [:Henkilo] (ua-get-henkilo data))))))
 
 (defn- ua-get-metatiedot [attachment]
   (let [op-name (get-in attachment [:op :name])
