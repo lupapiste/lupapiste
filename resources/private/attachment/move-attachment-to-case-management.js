@@ -4,7 +4,7 @@
   var pageName  = "move-attachments-to-case-management-select";
   var eventName = "start-moving-attachments-to-case-management";
   var command   = "attachments-to-asianhallinta";
-	var multiSelect = _.extend(new LUPAPISTE.AttachmentMultiSelect(), {});
+  var multiSelect = _.extend(new LUPAPISTE.AttachmentMultiSelect(), {});
 
   multiSelect.hash = "!/" + pageName + "/";
 
@@ -39,8 +39,8 @@
     return _(attachments)
       .filter(function(a) {
         return (a.versions.length > 0 &&
-        	(!a.sent || _.last(a.versions).created > a.sent) &&
-        	!(_.includes(["verdict", "statement"], util.getIn(a, ["target", "type"]))));
+          (!a.sent || _.last(a.versions).created > a.sent) &&
+          !(_.includes(["verdict", "statement"], util.getIn(a, ["target", "type"]))));
       })
       .each(function(a) {
         a.selected = true;
