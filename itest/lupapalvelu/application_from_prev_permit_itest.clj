@@ -21,7 +21,7 @@
   (let [args (->> args
                (apply hash-map)
                (merge {:operation "aiemmalla-luvalla-hakeminen"
-                       :municipality "186"  ;; Jarvenpaa
+                       :organizationId "186-R"  ;; Jarvenpaan rakennusvalvonta
                        :kuntalupatunnus example-kuntalupatunnus
                        :y 0
                        :x 0
@@ -36,7 +36,7 @@
         example-app-info (krysp-reader/get-app-info-from-message example-xml example-kuntalupatunnus)]
 
     (fact "missing parameters"
-      (create-app-from-prev-permit raktark-jarvenpaa :municipality "") => (partial expected-failure? "error.missing-parameters")
+      (create-app-from-prev-permit raktark-jarvenpaa :organizationId "") => (partial expected-failure? "error.missing-parameters")
       (create-app-from-prev-permit raktark-jarvenpaa :operation "") => (partial expected-failure? "error.missing-parameters"))
 
 
