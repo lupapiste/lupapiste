@@ -1,4 +1,4 @@
-(ns lupapalvelu.application-itest
+(ns lupapalvelu.application-from-prev-permit-itest
   (:require [midje.sweet :refer :all]
             [clojure.java.io :as io]
             [sade.core :refer [def-]]
