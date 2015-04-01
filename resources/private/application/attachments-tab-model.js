@@ -102,7 +102,7 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel, verdictAttachme
           return self.startMovingAttachmentsToCaseManagement();
         },
         visibleFn: function (rawAttachments) {
-          return self.authorizationModel.ok("move-attachments-to-backing-system") && self.appModel.hasAttachment() && unsentAttachmentFound(rawAttachments);
+          return self.authorizationModel.ok("attachments-to-asianhallinta") && self.appModel.hasAttachment() && unsentAttachmentFound(rawAttachments);
         }
       },
       "downloadAll": {

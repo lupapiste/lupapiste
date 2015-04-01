@@ -3,9 +3,8 @@
 
   var pageName  = "move-attachments-to-case-management-select";
   var eventName = "start-moving-attachments-to-case-management";
-  var command   = "move-attachments-to-case-management";
-
-  var multiSelect = _.extend(new LUPAPISTE.AttachmentMultiSelect(), {});
+  var command   = "attachments-to-asianhallinta";
+	var multiSelect = _.extend(new LUPAPISTE.AttachmentMultiSelect(), {});
 
   multiSelect.hash = "!/" + pageName + "/";
 

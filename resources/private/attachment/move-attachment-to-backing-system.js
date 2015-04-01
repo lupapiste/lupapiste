@@ -38,7 +38,9 @@
   multiSelect.filterAttachments = function(attachments) {
     return _(attachments)
       .filter(function(a) {
-        return (a.versions.length > 0 && (!a.sent || _.last(a.versions).created > a.sent) && !(_.includes(["verdict", "statement"], util.getIn(a, ["target", "type"]))));
+        return (a.versions.length > 0 &&
+          (!a.sent || _.last(a.versions).created > a.sent) &&
+          !(_.includes(["verdict", "statement"], util.getIn(a, ["target", "type"]))));
       })
       .each(function(a) {
         a.selected = true;
