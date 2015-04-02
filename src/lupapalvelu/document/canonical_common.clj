@@ -362,7 +362,9 @@
                     {:henkilotunnus (-> suunnittelija :henkilotiedot :hetu)}
                     (get-yhteystiedot-data (:yhteystiedot suunnittelija)))]
       (merge codes
-        {:koulutus (:koulutusvalinta patevyys)
+        {:koulutus (:koulutus (muu-select-map
+                                :koulutus (-> patevyys :koulutus)
+                                :koulutus (-> patevyys :koulutusvalinta)))
          :patevyysvaatimusluokka (:patevyysluokka patevyys)
          :valmistumisvuosi (:valmistumisvuosi patevyys)
          :kokemusvuodet (:kokemus patevyys)}
@@ -432,7 +434,9 @@
       foremans
       {:tyonjohtajaRooliKoodi rooli
        :vastattavatTyotehtavat (concat-tyotehtavat-to-string (:vastattavatTyotehtavat tyonjohtaja))
-       :koulutus (:koulutusvalinta patevyys)
+       :koulutus (:koulutus (muu-select-map
+                              :koulutus (-> patevyys :koulutus)
+                              :koulutus (-> patevyys :koulutusvalinta)))
        :patevyysvaatimusluokka (:patevyysvaatimusluokka patevyys)
        :valmistumisvuosi (:valmistumisvuosi patevyys)
        :kokemusvuodet (:kokemusvuodet patevyys)
@@ -455,7 +459,9 @@
       foremans
       {:tyonjohtajaRooliKoodi rooli
        :vastattavatTyotehtavat (concat-tyotehtavat-to-string (:vastattavatTyotehtavat tyonjohtaja))
-       :koulutus (:koulutusvalinta patevyys)
+       :koulutus (:koulutus (muu-select-map
+                              :koulutus (-> patevyys :koulutus)
+                              :koulutus (-> patevyys :koulutusvalinta)))
        :patevyysvaatimusluokka (:patevyysvaatimusluokka tyonjohtaja)
        :valmistumisvuosi (:valmistumisvuosi patevyys)
        :kokemusvuodet (:kokemusvuodet patevyys)
