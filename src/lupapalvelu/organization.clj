@@ -57,12 +57,9 @@
     (when-not (s/blank? (:url krysp-config))
       (select-keys krysp-config [:url :version])))))
 
-(defn loc-organization-name [organization]
+(defn get-organization-name [organization]
   (let [default (get-in organization [:name :fi] (str "???ORG:" (:id organization) "???"))]
     (get-in organization [:name i18n/*lang*] default)))
-
-(defn get-organization-name [organization]
-  (loc-organization-name organization))
 
 (defn resolve-organizations
   ([municipality]

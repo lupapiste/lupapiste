@@ -20,7 +20,7 @@ var repository = (function() {
     error(message);
   }
 
-  function calculateAttachmentStateIndicators(attachment) {
+  function calculateAttachmentStateIndicators(attachment, application) {
     attachment.signed = false;
     var versionsByApplicants = _(attachment.versions || []).filter(function(v) {return v.user.role === "applicant";}).value();
     if (versionsByApplicants && versionsByApplicants.length) {
@@ -33,6 +33,10 @@ var repository = (function() {
     attachment.isSent = false;
     attachment.sentDateString = "-";
     if (attachment.sent) {
+      // TODO check if sent to KRYSP afterwards (not yet in transfers log)
+      if (_.where(application.transfers, {type: "attachments-to-asianhallinta"})) {
+        attachment.isSentToAsianhallinta = true;
+      }
       attachment.isSent = true;
       attachment.sentDateString = moment(attachment.sent).format("D.M.YYYY");
     }
@@ -111,7 +115,7 @@ var repository = (function() {
             }
           });
           _.each(application.attachments ||[], function(att) {
-            calculateAttachmentStateIndicators(att);
+            calculateAttachmentStateIndicators(att, application);
             setAttachmentOperation(application.operations, att);
           });
           hub.send("application-loaded", {applicationDetails: loading});

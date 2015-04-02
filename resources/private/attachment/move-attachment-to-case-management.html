@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <body>
-    <section class="page container" id="move-attachments-to-backing-system-select">
+    <section class="page container" id="move-attachments-to-case-management-select">
       <div class="nav-back-container">
         <a class="btn left-align btn-nav-back"
            data-bind="click: cancelSelecting"
@@ -14,10 +14,10 @@
         <div id="attachments-multiselect-component-container"
              data-bind="component: {name: 'attachments-multiselect',
                                     params: {attachments: filteredAttachments,
-                                             titleLoc: 'application.attachmentsMoveToBackingSystem',
-                                             okLoc: 'application.attachmentsMoveToBackingSystem',
+                                             titleLoc: 'application.attachmentsMoveToCaseManagement',
+                                             okLoc: 'application.attachmentsMoveToCaseManagement',
                                              saveFn: moveAttachmets,
-                                             authKey: 'move-attachments-to-backing-system'}}"></div>
+                                             authKey: 'attachments-to-asianhallinta'}}"></div>
       </div>
     </section>
   </body>
