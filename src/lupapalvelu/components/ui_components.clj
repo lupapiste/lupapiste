@@ -149,8 +149,18 @@
                                     "verdict-attachment-prints-multiselect-model.js"]}
 
    :attachment   {:depends [:common-html :repository :signing :side-panel]
-                  :js ["targeted-attachments-model.js" "attachment-utils.js" "attachment.js" "attachmentTypeSelect.js" "move-attachment-to-backing-system.js"]
-                  :html ["targetted-attachments-template.html" "attachment.html" "upload.html" "move-attachment-to-backing-system.html"]}
+                  :js ["attachment-multi-select.js"
+                       "targeted-attachments-model.js"
+                       "attachment-utils.js"
+                       "attachment.js"
+                       "attachmentTypeSelect.js"
+                       "move-attachment-to-backing-system.js"
+                       "move-attachment-to-case-management.js"]
+                  :html ["targetted-attachments-template.html"
+                         "attachment.html"
+                         "upload.html"
+                         "move-attachment-to-backing-system.html"
+                         "move-attachment-to-case-management.html"]}
 
    :task         {:depends [:common-html :attachment]
                   :js ["task.js"]
