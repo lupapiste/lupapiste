@@ -1,7 +1,7 @@
 (ns lupapalvelu.integrations-api
   "API for commands/functions working with integrations (ie. KRYSP, Asianhallinta)"
   (:require [taoensso.timbre :as timbre :refer [infof error]]
-            [monger.operators :refer [$in $set]]
+            [monger.operators :refer [$in $set $push]]
             [lupapalvelu.action :refer [defcommand update-application notify] :as action]
             [lupapalvelu.application :as application]
             [lupapalvelu.application-meta-fields :as meta-fields]
@@ -187,8 +187,13 @@
         organization (organization/get-organization (:organization application))
         indicator-updates (application/mark-indicators-seen-updates application user created)
         file-ids (ah/save-as-asianhallinta application lang submitted-application organization) ; Writes to disk
-        attachments-updates (or (attachment/create-sent-timestamp-update-statements (:attachments application) file-ids created) {})]
-    (update-application command {$set (util/deep-merge app-updates attachments-updates indicator-updates)})
+        attachments-updates (or (attachment/create-sent-timestamp-update-statements (:attachments application) file-ids created) {})
+        transfer {:type "application-to-asianhallinta"
+                  :user (select-keys user [:id :role :firstName :lastName])
+                  :timestamp created}]
+    (update-application command
+                        {$push {:transfers transfer}
+                         $set (util/deep-merge app-updates attachments-updates indicator-updates)})
     (ok)))
 
 (defn- update-kuntalupatunnus [application]
@@ -199,11 +204,14 @@
                      :type "kuntalupatunnus"})
     application))
 
-; TODO allow only when application is already sent to asianhallinta
+(defn- application-already-in-asianhallinta [_ application]
+  (when-not (some #(= "application-to-asianhallinta" (:type %)) (:transfers application))
+    (fail :error.application.not-in-asianhallinta)))
+
 (defcommand attachments-to-asianhallinta
   {:parameters [id lang attachmentIds]
    :user-roles #{:authority}
-   :pre-checks [has-asianhallinta-operation]
+   :pre-checks [has-asianhallinta-operation application-already-in-asianhallinta]
    :states     [:verdictGiven :sent]
    :description "Sends such selected attachments to backing system that are not yet sent."}
   [{:keys [created application user] :as command}]

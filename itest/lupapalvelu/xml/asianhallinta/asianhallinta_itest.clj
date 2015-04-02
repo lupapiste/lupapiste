@@ -201,6 +201,8 @@
       (generate-documents application pena)
       (upload-attachment-to-all-placeholders pena application)
       (command pena :submit-application :id app-id) => ok?
+      (fact "Unable to send attachments if application is not yet in asianhallinta"
+        (command velho :attachments-to-asianhallinta :id app-id :attachmentIds [] :lang "fi") =not=> ok?)
       (command velho :application-to-asianhallinta :id app-id :lang "fi") => ok?
 
       (Thread/sleep 1000) ;wait for a while so that TaydennysAsiaan xml gets later timestamp in fs and gets loaded later in the test (problem atleast with mac)
