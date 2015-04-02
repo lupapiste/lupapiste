@@ -224,12 +224,17 @@
                                             (> (-> % :versions last :created) (:sent %)))
                                           (not (#{"verdict" "statement"} (-> % :target :type)))
                                           (some #{(:id %)} attachmentIds))
-                                        (:attachments application))]
+                                        (:attachments application))
+        transfer {:type "attachments-to-asianhallinta"
+                  :user (select-keys user [:id :role :firstName :lastName])
+                  :timestamp created
+                  :attachments (map :id attachments-wo-sent-timestamp)}]
        (if (pos? (count attachments-wo-sent-timestamp))
          (let [application (meta-fields/enrich-with-link-permit-data application)
                application (update-kuntalupatunnus application)
                sent-file-ids (ah/save-as-asianhallinta-asian-taydennys application attachments-wo-sent-timestamp lang)
                data-argument (attachment/create-sent-timestamp-update-statements (:attachments application) sent-file-ids created)]
-              (update-application command {$set data-argument})
+              (update-application command {$push {:transfers transfer}
+                                           $set data-argument})
               (ok))
          (fail :error.sending-unsent-attachments-failed))))
