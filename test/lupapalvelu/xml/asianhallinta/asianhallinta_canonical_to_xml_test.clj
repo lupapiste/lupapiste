@@ -68,7 +68,7 @@
 
     (fact "Validate UusiAsia XML"
       (validator/validate xml-s (:permitType application) schema-version) => nil)
-    
+
     (facts "Viiteluvat"
       (let [links    (sxml/select1 xml-parsed [:UusiAsia :Viiteluvat])]
         (count (sxml/children links)) => 1
@@ -90,7 +90,7 @@
         xml-parsed     (reader/strip-xml-namespaces (sxml/parse xml-s))]
     (fact "Validate UusiAsia XML"
       (validator/validate xml-s (:permitType application) schema-version) => nil)
-    
+
     (facts "Viiteluvat"
       (let [links    (sxml/select1 xml-parsed [:UusiAsia :Viiteluvat])
             content  (sxml/children links)]
@@ -258,7 +258,7 @@
 (facts "Unit tests - attachments-for-write"
 
   (fact "FileId and filename are returned"
-    (every? #(= (keys %) '(:fileId :filename)) (attachments-for-write {:attachments attachments})) => true)
+    (map keys (attachments-for-write {:attachments attachments})) => (has every? (just [:fileId :filename])))
 
   (fact "Only latestVersions are returned"
     (let [for-write-ids (set (map :fileId (attachments-for-write attachments)))]

@@ -177,7 +177,7 @@
                   :html ["attachment-actions-template.html" "attachments-template.html" "add-link-permit.html" "application.html" "inforequest.html" "add-operation.html"
                          "change-location.html" "invite-company.html" "foreman-template.html"]}
 
-   :applications {:depends [:common-html :repository :invites]
+   :applications {:depends [:common-html :repository :invites :global-models]
                   :html ["applications-list.html"]
                   :js ["applications-list.js"]}
 
