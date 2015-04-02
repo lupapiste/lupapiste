@@ -7,6 +7,8 @@
   (apply str (env/value :toj :host) path-parts))
 
 (def get-functions-from-toj (memo/ttl (fn [organization]
-                                        (let [response (http/get (build-url "/tiedonohjaus/api/org/" organization "/asiat") {:as :json})]
-                                          (:body response)))
+                                        (try (let [response (http/get (build-url "/tiedonohjaus/api/org/" organization "/asiat") {:as :json})]
+                                          (:body response))
+                                             (catch Exception e
+                                               [])))
                                       :ttl/threshold 10000))
