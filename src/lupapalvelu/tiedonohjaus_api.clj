@@ -1,6 +1,6 @@
 (ns lupapalvelu.tiedonohjaus-api
   (:require [lupapalvelu.action :refer [defquery defcommand non-blank-parameters]]
-            [sade.core :refer [ok]]
+            [sade.core :refer [ok fail]]
             [lupapalvelu.tiedonohjaus :as t]
             [lupapalvelu.organization :as o]
             [lupapalvelu.organization-api :as oa]
@@ -18,5 +18,11 @@
              :user-roles #{:authorityAdmin}
              :input-validators [(partial non-blank-parameters [:functionCode :operation])]}
             [{user :user}]
-            (o/update-organization (oa/authority-admins-organization-id user) {$set {(str "operations-tos-functions." operation) functionCode}})
-            (ok))
+            (let [orgId (oa/authority-admins-organization-id user)
+                  organization (o/get-organization orgId)
+                  operation-valid? (some #{operation} (:selected-operations organization))
+                  code-valid? (some #{functionCode} (map :code (t/get-functions-from-toj orgId)))]
+              (if (and operation-valid? code-valid?)
+                (do (o/update-organization orgId {$set {(str "operations-tos-functions." operation) functionCode}})
+                    (ok))
+                (fail "Invalid organization or operation"))))
