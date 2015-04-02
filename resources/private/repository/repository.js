@@ -34,7 +34,7 @@ var repository = (function() {
     attachment.sentDateString = "-";
     if (attachment.sent) {
       // TODO check if sent to KRYSP afterwards (not yet in transfers log)
-      if (_.where(application.transfers, {type: "attachments-to-asianhallinta"})) {
+      if (!_.isEmpty(_.where(application.transfers, {type: "attachments-to-asianhallinta"}))) {
         attachment.isSentToAsianhallinta = true;
       }
       attachment.isSent = true;
