@@ -2,7 +2,6 @@
 <html>
 <body>
   <section class="page" id="application">
-    <div id="modal-dialog" data-bind="component {name: 'modal-dialog'}"></div>
     <div class="application_summary">
       <div class="container">
         <div class="application-map-container">
@@ -456,7 +455,7 @@
         </div>
 
         <!-- Attachments tab -->
-
+        <!-- ko if: selectedTabName() === 'attachments' -->
         <div id="application-attachments-tab" class="tab-content" data-bind="with: $root.attachmentsTab">
           <h1 data-bind="ltext: 'application.tabAttachments'"></h1>
           <span class="icon help" data-bind="click: toggleHelp, css: {expanded: showHelp}"></span>
@@ -540,9 +539,10 @@
             </a>
           </div>
         </div>
+        <!-- /ko -->
 
         <!-- Required field summary tab -->
-
+        <!-- ko if: selectedTabName() === 'requiredFieldSummary' -->
         <div id="application-requiredFieldSummary-tab" data-bind="with: $root.application" class="tab-content">
           <div>
             <h1 data-bind="ltext: 'application.tabRequiredFieldSummary'"></h1>
@@ -620,6 +620,7 @@
             </a>
           </div>
         </div>
+        <!-- /ko -->
 
         <!-- Application summary tab -->
 
@@ -671,6 +672,7 @@
 
         <!-- Verdict tab -->
 
+        <!-- ko if: selectedTabName() === 'verdict' -->
         <div id="application-verdict-tab" class="tab-content">
           <h1 data-bind="ltext: 'application.tabVerdict'"></h1>
           <span class="icon help" data-bind="click: function(data, event) { application.toggleHelp('showVerdictInfoHelp') }, css: {expanded: application.showVerdictInfoHelp}"></span>
@@ -924,9 +926,11 @@
              href="#" data-test-id="test-open-prints-order-history"></a>
 
         </div>
+        <!-- /ko -->
 
         <!-- Statement tab -->
 
+        <!-- ko if: selectedTabName() === 'statement' -->
         <div id="application-statement-tab" class="tab-content">
 
           <div data-bind="with: application" class="application-statements">
@@ -954,6 +958,7 @@
             <button data-bind="click: $root.neighbor.manage, ltext: 'neighbors.manage', visible: $root.authorization.ok('neighbor-add')" class="btn btn-primary modal" data-test-id="manage-neighbors"></button>
           </div>
         </div>
+        <!-- /ko -->
 
         <script type="text/html" id="statements-template">
           <div data-bind="ifnot: $data.statements && statements().length > 0">

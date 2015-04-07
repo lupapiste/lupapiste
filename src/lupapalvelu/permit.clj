@@ -31,47 +31,56 @@
 (defpermit R  "Rakennusluvat"
   {:subtypes         []
    :sftp-directory   "/rakennus"
-   :applicant-doc-schema "hakija"})
+   :applicant-doc-schema "hakija"
+   :multiple-parties-allowed true})
 
 (defpermit YA "Yleisten alueiden luvat"
   {:subtypes             []
    :sftp-directory       "/yleiset_alueet"
-   :applicant-doc-schema "hakija-ya"})
+   :applicant-doc-schema "hakija-ya"
+   :multiple-parties-allowed false})
 
 (defpermit YI  "Ymparistoilmoitukset"
   {:subtypes       []
    :sftp-directory "/ymparisto"
-   :applicant-doc-schema "hakija"})
+   :applicant-doc-schema "hakija"
+   :multiple-parties-allowed true})
 
 (defpermit YL  "Ymparistolupa"
   {:subtypes       []
    :sftp-directory "/ymparisto"
-   :applicant-doc-schema "hakija"})
+   :applicant-doc-schema "hakija"
+   :multiple-parties-allowed true})
 
 (defpermit VVVL  "Vapautushakemus vesijohtoon ja viemariin liittymisesta"
   {:subtypes       []
    :sftp-directory "/ymparisto"
-   :applicant-doc-schema "hakija"})
+   :applicant-doc-schema "hakija"
+   :multiple-parties-allowed true})
 
 (defpermit P  "Poikkeusluvat"
   {:subtypes         [poikkeamislupa suunnittelutarveratkaisu]
    :sftp-directory   "/poikkeusasiat"
-   :applicant-doc-schema "hakija"})
+   :applicant-doc-schema "hakija"
+   :multiple-parties-allowed true})
 
 (defpermit MAL "Maa-ainesluvat"
   {:subtypes       []
    :sftp-directory "/ymparisto"
-   :applicant-doc-schema "hakija"})
+   :applicant-doc-schema "hakija"
+   :multiple-parties-allowed true})
 
 (defpermit KT "Kiinteistotoimitus"
   {:subtypes       []
    :sftp-directory "/rakennus"
-   :applicant-doc-schema "hakija"})
+   :applicant-doc-schema "hakija"
+   :multiple-parties-allowed true})
 
 (defpermit MM "Maankayton muutos"
   {:subtypes       []
    :sftp-directory "/kaavat"
-   :applicant-doc-schema "hakija"})
+   :applicant-doc-schema "hakija"
+   :multiple-parties-allowed true})
 
 ;;
 ;; Helpers
@@ -117,6 +126,9 @@
                         3) optional boolean parameter: raw form
                         4) optional boolean parameter: if true the id parameter is interpreted as kuntalupatunnus instead of application id."
   (get-metadata permit-type :xml-from-krysp))
+
+(defn multiple-parties-allowed? [permit-type]
+  (get-metadata permit-type :multiple-parties-allowed))
 
 (defn permit-type
   "gets the permit-type of application"

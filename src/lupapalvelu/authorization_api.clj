@@ -133,7 +133,7 @@
    :user-authz-roles action/default-authz-reader-roles
    :states     (action/all-application-states-but [:canceled])}
   [command]
-  (do-remove-auth command (get-in command [:user :email])))
+  (do-remove-auth command (get-in command [:user :username])))
 
 ;;
 ;; Auhtorizations

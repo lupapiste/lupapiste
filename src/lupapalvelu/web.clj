@@ -19,7 +19,7 @@
             [sade.status :as status]
             [sade.strings :as ss]
             [sade.session :as ssess]
-            [lupapalvelu.action :as action]
+            [lupapalvelu.action :as action :refer [defquery]]
             [lupapalvelu.application-search-api]
             [lupapalvelu.features-api]
             [lupapalvelu.i18n :refer [*lang*] :as i18n]
@@ -28,7 +28,7 @@
             [lupapalvelu.user :as user]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.proxy-services :as proxy-services]
-            [lupapalvelu.organization]
+            [lupapalvelu.organization-api]
             [lupapalvelu.application :as application]
             [lupapalvelu.foreman-api :as foreman-api]
             [lupapalvelu.open-inforequest-api]
@@ -282,9 +282,9 @@
        (redirect lang application-page)
        (redirect-to-frontpage lang)))))
 
-(defn- ->hashbang [v]
-  (when (and v (= -1 (.indexOf v ":")))
-    (->> (s/replace-first v "%21" "!") (re-matches #"^[#!/]{0,3}(.*)") second)))
+(defn- ->hashbang [s]
+  (when (and s (= -1 (.indexOf s ":")))
+    (->> (s/replace-first s "%21" "!") (re-matches #"^[#!/]{0,3}(.*)") second)))
 
 (defn- save-hashbang-on-client []
   (resp/set-headers {"Cache-Control" "no-cache", "Last-Modified" (util/to-RFC1123-datetime 0)}
@@ -295,20 +295,22 @@
   (if-let [hashbang (->hashbang hashbang)]
     (ssess/merge-to-session
       (request/ring-request) (single-resource :html (keyword app) (redirect-to-frontpage lang))
-      {:hashbang hashbang})
+      {:redirect-after-login hashbang})
     ; If current user has no access to the app, save hashbang using JS on client side.
     ; The next call will then be handled by the "true branch" above.
     (single-resource :html (keyword app) (save-hashbang-on-client))))
 
-(defpage [:get ["/app/:lang/:app" :lang #"[a-z]{2}" :app apps-pattern]] {app :app hashbang :hashbang lang :lang}
+(defpage [:get ["/app/:lang/:app" :lang #"[a-z]{2}" :app apps-pattern]] {app :app hashbang :redirect-after-login lang :lang}
   (serve-app app hashbang lang))
 
 ; Same as above, but with an extra path.
-(defpage [:get ["/app/:lang/:app/*" :lang #"[a-z]{2}" :app apps-pattern]] {app :app hashbang :hashbang lang :lang}
+(defpage [:get ["/app/:lang/:app/*" :lang #"[a-z]{2}" :app apps-pattern]] {app :app hashbang :redirect-after-login lang :lang}
   (serve-app app hashbang lang))
 
-(defjson "/api/hashbang" []
-  (ok :bang (get-in (request/ring-request) [:session :hashbang] "")))
+(defquery redirect-after-login
+  {:user-roles action/all-authenticated-user-roles}
+  [{session :session}]
+  (ok :url (get session :redirect-after-login "")))
 
 ;;
 ;; Login/logout:

@@ -196,29 +196,29 @@
                                :vaikutukset_yhdyskuntakehykselle {:etaisyys_kauppaan {:value "12"}
                                                                   :etaisyys_kuntakeskuksen_palveluihin {:value "12"}
                                                                   :etaisyys_paivakotiin {:value "11"}
-                                                                  :etaisyyys_alakouluun {:value "10"}
-                                                                  :etaisyyys_ylakouluun {:value "20"}
+                                                                  :etaisyys_alakouluun {:value "10"}
+                                                                  :etaisyys_ylakouluun {:value "20"}
                                                                   :muita_vaikutuksia {:value "Maisemallisesti talo tulee sijoittumaan m\u00e4en harjalle."}}
                                :virkistys_tarpeet {:ulkoilu_ja_virkistysaluetta_varattu {:value true}}}})
 
 (def- documents [hakija
-                          uusi
-                          uusi2
-                          hanke
-                          maksaja
-                          rakennuspaikka
-                          paasuunnittelija
-                          suunnittelija
-                          lisaosa])
+                 uusi
+                 uusi2
+                 hanke
+                 maksaja
+                 rakennuspaikka
+                 paasuunnittelija
+                 suunnittelija
+                 lisaosa])
 
 (def- documents-for-laajennus [hakija
-                                        laajennus
-                                        hanke
-                                        maksaja
-                                        rakennuspaikka
-                                        paasuunnittelija
-                                        suunnittelija
-                                        lisaosa])
+                               laajennus
+                               hanke
+                               maksaja
+                               rakennuspaikka
+                               paasuunnittelija
+                               suunnittelija
+                               lisaosa])
 
 (def poikkari-hakemus
   {:schema-version 1

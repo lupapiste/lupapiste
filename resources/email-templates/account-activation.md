@@ -14,12 +14,16 @@ Jos et ole rekister&ouml;itynyt Lupapisteeseen, voit j&auml;tt&auml;&auml; t&aum
 
 --
 
-Tack f&ouml;r registreringen {{name}}.
+#Tack f&ouml;r registreringen, {{name}}.
 
-V&auml;lkommen som Lupapiste-anv&auml;ndare. Aktivera ditt avn&auml;ndar-id genom denna l&auml;nk:
+V&auml;lkommen till Lupapiste. Aktivera ditt anv&auml;ndar-ID genom att klicka p&aring; denna l&auml;nk:
 
 {{link}}
 
-Ifall l&auml;nken inte fungerar kan du kopiera adressen till webbl&auml;srens adressf&auml;lt.
+Om l&auml;nken inte fungerar, kopiera adressen och klistra in den i webbl&auml;sarens adressf&auml;lt.
 
-Om du inte har registrerat dig i Lupapiste beh&ouml;ver du inte bry dig om detta e-postmeddelande.
+Fr&aring;gor om tj&auml;nsten? L&auml;s Lupapistes sidor med anvisningar [https://www.lupapiste.fi/ohjeet] (https://www.lupapiste.fi/ohjeet) och vanliga fr&aring;gor [https://www.lupapiste.fi/usein-kysytyt-kysymykset] (https://www.lupapiste.fi/usein-kysytyt-kysymykset).
+
+Vi hoppas att du trivs med v&aring;r tj&auml;nst!
+
+Om du inte registrerat dig hos Lupapiste beh&ouml;ver du inte beakta detta meddelande.

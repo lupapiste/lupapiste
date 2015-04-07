@@ -17,6 +17,8 @@
   function ApplicationsModel() {
     var self = this;
 
+    self.authorizationModel = lupapisteApp.models.globalAuthModel;
+
     self.userIsAdmin = ko.observable(false);
     self.total       = ko.observable(0);
     self.showFilterControls = ko.computed(function() {
@@ -220,7 +222,7 @@
       self.text(loc(["applications", colId]));
     });
 
-    ko.applyBindings(model, $("#applications")[0]);
+    $("#applications").applyBindings(model);
 
     var dataTableConfig = {
         bProcessing:      true, // don't hide this, it brakes layout.

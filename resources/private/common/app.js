@@ -141,7 +141,7 @@ var LUPAPISTE = LUPAPISTE || {};
       var hash = window.location.hash;
       if (hash && hash.length > 0) {
         var withoutHash = href.substring(0, href.indexOf("#"));
-        window.location = withoutHash + "?hashbang=" + encodeURIComponent(hash.substring(1, hash.length));
+        window.location = withoutHash + "?redirect-after-login=" + encodeURIComponent(hash.substring(1, hash.length));
       } else {
         // No hashbang. Go directly to front page.
         window.location = "/app/" + loc.getCurrentLanguage();
@@ -231,6 +231,7 @@ var LUPAPISTE = LUPAPISTE || {};
         model.screenMessage = LUPAPISTE.Screenmessage;
       }
 
+      $("#app").applyBindings(lupapisteApp.models.rootVMO);
       $("nav").applyBindings(model).css("visibility", "visible");
       $("footer").applyBindings(model).css("visibility", "visible");
     };

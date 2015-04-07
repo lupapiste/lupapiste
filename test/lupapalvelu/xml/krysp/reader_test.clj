@@ -389,7 +389,7 @@
 
     (facts "Rakennuspaikka"
       (let [{:keys [x y address propertyId] :as rakennuspaikka} (:rakennuspaikka info)]
-        (fact "contains all the needed keys" (every? #{:x :y :address :propertyId} rakennuspaikka))
+        (fact "contains all the needed keys" (every? (-> rakennuspaikka keys set) [:x :y :address :propertyId]))
         (fact "x" x => #(and (instance? Double %) (= 393033.614 %)))
         (fact "y" y => #(and (instance? Double %) (= 6707228.994 %)))
         (fact "address" address => "Kylykuja")
@@ -397,7 +397,7 @@
 
     (facts "Rakennus"
       (let [{:keys [x y address propertyId] :as rakennus} (:ensimmainen-rakennus info)]
-        (fact "contains all the needed keys" (every? #{:x :y :address :propertyId} rakennus))
+        (fact "contains all the needed keys" (every? (-> rakennus keys set) [:x :y :address :propertyId]))
         (fact "x" x => #(and (instance? Double %) (= 393033.614 %)))
         (fact "y" y => #(and (instance? Double %) (= 6707228.994 %)))
         (fact "address" address => "Kylykuja")

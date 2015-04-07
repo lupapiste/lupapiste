@@ -3,6 +3,7 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel, verdictAttachme
 
   var self = this;
 
+  self.authorizationModel = lupapisteApp.models.applicationAuthModel;
   self.appModel = appModel;
   self.signingModel = signingModel;
   self.verdictAttachmentPrintsOrderModel = verdictAttachmentPrintsOrderModel;
@@ -89,10 +90,19 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel, verdictAttachme
       "attachmentsMoveToBackingSystem": {
         loc: loc("application.attachmentsMoveToBackingSystem"),
         clickCommand: function() {
-          return self.sendUnsentAttachmentsToBackingSystem();
+          return self.startMovingAttachmentsToBackingSystem();
         },
         visibleFn: function (rawAttachments) {
           return self.authorizationModel.ok("move-attachments-to-backing-system") && self.appModel.hasAttachment() && unsentAttachmentFound(rawAttachments);
+        }
+      },
+      "attachmentsMoveToCaseManagement": {
+        loc: loc("application.attachmentsMoveToCaseManagement"),
+        clickCommand: function() {
+          return self.startMovingAttachmentsToCaseManagement();
+        },
+        visibleFn: function (rawAttachments) {
+          return self.authorizationModel.ok("attachments-to-asianhallinta") && self.appModel.hasAttachment() && unsentAttachmentFound(rawAttachments);
         }
       },
       "downloadAll": {
@@ -132,9 +142,8 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel, verdictAttachme
     self.showHelp(!self.showHelp());
   };
 
-  self.refresh = function(appModel, authorizationModel) {
+  self.refresh = function(appModel) {
     self.appModel = appModel;
-    self.authorizationModel = authorizationModel;
 
     var rawAttachments = ko.mapping.toJS(appModel.attachments);
     var preAttachments = attachmentUtils.getPreAttachments(rawAttachments);
@@ -171,20 +180,12 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel, verdictAttachme
     self.attachmentsOperations(updatedAttachmentsOperations(rawAttachments));
   };
 
-  self.sendUnsentAttachmentsToBackingSystem = function() {
-    var doSendAttachments = function() {
-      ajax.command("move-attachments-to-backing-system", {id: self.appModel.id(), lang: loc.getCurrentLanguage()})
-      .success(self.appModel.reload)
-      .processing(self.appModel.processing)
-      .pending(self.appModel.pending)
-      .call();
-    };
-    LUPAPISTE.ModalDialog.showDynamicYesNo(
-      loc("application.attachmentsMoveToBackingSystem"),
-      loc("application.attachmentsMoveToBackingSystem.confirmationMessage"),
-      {title: loc("yes"), fn: doSendAttachments},
-      {title: loc("no")}
-    );
+  self.startMovingAttachmentsToBackingSystem = function() {
+    hub.send("start-moving-attachments-to-backing-system");
+  };
+
+  self.startMovingAttachmentsToCaseManagement = function() {
+    hub.send("start-moving-attachments-to-case-management");
   };
 
   self.newAttachment = function() {
@@ -286,7 +287,7 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel, verdictAttachme
       }
     });
 
-    self.refresh(self.appModel, self.authorizationModel);
+    self.refresh(self.appModel);
   });
 
 };
