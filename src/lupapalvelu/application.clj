@@ -649,7 +649,8 @@
                                               [owner company]
                                               [owner])
                        :comments            (map #(domain/->comment % {:type "application"} (:role user) user nil created comment-target) messages)
-                       :schema-version      (schemas/get-latest-schema-version)})]
+                       :schema-version      (schemas/get-latest-schema-version)
+                       :tos-function        (get-in organization [:operations-tos-functions (keyword operation)])})]
     (merge application (when-not info-request?
                          {:attachments (make-attachments created op organization state)
                           :documents   (make-documents user created op application manual-schema-datas)}))))
