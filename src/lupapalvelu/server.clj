@@ -44,7 +44,8 @@
             [lupapalvelu.screenmessage-api]
             [lupapalvelu.integrations-api]
             [lupapalvelu.construction-api]
-            [lupapalvelu.asianhallinta-config-api]))
+            [lupapalvelu.asianhallinta-config-api]
+            [lupapalvelu.tiedonohjaus-api]))
 
 (defonce jetty (atom nil))
 
