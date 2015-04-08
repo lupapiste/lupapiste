@@ -59,6 +59,7 @@
 
   var authorities = ko.observableArray([]);
   var permitSubtypes = ko.observableArray([]);
+  var tosFunctions = ko.observableArray([]);
 
   var inviteCompanyModel = new LUPAPISTE.InviteCompanyModel(applicationModel.id);
 
@@ -123,6 +124,14 @@
     authorities(authorityInfos);
   }
 
+  function initAvailableTosFunctions(organizationId) {
+    ajax
+      .query("available-tos-functions", {organizationId: organizationId})
+      .success(function(data) {
+        tosFunctions(data.functions);
+      })
+      .call();
+  }
 
   function showApplication(applicationDetails) {
     isInitializing = true;
@@ -167,6 +176,8 @@
       // permit subtypes
       permitSubtypes(applicationDetails.permitSubtypes);
 
+      // Organization's TOS functions
+      initAvailableTosFunctions(applicationDetails.application.organization);
 
       // Mark-seen
       if (applicationModel.infoRequest() && authorizationModel.ok("mark-seen")) {
@@ -392,7 +403,8 @@
       verdictModel: verdictModel,
       openInviteCompany: inviteCompanyModel.open.bind(inviteCompanyModel),
       attachmentsTab: attachmentsTab,
-      selectedTabName: selectedTabName
+      selectedTabName: selectedTabName,
+      tosFunctions: tosFunctions
     };
 
     $("#application").applyBindings(bindings);
