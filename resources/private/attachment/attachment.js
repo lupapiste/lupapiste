@@ -317,6 +317,18 @@ var attachment = (function() {
     }
   }
 
+  function attachmentGroupLabel(groupName) {
+    return loc(["attachmentType", groupName, "_group_label"].join("."));
+  }
+
+  function attachmentType(groupName, typeName) {
+    return [groupName, typeName].join(".");
+  }
+
+  function attachmentTypeLabel(groupName, typeName) {
+    return loc(["attachmentType", attachmentType(groupName, typeName)].join("."));
+  }
+
   function showAttachment() {
     if (!applicationId || !attachmentId ||
         applicationId !== pageutil.subPage() ||
@@ -355,15 +367,27 @@ var attachment = (function() {
     model.isVerdictAttachment(attachment.forPrinting);
     model.applicationState(attachment.applicationState);
 
-    var type = attachment.type["type-group"] + "." + attachment.type["type-id"];
-    model.attachmentType(type);
+    model.attachmentType(attachmentType(attachment.type["type-group"], attachment.type["type-id"]));
     model.allowedAttachmentTypes(application.allowedAttachmentTypes);
 
     // Knockout works poorly with dynamic options.
     // To avoid headaches, init the select and update the ko model manually.
-    var selectList$ = $("#attachment-type-select");
-    attachmentTypeSelect.initSelectList(selectList$, application.allowedAttachmentTypes, model.attachmentType());
-    selectList$.change(function(e) {model.attachmentType($(e.target).val());});
+    var groups = _.map(application.allowedAttachmentTypes, function(typeGroup) {
+      return {
+        groupLabel: attachmentGroupLabel(typeGroup[0]),
+        types: _.map(typeGroup[1], function(type) {
+          return {
+            typeLabel: attachmentTypeLabel(typeGroup[0], type),
+            typeValue: attachmentType(typeGroup[0], type)
+          }
+        })
+      };
+    });
+    model.selectableAttachmentTypes = ko.observableArray(groups);
+
+    // var selectList$ = $("#attachment-type-select");
+    // attachmentTypeSelect.initSelectList(selectList$, application.allowedAttachmentTypes, model.attachmentType());
+    // selectList$.change(function(e) {model.attachmentType($(e.target).val());});
 
     model.id(attachmentId);
 
