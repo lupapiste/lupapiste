@@ -1,4 +1,5 @@
-/*!
+@import url(//fonts.googleapis.com/css?family=Source+Sans+Pro:200,300,400,600,700,200italic,300italic,400italic,600italic,700italic);
+/*
  * ajk's Hot New Template
  * Made by ajk (ajk.fi)
  */
@@ -13,7 +14,6 @@
     CSS Reset by ajk (http://ajk.im/)
     Based on http://necolas.github.com/normalize.css/
 */
-@import url(//fonts.googleapis.com/css?family=Source+Sans+Pro:200,300,400,600,700,200italic,300italic,400italic,600italic,700italic);
 /* line 11, ../sass/partials/_reset.scss */
 html, body, div,
 span, object, iframe,
@@ -172,7 +172,7 @@ hr {
   display: block;
   height: 1px;
   border: 0;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid #dddddd;
 }
 
 /* line 131, ../sass/partials/_reset.scss */
@@ -893,9 +893,9 @@ footer .informations .footer-box.sade-box a {
   font-weight: 400;
   width: 16.25em;
   margin: 0 0 6px;
-  padding: .25em 1.125em;
+  padding: 0.25em 1.125em;
   text-decoration: none;
-  text-shadow: 0px 1px 0px #fff;
+  text-shadow: 0px 1px 0px white;
   border: none;
   color: #303030;
   position: relative;
@@ -1648,7 +1648,7 @@ input[readonly]:focus, textarea[readonly]:focus {
 .docgen-content .form-table th {
   vertical-align: bottom;
   border-style: solid;
-  border-left: 1px solid #ffffff;
+  border-left: 1px solid white;
   border-top: none;
   border-bottom: none;
   border-right: none;
@@ -2186,7 +2186,7 @@ table.attachments-template-table td.attachment-version-info {
 
 /* line 88, ../sass/partials/_tabs.scss */
 .tabs-content-container {
-  border: 1px solid #ccc;
+  border: 1px solid #cccccc;
   border-top: none;
   padding: 10px;
   width: 400px;
@@ -2245,21 +2245,25 @@ table.attachments-template-table td.attachment-version-info {
   margin-bottom: 7px;
 }
 /* line 139, ../sass/partials/_tabs.scss */
-.radio-tabs button.application-create {
+.radio-tabs button.application-create, .radio-tabs button.application-from-previous {
   display: inline;
   margin-bottom: 0;
   width: 330px;
 }
 @media all and (max-width: 1000px) {
   /* line 139, ../sass/partials/_tabs.scss */
-  .radio-tabs button.application-create {
+  .radio-tabs button.application-create, .radio-tabs button.application-from-previous {
     position: absolute;
     left: 8px;
     top: 54px;
   }
 }
+/* line 149, ../sass/partials/_tabs.scss */
+.radio-tabs button.application-from-previous {
+  margin: 0 5px;
+}
 
-/* line 151, ../sass/partials/_tabs.scss */
+/* line 155, ../sass/partials/_tabs.scss */
 .missing-info-title {
   margin-bottom: 6px;
   margin-top: 24px;
@@ -2742,7 +2746,7 @@ table.attachments-template-table td.attachment-version-info {
 /* line 1, ../sass/partials/_errors.scss */
 .context-error {
   color: #f00;
-  border: 1px solid #f00;
+  border: 1px solid red;
   border-radius: 3px;
   padding: 6px;
   margin: 12px 0;
@@ -3455,16 +3459,16 @@ ul.attachments-list li.mandatory-attachments {
   min-height: 300px;
 }
 /* line 14, ../sass/views/_applications.scss */
-.applications-empty-state .app-type-box {
+.applications-empty-state .app-type-box, .applications-empty-state .app-type-box-wide {
   display: inline-block;
   width: 32%;
-  height: 100%;
+  height: 290px;
   margin: 12px auto;
   vertical-align: top;
   position: relative;
 }
 /* line 21, ../sass/views/_applications.scss */
-.applications-empty-state .app-type-box button {
+.applications-empty-state .app-type-box button, .applications-empty-state .app-type-box-wide button {
   position: absolute;
   bottom: 12px;
   left: 0;
@@ -3473,49 +3477,50 @@ ul.attachments-list li.mandatory-attachments {
 }
 /* line 29, ../sass/views/_applications.scss */
 .applications-empty-state .app-type-box-wide {
+  height: 230px;
   width: 45%;
 }
-/* line 32, ../sass/views/_applications.scss */
+/* line 34, ../sass/views/_applications.scss */
 .applications-empty-state .missing-wrapper {
   width: 100%;
 }
-/* line 35, ../sass/views/_applications.scss */
+/* line 37, ../sass/views/_applications.scss */
 .applications-empty-state .missing-inforequest-box {
   padding-right: 24px;
   border-right: 1px dotted #888a8c;
   padding-bottom: 48px;
 }
-/* line 40, ../sass/views/_applications.scss */
+/* line 42, ../sass/views/_applications.scss */
 .applications-empty-state .missing-application-box {
   padding-left: 24px;
   padding-right: 24px;
   padding-bottom: 48px;
 }
-/* line 45, ../sass/views/_applications.scss */
+/* line 47, ../sass/views/_applications.scss */
 .applications-empty-state .missing-prev-permit-box {
   padding-left: 24px;
   border-left: 1px dotted #888a8c;
   padding-bottom: 48px;
 }
 
-/* line 52, ../sass/views/_applications.scss */
+/* line 54, ../sass/views/_applications.scss */
 #applications-list_paginate, .dataTables_paginate {
   display: inline-block;
   width: 16.25em;
   float: left;
 }
-/* line 56, ../sass/views/_applications.scss */
+/* line 58, ../sass/views/_applications.scss */
 #applications-list_paginate a, .dataTables_paginate a {
   border: 1px solid #dddddd;
   padding: 6px;
   cursor: pointer;
 }
-/* line 61, ../sass/views/_applications.scss */
+/* line 63, ../sass/views/_applications.scss */
 #applications-list_paginate .paginate_disabled_previous, #applications-list_paginate .paginate_disabled_next, .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .paginate_disabled_next {
   background: #f6f6f6;
   color: gray;
 }
-/* line 65, ../sass/views/_applications.scss */
+/* line 67, ../sass/views/_applications.scss */
 #applications-list_paginate .paginate_enabled_previous, #applications-list_paginate .paginate_enabled_next, .dataTables_paginate .paginate_enabled_previous, .dataTables_paginate .paginate_enabled_next {
   background: #ffffff;
   /* Old browsers */
@@ -3525,31 +3530,31 @@ ul.attachments-list li.mandatory-attachments {
   background: -o-linear-gradient(top, #ffffff 0%, #f3f3f3 50%, #ededed 51%, #ffffff 100%);
   background: linear-gradient(top, #ffffff 0%, #f3f3f3 50%, #ededed 51%, #ffffff 100%);
 }
-/* line 69, ../sass/views/_applications.scss */
+/* line 71, ../sass/views/_applications.scss */
 #applications-list_paginate .paginate_disabled_previous, #applications-list_paginate .paginate_enabled_previous, .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .paginate_enabled_previous {
   margin-right: 12px;
 }
 
-/* line 74, ../sass/views/_applications.scss */
+/* line 76, ../sass/views/_applications.scss */
 #applications-list_length {
   width: 16.25em;
   position: absolute;
   left: 16.25em;
   bottom: -27px;
 }
-/* line 79, ../sass/views/_applications.scss */
+/* line 81, ../sass/views/_applications.scss */
 #applications-list_length select {
   width: 5.625em;
   margin-right: 6px;
 }
 
-/* line 85, ../sass/views/_applications.scss */
+/* line 87, ../sass/views/_applications.scss */
 .sorting, .sorting_asc, .sorting_desc {
   cursor: pointer;
   position: relative;
 }
 
-/* line 89, ../sass/views/_applications.scss */
+/* line 91, ../sass/views/_applications.scss */
 .sorting_asc:after {
   content: "";
   display: block;
@@ -3563,7 +3568,7 @@ ul.attachments-list li.mandatory-attachments {
   right: 2px;
 }
 
-/* line 100, ../sass/views/_applications.scss */
+/* line 102, ../sass/views/_applications.scss */
 .sorting_desc:after {
   content: "";
   display: block;
@@ -3577,7 +3582,7 @@ ul.attachments-list li.mandatory-attachments {
   right: 2px;
 }
 
-/* line 112, ../sass/views/_applications.scss */
+/* line 114, ../sass/views/_applications.scss */
 .dataTables_info {
   width: 16.25em;
   display: inline-block;
@@ -3586,30 +3591,30 @@ ul.attachments-list li.mandatory-attachments {
   bottom: 12px;
 }
 
-/* line 120, ../sass/views/_applications.scss */
+/* line 122, ../sass/views/_applications.scss */
 .invitations {
   margin-bottom: 24px;
 }
-/* line 123, ../sass/views/_applications.scss */
+/* line 125, ../sass/views/_applications.scss */
 .invitations .invitation span {
   margin-right: 12px;
 }
 
-/* line 130, ../sass/views/_applications.scss */
+/* line 132, ../sass/views/_applications.scss */
 .filter-controls div {
   display: inline-block;
   margin-bottom: 24px;
 }
-/* line 134, ../sass/views/_applications.scss */
+/* line 136, ../sass/views/_applications.scss */
 .filter-controls label {
   display: block;
 }
-/* line 137, ../sass/views/_applications.scss */
+/* line 139, ../sass/views/_applications.scss */
 .filter-controls select {
   display: block;
 }
 
-/* line 143, ../sass/views/_applications.scss */
+/* line 145, ../sass/views/_applications.scss */
 #applications-list .indicator-count {
   padding-left: 0;
   padding-right: 0;
@@ -3619,12 +3624,12 @@ ul.attachments-list li.mandatory-attachments {
   width: 22px;
   padding: 3px;
 }
-/* line 152, ../sass/views/_applications.scss */
+/* line 154, ../sass/views/_applications.scss */
 #applications-list div {
   padding-top: 3px;
   height: 30px;
 }
-/* line 153, ../sass/views/_applications.scss */
+/* line 155, ../sass/views/_applications.scss */
 #applications-list .urgent {
   background-image: url("/img/icons-sprite-1.14.png");
   background-repeat: no-repeat;
@@ -3632,7 +3637,7 @@ ul.attachments-list li.mandatory-attachments {
   height: 24px;
   width: 24px;
 }
-/* line 159, ../sass/views/_applications.scss */
+/* line 161, ../sass/views/_applications.scss */
 #applications-list .pending {
   background-image: url("/img/icons-sprite-1.14.png");
   background-repeat: no-repeat;
@@ -3640,7 +3645,7 @@ ul.attachments-list li.mandatory-attachments {
   width: 24px;
   height: 24px;
 }
-/* line 165, ../sass/views/_applications.scss */
+/* line 167, ../sass/views/_applications.scss */
 #applications-list .normal {
   background-image: url("/img/icons-sprite-1.14.png");
   background-repeat: no-repeat;
@@ -3648,21 +3653,21 @@ ul.attachments-list li.mandatory-attachments {
   width: 24px;
   height: 24px;
 }
-/* line 171, ../sass/views/_applications.scss */
+/* line 173, ../sass/views/_applications.scss */
 #applications-list .unseen-comments {
   background-image: url("/img/icons-sprite-1.14.png");
   background-repeat: no-repeat;
   background-position: 0 -4295px;
   width: 21px;
 }
-/* line 176, ../sass/views/_applications.scss */
+/* line 178, ../sass/views/_applications.scss */
 #applications-list .unseen-indicators {
   background-image: url("/img/icons-sprite-1.14.png");
   background-repeat: no-repeat;
   background-position: 0 -4597px;
   width: 25px;
 }
-/* line 181, ../sass/views/_applications.scss */
+/* line 183, ../sass/views/_applications.scss */
 #applications-list .unseen-attachments {
   background-image: url("/img/icons-sprite-1.14.png");
   background-repeat: no-repeat;
@@ -3670,25 +3675,25 @@ ul.attachments-list li.mandatory-attachments {
   width: 21px;
 }
 
-/* line 188, ../sass/views/_applications.scss */
+/* line 190, ../sass/views/_applications.scss */
 .clearable {
   position: relative;
   display: inline-block;
   vertical-align: bottom;
 }
 
-/* line 193, ../sass/views/_applications.scss */
+/* line 195, ../sass/views/_applications.scss */
 .applications-search {
   padding-right: 17px;
   /* add space for the 'x' icon*/
 }
 
-/* line 196, ../sass/views/_applications.scss */
+/* line 198, ../sass/views/_applications.scss */
 .applications-search::-ms-clear {
   display: none;
 }
 
-/* line 199, ../sass/views/_applications.scss */
+/* line 201, ../sass/views/_applications.scss */
 span.icon_clear {
   position: absolute;
   right: 12px;
@@ -3699,7 +3704,7 @@ span.icon_clear {
   font: bold 1em sans-serif;
   color: #38468F;
 }
-/* line 209, ../sass/views/_applications.scss */
+/* line 211, ../sass/views/_applications.scss */
 span.icon_clear:before {
   color: #f52;
 }
@@ -5240,7 +5245,7 @@ td.comment-text {
 #login h1 {
   margin-bottom: 1em;
   color: #f59c00;
-  font-family: 'Dosis', sans-serif;
+  font-family: "Dosis", sans-serif;
   word-spacing: 0.1em;
   line-height: 1em;
   font-size: 25px;
@@ -5709,17 +5714,17 @@ div.attachment-multiselect-content tr.attachment-group-header {
 /* line 3, ../sass/partials/_other.scss */
 .hide {
   visibility: hidden;
-  width: 0 !important;
-  height: 0 !important;
-  line-height: 0 !important;
-  padding: 0 !important;
-  margin: 0 !important;
+  width: 0!important;
+  height: 0!important;
+  line-height: 0!important;
+  padding: 0!important;
+  margin: 0!important;
 }
 
 /* Pretty &amp; s */
 /* line 13, ../sass/partials/_other.scss */
 .amp {
-  font-family: 'Goudy Old Style', Baskerville, Palatino, 'Palatino Linotype', 'Book Antiqua', serif;
+  font-family: "Goudy Old Style", Baskerville, Palatino, "Palatino Linotype", "Book Antiqua", serif;
   font-style: italic;
 }
 
