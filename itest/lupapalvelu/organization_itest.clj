@@ -22,7 +22,7 @@
     (fact "jarvenpaa just jarvenpaa"
       (->> jarvenpaa-user :user :orgAuthz (map :org)) => ["186-R"])
     (fact "oulu user in oulu & naantali orgs"
-      (->> oulu-user :user :orgAuthz (map :org)) => ["564-R" "529-R"])
+      (->> oulu-user :user :orgAuthz (map :org)) => ["564-R" "529-R" "564-YMP"])
 
 
     (let [naantali-sees (:users (query naantali :users-in-same-organizations))

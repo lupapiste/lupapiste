@@ -14,7 +14,7 @@
   .app-type-box {
     display: inline-block;
     width: 32%;
-    height: 100%;
+    height: 290px;
     margin: $marginM auto;
     vertical-align: top;
     position: relative;
@@ -25,6 +25,11 @@
       right: 0;
       margin: 0 auto;
     }
+  }
+  .app-type-box-wide {
+    @extend .app-type-box;
+    height: 230px;
+    width: 45%;
   }
   .missing-wrapper {
     width: 100%;
