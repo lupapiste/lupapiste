@@ -785,6 +785,17 @@
   {:apply-when (pos? (mongo/count :users {:organization {$exists true}}))}
   (mongo/update-by-query :users {:organization {$exists true}} {$unset {:organization 0}}))
 
+(defmigration rename-foreman-competence-documents
+  {:apply-when (pos? (mongo/count :applications {:documents {$elemMatch {"schema-info.name" {$regex #"^tyonjohtaja"}
+                                                                         "data.patevyys"    {$exists true}}}}))}
+  (update-applications-array
+    :documents
+    (fn [doc]
+      (if (re-find #"^tyonjohtaja" (-> doc :schema-info :name))
+        (update-in doc [:data] clojure.set/rename-keys {:patevyys :patevyys-tyonjohtaja})
+        doc))
+    {"documents.schema-info.name" {$regex #"^tyonjohtaja"}}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"

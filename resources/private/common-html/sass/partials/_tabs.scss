@@ -146,6 +146,10 @@
       top: 54px;
     }
   }
+  button.application-from-previous {
+    @extend button.application-create;
+    margin: 0 5px;
+  }
 }
 
 .missing-info-title {

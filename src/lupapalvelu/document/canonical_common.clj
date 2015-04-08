@@ -425,13 +425,14 @@
 
 (defn get-tyonjohtaja-data [lang tyonjohtaja party-type]
   (let [foremans (dissoc (get-suunnittelija-data tyonjohtaja party-type) :suunnittelijaRoolikoodi)
-        patevyys (:patevyys tyonjohtaja)
+        patevyys (:patevyys-tyonjohtaja tyonjohtaja)
         {:keys [alkamisPvm paattymisPvm] :as sijaistus} (:sijaistus tyonjohtaja)
         rooli    (get-kuntaRooliKoodi tyonjohtaja :tyonjohtaja)]
     (merge
       foremans
       {:tyonjohtajaRooliKoodi rooli
        :vastattavatTyotehtavat (concat-tyotehtavat-to-string (:vastattavatTyotehtavat tyonjohtaja))
+       :koulutus (:koulutusvalinta patevyys)
        :patevyysvaatimusluokka (:patevyysvaatimusluokka patevyys)
        :valmistumisvuosi (:valmistumisvuosi patevyys)
        :kokemusvuodet (:kokemusvuodet patevyys)
@@ -447,13 +448,14 @@
 
 (defn get-tyonjohtaja-v2-data [lang tyonjohtaja party-type]
   (let [foremans (dissoc (get-suunnittelija-data tyonjohtaja party-type) :suunnittelijaRoolikoodi)
-        patevyys (:patevyys tyonjohtaja)
+        patevyys (:patevyys-tyonjohtaja tyonjohtaja)
         {:keys [alkamisPvm paattymisPvm] :as sijaistus} (:sijaistus tyonjohtaja)
         rooli    (get-kuntaRooliKoodi tyonjohtaja :tyonjohtaja)]
     (merge
       foremans
       {:tyonjohtajaRooliKoodi rooli
        :vastattavatTyotehtavat (concat-tyotehtavat-to-string (:vastattavatTyotehtavat tyonjohtaja))
+       :koulutus (:koulutusvalinta patevyys)
        :patevyysvaatimusluokka (:patevyysvaatimusluokka tyonjohtaja)
        :valmistumisvuosi (:valmistumisvuosi patevyys)
        :kokemusvuodet (:kokemusvuodet patevyys)
@@ -466,8 +468,7 @@
       (get-vastattava-tyotieto tyonjohtaja lang)
       (let [sijaistettava-hlo (get-sijaistettava-hlo-214 sijaistus)]
         (when-not (ss/blank? sijaistettava-hlo)
-          {:sijaistettavaHlo sijaistettava-hlo}))
-      )))
+          {:sijaistettavaHlo sijaistettava-hlo})))))
 
 (defn- get-foremen [documents lang]
   (if (contains? documents :tyonjohtaja)
