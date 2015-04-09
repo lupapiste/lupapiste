@@ -48,7 +48,15 @@
             (fail! :error.link-permit-app-not-in-post-sent-state)
             (fail! :error.kuntalupatunnus-not-available-from-verdict)))))))
 
-(defn- do-approve [application created id lang jatkoaika-app? do-rest-fn]
+(defn get-transfer-item [type {:keys [created user]} & [attachments]]
+  (let [transfer {:type type
+                  :user (select-keys user [:id :role :firstName :lastName])
+                  :timestamp created}]
+    (if (empty? attachments)
+      transfer
+      (assoc transfer :attachments (map :id attachments)))))
+
+(defn- do-approve [application created id lang jatkoaika-app? do-rest-fn user]
   (let [organization (organization/get-organization (:organization application))]
     (if (organization/has-ftp-user? organization (permit/permit-type application))
       (or
@@ -89,14 +97,42 @@
                       {:state {$in ["submitted" "complement-needed"]}}
                       {})
         indicator-updates (application/mark-indicators-seen-updates application user created)
+        transfer (get-transfer-item "approve-application" {:created created :user user})
         do-update (fn [attachments-updates]
                     (update-application command
                       mongo-query
-                      {$set (util/deep-merge app-updates attachments-updates indicator-updates)})
+                      {$push {:transfers transfer}
+                       $set (util/deep-merge app-updates attachments-updates indicator-updates)})
                     (ok :integrationAvailable (not (nil? attachments-updates))))]
 
-    (do-approve application created id lang jatkoaika-app? do-update)))
+    (do-approve application created id lang jatkoaika-app? do-update user)))
 
+(defcommand move-attachments-to-backing-system
+  {:parameters [id lang attachmentIds]
+   :user-roles #{:authority}
+   :pre-checks [(permit/validate-permit-type-is permit/R)]
+   :states     [:verdictGiven :constructionStarted]
+   :description "Sends such selected attachments to backing system that are not yet sent."}
+  [{:keys [created application user] :as command}]
+
+  (let [attachments-wo-sent-timestamp (filter
+                                        #(and
+                                          (-> % :versions count pos?)
+                                          (or
+                                            (not (:sent %))
+                                            (> (-> % :versions last :created) (:sent %)))
+                                          (not (#{"verdict" "statement"} (-> % :target :type)))
+                                          (some #{(:id %)} attachmentIds))
+                                        (:attachments application))]
+    (if (pos? (count attachments-wo-sent-timestamp))
+      (let [organization  (organization/get-organization (:organization application))
+            sent-file-ids (mapping-to-krysp/save-unsent-attachments-as-krysp (assoc application :attachments attachments-wo-sent-timestamp) lang organization)
+            data-argument (attachment/create-sent-timestamp-update-statements (:attachments application) sent-file-ids created)
+            transfer      (get-transfer-item "move-attachments-to-backing-system" command attachments-wo-sent-timestamp)]
+        (update-application command {$push {:transfers transfer}
+                                     $set data-argument})
+        (ok))
+      (fail :error.sending-unsent-attachments-failed))))
 
 ;;
 ;; krysp enrichment
@@ -188,9 +224,7 @@
         indicator-updates (application/mark-indicators-seen-updates application user created)
         file-ids (ah/save-as-asianhallinta application lang submitted-application organization) ; Writes to disk
         attachments-updates (or (attachment/create-sent-timestamp-update-statements (:attachments application) file-ids created) {})
-        transfer {:type "application-to-asianhallinta"
-                  :user (select-keys user [:id :role :firstName :lastName])
-                  :timestamp created}]
+        transfer (get-transfer-item "application-to-asianhallinta" command)]
     (update-application command
                         {$push {:transfers transfer}
                          $set (util/deep-merge app-updates attachments-updates indicator-updates)})
@@ -205,7 +239,7 @@
     application))
 
 (defn- application-already-in-asianhallinta [_ application]
-  (when-not (some #(= "application-to-asianhallinta" (:type %)) (:transfers application))
+  (when-not (some #{(:type (last (:transfers application)))} ["application-to-asianhallinta" "attachments-to-asianhallinta"])
     (fail :error.application.not-in-asianhallinta)))
 
 (defcommand attachments-to-asianhallinta
@@ -225,16 +259,13 @@
                                           (not (#{"verdict" "statement"} (-> % :target :type)))
                                           (some #{(:id %)} attachmentIds))
                                         (:attachments application))
-        transfer {:type "attachments-to-asianhallinta"
-                  :user (select-keys user [:id :role :firstName :lastName])
-                  :timestamp created
-                  :attachments (map :id attachments-wo-sent-timestamp)}]
-       (if (pos? (count attachments-wo-sent-timestamp))
-         (let [application (meta-fields/enrich-with-link-permit-data application)
-               application (update-kuntalupatunnus application)
-               sent-file-ids (ah/save-as-asianhallinta-asian-taydennys application attachments-wo-sent-timestamp lang)
-               data-argument (attachment/create-sent-timestamp-update-statements (:attachments application) sent-file-ids created)]
-              (update-application command {$push {:transfers transfer}
-                                           $set data-argument})
-              (ok))
-         (fail :error.sending-unsent-attachments-failed))))
+        transfer (get-transfer-item "attachments-to-asianhallinta" command attachments-wo-sent-timestamp)]
+    (if (pos? (count attachments-wo-sent-timestamp))
+      (let [application (meta-fields/enrich-with-link-permit-data application)
+            application (update-kuntalupatunnus application)
+            sent-file-ids (ah/save-as-asianhallinta-asian-taydennys application attachments-wo-sent-timestamp lang)
+            data-argument (attachment/create-sent-timestamp-update-statements (:attachments application) sent-file-ids created)]
+        (update-application command {$push {:transfers transfer}
+                                     $set data-argument})
+        (ok))
+      (fail :error.sending-unsent-attachments-failed))))
