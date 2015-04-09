@@ -113,7 +113,7 @@
           </div>
           <!-- /ko -->
 
-          <!-- ko if: $root.tosFunctions().length > 0 -->
+          <!-- ko if: $root.tosFunctions().length > 0 && $root.authorization.ok("set-tos-function-for-application") -->
           <div>
             <p data-bind="ltext: 'tos.function'"></p>
             <span class="application_summary_text">
