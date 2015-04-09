@@ -13,6 +13,7 @@
             [lupapalvelu.mime :as mime]
             [lupapalvelu.pdf-export :as pdf-export]
             [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.tiedonohjaus :as tos]
             [clojure.java.io :as io])
   (:import [java.util.zip ZipOutputStream ZipEntry]
            [java.io File OutputStream FilterInputStream]))
@@ -326,7 +327,7 @@
   {:pre [application]}
   (get-attachment-types-by-permit-type (:permitType application)))
 
-(defn make-attachment [now target required? requested-by-authority? locked? application-state op attachment-type & [attachment-id]]
+(defn make-attachment [now target required? requested-by-authority? locked? application-state op attachment-type metadata & [attachment-id]]
   {:id (or attachment-id (mongo/create-id))
    :type attachment-type
    :modified now
@@ -340,7 +341,8 @@
    :forPrinting false
    :op op
    :signatures []
-   :versions []})
+   :versions []
+   :metadata metadata})
 
 (defn make-attachments
   "creates attachments with nil target"
@@ -349,7 +351,8 @@
 
 (defn create-attachment [application attachment-type op now target locked? required? requested-by-authority? & [attachment-id]]
   {:pre [(map? application)]}
-  (let [attachment (make-attachment now target required? requested-by-authority? locked? (:state application) op attachment-type attachment-id)]
+  ;FIXME: Fetch default metadata for attachment
+  (let [attachment (make-attachment now target required? requested-by-authority? locked? (:state application) op attachment-type {} attachment-id)]
     (update-application
       (application->command application)
       {$set {:modified now}
@@ -359,6 +362,7 @@
 
 (defn create-attachments [application attachment-types now locked? required? requested-by-authority?]
   {:pre [(map? application)]}
+  ;FIXME: Fetch default metadata for attachment
   (let [attachments (make-attachments now (:state application) attachment-types locked? required? requested-by-authority?)]
     (update-application
       (application->command application)

@@ -34,7 +34,8 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.company :as c]
-            [lupapalvelu.comment :as comment]))
+            [lupapalvelu.comment :as comment]
+            [lupapalvelu.tiedonohjaus :as tos]))
 
 ;; Notifications
 
@@ -550,9 +551,10 @@
     (ok :sameLocation same-location-irs :sameOperation same-op-irs :others others)
     ))
 
-(defn- make-attachments [created operation organization applicationState & {:keys [target]}]
+(defn- make-attachments [created operation organization applicationState tos-function & {:keys [target]}]
   (for [[type-group type-id] (organization/get-organization-attachments-for-operation organization operation)]
-    (attachment/make-attachment created target true false false applicationState operation {:type-group type-group :type-id type-id})))
+    (let [metadata (tos/get-metadata-for-document-from-toj (:id organization) tos-function (str type-group "." type-id))]
+      (attachment/make-attachment created target true false false applicationState operation {:type-group type-group :type-id type-id} metadata))))
 
 (defn- schema-data-to-body [schema-data application]
   (keywordize-keys
@@ -628,6 +630,7 @@
                       (user/authority? user) :open
                       :else                  :draft)
         comment-target (if open-inforequest? [:applicant :authority :oirAuthority] [:applicant :authority])
+        tos-function (get-in organization [:operations-tos-functions (keyword operation)])
         application (merge domain/application-skeleton
                       {:id                  id
                        :created             created
@@ -650,9 +653,9 @@
                                               [owner])
                        :comments            (map #(domain/->comment % {:type "application"} (:role user) user nil created comment-target) messages)
                        :schema-version      (schemas/get-latest-schema-version)
-                       :tosFunction         (get-in organization [:operations-tos-functions (keyword operation)])})]
+                       :tosFunction         tos-function})]
     (merge application (when-not info-request?
-                         {:attachments (make-attachments created op organization state)
+                         {:attachments (make-attachments created op organization state tos-function)
                           :documents   (make-documents user created op application manual-schema-datas)}))))
 
 (defn do-create-application
@@ -811,7 +814,7 @@
         organization (organization/get-organization (:organization application))]
     (update-application command {$push {:operations op
                                         :documents {$each new-docs}
-                                        :attachments {$each (make-attachments created op organization (:state application))}}
+                                        :attachments {$each (make-attachments created op organization (:state application) (:tosFunction application))}}
                                  $set {:modified created}})))
 
 (defcommand update-op-description
@@ -1083,7 +1086,7 @@
              :convertedToApplication created
              :documents (make-documents user created op application)
              :modified created}
-       $push {:attachments {$each (make-attachments created op organization (:state application))}}})
+       $push {:attachments {$each (make-attachments created op organization (:state application) (:tosFunction application))}}})
     (try (autofill-rakennuspaikka application created)
       (catch Exception e (error e "KTJ data was not updated")))))
 
