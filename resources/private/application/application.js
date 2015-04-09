@@ -109,8 +109,17 @@
     .call();
   }
 
+  function updateTosFunction(value) {
+    if (!isInitializing) {
+      ajax
+        .command("set-tos-function-for-application", {id: currentId, functionCode: value})
+        .call();
+    }
+  }
+
   applicationModel.assignee.subscribe(function(v) { updateAssignee(v); });
   applicationModel.permitSubtype.subscribe(function(v){updatePermitSubtype(v);});
+  applicationModel.tosFunction.subscribe(updateTosFunction);
 
   function resolveApplicationAssignee(authority) {
     return (authority) ? new AuthorityInfo(authority.id, authority.firstName, authority.lastName) : null;

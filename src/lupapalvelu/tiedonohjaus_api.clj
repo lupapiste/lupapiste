@@ -4,7 +4,8 @@
             [lupapalvelu.tiedonohjaus :as t]
             [lupapalvelu.organization :as o]
             [lupapalvelu.organization-api :as oa]
-            [monger.operators :refer :all]))
+            [monger.operators :refer :all]
+            [lupapalvelu.action :as action]))
 
 (defquery available-tos-functions
   {:user-roles       #{:anonymous}
@@ -29,3 +30,16 @@
    :input-validators [(partial non-blank-parameters [:functionCode :operation])]}
   [{user :user}]
   (store-function-code operation functionCode user))
+
+(defcommand set-tos-function-for-application
+  {:parameters [:id functionCode]
+   :user-roles #{:authority}
+   :states     (action/all-states-but [:closed :canceled])}
+  [{:keys [application created] :as command}]
+  (let [orgId (:organization application)
+        code-valid? (some #{functionCode} (map :code (t/get-functions-from-toj orgId)))]
+    (if code-valid?
+      (action/update-application command
+                                 {$set {:modified created
+                                        :tosFunction functionCode}})
+      (fail "Invalid TOS function code"))))
