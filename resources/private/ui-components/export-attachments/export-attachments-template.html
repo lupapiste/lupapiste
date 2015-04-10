@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container">
+    <script type="text/html" id="export-attachments-template">
+      <div>
+        <button class="btn btn-primary"
+                data-bind="visible: exportAttachmentsToBackingSystem,
+                           click: startExportingAttachmentsToBackingSystem,
+                           attr: {title: loc('application.attachmentsMoveToBackingSystem')}">
+          <span data-bind="ltext: 'application.exportAttachments'"></span>
+          <span class="icon approve left-align"></span>
+        </button>
+        <button class="btn btn-primary"
+                data-bind="visible: exportAttachmentsToAsianhallinta,
+                           click: startExportingAttachmentsToAsianhallinta,
+                           attr: {title: loc('application.attachmentsMoveToCaseManagement')}">
+          <span data-bind="ltext: 'application.exportAttachments',"></span>
+          <span class="icon approve left-align"></span>
+        </button>
+      </div>
+    </script>
+  </section>
+</body>
+</html>
