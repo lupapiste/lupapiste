@@ -2,6 +2,9 @@ LUPAPISTE.ExportAttachmentsModel = function(params) {
   "use strict";
   var self = this;
 
+  self.authorizationModel = lupapisteApp.models.applicationAuthModel;
+  self.appModel = lupapisteApp.models.application;
+
   function unsentAttachmentFound(attachments) {
     return _.some(attachments, function(a) {
       var lastVersion = _.last(a.versions);
