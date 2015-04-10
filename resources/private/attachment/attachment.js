@@ -321,20 +321,20 @@ var attachment = (function() {
     }
   }
 
-  function attachmentGroupLabel(groupName) {
-    return loc(["attachmentType", groupName, "_group_label"].join("."));
-  }
-
   function attachmentType(groupName, typeName) {
     return [groupName, typeName].join(".");
   }
 
-  function attachmentTypeLabel(groupName, typeName) {
-    return loc(["attachmentType", attachmentType(groupName, typeName)].join("."));
-  }
-
   function ChangeTypeDialogModel() {
     var self = this;
+
+    function attachmentGroupLabel(groupName) {
+      return loc(["attachmentType", groupName, "_group_label"].join("."));
+    }
+
+    function attachmentTypeLabel(groupName, typeName) {
+      return loc(["attachmentType", attachmentType(groupName, typeName)].join("."));
+    }
 
     self.attachmentType = ko.observable().extend({notify: "always"});
     self.selectableAttachmentTypes = ko.pureComputed(function () {
