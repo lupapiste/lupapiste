@@ -98,34 +98,35 @@ var attachment = (function() {
   var approveModel = new ApproveModel(authorizationModel);
 
   model = {
-    id:   ko.observable(),
-    application: applicationModel,
-    applicationState:     ko.observable(),
-    authorized:           ko.observable(false),
-    filename:             ko.observable(),
-    latestVersion:        ko.observable({}),
-    versions:             ko.observable([]),
-    signatures:           ko.observableArray([]),
-    type:                 ko.observable(),
-    attachmentType:       ko.observable(),
-    allowedAttachmentTypes: ko.observableArray([]),
-    previewDisabled:      ko.observable(false),
-    operation:            ko.observable(),
-    selectedOperationId:  ko.observable(),
-    selectableOperations: ko.observableArray(),
-    contents:             ko.observable(),
-    scale:                ko.observable(),
-    scales:               ko.observableArray(LUPAPISTE.config.attachmentScales),
-    size:                 ko.observable(),
-    sizes:                ko.observableArray(LUPAPISTE.config.attachmentSizes),
-    isVerdictAttachment:  ko.observable(),
-    subscriptions:        [],
-    indicator:            ko.observable().extend({notify: "always"}),
+    id:                           ko.observable(),
+    application:                  applicationModel,
+    applicationState:             ko.observable(),
+    authorized:                   ko.observable(false),
+    filename:                     ko.observable(),
+    latestVersion:                ko.observable({}),
+    versions:                     ko.observable([]),
+    signatures:                   ko.observableArray([]),
+    type:                         ko.observable(),
+    attachmentType:               ko.observable(),
+    allowedAttachmentTypes:       ko.observableArray([]),
+    previewDisabled:              ko.observable(false),
+    operation:                    ko.observable(),
+    selectedOperationId:          ko.observable(),
+    selectableOperations:         ko.observableArray(),
+    contents:                     ko.observable(),
+    scale:                        ko.observable(),
+    scales:                       ko.observableArray(LUPAPISTE.config.attachmentScales),
+    size:                         ko.observable(),
+    sizes:                        ko.observableArray(LUPAPISTE.config.attachmentSizes),
+    isVerdictAttachment:          ko.observable(),
+    subscriptions:                [],
+    indicator:                    ko.observable().extend({notify: "always"}),
     showAttachmentVersionHistory: ko.observable(),
-    showHelp:             ko.observable(false),
-    init:                 ko.observable(false),
-    groupAttachments:     ko.observableArray(),
-    groupIndex:           ko.observable(),
+    showHelp:                     ko.observable(false),
+    init:                         ko.observable(false),
+    groupAttachments:             ko.observableArray(),
+    groupIndex:                   ko.observable(),
+    changeTypeDialogModel:        undefined,
 
     toggleHelp: function() {
       model.showHelp(!model.showHelp());
@@ -189,6 +190,7 @@ var attachment = (function() {
     },
 
     showChangeTypeDialog: function() {
+      model.changeTypeDialogModel.init(model.attachmentType());
       LUPAPISTE.ModalDialog.open("#change-type-dialog");
     },
 
@@ -208,6 +210,8 @@ var attachment = (function() {
       model.showAttachmentVersionHistory(!model.showAttachmentVersionHistory());
     }
   };
+
+  model.changeTypeDialogModel = new ChangeTypeDialogModel();
 
   model.name = ko.computed(function() {
     if (model.attachmentType()) {
@@ -329,6 +333,34 @@ var attachment = (function() {
     return loc(["attachmentType", attachmentType(groupName, typeName)].join("."));
   }
 
+  function ChangeTypeDialogModel() {
+    var self = this;
+
+    self.attachmentType = ko.observable().extend({notify: "always"});
+    self.selectableAttachmentTypes = ko.pureComputed(function () {
+      return _.map(applicationModel.allowedAttachmentTypes(), function(typeGroup) {
+        return {
+          groupLabel: attachmentGroupLabel(typeGroup[0]),
+          types: _.map(typeGroup[1], function(type) {
+            return {
+              typeLabel: attachmentTypeLabel(typeGroup[0], type),
+              typeValue: attachmentType(typeGroup[0], type)
+            }
+          })
+        };
+      });
+    });
+
+    self.init = function(currentAttachmentType) {
+      self.attachmentType(currentAttachmentType);
+    };
+
+    self.ok = function() {
+      hub.send("change-attachment-type", {attachmentType: self.attachmentType()})
+      LUPAPISTE.ModalDialog.close();
+    };
+  }
+
   function showAttachment() {
     if (!applicationId || !attachmentId ||
         applicationId !== pageutil.subPage() ||
@@ -366,29 +398,13 @@ var attachment = (function() {
     model.size(attachment.size);
     model.isVerdictAttachment(attachment.forPrinting);
     model.applicationState(attachment.applicationState);
-
-    model.attachmentType(attachmentType(attachment.type["type-group"], attachment.type["type-id"]));
     model.allowedAttachmentTypes(application.allowedAttachmentTypes);
+    model.attachmentType(attachmentType(attachment.type["type-group"], attachment.type["type-id"]));
 
-    // Knockout works poorly with dynamic options.
-    // To avoid headaches, init the select and update the ko model manually.
-    var groups = _.map(application.allowedAttachmentTypes, function(typeGroup) {
-      return {
-        groupLabel: attachmentGroupLabel(typeGroup[0]),
-        types: _.map(typeGroup[1], function(type) {
-          return {
-            typeLabel: attachmentTypeLabel(typeGroup[0], type),
-            typeValue: attachmentType(typeGroup[0], type)
-          }
-        })
-      };
+    hub.subscribe("change-attachment-type", function(data) {
+      model.attachmentType(data.attachmentType);
     });
-    model.selectableAttachmentTypes = ko.observableArray(groups);
-
-    // var selectList$ = $("#attachment-type-select");
-    // attachmentTypeSelect.initSelectList(selectList$, application.allowedAttachmentTypes, model.attachmentType());
-    // selectList$.change(function(e) {model.attachmentType($(e.target).val());});
-
+    
     model.id(attachmentId);
 
     approveModel.setApplication(application);

@@ -221,7 +221,7 @@
       </div>
     </div>
 
-    <div class="window autosized" id="change-type-dialog">
+    <div class="window autosized" id="change-type-dialog" data-bind="with: changeTypeDialogModel">
       <div class="dialog-header">
        <p data-bind="ltext: 'attachment.changeType'"></p>
        <p class="dialog-close close">X</p>
@@ -239,7 +239,7 @@
         </div>
       </div>
       <div style="text-align:center">
-        <button class="btn btn-primary btn-dialog" data-test-id="confirm-yes" style="position:relative" data-bind="ltext: 'button.ok', click: LUPAPISTE.ModalDialog.close"></button>
+        <button class="btn btn-primary btn-dialog" data-test-id="confirm-yes" style="position:relative" data-bind="ltext: 'button.ok', click: ok"></button>
       </div>
     </div>
   <!-- /ko -->
