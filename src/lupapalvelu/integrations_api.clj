@@ -97,7 +97,7 @@
                       {:state {$in ["submitted" "complement-needed"]}}
                       {})
         indicator-updates (application/mark-indicators-seen-updates application user created)
-        transfer (get-transfer-item "approve-application" {:created created :user user})
+        transfer (get-transfer-item :exported-to-backing-system {:created created :user user})
         do-update (fn [attachments-updates]
                     (update-application command
                       mongo-query
@@ -107,10 +107,16 @@
 
     (do-approve application created id lang jatkoaika-app? do-update user)))
 
+(defn- application-already-exported [type]
+  (fn [_ application]
+    (let [filtered-transfers (filter #(some #{(keyword (:type %))} [:exported-to-backing-system :exported-to-asianhallinta]) (:transfers application))]
+      (when-not (= (keyword (:type (last filtered-transfers))) type)
+        (fail :error.application-not-exported)))))
+
 (defcommand move-attachments-to-backing-system
   {:parameters [id lang attachmentIds]
    :user-roles #{:authority}
-   :pre-checks [(permit/validate-permit-type-is permit/R)]
+   :pre-checks [(permit/validate-permit-type-is permit/R) (application-already-exported :exported-to-backing-system)]
    :states     [:verdictGiven :constructionStarted]
    :description "Sends such selected attachments to backing system that are not yet sent."}
   [{:keys [created application user] :as command}]
@@ -128,7 +134,7 @@
       (let [organization  (organization/get-organization (:organization application))
             sent-file-ids (mapping-to-krysp/save-unsent-attachments-as-krysp (assoc application :attachments attachments-wo-sent-timestamp) lang organization)
             data-argument (attachment/create-sent-timestamp-update-statements (:attachments application) sent-file-ids created)
-            transfer      (get-transfer-item "move-attachments-to-backing-system" command attachments-wo-sent-timestamp)]
+            transfer      (get-transfer-item :exported-to-backing-system command attachments-wo-sent-timestamp)]
         (update-application command {$push {:transfers transfer}
                                      $set data-argument})
         (ok))
@@ -224,7 +230,7 @@
         indicator-updates (application/mark-indicators-seen-updates application user created)
         file-ids (ah/save-as-asianhallinta application lang submitted-application organization) ; Writes to disk
         attachments-updates (or (attachment/create-sent-timestamp-update-statements (:attachments application) file-ids created) {})
-        transfer (get-transfer-item "application-to-asianhallinta" command)]
+        transfer (get-transfer-item :exported-to-asianhallinta command)]
     (update-application command
                         {$push {:transfers transfer}
                          $set (util/deep-merge app-updates attachments-updates indicator-updates)})
@@ -239,13 +245,14 @@
     application))
 
 (defn- application-already-in-asianhallinta [_ application]
-  (when-not (some #{(:type (last (:transfers application)))} ["application-to-asianhallinta" "attachments-to-asianhallinta"])
+  (let [filtered-transfers (filter #(some #{(:type %)} "to-backing-system to-asianhallinta" ) (:transfers application))]
+    (when-not (= (:type (last filtered-transfers)) "to-asianhallinta"))
     (fail :error.application.not-in-asianhallinta)))
 
 (defcommand attachments-to-asianhallinta
   {:parameters [id lang attachmentIds]
    :user-roles #{:authority}
-   :pre-checks [has-asianhallinta-operation application-already-in-asianhallinta]
+   :pre-checks [has-asianhallinta-operation (application-already-exported :exported-to-asianhallinta)]
    :states     [:verdictGiven :sent]
    :description "Sends such selected attachments to backing system that are not yet sent."}
   [{:keys [created application user] :as command}]
@@ -259,7 +266,7 @@
                                           (not (#{"verdict" "statement"} (-> % :target :type)))
                                           (some #{(:id %)} attachmentIds))
                                         (:attachments application))
-        transfer (get-transfer-item "attachments-to-asianhallinta" command attachments-wo-sent-timestamp)]
+        transfer (get-transfer-item :exported-to-asianhallinta command attachments-wo-sent-timestamp)]
     (if (pos? (count attachments-wo-sent-timestamp))
       (let [application (meta-fields/enrich-with-link-permit-data application)
             application (update-kuntalupatunnus application)

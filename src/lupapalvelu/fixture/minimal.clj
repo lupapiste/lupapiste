@@ -120,6 +120,7 @@
     :phone "1231234567"
     :street "Katuosoite 2 a 4"
     :zip "33456"
+    :personId "180495-754N"
     :city "Kuopio"
     :private {:password "$2a$10$me2UOXOUfEbseJeLUBde8u2rlqOwHuqxbFT00q70QEvTpskHKol2m"
               :apikey   "e1vshYravGWKA1QXL3NeWMmyzzBJmcgq6IUqKZmh"}}
