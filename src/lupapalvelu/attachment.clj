@@ -351,8 +351,8 @@
 
 (defn create-attachment [application attachment-type op now target locked? required? requested-by-authority? & [attachment-id]]
   {:pre [(map? application)]}
-  ;FIXME: Fetch default metadata for attachment
-  (let [attachment (make-attachment now target required? requested-by-authority? locked? (:state application) op attachment-type {} attachment-id)]
+  (let [metadata (tos/get-metadata-for-document-from-toj (:organization application) (:tosFunction application) attachment-type)
+        attachment (make-attachment now target required? requested-by-authority? locked? (:state application) op attachment-type metadata attachment-id)]
     (update-application
       (application->command application)
       {$set {:modified now}
