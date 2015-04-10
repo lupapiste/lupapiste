@@ -190,6 +190,46 @@
                     <span class="icon signed-white left-align"></span>
                 </button>
               </div>
+
+              <button id="show-tos-metadata"
+                      class="btn"
+                      style="margin-top: 15px"
+                      data-bind="click: toggleTosMetadata, visible: metadata().length > 0">
+                <span>Näytä arkistointitiedot</span>
+                  <span class="left-align"
+                        data-bind="drill: showTosMetadata, color: 'black'"></span>
+              </button>
+
+              <div class="attachment-file-versions-content" data-bind="slider: showTosMetadata" style="margin-top: 15px">
+                <h3>Arkistointitiedot</h3>
+                <table class="table table-striped">
+                  <thead>
+                  <tr>
+                    <th>Avain</th>
+                    <th>Arvo</th>
+                  </tr>
+                  </thead>
+                  <tbody data-bind="foreach: metadata">
+                    <tr>
+                      <td data-bind="text: name"></td>
+                      <td>
+                        <div data-bind="if: typeof(value) == 'object'">
+                          <table style="margin: 0">
+                            <tbody data-bind="foreach: value">
+                            <tr style="background: transparent; border: none;">
+                              <td data-bind="text: name" style="padding: 0"></td>
+                              <td data-bind="text: value" style="padding: 0"></td>
+                            </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                        <span data-bind="if: typeof(value) != 'object'"><span data-bind="text: value"></span></span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
             </div>
           </div>
 

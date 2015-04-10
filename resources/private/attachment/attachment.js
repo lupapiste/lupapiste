@@ -126,6 +126,8 @@ var attachment = (function() {
     init:                 ko.observable(false),
     groupAttachments:     ko.observableArray(),
     groupIndex:           ko.observable(),
+    metadata:             ko.observableArray(),
+    showTosMetadata:      ko.observable(false),
 
     toggleHelp: function() {
       model.showHelp(!model.showHelp());
@@ -206,6 +208,10 @@ var attachment = (function() {
 
     toggleAttachmentVersionHistory: function() {
       model.showAttachmentVersionHistory(!model.showAttachmentVersionHistory());
+    },
+
+    toggleTosMetadata: function() {
+      model.showTosMetadata(!model.showTosMetadata());
     }
   };
 
@@ -364,6 +370,16 @@ var attachment = (function() {
     var selectList$ = $("#attachment-type-select");
     attachmentTypeSelect.initSelectList(selectList$, application.allowedAttachmentTypes, model.attachmentType());
     selectList$.change(function(e) {model.attachmentType($(e.target).val());});
+
+    var metadataArray = _.map(attachment.metadata, function(value, key) {
+      if (typeof(value) === 'object') {
+        value = _.map(value, function(subvalue, subkey) {
+          return {name: subkey, value: subvalue};
+        });
+      }
+      return {name: key, value: value};
+    });
+    model.metadata(metadataArray);
 
     model.id(attachmentId);
 
