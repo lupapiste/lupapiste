@@ -50,12 +50,10 @@
 
     self.create = function() {
       hub.send("track-click", {category:"Applications", label:"create", event:"create"});
-      //ga('send', 'event', 'Applications', 'create'); 
       window.location = "#!/create-part-1";
       };
     self.createWithPrevPermit = function() {
       hub.send("track-click", {category:"Applications", label:"create", event:"createWithPrevPermit"}); 
-      //ga('send', 'event', 'Applications', 'createWithPrevPermit');
       window.location = "#!/create-page-prev-permit";
       };
 
@@ -87,15 +85,16 @@
     self.invites = ko.observableArray([]);
     self.updateInvites = function() {invites.getInvites(function(data) { self.invites(data.invites); }); };
     self.approveInvite = function(model) {
-        ajax
-          .command("approve-invite", {id: model.application})
-          .success(self.updateInvites)
-          .call();
-        return false;
+      hub.send("track-click", {category:"Applications", label:"", event:"approveInvite"});
+      ajax
+        .command("approve-invite", {id: model.application})
+        .success(self.updateInvites)
+        .call();
+      return false;
     };
 
     var acceptDecline = function(applicationId) {
-      ga('send', 'event', 'Applications', 'declineInvite');
+      hub.send("track-click", {category:"Applications", label:"", event:"declineInvite"});
         return function() {
             ajax
             .command("decline-invitation", {id: applicationId})
@@ -115,12 +114,12 @@
     };
 
     self.radioTabClick = function(model,event) {
-      ga('send', 'event', 'Applications', 'radio');
       var $target = $(event.target);
       $(".radio-label").removeClass("checked");
       $($target).addClass("checked");
       $("#"+$target.attr("for")).focus().attr("checked", true);
       self.filter.kind($("#"+$target.attr("for")).val());
+      hub.send("track-click", {category:"Applications", label:self.filter.kind(), event:"radioTab"});
     };
   }
 
@@ -190,7 +189,6 @@
   }
 
   function open(e) {
-    ga('send', 'event', 'Applications', 'openApplication');
     var $target = $(e.target);
 
     var tab = "";
@@ -204,6 +202,7 @@
     var kind = $target.attr("data-kind");
     var id = $target.attr("data-id");
     if (kind && id) { window.location.hash = "!/" + kind + "/" + id + tab; }
+    hub.send("track-click", {category:"Applications", label:kind, event:"openApplication"});
     return false;
   }
 

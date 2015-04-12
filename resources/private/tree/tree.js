@@ -53,7 +53,7 @@ var tree = (function() {
       var selectedLink = link[0],
           nextElement = link[1],
           next = _.isArray(nextElement) ? self.makeLinks(nextElement) : self.makeFinal(nextElement);
-          hub.send("track-click", {category:"Tree", label: selectedLink.op, event:"treeBack"});
+          hub.send("track-click", {category:"Tree", label: selectedLink.op, event:"treeClick"});
       self.model.stack.push(selectedLink);
       self.stateNop().content.append(next).animate(self.moveLeft, setup.speed, self.stateGo);
       return false;
