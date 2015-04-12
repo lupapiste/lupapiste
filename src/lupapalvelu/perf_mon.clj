@@ -69,7 +69,7 @@
                            {:ts (System/currentTimeMillis)
                             :duration (- end start)
                             :uri (get request :uri)
-                            :user (get-in request [:session :noir :user :username])
+                            :user (get-in request [:session :user :username])
                             :perfmon @*perf-context*}
                            WriteConcern/NONE)))))))))
 

@@ -186,13 +186,17 @@
   (when feature
     {:kiinttunnus (first (xml-> feature :ktjkiiwfs:PalstanTietoja :ktjkiiwfs:rekisteriyksikonKiinteistotunnus text))}))
 
+;; http://www.maanmittauslaitos.fi/node/7365, i.e. "oso:katunumero" and "oso:jarjestysnumero" explained
 (defn feature-to-address-details [feature]
   (when feature
-    {:street (first (xml-> feature :oso:Osoitepiste :oso:osoite :oso:Osoite :oso:katunimi text))
-     :number (first (xml-> feature :oso:Osoitepiste :oso:osoite :oso:Osoite :oso:katunumero text))
-     :municipality (first (xml-> feature :oso:Osoitepiste :oso:kuntatunnus text))
-     :name {:fi (first (xml-> feature :oso:Osoitepiste :oso:kuntanimiFin text))
-            :sv (first (xml-> feature :oso:Osoitepiste :oso:kuntanimiSwe text))}}))
+    (let [katunumero (first (xml-> feature :oso:Osoitepiste :oso:osoite :oso:Osoite :oso:katunumero text))]
+      {:street (first (xml-> feature :oso:Osoitepiste :oso:osoite :oso:Osoite :oso:katunimi text))
+       :number (if (or (nil? katunumero) (= "0" katunumero))
+                 (first (xml-> feature :oso:Osoitepiste :oso:osoite :oso:Osoite :oso:jarjestysnumero text))
+                 katunumero)
+       :municipality (first (xml-> feature :oso:Osoitepiste :oso:kuntatunnus text))
+       :name {:fi (first (xml-> feature :oso:Osoitepiste :oso:kuntanimiFin text))
+              :sv (first (xml-> feature :oso:Osoitepiste :oso:kuntanimiSwe text))}})))
 
 (defn feature-to-property-info [feature]
   (when feature
@@ -418,7 +422,7 @@
                  (xml/parse
                    (java.io.ByteArrayInputStream. (.getBytes gfi "UTF-8"))
                    startparse-sax-non-validating))]
-      (clojure.set/union 
+      (clojure.set/union
         (xml-> info :gml:featureMember :lupapiste:yleiskaavaindeksi)
         (xml-> info :gml:featureMember :lupapiste:yleiskaavaindeksi_poikkeavat)))))
 

@@ -72,25 +72,24 @@
 
     // Observables for creating new application from previous permit
     self.creatingAppWithPrevPermit = false;
+    self.organizationOptions = ko.observable([]);
+    self.selectedPrevPermitOrganization = ko.observable(null);
     self.kuntalupatunnusFromPrevPermit = ko.observable(null);
     self.needMorePrevPermitInfo = ko.observable(false);
     self.creatingAppWithPrevPermitOk = ko.computed(function() {
-      return !self.processing() && !self.pending() &&
-             !isBlank(self.kuntalupatunnusFromPrevPermit()) &&
-             !isBlank(self.municipalityCode()) && self.municipality() &&
-             ( !self.needMorePrevPermitInfo() || (self.propertyId() &&
-                                                  !isBlank(self.addressString()) &&
-                                                  !isBlank(self.search()) &&
-                                                  self.addressData() &&
-                                                  self.x() !== 0 && self.y() !== 0));
+
+    return !self.processing() && !self.pending() &&
+           !isBlank(self.kuntalupatunnusFromPrevPermit()) &&
+           !isBlank(self.selectedPrevPermitOrganization()) &&
+           ( !self.needMorePrevPermitInfo() || (self.propertyId() &&
+                                                !isBlank(self.addressString()) &&
+                                                !isBlank(self.search()) &&
+                                                self.addressData() &&
+                                                self.x() !== 0 && self.y() !== 0));
     });
 
-
     self.municipalityCode.subscribe(function(code) {
-      if (self.creatingAppWithPrevPermit) {
-        self.updateMunicipality(code);
-        self.updateOrganizationDetails("aiemmalla-luvalla-hakeminen");
-      } else {
+      if (!self.creatingAppWithPrevPermit) {
         if (code) { self.findOperations(code); }
         if (self.useManualEntry()) { self.updateMunicipality(code); }
       }
@@ -136,7 +135,7 @@
         self.map.updateSize();
       } else {
         self.map = gis
-          .makeMap("create-map", false)
+          .makeMap("create-map", true)
           .center(404168, 7205000, zoomLevel)
           .addClickHandler(self.click)
           .setPopupContentModel(self, "section#map-popup-content");
@@ -153,6 +152,8 @@
         .message("")
         .requestType(null)
         .kuntalupatunnusFromPrevPermit(null)
+        .organizationOptions([])
+        .selectedPrevPermitOrganization(null)
         .needMorePrevPermitInfo(false);
     };
 
@@ -202,7 +203,7 @@
     };
 
     var zoomLevelEnum = {
-      "540": 6,
+      "540": 9,
       "550": 7,
       "560": 9
     };
@@ -418,10 +419,20 @@
     // For creating new application based on a previous permit
     //
 
-    self.clearForCreateAppWithPrevPermit = function() {
+    self.initCreateAppWithPrevPermit = function() {
       self.clear();
       self.creatingAppWithPrevPermit = true;
       self.operation("aiemmalla-luvalla-hakeminen");
+
+      // TODO: Nyt kovakoodattu permitType -> pitaisiko hakea jostain muualta, esim permit-type-select-valinta?
+      //       "aiemmalla-luvalla-hakeminen"-toimenpiteen permitType on "R"
+      ajax.query("user-organizations-for-permit-type", {permitType: "R"})
+        .processing(self.processing)
+        .pending(self.pending)
+        .success(function(data) {
+          self.organizationOptions(data.organizations);
+        })
+        .call();
     };
 
     self.createApplicationWithPrevPermit = function() {
@@ -438,7 +449,7 @@
         x: self.x(),
         address: self.addressString(),
         propertyId: util.prop.toDbFormat(self.propertyId()),
-        municipality: self.municipality().id,
+        organizationId: self.selectedPrevPermitOrganization(),
         kuntalupatunnus: self.kuntalupatunnusFromPrevPermit()
       })
       .processing(self.processing)
@@ -468,7 +479,7 @@
   }();
 
   hub.onPageLoad("create-part-1", model.clear);
-  hub.onPageLoad("create-page-prev-permit", model.clearForCreateAppWithPrevPermit);
+  hub.onPageLoad("create-page-prev-permit", model.initCreateAppWithPrevPermit);
 
   function initAutocomplete(id) {
     $(id)

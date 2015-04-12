@@ -7,8 +7,10 @@
       <form id="own-info-form">
         <a data-bind="ltext: 'back'" href="#"
           onclick="javascript:history.go(-1);return false;" class="btn"></a>
+        <h1 data-bind="ltext: 'mypage.title'"></h1>
+        <div data-bind="lhtml:'mypage.desc'" class="page-info"></div>
         <div class="own-info form-group">
-          <h2 data-bind="ltext: 'mypage.title'"></h2>
+          <h2 data-bind="ltext: 'mypage.personalInfo'"></h2>
           <div class="form-entry">
             <label data-bind="ltext: 'userinfo.firstName'"
               for="firstName" class="form-label"></label> <input

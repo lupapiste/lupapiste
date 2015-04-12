@@ -3,7 +3,6 @@
             [clojure.set :as set]
             [noir.request :as request]
             [noir.response :as resp]
-            [noir.session :as session]
             [noir.core :refer [defpage]]
             [slingshot.slingshot :refer [throw+]]
             [monger.operators :refer :all]
@@ -12,6 +11,7 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.core :refer :all]
+            [sade.session :as ssess]
             [lupapalvelu.action :refer [defquery defcommand defraw] :as action]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.activation :as activation]
@@ -19,10 +19,12 @@
             [lupapalvelu.vetuma :as vetuma]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.user :as user]
+            [lupapalvelu.organization :as organization]
             [lupapalvelu.idf.idf-client :as idf]
             [lupapalvelu.token :as token]
             [lupapalvelu.ttl :as ttl]
             [lupapalvelu.notifications :as notifications]
+            [lupapalvelu.permit :as permit]
             [lupapalvelu.attachment :as attachment]))
 
 ;;
@@ -32,9 +34,13 @@
 ;;
 
 (defquery user
-  {:user-roles #{:applicant :authority :oirAuthority :authorityAdmin :admin}}
+  {:user-roles action/all-authenticated-user-roles}
   [{user :user}]
-  (ok :user user))
+  (if (user/virtual-user? user)
+    (ok :user user)
+    (if-let [full-user (user/get-user-by-id (:id user))]
+     (ok :user (user/with-org-auth (dissoc full-user :private :personId)))
+     (fail))))
 
 (defquery users
   {:user-roles #{:admin :authorityAdmin}}
@@ -58,6 +64,15 @@
   {:user-roles #{:admin :authorityAdmin}}
   [{caller :user {params :params} :data}]
   (ok :data (user/users-for-datatables caller params)))
+
+;; TODO: Kuuluuko tama tanne vai organization-apiin?
+(defquery user-organizations-for-permit-type
+  {:parameters [permitType]
+   :user-roles #{:authority}
+   :input-validators [permit/permit-type-validator]}
+  [{user :user}]
+  (ok :organizations (organization/get-organizations {:_id {$in (:organizations user)}
+                                                      :scope {$elemMatch {:permitType permitType}}})))
 
 ;;
 ;; ==============================================================================
@@ -90,6 +105,7 @@
   (let [password         (:password user-data)
         user-role        (keyword (:role user-data))
         caller-role      (keyword (:role caller))
+        organization-id  (or (:organization user-data) (-> user-data :organizations first))
         admin?           (= caller-role :admin)
         authorityAdmin?  (= caller-role :authorityAdmin)]
 
@@ -117,6 +133,9 @@
     (when (and password (not (security/valid-password? password)))
       (fail! :password-too-short :desc "password specified, but it's not valid"))
 
+    (when (and organization-id (not (organization/get-organization organization-id)))
+      (fail! :error.organization-not-found))
+
     (when (and (:apikey user-data) (not admin?))
       (fail! :error.unauthorized :desc "only admin can create create users with apikey")))
 
@@ -125,21 +144,22 @@
 (defn- create-new-user-entity [user-data]
   (let [email (user/canonize-email (:email user-data))]
     (-> user-data
-        (select-keys [:email :username :role :firstName :lastName :personId
-                      :phone :city :street :zip :enabled :organization
-                      :allowDirectMarketing :architect :company])
-        (as-> user-data (merge {:firstName "" :lastName "" :username email} user-data))
-        (assoc
-          :email email
-          :enabled (= "true" (str (:enabled user-data)))
-          :organizations (if (:organization user-data) [(:organization user-data)] [])
-          :private (merge {}
-                          (when (:password user-data)
-                            {:password (security/get-hash (:password user-data))})
-                          (when (and (:apikey user-data) (not= "false" (:apikey user-data)))
-                            {:apikey (if (and (env/dev-mode?) (not (#{"true" "false"} (:apikey user-data))))
-                                       (:apikey user-data)
-                                       (security/random-password))}))))))
+      (dissoc :organization)
+      (select-keys [:email :username :role :firstName :lastName :personId
+                    :phone :city :street :zip :enabled :organization
+                    :allowDirectMarketing :architect :company])
+      (as-> user-data (merge {:firstName "" :lastName "" :username email} user-data))
+      (assoc
+        :email email
+        :enabled (= "true" (str (:enabled user-data)))
+        :organizations (if (:organization user-data) [(:organization user-data)] [])
+        :private (merge {}
+                   (when (:password user-data)
+                     {:password (security/get-hash (:password user-data))})
+                   (when (and (:apikey user-data) (not= "false" (:apikey user-data)))
+                     {:apikey (if (and (env/dev-mode?) (not (#{"true" "false"} (:apikey user-data))))
+                                (:apikey user-data)
+                                (security/random-password))}))))))
 
 ;;
 ;; TODO: Ylimaaraisen "send-email"-parametrin sijaan siirra mailin lahetys pois
@@ -193,8 +213,7 @@
                    caller
                    {:email email :role :authority :organization new-organization :enabled true
                     :firstName firstName :lastName lastName}
-                   :send-email false)
-        ]
+                   :send-email false)]
     (infof "invitation for new authority user: email=%s, organization=%s" email new-organization)
     (notify-new-authority new-user caller)
     (ok :operation "invited")))
@@ -250,14 +269,13 @@
 
 (defcommand update-user
   {:user-roles #{:applicant :authority :authorityAdmin :admin}}
-  [{caller :user user-data :data}]
+  [{caller :user user-data :data :as command}]
   (let [email     (user/canonize-email (or (:email user-data) (:email caller)))
         user-data (assoc user-data :email email)]
     (validate-update-user! caller user-data)
     (if (= 1 (mongo/update-n :users {:email email} {$set (select-keys user-data user-data-editable-fields)}))
-      (do
-        (when (= email (:email caller))
-          (user/refresh-user! (:id caller)))
+      (if (= email (:email caller))
+        (ssess/merge-to-session command (ok) {:user (user/session-summary (user/get-user-by-id (:id caller)))})
         (ok))
       (fail :not-found :email email))))
 
@@ -396,7 +414,7 @@
 (defcommand login
   {:parameters [username password]
    :user-roles #{:anonymous}}
-  [_]
+  [command]
   (if (user/throttle-login? username)
     (do
       (info "login throttled, username:" username)
@@ -405,9 +423,11 @@
       (do
         (info "login successful, username:" username)
         (user/clear-logins username)
-        (session/put! :user user)
         (if-let [application-page (user/applicationpage-for (:role user))]
-          (ok :user user :applicationpage application-page)
+          (ssess/merge-to-session
+            command
+            (ok :user (user/non-private user) :applicationpage application-page)
+            {:user (user/session-summary user)})
           (do
             (error "Unknown user role:" (:role user))
             (fail :error.login))))
@@ -421,11 +441,10 @@
    :user-roles #{:admin}
    :input-validators [(partial action/non-blank-parameters [:organizationId])]
    :description "Changes admin session into authority session with access to given organization"}
-  [{user :user}]
+  [{user :user :as command}]
   (if (user/get-user-with-password (:username user) password)
     (let [imposter (assoc user :impersonating true :role "authority" :organizations [organizationId])]
-      (session/put! :user imposter)
-      (ok))
+      (ssess/merge-to-session command (ok) {:user imposter}))
     (fail :error.login)))
 
 ;;
@@ -505,7 +524,9 @@
 (defquery user-attachments
   {:user-roles #{:applicant :authority :authorityAdmin :admin}}
   [{user :user}]
-  (ok :attachments (:attachments user)))
+  (if-let [current-user (user/get-user-by-id (:id user))]
+    (ok :attachments (:attachments current-user))
+    (fail :error.user-not-found)))
 
 (defpage [:post "/api/upload/user-attachment"] {[{:keys [tempfile filename content-type size]}] :files attachmentType :attachmentType}
   (let [user              (user/current-user (request/ring-request))
@@ -527,7 +548,6 @@
 
     (mongo/upload attachment-id filename content-type tempfile :user-id (:id user))
     (mongo/update-by-id :users (:id user) {$push {:attachments file-info}})
-    (user/refresh-user! (:id user))
 
     (->> (assoc file-info :ok true)
       (resp/json)
@@ -554,7 +574,6 @@
   [{user :user}]
   (info "Removing user attachment: attachment-id:" attachment-id)
   (mongo/update-by-id :users (:id user) {$pull {:attachments {:attachment-id attachment-id}}})
-  (user/refresh-user! (:id user))
   (mongo/delete-file {:id attachment-id :metadata.user-id (:id user)})
   (ok))
 

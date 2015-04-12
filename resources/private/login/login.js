@@ -35,12 +35,16 @@
       .processing(processing)
       .pending(pending)
       .success(function(e) {
-        var applicationpage = e.applicationpage;
-        var redirectLocation = "/app/" + loc.getCurrentLanguage() + "/" + applicationpage;
-        // get the server-stored hashbang to redirect to right page (see web.clj for details)
-        ajax.get("/api/hashbang")
-          .success(function(e) { window.parent.location = redirectLocation + "#!/" + e.bang; })
-          .error(function() { window.parent.location = redirectLocation; })
+        var baseUrl = "/app/" + loc.getCurrentLanguage() + "/" + e.applicationpage;
+        // get the server-stored hashbang or redirect URL to redirect to right page (see web.clj for details)
+        ajax.query("redirect-after-login")
+          .success(function(e) {
+            var redirectLocation = baseUrl;
+            if (e.url) {
+              redirectLocation = _.startsWith(e.url, "/") ? e.url : baseUrl + "#!/" + e.url;
+            }
+            window.parent.location = redirectLocation;
+          })
           .call();
       })
       .error(function(e) { hub.send("login-failure", e); })

@@ -116,6 +116,8 @@ LUPAPISTE.ApplicationModel = function() {
   self.showSummaryInfoHelp = ko.observable(false);
   self.showConstructionInfoHelp = ko.observable(false);
 
+  self.targetTab = ko.observable({tab: undefined, id: undefined});
+
   self.updateInvites = function() {
     invites.getInvites(function(data) {
       self.invites(_.filter(data.invites, function(invite) {
@@ -435,46 +437,42 @@ LUPAPISTE.ApplicationModel = function() {
       .call();
   };
 
-  self.goToTabPosition = function(targetTab, targetId) {
-    if (targetTab === "requiredFieldSummary") {
+  self.targetTab.subscribe(function(target) {
+    if (target.tab === "requiredFieldSummary") {
       ajax
-        .command("fetch-validation-errors", {id: self.id()})
+        .query("fetch-validation-errors", {id: self.id()})
         .success(function (data) {
           self.updateMissingApplicationInfo(data.results);
         })
         .processing(self.processing)
         .call();
     }
-    window.location.hash = "!/application/" + self.id() + "/" + targetTab;
-    if (targetId) {
+    window.location.hash = "!/application/" + self.id() + "/" + target.tab;
+    if (target.id) {
       // The Nayta-links in "Puuttuvat pakolliset tiedot"-list do not work properly without using
       // the setTimeout function with 0 time here.
       setTimeout(function() {
-        window.scrollTo(0, $("#" + targetId).offset().top - 60);
+        window.scrollTo(0, $("#" + target.id).offset().top - 60);
       }, 0);
     }
-  };
+  });
 
   self.changeTab = function(model,event) {
-    var targetTab = $(event.target).closest("a").attr("data-target");
-    self.goToTabPosition(targetTab, null);
+    self.targetTab({tab: $(event.target).closest("a").attr("data-target"), id: null});
   };
 
   self.nextTab = function(model,event) {
-    var targetTab = $(event.target).closest("a").attr("data-target");
-    self.goToTabPosition(targetTab, "applicationTabs");
+    self.targetTab({tab: $(event.target).closest("a").attr("data-target"), id: "applicationTabs"});
   };
 
   self.moveToIncorrectlyFilledRequiredField = function(fieldInfo) {
-    var targetTab = (fieldInfo.document.type !== "party") ? "info" : "parties";
     var targetId = fieldInfo.document.id + "-" + fieldInfo.path.join("-");
-    self.goToTabPosition(targetTab, targetId);
+    self.targetTab({tab: (fieldInfo.document.type !== "party") ? "info" : "parties", id: targetId});
   };
 
   self.moveToMissingRequiredAttachment = function(fieldInfo) {
-    var targetTab = "attachments";
     var targetId = "attachment-row-" + fieldInfo.type["type-group"]() + "-" + fieldInfo.type["type-id"]();
-    self.goToTabPosition(targetTab, targetId);
+    self.targetTab({tab: "attachments", id: targetId});
   };
 
   function extractMissingAttachments(attachments) {

@@ -4,9 +4,8 @@
             [clj-time.coerce :refer [to-date]]
             [monger.operators :refer :all]
             [monger.query :as query]
-            [noir.session :as session]
             [camel-snake-kebab :as kebab]
-            [sade.core :refer [fail fail!]]
+            [sade.core :refer [fail fail! now]]
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.util :as util]
@@ -29,6 +28,28 @@
   [user]
   (when user
     (select-keys user [:id :username :firstName :lastName :role])))
+
+; Temporary mapping to generate orgAuth key from organizations.
+; TODO remove this after data model has been migrated
+(defn with-org-auth [{:keys [organizations role] :as user}]
+  (if (#{:authority :authorityAdmin} (keyword role))
+    (assoc user :orgAuthz (map (fn [org-id] {:org org-id :role role}) organizations))
+    user))
+
+(defn session-summary
+  "Returns common information about the user to be stored in session or nil"
+  [user]
+  (some-> user
+    (select-keys [:id :username :firstName :lastName :role :email :organizations :company :architect])
+    (assoc :expires (+ (now) (.toMillis java.util.concurrent.TimeUnit/MINUTES 5)))
+    with-org-auth))
+
+(defn virtual-user?
+  "True if user exists only in session, not in database"
+  [{:keys [role impersonating]}]
+  (or
+    impersonating
+    (contains? #{:oirAuthority} (keyword role))))
 
 (defn authority? [{role :role}]
   (#{:authority :oirAuthority} (keyword role)))
@@ -209,14 +230,6 @@
 (defn current-user
   "fetches the current user from session"
   [request] (:user request ))
-
-(defn refresh-user!
-  "Loads user information from db and saves it to session. Call this after you make changes to user information."
-  [user-id]
-  {:pre [user-id]}
-  (when-let [user (get-user-by-id user-id)]
-    (debug "user session refresh successful, username:" (:username user))
-    (session/put! :user user)))
 
 ;;
 ;; ==============================================================================

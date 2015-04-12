@@ -770,6 +770,32 @@
     #(if (= (:roles %) ["applicant" "authority"]) (assoc % :roles [:applicant :authority :oirAuthority]) %)
     {"comments.0" {$exists true}, :openInfoRequest true}))
 
+(defmigration select-all-operations-for-organizatio-if-none-selected
+  (let [organizations (mongo/select :organizations {$or [{:selected-operations {$size 0}},
+                                                         {:selected-operations {$exists false}},
+                                                         {:selected-operations nil}]})]
+       (doseq [organization organizations]
+         (let [org-permit-types (set (map :permitType (:scope organization)))
+               operations (map first (filter (fn [[_ v]] (org-permit-types (name (:permit-type v))))  op/operations))]
+              (mongo/update-by-id :organizations (:id organization)
+                                  {$set {:selected-operations operations}})))
+    ))
+
+(defmigration user-organization-cleanup
+  {:apply-when (pos? (mongo/count :users {:organization {$exists true}}))}
+  (mongo/update-by-query :users {:organization {$exists true}} {$unset {:organization 0}}))
+
+(defmigration rename-foreman-competence-documents
+  {:apply-when (pos? (mongo/count :applications {:documents {$elemMatch {"schema-info.name" {$regex #"^tyonjohtaja"}
+                                                                         "data.patevyys"    {$exists true}}}}))}
+  (update-applications-array
+    :documents
+    (fn [doc]
+      (if (re-find #"^tyonjohtaja" (-> doc :schema-info :name))
+        (update-in doc [:data] clojure.set/rename-keys {:patevyys :patevyys-tyonjohtaja})
+        doc))
+    {"documents.schema-info.name" {$regex #"^tyonjohtaja"}}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"

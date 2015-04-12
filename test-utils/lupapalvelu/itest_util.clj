@@ -18,7 +18,8 @@
             [swiss.arrows :refer [-<>>]]
             [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
             [clj-ssh.cli :as ssh-cli]
-            [clj-ssh.ssh :as ssh])
+            [clj-ssh.ssh :as ssh]
+            [sade.strings :as ss])
   (:import org.apache.http.client.CookieStore
            org.apache.http.cookie.Cookie))
 
@@ -343,12 +344,13 @@
     (facts "Signed succesfully"
       (fact "Status code" (:status resp) => 200))))
 
-(defn upload-attachment [apikey application-id {attachment-id :id attachment-type :type} expect-to-succeed & {:keys [filename] :or {filename "dev-resources/test-attachment.txt"}}]
+(defn upload-attachment [apikey application-id {attachment-id :id attachment-type :type} expect-to-succeed & {:keys [filename text] :or {filename "dev-resources/test-attachment.txt", text ""}}]
   (let [uploadfile  (io/file filename)
         uri         (str (server-address) "/api/upload/attachment")
         resp        (http/post uri
                                {:headers {"authorization" (str "apikey=" apikey)}
                                 :multipart [{:name "applicationId"  :content application-id}
+                                            {:name "text"           :content text}
                                             {:name "Content/type"   :content "text/plain"}
                                             {:name "attachmentType" :content (str
                                                                                (:type-group attachment-type) "."
@@ -403,7 +405,16 @@
     (let [data    (tools/create-document-data (model/get-document-schema document) (partial tools/dummy-values (id-for-key apikey)))
           updates (tools/path-vals data)
           updates (map (fn [[p v]] [(butlast p) v]) updates)
-          updates (map (fn [[p v]] [(s/join "." (map name p)) v]) updates)]
+          updates (map (fn [[p v]] [(s/join "." (map name p)) v]) updates)
+          user-role (:role (lupapalvelu.user/get-user-with-apikey apikey))
+          updates (filter (fn [[path value]]
+                            (try
+                              (let [splitted-path (ss/split path #"\.")]
+                                (lupapalvelu.document.commands/validate-against-whitelist! document [[splitted-path value]] user-role))
+                              true
+                              (catch Exception _
+                                false)))
+                          updates)]
       (command apikey :update-doc
         :id (:id application)
         :doc (:id document)

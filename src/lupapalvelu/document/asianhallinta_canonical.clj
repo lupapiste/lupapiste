@@ -3,6 +3,7 @@
            [lupapalvelu.document.tools :as tools]
            [lupapalvelu.xml.disk-writer :as writer]
            [clojure.string :as s]
+           [sade.core :refer :all]
            [sade.util :as util]
            [lupapalvelu.i18n :as i18n]))
 
@@ -67,8 +68,8 @@
                                                  :Operaattoritunnus (get-in data [:yritys :verkkolaskutustieto :valittajaTunnus])})}))]
 
     (if (= sel "yritys")
-      (assoc-in maksaja-map [:Yritys] (ua-get-yritys data))
-      (assoc-in maksaja-map [:Henkilo] (ua-get-henkilo data)))))
+      (util/strip-empty-maps (assoc-in maksaja-map [:Yritys] (ua-get-yritys data)))
+      (util/strip-empty-maps (assoc-in maksaja-map [:Henkilo] (ua-get-henkilo data))))))
 
 (defn- ua-get-metatiedot [attachment]
   (let [op-name (get-in attachment [:op :name])
@@ -87,6 +88,19 @@
   (when (seq operations)
     {:Toimenpide (map #(-> % (ua-get-toimenpide lang)) operations)}))
 
+(def- viitelupa-mapping
+  {"kuntalupatunnus" "Taustaj\u00E4rjestelm\u00E4"
+   "lupapistetunnus" "Lupapiste"})
+
+(defn- ua-get-viitelupa [linkPermit]
+  (util/strip-nils
+    {:MuuTunnus {:Tunnus (:id linkPermit)
+                 :Sovellus (viitelupa-mapping (:type linkPermit))}}))
+
+(defn- ua-get-viiteluvat [{:keys [linkPermitData]}]
+  (when (seq linkPermitData)
+    {:Viitelupa (map ua-get-viitelupa linkPermitData)}))
+
 (defn- ua-get-sijaintipiste [{:keys [location]}]
   {:Sijaintipiste (str (:x location) " " (:y location))})
 
@@ -101,7 +115,7 @@
 
 ;; Public
 
-(defn get-attachments-as-canonical [{:keys [attachments]} begin-of-link & [target]]
+(defn get-attachments-as-canonical [attachments begin-of-link & [target]]
   (not-empty
     (for [attachment attachments
           :when (and (:latestVersion attachment)
@@ -131,6 +145,7 @@
 
 ;; TaydennysAsiaan, prefix: ta-
 
+(def ^:private ta-root-element {:TaydennysAsiaan nil})
 
 ;; AsianPaatos, prefix: ap-
 
@@ -151,4 +166,9 @@
       (assoc-in [:UusiAsia :Asiointikieli] lang)
       (assoc-in [:UusiAsia :Toimenpiteet] (ua-get-toimenpiteet application lang))
       (assoc-in [:UusiAsia :Sijainti] (ua-get-sijaintipiste application))
-      (assoc-in [:UusiAsia :Kiinteistotunnus] (util/to-human-readable-property-id (:propertyId application))))))
+      (assoc-in [:UusiAsia :Kiinteistotunnus] (util/to-human-readable-property-id (:propertyId application)))
+      (assoc-in [:UusiAsia :Viiteluvat] (ua-get-viiteluvat application)))))
+
+(defn application-to-asianhallinta-taydennys-asiaan-canonical [application]
+  "Return TaydennysAsiaan canonical"
+  (-> (assoc-in ta-root-element [:TaydennysAsiaan :HakemusTunnus] (:id application))))

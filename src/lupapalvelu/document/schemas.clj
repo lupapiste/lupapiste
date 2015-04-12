@@ -275,7 +275,7 @@
           {:name "ei tiedossa"}]})
 
 (def patevyys-tyonjohtaja [koulutusvalinta
-                           {:name "koulutus" :type :string :required false  :i18nkey "muukoulutus"}
+                           {:name "koulutus" :type :string :required false :i18nkey "muukoulutus"}
                            patevyysvaatimusluokka
                            {:name "valmistumisvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size "s" :required false}
                            {:name "kokemusvuodet" :type :string :subtype :number :min-len 1 :max-len 2 :size "s" :required false}
@@ -286,7 +286,7 @@
                                    {:name "hakemus" :i18nkey "tyonjohtaja.patevyys.tyonjohtajaHakemusKytkin.hakemus"}]}])
 
 (def patevyys-tyonjohtaja-v2 [koulutusvalinta
-                              {:name "koulutus" :type :string :required false  :i18nkey "muukoulutus"}
+                              {:name "koulutus" :type :string :required false :i18nkey "muukoulutus"}
                               {:name "valmistumisvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size "s" :required false}
                               {:name "kokemusvuodet" :type :string :subtype :number :min-len 1 :max-len 2 :size "s" :required false}
                               {:name "valvottavienKohteidenMaara" :i18nkey "tyonjohtaja.patevyys.valvottavienKohteidenMaara" :type :string :subtype :number :size "s" :required false}])
@@ -311,7 +311,7 @@
                    vastuuaika-tyonjohtaja
                    henkilo-valitsin
                    designer-basic
-                   {:name "patevyys" :type :group :body patevyys-tyonjohtaja}
+                   {:name "patevyys-tyonjohtaja" :type :group :body patevyys-tyonjohtaja}
                    sijaisuus-tyonjohtaja))
 
 (def ilmoitus-hakemus-valitsin {:name "ilmoitusHakemusValitsin" :i18nkey "tyonjohtaja.ilmoitusHakemusValitsin._group_label" :type :select :sortBy :displayname :required true :blacklist [:applicant] :layout :single-line
@@ -365,7 +365,8 @@
    {:name "6kk" :type :string :subtype :number :size "s" :label false :uicomponent :string :i18nkey "muutHankkeet.6kk"}
    {:name "9kk" :type :string :subtype :number :size "s" :label false :uicomponent :string :i18nkey "muutHankkeet.9kk"}
    {:name "12kk" :type :string :subtype :number  :size "s" :label false :uicomponent :string :i18nkey "muutHankkeet.12kk"}
-   {:name "autoupdated" :type :checkbox :hidden true :i18nkey "muutHankkeet.autoupdated" :uicomponent :checkbox :whitelist [:none]}])
+   {:name "autoupdated" :type :checkbox :hidden true :i18nkey "muutHankkeet.autoupdated" :uicomponent :checkbox :whitelist {:roles [:none]
+                                                                                                                            :otherwise :disabled}}])
 
 (def muut-rakennushankkeet-table {:name "muutHankkeet"
                                   :type :foremanOtherApplications
@@ -376,13 +377,14 @@
                                   :listen [:hetuChanged]
                                   :body hanke-row})
 
-(def tayta-omat-tiedot-button {:name "fillMyInfo" :type :fillMyInfoButton :whitelist [:applicant]})
+(def tayta-omat-tiedot-button {:name "fillMyInfo" :type :fillMyInfoButton :whitelist {:roles [:applicant] :otherwise :disabled}})
 
 (def tyonjohtajan-historia {:name "foremanHistory" :type :foremanHistory})
 
 (def tyonjohtajan-hyvaksynta [{:name "tyonjohtajanHyvaksynta"
                                :type :group
-                               :whitelist [:authority]
+                               :whitelist {:roles [:authority]
+                                           :otherwise :hidden}
                                :body [{:name "tyonjohtajanHyvaksynta" :type :checkbox :i18nkey "tyonjohtaja.historia.hyvaksynta"}
                                       tyonjohtajan-historia]}])
 
@@ -396,7 +398,7 @@
                       tayta-omat-tiedot-button
                       designer-basic
                       muut-rakennushankkeet-table
-                      {:name "patevyys" :type :group :body patevyys-tyonjohtaja-v2}
+                      {:name "patevyys-tyonjohtaja" :type :group :body patevyys-tyonjohtaja-v2}
                       sijaisuus-tyonjohtaja))
 
 (def maksaja (body
@@ -539,6 +541,17 @@
                    {:name "kerrosluku" :type :string :size "s" :subtype :number :min 0 :max 50}
                    {:name "kellarinpinta-ala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}]})
 
+(def mitat-muutos {:name "mitat"
+                   :type :group
+                   :group-help "mitat-muutos.help"
+                   :whitelist {:roles [:authority]
+                               :otherwise :disabled}
+                   :body [{:name "tilavuus" :type :string :size "s" :unit "m3" :subtype :number :min 1 :max 9999999}
+                          {:name "kerrosala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}
+                          {:name "kokonaisala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}
+                          {:name "kerrosluku" :type :string :size "s" :subtype :number :min 0 :max 50}
+                          {:name "kellarinpinta-ala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}]})
+
 (def rakenne {:name "rakenne"
               :type :group
               :body [{:name "rakentamistapa" :type :select :sortBy :displayname :required true
@@ -640,11 +653,25 @@
                                           varusteet
                                           luokitus])
 
+(def rakennuksen-tiedot-ilman-huoneistoa-muutos [kaytto
+                                                 mitat-muutos
+                                                 rakenne
+                                                 lammitys
+                                                 verkostoliittymat
+                                                 varusteet
+                                                 luokitus])
+
 (def rakennuksen-tiedot-ilman-huoneistoa-ilman-ominaisuustietoja [kaytto
                                                                   rakenne
                                                                   mitat])
 
+(def rakennuksen-tiedot-ilman-huoneistoa-ilman-ominaisuustietoja-muutos [kaytto
+                                                                         rakenne
+                                                                         mitat-muutos])
+
 (def rakennuksen-tiedot (conj rakennuksen-tiedot-ilman-huoneistoa huoneistotTable))
+
+(def rakennuksen-tiedot-muutos (conj rakennuksen-tiedot-ilman-huoneistoa-muutos huoneistotTable))
 
 
 (def rakennelma (body
@@ -691,11 +718,23 @@
                               rakennuksen-osoite
                               rakennuksen-tiedot))
 
+(def olemassaoleva-rakennus-muutos (body
+                                     rakennuksen-valitsin
+                                     rakennuksen-omistajat
+                                     rakennuksen-osoite
+                                     rakennuksen-tiedot-muutos))
+
 (def olemassaoleva-rakennus-ei-huoneistoja (body
                                              rakennuksen-valitsin
                                              rakennuksen-omistajat
                                              rakennuksen-osoite
                                              rakennuksen-tiedot-ilman-huoneistoa))
+
+(def olemassaoleva-rakennus-ei-huoneistoja-muutos (body
+                                                    rakennuksen-valitsin
+                                                    rakennuksen-omistajat
+                                                    rakennuksen-osoite
+                                                    rakennuksen-tiedot-ilman-huoneistoa-muutos))
 
 (def olemassaoleva-rakennus-ei-huoneistoja-ei-ominaisuus-tietoja
   (body rakennuksen-valitsin
@@ -703,18 +742,35 @@
         rakennuksen-osoite
         rakennuksen-tiedot-ilman-huoneistoa-ilman-ominaisuustietoja))
 
+(def olemassaoleva-rakennus-ei-huoneistoja-ei-ominaisuus-tietoja-muutos
+  (body rakennuksen-valitsin
+        rakennuksen-omistajat
+        rakennuksen-osoite
+        rakennuksen-tiedot-ilman-huoneistoa-ilman-ominaisuustietoja-muutos))
 
 (def rakennuksen-muuttaminen-ei-huoneistoja (body
-                                               muutostyonlaji
-                                               olemassaoleva-rakennus-ei-huoneistoja))
+                                              muutostyonlaji
+                                              olemassaoleva-rakennus-ei-huoneistoja))
+
+(def rakennuksen-muuttaminen-ei-huoneistoja-muutos (body
+                                                     muutostyonlaji
+                                                     olemassaoleva-rakennus-ei-huoneistoja-muutos))
 
 (def rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuus-tietoja (body
-                                               muutostyonlaji
-                                               olemassaoleva-rakennus-ei-huoneistoja-ei-ominaisuus-tietoja))
+                                                                    muutostyonlaji
+                                                                    olemassaoleva-rakennus-ei-huoneistoja-ei-ominaisuus-tietoja))
+
+(def rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuus-tietoja-muutos (body
+                                                                    muutostyonlaji
+                                                                    olemassaoleva-rakennus-ei-huoneistoja-ei-ominaisuus-tietoja-muutos))
 
 (def rakennuksen-muuttaminen (body
                                muutostyonlaji
                                olemassaoleva-rakennus))
+
+(def rakennuksen-muuttaminen-muutos (body
+                               muutostyonlaji
+                               olemassaoleva-rakennus-muutos))
 
 (def rakennuksen-laajentaminen (body [{:name "laajennuksen-tiedot"
                                        :type :group
@@ -804,13 +860,13 @@
     :body (body rakennuksen-omistajat (approvable-top-level-groups rakennuksen-tiedot-ilman-huoneistoa))}
 
    {:info {:name "rakennuksen-muuttaminen-ei-huoneistoja" :i18name "rakennuksen-muuttaminen" :approvable true}
-     :body (approvable-top-level-groups rakennuksen-muuttaminen-ei-huoneistoja)}
+    :body (approvable-top-level-groups rakennuksen-muuttaminen-ei-huoneistoja-muutos)}
 
    {:info {:name "rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia" :i18name "rakennuksen-muuttaminen" :approvable true}
-     :body (approvable-top-level-groups rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuus-tietoja)}
+     :body (approvable-top-level-groups rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuus-tietoja-muutos)}
 
    {:info {:name "rakennuksen-muuttaminen" :approvable true}
-     :body (approvable-top-level-groups rakennuksen-muuttaminen)}
+     :body (approvable-top-level-groups rakennuksen-muuttaminen-muutos)}
 
     {:info {:name "rakennuksen-laajentaminen" :approvable true}
      :body (approvable-top-level-groups rakennuksen-laajentaminen)}
@@ -830,6 +886,7 @@
      :body (approvable-top-level-groups (body kuvaus))}
 
     {:info {:name "hakija"
+            :group-help "hakija.group.help"
             :i18name "osapuoli"
             :order 3
             :removable true
@@ -837,6 +894,7 @@
             :approvable true
             :type :party
             :subtype :hakija
+            :section-help "party.section.help"
             :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
             }
      :body party}
@@ -849,6 +907,7 @@
             :approvable true
             :type :party
             :subtype :hakija
+            :section-help "party.section.help"
             :after-update 'lupapalvelu.application-meta-fields/applicant-index-update}
      :body (schema-body-without-element-by-name ya-party turvakielto)}
 

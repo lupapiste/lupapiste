@@ -61,7 +61,7 @@
     (when task
       (let [updates [[[:asiointitunnus] (:id foreman-app)]]]
         (commands/persist-model-updates application "tasks" task updates created)))
-    (ok :id (:id foreman-app))))
+    (ok :id (:id foreman-app) :auth (:auth foreman-app))))
 
 (defcommand update-foreman-other-applications
   {:user-roles #{:applicant :authority}

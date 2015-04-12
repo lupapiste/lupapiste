@@ -171,6 +171,17 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return span;
   }
 
+  function makeSectionHelpTextSpan(schema) {
+    var span = document.createElement("span");
+    span.className = "group-help-text";
+    var locKey = schema.info["section-help"];
+    if (locKey) {
+      span.innerHTML = loc(locKey);
+    }
+
+    return span;
+  }
+
   function getUpdateCommand() {
     return (options && options.updateCommand) ? options.updateCommand : "update-doc";
   }
@@ -206,10 +217,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   }
 
   function sourceValueChanged(input, value, sourceValue, localizedSourceValue) {
-    if (sourceValue && sourceValue === value) {
+    if (sourceValue === value) {
       input.removeAttribute("title");
       $(input).removeClass("source-value-changed");
-    } else if (sourceValue && sourceValue !== value){
+    } else if (sourceValue !== undefined && sourceValue !== value){
       $(input).addClass("source-value-changed");
       input.title = _.escapeHTML(loc("sourceValue") + ": " + (localizedSourceValue ? localizedSourceValue : sourceValue));
     }
@@ -240,7 +251,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     } else {
       input.onchange = function(e) {
         if (type === "checkbox") {
-          sourceValueChanged(input, input.checked, sourceValue, loc("selected"));
+          sourceValueChanged(input, input.checked, sourceValue, sourceValue ? loc("selected") : loc("notSelected"));
         } else {
           sourceValueChanged(input, input.value, sourceValue);
         }
@@ -254,7 +265,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     if (type === "checkbox") {
       input.checked = value;
-      sourceValueChanged(input, value, sourceValue, loc("selected"));
+      sourceValueChanged(input, value, sourceValue, sourceValue ? loc("selected") : loc("notSelected"));
     } else {
       input.value = value || "";
       sourceValueChanged(input, value, sourceValue);
@@ -323,6 +334,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
           text += " " + moment(approval.timestamp).format("D.M.YYYY HH:mm") + ")";
         }
         statusContainer$.text(text);
+        statusContainer$.removeClass(function(index, css) {
+          return _.filter(css.split(" "), function(c) { return _.includes(c, "approval-"); }).join(" ");
+        });
         statusContainer$.addClass("approval-" + approval.value);
         approvalContainer$.removeClass("empty");
       }
@@ -411,9 +425,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     input.onmouseout = self.hideHelp;
     span.appendChild(input);
 
-    if ( model[subSchema.name] && model[subSchema.name].disabled) {
-      input.setAttribute("disabled", true);
-    }
+    $(input).prop("disabled", getModelDisabled(model, subSchema.name));
 
     if (subSchema.label) {
       var label = makeLabel(subSchema, "checkbox", myPath);
@@ -441,6 +453,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     var input = makeInput(inputType, myPath, model, subSchema);
     setMaxLen(input, subSchema);
+
+    $(input).prop("disabled", getModelDisabled(model, subSchema.name));
 
     listen(subSchema, myPath, input);
 
@@ -497,11 +511,15 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   }
 
   function getModelValue(model, name) {
-    return model[name] ? model[name].value : "";
+    return util.getIn(model, [name, "value"], "");
   }
 
   function getModelSourceValue(model, name) {
-    return model[name] ? model[name].sourceValue : "";
+    return util.getIn(model, [name, "sourceValue"]);
+  }
+
+  function getModelDisabled(model, name) {
+    return util.getIn(model, [name, "whitelist-action"]) === "disabled";
   }
 
   function buildText(subSchema, model, path) {
@@ -564,10 +582,17 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       value: value
     });
 
+    var sourceValue = getModelSourceValue(model, subSchema.name);
+
+    sourceValueChanged(input.get(0), value, sourceValue);
+
     if (subSchema.readonly) {
       input.attr("readonly", true);
     } else {
-      input.datepicker($.datepicker.regional[lang]).change(save);
+      input.datepicker($.datepicker.regional[lang]).change(function(e) {
+        sourceValueChanged(input.get(0), input.val(), sourceValue);
+        save(e);
+      });
     }
     input.appendTo(span);
 
@@ -590,6 +615,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     if (subSchema.name === "muutostapa" && _.isEmpty(_.keys(model))) {
       model[subSchema.name] = {value: "lis\u00e4ys"};
     }
+
+    $(select).prop("disabled", getModelDisabled(model, subSchema.name));
+
     var selectedOption = getModelValue(model, subSchema.name);
     var sourceValue = getModelSourceValue(model, subSchema.name);
     var span = makeEntrySpan(subSchema, myPath);
@@ -1120,7 +1148,12 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   }
 
   function build(subSchema, model, path, partOfChoice) {
-    if (subSchema.hidden) {
+    // Do not create hidden whitelisted elements
+    var whitelistedRoles = util.getIn(subSchema, ["whitelist", "roles"]);
+    var schemaBranchHidden = util.getIn(subSchema, ["whitelist", "otherwise"]) === "hidden" && !_.contains(whitelistedRoles, currentUser.get().role());
+    var schemaLeafHidden = util.getIn(model, [subSchema.name, "whitelist"]) === "hidden";
+
+    if (subSchema.hidden || schemaLeafHidden || schemaBranchHidden) {
       return;
     }
 
@@ -1731,6 +1764,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     sectionContainer.className = "accordion_content" + (accordionCollapsed ? "" : " expanded");
     sectionContainer.setAttribute("data-accordion-state", (accordionCollapsed ? "closed" : "open"));
     sectionContainer.id = "document-" + self.docId;
+
+    var sectionHelpText = makeSectionHelpTextSpan(self.schema);
+    sectionContainer.appendChild(sectionHelpText);
 
     appendElements(elements, self.schema, self.model, []);
 

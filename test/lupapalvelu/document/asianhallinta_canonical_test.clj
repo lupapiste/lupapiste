@@ -7,6 +7,8 @@
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [lupapalvelu.document.poikkeamis-canonical-test :as poikkeus-test]
+            [lupapalvelu.document.rakennuslupa_canonical-test :as rakennus-test]
+            [sade.core :refer :all]
             [sade.strings :as ss]
             [sade.util :as util]))
 
@@ -14,6 +16,39 @@
   (fact "type-group and type-id"
     (:Avain (first meta)) => "type-group"
     (:Avain (second meta)) => "type-id"))
+
+(def- link-permit-data-kuntalupatunnus {:id "123-123-123-123" :type "kuntalupatunnus"})
+
+(fl/facts* "UusiAsia canonical with Lupapiste link permit"
+  (let [canonical   (ah/application-to-asianhallinta-canonical rakennus-test/application-suunnittelijan-nimeaminen "fi") => truthy
+        application rakennus-test/application-suunnittelijan-nimeaminen]
+    (fact "Viiteluvat"
+      (let [links        (get-in canonical [:UusiAsia :Viiteluvat :Viitelupa])
+            link         (first links)]
+        (count links) => 1
+        (keys link) => (just [:MuuTunnus])
+        (let [link (get-in link [:MuuTunnus])]
+          (keys link) => (just [:Tunnus :Sovellus])
+          (:Tunnus link) => (get-in application [:linkPermitData 0 :id])
+          (:Sovellus link) => "Lupapiste")))))
+
+(fl/facts* "UusiAsia canonical with two link permits"
+  (let [application (update-in rakennus-test/application-suunnittelijan-nimeaminen [:linkPermitData] conj link-permit-data-kuntalupatunnus)
+        canonical   (ah/application-to-asianhallinta-canonical application "fi") => truthy]
+    (fact "Viiteluvat"
+      (let [links (get-in canonical [:UusiAsia :Viiteluvat :Viitelupa])
+            link1 (first links)
+            link2 (second links)        ]
+        (count links) => 2
+        (keys link1) => (just [:MuuTunnus])
+        (let [link1 (get-in link1 [:MuuTunnus])]
+          (keys link1) => (just [:Tunnus :Sovellus])
+          (:Tunnus link1) => (get-in application [:linkPermitData 0 :id])
+          (:Sovellus link1) => "Lupapiste")
+        (let [link2 (get-in link2 [:MuuTunnus])]
+          (keys link2) => (just [:Tunnus :Sovellus])
+          (:Tunnus link2) => (get-in application [:linkPermitData 1 :id])
+          (:Sovellus link2) => "Taustaj\u00E4rjestelm\u00E4")))))
 
 (fl/facts* "UusiAsia canonical"
   (let [canonical (ah/application-to-asianhallinta-canonical poikkeus-test/poikkari-hakemus "fi") => truthy
@@ -30,7 +65,8 @@
                                                                             :Asiointikieli
                                                                             :Toimenpiteet
                                                                             :Sijainti
-                                                                            :Kiinteistotunnus] :in-any-order))
+                                                                            :Kiinteistotunnus
+                                                                            :Viiteluvat] :in-any-order))
       (fact "HakemusTunnus is LP-753-2013-00001" (get-in canonical [:UusiAsia :HakemusTunnus]) => "LP-753-2013-00001")
       (fact "Kuvaus" (get-in canonical [:UusiAsia :Kuvaus]) => "S\u00f6derkullantie 146")
       (fact "Kuntanumero" (get-in canonical [:UusiAsia :Kuntanumero]) => "753")
@@ -125,7 +161,7 @@
                                  :type-id    "pohjapiirros"}
                           :versions []}]
             application-with-attachments (assoc poikkeus-test/poikkari-hakemus :attachments attachments)
-            canonical-attachments (ah/get-attachments-as-canonical application-with-attachments begin-of-link)]
+            canonical-attachments (ah/get-attachments-as-canonical (:attachments application-with-attachments) begin-of-link)]
         (fact "Canonical has correct count of attachments"
           (count canonical-attachments) => 2)
         (fact "attachment has correct keys"
@@ -142,5 +178,12 @@
               (doseq [meta metas]
                 (has-attachment-types meta)))
             (fact "Second attachment has operation meta"
-              (last (second metas)) => {:Avain "operation" :Arvo (get-in attachments [1 :op :name])})))))))
+              (last (second metas)) => {:Avain "operation" :Arvo (get-in attachments [1 :op :name])}))))))
 
+  (fl/facts* "TaydennysAsiaan canonical"
+             (let [application poikkeus-test/poikkari-hakemus
+                   canonical (ah/application-to-asianhallinta-taydennys-asiaan-canonical application) => truthy]
+               (facts "TaydennysAsiaan canonical from poikkeus-test/poikkari-hakemus"
+                 (fact "TaydennysAsiaan not empty" (:TaydennysAsiaan canonical) => seq)
+                 (fact "TaydennysAsiaan keys" (keys (get-in canonical [:TaydennysAsiaan])) => (just [:HakemusTunnus] :in-any-order))
+                 (fact "HakemusTunnus is LP-753-2013-00001" (get-in canonical [:TaydennysAsiaan :HakemusTunnus]) => "LP-753-2013-00001")))))

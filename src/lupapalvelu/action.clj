@@ -72,6 +72,8 @@
 
 ;; Role helpers
 
+(def all-authenticated-user-roles #{:applicant :authority :oirAuthority :authorityAdmin :admin})
+
 (def default-authz-writer-roles #{:owner :writer :foreman})
 (def default-authz-reader-roles (conj default-authz-writer-roles :reader))
 (def all-authz-writer-roles (conj default-authz-writer-roles :statementGiver))
@@ -121,8 +123,19 @@
 (defn boolean-parameters [params command]
   (filter-params-of-command params command #(not (instance? Boolean %)) :error.non-boolean-parameters))
 
+(defn number-parameters [params command]
+  (filter-params-of-command params command (complement number?) :error.illegal-number))
+
 (defn map-parameters [params command]
   (filter-params-of-command params command (complement map?) :error.unknown-type))
+
+(defn map-parameters-with-required-keys [params required-keys command]
+  (or
+    (map-parameters params command)
+    (filter-params-of-command params command
+      #(not (util/every-key-in-map? % required-keys))
+      :error.map-parameters-with-required-keys
+      {:required-keys required-keys})))
 
 (defn update-application
   "Get current application from command (or fail) and run changes into it.

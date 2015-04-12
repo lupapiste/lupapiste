@@ -18,51 +18,6 @@
 (def- operation-tree-for-R
   ["Rakentaminen ja purkaminen"
    [["Uuden rakennuksen rakentaminen"
-     [["Asuinrakennus" :asuinrakennus]
-      ["Vapaa-ajan asuinrakennus" :vapaa-ajan-asuinrakennus]
-      ["Varasto, sauna, autotalli tai muu talousrakennus" :varasto-tms]
-      ["Julkinen rakennus" :julkinen-rakennus]
-      ["Muun rakennuksen rakentaminen" :muu-uusi-rakentaminen]]]
-    ["Rakennuksen korjaaminen tai muuttaminen"
-     [["Rakennuksen laajentaminen tai korjaaminen" :laajentaminen]
-      ["Perustusten tai kantavien rakenteiden muuttaminen tai korjaaminen" :perus-tai-kant-rak-muutos]
-      ["Kayttotarkoituksen muutos" :kayttotark-muutos]
-      ["Rakennuksen julkisivun tai katon muuttaminen" :julkisivu-muutos]
-      ["Asuinhuoneiston jakaminen tai yhdistaminen" :jakaminen-tai-yhdistaminen]
-      ["Markatilan laajentaminen" :markatilan-laajentaminen]
-      ["Takan ja savuhormin rakentaminen" :takka-tai-hormi]
-      ["Parvekkeen tai terassin lasittaminen" :parveke-tai-terassi]
-      ["Muu rakennuksen muutostyo" :muu-laajentaminen]]]
-    ["Rakennelman rakentaminen"
-     [["Auto- tai grillikatos, vaja, kioski tai vastaava" :auto-katos]
-      ["Masto, piippu, sailio, laituri tai vastaava" :masto-tms]
-      ["Mainoslaite" :mainoslaite]
-      ["Aita" :aita]
-      ["Maalampokaivon poraaminen tai lammonkeruuputkiston asentaminen" :maalampo]
-      ["Rakennuksen jatevesijarjestelman uusiminen" :jatevesi]
-      ["Muun rakennelman rakentaminen" :muu-rakentaminen]]]
-    ["Rakennuksen purkaminen" :purkaminen]
-    ["Tyonjohtaja" :tyonjohtajan-nimeaminen-v2]
-    ["Suunnittelija" :suunnittelijan-nimeaminen]
-    ["Jatkoaika" :jatkoaika]
-    ["aiemmalla-luvalla-hakeminen" :aiemmalla-luvalla-hakeminen]
-    ["Aloitusoikeus" :aloitusoikeus]]])
-
-(def- operation-tree-for-environment-R
-  ["Elinympariston muuttaminen"
-   [["Maisemaa muutava toimenpide"
-     [["Kaivaminen, louhiminen tai maan tayttaminen" :kaivuu]
-      ["Puun kaataminen" :puun-kaataminen]
-      ["Muu maisemaa muuttava toimenpide" :muu-maisema-toimenpide]]]
-    ["Tontti tai korttelialueen jarjestelymuutos"
-     [["Tontin ajoliittyman muutos" :tontin-ajoliittyman-muutos]
-      ["Paikoitusjarjestelyihin liittyvat muutokset" :paikoutysjarjestus-muutos]
-      ["Korttelin yhteisiin alueisiin liittyva muutos" :kortteli-yht-alue-muutos]
-      ["Muu-tontti-tai-korttelialueen-jarjestelymuutos" :muu-tontti-tai-kort-muutos]]]]])
-
-(def- new-operation-tree-for-R
-  ["Rakentaminen ja purkaminen"
-   [["Uuden rakennuksen rakentaminen"
      [["kerrostalo-rivitalo" :kerrostalo-rivitalo]
       ["pientalo" :pientalo]
       ["Vapaa-ajan asuinrakennus" :vapaa-ajan-asuinrakennus]
@@ -206,11 +161,9 @@
 (def operation-tree
   (filterv identity
     `[
-      ~@(if (env/feature? :new-operations-tree)
-          [new-operation-tree-for-R]
-          [operation-tree-for-R operation-tree-for-environment-R])
+      ~@[operation-tree-for-R]
       ~@[operation-tree-for-P
-         (when (env/feature? :ymparisto) operation-tree-for-Y)
+         operation-tree-for-Y
          operation-tree-for-YA]
       ~@(when (env/feature? :kiinteistonMuodostus)
           [operation-tree-for-KT operation-tree-for-MM])]))
@@ -349,7 +302,7 @@
    :add-operation-allowed false
    :link-permit-required false
    :link-permit-verdict-required false
-   :asianhallinta false})
+   :asianhallinta true})
 
 (def yl-operations
   {:yl-uusi-toiminta ymparistolupa-operation
@@ -836,7 +789,7 @@
                                   :attachments []
                                   :link-permit-required false
                                   :link-permit-verdict-required false
-                                  :asianhallinta false}
+                                  :asianhallinta true}
     :vvvl-vesijohdosta           {:schema "talousvedet"
                                   :permit-type permit/VVVL
                                   :required common-vvvl-schemas
@@ -844,7 +797,7 @@
                                   :add-operation-allowed false
                                   :link-permit-required false
                                   :link-permit-verdict-required false
-                                  :asianhallinta false}
+                                  :asianhallinta true}
     :vvvl-viemarista             {:schema "jatevedet"
                                   :permit-type permit/VVVL
                                   :required common-vvvl-schemas
@@ -852,7 +805,7 @@
                                   :add-operation-allowed false
                                   :link-permit-required false
                                   :link-permit-verdict-required false
-                                  :asianhallinta false}
+                                  :asianhallinta true}
     :vvvl-vesijohdosta-ja-viemarista {:schema "talousvedet"
                                       :permit-type permit/VVVL
                                       :required (conj common-vvvl-schemas "jatevedet")
@@ -860,7 +813,7 @@
                                       :add-operation-allowed false
                                       :link-permit-required false
                                       :link-permit-verdict-required false
-                                      :asianhallinta false}
+                                      :asianhallinta true}
     :vvvl-hulevesiviemarista    {:schema "hulevedet"
                                  :permit-type permit/VVVL
                                  :required common-vvvl-schemas
@@ -868,7 +821,7 @@
                                  :add-operation-allowed false
                                  :link-permit-required false
                                  :link-permit-verdict-required false
-                                 :asianhallinta false}
+                                 :asianhallinta true}
 
     :tyonjohtajan-nimeaminen     {:schema "hankkeen-kuvaus-minimum"
                                   :permit-type permit/R
@@ -1052,7 +1005,6 @@
 (defn selected-operations-for-organizations [organizations]
   (let [filter-fn                 (fn [org] (seq (:selected-operations org)))
         orgs-with-selected-ops    (filter filter-fn organizations)
-        orgs-without-selected-ops (remove filter-fn organizations)
         ;; Resolving operation tree for organizations with "selected-operations" defined in db
         op-trees-for-orgs-with-selected-ops (if-not (empty? orgs-with-selected-ops)
                                               (let [selected-operations-arrays (map :selected-operations orgs-with-selected-ops)
@@ -1062,15 +1014,8 @@
                                                                           set)
                                                     filtering-fn (fn [node] (selected-operations node))]
                                                 (operations-filtered filtering-fn false))
-                                              [])
-        ;; Operation tree for organizations with no "selected-operations" defined in db
-        op-trees-for-orgs-without-selected-ops (if-not (empty? orgs-without-selected-ops)
-                                                 (-> orgs-without-selected-ops
-                                                   (#(map organization-operations %))
-                                                   (#(apply concat %)))
-                                                 [])]
-    (sort-operation-tree
-      (concat op-trees-for-orgs-with-selected-ops op-trees-for-orgs-without-selected-ops))))
+                                              [])]
+    (sort-operation-tree op-trees-for-orgs-with-selected-ops)))
 
 (defn addable-operations [selected-operations permit-type]
   (let [selected-operations (set selected-operations)
@@ -1079,3 +1024,7 @@
                                   (= (name permit-type) (permit-type-of-operation node))))]
     (sort-operation-tree
       (operations-filtered filtering-fn true))))
+
+(comment
+  ; operations (keys) with asianhallinta enabled
+  (keys (into {} (filter (fn [[k v]] (:asianhallinta v)) operations))))

@@ -78,7 +78,7 @@
     (let [body (json/decode (:body response) true)]
       (fact body => "09100200990013"))))
 
-(facts "address-by-point"
+(facts "address-by-point - street number not null"
   (let [x 333168
         y 6822000
         request {:params {:x x :y y}}
@@ -88,6 +88,17 @@
       (fact (:street body) => "Luhtaankatu")
       (fact (:number body) => #"\d")
       (fact (:fi (:name body)) => "Tampere"))))
+
+(facts "address-by-point - street number null"
+  (let [x 403827.289
+        y 6694204.426
+        request {:params {:x x :y y}}
+        response (address-by-point-proxy request)]
+    (fact (get-in response [:headers "Content-Type"]) => "application/json; charset=utf-8")
+    (let [body (json/decode (:body response) true)]
+      (fact (:street body) => "Kirkkomaanpolku")
+      (fact (:number body) => #"\d")
+      (fact (:fi (:name body)) => "Sipoo"))))
 
 (facts "plan-urls-by-point-proxy"
 

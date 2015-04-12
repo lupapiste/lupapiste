@@ -2,7 +2,6 @@
 <html>
 <body>
   <section class="page" id="application">
-    <div id="modal-dialog" data-bind="component {name: 'modal-dialog'}"></div>
     <div class="application_summary">
       <div class="container">
         <div class="application-map-container">
@@ -34,6 +33,9 @@
               <span data-bind="ltext: 'closed', attr: {'title' : loc('closed.title')}" class="closed-box"></span>
               <span data-bind="ltext: 'canceled', attr: {'title' : loc('canceled.title')}" class="canceled-box"></span>
             </div>
+          </div>
+          <div data-bind="if: $root.application.state() == 'draft'" id="state-infotext">
+            <p data-bind="lhtml: 'application.state.draft.help'"></p>
           </div>
 
           <!-- Property ID: -->
@@ -303,6 +305,9 @@
           <div class="tab-info" data-bind="slider: showApplicationInfoHelp">
             <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.applicationInfoDesc'"></p>
           </div>
+          <div data-bind="if: $root.application.state() == 'draft'">
+            <p data-bind="lhtml: 'application.state.draft.help'"></p>
+          </div>
           <div class="operation-info">
 
             <div data-bind="if: $root.authorization.ok('add-operation')">
@@ -450,7 +455,7 @@
         </div>
 
         <!-- Attachments tab -->
-
+        <!-- ko if: selectedTabName() === 'attachments' -->
         <div id="application-attachments-tab" class="tab-content" data-bind="with: $root.attachmentsTab">
           <h1 data-bind="ltext: 'application.tabAttachments'"></h1>
           <span class="icon help" data-bind="click: toggleHelp, css: {expanded: showHelp}"></span>
@@ -534,9 +539,10 @@
             </a>
           </div>
         </div>
+        <!-- /ko -->
 
         <!-- Required field summary tab -->
-
+        <!-- ko if: selectedTabName() === 'requiredFieldSummary' -->
         <div id="application-requiredFieldSummary-tab" data-bind="with: $root.application" class="tab-content">
           <div>
             <h1 data-bind="ltext: 'application.tabRequiredFieldSummary'"></h1>
@@ -614,6 +620,7 @@
             </a>
           </div>
         </div>
+        <!-- /ko -->
 
         <!-- Application summary tab -->
 
@@ -665,13 +672,19 @@
 
         <!-- Verdict tab -->
 
+        <!-- ko if: selectedTabName() === 'verdict' -->
         <div id="application-verdict-tab" class="tab-content">
           <h1 data-bind="ltext: 'application.tabVerdict'"></h1>
           <span class="icon help" data-bind="click: function(data, event) { application.toggleHelp('showVerdictInfoHelp') }, css: {expanded: application.showVerdictInfoHelp}"></span>
           <div class="tab-info" data-bind="slider: application.showVerdictInfoHelp">
             <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.verdictDesc'"></p>
           </div>
+
+
           <div data-bind="if: $root.verdictModel.verdicts()">
+            <div data-bind="ifnot: $root.verdictModel.verdicts().length">
+              <p data-bind="lhtml: 'application.verdictDesc'"></p>
+            </div>
             <div class="application_section" data-bind="foreach: $root.verdictModel.verdicts">
 
               <h2 class="application_section_header">
@@ -707,7 +720,7 @@
 
                     <div class="accordion-fields">
                       <div class="verdict-info-fields">
-                        <div class="verdict-signature-fields" data-bind="visible: !$parent.draft">
+                        <div class="verdict-signature-fields" data-bind="visible: !$parent.draft && $parent.sopimus">
                           <h3 data-bind="ltext: 'verdict.signatures'"></h3>
 
                           <div data-bind="foreach: $data.signatures">
@@ -913,9 +926,11 @@
              href="#" data-test-id="test-open-prints-order-history"></a>
 
         </div>
+        <!-- /ko -->
 
         <!-- Statement tab -->
 
+        <!-- ko if: selectedTabName() === 'statement' -->
         <div id="application-statement-tab" class="tab-content">
 
           <div data-bind="with: application" class="application-statements">
@@ -943,6 +958,7 @@
             <button data-bind="click: $root.neighbor.manage, ltext: 'neighbors.manage', visible: $root.authorization.ok('neighbor-add')" class="btn btn-primary modal" data-test-id="manage-neighbors"></button>
           </div>
         </div>
+        <!-- /ko -->
 
         <script type="text/html" id="statements-template">
           <div data-bind="ifnot: $data.statements && statements().length > 0">

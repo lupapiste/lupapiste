@@ -52,17 +52,12 @@
           <span data-bind="ltext: 'request.create'"></span><span class="icon add left-align"></span>
         </button>
 
-<!-- TODO: Poista 2 alla olevaa divia kun "app-from-prev-permit"-feature flagi on kaytossa -->
-        <div data-bind="if: features.enabled('app-from-prev-permit')" class="application-create" style="display: inline;">
-          <div class="feature" style="display: inline;">
-            <button
-              data-bind="click: createWithPrevPermit"
-              data-test-id="applications-create-new-with-prev-permit"
-              class="btn-primary application-create">
-              <span data-bind="ltext: 'newRequest.createNewWithPrevPermit'"></span><span class="icon add left-align"></span>
-            </button>
-          </div>
-        </div>
+        <button
+          data-bind="click: createWithPrevPermit, visible: authorizationModel.ok('create-application-from-previous-permit')"
+          data-test-id="applications-create-new-with-prev-permit"
+          class="btn-primary application-from-previous">
+          <span data-bind="ltext: 'newRequest.createNewWithPrevPermit'"></span><span class="icon add left-align"></span>
+        </button>
       </div>
 
       <div data-bind="visible: showMissing()" class="applications-empty-state">
@@ -70,7 +65,7 @@
         <p data-bind="html: missingDesc"></p>
         <div class="missing-wrapper">
 
-          <div class="missing-inforequest-box app-type-box">
+          <div class="missing-inforequest-box app-type-box" data-bind="css: {'app-type-box-wide': !authorizationModel.ok('create-application-from-previous-permit')}">
             <h2 data-bind="ltext: 'applications.missing.inforequest.title'"></h2>
             <p data-bind="ltext: 'applications.missing.inforequest.desc'"></p>
             <button
@@ -81,7 +76,7 @@
             </button>
           </div>
 
-          <div class="missing-application-box app-type-box">
+          <div class="missing-application-box app-type-box" data-bind="css: {'app-type-box-wide': !authorizationModel.ok('create-application-from-previous-permit')}">
             <h2 data-bind="ltext: 'applications.missing.application.title'"></h2>
             <p data-bind="ltext: 'applications.missing.application.desc'"></p>
             <button
@@ -92,25 +87,18 @@
             </button>
           </div>
 
-<!-- TODO: Poista 2 allaolevaa divia, kun "app-from-prev-permit"-feature flagi on kaytossa, ja korvaa explisiittinen "app-type-box"-class scss:ssa pelkalla div-maarityksella -->
-        <div data-bind="if: features.enabled('app-from-prev-permit')" class="app-type-box">
-          <div class="feature">
-              <div class="missing-prev-permit-box">    <!-- Lisaa talle class "app-type-box", kun "app-from-prev-permit"-feature flagi poistetaan-->
-                <h2 data-bind="ltext: 'applications.createWithPrevPermit.title'"></h2>
-                <p data-bind="ltext: 'applications.createWithPrevPermit.desc'"></p>
-                <button
-                  data-bind="click: createWithPrevPermit"
-                  data-test-id="applications-create-with-prev-permit"
-                  class="btn-primary application-create">
-                  <span data-bind="ltext: 'newRequest.createWithPrevPermit'"></span><span class="icon add left-align"></span>
-                </button>
-              </div>
-            </div>
+          <div class="missing-prev-permit-box app-type-box" data-bind="visible: authorizationModel.ok('create-application-from-previous-permit')">
+            <h2 data-bind="ltext: 'applications.createWithPrevPermit.title'"></h2>
+            <p data-bind="ltext: 'applications.createWithPrevPermit.desc'"></p>
+            <button
+              data-bind="click: createWithPrevPermit"
+              data-test-id="applications-create-with-prev-permit"
+              class="btn-primary application-create">
+              <span data-bind="ltext: 'newRequest.createNewWithPrevPermit'"></span><span class="icon add left-align"></span>
+            </button>
           </div>
-
         </div>
       </div>
-
     </form>
 
     <div data-bind="visible: showApplicationsList()">

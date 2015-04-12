@@ -268,6 +268,20 @@
                           ]
    :muut [:muu]])
 
+(defn attachment-ids-from-tree [tree]
+  {:pre [(sequential? tree)]}
+  (flatten (map second (partition 2 tree))))
+
+(def all-attachment-type-ids
+  (attachment-ids-from-tree
+    (concat
+      attachment-types-R
+      attachment-types-YA
+      attachment-types-YI
+      attachment-types-YL
+      attachment-types-MAL
+      attachment-types-KT)))
+
 ;;
 ;; Api
 ;;
@@ -479,16 +493,11 @@
     (let [[type-group type-id] (->> match (drop 1) (map keyword))]
       {:type-group type-group :type-id type-id})))
 
-(defn- allowed-attachment-types-contain? [allowed-types {:keys [type-group type-id]}]
+(defn allowed-attachment-types-contain? [allowed-types {:keys [type-group type-id]}]
   (let [type-group (keyword type-group)
         type-id (keyword type-id)]
     (if-let [types (some (fn [[group-name group-types]] (if (= (keyword group-name) type-group) group-types)) allowed-types)]
       (some #(= (keyword %) type-id) types))))
-
-(defn allowed-attachment-type-for-application? [application attachment-type]
-  (when application
-    (let [allowedAttachmentTypes (get-attachment-types-for-application application)]
-     (allowed-attachment-types-contain? allowedAttachmentTypes attachment-type))))
 
 (defn get-attachment-info-by-file-id
   "gets an attachment from application or nil"
@@ -600,8 +609,9 @@
     (.putNextEntry zip (ZipEntry. (ss/encode-filename file-name)))
     (io/copy in zip)))
 
-(defn get-all-attachments [attachments & [application lang]]
-  "Return attachments as zip file. If application and lang, application and submitted application PDF are included"
+(defn get-all-attachments
+  "Returns attachments as zip file. If application and lang, application and submitted application PDF are included."
+  [attachments & [application lang]]
   (let [temp-file (File/createTempFile "lupapiste.attachments." ".zip.tmp")]
     (debugf "Created temporary zip file for attachments: %s" (.getAbsolutePath temp-file))
     (with-open [out (io/output-stream temp-file)]

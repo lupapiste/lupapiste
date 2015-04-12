@@ -74,14 +74,15 @@
      :body (:body x)}
     (:body x)))
 
-(defn- ^{:testable true} create [{body :body} f]
-  (walk/prewalk
-    #(if (map? %)
-       (let [t (keyword (:type %))
-             v (if (#{:group :table :foremanOtherApplications} t) (group % t) (f %))]
-         {(keyword (:name %)) v})
-       %)
-    body))
+(defn create-unwrapped-data [{body :body} f]
+  (flattened
+    (walk/prewalk
+      #(if (map? %)
+         (let [t (keyword (:type %))
+               v (if (#{:group :table :foremanOtherApplications} t) (group % t) (f %))]
+           {(keyword (:name %)) v})
+         %)
+      body)))
 
 ;;
 ;; Public api
@@ -121,8 +122,7 @@
     (create-document-data schema nil-values))
   ([schema f]
     (-> schema
-      (create f)
-      flattened
+      (create-unwrapped-data f)
       wrapped)))
 
 (defn path-vals

@@ -14,7 +14,7 @@
     (:state application) => "submitted"
     (:to email) => (contains (email-for-key pena))
     (:subject email) => "Lupapiste.fi: Paatoskuja 9 - hakemuksen tila muuttunut"
-    (get-in email [:body :plain]) => (contains "Vireill\u00e4")
+    (get-in email [:body :plain]) => (contains "Hakemus j\u00e4tetty")
     email => (partial contains-application-link? application-id "applicant")
 
     (let [new-verdict-resp (command sonja :new-verdict-draft :id application-id) => ok?
