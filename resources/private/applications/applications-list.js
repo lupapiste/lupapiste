@@ -49,11 +49,13 @@
     self.searchField.subscribe(_.debounce(self.filter.search, 500));
 
     self.create = function() {
-      ga('send', 'event', 'Applications', 'create'); 
+      hub.send("track-click", {category:"Applications", label:"create", event:"create"});
+      //ga('send', 'event', 'Applications', 'create'); 
       window.location = "#!/create-part-1";
       };
-    self.createWithPrevPermit = function() { 
-      ga('send', 'event', 'Applications', 'createWithPrevPermit');
+    self.createWithPrevPermit = function() {
+      hub.send("track-click", {category:"Applications", label:"create", event:"createWithPrevPermit"}); 
+      //ga('send', 'event', 'Applications', 'createWithPrevPermit');
       window.location = "#!/create-page-prev-permit";
       };
 

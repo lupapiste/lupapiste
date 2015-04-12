@@ -20,7 +20,7 @@
 
 
     self.goPhase2 = function() {
-      ga('send', 'event', 'Create', 'mapContinue');
+      hub.send("track-click", {category:"Create", label:"map", event:"mapContinue"});
       window.location.hash = "!/create-part-2";
       tree.reset(_.map(self.operations(), operations2tree));
       window.scrollTo(0, 0);
@@ -178,7 +178,7 @@
     // Called when user clicks on map:
 
     self.click = function(x, y) {
-      ga('send', 'event', 'Create', 'mapClick');
+      hub.send("track-click", {category:"Create", label:"map", event:"mapClick"});
       self
         .setXY(x, y)
         .addressData(null)
@@ -192,7 +192,7 @@
     // Search activation:
 
     self.searchNow = function() {
-      ga('send', 'event', 'Create', 'search');
+      hub.send("track-click", {category:"Create", label:"map", event:"searchLocation"});
       self
         .resetXY()
         .addressData(null)
@@ -373,13 +373,13 @@
     self.create = function(infoRequest) {
       if (infoRequest) {
         if (self.inforequestsDisabled()) {
-          ga('send', 'event', 'Create', 'infoRequestDisabled');
+          hub.send("track-click", {category:"Create", label:"map", event:"infoRequestDisabled'"});
           LUPAPISTE.ModalDialog.showDynamicOk(
               loc("new-applications-or-inforequests-disabled.dialog.title"),
               loc("new-applications-or-inforequests-disabled.inforequests-disabled"));
           return;
         }
-        ga('send', 'event', 'Create', 'infoRequestOK');
+        hub.send("track-click", {category:"Create", label:"map", event:"infoRequestOK'"});
         LUPAPISTE.ModalDialog.showDynamicOk(loc("create.prompt.title"), loc("create.prompt.text"));
       } else if (self.newApplicationsDisabled()) {
         LUPAPISTE.ModalDialog.showDynamicOk(
