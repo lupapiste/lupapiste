@@ -128,6 +128,7 @@ LUPAPISTE.ChangeLocationModel = function() {
         .success(self.onSuccess)
         .error(self.onError)
         .call();
+      hub.send("track-click", {category:"Application", label:"", event:"locationChanged"});
     }
     return false;
   };
@@ -138,6 +139,7 @@ LUPAPISTE.ChangeLocationModel = function() {
     self.reset(app);
     self.drawLocation();
     LUPAPISTE.ModalDialog.open(self.dialogSelector);
+    hub.send("track-click", {category:"Application", label:"", event:"changeLocation"});
   };
 
   // Service functions
@@ -174,6 +176,7 @@ LUPAPISTE.ChangeLocationModel = function() {
       }
       self.address(newAddress);
       self.center();
+      hub.send("track-click", {category:"Application", label:"map", event:"changeLocationOnMap"});
     });
     return self;
   };

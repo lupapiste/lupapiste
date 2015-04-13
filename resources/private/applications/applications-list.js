@@ -48,8 +48,14 @@
     self.searchField = ko.observable();
     self.searchField.subscribe(_.debounce(self.filter.search, 500));
 
-    self.create = function() { window.location = "#!/create-part-1"; };
-    self.createWithPrevPermit = function() { window.location = "#!/create-page-prev-permit"; };
+    self.create = function() {
+      hub.send("track-click", {category:"Applications", label:"create", event:"create"});
+      window.location = "#!/create-part-1";
+      };
+    self.createWithPrevPermit = function() {
+      hub.send("track-click", {category:"Applications", label:"create", event:"createWithPrevPermit"}); 
+      window.location = "#!/create-page-prev-permit";
+      };
 
     self.found = function(total, matched) {
       self.total(total);
@@ -79,14 +85,16 @@
     self.invites = ko.observableArray([]);
     self.updateInvites = function() {invites.getInvites(function(data) { self.invites(data.invites); }); };
     self.approveInvite = function(model) {
-        ajax
-          .command("approve-invite", {id: model.application})
-          .success(self.updateInvites)
-          .call();
-        return false;
+      hub.send("track-click", {category:"Applications", label:"", event:"approveInvite"});
+      ajax
+        .command("approve-invite", {id: model.application})
+        .success(self.updateInvites)
+        .call();
+      return false;
     };
 
     var acceptDecline = function(applicationId) {
+      hub.send("track-click", {category:"Applications", label:"", event:"declineInvite"});
         return function() {
             ajax
             .command("decline-invitation", {id: applicationId})
@@ -111,6 +119,7 @@
       $($target).addClass("checked");
       $("#"+$target.attr("for")).focus().attr("checked", true);
       self.filter.kind($("#"+$target.attr("for")).val());
+      hub.send("track-click", {category:"Applications", label:self.filter.kind(), event:"radioTab"});
     };
   }
 
@@ -193,6 +202,7 @@
     var kind = $target.attr("data-kind");
     var id = $target.attr("data-id");
     if (kind && id) { window.location.hash = "!/" + kind + "/" + id + tab; }
+    hub.send("track-click", {category:"Applications", label:kind, event:"openApplication"});
     return false;
   }
 
