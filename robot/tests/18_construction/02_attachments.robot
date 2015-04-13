@@ -13,6 +13,7 @@ Sonja prepares the application
   Set Suite Variable  ${appname}  pre-verdict-attachment-test${secs}
   Create application the fast way  ${appname}  753  753-416-25-30  kerrostalo-rivitalo
   Submit application
+  Click enabled by test id  approve-application
   Open tab  verdict
   Fetch verdict
 
