@@ -215,6 +215,12 @@
                       <td>
                         <div data-bind="if: typeof(value) == 'object'">
                           <table style="margin: 0">
+                            <thead>
+                            <tr style="background: transparent;">
+                              <th style="background: transparent; padding: 0">Avain</th>
+                              <th style="background: transparent; padding: 0">Arvo</th>
+                            </tr>
+                            </thead>
                             <tbody data-bind="foreach: value">
                             <tr style="background: transparent; border: none;">
                               <td data-bind="text: name" style="padding: 0"></td>
