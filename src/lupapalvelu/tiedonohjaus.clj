@@ -20,8 +20,6 @@
 
 (def get-metadata-for-document-from-toj
   (memo/ttl (fn [organization code {:keys [type-group type-id]}]
-              (println (build-url "/tiedonohjaus/api/org/" organization "/asiat/" code "/document/" (str (name type-group) "." (name type-id))) {:as :json
-                                                                                                                                                 :throw-exceptions false})
               (when (and organization code type-group type-id)
                 (try
                   (let [response (http/get (build-url "/tiedonohjaus/api/org/" organization "/asiat/" code "/document/" (str (name type-group) "." (name type-id))) {:as :json

@@ -346,12 +346,15 @@
 
 (defn make-attachments
   "creates attachments with nil target"
-  [now application-state attachment-types locked? required? requested-by-authority?]
-  (map (partial make-attachment now nil required? requested-by-authority? locked? application-state nil) attachment-types))
+  [now application-state attachment-types-with-metadata locked? required? requested-by-authority?]
+  (map #(make-attachment now nil required? requested-by-authority? locked? application-state nil (:type %) (:metadata %)) attachment-types-with-metadata))
+
+(defn- default-metadata-for-attachment-type [type {:keys [:organization :tosFunction]}]
+  (tos/get-metadata-for-document-from-toj organization tosFunction type))
 
 (defn create-attachment [application attachment-type op now target locked? required? requested-by-authority? & [attachment-id]]
   {:pre [(map? application)]}
-  (let [metadata (tos/get-metadata-for-document-from-toj (:organization application) (:tosFunction application) attachment-type)
+  (let [metadata (default-metadata-for-attachment-type attachment-type application)
         attachment (make-attachment now target required? requested-by-authority? locked? (:state application) op attachment-type metadata attachment-id)]
     (update-application
       (application->command application)
@@ -362,8 +365,8 @@
 
 (defn create-attachments [application attachment-types now locked? required? requested-by-authority?]
   {:pre [(map? application)]}
-  ;FIXME: Fetch default metadata for attachment
-  (let [attachments (make-attachments now (:state application) attachment-types locked? required? requested-by-authority?)]
+  (let [attachment-types-with-metadata (map (fn [type] {:type type :metadata (default-metadata-for-attachment-type type application)}) attachment-types)
+        attachments (make-attachments now (:state application) attachment-types-with-metadata locked? required? requested-by-authority?)]
     (update-application
       (application->command application)
       {$set {:modified now}
