@@ -14,6 +14,11 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel, verdictAttachme
   self.attachmentsOperation = ko.observable();
   self.attachmentsOperations = ko.observable([]);
 
+  self.showPostAtachmentsActions = ko.pureComputed(function() {
+    return (!appModel.inPostVerdictState() && self.preAttachmentsByOperation().length > 0) ||
+           (appModel.inPostVerdictState()  && self.postAttachmentsByOperation().length > 0);
+  });
+
   var attachmentsOperationsMapping = {
       "attachmentsAdd": {
         loc: loc("application.attachmentsAdd"),

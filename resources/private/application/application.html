@@ -498,15 +498,15 @@
             <i data-bind="ltext: 'application.attachmentsEmpty'" data-test-id="application-attachments-no-attachments"></i>
           </div>
 
-          <div data-bind="visible: (!$root.application.inPostVerdictState() && preAttachmentsByOperation().length > 0) ||
-                                   ($root.application.inPostVerdictState() && postAttachmentsByOperation().length > 0),
-                          template: {name: 'attachment-actions-template',
+          <!-- ko if: showPostAtachmentsActions -->
+          <div data-bind="template: {name: 'attachment-actions-template',
                                      data: {appModel: $data.appModel,
                                             attachmentsOperation: $data.attachmentsOperation,
                                             attachmentsOperations: $data.attachmentsOperations,
                                             testId: 'upper'}}"></div>
 
           <export-attachments/>
+          <!-- /ko -->
 
           <div data-bind="if: postAttachmentsByOperation().length > 0" data-test-id="application-post-attachments-table">
             <h1><span data-bind="ltext: 'application.attachments.post-verdict'"></span></h1>
