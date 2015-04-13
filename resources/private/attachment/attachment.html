@@ -200,7 +200,7 @@
                         data-bind="drill: showTosMetadata, color: 'black'"></span>
               </button>
 
-              <div class="attachment-file-versions-content" data-bind="slider: showTosMetadata" style="margin-top: 15px">
+              <div class="attachment-file-versions-content" data-bind="slider: showTosMetadata, visible: metadata().length > 0" style="margin-top: 15px">
                 <h3>Arkistointitiedot</h3>
                 <table class="table table-striped">
                   <thead>
