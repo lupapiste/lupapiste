@@ -553,7 +553,7 @@
 
 (defn- make-attachments [created operation organization applicationState tos-function & {:keys [target]}]
   (for [[type-group type-id] (organization/get-organization-attachments-for-operation organization operation)]
-    (let [metadata (tos/get-metadata-for-document-from-toj (:id organization) tos-function {:type-group type-group :type-id type-id})]
+    (let [metadata (tos/metadata-for-document (:id organization) tos-function {:type-group type-group :type-id type-id})]
       (attachment/make-attachment created target true false false applicationState operation {:type-group type-group :type-id type-id} metadata))))
 
 (defn- schema-data-to-body [schema-data application]

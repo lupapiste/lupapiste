@@ -350,7 +350,7 @@
   (map #(make-attachment now nil required? requested-by-authority? locked? application-state nil (:type %) (:metadata %)) attachment-types-with-metadata))
 
 (defn- default-metadata-for-attachment-type [type {:keys [:organization :tosFunction]}]
-  (tos/get-metadata-for-document-from-toj organization tosFunction type))
+  (tos/metadata-for-document organization tosFunction type))
 
 (defn create-attachment [application attachment-type op now target locked? required? requested-by-authority? & [attachment-id]]
   {:pre [(map? application)]}
