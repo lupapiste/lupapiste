@@ -328,21 +328,21 @@
   (get-attachment-types-by-permit-type (:permitType application)))
 
 (defn make-attachment [now target required? requested-by-authority? locked? application-state op attachment-type metadata & [attachment-id]]
-  {:id (or attachment-id (mongo/create-id))
-   :type attachment-type
-   :modified now
-   :locked locked?
-   :applicationState application-state
-   :state :requires_user_action
-   :target target
-   :required required?       ;; true if the attachment is added from from template along with the operation, or when attachment is requested by authority
-   :requestedByAuthority requested-by-authority?  ;; true when authority is adding a new attachment template by hand
-   :notNeeded false
-   :forPrinting false
-   :op op
-   :signatures []
-   :versions []
-   :metadata metadata})
+  (cond-> {:id (or attachment-id (mongo/create-id))
+           :type attachment-type
+           :modified now
+           :locked locked?
+           :applicationState application-state
+           :state :requires_user_action
+           :target target
+           :required required?       ;; true if the attachment is added from from template along with the operation, or when attachment is requested by authority
+           :requestedByAuthority requested-by-authority?  ;; true when authority is adding a new attachment template by hand
+           :notNeeded false
+           :forPrinting false
+           :op op
+           :signatures []
+           :versions []}
+          (and (seq metadata) (env/feature? :tiedonohjaus)) (assoc :metadata metadata)))
 
 (defn make-attachments
   "creates attachments with nil target"
