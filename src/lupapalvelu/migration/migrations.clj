@@ -796,6 +796,18 @@
         doc))
     {"documents.schema-info.name" {$regex #"^tyonjohtaja"}}))
 
+(defmigration rename-suunnittelutarveratkaisun-lisaosa-changed-fields
+  {:apply-when (pos? (mongo/count :applications {$or [{"documents.data.vaikutukset_yhdyskuntakehykselle.etaisyyys_alakouluun" {$exists true}}
+                                                      {"documents.data.vaikutukset_yhdyskuntakehykselle.etaisyyys_ylakouluun" {$exists true}}]}))}
+  (update-applications-array
+    :documents
+    (fn [doc]
+      (if (= (-> doc :schema-info :name) "suunnittelutarveratkaisun-lisaosa")
+        (update-in doc [:data :vaikutukset_yhdyskuntakehykselle]
+                   clojure.set/rename-keys {:etaisyyys_alakouluun :etaisyys_alakouluun :etaisyyys_ylakouluun :etaisyys_ylakouluun})
+        doc))
+    {"documents.schema-info.name" "suunnittelutarveratkaisun-lisaosa"}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"
