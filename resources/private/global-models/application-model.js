@@ -58,6 +58,7 @@ LUPAPISTE.ApplicationModel = function() {
   self.neighbors = ko.observable([]);
   self.statements = ko.observable([]);
   self.tasks = ko.observable([]);
+  self.tosFunction = ko.observable();
   self.taskGroups = ko.computed(function() {
     var tasks = ko.toJS(self.tasks) || [];
     // TODO query without foreman tasks
@@ -117,6 +118,8 @@ LUPAPISTE.ApplicationModel = function() {
   self.showConstructionInfoHelp = ko.observable(false);
 
   self.targetTab = ko.observable({tab: undefined, id: undefined});
+
+  self.allowedAttachmentTypes = ko.observableArray([]);
 
   self.updateInvites = function() {
     invites.getInvites(function(data) {
