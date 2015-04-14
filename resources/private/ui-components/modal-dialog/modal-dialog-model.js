@@ -26,7 +26,7 @@ LUPAPISTE.ModalDialogModel = function () {
     return self.windowHeight() - 150;
   });
 
-  self.submitFn = ko.observable();
+  self.submitFn = ko.observable(undefined);
   self.submitEnabled = ko.observable();
 
   self.submitDialog = function() {
