@@ -118,6 +118,8 @@ LUPAPISTE.ApplicationModel = function() {
 
   self.targetTab = ko.observable({tab: undefined, id: undefined});
 
+  self.allowedAttachmentTypes = ko.observableArray([]);
+
   self.updateInvites = function() {
     invites.getInvites(function(data) {
       self.invites(_.filter(data.invites, function(invite) {
