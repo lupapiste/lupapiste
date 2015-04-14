@@ -3,7 +3,16 @@
 <body>
   <section class="page container">
     <script type="text/html" id="company-selector-template">
-      <div>Hallo</div>
+      <div>
+        <label for="company-select" data-bind="ltext: 'company-selector.title'"></label>
+        <select name="company-select"
+                class="form-input combobox"
+                data-bind="options: companies,
+                           optionsText: 'displayName',
+                           optionsCaption: loc('choose'),
+                           value: selected">
+        </select>
+      </div>
     </script>
   </section>
 </body>
