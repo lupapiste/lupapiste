@@ -22,6 +22,7 @@
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
+            [lupapalvelu.authorization-api :as authorization]
             [lupapalvelu.user :as user]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.operations :as operations]
@@ -686,11 +687,26 @@
 ;; Application from previous permit
 ;;
 
-(defn- do-create-application-from-previous-permit [{:keys [user created] :as command} xml app-info location-info]
-  (let [{:keys [rakennusvalvontaasianKuvaus vahainenPoikkeaminen]} app-info
-        ;;
-        ;; TODO: Add data manually for the Hakija document when info for that is receiced in the verdict xml message
-        ;;
+(defn- invite-applicants [{:keys [lang user created application] :as command} emails]
+  (when (pos? (count emails))
+    (let [invite-text (i18n/with-lang lang (i18n/loc "invite.default-text"))]
+      (dorun (->> emails
+              (map-indexed
+                (fn [i applicant-email]
+                  (let [hakija-doc-id (if (zero? i)
+                                        (:id (domain/get-document-by-name application "hakija"))
+                                        (:doc (commands/do-create-doc (assoc-in command [:data :schemaName] "hakija"))))]
+                    (authorization/send-invite! (update-in command [:data] merge
+                                                  {:email applicant-email
+                                                   :text invite-text
+                                                   :documentName "hakija"
+                                                   :documentId hakija-doc-id
+                                                   :path "henkilo"
+                                                   :role "writer"}))
+                    (info "Prev permit application creation, invited " applicant-email " to created app " (get-in command [:data :id]))))))))))
+
+(defn- do-create-application-from-previous-permit [{:keys [lang user created] :as command} xml app-info location-info]
+  (let [{:keys [rakennusvalvontaasianKuvaus vahainenPoikkeaminen hakijat]} app-info
         manual-schema-datas {"hankkeen-kuvaus" (filter seq
                                                  (conj []
                                                    (when-not (ss/blank? rakennusvalvontaasianKuvaus) [["kuvaus"] rakennusvalvontaasianKuvaus])
@@ -709,12 +725,20 @@
     ;; The application has to be inserted first, because it is assumed to be in the database when checking for verdicts (and their attachments).
     (insert-application created-application)
     (verdict-api/find-verdicts-from-xml command xml)  ;; Get verdicts for the application
+
+    ;; NOTE: at the moment only supporting henkilo-type applicants
+    (let [emails (->> hakijat
+                   (filter #(get-in % [:henkilo :sahkopostiosoite]))
+                   (map #(get-in % [:henkilo :sahkopostiosoite]))
+                   set)]
+      (invite-applicants command emails))
+
     (:id created-application)))
 
 (defcommand create-application-from-previous-permit
-  {:parameters [:operation :x :y :address :propertyId :organizationId :kuntalupatunnus]
+  {:parameters [:lang :operation :x :y :address :propertyId :organizationId :kuntalupatunnus]
    :user-roles #{:authority}
-   :input-validators [(partial action/non-blank-parameters [:operation :organizationId])  ;; no :address included
+   :input-validators [(partial action/non-blank-parameters [:lang :operation :organizationId])  ;; no :address included
                       ;; the propertyId parameter can be nil
                       (fn [{{propertyId :propertyId} :data :as command}]
                         (when (not (ss/blank? propertyId))
