@@ -389,7 +389,7 @@
     (fact "vahainenPoikkeaminen" vahainenPoikkeaminen => "Poikekkaa meill\u00e4!")
     (facts "hakijat"
       (fact "count" (count hakijat) => 3)
-      (fact "with email address" (filter identity (map #(get-in % [:henkilo :sahkopostiosoite]) hakijat)) => (just #{"lehtonen.antti@example.com" "lehtonen.marjut@example.com"})))
+      (fact "with email address" (filter identity (map #(get-in % [:henkilo :sahkopostiosoite]) hakijat)) => (just #{"pena@example.com" "mikko@example.com"})))
 
     (facts "Rakennuspaikka"
       (let [{:keys [x y address propertyId] :as rakennuspaikka} (:rakennuspaikka info)]
