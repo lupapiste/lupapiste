@@ -212,6 +212,10 @@ var attachment = (function() {
   };
 
   model.changeTypeDialogModel = new ChangeTypeDialogModel();
+  hub.subscribe("change-attachment-type", function(data) {
+    console.log("change-attachment-type");
+    model.attachmentType(data.attachmentType);
+  });
 
   model.name = ko.computed(function() {
     if (model.attachmentType()) {
@@ -401,10 +405,6 @@ var attachment = (function() {
     model.allowedAttachmentTypes(application.allowedAttachmentTypes);
     model.attachmentType(attachmentType(attachment.type["type-group"], attachment.type["type-id"]));
 
-    hub.subscribe("change-attachment-type", function(data) {
-      model.attachmentType(data.attachmentType);
-    });
-    
     model.id(attachmentId);
 
     approveModel.setApplication(application);
