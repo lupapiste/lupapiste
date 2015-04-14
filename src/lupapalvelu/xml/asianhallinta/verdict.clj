@@ -43,29 +43,31 @@
                 :poytakirjat  [{:paatoksentekija (:PaatoksenTekija AsianPaatos)
                                 :paatospvm       (cr/to-timestamp (:PaatoksenPvm AsianPaatos))
                                 :pykala          (:Pykala AsianPaatos)
-                                :paatoskoodi     (:PaatosKoodi AsianPaatos)}]}]})
+                                :paatoskoodi     (:PaatosKoodi AsianPaatos)
+                                :poytakirjaId    (mongo/create-id)}]}]})
 
-(defn- insert-attachment! [application attachment unzipped-path verdict-id attachment-id]
-  (prn attachment)
-  (let [filename (fs/base-name (:LinkkiLiitteeseen attachment))
-        file     (fs/file (s/join "/" [unzipped-path filename]))
-        file-size (.length file)
-        orgs      (lupapalvelu.organization/resolve-organizations
-                    (:municipality application)
-                    (:permitType application))
-        eraajo-user {:id "-"
-                     :enabled true
-                     :lastName "Er\u00e4ajo"
-                     :firstName "Lupapiste"
-                     :role "authority"
-                     :organizations (map :id orgs)}]
+(defn- insert-attachment! [application attachment unzipped-path verdict-id poytakirja-id]
+  (let [filename      (fs/base-name (:LinkkiLiitteeseen attachment))
+        file          (fs/file (s/join "/" [unzipped-path filename]))
+        file-size     (.length file)
+        orgs          (lupapalvelu.organization/resolve-organizations
+                        (:municipality application)
+                        (:permitType application))
+        eraajo-user   {:id "-"
+                       :enabled true
+                       :lastName "Er\u00e4ajo"
+                       :firstName "Lupapiste"
+                       :role "authority"
+                       :organizations (map :id orgs)}
+        target        {:type "verdict" :id verdict-id :poytakirjaId poytakirja-id}
+        attachment-id (pandect/sha1 (:LinkkiLiitteeseen attachment))]
     (attachment/attach-file! {:application application
                               :filename filename
                               :size file-size
                               :content file
                               :attachment-id attachment-id
                               :attachment-type {:type-group "muut" :type-id "muu"}
-                              :target {:type "verdict" :id attachment-id}
+                              :target target
                               :required false
                               :locked true
                               :user eraajo-user
@@ -102,19 +104,17 @@
           ; -> update-application
           (let [new-verdict   (build-verdict parsed-xml)
                 command       (action/application->command application)
-                new-verdict   (reduce (fn [verdict attachment]
-                                        (let [attachment-id (pandect/sha1 (:LinkkiLiitteeseen attachment))]
-                                          (insert-attachment!
-                                            application
-                                            attachment
-                                            unzipped-path
-                                            (:id new-verdict)
-                                            attachment-id)
-                                          (assoc-in verdict [:paatokset 0 :poytakirjat 0 :urlHash] attachment-id))) ; TODO: this is b0rken. Poytakirja should be copied for each attachment. Works only for one attachment
-                                      new-verdict
-                                      attachments)
+                poytakirja-id (get-in new-verdict [:paatokset 0 :poytakirjat 0 :poytakirjaId])
                 update-clause {$push {:verdicts new-verdict}}] ; TODO: Should update modified? can you use $push then?
+
             (action/update-application command update-clause)
+            (doseq [attachment attachments]
+              (insert-attachment!
+                application
+                attachment
+                unzipped-path
+                (:id new-verdict)
+                poytakirja-id))
             (ok)))))
     (catch Exception e
       (if-let [error-key (some-> e ex-data :object :text)]
