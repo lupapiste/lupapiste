@@ -117,7 +117,7 @@
                       :html ["modal-datepicker.html"]
                       :js   ["modal-datepicker.js"]}
 
-   :authenticated {:depends [:screenmessages]
+   :authenticated {:depends [:screenmessages :analytics]
                    :js ["comment.js"]
                    :html ["comments.html"]}
 
