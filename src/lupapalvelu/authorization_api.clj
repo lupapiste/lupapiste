@@ -53,15 +53,18 @@
                 :inviter      (user/summary inviter)}]
     (assoc (user/user-in-role invited :reader) :invite invite)))
 
-(defn- send-invite! [command application-id email text document-name document-id path role]
+(defn send-invite! [{{:keys [email text documentName documentId path role]} :data
+                     timestamp :created
+                     inviter :user
+                     application :application
+                     :as command}]
   {:pre [(valid-role role)]}
   (let [email (user/canonize-email email)
-        {timestamp :created inviter :user application :application} command
         existing-user (user/get-user-by-email email)]
     (if (or (domain/invite application email) (domain/has-auth? application (:id existing-user)))
       (fail :invite.already-has-auth)
       (let [invited (user-api/get-or-create-user-by-email email inviter)
-            auth    (create-invite-auth inviter invited application-id text document-name document-id path role timestamp)]
+            auth    (create-invite-auth inviter invited (:id application) text documentName documentId path role timestamp)]
         (update-application command
           {:auth {$not {$elemMatch {:invite.user.username (:email invited)}}}}
           {$push {:auth     auth}
@@ -74,7 +77,7 @@
     (fail! :error.illegal-role :parameters role)))
 
 (defcommand invite-with-role
-  {:parameters [id email text documentName documentId path role]
+  {:parameters [:id :email :text :documentName :documentId :path :role]
    :input-validators [(partial action/non-blank-parameters [:email])
                       action/email-validator
                       role-validator]
@@ -82,7 +85,7 @@
    :user-roles #{:applicant :authority}
    :notified   true}
   [command]
-  (send-invite! command id email text documentName documentId path role))
+  (send-invite! command))
 
 (defcommand approve-invite
   {:parameters [id]
