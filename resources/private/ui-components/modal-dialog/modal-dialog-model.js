@@ -42,6 +42,7 @@ LUPAPISTE.ModalDialogModel = function (params) {
   hub.subscribe("show-dialog", function(data) {
     $("html").addClass("no-scroll");
     self.contentName(data.contentName);
+    data.contentParams = data.contentParams ? data.contentParams : {};
     self.contentParams(_.assign(data.contentParams,
       {submitFn: self.submitFn,
        submitEnabled: self.submitEnabled}));
