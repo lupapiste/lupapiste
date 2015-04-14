@@ -7,6 +7,7 @@ LUPAPISTE.ModalDialogModel = function (params) {
 
   self.loc = {};
 
+  self.extraClass = ko.observable();
   self.windowWidth = ko.observable();
   self.windowHeight = ko.observable();
   self.dialogVisible = ko.observable(false);
@@ -46,7 +47,7 @@ LUPAPISTE.ModalDialogModel = function (params) {
        submitEnabled: self.submitEnabled}));
 
     self.loc = data.loc;
-
+    self.extraClass(data.extraClass);
     self.showDialog(true);
   });
 

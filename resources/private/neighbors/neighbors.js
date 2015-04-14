@@ -25,34 +25,30 @@
         .map.updateSize().clear().center(x, y, 13).add({x: x, y: y});
     };
 
-    self.edit   = function(neighbor) {
-      // editModel.init(neighbor).edit().openEdit();
+    function openEditDialog(params) {
       var loc = { title: "neighbors.edit.title",
                   submitButton: "save" };
       hub.send("show-dialog", {loc: loc,
                                contentName: "neighbors-edit",
-                               contentParams: {neighbor: neighbor}});
+                               contentParams: params,
+                               extraClass: "neighbors-edit"});
+    }
+
+    self.edit = function(neighbor) {
+      openEditDialog({neighbor: neighbor});
     };
 
-    self.add    = function() {
-      // editModel.init().edit().openEdit();
-      var loc = { title: "neighbors.edit.title",
-                  submitButton: "save" };
-      hub.send("show-dialog", {loc: loc,
-                               contentName: "neighbors-edit",
-                               contentParams: {}});
+    self.add = function() {
+      openEditDialog();
     };
 
-    self.click  = function(x, y) {
-      // ownersModel.init().search(x, y).openOwners();
+    self.click = function(x, y) {
       var loc = { title: "neighbor.owners.title",
                   submitButton: "save" };
-
       hub.send("show-dialog", { loc: loc,
                                 contentName: "neighbors-owners",
                                 contentParams: {x: x,
-                                                y: y}
-                              });
+                                                y: y} });
     };
 
     self.done = function() {
@@ -80,8 +76,6 @@
   }
 
   var model = new Model();
-  // var editModel = new EditModel();
-  // var ownersModel = new OwnersModel();
 
   hub.onPageLoad("neighbors", function(e) {
     applicationId = e.pagePath[0];
@@ -96,8 +90,5 @@
 
   $(function() {
     $("#neighbors-content").applyBindings(model);
-    // $("#dialog-edit-neighbor").applyBindings(editModel);
-    // $("#dialog-select-owners").applyBindings(ownersModel);
   });
-
 })();
