@@ -62,6 +62,14 @@
 
 (def canonize-email (comp ss/lower-case ss/trim))
 
+(defn batchrun-user [org-ids]
+  {:id "-"
+   :enabled true
+   :lastName "Er\u00e4ajo"
+   :firstName "Lupapiste"
+   :role "authority"
+   :organizations org-ids})
+
 ;;
 ;; ==============================================================================
 ;; Finding user data:

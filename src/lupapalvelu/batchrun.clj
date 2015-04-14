@@ -186,16 +186,10 @@
         orgs-by-id (reduce #(assoc %1 (:id %2) (:krysp %2)) {} orgs-with-wfs-url-defined-for-some-scope)
         org-ids (keys orgs-by-id)
         apps (mongo/select :applications {:state {$in ["sent"]} :organization {$in org-ids}})
-        eraajo-user {:id "-"
-                     :enabled true
-                     :lastName "Er\u00e4ajo"
-                     :firstName "Lupapiste"
-                     :role "authority"
-                     :organizations org-ids}]
+        eraajo-user (user/batchrun-user org-ids)]
     (doall
       (pmap
         (fn [{:keys [id permitType organization] :as app}]
-
           (try
             (let [url (get-in orgs-by-id [organization (keyword permitType) :url])]
               (logging/with-logging-context {:applicationId id}

@@ -11,6 +11,7 @@
             [lupapalvelu.organization :as org]
             [lupapalvelu.action :as action]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.user :as user]
             [clojure.string :as s]
             [sade.common-reader :as cr]
             [lupapalvelu.attachment :as attachment]))
@@ -53,12 +54,7 @@
         orgs          (lupapalvelu.organization/resolve-organizations
                         (:municipality application)
                         (:permitType application))
-        eraajo-user   {:id "-"
-                       :enabled true
-                       :lastName "Er\u00e4ajo"
-                       :firstName "Lupapiste"
-                       :role "authority"
-                       :organizations (map :id orgs)}
+        eraajo-user   (user/batchrun-user (map :id orgs))
         target        {:type "verdict" :id verdict-id :poytakirjaId poytakirja-id}
         attachment-id (pandect/sha1 (:LinkkiLiitteeseen attachment))]
     (attachment/attach-file! {:application application
