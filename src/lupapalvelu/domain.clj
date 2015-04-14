@@ -248,6 +248,7 @@
    :title                    ""
    :transfers                []
    :urgency                  "normal"
-   :verdicts                 []})
+   :verdicts                 []
+   :tosFunction              nil})
 
 

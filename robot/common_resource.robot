@@ -698,12 +698,12 @@ Set animations off
 Add neighbor
   [Arguments]  ${propertyId}  ${name}  ${email}
   Click enabled by test id  manager-neighbors-add
-  Wait Until   Element Should Be Visible  dialog-edit-neighbor
+  Wait Until   Element Should Be Visible  xpath=//*[@data-test-id='modal-dialog-content']
   Input text by test id  neighbors.edit.propertyId  ${propertyId}
   Input text by test id  neighbors.edit.name  ${name}
   Input text by test id  neighbors.edit.email  ${email}
-  Click by test id  neighbors.edit.ok
-  Wait Until  Element Should Not Be Visible  dialog-edit-neighbor
+  Click by test id  modal-dialog-submit-button
+  Wait Until  Element Should Not Be Visible  xpath=//*[@data-test-id='modal-dialog-content']
   Wait Until  Page Should Contain  ${email}
 
 #
