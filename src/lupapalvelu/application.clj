@@ -74,27 +74,6 @@
 
 ;; Helpers
 
-(defn do-set-user-to-document [application document user-id path current-user timestamp]
-  {:pre [document]}
-  (when-not (ss/blank? user-id)
-    (let [path-arr     (if-not (ss/blank? path) (split path #"\.") [])
-          schema       (schemas/get-schema (:schema-info document))
-          subject      (user/get-user-by-id user-id)
-          with-hetu    (model/has-hetu? (:body schema) path-arr)
-          person       (tools/unwrapped (model/->henkilo subject :with-hetu with-hetu :with-empty-defaults true))
-          model        (if (seq path-arr)
-                         (assoc-in {} (map keyword path-arr) person)
-                         person)
-          updates      (tools/path-vals model)
-          ; Path should exist in schema!
-          updates      (filter (fn [[update-path _]] (model/find-by-name (:body schema) update-path)) updates)]
-      (when-not schema (fail! :error.schema-not-found))
-      (when-not subject (fail! :error.user-not-found))
-      (when-not (and (domain/has-auth? application user-id) (domain/no-pending-invites? application user-id))
-        (fail! :error.application-does-not-have-given-auth))
-      (debugf "merging user %s with best effort into %s %s" model (get-in document [:schema-info :name]) (:id document))
-      (commands/persist-model-updates application "documents" document updates timestamp)))) ; TODO support for collection parameter
-
 (defn insert-application [application]
   (mongo/insert :applications (merge application (meta-fields/applicant-index application))))
 
@@ -334,7 +313,7 @@
    :states     (action/all-states-but [:info :sent :verdictGiven :constructionStarted :closed :canceled])}
   [{:keys [user created application] :as command}]
   (if-let [document (domain/get-document-by-id application documentId)]
-    (do-set-user-to-document application document userId path user created)
+    (commands/do-set-user-to-document application document userId path user created)
     (fail :error.document-not-found)))
 
 ;;

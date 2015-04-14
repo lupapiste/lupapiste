@@ -9,12 +9,10 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.application :as a]
             [lupapalvelu.user-api :as user-api]
             [lupapalvelu.user :as user]
             [lupapalvelu.document.model :as model]
-            ))
-
+            [lupapalvelu.document.commands :as commands]))
 
 ;;
 ;; Invites
@@ -105,7 +103,7 @@
       (when-let [document (domain/get-document-by-id application (:documentId my-invite))]
         ; Document can be undefined (invite's documentId is an empty string) in invite or removed by the time invite is approved.
         ; It's not possible to combine Mongo writes here, because only the last $elemMatch counts.
-        (a/do-set-user-to-document (domain/get-application-as id user) document (:id user) (:path my-invite) user created)))))
+        (commands/do-set-user-to-document (domain/get-application-as id user) document (:id user) (:path my-invite) user created)))))
 
 (defn generate-remove-invalid-user-from-docs-updates [{docs :documents :as application}]
   (-<>> docs
