@@ -26,7 +26,8 @@
 
   hub.subscribe("track-click", function(e) {
     //debug(e);
-    // hub.send("track-click", {category:"x", label:"y", event:"z"});
+    //hub.send("track-click", {category:"x", label:"y", event:"z"});
+    ga('send', 'event', e.category, e.event, e.label);
   });
 
 })(window,document,"script","//www.google-analytics.com/analytics.js","ga");

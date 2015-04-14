@@ -65,14 +65,17 @@ var comments = (function() {
     };
 
     self.markAnswered = function() {
+      ga('send', 'event', 'Conversation', 'markAnswered');
       return doAddComment(true, false);
     };
 
     self.submit = function() {
+      ga('send', 'event', 'Conversation', 'submit');
       return doAddComment(false, false);
     };
 
     self.stateOpenApplication = function() {
+      ga('send', 'event', 'Conversation', 'stateOpenApplication');
       return doAddComment(false, true);
     };
 

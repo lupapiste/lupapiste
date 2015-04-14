@@ -204,9 +204,11 @@ LUPAPISTE.ApplicationModel = function() {
     var municipality = "&municipality=" + self.municipality();
     var url = "/oskari/fullmap.html?build=" + LUPAPISTE.config.build + "&id=" + self.id() + coords + zoom + features + lang + municipality;
     window.open(url);
+    hub.send("track-click", {category:"Application", label:"map", event:"openOskariMap"});
   };
 
   self.submitApplication = function() {
+    hub.send("track-click", {category:"Application", label:"submit", event:"submitApplication"});
     LUPAPISTE.ModalDialog.showDynamicYesNo(
       loc("application.submit.areyousure.title"),
       loc("application.submit.areyousure.message"),
@@ -218,10 +220,12 @@ LUPAPISTE.ApplicationModel = function() {
           })
           .processing(self.processing)
           .call();
+        hub.send("track-click", {category:"Application", label:"submit", event:"applicationSubmitted"});
         return false;
       }},
       {title: loc("no")}
     );
+    hub.send("track-click", {category:"Application", label:"cancel", event:"applicationSubmitCanceled"});
     return false;
   };
 
@@ -243,6 +247,7 @@ LUPAPISTE.ApplicationModel = function() {
       })
       .processing(self.processing)
       .call();
+      hub.send("track-click", {category:"Inforequest", label:"", event:"convertToApplication"});
     return false;
   };
 
@@ -257,6 +262,7 @@ LUPAPISTE.ApplicationModel = function() {
       .error(function(e) {LUPAPISTE.showIntegrationError("integration.title", e.text, e.details);})
       .processing(self.processing)
       .call();
+    hub.send("track-click", {category:"Application", label:"", event:"approveApplication"}); 
     return false;
   };
 
@@ -270,11 +276,13 @@ LUPAPISTE.ApplicationModel = function() {
       .error(function(resp) {alert(resp.text);})
       .processing(self.processing)
       .call();
+      hub.send("track-click", {category:"Application", label:"", event:"refreshKTJ"});
     return false;
   };
 
   self.removeAuth = function(model) {
     var username = model.username();
+    hub.send("track-click", {category:"Application", label:"", event:"removeAuth"});
     LUPAPISTE.ModalDialog.showDynamicYesNo(
       loc("areyousure"),
       loc("areyousure.message"),
@@ -284,10 +292,12 @@ LUPAPISTE.ApplicationModel = function() {
            .success(self.reload)
            .processing(self.processing)
            .call();
+          hub.send("track-click", {category:"Application", label:"", event:"authRemoved"});
          return false;
       }},
       {title: loc("no")}
     );
+    hub.send("track-click", {category:"Application", label:"", event:"authRemoveCanceled"});
     return false;
   };
 
@@ -314,10 +324,12 @@ LUPAPISTE.ApplicationModel = function() {
 
   self.addOperation = function() {
     window.location.hash = "!/add-operation/" + self.id();
+    hub.send("track-click", {category:"Application", label:"", event:"addOperation"});
     return false;
   };
 
   self.cancelInforequest = function() {
+    hub.send("track-click", {category:"Inforequest", label:"", event:"cancelInforequest"});
     LUPAPISTE.ModalDialog.showDynamicYesNo(
       loc("areyousure"),
       loc("areyousure.cancel-inforequest"),
@@ -328,13 +340,16 @@ LUPAPISTE.ApplicationModel = function() {
           .success(function() {window.location.hash = "!/applications";})
           .processing(self.processing)
           .call();
+        hub.send("track-click", {category:"Inforequest", label:"", event:"infoRequestCanceled"});
         return false;}},
       {title: loc("no")}
     );
+    hub.send("track-click", {category:"Inforequest", label:"", event:"infoRequestCancelCanceled"});
     return false;
   };
 
   self.cancelApplication = function() {
+    hub.send("track-click", {category:"Application", label:"", event:"cancelApplication"});
     LUPAPISTE.ModalDialog.showDynamicYesNo(
       loc("areyousure"),
       loc("areyousure.cancel-application"),
@@ -345,15 +360,18 @@ LUPAPISTE.ApplicationModel = function() {
           .success(function() {window.location.hash = "!/applications";})
           .processing(self.processing)
           .call();
+        hub.send("track-click", {category:"Application", label:"", event:"ApplicationCanceled"});
         return false;}},
       {title: loc("no")}
     );
+    hub.send("track-click", {category:"Application", label:"", event:"ApplicationCancelCanceled"});
     return false;
   };
 
   self.cancelText = ko.observable("");
 
   self.cancelApplicationAuthority = function() {
+    hub.send("track-click", {category:"Application", label:"", event:"cancelApplicationAuthority"});
     LUPAPISTE.ModalDialog.setDialogContent(
       $("#dialog-cancel-application"),
       loc("areyousure"),
@@ -388,9 +406,11 @@ LUPAPISTE.ApplicationModel = function() {
       typeSelector: false
     });
     LUPAPISTE.ModalDialog.open("#upload-dialog");
+    hub.send("track-click", {category:"Application", label:"", event:"newOtherAttachment"});
   };
 
   self.createChangePermit = function() {
+    hub.send("track-click", {category:"Application", label:"", event:"createChangePermit"});
     LUPAPISTE.ModalDialog.showDynamicYesNo(
       loc("application.createChangePermit.areyousure.title"),
       loc("application.createChangePermit.areyousure.message"),
@@ -413,6 +433,7 @@ LUPAPISTE.ApplicationModel = function() {
 
 
   self.doCreateContinuationPeriodPermit = function() {
+    hub.send("track-click", {category:"Application", label:"", event:"doCreateContinuationPeriodPermit"});
     ajax
       .command("create-continuation-period-permit", {id: self.id()})
       .success(function(data) {
@@ -432,6 +453,7 @@ LUPAPISTE.ApplicationModel = function() {
   };
 
   self.resetIndicators = function() {
+    hub.send("track-click", {category:"Application", label:"", event:"resetIndicators"});
     ajax
       .command("mark-everything-seen", {id: self.id()})
       .success(self.reload)
@@ -461,10 +483,12 @@ LUPAPISTE.ApplicationModel = function() {
 
   self.changeTab = function(model,event) {
     self.targetTab({tab: $(event.target).closest("a").attr("data-target"), id: null});
+    hub.send("track-click", {category:"Application", label:self.targetTab().tab, event:"changeTab"});
   };
 
   self.nextTab = function(model,event) {
     self.targetTab({tab: $(event.target).closest("a").attr("data-target"), id: "applicationTabs"});
+    hub.send("track-click", {category:"Application", label:self.targetTab().tab, event:"nextTab"});
   };
 
   self.moveToIncorrectlyFilledRequiredField = function(fieldInfo) {
