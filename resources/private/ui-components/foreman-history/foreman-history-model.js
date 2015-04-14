@@ -26,7 +26,8 @@ LUPAPISTE.ForemanHistoryModel = function (params) {
   self.showAllProjects = function() {
     var newParams = params;
     newParams.showAllProjects = true;
-    hub.send("show-dialog", { titleLoc: "tyonjohtaja.historia.otsikko",
+    var loc = { title: "tyonjohtaja.historia.otsikko" };
+    hub.send("show-dialog", { loc: loc,
                               contentName: "foreman-history",
                               contentParams: newParams });
   };
