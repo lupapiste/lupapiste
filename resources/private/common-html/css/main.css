@@ -4902,7 +4902,7 @@ span.icon_clear:before {
 /* line 117, ../sass/views/_attachment.scss */
 .attachment-info-header {
   overflow: auto;
-  width: 50%;
+  width: 100%;
   display: block;
 }
 /* line 121, ../sass/views/_attachment.scss */
