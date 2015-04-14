@@ -69,7 +69,7 @@
 
 (def henkilo-valitsin [{:name "userId" :type :personSelector :blacklist [:neighbor]}])
 
-(def yritys-valitsin [{:name "userId" :type :companySelector :blacklist [:neighbor]}])
+(def yritys-valitsin [{:name "companyId" :type :companySelector :blacklist [:neighbor]}])
 
 (def rakennuksen-valitsin [{:name "buildingId" :type :buildingSelector :required true :i18nkey "rakennusnro" :other-key "manuaalinen_rakennusnro"}
                            {:name "rakennusnro" :type :string :subtype :rakennusnumero :hidden true}
@@ -139,6 +139,7 @@
                      {:name "liikeJaYhteisoTunnus" :type :string :subtype :y-tunnus :required true}])
 
 (def yritys (body
+              yritys-valitsin
               yritys-minimal
               simple-osoite
               {:name "yhteyshenkilo"

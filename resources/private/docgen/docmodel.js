@@ -1098,6 +1098,22 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return span;
   }
 
+  function buildCompanySelector(subSchema, model, path) {
+    console.log("buildCompanySelector", subSchema);
+    var myNs = path.slice(0, path.length - 1).join(".");
+
+    var params = {
+      id: self.appId,
+      documentId: self.docId,
+      documentName: self.schemaName,
+      userId: currentUser.id(),
+      path: myNs,
+      collection: self.getCollection()
+    };
+
+    return createComponent("company-selector", params);
+  }
+
   function buildTableRow(subSchema, model, path, partOfChoice) {
     var myPath = path.join(".");
     var name = subSchema.name;
@@ -1134,6 +1150,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     foremanHistory: buildForemanHistory,
     foremanOtherApplications: buildForemanOtherApplications,
     personSelector: buildPersonSelector,
+    companySelector: buildCompanySelector,
     table: buildTableRow,
     unknown: buildUnknown
   };
