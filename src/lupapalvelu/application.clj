@@ -371,8 +371,8 @@
   (ok))
 
 (defcommand cancel-application-authority
-  {:parameters [id text]
-   :input-validators [(partial action/non-blank-parameters [:id])]
+  {:parameters [id text lang]
+   :input-validators [(partial action/non-blank-parameters [:id :lang])]
    :user-roles #{:authority}
    :notified   true
    :on-success (notify :application-state-change)
@@ -383,10 +383,11 @@
       (when (seq text)
         (comment/comment-mongo-update
           (:state application)
-          (str
-            (i18n/loc "application.canceled.text") ". "
-            (i18n/loc "application.canceled.reason") ": "
-            text)
+          (i18n/with-lang lang
+            (str
+              (i18n/loc "application.canceled.text") ". "
+              (i18n/loc "application.canceled.reason") ": "
+              text))
           {:type "application"}
           (-> command :user :role)
           false

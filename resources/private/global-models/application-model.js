@@ -260,7 +260,7 @@ LUPAPISTE.ApplicationModel = function() {
       .error(function(e) {LUPAPISTE.showIntegrationError("integration.title", e.text, e.details);})
       .processing(self.processing)
       .call();
-    hub.send("track-click", {category:"Application", label:"", event:"approveApplication"}); 
+    hub.send("track-click", {category:"Application", label:"", event:"approveApplication"});
     return false;
   };
 
@@ -377,7 +377,7 @@ LUPAPISTE.ApplicationModel = function() {
       {title: loc("yes"),
        fn: function() {
         ajax
-          .command("cancel-application-authority", {id: self.id(), text: self.cancelText()})
+          .command("cancel-application-authority", {id: self.id(), text: self.cancelText(), lang: loc.getCurrentLanguage()})
           .success(function() {
             self.cancelText("");
             window.location.hash = "!/applications";
