@@ -1,0 +1,4 @@
+attachment.showTosMetadata: Näytä arkistointitiedot
+attachment.tosMetadata: Arkistointitiedot
+attachment.tosMetadataKey: Avain
+attachment.tosMetadataValue: Arvo

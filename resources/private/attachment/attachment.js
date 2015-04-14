@@ -127,6 +127,8 @@ var attachment = (function() {
     groupAttachments:             ko.observableArray(),
     groupIndex:                   ko.observable(),
     changeTypeDialogModel:        undefined,
+    metadata:                     ko.observableArray(),
+    showTosMetadata:              ko.observable(false),
 
     toggleHelp: function() {
       model.showHelp(!model.showHelp());
@@ -208,6 +210,10 @@ var attachment = (function() {
 
     toggleAttachmentVersionHistory: function() {
       model.showAttachmentVersionHistory(!model.showAttachmentVersionHistory());
+    },
+
+    toggleTosMetadata: function() {
+      model.showTosMetadata(!model.showTosMetadata());
     }
   };
 
@@ -404,6 +410,16 @@ var attachment = (function() {
     model.applicationState(attachment.applicationState);
     model.allowedAttachmentTypes(application.allowedAttachmentTypes);
     model.attachmentType(attachmentType(attachment.type["type-group"], attachment.type["type-id"]));
+
+    var metadataArray = _.map(attachment.metadata, function(value, key) {
+      if (typeof(value) === 'object') {
+        value = _.map(value, function(subvalue, subkey) {
+          return {name: subkey, value: subvalue};
+        });
+      }
+      return {name: key, value: value};
+    });
+    model.metadata(metadataArray);
 
     model.id(attachmentId);
 

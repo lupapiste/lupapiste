@@ -68,35 +68,35 @@
     (attachment-latest-file-id application :attachment2) => :file2))
 
 (fact "make attachments"
-  (make-attachments 999 :draft [:a :b] false true true) => (just
-                                                             [{:id "123"
-                                                               :locked false
-                                                               :modified 999
-                                                               :op nil
-                                                               :state :requires_user_action
-                                                               :target nil
-                                                               :type :a
-                                                               :applicationState :draft
-                                                               :signatures []
-                                                               :versions []
-                                                               :notNeeded false
-                                                               :required true
-                                                               :requestedByAuthority true
-                                                               :forPrinting false}
-                                                              {:id "123"
-                                                               :locked false
-                                                               :modified 999
-                                                               :op nil
-                                                               :state :requires_user_action
-                                                               :target nil
-                                                               :type :b
-                                                               :applicationState :draft
-                                                               :signatures []
-                                                               :versions []
-                                                               :notNeeded false
-                                                               :required true
-                                                               :requestedByAuthority true
-                                                               :forPrinting false}])
+  (make-attachments 999 :draft [{:type :a} {:type :b}] false true true) => (just
+                                                                             [{:id "123"
+                                                                               :locked false
+                                                                               :modified 999
+                                                                               :op nil
+                                                                               :state :requires_user_action
+                                                                               :target nil
+                                                                               :type :a
+                                                                               :applicationState :draft
+                                                                               :signatures []
+                                                                               :versions []
+                                                                               :notNeeded false
+                                                                               :required true
+                                                                               :requestedByAuthority true
+                                                                               :forPrinting false}
+                                                                              {:id "123"
+                                                                               :locked false
+                                                                               :modified 999
+                                                                               :op nil
+                                                                               :state :requires_user_action
+                                                                               :target nil
+                                                                               :type :b
+                                                                               :applicationState :draft
+                                                                               :signatures []
+                                                                               :versions []
+                                                                               :notNeeded false
+                                                                               :required true
+                                                                               :requestedByAuthority true
+                                                                               :forPrinting false}])
   (provided
     (mongo/create-id) => "123"))
 
@@ -131,3 +131,39 @@
         all-unique (set all-except-commons)]
 
     (count all-except-commons) => (count all-unique)))
+
+(fact "make attachments with metadata"
+  (let [types-with-metadata [{:type :a :metadata {"foo" "bar"}} {:type :b :metadata {"bar" "baz"}}]]
+    (make-attachments 999 :draft types-with-metadata false true true) => (just
+                                                                           [{:id "123"
+                                                                             :locked false
+                                                                             :modified 999
+                                                                             :op nil
+                                                                             :state :requires_user_action
+                                                                             :target nil
+                                                                             :type :a
+                                                                             :applicationState :draft
+                                                                             :signatures []
+                                                                             :versions []
+                                                                             :notNeeded false
+                                                                             :required true
+                                                                             :requestedByAuthority true
+                                                                             :forPrinting false
+                                                                             :metadata {"foo" "bar"}}
+                                                                            {:id "123"
+                                                                             :locked false
+                                                                             :modified 999
+                                                                             :op nil
+                                                                             :state :requires_user_action
+                                                                             :target nil
+                                                                             :type :b
+                                                                             :applicationState :draft
+                                                                             :signatures []
+                                                                             :versions []
+                                                                             :notNeeded false
+                                                                             :required true
+                                                                             :requestedByAuthority true
+                                                                             :forPrinting false
+                                                                             :metadata {"bar" "baz"}}])
+    (provided
+      (mongo/create-id) => "123")))
