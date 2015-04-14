@@ -54,7 +54,7 @@
         orgs          (lupapalvelu.organization/resolve-organizations
                         (:municipality application)
                         (:permitType application))
-        eraajo-user   (user/batchrun-user (map :id orgs))
+        batchrun-user (user/batchrun-user (map :id orgs))
         target        {:type "verdict" :id verdict-id :poytakirjaId poytakirja-id}
         attachment-id (pandect/sha1 (:LinkkiLiitteeseen attachment))]
     (attachment/attach-file! {:application application
@@ -66,7 +66,7 @@
                               :target target
                               :required false
                               :locked true
-                              :user eraajo-user
+                              :user batchrun-user
                               :created (core/now)
                               :state :ok})))
 
