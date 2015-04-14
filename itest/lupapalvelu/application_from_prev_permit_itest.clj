@@ -20,7 +20,8 @@
 (defn- create-app-from-prev-permit [apikey & args]
  (let [args (->> args
               (apply hash-map)
-              (merge {:operation "aiemmalla-luvalla-hakeminen"
+              (merge {:lang "fi"
+                      :operation "aiemmalla-luvalla-hakeminen"
                       :organizationId "186-R"  ;; Jarvenpaan rakennusvalvonta
                       :kuntalupatunnus example-kuntalupatunnus
                       :y 0
