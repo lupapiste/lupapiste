@@ -1,3 +1,9 @@
+/*
+ * Usage:
+ *
+ *   hub.send("track-click", {category:"x", label:"y", event:"z"});
+ *
+ */
 (function(i,s,o,g,r,a,m) {
   "use strict";
   if (LUPAPISTE.config.analytics && LUPAPISTE.config.analytics.id) {
@@ -25,9 +31,7 @@
   });
 
   hub.subscribe("track-click", function(e) {
-    //debug(e);
-    //hub.send("track-click", {category:"x", label:"y", event:"z"});
-    ga('send', 'event', e.category, e.event, e.label);
+    ga("send", "event", e.category, e.event, e.label);
   });
 
 })(window,document,"script","//www.google-analytics.com/analytics.js","ga");
