@@ -7,10 +7,11 @@
     <div data-bind="visible: false, documentEvent: {keypress: closeDialog, key: 27}"></div>
     <!-- ko if: showDialog -->
     <div class="mask" data-bind="fader: dialogVisible, click: closeDialog"></div>
-    <div class="dialog" data-bind="fader: dialogVisible, duration: 1000,
-                                   style: {'height': dialogHeight() + 'px',
-                                           'max-height': dialogHeight() + 'px'},
-                                   css: extraClass">
+    <div class="dialog" data-test-id="modal-dialog-content"
+         data-bind="fader: dialogVisible, duration: 1000,
+                    style: {'height': dialogHeight() + 'px',
+                            'max-height': dialogHeight() + 'px'},
+                    css: extraClass">
       <div class="header">
         <span class="title" data-bind="ltext: loc.title"></span>
         <span class="close" data-bind="click: closeDialog"></span>
@@ -18,11 +19,11 @@
       <div id="modal-dialog-content" class="content" data-bind="component: {name: contentName, params: contentParams}"></div>
       <div class="footer">
         <button class="btn btn-primary"
-                id="modal-dialog-submit-button"
+                data-test-id="modal-dialog-submit-button"
                 data-bind="visible: submitFn, enable: submitEnabled,
                            click: submitDialog, ltext: loc.submitButton">
         </button>
-        <a href="#" class="cancel" id="modal-dialog-cancel-button" data-bind="click: closeDialog">
+        <a href="#" class="cancel" data-test-id="modal-dialog-cancel-button" data-bind="click: closeDialog">
           <span data-bind="ltext: 'cancel'"></span>
         </a>
       </div>
