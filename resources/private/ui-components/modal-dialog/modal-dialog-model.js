@@ -1,16 +1,15 @@
-LUPAPISTE.ModalDialogModel = function (params) {
+LUPAPISTE.ModalDialogModel = function () {
   "use strict";
   var self = this;
+
+  self.loc = {};
+
   self.showDialog = ko.observable(false);
-  self.contentName = ko.observable();
-  self.contentParams = ko.observable();
-
-  self.submitButtonTitleLoc = ko.observable();
-  self.submitButtonFunc = null;
-
+  self.component = ko.observable();
+  self.componentParams = ko.observable();
+  self.extraClass = ko.observable();
   self.windowWidth = ko.observable();
   self.windowHeight = ko.observable();
-  self.title = ko.observable();
   self.dialogVisible = ko.observable(false);
 
   self.showDialog.subscribe(function(show) {
@@ -27,6 +26,14 @@ LUPAPISTE.ModalDialogModel = function (params) {
     return self.windowHeight() - 150;
   });
 
+  self.submitFn = ko.observable(undefined);
+  self.submitEnabled = ko.observable();
+
+  self.submitDialog = function() {
+    self.submitFn()();
+    self.closeDialog();
+  };
+
   self.closeDialog = function() {
     self.showDialog(false);
     $("html").removeClass("no-scroll");
@@ -34,14 +41,14 @@ LUPAPISTE.ModalDialogModel = function (params) {
 
   hub.subscribe("show-dialog", function(data) {
     $("html").addClass("no-scroll");
-    self.contentName(data.contentName);
-    self.contentParams(data.contentParams);
-
-    self.submitButtonTitleLoc(data.submitButtonTitleLoc);
-    self.submitButtonFunc = data.submitButtonFunc;
-
+    self.component(data.component);
+    var componentParams = data.componentParams ? data.componentParams : {};
+    self.componentParams(_.assign(componentParams,
+      {submitFn: self.submitFn,
+       submitEnabled: self.submitEnabled}));
+    self.loc = data.loc;
+    self.extraClass(data.extraClass);
     self.showDialog(true);
-    self.title(loc(data.titleLoc));
   });
 
   var setWindowSize = function(width, height) {

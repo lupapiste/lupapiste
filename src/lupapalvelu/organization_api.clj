@@ -299,3 +299,9 @@
         :kopiolaitos-orderer-phone (:kopiolaitos-orderer-phone organization)
         :kopiolaitos-orderer-email (:kopiolaitos-orderer-email organization))
       (fail :error.unknown-organization))))
+
+(defquery get-organization-names
+  {:user-roles #{:anonymous}}
+  [_]
+  (ok :names (into {} (for [{:keys [id name]} (o/get-organizations {})]
+                        [id name]))))

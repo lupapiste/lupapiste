@@ -68,8 +68,8 @@
                                                  :Operaattoritunnus (get-in data [:yritys :verkkolaskutustieto :valittajaTunnus])})}))]
 
     (if (= sel "yritys")
-      (assoc-in maksaja-map [:Yritys] (ua-get-yritys data))
-      (assoc-in maksaja-map [:Henkilo] (ua-get-henkilo data)))))
+      (util/strip-empty-maps (assoc-in maksaja-map [:Yritys] (ua-get-yritys data)))
+      (util/strip-empty-maps (assoc-in maksaja-map [:Henkilo] (ua-get-henkilo data))))))
 
 (defn- ua-get-metatiedot [attachment]
   (let [op-name (get-in attachment [:op :name])
@@ -115,7 +115,7 @@
 
 ;; Public
 
-(defn get-attachments-as-canonical [{:keys [attachments]} begin-of-link & [target]]
+(defn get-attachments-as-canonical [attachments begin-of-link & [target]]
   (not-empty
     (for [attachment attachments
           :when (and (:latestVersion attachment)
@@ -145,6 +145,7 @@
 
 ;; TaydennysAsiaan, prefix: ta-
 
+(def ^:private ta-root-element {:TaydennysAsiaan nil})
 
 ;; AsianPaatos, prefix: ap-
 
@@ -167,3 +168,7 @@
       (assoc-in [:UusiAsia :Sijainti] (ua-get-sijaintipiste application))
       (assoc-in [:UusiAsia :Kiinteistotunnus] (util/to-human-readable-property-id (:propertyId application)))
       (assoc-in [:UusiAsia :Viiteluvat] (ua-get-viiteluvat application)))))
+
+(defn application-to-asianhallinta-taydennys-asiaan-canonical [application]
+  "Return TaydennysAsiaan canonical"
+  (-> (assoc-in ta-root-element [:TaydennysAsiaan :HakemusTunnus] (:id application))))

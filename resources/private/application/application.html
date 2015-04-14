@@ -176,6 +176,7 @@
             <span data-bind="ltext: 'application.approveApplication'"></span>
             <span class="icon approve left-align"></span>
           </button>
+          <export-attachments/>
           <button data-bind="click: toAsianhallinta,
                              visible: $root.authorization.ok('application-to-asianhallinta') && asianhallintaEnabled,
                              enable: !processing() && $root.authorization.ok('application-to-asianhallinta') && asianhallintaEnabled,
@@ -497,13 +498,15 @@
             <i data-bind="ltext: 'application.attachmentsEmpty'" data-test-id="application-attachments-no-attachments"></i>
           </div>
 
-          <div data-bind="visible: (!$root.application.inPostVerdictState() && preAttachmentsByOperation().length > 0) ||
-                                   ($root.application.inPostVerdictState() && postAttachmentsByOperation().length > 0),
-                          template: {name: 'attachment-actions-template',
+          <!-- ko if: showPostAtachmentsActions -->
+          <div data-bind="template: {name: 'attachment-actions-template',
                                      data: {appModel: $data.appModel,
                                             attachmentsOperation: $data.attachmentsOperation,
                                             attachmentsOperations: $data.attachmentsOperations,
                                             testId: 'upper'}}"></div>
+
+          <export-attachments/>
+          <!-- /ko -->
 
           <div data-bind="if: postAttachmentsByOperation().length > 0" data-test-id="application-post-attachments-table">
             <h1><span data-bind="ltext: 'application.attachments.post-verdict'"></span></h1>
@@ -520,6 +523,8 @@
                                             attachmentsOperation: $data.attachmentsOperation,
                                             attachmentsOperations: $data.attachmentsOperations,
                                             testId: 'lower'}}"></div>
+
+          <export-attachments/>
 
           <!-- ko if: $root.application.inPostVerdictState() -->
           <div data-bind="if: preAttachmentsByOperation().length > 0" data-test-id="application-pre-attachments-table">

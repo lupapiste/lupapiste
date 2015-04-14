@@ -14,14 +14,10 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel, verdictAttachme
   self.attachmentsOperation = ko.observable();
   self.attachmentsOperations = ko.observable([]);
 
-  function unsentAttachmentFound(attachments) {
-    return _.some(attachments, function(a) {
-      var lastVersion = _.last(a.versions);
-      return lastVersion &&
-             (!a.sent || lastVersion.created > a.sent) &&
-             (!a.target || (a.target.type !== "statement" && a.target.type !== "verdict"));
-    });
-  }
+  self.showPostAtachmentsActions = ko.pureComputed(function() {
+    return (!appModel.inPostVerdictState() && self.preAttachmentsByOperation().length > 0) ||
+           (appModel.inPostVerdictState()  && self.postAttachmentsByOperation().length > 0);
+  });
 
   var attachmentsOperationsMapping = {
       "attachmentsAdd": {
@@ -85,15 +81,6 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel, verdictAttachme
         },
         visibleFn: function (rawAttachments) {
           return self.authorizationModel.ok("sign-attachments") && self.appModel.hasAttachment();
-        }
-      },
-      "attachmentsMoveToBackingSystem": {
-        loc: loc("application.attachmentsMoveToBackingSystem"),
-        clickCommand: function() {
-          return self.startMovingAttachmentsToBackingSystem();
-        },
-        visibleFn: function (rawAttachments) {
-          return self.authorizationModel.ok("move-attachments-to-backing-system") && self.appModel.hasAttachment() && unsentAttachmentFound(rawAttachments);
         }
       },
       "downloadAll": {
@@ -169,10 +156,6 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel, verdictAttachme
     self.postAttachmentsByOperation(postGrouped);
     self.attachmentsOperation(undefined);
     self.attachmentsOperations(updatedAttachmentsOperations(rawAttachments));
-  };
-
-  self.startMovingAttachmentsToBackingSystem = function() {
-    hub.send("start-moving-attachments-to-backing-system");
   };
 
   self.newAttachment = function() {
