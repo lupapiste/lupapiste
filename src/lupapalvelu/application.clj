@@ -1,6 +1,6 @@
 (ns lupapalvelu.application
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error fatal]]
-            [clojure.string :refer [join split]]
+            [clojure.string :as s]
             [clojure.walk :refer [keywordize-keys]]
             [clojure.zip :as zip]
             [clj-time.core :refer [year]]
@@ -49,7 +49,7 @@
 
 (defn property-id-parameters [params command]
   (when-let [invalid (seq (filter #(not (property-id? (get-in command [:data %]))) params))]
-    (info "invalid property id parameters:" (join ", " invalid))
+    (info "invalid property id parameters:" (s/join ", " invalid))
     (fail :error.invalid-property-id :parameters (vec invalid))))
 
 (defn- validate-x [{{:keys [x]} :data}]
