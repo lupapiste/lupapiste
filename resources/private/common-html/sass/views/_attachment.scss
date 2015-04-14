@@ -116,7 +116,7 @@ $previewHeight: 500px;
 
 .attachment-info-header {
   overflow: auto;
-  width: 100%;
+  width: 50%;
   display: block;
   h1 {
     line-height: normal;
@@ -238,4 +238,20 @@ td.comment-text {
 .signature-cell {
   display: table-cell;
   width: 200px;
+}
+
+.tos-metadata-content {
+  margin-top: $marginM;
+
+  .subtable {
+    margin: 0;
+    tr {
+      background: transparent;
+      border: none;
+    }
+    th, td {
+      background: transparent;
+      padding: 0;
+    }
+  }
 }

@@ -200,7 +200,7 @@
                       data-bind="drill: showTosMetadata, color: 'black'"></span>
               </button>
 
-              <div class="attachment-file-versions-content" data-bind="slider: showTosMetadata, visible: metadata().length > 0" style="margin-top: 15px">
+              <div class="tos-metadata-content" data-bind="slider: showTosMetadata, visible: metadata().length > 0">
                 <h3 data-bind="ltext: 'attachment.tosMetadata'"></h3>
                 <table class="table table-striped">
                   <thead>
@@ -214,17 +214,17 @@
                       <td data-bind="text: name"></td>
                       <td>
                         <div data-bind="if: typeof(value) == 'object'">
-                          <table style="margin: 0">
+                          <table class="subtable">
                             <thead>
-                            <tr style="background: transparent;">
-                              <th style="background: transparent; padding: 0" data-bind="ltext: 'attachment.tosMetadataKey'"></th>
-                              <th style="background: transparent; padding: 0" data-bind="ltext: 'attachment.tosMetadataValue'"></th>
+                            <tr>
+                              <th data-bind="ltext: 'attachment.tosMetadataKey'"></th>
+                              <th data-bind="ltext: 'attachment.tosMetadataValue'"></th>
                             </tr>
                             </thead>
                             <tbody data-bind="foreach: value">
-                            <tr style="background: transparent; border: none;">
-                              <td data-bind="text: name" style="padding: 0"></td>
-                              <td data-bind="text: value" style="padding: 0"></td>
+                            <tr>
+                              <td data-bind="text: name"></td>
+                              <td data-bind="text: value"></td>
                             </tr>
                             </tbody>
                           </table>
