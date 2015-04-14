@@ -28,7 +28,7 @@ LUPAPISTE.ForemanHistoryModel = function (params) {
     newParams.showAllProjects = true;
     var loc = { title: "tyonjohtaja.historia.otsikko" };
     hub.send("show-dialog", { loc: loc,
-                              contentName: "foreman-history",
-                              contentParams: newParams });
+                              component: "foreman-history",
+                              componentParams: newParams });
   };
 };

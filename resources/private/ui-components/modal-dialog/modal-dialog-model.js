@@ -5,8 +5,8 @@ LUPAPISTE.ModalDialogModel = function () {
   self.loc = {};
 
   self.showDialog = ko.observable(false);
-  self.contentName = ko.observable();
-  self.contentParams = ko.observable();
+  self.component = ko.observable();
+  self.componentParams = ko.observable();
   self.extraClass = ko.observable();
   self.windowWidth = ko.observable();
   self.windowHeight = ko.observable();
@@ -41,9 +41,9 @@ LUPAPISTE.ModalDialogModel = function () {
 
   hub.subscribe("show-dialog", function(data) {
     $("html").addClass("no-scroll");
-    self.contentName(data.contentName);
-    var contentParams = data.contentParams ? data.contentParams : {};
-    self.contentParams(_.assign(contentParams,
+    self.component(data.component);
+    var componentParams = data.componentParams ? data.componentParams : {};
+    self.componentParams(_.assign(componentParams,
       {submitFn: self.submitFn,
        submitEnabled: self.submitEnabled}));
     self.loc = data.loc;

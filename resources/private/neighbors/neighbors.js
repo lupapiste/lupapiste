@@ -29,8 +29,8 @@
       var loc = { title: "neighbors.edit.title",
                   submitButton: "save" };
       hub.send("show-dialog", {loc: loc,
-                               contentName: "neighbors-edit",
-                               contentParams: params,
+                               component: "neighbors-edit",
+                               componentParams: params,
                                extraClass: "neighbors-edit"});
     }
 
@@ -46,9 +46,9 @@
       var loc = { title: "neighbor.owners.title",
                   submitButton: "save" };
       hub.send("show-dialog", { loc: loc,
-                                contentName: "neighbors-owners",
-                                contentParams: {x: x,
-                                                y: y} });
+                                component: "neighbors-owners",
+                                componentParams: {x: x,
+                                                  y: y} });
     };
 
     self.done = function() {
