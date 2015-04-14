@@ -117,7 +117,7 @@
                       :html ["modal-datepicker.html"]
                       :js   ["modal-datepicker.js"]}
 
-   :authenticated {:depends [:screenmessages]
+   :authenticated {:depends [:screenmessages :analytics]
                    :js ["comment.js"]
                    :html ["comments.html"]}
 
@@ -250,6 +250,8 @@
                         "modal-dialog/modal-dialog-model.js"
                         "attachments-multiselect/attachments-multiselect-model.js"
                         "export-attachments/export-attachments-model.js"
+                        "neighbors/neighbors-owners-model.js"
+                        "neighbors/neighbors-edit-model.js"
                         "register-components.js"]
                    :html ["fill-info/fill-info-template.html"
                           "foreman-history/foreman-history-template.html"
@@ -260,7 +262,9 @@
                           "checkbox/checkbox-template.html"
                           "modal-dialog/modal-dialog-template.html"
                           "attachments-multiselect/attachments-multiselect-template.html"
-                          "export-attachments/export-attachments-template.html"]}
+                          "export-attachments/export-attachments-template.html"
+                          "neighbors/neighbors-owners-template.html"
+                          "neighbors/neighbors-edit-template.html"]}
 
    ;; Single Page Apps and standalone components:
    ;; (compare to auth-methods in web.clj)
