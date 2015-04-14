@@ -65,14 +65,17 @@ var comments = (function() {
     };
 
     self.markAnswered = function() {
+      hub.send("track-click", {category:"Conversation", event:"markAnswered"});
       return doAddComment(true, false);
     };
 
     self.submit = function() {
+      hub.send("track-click", {category:"Conversation", event:"submit"});
       return doAddComment(false, false);
     };
 
     self.stateOpenApplication = function() {
+      hub.send("track-click", {category:"Conversation", event:"stateOpenApplication"});
       return doAddComment(false, true);
     };
 
