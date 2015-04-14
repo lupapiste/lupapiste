@@ -208,11 +208,11 @@
      :x x
      :y y})))
 
-(defn- ->features [s & [encoding]]
+(defn- ->features [s parse-fn & [encoding]]
   (when s
     (-> (if encoding (.getBytes s encoding) (.getBytes s))
       java.io.ByteArrayInputStream.
-      (xml/parse sade.xml/startparse-sax-no-doctype)
+      (xml/parse parse-fn)
       zip/xml-zip)))
 
 ;;
@@ -245,7 +245,7 @@
       :failure (do (errorf data "wfs failure: url=%s" url) nil)
       :ok      (let [features (-> data
                                 (s/replace "UTF-8" "ISO-8859-1")
-                                (->features "ISO-8859-1"))]
+                                (->features sade.xml/startparse-sax-no-doctype "ISO-8859-1"))]
                  (xml-> features :gml:featureMember)))))
 
 (defn post [url q]
@@ -325,7 +325,7 @@
 
 (defn capabilities-to-layers [capabilities]
   (when capabilities
-    (xml-> (->features capabilities) :Capability :Layer :Layer)))
+    (xml-> (->features capabilities startparse-sax-non-validating) :Capability :Layer :Layer)))
 
 (defn layer-to-name [layer]
   (first (xml-> layer :Name text)))
@@ -360,7 +360,7 @@
 ;;; Mikkeli is special because it was done first and they use Bentley WMS
 (defn gfi-to-features-mikkeli [gfi _]
   (when gfi
-    (xml-> (->features gfi) :FeatureKeysInLevel :FeatureInfo :FeatureKey)))
+    (xml-> (->features gfi startparse-sax-non-validating) :FeatureKeysInLevel :FeatureInfo :FeatureKey)))
 
 (defn feature-to-feature-info-mikkeli  [feature]
   (when feature
@@ -373,7 +373,7 @@
 
 (defn gfi-to-features-sito [gfi municipality]
   (when gfi
-    (xml-> (->features gfi) :gml:featureMember (keyword (str "lupapiste:" municipality "_asemakaavaindeksi")))))
+    (xml-> (->features gfi startparse-sax-non-validating) :gml:featureMember (keyword (str "lupapiste:" municipality "_asemakaavaindeksi")))))
 
 (defn feature-to-feature-info-sito  [feature]
   (when feature
@@ -406,7 +406,7 @@
 
 (defn gfi-to-general-plan-features [gfi]
   (when gfi
-    (let [info (->features gfi "UTF-8")]
+    (let [info (->features gfi startparse-sax-non-validating "UTF-8")]
       (clojure.set/union
         (xml-> info :gml:featureMember :lupapiste:yleiskaavaindeksi)
         (xml-> info :gml:featureMember :lupapiste:yleiskaavaindeksi_poikkeavat)))))
