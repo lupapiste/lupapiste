@@ -477,6 +477,12 @@ input[readonly], textarea[readonly] {
     td {
       text-align: center;
     }
+    tr:hover{
+      background-color: white;
+      &:nth-child(even) {
+        background: darken($lp-light-grey, .5%);
+      }
+    }
   }
 
   .form-table th:first-child {
