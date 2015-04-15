@@ -34,8 +34,11 @@
               <span data-bind="ltext: 'canceled', attr: {'title' : loc('canceled.title')}" class="canceled-box"></span>
             </div>
           </div>
-          <div data-bind="if: $root.application.state() == 'draft'" id="state-infotext">
+          <div data-bind="if: $root.application.state() == 'draft'" class="summary-help">
             <p data-bind="lhtml: 'application.state.draft.help'"></p>
+          </div>
+          <div data-bind="if: hasInvites" class="summary-help">
+            <p data-bind="lhtml: 'application.invite.help'"></p>
           </div>
 
           <!-- Property ID: -->

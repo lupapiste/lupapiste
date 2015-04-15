@@ -3806,14 +3806,14 @@ span.icon_clear:before {
   background-position: 8px -4200px;
 }
 /* line 68, ../sass/views/_application.scss */
-.application_summary .application_summary_info #state-infotext {
+.application_summary .application_summary_info .summary-help {
   width: 100%;
   background-color: #4f4f4f;
   font-size: 0.8em;
   font-style: italic;
 }
 /* line 74, ../sass/views/_application.scss */
-.application_summary .application_summary_info #state-infotext p {
+.application_summary .application_summary_info .summary-help p {
   width: 100%;
 }
 /* line 79, ../sass/views/_application.scss */
