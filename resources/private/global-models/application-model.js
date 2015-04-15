@@ -61,9 +61,9 @@ LUPAPISTE.ApplicationModel = function() {
   self.tosFunction = ko.observable();
   self.metadata = ko.observable();
 
-  self.metadataList = ko.computed(function() {
+  self.metadataList = ko.pureComputed(function() {
     var data = ko.toJS(this) || {};
-    return _.map(data, function(value, key) {
+    var list = _.map(data, function(value, key) {
       if (typeof(value) === 'object') {
         value = _.map(value, function(subvalue, subkey) {
           return {name: subkey, value: subvalue};
@@ -71,7 +71,8 @@ LUPAPISTE.ApplicationModel = function() {
       }
       return {name: key, value: value};
     });
-  }, self.metadata);
+    return _.sortBy(list, 'name');
+  }, self.metadata).extend({ notify: 'always' });
 
   self.taskGroups = ko.computed(function() {
     var tasks = ko.toJS(self.tasks) || [];
