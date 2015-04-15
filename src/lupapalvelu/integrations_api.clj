@@ -191,7 +191,7 @@
     (let [kryspxml  (krysp-reader/building-xml url propertyId)
           buildings (krysp-reader/->buildings-summary kryspxml)]
       (ok :data buildings))
-    (fail :error.no-legacy-available)))
+    (ok)))
 
 ;;
 ;; Asianhallinta
