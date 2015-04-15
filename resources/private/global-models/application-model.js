@@ -59,7 +59,20 @@ LUPAPISTE.ApplicationModel = function() {
   self.statements = ko.observable([]);
   self.tasks = ko.observable([]);
   self.tosFunction = ko.observable();
-  self.metadata = ko.observableArray();
+  self.metadata = ko.observable();
+
+  self.metadataList = ko.computed(function() {
+    var data = ko.toJS(this) || {};
+    return _.map(data, function(value, key) {
+      if (typeof(value) === 'object') {
+        value = _.map(value, function(subvalue, subkey) {
+          return {name: subkey, value: subvalue};
+        });
+      }
+      return {name: key, value: value};
+    });
+  }, self.metadata);
+
   self.taskGroups = ko.computed(function() {
     var tasks = ko.toJS(self.tasks) || [];
     // TODO query without foreman tasks
