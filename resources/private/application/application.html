@@ -301,6 +301,11 @@
               <a data-bind="click: changeTab" href="#" data-target="applicationSummary" data-test-id="application-open-applicationSummary-tab">
                 <span data-bind="ltext: 'application.applicationSummary'"></span></a></li>
 
+            <li data-bind="css: {'active': $parent.selectedTabName() === 'metadata'}">
+              <a data-bind="click: changeTab" href="#" data-target="metadata" data-test-id="application-open-tasks-tab">
+                <span>Metatiedot</span>
+              </a></li>
+
           </ul>
         </div>
       </div>
@@ -975,6 +980,14 @@
 
             <button data-bind="click: $root.neighbor.manage, ltext: 'neighbors.manage', visible: $root.authorization.ok('neighbor-add')" class="btn btn-primary modal" data-test-id="manage-neighbors"></button>
           </div>
+        </div>
+        <!-- /ko -->
+
+        <!-- Metadata tab -->
+
+        <!-- ko if: selectedTabName() === 'metadata' -->
+        <div id="application-metadata-tab" class="tab-content" >
+          <h1>Metatiedot</h1>
         </div>
         <!-- /ko -->
 
