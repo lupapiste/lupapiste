@@ -3,26 +3,22 @@ LUPAPISTE.CompanySelectorModel = function(params) {
 
   function mapCompany(company) {
     company.displayName = ko.pureComputed(function() {
-      return company.name + ", " + (company.address1 ? company.address1 + " ": "") + (company.po ? company.po : "");
+      return ko.unwrap(company.name) + " (" + ko.unwrap(company.y) + ")";
     });
     return company;
   }
 
   var self = this;
 
-  console.log("CompanySelectorModel", params);
-
-  self.companies = ko.observableArray();
   self.pending = ko.observable();
   self.selected = ko.observable();
 
-  _.defer(function() {
-    ajax
-      .query("companies")
-      .pending(self.pending)
-      .success(function(response) {
-        self.companies(_.map(response.companies, mapCompany));
+  self.companies = ko.pureComputed(function() {
+    return _(lupapisteApp.models.application.roles())
+      .filter(function(r) {
+        return ko.unwrap(r.type) === "company";
       })
-      .call();
+      .map(mapCompany)
+      .value();
   });
 };
