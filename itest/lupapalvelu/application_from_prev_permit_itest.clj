@@ -133,15 +133,13 @@
 
     (fixture/apply-fixture "minimal")
 
-    ; 8: hakijalla on oikeus luoda hakemus
+    ; 8: hakijalla ei ole oiketta noutaa aiempaa lupaa
     (fact "applicant cannot create application"
-      (fact "authority of different municipality cannot create app with prev permit"
-        (create-app-from-prev-permit pena
-          :x "6707184.319"
-          :y "393021.589"
-          :address "Kylykuja 3"
-          :propertyId "18600303560005") => (partial expected-failure? "error.unauthorized")))
-
+      (create-app-from-prev-permit pena
+        :x "6707184.319"
+        :y "393021.589"
+        :address "Kylykuja 3"
+        :propertyId "18600303560005") => (partial expected-failure? "error.unauthorized"))
 
     ;; This applies to all tests in this namespace
     (against-background
