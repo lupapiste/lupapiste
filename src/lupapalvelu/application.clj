@@ -703,9 +703,9 @@
                     (authorization/send-invite! (update-in command [:data] merge
                                                   {:email applicant-email
                                                    :text invite-text
-                                                   :documentName "hakija"
-                                                   :documentId hakija-doc-id
-                                                   :path "henkilo"
+                                                   :documentName nil
+                                                   :documentId nil
+                                                   :path nil
                                                    :role "writer"}))
                     (info "Prev permit application creation, invited " applicant-email " to created app " (get-in command [:data :id]))))))))))
 
