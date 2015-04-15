@@ -1,5 +1,5 @@
 (ns lupapalvelu.wfs
-  (:require [taoensso.timbre :as timbre :refer [trace debug info infof warn errorf fatal]]
+  (:require [taoensso.timbre :as timbre :refer [trace debug info infof warn error errorf fatal]]
             [sade.http :as http]
             [clojure.string :as s]
             [clojure.xml :as xml]
@@ -7,7 +7,7 @@
             [clojure.data.zip.xml :refer [xml-> text attr=]]
             [sade.env :as env]
             [sade.xml]
-            [sade.strings :refer [starts-with-i numeric?]]
+            [sade.strings :as ss]
             [sade.util :refer [future*] :as util]
             [sade.core :refer :all]))
 
@@ -175,7 +175,7 @@
         (str street ", " fi)))
     (fn [feature]
       (let [{street :street number :number {fi :fi sv :sv} :name} (feature-to-address feature)
-            municipality-name (if (starts-with-i fi city) fi sv)]
+            municipality-name (if (ss/starts-with-i fi city) fi sv)]
         (str street " " number ", " municipality-name)))))
 
 (defn feature-to-position [feature]
@@ -318,14 +318,11 @@
   (let [host (env/value :geoserver :host) ; local IP from Chef environment
         path (env/value :geoserver :wms :path)]
     (assert (and host path))
-    (:body (http/get (str host path)
-             {:query-params {"version" "1.1.1"
-                             "request" "GetCapabilities"}
-              :headers {"accept-encoding" (get-in request [:headers "accept-encoding"])}}))))
+    (:body (http/get (str host path) {:query-params {"version" "1.1.1", "request" "GetCapabilities"}}))))
 
 (defn capabilities-to-layers [capabilities]
   (when capabilities
-    (xml-> (->features capabilities startparse-sax-non-validating) :Capability :Layer :Layer)))
+    (xml-> (->features (s/trim capabilities) startparse-sax-non-validating "UTF-8") :Capability :Layer :Layer)))
 
 (defn layer-to-name [layer]
   (first (xml-> layer :Name text)))
@@ -450,7 +447,7 @@
                   :basic-auth [username password]
                   :as :stream}))
       "plandocument" (let [id (get-in request [:params :id])]
-                       (assert (numeric? id))
+                       (assert (ss/numeric? id))
                        (http/get (str "http://194.28.3.37/maarays/" id "x.pdf")
                          {:query-params (:params request)
                           :headers {"accept-encoding" (get-in request [:headers "accept-encoding"])}
