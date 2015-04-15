@@ -39,6 +39,7 @@
   {:id              (mongo/create-id)
    :kuntalupatunnus (:AsianTunnus AsianPaatos)
    :timestamp (core/now)
+   :source    "ah"
    :paatokset [{:paatostunnus (:PaatoksenTunnus AsianPaatos)
                 :paivamaarat  {:anto (cr/to-timestamp (:PaatoksenPvm AsianPaatos))}
                 :poytakirjat  [{:paatoksentekija (:PaatoksenTekija AsianPaatos)
@@ -101,7 +102,8 @@
           (let [new-verdict   (build-verdict parsed-xml)
                 command       (action/application->command application)
                 poytakirja-id (get-in new-verdict [:paatokset 0 :poytakirjat 0 :id])
-                update-clause {$push {:verdicts new-verdict}}] ; TODO: Should update modified? can you use $push then?
+                update-clause {$push {:verdicts new-verdict}
+                               $set  {:modified (core/now)}}]
 
             (action/update-application command update-clause)
             (doseq [attachment attachments]
