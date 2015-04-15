@@ -4,6 +4,7 @@
             [midje.sweet :refer :all]
             [lupapalvelu.wfs :as wfs]
             [lupapalvelu.mongo :as mongo]
+            [sade.core :refer [now]]
             [sade.http :as http]
             [sade.env :as env]
             [cheshire.core :as json]))
@@ -221,7 +222,7 @@
 
 (fact "WMS capabilites"
   (http/get (str (server-address) "/proxy/wmscap")
-    {:query-params {:v "428"}
+    {:query-params {:v (str (now))}
      :throw-exceptions false}) => http200?)
 
 (fact "General plan documents"
