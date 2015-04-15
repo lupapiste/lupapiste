@@ -5038,6 +5038,25 @@ td.comment-text {
   width: 200px;
 }
 
+/* line 243, ../sass/views/_attachment.scss */
+.tos-metadata-content {
+  margin-top: 12px;
+}
+/* line 246, ../sass/views/_attachment.scss */
+.tos-metadata-content .subtable {
+  margin: 0;
+}
+/* line 248, ../sass/views/_attachment.scss */
+.tos-metadata-content .subtable tr {
+  background: transparent;
+  border: none;
+}
+/* line 252, ../sass/views/_attachment.scss */
+.tos-metadata-content .subtable th, .tos-metadata-content .subtable td {
+  background: transparent;
+  padding: 0;
+}
+
 /* line 2, ../sass/views/_statement.scss */
 #statement h1 {
   width: 70%;

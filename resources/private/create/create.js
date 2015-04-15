@@ -445,6 +445,7 @@
       }
 
       ajax.command("create-application-from-previous-permit", {
+        lang: loc.getCurrentLanguage(),
         operation: self.operation(),
         y: self.y(),
         x: self.x(),

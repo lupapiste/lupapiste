@@ -4,20 +4,21 @@
             [lupapalvelu.tiedonohjaus :as t]
             [lupapalvelu.organization :as o]
             [lupapalvelu.organization-api :as oa]
-            [monger.operators :refer :all]))
+            [monger.operators :refer :all]
+            [lupapalvelu.action :as action]))
 
 (defquery available-tos-functions
   {:user-roles       #{:anonymous}
    :parameters       [organizationId]
    :input-validators [(partial non-blank-parameters [:organizationId])]}
-  (let [functions (t/get-functions-from-toj organizationId)]
+  (let [functions (t/available-tos-functions organizationId)]
     (ok :functions functions)))
 
 (defn- store-function-code [operation function-code user]
   (let [orgId (oa/authority-admins-organization-id user)
         organization (o/get-organization orgId)
         operation-valid? (some #{operation} (:selected-operations organization))
-        code-valid? (some #{function-code} (map :code (t/get-functions-from-toj orgId)))]
+        code-valid? (some #{function-code} (map :code (t/available-tos-functions orgId)))]
     (if (and operation-valid? code-valid?)
       (do (o/update-organization orgId {$set {(str "operations-tos-functions." operation) function-code}})
           (ok))
@@ -29,3 +30,16 @@
    :input-validators [(partial non-blank-parameters [:functionCode :operation])]}
   [{user :user}]
   (store-function-code operation functionCode user))
+
+(defcommand set-tos-function-for-application
+  {:parameters [:id functionCode]
+   :user-roles #{:authority}
+   :states     (action/all-states-but [:closed :canceled])}
+  [{:keys [application created] :as command}]
+  (let [orgId (:organization application)
+        code-valid? (some #{functionCode} (map :code (t/available-tos-functions orgId)))]
+    (if code-valid?
+      (action/update-application command
+                                 {$set {:modified created
+                                        :tosFunction functionCode}})
+      (fail "Invalid TOS function code"))))

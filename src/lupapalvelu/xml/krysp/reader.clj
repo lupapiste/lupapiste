@@ -532,7 +532,9 @@
 ;                <gml:coordinates>23528933.213,6699629.937</gml:coordinates>
 ;              </gml:Point>
 ;            </yht:pistesijainti>
-            ]
+
+            osapuolet (map cr/all-of (select asia [:osapuolettieto :Osapuolet :osapuolitieto :Osapuoli]))
+            hakijat (filter #(= "hakija" (:VRKrooliKoodi %)) osapuolet)]
 
         (merge
           {:id (->lp-tunnus asia)
@@ -540,6 +542,7 @@
            :municipality kuntakoodi
            :rakennusvalvontaasianKuvaus (:rakennusvalvontaasianKuvaus asianTiedot)
            :vahainenPoikkeaminen (:vahainenPoikkeaminen asianTiedot)
+           :hakijat hakijat
 ;           :viitelupatiedot viitelupatiedot
 ;           :kasittelynTilatiedot kasittelynTilatiedot
 ;           :viimeisin-tila viimeisin-tila
