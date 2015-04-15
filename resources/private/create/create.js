@@ -20,6 +20,7 @@
 
 
     self.goPhase2 = function() {
+      hub.send("track-click", {category:"Create", label:"map", event:"mapContinue"});
       window.location.hash = "!/create-part-2";
       tree.reset(_.map(self.operations(), operations2tree));
       window.scrollTo(0, 0);
@@ -177,6 +178,7 @@
     // Called when user clicks on map:
 
     self.click = function(x, y) {
+      hub.send("track-click", {category:"Create", label:"map", event:"mapClick"});
       self
         .setXY(x, y)
         .addressData(null)
@@ -190,6 +192,7 @@
     // Search activation:
 
     self.searchNow = function() {
+      hub.send("track-click", {category:"Create", label:"map", event:"searchLocation"});
       self
         .resetXY()
         .addressData(null)
@@ -370,16 +373,19 @@
     self.create = function(infoRequest) {
       if (infoRequest) {
         if (self.inforequestsDisabled()) {
+          hub.send("track-click", {category:"Create", label:"tree", event:"infoRequestDisabled'"});
           LUPAPISTE.ModalDialog.showDynamicOk(
               loc("new-applications-or-inforequests-disabled.dialog.title"),
               loc("new-applications-or-inforequests-disabled.inforequests-disabled"));
           return;
         }
+        hub.send("track-click", {category:"Create", label:"tree", event:"newInfoRequest'"});
         LUPAPISTE.ModalDialog.showDynamicOk(loc("create.prompt.title"), loc("create.prompt.text"));
       } else if (self.newApplicationsDisabled()) {
         LUPAPISTE.ModalDialog.showDynamicOk(
             loc("new-applications-or-inforequests-disabled.dialog.title"),
             loc("new-applications-or-inforequests-disabled.new-applications-disabled"));
+        hub.send("track-click", {category:"Create", label:"tree", event:"newApplicationsDisabled"});
         return;
       }
 
@@ -405,7 +411,7 @@
         window.location.hash = (infoRequest ? "!/inforequest/" : "!/application/") + data.id;
       })
       .call();
-
+      hub.send("track-click", {category:"Create", label:"tree", event:"newApplication"});
     };
     self.createApplication = self.create.bind(self, false);
     self.createInfoRequest = self.create.bind(self, true);
@@ -439,6 +445,7 @@
       }
 
       ajax.command("create-application-from-previous-permit", {
+        lang: loc.getCurrentLanguage(),
         operation: self.operation(),
         y: self.y(),
         x: self.x(),

@@ -1,5 +1,5 @@
 (ns lupapalvelu.wfs
-  (:require [taoensso.timbre :as timbre :refer [trace debug info infof warn errorf fatal]]
+  (:require [taoensso.timbre :as timbre :refer [trace debug info infof warn error errorf fatal]]
             [sade.http :as http]
             [clojure.string :as s]
             [clojure.xml :as xml]
@@ -7,7 +7,7 @@
             [clojure.data.zip.xml :refer [xml-> text attr=]]
             [sade.env :as env]
             [sade.xml]
-            [sade.strings :refer [starts-with-i numeric?]]
+            [sade.strings :as ss]
             [sade.util :refer [future*] :as util]
             [sade.core :refer :all]))
 
@@ -175,7 +175,7 @@
         (str street ", " fi)))
     (fn [feature]
       (let [{street :street number :number {fi :fi sv :sv} :name} (feature-to-address feature)
-            municipality-name (if (starts-with-i fi city) fi sv)]
+            municipality-name (if (ss/starts-with-i fi city) fi sv)]
         (str street " " number ", " municipality-name)))))
 
 (defn feature-to-position [feature]
@@ -208,22 +208,19 @@
      :x x
      :y y})))
 
-(defn response->features [input-xml]
-  (when input-xml
-    (let [features (-> input-xml
-                     (s/replace "UTF-8" "ISO-8859-1")
-                     (.getBytes "ISO-8859-1")
-                     java.io.ByteArrayInputStream.
-                     (xml/parse sade.xml/startparse-sax-no-doctype)
-                     zip/xml-zip)]
-      (xml-> features :gml:featureMember))))
+(defn- ->features [s parse-fn & [encoding]]
+  (when s
+    (-> (if encoding (.getBytes s encoding) (.getBytes s))
+      java.io.ByteArrayInputStream.
+      (xml/parse parse-fn)
+      zip/xml-zip)))
 
 ;;
 ;; Executing HTTP calls to Maanmittauslaitos:
 ;;
 
 (def- http-method {:post [http/post :body]
-                            :get  [http/get  :query-params]})
+                   :get  [http/get  :query-params]})
 
 (defn- exec-http [http-fn url request]
   (try
@@ -246,7 +243,10 @@
       :timeout (do (errorf "wfs timeout: url=%s" url) nil)
       :error   (do (errorf "wfs status %s: url=%s" data url) nil)
       :failure (do (errorf data "wfs failure: url=%s" url) nil)
-      :ok      (response->features data))))
+      :ok      (let [features (-> data
+                                (s/replace "UTF-8" "ISO-8859-1")
+                                (->features sade.xml/startparse-sax-no-doctype "ISO-8859-1"))]
+                 (xml-> features :gml:featureMember)))))
 
 (defn post [url q]
   (exec :post url q))
@@ -318,18 +318,11 @@
   (let [host (env/value :geoserver :host) ; local IP from Chef environment
         path (env/value :geoserver :wms :path)]
     (assert (and host path))
-    (:body (http/get (str host path)
-             {:query-params {"version" "1.1.1"
-                             "request" "GetCapabilities"}
-              :headers {"accept-encoding" (get-in request [:headers "accept-encoding"])}}))))
+    (:body (http/get (str host path) {:query-params {"version" "1.1.1", "request" "GetCapabilities"}}))))
 
 (defn capabilities-to-layers [capabilities]
   (when capabilities
-    (let [caps (zip/xml-zip
-                 (xml/parse
-                   (java.io.ByteArrayInputStream. (.getBytes capabilities))
-                   startparse-sax-non-validating))]
-      (xml-> caps :Capability :Layer :Layer))))
+    (xml-> (->features (s/trim capabilities) startparse-sax-non-validating "UTF-8") :Capability :Layer :Layer)))
 
 (defn layer-to-name [layer]
   (first (xml-> layer :Name text)))
@@ -364,11 +357,7 @@
 ;;; Mikkeli is special because it was done first and they use Bentley WMS
 (defn gfi-to-features-mikkeli [gfi _]
   (when gfi
-    (let [info (zip/xml-zip
-                 (xml/parse
-                   (java.io.ByteArrayInputStream. (.getBytes gfi))
-                   startparse-sax-non-validating))]
-      (xml-> info :FeatureKeysInLevel :FeatureInfo :FeatureKey))))
+    (xml-> (->features gfi startparse-sax-non-validating) :FeatureKeysInLevel :FeatureInfo :FeatureKey)))
 
 (defn feature-to-feature-info-mikkeli  [feature]
   (when feature
@@ -381,11 +370,7 @@
 
 (defn gfi-to-features-sito [gfi municipality]
   (when gfi
-    (let [info (zip/xml-zip
-                 (xml/parse
-                   (java.io.ByteArrayInputStream. (.getBytes gfi))
-                   startparse-sax-non-validating))]
-      (xml-> info :gml:featureMember (keyword (str "lupapiste:" municipality "_asemakaavaindeksi"))))))
+    (xml-> (->features gfi startparse-sax-non-validating) :gml:featureMember (keyword (str "lupapiste:" municipality "_asemakaavaindeksi")))))
 
 (defn feature-to-feature-info-sito  [feature]
   (when feature
@@ -418,10 +403,7 @@
 
 (defn gfi-to-general-plan-features [gfi]
   (when gfi
-    (let [info (zip/xml-zip
-                 (xml/parse
-                   (java.io.ByteArrayInputStream. (.getBytes gfi "UTF-8"))
-                   startparse-sax-non-validating))]
+    (let [info (->features gfi startparse-sax-non-validating "UTF-8")]
       (clojure.set/union
         (xml-> info :gml:featureMember :lupapiste:yleiskaavaindeksi)
         (xml-> info :gml:featureMember :lupapiste:yleiskaavaindeksi_poikkeavat)))))
@@ -465,7 +447,7 @@
                   :basic-auth [username password]
                   :as :stream}))
       "plandocument" (let [id (get-in request [:params :id])]
-                       (assert (numeric? id))
+                       (assert (ss/numeric? id))
                        (http/get (str "http://194.28.3.37/maarays/" id "x.pdf")
                          {:query-params (:params request)
                           :headers {"accept-encoding" (get-in request [:headers "accept-encoding"])}
