@@ -14,7 +14,8 @@
             [lupapalvelu.application :as a]
             [lupapalvelu.application-meta-fields :as app-meta-fields]
             [lupapalvelu.operations :as op]
-            [sade.env :as env]))
+            [sade.env :as env]
+            [sade.excel-reader :as er]))
 
 (defn drop-schema-data [document]
   (let [schema-info (-> document :schema :info (assoc :version 1))]
@@ -550,7 +551,7 @@
           (mongo/update-by-id collection (:id application) {$set {:documents new-documents}}))))))
 
 (defmigration tutkinto-mapping
-  (let [mapping (sade.excel-reader/read-map "tutkinto-mapping.xlsx")]
+  (let [mapping (er/read-map "tutkinto-mapping.xlsx")]
     (doseq [collection [:applications :submitted-applications]
            application (mongo/select collection {"documents.data.patevyys.koulutus.value" {$exists true}} {:documents 1})]
      (let [id (:id application)

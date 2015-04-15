@@ -144,7 +144,7 @@
     (fact "Mikko sees the application" (query mikko :application :id application-id) => ok?)
     (fact "Sonja sees the application" (query sonja :application :id application-id) => ok?)
     (fact "Sonja can cancel Mikko's application"
-      (command sonja :cancel-application-authority :id application-id :text nil) => ok?)
+      (command sonja :cancel-application-authority :id application-id :text nil :lang "fi") => ok?)
     (fact "Sonja sees the canceled application" (query sonja :application :id application-id) => ok?)
     (let [email (last-email)]
       (:to email) => (contains (email-for-key mikko))
@@ -156,14 +156,14 @@
     (let [application-id  (create-app-id sonja :municipality sonja-muni)]
       (fact "Sonja sees the application" (query sonja :application :id application-id) => ok?)
       (fact "Sonja can cancel the application"
-        (let [r (command sonja :cancel-application-authority :id application-id :text nil)]
+        (let [r (command sonja :cancel-application-authority :id application-id :text nil :lang "fi")]
           r => ok?
           (fact "No comments exists from cancel" (-> r :application :comments count) => 0)))))
 
   (fact "Authority can cancel with reason text, which is added as comment"
     (let [application (create-and-submit-application mikko :municipality sonja-muni :address "Peruutustie 23")
           cancel-reason "Testihakemus"]
-      (command sonja :cancel-application-authority :id (:id application) :text cancel-reason) => ok?
+      (command sonja :cancel-application-authority :id (:id application) :text cancel-reason :lang "fi") => ok?
 
       (fact "Mikko sees cancel reason text in comments"
         (let [application (:application (query mikko :application :id (:id application)))]

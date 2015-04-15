@@ -65,17 +65,17 @@ var comments = (function() {
     };
 
     self.markAnswered = function() {
-      ga('send', 'event', 'Conversation', 'markAnswered');
+      hub.send("track-click", {category:"Conversation", event:"markAnswered"});
       return doAddComment(true, false);
     };
 
     self.submit = function() {
-      ga('send', 'event', 'Conversation', 'submit');
+      hub.send("track-click", {category:"Conversation", event:"submit"});
       return doAddComment(false, false);
     };
 
     self.stateOpenApplication = function() {
-      ga('send', 'event', 'Conversation', 'stateOpenApplication');
+      hub.send("track-click", {category:"Conversation", event:"stateOpenApplication"});
       return doAddComment(false, true);
     };
 

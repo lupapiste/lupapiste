@@ -1,6 +1,6 @@
 (ns lupapalvelu.application
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn error fatal]]
-            [clojure.string :refer [join split]]
+            [clojure.string :as s]
             [clojure.walk :refer [keywordize-keys]]
             [clojure.zip :as zip]
             [clj-time.core :refer [year]]
@@ -22,6 +22,7 @@
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
+            [lupapalvelu.authorization-api :as authorization]
             [lupapalvelu.user :as user]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.operations :as operations]
@@ -34,7 +35,8 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.company :as c]
-            [lupapalvelu.comment :as comment]))
+            [lupapalvelu.comment :as comment]
+            [lupapalvelu.tiedonohjaus :as tos]))
 
 ;; Notifications
 
@@ -49,7 +51,7 @@
 
 (defn property-id-parameters [params command]
   (when-let [invalid (seq (filter #(not (property-id? (get-in command [:data %]))) params))]
-    (info "invalid property id parameters:" (join ", " invalid))
+    (info "invalid property id parameters:" (s/join ", " invalid))
     (fail :error.invalid-property-id :parameters (vec invalid))))
 
 (defn- validate-x [{{:keys [x]} :data}]
@@ -73,27 +75,6 @@
 
 
 ;; Helpers
-
-(defn do-set-user-to-document [application document user-id path current-user timestamp]
-  {:pre [document]}
-  (when-not (ss/blank? user-id)
-    (let [path-arr     (if-not (ss/blank? path) (split path #"\.") [])
-          schema       (schemas/get-schema (:schema-info document))
-          subject      (user/get-user-by-id user-id)
-          with-hetu    (model/has-hetu? (:body schema) path-arr)
-          person       (tools/unwrapped (model/->henkilo subject :with-hetu with-hetu :with-empty-defaults true))
-          model        (if (seq path-arr)
-                         (assoc-in {} (map keyword path-arr) person)
-                         person)
-          updates      (tools/path-vals model)
-          ; Path should exist in schema!
-          updates      (filter (fn [[update-path _]] (model/find-by-name (:body schema) update-path)) updates)]
-      (when-not schema (fail! :error.schema-not-found))
-      (when-not subject (fail! :error.user-not-found))
-      (when-not (and (domain/has-auth? application user-id) (domain/no-pending-invites? application user-id))
-        (fail! :error.application-does-not-have-given-auth))
-      (debugf "merging user %s with best effort into %s %s" model (get-in document [:schema-info :name]) (:id document))
-      (commands/persist-model-updates application "documents" document updates timestamp)))) ; TODO support for collection parameter
 
 (defn insert-application [application]
   (mongo/insert :applications (merge application (meta-fields/applicant-index application))))
@@ -334,7 +315,7 @@
    :states     (action/all-states-but [:info :sent :verdictGiven :constructionStarted :closed :canceled])}
   [{:keys [user created application] :as command}]
   (if-let [document (domain/get-document-by-id application documentId)]
-    (do-set-user-to-document application document userId path user created)
+    (commands/do-set-user-to-document application document userId path user created)
     (fail :error.document-not-found)))
 
 ;;
@@ -392,8 +373,8 @@
   (ok))
 
 (defcommand cancel-application-authority
-  {:parameters [id text]
-   :input-validators [(partial action/non-blank-parameters [:id])]
+  {:parameters [id text lang]
+   :input-validators [(partial action/non-blank-parameters [:id :lang])]
    :user-roles #{:authority}
    :notified   true
    :on-success (notify :application-state-change)
@@ -405,8 +386,8 @@
         (comment/comment-mongo-update
           (:state application)
           (str
-            (i18n/loc "application.canceled.text") ". "
-            (i18n/loc "application.canceled.reason") ": "
+            (i18n/localize lang "application.canceled.text") ". "
+            (i18n/localize lang "application.canceled.reason") ": "
             text)
           {:type "application"}
           (-> command :user :role)
@@ -550,9 +531,10 @@
     (ok :sameLocation same-location-irs :sameOperation same-op-irs :others others)
     ))
 
-(defn- make-attachments [created operation organization applicationState & {:keys [target]}]
+(defn- make-attachments [created operation organization applicationState tos-function & {:keys [target]}]
   (for [[type-group type-id] (organization/get-organization-attachments-for-operation organization operation)]
-    (attachment/make-attachment created target true false false applicationState operation {:type-group type-group :type-id type-id})))
+    (let [metadata (tos/metadata-for-document (:id organization) tos-function {:type-group type-group :type-id type-id})]
+      (attachment/make-attachment created target true false false applicationState operation {:type-group type-group :type-id type-id} metadata))))
 
 (defn- schema-data-to-body [schema-data application]
   (keywordize-keys
@@ -628,6 +610,7 @@
                       (user/authority? user) :open
                       :else                  :draft)
         comment-target (if open-inforequest? [:applicant :authority :oirAuthority] [:applicant :authority])
+        tos-function (get-in organization [:operations-tos-functions (keyword operation)])
         application (merge domain/application-skeleton
                       {:id                  id
                        :created             created
@@ -649,9 +632,10 @@
                                               [owner company]
                                               [owner])
                        :comments            (map #(domain/->comment % {:type "application"} (:role user) user nil created comment-target) messages)
-                       :schema-version      (schemas/get-latest-schema-version)})]
+                       :schema-version      (schemas/get-latest-schema-version)
+                       :tosFunction         tos-function})]
     (merge application (when-not info-request?
-                         {:attachments (make-attachments created op organization state)
+                         {:attachments (make-attachments created op organization state tos-function)
                           :documents   (make-documents user created op application manual-schema-datas)}))))
 
 (defn do-create-application
@@ -706,11 +690,26 @@
 ;; Application from previous permit
 ;;
 
-(defn- do-create-application-from-previous-permit [{:keys [user created] :as command} xml app-info location-info]
-  (let [{:keys [rakennusvalvontaasianKuvaus vahainenPoikkeaminen]} app-info
-        ;;
-        ;; TODO: Add data manually for the Hakija document when info for that is receiced in the verdict xml message
-        ;;
+(defn- invite-applicants [{:keys [lang user created application] :as command} emails]
+  (when (pos? (count emails))
+    (let [invite-text (i18n/localize lang "invite.default-text")]
+      (dorun (->> emails
+              (map-indexed
+                (fn [i applicant-email]
+                  (let [hakija-doc-id (if (zero? i)
+                                        (:id (domain/get-document-by-name application "hakija"))
+                                        (:doc (commands/do-create-doc (assoc-in command [:data :schemaName] "hakija"))))]
+                    (authorization/send-invite! (update-in command [:data] merge
+                                                  {:email applicant-email
+                                                   :text invite-text
+                                                   :documentName nil
+                                                   :documentId nil
+                                                   :path nil
+                                                   :role "writer"}))
+                    (info "Prev permit application creation, invited " applicant-email " to created app " (get-in command [:data :id]))))))))))
+
+(defn- do-create-application-from-previous-permit [{:keys [lang user created] :as command} xml app-info location-info]
+  (let [{:keys [rakennusvalvontaasianKuvaus vahainenPoikkeaminen hakijat]} app-info
         manual-schema-datas {"hankkeen-kuvaus" (filter seq
                                                  (conj []
                                                    (when-not (ss/blank? rakennusvalvontaasianKuvaus) [["kuvaus"] rakennusvalvontaasianKuvaus])
@@ -729,12 +728,20 @@
     ;; The application has to be inserted first, because it is assumed to be in the database when checking for verdicts (and their attachments).
     (insert-application created-application)
     (verdict-api/find-verdicts-from-xml command xml)  ;; Get verdicts for the application
+
+    ;; NOTE: at the moment only supporting henkilo-type applicants
+    (let [emails (->> hakijat
+                   (filter #(get-in % [:henkilo :sahkopostiosoite]))
+                   (map #(get-in % [:henkilo :sahkopostiosoite]))
+                   set)]
+      (invite-applicants command emails))
+
     (:id created-application)))
 
 (defcommand create-application-from-previous-permit
-  {:parameters [:operation :x :y :address :propertyId :organizationId :kuntalupatunnus]
+  {:parameters [:lang :operation :x :y :address :propertyId :organizationId :kuntalupatunnus]
    :user-roles #{:authority}
-   :input-validators [(partial action/non-blank-parameters [:operation :organizationId])  ;; no :address included
+   :input-validators [(partial action/non-blank-parameters [:lang :operation :organizationId])  ;; no :address included
                       ;; the propertyId parameter can be nil
                       (fn [{{propertyId :propertyId} :data :as command}]
                         (when (not (ss/blank? propertyId))
@@ -810,7 +817,7 @@
         organization (organization/get-organization (:organization application))]
     (update-application command {$push {:operations op
                                         :documents {$each new-docs}
-                                        :attachments {$each (make-attachments created op organization (:state application))}}
+                                        :attachments {$each (make-attachments created op organization (:state application) (:tosFunction application))}}
                                  $set {:modified created}})))
 
 (defcommand update-op-description
@@ -1082,7 +1089,7 @@
              :convertedToApplication created
              :documents (make-documents user created op application)
              :modified created}
-       $push {:attachments {$each (make-attachments created op organization (:state application))}}})
+       $push {:attachments {$each (make-attachments created op organization (:state application) (:tosFunction application))}}})
     (try (autofill-rakennuspaikka application created)
       (catch Exception e (error e "KTJ data was not updated")))))
 
