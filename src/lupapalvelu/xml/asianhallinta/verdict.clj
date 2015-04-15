@@ -45,7 +45,7 @@
                                 :paatospvm       (cr/to-timestamp (:PaatoksenPvm AsianPaatos))
                                 :pykala          (:Pykala AsianPaatos)
                                 :paatoskoodi     (:PaatosKoodi AsianPaatos)
-                                :poytakirjaId    (mongo/create-id)}]}]})
+                                :id              (mongo/create-id)}]}]})
 
 (defn- insert-attachment! [application attachment unzipped-path verdict-id poytakirja-id]
   (let [filename      (fs/base-name (:LinkkiLiitteeseen attachment))
@@ -100,7 +100,7 @@
           ; -> update-application
           (let [new-verdict   (build-verdict parsed-xml)
                 command       (action/application->command application)
-                poytakirja-id (get-in new-verdict [:paatokset 0 :poytakirjat 0 :poytakirjaId])
+                poytakirja-id (get-in new-verdict [:paatokset 0 :poytakirjat 0 :id])
                 update-clause {$push {:verdicts new-verdict}}] ; TODO: Should update modified? can you use $push then?
 
             (action/update-application command update-clause)

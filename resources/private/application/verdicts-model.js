@@ -23,7 +23,17 @@ LUPAPISTE.VerdictsModel = function() {
         var poytakirjat = _.map(paatos.poytakirjat || [], function(pk) {
           var myAttachments = _.filter(application.attachments || [], function(attachment) {
             var target = attachment.target;
-            return target && target.type === "verdict" && (target.urlHash ? target.urlHash === pk.urlHash : target.id === verdict.id);
+            var idMatch = false;
+            if (target && target.type === "verdict") {
+              if (target.poytakirjaId) {
+                idMatch = target.poytakirjaId === pk.id;
+              } else if (target.urlHash) {
+                idMatch = target.urlHash === pk.urlHash;
+              } else {
+                idMatch = target.id === verdict.id;
+              };
+            }
+            return idMatch;
           }) || [];
           pk.attachments = myAttachments;
           return pk;

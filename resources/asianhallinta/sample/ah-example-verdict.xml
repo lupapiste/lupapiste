@@ -13,5 +13,10 @@
         <ah:Tyyppi>Liitteen tyyppi</ah:Tyyppi>
         <ah:LinkkiLiitteeseen>sftp://foo/bar/baz/ah-example-attachment.pdf</ah:LinkkiLiitteeseen>
     </ah:Liite>
+    <ah:Liite>
+        <ah:Kuvaus>Liitteen 2 kuvaus</ah:Kuvaus>
+        <ah:Tyyppi>Liitteen 2 tyyppi</ah:Tyyppi>
+        <ah:LinkkiLiitteeseen>sftp://foo/bar/baz/ah-example-attachment2.txt</ah:LinkkiLiitteeseen>
+    </ah:Liite>
   </ah:Liitteet>
 </ah:AsianPaatos>
