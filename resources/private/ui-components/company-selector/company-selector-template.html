@@ -9,7 +9,9 @@
                 class="form-input combobox"
                 data-bind="options: companies,
                            optionsText: 'displayName',
+                           optionsValue: 'id',
                            optionsCaption: loc('choose'),
+                           optionsAfterRender: setOptionDisable,
                            value: selected">
         </select>
       </div>

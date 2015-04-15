@@ -1,17 +1,17 @@
 LUPAPISTE.CompanySelectorModel = function(params) {
   "use strict";
 
+  var self = this;
+
+  self.selected = ko.observable();
+
   function mapCompany(company) {
     company.displayName = ko.pureComputed(function() {
       return ko.unwrap(company.name) + " (" + ko.unwrap(company.y) + ")";
     });
+    company.disable = ko.observable(_.has(company, "invite"));
     return company;
   }
-
-  var self = this;
-
-  self.pending = ko.observable();
-  self.selected = ko.observable();
 
   self.companies = ko.pureComputed(function() {
     return _(lupapisteApp.models.application.roles())
@@ -20,5 +20,16 @@ LUPAPISTE.CompanySelectorModel = function(params) {
       })
       .map(mapCompany)
       .value();
+  });
+
+  self.setOptionDisable = function(option, item) {
+    if (!item) {
+      return;
+    }
+    ko.applyBindingsToNode(option, {disable: item.disable}, item);
+  };
+
+  self.selected.subscribe(function(id) {
+    console.log("selected", id);
   });
 };
