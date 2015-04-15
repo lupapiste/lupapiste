@@ -1106,7 +1106,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       id: self.appId,
       documentId: self.docId,
       documentName: self.schemaName,
-      userId: currentUser.id(),
       path: myNs,
       collection: self.getCollection()
     };

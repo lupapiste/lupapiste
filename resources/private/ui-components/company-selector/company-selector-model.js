@@ -30,6 +30,14 @@ LUPAPISTE.CompanySelectorModel = function(params) {
   };
 
   self.selected.subscribe(function(id) {
-    console.log("selected", id);
+    ajax.command("set-company-to-document", _.assign(params, {companyId: id}))
+    .error(function(r) {
+      // TODO save company selection to document
+      console.log("error", r);
+    })
+    .success(function(r) {
+      console.log("success", r);
+    })
+    .call();
   });
 };

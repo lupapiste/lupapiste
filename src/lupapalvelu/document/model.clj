@@ -483,3 +483,9 @@
       util/strip-empty-maps
       tools/wrapped)))
 
+(defn ->company [{:keys [name y address1 zip po]}]
+  (-> {:liikeJaYhteisoTunnus y
+       :yritysnimi name
+       :osoite {:katu address1
+                :postinumero zip
+                :postitoimipaikannimi po}}))

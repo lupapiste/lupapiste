@@ -95,6 +95,25 @@
       (debugf "merging user %s with best effort into %s %s" model (get-in document [:schema-info :name]) (:id document))
       (commands/persist-model-updates application "documents" document updates timestamp)))) ; TODO support for collection parameter
 
+(defn do-set-company-to-document [application document company-id path timestamp]
+  {:pre [document]}
+  (when-not (ss/blank? company-id)
+    (let [path-arr (if-not (ss/blank? path) (split path #"/.") [])
+          schema (schemas/get-schema (:schema-info document))
+          subject (c/find-company-by-id company-id)
+          company (tools/unwrapped (model/->company subject))
+          model (if (seq path-arr)
+                  (assoc-in {} (map keyword path-arr) company)
+                  company)
+          updates (tools/path-vals model)]
+      (when-not schema (fail! :error.schema-not-found))
+      (when-not company (fail! :error.company-not-found))
+      (when-not (and (domain/has-auth? application company-id) (domain/no-pending-invites? application company-id))
+        (fail! :error.application-does-not-have-given-auth))
+      (debugf "merging company %s into %s %s" model (get-in document [:schema-info :name]) (:id document))
+      (>pprint updates)
+      (commands/persist-model-updates application "documents" document updates timestamp))))
+
 (defn insert-application [application]
   (mongo/insert :applications (merge application (meta-fields/applicant-index application))))
 
@@ -336,6 +355,15 @@
   (if-let [document (domain/get-document-by-id application documentId)]
     (do-set-user-to-document application document userId path user created)
     (fail :error.document-not-found)))
+
+(defcommand set-company-to-document
+  {:parameters [id documentId companyId path]
+   :user-roles #{:applicant :authority}
+   :states     (action/all-states-but [:info :sent :verdictGiven :constructionStarted :closed :canceled])}
+  [{:keys [user created application] :as command}]
+  (if-let [document (domain/get-document-by-id application documentId)]
+   (do-set-company-to-document application document companyId path created)
+   (fail :error.document-not-found)))
 
 ;;
 ;; Assign
@@ -1085,4 +1113,3 @@
        $push {:attachments {$each (make-attachments created op organization (:state application))}}})
     (try (autofill-rakennuspaikka application created)
       (catch Exception e (error e "KTJ data was not updated")))))
-
