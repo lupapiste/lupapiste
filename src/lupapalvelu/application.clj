@@ -313,9 +313,9 @@
   {:parameters [id documentId userId path]
    :user-roles #{:applicant :authority}
    :states     (action/all-states-but [:info :sent :verdictGiven :constructionStarted :closed :canceled])}
-  [{:keys [user created application] :as command}]
+  [{:keys [created application] :as command}]
   (if-let [document (domain/get-document-by-id application documentId)]
-    (commands/do-set-user-to-document application document userId path user created)
+    (commands/do-set-user-to-document application document userId path created)
     (fail :error.document-not-found)))
 
 ;;
