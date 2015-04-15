@@ -128,6 +128,13 @@
                 (domain/no-pending-invites? application v))
       [:err "application-does-not-have-given-auth"])))
 
+(defmethod validate-field :companySelector [application elem v]
+  (when-not (ss/blank? v)
+    (when-not (and
+                (domain/has-auth? application v)
+                (domain/no-pending-invites? application v))
+      [:err "application-does-not-have-given-auth"])))
+
 (defmethod validate-field :fillMyInfoButton [_ _ _] nil)
 (defmethod validate-field :foremanHistory [_ _ _] nil)
 (defmethod validate-field :foremanOtherApplications [_ _ _] nil)
