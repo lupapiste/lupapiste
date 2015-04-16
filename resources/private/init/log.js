@@ -22,7 +22,7 @@
 
     var page = location.pathname + location.hash;
     if (level >= serverLimit && typeof ajax !== "undefined" && !filtered(page, message)) {
-      ajax.command("frontend-error", {page: page, message: message}).fail(nop).error(nop).call();
+      ajax.command("frontend-error", {page: page, message: message, build: LUPAPISTE.config.build}).fail(nop).error(nop).call();
     }
   };
 

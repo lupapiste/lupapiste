@@ -82,7 +82,7 @@
 (defn- ua-get-toimenpide [operation lang]
   (util/strip-nils
     {:ToimenpideTunnus (:name operation)
-     :ToimenpideTeksti (i18n/with-lang lang (i18n/loc "operations" (:name operation)))}))
+     :ToimenpideTeksti (i18n/localize lang "operations" (:name operation))}))
 
 (defn- ua-get-toimenpiteet [{:keys [operations]} lang]
   (when (seq operations)

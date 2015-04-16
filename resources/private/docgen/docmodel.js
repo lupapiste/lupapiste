@@ -853,7 +853,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     ajax
       .command("get-building-info-from-wfs", { id: self.appId })
       .success(function (data) {
-        $.each(data.data, function (i, building) {
+        _.each(data.data, function (building) {
           var name = building.buildingId;
           var usage = building.usage;
           var created = building.created;
