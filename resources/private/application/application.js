@@ -61,8 +61,6 @@
   var permitSubtypes = ko.observableArray([]);
   var tosFunctions = ko.observableArray([]);
 
-  var inviteCompanyModel = new LUPAPISTE.InviteCompanyModel(applicationModel.id);
-
   var accordian = function(data, event) { accordion.toggle(event); };
 
   var AuthorityInfo = function(id, firstName, lastName) {
@@ -410,7 +408,6 @@
       verdictAttachmentPrintsOrderModel: verdictAttachmentPrintsOrderModel,
       verdictAttachmentPrintsOrderHistoryModel: verdictAttachmentPrintsOrderHistoryModel,
       verdictModel: verdictModel,
-      openInviteCompany: inviteCompanyModel.open.bind(inviteCompanyModel),
       attachmentsTab: attachmentsTab,
       selectedTabName: selectedTabName,
       tosFunctions: tosFunctions
@@ -429,7 +426,6 @@
     $(verdictAttachmentPrintsOrderHistoryModel.dialogSelector).applyBindings({
       verdictAttachmentPrintsOrderHistoryModel: verdictAttachmentPrintsOrderHistoryModel
     });
-    $(inviteCompanyModel.selector).applyBindings(inviteCompanyModel);
     attachmentsTab.attachmentTemplatesModel.init();
   });
 
