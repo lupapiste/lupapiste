@@ -16,9 +16,7 @@
    :new-application-enabled false
    :open-inforequest false
    :open-inforequest-email ""
-   :opening nil
-   :caseManagement {:enabled false
-                    :version "1.1"}})
+   :opening nil})
 
 (defn- with-scope-defaults [org]
   (when (seq org)

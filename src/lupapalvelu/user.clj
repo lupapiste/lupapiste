@@ -29,11 +29,11 @@
   (when user
     (select-keys user [:id :username :firstName :lastName :role])))
 
-; Temporary mapping to generate orgAuth key from organizations.
+; Temporary mapping to generate orgAuthz key from organizations.
 ; TODO remove this after data model has been migrated
 (defn with-org-auth [{:keys [organizations role] :as user}]
   (if (#{:authority :authorityAdmin} (keyword role))
-    (assoc user :orgAuthz (map (fn [org-id] {:org org-id :role role}) organizations))
+    (assoc user :orgAuthz (reduce (fn [m org-id] (assoc m org-id #{role})) {} organizations))
     user))
 
 (defn session-summary
