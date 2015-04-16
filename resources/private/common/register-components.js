@@ -15,7 +15,9 @@ $(document).ready(function() {
     "neighbors-owners",
     "neighbors-edit",
     "company-selector",
-    "company-invite"
+    "company-invite",
+    "company-invite-dialog",
+    "modal-dialog-button-group"
   ];
 
   _.forEach(components, function(component) {

@@ -13,11 +13,11 @@
                             'max-height': dialogHeight() + 'px'},
                     css: extraClass">
       <div class="header">
-        <span class="title" data-bind="ltext: loc.title"></span>
+        <span class="title" data-bind="ltext: title"></span>
         <span class="close" data-bind="click: closeDialog"></span>
       </div>
       <div id="modal-dialog-content" class="content" data-bind="component: {name: component, params: componentParams}"></div>
-      <div class="footer">
+<!--       <div class="footer">
         <button class="btn btn-primary"
                 data-test-id="modal-dialog-submit-button"
                 data-bind="visible: submitFn, enable: submitEnabled,
@@ -27,7 +27,7 @@
           <span data-bind="ltext: 'cancel'"></span>
         </a>
       </div>
-    </div>
+ -->    </div>
     <!-- /ko -->
     </script>
   </section>

@@ -2489,14 +2489,14 @@ table.attachments-template-table td.attachment-version-info {
   right: 12px;
 }
 /* line 25, ../sass/partials/_modal.scss */
-#modal-dialog .dialog .footer {
+#modal-dialog .dialog .button-group {
   position: absolute;
   bottom: 12px;
   right: 12px;
   left: 12px;
 }
 /* line 30, ../sass/partials/_modal.scss */
-#modal-dialog .dialog .footer .cancel {
+#modal-dialog .dialog .button-group .cancel {
   float: right;
   margin-right: 12px;
 }

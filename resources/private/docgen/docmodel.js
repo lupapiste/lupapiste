@@ -1099,7 +1099,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
   }
 
   function buildCompanySelector(subSchema, model, path) {
-    console.log("buildCompanySelector", subSchema);
     var myNs = path.slice(0, path.length - 1).join(".");
 
     var params = {
