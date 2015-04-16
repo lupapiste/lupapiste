@@ -989,58 +989,34 @@
         <div id="application-metadata-tab" class="tab-content" >
           <h1 data-bind="ltext: 'attachment.tosMetadata'"></h1>
           <div class="tos-metadata-content" data-bind="with: application">
-            <table class="table table-striped" data-bind="foreach: {data: metadata, as: '_data' }">
+            <table class="table table-striped">
               <thead>
               <tr>
                 <th data-bind="ltext: 'attachment.tosMetadataKey'"></th>
                 <th data-bind="ltext: 'attachment.tosMetadataValue'"></th>
               </tr>
               </thead>
-              <!--<tbody data-bind="foreach: metadataList">-->
-              <!--<tr>-->
-                <!--<td data-bind="text: name"></td>-->
-                <!--<td>-->
-                  <!--<div data-bind="if: typeof(value) == 'object'">-->
-                    <!--<table class="subtable">-->
-                      <!--<thead>-->
-                      <!--<tr>-->
-                        <!--<th data-bind="ltext: 'attachment.tosMetadataKey'"></th>-->
-                        <!--<th data-bind="ltext: 'attachment.tosMetadataValue'"></th>-->
-                      <!--</tr>-->
-                      <!--</thead>-->
-                      <!--<tbody data-bind="foreach: value">-->
-                      <!--<tr>-->
-                        <!--<td data-bind="text: name"></td>-->
-                        <!--<td data-bind="text: value"></td>-->
-                      <!--</tr>-->
-                      <!--</tbody>-->
-                    <!--</table>-->
-                  <!--</div>-->
-                  <!--<span data-bind="if: typeof(value) != 'object'"><span data-bind="text: value"></span></span>-->
-                <!--</td>-->
-              <!--</tr>-->
-              <!--</tbody>-->
-              <tbody data-bind="foreach: {data: Object.keys(_data), as: '_key'}">
+              <tbody data-bind="foreach: metadataList">
               <tr>
-                <td data-bind="text: _key"></td>
+                <td data-bind="text: name"></td>
                 <td>
-                  <div data-bind="if: typeof(_data[_key]) == 'object'">
-                    <table class="subtable" data-bind="foreach: {data: _data[_key], as: '_subdata' }">
+                  <div data-bind="if: typeof(value) == 'object'">
+                    <table class="subtable">
                       <thead>
                       <tr>
                         <th data-bind="ltext: 'attachment.tosMetadataKey'"></th>
                         <th data-bind="ltext: 'attachment.tosMetadataValue'"></th>
                       </tr>
                       </thead>
-                      <tbody data-bind="foreach: {data: Object.keys(_subdata), as: '_subkey'}">
+                      <tbody data-bind="foreach: value">
                       <tr>
-                        <td data-bind="text: _subkey"></td>
-                        <td data-bind="text: _subdata[_subkey]"></td>
+                        <td data-bind="text: name"></td>
+                        <td data-bind="text: value"></td>
                       </tr>
                       </tbody>
                     </table>
                   </div>
-                  <span data-bind="if: typeof(_data[_key]) != 'object'"><span data-bind="text: _data[_key]"></span></span>
+                  <span data-bind="if: typeof(value) != 'object'"><span data-bind="text: value"></span></span>
                 </td>
               </tr>
               </tbody>

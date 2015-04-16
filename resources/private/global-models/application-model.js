@@ -59,20 +59,7 @@ LUPAPISTE.ApplicationModel = function() {
   self.statements = ko.observable([]);
   self.tasks = ko.observable([]);
   self.tosFunction = ko.observable();
-  self.metadata = ko.observable();
-
-  self.metadataList = ko.pureComputed(function() {
-    var data = ko.toJS(this) || {};
-    var list = _.map(data, function(value, key) {
-      if (typeof(value) === 'object') {
-        value = _.map(value, function(subvalue, subkey) {
-          return {name: subkey, value: subvalue};
-        });
-      }
-      return {name: key, value: value};
-    });
-    return _.sortBy(list, 'name');
-  }, self.metadata).extend({ notify: 'always' });
+  self.metadataList = ko.observableArray();
 
   self.taskGroups = ko.computed(function() {
     var tasks = ko.toJS(self.tasks) || [];

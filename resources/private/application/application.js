@@ -224,6 +224,15 @@
       var assigneeId = assignee ? assignee.id : null;
       applicationModel.assignee(assigneeId);
 
+      applicationModel.metadataList(_.map(app.metadata, function(value, key) {
+        if (typeof(value) === 'object') {
+          value = _.map(value, function(subvalue, subkey) {
+            return {name: subkey, value: subvalue};
+          });
+        }
+        return {name: key, value: value};
+      }));
+
       isInitializing = false;
       pageutil.hideAjaxWait();
 
