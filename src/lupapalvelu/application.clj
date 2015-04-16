@@ -113,7 +113,6 @@
       (when-not (and (domain/has-auth? application company-id) (domain/no-pending-invites? application company-id))
         (fail! :error.application-does-not-have-given-auth))
       (debugf "merging company %s into %s %s" model (get-in document [:schema-info :name]) (:id document))
-      (>pprint updates)
       (commands/persist-model-updates application "documents" document updates timestamp))))
 
 (defn insert-application [application]
