@@ -225,7 +225,7 @@
       applicationModel.assignee(assigneeId);
 
       applicationModel.metadataList(_.map(app.metadata, function(value, key) {
-        if (typeof(value) === 'object') {
+        if (_.isObject(value)) {
           value = _.map(value, function(subvalue, subkey) {
             return {name: subkey, value: subvalue};
           });
