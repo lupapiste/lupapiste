@@ -31,12 +31,8 @@ LUPAPISTE.CompanySelectorModel = function(params) {
 
   self.selected.subscribe(function(id) {
     ajax.command("set-company-to-document", _.assign(params, {companyId: id}))
-    .error(function(r) {
-      // TODO save company selection to document
-      console.log("error", r);
-    })
-    .success(function(r) {
-      console.log("success", r);
+    .success(function() {
+      repository.load(lupapisteApp.models.application.id());
     })
     .call();
   });
