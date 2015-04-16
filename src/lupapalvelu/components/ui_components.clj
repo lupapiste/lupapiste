@@ -66,7 +66,7 @@
 
    ;; Init can also be used as a standalone lib, see web.clj
    :init         {:depends [:underscore]
-                  :js [conf "hub.js" "log.js"]}
+                  :js [conf "hub.js" "log.js" ]}
 
    ;; Common components
 
@@ -86,7 +86,7 @@
 
    :common       {:depends [:init :jquery :jquery-upload :knockout :underscore :moment :i18n :selectm
                             :expanded-content :mockjax :open-layers]
-                  :js ["util.js" "event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js"
+                  :js ["register-components.js" "util.js" "event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js"
                        "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "features.js"
                        "statuses.js" "statusmodel.js" "authorization.js" "vetuma.js"]}
 
@@ -251,8 +251,7 @@
                         "attachments-multiselect/attachments-multiselect-model.js"
                         "export-attachments/export-attachments-model.js"
                         "neighbors/neighbors-owners-model.js"
-                        "neighbors/neighbors-edit-model.js"
-                        "register-components.js"]
+                        "neighbors/neighbors-edit-model.js"]
                    :html ["fill-info/fill-info-template.html"
                           "foreman-history/foreman-history-template.html"
                           "foreman-other-applications/foreman-other-applications-template.html"
