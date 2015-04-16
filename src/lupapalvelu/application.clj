@@ -309,15 +309,6 @@
   [{:keys [application user created] :as command}]
   (update-application command {$set (mark-indicators-seen-updates application user created)}))
 
-(defcommand set-user-to-document
-  {:parameters [id documentId userId path]
-   :user-roles #{:applicant :authority}
-   :states     (action/all-states-but [:info :sent :verdictGiven :constructionStarted :closed :canceled])}
-  [{:keys [created application] :as command}]
-  (if-let [document (domain/get-document-by-id application documentId)]
-    (commands/do-set-user-to-document application document userId path created)
-    (fail :error.document-not-found)))
-
 ;;
 ;; Assign
 ;;
