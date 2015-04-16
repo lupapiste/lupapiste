@@ -1110,7 +1110,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       collection: self.getCollection()
     };
 
-    return createComponent("company-selector", params);
+    var span = makeEntrySpan(subSchema, path.join("."));
+    span.appendChild(createComponent("company-selector", params));
+    $(span).addClass("companySelector");
+    return span;
   }
 
   function buildTableRow(subSchema, model, path, partOfChoice) {
