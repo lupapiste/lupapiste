@@ -237,6 +237,7 @@
    :integration-error {:js [ "integration-error.js"]
                        :html ["integration-error.html"]}
 
+   ; TODO maybe just find and add all ko components under ui-components automatically
    :ui-components {:depends [:common-html]
                    :js ["ui-components.js"
                         "fill-info/fill-info-model.js"
@@ -252,7 +253,8 @@
                         "export-attachments/export-attachments-model.js"
                         "neighbors/neighbors-owners-model.js"
                         "neighbors/neighbors-edit-model.js"
-                        "company-selector/company-selector-model.js"]
+                        "company-selector/company-selector-model.js"
+                        "company-invite/company-invite-model.js"]
                    :html ["fill-info/fill-info-template.html"
                           "foreman-history/foreman-history-template.html"
                           "foreman-other-applications/foreman-other-applications-template.html"
@@ -265,7 +267,8 @@
                           "export-attachments/export-attachments-template.html"
                           "neighbors/neighbors-owners-template.html"
                           "neighbors/neighbors-edit-template.html"
-                          "company-selector/company-selector-template.html"]}
+                          "company-selector/company-selector-template.html"
+                          "company-invite/company-invite-template.html"]}
 
    ;; Single Page Apps and standalone components:
    ;; (compare to auth-methods in web.clj)

@@ -13,7 +13,9 @@ $(document).ready(function() {
     "attachments-multiselect",
     "export-attachments",
     "neighbors-owners",
-    "neighbors-edit"
+    "neighbors-edit",
+    "company-selector",
+    "company-invite"
   ];
 
   _.forEach(components, function(component) {
