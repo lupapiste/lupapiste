@@ -385,11 +385,10 @@
       (when (seq text)
         (comment/comment-mongo-update
           (:state application)
-          (i18n/with-lang lang
-            (str
-              (i18n/loc "application.canceled.text") ". "
-              (i18n/loc "application.canceled.reason") ": "
-              text))
+          (str
+            (i18n/localize lang "application.canceled.text") ". "
+            (i18n/localize lang "application.canceled.reason") ": "
+            text)
           {:type "application"}
           (-> command :user :role)
           false
@@ -694,7 +693,7 @@
 
 (defn- invite-applicants [{:keys [lang user created application] :as command} emails]
   (when (pos? (count emails))
-    (let [invite-text (i18n/with-lang lang (i18n/loc "invite.default-text"))]
+    (let [invite-text (i18n/localize lang "invite.default-text")]
       (dorun (->> emails
               (map-indexed
                 (fn [i applicant-email]
@@ -704,9 +703,9 @@
                     (authorization/send-invite! (update-in command [:data] merge
                                                   {:email applicant-email
                                                    :text invite-text
-                                                   :documentName "hakija"
-                                                   :documentId hakija-doc-id
-                                                   :path "henkilo"
+                                                   :documentName nil
+                                                   :documentId nil
+                                                   :path nil
                                                    :role "writer"}))
                     (info "Prev permit application creation, invited " applicant-email " to created app " (get-in command [:data :id]))))))))))
 
