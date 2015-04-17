@@ -249,6 +249,7 @@
    :transfers                []
    :urgency                  "normal"
    :verdicts                 []
-   :tosFunction              nil})
+   :tosFunction              nil
+   :metadata                 {}})
 
 
