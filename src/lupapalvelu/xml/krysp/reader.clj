@@ -121,9 +121,9 @@
 (defn mal-application-xml    [server id raw? kuntalupatunnus?] (application-xml mal-case-type (mal-lp-lupatunnus kuntalupatunnus?) server id raw?))
 (defn vvvl-application-xml   [server id raw? kuntalupatunnus?] (application-xml vvvl-case-type (vvvl-lp-lupatunnus kuntalupatunnus?) server id raw?))
 (defn ya-application-xml     [server id raw? kuntalupatunnus?] (let [options (post-body-for-ya-application id kuntalupatunnus?)
-                                                    credentials nil]
-                                                (debug "Get application: " server " with post body: " options )
-                                                (cr/get-xml-with-post server options credentials raw?)))
+                                                                     credentials nil]
+                                                                 (debug "Get application: " server " with post body: " options )
+                                                                 (cr/get-xml-with-post server options credentials raw?)))
 
 (permit/register-function permit/R  :xml-from-krysp rakval-application-xml)
 (permit/register-function permit/P  :xml-from-krysp poik-application-xml)
