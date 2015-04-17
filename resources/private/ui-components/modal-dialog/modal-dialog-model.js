@@ -5,7 +5,6 @@ LUPAPISTE.ModalDialogModel = function () {
   self.showDialog = ko.observable(false);
   self.component = ko.observable();
   self.componentParams = ko.observable();
-  self.extraClass = ko.observable();
   self.windowWidth = ko.observable();
   self.windowHeight = ko.observable();
   self.dialogVisible = ko.observable(false);
@@ -42,12 +41,9 @@ LUPAPISTE.ModalDialogModel = function () {
     $("html").addClass("no-scroll");
     self.component(data.component);
     var componentParams = data.componentParams ? data.componentParams : {};
-    // self.componentParams(_.assign(componentParams,
-    //   {submitFn: self.submitFn,
-    //    submitEnabled: self.submitEnabled}));
     self.componentParams(componentParams);
     self.title = data.title;
-    self.extraClass(data.extraClass);
+    self.size = data.size ? data.size : "large";
     self.showDialog(true);
   });
 

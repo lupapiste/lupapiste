@@ -31,7 +31,7 @@
       hub.send("show-dialog", {loc: loc,
                                component: "neighbors-edit",
                                componentParams: params,
-                               extraClass: "neighbors-edit"});
+                               size: "medium"});
     }
 
     self.edit = function(neighbor) {

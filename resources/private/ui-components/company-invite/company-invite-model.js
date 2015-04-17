@@ -8,6 +8,7 @@ LUPAPISTE.CompanyInviteModel = function(params) {
 
   self.inviteCompany = function() {
     hub.send("show-dialog", {title: "company-invite.add",
+                             size: "medium",
                              component: "company-invite-dialog",
                              componentParams: params});
   };
