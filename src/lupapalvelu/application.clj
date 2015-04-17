@@ -682,7 +682,7 @@
 ;; Application from previous permit
 ;;
 
-(defn- invite-applicants [{:keys [lang #_user created application] :as command} applicants]
+(defn- invite-applicants [{:keys [lang user created application] :as command} applicants]
   {:pre [(every? #(get-in % [:henkilo :sahkopostiosoite]) applicants)]}
   (when (pos? (count applicants))
     (let [emails (->> applicants
@@ -699,77 +699,45 @@
           (info "Prev permit application creation, invalid email address received from backing system: " email)
           (fail! :error.email)))
 
-      (let [new-documents (->> applicants
-                            (map-indexed
-                              (fn [i applicant]
+      (dorun
+        (->> applicants
+         (map-indexed
+           (fn [i applicant]
+             (let [applicant-email (get-in applicant [:henkilo :sahkopostiosoite])]
 
-                                (let [applicant-email (get-in applicant [:henkilo :sahkopostiosoite])]
+               ;; Invite applicants
+               (authorization/send-invite!
+                 (update-in command [:data] merge {:email applicant-email
+                                                   :text (i18n/localize lang "invite.default-text")
+                                                   :documentName nil
+                                                   :documentId nil
+                                                   :path nil
+                                                   :role "writer"}))
+               (info "Prev permit application creation, invited " applicant-email " to created app " (get-in command [:data :id]))
 
-                                  (authorization/send-invite!
-                                    (update-in command [:data] merge {:email applicant-email
-                                                                      :text (i18n/localize lang "invite.default-text")
-                                                                      :documentName nil
-                                                                      :documentId nil
-                                                                      :path nil
-                                                                      :role "writer"}))
-                                  (info "Prev permit application creation, invited " applicant-email " to created app " (get-in command [:data :id]))
+               ;; Set applicants' user info to Hakija documents
+               (let [document (if (zero? i)
+                                (domain/get-document-by-name application "hakija")
+                                (commands/do-create-doc (assoc-in command [:data :schemaName] "hakija")))
+                     hakija-doc-id (:id document)
+                     invited-user (user/get-user-by-email applicant-email)
 
-                                  (let [document (if (zero? i)
-                                                   (domain/get-document-by-name application "hakija")
-                                                   (commands/do-create-doc (assoc-in command [:data :schemaName] "hakija")))
-                                        hakija-doc-id (:id document)
-                                        invited-user (user/get-user-by-email applicant-email)
+                     ;; Not including invited-user's id into "user-info", so it is not set to personSelector, and validation is thus not done.
+                     ;; If user id would be given, the validation would fail since applicants have not yet accepted their invitations
+                     ;; (see the check in :personSelector validator in model.clj).
+                     user-info {:role "applicant"
+                                :email applicant-email
+                                :username applicant-email
+                                :firstName (get-in applicant [:henkilo :nimi :etunimi])
+                                :lastName (get-in applicant [:henkilo :nimi :sukunimi])
+                                :phone (get-in applicant [:henkilo :puhelin])
+                                :street (get-in applicant [:henkilo :osoite :osoitenimi :teksti])
+                                :zip (get-in applicant [:henkilo :osoite :postinumero])
+                                :city (get-in applicant [:henkilo :osoite :postitoimipaikannimi])
+                                :personId (get-in applicant [:henkilo :henkilotunnus])
+                                :turvakieltokytkin (:turvakieltoKytkin applicant)}]
 
-                                        ; TODO: Lisaa kutsuun turvakieltokytkin
-                                        #_user-info #_{:id (:id invited-user)
-                                                       :role "applicant"
-                                                       :email applicant-email
-                                                       :username applicant-email
-                                                       :firstName (get-in applicant [:henkilo :nimi :etunimi])
-                                                       :lastName (get-in applicant [:henkilo :nimi :sukunimi])
-                                                       :phone (get-in applicant [:henkilo :puhelin])
-                                                       :street (get-in applicant [:henkilo :osoite :osoitenimi :teksti])
-                                                       :zip (get-in applicant [:henkilo :osoite :postinumero])
-                                                       :city (get-in applicant [:henkilo :osoite :postitoimipaikannimi])
-                                                       :personId (get-in applicant [:henkilo :henkilotunnus])
-                                                       }
-
-                                        new-info (->
-                                                   {:userId (:id invited-user)
-                                                    :henkilotiedot {:etunimi (get-in applicant [:henkilo :nimi :etunimi])
-                                                                    :sukunimi (get-in applicant [:henkilo :nimi :sukunimi])
-                                                                    :hetu (get-in applicant [:henkilo :henkilotunnus])
-                                                                    :turvakieltokytkin (:turvakieltoKytkin applicant)}
-                                                    :osoite {:katu (get-in applicant [:henkilo :osoite :osoitenimi :teksti])
-                                                             :postinumero (get-in applicant [:henkilo :osoite :postinumero])
-                                                             :postitoimipaikannimi (get-in applicant [:henkilo :osoite :postitoimipaikannimi])}
-                                                    :yhteystiedot {:email applicant-email
-                                                                   :puhelin (get-in applicant [:henkilo :puhelin])}}
-                                                   util/strip-nils
-                                                   util/strip-empty-maps
-                                                   tools/wrapped)
-
-                                        new-doc (update-in document [:data :henkilo] util/deep-merge new-info)]
-
-                                    new-doc
-
-
-                                    ;;
-                                    ;; TODO: Koita commands/set-subject-to-document !
-                                    ;;
-
-                                    #_(when-let [document (domain/get-document-by-id application hakija-doc-id)]
-                                        ; Document can be undefined (invite's documentId is an empty string) in invite or removed by the time invite is approved.
-                                        ; It's not possible to combine Mongo writes here, because only the last $elemMatch counts.
-                                        (commands/do-set-user-to-document application document (:id user) "henkilo" created))
-                                    )))))
-
-            new-document-ids (->> new-documents (map :id) set)
-
-            old-documents-ripped (remove #(new-document-ids (:id %)) (:documents application))
-            documents-final (reduce #(conj %1 %2) old-documents-ripped new-documents)]
-
-        (update-application command {$set {:documents documents-final}})))))
+                 (commands/set-subject-to-document application document user-info "henkilo" created))))))))))
 
 (defn- do-create-application-from-previous-permit [{:keys [lang user created] :as command} xml app-info location-info]
   (let [{:keys [rakennusvalvontaasianKuvaus vahainenPoikkeaminen hakijat]} app-info
