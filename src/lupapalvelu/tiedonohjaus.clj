@@ -23,11 +23,12 @@
   (memo/ttl get-tos-functions-from-toj
             :ttl/threshold 10000))
 
-(defn- get-metadata-for-document-from-toj [organization code {:keys [type-group type-id]}]
+(defn- get-metadata-for-document-from-toj [organization tos-function document-type]
   (if (env/feature? :tiedonohjaus)
-    (when (and organization code type-group type-id)
+    (when (and organization tos-function document-type)
       (try
-        (let [url (build-url "/tiedonohjaus/api/org/" organization "/asiat/" code "/document/" (str (name type-group) "." (name type-id)))
+        (let [doc-id (if (map? document-type) (str (name (:type-group document-type)) "." (name (:type-id document-type))) document-type)
+              url (build-url "/tiedonohjaus/api/org/" organization "/asiat/" tos-function "/document/" doc-id)
               response (http/get url {:as :json
                                       :throw-exceptions false})]
           (if (= 200 (:status response))
@@ -40,3 +41,7 @@
 (def metadata-for-document
   (memo/ttl get-metadata-for-document-from-toj
             :ttl/threshold 10000))
+
+(defn document-with-updated-metadata [document organization tos-function]
+  (->> (metadata-for-document organization tos-function (:type document))
+       (assoc document :metadata)))

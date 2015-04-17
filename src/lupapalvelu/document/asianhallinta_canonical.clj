@@ -153,14 +153,23 @@
 ;; AsianTunnusVastaus, prefix: atr-
 
 
+(defn- get-first-by-subtype [subtype documents]
+  (util/find-first (fn [doc]
+                     (= subtype (get-in doc (if (sequential? doc)
+                                              [0 :schema-info :subtype]
+                                              [:schema-info :subtype]))))
+                   (vals documents)))
+
 (defn application-to-asianhallinta-canonical [application lang]
   "Return canonical, does not contain attachments"
   (let [documents (tools/unwrapped (documents-by-type-without-blanks application))]
     (-> (assoc-in ua-root-element [:UusiAsia :Tyyppi] (ua-get-asian-tyyppi-string application))
       (assoc-in [:UusiAsia :Kuvaus] (:title application))
       (assoc-in [:UusiAsia :Kuntanumero] (:municipality application))
-      (assoc-in [:UusiAsia :Hakijat] (ua-get-hakijat (:hakija documents)))
-      (assoc-in [:UusiAsia :Maksaja] (ua-get-maksaja (first (:maksaja documents))))
+      (assoc-in [:UusiAsia :Hakijat] (ua-get-hakijat (or (:hakija documents)
+                                                         (get-first-by-subtype "hakija" documents))))
+      (assoc-in [:UusiAsia :Maksaja] (ua-get-maksaja (first (or (:maksaja documents)
+                                                                (get-first-by-subtype "maksaja" documents)))))
       (assoc-in [:UusiAsia :HakemusTunnus] (:id application))
       (assoc-in [:UusiAsia :VireilletuloPvm] (util/to-xml-date (:submitted application)))
       (assoc-in [:UusiAsia :Asiointikieli] lang)

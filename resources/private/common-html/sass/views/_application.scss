@@ -721,7 +721,18 @@
       }
     }
   }
+}
 
+#application-metadata-tab {
+  h1 {
+    float: none;
+  }
+  .table-metadata {
+      max-width: 875px;
+    .metadata-key {
+      width: 175px;
+    }
+  }
 }
 
 

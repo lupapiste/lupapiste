@@ -113,6 +113,9 @@
     if (!isInitializing) {
       ajax
         .command("set-tos-function-for-application", {id: currentId, functionCode: value})
+        .success(function() {
+          repository.load(currentId, applicationModel.pending);
+        })
         .call();
     }
   }
@@ -220,6 +223,16 @@
       var assignee = resolveApplicationAssignee(app.authority);
       var assigneeId = assignee ? assignee.id : null;
       applicationModel.assignee(assigneeId);
+
+      var metadata = _.map(app.metadata, function(value, key) {
+        if (_.isObject(value)) {
+          value = _.map(value, function(subvalue, subkey) {
+            return {name: subkey, value: subvalue};
+          });
+        }
+        return {name: key, value: value};
+      });
+      applicationModel.metadataList(_.sortBy(metadata, "name"));
 
       isInitializing = false;
       pageutil.hideAjaxWait();
