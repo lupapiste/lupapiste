@@ -122,7 +122,12 @@
           :x "6707184.319"
           :y "393021.589"
           :address "Kylykuja 3"
-          :propertyId "18600303560005") => (contains {:ok false :text "error.unauthorized"}))
+          :propertyId "18600303560005") => (partial expected-failure? "error.unauthorized"))
+
+      (fact "invalid email among the applicant emails in the received xml"
+        (create-app-from-prev-permit raktark-jarvenpaa) => (partial expected-failure? "error.email")
+        (provided
+          (krysp-reader/get-app-info-from-message anything anything) => (update-in example-app-info [:hakijat] conj {:henkilo {:sahkopostiosoite "invalid-email"}})))
 
       (fact "authority of same municipality can create application"
         (create-app-from-prev-permit raktark-jarvenpaa
