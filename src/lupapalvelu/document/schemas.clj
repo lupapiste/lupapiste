@@ -385,8 +385,8 @@
                                :type :group
                                :whitelist {:roles [:authority]
                                            :otherwise :hidden}
-                               :body [{:name "tyonjohtajanHyvaksynta" :type :checkbox :i18nkey "tyonjohtaja.historia.hyvaksynta"}
-                                      tyonjohtajan-historia]}])
+                               :body [tyonjohtajan-historia
+                                      {:name "tyonjohtajanHyvaksynta" :type :checkbox :i18nkey "tyonjohtaja.historia.hyvaksynta"}]}])
 
 (def tyonjohtaja-v2 (body
                       tayta-omat-tiedot-button
