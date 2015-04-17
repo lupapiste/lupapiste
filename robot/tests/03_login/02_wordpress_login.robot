@@ -6,7 +6,7 @@ Resource        ../../common_resource.robot
 *** Test Cases ***
 
 Login via WordPress site
-  [Tags]  integration
+  [Tags]  integration  ie8
   Go to  ${SERVER}
   Run Keyword Unless  '${SERVER}'=='http://localhost:8000'  Wait Until  Page should contain  Saanko luvan?
   Login  pena  pena
