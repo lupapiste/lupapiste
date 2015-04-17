@@ -11,3 +11,4 @@ Login via WordPress site
   Run Keyword Unless  '${SERVER}'=='http://localhost:8000'  Wait Until  Page should contain  Saanko luvan?
   Login  pena  pena
   User should be logged in  Pena Panaani
+  Logout
