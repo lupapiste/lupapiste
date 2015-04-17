@@ -66,29 +66,21 @@ LUPAPISTE.NeighborsEditDialogModel = function(params) {
 
   self.propertyIdOk = ko.computed(function() { return util.prop.isPropertyId(self.propertyId()); });
   self.emailOk = ko.computed(function() { return _.isBlank(self.email()) || util.isValidEmailAddress(self.email()); });
-  self.disabled = ko.computed(function() { return self.pending() || !self.propertyIdOk() || !self.emailOk(); });
-
-  params.submitEnabled(!self.disabled());
-  self.disabled.subscribe(function(val) {
-    params.submitEnabled(!val);
-  });
+  self.isSubmitEnabled = ko.pureComputed(function() { return !self.pending() && self.propertyIdOk() && self.emailOk(); });
 
   var paramNames = ["id", "neighborId", "propertyId", "name", "street", "city", "zip", "email", "type", "businessID", "nameOfDeceased"];
   function paramValue(paramName) { return self[paramName](); }
 
   self.openEdit = function() { LUPAPISTE.ModalDialog.open("#dialog-edit-neighbor"); return self; };
+
   self.save = function() {
     ajax
       .command(self.neighborId() ? "neighbor-update" : "neighbor-add", _.zipObject(paramNames, _.map(paramNames, paramValue)))
       .pending(self.pending)
-      .complete(_.partial(repository.load, self.id(), function(v) { if (!v) { LUPAPISTE.ModalDialog.close(); }}))
+      .complete(_.partial(repository.load, self.id(), function(v) { if (!v) { hub.send("close-dialog"); }}))
       .call();
     return self;
   };
-
-  params.submitFn(function() {
-    self.save();
-  });
 
   self.init(params.neighbor).edit();
 };
