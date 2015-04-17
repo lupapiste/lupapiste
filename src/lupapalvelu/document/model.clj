@@ -453,6 +453,7 @@
       (boolean (find-by-name schema-body full-path)))))
 
 (defn ->henkilo [{:keys [id firstName lastName email phone street zip city personId
+                         turvakieltokytkin
                          companyName companyId
                          fise degree graduatingYear]} & {:keys [with-hetu with-empty-defaults]}]
   (letfn [(wrap [v] (if (and with-empty-defaults (nil? v)) "" v))]
@@ -460,7 +461,8 @@
       {:userId                        (wrap id)
        :henkilotiedot {:etunimi       (wrap firstName)
                        :sukunimi      (wrap lastName)
-                       :hetu          (wrap (when with-hetu personId))}
+                       :hetu          (wrap (when with-hetu personId))
+                       :turvakieltoKytkin (wrap turvakieltokytkin)}
        :yhteystiedot {:email          (wrap email)
                       :puhelin        (wrap phone)}
        :osoite {:katu                 (wrap street)
