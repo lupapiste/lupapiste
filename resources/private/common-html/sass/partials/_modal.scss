@@ -23,18 +23,24 @@
     background-color: #fff;
     height: 700px;
     min-height: 250px;
-    .content {
-      overflow: auto;
-      margin: $marginM 0;
-    }
-    .button-group {
-      position: absolute;
-      bottom: $marginL;
-      right: $marginM;
-      left: $marginM;
-      .cancel {
-        float: right;
-        margin-right: $marginM;
+    .component {
+      .content {
+        overflow: auto;
+        position: absolute;
+        top: 45px;
+        left: $marginM;
+        right: $marginM;
+        bottom: 75px;
+      }
+      .button-group {
+        position: absolute;
+        bottom: $marginL;
+        right: $marginM;
+        left: $marginM;
+        .cancel {
+          float: right;
+          margin-right: $marginM;
+        }
       }
     }
     .header {
