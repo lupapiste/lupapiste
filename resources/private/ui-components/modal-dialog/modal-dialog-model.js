@@ -9,6 +9,11 @@ LUPAPISTE.ModalDialogModel = function () {
   self.windowHeight = ko.observable();
   self.dialogVisible = ko.observable(false);
   self.title = ko.observable();
+  self.size = ko.observable();
+
+  self.css = ko.pureComputed(function() {
+    return [self.size(), self.component()].join(" ");
+  });
 
   self.showDialog.subscribe(function(show) {
     _.delay(function(show) {
@@ -43,7 +48,7 @@ LUPAPISTE.ModalDialogModel = function () {
     var componentParams = data.componentParams ? data.componentParams : {};
     self.componentParams(componentParams);
     self.title = data.title;
-    self.size = data.size ? data.size : "large";
+    self.size(data.size ? data.size : "large");
     self.showDialog(true);
   });
 

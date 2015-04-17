@@ -2488,7 +2488,7 @@ table.attachments-template-table td.attachment-version-info {
   padding: 12px;
   background-color: #fff;
   height: 700px;
-  min-height: 300px;
+  min-height: 250px;
 }
 /* line 26, ../sass/partials/_modal.scss */
 #modal-dialog .dialog .content {
@@ -2735,6 +2735,15 @@ table.attachments-template-table td.attachment-version-info {
 /* line 247, ../sass/partials/_modal.scss */
 #dialog-cancel-application div.application-cancel-text-content p {
   margin-bottom: 0;
+}
+
+/* line 252, ../sass/partials/_modal.scss */
+.company-invite-dialog {
+  height: 250px !important;
+}
+/* line 254, ../sass/partials/_modal.scss */
+.company-invite-dialog select {
+  width: 100%;
 }
 
 /*

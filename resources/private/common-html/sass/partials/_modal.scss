@@ -22,7 +22,7 @@
     padding: $marginM;
     background-color: #fff;
     height: 700px;
-    min-height: 300px;
+    min-height: 250px;
     .content {
       overflow: auto;
       margin: $marginM 0;
@@ -246,5 +246,12 @@
 #dialog-cancel-application {
   div.application-cancel-text-content p {
     margin-bottom: 0;
+  }
+}
+
+.company-invite-dialog {
+  height: 250px !important;
+  select {
+    width: 100%;
   }
 }
