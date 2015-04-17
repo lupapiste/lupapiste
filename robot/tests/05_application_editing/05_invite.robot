@@ -104,7 +104,7 @@ Mikko invites Solita
   Wait Until  Click Element  xpath=//div[@class='parties-list']//button[@data-test-id='company-invite']
   Wait Until  Element should be visible  selectCompanyToInvite
   Select From List  selectCompanyToInvite  Solita Oy, Tulli Business Park Tampere
-  Click enabled by test id  submit-company-invitation
+  Click enabled by test id  modal-dialog-submit-button
   Wait Until  Page should contain  fi1060155-5
 
 Mikko decides to go to the desert, put on his ipod, and listen some some British hard-rock band
