@@ -26,10 +26,8 @@
     };
 
     function openEditDialog(params) {
-      var loc = { title: "neighbors.edit.title",
-                  submitButton: "save" };
-      hub.send("show-dialog", {loc: loc,
-                               component: "neighbors-edit",
+      hub.send("show-dialog", {title: "neighbors.edit.title",
+                               component: "neighbors-edit-dialog",
                                componentParams: params,
                                size: "medium"});
     }
@@ -43,10 +41,9 @@
     };
 
     self.click = function(x, y) {
-      var loc = { title: "neighbor.owners.title",
-                  submitButton: "save" };
-      hub.send("show-dialog", { loc: loc,
-                                component: "neighbors-owners",
+      hub.send("show-dialog", { title: "neighbor.owners.title",
+                                size: "large",
+                                component: "neighbors-owners-dialog",
                                 componentParams: {x: x,
                                                   y: y} });
     };

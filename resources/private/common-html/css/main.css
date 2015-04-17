@@ -2488,7 +2488,7 @@ table.attachments-template-table td.attachment-version-info {
   padding: 12px;
   background-color: #fff;
   height: 700px;
-  min-height: 150px;
+  min-height: 300px;
 }
 /* line 26, ../sass/partials/_modal.scss */
 #modal-dialog .dialog .content {
