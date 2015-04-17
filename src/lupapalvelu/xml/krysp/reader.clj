@@ -189,7 +189,7 @@
      :henkilo   {:henkilotiedot {:etunimi  (get-text henkilo :nimi :etunimi)
                                  :sukunimi (get-text henkilo :nimi :sukunimi)
                                  :hetu     (get-text henkilo :henkilotunnus)
-                                 :turvakieltoKytkin (get-text xml-without-ns :turvakieltoKytkin)}
+                                 :turvakieltoKytkin (cr/to-boolean (get-text xml-without-ns :turvakieltoKytkin))}
                  :yhteystiedot  {:email     (get-text henkilo :sahkopostiosoite)
                                  :puhelin   (get-text henkilo :puhelin)}
                  :osoite        {:katu         (get-osoite (select1 henkilo :osoite))
@@ -536,27 +536,28 @@
             osapuolet (map cr/all-of (select asia [:osapuolettieto :Osapuolet :osapuolitieto :Osapuoli]))
             hakijat (filter #(= "hakija" (:VRKrooliKoodi %)) osapuolet)]
 
-        (merge
-          {:id (->lp-tunnus asia)
-           :kuntalupatunnus (->kuntalupatunnus asia)
-           :municipality kuntakoodi
-           :rakennusvalvontaasianKuvaus (:rakennusvalvontaasianKuvaus asianTiedot)
-           :vahainenPoikkeaminen (:vahainenPoikkeaminen asianTiedot)
-           :hakijat hakijat
-;           :viitelupatiedot viitelupatiedot
-;           :kasittelynTilatiedot kasittelynTilatiedot
-;           :viimeisin-tila viimeisin-tila
-;           :rakennusten-tiedot (->buildings xml)
-;           :toimenpidetieto toimenpidetieto
-;           :asioimiskieli asioimiskieli
-          }
-          (when (and coord-array-Rakennus osoite-Rakennus kiinteistotunnus-Rakennus)
-            {:ensimmainen-rakennus {:x (first coord-array-Rakennus)
-                                    :y (second coord-array-Rakennus)
-                                    :address osoite-Rakennus
-                                    :propertyId kiinteistotunnus-Rakennus}})
-          (when (and coord-array-Rakennuspaikka osoite-Rakennuspaikka kiinteistotunnus-Rakennuspaikka)
-            {:rakennuspaikka {:x (first coord-array-Rakennuspaikka)
-                              :y (second coord-array-Rakennuspaikka)
-                              :address osoite-Rakennuspaikka
-                              :propertyId kiinteistotunnus-Rakennuspaikka}}))))))
+        ((comp cleanup cr/convert-booleans)
+          (merge
+            {:id (->lp-tunnus asia)
+             :kuntalupatunnus (->kuntalupatunnus asia)
+             :municipality kuntakoodi
+             :rakennusvalvontaasianKuvaus (:rakennusvalvontaasianKuvaus asianTiedot)
+             :vahainenPoikkeaminen (:vahainenPoikkeaminen asianTiedot)
+             :hakijat hakijat
+;             :viitelupatiedot viitelupatiedot
+;             :kasittelynTilatiedot kasittelynTilatiedot
+;             :viimeisin-tila viimeisin-tila
+;             :rakennusten-tiedot (->buildings xml)
+;             :toimenpidetieto toimenpidetieto
+;             :asioimiskieli asioimiskieli
+             }
+            (when (and coord-array-Rakennus osoite-Rakennus kiinteistotunnus-Rakennus)
+              {:ensimmainen-rakennus {:x (first coord-array-Rakennus)
+                                      :y (second coord-array-Rakennus)
+                                      :address osoite-Rakennus
+                                      :propertyId kiinteistotunnus-Rakennus}})
+            (when (and coord-array-Rakennuspaikka osoite-Rakennuspaikka kiinteistotunnus-Rakennuspaikka)
+              {:rakennuspaikka {:x (first coord-array-Rakennuspaikka)
+                                :y (second coord-array-Rakennuspaikka)
+                                :address osoite-Rakennuspaikka
+                                :propertyId kiinteistotunnus-Rakennuspaikka}})))))))
