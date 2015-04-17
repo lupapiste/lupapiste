@@ -17,7 +17,7 @@ $(document).ready(function() {
     "company-selector",
     "company-invite",
     "company-invite-dialog",
-    "modal-dialog-button-group"
+    "submit-button-group"
   ];
 
   _.forEach(components, function(component) {

@@ -256,7 +256,7 @@
                         "company-selector/company-selector-model.js"
                         "company-invite/company-invite-model.js"
                         "company-invite/company-invite-dialog-model.js"
-                        "modal-dialog/modal-dialog-button-group-model.js"]
+                        "modal-dialog/button-group/submit-button-group-model.js"]
                    :html ["fill-info/fill-info-template.html"
                           "foreman-history/foreman-history-template.html"
                           "foreman-other-applications/foreman-other-applications-template.html"
@@ -265,7 +265,7 @@
                           "select/select-template.html"
                           "checkbox/checkbox-template.html"
                           "modal-dialog/modal-dialog-template.html"
-                          "modal-dialog/modal-dialog-button-group-template.html"
+                          "modal-dialog/button-group/submit-button-group-template.html"
                           "attachments-multiselect/attachments-multiselect-template.html"
                           "export-attachments/export-attachments-template.html"
                           "neighbors/neighbors-owners-template.html"
