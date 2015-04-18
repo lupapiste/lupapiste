@@ -3,7 +3,8 @@ LUPAPISTE.CompanySelectorModel = function(params) {
 
   var self = this;
 
-  self.selected = ko.observable();
+  self.indicator = ko.observable();
+  self.result = ko.observable();
 
   function mapCompany(company) {
     company.displayName = ko.pureComputed(function() {
@@ -13,14 +14,19 @@ LUPAPISTE.CompanySelectorModel = function(params) {
     return company;
   }
 
-  self.companies = ko.pureComputed(function() {
+  function getCompanies() {
     return _(lupapisteApp.models.application.roles())
       .filter(function(r) {
         return ko.unwrap(r.type) === "company";
       })
       .map(mapCompany)
       .value();
-  });
+  }
+
+  self.companies = ko.observableArray(getCompanies());
+  self.selected = ko.observable(_.isEmpty(params.selected) ? undefined : params.selected);
+
+  console.log(params.selected);
 
   self.setOptionDisable = function(option, item) {
     if (!item) {
@@ -30,9 +36,22 @@ LUPAPISTE.CompanySelectorModel = function(params) {
   };
 
   self.selected.subscribe(function(id) {
+    id = id ? id : "";
     ajax.command("set-company-to-document", _.assign(params, {companyId: id}))
     .success(function() {
-      repository.load(lupapisteApp.models.application.id());
+      function cb() {
+        repository.load(lupapisteApp.models.application.id());
+      }
+
+      uiComponents.save("update-doc",
+                         params.documentId,
+                         lupapisteApp.models.application.id(),
+                         params.schema.name,
+                         params.path.split(".").concat([params.schema.name]),
+                         id,
+                         self.indicator,
+                         self.result,
+                         cb);
     })
     .call();
   });

@@ -1106,7 +1106,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       documentId: self.docId,
       documentName: self.schemaName,
       path: myNs,
-      collection: self.getCollection()
+      collection: self.getCollection(),
+      selected: getModelValue(model, subSchema.name),
+      schema: subSchema
     };
 
     var span = makeEntrySpan(subSchema, path.join("."));
