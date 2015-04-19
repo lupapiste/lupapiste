@@ -483,9 +483,17 @@
       util/strip-empty-maps
       tools/wrapped)))
 
-(defn ->company [{:keys [name y address1 zip po]}]
-  (-> {:liikeJaYhteisoTunnus y
-       :yritysnimi name
-       :osoite {:katu address1
-                :postinumero zip
-                :postitoimipaikannimi po}}))
+(defn ->company [{:keys [id name y address1 zip po]} {:keys [phone firstName lastName email company]} & {:keys [with-empty-defaults]}]
+  (prn id company)
+  (letfn [(wrap [v] (if (and with-empty-defaults (nil? v)) "" v))]
+    (-> (if (= (:id company) id)
+          {:yhteyshenkilo {:henkilotiedot {:etunimi  (wrap firstName)
+                                           :sukunimi (wrap lastName)}
+                           :yhteystiedot  {:email    (wrap email)
+                                           :puhelin  (wrap phone)}}}
+          {})
+        (merge {:liikeJaYhteisoTunnus          (wrap y)
+                :yritysnimi                    (wrap name)
+                :osoite {:katu                 (wrap address1)
+                         :postinumero          (wrap zip)
+                         :postitoimipaikannimi (wrap po)}}))))
