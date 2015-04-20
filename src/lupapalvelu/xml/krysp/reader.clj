@@ -57,10 +57,9 @@
 
 (defn- get-tunnus-path [permit-type search-type]
   (let [prefix (permit/get-metadata permit-type :wfs-krysp-url-asia-prefix)
-        tunnus-location (condp = search-type
+        tunnus-location (case search-type
                           :application-id  "yht:LupaTunnus/yht:muuTunnustieto/yht:MuuTunnus/yht:tunnus"
-                          :kuntalupatunnus "yht:LupaTunnus/yht:kuntalupatunnus"
-                          (throw (Exception. (str "No wfs krysp search type could be resolved from the given search type key: " search-type))))]
+                          :kuntalupatunnus "yht:LupaTunnus/yht:kuntalupatunnus")]
     (str prefix tunnus-location)))
 
 (def- rakennuksen-kiinteistotunnus "rakval:rakennustieto/rakval:Rakennus/rakval:rakennuksenTiedot/rakval:rakennustunnus/rakval:kiinttun")
