@@ -129,7 +129,7 @@
   "Returns a function that fetches KRYSP XML from municipality backend.
    Function parameters: 1) url,
                         2) id,
-                        3) optional boolean parameter: search-type (e.g. :application-id or :kuntalupatunnus)
+                        3) keyword parameter: search-type (e.g. :application-id or :kuntalupatunnus)
                         4) optional boolean parameter: raw form."
   (get-metadata permit-type :xml-from-krysp))
 
