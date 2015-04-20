@@ -63,7 +63,7 @@
     (fact "no xml content received from backend with the kuntalupatunnus"
       (create-app-from-prev-permit raktark-jarvenpaa) => (partial expected-failure? "error.no-previous-permit-found-from-backend")
       (provided
-        (krysp-fetch-api/get-application-xml anything false true) => nil))
+        (krysp-fetch-api/get-application-xml anything anything) => nil))
 
     ; 3: jos (krysp-reader/get-app-info-from-message xml kuntalupatunnus) palauttaa nillin -> (fail :error.no-previous-permit-found-from-backend)
     (fact "no application info could be parsed"
@@ -122,7 +122,12 @@
           :x "6707184.319"
           :y "393021.589"
           :address "Kylykuja 3"
-          :propertyId "18600303560005") => (contains {:ok false :text "error.unauthorized"}))
+          :propertyId "18600303560005") => (partial expected-failure? "error.unauthorized"))
+
+      (fact "invalid email among the applicant emails in the received xml"
+        (create-app-from-prev-permit raktark-jarvenpaa) => (partial expected-failure? "error.email")
+        (provided
+          (krysp-reader/get-app-info-from-message anything anything) => (update-in example-app-info [:hakijat] conj {:henkilo {:sahkopostiosoite "invalid-email"}})))
 
       (fact "authority of same municipality can create application"
         (create-app-from-prev-permit raktark-jarvenpaa
@@ -133,17 +138,15 @@
 
     (fixture/apply-fixture "minimal")
 
-    ; 8: hakijalla on oikeus luoda hakemus
+    ; 8: hakijalla ei ole oiketta noutaa aiempaa lupaa
     (fact "applicant cannot create application"
-      (fact "authority of different municipality cannot create app with prev permit"
-        (create-app-from-prev-permit pena
-          :x "6707184.319"
-          :y "393021.589"
-          :address "Kylykuja 3"
-          :propertyId "18600303560005") => (partial expected-failure? "error.unauthorized")))
-
+      (create-app-from-prev-permit pena
+        :x "6707184.319"
+        :y "393021.589"
+        :address "Kylykuja 3"
+        :propertyId "18600303560005") => (partial expected-failure? "error.unauthorized"))
 
     ;; This applies to all tests in this namespace
     (against-background
-      (krysp-fetch-api/get-application-xml anything false true) => example-xml)))
+      (krysp-fetch-api/get-application-xml anything anything) => example-xml)))
 

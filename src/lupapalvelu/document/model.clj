@@ -5,18 +5,17 @@
             [clojure.set :refer [union difference]]
             [clojure.string :as s]
             [clj-time.format :as timeformat]
-            [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.document.vrk]
-            [lupapalvelu.document.schemas :as schemas]
-            [lupapalvelu.document.tools :as tools]
             [sade.env :as env]
             [sade.util :as util]
             [sade.strings :as ss]
             [sade.core :refer :all]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.document.vrk]
+            [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.validator :as validator]
-            [lupapalvelu.document.subtype :as subtype]
-            ))
+            [lupapalvelu.document.subtype :as subtype]))
 
 ;;
 ;; Validation:
@@ -452,15 +451,17 @@
     (let [full-path (apply conj base-path [:henkilotiedot :hetu])]
       (boolean (find-by-name schema-body full-path)))))
 
-(defn ->henkilo [{:keys [id firstName lastName email phone street zip city personId
+(defn ->henkilo [{:keys [id firstName lastName email phone street zip city personId turvakieltokytkin
                          companyName companyId
-                         fise degree graduatingYear]} & {:keys [with-hetu with-empty-defaults]}]
-  (letfn [(wrap [v] (if (and with-empty-defaults (nil? v)) "" v))]
+                         fise degree graduatingYear]} & {:keys [with-hetu with-empty-defaults?]}]
+  {:pre [(or (nil? turvakieltokytkin) (util/boolean? turvakieltokytkin))]}
+  (letfn [(wrap [v] (if (and with-empty-defaults? (nil? v)) "" v))]
     (->
       {:userId                        (wrap id)
        :henkilotiedot {:etunimi       (wrap firstName)
                        :sukunimi      (wrap lastName)
-                       :hetu          (wrap (when with-hetu personId))}
+                       :hetu          (wrap (when with-hetu personId))
+                       :turvakieltoKytkin (when (or turvakieltokytkin with-empty-defaults?) (boolean turvakieltokytkin))}
        :yhteystiedot {:email          (wrap email)
                       :puhelin        (wrap phone)}
        :osoite {:katu                 (wrap street)

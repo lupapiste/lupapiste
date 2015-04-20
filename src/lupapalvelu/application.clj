@@ -309,15 +309,6 @@
   [{:keys [application user created] :as command}]
   (update-application command {$set (mark-indicators-seen-updates application user created)}))
 
-(defcommand set-user-to-document
-  {:parameters [id documentId userId path]
-   :user-roles #{:applicant :authority}
-   :states     (action/all-states-but [:info :sent :verdictGiven :constructionStarted :closed :canceled])}
-  [{:keys [user created application] :as command}]
-  (if-let [document (domain/get-document-by-id application documentId)]
-    (commands/do-set-user-to-document application document userId path user created)
-    (fail :error.document-not-found)))
-
 ;;
 ;; Assign
 ;;
@@ -385,9 +376,9 @@
       (when (seq text)
         (comment/comment-mongo-update
           (:state application)
-          (str
-            (i18n/localize lang "application.canceled.text") ". "
-            (i18n/localize lang "application.canceled.reason") ": "
+            (str
+              (i18n/localize lang "application.canceled.text") ". "
+              (i18n/localize lang "application.canceled.reason") ": "
             text)
           {:type "application"}
           (-> command :user :role)
@@ -691,23 +682,58 @@
 ;; Application from previous permit
 ;;
 
-(defn- invite-applicants [{:keys [lang user created application] :as command} emails]
-  (when (pos? (count emails))
-    (let [invite-text (i18n/localize lang "invite.default-text")]
-      (dorun (->> emails
+(defn- invite-applicants [{:keys [lang user created application] :as command} applicants]
+  {:pre [(every? #(get-in % [:henkilo :sahkopostiosoite]) applicants)]}
+  (when (pos? (count applicants))
+    (let [emails (->> applicants
+                   (map #(get-in % [:henkilo :sahkopostiosoite]))
+                   (map user/canonize-email)
+                   set)]
+
+      (doseq [email emails]
+        ;; action/email-validator returns nil if email was valid
+        (when (action/email-validator {:data {:email email}})
+          (info "Prev permit application creation, invalid email address received from backing system: " email)
+          (fail! :error.email)))
+
+      (dorun
+        (->> applicants
               (map-indexed
-                (fn [i applicant-email]
-                  (let [hakija-doc-id (if (zero? i)
-                                        (:id (domain/get-document-by-name application "hakija"))
-                                        (:doc (commands/do-create-doc (assoc-in command [:data :schemaName] "hakija"))))]
-                    (authorization/send-invite! (update-in command [:data] merge
-                                                  {:email applicant-email
-                                                   :text invite-text
+           (fn [i applicant]
+             (let [applicant-email (get-in applicant [:henkilo :sahkopostiosoite])]
+
+               ;; Invite applicants
+               (authorization/send-invite!
+                 (update-in command [:data] merge {:email applicant-email
+                                                   :text (i18n/localize lang "invite.default-text")
                                                    :documentName nil
                                                    :documentId nil
                                                    :path nil
                                                    :role "writer"}))
-                    (info "Prev permit application creation, invited " applicant-email " to created app " (get-in command [:data :id]))))))))))
+               (info "Prev permit application creation, invited " applicant-email " to created app " (get-in command [:data :id]))
+
+               ;; Set applicants' user info to Hakija documents
+               (let [document (if (zero? i)
+                                (domain/get-document-by-name application "hakija")
+                                (commands/do-create-doc (assoc-in command [:data :schemaName] "hakija")))
+                     hakija-doc-id (:id document)
+
+                     ;; Not including the id of the invited user into "user-info", so it is not set to personSelector, and validation is thus not done.
+                     ;; If user id would be given, the validation would fail since applicants have not yet accepted their invitations
+                     ;; (see the check in :personSelector validator in model.clj).
+                     user-info {:role "applicant"
+                                :email applicant-email
+                                :username applicant-email
+                                :firstName (get-in applicant [:henkilo :nimi :etunimi])
+                                :lastName (get-in applicant [:henkilo :nimi :sukunimi])
+                                :phone (get-in applicant [:henkilo :puhelin])
+                                :street (get-in applicant [:henkilo :osoite :osoitenimi :teksti])
+                                :zip (get-in applicant [:henkilo :osoite :postinumero])
+                                :city (get-in applicant [:henkilo :osoite :postitoimipaikannimi])
+                                :personId (get-in applicant [:henkilo :henkilotunnus])
+                                :turvakieltokytkin (:turvakieltoKytkin applicant)}]
+
+                 (commands/set-subject-to-document application document user-info "henkilo" created))))))))))
 
 (defn- do-create-application-from-previous-permit [{:keys [lang user created] :as command} xml app-info location-info]
   (let [{:keys [rakennusvalvontaasianKuvaus vahainenPoikkeaminen hakijat]} app-info
@@ -731,11 +757,8 @@
     (verdict-api/find-verdicts-from-xml command xml)  ;; Get verdicts for the application
 
     ;; NOTE: at the moment only supporting henkilo-type applicants
-    (let [emails (->> hakijat
-                   (filter #(get-in % [:henkilo :sahkopostiosoite]))
-                   (map #(get-in % [:henkilo :sahkopostiosoite]))
-                   set)]
-      (invite-applicants command emails))
+    (let [applicants-with-email (filter #(get-in % [:henkilo :sahkopostiosoite]) hakijat)]
+      (invite-applicants command applicants-with-email))
 
     (:id created-application)))
 
@@ -766,9 +789,8 @@
 
       ;; Fetch xml data needed for application creation from backing system with the provided kuntalupatunnus.
       ;; Then extract needed data from it to "app info".
-      (let [xml (krysp-fetch-api/get-application-xml
-                  {:id kuntalupatunnus :permitType permit-type :organization organizationId}
-                  false true)]
+      (let [dummy-application {:id kuntalupatunnus :permitType permit-type :organization organizationId}
+            xml (krysp-fetch-api/get-application-xml dummy-application :kuntalupatunnus)]
         (when-not xml (fail! :error.no-previous-permit-found-from-backend))  ;; Show error if could not receive the verdict message xml for the given kuntalupatunnus
 
         (let [app-info (krysp-reader/get-app-info-from-message xml kuntalupatunnus)
