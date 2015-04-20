@@ -657,7 +657,7 @@
                                                  :postitoimipaikannimi {:value "city"}}})
 
   (fact "all fields are mapped - empty defaults"
-    (->henkilo {:id "id", :lastName  "lastName", :city "city"} :with-empty-defaults true)
+    (->henkilo {:id "id", :lastName  "lastName", :city "city"} :with-empty-defaults? true)
     => {:userId                        {:value "id"}
         :henkilotiedot {:etunimi       {:value ""}
                         :sukunimi      {:value "lastName"}
