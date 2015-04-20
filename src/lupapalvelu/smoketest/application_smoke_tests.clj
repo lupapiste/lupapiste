@@ -112,13 +112,11 @@
   (timestamp-is-set :closed #{:closed}))
 
 (defmonster permit-type-only-in-single-municipality-scope
-  (let [permit-types-by-municipality (->> @organizations
-                                         (mapcat #(get-in % [:scope]))
-                                         (group-by :municipality)
-                                         (map (fn [[muni scopes]] [muni (map :permitType scopes)])))
-        results                      (filter
-                                       (fn [[_, permit-types]] (not= (count permit-types) (count (distinct permit-types))))
-                                       permit-types-by-municipality)]
+  (let [results (->> @organizations
+                     (mapcat #(get-in % [:scope]))
+                     (group-by :municipality)
+                     (map (fn [[muni scopes]] [muni (map :permitType scopes)]))
+                     (remove #(apply distinct? (second %))))]
     (if (seq results)
       {:ok false :results results}
       {:ok true})))
