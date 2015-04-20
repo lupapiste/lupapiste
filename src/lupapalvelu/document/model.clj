@@ -496,4 +496,7 @@
                 :yritysnimi                    (wrap name)
                 :osoite {:katu                 (wrap address1)
                          :postinumero          (wrap zip)
-                         :postitoimipaikannimi (wrap po)}}))))
+                         :postitoimipaikannimi (wrap po)}})
+        util/strip-nils
+        util/strip-empty-maps
+        tools/wrapped)))
