@@ -699,41 +699,41 @@
       (dorun
         (->> applicants
               (map-indexed
-           (fn [i applicant]
-             (let [applicant-email (get-in applicant [:henkilo :sahkopostiosoite])]
+                (fn [i applicant]
+                  (let [applicant-email (get-in applicant [:henkilo :sahkopostiosoite])]
 
-               ;; Invite applicants
-               (authorization/send-invite!
-                 (update-in command [:data] merge {:email applicant-email
-                                                   :text (i18n/localize lang "invite.default-text")
-                                                   :documentName nil
-                                                   :documentId nil
-                                                   :path nil
-                                                   :role "writer"}))
-               (info "Prev permit application creation, invited " applicant-email " to created app " (get-in command [:data :id]))
+                    ;; Invite applicants
+                    (authorization/send-invite!
+                      (update-in command [:data] merge {:email applicant-email
+                                                        :text (i18n/localize lang "invite.default-text")
+                                                        :documentName nil
+                                                        :documentId nil
+                                                        :path nil
+                                                        :role "writer"}))
+                    (info "Prev permit application creation, invited " applicant-email " to created app " (get-in command [:data :id]))
 
-               ;; Set applicants' user info to Hakija documents
-               (let [document (if (zero? i)
-                                (domain/get-document-by-name application "hakija")
-                                (commands/do-create-doc (assoc-in command [:data :schemaName] "hakija")))
-                     hakija-doc-id (:id document)
+                    ;; Set applicants' user info to Hakija documents
+                    (let [document (if (zero? i)
+                                     (domain/get-document-by-name application "hakija")
+                                     (commands/do-create-doc (assoc-in command [:data :schemaName] "hakija")))
+                          hakija-doc-id (:id document)
 
-                     ;; Not including the id of the invited user into "user-info", so it is not set to personSelector, and validation is thus not done.
-                     ;; If user id would be given, the validation would fail since applicants have not yet accepted their invitations
-                     ;; (see the check in :personSelector validator in model.clj).
-                     user-info {:role "applicant"
-                                :email applicant-email
-                                :username applicant-email
-                                :firstName (get-in applicant [:henkilo :nimi :etunimi])
-                                :lastName (get-in applicant [:henkilo :nimi :sukunimi])
-                                :phone (get-in applicant [:henkilo :puhelin])
-                                :street (get-in applicant [:henkilo :osoite :osoitenimi :teksti])
-                                :zip (get-in applicant [:henkilo :osoite :postinumero])
-                                :city (get-in applicant [:henkilo :osoite :postitoimipaikannimi])
-                                :personId (get-in applicant [:henkilo :henkilotunnus])
-                                :turvakieltokytkin (:turvakieltoKytkin applicant)}]
+                          ;; Not including the id of the invited user into "user-info", so it is not set to personSelector, and validation is thus not done.
+                          ;; If user id would be given, the validation would fail since applicants have not yet accepted their invitations
+                          ;; (see the check in :personSelector validator in model.clj).
+                          user-info {:role "applicant"
+                                     :email applicant-email
+                                     :username applicant-email
+                                     :firstName (get-in applicant [:henkilo :nimi :etunimi])
+                                     :lastName (get-in applicant [:henkilo :nimi :sukunimi])
+                                     :phone (get-in applicant [:henkilo :puhelin])
+                                     :street (get-in applicant [:henkilo :osoite :osoitenimi :teksti])
+                                     :zip (get-in applicant [:henkilo :osoite :postinumero])
+                                     :city (get-in applicant [:henkilo :osoite :postitoimipaikannimi])
+                                     :personId (get-in applicant [:henkilo :henkilotunnus])
+                                     :turvakieltokytkin (:turvakieltoKytkin applicant)}]
 
-                 (commands/set-subject-to-document application document user-info "henkilo" created))))))))))
+                      (commands/set-subject-to-document application document user-info "henkilo" created))))))))))
 
 (defn- do-create-application-from-previous-permit [{:keys [lang user created] :as command} xml app-info location-info]
   (let [{:keys [rakennusvalvontaasianKuvaus vahainenPoikkeaminen hakijat]} app-info
