@@ -376,11 +376,10 @@
       (when (seq text)
         (comment/comment-mongo-update
           (:state application)
-          (i18n/with-lang lang
             (str
-              (i18n/loc "application.canceled.text") ". "
-              (i18n/loc "application.canceled.reason") ": "
-              text))
+            (i18n/localize lang "application.canceled.text") ". "
+            (i18n/localize lang "application.canceled.reason") ": "
+            text)
           {:type "application"}
           (-> command :user :role)
           false
@@ -625,7 +624,8 @@
                                               [owner])
                        :comments            (map #(domain/->comment % {:type "application"} (:role user) user nil created comment-target) messages)
                        :schema-version      (schemas/get-latest-schema-version)
-                       :tosFunction         tos-function})]
+                       :tosFunction         tos-function
+                       :metadata            (tos/metadata-for-document (:id organization) tos-function "hakemus")})]
     (merge application (when-not info-request?
                          {:attachments (make-attachments created op organization state tos-function)
                           :documents   (make-documents user created op application manual-schema-datas)}))))
@@ -701,7 +701,7 @@
 
       (dorun
         (->> applicants
-         (map-indexed
+              (map-indexed
            (fn [i applicant]
              (let [applicant-email (get-in applicant [:henkilo :sahkopostiosoite])]
 

@@ -18,11 +18,11 @@
 
     ; Meta
     (fact "naantali user in naantali & jarvenpaa orgs"
-      (->> naantali-user :user :orgAuthz (map :org)) => ["529-R" "186-R"])
+      (->> naantali-user :user :orgAuthz keys) => (just [:529-R :186-R] :in-any-order))
     (fact "jarvenpaa just jarvenpaa"
-      (->> jarvenpaa-user :user :orgAuthz (map :org)) => ["186-R"])
+      (->> jarvenpaa-user :user :orgAuthz keys) => [:186-R])
     (fact "oulu user in oulu & naantali orgs"
-      (->> oulu-user :user :orgAuthz (map :org)) => ["564-R" "529-R" "564-YMP"])
+      (->> oulu-user :user :orgAuthz keys) => (just [:564-R :529-R :564-YMP] :in-any-order))
 
 
     (let [naantali-sees (:users (query naantali :users-in-same-organizations))
