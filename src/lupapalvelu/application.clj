@@ -305,7 +305,7 @@
 (defcommand mark-everything-seen
   {:parameters [:id]
    :user-roles #{:authority :oirAuthority}
-   :states     action/all-application-states}
+   :states     action/all-states}
   [{:keys [application user created] :as command}]
   (update-application command {$set (mark-indicators-seen-updates application user created)}))
 
