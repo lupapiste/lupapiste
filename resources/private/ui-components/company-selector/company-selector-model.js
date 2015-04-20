@@ -36,8 +36,13 @@ LUPAPISTE.CompanySelectorModel = function(params) {
   };
 
   self.selected.subscribe(function(id) {
-    id = id ? id : "";
-    ajax.command("set-company-to-document", _.assign(params, {companyId: id}))
+    var p = {
+      id: lupapisteApp.models.application.id(),
+      documentId: params.documentId,
+      companyId: id ? id : "",
+      path: params.path
+    };
+    ajax.command("set-company-to-document", p)
     .success(function() {
       function cb() {
         repository.load(lupapisteApp.models.application.id());
