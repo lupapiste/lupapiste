@@ -811,11 +811,10 @@
 
 (defmigration create-transfered-to-backing-system-transfer-entry
   (doseq [collection [:applications :submitted-applications]
-          application (mongo/select collection {$and [{:transfers {$not {$elemMatch {:type "exported-to-backing-system"}}}},
-                                                      {:sent {$ne nil}},
-                                                      {:state "verdictGiven"}]})]
+          application (mongo/select collection {$and [{:transfers {$not {$elemMatch {:type "exported-to-backing-system"}}}}
+                                                      {:sent {$ne nil}}]})]
     (mongo/update-by-id collection (:id application)
-                        {$push {:transfers {:type "export-to-backing-system"
+                        {$push {:transfers {:type "exported-to-backing-system"
                                             :timestamp (:sent application)}}})))
 ;;
 ;; ****** NOTE! ******
