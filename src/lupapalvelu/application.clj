@@ -377,8 +377,8 @@
         (comment/comment-mongo-update
           (:state application)
             (str
-            (i18n/localize lang "application.canceled.text") ". "
-            (i18n/localize lang "application.canceled.reason") ": "
+              (i18n/localize lang "application.canceled.text") ". "
+              (i18n/localize lang "application.canceled.reason") ": "
             text)
           {:type "application"}
           (-> command :user :role)
@@ -690,9 +690,6 @@
                    (map user/canonize-email)
                    set)]
 
-      ;;
-      ;; TODO: Feilataanko koko commandi, jos yksi email on epavalidi ?
-      ;;
       (doseq [email emails]
         ;; action/email-validator returns nil if email was valid
         (when (action/email-validator {:data {:email email}})
@@ -720,9 +717,8 @@
                                 (domain/get-document-by-name application "hakija")
                                 (commands/do-create-doc (assoc-in command [:data :schemaName] "hakija")))
                      hakija-doc-id (:id document)
-                     invited-user (user/get-user-by-email applicant-email)
 
-                     ;; Not including invited-user's id into "user-info", so it is not set to personSelector, and validation is thus not done.
+                     ;; Not including the id of the invited user into "user-info", so it is not set to personSelector, and validation is thus not done.
                      ;; If user id would be given, the validation would fail since applicants have not yet accepted their invitations
                      ;; (see the check in :personSelector validator in model.clj).
                      user-info {:role "applicant"
