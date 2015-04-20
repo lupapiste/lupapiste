@@ -809,6 +809,14 @@
         doc))
     {"documents.schema-info.name" "suunnittelutarveratkaisun-lisaosa"}))
 
+(defmigration create-transfered-to-backing-system-transfer-entry
+  (doseq [collection [:applications :submitted-applications]
+          application (mongo/select collection {$and [{:transfers {$not {$elemMatch {:type "exported-to-backing-system"}}}},
+                                                      {:sent {$ne nil}},
+                                                      {:state "verdictGiven"}]})]
+    (mongo/update-by-id collection (:id application)
+                        {$push {:transfers {:type "export-to-backing-system"
+                                            :timestamp (:sent application)}}})))
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"
