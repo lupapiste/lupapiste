@@ -657,11 +657,12 @@
                                                  :postitoimipaikannimi {:value "city"}}})
 
   (fact "all fields are mapped - empty defaults"
-    (->henkilo {:id "id", :lastName  "lastName", :city "city"} :with-empty-defaults? true)
+    (->henkilo {:id "id" :lastName "lastName" :city "city"} :with-empty-defaults? true)
     => {:userId                        {:value "id"}
         :henkilotiedot {:etunimi       {:value ""}
                         :sukunimi      {:value "lastName"}
-                        :hetu          {:value ""}}
+                        :hetu          {:value ""}
+                        :turvakieltoKytkin {:value false}}
         :yhteystiedot {:email          {:value ""}
                        :puhelin        {:value ""}}
         :osoite {:katu                 {:value ""}
@@ -678,8 +679,10 @@
 
   (fact "some fields are mapped"
     (->henkilo {:firstName "firstName"
-                :zip       "zip"}) => {:henkilotiedot {:etunimi  {:value "firstName"}}
-                                       :osoite {:postinumero     {:value "zip"}}})
+                :zip       "zip"
+                :turvakieltokytkin true}) => {:henkilotiedot {:etunimi {:value "firstName"}
+                                                              :turvakieltoKytkin {:value true}}
+                                              :osoite {:postinumero {:value "zip"}}})
 
   (fact "hetu is mapped"
     (->henkilo {:id       "id"

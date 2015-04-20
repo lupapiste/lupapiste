@@ -461,7 +461,7 @@
        :henkilotiedot {:etunimi       (wrap firstName)
                        :sukunimi      (wrap lastName)
                        :hetu          (wrap (when with-hetu personId))
-                       :turvakieltoKytkin (boolean turvakieltokytkin)}
+                       :turvakieltoKytkin (when (or turvakieltokytkin with-empty-defaults?) (boolean turvakieltokytkin))}
        :yhteystiedot {:email          (wrap email)
                       :puhelin        (wrap phone)}
        :osoite {:katu                 (wrap street)
