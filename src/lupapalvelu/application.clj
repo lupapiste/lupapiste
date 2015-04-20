@@ -793,9 +793,8 @@
 
       ;; Fetch xml data needed for application creation from backing system with the provided kuntalupatunnus.
       ;; Then extract needed data from it to "app info".
-      (let [xml (krysp-fetch-api/get-application-xml
-                  {:id kuntalupatunnus :permitType permit-type :organization organizationId}
-                  false true)]
+      (let [dummy-application {:id kuntalupatunnus :permitType permit-type :organization organizationId}
+            xml (krysp-fetch-api/get-application-xml dummy-application :kuntalupatunnus)]
         (when-not xml (fail! :error.no-previous-permit-found-from-backend))  ;; Show error if could not receive the verdict message xml for the given kuntalupatunnus
 
         (let [app-info (krysp-reader/get-app-info-from-message xml kuntalupatunnus)

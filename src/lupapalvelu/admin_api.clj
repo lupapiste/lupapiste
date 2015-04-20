@@ -12,7 +12,7 @@
   [_]
   (if-let [application (domain/get-application-no-access-checking applicationId)]
     {:status 200
-     :body (krysp-fetch-api/get-application-xml application true)
+     :body (krysp-fetch-api/get-application-xml application :application-id true)
      :headers {"Content-Type" "application/xml;charset=UTF-8"
                "Content-Disposition" (format "attachment;filename=\"%s-%s.xml\"" applicationId (now))
                "Cache-Control" "no-cache"}}

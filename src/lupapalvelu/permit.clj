@@ -32,13 +32,15 @@
   {:subtypes         []
    :sftp-directory   "/rakennus"
    :applicant-doc-schema "hakija"
-   :multiple-parties-allowed true})
+   :multiple-parties-allowed true
+   :wfs-krysp-url-asia-prefix "rakval:luvanTunnisteTiedot/"})
 
 (defpermit YA "Yleisten alueiden luvat"
   {:subtypes             []
    :sftp-directory       "/yleiset_alueet"
    :applicant-doc-schema "hakija-ya"
-   :multiple-parties-allowed false})
+   :multiple-parties-allowed false
+   :wfs-krysp-url-asia-prefix "yak:luvanTunnisteTiedot/"})
 
 (defpermit YI  "Ymparistoilmoitukset"
   {:subtypes       []
@@ -50,25 +52,29 @@
   {:subtypes       []
    :sftp-directory "/ymparisto"
    :applicant-doc-schema "hakija"
-   :multiple-parties-allowed true})
+   :multiple-parties-allowed true
+   :wfs-krysp-url-asia-prefix "ymy:luvanTunnistetiedot/"})
 
 (defpermit VVVL  "Vapautushakemus vesijohtoon ja viemariin liittymisesta"
   {:subtypes       []
    :sftp-directory "/ymparisto"
    :applicant-doc-schema "hakija"
-   :multiple-parties-allowed true})
+   :multiple-parties-allowed true
+   :wfs-krysp-url-asia-prefix "ymv:luvanTunnistetiedot/"})
 
 (defpermit P  "Poikkeusluvat"
   {:subtypes         [poikkeamislupa suunnittelutarveratkaisu]
    :sftp-directory   "/poikkeusasiat"
    :applicant-doc-schema "hakija"
-   :multiple-parties-allowed true})
+   :multiple-parties-allowed true
+   :wfs-krysp-url-asia-prefix "ppst:luvanTunnistetiedot/"})
 
 (defpermit MAL "Maa-ainesluvat"
   {:subtypes       []
    :sftp-directory "/ymparisto"
    :applicant-doc-schema "hakija"
-   :multiple-parties-allowed true})
+   :multiple-parties-allowed true
+   :wfs-krysp-url-asia-prefix "ymm:luvanTunnistetiedot/"})
 
 (defpermit KT "Kiinteistotoimitus"
   {:subtypes       []
@@ -85,7 +91,7 @@
 ;;
 ;; Helpers
 ;;
-(defn- get-metadata [permit-type k & [default]]
+(defn get-metadata [permit-type k & [default]]
   (if permit-type
     (-> (permit-types) (get (name permit-type)) (get k default))
     default))

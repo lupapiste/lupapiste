@@ -63,7 +63,7 @@
     (fact "no xml content received from backend with the kuntalupatunnus"
       (create-app-from-prev-permit raktark-jarvenpaa) => (partial expected-failure? "error.no-previous-permit-found-from-backend")
       (provided
-        (krysp-fetch-api/get-application-xml anything false true) => nil))
+        (krysp-fetch-api/get-application-xml anything anything anything) => nil))
 
     ; 3: jos (krysp-reader/get-app-info-from-message xml kuntalupatunnus) palauttaa nillin -> (fail :error.no-previous-permit-found-from-backend)
     (fact "no application info could be parsed"
@@ -148,5 +148,5 @@
 
     ;; This applies to all tests in this namespace
     (against-background
-      (krysp-fetch-api/get-application-xml anything false true) => example-xml)))
+      (krysp-fetch-api/get-application-xml anything anything anything) => example-xml)))
 

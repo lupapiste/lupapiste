@@ -55,16 +55,13 @@
                           [:MaaAineslupaAsia]
                           [:Vapautus]})
 
-;; For building filters
-(def- yht-tunnus "yht:LupaTunnus/yht:muuTunnustieto/yht:MuuTunnus/yht:tunnus")
-(def- yht-kuntalupatunnus "yht:LupaTunnus/yht:kuntalupatunnus")
-(defn- tunnus-path [prefix kuntalupatunnus?] (str prefix (if kuntalupatunnus? yht-kuntalupatunnus yht-tunnus)))
-(def- asian-lp-lupatunnus (partial tunnus-path "rakval:luvanTunnisteTiedot/"))
-(def- poik-lp-lupatunnus  (partial tunnus-path "ppst:luvanTunnistetiedot/"))
-(def- yl-lp-lupatunnus    (partial tunnus-path "ymy:luvanTunnistetiedot/"))
-(def- mal-lp-lupatunnus   (partial tunnus-path "ymm:luvanTunnistetiedot/"))
-(def- vvvl-lp-lupatunnus  (partial tunnus-path "ymv:luvanTunnistetiedot/"))
-(def- ya-lp-lupatunnus    (partial tunnus-path "yak:luvanTunnisteTiedot/"))
+(defn- get-tunnus-path [permit-type search-type]
+  (let [prefix (permit/get-metadata permit-type :wfs-krysp-url-asia-prefix)
+        tunnus-location (condp = search-type
+                          :application-id  "yht:LupaTunnus/yht:muuTunnustieto/yht:MuuTunnus/yht:tunnus"
+                          :kuntalupatunnus "yht:LupaTunnus/yht:kuntalupatunnus"
+                          (throw (Exception. (str "No wfs krysp search type could be resolved from the given search type key: " search-type))))]
+    (str prefix tunnus-location)))
 
 (def- rakennuksen-kiinteistotunnus "rakval:rakennustieto/rakval:Rakennus/rakval:rakennuksenTiedot/rakval:rakennustunnus/rakval:kiinttun")
 
@@ -73,7 +70,7 @@
   [property value]
   (codec/url-encode (str "<PropertyIsEqualTo><PropertyName>" (escape-xml property) "</PropertyName><Literal>" (escape-xml value) "</Literal></PropertyIsEqualTo>")))
 
-(defn- post-body-for-ya-application [id kuntalupatunnus?]
+(defn- post-body-for-ya-application [id id-path]
   {:body (str "<wfs:GetFeature service=\"WFS\"
         version=\"1.1.0\"
         outputFormat=\"GML2\"
@@ -84,7 +81,7 @@
         <wfs:Query typeName=\"yak:Sijoituslupa,yak:Kayttolupa,yak:Liikennejarjestelylupa,yak:Tyolupa\">
           <ogc:Filter>
             <ogc:PropertyIsEqualTo>
-                       <ogc:PropertyName>" (ya-lp-lupatunnus kuntalupatunnus?) "</ogc:PropertyName>
+                       <ogc:PropertyName>" id-path "</ogc:PropertyName>
                        <ogc:Literal>" id "</ogc:Literal>
             </ogc:PropertyIsEqualTo>
           </ogc:Filter>
@@ -115,22 +112,23 @@
     (debug "Get application: " url)
     (cr/get-xml url credentials raw?)))
 
-(defn rakval-application-xml [server id raw? kuntalupatunnus?] (application-xml rakval-case-type (asian-lp-lupatunnus kuntalupatunnus?) server id raw?))
-(defn poik-application-xml   [server id raw? kuntalupatunnus?] (application-xml poik-case-type (poik-lp-lupatunnus kuntalupatunnus?) server id raw?))
-(defn yl-application-xml     [server id raw? kuntalupatunnus?] (application-xml yl-case-type (yl-lp-lupatunnus kuntalupatunnus?) server id raw?))
-(defn mal-application-xml    [server id raw? kuntalupatunnus?] (application-xml mal-case-type (mal-lp-lupatunnus kuntalupatunnus?) server id raw?))
-(defn vvvl-application-xml   [server id raw? kuntalupatunnus?] (application-xml vvvl-case-type (vvvl-lp-lupatunnus kuntalupatunnus?) server id raw?))
-(defn ya-application-xml     [server id raw? kuntalupatunnus?] (let [options (post-body-for-ya-application id kuntalupatunnus?)
-                                                                     credentials nil]
-                                                                 (debug "Get application: " server " with post body: " options )
-                                                                 (cr/get-xml-with-post server options credentials raw?)))
+(defn rakval-application-xml [server id search-type raw?] (application-xml rakval-case-type (get-tunnus-path permit/R search-type) server id raw?))
+(defn poik-application-xml   [server id search-type raw?] (application-xml poik-case-type   (get-tunnus-path permit/P search-type) server id raw?))
+(defn yl-application-xml     [server id search-type raw?] (application-xml yl-case-type     (get-tunnus-path permit/YL search-type) server id raw?))
+(defn mal-application-xml    [server id search-type raw?] (application-xml mal-case-type    (get-tunnus-path permit/MAL search-type) server id raw?))
+(defn vvvl-application-xml   [server id search-type raw?] (application-xml vvvl-case-type   (get-tunnus-path permit/VVVL search-type) server id raw?))
+(defn ya-application-xml     [server id search-type raw?] (let [options (post-body-for-ya-application id (get-tunnus-path permit/YA search-type))
+                                                                credentials nil]
+                                                            (debug "Get application: " server " with post body: " options )
+                                                            (cr/get-xml-with-post server options credentials raw?)))
 
-(permit/register-function permit/R  :xml-from-krysp rakval-application-xml)
-(permit/register-function permit/P  :xml-from-krysp poik-application-xml)
-(permit/register-function permit/YA :xml-from-krysp ya-application-xml)
-(permit/register-function permit/YL :xml-from-krysp yl-application-xml)
-(permit/register-function permit/MAL :xml-from-krysp mal-application-xml)
+(permit/register-function permit/R    :xml-from-krysp rakval-application-xml)
+(permit/register-function permit/P    :xml-from-krysp poik-application-xml)
+(permit/register-function permit/YA   :xml-from-krysp ya-application-xml)
+(permit/register-function permit/YL   :xml-from-krysp yl-application-xml)
+(permit/register-function permit/MAL  :xml-from-krysp mal-application-xml)
 (permit/register-function permit/VVVL :xml-from-krysp vvvl-application-xml)
+
 
 (defn- pysyva-rakennustunnus
   "Returns national building id or nil if the input was not valid"
