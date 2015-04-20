@@ -26,8 +26,6 @@ LUPAPISTE.CompanySelectorModel = function(params) {
   self.companies = ko.observableArray(getCompanies());
   self.selected = ko.observable(_.isEmpty(params.selected) ? undefined : params.selected);
 
-  console.log(params.selected);
-
   self.setOptionDisable = function(option, item) {
     if (!item) {
       return;
