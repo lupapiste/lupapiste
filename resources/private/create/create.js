@@ -432,6 +432,9 @@
         .pending(self.pending)
         .success(function(data) {
           self.organizationOptions(data.organizations);
+          if (self.organizationOptions().length) {
+            self.selectedPrevPermitOrganization(self.organizationOptions()[0].id);
+          }
         })
         .call();
     };
