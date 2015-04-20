@@ -109,9 +109,9 @@
   (get-metadata permit-type :review-krysp-mapper))
 
 (defn get-verdict-reader [permit-type]
-  "Returns a function that reads verdics (sequence) from KRYSP xml.
+  "Returns a function that reads verdicts (sequence) from KRYSP xml.
    Function takes xml as parameter.
-   Use ((get-application-xml-getter permit-type) url application-id) to fetch the XML."
+   Use get-application-xml-getter to fetch the XML."
   (get-metadata permit-type :verdict-krysp-reader))
 
 (defn get-verdict-extras-reader [permit-type]
@@ -123,8 +123,8 @@
   "Returns a function that fetches KRYSP XML from municipality backend.
    Function parameters: 1) url,
                         2) id,
-                        3) optional boolean parameter: raw form
-                        4) optional boolean parameter: if true the id parameter is interpreted as kuntalupatunnus instead of application id."
+                        3) optional boolean parameter: search-type (e.g. :application-id or :kuntalupatunnus)
+                        4) optional boolean parameter: raw form."
   (get-metadata permit-type :xml-from-krysp))
 
 (defn multiple-parties-allowed? [permit-type]
