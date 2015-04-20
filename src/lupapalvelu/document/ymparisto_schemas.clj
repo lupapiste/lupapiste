@@ -100,6 +100,7 @@
            :order 6
            :removable false
            :approvable true
+           :subtype :maksaja
            :type :party}
      :body maksaja}
    {:info {:name "yl-hankkeen-kuvaus"
