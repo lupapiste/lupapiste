@@ -100,7 +100,7 @@
 (defn do-set-company-to-document [application document company-id path user timestamp]
   {:pre [document]}
   (when-not (ss/blank? company-id)
-    (let [path-arr (if-not (ss/blank? path) (s/split path #"/.") [])
+    (let [path-arr (if-not (ss/blank? path) (s/split path #"\.") [])
           schema (schemas/get-schema (:schema-info document))
           subject (c/find-company-by-id company-id)
           company (tools/unwrapped (model/->company subject user :with-empty-defaults true))
