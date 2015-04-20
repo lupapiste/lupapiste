@@ -385,21 +385,21 @@
                                :type :group
                                :whitelist {:roles [:authority]
                                            :otherwise :hidden}
-                               :body [{:name "tyonjohtajanHyvaksynta" :type :checkbox :i18nkey "tyonjohtaja.historia.hyvaksynta"}
-                                      tyonjohtajan-historia]}])
+                               :body [tyonjohtajan-historia
+                                      {:name "tyonjohtajanHyvaksynta" :type :checkbox :i18nkey "tyonjohtaja.historia.hyvaksynta"}]}])
 
 (def tyonjohtaja-v2 (body
-                      tyonjohtajan-hyvaksynta
+                      tayta-omat-tiedot-button
+                      designer-basic
                       ilmoitus-hakemus-valitsin
                       kuntaroolikoodi-tyonjohtaja-v2
                       patevyysvaatimusluokka
                       vastattavat-tyotehtavat-tyonjohtaja-v2
                       tyonjohtaja-hanketieto
-                      tayta-omat-tiedot-button
-                      designer-basic
-                      muut-rakennushankkeet-table
+                      sijaisuus-tyonjohtaja
                       {:name "patevyys-tyonjohtaja" :type :group :body patevyys-tyonjohtaja-v2}
-                      sijaisuus-tyonjohtaja))
+                      muut-rakennushankkeet-table
+                      tyonjohtajan-hyvaksynta))
 
 (def maksaja (body
                (henkilo-yritys-select-group :yritys-body yritys-with-verkkolaskutustieto)
