@@ -224,12 +224,18 @@
                             <tbody data-bind="foreach: value">
                             <tr>
                               <td data-bind="text: name"></td>
-                              <td data-bind="text: value"></td>
+                              <td>
+                                <span data-bind="text: value"></span>
+                                <span data-bind="if: isFinite(value)"> vuotta</span>
+                              </td>
                             </tr>
                             </tbody>
                           </table>
                         </div>
-                        <span data-bind="if: typeof(value) != 'object'"><span data-bind="text: value"></span></span>
+                        <span data-bind="if: typeof(value) != 'object'">
+                          <span data-bind="text: value"></span>
+                          <span data-bind="if: isFinite(value)"> vuotta</span>
+                        </span>
                       </td>
                     </tr>
                   </tbody>

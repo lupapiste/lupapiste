@@ -39,7 +39,11 @@
   (let [orgId (:organization application)
         code-valid? (some #{functionCode} (map :code (t/available-tos-functions orgId)))]
     (if code-valid?
-      (action/update-application command
-                                 {$set {:modified created
-                                        :tosFunction functionCode}})
+      (let [updated-attachments (map #(t/document-with-updated-metadata % orgId functionCode) (:attachments application))
+            updated-metadata (t/metadata-for-document orgId functionCode "hakemus")]
+        (action/update-application command
+                                   {$set {:modified created
+                                          :tosFunction functionCode
+                                          :metadata updated-metadata
+                                          :attachments updated-attachments}}))
       (fail "Invalid TOS function code"))))

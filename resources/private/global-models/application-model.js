@@ -59,6 +59,8 @@ LUPAPISTE.ApplicationModel = function() {
   self.statements = ko.observable([]);
   self.tasks = ko.observable([]);
   self.tosFunction = ko.observable();
+  self.metadataList = ko.observableArray();
+
   self.taskGroups = ko.computed(function() {
     var tasks = ko.toJS(self.tasks) || [];
     // TODO query without foreman tasks
