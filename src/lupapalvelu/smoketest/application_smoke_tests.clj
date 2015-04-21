@@ -113,7 +113,7 @@
 
 (defmonster permit-type-only-in-single-municipality-scope
   (let [results (->> @organizations
-                     (mapcat #(get-in % [:scope]))
+                     (mapcat :scope)
                      (group-by :municipality)
                      (map (fn [[muni scopes]] [muni (map :permitType scopes)]))
                      (remove #(apply distinct? (second %))))]
