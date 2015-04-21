@@ -373,6 +373,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         if (!timestamp) {
           return true;
         }
+        if (!_.isObject(model)) {
+          return false; // whitelist-action : "disabled"
+        }
         if (_.has(model, "value")) {
           // Leaf
           return model.modified && model.modified > timestamp;
