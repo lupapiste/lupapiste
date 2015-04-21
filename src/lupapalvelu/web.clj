@@ -184,7 +184,6 @@
         (resp/status 401 "Unauthorized")
         (assoc-in [:headers "WWW-Authenticate"] "Basic realm=\"Lupapiste\"")))))
 
-
 (defpage "/api/raw/:name" {name :name}
   (let [request (request/ring-request)
         response (execute (enriched (action/make-raw name (from-query request)) request))]
