@@ -127,6 +127,13 @@
                 (domain/no-pending-invites? application v))
       [:err "application-does-not-have-given-auth"])))
 
+(defmethod validate-field :companySelector [application elem v]
+  (when-not (ss/blank? v)
+    (when-not (and
+                (domain/has-auth? application v)
+                (domain/no-pending-invites? application v))
+      [:err "application-does-not-have-given-auth"])))
+
 (defmethod validate-field :fillMyInfoButton [_ _ _] nil)
 (defmethod validate-field :foremanHistory [_ _ _] nil)
 (defmethod validate-field :foremanOtherApplications [_ _ _] nil)
@@ -477,3 +484,20 @@
       util/strip-empty-maps
       tools/wrapped)))
 
+(defn ->company [{:keys [id name y address1 zip po]} {:keys [phone firstName lastName email company]} & {:keys [with-empty-defaults]}]
+  (prn id company)
+  (letfn [(wrap [v] (if (and with-empty-defaults (nil? v)) "" v))]
+    (-> (if (= (:id company) id)
+          {:yhteyshenkilo {:henkilotiedot {:etunimi  (wrap firstName)
+                                           :sukunimi (wrap lastName)}
+                           :yhteystiedot  {:email    (wrap email)
+                                           :puhelin  (wrap phone)}}}
+          {})
+        (merge {:liikeJaYhteisoTunnus          (wrap y)
+                :yritysnimi                    (wrap name)
+                :osoite {:katu                 (wrap address1)
+                         :postinumero          (wrap zip)
+                         :postitoimipaikannimi (wrap po)}})
+        util/strip-nils
+        util/strip-empty-maps
+        tools/wrapped)))
