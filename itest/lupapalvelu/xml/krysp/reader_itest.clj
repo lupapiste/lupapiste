@@ -137,7 +137,8 @@
                                :userId nil
                                :yhteystiedot {:email "", :puhelin ""}}
                      :muu-omistajalaji "", :omistajalaji nil
-                     :yritys {:liikeJaYhteisoTunnus "1234567-1"
+                     :yritys {:companyId nil
+                              :liikeJaYhteisoTunnus "1234567-1"
                               :osoite {:katu "Testikatu 1 A 11477"
                                        :postinumero "00380"
                                        :postitoimipaikannimi "HELSINKI"}
