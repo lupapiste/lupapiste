@@ -10,8 +10,19 @@
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch-api]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
             [lupapalvelu.organization :as organization]
-            [lupapalvelu.action :refer [defcommand]]
+            [lupapalvelu.action :refer [defcommand defraw]]
             [lupapalvelu.prev-permit :as prev-permit]))
+
+(defraw get-lp-id-from-previous-permit
+  {:parameters [:kuntalupatunnus]
+   :input-validators [(partial action/non-blank-parameters [:kuntalupatunnus])]
+   :user-roles #{:anonymous}}
+  [{{:keys [kuntalupatunnus]} :data}]
+
+  {:status 200
+   :headers {"Content-Type" "text/plain"}
+   :body (str "kuntalupatunnus: " kuntalupatunnus)}
+  )
 
 (defcommand create-application-from-previous-permit
   {:parameters       [:lang :operation :x :y :address :propertyId :organizationId :kuntalupatunnus]
