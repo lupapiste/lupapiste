@@ -59,9 +59,27 @@
     {:fileId fileId
      :filename (writer/get-file-name-on-server fileId (get-in attachment [:latestVersion :filename]))}))
 
+(defn- enrich-attachment-with-operation [attachment operations]
+  (if-let [op-id (get-in attachment [:op :id])]
+    (assoc-in
+      attachment
+      [:op :name]
+      (some
+        #(when (= op-id (:id %))
+           (:name %))
+        operations))
+    attachment))
+
+(defn enrich-attachments-with-operation-data [attachments operations]
+  (mapv #(enrich-attachment-with-operation % operations) attachments))
+
+(defn enrich-application [application]
+  (update-in application [:attachments] enrich-attachments-with-operation-data (:operations application)))
+
 (defn uusi-asia-from-application [application lang ah-version submitted-application begin-of-link output-dir]
   "Construct UusiAsia XML message. Writes XML and attachments to disk (output-dir)"
-  (let [canonical (canonical/application-to-asianhallinta-canonical application lang)
+  (let [application (enrich-application application)
+        canonical (canonical/application-to-asianhallinta-canonical application lang)
         attachments-canonical (canonical/get-attachments-as-canonical (:attachments application) begin-of-link)
         attachments-with-pdfs (conj attachments-canonical
                                 (canonical/get-submitted-application-pdf application begin-of-link)
