@@ -1,6 +1,7 @@
 (ns lupapalvelu.attachment-test
   (:require [clojure.string :as s]
             [sade.strings :refer [encode-filename]]
+            [sade.env :as env]
             [monger.core :as monger]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.attachment :refer :all]
@@ -132,38 +133,39 @@
 
     (count all-except-commons) => (count all-unique)))
 
-(fact "make attachments with metadata"
-  (let [types-with-metadata [{:type :a :metadata {"foo" "bar"}} {:type :b :metadata {"bar" "baz"}}]]
-    (make-attachments 999 :draft types-with-metadata false true true) => (just
-                                                                           [{:id "123"
-                                                                             :locked false
-                                                                             :modified 999
-                                                                             :op nil
-                                                                             :state :requires_user_action
-                                                                             :target nil
-                                                                             :type :a
-                                                                             :applicationState :draft
-                                                                             :signatures []
-                                                                             :versions []
-                                                                             :notNeeded false
-                                                                             :required true
-                                                                             :requestedByAuthority true
-                                                                             :forPrinting false
-                                                                             :metadata {"foo" "bar"}}
-                                                                            {:id "123"
-                                                                             :locked false
-                                                                             :modified 999
-                                                                             :op nil
-                                                                             :state :requires_user_action
-                                                                             :target nil
-                                                                             :type :b
-                                                                             :applicationState :draft
-                                                                             :signatures []
-                                                                             :versions []
-                                                                             :notNeeded false
-                                                                             :required true
-                                                                             :requestedByAuthority true
-                                                                             :forPrinting false
-                                                                             :metadata {"bar" "baz"}}])
-    (provided
-      (mongo/create-id) => "123")))
+(when (env/feature? :tiedonohjaus)
+  (fact "make attachments with metadata"
+    (let [types-with-metadata [{:type :a :metadata {"foo" "bar"}} {:type :b :metadata {"bar" "baz"}}]]
+      (make-attachments 999 :draft types-with-metadata false true true) => (just
+                                                                             [{:id "123"
+                                                                               :locked false
+                                                                               :modified 999
+                                                                               :op nil
+                                                                               :state :requires_user_action
+                                                                               :target nil
+                                                                               :type :a
+                                                                               :applicationState :draft
+                                                                               :signatures []
+                                                                               :versions []
+                                                                               :notNeeded false
+                                                                               :required true
+                                                                               :requestedByAuthority true
+                                                                               :forPrinting false
+                                                                               :metadata {"foo" "bar"}}
+                                                                              {:id "123"
+                                                                               :locked false
+                                                                               :modified 999
+                                                                               :op nil
+                                                                               :state :requires_user_action
+                                                                               :target nil
+                                                                               :type :b
+                                                                               :applicationState :draft
+                                                                               :signatures []
+                                                                               :versions []
+                                                                               :notNeeded false
+                                                                               :required true
+                                                                               :requestedByAuthority true
+                                                                               :forPrinting false
+                                                                               :metadata {"bar" "baz"}}])
+      (provided
+        (mongo/create-id) => "123"))))

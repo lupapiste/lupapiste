@@ -4612,7 +4612,24 @@ span.icon_clear:before {
 }
 /* line 719, ../sass/views/_application.scss */
 .organizationLinks .organization-links a:active, .organizationLinks .organization-links a:visited, .organizationLinks .organization-links a:hover {
+<<<<<<< mine
   color: #333;
+=======
+  color: #333;
+}
+
+/* line 727, ../sass/views/_application.scss */
+#application-metadata-tab h1 {
+  float: none;
+}
+/* line 730, ../sass/views/_application.scss */
+#application-metadata-tab .table-metadata {
+  max-width: 875px;
+}
+/* line 732, ../sass/views/_application.scss */
+#application-metadata-tab .table-metadata .metadata-key {
+  width: 175px;
+>>>>>>> theirs
 }
 
 /* line 1, ../sass/views/_create_application.scss */

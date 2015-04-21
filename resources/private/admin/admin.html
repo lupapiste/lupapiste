@@ -8,8 +8,19 @@
 
         <h2>Lataa xml taustaj&auml;rjestelm&auml;st&auml;</h2>
         <form action="/api/raw/admin-download-application-xml" method="get">
-        <input type="hidden" name="__anti-forgery-token" data-bind="value: $.cookie('anti-csrf-token')">
-        <input type="text" name="applicationId" placeholder="LP-tunnus"><input type="submit" value="Lataa">
+          <input type="hidden" name="__anti-forgery-token" data-bind="value: $.cookie('anti-csrf-token')">
+          <input type="text" name="applicationId" placeholder="LP-tunnus">
+          <input type="submit" value="Lataa">
+        </form>
+
+        <h2>Lataa xml taustaj&auml;rjestelm&auml;st&auml; kuntalupatunnuksella</h2>
+        <form action="/api/raw/admin-download-application-xml-with-kuntalupatunnus" method="get">
+          <input type="hidden" name="__anti-forgery-token" data-bind="value: $.cookie('anti-csrf-token')">
+          <input type="text" name="kuntalupatunnus" placeholder="kuntalupatunnus">
+<!--           TODO: Tee permit-typeille dropdown -->
+          <input type="text" name="municipality" placeholder="kunnan id, esim. '753'">
+          <input type="text" name="permitType" placeholder="lupatyyppi, esim. 'R'">
+          <input type="submit" value="Lataa">
         </form>
 
       </div>

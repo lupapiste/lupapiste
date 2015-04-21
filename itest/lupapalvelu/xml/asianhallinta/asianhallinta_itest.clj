@@ -108,9 +108,9 @@
               (let [operations (sxml/select xml [:UusiAsia :Toimenpiteet :Toimenpide])]
                 (count operations) => (count (:operations updated-application))
                 (sxml/get-text operations [:ToimenpideTunnus]) => (-> updated-application :operations first :name)))
-            
+
             (fact "Link permits do not exist" (sxml/select xml [:UusiAsia :Viiteluvat]) => empty?))))))
-  
+
   (facts "UusiAsia with link permits"
     (let [link-app-id (create-app-id
                          pena
@@ -295,7 +295,7 @@
             scope (:scope resp)]
         resp => ok?
         scope => truthy
-        (every? #(= {:enabled false :version "1.1"} %) (map :caseManagement scope)) => true))
+        (get scope :caseManagement) => nil? ))
 
     (facts "Kuopio auth admin"
       (fact "query asianhallinta-config, response has scope with one caseManagement having FTP user"
