@@ -485,7 +485,6 @@
       tools/wrapped)))
 
 (defn ->company [{:keys [id name y address1 zip po]} {:keys [phone firstName lastName email company]} & {:keys [with-empty-defaults]}]
-  (prn id company)
   (letfn [(wrap [v] (if (and with-empty-defaults (nil? v)) "" v))]
     (-> (if (= (:id company) id)
           {:yhteyshenkilo {:henkilotiedot {:etunimi  (wrap firstName)
