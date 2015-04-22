@@ -291,6 +291,16 @@
     :private {:password "$2a$10$eYl/SxvzYzOfIDIqjQIZ8.uhi57zPKg0m8J1BHwnAIx/sBcxYojvS"
               :apikey "a0ac77ecd2e6c2ea6e73f852"}}
 
+   {:id "jarvenpaa-backend"
+    :username "jarvenpaa-backend"
+    :email "jarvenpaa@example.com"
+    :firstName "J\u00E4rvenp\u00E4\u00E4"
+    :lastName "Taustaj\u00E4rjestelm\u00E4"
+    :enabled true
+    :role "rest-api"
+    :private {:password "$2a$10$eYl/SxvzYzOfIDIqjQIZ8.uhi57zPKg0m8J1BHwnAIx/sBcxYojvS"} ;jarvenpaa
+    :organizations ["187-R"]}
+
    ;; Loppi
 
    ;; Arto Viranomainen - Lopen R lupa-arkkitehti:  arto / arto

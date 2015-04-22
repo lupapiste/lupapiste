@@ -20,6 +20,7 @@
                  {$or [{:auth.id (:id user)} {:auth.id company-id}]}
                  {:auth.id (:id user)})
     :authority {$or [{:organization {$in (:organizations user)}} {:auth.id (:id user)}]}
+    :rest-api  {$or [{:organization {$in (:organizations user)}} {:auth.id (:id user)}]}
     :oirAuthority {:organization {$in (:organizations user)}}
     :trusted-etl {}
     (do
