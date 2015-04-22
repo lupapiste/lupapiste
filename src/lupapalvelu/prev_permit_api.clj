@@ -17,21 +17,25 @@
 
 (defn- fetch-prev-application! [{:keys [user] :as command} kuntalupatunnus]
   (let [organization      (first (:organizations user))
+        permit-type       (operations/permit-type-of-operation :aiemmalla-luvalla-hakeminen)
         dummy-application {:id kuntalupatunnus
-                           :permitType (operations/permit-type-of-operation :aiemmalla-luvalla-hakeminen)
+                           :permitType permit-type
                            :organization organization}
         xml (krysp-fetch-api/get-application-xml dummy-application :kuntalupatunnus)]
     (when-not xml (fail! :error.no-previous-permit-found-from-backend)) ;; Show error if could not receive the verdict message xml for the given kuntalupatunnus
 
-    (let [app-info (krysp-reader/get-app-info-from-message xml kuntalupatunnus)
-          rakennuspaikka-exists (and (:rakennuspaikka app-info)
-                                     (every? (-> app-info :rakennuspaikka keys set) [:x :y :address :propertyId]))]
+    (let [app-info               (krysp-reader/get-app-info-from-message xml kuntalupatunnus)
+          rakennuspaikka-exists? (and (:rakennuspaikka app-info)
+                                      (every? (-> app-info :rakennuspaikka keys set) [:x :y :address :propertyId]))
+          organizations-match?   (= organization (:id (organization/resolve-organization (:municipality app-info) permit-type)))]
+
       (cond
-        (empty? app-info)           (fail! :error.no-previous-permit-found-from-backend)
-        (not rakennuspaikka-exists) (fail! :error.more-prev-app-info-needed)
-        :else                       (let [location-info (:rakennuspaikka app-info)
-                                          created-app-id (prev-permit/do-create-application-from-previous-permit command xml app-info location-info)]
-                                      (ok :id created-app-id))))))
+        (empty? app-info)            (fail! :error.no-previous-permit-found-from-backend)
+        (not rakennuspaikka-exists?) (fail! :error.more-prev-app-info-needed)
+        (not organizations-match?)   (fail! :error.previous-permit-found-from-backend-is-of-different-organization)
+        :else                        (let [location-info (:rakennuspaikka app-info)
+                                           created-app-id (prev-permit/do-create-application-from-previous-permit command xml app-info location-info)]
+                                       (ok :id created-app-id))))))
 
 (defraw get-lp-id-from-previous-permit
   {:parameters [kuntalupatunnus]
