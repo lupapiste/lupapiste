@@ -424,13 +424,9 @@
                                    enabled: $root.authorization.ok('invite-with-role')"
                         onclick="$('#invite-document-name').val('').change();$('#invite-document-path').val('').change();$('#invite-document-id').val('').change();LUPAPISTE.ModalDialog.open('#dialog-valtuutus');return false;">
                   </button>
-                  <button class="btn-primary"
-                        data-test-id="company-invite"
-                        data-bind="ltext: 'company-invite.invite',
-                                   visible: $root.authorization.ok('invite-with-role'),
-                                   enabled: $root.authorization.ok('invite-with-role'),
-                                   click: $root.openInviteCompany">
-                  </button>
+
+                  <company-invite/>
+
                 </div>
               </div>
             </div>
@@ -604,7 +600,7 @@
                </button>
               <h2 class="missing-info-title"
                   data-bind="ltext: 'application.requiredDataMissing'"></h2>
-              
+
             <!-- /ko -->
 
             <!--  ko if: hasIncorrectlyFilledRequiredFields() -->

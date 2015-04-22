@@ -45,7 +45,7 @@
                                    :fileId "file123"
                                    :filename "valtakirja.pdf"
                                    :contentType "application/pdf"}
-                   :op {:name "poikkeaminen"}
+                   :op {:id "523844e1da063788effc1c56"}
                    :modified 1424248442767}
                   {:id :attachment3
                    :type {:type-group "paapiirustus"
@@ -58,7 +58,7 @@
 
 (fl/facts*
   "UusiAsia xml from suunnittelija application"
-  (let [application    rakennus-test/application-suunnittelijan-nimeaminen
+  (let [application    (ua-mapping/enrich-application rakennus-test/application-suunnittelijan-nimeaminen)
         canonical      (ah/application-to-asianhallinta-canonical application "fi") => truthy
         schema-version "ah-1.1"
         mapping        (ua-mapping/get-ua-mapping (ss/suffix schema-version "-"))
@@ -81,7 +81,8 @@
 
 (fl/facts*
   "UusiAsia xml from application with two link permits"
-  (let [application    (update-in rakennus-test/application-suunnittelijan-nimeaminen [:linkPermitData] conj link-permit-data-kuntalupatunnus)
+  (let [application    (ua-mapping/enrich-application
+                         (update-in rakennus-test/application-suunnittelijan-nimeaminen [:linkPermitData] conj link-permit-data-kuntalupatunnus))
         canonical      (ah/application-to-asianhallinta-canonical application "fi") => truthy
         schema-version "ah-1.1"
         mapping        (ua-mapping/get-ua-mapping (ss/suffix schema-version "-"))
@@ -102,7 +103,8 @@
           (sxml/get-text (second content) [:Sovellus]) => "Taustaj\u00E4rjestelm\u00E4")))))
 
 (fl/facts* "UusiAsia xml from poikkeus"
-  (let [application    (assoc poikkeus-test/poikkari-hakemus :attachments attachments)
+  (let [application    (ua-mapping/enrich-application
+                         (assoc poikkeus-test/poikkari-hakemus :attachments attachments))
         canonical      (ah/application-to-asianhallinta-canonical application "fi") => truthy
         canonical      (assoc-in canonical
                          [:UusiAsia :Liitteet :Liite]
@@ -203,7 +205,7 @@
                     (sxml/get-text (:content (second metas)) [:Arvo]) => (get-in attachments [1 :type :type-id]))
                   (fact "Operation meta check"
                     (sxml/get-text (:content (last metas)) [:Avain]) => "operation"
-                    (sxml/get-text (:content (last metas)) [:Arvo]) => (get-in attachments [1 :op :name])))))))
+                    (sxml/get-text (:content (last metas)) [:Arvo]) => (-> application :operations first :name)))))))
 
         (facts "Toimenpiteet"
           (let [operations (sxml/select1 xml-parsed [:UusiAsia :Toimenpiteet])

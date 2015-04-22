@@ -123,7 +123,8 @@
       (when (not-any? #(or
                          (= "reminder-sent" (:state %))
                          (= "response-given-ok" (:state %))
-                         (= "response-given-comments" (:state %))) statuses)
+                         (= "response-given-comments" (:state %))
+                         (= "mark-done" (:state %))) statuses)
 
         (doseq [status statuses]
 
