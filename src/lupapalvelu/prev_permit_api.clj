@@ -47,8 +47,8 @@
         (when-not xml (fail! :error.no-previous-permit-found-from-backend))
 
         (let [app-info (krysp-reader/get-app-info-from-message xml kuntalupatunnus)
-              rakennuspaikka-exists (and (:rakennuspaikka app-info) (every? (-> app-info :rakennuspaikka keys set) [:x :y :address :propertyId]))
-              lupapiste-tunnus (:id app-info)]
+              rakennuspaikka-exists (and (:rakennuspaikka app-info) (every? (-> app-info :rakennuspaikka keys set) [:x :y :address :propertyId]))]
+
           ;; Could not extract info from verdict message xml
           (when (empty? app-info)
             (fail! :error.no-previous-permit-found-from-backend))
@@ -61,16 +61,10 @@
               (info "Prev permit application creation, rakennuspaikkatieto information incomplete:\n " (:rakennuspaikka app-info) "\n"))
             (fail! :error.more-prev-app-info-needed :needMorePrevPermitInfo true))
 
-          (if (ss/blank? lupapiste-tunnus)
-            ;; NO LUPAPISTE ID FOUND -> create the application
-            (let [location-info (cond
-                                  rakennuspaikka-exists (:rakennuspaikka app-info)
-                                  ;; TODO: Pitaisiko kayttaa taman propertyId:ta yms tietoja, kalilta annettujen sijaan (kts alla 'enough-info-from-parameters')?
-                                  ;(:ensimmainen-rakennus app-info) (:ensimmainen-rakennus app-info)
-                                  enough-info-from-parameters {:x x :y y :address address :propertyId propertyId})
-                  created-app-id (prev-permit/do-create-application-from-previous-permit command xml app-info location-info)]
-              (ok :id created-app-id))
-            ;; LUPAPISTE ID WAS FOUND -> open it if user has rights, otherwise show error
-            (if-let [existing-application (domain/get-application-as lupapiste-tunnus user)]
-              (ok :id (:id existing-application))
-              (fail :error.lupapiste-application-already-exists-but-unauthorized-to-access-it :id lupapiste-tunnus))))))))
+          (let [location-info (cond
+                                rakennuspaikka-exists (:rakennuspaikka app-info)
+                                ;; TODO: Pitaisiko kayttaa taman propertyId:ta yms tietoja, kalilta annettujen sijaan (kts alla 'enough-info-from-parameters')?
+                                ;(:ensimmainen-rakennus app-info) (:ensimmainen-rakennus app-info)
+                                enough-info-from-parameters {:x x :y y :address address :propertyId propertyId})
+                created-app-id (prev-permit/do-create-application-from-previous-permit command xml app-info location-info)]
+            (ok :id created-app-id)))))))
