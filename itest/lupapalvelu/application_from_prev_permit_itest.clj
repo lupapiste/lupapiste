@@ -41,23 +41,11 @@
       (create-app-from-prev-permit raktark-jarvenpaa :operation "") => (partial expected-failure? "error.missing-parameters"))
 
 
-    ; 1: Kannassa on hakemus, jonka organization ja verdictin kuntalupatunnus matchaa haettuihin
-    (facts "db has app that has the kuntalupatunnus in its verdict and its organization matches"
-      ; 1 a: avaa hakemus, jos on oikeudet sille -> (ok :id lupapiste-tunnus)
-      (fact "has rights to the found app"
-        (create-app-from-prev-permit raktark-jarvenpaa) => (contains {:ok true :id "lupis-id"})
-        (provided
-          (domain/get-application-as anything anything) => {:id "lupis-id"}))
-      ; 1 b: jos ei oikeuksia -> (fail :error.lupapiste-application-already-exists-but-unauthorized-to-access-it :id (:id app-with-verdict))
-      (fact "does not have rights to the found app"
-        (create-app-from-prev-permit raktark-jarvenpaa) => (contains {:ok false
-                                                                      :id "lupis-id"
-                                                                      :text "error.lupapiste-application-already-exists-but-unauthorized-to-access-it"})
-        (provided
-          (domain/get-application-as anything anything) => nil))
-
-      (against-background
-        (domain/get-application-no-access-checking anything) => {:id "lupis-id"}))
+    ; 1: Kannassa on hakemus, jonka organization ja verdictin kuntalupatunnus matchaa haettuihin. Palautuu lupapiste-tunnus, jolloin hakemus avataan.
+    (fact "db has app that has the kuntalupatunnus in its verdict and its organization matches"
+      (create-app-from-prev-permit raktark-jarvenpaa) => (contains {:ok true :id "lupis-id"})
+      (provided
+        (domain/get-application-as anything anything) => {:id "lupis-id"}))
 
     ; 2: jos taustajarjestelmasta ei saada xml-sisaltoa -> (fail :error.no-previous-permit-found-from-backend)
     (fact "no xml content received from backend with the kuntalupatunnus"

@@ -1,5 +1,6 @@
 (ns lupapalvelu.prev-permit-api
-  (:require [lupapalvelu.action :as action]
+  (:require [taoensso.timbre :refer [info]]
+            [lupapalvelu.action :as action]
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.core :refer :all]
@@ -30,13 +31,12 @@
 
     ;; Prevent creating many applications based on the same kuntalupatunnus:
     ;; Check if we have in database an application of same organization that has a verdict with the given kuntalupatunnus.
-    (if-let [app-with-verdict (domain/get-application-no-access-checking {:organization organizationId
-                                                                          :verdicts     {$elemMatch {:kuntalupatunnus kuntalupatunnus}}})]
-
-      ;; Found an application of same organization that has a verdict with the given kuntalupatunnus. Open it if user has rights, otherwise show error.
-      (if-let [existing-app (domain/get-application-as (:id app-with-verdict) user)]
-        (ok :id (:id existing-app))
-        (fail :error.lupapiste-application-already-exists-but-unauthorized-to-access-it :id (:id app-with-verdict)))
+    (if-let [app-with-verdict (domain/get-application-as
+                                {:organization organizationId
+                                 :verdicts     {$elemMatch {:kuntalupatunnus kuntalupatunnus}}}
+                                user)]
+      ;;Found an application of same organization that has a verdict with the given kuntalupatunnus -> Open it.
+      (ok :id (:id app-with-verdict))
 
       ;; Fetch xml data needed for application creation from backing system with the provided kuntalupatunnus.
       ;; Then extract needed data from it to "app info".
