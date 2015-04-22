@@ -15,33 +15,23 @@
             [noir.response :as resp]))
 
 
-(defn- try-fetch-prev-application! [kuntalupatunnus organization permit-type command]
-  (let [dummy-application {:id kuntalupatunnus :permitType permit-type :organization organization}
+(defn- fetch-prev-application! [{:keys [user] :as command} kuntalupatunnus]
+  (let [organization      (first (:organizations user))
+        dummy-application {:id kuntalupatunnus
+                           :permitType (operations/permit-type-of-operation :aiemmalla-luvalla-hakeminen)
+                           :organization organization}
         xml (krysp-fetch-api/get-application-xml dummy-application :kuntalupatunnus)]
     (when-not xml (fail! :error.no-previous-permit-found-from-backend)) ;; Show error if could not receive the verdict message xml for the given kuntalupatunnus
 
     (let [app-info (krysp-reader/get-app-info-from-message xml kuntalupatunnus)
-          rakennuspaikka-exists (and (:rakennuspaikka app-info) (every? (-> app-info :rakennuspaikka keys set) [:x :y :address :propertyId]))
-          lupapiste-tunnus (:id app-info)]
-      ;; Could not extract info from verdict message xml
-      (when (empty? app-info)
-        (fail! :error.no-previous-permit-found-from-backend))
-      ;; Given organization and the organization in the verdict message xml differ from each other
-      (when-not (= organization (:id (organization/resolve-organization (:municipality app-info) permit-type)))
-        (fail! :error.previous-permit-found-from-backend-is-of-different-organization))
-      ;; This needs to be last of these error chekcs! Did not get the "rakennuspaikkatieto" element in the xml, so let's ask more needed location info from user.
-      (when-not rakennuspaikka-exists
-        (fail! :error.more-prev-app-info-needed :needMorePrevPermitInfo true))
-
-      (if (ss/blank? lupapiste-tunnus)
-        ;; NO LUPAPISTE ID FOUND -> create the application
-        (let [location-info (:rakennuspaikka app-info)
-              created-app-id (prev-permit/do-create-application-from-previous-permit command xml app-info location-info)]
-          (ok :id created-app-id))
-        ;; LUPAPISTE ID WAS FOUND -> open it if user has rights, otherwise show error
-        (if-let [existing-application (domain/get-application-as lupapiste-tunnus (:user command))]
-          (resp/status 200 (str (ok :id (:id existing-application))))
-          (fail :error.lupapiste-application-already-exists-but-unauthorized-to-access-it :id lupapiste-tunnus))))))
+          rakennuspaikka-exists (and (:rakennuspaikka app-info)
+                                     (every? (-> app-info :rakennuspaikka keys set) [:x :y :address :propertyId]))]
+      (cond
+        (empty? app-info)           (fail! :error.no-previous-permit-found-from-backend)
+        (not rakennuspaikka-exists) (fail! :error.more-prev-app-info-needed)
+        :else                       (let [location-info (:rakennuspaikka app-info)
+                                          created-app-id (prev-permit/do-create-application-from-previous-permit command xml app-info location-info)]
+                                      (ok :id created-app-id))))))
 
 (defraw get-lp-id-from-previous-permit
   {:parameters [kuntalupatunnus]
@@ -53,10 +43,7 @@
     (if existing-app
       (resp/status 200 (str (merge (ok :id (:id existing-app))
                                    {:status :already-existing-application})))
-      (resp/status 200 (str (merge (try-fetch-prev-application! kuntalupatunnus
-                                                                (first (:organizations user))
-                                                                (operations/permit-type-of-operation :aiemmalla-luvalla-hakeminen)
-                                                                command)
+      (resp/status 200 (str (merge (fetch-prev-application! command kuntalupatunnus)
                                    {:status :created-new-application}))))))
 
 (defcommand create-application-from-previous-permit
