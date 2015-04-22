@@ -61,16 +61,13 @@
 
 (defn- enrich-attachment-with-operation [attachment operations]
   (if-let [op-id (get-in attachment [:op :id])]
-    (assoc-in
-      attachment
-      [:op :name]
-      (some
-        #(when (= op-id (:id %))
-           (:name %))
-        operations))
+    (assoc-in attachment [:op :name] (some
+                                       #(when (= op-id (:id %))
+                                          (:name %))
+                                       operations))
     attachment))
 
-(defn enrich-attachments-with-operation-data [attachments operations]
+(defn- enrich-attachments-with-operation-data [attachments operations]
   (mapv #(enrich-attachment-with-operation % operations) attachments))
 
 (defn enrich-application [application]
