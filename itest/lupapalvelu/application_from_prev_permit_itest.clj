@@ -88,49 +88,40 @@
           :address "Kylykuja 3"
           :propertyId "18600303560005") => (partial expected-failure? "error.unauthorized"))
 
-      (fact "authority of same municipality can create application"
-        (create-app-from-prev-permit raktark-jarvenpaa
-          :x "6707184.319"
-          :y "393021.589"
-          :address "Kylykuja 3"
-          :propertyId "18600303560005") => ok?
+      (fact* "authority of same municipality can create application"
+        (let [resp (create-app-from-prev-permit raktark-jarvenpaa
+                     :x "6707184.319"
+                     :y "393021.589"
+                     :address "Kylykuja 3"
+                     :propertyId "18600303560005") => ok?
+              app-id (:id resp)
 
-        ;; test count of the invited emails, because invalid emails are ignored
-;        (count (:invites (apply local-query pena  :invites))) => 1
-;        (count (:invites (apply local-query mikko :invites))) => 1
-;        (count (:invites (apply local-query teppo :invites))) => 1  ;; yritys-type applicant
+              ;;
+              ;; TODO: onko local queryssa jotain vikaa, kun tulee {:text error.application-not-accessible, :ok false} ?
+              ;;
+              application (query-application local-query raktark-jarvenpaa app-id)
+              invites (filter #(= raktark-jarvenpaa-id (get-in % [:invite :inviter :id])) (:auth application))]
 
-        ;;
-        ;; TODO: onko local queryssa jotain vikaa, kun tulee {:text error.application-not-accessible, :ok false} ?
-        ;;
-        #_(let [application (query-application local-query raktark-jarvenpaa example-LP-tunnus)
-               invites (filter #(= raktark-jarvenpaa-id (get-in % [:invite :inviter :id])) (:auth application))]
+        ;; Test count of the invited emails, because invalid emails are ignored
+        (fact "invites count"
+          (count invites) => 3
+          (count (:invites (local-query pena  :invites))) => 1
+          (count (:invites (local-query mikko :invites))) => 1
+          (count (:invites (local-query teppo :invites))) => 1)
 
-           (println "\n prev-permit-itest, application:")
-           (>pprint application)
-           (println "\n prev-permit-itest, invites:")
-           (>pprint invites)
-           (println "\n")
+        ;; Cancel the application and re-call 'create-app-from-prev-permit' -> should open application with different ID
+        (fact "fetching prev-permit again after canceling the previously fetched one"
+          (local-command raktark-jarvenpaa :cancel-application-authority
+            :id (:id application)
+            :text "Se on peruutus ny!"
+            :lang "fi")
+          (let [resp (create-app-from-prev-permit raktark-jarvenpaa
+                       :x "6707184.319"
+                       :y "393021.589"
+                       :address "Kylykuja 3"
+                       :propertyId "18600303560005") => ok?]
+            (:id resp) =not=> app-id)))))
 
-           (count invites) => 3
-
-           ;; TODO: Cancel the application and re-call 'create-app-from-prev-permit' -> should open application with different ID
-           (apply local-command raktark-jarvenpaa :cancel-application-authority
-             :id (:id application)
-             :text "Se on peruutus ny!"
-             :lang "fi")
-
-           (let [resp (create-app-from-prev-permit raktark-jarvenpaa
-                        :x "6707184.319"
-                        :y "393021.589"
-                        :address "Kylykuja 3"
-                        :propertyId "18600303560005")]
-             resp => ok?
-             (:id resp) =not=> example-LP-tunnus
-
-             (query-application local-query raktark-jarvenpaa example-LP-tunnus) => nil?  ;; Ei poistetakaan kannasta...
-             )
-           )))
 
     ;; This applies to all tests in this namespace
     (against-background
