@@ -75,7 +75,7 @@
 
                  (commands/set-subject-to-document application document user-info (name applicant-type) created))))))))
 
-(defn do-create-application-from-previous-permit [command xml app-info location-info]
+(defn do-create-application-from-previous-permit [command operation xml app-info location-info]
   (let [{:keys [rakennusvalvontaasianKuvaus vahainenPoikkeaminen hakijat]} app-info
         manual-schema-datas {"hankkeen-kuvaus" (remove empty? (conj []
                                                                     (when-not (ss/blank? rakennusvalvontaasianKuvaus)
@@ -84,7 +84,9 @@
                                                                       [["poikkeamat"] vahainenPoikkeaminen])))}
         ;; TODO: Property-id structure is about to change -> Fix this municipality logic when it changes.
         municipality (subs (:propertyId location-info) 0 3)
-        command (update-in command [:data] merge {:municipality municipality :infoRequest false :messages []} location-info)
+        command (update-in command [:data] merge
+                  {:operation operation :municipality municipality :infoRequest false :messages []}
+                  location-info)
         created-application (application/do-create-application command manual-schema-datas)
         ;; TODO: Aseta applicationille viimeisin state? (lupapalvelu.document.canonical-common/application-state-to-krysp-state kaanteisesti)
         ;        created-application (assoc created-application

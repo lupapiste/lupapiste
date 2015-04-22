@@ -21,7 +21,6 @@
  (let [args (->> args
               (apply hash-map)
               (merge {:lang "fi"
-                      :operation "aiemmalla-luvalla-hakeminen"
                       :organizationId "186-R"  ;; Jarvenpaan rakennusvalvonta
                       :kuntalupatunnus example-kuntalupatunnus
                       :y 0
@@ -37,8 +36,7 @@
   (facts "Creating new application based on a prev permit"
 
     (fact "missing parameters"
-      (create-app-from-prev-permit raktark-jarvenpaa :organizationId "") => (partial expected-failure? "error.missing-parameters")
-      (create-app-from-prev-permit raktark-jarvenpaa :operation "") => (partial expected-failure? "error.missing-parameters"))
+      (create-app-from-prev-permit raktark-jarvenpaa :organizationId "") => (partial expected-failure? "error.missing-parameters"))
 
     ; 1: hakijalla ei ole oiketta noutaa aiempaa lupaa
     (fact "applicant cannot create application"
@@ -130,9 +128,9 @@
              resp => ok?
              (:id resp) =not=> example-LP-tunnus
 
-;            (query-application local-query raktark-jarvenpaa example-LP-tunnus) => nil?  ;; Ei poistetakaan kannasta...
-            )
-          )))
+             (query-application local-query raktark-jarvenpaa example-LP-tunnus) => nil?  ;; Ei poistetakaan kannasta...
+             )
+           )))
 
     ;; This applies to all tests in this namespace
     (against-background
