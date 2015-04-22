@@ -5,7 +5,7 @@
             [sade.core :refer [now]]
             [sade.strings :as ss]
             [sade.util :as util]
-            [lupapalvelu.i18n :refer [with-lang loc]]
+            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.document.canonical-common :refer :all]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.schemas :as schemas]))
@@ -112,7 +112,7 @@
 
 (defn- get-toimenpiteen-kuvaus [doc]
   ;Uses fi as default since krysp uses finnish in enumeration values
-  {:kuvaus (with-lang "fi" (loc (str "operations." (-> doc :schema-info :op :name))))})
+  {:kuvaus (i18n/localize "fi" (str "operations." (-> doc :schema-info :op :name)))})
 
 (defn get-uusi-toimenpide [doc application]
   (let [toimenpide (:data doc)]

@@ -69,6 +69,8 @@
 
 (def henkilo-valitsin [{:name "userId" :type :personSelector :blacklist [:neighbor]}])
 
+(def yritys-valitsin [{:name "companyId" :type :companySelector :blacklist [:neighbor]}])
+
 (def rakennuksen-valitsin [{:name "buildingId" :type :buildingSelector :required true :i18nkey "rakennusnro" :other-key "manuaalinen_rakennusnro"}
                            {:name "rakennusnro" :type :string :subtype :rakennusnumero :hidden true}
                            {:name "manuaalinen_rakennusnro" :type :string :subtype :rakennusnumero :i18nkey "manuaalinen_rakennusnro" :labelclass "really-long"}
@@ -137,6 +139,7 @@
                      {:name "liikeJaYhteisoTunnus" :type :string :subtype :y-tunnus :required true}])
 
 (def yritys (body
+              yritys-valitsin
               yritys-minimal
               simple-osoite
               {:name "yhteyshenkilo"
@@ -384,21 +387,21 @@
                                :type :group
                                :whitelist {:roles [:authority]
                                            :otherwise :hidden}
-                               :body [{:name "tyonjohtajanHyvaksynta" :type :checkbox :i18nkey "tyonjohtaja.historia.hyvaksynta"}
-                                      tyonjohtajan-historia]}])
+                               :body [tyonjohtajan-historia
+                                      {:name "tyonjohtajanHyvaksynta" :type :checkbox :i18nkey "tyonjohtaja.historia.hyvaksynta"}]}])
 
 (def tyonjohtaja-v2 (body
-                      tyonjohtajan-hyvaksynta
+                      tayta-omat-tiedot-button
+                      designer-basic
                       ilmoitus-hakemus-valitsin
                       kuntaroolikoodi-tyonjohtaja-v2
                       patevyysvaatimusluokka
                       vastattavat-tyotehtavat-tyonjohtaja-v2
                       tyonjohtaja-hanketieto
-                      tayta-omat-tiedot-button
-                      designer-basic
-                      muut-rakennushankkeet-table
+                      sijaisuus-tyonjohtaja
                       {:name "patevyys-tyonjohtaja" :type :group :body patevyys-tyonjohtaja-v2}
-                      sijaisuus-tyonjohtaja))
+                      muut-rakennushankkeet-table
+                      tyonjohtajan-hyvaksynta))
 
 (def maksaja (body
                (henkilo-yritys-select-group :yritys-body yritys-with-verkkolaskutustieto)

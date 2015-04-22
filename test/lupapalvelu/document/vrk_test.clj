@@ -3,10 +3,11 @@
         [lupapalvelu.document.validators]
         [lupapalvelu.document.model]
         [lupapalvelu.itest-util]
-        [midje.sweet]
-        [sade.util])
+        [midje.sweet])
+  (:refer-clojure :exclude [pos? neg? zero?])
   (:require [lupapalvelu.document.validator :as v]
-            [clojure.string :as s]))
+            [clojure.string :as s]
+            [sade.util :refer :all]))
 
 (defn check-validator
   "Runs generated facts of a single validator."

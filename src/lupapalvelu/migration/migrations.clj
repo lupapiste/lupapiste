@@ -14,7 +14,8 @@
             [lupapalvelu.application :as a]
             [lupapalvelu.application-meta-fields :as app-meta-fields]
             [lupapalvelu.operations :as op]
-            [sade.env :as env]))
+            [sade.env :as env]
+            [sade.excel-reader :as er]))
 
 (defn drop-schema-data [document]
   (let [schema-info (-> document :schema :info (assoc :version 1))]
@@ -550,7 +551,7 @@
           (mongo/update-by-id collection (:id application) {$set {:documents new-documents}}))))))
 
 (defmigration tutkinto-mapping
-  (let [mapping (sade.excel-reader/read-map "tutkinto-mapping.xlsx")]
+  (let [mapping (er/read-map "tutkinto-mapping.xlsx")]
     (doseq [collection [:applications :submitted-applications]
            application (mongo/select collection {"documents.data.patevyys.koulutus.value" {$exists true}} {:documents 1})]
      (let [id (:id application)
@@ -796,6 +797,25 @@
         doc))
     {"documents.schema-info.name" {$regex #"^tyonjohtaja"}}))
 
+(defmigration rename-suunnittelutarveratkaisun-lisaosa-changed-fields
+  {:apply-when (pos? (mongo/count :applications {$or [{"documents.data.vaikutukset_yhdyskuntakehykselle.etaisyyys_alakouluun" {$exists true}}
+                                                      {"documents.data.vaikutukset_yhdyskuntakehykselle.etaisyyys_ylakouluun" {$exists true}}]}))}
+  (update-applications-array
+    :documents
+    (fn [doc]
+      (if (= (-> doc :schema-info :name) "suunnittelutarveratkaisun-lisaosa")
+        (update-in doc [:data :vaikutukset_yhdyskuntakehykselle]
+                   clojure.set/rename-keys {:etaisyyys_alakouluun :etaisyys_alakouluun :etaisyyys_ylakouluun :etaisyys_ylakouluun})
+        doc))
+    {"documents.schema-info.name" "suunnittelutarveratkaisun-lisaosa"}))
+
+(defmigration create-transfered-to-backing-system-transfer-entry
+  (doseq [collection [:applications :submitted-applications]
+          application (mongo/select collection {$and [{:transfers {$not {$elemMatch {:type "exported-to-backing-system"}}}}
+                                                      {:sent {$ne nil}}]})]
+    (mongo/update-by-id collection (:id application)
+                        {$push {:transfers {:type "exported-to-backing-system"
+                                            :timestamp (:sent application)}}})))
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"

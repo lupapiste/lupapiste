@@ -5,7 +5,7 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.core :refer :all]
-            [lupapalvelu.i18n :refer [with-lang loc]]
+            [lupapalvelu.i18n :as i18n]
             [cljts.geom :as geo]
             [cljts.io :as jts]
             [sade.env :as env]))
@@ -409,21 +409,20 @@
     (s/trim (str sijaistettavaHloEtunimi " " sijaistettavaHloSukunimi))))
 
 (defn- get-vastattava-tyotieto [{tyotehtavat :vastattavatTyotehtavat} lang]
-  (with-lang lang
-    (util/strip-nils
-      (when (seq tyotehtavat)
-        {:vastattavaTyotieto
-         (remove nil?
-           (map (fn [[k v]]
-                  (when v
-                    {:VastattavaTyo
-                     {:vastattavaTyo
-                      (if (= k :muuMika)
-                        v
-                        (let [loc-s (loc (str "osapuoli.tyonjohtaja.vastattavatTyotehtavat." (name k)))]
-                          (assert (not (re-matches #"^\?\?\?.*" loc-s)))
-                          loc-s))}}))
-             tyotehtavat))}))))
+  (util/strip-nils
+    (when (seq tyotehtavat)
+      {:vastattavaTyotieto
+       (remove nil?
+         (map (fn [[k v]]
+                (when v
+                  {:VastattavaTyo
+                   {:vastattavaTyo
+                    (if (= k :muuMika)
+                      v
+                      (let [loc-s (i18n/localize lang (str "osapuoli.tyonjohtaja.vastattavatTyotehtavat." (name k)))]
+                        (assert (not (re-matches #"^\?\?\?.*" loc-s)))
+                        loc-s))}}))
+           tyotehtavat))})))
 
 (defn get-tyonjohtaja-data [lang tyonjohtaja party-type]
   (let [foremans (dissoc (get-suunnittelija-data tyonjohtaja party-type) :suunnittelijaRoolikoodi)

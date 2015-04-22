@@ -373,6 +373,9 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         if (!timestamp) {
           return true;
         }
+        if (!_.isObject(model)) {
+          return false; // whitelist-action : "disabled"
+        }
         if (_.has(model, "value")) {
           // Leaf
           return model.modified && model.modified > timestamp;
@@ -853,7 +856,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     ajax
       .command("get-building-info-from-wfs", { id: self.appId })
       .success(function (data) {
-        $.each(data.data, function (i, building) {
+        _.each(data.data, function (building) {
           var name = building.buildingId;
           var usage = building.usage;
           var created = building.created;
@@ -1098,6 +1101,25 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return span;
   }
 
+  function buildCompanySelector(subSchema, model, path) {
+    var myNs = path.slice(0, path.length - 1).join(".");
+
+    var params = {
+      id: self.appId,
+      documentId: self.docId,
+      documentName: self.schemaName,
+      path: myNs,
+      collection: self.getCollection(),
+      selected: getModelValue(model, subSchema.name),
+      schema: subSchema
+    };
+
+    var span = makeEntrySpan(subSchema, path.join("."));
+    span.appendChild(createComponent("company-selector", params));
+    $(span).addClass("companySelector");
+    return span;
+  }
+
   function buildTableRow(subSchema, model, path, partOfChoice) {
     var myPath = path.join(".");
     var name = subSchema.name;
@@ -1134,6 +1156,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     foremanHistory: buildForemanHistory,
     foremanOtherApplications: buildForemanOtherApplications,
     personSelector: buildPersonSelector,
+    companySelector: buildCompanySelector,
     table: buildTableRow,
     unknown: buildUnknown
   };

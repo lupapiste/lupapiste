@@ -6,14 +6,42 @@
 (defn- build-url [& path-parts]
   (apply str (env/value :toj :host) path-parts))
 
-(def get-functions-from-toj
-  (memo/ttl (fn [organization]
-              (try
-                (let [response (http/get (build-url "/tiedonohjaus/api/org/" organization "/asiat") {:as :json
-                                                                                                     :throw-exceptions false})]
-                  (if (= 200 (:status response))
-                    (:body response)
-                    []))
-                (catch Exception e
-                  [])))
+(defn- get-tos-functions-from-toj [organization]
+  (if (env/feature? :tiedonohjaus)
+    (try
+      (let [url (build-url "/tiedonohjaus/api/org/" organization "/asiat")
+            response (http/get url {:as :json
+                                    :throw-exceptions false})]
+        (if (= 200 (:status response))
+          (:body response)
+          []))
+      (catch Exception _
+        []))
+    []))
+
+(def available-tos-functions
+  (memo/ttl get-tos-functions-from-toj
             :ttl/threshold 10000))
+
+(defn- get-metadata-for-document-from-toj [organization tos-function document-type]
+  (if (env/feature? :tiedonohjaus)
+    (when (and organization tos-function document-type)
+      (try
+        (let [doc-id (if (map? document-type) (str (name (:type-group document-type)) "." (name (:type-id document-type))) document-type)
+              url (build-url "/tiedonohjaus/api/org/" organization "/asiat/" tos-function "/document/" doc-id)
+              response (http/get url {:as :json
+                                      :throw-exceptions false})]
+          (if (= 200 (:status response))
+            (:body response)
+            {}))
+        (catch Exception _
+          {})))
+    {}))
+
+(def metadata-for-document
+  (memo/ttl get-metadata-for-document-from-toj
+            :ttl/threshold 10000))
+
+(defn document-with-updated-metadata [document organization tos-function]
+  (->> (metadata-for-document organization tos-function (:type document))
+       (assoc document :metadata)))

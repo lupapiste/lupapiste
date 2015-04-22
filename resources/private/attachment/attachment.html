@@ -190,6 +190,58 @@
                     <span class="icon signed-white left-align"></span>
                 </button>
               </div>
+
+              <button id="show-tos-metadata"
+                      class="btn"
+                      style="margin-top: 15px"
+                      data-bind="click: toggleTosMetadata, visible: metadata().length > 0">
+                <span data-bind="ltext: 'attachment.showTosMetadata'"></span>
+                <span class="left-align"
+                      data-bind="drill: showTosMetadata, color: 'black'"></span>
+              </button>
+
+              <div class="tos-metadata-content" data-bind="slider: showTosMetadata, visible: metadata().length > 0">
+                <h3 data-bind="ltext: 'attachment.tosMetadata'"></h3>
+                <table class="table table-striped">
+                  <thead>
+                  <tr>
+                    <th data-bind="ltext: 'attachment.tosMetadataKey'"></th>
+                    <th data-bind="ltext: 'attachment.tosMetadataValue'"></th>
+                  </tr>
+                  </thead>
+                  <tbody data-bind="foreach: metadata">
+                    <tr>
+                      <td data-bind="text: name"></td>
+                      <td>
+                        <div data-bind="if: typeof(value) == 'object'">
+                          <table class="subtable">
+                            <thead>
+                            <tr>
+                              <th data-bind="ltext: 'attachment.tosMetadataKey'"></th>
+                              <th data-bind="ltext: 'attachment.tosMetadataValue'"></th>
+                            </tr>
+                            </thead>
+                            <tbody data-bind="foreach: value">
+                            <tr>
+                              <td data-bind="text: name"></td>
+                              <td>
+                                <span data-bind="text: value"></span>
+                                <span data-bind="if: isFinite(value)"> vuotta</span>
+                              </td>
+                            </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                        <span data-bind="if: typeof(value) != 'object'">
+                          <span data-bind="text: value"></span>
+                          <span data-bind="if: isFinite(value)"> vuotta</span>
+                        </span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
             </div>
           </div>
 
@@ -221,22 +273,26 @@
       </div>
     </div>
 
-    <div class="window autosized" id="change-type-dialog">
+    <div class="window autosized" id="change-type-dialog" data-bind="with: changeTypeDialogModel">
       <div class="dialog-header">
        <p data-bind="ltext: 'attachment.changeType'"></p>
        <p class="dialog-close close">X</p>
       </div>
-        <div class="form-entry change-type">
-          <label for="attachment-type-select" class="form-label">
-           <img src="/img/ajax-loader-12.gif" alt="..." width="12" height="12" id="attachment-type-select-loader" style="display: none;">
-          </label>
-          <div>
-            <select id="attachment-type-select" class="long" data-bind="enable: $root.authorization.ok('set-attachment-type')"></select>
-          </div>
+      <div class="form-entry change-type">
+        <label for="attachment-type-select" class="form-label">
+         <img src="/img/ajax-loader-12.gif" alt="..." width="12" height="12" id="attachment-type-select-loader" style="display: none;">
+        </label>
+        <div>
+          <select id="attachment-type-select" class="long" data-bind="enable: $root.authorization.ok('set-attachment-type'), foreach: selectableAttachmentTypes, value: attachmentType">
+            <optgroup data-bind="attr: {label: groupLabel}, foreach: types">
+              <option data-bind="text: typeLabel, value: typeValue"></option>
+            </optgroup>
+          </select>
         </div>
-        <div style="text-align:center">
-          <button class="btn btn-primary btn-dialog" data-test-id="confirm-yes" style="position:relative" data-bind="ltext: 'button.ok', click: LUPAPISTE.ModalDialog.close"></button>
-        </div>
+      </div>
+      <div style="text-align:center">
+        <button class="btn btn-primary btn-dialog" data-test-id="confirm-yes" style="position:relative" data-bind="ltext: 'button.ok', click: ok"></button>
+      </div>
     </div>
   <!-- /ko -->
   </section>
