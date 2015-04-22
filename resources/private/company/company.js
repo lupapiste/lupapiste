@@ -27,10 +27,11 @@
 
     this.showSearchEmail    = ko.observable();
     this.showUserInCompany  = ko.observable();
+    this.showUserAlreadyInvited = ko.observable();
     this.showUserInvited    = ko.observable();
     this.showUserDetails    = ko.observable();
 
-    this.views  = ["showSearchEmail", "showUserInCompany", "showUserInvited", "showUserDetails"];
+    this.views  = ["showSearchEmail", "showUserInCompany", "showUserAlreadyInvited", "showUserInvited", "showUserDetails"];
 
     this.canSearchUser    = this.email.isValid;
     this.pending          = ko.observable();
@@ -59,6 +60,8 @@
           this.showSearchEmail(false).showUserInvited(true);
         } else if (result === "already-in-company") {
           this.showSearchEmail(false).showUserInCompany(true);
+        } else if (result === "already-invited") {
+          this.showSearchEmail(false).showUserAlreadyInvited(true);
         } else if (result === "not-found") {
           this.showSearchEmail(false).showUserDetails(true);
         }
@@ -98,19 +101,21 @@
     self.message  = ko.observable();
     self.pending  = ko.observable();
 
-    self.userId = null;
-    self.op     = null;
-    self.value  = null;
-    self.cb     = null;
+    self.userId   = null;
+    self.tokenId  = null;
+    self.op       = null;
+    self.value    = null;
+    self.cb       = null;
 
     self.withConfirmation = function(user, value, op, cb) {
       return function() {
-        self.value  = value ? value : ko.observable(true);
-        self.userId = user.id;
-        self.op     = op;
-        self.cb     = cb;
-        var prefix   = "company.user.op." + op + "." + self.value() + ".",
-            userName = user.firstName + " " + user.lastName;
+        self.value    = value ? value : ko.observable(true);
+        self.userId   = user.id;
+        self.tokenId  = user.tokenId;
+        self.op       = op;
+        self.cb       = cb;
+        var prefix    = "company.user.op." + op + "." + self.value() + ".",
+            userName  = user.firstName + " " + user.lastName;
         self
           .title(loc(prefix + "title"))
           .message(loc(prefix + "message", userName))
@@ -121,8 +126,14 @@
 
     self.ok = function() {
       self.pending(true);
+      var command = "company-user-update";
+      var params = {"user-id": self.userId, op: self.op, value: !self.value()};
+      if (self.tokenId) {
+        command = "company-delete-invite";
+        params = {"tokenId": self.tokenId};
+      }
       ajax
-        .command("company-user-update", {"user-id": self.userId, op: self.op, value: !self.value()})
+        .command(command, params)
         .success(function() {
           if (self.cb) {
             self.cb();
@@ -158,6 +169,19 @@
     self.toggleEnable = companyUserOp.withConfirmation(user, self.enabled, "enabled");
     self.deleteUser   = companyUserOp.withConfirmation(user, self.deleted, "delete", function() {
       users.remove(function(u) { return u.id === self.id; });
+    });
+  }
+
+  function InvitedUser(user) {
+    var self = this;
+    self.firstName = user.firstName;
+    self.lastName  = user.lastName;
+    self.email     = user.email;
+    self.expires   = user.expires;
+    self.role      = user.role;
+    self.tokenId   = user.tokenId;
+    self.deleteInvitation = companyUserOp.withConfirmation(user, self.deleted, "delete-invite", function() {
+      console.log("deleteInvitation");
     });
   }
 
@@ -262,12 +286,15 @@
   function Company() {
     var self = this;
 
-    self.pending  = ko.observable();
-    self.id       = ko.observable();
-    self.isAdmin  = ko.observable();
-    self.users    = ko.observableArray();
-    self.info     = new CompanyInfo(self);
-    self.tabs     = new TabsModel(self.id);
+    self.pending     = ko.observable();
+    self.id          = ko.observable();
+    self.isAdmin     = ko.observable();
+    self.users       = ko.observableArray();
+    self.invitations = ko.observableArray();
+    self.info        = new CompanyInfo(self);
+    self.tabs        = new TabsModel(self.id);
+
+    self.invitations.subscribe(function(val) { console.log("val", val); });
 
     self.clear = function() {
       return self
@@ -283,7 +310,8 @@
         .id(data.company.id)
         .info.update(data.company)
         .isAdmin(currentUser.get().role() === "admin" || (currentUser.get().company.role() === "admin" && currentUser.get().company.id() === self.id()))
-        .users(_.map(data.users, function(user) { return new CompanyUser(user, self.users); }));
+        .users(_.map(data.users, function(user) { return new CompanyUser(user, self.users); }))
+        .invitations(_.map(data.invitations, function(invitation) { return new InvitedUser(invitation); }));
     };
 
     self.load = function() {

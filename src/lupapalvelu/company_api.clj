@@ -2,7 +2,8 @@
   (:require [sade.core :refer [ok fail fail! unauthorized unauthorized!]]
             [lupapalvelu.action :refer [defquery defcommand] :as action]
             [lupapalvelu.company :as c]
-            [lupapalvelu.user :as u]))
+            [lupapalvelu.user :as u]
+            [lupapalvelu.mongo :as mongo]))
 
 ;;
 ;; Company API:
@@ -29,8 +30,9 @@
    :input-validators [validate-user-is-admin-or-company-member]
    :parameters [company]}
   [{{:keys [users]} :data}]
-  (ok :company (c/find-company! {:id company})
-      :users   (and users (c/find-company-users company))))
+  (ok :company     (c/find-company! {:id company})
+      :users       (and users (c/find-company-users company))
+      :invitations (and users (c/find-user-invitations company))))
 
 (defquery companies
   {:user-roles #{:applicant :authority :admin}}
@@ -62,8 +64,13 @@
    :input-validators [validate-user-is-admin-or-company-admin]
    :parameters [email]}
   [{caller :user}]
-  (let [user (u/find-user {:email email})]
+  (let [user (u/find-user {:email email})
+        tokens (c/find-user-invitations (-> caller :company :id))]
+    (>pprint (some #(= email (:email %)) tokens))
     (cond
+      (some #(= email (:email %)) tokens)
+      (ok :result :already-invited)
+
       (nil? user)
       (ok :result :not-found)
 
@@ -106,3 +113,15 @@
       (u/update-user-by-email email {:company  {:id (:id company), :role :admin}})
       (ok))
     (fail :error.user-not-found)))
+
+(defcommand company-delete-invite
+  {:parameters [tokenId]
+   :user-roles #{:applicant}}
+  [{user :user}]
+  (let [token (mongo/by-id :token tokenId)
+        token-company-id (get-in token [:data :company :id])
+        user-company-id (get-in user [:company :id])]
+    (if-not (= token-company-id user-company-id)
+      (fail! :forbidden)))
+  (mongo/remove :token tokenId)
+  (ok))

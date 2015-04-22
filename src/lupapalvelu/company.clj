@@ -80,6 +80,20 @@
 (defn find-company-users [company-id]
   (u/get-users {:company.id company-id}))
 
+(defn- map-token-to-user-invitation [token]
+  (-> {}
+      (assoc :firstName (get-in token [:data :user :firstName]))
+      (assoc :lastName  (get-in token [:data :user :lastName]))
+      (assoc :email     (get-in token [:data :user :email]))
+      (assoc :role      (get-in token [:data :role]))
+      (assoc :tokenId (:id token))
+      (assoc :expires (:expires token))))
+
+(defn find-user-invitations [company-id]
+  (let [tokens (mongo/select :token {$and [{:token-type {$in ["invite-company-user" "new-company-user"]}} {:data.company.id company-id}]})
+        data (map map-token-to-user-invitation tokens)]
+    data))
+
 (defn find-company-admins [company-id]
   (u/get-users {:company.id company-id, :company.role "admin"}))
 

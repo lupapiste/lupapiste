@@ -105,6 +105,17 @@
                 <th data-bind="visible: isAdmin"></th>
               </tr>
             </thead>
+            <tbody data-bind="foreach: invitations">
+              <tr>
+                <td data-bind="text: firstName"></td>
+                <td data-bind="text: lastName"></td>
+                <td data-bind="text: email"></td>
+                <td>Kutsuttu</td>
+                <td data-bind="ltext: 'company.user.role.' + role"></td>
+                <td>
+                  <a href="#" data-bind="click: deleteInvitation">[poista]</a>
+                </td>
+            </tbody>
             <tbody data-bind="foreach: users">
               <tr>
                 <td data-bind="text: firstName"></td>
@@ -182,6 +193,12 @@
           <span data-bind="ltext: 'register.company.add-user.already-in'"></span>
             <button data-bind="ltext: 'ok'" class="btn btn-dialog close"></button>
           </div>
+
+        <div data-bind="visible: showUserAlreadyInvited">
+          <span data-bind="ltext: 'register.company.add-user.already-invited'"></span>
+            <button data-bind="ltext: 'ok'" class="btn btn-dialog close"></button>
+          </div>
+        </div>
 
         <div data-bind="visible: showUserInvited">
           <h3 data-bind="ltext: 'register.company.add-user.done.header'"></h3>
