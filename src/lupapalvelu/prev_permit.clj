@@ -68,11 +68,6 @@
                                             :y (get-in applicant [:yritys :liikeJaYhteisotunnus])
                                             :email applicant-email
                                             :phone (get-in applicant [:yritys :puhelin])
-                                            ;;
-                                            ;; TODO: Etsitaanko naita yhteyshenkilon tietoja esim. applicant-emailin perusteella kannasta?
-                                            ;;
-;                                            :firstName (get-in applicant [:henkilo :nimi :etunimi])
-;                                            :lastName (get-in applicant [:henkilo :nimi :sukunimi])
                                             :adress1 (get-in postiosoite [:osoitenimi :teksti])
                                             :zip (get-in postiosoite [:postinumero])
                                             :po (get-in postiosoite [:postitoimipaikannimi])

@@ -16,9 +16,9 @@
             [noir.response :as resp]))
 
 
-(defn- fetch-prev-application! [{:keys [user] :as command} kuntalupatunnus]
+(defn- fetch-prev-application! [{:keys [user] :as command} kuntalupatunnus & {:keys [operation] :or {operation :aiemmalla-luvalla-hakeminen}}]
   (let [organization      (first (:organizations user))
-        permit-type       (operations/permit-type-of-operation :aiemmalla-luvalla-hakeminen)
+        permit-type       (operations/permit-type-of-operation operation)
         dummy-application {:id kuntalupatunnus
                            :permitType permit-type
                            :organization organization}
