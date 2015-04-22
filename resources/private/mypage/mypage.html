@@ -99,8 +99,8 @@
               <label data-bind="ltext: 'userInfo.company.y'" class="form-label"></label>
               <span data-bind="text: company.y" class="form-input"></span>
 
-              <button data-bind="attr: {href: '#!/company/' + company.id()}, ltext: 'mypage.companyAccount.editInfo'" href="#" class="btn btn-primary" data-test-id="company-edit-info"></button>
-              <button data-bind="attr: {href: '#!/company/' + company.id() + '/users/'}, ltext: 'mypage.companyAccount.editUsers'" href="#" class="btn btn-primary" data-test-id="company-edit-users"></button>
+              <button data-bind="click: editCompany, ltext: 'mypage.companyAccount.editInfo'" class="btn btn-primary" data-test-id="company-edit-info"></button>
+              <button data-bind="click: editUsers, ltext: 'mypage.companyAccount.editUsers'" class="btn btn-primary" data-test-id="company-edit-users"></button>
             </div>
 
           </div>
