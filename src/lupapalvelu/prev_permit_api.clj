@@ -42,7 +42,8 @@
       ;; Then extract needed data from it to "app info".
       (let [dummy-application {:id kuntalupatunnus :permitType permit-type :organization organizationId}
             xml (krysp-fetch-api/get-application-xml dummy-application :kuntalupatunnus)]
-        (when-not xml (fail! :error.no-previous-permit-found-from-backend)) ;; Show error if could not receive the verdict message xml for the given kuntalupatunnus
+        ;; Show error if could not receive the verdict message xml for the given kuntalupatunnus
+        (when-not xml (fail! :error.no-previous-permit-found-from-backend))
 
         (let [app-info (krysp-reader/get-app-info-from-message xml kuntalupatunnus)
               rakennuspaikka-exists (and (:rakennuspaikka app-info) (every? (-> app-info :rakennuspaikka keys set) [:x :y :address :propertyId]))
@@ -55,6 +56,8 @@
             (fail! :error.previous-permit-found-from-backend-is-of-different-organization))
           ;; This needs to be last of these error chekcs! Did not get the "rakennuspaikkatieto" element in the xml, so let's ask more needed location info from user.
           (when-not (or rakennuspaikka-exists enough-info-from-parameters)
+            (when-not rakennuspaikka-exists
+              (info "Prev permit application creation, rakennuspaikkatieto information incomplete:\n " (:rakennuspaikka app-info) "\n"))
             (fail! :error.more-prev-app-info-needed :needMorePrevPermitInfo true))
 
           (if (ss/blank? lupapiste-tunnus)
