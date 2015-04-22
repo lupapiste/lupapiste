@@ -136,5 +136,9 @@
 
     ;; This applies to all tests in this namespace
     (against-background
-      (krysp-fetch-api/get-application-xml anything anything) => example-xml)))
+      (krysp-fetch-api/get-application-xml anything anything) => example-xml))
+
+  (facts "Create new application from kuntalupatunnus via rest API"
+
+    ))
 

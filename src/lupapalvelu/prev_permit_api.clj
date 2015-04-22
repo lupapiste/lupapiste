@@ -23,7 +23,8 @@
                            :permitType permit-type
                            :organization organization}
         xml (krysp-fetch-api/get-application-xml dummy-application :kuntalupatunnus)]
-    (when-not xml (fail! :error.no-previous-permit-found-from-backend)) ;; Show error if could not receive the verdict message xml for the given kuntalupatunnus
+    (when-not xml
+      (fail! :error.no-previous-permit-found-from-backend))
 
     (let [app-info               (krysp-reader/get-app-info-from-message xml kuntalupatunnus)
           rakennuspaikka-exists? (and (:rakennuspaikka app-info)
@@ -34,9 +35,10 @@
         (empty? app-info)            (fail! :error.no-previous-permit-found-from-backend)
         (not rakennuspaikka-exists?) (fail! :error.more-prev-app-info-needed)
         (not organizations-match?)   (fail! :error.previous-permit-found-from-backend-is-of-different-organization)
-        :else                        (let [location-info (:rakennuspaikka app-info)
-                                           created-app-id (prev-permit/do-create-application-from-previous-permit command xml app-info location-info)]
-                                       (ok :id created-app-id))))))
+        :else
+          (let [location-info (:rakennuspaikka app-info)
+                created-app-id (prev-permit/do-create-application-from-previous-permit command xml app-info location-info)]
+            (ok :id created-app-id))))))
 
 (defraw get-lp-id-from-previous-permit
   {:parameters [kuntalupatunnus]
@@ -44,12 +46,13 @@
    :user-roles #{:rest-api}}
   [{:keys [user] :as command}]
   (let [command (update-in command [:data] merge {:operation :aiemmalla-luvalla-hakeminen})
-        existing-app (domain/get-application-as {:verdicts {$elemMatch {:kuntalupatunnus kuntalupatunnus}}} user)]
-    (if existing-app
-      (resp/status 200 (str (merge (ok :id (:id existing-app))
-                                   {:status :already-existing-application})))
-      (resp/status 200 (str (merge (fetch-prev-application! command kuntalupatunnus)
-                                   {:status :created-new-application}))))))
+        existing-app (domain/get-application-as {:verdicts {$elemMatch {:kuntalupatunnus kuntalupatunnus}}} user)
+        result (if existing-app
+                 (merge (ok :id (:id existing-app))
+                        {:status :already-existing-application})
+                 (merge (fetch-prev-application! command kuntalupatunnus)
+                        {:status :created-new-application}))]
+    (resp/status 200 (str result))))
 
 (defcommand create-application-from-previous-permit
   {:parameters       [:lang :operation :x :y :address :propertyId :organizationId :kuntalupatunnus]
