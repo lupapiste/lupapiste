@@ -64,12 +64,13 @@
 
                      (commands/set-subject-to-document application document user-info "henkilo" created))))))))))
 
-(defn do-create-application-from-previous-permit [{:keys [lang user created] :as command} xml app-info location-info]
+(defn do-create-application-from-previous-permit [command xml app-info location-info]
   (let [{:keys [rakennusvalvontaasianKuvaus vahainenPoikkeaminen hakijat]} app-info
-        manual-schema-datas {"hankkeen-kuvaus" (filter seq
-                                                       (conj []
-                                                             (when-not (ss/blank? rakennusvalvontaasianKuvaus) [["kuvaus"] rakennusvalvontaasianKuvaus])
-                                                             (when-not (ss/blank? vahainenPoikkeaminen) [["poikkeamat"] vahainenPoikkeaminen])))}
+        manual-schema-datas {"hankkeen-kuvaus" (remove empty? (conj []
+                                                                    (when-not (ss/blank? rakennusvalvontaasianKuvaus)
+                                                                      [["kuvaus"] rakennusvalvontaasianKuvaus])
+                                                                    (when-not (ss/blank? vahainenPoikkeaminen)
+                                                                      [["poikkeamat"] vahainenPoikkeaminen])))}
         ;; TODO: Property-id structure is about to change -> Fix this municipality logic when it changes.
         municipality (subs (:propertyId location-info) 0 3)
         command (update-in command [:data] merge {:municipality municipality :infoRequest false :messages []} location-info)
