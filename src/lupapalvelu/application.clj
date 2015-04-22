@@ -376,9 +376,9 @@
       (when (seq text)
         (comment/comment-mongo-update
           (:state application)
-            (str
-              (i18n/localize lang "application.canceled.text") ". "
-              (i18n/localize lang "application.canceled.reason") ": "
+          (str
+            (i18n/localize lang "application.canceled.text") ". "
+            (i18n/localize lang "application.canceled.reason") ": "
             text)
           {:type "application"}
           (-> command :user :role)

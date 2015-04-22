@@ -43,7 +43,7 @@
     (fact "Mikko must be able to invite Teppo!"
       (last-email) ; Inbox zero
 
-      (invite mikko application-id suunnittelija-doc "suunnittelija" (email-for-key teppo) "Hei, sinut on kustuttu") => ok?
+      (invite mikko application-id suunnittelija-doc "suunnittelija" (email-for-key teppo) "Hei, sinut on kutsuttu") => ok?
 
       (count (:invites (query teppo :invites))) => 1
 
@@ -51,7 +51,7 @@
         email => (partial contains-application-link? application-id "applicant")
         (:to email) => (contains (email-for-key teppo))
         (:subject email) => "Lupapiste.fi: Kutsukatu 13 - kutsu"
-        (get-in email [:body :plain]) => (contains "Hei, sinut on kustuttu")))
+        (get-in email [:body :plain]) => (contains "Hei, sinut on kutsuttu")))
 
     (fact "Sonja must NOT be able to uninvite Teppo!"
       (command sonja :remove-auth :id application-id :username (email-for-key teppo)) => not-accessible?
