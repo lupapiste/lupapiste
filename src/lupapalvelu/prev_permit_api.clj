@@ -54,7 +54,8 @@
    :user-roles #{:rest-api}}
   [{:keys [user] :as command}]
   (let [command (update-in command [:data] merge {:organizationId (first (:organizations user))})
-        existing-app (domain/get-application-as {:verdicts {$elemMatch {:kuntalupatunnus kuntalupatunnus}}} user)]
+        existing-app (domain/get-application-as {:state    {$ne "canceled"}
+                                                 :verdicts {$elemMatch {:kuntalupatunnus kuntalupatunnus}}} user)]
     (if existing-app
       (resp/status 200 (str (merge (ok :id (:id existing-app))
                                    {:status :already-existing-application})))
@@ -74,7 +75,7 @@
     ;; Check if we have in database an application of same organization that has a verdict with the given kuntalupatunnus.
     (if-let [app-with-verdict (domain/get-application-as
                                 {:organization organizationId
-                                 :state        {$nin ["canceled"]}
+                                 :state        {$ne "canceled"}
                                  :verdicts     {$elemMatch {:kuntalupatunnus kuntalupatunnus}}}
                                 user)]
       ;;Found an application of same organization that has a verdict with the given kuntalupatunnus -> Open it.
