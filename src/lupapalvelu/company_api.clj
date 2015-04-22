@@ -66,7 +66,6 @@
   [{caller :user}]
   (let [user (u/find-user {:email email})
         tokens (c/find-user-invitations (-> caller :company :id))]
-    (>pprint (some #(= email (:email %)) tokens))
     (cond
       (some #(= email (:email %)) tokens)
       (ok :result :already-invited)
