@@ -40,67 +40,45 @@
       (create-app-from-prev-permit raktark-jarvenpaa :organizationId "") => (partial expected-failure? "error.missing-parameters")
       (create-app-from-prev-permit raktark-jarvenpaa :operation "") => (partial expected-failure? "error.missing-parameters"))
 
+    ; 1: hakijalla ei ole oiketta noutaa aiempaa lupaa
+    (fact "applicant cannot create application"
+      (create-app-from-prev-permit pena
+        :x "6707184.319"
+        :y "393021.589"
+        :address "Kylykuja 3"
+        :propertyId "18600303560005") => (partial expected-failure? "error.unauthorized"))
 
-    ; 1: Kannassa on hakemus, jonka organization ja verdictin kuntalupatunnus matchaa haettuihin. Palautuu lupapiste-tunnus, jolloin hakemus avataan.
+    ; 2: Kannassa on ei-peruutettu hakemus, jonka organization ja verdictin kuntalupatunnus matchaa haettuihin. Palautuu lupapiste-tunnus, jolloin hakemus avataan.
     (fact "db has app that has the kuntalupatunnus in its verdict and its organization matches"
       (create-app-from-prev-permit raktark-jarvenpaa) => (contains {:ok true :id "lupis-id"})
       (provided
-        (domain/get-application-as anything anything) => {:id "lupis-id"}))
+        (domain/get-application-as anything anything) => {:id "lupis-id" :state "verdictGiven"}))
 
-    ; 2: jos taustajarjestelmasta ei saada xml-sisaltoa -> (fail :error.no-previous-permit-found-from-backend)
+    ; 3: jos taustajarjestelmasta ei saada xml-sisaltoa -> (fail :error.no-previous-permit-found-from-backend)
     (fact "no xml content received from backend with the kuntalupatunnus"
       (create-app-from-prev-permit raktark-jarvenpaa) => (partial expected-failure? "error.no-previous-permit-found-from-backend")
       (provided
         (krysp-fetch-api/get-application-xml anything anything) => nil))
 
-    ; 3: jos (krysp-reader/get-app-info-from-message xml kuntalupatunnus) palauttaa nillin -> (fail :error.no-previous-permit-found-from-backend)
+    ; 4: jos (krysp-reader/get-app-info-from-message xml kuntalupatunnus) palauttaa nillin -> (fail :error.no-previous-permit-found-from-backend)
     (fact "no application info could be parsed"
       (create-app-from-prev-permit raktark-jarvenpaa) => (partial expected-failure? "error.no-previous-permit-found-from-backend")
       (provided
         (krysp-reader/get-app-info-from-message anything anything) => nil))
 
-    ; 4: jos parametrina annettu organisaatio ja app-infosta ratkaistu organisaatio ei matchaa -> (fail :error.previous-permit-found-from-backend-is-of-different-organization)
+    ; 5: jos parametrina annettu organisaatio ja app-infosta ratkaistu organisaatio ei matchaa -> (fail :error.previous-permit-found-from-backend-is-of-different-organization)
     (fact "ids of the given and resolved organizations do not match"
       (create-app-from-prev-permit raktark-jarvenpaa) => (partial expected-failure? "error.previous-permit-found-from-backend-is-of-different-organization")
       (provided
         (krysp-reader/get-app-info-from-message anything anything) => {:municipality "753"}))
 
-    ; 5: jos sanomassa ei ollut rakennuspaikkaa, ja ei alunperin annettu tarpeeksi parametreja -> (fail :error.more-prev-app-info-needed :needMorePrevPermitInfo true)
+    ; 6: jos sanomassa ei ollut rakennuspaikkaa, ja ei alunperin annettu tarpeeksi parametreja -> (fail :error.more-prev-app-info-needed :needMorePrevPermitInfo true)
     (fact "no 'rakennuspaikkatieto' element in the received xml, need more info"
       (create-app-from-prev-permit raktark-jarvenpaa) => (contains {:ok false
                                                                     :needMorePrevPermitInfo true
                                                                     :text "error.more-prev-app-info-needed"})
       (provided
         (krysp-reader/get-app-info-from-message anything anything) => (dissoc example-app-info :rakennuspaikka)))
-
-    ; 6) sanomassa tulee lupapiste-id
-    (facts "message includes lupapiste id and app id found in the database"
-
-      ; 6 a: on jarjestelmassa, mutta kayttajalla ei oikeuksia sille -> (fail :error.lupapiste-application-already-exists-but-unauthorized-to-access-it :id lupapiste-tunnus)
-      (fact "we do not have permissions to application"
-        (create-app-from-prev-permit raktark-jarvenpaa
-          :x "6707184.319"
-          :y "393021.589"
-          :address "Kylykuja 3"
-          :propertyId "18600303560005") => (contains {:ok false
-                                                      :id example-LP-tunnus
-                                                      :text "error.lupapiste-application-already-exists-but-unauthorized-to-access-it"})
-        (provided
-          (domain/get-application-as anything anything) => nil))
-
-      ; 6 b: on jarjestelmassa, ja kayttajalla on oikeudet sille     -> (ok :id lupapiste-tunnus)
-      (fact "got permissions for the application"
-        (create-app-from-prev-permit raktark-jarvenpaa
-          :x "6707184.319"
-          :y "393021.589"
-          :address "Kylykuja 3"
-          :propertyId "18600303560005") => (contains {:ok true
-                                                      :id example-LP-tunnus})
-        (provided
-          (domain/get-application-as anything anything) => {:id example-LP-tunnus}))
-
-      (against-background
-        (krysp-reader/get-app-info-from-message anything anything) => (assoc example-app-info :id example-LP-tunnus)))
 
     ; 7: testaa Sonjalla, etta ei ole oikeuksia luoda hakemusta, mutta jarvenpaan viranomaisella on
     (facts "authority tests"
@@ -112,27 +90,49 @@
           :address "Kylykuja 3"
           :propertyId "18600303560005") => (partial expected-failure? "error.unauthorized"))
 
-      (fact "invalid email among the applicant emails in the received xml"
-        (create-app-from-prev-permit raktark-jarvenpaa) => (partial expected-failure? "error.email")
-        (provided
-          (krysp-reader/get-app-info-from-message anything anything) => (update-in example-app-info [:hakijat] conj {:henkilo {:sahkopostiosoite "invalid-email"}})))
-
       (fact "authority of same municipality can create application"
         (create-app-from-prev-permit raktark-jarvenpaa
           :x "6707184.319"
           :y "393021.589"
           :address "Kylykuja 3"
-          :propertyId "18600303560005") => ok?))
+          :propertyId "18600303560005") => ok?
 
-    (fixture/apply-fixture "minimal")
+        ;; test count of the invited emails, because invalid emails are ignored
+;        (count (:invites (apply local-query pena  :invites))) => 1
+;        (count (:invites (apply local-query mikko :invites))) => 1
+;        (count (:invites (apply local-query teppo :invites))) => 1  ;; yritys-type applicant
 
-    ; 8: hakijalla ei ole oiketta noutaa aiempaa lupaa
-    (fact "applicant cannot create application"
-      (create-app-from-prev-permit pena
-        :x "6707184.319"
-        :y "393021.589"
-        :address "Kylykuja 3"
-        :propertyId "18600303560005") => (partial expected-failure? "error.unauthorized"))
+        ;;
+        ;; TODO: onko local queryssa jotain vikaa, kun tulee {:text error.application-not-accessible, :ok false} ?
+        ;;
+        #_(let [application (query-application local-query raktark-jarvenpaa example-LP-tunnus)
+               invites (filter #(= raktark-jarvenpaa-id (get-in % [:invite :inviter :id])) (:auth application))]
+
+           (println "\n prev-permit-itest, application:")
+           (>pprint application)
+           (println "\n prev-permit-itest, invites:")
+           (>pprint invites)
+           (println "\n")
+
+           (count invites) => 3
+
+           ;; TODO: Cancel the application and re-call 'create-app-from-prev-permit' -> should open application with different ID
+           (apply local-command raktark-jarvenpaa :cancel-application-authority
+             :id (:id application)
+             :text "Se on peruutus ny!"
+             :lang "fi")
+
+           (let [resp (create-app-from-prev-permit raktark-jarvenpaa
+                        :x "6707184.319"
+                        :y "393021.589"
+                        :address "Kylykuja 3"
+                        :propertyId "18600303560005")]
+             resp => ok?
+             (:id resp) =not=> example-LP-tunnus
+
+;            (query-application local-query raktark-jarvenpaa example-LP-tunnus) => nil?  ;; Ei poistetakaan kannasta...
+            )
+          )))
 
     ;; This applies to all tests in this namespace
     (against-background
