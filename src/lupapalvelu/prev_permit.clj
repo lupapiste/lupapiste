@@ -64,13 +64,13 @@
                                                postiosoite (or
                                                              (get-in applicant [:yritys :postiosoite])
                                                              (get-in applicant [:yritys :postiosoitetieto :postiosoite]))]
-                                           {:companyName (get-in applicant [:yritys :nimi])
-                                            :companyId (get-in applicant [:yritys :liikeJaYhteisotunnus])
+                                           {:name (get-in applicant [:yritys :nimi])
+                                            :y (get-in applicant [:yritys :liikeJaYhteisotunnus])
                                             :email applicant-email
                                             :phone (get-in applicant [:yritys :puhelin])
-                                            :street (get-in postiosoite [:osoitenimi :teksti])
+                                            :adress1 (get-in postiosoite [:osoitenimi :teksti])
                                             :zip (get-in postiosoite [:postinumero])
-                                            :city (get-in postiosoite [:postitoimipaikannimi])
+                                            :po (get-in postiosoite [:postitoimipaikannimi])
                                             :turvakieltokytkin (:turvakieltoKytkin applicant)}))]
 
                  (commands/set-subject-to-document application document user-info (name applicant-type) created))))))))

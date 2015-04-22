@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container">
+    <script type="text/html" id="company-invite-dialog-template">
+      <div class="content">
+        <p data-bind="ltext: 'company-invite.desc'" class="dialog-desc"></p>
+        <form>
+          <select id="selectCompanyToInvite" data-bind="options: companies, optionsText: 'label', value: selected"></select>
+        </form>
+      </div>
+      <submit-button-group params="isSubmitVisible: isSubmitVisible,
+                                         isSubmitEnabled: isSubmitEnabled,
+                                         submit: submit,
+                                         submitTitle: 'company-invite.invite'"/>
+    </script>
+  </section>
+</body>
+</html>

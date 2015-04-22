@@ -2,15 +2,18 @@ LUPAPISTE.ModalDialogModel = function () {
   "use strict";
   var self = this;
 
-  self.loc = {};
-
   self.showDialog = ko.observable(false);
   self.component = ko.observable();
   self.componentParams = ko.observable();
-  self.extraClass = ko.observable();
   self.windowWidth = ko.observable();
   self.windowHeight = ko.observable();
   self.dialogVisible = ko.observable(false);
+  self.title = ko.observable();
+  self.size = ko.observable();
+
+  self.css = ko.pureComputed(function() {
+    return [self.size(), self.component()].join(" ");
+  });
 
   self.showDialog.subscribe(function(show) {
     _.delay(function(show) {
@@ -43,12 +46,14 @@ LUPAPISTE.ModalDialogModel = function () {
     $("html").addClass("no-scroll");
     self.component(data.component);
     var componentParams = data.componentParams ? data.componentParams : {};
-    self.componentParams(_.assign(componentParams,
-      {submitFn: self.submitFn,
-       submitEnabled: self.submitEnabled}));
-    self.loc = data.loc;
-    self.extraClass(data.extraClass);
+    self.componentParams(componentParams);
+    self.title = data.title;
+    self.size(data.size ? data.size : "large");
     self.showDialog(true);
+  });
+
+  hub.subscribe("close-dialog", function() {
+    self.closeDialog();
   });
 
   var setWindowSize = function(width, height) {
