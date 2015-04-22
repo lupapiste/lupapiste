@@ -24,9 +24,7 @@
 (defn- fetch-prev-application! [{{:keys [x y address propertyId organizationId kuntalupatunnus]} :data user :user :as command}]
   (let [operation         :aiemmalla-luvalla-hakeminen
         permit-type       (operations/permit-type-of-operation operation)
-        dummy-application {:id kuntalupatunnus
-                           :permitType permit-type
-                           :organization organizationId}
+        dummy-application {:id kuntalupatunnus :permitType permit-type :organization organizationId}
         xml (krysp-fetch-api/get-application-xml dummy-application :kuntalupatunnus)]
     (when-not xml (fail! :error.no-previous-permit-found-from-backend)) ;; Show error if could not receive the verdict message xml for the given kuntalupatunnus
 
@@ -38,7 +36,6 @@
                                    (enough-location-info-from-parameters? command) {:x x :y y :address address :propertyId propertyId})
           organizations-match?   (when (seq app-info)
                                    (= organizationId (:id (organization/resolve-organization (:municipality app-info) permit-type))))]
-
       (cond
         (empty? app-info)            (fail! :error.no-previous-permit-found-from-backend)
         (not organizations-match?)   (fail! :error.previous-permit-found-from-backend-is-of-different-organization)
