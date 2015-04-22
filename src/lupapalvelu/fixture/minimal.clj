@@ -299,7 +299,7 @@
     :enabled true
     :role "rest-api"
     :private {:password "$2a$10$eYl/SxvzYzOfIDIqjQIZ8.uhi57zPKg0m8J1BHwnAIx/sBcxYojvS"} ;jarvenpaa
-    :organizations ["187-R"]}
+    :organizations ["186-R"]}
 
    ;; Loppi
 

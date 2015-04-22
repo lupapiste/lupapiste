@@ -44,13 +44,12 @@
           (fail :error.lupapiste-application-already-exists-but-unauthorized-to-access-it :id lupapiste-tunnus))))))
 
 (defraw get-lp-id-from-previous-permit
-  {:parameters [:kuntalupatunnus]
+  {:parameters [kuntalupatunnus]
    :input-validators [(partial action/non-blank-parameters [:kuntalupatunnus])]
    :user-roles #{:rest-api}}
-  [{{:keys [kuntalupatunnus]} :data :keys [user] :as command}]
+  [{:keys [user] :as command}]
   (let [command (update-in command [:data] merge {:operation :aiemmalla-luvalla-hakeminen})
-        existing-app (domain/get-application-as {:organization (first (:organizations user))
-                                                 :verdicts {$elemMatch {:kuntalupatunnus kuntalupatunnus}}} user)]
+        existing-app (domain/get-application-as {:verdicts {$elemMatch {:kuntalupatunnus kuntalupatunnus}}} user)]
     (if existing-app
       (resp/status 200 (str (merge (ok :id (:id existing-app))
                                    {:status :already-existing-application})))
@@ -59,8 +58,6 @@
                                                                 (operations/permit-type-of-operation :aiemmalla-luvalla-hakeminen)
                                                                 command)
                                    {:status :created-new-application}))))))
-
-
 
 (defcommand create-application-from-previous-permit
   {:parameters       [:lang :operation :x :y :address :propertyId :organizationId :kuntalupatunnus]
