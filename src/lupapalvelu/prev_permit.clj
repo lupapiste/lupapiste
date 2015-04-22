@@ -11,65 +11,81 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.commands :as commands]))
 
+(defn- get-applicant-email [applicant]
+  (-> (or
+        (get-in applicant [:henkilo :sahkopostiosoite])
+        (get-in applicant [:yritys :sahkopostiosoite]))
+    user/canonize-email
+    (#(if-not (action/email-validator {:data {:email %}})  ;; action/email-validator returns nil if email was valid
+       %
+       (do
+         (info "Prev permit application creation, not inviting the invalid email address received from backing system: " %)
+         nil)))))
+
 (defn- invite-applicants [{:keys [lang user created application] :as command} applicants]
-  {:pre [(every? #(get-in % [:henkilo :sahkopostiosoite]) applicants)]}
-  (when (pos? (count applicants))
-    (let [emails (->> applicants
-                      (map #(get-in % [:henkilo :sahkopostiosoite]))
-                      (map user/canonize-email)
-                      set)]
+  (dorun
+    (->> applicants
+         (map-indexed
+           (fn [i applicant]
+             ;; only invite applicants who have a valid email address
+             (when-let [applicant-email (get-applicant-email applicant)]
 
-      (doseq [email emails]
-        ;; action/email-validator returns nil if email was valid
-        (when (action/email-validator {:data {:email email}})
-          (info "Prev permit application creation, invalid email address received from backing system: " email)
-          (fail! :error.email)))
+               ;; Invite applicants
+               (authorization/send-invite!
+                 (update-in command [:data] merge {:email        applicant-email
+                                                   :text         (i18n/localize lang "invite.default-text")
+                                                   :documentName nil
+                                                   :documentId   nil
+                                                   :path         nil
+                                                   :role         "writer"}))
+               (info "Prev permit application creation, invited " applicant-email " to created app " (get-in command [:data :id]))
 
-      (dorun
-        (->> applicants
-             (map-indexed
-               (fn [i applicant]
-                 (let [applicant-email (get-in applicant [:henkilo :sahkopostiosoite])]
+               ;; Set applicants' user info to Hakija documents
+               (let [document (if (zero? i)
+                                (domain/get-document-by-name application "hakija")
+                                (commands/do-create-doc (assoc-in command [:data :schemaName] "hakija")))
+                     applicant-type (-> applicant (select-keys [:henkilo :yritys]) keys first)
+                     user-info (case applicant-type
+                                 ;; Not including here the id of the invited user into "user-info",
+                                 ;; so it is not set to personSelector, and validation is thus not done.
+                                 ;; If user id would be given, the validation would fail since applicants have not yet accepted their invitations
+                                 ;; (see the check in :personSelector validator in model.clj).
+                                 :henkilo {:firstName (get-in applicant [:henkilo :nimi :etunimi])
+                                           :lastName (get-in applicant [:henkilo :nimi :sukunimi])
+                                           :email applicant-email
+                                           :phone (get-in applicant [:henkilo :puhelin])
+                                           :personId (get-in applicant [:henkilo :henkilotunnus])
+                                           :street (get-in applicant [:henkilo :osoite :osoitenimi :teksti])
+                                           :zip (get-in applicant [:henkilo :osoite :postinumero])
+                                           :city (get-in applicant [:henkilo :osoite :postitoimipaikannimi])
+                                           :turvakieltokytkin (:turvakieltoKytkin applicant)}
 
-                   ;; Invite applicants
-                   (authorization/send-invite!
-                     (update-in command [:data] merge {:email        applicant-email
-                                                       :text         (i18n/localize lang "invite.default-text")
-                                                       :documentName nil
-                                                       :documentId   nil
-                                                       :path         nil
-                                                       :role         "writer"}))
-                   (info "Prev permit application creation, invited " applicant-email " to created app " (get-in command [:data :id]))
+                                 :yritys (let [;; the postiosoite path changed in krysp 2.1.5, supporting both
+                                               postiosoite (or
+                                                             (get-in applicant [:yritys :postiosoite])
+                                                             (get-in applicant [:yritys :postiosoitetieto :postiosoite]))]
+                                           {:companyName (get-in applicant [:yritys :nimi])
+                                            :companyId (get-in applicant [:yritys :liikeJaYhteisotunnus])
+                                            :email applicant-email
+                                            :phone (get-in applicant [:yritys :puhelin])
+                                            ;;
+                                            ;; TODO: Etsitaanko naita yhteyshenkilon tietoja esim. applicant-emailin perusteella kannasta?
+                                            ;;
+;                                            :firstName (get-in applicant [:henkilo :nimi :etunimi])
+;                                            :lastName (get-in applicant [:henkilo :nimi :sukunimi])
+                                            :street (get-in postiosoite [:osoitenimi :teksti])
+                                            :zip (get-in postiosoite [:postinumero])
+                                            :city (get-in postiosoite [:postitoimipaikannimi])
+                                            :turvakieltokytkin (:turvakieltoKytkin applicant)}))]
 
-                   ;; Set applicants' user info to Hakija documents
-                   (let [document (if (zero? i)
-                                    (domain/get-document-by-name application "hakija")
-                                    (commands/do-create-doc (assoc-in command [:data :schemaName] "hakija")))
-                         hakija-doc-id (:id document)
-
-                         ;; Not including the id of the invited user into "user-info", so it is not set to personSelector, and validation is thus not done.
-                         ;; If user id would be given, the validation would fail since applicants have not yet accepted their invitations
-                         ;; (see the check in :personSelector validator in model.clj).
-                         user-info {:role "applicant"
-                                    :email applicant-email
-                                    :username applicant-email
-                                    :firstName (get-in applicant [:henkilo :nimi :etunimi])
-                                    :lastName (get-in applicant [:henkilo :nimi :sukunimi])
-                                    :phone (get-in applicant [:henkilo :puhelin])
-                                    :street (get-in applicant [:henkilo :osoite :osoitenimi :teksti])
-                                    :zip (get-in applicant [:henkilo :osoite :postinumero])
-                                    :city (get-in applicant [:henkilo :osoite :postitoimipaikannimi])
-                                    :personId (get-in applicant [:henkilo :henkilotunnus])
-                                    :turvakieltokytkin (:turvakieltoKytkin applicant)}]
-
-                     (commands/set-subject-to-document application document user-info "henkilo" created))))))))))
+                 (commands/set-subject-to-document application document user-info (name applicant-type) created))))))))
 
 (defn do-create-application-from-previous-permit [{:keys [lang user created] :as command} xml app-info location-info]
   (let [{:keys [rakennusvalvontaasianKuvaus vahainenPoikkeaminen hakijat]} app-info
         manual-schema-datas {"hankkeen-kuvaus" (filter seq
-                                                       (conj []
-                                                             (when-not (ss/blank? rakennusvalvontaasianKuvaus) [["kuvaus"] rakennusvalvontaasianKuvaus])
-                                                             (when-not (ss/blank? vahainenPoikkeaminen) [["poikkeamat"] vahainenPoikkeaminen])))}
+                                                 (conj []
+                                                   (when-not (ss/blank? rakennusvalvontaasianKuvaus) [["kuvaus"] rakennusvalvontaasianKuvaus])
+                                                   (when-not (ss/blank? vahainenPoikkeaminen) [["poikkeamat"] vahainenPoikkeaminen])))}
         ;; TODO: Property-id structure is about to change -> Fix this municipality logic when it changes.
         municipality (subs (:propertyId location-info) 0 3)
         command (update-in command [:data] merge {:municipality municipality :infoRequest false :messages []} location-info)
@@ -84,9 +100,5 @@
     ;; The application has to be inserted first, because it is assumed to be in the database when checking for verdicts (and their attachments).
     (application/insert-application created-application)
     (verdict-api/find-verdicts-from-xml command xml)  ;; Get verdicts for the application
-
-    ;; NOTE: at the moment only supporting henkilo-type applicants
-    (let [applicants-with-email (filter #(get-in % [:henkilo :sahkopostiosoite]) hakijat)]
-      (invite-applicants command applicants-with-email))
-
+    (invite-applicants command hakijat)
     (:id created-application)))

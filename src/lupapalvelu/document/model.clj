@@ -477,3 +477,22 @@
       util/strip-empty-maps
       tools/wrapped)))
 
+(defn ->yritys [{:keys [firstName lastName email phone street zip city turvakieltokytkin companyName companyId]}
+                & {:keys [with-empty-defaults?]}]
+  {:pre [(or (nil? turvakieltokytkin) (util/boolean? turvakieltokytkin))]}
+  (letfn [(wrap [v] (if (and with-empty-defaults? (nil? v)) "" v))]
+    (->
+      {:yritysnimi                                    (wrap companyName)
+       :liikeJaYhteisoTunnus                          (wrap companyId)
+       :osoite {:katu                                 (wrap street)
+                :postinumero                          (wrap zip)
+                :postitoimipaikannimi                 (wrap city)}
+       :yhteyshenkilo {:henkilotiedot {:etunimi       (wrap firstName)
+                                       :sukunimi      (wrap lastName)
+                                       :turvakieltoKytkin (when (or turvakieltokytkin with-empty-defaults?) (boolean turvakieltokytkin))}
+                       :yhteystiedot {:email          (wrap email)
+                                      :puhelin        (wrap phone)}}}
+      util/strip-nils
+      util/strip-empty-maps
+      tools/wrapped)))
+
