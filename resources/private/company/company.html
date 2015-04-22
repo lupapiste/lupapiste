@@ -109,7 +109,7 @@
               <tr>
                 <td data-bind="text: firstName"></td>
                 <td data-bind="text: lastName"></td>
-                <td data-bind="text: email"></td>
+                <td data-bind="text: email" data-test-id="company-invited-user-email"></td>
                 <td data-bind="ltext: 'company.user.invited'"></td>
                 <td data-bind="ltext: 'company.user.role.' + role"></td>
                 <td>
@@ -164,7 +164,8 @@
                 class="btn btn-primary btn-dialog"
                 data-test-id="dialog-company-user-op.ok">
         </button>
-        <button data-bind="enable: !pending(),
+        <button data-test-id="company-new-user-close-dialog"
+                data-bind="enable: !pending(),
                            ltext: 'no'"
                 class="btn btn-dialog close">
         </button>
@@ -234,7 +235,7 @@
 
           <div>
             <button data-bind="enable: canSubmit, click: submit, ltext: 'register.company.add-user.submit'" type="submit" class="btn btn-dialog btn-primary" data-test-id="company-user-submit"></button>
-            <button data-bind="enable: canClose, ltext: 'close'" class="btn btn-dialog close"></button>
+            <button data-bind="enable: canClose, ltext: 'close'" class="btn btn-dialog close" data-test-id="company-new-user-invited-close-dialog"></button>
           </div>
         </form>
       </div>
