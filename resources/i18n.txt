@@ -1,0 +1,5 @@
+company.user.op.delete.invitation:  [Peruuta kutsu]
+company.user.invited:  Kutsuttu
+company.user.op.delete-invite.true.title:  Yrityskäyttäjäkutsun peruuttaminen
+company.user.op.delete-invite.true.message:  Oletko varma että haluat peruuttaa lähetyn kutsun?
+register.company.add-user.already-invited:  Käyttäjälle on jo lähetetty kutsu.

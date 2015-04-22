@@ -73,7 +73,10 @@
     ajax
       .command("company-add-user", unObservableize(this.fields, this))
       .pending(this.pending)
-      .success(this.done.bind(this, true))
+      .success(function() {
+          hub.send("refresh-companies");
+          this.done(true);
+        }, this)
       .call();
   };
 
@@ -172,7 +175,7 @@
     });
   }
 
-  function InvitedUser(user) {
+  function InvitedUser(user, invitations) {
     var self = this;
     self.firstName = user.firstName;
     self.lastName  = user.lastName;
@@ -180,8 +183,9 @@
     self.expires   = user.expires;
     self.role      = user.role;
     self.tokenId   = user.tokenId;
+    self.opsEnabled   = ko.computed(function() { return currentUser.get().company.role() === "admin" && currentUser.id() !== user.id; });
     self.deleteInvitation = companyUserOp.withConfirmation(user, self.deleted, "delete-invite", function() {
-      console.log("deleteInvitation");
+      invitations.remove(function(i) { return i.tokenId === user.tokenId; });
     });
   }
 
@@ -311,7 +315,7 @@
         .info.update(data.company)
         .isAdmin(currentUser.get().role() === "admin" || (currentUser.get().company.role() === "admin" && currentUser.get().company.id() === self.id()))
         .users(_.map(data.users, function(user) { return new CompanyUser(user, self.users); }))
-        .invitations(_.map(data.invitations, function(invitation) { return new InvitedUser(invitation); }));
+        .invitations(_.map(data.invitations, function(invitation) { return new InvitedUser(invitation, self.invitations); }));
     };
 
     self.load = function() {
@@ -338,6 +342,8 @@
   var company = new Company();
 
   hub.onPageLoad("company", function(e) { company.show(e.pagePath[0], e.pagePath[1]); });
+
+  hub.subscribe("refresh-companies", function() { company.load(); });
 
   $(function() {
     $("#company-content").applyBindings(company);

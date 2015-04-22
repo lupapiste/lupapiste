@@ -110,10 +110,12 @@
                 <td data-bind="text: firstName"></td>
                 <td data-bind="text: lastName"></td>
                 <td data-bind="text: email"></td>
-                <td>Kutsuttu</td>
+                <td data-bind="ltext: 'company.user.invited'"></td>
                 <td data-bind="ltext: 'company.user.role.' + role"></td>
                 <td>
-                  <a href="#" data-bind="click: deleteInvitation">[poista]</a>
+                  <div data-bind="visible: opsEnabled">
+                    <a href="#" data-bind="click: deleteInvitation, ltext: 'company.user.op.delete.invitation'"></a>
+                  </div>
                 </td>
             </tbody>
             <tbody data-bind="foreach: users">
@@ -140,7 +142,7 @@
       </div>
     </div>
 
-    <div id="dialog-company-user-op" class="window autosized" data-bind="if: lupapisteApp.models.rootVMO.currentPage() === 'company'">
+    <div id="dialog-company-user-op" class="window autosized">
       <div class="dialog-header">
         <p data-bind="text: title"></p>
         <p class="dialog-close close">X</p>
@@ -170,7 +172,7 @@
       </div>
     </div>
 
-    <div id="dialog-company-new-user" class="window autosized" data-bind="if: lupapisteApp.models.rootVMO.currentPage() === 'company'">
+    <div id="dialog-company-new-user" class="window autosized">
       <div class="dialog-header">
         <p data-bind="ltext: 'register.company.add-user.message'"></p>
         <p class="dialog-close close">X</p>
@@ -196,8 +198,7 @@
 
         <div data-bind="visible: showUserAlreadyInvited">
           <span data-bind="ltext: 'register.company.add-user.already-invited'"></span>
-            <button data-bind="ltext: 'ok'" class="btn btn-dialog close"></button>
-          </div>
+          <button data-bind="ltext: 'ok'" class="btn btn-dialog close"></button>
         </div>
 
         <div data-bind="visible: showUserInvited">
