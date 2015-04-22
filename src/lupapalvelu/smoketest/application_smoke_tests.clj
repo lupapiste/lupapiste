@@ -97,8 +97,20 @@
 (defmonster opened-timestamp
   (timestamp-is-set :opened (action/all-states-but [:draft :canceled])))
 
+;;
+;; Skips applications with operation "aiemmalla-luvalla-hakeminen" (previous permit aka paperilupa)
+;;
 (defmonster submitted-timestamp
-  (timestamp-is-set :submitted (action/all-application-states-but [:canceled :draft :open])))
+ (if-let [results (seq (remove nil? (map
+                                      (fn [app]
+                                        (when (and
+                                                ((action/all-application-states-but [:canceled :draft :open]) (keyword (:state app)))
+                                                (when-not (some #(#{"aiemmalla-luvalla-hakeminen"} (:name %)) (:operations app))
+                                                  (nil? (:submitted app))))
+                                          (:id app)))
+                                      @applications)))]
+   {:ok false :results results}
+   {:ok true}))
 
 ; Fails with 255 applications
 ;(defmonster canceled-timestamp
