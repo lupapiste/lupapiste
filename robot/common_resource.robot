@@ -511,7 +511,7 @@ Click tree item by text
 # Closes the application that is currently open by clicking cancel button
 Close current application
   Wait Until  Element Should Be Enabled  xpath=//button[@data-test-id="application-cancel-btn"]
-  Click by test id  application-cancel-btn
+  Click enabled by test id  application-cancel-btn
   Confirm  dynamic-yes-no-confirm-dialog
 
 Close current application as authority
