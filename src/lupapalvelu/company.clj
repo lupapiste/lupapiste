@@ -91,8 +91,10 @@
 
 (defn find-user-invitations [company-id]
   (let [tokens (mongo/select :token {$and [{:token-type {$in ["invite-company-user" "new-company-user"]}}
-                                           {:data.company.id company-id} {:used nil}]}
-                             {:data 1 :tokenId 1 :expires 1}
+                                           {:data.company.id company-id}
+                                           {:expires {$gt (now)}}
+                                           {:used nil}]}
+                             {:data 1 :tokenId 1}
                              {:data.user.firstName 1})
         data (map map-token-to-user-invitation tokens)]
     data))
