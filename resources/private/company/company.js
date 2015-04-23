@@ -299,8 +299,6 @@
     self.info        = new CompanyInfo(self);
     self.tabs        = new TabsModel(self.id);
 
-    self.invitations.subscribe(function(val) { console.log("val", val); });
-
     self.clear = function() {
       return self
         .pending(false)
