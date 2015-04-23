@@ -121,19 +121,25 @@
 (defn fetch-document [process-id ts]
   (infof "sign:fetch-document:%s" process-id)
   (let [process (find-sign-process! process-id)
-        content-type "application/pdf"
-        ; FIXME: where we get the selected account?
-        pdf (docx/yritystilisopimus (:company process) (:signer process) {} (now))]
-
+        content-type "application/pdf"]
     (when (= (:status process) "created")
-      (process-update! process :started ts)
+      (process-update! process :started ts))
+
+    (if-let [pdf (mongo/download-find {:metadata.process.id process-id})]
+      (do
+        (debug "sign:fetch-document:download-from-mongo")
+        [content-type ((:content pdf))])
+
       (let [filename (str "yritystilisopimus-" (-> process :company :name) ".pdf")
+            ; FIXME: where we get the selected account?
+            pdf (docx/yritystilisopimus (:company process) (:signer process) {} (now))
             sha256 (pandect/sha256 pdf)]
+
+        (debug "sign:fetch-document:upload-to-mongo")
         (.reset pdf)
         (mongo/upload (mongo/create-id) filename content-type pdf {:sha256 sha256, :process process})
-        (.reset pdf)))
-
-    [content-type pdf]))
+        (.reset pdf)
+        [content-type pdf]))))
 
 ;
 ; Success:
