@@ -4,13 +4,15 @@
             [sade.core :refer [def-]]
             [sade.xml :as xml]
             [lupapalvelu.itest-util :refer :all]
-            [lupapalvelu.factlet  :refer :all]
+            [lupapalvelu.factlet :refer :all]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.fixture.core :as fixture]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch-api]
-            [lupapalvelu.xml.krysp.reader :as krysp-reader]))
+            [lupapalvelu.xml.krysp.reader :as krysp-reader]
+            [sade.http :as http]
+            [lupapalvelu.itest-util :as util]))
 
 (fixture/apply-fixture "minimal")
 
@@ -124,12 +126,31 @@
       (krysp-fetch-api/get-application-xml anything anything) => example-xml))
 
   (facts "Application from kuntalupatunnus via rest API"
-    (facts "Happy cases"
-      (fact "should return the LP application if the kuntalupatunnus matches an existing app")
-      (fact "should create new LP application if kuntalupatunnus doesn't match existing app"))
+    (let [rest-address (str (server-address) "/rest/get-lp-id-from-previous-permit")
+          params  {:query-params {"kuntalupatunnus" example-kuntalupatunnus}
+                   :basic-auth   ["jarvenpaa-backend" "jarvenpaa"]}]
+      (against-background [(before :facts (apply-remote-minimal))]
+        (fact "should create new LP application if kuntalupatunnus doesn't match existing app"
+          (let [response (http/get rest-address params)
+                resp-body (:body (util/decode-response response))]
+            (:status response) => 200
+            resp-body => ok?
+            (keyword (:status resp-body)) => :created-new-application))
 
-    (facts "Error cases"
-      (fact ""))
+        (fact "should return the LP application if the kuntalupatunnus matches an existing app"
+          (let [{app-id :id} (create-and-submit-application pena :municipality jarvenpaa-muni)
+                _            (give-verdict raktark-jarvenpaa app-id :verdictId example-kuntalupatunnus)
+                response     (http/get rest-address params)
+                resp-body    (:body (util/decode-response response))]
+            (:status response) => 200
+            resp-body => ok?
+            (keyword (:status resp-body)) => :already-existing-application))
 
-    ))
-
+        (fact "create new LP app if kuntalupatunnus matches existing app in another organization"
+          (let [{app-id :id} (create-and-submit-application pena :municipality sonja-muni)
+                _            (give-verdict sonja app-id :verdictId example-kuntalupatunnus)
+                response     (http/get rest-address params)
+                resp-body    (:body (util/decode-response response))]
+            (:status response) => 200
+            resp-body => ok?
+            (keyword (:status resp-body)) => :created-new-application))))))

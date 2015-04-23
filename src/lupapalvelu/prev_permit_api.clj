@@ -18,12 +18,10 @@
   (let [command      (update-in command [:data] merge {:organizationId (first (:organizations user))})
         existing-app (domain/get-application-as {:state    {$ne "canceled"}
                                                  :verdicts {$elemMatch {:kuntalupatunnus kuntalupatunnus}}} user)
-        result       (if existing-app
-                       (merge (ok :id (:id existing-app))
-                              {:status :already-existing-application})
-                       (merge (prev-permit/fetch-prev-application! command)
-                              {:status :created-new-application}))]
-    (resp/status 200 (str result))))
+        result       (apply merge (if existing-app
+                                    [(ok :id (:id existing-app)) {:status :already-existing-application}]
+                                    [(prev-permit/fetch-prev-application! command) {:status :created-new-application}]))]
+    (resp/json result)))
 
 (defcommand create-application-from-previous-permit
   {:parameters       [:lang :x :y :address :propertyId organizationId kuntalupatunnus]
