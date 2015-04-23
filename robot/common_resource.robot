@@ -636,6 +636,14 @@ Comment count is
   Close side panel  conversation
 
 #
+# Invites
+#
+
+Invite count is
+  [Arguments]  ${amount}
+  Wait Until  Xpath Should Match X Times  //*[@class='user-invite']  ${amount}
+
+#
 # Tasks
 #
 

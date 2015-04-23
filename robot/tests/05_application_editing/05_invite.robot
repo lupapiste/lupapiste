@@ -176,10 +176,6 @@ Error message is present on invite form
 Mask is invisible
   Element should not be visible  xpath=//div[@id='ModalDialogMask']
 
-Invite count is
-  [Arguments]  ${amount}
-  Wait Until  Xpath Should Match X Times  //*[@class='user-invite']  ${amount}
-
 Invite Teppo
   Invite count is  0
   Click by test id  application-invite-paasuunnittelija
