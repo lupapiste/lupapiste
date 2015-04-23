@@ -46,6 +46,25 @@ Click create button
   #Wait until  Element should be visible  xpath=//section[@id='application']//span[@data-test-id='application-property-id']
   Wait until  Element text should be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  186-3-356-6
   Element text should be  xpath=//section[@id='application']//span[@data-test-id='test-application-operation']  Rakennusvalvonnan luvan siirto Lupapisteeseen
+  Application state should be  verdictGiven
+
+#Check invitees
+
+
+Open Rakentaminen tab, and check it contains 13 tasks
+  Open tab  tasks
+  Wait until  Xpath Should Match X Times  //div[@id='application-tasks-tab']//table[@data-bind="foreach: taskGroups"]/tbody/tr  10
+  Task count is  task-katselmus  8
+  #Wait until  Xpath Should Match X Times  //table[@data-bind="foreach: taskGroups"]/tbody/tr[@data-test-type="task-katselmus"]  8
+  Task count is  task-lupamaarays  2
+  #Wait until  Xpath Should Match X Times  //table[@data-bind="foreach: taskGroups"]/tbody/tr[@data-test-type="task-lupamaarays"]  2
+  Wait until  Xpath Should Match X Times  //table[@data-test-id="tasks-foreman"]/tbody/tr  3
+
+#Re-fetch application with same kuntalupatunnus -> the same application is opened
+
+
+
+#Cancel the created application and re-fetch application
 
 
 
