@@ -48,8 +48,9 @@ Click create button
   Element text should be  xpath=//section[@id='application']//span[@data-test-id='test-application-operation']  Rakennusvalvonnan luvan siirto Lupapisteeseen
   Application state should be  verdictGiven
 
-#Check invitees
-
+Check invitees
+  Open tab  parties
+  Invite count is  3
 
 Open Rakentaminen tab, and check it contains 13 tasks
   Open tab  tasks
