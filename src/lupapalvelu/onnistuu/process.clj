@@ -1,5 +1,5 @@
 (ns lupapalvelu.onnistuu.process
-  (:require [taoensso.timbre :as timbre :refer [infof warnf errorf]]
+  (:require [taoensso.timbre :as timbre :refer [debug infof warnf errorf]]
             [clojure.java.io :as io]
             [clojure.walk :as walk]
             [monger.collection :as mc]
@@ -11,12 +11,13 @@
             [noir.response :as resp]
             [sade.env :as env]
             [sade.util :refer [max-length-string valid-email?]]
-            [sade.core :refer [ok]]
+            [sade.core :refer [ok now]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :refer [random-password]]
             [sade.crypt :as crypt]
             [lupapalvelu.company :as c]
-            [lupapalvelu.user-api :as u]))
+            [lupapalvelu.user-api :as u]
+            [lupapalvelu.docx :as docx]))
 
 (set! *warn-on-reflection* true)
 
@@ -118,10 +119,15 @@
 
 (defn fetch-document [process-id ts]
   (infof "sign:fetch-document:%s" process-id)
-  (-> (find-sign-process! process-id)
-      (process-update! :started ts))
-  ; FIXME: where we get the actual document?
-  ["application/pdf" (-> "hello.pdf" io/resource io/input-stream)])
+  (let [process (find-sign-process! process-id)]
+    (when (= (:status process) "created")
+      (process-update! process :started ts))
+
+    (debug process)
+
+    ; FIXME: where we get the selected account?
+    ["application/pdf" (docx/yritystilisopimus (:company process) (:signer process) {} (now))])
+  )
 
 ;
 ; Success:
