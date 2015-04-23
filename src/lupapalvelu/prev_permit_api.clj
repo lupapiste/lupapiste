@@ -15,36 +15,6 @@
             [lupapalvelu.prev-permit :as prev-permit]
             [noir.response :as resp]))
 
-
-(defn- enough-location-info-from-parameters? [{{:keys [x y address propertyId]} :data}]
-  (and
-    (not (ss/blank? address)) (not (ss/blank? propertyId))
-    (-> x util/->double pos?) (-> y util/->double pos?)))
-
-(defn- fetch-prev-application! [{{:keys [x y address propertyId organizationId kuntalupatunnus]} :data user :user :as command}]
-  (let [operation         :aiemmalla-luvalla-hakeminen
-        permit-type       (operations/permit-type-of-operation operation)
-        dummy-application {:id kuntalupatunnus :permitType permit-type :organization organizationId}
-        xml (krysp-fetch-api/get-application-xml dummy-application :kuntalupatunnus)]
-    (when-not xml (fail! :error.no-previous-permit-found-from-backend)) ;; Show error if could not receive the verdict message xml for the given kuntalupatunnus
-
-    (let [app-info               (krysp-reader/get-app-info-from-message xml kuntalupatunnus)
-          rakennuspaikka-exists? (and (:rakennuspaikka app-info)
-                                      (every? (-> app-info :rakennuspaikka keys set) [:x :y :address :propertyId]))
-          location-info          (cond
-                                   rakennuspaikka-exists?                          (:rakennuspaikka app-info)
-                                   (enough-location-info-from-parameters? command) {:x x :y y :address address :propertyId propertyId})
-          organizations-match?   (when (seq app-info)
-                                   (= organizationId (:id (organization/resolve-organization (:municipality app-info) permit-type))))]
-      (cond
-        (empty? app-info)            (fail! :error.no-previous-permit-found-from-backend)
-        (not organizations-match?)   (fail! :error.previous-permit-found-from-backend-is-of-different-organization)
-        (not location-info)          (do
-                                       (when-not rakennuspaikka-exists?
-                                         (info "Prev permit application creation, rakennuspaikkatieto information incomplete:\n " (:rakennuspaikka app-info) "\n"))
-                                       (fail! :error.more-prev-app-info-needed :needMorePrevPermitInfo true))
-        :else                        (ok :id (prev-permit/do-create-application-from-previous-permit command operation xml app-info location-info))))))
-
 (defraw get-lp-id-from-previous-permit
   {:parameters [kuntalupatunnus]
    :input-validators [(partial action/non-blank-parameters [:kuntalupatunnus])]
@@ -56,7 +26,7 @@
     (if existing-app
       (resp/status 200 (str (merge (ok :id (:id existing-app))
                                    {:status :already-existing-application})))
-      (resp/status 200 (str (merge (fetch-prev-application! command)
+      (resp/status 200 (str (merge (prev-permit/fetch-prev-application! command)
                                    {:status :created-new-application}))))))
 
 (defcommand create-application-from-previous-permit
@@ -77,4 +47,4 @@
                                 user)]
       ;;Found an application of same organization that has a verdict with the given kuntalupatunnus -> Open it.
       (ok :id (:id app-with-verdict))
-      (fetch-prev-application! command)))
+      (prev-permit/fetch-prev-application! command)))
