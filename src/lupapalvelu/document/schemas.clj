@@ -170,7 +170,7 @@
 (def ya-party (henkilo-yritys-select-group :default "yritys"))
 (def party-with-required-hetu (henkilo-yritys-select-group :henkilo-body henkilo-with-required-hetu))
 
-(def koulutusvalinta {:name "koulutusvalinta" :type :select :sortBy :displayname :i18nkey "koulutus"
+(def koulutusvalinta {:name "koulutusvalinta" :type :select :sortBy :displayname :i18nkey "koulutus" :other-key "koulutus"
                       :body [{:name "arkkitehti"}
                              {:name "arkkitehtiylioppilas"}
                              {:name "diplomi-insin\u00f6\u00f6ri"}
@@ -194,8 +194,7 @@
                              {:name "talonrakennusinsin\u00f6\u00f6ri"}
                              {:name "talonrakennusteknikko"}
                              {:name "tekniikan kandidaatti"}
-                             {:name "teknikko"}
-                             {:name "muu"}]})
+                             {:name "teknikko"}]})
 
 (def patevyys [koulutusvalinta
                {:name "koulutus" :type :string :required false :i18nkey "muukoulutus"}
