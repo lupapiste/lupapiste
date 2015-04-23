@@ -269,6 +269,10 @@ SolitaAdmin logs in
   Admin logs in  admin  admin  Admin Admin
   Wait until  Element should be visible  admin
 
+Jarvenpaa authority logs in
+  Authority logs in  rakennustarkastaja@jarvenpaa.fi  jarvenpaa  Rakennustarkastaja Järvenpää
+
+
 #
 # Helpers for cases when target element is identified by "data-test-id" attribute:
 #
