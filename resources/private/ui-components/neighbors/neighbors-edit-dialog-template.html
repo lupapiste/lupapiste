@@ -44,10 +44,11 @@
                  class="form-input text long" type="text" id="neighbors.owner.email" data-test-id="neighbors.edit.email" />
         </form>
       </div>
-      <submit-button-group params="isSubmitVisible: true,
-                                   isSubmitEnabled: isSubmitEnabled,
-                                   submit: save,
-                                   submitTitle: 'save'"/>
+      <div data-bind="component: {name: 'submit-button-group',
+                                  params: { isSubmitVisible: true,
+                                            isSubmitEnabled: isSubmitEnabled,
+                                            submit: save,
+                                            submitTitle: 'save'}}"></div>
     </script>
   </section>
 </body>
