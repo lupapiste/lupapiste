@@ -662,7 +662,7 @@
                       operation-validator]}
   [{{:keys [operation address municipality infoRequest]} :data :keys [user created] :as command}]
 
-  ;; TODO: These let-bindings are repeated in do-create-application, merge th somehow
+  ;; TODO: These let-bindings are repeated in do-create-application, merge those somehow
   (let [permit-type (operations/permit-type-of-operation operation)
         organization (organization/resolve-organization municipality permit-type)
         scope (organization/resolve-organization-scope municipality permit-type organization)

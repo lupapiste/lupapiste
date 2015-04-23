@@ -9,7 +9,12 @@
             [lupapalvelu.authorization-api :as authorization]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.document.commands :as commands]))
+            [lupapalvelu.document.commands :as commands]
+            [lupapalvelu.xml.krysp.reader :as krysp-reader]
+            [sade.util :as util]
+            [lupapalvelu.operations :as operations]
+            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch-api]
+            [lupapalvelu.organization :as organization]))
 
 (defn- get-applicant-email [applicant]
   (-> (or
@@ -75,7 +80,7 @@
 
                  (commands/set-subject-to-document application document user-info (name applicant-type) created))))))))
 
-(defn do-create-application-from-previous-permit [command xml app-info location-info]
+(defn do-create-application-from-previous-permit [command operation xml app-info location-info]
   (let [{:keys [rakennusvalvontaasianKuvaus vahainenPoikkeaminen hakijat]} app-info
         manual-schema-datas {"hankkeen-kuvaus" (remove empty? (conj []
                                                                     (when-not (ss/blank? rakennusvalvontaasianKuvaus)
@@ -84,7 +89,9 @@
                                                                       [["poikkeamat"] vahainenPoikkeaminen])))}
         ;; TODO: Property-id structure is about to change -> Fix this municipality logic when it changes.
         municipality (subs (:propertyId location-info) 0 3)
-        command (update-in command [:data] merge {:municipality municipality :infoRequest false :messages []} location-info)
+        command (update-in command [:data] merge
+                  {:operation operation :municipality municipality :infoRequest false :messages []}
+                  location-info)
         created-application (application/do-create-application command manual-schema-datas)
         ;; TODO: Aseta applicationille viimeisin state? (lupapalvelu.document.canonical-common/application-state-to-krysp-state kaanteisesti)
         ;        created-application (assoc created-application
@@ -98,3 +105,32 @@
     (verdict-api/find-verdicts-from-xml command xml)  ;; Get verdicts for the application
     (invite-applicants command hakijat)
     (:id created-application)))
+
+(defn- enough-location-info-from-parameters? [{{:keys [x y address propertyId]} :data}]
+  (and
+    (not (ss/blank? address)) (not (ss/blank? propertyId))
+    (-> x util/->double pos?) (-> y util/->double pos?)))
+
+(defn fetch-prev-application! [{{:keys [x y address propertyId organizationId kuntalupatunnus]} :data user :user :as command}]
+  (let [operation         :aiemmalla-luvalla-hakeminen
+        permit-type       (operations/permit-type-of-operation operation)
+        dummy-application {:id kuntalupatunnus :permitType permit-type :organization organizationId}
+        xml (krysp-fetch-api/get-application-xml dummy-application :kuntalupatunnus)]
+    (when-not xml (fail! :error.no-previous-permit-found-from-backend)) ;; Show error if could not receive the verdict message xml for the given kuntalupatunnus
+
+    (let [app-info               (krysp-reader/get-app-info-from-message xml kuntalupatunnus)
+          rakennuspaikka-exists? (and (:rakennuspaikka app-info)
+                                      (every? (-> app-info :rakennuspaikka keys set) [:x :y :address :propertyId]))
+          location-info          (cond
+                                   rakennuspaikka-exists?                          (:rakennuspaikka app-info)
+                                   (enough-location-info-from-parameters? command) {:x x :y y :address address :propertyId propertyId})
+          organizations-match?   (when (seq app-info)
+                                   (= organizationId (:id (organization/resolve-organization (:municipality app-info) permit-type))))]
+      (cond
+        (empty? app-info)            (fail! :error.no-previous-permit-found-from-backend)
+        (not organizations-match?)   (fail! :error.previous-permit-found-from-backend-is-of-different-organization)
+        (not location-info)          (do
+                                       (when-not rakennuspaikka-exists?
+                                         (info "Prev permit application creation, rakennuspaikkatieto information incomplete:\n " (:rakennuspaikka app-info) "\n"))
+                                       (fail! :error.more-prev-app-info-needed :needMorePrevPermitInfo true))
+        :else                        (ok :id (do-create-application-from-previous-permit command operation xml app-info location-info))))))

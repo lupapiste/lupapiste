@@ -129,57 +129,6 @@
                                                    :tilanNimi {:value "Omatila"}
                                                    :rantaKytkin {:value true}}}})
 
-(def- paasuunnittelija {:id "523844e1da063788effc1c5d"
-                                 :created 1379419361123
-                                 :schema-info {:approvable true
-                                               :name "paasuunnittelija"
-                                               :removable false
-                                               :version 1
-                                               :type "party"
-                                               :order 4}
-                                 :data {:henkilotiedot {:etunimi {:value "Pena"}
-                                                        :sukunimi {:value "Panaani"}
-                                                        :hetu {:value "210281-9988"}}
-                                        :osoite {:katu {:value "Paapankuja 12"}
-                                                 :postinumero {:value "10203"}
-                                                 :postitoimipaikannimi {:value "Piippola"}}
-                                        :patevyys {:koulutusvalinta {:value "arkkitehti"}, :koulutus {:value "Arkkitehti"}
-                                                   :valmistumisvuosi {:value "2010"}
-                                                   :patevyysluokka {:value "AA"}
-                                                   :kokemus {:value "3"}
-                                                   :fise {:value "http://www.solita.fi"}}
-                                        :userId {:value "777777777777777777000020"}
-                                        :yhteystiedot {:email {:value "pena@example.com"}
-                                                       :puhelin {:value "0102030405"}}}})
-
-(def- suunnittelija {:id "523844e1da063788effc1c5e"
-                              :schema-info {:approvable true
-                                            :name "suunnittelija"
-                                            :removable true
-                                            :repeating true
-                                            :version 1
-                                            :type "party"
-                                            :order 5}
-                              :created 1379419361123
-                              :data {:henkilotiedot
-                                     {:etunimi {:value "Pena"}
-                                      :sukunimi {:value "Panaani"}
-                                      :hetu {:value "210281-9988"}}
-                                     :kuntaRoolikoodi {:value "KVV-suunnittelija"}
-                                     :osoite {:katu {:value "Paapankuja 12"}
-                                              :postinumero {:value "10203"}
-                                              :postitoimipaikannimi {:value "Piippola"}}
-                                     :patevyys {:koulutusvalinta {:value "muu"}, :koulutus {:value "El\u00e4m\u00e4n koulu"}
-                                                :valmistumisvuosi {:value "2010"}
-                                                :patevyysluokka {:value "C"}
-                                                :kokemus {:value "3"}
-                                                :fise {:value "http://www.solita.fi"}}
-                                     :userId {:value "777777777777777777000020"}
-                                     :yhteystiedot {:email {:value "pena@example.com"}
-                                                    :puhelin {:value "0102030405"}}
-                                     :yritys {:liikeJaYhteisoTunnus {:value "1743842-0"}
-                                              :yritysnimi {:value "ewq"}}}})
-
 (def- lisaosa {:id "523844e1da063788effc1c5f"
                         :created 1379419361123
                         :schema-info {:name "suunnittelutarveratkaisun-lisaosa"
@@ -207,18 +156,7 @@
                  hanke
                  maksaja
                  rakennuspaikka
-                 paasuunnittelija
-                 suunnittelija
                  lisaosa])
-
-(def- documents-for-laajennus [hakija
-                               laajennus
-                               hanke
-                               maksaja
-                               rakennuspaikka
-                               paasuunnittelija
-                               suunnittelija
-                               lisaosa])
 
 (def poikkari-hakemus
   {:schema-version 1
@@ -327,43 +265,6 @@
         _ (:sahkopostiosoite henkilo) => "pena@example.com"
         yritys (:yritys Osapuoli) => nil
 
-        ;Paasuunnittelija
-        suunnittelijatieto (:suunnittelijatieto Osapuolet) => truthy
-        paasuunnittelija (some #(when (= (get-in % [:Suunnittelija :VRKrooliKoodi] %) "p\u00e4\u00e4suunnittelija") %) suunnittelijatieto) => truthy
-        Suunnittelija (:Suunnittelija paasuunnittelija) => truthy
-        henkilo (:henkilo Suunnittelija) => truthy
-        _ (get-in henkilo [:nimi :etunimi]) => "Pena"
-        _ (get-in henkilo [:nimi :sukunimi]) => "Panaani"
-        _ (:henkilotunnus henkilo) => "210281-9988"
-        _ (:puhelin henkilo) => "0102030405"
-        _ (:sahkopostiosoite henkilo) => "pena@example.com"
-        osoite (:osoite henkilo) => truthy
-        _ (get-in osoite [:osoitenimi :teksti]) => "Paapankuja 12"
-        _ (:postinumero osoite) => "10203"
-        _ (:postitoimipaikannimi osoite) => "Piippola"
-        _ (:koulutus Suunnittelija) => "arkkitehti"
-        _ (:patevyysvaatimusluokka Suunnittelija) => "AA"
-        _ (:valmistumisvuosi Suunnittelija) => "2010"
-        _ (:kokemusvuodet Suunnittelija) => "3"
-
-        ;Suunnittelija
-        suunnittelijatieto (:suunnittelijatieto Osapuolet) => truthy
-        suunnittelija (some #(when (= (get-in % [:Suunnittelija :suunnittelijaRoolikoodi] %) "KVV-suunnittelija") %) suunnittelijatieto) => truthy
-        Suunnittelija (:Suunnittelija suunnittelija) => truthy
-        henkilo (:henkilo Suunnittelija) => truthy
-        _ (get-in henkilo [:nimi :etunimi]) => "Pena"
-        _ (get-in henkilo [:nimi :sukunimi]) => "Panaani"
-        _ (:henkilotunnus henkilo) => "210281-9988"
-        _ (:puhelin henkilo) => "0102030405"
-        _ (:sahkopostiosoite henkilo) => "pena@example.com"
-        osoite (:osoite henkilo) => truthy
-        _ (get-in osoite [:osoitenimi :teksti]) => "Paapankuja 12"
-        _ (:postinumero osoite) => "10203"
-        _ (:postitoimipaikannimi osoite) => "Piippola"
-        _ (:koulutus Suunnittelija) => "muu"
-        _ (:patevyysvaatimusluokka Suunnittelija) => "C"
-        _ (:valmistumisvuosi Suunnittelija) => "2010"
-        _ (:kokemusvuodet Suunnittelija) => "3"
 
         rakennuspaikkatieto (:rakennuspaikkatieto Poikkeamisasia) => truthy
         Rakennuspaikkaf (first rakennuspaikkatieto) => truthy
@@ -538,37 +439,6 @@
         _ (:sahkopostiosoite henkilo) => "pena@example.com"
         yritys (:yritys Osapuoli) => nil
 
-        ;Paassuunnitelija
-        suunnittelijatieto (:suunnittelijatieto Osapuolet) => truthy
-        paasuunnittelija (some #(when (= (get-in % [:Suunnittelija :VRKrooliKoodi] %) "p\u00e4\u00e4suunnittelija") %) suunnittelijatieto) => truthy
-        Suunnittelija (:Suunnittelija paasuunnittelija) => truthy
-        henkilo (:henkilo Suunnittelija) => truthy
-        _ (get-in henkilo [:nimi :etunimi]) => "Pena"
-        _ (get-in henkilo [:nimi :sukunimi]) => "Panaani"
-        _ (:puhelin henkilo) => "0102030405"
-        _ (:sahkopostiosoite henkilo) => "pena@example.com"
-        osoite (:osoite henkilo) => truthy
-        _ (get-in osoite [:osoitenimi :teksti]) => "Paapankuja 12"
-        _ (:postinumero osoite) => "10203"
-        _ (:postitoimipaikannimi osoite) => "Piippola"
-        _ (:koulutus Suunnittelija) => "arkkitehti"
-        _ (:patevyysvaatimusluokka Suunnittelija) => "AA"
-
-        ;Suunnitelija
-        suunnittelijatieto (:suunnittelijatieto Osapuolet) => truthy
-        suunnittelija (some #(when (= (get-in % [:Suunnittelija :suunnittelijaRoolikoodi] %) "KVV-suunnittelija") %) suunnittelijatieto) => truthy
-        Suunnittelija (:Suunnittelija suunnittelija) => truthy
-        henkilo (:henkilo Suunnittelija) => truthy
-        _ (get-in henkilo [:nimi :etunimi]) => "Pena"
-        _ (get-in henkilo [:nimi :sukunimi]) => "Panaani"
-        _ (:puhelin henkilo) => "0102030405"
-        _ (:sahkopostiosoite henkilo) => "pena@example.com"
-        osoite (:osoite henkilo) => truthy
-        _ (get-in osoite [:osoitenimi :teksti]) => "Paapankuja 12"
-        _ (:postinumero osoite) => "10203"
-        _ (:postitoimipaikannimi osoite) => "Piippola"
-        _ (:koulutus Suunnittelija) => "muu"
-        _ (:patevyysvaatimusluokka Suunnittelija) => "C"
 
         rakennuspaikkatieto (:rakennuspaikkatieto Suunnittelutarveasia) => truthy
         Rakennuspaikkaf (first rakennuspaikkatieto) => truthy

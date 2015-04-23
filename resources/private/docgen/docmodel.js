@@ -809,16 +809,17 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
         function mergeFromWfs(overwriteWithBackendData) {
           ajax
-          .command("merge-details-from-krysp",
-              {id: self.appId, documentId: self.docId,
+          .command("merge-details-from-krysp", {
+            id: self.appId, documentId: self.docId,
             path: myPath,
             buildingId: buildingId,
             overwrite: overwriteWithBackendData,
-            collection: self.getCollection() })
-            .success(function () {
-              repository.load(self.appId);
-            })
-            .call();
+            collection: self.getCollection()
+          })
+          .success(function () {
+            repository.load(self.appId);
+          })
+          .call();
         }
 
         if (buildingId !== "" && buildingId !== "other") {
