@@ -75,7 +75,7 @@
 ; Init sign process:
 ;
 
-(defn init-sign-process [ts crypto-key success-url document-url company signer lang]
+(defn init-sign-process [^java.util.Date current-date crypto-key success-url document-url company signer lang]
   (let [crypto-iv    (crypt/make-iv)
         process-id   (random-password 40)
         stamp        (random-password 40)
@@ -88,8 +88,8 @@
                                    :signer    signer
                                    :lang      lang
                                    :status    :created
-                                   :created   ts
-                                   :progress  [{:status :created, :ts ts}]})
+                                   :created   current-date
+                                   :progress  [{:status :created, :ts (.getTime current-date)}]})
     {:process-id process-id
      :data       (->> {:stamp           stamp
                        :return_success  (str success-url "/" process-id)
