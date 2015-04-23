@@ -29,4 +29,12 @@ Sonja logs in and sees the Nouda lupa button
   Create application the fast way  ${appname}  753  753-423-2-159  kerrostalo-rivitalo
   Go to page  applications
   Wait until  Element should be visible  //section[@id='applications']//button[@data-test-id='applications-create-new-with-prev-permit']
+
+  Click by test id  applications-create-new-with-prev-permit
+  Wait until  Element should be visible  //section[@id='create-page-prev-permit']//input[@data-test-id='test-prev-permit-kuntalupatunnus']
+  Element should be visible  //section[@id='create-page-prev-permit']//select[@data-test-id='test-prev-permit-organization-select']
+  Element should be disabled  //section[@id='create-page-prev-permit']//button[@data-test-id='test-prev-permit-create-button']
+
+  Wait until  Element Should Contain  xpath=//section[@id='create-page-prev-permit']//select[@data-test-id='test-prev-permit-organization-select']  Sipoon rakennusvalvonta
+
   Logout
