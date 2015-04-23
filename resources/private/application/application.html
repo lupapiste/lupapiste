@@ -192,7 +192,7 @@
             <span data-bind="ltext: 'application.approveApplication'"></span>
             <span class="icon approve left-align"></span>
           </button>
-          <export-attachments></export-attachments>
+          <div data-bind="component: {name: 'export-attachments'}"></div>
           <button data-bind="click: toAsianhallinta,
                              visible: $root.authorization.ok('application-to-asianhallinta') && asianhallintaEnabled,
                              enable: !processing() && $root.authorization.ok('application-to-asianhallinta') && asianhallintaEnabled,
@@ -425,7 +425,7 @@
                         onclick="$('#invite-document-name').val('').change();$('#invite-document-path').val('').change();$('#invite-document-id').val('').change();LUPAPISTE.ModalDialog.open('#dialog-valtuutus');return false;">
                   </button>
 
-                  <company-invite></company-invite>
+                  <div data-bind="component: {name: 'company-invite'}"></div>
 
                 </div>
               </div>
@@ -522,7 +522,7 @@
                                             attachmentsOperations: $data.attachmentsOperations,
                                             testId: 'upper'}}"></div>
 
-          <export-attachments></export-attachments>
+          <div data-bind="component: {name: 'export-attachments'}"></div>
           <!-- /ko -->
 
           <div data-bind="if: postAttachmentsByOperation().length > 0" data-test-id="application-post-attachments-table">
@@ -541,7 +541,7 @@
                                             attachmentsOperations: $data.attachmentsOperations,
                                             testId: 'lower'}}"></div>
 
-          <export-attachments></export-attachments>
+          <div data-bind="component: {name: 'export-attachments'}"></div>
 
           <!-- ko if: $root.application.inPostVerdictState() -->
           <div data-bind="if: preAttachmentsByOperation().length > 0" data-test-id="application-pre-attachments-table">

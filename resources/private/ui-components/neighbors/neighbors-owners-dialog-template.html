@@ -52,10 +52,11 @@
           </table>
         </div>
       </div>
-      <submit-button-group params="isSubmitVisible: true,
-                                   isSubmitEnabled: isSubmitEnabled,
-                                   submit: addSelectedOwners,
-                                   submitTitle: 'save'"></submit-button-group>
+      <div data-bind="component: {name: 'submit-button-group',
+                                  params: { isSubmitVisible: true,
+                                            isSubmitEnabled: isSubmitEnabled,
+                                            submit: addSelectedOwners,
+                                            submitTitle: 'save'}}"></div>
     </script>
   </section>
 </body>
