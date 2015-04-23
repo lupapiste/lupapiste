@@ -134,11 +134,10 @@
             ; FIXME: where we get the selected account?
             pdf (docx/yritystilisopimus (:company process) (:signer process) {} (now))
             sha256 (pandect/sha256 pdf)]
-
         (debug "sign:fetch-document:upload-to-mongo")
-        (.reset pdf)
+        (.reset pdf) ; Hashing read the whole stream
         (mongo/upload (mongo/create-id) filename content-type pdf {:sha256 sha256, :process process})
-        (.reset pdf)
+        (.reset pdf) ; Again, the whole stream was read
         [content-type pdf]))))
 
 ;
