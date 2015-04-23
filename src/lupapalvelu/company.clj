@@ -90,7 +90,7 @@
       (assoc :expires (:expires token))))
 
 (defn find-user-invitations [company-id]
-  (let [tokens (mongo/select :token {$and [{:token-type {$in ["invite-company-user" "new-company-user"]}} {:data.company.id company-id}]})
+  (let [tokens (mongo/select :token {$and [{:token-type {$in ["invite-company-user" "new-company-user"]}} {:data.company.id company-id} {:used nil}]})
         data (map map-token-to-user-invitation tokens)]
     data))
 
