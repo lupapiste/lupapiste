@@ -95,10 +95,6 @@
                      :address "Kylykuja 3"
                      :propertyId "18600303560005") => ok?
               app-id (:id resp)
-
-              ;;
-              ;; TODO: onko local queryssa jotain vikaa, kun tulee {:text error.application-not-accessible, :ok false} ?
-              ;;
               application (query-application local-query raktark-jarvenpaa app-id)
               invites (filter #(= raktark-jarvenpaa-id (get-in % [:invite :inviter :id])) (:auth application))]
 
