@@ -2,48 +2,59 @@
 <html >
 <body>
   <section class="page container" id="attachment" data-bind="with: attachment">
-    <!-- ko if: init -->
+  <!-- ko if: lupapisteApp.models.rootVMO.currentPage() === 'attachment' && init -->
     <div>
       <div class="attachment-info">
         <div class="container">
 
-          <div class="attachment-info-header">
-            <h1>
-              <span data-bind="text: application.title"></span>: <span data-bind="ltext: name"></span>
-              <span data-bind="if: latestVersion">
-                <span data-bind="ltext: 'attachment.version'">versio</span>
-                <span id="test-attachment-version" data-bind="version: latestVersion().version">0.0</span>
-              </span>
-            </h1>
-            <span class="icon help" data-bind="click: toggleHelp, css: {expanded: showHelp}"></span>
-          </div>
-
-          <div class="tab-info" data-bind="slider: showHelp">
-            <p data-bind="lhtml: 'attachment.view.desc'"></p>
-          </div>
-
-          <div class="clear">
+          <div class="attachment-back">
             <a class="btn left-align btn-nav-back"
                data-bind="click: function() { window.location.hash = '!/application/' + application.id() + '/attachments'; repository.load(application.id()); }"
                data-test-id="back-to-application-from-attachment">
               <span data-bind =" ltext: 'application.return'"></span>
               <span class="icon drill-left-black-bigger left-align"></span>
             </a>
-          </div>
-
-          <div class="attachment-actions">
             <div data-bind="with: $root.approve">
               <button id="test-attachment-approve" data-bind="ltext: 'document.approve', click: approveAttachment, enable: isApprovable() && isNotOk(), visible: isApprovable()" class="btn btn-primary">Hyv&auml;ksy</button>
               <button id="test-attachment-reject" data-bind="ltext: 'attachment.reject', click: rejectAttachment, enable: isRejectable() && doesNotRequireUserAction(), visible: isRejectable()" class="btn btn-decline">Tarkennettavaa</button>
             </div>
-            <button data-test-id="change-attachment-type"
-                    data-bind="ltext: 'attachment.changeType', click: showChangeTypeDialog, visible: $root.authorization.ok('set-attachment-type') && editable && authorized"></button>
-            <button data-test-id="delete-attachment"
-                    data-bind="ltext: 'attachment.delete', click: deleteAttachment, visible: $root.authorization.ok('delete-attachment') && editable && authorized">Poista liite</button>
+          </div>
+
+          <div>
+            <div class="attachment-info-wrapper">
+              <div class="attachment-info-header">
+                <h1>
+                  <span data-bind="text: application.title"></span>: <span data-bind="ltext: name"></span>
+                  <span data-bind="if: latestVersion">
+                    <span data-bind="ltext: 'attachment.version'">versio</span>
+                    <span id="test-attachment-version" data-bind="version: latestVersion().version">0.0</span>
+                  </span>
+                </h1>
+                <span class="icon help" data-bind="click: toggleHelp, css: {expanded: showHelp}"></span>
+              </div>
+
+              <div class="tab-info" data-bind="slider: showHelp">
+                <p data-bind="lhtml: 'attachment.view.desc'"></p>
+              </div>
+            </div>
+
+            <div class="attachment-actions">
+              <button data-bind="enable: previousAttachmentPresent, click: previousAttachment">
+                <span data-bind="ltext: 'previous'"></span>
+                <span class="icon drill-left-black-bigger left-align"></span>
+              </button>
+              <button data-bind="enable: nextAttachmentPresent, click: nextAttachment">
+                <span data-bind="ltext: 'next'"></span>
+                <span class="icon drill-right-black left-align"></span>
+              </button>
+              <button data-test-id="change-attachment-type"
+                      data-bind="ltext: 'attachment.changeType', click: showChangeTypeDialog, visible: $root.authorization.ok('set-attachment-type') && editable && authorized"></button>
+              <button data-test-id="delete-attachment"
+                      data-bind="ltext: 'attachment.delete', click: deleteAttachment, visible: $root.authorization.ok('delete-attachment') && editable && authorized">Poista liite</button>
+            </div>
           </div>
 
           <div class="clear"></div>
-
           <div class="col1">
             <div class="attachment-file-versions">
               <div class="btn-container">
@@ -111,7 +122,7 @@
                 <div class="attachment-info-fields">
                   <div class="col1 attachment-info-field">
                     <label data-bind="ltext: 'attachment.label.contents'"></label>
-                    <span class="save-indicator" data-bind="saveIndicator: indicator, name: 'contents'"></span>
+                    <span data-bind="saveIndicator: indicator, name: 'contents'"></span>
                     <input class="form-input" type="text"
                            data-test-id="attachment-contents-input"
                            data-bind="value: contents,
@@ -120,7 +131,7 @@
                   </div>
                   <div class="col2 attachment-info-field">
                     <label data-bind="ltext: 'attachment.label.operation'"></label>
-                    <span class="save-indicator" data-bind="saveIndicator: indicator, name: 'operation'"></span>
+                    <span data-bind="saveIndicator: indicator, name: 'operation'"></span>
                     <select data-test-id="attachment-operation-select"
                             data-bind="options: selectableOperations,
                                        optionsText: function(item) {return item.description ? loc([item.name, '_group_label']) + ' - ' + item.description : loc([item.name, '_group_label'])},
@@ -131,7 +142,7 @@
                   </div>
                   <div class="col1 attachment-info-field">
                     <label data-bind="ltext: 'attachment.label.scale'"></label>
-                    <span class="save-indicator" data-bind="saveIndicator: indicator, name: 'scale'"></span>
+                    <span data-bind="saveIndicator: indicator, name: 'scale'"></span>
                     <select data-test-id="attachment-scale-select"
                             data-bind="options: scales,
                                        optionsText: function(item) {return item === 'muu' ? loc('select-other') : item},
@@ -141,7 +152,7 @@
                   </div>
                   <div class="col2 attachment-info-field">
                     <label data-bind="ltext: 'attachment.label.size'"></label>
-                    <span class="save-indicator" data-bind="saveIndicator: indicator, name: 'size'"></span>
+                    <span data-bind="saveIndicator: indicator, name: 'size'"></span>
                     <select data-test-id="attachment-size-select"
                             data-bind="options: sizes,
                                        optionsText: function(item) {return loc(item);},
@@ -179,6 +190,58 @@
                     <span class="icon signed-white left-align"></span>
                 </button>
               </div>
+
+              <button id="show-tos-metadata"
+                      class="btn"
+                      style="margin-top: 15px"
+                      data-bind="click: toggleTosMetadata, visible: metadata().length > 0">
+                <span data-bind="ltext: 'attachment.showTosMetadata'"></span>
+                <span class="left-align"
+                      data-bind="drill: showTosMetadata, color: 'black'"></span>
+              </button>
+
+              <div class="tos-metadata-content" data-bind="slider: showTosMetadata, visible: metadata().length > 0">
+                <h3 data-bind="ltext: 'attachment.tosMetadata'"></h3>
+                <table class="table table-striped">
+                  <thead>
+                  <tr>
+                    <th data-bind="ltext: 'attachment.tosMetadataKey'"></th>
+                    <th data-bind="ltext: 'attachment.tosMetadataValue'"></th>
+                  </tr>
+                  </thead>
+                  <tbody data-bind="foreach: metadata">
+                    <tr>
+                      <td data-bind="text: name"></td>
+                      <td>
+                        <div data-bind="if: typeof(value) == 'object'">
+                          <table class="subtable">
+                            <thead>
+                            <tr>
+                              <th data-bind="ltext: 'attachment.tosMetadataKey'"></th>
+                              <th data-bind="ltext: 'attachment.tosMetadataValue'"></th>
+                            </tr>
+                            </thead>
+                            <tbody data-bind="foreach: value">
+                            <tr>
+                              <td data-bind="text: name"></td>
+                              <td>
+                                <span data-bind="text: value"></span>
+                                <span data-bind="if: isFinite(value)"> vuotta</span>
+                              </td>
+                            </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                        <span data-bind="if: typeof(value) != 'object'">
+                          <span data-bind="text: value"></span>
+                          <span data-bind="if: isFinite(value)"> vuotta</span>
+                        </span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
             </div>
           </div>
 
@@ -209,25 +272,29 @@
         </div>
       </div>
     </div>
-    <!-- /ko -->
 
-    <div class="window autosized" id="change-type-dialog">
+    <div class="window autosized" id="change-type-dialog" data-bind="with: changeTypeDialogModel">
       <div class="dialog-header">
        <p data-bind="ltext: 'attachment.changeType'"></p>
        <p class="dialog-close close">X</p>
       </div>
-        <div class="form-entry change-type">
-          <label for="attachment-type-select" class="form-label">
-           <img src="/img/ajax-loader-12.gif" alt="..." width="12" height="12" id="attachment-type-select-loader" style="display: none;">
-          </label>
-          <div>
-            <select id="attachment-type-select" class="long" data-bind="enable: $root.authorization.ok('set-attachment-type')"></select>
-          </div>
+      <div class="form-entry change-type">
+        <label for="attachment-type-select" class="form-label">
+         <img src="/img/ajax-loader-12.gif" alt="..." width="12" height="12" id="attachment-type-select-loader" style="display: none;">
+        </label>
+        <div>
+          <select id="attachment-type-select" class="long" data-bind="enable: $root.authorization.ok('set-attachment-type'), foreach: selectableAttachmentTypes, value: attachmentType">
+            <optgroup data-bind="attr: {label: groupLabel}, foreach: types">
+              <option data-bind="text: typeLabel, value: typeValue"></option>
+            </optgroup>
+          </select>
         </div>
-        <div style="text-align:center">
-          <button class="btn btn-primary btn-dialog" data-test-id="confirm-yes" style="position:relative" data-bind="ltext: 'button.ok', click: LUPAPISTE.ModalDialog.close"></button>
-        </div>
+      </div>
+      <div style="text-align:center">
+        <button class="btn btn-primary btn-dialog" data-test-id="confirm-yes" style="position:relative" data-bind="ltext: 'button.ok', click: ok"></button>
+      </div>
     </div>
+  <!-- /ko -->
   </section>
 </body>
 </html>

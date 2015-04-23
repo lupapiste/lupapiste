@@ -9,13 +9,17 @@
             [lupapalvelu.web :as web]
             [lupapalvelu.domain :as domain]
             [sade.http :as http]
+            [sade.env :as env]
             [midje.sweet :refer :all]
             [cheshire.core :as json]
             [clojure.walk :refer [keywordize-keys]]
             [clojure.java.io :as io]
             [clojure.string :as s]
             [swiss.arrows :refer [-<>>]]
-            [taoensso.timbre :as timbre :refer (trace debug info warn error fatal)])
+            [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
+            [clj-ssh.cli :as ssh-cli]
+            [clj-ssh.ssh :as ssh]
+            [sade.strings :as ss])
   (:import org.apache.http.client.CookieStore
            org.apache.http.cookie.Cookie))
 
@@ -39,6 +43,8 @@
 (defn muni-for-key [apikey] (muni-for-user (find-user-from-minimal-by-apikey apikey)))
 
 
+(def kaino       (apikey-for "kaino@solita.fi"))
+(def kaino-id    (id-for "kaino@solita.fi"))
 (def pena        (apikey-for "pena"))
 (def pena-id     (id-for "pena"))
 (def mikko       (apikey-for "mikko@example.com"))
@@ -62,8 +68,14 @@
 (def raktark-jarvenpaa (apikey-for "rakennustarkastaja@jarvenpaa.fi"))
 (def jarvenpaa-muni    (muni-for "rakennustarkastaja@jarvenpaa.fi"))
 (def arto       (apikey-for "arto"))
+(def kuopio     (apikey-for "kuopio-r"))
+(def velho      (apikey-for "velho"))
+(def velho-muni (muni-for "velho"))
+(def velho-id   (id-for "velho"))
 
 (defn server-address [] (System/getProperty "target_server" "http://localhost:8000"))
+
+(def get-files-from-sftp-server? (= (s/upper-case env/target-env) "DEV"))
 
 (defn decode-response [resp]
   (update-in resp [:body] (comp keywordize-keys json/decode)))
@@ -334,12 +346,13 @@
     (facts "Signed succesfully"
       (fact "Status code" (:status resp) => 200))))
 
-(defn upload-attachment [apikey application-id {attachment-id :id attachment-type :type} expect-to-succeed & {:keys [filename] :or {filename "dev-resources/test-attachment.txt"}}]
+(defn upload-attachment [apikey application-id {attachment-id :id attachment-type :type} expect-to-succeed & {:keys [filename text] :or {filename "dev-resources/test-attachment.txt", text ""}}]
   (let [uploadfile  (io/file filename)
         uri         (str (server-address) "/api/upload/attachment")
         resp        (http/post uri
                                {:headers {"authorization" (str "apikey=" apikey)}
                                 :multipart [{:name "applicationId"  :content application-id}
+                                            {:name "text"           :content text}
                                             {:name "Content/type"   :content "text/plain"}
                                             {:name "attachmentType" :content (str
                                                                                (:type-group attachment-type) "."
@@ -394,7 +407,16 @@
     (let [data    (tools/create-document-data (model/get-document-schema document) (partial tools/dummy-values (id-for-key apikey)))
           updates (tools/path-vals data)
           updates (map (fn [[p v]] [(butlast p) v]) updates)
-          updates (map (fn [[p v]] [(s/join "." (map name p)) v]) updates)]
+          updates (map (fn [[p v]] [(s/join "." (map name p)) v]) updates)
+          user-role (:role (lupapalvelu.user/get-user-with-apikey apikey))
+          updates (filter (fn [[path value]]
+                            (try
+                              (let [splitted-path (ss/split path #"\.")]
+                                (lupapalvelu.document.commands/validate-against-whitelist! document [[splitted-path value]] user-role))
+                              true
+                              (catch Exception _
+                                false)))
+                          updates)]
       (command apikey :update-doc
         :id (:id application)
         :doc (:id document)
@@ -474,3 +496,37 @@
     (command apikey :set-user-to-document :id foreman-app-id :documentId (:id foreman-doc) :userId userId :path "" :collection "documents")
     (command apikey :update-doc :id foreman-app-id :doc (:id foreman-doc) :updates [["patevyysvaatimusluokka" difficulty]])
     foreman-app-id))
+
+;; File actions
+
+
+(defn get-local-filename [directory file-prefix]
+  (let [files (sort-by #(.lastModified %) > (file-seq (io/file directory)))]
+    (str directory (some #(when (and (.startsWith (.getName %) file-prefix) (.endsWith (.getName %) ".xml"))
+                            (.getName %)) files))))
+
+(def dev-password "Lupapiste")
+
+(defn get-file-from-server
+  ([user server file-to-get target-file-name]
+    (timbre/info "sftp" (str user "@" server ":" file-to-get) target-file-name)
+    (ssh-cli/sftp server :get file-to-get target-file-name :username user :password dev-password :strict-host-key-checking :no)
+    target-file-name)
+  ([user server file-prefix target-file-name path-to-file]
+    (try
+      (let [agent (ssh/ssh-agent {})
+           session (ssh/session agent server {:username user :password dev-password :strict-host-key-checking :no})]
+       (ssh/with-connection session
+         (let [channel (ssh/ssh-sftp session)]
+           (ssh/with-channel-connection channel
+             (timbre/info "sftp: ls" path-to-file)
+             (let [filename (some #(when (and (.startsWith (.getFilename %) file-prefix) (.endsWith (.getFilename %) ".xml"))
+                                     (.getFilename %))
+                              (sort-by #(.getMTime (.getAttrs %)) > (ssh/sftp channel {} :ls path-to-file)))
+                   file-to-get (str path-to-file filename)]
+               (timbre/info "sftp: get" file-to-get)
+               (ssh/sftp channel {} :get file-to-get target-file-name)
+               (timbre/info "sftp: done.")
+               target-file-name)))))
+      (catch com.jcraft.jsch.JSchException e
+        (error e (str "SSH connection " user "@" server))))))

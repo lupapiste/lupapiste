@@ -13,6 +13,7 @@
             [lupapalvelu.mime :as mime]
             [lupapalvelu.pdf-export :as pdf-export]
             [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.tiedonohjaus :as tos]
             [clojure.java.io :as io])
   (:import [java.util.zip ZipOutputStream ZipEntry]
            [java.io File OutputStream FilterInputStream]))
@@ -251,11 +252,36 @@
   [:hakija [:valtakirja
             :virkatodistus
             :ote_kauppa_ja_yhdistysrekisterista]
+   :kartat [:rasitesopimuksen_liitekartta
+            :liitekartta]
    :kiinteiston_hallinta [:jaljennos_perunkirjasta
                           :rasitesopimus
-                          :rasitesopimuksen_liitekartta
-                          :ote_asunto-osakeyhtion_kokouksen_poytakirjasta]
+                          :ote_asunto-osakeyhtion_kokouksen_poytakirjasta
+                          :sukuselvitys
+                          :testamentti
+                          :saantokirja
+                          :tilusvaihtosopimus
+                          :jakosopimus
+                          :kaupparekisteriote
+                          :yhtiojarjestys
+                          :ote_osakeyhtion_yhtiokokouksen_poytakirjasta
+                          :ote_osakeyhtion_hallituksen_kokouksen_poytakirjasta
+                          ]
    :muut [:muu]])
+
+(defn attachment-ids-from-tree [tree]
+  {:pre [(sequential? tree)]}
+  (flatten (map second (partition 2 tree))))
+
+(def all-attachment-type-ids
+  (attachment-ids-from-tree
+    (concat
+      attachment-types-R
+      attachment-types-YA
+      attachment-types-YI
+      attachment-types-YL
+      attachment-types-MAL
+      attachment-types-KT)))
 
 ;;
 ;; Api
@@ -301,30 +327,35 @@
   {:pre [application]}
   (get-attachment-types-by-permit-type (:permitType application)))
 
-(defn make-attachment [now target required? requested-by-authority? locked? application-state op attachment-type & [attachment-id]]
-  {:id (or attachment-id (mongo/create-id))
-   :type attachment-type
-   :modified now
-   :locked locked?
-   :applicationState application-state
-   :state :requires_user_action
-   :target target
-   :required required?       ;; true if the attachment is added from from template along with the operation, or when attachment is requested by authority
-   :requestedByAuthority requested-by-authority?  ;; true when authority is adding a new attachment template by hand
-   :notNeeded false
-   :forPrinting false
-   :op op
-   :signatures []
-   :versions []})
+(defn make-attachment [now target required? requested-by-authority? locked? application-state op attachment-type metadata & [attachment-id]]
+  (cond-> {:id (or attachment-id (mongo/create-id))
+           :type attachment-type
+           :modified now
+           :locked locked?
+           :applicationState application-state
+           :state :requires_user_action
+           :target target
+           :required required?       ;; true if the attachment is added from from template along with the operation, or when attachment is requested by authority
+           :requestedByAuthority requested-by-authority?  ;; true when authority is adding a new attachment template by hand
+           :notNeeded false
+           :forPrinting false
+           :op op
+           :signatures []
+           :versions []}
+          (and (seq metadata) (env/feature? :tiedonohjaus)) (assoc :metadata metadata)))
 
 (defn make-attachments
   "creates attachments with nil target"
-  [now application-state attachment-types locked? required? requested-by-authority?]
-  (map (partial make-attachment now nil required? requested-by-authority? locked? application-state nil) attachment-types))
+  [now application-state attachment-types-with-metadata locked? required? requested-by-authority?]
+  (map #(make-attachment now nil required? requested-by-authority? locked? application-state nil (:type %) (:metadata %)) attachment-types-with-metadata))
+
+(defn- default-metadata-for-attachment-type [type {:keys [:organization :tosFunction]}]
+  (tos/metadata-for-document organization tosFunction type))
 
 (defn create-attachment [application attachment-type op now target locked? required? requested-by-authority? & [attachment-id]]
   {:pre [(map? application)]}
-  (let [attachment (make-attachment now target required? requested-by-authority? locked? (:state application) op attachment-type attachment-id)]
+  (let [metadata (default-metadata-for-attachment-type attachment-type application)
+        attachment (make-attachment now target required? requested-by-authority? locked? (:state application) op attachment-type metadata attachment-id)]
     (update-application
       (application->command application)
       {$set {:modified now}
@@ -334,7 +365,8 @@
 
 (defn create-attachments [application attachment-types now locked? required? requested-by-authority?]
   {:pre [(map? application)]}
-  (let [attachments (make-attachments now (:state application) attachment-types locked? required? requested-by-authority?)]
+  (let [attachment-types-with-metadata (map (fn [type] {:type type :metadata (default-metadata-for-attachment-type type application)}) attachment-types)
+        attachments (make-attachments now (:state application) attachment-types-with-metadata locked? required? requested-by-authority?)]
     (update-application
       (application->command application)
       {$set {:modified now}
@@ -424,11 +456,11 @@
 (defn update-attachment-key [command attachmentId k v now & {:keys [set-app-modified? set-attachment-modified?] :or {set-app-modified? true set-attachment-modified? true}}]
   (let [update-key (->> (name k) (str "attachments.$.") keyword)]
     (update-application command
-     {:attachments {$elemMatch {:id attachmentId}}}
-     {$set (merge
-             {update-key v}
-             (when set-app-modified? {:modified now})
-             (when set-attachment-modified? {:attachments.$.modified now}))})))
+      {:attachments {$elemMatch {:id attachmentId}}}
+      {$set (merge
+              {update-key v}
+              (when set-app-modified? {:modified now})
+              (when set-attachment-modified? {:attachments.$.modified now}))})))
 
 (defn update-latest-version-content [application attachment-id file-id size now]
   (let [attachment (get-attachment-info application attachment-id)
@@ -468,16 +500,11 @@
     (let [[type-group type-id] (->> match (drop 1) (map keyword))]
       {:type-group type-group :type-id type-id})))
 
-(defn- allowed-attachment-types-contain? [allowed-types {:keys [type-group type-id]}]
+(defn allowed-attachment-types-contain? [allowed-types {:keys [type-group type-id]}]
   (let [type-group (keyword type-group)
         type-id (keyword type-id)]
     (if-let [types (some (fn [[group-name group-types]] (if (= (keyword group-name) type-group) group-types)) allowed-types)]
       (some #(= (keyword %) type-id) types))))
-
-(defn allowed-attachment-type-for-application? [application attachment-type]
-  (when application
-    (let [allowedAttachmentTypes (get-attachment-types-for-application application)]
-     (allowed-attachment-types-contain? allowedAttachmentTypes attachment-type))))
 
 (defn get-attachment-info-by-file-id
   "gets an attachment from application or nil"
@@ -589,8 +616,9 @@
     (.putNextEntry zip (ZipEntry. (ss/encode-filename file-name)))
     (io/copy in zip)))
 
-(defn get-all-attachments [attachments & [application lang]]
-  "Return attachments as zip file. If application and lang, application and submitted application PDF are included"
+(defn get-all-attachments
+  "Returns attachments as zip file. If application and lang, application and submitted application PDF are included."
+  [attachments & [application lang]]
   (let [temp-file (File/createTempFile "lupapiste.attachments." ".zip.tmp")]
     (debugf "Created temporary zip file for attachments: %s" (.getAbsolutePath temp-file))
     (with-open [out (io/output-stream temp-file)]

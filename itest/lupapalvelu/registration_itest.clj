@@ -153,7 +153,14 @@
              (contains "/app/security/activate/"))
 
            (fact "Activate account"
-             (http/get first-href {:follow-redirects false}) => http302?)
+             (let [resp (http/get first-href {:follow-redirects false})]
+               resp => http302?
+               (get-in resp [:headers "location"]) => (contains "/app/fi/applicant")))
+
+           (fact "Second activation attempt leads to login page"
+             (let [resp (http/get first-href {:follow-redirects false})]
+               resp => http302?
+               (get-in resp [:headers "location"]) => (contains "/app/fi/welcome")))
 
            (fact "Log in"
              (login new-user-email new-user-pw) => ok?)))))))

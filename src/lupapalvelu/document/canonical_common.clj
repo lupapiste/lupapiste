@@ -3,9 +3,9 @@
             [clojure.walk :as walk]
             [swiss.arrows :refer [-<>]]
             [sade.strings :as ss]
-            [sade.util :refer :all]
+            [sade.util :as util]
             [sade.core :refer :all]
-            [lupapalvelu.i18n :refer [with-lang loc]]
+            [lupapalvelu.i18n :as i18n]
             [cljts.geom :as geo]
             [cljts.io :as jts]
             [sade.env :as env]))
@@ -73,13 +73,13 @@
   (let [lausunto {:Lausunto
                   {:id (:id statement)
                    :viranomainen (get-in statement [:person :text])
-                   :pyyntoPvm (to-xml-date (:requested statement))}}]
+                   :pyyntoPvm (util/to-xml-date (:requested statement))}}]
     (if-not (:status statement)
       lausunto
       (assoc-in lausunto [:Lausunto :lausuntotieto] {:Lausunto
                                                      {:viranomainen (get-in statement [:person :text])
                                                       :lausunto (:text statement)
-                                                      :lausuntoPvm (to-xml-date (:given statement))
+                                                      :lausuntoPvm (util/to-xml-date (:given statement))
                                                       :puoltotieto
                                                       {:Puolto
                                                        {:puolto ((keyword (:status statement)) puolto-mapping)}}}}))))
@@ -203,7 +203,7 @@
   {:aineistonnimi title
    :aineistotoimittaja "lupapiste@solita.fi"
    :tila toimituksenTiedot-tila
-   :toimitusPvm (to-xml-date (now))
+   :toimitusPvm (util/to-xml-date (now))
    :kuntakoodi municipality
    :kielitieto lang})
 
@@ -216,13 +216,13 @@
 (defn get-state [application]
   (let [state-timestamps (-<> (all-state-timestamps application)
                            (dissoc :sent :closed) ; sent date will be returned from toimituksen-tiedot function, closed has no valid KRYSP enumeration
-                           strip-nils
+                           util/strip-nils
                            (sort-by second <>))]
     (mapv
       (fn [[state ts]]
         {:Tilamuutos
          {:tila (application-state-to-krysp-state state)
-          :pvm (to-xml-date ts)
+          :pvm (util/to-xml-date ts)
           :kasittelija (get-handler application)}})
       state-timestamps)))
 
@@ -230,9 +230,9 @@
 (defn lupatunnus [{:keys [id submitted] :as application}]
   {:pre [id]}
   {:LupaTunnus
-   (assoc-when
+   (util/assoc-when
      {:muuTunnustieto {:MuuTunnus {:tunnus id, :sovellus "Lupapiste"}}}
-     :saapumisPvm (to-xml-date submitted)
+     :saapumisPvm (util/to-xml-date submitted)
      :kuntalupatunnus (-> application :verdicts first :kuntalupatunnus))})
 
 (def kuntaRoolikoodi-to-vrkRooliKoodi
@@ -296,7 +296,7 @@
                                 :puhelin (:puhelin yhteystiedot)
                                 :sahkopostiosoite (:email yhteystiedot)}
         yritys-canonical (merge (get-simple-yritys yritys) yhteystiedot-canonical)]
-    (assoc-when yritys-canonical :verkkolaskutustieto (get-verkkolaskutus yritys))))
+    (util/assoc-when yritys-canonical :verkkolaskutustieto (get-verkkolaskutus yritys))))
 
 (def- default-role "ei tiedossa")
 (defn- get-kuntaRooliKoodi [party party-type]
@@ -356,13 +356,16 @@
           codes {:suunnittelijaRoolikoodi kuntaRoolikoodi ; Note the lower case 'koodi'
                  :VRKrooliKoodi (kuntaRoolikoodi-to-vrkRooliKoodi kuntaRoolikoodi)}
           patevyys (:patevyys suunnittelija)
+          koulutus (if (= "other" (:koulutusvalinta patevyys))
+                     "muu"
+                     (:koulutusvalinta patevyys))
           osoite (get-simple-osoite (:osoite suunnittelija))
           henkilo (merge (get-name (:henkilotiedot suunnittelija))
                     {:osoite osoite}
                     {:henkilotunnus (-> suunnittelija :henkilotiedot :hetu)}
                     (get-yhteystiedot-data (:yhteystiedot suunnittelija)))]
       (merge codes
-        {:koulutus (:koulutusvalinta patevyys)
+        {:koulutus koulutus
          :patevyysvaatimusluokka (:patevyysluokka patevyys)
          :valmistumisvuosi (:valmistumisvuosi patevyys)
          :kokemusvuodet (:kokemus patevyys)}
@@ -396,50 +399,58 @@
 
 (defn- get-sijaistustieto [{:keys [sijaistettavaHloEtunimi sijaistettavaHloSukunimi alkamisPvm paattymisPvm] :as sijaistus} sijaistettavaRooli]
   (when (or sijaistettavaHloEtunimi sijaistettavaHloSukunimi)
-    {:Sijaistus (assoc-when {}
+    {:Sijaistus (util/assoc-when {}
                   :sijaistettavaHlo (s/trim (str sijaistettavaHloEtunimi " " sijaistettavaHloSukunimi))
                   :sijaistettavaRooli sijaistettavaRooli
-                  :alkamisPvm (when-not (s/blank? alkamisPvm) (to-xml-date-from-string alkamisPvm))
-                  :paattymisPvm (when-not (s/blank? paattymisPvm) (to-xml-date-from-string paattymisPvm)))}))
+                  :alkamisPvm (when-not (s/blank? alkamisPvm) (util/to-xml-date-from-string alkamisPvm))
+                  :paattymisPvm (when-not (s/blank? paattymisPvm) (util/to-xml-date-from-string paattymisPvm)))}))
 
 (defn- get-sijaistettava-hlo-214 [{:keys [sijaistettavaHloEtunimi sijaistettavaHloSukunimi] :as sijaistus}]
   (when (or sijaistettavaHloEtunimi sijaistettavaHloSukunimi)
     (s/trim (str sijaistettavaHloEtunimi " " sijaistettavaHloSukunimi))))
 
 (defn- get-vastattava-tyotieto [{tyotehtavat :vastattavatTyotehtavat} lang]
-  (with-lang lang
-    (strip-nils
-      (when (seq tyotehtavat)
-        {:vastattavaTyotieto
-         (remove nil?
-           (map (fn [[k v]]
-                  (when v
-                    {:VastattavaTyo
-                     {:vastattavaTyo
-                      (if (= k :muuMika)
-                        v
-                        (let [loc-s (loc (str "osapuoli.tyonjohtaja.vastattavatTyotehtavat." (name k)))]
-                          (assert (not (re-matches #"^\?\?\?.*" loc-s)))
-                          loc-s))}}))
-             tyotehtavat))}))))
+  (util/strip-nils
+    (when (seq tyotehtavat)
+      {:vastattavaTyotieto
+       (remove nil?
+         (map (fn [[k v]]
+                (when v
+                  {:VastattavaTyo
+                   {:vastattavaTyo
+                    (if (= k :muuMika)
+                      v
+                      (let [loc-s (i18n/localize lang (str "osapuoli.tyonjohtaja.vastattavatTyotehtavat." (name k)))]
+                        (assert (not (re-matches #"^\?\?\?.*" loc-s)))
+                        loc-s))}}))
+           tyotehtavat))})))
 
 (defn get-tyonjohtaja-data [lang tyonjohtaja party-type]
   (let [foremans (dissoc (get-suunnittelija-data tyonjohtaja party-type) :suunnittelijaRoolikoodi)
-        patevyys (:patevyys tyonjohtaja)
+        patevyys (:patevyys-tyonjohtaja tyonjohtaja)
+        ;; The mappings in backing system providers' end make us pass "muu" when "muu koulutus" is selected.
+        ;; Thus cannot use just this as koulutus:
+        ;; (:koulutus (muu-select-map
+        ;;              :koulutus (-> patevyys :koulutus)
+        ;;              :koulutus (-> patevyys :koulutusvalinta)))
+        koulutus (if (= "other" (:koulutusvalinta patevyys))
+                   "muu"
+                   (:koulutusvalinta patevyys))
         {:keys [alkamisPvm paattymisPvm] :as sijaistus} (:sijaistus tyonjohtaja)
         rooli    (get-kuntaRooliKoodi tyonjohtaja :tyonjohtaja)]
     (merge
       foremans
       {:tyonjohtajaRooliKoodi rooli
        :vastattavatTyotehtavat (concat-tyotehtavat-to-string (:vastattavatTyotehtavat tyonjohtaja))
+       :koulutus koulutus
        :patevyysvaatimusluokka (:patevyysvaatimusluokka patevyys)
        :valmistumisvuosi (:valmistumisvuosi patevyys)
        :kokemusvuodet (:kokemusvuodet patevyys)
        :valvottavienKohteidenMaara (:valvottavienKohteidenMaara patevyys)
        :tyonjohtajaHakemusKytkin (= "hakemus" (:tyonjohtajaHakemusKytkin patevyys))
        :sijaistustieto (get-sijaistustieto sijaistus rooli)}
-      (when-not (s/blank? alkamisPvm) {:alkamisPvm (to-xml-date-from-string alkamisPvm)})
-      (when-not (s/blank? paattymisPvm) {:paattymisPvm (to-xml-date-from-string paattymisPvm)})
+      (when-not (s/blank? alkamisPvm) {:alkamisPvm (util/to-xml-date-from-string alkamisPvm)})
+      (when-not (s/blank? paattymisPvm) {:paattymisPvm (util/to-xml-date-from-string paattymisPvm)})
       (get-vastattava-tyotieto tyonjohtaja lang)
       (let [sijaistettava-hlo (get-sijaistettava-hlo-214 sijaistus)]
         (when-not (ss/blank? sijaistettava-hlo)
@@ -447,13 +458,19 @@
 
 (defn get-tyonjohtaja-v2-data [lang tyonjohtaja party-type]
   (let [foremans (dissoc (get-suunnittelija-data tyonjohtaja party-type) :suunnittelijaRoolikoodi)
-        patevyys (:patevyys tyonjohtaja)
+        patevyys (:patevyys-tyonjohtaja tyonjohtaja)
+        koulutus (if (= "other" (:koulutusvalinta patevyys))
+                   "muu"
+                   (:koulutusvalinta patevyys))
         {:keys [alkamisPvm paattymisPvm] :as sijaistus} (:sijaistus tyonjohtaja)
         rooli    (get-kuntaRooliKoodi tyonjohtaja :tyonjohtaja)]
     (merge
       foremans
       {:tyonjohtajaRooliKoodi rooli
        :vastattavatTyotehtavat (concat-tyotehtavat-to-string (:vastattavatTyotehtavat tyonjohtaja))
+       :koulutus (if (= "other" (:koulutusvalinta patevyys))
+                   "muu"
+                   (:koulutusvalinta patevyys))
        :patevyysvaatimusluokka (:patevyysvaatimusluokka tyonjohtaja)
        :valmistumisvuosi (:valmistumisvuosi patevyys)
        :kokemusvuodet (:kokemusvuodet patevyys)
@@ -461,13 +478,12 @@
        :tyonjohtajaHakemusKytkin (= "hakemus" (:ilmoitusHakemusValitsin tyonjohtaja))
        :sijaistustieto (get-sijaistustieto sijaistus rooli)
        :vainTamaHankeKytkin (:tyonjohtajanHyvaksynta (:tyonjohtajanHyvaksynta tyonjohtaja))}
-      (when-not (s/blank? alkamisPvm) {:alkamisPvm (to-xml-date-from-string alkamisPvm)})
-      (when-not (s/blank? paattymisPvm) {:paattymisPvm (to-xml-date-from-string paattymisPvm)})
+      (when-not (s/blank? alkamisPvm) {:alkamisPvm (util/to-xml-date-from-string alkamisPvm)})
+      (when-not (s/blank? paattymisPvm) {:paattymisPvm (util/to-xml-date-from-string paattymisPvm)})
       (get-vastattava-tyotieto tyonjohtaja lang)
       (let [sijaistettava-hlo (get-sijaistettava-hlo-214 sijaistus)]
         (when-not (ss/blank? sijaistettava-hlo)
-          {:sijaistettavaHlo sijaistettava-hlo}))
-      )))
+          {:sijaistettavaHlo sijaistettava-hlo})))))
 
 (defn- get-foremen [documents lang]
   (if (contains? documents :tyonjohtaja)
@@ -518,7 +534,7 @@
               kaavanaste (change-value-to-when (-> rakennuspaikka :kaavanaste) "eiKaavaa" "ei kaavaa")
               rakennuspaikka-map {:Rakennuspaikka
                                   {:yksilointitieto id
-                                   :alkuHetki (to-xml-datetime (now))
+                                   :alkuHetki (util/to-xml-datetime (now))
                                    :rakennuspaikanKiinteistotieto
                                    {:RakennuspaikanKiinteisto
                                     {:kokotilaKytkin (s/blank? (-> kiinteisto :maaraalaTunnus))
@@ -557,10 +573,10 @@
       lupatunnus-map)))
 
 (defn get-kasittelytieto-ymp [application kt-key]
-  {kt-key {:muutosHetki (to-xml-datetime (:modified application))
+  {kt-key {:muutosHetki (util/to-xml-datetime (:modified application))
            :hakemuksenTila (ymp-application-state-to-krysp-state (keyword (:state application)))
            :asiatunnus (:id application)
-           :paivaysPvm (to-xml-date (state-timestamp application))
+           :paivaysPvm (util/to-xml-date (state-timestamp application))
            :kasittelija (let [handler (:authority application)]
                           (if (seq handler)
                             {:henkilo
@@ -569,16 +585,16 @@
                             empty-tag))}})
 
 (defn get-henkilo [henkilo]
-  (let [nimi (assoc-when {}
+  (let [nimi (util/assoc-when {}
                          :etunimi (-> henkilo :henkilotiedot :etunimi)
                          :sukunimi (-> henkilo :henkilotiedot :sukunimi))
-        teksti (assoc-when {} :teksti (-> henkilo :osoite :katu))
-        osoite (assoc-when {}
+        teksti (util/assoc-when {} :teksti (-> henkilo :osoite :katu))
+        osoite (util/assoc-when {}
                            :osoitenimi teksti
                            :postinumero (-> henkilo :osoite :postinumero)
                            :postitoimipaikannimi (-> henkilo :osoite :postitoimipaikannimi))]
     (not-empty
-      (assoc-when {}
+      (util/assoc-when {}
                   :nimi nimi
                   :osoite osoite
                   :sahkopostiosoite (-> henkilo :yhteystiedot :email)
@@ -594,7 +610,7 @@
           yhteyshenkilon-nimi (s/trim (str etunimi " " sukunimi))
           osoite (get-simple-osoite (:osoite yritys))]
       (not-empty
-        (assoc-when {}
+        (util/assoc-when {}
           :yTunnus (:liikeJaYhteisoTunnus yritys)
           :yrityksenNimi (:yritysnimi yritys)
           :yhteyshenkilonNimi (when-not (ss/blank? yhteyshenkilon-nimi) yhteyshenkilon-nimi)
@@ -603,13 +619,13 @@
           :sahkopostiosoite email)))
     (when-let [henkilo (-> unwrapped-party-doc :data :henkilo)]
       (let [{:keys [henkilotiedot osoite yhteystiedot]} henkilo
-            teksti (assoc-when {} :teksti (:katu osoite))
-            osoite (assoc-when {}
+            teksti (util/assoc-when {} :teksti (:katu osoite))
+            osoite (util/assoc-when {}
                      :osoitenimi teksti
                      :postinumero (:postinumero osoite)
                      :postitoimipaikannimi (:postitoimipaikannimi osoite))]
         (not-empty
-         (assoc-when {}
+         (util/assoc-when {}
            :henkilotunnus (:hetu henkilotiedot)
            :sukunimi (:sukunimi henkilotiedot)
            :etunimi (:etunimi henkilotiedot)
@@ -622,7 +638,7 @@
   (merge
     (get-yhteystiedot unwrapped-party-doc)
     (not-empty
-      (assoc-when {}
+      (util/assoc-when {}
         :laskuviite (get-in unwrapped-party-doc [:data :laskuviite])
         :verkkolaskutustieto (get-verkkolaskutus unwrapped-party-doc)))))
 
@@ -660,7 +676,7 @@
 (defn get-sijaintitieto [application]
   (let [drawings (drawings-as-krysp (:drawings application))]
     (cons {:Sijainti {:osoite {:yksilointitieto (:id application)
-                               :alkuHetki (to-xml-datetime (now))
+                               :alkuHetki (util/to-xml-datetime (now))
                                :osoitenimi {:teksti (:address application)}}
                       :piste {:Point {:pos (str (:x (:location application)) " " (:y (:location application)))}}}}
       drawings)))

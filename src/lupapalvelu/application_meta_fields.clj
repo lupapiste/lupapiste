@@ -12,6 +12,12 @@
             [sade.env :as env]
             [sade.strings :as ss]))
 
+(def post-verdict-states #{:verdictGiven :constructionStarted :closed})
+
+(def post-sent-states (conj post-verdict-states :sent))
+
+(defn in-post-verdict-state? [_ app] (contains? post-verdict-states (keyword (:state app))))
+
 (defn- applicant-name-from-auth [application]
   (let [owner (first (domain/get-auths-by-role application :owner))
         {first-name :firstName last-name :lastName} owner]
@@ -57,7 +63,7 @@
     (let [last-seen (get-in app [:_statements-seen-by (keyword (:id user))] 0)]
       (count (filter (fn [statement]
                        (and (> (or (:given statement) 0) last-seen)
-                            (not= (ss/lower-case (get-in statement [:person :email])) (ss/lower-case (:email user)))))
+                            (not= (user/canonize-email (get-in statement [:person :email])) (user/canonize-email (:email user)))))
                      (:statements app))))
     0))
 
@@ -95,17 +101,18 @@
     0))
 
 (defn- organization-meta [_ app]
-  (let [org (organization/get-organization (:organization app))]
+  (let [org (organization/get-organization (:organization app))
+        muni (:municipality app)
+        permit-type (:permitType app)
+        scope (organization/resolve-organization-scope muni permit-type org)]
     {:name (organization/get-organization-name org)
      :links (:links org)
      :requiredFieldsFillingObligatory (:app-required-fields-filling-obligatory org)
      :kopiolaitos {:kopiolaitosEmail (:kopiolaitos-email org)
                    :kopiolaitosOrdererAddress (:kopiolaitos-orderer-address org)
                    :kopiolaitosOrdererPhone (:kopiolaitos-orderer-phone org)
-                   :kopiolaitosOrdererEmail (:kopiolaitos-orderer-email org)}}))
-
-(def post-verdict-states #{"verdictGiven" "constructionStarted" "closed"})
-(defn- in-post-verdict-state? [_ app] (if (post-verdict-states (name (:state app))) true false))
+                   :kopiolaitosOrdererEmail (:kopiolaitos-orderer-email org)}
+     :asianhallinta (get-in scope [:caseManagement :enabled])}))
 
 (defn- indicator-sum [_ app]
   (apply + (map (fn [[k v]] (if (#{:documentModifications :unseenStatements :unseenVerdicts} k) v 0)) app)))

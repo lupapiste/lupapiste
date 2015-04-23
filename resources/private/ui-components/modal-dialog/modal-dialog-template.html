@@ -7,17 +7,16 @@
     <div data-bind="visible: false, documentEvent: {keypress: closeDialog, key: 27}"></div>
     <!-- ko if: showDialog -->
     <div class="mask" data-bind="fader: dialogVisible, click: closeDialog"></div>
-    <div class="dialog" data-bind="fader: dialogVisible, duration: 1000, style: {'max-height': dialogHeight() + 'px'}">
+    <div class="dialog" data-test-id="modal-dialog-content"
+         data-bind="fader: dialogVisible, duration: 1000,
+                    style: {'height': dialogHeight() + 'px',
+                            'max-height': dialogHeight() + 'px'},
+                    css: css">
       <div class="header">
-        <span class="title" data-bind="text: title"></span>
+        <span class="title" data-bind="ltext: title"></span>
         <span class="close" data-bind="click: closeDialog"></span>
       </div>
-      <div id="modal-dialog-content" class="content" data-bind="component: {name: contentName, params: contentParams}"></div>
-      <div class="footer">
-        <a href="#" class="cancel" data-bind="click: closeDialog">
-          <span data-bind="ltext: 'cancel'"></span>
-        </a>
-      </div>
+      <div id="modal-dialog-content" class="component" data-bind="component: {name: component, params: componentParams}"></div>
     </div>
     <!-- /ko -->
     </script>

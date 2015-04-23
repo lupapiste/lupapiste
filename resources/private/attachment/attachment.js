@@ -98,32 +98,37 @@ var attachment = (function() {
   var approveModel = new ApproveModel(authorizationModel);
 
   model = {
-    id:   ko.observable(),
-    application: applicationModel,
-    applicationState:     ko.observable(),
-    authorized:           ko.observable(false),
-    filename:             ko.observable(),
-    latestVersion:        ko.observable({}),
-    versions:             ko.observable([]),
-    signatures:           ko.observableArray([]),
-    type:                 ko.observable(),
-    attachmentType:       ko.observable(),
-    allowedAttachmentTypes: ko.observableArray([]),
-    previewDisabled:      ko.observable(false),
-    operation:            ko.observable(),
-    selectedOperationId:  ko.observable(),
-    selectableOperations: ko.observableArray(),
-    contents:             ko.observable(),
-    scale:                ko.observable(),
-    scales:               ko.observableArray(LUPAPISTE.config.attachmentScales),
-    size:                 ko.observable(),
-    sizes:                ko.observableArray(LUPAPISTE.config.attachmentSizes),
-    isVerdictAttachment:  ko.observable(),
-    subscriptions:        [],
-    indicator:            ko.observable().extend({notify: "always"}),
+    id:                           ko.observable(),
+    application:                  applicationModel,
+    applicationState:             ko.observable(),
+    authorized:                   ko.observable(false),
+    filename:                     ko.observable(),
+    latestVersion:                ko.observable({}),
+    versions:                     ko.observable([]),
+    signatures:                   ko.observableArray([]),
+    type:                         ko.observable(),
+    attachmentType:               ko.observable(),
+    allowedAttachmentTypes:       ko.observableArray([]),
+    previewDisabled:              ko.observable(false),
+    operation:                    ko.observable(),
+    selectedOperationId:          ko.observable(),
+    selectableOperations:         ko.observableArray(),
+    contents:                     ko.observable(),
+    scale:                        ko.observable(),
+    scales:                       ko.observableArray(LUPAPISTE.config.attachmentScales),
+    size:                         ko.observable(),
+    sizes:                        ko.observableArray(LUPAPISTE.config.attachmentSizes),
+    isVerdictAttachment:          ko.observable(),
+    subscriptions:                [],
+    indicator:                    ko.observable().extend({notify: "always"}),
     showAttachmentVersionHistory: ko.observable(),
-    showHelp:             ko.observable(false),
-    init:                 ko.observable(false),
+    showHelp:                     ko.observable(false),
+    init:                         ko.observable(false),
+    groupAttachments:             ko.observableArray(),
+    groupIndex:                   ko.observable(),
+    changeTypeDialogModel:        undefined,
+    metadata:                     ko.observableArray(),
+    showTosMetadata:              ko.observable(false),
 
     toggleHelp: function() {
       model.showHelp(!model.showHelp());
@@ -172,7 +177,22 @@ var attachment = (function() {
       LUPAPISTE.ModalDialog.open("#dialog-confirm-delete-attachment");
     },
 
+    previousAttachment: function() {
+      var previousId = util.getIn(model.groupAttachments(), [model.groupIndex() - 1, "id"]);
+      if (previousId) {
+        window.location.hash = "!/attachment/"+applicationId+"/" + previousId;
+      }
+    },
+
+    nextAttachment: function() {
+      var nextId = util.getIn(model.groupAttachments(), [model.groupIndex() + 1, "id"]);
+      if (nextId) {
+        window.location.hash = "!/attachment/"+applicationId+"/" + nextId;
+      }
+    },
+
     showChangeTypeDialog: function() {
+      model.changeTypeDialogModel.init(model.attachmentType());
       LUPAPISTE.ModalDialog.open("#change-type-dialog");
     },
 
@@ -190,8 +210,17 @@ var attachment = (function() {
 
     toggleAttachmentVersionHistory: function() {
       model.showAttachmentVersionHistory(!model.showAttachmentVersionHistory());
+    },
+
+    toggleTosMetadata: function() {
+      model.showTosMetadata(!model.showTosMetadata());
     }
   };
+
+  model.changeTypeDialogModel = new ChangeTypeDialogModel();
+  hub.subscribe("change-attachment-type", function(data) {
+    model.attachmentType(data.attachmentType);
+  });
 
   model.name = ko.computed(function() {
     if (model.attachmentType()) {
@@ -206,17 +235,25 @@ var attachment = (function() {
              true;
   });
 
+  model.previousAttachmentPresent = ko.pureComputed(function() {
+    return model.groupIndex() > 0;
+  });
 
-  function saveLabelInformation(type, data) {
+  model.nextAttachmentPresent = ko.pureComputed(function() {
+    return model.groupIndex() < model.groupAttachments().length - 1;
+  });
+
+  function saveLabelInformation(name, data) {
     data.id = applicationId;
     data.attachmentId = attachmentId;
     ajax
       .command("set-attachment-meta", data)
       .success(function() {
-        model.indicator(type);
+        model.indicator({name: name, type: "saved"});
       })
       .error(function(e) {
         error(e.text);
+        model.indicator({name: name, type: "err"});
       })
       .call();
   }
@@ -265,16 +302,20 @@ var attachment = (function() {
     }));
 
     model.subscriptions.push(model.isVerdictAttachment.subscribe(function(isVerdictAttachment) {
-      ajax.command("set-attachments-as-verdict-attachment", { id: applicationId, attachmentIds: [attachmentId], isVerdictAttachment: isVerdictAttachment })
-        .success(function() {
-          repository.load(applicationId);
-        })
-        .error(function(e) {
-          error(e.text);
-          notify.error(loc("error.dialog.title"), loc("attachment.set-attachments-as-verdict-attachment.error"));
-          repository.load(applicationId);
-        })
-        .call();
+      ajax.command("set-attachments-as-verdict-attachment", {
+        id: applicationId,
+        selectedAttachmentIds: isVerdictAttachment ? [attachmentId] : [],
+        unSelectedAttachmentIds: isVerdictAttachment ? [] : [attachmentId]
+      })
+      .success(function() {
+        repository.load(applicationId);
+      })
+      .error(function(e) {
+        error(e.text);
+        notify.error(loc("error.dialog.title"), loc("attachment.set-attachments-as-verdict-attachment.error"));
+        repository.load(applicationId);
+      })
+      .call();
     }));
 
 
@@ -289,8 +330,52 @@ var attachment = (function() {
     }
   }
 
+  function attachmentType(groupName, typeName) {
+    return [groupName, typeName].join(".");
+  }
+
+  function ChangeTypeDialogModel() {
+    var self = this;
+
+    function attachmentGroupLabel(groupName) {
+      return loc(["attachmentType", groupName, "_group_label"].join("."));
+    }
+
+    function attachmentTypeLabel(groupName, typeName) {
+      return loc(["attachmentType", attachmentType(groupName, typeName)].join("."));
+    }
+
+    self.attachmentType = ko.observable().extend({notify: "always"});
+    self.selectableAttachmentTypes = ko.pureComputed(function () {
+      return _.map(applicationModel.allowedAttachmentTypes(), function(typeGroup) {
+        return {
+          groupLabel: attachmentGroupLabel(typeGroup[0]),
+          types: _.map(typeGroup[1], function(type) {
+            return {
+              typeLabel: attachmentTypeLabel(typeGroup[0], type),
+              typeValue: attachmentType(typeGroup[0], type)
+            }
+          })
+        };
+      });
+    });
+
+    self.init = function(currentAttachmentType) {
+      self.attachmentType(currentAttachmentType);
+    };
+
+    self.ok = function() {
+      hub.send("change-attachment-type", {attachmentType: self.attachmentType()})
+      LUPAPISTE.ModalDialog.close();
+    };
+  }
+
   function showAttachment() {
-    if (!applicationId || !attachmentId) { return; }
+    if (!applicationId || !attachmentId ||
+        applicationId !== pageutil.subPage() ||
+        attachmentId !== pageutil.lastSubPage()) {
+      return;
+    }
 
     var application = applicationModel._js;
 
@@ -322,18 +407,20 @@ var attachment = (function() {
     model.size(attachment.size);
     model.isVerdictAttachment(attachment.forPrinting);
     model.applicationState(attachment.applicationState);
-
-    var type = attachment.type["type-group"] + "." + attachment.type["type-id"];
-    model.attachmentType(type);
     model.allowedAttachmentTypes(application.allowedAttachmentTypes);
+    model.attachmentType(attachmentType(attachment.type["type-group"], attachment.type["type-id"]));
 
-    // Knockout works poorly with dynamic options.
-    // To avoid headaches, init the select and update the ko model manually.
-    var selectList$ = $("#attachment-type-select");
-    attachmentTypeSelect.initSelectList(selectList$, application.allowedAttachmentTypes, model.attachmentType());
-    selectList$.change(function(e) {model.attachmentType($(e.target).val());});
+    var metadataArray = _.map(attachment.metadata, function(value, key) {
+      if (_.isObject(value)) {
+        value = _.map(value, function(subvalue, subkey) {
+          return {name: subkey, value: subvalue};
+        });
+      }
+      return {name: key, value: value};
+    });
+    model.metadata(metadataArray);
 
-    model.id = attachmentId;
+    model.id(attachmentId);
 
     approveModel.setApplication(application);
     approveModel.setAttachmentId(attachmentId);
@@ -348,19 +435,38 @@ var attachment = (function() {
       if (!model.latestVersion()) {
         setTimeout(function() {
           model.showHelp(true);
-        }, 1500);
+        }, 50);
       }
     });
+
+    var rawAttachments = ko.mapping.toJS(model.application.attachments());
+
+    var preAttachments = attachmentUtils.getPreAttachments(rawAttachments);
+    var postAttachments = attachmentUtils.getPostAttachments(rawAttachments);
+
+    var preGrouped = attachmentUtils.getGroupByOperation(preAttachments, true, model.application.allowedAttachmentTypes());
+    var postGrouped = attachmentUtils.getGroupByOperation(postAttachments, true, model.application.allowedAttachmentTypes());
+
+    var group = _.find(preGrouped.concat(postGrouped), function(g) {
+      return _.find(g.attachments, function(att) {
+        return att.id === model.id();
+      }) !== undefined;
+    });
+
+    model.groupAttachments(group.attachments);
+    model.groupIndex(_.findIndex(model.groupAttachments(), function(att) {
+      return att.id === model.id();
+    }));
 
     subscribe();
   }
 
-  hub.onPageLoad("attachment", function(e) {
+  hub.onPageLoad("attachment", function() {
     pageutil.showAjaxWait();
     model.init(false);
     model.showHelp(false);
-    applicationId = e.pagePath[0];
-    attachmentId = e.pagePath[1];
+    applicationId = pageutil.subPage();
+    attachmentId = pageutil.lastSubPage();
 
     if (applicationModel._js.id !== applicationId) {
       repository.load(applicationId);

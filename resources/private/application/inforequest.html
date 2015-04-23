@@ -2,14 +2,14 @@
 <html>
 <body>
   <section class="page" id="inforequest">
-
+  <!-- ko if: lupapisteApp.models.rootVMO.currentPage() === 'inforequest' -->
     <div class="application_summary">
       <div class="container">
         <div class="application-map-container">
           <div id="inforequest-map" class="map map-large" style="width: 320px; height: 280px;"></div>
           <div class="application-map-actions" data-bind="with: application">
             <!-- ko if: location() -->
-              <a data-bind="click: openOskariMap" class="map-search-button icon search"></a>
+              <a data-bind="click: openOskariMap, ltext:'map.open'" class="map-search-button" ></a>
             <!-- /ko -->
           </div>
         </div>
@@ -99,6 +99,10 @@
             <span data-bind="ltext: 'inforequest.cancelInforequest'"></span>
             <span class="icon remove-grey left-align"></span>
           </button>
+          <button data-bind="click: resetIndicators,           visible: $root.authorization.ok('mark-everything-seen'),            enable: !processing() && $root.authorization.ok('mark-everything-seen')"     data-test-id="application-mark-everything-seen-btn"  class="btn">
+            <span data-bind="ltext: 'application.reset-indicators'"></span>
+            <span class="icon mark-seen left-align"></span>
+          </button>
         </div>
         <div class="clear"></div>
       </div>
@@ -107,7 +111,7 @@
 
     <div class="container">
 
-      <div data-bind="if: $root.authorization.ok('inforequest-markers')" class="related-map">
+      <div class="related-map">
         <div id="inforequest-marker-map" class="map map-large"></div>
         <div id="inforequest-marker-map-contents"></div>
       </div>
@@ -174,6 +178,7 @@
       </div>
 
     </div>
+  <!-- /ko -->
   </section>
 </body>
 </html>

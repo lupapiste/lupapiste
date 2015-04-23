@@ -10,7 +10,7 @@ LUPAPISTE.VerdictSigningModel = function(dialogSelector) {
   self.applicationId = null;
   self.signed = ko.observable(false);
 
-  self.authorizationModel = authorization.create();
+  self.authorizationModel = lupapisteApp.models.applicationAuthModel;
 
   self.init = function(applicationId, verdictId) {
     self.applicationId = applicationId;
@@ -19,8 +19,6 @@ LUPAPISTE.VerdictSigningModel = function(dialogSelector) {
     self.processing(false);
     self.pending(false);
     self.errorMessage("");
-
-    self.authorizationModel.refresh(applicationId);
 
     LUPAPISTE.ModalDialog.open(self.dialogSelector);
   };

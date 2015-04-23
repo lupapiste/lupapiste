@@ -20,11 +20,14 @@ LUPAPISTE.ApplicationModel = function() {
   self.location = ko.observable();
   self.municipality = ko.observable();
   self.organizationMeta = ko.observable();
+  self.asianhallintaEnabled = ko.computed(function() {
+    return self.organizationMeta() ? self.organizationMeta().asianhallinta() : false;
+  });
   self.organizationLinks = ko.computed(function() {
     return self.organizationMeta() ? self.organizationMeta().links() : "";
   });
   self.organizationName = ko.computed(function() {
-    return self.organizationMeta() ? self.organizationMeta().name() : [];
+    return self.organizationMeta() ? self.organizationMeta().name() : "";
   });
   self.requiredFieldsFillingObligatory = ko.computed(function() {
     return self.organizationMeta() ? self.organizationMeta().requiredFieldsFillingObligatory() : false;
@@ -55,11 +58,14 @@ LUPAPISTE.ApplicationModel = function() {
   self.neighbors = ko.observable([]);
   self.statements = ko.observable([]);
   self.tasks = ko.observable([]);
+  self.tosFunction = ko.observable();
+  self.metadataList = ko.observableArray();
+
   self.taskGroups = ko.computed(function() {
     var tasks = ko.toJS(self.tasks) || [];
     // TODO query without foreman tasks
     tasks = _.filter(tasks, function(task) {
-      return task['schema-info'].name !== "task-vaadittu-tyonjohtaja";
+      return task["schema-info"].name !== "task-vaadittu-tyonjohtaja";
     });
     var schemaInfos = _.reduce(tasks, function(m, task){
       var info = task.schema.info;
@@ -112,6 +118,10 @@ LUPAPISTE.ApplicationModel = function() {
   self.showVerdictInfoHelp = ko.observable(false);
   self.showSummaryInfoHelp = ko.observable(false);
   self.showConstructionInfoHelp = ko.observable(false);
+
+  self.targetTab = ko.observable({tab: undefined, id: undefined});
+
+  self.allowedAttachmentTypes = ko.observableArray([]);
 
   self.updateInvites = function() {
     invites.getInvites(function(data) {
@@ -197,9 +207,11 @@ LUPAPISTE.ApplicationModel = function() {
     var municipality = "&municipality=" + self.municipality();
     var url = "/oskari/fullmap.html?build=" + LUPAPISTE.config.build + "&id=" + self.id() + coords + zoom + features + lang + municipality;
     window.open(url);
+    hub.send("track-click", {category:"Application", label:"map", event:"openOskariMap"});
   };
 
   self.submitApplication = function() {
+    hub.send("track-click", {category:"Application", label:"submit", event:"submitApplication"});
     LUPAPISTE.ModalDialog.showDynamicYesNo(
       loc("application.submit.areyousure.title"),
       loc("application.submit.areyousure.message"),
@@ -211,10 +223,12 @@ LUPAPISTE.ApplicationModel = function() {
           })
           .processing(self.processing)
           .call();
+        hub.send("track-click", {category:"Application", label:"submit", event:"applicationSubmitted"});
         return false;
       }},
       {title: loc("no")}
     );
+    hub.send("track-click", {category:"Application", label:"cancel", event:"applicationSubmitCanceled"});
     return false;
   };
 
@@ -236,6 +250,7 @@ LUPAPISTE.ApplicationModel = function() {
       })
       .processing(self.processing)
       .call();
+      hub.send("track-click", {category:"Inforequest", label:"", event:"convertToApplication"});
     return false;
   };
 
@@ -250,6 +265,7 @@ LUPAPISTE.ApplicationModel = function() {
       .error(function(e) {LUPAPISTE.showIntegrationError("integration.title", e.text, e.details);})
       .processing(self.processing)
       .call();
+    hub.send("track-click", {category:"Application", label:"", event:"approveApplication"});
     return false;
   };
 
@@ -263,11 +279,13 @@ LUPAPISTE.ApplicationModel = function() {
       .error(function(resp) {alert(resp.text);})
       .processing(self.processing)
       .call();
+      hub.send("track-click", {category:"Application", label:"", event:"refreshKTJ"});
     return false;
   };
 
   self.removeAuth = function(model) {
     var username = model.username();
+    hub.send("track-click", {category:"Application", label:"", event:"removeAuth"});
     LUPAPISTE.ModalDialog.showDynamicYesNo(
       loc("areyousure"),
       loc("areyousure.message"),
@@ -277,10 +295,12 @@ LUPAPISTE.ApplicationModel = function() {
            .success(self.reload)
            .processing(self.processing)
            .call();
+          hub.send("track-click", {category:"Application", label:"", event:"authRemoved"});
          return false;
       }},
       {title: loc("no")}
     );
+    hub.send("track-click", {category:"Application", label:"", event:"authRemoveCanceled"});
     return false;
   };
 
@@ -307,10 +327,12 @@ LUPAPISTE.ApplicationModel = function() {
 
   self.addOperation = function() {
     window.location.hash = "!/add-operation/" + self.id();
+    hub.send("track-click", {category:"Application", label:"", event:"addOperation"});
     return false;
   };
 
   self.cancelInforequest = function() {
+    hub.send("track-click", {category:"Inforequest", label:"", event:"cancelInforequest"});
     LUPAPISTE.ModalDialog.showDynamicYesNo(
       loc("areyousure"),
       loc("areyousure.cancel-inforequest"),
@@ -321,13 +343,16 @@ LUPAPISTE.ApplicationModel = function() {
           .success(function() {window.location.hash = "!/applications";})
           .processing(self.processing)
           .call();
+        hub.send("track-click", {category:"Inforequest", label:"", event:"infoRequestCanceled"});
         return false;}},
       {title: loc("no")}
     );
+    hub.send("track-click", {category:"Inforequest", label:"", event:"infoRequestCancelCanceled"});
     return false;
   };
 
   self.cancelApplication = function() {
+    hub.send("track-click", {category:"Application", label:"", event:"cancelApplication"});
     LUPAPISTE.ModalDialog.showDynamicYesNo(
       loc("areyousure"),
       loc("areyousure.cancel-application"),
@@ -338,15 +363,18 @@ LUPAPISTE.ApplicationModel = function() {
           .success(function() {window.location.hash = "!/applications";})
           .processing(self.processing)
           .call();
+        hub.send("track-click", {category:"Application", label:"", event:"ApplicationCanceled"});
         return false;}},
       {title: loc("no")}
     );
+    hub.send("track-click", {category:"Application", label:"", event:"ApplicationCancelCanceled"});
     return false;
   };
 
   self.cancelText = ko.observable("");
 
   self.cancelApplicationAuthority = function() {
+    hub.send("track-click", {category:"Application", label:"", event:"cancelApplicationAuthority"});
     LUPAPISTE.ModalDialog.setDialogContent(
       $("#dialog-cancel-application"),
       loc("areyousure"),
@@ -354,7 +382,7 @@ LUPAPISTE.ApplicationModel = function() {
       {title: loc("yes"),
        fn: function() {
         ajax
-          .command("cancel-application-authority", {id: self.id(), text: self.cancelText()})
+          .command("cancel-application-authority", {id: self.id(), text: self.cancelText(), lang: loc.getCurrentLanguage()})
           .success(function() {
             self.cancelText("");
             window.location.hash = "!/applications";
@@ -381,9 +409,11 @@ LUPAPISTE.ApplicationModel = function() {
       typeSelector: false
     });
     LUPAPISTE.ModalDialog.open("#upload-dialog");
+    hub.send("track-click", {category:"Application", label:"", event:"newOtherAttachment"});
   };
 
   self.createChangePermit = function() {
+    hub.send("track-click", {category:"Application", label:"", event:"createChangePermit"});
     LUPAPISTE.ModalDialog.showDynamicYesNo(
       loc("application.createChangePermit.areyousure.title"),
       loc("application.createChangePermit.areyousure.message"),
@@ -406,6 +436,7 @@ LUPAPISTE.ApplicationModel = function() {
 
 
   self.doCreateContinuationPeriodPermit = function() {
+    hub.send("track-click", {category:"Application", label:"", event:"doCreateContinuationPeriodPermit"});
     ajax
       .command("create-continuation-period-permit", {id: self.id()})
       .success(function(data) {
@@ -425,6 +456,7 @@ LUPAPISTE.ApplicationModel = function() {
   };
 
   self.resetIndicators = function() {
+    hub.send("track-click", {category:"Application", label:"", event:"resetIndicators"});
     ajax
       .command("mark-everything-seen", {id: self.id()})
       .success(self.reload)
@@ -432,58 +464,44 @@ LUPAPISTE.ApplicationModel = function() {
       .call();
   };
 
-  function extractRequiredErrors(errors) {
-    var errs = _.map(errors, function(errArray) {
-      return _.filter(errArray, function(err) {
-        return err.result[1] === "illegal-value:required";
-      });
-    });
-    errs = _.filter(errs, function(errArray) {
-      return errArray.length > 0;
-    });
-    return errs;
-  }
-
-  self.goToTabPosition = function(targetTab, targetId) {
-    if (targetTab === "requiredFieldSummary") {
+  self.targetTab.subscribe(function(target) {
+    if (target.tab === "requiredFieldSummary") {
       ajax
-        .command("fetch-validation-errors", {id: self.id()})
+        .query("fetch-validation-errors", {id: self.id()})
         .success(function (data) {
           self.updateMissingApplicationInfo(data.results);
         })
         .processing(self.processing)
         .call();
     }
-    window.location.hash = "!/application/" + self.id() + "/" + targetTab;
-    if (targetId) {
+    window.location.hash = "!/application/" + self.id() + "/" + target.tab;
+    if (target.id) {
       // The Nayta-links in "Puuttuvat pakolliset tiedot"-list do not work properly without using
       // the setTimeout function with 0 time here.
       setTimeout(function() {
-        window.scrollTo(0, $("#" + targetId).offset().top - 60);
+        window.scrollTo(0, $("#" + target.id).offset().top - 60);
       }, 0);
     }
-  };
+  });
 
   self.changeTab = function(model,event) {
-    var targetTab = $(event.target).closest("a").attr("data-target");
-    self.goToTabPosition(targetTab, null);
+    self.targetTab({tab: $(event.target).closest("a").attr("data-target"), id: null});
+    hub.send("track-click", {category:"Application", label:self.targetTab().tab, event:"changeTab"});
   };
 
   self.nextTab = function(model,event) {
-    var targetTab = $(event.target).closest("a").attr("data-target");
-    self.goToTabPosition(targetTab, "applicationTabs");
+    self.targetTab({tab: $(event.target).closest("a").attr("data-target"), id: "applicationTabs"});
+    hub.send("track-click", {category:"Application", label:self.targetTab().tab, event:"nextTab"});
   };
 
   self.moveToIncorrectlyFilledRequiredField = function(fieldInfo) {
-    var targetTab = (fieldInfo.document.type !== "party") ? "info" : "parties";
     var targetId = fieldInfo.document.id + "-" + fieldInfo.path.join("-");
-    self.goToTabPosition(targetTab, targetId);
+    self.targetTab({tab: (fieldInfo.document.type !== "party") ? "info" : "parties", id: targetId});
   };
 
   self.moveToMissingRequiredAttachment = function(fieldInfo) {
-    var targetTab = "attachments";
-    var targetId = 'attachment-row-' + fieldInfo.type['type-group']() + '-' + fieldInfo.type['type-id']();
-    self.goToTabPosition(targetTab, targetId);
+    var targetId = "attachment-row-" + fieldInfo.type["type-group"]() + "-" + fieldInfo.type["type-id"]();
+    self.targetTab({tab: "attachments", id: targetId});
   };
 
   function extractMissingAttachments(attachments) {
@@ -493,7 +511,7 @@ LUPAPISTE.ApplicationModel = function() {
       var versionsExist = a.versions() && a.versions().length;
       return required && !notNeeded && !versionsExist;
     });
-    missingAttachments = _.groupBy(missingAttachments, function(a){ return a.type['type-group']() });
+    missingAttachments = _.groupBy(missingAttachments, function(a){ return a.type["type-group"](); });
     missingAttachments = _.map(_.keys(missingAttachments), function(k) {
       return [k, missingAttachments[k]];
     });
@@ -501,11 +519,21 @@ LUPAPISTE.ApplicationModel = function() {
   }
 
   self.updateMissingApplicationInfo = function(errors) {
-    self.incorrectlyFilledRequiredFields(extractRequiredErrors(errors));
+    self.incorrectlyFilledRequiredFields(util.extractRequiredErrors(errors));
     self.missingRequiredAttachments(extractMissingAttachments(self.attachments()));
   };
 
   self.toggleHelp = function(param) {
     self[param](!self[param]());
+  };
+
+  self.toAsianhallinta = function() {
+    ajax.command("application-to-asianhallinta", {id: self.id(), lang: loc.getCurrentLanguage()})
+      .success(function() {
+        self.reload();
+      })
+      .error(function(e) {LUPAPISTE.showIntegrationError("integration.asianhallinta.title", e.text, e.details);})
+      .processing(self.processing)
+      .call();
   };
 };

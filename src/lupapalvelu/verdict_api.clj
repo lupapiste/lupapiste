@@ -93,7 +93,7 @@
 
 (defn do-check-for-verdict [command]
   {:pre [(every? command [:application :user :created])]}
-  (when-let [app-xml (krysp-fetch-api/get-application-xml (:application command))]
+  (when-let [app-xml (krysp-fetch-api/get-application-xml (:application command) :application-id)]
     (find-verdicts-from-xml command app-xml)))
 
 (notifications/defemail :application-verdict
@@ -106,7 +106,7 @@
                  replaced by the new ones."
    :parameters [:id]
    :states     [:submitted :complement-needed :sent :verdictGiven] ; states reviewed 2013-09-17
-   :roles      [:authority]
+   :user-roles #{:authority}
    :notified   true
    :on-success (notify :application-verdict)}
   [command]
@@ -126,7 +126,7 @@
 (defcommand new-verdict-draft
   {:parameters [:id]
    :states     [:submitted :complement-needed :sent :verdictGiven]
-   :roles      [:authority]}
+   :user-roles #{:authority}}
   [command]
   (let [blank-verdict (domain/->paatos {:draft true})]
     (update-application command {$push {:verdicts blank-verdict}})
@@ -145,7 +145,7 @@
                       (partial action/non-blank-parameters [:verdictId])
                       (partial action/boolean-parameters [:agreement])]
    :states     [:submitted :complement-needed :sent :verdictGiven]
-   :roles      [:authority]}
+   :user-roles #{:authority}}
   [{:keys [application created data] :as command}]
   (let [old-verdict (find-verdict application verdictId)
         verdict (domain/->paatos
@@ -159,26 +159,33 @@
       {:verdicts {$elemMatch {:id verdictId}}}
       {$set {(str "verdicts.$") verdict}})))
 
+(defn- publish-verdict [{timestamp :created :as command} {:keys [id kuntalupatunnus]}]
+  (if-not (ss/blank? kuntalupatunnus)
+    (do
+      (update-application command
+        {:verdicts {$elemMatch {:id id}}}
+        {$set {:modified timestamp
+               :state    :verdictGiven
+               :verdicts.$.draft false}})
+      (ok))
+    (fail :error.no-verdict-municipality-id)))
+
 (defcommand publish-verdict
   {:parameters [id verdictId]
    :states     [:submitted :complement-needed :sent :verdictGiven]
    :notified   true
    :on-success (notify :application-verdict)
-   :roles      [:authority]}
-  [{:keys [application created] :as command}]
+   :user-roles #{:authority}}
+  [{:keys [application] :as command}]
   (if-let [verdict (find-verdict application verdictId)]
-    (update-application command
-      {:verdicts {$elemMatch {:id verdictId}}}
-      {$set {:modified created
-             :state    :verdictGiven
-             :verdicts.$.draft false}})
+    (publish-verdict command verdict)
     (fail :error.unknown)))
 
 (defcommand delete-verdict
   {:parameters [id verdictId]
    :input-validators [(partial action/non-blank-parameters [:verdictId])]
    :states     [:submitted :complement-needed :sent :verdictGiven]
-   :roles      [:authority]}
+   :user-roles #{:authority}}
   [{:keys [application created] :as command}]
   (when-let [verdict (find-verdict application verdictId)]
     (let [target {:type "verdict", :id verdictId} ; key order seems to be significant!
@@ -202,7 +209,7 @@
    :parameters [id verdictId password]
    :states     [:verdictGiven :constructionStarted]
    :pre-checks [domain/validate-owner-or-write-access]
-   :roles      [:applicant :authority]}
+   :user-roles #{:applicant :authority}}
   [{:keys [application created user] :as command}]
   (if (user/get-user-with-password (:username user) password)
     (when (find-verdict application verdictId)

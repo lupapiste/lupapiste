@@ -7,7 +7,7 @@ LUPAPISTE.NoticeModel = function() {
   self.authorityNotice = ko.observable();
   self.urgency = ko.observable("normal");
 
-  self.indicator = ko.observable().extend({notify: "always"});
+  self.indicator = ko.observable({name: undefined, type: undefined}).extend({notify: "always"});
 
   self.availableUrgencyStates = ko.observableArray(["normal", "urgent", "pending"]);
 
@@ -20,7 +20,10 @@ LUPAPISTE.NoticeModel = function() {
           id: self.applicationId,
           urgency: value})
         .success(function() {
-          self.indicator("urgency");
+          self.indicator({name: "urgency", type: "saved"});
+        })
+        .error(function() {
+          self.indicator({name: "urgency", type: "err"});
         })
         .call();
     }, 500)));
@@ -31,7 +34,10 @@ LUPAPISTE.NoticeModel = function() {
           id: self.applicationId,
           authorityNotice: value})
         .success(function() {
-          self.indicator("notice");
+          self.indicator({name: "notice", type: "saved"});
+        })
+        .error(function() {
+          self.indicator({name: "urgency", type: "err"});
         })
         .call();
     }, 500)));

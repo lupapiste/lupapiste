@@ -26,6 +26,11 @@
 (testable-privates lupapalvelu.user-api validate-create-new-user!)
 
 (facts validate-create-new-user!
+  (against-background
+    [(mongo/by-id :organizations "o") => {:id "o"}
+     (mongo/by-id :organizations "other") => nil
+     (mongo/by-id :organizations "q") => {:id "q"}
+     (mongo/by-id :organizations "x") => {:id "x"}]
 
   (fact (validate-create-new-user! nil nil) => (fails-with :error.missing-parameters))
   (fact (validate-create-new-user! nil {})  => (fails-with :error.missing-parameters))
@@ -45,6 +50,7 @@
   (fact (validate-create-new-user! {:role "authorityAdmin" :organizations ["o"]} {:role "authority" :email "x" :organization "q"}) => forbidden)
   (fact (validate-create-new-user! {:role "admin"}          {:role "authority" :email "x"}) => forbidden)
   (fact (validate-create-new-user! {:role "admin"}          {:role "authorityAdmin" :email "x" :organization "o"}) => truthy)
+  (fact (validate-create-new-user! {:role "admin"}          {:role "authorityAdmin" :email "x" :organization "other"}) => (fails-with :error.organization-not-found))
 
   (fact (validate-create-new-user! {:role "applicant"}      {:role "applicant" :email "x"}) => forbidden)
   (fact (validate-create-new-user! {:role "authority"}      {:role "applicant" :email "x"}) => forbidden)
@@ -75,8 +81,9 @@
   (fact "only admin can create users with apikeys"
     (fact (validate-create-new-user! {:role "admin"} {:role "authorityAdmin" :organization "x" :email "x" :apikey "true"}) => truthy)
     (fact (validate-create-new-user! {:role "authorityAdmin" :organizations ["x"]} {:role "authority" :organization "x" :email "x"}) => truthy)
-    (fact (validate-create-new-user! {:role "authorityAdmin" :organizations ["x"]} {:role "authority" :organization "x" :email "x" :apikey "true"}) => forbidden)))
+    (fact (validate-create-new-user! {:role "authorityAdmin" :organizations ["x"]} {:role "authority" :organization "x" :email "x" :apikey "true"}) => forbidden))
 
+  ))
 ;;
 ;; ==============================================================================
 ;; create-new-user-entity
@@ -114,9 +121,9 @@
     (-> (create-new-user-entity {:email "email" :foo "bar"}) :foo) => nil)
 
   (facts "apikey is created"
-    (fact (-> (create-new-user-entity  {:email ..anything.. :apikey "true"}) :private :apikey) => string?)
-    (fact (-> (create-new-user-entity {:email ..anything.. :apikey "false"}) :private) => {})
-    (fact (-> (create-new-user-entity {:email ..anything.. :apikey "foo"}) :private :apikey) => "foo")))
+    (fact (-> (create-new-user-entity  {:email "..anything.." :apikey "true"}) :private :apikey) => string?)
+    (fact (-> (create-new-user-entity {:email "..anything.." :apikey "false"}) :private) => {})
+    (fact (-> (create-new-user-entity {:email "..anything.." :apikey "foo"}) :private :apikey) => "foo")))
 
 ;;
 ;; ==============================================================================
@@ -147,6 +154,7 @@
     (create-new-user {:role "admin"} {:email "email" :organization "x" :role "authorityAdmin"}) => ..result..
     (provided
       (user/get-user-by-email "email") =streams=> [{:id ..old-id.. :role "dummy"} ..result..]
+      (mongo/by-id :organizations "x") => {:id "x"}
       (mongo/insert :users anything) => anything :times 0
       (mongo/update-by-id :users ..old-id.. (contains {:email "email"})) => nil
       (activation/send-activation-mail-for (contains {:email "email" :id ..old-id..})) => nil))
@@ -155,6 +163,7 @@
     (create-new-user {:role "admin"} {:email "email" :organization "x" :role "authorityAdmin"}) => (fails-with :error.duplicate-email)
     (provided
       (user/get-user-by-email "email") => {:id ..old-id.. :role "authorityAdmin"} :times 1
+      (mongo/by-id :organizations "x") => {:id "x"}
       (mongo/insert :users anything) => anything :times 0
       (mongo/update-by-id :users ..old-id.. (contains {:email "email"})) => anything :times 0
       (activation/send-activation-mail-for anything) => anything :times 0)))

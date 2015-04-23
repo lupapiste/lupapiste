@@ -1,12 +1,14 @@
 (ns lupapalvelu.smoketest.application-smoke-tests
   (:require [lupapalvelu.smoketest.core :refer [defmonster]]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.action :as action]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.server] ; ensure all namespaces are loaded
             ))
 
 (def applications (delay (mongo/select :applications)))
 (def submitted-applications (delay (mongo/select :submitted-applications)))
+(def organizations (delay (mongo/select :organizations)))
 
 (defn- validate-doc [ignored-errors application {id :id schema-info :schema-info :as doc}]
   (if (and (:name schema-info) (:version schema-info))
@@ -60,7 +62,7 @@
         (:id application)))))
 
 (defn- schemas-have-ops [apps]
-  (let [app-ids-with-invalid-docs (filter identity (map application-schemas-have-ops apps))]
+  (let [app-ids-with-invalid-docs (remove nil? (map application-schemas-have-ops apps))]
     (when (seq app-ids-with-invalid-docs)
       {:ok false :results (into [] app-ids-with-invalid-docs)})))
 
@@ -87,6 +89,50 @@
 
 (defmonster municipality-is-set
   (nil-property :municipality))
+
+(defn timestamp-is-set [ts-key states]
+  (if-let [results (seq (remove nil? (map #(when (and (states (keyword (:state %))) (nil? (ts-key %))) (:id %)) @applications)))]
+    {:ok false :results results}
+    {:ok true}))
+
+(defmonster opened-timestamp
+  (timestamp-is-set :opened (action/all-states-but [:draft :canceled])))
+
+;;
+;; Skips applications with operation "aiemmalla-luvalla-hakeminen" (previous permit aka paperilupa)
+;;
+(defmonster submitted-timestamp
+ (if-let [results (seq (remove nil? (map
+                                      (fn [app]
+                                        (when (and
+                                                ((action/all-application-states-but [:canceled :draft :open]) (keyword (:state app)))
+                                                (when-not (some #(#{"aiemmalla-luvalla-hakeminen"} (:name %)) (:operations app))
+                                                  (nil? (:submitted app))))
+                                          (:id app)))
+                                      @applications)))]
+   {:ok false :results results}
+   {:ok true}))
+
+; Fails with 255 applications
+;(defmonster canceled-timestamp
+;  (timestamp-is-set :canceled #{:canceled}))
+
+(defmonster sent-timestamp
+  (timestamp-is-set :sent #{:sent :complement-needed}))
+
+(defmonster closed-timestamp
+  (timestamp-is-set :closed #{:closed}))
+
+(defmonster permit-type-only-in-single-municipality-scope
+  (let [results (->> @organizations
+                     (mapcat :scope)
+                     (group-by :municipality)
+                     (map (fn [[muni scopes]] [muni (map :permitType scopes)]))
+                     (remove #(apply distinct? (second %))))]
+    (if (seq results)
+      {:ok false :results results}
+      {:ok true})))
+
 
 ;; task source is set
 

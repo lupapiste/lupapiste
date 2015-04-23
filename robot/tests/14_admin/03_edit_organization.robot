@@ -13,34 +13,40 @@ Solita admin sees the list of organizations
 
 Admin edits organization with id 753-R
   Wait Until  Click link  xpath=//a[@data-test-id="edit-organization-753-R"]
-  Wait until  Element should be visible  xpath=//input[@data-test-id="inforequest-enabled"]
-  Select Checkbox  xpath=//input[@data-test-id="inforequest-enabled"]
-  Select Checkbox  xpath=//input[@data-test-id="application-enabled"]
-  Select Checkbox  open-inforequest
-  Input text by test id  open-inforequest-email  root@localhost
-  Click enabled by test id  save-organization
+  Wait until  Element should be visible  xpath=//section[@id="organization"]//td[@data-test-id="inforequest-enabled-753-R"]/input
+  Select Checkbox  xpath=//section[@id="organization"]//td[@data-test-id="inforequest-enabled-753-R"]/input
+  Select Checkbox  xpath=//section[@id="organization"]//td[@data-test-id="application-enabled-753-R"]/input
+  Select Checkbox  xpath=//section[@id="organization"]//td[@data-test-id="open-inforequest-753-R"]/input
+  Input text by test id  open-inforequest-email-753-R  root@localhost
+  Click enabled by test id  save-753-R
+  Wait Until  Page should contain  Tiedot tallennettu
+  Confirm  dynamic-ok-confirm-dialog
+  Go back
 
 Organization 753-R has now inforequest and application enabled
-  Wait Until  Element should be visible  xpath=//td[@data-test-id="inforequest-enabled-753-R"]  true
-  Wait Until  Element text should be  xpath=//td[@data-test-id="inforequest-enabled-753-R"]  true
-  Wait Until  Element text should be  xpath=//td[@data-test-id="application-enabled-753-R"]  true
-  Wait Until  Element text should be  xpath=//td[@data-test-id="open-inforequest-753-R"]  true
-  Wait Until  Element text should be  xpath=//td[@data-test-id="open-inforequest-email-753-R"]  root@localhost
+  Wait Until  Element should be visible  xpath=//section[@id="organizations"]//td[@data-test-id="inforequest-enabled-753-R"]  true
+  Wait Until  Element text should be  xpath=//section[@id="organizations"]//td[@data-test-id="inforequest-enabled-753-R"]  true
+  Wait Until  Element text should be  xpath=//section[@id="organizations"]//td[@data-test-id="application-enabled-753-R"]  true
+  Wait Until  Element text should be  xpath=//section[@id="organizations"]//td[@data-test-id="open-inforequest-753-R"]  true
+  Wait Until  Element text should be  xpath=//section[@id="organizations"]//td[@data-test-id="open-inforequest-email-753-R"]  root@localhost
 
 Admin sets application disabled
   Wait Until  Element should be visible  xpath=//a[@data-test-id="edit-organization-753-R"]
   Click link  xpath=//a[@data-test-id="edit-organization-753-R"]
-  Wait until  Element should be visible  xpath=//input[@data-test-id="inforequest-enabled"]
-  Select Checkbox  xpath=//input[@data-test-id="inforequest-enabled"]
-  Unselect Checkbox  xpath=//input[@data-test-id="application-enabled"]
-  Click enabled by test id  save-organization
+  Wait until  Element should be visible  xpath=//section[@id="organization"]//td[@data-test-id="inforequest-enabled-753-R"]/input
+  Select Checkbox  xpath=//section[@id="organization"]//td[@data-test-id="inforequest-enabled-753-R"]/input
+  Unselect Checkbox  xpath=//section[@id="organization"]//td[@data-test-id="application-enabled-753-R"]/input
+  Click enabled by test id  save-753-R
+  Wait Until  Page should contain  Tiedot tallennettu
+  Confirm  dynamic-ok-confirm-dialog
+  Go back
 
 Organization 753-R has now inforequest enabled and application disabled
-  Wait Until  Element should be visible  xpath=//td[@data-test-id="inforequest-enabled-753-R"]  true
-  Wait Until  Element text should be  xpath=//td[@data-test-id="inforequest-enabled-753-R"]  true
-  Wait Until  Element text should be  xpath=//td[@data-test-id="application-enabled-753-R"]  false
-  Wait Until  Element text should be  xpath=//td[@data-test-id="open-inforequest-753-R"]  true
-  Wait Until  Element text should be  xpath=//td[@data-test-id="open-inforequest-email-753-R"]  root@localhost
+  Wait Until  Element should be visible  xpath=//section[@id="organizations"]//td[@data-test-id="inforequest-enabled-753-R"]  true
+  Wait Until  Element text should be  xpath=//section[@id="organizations"]//td[@data-test-id="inforequest-enabled-753-R"]  true
+  Wait Until  Element text should be  xpath=//section[@id="organizations"]//td[@data-test-id="application-enabled-753-R"]  false
+  Wait Until  Element text should be  xpath=//section[@id="organizations"]//td[@data-test-id="open-inforequest-753-R"]  true
+  Wait Until  Element text should be  xpath=//section[@id="organizations"]//td[@data-test-id="open-inforequest-email-753-R"]  root@localhost
   [Teardown]  Logout
 
 Mikko creates an inforequest in Sipoo

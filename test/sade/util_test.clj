@@ -1,4 +1,5 @@
 (ns sade.util-test
+  (:refer-clojure :exclude [pos? neg? zero?])
   (:require [sade.util :refer :all]
             [midje.sweet :refer :all]
             [schema.core :as sc])
@@ -146,6 +147,7 @@
 
 (facts "to-xml-date-from-string"
   (fact "nil -> nil" (to-xml-date-from-string nil) => nil)
+  (fact "'' -> nil" (to-xml-date-from-string "") => nil)
   (fact "valid date" (to-xml-date-from-string "1.1.2013") => "2013-01-01")
   (fact "invalid date" (to-xml-date-from-string "1.2013") => (throws java.lang.IllegalArgumentException)))
 

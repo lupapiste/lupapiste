@@ -64,15 +64,17 @@
 ;; Database Api
 ;;
 
+(def isolated {"$isolated" 1})
+
 (defn update-n
   "Updates data into collection by query, returns a number of updated documents."
   [collection query data & {:as opts}]
-  (.getN (apply mc/update collection query data (-> opts (assoc :write-concern WriteConcern/ACKNOWLEDGED) seq flatten))))
+  (.getN (apply mc/update collection (merge isolated query) data (-> opts (assoc :write-concern WriteConcern/ACKNOWLEDGED) seq flatten))))
 
 (defn update
   "Updates data into collection by query. Always returns nil."
   [collection query data & opts]
-  (apply mc/update collection query data opts)
+  (apply mc/update collection (merge isolated query) data opts)
   nil)
 
 (defn update-by-id
@@ -84,7 +86,7 @@
 (defn update-by-query
   "Updates data into collection. Returns the number of documents updated"
   [collection query data]
-  (.getN (mc/update collection query data :multi true)))
+  (.getN (mc/update collection (merge isolated query) data :multi true)))
 
 (defn insert
   "Inserts data into collection. The 'id' in 'data' (if it exists) is persisted as _id"
@@ -305,6 +307,7 @@
   (mc/ensure-index :users {:private.apikey 1} {:unique true :sparse true})
   (mc/ensure-index :users {:company.id 1} {:sparse true})
   (mc/ensure-index :applications {:municipality 1})
+  (mc/ensure-index :applications {:submitted 1})
   (mc/ensure-index :applications {:organization 1})
   (mc/ensure-index :applications {:auth.id 1})
   (mc/ensure-index :applications {:auth.invite.user.id 1} {:sparse true})

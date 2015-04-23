@@ -7,7 +7,7 @@
             [lupapalvelu.document.yleiset-alueet-canonical :refer [application-to-canonical]]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.canonical-test-common :as ctc]
-            [sade.util :refer :all]
+            [sade.util :as util]
             [sade.core :refer :all]))
 
 
@@ -174,12 +174,12 @@
         pinta-ala (:pintaala Tyolupa) => truthy
         ]
 
-      (fact "contains nil" (contains-value? canonical nil?) => falsey)
+      (fact "contains nil" (util/contains-value? canonical nil?) => falsey)
 
-      (fact "Kasittelytieto-muutosHetki" (:muutosHetki Kasittelytieto) => (to-xml-datetime (:modified kaivulupa-application)))
+      (fact "Kasittelytieto-muutosHetki" (:muutosHetki Kasittelytieto) => (util/to-xml-datetime (:modified kaivulupa-application)))
       (fact "Kasittelytieto-hakemuksenTila" (:hakemuksenTila Kasittelytieto) => "vireill\u00e4")
       (fact "Kasittelytieto-asiatunnus" (:asiatunnus Kasittelytieto) => (:id kaivulupa-application))
-      (fact "Kasittelytieto-paivaysPvm" (:paivaysPvm Kasittelytieto) => (to-xml-date (:submitted kaivulupa-application)))
+      (fact "Kasittelytieto-paivaysPvm" (:paivaysPvm Kasittelytieto) => (util/to-xml-date (:submitted kaivulupa-application)))
       (fact "Kasittelytieto-kasittelija-etunimi" (:etunimi Kasittelytieto-kasittelija-nimi) => (:firstName sonja))
       (fact "Kasittelytieto-kasittelija-sukunimi" (:sukunimi Kasittelytieto-kasittelija-nimi) => (:lastName sonja))
 
@@ -306,8 +306,8 @@
       (fact "tyomaasta-vastaava-yksityinen-postitoimipaikannimi" (:postitoimipaikannimi tyomaasta-vastaava-Vastuuhenkilo-osoite) => (-> osoite :postitoimipaikannimi :value))
 
       ;; Kayton alku/loppu pvm
-      (fact "alkuPvm" alkuPvm => (to-xml-date-from-string (-> tyoaika :data :tyoaika-alkaa-pvm :value)))
-      (fact "loppuPvm" loppuPvm => (to-xml-date-from-string (-> tyoaika :data :tyoaika-paattyy-pvm :value)))
+      (fact "alkuPvm" alkuPvm => (util/to-xml-date-from-string (-> tyoaika :data :tyoaika-alkaa-pvm :value)))
+      (fact "loppuPvm" loppuPvm => (util/to-xml-date-from-string (-> tyoaika :data :tyoaika-paattyy-pvm :value)))
 
       ;; Hankkeen kuvaus
       (fact "lupaAsianKuvaus" lupaAsianKuvaus => (-> hankkeen-kuvaus :data :kayttotarkoitus :value))

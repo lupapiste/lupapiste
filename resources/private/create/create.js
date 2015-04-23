@@ -20,6 +20,7 @@
 
 
     self.goPhase2 = function() {
+      hub.send("track-click", {category:"Create", label:"map", event:"mapContinue"});
       window.location.hash = "!/create-part-2";
       tree.reset(_.map(self.operations(), operations2tree));
       window.scrollTo(0, 0);
@@ -71,25 +72,24 @@
 
     // Observables for creating new application from previous permit
     self.creatingAppWithPrevPermit = false;
+    self.organizationOptions = ko.observable([]);
+    self.selectedPrevPermitOrganization = ko.observable(null);
     self.kuntalupatunnusFromPrevPermit = ko.observable(null);
     self.needMorePrevPermitInfo = ko.observable(false);
     self.creatingAppWithPrevPermitOk = ko.computed(function() {
-      return !self.processing() && !self.pending() &&
-             !isBlank(self.kuntalupatunnusFromPrevPermit()) &&
-             !isBlank(self.municipalityCode()) && self.municipality() &&
-             ( !self.needMorePrevPermitInfo() || (self.propertyId() &&
-                                                  !isBlank(self.addressString()) &&
-                                                  !isBlank(self.search()) &&
-                                                  self.addressData() &&
-                                                  self.x() !== 0 && self.y() !== 0));
+
+    return !self.processing() && !self.pending() &&
+           !isBlank(self.kuntalupatunnusFromPrevPermit()) &&
+           !isBlank(self.selectedPrevPermitOrganization()) &&
+           ( !self.needMorePrevPermitInfo() || (self.propertyId() &&
+                                                !isBlank(self.addressString()) &&
+                                                !isBlank(self.search()) &&
+                                                self.addressData() &&
+                                                self.x() !== 0 && self.y() !== 0));
     });
 
-
     self.municipalityCode.subscribe(function(code) {
-      if (self.creatingAppWithPrevPermit) {
-        self.updateMunicipality(code);
-        self.updateOrganizationDetails("aiemmalla-luvalla-hakeminen");
-      } else {
+      if (!self.creatingAppWithPrevPermit) {
         if (code) { self.findOperations(code); }
         if (self.useManualEntry()) { self.updateMunicipality(code); }
       }
@@ -135,7 +135,7 @@
         self.map.updateSize();
       } else {
         self.map = gis
-          .makeMap("create-map", false)
+          .makeMap("create-map", true)
           .center(404168, 7205000, zoomLevel)
           .addClickHandler(self.click)
           .setPopupContentModel(self, "section#map-popup-content");
@@ -152,6 +152,8 @@
         .message("")
         .requestType(null)
         .kuntalupatunnusFromPrevPermit(null)
+        .organizationOptions([])
+        .selectedPrevPermitOrganization(null)
         .needMorePrevPermitInfo(false);
     };
 
@@ -176,6 +178,7 @@
     // Called when user clicks on map:
 
     self.click = function(x, y) {
+      hub.send("track-click", {category:"Create", label:"map", event:"mapClick"});
       self
         .setXY(x, y)
         .addressData(null)
@@ -189,6 +192,7 @@
     // Search activation:
 
     self.searchNow = function() {
+      hub.send("track-click", {category:"Create", label:"map", event:"searchLocation"});
       self
         .resetXY()
         .addressData(null)
@@ -199,7 +203,7 @@
     };
 
     var zoomLevelEnum = {
-      "540": 6,
+      "540": 9,
       "550": 7,
       "560": 9
     };
@@ -369,16 +373,19 @@
     self.create = function(infoRequest) {
       if (infoRequest) {
         if (self.inforequestsDisabled()) {
+          hub.send("track-click", {category:"Create", label:"tree", event:"infoRequestDisabled'"});
           LUPAPISTE.ModalDialog.showDynamicOk(
               loc("new-applications-or-inforequests-disabled.dialog.title"),
               loc("new-applications-or-inforequests-disabled.inforequests-disabled"));
           return;
         }
+        hub.send("track-click", {category:"Create", label:"tree", event:"newInfoRequest'"});
         LUPAPISTE.ModalDialog.showDynamicOk(loc("create.prompt.title"), loc("create.prompt.text"));
       } else if (self.newApplicationsDisabled()) {
         LUPAPISTE.ModalDialog.showDynamicOk(
             loc("new-applications-or-inforequests-disabled.dialog.title"),
             loc("new-applications-or-inforequests-disabled.new-applications-disabled"));
+        hub.send("track-click", {category:"Create", label:"tree", event:"newApplicationsDisabled"});
         return;
       }
 
@@ -404,7 +411,7 @@
         window.location.hash = (infoRequest ? "!/inforequest/" : "!/application/") + data.id;
       })
       .call();
-
+      hub.send("track-click", {category:"Create", label:"tree", event:"newApplication"});
     };
     self.createApplication = self.create.bind(self, false);
     self.createInfoRequest = self.create.bind(self, true);
@@ -413,10 +420,23 @@
     // For creating new application based on a previous permit
     //
 
-    self.clearForCreateAppWithPrevPermit = function() {
+    self.initCreateAppWithPrevPermit = function() {
       self.clear();
       self.creatingAppWithPrevPermit = true;
       self.operation("aiemmalla-luvalla-hakeminen");
+
+      // TODO: Nyt kovakoodattu permitType -> pitaisiko hakea jostain muualta, esim permit-type-select-valinta?
+      //       "aiemmalla-luvalla-hakeminen"-toimenpiteen permitType on "R"
+      ajax.query("user-organizations-for-permit-type", {permitType: "R"})
+        .processing(self.processing)
+        .pending(self.pending)
+        .success(function(data) {
+          self.organizationOptions(data.organizations);
+          if (self.organizationOptions().length) {
+            self.selectedPrevPermitOrganization(self.organizationOptions()[0].id);
+          }
+        })
+        .call();
     };
 
     self.createApplicationWithPrevPermit = function() {
@@ -428,12 +448,13 @@
       }
 
       ajax.command("create-application-from-previous-permit", {
+        lang: loc.getCurrentLanguage(),
         operation: self.operation(),
         y: self.y(),
         x: self.x(),
         address: self.addressString(),
         propertyId: util.prop.toDbFormat(self.propertyId()),
-        municipality: self.municipality().id,
+        organizationId: self.selectedPrevPermitOrganization(),
         kuntalupatunnus: self.kuntalupatunnusFromPrevPermit()
       })
       .processing(self.processing)
@@ -463,7 +484,7 @@
   }();
 
   hub.onPageLoad("create-part-1", model.clear);
-  hub.onPageLoad("create-page-prev-permit", model.clearForCreateAppWithPrevPermit);
+  hub.onPageLoad("create-page-prev-permit", model.initCreateAppWithPrevPermit);
 
   function initAutocomplete(id) {
     $(id)

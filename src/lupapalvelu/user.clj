@@ -1,16 +1,15 @@
 (ns lupapalvelu.user
   (:require [taoensso.timbre :as timbre :refer [debug debugf info warn warnf]]
-            [monger.operators :refer :all]
-            [monger.query :as query]
-            [noir.session :as session]
-            [camel-snake-kebab :as kebab]
-            [sade.strings :as ss]
-            [sade.util :as util]
-            [sade.env :as env]
-            [lupapalvelu.mongo :as mongo]
-            [sade.core :refer [fail fail!]]
             [clj-time.core :as time]
             [clj-time.coerce :refer [to-date]]
+            [monger.operators :refer :all]
+            [monger.query :as query]
+            [camel-snake-kebab :as kebab]
+            [sade.core :refer [fail fail! now]]
+            [sade.env :as env]
+            [sade.strings :as ss]
+            [sade.util :as util]
+            [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]))
 
 ;;
@@ -30,14 +29,38 @@
   (when user
     (select-keys user [:id :username :firstName :lastName :role])))
 
+; Temporary mapping to generate orgAuthz key from organizations.
+; TODO remove this after data model has been migrated
+(defn with-org-auth [{:keys [organizations role] :as user}]
+  (if (#{:authority :authorityAdmin} (keyword role))
+    (assoc user :orgAuthz (reduce (fn [m org-id] (assoc m org-id #{role})) {} organizations))
+    user))
+
+(defn session-summary
+  "Returns common information about the user to be stored in session or nil"
+  [user]
+  (some-> user
+    (select-keys [:id :username :firstName :lastName :role :email :organizations :company :architect])
+    (assoc :expires (+ (now) (.toMillis java.util.concurrent.TimeUnit/MINUTES 5)))
+    with-org-auth))
+
+(defn virtual-user?
+  "True if user exists only in session, not in database"
+  [{:keys [role impersonating]}]
+  (or
+    impersonating
+    (contains? #{:oirAuthority} (keyword role))))
+
 (defn authority? [{role :role}]
-  (= :authority (keyword role)))
+  (#{:authority :oirAuthority} (keyword role)))
 
 (defn applicant? [{role :role}]
   (= :applicant (keyword role)))
 
 (defn same-user? [{id1 :id} {id2 :id}]
   (= id1 id2))
+
+(def canonize-email (comp ss/lower-case ss/trim))
 
 ;;
 ;; ==============================================================================
@@ -53,10 +76,10 @@
                   (dissoc :id))
                 query)
         query (if-let [username (:username query)]
-                (assoc query :username (ss/lower-case username))
+                (assoc query :username (canonize-email username))
                 query)
         query (if-let [email (:email query)]
-                (assoc query :email (ss/lower-case email))
+                (assoc query :email (canonize-email email))
                 query)
         query (if-let [organization (:organization query)]
                 (-> query
@@ -124,21 +147,21 @@
 
 (defn throttle-login? [username]
   {:pre [username]}
-  (mongo/any? :logins {:_id (ss/lower-case username)
+  (mongo/any? :logins {:_id (canonize-email username)
                        :failed-logins {$gte (env/value :login :allowed-failures)}
                        :locked {$gt (logins-lock-expires-date)}}))
 
 (defn login-failed [username]
   {:pre [username]}
   (mongo/remove-many :logins {:locked {$lte (logins-lock-expires-date)}})
-  (mongo/update :logins {:_id (ss/lower-case username)}
+  (mongo/update :logins {:_id (canonize-email username)}
                 {$set {:locked (java.util.Date.)}, $inc {:failed-logins 1}}
                 :multi false
                 :upsert true))
 
 (defn clear-logins [username]
   {:pre [username]}
-  (mongo/remove :logins (ss/lower-case username)))
+  (mongo/remove :logins (canonize-email username)))
 
 ;;
 ;; ==============================================================================
@@ -190,9 +213,10 @@
 
 (defn applicationpage-for [role]
   (let [s (name role)]
-    (if (or (ss/blank? s) (= s "dummy"))
-     "applicant"
-     (kebab/->kebab-case s))))
+    (cond
+      (or (ss/blank? s) (= s "dummy")) "applicant"
+      (= s "oirAuthority") "oir"
+      :else (kebab/->kebab-case s))))
 
 (defn user-in-role [user role & params]
   (merge (apply hash-map params) (assoc (summary user) :role role)))
@@ -207,14 +231,6 @@
   "fetches the current user from session"
   [request] (:user request ))
 
-(defn refresh-user!
-  "Loads user information from db and saves it to session. Call this after you make changes to user information."
-  [user-id]
-  {:pre [user-id]}
-  (when-let [user (get-user-by-id user-id)]
-    (debug "user session refresh successful, username:" (:username user))
-    (session/put! :user user)))
-
 ;;
 ;; ==============================================================================
 ;; Creating API keys:
@@ -225,7 +241,7 @@
   "Add or replace users api key. User is identified by email. Returns apikey. If user is unknown throws an exception."
   [email]
   (let [apikey (security/random-password)
-        n      (mongo/update-n :users {:email (ss/lower-case email)} {$set {:private.apikey apikey}})]
+        n      (mongo/update-n :users {:email (canonize-email email)} {$set {:private.apikey apikey}})]
     (when-not (= n 1) (fail! :unknown-user :email email))
     apikey))
 
@@ -240,7 +256,7 @@
   [email password]
   (let [salt              (security/dispense-salt)
         hashed-password   (security/get-hash password salt)
-        email             (ss/lower-case email)
+        email             (canonize-email email)
         updated-user      (mongo/update-one-and-return :users
                             {:email email}
                             {$set {:private.password hashed-password
@@ -259,7 +275,7 @@
 ;;
 
 (defn update-user-by-email [email data]
-  (mongo/update :users {:email (ss/lower-case email)} {$set data}))
+  (mongo/update :users {:email (canonize-email email)} {$set data}))
 
 (defn update-organizations-of-authority-user [email new-organization]
   (let [old-orgs (:organizations (get-user-by-email email))]

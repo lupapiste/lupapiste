@@ -7,8 +7,10 @@
       <form id="own-info-form">
         <a data-bind="ltext: 'back'" href="#"
           onclick="javascript:history.go(-1);return false;" class="btn"></a>
+        <h1 data-bind="ltext: 'mypage.title'"></h1>
+        <div data-bind="lhtml:'mypage.desc'" class="page-info"></div>
         <div class="own-info form-group">
-          <h2 data-bind="ltext: 'mypage.title'"></h2>
+          <h2 data-bind="ltext: 'mypage.personalInfo'"></h2>
           <div class="form-entry">
             <label data-bind="ltext: 'userinfo.firstName'"
               for="firstName" class="form-label"></label> <input
@@ -82,7 +84,7 @@
             </div>
           </div>
 
-        <div data-bind="visible: companyShow">
+        <div data-bind="visible: companyShow" data-test-id="my-company">
           <div class="form-group">
             <h2 data-bind="ltext: 'userInfo.company.title'"></h2>
 
@@ -97,8 +99,8 @@
               <label data-bind="ltext: 'userInfo.company.y'" class="form-label"></label>
               <span data-bind="text: company.y" class="form-input"></span>
 
-              <a data-bind="attr: {href: '#!/company/' + company.id()}, ltext: 'mypage.companyAccount.editInfo'" href="#" class="btn btn-primary"></a>
-              <a data-bind="attr: {href: '#!/company/' + company.id() + '/users/'}, ltext: 'mypage.companyAccount.editUsers'" href="#" class="btn btn-primary"></a>
+              <button data-bind="click: editCompany, ltext: 'mypage.companyAccount.editInfo'" class="btn btn-primary" data-test-id="company-edit-info"></button>
+              <button data-bind="click: editUsers, ltext: 'mypage.companyAccount.editUsers'" class="btn btn-primary" data-test-id="company-edit-users"></button>
             </div>
 
           </div>
@@ -164,7 +166,7 @@
                 </tbody>
               </table>
               <button
-                data-bind="click: add, ltext: 'userinfo.architect.attachments.add'" data-test-id="add-attachment"></button>
+                data-bind="click: add, ltext: 'userinfo.architect.attachments.add'" data-test-id="test-add-architect-attachment"></button>
             </div>
           </div>
         </div>

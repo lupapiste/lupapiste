@@ -6,7 +6,7 @@
             [lupapalvelu.xml.emit :refer :all]
             [lupapalvelu.xml.krysp.rakennuslupa-mapping :refer :all]
             [lupapalvelu.factlet :as fl]
-            [sade.util :refer :all]
+            [sade.util :as util]
             [sade.core :refer :all]
             [clojure.data.xml :refer :all]
             [clj-time.core :refer [date-time]]
@@ -18,8 +18,8 @@
 ;;
 
 (facts "Date format"
-  (fact (to-xml-date (date-time 2012 1 14)) => "2012-01-14")
-  (fact (to-xml-date (date-time 2012 2 29)) => "2012-02-29"))
+  (fact (util/to-xml-date (date-time 2012 1 14)) => "2012-01-14")
+  (fact (util/to-xml-date (date-time 2012 2 29)) => "2012-02-29"))
 
 (def- municipality 753)
 
@@ -65,7 +65,7 @@
                  :version 1}
    :data (merge
            suunnittelija-henkilo
-           {:patevyys {:koulutusvalinta {:value "arkkitehti"}, :koulutus {:value "Arkkitehti"}
+           {:patevyys {:koulutusvalinta {:value "arkkitehti"} :koulutus {:value "Arkkitehti"}
                        :patevyysluokka {:value "ei tiedossa"}
                        :valmistumisvuosi {:value "2010"}
                        :kokemus {:value "5"}
@@ -77,7 +77,7 @@
                                       :version 1}
    :data (merge suunnittelija-henkilo
                 {:kuntaRoolikoodi {:value "ARK-rakennussuunnittelija"}}
-                {:patevyys {:koulutusvalinta {:value "arkkitehti"}, :koulutus {:value "Arkkitehti"}
+                {:patevyys {:koulutusvalinta {:value "arkkitehti"} :koulutus {:value "Arkkitehti"}
                             :patevyysluokka {:value "B"}
                             :valmistumisvuosi {:value "2010"}
                             :kokemus {:value "5"}
@@ -89,8 +89,7 @@
                                        :version 1}
    :data (merge suunnittelija-henkilo
                 {:kuntaRoolikoodi {:value "GEO-suunnittelija"}}
-                {:patevyys {:koulutusvalinta {:value "muu"}
-                            :koulutus {:value "El\u00e4m\u00e4n koulu"}
+                {:patevyys {:koulutusvalinta {:value "other"} :koulutus {:value "El\u00e4m\u00e4n koulu"}  ;; "Muu" option ( i.e. :other-key) is selected
                             :patevyysluokka {:value "AA"}
                             :valmistumisvuosi {:value "2010"}
                             :kokemus {:value "5"}
@@ -101,7 +100,7 @@
   {:id "suunnittelija-old-schema-LUPA771" :schema-info {:name "suunnittelija"
                                                         :version 1}
    :data (merge suunnittelija-henkilo
-                {:patevyys {:koulutusvalinta {:value "arkkitehti"}, :koulutus {:value "Arkkitehti"}
+                {:patevyys {:koulutusvalinta {:value "arkkitehti"} :koulutus {:value "Arkkitehti"}
                             :kuntaRoolikoodi {:value "ARK-rakennussuunnittelija"}
                             :patevyysluokka {:value "B"}
                             :valmistumisvuosi {:value "2010"}
@@ -113,7 +112,7 @@
                                                 :version 1}
    :data (merge suunnittelija-henkilo
                 {:kuntaRoolikoodi {:value ""}}
-                {:patevyys {:koulutusvalinta {:value "arkkitehti"}, :koulutus {:value "Arkkitehti"}
+                {:patevyys {:koulutusvalinta {:value "arkkitehti"} :koulutus {:value "Arkkitehti"}
                             :patevyysluokka {:value "B"}
                             :valmistumisvuosi {:value "2010"}
                             :kokemus {:value "5"}
@@ -140,12 +139,12 @@
    :schema-info {:name "tyonjohtaja", :version 1}
    :data (merge suunnittelija-henkilo
            {:kuntaRoolikoodi {:value "KVV-ty\u00f6njohtaja"}
-            :patevyys {:koulutusvalinta {:value "muu"}, :koulutus {:value "Koulutus"}
-                       :patevyysvaatimusluokka {:value "A"}
-                       :valmistumisvuosi {:value "2010"}
-                       :tyonjohtajaHakemusKytkin {:value "hakemus"}
-                       :kokemusvuodet {:value "3"}
-                       :valvottavienKohteidenMaara {:value "9"}}
+            :patevyys-tyonjohtaja {:koulutusvalinta {:value "other"}, :koulutus {:value "Koulutus"}   ;; "Muu" option ( i.e. :other-key) is selected
+                                   :patevyysvaatimusluokka {:value "A"}
+                                   :valmistumisvuosi {:value "2010"}
+                                   :tyonjohtajaHakemusKytkin {:value "hakemus"}
+                                   :kokemusvuodet {:value "3"}
+                                   :valvottavienKohteidenMaara {:value "9"}}
             :vastattavatTyotehtavat {:kiinteistonVesiJaViemarilaitteistonRakentaminen {:value true}
                                      :kiinteistonilmanvaihtolaitteistonRakentaminen {:value true}
                                      :maanrakennustyo {:value true}
@@ -160,12 +159,12 @@
 (def- tyonjohtaja-blank-role-and-blank-qualification
   (-> tyonjohtaja
     (assoc-in [:data :kuntaRoolikoodi :value] nil)
-    (assoc-in [:data :patevyys :patevyysvaatimusluokka :value] "ei tiedossa")
-    (assoc-in [:data :patevyys :tyonjohtajaHakemusKytkin :value] "nimeaminen")))
+    (assoc-in [:data :patevyys-tyonjohtaja :patevyysvaatimusluokka :value] "ei tiedossa")
+    (assoc-in [:data :patevyys-tyonjohtaja :tyonjohtajaHakemusKytkin :value] "nimeaminen")))
 
 (def- tyonjohtajan-sijaistus-blank-dates
   (-> tyonjohtaja
-    (dissoc-in [:data :sijaistus :alkamisPvm])
+    (util/dissoc-in [:data :sijaistus :alkamisPvm])
     (assoc-in  [:data :sijaistus :paattymisPvm :value] "")))
 
 (def- rakennuspaikka
@@ -256,6 +255,7 @@
    :data (conj
            common-rakennus
            {:rakennusnro {:value "001"}
+            :buildingId {:value "000"}
             :valtakunnallinenNumero {:value "1234567892"}
             :perusparannuskytkin {:value true}
             :muutostyolaji {:value "muut muutosty\u00f6t"}})})
@@ -269,6 +269,7 @@
    :data (conj
            common-rakennus
            {:rakennusnro {:value "001"}
+            :buildingId {:value "000"}
             :manuaalinen_rakennusnro {:value "002"}
             :laajennuksen-tiedot {:perusparannuskytkin {:value true}
                                   :mitat {:tilavuus {:value "1500"}
@@ -294,6 +295,7 @@
                                 (dissoc :varusteet)
                                 (dissoc :luokitus))
                               {:rakennusnro {:value "001"}
+                               :buildingId {:value "000"}
                                :poistumanAjankohta {:value "17.04.2013"},
                                :poistumanSyy {:value "tuhoutunut"}})})
 
@@ -391,6 +393,7 @@
   (merge application-rakennuslupa {:id "LP-753-2013-00002"
                                    :organization "753-R"
                                    :state "submitted"
+                                   :submitted 1426247899490
                                    :operations [{:name "tyonjohtajan-nimeaminen"
                                                  :id "5272668be8db5aaa01084601"
                                                  :created 1383229067483}]
@@ -407,6 +410,7 @@
   (merge application-rakennuslupa {:id "LP-753-2013-00003"
                                    :organization "753-R"
                                    :state "submitted"
+                                   :submitted 1426247899490
                                    :propertyId "75341600550007"
                                    :operations [{:name "suunnittelijan-nimeaminen"
                                                  :id "527b3392e8dbbb95047a89de"
@@ -555,14 +559,14 @@
     (fact "tyonjohtajaRooliKoodi" (:tyonjohtajaRooliKoodi tyonjohtaja-model) => (-> tyonjohtaja :data :kuntaRoolikoodi :value))
     (fact "alkamisPvm" (:alkamisPvm tyonjohtaja-model) => "2014-02-13")
     (fact "paattymisPvm" (:paattymisPvm tyonjohtaja-model) => "2014-02-20")
-    (fact "koulutus" (:koulutus tyonjohtaja-model) => (-> tyonjohtaja :data :patevyys :koulutusvalinta :value))
-    (fact "valmistumisvuosi" (:valmistumisvuosi tyonjohtaja-model) => (-> tyonjohtaja :data :patevyys :valmistumisvuosi :value))
-    (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka tyonjohtaja-model) => (-> tyonjohtaja :data :patevyys :patevyysvaatimusluokka :value))
-    (fact "kokemusvuodet" (:kokemusvuodet tyonjohtaja-model) => (-> tyonjohtaja :data :patevyys :kokemusvuodet :value))
-    (fact "valvottavienKohteidenMaara" (:valvottavienKohteidenMaara tyonjohtaja-model) => (-> tyonjohtaja :data :patevyys :valvottavienKohteidenMaara :value))
+    (fact "koulutus with 'Muu' selected" (:koulutus tyonjohtaja-model) => "muu")
+    (fact "valmistumisvuosi" (:valmistumisvuosi tyonjohtaja-model) => (-> tyonjohtaja :data :patevyys-tyonjohtaja :valmistumisvuosi :value))
+    (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka tyonjohtaja-model) => (-> tyonjohtaja :data :patevyys-tyonjohtaja :patevyysvaatimusluokka :value))
+    (fact "kokemusvuodet" (:kokemusvuodet tyonjohtaja-model) => (-> tyonjohtaja :data :patevyys-tyonjohtaja :kokemusvuodet :value))
+    (fact "valvottavienKohteidenMaara" (:valvottavienKohteidenMaara tyonjohtaja-model) => (-> tyonjohtaja :data :patevyys-tyonjohtaja :valvottavienKohteidenMaara :value))
     (fact "tyonjohtajaHakemusKytkin" (:tyonjohtajaHakemusKytkin tyonjohtaja-model) => true)
     (fact "vastattavatTyotehtavat" (:vastattavatTyotehtavat tyonjohtaja-model) =>
-      "kiinteistonilmanvaihtolaitteistonRakentaminen,rakennelmaTaiLaitos,maanrakennustyo,kiinteistonVesiJaViemarilaitteistonRakentaminen,Muu tyotehtava")
+      "kiinteistonilmanvaihtolaitteistonRakentaminen,rakennelmaTaiLaitos,kiinteistonVesiJaViemarilaitteistonRakentaminen,maanrakennustyo,Muu tyotehtava")
     (fact "henkilo" (:henkilo tyonjohtaja-model) => truthy)
     (fact "yritys" (:yritys tyonjohtaja-model) => truthy)
     (fact "sijaisuus" sijaistus-213 => truthy)
@@ -725,7 +729,7 @@
 
     (fact "If only kaavanaste is set, kaavatilanne is not in canonical"
       (let [rakennuspaikka (assoc-in
-                             (dissoc-in (first rakennuspaikka) [:data :kaavatilanne])
+                             (util/dissoc-in (first rakennuspaikka) [:data :kaavatilanne])
                              [:data :kaavanaste]
                              "yleis")
             result (first (get-bulding-places [rakennuspaikka] application-rakennuslupa))]
@@ -740,7 +744,7 @@
         (get-in result [:Rakennuspaikka :kaavanaste]) => "ei tiedossa"))
 
     (fact "When kaavanaste/kaavatilanne are not in rakennuspaikka, they are not in canonical either"
-      (let [rakennuspaikka (dissoc-in rakennuspaikka [:Rakennuspaikka :kaavatilanne])
+      (let [rakennuspaikka (util/dissoc-in rakennuspaikka [:Rakennuspaikka :kaavatilanne])
             result (first (get-bulding-places [rakennuspaikka] application-rakennuslupa))]
 
         (get-in result [:Rakennuspaikka]) => truthy
@@ -824,7 +828,7 @@
         MuuTunnus (:MuuTunnus muuTunnustieto) => truthy
         kasittelynTilatieto (:kasittelynTilatieto rakennusvalvontaasia) => truthy]
     ;(clojure.pprint/pprint canonical)
-    (fact "contains nil" (contains-value? canonical nil?) => falsey)
+    (fact "contains nil" (util/contains-value? canonical nil?) => falsey)
     (fact "paasuunnitelija" paasuunnitelija => (contains {:suunnittelijaRoolikoodi "p\u00e4\u00e4suunnittelija"}))
     (fact "Osapuolien maara" (+ (count suunnittelijat) (count tyonjohtajat) (count (:osapuolitieto osapuolet))) => 8)
     (fact "rakennuspaikkojen maara" (count rakennuspaikkatiedot) => 1)

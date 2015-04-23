@@ -8,7 +8,7 @@
             [lupapalvelu.action :refer :all]
             [sade.dummy-email-server :as dummy-email-server]
             [sade.core :refer [def- now]]
-            [lupapalvelu.fixture :as fixture]
+            [lupapalvelu.fixture.core :as fixture]
             [lupapalvelu.batchrun :as batchrun]))
 
 (dummy-email-server/messages :reset true)  ;; clears inbox
@@ -64,6 +64,14 @@
                                         :street nil
                                         :lastName "TESTAA"
                                         :firstName "PORTAALIA"}})))
+
+
+(def- neighbor-non-matching-with-mark-done ; reminders not sent if authority has marked neighbor done
+  (-> neighbor-matching
+    (assoc :id "553649e9aa24e8d915b579da")
+    (update-in [:status] conj {:state "mark-done"
+                               :user nil
+                               :created (+ 100 timestamp-1-day-ago)})))
 
 (def- statement-non-matching
   {:id "525533f7e4b0138a23d8r4b4"
@@ -141,7 +149,7 @@
     :id "LP-753-2014-123456789"
     :modified timestamp-1-day-ago
     :statements [statement-non-matching]
-    :neighbors [neighbor-non-matching-with-response-given]))
+    :neighbors [neighbor-non-matching-with-response-given neighbor-non-matching-with-mark-done]))
 
 (def- reminder-application-matching-to-inforequest
   (assoc reminder-application
@@ -328,7 +336,7 @@
          (check-sent-reminder-email
            "pena@example.com"
            "Lupapiste.fi: Naapurikuja 3 - Muistutus aktiivisesta hakemuksesta"
-           "Sinulla on Lupapiste.fi-palvelussa aktiivinen lupahakemus")
+           "Sinulla on Lupapiste-palvelussa aktiivinen lupahakemus")
          )))
 
    (fact "the \"reminder-sent\" timestamp already exists"
@@ -343,7 +351,7 @@
        (check-sent-reminder-email
          "pena@example.com"
          "Lupapiste.fi: Naapurikuja 3 - Muistutus aktiivisesta hakemuksesta"
-         "Sinulla on Lupapiste.fi-palvelussa aktiivinen lupahakemus")
+         "Sinulla on Lupapiste-palvelussa aktiivinen lupahakemus")
        )))
 
  )

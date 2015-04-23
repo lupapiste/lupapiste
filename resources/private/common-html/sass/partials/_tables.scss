@@ -16,9 +16,16 @@ th {
 
 tr {
   background: white;
-  border-bottom: 1px solid darken($lp-light-grey, 5%);;
+  border-bottom: 1px solid darken($lp-light-grey, 5%);
   &:nth-child(even) {
     background: darken($lp-light-grey, .5%);
+  }
+  &:hover {
+    background-color: lighten($lp-orange, 40%);
+    &:active {
+      background-color: lighten($lp-orange, 20%);
+      color: black;
+    }
   }
   &.attachment-row {
     cursor: pointer;
@@ -27,14 +34,17 @@ tr {
       text-align: right;
     }
   }
-  &.stamp-attachment-row {
+  &.attachment-multiselect-row {
     &.selected {
-      background-color: $lp-light-green;
+      background-color: lighten($lp-orange, 20%);
+      color: black;
+      &:hover {
+        background-color: lighten($lp-orange, 15%);
+        color: black;
+      }
     }
-    &:hover {
-      background-color: $lp-light-green;
-    }
-    td.attachment-file {
+
+    td.attachment-file-info {
       span.attachment-file-name {
         display: block;
       }
@@ -129,12 +139,20 @@ table.attachments-template-table {
         float: right;
       }
     }
+    &.attachment-type-group, &.attachment-type-id {
+      max-width: 150px;
+      word-wrap: break-word;
+    }
     &.attachment-help-info {
       max-width: 200px;
       word-wrap: break-word;
     }
-    &.attachment-file-info {
+    &.attachment-file-info, &.attachment-file-changed {
       max-width: 230px;
+      word-wrap: break-word;
+    }
+    &.attachment-version-info {
+      max-width: 60px;
       word-wrap: break-word;
     }
   }

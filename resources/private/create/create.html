@@ -20,8 +20,8 @@
 
   <section class="page container" id="create-part-2">
     <h1 data-bind="ltext: 'newRequest.descTitle'"></h1>
-    <span class="icon info-big right-align"></span>
     <p data-bind="ltext: 'newRequest.descInfo'" class="create-info-text"></p>
+    <span class="icon info-big right-align" style="vertical-align: top"></span>
 
     <div class="operation-tree tree-control"></div>
 
@@ -35,10 +35,12 @@
       <p class="tab-info" data-bind="ltext: 'newRequest.create.desc'"></p>
       <form class="tree-intend">
         <h3 data-bind="ltext: 'newRequest.messageTitle'"></h3>
+        <p data-bind="ltext: 'newRequest.inforequestMessage'"></p>
         <textarea
             class="form-input tree-width"
-            data-bind="attr: {placeholder: loc('newRequest.inforequestMessage')}, textInput: message"
+            data-bind="textInput: message"
             rows="3"
+            autofocus="autofocus"
             data-test-id="create-inforequest-message">
         </textarea>
         <button
@@ -122,14 +124,14 @@
       </div>
 
       <div data-bind="visible: !needMorePrevPermitInfo()">
-        <label data-bind="ltext: 'prev-permit-label-municipality'" class="form-label" for="prev-permit-municipality"></label>
-        <select data-bind="options: municipalities.municipalitiesWithBackendSystem,
-                           optionsText: function(m) { return loc(['municipality', m.id]); },
+        <label data-bind="ltext: 'prev-permit-label-organization'" class="form-label" for="prev-permit-organization-select"></label>
+        <select id="prev-permit-organization-select" data-test-id="test-prev-permit-organization-select"
+                class="form-select form-input combobox"
+                data-bind="options: organizationOptions,
+                           optionsText: function(org) { return util.getIn(org, ['name', loc.getCurrentLanguage()]) || org.name.fi; },
                            optionsValue: 'id',
-                           value: municipalityCode,
-                           optionsCaption: loc('choose')"
-                id="prev-permit-municipality-select" data-test-id="test-prev-permit-municipality-select"
-                class="form-select form-input combobox">
+                           value: selectedPrevPermitOrganization,
+                           optionsCaption: loc('choose')">
         </select>
       </div>
 

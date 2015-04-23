@@ -2,7 +2,7 @@
   (:require [monger.operators :refer :all]
             [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]]
             [clojure.walk :as walk]
-            [sade.util :refer [dissoc-in postwalk-map strip-nils abs]]
+            [sade.util :refer [dissoc-in postwalk-map strip-nils abs] :as util]
             [sade.core :refer [def-]]
             [sade.strings :as ss]
             [lupapalvelu.migration.core :refer [defmigration]]
@@ -14,7 +14,8 @@
             [lupapalvelu.application :as a]
             [lupapalvelu.application-meta-fields :as app-meta-fields]
             [lupapalvelu.operations :as op]
-            [sade.env :as env]))
+            [sade.env :as env]
+            [sade.excel-reader :as er]))
 
 (defn drop-schema-data [document]
   (let [schema-info (-> document :schema :info (assoc :version 1))]
@@ -429,10 +430,6 @@
                :open-inforequest-email ""}
        $set {:scope new-scopes}}))))
 
-(defmigration cleanup-activation-collection-v2
-  (let [users (map :email (mongo/select :users {} {:email 1}))]
-    (mongo/remove-many :activation {:email {$nin users}})))
-
 (defmigration generate-verdict-ids
   (doseq [application (mongo/select :applications {"verdicts.0" {$exists true}} {:verdicts 1, :attachments 1})]
     (let [verdicts (map #(assoc % :id (mongo/create-id)) (:verdicts application))
@@ -475,11 +472,6 @@
                   (:tasks application))]
       (when-not (= tasks (:tasks application))
         (mongo/update-by-id :applications (:id application) {$set {:tasks tasks}})))))
-
-(defmigration comment-roles
-  (doseq [application (mongo/select :applications {"comments.0" {$exists true}} {:comments 1})]
-    (mongo/update-by-id :applications (:id application)
-      {$set (mongo/generate-array-updates :comments (:comments application) (constantly true) :roles [:applicant :authority])})))
 
 (defmigration unify-attachment-latest-version
   (doseq [application (mongo/select :applications {"state" {$in ["sent", "verdictGiven" "complement-needed", "constructionStarted"]}} {:attachments 1})
@@ -559,7 +551,7 @@
           (mongo/update-by-id collection (:id application) {$set {:documents new-documents}}))))))
 
 (defmigration tutkinto-mapping
-  (let [mapping (sade.excel-reader/read-map "tutkinto-mapping.xlsx")]
+  (let [mapping (er/read-map "tutkinto-mapping.xlsx")]
     (doseq [collection [:applications :submitted-applications]
            application (mongo/select collection {"documents.data.patevyys.koulutus.value" {$exists true}} {:documents 1})]
      (let [id (:id application)
@@ -758,6 +750,89 @@
             :kopiolaitos-orderer-address (or (:kopiolaitos-orderer-address organization) nil)
             :kopiolaitos-orderer-email   (or (:kopiolaitos-orderer-email organization) nil)
             :kopiolaitos-orderer-phone   (or (:kopiolaitos-orderer-phone organization) nil)}})))
+
+(def known-good-domains #{"luukku.com" "suomi24.fi" "turku.fi" "kolumbus.fi"
+                          "gmail.fi" "gmail.com" "aol.com" "sweco.fi" "me.com"
+                          "hotmail.com" "fimnet.fi" "hotmail.fi"
+                          "welho.com" "parkano.fi" "rautjarvi.fi" "lupapiste.fi"
+                          "elisanet.fi" "elisa.fi" "yit.fi" "jarvenpaa.fi" "jippii.fi"})
+
+(defmigration cleanup-activation-collection-v3
+  (let [active-emails (map :email (mongo/select :users {:enabled true, :role "applicant"} {:email 1}))]
+    (mongo/remove-many :activation {:email {$in active-emails}}))
+  (doseq [{:keys [id email]} (mongo/select :activation)]
+    (let [known-domain (known-good-domains (ss/suffix email "@"))]
+      (when (or (.endsWith email ".f") (and (not known-domain) (not (sade.dns/valid-mx-domain? email))))
+       (mongo/remove :activation id)))))
+
+(defmigration comment-roles-v2
+  (update-applications-array
+    :comments
+    #(if (= (:roles %) ["applicant" "authority"]) (assoc % :roles [:applicant :authority :oirAuthority]) %)
+    {"comments.0" {$exists true}, :openInfoRequest true}))
+
+(defmigration select-all-operations-for-organizatio-if-none-selected
+  (let [organizations (mongo/select :organizations {$or [{:selected-operations {$size 0}},
+                                                         {:selected-operations {$exists false}},
+                                                         {:selected-operations nil}]})]
+       (doseq [organization organizations]
+         (let [org-permit-types (set (map :permitType (:scope organization)))
+               operations (map first (filter (fn [[_ v]] (org-permit-types (name (:permit-type v))))  op/operations))]
+              (mongo/update-by-id :organizations (:id organization)
+                                  {$set {:selected-operations operations}})))
+    ))
+
+(defmigration user-organization-cleanup
+  {:apply-when (pos? (mongo/count :users {:organization {$exists true}}))}
+  (mongo/update-by-query :users {:organization {$exists true}} {$unset {:organization 0}}))
+
+(defmigration rename-foreman-competence-documents
+  {:apply-when (pos? (mongo/count :applications {:documents {$elemMatch {"schema-info.name" {$regex #"^tyonjohtaja"}
+                                                                         "data.patevyys"    {$exists true}}}}))}
+  (update-applications-array
+    :documents
+    (fn [doc]
+      (if (re-find #"^tyonjohtaja" (-> doc :schema-info :name))
+        (update-in doc [:data] clojure.set/rename-keys {:patevyys :patevyys-tyonjohtaja})
+        doc))
+    {"documents.schema-info.name" {$regex #"^tyonjohtaja"}}))
+
+(defmigration rename-suunnittelutarveratkaisun-lisaosa-changed-fields
+  {:apply-when (pos? (mongo/count :applications {$or [{"documents.data.vaikutukset_yhdyskuntakehykselle.etaisyyys_alakouluun" {$exists true}}
+                                                      {"documents.data.vaikutukset_yhdyskuntakehykselle.etaisyyys_ylakouluun" {$exists true}}]}))}
+  (update-applications-array
+    :documents
+    (fn [doc]
+      (if (= (-> doc :schema-info :name) "suunnittelutarveratkaisun-lisaosa")
+        (update-in doc [:data :vaikutukset_yhdyskuntakehykselle]
+                   clojure.set/rename-keys {:etaisyyys_alakouluun :etaisyys_alakouluun :etaisyyys_ylakouluun :etaisyys_ylakouluun})
+        doc))
+    {"documents.schema-info.name" "suunnittelutarveratkaisun-lisaosa"}))
+
+(defmigration create-transfered-to-backing-system-transfer-entry
+  (doseq [collection [:applications :submitted-applications]
+          application (mongo/select collection {$and [{:transfers {$not {$elemMatch {:type "exported-to-backing-system"}}}}
+                                                      {:sent {$ne nil}}]})]
+    (mongo/update-by-id collection (:id application)
+                        {$push {:transfers {:type "exported-to-backing-system"
+                                            :timestamp (:sent application)}}})))
+
+(defn- change-patevyys-muu-key [doc]
+  (let [koulutusvalinta-path             [:data :patevyys             :koulutusvalinta :value]
+        tyonjohtaja-koulutusvalinta-path [:data :patevyys-tyonjohtaja :koulutusvalinta :value]]
+    (cond
+     (= "muu" (get-in doc koulutusvalinta-path))             (assoc-in doc koulutusvalinta-path "other")
+     (= "muu" (get-in doc tyonjohtaja-koulutusvalinta-path)) (assoc-in doc tyonjohtaja-koulutusvalinta-path "other")
+     :else doc)))
+
+(defmigration patevyys-muu-key-to-other
+  {:apply-when (pos? (mongo/count :applications {:documents {$elemMatch {$or [{:data.patevyys.koulutusvalinta.value "muu"}
+                                                                              {:data.patevyys-tyonjohtaja.koulutusvalinta.value "muu"}]}}}))}
+  (update-applications-array
+    :documents
+    change-patevyys-muu-key
+    {:documents {$elemMatch {$or [{:data.patevyys.koulutusvalinta.value "muu"}
+                                  {:data.patevyys-tyonjohtaja.koulutusvalinta.value "muu"}]}}}))
 
 ;;
 ;; ****** NOTE! ******

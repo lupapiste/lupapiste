@@ -2,7 +2,7 @@
   (:require [clojure.string :as s]
             [monger.operators :refer :all]
             [clojure.data.zip.xml :refer [xml-> text]]
-            [lupapalvelu.i18n :refer [*lang* with-lang]]
+            [lupapalvelu.i18n :as i18n]
             [monger.query :as q]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.wfs :as wfs]))
@@ -46,12 +46,11 @@
   (map
     (comp (fn [r] (dissoc r :_id)) (set-kind :poi))
     (q/with-collection "poi"
-      (q/find {:name {$regex (str \^ (s/lower-case poi))}
-               :lang *lang*})
+      (q/find {:name {$regex (str \^ (s/lower-case poi))}})
       (q/sort (array-map :name 1 :priority 1))
       (q/limit max-entries))))
 
-(defn municipality-prop [] (if (= *lang* "sv") "oso:kuntanimiSwe" "oso:kuntanimiFin"))
+(defn municipality-prop [] (if (= i18n/*lang* "sv") "oso:kuntanimiSwe" "oso:kuntanimiFin"))
 
 (defn search-street [street]
   (map

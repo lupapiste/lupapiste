@@ -97,11 +97,16 @@ var util = (function($) {
 
   $.fn.ajaxMask = function(on) { return on ? this.ajaxMaskOn() : this.ajaxMaskOff(); };
 
+  function autofocus(baseElem$) {
+    var base$ = baseElem$ || $("body");
+    return base$.find("[autofocus]:enabled:visible:first").focus();
+  }
+
   function isNum(s) {
     return s && s.match(/^\s*\d+\s*$/) !== null;
   }
 
-  function getIn(m, keyArray) {
+  function getIn(m, keyArray, defaultValue) {
     if (m && keyArray && keyArray.length > 0) {
       var key = keyArray[0];
       if (m.hasOwnProperty(key)) {
@@ -109,10 +114,10 @@ var util = (function($) {
         if (keyArray.length === 1) {
           return val;
         }
-        return getIn(val, keyArray.splice(1, keyArray.length - 1));
+        return getIn(val, keyArray.splice(1, keyArray.length - 1), defaultValue);
       }
     }
-    return undefined;
+    return defaultValue;
   }
 
     function locKeyFromDocPath(pathStr) {
@@ -178,6 +183,19 @@ var util = (function($) {
     return isValidFinnishOVT(ovt) || isValidNonFinnishOVT(ovt);
   }
 
+  function extractRequiredErrors(errors) {
+    var errs = _.map(errors, function(errArray) {
+      return _.filter(errArray, function(err) {
+        var ret = _.includes(err.result, "illegal-value:required");
+        return ret;
+      });
+    });
+    errs = _.filter(errs, function(errArray) {
+      return errArray.length > 0;
+    });
+    return errs;
+  }
+
   return {
     zeropad:             zeropad,
     fluentify:           fluentify,
@@ -196,12 +214,14 @@ var util = (function($) {
     buildingName: buildingName,
     nop:          nop,
     constantly:   function(value) { return function() { return value; }; },
+    autofocus:    autofocus,
     isNum:        isNum,
     getIn:        getIn,
         locKeyFromDocPath: locKeyFromDocPath,
     getDocumentOrder: getDocumentOrder,
     isPartyDoc: isPartyDoc,
-    isNotPartyDoc: isNotPartyDoc
+    isNotPartyDoc: isNotPartyDoc,
+    extractRequiredErrors: extractRequiredErrors
   };
 
 })(jQuery);

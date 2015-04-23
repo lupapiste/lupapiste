@@ -5,7 +5,7 @@
             [sade.core :refer [now]]
             [sade.strings :as ss]
             [sade.util :as util]
-            [lupapalvelu.i18n :refer [with-lang loc]]
+            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.document.canonical-common :refer :all]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.schemas :as schemas]))
@@ -112,7 +112,7 @@
 
 (defn- get-toimenpiteen-kuvaus [doc]
   ;Uses fi as default since krysp uses finnish in enumeration values
-  {:kuvaus (with-lang "fi" (loc (str "operations." (-> doc :schema-info :op :name))))})
+  {:kuvaus (i18n/localize "fi" (str "operations." (-> doc :schema-info :op :name)))})
 
 (defn get-uusi-toimenpide [doc application]
   (let [toimenpide (:data doc)]
@@ -326,7 +326,9 @@
                                                                                      building-canonical)]
                                                             {:KatselmuksenRakennus building-canonical}) buildings)}) ; v2.1.3
                       (when (:kuvaus huomautukset) {:huomautukset {:huomautus (reduce-kv
-                                                                                (fn [m k v] (assoc m k (util/to-xml-date-from-string v)))
+                                                                                (fn [m k v] (if-not (ss/blank? v)
+                                                                                              (assoc m k (util/to-xml-date-from-string v))
+                                                                                              m))
                                                                                 (select-keys huomautukset [:kuvaus :toteaja])
                                                                                 (select-keys huomautukset [:maaraAika :toteamisHetki]))}})))
         canonical {:Rakennusvalvonta

@@ -2,8 +2,7 @@
 <html>
 <body>
   <section class="page container" id="neighbors">
-
-    <div id="neighbors-content">
+    <div id="neighbors-content" data-bind="if: lupapisteApp.models.rootVMO.currentPage() === 'neighbors'">
 
       <div class="map map-large" id="neighbors-map"></div>
 
@@ -47,119 +46,6 @@
       <button data-bind="click: $root.done, ltext: 'neighbors.done'" data-test-id="manager-neighbors-done" class="btn"></button>
 
     </div>
-
-    <div id="dialog-select-owners" class="window autosized">
-      <div class="dialog-header">
-        <p data-bind="ltext: 'neighbor.owners.title'"></p>
-        <p class="dialog-close close">X</p>
-      </div>
-      <div class="dialog-content">
-        <div>
-          <h3 data-bind="visible: isPropertyIdAvailable()">
-            <span data-bind="ltext: 'neighbors.edit.propertyId'"></span>:
-            <span data-bind="propertyId: propertyId"></span>
-          </h3>
-          <span data-bind="text: loc(['neighbors.owners.status', status()])"></span>
-          <img data-bind="visible: isSearching()" src="/img/ajax-loader-16.gif" alt=""/>
-        </div>
-        <div class="scrolling-content">
-          <table class="application-neighbors property-owners">
-            <thead>
-              <tr>
-                <th><input class="form-input" type="checkbox" data-test-id="select-all-owners" data-bind="checked: allSelected" /></th>
-                <th data-bind="ltext: 'neighbors.owner'"></th>
-                <th data-bind="ltext: 'neighbors.owner.address'"></th>
-                <th data-bind="ltext: 'neighbors.owner.type'"></th>
-              </tr>
-            </thead>
-            <tbody data-bind="foreach: owners">
-              <tr>
-                <td>
-                  <input class="form-input" type="checkbox" data-bind="value: $index, checked: $parent.selectedOwners, attr: {'data-test-id' : 'select-owner-' + $index()}" />
-                </td>
-                <td>
-                  <!-- ko if: nameOfDeceased -->
-                  <span data-bind="text: nameOfDeceased" class="owner-nameOfDeceased"></span>
-                  -<span data-bind="text: loc('neighbors.owner.type.kuolinpesa')"></span>
-                  <br/>
-                  <!-- /ko -->
-
-                  <span data-bind="text: name" class="owner-name"></span>
-
-                  <!-- ko if: businessID -->
-                  (<span data-bind="text: businessID" class="owner-businessID"></span>)
-                  <!-- /ko -->
-                </td>
-                <td>
-                  <span data-bind="text: street" class="owner-street"></span>
-                  <span data-bind="text: zip" class="owner-zip"></span>
-                  <span data-bind="text: city" class="owner-city"></span>
-                </td>
-                <td data-bind="text: loc(['neighbors.owner.type', type])">
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <button data-bind="click: $root.addSelectedOwners, enable: status() === statusSelectOwners && selectedOwners().length > 0, ltext: 'neighbors.select.ok'"
-                class="btn btn-primary btn-dialog" data-test-id="neighbors.select.ok"></button>
-        <button data-bind="ltext: 'neighbors.edit.cancel'" class="btn btn-dialog close" data-test-id="neighbors.edit.cancel"></button>
-      </div>
-    </div>
-
-    <div id="dialog-edit-neighbor" class="window autosized">
-      <div class="dialog-header">
-        <p data-bind="ltext: 'neighbors.edit.title'"></p>
-        <p class="dialog-close close">X</p>
-      </div>
-      <div class="dialog-content">
-
-        <div>
-          <span data-bind="text: loc(['neighbors.edit.status', status()])"></span>
-        </div>
-        <form>
-          <label data-bind="ltext: 'neighbors.edit.propertyId'" class="form-label" for="neighbors.edit.propertyId"></label>
-          <input data-bind="textInput: editablePropertyId, enable: status() > statusInit, css: {'error': !propertyIdOk()}"
-                 class="form-input text long" type="text" id="neighbors.edit.propertyId" data-test-id="neighbors.edit.propertyId" />
-
-          <!-- ko if: type -->
-          <label data-bind="ltext: 'neighbors.owner.type'" class="form-label" for="neighbors.owner.type"></label>
-          <input data-bind="value: typeLabel(), enable: false" class="form-input text long" type="text" id="neighbors.owner.type" data-test-id="neighbors.edit.type" readonly/>
-          <!-- /ko -->
-
-          <!-- ko if: nameOfDeceased -->
-          <label data-bind="ltext: 'neighbors.owner.nameOfDeceased'" class="form-label" for="neighbors.owner.nameOfDeceased"></label>
-          <input data-bind="value: nameOfDeceased, enable: false" class="form-input text long" type="text" id="neighbors.owner.nameOfDeceased" data-test-id="neighbors.edit.nameOfDeceased" readonly/>
-          <!-- /ko -->
-
-          <!-- ko if: businessID -->
-          <label data-bind="ltext: 'neighbors.owner.businessID'" class="form-label" for="neighbors.owner.businessID"></label>
-          <input data-bind="value: businessID, enable: false" class="form-input text long" type="text" id="neighbors.owner.businessID" data-test-id="neighbors.edit.businessID" readonly/>
-          <!-- /ko -->
-
-          <label data-bind="ltext: 'neighbors.owner.name'" class="form-label" for="neighbors.owner.name"></label>
-          <input data-bind="value: name, enable: status() > statusInit" class="form-input text long" type="text" id="neighbors.owner.name" data-test-id="neighbors.edit.name"/>
-
-          <label data-bind="ltext: 'neighbors.owner.address.street'" class="form-label" for="neighbors.owner.address.street"></label>
-          <input data-bind="value: street, enable: status() > statusInit" class="form-input text long" type="text" id="neighbors.owner.address.street" />
-
-          <label data-bind="ltext: 'neighbors.owner.address.zip'" class="form-label" for="neighbors.owner.address.zip"></label>
-          <input data-bind="value: zip, enable: status() > statusInit" class="form-input text long" type="text" id="neighbors.owner.address.zip" />
-
-          <label data-bind="ltext: 'neighbors.owner.address.city'" class="form-label" for="neighbors.owner.address.city"></label>
-          <input data-bind="value: city, enable: status() > statusInit" class="form-input text long" type="text" id="neighbors.owner.address.city" />
-
-          <label data-bind="ltext: 'neighbors.owner.email'" class="form-label" for="neighbors.owner.email"></label>
-          <input data-bind="textInput: email, enable: status() > statusInit, css: {'error': !emailOk()}"
-                 class="form-input text long" type="text" id="neighbors.owner.email" data-test-id="neighbors.edit.email" />
-        </form>
-
-        <button data-bind="click: save, disable: disabled, ltext: 'neighbors.edit.ok'" class="btn btn-primary btn-dialog" data-test-id="neighbors.edit.ok"></button>
-        <button data-bind="ltext: 'neighbors.edit.cancel'" class="btn btn-dialog close"></button>
-
-      </div>
-    </div>
-
   </section>
 
 </body>

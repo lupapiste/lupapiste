@@ -46,7 +46,7 @@
 
 (def tyo-aika-for-jatkoaika
   (body
-    {:name "tyoaika-alkaa-pvm" :type :date :readonly true :required true}  ;; alkuPvm / loppuPvm
+    {:name "tyoaika-alkaa-pvm" :type :date :required true}  ;; alkuPvm / loppuPvm
     {:name "tyoaika-paattyy-pvm" :type :date :required true}))
 
 (def hankkeen-kuvaus-jatkoaika
@@ -73,7 +73,8 @@
            :type :party
            :removable false
            :repeating false
-           :order 62}
+           :order 62
+           :subtype :maksaja}
     :body yleiset-alueet-maksaja}
    {:info {:name "tyoaika"                                                 ;; alkuPvm / loppuPvm
            :type :group

@@ -154,7 +154,7 @@
 ;; Web stuff
 ;;
 
-(defn session-id [] (get-in (request/ring-request) [:cookies "ring-session" :value]))
+(defn session-id [] (get-in (request/ring-request) [:session :id]))
 
 (defn- field [[k v]]
   (form/hidden-field k v))
@@ -212,7 +212,7 @@
    "ERROR" "Kutsu oli virheellinen."
    "FAILURE" "Kutsun palveleminen ep\u00e4onnistui jostain muusta syyst\u00e4 kuin siit\u00e4, ett\u00e4 taustapalvelu hylk\u00e4si suorittamisen."})
 
-(defpage [:any "/api/vetuma/:status"] {status :status}
+(defpage [:any ["/api/vetuma/:status" :status #"(cancel|error)"]] {status :status}
   (let [params       (:form-params (request/ring-request))
         status-param (get params "STATUS")
         trid         (get params "TRID")
@@ -222,8 +222,7 @@
 
     (case status
       "cancel" (info "Vetuma cancel")
-      "error"  (error "Vetuma failure, STATUS =" status-param "=" (get error-status-codes status-param) "Request parameters:" (keys-as-keywords params))
-      (error "Unknown status:" status))
+      "error"  (error "Vetuma failure, STATUS =" status-param "=" (get error-status-codes status-param) "Request parameters:" (keys-as-keywords params)))
 
     (response/redirect return-uri)))
 

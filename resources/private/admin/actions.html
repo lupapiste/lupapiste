@@ -4,12 +4,20 @@
     <section class="page" id="actions">
       <div class="container">
 
-        <h2>Toiminnot</h2>
+        <h2>Toiminnot joita ei ole testattu</h2>
+
+        <p>
+        <span data-bind="text: uncalledActions" data-test-id="uncalled-actions"></span>
+        (<span data-bind="text: uncalledActionsCount" data-test-id="uncalled-actions-count"></span>)
+        </p>
+
+        <h2>Kaikki toiminnot</h2>
         <table>
           <thead>
             <tr>
               <th>toiminto</th>
               <th>tyyppi</th>
+              <th>kutsut</th>
               <th>kuvaus</th>
               <th>roolit</th>
               <th>extra-roolit</th>
@@ -24,13 +32,14 @@
             <tr>
               <td data-bind="text: name"></td>
               <td data-bind="text: type"></td>
+              <td data-bind="text: $data['call-count']"></td>
               <td>
                 <!-- ko if: $data.description -->
                   <span data-bind="text: description"></span>
                 <!-- /ko -->
               </td>
-              <td  data-bind="attr: {'class' : $data.roles[0] === 'anonymous' ? 'btn-decline' : ''}">
-                <ul data-bind="foreach: roles">
+              <td  data-bind="attr: {'class' : $data['user-roles'][0] === 'anonymous' ? 'btn-decline' : ''}">
+                <ul data-bind="foreach: $data['user-roles']">
                   <li data-bind="text: $data"></li>
                 </ul>
               </td>

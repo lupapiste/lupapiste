@@ -10,7 +10,7 @@ legend {
 // :focus   - Tell the user "Hello, you've selected me!"
 //
 // Styleguide 2.1
-[type="text"], [type="email"], [type="tel"], [type="url"], [type="password"], select, textarea {
+[type="text"], [type="email"], [type="tel"], [type="url"], [type="password"], [type="time"], select, textarea {
   background: #fff;
   border: 1px solid #c9c9c9;
   font-size: 0.875em;
@@ -37,8 +37,11 @@ legend {
     -webkit-box-shadow: inset 0 2px 4px darken($lp-light-grey, 20%), 0 1px 0 #fff;
   }
   // newbies
+  &.source-value-changed {
+    border: 2px solid $lp-green;
+  }
   &.error {
-    border-color:red;
+    border-color: red;
     border-width: 3px;
   }
   &.warn {
@@ -95,20 +98,47 @@ input[readonly], textarea[readonly] {
   display: none;
   top: 20px;
   right: 8px;
-  padding: $marginS $marginS $marginS $marginL;
-  @include spite-bg;
+  padding: $marginS;
+  color: $grey-text;
   background-color: white;
   border: 1px solid $lp-light-grey;
-  border-radius: 4px;
   box-shadow: 1px 1px 2px $lp-dark-grey;
+  white-space: nowrap;
+
+  .icon {
+    @include spite-bg;
+    display: none;
+    height: 24px;
+    width: 24px;
+    vertical-align: top;
+    margin: 0;
+  }
+  .text {
+    display: inline-block;
+    vertical-align: top;
+  }
+  &.form-input-saved {
+    .icon {
+      background-position: 6px -2496px;
+      display: inline-block;
+    }
+
+  }
+  &.form-input-warn {
+    .icon {
+      background-position: 6px -3196px;
+      display: inline-block;
+    }
+  }
+  &.form-input-err {
+    .icon {
+      background-position: 6px -2396px;
+      display: inline-block;
+    }
+  }
 }
 
 .save-indicator {
-  @include spite-bg;
-  background-position: 5px -2497px;
-  padding-left: 27px;
-  float: right;
-  display: none;
 }
 
 .errorPanel {
@@ -130,20 +160,6 @@ input[readonly], textarea[readonly] {
     }
   }
 }
-
-.form-input-saved {
-  background-position: 6px -2490px;
-}
-.form-input-warn
-{
-  background-position: 6px -3190px;
-}
-.form-input-err
-{
-  background-position: 6px -2390px;
-}
-
-
 
 .form-entry {
   display: inline-block;
@@ -239,14 +255,17 @@ input[readonly], textarea[readonly] {
   display: inline-block;
   vertical-align: bottom;
   margin: 0 $marginS 2px $marginS;
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   padding: 0;
   &.error {
     outline: 3px solid red;
   }
   &.warning {
     outline: 3px solid $lp-orange;
+  }
+  &.source-value-changed {
+    outline: 2px solid $lp-green;
   }
 }
 
@@ -407,17 +426,16 @@ input[readonly], textarea[readonly] {
     &.long {
       min-width: 480px;
     }
-    &.personSelector {
+    &.personSelector, &.companySelector {
+      display: block;
       width: auto;
       label {
         display: block;
-  }
-
+      }
       .form-input {
         display: inline-block;
       }
     }
-
   }
   .form-entry.radioGroup {
     min-height: 32px;
@@ -458,6 +476,12 @@ input[readonly], textarea[readonly] {
     td {
       text-align: center;
     }
+    tr:hover{
+      background-color: white;
+      &:nth-child(even) {
+        background: darken($lp-light-grey, .5%);
+      }
+    }
   }
 
   .form-table th:first-child {
@@ -476,7 +500,6 @@ input[readonly], textarea[readonly] {
   .form-table .form-input {
     display: inline;
     margin: 0;
-    padding: 0 6px;
   }
 
   .form-table {
@@ -495,10 +518,20 @@ input[readonly], textarea[readonly] {
     height: 28px;
     width: 28px;
     padding: 0;
-  }
 
-  .form-table .form-input-saved {
-    background-position: 4px -2494px;
+    .icon {
+      position: absolute;
+      top: 0px;
+      left: 0px;
+      padding: 0;
+      margin: 0;
+    }
+
+    .form-input-saved {
+      .icon {
+        background-position: 4px -2494px;
+      }
+    }
   }
 
   .form-table .form-entry {
@@ -560,7 +593,7 @@ input[readonly], textarea[readonly] {
 .form-help {
   min-height: 100px;
   padding: $marginS $marginL $marginS $marginS;
-  width: 300px;
+  width: 350px;
   background: $lp-dark-grey;
   color: white;
   display: none;
@@ -569,6 +602,7 @@ input[readonly], textarea[readonly] {
   left: 0;
   z-index: 11000;
   box-shadow: 2px 2px 3px $lp-dark-grey;
+  text-align: left;
   &:after {
     content: " ";
     width: 0;
@@ -726,4 +760,10 @@ foreman-history {
   th.fifth {
     width: 45%;
   }
+}
+
+.indicator-wrapper {
+  position: relative;
+  display: inline-block;
+  width: 100%;
 }

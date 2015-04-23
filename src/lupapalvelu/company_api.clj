@@ -2,7 +2,9 @@
   (:require [sade.core :refer [ok fail fail! unauthorized unauthorized!]]
             [lupapalvelu.action :refer [defquery defcommand] :as action]
             [lupapalvelu.company :as c]
-            [lupapalvelu.user :as u]))
+            [lupapalvelu.user :as u]
+            [monger.operators :refer :all]
+            [lupapalvelu.mongo :as mongo]))
 
 ;;
 ;; Company API:
@@ -25,26 +27,27 @@
 ;;
 
 (defquery company
-  {:roles [:applicant :authority]
+  {:user-roles #{:applicant :authority}
    :input-validators [validate-user-is-admin-or-company-member]
    :parameters [company]}
   [{{:keys [users]} :data}]
-  (ok :company (c/find-company! {:id company})
-      :users   (and users (c/find-company-users company))))
+  (ok :company     (c/find-company! {:id company})
+      :users       (and users (c/find-company-users company))
+      :invitations (and users (c/find-user-invitations company))))
 
 (defquery companies
-  {:roles [:applicant :authority :admin]}
+  {:user-roles #{:applicant :authority :admin}}
   [_]
   (ok :companies (c/find-companies)))
 
 (defcommand company-update
-  {:roles [:applicant]
+  {:user-roles #{:applicant}
    :input-validators [validate-user-is-admin-or-company-member]
    :parameters [company updates]}
   (ok :company (c/update-company! company updates)))
 
 (defcommand company-user-update
-  {:roles [:applicant :admin]
+  {:user-roles #{:applicant :admin}
    :parameters [user-id op value]}
   [{caller :user}]
   (let [target-user (u/get-user-by-id! user-id)]
@@ -58,12 +61,16 @@
     (ok)))
 
 (defquery company-invite-user
-  {:roles [:applicant]
+  {:user-roles #{:applicant}
    :input-validators [validate-user-is-admin-or-company-admin]
    :parameters [email]}
   [{caller :user}]
-  (let [user (u/find-user {:email email})]
+  (let [user (u/find-user {:email email})
+        tokens (c/find-user-invitations (-> caller :company :id))]
     (cond
+      (some #(= email (:email %)) tokens)
+      (ok :result :already-invited)
+
       (nil? user)
       (ok :result :not-found)
 
@@ -76,7 +83,7 @@
         (ok :result :invited)))))
 
 (defcommand company-add-user
-  {:roles [:applicant]
+  {:user-roles #{:applicant}
    :parameters [firstName lastName email]}
   [{user :user {:keys [admin]} :params}]
   (if-not (or (= (:role user) "admin")
@@ -90,7 +97,7 @@
 (defcommand company-invite
   {:parameters [id company-id]
    :states (action/all-application-states-but [:closed :canceled])
-   :roles [:applicant :authority]}
+   :user-roles #{:applicant :authority}}
   [{caller :user application :application}]
   (c/company-invite caller application company-id)
   (ok))
@@ -99,10 +106,23 @@
   {:parameters [:name :y :address1 :address2 :po :zip email]
    :input-validators [action/email-validator
                       (partial action/non-blank-parameters [:name :y])]
-   :roles [:admin]}
+   :user-roles #{:admin}}
   [{data :data}]
   (if-let [user (u/find-user {:email email, :role :applicant, :company.id {"$exists" false}})]
     (let [company (c/create-company (select-keys data [:name :y :address1 :address2 :po :zip]))]
       (u/update-user-by-email email {:company  {:id (:id company), :role :admin}})
       (ok))
     (fail :error.user-not-found)))
+
+(defcommand company-cancel-invite
+  {:parameters [tokenId]
+   :user-roles #{:applicant}
+   :input-validators [validate-user-is-admin-or-company-admin]}
+  [{:keys [created user application] :as command}]
+  (let [token (mongo/by-id :token tokenId)
+        token-company-id (get-in token [:data :company :id])
+        user-company-id (get-in user [:company :id])]
+    (if-not (= token-company-id user-company-id)
+      (fail! :forbidden)))
+  (mongo/update-by-id :token tokenId {$set {:used created}})
+  (ok))

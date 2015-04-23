@@ -121,7 +121,7 @@
 @import "views/_verdict";
 @import "views/_side_panel";
 @import "views/_company";
-@import "views/_stamping";
+@import "views/_attachment_multiselect";
 
 
 /*------------------------------------*\
@@ -214,6 +214,7 @@ div.pzbDiv {
   border: 1px solid black;
   box-shadow: 3px 4px 7px;
   font-size: 0.8em;
+  color: $color-text;
 
   p {
     margin-bottom: 4px;

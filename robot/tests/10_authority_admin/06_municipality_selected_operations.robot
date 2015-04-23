@@ -28,9 +28,9 @@ AuthAdmin removes 'Uuden rakennuksen rakentaminen' from selected operations
   # Open dialog
 
   # => (ns lupapalvelu.operations)
-  # => (count (filter (fn [[_ v]] (#{permit/R permit/P permit/YI permit/YL permit/MAL permit/VVVL permit/KT} (:permit-type v) ))  operations))
+  # => (count (filter (fn [[_ v]] (#{permit/R permit/P permit/YI permit/YL permit/MAL permit/VVVL permit/KT permit/MM} (:permit-type v) ))  operations))
   # TODO 68 when tyonjohtaja-v2 is removed
-  Wait until  Xpath Should Match X Times  //section[@id='admin']//table[@data-test-id='organization-selected-operations']//tr[@class='sel-op-row']  71
+  Wait until  Xpath Should Match X Times  //section[@id='admin']//table[@data-test-id='organization-selected-operations']//tr[@class='sel-op-row']  77
 
   Click by test id  authadmin-edit-selected-operations
 
@@ -74,5 +74,5 @@ Go to operation tree
   Wait Until  List Selection Should Be  xpath=//div[@id='popup-id']//select[@data-test-id='create-municipality-select']  ${municipality}
   Execute Javascript  $("div[id='popup-id'] input[data-test-id='create-address']").val("${address}").change();
   Set animations off
-  Click enabled by test id  create-continue
+  Click by test id  create-continue
 

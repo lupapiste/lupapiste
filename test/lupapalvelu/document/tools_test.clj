@@ -32,14 +32,11 @@
                         :instrument {:value nil}}}}})
 
 (fact "simple schema"
-  (-> schema
-    (create nil-values)
-    flattened) => expected-simple-document)
+  (create-unwrapped-data schema nil-values) => expected-simple-document)
 
 (fact "simple schema with wrapped values"
   (-> schema
-    (create nil-values)
-    flattened
+    (create-unwrapped-data nil-values)
     (wrapped :value)) => expected-wrapped-simple-document)
 
 ;;

@@ -82,8 +82,11 @@
                            :postinumero "04200"
                            :postitoimipaikannimi "KERAVA"}
                   :luokitus {:energialuokka "10"
-                             :paloluokka "P1 / P2"}
-                  :kaytto {:kayttotarkoitus "039 muut asuinkerrostalot"}
+                             :paloluokka "P1 / P2"
+                             :energiatehokkuusluku ""
+                             :energiatehokkuusluvunYksikko nil}
+                  :kaytto {:kayttotarkoitus "039 muut asuinkerrostalot"
+                           :rakentajaTyyppi nil}
                   :mitat {:kerrosluku "5"
                           :kerrosala "1785"
                           :kokonaisala "2682"
@@ -91,9 +94,12 @@
                           :tilavuus "8240"}
                   :rakenne {:julkisivu "betoni"
                             :kantavaRakennusaine "betoni"
-                            :rakentamistapa "elementti"}
+                            :rakentamistapa "elementti"
+                            :muuMateriaali ""
+                            :muuRakennusaine ""}
                   :lammitys {:lammitystapa "vesikeskus"
-                             :lammonlahde  "kauko tai aluel\u00e4mp\u00f6"}
+                             :lammonlahde  "kauko tai aluel\u00e4mp\u00f6"
+                             :muu-lammonlahde ""}
                   :varusteet {:kaasuKytkin false
                               :lamminvesiKytkin true
                               :sahkoKytkin true
@@ -102,13 +108,16 @@
                               :viemariKytkin true
                               :hissiKytkin false
                               :koneellinenilmastointiKytkin true
-                              :aurinkopaneeliKytkin false}}))
+                              :aurinkopaneeliKytkin false
+                              :liitettyJatevesijarjestelmaanKytkin false
+                              :saunoja ""}}))
 
         (fact "there are 21 huoneisto" (count (keys huoneistot)) => 21)
 
         (fact "first huoneisto is mapped correctly"
           (:0 huoneistot) => {:huoneistonumero "001"
                               :porras "A"
+                              :jakokirjain ""
                               :huoneistoTyyppi "asuinhuoneisto"
                               :huoneistoala "52", :huoneluku "2"
                               :keittionTyyppi "keittokomero"
@@ -123,30 +132,38 @@
         (fact "first omistajat is mapped correctly"
           (:0 omistajat) =>
                     {:_selected "yritys"
-                     :yritys {:liikeJaYhteisoTunnus "1234567-1"
+                     :henkilo {:henkilotiedot {:etunimi "", :hetu nil, :sukunimi "", :turvakieltoKytkin false}
+                               :osoite {:katu "", :postinumero "", :postitoimipaikannimi ""}
+                               :userId nil
+                               :yhteystiedot {:email "", :puhelin ""}}
+                     :muu-omistajalaji "", :omistajalaji nil
+                     :yritys {:companyId nil
+                              :liikeJaYhteisoTunnus "1234567-1"
                               :osoite {:katu "Testikatu 1 A 11477"
                                        :postinumero "00380"
                                        :postitoimipaikannimi "HELSINKI"}
-                              :yritysnimi "Testiyritys 11477"}})))))
+                              :yritysnimi "Testiyritys 11477"
+                              :yhteyshenkilo {:henkilotiedot {:etunimi "", :sukunimi "", :turvakieltoKytkin false}
+                                              :yhteystiedot {:email "", :puhelin ""}}}})))))
 
 (fact "converting rakval verdict krysp to lupapiste domain model, using lupapistetunnus"
-  (let [xml (rakval-application-xml local-krysp id false false)]
+  (let [xml (rakval-application-xml local-krysp id :application-id false)]
     xml => truthy
     (count (->verdicts xml ->standard-verdicts)) => 2))
 
 (fact "converting rakval verdict krysp to lupapiste domain model, using kuntalupatunnus"
-  (let [xml (rakval-application-xml local-krysp kuntalupatunnus false true)]
+  (let [xml (rakval-application-xml local-krysp kuntalupatunnus :kuntalupatunnus false)]
     xml => truthy
     (count (->verdicts xml ->standard-verdicts)) => 1))
 
 (fact "converting poikkeamis verdict krysp to lupapiste domain model"
-  (let [xml (poik-application-xml local-krysp id false false)]
+  (let [xml (poik-application-xml local-krysp id :application-id false)]
     xml => truthy
     (count (->verdicts xml ->standard-verdicts)) => 1))
 
 
 (fact "converting ya-verdict krysp to lupapiste domain model"
-  (let [xml (ya-application-xml local-krysp id false false)]
+  (let [xml (ya-application-xml local-krysp id :application-id false)]
     xml => truthy
     (count (->verdicts xml ->simple-verdicts)) => 1))
 
@@ -158,7 +175,7 @@
       (fact "Application XML getter is set up" getter => fn?)
       (fact "Verdict reader is set ip" reader => fn?)
 
-      (let [xml (getter local-krysp id false false)
+      (let [xml (getter local-krysp id :application-id false)
             cases (->verdicts xml reader)]
         (fact "xml is parsed" cases => truthy)
         (fact "xml has 1 cases" (count cases) => 1)

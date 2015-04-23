@@ -29,9 +29,21 @@
               :private "SECRET"}]
     (fact (summary user) => (just (dissoc user :private)))))
 
+(fact "virtual-user?"
+  (virtual-user? {:role "authority"})  => false
+  (virtual-user? {:role :authorityAdmin})   => false
+  (virtual-user? {:role "oirAuthority"}) => true
+  (virtual-user? {:role :oirAuthority}) => true
+  (virtual-user? {:role "applicant"})  => false
+  (virtual-user? {:role "admin"})  => false
+  (virtual-user? {:role "authorityAdmin"})  => false
+  (virtual-user? {})                   => false
+  (virtual-user? nil)                  => false)
+
 (fact authority?
   (authority? {:role "authority"})  => truthy
   (authority? {:role :authority})   => truthy
+  (authority? {:role :oirAuthority}) => truthy
   (authority? {:role "applicant"})  => falsey
   (authority? {})                   => falsey
   (authority? nil)                  => falsey)
@@ -75,7 +87,7 @@
   (fact (users-for-datatables-base-query {:role :admin} {})                          => {})
   (fact (users-for-datatables-base-query {:role :admin} {:organizations ["a" "b"]})  => {:organizations {$in ["a" "b"]}})
   (fact (users-for-datatables-base-query {:role :admin} {:organizations ["a" "b"]})  => {:organizations {$in ["a" "b"]}})
-  
+
   (fact (users-for-datatables-base-query {:organizations ["a" "b"]} {:organizations ["a"]})           => (contains {:organizations {$in ["a"]}}))
   (fact (users-for-datatables-base-query {:organizations ["a" "b"]} {:organizations ["b"]})           => (contains {:organizations {$in ["b"]}}))
   (fact (users-for-datatables-base-query {:organizations ["a" "b"]} {:organizations ["a" "b"]})       => (contains {:organizations {$in ["a" "b"]}}))
@@ -101,21 +113,21 @@
     (provided (mongo/select-one :users {:email "email"}) => {:id ..id.. :email "email" :private ..private..}))
 
 (facts get-user-with-password
-  
+
   (fact happy-case
     (get-user-with-password "username" "password") => {:id ..id.. :enabled true}
       (provided (mongo/select-one :users {:username "username"}) => {:id ..id.. :enabled true :private {:password "from-db"}}
                 (security/check-password "password" "from-db") => true))
-    
+
   (fact wrong-password
     (get-user-with-password "username" "password") => nil
       (provided (mongo/select-one :users {:username "username"}) => {:id ..id.. :enabled true :private {:password "from-db"}}
                 (security/check-password "password" "from-db") => false))
-  
+
   (fact disabled-user
     (get-user-with-password "username" "password") => nil
       (provided (mongo/select-one :users {:username "username"}) => {:id ..id.. :enabled false :private {:password "from-db"}}))
-  
+
   (fact unknown-user
     (get-user-with-password "username" "password") => nil
       (provided (mongo/select-one :users {:username "username"}) => nil)))
@@ -142,16 +154,16 @@
   (applicationpage-for "admin")          => "admin")
 
 (facts user-in-role
-  
+
   (fact "role is overridden"
     (user-in-role {:id 1 :role :applicant} :reader) => {:id 1 :role :reader})
-  
+
   (fact "takes optional name & value parameter pair"
     (user-in-role {:id 1 :role :applicant} :reader :age 16) => {:id 1 :role :reader :age 16})
-  
+
   (fact "takes optional name & value parameter pairS"
     (user-in-role {:id 1 :role :applicant} :reader :age 16 :size :L) => {:id 1 :role :reader :age 16 :size :L})
-  
+
   (fact "fails with uneven optional parameter pairs"
     (user-in-role {:id 1 :role :applicant} :reader :age) => (throws Exception)))
 

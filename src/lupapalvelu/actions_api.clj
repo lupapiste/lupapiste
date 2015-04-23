@@ -16,13 +16,13 @@
   {(:action command) (action/validate command)})
 
 (defquery actions
- {:roles       [:admin]
+ {:user-roles #{:admin}
   :description "List of all actions and their meta-data."} [_]
  (ok :actions (action/serializable-actions)))
 
 (defquery "allowed-actions"
- {:roles [:anonymous]
-  :extra-auth-roles [:any]}
+ {:user-roles #{:anonymous}
+  :user-authz-roles action/all-authz-roles}
  [{:keys [data user application]}]
  (let [results  (map validated (foreach-action user data application))
        filtered (if (env/dev-mode?)

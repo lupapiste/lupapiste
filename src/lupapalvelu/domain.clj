@@ -1,5 +1,6 @@
 (ns lupapalvelu.domain
-  (:require [taoensso.timbre :as timbre :refer [trace debug info warn warnf error fatal]]
+  (:require [clojure.set :refer [difference]]
+            [taoensso.timbre :as timbre :refer [trace debug info warn warnf error fatal]]
             [monger.operators :refer :all]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as user]
@@ -19,6 +20,7 @@
                  {$or [{:auth.id (:id user)} {:auth.id company-id}]}
                  {:auth.id (:id user)})
     :authority {$or [{:organization {$in (:organizations user)}} {:auth.id (:id user)}]}
+    :oirAuthority {:organization {$in (:organizations user)}}
     :trusted-etl {}
     (do
       (warnf "invalid role to get applications: user-id: %s, role: %s" (:id user) (:role user))
@@ -30,6 +32,7 @@
     (case (keyword (:role user))
       :applicant {:state {$nin ["canceled"]}}
       :authority {:state {$nin ["draft" "canceled"]}}
+      :oirAuthority {:state {$in ["info" "answered"]} :openInfoRequest true}
       {})))
 
 (defn- only-authority-sees [user checker items]
@@ -66,7 +69,7 @@
   {:pre [query-or-id (map? user)]}
   (let [query-id-part (if (map? query-or-id) query-or-id {:_id query-or-id})
         query-user-part (if include-canceled-apps?
-                          (update-in (application-query-for user) [:state $nin] #(util/exclude-from-sequence % ["canceled"]))
+                          (update-in (application-query-for user) [:state $nin] #(difference (set %) #{"canceled"}))
                           (application-query-for user))]
    (filter-application-content-for
      (mongo/select-one :applications {$and [query-id-part query-user-part]})
@@ -243,7 +246,10 @@
    :submitted                nil ; timestamp
    :tasks                    []
    :title                    ""
+   :transfers                []
    :urgency                  "normal"
-   :verdicts                 []})
+   :verdicts                 []
+   :tosFunction              nil
+   :metadata                 {}})
 
 

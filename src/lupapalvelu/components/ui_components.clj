@@ -1,14 +1,16 @@
 (ns lupapalvelu.components.ui-components
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
+            [clojure.java.io :as io]
             [lupapalvelu.components.core :as c]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mime :as mime]
-            [lupapalvelu.xml.krysp.validator :as validator]
+            [lupapalvelu.xml.validator :as validator]
             [sade.env :as env]
             [sade.util :as util]
             [cheshire.core :as json]
             [lupapalvelu.attachment :refer [attachment-types-osapuoli, attachment-scales, attachment-sizes]]
-            [lupapalvelu.attachment-api :refer [post-verdict-states]]))
+            [lupapalvelu.stamper :refer [file-types]]
+            [scss-compiler.core :as scss]))
 
 (def debugjs {:depends [:jquery]
               :js ["debug.js"]
@@ -30,17 +32,25 @@
                  :userAttachmentTypes (map #(str "osapuolet." (name %)) attachment-types-osapuoli)
                  :attachmentScales  attachment-scales
                  :attachmentSizes   attachment-sizes
-                 :postVerdictStates post-verdict-states
-                 :stampableMimes    (filter identity (map mime/mime-types lupapalvelu.stamper/file-types))
+                 :postVerdictStates lupapalvelu.application-meta-fields/post-verdict-states
+                 :stampableMimes    (filter identity (map mime/mime-types file-types))
                  :foremanRoles      (:body (first lupapalvelu.document.schemas/kuntaroolikoodi-tyonjohtaja))
-                 :foremanReadonlyFields ["luvanNumero", "katuosoite", "rakennustoimenpide", "kokonaisala"]}]
+                 :foremanReadonlyFields ["luvanNumero", "katuosoite", "rakennustoimenpide", "kokonaisala"]
+                 :asianhallintaVersions (util/convert-values ; asianhallinta versions have "ah-" prefix
+                                          validator/supported-asianhallinta-versions-by-permit-type
+                                          (partial map #(sade.strings/suffix % "ah-")))}]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
 
 (defn- loc->js []
   (str ";loc.setTerms(" (json/generate-string (i18n/get-localizations)) ");"))
 
 (defn- schema-versions-by-permit-type []
-  (str ";LUPAPISTE.config.kryspVersions = " (json/generate-string validator/supported-versions-by-permit-type) ";"))
+  (str ";LUPAPISTE.config.kryspVersions = " (json/generate-string validator/supported-krysp-versions-by-permit-type) ";"))
+
+(defn- main-style-file [css-file-path scss-file-path]
+  (if-let [main-css-file (io/resource (c/path css-file-path))]
+    (slurp main-css-file)
+    (scss/scss->css (.getPath (-> scss-file-path c/path io/resource)))))
 
 (def ui-components
   {;; 3rd party libs
@@ -56,7 +66,7 @@
 
    ;; Init can also be used as a standalone lib, see web.clj
    :init         {:depends [:underscore]
-                  :js [conf "hub.js" "log.js"]}
+                  :js [conf "hub.js" "log.js" ]}
 
    ;; Common components
 
@@ -69,27 +79,26 @@
 
    :selectm      {:js ["selectm.js"]}
 
-   :selectm-html {:html ["selectm.html"]
-                  :css ["selectm.css"]}
+   :selectm-html {:html ["selectm.html"]}
 
    :expanded-content  {:depends [:jquery]
                        :js ["expanded-content.js"]}
 
    :common       {:depends [:init :jquery :jquery-upload :knockout :underscore :moment :i18n :selectm
                             :expanded-content :mockjax :open-layers]
-                  :js ["util.js" "event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js"
+                  :js ["register-components.js" "util.js" "event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js"
                        "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "features.js"
                        "statuses.js" "statusmodel.js" "authorization.js" "vetuma.js"]}
 
    :common-html  {:depends [:selectm-html]
-                  :css ["css/main.css" "jquery-ui.css"]
+                  :css [(partial main-style-file "common-html/css/main.css" "common-html/sass/main.scss") "jquery-ui.css"]
                   :html ["404.html" "footer.html"]}
 
    ;; Components to be included in a SPA
 
    :analytics    {:js ["analytics.js"]}
 
-   :global-models {:js ["application-model.js" "register-models.js"]}
+   :global-models {:js ["root-model.js" "application-model.js" "register-models.js"]}
 
    :screenmessages  {:js   ["screenmessage.js"]
                      :html ["screenmessage.html"]}
@@ -100,8 +109,7 @@
 
    :mypage       {:depends [:common-html]
                   :js ["mypage.js"]
-                  :html ["mypage.html"]
-                  :css ["mypage.css"]}
+                  :html ["mypage.html"]}
 
    :user-menu     {:html ["nav.html"]}
 
@@ -109,7 +117,7 @@
                       :html ["modal-datepicker.html"]
                       :js   ["modal-datepicker.js"]}
 
-   :authenticated {:depends [:screenmessages]
+   :authenticated {:depends [:screenmessages :analytics]
                    :js ["comment.js"]
                    :html ["comments.html"]}
 
@@ -120,11 +128,9 @@
                   :js ["repository.js"]}
 
    :tree         {:js ["tree.js"]
-                  :html ["tree.html"]
-                  :css ["tree.css"]}
+                  :html ["tree.html"]}
 
-   :accordion    {:js ["accordion.js"]
-                  :css ["accordion.css"]}
+   :accordion    {:js ["accordion.js"]}
 
    :signing      {:depends [:common-html]
                   :html ["signing-dialogs.html"]
@@ -135,12 +141,26 @@
                   :js ["stamp-model.js" "stamp.js"]}
 
    :verdict-attachment-prints {:depends [:common-html]
-                               :html ["verdict-attachment-prints-order-template.html"]
-                               :js ["verdict-attachment-prints-order-model.js"]}
+                               :html ["verdict-attachment-prints-order-template.html"
+                                      "verdict-attachment-prints-order-history-template.html"
+                                      "verdict-attachment-prints-multiselect.html"]
+                               :js ["verdict-attachment-prints-order-model.js"
+                                    "verdict-attachment-prints-order-history-model.js"
+                                    "verdict-attachment-prints-multiselect-model.js"]}
 
    :attachment   {:depends [:common-html :repository :signing :side-panel]
-                  :js ["targeted-attachments-model.js" "attachment.js" "attachmentTypeSelect.js" "attachment-utils.js"]
-                  :html ["targetted-attachments-template.html" "attachment.html" "upload.html"]}
+                  :js ["attachment-multi-select.js"
+                       "targeted-attachments-model.js"
+                       "attachment-utils.js"
+                       "attachment.js"
+                       "attachmentTypeSelect.js"
+                       "move-attachment-to-backing-system.js"
+                       "move-attachment-to-case-management.js"]
+                  :html ["targetted-attachments-template.html"
+                         "attachment.html"
+                         "upload.html"
+                         "move-attachment-to-backing-system.html"
+                         "move-attachment-to-case-management.html"]}
 
    :task         {:depends [:common-html :attachment]
                   :js ["task.js"]
@@ -149,31 +169,15 @@
    :create-task  {:js ["create-task.js"]
                   :html ["create-task.html"]}
 
-   :ui-components {:depends [:common-html]
-                   :js ["ui-components.js"
-                        "fill-info-button/fill-info-model.js"
-                        "foreman-history/foreman-history-model.js"
-                        "foreman-other-applications/foreman-other-applications-model.js"
-                        "input-model.js"
-                        "modal-dialog/modal-dialog-model.js"
-                        "register-components.js"]
-                   :html ["fill-info-button/fill-info-button-template.html"
-                          "foreman-history/foreman-history-template.html"
-                          "foreman-other-applications/foreman-other-applications-template.html"
-                          "string/string-template.html"
-                          "select/select-template.html"
-                          "checkbox/checkbox-template.html"
-                          "modal-dialog/modal-dialog-template.html"]}
-
-   :application  {:depends [:common-html :global-models :repository :tree :task :create-task :modal-datepicker :signing :invites :side-panel :verdict-attachment-prints :ui-components]
+   :application  {:depends [:common-html :global-models :repository :tree :task :create-task :modal-datepicker :signing :invites :side-panel :verdict-attachment-prints]
                   :js ["add-link-permit.js" "map-model.js" "change-location.js" "invite.js" "verdicts-model.js"
                        "add-operation.js" "foreman-model.js"
                        "request-statement-model.js" "add-party.js" "attachments-tab-model.js"
-                       "invite-company.js" "application.js"]
+                       "application.js"]
                   :html ["attachment-actions-template.html" "attachments-template.html" "add-link-permit.html" "application.html" "inforequest.html" "add-operation.html"
-                         "change-location.html" "invite-company.html" "foreman-template.html"]}
+                         "change-location.html" "foreman-template.html"]}
 
-   :applications {:depends [:common-html :repository :invites]
+   :applications {:depends [:common-html :repository :invites :global-models]
                   :html ["applications-list.html"]
                   :js ["applications-list.js"]}
 
@@ -205,8 +209,7 @@
 
    :create       {:depends [:common-html]
                   :js ["municipalities.js" "create.js"]
-                  :html ["create.html"]
-                  :css ["create.css"]}
+                  :html ["create.html"]}
 
    :iframe       {:depends [:common-html]
                   :css ["iframe.css"]}
@@ -218,8 +221,7 @@
                   :html ["users.html"]}
 
    :company      {:js ["company.js"]
-                  :html ["company.html"]
-                  :css ["company.css"]}
+                  :html ["company.html"]}
 
    :admins       {:depends [:users]}
 
@@ -236,6 +238,43 @@
    :integration-error {:js [ "integration-error.js"]
                        :html ["integration-error.html"]}
 
+   ; TODO maybe just find and add all ko components under ui-components automatically
+   :ui-components {:depends [:common-html]
+                   :js ["ui-components.js"
+                        "fill-info/fill-info-model.js"
+                        "foreman-history/foreman-history-model.js"
+                        "foreman-other-applications/foreman-other-applications-model.js"
+                        "input-model.js"
+                        "message-panel/message-panel-model.js"
+                        "checkbox/checkbox-model.js"
+                        "select/select-model.js"
+                        "string/string-model.js"
+                        "modal-dialog/modal-dialog-model.js"
+                        "attachments-multiselect/attachments-multiselect-model.js"
+                        "export-attachments/export-attachments-model.js"
+                        "neighbors/neighbors-owners-dialog-model.js"
+                        "neighbors/neighbors-edit-dialog-model.js"
+                        "company-selector/company-selector-model.js"
+                        "company-invite/company-invite-model.js"
+                        "company-invite/company-invite-dialog-model.js"
+                        "modal-dialog/button-group/submit-button-group-model.js"]
+                   :html ["fill-info/fill-info-template.html"
+                          "foreman-history/foreman-history-template.html"
+                          "foreman-other-applications/foreman-other-applications-template.html"
+                          "message-panel/message-panel-template.html"
+                          "string/string-template.html"
+                          "select/select-template.html"
+                          "checkbox/checkbox-template.html"
+                          "modal-dialog/modal-dialog-template.html"
+                          "modal-dialog/button-group/submit-button-group-template.html"
+                          "attachments-multiselect/attachments-multiselect-template.html"
+                          "export-attachments/export-attachments-template.html"
+                          "neighbors/neighbors-owners-dialog-template.html"
+                          "neighbors/neighbors-edit-dialog-template.html"
+                          "company-selector/company-selector-template.html"
+                          "company-invite/company-invite-template.html"
+                          "company-invite/company-invite-dialog-template.html"]}
+
    ;; Single Page Apps and standalone components:
    ;; (compare to auth-methods in web.clj)
 
@@ -246,46 +285,52 @@
                   :js ["upload.js"]
                   :css ["upload.css"]}
 
-   :applicant-app {:js ["applicant.js"]}
+   :applicant-app {:depends [:ui-components]
+                   :js ["applicant.js"]}
+
    :applicant     {:depends [:applicant-app
                              :common-html :authenticated :map :applications :application
                              :statement :docgen :create :mypage :user-menu :debug
                              :company :analytics]}
 
-   :authority-app {:js ["authority.js"]}
-   :authority     {:depends [:authority-app :common-html :authenticated :map :applications :notice :application
+   :authority-app {:depends [:ui-components] :js ["authority.js"]}
+   :authority     {:depends [:ui-components :authority-app :common-html :authenticated :map :applications :notice :application
                              :statement :verdict :neighbors :docgen :create :mypage :user-menu :debug
                              :company :stamp :integration-error :analytics]}
 
-   :oir-app {:js ["oir.js"]}
+   :oir-app {:depends [:ui-components] :js ["oir.js"]}
    :oir     {:depends [:oir-app :common-html :authenticated :map :application :attachment
                        :docgen :debug :notice :analytics]
              :css ["oir.css"]}
 
-   :authority-admin-app {:js ["authority-admin.js"]}
+   :authority-admin-app {:depends [:ui-components]
+                         :js ["authority-admin.js"]}
    :authority-admin     {:depends [:authority-admin-app :common-html :authenticated :admins :mypage :user-menu :debug :analytics]
                          :js ["admin.js" schema-versions-by-permit-type]
                          :html ["admin.html"]}
 
-   :admin-app {:js ["admin.js"]}
+   :admin-app {:depends [:ui-components]
+               :js ["admin.js"]}
    :admin     {:depends [:admin-app :common-html :authenticated :admins :map :mypage :user-menu :debug]
                :css ["admin.css"]
                :js ["admin-users.js" "organizations.js" "companies.js" "features.js" "actions.js" "screenmessages-list.js"]
-               :html ["index.html" "admin.html"
+               :html ["index.html" "admin.html" "organization.html"
                       "admin-users.html" "organizations.html" "companies.html" "features.html" "actions.html"
                       "screenmessages-list.html"]}
 
    :wordpress {:depends [:login :password-reset]}
 
-   :welcome-app {:js ["welcome.js"]}
+   :welcome-app {:depends [:ui-components]
+                 :js ["welcome.js"]}
    :welcome {:depends [:welcome-app :login :register :link-account :debug :user-menu :screenmessages :password-reset :analytics]
              :js ["company-user.js"]
              :html ["index.html" "login.html" "company-user.html"]}
 
    :oskari  {:css ["oskari.css"]}
 
-   :neighbor-app {:js ["neighbor-app.js"]}
-   :neighbor {:depends [:neighbor-app :common-html :map :debug :docgen :debug :user-menu :screenmessages :analytics]
+   :neighbor-app {:depends [:ui-components]
+                  :js ["neighbor-app.js"]}
+   :neighbor {:depends [:neighbor-app :common-html :global-models :map :debug :docgen :debug :user-menu :screenmessages :analytics]
               :html ["neighbor-show.html"]
               :js ["neighbor-show.js"]}})
 
@@ -297,9 +342,6 @@
 
 ; Make sure that all resources are available:
 (doseq [c (keys ui-components)
-        r (mapcat #(c/component-resources ui-components % c) [:js :html :css])]
-  (if (not (fn? r))
-    (let [resource (.getResourceAsStream (clojure.lang.RT/baseLoader) (c/path r))]
-      (if resource
-        (.close resource)
-        (throw (Exception. (str "Resource missing: " r)))))))
+        r (mapcat #(c/component-resources ui-components % c) [:js :html :css :scss])]
+  (when-not (or (fn? r) (io/resource (c/path r)))
+    (throw (Exception. (str "Resource missing: " r)))))

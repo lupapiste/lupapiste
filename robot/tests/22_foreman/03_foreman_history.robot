@@ -11,9 +11,10 @@ Mikko invites foreman and goes back to application
   Mikko goes back to project application
 
 *** Test Cases ***
-Foreman sees his foreman application history
+Foreman sets his information to several applications
   Mikko logs in
   Mikko creates new application
+  Submit application
 
   Repeat Keyword  5  Mikko invites foreman and goes back to application
 
@@ -25,6 +26,11 @@ Foreman sees his foreman application history
 
   Foreman opens application  4
   Foreman accepts invitation and fills info
+  [Teardown]  logout
+
+Authority sees foreman history
+  Sonja logs in
+  Foreman opens application  4
 
   Wait until  Foreman history should have text X times  Sipoo  3
   Foreman history should have text X times  Tavanomainen  2

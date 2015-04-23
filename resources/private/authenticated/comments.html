@@ -14,6 +14,14 @@
             maxlength="4000">
           </textarea>
           <button
+            data-bind="visible: $parent.authorization.ok('open-application'), disable: disabled, click: stateOpenApplication"
+            data-test-id="application-open-application-btn"
+            type="submit"
+            class="btn btn-primary">
+            <span data-bind="ltext: 'application.conversationOpen'"></span>
+            <em data-bind="visible: pending" class="button-loader"></em>
+          </button>
+          <button
             data-bind="visible: $parent.authorization.ok('add-comment'), disable: disabled, click: submit"
             data-test-id="application-new-comment-btn"
             type="submit"
@@ -22,26 +30,19 @@
             <em data-bind="visible: pending" class="button-loader"></em>
           </button>
 
-          <button
-            data-bind="visible: $parent.authorization.ok('open-application'), disable: disabled, click: stateOpenApplication"
-            data-test-id="application-open-application-btn"
-            type="submit"
-            class="btn btn-primary">
-            <span data-bind="ltext: 'application.conversationOpen'"></span>
-            <em data-bind="visible: pending" class="button-loader"></em>
-          </button>
+          
 
-          <div data-bind="visible: $parent.authorization.ok('can-target-comment-to-authority')" class="comment-controls">
-            <div class="mark-answered" data-bind="visible: $parent.infoRequest">
+          <div data-bind="visible: $parent.authorization.ok('can-target-comment-to-authority') || $parent.authorization.ok('can-mark-answered')" class="comment-controls">
+            <div class="mark-answered" data-bind="if: $parent.authorization.ok('can-mark-answered')">
               <button
-                data-bind="visible: $parent.authorization.ok('add-comment'), click: markAnswered"
+                data-bind="click: markAnswered"
                 data-test-id="comment-request-mark-answered"
                 type="submit"
                 class="btn btn-primary">
                 <span data-bind="ltext: 'comment-request-mark-answered-label'"></span>
               </button>
             </div>
-            <div class="comment-request">
+            <div class="comment-request" data-bind="if: $parent.authorization.ok('can-target-comment-to-authority')">
               <label data-bind="ltext: 'comment-request-label'"></label>
               <select
                 data-bind="options: $parent.authorities,

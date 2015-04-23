@@ -247,6 +247,9 @@ Arto logs in
 Veikko logs in
   Authority logs in  veikko  veikko  Veikko Viranomainen
 
+Velho logs in
+  Authority logs in  velho  velho  Velho Viranomainen
+
 Sonja logs in
   Authority logs in  sonja  sonja  Sonja Sibbo
 
@@ -258,6 +261,9 @@ Sipoo logs in
 
 Naantali logs in
   Authority-admin logs in  admin@naantali.fi  naantali  Admin Naantali
+
+Kuopio logs in
+  Authority-admin logs in  kuopio-r  kuopio  Paakayttaja-R Kuopio
 
 SolitaAdmin logs in
   Admin logs in  admin  admin  Admin Admin
@@ -296,7 +302,7 @@ Click by test id
 Click enabled by test id
   [Arguments]  ${id}
   ${path} =   Set Variable  xpath=//*[@data-test-id='${id}']
-  Wait until  Page Should Contain Element  ${path}
+  Wait Until  Element Should Be Visible  ${path}
   Wait Until  Element Should Be Enabled  ${path}
   Click by test id  ${id}
 
@@ -373,16 +379,24 @@ Do prepare new request
   Execute Javascript  $("div[id='popup-id'] input[data-test-id='create-address']").val("${address}").change();
 
   Set animations off
-  Click enabled by test id  create-continue
+
+  ${path} =   Set Variable  xpath=//div[@id="popup-id"]//button[@data-test-id="create-continue"]
+  Wait until  Element should be enabled  ${path}
+  Click element  ${path}
+
   Select operation path by permit type  ${permitType}
   Wait until  Element should be visible  xpath=//section[@id="create-part-2"]//div[@class="tree-content"]//*[@data-test-id="create-application"]
   Set animations on
 
 
+Select attachment operation option from dropdown
+  [Arguments]  ${optionName}
+  Wait until  Element should be visible  xpath=//select[@data-test-id="attachment-operations-select-lower"]
+  Select From List By Value  xpath=//select[@data-test-id="attachment-operations-select-lower"]  ${optionName}
+
 Add empty attachment template
   [Arguments]  ${templateName}  ${topCategory}  ${subCategory}
-  Wait Until Element Is Visible  xpath=//div[@id="application-attachments-tab"]//button[@data-test-id="new-attachment-template-button"]
-  Click Element  xpath=//div[@id="application-attachments-tab"]//button[@data-test-id="new-attachment-template-button"]
+  Select attachment operation option from dropdown  newAttachmentTemplates
   Wait Until Element Is Visible  xpath=//div[@id="dialog-add-attachment-templates"]//input[@data-test-id="selectm-filter-input"]
   Input Text  xpath=//div[@id="dialog-add-attachment-templates"]//input[@data-test-id="selectm-filter-input"]  ${subCategory}
   List Should Have No Selections  xpath=//div[@id="dialog-add-attachment-templates"]//select[@data-test-id="selectm-source-list"]
@@ -394,11 +408,8 @@ Add empty attachment template
 
 Add attachment
   [Arguments]  ${path}  ${description}  ${operation}
-
-  # Go home Selenium, you're drunk! Why the fuck are you clicking the 'process-previous' button?
-  # Must I do everything manually??
-  #Wait and click   xpath=//button[@data-test-id="add-attachment"]
-  Execute Javascript  $('button[data-test-id="add-attachment"]').click();
+  Select attachment operation option from dropdown  attachmentsAdd
+  Wait until  Element should be visible  upload-dialog
 
   Select Frame      uploadFrame
   Wait until        Element should be visible  test-save-new-attachment
@@ -687,12 +698,12 @@ Set animations off
 Add neighbor
   [Arguments]  ${propertyId}  ${name}  ${email}
   Click enabled by test id  manager-neighbors-add
-  Wait Until   Element Should Be Visible  dialog-edit-neighbor
+  Wait Until   Element Should Be Visible  xpath=//*[@data-test-id='modal-dialog-content']
   Input text by test id  neighbors.edit.propertyId  ${propertyId}
   Input text by test id  neighbors.edit.name  ${name}
   Input text by test id  neighbors.edit.email  ${email}
-  Click by test id  neighbors.edit.ok
-  Wait Until  Element Should Not Be Visible  dialog-edit-neighbor
+  Click by test id  modal-dialog-submit-button
+  Wait Until  Element Should Not Be Visible  xpath=//*[@data-test-id='modal-dialog-content']
   Wait Until  Page Should Contain  ${email}
 
 #
@@ -705,10 +716,27 @@ Go to give new verdict
   Wait Until  Element Should Be Visible  backend-id
   Wait Until  Element Should Be Enabled  backend-id
 
+Input verdict
+  [Arguments]  ${backend-id}  ${verdict-type-select-value}  ${verdict-given-date}  ${verdict-official-date}  ${verdict-giver-name}
+  ## Disable date picker
+  Execute JavaScript  $(".hasDatepicker").unbind("focus");
+  Input text  backend-id  ${backend-id}
+  Select From List By Value  verdict-type-select  ${verdict-type-select-value}
+  Input text  verdict-given  ${verdict-given-date}
+  Input text  verdict-official  ${verdict-official-date}
+  Input text  verdict-name  ${verdict-giver-name}
+  Select Checkbox  verdict-agreement
+  ## Trigger change manually
+  Execute JavaScript  $("#backend-id").change();
+  Execute JavaScript  $("#verdict-type-select").change();
+  Execute JavaScript  $("#verdict-given").change();
+  Execute JavaScript  $("#verdict-official").change();
+  Execute JavaScript  $("#verdict-name").change();
+
 Submit empty verdict
   Go to give new verdict
-  Go back
-  Click enabled by test id  publish-verdict
+  Input verdict  -  6  01.05.2018  01.06.2018  -
+  Click enabled by test id  verdict-publish
   Confirm  dynamic-yes-no-confirm-dialog
   Wait until  Application state should be  verdictGiven
 

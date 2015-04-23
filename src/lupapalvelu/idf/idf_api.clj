@@ -98,7 +98,7 @@
       (try
         (let [first-name (strip-nonletters first-name)
               last-name  (strip-nonletters last-name)
-              email      (ss/trim (ss/lower-case email))
+              email      (user/canonize-email email)
               phone      (ss/trim phone)
               user-id (link-user! first-name last-name email phone marketing architect app id ts)]
           (resp/response (str user-id "\n")))
@@ -109,7 +109,7 @@
 
 (defquery get-link-account-token
   {:parameters [tokenId]
-   :roles [:anonymous]}
+   :user-roles #{:anonymous}}
   [_]
   (ok :data
     (let [skeleton {:email "" :phone ""}

@@ -3,7 +3,7 @@
 
   var isInitializing = true;
   var currentId = null;
-  var authorizationModel = authorization.create();
+  var authorizationModel = lupapisteApp.models.applicationAuthModel;
   var applicationModel = lupapisteApp.models.application;
   var changeLocationModel = new LUPAPISTE.ChangeLocationModel();
   var addLinkPermitModel = new LUPAPISTE.AddLinkPermitModel();
@@ -49,17 +49,17 @@
   var verdictModel = new LUPAPISTE.VerdictsModel();
   var signingModel = new LUPAPISTE.SigningModel("#dialog-sign-attachments", true);
   var verdictAttachmentPrintsOrderModel = new LUPAPISTE.VerdictAttachmentPrintsOrderModel();
+  var verdictAttachmentPrintsOrderHistoryModel = new LUPAPISTE.VerdictAttachmentPrintsOrderHistoryModel();
   var requestForStatementModel = new LUPAPISTE.RequestForStatementModel();
   var addPartyModel = new LUPAPISTE.AddPartyModel();
   var createTaskController = LUPAPISTE.createTaskController;
   var mapModel = new LUPAPISTE.MapModel(authorizationModel);
-  var attachmentsTab = new LUPAPISTE.AttachmentsTabModel(applicationModel);
+  var attachmentsTab = new LUPAPISTE.AttachmentsTabModel(applicationModel, signingModel, verdictAttachmentPrintsOrderModel);
   var foremanModel = new LUPAPISTE.ForemanModel();
 
   var authorities = ko.observableArray([]);
   var permitSubtypes = ko.observableArray([]);
-
-  var inviteCompanyModel = new LUPAPISTE.InviteCompanyModel(applicationModel.id);
+  var tosFunctions = ko.observableArray([]);
 
   var accordian = function(data, event) { accordion.toggle(event); };
 
@@ -93,18 +93,34 @@
   function updatePermitSubtype(value){
     if (isInitializing) { return; }
 
+    var element = $("#permitSubtypeSaveIndicator");
+    element.stop().hide();
+
     ajax.command("change-permit-sub-type", {id: currentId, permitSubtype: value})
     .success(function() {
       authorizationModel.refresh(currentId);
-      })
-    .error(function(data) {
-      LUPAPISTE.ModalDialog.showDynamicOk(loc("error.dialog.title"), loc(data.text) + ": " + data.id);
+      element.stop().show();
+      setTimeout(function() {
+        element.fadeOut("slow");
+      }, 2000);
     })
     .call();
   }
 
+  function updateTosFunction(value) {
+    if (!isInitializing) {
+      ajax
+        .command("set-tos-function-for-application", {id: currentId, functionCode: value})
+        .success(function() {
+          repository.load(currentId, applicationModel.pending);
+        })
+        .call();
+    }
+  }
+
   applicationModel.assignee.subscribe(function(v) { updateAssignee(v); });
   applicationModel.permitSubtype.subscribe(function(v){updatePermitSubtype(v);});
+  applicationModel.tosFunction.subscribe(updateTosFunction);
 
   function resolveApplicationAssignee(authority) {
     return (authority) ? new AuthorityInfo(authority.id, authority.firstName, authority.lastName) : null;
@@ -118,6 +134,14 @@
     authorities(authorityInfos);
   }
 
+  function initAvailableTosFunctions(organizationId) {
+    ajax
+      .query("available-tos-functions", {organizationId: organizationId})
+      .success(function(data) {
+        tosFunctions(data.functions);
+      })
+      .call();
+  }
 
   function showApplication(applicationDetails) {
     isInitializing = true;
@@ -148,7 +172,10 @@
       // Operations
       applicationModel.operationsCount(_.map(_.countBy(app.operations, "name"), function(v, k) { return {name: k, count: v}; }));
 
-      attachmentsTab.refresh(applicationModel, authorizationModel);
+      verdictAttachmentPrintsOrderModel.refresh(applicationModel);
+      verdictAttachmentPrintsOrderHistoryModel.refresh(applicationModel);
+
+      attachmentsTab.refresh(applicationModel);
 
       // Statements
       requestForStatementModel.setApplicationId(app.id);
@@ -159,6 +186,8 @@
       // permit subtypes
       permitSubtypes(applicationDetails.permitSubtypes);
 
+      // Organization's TOS functions
+      initAvailableTosFunctions(applicationDetails.application.organization);
 
       // Mark-seen
       if (applicationModel.infoRequest() && authorizationModel.ok("mark-seen")) {
@@ -192,6 +221,16 @@
       var assignee = resolveApplicationAssignee(app.authority);
       var assigneeId = assignee ? assignee.id : null;
       applicationModel.assignee(assigneeId);
+
+      var metadata = _.map(app.metadata, function(value, key) {
+        if (_.isObject(value)) {
+          value = _.map(value, function(subvalue, subkey) {
+            return {name: subkey, value: subvalue};
+          });
+        }
+        return {name: key, value: value};
+      });
+      applicationModel.metadataList(_.sortBy(metadata, "name"));
 
       isInitializing = false;
       pageutil.hideAjaxWait();
@@ -255,7 +294,6 @@
     } else {
       pageutil.showAjaxWait();
       currentId = newId;
-      mapModel.updateMapSize(kind);
       repository.load(currentId, applicationModel.pending, function(application) {
         selectTab(tab || (application.inPostVerdictState ? "tasks" : "info"));
       });
@@ -265,7 +303,6 @@
   hub.onPageLoad("application", _.partial(initPage, "application"));
   hub.onPageLoad("inforequest", _.partial(initPage, "inforequest"));
 
-// (["application","inforequest","attachment","statement","neighbors","task","verdict"]
   hub.subscribe("application-loaded", function(e) {
     showApplication(e.applicationDetails);
     updateWindowTitle(e.applicationDetails.application.title);
@@ -382,10 +419,11 @@
       sendNeighborEmailModel: sendNeighborEmailModel,
       signingModel: signingModel,
       verdictAttachmentPrintsOrderModel: verdictAttachmentPrintsOrderModel,
+      verdictAttachmentPrintsOrderHistoryModel: verdictAttachmentPrintsOrderHistoryModel,
       verdictModel: verdictModel,
-      openInviteCompany: inviteCompanyModel.open.bind(inviteCompanyModel),
       attachmentsTab: attachmentsTab,
-      selectedTabName: selectedTabName
+      selectedTabName: selectedTabName,
+      tosFunctions: tosFunctions
     };
 
     $("#application").applyBindings(bindings);
@@ -398,7 +436,9 @@
       verdictAttachmentPrintsOrderModel: verdictAttachmentPrintsOrderModel,
       authorization: authorizationModel
     });
-    $(inviteCompanyModel.selector).applyBindings(inviteCompanyModel);
+    $(verdictAttachmentPrintsOrderHistoryModel.dialogSelector).applyBindings({
+      verdictAttachmentPrintsOrderHistoryModel: verdictAttachmentPrintsOrderHistoryModel
+    });
     attachmentsTab.attachmentTemplatesModel.init();
   });
 

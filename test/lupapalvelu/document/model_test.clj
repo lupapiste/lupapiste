@@ -19,10 +19,11 @@
                             {:name "ac" :type :string :min-len 2 :max-len 3}
                             {:name "b" :type :group
                              :body [{:name "ba" :type :string :min-len 2}
-                                    {:name "bb" :type :boolean}]}
-                            {:name "c" :type :list
+                                    {:name "bb" :type :checkbox}]}
+                            {:name "c" :type :group
                              :body [{:name "ca" :type :string}
                                     {:name "cb" :type :checkbox}]}
+                            {:name "partytype" :type :radioGroup :body [{:name "henkilo"} {:name "yritys"}] :default "henkilo"}
                             {:name "d" :type :select :sortBy :displayname
                              :body [{:name "A"}
                                     {:name "B"}
@@ -38,10 +39,10 @@
   (fact (find-by-name (:body schema) ["a"])          => (-> schema :body first))
   (fact (find-by-name (:body schema) ["a" :b])       => {:name "b" :type :group
                                                          :body [{:name "ba" :type :string :min-len 2}
-                                                                {:name "bb" :type :boolean}]})
+                                                                {:name "bb" :type :checkbox}]})
   (fact (find-by-name (:body schema) ["a" "aa"])     => {:name "aa" :type :string})
-  (fact (find-by-name (:body schema) ["a" "b" "bb"]) => {:name "bb" :type :boolean})
-  (fact (find-by-name (:body schema) [:a :b :bb])    => {:name "bb" :type :boolean})
+  (fact (find-by-name (:body schema) ["a" "b" "bb"]) => {:name "bb" :type :checkbox})
+  (fact (find-by-name (:body schema) [:a :b :bb])    => {:name "bb" :type :checkbox})
   (fact (find-by-name (:body schema) ["a" "b" "bc"]) => nil))
 
 ;; Tests for internals:
@@ -123,6 +124,16 @@
       (apply-update document [:a :d] "")  => (valid-against? schema)
       (apply-update document [:a :d] "D") => (invalid-with? schema [:warn "illegal-value:select"]))))
 
+(facts "Radio group"
+  (with-timestamp some-time
+    (let [document (new-document schema ..now..)]
+      (facts "valid cases"
+        (apply-update document [:a :partytype] "henkilo") => (valid-against? schema)
+        (apply-update document [:a :partytype] "yritys") => (valid-against? schema)
+        (apply-update document [:a :partytype] "")  => (valid-against? schema))
+      (fact "invalid value"
+        (apply-update document [:a :partytype] "neither") => (invalid-with? schema [:warn "illegal-value:select"])))))
+
 (facts "with real schemas - important field for paasuunnittelija"
   (with-timestamp some-time
     (let [document (new-document (schemas/get-schema (schemas/get-latest-schema-version) "paasuunnittelija") ..now..)]
@@ -146,7 +157,7 @@
   (with-timestamp some-time
     (let [document (new-document schema-with-repetition ..now..)]
       (fact "Single value contains no nested sections"
-        (apply-update document [:single :1 :single2] "foo") => (invalid-with? schema-with-repetition [:err "illegal-key"]))
+        (apply-update (util/dissoc-in document [:data :single]) [:single :1 :single2] "foo") => (invalid-with? schema-with-repetition [:err "illegal-key"]))
 
       (fact "Repeating section happy case"
         (apply-update document [:repeats :1 :single2] "foo") => (valid-against? schema-with-repetition))
@@ -186,75 +197,71 @@
       document => missing-required-fields?
 
       (-> document
-        (apply-update [:a :b :aa] " ")
-        (apply-update [:a :b :ab] " ")) => missing-required-fields?
+          (apply-update [:a :b :aa] "value")
+          (apply-update [:a :b :ab] "value")) => missing-required-fields?
 
       (-> document
-        (apply-update [:a :b :aa] "value")
-        (apply-update [:a :b :ab] "value")) => (valid-against? schema-with-required)
+          (apply-update [:a :b :aa] "value")
+          (apply-update [:a :b :ab] "value")
+          (apply-update [:a :c :0 :raa] "value")) => missing-required-fields?
 
       (-> document
-        (apply-update [:a :b :aa] "value")
-        (apply-update [:a :b :ab] "value")
-        (apply-update [:a :c :0 :raa] "value")) => missing-required-fields?
+          (apply-update [:a :b :aa] "value")
+          (apply-update [:a :b :ab] "value")
+          (apply-update [:a :c :0 :rab] "value")
+          (apply-update [:a :c :6 :rab] "value")) => missing-required-fields?
 
       (-> document
-        (apply-update [:a :b :aa] "value")
-        (apply-update [:a :b :ab] "value")
-        (apply-update [:a :c :0 :rab] "value")
-        (apply-update [:a :c :6 :rab] "value")) => (valid-against? schema-with-required)
+          (apply-update [:a :b :aa] "value")
+          (apply-update [:a :b :ab] "value")
+          (apply-update [:a :c :0 :rab] "value")
+          (apply-update [:a :d :0 :d2 :0 :od1] "value")) => missing-required-fields?
 
       (-> document
-        (apply-update [:a :b :aa] "value")
-        (apply-update [:a :b :ab] "value")
-        (apply-update [:a :c :0 :rab] "value")
-        (apply-update [:a :d :0 :d2 :0 :od1] "value")) => missing-required-fields?
+          (apply-update [:a :b :aa] "value")
+          (apply-update [:a :b :ab] "value")
+          (apply-update [:a :c :0 :rab] "value")
+          (apply-update [:a :d :0 :d2 :0 :od1] "value")
+          (apply-update [:a :d :0 :d2 :0 :od2] "value")) => missing-required-fields?
 
       (-> document
-        (apply-update [:a :b :aa] "value")
-        (apply-update [:a :b :ab] "value")
-        (apply-update [:a :c :0 :rab] "value")
-        (apply-update [:a :d :0 :d2 :0 :od1] "value")
-        (apply-update [:a :d :0 :d2 :0 :od2] "value")) => missing-required-fields?
+          (apply-update [:a :b :aa] "value")
+          (apply-update [:a :b :ab] "value")
+          (apply-update [:a :c :0 :rab] "value")
+          (apply-update [:a :d :0 :d2 :0 :od1] "value")
+          (apply-update [:a :d :0 :d2 :0 :rd] "value")
+          (apply-update [:a :d :0 :d2 :0 :od2] "value")) => (valid-against? schema-with-required)
 
       (-> document
-        (apply-update [:a :b :aa] "value")
-        (apply-update [:a :b :ab] "value")
-        (apply-update [:a :c :0 :rab] "value")
-        (apply-update [:a :d :0 :d2 :0 :od1] "value")
-        (apply-update [:a :d :0 :d2 :0 :rd] "value")
-        (apply-update [:a :d :0 :d2 :0 :od2] "value")) => (valid-against? schema-with-required)
+          (apply-update [:a :b :aa] "value")
+          (apply-update [:a :b :ab] "value")
+          (apply-update [:a :c :0 :rab] "value")
+          (apply-update [:a :d :0 :d2 :0 :od1] "value")
+          (apply-update [:a :d :0 :d2 :0 :rd] "value")
+          (apply-update [:a :d :1 :d2 :6 :rd] "value")) => (valid-against? schema-with-required)))
 
-      (-> document
-        (apply-update [:a :b :aa] "value")
-        (apply-update [:a :b :ab] "value")
-        (apply-update [:a :c :0 :rab] "value")
-        (apply-update [:a :d :0 :d2 :0 :od1] "value")
-        (apply-update [:a :d :0 :d2 :0 :rd] "value")
-        (apply-update [:a :d :1 :d2 :6 :rd] "value")) => (valid-against? schema-with-required))))
+  (facts "with real schemas - required fields for henkilo hakija"
+    (with-timestamp some-time
+      (let [document (-> (new-document (schemas/get-schema (schemas/get-latest-schema-version) "hakija") ..now..)
+                         (apply-update [:_selected] "henkilo")
+                         (apply-update [:henkilo :henkilotiedot :etunimi] "Tauno")
+                         (apply-update [:henkilo :henkilotiedot :sukunimi] "Palo")
+                         (apply-update [:henkilo :henkilotiedot :hetu] "230470-658B")
+                         (apply-update [:henkilo :osoite :katu] "katu")
+                         (apply-update [:henkilo :osoite :postinumero] "12345")
+                         (apply-update [:henkilo :osoite :postitoimipaikannimi] "Demola")
+                         (apply-update [:henkilo :yhteystiedot :email] "tauno@example.com")
+                         (apply-update [:henkilo :yhteystiedot :puhelin] "050"))]
 
-(facts "with real schemas - required fields for henkilo hakija"
-  (with-timestamp some-time
-    (let [document (-> (new-document (schemas/get-schema (schemas/get-latest-schema-version) "hakija") ..now..)
-                   (apply-update [:_selected] "henkilo")
-                   (apply-update [:henkilo :henkilotiedot :etunimi] "Tauno")
-                   (apply-update [:henkilo :henkilotiedot :sukunimi] "Palo")
-                   (apply-update [:henkilo :henkilotiedot :hetu] "230470-658B")
-                   (apply-update [:henkilo :osoite :katu] "katu")
-                   (apply-update [:henkilo :osoite :postinumero] "12345")
-                   (apply-update [:henkilo :osoite :postitoimipaikannimi] "Demola")
-                   (apply-update [:henkilo :yhteystiedot :email] "tauno@example.com")
-                   (apply-update [:henkilo :yhteystiedot :puhelin] "050"))]
-
-      document => valid?
-      (-> document
-        (apply-update [:_selected])) => valid?
-      (-> document
-        (apply-update [:henkilo :osoite :katu])) => missing-required-fields?
-      (-> document
-        (apply-update [:henkilo :osoite :postinumero])) => missing-required-fields?
-      (-> document
-        (apply-update [:henkilo :osoite :postitoimipaikannimi])) => missing-required-fields?)))
+        document => valid?
+        (-> document
+            (apply-update [:_selected])) => valid?
+        (-> document
+            (apply-update [:henkilo :osoite :katu])) => missing-required-fields?
+        (-> document
+            (apply-update [:henkilo :osoite :postinumero])) => missing-required-fields?
+        (-> document
+            (apply-update [:henkilo :osoite :postitoimipaikannimi])) => missing-required-fields?))))
 
 (facts "with real schemas - required fields for yritys hakija"
   (with-timestamp some-time
@@ -615,10 +622,21 @@
         (get-in stripped-uusirakennus [:data :rakennuksenOmistajat :3]) => (:data stripped-hakija)))))
 
 (facts "hetu-mask"
-  (let [masked (mask-person-ids hakija)]
-    (get-in masked [:data :henkilo :henkilotiedot :etunimi :value]) => (get-in hakija [:data :henkilo :henkilotiedot :etunimi :value])
-    (get-in masked [:data :henkilo :henkilotiedot :hetu]) => truthy
-    (get-in masked [:data :henkilo :henkilotiedot :hetu :value]) => "010203-****"))
+  (fact "ending is masked"
+    (let [masked (mask-person-id-ending hakija)]
+      (get-in masked [:data :henkilo :henkilotiedot :hetu]) => truthy
+      (get-in masked [:data :henkilo :henkilotiedot :hetu :value]) => "010203-****"
+      (fact "non-related field is not changed"
+        (get-in masked [:data :henkilo :henkilotiedot :etunimi :value]) => (get-in hakija [:data :henkilo :henkilotiedot :etunimi :value]))))
+  (fact "birthday is masked"
+    (let [masked (mask-person-id-birthday hakija)]
+      (get-in masked [:data :henkilo :henkilotiedot :hetu]) => truthy
+      (get-in masked [:data :henkilo :henkilotiedot :hetu :value]) => "******-040A"
+      (fact "non-related field is not changed"
+        (get-in masked [:data :henkilo :henkilotiedot :etunimi :value]) => (get-in hakija [:data :henkilo :henkilotiedot :etunimi :value]))))
+  (fact "combination"
+    (let [masked (-> hakija mask-person-id-ending mask-person-id-birthday)]
+      (get-in masked [:data :henkilo :henkilotiedot :hetu :value]) => "******-****")))
 
 (facts
   (fact "all fields are mapped"
@@ -639,11 +657,12 @@
                                                  :postitoimipaikannimi {:value "city"}}})
 
   (fact "all fields are mapped - empty defaults"
-    (->henkilo {:id "id", :lastName  "lastName", :city "city"} :with-empty-defaults true)
+    (->henkilo {:id "id" :lastName "lastName" :city "city"} :with-empty-defaults? true)
     => {:userId                        {:value "id"}
         :henkilotiedot {:etunimi       {:value ""}
                         :sukunimi      {:value "lastName"}
-                        :hetu          {:value ""}}
+                        :hetu          {:value ""}
+                        :turvakieltoKytkin {:value false}}
         :yhteystiedot {:email          {:value ""}
                        :puhelin        {:value ""}}
         :osoite {:katu                 {:value ""}
@@ -660,8 +679,10 @@
 
   (fact "some fields are mapped"
     (->henkilo {:firstName "firstName"
-                :zip       "zip"}) => {:henkilotiedot {:etunimi  {:value "firstName"}}
-                                       :osoite {:postinumero     {:value "zip"}}})
+                :zip       "zip"
+                :turvakieltokytkin true}) => {:henkilotiedot {:etunimi {:value "firstName"}
+                                                              :turvakieltoKytkin {:value true}}
+                                              :osoite {:postinumero {:value "zip"}}})
 
   (fact "hetu is mapped"
     (->henkilo {:id       "id"

@@ -1,11 +1,33 @@
 (ns sade.util
+  (:refer-clojure :exclude [pos? neg? zero?])
   (:require [clojure.walk :refer [postwalk prewalk]]
             [clojure.string :refer [join]]
-            [sade.strings :refer [numeric? decimal-number?] :as ss]
+            [sade.strings :refer [numeric? decimal-number? trim] :as ss]
             [clj-time.format :as timeformat]
             [clj-time.coerce :as tc]
             [schema.core :as sc])
   (:import [org.joda.time LocalDateTime]))
+
+;;
+;; Nil-safe number utilities
+;;
+
+(defn pos?
+  "Like clojure.core/pos?, but nil returns false instead of NPE"
+  [n]
+  (if n (clojure.core/pos? n) false))
+
+(defn neg?
+  "Like clojure.core/neg?, but nil returns false instead of NPE"
+  [n]
+  (if n (clojure.core/neg? n) false))
+
+(defn zero?
+  "Like clojure.core/zero?, but nil returns false instead of NPE"
+  [n]
+  (if n (clojure.core/zero? n) false))
+
+;; Map utilities
 
 (defn postwalk-map
   "traverses m and applies f to all maps within"
@@ -207,17 +229,17 @@
   (format-utc-timestamp timestamp "YYYY-MM-dd'T'HH:mm:ss"))
 
 (defn to-xml-date-from-string [^String date-as-string]
-  (when date-as-string
+  (when-not (ss/blank? date-as-string)
     (let [d (timeformat/parse-local-date (timeformat/formatter "dd.MM.YYYY" ) date-as-string)]
       (timeformat/unparse-local-date (timeformat/formatter "YYYY-MM-dd") d))))
 
 (defn to-xml-datetime-from-string [^String date-as-string]
-  (when date-as-string
+  (when-not (ss/blank? date-as-string)
     (let [d (timeformat/parse-local (timeformat/formatter "dd.MM.YYYY" ) date-as-string)]
       (timeformat/unparse-local-date (timeformat/formatter "YYYY-MM-dd'T'HH:mm:ssZ") d))))
 
 (defn to-millis-from-local-date-string [^String date-as-string]
-  (when date-as-string
+  (when-not (ss/blank? date-as-string)
     (let [d (timeformat/parse (timeformat/formatter "dd.MM.YYYY" ) date-as-string)]
       (tc/to-long d))))
 
@@ -350,13 +372,6 @@
 (defn max-length-string [max-len]
   (sc/both sc/Str (max-length max-len)))
 
-(defn exclude-from-sequence
-  "Removes the items in the sequential given as the second parameter from the sequential given as the first parameter"
-  [orig-seq exclude-seq]
-  {:pre [(and (sequential? orig-seq) (sequential? exclude-seq))]}
-  (let [exclude-set (set exclude-seq)]
-    (remove #(exclude-set %) orig-seq)))
-
 (def difficulty-values ["AA" "A" "B" "C" "ei tiedossa"])    ;TODO: move this to schemas?
 (defn compare-difficulty [a b]                              ;TODO: make this function more generic by taking the key and comparison values as param? E.g. compare-against [a b key ref-values]
   (let [a (:difficulty a)
@@ -368,3 +383,12 @@
 
 (defn every-key-in-map? [target-map required-keys]
   (every? (-> target-map keys set) required-keys))
+
+(defn separate-emails [^String email-str]
+  (->> (ss/split email-str #"[,;]") (map ss/trim) set))
+
+(defn find-first
+  "Returns first element from coll for which (pred item)
+   returns true. pred must be free of side-effects."
+  [pred coll]
+  (first (filter pred coll)))

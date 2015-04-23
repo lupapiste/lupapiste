@@ -1,13 +1,19 @@
-LUPAPISTE.ModalDialogModel = function (params) {
+LUPAPISTE.ModalDialogModel = function () {
   "use strict";
   var self = this;
+
   self.showDialog = ko.observable(false);
-  self.contentName = ko.observable();
-  self.contentParams = ko.observable();
+  self.component = ko.observable();
+  self.componentParams = ko.observable();
   self.windowWidth = ko.observable();
   self.windowHeight = ko.observable();
-  self.title = ko.observable();
   self.dialogVisible = ko.observable(false);
+  self.title = ko.observable();
+  self.size = ko.observable();
+
+  self.css = ko.pureComputed(function() {
+    return [self.size(), self.component()].join(" ");
+  });
 
   self.showDialog.subscribe(function(show) {
     _.delay(function(show) {
@@ -23,6 +29,14 @@ LUPAPISTE.ModalDialogModel = function (params) {
     return self.windowHeight() - 150;
   });
 
+  self.submitFn = ko.observable(undefined);
+  self.submitEnabled = ko.observable();
+
+  self.submitDialog = function() {
+    self.submitFn()();
+    self.closeDialog();
+  };
+
   self.closeDialog = function() {
     self.showDialog(false);
     $("html").removeClass("no-scroll");
@@ -30,10 +44,16 @@ LUPAPISTE.ModalDialogModel = function (params) {
 
   hub.subscribe("show-dialog", function(data) {
     $("html").addClass("no-scroll");
-    self.contentName(data.contentName);
-    self.contentParams(data.contentParams);
+    self.component(data.component);
+    var componentParams = data.componentParams ? data.componentParams : {};
+    self.componentParams(componentParams);
+    self.title = data.title;
+    self.size(data.size ? data.size : "large");
     self.showDialog(true);
-    self.title(loc(data.titleLoc));
+  });
+
+  hub.subscribe("close-dialog", function() {
+    self.closeDialog();
   });
 
   var setWindowSize = function(width, height) {

@@ -5,18 +5,17 @@
             [clojure.set :refer [union difference]]
             [clojure.string :as s]
             [clj-time.format :as timeformat]
-            [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.document.vrk]
-            [lupapalvelu.document.schemas :as schemas]
-            [lupapalvelu.document.tools :as tools]
             [sade.env :as env]
             [sade.util :as util]
             [sade.strings :as ss]
             [sade.core :refer :all]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.document.vrk]
+            [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.validator :as validator]
-            [lupapalvelu.document.subtype :as subtype]
-            ))
+            [lupapalvelu.document.subtype :as subtype]))
 
 ;;
 ;; Validation:
@@ -103,12 +102,13 @@
 (defmethod validate-field :select [_ {:keys [body other-key]} v]
   (let [accepted-values (set (map :name body))
         accepted-values (if other-key (conj accepted-values "other") accepted-values)]
-    (when-not (or (ss/blank? v) (contains? accepted-values v))
+    (when-not (or (ss/blank? v) (accepted-values v))
       [:warn "illegal-value:select"])))
 
-;; FIXME https://support.solita.fi/browse/LUPA-1453
-;; implement validator, the same as :select?
-(defmethod validate-field :radioGroup [_ elem v] nil)
+(defmethod validate-field :radioGroup [_ {body :body} v]
+  (let [accepted-values (set (map :name body))]
+    (when-not (or (ss/blank? v) (accepted-values v))
+      [:warn "illegal-value:select"])))
 
 (defmethod validate-field :buildingSelector [_ elem v]
   (cond
@@ -121,6 +121,13 @@
 (defmethod validate-field :newBuildingSelector [_ elem v] (subtype/subtype-validation {:subtype :number} v))
 
 (defmethod validate-field :personSelector [application elem v]
+  (when-not (ss/blank? v)
+    (when-not (and
+                (domain/has-auth? application v)
+                (domain/no-pending-invites? application v))
+      [:err "application-does-not-have-given-auth"])))
+
+(defmethod validate-field :companySelector [application elem v]
   (when-not (ss/blank? v)
     (when-not (and
                 (domain/has-auth? application v)
@@ -374,10 +381,10 @@
 (defn new-document
   "Creates an empty document out of schema"
   [schema created]
-  {:id           (mongo/create-id)
-   :created      created
-   :schema-info  (:info schema)
-   :data         {}})
+  {:id          (mongo/create-id)
+   :created     created
+   :schema-info (:info schema)
+   :data        (tools/create-document-data schema tools/default-values)})
 
 ;;
 ;; Convert data
@@ -430,11 +437,18 @@
     document
     (tools/deep-find data (keyword schemas/turvakielto))))
 
-(defn mask-person-ids
+(defn mask-person-id-ending
   "Replaces last characters of person IDs with asterisks (e.g., 010188-123A -> 010188-****)"
   [document & [initial-path]]
   (let [mask-if (fn [{type :type} {hetu :value}] (and (= (keyword type) :hetu) hetu (> (count hetu) 7)))
         do-mask (fn [{hetu :value :as v}] (assoc v :value (str (subs hetu 0 7) "****")))]
+    (convert-document-data mask-if do-mask document initial-path)))
+
+(defn mask-person-id-birthday
+  "Replaces first characters of person IDs with asterisks (e.g., 010188-123A -> ******-123A)"
+  [document & [initial-path]]
+  (let [mask-if (fn [{type :type} {hetu :value}] (and (= (keyword type) :hetu) hetu (pos? (count hetu))))
+        do-mask (fn [{hetu :value :as v}] (assoc v :value (str "******" (ss/substring hetu 6 11))))]
     (convert-document-data mask-if do-mask document initial-path)))
 
 (defn has-hetu?
@@ -444,15 +458,17 @@
     (let [full-path (apply conj base-path [:henkilotiedot :hetu])]
       (boolean (find-by-name schema-body full-path)))))
 
-(defn ->henkilo [{:keys [id firstName lastName email phone street zip city personId
+(defn ->henkilo [{:keys [id firstName lastName email phone street zip city personId turvakieltokytkin
                          companyName companyId
-                         fise degree graduatingYear]} & {:keys [with-hetu with-empty-defaults]}]
-  (letfn [(wrap [v] (if (and with-empty-defaults (nil? v)) "" v))]
+                         fise degree graduatingYear]} & {:keys [with-hetu with-empty-defaults?]}]
+  {:pre [(or (nil? turvakieltokytkin) (util/boolean? turvakieltokytkin))]}
+  (letfn [(wrap [v] (if (and with-empty-defaults? (nil? v)) "" v))]
     (->
       {:userId                        (wrap id)
        :henkilotiedot {:etunimi       (wrap firstName)
                        :sukunimi      (wrap lastName)
-                       :hetu          (wrap (when with-hetu personId))}
+                       :hetu          (wrap (when with-hetu personId))
+                       :turvakieltoKytkin (when (or turvakieltokytkin with-empty-defaults?) (boolean turvakieltokytkin))}
        :yhteystiedot {:email          (wrap email)
                       :puhelin        (wrap phone)}
        :osoite {:katu                 (wrap street)
@@ -468,3 +484,19 @@
       util/strip-empty-maps
       tools/wrapped)))
 
+(defn ->company [{:keys [id name y address1 zip po]} {:keys [phone firstName lastName email company]} & {:keys [with-empty-defaults]}]
+  (letfn [(wrap [v] (if (and with-empty-defaults (nil? v)) "" v))]
+    (-> (if (= (:id company) id)
+          {:yhteyshenkilo {:henkilotiedot {:etunimi  (wrap firstName)
+                                           :sukunimi (wrap lastName)}
+                           :yhteystiedot  {:email    (wrap email)
+                                           :puhelin  (wrap phone)}}}
+          {})
+        (merge {:liikeJaYhteisoTunnus          (wrap y)
+                :yritysnimi                    (wrap name)
+                :osoite {:katu                 (wrap address1)
+                         :postinumero          (wrap zip)
+                         :postitoimipaikannimi (wrap po)}})
+        util/strip-nils
+        util/strip-empty-maps
+        tools/wrapped)))

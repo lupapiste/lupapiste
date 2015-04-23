@@ -3,6 +3,10 @@ LUPAPISTE.ForemanModel = function() {
   var self = this;
 
   self.application = ko.observable();
+  self.inPostVerdictState = ko.pureComputed(function() {
+    var app = ko.unwrap(self.application);
+    return app ? app.inPostVerdictState : false;
+  });
   self.email = ko.observable();
   self.error = ko.observable();
   self.processing = ko.observable();
@@ -11,7 +15,7 @@ LUPAPISTE.ForemanModel = function() {
     return self.email() && !util.isValidEmailAddress(self.email());
   });
   self.foremanApplications = ko.observableArray();
-  self.foremanTasks = ko.observableArray();
+  self.foremanTasks = ko.observableArray([]);
   self.finished = ko.observable(false);
   self.foremanRoles = ko.observable(LUPAPISTE.config.foremanRoles);
   self.selectedRole = ko.observable();
@@ -20,62 +24,123 @@ LUPAPISTE.ForemanModel = function() {
     return util.getIn(self, ["application", "permitType"]) === "R" &&
       !/tyonjohtajan-nimeaminen/.test(util.getIn(self, ["application", "operations", 0, "name"]));
   });
+  self.linkedForemanApps = ko.observableArray();
+  self.selectableForemen = ko.pureComputed(function() {
+    return _.filter(self.foremanApplications(), function(app) {
+      return !_.contains(self.linkedForemanApps(), app.id);
+    });
+  });
+
+  self.indicator = ko.observable();
 
   self.refresh = function(application) {
+    function foremanApplications(applications) {
+      _.forEach(applications, function(app) {
+        var foreman = _.find(app.auth, function(f) {
+          return f.role === "foreman" || util.getIn(f, ["invite", "role"]) === "foreman";
+        });
+
+        var foremanDoc = _.find(app.documents, { "schema-info": { "name": "tyonjohtaja-v2" } });
+        var name = util.getIn(foremanDoc, ["data", "kuntaRoolikoodi", "value"]);
+
+        var username  = util.getIn(foremanDoc, ["data", "yhteystiedot", "email", "value"]);
+        var firstname = util.getIn(foremanDoc, ["data", "henkilotiedot", "etunimi", "value"]);
+        var lastname  = util.getIn(foremanDoc, ["data", "henkilotiedot", "sukunimi", "value"]);
+
+        if (!(username || firstname || lastname)) {
+          username = util.getIn(foreman, ["username"]);
+          firstname = util.getIn(foreman, ["firstName"]);
+          lastname = util.getIn(foreman, ["lastName"]);
+        }
+
+        var data = {"state":       app.state,
+                    "id":          app.id,
+                    "email":       username,
+                    "firstName":   firstname,
+                    "lastName":    lastname,
+                    "name":        name,
+                    "statusName":  app.state === "verdictGiven" ? "ok" : "new",
+                    "displayRole": name ? loc(["osapuoli.tyonjohtaja.kuntaRoolikoodi", name]) : ""};
+
+        data.displayName = ko.pureComputed(function() {
+          var output = data.id;
+          if (data.firstName || data.lastName) {
+            output += " ";
+            output += data.lastName ? data.lastName : "";
+            if (data.lastName) {
+              output += " ";
+            }
+            output += data.firstName ? data.firstName : "";
+          }
+          if (data.displayRole) {
+            output += " (" + data.displayRole + ")";
+          }
+          return output;
+        });
+        self.foremanApplications.push(data);
+      });
+    }
+
+    function loadForemanTasks() {
+      var foremanTasks = _.where(self.application().tasks, { "schema-info": { "name": "task-vaadittu-tyonjohtaja" } });
+      var foremen = [];
+      var asiointitunnukset = [];
+
+      _.forEach(foremanTasks, function(task) {
+        var asiointitunnus = util.getIn(task, ["data", "asiointitunnus", "value"]);
+        if (asiointitunnus) {
+          asiointitunnukset.push(asiointitunnus);
+        }
+      });
+
+      self.linkedForemanApps(asiointitunnukset);
+      _.forEach(foremanTasks, function(task) {
+        var asiointitunnus = util.getIn(task, ["data", "asiointitunnus", "value"]);
+        var linkedForemanApp = _.findWhere(self.foremanApplications(), { "id": asiointitunnus});
+
+        var data = { "name": task.taskname,
+                     "taskId": task.id,
+                     "statusName": linkedForemanApp ? linkedForemanApp.statusName : "missing",
+                     "selectedForeman": ko.observable(_.isEmpty(asiointitunnus) ? undefined : asiointitunnus),
+                     "selectableForemen": ko.observableArray(),
+                     "indicator": ko.observable()};
+
+        data.selectableForemen(_.filter(self.foremanApplications(), function(app) {
+          return !_.contains(asiointitunnukset, app.id) || app.id === asiointitunnus;
+        }));
+
+        data.selectedForeman.subscribe(function(val) {
+          ajax
+            .command("link-foreman-task", { id: self.application().id,
+                                            taskId: data.taskId,
+                                            foremanAppId: val ? val : ""})
+            .success(function() {
+              self.indicator({type: "saved"});
+              repository.load(self.application().id);
+            })
+            .error(function(err) {
+              self.indicator({type: "err"});
+              self.error(err.text);
+            })
+            .call();
+        });
+
+        foremen.push(data);
+      });
+      self.foremanTasks({ "name": loc(["task-vaadittu-tyonjohtaja", "_group_label"]),
+                          "foremen": foremen });
+    }
+
     function loadForemanApplications(id) {
       self.foremanApplications([]);
       ajax
         .query("foreman-applications", {id: id})
         .success(function(data) {
-          // TODO query only foreman tasks
-          var foremanTasks = _.where(self.application().tasks, { "schema-info": { "name": "task-vaadittu-tyonjohtaja" } });
-          var foremans = [];
-
-          _.forEach(data.applications, function(app) {
-            var foreman = _.find(app.auth, {"role": "foreman"});
-            var foremanDoc = _.find(app.documents, { "schema-info": { "name": "tyonjohtaja-v2" } });
-            var name = util.getIn(foremanDoc, ["data", "kuntaRoolikoodi", "value"]);
-            var existingTask = _.find(foremanTasks, { "data": {"asiointitunnus": { "value": app.id } } });
-
-            if (existingTask) {
-              name = existingTask.taskname;
-              foremanTasks = _.without(foremanTasks, existingTask);
-            }
-
-            var username  = util.getIn(foremanDoc, ["data", "yhteystiedot", "email", "value"]);
-            var firstname = util.getIn(foremanDoc, ["data", "henkilotiedot", "etunimi", "value"]);
-            var lastname  = util.getIn(foremanDoc, ["data", "henkilotiedot", "sukunimi", "value"]);
-
-            if (!(username || firstname || lastname)) {
-              username = util.getIn(foreman, ["username"]);
-              firstname = util.getIn(foreman, ["firstName"]);
-              lastname = util.getIn(foreman, ["lastName"]);
-            }
-
-            var data = {"state": app.state,
-                        "id": app.id,
-                        "email":     username,
-                        "firstName": firstname,
-                        "lastName":  lastname,
-                        "name": name,
-                        "statusName": app.state === "verdictGiven" ? "ok" : "new" };
-
-            self.foremanApplications.push(data);
-            foremans.push(data);
-          });
-
-          _.forEach(foremanTasks, function(task) {
-            var data = { "name": task.taskname,
-                         "taskId": task.id,
-                         "statusName": "missing" };
-            foremans.push(data);
-          });
-
-          self.foremanTasks({ "name": loc(["task-vaadittu-tyonjohtaja", "_group_label"]),
-                              "foremans": foremans });
+          foremanApplications(data.applications);
+          loadForemanTasks();
         })
         .error(function() {
-          // invited foreman can't always fetch applicants other foreman appications (if they are not invited to them also)
+          // noop
         })
         .call();
     }
@@ -97,6 +162,7 @@ LUPAPISTE.ForemanModel = function() {
         self.selectedRole(undefined);
       }
     } else {
+      self.taskId(undefined);
       self.selectedRole(undefined);
     }
     self.email(undefined);
@@ -112,25 +178,72 @@ LUPAPISTE.ForemanModel = function() {
   self.submit = function() {
     self.error(undefined);
 
-    function inviteToApplication(id, cb) {
-      ajax.command("invite-with-role", { id: id,
-                               documentName: "",
-                               documentId: "",
-                               path: "",
-                               email: self.email(),
-                               title: "",
-                               text: "",
-                               role: "foreman" })
-        .processing(self.processing)
-        .pending(self.pending)
-        .success(function(data) {
-          cb(data);
-        })
-        .error(function(err) {
-          // recipient might have already been invited
-          cb(err);
-        })
-        .call();
+    function inviteToApplication(params, cb) {
+      var defaults = {
+        id: "",
+        documentName: "",
+        documentId: "",
+        path: "",
+        email: "",
+        title: "",
+        text: "",
+        role: "",
+        appAuth: []
+      };
+      params = _.merge(defaults, params);
+
+      // check if invitee is already authenticated (or invited)
+      if (!_.find(params.appAuth, {username: params.email})) {
+        ajax.command("invite-with-role", params)
+          .processing(self.processing)
+          .pending(self.pending)
+          .success(function(data) {
+            cb(data);
+          })
+          .error(function(err) {
+            // recipient might have already been invited
+            error("Unable to invite user:", params.email, err);
+            cb(err);
+          })
+          .call();
+      } else {
+        cb();
+      }
+    }
+
+    function inviteHakijat(id, auth) {
+      var hakijaDocs = _.where(self.application().documents, {"schema-info": {"name": "hakija"}});
+      var hakijat = _.map(hakijaDocs, function(doc) {
+        var userId = util.getIn(doc, ["data", "henkilo", "userId", "value"]);
+        var auth = _.find(self.application().auth, function(a) {
+          return a.id === userId;
+        });
+        return {
+          userId: userId,
+          docId: doc.id,
+          docName: util.getIn(doc, ["schema-info", "name"]),
+          path: "henkilo",
+          email: util.getIn(auth, ["username"])
+        };
+      });
+      var deferreds = [];
+      _.forEach(hakijat, function(hakija) {
+        if (hakija.email) {
+          deferreds.push(inviteToApplication({
+            id: id,
+            documentId: hakija.docId,
+            documentName: hakija.docName,
+            path: hakija.path,
+            email: hakija.email,
+            role: "writer",
+            appAuth: auth
+          }, function(){}));
+        }
+      });
+      $.when.apply($, deferreds)
+      .then(function() {
+        self.finished(id);
+      });
     }
 
     function createApplication() {
@@ -143,11 +256,16 @@ LUPAPISTE.ForemanModel = function() {
         .success(function(data) {
           // 3. invite foreman to new application
           if (self.email()) {
-            inviteToApplication(data.id, function() {
-              self.finished(data.id);
+            inviteToApplication({
+                id: data.id,
+                email: self.email(),
+                role: "foreman",
+                appAuth: data.auth
+              }, function() {
+                inviteHakijat(data.id, data.auth);
             });
           } else {
-            self.finished(data.id);
+            inviteHakijat(data.id, data.auth);
           }
         })
         .error(function(err) {
@@ -158,10 +276,16 @@ LUPAPISTE.ForemanModel = function() {
 
     // 1. invite foreman to current application
     if (self.email()) {
-      inviteToApplication(self.application().id, createApplication);
+      inviteToApplication({
+                id: self.application().id,
+                email: self.email(),
+                role: "foreman",
+                appAuth: self.application().auth
+              }, createApplication);
     } else {
       createApplication();
     }
+
     return false;
   };
 

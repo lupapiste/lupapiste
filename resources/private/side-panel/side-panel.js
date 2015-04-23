@@ -14,7 +14,7 @@ LUPAPISTE.SidePanelModel = function() {
   self.showConversationPanel = ko.observable(false);
   self.showNoticePanel = ko.observable(false);
   self.unseenComments = ko.observable();
-  self.authorization = authorization.create();
+  self.authorization = lupapisteApp.models.applicationAuthModel;
   self.comment = ko.observable(comments.create());
   self.permitType = ko.observable();
   self.authorities = ko.observableArray([]);
@@ -29,6 +29,18 @@ LUPAPISTE.SidePanelModel = function() {
   });
 
   self.previousPage = undefined;
+
+  function setHeight(newHeight) {
+    $("#side-panel .content-wrapper").height(newHeight);
+  }
+
+  function calculateHeight() {
+    var top = $("#side-panel").css("top");
+    var offset = _.parseInt(top.replace(/px/, ""), 10);
+    var margin = 20; // extra 20px margin looks nice
+    var newHeight = $(window).height() - offset - margin;
+    setHeight(newHeight);
+  }
 
   var AuthorityInfo = function(id, firstName, lastName) {
     this.id = id;
@@ -89,13 +101,19 @@ LUPAPISTE.SidePanelModel = function() {
     // Set focus to new comment textarea
     self.comment().isSelected(self.showConversationPanel());
 
-    setTimeout(function() {
-      // Mark comments seen after a second
-      if (self.applicationId() && self.authorization.ok("mark-seen")) {
-        ajax.command("mark-seen", {id: self.applicationId(), type: "comments"})
+    if (self.showConversationPanel()) {
+      calculateHeight();
+
+      setTimeout(function() {
+        // Mark comments seen after a second
+        if (self.applicationId() && self.authorization.ok("mark-seen")) {
+          ajax.command("mark-seen", {id: self.applicationId(), type: "comments"})
           .success(function() {self.unseenComments(0);})
           .call();
-      }}, 1000);
+        }}, 1000);
+    } else {
+      setHeight(0);
+    }
   };
 
   self.highlightConversation = function() {
@@ -113,6 +131,12 @@ LUPAPISTE.SidePanelModel = function() {
   self.toggleNoticePanel = function() {
     self.showNoticePanel(!self.showNoticePanel());
     self.showConversationPanel(false);
+
+    if (self.showNoticePanel()) {
+      calculateHeight();
+    } else {
+      setHeight(0);
+    }
   };
 
   self.closeSidePanel = function() {
@@ -122,6 +146,7 @@ LUPAPISTE.SidePanelModel = function() {
     if (self.showNoticePanel()) {
       self.toggleNoticePanel();
     }
+    setHeight(0);
   };
 
   self.toggleHelp = function() {
@@ -181,13 +206,15 @@ LUPAPISTE.SidePanelModel = function() {
     if(_.contains(pages, pageutil.getPage())) {
       $("#side-panel-template").addClass("visible");
     }
+
+    if (self.sidePanelVisible()) {
+      calculateHeight();
+    }
   });
 
   repository.loaded(pages, function(application, applicationDetails) {
     if (!unsentMessage) {
-      self.authorization.refreshWithCallback({id: applicationDetails.application.id}, function() {
-        self.refresh(application, applicationDetails.authorities);
-      });
+      self.refresh(application, applicationDetails.authorities);
     }
   });
 };

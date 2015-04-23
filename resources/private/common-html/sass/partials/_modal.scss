@@ -1,33 +1,46 @@
 // TODO knockout dialog to share same styles with legacy dialog
 #modal-dialog {
+  .small {
+    width: 320px;
+  }
+  .medium {
+    width: 480px;
+  }
+  .large {
+    width: 980px;
+  }
+
   .dialog {
     display: none;
     position: fixed;
-    width: 980px;
     right: 0;
     left: 0;
+    top: 0;
+    bottom: 0;
     margin: auto;
     z-index: 9999;
     padding: $marginM;
     background-color: #fff;
     height: 700px;
-    min-height: 150px;
-    .content {
-      overflow: auto;
-      position: absolute;
-      top: 52px;
-      bottom: 70px;
-      left: $marginM;
-      right: $marginM;
-    }
-    .footer {
-      position: absolute;
-      bottom: $marginM;
-      right: $marginM;
-      left: $marginM;
-      .cancel {
-        float: right;
-        margin-right: $marginM;
+    min-height: 250px;
+    .component {
+      .content {
+        overflow: auto;
+        position: absolute;
+        top: 45px;
+        left: $marginM;
+        right: $marginM;
+        bottom: 75px;
+      }
+      .button-group {
+        position: absolute;
+        bottom: $marginL;
+        right: $marginM;
+        left: $marginM;
+        .cancel {
+          float: right;
+          margin-right: $marginM;
+        }
       }
     }
     .header {
@@ -239,5 +252,12 @@
 #dialog-cancel-application {
   div.application-cancel-text-content p {
     margin-bottom: 0;
+  }
+}
+
+.company-invite-dialog {
+  height: 250px !important;
+  select {
+    width: 100%;
   }
 }

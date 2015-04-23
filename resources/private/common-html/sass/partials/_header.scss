@@ -2,17 +2,18 @@
 nav {
   position: fixed;
   top:0;
-  z-index: 1100;
+  z-index: 2002;
   background: #fff;
   height: 60px;
   box-sizing: border-box;
   width: 100%;
-  &.nav-wrapper {
+  background: $lp-dark-grey;
+  .nav-wrapper {
     width: 100%;
     max-width: $application-max-width;
     margin: 0 auto;
     position: relative;
-    background: $lp-dark-grey;
+    box-sizing: border-box;
     .brand {
       position: relative;
       width: 300px;
@@ -21,6 +22,7 @@ nav {
         margin: 12px;
       }
       a img {
+        float: left;
         width: 164px;
         height: 35px;
         margin: 12px;
