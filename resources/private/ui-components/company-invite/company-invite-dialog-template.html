@@ -9,10 +9,11 @@
           <select id="selectCompanyToInvite" data-bind="options: companies, optionsText: 'label', value: selected"></select>
         </form>
       </div>
-      <submit-button-group params="isSubmitVisible: isSubmitVisible,
-                                         isSubmitEnabled: isSubmitEnabled,
-                                         submit: submit,
-                                         submitTitle: 'company-invite.invite'"/>
+      <div data-bind="component: {name:'submit-button-group',
+                                  params: { isSubmitVisible: isSubmitVisible,
+                                            isSubmitEnabled: isSubmitEnabled,
+                                            submit: submit,
+                                            submitTitle: 'company-invite.invite'}}"></div>
     </script>
   </section>
 </body>
