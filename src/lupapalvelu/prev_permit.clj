@@ -9,6 +9,11 @@
             [lupapalvelu.authorization-api :as authorization]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.domain :as domain]
+            [sade.util :as util]
+            [lupapalvelu.organization :as organization]
+            [lupapalvelu.operations :as operations]
+            [lupapalvelu.xml.krysp.reader :as krysp-reader]
+            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch-api]
             [lupapalvelu.document.commands :as commands]))
 
 (defn- get-applicant-email [applicant]
@@ -128,4 +133,4 @@
                                        (when-not rakennuspaikka-exists?
                                          (info "Prev permit application creation, rakennuspaikkatieto information incomplete:\n " (:rakennuspaikka app-info) "\n"))
                                        (fail! :error.more-prev-app-info-needed :needMorePrevPermitInfo true))
-        :else                        (ok :id (prev-permit/do-create-application-from-previous-permit command operation xml app-info location-info))))))
+        :else                        (ok :id (do-create-application-from-previous-permit command operation xml app-info location-info))))))
