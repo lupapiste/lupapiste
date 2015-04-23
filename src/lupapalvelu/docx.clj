@@ -23,7 +23,7 @@
   (reduce (fn [^IContext c, [k v]] (.put c k v) c) (.createContext report) m))
 
 (def- yritystilisopimus-default-model {:date ""
-                                       :company {:name "", :y "", :address1 "" :address2 ""}
+                                       :company {:name "", :y "", :address1 "", :address2 "", :zip "", :po ""}
                                        :contact {:firstName "", :lastName ""}
                                        :account {:type "", :price ""}})
 
