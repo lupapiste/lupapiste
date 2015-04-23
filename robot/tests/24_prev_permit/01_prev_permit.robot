@@ -25,7 +25,7 @@ Järvenpää authority logs in and sees the Nouda lupa button
   Wait until  Element should be visible  //section[@id='applications']//button[@data-test-id='applications-create-with-prev-permit']
   # test the smaller button in the upper-right corner
   ${secs} =  Get Time  epoch
-  Set Suite Variable  ${appname-jarvenpaa-normal}  create-jarvenpaa-app${secs}
+  Set Suite Variable  ${appname-jarvenpaa-normal}  create-jarvenpaa-app-${secs}
   Create application the fast way  ${appname-jarvenpaa-normal}  186  186-2-215-10  kerrostalo-rivitalo
   Go to page  applications
   Wait until  Element should be visible  //section[@id='applications']//button[@data-test-id='applications-create-new-with-prev-permit']
@@ -39,6 +39,8 @@ Click create button
   Wait until  Element text should be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  186-3-356-6
   Element text should be  xpath=//section[@id='application']//span[@data-test-id='test-application-operation']  Rakennusvalvonnan luvan siirto Lupapisteeseen
   Application state should be  verdictGiven
+  ${applicationid} =  Get Text  xpath=//span[@data-test-id='application-id']
+  Set Suite Variable  ${applicationid}
 
 Check invitees
   Open tab  parties
@@ -53,14 +55,30 @@ Open Rakentaminen tab, and check it contains 13 tasks
   #Wait until  Xpath Should Match X Times  //table[@data-bind="foreach: taskGroups"]/tbody/tr[@data-test-type="task-lupamaarays"]  2
   Wait until  Xpath Should Match X Times  //table[@data-test-id="tasks-foreman"]/tbody/tr  3
 
-#Re-fetch application with same kuntalupatunnus -> the same application is opened
+Re-fetch application with same kuntalupatunnus
+  Go to page  applications
+  Go to prev permit page and fill the kuntalupatunnus
+  Click button  prev-permit-create-button
 
+The same application is opened, new one is not created
+  Wait until  Element text should be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  186-3-356-6
+  ${newApplicationid} =  Get Text  xpath=//span[@data-test-id='application-id']
+  #Set Suite Variable  ${newApplicationid}
+  Should Be Equal As Strings  ${newApplicationid}  ${applicationid}
 
+Cancel the created application and re-fetch application
+  Close current application as authority
+  #Wait until  Application state should be  canceled     # TODO: make this work
 
-#Cancel the created application and re-fetch application
+  Go to page  applications
+  Go to prev permit page and fill the kuntalupatunnus
+  Click button  prev-permit-create-button
 
-
-
+A new application is opened, still with same property id
+  Wait until  Element text should be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  186-3-356-6
+  ${newApplicationid} =  Get Text  xpath=//span[@data-test-id='application-id']
+  #Set Suite Variable  ${newApplicationid}
+  Should Not Be Equal As Strings  ${newApplicationid}  ${applicationid}
   Logout
 
 
