@@ -514,6 +514,11 @@ Close current application
   Click by test id  application-cancel-btn
   Confirm  dynamic-yes-no-confirm-dialog
 
+Close current application as authority
+  Wait Until  Element Should Be Enabled  xpath=//button[@data-test-id="application-cancel-authority-btn"]
+  Click enabled by test id  application-cancel-authority-btn
+  Confirm  dialog-cancel-application
+
 Confirm
   [Arguments]  ${modalId}
   Wait until  Element should be visible  xpath=//div[@id="${modalId}"]//button[@data-test-id="confirm-yes"]
