@@ -122,12 +122,8 @@
   (let [process (find-sign-process! process-id)]
     (when (= (:status process) "created")
       (process-update! process :started ts))
-
-    (debug process)
-
     ; FIXME: where we get the selected account?
-    ["application/pdf" (docx/yritystilisopimus (:company process) (:signer process) {} (now))])
-  )
+    ["application/pdf" (docx/yritystilisopimus (:company process) (:signer process) {} (now))]))
 
 ;
 ; Success:
