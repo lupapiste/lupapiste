@@ -12,6 +12,8 @@
 
 (set! *warn-on-reflection* true)
 
+(def ^Options to-pdf (-> (Options/getTo ConverterTypeTo/PDF) (.via ConverterTypeVia/XWPF)))
+
 (defn- ^IContext create-context
   ([^IXDocReport report m]
     (create-context report m (constantly "")))
@@ -19,26 +21,25 @@
     (reduce
       (fn [^IContext c, [k v]] (.put c k v) c)
       (.createContext report)
+      ; Freemarker throws exception from null values by default
       (-> m walk/stringify-keys (util/convert-values #(nil? %2) nil-convert)))))
 
-(defn testi []
+(defn poc []
   (with-open [in (-> "yritystilisopimus.docx" io/resource io/input-stream)
               out (FileOutputStream. (io/file "out.pdf"))]
     (let [report  (.loadReport (XDocReportRegistry/getRegistry) in TemplateEngineKind/Freemarker )
           context (create-context report {:company {:name "Asiakas Oy",
                                                     :y "123456-1"
                                                     :address1 "Osoiterivi 1"
-                                                    :address2 "Osoiterivi 2"}
+                                                    :address2 nil}
                                           :contact {:firstName "Etu",
                                                     :lastName "Suku"}
-                                          :account {:type nil,
+                                          :account {:type "TEST",
                                                     :price "100"}})
-
-          options (doto (Options/getTo ConverterTypeTo/PDF) (.via ConverterTypeVia/XWPF))
           starting (now)]
 
-      (.convert report context options out )
-      (println "Took" (- (now) starting))
+      (.convert report context to-pdf out)
+      (println "Conversion took" (- (now) starting) "ms")
       )
     )
   )
