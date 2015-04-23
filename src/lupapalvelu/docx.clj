@@ -27,22 +27,25 @@
                                        :contact {:firstName "", :lastName ""}
                                        :account {:type "", :price ""}})
 
-(defn ^InputStream yritystilisopimus [company contact account timestamp]
-  {:pre [(map? company) (map? contact) (map? account)]}
-  (with-open [out (ByteArrayOutputStream. (* 60 1024)) ; output will be about 60 KB
-              in (-> "yritystilisopimus.docx" io/resource io/input-stream)]
+(defn ^InputStream docx-template-to-pdf [template-name model]
+  (with-open [in (-> template-name io/resource io/input-stream)
+              out (ByteArrayOutputStream. 4096)]
     (let [report  (.loadReport (XDocReportRegistry/getRegistry) in TemplateEngineKind/Freemarker )
-          model (freemarker-compliant (util/deep-merge
-                                        yritystilisopimus-default-model
-                                        {:date (util/to-local-date timestamp)
-                                         :company company
-                                         :contact contact
-                                         :account account}))
-          context (create-context report model)
+          context (->> model freemarker-compliant (create-context report))
           starting (now)]
       (.convert report context to-pdf out)
       (debugf "Conversion took %d ms" (- (now) starting))
       (ByteArrayInputStream. (.toByteArray out)))))
+
+(defn ^InputStream yritystilisopimus [company contact account timestamp]
+  {:pre [(map? company) (map? contact) (map? account)]}
+  (let [model (util/deep-merge
+                yritystilisopimus-default-model
+                {:date (util/to-local-date timestamp)
+                 :company company
+                 :contact contact
+                 :account account})]
+    (docx-template-to-pdf "yritystilisopimus.docx" model)))
 
 (defn- poc []
   (with-open [pdf (yritystilisopimus
