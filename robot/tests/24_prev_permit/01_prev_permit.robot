@@ -31,15 +31,7 @@ Järvenpää authority logs in and sees the Nouda lupa button
   Wait until  Element should be visible  //section[@id='applications']//button[@data-test-id='applications-create-new-with-prev-permit']
 
 Open 'prev permit' create page and check the fields
-  Click by test id  applications-create-new-with-prev-permit
-  Wait until  Element should be visible  //section[@id='create-page-prev-permit']//input[@data-test-id='test-prev-permit-kuntalupatunnus']
-  Element should be visible  //section[@id='create-page-prev-permit']//select[@data-test-id='test-prev-permit-organization-select']
-  Element should be disabled  //section[@id='create-page-prev-permit']//button[@data-test-id='test-prev-permit-create-button']
-
-  Wait until  Element Should Contain  xpath=//section[@id='create-page-prev-permit']//select[@data-test-id='test-prev-permit-organization-select']  Järvenpään rakennusvalvonta
-
-  Input text  //section[@id='create-page-prev-permit']//input[@data-test-id='test-prev-permit-kuntalupatunnus']  14-0241-R 3
-  Element should be enabled  //section[@id='create-page-prev-permit']//button[@data-test-id='test-prev-permit-create-button']
+  Go to prev permit page and fill the kuntalupatunnus
 
 Click create button
   Click button  prev-permit-create-button
@@ -70,3 +62,15 @@ Open Rakentaminen tab, and check it contains 13 tasks
 
 
   Logout
+
+
+*** Keywords ***
+
+Go to prev permit page and fill the kuntalupatunnus
+  Click by test id  applications-create-new-with-prev-permit
+  Wait until  Element should be visible  //section[@id='create-page-prev-permit']//input[@data-test-id='test-prev-permit-kuntalupatunnus']
+  Element should be visible  //section[@id='create-page-prev-permit']//select[@data-test-id='test-prev-permit-organization-select']
+  Element should be disabled  //section[@id='create-page-prev-permit']//button[@data-test-id='test-prev-permit-create-button']
+  Wait until  Element Should Contain  xpath=//section[@id='create-page-prev-permit']//select[@data-test-id='test-prev-permit-organization-select']  Järvenpään rakennusvalvonta
+  Input text  //section[@id='create-page-prev-permit']//input[@data-test-id='test-prev-permit-kuntalupatunnus']  14-0241-R 3
+  Element should be enabled  //section[@id='create-page-prev-permit']//button[@data-test-id='test-prev-permit-create-button']
