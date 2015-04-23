@@ -30,5 +30,12 @@ Open 'prev permit' create page and check the fields
   Input text  //section[@id='create-page-prev-permit']//input[@data-test-id='test-prev-permit-kuntalupatunnus']  14-0241-R 3
   Element should be enabled  //section[@id='create-page-prev-permit']//button[@data-test-id='test-prev-permit-create-button']
 
+Click create button
+  Click button  prev-permit-create-button
+  #Wait until  Element should be visible  xpath=//section[@id='application']//span[@data-test-id='application-property-id']
+  Wait until  Element text should be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  186-3-356-6
+  Element text should be  xpath=//section[@id='application']//span[@data-test-id='test-application-operation']  Rakennusvalvonnan luvan siirto Lupapisteeseen
+
+
 
   Logout
