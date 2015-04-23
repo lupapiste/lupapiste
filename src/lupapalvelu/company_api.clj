@@ -3,6 +3,7 @@
             [lupapalvelu.action :refer [defquery defcommand] :as action]
             [lupapalvelu.company :as c]
             [lupapalvelu.user :as u]
+            [monger.operators :refer :all]
             [lupapalvelu.mongo :as mongo]))
 
 ;;
@@ -113,14 +114,15 @@
       (ok))
     (fail :error.user-not-found)))
 
-(defcommand company-delete-invite
+(defcommand company-cancel-invite
   {:parameters [tokenId]
-   :user-roles #{:applicant}}
-  [{user :user}]
+   :user-roles #{:applicant}
+   :input-validators [validate-user-is-admin-or-company-admin]}
+  [{:keys [created user application] :as command}]
   (let [token (mongo/by-id :token tokenId)
         token-company-id (get-in token [:data :company :id])
         user-company-id (get-in user [:company :id])]
     (if-not (= token-company-id user-company-id)
       (fail! :forbidden)))
-  (mongo/remove :token tokenId)
+  (mongo/update-by-id :token tokenId {$set {:used created}})
   (ok))

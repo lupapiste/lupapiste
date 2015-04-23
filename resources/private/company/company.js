@@ -57,6 +57,7 @@
       .success(function(data) {
         var result = data.result;
         if (result === "invited") {
+          hub.send("refresh-companies");
           this.showSearchEmail(false).showUserInvited(true);
         } else if (result === "already-in-company") {
           this.showSearchEmail(false).showUserInCompany(true);
@@ -132,7 +133,7 @@
       var command = "company-user-update";
       var params = {"user-id": self.userId, op: self.op, value: !self.value()};
       if (self.tokenId) {
-        command = "company-delete-invite";
+        command = "company-cancel-invite";
         params = {"tokenId": self.tokenId};
       }
       ajax
