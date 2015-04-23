@@ -7,6 +7,17 @@ Resource        ../../common_resource.robot
 
 *** Test Cases ***
 
+Mikko logs in and does not see the Nouda lupa button
+  Mikko logs in
+  # test the bigger button
+  Wait until  Element should not be visible  //section[@id='applications']//button[@data-test-id='applications-create-with-prev-permit']
+  # test the smaller button in the upper-right corner
+  ${secs} =  Get Time  epoch
+  Set Suite Variable  ${appname-mikko}  create-mikko-app${secs}
+  Create application the fast way  ${appname-mikko}  753  753-416-25-30  kerrostalo-rivitalo
+  Go to page  applications
+  Wait until  Element should not be visible  //section[@id='applications']//button[@data-test-id='applications-create-new-with-prev-permit']
+  Logout
 
 Järvenpää authority logs in and sees the Nouda lupa button
   Jarvenpaa authority logs in
