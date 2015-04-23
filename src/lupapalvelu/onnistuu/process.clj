@@ -2,6 +2,7 @@
   (:require [taoensso.timbre :as timbre :refer [debug infof warnf errorf]]
             [clojure.java.io :as io]
             [clojure.walk :as walk]
+            [pandect.core :as pandect]
             [monger.collection :as mc]
             [monger.operators :refer :all]
             [schema.core :as sc]
@@ -119,11 +120,20 @@
 
 (defn fetch-document [process-id ts]
   (infof "sign:fetch-document:%s" process-id)
-  (let [process (find-sign-process! process-id)]
+  (let [process (find-sign-process! process-id)
+        content-type "application/pdf"
+        ; FIXME: where we get the selected account?
+        pdf (docx/yritystilisopimus (:company process) (:signer process) {} (now))]
+
     (when (= (:status process) "created")
-      (process-update! process :started ts))
-    ; FIXME: where we get the selected account?
-    ["application/pdf" (docx/yritystilisopimus (:company process) (:signer process) {} (now))]))
+      (process-update! process :started ts)
+      (let [filename (str "yritystilisopimus-" (-> process :company :name) ".pdf")
+            sha256 (pandect/sha256 pdf)]
+        (.reset pdf)
+        (mongo/upload (mongo/create-id) filename content-type pdf {:sha256 sha256, :process process})
+        (.reset pdf)))
+
+    [content-type pdf]))
 
 ;
 ; Success:
