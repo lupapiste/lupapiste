@@ -15,14 +15,13 @@
    :input-validators [(partial action/non-blank-parameters [:kuntalupatunnus])]
    :user-roles #{:rest-api}}
   [{:keys [user] :as command}]
-  (let [command (update-in command [:data] merge {:organizationId (first (:organizations user))})
+  (let [command      (update-in command [:data] merge {:organizationId (first (:organizations user))})
         existing-app (domain/get-application-as {:state    {$ne "canceled"}
-                                                 :verdicts {$elemMatch {:kuntalupatunnus kuntalupatunnus}}} user)]
-    (if existing-app
-      (resp/status 200 (str (merge (ok :id (:id existing-app))
-                                   {:status :already-existing-application})))
-      (resp/status 200 (str (merge (prev-permit/fetch-prev-application! command)
-                                   {:status :created-new-application}))))))
+                                                 :verdicts {$elemMatch {:kuntalupatunnus kuntalupatunnus}}} user)
+        result       (apply merge (if existing-app
+                                    [(ok :id (:id existing-app)) {:text :already-existing-application}]
+                                    [(prev-permit/fetch-prev-application! command) {:text :created-new-application}]))]
+    (resp/json result)))
 
 (defcommand create-application-from-previous-permit
   {:parameters       [:lang :x :y :address :propertyId organizationId kuntalupatunnus]

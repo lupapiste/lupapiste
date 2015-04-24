@@ -9,12 +9,12 @@
             [lupapalvelu.authorization-api :as authorization]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.domain :as domain]
-            [sade.util :as util]
-            [lupapalvelu.organization :as organization]
-            [lupapalvelu.operations :as operations]
+            [lupapalvelu.document.commands :as commands]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
+            [sade.util :as util]
+            [lupapalvelu.operations :as operations]
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch-api]
-            [lupapalvelu.document.commands :as commands]))
+            [lupapalvelu.organization :as organization]))
 
 (defn- get-applicant-email [applicant]
   (-> (or
