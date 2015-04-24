@@ -123,6 +123,15 @@ LUPAPISTE.ApplicationModel = function() {
 
   self.allowedAttachmentTypes = ko.observableArray([]);
 
+  self.linkToBackingSystemEnabled = ko.pureComputed(function () {
+    return true;
+  });
+
+  self.toBackingSystem = function() {
+    console.log("foo!");
+    window.open("http://www.google.com", "_blank");
+  };
+
   self.updateInvites = function() {
     invites.getInvites(function(data) {
       self.invites(_.filter(data.invites, function(invite) {
