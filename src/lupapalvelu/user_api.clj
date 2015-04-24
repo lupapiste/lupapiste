@@ -153,6 +153,7 @@
         :email email
         :enabled (= "true" (str (:enabled user-data)))
         :organizations (if (:organization user-data) [(:organization user-data)] [])
+        :orgAuthz {(:organization user-data) #{(:role user-data)}}
         :private (merge {}
                    (when (:password user-data)
                      {:password (security/get-hash (:password user-data))})
@@ -299,6 +300,16 @@
   (when-not (#{"add" "remove"} (:operation data))
     (fail :bad-request :desc (str "illegal organization operation: '" (:operation data) "'"))))
 
+(defn update-user [email operation organization]
+  (let [role             "authority"
+        org-op           ({"add" $addToSet "remove" $pull} operation)
+        org-data         {:organizations organization}
+        org-authz-op     ({"add" $set "remove" $unset} operation)
+        org-authz-data   {(str "orgAuthz." organization) [role]}
+        query            {:email email, :role role}]
+    (mongo/update-n :users query {org-op       org-data
+                                  org-authz-op org-authz-data})))
+
 (defcommand update-user-organization
   {:parameters       [operation email firstName lastName]
    :input-validators [valid-organization-operation?
@@ -308,8 +319,7 @@
   [{caller :user}]
   (let [email            (user/canonize-email email)
         new-organization (first (:organizations caller))
-        update-count     (mongo/update-n :users {:email email, :role "authority"}
-                           {({"add" $addToSet "remove" $pull} operation) {:organizations new-organization}})]
+        update-count     (update-user email operation new-organization)]
     (debug "update user" email)
     (if (pos? update-count)
       (ok :operation operation)

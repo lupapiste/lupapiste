@@ -123,7 +123,12 @@
   (facts "apikey is created"
     (fact (-> (create-new-user-entity  {:email "..anything.." :apikey "true"}) :private :apikey) => string?)
     (fact (-> (create-new-user-entity {:email "..anything.." :apikey "false"}) :private) => {})
-    (fact (-> (create-new-user-entity {:email "..anything.." :apikey "foo"}) :private :apikey) => "foo")))
+    (fact (-> (create-new-user-entity {:email "..anything.." :apikey "foo"}) :private :apikey) => "foo"))
+
+  (fact "orgAuthz is created"
+    (:orgAuthz (create-new-user-entity {:email "..anything.."
+                                        :organization "123-R"
+                                        :role "authority"})) => {"123-R" #{"authority"}}))
 
 ;;
 ;; ==============================================================================
