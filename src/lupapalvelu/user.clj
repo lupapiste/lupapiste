@@ -70,6 +70,10 @@
     (filter (fn [[org org-roles]] (some roles org-roles)))
     (map (comp name first))))
 
+(defn authority-admins-organization-id [user]
+  (first (organization-ids-by-roles user #{"authorityAdmin"})))
+
+
 ;;
 ;; ==============================================================================
 ;; Finding user data:
