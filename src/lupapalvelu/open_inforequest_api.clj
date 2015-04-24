@@ -15,6 +15,7 @@
      :email email
      :enabled true
      :role "oirAuthority"
+     :orgAuthz {(keyword organization-id) #{:authority}}
      :oir true
      :organizations [organization-id]
      :firstName ""

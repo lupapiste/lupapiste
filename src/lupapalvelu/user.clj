@@ -33,7 +33,7 @@
 ; TODO remove this after data model has been migrated
 (defn with-org-auth [{:keys [organizations role] :as user}]
   (if (#{:authority :authorityAdmin} (keyword role))
-    (assoc user :orgAuthz (reduce (fn [m org-id] (assoc m org-id #{role})) {} organizations))
+    (assoc user :orgAuthz (reduce (fn [m org-id] (assoc m (keyword org-id) #{role})) {} organizations))
     user))
 
 (defn session-summary
