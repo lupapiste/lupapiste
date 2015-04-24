@@ -79,6 +79,9 @@
 (def all-authz-writer-roles (conj default-authz-writer-roles :statementGiver))
 (def all-authz-roles (conj all-authz-writer-roles :reader))
 
+(def default-org-authz-roles #{:authority})
+(def all-org-authz-roles (conj default-org-authz-roles :authorityAdmin)) ; TODO add TOJ roles here
+
 ;; Notificator
 
 (defn notify [notification]
@@ -424,7 +427,9 @@
       action-keyword
       (merge
         {:user-authz-roles (default-user-authz action-type)
-         :org-authz-roles (when (some user-roles [:authority :oirAuthority :anonymous]) #{:authority})}
+         :org-authz-roles (cond
+                            (some user-roles [:authority :oirAuthority]) default-org-authz-roles
+                            (user-roles :anonymous) all-org-authz-roles)}
         meta-data
         {:type action-type
          :ns ns-str
