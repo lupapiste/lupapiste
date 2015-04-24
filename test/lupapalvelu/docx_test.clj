@@ -1,0 +1,17 @@
+(ns lupapalvelu.docx-test
+  (:require [midje.sweet :refer :all]
+            [pdfboxing.text :as pdfbox]
+            [lupapalvelu.docx :as docx]
+            [lupapalvelu.test-util :refer :all]
+            [sade.strings :as ss]))
+
+(fact "Yritystilisopimus"
+  (let [company {:name "Asiakas Oy", :y "123456-1", :address1 "Osoiterivi 1", :address2 "Osoiterivi 2", :zip "99999", :po "Stockholm"}
+        contact {:firstName "Etu", :lastName "Suku"}
+        account {:type "TEST", :price "BILLIONS!"}
+        pdf-stream (docx/yritystilisopimus company contact account 0)
+        pdf-content (pdfbox/extract pdf-stream)]
+
+    (doseq [[k v] (merge company contact account)
+            :let [result (doc-result (ss/contains pdf-content v) k)]]
+      result => (doc-check true?))))
