@@ -12,6 +12,9 @@
         pdf-stream (docx/yritystilisopimus company contact account 0)
         pdf-content (pdfbox/extract pdf-stream)]
 
+    (fact "PDF contains date"
+      pdf-content => (contains "01.01.1970"))
+
     (doseq [[k v] (merge company contact account)
             :let [result (doc-result (ss/contains pdf-content v) k)]]
       result => (doc-check true?))))
