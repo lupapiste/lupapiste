@@ -32,7 +32,7 @@
 ; Temporary mapping to generate orgAuthz key from organizations.
 ; TODO remove this after data model has been migrated
 (defn with-org-auth [{:keys [organizations role] :as user}]
-  (if (#{:authority :authorityAdmin} (keyword role))
+  (if (#{:authority :authorityAdmin :rest-api} (keyword role))
     (assoc user :orgAuthz (reduce (fn [m org-id] (assoc m (keyword org-id) #{role})) {} organizations))
     user))
 
