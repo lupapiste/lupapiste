@@ -52,7 +52,7 @@
                              (assoc data :organizations {$in [organizations]})
                              data))
                 (user/find-users))]
-    (ok :users (map user/session-summary users))))
+    (ok :users (map (comp user/with-org-auth user/non-private) users))))
 
 (env/in-dev
   (defquery user-by-email
