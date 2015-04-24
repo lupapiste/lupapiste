@@ -5,7 +5,7 @@
             [lupapalvelu.test-util :refer :all]
             [sade.strings :as ss]))
 
-(fact "Yritystilisopimus"
+(facts "Yritystilisopimus"
   (let [company {:name "Asiakas Oy", :y "123456-1", :address1 "Osoiterivi 1", :address2 "Osoiterivi 2", :zip "99999", :po "Stockholm"}
         contact {:firstName "Etu", :lastName "Suku"}
         account {:type "TEST", :price "BILLIONS!"}
@@ -15,6 +15,7 @@
     (fact "PDF contains date"
       pdf-content => (contains "01.01.1970"))
 
-    (doseq [[k v] (merge company contact account)
-            :let [result (doc-result (ss/contains pdf-content v) k)]]
-      result => (doc-check true?))))
+    (fact "PDF contains all model data"
+      (doseq [[k v] (merge company contact account)
+             :let [result (doc-result (ss/contains pdf-content v) k)]]
+       result => (doc-check true?)))))
