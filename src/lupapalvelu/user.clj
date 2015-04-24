@@ -196,7 +196,7 @@
   (when-not (ss/blank? apikey)
     (let [user (find-user {:private.apikey apikey})]
       (when (:enabled user)
-        (non-private user)))))
+        (session-summary user)))))
 
 (defmacro with-user-by-email [email & body]
   `(let [~'user (get-user-by-email ~email)]
