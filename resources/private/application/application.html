@@ -192,7 +192,7 @@
             <span data-bind="ltext: 'application.approveApplication'"></span>
             <span class="icon approve left-align"></span>
           </button>
-          <export-attachments/>
+          <div data-bind="component: {name: 'export-attachments'}"></div>
           <button data-bind="click: toAsianhallinta,
                              visible: $root.authorization.ok('application-to-asianhallinta') && asianhallintaEnabled,
                              enable: !processing() && $root.authorization.ok('application-to-asianhallinta') && asianhallintaEnabled,
@@ -424,13 +424,9 @@
                                    enabled: $root.authorization.ok('invite-with-role')"
                         onclick="$('#invite-document-name').val('').change();$('#invite-document-path').val('').change();$('#invite-document-id').val('').change();LUPAPISTE.ModalDialog.open('#dialog-valtuutus');return false;">
                   </button>
-                  <button class="btn-primary"
-                        data-test-id="company-invite"
-                        data-bind="ltext: 'company-invite.invite',
-                                   visible: $root.authorization.ok('invite-with-role'),
-                                   enabled: $root.authorization.ok('invite-with-role'),
-                                   click: $root.openInviteCompany">
-                  </button>
+
+                  <div data-bind="component: {name: 'company-invite'}"></div>
+
                 </div>
               </div>
             </div>
@@ -526,7 +522,7 @@
                                             attachmentsOperations: $data.attachmentsOperations,
                                             testId: 'upper'}}"></div>
 
-          <export-attachments/>
+          <div data-bind="component: {name: 'export-attachments'}"></div>
           <!-- /ko -->
 
           <div data-bind="if: postAttachmentsByOperation().length > 0" data-test-id="application-post-attachments-table">
@@ -545,7 +541,7 @@
                                             attachmentsOperations: $data.attachmentsOperations,
                                             testId: 'lower'}}"></div>
 
-          <export-attachments/>
+          <div data-bind="component: {name: 'export-attachments'}"></div>
 
           <!-- ko if: $root.application.inPostVerdictState() -->
           <div data-bind="if: preAttachmentsByOperation().length > 0" data-test-id="application-pre-attachments-table">
@@ -604,7 +600,7 @@
                </button>
               <h2 class="missing-info-title"
                   data-bind="ltext: 'application.requiredDataMissing'"></h2>
-              
+
             <!-- /ko -->
 
             <!--  ko if: hasIncorrectlyFilledRequiredFields() -->

@@ -65,6 +65,14 @@
                                         :lastName "TESTAA"
                                         :firstName "PORTAALIA"}})))
 
+
+(def- neighbor-non-matching-with-mark-done ; reminders not sent if authority has marked neighbor done
+  (-> neighbor-matching
+    (assoc :id "553649e9aa24e8d915b579da")
+    (update-in [:status] conj {:state "mark-done"
+                               :user nil
+                               :created (+ 100 timestamp-1-day-ago)})))
+
 (def- statement-non-matching
   {:id "525533f7e4b0138a23d8r4b4"
     :given nil
@@ -141,7 +149,7 @@
     :id "LP-753-2014-123456789"
     :modified timestamp-1-day-ago
     :statements [statement-non-matching]
-    :neighbors [neighbor-non-matching-with-response-given]))
+    :neighbors [neighbor-non-matching-with-response-given neighbor-non-matching-with-mark-done]))
 
 (def- reminder-application-matching-to-inforequest
   (assoc reminder-application

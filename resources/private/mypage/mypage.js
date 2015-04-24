@@ -32,7 +32,6 @@
     self.phone = ko.observable();
     self.role = ko.observable();
     self.architect = ko.observable();
-    self.companyId = ko.observable();
     self.degree = ko.observable();
     self.graduatingYear = ko.observable();
     self.fise = ko.observable();
@@ -154,6 +153,14 @@
         .command("remove-user-attachment", {"attachment-id": self.fileToRemove})
         .success(self.updateAttachments)
         .call();
+    };
+
+    self.editUsers = function() {
+      window.location.hash = "#!/company/" + self.company.id() + "/users/";
+    };
+
+    self.editCompany = function() {
+      window.location.hash = "#!/company/" + self.company.id();
     };
 
     self.saved.subscribe(self.updateUserName);

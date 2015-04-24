@@ -269,6 +269,10 @@ SolitaAdmin logs in
   Admin logs in  admin  admin  Admin Admin
   Wait until  Element should be visible  admin
 
+Jarvenpaa authority logs in
+  Authority logs in  rakennustarkastaja@jarvenpaa.fi  jarvenpaa  Rakennustarkastaja Järvenpää
+
+
 #
 # Helpers for cases when target element is identified by "data-test-id" attribute:
 #
@@ -507,8 +511,13 @@ Click tree item by text
 # Closes the application that is currently open by clicking cancel button
 Close current application
   Wait Until  Element Should Be Enabled  xpath=//button[@data-test-id="application-cancel-btn"]
-  Click by test id  application-cancel-btn
+  Click enabled by test id  application-cancel-btn
   Confirm  dynamic-yes-no-confirm-dialog
+
+Close current application as authority
+  Wait Until  Element Should Be Enabled  xpath=//button[@data-test-id="application-cancel-authority-btn"]
+  Click enabled by test id  application-cancel-authority-btn
+  Confirm  dialog-cancel-application
 
 Confirm
   [Arguments]  ${modalId}
@@ -630,6 +639,14 @@ Comment count is
   Open side panel  conversation
   Wait until  Xpath Should Match X Times  //div[@id='conversation-panel']//div[contains(@class,'comment-text')]  ${amount}
   Close side panel  conversation
+
+#
+# Invites
+#
+
+Invite count is
+  [Arguments]  ${amount}
+  Wait Until  Xpath Should Match X Times  //*[@class='user-invite']  ${amount}
 
 #
 # Tasks

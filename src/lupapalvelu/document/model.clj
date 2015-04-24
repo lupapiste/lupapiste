@@ -127,6 +127,13 @@
                 (domain/no-pending-invites? application v))
       [:err "application-does-not-have-given-auth"])))
 
+(defmethod validate-field :companySelector [application elem v]
+  (when-not (ss/blank? v)
+    (when-not (and
+                (domain/has-auth? application v)
+                (domain/no-pending-invites? application v))
+      [:err "application-does-not-have-given-auth"])))
+
 (defmethod validate-field :fillMyInfoButton [_ _ _] nil)
 (defmethod validate-field :foremanHistory [_ _ _] nil)
 (defmethod validate-field :foremanOtherApplications [_ _ _] nil)
@@ -473,6 +480,25 @@
                   :koulutus           (wrap degree)
                   :valmistumisvuosi   (wrap graduatingYear)
                   :fise               (wrap fise)}}
+      util/strip-nils
+      util/strip-empty-maps
+      tools/wrapped)))
+
+(defn ->yritys [{:keys [firstName lastName email phone address1 zip po turvakieltokytkin name y]}
+                & {:keys [with-empty-defaults?]}]
+  {:pre [(or (nil? turvakieltokytkin) (util/boolean? turvakieltokytkin))]}
+  (letfn [(wrap [v] (if (and with-empty-defaults? (nil? v)) "" v))]
+    (->
+      {:yritysnimi                                    (wrap name)
+       :liikeJaYhteisoTunnus                          (wrap y)
+       :osoite {:katu                                 (wrap address1)
+                :postinumero                          (wrap zip)
+                :postitoimipaikannimi                 (wrap po)}
+       :yhteyshenkilo {:henkilotiedot {:etunimi       (wrap firstName)
+                                       :sukunimi      (wrap lastName)
+                                       :turvakieltoKytkin (when (or turvakieltokytkin with-empty-defaults?) (boolean turvakieltokytkin))}
+                       :yhteystiedot {:email          (wrap email)
+                                      :puhelin        (wrap phone)}}}
       util/strip-nils
       util/strip-empty-maps
       tools/wrapped)))

@@ -12,8 +12,12 @@ jQuery(document).ready(function() {
     "string",
     "attachments-multiselect",
     "export-attachments",
-    "neighbors-owners",
-    "neighbors-edit"
+    "neighbors-owners-dialog",
+    "neighbors-edit-dialog",
+    "company-selector",
+    "company-invite",
+    "company-invite-dialog",
+    "submit-button-group"
   ];
 
   _.forEach(components, function(component) {

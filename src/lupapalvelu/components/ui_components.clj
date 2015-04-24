@@ -173,9 +173,9 @@
                   :js ["add-link-permit.js" "map-model.js" "change-location.js" "invite.js" "verdicts-model.js"
                        "add-operation.js" "foreman-model.js"
                        "request-statement-model.js" "add-party.js" "attachments-tab-model.js"
-                       "invite-company.js" "application.js"]
+                       "application.js"]
                   :html ["attachment-actions-template.html" "attachments-template.html" "add-link-permit.html" "application.html" "inforequest.html" "add-operation.html"
-                         "change-location.html" "invite-company.html" "foreman-template.html"]}
+                         "change-location.html" "foreman-template.html"]}
 
    :applications {:depends [:common-html :repository :invites :global-models]
                   :html ["applications-list.html"]
@@ -237,6 +237,7 @@
    :integration-error {:js [ "integration-error.js"]
                        :html ["integration-error.html"]}
 
+   ; TODO maybe just find and add all ko components under ui-components automatically
    :ui-components {:depends [:common-html]
                    :js ["ui-components.js"
                         "fill-info/fill-info-model.js"
@@ -250,8 +251,12 @@
                         "modal-dialog/modal-dialog-model.js"
                         "attachments-multiselect/attachments-multiselect-model.js"
                         "export-attachments/export-attachments-model.js"
-                        "neighbors/neighbors-owners-model.js"
-                        "neighbors/neighbors-edit-model.js"]
+                        "neighbors/neighbors-owners-dialog-model.js"
+                        "neighbors/neighbors-edit-dialog-model.js"
+                        "company-selector/company-selector-model.js"
+                        "company-invite/company-invite-model.js"
+                        "company-invite/company-invite-dialog-model.js"
+                        "modal-dialog/button-group/submit-button-group-model.js"]
                    :html ["fill-info/fill-info-template.html"
                           "foreman-history/foreman-history-template.html"
                           "foreman-other-applications/foreman-other-applications-template.html"
@@ -260,10 +265,14 @@
                           "select/select-template.html"
                           "checkbox/checkbox-template.html"
                           "modal-dialog/modal-dialog-template.html"
+                          "modal-dialog/button-group/submit-button-group-template.html"
                           "attachments-multiselect/attachments-multiselect-template.html"
                           "export-attachments/export-attachments-template.html"
-                          "neighbors/neighbors-owners-template.html"
-                          "neighbors/neighbors-edit-template.html"]}
+                          "neighbors/neighbors-owners-dialog-template.html"
+                          "neighbors/neighbors-edit-dialog-template.html"
+                          "company-selector/company-selector-template.html"
+                          "company-invite/company-invite-template.html"
+                          "company-invite/company-invite-dialog-template.html"]}
 
    ;; Single Page Apps and standalone components:
    ;; (compare to auth-methods in web.clj)
