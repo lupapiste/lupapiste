@@ -65,9 +65,8 @@ The same application is opened, new one is not created
 
 Cancel the created application and re-fetch application
   Close current application as authority
-  #Wait until  Application state should be  canceled     # TODO: make this work
+  Wait until  Element should be visible  applications
 
-  Go to page  applications
   Go to prev permit page and fill the kuntalupatunnus
   Click button  prev-permit-create-button
 
@@ -75,7 +74,7 @@ A new application is opened, still with same property id
   Wait until  Element text should be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  186-3-356-6
   ${newApplicationid} =  Get Text  xpath=//span[@data-test-id='application-id']
   Should Not Be Equal As Strings  ${newApplicationid}  ${applicationid}
-  Logout
+
 
 
 *** Keywords ***
