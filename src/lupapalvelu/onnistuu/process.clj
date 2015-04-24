@@ -1,7 +1,8 @@
 (ns lupapalvelu.onnistuu.process
-  (:require [taoensso.timbre :as timbre :refer [infof warnf errorf]]
+  (:require [taoensso.timbre :as timbre :refer [debug infof warnf errorf]]
             [clojure.java.io :as io]
             [clojure.walk :as walk]
+            [pandect.core :as pandect]
             [monger.collection :as mc]
             [monger.operators :refer :all]
             [schema.core :as sc]
@@ -11,12 +12,13 @@
             [noir.response :as resp]
             [sade.env :as env]
             [sade.util :refer [max-length-string valid-email?]]
-            [sade.core :refer [ok]]
+            [sade.core :refer [ok now]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :refer [random-password]]
             [sade.crypt :as crypt]
             [lupapalvelu.company :as c]
-            [lupapalvelu.user-api :as u]))
+            [lupapalvelu.user-api :as u]
+            [lupapalvelu.docx :as docx]))
 
 (set! *warn-on-reflection* true)
 
@@ -74,7 +76,7 @@
 ; Init sign process:
 ;
 
-(defn init-sign-process [ts crypto-key success-url document-url company signer lang]
+(defn init-sign-process [^java.util.Date current-date crypto-key success-url document-url company signer lang]
   (let [crypto-iv    (crypt/make-iv)
         process-id   (random-password 40)
         stamp        (random-password 40)
@@ -87,8 +89,8 @@
                                    :signer    signer
                                    :lang      lang
                                    :status    :created
-                                   :created   ts
-                                   :progress  [{:status :created, :ts ts}]})
+                                   :created   current-date
+                                   :progress  [{:status :created, :ts (.getTime current-date)}]})
     {:process-id process-id
      :data       (->> {:stamp           stamp
                        :return_success  (str success-url "/" process-id)
@@ -118,10 +120,25 @@
 
 (defn fetch-document [process-id ts]
   (infof "sign:fetch-document:%s" process-id)
-  (-> (find-sign-process! process-id)
-      (process-update! :started ts))
-  ; FIXME: where we get the actual document?
-  ["application/pdf" (-> "hello.pdf" io/resource io/input-stream)])
+  (let [process (find-sign-process! process-id)
+        content-type "application/pdf"]
+    (when (not= (:status process) "started")
+      (process-update! process :started ts))
+
+    (if-let [pdf (mongo/download-find {:metadata.process.id process-id})]
+      (do
+        (debug "sign:fetch-document:download-from-mongo")
+        [content-type ((:content pdf))])
+
+      (let [filename (str "yritystilisopimus-" (-> process :company :name) ".pdf")
+            ; FIXME: where we get the selected account?
+            pdf (docx/yritystilisopimus (:company process) (:signer process) {} (now))
+            sha256 (pandect/sha256 pdf)]
+        (debug "sign:fetch-document:upload-to-mongo")
+        (.reset pdf) ; Hashing read the whole stream
+        (mongo/upload (mongo/create-id) filename content-type pdf {:sha256 sha256, :process process})
+        (.reset pdf) ; Again, the whole stream was read
+        [content-type pdf]))))
 
 ;
 ; Success:

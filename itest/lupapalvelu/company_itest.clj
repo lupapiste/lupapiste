@@ -5,6 +5,55 @@
             [lupapalvelu.domain :as domain]
             [sade.http :as http]))
 
+(apply-remote-minimal)
+
+(facts* "User is invited to company"
+  (let [company (query kaino :company :company "solita" :users true)]
+    (count (:invitations company)) => 0
+    (count (:users company)) => 1
+
+    (fact "Invite is sent"
+      (query kaino :company-invite-user :email "teppo@example.com") => ok?)
+
+    (fact "Sent invitation is seen in company query"
+      (let [company (query kaino :company :company "solita" :users true)]
+        (count (:invitations company)) => 1
+        (count (:users company)) => 1))
+
+    (fact "Invitation is accepted"
+      (let [email (last-email)
+            [uri token] (re-find #"http.+/app/fi/welcome#!/invite-company-user/ok/([A-Za-z0-9-]+)" (:plain (:body email)))
+            params {:follow-redirects false
+                    :throw-exceptions false
+                    :content-type     :json
+                    :body "{\"ok\": true}"}
+            resp (http/post (str (server-address) "/api/token/" token) params)
+            ]
+        (:status resp) => 200
+        (:to email) => "Teppo Nieminen <teppo@example.com>")))
+
+  (fact "User is seen in company query"
+    (let [company (query kaino :company :company "solita" :users true)]
+      (count (:invitations company)) => 0
+      (count (:users company)) => 2))
+
+  (fact "Invitation is sent and cancelled"
+    (fact "Invite is sent"
+      (query kaino :company-invite-user :email "rakennustarkastaja@jarvenpaa.fi") => ok?
+      (let [company (query kaino :company :company "solita" :users true)]
+        (count (:invitations company)) => 1
+        (count (:users company)) => 2))
+
+    (fact "Invitation is cancelled"
+      (let [email (last-email)
+            [uri token] (re-find #"http.+/app/fi/welcome#!/invite-company-user/ok/([A-Za-z0-9-]+)" (:plain (:body email)))]
+        (command kaino :company-cancel-invite :tokenId token) => ok?
+        (let [company (query kaino :company :company "solita" :users true)]
+          (count (:invitations company)) => 0
+          (count (:users company)) => 2))))
+  )
+
+
 (facts* "Company is added to application"
 
   (let [application-id (create-app-id mikko :municipality sonja-muni :address "Kustukatu 13")

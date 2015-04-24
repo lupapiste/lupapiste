@@ -32,7 +32,8 @@
                  [com.draines/postal "1.11.1" :exclusions [commons-codec/commons-codec]]
                  [swiss-arrows "1.0.0"]
                  [me.raynes/fs "1.4.6"]
-                 [ontodev/excel "0.2.3" :exclusions [xml-apis]]
+                 [ontodev/excel "0.2.3" :exclusions [xml-apis org.apache.poi/poi-ooxml]]
+                 [org.apache.poi/poi-ooxml "3.11"]
                  [com.googlecode.htmlcompressor/htmlcompressor "1.5.2"]
                  [com.yahoo.platform.yui/yuicompressor "2.4.8" :exclusions [rhino/js]] ; http://jira.xwiki.org/browse/XWIKI-6148?focusedCommentId=59523#comment-59523
                  [fi.sito/oskari "0.9.43"]
@@ -44,6 +45,11 @@
                  ; batik-js includes a built-in rhino, which breaks yuicompressor (it too has rhino built in)
                  ; xalan excluded just to avoid bloat, presumably XSLT is not needed
                  [clj-pdf "1.11.21" :exclusions [xalan org.apache.xmlgraphics/batik-js]]
+                 [org.freemarker/freemarker  "2.3.22"]
+                 [fr.opensagres.xdocreport/fr.opensagres.xdocreport.converter.docx.xwpf  "1.0.5"]
+                 [fr.opensagres.xdocreport/fr.opensagres.xdocreport.itext.extension  "1.0.5"]
+                 [fr.opensagres.xdocreport/fr.opensagres.xdocreport.document.docx  "1.0.5"]
+                 [fr.opensagres.xdocreport/fr.opensagres.xdocreport.template.freemarker "1.0.5" :exclusions [org.freemarker/freemarker]]
                  [scss-compiler "0.1.2"]
                  [org.clojure/core.memoize "0.5.7"]]
   :profiles {:dev {:dependencies [[midje "1.6.3"]

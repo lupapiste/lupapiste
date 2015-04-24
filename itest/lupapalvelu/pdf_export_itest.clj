@@ -9,7 +9,6 @@
             [pdfboxing.text :as pdfbox]
             [lupapalvelu.mongo :as mongo]))
 
-(mongo/connect!)
 (apply-remote-minimal)
 
 (defn- localize-value [value]

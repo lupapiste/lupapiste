@@ -412,7 +412,8 @@
     :firstName "Kaino"
     :lastName "Solita"
     :email "kaino@solita.fi"
-    :private {:password "$2a$10$QjKZTnJy77sxiWaBKR0jQezFf1LSpKfg/sljmsSq4YIq05HRZI.l."}
+    :private {:password "$2a$10$QjKZTnJy77sxiWaBKR0jQezFf1LSpKfg/sljmsSq4YIq05HRZI.l."
+              :apikey "502cb9e58426c613c8b85abe"}
     :role "applicant"
     :architect true
     :company {:id "solita", :role "admin"}}
