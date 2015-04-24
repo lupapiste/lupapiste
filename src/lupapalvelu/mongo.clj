@@ -161,18 +161,19 @@
   input)
 
 (defn upload [file-id filename content-type content & metadata]
-  (assert (string? file-id))
-  (assert (string? filename))
-  (assert (string? content-type))
-  (assert (or (instance? java.io.File content) (instance? java.io.InputStream content)))
-  (assert (sequential? metadata))
-  (assert (even? (clojure.core/count metadata)))
-  (gfs/store-file
-    (gfs/make-input-file content)
-    (set-file-id file-id)
-    (gfs/filename filename)
-    (gfs/content-type content-type)
-    (gfs/metadata (assoc (apply hash-map metadata) :uploaded (System/currentTimeMillis)))))
+  {:pre [(string? file-id) (string? filename) (string? content-type)
+         (or (instance? java.io.File content) (instance? java.io.InputStream content))
+         (sequential? metadata)
+         (or (even? (clojure.core/count metadata)) (map? (first metadata)))]}
+  (let [meta (if (map? (first metadata))
+               (first metadata)
+               (apply hash-map metadata))]
+    (gfs/store-file
+      (gfs/make-input-file content)
+      (set-file-id file-id)
+      (gfs/filename filename)
+      (gfs/content-type content-type)
+      (gfs/metadata (assoc meta :uploaded (System/currentTimeMillis))))))
 
 (defn download-find [query]
   (when-let [attachment (gfs/find-one (with-_id query))]
