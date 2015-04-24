@@ -161,7 +161,9 @@
                     )
                (- (:right sides) (:left sides))
                (:right sides))
-        min-y (:bottom sides)
+        min-y (if (and (zero? (:bottom (get-sides crop-box))) (zero? (:bottom (get-sides page-box))))
+                (:bottom page-size)
+                (:bottom sides))
         x (- max-x stamp-width (mm->u x-margin))
         y (+ min-y (mm->u y-margin))]
     (debugf "Rotation %s, visible-area with rotation: %s, page with rotation %s,  max-x/min-y: %s/%s, stamp location x/y: %s/%s"
