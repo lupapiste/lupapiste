@@ -74,7 +74,6 @@ Cancel the created application and re-fetch application
 A new application is opened, still with same property id
   Wait until  Element text should be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  186-3-356-6
   ${newApplicationid} =  Get Text  xpath=//span[@data-test-id='application-id']
-  #Set Suite Variable  ${newApplicationid}
   Should Not Be Equal As Strings  ${newApplicationid}  ${applicationid}
   Logout
 
