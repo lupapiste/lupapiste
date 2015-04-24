@@ -72,7 +72,7 @@
    :user-roles #{:authority}
    :input-validators [permit/permit-type-validator]}
   [{user :user}]
-  (ok :organizations (organization/get-organizations {:_id {$in (:organizations user)}
+  (ok :organizations (organization/get-organizations {:_id {$in (user/organization-ids-by-roles user #{"authority"})}
                                                       :scope {$elemMatch {:permitType permitType}}})))
 
 ;;
@@ -427,7 +427,7 @@
         (if-let [application-page (user/applicationpage-for (:role user))]
           (ssess/merge-to-session
             command
-            (ok :user (user/non-private user) :applicationpage application-page)
+            (ok :user (-> user user/with-org-auth user/non-private) :applicationpage application-page)
             {:user (user/session-summary user)})
           (do
             (error "Unknown user role:" (:role user))

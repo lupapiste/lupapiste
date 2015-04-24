@@ -17,7 +17,6 @@
      :role "oirAuthority"
      :orgAuthz {(keyword organization-id) #{:authority}}
      :oir true
-     :organizations [organization-id]
      :firstName ""
      :lastName email
      :phone ""

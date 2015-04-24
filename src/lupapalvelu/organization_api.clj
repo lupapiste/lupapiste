@@ -18,7 +18,7 @@
 ;;
 
 (defn authority-admins-organization-id [user]
-  (-> user :organizations first))
+  (first (user/organization-ids-by-roles user #{"authorityAdmin"})))
 
 (defn- municipalities-with-organization []
   (let [organizations (o/get-organizations {} [:scope :krysp])]
