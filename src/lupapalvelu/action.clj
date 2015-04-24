@@ -428,7 +428,8 @@
     (swap! actions assoc
       action-keyword
       (merge
-        {:user-authz-roles (default-user-authz action-type)}
+        {:user-authz-roles (default-user-authz action-type)
+         :org-authz-roles (when (some user-roles [:authority :oirAuthority]) #{:authority})}
         meta-data
         {:type action-type
          :ns ns-str
