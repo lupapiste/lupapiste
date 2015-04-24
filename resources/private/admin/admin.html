@@ -17,9 +17,18 @@
         <form action="/api/raw/admin-download-application-xml-with-kuntalupatunnus" method="get">
           <input type="hidden" name="__anti-forgery-token" data-bind="value: $.cookie('anti-csrf-token')">
           <input type="text" name="kuntalupatunnus" placeholder="kuntalupatunnus">
-<!--           TODO: Tee permit-typeille dropdown -->
           <input type="text" name="municipality" placeholder="kunnan id, esim. '753'">
-          <input type="text" name="permitType" placeholder="lupatyyppi, esim. 'R'">
+          <select id="choose-permit-type" name="permitType">
+            <option value="R">R</option>
+            <option value="YA">YA</option>
+            <option value="YI">YI</option>
+            <option value="YL">YL</option>
+            <option value="VVVL">VVVL</option>
+            <option value="P">P</option>
+            <option value="MAL">MAL</option>
+            <option value="KT">KT</option>
+            <option value="MM">MM</option>
+          </select>
           <input type="submit" value="Lataa">
         </form>
 

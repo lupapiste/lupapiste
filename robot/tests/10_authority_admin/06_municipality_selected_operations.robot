@@ -1,6 +1,7 @@
 *** Settings ***
 
 Documentation   Authority admin edits organization specific selected operations
+Suite setup     Apply minimal fixture now
 Suite teardown  Logout
 Resource        ../../common_resource.robot
 
@@ -11,7 +12,6 @@ Setting maps enabled for these tests
   Set integration proxy on
 
 Operation tree does have 'Asuinkerrostalon tai rivitalon rakentaminen' in it
-  Apply minimal fixture now
   Mikko logs in
   Go to operation tree  Latokuja 1, Sipoo  753  753-416-25-30
   Click tree item by text  "Rakentaminen, purkaminen tai maisemaan vaikuttava toimenpide"

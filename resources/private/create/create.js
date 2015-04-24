@@ -77,7 +77,6 @@
     self.kuntalupatunnusFromPrevPermit = ko.observable(null);
     self.needMorePrevPermitInfo = ko.observable(false);
     self.creatingAppWithPrevPermitOk = ko.computed(function() {
-
     return !self.processing() && !self.pending() &&
            !isBlank(self.kuntalupatunnusFromPrevPermit()) &&
            !isBlank(self.selectedPrevPermitOrganization()) &&
@@ -423,7 +422,6 @@
     self.initCreateAppWithPrevPermit = function() {
       self.clear();
       self.creatingAppWithPrevPermit = true;
-      self.operation("aiemmalla-luvalla-hakeminen");
 
       // TODO: Nyt kovakoodattu permitType -> pitaisiko hakea jostain muualta, esim permit-type-select-valinta?
       //       "aiemmalla-luvalla-hakeminen"-toimenpiteen permitType on "R"
@@ -449,7 +447,6 @@
 
       ajax.command("create-application-from-previous-permit", {
         lang: loc.getCurrentLanguage(),
-        operation: self.operation(),
         y: self.y(),
         x: self.x(),
         address: self.addressString(),

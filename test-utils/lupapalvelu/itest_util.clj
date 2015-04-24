@@ -66,6 +66,7 @@
 (def admin       (apikey-for "admin"))
 (def admin-id    (id-for "admin"))
 (def raktark-jarvenpaa (apikey-for "rakennustarkastaja@jarvenpaa.fi"))
+(def raktark-jarvenpaa-id   (id-for "rakennustarkastaja@jarvenpaa.fi"))
 (def jarvenpaa-muni    (muni-for "rakennustarkastaja@jarvenpaa.fi"))
 (def arto       (apikey-for "arto"))
 (def kuopio     (apikey-for "kuopio-r"))

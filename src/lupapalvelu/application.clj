@@ -376,9 +376,9 @@
       (when (seq text)
         (comment/comment-mongo-update
           (:state application)
-            (str
-              (i18n/localize lang "application.canceled.text") ". "
-              (i18n/localize lang "application.canceled.reason") ": "
+          (str
+            (i18n/localize lang "application.canceled.text") ". "
+            (i18n/localize lang "application.canceled.reason") ": "
             text)
           {:type "application"}
           (-> command :user :role)
@@ -589,7 +589,7 @@
 (defn user-is-authority-in-organization? [user-id organization-id]
   (mongo/any? :users {$and [{:organizations organization-id} {:_id user-id}]}))
 
-(defn- operation-validator [{{operation :operation} :data}]
+(defn operation-validator [{{operation :operation} :data}]
   (when-not (operations/operations (keyword operation)) (fail :error.unknown-type)))
 
 (defn make-application [id operation x y address property-id municipality organization info-request? open-inforequest? messages user created manual-schema-datas]
@@ -662,7 +662,7 @@
                       operation-validator]}
   [{{:keys [operation address municipality infoRequest]} :data :keys [user created] :as command}]
 
-  ;; TODO: These let-bindings are repeated in do-create-application, merge th somehow
+  ;; TODO: These let-bindings are repeated in do-create-application, merge those somehow
   (let [permit-type (operations/permit-type-of-operation operation)
         organization (organization/resolve-organization municipality permit-type)
         scope (organization/resolve-organization-scope municipality permit-type organization)
@@ -677,148 +677,6 @@
       (autofill-rakennuspaikka created-application created)
       (catch Exception e (error e "KTJ data was not updated")))
     (ok :id (:id created-application))))
-
-;;
-;; Application from previous permit
-;;
-
-(defn- invite-applicants [{:keys [lang user created application] :as command} applicants]
-  {:pre [(every? #(get-in % [:henkilo :sahkopostiosoite]) applicants)]}
-  (when (pos? (count applicants))
-    (let [emails (->> applicants
-                   (map #(get-in % [:henkilo :sahkopostiosoite]))
-                   (map user/canonize-email)
-                   set)]
-
-      (doseq [email emails]
-        ;; action/email-validator returns nil if email was valid
-        (when (action/email-validator {:data {:email email}})
-          (info "Prev permit application creation, invalid email address received from backing system: " email)
-          (fail! :error.email)))
-
-      (dorun
-        (->> applicants
-              (map-indexed
-           (fn [i applicant]
-             (let [applicant-email (get-in applicant [:henkilo :sahkopostiosoite])]
-
-               ;; Invite applicants
-               (authorization/send-invite!
-                 (update-in command [:data] merge {:email applicant-email
-                                                   :text (i18n/localize lang "invite.default-text")
-                                                   :documentName nil
-                                                   :documentId nil
-                                                   :path nil
-                                                   :role "writer"}))
-               (info "Prev permit application creation, invited " applicant-email " to created app " (get-in command [:data :id]))
-
-               ;; Set applicants' user info to Hakija documents
-               (let [document (if (zero? i)
-                                (domain/get-document-by-name application "hakija")
-                                (commands/do-create-doc (assoc-in command [:data :schemaName] "hakija")))
-                     hakija-doc-id (:id document)
-
-                     ;; Not including the id of the invited user into "user-info", so it is not set to personSelector, and validation is thus not done.
-                     ;; If user id would be given, the validation would fail since applicants have not yet accepted their invitations
-                     ;; (see the check in :personSelector validator in model.clj).
-                     user-info {:role "applicant"
-                                :email applicant-email
-                                :username applicant-email
-                                :firstName (get-in applicant [:henkilo :nimi :etunimi])
-                                :lastName (get-in applicant [:henkilo :nimi :sukunimi])
-                                :phone (get-in applicant [:henkilo :puhelin])
-                                :street (get-in applicant [:henkilo :osoite :osoitenimi :teksti])
-                                :zip (get-in applicant [:henkilo :osoite :postinumero])
-                                :city (get-in applicant [:henkilo :osoite :postitoimipaikannimi])
-                                :personId (get-in applicant [:henkilo :henkilotunnus])
-                                :turvakieltokytkin (:turvakieltoKytkin applicant)}]
-
-                 (commands/set-subject-to-document application document user-info "henkilo" created))))))))))
-
-(defn- do-create-application-from-previous-permit [{:keys [lang user created] :as command} xml app-info location-info]
-  (let [{:keys [rakennusvalvontaasianKuvaus vahainenPoikkeaminen hakijat]} app-info
-        manual-schema-datas {"hankkeen-kuvaus" (filter seq
-                                                       (conj []
-                                                             (when-not (ss/blank? rakennusvalvontaasianKuvaus) [["kuvaus"] rakennusvalvontaasianKuvaus])
-                                                             (when-not (ss/blank? vahainenPoikkeaminen) [["poikkeamat"] vahainenPoikkeaminen])))}
-        ;; TODO: Property-id structure is about to change -> Fix this municipality logic when it changes.
-        municipality (subs (:propertyId location-info) 0 3)
-        command (update-in command [:data] merge {:municipality municipality :infoRequest false :messages []} location-info)
-        created-application (do-create-application command manual-schema-datas)
-        ;; TODO: Aseta applicationille viimeisin state? (lupapalvelu.document.canonical-common/application-state-to-krysp-state kaanteisesti)
-        ;        created-application (assoc created-application
-        ;                              :state (some #(when (= (-> app-info :viimeisin-tila :tila) (val %)) (first %)) lupapalvelu.document.canonical-common/application-state-to-krysp-state))
-
-        ;; attaches the new application, and its id to path [:data :id], into the command
-        command (merge command (application->command created-application))]
-
-    ;; The application has to be inserted first, because it is assumed to be in the database when checking for verdicts (and their attachments).
-    (insert-application created-application)
-    (verdict-api/find-verdicts-from-xml command xml)        ;; Get verdicts for the application
-
-    ;; NOTE: at the moment only supporting henkilo-type applicants
-    (let [applicants-with-email (filter #(get-in % [:henkilo :sahkopostiosoite]) hakijat)]
-      (invite-applicants command applicants-with-email))
-
-    (:id created-application)))
-
-(defcommand create-application-from-previous-permit
-  {:parameters       [:lang :operation :x :y :address :propertyId :organizationId :kuntalupatunnus]
-   :user-roles       #{:authority}
-   :input-validators [(partial action/non-blank-parameters [:lang :operation :organizationId]) ;; no :address included
-                      ;; the propertyId parameter can be nil
-                      (fn [{{propertyId :propertyId} :data :as command}]
-                        (when (not (ss/blank? propertyId))
-                          (property-id-parameters [:propertyId] command)))
-                      operation-validator]}
-  [{{:keys [operation x y address propertyId organizationId kuntalupatunnus]} :data :keys [user] :as command}]
-  (let [enough-info-from-parameters (and
-                                      (not (ss/blank? address)) (not (ss/blank? propertyId))
-                                      (-> x util/->double pos?) (-> y util/->double pos?))
-        permit-type (operations/permit-type-of-operation operation)]
-
-    ;; Prevent creating many applications based on the same kuntalupatunnus:
-    ;; Check if we have in database an application of same organization that has a verdict with the given kuntalupatunnus.
-    (if-let [app-with-verdict (domain/get-application-no-access-checking {:organization organizationId
-                                                                          :verdicts     {$elemMatch {:kuntalupatunnus kuntalupatunnus}}})]
-
-      ;; Found an application of same organization that has a verdict with the given kuntalupatunnus. Open it if user has rights, otherwise show error.
-      (if-let [existing-app (domain/get-application-as (:id app-with-verdict) user)]
-        (ok :id (:id existing-app))
-        (fail :error.lupapiste-application-already-exists-but-unauthorized-to-access-it :id (:id app-with-verdict)))
-
-      ;; Fetch xml data needed for application creation from backing system with the provided kuntalupatunnus.
-      ;; Then extract needed data from it to "app info".
-      (let [dummy-application {:id kuntalupatunnus :permitType permit-type :organization organizationId}
-            xml (krysp-fetch-api/get-application-xml dummy-application :kuntalupatunnus)]
-        (when-not xml (fail! :error.no-previous-permit-found-from-backend))  ;; Show error if could not receive the verdict message xml for the given kuntalupatunnus
-
-        (let [app-info (krysp-reader/get-app-info-from-message xml kuntalupatunnus)
-              rakennuspaikka-exists (and (:rakennuspaikka app-info) (every? (-> app-info :rakennuspaikka keys set) [:x :y :address :propertyId]))
-              lupapiste-tunnus (:id app-info)]
-          ;; Could not extract info from verdict message xml
-          (when (empty? app-info)
-            (fail! :error.no-previous-permit-found-from-backend))
-          ;; Given organization and the organization in the verdict message xml differ from each other
-          (when-not (= organizationId (:id (organization/resolve-organization (:municipality app-info) permit-type)))
-            (fail! :error.previous-permit-found-from-backend-is-of-different-organization))
-          ;; This needs to be last of these error chekcs! Did not get the "rakennuspaikkatieto" element in the xml, so let's ask more needed location info from user.
-          (when-not (or rakennuspaikka-exists enough-info-from-parameters)
-            (fail! :error.more-prev-app-info-needed :needMorePrevPermitInfo true))
-
-          (if (ss/blank? lupapiste-tunnus)
-            ;; NO LUPAPISTE ID FOUND -> create the application
-            (let [location-info (cond
-                                  rakennuspaikka-exists (:rakennuspaikka app-info)
-                                  ;; TODO: Pitaisiko kayttaa taman propertyId:ta yms tietoja, kalilta annettujen sijaan (kts alla 'enough-info-from-parameters')?
-                                  ;(:ensimmainen-rakennus app-info) (:ensimmainen-rakennus app-info)
-                                  enough-info-from-parameters {:x x :y y :address address :propertyId propertyId})
-                  created-app-id (do-create-application-from-previous-permit command xml app-info location-info)]
-              (ok :id created-app-id))
-            ;; LUPAPISTE ID WAS FOUND -> open it if user has rights, otherwise show error
-            (if-let [existing-application (domain/get-application-as lupapiste-tunnus user)]
-              (ok :id (:id existing-application))
-              (fail :error.lupapiste-application-already-exists-but-unauthorized-to-access-it :id lupapiste-tunnus))))))))
 
 (defn- add-operation-allowed? [_ application]
   (let [op (-> application :operations first :name keyword)

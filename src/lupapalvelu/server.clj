@@ -20,6 +20,7 @@
             [lupapalvelu.fixture.municipality-test-users]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.commands]
+            [lupapalvelu.prev-permit-api]
             [lupapalvelu.user-api]
             [lupapalvelu.mml.yhteystiedot-api]
             [lupapalvelu.operations]
