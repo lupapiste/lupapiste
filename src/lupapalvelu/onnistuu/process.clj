@@ -122,7 +122,7 @@
   (infof "sign:fetch-document:%s" process-id)
   (let [process (find-sign-process! process-id)
         content-type "application/pdf"]
-    (when (= (:status process) "created")
+    (when (not= (:status process) "started")
       (process-update! process :started ts))
 
     (if-let [pdf (mongo/download-find {:metadata.process.id process-id})]
