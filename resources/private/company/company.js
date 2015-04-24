@@ -141,6 +141,7 @@
         .success(function() {
           if (self.cb) {
             self.cb();
+            lupapisteApp.models.globalAuthModel.refresh();
           } else {
             self.value(!self.value());
           }
@@ -342,7 +343,10 @@
 
   hub.onPageLoad("company", function(e) { company.show(e.pagePath[0], e.pagePath[1]); });
 
-  hub.subscribe("refresh-companies", function() { company.load(); });
+  hub.subscribe("refresh-companies", function() {
+    lupapisteApp.models.globalAuthModel.refresh();
+    company.load();
+  });
 
   $(function() {
     $("#company-content").applyBindings(company);

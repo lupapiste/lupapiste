@@ -763,7 +763,8 @@
                                            :name "Sonja Sibbo"}]
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))}]))
 
-(def companies [{:_id "solita",
+(def companies [{:_id "solita"
+                 :accountType "account5"
                  :created 1412959886600
                  :name "Solita Oy"
                  :address1 "Tulli Business Park"

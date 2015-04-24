@@ -20,6 +20,10 @@
 ;; Company schema:
 ;;
 
+(def user-limit-for-account-type {:account5 5
+                 :account15 15
+                 :account30 30})
+
 (def- max-64-or-nil (sc/either (max-length-string 64) (sc/pred nil?)))
 
 (def Company {:name                          (sc/both (min-length-string 1) (max-length-string 64))
