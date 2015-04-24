@@ -43,6 +43,8 @@
 (defn muni-for-key [apikey] (muni-for-user (find-user-from-minimal-by-apikey apikey)))
 
 
+(def kaino       (apikey-for "kaino@solita.fi"))
+(def kaino-id    (id-for "kaino@solita.fi"))
 (def pena        (apikey-for "pena"))
 (def pena-id     (id-for "pena"))
 (def mikko       (apikey-for "mikko@example.com"))
