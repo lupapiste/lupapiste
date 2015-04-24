@@ -245,7 +245,7 @@
           </button>
           <button data-bind="click: toBackingSystem, visible: linkToBackingSystemEnabled" class="btn">
             <span>Näytä taustajärjestelmässä</span>
-            <span class="icon approve left-align"/>
+            <span class="icon approve-grey left-align"/>
           </button>
           <!-- /ko  -->
           <!-- ko if: hasInvites -->
@@ -429,7 +429,7 @@
                         onclick="$('#invite-document-name').val('').change();$('#invite-document-path').val('').change();$('#invite-document-id').val('').change();LUPAPISTE.ModalDialog.open('#dialog-valtuutus');return false;">
                   </button>
 
-                  <div data-bind="component: {name: 'company-invite'}"></div>
+                  <span data-bind="component: {name: 'company-invite'}"></span>
 
                 </div>
               </div>

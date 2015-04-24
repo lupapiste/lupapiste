@@ -240,6 +240,12 @@ $spritegrid: 100px;
     height: 19px;
   }
 
+  &.approve-grey {
+    background-position: 0px -6100px;
+    width: 16px;
+    height: 16px;
+  }
+
   //states
   &:hover {
     background-position-x: $spritegrid * -1;

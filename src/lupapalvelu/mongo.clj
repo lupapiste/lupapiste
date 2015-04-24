@@ -284,7 +284,7 @@
          (debug "Connecting to MongoDB:" servers (if ssl "using ssl" "without encryption"))
          (m/connect! servers (mongo-options :ssl ssl))
          (reset! connected true)
-         (m/set-default-write-concern! WriteConcern/SAFE)
+         (m/set-default-write-concern! WriteConcern/JOURNALED)
          (when (and username password)
            (if (m/authenticate (m/get-db db) username (.toCharArray password))
              (debugf "Authenticated to DB '%s' as '%s'" db username)
