@@ -443,7 +443,7 @@
    :description "Changes admin session into authority session with access to given organization"}
   [{user :user :as command}]
   (if (user/get-user-with-password (:username user) password)
-    (let [imposter (assoc user :impersonating true :role "authority" :organizations [organizationId])]
+    (let [imposter (assoc user :impersonating true :role "authority" :organizations [organizationId] :orgAuthz {(keyword organizationId) ["authority"]})]
       (ssess/merge-to-session command (ok) {:user imposter}))
     (fail :error.login)))
 
