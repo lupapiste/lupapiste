@@ -172,6 +172,9 @@
     (when (and u p)
       (:user (execute-command "login" {:username u :password p} request)))))
 
+(def basic-401
+  (assoc-in (resp/status 401 "Unauthorized") [:headers "WWW-Authenticate"] "Basic realm=\"Lupapiste\""))
+
 (defn execute-export [name params request]
   (execute (enriched (action/make-export name params) request)))
 
@@ -183,18 +186,14 @@
         (if (false? (:ok response))
           (resp/status 404 (resp/json response))
           response))
-      (->
-        (resp/status 401 "Unauthorized")
-        (assoc-in [:headers "WWW-Authenticate"] "Basic realm=\"Lupapiste\"")))))
+      basic-401)))
 
 (defpage [:get "/data-api/json/:name"] {name :name}
   (let [request (request/ring-request)
         user (basic-authentication request)]
     (if user
       (resp/json (execute-export name (from-query request) (assoc request :user user)))
-      (->
-        (resp/status 401 "Unauthorized")
-        (assoc-in [:headers "WWW-Authenticate"] "Basic realm=\"Lupapiste\"")))))
+      basic-401)))
 
 (defpage "/api/raw/:name" {name :name}
   (let [request (request/ring-request)
