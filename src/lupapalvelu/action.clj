@@ -424,7 +424,7 @@
       action-keyword
       (merge
         {:user-authz-roles (default-user-authz action-type)
-         :org-authz-roles (when (some user-roles [:authority :oirAuthority]) #{:authority})}
+         :org-authz-roles (when (some user-roles [:authority :oirAuthority :anonymous]) #{:authority})}
         meta-data
         {:type action-type
          :ns ns-str
