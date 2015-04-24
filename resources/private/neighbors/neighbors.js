@@ -22,7 +22,7 @@
         .applicationId(application.id)
         .neighbors(application.neighbors)
         .neighborId(null)
-        .map.updateSize().clear().center(x, y, 13).add({x: x, y: y});
+        .map.clear().updateSize().center(x, y, 13).add({x: x, y: y});
     };
 
     function openEditDialog(params) {
@@ -77,6 +77,10 @@
   hub.onPageLoad("neighbors", function(e) {
     applicationId = e.pagePath[0];
     repository.load(applicationId);
+  });
+
+  hub.onPageUnload("neighbors", function(e) {
+    model.map = null;
   });
 
   repository.loaded(["neighbors"], function(application) {
