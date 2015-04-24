@@ -135,7 +135,7 @@
                 resp-body (:body (util/decode-response response))]
             (:status response) => 200
             resp-body => ok?
-            (keyword (:status resp-body)) => :created-new-application))
+            (keyword (:text resp-body)) => :created-new-application))
 
         (fact "should return the LP application if the kuntalupatunnus matches an existing app"
           (let [{app-id :id} (create-and-submit-application pena :municipality jarvenpaa-muni)
@@ -144,7 +144,7 @@
                 resp-body    (:body (util/decode-response response))]
             (:status response) => 200
             resp-body => ok?
-            (keyword (:status resp-body)) => :already-existing-application))
+            (keyword (:text resp-body)) => :already-existing-application))
 
         (fact "create new LP app if kuntalupatunnus matches existing app in another organization"
           (let [{app-id :id} (create-and-submit-application pena :municipality sonja-muni)
@@ -153,4 +153,4 @@
                 resp-body    (:body (util/decode-response response))]
             (:status response) => 200
             resp-body => ok?
-            (keyword (:status resp-body)) => :created-new-application))))))
+            (keyword (:text resp-body)) => :created-new-application))))))

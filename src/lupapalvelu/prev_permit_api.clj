@@ -19,8 +19,8 @@
         existing-app (domain/get-application-as {:state    {$ne "canceled"}
                                                  :verdicts {$elemMatch {:kuntalupatunnus kuntalupatunnus}}} user)
         result       (apply merge (if existing-app
-                                    [(ok :id (:id existing-app)) {:status :already-existing-application}]
-                                    [(prev-permit/fetch-prev-application! command) {:status :created-new-application}]))]
+                                    [(ok :id (:id existing-app)) {:text :already-existing-application}]
+                                    [(prev-permit/fetch-prev-application! command) {:text :created-new-application}]))]
     (resp/json result)))
 
 (defcommand create-application-from-previous-permit
