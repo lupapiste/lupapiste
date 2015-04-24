@@ -4,6 +4,7 @@
             [sade.core :refer [fail! unauthorized not-accessible]]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.model :as model]
+            [lupapalvelu.document.commands :as doc-commands]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.vetuma :as vetuma]
             [lupapalvelu.web :as web]
@@ -409,11 +410,11 @@
           updates (tools/path-vals data)
           updates (map (fn [[p v]] [(butlast p) v]) updates)
           updates (map (fn [[p v]] [(s/join "." (map name p)) v]) updates)
-          user-role (:role (lupapalvelu.user/get-user-with-apikey apikey))
+          user-role (:role (find-user-from-minimal-by-apikey apikey))
           updates (filter (fn [[path value]]
                             (try
                               (let [splitted-path (ss/split path #"\.")]
-                                (lupapalvelu.document.commands/validate-against-whitelist! document [[splitted-path value]] user-role))
+                                (doc-commands/validate-against-whitelist! document [[splitted-path value]] user-role))
                               true
                               (catch Exception _
                                 false)))
