@@ -61,8 +61,6 @@
   var permitSubtypes = ko.observableArray([]);
   var tosFunctions = ko.observableArray([]);
 
-  var inviteCompanyModel = new LUPAPISTE.InviteCompanyModel(applicationModel.id);
-
   var accordian = function(data, event) { accordion.toggle(event); };
 
   var AuthorityInfo = function(id, firstName, lastName) {
@@ -113,6 +111,9 @@
     if (!isInitializing) {
       ajax
         .command("set-tos-function-for-application", {id: currentId, functionCode: value})
+        .success(function() {
+          repository.load(currentId, applicationModel.pending);
+        })
         .call();
     }
   }
@@ -220,6 +221,16 @@
       var assignee = resolveApplicationAssignee(app.authority);
       var assigneeId = assignee ? assignee.id : null;
       applicationModel.assignee(assigneeId);
+
+      var metadata = _.map(app.metadata, function(value, key) {
+        if (_.isObject(value)) {
+          value = _.map(value, function(subvalue, subkey) {
+            return {name: subkey, value: subvalue};
+          });
+        }
+        return {name: key, value: value};
+      });
+      applicationModel.metadataList(_.sortBy(metadata, "name"));
 
       isInitializing = false;
       pageutil.hideAjaxWait();
@@ -410,7 +421,6 @@
       verdictAttachmentPrintsOrderModel: verdictAttachmentPrintsOrderModel,
       verdictAttachmentPrintsOrderHistoryModel: verdictAttachmentPrintsOrderHistoryModel,
       verdictModel: verdictModel,
-      openInviteCompany: inviteCompanyModel.open.bind(inviteCompanyModel),
       attachmentsTab: attachmentsTab,
       selectedTabName: selectedTabName,
       tosFunctions: tosFunctions
@@ -429,7 +439,6 @@
     $(verdictAttachmentPrintsOrderHistoryModel.dialogSelector).applyBindings({
       verdictAttachmentPrintsOrderHistoryModel: verdictAttachmentPrintsOrderHistoryModel
     });
-    $(inviteCompanyModel.selector).applyBindings(inviteCompanyModel);
     attachmentsTab.attachmentTemplatesModel.init();
   });
 

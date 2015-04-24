@@ -103,7 +103,7 @@
       (when-let [document (domain/get-document-by-id application (:documentId my-invite))]
         ; Document can be undefined (invite's documentId is an empty string) in invite or removed by the time invite is approved.
         ; It's not possible to combine Mongo writes here, because only the last $elemMatch counts.
-        (commands/do-set-user-to-document (domain/get-application-as id user) document (:id user) (:path my-invite) user created)))))
+        (commands/do-set-user-to-document (domain/get-application-as id user) document (:id user) (:path my-invite) created)))))
 
 (defn generate-remove-invalid-user-from-docs-updates [{docs :documents :as application}]
   (-<>> docs

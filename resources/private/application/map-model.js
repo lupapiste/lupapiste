@@ -186,13 +186,6 @@ LUPAPISTE.MapModel = function(authorizationModel) {
     }
   };
 
-  self.updateMapSize = function(kind) {
-    getOrCreateMap(kind).updateSize();
-    if (kind === "inforequest") {
-      getOrCreateMap("inforequest-markers").updateSize();
-    }
-  };
-
 
   // Oskari events
 

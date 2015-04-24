@@ -192,7 +192,7 @@
             <span data-bind="ltext: 'application.approveApplication'"></span>
             <span class="icon approve left-align"></span>
           </button>
-          <export-attachments/>
+          <div data-bind="component: {name: 'export-attachments'}"></div>
           <button data-bind="click: toAsianhallinta,
                              visible: $root.authorization.ok('application-to-asianhallinta') && asianhallintaEnabled,
                              enable: !processing() && $root.authorization.ok('application-to-asianhallinta') && asianhallintaEnabled,
@@ -218,7 +218,7 @@
             <span data-bind="ltext: 'application.addLinkPermit'"></span>
             <span class="icon add-grey left-align"></span>
           </button>
-          <button data-bind="click: createChangePermit,   visible: $root.authorization.ok('create-change-permit'),   enable: !processing() && $root.authorization.ok('create-change-permit')"     data-test-id="change-permit-create-btn"  class="btn">
+          <button data-bind="click: createChangePermit, visible: $root.authorization.ok('create-change-permit'), enable: !processing() && $root.authorization.ok('create-change-permit')" data-test-id="change-permit-create-btn" class="btn">
             <span data-bind="ltext: 'application.createChangePermit'"></span>
             <span class="icon add-grey left-align"></span>
           </button>
@@ -303,6 +303,11 @@
             <li data-bind="if: summaryAvailable(), css: {'active': $parent.selectedTabName() === 'applicationSummary'}">
               <a data-bind="click: changeTab" href="#" data-target="applicationSummary" data-test-id="application-open-applicationSummary-tab">
                 <span data-bind="ltext: 'application.applicationSummary'"></span></a></li>
+
+            <li data-bind="if: metadataList().length > 0, css: {'active': $parent.selectedTabName() === 'metadata'}">
+              <a data-bind="click: changeTab" href="#" data-target="metadata" data-test-id="application-open-tasks-tab">
+                <span data-bind="ltext: 'attachment.tosMetadata'"></span>
+              </a></li>
 
           </ul>
         </div>
@@ -419,13 +424,9 @@
                                    enabled: $root.authorization.ok('invite-with-role')"
                         onclick="$('#invite-document-name').val('').change();$('#invite-document-path').val('').change();$('#invite-document-id').val('').change();LUPAPISTE.ModalDialog.open('#dialog-valtuutus');return false;">
                   </button>
-                  <button class="btn-primary"
-                        data-test-id="company-invite"
-                        data-bind="ltext: 'company-invite.invite',
-                                   visible: $root.authorization.ok('invite-with-role'),
-                                   enabled: $root.authorization.ok('invite-with-role'),
-                                   click: $root.openInviteCompany">
-                  </button>
+
+                  <span data-bind="component: {name: 'company-invite'}"></span>
+
                 </div>
               </div>
             </div>
@@ -521,7 +522,7 @@
                                             attachmentsOperations: $data.attachmentsOperations,
                                             testId: 'upper'}}"></div>
 
-          <export-attachments/>
+          <div data-bind="component: {name: 'export-attachments'}"></div>
           <!-- /ko -->
 
           <div data-bind="if: postAttachmentsByOperation().length > 0" data-test-id="application-post-attachments-table">
@@ -540,7 +541,7 @@
                                             attachmentsOperations: $data.attachmentsOperations,
                                             testId: 'lower'}}"></div>
 
-          <export-attachments/>
+          <div data-bind="component: {name: 'export-attachments'}"></div>
 
           <!-- ko if: $root.application.inPostVerdictState() -->
           <div data-bind="if: preAttachmentsByOperation().length > 0" data-test-id="application-pre-attachments-table">
@@ -599,7 +600,7 @@
                </button>
               <h2 class="missing-info-title"
                   data-bind="ltext: 'application.requiredDataMissing'"></h2>
-              
+
             <!-- /ko -->
 
             <!--  ko if: hasIncorrectlyFilledRequiredFields() -->
@@ -978,6 +979,54 @@
             <div data-bind="template: {name: 'neighbors-template', data: {neighbors: $data.neighbors, localisationKeys: {missing: 'neighbors.missing'}}}"></div>
 
             <button data-bind="click: $root.neighbor.manage, ltext: 'neighbors.manage', visible: $root.authorization.ok('neighbor-add')" class="btn btn-primary modal" data-test-id="manage-neighbors"></button>
+          </div>
+        </div>
+        <!-- /ko -->
+
+        <!-- Metadata tab -->
+
+        <!-- ko if: selectedTabName() === 'metadata' -->
+        <div id="application-metadata-tab" class="tab-content" >
+          <h1 data-bind="ltext: 'attachment.tosMetadata'"></h1>
+          <div class="tos-metadata-content" data-bind="with: application">
+            <table class="table table-striped table-metadata">
+              <thead>
+              <tr>
+                <th data-bind="ltext: 'attachment.tosMetadataKey'" class="metadata-key"></th>
+                <th data-bind="ltext: 'attachment.tosMetadataValue'"></th>
+              </tr>
+              </thead>
+              <tbody data-bind="foreach: metadataList">
+              <tr>
+                <td data-bind="text: name" class="metadata-key"></td>
+                <td>
+                  <div data-bind="if: typeof(value) == 'object'">
+                    <table class="subtable">
+                      <thead>
+                      <tr>
+                        <th data-bind="ltext: 'attachment.tosMetadataKey'"></th>
+                        <th data-bind="ltext: 'attachment.tosMetadataValue'"></th>
+                      </tr>
+                      </thead>
+                      <tbody data-bind="foreach: value">
+                      <tr>
+                        <td data-bind="text: name" class="metadata-key"></td>
+                        <td>
+                          <span data-bind="text: value"></span>
+                          <span data-bind="if: isFinite(value)"> vuotta</span>
+                        </td>
+                      </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <span data-bind="if: typeof(value) != 'object'">
+                    <span data-bind="text: value"></span>
+                    <span data-bind="if: isFinite(value)"> vuotta</span>
+                  </span>
+                </td>
+              </tr>
+              </tbody>
+            </table>
           </div>
         </div>
         <!-- /ko -->

@@ -426,17 +426,16 @@ input[readonly], textarea[readonly] {
     &.long {
       min-width: 480px;
     }
-    &.personSelector {
+    &.personSelector, &.companySelector {
+      display: block;
       width: auto;
       label {
         display: block;
-  }
-
+      }
       .form-input {
         display: inline-block;
       }
     }
-
   }
   .form-entry.radioGroup {
     min-height: 32px;

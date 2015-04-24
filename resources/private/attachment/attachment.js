@@ -411,7 +411,7 @@ var attachment = (function() {
     model.attachmentType(attachmentType(attachment.type["type-group"], attachment.type["type-id"]));
 
     var metadataArray = _.map(attachment.metadata, function(value, key) {
-      if (typeof(value) === 'object') {
+      if (_.isObject(value)) {
         value = _.map(value, function(subvalue, subkey) {
           return {name: subkey, value: subvalue};
         });

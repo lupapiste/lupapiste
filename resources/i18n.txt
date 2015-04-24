@@ -1,1 +1,0 @@
-application.invite.help: Sinut on valtuutettu tälle hankkeelle. Näet hankkeen lukutilassa. Hyväksyttyäsi valtuutuksen saat kirjoitusoikeudet hankkeelle. Tällöin voit muokata hankkeen tietoja ja lisätä uusia liitteitä ja suunnitelmia. Valtuutus vastaa perinteistä valtakirjaa.

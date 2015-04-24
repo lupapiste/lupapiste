@@ -5,7 +5,8 @@
            [clojure.string :as s]
            [sade.core :refer :all]
            [sade.util :as util]
-           [lupapalvelu.i18n :as i18n]))
+           [lupapalvelu.i18n :as i18n]
+           [lupapalvelu.document.schemas :as schemas]))
 
 
 ;; UusiAsia, functions prefixed with ua-
@@ -153,14 +154,24 @@
 ;; AsianTunnusVastaus, prefix: atr-
 
 
+(defn- get-first-by-subtype [subtype documents]
+  (util/find-first
+    (fn [doc]
+      (let [doc (if (sequential? doc) (first doc) doc)
+            schema (schemas/get-schema (:schema-info doc))]
+        (= (keyword subtype) (get-in schema [:info :subtype]))))
+    (vals documents)))
+
 (defn application-to-asianhallinta-canonical [application lang]
   "Return canonical, does not contain attachments"
   (let [documents (tools/unwrapped (documents-by-type-without-blanks application))]
     (-> (assoc-in ua-root-element [:UusiAsia :Tyyppi] (ua-get-asian-tyyppi-string application))
       (assoc-in [:UusiAsia :Kuvaus] (:title application))
       (assoc-in [:UusiAsia :Kuntanumero] (:municipality application))
-      (assoc-in [:UusiAsia :Hakijat] (ua-get-hakijat (:hakija documents)))
-      (assoc-in [:UusiAsia :Maksaja] (ua-get-maksaja (first (:maksaja documents))))
+      (assoc-in [:UusiAsia :Hakijat] (ua-get-hakijat (or (:hakija documents)
+                                                         (get-first-by-subtype :hakija documents))))
+      (assoc-in [:UusiAsia :Maksaja] (ua-get-maksaja (first (or (:maksaja documents)
+                                                                (get-first-by-subtype :maksaja documents)))))
       (assoc-in [:UusiAsia :HakemusTunnus] (:id application))
       (assoc-in [:UusiAsia :VireilletuloPvm] (util/to-xml-date (:submitted application)))
       (assoc-in [:UusiAsia :Asiointikieli] lang)

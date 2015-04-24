@@ -28,6 +28,7 @@
     :select           (-> body first :name)
     :radioGroup       (-> body first :name)
     :personSelector   user-id
+    :companySelector  nil
     :buildingSelector "001"
     :newBuildingSelector "1"
     :hetu             "210281-9988"

@@ -8,6 +8,7 @@
 
 (def applications (delay (mongo/select :applications)))
 (def submitted-applications (delay (mongo/select :submitted-applications)))
+(def organizations (delay (mongo/select :organizations)))
 
 (defn- validate-doc [ignored-errors application {id :id schema-info :schema-info :as doc}]
   (if (and (:name schema-info) (:version schema-info))
@@ -121,6 +122,17 @@
 
 (defmonster closed-timestamp
   (timestamp-is-set :closed #{:closed}))
+
+(defmonster permit-type-only-in-single-municipality-scope
+  (let [results (->> @organizations
+                     (mapcat :scope)
+                     (group-by :municipality)
+                     (map (fn [[muni scopes]] [muni (map :permitType scopes)]))
+                     (remove #(apply distinct? (second %))))]
+    (if (seq results)
+      {:ok false :results results}
+      {:ok true})))
+
 
 ;; task source is set
 
