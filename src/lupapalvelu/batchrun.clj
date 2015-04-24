@@ -189,7 +189,7 @@
                      :lastName "Er\u00e4ajo"
                      :firstName "Lupapiste"
                      :role "authority"
-                     :organizations org-ids}]
+                     :orgAuthz (reduce (fn [m org-id] (assoc m (keyword org-id) ["authority"])) {} org-ids)}]
     (doall
       (pmap
         (fn [{:keys [id permitType organization] :as app}]
