@@ -283,8 +283,10 @@
     (when-let [role-in-app (keyword (:role (domain/get-auth application (:id user))))]
      (allowed-roles role-in-app))))
 
-(defn- organization-authz? [command-meta-data application user]
-  (and (user/authority? user) ((set (:organizations user)) (:organization application))))
+(defn- organization-authz? [command-meta-data {organization :organization} user]
+  (let [required-authz (:org-authz-roles command-meta-data)
+        user-org-authz (map keyword (get-in user [:orgAuthz (keyword organization)]))]
+    (and (user/authority? user) (some required-authz user-org-authz))))
 
 (defn- company-authz? [command-meta-data application user]
   (domain/has-auth? application (get-in user [:company :id])))
@@ -421,8 +423,8 @@
     (assert (seq user-roles) (str "You must define :user-roles meta data for " action-name ". Use :user-roles #{:anonymous}] to grant access to anyone."))
     (assert (and (set? user-roles) (every? keyword? user-roles)) ":user-roles must be a set of keywords")
 
-  (when user-authz-roles
-    (assert (and (set? user-authz-roles) (every? keyword? user-authz-roles)) ":user-authz-roles must be a set of keywords"))
+    (when user-authz-roles
+      (assert (and (set? user-authz-roles) (every? keyword? user-authz-roles)) ":user-authz-roles must be a set of keywords"))
 
     (tracef "registering %s: '%s' (%s:%s)" (name action-type) action-name ns-str line)
     (swap! actions assoc
