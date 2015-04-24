@@ -29,20 +29,18 @@
   (when user
     (select-keys user [:id :username :firstName :lastName :role])))
 
-; Temporary mapping to generate orgAuthz key from organizations.
-; TODO remove this after data model has been migrated
-(defn with-org-auth [{:keys [organizations role] :as user}]
-  (if (#{:authority :authorityAdmin} (keyword role))
-    (assoc user :orgAuthz (reduce (fn [m org-id] (assoc m org-id #{role})) {} organizations))
-    user))
+(defn coerce-org-authz
+  "Coerces orgAuthz to schema {Str #{Str}}"
+  [org-authz]
+  (into {} (for [[k v] org-authz] [(name k) (set v)])))
 
 (defn session-summary
   "Returns common information about the user to be stored in session or nil"
   [user]
   (some-> user
-    (select-keys [:id :username :firstName :lastName :role :email :organizations :company :architect])
-    (assoc :expires (+ (now) (.toMillis java.util.concurrent.TimeUnit/MINUTES 5)))
-    with-org-auth))
+    (select-keys [:id :username :firstName :lastName :role :email :organizations :company :architect :orgAuthz])
+    (update-in [:orgAuthz] coerce-org-authz)
+    (assoc :expires (+ (now) (.toMillis java.util.concurrent.TimeUnit/MINUTES 5)))))
 
 (defn virtual-user?
   "True if user exists only in session, not in database"
