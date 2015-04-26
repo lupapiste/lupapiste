@@ -55,6 +55,7 @@
           window.location.hash = self.url();
         })
         .call();
+        hub.send("track-click", {category:"Application", label:"", event:"addOperation"});
     };
 
   }
