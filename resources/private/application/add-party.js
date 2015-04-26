@@ -29,6 +29,7 @@ LUPAPISTE.AddPartyModel = function() {
     ajax.command("create-doc", {id: self.applicationId, schemaName: self.documentName()})
       .success(function() { repository.load(self.applicationId); })
       .call();
+    hub.send("track-click", {category:"Application", label: self.documentName(), event:"addParty"});
     return false;
   };
 };
