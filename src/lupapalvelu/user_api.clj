@@ -583,7 +583,7 @@
    :states     [:draft :open :submitted :complement-needed]
    :pre-checks [(fn [command application] (not (-> command :user :architect)))]}
   [{application :application user :user}]
-  (doseq [attachment (:attachments user)]
+  (doseq [attachment (:attachments (mongo/by-id :users (:id user)))]
     (let [application-id id
           user-id (:id user)
           {:keys [attachment-type attachment-id file-name content-type size created]} attachment

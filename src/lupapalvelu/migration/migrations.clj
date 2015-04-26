@@ -14,7 +14,8 @@
             [lupapalvelu.application :as a]
             [lupapalvelu.application-meta-fields :as app-meta-fields]
             [lupapalvelu.operations :as op]
-            [sade.env :as env]))
+            [sade.env :as env]
+            [sade.excel-reader :as er]))
 
 (defn drop-schema-data [document]
   (let [schema-info (-> document :schema :info (assoc :version 1))]
@@ -550,7 +551,7 @@
           (mongo/update-by-id collection (:id application) {$set {:documents new-documents}}))))))
 
 (defmigration tutkinto-mapping
-  (let [mapping (sade.excel-reader/read-map "tutkinto-mapping.xlsx")]
+  (let [mapping (er/read-map "tutkinto-mapping.xlsx")]
     (doseq [collection [:applications :submitted-applications]
            application (mongo/select collection {"documents.data.patevyys.koulutus.value" {$exists true}} {:documents 1})]
      (let [id (:id application)
@@ -807,6 +808,31 @@
                    clojure.set/rename-keys {:etaisyyys_alakouluun :etaisyys_alakouluun :etaisyyys_ylakouluun :etaisyys_ylakouluun})
         doc))
     {"documents.schema-info.name" "suunnittelutarveratkaisun-lisaosa"}))
+
+(defmigration create-transfered-to-backing-system-transfer-entry
+  (doseq [collection [:applications :submitted-applications]
+          application (mongo/select collection {$and [{:transfers {$not {$elemMatch {:type "exported-to-backing-system"}}}}
+                                                      {:sent {$ne nil}}]})]
+    (mongo/update-by-id collection (:id application)
+                        {$push {:transfers {:type "exported-to-backing-system"
+                                            :timestamp (:sent application)}}})))
+
+(defn- change-patevyys-muu-key [doc]
+  (let [koulutusvalinta-path             [:data :patevyys             :koulutusvalinta :value]
+        tyonjohtaja-koulutusvalinta-path [:data :patevyys-tyonjohtaja :koulutusvalinta :value]]
+    (cond
+     (= "muu" (get-in doc koulutusvalinta-path))             (assoc-in doc koulutusvalinta-path "other")
+     (= "muu" (get-in doc tyonjohtaja-koulutusvalinta-path)) (assoc-in doc tyonjohtaja-koulutusvalinta-path "other")
+     :else doc)))
+
+(defmigration patevyys-muu-key-to-other
+  {:apply-when (pos? (mongo/count :applications {:documents {$elemMatch {$or [{:data.patevyys.koulutusvalinta.value "muu"}
+                                                                              {:data.patevyys-tyonjohtaja.koulutusvalinta.value "muu"}]}}}))}
+  (update-applications-array
+    :documents
+    change-patevyys-muu-key
+    {:documents {$elemMatch {$or [{:data.patevyys.koulutusvalinta.value "muu"}
+                                  {:data.patevyys-tyonjohtaja.koulutusvalinta.value "muu"}]}}}))
 
 ;;
 ;; ****** NOTE! ******

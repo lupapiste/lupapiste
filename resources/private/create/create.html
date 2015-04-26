@@ -128,7 +128,7 @@
         <select id="prev-permit-organization-select" data-test-id="test-prev-permit-organization-select"
                 class="form-select form-input combobox"
                 data-bind="options: organizationOptions,
-                           optionsText: function(org) { return util.getIn(org, ['name', loc.getCurrentLanguage()]); },
+                           optionsText: function(org) { return util.getIn(org, ['name', loc.getCurrentLanguage()]) || org.name.fi; },
                            optionsValue: 'id',
                            value: selectedPrevPermitOrganization,
                            optionsCaption: loc('choose')">

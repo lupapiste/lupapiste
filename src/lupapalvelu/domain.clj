@@ -16,10 +16,11 @@
 
 (defn basic-application-query-for [user]
   (case (keyword (:role user))
-    :applicant (if-let [company-id (get-in user [:company :id])]
-                 {$or [{:auth.id (:id user)} {:auth.id company-id}]}
-                 {:auth.id (:id user)})
-    :authority {$or [{:organization {$in (:organizations user)}} {:auth.id (:id user)}]}
+    :applicant    (if-let [company-id (get-in user [:company :id])]
+                    {$or [{:auth.id (:id user)} {:auth.id company-id}]}
+                    {:auth.id (:id user)})
+    :authority    {$or [{:organization {$in (:organizations user)}} {:auth.id (:id user)}]}
+    :rest-api     {:organization {$in (:organizations user)}}
     :oirAuthority {:organization {$in (:organizations user)}}
     :trusted-etl {}
     (do
@@ -248,6 +249,8 @@
    :title                    ""
    :transfers                []
    :urgency                  "normal"
-   :verdicts                 []})
+   :verdicts                 []
+   :tosFunction              nil
+   :metadata                 {}})
 
 

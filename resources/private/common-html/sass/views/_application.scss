@@ -65,7 +65,7 @@
       }
     }
 
-    #state-infotext {
+    .summary-help {
       width: 100%;
       background-color: $lp-dark-grey;
       font-size: 0.8em;
@@ -721,7 +721,18 @@
       }
     }
   }
+}
 
+#application-metadata-tab {
+  h1 {
+    float: none;
+  }
+  .table-metadata {
+      max-width: 875px;
+    .metadata-key {
+      width: 175px;
+    }
+  }
 }
 
 

@@ -371,21 +371,25 @@
 
 (facts* "Testing information parsed from a verdict xml message for application creation"
   (let [xml (xml/parse (slurp "resources/krysp/sample/verdict-rakval-from-kuntalupatunnus-query.xml"))
-        info (get-app-info-from-message xml "invalid-kuntalupatunnus") => nil
-        info-keys [:id :kuntalupatunnus :municipality :rakennusvalvontaasianKuvaus :vahainenPoikkeaminen :rakennuspaikka :ensimmainen-rakennus
-                   ; :viitelupatiedot :viimeisin-tila :asioimiskieli
-                   ]
-        info-keys-as-symbols (-> info-keys ((partial map (comp symbol name))) vec)
-        {:keys [id kuntalupatunnus municipality rakennusvalvontaasianKuvaus vahainenPoikkeaminen rakennuspaikka ensimmainen-rakennus
+        info (get-app-info-from-message xml "14-0241-R 3") => truthy
+        {:keys [id kuntalupatunnus municipality rakennusvalvontaasianKuvaus vahainenPoikkeaminen rakennuspaikka ensimmainen-rakennus hakijat
                 ; viitelupatiedot viimeisin-tila asioimiskieli
-                ] :as info}        (get-app-info-from-message xml "14-0241-R 3") => truthy]
+                ]} info]
 
-    (fact "info contains the needed keys" (every? (partial contains info) info-keys))
+    (fact "info contains the needed keys" (every? (partial contains info)
+                                            [:id :kuntalupatunnus :municipality :rakennusvalvontaasianKuvaus :vahainenPoikkeaminen :rakennuspaikka :ensimmainen-rakennus :hakijat
+                                             ; :viitelupatiedot :viimeisin-tila :asioimiskieli
+                                             ]))
+
+    (fact "invalid kuntalupatunnus" (get-app-info-from-message xml "invalid-kuntalupatunnus") => nil)
 
     (fact "kuntalupatunnus" kuntalupatunnus => "14-0241-R 3")
     (fact "municipality" municipality => "186")
     (fact "rakennusvalvontaasianKuvaus" rakennusvalvontaasianKuvaus => "Rakennetaan yksikerroksinen lautaverhottu omakotitalo jossa kytketty autokatos/ varasto.")
     (fact "vahainenPoikkeaminen" vahainenPoikkeaminen => "Poikekkaa meill\u00e4!")
+    (facts "hakijat"
+      (fact "count" (count hakijat) => 4)
+      (fact "with email address" (filter identity (map #(get-in % [:henkilo :sahkopostiosoite]) hakijat)) => (just #{"pena@example.com" "mikko@example.com"})))
 
     (facts "Rakennuspaikka"
       (let [{:keys [x y address propertyId] :as rakennuspaikka} (:rakennuspaikka info)]
