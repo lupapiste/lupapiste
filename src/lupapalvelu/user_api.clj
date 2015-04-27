@@ -12,7 +12,7 @@
             [sade.util :as util]
             [sade.core :refer :all]
             [sade.session :as ssess]
-            [lupapalvelu.action :refer [defquery defcommand defraw] :as action]
+            [lupapalvelu.action :refer [defquery defcommand defraw email-validator] :as action]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.activation :as activation]
             [lupapalvelu.security :as security]
@@ -603,3 +603,13 @@
                                   :required false
                                   :locked false}))))
   (ok))
+
+(defquery email-in-use
+  {:parameters       [email]
+   :input-validators [email-validator]
+   :user-roles       #{:anonymous}}
+  [_]
+  (let [user (user/get-user-by-email email)]
+    (if user
+      (ok)
+      (fail :email-not-in-use))))

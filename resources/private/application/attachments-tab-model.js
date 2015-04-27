@@ -197,6 +197,7 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel, verdictAttachme
         })
         .processing(self.appModel.processing)
         .call();
+        hub.send("track-click", {category:"Application", label: "", event:"deleteSingleAttachment"});
       return false;
     };
     LUPAPISTE.ModalDialog.showDynamicYesNo(

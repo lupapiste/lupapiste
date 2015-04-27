@@ -136,7 +136,11 @@
             </tbody>
           </table>
           <div data-bind="visible: isAdmin">
-            <button data-bind="click: openNewUser, ltext: 'register.company.add-user.open'" class="btn btn-primary" data-test-id="company-add-user"></button>
+            <button class="btn btn-primary"
+                    data-test-id="company-add-user"
+                    data-bind="click: openNewUser,
+                               ltext: 'register.company.add-user.open',
+                               enable: lupapisteApp.models.globalAuthModel.ok('company-add-user')" ></button>
           </div>
         </div>
       </div>
