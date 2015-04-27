@@ -36,8 +36,9 @@
 (defn organization-from-minimal-by-id [org-id]
   (some #(when (= (:id %) org-id) %) minimal/organizations))
 
-(defn- muni-for-user [user]
-  (let [org (organization-from-minimal-by-id (first (:organizations user)))]
+(defn- muni-for-user [{org-authz :orgAuthz}]
+  {:pre [(= 1 (count org-authz))]}
+  (let [org (organization-from-minimal-by-id (first (first org-authz)))]
     (-> org :scope first :municipality)))
 
 (defn muni-for [username] (muni-for-user (find-user-from-minimal username)))
@@ -57,7 +58,7 @@
 (def veikko-muni (muni-for "veikko"))
 (def sonja       (apikey-for "sonja"))
 (def sonja-id    (id-for "sonja"))
-(def sonja-muni  (muni-for "sonja"))
+(def sonja-muni  "753")
 (def ronja       (apikey-for "ronja"))
 (def ronja-id    (id-for "ronja"))
 (def sipoo       (apikey-for "sipoo"))
@@ -72,7 +73,7 @@
 (def arto       (apikey-for "arto"))
 (def kuopio     (apikey-for "kuopio-r"))
 (def velho      (apikey-for "velho"))
-(def velho-muni (muni-for "velho"))
+(def velho-muni "297")
 (def velho-id   (id-for "velho"))
 
 (defn server-address [] (System/getProperty "target_server" "http://localhost:8000"))
