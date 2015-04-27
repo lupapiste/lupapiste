@@ -17,7 +17,6 @@
             [scss-compiler.core :as scss]
             [lupapalvelu.fixture.fixture-api]
             [lupapalvelu.fixture.minimal]
-            [lupapalvelu.fixture.municipality-test-users]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.commands]
             [lupapalvelu.prev-permit-api]
