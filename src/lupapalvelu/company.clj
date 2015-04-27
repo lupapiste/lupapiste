@@ -2,7 +2,7 @@
   (:require [taoensso.timbre :as timbre :refer [trace debug info infof warn warnf error fatal]]
             [monger.operators :refer :all]
             [schema.core :as sc]
-            [sade.util :refer [min-length-string max-length-string y? ovt? fn-> fn->>]]
+            [sade.util :refer [min-length-string max-length-string y? ovt? account-type? fn-> fn->>]]
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.core :refer :all]
@@ -20,10 +20,15 @@
 ;; Company schema:
 ;;
 
+(def user-limit-for-account-type {:account5 5
+                 :account15 15
+                 :account30 30})
+
 (def- max-64-or-nil (sc/either (max-length-string 64) (sc/pred nil?)))
 
 (def Company {:name                          (sc/both (min-length-string 1) (max-length-string 64))
               :y                             (sc/pred y? "Not valid Y code")
+              :accountType                   (sc/pred account-type? "Not valid account type")
               (sc/optional-key :reference)   max-64-or-nil
               (sc/optional-key :address1)    max-64-or-nil
               (sc/optional-key :address2)    max-64-or-nil
@@ -33,7 +38,8 @@
               (sc/optional-key :ovt)         (sc/pred ovt? "Not valid OVT code")
               (sc/optional-key :pop)         (sc/pred ovt? "Not valid OVT code")
               (sc/optional-key :process-id)  sc/Str
-              (sc/optional-key :created)     sc/Int})
+              (sc/optional-key :created)     sc/Int
+              })
 
 (def company-updateable-keys (->> (keys Company)
                                   (map (fn [k] (if (sc/optional-key? k) (:k k) k)))
