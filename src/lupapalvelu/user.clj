@@ -23,11 +23,13 @@
   [user]
   (dissoc user :private))
 
+(def summary-keys [:id :username :firstName :lastName :role])
+
 (defn summary
   "Returns common information about the user or nil"
   [user]
   (when user
-    (select-keys user [:id :username :firstName :lastName :role])))
+    (select-keys user summary-keys)))
 
 (defn coerce-org-authz
   "Coerces orgAuthz to schema {Keyword #{Keyword}}"
@@ -74,7 +76,6 @@
 (defn authority-admins-organization-id [user]
   (first (organization-ids-by-roles user #{:authorityAdmin})))
 
-
 ;;
 ;; ==============================================================================
 ;; Finding user data:
@@ -96,7 +97,7 @@
                 query)
         query (if-let [organization (:organization query)]
                 (-> query
-                  (assoc :organizations organization)
+                  (assoc (str "orgAuthz." organization) {$exists true})
                   (dissoc :organization))
                 query)]
     query))
@@ -293,6 +294,7 @@
 (defn update-organizations-of-authority-user [email new-organization]
   (let [old-orgs (:organizations (get-user-by-email email))]
     (when (every? #(not= % new-organization) old-orgs)
+      ; FIXME
       (update-user-by-email email {:organizations (merge old-orgs new-organization)}))))
 
 

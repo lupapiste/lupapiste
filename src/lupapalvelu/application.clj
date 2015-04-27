@@ -234,8 +234,8 @@
 
 (defn find-authorities-in-applications-organization [app]
   (mongo/select :users
-                {:organizations (:organization app) :role "authority" :enabled true}
-                [:firstName :lastName]
+                {(str "orgAuthz." (:organization app)) "authority", :enabled true}
+                user/summary-keys
                 (array-map :lastName 1, :firstName 1)))
 
 (defquery application
@@ -248,7 +248,7 @@
             (let [app (assoc app :allowedAttachmentTypes (attachment/get-attachment-types-for-application app))]
               (ok :application (post-process-app app user)
                   :authorities (if (user/authority? user)
-                                 (find-authorities-in-applications-organization app)
+                                 (map #(select-keys % [:id :firstName :lastName]) (find-authorities-in-applications-organization app))
                                  [])
                   :permitSubtypes (permit/permit-subtypes (:permitType app))))
             (fail :error.not-found)))
@@ -318,8 +318,7 @@
    :user-roles #{:authority}
    :states     (action/all-states-but [:draft :closed :canceled])}
   [{:keys [user created application] :as command}]
-  (let [assignee (user/find-user {:_id  assigneeId :enabled true
-                                  :role "authority" :organizations (:organization application)})]
+  (let [assignee (util/find-by-id assigneeId (find-authorities-in-applications-organization application))]
     (if (or assignee (ss/blank? assigneeId))
       (update-application command
                           {$set {:modified  created
