@@ -72,7 +72,7 @@
    :user-roles #{:authority}
    :input-validators [permit/permit-type-validator]}
   [{user :user}]
-  (ok :organizations (organization/get-organizations {:_id {$in (user/organization-ids-by-roles user #{"authority"})}
+  (ok :organizations (organization/get-organizations {:_id {$in (user/organization-ids-by-roles user #{:authority})}
                                                       :scope {$elemMatch {:permitType permitType}}})))
 
 ;;
@@ -444,7 +444,7 @@
    :description "Changes admin session into authority session with access to given organization"}
   [{user :user :as command}]
   (if (user/get-user-with-password (:username user) password)
-    (let [imposter (assoc user :impersonating true :role "authority" :orgAuthz {(keyword organizationId) ["authority"]})]
+    (let [imposter (assoc user :impersonating true :role "authority" :orgAuthz {(keyword organizationId) #{:authority}})]
       (ssess/merge-to-session command (ok) {:user imposter}))
     (fail :error.login)))
 

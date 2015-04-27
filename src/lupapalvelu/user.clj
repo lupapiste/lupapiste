@@ -33,7 +33,7 @@
 ; TODO remove this after data model has been migrated
 (defn with-org-auth [{:keys [organizations role] :as user}]
   (if (#{:authority :authorityAdmin :rest-api} (keyword role))
-    (assoc user :orgAuthz (reduce (fn [m org-id] (assoc m (keyword org-id) #{role})) {} organizations))
+    (assoc user :orgAuthz (reduce (fn [m org-id] (assoc m (keyword org-id) #{(keyword role)})) {} organizations))
     user))
 
 (defn session-summary
@@ -65,13 +65,13 @@
 (defn organization-ids-by-roles
   "Returns organization IDs where user has given roles."
   [{org-authz :orgAuthz :as user} roles]
-  {:pre [(set? roles) (every? string? roles)]}
+  {:pre [(set? roles) (every? keyword? roles)]}
   (->> org-authz
     (filter (fn [[org org-roles]] (some roles org-roles)))
     (map (comp name first))))
 
 (defn authority-admins-organization-id [user]
-  (first (organization-ids-by-roles user #{"authorityAdmin"})))
+  (first (organization-ids-by-roles user #{:authorityAdmin})))
 
 
 ;;
