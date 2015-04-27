@@ -21,7 +21,7 @@
      (merge {:muutostapa (-> huoneisto :muutostapa)
              :huoneluku (-> huoneisto :huoneluku)
              :keittionTyyppi (-> huoneisto :keittionTyyppi)
-             :huoneistoala (-> huoneisto :huoneistoala)
+             :huoneistoala (ss/replace (-> huoneisto :huoneistoala) "," ".")
              :varusteet {:WCKytkin (true? (-> huoneisto :WCKytkin))
                          :ammeTaiSuihkuKytkin (true? (-> huoneisto :ammeTaiSuihkuKytkin))
                          :saunaKytkin (true? (-> huoneisto :saunaKytkin))
