@@ -37,9 +37,10 @@
   (some #(when (= (:id %) org-id) %) minimal/organizations))
 
 (defn- muni-for-user [{org-authz :orgAuthz :as user}]
+  {:pre [user]}
   (when (seq org-authz)
     (assert (= 1 (count org-authz)) user)
-    (let [org (organization-from-minimal-by-id (first (first org-authz)))]
+    (let [org (organization-from-minimal-by-id (-> org-authz first first name))]
       (-> org :scope first :municipality))))
 
 (defn muni-for [username] (muni-for-user (find-user-from-minimal username)))
@@ -70,7 +71,7 @@
 (def admin-id    (id-for "admin"))
 (def raktark-jarvenpaa (apikey-for "rakennustarkastaja@jarvenpaa.fi"))
 (def raktark-jarvenpaa-id   (id-for "rakennustarkastaja@jarvenpaa.fi"))
-(def jarvenpaa-muni    "186")
+(def jarvenpaa-muni    (muni-for "rakennustarkastaja@jarvenpaa.fi"))
 (def arto       (apikey-for "arto"))
 (def kuopio     (apikey-for "kuopio-r"))
 (def velho      (apikey-for "velho"))
@@ -138,15 +139,16 @@
 (def apply-remote-minimal (partial apply-remote-fixture "minimal"))
 
 (defn create-app-with-fn [f apikey & args]
-  (let [args (->> args
-               (apply hash-map)
-               (merge {:operation "kerrostalo-rivitalo"
-                       :propertyId "75312312341234"
-                       :x 444444 :y 6666666
-                       :address "foo 42, bar"
-                       :municipality (or (muni-for-key apikey) sonja-muni)})
-               (mapcat seq))]
-    (apply f apikey :create-application args)))
+  (let [args (apply hash-map args)
+        municipality (:municipality args)
+        params (->> args
+                 (merge {:operation "kerrostalo-rivitalo"
+                         :propertyId "75312312341234"
+                         :x 444444 :y 6666666
+                         :address "foo 42, bar"
+                         :municipality (or municipality (muni-for-key apikey) sonja-muni)})
+                 (mapcat seq))]
+    (apply f apikey :create-application params)))
 
 (defn create-app
   "Runs the create-application command, returns reply map. Use ok? to check it."
