@@ -32,8 +32,8 @@
 ; Temporary mapping to generate orgAuthz key from organizations.
 ; TODO remove this after data model has been migrated
 (defn with-org-auth [{:keys [organizations role] :as user}]
-  (if (#{:authority :authorityAdmin} (keyword role))
-    (assoc user :orgAuthz (reduce (fn [m org-id] (assoc m org-id #{role})) {} organizations))
+  (if (#{:authority :authorityAdmin :rest-api} (keyword role))
+    (assoc user :orgAuthz (reduce (fn [m org-id] (assoc m (keyword org-id) #{(keyword role)})) {} organizations))
     user))
 
 (defn session-summary
@@ -61,6 +61,18 @@
   (= id1 id2))
 
 (def canonize-email (comp ss/lower-case ss/trim))
+
+(defn organization-ids-by-roles
+  "Returns organization IDs where user has given roles."
+  [{org-authz :orgAuthz :as user} roles]
+  {:pre [(set? roles) (every? keyword? roles)]}
+  (->> org-authz
+    (filter (fn [[org org-roles]] (some roles org-roles)))
+    (map (comp name first))))
+
+(defn authority-admins-organization-id [user]
+  (first (organization-ids-by-roles user #{:authorityAdmin})))
+
 
 ;;
 ;; ==============================================================================
@@ -196,7 +208,7 @@
   (when-not (ss/blank? apikey)
     (let [user (find-user {:private.apikey apikey})]
       (when (:enabled user)
-        (non-private user)))))
+        (session-summary user)))))
 
 (defmacro with-user-by-email [email & body]
   `(let [~'user (get-user-by-email ~email)]
