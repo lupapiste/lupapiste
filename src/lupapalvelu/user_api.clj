@@ -153,7 +153,7 @@
       (as-> user-data
         (merge
           {:firstName "" :lastName "" :username email}
-          (when-not (ss/blank? organization) {:orgAuthz {organization #{role}}})
+          (when-not (ss/blank? organization) {:orgAuthz {organization #{(keyword role)}}})
           user-data))
       (assoc
         :email email
