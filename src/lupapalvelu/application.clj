@@ -977,8 +977,7 @@
 (defraw redirect-to-vendor-backend
   {:parameters [id]
    :user-roles #{:authority}
-   :states     action/post-submitted-states
-   :pre-checks []}
+   :states     action/post-submitted-states}
   [{{:keys [verdicts id]} :application}]
   (let [vendor-backend-id (->> verdicts
                                (remove :draft)

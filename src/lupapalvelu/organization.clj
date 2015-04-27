@@ -92,3 +92,6 @@
 (defn has-ftp-user? [organization permit-type]
   (not (ss/blank? (get-in organization [:krysp (keyword permit-type) :ftpUser]))))
 
+(defn authority-admins-organization-id [user]
+  (-> user :organizations first))
+

@@ -15,7 +15,7 @@
     (ok :functions functions)))
 
 (defn- store-function-code [operation function-code user]
-  (let [orgId (oa/authority-admins-organization-id user)
+  (let [orgId (o/authority-admins-organization-id user)
         organization (o/get-organization orgId)
         operation-valid? (some #{operation} (:selected-operations organization))
         code-valid? (some #{function-code} (map :code (t/available-tos-functions orgId)))]
