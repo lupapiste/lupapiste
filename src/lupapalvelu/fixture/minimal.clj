@@ -305,7 +305,7 @@
     :enabled true
     :role "rest-api"
     :private {:password "$2a$10$eYl/SxvzYzOfIDIqjQIZ8.uhi57zPKg0m8J1BHwnAIx/sBcxYojvS"} ;jarvenpaa
-    :orgAuthz {:186-R #{:rest-api}}}
+    :orgAuthz {:186-R #{:authority}}}
 
    ;; Loppi
 
