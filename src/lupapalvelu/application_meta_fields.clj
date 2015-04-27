@@ -13,10 +13,10 @@
             [sade.strings :as ss]))
 
 (def post-verdict-states #{:verdictGiven :constructionStarted :closed})
-
-(def post-sent-states (conj post-verdict-states :sent))
+(def post-submitted-states (conj post-verdict-states :sent))
 
 (defn in-post-verdict-state? [_ app] (contains? post-verdict-states (keyword (:state app))))
+(defn in-post-submitted-state? [_ app] (contains? post-submitted-states (keyword (:state app))))
 
 (defn- applicant-name-from-auth [application]
   (let [owner (first (domain/get-auths-by-role application :owner))
@@ -45,6 +45,11 @@
   (let [owner (first (domain/get-auths-by-role app :owner))
         user (user/get-user-by-id (:id owner))]
     (:phone user)))
+
+(defn- get-vendor-backend-id [_ app]
+  (->> (:verdicts app)
+       (remove :draft)
+       (some :kuntalupatunnus)))
 
 
 (defn get-application-operation [app]
@@ -127,6 +132,8 @@
 
 (def meta-fields (conj indicator-meta-fields
                    {:field :inPostVerdictState :fn in-post-verdict-state?}
+                   {:field :inPostSubmittedState :fn in-post-submitted-state?}
+                   {:field :vendorBackendId :fn get-vendor-backend-id}
                    {:field :applicantPhone :fn get-applicant-phone}
                    {:field :organizationMeta :fn organization-meta}
                    {:field :neighbors :fn neighbors/normalize-neighbors}
