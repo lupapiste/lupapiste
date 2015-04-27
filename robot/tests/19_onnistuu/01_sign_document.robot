@@ -9,6 +9,7 @@ Resource        ../../common_resource.robot
 Bob decides to register his company, but then cancels his mind
   Wait and click  register-button
   Wait and click  xpath=//*[@data-test-id='register-company-start']
+  Select account type  account5
   Wait until  Element should be visible  xpath=//*[@data-test-id='register-company-submit']
   Element Should Be Disabled  xpath=//*[@data-test-id='register-company-submit']
   Element Should Be Enabled   xpath=//*[@data-test-id='register-company-cancel']
@@ -17,6 +18,7 @@ Bob decides to register his company, but then cancels his mind
 
 Bob decides to register his company after all, but still chikens out
   Wait and click  xpath=//*[@data-test-id='register-company-start']
+  Select account type  account5
   Wait until  Element should be visible  xpath=//*[@data-test-id='register-company-submit']
   Input text by test id  register-company-name        Peten rakennus Oy
   Input text by test id  register-company-y           FI2341528-4
@@ -36,6 +38,7 @@ Bob decides to register his company after all, but still chikens out
 Bob decides to register his company after all, and this time he means it
   Wait and click  register-button
   Wait and click  xpath=//*[@data-test-id='register-company-start']
+  Select account type  account5
   Wait until  Element should be visible  xpath=//*[@data-test-id='register-company-submit']
   Input text by test id  register-company-name        Peten rakennus Oy
   Input text by test id  register-company-y           FI2341528-4
@@ -72,3 +75,9 @@ Login with the new password
   User should be logged in  Pete Puuha
   [Teardown]  logout
 
+*** Keywords ***
+
+Select account type
+  [Arguments]  ${type}
+  Wait Until  Click Element  xpath=//*[@data-test-id='account-type-${type}']
+  Wait Until  Click Element  xpath=//*[@data-test-id='account-type-submit']

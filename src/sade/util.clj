@@ -328,6 +328,11 @@
     (.startsWith ovt "0037")  (finnish-ovt? ovt)
     :else                     (re-matches #"\d{4}.+" ovt)))
 
+(defn account-type? [account-type]
+  (cond
+    (nil? account-type) false
+    :else (re-matches   #"account(5|15|30)" account-type)))
+
 (defn rakennusnumero? [^String s]
   (and (not (nil? s)) (re-matches #"^\d{3}$" s)))
 

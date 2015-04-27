@@ -13,7 +13,8 @@
 (defn init-sign []
   (-> (u/command u/pena :init-sign
                  :company {:name  "company-name"
-                           :y     "FI2341528-4"}
+                           :y     "FI2341528-4"
+                           :accountType "account5"}
                  :signer {:firstName   "First"
                           :lastName    "Last"
                           :email       "a@b.c"}
@@ -24,7 +25,8 @@
 (fact "init-sign"
   (init-sign) => (contains {:stamp   #"[a-zA-Z0-9]{40}"
                             :company {:name "company-name"
-                                      :y    "FI2341528-4"}
+                                      :y    "FI2341528-4"
+                                      :accountType "account5"}
                             :signer {:firstName   "First"
                                      :lastName    "Last"
                                      :email        "a@b.c"}
