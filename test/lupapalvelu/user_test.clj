@@ -75,7 +75,7 @@
   (user-query {:email "x"})     => {:email "x"}
   (user-query {:email "XyZq"})  => {:email "xyzq"}
   (user-query {:id "x" :username "UserName" :email "Email@AddreSS.FI" :foo "BoZo"}) => {:_id "x" :username "username" :email "email@address.fi" :foo "BoZo"}
-  (user-query {:organization "x"}) => {:organizations "x"})
+  (user-query {:organization "x"}) => {"orgAuthz.x" {$exists true}})
 
 ;;
 ;; jQuery data-tables:
