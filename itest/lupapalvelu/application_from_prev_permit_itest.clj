@@ -3,6 +3,7 @@
             [clojure.java.io :as io]
             [sade.core :refer [def-]]
             [sade.xml :as xml]
+            [lupapalvelu.prev-permit-api]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.domain :as domain]
