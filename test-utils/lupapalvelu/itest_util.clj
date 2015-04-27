@@ -70,7 +70,7 @@
 (def admin-id    (id-for "admin"))
 (def raktark-jarvenpaa (apikey-for "rakennustarkastaja@jarvenpaa.fi"))
 (def raktark-jarvenpaa-id   (id-for "rakennustarkastaja@jarvenpaa.fi"))
-(def jarvenpaa-muni    (muni-for "rakennustarkastaja@jarvenpaa.fi"))
+(def jarvenpaa-muni    "186")
 (def arto       (apikey-for "arto"))
 (def kuopio     (apikey-for "kuopio-r"))
 (def velho      (apikey-for "velho"))
@@ -232,8 +232,9 @@
   [apikey & args]
   (let [resp (apply create-app apikey args)
         id   (:id resp)]
-    resp => ok?
-    id => truthy
+    (fact "Application created"
+      resp => ok?
+      id => truthy)
     id))
 
 (defn comment-application
