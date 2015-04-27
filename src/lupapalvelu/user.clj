@@ -30,9 +30,9 @@
     (select-keys user [:id :username :firstName :lastName :role])))
 
 (defn coerce-org-authz
-  "Coerces orgAuthz to schema {Str #{Str}}"
+  "Coerces orgAuthz to schema {Keyword #{Str}}"
   [org-authz]
-  (into {} (for [[k v] org-authz] [(name k) (set v)])))
+  (into {} (for [[k v] org-authz] [k (set v)])))
 
 (defn session-summary
   "Returns common information about the user to be stored in session or nil"
