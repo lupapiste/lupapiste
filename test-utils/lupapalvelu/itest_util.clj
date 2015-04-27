@@ -36,10 +36,11 @@
 (defn organization-from-minimal-by-id [org-id]
   (some #(when (= (:id %) org-id) %) minimal/organizations))
 
-(defn- muni-for-user [{org-authz :orgAuthz}]
-  {:pre [(= 1 (count org-authz))]}
-  (let [org (organization-from-minimal-by-id (first (first org-authz)))]
-    (-> org :scope first :municipality)))
+(defn- muni-for-user [{org-authz :orgAuthz :as user}]
+  (when (seq org-authz)
+    (assert (= 1 (count org-authz)) user)
+    (let [org (organization-from-minimal-by-id (first (first org-authz)))]
+      (-> org :scope first :municipality))))
 
 (defn muni-for [username] (muni-for-user (find-user-from-minimal username)))
 (defn muni-for-key [apikey] (muni-for-user (find-user-from-minimal-by-apikey apikey)))
