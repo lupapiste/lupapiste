@@ -21,8 +21,8 @@
 ;;
 
 (def user-limit-for-account-type {:account5 5
-                 :account15 15
-                 :account30 30})
+                                  :account15 15
+                                  :account30 30})
 
 (def- max-64-or-nil (sc/either (max-length-string 64) (sc/pred nil?)))
 

@@ -75,7 +75,7 @@
 
 (defquery company-invite-user
   {:user-roles #{:applicant}
-   :pre-checks [validate-user-is-admin-or-company-admin]
+   :pre-checks [validate-user-is-admin-or-company-admin user-limit-not-exceeded]
    :parameters [email]}
   [{caller :user}]
   (let [user (u/find-user {:email email})
