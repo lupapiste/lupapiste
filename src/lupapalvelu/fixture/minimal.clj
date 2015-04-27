@@ -44,7 +44,6 @@
     :email "tampere-ya"
     :role "authorityAdmin"
     :zip "10203"
-    :organizations ["837-YA"]
     :orgAuthz {:837-YA #{:authorityAdmin}}
     :private {:password "$2a$10$hkJ5ZQhqL66iM2.3m4712eDIH1K1Ez6wp7FeV9DTkPCNEZz8IfrAe" :apikey "tampereYAapikey"}}
 
@@ -53,7 +52,6 @@
     :email "veikko.viranomainen@tampere.fi"
     :enabled true
     :role "authority"
-    :organizations ["837-R"]
     :orgAuthz {:837-R #{:authority}}
     :firstName "Veikko"
     :lastName "Viranomainen"
@@ -68,7 +66,6 @@
     :enabled true
     :role "authority"
     :username "jussi"
-    :organizations ["837-YA"]
     :orgAuthz {:837-YA #{:authority}}
     :firstName "Jussi"
     :lastName "Viranomainen"
@@ -87,7 +84,6 @@
     :enabled true
     :role "authority"
     :username "sakari"
-    :organizations ["297-YA"]
     :orgAuthz {:297-YA #{:authority}}
     :firstName "Sakari"
     :lastName "Viranomainen"
@@ -108,7 +104,6 @@
     :email "kuopio-ya"
     :role "authorityAdmin"
     :zip "10203"
-    :organizations ["297-YA"]
     :orgAuthz {:297-YA #{:authorityAdmin}}
     :private {:password "$2a$10$YceveAiQXbeUs65B4FZ6lez/itf0UEXooHcZlygI2WnQGhF0dJ1jO"}}
 
@@ -119,9 +114,8 @@
     :enabled true
     :role "authority"
     :username "velho"
-    :organizations ["297-R" "297-YA"]
     :orgAuthz {:297-R #{:authority}
-               297-YA #{:authority}}
+               :297-YA #{:authority}}
     :firstName "Velho"
     :lastName "Viranomainen"
     :phone "1231234567"
@@ -145,7 +139,6 @@
     :email "kuopio-r@kuopio.fi"
     :role "authorityAdmin"
     :zip "10203"
-    :organizations ["297-R"]
     :orgAuthz {:297-R #{:authorityAdmin}}
     :private {:password "$2a$10$YceveAiQXbeUs65B4FZ6lez/itf0UEXooHcZlygI2WnQGhF0dJ1jO"
               :apikey   "lhIqT1YwOMH8HuiCGcjBtGggfeRaxZL5OUNd3r4u"}}
@@ -157,7 +150,6 @@
     :email "admin@sipoo.fi"
     :enabled true
     :role "authorityAdmin"
-    :organizations ["753-R"]
     :orgAuthz {:753-R #{:authorityAdmin}}
     :firstName "Simo"
     :lastName "Suurvisiiri"
@@ -171,7 +163,6 @@
     :role "authority"
     :enabled true
     :email "sonja.sibbo@sipoo.fi"
-    :organizations ["753-R" "753-YA" "998-R-TESTI-2"]
     :orgAuthz {:753-R #{:authority}
                :753-YA #{:authority}
                :998-R-TESTI-2 #{:authority}}
@@ -189,7 +180,6 @@
     :role "authority"
     :enabled true
     :email "ronja.sibbo@sipoo.fi"
-    :organizations ["753-R"]
     :orgAuthz {:753-R #{:authority}}
     :firstName "Ronja"
     :lastName "Sibbo"
@@ -207,7 +197,6 @@
      :email "pekka.borga@porvoo.fi"
      :enabled true
      :role "authority"
-     :organizations ["638-R"]
      :orgAuthz {:638-R #{:authority}}
      :firstName "Pekka"
      :lastName "Borga"
@@ -224,7 +213,6 @@
      :email "olli.uleaborg@ouka.fi"
      :enabled true
      :role "authority"
-     :organizations ["564-R" "529-R" "564-YMP"]
      :orgAuthz {:564-R #{:authority}
                 :529-R #{:authority}
                 :564-YMP #{:authority}}
@@ -242,7 +230,6 @@
     :email "admin@naantali.fi"
     :enabled true
     :role "authorityAdmin"
-    :organizations ["529-R"]
     :orgAuthz {:529-R #{:authorityAdmin}}
     :firstName "Admin"
     :lastName "Naantali"
@@ -255,7 +242,6 @@
     :email "rakennustarkastaja@naantali.fi"
     :enabled true
     :role "authority"
-    :organizations ["529-R" "186-R"]
     :orgAuthz {:529-R #{:authority}
                :186-R #{:authority}}
     :firstName "Rakennustarkastaja"
@@ -268,7 +254,6 @@
     :email "lupasihteeri@naantali.fi"
     :enabled true
     :role "authority"
-    :organizations ["529-R"]
     :orgAuthz {:529-R #{:authority}}
     :firstName "Lupasihteeri"
     :lastName "Naantali"
@@ -283,7 +268,6 @@
     :email "admin@jarvenpaa.fi"
     :enabled true
     :role "authorityAdmin"
-    :organizations ["186-R"]
     :orgAuthz {:186-R #{:authorityAdmin}}
     :firstName "Admin"
     :lastName "J\u00E4rvenp\u00E4\u00E4"
@@ -295,7 +279,6 @@
     :email "rakennustarkastaja@jarvenpaa.fi"
     :enabled true
     :role "authority"
-    :organizations ["186-R"]
     :orgAuthz {:186-R #{:authority}}
     :firstName "Rakennustarkastaja"
     :lastName "J\u00E4rvenp\u00E4\u00E4"
@@ -307,8 +290,7 @@
     :email "lupasihteeri@jarvenpaa.fi"
     :enabled true
     :role "authority"
-    :organizations ["186-R"]
-    {:186-R #{:authority}}
+    :orgAuthz {:186-R #{:authority}}
     :firstName "Lupasihteeri"
     :lastName "J\u00E4rvenp\u00E4\u00E4"
     :username "lupasihteeri@jarvenpaa.fi"
@@ -323,7 +305,7 @@
     :enabled true
     :role "rest-api"
     :private {:password "$2a$10$eYl/SxvzYzOfIDIqjQIZ8.uhi57zPKg0m8J1BHwnAIx/sBcxYojvS"} ;jarvenpaa
-    :organizations ["186-R"]}
+    :orgAuthz {:186-R #{:rest-api}}}
 
    ;; Loppi
 
@@ -333,7 +315,6 @@
     :enabled true
     :role "authority"
     :username "arto"
-    :organizations ["433-R"]
     :orgAuthz {:433-R #{:authority}}
     :firstName "Arto"
     :lastName "Viranomainen"
