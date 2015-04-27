@@ -72,7 +72,7 @@
 (defquery users-in-same-organizations
   {:user-roles #{:authority}}
   [{user :user}]
-  (let [users (mongo/select :users {:role "authority", :organizations {$in (:organizations user)}})]
+  (let [users (mongo/select :users {:role "authority", :organizations {$in (->> user :orgAuthz keys)}})]
     (ok :users (map user/summary users))))
 
 (defquery organization-by-user
