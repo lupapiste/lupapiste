@@ -13,7 +13,7 @@
             [sade.strings :as ss]
             [sade.xml :as xml]
             [sade.core :refer :all]
-            [lupapalvelu.action :refer [defquery defcommand update-application without-system-keys notify application->command] :as action]
+            [lupapalvelu.action :refer [defraw defquery defcommand update-application without-system-keys notify application->command] :as action]
             [lupapalvelu.mongo :refer [$each] :as mongo]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.domain :as domain]
@@ -973,3 +973,12 @@
                          $push {:attachments {$each (make-attachments created op organization (:state application) (:tosFunction application))}}})
     (try (autofill-rakennuspaikka application created)
          (catch Exception e (error e "KTJ data was not updated")))))
+
+(defraw redirect-to-vendor-backend
+  {:parameters [applicationId]
+   :user-roles #{:authority}
+   :states     action/all-states
+   :pre-checks []}
+  [_]
+  {:status 303
+   :headers {"Location" "http://www.google.com?q=foo"}})

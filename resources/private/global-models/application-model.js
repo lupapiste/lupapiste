@@ -46,8 +46,8 @@ LUPAPISTE.ApplicationModel = function() {
 
   // Application metadata fields
   self.inPostVerdictState = ko.observable(false);
-  self.inPostSubmittedState = ko.observable(false);
-  self.vendorBackendId = ko.observable();
+  self.inPostSubmittedState = ko.observable(false); // TODO: remove
+  self.vendorBackendId = ko.observable(); // TODO: remove
   self.applicantPhone = ko.observable();
   self.organizationMeta = ko.observable();
   self.neighbors = ko.observable([]);
@@ -130,16 +130,8 @@ LUPAPISTE.ApplicationModel = function() {
 
   self.allowedAttachmentTypes = ko.observableArray([]);
 
-  self.linkToBackingSystemEnabled = ko.pureComputed(function () {
-    return true;
-  });
-  self.linkToBackingSystem = ko.pureComputed(function () {
-    return self.inPostSubmittedState() ? self.vendorBackendId() : self.id();
-  });
-
   self.toBackingSystem = function() {
-    var url = "http://www.google.com?q=" + self.linkToBackingSystem();
-    window.open(url, "_blank");
+    window.open("/api/raw/redirect-to-vendor-backend?applicationId=" + self.id(), "_blank");
   };
 
   self.updateInvites = function() {

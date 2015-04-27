@@ -243,7 +243,7 @@
             <span data-bind="ltext: 'application.reset-indicators'"></span>
             <span class="icon mark-seen left-align"></span>
           </button>
-          <button data-bind="click: toBackingSystem, visible: linkToBackingSystemEnabled" class="btn">
+          <button data-bind="click: toBackingSystem, visible: $root.authorization.ok('redirect-to-vendor-backend')" class="btn">
             <span data-bind="ltext: 'application.showInBackingSysten'"></span>
             <span class="icon approve-grey left-align"/>
           </button>

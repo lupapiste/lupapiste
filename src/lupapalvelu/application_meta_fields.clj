@@ -132,8 +132,8 @@
 
 (def meta-fields (conj indicator-meta-fields
                    {:field :inPostVerdictState :fn in-post-verdict-state?}
-                   {:field :inPostSubmittedState :fn in-post-submitted-state?}
-                   {:field :vendorBackendId :fn get-vendor-backend-id}
+                   {:field :inPostSubmittedState :fn in-post-submitted-state?} ;TODO remove
+                   {:field :vendorBackendId :fn get-vendor-backend-id} ;TODO remove
                    {:field :applicantPhone :fn get-applicant-phone}
                    {:field :organizationMeta :fn organization-meta}
                    {:field :neighbors :fn neighbors/normalize-neighbors}
