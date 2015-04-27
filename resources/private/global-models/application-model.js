@@ -131,7 +131,7 @@ LUPAPISTE.ApplicationModel = function() {
   self.allowedAttachmentTypes = ko.observableArray([]);
 
   self.toBackingSystem = function() {
-    window.open("/api/raw/redirect-to-vendor-backend?applicationId=" + self.id(), "_blank");
+    window.open("/api/raw/redirect-to-vendor-backend?id=" + self.id(), "_blank");
   };
 
   self.updateInvites = function() {

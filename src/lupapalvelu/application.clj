@@ -975,10 +975,14 @@
          (catch Exception e (error e "KTJ data was not updated")))))
 
 (defraw redirect-to-vendor-backend
-  {:parameters [applicationId]
+  {:parameters [id]
    :user-roles #{:authority}
-   :states     action/all-states
+   :states     action/post-submitted-states
    :pre-checks []}
-  [_]
-  {:status 303
-   :headers {"Location" "http://www.google.com?q=foo"}})
+  [{{:keys [verdicts id]} :application}]
+  (let [vendor-backend-id (->> verdicts
+                               (remove :draft)
+                               (some :kuntalupatunnus))
+        url (or vendor-backend-id id)]
+    {:status 303
+     :headers {"Location" (str "http://www.google.com?q=" url)}}))
