@@ -30,9 +30,9 @@
     (select-keys user [:id :username :firstName :lastName :role])))
 
 (defn coerce-org-authz
-  "Coerces orgAuthz to schema {Keyword #{Str}}"
+  "Coerces orgAuthz to schema {Keyword #{Keyword}}"
   [org-authz]
-  (into {} (for [[k v] org-authz] [k (set v)])))
+  (into {} (for [[k v] org-authz] [k (set (map keyword v))])))
 
 (defn with-org-auth [user]
   (update-in user [:orgAuthz] coerce-org-authz))
