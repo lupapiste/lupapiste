@@ -66,15 +66,20 @@
 (def canonize-email (comp ss/lower-case ss/trim))
 
 (defn organization-ids-by-roles
-  "Returns organization IDs where user has given roles."
+  "Returns a set of organization IDs where user has given roles."
   [{org-authz :orgAuthz :as user} roles]
   {:pre [(set? roles) (every? keyword? roles)]}
   (->> org-authz
     (filter (fn [[org org-roles]] (some roles org-roles)))
-    (map (comp name first))))
+    (map (comp name first))
+    set))
 
 (defn authority-admins-organization-id [user]
   (first (organization-ids-by-roles user #{:authorityAdmin})))
+
+(defn user-is-authority-in-organization? [user organization-id]
+  (let [org-set (organization-ids-by-roles user #{:authority})]
+    (contains? org-set organization-id)))
 
 ;;
 ;; ==============================================================================

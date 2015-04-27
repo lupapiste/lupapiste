@@ -585,9 +585,6 @@
    :description nil
    :created     created})
 
-(defn user-is-authority-in-organization? [user-id organization-id]
-  (mongo/any? :users {$and [{:organizations organization-id} {:_id user-id}]}))
-
 (defn operation-validator [{{operation :operation} :data}]
   (when-not (operations/operations (keyword operation)) (fail :error.unknown-type)))
 
@@ -638,7 +635,7 @@
         info-request? (boolean infoRequest)
         open-inforequest? (and info-request? (:open-inforequest scope))]
 
-    (when-not (or (user/applicant? user) (user-is-authority-in-organization? (:id user) organization-id))
+    (when-not (or (user/applicant? user) (user/user-is-authority-in-organization? user organization-id))
       (unauthorized!))
     (when-not organization-id
       (fail! :error.missing-organization :municipality municipality :permit-type permit-type :operation operation))
