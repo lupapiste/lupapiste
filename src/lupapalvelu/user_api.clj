@@ -153,7 +153,6 @@
       (assoc
         :email email
         :enabled (= "true" (str (:enabled user-data)))
-        :organizations (if (:organization user-data) [(:organization user-data)] [])
         :orgAuthz {(:organization user-data) #{(:role user-data)}}
         :private (merge {}
                    (when (:password user-data)
@@ -303,13 +302,10 @@
 
 (defn update-user [email operation organization]
   (let [role             "authority"
-        org-op           ({"add" $addToSet "remove" $pull} operation)
-        org-data         {:organizations organization}
         org-authz-op     ({"add" $set "remove" $unset} operation)
         org-authz-data   {(str "orgAuthz." organization) [role]}
         query            {:email email, :role role}]
-    (mongo/update-n :users query {org-op       org-data
-                                  org-authz-op org-authz-data})))
+    (mongo/update-n :users query {org-authz-op org-authz-data})))
 
 (defcommand update-user-organization
   {:parameters       [operation email firstName lastName]
