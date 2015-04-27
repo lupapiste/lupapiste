@@ -4,7 +4,7 @@
 
 Voit hyv&auml;ksy&auml; liitt&auml;misen oheisella linkill&auml;:
 
-[{{link-fi}}]({{link-fi}})
+[{{ok-fi}}]({{ok-fi}})
 
 Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville.
 
