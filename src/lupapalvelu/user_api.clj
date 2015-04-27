@@ -158,13 +158,7 @@
       (assoc
         :email email
         :enabled (= "true" (str enabled))
-        :private (merge {}
-                   (when password
-                     {:password (security/get-hash password)})
-                   (when (and (:apikey user-data) (not= "false" (:apikey user-data)))
-                     {:apikey (if (and (env/dev-mode?) (not (#{"true" "false"} (:apikey user-data))))
-                                (:apikey user-data)
-                                (security/random-password))}))))))
+        :private (if password {:password (security/get-hash password)} {})))))
 
 ;;
 ;; TODO: Ylimaaraisen "send-email"-parametrin sijaan siirra mailin lahetys pois
