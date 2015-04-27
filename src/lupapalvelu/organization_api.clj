@@ -72,20 +72,19 @@
 (defquery users-in-same-organizations
   {:user-roles #{:authority}}
   [{user :user}]
-  (if-let [organization-ids (seq (keys (:orgAuthz user)))]
+  (if-let [organization-ids (seq (user/organization-ids user))]
     (let [org-match (for [org-id organization-ids]
-                      {(str "orgAuthz." (name org-id)) "authority"})
+                      {(str "orgAuthz." org-id) "authority"})
           query {$and [{:role "authority"}, {$or org-match}]}
           users (user/find-users query)]
       (ok :users (map user/summary users)))
     (ok :users [])))
 
 (defquery organization-by-user
-  {:description "Lists all organization users by organization."
+  {:description "Lists organization details."
    :user-roles #{:authorityAdmin}}
-  [{{:keys [organizations]} :user}]
-  (let [orgs (o/get-organizations {:_id {$in organizations}}) ; FIXME
-        organization (first orgs)
+  [{user :user}]
+  (let [organization (o/get-organization (user/authority-admins-organization-id user))
         ops-with-attachments (organization-operations-with-attachments organization)
         selected-operations-with-permit-type (selected-operations-with-permit-types organization)]
     (ok :organization (-> organization

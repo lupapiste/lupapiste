@@ -22,8 +22,8 @@
 
 (defquery get-organizations-statement-givers
   {:user-roles #{:authorityAdmin}}
-  [{{:keys [organizations]} :user}]
-  (let [organization (organization/get-organization (first organizations))
+  [{user :user}]
+  (let [organization (organization/get-organization (user/authority-admins-organization-id user))
         permitPersons (or (:statementGivers organization) [])]
     (ok :data permitPersons)))
 
@@ -44,18 +44,17 @@
                       action/email-validator]
    :notified   true
    :user-roles #{:authorityAdmin}}
-  [{{:keys [organizations]} :user}]
-  (let [organization-id (first organizations)
-        organization    (organization/get-organization organization-id)
+  [{user :user}]
+  (let [organization (organization/get-organization (user/authority-admins-organization-id user))
         email           (user/canonize-email email)
         statement-giver-id (mongo/create-id)]
     (if-let [user (user/get-user-by-email email)]
       (do
         (when-not (user/authority? user) (fail! :error.not-authority))
-        (organization/update-organization organization-id {$push {:statementGivers {:id statement-giver-id
-                                                                                    :text text
-                                                                                    :email email
-                                                                                    :name (str (:firstName user) " " (:lastName user))}}})
+        (organization/update-organization (:id organization) {$push {:statementGivers {:id statement-giver-id
+                                                                                       :text text
+                                                                                       :email email
+                                                                                       :name (str (:firstName user) " " (:lastName user))}}})
         (notifications/notify! :add-statement-giver  {:user user :data {:text text :organization organization}})
         (ok :id statement-giver-id))
       (fail :error.user-not-found))))
@@ -63,8 +62,10 @@
 (defcommand delete-statement-giver
   {:parameters [personId]
    :user-roles #{:authorityAdmin}}
-  [{{:keys [organizations]} :user}]
-  (organization/update-organization (first organizations) {$pull {:statementGivers {:id personId}}}))
+  [{user :user}]
+  (organization/update-organization
+    (organization/get-organization (user/authority-admins-organization-id user))
+    {$pull {:statementGivers {:id personId}}}))
 
 ;;
 ;; Authority operations
