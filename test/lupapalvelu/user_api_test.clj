@@ -78,11 +78,6 @@
     (validate-create-new-user! {:role "admin"} {:password "z" :role "dummy" :email "x"}) => truthy
     (provided (security/valid-password? "z") => true))
 
-  (fact "only admin can create users with apikeys"
-    (fact (validate-create-new-user! {:role "admin"} {:role "authorityAdmin" :organization "x" :email "x" :apikey "true"}) => truthy)
-    (fact (validate-create-new-user! {:role "authorityAdmin" :organizations ["x"]} {:role "authority" :organization "x" :email "x"}) => truthy)
-    (fact (validate-create-new-user! {:role "authorityAdmin" :organizations ["x"]} {:role "authority" :organization "x" :email "x" :apikey "true"}) => forbidden))
-
   ))
 ;;
 ;; ==============================================================================
@@ -120,15 +115,15 @@
   (fact "does not contain extra fields"
     (-> (create-new-user-entity {:email "email" :foo "bar"}) :foo) => nil)
 
-  (facts "apikey is created"
-    (fact (-> (create-new-user-entity  {:email "..anything.." :apikey "true"}) :private :apikey) => string?)
+  (facts "apikey is not created"
+    (fact (-> (create-new-user-entity  {:email "..anything.." :apikey "true"}) :private :apikey) => nil?)
     (fact (-> (create-new-user-entity {:email "..anything.." :apikey "false"}) :private) => {})
-    (fact (-> (create-new-user-entity {:email "..anything.." :apikey "foo"}) :private :apikey) => "foo"))
+    (fact (-> (create-new-user-entity {:email "..anything.." :apikey "foo"}) :private :apikey) => nil?))
 
   (fact "orgAuthz is created"
     (:orgAuthz (create-new-user-entity {:email "..anything.."
                                         :organization "123-R"
-                                        :role "authority"})) => {"123-R" #{"authority"}}))
+                                        :role "authority"})) => {"123-R" #{:authority}}))
 
 ;;
 ;; ==============================================================================
