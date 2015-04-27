@@ -484,19 +484,22 @@
       util/strip-empty-maps
       tools/wrapped)))
 
-(defn ->company [{:keys [id name y address1 zip po]} {:keys [phone firstName lastName email company]} & {:keys [with-empty-defaults]}]
-  (letfn [(wrap [v] (if (and with-empty-defaults (nil? v)) "" v))]
-    (-> (if (= (:id company) id)
-          {:yhteyshenkilo {:henkilotiedot {:etunimi  (wrap firstName)
-                                           :sukunimi (wrap lastName)}
-                           :yhteystiedot  {:email    (wrap email)
-                                           :puhelin  (wrap phone)}}}
-          {})
-        (merge {:liikeJaYhteisoTunnus          (wrap y)
-                :yritysnimi                    (wrap name)
-                :osoite {:katu                 (wrap address1)
-                         :postinumero          (wrap zip)
-                         :postitoimipaikannimi (wrap po)}})
-        util/strip-nils
-        util/strip-empty-maps
-        tools/wrapped)))
+(defn ->yritys [{:keys [firstName lastName email phone address1 zip po turvakieltokytkin name y]}
+                & {:keys [with-empty-defaults?]}]
+  {:pre [(or (nil? turvakieltokytkin) (util/boolean? turvakieltokytkin))]}
+  (letfn [(wrap [v] (if (and with-empty-defaults? (nil? v)) "" v))]
+    (->
+      {:yritysnimi                                    (wrap name)
+       :liikeJaYhteisoTunnus                          (wrap y)
+       :osoite {:katu                                 (wrap address1)
+                :postinumero                          (wrap zip)
+                :postitoimipaikannimi                 (wrap po)}
+       :yhteyshenkilo {:henkilotiedot {:etunimi       (wrap firstName)
+                                       :sukunimi      (wrap lastName)
+                                       :turvakieltoKytkin (when (or turvakieltokytkin with-empty-defaults?) (boolean turvakieltokytkin))}
+                       :yhteystiedot {:email          (wrap email)
+                                      :puhelin        (wrap phone)}}}
+      util/strip-nils
+      util/strip-empty-maps
+      tools/wrapped)))
+

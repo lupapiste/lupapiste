@@ -12,7 +12,7 @@
             [sade.util :as util]
             [sade.core :refer :all]
             [sade.session :as ssess]
-            [lupapalvelu.action :refer [defquery defcommand defraw] :as action]
+            [lupapalvelu.action :refer [defquery defcommand defraw email-validator] :as action]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.activation :as activation]
             [lupapalvelu.security :as security]
@@ -45,13 +45,14 @@
 (defquery users
   {:user-roles #{:admin :authorityAdmin}}
   [{{:keys [role organizations]} :user data :data}]
-  (ok :users (map user/non-private (-> data
+  (let [users (-> data
                                      (set/rename-keys {:userId :id})
                                      (select-keys [:id :role :organization :organizations :email :username :firstName :lastName :enabled :allowDirectMarketing])
                                      (as-> data (if (= role :authorityAdmin)
                                                   (assoc data :organizations {$in [organizations]})
                                                   data))
-                                     (user/find-users)))))
+                (user/find-users))]
+    (ok :users (map (comp user/with-org-auth user/non-private) users))))
 
 (env/in-dev
   (defquery user-by-email
@@ -71,7 +72,7 @@
    :user-roles #{:authority}
    :input-validators [permit/permit-type-validator]}
   [{user :user}]
-  (ok :organizations (organization/get-organizations {:_id {$in (:organizations user)}
+  (ok :organizations (organization/get-organizations {:_id {$in (user/organization-ids-by-roles user #{:authority})}
                                                       :scope {$elemMatch {:permitType permitType}}})))
 
 ;;
@@ -318,7 +319,7 @@
    :user-roles #{:authorityAdmin}}
   [{caller :user}]
   (let [email            (user/canonize-email email)
-        new-organization (first (:organizations caller))
+        new-organization (user/authority-admins-organization-id caller)
         update-count     (update-user email operation new-organization)]
     (debug "update user" email)
     (if (pos? update-count)
@@ -436,7 +437,7 @@
         (if-let [application-page (user/applicationpage-for (:role user))]
           (ssess/merge-to-session
             command
-            (ok :user (user/non-private user) :applicationpage application-page)
+            (ok :user (-> user user/with-org-auth user/non-private) :applicationpage application-page)
             {:user (user/session-summary user)})
           (do
             (error "Unknown user role:" (:role user))
@@ -453,7 +454,7 @@
    :description "Changes admin session into authority session with access to given organization"}
   [{user :user :as command}]
   (if (user/get-user-with-password (:username user) password)
-    (let [imposter (assoc user :impersonating true :role "authority" :organizations [organizationId])]
+    (let [imposter (assoc user :impersonating true :role "authority" :orgAuthz {(keyword organizationId) #{:authority}})]
       (ssess/merge-to-session command (ok) {:user imposter}))
     (fail :error.login)))
 
@@ -612,3 +613,13 @@
                                   :required false
                                   :locked false}))))
   (ok))
+
+(defquery email-in-use
+  {:parameters       [email]
+   :input-validators [email-validator]
+   :user-roles       #{:anonymous}}
+  [_]
+  (let [user (user/get-user-by-email email)]
+    (if user
+      (ok)
+      (fail :email-not-in-use))))

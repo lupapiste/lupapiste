@@ -60,6 +60,18 @@
 
 (def canonize-email (comp ss/lower-case ss/trim))
 
+(defn organization-ids-by-roles
+  "Returns organization IDs where user has given roles."
+  [{org-authz :orgAuthz :as user} roles]
+  {:pre [(set? roles) (every? keyword? roles)]}
+  (->> org-authz
+    (filter (fn [[org org-roles]] (some roles org-roles)))
+    (map (comp name first))))
+
+(defn authority-admins-organization-id [user]
+  (first (organization-ids-by-roles user #{:authorityAdmin})))
+
+
 ;;
 ;; ==============================================================================
 ;; Finding user data:
@@ -194,7 +206,7 @@
   (when-not (ss/blank? apikey)
     (let [user (find-user {:private.apikey apikey})]
       (when (:enabled user)
-        (non-private user)))))
+        (session-summary user)))))
 
 (defmacro with-user-by-email [email & body]
   `(let [~'user (get-user-by-email ~email)]
