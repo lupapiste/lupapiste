@@ -142,21 +142,25 @@
 
   true)
 
-(defn- create-new-user-entity [user-data]
-  (let [email (user/canonize-email (:email user-data))]
+(defn- create-new-user-entity [{:keys [organization role enabled password] :as user-data}]
+  (let [email (user/canonize-email (:email user-data))
+        ]
     (-> user-data
       (dissoc :organization)
       (select-keys [:email :username :role :firstName :lastName :personId
                     :phone :city :street :zip :enabled :organization
                     :allowDirectMarketing :architect :company])
-      (as-> user-data (merge {:firstName "" :lastName "" :username email} user-data))
+      (as-> user-data
+        (merge
+          {:firstName "" :lastName "" :username email}
+          (when-not (ss/blank? organization) {:orgAuthz {organization #{role}}})
+          user-data))
       (assoc
         :email email
-        :enabled (= "true" (str (:enabled user-data)))
-        :orgAuthz {(:organization user-data) #{(:role user-data)}}
+        :enabled (= "true" (str enabled))
         :private (merge {}
-                   (when (:password user-data)
-                     {:password (security/get-hash (:password user-data))})
+                   (when password
+                     {:password (security/get-hash password)})
                    (when (and (:apikey user-data) (not= "false" (:apikey user-data)))
                      {:apikey (if (and (env/dev-mode?) (not (#{"true" "false"} (:apikey user-data))))
                                 (:apikey user-data)
