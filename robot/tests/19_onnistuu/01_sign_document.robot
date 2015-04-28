@@ -62,6 +62,9 @@ Registrations succeeds, user gets email
   Wait until  Element should be visible  xpath=//section[@id='register-company-success']
   Open last email
   Wait Until  Page Should Contain  puuha.pete@pete-rakennus.fi
+  Page Should Contain  new-company-user
+  ${subject} =  Execute Javascript  return document.getElementById("subject").innerHTML
+  Should Be Equal  ${subject}  Lupapiste.fi: Kutsu Lupapiste-palveluun yritystilin pääkäyttäjäksi
 
 Second link in email should lead to password reset
   Click Element  xpath=(//a)[2]
