@@ -304,13 +304,21 @@
   (ok :names (into {} (for [{:keys [id name]} (o/get-organizations {})]
                         [id name]))))
 
+(defquery vendor-backend-redirect-config
+  {:user-roles #{:authorityAdmin}}
+  [{user :user}]
+  (let [organization-id (o/authority-admins-organization-id user)]
+    (if-let [organization (o/get-organization organization-id)]
+      (ok (:vendor-backend-redirect organization))
+      (fail :error.unknown-organization))))
+
 (defcommand save-vendor-backend-redirect-config
   {:parameters [key val]
    :user-roles #{:authorityAdmin}
-   :input-validators [(fn [{{key :key} :data :as foo}]
+   :input-validators [(fn [{{key :key} :data}]
                         (when-not (contains? #{:vendorBackendUrlForBackendId :vendorBackendUrlForLpId} (keyword key))
                           (fail :error.illegal-key)))]}
   [{user :user}]
-  (let [key    (csk/->kebab-case-keyword key)
+  (let [key    (csk/->kebab-case key)
         org-id (o/authority-admins-organization-id user)]
-    (o/update-organization org-id {$set {:vendor-backend-redirect {key val}}})))
+    (o/update-organization org-id {$set {(str "vendor-backend-redirect." key) val}})))
