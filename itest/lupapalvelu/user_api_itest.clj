@@ -74,11 +74,9 @@
 ;; ==============================================================================
 ;;
 
-(facts update-user
-  (apply-remote-minimal)
-  (fact (command admin :create-user :email "foo@example.com" :role "authorityAdmin" :enabled "true" :organization "753-R" :apikey "xyz") => ok?)
-  (fact (command "xyz" :update-user :firstName "f" :lastName "l") => ok?)
-  (fact (-> (query "xyz" :user) :user) => (contains {:firstName "f" :lastName "l"})))
+(facts "Veikko updates his name"
+  (fact (command veikko :update-user :firstName "f" :lastName "l") => ok?)
+  (fact (-> (query veikko :user) :user) => (contains {:firstName "f" :lastName "l"})))
 
 (facts update-user-organization
   (apply-remote-minimal)
