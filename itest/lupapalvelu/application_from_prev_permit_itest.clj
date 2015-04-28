@@ -139,18 +139,19 @@
 
         (fact "should return the LP application if the kuntalupatunnus matches an existing app"
           (let [{app-id :id} (create-and-submit-application pena :municipality jarvenpaa-muni)
-                _            (give-verdict raktark-jarvenpaa app-id :verdictId example-kuntalupatunnus)
+                verdict-resp (give-verdict raktark-jarvenpaa app-id :verdictId example-kuntalupatunnus)
                 response     (http/get rest-address params)
                 resp-body    (:body (util/decode-response response))]
+            verdict-resp => ok?
             (:status response) => 200
             resp-body => ok?
             (keyword (:text resp-body)) => :already-existing-application))
 
         (fact "create new LP app if kuntalupatunnus matches existing app in another organization"
-          (let [{app-id :id} (create-and-submit-application pena :municipality sonja-muni)
-                _            (give-verdict sonja app-id :verdictId example-kuntalupatunnus)
-                response     (http/get rest-address params)
-                resp-body    (:body (util/decode-response response))]
-            (:status response) => 200
-            resp-body => ok?
-            (keyword (:text resp-body)) => :created-new-application))))))
+         (let [{app-id :id} (create-and-submit-application pena :municipality sonja-muni)
+               _            (give-verdict sonja app-id :verdictId example-kuntalupatunnus)
+               response     (http/get rest-address params)
+               resp-body    (:body (util/decode-response response))]
+           (:status response) => 200
+           resp-body => ok?
+           (keyword (:text resp-body)) => :created-new-application))))))

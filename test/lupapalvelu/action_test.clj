@@ -85,34 +85,37 @@
   (against-background
     (get-actions) => {:test-command-auth {:parameters [:id]
                                           :user-roles #{:authority}
+                                          :org-authz-roles #{:authority}
                                           :states     all-states}}
-    (domain/get-application-as "123" {:id "user123" :organizations ["ankkalinna"] :role :authority} true) =>  {:state "submitted" :organization "ankkalinna"}
-    (domain/get-application-as "123" {:id "user123" :organizations ["hanhivaara"] :role :authority} true) =>  nil)
+    (domain/get-application-as "123" {:id "user123" :organizations ["ankkalinna"] :orgAuthz {:ankkalinna #{:authority}} :role :authority} true) =>  {:state "submitted" :organization "ankkalinna"}
+    (domain/get-application-as "123" {:id "user123" :organizations ["hanhivaara"] :orgAuthz {:hanhivaara #{:authority}} :role :authority} true) =>  nil)
 
   (fact "regular user is not authority"
     (execute {:action "test-command-auth" :user {:id "user123"} :data {:id "123"}}) => unauthorized)
 
   (fact "with correct authority command is executed"
-    (execute {:action "test-command-auth" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => ok?)
+    (execute {:action "test-command-auth" :user {:id "user123" :organizations ["ankkalinna"] :orgAuthz {:ankkalinna #{:authority}} :role :authority} :data {:id "123"}}) => ok?)
 
   (fact "with incorrect authority error is returned"
-    (execute {:action "test-command-auth" :user {:id "user123" :organizations ["hanhivaara"] :role :authority} :data {:id "123"}}) => not-accessible))
+    (execute {:action "test-command-auth" :user {:id "user123" :organizations ["hanhivaara"] :orgAuthz {:hanhivaara #{:authority}} :role :authority} :data {:id "123"}}) => not-accessible))
 
 (facts "Access based on user-authz-roles"
   (against-background
     (get-actions) => {:test-command-auth {:parameters [:id]
                                           :user-roles #{:authority}
+                                          :org-authz-roles #{:authority}
                                           :states all-states
                                           :user-authz-roles #{:someRole}}
                       :with-default-roles {:parameters [:id]
                                             :user-roles #{:authority}
+                                            :org-authz-roles #{:authority}
                                             :states all-states
                                             :user-authz-roles default-authz-writer-roles}}
-    (domain/get-application-as "123" {:id "some1" :organizations ["999-R"] :role :authority} true) => {:organization "999-R"
-                                                                                                       :state "submitted"
-                                                                                                       :auth [{:id "user123" :role "someRole"}]}
+    (domain/get-application-as "123" {:id "some1" :organizations ["999-R"] :orgAuthz {:999-R #{:authority}} :role :authority} true) => {:organization "999-R"
+                                                                                                        :state "submitted"
+                                                                                                        :auth [{:id "user123" :role "someRole"}]}
 
-    (domain/get-application-as "123" {:id "some1" :organizations ["999-R"] :role :applicant} true) => {:organization "999-R" :state "submitted" :auth []}
+    (domain/get-application-as "123" {:id "some1" :organizations ["999-R"] :orgAuthz {:999-R #{:authority}} :role :applicant} true) => {:organization "999-R" :state "submitted" :auth []}
 
     (domain/get-application-as "123" {:id "user123" :organizations [] :role :authority} true) =>  {:organization "999-R"
                                                                                                    :state "submitted"
@@ -132,10 +135,10 @@
     )
 
   (fact "Authority from same org has access"
-    (execute {:action "test-command-auth" :user {:id "some1" :organizations ["999-R"] :role :authority} :data {:id "123"}}) => ok?)
+    (execute {:action "test-command-auth" :user {:id "some1" :organizations ["999-R"] :orgAuthz {:999-R #{:authority}} :role :authority} :data {:id "123"}}) => ok?)
 
   (fact "Non-authority from same org has no access"
-    (execute {:action "test-command-auth" :user {:id "some1" :organizations ["999-R"] :role :applicant} :data {:id "123"}}) => unauthorized)
+    (execute {:action "test-command-auth" :user {:id "some1" :organizations ["999-R"] :orgAuthz {:999-R #{:authority}} :role :applicant} :data {:id "123"}}) => unauthorized)
 
   (fact "Authority with no org but correct role has access"
     (execute {:action "test-command-auth" :user {:id "user123" :organizations [] :role :authority} :data {:id "123"}}) => ok?)
@@ -159,31 +162,31 @@
 
 (facts "Custom pre-check is run"
   (against-background
-    (get-actions) => {:test-command1 {:pre-checks [(constantly (fail "FAIL"))] :user-roles #{:authority}}
-                      :test-command2 {:pre-checks [(constantly nil)] :user-roles #{:authority}}
-                      :test-command3 {:pre-checks [(constantly nil) (constantly nil) (constantly (fail "FAIL"))] :user-roles #{:authority}}}
-    (domain/get-application-as "123" {:id "user123" :organizations ["ankkalinna"] :role :authority} true) =>  {:organization "ankkalinna" :state "submitted"})
+    (get-actions) => {:test-command1 {:pre-checks [(constantly (fail "FAIL"))], :user-roles #{:authority}, :org-authz-roles #{:authority}}
+                      :test-command2 {:pre-checks [(constantly nil)], :user-roles #{:authority}, :org-authz-roles #{:authority}}
+                      :test-command3 {:pre-checks [(constantly nil) (constantly nil) (constantly (fail "FAIL"))], :user-roles #{:authority}, :org-authz-roles #{:authority}}}
+    (domain/get-application-as "123" {:id "user123" :organizations ["ankkalinna"] :orgAuthz {:ankkalinna #{:authority}} :role :authority} true) =>  {:organization "ankkalinna" :state "submitted"})
 
-  (fact (execute {:action "test-command1" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => {:ok false :text "FAIL"})
-  (fact (execute {:action "test-command2" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => ok?)
-  (fact (execute {:action "test-command3" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => {:ok false :text "FAIL"}))
+  (fact (execute {:action "test-command1" :user {:id "user123" :organizations ["ankkalinna"] :orgAuthz {:ankkalinna #{:authority}} :role :authority} :data {:id "123"}}) => {:ok false :text "FAIL"})
+  (fact (execute {:action "test-command2" :user {:id "user123" :organizations ["ankkalinna"] :orgAuthz {:ankkalinna #{:authority}} :role :authority} :data {:id "123"}}) => ok?)
+  (fact (execute {:action "test-command3" :user {:id "user123" :organizations ["ankkalinna"] :orgAuthz {:ankkalinna #{:authority}} :role :authority} :data {:id "123"}}) => {:ok false :text "FAIL"}))
 
 (facts "Custom input-validator is run"
   (against-background
-    (get-actions) => {:test-command1 {:input-validators [(constantly (fail "FAIL"))] :user-roles #{:authority}}
-                      :test-command2 {:input-validators [(constantly nil)] :user-roles #{:authority}}
-                      :test-command3 {:input-validators [(constantly nil) (constantly nil) (constantly (fail "FAIL"))] :user-roles #{:authority}}}
-    (domain/get-application-as "123" {:id "user123" :organizations ["ankkalinna"] :role :authority} true) =>  {:organization "ankkalinna" :state "submitted"})
+    (get-actions) => {:test-command1 {:input-validators [(constantly (fail "FAIL"))], :user-roles #{:authority}, :org-authz-roles #{:authority}}
+                      :test-command2 {:input-validators [(constantly nil)], :user-roles #{:authority}, :org-authz-roles #{:authority}}
+                      :test-command3 {:input-validators [(constantly nil) (constantly nil) (constantly (fail "FAIL"))], :user-roles #{:authority}, :org-authz-roles #{:authority}}}
+    (domain/get-application-as "123" {:id "user123" :organizations ["ankkalinna"] :orgAuthz {:ankkalinna #{:authority}} :role :authority} true) =>  {:organization "ankkalinna" :state "submitted"})
 
-  (fact (execute {:action "test-command1" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => {:ok false :text "FAIL"})
-  (fact (execute {:action "test-command2" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => ok?)
-  (fact (execute {:action "test-command3" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => {:ok false :text "FAIL"}))
+  (fact (execute {:action "test-command1" :user {:id "user123" :organizations ["ankkalinna"] :orgAuthz {:ankkalinna #{:authority}} :role :authority} :data {:id "123"}}) => {:ok false :text "FAIL"})
+  (fact (execute {:action "test-command2" :user {:id "user123" :organizations ["ankkalinna"] :orgAuthz {:ankkalinna #{:authority}} :role :authority} :data {:id "123"}}) => ok?)
+  (fact (execute {:action "test-command3" :user {:id "user123" :organizations ["ankkalinna"] :orgAuthz {:ankkalinna #{:authority}} :role :authority} :data {:id "123"}}) => {:ok false :text "FAIL"}))
 
 (facts "Input-validator is not run during auth check"
   (against-background
-    (get-actions) => {:test-command1 {:input-validators [(constantly (fail "FAIL"))]:user-roles #{:authority}}}
-    (domain/get-application-as "123" {:id "user123" :organizations ["ankkalinna"] :role :authority} true) =>  {:organization "ankkalinna" :state "submitted"})
-  (validate {:action "test-command1" :user {:id "user123" :organizations ["ankkalinna"] :role :authority} :data {:id "123"}}) => ok?)
+    (get-actions) => {:test-command1 {:input-validators [(constantly (fail "FAIL"))], :user-roles #{:authority}, :org-authz-roles #{:authority}}}
+    (domain/get-application-as "123" {:id "user123" :organizations ["ankkalinna"] :orgAuthz {:ankkalinna #{:authority}} :role :authority} true) =>  {:organization "ankkalinna" :state "submitted"})
+  (validate {:action "test-command1" :user {:id "user123" :organizations ["ankkalinna"] :orgAuthz {:ankkalinna #{:authority}} :role :authority} :data {:id "123"}}) => ok?)
 
 (facts "Defined querys work only in query pipelines"
   (against-background (get-actions) => {:test-command {:type :query :user-roles #{:anonymous}}})
