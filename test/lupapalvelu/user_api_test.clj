@@ -46,8 +46,8 @@
 
   (fact (validate-create-new-user! {:role "applicant"}      {:role "authority" :email "x"}) => forbidden)
   (fact (validate-create-new-user! {:role "authority"}      {:role "authority" :email "x"}) => forbidden)
-  (fact (validate-create-new-user! {:role "authorityAdmin" :organizations ["o"]} {:role "authority" :email "x" :organization "o"}) => truthy)
-  (fact (validate-create-new-user! {:role "authorityAdmin" :organizations ["o"]} {:role "authority" :email "x" :organization "q"}) => forbidden)
+  (fact (validate-create-new-user! {:role "authorityAdmin" :orgAuthz {:o "authorityAdmin"}} {:role "authority" :email "x" :organization "o"}) => truthy)
+  (fact (validate-create-new-user! {:role "authorityAdmin" :orgAuthz {:o "authorityAdmin"}} {:role "authority" :email "x" :organization "q"}) => forbidden)
   (fact (validate-create-new-user! {:role "admin"}          {:role "authority" :email "x"}) => forbidden)
   (fact (validate-create-new-user! {:role "admin"}          {:role "authorityAdmin" :email "x" :organization "o"}) => truthy)
   (fact (validate-create-new-user! {:role "admin"}          {:role "authorityAdmin" :email "x" :organization "other"}) => (fails-with :error.organization-not-found))
@@ -64,11 +64,11 @@
     (validate-create-new-user! {:role "admin"} {:role "admin" :email "x"}) => (fails-with :error.invalid-role))
 
   (fact "authorityAdmin can create authority users to her own organization only"
-    (fact (validate-create-new-user! {:role "authorityAdmin"}                      {:role "authority" :organization "x" :email "x"}) => forbidden)
-    (fact (validate-create-new-user! {:role "authorityAdmin" :organizations nil}   {:role "authority" :organization "x" :email "x"}) => forbidden)
-    (fact (validate-create-new-user! {:role "authorityAdmin" :organizations []}    {:role "authority" :organization "x" :email "x"}) => forbidden)
-    (fact (validate-create-new-user! {:role "authorityAdmin" :organizations ["y"]} {:role "authority" :organization "x" :email "x"}) => forbidden)
-    (fact (validate-create-new-user! {:role "authorityAdmin" :organizations ["x"]} {:role "authority" :organization "x" :email "x"}) => truthy))
+    (fact (validate-create-new-user! {:role "authorityAdmin"}                 {:role "authority" :organization "x" :email "x"}) => forbidden)
+    (fact (validate-create-new-user! {:role "authorityAdmin" :orgAuthz nil}   {:role "authority" :organization "x" :email "x"}) => forbidden)
+    (fact (validate-create-new-user! {:role "authorityAdmin" :orgAuthz {}}    {:role "authority" :organization "x" :email "x"}) => forbidden)
+    (fact (validate-create-new-user! {:role "authorityAdmin" :orgAuthz {:y "authorityAdmin"}} {:role "authority" :organization "x" :email "x"}) => forbidden)
+    (fact (validate-create-new-user! {:role "authorityAdmin" :orgAuthz {:x "authorityAdmin"}} {:role "authority" :organization "x" :email "x"}) => truthy))
 
   (fact "invalid passwords are rejected"
     (validate-create-new-user! {:role "admin"} {:password "z" :role "dummy" :email "x"}) => (fails-with :password-too-short)
@@ -123,7 +123,7 @@
   (fact "orgAuthz is created"
     (:orgAuthz (create-new-user-entity {:email "..anything.."
                                         :organization "123-R"
-                                        :role "authority"})) => {"123-R" #{:authority}}))
+                                        :role "authority"})) => {:123-R #{:authority}}))
 
 ;;
 ;; ==============================================================================
