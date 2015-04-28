@@ -47,7 +47,7 @@
   [{{:keys [role]} :user data :data}]
   (let [users (-> data
                 (set/rename-keys {:userId :id})
-                (select-keys [:id :role :organization :organizations :email :username :firstName :lastName :enabled :allowDirectMarketing])
+                (select-keys [:id :role :email :username :firstName :lastName :enabled :allowDirectMarketing])
                 (user/find-users))]
     (ok :users (map (comp user/with-org-auth user/non-private) users))))
 
