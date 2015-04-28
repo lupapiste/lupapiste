@@ -119,13 +119,13 @@
     (when (and (= user-role :authority) (not authorityAdmin?))
       (fail! :error.unauthorized :desc "only authorityAdmin can create authority users" :user-role user-role :caller-role caller-role))
 
-    (when (and (= user-role :authorityAdmin) (not (:organization user-data)))
+    (when (and (= user-role :authorityAdmin) (not organization-id))
       (fail! :error.missing-parameters :desc "new authorityAdmin user must have organization" :parameters [:organization]))
 
-    (when (and (= user-role :authority) (and (:organization user-data) (every? (partial not= (:organization user-data)) (:organizations caller))))
+    (when (and (= user-role :authority) (and organization-id (not ((user/organization-ids caller) organization-id))))
       (fail! :error.unauthorized :desc "authorityAdmin can create users into his/her own organization only, or statement givers without any organization at all"))
 
-    (when (and (= user-role :dummy) (:organization user-data))
+    (when (and (= user-role :dummy) organization-id)
       (fail! :error.unauthorized :desc "dummy user may not have an organization" :missing :organization))
 
     (when (and password (not (security/valid-password? password)))
