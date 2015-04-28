@@ -1,6 +1,7 @@
 (ns lupapalvelu.document.vrk
-  (:require [sade.util :refer [->int fn->]]
+  (:require [sade.util :refer [->int fn-> ->double]]
             [clojure.string :as s]
+            [sade.strings :as ss]
             [lupapalvelu.document.validator :refer :all]))
 
 ;;
@@ -108,7 +109,7 @@
   (some->> x (re-matches #"(\d+) .*") last keyword ))
 
 (defn ->huoneistoala [huoneistot]
-  (apply + (map (fn-> second :huoneistoala ->int) huoneistot)))
+  (apply + (map (fn-> second :huoneistoala (ss/replace "," ".") ->double) huoneistot)))
 
 (defn ->count [m]
   (-> m keys count))
