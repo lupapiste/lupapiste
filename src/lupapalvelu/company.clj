@@ -215,9 +215,9 @@
                        true)]
     (when (pos? update-count)
       (notif/notify! :accept-company-invitation {:admins     admins
-                                      :caller     caller
-                                      :link-fi    (str (env/value :host) "/app/fi/welcome#!/accept-company-invitation/" token-id)
-                                      :link-sv    (str (env/value :host) "/app/sv/welcome#!/accept-company-invitation/" token-id)})
+                                                 :caller     caller
+                                                 :link-fi    (str (env/value :host) "/app/fi/welcome#!/accept-company-invitation/" token-id)
+                                                 :link-sv    (str (env/value :host) "/app/sv/welcome#!/accept-company-invitation/" token-id)})
       token-id)))
 
 (notif/defemail :accept-company-invitation {:subject-key   "accept-company-invitation.subject"
