@@ -793,6 +793,15 @@ nav .nav-wrapper .header-menu .header-box a, nav .nav-wrapper .header-menu .head
   text-decoration: none;
   vertical-align: middle;
 }
+/* line 53, ../sass/partials/_header.scss */
+nav .nav-wrapper .header-menu .header-box a {
+  white-space: nowrap;
+  position: relative;
+  max-width: 300px;
+  display: inline-block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 /* Side bar styles*/
 /* line 2, ../sass/partials/_sidebar.scss */
