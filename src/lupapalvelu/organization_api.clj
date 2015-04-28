@@ -69,17 +69,6 @@
 ;; Actions
 ;;
 
-(defquery users-in-same-organizations
-  {:user-roles #{:authority}}
-  [{user :user}]
-  (if-let [organization-ids (seq (user/organization-ids user))]
-    (let [org-match (for [org-id organization-ids]
-                      {(str "orgAuthz." org-id) "authority"})
-          query {$and [{:role "authority"}, {$or org-match}]}
-          users (user/find-users query)]
-      (ok :users (map user/summary users)))
-    (ok :users [])))
-
 (defquery organization-by-user
   {:description "Lists organization details."
    :user-roles #{:authorityAdmin}}
