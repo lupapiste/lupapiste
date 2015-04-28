@@ -173,7 +173,7 @@
            identifier
            name)
     (let [company  (c/create-company (merge (:company process) {:name name, :process-id process-id}))
-          token-id (c/add-user! signer company :admin)]
+          token-id (c/add-user-after-company-creation! signer company :admin)]
       (infof "sign:success:%s: company-created: y [%s], company: [%s], id: [%s], token: [%s]"
              process-id
              (:y company)

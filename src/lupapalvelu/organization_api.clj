@@ -11,8 +11,7 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.attachment :as attachment]
-            [lupapalvelu.organization :as o]
-            [camel-snake-kebab :as csk]))
+            [lupapalvelu.organization :as o]))
 
 ;;
 ;; local api
@@ -73,7 +72,7 @@
 (defquery users-in-same-organizations
   {:user-roles #{:authority}}
   [{user :user}]
-  (let [users (mongo/select :users {:role "authority", :organizations {$in (:organizations user)}})]
+  (let [users (mongo/select :users {:role "authority", :organizations {$in (->> user :orgAuthz keys)}})]
     (ok :users (map user/summary users))))
 
 (defquery organization-by-user
@@ -113,7 +112,7 @@
    :user-roles #{:authorityAdmin}
    :input-validators [(partial non-blank-parameters [:url :nameFi :nameSv])]}
   [{user :user}]
-  (o/update-organization (o/authority-admins-organization-id user) {$push {:links {:name {:fi nameFi :sv nameSv} :url url}}})
+  (o/update-organization (user/authority-admins-organization-id user) {$push {:links {:name {:fi nameFi :sv nameSv} :url url}}})
   (ok))
 
 (defcommand update-organization-link
@@ -123,7 +122,7 @@
    :input-validators [(partial non-blank-parameters [:url :nameFi :nameSv :index])
                       (partial number-parameters [:index])]}
   [{user :user}]
-  (o/update-organization (o/authority-admins-organization-id user) {$set {(str "links." index) {:name {:fi nameFi :sv nameSv} :url url}}})
+  (o/update-organization (user/authority-admins-organization-id user) {$set {(str "links." index) {:name {:fi nameFi :sv nameSv} :url url}}})
   (ok))
 
 (defcommand remove-organization-link
@@ -132,7 +131,7 @@
    :user-roles #{:authorityAdmin}
    :input-validators [(partial non-blank-parameters [:url :nameFi :nameSv])]}
   [{user :user}]
-  (o/update-organization (o/authority-admins-organization-id user) {$pull {:links {:name {:fi nameFi :sv nameSv} :url url}}})
+  (o/update-organization (user/authority-admins-organization-id user) {$pull {:links {:name {:fi nameFi :sv nameSv} :url url}}})
   (ok))
 
 (defquery organizations
@@ -221,7 +220,7 @@
                          (when-not (every? (->> operations/operations keys (map name) set) operations)
                            (fail :error.unknown-operation)))]}
   [{user :user}]
-  (o/update-organization (o/authority-admins-organization-id user) {$set {:selected-operations operations}})
+  (o/update-organization (user/authority-admins-organization-id user) {$set {:selected-operations operations}})
   (ok))
 
 (defcommand organization-operations-attachments
@@ -230,7 +229,7 @@
    :input-validators [(partial non-blank-parameters [:operation])
                       (partial vector-parameters [:attachments])
                       (fn [{{:keys [operation attachments]} :data, user :user}]
-                        (let [organization (o/get-organization (o/authority-admins-organization-id user))
+                        (let [organization (o/get-organization (user/authority-admins-organization-id user))
                               selected-operations (set (:selected-operations organization))
                               permit-type (get-in operations/operations [(keyword operation) :permit-type] )
                               allowed-types (when permit-type (attachment/get-attachment-types-by-permit-type permit-type))
@@ -239,7 +238,7 @@
                             (not (selected-operations operation)) (fail :error.unknown-operation)
                             (not (every? (partial attachment/allowed-attachment-types-contain? allowed-types) attachment-types)) (fail :error.unknown-attachment-type))))]}
   [{user :user}]
-  (o/update-organization (o/authority-admins-organization-id user) {$set {(str "operations-attachments." operation) attachments}})
+  (o/update-organization (user/authority-admins-organization-id user) {$set {(str "operations-attachments." operation) attachments}})
   (ok))
 
 (defcommand set-organization-app-required-fields-filling-obligatory
@@ -248,13 +247,13 @@
    :input-validators  [(partial non-blank-parameters [:isObligatory])
                        (partial boolean-parameters [:isObligatory])]}
   [{user :user}]
-  (o/update-organization (o/authority-admins-organization-id user) {$set {:app-required-fields-filling-obligatory isObligatory}})
+  (o/update-organization (user/authority-admins-organization-id user) {$set {:app-required-fields-filling-obligatory isObligatory}})
   (ok))
 
 (defquery krysp-config
   {:user-roles #{:authorityAdmin}}
   [{user :user}]
-  (let [organization-id (o/authority-admins-organization-id user)]
+  (let [organization-id (user/authority-admins-organization-id user)]
     (if-let [organization (o/get-organization organization-id)]
       (let [empty-confs (zipmap (map (comp keyword :permitType) (:scope organization)) (repeat {}))]
         (ok :krysp (merge empty-confs (:krysp organization))))
@@ -266,7 +265,7 @@
    :input-validators [permit/permit-type-validator]}
   [{user :user}]
   (if (or (s/blank? url) (krysp/wfs-is-alive? url))
-    (mongo/update-by-id :organizations (o/authority-admins-organization-id user) {$set {(str "krysp." permitType ".url") url
+    (mongo/update-by-id :organizations (user/authority-admins-organization-id user) {$set {(str "krysp." permitType ".url") url
                                                                     (str "krysp." permitType ".version") version}})
     (fail :auth-admin.legacyNotResponding)))
 
@@ -279,7 +278,7 @@
                           (when (some #(email-validator :email {:data {:email %}}) emails)
                             (fail :error.set-kopiolaitos-info.invalid-email))))]}
   [{user :user}]
-  (o/update-organization (o/authority-admins-organization-id user)
+  (o/update-organization (user/authority-admins-organization-id user)
     {$set {:kopiolaitos-email kopiolaitosEmail
            :kopiolaitos-orderer-address kopiolaitosOrdererAddress
            :kopiolaitos-orderer-phone kopiolaitosOrdererPhone
@@ -289,7 +288,7 @@
 (defquery kopiolaitos-config
   {:user-roles #{:authorityAdmin}}
   [{user :user}]
-  (let [organization-id (o/authority-admins-organization-id user)]
+  (let [organization-id (user/authority-admins-organization-id user)]
     (if-let [organization (o/get-organization organization-id)]
       (ok
         :kopiolaitos-email (:kopiolaitos-email organization)
@@ -303,22 +302,3 @@
   [_]
   (ok :names (into {} (for [{:keys [id name]} (o/get-organizations {})]
                         [id name]))))
-
-(defquery vendor-backend-redirect-config
-  {:user-roles #{:authorityAdmin}}
-  [{user :user}]
-  (let [organization-id (o/authority-admins-organization-id user)]
-    (if-let [organization (o/get-organization organization-id)]
-      (ok (:vendor-backend-redirect organization))
-      (fail :error.unknown-organization))))
-
-(defcommand save-vendor-backend-redirect-config
-  {:parameters [key val]
-   :user-roles #{:authorityAdmin}
-   :input-validators [(fn [{{key :key} :data}]
-                        (when-not (contains? #{:vendorBackendUrlForBackendId :vendorBackendUrlForLpId} (keyword key))
-                          (fail :error.illegal-key)))]}
-  [{user :user}]
-  (let [key    (csk/->kebab-case key)
-        org-id (o/authority-admins-organization-id user)]
-    (o/update-organization org-id {$set {(str "vendor-backend-redirect." key) val}})))

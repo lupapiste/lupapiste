@@ -4,6 +4,7 @@
             [lupapalvelu.tiedonohjaus :as t]
             [lupapalvelu.organization :as o]
             [lupapalvelu.organization-api :as oa]
+            [lupapalvelu.user :as user]
             [monger.operators :refer :all]
             [lupapalvelu.action :as action]))
 
@@ -15,7 +16,7 @@
     (ok :functions functions)))
 
 (defn- store-function-code [operation function-code user]
-  (let [orgId (o/authority-admins-organization-id user)
+  (let [orgId (user/authority-admins-organization-id user)
         organization (o/get-organization orgId)
         operation-valid? (some #{operation} (:selected-operations organization))
         code-valid? (some #{function-code} (map :code (t/available-tos-functions orgId)))]

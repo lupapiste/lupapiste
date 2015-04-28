@@ -1,1 +1,2 @@
 application.showInBackingSysten: Näytä taustajärjestelmässä
+new-company-admin-user.subject: Kutsu Lupapiste-palveluun yritystilin pääkäyttäjäksi
