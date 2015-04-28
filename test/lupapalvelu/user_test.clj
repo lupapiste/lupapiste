@@ -84,19 +84,19 @@
 (testable-privates lupapalvelu.user users-for-datatables-base-query)
 
 (facts users-for-datatables-base-query
-  (fact (users-for-datatables-base-query {:role :admin} {})                          => {})
-  (fact (users-for-datatables-base-query {:role :admin} {:organizations ["a" "b"]})  => {:organizations {$in ["a" "b"]}})
-  (fact (users-for-datatables-base-query {:role :admin} {:organizations ["a" "b"]})  => {:organizations {$in ["a" "b"]}})
+  (fact "admin" (users-for-datatables-base-query {:role :admin} {})                          => {})
+  (fact "admin" (users-for-datatables-base-query {:role :admin} {:organizations ["a" "b"]})  => {:organizations ["a" "b"]})
+  (fact "admin" (users-for-datatables-base-query {:role :admin} {:organizations ["a" "b"]})  => {:organizations ["a" "b"]})
 
-  (fact (users-for-datatables-base-query {:organizations ["a" "b"]} {:organizations ["a"]})           => (contains {:organizations {$in ["a"]}}))
-  (fact (users-for-datatables-base-query {:organizations ["a" "b"]} {:organizations ["b"]})           => (contains {:organizations {$in ["b"]}}))
-  (fact (users-for-datatables-base-query {:organizations ["a" "b"]} {:organizations ["a" "b"]})       => (contains {:organizations {$in ["a" "b"]}}))
-  (fact (users-for-datatables-base-query {:organizations ["a" "b"]} {:organizations ["a" "b" "c"]})   => (contains {:organizations {$in ["a" "b"]}}))
-  (fact (users-for-datatables-base-query {:organizations ["a" "b"]} {:organizations ["c"]})           => (contains {:organizations {$in []}}))
-  (fact (users-for-datatables-base-query {:organizations ["a" "b"]} {:organizations []})              => (contains {:organizations {$in []}}))
-  (fact (users-for-datatables-base-query {:organizations ["a" "b"]} {:organizations nil})             => (contains {:organizations {$in ["a" "b"]}}))
-  (fact (users-for-datatables-base-query {:organizations ["a" "b"]} {})                               => (contains {:organizations {$in ["a" "b"]}}))
-  (fact (users-for-datatables-base-query {} {})                                                       => (contains {:organizations {$in []}})))
+  (fact (users-for-datatables-base-query {:orgAuthz {:a "some-role", :b "some-role"}} {:organizations ["a"]})           => (contains {:organizations ["a"]}))
+  (fact (users-for-datatables-base-query {:orgAuthz {:a "some-role", :b "some-role"}} {:organizations ["b"]})           => (contains {:organizations ["b"]}))
+  (fact (users-for-datatables-base-query {:orgAuthz {:a "some-role", :b "some-role"}} {:organizations ["a" "b"]})       => (contains {:organizations ["a" "b"]}))
+  (fact (users-for-datatables-base-query {:orgAuthz {:a "some-role", :b "some-role"}} {:organizations ["a" "b" "c"]})   => (contains {:organizations ["a" "b"]}))
+  (fact (users-for-datatables-base-query {:orgAuthz {:a "some-role", :b "some-role"}} {:organizations ["c"]})           =not=> (partial contains? :organizations))
+  (fact (users-for-datatables-base-query {:orgAuthz {:a "some-role", :b "some-role"}} {:organizations []})              =not=> (partial contains? :organizations))
+  (fact (users-for-datatables-base-query {:orgAuthz {:a "some-role", :b "some-role"}} {:organizations nil})             => (contains {:organizations ["a" "b"]}))
+  (fact (users-for-datatables-base-query {:orgAuthz {:a "some-role", :b "some-role"}} {})                               => (contains {:organizations ["a" "b"]}))
+  (fact (users-for-datatables-base-query {} {})                                                                         =not=> (partial contains? :organizations)))
 
 ;;
 ;; ==============================================================================
