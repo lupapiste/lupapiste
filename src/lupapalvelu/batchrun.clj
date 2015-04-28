@@ -232,10 +232,7 @@
                          (env/value :outgoing-directory) "/"
                          user "/"
                          "asianhallinta/to_lupapiste/")]
-            zip (filter
-                  #(re-matches #".+\.zip$" (.getName %))
-                  (-> path io/file (.listFiles) seq))]
-
+            zip (util/get-files-by-regex path #".+\.zip$")]
       (fs/mkdirs (str path "archive"))
       (fs/mkdirs (str path "error"))
       (let [result (ah-verdict/process-ah-verdict (.getPath zip) user)]
