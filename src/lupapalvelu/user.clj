@@ -127,14 +127,14 @@
 
 (defn- users-for-datatables-base-query [caller params]
   (let [admin?               (= (-> caller :role keyword) :admin)
-        caller-organizations (set (:organizations caller))
+        caller-organizations (organization-ids caller)
         organizations        (:organizations params)
         organizations        (if admin? organizations (filter caller-organizations (or organizations caller-organizations)))
         role                 (:filter-role params)
         role                 (if admin? role :authority)
         enabled              (if admin? (:filter-enabled params) true)]
     (merge {}
-      (when organizations       {:organizations {$in organizations}})
+      (when (seq organizations) {:organizations organizations})
       (when role                {:role role})
       (when-not (nil? enabled)  {:enabled enabled}))))
 
@@ -148,14 +148,19 @@
                                            (repeat t))})
                                (map re-pattern searches))))))
 
+(defn- limit-organizations [query]
+  (if-let [org-ids (:organizations query)]
+    {$and [(dissoc query :organizations), (org-authz-match org-ids)]}
+    query))
+
 (defn users-for-datatables [caller params]
   (let [base-query       (users-for-datatables-base-query caller params)
-        base-query-total (mongo/count :users base-query)
-        query            (users-for-datatables-query base-query params)
+        base-query-total (mongo/count :users (limit-organizations base-query))
+        query            (limit-organizations (users-for-datatables-query base-query params))
         query-total      (mongo/count :users query)
         users            (query/with-collection "users"
                            (query/find query)
-                           (query/fields [:email :firstName :lastName :role :organizations :enabled])
+                           (query/fields [:email :firstName :lastName :role :orgAuthz :enabled])
                            (query/skip (util/->int (:iDisplayStart params) 0))
                            (query/limit (util/->int (:iDisplayLength params) 16)))]
     {:rows     users
