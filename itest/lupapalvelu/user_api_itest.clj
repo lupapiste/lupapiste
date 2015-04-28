@@ -83,15 +83,15 @@
 
   (fact (command naantali :create-user :email "foo@example.com" :role "authority" :enabled "true" :organization "529-R") => ok?)
 
-  (fact (-> (query admin :user-by-email :email "foo@example.com") :user :organizations) => ["529-R"])
+  (fact (->> (query admin :user-by-email :email "foo@example.com") :user :orgAuthz keys (map name)) => ["529-R"])
   (fact (command sipoo :update-user-organization :email "foo@example.com" :firstName "bar" :lastName "har" :operation "add") => ok?)
 
-  (fact (-> (query admin :user-by-email :email "foo@example.com") :user :organizations) => ["529-R" "753-R"])
+  (fact (->> (query admin :user-by-email :email "foo@example.com") :user :orgAuthz keys (map name)) => ["529-R" "753-R"])
   (fact (command sipoo :update-user-organization :email "foo@example.com" :firstName "bar" :lastName "har" :operation "add") => ok?)
 
-  (fact (-> (query admin :user-by-email :email "foo@example.com") :user :organizations) => ["529-R" "753-R"])
+  (fact (->> (query admin :user-by-email :email "foo@example.com") :user :orgAuthz keys (map name)) => ["529-R" "753-R"])
   (fact (command sipoo :update-user-organization :email "foo@example.com" :firstName "bar" :lastName "har" :operation "remove") => ok?)
-  (fact (-> (query admin :user-by-email :email "foo@example.com") :user :organizations) => ["529-R"])
+  (fact (->> (query admin :user-by-email :email "foo@example.com") :user :orgAuthz keys (map name)) => ["529-R"])
 
   (fact (command sipoo :update-user-organization :email "foo@example.com" :firstName "bar" :lastName "har" :operation "xxx") => (contains {:ok false :text "bad-request"}))
 
@@ -218,7 +218,7 @@
                       (assoc params :form-params {:username "admin" :password "admin"})) => http200?
        csrf-token   (-> (get @store "anti-csrf-token") .getValue codec/url-decode) => truthy
        params       (assoc params :headers {"x-anti-forgery-token" csrf-token})
-       sipoo-rakval (-> "sipoo" find-user-from-minimal :organizations first)
+       sipoo-rakval (-> "sipoo" find-user-from-minimal :orgAuthz keys first name)
        impersonate  (fn [password]
                       (-> (http/post
                             (str (server-address) "/api/command/impersonate-authority")
