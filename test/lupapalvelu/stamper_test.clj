@@ -61,3 +61,10 @@
      x => (roughly (- (:top crop-box) (:bottom crop-box)))
      y => (roughly (:left crop-box))))
 
+(fact "problematic-pdfs/01_Talo_Huhtala_asemapiirustus.pdf"
+   (let [crop-box {:left  819.063, :bottom 0.0, :right 1682.0, :top 2380.4}
+         page-box {:left 0.0, :bottom 0.0, :right 1684.0, :top 2384.0}
+         [x y] (calculate-x-y page-box crop-box 90 0.0 0 0)]
+     x => (roughly (:top crop-box))
+     y => (roughly (:bottom crop-box))))
+

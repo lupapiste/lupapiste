@@ -82,6 +82,7 @@ LUPAPISTE.VerdictsModel = function() {
       ajax.command("publish-verdict", {id: applicationId, verdictId: verdict.id})
         .success(function() {repository.load(applicationId, self.newPending);})
         .call();
+      hub.send("track-click", {category:"Application", label: "", event:"publishVerdict"});
       }});
   };
 
@@ -90,6 +91,7 @@ LUPAPISTE.VerdictsModel = function() {
       ajax.command("delete-verdict", {id: self.applicationId, verdictId: bindings.id})
         .success(function() {repository.load(self.applicationId);})
         .call();
+        hub.send("track-click", {category:"Application", label: "", event:"deleteVerdict"});
       }});
   };
 
@@ -108,6 +110,7 @@ LUPAPISTE.VerdictsModel = function() {
       LUPAPISTE.ModalDialog.showDynamicOk(loc("verdict.fetch.title"), loc(d.text));
     })
     .call();
+    hub.send("track-click", {category:"Application", label: "", event:"chechForVerdict"});
   };
 
   self.verdictSigningModel = new LUPAPISTE.VerdictSigningModel("#dialog-sign-verdict");
@@ -120,6 +123,7 @@ LUPAPISTE.VerdictsModel = function() {
   };
 
   self.verdictSignedByUser = function(paatos) {
+    hub.send("track-click", {category:"Application", label: "", event:"verdictSignedByUser"});
     return _.some(paatos.signatures, {user: {id: currentUser.id()}});
   };
 };

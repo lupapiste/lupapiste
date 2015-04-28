@@ -104,7 +104,7 @@
         (fact "personId" (:personId new-user) => person-id)
         (fact "enabled" (:enabled new-user) => false)
         (fact "role" (:role new-user) => "applicant")
-        (fact "organizations" (:organizations new-user) => empty?)
+        (fact "orgAuthz" (:orgAuthz new-user) => empty?)
         (fact "phone" (:phone new-user) => new-user-phone)))
 
      (fact "New user got email"

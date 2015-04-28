@@ -291,6 +291,16 @@
     :private {:password "$2a$10$eYl/SxvzYzOfIDIqjQIZ8.uhi57zPKg0m8J1BHwnAIx/sBcxYojvS"
               :apikey "a0ac77ecd2e6c2ea6e73f852"}}
 
+   {:id "jarvenpaa-backend"
+    :username "jarvenpaa-backend"
+    :email "jarvenpaa@example.com"
+    :firstName "J\u00E4rvenp\u00E4\u00E4"
+    :lastName "Taustaj\u00E4rjestelm\u00E4"
+    :enabled true
+    :role "rest-api"
+    :private {:password "$2a$10$eYl/SxvzYzOfIDIqjQIZ8.uhi57zPKg0m8J1BHwnAIx/sBcxYojvS"} ;jarvenpaa
+    :organizations ["186-R"]}
+
    ;; Loppi
 
    ;; Arto Viranomainen - Lopen R lupa-arkkitehti:  arto / arto
@@ -402,7 +412,8 @@
     :firstName "Kaino"
     :lastName "Solita"
     :email "kaino@solita.fi"
-    :private {:password "$2a$10$QjKZTnJy77sxiWaBKR0jQezFf1LSpKfg/sljmsSq4YIq05HRZI.l."}
+    :private {:password "$2a$10$QjKZTnJy77sxiWaBKR0jQezFf1LSpKfg/sljmsSq4YIq05HRZI.l."
+              :apikey "502cb9e58426c613c8b85abe"}
     :role "applicant"
     :architect true
     :company {:id "solita", :role "admin"}}
@@ -752,7 +763,8 @@
                                            :name "Sonja Sibbo"}]
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R"} (name (:permit-type v)))) operations/operations))}]))
 
-(def companies [{:_id "solita",
+(def companies [{:_id "solita"
+                 :accountType "account5"
                  :created 1412959886600
                  :name "Solita Oy"
                  :address1 "Tulli Business Park"

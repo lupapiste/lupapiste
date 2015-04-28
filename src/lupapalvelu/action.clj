@@ -79,6 +79,9 @@
 (def all-authz-writer-roles (conj default-authz-writer-roles :statementGiver))
 (def all-authz-roles (conj all-authz-writer-roles :reader))
 
+(def default-org-authz-roles #{:authority})
+(def all-org-authz-roles (conj default-org-authz-roles :authorityAdmin)) ; TODO add TOJ roles here
+
 ;; Notificator
 
 (defn notify [notification]
@@ -283,8 +286,10 @@
     (when-let [role-in-app (keyword (:role (domain/get-auth application (:id user))))]
      (allowed-roles role-in-app))))
 
-(defn- organization-authz? [command-meta-data application user]
-  (and (user/authority? user) ((set (:organizations user)) (:organization application))))
+(defn- organization-authz? [command-meta-data {organization :organization} user]
+  (let [required-authz (:org-authz-roles command-meta-data)
+        user-org-authz (get-in user [:orgAuthz (keyword organization)])]
+    (and (user/authority? user) (some required-authz user-org-authz))))
 
 (defn- company-authz? [command-meta-data application user]
   (domain/has-auth? application (get-in user [:company :id])))
@@ -298,14 +303,7 @@
                 (organization-authz? meta-data application user)
                 (company-authz? meta-data application user))
 
-     unauthorized)
-      #_(let [meta-data (meta-data command)
-         extra-auth-roles (set (:extra-auth-roles meta-data))]
-         (when-not (or (extra-auth-roles :any)
-                     (domain/owner-or-write-access? application (:id user))
-                     (and (= :authority (keyword (:role user))) ((set (:organizations user)) (:organization application)))
-                     (some #(domain/has-auth-role? application (:id user) %) extra-auth-roles))
-           unauthorized))))
+     unauthorized)))
 
 (defn- not-authorized-to-application [command application]
   (when (-> command :data :id)
@@ -416,19 +414,25 @@
 
 
   (let [action-keyword (keyword action-name)
-        {:keys [user-roles user-authz-roles]} meta-data]
+        {:keys [user-roles user-authz-roles org-authz-roles]} meta-data]
 
     (assert (seq user-roles) (str "You must define :user-roles meta data for " action-name ". Use :user-roles #{:anonymous}] to grant access to anyone."))
     (assert (and (set? user-roles) (every? keyword? user-roles)) ":user-roles must be a set of keywords")
 
-  (when user-authz-roles
-    (assert (and (set? user-authz-roles) (every? keyword? user-authz-roles)) ":user-authz-roles must be a set of keywords"))
+    (when user-authz-roles
+      (assert (and (set? user-authz-roles) (every? keyword? user-authz-roles)) ":user-authz-roles must be a set of keywords"))
+
+    (when org-authz-roles
+      (assert (and (set? org-authz-roles) (every? keyword? org-authz-roles)) ":org-authz-roles must be a set of keywords"))
 
     (tracef "registering %s: '%s' (%s:%s)" (name action-type) action-name ns-str line)
     (swap! actions assoc
       action-keyword
       (merge
-        {:user-authz-roles (default-user-authz action-type)}
+        {:user-authz-roles (default-user-authz action-type)
+         :org-authz-roles (cond
+                            (some user-roles [:authority :oirAuthority]) default-org-authz-roles
+                            (user-roles :anonymous) all-org-authz-roles)}
         meta-data
         {:type action-type
          :ns ns-str

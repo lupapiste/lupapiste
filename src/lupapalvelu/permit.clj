@@ -1,8 +1,9 @@
 (ns lupapalvelu.permit
-  (:require [lupapalvelu.domain :as domain]
+  (:require [taoensso.timbre :as timbre :refer [errorf warn]]
             [sade.core :refer [fail]]
             [sade.util :as util]
-            [taoensso.timbre :as timbre :refer [errorf warn]]))
+            [lupapalvelu.domain :as domain]
+            [lupapalvelu.action :refer [defquery]]))
 
 (defonce ^:private permit-type-defs (atom {}))
 (defn permit-types [] @permit-type-defs)
@@ -32,13 +33,15 @@
   {:subtypes         []
    :sftp-directory   "/rakennus"
    :applicant-doc-schema "hakija"
-   :multiple-parties-allowed true})
+   :multiple-parties-allowed true
+   :wfs-krysp-url-asia-prefix "rakval:luvanTunnisteTiedot/"})
 
 (defpermit YA "Yleisten alueiden luvat"
   {:subtypes             []
    :sftp-directory       "/yleiset_alueet"
    :applicant-doc-schema "hakija-ya"
-   :multiple-parties-allowed false})
+   :multiple-parties-allowed false
+   :wfs-krysp-url-asia-prefix "yak:luvanTunnisteTiedot/"})
 
 (defpermit YI  "Ymparistoilmoitukset"
   {:subtypes       []
@@ -50,25 +53,29 @@
   {:subtypes       []
    :sftp-directory "/ymparisto"
    :applicant-doc-schema "hakija"
-   :multiple-parties-allowed true})
+   :multiple-parties-allowed true
+   :wfs-krysp-url-asia-prefix "ymy:luvanTunnistetiedot/"})
 
 (defpermit VVVL  "Vapautushakemus vesijohtoon ja viemariin liittymisesta"
   {:subtypes       []
    :sftp-directory "/ymparisto"
    :applicant-doc-schema "hakija"
-   :multiple-parties-allowed true})
+   :multiple-parties-allowed true
+   :wfs-krysp-url-asia-prefix "ymv:luvanTunnistetiedot/"})
 
 (defpermit P  "Poikkeusluvat"
   {:subtypes         [poikkeamislupa suunnittelutarveratkaisu]
    :sftp-directory   "/poikkeusasiat"
    :applicant-doc-schema "hakija"
-   :multiple-parties-allowed true})
+   :multiple-parties-allowed true
+   :wfs-krysp-url-asia-prefix "ppst:luvanTunnistetiedot/"})
 
 (defpermit MAL "Maa-ainesluvat"
   {:subtypes       []
    :sftp-directory "/ymparisto"
    :applicant-doc-schema "hakija"
-   :multiple-parties-allowed true})
+   :multiple-parties-allowed true
+   :wfs-krysp-url-asia-prefix "ymm:luvanTunnistetiedot/"})
 
 (defpermit KT "Kiinteistotoimitus"
   {:subtypes       []
@@ -85,7 +92,7 @@
 ;;
 ;; Helpers
 ;;
-(defn- get-metadata [permit-type k & [default]]
+(defn get-metadata [permit-type k & [default]]
   (if permit-type
     (-> (permit-types) (get (name permit-type)) (get k default))
     default))
@@ -109,9 +116,9 @@
   (get-metadata permit-type :review-krysp-mapper))
 
 (defn get-verdict-reader [permit-type]
-  "Returns a function that reads verdics (sequence) from KRYSP xml.
+  "Returns a function that reads verdicts (sequence) from KRYSP xml.
    Function takes xml as parameter.
-   Use ((get-application-xml-getter permit-type) url application-id) to fetch the XML."
+   Use get-application-xml-getter to fetch the XML."
   (get-metadata permit-type :verdict-krysp-reader))
 
 (defn get-verdict-extras-reader [permit-type]
@@ -123,8 +130,8 @@
   "Returns a function that fetches KRYSP XML from municipality backend.
    Function parameters: 1) url,
                         2) id,
-                        3) optional boolean parameter: raw form
-                        4) optional boolean parameter: if true the id parameter is interpreted as kuntalupatunnus instead of application id."
+                        3) keyword parameter: search-type (e.g. :application-id or :kuntalupatunnus)
+                        4) optional boolean parameter: raw form."
   (get-metadata permit-type :xml-from-krysp))
 
 (defn multiple-parties-allowed? [permit-type]

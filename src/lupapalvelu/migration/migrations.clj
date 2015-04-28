@@ -809,6 +809,31 @@
         doc))
     {"documents.schema-info.name" "suunnittelutarveratkaisun-lisaosa"}))
 
+(defmigration create-transfered-to-backing-system-transfer-entry
+  (doseq [collection [:applications :submitted-applications]
+          application (mongo/select collection {$and [{:transfers {$not {$elemMatch {:type "exported-to-backing-system"}}}}
+                                                      {:sent {$ne nil}}]})]
+    (mongo/update-by-id collection (:id application)
+                        {$push {:transfers {:type "exported-to-backing-system"
+                                            :timestamp (:sent application)}}})))
+
+(defn- change-patevyys-muu-key [doc]
+  (let [koulutusvalinta-path             [:data :patevyys             :koulutusvalinta :value]
+        tyonjohtaja-koulutusvalinta-path [:data :patevyys-tyonjohtaja :koulutusvalinta :value]]
+    (cond
+     (= "muu" (get-in doc koulutusvalinta-path))             (assoc-in doc koulutusvalinta-path "other")
+     (= "muu" (get-in doc tyonjohtaja-koulutusvalinta-path)) (assoc-in doc tyonjohtaja-koulutusvalinta-path "other")
+     :else doc)))
+
+(defmigration patevyys-muu-key-to-other
+  {:apply-when (pos? (mongo/count :applications {:documents {$elemMatch {$or [{:data.patevyys.koulutusvalinta.value "muu"}
+                                                                              {:data.patevyys-tyonjohtaja.koulutusvalinta.value "muu"}]}}}))}
+  (update-applications-array
+    :documents
+    change-patevyys-muu-key
+    {:documents {$elemMatch {$or [{:data.patevyys.koulutusvalinta.value "muu"}
+                                  {:data.patevyys-tyonjohtaja.koulutusvalinta.value "muu"}]}}}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"

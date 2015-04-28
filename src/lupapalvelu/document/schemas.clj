@@ -69,6 +69,8 @@
 
 (def henkilo-valitsin [{:name "userId" :type :personSelector :blacklist [:neighbor]}])
 
+(def yritys-valitsin [{:name "companyId" :type :companySelector :blacklist [:neighbor]}])
+
 (def rakennuksen-valitsin [{:name "buildingId" :type :buildingSelector :required true :i18nkey "rakennusnro" :other-key "manuaalinen_rakennusnro"}
                            {:name "rakennusnro" :type :string :subtype :rakennusnumero :hidden true}
                            {:name "manuaalinen_rakennusnro" :type :string :subtype :rakennusnumero :i18nkey "manuaalinen_rakennusnro" :labelclass "really-long"}
@@ -137,6 +139,7 @@
                      {:name "liikeJaYhteisoTunnus" :type :string :subtype :y-tunnus :required true}])
 
 (def yritys (body
+              yritys-valitsin
               yritys-minimal
               simple-osoite
               {:name "yhteyshenkilo"
@@ -167,7 +170,7 @@
 (def ya-party (henkilo-yritys-select-group :default "yritys"))
 (def party-with-required-hetu (henkilo-yritys-select-group :henkilo-body henkilo-with-required-hetu))
 
-(def koulutusvalinta {:name "koulutusvalinta" :type :select :sortBy :displayname :i18nkey "koulutus"
+(def koulutusvalinta {:name "koulutusvalinta" :type :select :sortBy :displayname :i18nkey "koulutus" :other-key "koulutus"
                       :body [{:name "arkkitehti"}
                              {:name "arkkitehtiylioppilas"}
                              {:name "diplomi-insin\u00f6\u00f6ri"}
@@ -191,8 +194,7 @@
                              {:name "talonrakennusinsin\u00f6\u00f6ri"}
                              {:name "talonrakennusteknikko"}
                              {:name "tekniikan kandidaatti"}
-                             {:name "teknikko"}
-                             {:name "muu"}]})
+                             {:name "teknikko"}]})
 
 (def patevyys [koulutusvalinta
                {:name "koulutus" :type :string :required false :i18nkey "muukoulutus"}
@@ -385,21 +387,21 @@
                                :type :group
                                :whitelist {:roles [:authority]
                                            :otherwise :hidden}
-                               :body [{:name "tyonjohtajanHyvaksynta" :type :checkbox :i18nkey "tyonjohtaja.historia.hyvaksynta"}
-                                      tyonjohtajan-historia]}])
+                               :body [tyonjohtajan-historia
+                                      {:name "tyonjohtajanHyvaksynta" :type :checkbox :i18nkey "tyonjohtaja.historia.hyvaksynta"}]}])
 
 (def tyonjohtaja-v2 (body
-                      tyonjohtajan-hyvaksynta
+                      tayta-omat-tiedot-button
+                      designer-basic
                       ilmoitus-hakemus-valitsin
                       kuntaroolikoodi-tyonjohtaja-v2
                       patevyysvaatimusluokka
                       vastattavat-tyotehtavat-tyonjohtaja-v2
                       tyonjohtaja-hanketieto
-                      tayta-omat-tiedot-button
-                      designer-basic
-                      muut-rakennushankkeet-table
+                      sijaisuus-tyonjohtaja
                       {:name "patevyys-tyonjohtaja" :type :group :body patevyys-tyonjohtaja-v2}
-                      sijaisuus-tyonjohtaja))
+                      muut-rakennushankkeet-table
+                      tyonjohtajan-hyvaksynta))
 
 (def maksaja (body
                (henkilo-yritys-select-group :yritys-body yritys-with-verkkolaskutustieto)

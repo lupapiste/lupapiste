@@ -229,7 +229,7 @@
                                       :add-operation-allowed false
                                       :link-permit-required false
                                       :link-permit-verdict-required false
-                                      :asianhallinta false})
+                                      :asianhallinta true})
 
 (def- ya-kayttolupa-with-tyomaastavastaava
   (update-in ya-kayttolupa-general [:required] conj "tyomaastaVastaava"))
@@ -258,7 +258,7 @@
                                            :add-operation-allowed false
                                            :link-permit-required false
                                            :link-permit-verdict-required false
-                                           :asianhallinta false}
+                                           :asianhallinta true}
    :ya-kayttolupa-nostotyot                                           ya-kayttolupa-with-tyomaastavastaava
    :ya-kayttolupa-vaihtolavat                                         ya-kayttolupa-with-tyomaastavastaava
    :ya-kayttolupa-kattolumien-pudotustyot                             ya-kayttolupa-with-tyomaastavastaava

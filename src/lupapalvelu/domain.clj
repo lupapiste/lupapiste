@@ -15,16 +15,18 @@
 ;;
 
 (defn basic-application-query-for [user]
-  (case (keyword (:role user))
-    :applicant (if-let [company-id (get-in user [:company :id])]
-                 {$or [{:auth.id (:id user)} {:auth.id company-id}]}
-                 {:auth.id (:id user)})
-    :authority {$or [{:organization {$in (:organizations user)}} {:auth.id (:id user)}]}
-    :oirAuthority {:organization {$in (:organizations user)}}
-    :trusted-etl {}
-    (do
-      (warnf "invalid role to get applications: user-id: %s, role: %s" (:id user) (:role user))
-      {:_id nil}))) ; should not yield any results
+  (let [organizations (user/organization-ids-by-roles user #{:authority :reader :rest-api})]
+    (case (keyword (:role user))
+      :applicant    (if-let [company-id (get-in user [:company :id])]
+                      {$or [{:auth.id (:id user)} {:auth.id company-id}]}
+                      {:auth.id (:id user)})
+      :authority    {$or [{:organization {$in organizations}} {:auth.id (:id user)}]}
+      :rest-api     {:organization {$in organizations}}
+      :oirAuthority {:organization {$in organizations}}
+      :trusted-etl {}
+      (do
+        (warnf "invalid role to get applications: user-id: %s, role: %s" (:id user) (:role user))
+        {:_id nil})))) ; should not yield any results
 
 (defn application-query-for [user]
   (merge
