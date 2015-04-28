@@ -45,10 +45,16 @@
 (defquery users
   {:user-roles #{:admin}}
   [{{:keys [role]} :user data :data}]
-  (let [users (-> data
-                (set/rename-keys {:userId :id})
-                (select-keys [:id :role :email :username :firstName :lastName :enabled :allowDirectMarketing])
-                (user/find-users))]
+  (let [base-query (-> data
+                     (set/rename-keys {:userId :id})
+                     (select-keys [:id :role :email :username :firstName :lastName :enabled :allowDirectMarketing]))
+        org-ids (cond
+                  (:organization data) [(:organization data)]
+                  (:organizations data) (:organizations data))
+        query (if (seq org-ids)
+                {$and [base-query, (user/org-authz-match org-ids)]}
+                base-query)
+        users (user/find-users query)]
     (ok :users (map (comp user/with-org-auth user/non-private) users))))
 
 (defquery users-in-same-organizations
