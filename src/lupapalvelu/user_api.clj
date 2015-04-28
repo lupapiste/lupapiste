@@ -146,12 +146,11 @@
   true)
 
 (defn- create-new-user-entity [{:keys [organization role enabled password] :as user-data}]
-  (let [email (user/canonize-email (:email user-data))
-        ]
+  (let [email (user/canonize-email (:email user-data))]
     (-> user-data
       (dissoc :organization)
       (select-keys [:email :username :role :firstName :lastName :personId
-                    :phone :city :street :zip :enabled :organization
+                    :phone :city :street :zip :enabled
                     :allowDirectMarketing :architect :company])
       (as-> user-data
         (merge
