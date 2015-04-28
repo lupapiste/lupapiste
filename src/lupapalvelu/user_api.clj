@@ -78,15 +78,6 @@
   [{caller :user {params :params} :data}]
   (ok :data (user/users-for-datatables caller params)))
 
-;; TODO: Kuuluuko tama tanne vai organization-apiin?
-(defquery user-organizations-for-permit-type
-  {:parameters [permitType]
-   :user-roles #{:authority}
-   :input-validators [permit/permit-type-validator]}
-  [{user :user}]
-  (ok :organizations (organization/get-organizations {:_id {$in (user/organization-ids-by-roles user #{:authority})}
-                                                      :scope {$elemMatch {:permitType permitType}}})))
-
 ;;
 ;; ==============================================================================
 ;; Creating users:
