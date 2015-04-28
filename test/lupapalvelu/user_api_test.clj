@@ -118,12 +118,7 @@
   (facts "apikey is not created"
     (fact (-> (create-new-user-entity  {:email "..anything.." :apikey "true"}) :private :apikey) => nil?)
     (fact (-> (create-new-user-entity {:email "..anything.." :apikey "false"}) :private) => {})
-    (fact (-> (create-new-user-entity {:email "..anything.." :apikey "foo"}) :private :apikey) => nil?))
-
-  (fact "orgAuthz is created"
-    (:orgAuthz (create-new-user-entity {:email "..anything.."
-                                        :organization "123-R"
-                                        :role "authority"})) => {:123-R #{:authority}}))
+    (fact (-> (create-new-user-entity {:email "..anything.." :apikey "foo"}) :private :apikey) => nil?)))
 
 ;;
 ;; ==============================================================================
