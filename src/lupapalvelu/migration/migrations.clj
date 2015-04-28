@@ -834,6 +834,10 @@
     {:documents {$elemMatch {$or [{:data.patevyys.koulutusvalinta.value "muu"}
                                   {:data.patevyys-tyonjohtaja.koulutusvalinta.value "muu"}]}}}))
 
+(defmigration remove-organizations-field-from-dummy-and-applicant
+  {:apply-when (pos? (mongo/count :users {$and [{:organizations []} {$or [{:role "applicant"} {:role "dummy"}]}]}))}
+  (mongo/update-by-query :users {$and [{:organizations []} {$or [{:role "applicant"} {:role "dummy"}]}]} {$unset {:organizations 1}}))
+
 (defn add-org-authz [coll]
   (let [users (mongo/select coll {:organizations {$exists true}})]
     (reduce + 0
