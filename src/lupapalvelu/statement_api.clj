@@ -64,7 +64,7 @@
    :user-roles #{:authorityAdmin}}
   [{user :user}]
   (organization/update-organization
-    (organization/get-organization (user/authority-admins-organization-id user))
+    (user/authority-admins-organization-id user)
     {$pull {:statementGivers {:id personId}}}))
 
 ;;
