@@ -221,11 +221,11 @@
     (mongo/disconnect!)))
 
 (defn- get-asianhallinta-ftp-users [organizations]
-  (remove
-    nil?
-    (for [org organizations
-          scope (:scope org)]
-      (get-in scope [:caseManagement :ftpUser]))))
+  (->> (for [org organizations
+             scope (:scope org)]
+         (get-in scope [:caseManagement :ftpUser]))
+    (remove nil?)
+    distinct))
 
 (defn fetch-asianhallinta-verdicts []
   (let [ah-organizations (mongo/select :organizations
