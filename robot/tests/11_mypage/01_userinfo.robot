@@ -64,7 +64,6 @@ Experience should have changed in Finnish back to original
 
 Save User Data
   Click enabled by test id  save-my-userinfo
-  Wait Until  Element Should be visible  //*[@data-test-id='save-my-userinfo-ok']
 
 Wait for Page to Load
   [Arguments]  ${firstName}  ${lastName}

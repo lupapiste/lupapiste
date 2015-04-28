@@ -34,4 +34,3 @@ Change password
   Input Text  newPassword  ${new}
   Input Text  newPassword2  ${new}
   Click enabled by test id  change-my-password
-  Wait Until  Element Should be visible  //*[@data-test-id='change-my-passwor-ok']
