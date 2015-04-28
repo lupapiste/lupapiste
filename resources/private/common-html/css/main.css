@@ -5258,6 +5258,23 @@ td.comment-text {
   margin-top: 24px;
 }
 
+/* line 23, ../sass/views/_admin.scss */
+#link-to-vendor-backend-config table td {
+  width: 50%;
+}
+/* line 24, ../sass/views/_admin.scss */
+#link-to-vendor-backend-config table td.value {
+  position: relative;
+}
+/* line 25, ../sass/views/_admin.scss */
+#link-to-vendor-backend-config table td.value input {
+  width: 80%;
+}
+/* line 26, ../sass/views/_admin.scss */
+#link-to-vendor-backend-config table td.value .save-indicator {
+  top: 0px;
+}
+
 /* line 2, ../sass/views/_authority_admin.scss */
 #authority-admin h2 {
   margin-top: 24px;

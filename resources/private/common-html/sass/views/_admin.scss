@@ -17,3 +17,14 @@
     margin-top: $marginL;
   }
 }
+
+#link-to-vendor-backend-config {
+  table {
+    td { width: 50%; }
+    td.value {
+      input { width: 80%; }
+      .save-indicator { top: 0px; }
+      position: relative;
+    }
+  }
+}
