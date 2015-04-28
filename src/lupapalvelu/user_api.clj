@@ -33,9 +33,6 @@
 ;; ==============================================================================
 ;;
 
-(defn org-authz-match [organization-ids & [role]]
-  {$or (for [org-id organization-ids] {(str "orgAuthz." (name org-id)) (or role {$exists true})})})
-
 (defquery user
   {:user-roles action/all-authenticated-user-roles}
   [{user :user}]
@@ -61,7 +58,7 @@
   {:user-roles #{:authority}}
   [{user :user}]
   (if-let [organization-ids (seq (user/organization-ids user))]
-    (let [query {$and [{:role "authority"}, (org-authz-match organization-ids)]}
+    (let [query {$and [{:role "authority"}, (user/org-authz-match organization-ids)]}
           users (user/find-users query)]
       (ok :users (map user/summary users)))
     (ok :users [])))

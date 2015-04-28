@@ -86,6 +86,9 @@
   (let [org-set (organization-ids-by-roles user #{:authority})]
     (contains? org-set organization-id)))
 
+(defn org-authz-match [organization-ids & [role]]
+  {$or (for [org-id organization-ids] {(str "orgAuthz." (name org-id)) (or role {$exists true})})})
+
 ;;
 ;; ==============================================================================
 ;; Finding user data:
