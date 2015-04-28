@@ -87,8 +87,8 @@
    :user-roles #{:authority}
    :input-validators [permit/permit-type-validator]}
   [{user :user}]
-  (ok :organizations (organization/get-organizations {:_id {$in (user/organization-ids-by-roles user #{:authority})}
-                                                      :scope {$elemMatch {:permitType permitType}}})))
+  (ok :organizations (o/get-organizations {:_id {$in (user/organization-ids-by-roles user #{:authority})}
+                                           :scope {$elemMatch {:permitType permitType}}})))
 
 (defcommand update-organization
   {:description "Update organization details."
