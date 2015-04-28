@@ -73,6 +73,14 @@
 (defn authority-admins-organization-id [user]
   (first (organization-ids-by-roles user #{:authorityAdmin})))
 
+(defn batchrun-user [org-ids]
+  {:id "-"
+   :enabled true
+   :lastName "Er\u00e4ajo"
+   :firstName "Lupapiste"
+   :role "authority"
+   :orgAuthz (reduce (fn [m org-id] (assoc m (keyword org-id) #{:authority})) {} org-ids)})
+
 ;;
 ;; ==============================================================================
 ;; Finding user data:
