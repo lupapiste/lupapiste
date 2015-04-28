@@ -978,10 +978,16 @@
   {:parameters [id]
    :user-roles #{:authority}
    :states     action/post-submitted-states}
-  [{{:keys [verdicts id]} :application}]
+  [{{:keys [verdicts id organization]} :application}]
   (let [vendor-backend-id (->> verdicts
                                (remove :draft)
                                (some :kuntalupatunnus))
-        url (or vendor-backend-id id)]
+        urlPrefixType     (if (nil? vendor-backend-id)
+                            :vendor-backend-url-for-backend-id
+                            :vendor-backend-url-for-lp-id)
+        urlParam          (or vendor-backend-id id)
+        organization      (organization/get-organization organization)
+
+        urlPrefix         (get-in organization [:vendor-backend-redirect urlPrefixType])]
     {:status 303
-     :headers {"Location" (str "http://www.google.com?q=" url)}}))
+     :headers {"Location" (str urlPrefix urlParam)}}))
