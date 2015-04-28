@@ -164,7 +164,7 @@
       (as-> user-data
         (merge
           {:firstName "" :lastName "" :username email}
-          (when-not (ss/blank? organization) {:orgAuthz {organization #{(keyword role)}}})
+          (when-not (ss/blank? organization) {:orgAuthz {(keyword organization) #{(keyword role)}}})
           user-data))
       (assoc
         :email email
@@ -235,8 +235,8 @@
    :user-roles #{:admin :authorityAdmin}}
   [{user-data :data caller :user}]
   (let [user (create-new-user caller user-data :send-email false)]
-    (infof "Added a new user: role=%s, email=%s, organizations=%s" (:role user) (:email user) (:organizations user))
-    (if (= role "authority")
+    (infof "Added a new user: role=%s, email=%s, orgAuthz=%s" (:role user) (:email user) (:orgAuthz user))
+    (if (user/authority? user)
       (do
         (notify-new-authority user caller)
         (ok :id (:id user) :user user))
