@@ -66,7 +66,7 @@
 (def canonize-email (comp ss/lower-case ss/trim))
 
 (defn organization-ids
-  "Returns a set of organization IDs where user some role."
+  "Returns user's organizations as a set"
   [{org-authz :orgAuthz :as user}]
   (->> org-authz keys (map name) set))
 
