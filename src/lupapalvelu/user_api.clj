@@ -43,14 +43,11 @@
      (fail))))
 
 (defquery users
-  {:user-roles #{:admin :authorityAdmin}}
-  [{{:keys [role organizations]} :user data :data}]
+  {:user-roles #{:admin}}
+  [{{:keys [role]} :user data :data}]
   (let [users (-> data
-                                     (set/rename-keys {:userId :id})
-                                     (select-keys [:id :role :organization :organizations :email :username :firstName :lastName :enabled :allowDirectMarketing])
-                                     (as-> data (if (= role :authorityAdmin)
-                                                  (assoc data :organizations {$in [organizations]})
-                                                  data))
+                (set/rename-keys {:userId :id})
+                (select-keys [:id :role :organization :organizations :email :username :firstName :lastName :enabled :allowDirectMarketing])
                 (user/find-users))]
     (ok :users (map (comp user/with-org-auth user/non-private) users))))
 
