@@ -119,7 +119,7 @@
                               :porras "A"
                               :jakokirjain ""
                               :huoneistoTyyppi "asuinhuoneisto"
-                              :huoneistoala "52", :huoneluku "2"
+                              :huoneistoala "52,1", :huoneluku "2"
                               :keittionTyyppi "keittokomero"
                               :ammeTaiSuihkuKytkin true
                               :lamminvesiKytkin true
