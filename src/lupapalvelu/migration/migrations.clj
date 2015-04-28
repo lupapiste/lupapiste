@@ -834,6 +834,21 @@
     {:documents {$elemMatch {$or [{:data.patevyys.koulutusvalinta.value "muu"}
                                   {:data.patevyys-tyonjohtaja.koulutusvalinta.value "muu"}]}}}))
 
+(defn add-org-authz [coll]
+  (let [users (mongo/select coll {:organizations {$exists true}})]
+    (reduce + 0
+            (for [{:keys [organizations id role]} users]
+              (let [org-authz (into {} (for [org organizations] [(str "orgAuthz." org) [role]]))]
+                (if (empty? org-authz)
+                  (mongo/update-n coll {:_id id} {$set {:orgAuthz {}}
+                                                  $unset {:organizations 1}})
+                  (mongo/update-n coll {:_id id} {$set org-authz
+                                                  $unset {:organizations 1}})))))))
+
+(defmigration add-org-authz
+  {:apply-when (pos? (mongo/count :users {:organizations {$exists true}}))}
+  (add-org-authz :users))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"
