@@ -9,6 +9,7 @@
             [lupapalvelu.vetuma :as vetuma]
             [lupapalvelu.web :as web]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.user :as u]
             [sade.http :as http]
             [sade.env :as env]
             [midje.sweet :refer :all]
@@ -25,7 +26,7 @@
            org.apache.http.cookie.Cookie))
 
 (defn find-user-from-minimal [username] (some #(when (= (:username %) username) %) minimal/users))
-(defn find-user-from-minimal-by-apikey [apikey] (some #(when (= (get-in % [:private :apikey]) apikey) %) minimal/users))
+(defn find-user-from-minimal-by-apikey [apikey] (u/with-org-auth (some #(when (= (get-in % [:private :apikey]) apikey) %) minimal/users)))
 (defn- id-for [username] (:id (find-user-from-minimal username)))
 (defn id-for-key [apikey] (:id (find-user-from-minimal-by-apikey apikey)))
 (defn apikey-for [username] (get-in (find-user-from-minimal username) [:private :apikey]))
