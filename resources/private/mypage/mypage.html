@@ -171,16 +171,16 @@
           </div>
         </div>
 
-        <button data-bind="ltext: 'save', enable: ok, click: save"
-          type="button" class="btn btn-primary"
-          data-test-id="save-my-userinfo"></button>
-        <p class="context-error"
-          data-bind="visible: error() != null, ltext: error"></p>
-        <span data-bind="visible: !error() && saved, ltext: 'saved'"
-          style="font-weight: bold; color: green;"
-          data-test-id="save-my-userinfo-ok"></span> <img
-          class="own-info-ajax-loader" style="display: none"
-          src="/img/ajax-loader-12.gif" alt="..." width="12" height="12" />
+        <div class="button-group" style="position: relative;">
+          <button data-bind="ltext: 'save', enable: isValid, click: save"
+            type="button" class="btn btn-primary"
+            data-test-id="save-my-userinfo"></button>
+          <span data-bind="saveIndicator: indicator"></span>
+          <img class="own-info-ajax-loader" data-bind="visible: pending"
+               src="/img/ajax-loader-12.gif" alt="..." width="12" height="12"></img>
+          <p class="context-error"
+            data-bind="visible: error() != null, ltext: error"></p>
+        </div>
       </form>
     </div>
 
@@ -212,20 +212,21 @@
               style="color: gray; font-style: italic;"></span>
           </div>
           <div class="clear"></div>
-          <button
-            data-bind="click: save, enable: ok, ltext: 'userinfo.changePassword'"
-            type="button" class="btn btn-primary"
-            data-test-id="change-my-password"></button>
-          <p class="context-error"
-            data-bind="visible: error() != null, ltext: error"
-            class="context-error"></p>
-          <span
-            data-bind="visible: !error() && saved, ltext: 'mypage.passwordChanged'"
-            style="font-weight: bold; color: green;"
-            data-test-id="change-my-passwor-ok"></span> <img
-            class="pw-ajax-loader" style="display: none"
-            src="/img/ajax-loader-12.gif" alt="..." width="12"
-            height="12" />
+
+          <div class="button-group" style="position: relative;">
+            <button
+              data-bind="click: save, enable: ok, ltext: 'userinfo.changePassword'"
+              type="button" class="btn btn-primary"
+              data-test-id="change-my-password">
+            </button>
+            <span data-bind="saveIndicator: indicator"></span>
+            <img class="own-info-ajax-loader" data-bind="visible: pending"
+                 src="/img/ajax-loader-12.gif" alt="..." width="12" height="12"></img>
+            <p class="context-error"
+               data-bind="visible: error() != null, ltext: error"
+               class="context-error">
+            </p>
+          </div>
         </div>
       </form>
     </div>
