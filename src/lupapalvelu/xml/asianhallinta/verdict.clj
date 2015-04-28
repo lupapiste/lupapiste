@@ -1,6 +1,5 @@
 (ns lupapalvelu.xml.asianhallinta.verdict
   (:require [sade.core :refer [ok fail fail!] :as core]
-            [sade.common-reader :as reader]
             [sade.xml :as xml]
             [pandect.core :as pandect]
             [taoensso.timbre :refer [error]]
@@ -80,9 +79,9 @@
         (error-and-fail! (str "Expected to find one xml, found " (count xmls)) :error.integration.asianhallinta-wrong-number-of-xmls))
 
       ; parse XML
-      (let [parsed-xml (-> (first xmls) slurp xml/parse reader/strip-xml-namespaces xml/xml->edn)
+      (let [parsed-xml (-> (first xmls) slurp xml/parse cr/strip-xml-namespaces xml/xml->edn)
             attachments (-> (get-in parsed-xml [:AsianPaatos :Liitteet])
-                            (reader/ensure-sequential :Liite)
+                            (cr/ensure-sequential :Liite)
                             :Liite)]
         ; Check that all referenced attachments were included in zip
         (ensure-attachments-present! unzipped-path attachments)
