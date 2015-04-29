@@ -103,16 +103,17 @@
 
 (facts "plan-urls-by-point-proxy"
 
-  (fact "Helsinki"
-    (let [response (plan-urls-by-point-proxy {:params {:x "395628" :y "6677704" :municipality "091"}})
-          body     (if (http200? response) (json/decode (:body response) true))]
-      response => http200?
-      (first body) => {:id "8755"
-                       :kuntanro "91"
-                       :kaavanro "8755"
-                       :vahvistett_pvm "19.12.1985"
-                       :linkki "http://img.sito.fi/kaavamaaraykset/91/8755.pdf"
-                       :type "sito"}))
+  ; Sito has been notified, enable test when Sito's Geoserver is up
+  #_(fact "Helsinki"
+     (let [response (plan-urls-by-point-proxy {:params {:x "395628" :y "6677704" :municipality "091"}})
+           body     (if (http200? response) (json/decode (:body response) true))]
+       response => http200?
+       (first body) => {:id "8755"
+                        :kuntanro "91"
+                        :kaavanro "8755"
+                        :vahvistett_pvm "19.12.1985"
+                        :linkki "http://img.sito.fi/kaavamaaraykset/91/8755.pdf"
+                        :type "sito"}))
 
   (fact "Mikkeli"
     (let [response (plan-urls-by-point-proxy {:params {:x "533257.514" :y "6828489.823" :municipality "491"}})
