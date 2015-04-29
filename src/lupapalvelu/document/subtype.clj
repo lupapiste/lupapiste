@@ -1,6 +1,6 @@
 (ns lupapalvelu.document.subtype
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
-            [sade.util :refer [->int] :as util]
+            [sade.util :refer [->int ->double] :as util]
             [clojure.string :refer [blank?]]))
 
 (defmulti subtype-validation (fn [elem _] (keyword (:subtype elem))))
@@ -24,6 +24,14 @@
           number   (->int v nil)]
       (when-not (and number (<= min-int number max-int))
         [:warn "illegal-number"]))))
+
+(defmethod subtype-validation :decimal [{:keys [min max]} v]
+  (when-not (blank? v)
+    (let [min-double (->double min (java.lang.Integer/MIN_VALUE))
+          max-double (->double max (java.lang.Integer/MAX_VALUE))
+          number (->double (clojure.string/replace v "," ".") nil)]
+      (when-not (and number (<= min-double number max-double))
+        [:warn "illegal-decimal"]))))
 
 (defmethod subtype-validation :digit [_ v]
   (cond

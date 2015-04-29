@@ -3,6 +3,7 @@
             [clojure.java.io :as io]
             [sade.core :refer [def-]]
             [sade.xml :as xml]
+            [lupapalvelu.prev-permit-api]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.domain :as domain]
@@ -91,12 +92,13 @@
           :propertyId "18600303560005") => (partial expected-failure? "error.unauthorized"))
 
       (fact* "authority of same municipality can create application"
-        (let [resp (create-app-from-prev-permit raktark-jarvenpaa
-                     :x "6707184.319"
-                     :y "393021.589"
-                     :address "Kylykuja 3"
-                     :propertyId "18600303560005") => ok?
-              app-id (:id resp)
+        (let [resp1 (create-app-from-prev-permit raktark-jarvenpaa
+                      :x "6707184.319"
+                      :y "393021.589"
+                      :address "Kylykuja 3"
+                      :municipality "186"
+                      :propertyId "18600303560005") => ok?
+              app-id (:id resp1)
               application (query-application local-query raktark-jarvenpaa app-id)
               invites (filter #(= raktark-jarvenpaa-id (get-in % [:invite :inviter :id])) (:auth application))]
 
@@ -113,12 +115,13 @@
             :id (:id application)
             :text "Se on peruutus ny!"
             :lang "fi")
-          (let [resp (create-app-from-prev-permit raktark-jarvenpaa
-                       :x "6707184.319"
-                       :y "393021.589"
-                       :address "Kylykuja 3"
-                       :propertyId "18600303560005") => ok?]
-            (:id resp) =not=> app-id)))))
+          (let [resp2 (create-app-from-prev-permit raktark-jarvenpaa
+                        :x "6707184.319"
+                        :y "393021.589"
+                        :address "Kylykuja 3"
+                        :municipality "186"
+                        :propertyId "18600303560005") => ok?]
+            (:id resp2) =not=> app-id)))))
 
 
     ;; This applies to all tests in this namespace
@@ -139,18 +142,19 @@
 
         (fact "should return the LP application if the kuntalupatunnus matches an existing app"
           (let [{app-id :id} (create-and-submit-application pena :municipality jarvenpaa-muni)
-                _            (give-verdict raktark-jarvenpaa app-id :verdictId example-kuntalupatunnus)
+                verdict-resp (give-verdict raktark-jarvenpaa app-id :verdictId example-kuntalupatunnus)
                 response     (http/get rest-address params)
                 resp-body    (:body (util/decode-response response))]
+            verdict-resp => ok?
             (:status response) => 200
             resp-body => ok?
             (keyword (:text resp-body)) => :already-existing-application))
 
         (fact "create new LP app if kuntalupatunnus matches existing app in another organization"
-          (let [{app-id :id} (create-and-submit-application pena :municipality sonja-muni)
-                _            (give-verdict sonja app-id :verdictId example-kuntalupatunnus)
-                response     (http/get rest-address params)
-                resp-body    (:body (util/decode-response response))]
-            (:status response) => 200
-            resp-body => ok?
-            (keyword (:text resp-body)) => :created-new-application))))))
+         (let [{app-id :id} (create-and-submit-application pena :municipality sonja-muni)
+               _            (give-verdict sonja app-id :verdictId example-kuntalupatunnus)
+               response     (http/get rest-address params)
+               resp-body    (:body (util/decode-response response))]
+           (:status response) => 200
+           resp-body => ok?
+           (keyword (:text resp-body)) => :created-new-application))))))

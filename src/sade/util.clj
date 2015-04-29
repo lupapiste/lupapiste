@@ -147,7 +147,7 @@
       false)))
 
 (defn ->int
-  "Reads a integer from input. Returns default if not a integer.
+  "Reads a integer from input. Returns default if not an integer.
    Default default is 0"
   ([x] (->int x 0))
   ([x default]
@@ -157,12 +157,19 @@
                           (number? x)  (str (int x))
                           :else        (str x))
                         10)
-      (catch Exception e
+      (catch Exception _
         default))))
 
-(defn ->double [v]
-  (let [s (str v)]
-    (if (or (numeric? s) (decimal-number? s)) (Double/parseDouble s) 0.0)))
+(defn ->double
+  "Reads a double from input. Return default if not a double.
+  Default is 0.0"
+  ([v] (->double v 0.0))
+  ([v default]
+   (let [s (str v)]
+     (try
+       (Double/parseDouble s)
+       (catch Exception _
+         default)))))
 
 (defn abs [n]
   {:pre [(number? n)]}
@@ -327,6 +334,11 @@
     (nil? ovt)                false
     (.startsWith ovt "0037")  (finnish-ovt? ovt)
     :else                     (re-matches #"\d{4}.+" ovt)))
+
+(defn account-type? [account-type]
+  (cond
+    (nil? account-type) false
+    :else (re-matches   #"account(5|15|30)" account-type)))
 
 (defn rakennusnumero? [^String s]
   (and (not (nil? s)) (re-matches #"^\d{3}$" s)))

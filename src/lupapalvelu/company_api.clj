@@ -4,7 +4,8 @@
             [lupapalvelu.company :as c]
             [lupapalvelu.user :as u]
             [monger.operators :refer :all]
-            [lupapalvelu.mongo :as mongo]))
+            [lupapalvelu.mongo :as mongo]
+            [sade.strings :as ss]))
 
 ;;
 ;; Company API:
@@ -13,13 +14,13 @@
 ; Validator: check is user is either :admin or user belongs to requested company
 
 (defn validate-user-is-admin-or-company-member [{{:keys [role company]} :user {requested-company :company} :data}]
-  (if-not (or (= role "admin")
-              (= (:id company) requested-company))
+  (when-not (or (= role "admin")
+                (= (:id company) requested-company))
     unauthorized))
 
-(defn validate-user-is-admin-or-company-admin [{user :user}]
-  (if-not (or (= (get user :role) "admin")
-              (= (get-in user [:company :role]) "admin"))
+(defn validate-user-is-admin-or-company-admin [{user :user} _]
+  (when-not (or (= (:role user) "admin")
+                (= (get-in user [:company :role]) "admin"))
     unauthorized))
 
 ;;
@@ -60,9 +61,21 @@
     (c/update-user! user-id (keyword op) value)
     (ok)))
 
+(defn- user-limit-not-exceeded [command _]
+  (let [company (c/find-company-by-id (get-in command [:user :company :id]))
+        company-users (c/find-company-users (:id company))
+        invitations (c/find-user-invitations (:id company))
+        users (+ (count invitations) (count company-users))]
+    (when-not (:accountType company)
+      (fail! :error.account-type-not-defined-for-company))
+    (let [user-limit (c/user-limit-for-account-type (keyword (:accountType company)))]
+      (when-not (< users user-limit)
+        (fail :error.company-user-limit-exceeded)))))
+
+
 (defquery company-invite-user
   {:user-roles #{:applicant}
-   :input-validators [validate-user-is-admin-or-company-admin]
+   :pre-checks [validate-user-is-admin-or-company-admin user-limit-not-exceeded]
    :parameters [email]}
   [{caller :user}]
   (let [user (u/find-user {:email email})
@@ -84,11 +97,9 @@
 
 (defcommand company-add-user
   {:user-roles #{:applicant}
-   :parameters [firstName lastName email]}
+   :parameters [firstName lastName email]
+   :pre-checks [validate-user-is-admin-or-company-admin user-limit-not-exceeded]}
   [{user :user {:keys [admin]} :params}]
-  (if-not (or (= (:role user) "admin")
-              (= (get-in user [:company :role]) "admin"))
-    (fail! :forbidden))
   (c/add-user! {:firstName firstName :lastName lastName :email email}
                (c/find-company-by-id (-> user :company :id))
                (if admin :admin :user))
@@ -117,7 +128,7 @@
 (defcommand company-cancel-invite
   {:parameters [tokenId]
    :user-roles #{:applicant}
-   :input-validators [validate-user-is-admin-or-company-admin]}
+   :pre-checks [validate-user-is-admin-or-company-admin]}
   [{:keys [created user application] :as command}]
   (let [token (mongo/by-id :token tokenId)
         token-company-id (get-in token [:data :company :id])

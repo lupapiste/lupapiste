@@ -18,7 +18,7 @@ Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville.
 
 Klicka p&aring; l&auml;nken nedan f&ouml;r att delta i behandlingen av ans&ouml;kan.
 
- [{{link-fi}}]({{link-fi}})
+ [{{link-sv}}]({{link-sv}})
 
 Om l&auml;nken inte fungerar, kopiera adressen och klistra in den i webbl&auml;sarens adressf&auml;lt.
 

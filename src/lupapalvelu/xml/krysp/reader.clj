@@ -293,7 +293,7 @@
                                  :jakokirjain     (get-text huoneisto :jakokirjain)
                                  :porras          (get-text huoneisto :porras)
                                  :huoneistoTyyppi (get-text huoneisto :huoneistonTyyppi)
-                                 :huoneistoala    (get-text huoneisto :huoneistoala)
+                                 :huoneistoala    (ss/replace (get-text huoneisto :huoneistoala) "." ",")
                                  :huoneluku       (get-text huoneisto :huoneluku)
                                  :keittionTyyppi  (get-text huoneisto :keittionTyyppi)
                                  :WCKytkin                (get-text huoneisto :WCKytkin)

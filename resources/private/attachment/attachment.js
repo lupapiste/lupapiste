@@ -19,6 +19,7 @@ var attachment = (function() {
         return false;
       })
       .call();
+      hub.send("track-click", {category:"Attachments", label: "", event:"deleteAttachment"});
     return false;
   }
 
@@ -35,6 +36,7 @@ var attachment = (function() {
         repository.load(applicationId);
       })
       .call();
+      hub.send("track-click", {category:"Attachments", label: "", event:"deleteAttachmentVertion"});
     return false;
   }
 
@@ -78,6 +80,7 @@ var attachment = (function() {
           repository.load(id);
         })
         .call();
+        hub.send("track-click", {category:"Attachments", label: "", event:"rejectAttachment"});
       return false;
     };
 
@@ -91,6 +94,7 @@ var attachment = (function() {
           repository.load(id);
         })
         .call();
+        hub.send("track-click", {category:"Attachments", label: "", event:"approveAttachment"});
       return false;
     };
   }
@@ -181,6 +185,7 @@ var attachment = (function() {
       var previousId = util.getIn(model.groupAttachments(), [model.groupIndex() - 1, "id"]);
       if (previousId) {
         window.location.hash = "!/attachment/"+applicationId+"/" + previousId;
+        hub.send("track-click", {category:"Attachments", label: "", event:"previousAttachment"});
       }
     },
 
@@ -188,6 +193,7 @@ var attachment = (function() {
       var nextId = util.getIn(model.groupAttachments(), [model.groupIndex() + 1, "id"]);
       if (nextId) {
         window.location.hash = "!/attachment/"+applicationId+"/" + nextId;
+        hub.send("track-click", {category:"Attachments", label: "", event:"nextAttachment"});
       }
     },
 

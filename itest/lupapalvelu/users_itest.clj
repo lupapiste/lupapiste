@@ -11,8 +11,9 @@
 (defn all-in-organization? [organization]
   (fn [users]
     (->> users
-      (map :organizations)
+      (map (comp keys :orgAuthz))
       flatten
+      (map name)
       (every? #{organization}))))
 
 (facts "defquery users"
