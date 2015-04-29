@@ -11,6 +11,7 @@
             [lupapalvelu.action :as action]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as user]
+            [lupapalvelu.notifications :as notifications]
             [clojure.string :as s]
             [sade.common-reader :as cr]
             [lupapalvelu.attachment :as attachment]))
@@ -97,7 +98,7 @@
             (error-and-fail! (str "FTP user " ftp-user " is not allowed to make changes to application " application-id) :error.integration.asianhallinta.unauthorized))
 
           ; -> check that application is in correct state
-          (when-not (#{:constructionStarted :sent :verdictGiven} (:state application)
+          (when-not (#{:constructionStarted :sent :verdictGiven} (keyword (:state application)))
             (error-and-fail!
               (str "Application " application-id " in wrong state (" (:state application) ") for asianhallinta verdict") :error.integration.asianhallinta.wrong-state))
 
