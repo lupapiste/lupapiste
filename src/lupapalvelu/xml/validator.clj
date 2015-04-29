@@ -145,6 +145,5 @@
     (try
       (.validate validator xml-source)
       (catch Exception e
-        (warnf "Validation error with permit-type %s, schema-version %s: %s" permit-type schema-version (.getMessage e))
-        (debug xml)
+        (debugf "Validation error with permit-type %s, schema-version %s: %s" permit-type schema-version (.getMessage e))
         (throw e)))))
