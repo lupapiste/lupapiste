@@ -39,20 +39,32 @@
   (if (user/virtual-user? user)
     (ok :user user)
     (if-let [full-user (user/get-user-by-id (:id user))]
-     (ok :user (user/with-org-auth (dissoc full-user :private :personId)))
+      (ok :user (dissoc full-user :private :personId))
      (fail))))
 
 (defquery users
-  {:user-roles #{:admin :authorityAdmin}}
-  [{{:keys [role organizations]} :user data :data}]
-  (let [users (-> data
-                (set/rename-keys {:userId :id})
-                (select-keys [:id :role :organization :organizations :email :username :firstName :lastName :enabled :allowDirectMarketing])
-                (as-> data (if (= role :authorityAdmin)
-                             (assoc data :organizations {$in [organizations]})
-                             data))
-                (user/find-users))]
+  {:user-roles #{:admin}}
+  [{{:keys [role]} :user data :data}]
+  (let [base-query (-> data
+                     (set/rename-keys {:userId :id})
+                     (select-keys [:id :role :email :username :firstName :lastName :enabled :allowDirectMarketing]))
+        org-ids (cond
+                  (:organization data) [(:organization data)]
+                  (:organizations data) (:organizations data))
+        query (if (seq org-ids)
+                {$and [base-query, (user/org-authz-match org-ids)]}
+                base-query)
+        users (user/find-users query)]
     (ok :users (map (comp user/with-org-auth user/non-private) users))))
+
+(defquery users-in-same-organizations
+  {:user-roles #{:authority}}
+  [{user :user}]
+  (if-let [organization-ids (seq (user/organization-ids user))]
+    (let [query {$and [{:role "authority"}, (user/org-authz-match organization-ids)]}
+          users (user/find-users query)]
+      (ok :users (map user/summary users)))
+    (ok :users [])))
 
 (env/in-dev
   (defquery user-by-email
@@ -65,15 +77,6 @@
   {:user-roles #{:admin :authorityAdmin}}
   [{caller :user {params :params} :data}]
   (ok :data (user/users-for-datatables caller params)))
-
-;; TODO: Kuuluuko tama tanne vai organization-apiin?
-(defquery user-organizations-for-permit-type
-  {:parameters [permitType]
-   :user-roles #{:authority}
-   :input-validators [permit/permit-type-validator]}
-  [{user :user}]
-  (ok :organizations (organization/get-organizations {:_id {$in (user/organization-ids-by-roles user #{:authority})}
-                                                      :scope {$elemMatch {:permitType permitType}}})))
 
 ;;
 ;; ==============================================================================
@@ -122,13 +125,13 @@
     (when (and (= user-role :authority) (not authorityAdmin?))
       (fail! :error.unauthorized :desc "only authorityAdmin can create authority users" :user-role user-role :caller-role caller-role))
 
-    (when (and (= user-role :authorityAdmin) (not (:organization user-data)))
+    (when (and (= user-role :authorityAdmin) (not organization-id))
       (fail! :error.missing-parameters :desc "new authorityAdmin user must have organization" :parameters [:organization]))
 
-    (when (and (= user-role :authority) (and (:organization user-data) (every? (partial not= (:organization user-data)) (:organizations caller))))
+    (when (and (= user-role :authority) (and organization-id (not ((user/organization-ids caller) organization-id))))
       (fail! :error.unauthorized :desc "authorityAdmin can create users into his/her own organization only, or statement givers without any organization at all"))
 
-    (when (and (= user-role :dummy) (:organization user-data))
+    (when (and (= user-role :dummy) organization-id)
       (fail! :error.unauthorized :desc "dummy user may not have an organization" :missing :organization))
 
     (when (and password (not (security/valid-password? password)))
@@ -142,25 +145,21 @@
 
   true)
 
-(defn- create-new-user-entity [user-data]
+(defn- create-new-user-entity [{:keys [enabled password] :as user-data}]
   (let [email (user/canonize-email (:email user-data))]
     (-> user-data
       (dissoc :organization)
       (select-keys [:email :username :role :firstName :lastName :personId
-                    :phone :city :street :zip :enabled :organization
+                    :phone :city :street :zip :enabled :orgAuthz
                     :allowDirectMarketing :architect :company])
-      (as-> user-data (merge {:firstName "" :lastName "" :username email} user-data))
+      (as-> user-data
+        (merge
+          {:firstName "" :lastName "" :username email}
+          user-data))
       (assoc
         :email email
-        :enabled (= "true" (str (:enabled user-data)))
-        :organizations (if (:organization user-data) [(:organization user-data)] [])
-        :private (merge {}
-                   (when (:password user-data)
-                     {:password (security/get-hash (:password user-data))})
-                   (when (and (:apikey user-data) (not= "false" (:apikey user-data)))
-                     {:apikey (if (and (env/dev-mode?) (not (#{"true" "false"} (:apikey user-data))))
-                                (:apikey user-data)
-                                (security/random-password))}))))))
+        :enabled (= "true" (str enabled))
+        :private (if password {:password (security/get-hash password)} {})))))
 
 ;;
 ;; TODO: Ylimaaraisen "send-email"-parametrin sijaan siirra mailin lahetys pois
@@ -209,10 +208,11 @@
             (warn e "Inserting new user failed")
             (fail! :cant-insert)))))))
 
-(defn- create-authority-user-with-organization [caller new-organization email firstName lastName]
-  (let [new-user (create-new-user
+(defn- create-authority-user-with-organization [caller new-organization email firstName lastName roles]
+  (let [org-authz {new-organization (into #{} roles)}
+        new-user (create-new-user
                    caller
-                   {:email email :role :authority :organization new-organization :enabled true
+                   {:email email :orgAuthz org-authz :role :authority :enabled true
                     :firstName firstName :lastName lastName}
                    :send-email false)]
     (infof "invitation for new authority user: email=%s, organization=%s" email new-organization)
@@ -225,9 +225,10 @@
                       action/email-validator]
    :user-roles #{:admin :authorityAdmin}}
   [{user-data :data caller :user}]
-  (let [user (create-new-user caller user-data :send-email false)]
-    (infof "Added a new user: role=%s, email=%s, organizations=%s" (:role user) (:email user) (:organizations user))
-    (if (= role "authority")
+  (let [updated-user-data (if (:organization user-data) (assoc user-data :orgAuthz {(:organization user-data) (:role user-data)}) user-data)
+        user (create-new-user caller updated-user-data :send-email false)]
+    (infof "Added a new user: role=%s, email=%s, orgAuthz=%s" (:role user) (:email user) (:orgAuthz user))
+    (if (user/authority? user)
       (do
         (notify-new-authority user caller)
         (ok :id (:id user) :user user))
@@ -300,22 +301,29 @@
   (when-not (#{"add" "remove"} (:operation data))
     (fail :bad-request :desc (str "illegal organization operation: '" (:operation data) "'"))))
 
+(defn update-user [email operation organization roles]
+  (let [role             "authority"
+        org-authz-op     ({"add" $set "remove" $unset} operation)
+        org-authz-data   {(str "orgAuthz." organization) roles}
+        query            {:email email, :role role}]
+    (mongo/update-n :users query {org-authz-op org-authz-data})))
+
 (defcommand update-user-organization
-  {:parameters       [operation email firstName lastName]
+  {:parameters       [operation email firstName lastName roles]
    :input-validators [valid-organization-operation?
                       (partial action/non-blank-parameters [:email :firstName :lastName])
                       action/email-validator]
    :user-roles #{:authorityAdmin}}
   [{caller :user}]
-  (let [email            (user/canonize-email email)
+  (let [actual-roles     (if (env/feature? :tiedonohjaus) roles ["authority"])
+        email            (user/canonize-email email)
         new-organization (user/authority-admins-organization-id caller)
-        update-count     (mongo/update-n :users {:email email, :role "authority"}
-                           {({"add" $addToSet "remove" $pull} operation) {:organizations new-organization}})]
+        update-count     (update-user email operation new-organization actual-roles)]
     (debug "update user" email)
     (if (pos? update-count)
       (ok :operation operation)
       (if (and (= operation "add") (not (user/get-user-by-email email)))
-        (create-authority-user-with-organization caller new-organization email firstName lastName)
+        (create-authority-user-with-organization caller new-organization email firstName lastName actual-roles)
         (fail :error.user-not-found)))))
 
 (defmethod token/handle-token :authority-invitation [{{:keys [email organization caller-email]} :data} {password :password}]

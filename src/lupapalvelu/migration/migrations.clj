@@ -834,6 +834,25 @@
     {:documents {$elemMatch {$or [{:data.patevyys.koulutusvalinta.value "muu"}
                                   {:data.patevyys-tyonjohtaja.koulutusvalinta.value "muu"}]}}}))
 
+(defmigration remove-organizations-field-from-dummy-and-applicant
+  {:apply-when (pos? (mongo/count :users {$and [{:organizations {$exists true}} {:role {$in ["dummy", "applicant"]}}]}))}
+  (mongo/update-by-query :users {$and [{:organizations {$exists true}} {:role {$in ["dummy", "applicant"]}}]} {$unset {:organizations 1}}))
+
+(defn organizations->org-authz [coll]
+  (let [users (mongo/select coll {:organizations {$exists true}})]
+    (reduce + 0
+            (for [{:keys [organizations id role]} users]
+              (let [org-authz (into {} (for [org organizations] [(str "orgAuthz." org) [role]]))]
+                (if (empty? org-authz)
+                  (mongo/update-n coll {:_id id} {$set {:orgAuthz {}}
+                                                  $unset {:organizations 1}})
+                  (mongo/update-n coll {:_id id} {$set org-authz
+                                                  $unset {:organizations 1}})))))))
+
+(defmigration add-org-authz
+  {:apply-when (pos? (mongo/count :users {:organizations {$exists true}}))}
+  (organizations->org-authz :users))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"

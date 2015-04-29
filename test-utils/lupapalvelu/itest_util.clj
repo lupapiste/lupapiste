@@ -36,9 +36,12 @@
 (defn organization-from-minimal-by-id [org-id]
   (some #(when (= (:id %) org-id) %) minimal/organizations))
 
-(defn- muni-for-user [user]
-  (let [org (organization-from-minimal-by-id (first (:organizations user)))]
-    (-> org :scope first :municipality)))
+(defn- muni-for-user [{org-authz :orgAuthz :as user}]
+  {:pre [user]}
+  (when (seq org-authz)
+    (assert (= 1 (count org-authz)) user)
+    (let [org (organization-from-minimal-by-id (-> org-authz first first name))]
+      (-> org :scope first :municipality))))
 
 (defn muni-for [username] (muni-for-user (find-user-from-minimal username)))
 (defn muni-for-key [apikey] (muni-for-user (find-user-from-minimal-by-apikey apikey)))
@@ -57,7 +60,7 @@
 (def veikko-muni (muni-for "veikko"))
 (def sonja       (apikey-for "sonja"))
 (def sonja-id    (id-for "sonja"))
-(def sonja-muni  (muni-for "sonja"))
+(def sonja-muni  "753")
 (def ronja       (apikey-for "ronja"))
 (def ronja-id    (id-for "ronja"))
 (def sipoo       (apikey-for "sipoo"))
@@ -72,7 +75,7 @@
 (def arto       (apikey-for "arto"))
 (def kuopio     (apikey-for "kuopio-r"))
 (def velho      (apikey-for "velho"))
-(def velho-muni (muni-for "velho"))
+(def velho-muni "297")
 (def velho-id   (id-for "velho"))
 
 (defn server-address [] (System/getProperty "target_server" "http://localhost:8000"))
@@ -136,15 +139,16 @@
 (def apply-remote-minimal (partial apply-remote-fixture "minimal"))
 
 (defn create-app-with-fn [f apikey & args]
-  (let [args (->> args
-               (apply hash-map)
-               (merge {:operation "kerrostalo-rivitalo"
-                       :propertyId "75312312341234"
-                       :x 444444 :y 6666666
-                       :address "foo 42, bar"
-                       :municipality (or (muni-for-key apikey) sonja-muni)})
-               (mapcat seq))]
-    (apply f apikey :create-application args)))
+  (let [args (apply hash-map args)
+        municipality (:municipality args)
+        params (->> args
+                 (merge {:operation "kerrostalo-rivitalo"
+                         :propertyId "75312312341234"
+                         :x 444444 :y 6666666
+                         :address "foo 42, bar"
+                         :municipality (or municipality (muni-for-key apikey) sonja-muni)})
+                 (mapcat seq))]
+    (apply f apikey :create-application params)))
 
 (defn create-app
   "Runs the create-application command, returns reply map. Use ok? to check it."
@@ -230,8 +234,9 @@
   [apikey & args]
   (let [resp (apply create-app apikey args)
         id   (:id resp)]
-    resp => ok?
-    id => truthy
+    (fact "Application created"
+      resp => ok?
+      id => truthy)
     id))
 
 (defn comment-application
