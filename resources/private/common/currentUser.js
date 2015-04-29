@@ -13,6 +13,7 @@ LUPAPISTE.CurrentUser = function() {
     lastName:       "",
     phone:          "",
     username:       "",
+    orgAuthz:       undefined,
     company: {
       id:   undefined,
       role: undefined

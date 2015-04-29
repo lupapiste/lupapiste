@@ -310,14 +310,14 @@
   (-> (cr/all-of paatos-xml-without-ns :lupamaaraykset)
     (cleanup)
 
-    (cr/ensure-sequental :vaaditutKatselmukset)
+    (cr/ensure-sequential :vaaditutKatselmukset)
     (#(let [kats (map :Katselmus (:vaaditutKatselmukset %))]
         (if (seq kats)
           (assoc % :vaaditutKatselmukset kats)
           (dissoc % :vaaditutKatselmukset))))
 
     ; KRYSP yhteiset 2.1.1+
-    (cr/ensure-sequental :vaadittuTyonjohtajatieto)
+    (cr/ensure-sequential :vaadittuTyonjohtajatieto)
     (#(let [tyonjohtajat (map (comp :tyonjohtajaLaji :VaadittuTyonjohtaja) (:vaadittuTyonjohtajatieto %))]
         (if (seq tyonjohtajat)
           (-> %
@@ -327,7 +327,7 @@
             (assoc :vaaditutTyonjohtajat (s/join ", " tyonjohtajat)))
           (dissoc % :vaadittuTyonjohtajatieto))))
 
-    (cr/ensure-sequental :maarays)
+    (cr/ensure-sequential :maarays)
     (#(if-let [maarays (:maarays %)]
         (assoc % :maaraykset (cr/convert-keys-to-timestamps maarays [:maaraysaika :toteutusHetki]))
         %))
@@ -346,7 +346,7 @@
       (-> lupaehdot
         (cleanup)
         ((fn [maar] (map #(get-text % :lupaehdotJaMaaraykset) maar)))
-        (cr/ensure-sequental :lupaehdotJaMaaraykset)))))
+        (cr/ensure-sequential :lupaehdotJaMaaraykset)))))
 
 (defn- get-pvm-dates [paatos v]
   (into {} (map #(let [xml-kw (keyword (str (name %) "Pvm"))]

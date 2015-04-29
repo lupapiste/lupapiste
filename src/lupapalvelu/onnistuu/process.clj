@@ -12,10 +12,11 @@
             [noir.response :as resp]
             [sade.env :as env]
             [sade.util :refer [max-length-string valid-email?]]
-            [sade.core :refer [ok now]]
+            [sade.core :refer [ok]]
+            [sade.crypt :as crypt]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :refer [random-password]]
-            [sade.crypt :as crypt]
+            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.company :as c]
             [lupapalvelu.user-api :as u]
             [lupapalvelu.docx :as docx]))
@@ -129,10 +130,11 @@
       (do
         (debug "sign:fetch-document:download-from-mongo")
         [content-type ((:content pdf))])
-
       (let [filename (str "yritystilisopimus-" (-> process :company :name) ".pdf")
-            ; FIXME: where we get the selected account?
-            pdf (docx/yritystilisopimus (:company process) (:signer process) {} (now))
+            account-type (get-in process [:company :accountType])
+            account {:type  (i18n/localize "fi" :register :company account-type :title)
+                     :price (i18n/localize "fi" :register :company account-type :price)}
+            pdf (docx/yritystilisopimus (:company process) (:signer process) account ts)
             sha256 (pandect/sha256 pdf)]
         (debug "sign:fetch-document:upload-to-mongo")
         (.reset pdf) ; Hashing read the whole stream

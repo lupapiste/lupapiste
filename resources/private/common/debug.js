@@ -12,7 +12,7 @@ jQuery(function($) {
   function createApplication(operation) {
     var municipality = "753";
     if (lupapisteApp.models.currentUser.isAuthority()) {
-      var org = lupapisteApp.models.currentUser.organizations()[0];
+      var org = _.keys(lupapisteApp.models.currentUser.orgAuthz())[0];
       municipality = org.split("-")[0];
     }
     $.ajax({
