@@ -112,6 +112,7 @@
                 unzipped-path
                 (:id new-verdict)
                 poytakirja-id))
+            (notifications/notify! :application-verdict command)
             (ok)))))
     (catch Exception e
       (if-let [error-key (some-> e ex-data :object :text)]
