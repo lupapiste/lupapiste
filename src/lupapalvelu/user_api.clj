@@ -225,7 +225,6 @@
                       action/email-validator]
    :user-roles #{:admin :authorityAdmin}}
   [{user-data :data caller :user}]
-  (println user-data)
   (let [updated-user-data (if (:organization user-data) (assoc user-data :orgAuthz {(:organization user-data) (:role user-data)}) user-data)
         user (create-new-user caller updated-user-data :send-email false)]
     (infof "Added a new user: role=%s, email=%s, orgAuthz=%s" (:role user) (:email user) (:orgAuthz user))
