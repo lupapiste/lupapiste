@@ -131,6 +131,23 @@
 ;; Add/invite new company user:
 ;;
 
+(notif/defemail :new-company-admin-user {:subject-key   "new-company-admin-user.subject"
+                                         :recipients-fn notif/from-user
+                                         :model-fn      (fn [model _ __] model)})
+
+(notif/defemail :new-company-user {:subject-key   "new-company-user.subject"
+                                   :recipients-fn notif/from-user
+                                   :model-fn      (fn [model _ __] model)})
+
+(defn add-user-after-company-creation! [user company role]
+  (let [user (update-in user [:email] u/canonize-email)
+        token-id (token/make-token :new-company-user nil {:user user, :company company, :role role} :auto-consume false)]
+    (notif/notify! :new-company-admin-user {:user       user
+                                            :company    company
+                                            :link-fi    (str (env/value :host) "/app/fi/welcome#!/new-company-user/" token-id)
+                                            :link-sv    (str (env/value :host) "/app/sv/welcome#!/new-company-user/" token-id)})
+    token-id))
+
 (defn add-user! [user company role]
   (let [user (update-in user [:email] u/canonize-email)
         token-id (token/make-token :new-company-user nil {:user user, :company company, :role role} :auto-consume false)]
@@ -139,10 +156,6 @@
                                       :link-fi    (str (env/value :host) "/app/fi/welcome#!/new-company-user/" token-id)
                                       :link-sv    (str (env/value :host) "/app/sv/welcome#!/new-company-user/" token-id)})
     token-id))
-
-(notif/defemail :new-company-user {:subject-key   "new-company-user.subject"
-                                   :recipients-fn notif/from-user
-                                   :model-fn      (fn [model _ __] model)})
 
 (defmethod token/handle-token :new-company-user [{{:keys [user company role]} :data} {password :password}]
   (find-company-by-id! (:id company)) ; make sure company still exists
@@ -195,8 +208,6 @@
                  :username  (-> company :y ss/trim ss/lower-case) ; usernames are always in lower case
                  :firstName (:name company)
                  :lastName  "")))
-
-
 
 (defn company-invite [caller application company-id]
   {:pre [(map? caller) (map? application) (string? company-id)]}

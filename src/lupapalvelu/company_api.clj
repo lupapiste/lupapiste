@@ -14,13 +14,13 @@
 ; Validator: check is user is either :admin or user belongs to requested company
 
 (defn validate-user-is-admin-or-company-member [{{:keys [role company]} :user {requested-company :company} :data}]
-  (if-not (or (= role "admin")
-              (= (:id company) requested-company))
+  (when-not (or (= role "admin")
+                (= (:id company) requested-company))
     unauthorized))
 
 (defn validate-user-is-admin-or-company-admin [{user :user} _]
-  (if-not (or (= (get user :role) "admin")
-              (= (get-in user [:company :role]) "admin"))
+  (when-not (or (= (:role user) "admin")
+                (= (get-in user [:company :role]) "admin"))
     unauthorized))
 
 ;;
@@ -100,9 +100,6 @@
    :parameters [firstName lastName email]
    :pre-checks [validate-user-is-admin-or-company-admin user-limit-not-exceeded]}
   [{user :user {:keys [admin]} :params}]
-  (if-not (or (= (:role user) "admin")
-              (= (get-in user [:company :role]) "admin"))
-    (fail! :forbidden))
   (c/add-user! {:firstName firstName :lastName lastName :email email}
                (c/find-company-by-id (-> user :company :id))
                (if admin :admin :user))
