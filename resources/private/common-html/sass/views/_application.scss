@@ -48,7 +48,7 @@
   .application_summary_info{
     margin: 0 $marginL $marginL $marginL;
     float: left;
-    width: 40%;
+    width: 50%;
     h1 {
       width: 100%;
       .address {
@@ -65,7 +65,7 @@
       }
     }
 
-    #state-infotext {
+    .summary-help {
       width: 100%;
       background-color: $lp-dark-grey;
       font-size: 0.8em;
@@ -110,6 +110,7 @@
       background-color: $lp-dark-grey;
       margin: 0 0 0 0;
       overflow: hidden;
+      white-space: nowrap;
       height: 32px;
       @mixin past-state {
           background-color: white;
@@ -720,7 +721,18 @@
       }
     }
   }
+}
 
+#application-metadata-tab {
+  h1 {
+    float: none;
+  }
+  .table-metadata {
+      max-width: 875px;
+    .metadata-key {
+      width: 175px;
+    }
+  }
 }
 
 

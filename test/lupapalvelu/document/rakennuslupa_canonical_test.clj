@@ -65,7 +65,7 @@
                  :version 1}
    :data (merge
            suunnittelija-henkilo
-           {:patevyys {:koulutusvalinta {:value "arkkitehti"}, :koulutus {:value "Arkkitehti"}
+           {:patevyys {:koulutusvalinta {:value "arkkitehti"} :koulutus {:value "Arkkitehti"}
                        :patevyysluokka {:value "ei tiedossa"}
                        :valmistumisvuosi {:value "2010"}
                        :kokemus {:value "5"}
@@ -77,7 +77,7 @@
                                       :version 1}
    :data (merge suunnittelija-henkilo
                 {:kuntaRoolikoodi {:value "ARK-rakennussuunnittelija"}}
-                {:patevyys {:koulutusvalinta {:value "arkkitehti"}, :koulutus {:value "Arkkitehti"}
+                {:patevyys {:koulutusvalinta {:value "arkkitehti"} :koulutus {:value "Arkkitehti"}
                             :patevyysluokka {:value "B"}
                             :valmistumisvuosi {:value "2010"}
                             :kokemus {:value "5"}
@@ -89,8 +89,7 @@
                                        :version 1}
    :data (merge suunnittelija-henkilo
                 {:kuntaRoolikoodi {:value "GEO-suunnittelija"}}
-                {:patevyys {:koulutusvalinta {:value "muu"}
-                            :koulutus {:value "El\u00e4m\u00e4n koulu"}
+                {:patevyys {:koulutusvalinta {:value "other"} :koulutus {:value "El\u00e4m\u00e4n koulu"}  ;; "Muu" option ( i.e. :other-key) is selected
                             :patevyysluokka {:value "AA"}
                             :valmistumisvuosi {:value "2010"}
                             :kokemus {:value "5"}
@@ -101,7 +100,7 @@
   {:id "suunnittelija-old-schema-LUPA771" :schema-info {:name "suunnittelija"
                                                         :version 1}
    :data (merge suunnittelija-henkilo
-                {:patevyys {:koulutusvalinta {:value "arkkitehti"}, :koulutus {:value "Arkkitehti"}
+                {:patevyys {:koulutusvalinta {:value "arkkitehti"} :koulutus {:value "Arkkitehti"}
                             :kuntaRoolikoodi {:value "ARK-rakennussuunnittelija"}
                             :patevyysluokka {:value "B"}
                             :valmistumisvuosi {:value "2010"}
@@ -113,7 +112,7 @@
                                                 :version 1}
    :data (merge suunnittelija-henkilo
                 {:kuntaRoolikoodi {:value ""}}
-                {:patevyys {:koulutusvalinta {:value "arkkitehti"}, :koulutus {:value "Arkkitehti"}
+                {:patevyys {:koulutusvalinta {:value "arkkitehti"} :koulutus {:value "Arkkitehti"}
                             :patevyysluokka {:value "B"}
                             :valmistumisvuosi {:value "2010"}
                             :kokemus {:value "5"}
@@ -140,12 +139,12 @@
    :schema-info {:name "tyonjohtaja", :version 1}
    :data (merge suunnittelija-henkilo
            {:kuntaRoolikoodi {:value "KVV-ty\u00f6njohtaja"}
-            :patevyys {:koulutusvalinta {:value "muu"}, :koulutus {:value "Koulutus"}
-                       :patevyysvaatimusluokka {:value "A"}
-                       :valmistumisvuosi {:value "2010"}
-                       :tyonjohtajaHakemusKytkin {:value "hakemus"}
-                       :kokemusvuodet {:value "3"}
-                       :valvottavienKohteidenMaara {:value "9"}}
+            :patevyys-tyonjohtaja {:koulutusvalinta {:value "other"}, :koulutus {:value "Koulutus"}   ;; "Muu" option ( i.e. :other-key) is selected
+                                   :patevyysvaatimusluokka {:value "A"}
+                                   :valmistumisvuosi {:value "2010"}
+                                   :tyonjohtajaHakemusKytkin {:value "hakemus"}
+                                   :kokemusvuodet {:value "3"}
+                                   :valvottavienKohteidenMaara {:value "9"}}
             :vastattavatTyotehtavat {:kiinteistonVesiJaViemarilaitteistonRakentaminen {:value true}
                                      :kiinteistonilmanvaihtolaitteistonRakentaminen {:value true}
                                      :maanrakennustyo {:value true}
@@ -160,8 +159,8 @@
 (def- tyonjohtaja-blank-role-and-blank-qualification
   (-> tyonjohtaja
     (assoc-in [:data :kuntaRoolikoodi :value] nil)
-    (assoc-in [:data :patevyys :patevyysvaatimusluokka :value] "ei tiedossa")
-    (assoc-in [:data :patevyys :tyonjohtajaHakemusKytkin :value] "nimeaminen")))
+    (assoc-in [:data :patevyys-tyonjohtaja :patevyysvaatimusluokka :value] "ei tiedossa")
+    (assoc-in [:data :patevyys-tyonjohtaja :tyonjohtajaHakemusKytkin :value] "nimeaminen")))
 
 (def- tyonjohtajan-sijaistus-blank-dates
   (-> tyonjohtaja
@@ -560,11 +559,11 @@
     (fact "tyonjohtajaRooliKoodi" (:tyonjohtajaRooliKoodi tyonjohtaja-model) => (-> tyonjohtaja :data :kuntaRoolikoodi :value))
     (fact "alkamisPvm" (:alkamisPvm tyonjohtaja-model) => "2014-02-13")
     (fact "paattymisPvm" (:paattymisPvm tyonjohtaja-model) => "2014-02-20")
-    (fact "koulutus" (:koulutus tyonjohtaja-model) => (-> tyonjohtaja :data :patevyys :koulutusvalinta :value))
-    (fact "valmistumisvuosi" (:valmistumisvuosi tyonjohtaja-model) => (-> tyonjohtaja :data :patevyys :valmistumisvuosi :value))
-    (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka tyonjohtaja-model) => (-> tyonjohtaja :data :patevyys :patevyysvaatimusluokka :value))
-    (fact "kokemusvuodet" (:kokemusvuodet tyonjohtaja-model) => (-> tyonjohtaja :data :patevyys :kokemusvuodet :value))
-    (fact "valvottavienKohteidenMaara" (:valvottavienKohteidenMaara tyonjohtaja-model) => (-> tyonjohtaja :data :patevyys :valvottavienKohteidenMaara :value))
+    (fact "koulutus with 'Muu' selected" (:koulutus tyonjohtaja-model) => "muu")
+    (fact "valmistumisvuosi" (:valmistumisvuosi tyonjohtaja-model) => (-> tyonjohtaja :data :patevyys-tyonjohtaja :valmistumisvuosi :value))
+    (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka tyonjohtaja-model) => (-> tyonjohtaja :data :patevyys-tyonjohtaja :patevyysvaatimusluokka :value))
+    (fact "kokemusvuodet" (:kokemusvuodet tyonjohtaja-model) => (-> tyonjohtaja :data :patevyys-tyonjohtaja :kokemusvuodet :value))
+    (fact "valvottavienKohteidenMaara" (:valvottavienKohteidenMaara tyonjohtaja-model) => (-> tyonjohtaja :data :patevyys-tyonjohtaja :valvottavienKohteidenMaara :value))
     (fact "tyonjohtajaHakemusKytkin" (:tyonjohtajaHakemusKytkin tyonjohtaja-model) => true)
     (fact "vastattavatTyotehtavat" (:vastattavatTyotehtavat tyonjohtaja-model) =>
       "kiinteistonilmanvaihtolaitteistonRakentaminen,rakennelmaTaiLaitos,kiinteistonVesiJaViemarilaitteistonRakentaminen,maanrakennustyo,Muu tyotehtava")

@@ -5,7 +5,7 @@
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.kopiolaitos :refer :all]
             [lupapalvelu.organization :as organization]
-            [lupapalvelu.i18n :refer [with-lang loc]]
+            [lupapalvelu.i18n :as i18n]
             [sade.util :as util]
             [sade.crypt :as crypt])
   (:import  [java.util.zip ZipInputStream]))
@@ -63,7 +63,7 @@
                                          :amount   "2"
                                          :filename (-> % :latestVersion :filename)
                                          :fileId   (-> % :latestVersion :fileId)
-                                         :contents (with-lang "fi" (or (:contents %) (loc (str "attachmentType." (-> % :type :type-group) "." (-> % :type :type-id))))))
+                                         :contents (or (:contents %) (i18n/localize "fi" (str "attachmentType." (-> % :type :type-group) "." (-> % :type :type-id)))))
                                       (:attachments app))
             order-info {:ordererOrganization "Testi"
                         :ordererAddress      "Testikuja 2"

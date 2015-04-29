@@ -93,7 +93,7 @@
 
 (defn do-check-for-verdict [command]
   {:pre [(every? command [:application :user :created])]}
-  (when-let [app-xml (krysp-fetch-api/get-application-xml (:application command))]
+  (when-let [app-xml (krysp-fetch-api/get-application-xml (:application command) :application-id)]
     (find-verdicts-from-xml command app-xml)))
 
 (notifications/defemail :application-verdict

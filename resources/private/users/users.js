@@ -48,12 +48,16 @@ var users = (function($) {
       });
     };
 
+    function usersOrganizations(user) {
+      return user.orgAuthz ? _.keys(user.orgAuthz) : [];
+    }
+
     self.userToRow = function(user) {
       return {user: user,
               0: user.email,
               1: user.lastName + " " + user.firstName,
               2: user.role,
-              3: user.organizations ? user.organizations : [],
+              3: usersOrganizations(user),
               4: user.enabled,
               5: ""}; // column 5 will be set by toOps
     };

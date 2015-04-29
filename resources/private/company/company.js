@@ -27,10 +27,11 @@
 
     this.showSearchEmail    = ko.observable();
     this.showUserInCompany  = ko.observable();
+    this.showUserAlreadyInvited = ko.observable();
     this.showUserInvited    = ko.observable();
     this.showUserDetails    = ko.observable();
 
-    this.views  = ["showSearchEmail", "showUserInCompany", "showUserInvited", "showUserDetails"];
+    this.views  = ["showSearchEmail", "showUserInCompany", "showUserAlreadyInvited", "showUserInvited", "showUserDetails"];
 
     this.canSearchUser    = this.email.isValid;
     this.pending          = ko.observable();
@@ -56,9 +57,12 @@
       .success(function(data) {
         var result = data.result;
         if (result === "invited") {
+          hub.send("refresh-companies");
           this.showSearchEmail(false).showUserInvited(true);
         } else if (result === "already-in-company") {
           this.showSearchEmail(false).showUserInCompany(true);
+        } else if (result === "already-invited") {
+          this.showSearchEmail(false).showUserAlreadyInvited(true);
         } else if (result === "not-found") {
           this.showSearchEmail(false).showUserDetails(true);
         }
@@ -70,7 +74,10 @@
     ajax
       .command("company-add-user", unObservableize(this.fields, this))
       .pending(this.pending)
-      .success(this.done.bind(this, true))
+      .success(function() {
+          hub.send("refresh-companies");
+          this.done(true);
+        }, this)
       .call();
   };
 
@@ -98,19 +105,21 @@
     self.message  = ko.observable();
     self.pending  = ko.observable();
 
-    self.userId = null;
-    self.op     = null;
-    self.value  = null;
-    self.cb     = null;
+    self.userId   = null;
+    self.tokenId  = null;
+    self.op       = null;
+    self.value    = null;
+    self.cb       = null;
 
     self.withConfirmation = function(user, value, op, cb) {
       return function() {
-        self.value  = value ? value : ko.observable(true);
-        self.userId = user.id;
-        self.op     = op;
-        self.cb     = cb;
-        var prefix   = "company.user.op." + op + "." + self.value() + ".",
-            userName = user.firstName + " " + user.lastName;
+        self.value    = value ? value : ko.observable(true);
+        self.userId   = user.id;
+        self.tokenId  = user.tokenId;
+        self.op       = op;
+        self.cb       = cb;
+        var prefix    = "company.user.op." + op + "." + self.value() + ".",
+            userName  = user.firstName + " " + user.lastName;
         self
           .title(loc(prefix + "title"))
           .message(loc(prefix + "message", userName))
@@ -121,11 +130,18 @@
 
     self.ok = function() {
       self.pending(true);
+      var command = "company-user-update";
+      var params = {"user-id": self.userId, op: self.op, value: !self.value()};
+      if (self.tokenId) {
+        command = "company-cancel-invite";
+        params = {"tokenId": self.tokenId};
+      }
       ajax
-        .command("company-user-update", {"user-id": self.userId, op: self.op, value: !self.value()})
+        .command(command, params)
         .success(function() {
           if (self.cb) {
             self.cb();
+            lupapisteApp.models.globalAuthModel.refresh();
           } else {
             self.value(!self.value());
           }
@@ -158,6 +174,20 @@
     self.toggleEnable = companyUserOp.withConfirmation(user, self.enabled, "enabled");
     self.deleteUser   = companyUserOp.withConfirmation(user, self.deleted, "delete", function() {
       users.remove(function(u) { return u.id === self.id; });
+    });
+  }
+
+  function InvitedUser(user, invitations) {
+    var self = this;
+    self.firstName = user.firstName;
+    self.lastName  = user.lastName;
+    self.email     = user.email;
+    self.expires   = user.expires;
+    self.role      = user.role;
+    self.tokenId   = user.tokenId;
+    self.opsEnabled   = ko.computed(function() { return currentUser.get().company.role() === "admin" && currentUser.id() !== user.id; });
+    self.deleteInvitation = companyUserOp.withConfirmation(user, self.deleted, "delete-invite", function() {
+      invitations.remove(function(i) { return i.tokenId === user.tokenId; });
     });
   }
 
@@ -262,12 +292,13 @@
   function Company() {
     var self = this;
 
-    self.pending  = ko.observable();
-    self.id       = ko.observable();
-    self.isAdmin  = ko.observable();
-    self.users    = ko.observableArray();
-    self.info     = new CompanyInfo(self);
-    self.tabs     = new TabsModel(self.id);
+    self.pending     = ko.observable();
+    self.id          = ko.observable();
+    self.isAdmin     = ko.observable();
+    self.users       = ko.observableArray();
+    self.invitations = ko.observableArray();
+    self.info        = new CompanyInfo(self);
+    self.tabs        = new TabsModel(self.id);
 
     self.clear = function() {
       return self
@@ -283,7 +314,8 @@
         .id(data.company.id)
         .info.update(data.company)
         .isAdmin(currentUser.get().role() === "admin" || (currentUser.get().company.role() === "admin" && currentUser.get().company.id() === self.id()))
-        .users(_.map(data.users, function(user) { return new CompanyUser(user, self.users); }));
+        .users(_.map(data.users, function(user) { return new CompanyUser(user, self.users); }))
+        .invitations(_.map(data.invitations, function(invitation) { return new InvitedUser(invitation, self.invitations); }));
     };
 
     self.load = function() {
@@ -310,6 +342,11 @@
   var company = new Company();
 
   hub.onPageLoad("company", function(e) { company.show(e.pagePath[0], e.pagePath[1]); });
+
+  hub.subscribe("refresh-companies", function() {
+    lupapisteApp.models.globalAuthModel.refresh();
+    company.load();
+  });
 
   $(function() {
     $("#company-content").applyBindings(company);

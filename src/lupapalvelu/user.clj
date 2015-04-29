@@ -23,26 +23,29 @@
   [user]
   (dissoc user :private))
 
+(def summary-keys [:id :username :firstName :lastName :role])
+
 (defn summary
   "Returns common information about the user or nil"
   [user]
   (when user
-    (select-keys user [:id :username :firstName :lastName :role])))
+    (select-keys user summary-keys)))
 
-; Temporary mapping to generate orgAuth key from organizations.
-; TODO remove this after data model has been migrated
-(defn with-org-auth [{:keys [organizations role] :as user}]
-  (if (#{:authority :authorityAdmin} (keyword role))
-    (assoc user :orgAuthz (map (fn [org-id] {:org org-id :role role}) organizations))
-    user))
+(defn coerce-org-authz
+  "Coerces orgAuthz to schema {Keyword #{Keyword}}"
+  [org-authz]
+  (into {} (for [[k v] org-authz] [k (set (map keyword v))])))
+
+(defn with-org-auth [user]
+  (update-in user [:orgAuthz] coerce-org-authz))
 
 (defn session-summary
   "Returns common information about the user to be stored in session or nil"
   [user]
   (some-> user
-    (select-keys [:id :username :firstName :lastName :role :email :organizations :company :architect])
-    (assoc :expires (+ (now) (.toMillis java.util.concurrent.TimeUnit/MINUTES 5)))
-    with-org-auth))
+    (select-keys [:id :username :firstName :lastName :role :email :organizations :company :architect :orgAuthz])
+    with-org-auth
+    (assoc :expires (+ (now) (.toMillis java.util.concurrent.TimeUnit/MINUTES 5)))))
 
 (defn virtual-user?
   "True if user exists only in session, not in database"
@@ -61,6 +64,30 @@
   (= id1 id2))
 
 (def canonize-email (comp ss/lower-case ss/trim))
+
+(defn organization-ids
+  "Returns user's organizations as a set"
+  [{org-authz :orgAuthz :as user}]
+  (->> org-authz keys (map name) set))
+
+(defn organization-ids-by-roles
+  "Returns a set of organization IDs where user has given roles."
+  [{org-authz :orgAuthz :as user} roles]
+  {:pre [(set? roles) (every? keyword? roles)]}
+  (->> org-authz
+    (filter (fn [[org org-roles]] (some roles org-roles)))
+    (map (comp name first))
+    set))
+
+(defn authority-admins-organization-id [user]
+  (first (organization-ids-by-roles user #{:authorityAdmin})))
+
+(defn user-is-authority-in-organization? [user organization-id]
+  (let [org-set (organization-ids-by-roles user #{:authority})]
+    (contains? org-set organization-id)))
+
+(defn org-authz-match [organization-ids & [role]]
+  {$or (for [org-id organization-ids] {(str "orgAuthz." (name org-id)) (or role {$exists true})})})
 
 ;;
 ;; ==============================================================================
@@ -83,7 +110,7 @@
                 query)
         query (if-let [organization (:organization query)]
                 (-> query
-                  (assoc :organizations organization)
+                  (assoc (str "orgAuthz." organization) {$exists true})
                   (dissoc :organization))
                 query)]
     query))
@@ -100,14 +127,14 @@
 
 (defn- users-for-datatables-base-query [caller params]
   (let [admin?               (= (-> caller :role keyword) :admin)
-        caller-organizations (set (:organizations caller))
+        caller-organizations (organization-ids caller)
         organizations        (:organizations params)
         organizations        (if admin? organizations (filter caller-organizations (or organizations caller-organizations)))
         role                 (:filter-role params)
         role                 (if admin? role :authority)
         enabled              (if admin? (:filter-enabled params) true)]
     (merge {}
-      (when organizations       {:organizations {$in organizations}})
+      (when (seq organizations) {:organizations organizations})
       (when role                {:role role})
       (when-not (nil? enabled)  {:enabled enabled}))))
 
@@ -121,14 +148,19 @@
                                            (repeat t))})
                                (map re-pattern searches))))))
 
+(defn- limit-organizations [query]
+  (if-let [org-ids (:organizations query)]
+    {$and [(dissoc query :organizations), (org-authz-match org-ids)]}
+    query))
+
 (defn users-for-datatables [caller params]
   (let [base-query       (users-for-datatables-base-query caller params)
-        base-query-total (mongo/count :users base-query)
-        query            (users-for-datatables-query base-query params)
+        base-query-total (mongo/count :users (limit-organizations base-query))
+        query            (limit-organizations (users-for-datatables-query base-query params))
         query-total      (mongo/count :users query)
         users            (query/with-collection "users"
                            (query/find query)
-                           (query/fields [:email :firstName :lastName :role :organizations :enabled])
+                           (query/fields [:email :firstName :lastName :role :orgAuthz :enabled])
                            (query/skip (util/->int (:iDisplayStart params) 0))
                            (query/limit (util/->int (:iDisplayLength params) 16)))]
     {:rows     users
@@ -196,7 +228,7 @@
   (when-not (ss/blank? apikey)
     (let [user (find-user {:private.apikey apikey})]
       (when (:enabled user)
-        (non-private user)))))
+        (session-summary user)))))
 
 (defmacro with-user-by-email [email & body]
   `(let [~'user (get-user-by-email ~email)]
@@ -276,12 +308,6 @@
 
 (defn update-user-by-email [email data]
   (mongo/update :users {:email (canonize-email email)} {$set data}))
-
-(defn update-organizations-of-authority-user [email new-organization]
-  (let [old-orgs (:organizations (get-user-by-email email))]
-    (when (every? #(not= % new-organization) old-orgs)
-      (update-user-by-email email {:organizations (merge old-orgs new-organization)}))))
-
 
 ;;
 ;; ==============================================================================

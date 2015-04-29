@@ -69,6 +69,8 @@
 
 (def henkilo-valitsin [{:name "userId" :type :personSelector :blacklist [:neighbor]}])
 
+(def yritys-valitsin [{:name "companyId" :type :companySelector :blacklist [:neighbor]}])
+
 (def rakennuksen-valitsin [{:name "buildingId" :type :buildingSelector :required true :i18nkey "rakennusnro" :other-key "manuaalinen_rakennusnro"}
                            {:name "rakennusnro" :type :string :subtype :rakennusnumero :hidden true}
                            {:name "manuaalinen_rakennusnro" :type :string :subtype :rakennusnumero :i18nkey "manuaalinen_rakennusnro" :labelclass "really-long"}
@@ -137,6 +139,7 @@
                      {:name "liikeJaYhteisoTunnus" :type :string :subtype :y-tunnus :required true}])
 
 (def yritys (body
+              yritys-valitsin
               yritys-minimal
               simple-osoite
               {:name "yhteyshenkilo"
@@ -167,7 +170,7 @@
 (def ya-party (henkilo-yritys-select-group :default "yritys"))
 (def party-with-required-hetu (henkilo-yritys-select-group :henkilo-body henkilo-with-required-hetu))
 
-(def koulutusvalinta {:name "koulutusvalinta" :type :select :sortBy :displayname :i18nkey "koulutus"
+(def koulutusvalinta {:name "koulutusvalinta" :type :select :sortBy :displayname :i18nkey "koulutus" :other-key "koulutus" :required true
                       :body [{:name "arkkitehti"}
                              {:name "arkkitehtiylioppilas"}
                              {:name "diplomi-insin\u00f6\u00f6ri"}
@@ -191,8 +194,7 @@
                              {:name "talonrakennusinsin\u00f6\u00f6ri"}
                              {:name "talonrakennusteknikko"}
                              {:name "tekniikan kandidaatti"}
-                             {:name "teknikko"}
-                             {:name "muu"}]})
+                             {:name "teknikko"}]})
 
 (def patevyys [koulutusvalinta
                {:name "koulutus" :type :string :required false :i18nkey "muukoulutus"}
@@ -267,7 +269,7 @@
                                           {:name "ei tiedossa" :i18nkey "osapuoli.kuntaRoolikoodi.ei tiedossa"}]}])
 
 (def patevyysvaatimusluokka
-  {:name "patevyysvaatimusluokka" :type :select :sortBy nil :required false
+  {:name "patevyysvaatimusluokka" :type :select :sortBy nil :required true
    :body [{:name "AA"}
           {:name "A"}
           {:name "B"}
@@ -275,21 +277,21 @@
           {:name "ei tiedossa"}]})
 
 (def patevyys-tyonjohtaja [koulutusvalinta
-                           {:name "koulutus" :type :string :required false  :i18nkey "muukoulutus"}
+                           {:name "koulutus" :type :string :required true :i18nkey "muukoulutus"}
                            patevyysvaatimusluokka
-                           {:name "valmistumisvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size "s" :required false}
-                           {:name "kokemusvuodet" :type :string :subtype :number :min-len 1 :max-len 2 :size "s" :required false}
-                           {:name "valvottavienKohteidenMaara" :i18nkey "tyonjohtaja.patevyys.valvottavienKohteidenMaara" :type :string :subtype :number :size "s" :required false}
+                           {:name "valmistumisvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size "s" :required true}
+                           {:name "kokemusvuodet" :type :string :subtype :number :min-len 1 :max-len 2 :size "s" :required true}
+                           {:name "valvottavienKohteidenMaara" :i18nkey "tyonjohtaja.patevyys.valvottavienKohteidenMaara" :type :string :subtype :number :size "s" :required true}
                            ;; TODO: Miten tyonjohtajaHakemusKytkimen saa piilotettua hakijalta?
-                           {:name "tyonjohtajaHakemusKytkin" :i18nkey "tyonjohtaja.patevyys.tyonjohtajaHakemusKytkin._group_label" :type :select :sortBy :displayname :required false :blacklist [:applicant]
+                           {:name "tyonjohtajaHakemusKytkin" :i18nkey "tyonjohtaja.patevyys.tyonjohtajaHakemusKytkin._group_label" :required true :type :select :sortBy :displayname :blacklist [:applicant]
                             :body [{:name "nimeaminen" :i18nkey "tyonjohtaja.patevyys.tyonjohtajaHakemusKytkin.nimeaminen"}
                                    {:name "hakemus" :i18nkey "tyonjohtaja.patevyys.tyonjohtajaHakemusKytkin.hakemus"}]}])
 
 (def patevyys-tyonjohtaja-v2 [koulutusvalinta
-                              {:name "koulutus" :type :string :required false  :i18nkey "muukoulutus"}
-                              {:name "valmistumisvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size "s" :required false}
-                              {:name "kokemusvuodet" :type :string :subtype :number :min-len 1 :max-len 2 :size "s" :required false}
-                              {:name "valvottavienKohteidenMaara" :i18nkey "tyonjohtaja.patevyys.valvottavienKohteidenMaara" :type :string :subtype :number :size "s" :required false}])
+                              {:name "koulutus" :type :string :required false :i18nkey "muukoulutus"}
+                              {:name "valmistumisvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size "s" :required true}
+                              {:name "kokemusvuodet" :type :string :subtype :number :min-len 1 :max-len 2 :size "s" :required true}
+                              {:name "valvottavienKohteidenMaara" :i18nkey "tyonjohtaja.patevyys.valvottavienKohteidenMaara" :type :string :subtype :number :size "s" :required true}])
 
 ;; FIXME remove + migration
 (def vastuuaika-tyonjohtaja [{:name "vastuuaika"
@@ -311,7 +313,7 @@
                    vastuuaika-tyonjohtaja
                    henkilo-valitsin
                    designer-basic
-                   {:name "patevyys" :type :group :body patevyys-tyonjohtaja}
+                   {:name "patevyys-tyonjohtaja" :type :group :body patevyys-tyonjohtaja}
                    sijaisuus-tyonjohtaja))
 
 (def ilmoitus-hakemus-valitsin {:name "ilmoitusHakemusValitsin" :i18nkey "tyonjohtaja.ilmoitusHakemusValitsin._group_label" :type :select :sortBy :displayname :required true :blacklist [:applicant] :layout :single-line
@@ -332,6 +334,7 @@
 (def vastattavat-tyotehtavat-tyonjohtaja-v2 [{:name "vastattavatTyotehtavat"
                                               :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat._group_label"
                                               :type :group
+                                              :required true
                                               :listen [:filterByCode]
                                               :layout :vertical
                                               :body [{:name "ivLaitoksenAsennustyo" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.ivLaitoksenAsennustyo" :codes [:ivt] :type :checkbox}
@@ -365,7 +368,8 @@
    {:name "6kk" :type :string :subtype :number :size "s" :label false :uicomponent :string :i18nkey "muutHankkeet.6kk"}
    {:name "9kk" :type :string :subtype :number :size "s" :label false :uicomponent :string :i18nkey "muutHankkeet.9kk"}
    {:name "12kk" :type :string :subtype :number  :size "s" :label false :uicomponent :string :i18nkey "muutHankkeet.12kk"}
-   {:name "autoupdated" :type :checkbox :hidden true :i18nkey "muutHankkeet.autoupdated" :uicomponent :checkbox :whitelist [:none]}])
+   {:name "autoupdated" :type :checkbox :hidden true :i18nkey "muutHankkeet.autoupdated" :uicomponent :checkbox :whitelist {:roles [:none]
+                                                                                                                            :otherwise :disabled}}])
 
 (def muut-rakennushankkeet-table {:name "muutHankkeet"
                                   :type :foremanOtherApplications
@@ -376,28 +380,29 @@
                                   :listen [:hetuChanged]
                                   :body hanke-row})
 
-(def tayta-omat-tiedot-button {:name "fillMyInfo" :type :fillMyInfoButton :whitelist [:applicant]})
+(def tayta-omat-tiedot-button {:name "fillMyInfo" :type :fillMyInfoButton :whitelist {:roles [:applicant] :otherwise :disabled}})
 
 (def tyonjohtajan-historia {:name "foremanHistory" :type :foremanHistory})
 
 (def tyonjohtajan-hyvaksynta [{:name "tyonjohtajanHyvaksynta"
                                :type :group
-                               :whitelist [:authority]
-                               :body [{:name "tyonjohtajanHyvaksynta" :type :checkbox :i18nkey "tyonjohtaja.historia.hyvaksynta"}
-                                      tyonjohtajan-historia]}])
+                               :whitelist {:roles [:authority]
+                                           :otherwise :hidden}
+                               :body [tyonjohtajan-historia
+                                      {:name "tyonjohtajanHyvaksynta" :type :checkbox :i18nkey "tyonjohtaja.historia.hyvaksynta"}]}])
 
 (def tyonjohtaja-v2 (body
-                      tyonjohtajan-hyvaksynta
+                      tayta-omat-tiedot-button
+                      designer-basic
                       ilmoitus-hakemus-valitsin
                       kuntaroolikoodi-tyonjohtaja-v2
                       patevyysvaatimusluokka
                       vastattavat-tyotehtavat-tyonjohtaja-v2
                       tyonjohtaja-hanketieto
-                      tayta-omat-tiedot-button
-                      designer-basic
+                      sijaisuus-tyonjohtaja
+                      {:name "patevyys-tyonjohtaja" :type :group :body patevyys-tyonjohtaja-v2}
                       muut-rakennushankkeet-table
-                      {:name "patevyys" :type :group :body patevyys-tyonjohtaja-v2}
-                      sijaisuus-tyonjohtaja))
+                      tyonjohtajan-hyvaksynta))
 
 (def maksaja (body
                (henkilo-yritys-select-group :yritys-body yritys-with-verkkolaskutustieto)
@@ -422,7 +427,7 @@
                            {:name "keittotila"}
                            {:name "tupakeittio"}
                            {:name "ei tiedossa" :i18nkey "huoneistot.keittionTyyppi.eiTiedossa"}]}
-                   {:name "huoneistoala" :type :string :subtype :number :size "s" :min 1 :max 9999999 :required true :label false :i18nkey "huoneistot.huoneistoala" :listen [:muutostapaChanged]}
+                   {:name "huoneistoala" :type :string :subtype :decimal :size "s" :min 1 :max 9999999 :required true :label false :i18nkey "huoneistot.huoneistoala" :listen [:muutostapaChanged]}
                    {:name "WCKytkin" :type :checkbox :label false :i18nkey "huoneistot.WCKytkin" :listen [:muutostapaChanged]}
                    {:name "ammeTaiSuihkuKytkin" :type :checkbox :label false :i18nkey "huoneistot.ammeTaiSuihkuKytkin" :listen [:muutostapaChanged]}
                    {:name "saunaKytkin" :type :checkbox :label false :i18nkey "huoneistot.saunaKytkin" :listen [:muutostapaChanged]}
@@ -540,14 +545,15 @@
                    {:name "kellarinpinta-ala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}]})
 
 (def mitat-muutos {:name "mitat"
-                        :type :group
-                        :group-help "mitat-muutos.help"
-                        :whitelist [:authority]
-                        :body [{:name "tilavuus" :type :string :size "s" :unit "m3" :subtype :number :min 1 :max 9999999}
-                               {:name "kerrosala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}
-                               {:name "kokonaisala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}
-                               {:name "kerrosluku" :type :string :size "s" :subtype :number :min 0 :max 50}
-                               {:name "kellarinpinta-ala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}]})
+                   :type :group
+                   :group-help "mitat-muutos.help"
+                   :whitelist {:roles [:authority]
+                               :otherwise :disabled}
+                   :body [{:name "tilavuus" :type :string :size "s" :unit "m3" :subtype :number :min 1 :max 9999999}
+                          {:name "kerrosala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}
+                          {:name "kokonaisala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}
+                          {:name "kerrosluku" :type :string :size "s" :subtype :number :min 0 :max 50}
+                          {:name "kellarinpinta-ala" :type :string :size "s" :unit "m2" :subtype :number :min 1 :max 9999999}]})
 
 (def rakenne {:name "rakenne"
               :type :group

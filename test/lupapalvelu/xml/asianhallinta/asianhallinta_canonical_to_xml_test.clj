@@ -11,7 +11,7 @@
             [lupapalvelu.document.canonical-test-common :as ctc]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.xml.asianhallinta.core]
-            [lupapalvelu.xml.asianhallinta.uusi_asia_mapping :as ua-mapping]
+            [lupapalvelu.xml.asianhallinta.asianhallinta_mapping :as ua-mapping]
             [lupapalvelu.xml.disk-writer :as writer]
             [lupapalvelu.xml.krysp.canonical-to-krysp-xml-test-common :refer [has-tag]]
             [lupapalvelu.xml.emit :refer [element-to-xml]]
@@ -23,7 +23,7 @@
             [sade.xml :as sxml]))
 
 (mu/testable-privates lupapalvelu.xml.asianhallinta.core begin-of-link)
-(mu/testable-privates lupapalvelu.xml.asianhallinta.uusi_asia_mapping attachments-for-write)
+(mu/testable-privates lupapalvelu.xml.asianhallinta.asianhallinta_mapping attachments-for-write)
 
 (defn- has-attachment-types [meta]
   (fact "type-group and type-id"
@@ -45,7 +45,7 @@
                                    :fileId "file123"
                                    :filename "valtakirja.pdf"
                                    :contentType "application/pdf"}
-                   :op {:name "poikkeaminen"}
+                   :op {:id "523844e1da063788effc1c56"}
                    :modified 1424248442767}
                   {:id :attachment3
                    :type {:type-group "paapiirustus"
@@ -58,17 +58,17 @@
 
 (fl/facts*
   "UusiAsia xml from suunnittelija application"
-  (let [application    rakennus-test/application-suunnittelijan-nimeaminen
+  (let [application    (ua-mapping/enrich-application rakennus-test/application-suunnittelijan-nimeaminen)
         canonical      (ah/application-to-asianhallinta-canonical application "fi") => truthy
         schema-version "ah-1.1"
-        mapping        (ua-mapping/get-mapping (ss/suffix schema-version "-"))
+        mapping        (ua-mapping/get-ua-mapping (ss/suffix schema-version "-"))
         xml            (element-to-xml canonical mapping) => truthy
         xml-s          (xml/indent-str xml) => truthy
         xml-parsed     (reader/strip-xml-namespaces (sxml/parse xml-s))]
 
     (fact "Validate UusiAsia XML"
       (validator/validate xml-s (:permitType application) schema-version) => nil)
-    
+
     (facts "Viiteluvat"
       (let [links    (sxml/select1 xml-parsed [:UusiAsia :Viiteluvat])]
         (count (sxml/children links)) => 1
@@ -81,16 +81,17 @@
 
 (fl/facts*
   "UusiAsia xml from application with two link permits"
-  (let [application    (update-in rakennus-test/application-suunnittelijan-nimeaminen [:linkPermitData] conj link-permit-data-kuntalupatunnus)
+  (let [application    (ua-mapping/enrich-application
+                         (update-in rakennus-test/application-suunnittelijan-nimeaminen [:linkPermitData] conj link-permit-data-kuntalupatunnus))
         canonical      (ah/application-to-asianhallinta-canonical application "fi") => truthy
         schema-version "ah-1.1"
-        mapping        (ua-mapping/get-mapping (ss/suffix schema-version "-"))
+        mapping        (ua-mapping/get-ua-mapping (ss/suffix schema-version "-"))
         xml            (element-to-xml canonical mapping) => truthy
         xml-s          (xml/indent-str xml) => truthy
         xml-parsed     (reader/strip-xml-namespaces (sxml/parse xml-s))]
     (fact "Validate UusiAsia XML"
       (validator/validate xml-s (:permitType application) schema-version) => nil)
-    
+
     (facts "Viiteluvat"
       (let [links    (sxml/select1 xml-parsed [:UusiAsia :Viiteluvat])
             content  (sxml/children links)]
@@ -102,13 +103,14 @@
           (sxml/get-text (second content) [:Sovellus]) => "Taustaj\u00E4rjestelm\u00E4")))))
 
 (fl/facts* "UusiAsia xml from poikkeus"
-  (let [application    (assoc poikkeus-test/poikkari-hakemus :attachments attachments)
+  (let [application    (ua-mapping/enrich-application
+                         (assoc poikkeus-test/poikkari-hakemus :attachments attachments))
         canonical      (ah/application-to-asianhallinta-canonical application "fi") => truthy
         canonical      (assoc-in canonical
                          [:UusiAsia :Liitteet :Liite]
-                         (ah/get-attachments-as-canonical application begin-of-link))
+                         (ah/get-attachments-as-canonical (:attachments application) begin-of-link))
         schema-version "ah-1.1"
-        mapping        (ua-mapping/get-mapping (ss/suffix schema-version "-"))
+        mapping        (ua-mapping/get-ua-mapping (ss/suffix schema-version "-"))
         xml            (element-to-xml canonical mapping) => truthy
         xml-s          (xml/indent-str xml) => truthy
         permit-type    (:permitType application)
@@ -203,7 +205,7 @@
                     (sxml/get-text (:content (second metas)) [:Arvo]) => (get-in attachments [1 :type :type-id]))
                   (fact "Operation meta check"
                     (sxml/get-text (:content (last metas)) [:Avain]) => "operation"
-                    (sxml/get-text (:content (last metas)) [:Arvo]) => (get-in attachments [1 :op :name])))))))
+                    (sxml/get-text (:content (last metas)) [:Arvo]) => (-> application :operations first :name)))))))
 
         (facts "Toimenpiteet"
           (let [operations (sxml/select1 xml-parsed [:UusiAsia :Toimenpiteet])
@@ -229,9 +231,9 @@
         canonical      (ah/application-to-asianhallinta-canonical application "fi") => truthy
         canonical      (assoc-in canonical
                          [:UusiAsia :Liitteet :Liite]
-                         (ah/get-attachments-as-canonical application begin-of-link))
+                         (ah/get-attachments-as-canonical (:attachments application) begin-of-link))
         schema-version "ah-1.1"
-        mapping        (ua-mapping/get-mapping (ss/suffix schema-version "-"))
+        mapping        (ua-mapping/get-ua-mapping (ss/suffix schema-version "-"))
         xml            (element-to-xml canonical mapping) => truthy
         permit-type    (:permitType application)
         docs           (common/documents-by-type-without-blanks (tools/unwrapped application)) => truthy
@@ -258,10 +260,10 @@
 (facts "Unit tests - attachments-for-write"
 
   (fact "FileId and filename are returned"
-    (every? #(= (keys %) '(:fileId :filename)) (attachments-for-write {:attachments attachments})) => true)
+    (map keys (attachments-for-write {:attachments attachments})) => (has every? (just [:fileId :filename])))
 
   (fact "Only latestVersions are returned"
-    (let [for-write-ids (set (map :fileId (attachments-for-write {:attachments attachments})))]
+    (let [for-write-ids (set (map :fileId (attachments-for-write attachments)))]
       (some #(= % (-> attachments first :latestVersion :fileId)) for-write-ids) => true
       (some #(= % (-> attachments second :latestVersion :fileId)) for-write-ids) => true
       (some #(= % (-> attachments (nth 2) :latestVersion :fileId)) for-write-ids) => falsey))
@@ -270,13 +272,13 @@
 
     (fact "Statement"
       (let [attachments (assoc-in attachments [0 :target :type] "statement")
-           for-write-ids (set (map :fileId (attachments-for-write {:attachments attachments})))]
+           for-write-ids (set (map :fileId (attachments-for-write attachments)))]
        (some #(= % (-> attachments first :latestVersion :fileId)) for-write-ids) => falsey
        (some #(= % (-> attachments second :latestVersion :fileId)) for-write-ids) => true))
 
     (fact "Verdict"
       (let [attachments (assoc-in attachments [1 :target :type] "verdict")
-           for-write-ids (set (map :fileId (attachments-for-write {:attachments attachments})))]
+           for-write-ids (set (map :fileId (attachments-for-write attachments)))]
        (some #(= % (-> attachments first :latestVersion :fileId)) for-write-ids) => true
        (some #(= % (-> attachments second :latestVersion :fileId)) for-write-ids) => falsey))
 

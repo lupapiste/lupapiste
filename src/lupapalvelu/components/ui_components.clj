@@ -37,7 +37,7 @@
                  :foremanRoles      (:body (first lupapalvelu.document.schemas/kuntaroolikoodi-tyonjohtaja))
                  :foremanReadonlyFields ["luvanNumero", "katuosoite", "rakennustoimenpide", "kokonaisala"]
                  :asianhallintaVersions (util/convert-values ; asianhallinta versions have "ah-" prefix
-                                          validator/supported-asianhallinta-versions-by-permit-type 
+                                          validator/supported-asianhallinta-versions-by-permit-type
                                           (partial map #(sade.strings/suffix % "ah-")))}]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
 
@@ -66,7 +66,7 @@
 
    ;; Init can also be used as a standalone lib, see web.clj
    :init         {:depends [:underscore]
-                  :js [conf "hub.js" "log.js"]}
+                  :js [conf "hub.js" "log.js" ]}
 
    ;; Common components
 
@@ -90,7 +90,7 @@
 
    :common       {:depends [:init :jquery :jquery-upload :knockout :underscore :moment :i18n :selectm
                             :expanded-content :mockjax :open-layers]
-                  :js ["util.js" "event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js"
+                  :js ["register-components.js" "util.js" "event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js"
                        "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "features.js"
                        "statuses.js" "statusmodel.js" "authorization.js" "vetuma.js"]}
 
@@ -102,7 +102,7 @@
 
    :analytics    {:js ["analytics.js"]}
 
-   :global-models {:js ["application-model.js" "register-models.js"]}
+   :global-models {:js ["root-model.js" "application-model.js" "register-models.js"]}
 
    :screenmessages  {:js   ["screenmessage.js"]
                      :html ["screenmessage.html"]}
@@ -121,7 +121,7 @@
                       :html ["modal-datepicker.html"]
                       :js   ["modal-datepicker.js"]}
 
-   :authenticated {:depends [:screenmessages]
+   :authenticated {:depends [:screenmessages :analytics]
                    :js ["comment.js"]
                    :html ["comments.html"]}
 
@@ -153,8 +153,18 @@
                                     "verdict-attachment-prints-multiselect-model.js"]}
 
    :attachment   {:depends [:common-html :repository :signing :side-panel]
-                  :js ["targeted-attachments-model.js" "attachment-utils.js" "attachment.js" "attachmentTypeSelect.js"]
-                  :html ["targetted-attachments-template.html" "attachment.html" "upload.html"]}
+                  :js ["attachment-multi-select.js"
+                       "targeted-attachments-model.js"
+                       "attachment-utils.js"
+                       "attachment.js"
+                       "attachmentTypeSelect.js"
+                       "move-attachment-to-backing-system.js"
+                       "move-attachment-to-case-management.js"]
+                  :html ["targetted-attachments-template.html"
+                         "attachment.html"
+                         "upload.html"
+                         "move-attachment-to-backing-system.html"
+                         "move-attachment-to-case-management.html"]}
 
    :task         {:depends [:common-html :attachment]
                   :js ["task.js"]
@@ -163,36 +173,15 @@
    :create-task  {:js ["create-task.js"]
                   :html ["create-task.html"]}
 
-   :ui-components {:depends [:common-html]
-                   :js ["ui-components.js"
-                        "fill-info/fill-info-model.js"
-                        "foreman-history/foreman-history-model.js"
-                        "foreman-other-applications/foreman-other-applications-model.js"
-                        "input-model.js"
-                        "message-panel/message-panel-model.js"
-                        "checkbox/checkbox-model.js"
-                        "select/select-model.js"
-                        "string/string-model.js"
-                        "modal-dialog/modal-dialog-model.js"
-                        "register-components.js"]
-                   :html ["fill-info/fill-info-template.html"
-                          "foreman-history/foreman-history-template.html"
-                          "foreman-other-applications/foreman-other-applications-template.html"
-                          "message-panel/message-panel-template.html"
-                          "string/string-template.html"
-                          "select/select-template.html"
-                          "checkbox/checkbox-template.html"
-                          "modal-dialog/modal-dialog-template.html"]}
-
-   :application  {:depends [:common-html :global-models :repository :tree :task :create-task :modal-datepicker :signing :invites :side-panel :verdict-attachment-prints :ui-components]
+   :application  {:depends [:common-html :global-models :repository :tree :task :create-task :modal-datepicker :signing :invites :side-panel :verdict-attachment-prints]
                   :js ["add-link-permit.js" "map-model.js" "change-location.js" "invite.js" "verdicts-model.js"
                        "add-operation.js" "foreman-model.js"
                        "request-statement-model.js" "add-party.js" "attachments-tab-model.js"
-                       "invite-company.js" "application.js"]
+                       "application.js"]
                   :html ["attachment-actions-template.html" "attachments-template.html" "add-link-permit.html" "application.html" "inforequest.html" "add-operation.html"
-                         "change-location.html" "invite-company.html" "foreman-template.html"]}
+                         "change-location.html" "foreman-template.html"]}
 
-   :applications {:depends [:common-html :repository :invites]
+   :applications {:depends [:common-html :repository :invites :global-models]
                   :html ["applications-list.html"]
                   :js ["applications-list.js"]}
 
@@ -212,7 +201,8 @@
                   :js ["registration-models.js" "register.js"
                        "company-registration.js"]
                   :html ["register.html" "register2.html" "register3.html"
-                         "register-company.html" "register-company-success.html" "register-company-fail.html"]}
+                         "register-company.html" "register-company-success.html" "register-company-fail.html" 
+                         "register-company-account-type.html" "register-company-signing.html"]}
 
    :link-account {:depends [:register]
                   :js ["link-account.js"]
@@ -252,6 +242,43 @@
    :integration-error {:js [ "integration-error.js"]
                        :html ["integration-error.html"]}
 
+   ; TODO maybe just find and add all ko components under ui-components automatically
+   :ui-components {:depends [:common-html]
+                   :js ["ui-components.js"
+                        "fill-info/fill-info-model.js"
+                        "foreman-history/foreman-history-model.js"
+                        "foreman-other-applications/foreman-other-applications-model.js"
+                        "input-model.js"
+                        "message-panel/message-panel-model.js"
+                        "checkbox/checkbox-model.js"
+                        "select/select-model.js"
+                        "string/string-model.js"
+                        "modal-dialog/modal-dialog-model.js"
+                        "attachments-multiselect/attachments-multiselect-model.js"
+                        "export-attachments/export-attachments-model.js"
+                        "neighbors/neighbors-owners-dialog-model.js"
+                        "neighbors/neighbors-edit-dialog-model.js"
+                        "company-selector/company-selector-model.js"
+                        "company-invite/company-invite-model.js"
+                        "company-invite/company-invite-dialog-model.js"
+                        "modal-dialog/button-group/submit-button-group-model.js"]
+                   :html ["fill-info/fill-info-template.html"
+                          "foreman-history/foreman-history-template.html"
+                          "foreman-other-applications/foreman-other-applications-template.html"
+                          "message-panel/message-panel-template.html"
+                          "string/string-template.html"
+                          "select/select-template.html"
+                          "checkbox/checkbox-template.html"
+                          "modal-dialog/modal-dialog-template.html"
+                          "modal-dialog/button-group/submit-button-group-template.html"
+                          "attachments-multiselect/attachments-multiselect-template.html"
+                          "export-attachments/export-attachments-template.html"
+                          "neighbors/neighbors-owners-dialog-template.html"
+                          "neighbors/neighbors-edit-dialog-template.html"
+                          "company-selector/company-selector-template.html"
+                          "company-invite/company-invite-template.html"
+                          "company-invite/company-invite-dialog-template.html"]}
+
    ;; Single Page Apps and standalone components:
    ;; (compare to auth-methods in web.clj)
 
@@ -262,28 +289,32 @@
                   :js ["upload.js"]
                   :css ["upload.css"]}
 
-   :applicant-app {:js ["applicant.js"]}
+   :applicant-app {:depends [:ui-components]
+                   :js ["applicant.js"]}
+
    :applicant     {:depends [:applicant-app
                              :common-html :authenticated :map :applications :application
                              :statement :docgen :create :mypage :user-menu :debug :perfmon
                              :company :analytics]}
 
-   :authority-app {:js ["authority.js"]}
-   :authority     {:depends [:authority-app :common-html :authenticated :map :applications :notice :application
+   :authority-app {:depends [:ui-components] :js ["authority.js"]}
+   :authority     {:depends [:ui-components :authority-app :common-html :authenticated :map :applications :notice :application
                              :statement :verdict :neighbors :docgen :create :mypage :user-menu :debug :perfmon
                              :company :stamp :integration-error :analytics]}
 
-   :oir-app {:js ["oir.js"]}
+   :oir-app {:depends [:ui-components] :js ["oir.js"]}
    :oir     {:depends [:oir-app :common-html :authenticated :map :application :attachment
                        :docgen :debug :perfmon :notice :analytics]
              :css ["oir.css"]}
 
-   :authority-admin-app {:js ["authority-admin.js"]}
+   :authority-admin-app {:depends [:ui-components]
+                         :js ["authority-admin.js"]}
    :authority-admin     {:depends [:authority-admin-app :common-html :authenticated :admins :mypage :user-menu :debug :perfmon :analytics]
                          :js ["admin.js" schema-versions-by-permit-type]
                          :html ["admin.html"]}
 
-   :admin-app {:js ["admin.js"]}
+   :admin-app {:depends [:ui-components]
+               :js ["admin.js"]}
    :admin     {:depends [:admin-app :common-html :authenticated :admins :map :mypage :user-menu :debug :perfmon]
                :css ["admin.css"]
                :js ["admin-users.js" "organizations.js" "companies.js" "features.js" "actions.js" "screenmessages-list.js"]
@@ -293,15 +324,17 @@
 
    :wordpress {:depends [:login :password-reset]}
 
-   :welcome-app {:js ["welcome.js"]}
+   :welcome-app {:depends [:ui-components]
+                 :js ["welcome.js"]}
    :welcome {:depends [:welcome-app :login :register :link-account :debug :perfmon :user-menu :screenmessages :password-reset :analytics]
              :js ["company-user.js"]
              :html ["index.html" "login.html" "company-user.html"]}
 
    :oskari  {:css ["oskari.css"]}
 
-   :neighbor-app {:js ["neighbor-app.js"]}
-   :neighbor {:depends [:neighbor-app :common-html :map :debug :docgen :debug :perfmon :user-menu :screenmessages :analytics]
+   :neighbor-app {:depends [:ui-components]
+                  :js ["neighbor-app.js"]}
+   :neighbor {:depends [:neighbor-app :common-html :global-models :map :debug :docgen :debug :perfmon :user-menu :screenmessages :analytics]
               :html ["neighbor-show.html"]
               :js ["neighbor-show.js"]}})
 

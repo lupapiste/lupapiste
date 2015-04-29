@@ -13,6 +13,7 @@
             [lupapalvelu.mime :as mime]
             [lupapalvelu.pdf-export :as pdf-export]
             [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.tiedonohjaus :as tos]
             [clojure.java.io :as io])
   (:import [java.util.zip ZipOutputStream ZipEntry]
            [java.io File OutputStream FilterInputStream]))
@@ -268,6 +269,20 @@
                           ]
    :muut [:muu]])
 
+(defn attachment-ids-from-tree [tree]
+  {:pre [(sequential? tree)]}
+  (flatten (map second (partition 2 tree))))
+
+(def all-attachment-type-ids
+  (attachment-ids-from-tree
+    (concat
+      attachment-types-R
+      attachment-types-YA
+      attachment-types-YI
+      attachment-types-YL
+      attachment-types-MAL
+      attachment-types-KT)))
+
 ;;
 ;; Api
 ;;
@@ -312,30 +327,35 @@
   {:pre [application]}
   (get-attachment-types-by-permit-type (:permitType application)))
 
-(defn make-attachment [now target required? requested-by-authority? locked? application-state op attachment-type & [attachment-id]]
-  {:id (or attachment-id (mongo/create-id))
-   :type attachment-type
-   :modified now
-   :locked locked?
-   :applicationState application-state
-   :state :requires_user_action
-   :target target
-   :required required?       ;; true if the attachment is added from from template along with the operation, or when attachment is requested by authority
-   :requestedByAuthority requested-by-authority?  ;; true when authority is adding a new attachment template by hand
-   :notNeeded false
-   :forPrinting false
-   :op op
-   :signatures []
-   :versions []})
+(defn make-attachment [now target required? requested-by-authority? locked? application-state op attachment-type metadata & [attachment-id]]
+  (cond-> {:id (or attachment-id (mongo/create-id))
+           :type attachment-type
+           :modified now
+           :locked locked?
+           :applicationState application-state
+           :state :requires_user_action
+           :target target
+           :required required?       ;; true if the attachment is added from from template along with the operation, or when attachment is requested by authority
+           :requestedByAuthority requested-by-authority?  ;; true when authority is adding a new attachment template by hand
+           :notNeeded false
+           :forPrinting false
+           :op op
+           :signatures []
+           :versions []}
+          (and (seq metadata) (env/feature? :tiedonohjaus)) (assoc :metadata metadata)))
 
 (defn make-attachments
   "creates attachments with nil target"
-  [now application-state attachment-types locked? required? requested-by-authority?]
-  (map (partial make-attachment now nil required? requested-by-authority? locked? application-state nil) attachment-types))
+  [now application-state attachment-types-with-metadata locked? required? requested-by-authority?]
+  (map #(make-attachment now nil required? requested-by-authority? locked? application-state nil (:type %) (:metadata %)) attachment-types-with-metadata))
+
+(defn- default-metadata-for-attachment-type [type {:keys [:organization :tosFunction]}]
+  (tos/metadata-for-document organization tosFunction type))
 
 (defn create-attachment [application attachment-type op now target locked? required? requested-by-authority? & [attachment-id]]
   {:pre [(map? application)]}
-  (let [attachment (make-attachment now target required? requested-by-authority? locked? (:state application) op attachment-type attachment-id)]
+  (let [metadata (default-metadata-for-attachment-type attachment-type application)
+        attachment (make-attachment now target required? requested-by-authority? locked? (:state application) op attachment-type metadata attachment-id)]
     (update-application
       (application->command application)
       {$set {:modified now}
@@ -345,7 +365,8 @@
 
 (defn create-attachments [application attachment-types now locked? required? requested-by-authority?]
   {:pre [(map? application)]}
-  (let [attachments (make-attachments now (:state application) attachment-types locked? required? requested-by-authority?)]
+  (let [attachment-types-with-metadata (map (fn [type] {:type type :metadata (default-metadata-for-attachment-type type application)}) attachment-types)
+        attachments (make-attachments now (:state application) attachment-types-with-metadata locked? required? requested-by-authority?)]
     (update-application
       (application->command application)
       {$set {:modified now}
@@ -479,16 +500,11 @@
     (let [[type-group type-id] (->> match (drop 1) (map keyword))]
       {:type-group type-group :type-id type-id})))
 
-(defn- allowed-attachment-types-contain? [allowed-types {:keys [type-group type-id]}]
+(defn allowed-attachment-types-contain? [allowed-types {:keys [type-group type-id]}]
   (let [type-group (keyword type-group)
         type-id (keyword type-id)]
     (if-let [types (some (fn [[group-name group-types]] (if (= (keyword group-name) type-group) group-types)) allowed-types)]
       (some #(= (keyword %) type-id) types))))
-
-(defn allowed-attachment-type-for-application? [application attachment-type]
-  (when application
-    (let [allowedAttachmentTypes (get-attachment-types-for-application application)]
-     (allowed-attachment-types-contain? allowedAttachmentTypes attachment-type))))
 
 (defn get-attachment-info-by-file-id
   "gets an attachment from application or nil"
@@ -618,6 +634,7 @@
           ; Add current PDF:
           (append-stream zip (i18n/loc "attachment.zip.pdf.filename.current") (pdf-export/generate application lang)))
         (.finish zip)))
+    (debugf "Size of the temporary zip file: %d" (.length temp-file))
     temp-file))
 
 (defn temp-file-input-stream [^File file]

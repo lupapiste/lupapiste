@@ -5,7 +5,7 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.core :refer :all]
-            [lupapalvelu.i18n :refer [with-lang loc]]
+            [lupapalvelu.i18n :as i18n]
             [cljts.geom :as geo]
             [cljts.io :as jts]
             [sade.env :as env]))
@@ -356,13 +356,16 @@
           codes {:suunnittelijaRoolikoodi kuntaRoolikoodi ; Note the lower case 'koodi'
                  :VRKrooliKoodi (kuntaRoolikoodi-to-vrkRooliKoodi kuntaRoolikoodi)}
           patevyys (:patevyys suunnittelija)
+          koulutus (if (= "other" (:koulutusvalinta patevyys))
+                     "muu"
+                     (:koulutusvalinta patevyys))
           osoite (get-simple-osoite (:osoite suunnittelija))
           henkilo (merge (get-name (:henkilotiedot suunnittelija))
                     {:osoite osoite}
                     {:henkilotunnus (-> suunnittelija :henkilotiedot :hetu)}
                     (get-yhteystiedot-data (:yhteystiedot suunnittelija)))]
       (merge codes
-        {:koulutus (:koulutusvalinta patevyys)
+        {:koulutus koulutus
          :patevyysvaatimusluokka (:patevyysluokka patevyys)
          :valmistumisvuosi (:valmistumisvuosi patevyys)
          :kokemusvuodet (:kokemus patevyys)}
@@ -407,31 +410,39 @@
     (s/trim (str sijaistettavaHloEtunimi " " sijaistettavaHloSukunimi))))
 
 (defn- get-vastattava-tyotieto [{tyotehtavat :vastattavatTyotehtavat} lang]
-  (with-lang lang
-    (util/strip-nils
-      (when (seq tyotehtavat)
-        {:vastattavaTyotieto
-         (remove nil?
-           (map (fn [[k v]]
-                  (when v
-                    {:VastattavaTyo
-                     {:vastattavaTyo
-                      (if (= k :muuMika)
-                        v
-                        (let [loc-s (loc (str "osapuoli.tyonjohtaja.vastattavatTyotehtavat." (name k)))]
-                          (assert (not (re-matches #"^\?\?\?.*" loc-s)))
-                          loc-s))}}))
-             tyotehtavat))}))))
+  (util/strip-nils
+    (when (seq tyotehtavat)
+      {:vastattavaTyotieto
+       (remove nil?
+         (map (fn [[k v]]
+                (when v
+                  {:VastattavaTyo
+                   {:vastattavaTyo
+                    (if (= k :muuMika)
+                      v
+                      (let [loc-s (i18n/localize lang (str "osapuoli.tyonjohtaja.vastattavatTyotehtavat." (name k)))]
+                        (assert (not (re-matches #"^\?\?\?.*" loc-s)))
+                        loc-s))}}))
+           tyotehtavat))})))
 
 (defn get-tyonjohtaja-data [lang tyonjohtaja party-type]
   (let [foremans (dissoc (get-suunnittelija-data tyonjohtaja party-type) :suunnittelijaRoolikoodi)
-        patevyys (:patevyys tyonjohtaja)
+        patevyys (:patevyys-tyonjohtaja tyonjohtaja)
+        ;; The mappings in backing system providers' end make us pass "muu" when "muu koulutus" is selected.
+        ;; Thus cannot use just this as koulutus:
+        ;; (:koulutus (muu-select-map
+        ;;              :koulutus (-> patevyys :koulutus)
+        ;;              :koulutus (-> patevyys :koulutusvalinta)))
+        koulutus (if (= "other" (:koulutusvalinta patevyys))
+                   "muu"
+                   (:koulutusvalinta patevyys))
         {:keys [alkamisPvm paattymisPvm] :as sijaistus} (:sijaistus tyonjohtaja)
         rooli    (get-kuntaRooliKoodi tyonjohtaja :tyonjohtaja)]
     (merge
       foremans
       {:tyonjohtajaRooliKoodi rooli
        :vastattavatTyotehtavat (concat-tyotehtavat-to-string (:vastattavatTyotehtavat tyonjohtaja))
+       :koulutus koulutus
        :patevyysvaatimusluokka (:patevyysvaatimusluokka patevyys)
        :valmistumisvuosi (:valmistumisvuosi patevyys)
        :kokemusvuodet (:kokemusvuodet patevyys)
@@ -447,13 +458,19 @@
 
 (defn get-tyonjohtaja-v2-data [lang tyonjohtaja party-type]
   (let [foremans (dissoc (get-suunnittelija-data tyonjohtaja party-type) :suunnittelijaRoolikoodi)
-        patevyys (:patevyys tyonjohtaja)
+        patevyys (:patevyys-tyonjohtaja tyonjohtaja)
+        koulutus (if (= "other" (:koulutusvalinta patevyys))
+                   "muu"
+                   (:koulutusvalinta patevyys))
         {:keys [alkamisPvm paattymisPvm] :as sijaistus} (:sijaistus tyonjohtaja)
         rooli    (get-kuntaRooliKoodi tyonjohtaja :tyonjohtaja)]
     (merge
       foremans
       {:tyonjohtajaRooliKoodi rooli
        :vastattavatTyotehtavat (concat-tyotehtavat-to-string (:vastattavatTyotehtavat tyonjohtaja))
+       :koulutus (if (= "other" (:koulutusvalinta patevyys))
+                   "muu"
+                   (:koulutusvalinta patevyys))
        :patevyysvaatimusluokka (:patevyysvaatimusluokka tyonjohtaja)
        :valmistumisvuosi (:valmistumisvuosi patevyys)
        :kokemusvuodet (:kokemusvuodet patevyys)
@@ -466,8 +483,7 @@
       (get-vastattava-tyotieto tyonjohtaja lang)
       (let [sijaistettava-hlo (get-sijaistettava-hlo-214 sijaistus)]
         (when-not (ss/blank? sijaistettava-hlo)
-          {:sijaistettavaHlo sijaistettava-hlo}))
-      )))
+          {:sijaistettavaHlo sijaistettava-hlo})))))
 
 (defn- get-foremen [documents lang]
   (if (contains? documents :tyonjohtaja)

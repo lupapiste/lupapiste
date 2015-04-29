@@ -13,12 +13,13 @@ Sonja prepares the application
   Set Suite Variable  ${appname}  pre-verdict-attachment-test${secs}
   Create application the fast way  ${appname}  753  753-416-25-30  kerrostalo-rivitalo
   Submit application
+  Click enabled by test id  approve-application
   Open tab  verdict
   Fetch verdict
 
 Add post-verdict attachment
   Open tab  attachments
-  Page should not contain element  xpath=//select[@data-test-id="attachment-operations-select-lower"]//option[@value='attachmentsMoveToBackingSystem']
+  Wait until  Element should not be visible  xpath=//button[@data-test-id='export-attachments-to-backing-system']
   Add attachment  ${TXT_TESTFILE_PATH}  ${EMPTY}  Asuinkerrostalon tai rivitalon rakentaminen
   Wait Until  Element should be visible  xpath=//div[@data-test-id='application-post-attachments-table']//a[contains(., '${TXT_TESTFILE_NAME}')]
-  Page should contain element  xpath=//select[@data-test-id="attachment-operations-select-lower"]//option[@value='attachmentsMoveToBackingSystem']
+  Wait until  Element should be visible  xpath=//button[@data-test-id='export-attachments-to-backing-system']

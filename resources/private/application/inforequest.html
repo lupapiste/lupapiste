@@ -2,7 +2,7 @@
 <html>
 <body>
   <section class="page" id="inforequest">
-
+  <!-- ko if: lupapisteApp.models.rootVMO.currentPage() === 'inforequest' -->
     <div class="application_summary">
       <div class="container">
         <div class="application-map-container">
@@ -99,6 +99,10 @@
             <span data-bind="ltext: 'inforequest.cancelInforequest'"></span>
             <span class="icon remove-grey left-align"></span>
           </button>
+          <button data-bind="click: resetIndicators,           visible: $root.authorization.ok('mark-everything-seen'),            enable: !processing() && $root.authorization.ok('mark-everything-seen')"     data-test-id="application-mark-everything-seen-btn"  class="btn">
+            <span data-bind="ltext: 'application.reset-indicators'"></span>
+            <span class="icon mark-seen left-align"></span>
+          </button>
         </div>
         <div class="clear"></div>
       </div>
@@ -174,6 +178,7 @@
       </div>
 
     </div>
+  <!-- /ko -->
   </section>
 </body>
 </html>

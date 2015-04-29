@@ -1,5 +1,6 @@
 (ns lupapalvelu.server
   (:require [clojure.java.io :as io]
+            [clojure.string :as s]
             [taoensso.timbre :as timbre :refer [trace debug info warn error fatal tracef debugf infof warnf errorf fatalf]]
             [noir.core :refer [defpage]]
             [noir.server :as server]
@@ -17,9 +18,9 @@
             [scss-compiler.core :as scss]
             [lupapalvelu.fixture.fixture-api]
             [lupapalvelu.fixture.minimal]
-            [lupapalvelu.fixture.municipality-test-users]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.commands]
+            [lupapalvelu.prev-permit-api]
             [lupapalvelu.user-api]
             [lupapalvelu.mml.yhteystiedot-api]
             [lupapalvelu.operations]
@@ -45,7 +46,8 @@
             [lupapalvelu.integrations-api]
             [lupapalvelu.construction-api]
             [lupapalvelu.asianhallinta-config-api]
-            [lupapalvelu.perf-mon :as perf-mon]))
+            [lupapalvelu.perf-mon :as perf-mon]
+            [lupapalvelu.tiedonohjaus-api]))
 
 (defonce jetty (atom nil))
 
@@ -54,7 +56,11 @@
 
   (migration/update!)
   (when-let [failures (seq (migration/failing-migrations))]
-    (let [msg (str "Failing migration(s): " (clojure.string/join failures))]
+    (let [msg (format "%s build %s (%s)\nFailing migration(s): %s"
+                env/target-env
+                (:build-number env/buildinfo)
+                (:branch env/buildinfo)
+                (s/join failures))]
       (email/send-email-message "lupapalvelu@solita.fi" "Critical: Migration failure!" [msg msg])))
 
   (mongo/ensure-indexes)

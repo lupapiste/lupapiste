@@ -231,6 +231,7 @@ var LUPAPISTE = LUPAPISTE || {};
         model.screenMessage = LUPAPISTE.Screenmessage;
       }
 
+      $("#app").applyBindings(lupapisteApp.models.rootVMO);
       $("nav").applyBindings(model).css("visibility", "visible");
       $("footer").applyBindings(model).css("visibility", "visible");
     };

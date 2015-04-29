@@ -269,6 +269,10 @@ SolitaAdmin logs in
   Admin logs in  admin  admin  Admin Admin
   Wait until  Element should be visible  admin
 
+Jarvenpaa authority logs in
+  Authority logs in  rakennustarkastaja@jarvenpaa.fi  jarvenpaa  Rakennustarkastaja Järvenpää
+
+
 #
 # Helpers for cases when target element is identified by "data-test-id" attribute:
 #
@@ -507,8 +511,13 @@ Click tree item by text
 # Closes the application that is currently open by clicking cancel button
 Close current application
   Wait Until  Element Should Be Enabled  xpath=//button[@data-test-id="application-cancel-btn"]
-  Click by test id  application-cancel-btn
+  Click enabled by test id  application-cancel-btn
   Confirm  dynamic-yes-no-confirm-dialog
+
+Close current application as authority
+  Wait Until  Element Should Be Enabled  xpath=//button[@data-test-id="application-cancel-authority-btn"]
+  Click enabled by test id  application-cancel-authority-btn
+  Confirm  dialog-cancel-application
 
 Confirm
   [Arguments]  ${modalId}
@@ -632,6 +641,14 @@ Comment count is
   Close side panel  conversation
 
 #
+# Invites
+#
+
+Invite count is
+  [Arguments]  ${amount}
+  Wait Until  Xpath Should Match X Times  //*[@class='user-invite']  ${amount}
+
+#
 # Tasks
 #
 
@@ -698,12 +715,12 @@ Set animations off
 Add neighbor
   [Arguments]  ${propertyId}  ${name}  ${email}
   Click enabled by test id  manager-neighbors-add
-  Wait Until   Element Should Be Visible  dialog-edit-neighbor
+  Wait Until   Element Should Be Visible  xpath=//*[@data-test-id='modal-dialog-content']
   Input text by test id  neighbors.edit.propertyId  ${propertyId}
   Input text by test id  neighbors.edit.name  ${name}
   Input text by test id  neighbors.edit.email  ${email}
-  Click by test id  neighbors.edit.ok
-  Wait Until  Element Should Not Be Visible  dialog-edit-neighbor
+  Click by test id  modal-dialog-submit-button
+  Wait Until  Element Should Not Be Visible  xpath=//*[@data-test-id='modal-dialog-content']
   Wait Until  Page Should Contain  ${email}
 
 #

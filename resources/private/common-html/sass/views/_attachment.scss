@@ -239,3 +239,19 @@ td.comment-text {
   display: table-cell;
   width: 200px;
 }
+
+.tos-metadata-content {
+  margin-top: $marginM;
+
+  .subtable {
+    margin: 0;
+    tr {
+      background: transparent;
+      border: none;
+    }
+    th, td {
+      background: transparent;
+      padding: 0;
+    }
+  }
+}

@@ -49,7 +49,7 @@
         test-application-id       (:id test-application)]
 
     (fact "New ya-jatkoaika requires link permit"
-      (let [new-application-id (create-app-id apikey :operation "ya-jatkoaika") ]
+      (let [new-application-id (create-app-id apikey :operation "ya-jatkoaika" :municipality municipality) ]
         (query apikey :link-permit-required :id new-application-id) => ok?))
 
     (fact "ya-jatkoaika has a link permit"

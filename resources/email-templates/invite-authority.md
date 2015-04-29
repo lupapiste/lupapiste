@@ -16,14 +16,19 @@ Toivottavasti viihdyt palvelumme parissa!
 
 --
 
-Hej,
+# Hej,
 
-du &auml;r i egenskap av myndighetsperson inbjuden till e-tj&auml;nsten Lupapiste. Genom vidst&&aring;;ende l&auml;nk kan du v&auml;lja ett l&ouml;senord till tj&auml;nsten.
+du har bjudits in som myndighet i tj&auml;nsten Lupapiste. Genom l&auml;nken nedan kan du skapa ett l&ouml;senord till tj&auml;nsten.
 
-Forts&auml;tt genom att klicka p&aring; l&auml;nken
+Forts&auml;tt genom att klicka p&aring; l&auml;nken:
 
 {{link-sv}}
 
-Ifall l&auml;nken inte fungerar kan du kopiera adressen till webbl&auml;sarens adressf&auml;lt.
+Om l&auml;nken inte fungerar, kopiera adressen och klistra in den i webbl&auml;sarens adressf&auml;lt.
 
-V&auml;lkommen.
+Fr&aring;gor om tj&auml;nsten? L&auml;s Lupapistes sidor med anvisningar [https://www.lupapiste.fi/ohjeet] (https://www.lupapiste.fi/ohjeet) och vanliga fr&aring;gor [https://www.lupapiste.fi/usein-kysytyt-kysymykset] (https://www.lupapiste.fi/usein-kysytyt-kysymykset).
+
+Vid problem &auml;r du v&auml;lkommen att kontakta [tuki@lupapiste.fi](tuki@lupapiste.fi).
+
+Vi hoppas att du trivs med v&aring;r tj&auml;nst!
+

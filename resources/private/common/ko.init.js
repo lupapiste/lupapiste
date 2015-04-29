@@ -40,6 +40,17 @@
     message: loc("error.invalidOVT")
   };
 
+  ko.validation.rules.usernameAsync = {
+    async: true,
+    validator: _.debounce(function(val, params, cb) {
+      ajax.query("email-in-use", {email: val})
+        .success(function() { cb(false); })
+        .error(function() { cb(true); })
+        .call();
+    }, 500),
+    message: loc("email-in-use")
+  };
+
   ko.validation.registerExtenders();
 
   ko.bindingHandlers.dateString = {
@@ -333,15 +344,5 @@
         }
       });
     }
-  };
-
-  $.fn.placeholderize = function() {
-    this.find("input").each(function(i, element) {
-      var e = $(element),
-          id = e.attr("id"),
-          p = loc([id, "placeholder"]);
-      if (p) { e.attr("placeholder", p); }
-    });
-    return this;
   };
 })(jQuery);

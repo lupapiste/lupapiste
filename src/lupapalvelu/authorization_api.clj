@@ -9,12 +9,10 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.application :as a]
             [lupapalvelu.user-api :as user-api]
             [lupapalvelu.user :as user]
             [lupapalvelu.document.model :as model]
-            ))
-
+            [lupapalvelu.document.commands :as commands]))
 
 ;;
 ;; Invites
@@ -53,15 +51,18 @@
                 :inviter      (user/summary inviter)}]
     (assoc (user/user-in-role invited :reader) :invite invite)))
 
-(defn- send-invite! [command application-id email text document-name document-id path role]
+(defn send-invite! [{{:keys [email text documentName documentId path role]} :data
+                     timestamp :created
+                     inviter :user
+                     application :application
+                     :as command}]
   {:pre [(valid-role role)]}
   (let [email (user/canonize-email email)
-        {timestamp :created inviter :user application :application} command
         existing-user (user/get-user-by-email email)]
     (if (or (domain/invite application email) (domain/has-auth? application (:id existing-user)))
       (fail :invite.already-has-auth)
       (let [invited (user-api/get-or-create-user-by-email email inviter)
-            auth    (create-invite-auth inviter invited application-id text document-name document-id path role timestamp)]
+            auth    (create-invite-auth inviter invited (:id application) text documentName documentId path role timestamp)]
         (update-application command
           {:auth {$not {$elemMatch {:invite.user.username (:email invited)}}}}
           {$push {:auth     auth}
@@ -74,7 +75,7 @@
     (fail! :error.illegal-role :parameters role)))
 
 (defcommand invite-with-role
-  {:parameters [id email text documentName documentId path role]
+  {:parameters [:id :email :text :documentName :documentId :path :role]
    :input-validators [(partial action/non-blank-parameters [:email])
                       action/email-validator
                       role-validator]
@@ -82,7 +83,7 @@
    :user-roles #{:applicant :authority}
    :notified   true}
   [command]
-  (send-invite! command id email text documentName documentId path role))
+  (send-invite! command))
 
 (defcommand approve-invite
   {:parameters [id]
@@ -102,7 +103,7 @@
       (when-let [document (domain/get-document-by-id application (:documentId my-invite))]
         ; Document can be undefined (invite's documentId is an empty string) in invite or removed by the time invite is approved.
         ; It's not possible to combine Mongo writes here, because only the last $elemMatch counts.
-        (a/do-set-user-to-document (domain/get-application-as id user) document (:id user) (:path my-invite) user created)))))
+        (commands/do-set-user-to-document (domain/get-application-as id user) document (:id user) (:path my-invite) created)))))
 
 (defn generate-remove-invalid-user-from-docs-updates [{docs :documents :as application}]
   (-<>> docs
@@ -133,7 +134,7 @@
    :user-authz-roles action/default-authz-reader-roles
    :states     (action/all-application-states-but [:canceled])}
   [command]
-  (do-remove-auth command (get-in command [:user :email])))
+  (do-remove-auth command (get-in command [:user :username])))
 
 ;;
 ;; Auhtorizations
@@ -150,7 +151,7 @@
 (defn- manage-unsubscription [{application :application user :user :as command} unsubscribe?]
   (let [username (get-in command [:data :username])]
     (if (or (= username (:username user))
-         (some (partial = (:organization application)) (:organizations user)))
+         (some (partial = (:organization application)) (user/organization-ids-by-roles user #{:authority})))
       (update-application command
         {:auth {$elemMatch {:username username}}}
         {$set {:auth.$.unsubscribed unsubscribe?}})

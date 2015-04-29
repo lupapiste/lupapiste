@@ -3,6 +3,7 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel, verdictAttachme
 
   var self = this;
 
+  self.authorizationModel = lupapisteApp.models.applicationAuthModel;
   self.appModel = appModel;
   self.signingModel = signingModel;
   self.verdictAttachmentPrintsOrderModel = verdictAttachmentPrintsOrderModel;
@@ -13,14 +14,10 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel, verdictAttachme
   self.attachmentsOperation = ko.observable();
   self.attachmentsOperations = ko.observable([]);
 
-  function unsentAttachmentFound(attachments) {
-    return _.some(attachments, function(a) {
-      var lastVersion = _.last(a.versions);
-      return lastVersion &&
-             (!a.sent || lastVersion.created > a.sent) &&
-             (!a.target || (a.target.type !== "statement" && a.target.type !== "verdict"));
-    });
-  }
+  self.showPostAtachmentsActions = ko.pureComputed(function() {
+    return (!appModel.inPostVerdictState() && self.preAttachmentsByOperation().length > 0) ||
+           (appModel.inPostVerdictState()  && self.postAttachmentsByOperation().length > 0);
+  });
 
   var attachmentsOperationsMapping = {
       "attachmentsAdd": {
@@ -86,15 +83,6 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel, verdictAttachme
           return self.authorizationModel.ok("sign-attachments") && self.appModel.hasAttachment();
         }
       },
-      "attachmentsMoveToBackingSystem": {
-        loc: loc("application.attachmentsMoveToBackingSystem"),
-        clickCommand: function() {
-          return self.sendUnsentAttachmentsToBackingSystem();
-        },
-        visibleFn: function (rawAttachments) {
-          return self.authorizationModel.ok("move-attachments-to-backing-system") && self.appModel.hasAttachment() && unsentAttachmentFound(rawAttachments);
-        }
-      },
       "downloadAll": {
         loc: loc("download-all"),
         clickCommand: function() {
@@ -132,9 +120,8 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel, verdictAttachme
     self.showHelp(!self.showHelp());
   };
 
-  self.refresh = function(appModel, authorizationModel) {
+  self.refresh = function(appModel) {
     self.appModel = appModel;
-    self.authorizationModel = authorizationModel;
 
     var rawAttachments = ko.mapping.toJS(appModel.attachments);
     var preAttachments = attachmentUtils.getPreAttachments(rawAttachments);
@@ -169,22 +156,6 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel, verdictAttachme
     self.postAttachmentsByOperation(postGrouped);
     self.attachmentsOperation(undefined);
     self.attachmentsOperations(updatedAttachmentsOperations(rawAttachments));
-  };
-
-  self.sendUnsentAttachmentsToBackingSystem = function() {
-    var doSendAttachments = function() {
-      ajax.command("move-attachments-to-backing-system", {id: self.appModel.id(), lang: loc.getCurrentLanguage()})
-      .success(self.appModel.reload)
-      .processing(self.appModel.processing)
-      .pending(self.appModel.pending)
-      .call();
-    };
-    LUPAPISTE.ModalDialog.showDynamicYesNo(
-      loc("application.attachmentsMoveToBackingSystem"),
-      loc("application.attachmentsMoveToBackingSystem.confirmationMessage"),
-      {title: loc("yes"), fn: doSendAttachments},
-      {title: loc("no")}
-    );
   };
 
   self.newAttachment = function() {
@@ -226,6 +197,7 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel, verdictAttachme
         })
         .processing(self.appModel.processing)
         .call();
+        hub.send("track-click", {category:"Application", label: "", event:"deleteSingleAttachment"});
       return false;
     };
     LUPAPISTE.ModalDialog.showDynamicYesNo(
@@ -286,7 +258,7 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel, verdictAttachme
       }
     });
 
-    self.refresh(self.appModel, self.authorizationModel);
+    self.refresh(self.appModel);
   });
 
 };

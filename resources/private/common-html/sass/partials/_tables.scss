@@ -16,9 +16,16 @@ th {
 
 tr {
   background: white;
-  border-bottom: 1px solid darken($lp-light-grey, 5%);;
+  border-bottom: 1px solid darken($lp-light-grey, 5%);
   &:nth-child(even) {
     background: darken($lp-light-grey, .5%);
+  }
+  &:hover {
+    background-color: lighten($lp-orange, 40%);
+    &:active {
+      background-color: lighten($lp-orange, 20%);
+      color: black;
+    }
   }
   &.attachment-row {
     cursor: pointer;
@@ -29,11 +36,14 @@ tr {
   }
   &.attachment-multiselect-row {
     &.selected {
-      background-color: $lp-light-green;
+      background-color: lighten($lp-orange, 20%);
+      color: black;
+      &:hover {
+        background-color: lighten($lp-orange, 15%);
+        color: black;
+      }
     }
-    &:hover {
-      background-color: $lp-light-green;
-    }
+
     td.attachment-file-info {
       span.attachment-file-name {
         display: block;
@@ -92,8 +102,6 @@ table.tasks {
 }
 
 table.attachments-template-table {
-
-  margin-bottom: 0;
 
   .center {
     text-align: center;

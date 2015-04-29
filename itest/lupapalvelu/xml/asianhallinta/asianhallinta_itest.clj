@@ -12,13 +12,14 @@
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.xml :as sxml]
-            [sade.util :as util])
+            [sade.util :as util]
+            [midje.repl])
   (:import [java.net URI]))
 
 (apply-remote-minimal)
 
 (testable-privates lupapalvelu.xml.asianhallinta.core resolve-output-directory resolve-ah-version)
-(testable-privates lupapalvelu.xml.asianhallinta.uusi_asia_mapping attachments-for-write)
+(testable-privates lupapalvelu.xml.asianhallinta.asianhallinta_mapping attachments-for-write)
 
 (fl/facts* "Asianhallinta itest"
   (facts "UusiAsia from poikkeamis application"
@@ -83,7 +84,7 @@
 
             (fact "Attachments are correct"
               (let [xml-attachments (sxml/select xml [:UusiAsia :Liitteet :Liite])
-                    writed-attachments (attachments-for-write updated-application)
+                    writed-attachments (attachments-for-write (:attachments updated-application))
                     last-link (sxml/get-text (last xml-attachments) [:LinkkiLiitteeseen])
                     filename (last (ss/split last-link #"/"))
                     linkki-as-uri (URI. last-link)
@@ -107,9 +108,9 @@
               (let [operations (sxml/select xml [:UusiAsia :Toimenpiteet :Toimenpide])]
                 (count operations) => (count (:operations updated-application))
                 (sxml/get-text operations [:ToimenpideTunnus]) => (-> updated-application :operations first :name)))
-            
+
             (fact "Link permits do not exist" (sxml/select xml [:UusiAsia :Viiteluvat]) => empty?))))))
-  
+
   (facts "UusiAsia with link permits"
     (let [link-app-id (create-app-id
                          pena
@@ -185,6 +186,77 @@
                     (= "Taustaj\u00E4rjestelm\u00E4" (sxml/get-text % [:Viitelupa :MuuTunnus :Sovellus]))) 
                   contents) => truthy)))))))
 
+  (facts "AsianTaydennys"
+    (let [app-id (create-app-id
+                   pena
+                   :municipality velho-muni
+                   :operation "poikkeamis"
+                   :propertyId "29703401070010"
+                   :y 6965051.2333374 :x 535179.5
+                   :address "Suusaarenkierto 44") => truthy
+          application (query-application pena app-id) => truthy
+          organization (organization/resolve-organization velho-muni (:permitType application)) => truthy
+          scope  (organization/resolve-organization-scope velho-muni (:permitType application) organization) => truthy]
+      (keys (:caseManagement scope)) => (just [:ftpUser :version :enabled])
+      (generate-documents application pena)
+      (upload-attachment-to-all-placeholders pena application)
+      (command pena :submit-application :id app-id) => ok?
+      (fact "Unable to send attachments if application is not yet in asianhallinta"
+        (command velho :attachments-to-asianhallinta :id app-id :attachmentIds [] :lang "fi") =not=> ok?)
+      (command velho :application-to-asianhallinta :id app-id :lang "fi") => ok?
+
+      (Thread/sleep 1000) ;wait for a while so that TaydennysAsiaan xml gets later timestamp in fs and gets loaded later in the test (problem atleast with mac)
+
+      (fact "Unable to send attachment which is already sent"
+        (command velho :attachments-to-asianhallinta :id app-id :attachmentIds [(:id (first (:attachments application)))] :lang "fi") =not=> ok?)
+
+      (fact "Able to send attachment with new file version"
+        (let [versioned-attachment (first (:attachments (query-application velho (:id application))))]
+          (upload-attachment velho (:id application) versioned-attachment true)
+          (command velho :attachments-to-asianhallinta :id app-id :attachmentIds [(:id versioned-attachment)] :lang "fi") => ok?))
+
+      (facts "XML file"
+        (let [updated-application (query-application pena app-id) => truthy
+              output-dir (str (resolve-output-directory scope) "/")
+              target-file-name (str "target/Downloaded-" app-id "-" (now) ".xml")
+              filename-starts-with app-id
+              xml-file (if get-files-from-sftp-server?
+                         (io/file (get-file-from-server
+                                    (get-in scope [:caseManagement :ftpUser])
+                                    (subs (env/value :fileserver-address) 7)
+                                    filename-starts-with
+                                    target-file-name
+                                    (str ah/ah-from-dir "/")))
+                         (io/file (get-local-filename output-dir filename-starts-with)))
+              xml-as-string (slurp xml-file)
+              xml (xml/parse (io/reader xml-file))]
+
+             (fact "Correctly named xml file is created" (.exists xml-file) => true)
+
+          (fact "XML file is valid"
+            (validator/validate xml-as-string (:permitType updated-application) (str "ah-" (resolve-ah-version scope))))
+
+          (fact "Application IDs match"
+            (sxml/get-text xml [:TaydennysAsiaan :HakemusTunnus]) => (:id updated-application))
+
+          (fact "Attachments are correct"
+            (let [xml-attachments (sxml/select xml [:TaydennysAsiaan :Liitteet :Liite])
+                  writed-attachments (attachments-for-write (:attachments updated-application))
+                  last-link (sxml/get-text (last xml-attachments) [:LinkkiLiitteeseen])
+                  filename (last (ss/split last-link #"/"))
+                  linkki-as-uri (URI. last-link)
+                  attachment-file (if get-files-from-sftp-server?
+                                    (get-file-from-server
+                                      (get-in scope [:caseManagement :ftpUser])
+                                      (.getHost linkki-as-uri)
+                                      (.getPath linkki-as-uri)
+                                      (str "target/Downloaded-" filename))
+                                    (str output-dir filename))
+                  attachment-string (slurp attachment-file)]
+                 (count xml-attachments) => (count (:attachments updated-application))
+                                         (fact "Filename in XML and filename written to disk are the same"
+                                           filename => (-> writed-attachments first :filename))
+                                         (fact "Filename content is correct" attachment-string => "This is test file for file upload in itest.")))))))
 
   (fact "Can't create asianhallinta with non-asianhallinta operation"
     (let [app-id (create-app-id
@@ -223,7 +295,7 @@
             scope (:scope resp)]
         resp => ok?
         scope => truthy
-        (every? #(= {:enabled false :version "1.1"} %) (map :caseManagement scope)) => true))
+        (get scope :caseManagement) => nil? ))
 
     (facts "Kuopio auth admin"
       (fact "query asianhallinta-config, response has scope with one caseManagement having FTP user"
@@ -234,19 +306,19 @@
       (fact "admin can disable asianhallinta using command"
         (command kuopio "save-asianhallinta-config" :permitType "P" :municipality velho-muni :enabled false :version "1.1")
         (let [resp (query kuopio "asianhallinta-config")
-              ah-config (some #(when (and 
+              ah-config (some #(when (and
                                        (= (:municipality %) velho-muni)
-                                       (= (:permitType %) "P")) 
-                                 (:caseManagement %)) 
+                                       (= (:permitType %) "P"))
+                                 (:caseManagement %))
                               (:scope resp))]
           (:enabled ah-config) => false))
       (fact "admin can enable asianhallinta and change version using command"
         (command kuopio "save-asianhallinta-config" :permitType "P" :municipality velho-muni :enabled true :version "lol")
           (let [resp (query kuopio "asianhallinta-config")
-                ah-config (some #(when (and 
+                ah-config (some #(when (and
                                        (= (:municipality %) velho-muni)
-                                       (= (:permitType %) "P")) 
-                                 (:caseManagement %)) 
+                                       (= (:permitType %) "P"))
+                                 (:caseManagement %))
                               (:scope resp))]
             (:enabled ah-config) => true
             (:version ah-config) => "lol"))))

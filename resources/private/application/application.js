@@ -3,7 +3,7 @@
 
   var isInitializing = true;
   var currentId = null;
-  var authorizationModel = authorization.create();
+  var authorizationModel = lupapisteApp.models.applicationAuthModel;
   var applicationModel = lupapisteApp.models.application;
   var changeLocationModel = new LUPAPISTE.ChangeLocationModel();
   var addLinkPermitModel = new LUPAPISTE.AddLinkPermitModel();
@@ -59,8 +59,7 @@
 
   var authorities = ko.observableArray([]);
   var permitSubtypes = ko.observableArray([]);
-
-  var inviteCompanyModel = new LUPAPISTE.InviteCompanyModel(applicationModel.id);
+  var tosFunctions = ko.observableArray([]);
 
   var accordian = function(data, event) { accordion.toggle(event); };
 
@@ -108,8 +107,20 @@
     .call();
   }
 
+  function updateTosFunction(value) {
+    if (!isInitializing) {
+      ajax
+        .command("set-tos-function-for-application", {id: currentId, functionCode: value})
+        .success(function() {
+          repository.load(currentId, applicationModel.pending);
+        })
+        .call();
+    }
+  }
+
   applicationModel.assignee.subscribe(function(v) { updateAssignee(v); });
   applicationModel.permitSubtype.subscribe(function(v){updatePermitSubtype(v);});
+  applicationModel.tosFunction.subscribe(updateTosFunction);
 
   function resolveApplicationAssignee(authority) {
     return (authority) ? new AuthorityInfo(authority.id, authority.firstName, authority.lastName) : null;
@@ -123,6 +134,14 @@
     authorities(authorityInfos);
   }
 
+  function initAvailableTosFunctions(organizationId) {
+    ajax
+      .query("available-tos-functions", {organizationId: organizationId})
+      .success(function(data) {
+        tosFunctions(data.functions);
+      })
+      .call();
+  }
 
   function showApplication(applicationDetails) {
     isInitializing = true;
@@ -156,7 +175,7 @@
       verdictAttachmentPrintsOrderModel.refresh(applicationModel);
       verdictAttachmentPrintsOrderHistoryModel.refresh(applicationModel);
 
-      attachmentsTab.refresh(applicationModel, authorizationModel);
+      attachmentsTab.refresh(applicationModel);
 
       // Statements
       requestForStatementModel.setApplicationId(app.id);
@@ -167,6 +186,8 @@
       // permit subtypes
       permitSubtypes(applicationDetails.permitSubtypes);
 
+      // Organization's TOS functions
+      initAvailableTosFunctions(applicationDetails.application.organization);
 
       // Mark-seen
       if (applicationModel.infoRequest() && authorizationModel.ok("mark-seen")) {
@@ -200,6 +221,16 @@
       var assignee = resolveApplicationAssignee(app.authority);
       var assigneeId = assignee ? assignee.id : null;
       applicationModel.assignee(assigneeId);
+
+      var metadata = _.map(app.metadata, function(value, key) {
+        if (_.isObject(value)) {
+          value = _.map(value, function(subvalue, subkey) {
+            return {name: subkey, value: subvalue};
+          });
+        }
+        return {name: key, value: value};
+      });
+      applicationModel.metadataList(_.sortBy(metadata, "name"));
 
       isInitializing = false;
       pageutil.hideAjaxWait();
@@ -390,9 +421,9 @@
       verdictAttachmentPrintsOrderModel: verdictAttachmentPrintsOrderModel,
       verdictAttachmentPrintsOrderHistoryModel: verdictAttachmentPrintsOrderHistoryModel,
       verdictModel: verdictModel,
-      openInviteCompany: inviteCompanyModel.open.bind(inviteCompanyModel),
       attachmentsTab: attachmentsTab,
-      selectedTabName: selectedTabName
+      selectedTabName: selectedTabName,
+      tosFunctions: tosFunctions
     };
 
     $("#application").applyBindings(bindings);
@@ -408,7 +439,6 @@
     $(verdictAttachmentPrintsOrderHistoryModel.dialogSelector).applyBindings({
       verdictAttachmentPrintsOrderHistoryModel: verdictAttachmentPrintsOrderHistoryModel
     });
-    $(inviteCompanyModel.selector).applyBindings(inviteCompanyModel);
     attachmentsTab.attachmentTemplatesModel.init();
   });
 

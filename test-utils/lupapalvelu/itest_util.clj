@@ -4,6 +4,7 @@
             [sade.core :refer [fail! unauthorized not-accessible]]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.model :as model]
+            [lupapalvelu.document.commands :as doc-commands]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.vetuma :as vetuma]
             [lupapalvelu.web :as web]
@@ -35,14 +36,19 @@
 (defn organization-from-minimal-by-id [org-id]
   (some #(when (= (:id %) org-id) %) minimal/organizations))
 
-(defn- muni-for-user [user]
-  (let [org (organization-from-minimal-by-id (first (:organizations user)))]
-    (-> org :scope first :municipality)))
+(defn- muni-for-user [{org-authz :orgAuthz :as user}]
+  {:pre [user]}
+  (when (seq org-authz)
+    (assert (= 1 (count org-authz)) user)
+    (let [org (organization-from-minimal-by-id (-> org-authz first first name))]
+      (-> org :scope first :municipality))))
 
 (defn muni-for [username] (muni-for-user (find-user-from-minimal username)))
 (defn muni-for-key [apikey] (muni-for-user (find-user-from-minimal-by-apikey apikey)))
 
 
+(def kaino       (apikey-for "kaino@solita.fi"))
+(def kaino-id    (id-for "kaino@solita.fi"))
 (def pena        (apikey-for "pena"))
 (def pena-id     (id-for "pena"))
 (def mikko       (apikey-for "mikko@example.com"))
@@ -54,7 +60,7 @@
 (def veikko-muni (muni-for "veikko"))
 (def sonja       (apikey-for "sonja"))
 (def sonja-id    (id-for "sonja"))
-(def sonja-muni  (muni-for "sonja"))
+(def sonja-muni  "753")
 (def ronja       (apikey-for "ronja"))
 (def ronja-id    (id-for "ronja"))
 (def sipoo       (apikey-for "sipoo"))
@@ -64,11 +70,12 @@
 (def admin       (apikey-for "admin"))
 (def admin-id    (id-for "admin"))
 (def raktark-jarvenpaa (apikey-for "rakennustarkastaja@jarvenpaa.fi"))
+(def raktark-jarvenpaa-id   (id-for "rakennustarkastaja@jarvenpaa.fi"))
 (def jarvenpaa-muni    (muni-for "rakennustarkastaja@jarvenpaa.fi"))
 (def arto       (apikey-for "arto"))
 (def kuopio     (apikey-for "kuopio-r"))
 (def velho      (apikey-for "velho"))
-(def velho-muni (muni-for "velho"))
+(def velho-muni "297")
 (def velho-id   (id-for "velho"))
 
 (defn server-address [] (System/getProperty "target_server" "http://localhost:8000"))
@@ -132,15 +139,16 @@
 (def apply-remote-minimal (partial apply-remote-fixture "minimal"))
 
 (defn create-app-with-fn [f apikey & args]
-  (let [args (->> args
-               (apply hash-map)
-               (merge {:operation "kerrostalo-rivitalo"
-                       :propertyId "75312312341234"
-                       :x 444444 :y 6666666
-                       :address "foo 42, bar"
-                       :municipality (or (muni-for-key apikey) sonja-muni)})
-               (mapcat seq))]
-    (apply f apikey :create-application args)))
+  (let [args (apply hash-map args)
+        municipality (:municipality args)
+        params (->> args
+                 (merge {:operation "kerrostalo-rivitalo"
+                         :propertyId "75312312341234"
+                         :x 444444 :y 6666666
+                         :address "foo 42, bar"
+                         :municipality (or municipality (muni-for-key apikey) sonja-muni)})
+                 (mapcat seq))]
+    (apply f apikey :create-application params)))
 
 (defn create-app
   "Runs the create-application command, returns reply map. Use ok? to check it."
@@ -226,8 +234,9 @@
   [apikey & args]
   (let [resp (apply create-app apikey args)
         id   (:id resp)]
-    resp => ok?
-    id => truthy
+    (fact "Application created"
+      resp => ok?
+      id => truthy)
     id))
 
 (defn comment-application
@@ -284,7 +293,7 @@
   [apikey & args]
   (let [id    (apply create-app-id apikey args)
         resp  (command apikey :submit-application :id id)]
-    resp => ok?
+    (fact "Submit OK" resp => ok?)
     (query-application apikey id)))
 
 (defn give-verdict-with-fn [f apikey application-id & {:keys [verdictId status name given official] :or {verdictId "aaa", status 1, name "Name", given 123, official 124}}]
@@ -344,12 +353,13 @@
     (facts "Signed succesfully"
       (fact "Status code" (:status resp) => 200))))
 
-(defn upload-attachment [apikey application-id {attachment-id :id attachment-type :type} expect-to-succeed & {:keys [filename] :or {filename "dev-resources/test-attachment.txt"}}]
+(defn upload-attachment [apikey application-id {attachment-id :id attachment-type :type} expect-to-succeed & {:keys [filename text] :or {filename "dev-resources/test-attachment.txt", text ""}}]
   (let [uploadfile  (io/file filename)
         uri         (str (server-address) "/api/upload/attachment")
         resp        (http/post uri
                                {:headers {"authorization" (str "apikey=" apikey)}
                                 :multipart [{:name "applicationId"  :content application-id}
+                                            {:name "text"           :content text}
                                             {:name "Content/type"   :content "text/plain"}
                                             {:name "attachmentType" :content (str
                                                                                (:type-group attachment-type) "."
@@ -405,11 +415,11 @@
           updates (tools/path-vals data)
           updates (map (fn [[p v]] [(butlast p) v]) updates)
           updates (map (fn [[p v]] [(s/join "." (map name p)) v]) updates)
-          user-role (:role (lupapalvelu.user/get-user-with-apikey apikey))
+          user-role (:role (find-user-from-minimal-by-apikey apikey))
           updates (filter (fn [[path value]]
                             (try
                               (let [splitted-path (ss/split path #"\.")]
-                                (lupapalvelu.document.commands/validate-against-whitelist! document [[splitted-path value]] user-role))
+                                (doc-commands/validate-against-whitelist! document [[splitted-path value]] user-role))
                               true
                               (catch Exception _
                                 false)))
