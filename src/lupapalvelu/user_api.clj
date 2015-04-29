@@ -145,18 +145,16 @@
 
   true)
 
-(defn- create-new-user-entity [{:keys [organization role enabled password] :as user-data}]
-  (let [email (user/canonize-email (:email user-data))
-        ]
+(defn- create-new-user-entity [{:keys [enabled password] :as user-data}]
+  (let [email (user/canonize-email (:email user-data))]
     (-> user-data
       (dissoc :organization)
       (select-keys [:email :username :role :firstName :lastName :personId
-                    :phone :city :street :zip :enabled :organization
+                    :phone :city :street :zip :enabled :orgAuthz
                     :allowDirectMarketing :architect :company])
       (as-> user-data
         (merge
           {:firstName "" :lastName "" :username email}
-          (when-not (ss/blank? organization) {:orgAuthz {(keyword organization) #{(keyword role)}}})
           user-data))
       (assoc
         :email email
@@ -210,10 +208,11 @@
             (warn e "Inserting new user failed")
             (fail! :cant-insert)))))))
 
-(defn- create-authority-user-with-organization [caller new-organization email firstName lastName]
-  (let [new-user (create-new-user
+(defn- create-authority-user-with-organization [caller new-organization email firstName lastName roles]
+  (let [org-authz {new-organization (into #{} roles)}
+        new-user (create-new-user
                    caller
-                   {:email email :role :authority :organization new-organization :enabled true
+                   {:email email :orgAuthz org-authz :role :authority :enabled true
                     :firstName firstName :lastName lastName}
                    :send-email false)]
     (infof "invitation for new authority user: email=%s, organization=%s" email new-organization)
@@ -226,7 +225,9 @@
                       action/email-validator]
    :user-roles #{:admin :authorityAdmin}}
   [{user-data :data caller :user}]
-  (let [user (create-new-user caller user-data :send-email false)]
+  (println user-data)
+  (let [updated-user-data (if (:organization user-data) (assoc user-data :orgAuthz {(:organization user-data) (:role user-data)}) user-data)
+        user (create-new-user caller updated-user-data :send-email false)]
     (infof "Added a new user: role=%s, email=%s, orgAuthz=%s" (:role user) (:email user) (:orgAuthz user))
     (if (user/authority? user)
       (do
@@ -301,15 +302,15 @@
   (when-not (#{"add" "remove"} (:operation data))
     (fail :bad-request :desc (str "illegal organization operation: '" (:operation data) "'"))))
 
-(defn update-user [email operation organization]
+(defn update-user [email operation organization roles]
   (let [role             "authority"
         org-authz-op     ({"add" $set "remove" $unset} operation)
-        org-authz-data   {(str "orgAuthz." organization) [role]}
+        org-authz-data   {(str "orgAuthz." organization) roles}
         query            {:email email, :role role}]
     (mongo/update-n :users query {org-authz-op org-authz-data})))
 
 (defcommand update-user-organization
-  {:parameters       [operation email firstName lastName]
+  {:parameters       [operation email firstName lastName roles]
    :input-validators [valid-organization-operation?
                       (partial action/non-blank-parameters [:email :firstName :lastName])
                       action/email-validator]
@@ -317,12 +318,12 @@
   [{caller :user}]
   (let [email            (user/canonize-email email)
         new-organization (user/authority-admins-organization-id caller)
-        update-count     (update-user email operation new-organization)]
+        update-count     (update-user email operation new-organization roles)]
     (debug "update user" email)
     (if (pos? update-count)
       (ok :operation operation)
       (if (and (= operation "add") (not (user/get-user-by-email email)))
-        (create-authority-user-with-organization caller new-organization email firstName lastName)
+        (create-authority-user-with-organization caller new-organization email firstName lastName roles)
         (fail :error.user-not-found)))))
 
 (defmethod token/handle-token :authority-invitation [{{:keys [email organization caller-email]} :data} {password :password}]
