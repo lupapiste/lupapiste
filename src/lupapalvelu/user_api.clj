@@ -312,6 +312,7 @@
   {:parameters       [operation email firstName lastName roles]
    :input-validators [valid-organization-operation?
                       (partial action/non-blank-parameters [:email :firstName :lastName])
+                      (partial action/vector-parameters-with-at-least-n-non-blank-items 1 [:roles])
                       action/email-validator]
    :user-roles #{:authorityAdmin}}
   [{caller :user}]
