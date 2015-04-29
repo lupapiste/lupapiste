@@ -110,7 +110,7 @@
                 update-clause {$push {:verdicts new-verdict}
                                $set  (merge
                                        {:modified (core/now)}
-                                       (when (#{:sent} (:state application))
+                                       (when (#{:sent} (keyword (:state application)))
                                          {:state :verdictGiven}))}]
 
             (action/update-application command update-clause)
