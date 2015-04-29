@@ -12,7 +12,7 @@ jQuery(function($) {
   function createApplication(operation) {
     var municipality = "753";
     if (currentUser.isAuthority()) {
-      var org = currentUser.get().organizations()[0];
+      var org = _.keys(currentUser.get().orgAuthz)[0];
       municipality = org.split("-")[0];
     }
     $.ajax({
