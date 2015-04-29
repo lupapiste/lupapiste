@@ -36,7 +36,13 @@
 }
 
 #mypage {
-
+  .button-group {
+    position: relative;
+    width: 360px;
+    .form-indicator {
+      top: -4px;
+    }
+  }
 }
 
 /*  */
@@ -77,7 +83,7 @@
 .architect-info {
   margin: $marginL auto;
   transition: height 2s;
-    
+
 
   .architect-attachments {
     margin-top: $marginL;
