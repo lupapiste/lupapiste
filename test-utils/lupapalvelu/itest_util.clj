@@ -405,7 +405,7 @@
     (upload-attachment apikey (:id application) attachment true)))
 
 
-(defn generate-documents [application apikey]
+(defn generate-documents [application apikey & [local?]]
   (doseq [document (:documents application)]
     (let [data    (tools/create-document-data (model/get-document-schema document) (partial tools/dummy-values (id-for-key apikey)))
           updates (tools/path-vals data)
@@ -420,10 +420,15 @@
                               (catch Exception _
                                 false)))
                           updates)]
-      (command apikey :update-doc
-        :id (:id application)
-        :doc (:id document)
-        :updates updates) => ok?)))
+      (if local?
+        (local-command apikey :update-doc
+         :id (:id application)
+         :doc (:id document)
+         :updates updates)
+        (command apikey :update-doc
+         :id (:id application)
+         :doc (:id document)
+         :updates updates)) => ok?)))
 
 (defn dummy-doc [schema-name]
   (let [schema (schemas/get-schema (schemas/get-latest-schema-version) schema-name)
