@@ -12,6 +12,6 @@ Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville.
 
 i egenskap av r&aring;granne meddelas Ni att en ans&ouml;kan om bygglov p&aring; adressen {{address}}, {{city-fi}} &auml;r under behandling. N&auml;rmare uppgifter om projektet finns under den bifogade l&auml;nken. H&ouml;randet av grannar undertecknas elektroniskt med bankkoder eller mobilcertifikat. Se till att du har dina bankkoder till hands vid behov.
 
-{{link-fi}}
+{{link-sv}}
 
 Om l&auml;nken inte fungerar, kopiera adressen och klistra in den i webbl&auml;sarens adressf&auml;lt.
