@@ -974,10 +974,24 @@
     (try (autofill-rakennuspaikka application created)
          (catch Exception e (error e "KTJ data was not updated")))))
 
+(defn validate-url [url]
+  ; Regex derived from @stephenhay's at https://mathiasbynens.be/demo/url-regex
+  (when-not (re-matches #"^(https?)://[^\s/$.?#].[^\s]*$" url)
+    (fail :error.invalid.url)))
+
+(defn- validate-organization-backend-urls [_ {orgId :organization}]
+  (when orgId
+    (let [org (organization/get-organization orgId)]
+      (when-not (:vendor-backend-redirect org)
+        (fail :error.vendor-urls-not-set))
+      (doseq [url (vals (:vendor-backend-redirect org))]
+        (validate-url url )))))
+
 (defraw redirect-to-vendor-backend
   {:parameters [id]
    :user-roles #{:authority}
-   :states     action/post-submitted-states}
+   :states     action/post-submitted-states
+   :pre-checks [validate-organization-backend-urls]}
   [{{:keys [verdicts id organization]} :application}]
   (let [vendor-backend-id (->> verdicts
                                (remove :draft)
@@ -987,7 +1001,5 @@
                             :vendor-backend-url-for-lp-id)
         urlParam          (or vendor-backend-id id)
         organization      (organization/get-organization organization)
-
         urlPrefix         (get-in organization [:vendor-backend-redirect urlPrefixType])]
-    {:status 303
-     :headers {"Location" (str urlPrefix urlParam)}}))
+    {:status 303 :headers {"Location" (str urlPrefix urlParam)}}))

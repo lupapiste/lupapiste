@@ -9,10 +9,11 @@
   `(throw+ (merge (fail ~@args) {::type ::fail ::file ~*file* ::line ~(:line (meta &form))})))
 
 (defn ok [& kv]
-  (let [res (if (and (= 1 (count kv))
-                     (-> kv first map?))
-              (first kv)
-              (apply hash-map kv))]
+  (let [first (first kv)
+        res   (cond
+                (map? first) first
+                (nil? first) {}
+                :else        (apply hash-map kv))]
     (assoc res :ok true)))
 
 (def unauthorized (fail :error.unauthorized))
