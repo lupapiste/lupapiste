@@ -27,6 +27,7 @@ Mikko changes his name and experience
   Select Checkbox  allowDirectMarketing
 
   Save User Data
+  Wait until  Page should contain  Tallennettu
   User should be logged in  Mika Intola
 
 Name should have changed in Swedish page too
@@ -48,6 +49,7 @@ Mika changes the name and experience back
   Change Textfield Value  architect.graduatingYear  2001  2000
   Change Textfield Value  architect.fise  fise  f
   Save User Data
+  Wait until  Page should contain  Sparad
 
 Name should have changed in Finnish page too
   Click link  xpath=//*[@data-test-id='lang-fi']
@@ -64,7 +66,6 @@ Experience should have changed in Finnish back to original
 
 Save User Data
   Click enabled by test id  save-my-userinfo
-  Wait Until  Element Should be visible  //*[@data-test-id='save-my-userinfo-ok']
 
 Wait for Page to Load
   [Arguments]  ${firstName}  ${lastName}

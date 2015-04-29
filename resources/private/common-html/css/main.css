@@ -793,6 +793,15 @@ nav .nav-wrapper .header-menu .header-box a, nav .nav-wrapper .header-menu .head
   text-decoration: none;
   vertical-align: middle;
 }
+/* line 53, ../sass/partials/_header.scss */
+nav .nav-wrapper .header-menu .header-box a {
+  white-space: nowrap;
+  position: relative;
+  max-width: 300px;
+  display: inline-block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 /* Side bar styles*/
 /* line 2, ../sass/partials/_sidebar.scss */
@@ -5186,52 +5195,62 @@ td.comment-text {
   left: 0;
 }
 
+/* line 39, ../sass/views/_mypage.scss */
+#mypage .button-group {
+  position: relative;
+  width: 360px;
+}
+/* line 42, ../sass/views/_mypage.scss */
+#mypage .button-group .form-indicator {
+  top: -4px;
+}
+
 /*  */
-/* line 43, ../sass/views/_mypage.scss */
+/* line 49, ../sass/views/_mypage.scss */
 #own-info-form {
   padding: 0 24px;
 }
-/* line 45, ../sass/views/_mypage.scss */
+/* line 51, ../sass/views/_mypage.scss */
 #own-info-form .architect-toggle, #own-info-form .allowDirectMarketing-toggle {
   height: 55px;
   margin: 9px 0;
   display: block;
   width: 100%;
 }
-/* line 51, ../sass/views/_mypage.scss */
+/* line 57, ../sass/views/_mypage.scss */
 #own-info-form .architect-toggle label, #own-info-form .architect-toggle input, #own-info-form .allowDirectMarketing-toggle label, #own-info-form .allowDirectMarketing-toggle input {
   display: inline;
   width: 3.75em;
 }
-/* line 55, ../sass/views/_mypage.scss */
+/* line 61, ../sass/views/_mypage.scss */
 #own-info-form .architect-toggle input, #own-info-form .allowDirectMarketing-toggle input {
   margin-right: 12px;
   display: inline;
 }
-/* line 60, ../sass/views/_mypage.scss */
+/* line 66, ../sass/views/_mypage.scss */
 #own-info-form .form-group {
   padding: 12px;
 }
 
-/* line 65, ../sass/views/_mypage.scss */
+/* line 71, ../sass/views/_mypage.scss */
 #pw-form {
   padding: 0 24px;
 }
-/* line 68, ../sass/views/_mypage.scss */
+/* line 74, ../sass/views/_mypage.scss */
 #pw-form .form-group {
   padding: 12px;
 }
-/* line 71, ../sass/views/_mypage.scss */
+/* line 77, ../sass/views/_mypage.scss */
 #pw-form .form-entry {
   height: 78px;
 }
 
-/* line 77, ../sass/views/_mypage.scss */
+/* line 83, ../sass/views/_mypage.scss */
 .architect-info {
   margin: 24px auto;
   transition: height 2s;
 }
-/* line 82, ../sass/views/_mypage.scss */
+/* line 88, ../sass/views/_mypage.scss */
 .architect-info .architect-attachments {
   margin-top: 24px;
 }

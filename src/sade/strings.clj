@@ -2,7 +2,8 @@
   (:require [clojure.string :as s])
   (:import [java.text Normalizer Normalizer$Form]
            [org.apache.commons.lang3 StringUtils]
-           [org.apache.commons.codec.binary Base64]))
+           [org.apache.commons.codec.binary Base64])
+  (:refer-clojure :exclude (replace)))
 
 (def utf8 (java.nio.charset.Charset/forName "UTF-8"))
 
@@ -96,6 +97,8 @@
 (defn trim ^String [^CharSequence x] (when x (s/trim x)))
 
 (defn split ^String [^CharSequence s ^java.util.regex.Pattern re] (when s (s/split s re)))
+
+(defn replace ^String [^CharSequence s match replacement] (when s (s/replace s match replacement)))
 
 ; alias common clojure.string stuff, so that you dont need to require both namespaces:
 

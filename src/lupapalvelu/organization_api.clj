@@ -69,18 +69,11 @@
 ;; Actions
 ;;
 
-(defquery users-in-same-organizations
-  {:user-roles #{:authority}}
-  [{user :user}]
-  (let [users (mongo/select :users {:role "authority", :organizations {$in (->> user :orgAuthz keys)}})]
-    (ok :users (map user/summary users))))
-
 (defquery organization-by-user
-  {:description "Lists all organization users by organization."
+  {:description "Lists organization details."
    :user-roles #{:authorityAdmin}}
-  [{{:keys [organizations]} :user}]
-  (let [orgs (o/get-organizations {:_id {$in organizations}})
-        organization (first orgs)
+  [{user :user}]
+  (let [organization (o/get-organization (user/authority-admins-organization-id user))
         ops-with-attachments (organization-operations-with-attachments organization)
         selected-operations-with-permit-type (selected-operations-with-permit-types organization)]
     (ok :organization (-> organization
@@ -88,6 +81,14 @@
                                :selectedOperations selected-operations-with-permit-type)
                         (dissoc :operations-attachments :selected-operations))
         :attachmentTypes (organization-attachments organization))))
+
+(defquery user-organizations-for-permit-type
+  {:parameters [permitType]
+   :user-roles #{:authority}
+   :input-validators [permit/permit-type-validator]}
+  [{user :user}]
+  (ok :organizations (o/get-organizations {:_id {$in (user/organization-ids-by-roles user #{:authority})}
+                                           :scope {$elemMatch {:permitType permitType}}})))
 
 (defcommand update-organization
   {:description "Update organization details."
