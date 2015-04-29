@@ -315,14 +315,15 @@
                       action/email-validator]
    :user-roles #{:authorityAdmin}}
   [{caller :user}]
-  (let [email            (user/canonize-email email)
+  (let [actual-roles     (if (env/feature? :tiedonohjaus) roles ["authority"])
+        email            (user/canonize-email email)
         new-organization (user/authority-admins-organization-id caller)
-        update-count     (update-user email operation new-organization roles)]
+        update-count     (update-user email operation new-organization actual-roles)]
     (debug "update user" email)
     (if (pos? update-count)
       (ok :operation operation)
       (if (and (= operation "add") (not (user/get-user-by-email email)))
-        (create-authority-user-with-organization caller new-organization email firstName lastName roles)
+        (create-authority-user-with-organization caller new-organization email firstName lastName actual-roles)
         (fail :error.user-not-found)))))
 
 (defmethod token/handle-token :authority-invitation [{{:keys [email organization caller-email]} :data} {password :password}]
