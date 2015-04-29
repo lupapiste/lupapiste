@@ -4,8 +4,12 @@
 
 (last-email) ; inbox zero
 
+(apply-remote-minimal)
+
 (facts "Subscription"
-  (let [{:keys [id]} (create-and-submit-application pena)]
+  (let [{:keys [id]} (create-and-submit-application pena :municipality sonja-muni)]
+
+    (fact "Application was created" id => truthy)
 
     (fact "applicant gets email"
       (comment-application sonja id false) => ok?

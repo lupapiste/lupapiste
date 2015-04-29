@@ -37,7 +37,6 @@
    :pre-checks [(fn [{:keys [user data]} _]
                   (when-let [organization-id (:organizationId data)]
                     (when-not (user/user-is-authority-in-organization? user organization-id)
-                      (info "Precheck FAILED!")
                       unauthorized)))]}
   [{:keys [user] :as command}]
   ;; Prevent creating many applications based on the same kuntalupatunnus:
