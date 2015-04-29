@@ -96,13 +96,21 @@
           (when-not (= ftp-user (get-in org-scope [:caseManagement :ftpUser]))
             (error-and-fail! (str "FTP user " ftp-user " is not allowed to make changes to application " application-id) :error.integration.asianhallinta.unauthorized))
 
+          ; -> check that application is in correct state
+          (when-not (#{:constructionStarted :sent :verdictGiven} (:state application)
+            (error-and-fail!
+              (str "Application " application-id " in wrong state (" (:state application) ") for asianhallinta verdict") :error.integration.asianhallinta.wrong-state))
+
           ; -> build update clause
           ; -> update-application
           (let [new-verdict   (build-verdict parsed-xml)
                 command       (action/application->command application)
                 poytakirja-id (get-in new-verdict [:paatokset 0 :poytakirjat 0 :id])
                 update-clause {$push {:verdicts new-verdict}
-                               $set  {:modified (core/now)}}]
+                               $set  (merge
+                                       {:modified (core/now)}
+                                       (when (#{:sent} (:state application))
+                                         {:state :verdictGiven}))}]
 
             (action/update-application command update-clause)
             (doseq [attachment attachments]
