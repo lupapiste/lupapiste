@@ -124,6 +124,6 @@ LUPAPISTE.VerdictsModel = function() {
 
   self.verdictSignedByUser = function(paatos) {
     hub.send("track-click", {category:"Application", label: "", event:"verdictSignedByUser"});
-    return _.some(paatos.signatures, {user: {id: currentUser.id()}});
+    return _.some(paatos.signatures, {user: {id: lupapisteApp.models.currentUser.id()}});
   };
 };

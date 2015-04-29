@@ -84,7 +84,7 @@ LUPAPISTE.VerdictAttachmentPrintsOrderModel = function() {
     self.attachments(attachments);
 
     var kopiolaitosMeta = ko.unwrap(self.application.organizationMeta).kopiolaitos;
-    var currentUserName = currentUser.get().firstName() + " " + currentUser.get().lastName();
+    var currentUserName = lupapisteApp.models.currentUser.firstName() + " " + lupapisteApp.models.currentUser.lastName();
     var ordererName = (self.application.organizationName || "") + ", " + currentUserName;
 
     self.kopiolaitosEmail(kopiolaitosMeta.kopiolaitosEmail || "");
