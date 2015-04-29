@@ -380,9 +380,8 @@
       (get-in sipoo-r [:krysp :R :version]) => "2.1.6"
       (get-in jp-r [:krysp :R :version]) => "2.1.3"))
 
- (doseq [[apikey assignee] [[sonja sonja-id] [raktark-jarvenpaa (id-for-key raktark-jarvenpaa)]]]
-   (let [municipality   (muni-for-key apikey)
-         application    (create-and-submit-application apikey :municipality municipality :address "Katselmuskatu 17")
+ (doseq [[apikey assignee municipality] [[sonja sonja-id sonja-muni] [raktark-jarvenpaa (id-for-key raktark-jarvenpaa) jarvenpaa-muni]]]
+   (let [application    (create-and-submit-application apikey :municipality municipality :address "Katselmuskatu 17")
          application-id (:id application)
          _ (command apikey :assign-application :id application-id :assigneeId assignee) => ok?
          task-name      "do the shopping"
