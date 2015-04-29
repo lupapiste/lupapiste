@@ -105,7 +105,8 @@
 
   (fact "Helsinki"
     (let [response (plan-urls-by-point-proxy {:params {:x "395628" :y "6677704" :municipality "091"}})
-          body (json/decode (:body response) true)]
+          body     (if (http200? response) (json/decode (:body response) true))]
+      response => http200?
       (first body) => {:id "8755"
                        :kuntanro "91"
                        :kaavanro "8755"
