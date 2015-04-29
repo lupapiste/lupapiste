@@ -170,7 +170,7 @@
 (def ya-party (henkilo-yritys-select-group :default "yritys"))
 (def party-with-required-hetu (henkilo-yritys-select-group :henkilo-body henkilo-with-required-hetu))
 
-(def koulutusvalinta {:name "koulutusvalinta" :type :select :sortBy :displayname :i18nkey "koulutus" :other-key "koulutus"
+(def koulutusvalinta {:name "koulutusvalinta" :type :select :sortBy :displayname :i18nkey "koulutus" :other-key "koulutus" :required true
                       :body [{:name "arkkitehti"}
                              {:name "arkkitehtiylioppilas"}
                              {:name "diplomi-insin\u00f6\u00f6ri"}
@@ -269,7 +269,7 @@
                                           {:name "ei tiedossa" :i18nkey "osapuoli.kuntaRoolikoodi.ei tiedossa"}]}])
 
 (def patevyysvaatimusluokka
-  {:name "patevyysvaatimusluokka" :type :select :sortBy nil :required false
+  {:name "patevyysvaatimusluokka" :type :select :sortBy nil :required true
    :body [{:name "AA"}
           {:name "A"}
           {:name "B"}
@@ -277,21 +277,21 @@
           {:name "ei tiedossa"}]})
 
 (def patevyys-tyonjohtaja [koulutusvalinta
-                           {:name "koulutus" :type :string :required false :i18nkey "muukoulutus"}
+                           {:name "koulutus" :type :string :required true :i18nkey "muukoulutus"}
                            patevyysvaatimusluokka
-                           {:name "valmistumisvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size "s" :required false}
-                           {:name "kokemusvuodet" :type :string :subtype :number :min-len 1 :max-len 2 :size "s" :required false}
-                           {:name "valvottavienKohteidenMaara" :i18nkey "tyonjohtaja.patevyys.valvottavienKohteidenMaara" :type :string :subtype :number :size "s" :required false}
+                           {:name "valmistumisvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size "s" :required true}
+                           {:name "kokemusvuodet" :type :string :subtype :number :min-len 1 :max-len 2 :size "s" :required true}
+                           {:name "valvottavienKohteidenMaara" :i18nkey "tyonjohtaja.patevyys.valvottavienKohteidenMaara" :type :string :subtype :number :size "s" :required true}
                            ;; TODO: Miten tyonjohtajaHakemusKytkimen saa piilotettua hakijalta?
-                           {:name "tyonjohtajaHakemusKytkin" :i18nkey "tyonjohtaja.patevyys.tyonjohtajaHakemusKytkin._group_label" :type :select :sortBy :displayname :required false :blacklist [:applicant]
+                           {:name "tyonjohtajaHakemusKytkin" :i18nkey "tyonjohtaja.patevyys.tyonjohtajaHakemusKytkin._group_label" :required true :type :select :sortBy :displayname :blacklist [:applicant]
                             :body [{:name "nimeaminen" :i18nkey "tyonjohtaja.patevyys.tyonjohtajaHakemusKytkin.nimeaminen"}
                                    {:name "hakemus" :i18nkey "tyonjohtaja.patevyys.tyonjohtajaHakemusKytkin.hakemus"}]}])
 
 (def patevyys-tyonjohtaja-v2 [koulutusvalinta
                               {:name "koulutus" :type :string :required false :i18nkey "muukoulutus"}
-                              {:name "valmistumisvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size "s" :required false}
-                              {:name "kokemusvuodet" :type :string :subtype :number :min-len 1 :max-len 2 :size "s" :required false}
-                              {:name "valvottavienKohteidenMaara" :i18nkey "tyonjohtaja.patevyys.valvottavienKohteidenMaara" :type :string :subtype :number :size "s" :required false}])
+                              {:name "valmistumisvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size "s" :required true}
+                              {:name "kokemusvuodet" :type :string :subtype :number :min-len 1 :max-len 2 :size "s" :required true}
+                              {:name "valvottavienKohteidenMaara" :i18nkey "tyonjohtaja.patevyys.valvottavienKohteidenMaara" :type :string :subtype :number :size "s" :required true}])
 
 ;; FIXME remove + migration
 (def vastuuaika-tyonjohtaja [{:name "vastuuaika"
@@ -334,6 +334,7 @@
 (def vastattavat-tyotehtavat-tyonjohtaja-v2 [{:name "vastattavatTyotehtavat"
                                               :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat._group_label"
                                               :type :group
+                                              :required true
                                               :listen [:filterByCode]
                                               :layout :vertical
                                               :body [{:name "ivLaitoksenAsennustyo" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.ivLaitoksenAsennustyo" :codes [:ivt] :type :checkbox}

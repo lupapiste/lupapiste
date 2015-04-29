@@ -838,7 +838,7 @@
   {:apply-when (pos? (mongo/count :users {$and [{:organizations {$exists true}} {:role {$in ["dummy", "applicant"]}}]}))}
   (mongo/update-by-query :users {$and [{:organizations {$exists true}} {:role {$in ["dummy", "applicant"]}}]} {$unset {:organizations 1}}))
 
-(defn add-org-authz [coll]
+(defn organizations->org-authz [coll]
   (let [users (mongo/select coll {:organizations {$exists true}})]
     (reduce + 0
             (for [{:keys [organizations id role]} users]
@@ -851,7 +851,7 @@
 
 (defmigration add-org-authz
   {:apply-when (pos? (mongo/count :users {:organizations {$exists true}}))}
-  (add-org-authz :users))
+  (organizations->org-authz :users))
 
 ;;
 ;; ****** NOTE! ******
