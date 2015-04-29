@@ -8,4 +8,6 @@
   lupapisteApp.models.globalAuthModel.refresh();                      // no application bound
 
   lupapisteApp.models.rootVMO = new LUPAPISTE.RootViewModel();
+
+  lupapisteApp.models.currentUser = new LUPAPISTE.CurrentUser();
 })();
