@@ -309,13 +309,6 @@
 (defn update-user-by-email [email data]
   (mongo/update :users {:email (canonize-email email)} {$set data}))
 
-(defn update-organizations-of-authority-user [email new-organization]
-  (let [old-orgs (:organizations (get-user-by-email email))]
-    (when (every? #(not= % new-organization) old-orgs)
-      ; FIXME
-      (update-user-by-email email {:organizations (merge old-orgs new-organization)}))))
-
-
 ;;
 ;; ==============================================================================
 ;; Other:
