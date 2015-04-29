@@ -5,7 +5,7 @@
   }
 
   function filtered(page, message) {
-    var pageFilter = /^(resource:\/|https:\/\/[a-z1-9]+\.checkpoint\.com\/)/;
+    var pageFilter = /^(resource:\/|Unknown script code|https:\/\/[a-z1-9]+\.checkpoint\.com\/)/;
     return pageFilter.test(page) || _.include(message, "NPObject");
   }
 
