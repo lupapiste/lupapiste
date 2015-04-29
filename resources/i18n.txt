@@ -1,1 +1,2 @@
+error.integration.asianhallinta.wrong-state: Asianhallinta päätöstä ei voida lukea. Hakemus on väärässä tilassa.
 new-company-admin-user.subject: Kutsu Lupapiste-palveluun yritystilin pääkäyttäjäksi
