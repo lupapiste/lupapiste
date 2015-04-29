@@ -293,13 +293,6 @@
                               {:name "kokemusvuodet" :type :string :subtype :number :min-len 1 :max-len 2 :size "s" :required true}
                               {:name "valvottavienKohteidenMaara" :i18nkey "tyonjohtaja.patevyys.valvottavienKohteidenMaara" :type :string :subtype :number :size "s" :required true}])
 
-;; FIXME remove + migration
-(def vastuuaika-tyonjohtaja [{:name "vastuuaika"
-                              :type :group
-                              :hidden true
-                              :body [{:name "vastuuaika-alkaa-pvm" :type :date}
-                                     {:name "vastuuaika-paattyy-pvm" :type :date}]}])
-
 (def sijaisuus-tyonjohtaja [{:name "sijaistus" :i18nkey "tyonjohtaja.sijaistus._group_label"
                              :type :group
                              :body [{:name "sijaistettavaHloEtunimi" :i18nkey "tyonjohtaja.sijaistus.sijaistettavaHloEtunimi" :type :string}
@@ -310,7 +303,6 @@
 (def tyonjohtaja (body
                    kuntaroolikoodi-tyonjohtaja
                    vastattavat-tyotehtavat-tyonjohtaja
-                   vastuuaika-tyonjohtaja
                    henkilo-valitsin
                    designer-basic
                    {:name "patevyys-tyonjohtaja" :type :group :body patevyys-tyonjohtaja}
