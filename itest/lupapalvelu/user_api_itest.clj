@@ -84,24 +84,24 @@
   (fact (command naantali :create-user :email "foo@example.com" :role "authority" :enabled "true" :organization "529-R") => ok?)
 
   (fact (->> (query admin :user-by-email :email "foo@example.com") :user :orgAuthz keys (map name)) => ["529-R"])
-  (fact (command sipoo :update-user-organization :email "foo@example.com" :firstName "bar" :lastName "har" :operation "add") => ok?)
+  (fact (command sipoo :update-user-organization :email "foo@example.com" :firstName "bar" :lastName "har" :operation "add" :roles ["authority"]) => ok?)
 
   (fact (->> (query admin :user-by-email :email "foo@example.com") :user :orgAuthz keys (map name)) => ["529-R" "753-R"])
-  (fact (command sipoo :update-user-organization :email "foo@example.com" :firstName "bar" :lastName "har" :operation "add") => ok?)
+  (fact (command sipoo :update-user-organization :email "foo@example.com" :firstName "bar" :lastName "har" :operation "add" :roles ["authority"]) => ok?)
 
   (fact (->> (query admin :user-by-email :email "foo@example.com") :user :orgAuthz keys (map name)) => ["529-R" "753-R"])
-  (fact (command sipoo :update-user-organization :email "foo@example.com" :firstName "bar" :lastName "har" :operation "remove") => ok?)
+  (fact (command sipoo :update-user-organization :email "foo@example.com" :firstName "bar" :lastName "har" :operation "remove" :roles []) => ok?)
   (fact (->> (query admin :user-by-email :email "foo@example.com") :user :orgAuthz keys (map name)) => ["529-R"])
 
-  (fact (command sipoo :update-user-organization :email "foo@example.com" :firstName "bar" :lastName "har" :operation "xxx") => (contains {:ok false :text "bad-request"}))
+  (fact (command sipoo :update-user-organization :email "foo@example.com" :firstName "bar" :lastName "har" :operation "xxx" :roles ["authority"]) => (contains {:ok false :text "bad-request"}))
 
-  (fact (command sipoo :update-user-organization :email (email-for-key teppo) :firstName "Teppo" :lastName "Example" :operation "add") => fail?)
+  (fact (command sipoo :update-user-organization :email (email-for-key teppo) :firstName "Teppo" :lastName "Example" :operation "add" :roles ["authority"]) => fail?)
 
-  (fact (command sipoo :update-user-organization :email "tonja.sibbo@sipoo.fi" :firstName "bar" :operation "add") => (contains {:ok false :parameters ["lastName"], :text "error.missing-parameters"}))
+  (fact (command sipoo :update-user-organization :email "tonja.sibbo@sipoo.fi" :firstName "bar" :operation "add" :roles ["authority"]) => (contains {:ok false :parameters ["lastName"], :text "error.missing-parameters"}))
 
   (fact "invite new user Tonja to Sipoo"
 
-    (command sipoo :update-user-organization :email "tonja.sibbo@sipoo.fi" :firstName "bar" :lastName "har" :operation "add") => ok?
+    (command sipoo :update-user-organization :email "tonja.sibbo@sipoo.fi" :firstName "bar" :lastName "har" :operation "add"  :roles ["authority"]) => ok?
 
     (let [email (last-email)]
       (:to email) => (contains "tonja.sibbo@sipoo.fi")
