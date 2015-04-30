@@ -271,9 +271,11 @@
         (let [updates [[[:kiinteisto :tilanNimi] (or (:nimi ktj-tiedot) "")]
                        [[:kiinteisto :maapintaala] (or (:maapintaala ktj-tiedot) "")]
                        [[:kiinteisto :vesipintaala] (or (:vesipintaala ktj-tiedot) "")]
-                       [[:kiinteisto :rekisterointipvm] (or (try
-                                                              (tf/unparse output-format (tf/parse ktj-format (:rekisterointipvm ktj-tiedot)))
-                                                              (catch Exception e (:rekisterointipvm ktj-tiedot))) "")]]
+                       [[:kiinteisto :rekisterointipvm] (or
+                                                          (try
+                                                            (tf/unparse output-format (tf/parse ktj-format (:rekisterointipvm ktj-tiedot)))
+                                                            (catch Exception e (:rekisterointipvm ktj-tiedot)))
+                                                          "")]]
               schema (schemas/get-schema (:schema-info rakennuspaikka))
               updates (filter (fn [[update-path _]] (model/find-by-name (:body schema) update-path)) updates)]
           (commands/persist-model-updates
@@ -449,8 +451,8 @@
    :user-roles #{:authority}
    :states     action/all-states}
   [{:keys [application created]}]
-  (try (autofill-rakennuspaikka application created)
-       (catch Exception e (error e "KTJ data was not updated"))))
+  (autofill-rakennuspaikka application created)
+  (ok))
 
 (defcommand save-application-drawings
   {:parameters       [:id drawings]
