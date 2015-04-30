@@ -35,15 +35,19 @@
   {:parameters [company signer lang]
    :feature :companyRegistration
    :user-roles #{:anonymous}}
-  [{:keys [created]}]
+  [{:keys [created user]}]
   (sc/validate c/Company company)
   (sc/validate p/Signer signer)
   (if-not ((set (map name i18n/languages)) lang) (fail! :bad-lang))
-  (if (u/get-user-by-email (:email signer)) (fail! :email-in-use))
+  (if (and (nil? (:currentUser signer)) (u/get-user-by-email (:email signer))) (fail! :email-in-use))
   (let [config       (env/value :onnistuu)
         base-url     (or (env/value :onnistuu :return-base-url) (env/value :host))
         document-url (str base-url "/api/sign/document")
         success-url  (str base-url "/api/sign/success")
+        signer       (if (:currentUser signer) (-> signer
+                                                   (assoc :email (:email user))
+                                                   (assoc :currentUser (:id user)))
+                                               signer)
         process-data (p/init-sign-process (java.util.Date. created) (:crypto-key config) success-url document-url company signer lang)]
     (ok :processId (:process-id process-data)
         :form (html

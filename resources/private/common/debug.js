@@ -159,7 +159,8 @@ jQuery(function($) {
         var form = $("#register-company .form-group"),
             fill = function(id, value) { $("[data-test-id=register-company-" + id + "]", form).val(value).change(); },
             fillAll = function(f) { _.each(f, function(value, id) { fill(id, value); }); };
-        fillAll({
+
+        var formData = {
           name:      "Oy FooBar Ab",
           y:         "FI1234567-1",
           reference: "Kansantanhu osasto",
@@ -172,7 +173,13 @@ jQuery(function($) {
           firstName: "fo",
           lastName:  "ba",
           email:     "fo@ba.com"
-        });
+        };
+        if (lupapisteApp.models.currentUser) {
+          delete formData.firstName;
+          delete formData.lastName;
+          delete formData.email;
+        }
+        fillAll(formData);
       }))
     .appendTo("#register-company .content");
 

@@ -105,7 +105,6 @@
               <button data-bind="click: editCompany, ltext: 'mypage.companyAccount.editInfo'" class="btn btn-primary" data-test-id="company-edit-info"></button>
               <button data-bind="click: editUsers, ltext: 'mypage.companyAccount.editUsers'" class="btn btn-primary" data-test-id="company-edit-users"></button>
             </div>
-
           </div>
         </div>
 
@@ -184,6 +183,20 @@
           <p class="context-error"
             data-bind="visible: error() != null, ltext: error"></p>
         </div>
+
+        <!-- ko ifnot: companyShow -->
+        <div data-bind="if: features.enabled('companyRegistration')">
+          <div class="feature">
+            <h1 data-bind="ltext: 'register.company.header'"></h1>
+            <p data-bind="ltext: 'register.company.info'" class="register-info"></p>
+            <a data-bind="attr: {href: '#!/register-company-account-type'}, ltext: 'register.company.register'"
+               href="#"
+               class="btn btn-primary"
+               data-test-id="logged-user-register-company-start">
+            </a>
+          </div>
+        </div>
+        <!-- /ko -->
       </form>
     </div>
 

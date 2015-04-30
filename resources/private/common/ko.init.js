@@ -43,6 +43,10 @@
   ko.validation.rules.usernameAsync = {
     async: true,
     validator: _.debounce(function(val, params, cb) {
+      if (!params) {
+        // don't validate
+        return cb(true);
+      }
       ajax.query("email-in-use", {email: val})
         .success(function() { cb(false); })
         .error(function() { cb(true); })

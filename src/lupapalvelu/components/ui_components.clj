@@ -194,11 +194,14 @@
                   :html ["neighbors.html"]}
 
    :register     {:depends [:common-html]
-                  :js ["registration-models.js" "register.js"
-                       "company-registration.js"]
-                  :html ["register.html" "register2.html" "register3.html"
-                         "register-company.html" "register-company-success.html" "register-company-fail.html" 
-                         "register-company-account-type.html" "register-company-signing.html"]}
+                  :js ["registration-models.js" "register.js"]
+                  :html ["register.html" "register2.html" "register3.html"]}
+
+   :register-company {:depends [:common-html]
+                      :js ["company-registration.js"]
+                      :html [
+                             "register-company.html" "register-company-success.html" "register-company-fail.html"
+                             "register-company-account-type.html" "register-company-signing.html"]}
 
    :link-account {:depends [:register]
                   :js ["link-account.js"]
@@ -287,11 +290,10 @@
 
    :applicant-app {:depends [:ui-components]
                    :js ["applicant.js"]}
-
    :applicant     {:depends [:applicant-app
                              :common-html :authenticated :map :applications :application
                              :statement :docgen :create :mypage :user-menu :debug
-                             :company :analytics]}
+                             :company :analytics :register-company]}
 
    :authority-app {:depends [:ui-components] :js ["authority.js"]}
    :authority     {:depends [:ui-components :authority-app :common-html :authenticated :map :applications :notice :application
@@ -322,7 +324,8 @@
 
    :welcome-app {:depends [:ui-components]
                  :js ["welcome.js"]}
-   :welcome {:depends [:welcome-app :login :register :link-account :debug :user-menu :screenmessages :password-reset :analytics]
+
+   :welcome {:depends [:welcome-app :login :register :register-company :link-account :debug :user-menu :screenmessages :password-reset :analytics]
              :js ["company-user.js"]
              :html ["index.html" "login.html" "company-user.html"]}
 
