@@ -47,7 +47,9 @@
 (def- excel-data (future (load-excel)))
 
 (defn reload! []
-  (reset! localizations @excel-data))
+  (if (seq @localizations)
+    (reset! localizations (load-excel))
+    (reset! localizations @excel-data)))
 
 (defn- get-or-load-localizations []
   (if-not @localizations
