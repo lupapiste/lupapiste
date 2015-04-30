@@ -1,8 +1,10 @@
-jQuery(function($) {
+(function() {
   "use strict";
 
   function loadTimingData() {
-    if (!window.performance) { return; }
+    if (!features.enabled("perfmon") || !window.performance) {
+      return;
+    }
 
     if (!window.performance.timing.loadEventEnd) {
       setTimeout(loadTimingData, 10);
@@ -37,7 +39,5 @@ jQuery(function($) {
       .call();
   }
 
-  // ---
-
-  setTimeout(loadTimingData, 10);
-});
+  hub.subscribe("features-loaded", loadTimingData, true);
+})();

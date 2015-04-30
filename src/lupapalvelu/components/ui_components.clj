@@ -74,10 +74,6 @@
 
    :mockjax      (if (env/dev-mode?) mockjax {})
 
-   :perfmon      {:depends [:jquery]
-                  :js ["perfmon.js"]
-                  :name "common"}
-
    :i18n         {:depends [:jquery :underscore]
                   :js ["loc.js" loc->js]}
 
@@ -91,7 +87,7 @@
    :common       {:depends [:init :jquery :jquery-upload :knockout :underscore :moment :i18n :selectm
                             :expanded-content :mockjax :open-layers]
                   :js ["register-components.js" "util.js" "event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js"
-                       "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "features.js"
+                       "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "perfmon.js" "features.js"
                        "statuses.js" "statusmodel.js" "authorization.js" "vetuma.js"]}
 
    :common-html  {:depends [:selectm-html]
@@ -294,28 +290,28 @@
 
    :applicant     {:depends [:applicant-app
                              :common-html :authenticated :map :applications :application
-                             :statement :docgen :create :mypage :user-menu :debug :perfmon
+                             :statement :docgen :create :mypage :user-menu :debug
                              :company :analytics]}
 
    :authority-app {:depends [:ui-components] :js ["authority.js"]}
    :authority     {:depends [:ui-components :authority-app :common-html :authenticated :map :applications :notice :application
-                             :statement :verdict :neighbors :docgen :create :mypage :user-menu :debug :perfmon
+                             :statement :verdict :neighbors :docgen :create :mypage :user-menu :debug
                              :company :stamp :integration-error :analytics]}
 
    :oir-app {:depends [:ui-components] :js ["oir.js"]}
    :oir     {:depends [:oir-app :common-html :authenticated :map :application :attachment
-                       :docgen :debug :perfmon :notice :analytics]
+                       :docgen :debug :notice :analytics]
              :css ["oir.css"]}
 
    :authority-admin-app {:depends [:ui-components]
                          :js ["authority-admin.js" "register-authority-admin-models.js"]}
-   :authority-admin     {:depends [:authority-admin-app :common-html :authenticated :admins :mypage :user-menu :debug :analytics :perfmon]
+   :authority-admin     {:depends [:authority-admin-app :common-html :authenticated :admins :mypage :user-menu :debug :analytics]
                          :js ["admin.js" schema-versions-by-permit-type]
                          :html ["admin.html"]}
 
    :admin-app {:depends [:ui-components]
                :js ["admin.js" "register-admin-models.js"]}
-   :admin     {:depends [:admin-app :common-html :authenticated :admins :map :mypage :user-menu :debug :perfmon]
+   :admin     {:depends [:admin-app :common-html :authenticated :admins :map :mypage :user-menu :debug]
                :css ["admin.css"]
                :js ["admin-users.js" "organizations.js" "companies.js" "features.js" "actions.js" "screenmessages-list.js"]
                :html ["index.html" "admin.html" "organization.html"
@@ -326,7 +322,7 @@
 
    :welcome-app {:depends [:ui-components]
                  :js ["welcome.js"]}
-   :welcome {:depends [:welcome-app :login :register :link-account :debug :perfmon :user-menu :screenmessages :password-reset :analytics]
+   :welcome {:depends [:welcome-app :login :register :link-account :debug :user-menu :screenmessages :password-reset :analytics]
              :js ["company-user.js"]
              :html ["index.html" "login.html" "company-user.html"]}
 
@@ -334,7 +330,7 @@
 
    :neighbor-app {:depends [:ui-components]
                   :js ["neighbor-app.js"]}
-   :neighbor {:depends [:neighbor-app :common-html :global-models :map :debug :docgen :debug :perfmon :user-menu :screenmessages :analytics]
+   :neighbor {:depends [:neighbor-app :common-html :global-models :map :debug :docgen :debug :user-menu :screenmessages :analytics]
               :html ["neighbor-show.html"]
               :js ["neighbor-show.js"]}})
 
