@@ -464,16 +464,14 @@
                               true
                               (catch Exception _
                                 false)))
-                          updates)]
-      (if local?
-        (local-command apikey :update-doc
+                          updates)
+          f (if local? local-command command)
+          ]
+      (fact "Document is updated"
+        (f apikey :update-doc
          :id (:id application)
          :doc (:id document)
-         :updates updates)
-        (command apikey :update-doc
-         :id (:id application)
-         :doc (:id document)
-         :updates updates)) => ok?)))
+          :updates updates) => ok?))))
 
 (defn dummy-doc [schema-name]
   (let [schema (schemas/get-schema (schemas/get-latest-schema-version) schema-name)
