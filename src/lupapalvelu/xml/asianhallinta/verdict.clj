@@ -13,8 +13,25 @@
             [lupapalvelu.user :as user]
             [lupapalvelu.notifications :as notifications]
             [clojure.string :as s]
+            [clojure.java.io :as io]
             [sade.common-reader :as cr]
-            [lupapalvelu.attachment :as attachment]))
+            [lupapalvelu.attachment :as attachment])
+  (:import (java.util.zip ZipFile)))
+
+; Patched from me.raynes.fs.compression
+(defn unzip
+  "Takes the path to a zipfile source and unzips it to target-dir."
+  ([source]
+    (unzip source (name source)))
+  ([source target-dir]
+    (with-open [zip (ZipFile. (fs/file source))]
+      (let [entries (enumeration-seq (.entries zip))
+            target-file #(fs/file target-dir (str %))]
+        (doseq [entry entries :when (not (.isDirectory ^java.util.zip.ZipEntry entry))
+                :let [f (target-file entry)]]
+          (fs/mkdirs (fs/parent f))
+          (io/copy (.getInputStream zip entry) f))))
+    target-dir))
 
 (defn- error-and-fail! [error-msg fail-key]
   (error error-msg)
@@ -24,7 +41,7 @@
   (if-not (fs/exists? path-to-zip)
     (error-and-fail! (str "Could not find file " path-to-zip) :error.integration.asianhallinta-file-not-found)
     (let [tmp-dir (fs/temp-dir "ah")]
-      (fsc/unzip path-to-zip tmp-dir)
+      (unzip path-to-zip tmp-dir)
       tmp-dir)))
 
 (defn- ensure-attachments-present! [unzipped-path attachments]
