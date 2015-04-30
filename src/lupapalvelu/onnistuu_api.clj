@@ -105,7 +105,9 @@
   (with-error-handling
     (let [process (p/success id data iv (now))
           lang    (-> process :lang)]
-      (resp/redirect (str (env/value :host) "/app/" lang "/welcome#!/register-company-success")))))
+      (if (nil? (get-in process [:signer :currentUser]))
+        (resp/redirect (str (env/value :host) "/app/" lang "/welcome#!/register-company-success"))
+        (resp/redirect (str (env/value :host) "/app/" lang "/welcome#!/register-company-existing-user-success"))))))
 
 ;
 ; Something went terribly wrong!
