@@ -309,7 +309,7 @@ LUPAPISTE.ApplicationModel = function() {
   };
 
   self.canSubscribe = function(model) {
-    return model.role() !== "statementGiver" && currentUser && (currentUser.isAuthority() || currentUser.id() ===  model.id());
+    return model.role() !== "statementGiver" && lupapisteApp.models.currentUser && (lupapisteApp.models.currentUser.isAuthority() || lupapisteApp.models.currentUser.id() ===  model.id());
   };
 
   self.manageSubscription = function(command, model) {

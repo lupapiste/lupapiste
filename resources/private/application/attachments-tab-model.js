@@ -128,7 +128,7 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel, verdictAttachme
     var postAttachments = attachmentUtils.getPostAttachments(rawAttachments);
 
     // pre verdict attachments are not editable after verdict has been given
-    var preGroupEditable = currentUser.isAuthority() || !_.contains(LUPAPISTE.config.postVerdictStates, appModel.state());
+    var preGroupEditable = lupapisteApp.models.currentUser.isAuthority() || !_.contains(LUPAPISTE.config.postVerdictStates, appModel.state());
     var preGrouped = attachmentUtils.getGroupByOperation(preAttachments, preGroupEditable, self.appModel.allowedAttachmentTypes());
 
     var postGrouped = attachmentUtils.getGroupByOperation(postAttachments, true, self.appModel.allowedAttachmentTypes());

@@ -201,7 +201,7 @@
                   :js ["registration-models.js" "register.js"
                        "company-registration.js"]
                   :html ["register.html" "register2.html" "register3.html"
-                         "register-company.html" "register-company-success.html" "register-company-fail.html" 
+                         "register-company.html" "register-company-success.html" "register-company-fail.html"
                          "register-company-account-type.html" "register-company-signing.html"]}
 
    :link-account {:depends [:register]
@@ -308,13 +308,13 @@
              :css ["oir.css"]}
 
    :authority-admin-app {:depends [:ui-components]
-                         :js ["authority-admin.js"]}
-   :authority-admin     {:depends [:authority-admin-app :common-html :authenticated :admins :mypage :user-menu :debug :perfmon :analytics]
+                         :js ["authority-admin.js" "register-authority-admin-models.js"]}
+   :authority-admin     {:depends [:authority-admin-app :common-html :authenticated :admins :mypage :user-menu :debug :analytics :perfmon]
                          :js ["admin.js" schema-versions-by-permit-type]
                          :html ["admin.html"]}
 
    :admin-app {:depends [:ui-components]
-               :js ["admin.js"]}
+               :js ["admin.js" "register-admin-models.js"]}
    :admin     {:depends [:admin-app :common-html :authenticated :admins :map :mypage :user-menu :debug :perfmon]
                :css ["admin.css"]
                :js ["admin-users.js" "organizations.js" "companies.js" "features.js" "actions.js" "screenmessages-list.js"]
