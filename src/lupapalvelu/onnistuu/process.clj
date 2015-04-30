@@ -42,7 +42,7 @@
 (def process-state {:created  #{:started :cancelled}
                     :started  #{:done :error :fail}})
 
-(def Signer {:currentUser (max-length-string 64)
+(def Signer {(sc/optional-key :currentUser) (sc/pred mongo/valid-key? "valid key")
              :firstName (max-length-string 64)
              :lastName  (max-length-string 64)
              :email     (sc/pred valid-email? "valid email")})
