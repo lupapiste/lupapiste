@@ -87,7 +87,7 @@
    :common       {:depends [:init :jquery :jquery-upload :knockout :underscore :moment :i18n :selectm
                             :expanded-content :mockjax :open-layers]
                   :js ["register-components.js" "util.js" "event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js"
-                       "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "features.js"
+                       "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "perfmon.js" "features.js"
                        "statuses.js" "statusmodel.js" "authorization.js" "vetuma.js"]}
 
    :common-html  {:depends [:selectm-html]
@@ -197,7 +197,7 @@
                   :js ["registration-models.js" "register.js"
                        "company-registration.js"]
                   :html ["register.html" "register2.html" "register3.html"
-                         "register-company.html" "register-company-success.html" "register-company-fail.html" 
+                         "register-company.html" "register-company-success.html" "register-company-fail.html"
                          "register-company-account-type.html" "register-company-signing.html"]}
 
    :link-account {:depends [:register]
@@ -304,13 +304,13 @@
              :css ["oir.css"]}
 
    :authority-admin-app {:depends [:ui-components]
-                         :js ["authority-admin.js"]}
+                         :js ["authority-admin.js" "register-authority-admin-models.js"]}
    :authority-admin     {:depends [:authority-admin-app :common-html :authenticated :admins :mypage :user-menu :debug :analytics]
                          :js ["admin.js" schema-versions-by-permit-type]
                          :html ["admin.html"]}
 
    :admin-app {:depends [:ui-components]
-               :js ["admin.js"]}
+               :js ["admin.js" "register-admin-models.js"]}
    :admin     {:depends [:admin-app :common-html :authenticated :admins :map :mypage :user-menu :debug]
                :css ["admin.css"]
                :js ["admin-users.js" "organizations.js" "companies.js" "features.js" "actions.js" "screenmessages-list.js"]

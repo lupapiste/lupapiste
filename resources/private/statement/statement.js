@@ -127,11 +127,11 @@
     };
 
     self.canDeleteAttachment = function(attachment) {
-      return authorizationModel.ok("delete-attachment") && (!attachment.authority || currentUser.isAuthority());
+      return authorizationModel.ok("delete-attachment") && (!attachment.authority || lupapisteApp.models.currentUser.isAuthority());
     };
 
     self.canAddAttachment = function() {
-      return authorizationModel.ok("upload-attachment") && currentUser.isAuthority();
+      return authorizationModel.ok("upload-attachment") && lupapisteApp.models.currentUser.isAuthority();
     };
 
     self.deleteAttachment = function(attachmentId) {
@@ -153,7 +153,7 @@
         typeSelector: false,
         target: {type: "statement", id: statementId},
         locked: true,
-        authority: currentUser.isAuthority()
+        authority: lupapisteApp.models.currentUser.isAuthority()
       });
       LUPAPISTE.ModalDialog.open("#upload-dialog");
     };
