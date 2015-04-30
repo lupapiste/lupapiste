@@ -465,12 +465,11 @@
                               (catch Exception _
                                 false)))
                           updates)
-          f (if local? local-command command)
-          ]
+          f (if local? local-command command)]
       (fact "Document is updated"
         (f apikey :update-doc
-         :id (:id application)
-         :doc (:id document)
+          :id (:id application)
+          :doc (:id document)
           :updates updates) => ok?))))
 
 (defn dummy-doc [schema-name]
