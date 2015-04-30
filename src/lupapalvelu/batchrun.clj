@@ -1,5 +1,5 @@
 (ns lupapalvelu.batchrun
-  (:require [taoensso.timbre :refer [error]]
+  (:require [taoensso.timbre :refer [debug error errorf]]
             [me.raynes.fs :as fs]
             [clojure.java.io :as io]
             [lupapalvelu.notifications :as notifications]
@@ -235,10 +235,11 @@
             zip (util/get-files-by-regex path #".+\.zip$")]
       (fs/mkdirs (str path "archive"))
       (fs/mkdirs (str path "error"))
-      (let [result (ah-verdict/process-ah-verdict (.getPath zip) user)]
-        (if (ok? result)
-          (fs/rename zip (io/file (str path "archive/" (.getName zip))))
-          (fs/rename zip (io/file (str path "error/" (.getName zip)))))))))
+      (let [zip-path (.getPath zip)
+            result (ah-verdict/process-ah-verdict zip-path user)
+            target (str path (if (ok? result) "archive" "error") "/" (.getName zip))]
+        (when-not (fs/rename zip target)
+          (errorf "Failed to rename %s to %s" zip-path target))))))
 
 (defn check-for-asianhallinta-verdicts [& args]
   (when (env/feature? :automatic-verdicts-checking)
