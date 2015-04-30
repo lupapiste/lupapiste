@@ -1,0 +1,1 @@
+register.company.user-limit.reached:  Yritystilin käyttäjämäärä saavutettu.
