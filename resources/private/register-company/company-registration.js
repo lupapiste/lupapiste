@@ -69,7 +69,7 @@
     if (lupapisteApp.models.currentUser && !lupapisteApp.models.currentUser.company.id()) {
       this.model().firstName(lupapisteApp.models.currentUser.firstName());
       this.model().lastName(lupapisteApp.models.currentUser.lastName());
-      this.model().email("jumalautaa@perkele.com");
+      this.model().email(lupapisteApp.models.currentUser.email());
     }
     return this.processId(null).pending(false).state(this.stateInfo);
   };
