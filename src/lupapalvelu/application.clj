@@ -271,9 +271,11 @@
         (let [updates [[[:kiinteisto :tilanNimi] (or (:nimi ktj-tiedot) "")]
                        [[:kiinteisto :maapintaala] (or (:maapintaala ktj-tiedot) "")]
                        [[:kiinteisto :vesipintaala] (or (:vesipintaala ktj-tiedot) "")]
-                       [[:kiinteisto :rekisterointipvm] (or (try
+                       [[:kiinteisto :rekisterointipvm] (or
+                                                          (try
                                                               (tf/unparse output-format (tf/parse ktj-format (:rekisterointipvm ktj-tiedot)))
-                                                              (catch Exception e (:rekisterointipvm ktj-tiedot))) "")]]
+                                                            (catch Exception e (:rekisterointipvm ktj-tiedot)))
+                                                          "")]]
               schema (schemas/get-schema (:schema-info rakennuspaikka))
               updates (filter (fn [[update-path _]] (model/find-by-name (:body schema) update-path)) updates)]
           (commands/persist-model-updates
