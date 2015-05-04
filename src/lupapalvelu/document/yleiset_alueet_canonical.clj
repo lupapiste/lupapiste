@@ -11,7 +11,7 @@
                     :asiatunnus (:id application)
                     :paivaysPvm (util/to-xml-date (state-timestamp application))
                     :kasittelija (let [handler (:authority application)]
-                                   (if (seq handler)
+                                   (if (:id handler)
                                      {:henkilotieto {:Henkilo {:nimi {:etunimi  (:firstName handler)
                                                                       :sukunimi (:lastName handler)}}}}
                                      empty-tag))}})

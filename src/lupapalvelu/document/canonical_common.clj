@@ -208,7 +208,7 @@
    :kielitieto lang})
 
 (defn- get-handler [{handler :authority}]
-  (if (seq handler)
+  (if (:id handler)
     {:henkilo {:nimi {:etunimi (:firstName handler) :sukunimi (:lastName handler)}}}
     empty-tag))
 
@@ -578,7 +578,7 @@
            :asiatunnus (:id application)
            :paivaysPvm (util/to-xml-date (state-timestamp application))
            :kasittelija (let [handler (:authority application)]
-                          (if (seq handler)
+                          (if (:id handler)
                             {:henkilo
                              {:nimi {:etunimi  (:firstName handler)
                                      :sukunimi (:lastName handler)}}}
