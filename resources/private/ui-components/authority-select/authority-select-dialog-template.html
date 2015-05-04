@@ -4,15 +4,18 @@
   <section class="page container">
     <script type="text/html" id="authority-select-dialog-template">
 <div class="content"><form>
-  <select data-bind="attr: {id: kind + '-assignee-select'}, disable: pending,
-                     value: assigneeId,
-                     options: authorities,
+  <select id="assignee-select"
+          data-bind="disable: pending, value: assigneeId, options: authorities,
                      optionsText: function(item) { return item.lastName + ' ' + item.firstName; },
                      optionsValue: 'id',
                      optionsCaption: loc('choose')"></select>
 
-  <button class="btn btn-primary btn-auto" data-bind="click: save, ltext: 'ok', attr: {'data-test-id': kind + '-assignee-submit'}"></button>
-
+      <div data-bind="component: {name: 'submit-button-group',
+                                  params: { isSubmitVisible: true,
+                                            isSubmitEnabled: true,
+                                            submitCssClasses: 'btn btn-primary btn-narrow',
+                                            submit: save,
+                                            submitTitle: 'ok'}}"></div>
 </form></div>
 
     </script>
