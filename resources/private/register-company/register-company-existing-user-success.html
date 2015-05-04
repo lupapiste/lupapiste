@@ -26,7 +26,7 @@
         <div>
           <a href="#!/applications" data-bind="ltext: 'navigation'"></a>
         </div>
-        <div>
+        <div data-bind="if: lupapisteApp.models.currentUser">
           <a href="#" data-bind="ltext: 'company.tab.info', attr: {href: '#!/company/' + lupapisteApp.models.currentUser.company.id() + '/info'}"></a>
         </div>
       </div>

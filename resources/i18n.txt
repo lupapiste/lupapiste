@@ -1,1 +1,0 @@
-register.company.user-limit.reached:  Yritystilin maksimi käyttäjämäärä saavutettu.

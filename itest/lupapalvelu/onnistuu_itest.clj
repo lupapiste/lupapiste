@@ -2,7 +2,15 @@
   (:require [midje.sweet :refer :all]
             [lupapalvelu.itest-util :as u]
             [sade.http :as http]
-            [lupapalvelu.onnistuu.process :as p]))
+            [lupapalvelu.onnistuu.process :as p]
+            [sade.crypt :as crypt]
+            [sade.env :as env]
+            [cheshire.core :as json]
+            [lupapalvelu.itest-util :refer [->cookie-store server-address decode-response
+                                            admin query command
+                                            last-email apply-remote-minimal
+                                            ok? fail? http200? http302?
+                                            ]]))
 
 (defn get-process [process-id]
   (:process (u/query u/pena :find-sign-process :processId process-id)))
@@ -83,3 +91,44 @@
   (let [process-id (:id (init-sign-existing-user))]
     (http/get (str (u/server-address) "/api/sign/document/" process-id) :throw-exceptions false) => (contains {:status 200})
     (get-process-status process-id) => "started"))
+
+(fact "Approve signin process"
+  (let [process-id (:id (init-sign))
+        _ (http/get (str (u/server-address) "/api/sign/document/" process-id) :throw-exceptions false) => (contains {:status 200})
+        process (get-process process-id)
+        stamp (:stamp process)
+        crypto-key (-> (env/get-config) :onnistuu :crypto-key (crypt/str->bytes) (crypt/base64-decode))
+        crypto-iv (crypt/make-iv)
+        y (get-in process [:company :y])
+        uuid (str (java.util.UUID/randomUUID))
+        data (->> {:stamp      stamp
+                   :document   (str "/dev/dummy-onnistuu/doc/" stamp)
+                   :cancel     "cancel-url-not-used"
+                   :signatures [{:type       :company
+                                 :identifier y
+                                 :name       "foobar"
+                                 :timestamp  "foobar"
+                                 :uuid       uuid}]}
+                  (json/encode)
+                  (crypt/str->bytes)
+                  (crypt/encrypt crypto-key crypto-iv)
+                  (crypt/base64-encode)
+                  (crypt/bytes->str)
+                  (crypt/url-encode))
+        iv (-> crypto-iv (crypt/base64-encode) (crypt/bytes->str) (crypt/url-encode))
+        store (atom {})
+        params {:cookie-store (->cookie-store store)
+                :throw-exceptions false}
+        response   (http/get (str (u/server-address) "/api/sign/success/" process-id "?data=" data "&iv=" iv) params)]
+    response => http200?
+    (get-process-status process-id) => "done"))
+
+(fact "Fail signin process"
+  (let [process-id (:id (init-sign))
+        _ (http/get (str (u/server-address) "/api/sign/document/" process-id) :throw-exceptions false) => (contains {:status 200})
+        store (atom {})
+        params {:cookie-store (->cookie-store store)
+                :throw-exceptions false}
+        response   (http/get (str (u/server-address) "/api/sign/fail/" process-id) params)]
+    response => http200?
+    (get-process-status process-id) => "fail"))
