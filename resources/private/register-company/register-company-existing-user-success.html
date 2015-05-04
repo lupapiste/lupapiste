@@ -23,7 +23,12 @@
       </div>
       <div class="register-contentbox">
         <h1 data-bind="ltext: 'register-company-success.title'"></h1>
-        <a href="#!/login" data-bind="ltext: 'welcome.login'"></a>
+        <div>
+          <a href="#!/applications" data-bind="ltext: 'navigation'"></a>
+        </div>
+        <div>
+          <a href="#" data-bind="ltext: 'company.tab.info', attr: {href: '#!/company/' + lupapisteApp.models.currentUser.company.id() + '/info'}"></a>
+        </div>
       </div>
     </div>
   </section>
