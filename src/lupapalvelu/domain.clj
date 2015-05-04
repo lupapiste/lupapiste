@@ -216,7 +216,7 @@
    :applicant                ""
    :attachments              []
    :auth                     []
-   :authority                {}
+   :authority                {:firstName "", :lastName "", :id nil}
    :authorityNotice          ""
    :buildings                []
    :closed                   nil ; timestamp
