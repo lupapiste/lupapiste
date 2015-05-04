@@ -21,10 +21,6 @@ LUPAPISTE.ModalDialogModel = function () {
     }, 100, show);
   });
 
-  self.dialogWidth = ko.pureComputed(function() {
-    return self.windowWidth() - 200;
-  });
-
   self.dialogHeight = ko.pureComputed(function() {
     return self.windowHeight() - 150;
   });
