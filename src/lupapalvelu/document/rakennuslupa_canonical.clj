@@ -306,7 +306,7 @@
                        :lasnaolijat lasnaolijat
                        :pitaja pitaja
                        :poikkeamat poikkeamat}
-                      (when-not (some #{katselmusTyyppi} ["muu tarkastus" "muu katselmus"]) {:tarkastuksenTaiKatselmuksenNimi task-name})
+                      :tarkastuksenTaiKatselmuksenNimi task-name
                       (when task-id {:muuTunnustieto {:MuuTunnus {:tunnus task-id :sovellus "Lupapiste"}}}) ; v 2.1.3
                       (when (seq buildings)
                         {:rakennustunnus (let [building (-> buildings first :rakennus)]
