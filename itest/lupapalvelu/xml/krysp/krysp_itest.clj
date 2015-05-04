@@ -409,8 +409,8 @@
            (let [katselmus (xml/select1 xml [:RakennusvalvontaAsia :katselmustieto :Katselmus])
                  poytakirja (xml/select1 katselmus [:katselmuspoytakirja])]
              (validate-attachment poytakirja "katselmuksen_tai_tarkastuksen_poytakirja" application)
-             (fact "task name is not transferred for muu katselmus type"
-               (xml/get-text katselmus [:tarkastuksenTaiKatselmuksenNimi]) =not=> task-name))))
+             (fact "task name is transferred for muu katselmus type"
+               (xml/get-text katselmus [:tarkastuksenTaiKatselmuksenNimi]) => task-name))))
 
        (doseq [attachment (filter :latestVersion (:attachments application))]
          (fact "sent timestamp is set"
