@@ -30,9 +30,8 @@
             resp            (try
                               (http/get url :as :stream :throw-exceptions false)
                               (catch Exception e {:status -1 :body (str e)}))
-            header-filename  (when (get (:headers resp) "content-disposition")
-                               (clojure.string/replace (get (:headers resp) "content-disposition") #"attachment;filename=" ""))
-
+            header-filename  (when-let [content-disposition (get-in resp [:headers "content-disposition"])]
+                               (ss/replace content-disposition #"attachment;filename=" ""))
             content-length  (util/->int (get-in resp [:headers "content-length"] 0))
             urlhash         (pandect/sha1 url)
             attachment-id   urlhash

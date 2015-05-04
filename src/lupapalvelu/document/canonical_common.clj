@@ -6,6 +6,7 @@
             [sade.util :as util]
             [sade.core :refer :all]
             [lupapalvelu.i18n :as i18n]
+            [lupapalvelu.domain :as domain]
             [cljts.geom :as geo]
             [cljts.io :as jts]
             [sade.env :as env]))
@@ -207,11 +208,10 @@
    :kuntakoodi municipality
    :kielitieto lang})
 
-(defn- get-handler [{handler :authority}]
-  (if (seq handler)
+(defn- get-handler [{handler :authority :as application}]
+  (if (domain/assigned? application)
     {:henkilo {:nimi {:etunimi (:firstName handler) :sukunimi (:lastName handler)}}}
     empty-tag))
-
 
 (defn get-state [application]
   (let [state-timestamps (-<> (all-state-timestamps application)
@@ -577,12 +577,11 @@
            :hakemuksenTila (ymp-application-state-to-krysp-state (keyword (:state application)))
            :asiatunnus (:id application)
            :paivaysPvm (util/to-xml-date (state-timestamp application))
-           :kasittelija (let [handler (:authority application)]
-                          (if (seq handler)
-                            {:henkilo
-                             {:nimi {:etunimi  (:firstName handler)
-                                     :sukunimi (:lastName handler)}}}
-                            empty-tag))}})
+           :kasittelija (if (domain/assigned? application)
+                          {:henkilo
+                           {:nimi {:etunimi  (get-in application [:authority :firstName])
+                                   :sukunimi (get-in application [:authority :lastName])}}}
+                          empty-tag)}})
 
 (defn get-henkilo [henkilo]
   (let [nimi (util/assoc-when {}

@@ -271,7 +271,7 @@
           (fact "xml exists" xml => truthy)))
 
       (fact "Application is not assigned"
-        (:authority (query-application sonja application-id)) => empty?)
+        (get-in (query-application sonja application-id) [:authority :id]) => nil)
 
       (fact "Approve application"
         (let [resp (command sonja :approve-application :id application-id :lang "fi")]
@@ -409,8 +409,8 @@
            (let [katselmus (xml/select1 xml [:RakennusvalvontaAsia :katselmustieto :Katselmus])
                  poytakirja (xml/select1 katselmus [:katselmuspoytakirja])]
              (validate-attachment poytakirja "katselmuksen_tai_tarkastuksen_poytakirja" application)
-             (fact "task name is not transferred for muu katselmus type"
-               (xml/get-text katselmus [:tarkastuksenTaiKatselmuksenNimi]) =not=> task-name))))
+             (fact "task name is transferred for muu katselmus type"
+               (xml/get-text katselmus [:tarkastuksenTaiKatselmuksenNimi]) => task-name))))
 
        (doseq [attachment (filter :latestVersion (:attachments application))]
          (fact "sent timestamp is set"

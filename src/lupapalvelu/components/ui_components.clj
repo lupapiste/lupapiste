@@ -194,11 +194,15 @@
                   :html ["neighbors.html"]}
 
    :register     {:depends [:common-html]
-                  :js ["registration-models.js" "register.js"
-                       "company-registration.js"]
-                  :html ["register.html" "register2.html" "register3.html"
-                         "register-company.html" "register-company-success.html" "register-company-fail.html"
-                         "register-company-account-type.html" "register-company-signing.html"]}
+                  :js ["registration-models.js" "register.js"]
+                  :html ["register.html" "register2.html" "register3.html"]}
+
+   :register-company {:depends [:common-html]
+                      :js ["company-registration.js"]
+                      :html [
+                             "register-company.html" "register-company-success.html" "register-company-fail.html"
+                             "register-company-account-type.html" "register-company-signing.html"
+                             "register-company-existing-user-success.html"]}
 
    :link-account {:depends [:register]
                   :js ["link-account.js"]
@@ -251,6 +255,8 @@
                         "string/string-model.js"
                         "modal-dialog/modal-dialog-model.js"
                         "attachments-multiselect/attachments-multiselect-model.js"
+                        "authority-select/authority-select-model.js"
+                        "authority-select/authority-select-dialog-model.js"
                         "export-attachments/export-attachments-model.js"
                         "neighbors/neighbors-owners-dialog-model.js"
                         "neighbors/neighbors-edit-dialog-model.js"
@@ -268,6 +274,8 @@
                           "modal-dialog/modal-dialog-template.html"
                           "modal-dialog/button-group/submit-button-group-template.html"
                           "attachments-multiselect/attachments-multiselect-template.html"
+                          "authority-select/authority-select-template.html"
+                          "authority-select/authority-select-dialog-template.html"
                           "export-attachments/export-attachments-template.html"
                           "neighbors/neighbors-owners-dialog-template.html"
                           "neighbors/neighbors-edit-dialog-template.html"
@@ -287,11 +295,10 @@
 
    :applicant-app {:depends [:ui-components]
                    :js ["applicant.js"]}
-
    :applicant     {:depends [:applicant-app
                              :common-html :authenticated :map :applications :application
                              :statement :docgen :create :mypage :user-menu :debug
-                             :company :analytics]}
+                             :company :analytics :register-company]}
 
    :authority-app {:depends [:ui-components] :js ["authority.js"]}
    :authority     {:depends [:ui-components :authority-app :common-html :authenticated :map :applications :notice :application
@@ -322,7 +329,8 @@
 
    :welcome-app {:depends [:ui-components]
                  :js ["welcome.js"]}
-   :welcome {:depends [:welcome-app :login :register :link-account :debug :user-menu :screenmessages :password-reset :analytics]
+
+   :welcome {:depends [:welcome-app :login :register :register-company :link-account :debug :user-menu :screenmessages :password-reset :analytics]
              :js ["company-user.js"]
              :html ["index.html" "login.html" "company-user.html"]}
 

@@ -9,6 +9,7 @@
             [sade.dummy-email-server :as dummy-email-server]
             [sade.core :refer [def- now]]
             [lupapalvelu.fixture.core :as fixture]
+            [lupapalvelu.domain :as domain]
             [lupapalvelu.batchrun :as batchrun]))
 
 (dummy-email-server/messages :reset true)  ;; clears inbox
@@ -93,56 +94,39 @@
    :requested timestamp-the-beginning-of-time
    :status nil})
 
-(def- app-id
-  "LP-753-2014-12345")
+(def- app-id "LP-753-2014-12345")
 
 (def- reminder-application
-  {:sent nil
-   :neighbors [neighbor-non-matching
-               neighbor-matching]
-   :schema-version 1
-   :authority {}
-   :auth [{:lastName "Panaani"
-           :firstName "Pena"
-           :username "pena"
-           :type "owner"
-           :role "owner"
-           :id "777777777777777777000020"}]
-   :drawings []
-   :submitted nil
-   :state "open"
-   :permitSubtype nil
-   :tasks []
-   :closedBy {}
-   :_verdicts-seen-by {}
-   :location {:x 444444.0, :y 6666666.0}
-   :attachments []
-   :statements [statement-non-matching
-                statement-matching]
-   :organization "753-R"
-   :buildings []
-   :title "Naapurikuja 3"
-   :started nil
-   :closed nil
-   :operations [{:id "534bf825299508fb3618455d"
-                 :name "kerrostalo-rivitalo"
-                 :created 1397487653097}]
-   :infoRequest false
-   :openInfoRequest false
-   :opened 1397487653750
-   :created 1397487653097
-   :_comments-seen-by {}
-   :propertyId "75312312341234"
-   :verdicts []
-   :startedBy {}
-   :documents []
-   :_statements-seen-by {}
-   :modified timestamp-the-beginning-of-time
-   :comments []
-   :address "Naapurikuja 3"
-   :permitType "R"
-   :id app-id
-   :municipality "753"})
+  (merge
+    domain/application-skeleton
+    {:neighbors [neighbor-non-matching
+                 neighbor-matching]
+     :schema-version 1
+     :auth [{:lastName "Panaani"
+             :firstName "Pena"
+             :username "pena"
+             :type "owner"
+             :role "owner"
+             :id "777777777777777777000020"}]
+     :state "open"
+     :location {:x 444444.0, :y 6666666.0}
+     :statements [statement-non-matching
+                  statement-matching]
+     :organization "753-R"
+     :title "Naapurikuja 3"
+     :operations [{:id "534bf825299508fb3618455d"
+                   :name "kerrostalo-rivitalo"
+                   :created 1397487653097}]
+     :infoRequest false
+     :openInfoRequest false
+     :opened 1397487653750
+     :created 1397487653097
+     :propertyId "75312312341234"
+     :modified timestamp-the-beginning-of-time
+     :address "Naapurikuja 3"
+     :permitType "R"
+     :id app-id
+     :municipality "753"}))
 
 (def- reminder-application-non-matching-neighbors
   (assoc reminder-application
