@@ -255,11 +255,10 @@
 
 (defquery application-authorities
   {:user-roles #{:authority}
-   :states           action/all-states
-   :user-authz-roles action/all-authz-roles
-   :parameters       [:id]}
-  [{app :application}]
-  (let [authorities (find-authorities-in-applications-organization app)]
+   :states     (action/all-states-but [:draft :closed :canceled]) ; the same as assign-application
+   :parameters [:id]}
+  [{application :application}]
+  (let [authorities (find-authorities-in-applications-organization application)]
     (ok :authorities (map #(select-keys % [:id :firstName :lastName]) authorities))))
 
 (defn filter-repeating-party-docs [schema-version schema-names]
