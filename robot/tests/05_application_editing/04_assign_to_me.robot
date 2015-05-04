@@ -33,7 +33,7 @@ Sonja sees comment indicator on applications list
 
 Application is not assigned
   Open application  ${appname}  ${propertyId}
-  Wait Until  Application is assigned to  Valitse..
+  Wait Until  Application is assigned to  ${EMPTY}
 
 Sonja sees Mikko's person ID masked
   Open tab  parties
@@ -47,7 +47,11 @@ Sonja resets indicators
   Wait until  Element should not be visible  applicationUnseenComments
 
 Sonja assign application to herself
-  Select From List  xpath=//select[@data-test-id='application-assigneed-authority']  Sibbo Sonja
+  Click link  application-assignee-edit
+  Wait Until  Element should be visible  application-assignee-select
+  Wait Until  Select From List  application-assignee-select  Sibbo Sonja
+  Click enabled by test id  application-assignee-submit
+  Wait Until  Element should not be visible  application-assignee-select
 
 Assignee has changed
   Wait Until  Application is assigned to  Sibbo Sonja
@@ -92,7 +96,6 @@ Sonja cancels the application
 
 Application is assigned to
   [Arguments]  ${to}
-  Wait until  Element should be visible  xpath=//select[@data-test-id='application-assigneed-authority']
-  ${assignee} =  Get selected list label  xpath=//select[@data-test-id='application-assigneed-authority']
-  Should be equal  ${assignee}  ${to}
-
+  ${path} =   Set Variable  xpath=//span[@class='application_summary_text']/span[@data-bind='fullName: authority']
+  Wait until  Element should be visible  ${path}
+  Wait until  Element text should be  ${path}  ${to}
