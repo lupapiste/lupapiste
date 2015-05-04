@@ -30,5 +30,5 @@ Loppi auth clicks the link in email
   Wait Until  Title Should Be  ${appname} - Lupapiste
   Wait until  Element should be visible  //h2[@data-test-id='wanna-join']
   Element should not be visible  inforequest-assignee-edit
-  Element should not be visible  application-assigneed-edit
+  Element should not be visible  application-assignee-edit
   Page should contain  Jiihaa

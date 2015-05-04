@@ -48,10 +48,10 @@ Sonja resets indicators
 
 Sonja assign application to herself
   Click link  application-assignee-edit
-  Wait Until  Element should be visible  application-assignee-select
-  Wait Until  Select From List  application-assignee-select  Sibbo Sonja
-  Click enabled by test id  application-assignee-submit
-  Wait Until  Element should not be visible  application-assignee-select
+  Wait Until  Element should be visible  assignee-select
+  Wait Until  Select From List  assignee-select  Sibbo Sonja
+  Click enabled by test id  modal-dialog-submit-button
+  Wait Until  Element should not be visible  assignee-select
 
 Assignee has changed
   Wait Until  Application is assigned to  Sibbo Sonja

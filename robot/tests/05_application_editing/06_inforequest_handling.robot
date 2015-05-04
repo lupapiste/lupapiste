@@ -21,16 +21,11 @@ Authority assigns an inforequest to herself
   Sonja logs in
   Inforequest is not assigned  ${inforequest-handling}
   Open inforequest  ${inforequest-handling}  ${propertyId}
-
-  #Wait until  Element should be visible  inforequest-assignee-select
-  #Select From List  inforequest-assignee-select  777777777777777777000023
-
   Click link  inforequest-assignee-edit
-  Wait Until  Element should be visible  inforequest-assignee-select
-  Wait Until  Select From List  inforequest-assignee-select  Sibbo Sonja
-  Click enabled by test id  inforequest-assignee-submit
-  Wait Until  Element should not be visible  inforequest-assignee-select
-
+  Wait Until  Element should be visible  assignee-select
+  Wait Until  Select From List  assignee-select  Sibbo Sonja
+  Click enabled by test id  modal-dialog-submit-button
+  Wait Until  Element should not be visible  assignee-select
   Element should be visible  //*[@data-test-id='inforequest-cancel-btn']
 
 Now Sonja is marked as authority
