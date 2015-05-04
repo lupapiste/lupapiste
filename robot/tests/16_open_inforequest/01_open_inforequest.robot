@@ -29,6 +29,6 @@ Loppi auth clicks the link in email
   User nav menu is not visible
   Wait Until  Title Should Be  ${appname} - Lupapiste
   Wait until  Element should be visible  //h2[@data-test-id='wanna-join']
-  Element should not be visible  //select[@id='inforequest-assignee-select']
-  Element should not be visible  //select[@data-test-id='application-assigneed-authority']
+  Element should not be visible  inforequest-assignee-edit
+  Element should not be visible  application-assigneed-edit
   Page should contain  Jiihaa
