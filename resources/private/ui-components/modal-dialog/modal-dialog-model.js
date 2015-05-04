@@ -21,8 +21,8 @@ LUPAPISTE.ModalDialogModel = function () {
     }, 100, show);
   });
 
-  self.dialogHeight = ko.pureComputed(function() {
-    return self.windowHeight() - 150;
+  self.dialogHeightPx = ko.pureComputed(function() {
+    return self.windowHeight() - 150  + "px";
   });
 
   self.submitFn = ko.observable(undefined);
