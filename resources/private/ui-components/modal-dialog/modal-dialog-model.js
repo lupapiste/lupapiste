@@ -21,9 +21,21 @@ LUPAPISTE.ModalDialogModel = function () {
     }, 100, show);
   });
 
-  self.dialogHeightPx = ko.pureComputed(function() {
-    return self.windowHeight() - 150  + "px";
+  self.dialogHeight = ko.pureComputed(function() {
+    return self.windowHeight() - 150;
   });
+
+  self.dialogHeightPx = ko.pureComputed(function() {
+    return self.dialogHeight()  + "px";
+  });
+
+  self.contentHeightPx = ko.pureComputed(function() {
+    var headerMargin = 12;
+    var headerHeight = 24;
+    var headerPaddings = 9;
+    return self.dialogHeight() - headerMargin - headerHeight - headerPaddings + "px";
+  });
+
 
   self.submitFn = ko.observable(undefined);
   self.submitEnabled = ko.observable();
