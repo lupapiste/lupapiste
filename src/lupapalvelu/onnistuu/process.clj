@@ -18,7 +18,7 @@
             [lupapalvelu.security :refer [random-password]]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.company :as c]
-            [lupapalvelu.user-api :as u]
+            [lupapalvelu.user :as u]
             [lupapalvelu.docx :as docx]))
 
 (set! *warn-on-reflection* true)
@@ -42,7 +42,8 @@
 (def process-state {:created  #{:started :cancelled}
                     :started  #{:done :error :fail}})
 
-(def Signer {:firstName (max-length-string 64)
+(def Signer {(sc/optional-key :currentUser) (sc/pred mongo/valid-key? "valid key")
+             :firstName (max-length-string 64)
              :lastName  (max-length-string 64)
              :email     (sc/pred valid-email? "valid email")})
 
@@ -175,13 +176,18 @@
            identifier
            name)
     (let [company  (c/create-company (merge (:company process) {:name name, :process-id process-id}))
-          token-id (c/add-user-after-company-creation! signer company :admin)]
+          token-id (if (nil? (:currentUser signer)) (c/add-user-after-company-creation! signer company :admin))]
       (infof "sign:success:%s: company-created: y [%s], company: [%s], id: [%s], token: [%s]"
              process-id
              (:y company)
              (:name company)
              (:id company)
-             token-id))
+             token-id)
+      (when (:currentUser signer)
+        (u/link-user-to-company! (:currentUser signer) (:id company) :admin)
+        (infof "added current user to created-company: company [%s], user [%s]"
+               (:id company)
+               (:currentUser signer))))
     process))
 
 ;

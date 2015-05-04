@@ -11,6 +11,7 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.attachment :as attachment]
+            [lupapalvelu.logging :as logging]
             [lupapalvelu.organization :as o]))
 
 ;;
@@ -236,7 +237,9 @@
                               allowed-types (when permit-type (attachment/get-attachment-types-by-permit-type permit-type))
                               attachment-types (map (fn [[group id]] {:type-group group :type-id id}) attachments)]
                           (cond
-                            (not (selected-operations operation)) (fail :error.unknown-operation)
+                            (not (selected-operations operation)) (do
+                                                                    (error "Unknown operation: " (logging/sanitize 100 operation))
+                                                                    (fail :error.unknown-operation))
                             (not (every? (partial attachment/allowed-attachment-types-contain? allowed-types) attachment-types)) (fail :error.unknown-attachment-type))))]}
   [{user :user}]
   (o/update-organization (user/authority-admins-organization-id user) {$set {(str "operations-attachments." operation) attachments}})

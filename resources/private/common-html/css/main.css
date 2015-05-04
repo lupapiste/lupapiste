@@ -6029,6 +6029,10 @@ td.comment-text {
   border: 1px solid #828282;
   padding: 8px;
 }
+/* line 33, ../sass/views/_company.scss */
+#company-content .user-limit-reached {
+  color: #f39129;
+}
 
 /* line 1, ../sass/views/_attachment_multiselect.scss */
 div.nav-back-container {

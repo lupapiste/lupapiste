@@ -141,6 +141,9 @@
                     data-bind="click: openNewUser,
                                ltext: 'register.company.add-user.open',
                                enable: lupapisteApp.models.globalAuthModel.ok('company-add-user')" ></button>
+            <span class="user-limit-reached"
+                  data-bind="ltext: 'register.company.user-limit.reached',
+                             visible: isAdmin && !lupapisteApp.models.globalAuthModel.ok('company-add-user')"></span>
           </div>
         </div>
       </div>
