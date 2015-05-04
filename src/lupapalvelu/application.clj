@@ -253,6 +253,15 @@
                   :permitSubtypes (permit/permit-subtypes (:permitType app))))
             (fail :error.not-found)))
 
+(defquery application-authorities
+  {:user-roles #{:authority}
+   :states           action/all-states
+   :user-authz-roles action/all-authz-roles
+   :parameters       [:id]}
+  [{app :application}]
+  (let [authorities (find-authorities-in-applications-organization app)]
+    (ok :authorities (map #(select-keys % [:id :firstName :lastName]) authorities))))
+
 (defn filter-repeating-party-docs [schema-version schema-names]
   (let [schemas (schemas/get-schemas schema-version)]
     (filter
