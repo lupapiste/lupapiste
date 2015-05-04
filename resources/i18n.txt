@@ -3,3 +3,5 @@ new-company-admin-user.subject: Kutsu Lupapiste-palveluun yritystilin pääkäyt
 tos-editor: Tiedonohjaussuunnitelman muokkaaja
 tos-publisher: Tiedonohjaussuunnitelman julkaisija
 auth-admin.add-dialog.roles: Käyttäjäroolit
+
+users.table.organizationsAndRoles: Organisaatiot ja roolit
