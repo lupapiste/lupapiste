@@ -2762,10 +2762,19 @@ table.attachments-template-table td.attachment-version-info {
 }
 
 /* line 258, ../sass/partials/_modal.scss */
+.authority-select-dialog {
+  height: 150px !important;
+}
+/* line 260, ../sass/partials/_modal.scss */
+.authority-select-dialog select {
+  width: 100%;
+}
+
+/* line 265, ../sass/partials/_modal.scss */
 .company-invite-dialog {
   height: 250px !important;
 }
-/* line 260, ../sass/partials/_modal.scss */
+/* line 267, ../sass/partials/_modal.scss */
 .company-invite-dialog select {
   width: 100%;
 }
