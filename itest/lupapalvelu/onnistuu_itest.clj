@@ -22,6 +22,19 @@
       :processId
       get-process))
 
+(defn init-sign-existing-user []
+  (-> (u/command u/pena :init-sign
+                 :company {:name  "company-name"
+                           :y     "FI2341528-4"
+                           :accountType "account5"}
+                 :signer {:firstName   "Pena"
+                          :lastName    "Panaani"
+                          :email       "in@va.lid"
+                          :currentUser "777777777777777777000000"}
+                 :lang "fi")
+      :processId
+      get-process))
+
 (fact "init-sign"
   (init-sign) => (contains {:stamp   #"[a-zA-Z0-9]{40}"
                             :company {:name "company-name"
@@ -53,3 +66,20 @@
   (let [process-id (:id (init-sign))]
     (u/command u/pena :cancel-sign :processId process-id)
     (http/get (str (u/server-address) "/api/sign/document/" process-id) :throw-exceptions false) => (contains {:status 400})))
+
+(fact "init-sign-for-existing-user"
+  (init-sign-existing-user) => (contains {:stamp   #"[a-zA-Z0-9]{40}"
+                                             :company {:name        "company-name"
+                                                       :y           "FI2341528-4"
+                                                       :accountType "account5"}
+                                             :signer  {:firstName   "Pena"
+                                                       :lastName    "Panaani"
+                                                       :email       "pena@example.com"
+                                                       :currentUser "777777777777777777000020"}
+                                             :status  "created"
+                                             :lang    "fi"}))
+
+(fact "Fetch document for existing user"
+  (let [process-id (:id (init-sign-existing-user))]
+    (http/get (str (u/server-address) "/api/sign/document/" process-id) :throw-exceptions false) => (contains {:status 200})
+    (get-process-status process-id) => "started"))
