@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container">
+    <script type="text/html" id="authority-select-dialog-template">
+<div class="content"><form>
+  <select data-bind="attr: {id: kind + '-assignee-select'}, disable: pending,
+                     value: assigneeId,
+                     options: authorities,
+                     optionsText: function(item) { return item.lastName + ' ' + item.firstName; },
+                     optionsValue: 'id',
+                     optionsCaption: loc('choose')"></select>
+
+  <button class="btn btn-primary btn-auto" data-bind="click: save, ltext: 'ok', attr: {'data-test-id': kind + '-assignee-submit'}"></button>
+
+</form></div>
+
+    </script>
+  </section>
+</body>
+</html>

@@ -67,6 +67,9 @@
 
           <!-- Authorities: -->
           <!-- ko if: $root.authorization.ok('assign-application') -->
+
+          <div data-bind="component: {name: 'authority-select', params: {kind: 'application'}}"></div>
+
           <div>
             <p data-bind="ltext: 'application.assignee'"></p>
             <span class="application_summary_text">

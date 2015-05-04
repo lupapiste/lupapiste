@@ -55,16 +55,17 @@
         white-space: nowrap;
       }
       a {
-        color: white;
-        font-size: $font-size-body;
-        text-transform: none;
         padding-left: 32px;
-        width: auto;
-        height: auto;
         background-position: 8px -4200px;
       }
     }
-
+    a {
+        color: white;
+        font-size: $font-size-body;
+        text-transform: none;
+        height: auto;
+        width: auto;
+    }
     .summary-help {
       width: 100%;
       background-color: $lp-dark-grey;

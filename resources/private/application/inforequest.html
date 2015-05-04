@@ -71,9 +71,12 @@
           </div>
 
           <!-- ko if: $root.authorization.ok('assign-application') -->
+
+          <div data-bind="component: {name: 'authority-select', params: {kind: 'inforequest'}}"></div>
+
           <div>
             <p data-bind="ltext: 'application.assignee'"></p>
-            <span id="test-inforequest-assignee" class="application_summary_text">
+            <span class="application_summary_text">
               <select id="inforequest-assignee-select"
                       class="form-input combobox"
                       data-bind="options: $root.authorities,
