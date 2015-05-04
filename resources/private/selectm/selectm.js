@@ -154,7 +154,6 @@
       _(targetData).each(self.addTarget).value();
       self.$filter.val("");
       self.updateFilter();
-      self.check();
       return self;
     };
 
