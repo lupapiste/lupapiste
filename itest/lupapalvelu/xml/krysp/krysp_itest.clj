@@ -271,7 +271,7 @@
           (fact "xml exists" xml => truthy)))
 
       (fact "Application is not assigned"
-        (:authority (query-application sonja application-id)) => empty?)
+        (get-in (query-application sonja application-id) [:authority :id]) => nil)
 
       (fact "Approve application"
         (let [resp (command sonja :approve-application :id application-id :lang "fi")]

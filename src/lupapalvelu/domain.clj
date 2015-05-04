@@ -113,6 +113,14 @@
     unauthorized))
 
 ;;
+;; assignee
+;;
+
+(defn assigned? [{authority :authority :as application}]
+  {:pre [(map? authority)]}
+  (-> authority :id nil? not))
+
+;;
 ;; documents
 ;;
 
@@ -216,7 +224,7 @@
    :applicant                ""
    :attachments              []
    :auth                     []
-   :authority                {}
+   :authority                {:firstName "", :lastName "", :id nil}
    :authorityNotice          ""
    :buildings                []
    :closed                   nil ; timestamp

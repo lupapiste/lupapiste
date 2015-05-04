@@ -92,7 +92,7 @@
          application-id => truthy
          application => truthy
          (success resp) => true
-         (empty? authority-before-assignation) => true
+         (:id authority-before-assignation) => nil
          authority-after-assignation => (contains {:id ronja-id})
          (fact "Authority is not able to submit"
            sonja =not=> (allowed? sonja :submit-application :id application-id))))
@@ -107,8 +107,8 @@
              resp (command sonja :assign-application :id application-id :assigneeId nil)
              assigned-app (query-application sonja application-id)
              authority-in-the-end (:authority assigned-app)]
-         (empty? authority-before-assignation) => true
-         (empty? authority-in-the-end) => true))
+         (:id authority-before-assignation) => nil
+         (:id authority-in-the-end) => nil))
 
 (fact "Authority is able to create an application to a municipality in own organization"
   (let [application-id  (create-app-id sonja :municipality sonja-muni)]
@@ -292,7 +292,7 @@
       (fact "application is unassigned, Sonja does not see the full person IDs"
         (let [app (query-application sonja application-id)
               suunnittelija (domain/get-document-by-id app doc-id)]
-          (:authority app) => empty?
+          (-> app :authority :id) => nil
           (get-in suunnittelija [:data :henkilotiedot :hetu :value]) => "210281-****"))
 
       (fact "application is unassigned, Ronja does not see the full person IDs"

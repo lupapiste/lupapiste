@@ -863,6 +863,10 @@
         doc))
     {:documents {$elemMatch {"schema-info.name" "tyonjohtaja", "data.vastuuaika" {$exists true}}}}))
 
+(defmigration application-authority-default-keys
+  {:apply-when (pos? (mongo/count :applications {:authority.lastName {$exists false}}))}
+  (mongo/update-n :applications {$set {:authority (:authority domain/application-skeleton)}}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"

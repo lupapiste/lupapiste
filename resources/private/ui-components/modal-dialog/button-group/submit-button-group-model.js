@@ -4,6 +4,7 @@ LUPAPISTE.SubmitButtonGroupModel = function (params) {
 
   self.isSubmitVisible = params.isSubmitVisible;
   self.isSubmitEnabled = params.isSubmitEnabled;
+  self.submitCssClasses = params.submitCssClasses || "btn btn-primary";
   self.submitTitle = params.submitTitle;
 
   self.submit = function() {
