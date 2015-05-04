@@ -115,15 +115,10 @@
 ;;
 ;; assignee
 ;;
-(defn assigned?
-  "Takes application or (:authority application) map as parameter and
-   returns is the application assigned to anyone."
-  [m]
-  {:pre [(or (nil? m) (map? m))]}
-  (if m
-    (let [assignee (if (:authority m) (:authority m) m)]
-      (-> m :id nil? not))
-    false))
+
+(defn assigned? [{authority :authority :as application}]
+  {:pre [(map? authority)]}
+  (-> authority :id nil? not))
 
 ;;
 ;; documents
