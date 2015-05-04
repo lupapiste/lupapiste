@@ -89,6 +89,7 @@
     };
 
     self.canAdd      = function(ids) {
+      if (_.isEmpty(ids)) return false;
       ids = _.isArray(ids) ? ids : [ids];
       var someFalsey = _.some(ids, function(id) {
         var isAddable = id && (self.duplicatesAllowed || !self.inTarget(id));
@@ -113,7 +114,16 @@
       return self;
     };
 
-    self.add = function() { self.addTarget(self.getSelected()); self.check(); };
+    self.add = function() {
+      self.addTarget(self.getSelected());
+      if (!self.duplicatesAllowed) {
+        $("option", self.$source).each(function() {
+          var e = $(this);
+          e.prop("selected", false);
+        });
+      }
+      self.check();
+    };
     self.remove = function() { $("option:selected", self.$target).remove(); self.check(); };
 
     self.check = function() {
