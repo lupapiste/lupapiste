@@ -34,7 +34,7 @@ var comments = (function() {
     };
 
     self.isForMe = function(model) {
-      return model.to && model.to.id && model.to.id() === currentUser.id();
+      return model.to && model.to.id && model.to.id() === lupapisteApp.models.currentUser.id();
     };
 
     self.disabled = ko.computed(function() {

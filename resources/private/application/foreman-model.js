@@ -202,7 +202,6 @@ LUPAPISTE.ForemanModel = function() {
           })
           .error(function(err) {
             // recipient might have already been invited
-            error("Unable to invite user:", params.email, err);
             cb(err);
           })
           .call();

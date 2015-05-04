@@ -135,11 +135,7 @@
          "allowDirectMarketing"]);
 
     self.updateUserName = function() {
-      var username = self.username() || "";
-      if (self.firstName() || self.lastName()) {
-        username = self.firstName() + " " + self.lastName();
-      }
-      $("#user-name").text(username).attr("data-test-role", self.role());
+      hub.send("reload-current-user");
       return self;
     };
 
@@ -279,7 +275,7 @@
   var uploadModel = new UploadModel();
 
   hub.onPageLoad("mypage", function() { ownInfo.clear(); pw.clear(); });
-  hub.subscribe("login", function(e) { ownInfo.clear().init(e.user).updateUserName(); });
+  hub.subscribe("login", function(e) { ownInfo.clear().init(e.user); });
 
   $(function() {
 

@@ -11,8 +11,8 @@ jQuery(function($) {
 
   function createApplication(operation) {
     var municipality = "753";
-    if (currentUser.isAuthority()) {
-      var org = currentUser.get().organizations()[0];
+    if (lupapisteApp.models.currentUser.isAuthority()) {
+      var org = _.keys(lupapisteApp.models.currentUser.orgAuthz())[0];
       municipality = org.split("-")[0];
     }
     $.ajax({
@@ -36,42 +36,6 @@ jQuery(function($) {
       .json({value: value})
       .header("npm", "true")
       .success(function() { t.parent().find("b.dev-throttle-" + type).text(value); })
-      .call();
-  }
-
-  function loadTimingData() {
-    if (!window.performance) { return; }
-
-    if (!window.performance.timing.loadEventEnd) {
-      setTimeout(loadTimingData, 10);
-      return;
-    }
-
-    var table = $("footer table.dev-debug-timing");
-    var data = [["fetch", "fetchStart", "requestStart"],
-                ["req", "requestStart", "responseStart"],
-                ["resp", "responseStart", "responseEnd"],
-                ["network", "fetchStart", "responseEnd"],
-                ["display", "responseEnd", "loadEventEnd"],
-                ["total", "navigationStart", "loadEventEnd"]];
-
-    _.each(data, function(row) {
-      var name = row[0],
-          start = window.performance.timing[row[1]],
-          end = window.performance.timing[row[2]],
-          duration = end - start;
-      if (typeof start !== "number") {throw "Unknown timineg event: " + row[1]; }
-      if (typeof end !== "number") {throw "Unknown timineg event: " + row[2]; }
-      table
-        .append($("<tr>").css("padding", "0px")
-          .append($("<td>").text(name).css("padding", "0px"))
-          .append($("<td>").text(duration).css("padding", "0px").css("text-align","right")));
-    });
-
-    ajax.post(window.location.protocol + "//" + window.location.host + "/perfmon/browser-timing")
-      .raw()
-      .json({timing: window.performance.timing})
-      .header("npm", "true")
       .call();
   }
 
@@ -125,8 +89,6 @@ jQuery(function($) {
         .append($("<table>").addClass("dev-debug-timing"))
         .hide()));
 
-  setTimeout(loadTimingData, 10);
-
   ajax.get(window.location.protocol + "//" + window.location.host + "/perfmon/throttle")
     .success(function(data) {
       var ranges = $("footer .dev-debug input[type='range']");
@@ -159,7 +121,8 @@ jQuery(function($) {
         var form = $("#register-company .form-group"),
             fill = function(id, value) { $("[data-test-id=register-company-" + id + "]", form).val(value).change(); },
             fillAll = function(f) { _.each(f, function(value, id) { fill(id, value); }); };
-        fillAll({
+
+        var formData = {
           name:      "Oy FooBar Ab",
           y:         "FI1234567-1",
           reference: "Kansantanhu osasto",
@@ -172,7 +135,13 @@ jQuery(function($) {
           firstName: "fo",
           lastName:  "ba",
           email:     "fo@ba.com"
-        });
+        };
+        if (lupapisteApp.models.currentUser) {
+          delete formData.firstName;
+          delete formData.lastName;
+          delete formData.email;
+        }
+        fillAll(formData);
       }))
     .appendTo("#register-company .content");
 

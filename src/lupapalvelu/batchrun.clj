@@ -1,5 +1,7 @@
 (ns lupapalvelu.batchrun
-  (:require [taoensso.timbre :refer [error]]
+  (:require [taoensso.timbre :refer [debug error errorf]]
+            [me.raynes.fs :as fs]
+            [clojure.java.io :as io]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.neighbors :as neighbors]
             [lupapalvelu.open-inforequest :as inforequest]
@@ -14,6 +16,7 @@
             [lupapalvelu.verdict-api :as verdict-api]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.xml.krysp.reader :as krysp]
+            [lupapalvelu.xml.asianhallinta.verdict :as ah-verdict]
             [lupapalvelu.action :refer :all]
             [sade.util :as util]
             [sade.env :as env]
@@ -184,16 +187,10 @@
         orgs-by-id (reduce #(assoc %1 (:id %2) (:krysp %2)) {} orgs-with-wfs-url-defined-for-some-scope)
         org-ids (keys orgs-by-id)
         apps (mongo/select :applications {:state {$in ["sent"]} :organization {$in org-ids}})
-        eraajo-user {:id "-"
-                     :enabled true
-                     :lastName "Er\u00e4ajo"
-                     :firstName "Lupapiste"
-                     :role "authority"
-                     :orgAuthz (reduce (fn [m org-id] (assoc m (keyword org-id) #{:authority})) {} org-ids)}]
+        eraajo-user (user/batchrun-user org-ids)]
     (doall
       (pmap
         (fn [{:keys [id permitType organization] :as app}]
-
           (try
             (let [url (get-in orgs-by-id [organization (keyword permitType) :url])]
               (logging/with-logging-context {:applicationId id}
@@ -216,4 +213,36 @@
   (when (env/feature? :automatic-verdicts-checking)
     (mongo/connect!)
     (fetch-verdicts)
+    (mongo/disconnect!)))
+
+(defn- get-asianhallinta-ftp-users [organizations]
+  (->> (for [org organizations
+             scope (:scope org)]
+         (get-in scope [:caseManagement :ftpUser]))
+    (remove nil?)
+    distinct))
+
+(defn fetch-asianhallinta-verdicts []
+  (let [ah-organizations (mongo/select :organizations
+                                       {"scope.caseManagement.ftpUser" {$exists true}}
+                                       {"scope.caseManagement.ftpUser" 1})
+        ftp-users (get-asianhallinta-ftp-users ah-organizations)]
+    (doseq [user ftp-users
+            :let [path (str
+                         (env/value :outgoing-directory) "/"
+                         user "/"
+                         "asianhallinta/to_lupapiste/")]
+            zip (util/get-files-by-regex path #".+\.zip$")]
+      (fs/mkdirs (str path "archive"))
+      (fs/mkdirs (str path "error"))
+      (let [zip-path (.getPath zip)
+            result (ah-verdict/process-ah-verdict zip-path user)
+            target (str path (if (ok? result) "archive" "error") "/" (.getName zip))]
+        (when-not (fs/rename zip target)
+          (errorf "Failed to rename %s to %s" zip-path target))))))
+
+(defn check-for-asianhallinta-verdicts [& args]
+  (when (env/feature? :automatic-verdicts-checking)
+    (mongo/connect!)
+    (fetch-asianhallinta-verdicts)
     (mongo/disconnect!)))

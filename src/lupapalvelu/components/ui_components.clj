@@ -87,7 +87,7 @@
    :common       {:depends [:init :jquery :jquery-upload :knockout :underscore :moment :i18n :selectm
                             :expanded-content :mockjax :open-layers]
                   :js ["register-components.js" "util.js" "event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js"
-                       "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "features.js"
+                       "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "perfmon.js" "features.js"
                        "statuses.js" "statusmodel.js" "authorization.js" "vetuma.js"]}
 
    :common-html  {:depends [:selectm-html]
@@ -194,11 +194,15 @@
                   :html ["neighbors.html"]}
 
    :register     {:depends [:common-html]
-                  :js ["registration-models.js" "register.js"
-                       "company-registration.js"]
-                  :html ["register.html" "register2.html" "register3.html"
-                         "register-company.html" "register-company-success.html" "register-company-fail.html" 
-                         "register-company-account-type.html" "register-company-signing.html"]}
+                  :js ["registration-models.js" "register.js"]
+                  :html ["register.html" "register2.html" "register3.html"]}
+
+   :register-company {:depends [:common-html]
+                      :js ["company-registration.js"]
+                      :html [
+                             "register-company.html" "register-company-success.html" "register-company-fail.html"
+                             "register-company-account-type.html" "register-company-signing.html"
+                             "register-company-existing-user-success.html"]}
 
    :link-account {:depends [:register]
                   :js ["link-account.js"]
@@ -287,11 +291,10 @@
 
    :applicant-app {:depends [:ui-components]
                    :js ["applicant.js"]}
-
    :applicant     {:depends [:applicant-app
                              :common-html :authenticated :map :applications :application
                              :statement :docgen :create :mypage :user-menu :debug
-                             :company :analytics]}
+                             :company :analytics :register-company]}
 
    :authority-app {:depends [:ui-components] :js ["authority.js"]}
    :authority     {:depends [:ui-components :authority-app :common-html :authenticated :map :applications :notice :application
@@ -304,13 +307,13 @@
              :css ["oir.css"]}
 
    :authority-admin-app {:depends [:ui-components]
-                         :js ["authority-admin.js"]}
+                         :js ["authority-admin.js" "register-authority-admin-models.js"]}
    :authority-admin     {:depends [:authority-admin-app :common-html :authenticated :admins :mypage :user-menu :debug :analytics]
                          :js ["admin.js" schema-versions-by-permit-type]
                          :html ["admin.html"]}
 
    :admin-app {:depends [:ui-components]
-               :js ["admin.js"]}
+               :js ["admin.js" "register-admin-models.js"]}
    :admin     {:depends [:admin-app :common-html :authenticated :admins :map :mypage :user-menu :debug]
                :css ["admin.css"]
                :js ["admin-users.js" "organizations.js" "companies.js" "features.js" "actions.js" "screenmessages-list.js"]
@@ -322,7 +325,8 @@
 
    :welcome-app {:depends [:ui-components]
                  :js ["welcome.js"]}
-   :welcome {:depends [:welcome-app :login :register :link-account :debug :user-menu :screenmessages :password-reset :analytics]
+
+   :welcome {:depends [:welcome-app :login :register :register-company :link-account :debug :user-menu :screenmessages :password-reset :analytics]
              :js ["company-user.js"]
              :html ["index.html" "login.html" "company-user.html"]}
 

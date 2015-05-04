@@ -853,6 +853,16 @@
   {:apply-when (pos? (mongo/count :users {:organizations {$exists true}}))}
   (organizations->org-authz :users))
 
+(defmigration tyonjohtaja-v1-vastuuaika-cleanup
+  {:apply-when (pos? (mongo/count :applications {:documents {$elemMatch {"schema-info.name" "tyonjohtaja", "data.vastuuaika" {$exists true}}}}))}
+  (update-applications-array
+    :documents
+    (fn [doc]
+      (if (= (-> doc :schema-info :name) "tyonjohtaja")
+        (util/dissoc-in doc [:data :vastuuaika])
+        doc))
+    {:documents {$elemMatch {"schema-info.name" "tyonjohtaja", "data.vastuuaika" {$exists true}}}}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"

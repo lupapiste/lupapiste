@@ -202,7 +202,7 @@ Admin logs in
 
 User role should be
   [Arguments]  ${expected-role}
-  ${user-role}=  Execute JavaScript  return window.currentUser.get().role();
+  ${user-role}=  Execute JavaScript  return window.lupapisteApp.models.currentUser.role();
   Should Be Equal  ${expected-role}  ${user-role}
 
 User nav menu is visible

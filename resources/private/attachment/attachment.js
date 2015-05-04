@@ -237,7 +237,7 @@ var attachment = (function() {
 
   model.editable = ko.computed(function() {
     return _.contains(LUPAPISTE.config.postVerdictStates, ko.unwrap(model.application.state)) ?
-             currentUser.isAuthority() || _.contains(LUPAPISTE.config.postVerdictStates, ko.unwrap(model.applicationState)) :
+             lupapisteApp.models.currentUser.isAuthority() || _.contains(LUPAPISTE.config.postVerdictStates, ko.unwrap(model.applicationState)) :
              true;
   });
 
@@ -397,7 +397,7 @@ var attachment = (function() {
 
     $("#file-preview-iframe").attr("src","");
 
-    var isUserAuthorizedForAttachment = attachment.required ? currentUser.get().role() === "authority" : true;
+    var isUserAuthorizedForAttachment = attachment.required ? lupapisteApp.models.currentUser.role() === "authority" : true;
     model.authorized(isUserAuthorizedForAttachment);
 
     model.latestVersion(attachment.latestVersion);

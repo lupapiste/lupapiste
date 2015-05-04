@@ -89,6 +89,14 @@
 (defn org-authz-match [organization-ids & [role]]
   {$or (for [org-id organization-ids] {(str "orgAuthz." (name org-id)) (or role {$exists true})})})
 
+(defn batchrun-user [org-ids]
+  {:id "-"
+   :enabled true
+   :lastName "Er\u00e4ajo"
+   :firstName "Lupapiste"
+   :role "authority"
+   :orgAuthz (reduce (fn [m org-id] (assoc m (keyword org-id) #{:authority})) {} org-ids)})
+
 ;;
 ;; ==============================================================================
 ;; Finding user data:

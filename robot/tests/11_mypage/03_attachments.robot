@@ -39,7 +39,7 @@ Copy own attachments button is not shown to non-architect
 
 Save User Data
   Click enabled by test id  save-my-userinfo
-  Wait Until  Element Should be visible  //*[@data-test-id='save-my-userinfo-ok']
+  Wait until  Page should contain  Tallennettu
 
 Wait for Page to Load
   [Arguments]  ${firstName}  ${lastName}
