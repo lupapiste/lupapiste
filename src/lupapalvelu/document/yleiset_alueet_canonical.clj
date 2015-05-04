@@ -1,6 +1,7 @@
 (ns lupapalvelu.document.yleiset-alueet-canonical
   (:require [lupapalvelu.document.canonical-common :refer :all]
             [lupapalvelu.document.tools :as tools]
+            [lupapalvelu.domain :as domain]
             [sade.util :as util]
             [sade.core :refer :all]
             [clojure.walk :as walk]))
@@ -10,11 +11,10 @@
                     :hakemuksenTila (application-state-to-krysp-state (keyword (:state application)))
                     :asiatunnus (:id application)
                     :paivaysPvm (util/to-xml-date (state-timestamp application))
-                    :kasittelija (let [handler (:authority application)]
-                                   (if (:id handler)
-                                     {:henkilotieto {:Henkilo {:nimi {:etunimi  (:firstName handler)
-                                                                      :sukunimi (:lastName handler)}}}}
-                                     empty-tag))}})
+                    :kasittelija (if (domain/assigned? application)
+                                   {:henkilotieto {:Henkilo {:nimi {:etunimi  (get-in application [:authority :firstName])
+                                                                    :sukunimi (get-in application [:authority :lastName])}}}}
+                                   empty-tag)}})
 
 (defn- get-postiosoite [yritys]
   (let [teksti (util/assoc-when {} :teksti (-> yritys :osoite :katu))]
