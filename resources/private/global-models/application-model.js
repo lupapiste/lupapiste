@@ -273,10 +273,8 @@ LUPAPISTE.ApplicationModel = function() {
     ajax.command("refresh-ktj", {id: self.id()})
       .success(function() {
         self.reload();
-        //FIXME parempi tapa ilmoittaa onnistumisesta
-        notify.success("KTJ tiedot p\u00e4ivitetty",model);
-      })//FIXME parempi/tyylikaampi virheilmoitus
-      .error(function(resp) {alert(resp.text);})
+        LUPAPISTE.ModalDialog.showDynamicOk(loc("integration.title"), loc("application.refreshed"));
+      })
       .processing(self.processing)
       .call();
       hub.send("track-click", {category:"Application", label:"", event:"refreshKTJ"});
