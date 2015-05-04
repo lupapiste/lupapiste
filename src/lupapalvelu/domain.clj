@@ -113,6 +113,19 @@
     unauthorized))
 
 ;;
+;; assignee
+;;
+(defn assigned?
+  "Takes application or (:authority application) map as parameter and
+   returns is the application assigned to anyone."
+  [m]
+  {:pre [(or (nil? m) (map? m))]}
+  (if m
+    (let [assignee (if (:authority m) (:authority m) m)]
+      (-> m :id nil? not))
+    false))
+
+;;
 ;; documents
 ;;
 
