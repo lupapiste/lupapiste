@@ -54,7 +54,6 @@ LUPAPISTE.ApplicationModel = function() {
   self.operationsCount = ko.observable();
   self.applicant = ko.observable();
   self.applicantPhone = ko.observable();
-  self.assignee = ko.observable(); // FIXME delete
   self.authority = ko.observable({});
   self.neighbors = ko.observable([]);
   self.statements = ko.observable([]);
