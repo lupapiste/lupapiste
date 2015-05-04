@@ -28,7 +28,7 @@
 
     self.data = [];
     self.visible = [];
-    self.duplicates = true;
+    self.duplicatesAllowed = false;
 
     this.append((template || $("#selectm-template"))
       .children()
@@ -47,7 +47,7 @@
     self.ok = function(f) { self.okCallback = toCallback(f); return self; };
     self.cancelCallback = nop;
     self.cancel = function(f) { self.cancelCallback = toCallback(f); return self; };
-    self.allowDuplicates = function(d) { self.duplicates = d; return self; };
+    self.allowDuplicates = function(d) { self.duplicatesAllowed = d; return self; };
 
     self.filterData = function(filterValue) {
       var f = _.trim(filterValue).toLowerCase();
@@ -74,18 +74,24 @@
       self.check();
     };
 
-    self.getSelected = function()   {
+    self.getSelected = function() {
       var trimmed = [];
-      $("option:selected", self.$source).each( function( i, selected ) { trimmed.push($(selected).data()); });
+      $("option:selected", self.$source).each( function( i, selected ) {
+        trimmed.push($(selected).data());
+      });
       return trimmed;
     };
 
-    self.inTarget    = function(id) { return $("option", self.$target).filter(function() { return _.isEqual($(this).data("id"), id); }).length; };
+    self.inTarget    = function(id) {
+      return $("option", self.$target)
+        .filter(function() { return _.isEqual($(this).data("id"), id); })
+        .length;
+    };
 
     self.canAdd      = function(ids) {
       ids = _.isArray(ids) ? ids : [ids];
       var someFalsey = _.some(ids, function(id) {
-        var isAddable = id && (self.duplicates || !self.inTarget(id));
+        var isAddable = id && (self.duplicatesAllowed || !self.inTarget(id));
         return !isAddable;
       });
       return !someFalsey;
@@ -113,7 +119,7 @@
     self.check = function() {
       self.$add.prop("disabled", !self.canAdd(self.getSelected()));
       self.$remove.prop("disabled", $("option:selected", self.$target).length === 0);
-      if (!self.duplicates) {
+      if (!self.duplicatesAllowed) {
         $("option", self.$source).each(function() {
           var e = $(this);
           e.prop("disabled", self.inTarget(e.data("id")));
