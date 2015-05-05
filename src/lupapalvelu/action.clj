@@ -367,8 +367,10 @@
         (fail :error.unknown)))))
 
 (defn execute [{action :action :as command}]
-  (let [response (run command execute-validators true)]
-    (debug action "->" (:ok response))
+  (let [before   (System/nanoTime)
+        response (run command execute-validators true)
+        after    (System/nanoTime)]
+    (debug action "->" (:ok response) "(took" (- after before) "ns)")
     (swap! actions update-in [(keyword action) :call-count] #(if % (inc %) 1))
     response))
 
@@ -388,6 +390,7 @@
   {:parameters  "Vector of parameters. Parameters can be keywords or symbols. Symbols will be available in the action body. If a parameter is missing from request, an error will be raised."
    :user-roles  "Set of user role keywords."
    :user-authz-roles  "Set of application context role keywords."
+   :org-authz-roles "Set of application organization context role keywords"
    :description "Documentation string."
    :notified    "Boolean. Documents that the action will be sending (email) notifications."
    :pre-checks  "Vector of functions."
