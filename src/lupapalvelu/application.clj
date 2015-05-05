@@ -13,7 +13,7 @@
             [sade.strings :as ss]
             [sade.xml :as xml]
             [sade.core :refer :all]
-            [sade.permit :as p]
+            [sade.property :as p]
             [lupapalvelu.action :refer [defquery defcommand update-application without-system-keys notify application->command] :as action]
             [lupapalvelu.mongo :refer [$each] :as mongo]
             [lupapalvelu.attachment :as attachment]
@@ -670,7 +670,7 @@
    :input-validators [(partial action/non-blank-parameters [:operation :address :propertyId])
                       (partial property-id-parameters [:propertyId])
                       operation-validator]}
-  [{{:keys [operation address infoRequest]} :data :keys [user created] :as command}]
+  [{{:keys [operation address propertyId infoRequest]} :data :keys [user created] :as command}]
 
   ;; TODO: These let-bindings are repeated in do-create-application, merge those somehow
   (let [municipality (p/municipality-id-by-property-id propertyId)
