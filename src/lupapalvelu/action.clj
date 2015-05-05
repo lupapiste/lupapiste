@@ -367,8 +367,10 @@
         (fail :error.unknown)))))
 
 (defn execute [{action :action :as command}]
-  (let [response (run command execute-validators true)]
-    (debug action "->" (:ok response))
+  (let [before   (System/nanoTime)
+        response (run command execute-validators true)
+        after    (System/nanoTime)]
+    (debug action "->" (:ok response) "(took" (- after before) "ns)")
     (swap! actions update-in [(keyword action) :call-count] #(if % (inc %) 1))
     response))
 
