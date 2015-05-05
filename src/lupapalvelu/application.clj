@@ -989,26 +989,27 @@
 (defn- validate-organization-backend-urls [_ {orgId :organization}]
   (when orgId
     (let [org (organization/get-organization orgId)]
-      (when-not (:vendor-backend-redirect org)
-        (fail :error.vendor-urls-not-set))
-      (doseq [url (vals (:vendor-backend-redirect org))]
-        (validate-url url )))))
+      (if-let [conf (:vendor-backend-redirect org)]
+        (some validate-url (vals conf))
+        (fail :error.vendor-urls-not-set)))))
 
 (defraw redirect-to-vendor-backend
   {:parameters [id]
    :user-roles #{:authority}
    :states     action/post-submitted-states
    :pre-checks [validate-organization-backend-urls]}
-  [{{:keys [verdicts id organization]} :application}]
-  (let [vendor-backend-id (->> verdicts
-                               (remove :draft)
-                               (some :kuntalupatunnus))
-        url-prefix-type   (if (nil? vendor-backend-id)
-                            :vendor-backend-url-for-lp-id
-                            :vendor-backend-url-for-backend-id)
-        url-param         (or vendor-backend-id id)
-        organization      (organization/get-organization organization)
-        url-prefix        (get-in organization [:vendor-backend-redirect url-prefix-type])
-        redirect-url      (str url-prefix url-param)]
+  [{{:keys [verdicts organization]} :application}]
+  (let [vendor-backend-id          (->> verdicts
+                                        (remove :draft)
+                                        (some :kuntalupatunnus))
+        [backend-id-url lp-id-url] (-> (organization/get-organization organization)
+                                       :vendor-backend-redirect
+                                       (select-values [:vendor-backend-url-for-backend-id
+                                                       :vendor-backend-url-for-lp-id]))
+        url-parts                  (if (and vendor-backend-id
+                                            (not (ss/blank? backend-id-url)))
+                                     [backend-id-url vendor-backend-id]
+                                     [lp-id-url id])
+        redirect-url               (apply str url-parts)]
     (info "Redirecting from" id "to" redirect-url)
     {:status 303 :headers {"Location" redirect-url}}))

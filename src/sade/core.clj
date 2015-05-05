@@ -30,3 +30,6 @@
 (defmacro def- [item value]
   `(def ^{:private true} ~item ~value))
 
+(defn select-values [m keys]
+  (->> (map #(get m %) keys)
+       (remove nil?)))
