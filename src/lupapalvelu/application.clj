@@ -990,7 +990,9 @@
   (when org-id
     (let [org (organization/get-organization org-id)]
       (if-let [conf (:vendor-backend-redirect org)]
-        (some validate-url (vals conf))
+        (->> (vals conf)
+             (remove ss/blank?)
+             (some validate-url))
         (fail :error.vendor-urls-not-set)))))
 
 (defn- get-vendor-backend-id [verdicts]
@@ -1008,12 +1010,12 @@
   (when application
     (let [vendor-backend-id (get-vendor-backend-id verdicts)
           [backend-id-url lp-id-url] (get-backend-and-lp-urls organization)
-          both-urls-missing? (not (or (ss/blank? backend-id-url)
-                                      (ss/blank? lp-id-url)))]
+          both-urls-missing? (and (ss/blank? backend-id-url)
+                                  (ss/blank? lp-id-url))]
       (if (and vendor-backend-id
                both-urls-missing?)
         (fail :error.vendor-urls-not-set)
-        (when-not lp-id-url
+        (when (ss/blank? lp-id-url)
           (fail :error.vendor-urls-not-set))))))
 
 (defraw redirect-to-vendor-backend
