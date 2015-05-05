@@ -3,11 +3,6 @@
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]))
 
-(testable-privates lupapalvelu.find-address to-property-id)
-
-(facts "to-property-id"
-  (to-property-id "1" "2" "3" "4") => "00100200030004")
-
 (facts "search dispatch"
   (fact
     (prerequisite (search-property-id "12345678901234") => ...result...)

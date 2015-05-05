@@ -5,6 +5,7 @@
             [lupapalvelu.i18n :as i18n]
             [monger.query :as q]
             [sade.strings :as ss]
+            [sade.property :as p]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.wfs :as wfs]))
 
@@ -107,11 +108,6 @@
 ;; Utils:
 ;;
 
-(defn- to-property-id
-  "Convert property ID elements to 'database' format"
-  [a b c d]
-  (str (ss/pwz 3 a) (ss/pwz 3 b) (ss/pwz 4 c) (ss/pwz 4 d)))
-
 (defn- apply-search
   "Return a function that can be used as a target function in 'search' function.
    The returned function accepts the list as returned from clojure.core/re-find.
@@ -127,7 +123,7 @@
 (defn search [term]
   (condp re-find (s/trim term)
     #"^(\d{14})$"                                 :>> (apply-search search-property-id)
-    #"^(\d{1,3})-(\d{1,3})-(\d{1,4})-(\d{1,4})$"  :>> (fn [[_ a b c d]] (search-property-id (to-property-id a b c d)))
+    p/property-id-pattern                         :>> (fn [result] (search-property-id (p/to-property-id (first result))))
     #"^(\S+)$"                                    :>> (apply-search search-poi-or-street)
     #"^(\S+)\s+(\d+)\s*,?\s*$"                    :>> (apply-search search-street-with-number)
     #"^(\S+)\s+(\S+)$"                            :>> (apply-search search-street-with-city)
