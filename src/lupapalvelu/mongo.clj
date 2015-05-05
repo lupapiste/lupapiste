@@ -69,7 +69,8 @@
 (defn update-n
   "Updates data into collection by query, returns a number of updated documents."
   [collection query data & {:as opts}]
-  (.getN (apply mc/update collection (merge isolated query) data (-> opts (assoc :write-concern WriteConcern/ACKNOWLEDGED) seq flatten))))
+  (let [options (-> (merge {:write-concern WriteConcern/ACKNOWLEDGED} opts) seq flatten)]
+    (.getN (apply mc/update collection (merge isolated query) data options))))
 
 (defn update
   "Updates data into collection by query. Always returns nil."
