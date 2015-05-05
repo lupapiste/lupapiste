@@ -122,7 +122,7 @@
       } else {
         var code = id ? util.zeropad(3, id.split("-")[0].substring(0, 3)) : null;
         self
-          .municipalityCode(code)
+          .municipalityCode(code) // FIXME
           .updateMunicipality(code, self.municipality);
       }
     });

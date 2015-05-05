@@ -13,6 +13,7 @@
             [sade.strings :as ss]
             [sade.xml :as xml]
             [sade.core :refer :all]
+            [sade.permit :as p]
             [lupapalvelu.action :refer [defquery defcommand update-application without-system-keys notify application->command] :as action]
             [lupapalvelu.mongo :refer [$each] :as mongo]
             [lupapalvelu.attachment :as attachment]
@@ -600,6 +601,7 @@
   (when-not (operations/operations (keyword operation)) (fail :error.unknown-type)))
 
 (defn make-application [id operation x y address property-id municipality organization info-request? open-inforequest? messages user created manual-schema-datas]
+  {:pre [id operation address property-id (not (nil? info-request?)) (not (nil? open-inforequest?)) user created]}
   (let [permit-type (operations/permit-type-of-operation operation)
         owner (user/user-in-role user :owner :type :owner)
         op (make-op operation created)
@@ -638,8 +640,9 @@
                           :documents   (make-documents user created op application manual-schema-datas)}))))
 
 (defn do-create-application
-  [{{:keys [operation x y address propertyId municipality infoRequest messages]} :data :keys [user created] :as command} & [manual-schema-datas]]
-  (let [permit-type (operations/permit-type-of-operation operation)
+  [{{:keys [operation x y address propertyId infoRequest messages]} :data :keys [user created] :as command} & [manual-schema-datas]]
+  (let [municipality (p/municipality-id-by-property-id propertyId)
+        permit-type (operations/permit-type-of-operation operation)
         organization (organization/resolve-organization municipality permit-type)
         scope (organization/resolve-organization-scope municipality permit-type organization)
         organization-id (:id organization)
@@ -661,16 +664,17 @@
 
 ;; TODO: separate methods for inforequests & applications for clarity.
 (defcommand create-application
-  {:parameters       [:operation :x :y :address :propertyId :municipality]
+  {:parameters       [:operation :x :y :address :propertyId]
    :user-roles       #{:applicant :authority}
    :notified         true                                   ; OIR
-   :input-validators [(partial action/non-blank-parameters [:operation :address :municipality])
+   :input-validators [(partial action/non-blank-parameters [:operation :address :propertyId])
                       (partial property-id-parameters [:propertyId])
                       operation-validator]}
-  [{{:keys [operation address municipality infoRequest]} :data :keys [user created] :as command}]
+  [{{:keys [operation address infoRequest]} :data :keys [user created] :as command}]
 
   ;; TODO: These let-bindings are repeated in do-create-application, merge those somehow
-  (let [permit-type (operations/permit-type-of-operation operation)
+  (let [municipality (p/municipality-id-by-property-id propertyId)
+        permit-type (operations/permit-type-of-operation operation)
         organization (organization/resolve-organization municipality permit-type)
         scope (organization/resolve-organization-scope municipality permit-type organization)
         info-request? (boolean infoRequest)
