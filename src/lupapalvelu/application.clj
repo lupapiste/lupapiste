@@ -699,8 +699,7 @@
    :input-validators [operation-validator]
    :pre-checks       [add-operation-allowed?]}
   [{:keys [application created] :as command}]
-  (let [op-id (mongo/create-id)
-        op (make-op operation created)
+  (let [op (make-op operation created)
         new-docs (make-documents nil created op application)
         organization (organization/get-organization (:organization application))]
     (update-application command {$push {:operations  op
