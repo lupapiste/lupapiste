@@ -45,7 +45,7 @@ LUPAPISTE.ModalDialogModel = function () {
 
   self.dialogTop = ko.pureComputed(function() {
     var contentHeight = ($("#modal-dialog-content").height());
-    return (self.windowHeight() - contentHeight) / 4;
+    return self.windowHeight() / 2 - (contentHeight + 135) / 2;
   });
 
   self.submitFn = ko.observable(undefined);
