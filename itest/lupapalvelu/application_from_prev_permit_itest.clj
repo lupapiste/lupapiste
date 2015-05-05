@@ -151,7 +151,7 @@
             (keyword (:text resp-body)) => :already-existing-application))
 
         (fact "create new LP app if kuntalupatunnus matches existing app in another organization"
-         (let [{app-id :id} (create-and-submit-application pena :municipality sonja-muni)
+         (let [{app-id :id} (create-and-submit-application pena :propertyId sipoo-property-id)
                _            (give-verdict sonja app-id :verdictId example-kuntalupatunnus)
                response     (http/get rest-address params)
                resp-body    (:body (util/decode-response response))]

@@ -22,7 +22,7 @@
 (facts* "Search"
   (let [property-id (str sonja-muni "-123-0000-1234")
         application (create-and-submit-application mikko
-                      :municipality sonja-muni
+                      :propertyId sipoo-property-id
                       :address "Hakukuja 123"
                       :propertyId (p/to-property-id property-id)
                       :operation "muu-uusi-rakentaminen") => truthy
