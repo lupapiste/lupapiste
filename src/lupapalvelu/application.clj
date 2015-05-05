@@ -1003,10 +1003,12 @@
   (let [vendor-backend-id (->> verdicts
                                (remove :draft)
                                (some :kuntalupatunnus))
-        urlPrefixType     (if (nil? vendor-backend-id)
-                            :vendor-backend-url-for-backend-id
-                            :vendor-backend-url-for-lp-id)
-        urlParam          (or vendor-backend-id id)
+        url-prefix-type   (if (nil? vendor-backend-id)
+                            :vendor-backend-url-for-lp-id
+                            :vendor-backend-url-for-backend-id)
+        url-param         (or vendor-backend-id id)
         organization      (organization/get-organization organization)
-        urlPrefix         (get-in organization [:vendor-backend-redirect urlPrefixType])]
-    {:status 303 :headers {"Location" (str urlPrefix urlParam)}}))
+        url-prefix        (get-in organization [:vendor-backend-redirect url-prefix-type])
+        redirect-url      (str url-prefix url-param)]
+    (info "Redirecting from" id "to" redirect-url)
+    {:status 303 :headers {"Location" redirect-url}}))
