@@ -33,7 +33,7 @@
 (facts users-for-datatables
  (fact (command admin :users-for-datatables :params {:iDisplayLength 5 :iDisplayStart 0 :sEcho "123" :enabled "true" :organizations ["753-R"]})
    => (contains {:ok true
-                 :data (contains {:rows (comp (partial = 3) count)
+                 :data (contains {:rows (comp (partial = 4) count)
                                   :total 4
                                   :display 4
                                   :echo "123"})}))
