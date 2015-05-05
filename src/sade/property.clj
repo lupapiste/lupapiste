@@ -21,7 +21,11 @@
     (map util/->int)
     (s/join "-")))
 
-(def municipality-mapping {})
+(def municipality-mapping
+  {"476" "297" ; Maaninka -> Kuopio (2015)
+   "413" "609" ; Lavia -> Pori (2015)
+   "838" "423" ; Tarvasjoki -> Lieto (2015)
+   })
 
 (defn- take-municipality [[match s _1 _2 _4]]
   (let [municipality (ss/zero-pad 3 s)]
