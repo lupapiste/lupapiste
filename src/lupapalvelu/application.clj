@@ -986,26 +986,45 @@
   (when-not (re-matches #"^(https?)://[^\s/$.?#].[^\s]*$" url)
     (fail :error.invalid.url)))
 
-(defn- validate-organization-backend-urls [_ {orgId :organization}]
-  (when orgId
-    (let [org (organization/get-organization orgId)]
+(defn- validate-organization-backend-urls [_ {org-id :organization}]
+  (when org-id
+    (let [org (organization/get-organization org-id)]
       (if-let [conf (:vendor-backend-redirect org)]
         (some validate-url (vals conf))
         (fail :error.vendor-urls-not-set)))))
+
+(defn- get-vendor-backend-id [verdicts]
+  (->> verdicts
+       (remove :draft)
+       (some :kuntalupatunnus)))
+
+(defn- get-backend-and-lp-urls [org-id]
+  (-> (organization/get-organization org-id)
+      :vendor-backend-redirect
+      (select-values [:vendor-backend-url-for-backend-id
+                      :vendor-backend-url-for-lp-id])))
+
+(defn- correct-urls-configured [_ {:keys [verdicts organization] :as application}]
+  (when application
+    (let [vendor-backend-id (get-vendor-backend-id verdicts)
+          [backend-id-url lp-id-url] (get-backend-and-lp-urls organization)
+          both-urls-missing? (not (or (ss/blank? backend-id-url)
+                                      (ss/blank? lp-id-url)))]
+      (if (and vendor-backend-id
+               both-urls-missing?)
+        (fail :error.vendor-urls-not-set)
+        (when-not lp-id-url
+          (fail :error.vendor-urls-not-set))))))
 
 (defraw redirect-to-vendor-backend
   {:parameters [id]
    :user-roles #{:authority}
    :states     action/post-submitted-states
-   :pre-checks [validate-organization-backend-urls]}
+   :pre-checks [validate-organization-backend-urls
+                correct-urls-configured]}
   [{{:keys [verdicts organization]} :application}]
-  (let [vendor-backend-id          (->> verdicts
-                                        (remove :draft)
-                                        (some :kuntalupatunnus))
-        [backend-id-url lp-id-url] (-> (organization/get-organization organization)
-                                       :vendor-backend-redirect
-                                       (select-values [:vendor-backend-url-for-backend-id
-                                                       :vendor-backend-url-for-lp-id]))
+  (let [vendor-backend-id          (get-vendor-backend-id verdicts)
+        [backend-id-url lp-id-url] (get-backend-and-lp-urls organization)
         url-parts                  (if (and vendor-backend-id
                                             (not (ss/blank? backend-id-url)))
                                      [backend-id-url vendor-backend-id]
