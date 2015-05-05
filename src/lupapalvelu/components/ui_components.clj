@@ -254,6 +254,8 @@
                         "select/select-model.js"
                         "string/string-model.js"
                         "modal-dialog/modal-dialog-model.js"
+                        "modal-dialog/button-group/submit-button-group-model.js"
+                        "modal-dialog/dialog/yes-no-dialog-model.js"
                         "attachments-multiselect/attachments-multiselect-model.js"
                         "authority-select/authority-select-model.js"
                         "authority-select/authority-select-dialog-model.js"
@@ -262,9 +264,7 @@
                         "neighbors/neighbors-edit-dialog-model.js"
                         "company-selector/company-selector-model.js"
                         "company-invite/company-invite-model.js"
-                        "company-invite/company-invite-dialog-model.js"
-                        "modal-dialog/button-group/submit-button-group-model.js"
-                        "modal-dialog/yes-no-dialog-model.js"]
+                        "company-invite/company-invite-dialog-model.js"]
                    :html ["fill-info/fill-info-template.html"
                           "foreman-history/foreman-history-template.html"
                           "foreman-other-applications/foreman-other-applications-template.html"
@@ -274,7 +274,7 @@
                           "checkbox/checkbox-template.html"
                           "modal-dialog/modal-dialog-template.html"
                           "modal-dialog/button-group/submit-button-group-template.html"
-                          "modal-dialog/yes-no-dialog-template.html"
+                          "modal-dialog/dialog/yes-no-dialog-template.html"
                           "attachments-multiselect/attachments-multiselect-template.html"
                           "authority-select/authority-select-template.html"
                           "authority-select/authority-select-dialog-template.html"
