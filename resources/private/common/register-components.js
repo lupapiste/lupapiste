@@ -20,7 +20,8 @@ jQuery(document).ready(function() {
     "company-invite",
     "company-invite-dialog",
     "submit-button-group",
-    "yes-no-dialog"
+    "yes-no-dialog",
+    "yes-no-button-group"
   ];
 
   _.forEach(components, function(component) {
