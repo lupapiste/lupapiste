@@ -20,9 +20,10 @@
   :description "List of all actions and their meta-data."} [_]
  (ok :actions (action/serializable-actions)))
 
-(defquery "allowed-actions"
+(defquery allowed-actions
  {:user-roles #{:anonymous}
-  :user-authz-roles action/all-authz-roles}
+  :user-authz-roles action/all-authz-roles
+  :org-authz-roles #{:authority :reader}}
  [{:keys [data user application]}]
  (let [results  (map validated (foreach-action user data application))
        filtered (if (env/dev-mode?)
