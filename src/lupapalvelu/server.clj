@@ -77,7 +77,7 @@
   (when-let [gemsdir (io/resource "gems")]
     (scss/initialize :gempath (.getPath gemsdir)))
 
-  (env/in-dev
+  (env/feature? :perfmon
     (warn "*** Instrumenting performance monitoring")
     (perf-mon/init))
   (when (env/feature? :nrepl)

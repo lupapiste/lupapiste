@@ -36,7 +36,10 @@
 ;;
 
 (defn- bypass? [request]
-  (or (get-in request [:query-params "npm"]) (get-in request [:headers "npm"])))
+  (or (get-in request [:query-params "npm"])
+      (get-in request [:headers "npm"])
+      (re-matches #"^\/api\/alive.*" (:uri request))
+      (not (re-matches #"^\/api\/.*" (:uri request)))))
 
 ;;
 ;; Performance monitoring:

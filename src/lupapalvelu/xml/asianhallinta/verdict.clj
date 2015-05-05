@@ -69,7 +69,7 @@
   (let [filename      (fs/base-name (:LinkkiLiitteeseen attachment))
         file          (fs/file (s/join "/" [unzipped-path filename]))
         file-size     (.length file)
-        orgs          (lupapalvelu.organization/resolve-organizations
+        orgs          (org/resolve-organizations
                         (:municipality application)
                         (:permitType application))
         batchrun-user (user/batchrun-user (map :id orgs))

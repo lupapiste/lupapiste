@@ -2,6 +2,7 @@
   (require [lupapalvelu.document.canonical-common :refer :all]
            [lupapalvelu.document.tools :as tools]
            [lupapalvelu.xml.disk-writer :as writer]
+           [lupapalvelu.mongo :as mongo]
            [clojure.string :as s]
            [sade.core :refer :all]
            [sade.util :as util]
@@ -89,14 +90,13 @@
   (when (seq operations)
     {:Toimenpide (map #(-> % (ua-get-toimenpide lang)) operations)}))
 
-(def- viitelupa-mapping
-  {"kuntalupatunnus" "Taustaj\u00E4rjestelm\u00E4"
-   "lupapistetunnus" "Lupapiste"})
-
 (defn- ua-get-viitelupa [linkPermit]
-  (util/strip-nils
-    {:MuuTunnus {:Tunnus (:id linkPermit)
-                 :Sovellus (viitelupa-mapping (:type linkPermit))}}))
+  (if (= (:type linkPermit) "lupapistetunnus")
+    (util/strip-nils
+     {:MuuTunnus {:Tunnus (:id linkPermit)
+                  :Sovellus "Lupapiste"}})
+    (util/strip-nils
+     {:AsianTunnus (:id linkPermit)})))
 
 (defn- ua-get-viiteluvat [{:keys [linkPermitData]}]
   (when (seq linkPermitData)

@@ -2501,37 +2501,33 @@ table.attachments-template-table td.attachment-version-info {
   position: fixed;
   right: 0;
   left: 0;
-  top: 0;
-  bottom: 0;
-  margin: auto;
+  margin-top: 50px;
+  margin-left: auto;
+  margin-right: auto;
   z-index: 9999;
   padding: 12px;
   background-color: #fff;
-  height: 700px;
   min-height: 250px;
 }
-/* line 27, ../sass/partials/_modal.scss */
-#modal-dialog .dialog .component .content {
+/* line 25, ../sass/partials/_modal.scss */
+#modal-dialog .dialog .component {
   overflow: auto;
-  position: absolute;
-  top: 45px;
-  left: 12px;
-  right: 12px;
-  bottom: 75px;
+  margin: 12px 12px 75px 12px;
+  min-height: 117px;
 }
-/* line 35, ../sass/partials/_modal.scss */
+/* line 29, ../sass/partials/_modal.scss */
 #modal-dialog .dialog .component .button-group {
   position: absolute;
   bottom: 24px;
   right: 12px;
   left: 12px;
 }
-/* line 40, ../sass/partials/_modal.scss */
+/* line 34, ../sass/partials/_modal.scss */
 #modal-dialog .dialog .component .button-group .cancel {
   float: right;
   margin-right: 12px;
 }
-/* line 46, ../sass/partials/_modal.scss */
+/* line 40, ../sass/partials/_modal.scss */
 #modal-dialog .dialog .header {
   padding-top: 2px;
   padding-bottom: 4px;
@@ -2539,24 +2535,24 @@ table.attachments-template-table td.attachment-version-info {
   border-bottom: 1px solid;
   font-size: 20px;
 }
-/* line 52, ../sass/partials/_modal.scss */
+/* line 46, ../sass/partials/_modal.scss */
 #modal-dialog .dialog .header .title {
   line-height: 24px;
 }
-/* line 55, ../sass/partials/_modal.scss */
+/* line 49, ../sass/partials/_modal.scss */
 #modal-dialog .dialog .header .close {
   position: absolute;
   right: 12px;
   cursor: pointer;
 }
-/* line 59, ../sass/partials/_modal.scss */
+/* line 53, ../sass/partials/_modal.scss */
 #modal-dialog .dialog .header .close:after {
   content: "X";
 }
-/* line 65, ../sass/partials/_modal.scss */
+/* line 59, ../sass/partials/_modal.scss */
 #modal-dialog .mask {
   position: fixed;
-  display: none;
+  display: block;
   z-index: 9000;
   left: 0;
   right: 0;
@@ -2564,10 +2560,11 @@ table.attachments-template-table td.attachment-version-info {
   bottom: 0;
   background-color: #000;
   opacity: 0.5;
+  filter: alpha(opacity=50) \9;
 }
 
 /* Z-index of .mask must lower than .window */
-/* line 80, ../sass/partials/_modal.scss */
+/* line 74, ../sass/partials/_modal.scss */
 .mask {
   position: absolute;
   z-index: 9000;
@@ -2575,16 +2572,16 @@ table.attachments-template-table td.attachment-version-info {
   top: 0;
   left: 0;
 }
-/* line 86, ../sass/partials/_modal.scss */
+/* line 80, ../sass/partials/_modal.scss */
 .mask.black {
   background-color: #000;
 }
-/* line 89, ../sass/partials/_modal.scss */
+/* line 83, ../sass/partials/_modal.scss */
 .mask.white {
   background-color: #fff;
 }
 
-/* line 94, ../sass/partials/_modal.scss */
+/* line 88, ../sass/partials/_modal.scss */
 .window {
   position: fixed;
   display: none;
@@ -2593,12 +2590,12 @@ table.attachments-template-table td.attachment-version-info {
   background: white;
   overflow: hidden;
 }
-/* line 101, ../sass/partials/_modal.scss */
+/* line 95, ../sass/partials/_modal.scss */
 .window.rounded {
   border-radius: 6px;
 }
 
-/* line 106, ../sass/partials/_modal.scss */
+/* line 100, ../sass/partials/_modal.scss */
 .autosized {
   min-width: 22.5em;
   min-height: 144px;
@@ -2606,14 +2603,14 @@ table.attachments-template-table td.attachment-version-info {
   width: auto;
 }
 
-/* line 113, ../sass/partials/_modal.scss */
+/* line 107, ../sass/partials/_modal.scss */
 .autosized-yes-no {
   min-height: 144px;
   height: auto;
   width: 35em;
 }
 
-/* line 118, ../sass/partials/_modal.scss */
+/* line 112, ../sass/partials/_modal.scss */
 .autosized-ok {
   min-height: 120px;
   height: auto;
@@ -2621,18 +2618,18 @@ table.attachments-template-table td.attachment-version-info {
 }
 
 /* Customize your modal window here, you can add background image too */
-/* line 125, ../sass/partials/_modal.scss */
+/* line 119, ../sass/partials/_modal.scss */
 .dialog-header {
   padding: 2px 24px;
   border-bottom: 1px solid;
 }
-/* line 128, ../sass/partials/_modal.scss */
+/* line 122, ../sass/partials/_modal.scss */
 .dialog-header p {
   margin: 0px;
   font-size: 20px;
   display: inline;
 }
-/* line 133, ../sass/partials/_modal.scss */
+/* line 127, ../sass/partials/_modal.scss */
 .dialog-header .dialog-close {
   position: absolute;
   right: 14px;
@@ -2640,7 +2637,7 @@ table.attachments-template-table td.attachment-version-info {
   cursor: pointer;
 }
 
-/* line 141, ../sass/partials/_modal.scss */
+/* line 135, ../sass/partials/_modal.scss */
 .dialog-content {
   /* somewhat less than .autosized - .dialog-header */
   min-height: 96px;
@@ -2648,41 +2645,41 @@ table.attachments-template-table td.attachment-version-info {
   margin: 12px 0;
   padding-bottom: 64px;
 }
-/* line 148, ../sass/partials/_modal.scss */
+/* line 142, ../sass/partials/_modal.scss */
 .dialog-content .dialog-desc {
   width: 300px;
 }
-/* line 152, ../sass/partials/_modal.scss */
+/* line 146, ../sass/partials/_modal.scss */
 .dialog-content .dialog-desc-wide {
   width: 450px;
 }
-/* line 156, ../sass/partials/_modal.scss */
+/* line 150, ../sass/partials/_modal.scss */
 .dialog-content [type=submit], .dialog-content .btn, .dialog-content button {
   padding: 4px 24px;
   min-width: 10em;
   max-width: 16.25em;
 }
-/* line 163, ../sass/partials/_modal.scss */
+/* line 157, ../sass/partials/_modal.scss */
 .dialog-content .file-upload {
   margin: 12px 0;
 }
-/* line 167, ../sass/partials/_modal.scss */
+/* line 161, ../sass/partials/_modal.scss */
 .dialog-content .dialog-user-content {
   padding: 12px 0;
 }
 
-/* line 173, ../sass/partials/_modal.scss */
+/* line 167, ../sass/partials/_modal.scss */
 .dialog-content p {
   margin-bottom: 0;
 }
-/* line 177, ../sass/partials/_modal.scss */
+/* line 171, ../sass/partials/_modal.scss */
 .dialog-content div.finished {
   background: #fff;
   display: block;
   text-align: left;
   z-index: 5000;
 }
-/* line 184, ../sass/partials/_modal.scss */
+/* line 178, ../sass/partials/_modal.scss */
 .dialog-content div.pending {
   background: #fff;
   display: block;
@@ -2694,87 +2691,79 @@ table.attachments-template-table td.attachment-version-info {
   text-align: center;
   z-index: 5000;
 }
-/* line 194, ../sass/partials/_modal.scss */
+/* line 188, ../sass/partials/_modal.scss */
 .dialog-content div.pending div.ajax {
   background: url(/img/ajax-loader.gif) no-repeat center center;
   margin: auto;
   height: 160px;
 }
 
-/* line 202, ../sass/partials/_modal.scss */
+/* line 196, ../sass/partials/_modal.scss */
 .scrolling-content {
   overflow-y: scroll;
   max-height: 288px;
 }
 
-/* line 207, ../sass/partials/_modal.scss */
+/* line 201, ../sass/partials/_modal.scss */
 .dialog-content-low {
   min-height: 72px;
   padding-bottom: 0;
 }
 
-/* line 212, ../sass/partials/_modal.scss */
+/* line 206, ../sass/partials/_modal.scss */
 .with-map {
   display: table-row;
 }
-/* line 215, ../sass/partials/_modal.scss */
+/* line 209, ../sass/partials/_modal.scss */
 .with-map .map-container {
   padding: 0;
 }
-/* line 219, ../sass/partials/_modal.scss */
+/* line 213, ../sass/partials/_modal.scss */
 .with-map .btn-primary {
   left: auto;
   right: 260px;
   bottom: 5px;
 }
-/* line 223, ../sass/partials/_modal.scss */
+/* line 217, ../sass/partials/_modal.scss */
 .with-map a.btn-dialog {
   right: -70px;
   bottom: 10px;
   width: 100px;
 }
 
-/* line 230, ../sass/partials/_modal.scss */
+/* line 224, ../sass/partials/_modal.scss */
 .with-map > div {
   display: table-cell;
   vertical-align: top;
   padding-left: 12px;
 }
 
-/* line 236, ../sass/partials/_modal.scss */
+/* line 230, ../sass/partials/_modal.scss */
 .neighbors-message {
   margin: 12px;
 }
 
-/* line 241, ../sass/partials/_modal.scss */
+/* line 235, ../sass/partials/_modal.scss */
 #dialog-add-link-permit .combobox {
   margin-bottom: 8px;
 }
 
-/* line 247, ../sass/partials/_modal.scss */
+/* line 241, ../sass/partials/_modal.scss */
 #upload-dialog .dialog-content {
   padding-bottom: 0;
 }
 
-/* line 253, ../sass/partials/_modal.scss */
+/* line 247, ../sass/partials/_modal.scss */
 #dialog-cancel-application div.application-cancel-text-content p {
   margin-bottom: 0;
 }
 
-/* line 258, ../sass/partials/_modal.scss */
-.authority-select-dialog {
-  height: 150px !important;
-}
-/* line 260, ../sass/partials/_modal.scss */
+/* line 253, ../sass/partials/_modal.scss */
 .authority-select-dialog select {
   width: 100%;
 }
 
-/* line 265, ../sass/partials/_modal.scss */
-.company-invite-dialog {
-  height: 250px !important;
-}
-/* line 267, ../sass/partials/_modal.scss */
+/* line 259, ../sass/partials/_modal.scss */
 .company-invite-dialog select {
   width: 100%;
 }

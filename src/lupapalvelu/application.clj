@@ -239,19 +239,20 @@
                 (array-map :lastName 1, :firstName 1)))
 
 (defquery application
-          {:user-roles       #{:applicant :authority :oirAuthority}
-           :states           action/all-states
-           :user-authz-roles action/all-authz-roles
-           :parameters       [:id]}
-          [{app :application user :user}]
-          (if app
-            (let [app (assoc app :allowedAttachmentTypes (attachment/get-attachment-types-for-application app))]
-              (ok :application (post-process-app app user)
-                  :authorities (if (user/authority? user)
-                                 (map #(select-keys % [:id :firstName :lastName]) (find-authorities-in-applications-organization app))
-                                 [])
-                  :permitSubtypes (permit/permit-subtypes (:permitType app))))
-            (fail :error.not-found)))
+  {:parameters       [:id]
+   :states           action/all-states
+   :user-roles       #{:applicant :authority :oirAuthority}
+   :user-authz-roles action/all-authz-roles
+   :org-authz-roles #{:authority :reader}}
+  [{app :application user :user}]
+  (if app
+    (let [app (assoc app :allowedAttachmentTypes (attachment/get-attachment-types-for-application app))]
+      (ok :application (post-process-app app user)
+          :authorities (if (user/authority? user)
+                         (map #(select-keys % [:id :firstName :lastName]) (find-authorities-in-applications-organization app))
+                         [])
+          :permitSubtypes (permit/permit-subtypes (:permitType app))))
+    (fail :error.not-found)))
 
 (defquery application-authorities
   {:user-roles #{:authority}
@@ -698,8 +699,7 @@
    :input-validators [operation-validator]
    :pre-checks       [add-operation-allowed?]}
   [{:keys [application created] :as command}]
-  (let [op-id (mongo/create-id)
-        op (make-op operation created)
+  (let [op (make-op operation created)
         new-docs (make-documents nil created op application)
         organization (organization/get-organization (:organization application))]
     (update-application command {$push {:operations  op

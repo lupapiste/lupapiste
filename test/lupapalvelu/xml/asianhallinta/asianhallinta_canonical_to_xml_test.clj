@@ -96,11 +96,12 @@
       (let [links    (sxml/select1 xml-parsed [:UusiAsia :Viiteluvat])
             content  (sxml/children links)]
         (count content) => 2
-        (fact "Both have Tunnus and Sovellus"
+        (fact "Lupapistetunnus has Tunnus and Sovellus"
           (sxml/get-text (first content) [:Tunnus]) => (get-in application [:linkPermitData 0 :id])
-          (sxml/get-text (first content) [:Sovellus]) => "Lupapiste"
-          (sxml/get-text (second content) [:Tunnus]) => (get-in application [:linkPermitData 1 :id])
-          (sxml/get-text (second content) [:Sovellus]) => "Taustaj\u00E4rjestelm\u00E4")))))
+          (sxml/get-text (first content) [:Sovellus]) => "Lupapiste")
+
+        (fact "Other link permit is in AsianTunnus field"
+          (sxml/get-text (second content) [:AsianTunnus]) => (get-in application [:linkPermitData 1 :id]))))))
 
 (fl/facts* "UusiAsia xml from poikkeus"
   (let [application    (ua-mapping/enrich-application
