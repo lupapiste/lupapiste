@@ -15,23 +15,17 @@
     position: fixed;
     right: 0;
     left: 0;
-    top: 0;
-    bottom: 0;
-    margin: auto;
+    margin-top: 50px;
+    margin-left: auto;
+    margin-right: auto;
     z-index: 9999;
     padding: $marginM;
     background-color: #fff;
-    height: 700px;
     min-height: 250px;
     .component {
-      .content {
-        overflow: auto;
-        position: absolute;
-        top: 45px;
-        left: $marginM;
-        right: $marginM;
-        bottom: 75px;
-      }
+      overflow: auto;
+      margin: $marginM $marginM 75px $marginM;
+      min-height: 117px;
       .button-group {
         position: absolute;
         bottom: $marginL;
@@ -256,14 +250,12 @@
 }
 
 .authority-select-dialog {
-  height: 150px !important;
   select {
     width: 100%;
   }
 }
 
 .company-invite-dialog {
-  height: 250px !important;
   select {
     width: 100%;
   }
