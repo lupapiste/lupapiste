@@ -388,6 +388,7 @@
   {:parameters  "Vector of parameters. Parameters can be keywords or symbols. Symbols will be available in the action body. If a parameter is missing from request, an error will be raised."
    :user-roles  "Set of user role keywords."
    :user-authz-roles  "Set of application context role keywords."
+   :org-authz-roles "Set of application organization context role keywords"
    :description "Documentation string."
    :notified    "Boolean. Documents that the action will be sending (email) notifications."
    :pre-checks  "Vector of functions."
