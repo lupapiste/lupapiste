@@ -2552,7 +2552,7 @@ table.attachments-template-table td.attachment-version-info {
 /* line 59, ../sass/partials/_modal.scss */
 #modal-dialog .mask {
   position: fixed;
-  display: none;
+  display: block;
   z-index: 9000;
   left: 0;
   right: 0;
@@ -2560,6 +2560,7 @@ table.attachments-template-table td.attachment-version-info {
   bottom: 0;
   background-color: #000;
   opacity: 0.5;
+  filter: alpha(opacity=50) \9;
 }
 
 /* Z-index of .mask must lower than .window */

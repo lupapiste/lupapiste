@@ -6,7 +6,7 @@
     <!-- dummy div for catching keypress events -->
     <div data-bind="visible: false, documentEvent: {keypress: closeDialog, key: 27}"></div>
     <!-- ko if: showDialog -->
-    <div class="mask" data-bind="fader: dialogVisible, click: closeDialog"></div>
+    <div class="mask" data-bind="visible: dialogVisible, click: closeDialog"></div>
     <div class="dialog" id="modal-dialog-content" data-test-id="modal-dialog-content"
          data-bind="fader: dialogVisible, duration: 1000,
                     style: {'max-height': dialogHeightPx(),
