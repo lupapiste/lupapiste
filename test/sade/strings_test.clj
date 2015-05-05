@@ -56,12 +56,12 @@
   (fact (remove-leading-zeros "0000000") => "0")
   (fact (remove-leading-zeros "0000009") => "9"))
 
-(facts "pwz"
-  (pwz 4 "1")     => "0001"
-  (pwz 4 "12")    => "0012"
-  (pwz 4 "123")   => "0123"
-  (pwz 4 "1234")  => "1234"
-  (pwz 4 "12345") => "12345")
+(facts "zero-pad"
+  (zero-pad 4 "1")     => "0001"
+  (zero-pad 4 "12")    => "0012"
+  (zero-pad 4 "123")   => "0123"
+  (zero-pad 4 "1234")  => "1234"
+  (zero-pad 4 "12345") => "12345")
 
 (facts
   (fact (starts-with "foo" "f")    => truthy)
