@@ -10,7 +10,7 @@ Mikko creates an application, permit-type R
   Mikko logs in
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  approve-app${secs}
-  Create application the fast way  ${appname}  297  297-34-107-10  kerrostalo-rivitalo
+  Create application the fast way  ${appname}  297-34-107-10  kerrostalo-rivitalo
 
 Mikko sets himself the applicant
   Open tab  parties
@@ -40,7 +40,7 @@ Mikko creates an application, permit-type P
   Mikko logs in
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  approve-app${secs}
-  Create application the fast way  ${appname}  297  297-34-107-10  poikkeamis
+  Create application the fast way  ${appname}  297-34-107-10  poikkeamis
 
 Mikko sets himself the applicant and submits, doesn't see asianhallinta button and logsout
   Open tab  parties

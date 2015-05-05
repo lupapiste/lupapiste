@@ -400,8 +400,7 @@
         x: self.x(),
         address: self.addressString(),
         propertyId: util.prop.toDbFormat(self.propertyId()),
-        messages: isBlank(self.message()) ? [] : [self.message()],
-        municipality: self.municipality().id
+        messages: isBlank(self.message()) ? [] : [self.message()]
       })
       .processing(self.processing)
       .pending(self.pending)

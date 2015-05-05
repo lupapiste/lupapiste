@@ -12,7 +12,7 @@ Mikko opens an application
   Set Suite Variable  ${appname}  create-app${secs}
   Set Suite Variable  ${newName}  ${appname}-edit
   Set Suite Variable  ${propertyId}  753-423-2-41
-  Create application the fast way  ${appname}  753  ${propertyId}  kerrostalo-rivitalo
+  Create application the fast way  ${appname}  ${propertyId}  kerrostalo-rivitalo
 
 # Testing the case that was fixed with hotfix/repeating-element-saving
 # and later regression LUPA-1784

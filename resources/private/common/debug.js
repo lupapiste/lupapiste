@@ -19,7 +19,6 @@ jQuery(function($) {
       url: "/dev/create",
       data: { address: "Latokuja 3",
               propertyId: municipality + "-416-55-7",
-              municipality: municipality,
               operation: operation,
               x: "404369.304000",
               y: "6693806.957000" },

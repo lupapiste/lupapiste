@@ -10,7 +10,7 @@ Mikko creates new application
   Mikko logs in
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  foreman-app${secs}
-  Create application the fast way  ${appname}  753  753-416-25-22  kerrostalo-rivitalo
+  Create application the fast way  ${appname}  753-416-25-22  kerrostalo-rivitalo
   ${newApplicationid} =  Get Text  xpath=//span[@data-test-id='application-id']
   Set Suite Variable  ${newApplicationid}  ${newApplicationid}
 
