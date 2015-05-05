@@ -1,7 +1,6 @@
 (ns sade.util
   (:refer-clojure :exclude [pos? neg? zero?])
   (:require [clojure.walk :refer [postwalk prewalk]]
-            [clojure.string :refer [join]]
             [clojure.java.io :as io]
             [sade.strings :refer [numeric? decimal-number? trim] :as ss]
             [clj-time.format :as timeformat]
@@ -263,24 +262,6 @@
                 3 "%02d:%02d:%02d"
                 4 "%02d:%02d:%02d.%d")]
       (apply format fmt (map ->int matches)))))
-
-(def property-id-pattern
-  "Regex for property id human readable format"
-  #"^(\d{1,3})-(\d{1,3})-(\d{1,4})-(\d{1,4})$")
-
-(defn to-property-id [^String human-readable]
-  (let [parts (map #(Integer/parseInt % 10) (rest (re-matches property-id-pattern human-readable)))]
-    (apply format "%03d%03d%04d%04d" parts)))
-
-(def human-readable-property-id-pattern
-  "Regex for splitting db-saved property id to human readable form"
-  #"^([0-9]{1,3})([0-9]{1,3})([0-9]{1,4})([0-9]{1,4})$")
-
-(defn to-human-readable-property-id [property-id]
-  (->> (re-matches human-readable-property-id-pattern property-id)
-       (rest)
-       (map ->int)
-       (join "-")))
 
 (defn valid-email? [email]
   (try

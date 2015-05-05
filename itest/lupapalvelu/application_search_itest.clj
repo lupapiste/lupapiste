@@ -2,6 +2,7 @@
   (:require [midje.sweet :refer :all]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.factlet  :refer :all]
+            [sade.property :as p]
             ))
 
 (apply-remote-minimal)
@@ -23,7 +24,7 @@
         application (create-and-submit-application mikko
                       :municipality sonja-muni
                       :address "Hakukuja 123"
-                      :propertyId (sade.util/to-property-id property-id)
+                      :propertyId (p/to-property-id property-id)
                       :operation "muu-uusi-rakentaminen") => truthy
         application-id (:id application)
         id-matches? (fn [response]

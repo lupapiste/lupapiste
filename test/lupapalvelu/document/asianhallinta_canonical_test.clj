@@ -10,6 +10,7 @@
             [lupapalvelu.document.rakennuslupa_canonical-test :as rakennus-test]
             [sade.core :refer :all]
             [sade.strings :as ss]
+            [sade.property :as p]
             [sade.util :as util]))
 
 (defn- has-attachment-types [meta]
@@ -135,7 +136,7 @@
       (fact "Sijainti is correct"
         (get-in canonical [:UusiAsia :Sijainti :Sijaintipiste]) => (str (-> application :location :x) " " (-> application :location :y)))
       (fact "Kiinteistotunnus is human readable"
-        (get-in canonical [:UusiAsia :Kiinteistotunnus]) => (sade.util/to-human-readable-property-id (:propertyId application))))
+        (get-in canonical [:UusiAsia :Kiinteistotunnus]) => (p/to-human-readable-property-id (:propertyId application))))
 
     (facts "Canonical with attachments"
       (let [begin-of-link "sftp://localhost/test/"
