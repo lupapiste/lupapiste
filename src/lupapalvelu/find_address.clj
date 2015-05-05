@@ -4,6 +4,7 @@
             [clojure.data.zip.xml :refer [xml-> text]]
             [lupapalvelu.i18n :as i18n]
             [monger.query :as q]
+            [sade.strings :as ss]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.wfs :as wfs]))
 
@@ -106,15 +107,10 @@
 ;; Utils:
 ;;
 
-(defn- pwz
-  "Pad 's' with zeros so that its at least 'c' characters long"
-  [c s]
-  (apply str (conj (vec (repeat (- c (count s)) \0)) s)))
-
 (defn- to-property-id
   "Convert property ID elements to 'database' format"
   [a b c d]
-  (str (pwz 3 a) (pwz 3 b) (pwz 4 c) (pwz 4 d)))
+  (str (ss/pwz 3 a) (ss/pwz 3 b) (ss/pwz 4 c) (ss/pwz 4 d)))
 
 (defn- apply-search
   "Return a function that can be used as a target function in 'search' function.
