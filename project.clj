@@ -36,7 +36,7 @@
                  [org.apache.poi/poi-ooxml "3.11"]
                  [com.googlecode.htmlcompressor/htmlcompressor "1.5.2"]
                  [com.yahoo.platform.yui/yuicompressor "2.4.8" :exclusions [rhino/js]] ; http://jira.xwiki.org/browse/XWIKI-6148?focusedCommentId=59523#comment-59523
-                 [fi.sito/oskari "0.9.43"]
+                 [fi.sito/oskari "0.9.44"]
                  [slingshot "0.10.3"]
                  [com.google.zxing/javase "2.2"]
                  [org.geotoolkit/geotk-referencing "3.20-geoapi-3.0"]
