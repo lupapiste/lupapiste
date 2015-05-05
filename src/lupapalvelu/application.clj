@@ -745,7 +745,7 @@
                       validate-x validate-y]
    :pre-checks       [authority-if-post-verdict-state]}
   [{:keys [created application] :as command}]
-  (if (= (:municipality application) (organization/municipality-by-propertyId propertyId))
+  (if (= (:municipality application) (p/municipality-id-by-property-id propertyId))
     (do
       (update-application command
                           {$set {:location   (->location x y)
