@@ -13,7 +13,8 @@
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.organization :as o]
             [camel-snake-kebab :as csk]
-            [sade.strings :as ss]))
+            [sade.strings :as ss]
+            [lupapalvelu.logging :as logging]))
 
 ;;
 ;; local api
@@ -71,18 +72,11 @@
 ;; Actions
 ;;
 
-(defquery users-in-same-organizations
-  {:user-roles #{:authority}}
-  [{user :user}]
-  (let [users (mongo/select :users {:role "authority", :organizations {$in (->> user :orgAuthz keys)}})]
-    (ok :users (map user/summary users))))
-
 (defquery organization-by-user
-  {:description "Lists all organization users by organization."
+  {:description "Lists organization details."
    :user-roles #{:authorityAdmin}}
-  [{{:keys [organizations]} :user}]
-  (let [orgs (o/get-organizations {:_id {$in organizations}})
-        organization (first orgs)
+  [{user :user}]
+  (let [organization (o/get-organization (user/authority-admins-organization-id user))
         ops-with-attachments (organization-operations-with-attachments organization)
         selected-operations-with-permit-type (selected-operations-with-permit-types organization)]
     (ok :organization (-> organization
@@ -90,6 +84,14 @@
                                :selectedOperations selected-operations-with-permit-type)
                         (dissoc :operations-attachments :selected-operations))
         :attachmentTypes (organization-attachments organization))))
+
+(defquery user-organizations-for-permit-type
+  {:parameters [permitType]
+   :user-roles #{:authority}
+   :input-validators [permit/permit-type-validator]}
+  [{user :user}]
+  (ok :organizations (o/get-organizations {:_id {$in (user/organization-ids-by-roles user #{:authority})}
+                                           :scope {$elemMatch {:permitType permitType}}})))
 
 (defcommand update-organization
   {:description "Update organization details."
@@ -237,7 +239,9 @@
                               allowed-types (when permit-type (attachment/get-attachment-types-by-permit-type permit-type))
                               attachment-types (map (fn [[group id]] {:type-group group :type-id id}) attachments)]
                           (cond
-                            (not (selected-operations operation)) (fail :error.unknown-operation)
+                            (not (selected-operations operation)) (do
+                                                                    (error "Unknown operation: " (logging/sanitize 100 operation))
+                                                                    (fail :error.unknown-operation))
                             (not (every? (partial attachment/allowed-attachment-types-contain? allowed-types) attachment-types)) (fail :error.unknown-attachment-type))))]}
   [{user :user}]
   (o/update-organization (user/authority-admins-organization-id user) {$set {(str "operations-attachments." operation) attachments}})

@@ -2,6 +2,7 @@
   (:refer-clojure :exclude [pos? neg? zero?])
   (:require [clojure.walk :refer [postwalk prewalk]]
             [clojure.string :refer [join]]
+            [clojure.java.io :as io]
             [sade.strings :refer [numeric? decimal-number? trim] :as ss]
             [clj-time.format :as timeformat]
             [clj-time.coerce :as tc]
@@ -404,3 +405,10 @@
    returns true. pred must be free of side-effects."
   [pred coll]
   (first (filter pred coll)))
+
+(defn get-files-by-regex [path ^java.util.regex.Pattern regex]
+  "Takes all files (and folders) from given path and filters them by regex. Not recursive. Returns sequence of File objects."
+  {:pre [(instance? java.util.regex.Pattern regex) (string? path)]}
+  (filter
+    #(re-matches regex (.getName %))
+    (-> path io/file (.listFiles) seq)))

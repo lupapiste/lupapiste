@@ -69,7 +69,8 @@
 (defn update-n
   "Updates data into collection by query, returns a number of updated documents."
   [collection query data & {:as opts}]
-  (.getN (apply mc/update collection (merge isolated query) data (-> opts (assoc :write-concern WriteConcern/ACKNOWLEDGED) seq flatten))))
+  (let [options (-> (merge {:write-concern WriteConcern/ACKNOWLEDGED} opts) seq flatten)]
+    (.getN (apply mc/update collection (merge isolated query) data options))))
 
 (defn update
   "Updates data into collection by query. Always returns nil."
@@ -327,7 +328,9 @@
   (mc/ensure-index :app-links {:link 1})
   ; Disabled TTL for now: (mc/ensure-index :sign-processes {:created 1} {:expireAfterSeconds (env/value :onnistuu :timeout)})
   (mc/ensure-index :companies {:name 1} {:name "company-name"})
-  (mc/ensure-index :companies {:y 1} {:name "company-y"}))
+  (mc/ensure-index :companies {:y 1} {:name "company-y"})
+  (mc/ensure-index :perf-mon {:ts 1} {:expireAfterSeconds (env/value :monitoring :data-expiry)})
+  (mc/ensure-index :perf-mon-timing {:ts 1} {:expireAfterSeconds (env/value :monitoring :data-expiry)}))
 
 (defn clear! []
   (if-let [mode (db-mode)]

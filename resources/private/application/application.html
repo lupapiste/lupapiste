@@ -67,19 +67,7 @@
 
           <!-- Authorities: -->
           <!-- ko if: $root.authorization.ok('assign-application') -->
-          <div>
-            <p data-bind="ltext: 'application.assignee'"></p>
-            <span class="application_summary_text">
-              <select
-                data-bind="options: $root.authorities,
-                           optionsText: function(item) { return item.lastName + ' ' + item.firstName; },
-                           optionsValue: 'id',
-                           value: $root.application.assignee,
-                           optionsCaption: loc('choose')"
-                data-test-id="application-assigneed-authority">
-              </select>
-            </span>
-          </div>
+          <div data-bind="component: {name: 'authority-select', params: {kind: 'application'}}"></div>
           <!-- /ko -->
 
           <!-- Operations: -->

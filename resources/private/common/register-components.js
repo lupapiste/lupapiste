@@ -11,6 +11,8 @@ jQuery(document).ready(function() {
     "select-component",
     "string",
     "attachments-multiselect",
+    "authority-select",
+    "authority-select-dialog",
     "export-attachments",
     "neighbors-owners-dialog",
     "neighbors-edit-dialog",

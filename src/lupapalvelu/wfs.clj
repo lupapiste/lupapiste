@@ -6,10 +6,11 @@
             [clojure.zip :as zip]
             [clojure.data.zip.xml :refer [xml-> text attr=]]
             [sade.env :as env]
-            [sade.xml]
+            [sade.xml :as sxml]
             [sade.strings :as ss]
             [sade.util :refer [future*] :as util]
-            [sade.core :refer :all]))
+            [sade.core :refer :all]
+            [lupapalvelu.logging :as logging]))
 
 
 ;; SAX options
@@ -245,11 +246,24 @@
       :failure (do (errorf data "wfs failure: url=%s" url) nil)
       :ok      (let [features (-> data
                                 (s/replace "UTF-8" "ISO-8859-1")
-                                (->features sade.xml/startparse-sax-no-doctype "ISO-8859-1"))]
+                                (->features sxml/startparse-sax-no-doctype "ISO-8859-1"))]
                  (xml-> features :gml:featureMember)))))
 
 (defn post [url q]
   (exec :post url q))
+
+(defn wms-get
+  "WMS query with error handling. Returns response body or nil."
+  [url query-params]
+  (let [{:keys [status body]} (http/get url {:query-params query-params})
+        error (when (ss/contains body "ServiceException")
+                (-> body ss/trim
+                  (->features startparse-sax-non-validating "UTF-8")
+                  (xml-> :ServiceException)
+                  first text ss/trim))]
+    (if (or (not= 200 status) error)
+      (errorf "Failed to get %s (status %s): %s" url status (logging/sanitize 1000 error))
+      body)))
 
 ;;
 ;; Public queries:
@@ -335,24 +349,24 @@
 
 (defn plan-info-by-point [x y municipality]
   (let [bbox [(- (util/->double x) 128) (- (util/->double y) 128) (+ (util/->double x) 128) (+ (util/->double y) 128)]
-        {:keys [url layers format]} (plan-info-config municipality)]
-    (:body (http/get url
-             {:query-params {"REQUEST" "GetFeatureInfo"
-                             "EXCEPTIONS" "application/vnd.ogc.se_xml"
-                             "SERVICE" "WMS"
-                             "INFO_FORMAT" format
-                             "QUERY_LAYERS" layers
-                             "FEATURE_COUNT" "50"
-                             "Layers" layers
-                             "WIDTH" "256"
-                             "HEIGHT" "256"
-                             "format" "image/png"
-                             "styles" ""
-                             "srs" "EPSG:3067"
-                             "version" "1.1.1"
-                             "x" "128"
-                             "y" "128"
-                             "BBOX" (s/join "," bbox)}}))))
+        {:keys [url layers format]} (plan-info-config municipality)
+        query {"REQUEST" "GetFeatureInfo"
+               "EXCEPTIONS" "application/vnd.ogc.se_xml"
+               "SERVICE" "WMS"
+               "INFO_FORMAT" format
+               "QUERY_LAYERS" layers
+               "FEATURE_COUNT" "50"
+               "Layers" layers
+               "WIDTH" "256"
+               "HEIGHT" "256"
+               "format" "image/png"
+               "styles" ""
+               "srs" "EPSG:3067"
+               "version" "1.1.1"
+               "x" "128"
+               "y" "128"
+               "BBOX" (s/join "," bbox)}]
+    (wms-get url query)))
 
 ;;; Mikkeli is special because it was done first and they use Bentley WMS
 (defn gfi-to-features-mikkeli [gfi _]
@@ -382,9 +396,8 @@
      :type "sito"}))
 
 (defn general-plan-info-by-point [x y]
-  (let [bbox [(- (util/->double x) 128) (- (util/->double y) 128) (+ (util/->double x) 128) (+ (util/->double y) 128)]]
-    (:body (http/get wms-url
-             {:query-params {"REQUEST" "GetFeatureInfo"
+  (let [bbox [(- (util/->double x) 128) (- (util/->double y) 128) (+ (util/->double x) 128) (+ (util/->double y) 128)]
+        query {"REQUEST" "GetFeatureInfo"
                              "EXCEPTIONS" "application/vnd.ogc.se_xml"
                              "SERVICE" "WMS"
                              "INFO_FORMAT" "application/vnd.ogc.gml"
@@ -399,7 +412,8 @@
                              "version" "1.1.1"
                              "x" "128"
                              "y" "128"
-                             "BBOX" (s/join "," bbox)}}))))
+                             "BBOX" (s/join "," bbox)}]
+    (wms-get wms-url query)))
 
 (defn gfi-to-general-plan-features [gfi]
   (when gfi

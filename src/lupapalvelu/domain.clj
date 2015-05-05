@@ -15,7 +15,7 @@
 ;;
 
 (defn basic-application-query-for [user]
-  (let [organizations (user/organization-ids-by-roles user #{:authority :reader :rest-api})]
+  (let [organizations (user/organization-ids-by-roles user #{:authority :reader})]
     (case (keyword (:role user))
       :applicant    (if-let [company-id (get-in user [:company :id])]
                       {$or [{:auth.id (:id user)} {:auth.id company-id}]}
@@ -111,6 +111,14 @@
   [command application]
   (when-not (owner-or-write-access? application (-> command :user :id))
     unauthorized))
+
+;;
+;; assignee
+;;
+
+(defn assigned? [{authority :authority :as application}]
+  {:pre [(map? authority)]}
+  (-> authority :id nil? not))
 
 ;;
 ;; documents
@@ -216,7 +224,7 @@
    :applicant                ""
    :attachments              []
    :auth                     []
-   :authority                {}
+   :authority                {:firstName "", :lastName "", :id nil}
    :authorityNotice          ""
    :buildings                []
    :closed                   nil ; timestamp

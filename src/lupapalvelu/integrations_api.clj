@@ -83,7 +83,7 @@
         app-updates (merge
                       {:modified created
                        :sent created
-                       :authority (if (seq (:authority application)) (:authority application) (user/summary user))} ; LUPA-1450
+                       :authority (if (domain/assigned? application) (:authority application) (user/summary user))} ; LUPA-1450
                       (if (or jatkoaika-app? foreman-notice?)
                         {:state :closed :closed created}
                         {:state :sent}))
@@ -216,15 +216,15 @@
   [{:keys [application created user]:as command}]
   (let [application (meta-fields/enrich-with-link-permit-data application)
         application (if-let [kuntalupatunnus (fetch-linked-kuntalupatunnus application)]
-                      (update-in application 
-                                 [:linkPermitData] 
+                      (update-in application
+                                 [:linkPermitData]
                                  conj {:id kuntalupatunnus
                                        :type "kuntalupatunnus"})
                       application)
         submitted-application (mongo/by-id :submitted-applications id)
         app-updates {:modified created
                      :sent created
-                     :authority (if (seq (:authority application)) (:authority application) (user/summary user))
+                     :authority (if (domain/assigned? application) (:authority application) (user/summary user))
                      :state :sent}
         organization (organization/get-organization (:organization application))
         indicator-updates (application/mark-indicators-seen-updates application user created)

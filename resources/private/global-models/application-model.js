@@ -33,6 +33,9 @@ LUPAPISTE.ApplicationModel = function() {
   self.operationsCount = ko.observable();
   self.applicant = ko.observable();
   self.assignee = ko.observable();
+  self.applicantPhone = ko.observable();
+  self.authority = ko.observable({});
+  self.neighbors = ko.observable([]);
   self.statements = ko.observable([]);
   self.tasks = ko.observable([]);
   self.tosFunction = ko.observable();
@@ -284,10 +287,8 @@ LUPAPISTE.ApplicationModel = function() {
     ajax.command("refresh-ktj", {id: self.id()})
       .success(function() {
         self.reload();
-        //FIXME parempi tapa ilmoittaa onnistumisesta
-        notify.success("KTJ tiedot p\u00e4ivitetty",model);
-      })//FIXME parempi/tyylikaampi virheilmoitus
-      .error(function(resp) {alert(resp.text);})
+        LUPAPISTE.ModalDialog.showDynamicOk(loc("integration.title"), loc("application.refreshed"));
+      })
       .processing(self.processing)
       .call();
       hub.send("track-click", {category:"Application", label:"", event:"refreshKTJ"});
@@ -320,7 +321,7 @@ LUPAPISTE.ApplicationModel = function() {
   };
 
   self.canSubscribe = function(model) {
-    return model.role() !== "statementGiver" && currentUser && (currentUser.isAuthority() || currentUser.id() ===  model.id());
+    return model.role() !== "statementGiver" && lupapisteApp.models.currentUser && (lupapisteApp.models.currentUser.isAuthority() || lupapisteApp.models.currentUser.id() ===  model.id());
   };
 
   self.manageSubscription = function(command, model) {

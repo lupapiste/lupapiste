@@ -128,7 +128,7 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel, verdictAttachme
     var postAttachments = attachmentUtils.getPostAttachments(rawAttachments);
 
     // pre verdict attachments are not editable after verdict has been given
-    var preGroupEditable = currentUser.isAuthority() || !_.contains(LUPAPISTE.config.postVerdictStates, appModel.state());
+    var preGroupEditable = lupapisteApp.models.currentUser.isAuthority() || !_.contains(LUPAPISTE.config.postVerdictStates, appModel.state());
     var preGrouped = attachmentUtils.getGroupByOperation(preAttachments, preGroupEditable, self.appModel.allowedAttachmentTypes());
 
     var postGrouped = attachmentUtils.getGroupByOperation(postAttachments, true, self.appModel.allowedAttachmentTypes());
@@ -217,6 +217,7 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel, verdictAttachme
 
   self.attachmentTemplatesModel = new function() {
     var templateModel = this;
+
     templateModel.ok = function(ids) {
       ajax.command("create-attachments", {id: self.appModel.id(), attachmentTypes: ids})
         .success(function() { repository.load(self.appModel.id()); })
@@ -226,7 +227,10 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel, verdictAttachme
 
     templateModel.init = function() {
       templateModel.selectm = $("#dialog-add-attachment-templates .attachment-templates").selectm();
-      templateModel.selectm.ok(templateModel.ok).cancel(LUPAPISTE.ModalDialog.close);
+      templateModel.selectm
+        .allowDuplicates(true)
+        .ok(templateModel.ok)
+        .cancel(LUPAPISTE.ModalDialog.close);
       return templateModel;
     };
 

@@ -834,6 +834,39 @@
     {:documents {$elemMatch {$or [{:data.patevyys.koulutusvalinta.value "muu"}
                                   {:data.patevyys-tyonjohtaja.koulutusvalinta.value "muu"}]}}}))
 
+(defmigration remove-organizations-field-from-dummy-and-applicant
+  {:apply-when (pos? (mongo/count :users {$and [{:organizations {$exists true}} {:role {$in ["dummy", "applicant"]}}]}))}
+  (mongo/update-by-query :users {$and [{:organizations {$exists true}} {:role {$in ["dummy", "applicant"]}}]} {$unset {:organizations 1}}))
+
+(defn organizations->org-authz [coll]
+  (let [users (mongo/select coll {:organizations {$exists true}})]
+    (reduce + 0
+            (for [{:keys [organizations id role]} users]
+              (let [org-authz (into {} (for [org organizations] [(str "orgAuthz." org) [role]]))]
+                (if (empty? org-authz)
+                  (mongo/update-n coll {:_id id} {$set {:orgAuthz {}}
+                                                  $unset {:organizations 1}})
+                  (mongo/update-n coll {:_id id} {$set org-authz
+                                                  $unset {:organizations 1}})))))))
+
+(defmigration add-org-authz
+  {:apply-when (pos? (mongo/count :users {:organizations {$exists true}}))}
+  (organizations->org-authz :users))
+
+(defmigration tyonjohtaja-v1-vastuuaika-cleanup
+  {:apply-when (pos? (mongo/count :applications {:documents {$elemMatch {"schema-info.name" "tyonjohtaja", "data.vastuuaika" {$exists true}}}}))}
+  (update-applications-array
+    :documents
+    (fn [doc]
+      (if (= (-> doc :schema-info :name) "tyonjohtaja")
+        (util/dissoc-in doc [:data :vastuuaika])
+        doc))
+    {:documents {$elemMatch {"schema-info.name" "tyonjohtaja", "data.vastuuaika" {$exists true}}}}))
+
+(defmigration application-authority-default-keys
+  {:apply-when (pos? (mongo/count :applications {:authority.lastName {$exists false}}))}
+  (mongo/update-n :applications {:authority.lastName {$exists false}} {$set {:authority (:authority domain/application-skeleton)}} :multi true))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"

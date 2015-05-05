@@ -133,7 +133,7 @@
                          :propertyId "29703401070010"
                          :y 6965051.2333374 :x 535179.5
                          :address "Suusaarenkierto 44")
-          application (query-application pena app-id) => truthy          
+          application (query-application pena app-id) => truthy
           organization (organization/resolve-organization velho-muni (:permitType application)) => truthy
           scope  (organization/resolve-organization-scope velho-muni (:permitType application) organization) => truthy]
 
@@ -165,25 +165,21 @@
             (let [contents (sxml/select xml [:UusiAsia :Viiteluvat :Viitelupa])]
               (fact "Three link permits are present" (count contents) => 3)
 
-              (fact "One is link to LP application" 
-                (some 
-                  #(and 
+              (fact "One is link to LP application"
+                (some
+                  #(and
                     (= link-app-id (sxml/get-text % [:Viitelupa :MuuTunnus :Tunnus]))
-                    (= "Lupapiste" (sxml/get-text % [:Viitelupa :MuuTunnus :Sovellus]))) 
+                    (= "Lupapiste" (sxml/get-text % [:Viitelupa :MuuTunnus :Sovellus])))
                   contents) => truthy)
 
-              (fact "One is link to link-permit's verdict" 
-                (some 
-                  #(and 
-                    (= "KLTunnus1" (sxml/get-text % [:Viitelupa :MuuTunnus :Tunnus]))
-                    (= "Taustaj\u00E4rjestelm\u00E4" (sxml/get-text % [:Viitelupa :MuuTunnus :Sovellus]))) 
+              (fact "One is link to link-permit's verdict"
+                (some
+                  #(= "KLTunnus1" (sxml/get-text % [:Viitelupa :AsianTunnus]))
                   contents) => truthy)
 
-              (fact "One is link to manual link" 
-                (some 
-                  #(and 
-                    (= manual-link (sxml/get-text % [:Viitelupa :MuuTunnus :Tunnus]))
-                    (= "Taustaj\u00E4rjestelm\u00E4" (sxml/get-text % [:Viitelupa :MuuTunnus :Sovellus]))) 
+              (fact "One is link to manual link"
+                (some
+                  #(= manual-link (sxml/get-text % [:Viitelupa :AsianTunnus]))
                   contents) => truthy)))))))
 
   (facts "AsianTaydennys"

@@ -12,7 +12,7 @@ Jos linkki ei toimi, kopioi osoite ja liit&auml; se selaimen osoiteriville.
 
 din ans&ouml;kan har avgjorts. Du kan se beslutet under fliken &quot;Beslut&quot;. Bekanta dig noga med beslutets inneh&aring;ll och tillst&aring;ndsvillkoren.
 
-{{link-fi}}
+{{link-sv}}
 
 Om l&auml;nken inte fungerar, kopiera adressen och klistra in den i webbl&auml;sarens adressf&auml;lt.
 
