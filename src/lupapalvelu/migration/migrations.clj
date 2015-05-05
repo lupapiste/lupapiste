@@ -865,7 +865,7 @@
 
 (defmigration application-authority-default-keys
   {:apply-when (pos? (mongo/count :applications {:authority.lastName {$exists false}}))}
-  (mongo/update-n :applications {$set {:authority (:authority domain/application-skeleton)}}))
+  (mongo/update-n :applications {:authority.lastName {$exists false}} {$set {:authority (:authority domain/application-skeleton)}} :multi true))
 
 ;;
 ;; ****** NOTE! ******
