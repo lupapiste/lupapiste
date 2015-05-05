@@ -16,6 +16,8 @@ var attachment = (function() {
       .success(function() {
         repository.load(applicationId);
         window.location.hash = "!/application/"+applicationId+"/attachments";
+        model.previewDisabled(false);
+        hub.send("close-dialog");
         return false;
       })
       .call();
@@ -42,8 +44,8 @@ var attachment = (function() {
 
   // These cannot be changed to use LUPAPISTE.ModalDialog.showDynamicYesNo,
   // because the ids are registered with hub.subscribe.
-  LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-delete-attachment",
-    loc("attachment.delete.header"), loc("attachment.delete.message"), loc("yes"), deleteAttachmentFromServer, loc("no"));
+  // LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-delete-attachment",
+  //   loc("attachment.delete.header"), loc("attachment.delete.message"), loc("yes"), deleteAttachmentFromServer, loc("no"));
   LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-delete-attachment-version",
     loc("attachment.delete.version.header"), loc("attachment.delete.version.message"), loc("yes"), function() {deleteAttachmentVersionFromServerProxy();}, loc("no"));
 
@@ -178,7 +180,12 @@ var attachment = (function() {
 
     deleteAttachment: function() {
       model.previewDisabled(true);
-      LUPAPISTE.ModalDialog.open("#dialog-confirm-delete-attachment");
+      // LUPAPISTE.ModalDialog.open("#dialog-confirm-delete-attachment");
+      hub.send("show-dialog", {title: "attachment.delete.header",
+                               size: "medium",
+                               component: "yes-no-dialog",
+                               componentParams: {text: "attachment.delete.message",
+                                                 yesFn: deleteAttachmentFromServer}});
     },
 
     previousAttachment: function() {
@@ -494,9 +501,9 @@ var attachment = (function() {
     resetUploadIframe();
     model.previewDisabled(false);
   });
-  hub.subscribe({type: "dialog-close", id : "dialog-confirm-delete-attachment"}, function() {
-    model.previewDisabled(false);
-  });
+  // hub.subscribe({type: "dialog-close", id : "dialog-confirm-delete-attachment"}, function() {
+  //   model.previewDisabled(false);
+  // });
   hub.subscribe({type: "dialog-close", id : "dialog-confirm-delete-attachment-version"}, function() {
     model.previewDisabled(false);
   });
