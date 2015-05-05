@@ -12,6 +12,7 @@
             [lupapalvelu.operations :as operations]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.organization :as o]
+            [lupapalvelu.application :as application]
             [camel-snake-kebab :as csk]
             [sade.strings :as ss]
             [lupapalvelu.logging :as logging]))
@@ -325,7 +326,7 @@
                           (fail :error.illegal-key)))
                       (fn [{{url :val} :data}]
                         (when-not (ss/blank? url)
-                          (lupapalvelu.application/validate-url url)))]}
+                          (application/validate-url url)))]}
   [{user :user}]
   (let [key    (csk/->kebab-case key)
         org-id (user/authority-admins-organization-id user)]
