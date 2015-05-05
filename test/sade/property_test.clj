@@ -11,3 +11,11 @@
 (facts "to-human-readable-property-id"
   (to-human-readable-property-id "24500301050006") => "245-3-105-6"
   (to-human-readable-property-id "00500301050006") => "5-3-105-6")
+
+(facts "municipality-id-by-property-id"
+  (municipality-id-by-property-id nil) => nil
+  (municipality-id-by-property-id "") => nil
+  (municipality-id-by-property-id "245-003-0105-0006") => "245"
+  (municipality-id-by-property-id "05-03-0105-006") => "005"
+  (municipality-id-by-property-id "24500301050006") => "245"
+  (municipality-id-by-property-id "00500301050006") => "005")

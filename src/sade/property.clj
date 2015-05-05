@@ -1,5 +1,6 @@
 (ns sade.property
   (:require [clojure.string :as s]
+            [sade.strings :as ss]
             [sade.util :as util]))
 
 (def property-id-pattern
@@ -10,12 +11,26 @@
   (let [parts (map #(Integer/parseInt % 10) (rest (re-matches property-id-pattern human-readable)))]
     (apply format "%03d%03d%04d%04d" parts)))
 
-(def human-readable-property-id-pattern
+(def db-property-id-pattern
   "Regex for splitting db-saved property id to human readable form"
   #"^([0-9]{1,3})([0-9]{1,3})([0-9]{1,4})([0-9]{1,4})$")
 
 (defn to-human-readable-property-id [^String property-id]
-  (->> (re-matches human-readable-property-id-pattern property-id)
+  (->> (re-matches db-property-id-pattern property-id)
     rest
     (map util/->int)
     (s/join "-")))
+
+(def municipality-mapping {})
+
+(defn- take-municipality [[match s _1 _2 _4]]
+  (let [municipality (ss/zero-pad 3 s)]
+    (get municipality-mapping municipality municipality)))
+
+(defn municipality-id-by-property-id [^String property-id]
+  (when (string? property-id)
+    (condp re-find (s/trim property-id)
+      property-id-pattern    :>> take-municipality
+      db-property-id-pattern :>> take-municipality
+      nil))
+  )
