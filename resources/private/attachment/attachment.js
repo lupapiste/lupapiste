@@ -42,13 +42,6 @@ var attachment = (function() {
     return false;
   }
 
-  // These cannot be changed to use LUPAPISTE.ModalDialog.showDynamicYesNo,
-  // because the ids are registered with hub.subscribe.
-  // LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-delete-attachment",
-  //   loc("attachment.delete.header"), loc("attachment.delete.message"), loc("yes"), deleteAttachmentFromServer, loc("no"));
-  LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-delete-attachment-version",
-    loc("attachment.delete.version.header"), loc("attachment.delete.version.message"), loc("yes"), function() {deleteAttachmentVersionFromServerProxy();}, loc("no"));
-
   function ApproveModel(authorizationModel) {
     var self = this;
 
@@ -180,7 +173,6 @@ var attachment = (function() {
 
     deleteAttachment: function() {
       model.previewDisabled(true);
-      // LUPAPISTE.ModalDialog.open("#dialog-confirm-delete-attachment");
       hub.send("show-dialog", {title: "attachment.delete.header",
                                size: "medium",
                                component: "yes-no-dialog",
@@ -211,9 +203,17 @@ var attachment = (function() {
 
     deleteVersion: function(fileModel) {
       var fileId = fileModel.fileId;
-      deleteAttachmentVersionFromServerProxy = function() { deleteAttachmentVersionFromServer(fileId); };
+      deleteAttachmentVersionFromServerProxy = function() {
+        deleteAttachmentVersionFromServer(fileId);
+        model.previewDisabled(false);
+        hub.send("close-dialog");
+      };
       model.previewDisabled(true);
-      LUPAPISTE.ModalDialog.open("#dialog-confirm-delete-attachment-version");
+      hub.send("show-dialog", {title: "attachment.delete.version.header",
+                               size: "medium",
+                               component: "yes-no-dialog",
+                               componentParams: {text: "attachment.delete.version.message",
+                                                 yesFn: deleteAttachmentVersionFromServerProxy}});
     },
 
     sign: function() {
@@ -367,7 +367,7 @@ var attachment = (function() {
             return {
               typeLabel: attachmentTypeLabel(typeGroup[0], type),
               typeValue: attachmentType(typeGroup[0], type)
-            }
+            };
           })
         };
       });
@@ -378,7 +378,7 @@ var attachment = (function() {
     };
 
     self.ok = function() {
-      hub.send("change-attachment-type", {attachmentType: self.attachmentType()})
+      hub.send("change-attachment-type", {attachmentType: self.attachmentType()});
       LUPAPISTE.ModalDialog.close();
     };
   }
@@ -499,12 +499,6 @@ var attachment = (function() {
 
   hub.subscribe({type: "dialog-close", id : "upload-dialog"}, function() {
     resetUploadIframe();
-    model.previewDisabled(false);
-  });
-  // hub.subscribe({type: "dialog-close", id : "dialog-confirm-delete-attachment"}, function() {
-  //   model.previewDisabled(false);
-  // });
-  hub.subscribe({type: "dialog-close", id : "dialog-confirm-delete-attachment-version"}, function() {
     model.previewDisabled(false);
   });
   hub.subscribe({type: "dialog-close", id : "dialog-sign-attachment"}, function() {
