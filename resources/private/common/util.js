@@ -134,7 +134,7 @@ var util = (function($) {
   function isNotPartyDoc(doc) { return !isPartyDoc(doc); }
 
   function isValidFinnishY(y) {
-    var m = /^FI(\d{7})-(\d)$/.exec(y || ""),
+    var m = /^(\d{7})-(\d)$/.exec(y || ""),
         number = m && m[1],
         check  = m && m[2];
 
@@ -151,18 +151,8 @@ var util = (function($) {
     return cn === parseInt(check, 10);
   }
 
-  function isValidNonFinnishY(y) {
-    var m = /^([A-Z]{2})\w+/.exec(y),
-        c = m && m[1];
-    return c && c !== "FI";
-  }
-
   function isValidY(y) {
-    return isValidFinnishY(y) || isValidFinnishY("FI" + y) || isValidNonFinnishY(y);
-  }
-
-  function coerceNationalY(y) {
-    return isValidFinnishY("FI" + y) ? "FI" + y : y;
+    return isValidFinnishY(y);
   }
 
   function isValidFinnishOVT(ovt) {
@@ -170,7 +160,7 @@ var util = (function($) {
         y = m && m[1],
         c = m && m[2];
     if (!y || !c) { return false; }
-    return isValidY("FI" + y + "-" + c);
+    return isValidY(y + "-" + c);
   }
 
   function isValidNonFinnishOVT(ovt) {
@@ -203,7 +193,6 @@ var util = (function($) {
     isValidEmailAddress: isValidEmailAddress,
     isValidPassword:     isValidPassword,
     isValidY:            isValidY,
-    coerceNationalY:     coerceNationalY,
     isValidOVT:          isValidOVT,
     prop: {
       isPropertyId:           isPropertyId,

@@ -222,9 +222,8 @@
   (fact (y? nil)           => falsey)
   (fact (y? "")            => falsey)
   (fact (y? "foo")         => falsey)
-  (fact (y? "FI2341529-4") => falsey)
-  (fact (y? "FI2341528-4") => truthy)
-  (fact (y? "SW123456789") => truthy))
+  (fact (y? "2341529-4")   => falsey)
+  (fact (y? "2341528-4")   => truthy))
 
 (facts ovt?
   (fact (ovt? nil)             => falsey)
