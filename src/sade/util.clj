@@ -415,8 +415,7 @@
     (-> path io/file (.listFiles) seq)))
 
 (defn select-values [m keys]
-  (->> (map #(get m %) keys)
-       (remove nil?)))
+  (->> (map #(get m %) keys)))
 
 (defn validate-url [url]
   ; Regex derived from @stephenhay's at https://mathiasbynens.be/demo/url-regex

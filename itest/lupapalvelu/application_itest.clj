@@ -18,7 +18,7 @@
    (create-app pena :x "2" :y "1.0")                      =not=> ok?
    (create-app pena :x "410000.1" :y "6610000.1")         => ok?)
 
-(fact "creating application without message"
+#_((fact "creating application without message"
   (let [id    (create-app-id pena)
         app   (query-application pena id)]
     app => (contains {:id id
@@ -183,10 +183,23 @@
 
     (fact "Authority is able to add operation"
       (success (command veikko :add-operation :id application-id :operation "muu-uusi-rakentaminen")) => true)))
+)
 
+(facts "link to backend system"
+  (let [application    (create-and-submit-application mikko :municipality sonja-muni)
+        application-id (:id application)
+        _              (command sonja :approve-application :id application-id :lang "fi")]
+    (facts "no vendor backend id (kuntalupatunnus)"
+      (fact* "redirects to LP backend url if configured"
+        (let [_    (command sipoo :save-vendor-backend-redirect-config :key :vendorBackendUrlForLpId :val "http://www.google.com?q=") => ok?
+              resp (raw sonja :redirect-to-vendor-backend :id application-id)]
+          resp => http303?)
+        )
+      )
+    )
+  )
 
-
-(fact "Pena cannot create app for organization that has new applications disabled"
+#_((fact "Pena cannot create app for organization that has new applications disabled"
   (let [resp  (create-app pena :municipality "997")]
     resp =not=> ok?
     (:text resp) => "error.new-applications-disabled"))
@@ -402,4 +415,4 @@
       (command sonja :change-location :id application-id
                :x (-> application :location :x) - 1
                :y (-> application :location :y) + 1
-               :address (:address application) :propertyId (:propertyId application)) => ok?)))
+               :address (:address application) :propertyId (:propertyId application)) => ok?))))

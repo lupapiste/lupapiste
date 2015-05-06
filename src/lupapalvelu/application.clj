@@ -999,7 +999,7 @@
   (-> (organization/get-organization org-id)
       :vendor-backend-redirect
       (util/select-values [:vendor-backend-url-for-backend-id
-                      :vendor-backend-url-for-lp-id])))
+                           :vendor-backend-url-for-lp-id])))
 
 (defn- correct-urls-configured [_ {:keys [verdicts organization] :as application}]
   (when application
@@ -1008,6 +1008,9 @@
           lp-id-url-missing?         (ss/blank? lp-id-url)
           both-urls-missing?         (and lp-id-url-missing?
                                           (ss/blank? backend-id-url))]
+      (prn organization)
+      (prn backend-id-url lp-id-url)
+      (prn (get-backend-and-lp-urls organization))
       (if vendor-backend-id
         (when both-urls-missing?
           (fail :error.vendor-urls-not-set))
