@@ -1,0 +1,8 @@
+new-company-admin-user.subject: Kutsu Lupapiste-palveluun yritystilin pääkäyttäjäksi
+register.company.user-limit.reached:  Yritystilin maksimi käyttäjämäärä saavutettu.
+
+tos-editor: Tiedonohjaussuunnitelman muokkaaja
+tos-publisher: Tiedonohjaussuunnitelman julkaisija
+auth-admin.add-dialog.roles: Käyttäjäroolit
+
+users.table.organizationsAndRoles: Organisaatiot ja roolit

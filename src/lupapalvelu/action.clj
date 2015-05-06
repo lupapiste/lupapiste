@@ -115,6 +115,13 @@
       (partial some #(or (nil? %) (and (string? %) (s/blank? %))))
       :error.vector-parameters-with-blank-items )))
 
+(defn vector-parameters-with-at-least-n-non-blank-items [n params command]
+  (or
+    (vector-parameters-with-non-blank-items params command)
+    (filter-params-of-command params command
+      #(> n (count %))
+      :error.vector-parameters-with-items-missing-required-keys)))
+
 (defn vector-parameters-with-map-items-with-required-keys [params required-keys command]
   (or
     (vector-parameters params command)
