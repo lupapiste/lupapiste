@@ -981,11 +981,6 @@
     (try (autofill-rakennuspaikka application created)
          (catch Exception e (error e "KTJ data was not updated")))))
 
-(defn validate-url [url]
-  ; Regex derived from @stephenhay's at https://mathiasbynens.be/demo/url-regex
-  (when-not (re-matches #"^(https?)://[^\s/$.?#].[^\s]*$" url)
-    (fail :error.invalid.url)))
-
 (defn- validate-organization-backend-urls [_ {org-id :organization}]
   (when org-id
     (let [org (organization/get-organization org-id)]
@@ -1013,9 +1008,9 @@
           lp-id-url-missing?         (ss/blank? lp-id-url)
           both-urls-missing?         (and lp-id-url-missing?
                                           (ss/blank? backend-id-url))]
-      (if (and vendor-backend-id
-               both-urls-missing?)
-        (fail :error.vendor-urls-not-set)
+      (if vendor-backend-id
+        (when both-urls-missing?
+          (fail :error.vendor-urls-not-set))
         (when lp-id-url-missing?
           (fail :error.vendor-urls-not-set))))))
 
