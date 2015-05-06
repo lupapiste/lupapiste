@@ -12,30 +12,9 @@ LUPAPISTE.ApplicationModel = function() {
   self.infoRequest = ko.observable();
   self.openInfoRequest = ko.observable();
   self.state = ko.observable();
-  self.inPostVerdictState = ko.observable(false);
-  self.summaryAvailable = ko.computed(function() {
-    return self.inPostVerdictState() || self.state() === "canceled";
-  });
   self.submitted = ko.observable();
   self.location = ko.observable();
   self.municipality = ko.observable();
-  self.organizationMeta = ko.observable();
-  self.asianhallintaEnabled = ko.computed(function() {
-    return self.organizationMeta() ? self.organizationMeta().asianhallinta() : false;
-  });
-  self.organizationLinks = ko.computed(function() {
-    return self.organizationMeta() ? self.organizationMeta().links() : "";
-  });
-  self.organizationName = ko.computed(function() {
-    return self.organizationMeta() ? self.organizationMeta().name() : "";
-  });
-  self.requiredFieldsFillingObligatory = ko.computed(function() {
-    return self.organizationMeta() ? self.organizationMeta().requiredFieldsFillingObligatory() : false;
-  });
-  self.incorrectlyFilledRequiredFields = ko.observable([]);
-  self.hasIncorrectlyFilledRequiredFields = ko.computed(function() {
-    return self.incorrectlyFilledRequiredFields() && self.incorrectlyFilledRequiredFields().length > 0;
-  });
   self.permitType = ko.observable("R");
   self.propertyId = ko.observable();
   self.title = ko.observable();
@@ -53,6 +32,7 @@ LUPAPISTE.ApplicationModel = function() {
   self.permitSubtype = ko.observable();
   self.operationsCount = ko.observable();
   self.applicant = ko.observable();
+  self.assignee = ko.observable();
   self.applicantPhone = ko.observable();
   self.authority = ko.observable({});
   self.neighbors = ko.observable([]);
@@ -60,6 +40,42 @@ LUPAPISTE.ApplicationModel = function() {
   self.tasks = ko.observable([]);
   self.tosFunction = ko.observable();
   self.metadataList = ko.observableArray();
+  
+  // Application indicator metadata fields
+  self.unseenStatements = ko.observable();
+  self.unseenVerdicts = ko.observable();
+  self.unseenComments = ko.observable();
+  self.attachmentsRequiringAction = ko.observable();
+
+  // Application metadata fields
+  self.inPostVerdictState = ko.observable(false);
+  self.inPostSubmittedState = ko.observable(false); // TODO: remove
+  self.vendorBackendId = ko.observable(); // TODO: remove
+  self.applicantPhone = ko.observable();
+  self.organizationMeta = ko.observable();
+  self.neighbors = ko.observable([]);
+  self.submittable = ko.observable(true);
+
+  self.asianhallintaEnabled = ko.computed(function() {
+    return self.organizationMeta() ? self.organizationMeta().asianhallinta() : false;
+  });
+  self.organizationLinks = ko.computed(function() {
+    return self.organizationMeta() ? self.organizationMeta().links() : "";
+  });
+  self.organizationName = ko.computed(function() {
+    return self.organizationMeta() ? self.organizationMeta().name() : "";
+  });
+  self.requiredFieldsFillingObligatory = ko.computed(function() {
+    return self.organizationMeta() ? self.organizationMeta().requiredFieldsFillingObligatory() : false;
+  });
+  self.incorrectlyFilledRequiredFields = ko.observable([]);
+  self.hasIncorrectlyFilledRequiredFields = ko.computed(function() {
+    return self.incorrectlyFilledRequiredFields() && self.incorrectlyFilledRequiredFields().length > 0;
+  });
+
+  self.summaryAvailable = ko.computed(function() {
+    return self.inPostVerdictState() || self.state() === "canceled";
+  });
 
   self.taskGroups = ko.computed(function() {
     var tasks = ko.toJS(self.tasks) || [];
@@ -96,8 +112,7 @@ LUPAPISTE.ApplicationModel = function() {
   });
 
   self.foremanTasks = ko.observable();
-  self.submittable = ko.observable(true);
-
+  
   self.buildings = ko.observable([]);
   self.nonpartyDocumentIndicator = ko.observable(0);
   self.partyDocumentIndicator = ko.observable(0);
@@ -105,11 +120,6 @@ LUPAPISTE.ApplicationModel = function() {
   self.appsLinkingToUs = ko.observable(null);
   self.pending = ko.observable(false);
   self.processing = ko.observable(false);
-
-  self.attachmentsRequiringAction = ko.observable();
-  self.unseenStatements = ko.observable();
-  self.unseenVerdicts = ko.observable();
-  self.unseenComments = ko.observable();
   self.invites = ko.observableArray([]);
   self.showApplicationInfoHelp = ko.observable(false);
   self.showPartiesInfoHelp = ko.observable(false);
@@ -122,6 +132,10 @@ LUPAPISTE.ApplicationModel = function() {
   self.targetTab = ko.observable({tab: undefined, id: undefined});
 
   self.allowedAttachmentTypes = ko.observableArray([]);
+
+  self.toBackingSystem = function() {
+    window.open("/api/raw/redirect-to-vendor-backend?id=" + self.id(), "_blank");
+  };
 
   self.updateInvites = function() {
     invites.getInvites(function(data) {
