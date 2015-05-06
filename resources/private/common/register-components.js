@@ -19,7 +19,8 @@ jQuery(document).ready(function() {
     "company-selector",
     "company-invite",
     "company-invite-dialog",
-    "submit-button-group"
+    "submit-button-group",
+    "yes-no-dialog"
   ];
 
   _.forEach(components, function(component) {
