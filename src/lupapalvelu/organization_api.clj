@@ -11,8 +11,11 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.attachment :as attachment]
-            [lupapalvelu.logging :as logging]
-            [lupapalvelu.organization :as o]))
+            [lupapalvelu.organization :as o]
+            [lupapalvelu.application :as application]
+            [camel-snake-kebab :as csk]
+            [sade.strings :as ss]
+            [lupapalvelu.logging :as logging]))
 
 ;;
 ;; local api
@@ -270,7 +273,7 @@
   [{user :user}]
   (if (or (s/blank? url) (krysp/wfs-is-alive? url))
     (mongo/update-by-id :organizations (user/authority-admins-organization-id user) {$set {(str "krysp." permitType ".url") url
-                                                                    (str "krysp." permitType ".version") version}})
+                                                                                           (str "krysp." permitType ".version") version}})
     (fail :auth-admin.legacyNotResponding)))
 
 (defcommand set-kopiolaitos-info
@@ -306,3 +309,25 @@
   [_]
   (ok :names (into {} (for [{:keys [id name]} (o/get-organizations {})]
                         [id name]))))
+
+(defquery vendor-backend-redirect-config
+  {:user-roles #{:authorityAdmin}}
+  [{user :user}]
+  (let [organization-id (user/authority-admins-organization-id user)]
+    (if-let [organization (o/get-organization organization-id)]
+      (ok (:vendor-backend-redirect organization))
+      (fail :error.unknown-organization))))
+
+(defcommand save-vendor-backend-redirect-config
+  {:parameters       [key val]
+   :user-roles       #{:authorityAdmin}
+   :input-validators [(fn [{{key :key} :data}]
+                        (when-not (contains? #{:vendorBackendUrlForBackendId :vendorBackendUrlForLpId} (keyword key))
+                          (fail :error.illegal-key)))
+                      (fn [{{url :val} :data}]
+                        (when-not (ss/blank? url)
+                          (util/validate-url url)))]}
+  [{user :user}]
+  (let [key    (csk/->kebab-case key)
+        org-id (user/authority-admins-organization-id user)]
+    (o/update-organization org-id {$set {(str "vendor-backend-redirect." key) val}})))

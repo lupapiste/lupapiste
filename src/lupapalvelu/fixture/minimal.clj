@@ -792,7 +792,7 @@
                  :zip "33100"
                  :po "Tampere"
                  :country "FINLAND"
-                 :y "FI1060155-5"
+                 :y "1060155-5"
                  :ovt "003710601555"
                  :pop "BAWCFI22"
                  :reference "Lupis"

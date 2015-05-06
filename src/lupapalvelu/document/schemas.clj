@@ -326,7 +326,7 @@
 (def vastattavat-tyotehtavat-tyonjohtaja-v2 [{:name "vastattavatTyotehtavat"
                                               :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat._group_label"
                                               :type :group
-                                              :required true
+                                              :required false
                                               :listen [:filterByCode]
                                               :layout :vertical
                                               :body [{:name "ivLaitoksenAsennustyo" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.ivLaitoksenAsennustyo" :codes [:ivt] :type :checkbox}

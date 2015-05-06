@@ -83,7 +83,6 @@
       signer.currentUser = lupapisteApp.models.currentUser.id();
     }
 
-    company.y = util.coerceNationalY(company.y);
     ajax
       .command("init-sign", {company: company, signer: signer, lang: loc.currentLanguage}, this.pending)
       .success(function(resp) {

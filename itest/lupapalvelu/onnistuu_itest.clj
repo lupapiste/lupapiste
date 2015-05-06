@@ -21,7 +21,7 @@
 (defn init-sign []
   (-> (u/command u/pena :init-sign
                  :company {:name  "company-name"
-                           :y     "FI2341528-4"
+                           :y     "2341528-4"
                            :accountType "account5"}
                  :signer {:firstName   "First"
                           :lastName    "Last"
@@ -33,7 +33,7 @@
 (defn init-sign-existing-user []
   (-> (u/command u/pena :init-sign
                  :company {:name  "company-name"
-                           :y     "FI2341528-4"
+                           :y     "2341528-4"
                            :accountType "account5"}
                  :signer {:firstName   "Pena"
                           :lastName    "Panaani"
@@ -46,7 +46,7 @@
 (fact "init-sign"
   (init-sign) => (contains {:stamp   #"[a-zA-Z0-9]{40}"
                             :company {:name "company-name"
-                                      :y    "FI2341528-4"
+                                      :y    "2341528-4"
                                       :accountType "account5"}
                             :signer {:firstName   "First"
                                      :lastName    "Last"
@@ -78,7 +78,7 @@
 (fact "init-sign-for-existing-user"
   (init-sign-existing-user) => (contains {:stamp   #"[a-zA-Z0-9]{40}"
                                              :company {:name        "company-name"
-                                                       :y           "FI2341528-4"
+                                                       :y           "2341528-4"
                                                        :accountType "account5"}
                                              :signer  {:firstName   "Pena"
                                                        :lastName    "Panaani"

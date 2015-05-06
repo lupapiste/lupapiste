@@ -1,0 +1,9 @@
+application.showInBackingSysten: Näytä taustajärjestelmässä
+new-company-admin-user.subject: Kutsu Lupapiste-palveluun yritystilin pääkäyttäjäksi
+
+auth-admin.vendor-backend-link.header: Hakemuksen avaus taustajärjestelmässä
+auth-admin.vendor-backend-link.param-name: Tieto
+auth-admin.vendor-backend-link.param-value: Arvo
+auth-admin.vendor-backend-link.backend-id-param: Kuntalupatunnuksen perusteella hakemuksen avaus taustajärjestelmässä
+auth-admin.vendor-backend-link.lp-id-param: Lupapistetunnuksen perusteella hakemuksen avaus taustajärjestelmässä
+
