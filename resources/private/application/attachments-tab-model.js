@@ -177,12 +177,11 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel, verdictAttachme
         .call();
       return false;
     };
-    LUPAPISTE.ModalDialog.showDynamicYesNo(
-      loc("application.attachmentsCopyOwn"),
-      loc("application.attachmentsCopyOwn.confirmationMessage"),
-      {title: loc("yes"), fn: doSendAttachments},
-      {title: loc("no")}
-    );
+    hub.send("show-dialog", {title: "application.attachmentsCopyOwn",
+                             size: "medium",
+                             component: "yes-no-dialog",
+                             componentParams: {text: "application.attachmentsCopyOwn.confirmationMessage",
+                                               yesFn: doSendAttachments}});
   };
 
   self.deleteSingleAttachment = function(a) {
@@ -200,11 +199,11 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel, verdictAttachme
         hub.send("track-click", {category:"Application", label: "", event:"deleteSingleAttachment"});
       return false;
     };
-    LUPAPISTE.ModalDialog.showDynamicYesNo(
-      loc("attachment.delete.header"),
-      loc("attachment.delete.message"),
-      {title: loc("yes"), fn: doDelete},
-      {title: loc("no")});
+    hub.send("show-dialog", {title: "attachment.delete.header",
+                             size: "medium",
+                             component: "yes-no-dialog",
+                             componentParams: {text: "attachment.delete.message",
+                                               yesFn: doDelete}});
   };
 
   self.startStamping = function() {
