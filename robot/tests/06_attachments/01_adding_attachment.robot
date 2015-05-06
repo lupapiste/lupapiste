@@ -60,7 +60,7 @@ Mikko does not see Approve-button
 Mikko deletes attachment
   [Tags]  attachments
   Click enabled by test id  delete-attachment
-  Confirm  dialog-confirm-delete-attachment
+  Confirm yes no dialog
   Wait Until Page Contains  753-416-25-30
   Wait Until  Page Should Not Contain  xpath=//a[@data-test-type="muut.muu"]
 

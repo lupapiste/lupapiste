@@ -519,6 +519,13 @@ Close current application as authority
   Click enabled by test id  application-cancel-authority-btn
   Confirm  dialog-cancel-application
 
+# New yes no modal dialog
+Confirm yes no dialog
+  Wait until  Element should be visible  xpath=//div[@id="modal-dialog"]//button[@data-test-id="confirm-yes"]
+  Focus  xpath=//div[@id="modal-dialog"]//button[@data-test-id="confirm-yes"]
+  Click Element  xpath=//div[@id="modal-dialog"]//button[@data-test-id="confirm-yes"]
+  Wait Until  Element Should Not Be Visible  xpath=//div[@id="modal-dialog"]//button[@data-test-id="confirm-yes"]
+
 Confirm
   [Arguments]  ${modalId}
   Wait until  Element should be visible  xpath=//div[@id="${modalId}"]//button[@data-test-id="confirm-yes"]
