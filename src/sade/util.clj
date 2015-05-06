@@ -332,8 +332,7 @@
 (defn ovt? [ovt]
   (cond
     (nil? ovt)                false
-    (.startsWith ovt "0037")  (finnish-ovt? ovt)
-    :else                     (re-matches #"\d{4}.+" ovt)))
+    :else                     (finnish-ovt? ovt)))
 
 (defn account-type? [account-type]
   (cond

@@ -133,7 +133,7 @@ var util = (function($) {
   function isPartyDoc(doc) { return doc["schema-info"].type === "party"; }
   function isNotPartyDoc(doc) { return !isPartyDoc(doc); }
 
-  function isValidFinnishY(y) {
+  function isValidY(y) {
     var m = /^(\d{7})-(\d)$/.exec(y || ""),
         number = m && m[1],
         check  = m && m[2];
@@ -151,26 +151,12 @@ var util = (function($) {
     return cn === parseInt(check, 10);
   }
 
-  function isValidY(y) {
-    return isValidFinnishY(y);
-  }
-
-  function isValidFinnishOVT(ovt) {
+  function isValidOVT(ovt) {
     var m = /^0037(\d{7})(\d)\d{0,5}$/.exec(ovt || ""),
         y = m && m[1],
         c = m && m[2];
     if (!y || !c) { return false; }
     return isValidY(y + "-" + c);
-  }
-
-  function isValidNonFinnishOVT(ovt) {
-    var m = /^(\d{4}).+/.exec(ovt),
-        c = m && m[1];
-    return c && c !== "0037";
-  }
-
-  function isValidOVT(ovt) {
-    return isValidFinnishOVT(ovt) || isValidNonFinnishOVT(ovt);
   }
 
   function extractRequiredErrors(errors) {
