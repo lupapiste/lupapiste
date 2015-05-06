@@ -17,7 +17,6 @@ var attachment = (function() {
         repository.load(applicationId);
         window.location.hash = "!/application/"+applicationId+"/attachments";
         model.previewDisabled(false);
-        hub.send("close-dialog");
         return false;
       })
       .call();
@@ -206,7 +205,6 @@ var attachment = (function() {
       deleteAttachmentVersionFromServerProxy = function() {
         deleteAttachmentVersionFromServer(fileId);
         model.previewDisabled(false);
-        hub.send("close-dialog");
       };
       model.previewDisabled(true);
       hub.send("show-dialog", {title: "attachment.delete.version.header",

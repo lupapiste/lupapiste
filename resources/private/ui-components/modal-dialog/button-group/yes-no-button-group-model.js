@@ -5,7 +5,12 @@ LUPAPISTE.YesNoButtonGroupModel = function (params) {
   self.yesTitle = params.yesTitle || "yes";
   self.noTitle = params.noTitle || "no";
 
-  self.yes = params.yesFn || function() { _.noop(); };
+  self.yes = function() {
+    if (_.isFunction(params.yesFn)) {
+      params.yesFn();
+    }
+    hub.send("close-dialog");
+  };
 
   self.no = function() {
     hub.send("close-dialog");
