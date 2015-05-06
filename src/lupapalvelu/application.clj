@@ -699,8 +699,7 @@
    :input-validators [operation-validator]
    :pre-checks       [add-operation-allowed?]}
   [{:keys [application created] :as command}]
-  (let [op-id (mongo/create-id)
-        op (make-op operation created)
+  (let [op (make-op operation created)
         new-docs (make-documents nil created op application)
         organization (organization/get-organization (:organization application))]
     (update-application command {$push {:operations  op
@@ -990,7 +989,7 @@
              (some util/validate-url))
         (fail :error.vendor-urls-not-set)))))
 
-(defn- get-vendor-backend-id [verdicts]
+(defn get-vendor-backend-id [verdicts]
   (->> verdicts
        (remove :draft)
        (some :kuntalupatunnus)))
@@ -1008,9 +1007,6 @@
           lp-id-url-missing?         (ss/blank? lp-id-url)
           both-urls-missing?         (and lp-id-url-missing?
                                           (ss/blank? backend-id-url))]
-      (prn organization)
-      (prn backend-id-url lp-id-url)
-      (prn (get-backend-and-lp-urls organization))
       (if vendor-backend-id
         (when both-urls-missing?
           (fail :error.vendor-urls-not-set))
