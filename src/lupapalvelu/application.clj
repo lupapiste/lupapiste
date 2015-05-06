@@ -1008,14 +1008,15 @@
 
 (defn- correct-urls-configured [_ {:keys [verdicts organization] :as application}]
   (when application
-    (let [vendor-backend-id (get-vendor-backend-id verdicts)
+    (let [vendor-backend-id          (get-vendor-backend-id verdicts)
           [backend-id-url lp-id-url] (get-backend-and-lp-urls organization)
-          both-urls-missing? (and (ss/blank? backend-id-url)
-                                  (ss/blank? lp-id-url))]
+          lp-id-url-missing?         (ss/blank? lp-id-url)
+          both-urls-missing?         (and lp-id-url-missing?
+                                          (ss/blank? backend-id-url))]
       (if (and vendor-backend-id
                both-urls-missing?)
         (fail :error.vendor-urls-not-set)
-        (when (ss/blank? lp-id-url)
+        (when lp-id-url-missing?
           (fail :error.vendor-urls-not-set))))))
 
 (defraw redirect-to-vendor-backend
