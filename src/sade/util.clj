@@ -4,6 +4,7 @@
             [clojure.string :refer [join]]
             [clojure.java.io :as io]
             [sade.strings :refer [numeric? decimal-number? trim] :as ss]
+            [sade.core :refer :all]
             [clj-time.format :as timeformat]
             [clj-time.coerce :as tc]
             [schema.core :as sc])
@@ -412,3 +413,12 @@
   (filter
     #(re-matches regex (.getName %))
     (-> path io/file (.listFiles) seq)))
+
+(defn select-values [m keys]
+  (->> (map #(get m %) keys)
+       (remove nil?)))
+
+(defn validate-url [url]
+  ; Regex derived from @stephenhay's at https://mathiasbynens.be/demo/url-regex
+  (when-not (re-matches #"^(https?)://[^\s/$.?#].[^\s]*$" url)
+    (fail :error.invalid.url)))

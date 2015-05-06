@@ -29,12 +29,3 @@
 
 (defmacro def- [item value]
   `(def ^{:private true} ~item ~value))
-
-(defn select-values [m keys]
-  (->> (map #(get m %) keys)
-       (remove nil?)))
-
-(defn validate-url [url]
-  ; Regex derived from @stephenhay's at https://mathiasbynens.be/demo/url-regex
-  (when-not (re-matches #"^(https?)://[^\s/$.?#].[^\s]*$" url)
-    (fail :error.invalid.url)))

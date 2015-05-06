@@ -987,7 +987,7 @@
       (if-let [conf (:vendor-backend-redirect org)]
         (->> (vals conf)
              (remove ss/blank?)
-             (some validate-url))
+             (some util/validate-url))
         (fail :error.vendor-urls-not-set)))))
 
 (defn- get-vendor-backend-id [verdicts]
@@ -998,7 +998,7 @@
 (defn- get-backend-and-lp-urls [org-id]
   (-> (organization/get-organization org-id)
       :vendor-backend-redirect
-      (select-values [:vendor-backend-url-for-backend-id
+      (util/select-values [:vendor-backend-url-for-backend-id
                       :vendor-backend-url-for-lp-id])))
 
 (defn- correct-urls-configured [_ {:keys [verdicts organization] :as application}]

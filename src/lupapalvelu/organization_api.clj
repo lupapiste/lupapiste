@@ -2,7 +2,7 @@
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf fatal]]
             [clojure.string :as s]
             [monger.operators :refer :all]
-            [sade.core :refer [ok fail fail!] :as sade]
+            [sade.core :refer [ok fail fail!]]
             [sade.util :as util]
             [lupapalvelu.action :refer [defquery defcommand non-blank-parameters vector-parameters boolean-parameters number-parameters email-validator]]
             [lupapalvelu.xml.krysp.reader :as krysp]
@@ -326,7 +326,7 @@
                           (fail :error.illegal-key)))
                       (fn [{{url :val} :data}]
                         (when-not (ss/blank? url)
-                          (sade/validate-url url)))]}
+                          (util/validate-url url)))]}
   [{user :user}]
   (let [key    (csk/->kebab-case key)
         org-id (user/authority-admins-organization-id user)]
