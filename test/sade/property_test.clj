@@ -18,4 +18,9 @@
   (municipality-id-by-property-id "245-003-0105-0006") => "245"
   (municipality-id-by-property-id "05-03-0105-006") => "005"
   (municipality-id-by-property-id "24500301050006") => "245"
-  (municipality-id-by-property-id "00500301050006") => "005")
+  (municipality-id-by-property-id "00500301050006") => "005"
+
+  (fact "Maaninka -> Kuopio"
+    (municipality-id-by-property-id "47641100030051") => "297"
+    (municipality-id-by-property-id "476-411-30-85") => "297"
+    (municipality-id-by-property-id "476-405-7-58") => "297"))
