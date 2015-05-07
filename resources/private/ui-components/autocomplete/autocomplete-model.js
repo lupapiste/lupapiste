@@ -19,7 +19,6 @@ LUPAPISTE.AutocompleteModel = function(params) {
   };
 
   self.selectItem = function(item) {
-    console.log("selectItem", item);
     self.value(item);
     self.selected(item.label);
     self.showResult(false);
