@@ -23,17 +23,35 @@ LUPAPISTE.CompanyInviteDialogModel = function(params) {
       .call();
   };
 
-  function mapCompany(company) {
-    company.label = company.name + ", " + (company.address1 ? company.address1 + " ": "") + (company.po ? company.po : "");
-    return company;
-  }
+  var CompaniesDataProvider = function() {
+    var self = this;
 
-  ajax
-    .query("companies")
-    .pending(self.pending)
-    .success(function(r) {
-      self.companies(_.map(r.companies, mapCompany));
-    })
-    .call();
+    self.query = ko.observable();
+
+    self.companies = ko.observable();
+
+    self.data = ko.computed(function() {
+      var q = self.query() || "";
+      var filteredData = _.filter(self.companies(), function(item) {
+        return _.contains(item.label.toUpperCase(), q.toUpperCase());
+      });
+      return filteredData;
+    }).extend({ throttle: 250 });
+
+    function mapCompany(company) {
+      company.label = company.name + ", " + (company.address1 ? company.address1 + " ": "") + (company.po ? company.po : "");
+      return company;
+    }
+
+    ajax
+      .query("companies")
+      .pending(self.pending)
+      .success(function(r) {
+        self.companies(_.map(r.companies, mapCompany).concat(_.map(r.companies, mapCompany)).concat(_.map(r.companies, mapCompany)));
+      })
+      .call();
+  };
+
+  self.companiesProvider = new CompaniesDataProvider();
 
 };
