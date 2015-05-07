@@ -14,7 +14,7 @@
                  data-bind="textInput: query, hasFocus: inputSelected, event: {keydown: navigate, key: 38}"></input>
           <!-- ko if: dataProvider.data().length > 0 -->
           <ul class="autocomplete-result"
-              data-bind="foreach: {data: dataProvider.data, afterRender: function() {$(window).trigger('resize');}}">
+              data-bind="foreach: dataProvider.data">
             <li class="autocomplete-result-item"
                 data-bind="click: $parent.selectItem,
                            event: {mouseover: $parent.changeIndex.bind($data, $index())},

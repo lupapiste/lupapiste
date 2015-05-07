@@ -12,7 +12,6 @@ LUPAPISTE.AutocompleteModel = function(params) {
   self.inputSelected = ko.observable(false);
   self.showResult = ko.observable(false);
   self.selected = ko.observable("");
-
   self.index = ko.observable(0);
 
   self.selectInput = function() {
