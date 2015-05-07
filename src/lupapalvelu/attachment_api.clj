@@ -25,7 +25,8 @@
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
             [sade.util :as util]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.application-meta-fields :as meta-fields])
+            [lupapalvelu.application-meta-fields :as meta-fields]
+            [lupapalvelu.pdf-conversion :as pdf-conversion])
   (:import [java.io File]))
 
 ;; Validators
@@ -272,6 +273,9 @@
   (when (= (:type target) "statement")
     (when-let [validation-error (statement/statement-owner (assoc-in command [:data :statementId] (:id target)) application)]
       (fail! (:text validation-error))))
+
+  (when-not (pdf-conversion/is-pdf-a? tempfile)
+    (pdf-conversion/convert-to-pdf-a tempfile))
 
   (when-not (attachment/attach-file! {:application application
                                       :filename filename

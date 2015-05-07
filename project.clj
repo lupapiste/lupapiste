@@ -51,7 +51,9 @@
                  [fr.opensagres.xdocreport/fr.opensagres.xdocreport.document.docx  "1.0.5"]
                  [fr.opensagres.xdocreport/fr.opensagres.xdocreport.template.freemarker "1.0.5" :exclusions [org.freemarker/freemarker]]
                  [scss-compiler "0.1.2"]
-                 [org.clojure/core.memoize "0.5.7"]]
+                 [org.clojure/core.memoize "0.5.7"]
+                 [org.apache.pdfbox/preflight "1.8.9"]
+                 [org.ghost4j/ghost4j "0.5.1"]]
   :profiles {:dev {:dependencies [[midje "1.6.3"]
                                   [ring-mock "0.1.5"]
                                   [clj-ssh "0.5.7"]
@@ -79,7 +81,8 @@
   :repositories [["solita-archiva" {:url "http://mvn.solita.fi/archiva/repository/solita"
                                     :checksum :ignore}]
                  ["mygrid-repository" {:url "http://www.mygrid.org.uk/maven/repository"
-                                       :snapshots false}]]
+                                       :snapshots false}]
+                 ["ghost4j-releases" {:url "http://repo.ghost4j.org/maven2/releases"}]]
   :plugin-repositories [["solita-archiva" {:url "http://mvn.solita.fi/archiva/repository/solita"
                                            :checksum :ignore}]]
   :aliases {"integration" ["with-profile" "dev,itest" "midje"]
