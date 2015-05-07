@@ -14,33 +14,59 @@
 }
 
 .autocomplete-component {
-  position: relative;
-  input.autocomplete-input {
-    width: 430px;
+  .autocomplete-selection-wrapper {
+    position: relative;
     height: 28px;
-    line-height: 24px;
-    margin: 2px 6px 0 2px;
-    display: block;
-    box-sizing: border-box;
+    span.autocomplete-selection {
+      width: 430px;
+      height: 100%;
+      display: inline-block;
+      border: 1px solid darken($lp-light-grey, 10%);
+      padding: 0 0 0 $marginS;
+      color: black;
+      box-sizing: border-box;
+    }
+    span.autocomplete-selection-arrow {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      margin: auto;
+      right: 9px;
+    }
   }
-  ul.autocomplete-result {
-    position: fixed;
-    z-index: 1000;
-    padding: 0;
+
+  .autocomplete-dropdown {
     width: 430px;
-    border: 1px solid darken($lp-light-grey, 10%);
-    box-sizing: border-box;
-    margin: 0 6px 0 2px;
-    background-color: #fff;
-    max-height: 300px;
-    overflow: auto;
-    li.autocomplete-result-item {
-      cursor:pointer;
-      display: list-item;
-      list-style-type: none;
-      padding: $marginS $marginS;
-      &:hover {
-        background-color: lighten($lp-orange, 40%);
+    position: relative;
+    input.autocomplete-input {
+      width: 430px;
+      height: 28px;
+      line-height: 24px;
+      margin: 2px 0;
+      display: block;
+      box-sizing: border-box;
+    }
+    ul.autocomplete-result {
+      position: fixed;
+      z-index: 1000;
+      padding: 0;
+      width: 430px;
+      border: 1px solid darken($lp-light-grey, 10%);
+      box-sizing: border-box;
+      background-color: #fff;
+      max-height: 300px;
+      overflow: auto;
+      li.autocomplete-result-item, li.autocomplete-result-empty {
+        cursor: default;
+        display: list-item;
+        list-style-type: none;
+        padding: $marginS $marginS;
+      }
+      li.autocomplete-result-item {
+        cursor: pointer;
+        &:hover {
+          background-color: lighten($lp-orange, 40%);
+        }
       }
     }
   }
