@@ -11,11 +11,14 @@
         <div>
         <div class="autocomplete-dropdown" data-bind="fader: inputSelected, duration: 250">
           <input class="autocomplete-input" type="text" data-test-id="autocomplete-input"
-                 data-bind="textInput: query, hasFocus: inputSelected"></input>
+                 data-bind="textInput: query, hasFocus: inputSelected, event: {keydown: navigate, key: 38}"></input>
           <!-- ko if: dataProvider.data().length > 0 -->
           <ul class="autocomplete-result"
               data-bind="foreach: {data: dataProvider.data, afterRender: function() {$(window).trigger('resize');}}">
-            <li class="autocomplete-result-item" data-bind="click: $parent.selectItem">
+            <li class="autocomplete-result-item"
+                data-bind="click: $parent.selectItem,
+                           event: {mouseover: $parent.changeIndex.bind($data, $index())},
+                           css: {active: $index() === $parent.index()}">
               <span data-bind="text: label"></span>
             </li>
           </ul>

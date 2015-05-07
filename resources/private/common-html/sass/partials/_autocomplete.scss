@@ -64,9 +64,9 @@
       }
       li.autocomplete-result-item {
         cursor: pointer;
-        &:hover {
-          background-color: lighten($lp-orange, 40%);
-        }
+      }
+      li.autocomplete-result-item.active {
+        background-color: lighten($lp-orange, 40%);
       }
     }
   }

@@ -2999,8 +2999,8 @@ table.attachments-template-table td.attachment-version-info {
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item {
   cursor: pointer;
 }
-/* line 67, ../sass/partials/_autocomplete.scss */
-.autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item:hover {
+/* line 68, ../sass/partials/_autocomplete.scss */
+.autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item.active {
   background-color: #fef4ea;
 }
 
