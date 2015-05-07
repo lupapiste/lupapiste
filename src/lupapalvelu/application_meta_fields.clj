@@ -13,8 +13,7 @@
             [sade.strings :as ss]))
 
 (def post-verdict-states #{:verdictGiven :constructionStarted :closed})
-
-(def post-sent-states (conj post-verdict-states :sent))
+(def post-submitted-states (conj post-verdict-states :sent))
 
 (defn in-post-verdict-state? [_ app] (contains? post-verdict-states (keyword (:state app))))
 
@@ -45,7 +44,6 @@
   (let [owner (first (domain/get-auths-by-role app :owner))
         user (user/get-user-by-id (:id owner))]
     (:phone user)))
-
 
 (defn get-application-operation [app]
   (first (:operations app)))
