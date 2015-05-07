@@ -834,6 +834,18 @@
     {:documents {$elemMatch {$or [{:data.patevyys.koulutusvalinta.value "muu"}
                                   {:data.patevyys-tyonjohtaja.koulutusvalinta.value "muu"}]}}}))
 
+(defmigration helsinki-raki
+  (let [query {$and [{:municipality "091"}
+                     {$or [{"buildings.0" {$exists:true}}
+                           {"documents.data.buildingId" {$exists:true}}
+                           {"tasks.data.rakennus" {$exists:true}}]}]}]
+    (doseq [collection [:applications :submitted-applications]
+            {:keys [id buildings documents tasks]} (mongo/select collection query)]
+      (mongo/update-by-id collection id
+        {$set {:buildings buildings
+               :documents documents
+               :tasks task}}))))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"
