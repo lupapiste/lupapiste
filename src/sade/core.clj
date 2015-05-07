@@ -9,7 +9,12 @@
   `(throw+ (merge (fail ~@args) {::type ::fail ::file ~*file* ::line ~(:line (meta &form))})))
 
 (defn ok [& kv]
-  (assoc (apply hash-map kv) :ok true))
+  (let [first (first kv)
+        res   (cond
+                (map? first) first
+                (nil? first) {}
+                :else        (apply hash-map kv))]
+    (assoc res :ok true)))
 
 (def unauthorized (fail :error.unauthorized))
 (defn unauthorized!
@@ -24,4 +29,3 @@
 
 (defmacro def- [item value]
   `(def ^{:private true} ~item ~value))
-

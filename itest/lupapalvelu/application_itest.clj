@@ -5,7 +5,8 @@
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.mongo :as mongo]))
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.application :as app]))
 
 (mongo/connect!)
 
@@ -184,7 +185,46 @@
     (fact "Authority is able to add operation"
       (success (command veikko :add-operation :id application-id :operation "muu-uusi-rakentaminen")) => true)))
 
+(facts "link to backend system"
+  (let [application    (create-and-submit-application mikko :municipality sonja-muni)
+        application-id (:id application)
+        redirect-url   "http://www.taustajarjestelma.fi/servlet/kohde?kohde=rakennuslupatunnus&lupatunnus="]
 
+    (command sonja :approve-application :id application-id :lang "fi")
+
+    (facts "no vendor backend id (kuntalupatunnus)"
+      (fact* "redirects to LP backend url if configured"
+        (command sipoo :save-vendor-backend-redirect-config :key :vendorBackendUrlForLpId :val redirect-url) => ok?
+        (let [resp (raw sonja :redirect-to-vendor-backend :id application-id) => http303?]
+          (get-in resp [:headers "location"]) => (str redirect-url application-id)))
+
+      (fact "error if no LP backend url configured"
+        (command sipoo :save-vendor-backend-redirect-config :key :vendorBackendUrlForLpId :val "") => ok?
+        (raw sonja :redirect-to-vendor-backend :id application-id) => http404?
+
+        (command sipoo :save-vendor-backend-redirect-config :key :vendorBackendUrlForBackendId :val redirect-url) => ok?
+        (raw sonja :redirect-to-vendor-backend :id application-id) => http404?))
+
+    (facts "vendor backend id available (kuntalupatunnus)"
+      (command sonja :check-for-verdict :id application-id)
+      (let [{verdicts :verdicts} (query-application sonja application-id)
+            vendor-backend-id    (app/get-vendor-backend-id verdicts)]
+        (fact* "redirect to backend id url if configured"
+          (command sipoo :save-vendor-backend-redirect-config :key :vendorBackendUrlForBackendId :val redirect-url) => ok?
+          (command sipoo :save-vendor-backend-redirect-config :key :vendorBackendUrlForLpId :val "http://dontgohere.com") => ok?
+          (let [resp (raw sonja :redirect-to-vendor-backend :id application-id) => http303?]
+            (get-in resp [:headers "location"]) => (str redirect-url vendor-backend-id)))
+
+        (fact* "redirect to LP backend url if available and backend id url not configured"
+          (command sipoo :save-vendor-backend-redirect-config :key :vendorBackendUrlForBackendId :val "") => ok?
+          (command sipoo :save-vendor-backend-redirect-config :key :vendorBackendUrlForLpId :val redirect-url) => ok?
+          (let [resp (raw sonja :redirect-to-vendor-backend :id application-id) => http303?]
+            (get-in resp [:headers "location"]) => (str redirect-url application-id)))
+
+        (fact "error if no LP backend url or backend id url configured"
+          (command sipoo :save-vendor-backend-redirect-config :key :vendorBackendUrlForBackendId :val "") => ok?
+          (command sipoo :save-vendor-backend-redirect-config :key :vendorBackendUrlForLpId :val "") => ok?
+          (raw sonja :redirect-to-vendor-backend :id application-id) => http404?)))))
 
 (fact "Pena cannot create app for organization that has new applications disabled"
   (let [resp  (create-app pena :propertyId "99700000000000")]
@@ -217,12 +257,12 @@
 
 (defn- check-empty-person
   ([document doc-path args]
-    (let [empty-person {:etunimi  {:value ""}
-                        :sukunimi {:value ""}
-                        :hetu     {:value nil}}
-          empty-person (merge empty-person args)]
-      document => truthy
-      (get-in document doc-path) => empty-person))
+   (let [empty-person {:etunimi  {:value ""}
+                       :sukunimi {:value ""}
+                       :hetu     {:value nil}}
+         empty-person (merge empty-person args)]
+     document => truthy
+     (get-in document doc-path) => empty-person))
   ([document doc-path] (check-empty-person document doc-path {}))
   )
 
@@ -260,9 +300,9 @@
 
       (fact "suunnittelija patevyys is set"
         (command mikko :update-doc :id application-id :doc doc-id :updates
-                 [["patevyys.kokemus" "10"]
-                  ["patevyys.patevyysluokka" "AA"]
-                  ["patevyys.patevyys" "Patevyys"]]) => ok?
+                                   [["patevyys.kokemus" "10"]
+                                    ["patevyys.patevyysluokka" "AA"]
+                                    ["patevyys.patevyys" "Patevyys"]]) => ok?
         (let [updated-app          (query-application mikko application-id)
               updated-suunnittelija (domain/get-document-by-id updated-app doc-id)]
           updated-suunnittelija => truthy
@@ -384,9 +424,9 @@
     (fact "applicant should be able to change location when state is draft"
       (:state application) => "draft"
       (command pena :change-location :id application-id
-               :x (-> application :location :x) - 1
-               :y (-> application :location :y) + 1
-               :address (:address application) :propertyId (:propertyId application)) => ok?)
+                                     :x (-> application :location :x) - 1
+                                     :y (-> application :location :y) + 1
+                                     :address (:address application) :propertyId (:propertyId application)) => ok?)
 
     ; applicant submits and authority gives verdict
     (command pena :submit-application :id application-id)
@@ -394,12 +434,12 @@
 
     (fact "applicant should not be authorized to change location anymore"
       (command pena :change-location :id application-id
-               :x (-> application :location :x) - 1
-               :y (-> application :location :y) + 1
-               :address (:address application) :propertyId (:propertyId application)) => fail?)
+                                     :x (-> application :location :x) - 1
+                                     :y (-> application :location :y) + 1
+                                     :address (:address application) :propertyId (:propertyId application)) => fail?)
 
     (fact "authority should still be authorized to change location"
       (command sonja :change-location :id application-id
-               :x (-> application :location :x) - 1
-               :y (-> application :location :y) + 1
-               :address (:address application) :propertyId (:propertyId application)) => ok?)))
+                                      :x (-> application :location :x) - 1
+                                      :y (-> application :location :y) + 1
+                                      :address (:address application) :propertyId (:propertyId application)) => ok?)))

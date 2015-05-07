@@ -123,7 +123,7 @@ jQuery(function($) {
 
         var formData = {
           name:      "Oy FooBar Ab",
-          y:         "FI1234567-1",
+          y:         "1234567-1",
           reference: "Kansantanhu osasto",
           address1:  "Latokuja 1",
           po:        "Sipoo",

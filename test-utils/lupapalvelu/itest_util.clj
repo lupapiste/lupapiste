@@ -87,7 +87,8 @@
     (str (server-address) "/api/raw/" (name action))
     {:headers {"authorization" (str "apikey=" apikey)}
      :query-params (apply hash-map args)
-     :throw-exceptions false}))
+     :throw-exceptions false
+     :follow-redirects false}))
 
 (defn raw-query [apikey query-name & args]
   (decode-response
@@ -200,6 +201,9 @@
 
 (defn http302? [{:keys [status]}]
   (= status 302))
+
+(defn http303? [{:keys [status]}]
+  (= status 303))
 
 (defn http401? [{:keys [status]}]
   (= status 401))

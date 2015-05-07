@@ -14,7 +14,7 @@
             [sade.xml :as xml]
             [sade.core :refer :all]
             [sade.property :as p]
-            [lupapalvelu.action :refer [defquery defcommand update-application without-system-keys notify application->command] :as action]
+            [lupapalvelu.action :refer [defraw defquery defcommand update-application without-system-keys notify application->command] :as action]
             [lupapalvelu.mongo :refer [$each] :as mongo]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.domain :as domain]
@@ -983,3 +983,53 @@
                          $push {:attachments {$each (make-attachments created op organization (:state application) (:tosFunction application))}}})
     (try (autofill-rakennuspaikka application created)
          (catch Exception e (error e "KTJ data was not updated")))))
+
+(defn- validate-organization-backend-urls [_ {org-id :organization}]
+  (when org-id
+    (let [org (organization/get-organization org-id)]
+      (if-let [conf (:vendor-backend-redirect org)]
+        (->> (vals conf)
+             (remove ss/blank?)
+             (some util/validate-url))
+        (fail :error.vendor-urls-not-set)))))
+
+(defn get-vendor-backend-id [verdicts]
+  (->> verdicts
+       (remove :draft)
+       (some :kuntalupatunnus)))
+
+(defn- get-backend-and-lp-urls [org-id]
+  (-> (organization/get-organization org-id)
+      :vendor-backend-redirect
+      (util/select-values [:vendor-backend-url-for-backend-id
+                           :vendor-backend-url-for-lp-id])))
+
+(defn- correct-urls-configured [_ {:keys [verdicts organization] :as application}]
+  (when application
+    (let [vendor-backend-id          (get-vendor-backend-id verdicts)
+          [backend-id-url lp-id-url] (get-backend-and-lp-urls organization)
+          lp-id-url-missing?         (ss/blank? lp-id-url)
+          both-urls-missing?         (and lp-id-url-missing?
+                                          (ss/blank? backend-id-url))]
+      (if vendor-backend-id
+        (when both-urls-missing?
+          (fail :error.vendor-urls-not-set))
+        (when lp-id-url-missing?
+          (fail :error.vendor-urls-not-set))))))
+
+(defraw redirect-to-vendor-backend
+  {:parameters [id]
+   :user-roles #{:authority}
+   :states     action/post-submitted-states
+   :pre-checks [validate-organization-backend-urls
+                correct-urls-configured]}
+  [{{:keys [verdicts organization]} :application}]
+  (let [vendor-backend-id          (get-vendor-backend-id verdicts)
+        [backend-id-url lp-id-url] (get-backend-and-lp-urls organization)
+        url-parts                  (if (and vendor-backend-id
+                                            (not (ss/blank? backend-id-url)))
+                                     [backend-id-url vendor-backend-id]
+                                     [lp-id-url id])
+        redirect-url               (apply str url-parts)]
+    (info "Redirecting from" id "to" redirect-url)
+    {:status 303 :headers {"Location" redirect-url}}))
