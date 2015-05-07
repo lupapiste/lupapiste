@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container">
+    <script type="text/html" id="autocomplete-template">
+      <!-- <select id="selectCompanyToInvite" data-bind="options: dataProvider.data, optionsText: 'label', value: value"></select> -->
+      <div class="autocomplete-component">
+        <input class="autocomplete-input" type="text" data-test-id="autocomplete-input"
+               data-bind="textInput: query, hasFocus: inputSelected"></input>
+        <ul class="autocomplete-result"
+            data-bind="foreach: {data: dataProvider.data, afterRender: function() {$(window).trigger('resize');}},
+                       fader: inputSelected, duration: 200">
+          <li class="autocomplete-result-item" data-bind="click: $parent.selectItem">
+            <span data-bind="text: label"></span>
+          </li>
+        </ul>
+      </div>
+    </script>
+  </section>
+</body>
+</html>

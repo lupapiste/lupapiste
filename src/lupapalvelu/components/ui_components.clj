@@ -264,7 +264,8 @@
                         "neighbors/neighbors-edit-dialog-model.js"
                         "company-selector/company-selector-model.js"
                         "company-invite/company-invite-model.js"
-                        "company-invite/company-invite-dialog-model.js"]
+                        "company-invite/company-invite-dialog-model.js"
+                        "autocomplete/autocomplete-model.js"]
                    :html ["fill-info/fill-info-template.html"
                           "foreman-history/foreman-history-template.html"
                           "foreman-other-applications/foreman-other-applications-template.html"
@@ -283,7 +284,8 @@
                           "neighbors/neighbors-edit-dialog-template.html"
                           "company-selector/company-selector-template.html"
                           "company-invite/company-invite-template.html"
-                          "company-invite/company-invite-dialog-template.html"]}
+                          "company-invite/company-invite-dialog-template.html"
+                          "autocomplete/autocomplete-template.html"]}
 
    ;; Single Page Apps and standalone components:
    ;; (compare to auth-methods in web.clj)
