@@ -74,6 +74,10 @@
       }
       li.autocomplete-result-item.active {
         background-color: lighten($lp-orange, 40%);
+        &:active {
+          background-color: lighten($lp-orange, 20%);
+          color: black;
+        }
       }
     }
   }

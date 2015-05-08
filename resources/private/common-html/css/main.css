@@ -3025,6 +3025,11 @@ table.attachments-template-table td.attachment-version-info {
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item.active {
   background-color: #fef4ea;
 }
+/* line 77, ../sass/partials/_autocomplete.scss */
+.autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item.active:active {
+  background-color: #f8c38a;
+  color: black;
+}
 
 /* line 4, ../sass/partials/_tree.scss */
 .operation-tree {
