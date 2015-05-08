@@ -29,7 +29,7 @@ var locationSearch = (function() {
       .call();
   };
 
-  var searchAddress = function(requestContext, x, y, onSuccess) {
+  var searchAddress = function(requestContext, x, y, onSuccess, onFail) {
     ajax
       .get("/proxy/address-by-point")
       .param("x", x)
