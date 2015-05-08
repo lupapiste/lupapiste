@@ -54,6 +54,14 @@
     self.addressData = ko.observable(null);
     self.addressString = ko.observable(null);
     self.propertyId = ko.observable(null);
+    self.propertyIdHumanReadable = ko.pureComputed({
+      read: function(){
+        return self.propertyId() ? util.prop.toHumanFormat(self.propertyId()) : "";
+      },
+      write: function(value) {
+        self.propertyId(util.prop.toDbFormat(value));
+      },
+      owner: self});
     self.operations = ko.observable(null);
     self.organization = ko.observable(null);
     self.organizationLinks = ko.computed(function() { var m = self.organization(); return m ? m.links : null; });
@@ -123,11 +131,7 @@
     });
 
     self.propertyId.subscribe(function(id) {
-      var human = util.prop.toHumanFormat(id);
-      if (human !== id) {
-        self.propertyId(human);
-      }
-      if (id) {
+      if (id && util.prop.isPropertyIdInDbFormat(id)) {
         ajax.query("municipality-by-property-id", {propertyId: id})
           .success(function(resp) {
             var code = resp.municipality;
@@ -210,6 +214,7 @@
         .resetXY()
         .addressData(null)
         .propertyId(null)
+        .municipalityCode(null)
         .beginUpdateRequest()
         .searchPointByAddressOrPropertyId(self.search());
       return false;
