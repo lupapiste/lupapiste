@@ -16,10 +16,7 @@
   (let [t (get row lang)]
     (if (seq t)
       (add-term k t result lang)
-      (do
-        (when-not (s/blank? default-t)
-          (errorf "Missing localization for %s in %s, defaulting to %s" k lang default-t))
-        (add-term k default-t result lang)))))
+      (add-term k default-t result lang))))
 
 (defn- process-row [langs-but-default result row]
   (let [k (get row "key")
