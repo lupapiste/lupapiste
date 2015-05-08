@@ -6,8 +6,11 @@
       <!-- <select id="selectCompanyToInvite" data-bind="options: dataProvider.data, optionsText: 'label', value: value"></select> -->
       <div class="autocomplete-component">
         <div class="autocomplete-selection-wrapper" data-bind="click: selectInput">
-          <span class="autocomplete-selection" data-bind="text: selected"></span>
-          <span class="autocomplete-selection-arrow icon drill-down-black"></span>
+          <span class="autocomplete-selection">
+            <span data-bind="visible: selected, text: selected"></span>
+            <span data-bind="visible: !selected(), ltext: 'choose'"></span>
+          </span>
+          <span class="autocomplete-selection-arrow icon drill-down-black-smaller"></span>
         <div>
         <div class="autocomplete-dropdown" data-bind="fader: inputSelected, duration: 250">
           <input class="autocomplete-input" type="text" data-test-id="autocomplete-input"

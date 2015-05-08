@@ -527,46 +527,58 @@ a:active, a:visited, a:hover {
   height: 12px;
 }
 /* line 101, ../sass/partials/_icons.scss */
+.icon.drill-down-black-smaller {
+  background-position: 0px -3400px;
+  width: 9px;
+  height: 8px;
+}
+/* line 106, ../sass/partials/_icons.scss */
+.icon.drill-up-black-smaller {
+  background-position: 0px -3300px;
+  width: 9px;
+  height: 8px;
+}
+/* line 111, ../sass/partials/_icons.scss */
 .icon.add {
   background-position: 0px -2200px;
   width: 15px;
   height: 15px;
 }
-/* line 106, ../sass/partials/_icons.scss */
+/* line 116, ../sass/partials/_icons.scss */
 .icon.search {
   background-position: 0px -2300px;
   width: 14px;
   height: 14px;
 }
-/* line 111, ../sass/partials/_icons.scss */
+/* line 121, ../sass/partials/_icons.scss */
 .icon.missing {
   background-position: 0px -2400px;
   width: 16px;
   height: 16px;
 }
-/* line 116, ../sass/partials/_icons.scss */
+/* line 126, ../sass/partials/_icons.scss */
 .icon.ok {
   background-position: 0px -2500px;
   width: 16px;
   height: 16px;
 }
-/* line 121, ../sass/partials/_icons.scss */
+/* line 131, ../sass/partials/_icons.scss */
 .icon.info-indicator {
   background-position: 0px -2600px;
   width: 16px;
   height: 16px;
 }
-/* line 126, ../sass/partials/_icons.scss */
+/* line 136, ../sass/partials/_icons.scss */
 .icon.remove {
   background-position: 0px -2700px;
   width: 15px;
   height: 15px;
 }
-/* line 131, ../sass/partials/_icons.scss */
+/* line 141, ../sass/partials/_icons.scss */
 .icon.wait {
   background-position: 0px -2800px;
 }
-/* line 134, ../sass/partials/_icons.scss */
+/* line 144, ../sass/partials/_icons.scss */
 .icon.info-big {
   background-position: 0px -2900px;
   width: 30px;
@@ -574,139 +586,139 @@ a:active, a:visited, a:hover {
   margin-left: -6px;
   margin-bottom: -6px;
 }
-/* line 141, ../sass/partials/_icons.scss */
+/* line 151, ../sass/partials/_icons.scss */
 .icon.help {
   background-position: 0px -2900px;
   width: 30px;
   height: 32px;
   overflow: visible;
 }
-/* line 147, ../sass/partials/_icons.scss */
+/* line 157, ../sass/partials/_icons.scss */
 .icon.new {
   background-position: 0px -3000px;
   width: 16px;
   height: 16px;
 }
-/* line 152, ../sass/partials/_icons.scss */
+/* line 162, ../sass/partials/_icons.scss */
 .icon.print {
   background-position: 0px -3500px;
   width: 16px;
   height: 15px;
 }
-/* line 157, ../sass/partials/_icons.scss */
+/* line 167, ../sass/partials/_icons.scss */
 .icon.send {
   background-position: 0px -3600px;
   height: 15px;
   width: 17px;
 }
-/* line 162, ../sass/partials/_icons.scss */
+/* line 172, ../sass/partials/_icons.scss */
 .icon.approve {
   background-position: 0px -3700px;
   height: 17px;
   width: 17px;
 }
-/* line 167, ../sass/partials/_icons.scss */
+/* line 177, ../sass/partials/_icons.scss */
 .icon.stamp {
   background-position: 0px -3800px;
   height: 16px;
   width: 16px;
 }
-/* line 172, ../sass/partials/_icons.scss */
+/* line 182, ../sass/partials/_icons.scss */
 .icon.add-grey {
   background-position: 0px -3900px;
   height: 16px;
   width: 16px;
 }
-/* line 177, ../sass/partials/_icons.scss */
+/* line 187, ../sass/partials/_icons.scss */
 .icon.complement {
   background-position: 0px -4000px;
   height: 16px;
   width: 16px;
 }
-/* line 182, ../sass/partials/_icons.scss */
+/* line 192, ../sass/partials/_icons.scss */
 .icon.remove-grey {
   background-position: 0px -4100px;
   cursor: pointer;
   height: 16px;
   width: 16px;
 }
-/* line 188, ../sass/partials/_icons.scss */
+/* line 198, ../sass/partials/_icons.scss */
 .icon.edit {
   background-position: 0px -4200px;
   cursor: pointer;
 }
-/* line 192, ../sass/partials/_icons.scss */
+/* line 202, ../sass/partials/_icons.scss */
 .icon.refresh-grey {
   background-position: 0px -4697px;
   width: 16px;
   height: 16px;
 }
-/* line 197, ../sass/partials/_icons.scss */
+/* line 207, ../sass/partials/_icons.scss */
 .icon.signed {
   background-position: 0px -4900px;
   width: 18px;
   height: 18px;
 }
-/* line 202, ../sass/partials/_icons.scss */
+/* line 212, ../sass/partials/_icons.scss */
 .icon.signed-white {
   background-position: 0px -5800px;
   width: 16px;
   height: 16px;
 }
-/* line 207, ../sass/partials/_icons.scss */
+/* line 217, ../sass/partials/_icons.scss */
 .icon.stamped {
   background-position: 0px -5000px;
   height: 18px;
   width: 18px;
 }
-/* line 212, ../sass/partials/_icons.scss */
+/* line 222, ../sass/partials/_icons.scss */
 .icon.transfered {
   background-position: 0px -5100px;
   height: 17px;
   width: 25px;
 }
-/* line 217, ../sass/partials/_icons.scss */
+/* line 227, ../sass/partials/_icons.scss */
 .icon.mark-seen {
   background-position: 0px -5198px;
   width: 25px;
   height: 15px;
 }
-/* line 222, ../sass/partials/_icons.scss */
+/* line 232, ../sass/partials/_icons.scss */
 .icon.urgent {
   width: 24px;
   height: 24px;
   background-position: 0px -5300px;
 }
-/* line 227, ../sass/partials/_icons.scss */
+/* line 237, ../sass/partials/_icons.scss */
 .icon.hold {
   width: 24px;
   height: 24px;
   background-position: 0px -5500px;
 }
-/* line 232, ../sass/partials/_icons.scss */
+/* line 242, ../sass/partials/_icons.scss */
 .icon.verdict-attachment {
   width: 8px;
   height: 18px;
   background-position: 0px -5900px;
 }
-/* line 237, ../sass/partials/_icons.scss */
+/* line 247, ../sass/partials/_icons.scss */
 .icon.scroll-up {
   background-position: 0px -6100px;
   width: 24px;
   height: 19px;
 }
-/* line 243, ../sass/partials/_icons.scss */
+/* line 253, ../sass/partials/_icons.scss */
 .icon.approve-grey {
   background-position: 0px -6200px;
   width: 16px;
   height: 16px;
 }
-/* line 250, ../sass/partials/_icons.scss */
+/* line 260, ../sass/partials/_icons.scss */
 .icon:hover {
   background-position-x: -100px;
 }
 
-/* line 262, ../sass/partials/_icons.scss */
+/* line 272, ../sass/partials/_icons.scss */
 [type=submit] .icon.left-align, .btn .icon.left-align, button .icon.left-align {
   position: absolute;
   left: 12px;
@@ -714,7 +726,7 @@ a:active, a:visited, a:hover {
   top: 0;
   margin: auto;
 }
-/* line 269, ../sass/partials/_icons.scss */
+/* line 279, ../sass/partials/_icons.scss */
 [type=submit] .icon.right-align, .btn .icon.right-align, button .icon.right-align {
   position: absolute;
   right: 6px;
@@ -723,7 +735,7 @@ a:active, a:visited, a:hover {
   margin: auto;
 }
 
-/* line 278, ../sass/partials/_icons.scss */
+/* line 288, ../sass/partials/_icons.scss */
 h1 .icon {
   margin-right: 3px;
 }
@@ -2953,8 +2965,9 @@ table.attachments-template-table td.attachment-version-info {
   padding: 0 0 0 6px;
   color: black;
   box-sizing: border-box;
+  border-radius: 5px;
 }
-/* line 29, ../sass/partials/_autocomplete.scss */
+/* line 30, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-selection-wrapper span.autocomplete-selection-arrow {
   position: absolute;
   top: 0;
@@ -2962,12 +2975,12 @@ table.attachments-template-table td.attachment-version-info {
   margin: auto;
   right: 9px;
 }
-/* line 38, ../sass/partials/_autocomplete.scss */
+/* line 39, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown {
   width: 430px;
   position: relative;
 }
-/* line 41, ../sass/partials/_autocomplete.scss */
+/* line 42, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown input.autocomplete-input {
   width: 430px;
   height: 28px;
@@ -2976,7 +2989,7 @@ table.attachments-template-table td.attachment-version-info {
   display: block;
   box-sizing: border-box;
 }
-/* line 49, ../sass/partials/_autocomplete.scss */
+/* line 50, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result {
   position: fixed;
   z-index: 1000;
@@ -2988,18 +3001,18 @@ table.attachments-template-table td.attachment-version-info {
   max-height: 300px;
   overflow: auto;
 }
-/* line 59, ../sass/partials/_autocomplete.scss */
+/* line 60, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item, .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-empty {
   cursor: default;
   display: list-item;
   list-style-type: none;
   padding: 6px 6px;
 }
-/* line 65, ../sass/partials/_autocomplete.scss */
+/* line 66, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item {
   cursor: pointer;
 }
-/* line 68, ../sass/partials/_autocomplete.scss */
+/* line 69, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item.active {
   background-color: #fef4ea;
 }
