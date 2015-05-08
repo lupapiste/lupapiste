@@ -4,7 +4,7 @@
   <section class="page container">
     <script type="text/html" id="autocomplete-template">
       <div class="autocomplete-component">
-        <div class="autocomplete-selection-wrapper" data-bind="click: selectInput">
+        <div class="autocomplete-selection-wrapper" data-bind="event: {mousedown: selectInput}">
           <span class="autocomplete-selection">
             <span data-bind="visible: selected, text: selected"></span>
             <span data-bind="visible: !selected(), ltext: 'choose'"></span>
