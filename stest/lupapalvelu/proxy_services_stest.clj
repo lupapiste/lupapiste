@@ -142,7 +142,7 @@
                        :tyyppi "Kunnan hyv\u00e4ksym\u00e4"
                        :oikeusvaik "Oikeusvaikutteinen"
                        :lisatieto ""
-                       :linkki "http://194.28.3.37/maarays/0912007x.pdf"
+                       :linkki "http://liiteri.ymparisto.fi//maarays/0912007x.pdf"
                        :type "yleiskaava"}
       (second body) => {:id "0911001"
                         :nimi "Helsingin yleiskaava 2002"
@@ -150,7 +150,7 @@
                         :tyyppi "Kunnan hyv\u00e4ksym\u00e4"
                         :oikeusvaik "Oikeusvaikutteinen"
                         :lisatieto "Kaupungin toimittamasta aineistosta puuttuu etel\u00e4inen eli merellinen osa"
-                        :linkki "http://194.28.3.37/maarays/0911001x.pdf"
+                        :linkki "http://liiteri.ymparisto.fi//maarays/0911001x.pdf"
                         :type "yleiskaava"})))
 
 (facts "geoserver-layers"
