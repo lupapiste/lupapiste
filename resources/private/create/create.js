@@ -77,20 +77,24 @@
     self.kuntalupatunnusFromPrevPermit = ko.observable(null);
     self.needMorePrevPermitInfo = ko.observable(false);
     self.creatingAppWithPrevPermitOk = ko.computed(function() {
-    return !self.processing() && !self.pending() &&
-           !isBlank(self.kuntalupatunnusFromPrevPermit()) &&
-           !isBlank(self.selectedPrevPermitOrganization()) &&
-           ( !self.needMorePrevPermitInfo() || (self.propertyId() &&
-                                                !isBlank(self.addressString()) &&
-                                                !isBlank(self.search()) &&
-                                                self.addressData() &&
-                                                self.x() !== 0 && self.y() !== 0));
-    });
+      return !self.processing() && !self.pending() &&
+             !isBlank(self.kuntalupatunnusFromPrevPermit()) &&
+             !isBlank(self.selectedPrevPermitOrganization()) &&
+             ( !self.needMorePrevPermitInfo() || (self.propertyId() &&
+                                                  !isBlank(self.addressString()) &&
+                                                  !isBlank(self.search()) &&
+                                                  self.addressData() &&
+                                                  self.x() !== 0 && self.y() !== 0));
+      });
 
     self.municipalityCode.subscribe(function(code) {
       if (!self.creatingAppWithPrevPermit) {
-        if (code) { self.findOperations(code); }
-        if (self.useManualEntry()) { self.updateMunicipality(code); }
+        if (code) {
+          self.findOperations(code);
+        }
+        if (self.useManualEntry()) {
+          self.updateMunicipality(code);
+        }
       }
     });
 
@@ -120,10 +124,15 @@
       if (human !== id) {
         self.propertyId(human);
       } else {
-        var code = id ? util.zeropad(3, id.split("-")[0].substring(0, 3)) : null;
-        self
-          .municipalityCode(code) // FIXME
-          .updateMunicipality(code, self.municipality);
+        ajax.query("municipality-by-property-id", {propertyId: id})
+          .success(function(resp) {
+            var code = resp.municipality;
+            self.municipalityCode(code).updateMunicipality(code, self.municipality);
+          })
+          .error(function(e) {
+            error("Failed to find municipality", id, e);
+          })
+          .call();
       }
     });
 

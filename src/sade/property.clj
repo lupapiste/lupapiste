@@ -32,7 +32,7 @@
     (get municipality-mapping municipality municipality)))
 
 (defn municipality-id-by-property-id [^String property-id]
-  (when (string? property-id)
+  (when (and (string? property-id) (> (count property-id) 3))
     (condp re-find (s/trim property-id)
       property-id-pattern    :>> take-municipality
       db-property-id-pattern :>> take-municipality
