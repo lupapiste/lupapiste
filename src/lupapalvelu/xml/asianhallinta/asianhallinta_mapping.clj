@@ -90,10 +90,11 @@
 
 (defn taydennys-asiaan-from-application [application attachments lang ah-version begin-of-link output-dir]
   "Construct AsiaanTaydennys XML message. Writes XML and attachmets to disk (ouput-dir)"
-  (let [canonical (canonical/application-to-asianhallinta-taydennys-asiaan-canonical application)
+  (let [application (enrich-application application)
+        canonical (canonical/application-to-asianhallinta-taydennys-asiaan-canonical application)
         attachments-canonical (canonical/get-attachments-as-canonical attachments begin-of-link)
         canonical-with-attachments (assoc-in canonical [:TaydennysAsiaan :Liitteet :Liite] attachments-canonical)
         mapping (get-ta-mapping ah-version)
         xml (emit/element-to-xml canonical-with-attachments mapping)
         attachments (attachments-for-write attachments)]
-       (writer/write-to-disk application attachments xml (str "ah-" ah-version) output-dir)))
+    (writer/write-to-disk application attachments xml (str "ah-" ah-version) output-dir nil nil "taydennys")))

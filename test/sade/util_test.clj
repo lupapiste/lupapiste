@@ -259,3 +259,11 @@
   (fact "new more difficult"    (compare-difficulty {:difficulty "B"} {:difficulty "A"})  => pos?)
   (fact "tricky difficulty val" (compare-difficulty {:difficulty "A"} {:difficulty "AA"}) => pos?)
   (fact "equality"              (compare-difficulty {:difficulty "B"} {:difficulty "B"})  => zero?))
+
+(facts select-values
+  (let [m {:foo "foo" :bar "bar" :baz "baz"}]
+    (fact (select-values m [])                    => [])
+    (fact (select-values m [:foo :bar])           => ["foo" "bar"])
+    (fact (select-values m [:bar :foo])           => ["bar" "foo"])
+    (fact (select-values m [:foo :unknown :bar])  => ["foo" nil "bar"])
+    (fact (select-values m [:unknown1 :unknown2]) => [nil nil])))

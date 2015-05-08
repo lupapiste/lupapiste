@@ -236,7 +236,11 @@
       (fs/mkdirs (str path "archive"))
       (fs/mkdirs (str path "error"))
       (let [zip-path (.getPath zip)
-            result (ah-verdict/process-ah-verdict zip-path user)
+            result (try
+                     (ah-verdict/process-ah-verdict zip-path user)
+                     (catch Throwable e
+                       (error e "Error processing zip-file in asianhallinta verdict batchrun")
+                       (fail :error.unknown)))
             target (str path (if (ok? result) "archive" "error") "/" (.getName zip))]
         (when-not (fs/rename zip target)
           (errorf "Failed to rename %s to %s" zip-path target))))))
