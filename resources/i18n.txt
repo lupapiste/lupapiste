@@ -1,1 +1,2 @@
 autocomplete.no-results:  Ei hakutuloksia
+company-invite.desc:  Voit valtuuttaa yrityksen alla olevasta listasta. Tällöin yrityksen edustajat saavat oikeudet muokata hakemusta ja perinteistä valtakirjaa vastaavat oikeudet asioida puolestasi.
