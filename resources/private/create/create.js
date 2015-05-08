@@ -54,13 +54,27 @@
     self.addressData = ko.observable(null);
     self.addressString = ko.observable(null);
     self.propertyId = ko.observable(null);
-    self.municipality = ko.observable(null);
+    self.propertyIdHumanReadable = ko.pureComputed({
+      read: function(){
+        return self.propertyId() ? util.prop.toHumanFormat(self.propertyId()) : "";
+      },
+      write: function(value) {
+        self.propertyId(util.prop.toDbFormat(value));
+      },
+      owner: self});
     self.operations = ko.observable(null);
     self.organization = ko.observable(null);
     self.organizationLinks = ko.computed(function() { var m = self.organization(); return m ? m.links : null; });
     self.attachmentsForOp = ko.computed(function() { var m = self.organization(); return m ? _.map(m.attachmentsForOp, function(d) { return { group: d[0], id: d[1]};}) : null; });
     self.municipalityCode = ko.observable(null);
-    self.municipalityName = ko.observable();
+    self.municipalityName = ko.pureComputed(function() {
+      if (self.municipalityCode()) {
+        return loc(["municipality", self.municipalityCode()]);
+      }
+      return "";
+    });
+
+
     self.municipalitySupported = ko.observable(true);
     self.processing = ko.observable(false);
     self.inforequestsDisabled = ko.observable(false);
@@ -77,29 +91,30 @@
     self.kuntalupatunnusFromPrevPermit = ko.observable(null);
     self.needMorePrevPermitInfo = ko.observable(false);
     self.creatingAppWithPrevPermitOk = ko.computed(function() {
-    return !self.processing() && !self.pending() &&
-           !isBlank(self.kuntalupatunnusFromPrevPermit()) &&
-           !isBlank(self.selectedPrevPermitOrganization()) &&
-           ( !self.needMorePrevPermitInfo() || (self.propertyId() &&
-                                                !isBlank(self.addressString()) &&
-                                                !isBlank(self.search()) &&
-                                                self.addressData() &&
-                                                self.x() !== 0 && self.y() !== 0));
-    });
+      return !self.processing() && !self.pending() &&
+             !isBlank(self.kuntalupatunnusFromPrevPermit()) &&
+             !isBlank(self.selectedPrevPermitOrganization()) &&
+             ( !self.needMorePrevPermitInfo() || (self.propertyId() &&
+                                                  !isBlank(self.addressString()) &&
+                                                  !isBlank(self.search()) &&
+                                                  self.addressData() &&
+                                                  self.x() !== 0 && self.y() !== 0));
+      });
 
     self.municipalityCode.subscribe(function(code) {
       if (!self.creatingAppWithPrevPermit) {
-        if (code) { self.findOperations(code); }
-        if (self.useManualEntry()) { self.updateMunicipality(code); }
+        if (code) {
+          self.findOperations(code);
+        }
+        if (self.useManualEntry()) {
+          self.updateMunicipality(code);
+        }
       }
     });
 
     self.updateMunicipality = function(code) {
       municipalities.findById(code, function(m) {
-        self
-          .municipalityName(m ? m.name : null)
-          .municipality(m)
-          .municipalitySupported(m ? true : false);
+        self.municipalitySupported(m ? true : false);
       });
       return self;
     };
@@ -116,14 +131,16 @@
     });
 
     self.propertyId.subscribe(function(id) {
-      var human = util.prop.toHumanFormat(id);
-      if (human !== id) {
-        self.propertyId(human);
-      } else {
-        var code = id ? util.zeropad(3, id.split("-")[0].substring(0, 3)) : null;
-        self
-          .municipalityCode(code)
-          .updateMunicipality(code, self.municipality);
+      if (id && util.prop.isPropertyIdInDbFormat(id)) {
+        ajax.query("municipality-by-property-id", {propertyId: id})
+          .success(function(resp) {
+            var code = resp.municipality;
+            self.municipalityCode(code).updateMunicipality(code, self.municipality);
+          })
+          .error(function(e) {
+            error("Failed to find municipality", id, e);
+          })
+          .call();
       }
     });
 
@@ -160,7 +177,7 @@
     self.setXY = function(x, y) { if (self.map) { self.map.clear().add({x: x, y: y}, true); } return self.x(x).y(y); };
     self.center = function(x, y, zoom) { if (self.map) { self.map.center(x, y, zoom); } return self; };
 
-    self.addressOk = ko.computed(function() { return self.municipality() && !isBlank(self.addressString()); });
+    self.addressOk = ko.computed(function() { return self.municipalityCode() && !isBlank(self.addressString()); });
     self.propertyIdOk = ko.computed(function() { return util.prop.isPropertyId(self.propertyId()) && !isBlank(self.propertyId());});
 
     //
@@ -182,6 +199,7 @@
         .setXY(x, y)
         .addressData(null)
         .propertyId(null)
+        .municipalityCode(null)
         .beginUpdateRequest()
         .searchPropertyId(x, y)
         .searchAddress(x, y);
@@ -196,6 +214,7 @@
         .resetXY()
         .addressData(null)
         .propertyId(null)
+        .municipalityCode(null)
         .beginUpdateRequest()
         .searchPointByAddressOrPropertyId(self.search());
       return false;
@@ -348,10 +367,10 @@
     };
 
     self.updateOrganizationDetails = function(operation) {
-      if (self.municipality() && operation) {
+      if (self.municipalityCode() && operation) {
         ajax
           .query("organization-details", {
-            municipality: self.municipality().id,
+            municipality: self.municipalityCode(),
             operation: operation,
             lang: loc.getCurrentLanguage()
           })
@@ -400,8 +419,7 @@
         x: self.x(),
         address: self.addressString(),
         propertyId: util.prop.toDbFormat(self.propertyId()),
-        messages: isBlank(self.message()) ? [] : [self.message()],
-        municipality: self.municipality().id
+        messages: isBlank(self.message()) ? [] : [self.message()]
       })
       .processing(self.processing)
       .pending(self.pending)

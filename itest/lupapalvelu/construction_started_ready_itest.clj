@@ -6,7 +6,7 @@
 (fact* "Application can be set to Started state after verdict has been given, and after that to Closed state."
   (let [initial-application (create-and-submit-application sonja
                               :operation "ya-katulupa-vesi-ja-viemarityot"
-                              :municipality sonja-muni
+                              :propertyId sipoo-property-id
                               :address "Paatoskuja 11") => truthy
         application-id (:id initial-application)
         _              (generate-documents initial-application sonja)
@@ -52,7 +52,7 @@
         email => (partial contains-application-link? application-id "authority")))))
 
 (fact* "Application cannot be set to Started state if it is not an YA type of application."
-  (let [application    (create-and-submit-application sonja :municipality sonja-muni :address "Paatoskuja 11") => truthy
+  (let [application    (create-and-submit-application sonja :propertyId sipoo-property-id :address "Paatoskuja 11") => truthy
         application-id (:id application)
         _              (command sonja :approve-application :id application-id :lang "fi") => ok?
         _              (give-verdict sonja application-id) => ok?

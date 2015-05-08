@@ -41,10 +41,6 @@
 (defn get-organization-attachments-for-operation [organization operation]
   (-> organization :operations-attachments ((-> operation :name keyword))))
 
-(defn municipality-by-propertyId [id]
-  (when (and (>= (count id) 3) (not (s/blank? id)))
-    (subs id 0 3)))
-
 (defn get-krysp-wfs
   "Returns a map containing :url and :version information for municipality's KRYSP WFS"
   ([{:keys [organization permitType] :as application}]

@@ -21,7 +21,7 @@ Mikko creates application and goes to empty attachments tab
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  stamping${secs}
   Mikko logs in
-  Create application the fast way  ${appname}  753  753-416-25-30  asuinrakennus
+  Create application the fast way  ${appname}  753-416-25-30  asuinrakennus
   Open tab  attachments
 
 Mikko adds PDF attachment without comment

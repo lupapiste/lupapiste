@@ -25,7 +25,7 @@
   (facts "UusiAsia from poikkeamis application"
     (let [app-id (create-app-id
                     pena
-                    :municipality velho-muni
+                    :propertyId kuopio-property-id
                     :operation "poikkeamis"
                     :propertyId "29703401070010"
                     :y 6965051.2333374 :x 535179.5
@@ -114,7 +114,7 @@
   (facts "UusiAsia with link permits"
     (let [link-app-id (create-app-id
                          pena
-                         :municipality velho-muni
+                         :propertyId kuopio-property-id
                          :operation "asuinrakennus"
                          :propertyId "29703401070010"
                          :y 6965051.2333374 :x 535179.5
@@ -128,7 +128,7 @@
 
           app-id (create-app-id ; Actual app for asianhallinta
                          pena
-                         :municipality velho-muni
+                         :propertyId kuopio-property-id
                          :operation "poikkeamis"
                          :propertyId "29703401070010"
                          :y 6965051.2333374 :x 535179.5
@@ -185,7 +185,7 @@
   (facts "AsianTaydennys"
     (let [app-id (create-app-id
                    pena
-                   :municipality velho-muni
+                   :propertyId kuopio-property-id
                    :operation "poikkeamis"
                    :propertyId "29703401070010"
                    :y 6965051.2333374 :x 535179.5
@@ -257,7 +257,7 @@
   (fact "Can't create asianhallinta with non-asianhallinta operation"
     (let [app-id (create-app-id
                     pena
-                    :municipality velho-muni
+                    :propertyId kuopio-property-id
                     :operation "asuinrakennus"
                     :propertyId "29703401070010"
                     :y 6965051.2333374 :x 535179.5
@@ -269,7 +269,7 @@
   (fact "If asianhallinta is not set error occurs"
     (let [app-id (create-app-id
                     pena
-                    :municipality sonja-muni
+                    :propertyId sipoo-property-id
                     :operation "poikkeamis"
                     :propertyId "75312312341234"
                     :x 444444 :y 6666666
@@ -281,10 +281,10 @@
   (facts "Auth admin configs"
     (fact "Pena can't use asianhallinta configure query & command"
       (query pena "asianhallinta-config") => unauthorized?
-      (command pena "save-asianhallinta-config" :permitType "P" :municipality sonja-muni :enabled true :version "1.3") => unauthorized?)
+      (command pena "save-asianhallinta-config" :permitType "P" :propertyId sipoo-property-id :enabled true :version "1.3") => unauthorized?)
     (fact "Sonja can't use asianhallinta configure query & command"
       (query sonja "asianhallinta-config") => unauthorized?
-      (command sonja "save-asianhallinta-config" :permitType "P" :municipality sonja-muni :enabled true :version "1.3") => unauthorized?)
+      (command sonja "save-asianhallinta-config" :permitType "P" :propertyId sipoo-property-id :enabled true :version "1.3") => unauthorized?)
 
     (fact "Sipoo auth admin can query asianhallinta-config, response has scope, caseManagement with skeleton values"
       (let [resp (query sipoo "asianhallinta-config")
@@ -322,7 +322,7 @@
   (fact "Fail when organization has unsupported version selected"
     (let [app-id (create-app-id
                     pena
-                    :municipality velho-muni
+                    :propertyId kuopio-property-id
                     :operation "poikkeamis"
                     :propertyId "29703401070010"
                     :y 6965051.2333374 :x 535179.5
@@ -337,7 +337,7 @@
     (let [_ (command kuopio "save-asianhallinta-config" :permitType "P" :municipality velho-muni :enabled true :version false)
           app-id (create-app-id
                     pena
-                    :municipality velho-muni
+                    :propertyId kuopio-property-id
                     :operation "poikkeamis"
                     :propertyId "29703401070010"
                     :y 6965051.2333374 :x 535179.5

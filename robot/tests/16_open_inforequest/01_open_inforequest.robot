@@ -12,7 +12,7 @@ Mikko creates an info request to Loppi
 
   Mikko logs in
   User role should be  applicant
-  Create inforequest the fast way  ${appname}  360834.385  6723358.262  433  433-406-3-229  kerrostalo-rivitalo  Jiihaa
+  Create inforequest the fast way  ${appname}  360834.385  6723358.262  433-406-3-229  kerrostalo-rivitalo  Jiihaa
   Wait until  Element text should be  //section[@id='inforequest']//span[@data-test-id='inforequest-application-applicant']  Intonen Mikko
   Element should not be visible  //button[@data-test-id='inforequest-convert-to-application']
   Wait Until  Title Should Be  ${appname} - Lupapiste

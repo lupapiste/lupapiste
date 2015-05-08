@@ -56,7 +56,7 @@
 
 (facts* "Company is added to application"
 
-  (let [application-id (create-app-id mikko :municipality sonja-muni :address "Kustukatu 13")
+  (let [application-id (create-app-id mikko :propertyId sipoo-property-id :address "Kustukatu 13")
         auth (:auth (query-application mikko application-id))
         params {:follow-redirects false
                 :throw-exceptions false}]
