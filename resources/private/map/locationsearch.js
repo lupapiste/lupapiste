@@ -35,6 +35,7 @@ var locationSearch = (function() {
       .param("x", x)
       .param("y", y)
       .success(requestContext.onResponse(onSuccess))
+      .fail(requestContext.onResponse(onFail))
       .call();
   };
 
@@ -46,7 +47,7 @@ var locationSearch = (function() {
       .error(requestContext.onResponse(onFail))
       .call();
   };
-  
+
   return {
     pointByAddress: serchPointByAddress,
     pointByPropertyId: searchPointByPropertyId,
