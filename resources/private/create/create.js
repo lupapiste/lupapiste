@@ -54,13 +54,19 @@
     self.addressData = ko.observable(null);
     self.addressString = ko.observable(null);
     self.propertyId = ko.observable(null);
-    self.municipality = ko.observable(null);
     self.operations = ko.observable(null);
     self.organization = ko.observable(null);
     self.organizationLinks = ko.computed(function() { var m = self.organization(); return m ? m.links : null; });
     self.attachmentsForOp = ko.computed(function() { var m = self.organization(); return m ? _.map(m.attachmentsForOp, function(d) { return { group: d[0], id: d[1]};}) : null; });
     self.municipalityCode = ko.observable(null);
-    self.municipalityName = ko.observable();
+    self.municipalityName = ko.pureComputed(function() {
+      if (self.municipalityCode()) {
+        return loc(["municipality", self.municipalityCode()]);
+      }
+      return "";
+    });
+
+
     self.municipalitySupported = ko.observable(true);
     self.processing = ko.observable(false);
     self.inforequestsDisabled = ko.observable(false);
@@ -100,10 +106,7 @@
 
     self.updateMunicipality = function(code) {
       municipalities.findById(code, function(m) {
-        self
-          .municipalityName(m ? m.name : null)
-          .municipality(m)
-          .municipalitySupported(m ? true : false);
+        self.municipalitySupported(m ? true : false);
       });
       return self;
     };
@@ -123,7 +126,8 @@
       var human = util.prop.toHumanFormat(id);
       if (human !== id) {
         self.propertyId(human);
-      } else {
+      }
+      if (id) {
         ajax.query("municipality-by-property-id", {propertyId: id})
           .success(function(resp) {
             var code = resp.municipality;
@@ -169,7 +173,7 @@
     self.setXY = function(x, y) { if (self.map) { self.map.clear().add({x: x, y: y}, true); } return self.x(x).y(y); };
     self.center = function(x, y, zoom) { if (self.map) { self.map.center(x, y, zoom); } return self; };
 
-    self.addressOk = ko.computed(function() { return self.municipality() && !isBlank(self.addressString()); });
+    self.addressOk = ko.computed(function() { return self.municipalityCode() && !isBlank(self.addressString()); });
     self.propertyIdOk = ko.computed(function() { return util.prop.isPropertyId(self.propertyId()) && !isBlank(self.propertyId());});
 
     //
@@ -191,6 +195,7 @@
         .setXY(x, y)
         .addressData(null)
         .propertyId(null)
+        .municipalityCode(null)
         .beginUpdateRequest()
         .searchPropertyId(x, y)
         .searchAddress(x, y);
@@ -357,10 +362,10 @@
     };
 
     self.updateOrganizationDetails = function(operation) {
-      if (self.municipality() && operation) {
+      if (self.municipalityCode() && operation) {
         ajax
           .query("organization-details", {
-            municipality: self.municipality().id,
+            municipality: self.municipalityCode(),
             operation: operation,
             lang: loc.getCurrentLanguage()
           })
