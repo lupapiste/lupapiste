@@ -49,7 +49,7 @@ LUPAPISTE.CompanyInviteDialogModel = function(params) {
       .query("companies")
       .pending(self.pending)
       .success(function(r) {
-        self.companies(_.map(r.companies, mapCompany).concat(_.map(r.companies, mapCompany)).concat(_.map(r.companies, mapCompany)));
+        self.companies(_.map(r.companies, mapCompany));
       })
       .call();
   };
