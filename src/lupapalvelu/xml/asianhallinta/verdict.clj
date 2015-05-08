@@ -140,7 +140,7 @@
                 poytakirja-id))
             (notifications/notify! :application-verdict command)
             (ok)))))
-    (catch Exception e
+    (catch Throwable e
       (if-let [error-key (some-> e ex-data :object :text)]
         (fail error-key)
-        (fail :error.unknown)))))
+        (throw e)))))
