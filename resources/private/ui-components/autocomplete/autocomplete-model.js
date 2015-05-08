@@ -46,7 +46,7 @@ LUPAPISTE.AutocompleteModel = function(params) {
       var itemTop = $activeItem.position().top;
       var itemBottom = $activeItem.position().top + $activeItem.height();
 
-      if (!((itemBottom < containerBottom) && (itemTop > containerTop))) {
+      if ((itemBottom > containerBottom) || (itemTop < containerTop)) {
         $container.scrollTop($container.scrollTop() + $activeItem.position().top);
       }
     };

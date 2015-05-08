@@ -13,7 +13,7 @@
         <div>
         <div class="autocomplete-dropdown" data-bind="fader: inputSelected, duration: 250">
           <input class="autocomplete-input" type="text" data-test-id="autocomplete-input"
-                 data-bind="textInput: query, hasFocus: inputSelected, event: {keydown: navigate, key: 38}"></input>
+                 data-bind="textInput: query, hasFocus: inputSelected, event: {keydown: navigate}"></input>
           <!-- ko if: dataProvider.data().length > 0 -->
           <ul class="autocomplete-result"
               data-bind="foreach: dataProvider.data">
