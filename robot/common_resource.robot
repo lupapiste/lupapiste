@@ -289,6 +289,12 @@ Select From List by test id
   Wait until page contains element  xpath=//select[@data-test-id="${id}"]
   Select From List  xpath=//select[@data-test-id="${id}"]  ${value}
 
+Select From Autocomplete
+  [Arguments]  ${value}
+  Wait until  Click Element  xpath=//span[@class='autocomplete-selection']
+  Input text by test id  autocomplete-input  ${value}
+  Wait until  Click Element  xpath=//*[contains(text(), '${value}')]
+
 Click by id
   [Arguments]  ${id}
   ${selector} =   Set Variable  $("[id='${id}']:visible")
