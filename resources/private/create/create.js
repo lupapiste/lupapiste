@@ -131,7 +131,10 @@
     });
 
     self.propertyId.subscribe(function(id) {
-      if (id && util.prop.isPropertyIdInDbFormat(id)) {
+      if (id) {
+        if (!util.prop.isPropertyIdInDbFormat(id)) {
+          throw "Invalid format: " + id;
+        }
         ajax.query("municipality-by-property-id", {propertyId: id})
           .success(function(resp) {
             var code = resp.municipality;
@@ -347,7 +350,7 @@
               .useManualEntry(false)
               .center(x, y, 14)
               .setXY(x, y)
-              .propertyId(id)
+              .propertyId(util.prop.toDbFormat(id))
               .beginUpdateRequest()
               .searchAddress(x, y);
           }
@@ -418,7 +421,7 @@
         y: self.y(),
         x: self.x(),
         address: self.addressString(),
-        propertyId: util.prop.toDbFormat(self.propertyId()),
+        propertyId: self.propertyId(),
         messages: isBlank(self.message()) ? [] : [self.message()]
       })
       .processing(self.processing)
@@ -468,7 +471,7 @@
         y: self.y(),
         x: self.x(),
         address: self.addressString(),
-        propertyId: util.prop.toDbFormat(self.propertyId()),
+        propertyId: self.propertyId(),
         organizationId: self.selectedPrevPermitOrganization(),
         kuntalupatunnus: self.kuntalupatunnusFromPrevPermit()
       })
