@@ -893,7 +893,7 @@
       (mongo/update-by-id collection id
         {$set {:buildings (map (partial building-raki-conversion propertyId) buildings)
                :documents (map (partial document-raki-conversion propertyId) documents)
-               :tasks (map (partition task-raki-conversion propertyId) tasks)}}))))
+               :tasks (map (partial task-raki-conversion propertyId) tasks)}}))))
 
 ;;
 ;; ****** NOTE! ******
