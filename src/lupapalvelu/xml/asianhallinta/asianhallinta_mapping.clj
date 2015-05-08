@@ -97,4 +97,4 @@
         mapping (get-ta-mapping ah-version)
         xml (emit/element-to-xml canonical-with-attachments mapping)
         attachments (attachments-for-write attachments)]
-    (writer/write-to-disk application attachments xml (str "ah-" ah-version) output-dir)))
+    (writer/write-to-disk application attachments xml (str "ah-" ah-version) output-dir nil nil "taydennys")))
