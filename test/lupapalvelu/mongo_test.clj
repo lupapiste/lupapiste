@@ -51,3 +51,14 @@
   (facts "generate-array-updates"
     (mongo/generate-array-updates :attachments attachments #(= (:id %) 1) "foo" "bar") => {"attachments.0.foo" "bar"}
     (mongo/generate-array-updates :attachments attachments #(#{1 3} (:id %)) "foo" "bar") => {"attachments.0.foo" "bar", "attachments.2.foo" "bar"}))
+
+(facts "remove-null-chars"
+  (mongo/remove-null-chars nil) => nil
+  (mongo/remove-null-chars "") => ""
+  (mongo/remove-null-chars "\u0000") => ""
+  (mongo/remove-null-chars [nil]) => [nil]
+  (mongo/remove-null-chars [""]) => [""]
+  (mongo/remove-null-chars {"" nil}) => {"" nil}
+  (mongo/remove-null-chars {"$set" {:k "v\0"}}) => {"$set" {:k "v"}}
+  (mongo/remove-null-chars {"$push" {:a {"$each" [nil "" "\0" "a\u0000"]}}}) => {"$push" {:a {"$each" [nil "" "" "a"]}}})
+
