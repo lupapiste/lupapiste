@@ -16,6 +16,7 @@
             [sade.core :refer [ok fail now def-] :as core]
             [sade.env :as env]
             [sade.util :as util]
+            [sade.property :as p]
             [sade.status :as status]
             [sade.strings :as ss]
             [sade.session :as ssess]
@@ -601,7 +602,7 @@
 
   (defpage "/dev/create" {:keys [infoRequest propertyId message]}
     (let [request (request/ring-request)
-          property (util/to-property-id propertyId)
+          property (p/to-property-id propertyId)
           params (assoc (from-query request) :propertyId property :messages (if message [message] []))
           response (execute-command "create-application" params request)]
       (if (core/ok? response)

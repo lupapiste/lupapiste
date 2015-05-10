@@ -6,6 +6,7 @@
            [clojure.string :as s]
            [sade.core :refer :all]
            [sade.util :as util]
+           [sade.property :as p]
            [lupapalvelu.i18n :as i18n]
            [lupapalvelu.document.schemas :as schemas]))
 
@@ -177,7 +178,7 @@
       (assoc-in [:UusiAsia :Asiointikieli] lang)
       (assoc-in [:UusiAsia :Toimenpiteet] (ua-get-toimenpiteet application lang))
       (assoc-in [:UusiAsia :Sijainti] (ua-get-sijaintipiste application))
-      (assoc-in [:UusiAsia :Kiinteistotunnus] (util/to-human-readable-property-id (:propertyId application)))
+      (assoc-in [:UusiAsia :Kiinteistotunnus] (p/to-human-readable-property-id (:propertyId application)))
       (assoc-in [:UusiAsia :Viiteluvat] (ua-get-viiteluvat application)))))
 
 (defn application-to-asianhallinta-taydennys-asiaan-canonical [application]

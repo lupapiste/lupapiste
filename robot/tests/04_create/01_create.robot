@@ -56,13 +56,13 @@ The contents of unsent inforequest's message field is resetted properly when mov
   # XXX 'Element Should Contain' or 'Textfield Value Should Be' do not work for some reason
   Wait For Condition  return $("#inforequest").find("textarea[data-test-id='application-new-comment-text']").val() == "roskaa";
 
-  Create inforequest the fast way  create-info-2  360603.153  6734222.95  753  753-416-25-22  kerrostalo-rivitalo  init-comment-2
+  Create inforequest the fast way  create-info-2  360603.153  6734222.95  753-416-25-22  kerrostalo-rivitalo  init-comment-2
   Wait For Condition  return $("#inforequest").find("textarea[data-test-id='application-new-comment-text']").val() == "";
 
 Mikko creates new application
   Go to page  applications
   Applications page should be open
-  Create application the fast way  create-app-2  753  753-416-25-22  kerrostalo-rivitalo
+  Create application the fast way  create-app-2  753-416-25-22  kerrostalo-rivitalo
   Go to page  applications
   Request should be visible  create-app
   Request should be visible  create-info
@@ -79,7 +79,7 @@ Mikko closes application at Latokuja 3 and logs out
 # LUPA-23
 Authority (Veikko) can create an application
   Veikko logs in
-  Create application the fast way  create-veikko-auth-app  837  837-111-172-1  kerrostalo-rivitalo
+  Create application the fast way  create-veikko-auth-app  837-111-172-1  kerrostalo-rivitalo
   Wait until  Application state should be  open
   It is possible to add operation
 

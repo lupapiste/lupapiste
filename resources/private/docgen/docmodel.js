@@ -1036,20 +1036,24 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     select.id = pathStrToID(myPath);
     select.name = myPath;
     select.className = "form-input combobox";
-    select.onchange = function (e) {
-      var event = getEvent(e);
-      var target = event.target;
-      var userId = target.value;
-      if (!_.isEmpty(userId)) {
-        ajax
-        .command("set-user-to-document", { id: self.appId, documentId: self.docId, userId: userId, path: myNs, collection: self.getCollection() })
-        .success(function () {
-          save(event, function () { repository.load(self.appId); });
-        })
-        .call();
-      }
-      return false;
-    };
+    if (authorizationModel.ok("set-user-to-document")) {
+      select.onchange = function (e) {
+        var event = getEvent(e);
+        var target = event.target;
+        var userId = target.value;
+        if (!_.isEmpty(userId)) {
+          ajax
+          .command("set-user-to-document", { id: self.appId, documentId: self.docId, userId: userId, path: myNs, collection: self.getCollection() })
+          .success(function () {
+            save(event, function () { repository.load(self.appId); });
+          })
+          .call();
+        }
+        return false;
+      };
+    } else {
+      select.disabled = true;
+    }
     option.value = "";
     option.appendChild(document.createTextNode(loc("selectone")));
     if (selectedOption === "") {

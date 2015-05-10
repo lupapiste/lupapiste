@@ -15,6 +15,7 @@
             [lupapalvelu.application :as application]
             [camel-snake-kebab :as csk]
             [sade.strings :as ss]
+            [sade.property :as p]
             [lupapalvelu.logging :as logging]))
 
 ;;
@@ -172,6 +173,14 @@
         :applications (->> scopes (filter :new-application-enabled) (map :permitType))
         :infoRequests (->> scopes (filter :inforequest-enabled) (map :permitType))
         :opening (->> scopes (filter :opening) (map #(select-keys % [:permitType :opening]))))))
+
+(defquery municipality-by-property-id
+  {:parameters [propertyId]
+   :user-roles #{:anonymous}}
+  [_]
+  (if-let [municipality (p/municipality-id-by-property-id propertyId)]
+    (ok :municipality municipality)
+    (fail :municipalitysearch.notfound)))
 
 (defquery all-operations-for-organization
   {:description "Returns operations that match the permit types of the organization whose id is given as parameter"

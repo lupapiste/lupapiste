@@ -47,6 +47,11 @@
 
 (defn remove-leading-zeros [^String s] (when s (.replaceFirst s "^0+(?!$)", "")))
 
+(defn zero-pad
+  "Pad 's' with zeros so that its at least 'c' characters long"
+  [^Long c ^String s]
+  (apply str (conj (vec (repeat (- c (count s)) \0)) s)))
+
 (defn starts-with [^String s ^String prefix]
   (when (and s prefix)
     (.startsWith s prefix)))

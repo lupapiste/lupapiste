@@ -248,7 +248,7 @@
    (fact "role remains admin"
      (role) => "admin")
 
-   (let [application (create-and-submit-application pena :municipality sonja-muni) => truthy
+   (let [application (create-and-submit-application pena :propertyId sipoo-property-id) => truthy
          application-id (:id application)
          query-as-admin (http/get (str (server-address) "/api/query/application?id=" application-id) params) => http200?]
 

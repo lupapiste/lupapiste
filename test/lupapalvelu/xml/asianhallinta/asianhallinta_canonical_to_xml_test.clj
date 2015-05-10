@@ -20,6 +20,7 @@
             [sade.core :refer :all]
             [sade.strings :as ss]
             [sade.util :as util]
+            [sade.property :as p]
             [sade.xml :as sxml]))
 
 (mu/testable-privates lupapalvelu.xml.asianhallinta.core begin-of-link)
@@ -223,7 +224,7 @@
         (fact "Sijainti"
           (sxml/get-text xml-parsed [:UusiAsia :Sijainti :Sijaintipiste]) => (str (get-in application [:location :x]) " " (get-in application [:location :y])))
         (fact "Kiinteistotunnus"
-          (sxml/get-text xml-parsed [:UusiAsia :Kiinteistotunnus]) => (util/to-human-readable-property-id (:propertyId application)))))))
+          (sxml/get-text xml-parsed [:UusiAsia :Kiinteistotunnus]) => (p/to-human-readable-property-id (:propertyId application)))))))
 
 (fl/facts* "Application with two multiple documents (Hakija, Maksaja)"
   (let [application    (assoc poikkeus-test/poikkari-hakemus :attachments attachments)

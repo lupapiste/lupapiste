@@ -17,7 +17,7 @@ Mikko creates new application
   # appname contains always the last created application
   Set Suite Variable  ${appname}  foreman-app${secs}
   Append To List  ${applications}  ${appname}
-  Create application the fast way  ${appname}  753  753-416-25-22  kerrostalo-rivitalo
+  Create application the fast way  ${appname}  753-416-25-22  kerrostalo-rivitalo
   ${newApplicationid} =  Get Text  xpath=//span[@data-test-id='application-id']
   Set Suite Variable  ${newApplicationid}
   Append To List  ${applicationIds}  ${newApplicationId}
