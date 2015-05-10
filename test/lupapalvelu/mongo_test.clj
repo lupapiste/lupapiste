@@ -29,12 +29,6 @@
         (provided
           (mc/insert "c" {:data "data"}) => nil)))
 
-(facts "delete-file"
-  (mongo/delete-file ...query...) => nil
-    (provided (gfs/remove ...query...) => nil)
-  (mongo/delete-file-by-id ...id...) => nil
-    (provided (gfs/remove {:_id ...id...}) => nil))
-
 (facts "valid key"
   (mongo/valid-key? (mongo/create-id)) => true
   (mongo/valid-key? (org.bson.types.ObjectId.)) => true
