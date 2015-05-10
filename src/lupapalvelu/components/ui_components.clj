@@ -1,3 +1,4 @@
+
 (ns lupapalvelu.components.ui-components
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
             [clojure.java.io :as io]
@@ -104,8 +105,7 @@
                      :html ["screenmessage.html"]}
 
    :map          {:depends [:common-html]
-                  :js [ "gis.js" "locationsearch.js"]
-                  :html ["map-popup.html"]}
+                  :js [ "gis.js" "locationsearch.js"]}
 
    :mypage       {:depends [:common-html]
                   :js ["mypage.js"]
@@ -211,9 +211,9 @@
    :docgen       {:depends [:accordion :common-html]
                   :js ["docmodel.js" "docgen.js"]}
 
-   :create       {:depends [:common-html]
+   :create       {:depends [:common-html :map]
                   :js ["municipalities.js" "create.js"]
-                  :html ["create.html"]}
+                  :html ["map-popup.html" "create.html"]}
 
    :iframe       {:depends [:common-html]
                   :css ["iframe.css"]}
