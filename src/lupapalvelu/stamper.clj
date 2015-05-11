@@ -154,7 +154,6 @@
   (let [visible-area (rotate-rectangle crop-box page-rotation)
         sides (get-sides visible-area)
         page-size (get-sides (rotate-rectangle page-box page-rotation))
-        rotate? (pos? (mod page-rotation 180))
         ; If the visible area does not fit into page, we must crop
         mod-x? (or
                  (< (:width page-size) (+ (:right sides) (:left sides)))
