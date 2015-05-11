@@ -159,6 +159,7 @@
         mod-x? (or
                  (< (:width page-size) (+ (:right sides) (:left sides)))
                  ;; TODO: Tama on mahdollinen 'parempi' korjaus, mutta problematic-pdf:ista 003P2U-A.pdf ei talloin mene testeista lapi (kts. stamper_test.clj).
+                 ;; Taman kanssa ei tarvitsisi 'special-mod-x?':aa.
 ;                 (< (+ (:left page-size) (:width page-size)) (+ (:left sides) (:width sides)))
                  (and (not (zero? (:bottom (get-sides page-box)))) (= page-rotation 270)))
         special-mod-x? (and
