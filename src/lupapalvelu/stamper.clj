@@ -156,17 +156,25 @@
         page-size (get-sides (rotate-rectangle page-box page-rotation))
         rotate? (pos? (mod page-rotation 180))
         ; If the visible area does not fit into page, we must crop
-        max-x (if (or (< (:width page-size) (+ (:right sides) (:left sides)))
-                    (and (not (zero? (:bottom (get-sides page-box)))) (= page-rotation 270))
-                    )
-               (- (:right sides) (:left sides))
-               (:right sides))
+        mod-x? (or
+                 (< (:width page-size) (+ (:right sides) (:left sides)))
+                 ;; TODO: Tama on mahdollinen 'parempi' korjaus, mutta problematic-pdf:ista 003P2U-A.pdf ei talloin mene testeista lapi (kts. stamper_test.clj).
+;                 (< (+ (:left page-size) (:width page-size)) (+ (:left sides) (:width sides)))
+                 (and (not (zero? (:bottom (get-sides page-box)))) (= page-rotation 270)))
+        special-mod-x? (and
+                         (= page-rotation 0)
+                         (pos? (- (:left sides) (:left page-size))))
+        max-x (cond
+                ;; NOTE: This needs to be the first condition in this Cond clause.
+                special-mod-x? (:right sides)
+                mod-x?         (- (:right sides) (:left sides))  ;; TODO: milloin tama on ok korjaus?
+                :else          (:right sides))
         min-y (if (and (zero? (:bottom (get-sides crop-box))) (zero? (:bottom (get-sides page-box))))
                 (:bottom page-size)
                 (:bottom sides))
         x (- max-x stamp-width (mm->u x-margin))
         y (+ min-y (mm->u y-margin))]
-    (debugf "Rotation %s, visible-area with rotation: %s, page with rotation %s,  max-x/min-y: %s/%s, stamp location x/y: %s/%s"
+    (debugf "Rotation %s, \ncrop-box with rotation: %s, \npage-box with rotation: %s,  \nmax-x/min-y: %s/%s, \nstamp location x/y: %s/%s"
       page-rotation sides page-size max-x min-y x y)
     [x y]))
 
@@ -184,7 +192,16 @@
         (let [page (inc i)
               page-box (.getPageSize reader page)
               crop-box (.getCropBox reader page)
+              trim-box (.getBoxSize reader page "trim")
               rotation (.getPageRotation reader page)
+              _ (do
+                  (println "\n stamp-pdf, page-box: " page-box "\n")
+                  (println "\n stamp-pdf, crop-box: " crop-box "\n")
+                  (println "\n stamp-pdf, trim-box: " trim-box "\n")
+                  (println "\n stamp-pdf, rotation: " rotation "\n")
+                  (println "\n")
+
+                  )
               [x y] (calculate-x-y page-box crop-box rotation stamp-width x-margin y-margin)]
           (doto (.getOverContent stamper page)
             (.saveState)
