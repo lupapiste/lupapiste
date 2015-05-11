@@ -174,7 +174,7 @@
                 (:bottom sides))
         x (- max-x stamp-width (mm->u x-margin))
         y (+ min-y (mm->u y-margin))]
-    (debugf "Rotation %s, \ncrop-box with rotation: %s, \npage-box with rotation: %s,  \nmax-x/min-y: %s/%s, \nstamp location x/y: %s/%s"
+    (debugf "Rotation %s, crop-box with rotation: %s, page-box with rotation: %s,  max-x/min-y: %s/%s, stamp location x/y: %s/%s"
       page-rotation sides page-size max-x min-y x y)
     [x y]))
 
@@ -192,16 +192,7 @@
         (let [page (inc i)
               page-box (.getPageSize reader page)
               crop-box (.getCropBox reader page)
-              trim-box (.getBoxSize reader page "trim")
               rotation (.getPageRotation reader page)
-              _ (do
-                  (println "\n stamp-pdf, page-box: " page-box "\n")
-                  (println "\n stamp-pdf, crop-box: " crop-box "\n")
-                  (println "\n stamp-pdf, trim-box: " trim-box "\n")
-                  (println "\n stamp-pdf, rotation: " rotation "\n")
-                  (println "\n")
-
-                  )
               [x y] (calculate-x-y page-box crop-box rotation stamp-width x-margin y-margin)]
           (doto (.getOverContent stamper page)
             (.saveState)
