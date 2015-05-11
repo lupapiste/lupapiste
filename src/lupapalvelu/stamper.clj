@@ -167,7 +167,7 @@
         max-x (cond
                 ;; NOTE: This needs to be the first condition in this Cond clause.
                 special-mod-x? (:right sides)
-                mod-x?         (- (:right sides) (:left sides))  ;; TODO: milloin tama on ok korjaus?
+                mod-x?         (- (:right sides) (:left sides))
                 :else          (:right sides))
         min-y (if (and (zero? (:bottom (get-sides crop-box))) (zero? (:bottom (get-sides page-box))))
                 (:bottom page-size)
