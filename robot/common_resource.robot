@@ -73,7 +73,7 @@ Wait and click
   [Arguments]  ${element}
   Wait until  Element should be visible  ${element}
   # for IE8
-  Focus  ${element}
+  Wait until  Focus  ${element}
   Wait until  Element should be visible  ${element}
   Click element  ${element}
 
