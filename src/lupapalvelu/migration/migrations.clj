@@ -5,6 +5,7 @@
             [sade.util :refer [dissoc-in postwalk-map strip-nils abs] :as util]
             [sade.core :refer [def-]]
             [sade.strings :as ss]
+            [sade.property :as p]
             [lupapalvelu.migration.core :refer [defmigration]]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
@@ -868,7 +869,7 @@
   (mongo/update-n :applications {:authority.lastName {$exists false}} {$set {:authority (:authority domain/application-skeleton)}} :multi true))
 
 (defn- rakennustunnus [property-id building-number]
-  (let [parts (rest (re-matches util/human-readable-property-id-pattern property-id))]
+  (let [parts (rest (re-matches p/db-property-id-pattern property-id))]
     (apply format "%s-%s-%s-%s %s" (concat parts [building-number]))))
 
 (defn- resolve-new-national-id? [building-number national-id]
