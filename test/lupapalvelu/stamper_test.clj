@@ -72,7 +72,6 @@
    (let [crop-box {:left 1513.16 :bottom 865.446 :right 3300.79 :top 1708.25}
          page-box {:left 0.0 :bottom 0.0 :right 4787.72 :top 2551.18}
          [x y] (calculate-x-y page-box crop-box 0 0.0 0 0)]
-     (println "\n [x y]: " [x y] "\n")
      x => (roughly (:right crop-box))
      y => (roughly (:bottom crop-box))))
 
