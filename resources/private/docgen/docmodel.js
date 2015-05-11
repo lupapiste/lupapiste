@@ -1086,22 +1086,24 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     span.appendChild(select);
 
     // new invite
-    var button =
-      $("<button>", {
-        "class": "icon-remove btn-primary",
-        text: loc("personSelector.invite"),
-        click: function () {
-          $("#invite-document-name").val(self.schemaName).change();
-          $("#invite-document-path").val(myNs).change();
-          $("#invite-document-id").val(self.docId).change();
-          LUPAPISTE.ModalDialog.open("#dialog-valtuutus");
-          return false;
-        }
-      });
-    if (options && options.dataTestSpecifiers) {
-      button.attr("data-test-id", "application-invite-" + self.schemaName);
+    if (authorizationModel.ok("invite-with-role")) {
+      var button =
+        $("<button>", {
+          "class": "icon-remove btn-primary",
+          text: loc("personSelector.invite"),
+          click: function () {
+            $("#invite-document-name").val(self.schemaName).change();
+            $("#invite-document-path").val(myNs).change();
+            $("#invite-document-id").val(self.docId).change();
+            LUPAPISTE.ModalDialog.open("#dialog-valtuutus");
+            return false;
+          }
+        });
+      if (options && options.dataTestSpecifiers) {
+        button.attr("data-test-id", "application-invite-" + self.schemaName);
+      }
+      button.appendTo(span);
     }
-    button.appendTo(span);
 
     return span;
   }
