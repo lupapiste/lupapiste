@@ -257,7 +257,7 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel, verdictAttachme
     var desc = e["op-desc"];
 
     _.each(self.appModel.attachments(), function(attachment) {
-      if ( ko.unwrap(attachment.op) && attachment.op.id() === opid ) {
+      if (ko.unwrap(attachment.op) && attachment.op.id() === opid && typeof attachment.op.description === "function") {
         attachment.op.description(desc);
       }
     });
