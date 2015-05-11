@@ -132,7 +132,7 @@
   {:parameters [:id]
    :user-roles #{:applicant :authority}
    :user-authz-roles action/default-authz-reader-roles
-   :states     (action/all-application-states-but [:canceled])}
+   :states     action/all-application-states}
   [command]
   (do-remove-auth command (get-in command [:user :username])))
 
