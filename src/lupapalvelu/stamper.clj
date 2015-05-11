@@ -155,20 +155,15 @@
         sides (get-sides visible-area)
         page-size (get-sides (rotate-rectangle page-box page-rotation))
         ; If the visible area does not fit into page, we must crop
-        mod-x? (or
-                 (< (:width page-size) (+ (:right sides) (:left sides)))
-                 ;; TODO: Tama on mahdollinen 'parempi' korjaus, mutta problematic-pdf:ista 003P2U-A.pdf ei talloin mene testeista lapi (kts. stamper_test.clj).
-                 ;; Taman kanssa ei tarvitsisi 'special-mod-x?':aa.
-;                 (< (+ (:left page-size) (:width page-size)) (+ (:left sides) (:width sides)))
-                 (and (not (zero? (:bottom (get-sides page-box)))) (= page-rotation 270)))
-        special-mod-x? (and
-                         (= page-rotation 0)
-                         (pos? (- (:left sides) (:left page-size))))
-        max-x (cond
-                ;; NOTE: This needs to be the first condition in this Cond clause.
-                special-mod-x? (:right sides)
-                mod-x?         (- (:right sides) (:left sides))
-                :else          (:right sides))
+        ;; TODO: how these special conditions could be merged and generalized?
+        max-x (if (or
+                    ;; TODO: This is possibly better condition than the one below, as it does not trust that page's left side is at 0 position.
+                    ;        Though, with it some 'problematic pdf' tests in stamper_test.clj will not pass.
+                    ;(< (+ (:left page-size) (:width page-size)) (+ (:left sides) (:width sides)))
+                    (and (< (:width page-size) (+ (:right sides) (:left sides))) (not= page-rotation 0))
+                    (and (not (zero? (:bottom (get-sides page-box)))) (= page-rotation 270)))
+                (- (:right sides) (:left sides))
+                (:right sides))
         min-y (if (and (zero? (:bottom (get-sides crop-box))) (zero? (:bottom (get-sides page-box))))
                 (:bottom page-size)
                 (:bottom sides))
