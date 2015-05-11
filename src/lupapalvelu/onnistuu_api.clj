@@ -35,7 +35,6 @@
 
 (defcommand init-sign
   {:parameters [company signer lang]
-   :feature :companyRegistration
    :user-roles #{:anonymous}}
   [{:keys [created user]}]
   (sc/validate c/Company company)
@@ -64,7 +63,6 @@
 
 (defcommand cancel-sign
   {:parameters [processId]
-   :feature :companyRegistration
    :user-roles #{:anonymous}}
   [{:keys [created]}]
   (p/cancel-sign-process! processId created)
