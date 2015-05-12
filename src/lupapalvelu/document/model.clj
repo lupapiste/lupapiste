@@ -484,7 +484,7 @@
       util/strip-empty-maps
       tools/wrapped)))
 
-(defn ->yritys [{:keys [firstName lastName email phone address1 zip po turvakieltokytkin name y]}
+(defn ->yritys [{:keys [firstName lastName email phone address1 zip po turvakieltokytkin name y ovt pop]}
                 & {:keys [with-empty-defaults?]}]
   {:pre [(or (nil? turvakieltokytkin) (util/boolean? turvakieltokytkin))]}
   (letfn [(wrap [v] (if (and with-empty-defaults? (nil? v)) "" v))]
@@ -498,7 +498,10 @@
                                        :sukunimi      (wrap lastName)
                                        :turvakieltoKytkin (when (or turvakieltokytkin with-empty-defaults?) (boolean turvakieltokytkin))}
                        :yhteystiedot {:email          (wrap email)
-                                      :puhelin        (wrap phone)}}}
+                                      :puhelin        (wrap phone)}}
+       :verkkolaskutustieto {:ovtTunnus (wrap ovt)
+                             :verkkolaskuTunnus ""
+                             :valittajaTunnus (wrap pop)}}
       util/strip-nils
       util/strip-empty-maps
       tools/wrapped)))
