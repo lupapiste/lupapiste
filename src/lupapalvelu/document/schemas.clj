@@ -148,6 +148,34 @@
                        [henkilotiedot-minimal]
                        yhteystiedot)}))
 
+(def e-invoice-operators
+  [{:name "BAWCFI22"} ; Basware Oyj
+   {:name "003714377140"} ; Enfo Zender Oy
+   {:name "003708599126"} ; Liaison Technologies Oy
+   {:name "HELSFIHH"} ; Aktia Säästöpankki Oyj
+   {:name "POPFFI22"} ; Paikallisosuuspankit
+   {:name "HANDFIHH"} ; Handelsbanken
+   {:name "003721291126"} ; Maventa
+   {:name "003723327487"} ; Apix Messaging Oy
+   {:name "003717203971"} ; Notebeat Oy
+   {:name "003723609900"} ; (tai PAGERO) Pagero
+   {:name "003701150617"} ; Strålfors Oy
+   {:name "FIYAPSOL"} ; YAP Solutions Oy
+   {:name "00885060259470028"} ; Tradeshift
+   {:name "TAPIFI22"} ; S-Pankki Oy
+   {:name "INEXCHANGE"} ; InExchange Factorum AB
+   {:name "DNBAFIHX"} ; DNB Bank ASA
+   {:name "003703575029"} ; TeliaSonera Finland Oyj
+   {:name "ITELFIHH"} ; Säästöpankit
+   {:name "003710948874"} ; OpusCapita Group Oy
+   {:name "00885790000000418"} ; HighJump AS
+   {:name "NDEAFIHH"} ; Nordea
+   {:name "OKOYFIHH"} ; OP-Pohjola-ryhmä
+   {:name "003701011385"} ; Tieto Oyj
+   {:name "DABAFIHH"} ; Danske Bank Oyj
+   {:name "003703575029"} ; CGI
+   ])
+
 (def verkkolaskutustieto [{:name "ovtTunnus" :type :string :subtype :ovt :min-len 12 :max-len 17}
                           {:name "verkkolaskuTunnus" :type :string}
                           {:name "valittajaTunnus" :type :string}])
