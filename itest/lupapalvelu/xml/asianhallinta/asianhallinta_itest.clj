@@ -227,7 +227,8 @@
               xml-as-string (slurp xml-file)
               xml (xml/parse (io/reader xml-file))]
 
-             (fact "Correctly named xml file is created" (.exists xml-file) => true)
+          (fact "Correctly named xml file is created"
+            (.exists xml-file) => true)
 
           (fact "XML file is valid"
             (validator/validate xml-as-string (:permitType updated-application) (str "ah-" (resolve-ah-version scope))))
