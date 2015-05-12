@@ -940,6 +940,10 @@
   (doseq [company (mongo/select :companies {:y {$regex #"^FI"}})]
     (mongo/update-by-id :companies (:id company) {$set {:y (subs (:y company) 2)}})))
 
+(defmigration company-default-account-type
+  {:apply-when (pos? (mongo/count :companies {:accountType {$exists false}}))}
+  (mongo/update-n :companies {:accountType {$exists false}} {$set {:accountType "account15"}} :multi true))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"
