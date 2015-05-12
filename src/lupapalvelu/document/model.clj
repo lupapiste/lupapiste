@@ -499,9 +499,9 @@
                                        :turvakieltoKytkin (when (or turvakieltokytkin with-empty-defaults?) (boolean turvakieltokytkin))}
                        :yhteystiedot {:email          (wrap email)
                                       :puhelin        (wrap phone)}}
-       :verkkolaskutustieto {:ovtTunnus (wrap ovt)
-                             :verkkolaskuTunnus ""
-                             :valittajaTunnus (wrap pop)}}
+       :verkkolaskutustieto {:ovtTunnus               (wrap ovt)
+                             :verkkolaskuTunnus       ""
+                             :valittajaTunnus         (wrap pop)}}
       util/strip-nils
       util/strip-empty-maps
       tools/wrapped)))
