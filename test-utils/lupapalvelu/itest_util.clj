@@ -37,6 +37,9 @@
 (defn organization-from-minimal-by-id [org-id]
   (some #(when (= (:id %) org-id) %) minimal/organizations))
 
+(defn company-from-minimal-by-id [id]
+  (some #(when (= (:_id %) id) %) minimal/companies))
+
 (def kaino       (apikey-for "kaino@solita.fi"))
 (def kaino-id    (id-for "kaino@solita.fi"))
 (def pena        (apikey-for "pena"))
@@ -373,6 +376,16 @@
     (command apikey :set-user-to-document :id foreman-app-id :documentId (:id foreman-doc) :userId userId :path "" :collection "documents")
     (command apikey :update-doc :id foreman-app-id :doc (:id foreman-doc) :updates [["patevyysvaatimusluokka" difficulty]])
     foreman-app-id))
+
+(defn accept-company-invitation []
+  (let [email     (last-email)
+        [_ token] (re-find #"http.+/app/fi/welcome#!/accept-company-invitation/([A-Za-z0-9-]+)" (:plain (:body email)))]
+    (http/post (str (server-address) "/api/token/" token) {:follow-redirects false
+                                                           :throw-exceptions false})))
+
+(defn invite-company-and-accept-invitation [apikey app-id company-id]
+  (command apikey :company-invite :id app-id :company-id company-id) => ok?
+  (accept-company-invitation))
 
 ;;
 ;; Stuffin' data in
