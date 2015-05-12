@@ -152,25 +152,25 @@
   [{:name "BAWCFI22"} ; Basware Oyj
    {:name "003714377140"} ; Enfo Zender Oy
    {:name "003708599126"} ; Liaison Technologies Oy
-   {:name "HELSFIHH"} ; Aktia Säästöpankki Oyj
+   {:name "HELSFIHH"} ; Aktia S\u00e4\u00e4st\u00f6pankki Oyj
    {:name "POPFFI22"} ; Paikallisosuuspankit
    {:name "HANDFIHH"} ; Handelsbanken
    {:name "003721291126"} ; Maventa
    {:name "003723327487"} ; Apix Messaging Oy
    {:name "003717203971"} ; Notebeat Oy
    {:name "003723609900"} ; (tai PAGERO) Pagero
-   {:name "003701150617"} ; Strålfors Oy
+   {:name "003701150617"} ; Str\u00e5lfors Oy
    {:name "FIYAPSOL"} ; YAP Solutions Oy
    {:name "00885060259470028"} ; Tradeshift
    {:name "TAPIFI22"} ; S-Pankki Oy
    {:name "INEXCHANGE"} ; InExchange Factorum AB
    {:name "DNBAFIHX"} ; DNB Bank ASA
    {:name "003703575029"} ; TeliaSonera Finland Oyj
-   {:name "ITELFIHH"} ; Säästöpankit
+   {:name "ITELFIHH"} ; S\u00e4\u00e4st\u00f6pankit
    {:name "003710948874"} ; OpusCapita Group Oy
    {:name "00885790000000418"} ; HighJump AS
    {:name "NDEAFIHH"} ; Nordea
-   {:name "OKOYFIHH"} ; OP-Pohjola-ryhmä
+   {:name "OKOYFIHH"} ; OP-Pohjola-ryhm\u00e4
    {:name "003701011385"} ; Tieto Oyj
    {:name "DABAFIHH"} ; Danske Bank Oyj
    {:name "003703575029"} ; CGI
