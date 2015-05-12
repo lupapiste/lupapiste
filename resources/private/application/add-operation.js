@@ -8,8 +8,6 @@
   function Model() {
     var self = this;
 
-    self.application = {};
-
     self.title = ko.observable();
     self.url = ko.observable();
     self.operations = ko.observable();
@@ -19,26 +17,26 @@
     self.waitingOperations = ko.observable();
 
     self.clear = function() {
-      self.application = {};
       return self.title("").url("").operations(null).operation(null).pending(false).waitingOperations(false);
     };
 
-    self.init = function(application) {
-      self.application = application;
+    self.init = function() {
       self
         .operations(null)
         .operation(null)
         .processing(false)
         .pending(false)
         .waitingOperations(false)
-        .title(application.title)
-        .url("#!/application/" + application.id);
-      var id = application.id;
+        .title(lupapisteApp.models.application.title())
+        .url("#!/application/" + lupapisteApp.models.application.id());
+
+      lupapisteApp.setTitle(lupapisteApp.models.application.title());
+
       ajax
-        .query("addable-operations", {id: id})
+        .query("addable-operations", {id: lupapisteApp.models.application.id()})
         .pending(self.waitingOperations)
-        .success(function (data) {
-          if (self.application.id === id) {
+        .success(function(data) {
+          if (lupapisteApp.models.application.id() === currentId) {
             self.operations(data.operations);
           }
         })
@@ -48,13 +46,14 @@
 
     self.addOperation = function(op) {
       ajax
-        .command("add-operation", {id: self.application.id, operation: op.op})
+        .command("add-operation", {id: lupapisteApp.models.application.id(), operation: op.op})
         .processing(self.processing)
         .pending(self.pending)
         .success(function() {
           window.location.hash = self.url();
         })
         .call();
+        hub.send("track-click", {category:"Application", label:"", event:"addOperation"});
     };
 
   }
@@ -67,7 +66,7 @@
       model.clear();
       repository.load(currentId);
     } else {
-      lupapisteApp.setTitle(model.application.title);
+      model.init();
     }
 
     if (tree) {
@@ -75,10 +74,9 @@
     }
   });
 
-  repository.loaded(["add-operation"], function(application) {
-    if (currentId === application.id) {
-      model.init(application);
-      lupapisteApp.setTitle(application.title);
+  hub.subscribe("application-model-updated", function() {
+    if (currentId === lupapisteApp.models.application.id()) {
+      model.init();
     }
   });
 

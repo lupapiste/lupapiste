@@ -22,7 +22,7 @@ du har bjudits in som myndighet i tj&auml;nsten Lupapiste. Genom l&auml;nken ned
 
 Forts&auml;tt genom att klicka p&aring; l&auml;nken:
 
-{{link-fi}}
+{{link-sv}}
 
 Om l&auml;nken inte fungerar, kopiera adressen och klistra in den i webbl&auml;sarens adressf&auml;lt.
 

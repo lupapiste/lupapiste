@@ -141,6 +141,7 @@
         .success(function() {
           if (self.cb) {
             self.cb();
+            lupapisteApp.models.globalAuthModel.refresh();
           } else {
             self.value(!self.value());
           }
@@ -168,7 +169,7 @@
       read:  function() { return self.role() === "admin"; },
       write: function(v) { return self.role(v ? "admin" : "user"); }
     });
-    self.opsEnabled   = ko.computed(function() { return currentUser.get().company.role() === "admin" && currentUser.id() !== user.id; });
+    self.opsEnabled   = ko.computed(function() { return lupapisteApp.models.currentUser.company.role() === "admin" && lupapisteApp.models.currentUser.id() !== user.id; });
     self.toggleAdmin  = companyUserOp.withConfirmation(user, self.admin, "admin");
     self.toggleEnable = companyUserOp.withConfirmation(user, self.enabled, "enabled");
     self.deleteUser   = companyUserOp.withConfirmation(user, self.deleted, "delete", function() {
@@ -184,7 +185,7 @@
     self.expires   = user.expires;
     self.role      = user.role;
     self.tokenId   = user.tokenId;
-    self.opsEnabled   = ko.computed(function() { return currentUser.get().company.role() === "admin" && currentUser.id() !== user.id; });
+    self.opsEnabled   = ko.computed(function() { return lupapisteApp.models.currentUser.company.role() === "admin" && lupapisteApp.models.currentUser.id() !== user.id; });
     self.deleteInvitation = companyUserOp.withConfirmation(user, self.deleted, "delete-invite", function() {
       invitations.remove(function(i) { return i.tokenId === user.tokenId; });
     });
@@ -312,7 +313,7 @@
       return self
         .id(data.company.id)
         .info.update(data.company)
-        .isAdmin(currentUser.get().role() === "admin" || (currentUser.get().company.role() === "admin" && currentUser.get().company.id() === self.id()))
+        .isAdmin(lupapisteApp.models.currentUser.role() === "admin" || (lupapisteApp.models.currentUser.company.role() === "admin" && lupapisteApp.models.currentUser.company.id() === self.id()))
         .users(_.map(data.users, function(user) { return new CompanyUser(user, self.users); }))
         .invitations(_.map(data.invitations, function(invitation) { return new InvitedUser(invitation, self.invitations); }));
     };
@@ -342,7 +343,10 @@
 
   hub.onPageLoad("company", function(e) { company.show(e.pagePath[0], e.pagePath[1]); });
 
-  hub.subscribe("refresh-companies", function() { company.load(); });
+  hub.subscribe("refresh-companies", function() {
+    lupapisteApp.models.globalAuthModel.refresh();
+    company.load();
+  });
 
   $(function() {
     $("#company-content").applyBindings(company);

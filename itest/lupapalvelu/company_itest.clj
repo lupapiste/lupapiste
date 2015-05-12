@@ -56,10 +56,8 @@
 
 (facts* "Company is added to application"
 
-  (let [application-id (create-app-id mikko :municipality sonja-muni :address "Kustukatu 13")
-        auth (:auth (query-application mikko application-id))
-        params {:follow-redirects false
-                :throw-exceptions false}]
+  (let [application-id (create-app-id mikko :propertyId sipoo-property-id :address "Kustukatu 13")
+        auth (:auth (query-application mikko application-id))]
     (count auth) => 1
 
     (fact "Applicant invites company"
@@ -72,10 +70,7 @@
         (some #(= "solita" %) auth-ids) => nil?))
 
     (fact "Invitation is accepted"
-      (let [email (last-email)
-            auth (:auth (query-application mikko application-id))
-            [uri token] (re-find #"http.+/app/fi/welcome#!/accept-company-invitation/([A-Za-z0-9-]+)" (:plain (:body email)))
-            resp (http/post (str (server-address) "/api/token/" token) params)]
+      (let [resp (accept-company-invitation)]
         (:status resp) => 200))
 
     (fact "Company is fully authored to the application after accept"

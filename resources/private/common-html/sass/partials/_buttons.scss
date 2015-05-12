@@ -7,6 +7,7 @@
 
 [type=submit], .btn, button {
   background: darken($lp-light-grey, 15%);
+  text-align: center;
   cursor: pointer;
   display:inline-block;
   font-family:inherit;
@@ -133,6 +134,10 @@ button[disabled] {
     -webkit-box-shadow:0 1px 2px darken($lp-light-grey, 20%);
     box-shadow:0 1px 2px darken($lp-light-grey, 20%);
   }
+  &:visited, &:active {
+    color: white;
+  }
+
 }
 
 // Decline button

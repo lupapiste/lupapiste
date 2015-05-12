@@ -23,7 +23,17 @@ LUPAPISTE.VerdictsModel = function() {
         var poytakirjat = _.map(paatos.poytakirjat || [], function(pk) {
           var myAttachments = _.filter(application.attachments || [], function(attachment) {
             var target = attachment.target;
-            return target && target.type === "verdict" && (target.urlHash ? target.urlHash === pk.urlHash : target.id === verdict.id);
+            var idMatch = false;
+            if (target && target.type === "verdict") {
+              if (target.poytakirjaId) {
+                idMatch = target.poytakirjaId === pk.id;
+              } else if (target.urlHash) {
+                idMatch = target.urlHash === pk.urlHash;
+              } else {
+                idMatch = target.id === verdict.id;
+              };
+            }
+            return idMatch;
           }) || [];
           pk.attachments = myAttachments;
           return pk;
@@ -72,6 +82,7 @@ LUPAPISTE.VerdictsModel = function() {
       ajax.command("publish-verdict", {id: applicationId, verdictId: verdict.id})
         .success(function() {repository.load(applicationId, self.newPending);})
         .call();
+      hub.send("track-click", {category:"Application", label: "", event:"publishVerdict"});
       }});
   };
 
@@ -80,6 +91,7 @@ LUPAPISTE.VerdictsModel = function() {
       ajax.command("delete-verdict", {id: self.applicationId, verdictId: bindings.id})
         .success(function() {repository.load(self.applicationId);})
         .call();
+        hub.send("track-click", {category:"Application", label: "", event:"deleteVerdict"});
       }});
   };
 
@@ -98,6 +110,7 @@ LUPAPISTE.VerdictsModel = function() {
       LUPAPISTE.ModalDialog.showDynamicOk(loc("verdict.fetch.title"), loc(d.text));
     })
     .call();
+    hub.send("track-click", {category:"Application", label: "", event:"chechForVerdict"});
   };
 
   self.verdictSigningModel = new LUPAPISTE.VerdictSigningModel("#dialog-sign-verdict");
@@ -110,6 +123,7 @@ LUPAPISTE.VerdictsModel = function() {
   };
 
   self.verdictSignedByUser = function(paatos) {
-    return _.some(paatos.signatures, {user: {id: currentUser.id()}});
+    hub.send("track-click", {category:"Application", label: "", event:"verdictSignedByUser"});
+    return _.some(paatos.signatures, {user: {id: lupapisteApp.models.currentUser.id()}});
   };
 };

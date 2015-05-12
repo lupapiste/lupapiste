@@ -14,7 +14,7 @@ Mikko logs in and does not see the Nouda lupa button
   # test the smaller button in the upper-right corner
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname-mikko}  create-mikko-app${secs}
-  Create application the fast way  ${appname-mikko}  753  753-416-25-30  kerrostalo-rivitalo
+  Create application the fast way  ${appname-mikko}  753-416-25-30  kerrostalo-rivitalo
   Go to page  applications
   Wait until  Element should not be visible  //section[@id='applications']//button[@data-test-id='applications-create-new-with-prev-permit']
   Logout
@@ -26,7 +26,7 @@ Järvenpää authority logs in and sees the Nouda lupa button
   # test the smaller button in the upper-right corner
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname-jarvenpaa-normal}  create-jarvenpaa-app-${secs}
-  Create application the fast way  ${appname-jarvenpaa-normal}  186  186-2-215-10  kerrostalo-rivitalo
+  Create application the fast way  ${appname-jarvenpaa-normal}  186-2-215-10  kerrostalo-rivitalo
   Go to page  applications
   Wait until  Element should be visible  //section[@id='applications']//button[@data-test-id='applications-create-new-with-prev-permit']
 

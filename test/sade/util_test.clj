@@ -171,16 +171,6 @@
     (to-xml-time-from-string "0:10") => "00:10:00"
     (to-xml-time-from-string "1:0") => "01:00:00"))
 
-(facts "to-property-id"
-  (to-property-id "245-003-0105-0006") => "24500301050006"
-  (to-property-id "245-3-105-6") => "24500301050006"
-  (to-property-id "245-03-0105-06") => "24500301050006"
-  (to-property-id "05-03-0105-006") => "00500301050006")
-
-(facts "to-human-readable-property-id"
-  (to-human-readable-property-id "24500301050006") => "245-3-105-6"
-  (to-human-readable-property-id "00500301050006") => "5-3-105-6")
-
 (facts sequable?
   (sequable? [])        => true
   (sequable? '())       => true
@@ -222,26 +212,25 @@
   (fact (y? nil)           => falsey)
   (fact (y? "")            => falsey)
   (fact (y? "foo")         => falsey)
-  (fact (y? "FI2341529-4") => falsey)
-  (fact (y? "FI2341528-4") => truthy)
-  (fact (y? "SW123456789") => truthy))
+  (fact (y? "2341529-4")   => falsey)
+  (fact (y? "2341528-4")   => truthy))
 
-(facts ovt?
-  (fact (ovt? nil)             => falsey)
-  (fact (ovt? "")              => falsey)
-  (fact (ovt? "foo")           => falsey)
-  (fact (ovt? "1234")          => falsey)
-  (fact (ovt? "12345")         => truthy) ; foreign OVT
-  (fact (ovt? "003712345")     => falsey)
-  (fact (ovt? "003723415284")  => truthy)
-  (fact (ovt? "0037234152841") => truthy)
-  (fact (ovt? "00372341528412") => truthy)
-  (fact (ovt? "003723415284123") => truthy)
-  (fact (ovt? "0037234152841234") => truthy)
-  (fact (ovt? "00372341528412345") => truthy)
-  (fact (ovt? "003723415284123456") => falsey)
-  (fact (ovt? "003701902735") => truthy)
-  (fact (ovt? "003710601555") => truthy))
+(facts finnish-ovt?
+  (fact (finnish-ovt? nil)             => falsey)
+  (fact (finnish-ovt? "")              => falsey)
+  (fact (finnish-ovt? "foo")           => falsey)
+  (fact (finnish-ovt? "1234")          => falsey)
+  (fact (finnish-ovt? "12345")         => falsey)
+  (fact (finnish-ovt? "003712345")     => falsey)
+  (fact (finnish-ovt? "003723415284")  => truthy)
+  (fact (finnish-ovt? "0037234152841") => truthy)
+  (fact (finnish-ovt? "00372341528412") => truthy)
+  (fact (finnish-ovt? "003723415284123") => truthy)
+  (fact (finnish-ovt? "0037234152841234") => truthy)
+  (fact (finnish-ovt? "00372341528412345") => truthy)
+  (fact (finnish-ovt? "003723415284123456") => falsey)
+  (fact (finnish-ovt? "003701902735") => truthy)
+  (fact (finnish-ovt? "003710601555") => truthy))
 
 (facts "rakennustunnus?"
   (fact (rakennustunnus? nil) => falsey)
@@ -270,3 +259,11 @@
   (fact "new more difficult"    (compare-difficulty {:difficulty "B"} {:difficulty "A"})  => pos?)
   (fact "tricky difficulty val" (compare-difficulty {:difficulty "A"} {:difficulty "AA"}) => pos?)
   (fact "equality"              (compare-difficulty {:difficulty "B"} {:difficulty "B"})  => zero?))
+
+(facts select-values
+  (let [m {:foo "foo" :bar "bar" :baz "baz"}]
+    (fact (select-values m [])                    => [])
+    (fact (select-values m [:foo :bar])           => ["foo" "bar"])
+    (fact (select-values m [:bar :foo])           => ["bar" "foo"])
+    (fact (select-values m [:foo :unknown :bar])  => ["foo" nil "bar"])
+    (fact (select-values m [:unknown1 :unknown2]) => [nil nil])))

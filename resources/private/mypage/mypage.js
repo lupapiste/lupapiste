@@ -10,8 +10,9 @@
       var t = setTimeout(img.show, 200);
       ajax
         .command(commandName, _.reduce(propertyNames, function(m, n) { m[n] = model[n](); return m; }, {}))
-        .success(function() { model.clear().saved(true); })
-        .error(function(d) { model.clear().saved(false).error(d.text); })
+        .pending(model.pending)
+        .success(function() { model.clear().saved(true).indicator({type: "saved"}); })
+        .error(function(d) { model.clear().saved(false).indicator({type: "err"}).error(d.text); })
         .complete(function() { clearTimeout(t); img.hide(); })
         .call();
     };
@@ -23,26 +24,39 @@
 
     self.error = ko.observable();
     self.saved = ko.observable();
-    self.firstName = ko.observable();
-    self.lastName = ko.observable();
+    self.firstName = ko.observable().extend({ maxLength: 255 });
+    self.lastName = ko.observable().extend({ maxLength: 255 });
     self.username = ko.observable();
-    self.street = ko.observable();
-    self.city = ko.observable();
-    self.zip = ko.observable();
-    self.phone = ko.observable();
+    self.street = ko.observable().extend({ maxLength: 255 });
+    self.city = ko.observable().extend({ maxLength: 255 });
+    self.zip = ko.observable().extend({number: true, maxLength: 5});
+    self.phone = ko.observable().extend({ maxLength: 255 });
     self.role = ko.observable();
     self.architect = ko.observable();
-    self.degree = ko.observable();
-    self.graduatingYear = ko.observable();
-    self.fise = ko.observable();
-    self.companyName = ko.observable();
-    self.companyId = ko.observable();
+    self.degree = ko.observable().extend({ maxLength: 255 });
+    self.graduatingYear = ko.observable().extend({ number: true, minLength: 4, maxLength: 4 });
+    self.fise = ko.observable().extend({ maxLength: 255 });
+    self.companyName = ko.observable().extend({ maxLength: 255 });
+    self.companyId = ko.observable().extend( { y: true });
     self.allowDirectMarketing = ko.observable();
     self.attachments = ko.observable();
     self.hasAttachments = ko.computed(function() {
       var a = self.attachments();
       return a && a.length > 0;
     });
+
+    self.all = ko.validatedObservable([self.firstName, self.lastName, self.street, self.city,
+                                       self.zip, self.phone, self.degree, self.graduatingYear, self.fise,
+                                       self.companyName, self.companyId]);
+
+    self.isValid = ko.computed(function() {
+      return self.all.isValid();
+    });
+
+    self.pending = ko.observable();
+
+    self.indicator = ko.observable().extend({notify: "always"});
+
     self.loadingAttachments = ko.observable();
 
     self.company = {
@@ -112,7 +126,6 @@
       return self.saved(false).error(null);
     };
 
-    self.ok = ko.computed(function() { return isNotBlank(self.firstName()) && isNotBlank(self.lastName()); }, self);
     self.save = makeSaveFn("update-user",
         ["firstName", "lastName",
          "street", "city", "zip", "phone",
@@ -122,11 +135,7 @@
          "allowDirectMarketing"]);
 
     self.updateUserName = function() {
-      var username = self.username() || "";
-      if (self.firstName() || self.lastName()) {
-        username = self.firstName() + " " + self.lastName();
-      }
-      $("#user-name").text(username).attr("data-test-role", self.role());
+      hub.send("reload-current-user");
       return self;
     };
 
@@ -172,6 +181,8 @@
     this.newPassword2 = ko.observable("");
     this.error = ko.observable(null);
     this.saved = ko.observable(false);
+    this.indicator = ko.observable().extend({ notify: "always" });
+    this.pending = ko.observable();
 
     this.clear = function() {
       return this
@@ -264,7 +275,7 @@
   var uploadModel = new UploadModel();
 
   hub.onPageLoad("mypage", function() { ownInfo.clear(); pw.clear(); });
-  hub.subscribe("login", function(e) { ownInfo.clear().init(e.user).updateUserName(); });
+  hub.subscribe("login", function(e) { ownInfo.clear().init(e.user); });
 
   $(function() {
 

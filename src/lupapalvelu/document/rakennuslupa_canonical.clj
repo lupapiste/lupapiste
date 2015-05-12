@@ -21,7 +21,7 @@
      (merge {:muutostapa (-> huoneisto :muutostapa)
              :huoneluku (-> huoneisto :huoneluku)
              :keittionTyyppi (-> huoneisto :keittionTyyppi)
-             :huoneistoala (-> huoneisto :huoneistoala)
+             :huoneistoala (ss/replace (-> huoneisto :huoneistoala) "," ".")
              :varusteet {:WCKytkin (true? (-> huoneisto :WCKytkin))
                          :ammeTaiSuihkuKytkin (true? (-> huoneisto :ammeTaiSuihkuKytkin))
                          :saunaKytkin (true? (-> huoneisto :saunaKytkin))
@@ -305,8 +305,8 @@
                        :osittainen osittainen
                        :lasnaolijat lasnaolijat
                        :pitaja pitaja
-                       :poikkeamat poikkeamat}
-                      (when-not (some #{katselmusTyyppi} ["muu tarkastus" "muu katselmus"]) {:tarkastuksenTaiKatselmuksenNimi task-name})
+                       :poikkeamat poikkeamat
+                       :tarkastuksenTaiKatselmuksenNimi task-name}
                       (when task-id {:muuTunnustieto {:MuuTunnus {:tunnus task-id :sovellus "Lupapiste"}}}) ; v 2.1.3
                       (when (seq buildings)
                         {:rakennustunnus (let [building (-> buildings first :rakennus)]

@@ -19,11 +19,11 @@
   (dorun (map (partial mongo/insert :organizations) organizations)))
 
 (facts "Automatic checking for verdicts"
- (let [application-submitted         (create-and-submit-local-application sonja :municipality sonja-muni :address "Paatoskuja 17")
+ (let [application-submitted         (create-and-submit-local-application sonja :propertyId sipoo-property-id :address "Paatoskuja 17")
        application-id-submitted      (:id application-submitted)
-       application-sent              (create-and-submit-local-application sonja :municipality sonja-muni :address "Paatoskuja 18")
+       application-sent              (create-and-submit-local-application sonja :propertyId sipoo-property-id :address "Paatoskuja 18")
        application-id-sent           (:id application-sent)
-       application-verdict-given     (create-and-submit-local-application sonja :municipality sonja-muni :address "Paatoskuja 19")
+       application-verdict-given     (create-and-submit-local-application sonja :propertyId sipoo-property-id :address "Paatoskuja 19")
        application-id-verdict-given  (:id application-verdict-given)]
 
    (local-command sonja :approve-application :id application-id-sent :lang "fi") => ok?

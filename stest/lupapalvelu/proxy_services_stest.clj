@@ -104,14 +104,14 @@
 (facts "plan-urls-by-point-proxy"
 
   (fact "Helsinki"
-    (let [response (plan-urls-by-point-proxy {:params {:x "395628" :y "6677704" :municipality "091"}})
-          body (json/decode (:body response) true)]
-      (first body) => {:id "8755"
-                       :kuntanro "91"
-                       :kaavanro "8755"
-                       :vahvistett_pvm "19.12.1985"
-                       :linkki "http://img.sito.fi/kaavamaaraykset/91/8755.pdf"
-                       :type "sito"}))
+   (let [response (plan-urls-by-point-proxy {:params {:x "395628" :y "6677704" :municipality "091"}})
+         body     (json/decode (:body response) true)]
+     (first body) => {:id "8755"
+                      :kuntanro "91"
+                      :kaavanro "8755"
+                      :vahvistett_pvm "19.12.1985"
+                      :linkki "http://img.sito.fi/kaavamaaraykset/91/8755.pdf"
+                      :type "sito"}))
 
   (fact "Mikkeli"
     (let [response (plan-urls-by-point-proxy {:params {:x "533257.514" :y "6828489.823" :municipality "491"}})
@@ -142,7 +142,7 @@
                        :tyyppi "Kunnan hyv\u00e4ksym\u00e4"
                        :oikeusvaik "Oikeusvaikutteinen"
                        :lisatieto ""
-                       :linkki "http://194.28.3.37/maarays/0912007x.pdf"
+                       :linkki "http://liiteri.ymparisto.fi/maarays/0912007x.pdf"
                        :type "yleiskaava"}
       (second body) => {:id "0911001"
                         :nimi "Helsingin yleiskaava 2002"
@@ -150,7 +150,7 @@
                         :tyyppi "Kunnan hyv\u00e4ksym\u00e4"
                         :oikeusvaik "Oikeusvaikutteinen"
                         :lisatieto "Kaupungin toimittamasta aineistosta puuttuu etel\u00e4inen eli merellinen osa"
-                        :linkki "http://194.28.3.37/maarays/0911001x.pdf"
+                        :linkki "http://liiteri.ymparisto.fi/maarays/0911001x.pdf"
                         :type "yleiskaava"})))
 
 (facts "geoserver-layers"

@@ -40,6 +40,21 @@
     message: loc("error.invalidOVT")
   };
 
+  ko.validation.rules.usernameAsync = {
+    async: true,
+    validator: _.debounce(function(val, params, cb) {
+      if (!params) {
+        // don't validate
+        return cb(true);
+      }
+      ajax.query("email-in-use", {email: val})
+        .success(function() { cb(false); })
+        .error(function() { cb(true); })
+        .call();
+    }, 500),
+    message: loc("email-in-use")
+  };
+
   ko.validation.registerExtenders();
 
   ko.bindingHandlers.dateString = {
@@ -87,12 +102,12 @@
 
   ko.bindingHandlers.fullName = {
     update: function(element, valueAccessor) {
-      var value = ko.utils.unwrapObservable(valueAccessor());
+      var value = ko.toJS(valueAccessor());
       var fullName = "";
       if (value) {
-        if (value.lastName) { fullName += _.isFunction(value.lastName) ? value.lastName() : value.lastName; }
+        if (value.lastName) { fullName += value.lastName; }
         if (value.firstName && value.lastName) { fullName += "\u00a0"; }
-        if (value.firstName) { fullName += _.isFunction(value.firstName) ? value.firstName() : value.firstName; }
+        if (value.firstName) { fullName +=  value.firstName; }
       }
       $(element).text(fullName);
     }

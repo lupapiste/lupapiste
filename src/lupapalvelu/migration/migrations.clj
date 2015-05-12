@@ -5,6 +5,7 @@
             [sade.util :refer [dissoc-in postwalk-map strip-nils abs] :as util]
             [sade.core :refer [def-]]
             [sade.strings :as ss]
+            [sade.property :as p]
             [lupapalvelu.migration.core :refer [defmigration]]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
@@ -834,8 +835,41 @@
     {:documents {$elemMatch {$or [{:data.patevyys.koulutusvalinta.value "muu"}
                                   {:data.patevyys-tyonjohtaja.koulutusvalinta.value "muu"}]}}}))
 
+(defmigration remove-organizations-field-from-dummy-and-applicant
+  {:apply-when (pos? (mongo/count :users {$and [{:organizations {$exists true}} {:role {$in ["dummy", "applicant"]}}]}))}
+  (mongo/update-by-query :users {$and [{:organizations {$exists true}} {:role {$in ["dummy", "applicant"]}}]} {$unset {:organizations 1}}))
+
+(defn organizations->org-authz [coll]
+  (let [users (mongo/select coll {:organizations {$exists true}})]
+    (reduce + 0
+            (for [{:keys [organizations id role]} users]
+              (let [org-authz (into {} (for [org organizations] [(str "orgAuthz." org) [role]]))]
+                (if (empty? org-authz)
+                  (mongo/update-n coll {:_id id} {$set {:orgAuthz {}}
+                                                  $unset {:organizations 1}})
+                  (mongo/update-n coll {:_id id} {$set org-authz
+                                                  $unset {:organizations 1}})))))))
+
+(defmigration add-org-authz
+  {:apply-when (pos? (mongo/count :users {:organizations {$exists true}}))}
+  (organizations->org-authz :users))
+
+(defmigration tyonjohtaja-v1-vastuuaika-cleanup
+  {:apply-when (pos? (mongo/count :applications {:documents {$elemMatch {"schema-info.name" "tyonjohtaja", "data.vastuuaika" {$exists true}}}}))}
+  (update-applications-array
+    :documents
+    (fn [doc]
+      (if (= (-> doc :schema-info :name) "tyonjohtaja")
+        (util/dissoc-in doc [:data :vastuuaika])
+        doc))
+    {:documents {$elemMatch {"schema-info.name" "tyonjohtaja", "data.vastuuaika" {$exists true}}}}))
+
+(defmigration application-authority-default-keys
+  {:apply-when (pos? (mongo/count :applications {:authority.lastName {$exists false}}))}
+  (mongo/update-n :applications {:authority.lastName {$exists false}} {$set {:authority (:authority domain/application-skeleton)}} :multi true))
+
 (defn- rakennustunnus [property-id building-number]
-  (let [parts (rest (re-matches util/human-readable-property-id-pattern property-id))]
+  (let [parts (rest (re-matches p/db-property-id-pattern property-id))]
     (apply format "%s-%s-%s-%s %s" (concat parts [building-number]))))
 
 (defn- resolve-new-national-id? [building-number national-id]
@@ -900,6 +934,15 @@
         {$set {:buildings (map (partial building-raki-conversion id) buildings)
                :documents (map (partial document-raki-conversion id propertyId) documents)
                :tasks (map (partial task-raki-conversion id propertyId) tasks)}}))))
+
+(defmigration strip-FI-from-y-tunnus
+  {:apply-when (pos? (mongo/count :companies {:y {$regex #"^FI"}}))}
+  (doseq [company (mongo/select :companies {:y {$regex #"^FI"}})]
+    (mongo/update-by-id :companies (:id company) {$set {:y (subs (:y company) 2)}})))
+
+(defmigration company-default-account-type
+  {:apply-when (pos? (mongo/count :companies {:accountType {$exists false}}))}
+  (mongo/update-n :companies {:accountType {$exists false}} {$set {:accountType "account15"}} :multi true))
 
 ;;
 ;; ****** NOTE! ******

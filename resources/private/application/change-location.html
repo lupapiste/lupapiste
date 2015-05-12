@@ -18,7 +18,7 @@
             <div>
               <form data-bind="submit: saveNewLocation">
                 <label class="form-label" data-bind ="ltext: 'newRequest.propertyId'"></label>
-                <input data-bind="textInput: propertyId, readonly: !currentUser.isAuthority()" data-test-id="application-new-propertyid"
+                <input data-bind="textInput: propertyId, readonly: !lupapisteApp.models.currentUser.isAuthority()" data-test-id="application-new-propertyid"
                        type="text" maxlength="20" class="form-input text long" ></input>
 
                 <label class="form-label" data-bind ="ltext: 'newRequest.address'"></label>

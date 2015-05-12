@@ -1,8 +1,9 @@
 (ns sade.util
   (:refer-clojure :exclude [pos? neg? zero?])
   (:require [clojure.walk :refer [postwalk prewalk]]
-            [clojure.string :refer [join]]
+            [clojure.java.io :as io]
             [sade.strings :refer [numeric? decimal-number? trim] :as ss]
+            [sade.core :refer :all]
             [clj-time.format :as timeformat]
             [clj-time.coerce :as tc]
             [schema.core :as sc])
@@ -147,7 +148,7 @@
       false)))
 
 (defn ->int
-  "Reads a integer from input. Returns default if not a integer.
+  "Reads a integer from input. Returns default if not an integer.
    Default default is 0"
   ([x] (->int x 0))
   ([x default]
@@ -157,12 +158,19 @@
                           (number? x)  (str (int x))
                           :else        (str x))
                         10)
-      (catch Exception e
+      (catch Exception _
         default))))
 
-(defn ->double [v]
-  (let [s (str v)]
-    (if (or (numeric? s) (decimal-number? s)) (Double/parseDouble s) 0.0)))
+(defn ->double
+  "Reads a double from input. Return default if not a double.
+  Default is 0.0"
+  ([v] (->double v 0.0))
+  ([v default]
+   (let [s (str v)]
+     (try
+       (Double/parseDouble s)
+       (catch Exception _
+         default)))))
 
 (defn abs [n]
   {:pre [(number? n)]}
@@ -256,24 +264,6 @@
                 4 "%02d:%02d:%02d.%d")]
       (apply format fmt (map ->int matches)))))
 
-(def property-id-pattern
-  "Regex for property id human readable format"
-  #"^(\d{1,3})-(\d{1,3})-(\d{1,4})-(\d{1,4})$")
-
-(defn to-property-id [^String human-readable]
-  (let [parts (map #(Integer/parseInt % 10) (rest (re-matches property-id-pattern human-readable)))]
-    (apply format "%03d%03d%04d%04d" parts)))
-
-(def human-readable-property-id-pattern
-  "Regex for splitting db-saved property id to human readable form"
-  #"^([0-9]{1,3})([0-9]{1,3})([0-9]{1,4})([0-9]{1,4})$")
-
-(defn to-human-readable-property-id [property-id]
-  (->> (re-matches human-readable-property-id-pattern property-id)
-       (rest)
-       (map ->int)
-       (join "-")))
-
 (defn valid-email? [email]
   (try
     (javax.mail.internet.InternetAddress. email)
@@ -307,26 +297,26 @@
   (into m (filter #(->> % val not-empty-or-nil?) (apply hash-map kvs))))
 
 (defn finnish-y? [y]
-  (if-let [[_ number check] (re-matches #"FI(\d{7})-(\d)" y)]
+  (if-let [[_ number check] (re-matches #"(\d{7})-(\d)" y)]
     (let [cn (mod (reduce + (map * [7 9 10 5 8 4 2] (map #(Long/parseLong (str %)) number))) 11)
           cn (if (zero? cn) 0 (- 11 cn))]
       (= (Long/parseLong check) cn))))
 
 (defn y? [y]
   (cond
-    (nil? y)              false
-    (.startsWith y "FI")  (finnish-y? y)
-    :else                 (re-matches #"[A-Z]{2}.+" y)))
+    (nil? y) false
+    :else    (finnish-y? y)))
 
 (defn finnish-ovt? [ovt]
-  (if-let [[_ y c] (re-matches #"0037(\d{7})(\d)\d{0,5}" ovt)]
-    (finnish-y? (str "FI" y \- c))))
+  (if ovt
+    (if-let [[_ y c] (re-matches #"0037(\d{7})(\d)\d{0,5}" ovt)]
+      (finnish-y? (str y \- c)))
+    false))
 
-(defn ovt? [ovt]
+(defn account-type? [account-type]
   (cond
-    (nil? ovt)                false
-    (.startsWith ovt "0037")  (finnish-ovt? ovt)
-    :else                     (re-matches #"\d{4}.+" ovt)))
+    (nil? account-type) false
+    :else (re-matches   #"account(5|15|30)" account-type)))
 
 (defn rakennusnumero? [^String s]
   (and (not (nil? s)) (re-matches #"^\d{3}$" s)))
@@ -392,3 +382,18 @@
    returns true. pred must be free of side-effects."
   [pred coll]
   (first (filter pred coll)))
+
+(defn get-files-by-regex [path ^java.util.regex.Pattern regex]
+  "Takes all files (and folders) from given path and filters them by regex. Not recursive. Returns sequence of File objects."
+  {:pre [(instance? java.util.regex.Pattern regex) (string? path)]}
+  (filter
+    #(re-matches regex (.getName %))
+    (-> path io/file (.listFiles) seq)))
+
+(defn select-values [m keys]
+  (map #(get m %) keys))
+
+(defn validate-url [url]
+  ; Regex derived from @stephenhay's at https://mathiasbynens.be/demo/url-regex
+  (when-not (re-matches #"^(https?)://[^\s/$.?#].[^\s]*$" url)
+    (fail :error.invalid.url)))

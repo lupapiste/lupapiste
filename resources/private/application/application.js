@@ -73,23 +73,6 @@
     lupapisteApp.setTitle(newTitle || util.getIn(applicationModel, ["_js", "title"]));
   }
 
-  //FIXME: why is this?
-  function updateAssignee(value) {
-    // do not update assignee if page is still initializing
-    if (isInitializing) { return; }
-
-    // The right is validated in the back-end. This check is just to prevent error.
-    if (!authorizationModel.ok("assign-application")) { return; }
-
-    var assigneeId = value ? value : null;
-
-    ajax.command("assign-application", {id: currentId, assigneeId: assigneeId})
-      .success(function() {
-        repository.load(currentId, applicationModel.pending);
-        })
-      .call();
-  }
-
   function updatePermitSubtype(value){
     if (isInitializing) { return; }
 
@@ -118,13 +101,8 @@
     }
   }
 
-  applicationModel.assignee.subscribe(function(v) { updateAssignee(v); });
   applicationModel.permitSubtype.subscribe(function(v){updatePermitSubtype(v);});
   applicationModel.tosFunction.subscribe(updateTosFunction);
-
-  function resolveApplicationAssignee(authority) {
-    return (authority) ? new AuthorityInfo(authority.id, authority.firstName, authority.lastName) : null;
-  }
 
   function initAuthoritiesSelectList(data) {
     var authorityInfos = [];
@@ -216,11 +194,6 @@
       }
       applicationModel.nonpartyDocumentIndicator(_.reduce(nonpartyDocs, sumDocIndicators, 0));
       applicationModel.partyDocumentIndicator(_.reduce(partyDocs, sumDocIndicators, 0));
-
-      // Set the value behind assignee selection list
-      var assignee = resolveApplicationAssignee(app.authority);
-      var assigneeId = assignee ? assignee.id : null;
-      applicationModel.assignee(assigneeId);
 
       var metadata = _.map(app.metadata, function(value, key) {
         if (_.isObject(value)) {

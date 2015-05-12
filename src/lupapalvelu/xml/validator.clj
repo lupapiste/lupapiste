@@ -122,7 +122,9 @@
    :MAL ymp-validators
    :VVVL {"2.1.3" common-validator-2_1_3
           "ah-1.1" asianhallinta-validator}
-   :YL  ymp-validators})
+   :YL  ymp-validators
+   :MM  {"ah-1.1" asianhallinta-validator} ; maankayton muutos aka kaavat
+   :KT  {"ah-1.1" asianhallinta-validator}})
 
 (def supported-versions-by-permit-type
   (reduce (fn [m [permit-type validators]] (assoc m permit-type (keys validators))) {} schema-validators))
@@ -145,6 +147,5 @@
     (try
       (.validate validator xml-source)
       (catch Exception e
-        (warnf "Validation error with permit-type %s, schema-version %s: %s" permit-type schema-version (.getMessage e))
-        (debug xml)
+        (debugf "Validation error with permit-type %s, schema-version %s: %s" permit-type schema-version (.getMessage e))
         (throw e)))))

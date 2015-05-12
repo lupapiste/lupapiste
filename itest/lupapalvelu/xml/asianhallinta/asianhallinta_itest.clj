@@ -25,7 +25,7 @@
   (facts "UusiAsia from poikkeamis application"
     (let [app-id (create-app-id
                     pena
-                    :municipality velho-muni
+                    :propertyId kuopio-property-id
                     :operation "poikkeamis"
                     :propertyId "29703401070010"
                     :y 6965051.2333374 :x 535179.5
@@ -114,7 +114,7 @@
   (facts "UusiAsia with link permits"
     (let [link-app-id (create-app-id
                          pena
-                         :municipality velho-muni
+                         :propertyId kuopio-property-id
                          :operation "asuinrakennus"
                          :propertyId "29703401070010"
                          :y 6965051.2333374 :x 535179.5
@@ -128,12 +128,12 @@
 
           app-id (create-app-id ; Actual app for asianhallinta
                          pena
-                         :municipality velho-muni
+                         :propertyId kuopio-property-id
                          :operation "poikkeamis"
                          :propertyId "29703401070010"
                          :y 6965051.2333374 :x 535179.5
                          :address "Suusaarenkierto 44")
-          application (query-application pena app-id) => truthy          
+          application (query-application pena app-id) => truthy
           organization (organization/resolve-organization velho-muni (:permitType application)) => truthy
           scope  (organization/resolve-organization-scope velho-muni (:permitType application) organization) => truthy]
 
@@ -165,31 +165,27 @@
             (let [contents (sxml/select xml [:UusiAsia :Viiteluvat :Viitelupa])]
               (fact "Three link permits are present" (count contents) => 3)
 
-              (fact "One is link to LP application" 
-                (some 
-                  #(and 
+              (fact "One is link to LP application"
+                (some
+                  #(and
                     (= link-app-id (sxml/get-text % [:Viitelupa :MuuTunnus :Tunnus]))
-                    (= "Lupapiste" (sxml/get-text % [:Viitelupa :MuuTunnus :Sovellus]))) 
+                    (= "Lupapiste" (sxml/get-text % [:Viitelupa :MuuTunnus :Sovellus])))
                   contents) => truthy)
 
-              (fact "One is link to link-permit's verdict" 
-                (some 
-                  #(and 
-                    (= "KLTunnus1" (sxml/get-text % [:Viitelupa :MuuTunnus :Tunnus]))
-                    (= "Taustaj\u00E4rjestelm\u00E4" (sxml/get-text % [:Viitelupa :MuuTunnus :Sovellus]))) 
+              (fact "One is link to link-permit's verdict"
+                (some
+                  #(= "KLTunnus1" (sxml/get-text % [:Viitelupa :AsianTunnus]))
                   contents) => truthy)
 
-              (fact "One is link to manual link" 
-                (some 
-                  #(and 
-                    (= manual-link (sxml/get-text % [:Viitelupa :MuuTunnus :Tunnus]))
-                    (= "Taustaj\u00E4rjestelm\u00E4" (sxml/get-text % [:Viitelupa :MuuTunnus :Sovellus]))) 
+              (fact "One is link to manual link"
+                (some
+                  #(= manual-link (sxml/get-text % [:Viitelupa :AsianTunnus]))
                   contents) => truthy)))))))
 
   (facts "AsianTaydennys"
     (let [app-id (create-app-id
                    pena
-                   :municipality velho-muni
+                   :propertyId kuopio-property-id
                    :operation "poikkeamis"
                    :propertyId "29703401070010"
                    :y 6965051.2333374 :x 535179.5
@@ -231,7 +227,8 @@
               xml-as-string (slurp xml-file)
               xml (xml/parse (io/reader xml-file))]
 
-             (fact "Correctly named xml file is created" (.exists xml-file) => true)
+          (fact "Correctly named xml file is created"
+            (.exists xml-file) => true)
 
           (fact "XML file is valid"
             (validator/validate xml-as-string (:permitType updated-application) (str "ah-" (resolve-ah-version scope))))
@@ -261,7 +258,7 @@
   (fact "Can't create asianhallinta with non-asianhallinta operation"
     (let [app-id (create-app-id
                     pena
-                    :municipality velho-muni
+                    :propertyId kuopio-property-id
                     :operation "asuinrakennus"
                     :propertyId "29703401070010"
                     :y 6965051.2333374 :x 535179.5
@@ -273,7 +270,7 @@
   (fact "If asianhallinta is not set error occurs"
     (let [app-id (create-app-id
                     pena
-                    :municipality sonja-muni
+                    :propertyId sipoo-property-id
                     :operation "poikkeamis"
                     :propertyId "75312312341234"
                     :x 444444 :y 6666666
@@ -285,10 +282,10 @@
   (facts "Auth admin configs"
     (fact "Pena can't use asianhallinta configure query & command"
       (query pena "asianhallinta-config") => unauthorized?
-      (command pena "save-asianhallinta-config" :permitType "P" :municipality sonja-muni :enabled true :version "1.3") => unauthorized?)
+      (command pena "save-asianhallinta-config" :permitType "P" :propertyId sipoo-property-id :enabled true :version "1.3") => unauthorized?)
     (fact "Sonja can't use asianhallinta configure query & command"
       (query sonja "asianhallinta-config") => unauthorized?
-      (command sonja "save-asianhallinta-config" :permitType "P" :municipality sonja-muni :enabled true :version "1.3") => unauthorized?)
+      (command sonja "save-asianhallinta-config" :permitType "P" :propertyId sipoo-property-id :enabled true :version "1.3") => unauthorized?)
 
     (fact "Sipoo auth admin can query asianhallinta-config, response has scope, caseManagement with skeleton values"
       (let [resp (query sipoo "asianhallinta-config")
@@ -326,7 +323,7 @@
   (fact "Fail when organization has unsupported version selected"
     (let [app-id (create-app-id
                     pena
-                    :municipality velho-muni
+                    :propertyId kuopio-property-id
                     :operation "poikkeamis"
                     :propertyId "29703401070010"
                     :y 6965051.2333374 :x 535179.5
@@ -341,7 +338,7 @@
     (let [_ (command kuopio "save-asianhallinta-config" :permitType "P" :municipality velho-muni :enabled true :version false)
           app-id (create-app-id
                     pena
-                    :municipality velho-muni
+                    :propertyId kuopio-property-id
                     :operation "poikkeamis"
                     :propertyId "29703401070010"
                     :y 6965051.2333374 :x 535179.5

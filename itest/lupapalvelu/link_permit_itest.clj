@@ -6,12 +6,12 @@
 (fact* "Link permit creation and removal"
   (apply-remote-minimal)
 
-  (let [apikey                 sonja
-        municipality           sonja-muni
+  (let [apikey      sonja
+        property-id sipoo-property-id
 
         ;; App 1 - with same permit type, approved
         approved-application      (create-and-submit-application apikey
-                                    :municipality municipality
+                                    :propertyId property-id
                                     :address "Paatoskuja 13"
                                     :operation "ya-katulupa-vesi-ja-viemarityot") => truthy
         approved-application-id   (:id approved-application)
@@ -20,7 +20,7 @@
 
         ;; App 2 - with same permit type, verdict given
         verdict-given-application (create-and-submit-application apikey
-                                    :municipality municipality
+                                    :propertyId property-id
                                     :address "Paatoskuja 14"
                                     :operation "ya-katulupa-vesi-ja-viemarityot") => truthy
         verdict-given-application-id (:id verdict-given-application)
@@ -35,7 +35,7 @@
 
         ;; App 4 - old submitted application
         submitted-application     (create-and-submit-application apikey
-                                    :municipality municipality
+                                    :propertyId property-id
                                     :address "Paatoskuja 13"
                                     :operation "ya-katulupa-vesi-ja-viemarityot") => truthy
         submitted-application-id  (:id submitted-application)
@@ -43,13 +43,13 @@
 
         ;; App that gets a link permit attached to it
         test-application          (create-and-submit-application apikey
-                                    :municipality municipality
+                                    :propertyId property-id
                                     :address "Paatoskuja 15"
                                     :operation "ya-katulupa-vesi-ja-viemarityot") => truthy
         test-application-id       (:id test-application)]
 
     (fact "New ya-jatkoaika requires link permit"
-      (let [new-application-id (create-app-id apikey :operation "ya-jatkoaika") ]
+      (let [new-application-id (create-app-id apikey :operation "ya-jatkoaika" :propertyId property-id) ]
         (query apikey :link-permit-required :id new-application-id) => ok?))
 
     (fact "ya-jatkoaika has a link permit"

@@ -12,6 +12,7 @@
             [sade.strings :as ss]
             [sade.coordinate :as coordinate]
             [sade.core :refer [now def-]]
+            [sade.property :as p]
             [lupapalvelu.document.schemas :as schema]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.permit :as permit]
@@ -293,7 +294,7 @@
                                  :jakokirjain     (get-text huoneisto :jakokirjain)
                                  :porras          (get-text huoneisto :porras)
                                  :huoneistoTyyppi (get-text huoneisto :huoneistonTyyppi)
-                                 :huoneistoala    (get-text huoneisto :huoneistoala)
+                                 :huoneistoala    (ss/replace (get-text huoneisto :huoneistoala) "." ",")
                                  :huoneluku       (get-text huoneisto :huoneluku)
                                  :keittionTyyppi  (get-text huoneisto :keittionTyyppi)
                                  :WCKytkin                (get-text huoneisto :WCKytkin)
@@ -310,14 +311,14 @@
   (-> (cr/all-of paatos-xml-without-ns :lupamaaraykset)
     (cleanup)
 
-    (cr/ensure-sequental :vaaditutKatselmukset)
+    (cr/ensure-sequential :vaaditutKatselmukset)
     (#(let [kats (map :Katselmus (:vaaditutKatselmukset %))]
         (if (seq kats)
           (assoc % :vaaditutKatselmukset kats)
           (dissoc % :vaaditutKatselmukset))))
 
     ; KRYSP yhteiset 2.1.1+
-    (cr/ensure-sequental :vaadittuTyonjohtajatieto)
+    (cr/ensure-sequential :vaadittuTyonjohtajatieto)
     (#(let [tyonjohtajat (map (comp :tyonjohtajaLaji :VaadittuTyonjohtaja) (:vaadittuTyonjohtajatieto %))]
         (if (seq tyonjohtajat)
           (-> %
@@ -327,7 +328,7 @@
             (assoc :vaaditutTyonjohtajat (s/join ", " tyonjohtajat)))
           (dissoc % :vaadittuTyonjohtajatieto))))
 
-    (cr/ensure-sequental :maarays)
+    (cr/ensure-sequential :maarays)
     (#(if-let [maarays (:maarays %)]
         (assoc % :maaraykset (cr/convert-keys-to-timestamps maarays [:maaraysaika :toteutusHetki]))
         %))
@@ -346,7 +347,7 @@
       (-> lupaehdot
         (cleanup)
         ((fn [maar] (map #(get-text % :lupaehdotJaMaaraykset) maar)))
-        (cr/ensure-sequental :lupaehdotJaMaaraykset)))))
+        (cr/ensure-sequential :lupaehdotJaMaaraykset)))))
 
 (defn- get-pvm-dates [paatos v]
   (into {} (map #(let [xml-kw (keyword (str (name %) "Pvm"))]
@@ -464,7 +465,6 @@
 ;;
 (defn get-app-info-from-message [xml kuntalupatunnus]
   (let [xml-no-ns (cr/strip-xml-namespaces xml)
-        kuntakoodi (-> (select1 xml-no-ns [:toimituksenTiedot :kuntakoodi]) cr/all-of)
         asiat (enlive/select xml-no-ns case-elem-selector)
         ;; Take first asia with given kuntalupatunnus. There should be only one. If there are many throw error.
         asiat-with-kuntalupatunnus (filter #(when (= kuntalupatunnus (->kuntalupatunnus %)) %) asiat)]
@@ -503,7 +503,8 @@
             osoitteet-xml (select asia [:rakennuspaikkatieto :Rakennuspaikka :osoite :osoitenimi :teksti])
             osoite-Rakennuspaikka (or (-> (select1 osoitteet-xml [(enlive/attr= :xml:lang asioimiskieli-code)]) cr/all-of)
                                     (-> (select1 osoitteet-xml [(enlive/attr= :xml:lang "fi")]) cr/all-of))
-            kiinteistotunnus-Rakennuspaikka (-> Rakennuspaikka :rakennuspaikanKiinteistotieto :RakennuspaikanKiinteisto :kiinteistotieto :Kiinteisto :kiinteistotunnus)
+            kiinteistotunnus (-> Rakennuspaikka :rakennuspaikanKiinteistotieto :RakennuspaikanKiinteisto :kiinteistotieto :Kiinteisto :kiinteistotunnus)
+            municipality (p/municipality-id-by-property-id kiinteistotunnus)
             coord-array-Rakennuspaikka (resolve-coordinates
                                          (select1 asia [:rakennuspaikkatieto :Rakennuspaikka :sijaintitieto :Sijainti :piste])
                                          (-> Rakennuspaikka :sijaintitieto :Sijainti :piste :Point :pos)
@@ -537,7 +538,7 @@
           (merge
             {:id (->lp-tunnus asia)
              :kuntalupatunnus (->kuntalupatunnus asia)
-             :municipality kuntakoodi
+             :municipality municipality
              :rakennusvalvontaasianKuvaus (:rakennusvalvontaasianKuvaus asianTiedot)
              :vahainenPoikkeaminen (:vahainenPoikkeaminen asianTiedot)
              :hakijat hakijat
@@ -553,8 +554,8 @@
                                       :y (second coord-array-Rakennus)
                                       :address osoite-Rakennus
                                       :propertyId kiinteistotunnus-Rakennus}})
-            (when (and coord-array-Rakennuspaikka osoite-Rakennuspaikka kiinteistotunnus-Rakennuspaikka)
+            (when (and coord-array-Rakennuspaikka osoite-Rakennuspaikka kiinteistotunnus)
               {:rakennuspaikka {:x (first coord-array-Rakennuspaikka)
                                 :y (second coord-array-Rakennuspaikka)
                                 :address osoite-Rakennuspaikka
-                                :propertyId kiinteistotunnus-Rakennuspaikka}})))))))
+                                :propertyId kiinteistotunnus}})))))))

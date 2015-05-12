@@ -19,6 +19,7 @@ var attachment = (function() {
         return false;
       })
       .call();
+      hub.send("track-click", {category:"Attachments", label: "", event:"deleteAttachment"});
     return false;
   }
 
@@ -35,6 +36,7 @@ var attachment = (function() {
         repository.load(applicationId);
       })
       .call();
+      hub.send("track-click", {category:"Attachments", label: "", event:"deleteAttachmentVertion"});
     return false;
   }
 
@@ -78,6 +80,7 @@ var attachment = (function() {
           repository.load(id);
         })
         .call();
+        hub.send("track-click", {category:"Attachments", label: "", event:"rejectAttachment"});
       return false;
     };
 
@@ -91,6 +94,7 @@ var attachment = (function() {
           repository.load(id);
         })
         .call();
+        hub.send("track-click", {category:"Attachments", label: "", event:"approveAttachment"});
       return false;
     };
   }
@@ -181,6 +185,7 @@ var attachment = (function() {
       var previousId = util.getIn(model.groupAttachments(), [model.groupIndex() - 1, "id"]);
       if (previousId) {
         window.location.hash = "!/attachment/"+applicationId+"/" + previousId;
+        hub.send("track-click", {category:"Attachments", label: "", event:"previousAttachment"});
       }
     },
 
@@ -188,6 +193,7 @@ var attachment = (function() {
       var nextId = util.getIn(model.groupAttachments(), [model.groupIndex() + 1, "id"]);
       if (nextId) {
         window.location.hash = "!/attachment/"+applicationId+"/" + nextId;
+        hub.send("track-click", {category:"Attachments", label: "", event:"nextAttachment"});
       }
     },
 
@@ -231,7 +237,7 @@ var attachment = (function() {
 
   model.editable = ko.computed(function() {
     return _.contains(LUPAPISTE.config.postVerdictStates, ko.unwrap(model.application.state)) ?
-             currentUser.isAuthority() || _.contains(LUPAPISTE.config.postVerdictStates, ko.unwrap(model.applicationState)) :
+             lupapisteApp.models.currentUser.isAuthority() || _.contains(LUPAPISTE.config.postVerdictStates, ko.unwrap(model.applicationState)) :
              true;
   });
 
@@ -391,7 +397,7 @@ var attachment = (function() {
 
     $("#file-preview-iframe").attr("src","");
 
-    var isUserAuthorizedForAttachment = attachment.required ? currentUser.get().role() === "authority" : true;
+    var isUserAuthorizedForAttachment = attachment.required ? lupapisteApp.models.currentUser.role() === "authority" : true;
     model.authorized(isUserAuthorizedForAttachment);
 
     model.latestVersion(attachment.latestVersion);

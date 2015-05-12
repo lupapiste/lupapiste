@@ -50,6 +50,14 @@ nav {
           text-decoration: none;
           vertical-align: middle;
         }
+        a {
+          white-space: nowrap;
+          position: relative;
+          max-width: 300px;
+          display: inline-block;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
       }
     }
   }
