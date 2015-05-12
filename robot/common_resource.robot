@@ -73,7 +73,7 @@ Wait and click
   [Arguments]  ${element}
   Wait until  Element should be visible  ${element}
   # for IE8
-  Focus  ${element}
+  Wait until  Focus  ${element}
   Wait until  Element should be visible  ${element}
   Click element  ${element}
 
@@ -315,14 +315,14 @@ Click enabled by test id
 #
 
 Create application the fast way
-  [Arguments]  ${address}  ${municipality}  ${propertyId}  ${operation}
-  Go to  ${CREATE URL}?address=${address}&propertyId=${propertyId}&municipality=${municipality}&operation=${operation}&x=360603.153&y=6734222.95
+  [Arguments]  ${address}  ${propertyId}  ${operation}
+  Go to  ${CREATE URL}?address=${address}&propertyId=${propertyId}&operation=${operation}&x=360603.153&y=6734222.95
   Wait until  Element Text Should Be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  ${propertyId}
   Kill dev-box
 
 Create inforequest the fast way
-  [Arguments]  ${address}  ${x}  ${y}  ${municipality}  ${propertyId}  ${operation}  ${message}
-  Go to  ${CREATE URL}?infoRequest=true&address=${address}&propertyId=${propertyId}&municipality=${municipality}&operation=${operation}&x=${x}&y=${y}&message=${message}
+  [Arguments]  ${address}  ${x}  ${y}   ${propertyId}  ${operation}  ${message}
+  Go to  ${CREATE URL}?infoRequest=true&address=${address}&propertyId=${propertyId}&operation=${operation}&x=${x}&y=${y}&message=${message}
   Wait until  Element Text Should Be  xpath=//section[@id='inforequest']//span[@data-test-id='inforequest-property-id']  ${propertyId}
   Kill dev-box
 

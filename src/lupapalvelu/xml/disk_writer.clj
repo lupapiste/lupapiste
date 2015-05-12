@@ -45,11 +45,13 @@
 (defn write-to-disk
   "Writes XML string to disk and copies attachments from database. XML is validated before writing.
    Returns a sequence of attachment fileIds that were written to disk."
-  [application attachments xml schema-version output-dir & [submitted-application lang]]
+  [application attachments xml schema-version output-dir & [submitted-application lang file-suffix]]
   {:pre [(string? output-dir)]
    :post [%]}
 
-  (let [file-name  (str output-dir "/" (:id application) "_" (now))
+  (let [file-name  (if file-suffix
+                     (str output-dir "/" (:id application) "_" (now) "_" file-suffix)
+                     (str output-dir "/" (:id application) "_" (now)))
         tempfile   (io/file (str file-name ".tmp"))
         outfile    (io/file (str file-name ".xml"))
         xml-s      (indent-str xml)]

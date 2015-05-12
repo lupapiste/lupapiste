@@ -32,7 +32,8 @@
 (comment
   (defcommand inform-building-construction-started
        {:parameters ["id" buildingIndex startedDate lang]
-        :user-roles #{:NONE} ;FIXME rakentamisen aikaisen toimminan yhteydessa korjataan oikeae
+        ; rakentamisen aikaisen toimminan yhteydessa korjataan oikeae
+        ;:user-roles ???
         :states     [:verdictGiven :constructionStarted]
         :notified   true
         :pre-checks [(permit/validate-permit-type-is permit/R)]

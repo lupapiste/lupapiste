@@ -26,7 +26,7 @@
 
   (let [ronja-email  (email-for "ronja")
         veikko-email (email-for "veikko")
-        application-id     (create-app-id sonja :municipality sonja-muni :address "Lausuntobulevardi 1 A 1")
+        application-id     (create-app-id sonja :propertyId sipoo-property-id :address "Lausuntobulevardi 1 A 1")
         resp (command sipoo :create-statement-giver :email (email-for "ronja") :text "<b>bold</b>") => ok?
         statement-giver-ronja (:id resp)
         email (last-email)]

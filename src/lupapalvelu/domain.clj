@@ -6,7 +6,7 @@
             [lupapalvelu.user :as user]
             [lupapalvelu.xml.krysp.verdict :as verdict]
             [sade.core :refer [unauthorized]]
-            [sade.strings :refer [lower-case]]
+            [sade.strings :as ss]
             [sade.util :as util]
             [sade.env :as env]))
 
@@ -113,6 +113,14 @@
     unauthorized))
 
 ;;
+;; assignee
+;;
+
+(defn assigned? [{authority :authority :as application}]
+  {:pre [(map? authority)]}
+  (-> authority :id nil? not))
+
+;;
 ;; documents
 ;;
 
@@ -156,7 +164,7 @@
   (map :invite (filter :invite auth)))
 
 (defn invite [application email]
-  (first (filter #(= (lower-case email) (:email %)) (invites application))))
+  (first (filter #(= (ss/lower-case email) (:email %)) (invites application))))
 
 (defn no-pending-invites? [application user-id]
   (not-any? #(= user-id (-> % :user :id)) (invites application)))
@@ -216,7 +224,7 @@
    :applicant                ""
    :attachments              []
    :auth                     []
-   :authority                {}
+   :authority                {:firstName "", :lastName "", :id nil}
    :authorityNotice          ""
    :buildings                []
    :closed                   nil ; timestamp

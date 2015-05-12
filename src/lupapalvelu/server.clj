@@ -46,6 +46,7 @@
             [lupapalvelu.integrations-api]
             [lupapalvelu.construction-api]
             [lupapalvelu.asianhallinta-config-api]
+            [lupapalvelu.perf-mon :as perf-mon]
             [lupapalvelu.tiedonohjaus-api]))
 
 (defonce jetty (atom nil))
@@ -76,10 +77,9 @@
   (when-let [gemsdir (io/resource "gems")]
     (scss/initialize :gempath (.getPath gemsdir)))
 
-  (env/in-dev
+  (env/feature? :perfmon
     (warn "*** Instrumenting performance monitoring")
-    (require 'lupapalvelu.perf-mon)
-    ((resolve 'lupapalvelu.perf-mon/init)))
+    (perf-mon/init))
   (when (env/feature? :nrepl)
     (warn "*** Starting nrepl")
     (require 'clojure.tools.nrepl.server)

@@ -2,7 +2,15 @@
   (:require [midje.sweet :refer :all]
             [lupapalvelu.itest-util :as u]
             [sade.http :as http]
-            [lupapalvelu.onnistuu.process :as p]))
+            [lupapalvelu.onnistuu.process :as p]
+            [sade.crypt :as crypt]
+            [sade.env :as env]
+            [cheshire.core :as json]
+            [lupapalvelu.itest-util :refer [->cookie-store server-address decode-response
+                                            admin query command
+                                            last-email apply-remote-minimal
+                                            ok? fail? http200? http302?
+                                            ]]))
 
 (defn get-process [process-id]
   (:process (u/query u/pena :find-sign-process :processId process-id)))
@@ -13,7 +21,7 @@
 (defn init-sign []
   (-> (u/command u/pena :init-sign
                  :company {:name  "company-name"
-                           :y     "FI2341528-4"
+                           :y     "2341528-4"
                            :accountType "account5"}
                  :signer {:firstName   "First"
                           :lastName    "Last"
@@ -22,10 +30,23 @@
       :processId
       get-process))
 
+(defn init-sign-existing-user []
+  (-> (u/command u/pena :init-sign
+                 :company {:name  "company-name"
+                           :y     "2341528-4"
+                           :accountType "account5"}
+                 :signer {:firstName   "Pena"
+                          :lastName    "Panaani"
+                          :email       "in@va.lid"
+                          :currentUser "777777777777777777000000"}
+                 :lang "fi")
+      :processId
+      get-process))
+
 (fact "init-sign"
   (init-sign) => (contains {:stamp   #"[a-zA-Z0-9]{40}"
                             :company {:name "company-name"
-                                      :y    "FI2341528-4"
+                                      :y    "2341528-4"
                                       :accountType "account5"}
                             :signer {:firstName   "First"
                                      :lastName    "Last"
@@ -53,3 +74,61 @@
   (let [process-id (:id (init-sign))]
     (u/command u/pena :cancel-sign :processId process-id)
     (http/get (str (u/server-address) "/api/sign/document/" process-id) :throw-exceptions false) => (contains {:status 400})))
+
+(fact "init-sign-for-existing-user"
+  (init-sign-existing-user) => (contains {:stamp   #"[a-zA-Z0-9]{40}"
+                                             :company {:name        "company-name"
+                                                       :y           "2341528-4"
+                                                       :accountType "account5"}
+                                             :signer  {:firstName   "Pena"
+                                                       :lastName    "Panaani"
+                                                       :email       "pena@example.com"
+                                                       :currentUser "777777777777777777000020"}
+                                             :status  "created"
+                                             :lang    "fi"}))
+
+(fact "Fetch document for existing user"
+  (let [process-id (:id (init-sign-existing-user))]
+    (http/get (str (u/server-address) "/api/sign/document/" process-id) :throw-exceptions false) => (contains {:status 200})
+    (get-process-status process-id) => "started"))
+
+(fact "Approve signin process"
+  (let [process-id (:id (init-sign))
+        _ (http/get (str (u/server-address) "/api/sign/document/" process-id) :throw-exceptions false) => (contains {:status 200})
+        process (get-process process-id)
+        stamp (:stamp process)
+        crypto-key (-> (env/get-config) :onnistuu :crypto-key (crypt/str->bytes) (crypt/base64-decode))
+        crypto-iv (crypt/make-iv)
+        y (get-in process [:company :y])
+        uuid (str (java.util.UUID/randomUUID))
+        data (->> {:stamp      stamp
+                   :document   (str "/dev/dummy-onnistuu/doc/" stamp)
+                   :cancel     "cancel-url-not-used"
+                   :signatures [{:type       :company
+                                 :identifier y
+                                 :name       "foobar"
+                                 :timestamp  "foobar"
+                                 :uuid       uuid}]}
+                  (json/encode)
+                  (crypt/str->bytes)
+                  (crypt/encrypt crypto-key crypto-iv)
+                  (crypt/base64-encode)
+                  (crypt/bytes->str)
+                  (crypt/url-encode))
+        iv (-> crypto-iv (crypt/base64-encode) (crypt/bytes->str) (crypt/url-encode))
+        store (atom {})
+        params {:cookie-store (->cookie-store store)
+                :throw-exceptions false}
+        response   (http/get (str (u/server-address) "/api/sign/success/" process-id "?data=" data "&iv=" iv) params)]
+    response => http200?
+    (get-process-status process-id) => "done"))
+
+(fact "Fail signin process"
+  (let [process-id (:id (init-sign))
+        _ (http/get (str (u/server-address) "/api/sign/document/" process-id) :throw-exceptions false) => (contains {:status 200})
+        store (atom {})
+        params {:cookie-store (->cookie-store store)
+                :throw-exceptions false}
+        response   (http/get (str (u/server-address) "/api/sign/fail/" process-id) params)]
+    response => http200?
+    (get-process-status process-id) => "fail"))

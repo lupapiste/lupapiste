@@ -10,7 +10,7 @@ Mikko creates application
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  attachments${secs}
   Mikko logs in
-  Create application the fast way  ${appname}  753  753-416-25-30  kerrostalo-rivitalo
+  Create application the fast way  ${appname}  753-416-25-30  kerrostalo-rivitalo
 
 Mikko edits operation description
   Open application  ${appname}  753-416-25-30

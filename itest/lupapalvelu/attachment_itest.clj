@@ -15,7 +15,7 @@
   (get-attachment-by-id veikko application-id attachment-id) => (in-state? "requires_user_action"))
 
 (facts "attachments"
-  (let [{application-id :id :as response} (create-app pena :municipality veikko-muni :operation "kerrostalo-rivitalo")]
+  (let [{application-id :id :as response} (create-app pena :propertyId tampere-property-id :operation "kerrostalo-rivitalo")]
 
     response => ok?
 
@@ -191,7 +191,7 @@
            ))))))
 
 (fact "pdf works with YA-lupa"
-  (let [{application-id :id :as response} (create-app pena :municipality "753" :operation "ya-katulupa-vesi-ja-viemarityot")
+  (let [{application-id :id :as response} (create-app pena :propertyId sipoo-property-id :operation "ya-katulupa-vesi-ja-viemarityot")
         application (query-application pena application-id)]
     response => ok?
     (:organization application) => "753-YA"
@@ -206,7 +206,7 @@
         (poll-job id (get-in resp [:job :version]) (dec limit))))))
 
 (facts "Stamping"
-  (let [application (create-and-submit-application sonja :municipality sonja-muni)
+  (let [application (create-and-submit-application sonja :propertyId sipoo-property-id)
         application-id (:id application)
         attachment (first (:attachments application))
         _ (upload-attachment sonja application-id attachment true :filename "dev-resources/VRK_Virhetarkistukset.pdf")

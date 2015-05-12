@@ -13,7 +13,7 @@
 (defn invalid-vetuma? [resp] (= (dissoc resp :response) {:ok false, :text "error.invalid-vetuma-user"}))
 
 (facts "add neigbor with missing optional data"
-  (let [application-id (create-app-id pena :municipality sonja-muni)]
+  (let [application-id (create-app-id pena :propertyId sipoo-property-id)]
     (comment-application pena application-id true) => ok?
     (fact "no name"   (command sonja "neighbor-add" :id application-id :propertyId "p"           :street "s" :city "c" :zip "z" :email "e") => ok?)
     (fact "no street" (command sonja "neighbor-add" :id application-id :propertyId "p" :name "n"             :city "c" :zip "z" :email "e") => ok?)

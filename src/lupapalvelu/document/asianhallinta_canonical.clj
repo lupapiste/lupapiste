@@ -2,9 +2,11 @@
   (require [lupapalvelu.document.canonical-common :refer :all]
            [lupapalvelu.document.tools :as tools]
            [lupapalvelu.xml.disk-writer :as writer]
+           [lupapalvelu.mongo :as mongo]
            [clojure.string :as s]
            [sade.core :refer :all]
            [sade.util :as util]
+           [sade.property :as p]
            [lupapalvelu.i18n :as i18n]
            [lupapalvelu.document.schemas :as schemas]))
 
@@ -89,14 +91,13 @@
   (when (seq operations)
     {:Toimenpide (map #(-> % (ua-get-toimenpide lang)) operations)}))
 
-(def- viitelupa-mapping
-  {"kuntalupatunnus" "Taustaj\u00E4rjestelm\u00E4"
-   "lupapistetunnus" "Lupapiste"})
-
 (defn- ua-get-viitelupa [linkPermit]
-  (util/strip-nils
-    {:MuuTunnus {:Tunnus (:id linkPermit)
-                 :Sovellus (viitelupa-mapping (:type linkPermit))}}))
+  (if (= (:type linkPermit) "lupapistetunnus")
+    (util/strip-nils
+     {:MuuTunnus {:Tunnus (:id linkPermit)
+                  :Sovellus "Lupapiste"}})
+    (util/strip-nils
+     {:AsianTunnus (:id linkPermit)})))
 
 (defn- ua-get-viiteluvat [{:keys [linkPermitData]}]
   (when (seq linkPermitData)
@@ -177,7 +178,7 @@
       (assoc-in [:UusiAsia :Asiointikieli] lang)
       (assoc-in [:UusiAsia :Toimenpiteet] (ua-get-toimenpiteet application lang))
       (assoc-in [:UusiAsia :Sijainti] (ua-get-sijaintipiste application))
-      (assoc-in [:UusiAsia :Kiinteistotunnus] (util/to-human-readable-property-id (:propertyId application)))
+      (assoc-in [:UusiAsia :Kiinteistotunnus] (p/to-human-readable-property-id (:propertyId application)))
       (assoc-in [:UusiAsia :Viiteluvat] (ua-get-viiteluvat application)))))
 
 (defn application-to-asianhallinta-taydennys-asiaan-canonical [application]

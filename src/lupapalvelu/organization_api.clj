@@ -11,7 +11,12 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.attachment :as attachment]
-            [lupapalvelu.organization :as o]))
+            [lupapalvelu.organization :as o]
+            [lupapalvelu.application :as application]
+            [camel-snake-kebab :as csk]
+            [sade.strings :as ss]
+            [sade.property :as p]
+            [lupapalvelu.logging :as logging]))
 
 ;;
 ;; local api
@@ -169,6 +174,14 @@
         :infoRequests (->> scopes (filter :inforequest-enabled) (map :permitType))
         :opening (->> scopes (filter :opening) (map #(select-keys % [:permitType :opening]))))))
 
+(defquery municipality-by-property-id
+  {:parameters [propertyId]
+   :user-roles #{:anonymous}}
+  [_]
+  (if-let [municipality (p/municipality-id-by-property-id propertyId)]
+    (ok :municipality municipality)
+    (fail :municipalitysearch.notfound)))
+
 (defquery all-operations-for-organization
   {:description "Returns operations that match the permit types of the organization whose id is given as parameter"
    :parameters [organizationId]
@@ -236,7 +249,9 @@
                               allowed-types (when permit-type (attachment/get-attachment-types-by-permit-type permit-type))
                               attachment-types (map (fn [[group id]] {:type-group group :type-id id}) attachments)]
                           (cond
-                            (not (selected-operations operation)) (fail :error.unknown-operation)
+                            (not (selected-operations operation)) (do
+                                                                    (error "Unknown operation: " (logging/sanitize 100 operation))
+                                                                    (fail :error.unknown-operation))
                             (not (every? (partial attachment/allowed-attachment-types-contain? allowed-types) attachment-types)) (fail :error.unknown-attachment-type))))]}
   [{user :user}]
   (o/update-organization (user/authority-admins-organization-id user) {$set {(str "operations-attachments." operation) attachments}})
@@ -267,7 +282,7 @@
   [{user :user}]
   (if (or (s/blank? url) (krysp/wfs-is-alive? url))
     (mongo/update-by-id :organizations (user/authority-admins-organization-id user) {$set {(str "krysp." permitType ".url") url
-                                                                    (str "krysp." permitType ".version") version}})
+                                                                                           (str "krysp." permitType ".version") version}})
     (fail :auth-admin.legacyNotResponding)))
 
 (defcommand set-kopiolaitos-info
@@ -303,3 +318,25 @@
   [_]
   (ok :names (into {} (for [{:keys [id name]} (o/get-organizations {})]
                         [id name]))))
+
+(defquery vendor-backend-redirect-config
+  {:user-roles #{:authorityAdmin}}
+  [{user :user}]
+  (let [organization-id (user/authority-admins-organization-id user)]
+    (if-let [organization (o/get-organization organization-id)]
+      (ok (:vendor-backend-redirect organization))
+      (fail :error.unknown-organization))))
+
+(defcommand save-vendor-backend-redirect-config
+  {:parameters       [key val]
+   :user-roles       #{:authorityAdmin}
+   :input-validators [(fn [{{key :key} :data}]
+                        (when-not (contains? #{:vendorBackendUrlForBackendId :vendorBackendUrlForLpId} (keyword key))
+                          (fail :error.illegal-key)))
+                      (fn [{{url :val} :data}]
+                        (when-not (ss/blank? url)
+                          (util/validate-url url)))]}
+  [{user :user}]
+  (let [key    (csk/->kebab-case key)
+        org-id (user/authority-admins-organization-id user)]
+    (o/update-organization org-id {$set {(str "vendor-backend-redirect." key) val}})))

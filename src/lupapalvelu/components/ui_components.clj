@@ -1,3 +1,4 @@
+
 (ns lupapalvelu.components.ui-components
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
             [clojure.java.io :as io]
@@ -87,7 +88,7 @@
    :common       {:depends [:init :jquery :jquery-upload :knockout :underscore :moment :i18n :selectm
                             :expanded-content :mockjax :open-layers]
                   :js ["register-components.js" "util.js" "event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js"
-                       "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "features.js"
+                       "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "perfmon.js" "features.js"
                        "statuses.js" "statusmodel.js" "authorization.js" "vetuma.js"]}
 
    :common-html  {:depends [:selectm-html]
@@ -104,8 +105,7 @@
                      :html ["screenmessage.html"]}
 
    :map          {:depends [:common-html]
-                  :js [ "gis.js" "locationsearch.js"]
-                  :html ["map-popup.html"]}
+                  :js [ "gis.js" "locationsearch.js"]}
 
    :mypage       {:depends [:common-html]
                   :js ["mypage.js"]
@@ -194,11 +194,15 @@
                   :html ["neighbors.html"]}
 
    :register     {:depends [:common-html]
-                  :js ["registration-models.js" "register.js"
-                       "company-registration.js"]
-                  :html ["register.html" "register2.html" "register3.html"
-                         "register-company.html" "register-company-success.html" "register-company-fail.html" 
-                         "register-company-account-type.html" "register-company-signing.html"]}
+                  :js ["registration-models.js" "register.js"]
+                  :html ["register.html" "register2.html" "register3.html"]}
+
+   :register-company {:depends [:common-html]
+                      :js ["company-registration.js"]
+                      :html [
+                             "register-company.html" "register-company-success.html" "register-company-fail.html"
+                             "register-company-account-type.html" "register-company-signing.html"
+                             "register-company-existing-user-success.html"]}
 
    :link-account {:depends [:register]
                   :js ["link-account.js"]
@@ -207,9 +211,9 @@
    :docgen       {:depends [:accordion :common-html]
                   :js ["docmodel.js" "docgen.js"]}
 
-   :create       {:depends [:common-html]
+   :create       {:depends [:common-html :map]
                   :js ["municipalities.js" "create.js"]
-                  :html ["create.html"]}
+                  :html ["map-popup.html" "create.html"]}
 
    :iframe       {:depends [:common-html]
                   :css ["iframe.css"]}
@@ -250,14 +254,17 @@
                         "select/select-model.js"
                         "string/string-model.js"
                         "modal-dialog/modal-dialog-model.js"
+                        "modal-dialog/button-group/submit-button-group-model.js"
+                        "modal-dialog/dialog/yes-no-dialog-model.js"
                         "attachments-multiselect/attachments-multiselect-model.js"
+                        "authority-select/authority-select-model.js"
+                        "authority-select/authority-select-dialog-model.js"
                         "export-attachments/export-attachments-model.js"
                         "neighbors/neighbors-owners-dialog-model.js"
                         "neighbors/neighbors-edit-dialog-model.js"
                         "company-selector/company-selector-model.js"
                         "company-invite/company-invite-model.js"
-                        "company-invite/company-invite-dialog-model.js"
-                        "modal-dialog/button-group/submit-button-group-model.js"]
+                        "company-invite/company-invite-dialog-model.js"]
                    :html ["fill-info/fill-info-template.html"
                           "foreman-history/foreman-history-template.html"
                           "foreman-other-applications/foreman-other-applications-template.html"
@@ -267,7 +274,10 @@
                           "checkbox/checkbox-template.html"
                           "modal-dialog/modal-dialog-template.html"
                           "modal-dialog/button-group/submit-button-group-template.html"
+                          "modal-dialog/dialog/yes-no-dialog-template.html"
                           "attachments-multiselect/attachments-multiselect-template.html"
+                          "authority-select/authority-select-template.html"
+                          "authority-select/authority-select-dialog-template.html"
                           "export-attachments/export-attachments-template.html"
                           "neighbors/neighbors-owners-dialog-template.html"
                           "neighbors/neighbors-edit-dialog-template.html"
@@ -287,11 +297,10 @@
 
    :applicant-app {:depends [:ui-components]
                    :js ["applicant.js"]}
-
    :applicant     {:depends [:applicant-app
                              :common-html :authenticated :map :applications :application
                              :statement :docgen :create :mypage :user-menu :debug
-                             :company :analytics]}
+                             :company :analytics :register-company]}
 
    :authority-app {:depends [:ui-components] :js ["authority.js"]}
    :authority     {:depends [:ui-components :authority-app :common-html :authenticated :map :applications :notice :application
@@ -322,7 +331,8 @@
 
    :welcome-app {:depends [:ui-components]
                  :js ["welcome.js"]}
-   :welcome {:depends [:welcome-app :login :register :link-account :debug :user-menu :screenmessages :password-reset :analytics]
+
+   :welcome {:depends [:welcome-app :login :register :register-company :link-account :debug :user-menu :screenmessages :password-reset :analytics]
              :js ["company-user.js"]
              :html ["index.html" "login.html" "company-user.html"]}
 

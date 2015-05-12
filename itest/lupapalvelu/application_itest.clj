@@ -5,7 +5,8 @@
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.mongo :as mongo]))
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.application :as app]))
 
 (mongo/connect!)
 
@@ -49,13 +50,13 @@
     (-> (:comments application) first :text) => "hello"))
 
 (fact "application created to Sipoo belongs to organization Sipoon Rakennusvalvonta"
-  (let [application-id  (create-app-id pena :municipality sonja-muni)
+  (let [application-id  (create-app-id pena :propertyId sipoo-property-id)
         application     (query-application pena application-id)
         hakija (domain/get-document-by-name application "hakija")]
     (:organization application) => "753-R"))
 
 (fact "the ready-calculated validation errors about required document fields, included by a newly created application, are updated when those application fields are filled"
-  (let [application-id  (create-app-id pena :municipality sonja-muni)
+  (let [application-id  (create-app-id pena :propertyId sipoo-property-id)
         application     (query-application pena application-id)
         hakija          (domain/get-document-by-name application "hakija")
         errs            (:validationErrors hakija)]
@@ -69,19 +70,19 @@
       (not-any? #(= "illegal-value:required" (-> % :result second)) errs))))
 
 (fact "application created to Tampere belongs to organization Tampereen Rakennusvalvonta"
-  (let [application-id  (create-app-id pena :municipality "837")
+  (let [application-id  (create-app-id pena :propertyId tampere-property-id)
         application     (query-application pena application-id)
         hakija (domain/get-document-by-name application "hakija")]
     (:organization application) => "837-R"))
 
 (fact "application created to Reisjarvi belongs to organization Peruspalvelukuntayhtyma Selanne"
-  (let [application-id  (create-app-id pena :municipality "626")
+  (let [application-id  (create-app-id pena :propertyId "62600000000000")
         application     (query-application pena application-id)
         hakija (domain/get-document-by-name application "hakija")]
     (:organization application) => "069-R"))
 
 (fact* "Assign application to an authority"
-       (let [application-id (create-app-id pena :municipality sonja-muni)
+       (let [application-id (create-app-id pena :propertyId sipoo-property-id)
              ;; add a comment to change state to open
              _ (comment-application pena application-id true) => ok?
              application (query-application sonja application-id)
@@ -92,13 +93,13 @@
          application-id => truthy
          application => truthy
          (success resp) => true
-         (empty? authority-before-assignation) => true
+         (:id authority-before-assignation) => nil
          authority-after-assignation => (contains {:id ronja-id})
          (fact "Authority is not able to submit"
            sonja =not=> (allowed? sonja :submit-application :id application-id))))
 
 (fact* "Assign application to an authority and then to no-one"
-       (let [application-id (create-app-id pena :municipality sonja-muni)
+       (let [application-id (create-app-id pena :propertyId sipoo-property-id)
              ;; add a comment change set state to open
              _ (comment-application pena application-id true) => ok?
              application (query-application sonja application-id)
@@ -107,11 +108,11 @@
              resp (command sonja :assign-application :id application-id :assigneeId nil)
              assigned-app (query-application sonja application-id)
              authority-in-the-end (:authority assigned-app)]
-         (empty? authority-before-assignation) => true
-         (empty? authority-in-the-end) => true))
+         (:id authority-before-assignation) => nil
+         (:id authority-in-the-end) => nil))
 
 (fact "Authority is able to create an application to a municipality in own organization"
-  (let [application-id  (create-app-id sonja :municipality sonja-muni)]
+  (let [application-id  (create-app-id sonja :propertyId sipoo-property-id)]
     (fact "Application is open"
       (let [application (query-application sonja application-id)]
         application => truthy
@@ -138,7 +139,7 @@
 (facts* "cancel application"
   (last-email) ; Inbox zero
 
-  (let [application (create-and-submit-application mikko :municipality sonja-muni :address "Peruutustie 23")
+  (let [application (create-and-submit-application mikko :propertyId sipoo-property-id :address "Peruutustie 23")
         application-id (:id application)]
 
     (fact "Mikko sees the application" (query mikko :application :id application-id) => ok?)
@@ -153,7 +154,7 @@
       email => (partial contains-application-link? application-id "applicant")))
 
   (fact "Authority can cancel own application"
-    (let [application-id  (create-app-id sonja :municipality sonja-muni)]
+    (let [application-id  (create-app-id sonja :propertyId sipoo-property-id)]
       (fact "Sonja sees the application" (query sonja :application :id application-id) => ok?)
       (fact "Sonja can cancel the application"
         (let [r (command sonja :cancel-application-authority :id application-id :text nil :lang "fi")]
@@ -161,7 +162,7 @@
           (fact "No comments exists from cancel" (-> r :application :comments count) => 0)))))
 
   (fact "Authority can cancel with reason text, which is added as comment"
-    (let [application (create-and-submit-application mikko :municipality sonja-muni :address "Peruutustie 23")
+    (let [application (create-and-submit-application mikko :propertyId sipoo-property-id :address "Peruutustie 23")
           cancel-reason "Testihakemus"]
       (command sonja :cancel-application-authority :id (:id application) :text cancel-reason :lang "fi") => ok?
 
@@ -171,10 +172,10 @@
           (-> application :comments (first) :text) => (contains cancel-reason))))))
 
 (fact "Authority in unable to create an application to a municipality in another organization"
-  (create-app sonja :municipality veikko-muni) => unauthorized?)
+  (create-app sonja :propertyId tampere-property-id) => unauthorized?)
 
 (facts "Add operations"
-  (let [application-id  (create-app-id mikko :municipality veikko-muni)]
+  (let [application-id  (create-app-id mikko :propertyId tampere-property-id)]
     (comment-application mikko application-id true) => ok?
     (command veikko :assign-application :id application-id :assigneeId veikko-id) => ok?
 
@@ -184,10 +185,49 @@
     (fact "Authority is able to add operation"
       (success (command veikko :add-operation :id application-id :operation "muu-uusi-rakentaminen")) => true)))
 
+(facts "link to backend system"
+  (let [application    (create-and-submit-application mikko :municipality sonja-muni)
+        application-id (:id application)
+        redirect-url   "http://www.taustajarjestelma.fi/servlet/kohde?kohde=rakennuslupatunnus&lupatunnus="]
 
+    (command sonja :approve-application :id application-id :lang "fi")
+
+    (facts "no vendor backend id (kuntalupatunnus)"
+      (fact* "redirects to LP backend url if configured"
+        (command sipoo :save-vendor-backend-redirect-config :key :vendorBackendUrlForLpId :val redirect-url) => ok?
+        (let [resp (raw sonja :redirect-to-vendor-backend :id application-id) => http303?]
+          (get-in resp [:headers "location"]) => (str redirect-url application-id)))
+
+      (fact "error if no LP backend url configured"
+        (command sipoo :save-vendor-backend-redirect-config :key :vendorBackendUrlForLpId :val "") => ok?
+        (raw sonja :redirect-to-vendor-backend :id application-id) => http404?
+
+        (command sipoo :save-vendor-backend-redirect-config :key :vendorBackendUrlForBackendId :val redirect-url) => ok?
+        (raw sonja :redirect-to-vendor-backend :id application-id) => http404?))
+
+    (facts "vendor backend id available (kuntalupatunnus)"
+      (command sonja :check-for-verdict :id application-id)
+      (let [{verdicts :verdicts} (query-application sonja application-id)
+            vendor-backend-id    (app/get-vendor-backend-id verdicts)]
+        (fact* "redirect to backend id url if configured"
+          (command sipoo :save-vendor-backend-redirect-config :key :vendorBackendUrlForBackendId :val redirect-url) => ok?
+          (command sipoo :save-vendor-backend-redirect-config :key :vendorBackendUrlForLpId :val "http://dontgohere.com") => ok?
+          (let [resp (raw sonja :redirect-to-vendor-backend :id application-id) => http303?]
+            (get-in resp [:headers "location"]) => (str redirect-url vendor-backend-id)))
+
+        (fact* "redirect to LP backend url if available and backend id url not configured"
+          (command sipoo :save-vendor-backend-redirect-config :key :vendorBackendUrlForBackendId :val "") => ok?
+          (command sipoo :save-vendor-backend-redirect-config :key :vendorBackendUrlForLpId :val redirect-url) => ok?
+          (let [resp (raw sonja :redirect-to-vendor-backend :id application-id) => http303?]
+            (get-in resp [:headers "location"]) => (str redirect-url application-id)))
+
+        (fact "error if no LP backend url or backend id url configured"
+          (command sipoo :save-vendor-backend-redirect-config :key :vendorBackendUrlForBackendId :val "") => ok?
+          (command sipoo :save-vendor-backend-redirect-config :key :vendorBackendUrlForLpId :val "") => ok?
+          (raw sonja :redirect-to-vendor-backend :id application-id) => http404?)))))
 
 (fact "Pena cannot create app for organization that has new applications disabled"
-  (let [resp  (create-app pena :municipality "997")]
+  (let [resp  (create-app pena :propertyId "99700000000000")]
     resp =not=> ok?
     (:text resp) => "error.new-applications-disabled"))
 
@@ -217,17 +257,17 @@
 
 (defn- check-empty-person
   ([document doc-path args]
-    (let [empty-person {:etunimi  {:value ""}
-                        :sukunimi {:value ""}
-                        :hetu     {:value nil}}
-          empty-person (merge empty-person args)]
-      document => truthy
-      (get-in document doc-path) => empty-person))
+   (let [empty-person {:etunimi  {:value ""}
+                       :sukunimi {:value ""}
+                       :hetu     {:value nil}}
+         empty-person (merge empty-person args)]
+     document => truthy
+     (get-in document doc-path) => empty-person))
   ([document doc-path] (check-empty-person document doc-path {}))
   )
 
 (facts "Set user to document"
-  (let [application   (create-and-submit-application mikko :municipality sonja-muni)
+  (let [application   (create-and-submit-application mikko :propertyId sipoo-property-id)
         application-id   (:id application)
         paasuunnittelija (domain/get-document-by-name application "paasuunnittelija")
         suunnittelija    (domain/get-document-by-name application "suunnittelija")
@@ -260,9 +300,9 @@
 
       (fact "suunnittelija patevyys is set"
         (command mikko :update-doc :id application-id :doc doc-id :updates
-                 [["patevyys.kokemus" "10"]
-                  ["patevyys.patevyysluokka" "AA"]
-                  ["patevyys.patevyys" "Patevyys"]]) => ok?
+                                   [["patevyys.kokemus" "10"]
+                                    ["patevyys.patevyysluokka" "AA"]
+                                    ["patevyys.patevyys" "Patevyys"]]) => ok?
         (let [updated-app          (query-application mikko application-id)
               updated-suunnittelija (domain/get-document-by-id updated-app doc-id)]
           updated-suunnittelija => truthy
@@ -292,7 +332,7 @@
       (fact "application is unassigned, Sonja does not see the full person IDs"
         (let [app (query-application sonja application-id)
               suunnittelija (domain/get-document-by-id app doc-id)]
-          (:authority app) => empty?
+          (-> app :authority :id) => nil
           (get-in suunnittelija [:data :henkilotiedot :hetu :value]) => "210281-****"))
 
       (fact "application is unassigned, Ronja does not see the full person IDs"
@@ -314,7 +354,7 @@
           (get-in suunnittelija [:data :henkilotiedot :hetu :value]) => "210281-****")))))
 
 (fact* "Merging building information from KRYSP does not overwrite muutostyolaji"
-  (let [application-id (create-app-id pena :municipality sonja-muni :operation "kayttotark-muutos")
+  (let [application-id (create-app-id pena :propertyId sipoo-property-id :operation "kayttotark-muutos")
         app (query-application pena application-id)
         rakmuu-doc (domain/get-document-by-name app "rakennuksen-muuttaminen")
         resp2 (command pena :update-doc :id application-id :doc (:id rakmuu-doc) :collection "documents" :updates [["muutostyolaji" "muut muutosty\u00f6t"]])
@@ -355,7 +395,7 @@
           (get-in doc-after-2 [:data :manuaalinen_rakennusnro :value]) => ss/blank?)))))
 
 (fact* "Merging building information from KRYSP succeeds even if document schema does not have place for all the info"
-  (let [application-id (create-app-id pena :municipality sonja-muni :operation "purkaminen")
+  (let [application-id (create-app-id pena :propertyId sipoo-property-id :operation "purkaminen")
         app (query-application pena application-id)
         doc (domain/get-document-by-name app "purkaminen")
         building-info (command pena :get-building-info-from-wfs :id application-id) => ok?
@@ -367,7 +407,7 @@
     (get-in doc-after [:data :kaytto :kayttotarkoitus :source]) => "krysp"))
 
 (facts "Facts about update operation description"
-  (let [application-id (create-app-id pena :operation "kerrostalo-rivitalo" :municipality sonja-muni)
+  (let [application-id (create-app-id pena :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id)
         application (query-application pena application-id)
         op (first (:operations application))
         test-desc "Testdesc"]
@@ -378,15 +418,15 @@
       (fact "description is set" (:description updated-op) => test-desc))))
 
 (facts "Changinging application location"
-  (let [application-id (create-app-id pena :operation "kerrostalo-rivitalo" :municipality sonja-muni)
+  (let [application-id (create-app-id pena :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id)
         application    (query-application pena application-id)]
 
     (fact "applicant should be able to change location when state is draft"
       (:state application) => "draft"
       (command pena :change-location :id application-id
-               :x (-> application :location :x) - 1
-               :y (-> application :location :y) + 1
-               :address (:address application) :propertyId (:propertyId application)) => ok?)
+                                     :x (-> application :location :x) - 1
+                                     :y (-> application :location :y) + 1
+                                     :address (:address application) :propertyId (:propertyId application)) => ok?)
 
     ; applicant submits and authority gives verdict
     (command pena :submit-application :id application-id)
@@ -394,12 +434,12 @@
 
     (fact "applicant should not be authorized to change location anymore"
       (command pena :change-location :id application-id
-               :x (-> application :location :x) - 1
-               :y (-> application :location :y) + 1
-               :address (:address application) :propertyId (:propertyId application)) => fail?)
+                                     :x (-> application :location :x) - 1
+                                     :y (-> application :location :y) + 1
+                                     :address (:address application) :propertyId (:propertyId application)) => fail?)
 
     (fact "authority should still be authorized to change location"
       (command sonja :change-location :id application-id
-               :x (-> application :location :x) - 1
-               :y (-> application :location :y) + 1
-               :address (:address application) :propertyId (:propertyId application)) => ok?)))
+                                      :x (-> application :location :x) - 1
+                                      :y (-> application :location :y) + 1
+                                      :address (:address application) :propertyId (:propertyId application)) => ok?)))

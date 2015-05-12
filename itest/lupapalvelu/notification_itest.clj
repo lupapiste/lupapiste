@@ -7,7 +7,7 @@
 (apply-remote-minimal)
 
 (facts "Subscription"
-  (let [{:keys [id]} (create-and-submit-application pena :municipality sonja-muni)]
+  (let [{:keys [id]} (create-and-submit-application pena :propertyId sipoo-property-id)]
 
     (fact "Application was created" id => truthy)
 

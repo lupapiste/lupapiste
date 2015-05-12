@@ -36,10 +36,13 @@
 ;;
 
 (defn- bypass? [request]
-  (or (get-in request [:query-params "npm"]) (get-in request [:headers "npm"])))
+  (or (get-in request [:query-params "npm"])
+      (get-in request [:headers "npm"])
+      (re-matches #"^\/api\/alive.*" (:uri request))
+      (not (re-matches #"^\/api\/.*" (:uri request)))))
 
 ;;
-;; Performance minitoring:
+;; Performance monitoring:
 ;;
 
 (defn wrap-perf-mon [f f-name]
@@ -66,7 +69,7 @@
             (finally
               (let [end (System/nanoTime)]
                 (mc/insert "perf-mon"
-                           {:ts (System/currentTimeMillis)
+                           {:ts (java.util.Date.)
                             :duration (- end start)
                             :uri (get request :uri)
                             :user (get-in request [:session :user :username])
@@ -127,10 +130,10 @@
       (reset! throttle (to-long value))
       (->> {id value} (resp/json) (resp/status 200)))))
 
-(defpage [:post "/perfmon/browser-timing"] {timing :timing}
+(defpage [:post "/api/perfmon/browser-timing"] {timing :timing}
   (let [user-agent (-> (request/ring-request) :headers (get "user-agent"))]
     (mc/insert "perf-mon-timing"
-      {:ts (System/currentTimeMillis)
+      {:ts (java.util.Date.)
        :ua user-agent
        :timing timing}
       WriteConcern/NONE))

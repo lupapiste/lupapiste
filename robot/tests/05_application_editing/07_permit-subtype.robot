@@ -9,7 +9,7 @@ Mikko creates an application
   Mikko logs in
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  poik-${secs}
-  Create application the fast way  ${appname}  753  753-416-25-33  poikkeamis
+  Create application the fast way  ${appname}  753-416-25-33  poikkeamis
 
 Poikkari default subtype = poikkeamislupa
   List Selection Should Be  permitSubtypeSelect  poikkeamislupa

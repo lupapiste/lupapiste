@@ -1,6 +1,8 @@
 (ns lupapalvelu.mongo
   (:refer-clojure :exclude [count remove])
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf]]
+            [clojure.walk :as walk]
+            [clojure.string :as s]
             [monger.operators :refer :all]
             [monger.conversion :refer [from-db-object]]
             [sade.env :as env]
@@ -60,6 +62,12 @@
   [array-name array pred k v]
   (reduce (fn [m i] (assoc m (str (name array-name) \. i \. (name k)) v)) {} (util/positions pred array)))
 
+(defn remove-null-chars
+  "Removes illegal null characters from input.
+   Nulls cause 'BSON cstring' exceptions."
+  [m]
+  (walk/postwalk (fn [v] (if (string? v) (s/replace v "\0" "") v)) m))
+
 ;;
 ;; Database Api
 ;;
@@ -69,36 +77,37 @@
 (defn update-n
   "Updates data into collection by query, returns a number of updated documents."
   [collection query data & {:as opts}]
-  (.getN (apply mc/update collection (merge isolated query) data (-> opts (assoc :write-concern WriteConcern/ACKNOWLEDGED) seq flatten))))
+  (let [options (-> (merge {:write-concern WriteConcern/ACKNOWLEDGED} opts) seq flatten)]
+    (.getN (apply mc/update collection (merge isolated query) (remove-null-chars data) options))))
 
 (defn update
   "Updates data into collection by query. Always returns nil."
   [collection query data & opts]
-  (apply mc/update collection (merge isolated query) data opts)
+  (apply mc/update collection (merge isolated (remove-null-chars query)) (remove-null-chars data) opts)
   nil)
 
 (defn update-by-id
   "Updates data into collection by id (which is mapped to _id). Always returns nil."
   [collection id data & opts]
-  (apply mc/update-by-id collection id data opts)
+  (apply mc/update-by-id collection (remove-null-chars id) (remove-null-chars data) opts)
   nil)
 
 (defn update-by-query
   "Updates data into collection. Returns the number of documents updated"
   [collection query data]
-  (.getN (mc/update collection (merge isolated query) data :multi true)))
+  (.getN (mc/update collection (merge isolated query) (remove-null-chars data) :multi true)))
 
 (defn insert
   "Inserts data into collection. The 'id' in 'data' (if it exists) is persisted as _id"
   [collection data]
-  (mc/insert collection (with-_id data))
+  (mc/insert collection (with-_id (remove-null-chars data)))
   nil)
 
 (defn by-id
   ([collection id]
-    (with-id (mc/find-one-as-map collection {:_id id})))
+    (with-id (mc/find-one-as-map collection {:_id (remove-null-chars id)})))
   ([collection id projection]
-    (with-id (mc/find-one-as-map collection {:_id id} projection))))
+    (with-id (mc/find-one-as-map collection {:_id (remove-null-chars id)} projection))))
 
 (defn select
   "Returns multiple entries by matching the monger query.
@@ -109,18 +118,18 @@
   ([collection query]
     {:pre [collection (map? query)]}
     (map with-id (query/with-collection (name collection)
-                 (query/find query)
+                 (query/find (remove-null-chars query))
                  (query/snapshot))))
   ([collection query projection]
     {:pre [collection (map? query) (seq projection)]}
     (map with-id (query/with-collection (name collection)
-                 (query/find query)
+                 (query/find (remove-null-chars query))
                  (query/fields (if (map? projection) (keys projection) projection))
                  (query/snapshot))))
   ([collection query projection order-by]
     {:pre [collection (map? query) (seq projection) (instance? clojure.lang.PersistentArrayMap order-by)]}
     (map with-id (query/with-collection (name collection)
-                   (query/find query)
+                   (query/find (remove-null-chars query))
                    (query/fields (if (map? projection) (keys projection) projection))
                    (query/sort order-by)))))
 
@@ -128,20 +137,21 @@
   "returns one entry by matching the monger query"
   ([collection query]
     {:pre [(map? query)]}
-    (with-id (mc/find-one-as-map collection query)))
+    (with-id (mc/find-one-as-map collection (remove-null-chars query))))
   ([collection query projection]
     {:pre [(map? query)]}
-    (with-id (mc/find-one-as-map collection query projection))))
+    (with-id (mc/find-one-as-map collection (remove-null-chars query) projection))))
 
 (defn any?
   "check if any"
   ([collection query]
-    (mc/any? collection query)))
+    (mc/any? collection (remove-null-chars query))))
 
 (defn update-one-and-return
   "Updates first document in collection matching conditions. Returns updated document or nil."
   [collection conditions document & {:keys [fields sort remove upsert] :or {fields nil sort nil remove false upsert false}}]
-  (mc/find-and-modify collection conditions document :return-new true :upsert upsert :remove remove :sort sort :fields fields))
+  (mc/find-and-modify collection (remove-null-chars conditions) (remove-null-chars document)
+    :return-new true :upsert upsert :remove remove :sort sort :fields fields))
 
 (defn drop-collection [collection]
   (mc/drop collection))
@@ -149,15 +159,15 @@
 (defn remove
   "Removes documents by id."
   [collection id]
-  (.ok (.getLastError (mc/remove collection {:_id id}))))
+  (.ok (.getLastError (mc/remove collection {:_id (remove-null-chars id)}))))
 
 (defn remove-many
   "Removes all documents matching query. Returns the success status."
   [collection query]
-  (.ok (.getLastError (mc/remove collection query))))
+  (.ok (.getLastError (mc/remove collection (remove-null-chars query)))))
 
 (defn set-file-id [^GridFSInputFile input ^String id]
-  (.setId input id)
+  (.setId input (remove-null-chars id))
   input)
 
 (defn upload [file-id filename content-type content & metadata]
@@ -165,9 +175,9 @@
          (or (instance? java.io.File content) (instance? java.io.InputStream content))
          (sequential? metadata)
          (or (even? (clojure.core/count metadata)) (map? (first metadata)))]}
-  (let [meta (if (map? (first metadata))
-               (first metadata)
-               (apply hash-map metadata))]
+  (let [meta (remove-null-chars (if (map? (first metadata))
+                                  (first metadata)
+                                  (apply hash-map metadata)))]
     (gfs/store-file
       (gfs/make-input-file content)
       (set-file-id file-id)
@@ -176,7 +186,7 @@
       (gfs/metadata (assoc meta :uploaded (System/currentTimeMillis))))))
 
 (defn download-find [query]
-  (when-let [attachment (gfs/find-one (with-_id query))]
+  (when-let [attachment (gfs/find-one (with-_id (remove-null-chars query)))]
     (let [metadata (from-db-object (.getMetaData attachment) :true)]
       {:content (fn [] (.getInputStream attachment))
        :content-type (.getContentType attachment)
@@ -189,7 +199,7 @@
   (download-find {:_id file-id}))
 
 (defn delete-file [query]
-  (let [query (with-_id query)]
+  (let [query (with-_id (remove-null-chars query))]
     (info "removing file" query)
     (gfs/remove query)))
 
@@ -201,7 +211,7 @@
   ([collection]
     (mc/count collection))
   ([collection query]
-    (mc/count collection query)))
+    (mc/count collection (remove-null-chars query))))
 
 (defn get-next-sequence-value [sequence-name]
   (:count (update-one-and-return :sequences {:_id (name sequence-name)} {$inc {:count 1}} :upsert true)))
@@ -327,7 +337,9 @@
   (mc/ensure-index :app-links {:link 1})
   ; Disabled TTL for now: (mc/ensure-index :sign-processes {:created 1} {:expireAfterSeconds (env/value :onnistuu :timeout)})
   (mc/ensure-index :companies {:name 1} {:name "company-name"})
-  (mc/ensure-index :companies {:y 1} {:name "company-y"}))
+  (mc/ensure-index :companies {:y 1} {:name "company-y"})
+  (mc/ensure-index :perf-mon {:ts 1} {:expireAfterSeconds (env/value :monitoring :data-expiry)})
+  (mc/ensure-index :perf-mon-timing {:ts 1} {:expireAfterSeconds (env/value :monitoring :data-expiry)}))
 
 (defn clear! []
   (if-let [mode (db-mode)]

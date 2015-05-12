@@ -189,7 +189,21 @@
     :city "Sipoo"
     :private {:password "$2a$10$s4OOPduvZeH5yQzsCFSKIuVKiwbKvNs90f80zc57FDiPnGjuMbuf2"
               :apikey "5056e6d3aa24a1c901e6b9dd"}}
-
+   ;; Luukas Lukija - Sipoon katselija:  luukas / luukas
+   {:id "777777777777777777000025"
+    :username "luukas"
+    :role "authority"
+    :enabled true
+    :email "luukas.lukija@sipoo.fi"
+    :orgAuthz {:753-R #{:reader}}
+    :firstName "Luukas"
+    :lastName "Lukija"
+    :phone "03121992"
+    :street "Katuosoite 1 a 2"
+    :zip "04130"
+    :city "Sipoo"
+    :private {:password "$2a$10$YM2XkcJVjM5JiqqR2qg7U.iUuY10LPYexYTfV/21RHOayn1xIf2sS"
+              :apikey "5056e6d3aa24a1c901e6b9de"}}
    ;; Porvoo
 
    ;; Pekka Borga - Porvoon lupa-arkkitehti:  pekka / pekka
@@ -778,7 +792,7 @@
                  :zip "33100"
                  :po "Tampere"
                  :country "FINLAND"
-                 :y "FI1060155-5"
+                 :y "1060155-5"
                  :ovt "003710601555"
                  :pop "BAWCFI22"
                  :reference "Lupis"

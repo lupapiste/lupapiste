@@ -17,6 +17,7 @@ var features = (function() {
                           function(feature) { return feature[0].join("."); });
           var asMap = _.reduce(features,function(m,f) { m[f] = true; return m;} ,{});
           self.data(asMap);
+          hub.send("features-loaded");
         })
         .error(function(e) {
           self.data({});
