@@ -2,7 +2,7 @@
   (:require [taoensso.timbre :as timbre :refer [trace debug info infof warn warnf error fatal]]
             [monger.operators :refer :all]
             [schema.core :as sc]
-            [sade.util :refer [min-length-string max-length-string y? ovt? account-type? fn-> fn->>]]
+            [sade.util :refer [min-length-string max-length-string y? account-type? fn-> fn->>] :as util]
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.core :refer :all]
@@ -35,8 +35,8 @@
               (sc/optional-key :po)          max-64-or-nil
               (sc/optional-key :zip)         max-64-or-nil
               (sc/optional-key :country)     max-64-or-nil
-              (sc/optional-key :ovt)         (sc/pred ovt? "Not valid OVT code")
-              (sc/optional-key :pop)         (sc/pred ovt? "Not valid OVT code")
+              (sc/optional-key :ovt)         (sc/pred util/finnish-ovt? "Not valid OVT code")
+              (sc/optional-key :pop)         (sc/pred util/finnish-ovt? "Not valid OVT code") ; FIXME LPK-350
               (sc/optional-key :process-id)  sc/Str
               (sc/optional-key :created)     sc/Int
               })

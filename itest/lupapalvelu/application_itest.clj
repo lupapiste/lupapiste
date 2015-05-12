@@ -6,7 +6,8 @@
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.application :as app]))
+            [lupapalvelu.application :as app]
+            [lupapalvelu.document.tools :as tools]))
 
 (mongo/connect!)
 
@@ -352,6 +353,38 @@
               suunnittelija (domain/get-document-by-id app doc-id)]
           (:authority app) => (contains {:id sonja-id})
           (get-in suunnittelija [:data :henkilotiedot :hetu :value]) => "210281-****")))))
+
+(facts "Set company to document"
+  (let [application   (create-and-submit-application pena :propertyId sipoo-property-id)
+        app-id        (:id application)
+        maksaja       (domain/get-document-by-name application "maksaja")
+        get-doc-value (fn [doc path-prefix path]
+                        (-> (get-in doc (into path-prefix path))
+                            tools/unwrapped))]
+
+    (fact "initially maksaja company is empty"
+      (let [check (partial get-doc-value maksaja [:data :yritys])]
+        (doseq [path [[:yritysnimi]
+                      [:liikeJaYhteisoTunnus]
+                      [:verkkolaskutustieto :ovtTunnus]
+                      [:verkkolaskutustieto :valittajaTunnus]
+                      [:yhteyshenkilo :henkilotiedot :etunimi]]]
+          (check path) => "")))
+
+    (let [resp (invite-company-and-accept-invitation pena app-id "solita")]
+      (:status resp) => 200)
+
+    (command pena :set-company-to-document :id app-id :documentId (:id maksaja) :companyId "solita" :path "yritys") => ok?
+
+    (let [application (query-application pena app-id)
+          maksaja     (domain/get-document-by-id application (:id maksaja))
+          company     (company-from-minimal-by-id "solita")
+          check       (partial get-doc-value maksaja [:data :yritys])]
+      (check [:yritysnimi :value]) => (:name company)
+      (check [:liikeJaYhteisoTunnus :value]) => (:y company)
+      (check [:verkkolaskutustieto :ovtTunnus :value]) => (:ovt company)
+      (check [:verkkolaskutustieto :valittajaTunnus]) => (:pop company)
+      (check [:yhteyshenkilo :henkilotiedot :etunimi :value]) => (-> (find-user-from-minimal-by-apikey pena) :firstName))))
 
 (fact* "Merging building information from KRYSP does not overwrite muutostyolaji"
   (let [application-id (create-app-id pena :propertyId sipoo-property-id :operation "kayttotark-muutos")

@@ -6,6 +6,7 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.xml.validator :as validator]
+            [lupapalvelu.document.schemas :as schemas]
             [sade.env :as env]
             [sade.util :as util]
             [cheshire.core :as json]
@@ -33,6 +34,7 @@
                  :userAttachmentTypes (map #(str "osapuolet." (name %)) attachment-types-osapuoli)
                  :attachmentScales  attachment-scales
                  :attachmentSizes   attachment-sizes
+                 :eInvoiceOperators (map :name schemas/e-invoice-operators)
                  :postVerdictStates lupapalvelu.application-meta-fields/post-verdict-states
                  :stampableMimes    (filter identity (map mime/mime-types file-types))
                  :foremanRoles      (:body (first lupapalvelu.document.schemas/kuntaroolikoodi-tyonjohtaja))
