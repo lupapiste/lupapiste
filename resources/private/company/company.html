@@ -73,8 +73,9 @@
             </div>
 
             <div class="form-entry">
-              <label class="form-label" data-bind="ltext: 'register.company.form.billing.pop'"></label>
-              <input class="form-input text" data-bind="textInput: model().pop, enable: edit" type="text"/>
+              <span data-bind="component: {name: 'invoice-operator-selector',
+                                           params: {selected: model().pop,
+                                                    enabled: edit}}"/>
             </div>
 
             <div>
