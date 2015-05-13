@@ -1,4 +1,6 @@
 kaivo-etaisyydet: Maalämpökaivon ohjeelliset minimietäisyydet
+kaivo-etaisyydet.groupHelpText: Täydennä alla oleva taulukko merkitsemällä oikea vaihtoehto, lisäselvitykset huomautus sarakkeeseen.
+maalampokaivo._group_label: Maalämpökaivo
 maalampokaivo.kuvaus: Kuvaus
 maalampokaivo.kaivo-etaisyydet.rengaskaivo.minimietaisyys: Minimietäisyys
 maalampokaivo.kaivo-etaisyydet.rengaskaivo.alleYli.alle: alle
