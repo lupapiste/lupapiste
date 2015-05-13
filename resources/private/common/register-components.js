@@ -13,6 +13,7 @@ jQuery(document).ready(function() {
     "attachments-multiselect",
     "authority-select",
     "authority-select-dialog",
+    "autocomplete",
     "export-attachments",
     "neighbors-owners-dialog",
     "neighbors-edit-dialog",

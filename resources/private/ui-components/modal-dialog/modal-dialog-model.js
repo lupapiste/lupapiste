@@ -5,7 +5,7 @@ LUPAPISTE.ModalDialogModel = function () {
   self.showDialog = ko.observable(false);
   self.component = ko.observable();
   self.componentParams = ko.observable();
-  self.windowWidth = ko.observable();
+  self.windowWidth = ko.observable().extend({notify: "always"});
   self.windowHeight = ko.observable().extend({notify: "always"});
   self.dialogVisible = ko.observable(false);
   self.title = ko.observable();
@@ -34,7 +34,7 @@ LUPAPISTE.ModalDialogModel = function () {
   });
 
   self.dialogContentHeight = ko.pureComputed(function() {
-    var contentHeight = ($("#modal-dialog-content-component").find(".content").height()) + 24; // add margins
+    var contentHeight = ($("#modal-dialog-content-component").find(".content").height()) + 36; // add margins
     var dialogContentHeight = self.dialogHeight() - 135; // remove margins buttons and title
     return contentHeight < dialogContentHeight ? contentHeight : dialogContentHeight;
   });
@@ -74,6 +74,10 @@ LUPAPISTE.ModalDialogModel = function () {
 
   hub.subscribe("close-dialog", function() {
     self.closeDialog();
+  });
+
+  hub.subscribe("resize-dialog", function() {
+    setWindowSize(win.width(), win.height());
   });
 
   var setWindowSize = function(width, height) {

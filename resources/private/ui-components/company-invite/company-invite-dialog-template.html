@@ -5,9 +5,7 @@
     <script type="text/html" id="company-invite-dialog-template">
       <div class="content">
         <p data-bind="ltext: 'company-invite.desc'" class="dialog-desc"></p>
-        <form>
-          <select id="selectCompanyToInvite" data-bind="options: companies, optionsText: 'label', value: selected"></select>
-        </form>
+        <div data-bind="component: {name: 'autocomplete', params: {dataProvider: companiesProvider, value: selected}}"></div>
       </div>
       <div data-bind="component: {name:'submit-button-group',
                                   params: { isSubmitVisible: isSubmitVisible,
