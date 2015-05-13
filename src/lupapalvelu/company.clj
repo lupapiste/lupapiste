@@ -20,9 +20,16 @@
 ;; Company schema:
 ;;
 
-(def user-limit-for-account-type {:account5 5
-                                  :account15 15
-                                  :account30 30})
+(def account-types [{:name :account5
+                     :limit 5}
+                    {:name :account15
+                     :limit 15}
+                    {:name :account30
+                     :limit 30}])
+
+(defn user-limit-for-account-type [account-name]
+  (let [account-type (some #(if (= (:name %) account-name) %) account-types)]
+    (:limit account-type)))
 
 (def- max-64-or-nil (sc/either (max-length-string 64) (sc/pred nil?)))
 
