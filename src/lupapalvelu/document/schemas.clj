@@ -697,14 +697,14 @@
 (def rakennuksen-tiedot-muutos (conj rakennuksen-tiedot-ilman-huoneistoa-muutos huoneistotTable))
 
 (def alle-yli-radiogroup
-  {:name "alleYli" :type :radioGroup :body [{:name "alle"} {:name "yli"}] :default "alle"})
+  {:name "alleYli" :type :radioGroup :body [{:name "alle"} {:name "yli"}] :default "alle" :required true})
 
 (defn etaisyys-row [name min-default]
   {:name name
    :type :group
-   :body [{:name "minimietaisyys" :type :string :size "s" :readonly true :default min-default}
+   :body [{:name "minimietaisyys" :type :string :size "s" :unit "m" :readonly true :default min-default :required true}
           alle-yli-radiogroup
-          {:name "huomautukset" :type :string}]})
+          {:name "huomautukset" :type :string :size "l"}]})
 
 (def maalampokaivon-etaisyydet {:name "kaivo-etaisyydet"
                                 :i18nkey "kaivo-etaisyydet"
