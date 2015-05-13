@@ -70,8 +70,8 @@
           </div>
 
           <div class="form-entry">
-            <label class="form-label tip" data-bind="ltext: 'register.company.form.billing.pop'"></label>
-            <input class="form-input text" data-bind="textInput: pop" data-test-id="register-company-pop" type="text"/>
+            <span data-bind="component: {name: 'invoice-operator-selector',
+                                         params: { selected: pop }}"/>
           </div>
 
           <div class="form-entry">
