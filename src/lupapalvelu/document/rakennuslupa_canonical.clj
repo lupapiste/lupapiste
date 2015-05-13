@@ -183,15 +183,9 @@
 
 
 (defn get-maalampokaivo [kaupunkikuvatoimenpide-doc application]
-  (let [toimenpide (:data kaupunkikuvatoimenpide-doc)]
-    {:Toimenpide {:kaupunkikuvaToimenpide (get-toimenpiteen-kuvaus kaupunkikuvatoimenpide-doc)
-                  :rakennelmatieto {:Rakennelma {:yksilointitieto (:id kaupunkikuvatoimenpide-doc)
-                                                 :alkuHetki (util/to-xml-datetime (:created kaupunkikuvatoimenpide-doc))
-                                                 :sijaintitieto {:Sijainti {:tyhja empty-tag}}
-                                                 :kuvaus {:kuvaus (-> toimenpide :kuvaus)}
-                                                 :tunnus {:jarjestysnumero nil}
-                                                 :kiinttun (:propertyId application)}}}
-     :created (:created kaupunkikuvatoimenpide-doc)}))
+  (util/dissoc-in
+    (get-kaupunkikuvatoimenpide kaupunkikuvatoimenpide-doc application)
+    [:Toimenpide :rakennelmatieto :Rakennelma :kokonaisala]))
 
 (defn- get-toimenpide-with-count [toimenpide n]
   (clojure.walk/postwalk #(if (and (map? %) (contains? % :jarjestysnumero))
