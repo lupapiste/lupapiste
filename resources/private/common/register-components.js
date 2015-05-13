@@ -20,7 +20,8 @@ jQuery(document).ready(function() {
     "company-invite",
     "company-invite-dialog",
     "submit-button-group",
-    "yes-no-dialog"
+    "yes-no-dialog",
+    "invoice-operator-selector"
   ];
 
   _.forEach(components, function(component) {
