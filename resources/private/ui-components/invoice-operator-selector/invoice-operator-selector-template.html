@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container">
+    <script type="text/html" id="invoice-operator-selector-template">
+      <label class="form-label tip"
+             data-bind="ltext: 'register.company.form.billing.pop'"></label>
+      <select name="invoice-operator-select"
+              class="form-input combobox"
+              data-bind="options: operators,
+                         optionsText: 'name',
+                         optionsValue: 'code',
+                         value: selected">
+        </select>
+    </script>
+  </section>
+</body>
+</html>
