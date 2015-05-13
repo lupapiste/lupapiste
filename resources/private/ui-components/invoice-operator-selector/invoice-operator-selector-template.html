@@ -3,13 +3,15 @@
 <body>
   <section class="page container">
     <script type="text/html" id="invoice-operator-selector-template">
-      <label class="form-label tip"
-             data-bind="ltext: 'register.company.form.billing.pop'"></label>
+      <label class="form-label"
+             data-bind="ltext: 'register.company.form.billing.pop',
+                        css: { tip: required }"></label>
       <select name="invoice-operator-select"
               class="form-input combobox"
               data-bind="options: operators,
                          optionsText: 'name',
                          optionsValue: 'code',
+                         enable: enabled,
                          value: selected">
         </select>
     </script>

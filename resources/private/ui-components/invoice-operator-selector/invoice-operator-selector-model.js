@@ -2,7 +2,7 @@ LUPAPISTE.InvoiceOperatorSelectorModel = function(params) {
   "use strict";
   var self = this;
 
-  var operators = _(LUPAPISTE.config.eInvoiceOperators).map(function(operator) {
+  self.operators = _(LUPAPISTE.config.eInvoiceOperators).map(function(operator) {
       var name = loc("operator." + operator) + " (" + operator + ")";
       return {
         name: name,
@@ -12,6 +12,7 @@ LUPAPISTE.InvoiceOperatorSelectorModel = function(params) {
       return operator.name;
     }).value();
 
-  self.operators = ko.observableArray(operators);
-  self.selected = params.selected;
+  self.selected = params.selected || ko.observable();
+  self.enabled = params.enabled || true;
+  self.required = params.required || false;
 };
