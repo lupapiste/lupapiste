@@ -1,7 +1,6 @@
 (ns sade.util
   (:refer-clojure :exclude [pos? neg? zero?])
   (:require [clojure.walk :refer [postwalk prewalk]]
-            [clojure.string :refer [join]]
             [clojure.java.io :as io]
             [sade.strings :refer [numeric? decimal-number? trim] :as ss]
             [sade.core :refer :all]
@@ -265,24 +264,6 @@
                 4 "%02d:%02d:%02d.%d")]
       (apply format fmt (map ->int matches)))))
 
-(def property-id-pattern
-  "Regex for property id human readable format"
-  #"^(\d{1,3})-(\d{1,3})-(\d{1,4})-(\d{1,4})$")
-
-(defn to-property-id [^String human-readable]
-  (let [parts (map #(Integer/parseInt % 10) (rest (re-matches property-id-pattern human-readable)))]
-    (apply format "%03d%03d%04d%04d" parts)))
-
-(def human-readable-property-id-pattern
-  "Regex for splitting db-saved property id to human readable form"
-  #"^([0-9]{1,3})([0-9]{1,3})([0-9]{1,4})([0-9]{1,4})$")
-
-(defn to-human-readable-property-id [property-id]
-  (->> (re-matches human-readable-property-id-pattern property-id)
-       (rest)
-       (map ->int)
-       (join "-")))
-
 (defn valid-email? [email]
   (try
     (javax.mail.internet.InternetAddress. email)
@@ -327,13 +308,10 @@
     :else    (finnish-y? y)))
 
 (defn finnish-ovt? [ovt]
-  (if-let [[_ y c] (re-matches #"0037(\d{7})(\d)\d{0,5}" ovt)]
-    (finnish-y? (str y \- c))))
-
-(defn ovt? [ovt]
-  (cond
-    (nil? ovt)                false
-    :else                     (finnish-ovt? ovt)))
+  (if ovt
+    (if-let [[_ y c] (re-matches #"0037(\d{7})(\d)\d{0,5}" ovt)]
+      (finnish-y? (str y \- c)))
+    false))
 
 (defn account-type? [account-type]
   (cond
@@ -413,7 +391,7 @@
     (-> path io/file (.listFiles) seq)))
 
 (defn select-values [m keys]
-  (->> (map #(get m %) keys)))
+  (map #(get m %) keys))
 
 (defn validate-url [url]
   ; Regex derived from @stephenhay's at https://mathiasbynens.be/demo/url-regex

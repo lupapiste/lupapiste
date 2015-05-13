@@ -1,3 +1,4 @@
+
 (ns lupapalvelu.components.ui-components
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
             [clojure.java.io :as io]
@@ -5,6 +6,7 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.xml.validator :as validator]
+            [lupapalvelu.document.schemas :as schemas]
             [sade.env :as env]
             [sade.util :as util]
             [cheshire.core :as json]
@@ -32,6 +34,7 @@
                  :userAttachmentTypes (map #(str "osapuolet." (name %)) attachment-types-osapuoli)
                  :attachmentScales  attachment-scales
                  :attachmentSizes   attachment-sizes
+                 :eInvoiceOperators (map :name schemas/e-invoice-operators)
                  :postVerdictStates lupapalvelu.application-meta-fields/post-verdict-states
                  :stampableMimes    (filter identity (map mime/mime-types file-types))
                  :foremanRoles      (:body (first lupapalvelu.document.schemas/kuntaroolikoodi-tyonjohtaja))
@@ -104,8 +107,7 @@
                      :html ["screenmessage.html"]}
 
    :map          {:depends [:common-html]
-                  :js [ "gis.js" "locationsearch.js"]
-                  :html ["map-popup.html"]}
+                  :js [ "gis.js" "locationsearch.js"]}
 
    :mypage       {:depends [:common-html]
                   :js ["mypage.js"]
@@ -211,9 +213,9 @@
    :docgen       {:depends [:accordion :common-html]
                   :js ["docmodel.js" "docgen.js"]}
 
-   :create       {:depends [:common-html]
+   :create       {:depends [:common-html :map]
                   :js ["municipalities.js" "create.js"]
-                  :html ["create.html"]}
+                  :html ["map-popup.html" "create.html"]}
 
    :iframe       {:depends [:common-html]
                   :css ["iframe.css"]}

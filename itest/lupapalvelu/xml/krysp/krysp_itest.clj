@@ -214,7 +214,7 @@
 (defn- do-test [operation-name]
   (facts "Valid KRYSP from generated application"
     (let [lupa-name-key  (ya-operation-type-to-schema-name-key (keyword operation-name))
-          application-id (create-app-id pena :municipality sonja-muni :propertyId "75341600550007" :operation operation-name :address "Ryspitie 289")
+          application-id (create-app-id pena :propertyId "75341600550007" :operation operation-name :address "Ryspitie 289")
           _              (when (= "kerrostalo-rivitalo" operation-name)   ;; "R" permit
                            (command pena :add-operation :id application-id :operation "jakaminen-tai-yhdistaminen")
                            (command pena :add-operation :id application-id :operation "laajentaminen")
@@ -318,7 +318,7 @@
                        ])))
 
 (fact* "Attachments are transferred to the backing system when verdict has been given."
-  (let [application      (create-and-submit-application sonja :municipality sonja-muni :address "Paatoskuja 10")
+  (let [application      (create-and-submit-application sonja :propertyId sipoo-property-id :address "Paatoskuja 10")
         application-id   (:id application)
         first-attachment (get-in application [:attachments 0])]
     (:sent first-attachment) => nil
@@ -340,7 +340,7 @@
         (:state application) => "verdictGiven"))))
 
 (fact* "Katselmus is transferred to the backing system"
-  (let [application    (create-and-submit-application sonja :municipality sonja-muni :address "Katselmuskatu 17")
+  (let [application    (create-and-submit-application sonja :propertyId sipoo-property-id :address "Katselmuskatu 17")
         application-id (:id application)
         _              (command sonja :assign-application :id application-id :assigneeId sonja-id) => ok?
         task-id        (:taskId (command sonja :create-task :id application-id :taskName "do the shopping" :schemaName "task-katselmus")) => truthy]
@@ -373,15 +373,15 @@
 (fact* "Fully populated katselmus is transferred to the backing system"
 
   (fact "Meta test: KRYSP configs have different versions"
-    (let [sipoo-r (organization-from-minimal-by-id (str sonja-muni "-R"))
-          jp-r    (organization-from-minimal-by-id (str jarvenpaa-muni "-R"))]
+    (let [sipoo-r (organization-from-minimal-by-id "753-R")
+          jp-r    (organization-from-minimal-by-id "186-R")]
       sipoo-r => truthy
       jp-r => truthy
       (get-in sipoo-r [:krysp :R :version]) => "2.1.6"
       (get-in jp-r [:krysp :R :version]) => "2.1.3"))
 
- (doseq [[apikey assignee municipality] [[sonja sonja-id sonja-muni] [raktark-jarvenpaa (id-for-key raktark-jarvenpaa) jarvenpaa-muni]]]
-   (let [application    (create-and-submit-application apikey :municipality municipality :address "Katselmuskatu 17")
+ (doseq [[apikey assignee property-id] [[sonja sonja-id sipoo-property-id] [raktark-jarvenpaa (id-for-key raktark-jarvenpaa) jarvenpaa-property-id]]]
+   (let [application    (create-and-submit-application apikey :propertyId property-id :address "Katselmuskatu 17")
          application-id (:id application)
          _ (command apikey :assign-application :id application-id :assigneeId assignee) => ok?
          task-name      "do the shopping"
@@ -420,7 +420,7 @@
 ;; TODO: Fix this
 ;;
 #_(fact* "Aloitusilmoitus is transferred to the backing system"
-   (let [application    (create-and-submit-application sonja :municipality sonja-muni :address "Aloituspolku 1")
+   (let [application    (create-and-submit-application sonja :propertyId sipoo-property-id :address "Aloituspolku 1")
          application-id (:id application)
          _ (command sonja :assign-application :id application-id :assigneeId sonja-id) => ok?
          _ (command sonja :check-for-verdict :id application-id) => ok?
