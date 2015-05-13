@@ -13,8 +13,8 @@
   (case (keyword type)
     :radioGroup       default
     :checkbox         false
-    :string           ""
-    :text             ""
+    :string           (or default "")
+    :text             (or default "")
     :fillMyInfoButton nil
     :foremanHistory   nil
     nil))
