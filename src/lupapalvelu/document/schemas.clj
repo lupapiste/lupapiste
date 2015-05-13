@@ -650,7 +650,7 @@
                               {:name "F"}
                               {:name "G"}]}
                       {:name "energiatehokkuusluku" :type :string :size "s" :subtype :number}
-                      {:name "energiatehokkuusluvunYksikko" :type :select :sortBy :displayname
+                      {:name "energiatehokkuusluvunYksikko" :type :select, :sortBy :displayname, :default "kWh/m2"
                        :body [{:name "kWh/m2"}
                               {:name "kWh/brm2/vuosi"}]}
                       {:name "paloluokka" :type :select :sortBy :displayname
