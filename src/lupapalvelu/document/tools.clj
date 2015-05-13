@@ -12,6 +12,7 @@
 (defn default-values [{:keys [type default]}]
   (case (keyword type)
     :radioGroup       default
+    :select           default
     :checkbox         false
     :string           (or default "")
     :text             (or default "")

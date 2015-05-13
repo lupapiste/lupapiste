@@ -84,7 +84,7 @@
                   :luokitus {:energialuokka "10"
                              :paloluokka "P1 / P2"
                              :energiatehokkuusluku ""
-                             :energiatehokkuusluvunYksikko nil}
+                             :energiatehokkuusluvunYksikko "kWh/m2"}
                   :kaytto {:kayttotarkoitus "039 muut asuinkerrostalot"
                            :rakentajaTyyppi nil}
                   :mitat {:kerrosluku "5"
