@@ -3,7 +3,7 @@ LUPAPISTE.InvoiceOperatorSelectorModel = function(params) {
   var self = this;
 
   self.operators = _(LUPAPISTE.config.eInvoiceOperators).map(function(operator) {
-      var name = loc("operator." + operator) + " (" + operator + ")";
+      var name = loc("osapuoli.yritys.verkkolaskutustieto.valittajaTunnus." + operator);
       return {
         name: name,
         code: operator
