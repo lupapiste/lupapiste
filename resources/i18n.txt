@@ -1,0 +1,26 @@
+operator.BAWCFI22: Basware Oyj
+operator.003714377140: Enfo Zender Oy
+operator.003708599126: Liaison Technologies Oy
+operator.HELSFIHH: Aktia Säästöpankki Oyj
+operator.POPFFI22: Paikallisosuuspankit
+operator.HANDFIHH: Handelsbanken
+operator.003721291126: Maventa
+operator.003723327487: Apix Messaging Oy
+operator.003717203971: Notebeat Oy
+operator.003723609900: PAGERO
+operator.003701150617: Strålfors Oy
+operator.FIYAPSOL: YAP Solutions Oy
+operator.00885060259470028: Tradeshift
+operator.TAPIFI22: S-Pankki Oy (ent. Lähitapiola)
+operator.INEXCHANGE: InExchange Factorum AB
+operator.DNBAFIHX: DNB Bank ASA
+operator.ITELFIHH: Säästöpankit / Itella
+operator.003710948874: OpusCapita Group Oy
+operator.00885790000000418: HighJump AS
+operator.NDEAFIHH: Nordea
+operator.OKOYFIHH: OP-Pohjola-ryhmä
+operator.003701011385: Tieto Oyj
+operator.DABAFIHH: Danske Bank Oyj
+operator.003703575029: CGI / TeliaSonera Finland Oyj
+operator.AABAFI22: Ålandsbanken Abp
+operator.SBANFIHH: S-Pankki Oy
