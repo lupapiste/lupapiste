@@ -717,8 +717,8 @@
                                         (etaisyys-row "rengaskaivo" "20")
                                         (etaisyys-row "rakennus" "3")
                                         (etaisyys-row "tontin-raja" "7.5")
-                                        (etaisyys-row "omat-vv-johdot" "3") ; vesi- ja viemärijohdot
-                                        (etaisyys-row "muut-vv-johdot" "5") ; vesi- ja viemärijohdot
+                                        (etaisyys-row "omat-vv-johdot" "3") ; vesi- ja viemarijohdot
+                                        (etaisyys-row "muut-vv-johdot" "5") ; vesi- ja viemarijohdot
                                         (etaisyys-row "omat-lampojohdot" "3")
                                         (etaisyys-row "muut-lampojohdot" "5")
                                         (etaisyys-row "wc-jatevedet-purkupaikka" "30")
