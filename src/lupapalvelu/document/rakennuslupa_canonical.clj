@@ -182,6 +182,17 @@
      :created (:created kaupunkikuvatoimenpide-doc)}))
 
 
+(defn get-maalampokaivo [kaupunkikuvatoimenpide-doc application]
+  (let [toimenpide (:data kaupunkikuvatoimenpide-doc)]
+    {:Toimenpide {:kaupunkikuvaToimenpide (get-toimenpiteen-kuvaus kaupunkikuvatoimenpide-doc)
+                  :rakennelmatieto {:Rakennelma {:yksilointitieto (:id kaupunkikuvatoimenpide-doc)
+                                                 :alkuHetki (util/to-xml-datetime (:created kaupunkikuvatoimenpide-doc))
+                                                 :sijaintitieto {:Sijainti {:tyhja empty-tag}}
+                                                 :kuvaus {:kuvaus (-> toimenpide :kuvaus)}
+                                                 :tunnus {:jarjestysnumero nil}
+                                                 :kiinttun (:propertyId application)}}}
+     :created (:created kaupunkikuvatoimenpide-doc)}))
+
 (defn- get-toimenpide-with-count [toimenpide n]
   (clojure.walk/postwalk #(if (and (map? %) (contains? % :jarjestysnumero))
                             (assoc % :jarjestysnumero n)
@@ -196,7 +207,8 @@
                                                (map #(get-rakennuksen-muuttaminen-toimenpide % application) (:rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia documents))
                                                (map #(get-rakennuksen-laajentaminen-toimenpide % application) (:rakennuksen-laajentaminen documents))
                                                (map #(get-purku-toimenpide % application) (:purkaminen documents))
-                                               (map #(get-kaupunkikuvatoimenpide % application) (:kaupunkikuvatoimenpide documents))))
+                                               (map #(get-kaupunkikuvatoimenpide % application) (:kaupunkikuvatoimenpide documents))
+                                               (map #(get-maalampokaivo % application) (:maalampokaivo documents))))
         toimenpiteet (map get-toimenpide-with-count toimenpiteet (range 1 9999))]
     (not-empty (sort-by :created toimenpiteet))))
 

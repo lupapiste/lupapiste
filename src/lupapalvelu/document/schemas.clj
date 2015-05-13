@@ -697,6 +697,9 @@
 (def rakennuksen-tiedot-muutos (conj rakennuksen-tiedot-ilman-huoneistoa-muutos huoneistotTable))
 
 
+(def maalampokaivo-rakennelma (body
+                  kuvaus))
+
 (def rakennelma (body
                   [{:name "kokonaisala" :type :string :size "s" :unit "m2" :subtype :number}]
                   kuvaus))
@@ -899,6 +902,11 @@
 
     {:info {:name "kaupunkikuvatoimenpide" :approvable true}
      :body (approvable-top-level-groups rakennelma)}
+
+    {:info {:name "maalampokaivo"
+            :approvable true
+            :i18name "kaupunkikuvatoimenpide"}
+     :body (approvable-top-level-groups maalampokaivo-rakennelma)}
 
     {:info {:name "maisematyo" :approvable true}
      :body (approvable-top-level-groups maisematyo)}
