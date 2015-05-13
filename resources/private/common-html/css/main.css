@@ -1969,6 +1969,12 @@ foreman-history th.fifth {
   width: 100%;
 }
 
+/* line 771, ../sass/partials/_forms.scss */
+div.alleYli-radioGroup {
+  display: inline-block;
+  margin-top: 24px;
+}
+
 /* line 4, ../sass/partials/_tables.scss */
 table {
   width: 100%;
