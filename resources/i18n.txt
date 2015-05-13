@@ -1,0 +1,64 @@
+kaivo-etaisyydet: Maalämpökaivon ohjeelliset minimietäisyydet
+kaivo-etaisyydet.groupHelpText: Täydennä alla oleva taulukko merkitsemällä oikea vaihtoehto, lisäselvitykset huomautus sarakkeeseen.
+maalampokaivo._group_label: Maalämpökaivo
+maalampokaivo.kuvaus: Kuvaus
+maalampokaivo.kaivo-etaisyydet.rengaskaivo.minimietaisyys: Minimietäisyys
+maalampokaivo.kaivo-etaisyydet.rengaskaivo.alleYli.alle: alle
+maalampokaivo.kaivo-etaisyydet.rengaskaivo.alleYli.yli: yli
+maalampokaivo.kaivo-etaisyydet.rengaskaivo.huomautukset: Huomautukset
+maalampokaivo.kaivo-etaisyydet.rengaskaivo._group_label: Rengaskaivo
+maalampokaivo.kaivo-etaisyydet.rakennus.minimietaisyys: Minimietäisyys
+maalampokaivo.kaivo-etaisyydet.rakennus.alleYli.alle: alle
+maalampokaivo.kaivo-etaisyydet.rakennus.alleYli.yli: yli
+maalampokaivo.kaivo-etaisyydet.rakennus.huomautukset: Huomautukset
+maalampokaivo.kaivo-etaisyydet.rakennus._group_label: Rakennus
+maalampokaivo.kaivo-etaisyydet.tontin-raja.minimietaisyys: Minimietäisyys
+maalampokaivo.kaivo-etaisyydet.tontin-raja.alleYli.alle: alle
+maalampokaivo.kaivo-etaisyydet.tontin-raja.alleYli.yli: yli
+maalampokaivo.kaivo-etaisyydet.tontin-raja.huomautukset: Huomautukset
+maalampokaivo.kaivo-etaisyydet.tontin-raja._group_label: Tontin raja
+maalampokaivo.kaivo-etaisyydet..minimietaisyys: Minimietäisyys
+maalampokaivo.kaivo-etaisyydet..alleYli.alle: alle
+maalampokaivo.kaivo-etaisyydet..alleYli.yli: yli
+maalampokaivo.kaivo-etaisyydet..huomautukset: Huomautukset
+maalampokaivo.kaivo-etaisyydet.._group_label:
+maalampokaivo.kaivo-etaisyydet.harmaat-jatevedet-purkupaikka.minimietaisyys: Minimietäisyys
+maalampokaivo.kaivo-etaisyydet.harmaat-jatevedet-purkupaikka.alleYli.alle: alle
+maalampokaivo.kaivo-etaisyydet.harmaat-jatevedet-purkupaikka.alleYli.yli: yli
+maalampokaivo.kaivo-etaisyydet.harmaat-jatevedet-purkupaikka.huomautukset: Huomautukset
+maalampokaivo.kaivo-etaisyydet.harmaat-jatevedet-purkupaikka._group_label: Harmaat jätevedet purkupaikka
+maalampokaivo.kaivo-etaisyydet.wc-jatevedet-purkupaikka.minimietaisyys: Minimietäisyys
+maalampokaivo.kaivo-etaisyydet.wc-jatevedet-purkupaikka.alleYli.alle: alle
+maalampokaivo.kaivo-etaisyydet.wc-jatevedet-purkupaikka.alleYli.yli: yli
+maalampokaivo.kaivo-etaisyydet.wc-jatevedet-purkupaikka.huomautukset: Huomautukset
+maalampokaivo.kaivo-etaisyydet.wc-jatevedet-purkupaikka._group_label: WC jätevedet purkupaikka
+maalampokaivo.kaivo-etaisyydet.omat-vv-johdot.minimietaisyys: Minimietäisyys
+maalampokaivo.kaivo-etaisyydet.omat-vv-johdot.alleYli.alle: alle
+maalampokaivo.kaivo-etaisyydet.omat-vv-johdot.alleYli.yli: yli
+maalampokaivo.kaivo-etaisyydet.omat-vv-johdot.huomautukset: Huomautukset
+maalampokaivo.kaivo-etaisyydet.omat-vv-johdot._group_label: Omat vesi- ja viemärijohdot
+maalampokaivo.kaivo-etaisyydet.muut-vv-johdot.minimietaisyys: Minimietäisyys
+maalampokaivo.kaivo-etaisyydet.muut-vv-johdot.alleYli.alle: alle
+maalampokaivo.kaivo-etaisyydet.muut-vv-johdot.alleYli.yli: yli
+maalampokaivo.kaivo-etaisyydet.muut-vv-johdot.huomautukset: Huomautukset
+maalampokaivo.kaivo-etaisyydet.muut-vv-johdot._group_label: Muut vesi- ja viemärijohdot
+maalampokaivo.kaivo-etaisyydet.omat-lampojohdot.minimietaisyys: Minimietäisyys
+maalampokaivo.kaivo-etaisyydet.omat-lampojohdot.alleYli.alle: alle
+maalampokaivo.kaivo-etaisyydet.omat-lampojohdot.alleYli.yli: yli
+maalampokaivo.kaivo-etaisyydet.omat-lampojohdot.huomautukset: Huomautukset
+maalampokaivo.kaivo-etaisyydet.omat-lampojohdot._group_label: Omat lämpöjohdot
+maalampokaivo.kaivo-etaisyydet.muut-lampojohdot.minimietaisyys: Minimietäisyys
+maalampokaivo.kaivo-etaisyydet.muut-lampojohdot.alleYli.alle: alle
+maalampokaivo.kaivo-etaisyydet.muut-lampojohdot.alleYli.yli: yli
+maalampokaivo.kaivo-etaisyydet.muut-lampojohdot.huomautukset: Huomautukset
+maalampokaivo.kaivo-etaisyydet.muut-lampojohdot._group_label: Muut lämpöjohdot
+maalampokaivo.kaivo-etaisyydet.porakaivo.minimietaisyys: Minimietäisyys
+maalampokaivo.kaivo-etaisyydet.porakaivo.alleYli.alle: alle
+maalampokaivo.kaivo-etaisyydet.porakaivo.alleYli.yli: yli
+maalampokaivo.kaivo-etaisyydet.porakaivo.huomautukset: Huomautukset
+maalampokaivo.kaivo-etaisyydet.porakaivo._group_label: Porakaivo
+maalampokaivo.kaivo-etaisyydet.lampokaivo.minimietaisyys: Minimietäisyys
+maalampokaivo.kaivo-etaisyydet.lampokaivo.alleYli.alle: alle
+maalampokaivo.kaivo-etaisyydet.lampokaivo.alleYli.yli: yli
+maalampokaivo.kaivo-etaisyydet.lampokaivo.huomautukset: Huomautukset
+maalampokaivo.kaivo-etaisyydet.lampokaivo._group_label: Lämpökaivo

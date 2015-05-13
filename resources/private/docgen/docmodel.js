@@ -761,6 +761,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var span = makeEntrySpan(subSchema, myPath);
     span.className = span.className + " radioGroup";
     partsDiv.id = pathStrToID(myPath);
+    partsDiv.className = subSchema.name + "-radioGroup";
 
     $.each(subSchema.body, function (i, o) {
       var pathForId = myPath + "." + o.name;
