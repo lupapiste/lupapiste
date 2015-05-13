@@ -386,7 +386,7 @@
       (check [:verkkolaskutustieto :valittajaTunnus]) => (:pop company)
       (check [:yhteyshenkilo :henkilotiedot :etunimi :value]) => (-> (find-user-from-minimal-by-apikey pena) :firstName))))
 
-(fact* "Merging building information from KRYSP does not overwrite muutostyolaji"
+(fact* "Merging building information from KRYSP does not overwrite muutostyolaji or energiatehokkuusluvunYksikko"
   (let [application-id (create-app-id pena :propertyId sipoo-property-id :operation "kayttotark-muutos")
         app (query-application pena application-id)
         rakmuu-doc (domain/get-document-by-name app "rakennuksen-muuttaminen")
@@ -399,8 +399,17 @@
         resp3 (command pena :merge-details-from-krysp :id application-id :documentId (:id doc-before) :collection "documents" :buildingId building-id :path "buildingId" :overwrite true) => ok?
         merged-app (query-application pena application-id)
         doc-after (domain/get-document-by-name merged-app "rakennuksen-muuttaminen")]
-    (get-in doc-before [:data :muutostyolaji :value]) => "muut muutosty\u00f6t"
-    (get-in doc-after [:data :muutostyolaji :value]) => "muut muutosty\u00f6t"
+
+    (fact "muutostyolaji"
+      (get-in doc-before [:data :muutostyolaji :value]) => "muut muutosty\u00f6t"
+      (get-in doc-after [:data :muutostyolaji :value]) => "muut muutosty\u00f6t")
+
+    (facts "energiatehokkuusluvunYksikko"
+      (fact "document has default value"
+        (get-in doc-before [:data :luokitus :energiatehokkuusluvunYksikko :value]) => "kWh/m2")
+      (fact "was not altered"
+        (get-in doc-after [:data :luokitus :energiatehokkuusluvunYksikko :value]) => "kWh/m2"))
+
     (get-in doc-after [:data :rakennusnro :value]) => "001"
     (get-in doc-after [:data :manuaalinen_rakennusnro :value]) => ss/blank?
     (get-in doc-after [:data :valtakunnallinenNumero :value]) => "481123123R"

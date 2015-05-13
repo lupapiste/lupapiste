@@ -98,6 +98,16 @@ $spritegrid: 100px;
     width: 12px;
     height: 12px;
   }
+  &.drill-down-black-smaller {
+    background-position: 0px -3400px;
+    width: 9px;
+    height: 8px;
+  }
+  &.drill-up-black-smaller {
+    background-position: 0px -3300px;
+    width: 9px;
+    height: 8px;
+  }
   &.add {
     background-position: 0px -2200px;
     width: 15px;
