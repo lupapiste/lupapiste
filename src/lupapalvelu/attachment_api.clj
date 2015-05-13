@@ -274,23 +274,28 @@
     (when-let [validation-error (statement/statement-owner (assoc-in command [:data :statementId] (:id target)) application)]
       (fail! (:text validation-error))))
 
-  (when-not (pdf-conversion/is-pdf-a? tempfile)
-    (pdf-conversion/convert-to-pdf-a tempfile))
 
-  (when-not (attachment/attach-file! {:application application
-                                      :filename filename
-                                      :size size
-                                      :content tempfile
-                                      :attachment-id attachmentId
-                                      :attachment-type attachmentType
-                                      :op op
-                                      :comment-text text
-                                      :target target
-                                      :locked locked
-                                      :required false
-                                      :user user
-                                      :created created})
-    (fail :error.unknown)))
+  (let [processed-tempfile (when (and (= (mime/mime-type filename) "application/pdf") (not (pdf-conversion/is-pdf-a? tempfile)))
+                             (pdf-conversion/convert-to-pdf-a tempfile))
+        attachment-data {:application application
+                         :filename filename
+                         :size size
+                         :content tempfile
+                         :attachment-id attachmentId
+                         :attachment-type attachmentType
+                         :op op
+                         :comment-text text
+                         :target target
+                         :locked locked
+                         :required false
+                         :user user
+                         :created created}]
+    (when-not (attachment/attach-file! attachment-data)
+      (fail :error.unknown))
+
+    (when-not (nil? processed-tempfile)
+      (when-not (attachment/attach-file! (assoc attachment-data :content processed-tempfile))
+        (fail :error.unknown)))))
 
 
 ;;
