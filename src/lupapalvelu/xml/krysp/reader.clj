@@ -1,5 +1,5 @@
 (ns lupapalvelu.xml.krysp.reader
-  (:require [taoensso.timbre :as timbre :refer [debug info warn error]]
+  (:require [taoensso.timbre :as timbre :refer [trace debug info warn error]]
             [clojure.string :as s]
             [clojure.walk :refer [postwalk prewalk]]
             [clj-time.format :as timeformat]
@@ -103,13 +103,13 @@
   "Returns clojure.xml map or an empty map if the data could not be downloaded."
   [server property-id]
   (let [url (wfs-krysp-url server building-type (property-equals rakennuksen-kiinteistotunnus property-id))]
-    (debug "Get building: " url)
+    (trace "Get building: " url)
     (or (cr/get-xml url) {})))
 
 (defn- application-xml [type-name id-path server id raw?]
   (let [url (wfs-krysp-url-with-service server type-name (property-equals id-path id))
         credentials nil]
-    (debug "Get application: " url)
+    (trace "Get application: " url)
     (cr/get-xml url credentials raw?)))
 
 (defn rakval-application-xml [server id search-type raw?] (application-xml rakval-case-type (get-tunnus-path permit/R search-type) server id raw?))
@@ -119,7 +119,7 @@
 (defn vvvl-application-xml   [server id search-type raw?] (application-xml vvvl-case-type   (get-tunnus-path permit/VVVL search-type) server id raw?))
 (defn ya-application-xml     [server id search-type raw?] (let [options (post-body-for-ya-application id (get-tunnus-path permit/YA search-type))
                                                                 credentials nil]
-                                                            (debug "Get application: " server " with post body: " options )
+                                                            (trace "Get application: " server " with post body: " options )
                                                             (cr/get-xml-with-post server options credentials raw?)))
 
 (permit/register-function permit/R    :xml-from-krysp rakval-application-xml)
