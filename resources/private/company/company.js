@@ -232,6 +232,7 @@
   function CompanyInfo(parent) {
     this.parent = parent;
     this.model = ko.validatedObservable({
+      accountType:  ko.observable().extend(required),
       name:         ko.observable().extend(required),
       y:            ko.observable(),
       reference:    ko.observable().extend(notRequired),
@@ -243,12 +244,13 @@
       ovt:          ko.observable().extend(notRequired).extend({ovt: true}),
       pop:          ko.observable().extend(notRequired).extend({ovt: true})
     });
-    this.fieldNames    = ["name", "y", "reference", "address1", "address2", "po", "zip", "country", "ovt", "pop"];
+    this.fieldNames    = ["name", "y", "reference", "address1", "address2", "po", "zip", "country", "ovt", "pop", "accountType"];
     this.edit          = ko.observable(false);
     this.saved         = ko.observable(null);
     this.canStartEdit  = ko.computed(function() { return !this.edit() && parent.isAdmin(); }, this);
     this.changed       = ko.computed(function() { return !_.isEqual(unObservableize(this.fieldNames, this.model()), this.saved()); }, this);
     this.canSubmit     = ko.computed(function() { return this.edit() && this.model.isValid() && this.changed(); }, this);
+    this.accountTypes  = ko.observableArray(LUPAPISTE.config.accountTypes);
   }
 
   CompanyInfo.prototype.update = function(company) {

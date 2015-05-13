@@ -27,6 +27,19 @@
           <div data-bind="with: info">
 
             <div class="form-entry">
+              <label class="form-label" for="account-type" data-bind="ltext: 'register.company.form.accountType'"></label>
+              <select name="account-type"
+                      class="form-input combobox"
+                      data-bind="options: accountTypes,
+                                 optionsText: function(item) {
+                                   return loc('register.company.' + item.name + '.title');
+                                 },
+                                 optionsValue: 'name',
+                                 value: model().accountType,
+                                 enable: edit"></select>
+            </div>
+
+            <div class="form-entry">
               <label class="form-label tip" data-bind="ltext: 'register.company.form.companyName'"></label>
               <input class="form-input text" data-bind="textInput: model().name, enable: edit" type="text"/>
             </div>

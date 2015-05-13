@@ -23,21 +23,22 @@
               :name "jquery"})
 
 (defn- conf []
-  (let [js-conf {:maps              (env/value :maps)
-                 :analytics         (env/value :analytics)
-                 :fileExtensions    mime/allowed-extensions
-                 :passwordMinLength (env/value :password :minlength)
-                 :mode              env/mode
-                 :build             (:build-number env/buildinfo)
-                 :cookie            (env/value :cookie)
-                 :wannaJoinUrl      (env/value :oir :wanna-join-url)
+  (let [js-conf {:maps                (env/value :maps)
+                 :analytics           (env/value :analytics)
+                 :fileExtensions      mime/allowed-extensions
+                 :passwordMinLength   (env/value :password :minlength)
+                 :mode                env/mode
+                 :build               (:build-number env/buildinfo)
+                 :cookie              (env/value :cookie)
+                 :wannaJoinUrl        (env/value :oir :wanna-join-url)
                  :userAttachmentTypes (map #(str "osapuolet." (name %)) attachment-types-osapuoli)
-                 :attachmentScales  attachment-scales
-                 :attachmentSizes   attachment-sizes
+                 :attachmentScales    attachment-scales
+                 :attachmentSizes     attachment-sizes
+                 :accountTypes        lupapalvelu.company/account-types
                  :eInvoiceOperators (map :name schemas/e-invoice-operators)
                  :postVerdictStates lupapalvelu.application-meta-fields/post-verdict-states
-                 :stampableMimes    (filter identity (map mime/mime-types file-types))
-                 :foremanRoles      (:body (first lupapalvelu.document.schemas/kuntaroolikoodi-tyonjohtaja))
+                 :stampableMimes (filter identity (map mime/mime-types file-types))
+                 :foremanRoles (:body (first lupapalvelu.document.schemas/kuntaroolikoodi-tyonjohtaja))
                  :foremanReadonlyFields ["luvanNumero", "katuosoite", "rakennustoimenpide", "kokonaisala"]
                  :asianhallintaVersions (util/convert-values ; asianhallinta versions have "ah-" prefix
                                           validator/supported-asianhallinta-versions-by-permit-type
