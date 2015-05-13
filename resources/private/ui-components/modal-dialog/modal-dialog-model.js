@@ -34,7 +34,7 @@ LUPAPISTE.ModalDialogModel = function () {
   });
 
   self.dialogContentHeight = ko.pureComputed(function() {
-    var contentHeight = ($("#modal-dialog-content-component").find(".content").height()) + 32; // add margins
+    var contentHeight = ($("#modal-dialog-content-component").find(".content").height()) + 36; // add margins
     var dialogContentHeight = self.dialogHeight() - 135; // remove margins buttons and title
     return contentHeight < dialogContentHeight ? contentHeight : dialogContentHeight;
   });
