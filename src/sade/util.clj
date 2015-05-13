@@ -308,13 +308,10 @@
     :else    (finnish-y? y)))
 
 (defn finnish-ovt? [ovt]
-  (if-let [[_ y c] (re-matches #"0037(\d{7})(\d)\d{0,5}" ovt)]
-    (finnish-y? (str y \- c))))
-
-(defn ovt? [ovt]
-  (cond
-    (nil? ovt)                false
-    :else                     (finnish-ovt? ovt)))
+  (if ovt
+    (if-let [[_ y c] (re-matches #"0037(\d{7})(\d)\d{0,5}" ovt)]
+      (finnish-y? (str y \- c)))
+    false))
 
 (defn account-type? [account-type]
   (cond

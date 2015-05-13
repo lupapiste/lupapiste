@@ -40,7 +40,7 @@ LUPAPISTE.ApplicationModel = function() {
   self.tasks = ko.observable([]);
   self.tosFunction = ko.observable();
   self.metadataList = ko.observableArray();
-  
+
   // Application indicator metadata fields
   self.unseenStatements = ko.observable();
   self.unseenVerdicts = ko.observable();
@@ -112,7 +112,7 @@ LUPAPISTE.ApplicationModel = function() {
   });
 
   self.foremanTasks = ko.observable();
-  
+
   self.buildings = ko.observable([]);
   self.nonpartyDocumentIndicator = ko.observable(0);
   self.partyDocumentIndicator = ko.observable(0);
@@ -204,6 +204,9 @@ LUPAPISTE.ApplicationModel = function() {
 
   self.roles = ko.computed(function() {
     var withRoles = function(r, i) {
+      if (i.id() === "" && i.invite) {
+        i.id(util.getIn(i, ["invite", "user", "id"]));
+      }
       var a = r[i.id()] || (i.roles = [], i);
       a.roles.push(i.role());
       r[i.id()] = a;

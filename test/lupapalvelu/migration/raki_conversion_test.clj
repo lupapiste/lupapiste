@@ -10,7 +10,7 @@
            :rakennusnro {:value "001" :source "krysp"}
            :manuaalinen_rakennusnro {:value ""}
            :valtakunnallinenNumero {:value ""}
-           :muutostyolaji {:value "muut muutostyöt"}
+           :muutostyolaji {:value "muut muutosty\u00f6t"}
            :kaytto {:rakentajaTyyppi {:value "ei tiedossa"} :kayttotarkoitus {:value "039 muut asuinkerrostalot"}}
            :lammitys {:lammitystapa {:value "vesikeskus"} :lammonlahde {:value nil} :muu-lammonlahde {:value ""}}
            :perusparannuskytkin {:value false}}}
@@ -32,7 +32,7 @@
   (fact "national building id is generated"
     (document-raki-conversion ..id.. "09100300520010" (documents 0)) =>
     {:data {:buildingId {:value "1030462707" :source "krysp"}
-            :muutostyolaji {:value "muut muutostyöt"}
+            :muutostyolaji {:value "muut muutosty\u00f6t"}
             :rakennusnro {:value "001" :source "krysp"}
             :kaytto {:rakentajaTyyppi {:value "ei tiedossa"} :kayttotarkoitus {:value "039 muut asuinkerrostalot"}}
             :lammitys {:lammitystapa {:value "vesikeskus"} :lammonlahde {:value nil} :muu-lammonlahde {:value ""}}
