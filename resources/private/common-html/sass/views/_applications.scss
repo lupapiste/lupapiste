@@ -122,11 +122,25 @@
 .invitations {
   margin-bottom: $baseline;
   .invitation {
+    margin: $marginS 0 $marginS 0;
+    display: table-row;
     span {
       margin-right: $marginM;
     }
+    div {
+      padding-right: $marginL;
+      display: table-cell;
+      .btn {
+        margin: 0 $marginS 0 $marginS;
+      }
+    }
+    p {
+      margin-bottom: $marginS;
+    }
+    h3 {
+      margin-top: $marginM;
+    }
   }
-
 }
 .filter-controls {
   div {

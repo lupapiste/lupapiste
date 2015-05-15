@@ -3750,26 +3750,48 @@ ul.attachments-list li.mandatory-attachments {
 .invitations {
   margin-bottom: 24px;
 }
-/* line 125, ../sass/views/_applications.scss */
+/* line 124, ../sass/views/_applications.scss */
+.invitations .invitation {
+  margin: 6px 0 6px 0;
+  display: table-row;
+}
+/* line 127, ../sass/views/_applications.scss */
 .invitations .invitation span {
   margin-right: 12px;
 }
+/* line 130, ../sass/views/_applications.scss */
+.invitations .invitation div {
+  padding-right: 24px;
+  display: table-cell;
+}
+/* line 133, ../sass/views/_applications.scss */
+.invitations .invitation div .btn {
+  margin: 0 6px 0 6px;
+}
+/* line 137, ../sass/views/_applications.scss */
+.invitations .invitation p {
+  margin-bottom: 6px;
+}
+/* line 140, ../sass/views/_applications.scss */
+.invitations .invitation h3 {
+  margin-top: 12px;
+}
 
-/* line 132, ../sass/views/_applications.scss */
+/* line 146, ../sass/views/_applications.scss */
 .filter-controls div {
   display: inline-block;
   margin-bottom: 24px;
 }
-/* line 136, ../sass/views/_applications.scss */
+/* line 150, ../sass/views/_applications.scss */
 .filter-controls label {
   display: block;
 }
-/* line 139, ../sass/views/_applications.scss */
+/* line 153, ../sass/views/_applications.scss */
 .filter-controls select {
   display: block;
 }
 
-/* line 145, ../sass/views/_applications.scss */
+/* line 159, ../sass/views/_applications.scss */
 #applications-list .indicator-count {
   padding-left: 0;
   padding-right: 0;
@@ -3779,12 +3801,12 @@ ul.attachments-list li.mandatory-attachments {
   width: 22px;
   padding: 3px;
 }
-/* line 154, ../sass/views/_applications.scss */
+/* line 168, ../sass/views/_applications.scss */
 #applications-list div {
   padding-top: 3px;
   height: 30px;
 }
-/* line 155, ../sass/views/_applications.scss */
+/* line 169, ../sass/views/_applications.scss */
 #applications-list .urgent {
   background-image: url("/img/icons-sprite-1.15.png");
   background-repeat: no-repeat;
@@ -3792,7 +3814,7 @@ ul.attachments-list li.mandatory-attachments {
   height: 24px;
   width: 24px;
 }
-/* line 161, ../sass/views/_applications.scss */
+/* line 175, ../sass/views/_applications.scss */
 #applications-list .pending {
   background-image: url("/img/icons-sprite-1.15.png");
   background-repeat: no-repeat;
@@ -3800,7 +3822,7 @@ ul.attachments-list li.mandatory-attachments {
   width: 24px;
   height: 24px;
 }
-/* line 167, ../sass/views/_applications.scss */
+/* line 181, ../sass/views/_applications.scss */
 #applications-list .normal {
   background-image: url("/img/icons-sprite-1.15.png");
   background-repeat: no-repeat;
@@ -3808,21 +3830,21 @@ ul.attachments-list li.mandatory-attachments {
   width: 24px;
   height: 24px;
 }
-/* line 173, ../sass/views/_applications.scss */
+/* line 187, ../sass/views/_applications.scss */
 #applications-list .unseen-comments {
   background-image: url("/img/icons-sprite-1.15.png");
   background-repeat: no-repeat;
   background-position: 0 -4295px;
   width: 21px;
 }
-/* line 178, ../sass/views/_applications.scss */
+/* line 192, ../sass/views/_applications.scss */
 #applications-list .unseen-indicators {
   background-image: url("/img/icons-sprite-1.15.png");
   background-repeat: no-repeat;
   background-position: 0 -4597px;
   width: 25px;
 }
-/* line 183, ../sass/views/_applications.scss */
+/* line 197, ../sass/views/_applications.scss */
 #applications-list .unseen-attachments {
   background-image: url("/img/icons-sprite-1.15.png");
   background-repeat: no-repeat;
@@ -3830,25 +3852,25 @@ ul.attachments-list li.mandatory-attachments {
   width: 21px;
 }
 
-/* line 190, ../sass/views/_applications.scss */
+/* line 204, ../sass/views/_applications.scss */
 .clearable {
   position: relative;
   display: inline-block;
   vertical-align: bottom;
 }
 
-/* line 195, ../sass/views/_applications.scss */
+/* line 209, ../sass/views/_applications.scss */
 .applications-search {
   padding-right: 17px;
   /* add space for the 'x' icon*/
 }
 
-/* line 198, ../sass/views/_applications.scss */
+/* line 212, ../sass/views/_applications.scss */
 .applications-search::-ms-clear {
   display: none;
 }
 
-/* line 201, ../sass/views/_applications.scss */
+/* line 215, ../sass/views/_applications.scss */
 span.icon_clear {
   position: absolute;
   right: 12px;
@@ -3859,7 +3881,7 @@ span.icon_clear {
   font: bold 1em sans-serif;
   color: #38468F;
 }
-/* line 211, ../sass/views/_applications.scss */
+/* line 225, ../sass/views/_applications.scss */
 span.icon_clear:before {
   color: #f52;
 }
