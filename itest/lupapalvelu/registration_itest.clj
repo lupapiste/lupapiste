@@ -86,11 +86,21 @@
          stamp (:stamp vetuma-data) => string?
          person-id (:userid vetuma-data) => string?
          new-user-email "jukka@example.com"
+         new-user-address  "Osootes"
+         new-user-zip      "0"
+         new-user-city     "Tammerfors"
          new-user-pw "salasana"
          new-user-phone "0500"
          cmd-opts {:cookies {"anti-csrf-token" {:value "123"}}
                    :headers {"x-anti-forgery-token" "123"}}
-         resp (register cmd-opts {:stamp stamp :phone new-user-phone, :city "Tampere", :zip "0", :street "street", :password new-user-pw, :email new-user-email, :personId "inject!"})
+         resp (register cmd-opts {:stamp stamp
+                                  :phone new-user-phone
+                                  :city new-user-city
+                                  :zip new-user-zip
+                                  :street new-user-address
+                                  :password new-user-pw
+                                  :email new-user-email
+                                  :personId "inject!"})
          user-id (:id resp) => string?
          email (last-email)
          body (:body email)]
@@ -99,13 +109,16 @@
 
      (facts "New user data"
        (let [new-user (first (:users (query admin :users :userId user-id)))]
-        (fact "username" (:username new-user) => new-user-email)
-        (fact "email" (:email new-user) => new-user-email)
-        (fact "personId" (:personId new-user) => person-id)
-        (fact "enabled" (:enabled new-user) => false)
-        (fact "role" (:role new-user) => "applicant")
-        (fact "orgAuthz" (:orgAuthz new-user) => empty?)
-        (fact "phone" (:phone new-user) => new-user-phone)))
+         (fact "username" (:username new-user) => new-user-email)
+         (fact "email" (:email new-user) => new-user-email)
+         (fact "address" (:street new-user) => new-user-address)
+         (fact "zip" (:zip new-user) => new-user-zip)
+         (fact "city" (:city new-user) => new-user-city)
+         (fact "personId" (:personId new-user) => person-id)
+         (fact "enabled" (:enabled new-user) => false)
+         (fact "role" (:role new-user) => "applicant")
+         (fact "orgAuthz" (:orgAuthz new-user) => empty?)
+         (fact "phone" (:phone new-user) => new-user-phone)))
 
      (fact "New user got email"
        (:to email) => new-user-email

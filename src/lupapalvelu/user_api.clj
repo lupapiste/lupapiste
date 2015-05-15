@@ -486,7 +486,8 @@
       (if-let [user (create-new-user nil (merge
                                            (dissoc data :personId)
                                            (set/rename-keys vetuma-data {:userid :personId})
-                                           {:email email :role "applicant" :enabled false}))]
+                                           {:email email :role "applicant" :enabled false}
+                                           (select-keys data [:street :zip :city])))]
         (do
           (vetuma/consume-user stamp)
           (when (:rakentajafi data)
