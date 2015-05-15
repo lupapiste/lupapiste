@@ -23,7 +23,7 @@
   [{{:keys [id]} :user}]
   (let [common     {:auth {$elemMatch {:invite.user.id id}}}
         query      {$and [common {:state {$ne :canceled}}]}
-        data       (mongo/select :applications query [:auth])
+        data       (mongo/select :applications query [:auth :operations :address])
         invites    (filter #(= id (get-in % [:user :id])) (map :invite (mapcat :auth data)))]
     (ok :invites invites)))
 
