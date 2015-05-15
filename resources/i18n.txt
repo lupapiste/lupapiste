@@ -1,2 +1,2 @@
 register.company.form.accountType:  Tilityyppi
-company.account-type-not-downgradable:  Tilityyppiä ei voi tällähetkellä alentaa. Ota tarvittaessa yhteyttä palvelun tekniseen tukeen.
+company.account-type-not-downgradable:  Tilityyppiä ei voi alentaa. Ota tarvittaessa yhteyttä palvelun tekniseen tukeen.
