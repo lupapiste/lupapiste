@@ -5,6 +5,7 @@
             [monger.operators :refer :all]
             [sade.strings :as ss]
             [sade.core :refer [ok fail fail! unauthorized]]
+            [sade.util :as util]
             [lupapalvelu.action :refer [defquery defcommand defraw update-application all-application-states notify] :as action]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.notifications :as notifications]
@@ -24,8 +25,15 @@
   (let [common     {:auth {$elemMatch {:invite.user.id id}}}
         query      {$and [common {:state {$ne :canceled}}]}
         data       (mongo/select :applications query [:auth :operations :address])
-        invites    (filter #(= id (get-in % [:user :id])) (map :invite (mapcat :auth data)))]
-    (ok :invites invites)))
+        invites    (filter #(= id (get-in % [:user :id])) (map :invite (mapcat :auth data)))
+        invites-with-application (map
+                                   #(update-in % [:application]
+                                               (fn [app-id]
+                                                 (select-keys
+                                                   (util/find-by-id app-id data)
+                                                   [:id :address :operations])))
+                                   invites)]
+    (ok :invites invites-with-application)))
 
 (defn- create-invite-email-model [command conf recipient]
   (assoc (notifications/create-app-model command conf recipient)
