@@ -266,3 +266,7 @@ button[disabled] {
   float: right;
 }
 
+a.command {
+  &:before { content: "["; }
+  &:after { content: "]"; }
+}
