@@ -175,13 +175,13 @@
    {:name "003703575029"} ; CGI / TeliaSonera Finland Oyj
    {:name "AABAFI22"} ; \u00c5landsbanken Abp
    {:name "SBANFIHH"} ; S-Pankki Oy (uusi)
+   {:name "003715482348" :disabled true} ; ELTEL NETWORKS OY, ei en\u00e4\u00e4 aktiivinen
    ])
 
 (def verkkolaskutustieto [{:name "ovtTunnus" :type :string :subtype :ovt :min-len 12 :max-len 17}
                           {:name "verkkolaskuTunnus" :type :string}
                           {:name "valittajaTunnus"
                            :type :select
-                           :uicomponent :select-component
                            :i18nkey "osapuoli.yritys.verkkolaskutustieto.valittajaTunnus"
                            :size "l"
                            :body e-invoice-operators}])
@@ -386,7 +386,7 @@
    {:name "katuosoite" :type :string :size "m" :label false :uicomponent :string :i18nkey "muutHankkeet.katuosoite"}
    {:name "rakennustoimenpide" :type :string :size "l" :label false :uicomponent :string :i18nkey "muutHankkeet.rakennustoimenpide"}
    {:name "kokonaisala" :type :string :subtype :number :size "s" :label false :uicomponent :string :i18nkey "muutHankkeet.kokonaisala"}
-   {:name "vaihe" :type :select :size "t" :label false :uicomponent :selenent :i18nkey "muutHankkeet.vaihe"
+   {:name "vaihe" :type :select :size "t" :label false :uicomponent :select-component :i18nkey "muutHankkeet.vaihe"
     :body [{:name "R" :i18nkey "muutHankkeet.R"}
            {:name "A" :i18nkey "muutHankkeet.A"}
            {:name "K" :i18nkey "muutHankkeet.K"}]}
