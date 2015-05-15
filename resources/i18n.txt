@@ -1,0 +1,1 @@
+attachment.upload.instructions.pdfa: Mikäli mahdollista, tallenna PDF-tiedostot arkistokelpoisessa PDF/A-1b, PDF/A-2b tai PDF/A-3b -muodossa. Muut PDF-muodot muunnetaan PDF/A-muotoon automaattisesti, jolloin joudut tarkastamaan lopputuloksen.
