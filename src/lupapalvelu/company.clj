@@ -2,7 +2,7 @@
   (:require [taoensso.timbre :as timbre :refer [trace debug info infof warn warnf error fatal]]
             [monger.operators :refer :all]
             [schema.core :as sc]
-            [sade.util :refer [min-length-string max-length-string y? account-type? fn-> fn->>] :as util]
+            [sade.util :refer [min-length-string max-length-string account-type? fn-> fn->>] :as util]
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.core :refer :all]
@@ -20,14 +20,21 @@
 ;; Company schema:
 ;;
 
-(def user-limit-for-account-type {:account5 5
-                                  :account15 15
-                                  :account30 30})
+(def account-types [{:name :account5
+                     :limit 5}
+                    {:name :account15
+                     :limit 15}
+                    {:name :account30
+                     :limit 30}])
+
+(defn user-limit-for-account-type [account-name]
+  (let [account-type (some #(if (= (:name %) account-name) %) account-types)]
+    (:limit account-type)))
 
 (def- max-64-or-nil (sc/either (max-length-string 64) (sc/pred nil?)))
 
 (def Company {:name                          (sc/both (min-length-string 1) (max-length-string 64))
-              :y                             (sc/pred y? "Not valid Y code")
+              :y                             (sc/pred util/finnish-y? "Not valid Y code")
               :accountType                   (sc/pred account-type? "Not valid account type")
               (sc/optional-key :reference)   max-64-or-nil
               (sc/optional-key :address1)    max-64-or-nil
@@ -113,8 +120,13 @@
    Retuens the updated company."
   [id updates]
   (if (some #{:id :y} (keys updates)) (fail! :bad-request))
-  (let [updated (merge (dissoc (find-company-by-id! id) :id) updates)]
+  (let [company (dissoc (find-company-by-id! id) :id)
+        updated (merge company updates)
+        old-limit (user-limit-for-account-type (keyword (:accountType company)))
+        limit     (user-limit-for-account-type (keyword (:accountType updated)))]
     (sc/validate Company updated)
+    (when (< limit old-limit)
+      (fail! :company.account-type-not-downgradable))
     (mongo/update :companies {:_id id} updated)
     updated))
 

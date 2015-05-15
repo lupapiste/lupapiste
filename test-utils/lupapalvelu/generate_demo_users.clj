@@ -19,14 +19,14 @@
              (println "user exits " full-email)
              (user-api/create-new-user
                {:role "authorityAdmin"
-                :organizations [id]}
+                :orgAuthz {(keyword id) ["authorityAdmin"]}}
                {:email full-email
                 :username full-email
                 :role "authority"
                 :firstName (str "Koulutus " %)
                 :lastName (str "Kayttaja " %)
                 :enabled true
-                :organization id
+                :orgAuthz {(keyword id) ["authority"]}
                 :password "koulutus"}
                :send-email false)))
         (range 1 21)))))
@@ -392,7 +392,7 @@
          :firstName (str "Ymp\u00e4rist\u00f6toimi")
          :lastName (str "P\u00e4\u00e4k\u00e4ytt\u00e4j\u00e4 " kuntano)
          :enabled true
-         :organization org-id
+         :orgAuthz {(keyword org-id) ["authorityAdmin"]}
          :password "koulutus"}
         :send-email false)
       (generate-users-for-organization {:id org-id}))))

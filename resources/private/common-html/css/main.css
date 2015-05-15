@@ -1969,6 +1969,12 @@ foreman-history th.fifth {
   width: 100%;
 }
 
+/* line 771, ../sass/partials/_forms.scss */
+div.alleYli-radioGroup {
+  display: inline-block;
+  margin-top: 24px;
+}
+
 /* line 4, ../sass/partials/_tables.scss */
 table {
   width: 100%;
@@ -5223,6 +5229,16 @@ td.comment-text {
   padding: 0;
 }
 
+/* line 259, ../sass/views/_attachment.scss */
+.upload-instructions {
+  margin-bottom: 24px;
+}
+/* line 260, ../sass/views/_attachment.scss */
+.upload-instructions p {
+  line-height: normal;
+  margin-bottom: 12px;
+}
+
 /* line 2, ../sass/views/_statement.scss */
 #statement h1 {
   width: 70%;
@@ -6130,6 +6146,11 @@ td.comment-text {
 /* line 33, ../sass/views/_company.scss */
 #company-content .user-limit-reached {
   color: #f39129;
+}
+
+/* line 38, ../sass/views/_company.scss */
+.account-type-selector {
+  display: block;
 }
 
 /* line 1, ../sass/views/_attachment_multiselect.scss */
