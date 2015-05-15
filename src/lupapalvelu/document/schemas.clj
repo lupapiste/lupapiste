@@ -650,7 +650,7 @@
                               {:name "F"}
                               {:name "G"}]}
                       {:name "energiatehokkuusluku" :type :string :size "s" :subtype :number}
-                      {:name "energiatehokkuusluvunYksikko" :type :select :sortBy :displayname
+                      {:name "energiatehokkuusluvunYksikko" :type :select, :sortBy :displayname, :default "kWh/m2"
                        :body [{:name "kWh/m2"}
                               {:name "kWh/brm2/vuosi"}]}
                       {:name "paloluokka" :type :select :sortBy :displayname
@@ -696,6 +696,37 @@
 
 (def rakennuksen-tiedot-muutos (conj rakennuksen-tiedot-ilman-huoneistoa-muutos huoneistotTable))
 
+(def alle-yli-radiogroup
+  {:name "alleYli" :type :radioGroup :body [{:name "alle"} {:name "yli"}] :default "alle" :required true})
+
+(defn etaisyys-row [name min-default]
+  {:name name
+   :type :group
+   :body [{:name "minimietaisyys" :type :string :size "s" :unit "m" :readonly true :default min-default :required true}
+          alle-yli-radiogroup
+          {:name "huomautukset" :type :string :size "l"}]})
+
+(def maalampokaivon-etaisyydet {:name "kaivo-etaisyydet"
+                                :i18nkey "kaivo-etaisyydet"
+                                :type :group
+                                :group-help "kaivo-etaisyydet.groupHelpText"
+                                :approvable true
+                                :body (body
+                                        (etaisyys-row "lampokaivo" "15")
+                                        (etaisyys-row "porakaivo" "40")
+                                        (etaisyys-row "rengaskaivo" "20")
+                                        (etaisyys-row "rakennus" "3")
+                                        (etaisyys-row "tontin-raja" "7.5")
+                                        (etaisyys-row "omat-vv-johdot" "3") ; vesi- ja viemarijohdot
+                                        (etaisyys-row "muut-vv-johdot" "5") ; vesi- ja viemarijohdot
+                                        (etaisyys-row "omat-lampojohdot" "3")
+                                        (etaisyys-row "muut-lampojohdot" "5")
+                                        (etaisyys-row "wc-jatevedet-purkupaikka" "30")
+                                        (etaisyys-row "harmaat-jatevedet-purkupaikka" "20"))})
+
+(def maalampokaivo-rakennelma (body
+                                kuvaus
+                                maalampokaivon-etaisyydet))
 
 (def rakennelma (body
                   [{:name "kokonaisala" :type :string :size "s" :unit "m2" :subtype :number}]
@@ -899,6 +930,11 @@
 
     {:info {:name "kaupunkikuvatoimenpide" :approvable true}
      :body (approvable-top-level-groups rakennelma)}
+
+    {:info {:name "maalampokaivo"
+            :approvable true
+            :i18name "maalampokaivo"}
+     :body (approvable-top-level-groups maalampokaivo-rakennelma)}
 
     {:info {:name "maisematyo" :approvable true}
      :body (approvable-top-level-groups maisematyo)}

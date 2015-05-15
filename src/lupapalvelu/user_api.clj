@@ -1,5 +1,6 @@
 (ns lupapalvelu.user-api
   (:require [taoensso.timbre :as timbre :refer [trace debug info infof warn warnf error fatal]]
+            [swiss.arrows :refer [-<>]]
             [clojure.set :as set]
             [noir.request :as request]
             [noir.response :as resp]
@@ -109,11 +110,16 @@
   (let [password         (:password user-data)
         user-role        (keyword (:role user-data))
         caller-role      (keyword (:role caller))
-        organization-id  (or (:organization user-data) (-> user-data :organizations first))
+        org-authz        (:orgAuthz user-data)
+        organization-id  (when (map? org-authz)
+                           (name (first (keys org-authz))))
         admin?           (= caller-role :admin)
         authorityAdmin?  (= caller-role :authorityAdmin)]
 
-    (when (not (#{:authority :authorityAdmin :applicant :dummy} user-role))
+    (when (and org-authz (not (every? coll? (vals org-authz))))
+      (fail! :error.invalid-role :desc "new user has unsupported organization roles"))
+
+    (when-not (#{:authority :authorityAdmin :applicant :dummy} user-role)
       (fail! :error.invalid-role :desc "new user has unsupported role" :user-role user-role))
 
     (when (and (= user-role :applicant) caller)
@@ -147,15 +153,11 @@
 
 (defn- create-new-user-entity [{:keys [enabled password] :as user-data}]
   (let [email (user/canonize-email (:email user-data))]
-    (-> user-data
-      (dissoc :organization)
+    (-<> user-data
       (select-keys [:email :username :role :firstName :lastName :personId
                     :phone :city :street :zip :enabled :orgAuthz
                     :allowDirectMarketing :architect :company])
-      (as-> user-data
-        (merge
-          {:firstName "" :lastName "" :username email}
-          user-data))
+      (merge {:firstName "" :lastName "" :username email} <>)
       (assoc
         :email email
         :enabled (= "true" (str enabled))
@@ -225,7 +227,7 @@
                       action/email-validator]
    :user-roles #{:admin :authorityAdmin}}
   [{user-data :data caller :user}]
-  (let [updated-user-data (if (:organization user-data) (assoc user-data :orgAuthz {(:organization user-data) (:role user-data)}) user-data)
+  (let [updated-user-data (if (:organization user-data) (assoc user-data :orgAuthz {(:organization user-data) [(:role user-data)]}) user-data)
         user (create-new-user caller updated-user-data :send-email false)]
     (infof "Added a new user: role=%s, email=%s, orgAuthz=%s" (:role user) (:email user) (:orgAuthz user))
     (if (user/authority? user)
