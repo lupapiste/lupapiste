@@ -120,8 +120,13 @@
    Retuens the updated company."
   [id updates]
   (if (some #{:id :y} (keys updates)) (fail! :bad-request))
-  (let [updated (merge (dissoc (find-company-by-id! id) :id) updates)]
+  (let [company (dissoc (find-company-by-id! id) :id)
+        updated (merge company updates)
+        old-limit (user-limit-for-account-type (keyword (:accountType company)))
+        limit     (user-limit-for-account-type (keyword (:accountType updated)))]
     (sc/validate Company updated)
+    (when (< limit old-limit)
+      (fail! :company.account-type-not-downgradable))
     (mongo/update :companies {:_id id} updated)
     updated))
 
