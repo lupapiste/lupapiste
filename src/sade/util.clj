@@ -307,7 +307,7 @@
 (defn finnish-ovt?
   "OVT-tunnus SFS 5748 standardin mukainen OVT-tunnus rakentuu ISO6523 -standardin
    mukaisesta Suomen verohallinnon tunnuksesta 0037, Y-tunnuksesta
-   (8 merkkiä ilman väliviivaa) sekä vapaamuotoisesta 5 merkistä,
+   (8 merkki\u00e4 ilman v\u00e4liviivaa) sek\u00e4 vapaamuotoisesta 5 merkist\u00e4,
    jolla voidaan antaa organisaation alataso tai kustannuspaikka.
    http://www.tieke.fi/pages/viewpage.action?pageId=17104927"
   [ovt]
