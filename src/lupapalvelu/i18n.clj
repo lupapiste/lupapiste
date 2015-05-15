@@ -2,51 +2,20 @@
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error errorf fatal]]
             [clojure.java.io :as io]
             [clojure.string :as s]
-            [ontodev.excel :as xls]
             [cheshire.core :as json]
             [sade.env :as env]
-            [sade.core :refer :all]))
+            [sade.core :refer :all]
+            [lupapiste-commons.i18n :as commons-i18n]))
 
 (def default-lang :fi)
 
-(defn- add-term [k t result lang]
-  (assoc-in result [(keyword lang) k] (s/trim t)))
-
-(defn- process-translation [row k default-t result lang]
-  (let [t (get row lang)]
-    (if (seq t)
-      (add-term k t result lang)
-      (add-term k default-t result lang))))
-
-(defn- process-row [langs-but-default result row]
-  (let [k (get row "key")
-        default-t (get row (name default-lang))]
-    (if (and (not (s/blank? k)) default-t)
-      (reduce
-        (partial process-translation row k default-t)
-        (add-term k default-t result default-lang)
-        langs-but-default)
-      result)))
-
-(defn- read-sheet [headers sheet]
-  (->> sheet seq rest (map xls/read-row) (map (partial zipmap headers))))
-
-(defn- load-excel []
-  (with-open [in (io/input-stream (io/resource "i18n.xlsx"))]
-    (let [wb      (xls/load-workbook in)
-          langs   (-> wb seq first first xls/read-row rest)
-          headers (cons "key" langs)
-          data    (->> wb (map (partial read-sheet headers)) (apply concat))
-          langs-but-default (disj (set langs) (name default-lang))]
-      (reduce (partial process-row langs-but-default) {} data))))
-
 (def- localizations (atom nil))
-(def- excel-data (future (load-excel)))
+(defn- load-translations [] (commons-i18n/keys-by-language (commons-i18n/read-translations)))
 
 (defn reload! []
   (if (seq @localizations)
-    (reset! localizations (load-excel))
-    (reset! localizations @excel-data)))
+    (reset! localizations (load-translations))
+    (reset! localizations @(future (load-translations)))))
 
 (defn- get-or-load-localizations []
   (if-not @localizations
