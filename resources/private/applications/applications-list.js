@@ -82,8 +82,24 @@
       }
     };
 
+    function getHeaderText(inv) {
+      return loc("auth")+ ": " +
+             inv.application.address + ", " +
+             loc(["municipality", inv.application.municipality]) + ", " +
+             loc(["operations", (_.first(inv.application.operations)).name]);
+    }
     self.invites = ko.observableArray([]);
-    self.updateInvites = function() {invites.getInvites(function(data) { self.invites(data.invites); }); };
+    self.updateInvites = function() {
+      invites.getInvites(function(data) {
+        var invs = _(data.invites).map(function(inv) {
+          return _.assign(inv,
+                          { headerText: getHeaderText(inv)
+                          });
+        }).value();
+
+        self.invites(invs);
+      });
+    };
     self.approveInvite = function(model) {
       hub.send("track-click", {category:"Applications", label:"", event:"approveInvite"});
       ajax
