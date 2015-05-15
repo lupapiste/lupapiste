@@ -5229,6 +5229,16 @@ td.comment-text {
   padding: 0;
 }
 
+/* line 259, ../sass/views/_attachment.scss */
+.upload-instructions {
+  margin-bottom: 24px;
+}
+/* line 260, ../sass/views/_attachment.scss */
+.upload-instructions p {
+  line-height: normal;
+  margin-bottom: 12px;
+}
+
 /* line 2, ../sass/views/_statement.scss */
 #statement h1 {
   width: 70%;

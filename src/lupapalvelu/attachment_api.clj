@@ -25,7 +25,9 @@
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
             [sade.util :as util]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.application-meta-fields :as meta-fields])
+            [lupapalvelu.application-meta-fields :as meta-fields]
+            [lupapalvelu.pdf-conversion :as pdf-conversion]
+            [sade.env :as env])
   (:import [java.io File]))
 
 ;; Validators
@@ -273,20 +275,28 @@
     (when-let [validation-error (statement/statement-owner (assoc-in command [:data :statementId] (:id target)) application)]
       (fail! (:text validation-error))))
 
-  (when-not (attachment/attach-file! {:application application
-                                      :filename filename
-                                      :size size
-                                      :content tempfile
-                                      :attachment-id attachmentId
-                                      :attachment-type attachmentType
-                                      :op op
-                                      :comment-text text
-                                      :target target
-                                      :locked locked
-                                      :required false
-                                      :user user
-                                      :created created})
-    (fail :error.unknown)))
+  (let [attachment-data {:application application
+                         :filename filename
+                         :size size
+                         :content tempfile
+                         :attachment-id attachmentId
+                         :attachment-type attachmentType
+                         :op op
+                         :comment-text text
+                         :target target
+                         :locked locked
+                         :required false
+                         :user user
+                         :created created}]
+    (when-not (attachment/attach-file! attachment-data)
+      (fail :error.unknown))
+
+    (when (env/feature? :arkistointi)
+      (when-let [processed-tempfile (when (and (= (mime/mime-type filename) "application/pdf") (not (pdf-conversion/is-pdf-a? tempfile)))
+                                 (pdf-conversion/convert-to-pdf-a tempfile))]
+        (let [new-filename (str (ss/substring filename 0 (- (count filename) 4)) "-PDFA.pdf")]
+          (when-not (attachment/attach-file! (assoc attachment-data :content processed-tempfile :filename new-filename))
+            (fail :error.unknown)))))))
 
 
 ;;
