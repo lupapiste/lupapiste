@@ -34,7 +34,7 @@
                  :userAttachmentTypes (map #(str "osapuolet." (name %)) attachment-types-osapuoli)
                  :attachmentScales  attachment-scales
                  :attachmentSizes   attachment-sizes
-                 :eInvoiceOperators (map :name schemas/e-invoice-operators)
+                 :eInvoiceOperators schemas/e-invoice-operators
                  :postVerdictStates lupapalvelu.application-meta-fields/post-verdict-states
                  :stampableMimes    (filter identity (map mime/mime-types file-types))
                  :foremanRoles      (:body (first lupapalvelu.document.schemas/kuntaroolikoodi-tyonjohtaja))
