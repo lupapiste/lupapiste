@@ -6,7 +6,7 @@ LUPAPISTE.InvoiceOperatorSelectorModel = function(params) {
     var name = loc("osapuoli.yritys.verkkolaskutustieto.valittajaTunnus." + operator.name);
     return {
       name: name,
-      code: operator,
+      code: operator.name,
       disabled: operator.disabled
     }
   }).sortBy(function(operator) {
