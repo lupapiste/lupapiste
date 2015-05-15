@@ -4,22 +4,22 @@
   var required      = {required: true},
       notRequired   = {required: false};
 
-  function assoc(m, k, v) { m[k] = v; return m; }
-  function dissoc(m, k) { delete m[k]; return m; }
-  function unObservableize(fields, m) { return _.reduce(fields, function(acc, f) { return assoc(acc, f, m[f]()); }, {}); }
-  function updateObservables(fields, target, source) { _.each(fields, function(f) { target[f](source[f]); }); return target; }
-
   // ========================================================================================
   // NewCompanyUser:
   // ========================================================================================
 
   function NewCompanyUser() {
+    this.defaults  = {
+      email: undefined,
+      firstName: undefined,
+      lastName: undefined,
+      admin: undefined
+    };
+
     this.email     = ko.observable().extend(required).extend({email: true});
     this.firstName = ko.observable().extend(required);
     this.lastName  = ko.observable().extend(required);
     this.admin     = ko.observable().extend(notRequired);
-
-    this.fields = ["email", "firstName", "lastName", "admin"];
 
     this.isValid = ko.computed(function() {
       return _.every(this.fields, function(f) { return this[f].isValid(); }, this);
@@ -30,8 +30,6 @@
     this.showUserAlreadyInvited = ko.observable();
     this.showUserInvited    = ko.observable();
     this.showUserDetails    = ko.observable();
-
-    this.views  = ["showSearchEmail", "showUserInCompany", "showUserAlreadyInvited", "showUserInvited", "showUserDetails"];
 
     this.canSearchUser    = this.email.isValid;
     this.pending          = ko.observable();
@@ -45,7 +43,7 @@
   }
 
   NewCompanyUser.prototype.update = function(source) {
-    updateObservables(this.fields, this, source || {});
+    ko.mapping.fromJS(_.merge(this.defaults, source), {}, this);
     return this;
   };
 
@@ -72,7 +70,7 @@
 
   NewCompanyUser.prototype.submit = function() {
     ajax
-      .command("company-add-user", unObservableize(this.fields, this))
+      .command("company-add-user", ko.mapping.toJS(this))
       .pending(this.pending)
       .success(function() {
           hub.send("refresh-companies");
@@ -82,13 +80,16 @@
   };
 
   NewCompanyUser.prototype.open = function() {
-    updateObservables(this.fields, this, {});
-    updateObservables(this.views, this, {});
+    ko.mapping.fromJS(this.defaults, {}, this);
     this
       .pending(false)
       .done(false)
       .emailEnabled(true)
-      .showSearchEmail(true);
+      .showSearchEmail(true)
+      .showUserInCompany(undefined)
+      .showUserAlreadyInvited(undefined)
+      .showUserInvited(undefined)
+      .showUserDetails(undefined);
     LUPAPISTE.ModalDialog.open("#dialog-company-new-user");
   };
 
@@ -244,11 +245,23 @@
       ovt:          ko.observable().extend(notRequired).extend({ovt: true}),
       pop:          ko.observable().extend(notRequired).extend({ovt: true})
     });
-    this.fieldNames    = ["name", "y", "reference", "address1", "address2", "po", "zip", "country", "ovt", "pop", "accountType"];
+    this.defaults = {
+      name: undefined,
+      y: undefined,
+      reference: undefined,
+      address1: undefined,
+      address2: undefined,
+      po: undefined,
+      zip: undefined,
+      country: undefined,
+      ovt: undefined,
+      pop: undefined,
+      accountType: undefined
+    };
     this.edit          = ko.observable(false);
     this.saved         = ko.observable(null);
     this.canStartEdit  = ko.computed(function() { return !this.edit() && parent.isAdmin(); }, this);
-    this.changed       = ko.computed(function() { return !_.isEqual(unObservableize(this.fieldNames, this.model()), this.saved()); }, this);
+    this.changed       = ko.computed(function() { return !_.isEqual(ko.mapping.toJS(this.model()), this.saved()); }, this);
     this.canSubmit     = ko.computed(function() { return this.edit() && this.model.isValid() && this.changed(); }, this);
     this.accountTypes  = ko.observableArray();
   }
@@ -270,7 +283,9 @@
 
   CompanyInfo.prototype.update = function(company) {
     this.updateAccountTypes(company);
-    updateObservables(this.fieldNames, this.model(), company);
+    ko.mapping.fromJS(_.merge(this.defaults, company), {
+      ignore:["id"]
+    }, this.model());
     return this
       .edit(false)
       .saved(null)
@@ -283,12 +298,12 @@
 
   CompanyInfo.prototype.startEdit = function() {
     return this
-      .saved(unObservableize(this.fieldNames, this.model()))
+      .saved(ko.mapping.toJS(this.model()))
       .edit(true);
   };
 
   CompanyInfo.prototype.cancelEdit = function() {
-    updateObservables(this.fieldNames, this.model(), this.saved());
+    ko.mapping.fromJS(this.saved(), {}, this.model());
     return this
       .edit(false)
       .saved(null);
@@ -296,7 +311,7 @@
 
   CompanyInfo.prototype.submit = function() {
     ajax
-      .command("company-update", {company: this.parent.id(), updates: dissoc(unObservableize(this.fieldNames, this.model()), "y")})
+      .command("company-update", {company: this.parent.id(), updates: util.dissoc(ko.mapping.toJS(this.model()), "y")})
       .pending(this.parent.pending)
       .success(function(data) { this.update(data.company); }, this)
       .call();
