@@ -100,6 +100,8 @@
                                   :street new-user-address
                                   :password new-user-pw
                                   :email new-user-email
+                                  :rakentajafi false
+                                  :allowDirectMarketing true
                                   :personId "inject!"})
          user-id (:id resp) => string?
          email (last-email)
@@ -142,7 +144,16 @@
              new-user-phone2 "046"
              cmd-opts {:cookies {"anti-csrf-token" {:value "123"}}
                    :headers {"x-anti-forgery-token" "123"}}
-             resp (register cmd-opts {:stamp stamp :phone new-user-phone2, :city "Tampere", :zip "0", :street "street", :password new-user-pw, :email new-user-email, :personId "inject!"}) => ok?
+             resp (register cmd-opts {:stamp stamp
+                                      :phone new-user-phone2
+                                      :city "Tampere"
+                                      :zip "0"
+                                      :street "street"
+                                      :password new-user-pw
+                                      :email new-user-email
+                                      :personId "inject!"
+                                      :rakentajafi false
+                                      :allowDirectMarketing true}) => ok?
              user-id (:id resp) => string?
              email (last-email)
              body (:body email)]
