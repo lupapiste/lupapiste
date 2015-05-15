@@ -11,6 +11,7 @@
             [sade.util :as util]
             [cheshire.core :as json]
             [lupapalvelu.attachment :refer [attachment-types-osapuoli, attachment-scales, attachment-sizes]]
+            [lupapalvelu.company :as company]
             [lupapalvelu.stamper :refer [file-types]]
             [scss-compiler.core :as scss]))
 
@@ -34,7 +35,7 @@
                  :userAttachmentTypes (map #(str "osapuolet." (name %)) attachment-types-osapuoli)
                  :attachmentScales    attachment-scales
                  :attachmentSizes     attachment-sizes
-                 :accountTypes        lupapalvelu.company/account-types
+                 :accountTypes        company/account-types
                  :eInvoiceOperators (map :name schemas/e-invoice-operators)
                  :postVerdictStates lupapalvelu.application-meta-fields/post-verdict-states
                  :stampableMimes (filter identity (map mime/mime-types file-types))
