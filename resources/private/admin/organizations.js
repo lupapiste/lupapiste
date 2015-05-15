@@ -38,6 +38,7 @@
                   applicationEnabled: scope["new-application-enabled"],
                   openInforequestEnabled: scope["open-inforequest"],
                   openInforequestEmail: scope["open-inforequest-email"],
+                  permanentArchiveEnabled: scope["permanent-archive-enabled"],
                   opening: openingMills};
 
       ajax.command("update-organization", data)

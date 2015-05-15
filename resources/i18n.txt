@@ -1,0 +1,1 @@
+organization.archive.enabled: Sähköinen arkisto käytössä

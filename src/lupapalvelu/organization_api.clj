@@ -98,7 +98,7 @@
 (defcommand update-organization
   {:description "Update organization details."
    :parameters [permitType municipality
-                inforequestEnabled applicationEnabled openInforequestEnabled openInforequestEmail
+                inforequestEnabled applicationEnabled openInforequestEnabled openInforequestEmail permanentArchiveEnabled
                 opening]
    :input-validators [permit/permit-type-validator]
    :user-roles #{:admin}}
@@ -109,6 +109,7 @@
              :scope.$.new-application-enabled applicationEnabled
              :scope.$.open-inforequest openInforequestEnabled
              :scope.$.open-inforequest-email openInforequestEmail
+             :scope.$.permanent-archive-enabled permanentArchiveEnabled
              :scope.$.opening (when (number? opening) opening)}})
   (ok))
 

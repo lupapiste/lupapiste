@@ -15,6 +15,7 @@
    :inforequest-enabled false
    :new-application-enabled false
    :open-inforequest false
+   :permanent-archive-enabled false
    :open-inforequest-email ""
    :opening nil})
 
