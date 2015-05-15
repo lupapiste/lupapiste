@@ -9,7 +9,7 @@ Resource        ../../common_resource.robot
 
 Mikko creates a new application
   Mikko logs in
-  Create application the fast way  invite-app  753  753-423-2-159  kerrostalo-rivitalo
+  Create application the fast way  invite-app  753-423-2-159  kerrostalo-rivitalo
 
 Mikko can see the general invite button and opens invite dialog with it
   Open tab  parties
@@ -101,8 +101,8 @@ Mikko adds comment so thate application will be visible to admin
 Mikko invites Solita
   # Click enabled by test id  company-invite
   Wait Until  Click Element  xpath=//div[@class='parties-list']//button[@data-test-id='company-invite']
-  Wait Until  Element should be visible  selectCompanyToInvite
-  Select From List  selectCompanyToInvite  Solita Oy, Tulli Business Park Tampere
+  Wait Until  Element should be visible  xpath=//div[@data-test-id='modal-dialog-content']
+  Select From Autocomplete  Solita Oy, Tulli Business Park Tampere
   Click enabled by test id  modal-dialog-submit-button
   Wait Until  Page should contain  1060155-5
 
@@ -148,7 +148,7 @@ Mikko invites previously unknown user Oskari as paasuunnittelija
 #        Testataan tyonjohtajan kutsuminen erikseen omalla hakemuksellaan.
 Mikko creates a new tyonjohtaja application
   #Mikko logs in
-  Create application the fast way  invite-app-tyonjohtaja  753  753-423-2-159  tyonjohtajan-nimeaminen
+  Create application the fast way  invite-app-tyonjohtaja  753-423-2-159  tyonjohtajan-nimeaminen
 
 Mikko can see invite tyonjohtaja button in parties tab
   Open tab  parties

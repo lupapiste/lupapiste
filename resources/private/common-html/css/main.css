@@ -1,5 +1,4 @@
-@import url(//fonts.googleapis.com/css?family=Source+Sans+Pro:200,300,400,600,700,200italic,300italic,400italic,600italic,700italic);
-/*
+/*!
  * ajk's Hot New Template
  * Made by ajk (ajk.fi)
  */
@@ -14,7 +13,8 @@
     CSS Reset by ajk (http://ajk.im/)
     Based on http://necolas.github.com/normalize.css/
 */
-/* line 11, ../sass/partials/_reset.scss */
+@import url(//fonts.googleapis.com/css?family=Source+Sans+Pro:200,300,400,600,700,200italic,300italic,400italic,600italic,700italic);
+/* line 6, ../sass/partials/_reset.scss */
 html, body, div,
 span, object, iframe,
 h1, h2, h3, h4, h5, h6,
@@ -114,8 +114,8 @@ button, input[type="button"], input[type="reset"], input[type="submit"] {
 
 /* line 80, ../sass/partials/_reset.scss */
 input[type="checkbox"], input[type="radio"] {
-  -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
   box-sizing: border-box;
 }
 
@@ -172,7 +172,7 @@ hr {
   display: block;
   height: 1px;
   border: 0;
-  border-bottom: 1px solid #dddddd;
+  border-bottom: 1px solid #ddd;
 }
 
 /* line 131, ../sass/partials/_reset.scss */
@@ -231,8 +231,8 @@ body.admin {
 
 /* line 57, ../sass/partials/_base.scss */
 .container {
-  -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
   box-sizing: border-box;
   padding: 12px 8px 0 8px;
   width: 100%;
@@ -398,11 +398,11 @@ i {
 /* LINKS */
 /* line 1, ../sass/partials/_links.scss */
 a {
-  color: #333333;
+  color: #333;
 }
 /* line 3, ../sass/partials/_links.scss */
 a:active, a:visited, a:hover {
-  color: #333333;
+  color: #333;
 }
 
 /*------------------------------------*\
@@ -527,46 +527,58 @@ a:active, a:visited, a:hover {
   height: 12px;
 }
 /* line 101, ../sass/partials/_icons.scss */
+.icon.drill-down-black-smaller {
+  background-position: 0px -3400px;
+  width: 9px;
+  height: 8px;
+}
+/* line 106, ../sass/partials/_icons.scss */
+.icon.drill-up-black-smaller {
+  background-position: 0px -3300px;
+  width: 9px;
+  height: 8px;
+}
+/* line 111, ../sass/partials/_icons.scss */
 .icon.add {
   background-position: 0px -2200px;
   width: 15px;
   height: 15px;
 }
-/* line 106, ../sass/partials/_icons.scss */
+/* line 116, ../sass/partials/_icons.scss */
 .icon.search {
   background-position: 0px -2300px;
   width: 14px;
   height: 14px;
 }
-/* line 111, ../sass/partials/_icons.scss */
+/* line 121, ../sass/partials/_icons.scss */
 .icon.missing {
   background-position: 0px -2400px;
   width: 16px;
   height: 16px;
 }
-/* line 116, ../sass/partials/_icons.scss */
+/* line 126, ../sass/partials/_icons.scss */
 .icon.ok {
   background-position: 0px -2500px;
   width: 16px;
   height: 16px;
 }
-/* line 121, ../sass/partials/_icons.scss */
+/* line 131, ../sass/partials/_icons.scss */
 .icon.info-indicator {
   background-position: 0px -2600px;
   width: 16px;
   height: 16px;
 }
-/* line 126, ../sass/partials/_icons.scss */
+/* line 136, ../sass/partials/_icons.scss */
 .icon.remove {
   background-position: 0px -2700px;
   width: 15px;
   height: 15px;
 }
-/* line 131, ../sass/partials/_icons.scss */
+/* line 141, ../sass/partials/_icons.scss */
 .icon.wait {
   background-position: 0px -2800px;
 }
-/* line 134, ../sass/partials/_icons.scss */
+/* line 144, ../sass/partials/_icons.scss */
 .icon.info-big {
   background-position: 0px -2900px;
   width: 30px;
@@ -574,139 +586,139 @@ a:active, a:visited, a:hover {
   margin-left: -6px;
   margin-bottom: -6px;
 }
-/* line 141, ../sass/partials/_icons.scss */
+/* line 151, ../sass/partials/_icons.scss */
 .icon.help {
   background-position: 0px -2900px;
   width: 30px;
   height: 32px;
   overflow: visible;
 }
-/* line 147, ../sass/partials/_icons.scss */
+/* line 157, ../sass/partials/_icons.scss */
 .icon.new {
   background-position: 0px -3000px;
   width: 16px;
   height: 16px;
 }
-/* line 152, ../sass/partials/_icons.scss */
+/* line 162, ../sass/partials/_icons.scss */
 .icon.print {
   background-position: 0px -3500px;
   width: 16px;
   height: 15px;
 }
-/* line 157, ../sass/partials/_icons.scss */
+/* line 167, ../sass/partials/_icons.scss */
 .icon.send {
   background-position: 0px -3600px;
   height: 15px;
   width: 17px;
 }
-/* line 162, ../sass/partials/_icons.scss */
+/* line 172, ../sass/partials/_icons.scss */
 .icon.approve {
   background-position: 0px -3700px;
   height: 17px;
   width: 17px;
 }
-/* line 167, ../sass/partials/_icons.scss */
+/* line 177, ../sass/partials/_icons.scss */
 .icon.stamp {
   background-position: 0px -3800px;
   height: 16px;
   width: 16px;
 }
-/* line 172, ../sass/partials/_icons.scss */
+/* line 182, ../sass/partials/_icons.scss */
 .icon.add-grey {
   background-position: 0px -3900px;
   height: 16px;
   width: 16px;
 }
-/* line 177, ../sass/partials/_icons.scss */
+/* line 187, ../sass/partials/_icons.scss */
 .icon.complement {
   background-position: 0px -4000px;
   height: 16px;
   width: 16px;
 }
-/* line 182, ../sass/partials/_icons.scss */
+/* line 192, ../sass/partials/_icons.scss */
 .icon.remove-grey {
   background-position: 0px -4100px;
   cursor: pointer;
   height: 16px;
   width: 16px;
 }
-/* line 188, ../sass/partials/_icons.scss */
+/* line 198, ../sass/partials/_icons.scss */
 .icon.edit {
   background-position: 0px -4200px;
   cursor: pointer;
 }
-/* line 192, ../sass/partials/_icons.scss */
+/* line 202, ../sass/partials/_icons.scss */
 .icon.refresh-grey {
   background-position: 0px -4697px;
   width: 16px;
   height: 16px;
 }
-/* line 197, ../sass/partials/_icons.scss */
+/* line 207, ../sass/partials/_icons.scss */
 .icon.signed {
   background-position: 0px -4900px;
   width: 18px;
   height: 18px;
 }
-/* line 202, ../sass/partials/_icons.scss */
+/* line 212, ../sass/partials/_icons.scss */
 .icon.signed-white {
   background-position: 0px -5800px;
   width: 16px;
   height: 16px;
 }
-/* line 207, ../sass/partials/_icons.scss */
+/* line 217, ../sass/partials/_icons.scss */
 .icon.stamped {
   background-position: 0px -5000px;
   height: 18px;
   width: 18px;
 }
-/* line 212, ../sass/partials/_icons.scss */
+/* line 222, ../sass/partials/_icons.scss */
 .icon.transfered {
   background-position: 0px -5100px;
   height: 17px;
   width: 25px;
 }
-/* line 217, ../sass/partials/_icons.scss */
+/* line 227, ../sass/partials/_icons.scss */
 .icon.mark-seen {
   background-position: 0px -5198px;
   width: 25px;
   height: 15px;
 }
-/* line 222, ../sass/partials/_icons.scss */
+/* line 232, ../sass/partials/_icons.scss */
 .icon.urgent {
   width: 24px;
   height: 24px;
   background-position: 0px -5300px;
 }
-/* line 227, ../sass/partials/_icons.scss */
+/* line 237, ../sass/partials/_icons.scss */
 .icon.hold {
   width: 24px;
   height: 24px;
   background-position: 0px -5500px;
 }
-/* line 232, ../sass/partials/_icons.scss */
+/* line 242, ../sass/partials/_icons.scss */
 .icon.verdict-attachment {
   width: 8px;
   height: 18px;
   background-position: 0px -5900px;
 }
-/* line 237, ../sass/partials/_icons.scss */
+/* line 247, ../sass/partials/_icons.scss */
 .icon.scroll-up {
   background-position: 0px -6100px;
   width: 24px;
   height: 19px;
 }
-/* line 243, ../sass/partials/_icons.scss */
+/* line 253, ../sass/partials/_icons.scss */
 .icon.approve-grey {
   background-position: 0px -6200px;
   width: 16px;
   height: 16px;
 }
-/* line 250, ../sass/partials/_icons.scss */
+/* line 260, ../sass/partials/_icons.scss */
 .icon:hover {
   background-position-x: -100px;
 }
 
-/* line 262, ../sass/partials/_icons.scss */
+/* line 272, ../sass/partials/_icons.scss */
 [type=submit] .icon.left-align, .btn .icon.left-align, button .icon.left-align {
   position: absolute;
   left: 12px;
@@ -714,7 +726,7 @@ a:active, a:visited, a:hover {
   top: 0;
   margin: auto;
 }
-/* line 269, ../sass/partials/_icons.scss */
+/* line 279, ../sass/partials/_icons.scss */
 [type=submit] .icon.right-align, .btn .icon.right-align, button .icon.right-align {
   position: absolute;
   right: 6px;
@@ -723,7 +735,7 @@ a:active, a:visited, a:hover {
   margin: auto;
 }
 
-/* line 278, ../sass/partials/_icons.scss */
+/* line 288, ../sass/partials/_icons.scss */
 h1 .icon {
   margin-right: 3px;
 }
@@ -909,9 +921,9 @@ footer .informations .footer-box.sade-box a {
   font-weight: 400;
   width: 16.25em;
   margin: 0 0 6px;
-  padding: 0.25em 1.125em;
+  padding: .25em 1.125em;
   text-decoration: none;
-  text-shadow: 0px 1px 0px white;
+  text-shadow: 0px 1px 0px #fff;
   border: none;
   color: #303030;
   position: relative;
@@ -924,7 +936,7 @@ footer .informations .footer-box.sade-box a {
 [type=submit]:hover, .btn:hover, button:hover {
   background: #dddddd;
 }
-/* line 39, ../sass/partials/_buttons.scss */
+/* line 37, ../sass/partials/_buttons.scss */
 [type=submit]:disabled, [type=submit][disabled=disabled], [type=submit].disabled, [type=submit]:disabled:hover, [type=submit][disabled=disabled]:hover, [type=submit].disabled:hover, [type=submit]:disabled:active, [type=submit][disabled=disabled]:active, [type=submit].disabled:active, .btn:disabled, .btn[disabled=disabled], .btn.disabled, .btn:disabled:hover, .btn[disabled=disabled]:hover, .btn.disabled:hover, .btn:disabled:active, .btn[disabled=disabled]:active, .btn.disabled:active, button:disabled, button[disabled=disabled], button.disabled, button:disabled:hover, button[disabled=disabled]:hover, button.disabled:hover, button:disabled:active, button[disabled=disabled]:active, button.disabled:active {
   color: #aaaaaa;
   -webkit-box-shadow: none;
@@ -1165,8 +1177,8 @@ legend {
   -ms-transition: border 125ms ease;
   -o-transition: border 125ms ease;
   transition: border 125ms ease;
-  -webkit-box-shadow: inset 0 2px 3px #dddddd, 0 1px 0 white;
-  box-shadow: inset 0 2px 3px #dddddd, 0 1px 0 white;
+  -webkit-box-shadow: inset 0 2px 3px #dddddd, 0 1px 0 #fff;
+  box-shadow: inset 0 2px 3px #dddddd, 0 1px 0 #fff;
 }
 /* line 31, ../sass/partials/_forms.scss */
 [type="text"]:hover, [type="email"]:hover, [type="tel"]:hover, [type="url"]:hover, [type="password"]:hover, [type="time"]:hover, select:hover, textarea:hover {
@@ -1175,7 +1187,7 @@ legend {
 /* line 35, ../sass/partials/_forms.scss */
 [type="text"]:focus, [type="email"]:focus, [type="tel"]:focus, [type="url"]:focus, [type="password"]:focus, [type="time"]:focus, select:focus, textarea:focus {
   border-color: #17c;
-  -webkit-box-shadow: inset 0 2px 4px #c3c3c3, 0 1px 0 white;
+  -webkit-box-shadow: inset 0 2px 4px #c3c3c3, 0 1px 0 #fff;
 }
 /* line 40, ../sass/partials/_forms.scss */
 [type="text"].source-value-changed, [type="email"].source-value-changed, [type="tel"].source-value-changed, [type="url"].source-value-changed, [type="password"].source-value-changed, [type="time"].source-value-changed, select.source-value-changed, textarea.source-value-changed {
@@ -1448,7 +1460,7 @@ input[readonly]:focus, textarea[readonly]:focus {
   background: #f6f6f6;
   border-bottom: 1px solid #e9e9e9;
 }
-/* line 296, ../sass/partials/_forms.scss */
+/* line 295, ../sass/partials/_forms.scss */
 .form-group:last-child, .form-choice:last-child, .form-table:last-child {
   border-bottom: none;
 }
@@ -1677,7 +1689,7 @@ input[readonly]:focus, textarea[readonly]:focus {
 .docgen-content .form-table th {
   vertical-align: bottom;
   border-style: solid;
-  border-left: 1px solid white;
+  border-left: 1px solid #ffffff;
   border-top: none;
   border-bottom: none;
   border-right: none;
@@ -1957,6 +1969,12 @@ foreman-history th.fifth {
   width: 100%;
 }
 
+/* line 771, ../sass/partials/_forms.scss */
+div.alleYli-radioGroup {
+  display: inline-block;
+  margin-top: 24px;
+}
+
 /* line 4, ../sass/partials/_tables.scss */
 table {
   width: 100%;
@@ -2188,10 +2206,9 @@ table.attachments-template-table td.attachment-version-info {
   content: " ";
   display: inline-block;
   border-right: 2px solid #828282;
-  -webkit-transform: skew(30deg, 5deg);
   -moz-transform: skew(30deg, 5deg);
   -ms-transform: skew(30deg, 5deg);
-  -o-transform: skew(30deg, 5deg);
+  -webkit-transform: skew(30deg, 5deg);
   transform: skew(30deg, 5deg);
   width: 10px;
   height: 13px;
@@ -2204,10 +2221,9 @@ table.attachments-template-table td.attachment-version-info {
   content: " ";
   display: inline-block;
   border-right: 2px solid #828282;
-  -webkit-transform: skew(-30deg, 5deg);
   -moz-transform: skew(-30deg, 5deg);
   -ms-transform: skew(-30deg, 5deg);
-  -o-transform: skew(-30deg, 5deg);
+  -webkit-transform: skew(-30deg, 5deg);
   transform: skew(-30deg, 5deg);
   width: 10px;
   height: 13px;
@@ -2226,7 +2242,7 @@ table.attachments-template-table td.attachment-version-info {
 
 /* line 88, ../sass/partials/_tabs.scss */
 .tabs-content-container {
-  border: 1px solid #cccccc;
+  border: 1px solid #ccc;
   border-top: none;
   padding: 10px;
   width: 400px;
@@ -2263,7 +2279,7 @@ table.attachments-template-table td.attachment-version-info {
   padding: 8px 10px;
   text-decoration: none;
   background: #f6f6f6;
-  color: #333333;
+  color: #333;
   outline: none;
   /* Note: IE filters and border-radius don't mix */
   filter: none;
@@ -2314,8 +2330,8 @@ table.attachments-template-table td.attachment-version-info {
   width: 100%;
   display: block;
   margin: 24px 30px 24px 0;
-  -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
   box-sizing: border-box;
 }
 
@@ -2804,7 +2820,7 @@ table.attachments-template-table td.attachment-version-info {
 /* line 1, ../sass/partials/_errors.scss */
 .context-error {
   color: #f00;
-  border: 1px solid red;
+  border: 1px solid #f00;
   border-radius: 3px;
   padding: 6px;
   margin: 12px 0;
@@ -2941,6 +2957,86 @@ table.attachments-template-table td.attachment-version-info {
   background-color: #e9e9e9;
 }
 
+/* line 16, ../sass/partials/_autocomplete.scss */
+.autocomplete-component {
+  width: 430px;
+}
+/* line 18, ../sass/partials/_autocomplete.scss */
+.autocomplete-component .autocomplete-selection-wrapper {
+  position: relative;
+  height: 32px;
+  line-height: 32px;
+  width: 100%;
+}
+/* line 23, ../sass/partials/_autocomplete.scss */
+.autocomplete-component .autocomplete-selection-wrapper span.autocomplete-selection {
+  width: 100%;
+  height: 100%;
+  display: inline-block;
+  border: 1px solid #dddddd;
+  padding: 0 0 0 6px;
+  color: black;
+  box-sizing: border-box;
+  border-radius: 5px;
+}
+/* line 33, ../sass/partials/_autocomplete.scss */
+.autocomplete-component .autocomplete-selection-wrapper span.autocomplete-selection-arrow {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  margin: auto;
+  right: 9px;
+}
+/* line 42, ../sass/partials/_autocomplete.scss */
+.autocomplete-component .autocomplete-dropdown {
+  width: 100%;
+  position: relative;
+}
+/* line 45, ../sass/partials/_autocomplete.scss */
+.autocomplete-component .autocomplete-dropdown input.autocomplete-input {
+  width: 100%;
+  height: 28px;
+  line-height: 24px;
+  margin: 2px 0;
+  display: block;
+  box-sizing: border-box;
+}
+/* line 53, ../sass/partials/_autocomplete.scss */
+.autocomplete-component .autocomplete-dropdown ul.autocomplete-result {
+  position: fixed;
+  z-index: 1000;
+  width: 430px;
+  max-width: 430px;
+  max-height: 300px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: auto;
+  padding: 0;
+  border: 1px solid #dddddd;
+  box-sizing: border-box;
+  background-color: #fff;
+}
+/* line 66, ../sass/partials/_autocomplete.scss */
+.autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item, .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-empty {
+  cursor: default;
+  display: list-item;
+  list-style-type: none;
+  padding: 6px 6px;
+}
+/* line 72, ../sass/partials/_autocomplete.scss */
+.autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item {
+  cursor: pointer;
+}
+/* line 75, ../sass/partials/_autocomplete.scss */
+.autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item.active {
+  background-color: #fef4ea;
+}
+/* line 77, ../sass/partials/_autocomplete.scss */
+.autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item.active:active {
+  background-color: #f8c38a;
+  color: black;
+}
+
 /* line 4, ../sass/partials/_tree.scss */
 .operation-tree {
   display: inline-block;
@@ -2965,25 +3061,26 @@ table.attachments-template-table td.attachment-version-info {
   float: left;
   border: 1px solid #dddddd;
   display: block;
-  -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
   box-sizing: border-box;
   padding: 4px 0px 4px 12px;
   text-decoration: none;
   background: white;
-  color: #333333;
+  color: #333;
   width: 800px;
   cursor: pointer;
+  -moz-user-select: -moz-none;
+  -ms-user-select: none;
   -webkit-user-select: none;
-  -moz-user-select: none;
   user-select: none;
-  -webkit-transition-property: font-size;
   -moz-transition-property: font-size;
   -o-transition-property: font-size;
+  -webkit-transition-property: font-size;
   transition-property: font-size;
-  -webkit-transition-duration: 200ms;
   -moz-transition-duration: 200ms;
   -o-transition-duration: 200ms;
+  -webkit-transition-duration: 200ms;
   transition-duration: 200ms;
 }
 /* line 36, ../sass/partials/_tree.scss */
@@ -3031,7 +3128,7 @@ table.attachments-template-table td.attachment-version-info {
 }
 /* line 72, ../sass/partials/_tree.scss */
 .operation-tree .tree-last li a {
-  color: #333333;
+  color: #333;
 }
 /* line 76, ../sass/partials/_tree.scss */
 .operation-tree .tree-last div {
@@ -3067,8 +3164,8 @@ ul.attachments-list li.mandatory-attachments {
   z-index: 5;
   height: auto;
   margin-bottom: 6px;
-  -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
   box-sizing: border-box;
 }
 /* line 9, ../sass/partials/_accordion.scss */
@@ -3086,8 +3183,8 @@ ul.attachments-list li.mandatory-attachments {
   position: relative;
   width: 100%;
   padding-right: 0;
-  -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
   box-sizing: border-box;
 }
 /* line 24, ../sass/partials/_accordion.scss */
@@ -3355,8 +3452,8 @@ ul.attachments-list li.mandatory-attachments {
 }
 /* line 24, ../sass/partials/_selectm.scss */
 .selectm input {
-  -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
   box-sizing: border-box;
   margin: 0px;
 }
@@ -3399,7 +3496,7 @@ ul.attachments-list li.mandatory-attachments {
 
 /* line 17, ../sass/views/_welcome.scss */
 .welcome_top {
-  background: #01bef5 url("/img/top-bg.jpg");
+  background: #01BEF5 url("/img/top-bg.jpg");
   margin-top: 48px;
   *zoom: 1;
 }
@@ -3582,11 +3679,11 @@ ul.attachments-list li.mandatory-attachments {
 #applications-list_paginate .paginate_enabled_previous, #applications-list_paginate .paginate_enabled_next, .dataTables_paginate .paginate_enabled_previous, .dataTables_paginate .paginate_enabled_next {
   background: #ffffff;
   /* Old browsers */
+  background: url('data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4gPHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJncmFkIiBncmFkaWVudFVuaXRzPSJvYmplY3RCb3VuZGluZ0JveCIgeDE9IjAuNSIgeTE9IjAuMCIgeDI9IjAuNSIgeTI9IjEuMCI+PHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iI2ZmZmZmZiIvPjxzdG9wIG9mZnNldD0iNTAlIiBzdG9wLWNvbG9yPSIjZjNmM2YzIi8+PHN0b3Agb2Zmc2V0PSI1MSUiIHN0b3AtY29sb3I9IiNlZGVkZWQiLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiNmZmZmZmYiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz48cmVjdCB4PSIwIiB5PSIwIiB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyYWQpIiAvPjwvc3ZnPiA=');
   background: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #ffffff), color-stop(50%, #f3f3f3), color-stop(51%, #ededed), color-stop(100%, #ffffff));
-  background: -webkit-linear-gradient(top, #ffffff 0%, #f3f3f3 50%, #ededed 51%, #ffffff 100%);
   background: -moz-linear-gradient(top, #ffffff 0%, #f3f3f3 50%, #ededed 51%, #ffffff 100%);
-  background: -o-linear-gradient(top, #ffffff 0%, #f3f3f3 50%, #ededed 51%, #ffffff 100%);
-  background: linear-gradient(top, #ffffff 0%, #f3f3f3 50%, #ededed 51%, #ffffff 100%);
+  background: -webkit-linear-gradient(top, #ffffff 0%, #f3f3f3 50%, #ededed 51%, #ffffff 100%);
+  background: linear-gradient(to bottom, #ffffff 0%, #f3f3f3 50%, #ededed 51%, #ffffff 100%);
 }
 /* line 71, ../sass/views/_applications.scss */
 #applications-list_paginate .paginate_disabled_previous, #applications-list_paginate .paginate_enabled_previous, .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .paginate_enabled_previous {
@@ -4123,8 +4220,8 @@ span.icon_clear:before {
   padding: 24px 12px;
   margin-top: -42px;
   margin-bottom: 6px;
-  -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
   box-sizing: border-box;
 }
 /* line 265, ../sass/views/_application.scss */
@@ -4493,7 +4590,7 @@ span.icon_clear:before {
 }
 /* line 592, ../sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card a {
-  color: #333333;
+  color: #333;
 }
 /* line 595, ../sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card:first-child {
@@ -4630,11 +4727,11 @@ span.icon_clear:before {
 }
 /* line 718, ../sass/views/_application.scss */
 .organizationLinks .organization-links a {
-  color: #333333;
+  color: #333;
 }
 /* line 720, ../sass/views/_application.scss */
 .organizationLinks .organization-links a:active, .organizationLinks .organization-links a:visited, .organizationLinks .organization-links a:hover {
-  color: #333333;
+  color: #333;
 }
 
 /* line 728, ../sass/views/_application.scss */
@@ -4776,7 +4873,7 @@ span.icon_clear:before {
   margin-top: 24px;
   padding: 12px;
   border-radius: 3px;
-  border: 1px solid #01bef5;
+  border: 1px solid #01BEF5;
 }
 /* line 113, ../sass/views/_create_application.scss */
 .create-group label {
@@ -5617,7 +5714,7 @@ td.comment-text {
 #login h1 {
   margin-bottom: 1em;
   color: #f59c00;
-  font-family: "Dosis", sans-serif;
+  font-family: 'Dosis', sans-serif;
   word-spacing: 0.1em;
   line-height: 1em;
   font-size: 25px;
@@ -5815,7 +5912,7 @@ td.comment-text {
   padding-top: 3px;
   margin-left: -6px;
   margin-bottom: 4px;
-  color: #333333;
+  color: #333;
   text-shadow: none;
 }
 /* line 77, ../sass/views/_side_panel.scss */
@@ -6018,7 +6115,7 @@ td.comment-text {
 /* line 11, ../sass/views/_company.scss */
 #company-content .tabs-container li a {
   background-color: #f6f6f6;
-  color: #333333;
+  color: #333;
   text-decoration: none;
   display: inline-block;
   margin-right: 4px;
@@ -6090,17 +6187,17 @@ div.attachment-multiselect-content tr.attachment-group-header {
 /* line 3, ../sass/partials/_other.scss */
 .hide {
   visibility: hidden;
-  width: 0!important;
-  height: 0!important;
-  line-height: 0!important;
-  padding: 0!important;
-  margin: 0!important;
+  width: 0 !important;
+  height: 0 !important;
+  line-height: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
 }
 
 /* Pretty &amp; s */
 /* line 13, ../sass/partials/_other.scss */
 .amp {
-  font-family: "Goudy Old Style", Baskerville, Palatino, "Palatino Linotype", "Book Antiqua", serif;
+  font-family: 'Goudy Old Style', Baskerville, Palatino, 'Palatino Linotype', 'Book Antiqua', serif;
   font-style: italic;
 }
 
@@ -6198,7 +6295,7 @@ div.attachment-multiselect-content tr.attachment-group-header {
   display: none;
 }
 
-/* line 168, ../sass/main.scss */
+/* line 167, ../sass/main.scss */
 .inert-table tbody tr:hover td,
 .inert-table tbody tr:hover th {
   background-color: #ffffff;
@@ -6253,7 +6350,7 @@ div.pzbDiv {
   border: 1px solid black;
   box-shadow: 3px 4px 7px;
   font-size: 0.8em;
-  color: #333333;
+  color: #333;
 }
 /* line 219, ../sass/main.scss */
 .dev-debug p {

@@ -37,16 +37,8 @@
 (defn organization-from-minimal-by-id [org-id]
   (some #(when (= (:id %) org-id) %) minimal/organizations))
 
-(defn- muni-for-user [{org-authz :orgAuthz :as user}]
-  {:pre [user]}
-  (when (seq org-authz)
-    (assert (= 1 (count org-authz)) user)
-    (let [org (organization-from-minimal-by-id (-> org-authz first first name))]
-      (-> org :scope first :municipality))))
-
-(defn muni-for [username] (muni-for-user (find-user-from-minimal username)))
-(defn muni-for-key [apikey] (muni-for-user (find-user-from-minimal-by-apikey apikey)))
-
+(defn company-from-minimal-by-id [id]
+  (some #(when (= (:_id %) id) %) minimal/companies))
 
 (def kaino       (apikey-for "kaino@solita.fi"))
 (def kaino-id    (id-for "kaino@solita.fi"))
@@ -58,7 +50,6 @@
 (def teppo-id    (id-for "teppo@example.com"))
 (def veikko      (apikey-for "veikko"))
 (def veikko-id   (id-for "veikko"))
-(def veikko-muni (muni-for "veikko"))
 (def sonja       (apikey-for "sonja"))
 (def sonja-id    (id-for "sonja"))
 (def sonja-muni  "753")
@@ -72,12 +63,18 @@
 (def admin-id    (id-for "admin"))
 (def raktark-jarvenpaa (apikey-for "rakennustarkastaja@jarvenpaa.fi"))
 (def raktark-jarvenpaa-id   (id-for "rakennustarkastaja@jarvenpaa.fi"))
-(def jarvenpaa-muni    (muni-for "rakennustarkastaja@jarvenpaa.fi"))
 (def arto       (apikey-for "arto"))
 (def kuopio     (apikey-for "kuopio-r"))
 (def velho      (apikey-for "velho"))
 (def velho-muni "297")
 (def velho-id   (id-for "velho"))
+
+(def sipoo-property-id "75300000000000")
+(def jarvenpaa-property-id "18600000000000")
+(def tampere-property-id "83700000000000")
+(def kuopio-property-id "29700000000000")
+(def oir-property-id "43300000000000")
+
 
 (defn server-address [] (System/getProperty "target_server" "http://localhost:8000"))
 
@@ -147,8 +144,7 @@
                  (merge {:operation "kerrostalo-rivitalo"
                          :propertyId "75312312341234"
                          :x 444444 :y 6666666
-                         :address "foo 42, bar"
-                         :municipality (or municipality (muni-for-key apikey) sonja-muni)})
+                         :address "foo 42, bar"})
                  (mapcat seq))]
     (apply f apikey :create-application params)))
 
@@ -380,6 +376,16 @@
     (command apikey :set-user-to-document :id foreman-app-id :documentId (:id foreman-doc) :userId userId :path "" :collection "documents")
     (command apikey :update-doc :id foreman-app-id :doc (:id foreman-doc) :updates [["patevyysvaatimusluokka" difficulty]])
     foreman-app-id))
+
+(defn accept-company-invitation []
+  (let [email     (last-email)
+        [_ token] (re-find #"http.+/app/fi/welcome#!/accept-company-invitation/([A-Za-z0-9-]+)" (:plain (:body email)))]
+    (http/post (str (server-address) "/api/token/" token) {:follow-redirects false
+                                                           :throw-exceptions false})))
+
+(defn invite-company-and-accept-invitation [apikey app-id company-id]
+  (command apikey :company-invite :id app-id :company-id company-id) => ok?
+  (accept-company-invitation))
 
 ;;
 ;; Stuffin' data in

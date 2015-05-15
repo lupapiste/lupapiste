@@ -7,7 +7,7 @@ Resource       ../../common_resource.robot
 
 Mikko creates application
   Mikko logs in
-  Create application the fast way  application-papplication  753  753-416-25-30  kerrostalo-rivitalo
+  Create application the fast way  application-papplication  753-416-25-30  kerrostalo-rivitalo
 
 Mikko edits operation description
   Open application  application-papplication  753-416-25-30

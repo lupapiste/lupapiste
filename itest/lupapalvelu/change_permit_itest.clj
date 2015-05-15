@@ -6,7 +6,7 @@
 (fact* "A change permit can be created based on current R application after verdict has been given."
   (let [apikey                 sonja
         application-id         (create-app-id apikey
-                                 :municipality sonja-muni
+                                 :propertyId sipoo-property-id
                                  :address "Paatoskuja 12")
         application            (query-application apikey application-id) => truthy]
     (generate-documents application apikey)
@@ -21,9 +21,9 @@
 
 (fact* "Change permit can only be applied for an R type of application."
   (let [apikey                 sonja
-        municipality           sonja-muni
+        property-id            sipoo-property-id
         application            (create-and-submit-application apikey
-                                 :municipality municipality
+                                 :propertyId property-id
                                  :address "Paatoskuja 13"
                                  :operation "ya-katulupa-vesi-ja-viemarityot") => truthy
         application-id         (:id application)]

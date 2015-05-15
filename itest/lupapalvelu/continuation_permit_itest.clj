@@ -7,17 +7,17 @@
   (apply-remote-minimal)
 
   (let [apikey                 sonja
-        municipality           sonja-muni
+        property-id            sipoo-property-id
 
         ;; Verdict given application, YA permit type
         verdict-given-application-ya (create-and-submit-application apikey
-                                       :municipality municipality
+                                       :propertyId property-id
                                        :address "Paatoskuja 14"
                                        :operation "ya-katulupa-vesi-ja-viemarityot") => truthy
         verdict-given-application-ya-id (:id verdict-given-application-ya)
 
         ;; Verdict given application, R permit type
-        verdict-given-application-r    (create-and-submit-application apikey :municipality municipality :address "Paatoskuja 15") => truthy
+        verdict-given-application-r    (create-and-submit-application apikey :propertyId property-id :address "Paatoskuja 15") => truthy
         verdict-given-application-r-id (:id verdict-given-application-r)]
 
     ;; YA app

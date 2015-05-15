@@ -6,7 +6,8 @@
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.application :as app]))
+            [lupapalvelu.application :as app]
+            [lupapalvelu.document.tools :as tools]))
 
 (mongo/connect!)
 
@@ -50,13 +51,13 @@
     (-> (:comments application) first :text) => "hello"))
 
 (fact "application created to Sipoo belongs to organization Sipoon Rakennusvalvonta"
-  (let [application-id  (create-app-id pena :municipality sonja-muni)
+  (let [application-id  (create-app-id pena :propertyId sipoo-property-id)
         application     (query-application pena application-id)
         hakija (domain/get-document-by-name application "hakija")]
     (:organization application) => "753-R"))
 
 (fact "the ready-calculated validation errors about required document fields, included by a newly created application, are updated when those application fields are filled"
-  (let [application-id  (create-app-id pena :municipality sonja-muni)
+  (let [application-id  (create-app-id pena :propertyId sipoo-property-id)
         application     (query-application pena application-id)
         hakija          (domain/get-document-by-name application "hakija")
         errs            (:validationErrors hakija)]
@@ -70,19 +71,19 @@
       (not-any? #(= "illegal-value:required" (-> % :result second)) errs))))
 
 (fact "application created to Tampere belongs to organization Tampereen Rakennusvalvonta"
-  (let [application-id  (create-app-id pena :municipality "837")
+  (let [application-id  (create-app-id pena :propertyId tampere-property-id)
         application     (query-application pena application-id)
         hakija (domain/get-document-by-name application "hakija")]
     (:organization application) => "837-R"))
 
 (fact "application created to Reisjarvi belongs to organization Peruspalvelukuntayhtyma Selanne"
-  (let [application-id  (create-app-id pena :municipality "626")
+  (let [application-id  (create-app-id pena :propertyId "62600000000000")
         application     (query-application pena application-id)
         hakija (domain/get-document-by-name application "hakija")]
     (:organization application) => "069-R"))
 
 (fact* "Assign application to an authority"
-       (let [application-id (create-app-id pena :municipality sonja-muni)
+       (let [application-id (create-app-id pena :propertyId sipoo-property-id)
              ;; add a comment to change state to open
              _ (comment-application pena application-id true) => ok?
              application (query-application sonja application-id)
@@ -99,7 +100,7 @@
            sonja =not=> (allowed? sonja :submit-application :id application-id))))
 
 (fact* "Assign application to an authority and then to no-one"
-       (let [application-id (create-app-id pena :municipality sonja-muni)
+       (let [application-id (create-app-id pena :propertyId sipoo-property-id)
              ;; add a comment change set state to open
              _ (comment-application pena application-id true) => ok?
              application (query-application sonja application-id)
@@ -112,7 +113,7 @@
          (:id authority-in-the-end) => nil))
 
 (fact "Authority is able to create an application to a municipality in own organization"
-  (let [application-id  (create-app-id sonja :municipality sonja-muni)]
+  (let [application-id  (create-app-id sonja :propertyId sipoo-property-id)]
     (fact "Application is open"
       (let [application (query-application sonja application-id)]
         application => truthy
@@ -139,7 +140,7 @@
 (facts* "cancel application"
   (last-email) ; Inbox zero
 
-  (let [application (create-and-submit-application mikko :municipality sonja-muni :address "Peruutustie 23")
+  (let [application (create-and-submit-application mikko :propertyId sipoo-property-id :address "Peruutustie 23")
         application-id (:id application)]
 
     (fact "Mikko sees the application" (query mikko :application :id application-id) => ok?)
@@ -154,7 +155,7 @@
       email => (partial contains-application-link? application-id "applicant")))
 
   (fact "Authority can cancel own application"
-    (let [application-id  (create-app-id sonja :municipality sonja-muni)]
+    (let [application-id  (create-app-id sonja :propertyId sipoo-property-id)]
       (fact "Sonja sees the application" (query sonja :application :id application-id) => ok?)
       (fact "Sonja can cancel the application"
         (let [r (command sonja :cancel-application-authority :id application-id :text nil :lang "fi")]
@@ -162,7 +163,7 @@
           (fact "No comments exists from cancel" (-> r :application :comments count) => 0)))))
 
   (fact "Authority can cancel with reason text, which is added as comment"
-    (let [application (create-and-submit-application mikko :municipality sonja-muni :address "Peruutustie 23")
+    (let [application (create-and-submit-application mikko :propertyId sipoo-property-id :address "Peruutustie 23")
           cancel-reason "Testihakemus"]
       (command sonja :cancel-application-authority :id (:id application) :text cancel-reason :lang "fi") => ok?
 
@@ -172,10 +173,10 @@
           (-> application :comments (first) :text) => (contains cancel-reason))))))
 
 (fact "Authority in unable to create an application to a municipality in another organization"
-  (create-app sonja :municipality veikko-muni) => unauthorized?)
+  (create-app sonja :propertyId tampere-property-id) => unauthorized?)
 
 (facts "Add operations"
-  (let [application-id  (create-app-id mikko :municipality veikko-muni)]
+  (let [application-id  (create-app-id mikko :propertyId tampere-property-id)]
     (comment-application mikko application-id true) => ok?
     (command veikko :assign-application :id application-id :assigneeId veikko-id) => ok?
 
@@ -227,7 +228,7 @@
           (raw sonja :redirect-to-vendor-backend :id application-id) => http404?)))))
 
 (fact "Pena cannot create app for organization that has new applications disabled"
-  (let [resp  (create-app pena :municipality "997")]
+  (let [resp  (create-app pena :propertyId "99700000000000")]
     resp =not=> ok?
     (:text resp) => "error.new-applications-disabled"))
 
@@ -267,7 +268,7 @@
   )
 
 (facts "Set user to document"
-  (let [application   (create-and-submit-application mikko :municipality sonja-muni)
+  (let [application   (create-and-submit-application mikko :propertyId sipoo-property-id)
         application-id   (:id application)
         paasuunnittelija (domain/get-document-by-name application "paasuunnittelija")
         suunnittelija    (domain/get-document-by-name application "suunnittelija")
@@ -353,8 +354,40 @@
           (:authority app) => (contains {:id sonja-id})
           (get-in suunnittelija [:data :henkilotiedot :hetu :value]) => "210281-****")))))
 
-(fact* "Merging building information from KRYSP does not overwrite muutostyolaji"
-  (let [application-id (create-app-id pena :municipality sonja-muni :operation "kayttotark-muutos")
+(facts "Set company to document"
+  (let [application   (create-and-submit-application pena :propertyId sipoo-property-id)
+        app-id        (:id application)
+        maksaja       (domain/get-document-by-name application "maksaja")
+        get-doc-value (fn [doc path-prefix path]
+                        (-> (get-in doc (into path-prefix path))
+                            tools/unwrapped))]
+
+    (fact "initially maksaja company is empty"
+      (let [check (partial get-doc-value maksaja [:data :yritys])]
+        (doseq [path [[:yritysnimi]
+                      [:liikeJaYhteisoTunnus]
+                      [:verkkolaskutustieto :ovtTunnus]
+                      [:verkkolaskutustieto :valittajaTunnus]
+                      [:yhteyshenkilo :henkilotiedot :etunimi]]]
+          (check path) => "")))
+
+    (let [resp (invite-company-and-accept-invitation pena app-id "solita")]
+      (:status resp) => 200)
+
+    (command pena :set-company-to-document :id app-id :documentId (:id maksaja) :companyId "solita" :path "yritys") => ok?
+
+    (let [application (query-application pena app-id)
+          maksaja     (domain/get-document-by-id application (:id maksaja))
+          company     (company-from-minimal-by-id "solita")
+          check       (partial get-doc-value maksaja [:data :yritys])]
+      (check [:yritysnimi :value]) => (:name company)
+      (check [:liikeJaYhteisoTunnus :value]) => (:y company)
+      (check [:verkkolaskutustieto :ovtTunnus :value]) => (:ovt company)
+      (check [:verkkolaskutustieto :valittajaTunnus]) => (:pop company)
+      (check [:yhteyshenkilo :henkilotiedot :etunimi :value]) => (-> (find-user-from-minimal-by-apikey pena) :firstName))))
+
+(fact* "Merging building information from KRYSP does not overwrite muutostyolaji or energiatehokkuusluvunYksikko"
+  (let [application-id (create-app-id pena :propertyId sipoo-property-id :operation "kayttotark-muutos")
         app (query-application pena application-id)
         rakmuu-doc (domain/get-document-by-name app "rakennuksen-muuttaminen")
         resp2 (command pena :update-doc :id application-id :doc (:id rakmuu-doc) :collection "documents" :updates [["muutostyolaji" "muut muutosty\u00f6t"]])
@@ -366,8 +399,17 @@
         resp3 (command pena :merge-details-from-krysp :id application-id :documentId (:id doc-before) :collection "documents" :buildingId building-id :path "buildingId" :overwrite true) => ok?
         merged-app (query-application pena application-id)
         doc-after (domain/get-document-by-name merged-app "rakennuksen-muuttaminen")]
-    (get-in doc-before [:data :muutostyolaji :value]) => "muut muutosty\u00f6t"
-    (get-in doc-after [:data :muutostyolaji :value]) => "muut muutosty\u00f6t"
+
+    (fact "muutostyolaji"
+      (get-in doc-before [:data :muutostyolaji :value]) => "muut muutosty\u00f6t"
+      (get-in doc-after [:data :muutostyolaji :value]) => "muut muutosty\u00f6t")
+
+    (facts "energiatehokkuusluvunYksikko"
+      (fact "document has default value"
+        (get-in doc-before [:data :luokitus :energiatehokkuusluvunYksikko :value]) => "kWh/m2")
+      (fact "was not altered"
+        (get-in doc-after [:data :luokitus :energiatehokkuusluvunYksikko :value]) => "kWh/m2"))
+
     (get-in doc-after [:data :rakennusnro :value]) => "001"
     (get-in doc-after [:data :manuaalinen_rakennusnro :value]) => ss/blank?
     (get-in doc-after [:data :valtakunnallinenNumero :value]) => "481123123R"
@@ -395,7 +437,7 @@
           (get-in doc-after-2 [:data :manuaalinen_rakennusnro :value]) => ss/blank?)))))
 
 (fact* "Merging building information from KRYSP succeeds even if document schema does not have place for all the info"
-  (let [application-id (create-app-id pena :municipality sonja-muni :operation "purkaminen")
+  (let [application-id (create-app-id pena :propertyId sipoo-property-id :operation "purkaminen")
         app (query-application pena application-id)
         doc (domain/get-document-by-name app "purkaminen")
         building-info (command pena :get-building-info-from-wfs :id application-id) => ok?
@@ -407,7 +449,7 @@
     (get-in doc-after [:data :kaytto :kayttotarkoitus :source]) => "krysp"))
 
 (facts "Facts about update operation description"
-  (let [application-id (create-app-id pena :operation "kerrostalo-rivitalo" :municipality sonja-muni)
+  (let [application-id (create-app-id pena :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id)
         application (query-application pena application-id)
         op (first (:operations application))
         test-desc "Testdesc"]
@@ -418,7 +460,7 @@
       (fact "description is set" (:description updated-op) => test-desc))))
 
 (facts "Changinging application location"
-  (let [application-id (create-app-id pena :operation "kerrostalo-rivitalo" :municipality sonja-muni)
+  (let [application-id (create-app-id pena :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id)
         application    (query-application pena application-id)]
 
     (fact "applicant should be able to change location when state is draft"

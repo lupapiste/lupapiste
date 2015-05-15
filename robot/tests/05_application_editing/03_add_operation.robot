@@ -10,7 +10,7 @@ New application contains the default initial operation
   Mikko logs in
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  add-operation${secs}
-  Create application the fast way  ${appname}  753  753-416-25-32  kerrostalo-rivitalo
+  Create application the fast way  ${appname}  753-416-25-32  kerrostalo-rivitalo
   Wait Until  Page Should Contain  Asuinkerrostalon tai rivitalon rakentaminen
 
 Mikko adds an operation

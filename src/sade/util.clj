@@ -1,7 +1,6 @@
 (ns sade.util
   (:refer-clojure :exclude [pos? neg? zero?])
   (:require [clojure.walk :refer [postwalk prewalk]]
-            [clojure.string :refer [join]]
             [clojure.java.io :as io]
             [sade.strings :refer [numeric? decimal-number? trim] :as ss]
             [sade.core :refer :all]
@@ -265,24 +264,6 @@
                 4 "%02d:%02d:%02d.%d")]
       (apply format fmt (map ->int matches)))))
 
-(def property-id-pattern
-  "Regex for property id human readable format"
-  #"^(\d{1,3})-(\d{1,3})-(\d{1,4})-(\d{1,4})$")
-
-(defn to-property-id [^String human-readable]
-  (let [parts (map #(Integer/parseInt % 10) (rest (re-matches property-id-pattern human-readable)))]
-    (apply format "%03d%03d%04d%04d" parts)))
-
-(def human-readable-property-id-pattern
-  "Regex for splitting db-saved property id to human readable form"
-  #"^([0-9]{1,3})([0-9]{1,3})([0-9]{1,4})([0-9]{1,4})$")
-
-(defn to-human-readable-property-id [property-id]
-  (->> (re-matches human-readable-property-id-pattern property-id)
-       (rest)
-       (map ->int)
-       (join "-")))
-
 (defn valid-email? [email]
   (try
     (javax.mail.internet.InternetAddress. email)
@@ -316,24 +297,24 @@
   (into m (filter #(->> % val not-empty-or-nil?) (apply hash-map kvs))))
 
 (defn finnish-y? [y]
-  (if-let [[_ number check] (re-matches #"(\d{7})-(\d)" y)]
-    (let [cn (mod (reduce + (map * [7 9 10 5 8 4 2] (map #(Long/parseLong (str %)) number))) 11)
-          cn (if (zero? cn) 0 (- 11 cn))]
-      (= (Long/parseLong check) cn))))
+  (if y
+    (if-let [[_ number check] (re-matches #"(\d{7})-(\d)" y)]
+      (let [cn (mod (reduce + (map * [7 9 10 5 8 4 2] (map #(Long/parseLong (str %)) number))) 11)
+            cn (if (zero? cn) 0 (- 11 cn))]
+        (= (Long/parseLong check) cn)))
+    false))
 
-(defn y? [y]
-  (cond
-    (nil? y) false
-    :else    (finnish-y? y)))
-
-(defn finnish-ovt? [ovt]
-  (if-let [[_ y c] (re-matches #"0037(\d{7})(\d)\d{0,5}" ovt)]
-    (finnish-y? (str y \- c))))
-
-(defn ovt? [ovt]
-  (cond
-    (nil? ovt)                false
-    :else                     (finnish-ovt? ovt)))
+(defn finnish-ovt?
+  "OVT-tunnus SFS 5748 standardin mukainen OVT-tunnus rakentuu ISO6523 -standardin
+   mukaisesta Suomen verohallinnon tunnuksesta 0037, Y-tunnuksesta
+   (8 merkki\u00e4 ilman v\u00e4liviivaa) sek\u00e4 vapaamuotoisesta 5 merkist\u00e4,
+   jolla voidaan antaa organisaation alataso tai kustannuspaikka.
+   http://www.tieke.fi/pages/viewpage.action?pageId=17104927"
+  [ovt]
+  (if ovt
+    (if-let [[_ y c] (re-matches #"0037(\d{7})(\d)\w{0,5}" ovt)]
+      (finnish-y? (str y \- c)))
+    false))
 
 (defn account-type? [account-type]
   (cond

@@ -761,6 +761,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var span = makeEntrySpan(subSchema, myPath);
     span.className = span.className + " radioGroup";
     partsDiv.id = pathStrToID(myPath);
+    partsDiv.className = subSchema.name + "-radioGroup";
 
     $.each(subSchema.body, function (i, o) {
       var pathForId = myPath + "." + o.name;
@@ -1036,20 +1037,24 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     select.id = pathStrToID(myPath);
     select.name = myPath;
     select.className = "form-input combobox";
-    select.onchange = function (e) {
-      var event = getEvent(e);
-      var target = event.target;
-      var userId = target.value;
-      if (!_.isEmpty(userId)) {
-        ajax
-        .command("set-user-to-document", { id: self.appId, documentId: self.docId, userId: userId, path: myNs, collection: self.getCollection() })
-        .success(function () {
-          save(event, function () { repository.load(self.appId); });
-        })
-        .call();
-      }
-      return false;
-    };
+    if (authorizationModel.ok("set-user-to-document")) {
+      select.onchange = function (e) {
+        var event = getEvent(e);
+        var target = event.target;
+        var userId = target.value;
+        if (!_.isEmpty(userId)) {
+          ajax
+          .command("set-user-to-document", { id: self.appId, documentId: self.docId, userId: userId, path: myNs, collection: self.getCollection() })
+          .success(function () {
+            save(event, function () { repository.load(self.appId); });
+          })
+          .call();
+        }
+        return false;
+      };
+    } else {
+      select.disabled = true;
+    }
     option.value = "";
     option.appendChild(document.createTextNode(loc("selectone")));
     if (selectedOption === "") {
@@ -1082,22 +1087,24 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     span.appendChild(select);
 
     // new invite
-    var button =
-      $("<button>", {
-        "class": "icon-remove btn-primary",
-        text: loc("personSelector.invite"),
-        click: function () {
-          $("#invite-document-name").val(self.schemaName).change();
-          $("#invite-document-path").val(myNs).change();
-          $("#invite-document-id").val(self.docId).change();
-          LUPAPISTE.ModalDialog.open("#dialog-valtuutus");
-          return false;
-        }
-      });
-    if (options && options.dataTestSpecifiers) {
-      button.attr("data-test-id", "application-invite-" + self.schemaName);
+    if (authorizationModel.ok("invite-with-role")) {
+      var button =
+        $("<button>", {
+          "class": "icon-remove btn-primary",
+          text: loc("personSelector.invite"),
+          click: function () {
+            $("#invite-document-name").val(self.schemaName).change();
+            $("#invite-document-path").val(myNs).change();
+            $("#invite-document-id").val(self.docId).change();
+            LUPAPISTE.ModalDialog.open("#dialog-valtuutus");
+            return false;
+          }
+        });
+      if (options && options.dataTestSpecifiers) {
+        button.attr("data-test-id", "application-invite-" + self.schemaName);
+      }
+      button.appendTo(span);
     }
-    button.appendTo(span);
 
     return span;
   }
