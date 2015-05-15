@@ -294,8 +294,9 @@
       (fail :error.unknown))
 
     (when-not (nil? processed-tempfile)
-      (when-not (attachment/attach-file! (assoc attachment-data :content processed-tempfile))
-        (fail :error.unknown)))))
+      (let [new-filename (str (ss/substring filename 0 (- (count filename) 4)) "-PDFA.pdf")]
+        (when-not (attachment/attach-file! (assoc attachment-data :content processed-tempfile :filename new-filename))
+        (fail :error.unknown))))))
 
 
 ;;
