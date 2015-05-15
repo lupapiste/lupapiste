@@ -473,9 +473,10 @@
 ;;
 
 (defcommand register-user
-  {:parameters [stamp email password street zip city phone]
+  {:parameters [stamp email password street zip city phone allowDirectMarketing rakentajafi]
    :user-roles #{:anonymous}
    :input-validators [(partial action/non-blank-parameters [:email :password :stamp :street :zip :city :phone])
+                      (partial action/boolean-parameters [:allowDirectMarketing :rakentajafi])
                       action/email-validator]}
   [{data :data}]
   (let [vetuma-data (vetuma/get-user stamp)
@@ -484,12 +485,12 @@
     (try
       (infof "Registering new user: %s - details from vetuma: %s" (dissoc data :password) vetuma-data)
       (if-let [user (create-new-user nil (merge
-                                           (dissoc data :personId)
                                            (set/rename-keys vetuma-data {:userid :personId})
+                                           (select-keys data [:password :street :zip :city :phone :allowDirectMarketing])
                                            {:email email :role "applicant" :enabled false}))]
         (do
           (vetuma/consume-user stamp)
-          (when (:rakentajafi data)
+          (when rakentajafi
             (util/future* (idf/send-user-data user "rakentaja.fi")))
           (ok :id (:id user)))
         (fail :error.create-user))
