@@ -250,10 +250,26 @@
     this.canStartEdit  = ko.computed(function() { return !this.edit() && parent.isAdmin(); }, this);
     this.changed       = ko.computed(function() { return !_.isEqual(unObservableize(this.fieldNames, this.model()), this.saved()); }, this);
     this.canSubmit     = ko.computed(function() { return this.edit() && this.model.isValid() && this.changed(); }, this);
-    this.accountTypes  = ko.observableArray(LUPAPISTE.config.accountTypes);
+    this.accountTypes  = ko.observableArray();
   }
 
+  CompanyInfo.prototype.setAccountTypeOptionDisable = function(option, item) {
+    ko.applyBindingsToNode(option, {disable: item ? item.disable : false}, item);
+  };
+
+  CompanyInfo.prototype.updateAccountTypes = function(company) {
+    var currentAccountType = _.findWhere(LUPAPISTE.config.accountTypes, {name: company.accountType});
+    var mappedAccountTypes = _.map(LUPAPISTE.config.accountTypes, function(type) {
+      type.disable = ko.observable(currentAccountType ? type.limit < currentAccountType.limit : false);
+      type.displayName = loc("register.company." + type.name + ".title") + " - " + loc("register.company." + type.name + ".price");
+      return type;
+    });
+    this.accountTypes([]);
+    this.accountTypes(mappedAccountTypes);
+  };
+
   CompanyInfo.prototype.update = function(company) {
+    this.updateAccountTypes(company);
     updateObservables(this.fieldNames, this.model(), company);
     return this
       .edit(false)

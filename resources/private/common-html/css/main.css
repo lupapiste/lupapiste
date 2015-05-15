@@ -6132,6 +6132,11 @@ td.comment-text {
   color: #f39129;
 }
 
+/* line 38, ../sass/views/_company.scss */
+.account-type-selector {
+  display: block;
+}
+
 /* line 1, ../sass/views/_attachment_multiselect.scss */
 div.nav-back-container {
   overflow: auto;
