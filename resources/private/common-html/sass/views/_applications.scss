@@ -122,7 +122,6 @@
 .invitations {
   margin-bottom: $baseline;
   .invitation {
-    margin: $marginS 0 $marginS 0;
     display: table-row;
     span {
       margin-right: $marginM;
@@ -135,10 +134,16 @@
       }
     }
     p {
+      max-width: $breakpoint5;
       margin-bottom: $marginS;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     h3 {
+      max-width: $breakpoint5;
       margin-top: $marginM;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
   }
 }
