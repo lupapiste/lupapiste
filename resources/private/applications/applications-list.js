@@ -53,7 +53,7 @@
       window.location = "#!/create-part-1";
       };
     self.createWithPrevPermit = function() {
-      hub.send("track-click", {category:"Applications", label:"create", event:"createWithPrevPermit"}); 
+      hub.send("track-click", {category:"Applications", label:"create", event:"createWithPrevPermit"});
       window.location = "#!/create-page-prev-permit";
       };
 
@@ -87,17 +87,17 @@
     self.approveInvite = function(model) {
       hub.send("track-click", {category:"Applications", label:"", event:"approveInvite"});
       ajax
-        .command("approve-invite", {id: model.application})
+        .command("approve-invite", {id: model.application.id})
         .success(self.updateInvites)
         .call();
       return false;
     };
 
-    var acceptDecline = function(applicationId) {
+    var acceptDecline = function(application) {
       hub.send("track-click", {category:"Applications", label:"", event:"declineInvite"});
         return function() {
             ajax
-            .command("decline-invitation", {id: applicationId})
+            .command("decline-invitation", {id: application.id})
             .success(reload)
             .call();
             return false;
