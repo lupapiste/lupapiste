@@ -11,9 +11,9 @@
           <span data-bind="text: text"></span>
           <span data-bind="dateString: created"></span>
           <span data-bind="fullName: inviter"></span>
-          <button data-bind="ltext: 'applications.openApplication', click: function() { window.location.hash = '!/application/' + application.id; }" class="btn btn-primary"></button>
+          <button data-bind="ltext: 'applications.openApplication', click: function() { window.location.hash = '!/application/' + application.id; }" class="btn btn-primary" data-test-id="open-application-button"></button>
           <button data-bind="ltext: 'applications.approveInvite', click: $root.approveInvite" class="btn btn-primary" data-test-id="accept-invite-button"></button>
-          [<a data-bind="ltext: 'applications.declineInvite', click: $root.declineInvite" class="link-action" data-test-id="decline-invite-button"></a>]
+          [<a data-bind="ltext: 'applications.declineInvite', click: $root.declineInvite" data-test-id="decline-invite-button"></a>]
         </div>
       </div>
     </div>
