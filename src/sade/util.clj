@@ -297,10 +297,12 @@
   (into m (filter #(->> % val not-empty-or-nil?) (apply hash-map kvs))))
 
 (defn finnish-y? [y]
+  (if y
   (if-let [[_ number check] (re-matches #"(\d{7})-(\d)" y)]
     (let [cn (mod (reduce + (map * [7 9 10 5 8 4 2] (map #(Long/parseLong (str %)) number))) 11)
           cn (if (zero? cn) 0 (- 11 cn))]
-      (= (Long/parseLong check) cn))))
+        (= (Long/parseLong check) cn)))
+    false))
 
 (defn y? [y]
   (cond

@@ -208,12 +208,12 @@
   (assoc-when {:a nil :b :b} :a :a, :b nil, :c :c)
   => {:a :a, :b :b, :c :c})
 
-(facts y?
-  (fact (y? nil)           => falsey)
-  (fact (y? "")            => falsey)
-  (fact (y? "foo")         => falsey)
-  (fact (y? "2341529-4")   => falsey)
-  (fact (y? "2341528-4")   => truthy))
+(facts finnish-y?
+  (fact (finnish-y? nil)           => falsey)
+  (fact (finnish-y? "")            => falsey)
+  (fact (finnish-y? "foo")         => falsey)
+  (fact (finnish-y? "2341529-4")   => falsey)
+  (fact (finnish-y? "2341528-4")   => truthy))
 
 (facts finnish-ovt?
   (fact (finnish-ovt? nil)             => falsey)
