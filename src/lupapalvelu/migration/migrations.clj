@@ -944,9 +944,6 @@
   {:apply-when (pos? (mongo/count :companies {:accountType {$exists false}}))}
   (mongo/update-n :companies {:accountType {$exists false}} {$set {:accountType "account15"}} :multi true))
 
-
-;{"003701011385 OKOYFIHH"                ???}
-;{"003715482348"                         ???}
 (def invoicing-operator-mapping
   {"003701274855102 OKOYFIHH" "OKOYFIHH"
    "0036714377140" "003714377140"
@@ -979,7 +976,9 @@
    "Tieto Oyj" "003701011385"
    "dabafihh" "DABAFIHH"
    "enfo" "003714377140"
-   "logica 00370357502" "003703575029"})
+   "logica 00370357502" "003703575029"
+   "003701011385 OKOYFIHH" "OKOYFIHH" ; Ilkka to confirm if this is the correct mapping
+   })
 
 (defmigration convert-invoicing-operator-values-from-documents
   (let [old-op-names (keys invoicing-operator-mapping)
