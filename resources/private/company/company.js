@@ -243,7 +243,7 @@
       zip:          ko.observable().extend(notRequired),
       country:      ko.observable().extend(notRequired),
       ovt:          ko.observable().extend(notRequired).extend({ovt: true}),
-      pop:          ko.observable().extend(notRequired).extend({ovt: true})
+      pop:          ko.observable().extend(notRequired)
     });
     this.defaults = {
       name: undefined,
