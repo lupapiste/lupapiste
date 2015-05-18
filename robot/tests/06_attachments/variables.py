@@ -10,11 +10,6 @@ JPG_TESTFILE_CONTENT = ''
 JPG_TESTFILE_DESCRIPTION = "attachment-jpg-foo"
 JPG_TESTFILE_PATH = os.path.join(os.path.expanduser('~'), JPG_TESTFILE_NAME)
 
-PDF_TESTFILE_NAME = 'robotframework-testfile-05_application_editing.pdf'
-PDF_TESTFILE_CONTENT = '1234'
-PDF_TESTFILE_DESCRIPTION = "attachment-pdf-foo"
-PDF_TESTFILE_PATH = os.path.join(os.path.expanduser('~'), PDF_TESTFILE_NAME)
-
 def createFile(path, content):
     if not os.path.isfile(path):
         fp = open(path, 'w')
@@ -23,4 +18,4 @@ def createFile(path, content):
 
 createFile(TXT_TESTFILE_PATH, TXT_TESTFILE_CONTENT)
 createFile(JPG_TESTFILE_PATH, JPG_TESTFILE_CONTENT)
-createFile(PDF_TESTFILE_PATH, PDF_TESTFILE_CONTENT)
+

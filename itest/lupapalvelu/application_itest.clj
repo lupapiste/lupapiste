@@ -369,7 +369,7 @@
                       [:verkkolaskutustieto :ovtTunnus]
                       [:verkkolaskutustieto :valittajaTunnus]
                       [:yhteyshenkilo :henkilotiedot :etunimi]]]
-          (check path) => "")))
+          (check path) => ss/blank?)))
 
     (let [resp (invite-company-and-accept-invitation pena app-id "solita")]
       (:status resp) => 200)

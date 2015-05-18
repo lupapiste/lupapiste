@@ -479,6 +479,32 @@ LUPAPISTE.ApplicationModel = function() {
       .call();
   };
 
+  function focusOnElement(id, retryLimit) {
+    var targetElem = document.getElementById(id);
+
+    if (!retryLimit || !targetElem) {
+      if (targetElem) {
+        // last chance: hope that the browser scrolls to somewhere near the focused element.
+        targetElem.focus();
+      }
+      // no more retries and no element: give up
+      return;
+    }
+
+    var offset = $(targetElem).offset();
+
+    if (!offset || offset.left === 0) {
+      // Element is not yet visible, wait for a short moment.
+      // Because of the padding, offset left is never zero when
+      // the element is visible.
+      setTimeout(_.partial(focusOnElement, id, --retryLimit), 5);
+    } else {
+      var navHeight = $("nav").first().height() || 0;
+      window.scrollTo(0, offset.top - navHeight - 30);
+      targetElem.focus();
+    }
+  }
+
   self.targetTab.subscribe(function(target) {
     if (target.tab === "requiredFieldSummary") {
       ajax
@@ -491,11 +517,8 @@ LUPAPISTE.ApplicationModel = function() {
     }
     window.location.hash = "!/application/" + self.id() + "/" + target.tab;
     if (target.id) {
-      // The Nayta-links in "Puuttuvat pakolliset tiedot"-list do not work properly without using
-      // the setTimeout function with 0 time here.
-      setTimeout(function() {
-        window.scrollTo(0, $("#" + target.id).offset().top - 60);
-      }, 0);
+      var maxRetries = 10; // quite arbitrary, might need to increase for slower browsers
+      focusOnElement(target.id, maxRetries);
     }
   });
 

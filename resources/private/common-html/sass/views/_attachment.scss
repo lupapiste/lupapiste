@@ -255,3 +255,11 @@ td.comment-text {
     }
   }
 }
+
+.upload-instructions {
+  p {
+    line-height: normal;
+    margin-bottom: $marginM;
+  }
+  margin-bottom: $marginL;
+}

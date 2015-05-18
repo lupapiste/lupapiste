@@ -94,8 +94,11 @@
 (defn has-auth? [{auth :auth} user-id]
   (or (some (partial = user-id) (map :id auth)) false))
 
-(defn get-auth [{auth :auth} user-id]
-  (some #(when (= (:id %) user-id) %) auth))
+(defn get-auths [{auth :auth} user-id]
+  (filter #(= (:id %) user-id) auth))
+
+(defn get-auth [application user-id]
+  (first (get-auths application user-id)))
 
 (defn has-auth-role? [{auth :auth} user-id role]
   (has-auth? {:auth (get-auths-by-role {:auth auth} role)} user-id))
