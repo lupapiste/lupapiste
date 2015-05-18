@@ -70,7 +70,7 @@
       (let [Verkkolaskutus (xml/select lp-xml [:maksajatieto :Maksaja :Verkkolaskutus])
             test-values {:ovtTunnus         "003712345671"
                          :verkkolaskuTunnus "verkkolaskuTunnus"
-                         :valittajaTunnus   "valittajatunnus"}]
+                         :valittajaTunnus   "BAWCFI22"}]
 
         (doseq [[k v] test-values]
           (xml/get-text Verkkolaskutus [k]) => v)))

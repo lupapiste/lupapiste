@@ -255,6 +255,11 @@ $spritegrid: 100px;
     width: 16px;
     height: 16px;
   }
+  &.help-new {
+    background-position: 0px -6300px;
+    width: 24px;
+    height: 24px;
+  }
 
   //states
   &:hover {

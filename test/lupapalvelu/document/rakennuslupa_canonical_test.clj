@@ -133,7 +133,7 @@
                          {:verkkolaskutustieto
                            {:ovtTunnus {:value "003712345671"}
                            :verkkolaskuTunnus {:value "laskutunnus-1234"}
-                           :valittajaTunnus {:value "valittajatunnus-1234"}}})}})
+                           :valittajaTunnus {:value "BAWCFI22"}}})}})
 
 (def- tyonjohtaja
   {:id "tyonjohtaja"
@@ -628,7 +628,7 @@
 (defn- validate-einvoice [einvoice]
   (fact "ovt-tunnus" (:ovtTunnus einvoice) => "003712345671")
   (fact "verkkolaskuTunnus" (:verkkolaskuTunnus einvoice) => "laskutunnus-1234")
-  (fact "valittajaTunnus" (:valittajaTunnus einvoice) => "valittajatunnus-1234"))
+  (fact "valittajaTunnus" (:valittajaTunnus einvoice) => "BAWCFI22"))
 
 (facts "Canonical maksaja/yritys model is correct"
   (let [osapuoli (tools/unwrapped (:data maksaja-yritys))

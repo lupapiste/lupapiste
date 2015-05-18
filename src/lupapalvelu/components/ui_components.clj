@@ -23,22 +23,22 @@
               :name "jquery"})
 
 (defn- conf []
-  (let [js-conf {:maps                (env/value :maps)
-                 :analytics           (env/value :analytics)
-                 :fileExtensions      mime/allowed-extensions
-                 :passwordMinLength   (env/value :password :minlength)
-                 :mode                env/mode
-                 :build               (:build-number env/buildinfo)
-                 :cookie              (env/value :cookie)
-                 :wannaJoinUrl        (env/value :oir :wanna-join-url)
-                 :userAttachmentTypes (map #(str "osapuolet." (name %)) attachment-types-osapuoli)
-                 :attachmentScales    attachment-scales
-                 :attachmentSizes     attachment-sizes
-                 :accountTypes        company/account-types
-                 :eInvoiceOperators (map :name schemas/e-invoice-operators)
-                 :postVerdictStates lupapalvelu.application-meta-fields/post-verdict-states
-                 :stampableMimes (filter identity (map mime/mime-types file-types))
-                 :foremanRoles (:body (first lupapalvelu.document.schemas/kuntaroolikoodi-tyonjohtaja))
+  (let [js-conf {:maps                  (env/value :maps)
+                 :analytics             (env/value :analytics)
+                 :fileExtensions        mime/allowed-extensions
+                 :passwordMinLength     (env/value :password :minlength)
+                 :mode                  env/mode
+                 :build                 (:build-number env/buildinfo)
+                 :cookie                (env/value :cookie)
+                 :wannaJoinUrl          (env/value :oir :wanna-join-url)
+                 :userAttachmentTypes   (map #(str "osapuolet." (name %)) attachment-types-osapuoli)
+                 :attachmentScales      attachment-scales
+                 :attachmentSizes       attachment-sizes
+                 :accountTypes          company/account-types
+                 :eInvoiceOperators     schemas/e-invoice-operators
+                 :postVerdictStates     lupapalvelu.application-meta-fields/post-verdict-states
+                 :stampableMimes        (filter identity (map mime/mime-types file-types))
+                 :foremanRoles          (:body (first lupapalvelu.document.schemas/kuntaroolikoodi-tyonjohtaja))
                  :foremanReadonlyFields ["luvanNumero", "katuosoite", "rakennustoimenpide", "kokonaisala"]
                  :asianhallintaVersions (util/convert-values ; asianhallinta versions have "ah-" prefix
                                           validator/supported-asianhallinta-versions-by-permit-type
@@ -269,7 +269,8 @@
                         "company-selector/company-selector-model.js"
                         "company-invite/company-invite-model.js"
                         "company-invite/company-invite-dialog-model.js"
-                        "autocomplete/autocomplete-model.js"]
+                        "autocomplete/autocomplete-model.js"
+                        "invoice-operator-selector/invoice-operator-selector-model.js"]
                    :html ["fill-info/fill-info-template.html"
                           "foreman-history/foreman-history-template.html"
                           "foreman-other-applications/foreman-other-applications-template.html"
@@ -289,7 +290,8 @@
                           "company-selector/company-selector-template.html"
                           "company-invite/company-invite-template.html"
                           "company-invite/company-invite-dialog-template.html"
-                          "autocomplete/autocomplete-template.html"]}
+                          "autocomplete/autocomplete-template.html"
+                          "invoice-operator-selector/invoice-operator-selector-template.html"]}
 
    ;; Single Page Apps and standalone components:
    ;; (compare to auth-methods in web.clj)

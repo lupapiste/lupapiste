@@ -42,8 +42,9 @@
               (sc/optional-key :po)          max-64-or-nil
               (sc/optional-key :zip)         max-64-or-nil
               (sc/optional-key :country)     max-64-or-nil
-              (sc/optional-key :ovt)         (sc/pred util/finnish-ovt? "Not valid OVT code")
-              (sc/optional-key :pop)         (sc/pred util/finnish-ovt? "Not valid OVT code") ; FIXME LPK-350
+              (sc/optional-key :ovt)         (sc/pred util/finnish-ovt? "Not a valid OVT code")
+              (sc/optional-key :pop)         (sc/either (sc/pred util/supported-invoice-operator? "Not a supported invoice operator")
+                                                        (sc/pred ss/blank?))
               (sc/optional-key :process-id)  sc/Str
               (sc/optional-key :created)     sc/Int
               })
