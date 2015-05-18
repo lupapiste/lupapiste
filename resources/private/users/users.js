@@ -1,10 +1,21 @@
 var users = (function($) {
   "use strict";
 
-  function toLoc(data) { return loc(data); }
   function toActive(data) { return loc(["users.data.enabled", data]); }
-  function toOrgs(data) { return data ? data.join(", ") : ""; }
   function rowCreated(row, data) { $(row).attr("data-user-email", data[0]); }
+
+  function toLocalizedOrgAuthz(data) {
+    if (_.isObject(data)) {
+      return _.map(data, function(roles, org) {
+        var localizedRoles = _.map(roles, function(role) {
+          return loc(role);
+        });
+        return "<b>" + org + ":</b> " + localizedRoles.join(", ");
+      }).join(", ");
+    } else {
+      return loc(data);
+    }
+  }
 
   function UsersModel(component, opts) {
     var self = this;
@@ -52,10 +63,9 @@ var users = (function($) {
       return {user: user,
               0: user.email,
               1: user.lastName + " " + user.firstName,
-              2: user.role,
-              3: user.organizations ? user.organizations : [],
-              4: user.enabled,
-              5: ""}; // column 5 will be set by toOps
+              2: user.orgAuthz ? user.orgAuthz : user.role,
+              3: user.enabled,
+              4: ""}; // column 4 will be set by toOps
     };
 
     self.processResults = function(r) {
@@ -118,11 +128,10 @@ var users = (function($) {
       bProcessing:      true, // don't hide this, it brakes layout.
       bServerSide:      true,
       sAjaxSource:      "",
-      aoColumnDefs:     [{aTargets: [1,2,3,4,5], bSortable: false},
-                         {aTargets: [2], mRender: toLoc},
-                         {aTargets: [3], mRender: toOrgs},
-                         {aTargets: [4], mRender: toActive},
-                         {aTargets: [5], fnCreatedCell: self.toOps}],
+      aoColumnDefs:     [{aTargets: [1,2,3,4], bSortable: false},
+                         {aTargets: [2], mRender: toLocalizedOrgAuthz},
+                         {aTargets: [3], mRender: toActive},
+                         {aTargets: [4], fnCreatedCell: self.toOps}],
       aaSorting:        [[0, "desc"]],
       sDom:             "<t><<r><p><i><l>>", // <'table-filter' f>
       iDisplayLength:   10,

@@ -39,7 +39,7 @@
          (assoc-in [:linkPermitData 0 :lupapisteId] link-permit-app-id)
          (assoc-in [:linkPermitData 0 :id] kuntalupatunnus)
          (assoc-in [:linkPermitData 0 :type] "kuntalupatunnus"))
-      (if (and (foreman/foreman-app? application) (some #{(keyword (:state link-permit-app))} meta-fields/post-sent-states))
+      (if (and (foreman/foreman-app? application) (some #{(keyword (:state link-permit-app))} meta-fields/post-submitted-states))
         application
         (do
           (error "Not able to get a kuntalupatunnus for the application  " (:id application) " from it's link permit's (" link-permit-app-id ") verdict."
@@ -83,7 +83,7 @@
         app-updates (merge
                       {:modified created
                        :sent created
-                       :authority (if (seq (:authority application)) (:authority application) (user/summary user))} ; LUPA-1450
+                       :authority (if (domain/assigned? application) (:authority application) (user/summary user))} ; LUPA-1450
                       (if (or jatkoaika-app? foreman-notice?)
                         {:state :closed :closed created}
                         {:state :sent}))
@@ -216,15 +216,15 @@
   [{:keys [application created user]:as command}]
   (let [application (meta-fields/enrich-with-link-permit-data application)
         application (if-let [kuntalupatunnus (fetch-linked-kuntalupatunnus application)]
-                      (update-in application 
-                                 [:linkPermitData] 
+                      (update-in application
+                                 [:linkPermitData]
                                  conj {:id kuntalupatunnus
                                        :type "kuntalupatunnus"})
                       application)
         submitted-application (mongo/by-id :submitted-applications id)
         app-updates {:modified created
                      :sent created
-                     :authority (if (seq (:authority application)) (:authority application) (user/summary user))
+                     :authority (if (domain/assigned? application) (:authority application) (user/summary user))
                      :state :sent}
         organization (organization/get-organization (:organization application))
         indicator-updates (application/mark-indicators-seen-updates application user created)

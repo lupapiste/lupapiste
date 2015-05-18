@@ -46,11 +46,11 @@
 
   (fact (validate-create-new-user! {:role "applicant"}      {:role "authority" :email "x"}) => forbidden)
   (fact (validate-create-new-user! {:role "authority"}      {:role "authority" :email "x"}) => forbidden)
-  (fact (validate-create-new-user! {:role "authorityAdmin" :organizations ["o"]} {:role "authority" :email "x" :organization "o"}) => truthy)
-  (fact (validate-create-new-user! {:role "authorityAdmin" :organizations ["o"]} {:role "authority" :email "x" :organization "q"}) => forbidden)
+  (fact (validate-create-new-user! {:role "authorityAdmin" :orgAuthz {:o "authorityAdmin"}} {:role "authority" :email "x" :orgAuthz {:o ["authority"]}}) => truthy)
+  (fact (validate-create-new-user! {:role "authorityAdmin" :orgAuthz {:o "authorityAdmin"}} {:role "authority" :email "x" :orgAuthz {:q ["authority"]}}) => forbidden)
   (fact (validate-create-new-user! {:role "admin"}          {:role "authority" :email "x"}) => forbidden)
-  (fact (validate-create-new-user! {:role "admin"}          {:role "authorityAdmin" :email "x" :organization "o"}) => truthy)
-  (fact (validate-create-new-user! {:role "admin"}          {:role "authorityAdmin" :email "x" :organization "other"}) => (fails-with :error.organization-not-found))
+  (fact (validate-create-new-user! {:role "admin"}          {:role "authorityAdmin" :email "x" :orgAuthz {:o ["authorityAdmin"]}}) => truthy)
+  (fact (validate-create-new-user! {:role "admin"}          {:role "authorityAdmin" :email "x" :orgAuthz {:other ["authorityAdmin"]}}) => (fails-with :error.organization-not-found))
 
   (fact (validate-create-new-user! {:role "applicant"}      {:role "applicant" :email "x"}) => forbidden)
   (fact (validate-create-new-user! {:role "authority"}      {:role "applicant" :email "x"}) => forbidden)
@@ -58,17 +58,17 @@
   (fact (validate-create-new-user! {:role "admin"}          {:role "applicant" :email "x"}) => forbidden)
   (fact (validate-create-new-user! nil                      {:role "applicant" :email "x"}) => truthy)
 
-  (fact (validate-create-new-user! {:role "authorityAdmin" :organizations ["o"]} {:role "dummy" :email "x" :organization "o"}) => forbidden)
+  (fact (validate-create-new-user! {:role "authorityAdmin" :orgAuthz {:o ["authorityAdmin"]}} {:role "dummy" :email "x" :orgAuthz {:o ["authority"]}}) => forbidden)
 
   (fact "not even admin can create another admin"
     (validate-create-new-user! {:role "admin"} {:role "admin" :email "x"}) => (fails-with :error.invalid-role))
 
   (fact "authorityAdmin can create authority users to her own organization only"
-    (fact (validate-create-new-user! {:role "authorityAdmin"}                      {:role "authority" :organization "x" :email "x"}) => forbidden)
-    (fact (validate-create-new-user! {:role "authorityAdmin" :organizations nil}   {:role "authority" :organization "x" :email "x"}) => forbidden)
-    (fact (validate-create-new-user! {:role "authorityAdmin" :organizations []}    {:role "authority" :organization "x" :email "x"}) => forbidden)
-    (fact (validate-create-new-user! {:role "authorityAdmin" :organizations ["y"]} {:role "authority" :organization "x" :email "x"}) => forbidden)
-    (fact (validate-create-new-user! {:role "authorityAdmin" :organizations ["x"]} {:role "authority" :organization "x" :email "x"}) => truthy))
+    (fact (validate-create-new-user! {:role "authorityAdmin"}                 {:role "authority" :orgAuthz {:x ["authority"]} :email "x"}) => forbidden)
+    (fact (validate-create-new-user! {:role "authorityAdmin" :orgAuthz nil}   {:role "authority" :orgAuthz {:x ["authority"]} :email "x"}) => forbidden)
+    (fact (validate-create-new-user! {:role "authorityAdmin" :orgAuthz {}}    {:role "authority" :orgAuthz {:x ["authority"]} :email "x"}) => forbidden)
+    (fact (validate-create-new-user! {:role "authorityAdmin" :orgAuthz {:y "authorityAdmin"}} {:role "authority" :orgAuthz {:x ["authority"]} :email "x"}) => forbidden)
+    (fact (validate-create-new-user! {:role "authorityAdmin" :orgAuthz {:x "authorityAdmin"}} {:role "authority" :orgAuthz {:x ["authority"]} :email "x"}) => truthy))
 
   (fact "invalid passwords are rejected"
     (validate-create-new-user! {:role "admin"} {:password "z" :role "dummy" :email "x"}) => (fails-with :password-too-short)
@@ -77,11 +77,6 @@
   (fact "valid passwords are ok"
     (validate-create-new-user! {:role "admin"} {:password "z" :role "dummy" :email "x"}) => truthy
     (provided (security/valid-password? "z") => true))
-
-  (fact "only admin can create users with apikeys"
-    (fact (validate-create-new-user! {:role "admin"} {:role "authorityAdmin" :organization "x" :email "x" :apikey "true"}) => truthy)
-    (fact (validate-create-new-user! {:role "authorityAdmin" :organizations ["x"]} {:role "authority" :organization "x" :email "x"}) => truthy)
-    (fact (validate-create-new-user! {:role "authorityAdmin" :organizations ["x"]} {:role "authority" :organization "x" :email "x" :apikey "true"}) => forbidden))
 
   ))
 ;;
@@ -120,10 +115,10 @@
   (fact "does not contain extra fields"
     (-> (create-new-user-entity {:email "email" :foo "bar"}) :foo) => nil)
 
-  (facts "apikey is created"
-    (fact (-> (create-new-user-entity  {:email "..anything.." :apikey "true"}) :private :apikey) => string?)
+  (facts "apikey is not created"
+    (fact (-> (create-new-user-entity  {:email "..anything.." :apikey "true"}) :private :apikey) => nil?)
     (fact (-> (create-new-user-entity {:email "..anything.." :apikey "false"}) :private) => {})
-    (fact (-> (create-new-user-entity {:email "..anything.." :apikey "foo"}) :private :apikey) => "foo")))
+    (fact (-> (create-new-user-entity {:email "..anything.." :apikey "foo"}) :private :apikey) => nil?)))
 
 ;;
 ;; ==============================================================================
@@ -151,7 +146,7 @@
       (activation/send-activation-mail-for (contains {:email "email" :id ..old-id..})) => nil))
 
   (fact "create new authorityAdmin user, user exists before as dummy user"
-    (create-new-user {:role "admin"} {:email "email" :organization "x" :role "authorityAdmin"}) => ..result..
+    (create-new-user {:role "admin"} {:email "email" :orgAuthz {:x ["authorityAdmin"]} :role "authorityAdmin"}) => ..result..
     (provided
       (user/get-user-by-email "email") =streams=> [{:id ..old-id.. :role "dummy"} ..result..]
       (mongo/by-id :organizations "x") => {:id "x"}
@@ -160,7 +155,7 @@
       (activation/send-activation-mail-for (contains {:email "email" :id ..old-id..})) => nil))
 
   (fact "create new authorityAdmin user, user exists before, but role is not 'dummy'"
-    (create-new-user {:role "admin"} {:email "email" :organization "x" :role "authorityAdmin"}) => (fails-with :error.duplicate-email)
+    (create-new-user {:role "admin"} {:email "email" :orgAuthz {:x ["authorityAdmin"]} :role "authorityAdmin"}) => (fails-with :error.duplicate-email)
     (provided
       (user/get-user-by-email "email") => {:id ..old-id.. :role "authorityAdmin"} :times 1
       (mongo/by-id :organizations "x") => {:id "x"}

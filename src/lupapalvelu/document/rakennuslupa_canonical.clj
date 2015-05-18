@@ -21,7 +21,7 @@
      (merge {:muutostapa (-> huoneisto :muutostapa)
              :huoneluku (-> huoneisto :huoneluku)
              :keittionTyyppi (-> huoneisto :keittionTyyppi)
-             :huoneistoala (-> huoneisto :huoneistoala)
+             :huoneistoala (ss/replace (-> huoneisto :huoneistoala) "," ".")
              :varusteet {:WCKytkin (true? (-> huoneisto :WCKytkin))
                          :ammeTaiSuihkuKytkin (true? (-> huoneisto :ammeTaiSuihkuKytkin))
                          :saunaKytkin (true? (-> huoneisto :saunaKytkin))
@@ -182,6 +182,11 @@
      :created (:created kaupunkikuvatoimenpide-doc)}))
 
 
+(defn get-maalampokaivo [kaupunkikuvatoimenpide-doc application]
+  (util/dissoc-in
+    (get-kaupunkikuvatoimenpide kaupunkikuvatoimenpide-doc application)
+    [:Toimenpide :rakennelmatieto :Rakennelma :kokonaisala]))
+
 (defn- get-toimenpide-with-count [toimenpide n]
   (clojure.walk/postwalk #(if (and (map? %) (contains? % :jarjestysnumero))
                             (assoc % :jarjestysnumero n)
@@ -196,7 +201,8 @@
                                                (map #(get-rakennuksen-muuttaminen-toimenpide % application) (:rakennuksen-muuttaminen-ei-huoneistoja-ei-ominaisuuksia documents))
                                                (map #(get-rakennuksen-laajentaminen-toimenpide % application) (:rakennuksen-laajentaminen documents))
                                                (map #(get-purku-toimenpide % application) (:purkaminen documents))
-                                               (map #(get-kaupunkikuvatoimenpide % application) (:kaupunkikuvatoimenpide documents))))
+                                               (map #(get-kaupunkikuvatoimenpide % application) (:kaupunkikuvatoimenpide documents))
+                                               (map #(get-maalampokaivo % application) (:maalampokaivo documents))))
         toimenpiteet (map get-toimenpide-with-count toimenpiteet (range 1 9999))]
     (not-empty (sort-by :created toimenpiteet))))
 
@@ -305,8 +311,8 @@
                        :osittainen osittainen
                        :lasnaolijat lasnaolijat
                        :pitaja pitaja
-                       :poikkeamat poikkeamat}
-                      (when-not (some #{katselmusTyyppi} ["muu tarkastus" "muu katselmus"]) {:tarkastuksenTaiKatselmuksenNimi task-name})
+                       :poikkeamat poikkeamat
+                       :tarkastuksenTaiKatselmuksenNimi task-name}
                       (when task-id {:muuTunnustieto {:MuuTunnus {:tunnus task-id :sovellus "Lupapiste"}}}) ; v 2.1.3
                       (when (seq buildings)
                         {:rakennustunnus (let [building (-> buildings first :rakennus)]

@@ -2,7 +2,7 @@
   (:require [taoensso.timbre :as timbre :refer [trace debug info infof warn warnf error fatal]]
             [monger.operators :refer :all]
             [schema.core :as sc]
-            [sade.util :refer [min-length-string max-length-string y? ovt? fn-> fn->>]]
+            [sade.util :refer [min-length-string max-length-string account-type? fn-> fn->>] :as util]
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.core :refer :all]
@@ -20,20 +20,33 @@
 ;; Company schema:
 ;;
 
+(def account-types [{:name :account5
+                     :limit 5}
+                    {:name :account15
+                     :limit 15}
+                    {:name :account30
+                     :limit 30}])
+
+(defn user-limit-for-account-type [account-name]
+  (let [account-type (some #(if (= (:name %) account-name) %) account-types)]
+    (:limit account-type)))
+
 (def- max-64-or-nil (sc/either (max-length-string 64) (sc/pred nil?)))
 
 (def Company {:name                          (sc/both (min-length-string 1) (max-length-string 64))
-              :y                             (sc/pred y? "Not valid Y code")
+              :y                             (sc/pred util/finnish-y? "Not valid Y code")
+              :accountType                   (sc/pred account-type? "Not valid account type")
               (sc/optional-key :reference)   max-64-or-nil
               (sc/optional-key :address1)    max-64-or-nil
               (sc/optional-key :address2)    max-64-or-nil
               (sc/optional-key :po)          max-64-or-nil
               (sc/optional-key :zip)         max-64-or-nil
               (sc/optional-key :country)     max-64-or-nil
-              (sc/optional-key :ovt)         (sc/pred ovt? "Not valid OVT code")
-              (sc/optional-key :pop)         (sc/pred ovt? "Not valid OVT code")
+              (sc/optional-key :ovt)         (sc/pred util/finnish-ovt? "Not valid OVT code")
+              (sc/optional-key :pop)         (sc/pred util/finnish-ovt? "Not valid OVT code") ; FIXME LPK-350
               (sc/optional-key :process-id)  sc/Str
-              (sc/optional-key :created)     sc/Int})
+              (sc/optional-key :created)     sc/Int
+              })
 
 (def company-updateable-keys (->> (keys Company)
                                   (map (fn [k] (if (sc/optional-key? k) (:k k) k)))
@@ -107,8 +120,13 @@
    Retuens the updated company."
   [id updates]
   (if (some #{:id :y} (keys updates)) (fail! :bad-request))
-  (let [updated (merge (dissoc (find-company-by-id! id) :id) updates)]
+  (let [company (dissoc (find-company-by-id! id) :id)
+        updated (merge company updates)
+        old-limit (user-limit-for-account-type (keyword (:accountType company)))
+        limit     (user-limit-for-account-type (keyword (:accountType updated)))]
     (sc/validate Company updated)
+    (when (< limit old-limit)
+      (fail! :company.account-type-not-downgradable))
     (mongo/update :companies {:_id id} updated)
     updated))
 
@@ -125,6 +143,23 @@
 ;; Add/invite new company user:
 ;;
 
+(notif/defemail :new-company-admin-user {:subject-key   "new-company-admin-user.subject"
+                                         :recipients-fn notif/from-user
+                                         :model-fn      (fn [model _ __] model)})
+
+(notif/defemail :new-company-user {:subject-key   "new-company-user.subject"
+                                   :recipients-fn notif/from-user
+                                   :model-fn      (fn [model _ __] model)})
+
+(defn add-user-after-company-creation! [user company role]
+  (let [user (update-in user [:email] u/canonize-email)
+        token-id (token/make-token :new-company-user nil {:user user, :company company, :role role} :auto-consume false)]
+    (notif/notify! :new-company-admin-user {:user       user
+                                            :company    company
+                                            :link-fi    (str (env/value :host) "/app/fi/welcome#!/new-company-user/" token-id)
+                                            :link-sv    (str (env/value :host) "/app/sv/welcome#!/new-company-user/" token-id)})
+    token-id))
+
 (defn add-user! [user company role]
   (let [user (update-in user [:email] u/canonize-email)
         token-id (token/make-token :new-company-user nil {:user user, :company company, :role role} :auto-consume false)]
@@ -133,10 +168,6 @@
                                       :link-fi    (str (env/value :host) "/app/fi/welcome#!/new-company-user/" token-id)
                                       :link-sv    (str (env/value :host) "/app/sv/welcome#!/new-company-user/" token-id)})
     token-id))
-
-(notif/defemail :new-company-user {:subject-key   "new-company-user.subject"
-                                   :recipients-fn notif/from-user
-                                   :model-fn      (fn [model _ __] model)})
 
 (defmethod token/handle-token :new-company-user [{{:keys [user company role]} :data} {password :password}]
   (find-company-by-id! (:id company)) ; make sure company still exists
@@ -190,8 +221,6 @@
                  :firstName (:name company)
                  :lastName  "")))
 
-
-
 (defn company-invite [caller application company-id]
   {:pre [(map? caller) (map? application) (string? company-id)]}
   (let [company   (find-company! {:id company-id})
@@ -209,9 +238,9 @@
                        true)]
     (when (pos? update-count)
       (notif/notify! :accept-company-invitation {:admins     admins
-                                      :caller     caller
-                                      :link-fi    (str (env/value :host) "/app/fi/welcome#!/accept-company-invitation/" token-id)
-                                      :link-sv    (str (env/value :host) "/app/sv/welcome#!/accept-company-invitation/" token-id)})
+                                                 :caller     caller
+                                                 :link-fi    (str (env/value :host) "/app/fi/welcome#!/accept-company-invitation/" token-id)
+                                                 :link-sv    (str (env/value :host) "/app/sv/welcome#!/accept-company-invitation/" token-id)})
       token-id)))
 
 (notif/defemail :accept-company-invitation {:subject-key   "accept-company-invitation.subject"

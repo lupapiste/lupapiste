@@ -25,7 +25,17 @@
 
         <div data-bind="visible: tabs.visible('info')">
           <div data-bind="with: info">
-
+            <div class="form-entry account-type-selector">
+              <label class="form-label" for="account-type" data-bind="ltext: 'register.company.form.accountType'"></label>
+              <select name="account-type"
+                      class="form-input combobox"
+                      data-bind="options: accountTypes,
+                                 optionsText: 'displayName',
+                                 optionsValue: 'name',
+                                 value: model().accountType,
+                                 optionsAfterRender: setAccountTypeOptionDisable,
+                                 enable: edit"></select>
+            </div>
             <div class="form-entry">
               <label class="form-label tip" data-bind="ltext: 'register.company.form.companyName'"></label>
               <input class="form-input text" data-bind="textInput: model().name, enable: edit" type="text"/>
@@ -136,7 +146,14 @@
             </tbody>
           </table>
           <div data-bind="visible: isAdmin">
-            <button data-bind="click: openNewUser, ltext: 'register.company.add-user.open'" class="btn btn-primary" data-test-id="company-add-user"></button>
+            <button class="btn btn-primary"
+                    data-test-id="company-add-user"
+                    data-bind="click: openNewUser,
+                               ltext: 'register.company.add-user.open',
+                               enable: lupapisteApp.models.globalAuthModel.ok('company-add-user')" ></button>
+            <span class="user-limit-reached"
+                  data-bind="ltext: 'register.company.user-limit.reached',
+                             visible: isAdmin && !lupapisteApp.models.globalAuthModel.ok('company-add-user')"></span>
           </div>
         </div>
       </div>

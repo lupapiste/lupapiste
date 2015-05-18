@@ -634,6 +634,7 @@
           ; Add current PDF:
           (append-stream zip (i18n/loc "attachment.zip.pdf.filename.current") (pdf-export/generate application lang)))
         (.finish zip)))
+    (debugf "Size of the temporary zip file: %d" (.length temp-file))
     temp-file))
 
 (defn temp-file-input-stream [^File file]

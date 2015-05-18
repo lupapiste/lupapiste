@@ -5,6 +5,7 @@
             [sade.util :refer [dissoc-in postwalk-map strip-nils abs] :as util]
             [sade.core :refer [def-]]
             [sade.strings :as ss]
+            [sade.property :as p]
             [lupapalvelu.migration.core :refer [defmigration]]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
@@ -833,6 +834,115 @@
     change-patevyys-muu-key
     {:documents {$elemMatch {$or [{:data.patevyys.koulutusvalinta.value "muu"}
                                   {:data.patevyys-tyonjohtaja.koulutusvalinta.value "muu"}]}}}))
+
+(defmigration remove-organizations-field-from-dummy-and-applicant
+  {:apply-when (pos? (mongo/count :users {$and [{:organizations {$exists true}} {:role {$in ["dummy", "applicant"]}}]}))}
+  (mongo/update-by-query :users {$and [{:organizations {$exists true}} {:role {$in ["dummy", "applicant"]}}]} {$unset {:organizations 1}}))
+
+(defn organizations->org-authz [coll]
+  (let [users (mongo/select coll {:organizations {$exists true}})]
+    (reduce + 0
+            (for [{:keys [organizations id role]} users]
+              (let [org-authz (into {} (for [org organizations] [(str "orgAuthz." org) [role]]))]
+                (if (empty? org-authz)
+                  (mongo/update-n coll {:_id id} {$set {:orgAuthz {}}
+                                                  $unset {:organizations 1}})
+                  (mongo/update-n coll {:_id id} {$set org-authz
+                                                  $unset {:organizations 1}})))))))
+
+(defmigration add-org-authz
+  {:apply-when (pos? (mongo/count :users {:organizations {$exists true}}))}
+  (organizations->org-authz :users))
+
+(defmigration tyonjohtaja-v1-vastuuaika-cleanup
+  {:apply-when (pos? (mongo/count :applications {:documents {$elemMatch {"schema-info.name" "tyonjohtaja", "data.vastuuaika" {$exists true}}}}))}
+  (update-applications-array
+    :documents
+    (fn [doc]
+      (if (= (-> doc :schema-info :name) "tyonjohtaja")
+        (util/dissoc-in doc [:data :vastuuaika])
+        doc))
+    {:documents {$elemMatch {"schema-info.name" "tyonjohtaja", "data.vastuuaika" {$exists true}}}}))
+
+(defmigration application-authority-default-keys
+  {:apply-when (pos? (mongo/count :applications {:authority.lastName {$exists false}}))}
+  (mongo/update-n :applications {:authority.lastName {$exists false}} {$set {:authority (:authority domain/application-skeleton)}} :multi true))
+
+(defn- rakennustunnus [property-id building-number]
+  (let [parts (rest (re-matches p/db-property-id-pattern property-id))]
+    (apply format "%s-%s-%s-%s %s" (concat parts [building-number]))))
+
+(defn- resolve-new-national-id? [building-number national-id]
+  (and (= 3 (count building-number)) (ss/blank? national-id)))
+
+(defn- find-national-id [application-id property-id building-number]
+  (let [lookup (rakennustunnus property-id building-number)
+        new-id (mongo/select-one :hki_tunnusvastaavuudet {:RAKENNUSTUNNUS lookup})]
+    (if (util/rakennustunnus? (:VTJ_PRT new-id))
+      new-id
+      (println application-id lookup new-id))))
+
+(defn- building-raki-conversion [application-id building]
+  (let [old-id (:buildingId building)
+        national-id (:nationalId building)
+        property-id (:propertyId building)]
+    (if (and (resolve-new-national-id? old-id national-id) (not (.endsWith property-id "00000000")))
+      (if-let [new-id (find-national-id application-id property-id old-id)]
+        (assoc building
+          :buildingId (:VTJ_PRT new-id)
+          :nationalId (:VTJ_PRT new-id)
+          :localId (:KUNNAN_PYSYVA_RAKNRO new-id))
+        building)
+      building)))
+
+(defn- document-raki-conversion [application-id property-id doc]
+  (let [old-id (get-in doc [:data :buildingId :value])
+        national-id (get-in doc [:data :valtakunnallinenNumero :value])]
+    (if (resolve-new-national-id? old-id national-id)
+      (if-let [new-id (find-national-id application-id property-id old-id)]
+        (-> doc
+          (assoc-in [:data :buildingId :value] (:VTJ_PRT new-id))
+          (assoc-in [:data :valtakunnallinenNumero :value] (:VTJ_PRT new-id)))
+        doc)
+      doc)))
+
+(defn- task-raki-conversion [application-id property-id task]
+  (if (empty? (get-in task [:data :rakennus]))
+    task
+    (update-in task [:data :rakennus]
+     #(reduce
+        (fn [m [k v]]
+          (assoc m k
+            (let [old-id (get-in v [:rakennus :rakennusnro :value])
+                  national-id (get-in v [:rakennus :valtakunnallinenNumero :value])]
+              (if (resolve-new-national-id? old-id national-id) ; task has old style short id but no national id
+                (if-let [new-id (find-national-id application-id property-id old-id)]
+                  (assoc-in v [:rakennus :valtakunnallinenNumero :value] (:VTJ_PRT new-id))
+                  v)
+                v)
+              )))
+        {} %))))
+
+(defmigration helsinki-raki
+  (let [query {$and [{:municipality "091"}
+                     {$or [{"buildings.0" {$exists true}}
+                           {"documents.data.buildingId" {$exists true}}
+                           {"tasks.data.rakennus" {$exists true}}]}]}]
+    (doseq [collection [:applications :submitted-applications]
+            {:keys [id buildings documents tasks propertyId]} (mongo/select collection query)]
+      (mongo/update-by-id collection id
+        {$set {:buildings (map (partial building-raki-conversion id) buildings)
+               :documents (map (partial document-raki-conversion id propertyId) documents)
+               :tasks (map (partial task-raki-conversion id propertyId) tasks)}}))))
+
+(defmigration strip-FI-from-y-tunnus
+  {:apply-when (pos? (mongo/count :companies {:y {$regex #"^FI"}}))}
+  (doseq [company (mongo/select :companies {:y {$regex #"^FI"}})]
+    (mongo/update-by-id :companies (:id company) {$set {:y (subs (:y company) 2)}})))
+
+(defmigration company-default-account-type
+  {:apply-when (pos? (mongo/count :companies {:accountType {$exists false}}))}
+  (mongo/update-n :companies {:accountType {$exists false}} {$set {:accountType "account15"}} :multi true))
 
 ;;
 ;; ****** NOTE! ******

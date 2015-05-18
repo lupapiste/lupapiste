@@ -20,7 +20,7 @@ Mikko uploads CV
 Mikko copies his attachments to application
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  Omat-liitteet-${secs}
-  Create application the fast way  ${appname}  753  753-416-25-30  kerrostalo-rivitalo
+  Create application the fast way  ${appname}  753-416-25-30  kerrostalo-rivitalo
   Open tab  attachments
   Select attachment operation option from dropdown  attachmentsCopyOwn
   Confirm  dynamic-yes-no-confirm-dialog
@@ -39,7 +39,7 @@ Copy own attachments button is not shown to non-architect
 
 Save User Data
   Click enabled by test id  save-my-userinfo
-  Wait Until  Element Should be visible  //*[@data-test-id='save-my-userinfo-ok']
+  Wait until  Page should contain  Tallennettu
 
 Wait for Page to Load
   [Arguments]  ${firstName}  ${lastName}

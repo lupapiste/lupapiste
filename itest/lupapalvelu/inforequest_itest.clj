@@ -10,7 +10,7 @@
 (last-email)
 
 (facts "inforequest workflow"
-  (let [{id :id :as resp} (create-app pena :messages ["hello"] :infoRequest true :municipality sonja-muni)]
+  (let [{id :id :as resp} (create-app pena :messages ["hello"] :infoRequest true :propertyId sipoo-property-id)]
 
     resp => ok?
 
@@ -46,12 +46,12 @@
 
 
   (fact "Pena cannot create app for organization that has inforequests disabled"
-  (let [resp  (create-app pena :infoRequest true :municipality "998")]
+  (let [resp  (create-app pena :infoRequest true :propertyId "99800000000000")]
     resp =not=> ok?
     (:text resp) => "error.inforequests-disabled"))
 
   (fact "Pena can cancel inforequest he created"
-    (let [{application-id :id :as resp} (create-app pena :infoRequest true :municipality sonja-muni)]
+    (let [{application-id :id :as resp} (create-app pena :infoRequest true :propertyId sipoo-property-id)]
       resp => ok?
       (command pena :cancel-inforequest :id application-id) => ok?
       (fact "Sonja is also allowed to cancel inforequest"
@@ -61,7 +61,7 @@
   ; Reset emails
   (last-email)
 
-  (let [application-id (create-app-id pena :municipality "433" :infoRequest true :address "OIR")
+  (let [application-id (create-app-id pena :propertyId oir-property-id :infoRequest true :address "OIR")
         application    (query-application pena application-id)
         email          (last-email)
         [url token lang] (re-find #"(?sm)/api/raw/openinforequest\?token-id=([A-Za-z0-9-]+)&lang=([a-z]{2})" (get-in email [:body :plain] ""))

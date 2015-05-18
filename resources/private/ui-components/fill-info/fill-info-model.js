@@ -2,6 +2,8 @@ LUPAPISTE.FillInfoModel = function(params) {
   "use strict";
   var self = this;
 
+  self.authorization = lupapisteApp.models.applicationAuthModel;
+
   self.fillUserInfo = function () {
     ajax
       .command("set-user-to-document", params)

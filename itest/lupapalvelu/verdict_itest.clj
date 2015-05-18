@@ -7,7 +7,7 @@
 (fact* "Give verdict"
   (last-email) ; Inbox zero
 
-  (let [application-id  (create-app-id pena :municipality sonja-muni :address "Paatoskuja 9")
+  (let [application-id  (create-app-id pena :propertyId sipoo-property-id :address "Paatoskuja 9")
         resp            (command pena :submit-application :id application-id) => ok?
         application     (query-application pena application-id)
         email           (last-email) => truthy]
@@ -80,7 +80,7 @@
 (facts* "Fetch verdict from KRYSP backend"
   (last-email) ; Inbox zero
 
-  (let [application (create-and-submit-application mikko :municipality sonja-muni :address "Paatoskuja 17")
+  (let [application (create-and-submit-application mikko :propertyId sipoo-property-id :address "Paatoskuja 17")
         application-id (:id application)
         attachment-count (-> application :attachments count)
         _ (command sonja :check-for-verdict :id application-id) => ok?
@@ -135,7 +135,7 @@
     ))
 
 (fact "Rakennus & rakennelma"
-  (let [application (create-and-submit-application mikko :municipality sonja-muni :address "Paatoskuja 17")
+  (let [application (create-and-submit-application mikko :propertyId sipoo-property-id :address "Paatoskuja 17")
         application-id (:id application)
         _ (command sonja :check-for-verdict :id application-id) => ok?
         application (query-application mikko application-id)

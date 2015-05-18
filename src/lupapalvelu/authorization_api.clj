@@ -132,7 +132,7 @@
   {:parameters [:id]
    :user-roles #{:applicant :authority}
    :user-authz-roles action/default-authz-reader-roles
-   :states     (action/all-application-states-but [:canceled])}
+   :states     action/all-application-states}
   [command]
   (do-remove-auth command (get-in command [:user :username])))
 
@@ -151,7 +151,7 @@
 (defn- manage-unsubscription [{application :application user :user :as command} unsubscribe?]
   (let [username (get-in command [:data :username])]
     (if (or (= username (:username user))
-         (some (partial = (:organization application)) (:organizations user)))
+         (some (partial = (:organization application)) (user/organization-ids-by-roles user #{:authority})))
       (update-application command
         {:auth {$elemMatch {:username username}}}
         {$set {:auth.$.unsubscribed unsubscribe?}})

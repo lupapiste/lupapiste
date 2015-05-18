@@ -10,7 +10,7 @@ Variables       ../06_attachments/variables.py
 
 Mikko creates a new application
   Mikko logs in
-  Create application the fast way  submit-app  753  753-416-25-30  kerrostalo-rivitalo
+  Create application the fast way  submit-app  753-416-25-30  kerrostalo-rivitalo
   Set Suite Variable  ${attachment-not-needed-test-id-hakija-valtakirja}  attachment-not-needed-hakija-valtakirja
   Set Suite Variable  ${attachment-not-needed-test-id-sonja}  attachment-not-needed-muut-muu
   Open to authorities  huba huba

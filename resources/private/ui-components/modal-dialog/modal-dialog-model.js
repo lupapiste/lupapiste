@@ -5,8 +5,8 @@ LUPAPISTE.ModalDialogModel = function () {
   self.showDialog = ko.observable(false);
   self.component = ko.observable();
   self.componentParams = ko.observable();
-  self.windowWidth = ko.observable();
-  self.windowHeight = ko.observable();
+  self.windowWidth = ko.observable().extend({notify: "always"});
+  self.windowHeight = ko.observable().extend({notify: "always"});
   self.dialogVisible = ko.observable(false);
   self.title = ko.observable();
   self.size = ko.observable();
@@ -18,18 +18,38 @@ LUPAPISTE.ModalDialogModel = function () {
   self.showDialog.subscribe(function(show) {
     _.delay(function(show) {
       self.dialogVisible(show);
+      // wait until inner component is rendered and refresh dialog content height
+      setTimeout(function() {
+        self.windowHeight(self.windowHeight());
+      }, 0);
     }, 100, show);
-  });
-
-  self.dialogWidth = ko.pureComputed(function() {
-    return self.windowWidth() - 200;
   });
 
   self.dialogHeight = ko.pureComputed(function() {
     return self.windowHeight() - 150;
+  }).extend({notify: "always"});
+
+  self.dialogHeightPx = ko.pureComputed(function() {
+    return self.dialogHeight() + "px";
+  });
+
+  self.dialogContentHeight = ko.pureComputed(function() {
+    var contentHeight = ($("#modal-dialog-content-component").find(".content").height()) + 36; // add margins
+    var dialogContentHeight = self.dialogHeight() - 135; // remove margins buttons and title
+    return contentHeight < dialogContentHeight ? contentHeight : dialogContentHeight;
+  });
+
+  self.dialogContentHeightPx = ko.pureComputed(function() {
+    return self.dialogContentHeight() + "px";
+  });
+
+  self.dialogTop = ko.pureComputed(function() {
+    var contentHeight = ($("#modal-dialog-content").height());
+    return self.windowHeight() / 2 - (contentHeight + 135) / 2;
   });
 
   self.submitFn = ko.observable(undefined);
+
   self.submitEnabled = ko.observable();
 
   self.submitDialog = function() {
@@ -54,6 +74,10 @@ LUPAPISTE.ModalDialogModel = function () {
 
   hub.subscribe("close-dialog", function() {
     self.closeDialog();
+  });
+
+  hub.subscribe("resize-dialog", function() {
+    setWindowSize(win.width(), win.height());
   });
 
   var setWindowSize = function(width, height) {

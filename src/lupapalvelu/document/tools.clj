@@ -12,9 +12,10 @@
 (defn default-values [{:keys [type default]}]
   (case (keyword type)
     :radioGroup       default
+    :select           default
     :checkbox         false
-    :string           ""
-    :text             ""
+    :string           (or default "")
+    :text             (or default "")
     :fillMyInfoButton nil
     :foremanHistory   nil
     nil))
@@ -39,6 +40,7 @@
                         :email            "example@example.com"
                         :tel              "012 123 4567"
                         :number           "4"
+                        :decimal          "6,9"
                         :digit            "1"
                         :kiinteistotunnus "09100200990013"
                         :zip              "33800"

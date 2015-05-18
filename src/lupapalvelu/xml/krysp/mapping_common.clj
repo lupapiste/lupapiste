@@ -379,6 +379,7 @@
 
 (def liite-children_213 (update-child-element liite-children_211 [:tekija :yritys] yritys_213))
 
+; yht:LausuntoRvPType or yak:LausuntoType
 (def lausunto_211 {:tag :Lausunto
                :child [{:tag :viranomainen :ns "yht"}
                        {:tag :pyyntoPvm :ns "yht"}
@@ -386,7 +387,7 @@
                         :child [{:tag :Lausunto
                                  :child [{:tag :viranomainen}
                                          {:tag :lausunto}
-                                         {:tag :liitetieto ; FIXME lausunnonliitetieto?
+                                         {:tag :liitetieto
                                           :child [{:tag :Liite :child liite-children_211}]}
                                          {:tag :lausuntoPvm}
                                          {:tag :puoltotieto

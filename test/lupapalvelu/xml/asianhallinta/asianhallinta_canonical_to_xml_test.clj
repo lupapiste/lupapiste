@@ -20,6 +20,7 @@
             [sade.core :refer :all]
             [sade.strings :as ss]
             [sade.util :as util]
+            [sade.property :as p]
             [sade.xml :as sxml]))
 
 (mu/testable-privates lupapalvelu.xml.asianhallinta.core begin-of-link)
@@ -96,11 +97,12 @@
       (let [links    (sxml/select1 xml-parsed [:UusiAsia :Viiteluvat])
             content  (sxml/children links)]
         (count content) => 2
-        (fact "Both have Tunnus and Sovellus"
+        (fact "Lupapistetunnus has Tunnus and Sovellus"
           (sxml/get-text (first content) [:Tunnus]) => (get-in application [:linkPermitData 0 :id])
-          (sxml/get-text (first content) [:Sovellus]) => "Lupapiste"
-          (sxml/get-text (second content) [:Tunnus]) => (get-in application [:linkPermitData 1 :id])
-          (sxml/get-text (second content) [:Sovellus]) => "Taustaj\u00E4rjestelm\u00E4")))))
+          (sxml/get-text (first content) [:Sovellus]) => "Lupapiste")
+
+        (fact "Other link permit is in AsianTunnus field"
+          (sxml/get-text (second content) [:AsianTunnus]) => (get-in application [:linkPermitData 1 :id]))))))
 
 (fl/facts* "UusiAsia xml from poikkeus"
   (let [application    (ua-mapping/enrich-application
@@ -222,7 +224,7 @@
         (fact "Sijainti"
           (sxml/get-text xml-parsed [:UusiAsia :Sijainti :Sijaintipiste]) => (str (get-in application [:location :x]) " " (get-in application [:location :y])))
         (fact "Kiinteistotunnus"
-          (sxml/get-text xml-parsed [:UusiAsia :Kiinteistotunnus]) => (util/to-human-readable-property-id (:propertyId application)))))))
+          (sxml/get-text xml-parsed [:UusiAsia :Kiinteistotunnus]) => (p/to-human-readable-property-id (:propertyId application)))))))
 
 (fl/facts* "Application with two multiple documents (Hakija, Maksaja)"
   (let [application    (assoc poikkeus-test/poikkari-hakemus :attachments attachments)

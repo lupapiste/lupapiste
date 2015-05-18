@@ -6,7 +6,7 @@
             [lupapalvelu.user :as user]
             [lupapalvelu.xml.krysp.verdict :as verdict]
             [sade.core :refer [unauthorized]]
-            [sade.strings :refer [lower-case]]
+            [sade.strings :as ss]
             [sade.util :as util]
             [sade.env :as env]))
 
@@ -15,17 +15,18 @@
 ;;
 
 (defn basic-application-query-for [user]
-  (case (keyword (:role user))
-    :applicant    (if-let [company-id (get-in user [:company :id])]
-                    {$or [{:auth.id (:id user)} {:auth.id company-id}]}
-                    {:auth.id (:id user)})
-    :authority    {$or [{:organization {$in (:organizations user)}} {:auth.id (:id user)}]}
-    :rest-api     {:organization {$in (:organizations user)}}
-    :oirAuthority {:organization {$in (:organizations user)}}
-    :trusted-etl {}
-    (do
-      (warnf "invalid role to get applications: user-id: %s, role: %s" (:id user) (:role user))
-      {:_id nil}))) ; should not yield any results
+  (let [organizations (user/organization-ids-by-roles user #{:authority :reader})]
+    (case (keyword (:role user))
+      :applicant    (if-let [company-id (get-in user [:company :id])]
+                      {$or [{:auth.id (:id user)} {:auth.id company-id}]}
+                      {:auth.id (:id user)})
+      :authority    {$or [{:organization {$in organizations}} {:auth.id (:id user)}]}
+      :rest-api     {:organization {$in organizations}}
+      :oirAuthority {:organization {$in organizations}}
+      :trusted-etl {}
+      (do
+        (warnf "invalid role to get applications: user-id: %s, role: %s" (:id user) (:role user))
+        {:_id nil})))) ; should not yield any results
 
 (defn application-query-for [user]
   (merge
@@ -93,8 +94,11 @@
 (defn has-auth? [{auth :auth} user-id]
   (or (some (partial = user-id) (map :id auth)) false))
 
-(defn get-auth [{auth :auth} user-id]
-  (some #(when (= (:id %) user-id) %) auth))
+(defn get-auths [{auth :auth} user-id]
+  (filter #(= (:id %) user-id) auth))
+
+(defn get-auth [application user-id]
+  (first (get-auths application user-id)))
 
 (defn has-auth-role? [{auth :auth} user-id role]
   (has-auth? {:auth (get-auths-by-role {:auth auth} role)} user-id))
@@ -110,6 +114,14 @@
   [command application]
   (when-not (owner-or-write-access? application (-> command :user :id))
     unauthorized))
+
+;;
+;; assignee
+;;
+
+(defn assigned? [{authority :authority :as application}]
+  {:pre [(map? authority)]}
+  (-> authority :id nil? not))
 
 ;;
 ;; documents
@@ -155,7 +167,7 @@
   (map :invite (filter :invite auth)))
 
 (defn invite [application email]
-  (first (filter #(= (lower-case email) (:email %)) (invites application))))
+  (first (filter #(= (ss/lower-case email) (:email %)) (invites application))))
 
 (defn no-pending-invites? [application user-id]
   (not-any? #(= user-id (-> % :user :id)) (invites application)))
@@ -215,7 +227,7 @@
    :applicant                ""
    :attachments              []
    :auth                     []
-   :authority                {}
+   :authority                {:firstName "", :lastName "", :id nil}
    :authorityNotice          ""
    :buildings                []
    :closed                   nil ; timestamp

@@ -61,6 +61,8 @@
 (def pre-verdict-states #{:draft :info :answered :open :submitted :complement-needed})
 (def post-verdict-states (difference all-application-states pre-verdict-states))
 
+(def post-submitted-states #{:sent :complement-needed :verdictGiven :constructionStarted :closed})
+
 (defn all-states-but [drop-states-array]
   (difference all-states (set drop-states-array)))
 
@@ -78,6 +80,9 @@
 (def default-authz-reader-roles (conj default-authz-writer-roles :reader))
 (def all-authz-writer-roles (conj default-authz-writer-roles :statementGiver))
 (def all-authz-roles (conj all-authz-writer-roles :reader))
+
+(def default-org-authz-roles #{:authority})
+(def all-org-authz-roles (conj default-org-authz-roles :authorityAdmin)) ; TODO add TOJ roles here
 
 ;; Notificator
 
@@ -111,6 +116,13 @@
     (filter-params-of-command params command
       (partial some #(or (nil? %) (and (string? %) (s/blank? %))))
       :error.vector-parameters-with-blank-items )))
+
+(defn vector-parameters-with-at-least-n-non-blank-items [n params command]
+  (or
+    (vector-parameters-with-non-blank-items params command)
+    (filter-params-of-command params command
+      #(> n (count %))
+      :error.vector-parameters-with-items-missing-required-keys)))
 
 (defn vector-parameters-with-map-items-with-required-keys [params required-keys command]
   (or
@@ -279,12 +291,14 @@
   (and id user (or application (domain/get-application-as id user true))))
 
 (defn- user-authz? [command-meta-data application user]
-  (let [allowed-roles (get command-meta-data :user-authz-roles #{})]
-    (when-let [role-in-app (keyword (:role (domain/get-auth application (:id user))))]
-     (allowed-roles role-in-app))))
+  (let [allowed-roles (get command-meta-data :user-authz-roles #{})
+        roles-in-app  (map (comp keyword :role) (domain/get-auths application (:id user)))]
+    (some allowed-roles roles-in-app)))
 
-(defn- organization-authz? [command-meta-data application user]
-  (and (user/authority? user) ((set (:organizations user)) (:organization application))))
+(defn- organization-authz? [command-meta-data {organization :organization} user]
+  (let [required-authz (:org-authz-roles command-meta-data)
+        user-org-authz (get-in user [:orgAuthz (keyword organization)])]
+    (and (user/authority? user) (some required-authz user-org-authz))))
 
 (defn- company-authz? [command-meta-data application user]
   (domain/has-auth? application (get-in user [:company :id])))
@@ -298,14 +312,7 @@
                 (organization-authz? meta-data application user)
                 (company-authz? meta-data application user))
 
-     unauthorized)
-      #_(let [meta-data (meta-data command)
-         extra-auth-roles (set (:extra-auth-roles meta-data))]
-         (when-not (or (extra-auth-roles :any)
-                     (domain/owner-or-write-access? application (:id user))
-                     (and (= :authority (keyword (:role user))) ((set (:organizations user)) (:organization application)))
-                     (some #(domain/has-auth-role? application (:id user) %) extra-auth-roles))
-           unauthorized))))
+     unauthorized)))
 
 (defn- not-authorized-to-application [command application]
   (when (-> command :data :id)
@@ -369,8 +376,10 @@
         (fail :error.unknown)))))
 
 (defn execute [{action :action :as command}]
-  (let [response (run command execute-validators true)]
-    (debug action "->" (:ok response))
+  (let [before   (System/currentTimeMillis)
+        response (run command execute-validators true)
+        after    (System/currentTimeMillis)]
+    (debug action "->" (:ok response) "(took" (- after before) "ms)")
     (swap! actions update-in [(keyword action) :call-count] #(if % (inc %) 1))
     response))
 
@@ -390,6 +399,7 @@
   {:parameters  "Vector of parameters. Parameters can be keywords or symbols. Symbols will be available in the action body. If a parameter is missing from request, an error will be raised."
    :user-roles  "Set of user role keywords."
    :user-authz-roles  "Set of application context role keywords."
+   :org-authz-roles "Set of application organization context role keywords"
    :description "Documentation string."
    :notified    "Boolean. Documents that the action will be sending (email) notifications."
    :pre-checks  "Vector of functions."
@@ -416,19 +426,25 @@
 
 
   (let [action-keyword (keyword action-name)
-        {:keys [user-roles user-authz-roles]} meta-data]
+        {:keys [user-roles user-authz-roles org-authz-roles]} meta-data]
 
     (assert (seq user-roles) (str "You must define :user-roles meta data for " action-name ". Use :user-roles #{:anonymous}] to grant access to anyone."))
     (assert (and (set? user-roles) (every? keyword? user-roles)) ":user-roles must be a set of keywords")
 
-  (when user-authz-roles
-    (assert (and (set? user-authz-roles) (every? keyword? user-authz-roles)) ":user-authz-roles must be a set of keywords"))
+    (when user-authz-roles
+      (assert (and (set? user-authz-roles) (every? keyword? user-authz-roles)) ":user-authz-roles must be a set of keywords"))
+
+    (when org-authz-roles
+      (assert (and (set? org-authz-roles) (every? keyword? org-authz-roles)) ":org-authz-roles must be a set of keywords"))
 
     (tracef "registering %s: '%s' (%s:%s)" (name action-type) action-name ns-str line)
     (swap! actions assoc
       action-keyword
       (merge
-        {:user-authz-roles (default-user-authz action-type)}
+        {:user-authz-roles (default-user-authz action-type)
+         :org-authz-roles (cond
+                            (some user-roles [:authority :oirAuthority]) default-org-authz-roles
+                            (user-roles :anonymous) all-org-authz-roles)}
         meta-data
         {:type action-type
          :ns ns-str

@@ -5,31 +5,49 @@
 
     <div class="">
       <form id="own-info-form">
-        <a data-bind="ltext: 'back'" href="#"
-          onclick="javascript:history.go(-1);return false;" class="btn"></a>
+        <a href="#" onclick="javascript:history.go(-1);return false;" class="btn left-align btn-nav-back">
+          <span data-bind="ltext: 'back'"></span>
+          <span class="icon drill-left-black-bigger left-align"></span>
+        </a>
+        <div class="clear"></div>
         <h1 data-bind="ltext: 'mypage.title'"></h1>
         <div data-bind="lhtml:'mypage.desc'" class="page-info"></div>
+
+        <!-- ko ifnot: companyShow -->
+        <div data-bind="if: features.enabled('companyRegistration')">
+          <div class="feature">
+            <h1 data-bind="ltext: 'register.company.header'"></h1>
+            <p data-bind="ltext: 'register.company.info'" class="register-info"></p>
+            <a data-bind="attr: {href: '#!/register-company-account-type'}, ltext: 'register.company.register'"
+               href="#"
+               class="btn btn-primary"
+               data-test-id="logged-user-register-company-start">
+            </a>
+          </div>
+        </div>
+        <!-- /ko -->
+
         <div class="own-info form-group">
           <h2 data-bind="ltext: 'mypage.personalInfo'"></h2>
           <div class="form-entry">
             <label data-bind="ltext: 'userinfo.firstName'"
               for="firstName" class="form-label"></label> <input
               data-bind="textInput: firstName, attr: {placeholder: loc('userinfo.firstName')}"
-              id="firstName" type="text" class="form-input"></input>
+              id="firstName" type="text" class="form-input" maxlength="255"></input>
           </div>
 
           <div class="form-entry">
             <label data-bind="ltext: 'userinfo.lastName'" for="lastName"
               class="form-label"></label> <input
               data-bind="textInput: lastName, attr: {placeholder: loc('userinfo.lastName')}"
-              id="lastName" type="text" class="form-input"></input>
+              id="lastName" type="text" class="form-input" maxlength="255"></input>
           </div>
 
           <div class="form-entry">
             <label data-bind="ltext: 'userinfo.phone'" for="phone"
               class="form-label"></label> <input
               data-bind="textInput: phone, attr: {placeholder: loc('userinfo.phone')}"
-              id="phone" type="text" class="form-input"></input>
+              id="phone" type="text" class="form-input" maxlength="255"></input>
           </div>
 
           <div data-bind="visible: showSimpleCompanyInfo" class="form-entry">
@@ -38,7 +56,7 @@
               for="architect.company.name" class="form-label"></label>
             <input data-bind="value: companyName"
               id="architect.company.name" type="text"
-              class="form-input"></input>
+              class="form-input" maxlength="255"></input>
           </div>
 
           <div data-bind="visible: showSimpleCompanyInfo" class="form-entry">
@@ -47,26 +65,26 @@
               for="architect.company.id" class="form-label"></label>
             <input data-bind="value: companyId"
               id="architect.company.id" type="text"
-              class="form-input"></input>
+              class="form-input" maxlength="255"></input>
           </div>
 
           <div class="form-entry">
             <label data-bind="ltext: 'userinfo.street'" for="street"
               class="form-label"></label> <input
               data-bind="textInput: street, attr: {placeholder: loc('userinfo.street')}"
-              id="street" type="text" class="form-input"></input>
+              id="street" type="text" class="form-input" maxlength="255"></input>
           </div>
           <div class="form-entry">
             <label data-bind="ltext: 'userinfo.zip'" for="zip"
               class="form-label"></label> <input
               data-bind="textInput: zip, attr: {placeholder: loc('userinfo.zip')}"
-              id="zip" type="text" class="form-input"></input>
+              id="zip" type="text" class="form-input" maxlength="5"></input>
           </div>
           <div class="form-entry">
             <label data-bind="ltext: 'userinfo.city'" for="city"
               class="form-label"></label> <input
               data-bind="textInput: city, attr: {placeholder: loc('userinfo.city')}"
-              id="city" type="text" class="form-input"></input>
+              id="city" type="text" class="form-input" maxlength="255"></input>
           </div>
 
             <div class="form-entry allowDirectMarketing-toggle">
@@ -102,7 +120,6 @@
               <button data-bind="click: editCompany, ltext: 'mypage.companyAccount.editInfo'" class="btn btn-primary" data-test-id="company-edit-info"></button>
               <button data-bind="click: editUsers, ltext: 'mypage.companyAccount.editUsers'" class="btn btn-primary" data-test-id="company-edit-users"></button>
             </div>
-
           </div>
         </div>
 
@@ -114,21 +131,21 @@
               <label data-bind="ltext: 'userinfo.architect.degree'"
                 for="architect.degree" class="form-label"></label> <input
                 data-bind="value: degree" id="architect.degree"
-                type="text" class="form-input"></input>
+                type="text" class="form-input" maxlength="255"></input>
             </div>
 
             <div class="form-entry">
               <label data-bind="ltext: 'userinfo.architect.graduatingYear'"
                 for="architect.graduatingYear" class="form-label"></label> <input
                 data-bind="value: graduatingYear" id="architect.graduatingYear"
-                type="text" class="form-input"></input>
+                type="text" class="form-input" maxlength="4"></input>
             </div>
 
             <div class="form-entry">
               <label data-bind="ltext: 'userinfo.architect.fise'"
                 for="architect.fise" class="form-label"></label> <input
                 data-bind="value: fise" id="architect.fise"
-                type="text" class="form-input"></input>
+                type="text" class="form-input" maxlength="255"></input>
             </div>
 
             <div class="form-entry clear">
@@ -171,16 +188,16 @@
           </div>
         </div>
 
-        <button data-bind="ltext: 'save', enable: ok, click: save"
-          type="button" class="btn btn-primary"
-          data-test-id="save-my-userinfo"></button>
-        <p class="context-error"
-          data-bind="visible: error() != null, ltext: error"></p>
-        <span data-bind="visible: !error() && saved, ltext: 'saved'"
-          style="font-weight: bold; color: green;"
-          data-test-id="save-my-userinfo-ok"></span> <img
-          class="own-info-ajax-loader" style="display: none"
-          src="/img/ajax-loader-12.gif" alt="..." width="12" height="12" />
+        <div class="button-group" style="position: relative;">
+          <button data-bind="ltext: 'save', enable: isValid, click: save"
+            type="button" class="btn btn-primary"
+            data-test-id="save-my-userinfo"></button>
+          <span data-bind="saveIndicator: indicator"></span>
+          <img class="own-info-ajax-loader" data-bind="visible: pending"
+               src="/img/ajax-loader-12.gif" alt="..." width="12" height="12"></img>
+          <p class="context-error"
+            data-bind="visible: error() != null, ltext: error"></p>
+        </div>
       </form>
     </div>
 
@@ -212,20 +229,21 @@
               style="color: gray; font-style: italic;"></span>
           </div>
           <div class="clear"></div>
-          <button
-            data-bind="click: save, enable: ok, ltext: 'userinfo.changePassword'"
-            type="button" class="btn btn-primary"
-            data-test-id="change-my-password"></button>
-          <p class="context-error"
-            data-bind="visible: error() != null, ltext: error"
-            class="context-error"></p>
-          <span
-            data-bind="visible: !error() && saved, ltext: 'mypage.passwordChanged'"
-            style="font-weight: bold; color: green;"
-            data-test-id="change-my-passwor-ok"></span> <img
-            class="pw-ajax-loader" style="display: none"
-            src="/img/ajax-loader-12.gif" alt="..." width="12"
-            height="12" />
+
+          <div class="button-group" style="position: relative;">
+            <button
+              data-bind="click: save, enable: ok, ltext: 'userinfo.changePassword'"
+              type="button" class="btn btn-primary"
+              data-test-id="change-my-password">
+            </button>
+            <span data-bind="saveIndicator: indicator"></span>
+            <img class="own-info-ajax-loader" data-bind="visible: pending"
+                 src="/img/ajax-loader-12.gif" alt="..." width="12" height="12"></img>
+            <p class="context-error"
+               data-bind="visible: error() != null, ltext: error"
+               class="context-error">
+            </p>
+          </div>
         </div>
       </form>
     </div>

@@ -13,7 +13,8 @@
             [sade.strings :as ss]
             [sade.xml :as xml]
             [sade.core :refer :all]
-            [lupapalvelu.action :refer [defquery defcommand update-application without-system-keys notify application->command] :as action]
+            [sade.property :as p]
+            [lupapalvelu.action :refer [defraw defquery defcommand update-application without-system-keys notify application->command] :as action]
             [lupapalvelu.mongo :refer [$each] :as mongo]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.domain :as domain]
@@ -234,24 +235,33 @@
 
 (defn find-authorities-in-applications-organization [app]
   (mongo/select :users
-                {:organizations (:organization app) :role "authority" :enabled true}
-                [:firstName :lastName]
+                {(str "orgAuthz." (:organization app)) "authority", :enabled true}
+                user/summary-keys
                 (array-map :lastName 1, :firstName 1)))
 
 (defquery application
-          {:user-roles       #{:applicant :authority :oirAuthority}
-           :states           action/all-states
-           :user-authz-roles action/all-authz-roles
-           :parameters       [:id]}
-          [{app :application user :user}]
-          (if app
-            (let [app (assoc app :allowedAttachmentTypes (attachment/get-attachment-types-for-application app))]
-              (ok :application (post-process-app app user)
-                  :authorities (if (user/authority? user)
-                                 (find-authorities-in-applications-organization app)
-                                 [])
-                  :permitSubtypes (permit/permit-subtypes (:permitType app))))
-            (fail :error.not-found)))
+  {:parameters       [:id]
+   :states           action/all-states
+   :user-roles       #{:applicant :authority :oirAuthority}
+   :user-authz-roles action/all-authz-roles
+   :org-authz-roles #{:authority :reader}}
+  [{app :application user :user}]
+  (if app
+    (let [app (assoc app :allowedAttachmentTypes (attachment/get-attachment-types-for-application app))]
+      (ok :application (post-process-app app user)
+          :authorities (if (user/authority? user)
+                         (map #(select-keys % [:id :firstName :lastName]) (find-authorities-in-applications-organization app))
+                         [])
+          :permitSubtypes (permit/permit-subtypes (:permitType app))))
+    (fail :error.not-found)))
+
+(defquery application-authorities
+  {:user-roles #{:authority}
+   :states     (action/all-states-but [:draft :closed :canceled]) ; the same as assign-application
+   :parameters [:id]}
+  [{application :application}]
+  (let [authorities (find-authorities-in-applications-organization application)]
+    (ok :authorities (map #(select-keys % [:id :firstName :lastName]) authorities))))
 
 (defn filter-repeating-party-docs [schema-version schema-names]
   (let [schemas (schemas/get-schemas schema-version)]
@@ -271,9 +281,11 @@
         (let [updates [[[:kiinteisto :tilanNimi] (or (:nimi ktj-tiedot) "")]
                        [[:kiinteisto :maapintaala] (or (:maapintaala ktj-tiedot) "")]
                        [[:kiinteisto :vesipintaala] (or (:vesipintaala ktj-tiedot) "")]
-                       [[:kiinteisto :rekisterointipvm] (or (try
-                                                              (tf/unparse output-format (tf/parse ktj-format (:rekisterointipvm ktj-tiedot)))
-                                                              (catch Exception e (:rekisterointipvm ktj-tiedot))) "")]]
+                       [[:kiinteisto :rekisterointipvm] (or
+                                                          (try
+                                                            (tf/unparse output-format (tf/parse ktj-format (:rekisterointipvm ktj-tiedot)))
+                                                            (catch Exception e (:rekisterointipvm ktj-tiedot)))
+                                                          "")]]
               schema (schemas/get-schema (:schema-info rakennuspaikka))
               updates (filter (fn [[update-path _]] (model/find-by-name (:body schema) update-path)) updates)]
           (commands/persist-model-updates
@@ -318,8 +330,7 @@
    :user-roles #{:authority}
    :states     (action/all-states-but [:draft :closed :canceled])}
   [{:keys [user created application] :as command}]
-  (let [assignee (user/find-user {:_id  assigneeId :enabled true
-                                  :role "authority" :organizations (:organization application)})]
+  (let [assignee (util/find-by-id assigneeId (find-authorities-in-applications-organization application))]
     (if (or assignee (ss/blank? assigneeId))
       (update-application command
                           {$set {:modified  created
@@ -450,8 +461,8 @@
    :user-roles #{:authority}
    :states     action/all-states}
   [{:keys [application created]}]
-  (try (autofill-rakennuspaikka application created)
-       (catch Exception e (error e "KTJ data was not updated"))))
+  (autofill-rakennuspaikka application created)
+  (ok))
 
 (defcommand save-application-drawings
   {:parameters       [:id drawings]
@@ -586,13 +597,11 @@
    :description nil
    :created     created})
 
-(defn user-is-authority-in-organization? [user-id organization-id]
-  (mongo/any? :users {$and [{:organizations organization-id} {:_id user-id}]}))
-
 (defn operation-validator [{{operation :operation} :data}]
   (when-not (operations/operations (keyword operation)) (fail :error.unknown-type)))
 
 (defn make-application [id operation x y address property-id municipality organization info-request? open-inforequest? messages user created manual-schema-datas]
+  {:pre [id operation address property-id (not (nil? info-request?)) (not (nil? open-inforequest?)) user created]}
   (let [permit-type (operations/permit-type-of-operation operation)
         owner (user/user-in-role user :owner :type :owner)
         op (make-op operation created)
@@ -631,15 +640,16 @@
                           :documents   (make-documents user created op application manual-schema-datas)}))))
 
 (defn do-create-application
-  [{{:keys [operation x y address propertyId municipality infoRequest messages]} :data :keys [user created] :as command} & [manual-schema-datas]]
-  (let [permit-type (operations/permit-type-of-operation operation)
+  [{{:keys [operation x y address propertyId infoRequest messages]} :data :keys [user created] :as command} & [manual-schema-datas]]
+  (let [municipality (p/municipality-id-by-property-id propertyId)
+        permit-type (operations/permit-type-of-operation operation)
         organization (organization/resolve-organization municipality permit-type)
         scope (organization/resolve-organization-scope municipality permit-type organization)
         organization-id (:id organization)
         info-request? (boolean infoRequest)
         open-inforequest? (and info-request? (:open-inforequest scope))]
 
-    (when-not (or (user/applicant? user) (user-is-authority-in-organization? (:id user) organization-id))
+    (when-not (or (user/applicant? user) (user/user-is-authority-in-organization? user organization-id))
       (unauthorized!))
     (when-not organization-id
       (fail! :error.missing-organization :municipality municipality :permit-type permit-type :operation operation))
@@ -654,16 +664,17 @@
 
 ;; TODO: separate methods for inforequests & applications for clarity.
 (defcommand create-application
-  {:parameters       [:operation :x :y :address :propertyId :municipality]
+  {:parameters       [:operation :x :y :address :propertyId]
    :user-roles       #{:applicant :authority}
    :notified         true                                   ; OIR
-   :input-validators [(partial action/non-blank-parameters [:operation :address :municipality])
+   :input-validators [(partial action/non-blank-parameters [:operation :address :propertyId])
                       (partial property-id-parameters [:propertyId])
                       operation-validator]}
-  [{{:keys [operation address municipality infoRequest]} :data :keys [user created] :as command}]
+  [{{:keys [operation address propertyId infoRequest]} :data :keys [user created] :as command}]
 
   ;; TODO: These let-bindings are repeated in do-create-application, merge those somehow
-  (let [permit-type (operations/permit-type-of-operation operation)
+  (let [municipality (p/municipality-id-by-property-id propertyId)
+        permit-type (operations/permit-type-of-operation operation)
         organization (organization/resolve-organization municipality permit-type)
         scope (organization/resolve-organization-scope municipality permit-type organization)
         info-request? (boolean infoRequest)
@@ -692,8 +703,7 @@
    :input-validators [operation-validator]
    :pre-checks       [add-operation-allowed?]}
   [{:keys [application created] :as command}]
-  (let [op-id (mongo/create-id)
-        op (make-op operation created)
+  (let [op (make-op operation created)
         new-docs (make-documents nil created op application)
         organization (organization/get-organization (:organization application))]
     (update-application command {$push {:operations  op
@@ -734,7 +744,7 @@
                       validate-x validate-y]
    :pre-checks       [authority-if-post-verdict-state]}
   [{:keys [created application] :as command}]
-  (if (= (:municipality application) (organization/municipality-by-propertyId propertyId))
+  (if (= (:municipality application) (p/municipality-id-by-property-id propertyId))
     (do
       (update-application command
                           {$set {:location   (->location x y)
@@ -973,3 +983,53 @@
                          $push {:attachments {$each (make-attachments created op organization (:state application) (:tosFunction application))}}})
     (try (autofill-rakennuspaikka application created)
          (catch Exception e (error e "KTJ data was not updated")))))
+
+(defn- validate-organization-backend-urls [_ {org-id :organization}]
+  (when org-id
+    (let [org (organization/get-organization org-id)]
+      (if-let [conf (:vendor-backend-redirect org)]
+        (->> (vals conf)
+             (remove ss/blank?)
+             (some util/validate-url))
+        (fail :error.vendor-urls-not-set)))))
+
+(defn get-vendor-backend-id [verdicts]
+  (->> verdicts
+       (remove :draft)
+       (some :kuntalupatunnus)))
+
+(defn- get-backend-and-lp-urls [org-id]
+  (-> (organization/get-organization org-id)
+      :vendor-backend-redirect
+      (util/select-values [:vendor-backend-url-for-backend-id
+                           :vendor-backend-url-for-lp-id])))
+
+(defn- correct-urls-configured [_ {:keys [verdicts organization] :as application}]
+  (when application
+    (let [vendor-backend-id          (get-vendor-backend-id verdicts)
+          [backend-id-url lp-id-url] (get-backend-and-lp-urls organization)
+          lp-id-url-missing?         (ss/blank? lp-id-url)
+          both-urls-missing?         (and lp-id-url-missing?
+                                          (ss/blank? backend-id-url))]
+      (if vendor-backend-id
+        (when both-urls-missing?
+          (fail :error.vendor-urls-not-set))
+        (when lp-id-url-missing?
+          (fail :error.vendor-urls-not-set))))))
+
+(defraw redirect-to-vendor-backend
+  {:parameters [id]
+   :user-roles #{:authority}
+   :states     action/post-submitted-states
+   :pre-checks [validate-organization-backend-urls
+                correct-urls-configured]}
+  [{{:keys [verdicts organization]} :application}]
+  (let [vendor-backend-id          (get-vendor-backend-id verdicts)
+        [backend-id-url lp-id-url] (get-backend-and-lp-urls organization)
+        url-parts                  (if (and vendor-backend-id
+                                            (not (ss/blank? backend-id-url)))
+                                     [backend-id-url vendor-backend-id]
+                                     [lp-id-url id])
+        redirect-url               (apply str url-parts)]
+    (info "Redirecting from" id "to" redirect-url)
+    {:status 303 :headers {"Location" redirect-url}}))

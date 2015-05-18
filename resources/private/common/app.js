@@ -100,7 +100,6 @@ var LUPAPISTE = LUPAPISTE || {};
           .success(function (e) {
             if (e.user) {
               self.session = true;
-              currentUser.set(e.user);
               hub.send("login", e);
               self.hashChanged();
             } else {

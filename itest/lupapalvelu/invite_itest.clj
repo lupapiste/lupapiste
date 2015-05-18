@@ -22,7 +22,7 @@
     (let [resp (query user-key :invites) => ok?]
       (count (:invites resp)) => 0))
 
-  (let [application-id (create-app-id mikko :municipality sonja-muni :address "Kutsukatu 13")
+  (let [application-id (create-app-id mikko :propertyId sipoo-property-id :address "Kutsukatu 13")
         app    (query-application mikko application-id)
         {hakija-doc :doc}  (command mikko :create-doc :id application-id :schemaName "hakija") => truthy
         suunnittelija-doc (:id (domain/get-document-by-name app "suunnittelija")) => truthy
@@ -151,7 +151,7 @@
     (let [resp (query user-key :invites) => ok?]
       (count (:invites resp)) => 0))
 
-  (let [resp  (create-app sonja :municipality sonja-muni) => ok?
+  (let [resp  (create-app sonja :propertyId sipoo-property-id) => ok?
         id    (:id resp) => truthy
         app    (query-application sonja id)
         suunnittelija-doc (:id (domain/get-document-by-name app "suunnittelija"))]

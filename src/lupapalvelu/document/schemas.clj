@@ -148,6 +148,34 @@
                        [henkilotiedot-minimal]
                        yhteystiedot)}))
 
+(def e-invoice-operators
+  [{:name "BAWCFI22"} ; Basware Oyj
+   {:name "003714377140"} ; Enfo Zender Oy
+   {:name "003708599126"} ; Liaison Technologies Oy
+   {:name "HELSFIHH"} ; Aktia S\u00e4\u00e4st\u00f6pankki Oyj
+   {:name "POPFFI22"} ; Paikallisosuuspankit
+   {:name "HANDFIHH"} ; Handelsbanken
+   {:name "003721291126"} ; Maventa
+   {:name "003723327487"} ; Apix Messaging Oy
+   {:name "003717203971"} ; Notebeat Oy
+   {:name "003723609900"} ; (tai PAGERO) Pagero
+   {:name "003701150617"} ; Str\u00e5lfors Oy
+   {:name "FIYAPSOL"} ; YAP Solutions Oy
+   {:name "00885060259470028"} ; Tradeshift
+   {:name "TAPIFI22"} ; S-Pankki Oy
+   {:name "INEXCHANGE"} ; InExchange Factorum AB
+   {:name "DNBAFIHX"} ; DNB Bank ASA
+   {:name "003703575029"} ; TeliaSonera Finland Oyj
+   {:name "ITELFIHH"} ; S\u00e4\u00e4st\u00f6pankit
+   {:name "003710948874"} ; OpusCapita Group Oy
+   {:name "00885790000000418"} ; HighJump AS
+   {:name "NDEAFIHH"} ; Nordea
+   {:name "OKOYFIHH"} ; OP-Pohjola-ryhm\u00e4
+   {:name "003701011385"} ; Tieto Oyj
+   {:name "DABAFIHH"} ; Danske Bank Oyj
+   {:name "003703575029"} ; CGI
+   ])
+
 (def verkkolaskutustieto [{:name "ovtTunnus" :type :string :subtype :ovt :min-len 12 :max-len 17}
                           {:name "verkkolaskuTunnus" :type :string}
                           {:name "valittajaTunnus" :type :string}])
@@ -170,7 +198,7 @@
 (def ya-party (henkilo-yritys-select-group :default "yritys"))
 (def party-with-required-hetu (henkilo-yritys-select-group :henkilo-body henkilo-with-required-hetu))
 
-(def koulutusvalinta {:name "koulutusvalinta" :type :select :sortBy :displayname :i18nkey "koulutus" :other-key "koulutus"
+(def koulutusvalinta {:name "koulutusvalinta" :type :select :sortBy :displayname :i18nkey "koulutus" :other-key "koulutus" :required true
                       :body [{:name "arkkitehti"}
                              {:name "arkkitehtiylioppilas"}
                              {:name "diplomi-insin\u00f6\u00f6ri"}
@@ -269,7 +297,7 @@
                                           {:name "ei tiedossa" :i18nkey "osapuoli.kuntaRoolikoodi.ei tiedossa"}]}])
 
 (def patevyysvaatimusluokka
-  {:name "patevyysvaatimusluokka" :type :select :sortBy nil :required false
+  {:name "patevyysvaatimusluokka" :type :select :sortBy nil :required true
    :body [{:name "AA"}
           {:name "A"}
           {:name "B"}
@@ -277,28 +305,21 @@
           {:name "ei tiedossa"}]})
 
 (def patevyys-tyonjohtaja [koulutusvalinta
-                           {:name "koulutus" :type :string :required false :i18nkey "muukoulutus"}
+                           {:name "koulutus" :type :string :required true :i18nkey "muukoulutus"}
                            patevyysvaatimusluokka
-                           {:name "valmistumisvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size "s" :required false}
-                           {:name "kokemusvuodet" :type :string :subtype :number :min-len 1 :max-len 2 :size "s" :required false}
-                           {:name "valvottavienKohteidenMaara" :i18nkey "tyonjohtaja.patevyys.valvottavienKohteidenMaara" :type :string :subtype :number :size "s" :required false}
+                           {:name "valmistumisvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size "s" :required true}
+                           {:name "kokemusvuodet" :type :string :subtype :number :min-len 1 :max-len 2 :size "s" :required true}
+                           {:name "valvottavienKohteidenMaara" :i18nkey "tyonjohtaja.patevyys.valvottavienKohteidenMaara" :type :string :subtype :number :size "s" :required true}
                            ;; TODO: Miten tyonjohtajaHakemusKytkimen saa piilotettua hakijalta?
-                           {:name "tyonjohtajaHakemusKytkin" :i18nkey "tyonjohtaja.patevyys.tyonjohtajaHakemusKytkin._group_label" :type :select :sortBy :displayname :required false :blacklist [:applicant]
+                           {:name "tyonjohtajaHakemusKytkin" :i18nkey "tyonjohtaja.patevyys.tyonjohtajaHakemusKytkin._group_label" :required true :type :select :sortBy :displayname :blacklist [:applicant]
                             :body [{:name "nimeaminen" :i18nkey "tyonjohtaja.patevyys.tyonjohtajaHakemusKytkin.nimeaminen"}
                                    {:name "hakemus" :i18nkey "tyonjohtaja.patevyys.tyonjohtajaHakemusKytkin.hakemus"}]}])
 
 (def patevyys-tyonjohtaja-v2 [koulutusvalinta
                               {:name "koulutus" :type :string :required false :i18nkey "muukoulutus"}
-                              {:name "valmistumisvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size "s" :required false}
-                              {:name "kokemusvuodet" :type :string :subtype :number :min-len 1 :max-len 2 :size "s" :required false}
-                              {:name "valvottavienKohteidenMaara" :i18nkey "tyonjohtaja.patevyys.valvottavienKohteidenMaara" :type :string :subtype :number :size "s" :required false}])
-
-;; FIXME remove + migration
-(def vastuuaika-tyonjohtaja [{:name "vastuuaika"
-                              :type :group
-                              :hidden true
-                              :body [{:name "vastuuaika-alkaa-pvm" :type :date}
-                                     {:name "vastuuaika-paattyy-pvm" :type :date}]}])
+                              {:name "valmistumisvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size "s" :required true}
+                              {:name "kokemusvuodet" :type :string :subtype :number :min-len 1 :max-len 2 :size "s" :required true}
+                              {:name "valvottavienKohteidenMaara" :i18nkey "tyonjohtaja.patevyys.valvottavienKohteidenMaara" :type :string :subtype :number :size "s" :required true}])
 
 (def sijaisuus-tyonjohtaja [{:name "sijaistus" :i18nkey "tyonjohtaja.sijaistus._group_label"
                              :type :group
@@ -310,7 +331,6 @@
 (def tyonjohtaja (body
                    kuntaroolikoodi-tyonjohtaja
                    vastattavat-tyotehtavat-tyonjohtaja
-                   vastuuaika-tyonjohtaja
                    henkilo-valitsin
                    designer-basic
                    {:name "patevyys-tyonjohtaja" :type :group :body patevyys-tyonjohtaja}
@@ -334,6 +354,7 @@
 (def vastattavat-tyotehtavat-tyonjohtaja-v2 [{:name "vastattavatTyotehtavat"
                                               :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat._group_label"
                                               :type :group
+                                              :required false
                                               :listen [:filterByCode]
                                               :layout :vertical
                                               :body [{:name "ivLaitoksenAsennustyo" :i18nkey "osapuoli.tyonjohtaja.vastattavatTyotehtavat.ivLaitoksenAsennustyo" :codes [:ivt] :type :checkbox}
@@ -426,7 +447,7 @@
                            {:name "keittotila"}
                            {:name "tupakeittio"}
                            {:name "ei tiedossa" :i18nkey "huoneistot.keittionTyyppi.eiTiedossa"}]}
-                   {:name "huoneistoala" :type :string :subtype :number :size "s" :min 1 :max 9999999 :required true :label false :i18nkey "huoneistot.huoneistoala" :listen [:muutostapaChanged]}
+                   {:name "huoneistoala" :type :string :subtype :decimal :size "s" :min 1 :max 9999999 :required true :label false :i18nkey "huoneistot.huoneistoala" :listen [:muutostapaChanged]}
                    {:name "WCKytkin" :type :checkbox :label false :i18nkey "huoneistot.WCKytkin" :listen [:muutostapaChanged]}
                    {:name "ammeTaiSuihkuKytkin" :type :checkbox :label false :i18nkey "huoneistot.ammeTaiSuihkuKytkin" :listen [:muutostapaChanged]}
                    {:name "saunaKytkin" :type :checkbox :label false :i18nkey "huoneistot.saunaKytkin" :listen [:muutostapaChanged]}
@@ -629,7 +650,7 @@
                               {:name "F"}
                               {:name "G"}]}
                       {:name "energiatehokkuusluku" :type :string :size "s" :subtype :number}
-                      {:name "energiatehokkuusluvunYksikko" :type :select :sortBy :displayname
+                      {:name "energiatehokkuusluvunYksikko" :type :select, :sortBy :displayname, :default "kWh/m2"
                        :body [{:name "kWh/m2"}
                               {:name "kWh/brm2/vuosi"}]}
                       {:name "paloluokka" :type :select :sortBy :displayname
@@ -675,6 +696,37 @@
 
 (def rakennuksen-tiedot-muutos (conj rakennuksen-tiedot-ilman-huoneistoa-muutos huoneistotTable))
 
+(def alle-yli-radiogroup
+  {:name "alleYli" :type :radioGroup :body [{:name "alle"} {:name "yli"}] :default "alle" :required true})
+
+(defn etaisyys-row [name min-default]
+  {:name name
+   :type :group
+   :body [{:name "minimietaisyys" :type :string :size "s" :unit "m" :readonly true :default min-default :required true}
+          alle-yli-radiogroup
+          {:name "huomautukset" :type :string :size "l"}]})
+
+(def maalampokaivon-etaisyydet {:name "kaivo-etaisyydet"
+                                :i18nkey "kaivo-etaisyydet"
+                                :type :group
+                                :group-help "kaivo-etaisyydet.groupHelpText"
+                                :approvable true
+                                :body (body
+                                        (etaisyys-row "lampokaivo" "15")
+                                        (etaisyys-row "porakaivo" "40")
+                                        (etaisyys-row "rengaskaivo" "20")
+                                        (etaisyys-row "rakennus" "3")
+                                        (etaisyys-row "tontin-raja" "7.5")
+                                        (etaisyys-row "omat-vv-johdot" "3") ; vesi- ja viemarijohdot
+                                        (etaisyys-row "muut-vv-johdot" "5") ; vesi- ja viemarijohdot
+                                        (etaisyys-row "omat-lampojohdot" "3")
+                                        (etaisyys-row "muut-lampojohdot" "5")
+                                        (etaisyys-row "wc-jatevedet-purkupaikka" "30")
+                                        (etaisyys-row "harmaat-jatevedet-purkupaikka" "20"))})
+
+(def maalampokaivo-rakennelma (body
+                                kuvaus
+                                maalampokaivon-etaisyydet))
 
 (def rakennelma (body
                   [{:name "kokonaisala" :type :string :size "s" :unit "m2" :subtype :number}]
@@ -878,6 +930,11 @@
 
     {:info {:name "kaupunkikuvatoimenpide" :approvable true}
      :body (approvable-top-level-groups rakennelma)}
+
+    {:info {:name "maalampokaivo"
+            :approvable true
+            :i18name "maalampokaivo"}
+     :body (approvable-top-level-groups maalampokaivo-rakennelma)}
 
     {:info {:name "maisematyo" :approvable true}
      :body (approvable-top-level-groups maisematyo)}
