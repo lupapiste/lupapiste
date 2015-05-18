@@ -24,4 +24,3 @@ osapuoli.yritys.verkkolaskutustieto.valittajaTunnus.DABAFIHH: Danske Bank Oyj (D
 osapuoli.yritys.verkkolaskutustieto.valittajaTunnus.003703575029: CGI / TeliaSonera Finland Oyj (003703575029)
 osapuoli.yritys.verkkolaskutustieto.valittajaTunnus.AABAFI22: Ålandsbanken Abp (AABAFI22)
 osapuoli.yritys.verkkolaskutustieto.valittajaTunnus.SBANFIHH: S-Pankki Oy (SBANFIHH)
-osapuoli.yritys.verkkolaskutustieto.valittajaTunnus.003715482348: Eltel Networks Oy (003715482348) (ei käytössä)
