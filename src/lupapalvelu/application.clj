@@ -673,12 +673,12 @@
   [{{:keys [operation address propertyId infoRequest]} :data :keys [user created] :as command}]
 
   ;; TODO: These let-bindings are repeated in do-create-application, merge those somehow
-  (let [municipality (p/municipality-id-by-property-id propertyId)
-        permit-type (operations/permit-type-of-operation operation)
-        organization (organization/resolve-organization municipality permit-type)
-        scope (organization/resolve-organization-scope municipality permit-type organization)
-        info-request? (boolean infoRequest)
-        open-inforequest? (and info-request? (:open-inforequest scope))
+  (let [municipality        (p/municipality-id-by-property-id propertyId)
+        permit-type         (operations/permit-type-of-operation operation)
+        organization        (organization/resolve-organization municipality permit-type)
+        scope               (organization/resolve-organization-scope municipality permit-type organization)
+        info-request?       (boolean infoRequest)
+        open-inforequest?   (and info-request? (:open-inforequest scope))
         created-application (do-create-application command)]
 
     (insert-application created-application)
