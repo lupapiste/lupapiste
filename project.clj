@@ -53,7 +53,7 @@
                  [scss-compiler "0.1.2"]
                  [org.clojure/core.memoize "0.5.7"]
                  [org.apache.pdfbox/preflight "1.8.9"]
-                 [lupapiste/commons "0.1.0-SNAPSHOT"]]
+                 [lupapiste/commons "0.1.0"]]
   :profiles {:dev {:dependencies [[midje "1.6.3"]
                                   [ring-mock "0.1.5"]
                                   [clj-ssh "0.5.7"]
