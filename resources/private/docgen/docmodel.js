@@ -1774,6 +1774,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     } else {
       title.appendChild(document.createTextNode(loc([self.schema.info.name, "_group_label"])));
     }
+    title.className = "sticky";
     title.setAttribute("data-doc-id", self.docId);
     title.setAttribute("data-app-id", self.appId);
     title.onclick = accordion.click;
