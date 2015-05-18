@@ -162,10 +162,9 @@
    {:name "003701150617"} ; Str\u00e5lfors Oy
    {:name "FIYAPSOL"} ; YAP Solutions Oy
    {:name "00885060259470028"} ; Tradeshift
-   {:name "TAPIFI22"} ; S-Pankki Oy
+   {:name "TAPIFI22"} ; S-Pankki Oy (vanha, ent L\u00e4hiTapiola)
    {:name "INEXCHANGE"} ; InExchange Factorum AB
    {:name "DNBAFIHX"} ; DNB Bank ASA
-   {:name "003703575029"} ; TeliaSonera Finland Oyj
    {:name "ITELFIHH"} ; S\u00e4\u00e4st\u00f6pankit
    {:name "003710948874"} ; OpusCapita Group Oy
    {:name "00885790000000418"} ; HighJump AS
@@ -173,12 +172,18 @@
    {:name "OKOYFIHH"} ; OP-Pohjola-ryhm\u00e4
    {:name "003701011385"} ; Tieto Oyj
    {:name "DABAFIHH"} ; Danske Bank Oyj
-   {:name "003703575029"} ; CGI
+   {:name "003703575029"} ; CGI / TeliaSonera Finland Oyj
+   {:name "AABAFI22"} ; \u00c5landsbanken Abp
+   {:name "SBANFIHH"} ; S-Pankki Oy (uusi)
    ])
 
 (def verkkolaskutustieto [{:name "ovtTunnus" :type :string :subtype :ovt :min-len 12 :max-len 17}
                           {:name "verkkolaskuTunnus" :type :string}
-                          {:name "valittajaTunnus" :type :string}])
+                          {:name "valittajaTunnus"
+                           :type :select
+                           :i18nkey "osapuoli.yritys.verkkolaskutustieto.valittajaTunnus"
+                           :size "l"
+                           :body e-invoice-operators}])
 
 (def yritys-with-verkkolaskutustieto (body
                                        yritys
