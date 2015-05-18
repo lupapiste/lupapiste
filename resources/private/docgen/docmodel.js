@@ -333,7 +333,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
           text += " (" + approval.user.lastName + " " + approval.user.firstName;
           text += " " + moment(approval.timestamp).format("D.M.YYYY HH:mm") + ")";
         }
-        statusContainer$.text(text);
+        statusContainer$.attr("title", text);
         statusContainer$.removeClass(function(index, css) {
           return _.filter(css.split(" "), function(c) { return _.includes(c, "approval-"); }).join(" ");
         });
@@ -1769,14 +1769,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     icon.className = "icon toggle-icon " + (accordionCollapsed ? "drill-right-white" : "drill-down-white");
     title.appendChild(icon);
 
-    if (op) {
-      title.appendChild(document.createTextNode(loc([op.name, "_group_label"])));
-      if (authorizationModel.ok("update-op-description")) {
-        title.appendChild(buildDescriptionElement(op));
-      }
-    } else {
-      title.appendChild(document.createTextNode(loc([self.schema.info.name, "_group_label"])));
-    }
     title.className = "sticky";
     title.setAttribute("data-doc-id", self.docId);
     title.setAttribute("data-app-id", self.appId);
@@ -1793,7 +1785,16 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }
 
     if (self.schema.info.approvable) {
-      elements.appendChild(self.makeApprovalButtons([], self.model));
+      title.appendChild(self.makeApprovalButtons([], self.model));
+    }
+
+    if (op) {
+      title.appendChild(document.createTextNode(loc([op.name, "_group_label"])));
+      if (authorizationModel.ok("update-op-description")) {
+        title.appendChild(buildDescriptionElement(op));
+      }
+    } else {
+      title.appendChild(document.createTextNode(loc([self.schema.info.name, "_group_label"])));
     }
 
     sectionContainer.className = "accordion_content" + (accordionCollapsed ? "" : " expanded");

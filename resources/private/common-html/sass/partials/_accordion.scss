@@ -64,6 +64,32 @@
         }
       }
     }
+    .form-approval-status {
+      text-transform: none;
+      width: auto;
+      display: inline;
+      min-height: 28px;
+
+      &.empty {
+        display: none;
+        height: 0;
+      }
+
+      .form-buttons {
+        display:inline-block;
+        text-align: right;
+        float: right;
+        .btn {
+          margin: 0 $marginS 0 0;
+          line-height: 19px;
+          min-height: 19px;
+          vertical-align: top;
+        }
+      }
+      .approval-rejected, .approval-approved {
+        margin-right: 0;
+      }
+    }
   }
 
   .accordion_content {
