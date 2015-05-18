@@ -180,8 +180,12 @@
     self.setXY = function(x, y) { if (self.map) { self.map.clear().add({x: x, y: y}, true); } return self.x(x).y(y); };
     self.center = function(x, y, zoom) { if (self.map) { self.map.center(x, y, zoom); } return self; };
 
-    self.addressOk = ko.computed(function() { return self.municipalityCode() && !isBlank(self.addressString()); });
-    self.propertyIdOk = ko.computed(function() { return util.prop.isPropertyId(self.propertyId()) && !isBlank(self.propertyId());});
+    self.addressOk = ko.pureComputed(function() { return self.municipalityCode() && !isBlank(self.addressString()); });
+    self.propertyIdOk = ko.pureComputed(function() { return !isBlank(self.propertyId()) && util.prop.isPropertyId(self.propertyId());});
+
+    self.createOK = ko.pureComputed(function() {
+      return self.propertyIdOk() && self.addressOk() && !self.processing();
+    });
 
     //
     // Concurrency control:
