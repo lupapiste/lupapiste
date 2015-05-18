@@ -288,15 +288,14 @@
                          :required false
                          :user user
                          :created created}
-        attachment-version (attachment/attach-file! attachment-data)]
-    (if-not attachment-version
+        attach-file-result (attachment/attach-file! attachment-data)]
+    (if-not attach-file-result
       (fail :error.unknown)
       (when (env/feature? :arkistointi)
-        (info attachment-version)
         (when-let [processed-tempfile (when (and (= (mime/mime-type filename) "application/pdf") (not (pdf-conversion/is-pdf-a? tempfile)))
                                         (pdf-conversion/convert-to-pdf-a tempfile))]
           (let [new-filename (str (ss/substring filename 0 (- (count filename) 4)) "-PDFA.pdf")
-                new-id (:id attachment-version)]
+                new-id (:id attach-file-result)]
             (when-not (attachment/attach-file! (assoc attachment-data :attachment-id new-id :content processed-tempfile :filename new-filename))
               (fail :error.unknown))))))))
 
