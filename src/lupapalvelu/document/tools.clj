@@ -12,9 +12,10 @@
 (defn default-values [{:keys [type default]}]
   (case (keyword type)
     :radioGroup       default
+    :select           default
     :checkbox         false
-    :string           ""
-    :text             ""
+    :string           (or default "")
+    :text             (or default "")
     :fillMyInfoButton nil
     :foremanHistory   nil
     nil))

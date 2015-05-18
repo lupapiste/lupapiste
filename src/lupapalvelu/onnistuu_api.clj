@@ -9,7 +9,6 @@
             [hiccup.form :as form]
             [slingshot.slingshot :refer [try+]]
             [sade.env :as env]
-            [sade.util :refer [y? max-length-string valid-email?]]
             [sade.core :refer [ok fail fail! now]]
             [sade.session :as ssess]
             [sade.strings :as ss]

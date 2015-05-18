@@ -55,7 +55,7 @@
   (fact (command admin :create-user :email "x@example.com" :role "authorityAdmin" :enabled true
           :organization "753-R" :password "foobarbozbiz") => ok?)
   ; Check that user was created
-  (fact (-> (query admin :users :email "x@example.com") :users first) => (contains {:role "authorityAdmin" :email "x@example.com" :enabled true}))
+  (fact (-> (query admin :users :email "x@example.com") :users first) => (contains {:role "authorityAdmin" :email "x@example.com" :enabled true :orgAuthz {:753-R ["authorityAdmin"]}}))
 
   ; Inbox zero
   (last-email)

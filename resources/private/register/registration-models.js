@@ -80,7 +80,8 @@ LUPAPISTE.RegistrationModel = function(commandName, afterSuccessFn, errorSelecto
   self.json = function() {
     var d = {};
     _.forEach(self.keys, function(key) {
-      d[key] = self.plainModel[key]() || null;
+      var val = self.plainModel[key]();
+      d[key] = val !== undefined ? val : null;
     });
 
     d.confirmPassword = null;
@@ -97,6 +98,9 @@ LUPAPISTE.RegistrationModel = function(commandName, afterSuccessFn, errorSelecto
         }
       }
     });
+    self.plainModel.rakentajafi(false);
+    self.plainModel.acceptTerms(false);
+    self.plainModel.allowDirectMarketing(false);
     self.plainModel.tokenId(pageutil.subPage());
     return false;
   };

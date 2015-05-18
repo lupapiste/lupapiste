@@ -291,9 +291,9 @@
   (and id user (or application (domain/get-application-as id user true))))
 
 (defn- user-authz? [command-meta-data application user]
-  (let [allowed-roles (get command-meta-data :user-authz-roles #{})]
-    (when-let [role-in-app (keyword (:role (domain/get-auth application (:id user))))]
-     (allowed-roles role-in-app))))
+  (let [allowed-roles (get command-meta-data :user-authz-roles #{})
+        roles-in-app  (map (comp keyword :role) (domain/get-auths application (:id user)))]
+    (some allowed-roles roles-in-app)))
 
 (defn- organization-authz? [command-meta-data {organization :organization} user]
   (let [required-authz (:org-authz-roles command-meta-data)

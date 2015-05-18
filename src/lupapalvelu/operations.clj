@@ -568,7 +568,7 @@
                                    :link-permit-required false
                                    :link-permit-verdict-required false
                                    :asianhallinta false}
-     :maalampo                    {:schema "kaupunkikuvatoimenpide"
+     :maalampo                    {:schema "maalampokaivo"
                                    :permit-type permit/R
                                    :required common-rakval-schemas
                                    :attachments kaupunkikuva_toimenpide_liitteet
