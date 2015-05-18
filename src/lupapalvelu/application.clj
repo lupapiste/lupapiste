@@ -641,12 +641,12 @@
 
 (defn do-create-application
   [{{:keys [operation x y address propertyId infoRequest messages]} :data :keys [user created] :as command} & [manual-schema-datas]]
-  (let [municipality (p/municipality-id-by-property-id propertyId)
-        permit-type (operations/permit-type-of-operation operation)
-        organization (organization/resolve-organization municipality permit-type)
-        scope (organization/resolve-organization-scope municipality permit-type organization)
-        organization-id (:id organization)
-        info-request? (boolean infoRequest)
+  (let [municipality      (p/municipality-id-by-property-id propertyId)
+        permit-type       (operations/permit-type-of-operation operation)
+        organization      (organization/resolve-organization municipality permit-type)
+        scope             (organization/resolve-organization-scope municipality permit-type organization)
+        organization-id   (:id organization)
+        info-request?     (boolean infoRequest)
         open-inforequest? (and info-request? (:open-inforequest scope))]
 
     (when-not (or (user/applicant? user) (user/user-is-authority-in-organization? user organization-id))
