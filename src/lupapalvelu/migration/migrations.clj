@@ -977,7 +977,8 @@
    "dabafihh" "DABAFIHH"
    "enfo" "003714377140"
    "logica 00370357502" "003703575029"
-   "003701011385 OKOYFIHH" "OKOYFIHH" ; Ilkka to confirm if this is the correct mapping
+   "003701011385 OKOYFIHH" "OKOYFIHH"
+   "003715482348" "OKOYFIHH"
    })
 
 (defmigration convert-invoicing-operator-values-from-documents
