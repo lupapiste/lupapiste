@@ -6,7 +6,8 @@
             [sade.core :refer :all]
             [clj-time.format :as timeformat]
             [clj-time.coerce :as tc]
-            [schema.core :as sc])
+            [schema.core :as sc]
+            [lupapalvelu.document.schemas :as schema])
   (:import [org.joda.time LocalDateTime]))
 
 ;;
@@ -320,6 +321,10 @@
   (if bic
     (re-matches #"^[a-zA-Z]{6}[a-zA-Z\d]{2,5}$" bic)
     false))
+
+(defn supported-invoice-operator? [op]
+  (let [supported-ops (map :name schema/e-invoice-operators)]
+    (some #(= op %) supported-ops)))
 
 (defn account-type? [account-type]
   (cond
