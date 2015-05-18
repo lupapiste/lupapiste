@@ -35,7 +35,6 @@ var taskPageController = (function() {
   "use strict";
 
   var currentApplicationId = null;
-  var currentApplicationTitle = null; // TODO read from global application instance after that has been implemented
   var currentTaskId = null;
   var task = ko.observable();
   var processing = ko.observable(false);
@@ -98,10 +97,9 @@ var taskPageController = (function() {
    */
   function refresh(application, taskId) {
     currentApplicationId = application.id;
-    currentApplicationTitle = application.title;
     currentTaskId = taskId;
 
-    lupapisteApp.setTitle(currentApplicationTitle);
+    lupapisteApp.setTitle(lupapisteApp.models.application.title());
 
     attachmentsModel.refresh(application, {type: "task", id: currentTaskId});
 
@@ -147,19 +145,15 @@ var taskPageController = (function() {
     if (currentApplicationId !== applicationId) {
       repository.load(applicationId);
     } else {
-      lupapisteApp.setTitle(currentApplicationTitle);
+      lupapisteApp.setTitle(lupapisteApp.models.application.title());
     }
     currentApplicationId = applicationId;
   });
 
   hub.subscribe("update-task-success", function(e) {
     if (task() && currentApplicationId === e.appId && currentTaskId === e.documentId) {
-      if (!e.results && !e.results.length) {
-        taskSubmitOk(true);
-      } else {
-        var requiredErrors = util.extractRequiredErrors([e.results]);
-        taskSubmitOk(authorizationModel.ok("send-task") && (task().state === "sent" || task().state === "ok") && !requiredErrors.length);
-      }
+      var requiredErrors = util.extractRequiredErrors([e.results]);
+      taskSubmitOk(authorizationModel.ok("send-task") && (task().state === "sent" || task().state === "ok") && !requiredErrors.length);
     }
   });
 
