@@ -115,7 +115,7 @@
   (let [operation         :aiemmalla-luvalla-hakeminen
         permit-type       (operations/permit-type-of-operation operation)
         dummy-application {:id kuntalupatunnus :permitType permit-type :organization organizationId}
-        xml (krysp-fetch-api/get-application-xml dummy-application :kuntalupatunnus)]
+        xml               (krysp-fetch-api/get-application-xml dummy-application :kuntalupatunnus)]
     (when-not xml (fail! :error.no-previous-permit-found-from-backend)) ;; Show error if could not receive the verdict message xml for the given kuntalupatunnus
 
     (let [app-info               (krysp-reader/get-app-info-from-message xml kuntalupatunnus)

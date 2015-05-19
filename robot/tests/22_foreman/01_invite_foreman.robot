@@ -66,7 +66,13 @@ Mikko can link existing foreman application to foreman task
   Open tab  tasks
   Select From List By Value  foreman-selection  ${foremanAppId}
 
+Mikko can move to linked foreman application and back
+  Wait until  Click element  xpath=//a[@data-test-id='foreman-application-link-${foremanAppId}']
+  Wait until  Element should contain  xpath=//span[@data-test-id='application-id']  ${foremanAppId}
+  Click by test id  test-application-link-permit-lupapistetunnus
+
 Mikko can start invite flow from tasks tab
+  Open tab  tasks
   Click enabled by test id  invite-other-foreman-button
   Wait until  Element should be visible  //div[@id='dialog-invite-foreman']
   Click by test id  cancel-foreman-dialog
