@@ -78,7 +78,7 @@
 
           <div class="missing-inforequest-box app-type-box" data-bind="css: {'app-type-box-wide': !authorizationModel.ok('create-application-from-previous-permit')}">
             <h2 data-bind="ltext: 'applications.missing.inforequest.title'"></h2>
-            <p data-bind="ltext: 'applications.missing.inforequest.desc'"></p>
+            <p data-bind="lhtml: 'applications.missing.inforequest.desc'"></p>
             <button
               data-bind="click: create"
               data-test-id="applications-create-new-inforequest"
@@ -89,7 +89,7 @@
 
           <div class="missing-application-box app-type-box" data-bind="css: {'app-type-box-wide': !authorizationModel.ok('create-application-from-previous-permit')}">
             <h2 data-bind="ltext: 'applications.missing.application.title'"></h2>
-            <p data-bind="ltext: 'applications.missing.application.desc'"></p>
+            <p data-bind="lhtml: 'applications.missing.application.desc'"></p>
             <button
               data-bind="click: create"
               data-test-id="applications-create-new-application"

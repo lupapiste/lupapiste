@@ -97,7 +97,7 @@
   {:parameters [id]
    :user-roles #{:applicant}
    :user-authz-roles action/default-authz-reader-roles
-   :states     (action/all-application-states-but [:closed :canceled])}
+   :states     action/all-application-states}
   [{:keys [created user application] :as command}]
   (when-let [my-invite (domain/invite application (:email user))]
 

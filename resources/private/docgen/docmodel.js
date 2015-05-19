@@ -660,24 +660,27 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
           locKey = e.i18nkey;
         } else if (subSchema.i18nkey) {
           locKey = subSchema.i18nkey + "." + e.name;
-
         }
-        return [e.name, loc(locKey)];
+        return {
+          name: e.name,
+          locName: loc(locKey),
+          disabled: e.disabled || false
+        };
       })
       .sortBy(function(e) {
-          if (subSchema.sortBy === "displayname") {
-            return e[1];
-          }
-          // lo-dash API doc tells that the sort is stable, so returning a static value equals to no sorting
-          return 0;
+        if (subSchema.sortBy === "displayname") {
+          return e.locName;
+        }
+        // lo-dash API doc tells that the sort is stable, so returning a static value equals to no sorting
+        return 0;
       }).value();
 
     _.forEach(options, function(e) {
-      var name = e[0];
       var option = document.createElement("option");
-      option.value = name;
-      option.appendChild(document.createTextNode(e[1]));
-      if (selectedOption === name) {
+      option.value = e.name;
+      option.appendChild(document.createTextNode(e.locName));
+      option.disabled = e.disabled;
+      if (selectedOption === e.name) {
         option.selected = "selected";
       }
       select.appendChild(option);
@@ -693,8 +696,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       select.appendChild(option);
     }
 
-    var locSelectedOption = _.find(options, function(o) {
-      return o[0] === sourceValue;
+    var locSelectedOption = _.find(options, function(e) {
+      return e.name === sourceValue;
     });
 
     sourceValueChanged(select, selectedOption, sourceValue, locSelectedOption ? locSelectedOption[1] : undefined);
@@ -1044,11 +1047,17 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         var userId = target.value;
         if (!_.isEmpty(userId)) {
           ajax
-          .command("set-user-to-document", { id: self.appId, documentId: self.docId, userId: userId, path: myNs, collection: self.getCollection() })
-          .success(function () {
-            save(event, function () { repository.load(self.appId); });
-          })
-          .call();
+            .command("set-user-to-document", { id: self.appId, documentId: self.docId, userId: userId, path: myNs, collection: self.getCollection() })
+            .success(function () {
+              save(event, function () { repository.load(self.appId); });
+            })
+            .error(function(e) {
+              if (e.text !== "error.application-does-not-have-given-auth") {
+                error("Failed to set user to document", userId, self.docId, e);
+              }
+              notify.error(loc("error.dialog.title"), loc(e.text));
+            })
+            .call();
         }
         return false;
       };
