@@ -140,7 +140,7 @@ LUPAPISTE.ApplicationModel = function() {
   self.updateInvites = function() {
     invites.getInvites(function(data) {
       self.invites(_.filter(data.invites, function(invite) {
-        return invite.application === self.id();
+        return invite.application.id === self.id();
       }));
     });
   };
