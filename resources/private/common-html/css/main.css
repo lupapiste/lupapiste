@@ -4743,7 +4743,7 @@ span.icon_clear:before {
 /* line 674, ../sass/views/_application.scss */
 .tasks-foreman .form-input {
   display: inline-block;
-  margin: 0 6px 0;
+  margin: 0 6px 0 0;
 }
 /* line 680, ../sass/views/_application.scss */
 .tasks-foreman .form-input.combobox.long, .tasks-foreman select.long {
