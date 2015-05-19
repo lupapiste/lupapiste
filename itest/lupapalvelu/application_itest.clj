@@ -129,7 +129,7 @@
         (:state application) => "submitted"))))
 
 (facts* "Application has opened when submitted from draft"
-  (let [app1 (create-application pena) => truthy
+  (let [{id :id :as app1} (create-application pena) => truthy
         resp (command pena :submit-application :id id) => ok?
         app2 (query-application pena id) => truthy]
     (:opened app1) => nil
