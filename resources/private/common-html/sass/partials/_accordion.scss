@@ -13,13 +13,12 @@
     color: white;
     font-size: 18px;
     line-height: 27px;
-    position: relative;
     cursor: pointer;
     font-weight: normal;
     margin-bottom: 0;
-    position: relative;
     width: 100%;
     padding-right:0;
+    max-width: $application-max-width - $marginS * 2;
     @include box-sizing(border-box);
     span {
       margin-right: $marginM;
@@ -63,6 +62,32 @@
         &:empty {
           display: none;
         }
+      }
+    }
+    .form-approval-status {
+      text-transform: none;
+      width: auto;
+      display: inline;
+      min-height: 28px;
+
+      &.empty {
+        display: none;
+        height: 0;
+      }
+
+      .form-buttons {
+        display:inline-block;
+        text-align: right;
+        float: right;
+        .btn {
+          margin: 0 $marginS 0 0;
+          line-height: 19px;
+          min-height: 19px;
+          vertical-align: top;
+        }
+      }
+      .approval-rejected, .approval-approved {
+        margin-right: 0;
       }
     }
   }
