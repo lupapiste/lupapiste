@@ -12,9 +12,7 @@
             <h3 data-bind="text: headerText"></h3>
             <span data-bind="text: 'Kutsuja:'"></span>
             <span data-bind="fullName: inviter"></span>
-            <!-- ko if: text -->
-            <p data-bind="text: text, attr: {'data-test-id': 'invitation-text-' + $index()}"></p>
-            <!-- /ko -->
+            <p data-bind="visible: text, text: text, attr: {'data-test-id': 'invitation-text-' + $index()}"></p>
           </div>
           <div>
             <span data-bind="dateString: created"></span>

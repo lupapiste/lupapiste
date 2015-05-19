@@ -96,9 +96,7 @@
     self.updateInvites = function() {
       invites.getInvites(function(data) {
         var invs = _(data.invites).map(function(inv) {
-          return _.assign(inv,
-                          { headerText: getHeaderText(inv)
-                          });
+          return _.assign(inv, { headerText: getHeaderText(inv) });
         }).value();
 
         self.invites(invs);
