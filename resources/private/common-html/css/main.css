@@ -3695,7 +3695,7 @@ ul.attachments-list li.mandatory-attachments {
     height: 320px;
   }
 }
-@media screen and (max-width: 1200px) {
+@media screen and (max-width: 1200px) and (min-width: 1100px) {
   /* line 34, ../sass/views/_applications.scss */
   .applications-empty-state .missing-wrapper {
     height: 290px;

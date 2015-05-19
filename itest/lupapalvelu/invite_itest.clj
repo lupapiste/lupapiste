@@ -91,6 +91,9 @@
     (fact "Teppo can read Mikko's application before accepting"
       (query teppo :application :id application-id) => ok?)
 
+    (fact "Teppo can not be se to document before he accepts invite"
+      (command mikko :set-user-to-document :id application-id :documentId hakija-doc :userId teppo-id :path "henkilo") => (partial expected-failure? "error.application-does-not-have-given-auth"))
+
     (fact "Teppo can not comment on Mikko's application before accepting the invite"
       (comment-application teppo application-id true) => unauthorized?)
 

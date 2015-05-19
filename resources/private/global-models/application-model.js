@@ -482,7 +482,7 @@ LUPAPISTE.ApplicationModel = function() {
   function focusOnElement(id, retryLimit) {
     var targetElem = document.getElementById(id);
 
-    if (!retryLimit || !targetElem) {
+    if (!retryLimit) {
       if (targetElem) {
         // last chance: hope that the browser scrolls to somewhere near the focused element.
         targetElem.focus();
@@ -493,14 +493,15 @@ LUPAPISTE.ApplicationModel = function() {
 
     var offset = $(targetElem).offset();
 
-    if (!offset || offset.left === 0) {
+    if (!offset || offset.left === 0 || !targetElem) {
       // Element is not yet visible, wait for a short moment.
       // Because of the padding, offset left is never zero when
       // the element is visible.
       setTimeout(_.partial(focusOnElement, id, --retryLimit), 5);
     } else {
       var navHeight = $("nav").first().height() || 0;
-      window.scrollTo(0, offset.top - navHeight - 30);
+      var roomForLabel = (targetElem.nodeName === "UL") ? 0 : 30;
+      window.scrollTo(0, offset.top - navHeight - roomForLabel);
       targetElem.focus();
     }
   }

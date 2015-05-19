@@ -1047,11 +1047,17 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         var userId = target.value;
         if (!_.isEmpty(userId)) {
           ajax
-          .command("set-user-to-document", { id: self.appId, documentId: self.docId, userId: userId, path: myNs, collection: self.getCollection() })
-          .success(function () {
-            save(event, function () { repository.load(self.appId); });
-          })
-          .call();
+            .command("set-user-to-document", { id: self.appId, documentId: self.docId, userId: userId, path: myNs, collection: self.getCollection() })
+            .success(function () {
+              save(event, function () { repository.load(self.appId); });
+            })
+            .error(function(e) {
+              if (e.text !== "error.application-does-not-have-given-auth") {
+                error("Failed to set user to document", userId, self.docId, e);
+              }
+              notify.error(loc("error.dialog.title"), loc(e.text));
+            })
+            .call();
         }
         return false;
       };
