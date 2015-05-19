@@ -129,9 +129,7 @@
         (:state application) => "submitted"))))
 
 (facts* "Application has opened when submitted from draft"
-  (let [resp (create-app pena) => ok?
-        id   (:id resp)
-        app1 (query-application pena id) => truthy
+  (let [{id :id :as app1} (create-application pena) => truthy
         resp (command pena :submit-application :id id) => ok?
         app2 (query-application pena id) => truthy]
     (:opened app1) => nil
@@ -355,12 +353,11 @@
           (get-in suunnittelija [:data :henkilotiedot :hetu :value]) => "210281-****")))))
 
 (facts "Set company to document"
-  (let [application   (create-and-submit-application pena :propertyId sipoo-property-id)
-        app-id        (:id application)
-        maksaja       (domain/get-document-by-name application "maksaja")
-        get-doc-value (fn [doc path-prefix path]
-                        (-> (get-in doc (into path-prefix path))
-                            tools/unwrapped))]
+  (let [{app-id :id :as app} (create-application pena :propertyId sipoo-property-id)
+        maksaja              (domain/get-document-by-name app "maksaja")
+        get-doc-value        (fn [doc path-prefix path]
+                               (-> (get-in doc (into path-prefix path))
+                                   tools/unwrapped))]
 
     (fact "initially maksaja company is empty"
       (let [check (partial get-doc-value maksaja [:data :yritys])]

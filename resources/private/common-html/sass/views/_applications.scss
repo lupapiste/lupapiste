@@ -37,7 +37,7 @@
     @media screen and (max-width: 1100px) {
       height: 320px;
     }
-    @media screen and (max-width: 1200px) {
+    @media screen and (max-width: 1200px) and (min-width: 1100px) {
       height: 290px;
     }
   }
