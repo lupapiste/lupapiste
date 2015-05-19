@@ -94,7 +94,7 @@
   (merge yritys
          {:verkkolaskutustieto {:ovtTunnus {:value "003712345671"}
                                 :verkkolaskuTunnus {:value "laskutunnus-1234"}
-                                :valittajaTunnus {:value "valittajatunnus-1234"}}}))
+                                :valittajaTunnus {:value "BAWCFI22"}}}))
 
 (def _laskuviite {:modified 1379404963313, :value "1234567890"})
 

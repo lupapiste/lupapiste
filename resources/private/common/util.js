@@ -172,6 +172,11 @@ var util = (function($) {
     return errs;
   }
 
+  function dissoc(m, k) {
+    delete m[k];
+    return m;
+  }
+
   return {
     zeropad:             zeropad,
     fluentify:           fluentify,
@@ -192,11 +197,12 @@ var util = (function($) {
     autofocus:    autofocus,
     isNum:        isNum,
     getIn:        getIn,
-        locKeyFromDocPath: locKeyFromDocPath,
+    locKeyFromDocPath: locKeyFromDocPath,
     getDocumentOrder: getDocumentOrder,
     isPartyDoc: isPartyDoc,
     isNotPartyDoc: isNotPartyDoc,
-    extractRequiredErrors: extractRequiredErrors
+    extractRequiredErrors: extractRequiredErrors,
+    dissoc: dissoc
   };
 
 })(jQuery);

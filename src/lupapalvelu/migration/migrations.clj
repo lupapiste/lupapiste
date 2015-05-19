@@ -1,5 +1,6 @@
 (ns lupapalvelu.migration.migrations
   (:require [monger.operators :refer :all]
+            [monger.collection :as mc]
             [taoensso.timbre :as timbre :refer [debug debugf info infof warn warnf error errorf]]
             [clojure.walk :as walk]
             [sade.util :refer [dissoc-in postwalk-map strip-nils abs] :as util]
@@ -943,6 +944,63 @@
 (defmigration company-default-account-type
   {:apply-when (pos? (mongo/count :companies {:accountType {$exists false}}))}
   (mongo/update-n :companies {:accountType {$exists false}} {$set {:accountType "account15"}} :multi true))
+
+(def invoicing-operator-mapping
+  {"003701274855102 OKOYFIHH" "OKOYFIHH"
+   "0036714377140" "003714377140"
+   "003703575029 " "003703575029"
+   "00370357529" "003703575029"
+   "003703675029" "003703575029"
+   "003708599126/Liaison Technologies Oy" "003708599126"
+   "003710948874 " "003710948874"
+   "003714377140 Enfo" "003714377140"
+   "003714377140ENFO" "003714377140"
+   "003721291126 " "003721291126"
+   "BASWARE (BAWCFI22)" "BAWCFI22"
+   "BAWCF122" "BAWCFI22"
+   "BasWare" "BAWCFI22"
+   "Basware" "BAWCFI22"
+   "CGI / 003703575029" "003703575029"
+   "Danske Bank" "DNBAFIHX"
+   "Enfo" "003714377140"
+   "Enfo Oyj" "003714377140"
+   "Enfo Oyj 003714377140" "003714377140"
+   "Enfo Zender Oy" "003714377140"
+   "Enfo Zender Oy / 003714377140" "003714377140"
+   "Liaison" "003708599126"
+   "Logica" "003703575029"
+   "Nordea (NDEAFIHH)" "NDEAFIHH"
+   "OKOYFIHH " "OKOYFIHH"
+   "Opus Capita Group Oy" "003710948874"
+   "OpusCapita Group Oy" "003710948874"
+   "OpusCapita Group Oy  003710948874" "003710948874"
+   "Tieto Oyj" "003701011385"
+   "dabafihh" "DABAFIHH"
+   "enfo" "003714377140"
+   "logica 00370357502" "003703575029"
+   "003701011385 OKOYFIHH" "OKOYFIHH"
+   "003715482348" "OKOYFIHH"
+   })
+
+(defmigration convert-invoicing-operator-values-from-documents
+  (let [old-op-names (keys invoicing-operator-mapping)
+        path         [:data :yritys :verkkolaskutustieto :valittajaTunnus :value]
+        query        (->> (cons :documents path)
+                          (map name)
+                          (clojure.string/join "."))]
+    (update-applications-array
+      :documents
+      (fn [doc]
+        (if-let [current-val (get-in doc path)]
+          (let [replace-val (get invoicing-operator-mapping current-val)]
+            (assoc-in doc path replace-val))
+          doc))
+      {query {$in old-op-names}})))
+
+; To find current unmapped operator values
+(comment
+  (let [cur-vals (mc/distinct :applications "documents.data.yritys.verkkolaskutustieto.valittajaTunnus.value")]
+    (remove (fn [val] (some #(= val %) (map :name lupapalvelu.document.schemas/e-invoice-operators))) cur-vals)))
 
 ;;
 ;; ****** NOTE! ******

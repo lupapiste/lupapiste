@@ -13,7 +13,8 @@
             [lupapalvelu.ttl :as ttl]
             [lupapalvelu.notifications :as notif]
             [lupapalvelu.user-api :as uapi]
-            [lupapalvelu.user :as u])
+            [lupapalvelu.user :as u]
+            [lupapalvelu.document.schemas :as schema])
   (:import [java.util Date]))
 
 ;;
@@ -33,6 +34,10 @@
 
 (def- max-64-or-nil (sc/either (max-length-string 64) (sc/pred nil?)))
 
+(defn supported-invoice-operator? [op]
+  (let [supported-ops (map :name schema/e-invoice-operators)]
+    (some #(= op %) supported-ops)))
+
 (def Company {:name                          (sc/both (min-length-string 1) (max-length-string 64))
               :y                             (sc/pred util/finnish-y? "Not valid Y code")
               :accountType                   (sc/pred account-type? "Not valid account type")
@@ -42,8 +47,9 @@
               (sc/optional-key :po)          max-64-or-nil
               (sc/optional-key :zip)         max-64-or-nil
               (sc/optional-key :country)     max-64-or-nil
-              (sc/optional-key :ovt)         (sc/pred util/finnish-ovt? "Not valid OVT code")
-              (sc/optional-key :pop)         (sc/pred util/finnish-ovt? "Not valid OVT code") ; FIXME LPK-350
+              (sc/optional-key :ovt)         (sc/pred util/finnish-ovt? "Not a valid OVT code")
+              (sc/optional-key :pop)         (sc/either (sc/pred supported-invoice-operator? "Not a supported invoice operator")
+                                                        (sc/pred ss/blank?))
               (sc/optional-key :process-id)  sc/Str
               (sc/optional-key :created)     sc/Int
               })

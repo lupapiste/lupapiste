@@ -5,6 +5,7 @@
             [monger.operators :refer :all]
             [sade.strings :as ss]
             [sade.core :refer [ok fail fail! unauthorized]]
+            [sade.util :as util]
             [lupapalvelu.action :refer [defquery defcommand defraw update-application all-application-states notify] :as action]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.notifications :as notifications]
@@ -23,9 +24,16 @@
   [{{:keys [id]} :user}]
   (let [common     {:auth {$elemMatch {:invite.user.id id}}}
         query      {$and [common {:state {$ne :canceled}}]}
-        data       (mongo/select :applications query [:auth])
-        invites    (filter #(= id (get-in % [:user :id])) (map :invite (mapcat :auth data)))]
-    (ok :invites invites)))
+        data       (mongo/select :applications query [:auth :operations :address :municipality])
+        invites    (filter #(= id (get-in % [:user :id])) (map :invite (mapcat :auth data)))
+        invites-with-application (map
+                                   #(update-in % [:application]
+                                               (fn [app-id]
+                                                 (select-keys
+                                                   (util/find-by-id app-id data)
+                                                   [:id :address :operations :municipality])))
+                                   invites)]
+    (ok :invites invites-with-application)))
 
 (defn- create-invite-email-model [command conf recipient]
   (assoc (notifications/create-app-model command conf recipient)
@@ -89,7 +97,7 @@
   {:parameters [id]
    :user-roles #{:applicant}
    :user-authz-roles action/default-authz-reader-roles
-   :states     (action/all-application-states-but [:closed :canceled])}
+   :states     action/all-application-states}
   [{:keys [created user application] :as command}]
   (when-let [my-invite (domain/invite application (:email user))]
 
@@ -103,7 +111,7 @@
       (when-let [document (domain/get-document-by-id application (:documentId my-invite))]
         ; Document can be undefined (invite's documentId is an empty string) in invite or removed by the time invite is approved.
         ; It's not possible to combine Mongo writes here, because only the last $elemMatch counts.
-        (commands/do-set-user-to-document (domain/get-application-as id user) document (:id user) (:path my-invite) created)))))
+        (commands/do-set-user-to-document (domain/get-application-as id user :include-canceled-apps? true) document (:id user) (:path my-invite) created)))))
 
 (defn generate-remove-invalid-user-from-docs-updates [{docs :documents :as application}]
   (-<>> docs

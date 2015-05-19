@@ -1,4 +1,3 @@
-
 (ns lupapalvelu.components.ui-components
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
             [clojure.java.io :as io]
@@ -24,22 +23,22 @@
               :name "jquery"})
 
 (defn- conf []
-  (let [js-conf {:maps                (env/value :maps)
-                 :analytics           (env/value :analytics)
-                 :fileExtensions      mime/allowed-extensions
-                 :passwordMinLength   (env/value :password :minlength)
-                 :mode                env/mode
-                 :build               (:build-number env/buildinfo)
-                 :cookie              (env/value :cookie)
-                 :wannaJoinUrl        (env/value :oir :wanna-join-url)
-                 :userAttachmentTypes (map #(str "osapuolet." (name %)) attachment-types-osapuoli)
-                 :attachmentScales    attachment-scales
-                 :attachmentSizes     attachment-sizes
-                 :accountTypes        company/account-types
-                 :eInvoiceOperators (map :name schemas/e-invoice-operators)
-                 :postVerdictStates lupapalvelu.application-meta-fields/post-verdict-states
-                 :stampableMimes (filter identity (map mime/mime-types file-types))
-                 :foremanRoles (:body (first lupapalvelu.document.schemas/kuntaroolikoodi-tyonjohtaja))
+  (let [js-conf {:maps                  (env/value :maps)
+                 :analytics             (env/value :analytics)
+                 :fileExtensions        mime/allowed-extensions
+                 :passwordMinLength     (env/value :password :minlength)
+                 :mode                  env/mode
+                 :build                 (:build-number env/buildinfo)
+                 :cookie                (env/value :cookie)
+                 :wannaJoinUrl          (env/value :oir :wanna-join-url)
+                 :userAttachmentTypes   (map #(str "osapuolet." (name %)) attachment-types-osapuoli)
+                 :attachmentScales      attachment-scales
+                 :attachmentSizes       attachment-sizes
+                 :accountTypes          company/account-types
+                 :eInvoiceOperators     schemas/e-invoice-operators
+                 :postVerdictStates     lupapalvelu.application-meta-fields/post-verdict-states
+                 :stampableMimes        (filter identity (map mime/mime-types file-types))
+                 :foremanRoles          (:body (first lupapalvelu.document.schemas/kuntaroolikoodi-tyonjohtaja))
                  :foremanReadonlyFields ["luvanNumero", "katuosoite", "rakennustoimenpide", "kokonaisala"]
                  :asianhallintaVersions (util/convert-values ; asianhallinta versions have "ah-" prefix
                                           validator/supported-asianhallinta-versions-by-permit-type
@@ -68,6 +67,7 @@
                     :js ["underscore.string.min.js" "underscore.string.init.js"]}
    :moment         {:js ["moment.min.js"]}
    :open-layers    {:js ["openlayers-2.13_20140619.min.lupapiste.js"]}
+   :stickyfill     {:js ["stickyfill.min.js"]}
 
    ;; Init can also be used as a standalone lib, see web.clj
    :init         {:depends [:underscore]
@@ -90,7 +90,7 @@
                        :js ["expanded-content.js"]}
 
    :common       {:depends [:init :jquery :jquery-upload :knockout :underscore :moment :i18n :selectm
-                            :expanded-content :mockjax :open-layers]
+                            :expanded-content :mockjax :open-layers :stickyfill]
                   :js ["register-components.js" "util.js" "event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js"
                        "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "perfmon.js" "features.js"
                        "statuses.js" "statusmodel.js" "authorization.js" "vetuma.js"]}
@@ -269,7 +269,8 @@
                         "company-selector/company-selector-model.js"
                         "company-invite/company-invite-model.js"
                         "company-invite/company-invite-dialog-model.js"
-                        "autocomplete/autocomplete-model.js"]
+                        "autocomplete/autocomplete-model.js"
+                        "invoice-operator-selector/invoice-operator-selector-model.js"]
                    :html ["fill-info/fill-info-template.html"
                           "foreman-history/foreman-history-template.html"
                           "foreman-other-applications/foreman-other-applications-template.html"
@@ -289,7 +290,8 @@
                           "company-selector/company-selector-template.html"
                           "company-invite/company-invite-template.html"
                           "company-invite/company-invite-dialog-template.html"
-                          "autocomplete/autocomplete-template.html"]}
+                          "autocomplete/autocomplete-template.html"
+                          "invoice-operator-selector/invoice-operator-selector-template.html"]}
 
    ;; Single Page Apps and standalone components:
    ;; (compare to auth-methods in web.clj)

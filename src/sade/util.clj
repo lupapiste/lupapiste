@@ -316,6 +316,11 @@
       (finnish-y? (str y \- c)))
     false))
 
+(defn bic? [bic]
+  (if bic
+    (re-matches #"^[a-zA-Z]{6}[a-zA-Z\d]{2,5}$" bic)
+    false))
+
 (defn account-type? [account-type]
   (cond
     (nil? account-type) false

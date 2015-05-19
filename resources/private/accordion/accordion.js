@@ -8,7 +8,7 @@ var accordion = (function() {
     var target = t;
     if (target.is("span")) { target = target.parent(); }
 
-    var content = target.next();
+    var content = target.siblings(".accordion_content");
 
     var state = content.attr("data-accordion-state");
     if (toState === state) { return; }
