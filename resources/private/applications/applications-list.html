@@ -13,7 +13,7 @@
             <span data-bind="text: 'Kutsuja:'"></span>
             <span data-bind="fullName: inviter"></span>
             <!-- ko if: text -->
-            <p data-bind="text: text"></p>
+            <p data-bind="text: text, attr: {'data-test-id': 'invitation-text-' + $index()}"></p>
             <!-- /ko -->
           </div>
           <div>
