@@ -54,6 +54,9 @@ Party tab has indicators
   Wait Until  Element should be visible  applicationPartyDocumentIndicator
 
 Sonja approves application
+  Open tab  requiredFieldSummary
+  Element should be visible  xpath=//button[@data-test-id="approve-application-summaryTab-missing-required"]
+  Element should be visible  xpath=//button[@data-test-id="approve-application"]
   Click enabled by test id  approve-application
 
 Sonja cant re-approve application
