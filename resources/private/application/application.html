@@ -579,6 +579,27 @@
                  <span data-bind="ltext: 'application.submitApplication'"></span>
                  <span class="icon send left-align"></span>
                </button>
+
+               <div class="auth-actions">
+                <button data-bind="click: approveApplication,
+                                    visible: $root.authorization.ok('approve-application'),
+                                    enable: !processing() && $root.authorization.ok('approve-application'), attr: {'title': loc('tooltip.approveApplication')}"
+                        data-test-id="approve-application-summaryTab"
+                        class="btn btn-primary">
+                  <span data-bind="ltext: 'application.approveApplication'"></span>
+                  <span class="icon approve left-align"></span>
+                </button>
+
+                <button data-bind="click: toAsianhallinta,
+                                   visible: $root.authorization.ok('application-to-asianhallinta') && asianhallintaEnabled,
+                                   enable: !processing() && $root.authorization.ok('application-to-asianhallinta') && asianhallintaEnabled,
+                                   attr: {'title': loc('tooltip.toAsianhallinta')}"
+                        data-test-id="to-asianhallinta-summaryTab"
+                        class="btn btn-primary">
+                  <span data-bind="ltext: 'application.toAsianhallinta'"></span>
+                  <span class="icon approve left-align"></span>
+                </button>
+              </div>
             <!-- /ko -->
 
             <!--  ko if:  missingRequiredInfo() -->
@@ -591,6 +612,26 @@
                  <span data-bind="ltext: 'application.submitApplication'"></span>
                  <span class="icon send left-align"></span>
                </button>
+               <div class="auth-actions">
+                  <button data-bind="click: approveApplication,
+                                      visible: $root.authorization.ok('approve-application'),
+                                      enable: !processing() && $root.authorization.ok('approve-application'), attr: {'title': loc('tooltip.approveApplication')}"
+                          data-test-id="approve-application-summaryTab-missing-required"
+                          class="btn btn-primary">
+                    <span data-bind="ltext: 'application.approveApplication'"></span>
+                    <span class="icon approve left-align"></span>
+                  </button>
+
+                  <button data-bind="click: toAsianhallinta,
+                                     visible: $root.authorization.ok('application-to-asianhallinta') && asianhallintaEnabled,
+                                     enable: !processing() && $root.authorization.ok('application-to-asianhallinta') && asianhallintaEnabled,
+                                     attr: {'title': loc('tooltip.toAsianhallinta')}"
+                          data-test-id="to-asianhallinta-summaryTab-missing-required"
+                          class="btn btn-primary">
+                    <span data-bind="ltext: 'application.toAsianhallinta'"></span>
+                    <span class="icon approve left-align"></span>
+                  </button>
+              </div>
               <h2 class="missing-info-title"
                   data-bind="ltext: 'application.requiredDataMissing'"></h2>
 
