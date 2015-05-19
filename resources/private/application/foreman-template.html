@@ -69,9 +69,13 @@
                              value: $data.selectedForeman">
                 </select>
 
-                <a class="add-foreman" data-bind="visible: !$data.selectedForeman(),
-                                                  click: function() { $parents[1].inviteForeman($data.taskId); }">
+                <a class="add-foreman" href="#" data-bind="visible: !$data.selectedForeman(),
+                                                           click: function() { $parents[1].inviteForeman($data.taskId); }">
                   <span data-bind="ltext: 'application.parties.addForeman'"></span>
+                </a>
+                <a class="add-foreman" href="#" data-bind="visible: $data.selectedForeman,
+                                                           attr: {href: '#!/application/' + $data.selectedForeman()}">
+                  <span data-bind="ltext: 'application.open'"></span>
                 </a>
               </td>
               <td>
