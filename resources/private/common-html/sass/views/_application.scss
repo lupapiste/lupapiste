@@ -375,8 +375,6 @@
     vertical-align: top;
     a.command {
       display: block;
-      &:before { content: "["; }
-      &:after { content: "]"; }
     }
     .owner-name {
       font-weight: bold;

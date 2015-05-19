@@ -18,8 +18,7 @@
   (query pena :actions) => unauthorized?
   (query sonja :actions) => unauthorized?)
 
-(let [resp  (create-app mikko :propertyId sipoo-property-id)
-      id    (:id resp)]
+(let [{id :id :as resp}  (create-app mikko :propertyId sipoo-property-id)]
   (fact "Mikko must be able to create an application!"
     resp => ok?)
 

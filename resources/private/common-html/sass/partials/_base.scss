@@ -56,7 +56,7 @@ body {
 }
 .container {
   @include box-sizing(border-box);
-  padding: $marginM 8px 0 8px;
+  padding: $marginM $marginS 0 $marginS;
   width: 100%;
   max-width: $application-max-width;
   margin: $baseline auto $baseline auto;
@@ -92,4 +92,16 @@ body {
 
 .left {
   float: left;
+}
+
+.sticky {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 60px;
+  z-index: 1;
+
+  &:after, &:before {
+    content: '';
+    display: table;
+  }
 }
