@@ -45,6 +45,7 @@ Mikko can't reinvite Teppo
 Teppo declines invitation
   Teppo logs in
   Wait until  Element should be visible  xpath=//*[@data-test-id='decline-invite-button']
+  Element Should Contain  xpath=//div[@class='invitation'][1]//h3  invite-app, Sipoo,
   Element Text Should Be  xpath=//div[@class='invitation'][1]//p[@data-test-id='invitation-text-0']  Tervetuloa muokkaamaan hakemusta
   Click by test id  decline-invite-button
   Confirm  dynamic-yes-no-confirm-dialog
@@ -68,6 +69,7 @@ Teppo can view application
 
 Teppo accepts invitation
   Wait until  Element should be visible  xpath=//*[@data-test-id='accept-invite-button']
+  Element Should Contain  xpath=//div[@class='invitation'][1]//h3  invite-app, Sipoo,
   Element Text Should Be  xpath=//div[@class='invitation']//p[@data-test-id='invitation-text-0']  Tervetuloa muokkaamaan hakemusta
   Click by test id  accept-invite-button
   Wait until  Element should not be visible  xpath=//*[@data-test-id='accept-invite-button']
