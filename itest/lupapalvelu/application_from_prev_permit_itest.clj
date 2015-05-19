@@ -53,7 +53,7 @@
     (fact "db has app that has the kuntalupatunnus in its verdict and its organization matches"
       (create-app-from-prev-permit raktark-jarvenpaa) => (contains {:ok true :id "lupis-id"})
       (provided
-        (domain/get-application-as anything anything) => {:id "lupis-id" :state "verdictGiven"}))
+        (domain/get-application-as anything anything :include-canceled-apps? false) => {:id "lupis-id" :state "verdictGiven"}))
 
     ; 3: jos taustajarjestelmasta ei saada xml-sisaltoa -> (fail :error.no-previous-permit-found-from-backend)
     (fact "no xml content received from backend with the kuntalupatunnus"

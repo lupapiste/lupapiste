@@ -350,7 +350,7 @@
   "Returns the attachment if user has access to application, otherwise nil."
   [user file-id]
   (when-let [attachment (mongo/download file-id)]
-    (when-let [application (get-application-as (:application attachment) user)]
+    (when-let [application (get-application-as (:application attachment) user :include-canceled-apps? true)]
       (when (seq application) attachment))))
 
 (defn get-attachment
