@@ -269,4 +269,5 @@ button[disabled] {
 a.command {
   &:before { content: "["; }
   &:after { content: "]"; }
+  white-space: nowrap;
 }
