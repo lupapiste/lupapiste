@@ -1,1 +1,2 @@
 applications.openApplication: Avaa hakemus
+auth: Valtuutus
