@@ -83,11 +83,15 @@
     };
 
     function getHeaderText(inv) {
-      return loc("auth")+ ": " +
-             inv.application.address + ", " +
-             loc(["municipality", inv.application.municipality]) + ", " +
-             loc(["operations", (_.first(inv.application.operations)).name]);
+      var address = inv.application.address;
+      var municipality = inv.application.municipality;
+      var operation = _.first(inv.application.operations).name;
+      return loc("auth") + ": " +
+             (address ? address + ", " : "") +
+             (municipality ? loc(["municipality", municipality]) + ", " : "") +
+             (operation ? loc(["operations", operation]) : "");
     }
+
     self.invites = ko.observableArray([]);
     self.updateInvites = function() {
       invites.getInvites(function(data) {
