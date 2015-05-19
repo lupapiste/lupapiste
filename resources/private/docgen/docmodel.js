@@ -314,7 +314,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return span;
   }
 
-  self.makeApprovalButtons = function (path, model) {
+  self.makeApprovalButtons = function (path, model, title) {
     var btnContainer$ = $("<span>").addClass("form-buttons");
     var statusContainer$ = $("<span>");
     var approvalContainer$ = $("<span>").addClass("form-approval-status empty").append(statusContainer$).append(btnContainer$);
@@ -333,7 +333,11 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
           text += " (" + approval.user.lastName + " " + approval.user.firstName;
           text += " " + moment(approval.timestamp).format("D.M.YYYY HH:mm") + ")";
         }
-        statusContainer$.text(text);
+        if (title) {
+          statusContainer$.attr("title", text);
+        } else {
+          statusContainer$.text(text);
+        }
         statusContainer$.removeClass(function(index, css) {
           return _.filter(css.split(" "), function(c) { return _.includes(c, "approval-"); }).join(" ");
         });
@@ -742,7 +746,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     div.appendChild(groupHelpText);
 
     if (subSchema.approvable) {
-      label.appendChild(self.makeApprovalButtons(path, myModel));
+      label.appendChild(self.makeApprovalButtons(path, myModel, false));
     }
     div.appendChild(partsDiv);
 
@@ -1289,7 +1293,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         div.appendChild(groupHelpText);
 
         if (subSchema.approvable) {
-          div.appendChild(self.makeApprovalButtons(path, models));
+          div.appendChild(self.makeApprovalButtons(path, models, false));
         }
         div.appendChild(table);
 
@@ -1775,14 +1779,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     icon.className = "icon toggle-icon " + (accordionCollapsed ? "drill-right-white" : "drill-down-white");
     title.appendChild(icon);
 
-    if (op) {
-      title.appendChild(document.createTextNode(loc([op.name, "_group_label"])));
-      if (authorizationModel.ok("update-op-description")) {
-        title.appendChild(buildDescriptionElement(op));
-      }
-    } else {
-      title.appendChild(document.createTextNode(loc([self.schema.info.name, "_group_label"])));
-    }
+    title.className = "sticky";
     title.setAttribute("data-doc-id", self.docId);
     title.setAttribute("data-app-id", self.appId);
     title.onclick = accordion.click;
@@ -1798,7 +1795,16 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }
 
     if (self.schema.info.approvable) {
-      elements.appendChild(self.makeApprovalButtons([], self.model));
+      title.appendChild(self.makeApprovalButtons([], self.model, true));
+    }
+
+    if (op) {
+      title.appendChild(document.createTextNode(loc([op.name, "_group_label"])));
+      if (authorizationModel.ok("update-op-description")) {
+        title.appendChild(buildDescriptionElement(op));
+      }
+    } else {
+      title.appendChild(document.createTextNode(loc([self.schema.info.name, "_group_label"])));
     }
 
     sectionContainer.className = "accordion_content" + (accordionCollapsed ? "" : " expanded");
