@@ -75,7 +75,7 @@
   });
 
   hub.subscribe("application-model-updated", function() {
-    if (currentId === lupapisteApp.models.application.id()) {
+    if (currentId === lupapisteApp.models.application.id() && pageutil.getPage() === "add-operation") {
       model.init();
     }
   });
