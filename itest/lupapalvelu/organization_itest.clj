@@ -60,7 +60,6 @@
                                :inforequestEnabled (not (:inforequest-enabled orig-scope))
                                :applicationEnabled (not (:new-application-enabled orig-scope))
                                :openInforequestEnabled (not (:open-inforequest orig-scope))
-                               :permanentArchiveEnabled (not (:permanent-archive-enabled orig-scope))
                                :openInforequestEmail "someone@localhost"
                                :opening nil)
         updated-organization (query admin :organization-by-id :organizationId organization-id)
@@ -71,7 +70,6 @@
     (fact "inforequest-enabled" (:inforequest-enabled updated-scope) => (not (:inforequest-enabled orig-scope)))
     (fact "new-application-enabled" (:new-application-enabled updated-scope) => (not (:new-application-enabled orig-scope)))
     (fact "open-inforequest" (:open-inforequest updated-scope) => (not (:open-inforequest orig-scope)))
-    (fact "permanent-archive-enabled" (:permanent-archive-enabled updated-scope) => (not (:permanent-archive-enabled orig-scope)))
     (fact "open-inforequest-email" (:open-inforequest-email updated-scope) => "someone@localhost")))
 
 (fact* "Tampere-ya sees (only) YA operations and attachments (LUPA-917, LUPA-1006)"
@@ -204,7 +202,6 @@
       :inforequestEnabled false
       :applicationEnabled false
       :openInforequestEnabled false
-      :permanentArchiveEnabled false
       :openInforequestEmail "someone@localhost"
 
       :opening 123)
@@ -229,3 +226,17 @@
 
   (fact "Valid attachment is ok"
     (command sipoo :organization-operations-attachments :operation "pientalo" :attachments [["muut" "muu"]]) => ok?))
+
+(facts "permanent-archive-can-be-set"
+  (let [organization  (first (:organizations (query admin :organizations)))
+        id (:id organization)]
+
+    (fact "Permanent archive can be enabled"
+      (command admin "set-organization-permanent-archive-enabled" :enabled true :organizationId id) => ok?
+      (let [updated-org (query admin "organization-by-id" :organizationId id)]
+        (:permanent-archive-enabled updated-org) => true))
+
+    (fact "Permanent archive can be disabled"
+      (command admin "set-organization-permanent-archive-enabled" :enabled false :organizationId id) => ok?
+      (let [updated-org (query admin "organization-by-id" :organizationId id)]
+        (:permanent-archive-enabled updated-org) => false))))

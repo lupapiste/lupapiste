@@ -8,6 +8,12 @@
         <div data-bind="with: organizationModel">
           <h2 data-bind="text: util.getIn($data, ['organization', 'name', loc.getCurrentLanguage()])"></h2>
 
+          <div class="permanent-archive-setting" data-bind="if: util.getIn($data, ['organization', 'id'])">
+            <label data-bind="ltext: 'organization.archive.enabled'" for="permanentArchiveEnabled"></label>
+            <input type="checkbox" data-bind="checked: permanentArchiveEnabled" class="form-input" id="permanentArchiveEnabled">
+            <span data-bind="saveIndicator: indicator"></span>
+          </div>
+
           <div data-bind="with: organization"><div data-bind="foreach: $data.scope">
             <h3 data-bind="ltext: $data.permitType"></h3>
             <table data-test-id="organization-table">
@@ -16,7 +22,6 @@
                   <th data-bind="ltext: 'organization.inforequest.enabled'"></th>
                   <th data-bind="ltext: 'organization.application.enabled'"></th>
                   <th data-bind="ltext: 'organization.openinforequest.enabled'"></th>
-                  <th data-bind="ltext: 'organization.archive.enabled'"></th>
                   <th data-bind="ltext: 'organization.openinforequest.email'"></th>
                   <th>Palvelu avataan</th>
                   <th>Tallenna rivi</th>
@@ -32,9 +37,6 @@
                   </td>
                   <td data-bind="attr: {'data-test-id': 'open-inforequest-' + $data.municipality() + '-' + $data.permitType()}">
                     <input type="checkbox" data-bind="checked: $data['open-inforequest']" class="form-input" >
-                  </td>
-                  <td>
-                    <input type="checkbox" data-bind="checked: $data['permanent-archive-enabled']" class="form-input" >
                   </td>
                   <td data-bind="">
                     <input type="text" data-bind="value: $data['open-inforequest-email'], attr: {'data-test-id': 'open-inforequest-email-' + $data.municipality() + '-' + $data.permitType()}" class="form-input" >

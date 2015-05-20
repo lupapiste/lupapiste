@@ -98,7 +98,7 @@
 (defcommand update-organization
   {:description "Update organization details."
    :parameters [permitType municipality
-                inforequestEnabled applicationEnabled openInforequestEnabled openInforequestEmail permanentArchiveEnabled
+                inforequestEnabled applicationEnabled openInforequestEnabled openInforequestEmail
                 opening]
    :input-validators [permit/permit-type-validator]
    :user-roles #{:admin}}
@@ -109,7 +109,6 @@
              :scope.$.new-application-enabled applicationEnabled
              :scope.$.open-inforequest openInforequestEnabled
              :scope.$.open-inforequest-email openInforequestEmail
-             :scope.$.permanent-archive-enabled permanentArchiveEnabled
              :scope.$.opening (when (number? opening) opening)}})
   (ok))
 
@@ -265,6 +264,15 @@
                        (partial boolean-parameters [:isObligatory])]}
   [{user :user}]
   (o/update-organization (user/authority-admins-organization-id user) {$set {:app-required-fields-filling-obligatory isObligatory}})
+  (ok))
+
+(defcommand set-organization-permanent-archive-enabled
+  {:parameters [enabled organizationId]
+   :user-roles #{:admin}
+   :input-validators  [(partial non-blank-parameters [:enabled :organizationId])
+                       (partial boolean-parameters [:enabled])]}
+  [{user :user}]
+  (o/update-organization organizationId {$set {:permanent-archive-enabled enabled}})
   (ok))
 
 (defquery krysp-config
