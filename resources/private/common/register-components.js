@@ -22,7 +22,8 @@ jQuery(document).ready(function() {
     "company-invite-dialog",
     "submit-button-group",
     "yes-no-dialog",
-    "invoice-operator-selector"
+    "invoice-operator-selector",
+    "user-notification"
   ];
 
   _.forEach(components, function(component) {

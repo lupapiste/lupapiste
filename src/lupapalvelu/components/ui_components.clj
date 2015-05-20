@@ -270,7 +270,8 @@
                         "company-invite/company-invite-model.js"
                         "company-invite/company-invite-dialog-model.js"
                         "autocomplete/autocomplete-model.js"
-                        "invoice-operator-selector/invoice-operator-selector-model.js"]
+                        "invoice-operator-selector/invoice-operator-selector-model.js"
+                        "user-notification/user-notification-model.js"]
                    :html ["fill-info/fill-info-template.html"
                           "foreman-history/foreman-history-template.html"
                           "foreman-other-applications/foreman-other-applications-template.html"
@@ -291,7 +292,8 @@
                           "company-invite/company-invite-template.html"
                           "company-invite/company-invite-dialog-template.html"
                           "autocomplete/autocomplete-template.html"
-                          "invoice-operator-selector/invoice-operator-selector-template.html"]}
+                          "invoice-operator-selector/invoice-operator-selector-template.html"
+                          "user-notification/user-notification-template.html"]}
 
    ;; Single Page Apps and standalone components:
    ;; (compare to auth-methods in web.clj)
