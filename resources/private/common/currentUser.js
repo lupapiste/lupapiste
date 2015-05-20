@@ -27,7 +27,7 @@ LUPAPISTE.CurrentUser = function() {
   };
 
   function constructor(user) {
-    ko.mapping.fromJS((_.assign({}, defaults, user)), {}, self);
+    ko.mapping.fromJS(_.defaults(user, defaults), {}, self);
   }
 
   constructor({});

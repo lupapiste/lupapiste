@@ -75,7 +75,7 @@
         .id(null)
         .name(null)
         .y(null);
-      if (u.company) {
+      if (u.company.id) {
         self
           .companyShow(true)
           .companyLoading(true);
