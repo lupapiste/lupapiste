@@ -464,22 +464,26 @@
   {:pre [(or (nil? turvakieltokytkin) (util/boolean? turvakieltokytkin))]}
   (letfn [(wrap [v] (if (and with-empty-defaults? (nil? v)) "" v))]
     (->
-      {:userId                        (wrap id)
-       :henkilotiedot {:etunimi       (wrap firstName)
-                       :sukunimi      (wrap lastName)
-                       :hetu          (wrap (when with-hetu personId))
-                       :turvakieltoKytkin (when (or turvakieltokytkin with-empty-defaults?) (boolean turvakieltokytkin))}
-       :yhteystiedot {:email          (wrap email)
-                      :puhelin        (wrap phone)}
-       :osoite {:katu                 (wrap street)
-                :postinumero          (wrap zip)
-                :postitoimipaikannimi (wrap city)}
-       :yritys {:yritysnimi           (wrap companyName)
-                :liikeJaYhteisoTunnus (wrap companyId)}
-       :patevyys {:koulutusvalinta    nil
-                  :koulutus           (wrap degree)
-                  :valmistumisvuosi   (wrap graduatingYear)
-                  :fise               (wrap fise)}}
+      {:userId                                  (wrap id)
+       :henkilotiedot {:etunimi                 (wrap firstName)
+                       :sukunimi                (wrap lastName)
+                       :hetu                    (wrap (when with-hetu personId))
+                       :turvakieltoKytkin       (when (or turvakieltokytkin with-empty-defaults?) (boolean turvakieltokytkin))}
+       :yhteystiedot {:email                    (wrap email)
+                      :puhelin                  (wrap phone)}
+       :osoite {:katu                           (wrap street)
+                :postinumero                    (wrap zip)
+                :postitoimipaikannimi           (wrap city)}
+       :yritys {:yritysnimi                     (wrap companyName)
+                :liikeJaYhteisoTunnus           (wrap companyId)}
+       :patevyys {:koulutusvalinta              (wrap degree)
+                  :koulutus                     nil
+                  :valmistumisvuosi             (wrap graduatingYear)
+                  :fise                         (wrap fise)}
+       :patevyys-tyonjohtaja {:koulutusvalinta  (wrap degree)
+                              :koulutus         nil
+                              :valmistumisvuosi (wrap graduatingYear)
+                              :fise             (wrap fise)}}
       util/strip-nils
       util/strip-empty-maps
       tools/wrapped)))
