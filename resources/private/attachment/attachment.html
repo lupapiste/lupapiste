@@ -226,7 +226,6 @@
                               <td data-bind="text: name"></td>
                               <td>
                                 <span data-bind="text: value"></span>
-                                <span data-bind="if: isFinite(value)"> vuotta</span>
                               </td>
                             </tr>
                             </tbody>
@@ -234,7 +233,6 @@
                         </div>
                         <span data-bind="if: typeof(value) != 'object'">
                           <span data-bind="text: value"></span>
-                          <span data-bind="if: isFinite(value)"> vuotta</span>
                         </span>
                       </td>
                     </tr>

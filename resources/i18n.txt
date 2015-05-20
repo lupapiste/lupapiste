@@ -1,0 +1,1 @@
+sailytysaika.pituus: {0} vuotta
