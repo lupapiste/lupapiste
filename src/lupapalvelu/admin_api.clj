@@ -1,5 +1,6 @@
 (ns lupapalvelu.admin-api
   (:require [taoensso.timbre :as timbre :refer [trace tracef debug info infof warn warnf error errorf]]
+            [monger.collection :as mc]
             [lupapalvelu.action :refer [defraw]]
             [sade.core :refer [now]]
             [lupapalvelu.domain :as domain]
@@ -35,3 +36,11 @@
     {:status 404
      :headers {"Content-Type"  "text/plain" "Cache-Control" "no-cache"}
      :body "Organization not found"}))
+
+(defraw admin-download-authority-usernames
+  {:user-roles #{:admin}}
+  [_]
+  {:status 200
+   :body (clojure.string/join "\n" (mc/distinct :users :username {:role "authority"}))
+   :headers {"Content-Type" "text/plain"
+             "Cache-Control" "no-cache"}})

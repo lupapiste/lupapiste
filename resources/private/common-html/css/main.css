@@ -4846,6 +4846,11 @@ span.icon_clear:before {
   width: 175px;
 }
 
+/* line 739, ../sass/views/_application.scss */
+#application-requiredFieldSummary-tab .auth-actions button {
+  display: block;
+}
+
 /* line 1, ../sass/views/_create_application.scss */
 .ui-autocomplete-loading {
   background: white url("/img/ajax-loader-16.gif") right center no-repeat;
