@@ -39,8 +39,17 @@ Foreman can see application
   Wait until  Element text should be  xpath=//table[@id='applications-list']//tr[@data-test-address='${appname}'][2]/td[@data-test-col-name='operation']  Asuinkerrostalon tai rivitalon rakentaminen
   [Teardown]  logout
 
-Application is submitted
+Foreman application can't be submitted before link permit application
   Mikko logs in
+  Open application at index  ${appname}  753-416-25-22  2
+  Wait until  Element should be visible  xpath=//a[@data-test-id='test-application-app-linking-to-us']
+  Click by test id  test-application-app-linking-to-us
+  Wait until  Element should be visible  //section[@id='application']//span[@data-test-operation-id='tyonjohtajan-nimeaminen-v2']
+  Open tab  requiredFieldSummary
+  Element should be disabled  xpath=//button[@data-test-id='application-submit-btn']
+  Element should be visible  xpath=//div[@id='application-requiredFieldSummary-tab']//p[@data-test-id='foreman-not-submittable']
+
+Application is submitted
   Open application at index  ${appname}  753-416-25-22  2
   Element should contain  xpath=//*[@data-test-id='test-application-operation']  Asuinkerrostalon tai rivitalon rakentaminen
   Submit application
@@ -66,7 +75,13 @@ Mikko can link existing foreman application to foreman task
   Open tab  tasks
   Select From List By Value  foreman-selection  ${foremanAppId}
 
+Mikko can move to linked foreman application and back
+  Wait until  Click element  xpath=//a[@data-test-id='foreman-application-link-${foremanAppId}']
+  Wait until  Element should contain  xpath=//span[@data-test-id='application-id']  ${foremanAppId}
+  Click by test id  test-application-link-permit-lupapistetunnus
+
 Mikko can start invite flow from tasks tab
+  Open tab  tasks
   Click enabled by test id  invite-other-foreman-button
   Wait until  Element should be visible  //div[@id='dialog-invite-foreman']
   Click by test id  cancel-foreman-dialog

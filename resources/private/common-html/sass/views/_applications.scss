@@ -129,11 +129,33 @@
 .invitations {
   margin-bottom: $baseline;
   .invitation {
+    display: table-row;
     span {
       margin-right: $marginM;
     }
+    div {
+      padding-right: $marginL;
+      display: table-cell;
+      .btn {
+        margin: 0 $marginS 0 $marginS;
+      }
+    }
+    p {
+      max-width: $breakpoint5;
+      margin-bottom: $marginS;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    h3 {
+      max-width: $breakpoint5;
+      margin-top: $marginM;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .invitation-actions {
+      white-space: nowrap;
+    }
   }
-
 }
 .filter-controls {
   div {

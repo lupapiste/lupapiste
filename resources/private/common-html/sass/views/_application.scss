@@ -375,8 +375,6 @@
     vertical-align: top;
     a.command {
       display: block;
-      &:before { content: "["; }
-      &:after { content: "]"; }
     }
     .owner-name {
       font-weight: bold;
@@ -673,6 +671,7 @@
 
   .form-input {
     display: inline-block;
+    margin: 0 6px 0 0;
   }
 
   .form-input.combobox, select {
@@ -736,6 +735,11 @@
   }
 }
 
+#application-requiredFieldSummary-tab {
+  .auth-actions button {
+    display: block;
+  }
+}
 
 
 

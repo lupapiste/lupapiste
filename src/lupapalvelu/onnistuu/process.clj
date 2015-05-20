@@ -164,17 +164,17 @@
                         (crypt/decrypt crypto-key crypto-iv)
                         (crypt/bytes->str)
                         (json/decode))
-        {:strs [signatures stamp]} resp
+        {:strs [signatures stamp document]} resp
         {:strs [type identifier name timestamp uuid]} (first signatures)]
     (resp-assert! (:stamp process)          stamp       "wrong stamp")
     (resp-assert! (count signatures)        1           "number of signatures")
     (resp-assert! type                      "company"   "wrong signature type")
-    (resp-assert! (-> process :company :y)  identifier  "wrong Y")
-    (process-update! process :done ts)
-    (infof "sign:success:%s: OK: y [%s], company: [%s]"
+    (process-update! process :done ts :document document)
+    (infof "sign:success:%s: OK: identifier [%s], company: [%s], document: [%s]"
            process-id
            identifier
-           name)
+           name
+           document)
     (let [company  (c/create-company (merge (:company process) {:name name, :process-id process-id}))
           token-id (if (nil? (:currentUser signer)) (c/add-user-after-company-creation! signer company :admin))]
       (infof "sign:success:%s: company-created: y [%s], company: [%s], id: [%s], token: [%s]"

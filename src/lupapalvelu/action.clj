@@ -288,7 +288,7 @@
   "if :id parameter is present read application from command
    (pre-loaded) or load application for user."
   [{{id :id} :data user :user application :application}]
-  (and id user (or application (domain/get-application-as id user true))))
+  (and id user (or application (domain/get-application-as id user :include-canceled-apps? true))))
 
 (defn- user-authz? [command-meta-data application user]
   (let [allowed-roles (get command-meta-data :user-authz-roles #{})
