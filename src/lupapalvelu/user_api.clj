@@ -632,3 +632,8 @@
     (if user
       (ok)
       (fail :email-not-in-use))))
+
+(defcommand remove-user-notification
+  {:user-roles #{:applicant}}
+  [{user :user}]
+  (user/update-user-by-email (:email user) {:notification {}}))
