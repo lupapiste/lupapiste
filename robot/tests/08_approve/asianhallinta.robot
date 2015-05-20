@@ -60,6 +60,12 @@ Velho now sees asianhallinta button
 Velho also sees approve-button
   Element should be visible  xpath=//section[@id="application"]//button[@data-test-id='approve-application']
 
+Velho sees approve and asianhallinta buttons in requiredFieldSummary tab
+  Open tab  requiredFieldSummary
+  Element should be visible  xpath=//button[@data-test-id="approve-application-summaryTab-missing-required"]
+  Element should be visible  xpath=//button[@data-test-id="to-asianhallinta-summaryTab-missing-required"]
+  Element should be visible  xpath=//button[@data-test-id="approve-application"]
+
 Velho moves application to asianhallinta, error should pop up
   Click by test id  to-asianhallinta
   Wait until  Element should be visible  xpath=//section[@id="integration-error-page"]//div[@id="integration-error-dialog"]
