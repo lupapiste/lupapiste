@@ -33,6 +33,9 @@
         (count applications) => 1
         (:id (first applications)) => foreman-application-id))
 
+    (fact "Can't submit foreman app before original link-permit-app is submitted"
+      (:submittable (query-application apikey foreman-application-id)) => false)
+
     (fact "Submit link-permit app"
       (command apikey :submit-application :id application-id) => ok?)
 
