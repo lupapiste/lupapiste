@@ -293,7 +293,7 @@ Select From Autocomplete
   [Arguments]  ${value}
   Wait until  Click Element  xpath=//span[@class='autocomplete-selection']
   Input text by test id  autocomplete-input  ${value}
-  Wait until  Click Element  xpath=//*[contains(text(), '${value}')]
+  Wait until  Click Element  xpath=//li//span[contains(text(), '${value}')]
 
 Click by id
   [Arguments]  ${id}
