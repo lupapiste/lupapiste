@@ -1025,7 +1025,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       id: self.appId,
       documentId: self.docId,
       documentName: self.schemaName,
-      userId: lupapisteApp.models.currentUser.id(),
       path: myNs,
       collection: self.getCollection()
     };
