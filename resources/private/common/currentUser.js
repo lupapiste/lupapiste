@@ -17,7 +17,14 @@ LUPAPISTE.CurrentUser = function() {
     company: {
       id:   undefined,
       role: undefined
-    }};
+    },
+    notification: {
+      title:      undefined,
+      titleLoc:   undefined,
+      message:    undefined,
+      messageLoc: undefined
+    }
+  };
 
   function constructor(user) {
     ko.mapping.fromJS((_.merge(defaults, user)), {}, self);
