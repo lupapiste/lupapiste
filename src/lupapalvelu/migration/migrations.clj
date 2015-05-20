@@ -13,7 +13,6 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as organization]
-            [lupapalvelu.application :as a]
             [lupapalvelu.application-meta-fields :as app-meta-fields]
             [lupapalvelu.operations :as op]
             [sade.env :as env]
