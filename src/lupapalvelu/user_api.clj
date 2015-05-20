@@ -636,4 +636,4 @@
 (defcommand remove-user-notification
   {:user-roles #{:applicant}}
   [{user :user}]
-  (user/update-user-by-email (:email user) {:notification {}}))
+  (mongo/update :users {:email (user/canonize-email (:email user))} {$unset {:notification 1}}))
