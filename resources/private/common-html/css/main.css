@@ -5549,6 +5549,22 @@ td.comment-text {
   top: 0px;
 }
 
+/* line 32, ../sass/views/_admin.scss */
+.permanent-archive-setting {
+  position: relative;
+  margin: 12px 0;
+}
+/* line 35, ../sass/views/_admin.scss */
+.permanent-archive-setting input {
+  vertical-align: middle;
+}
+/* line 38, ../sass/views/_admin.scss */
+.permanent-archive-setting .form-indicator {
+  top: -5px;
+  right: auto;
+  left: 250px;
+}
+
 /* line 2, ../sass/views/_authority_admin.scss */
 #authority-admin h2 {
   margin-top: 24px;

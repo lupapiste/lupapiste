@@ -16,6 +16,7 @@ var attachment = (function() {
       .success(function() {
         repository.load(applicationId);
         window.location.hash = "!/application/"+applicationId+"/attachments";
+        model.previewDisabled(false);
         return false;
       })
       .call();
@@ -39,13 +40,6 @@ var attachment = (function() {
       hub.send("track-click", {category:"Attachments", label: "", event:"deleteAttachmentVertion"});
     return false;
   }
-
-  // These cannot be changed to use LUPAPISTE.ModalDialog.showDynamicYesNo,
-  // because the ids are registered with hub.subscribe.
-  LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-delete-attachment",
-    loc("attachment.delete.header"), loc("attachment.delete.message"), loc("yes"), deleteAttachmentFromServer, loc("no"));
-  LUPAPISTE.ModalDialog.newYesNoDialog("dialog-confirm-delete-attachment-version",
-    loc("attachment.delete.version.header"), loc("attachment.delete.version.message"), loc("yes"), function() {deleteAttachmentVersionFromServerProxy();}, loc("no"));
 
   function ApproveModel(authorizationModel) {
     var self = this;
@@ -178,7 +172,11 @@ var attachment = (function() {
 
     deleteAttachment: function() {
       model.previewDisabled(true);
-      LUPAPISTE.ModalDialog.open("#dialog-confirm-delete-attachment");
+      hub.send("show-dialog", {title: "attachment.delete.header",
+                               size: "medium",
+                               component: "yes-no-dialog",
+                               componentParams: {text: "attachment.delete.message",
+                                                 yesFn: deleteAttachmentFromServer}});
     },
 
     previousAttachment: function() {
@@ -204,9 +202,16 @@ var attachment = (function() {
 
     deleteVersion: function(fileModel) {
       var fileId = fileModel.fileId;
-      deleteAttachmentVersionFromServerProxy = function() { deleteAttachmentVersionFromServer(fileId); };
+      deleteAttachmentVersionFromServerProxy = function() {
+        deleteAttachmentVersionFromServer(fileId);
+        model.previewDisabled(false);
+      };
       model.previewDisabled(true);
-      LUPAPISTE.ModalDialog.open("#dialog-confirm-delete-attachment-version");
+      hub.send("show-dialog", {title: "attachment.delete.version.header",
+                               size: "medium",
+                               component: "yes-no-dialog",
+                               componentParams: {text: "attachment.delete.version.message",
+                                                 yesFn: deleteAttachmentVersionFromServerProxy}});
     },
 
     sign: function() {
@@ -360,7 +365,7 @@ var attachment = (function() {
             return {
               typeLabel: attachmentTypeLabel(typeGroup[0], type),
               typeValue: attachmentType(typeGroup[0], type)
-            }
+            };
           })
         };
       });
@@ -371,7 +376,7 @@ var attachment = (function() {
     };
 
     self.ok = function() {
-      hub.send("change-attachment-type", {attachmentType: self.attachmentType()})
+      hub.send("change-attachment-type", {attachmentType: self.attachmentType()});
       LUPAPISTE.ModalDialog.close();
     };
   }
@@ -416,15 +421,9 @@ var attachment = (function() {
     model.allowedAttachmentTypes(application.allowedAttachmentTypes);
     model.attachmentType(attachmentType(attachment.type["type-group"], attachment.type["type-id"]));
 
-    var metadataArray = _.map(attachment.metadata, function(value, key) {
-      if (_.isObject(value)) {
-        value = _.map(value, function(subvalue, subkey) {
-          return {name: subkey, value: subvalue};
-        });
-      }
-      return {name: key, value: value};
-    });
-    model.metadata(metadataArray);
+    model.metadata(_.sortBy(_.map(attachment.metadata, function(value, key) {
+      return metadata.translateMetaData(key, value);
+    }), "name"));
 
     model.id(attachmentId);
 
@@ -492,12 +491,6 @@ var attachment = (function() {
 
   hub.subscribe({type: "dialog-close", id : "upload-dialog"}, function() {
     resetUploadIframe();
-    model.previewDisabled(false);
-  });
-  hub.subscribe({type: "dialog-close", id : "dialog-confirm-delete-attachment"}, function() {
-    model.previewDisabled(false);
-  });
-  hub.subscribe({type: "dialog-close", id : "dialog-confirm-delete-attachment-version"}, function() {
     model.previewDisabled(false);
   });
   hub.subscribe({type: "dialog-close", id : "dialog-sign-attachment"}, function() {

@@ -22,6 +22,7 @@ jQuery(document).ready(function() {
     "company-invite-dialog",
     "submit-button-group",
     "yes-no-dialog",
+    "yes-no-button-group",
     "invoice-operator-selector",
     "ok-dialog"
   ];

@@ -93,7 +93,7 @@
                             :expanded-content :mockjax :open-layers :stickyfill]
                   :js ["register-components.js" "util.js" "event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js"
                        "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "perfmon.js" "features.js"
-                       "statuses.js" "statusmodel.js" "authorization.js" "vetuma.js"]}
+                       "statuses.js" "statusmodel.js" "authorization.js" "vetuma.js" "metadata.js"]}
 
    :common-html  {:depends [:selectm-html]
                   :css [(partial main-style-file "common-html/css/main.css" "common-html/sass/main.scss") "jquery-ui.css"]
@@ -259,6 +259,7 @@
                         "string/string-model.js"
                         "modal-dialog/modal-dialog-model.js"
                         "modal-dialog/button-group/submit-button-group-model.js"
+                        "modal-dialog/button-group/yes-no-button-group-model.js"
                         "modal-dialog/dialog/yes-no-dialog-model.js"
                         "modal-dialog/dialog/ok-dialog-model.js"
                         "attachments-multiselect/attachments-multiselect-model.js"
@@ -282,6 +283,7 @@
                           "checkbox/checkbox-template.html"
                           "modal-dialog/modal-dialog-template.html"
                           "modal-dialog/button-group/submit-button-group-template.html"
+                          "modal-dialog/button-group/yes-no-button-group-template.html"
                           "modal-dialog/dialog/yes-no-dialog-template.html"
                           "modal-dialog/dialog/ok-dialog-template.html"
                           "attachments-multiselect/attachments-multiselect-template.html"

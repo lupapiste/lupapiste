@@ -105,7 +105,7 @@
   (util/not-empty-or-nil? (:submitted (mongo/by-id "applications" link-id [:submitted]))))
 
 (defn- foreman-submittable? [application]
-  (let [result (when (-> application :state #{:draft :open :submitted :complement-needed})
+  (let [result (when (-> application :state keyword #{:draft :open :submitted :complement-needed})
                  (when-let [lupapiste-link (filter #(= (:type %) "lupapistetunnus") (:linkPermitData application))]
                    (when (seq lupapiste-link) (link-permit-submitted? (-> lupapiste-link first :id)))))]
     (if (nil? result)
@@ -961,8 +961,8 @@
 (defn- validate-new-applications-enabled [command {:keys [permitType municipality] :as application}]
   (when application
     (let [scope (organization/resolve-organization-scope municipality permitType)]
-      (when-not (= (:new-application-enabled scope) true)
-        (fail :error.new-applications.disabled)))))
+      (when-not (:new-application-enabled scope)
+        (fail :error.new-applications-disabled)))))
 
 (defcommand convert-to-application
   {:parameters [id]
