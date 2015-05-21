@@ -46,6 +46,13 @@
     (when (and (is-link-permit-required application) (zero? linkPermits))
       (fail :error.permit-must-have-link-permit))))
 
+(defn validate-authority-in-drafts
+  "Validator: Restric authority access in draft application.
+   To be used in commands' :pre-checks vector."
+  [{user :user} {state :state}]
+  (when (and (= :draft (keyword state)) (= :authority (keyword (:role user))))
+    unauthorized))
+
 ;;
 ;; Helpers
 ;;
