@@ -30,7 +30,7 @@
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.proxy-services :as proxy-services]
             [lupapalvelu.organization-api]
-            [lupapalvelu.application :as application]
+            [lupapalvelu.application-api :as application]
             [lupapalvelu.foreman-api :as foreman-api]
             [lupapalvelu.open-inforequest-api]
             [lupapalvelu.pdf-export-api]
