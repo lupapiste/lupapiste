@@ -28,7 +28,7 @@
       min-height: 117px;
       .button-group {
         position: absolute;
-        bottom: $marginL;
+        bottom: $marginM;
         right: $marginM;
         left: $marginM;
         .cancel {
@@ -36,7 +36,7 @@
           margin-right: $marginM;
         }
       }
-      .button-group .ok {
+      .button-group.ok {
         text-align: center;
         .btn-dialog {
           position: relative;
@@ -49,6 +49,8 @@
       padding-left: 24px;
       border-bottom: 1px solid;
       font-size: 20px;
+      overflow: hidden;
+      text-overflow: ellipsis;
       .title {
         line-height: 24px;
       }
