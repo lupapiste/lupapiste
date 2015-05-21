@@ -52,6 +52,29 @@ LUPAPISTE.CurrentUser = function() {
     return username;
   });
 
+  self.showNotification = ko.pureComputed(function() {
+    return self.notification.titleLoc() && self.notification.messageLoc();
+  });
+
+  ko.computed(function() {
+    if (self.showNotification()) {
+      hub.send("show-dialog", {title: self.notification.titleLoc(),
+                               id: "user-notification-dialog",
+                               size: "medium",
+                               component: "ok-dialog",
+                               componentParams: {text: self.notification.messageLoc()}
+                              });
+    }
+  });
+
+  hub.subscribe({type: "dialog-close", id: "user-notification-dialog"}, function() {
+    ajax.command("remove-user-notification")
+      .complete(function () {
+        hub.send("reload-current-user");
+      })
+      .call();
+  });
+
   hub.subscribe("login", function(data) {
     if (data.user) {
       constructor(data.user);
