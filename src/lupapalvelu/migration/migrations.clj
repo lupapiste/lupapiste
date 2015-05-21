@@ -1012,7 +1012,7 @@
       (when-let [koulutus (:degree user)]
         (let [normalized (-> koulutus ss/trim ss/lower-case)]
           (when-not (or (ss/blank? normalized) (target-keys-set normalized))
-            (let [mapped (get mapping normalized "muu")]
+            (let [mapped (get mapping normalized "")]
               (debugf "%s/%s: Mapping '%s' to %s" :users (:id user) koulutus mapped)
               (mongo/update-by-id :users (:id user) {$set {:degree mapped}}))))))))
 
