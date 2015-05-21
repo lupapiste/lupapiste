@@ -10,7 +10,7 @@ LUPAPISTE.ModalDialogModel = function () {
   self.dialogVisible = ko.observable(false);
   self.title = ko.observable();
   self.size = ko.observable();
-
+  self.id = ko.observable();
   self.css = ko.pureComputed(function() {
     return [self.size(), self.component()].join(" ");
   });
@@ -60,6 +60,7 @@ LUPAPISTE.ModalDialogModel = function () {
   self.closeDialog = function() {
     self.showDialog(false);
     $("html").removeClass("no-scroll");
+    hub.send("dialog-close", {id : self.id()});
   };
 
   hub.subscribe("show-dialog", function(data) {
@@ -69,6 +70,7 @@ LUPAPISTE.ModalDialogModel = function () {
     self.componentParams(componentParams);
     self.title = data.title;
     self.size(data.size ? data.size : "large");
+    self.id(data.id || data.component);
     self.showDialog(true);
   });
 
