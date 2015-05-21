@@ -255,11 +255,9 @@
 
 (defmethod token/handle-token :accept-company-invitation [{{:keys [company-id application-id]} :data} _]
   (infof "company %s accepted application %s" company-id application-id)
-  (if-let [application (domain/get-application-no-access-checking application-id)]
-    (do
-      (update-application
-        (application->command application)
-        {:auth {$elemMatch {:invite.user.id company-id}}}
-        {$set  {:auth.$  (-> (find-company! {:id company-id}) (company->auth) (assoc :inviteAccepted (now)))}})
-      (ok))
-    (fail :error.unknown)))
+  (when-let [application (domain/get-application-no-access-checking application-id)]
+    (update-application
+      (application->command application)
+      {:auth {$elemMatch {:invite.user.id company-id}}}
+      {$set  {:auth.$  (-> (find-company! {:id company-id}) (company->auth) (assoc :inviteAccepted (now)))}})
+    (ok)))

@@ -405,7 +405,7 @@
   (let [email (user/canonize-email (:email data))]
     (user/change-password email password)
     (infof "password reset performed: email=%s" email)
-    (resp/status 200 (resp/json {:ok true}))))
+    (ok)))
 
 ;;
 ;; enable/disable:

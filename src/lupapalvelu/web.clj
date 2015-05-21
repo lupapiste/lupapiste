@@ -13,7 +13,7 @@
             [noir.response :as resp]
             [noir.session :as session]
             [noir.cookies :as cookies]
-            [sade.core :refer [ok fail now def-] :as core]
+            [sade.core :refer [ok fail ok? fail? now def-] :as core]
             [sade.env :as env]
             [sade.util :as util]
             [sade.property :as p]
@@ -486,13 +486,17 @@
 
 (defpage [:get "/api/token/:token-id"] {token-id :token-id}
   (if-let [token (token/get-token token-id :consume false)]
-    (resp/status 200 (resp/json {:ok true :token token}))
-    (resp/status 404 (resp/json {:ok false}))))
+    (resp/status 200 (resp/json (ok :token token)))
+    (resp/status 404 (resp/json (fail :error.unknown)))))
 
 (defpage [:post "/api/token/:token-id"] {token-id :token-id}
   (let [params (from-json (request/ring-request))
         response (token/consume-token token-id params :consume true)]
-    (or response (resp/status 404 (resp/json {:ok false})))))
+    (cond
+      (contains? response :status) response
+      (ok? response)   (resp/status 200 (resp/json response))
+      (fail? response) (resp/status 404 (resp/json response))
+      :else (resp/status 404 (resp/json (fail :error.unknown))))))
 
 ;;
 ;; Cross-site request forgery protection
