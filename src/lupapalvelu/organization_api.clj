@@ -266,6 +266,15 @@
   (o/update-organization (user/authority-admins-organization-id user) {$set {:app-required-fields-filling-obligatory isObligatory}})
   (ok))
 
+(defcommand set-organization-permanent-archive-enabled
+  {:parameters [enabled organizationId]
+   :user-roles #{:admin}
+   :input-validators  [(partial non-blank-parameters [:enabled :organizationId])
+                       (partial boolean-parameters [:enabled])]}
+  [{user :user}]
+  (o/update-organization organizationId {$set {:permanent-archive-enabled enabled}})
+  (ok))
+
 (defquery krysp-config
   {:user-roles #{:authorityAdmin}}
   [{user :user}]

@@ -4846,6 +4846,11 @@ span.icon_clear:before {
   width: 175px;
 }
 
+/* line 739, ../sass/views/_application.scss */
+#application-requiredFieldSummary-tab .auth-actions button {
+  display: block;
+}
+
 /* line 1, ../sass/views/_create_application.scss */
 .ui-autocomplete-loading {
   background: white url("/img/ajax-loader-16.gif") right center no-repeat;
@@ -5499,6 +5504,22 @@ td.comment-text {
 /* line 26, ../sass/views/_admin.scss */
 #link-to-vendor-backend-config table td.value .save-indicator {
   top: 0px;
+}
+
+/* line 32, ../sass/views/_admin.scss */
+.permanent-archive-setting {
+  position: relative;
+  margin: 12px 0;
+}
+/* line 35, ../sass/views/_admin.scss */
+.permanent-archive-setting input {
+  vertical-align: middle;
+}
+/* line 38, ../sass/views/_admin.scss */
+.permanent-archive-setting .form-indicator {
+  top: -5px;
+  right: auto;
+  left: 250px;
 }
 
 /* line 2, ../sass/views/_authority_admin.scss */

@@ -61,13 +61,13 @@
             <br/>
 
             <div class="form-entry">
-              <label class="form-label" data-bind="ltext: 'register.company.form.billing.po'"></label>
-              <input class="form-input text" data-bind="textInput: model().po, enable: edit" type="text"/>
+              <label class="form-label" data-bind="ltext: 'register.company.form.billing.zip'"></label>
+              <input class="form-input text" data-bind="textInput: model().zip, enable: edit" type="text"/>
             </div>
 
             <div class="form-entry">
-              <label class="form-label" data-bind="ltext: 'register.company.form.billing.zip'"></label>
-              <input class="form-input text" data-bind="textInput: model().zip, enable: edit" type="text"/>
+              <label class="form-label" data-bind="ltext: 'register.company.form.billing.po'"></label>
+              <input class="form-input text" data-bind="textInput: model().po, enable: edit" type="text"/>
             </div>
 
             <div class="form-entry">
@@ -83,9 +83,7 @@
             </div>
 
             <div class="form-entry">
-              <span data-bind="component: {name: 'invoice-operator-selector',
-                                           params: {selected: model().pop,
-                                                    enabled: edit}}"/>
+              <span data-bind="component: {name: 'invoice-operator-selector', params: {selected: model().pop, enabled: edit}}"></span>
             </div>
 
             <div>

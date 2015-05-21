@@ -274,7 +274,7 @@
     var currentAccountType = _.findWhere(LUPAPISTE.config.accountTypes, {name: company.accountType});
     var mappedAccountTypes = _.map(LUPAPISTE.config.accountTypes, function(type) {
       type.disable = ko.observable(currentAccountType ? type.limit < currentAccountType.limit : false);
-      type.displayName = loc("register.company." + type.name + ".title") + " - " + loc("register.company." + type.name + ".price");
+      type.displayName = loc("register.company." + type.name + ".title") + " (" + loc("register.company." + type.name + ".price") + ")";
       return type;
     });
     this.accountTypes([]);

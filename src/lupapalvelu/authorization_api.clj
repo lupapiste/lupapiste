@@ -100,18 +100,18 @@
    :states     action/all-application-states}
   [{:keys [created user application] :as command}]
   (when-let [my-invite (domain/invite application (:email user))]
-
-    (let [role (or (:role my-invite) (:role (domain/get-auth application (:id user))))]
+    (let [role (or (:role my-invite) (:role (domain/get-auth application (:id user))))
+          document-id (:documentId my-invite)]
       (update-application command
         {:auth {$elemMatch {:invite.user.id (:id user)}}}
         {$set {:modified created
-               :auth.$   (assoc (user/user-in-role user role) :inviteAccepted created)}}))
-
-    (when-not (empty? (:documentId my-invite))
-      (when-let [document (domain/get-document-by-id application (:documentId my-invite))]
-        ; Document can be undefined (invite's documentId is an empty string) in invite or removed by the time invite is approved.
-        ; It's not possible to combine Mongo writes here, because only the last $elemMatch counts.
-        (commands/do-set-user-to-document (domain/get-application-as id user :include-canceled-apps? true) document (:id user) (:path my-invite) created)))))
+               :auth.$   (assoc (user/user-in-role user role) :inviteAccepted created)}})
+      (when-not (empty? document-id)
+        (let [application (domain/get-application-as id user :include-canceled-apps? true)]
+          ; Document can be undefined (invite's documentId is an empty string) in invite or removed by the time invite is approved.
+          ; It's not possible to combine Mongo writes here, because only the last $elemMatch counts.
+          (commands/do-set-user-to-document application document-id (:id user) (:path my-invite) created)))
+      (ok))))
 
 (defn generate-remove-invalid-user-from-docs-updates [{docs :documents :as application}]
   (-<>> docs

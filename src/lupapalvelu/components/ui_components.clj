@@ -58,7 +58,7 @@
 
 (def ui-components
   {;; 3rd party libs
-   :cdn-fallback   {:js ["jquery-1.8.3.min.js" "jquery-ui-1.10.2.min.js" "jquery.dataTables.min.js"]}
+   :cdn-fallback   {:js ["jquery-1.11.3.min.js" "jquery-ui-1.10.2.min.js" "jquery.dataTables.min.js"]}
    :jquery         {:js ["jquery.ba-hashchange.js" "jquery.metadata-2.1.js" "jquery.cookie.js" "jquery.caret.js"]}
    :jquery-upload  {:js ["jquery.ui.widget.js" "jquery.iframe-transport.js" "jquery.fileupload.js"]}
    :knockout       {:js ["knockout-3.3.0.min.js" "knockout.mapping-2.4.1.js" "knockout.validation.min.js" "knockout-repeat-2.0.0.js"]}
@@ -93,7 +93,7 @@
                             :expanded-content :mockjax :open-layers :stickyfill]
                   :js ["register-components.js" "util.js" "event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js"
                        "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "perfmon.js" "features.js"
-                       "statuses.js" "statusmodel.js" "authorization.js" "vetuma.js"]}
+                       "statuses.js" "statusmodel.js" "authorization.js" "vetuma.js" "metadata.js"]}
 
    :common-html  {:depends [:selectm-html]
                   :css [(partial main-style-file "common-html/css/main.css" "common-html/sass/main.scss") "jquery-ui.css"]
@@ -259,6 +259,7 @@
                         "string/string-model.js"
                         "modal-dialog/modal-dialog-model.js"
                         "modal-dialog/button-group/submit-button-group-model.js"
+                        "modal-dialog/button-group/yes-no-button-group-model.js"
                         "modal-dialog/dialog/yes-no-dialog-model.js"
                         "attachments-multiselect/attachments-multiselect-model.js"
                         "authority-select/authority-select-model.js"
@@ -280,6 +281,7 @@
                           "checkbox/checkbox-template.html"
                           "modal-dialog/modal-dialog-template.html"
                           "modal-dialog/button-group/submit-button-group-template.html"
+                          "modal-dialog/button-group/yes-no-button-group-template.html"
                           "modal-dialog/dialog/yes-no-dialog-template.html"
                           "attachments-multiselect/attachments-multiselect-template.html"
                           "authority-select/authority-select-template.html"

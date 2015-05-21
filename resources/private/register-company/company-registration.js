@@ -18,8 +18,8 @@
       po:           ko.observable(""),
       zip:          ko.observable("").extend({number: true, maxLength: 5}),
       country:      ko.observable(""),
-      ovt:          ko.observable("").extend({required: true, ovt: true}),
-      pop:          ko.observable("").extend({required: true}),
+      ovt:          ko.observable("").extend({ovt: true}),
+      pop:          ko.observable(""),
       // Signer:
       firstName:    ko.observable("").extend({required: true}),
       lastName:     ko.observable("").extend({required: true}),
