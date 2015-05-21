@@ -20,7 +20,7 @@ There is no company info
 Mikko changes his name and experience
   Change Textfield Value  firstName  Mikko  Mika
   Change Textfield Value  lastName  Intonen  Intola
-  Change Textfield Value  architect.degree  Tutkinto  Arkkitehti
+  Change Textfield Value  architect.degree  Kirvesmies  Arkkitehti
   Change Textfield Value  architect.graduatingYear  2000  2001
   Change Textfield Value  architect.fise  f  fise
   Checkbox Should Not Be Selected  allowDirectMarketing
@@ -45,7 +45,7 @@ Experience should have changed in Swedish page too
 Mika changes the name and experience back
   Change Textfield Value  firstName  Mika  Mikko
   Change Textfield Value  lastName  Intola  Intonen
-  Change Textfield Value  architect.degree  Arkkitehti  Tutkinto
+  Change Textfield Value  architect.degree  Arkkitehti  Kirvesmies
   Change Textfield Value  architect.graduatingYear  2001  2000
   Change Textfield Value  architect.fise  fise  f
   Save User Data
@@ -58,7 +58,7 @@ Name should have changed in Finnish page too
 
 Experience should have changed in Finnish back to original
   Wait Until  Textfield Value Should Be  architect.fise  f
-  Textfield Value Should Be  architect.degree  Tutkinto
+  Textfield Value Should Be  architect.degree  Kirvesmies
   Textfield Value Should Be  architect.graduatingYear  2000
   Textfield Value Should Be  architect.fise  f
 

@@ -370,7 +370,7 @@
     :city "Sipoo"
     :phone "0505503171"
     :architect true
-    :degree "Tutkinto"
+    :degree "kirvesmies"
     :graduatingYear "2000"
     :companyName "Yritys Oy"
     :companyId "1234567-1"
