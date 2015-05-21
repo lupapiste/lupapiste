@@ -10,7 +10,7 @@
       //Account type
       accountType:  ko.observable(undefined),
       // Company:
-      name:         ko.observable(undefined).extend({required: true}),
+      name:         ko.observable(undefined).extend({required: true, maxLength: 64}),
       y:            ko.observable("").extend({required: true, y: true}),
       reference:    ko.observable(""),
       address1:     ko.observable(""),

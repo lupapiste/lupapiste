@@ -38,48 +38,48 @@
             </div>
             <div class="form-entry">
               <label class="form-label tip" data-bind="ltext: 'register.company.form.companyName'"></label>
-              <input class="form-input text" data-bind="textInput: model().name, enable: edit" type="text"/>
+              <input class="form-input text" data-bind="textInput: model().name, enable: edit" type="text" maxlength="64"/>
             </div>
             <div class="form-entry">
               <label class="form-label tip" data-bind="ltext: 'register.company.form.companyY'"></label>
-              <input class="form-input text" data-bind="value: model().y, enable: false" type="text"/>
+              <input class="form-input text" data-bind="value: model().y, enable: false" type="text" maxlength="9"/>
             </div>
 
             <h2 data-bind="ltext: 'register.company.form.billing'"></h2>
 
             <div class="form-entry">
               <label class="form-label" data-bind="ltext: 'register.company.form.billing.reference'"></label>
-              <input class="form-input text" data-bind="textInput: model().reference, enable: edit" type="text"/>
+              <input class="form-input text" data-bind="textInput: model().reference, enable: edit" type="text" maxlength="64"/>
             </div>
 
             <div class="form-entry">
               <label class="form-label" data-bind="ltext: 'register.company.form.billing.address'"></label>
-              <input class="form-input text" data-bind="textInput: model().address1, enable: edit" type="text"/>
-              <input class="form-input text" data-bind="textInput: model().address2, enable: edit" type="text"/>
+              <input class="form-input text" data-bind="textInput: model().address1, enable: edit" type="text" maxlength="64"/>
+              <input class="form-input text" data-bind="textInput: model().address2, enable: edit" type="text" maxlength="64"/>
             </div>
 
             <br/>
 
             <div class="form-entry">
               <label class="form-label" data-bind="ltext: 'register.company.form.billing.zip'"></label>
-              <input class="form-input text" data-bind="textInput: model().zip, enable: edit" type="text"/>
+              <input class="form-input text" data-bind="textInput: model().zip, enable: edit" type="text" maxlength="5"/>
             </div>
 
             <div class="form-entry">
               <label class="form-label" data-bind="ltext: 'register.company.form.billing.po'"></label>
-              <input class="form-input text" data-bind="textInput: model().po, enable: edit" type="text"/>
+              <input class="form-input text" data-bind="textInput: model().po, enable: edit" type="text" maxlength="64"/>
             </div>
 
             <div class="form-entry">
               <label class="form-label" data-bind="ltext: 'register.company.form.billing.country'"></label>
-              <input class="form-input text" data-bind="textInput: model().country, enable: edit" type="text"/>
+              <input class="form-input text" data-bind="textInput: model().country, enable: edit" type="text" maxlength="64"/>
             </div>
 
             <br/>
 
             <div class="form-entry">
               <label class="form-label" data-bind="ltext: 'register.company.form.billing.ovt'"></label>
-              <input class="form-input text" data-bind="textInput: model().ovt, enable: edit" type="text"/>
+              <input class="form-input text" data-bind="textInput: model().ovt, enable: edit" type="text" maxlength="17"/>
             </div>
 
             <div class="form-entry">
