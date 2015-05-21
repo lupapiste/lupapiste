@@ -70,8 +70,8 @@
 (defn create-app-model [{application :application} {tab :tab} recipient]
   {:link-fi (get-application-link application tab "fi" recipient)
    :link-sv (get-application-link application tab "sv" recipient)
-   :state-fi (i18n/localize :fi (str (:state application)))
-   :state-sv (i18n/localize :sv (str (:state application)))
+   :state-fi (i18n/localize :fi (name (:state application)))
+   :state-sv (i18n/localize :sv (name (:state application)))
    :modified (to-local-date (:modified application))})
 
 

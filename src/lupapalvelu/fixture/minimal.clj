@@ -803,8 +803,7 @@
                  :accountType "account5"
                  :created 1412959886600
                  :name "Solita Oy"
-                 :address1 "Tulli Business Park"
-                 :address2 "\u00c5kerlundinkatu 11"
+                 :address1 "\u00c5kerlundinkatu 11"
                  :zip "33100"
                  :po "Tampere"
                  :country "FINLAND"
