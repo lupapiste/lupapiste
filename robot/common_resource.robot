@@ -282,7 +282,7 @@ Input text by test id
   Wait until page contains element  xpath=//input[@data-test-id="${id}"]
   Wait until  Element should be visible  xpath=//input[@data-test-id="${id}"]
   Wait until  Element should be enabled  xpath=//input[@data-test-id="${id}"]
-  Execute Javascript  $("input[data-test-id='${id}']").val("${value}").change().blur();
+  Execute Javascript  $("input[data-test-id='${id}']").val("${value}").change();
   Run Keyword Unless  ${leaveFocus}  Execute Javascript  $("input[data-test-id='${id}']").blur();
 
 Select From List by test id
