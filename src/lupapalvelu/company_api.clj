@@ -114,13 +114,13 @@
   (ok))
 
 (defcommand create-company
-  {:parameters [:name :y :address1 :address2 :po :zip email]
+  {:parameters [:name :y :address1 :po :zip email]
    :input-validators [action/email-validator
                       (partial action/non-blank-parameters [:name :y])]
    :user-roles #{:admin}}
   [{data :data}]
   (if-let [user (u/find-user {:email email, :role :applicant, :company.id {"$exists" false}})]
-    (let [company (c/create-company (select-keys data [:name :y :address1 :address2 :po :zip]))]
+    (let [company (c/create-company (select-keys data [:name :y :address1 :po :zip]))]
       (u/update-user-by-email email {:company  {:id (:id company), :role :admin}})
       (ok))
     (fail :error.user-not-found)))

@@ -43,11 +43,11 @@
               :accountType                   (sc/pred account-type? "Not valid account type")
               (sc/optional-key :reference)   max-64-or-nil
               (sc/optional-key :address1)    max-64-or-nil
-              (sc/optional-key :address2)    max-64-or-nil
               (sc/optional-key :po)          max-64-or-nil
-              (sc/optional-key :zip)         max-64-or-nil
+              (sc/optional-key :zip)         (sc/pred util/finnish-zip? "Not a valid zip code")
               (sc/optional-key :country)     max-64-or-nil
-              (sc/optional-key :ovt)         (sc/pred util/finnish-ovt? "Not a valid OVT code")
+              (sc/optional-key :ovt)         (sc/either (sc/pred util/finnish-ovt? "Not a valid OVT code")
+                                                        (sc/pred ss/blank?))
               (sc/optional-key :pop)         (sc/either (sc/pred supported-invoice-operator? "Not a supported invoice operator")
                                                         (sc/pred ss/blank?))
               (sc/optional-key :process-id)  sc/Str
@@ -94,7 +94,7 @@
   (or (find-company-by-id id) (fail! :company.not-found)))
 
 (defn find-companies []
-  (mongo/select :companies {} [:name :y :address1 :address2 :zip :po] (array-map :name 1)))
+  (mongo/select :companies {} [:name :y :address1 :zip :po] (array-map :name 1)))
 
 (defn find-company-users [company-id]
   (u/get-users {:company.id company-id}))

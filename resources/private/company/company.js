@@ -238,7 +238,6 @@
       y:            ko.observable(),
       reference:    ko.observable().extend(notRequired),
       address1:     ko.observable().extend(notRequired),
-      address2:     ko.observable().extend(notRequired),
       po:           ko.observable().extend(notRequired),
       zip:          ko.observable().extend(notRequired),
       country:      ko.observable().extend(notRequired),
@@ -250,7 +249,6 @@
       y: undefined,
       reference: undefined,
       address1: undefined,
-      address2: undefined,
       po: undefined,
       zip: undefined,
       country: undefined,
@@ -274,7 +272,7 @@
     var currentAccountType = _.findWhere(LUPAPISTE.config.accountTypes, {name: company.accountType});
     var mappedAccountTypes = _.map(LUPAPISTE.config.accountTypes, function(type) {
       type.disable = ko.observable(currentAccountType ? type.limit < currentAccountType.limit : false);
-      type.displayName = loc("register.company." + type.name + ".title") + " - " + loc("register.company." + type.name + ".price");
+      type.displayName = loc("register.company." + type.name + ".title") + " (" + loc("register.company." + type.name + ".price") + ")";
       return type;
     });
     this.accountTypes([]);

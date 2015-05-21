@@ -63,7 +63,8 @@
                      timestamp :created
                      inviter :user
                      application :application
-                     :as command}]
+                     :as command}
+                    & {:keys [disable-notifications] :or {disable-notifications false}}]
   {:pre [(valid-role role)]}
   (let [email (user/canonize-email email)
         existing-user (user/get-user-by-email email)]
@@ -75,7 +76,8 @@
           {:auth {$not {$elemMatch {:invite.user.username (:email invited)}}}}
           {$push {:auth     auth}
            $set  {:modified timestamp}})
-        (notifications/notify! :invite (assoc command :recipients [invited]))
+        (when-not disable-notifications
+          (notifications/notify! :invite (assoc command :recipients [invited])))
         (ok)))))
 
 (defn- role-validator [{{role :role} :data}]
