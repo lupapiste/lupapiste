@@ -27,7 +27,7 @@
     });
 
     this.accountFieldNames = ["accountType"];
-    this.companyFieldNames = ["name", "y", "reference", "address1", "address2", "po", "zip", "country", "ovt", "pop"];
+    this.companyFieldNames = ["name", "y", "reference", "address1", "po", "zip", "country", "ovt", "pop"];
     this.signerFieldNames = ["firstName", "lastName", "email"];
 
     this.stateInfo  = 0;
