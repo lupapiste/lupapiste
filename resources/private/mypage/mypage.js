@@ -8,8 +8,16 @@
     return function(model, event) {
       var img = $(event.target).parent().find("img");
       var t = setTimeout(img.show, 200);
+      var params = _.reduce(propertyNames, function(m, n) {
+        if (n === "degree" && !model[n]()) {
+          m[n] = "";
+        } else {
+          m[n] = model[n]();
+        }
+        return m; }, {});
+
       ajax
-        .command(commandName, _.reduce(propertyNames, function(m, n) { m[n] = model[n](); return m; }, {}))
+        .command(commandName, params)
         .pending(model.pending)
         .success(function() { model.clear().saved(true).indicator({type: "saved"}); })
         .error(function(d) { model.clear().saved(false).indicator({type: "err"}).error(d.text); })
@@ -34,6 +42,9 @@
     self.role = ko.observable();
     self.architect = ko.observable();
     self.degree = ko.observable().extend({ maxLength: 255 });
+    self.availableDegrees = _.map(LUPAPISTE.config.degrees, function(degree) {
+      return {id: degree, name: loc(["koulutus", degree])};
+    });
     self.graduatingYear = ko.observable().extend({ number: true, minLength: 4, maxLength: 4 });
     self.fise = ko.observable().extend({ maxLength: 255 });
     self.companyName = ko.observable().extend({ maxLength: 255 });

@@ -129,7 +129,13 @@
 
             <div class="form-entry">
               <label data-bind="ltext: 'userinfo.architect.degree'" for="architect.degree" class="form-label"></label>
-              <input data-bind="value: degree" id="architect.degree" type="text" class="form-input" maxlength="255"></input>
+              <select class="form-input combobox"
+                      name="architect.degree"
+                      data-bind="options: availableDegrees,
+                                 value: degree,
+                                 optionsValue: 'id',
+                                 optionsText: 'name',
+                                 optionsCaption: loc('userinfo.architect.degree.choose')"></select>
             </div>
 
             <div class="form-entry">
