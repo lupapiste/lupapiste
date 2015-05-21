@@ -6,7 +6,7 @@
             [sade.strings :as ss]))
 
 (facts "Yritystilisopimus"
-  (let [company {:name "Asiakas Oy", :y "123456-1", :address1 "Osoiterivi 1", :address2 "Osoiterivi 2", :zip "99999", :po "Stockholm"}
+  (let [company {:name "Asiakas Oy", :y "123456-1", :address1 "Osoiterivi 1", :zip "99999", :po "Stockholm"}
         contact {:firstName "Etu", :lastName "Suku"}
         account {:type "TEST", :price "BILLIONS!"}
         pdf-stream (docx/yritystilisopimus company contact account 0)
