@@ -59,7 +59,7 @@
         (get-in email [:body :plain]) => (contains "Hei, sinut on kutsuttu")))
 
     (fact "Sonja must NOT be able to uninvite Teppo!"
-      (command sonja :remove-auth :id application-id :username (email-for-key teppo)) => not-accessible?
+      (command sonja :remove-auth :id application-id :username (email-for-key teppo)) => unauthorized?
       (count (:invites (query teppo :invites))) => 1)
 
     (fact "Mikko can't unsubscribe Teppo's notifications"
