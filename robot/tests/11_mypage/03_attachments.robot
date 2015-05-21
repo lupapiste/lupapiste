@@ -23,7 +23,7 @@ Mikko copies his attachments to application
   Create application the fast way  ${appname}  753-416-25-30  kerrostalo-rivitalo
   Open tab  attachments
   Select attachment operation option from dropdown  attachmentsCopyOwn
-  Confirm  dynamic-yes-no-confirm-dialog
+  Confirm yes no dialog
   Table Should Contain  css=table.attachments-template-table  ${TXT_TESTFILE_NAME}
 
 Copy own attachments button is not shown to non-architect
