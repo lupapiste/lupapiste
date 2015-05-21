@@ -203,6 +203,7 @@
       :applicationEnabled false
       :openInforequestEnabled false
       :openInforequestEmail "someone@localhost"
+
       :opening 123)
     (let [m (query pena :municipality-active :municipality "999")]
       (:applications m) => empty?
@@ -225,3 +226,17 @@
 
   (fact "Valid attachment is ok"
     (command sipoo :organization-operations-attachments :operation "pientalo" :attachments [["muut" "muu"]]) => ok?))
+
+(facts "permanent-archive-can-be-set"
+  (let [organization  (first (:organizations (query admin :organizations)))
+        id (:id organization)]
+
+    (fact "Permanent archive can be enabled"
+      (command admin "set-organization-permanent-archive-enabled" :enabled true :organizationId id) => ok?
+      (let [updated-org (query admin "organization-by-id" :organizationId id)]
+        (:permanent-archive-enabled updated-org) => true))
+
+    (fact "Permanent archive can be disabled"
+      (command admin "set-organization-permanent-archive-enabled" :enabled false :organizationId id) => ok?
+      (let [updated-org (query admin "organization-by-id" :organizationId id)]
+        (:permanent-archive-enabled updated-org) => false))))

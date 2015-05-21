@@ -12,6 +12,7 @@
               <th data-bind="ltext: 'organization.id'"></th>
               <th data-bind="ltext: 'organization.name'"></th>
               <th data-bind="ltext: 'login.with-rights'"></th>
+              <th data-bind="ltext: 'organization.archive.enabled'"></th>
               <th data-bind="ltext: 'admin.municipality'"></th>
               <th data-bind="ltext: 'organization.scope'"></th>
               <th data-bind="ltext: 'organization.inforequest.enabled'"></th>
@@ -31,6 +32,9 @@
                 </td>
                 <td data-bind="with: organization, attr: {'rowspan': organization.scope.length}">
                   [<a href="#" data-bind="click: $root.loginAsModel.open, ltext: 'loginframe.login', attr: {'data-impersonate': organization.id}"></a>]
+                </td>
+                <td data-bind="with: organization, attr: {'rowspan': organization.scope.length}">
+                  <span data-bind="text: $data['permanent-archive-enabled'] || false"></span>
                 </td>
               <!-- /ko -->
               <td><abbr data-bind="text: $data.municipality, attr: {'title': loc(['municipality',$data.municipality])}"></abbr></td>
@@ -56,7 +60,7 @@
         <div class="dialog-content">
           <div>
             <label class="form-label" for="login-as-password" data-bind="ltext: 'admin.admin-password'"></label>
-            <input type="password" data-bind="textInput: password" class="form-input" id="login-as-password" ></input>
+            <input type="password" data-bind="textInput: password" class="form-input" id="login-as-password" >
           </div>
 
           <button data-bind="click: login, ltext: 'loginframe.login'"

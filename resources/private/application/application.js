@@ -195,15 +195,9 @@
       applicationModel.nonpartyDocumentIndicator(_.reduce(nonpartyDocs, sumDocIndicators, 0));
       applicationModel.partyDocumentIndicator(_.reduce(partyDocs, sumDocIndicators, 0));
 
-      var metadata = _.map(app.metadata, function(value, key) {
-        if (_.isObject(value)) {
-          value = _.map(value, function(subvalue, subkey) {
-            return {name: subkey, value: subvalue};
-          });
-        }
-        return {name: key, value: value};
-      });
-      applicationModel.metadataList(_.sortBy(metadata, "name"));
+      applicationModel.metadataList(_.sortBy(_.map(app.metadata, function(value, key) {
+        return metadata.translateMetaData(key, value);
+      }), "name"));
 
       isInitializing = false;
       pageutil.hideAjaxWait();

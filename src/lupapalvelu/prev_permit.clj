@@ -14,7 +14,8 @@
             [sade.util :as util]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch-api]
-            [lupapalvelu.organization :as organization]))
+            [lupapalvelu.organization :as organization]
+            [sade.env :as env]))
 
 (defn- get-applicant-email [applicant]
   (-> (or
@@ -42,7 +43,8 @@
                                                    :documentName nil
                                                    :documentId   nil
                                                    :path         nil
-                                                   :role         "writer"}))
+                                                   :role         "writer"})
+                 :disable-notifications (env/feature? :disable-prev-permit-notifications))
                (info "Prev permit application creation, invited " applicant-email " to created app " (get-in command [:data :id]))
 
                ;; Set applicants' user info to Hakija documents
