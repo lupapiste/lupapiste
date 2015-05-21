@@ -1004,7 +1004,7 @@
 
 
 (defmigration tutkinto-mapping-in-own-info
-  (let [target-keys-set (set (map :name (:body lupapalvelu.document.schemas/koulutusvalinta)))
+  (let [target-keys-set (conj (set (map :name (:body lupapalvelu.document.schemas/koulutusvalinta))) "other")
         mapping (er/read-map "tutkinto-mapping.xlsx")]
     (doseq [user (mongo/select :users
                    {"degree" {$exists true}}
