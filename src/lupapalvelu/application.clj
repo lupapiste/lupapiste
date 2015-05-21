@@ -961,8 +961,8 @@
 (defn- validate-new-applications-enabled [command {:keys [permitType municipality] :as application}]
   (when application
     (let [scope (organization/resolve-organization-scope municipality permitType)]
-      (when-not (= (:new-application-enabled scope) true)
-        (fail :error.new-applications.disabled)))))
+      (when-not (:new-application-enabled scope)
+        (fail :error.new-applications-disabled)))))
 
 (defcommand convert-to-application
   {:parameters [id]
