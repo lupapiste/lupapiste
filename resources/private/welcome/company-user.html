@@ -63,11 +63,11 @@
 
         <button data-bind="click: send, enable: ok, ltext: 'setpw.send'" class="btn btn-primary" id="testCompanyUserSubmitPassword"></button>
 
-        <div data-bind="visible: success">
+        <div data-bind="if: success">
           <a data-bind="ltext: 'setpw.success'" href="#!/login"></a>
         </div>
 
-        <div data-bind="ltext: 'setpw.fail', visible: fail"></div>
+        <div data-bind="ltext: 'setpw.fail', if: fail"></div>
       </div>
 
     </form>
