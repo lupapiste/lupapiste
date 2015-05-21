@@ -19,10 +19,10 @@ LUPAPISTE.CurrentUser = function() {
       role: undefined
     },
     notification: {
-      title:      undefined,
-      titleLoc:   undefined,
-      message:    undefined,
-      messageLoc: undefined
+      title:          undefined,
+      titleI18nkey:   undefined,
+      message:        undefined,
+      messageI18nkey: undefined
     }
   };
 
@@ -52,17 +52,38 @@ LUPAPISTE.CurrentUser = function() {
     return username;
   });
 
+  function getNotificationFields(notification) {
+    if(notification.titleI18nkey() && notification.messageI18nkey()) {
+      return {
+        title: notification.titleI18nkey(),
+        msg: notification.messageI18nkey(),
+        localize: true
+      };
+    } else if (notification.title() && notification.message()) {
+      return {
+        title: notification.title(),
+        msg: notification.message(),
+        localize: false
+      };
+    } else {
+      return undefined;
+    }
+  }
+
   self.showNotification = ko.pureComputed(function() {
-    return self.notification.titleLoc() && self.notification.messageLoc();
+    return !_.isEmpty(getNotificationFields(self.notification));
   });
 
   ko.computed(function() {
     if (self.showNotification()) {
-      hub.send("show-dialog", {title: self.notification.titleLoc(),
+      var fields = getNotificationFields(self.notification);
+      hub.send("show-dialog", {title: fields.title,
+                               localize: fields.localize,
                                id: "user-notification-dialog",
                                size: "medium",
                                component: "ok-dialog",
-                               componentParams: {text: self.notification.messageLoc()}
+                               closeOnClick: true,
+                               componentParams: {text: fields.msg, localize: fields.localize}
                               });
     }
   });

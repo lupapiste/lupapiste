@@ -14,6 +14,8 @@ LUPAPISTE.ModalDialogModel = function () {
   self.css = ko.pureComputed(function() {
     return [self.size(), self.component()].join(" ");
   });
+  self.closeOnClick = ko.observable();
+  self.localize = ko.observable();
 
   self.showDialog.subscribe(function(show) {
     _.delay(function(show) {
@@ -63,14 +65,22 @@ LUPAPISTE.ModalDialogModel = function () {
     hub.send("dialog-close", {id : self.id()});
   };
 
+  self.componentClicked = function() {
+    if (self.closeOnClick()) {
+      self.closeDialog();
+    }
+    return true;
+  };
+
   hub.subscribe("show-dialog", function(data) {
     $("html").addClass("no-scroll");
     self.component(data.component);
-    var componentParams = data.componentParams ? data.componentParams : {};
-    self.componentParams(componentParams);
+    self.componentParams(data.componentParams || {});
     self.title = data.title;
     self.size(data.size ? data.size : "large");
     self.id(data.id || data.component);
+    self.closeOnClick(data.closeOnClick || false);
+    self.localize(_.isUndefined(data.localize) ? true : data.localize);
     self.showDialog(true);
   });
 

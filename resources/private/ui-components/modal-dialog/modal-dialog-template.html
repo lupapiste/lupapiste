@@ -13,12 +13,18 @@
                             'margin-top': dialogTop() + 'px'},
                     css: css">
       <div class="header">
+        <!-- ko if: localize -->
         <span class="title" data-bind="ltext: title"></span>
+        <!-- /ko -->
+        <!-- ko ifnot: localize -->
+        <span class="title" data-bind="text: title"></span>
+        <!-- /ko -->
         <span class="close" data-bind="click: closeDialog"></span>
       </div>
       <div id="modal-dialog-content-component" class="component"
       data-bind="component: {name: component, params: componentParams},
-                 style: {'height': dialogContentHeightPx()}"></div>
+                 style: {'height': dialogContentHeightPx()},
+                 click: componentClicked"></div>
     </div>
     <!-- /ko -->
     </script>
