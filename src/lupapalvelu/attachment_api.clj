@@ -104,7 +104,8 @@
    :input-validators [(partial action/non-blank-parameters [:id :attachmentId :attachmentType])]
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles action/all-authz-writer-roles
-   :states     (action/all-states-but [:answered :sent :closed :canceled])}
+   :states     (action/all-states-but [:answered :sent :closed :canceled])
+   :pre-checks [a/validate-authority-in-drafts]}
   [{:keys [application user created] :as command}]
 
   (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
@@ -137,7 +138,8 @@
    :parameters  [id attachmentId]
    :input-validators [(partial action/non-blank-parameters [:attachmentId])]
    :user-roles #{:authority}
-   :states      (action/all-states-but [:answered :sent :closed :canceled])}
+   :states      (action/all-states-but [:answered :sent :closed :canceled])
+   :pre-checks  [a/validate-authority-in-drafts]}
   [{:keys [created] :as command}]
   (attachment/update-attachment-key command attachmentId :state :ok created :set-app-modified? true :set-attachment-modified? false))
 
@@ -146,7 +148,8 @@
    :parameters  [id attachmentId]
    :input-validators [(partial action/non-blank-parameters [:attachmentId])]
    :user-roles #{:authority}
-   :states      (action/all-states-but [:answered :sent :closed :canceled])}
+   :states      (action/all-states-but [:answered :sent :closed :canceled])
+   :pre-checks  [a/validate-authority-in-drafts]}
   [{:keys [created] :as command}]
   (attachment/update-attachment-key command attachmentId :state :requires_user_action created :set-app-modified? true :set-attachment-modified? false))
 
@@ -160,7 +163,8 @@
 
    :pre-checks [(fn [{{attachment-types :attachmentTypes} :data} application]
                   (when (and attachment-types (not (every? #(allowed-attachment-type-for-application? % application) attachment-types)))
-                    (fail :error.unknown-attachment-type)))]
+                    (fail :error.unknown-attachment-type)))
+                a/validate-authority-in-drafts]
    :input-validators [(partial action/vector-parameters [:attachmentTypes])]
    :user-roles #{:authority :oirAuthority}
    :states      (action/all-states-but [:answered :sent :closed :canceled])}
@@ -179,7 +183,8 @@
    :input-validators [(partial action/non-blank-parameters [:attachmentId])]
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles action/all-authz-writer-roles
-   :states      (action/all-states-but [:answered :sent :closed :canceled])}
+   :states      (action/all-states-but [:answered :sent :closed :canceled])
+   :pre-checks  [a/validate-authority-in-drafts]}
   [{:keys [application user]}]
 
   (when-not (attachment-deletable application attachmentId (:role user))
@@ -197,7 +202,8 @@
    :input-validators [(partial action/non-blank-parameters [:attachmentId :fileId])]
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles action/all-authz-writer-roles
-   :states      (action/all-states-but [:answered :sent :closed :canceled])}
+   :states      (action/all-states-but [:answered :sent :closed :canceled])
+   :pre-checks  [a/validate-authority-in-drafts]}
   [{:keys [application user]}]
 
   (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
@@ -259,7 +265,8 @@
                   (when attachment-id
                     (when-not (attachment-editable-by-applicationState? application attachment-id (:role user))
                       (fail :error.pre-verdict-attachment))))
-                validate-attachment-type]
+                validate-attachment-type
+                a/validate-authority-in-drafts]
    :input-validators [(partial action/non-blank-parameters [:id :attachmentType :filename])
                       (partial action/map-parameters-with-required-keys [:attachmentType] [:type-id :type-group])
                       (fn [{{size :size} :data}] (when-not (pos? size) (fail :error.select-file)))
@@ -418,7 +425,8 @@
    :pre-checks [domain/validate-owner-or-write-access
                 (fn [_ application]
                   (when-not (pos? (count (:attachments application)))
-                    (fail :application.attachmentsEmpty)))]
+                    (fail :application.attachmentsEmpty)))
+                a/validate-authority-in-drafts]
    :user-roles #{:applicant :authority}}
   [{application :application u :user :as command}]
   (when (seq attachmentIds)
@@ -453,7 +461,8 @@
    :user-authz-roles action/all-authz-writer-roles
    :states     (action/all-states-but [:answered :sent :closed :canceled])
    :input-validators [(partial action/non-blank-parameters [:attachmentId])
-                      validate-meta validate-scale validate-size validate-operation]}
+                      validate-meta validate-scale validate-size validate-operation]
+   :pre-checks [a/validate-authority-in-drafts]}
   [{:keys [application user created] :as command}]
   (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
     (fail! :error.pre-verdict-attachment))
@@ -474,7 +483,7 @@
 (defcommand set-attachments-as-verdict-attachment
   {:parameters [:id selectedAttachmentIds unSelectedAttachmentIds]
    :user-roles #{:authority}
-   :states     (action/all-states-but [:closed :canceled])
+   :states     (action/all-states-but [:draft :closed :canceled])
    :input-validators [(partial action/vector-parameters-with-non-blank-items [:selectedAttachmentIds :unSelectedAttachmentIds])
                       (fn [{{:keys [selectedAttachmentIds unSelectedAttachmentIds]} :data}]
                         (when (seq (intersection (set selectedAttachmentIds) (set unSelectedAttachmentIds)))

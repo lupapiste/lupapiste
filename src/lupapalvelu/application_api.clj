@@ -132,7 +132,7 @@
 (defcommand mark-everything-seen
   {:parameters [:id]
    :user-roles #{:authority :oirAuthority}
-   :states     action/all-states}
+   :states     (action/all-states-but [:draft])}
   [{:keys [application user created] :as command}]
   (update-application command {$set (a/mark-indicators-seen-updates application user created)}))
 
@@ -195,7 +195,8 @@
    :user-roles       #{:authority}
    :notified         true
    :on-success       (notify :application-state-change)
-   :states           (action/all-states-but [:canceled :closed :answered])}
+   :states           (action/all-states-but [:canceled :closed :answered])
+   :pre-checks       [a/validate-authority-in-drafts]}
   [{:keys [created application] :as command}]
   (update-application command
     (util/deep-merge
@@ -274,7 +275,7 @@
 (defcommand refresh-ktj
   {:parameters [:id]
    :user-roles #{:authority}
-   :states     action/all-states}
+   :states     (action/all-states-but [:draft])}
   [{:keys [application created]}]
   (autofill-rakennuspaikka application created)
   (ok))
@@ -283,7 +284,8 @@
   {:parameters       [:id drawings]
    :input-validators [(partial action/non-blank-parameters [:id])]
    :user-roles       #{:applicant :authority :oirAuthority}
-   :states           [:draft :info :answered :open :submitted :complement-needed]}
+   :states           [:draft :info :answered :open :submitted :complement-needed]
+   :pre-checks       [a/validate-authority-in-drafts]}
   [{:keys [created] :as command}]
   (when (sequential? drawings)
     (update-application command
@@ -389,7 +391,8 @@
    :user-roles       #{:applicant :authority}
    :states           [:draft :open :submitted :complement-needed]
    :input-validators [operation-validator]
-   :pre-checks       [add-operation-allowed?]}
+   :pre-checks       [add-operation-allowed?
+                      a/validate-authority-in-drafts]}
   [{:keys [application created] :as command}]
   (let [op (a/make-op operation created)
         new-docs (a/make-documents nil created op application)
@@ -402,7 +405,8 @@
 (defcommand update-op-description
   {:parameters [id op-id desc]
    :user-roles #{:applicant :authority}
-   :states     [:draft :open :submitted :complement-needed]}
+   :states     [:draft :open :submitted :complement-needed]
+   :pre-checks [a/validate-authority-in-drafts]}
   [command]
   (update-application command {"operations" {$elemMatch {:id op-id}}} {$set {"operations.$.description" desc}}))
 
@@ -410,7 +414,8 @@
   {:parameters [id permitSubtype]
    :user-roles #{:applicant :authority}
    :states     [:draft :open :submitted :complement-needed]
-   :pre-checks [permit/validate-permit-has-subtypes]}
+   :pre-checks [permit/validate-permit-has-subtypes
+                a/validate-authority-in-drafts]}
   [{:keys [application created] :as command}]
   (if-let [validation-errors (permit/is-valid-subtype (keyword permitSubtype) application)]
     validation-errors
@@ -430,7 +435,8 @@
    :input-validators [(partial action/non-blank-parameters [:address])
                       (partial a/property-id-parameters [:propertyId])
                       validate-x validate-y]
-   :pre-checks       [authority-if-post-verdict-state]}
+   :pre-checks       [authority-if-post-verdict-state
+                      a/validate-authority-in-drafts]}
   [{:keys [created application] :as command}]
   (if (= (:municipality application) (p/municipality-id-by-property-id propertyId))
     (do
@@ -509,7 +515,8 @@
    :user-roles       #{:applicant :authority}
    :states           (action/all-application-states-but [:sent :closed :canceled]) ;; Pitaako olla myos 'sent'-tila?
    :pre-checks       [validate-jatkolupa-zero-link-permits
-                      validate-link-permit-id]
+                      validate-link-permit-id
+                      a/validate-authority-in-drafts]
    :input-validators [(partial action/non-blank-parameters [:linkPermitId])
                       (fn [{d :data}] (when-not (mongo/valid-key? (:linkPermitId d)) (fail :error.invalid-db-key)))]}
   [{application :application}]
@@ -519,7 +526,8 @@
 (defcommand remove-link-permit-by-app-id
   {:parameters [id linkPermitId]
    :user-roles #{:applicant :authority}
-   :states     [:draft :open :submitted :complement-needed :verdictGiven :constructionStarted]} ;; Pitaako olla myos 'sent'-tila?
+   :states     [:draft :open :submitted :complement-needed :verdictGiven :constructionStarted]
+   :pre-checks [a/validate-authority-in-drafts]} ;; Pitaako olla myos 'sent'-tila?
   [{application :application}]
   (if (mongo/remove :app-links (a/make-mongo-id-for-link-permit id linkPermitId))
     (ok)

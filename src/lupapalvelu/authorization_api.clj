@@ -7,6 +7,7 @@
             [sade.core :refer [ok fail fail! unauthorized]]
             [sade.util :as util]
             [lupapalvelu.action :refer [defquery defcommand defraw update-application all-application-states notify] :as action]
+            [lupapalvelu.application :as application]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.mongo :as mongo]
@@ -89,6 +90,7 @@
                       role-validator]
    :states     (action/all-application-states-but [:closed :canceled])
    :user-roles #{:applicant :authority}
+   :pre-checks  [application/validate-authority-in-drafts]
    :notified   true}
   [command]
   (send-invite! command))
@@ -152,7 +154,8 @@
   {:parameters [:id username]
    :input-validators [(partial action/non-blank-parameters [:username])]
    :user-roles #{:applicant :authority}
-   :states     (action/all-application-states-but [:canceled])}
+   :states     (action/all-application-states-but [:canceled])
+   :pre-checks [application/validate-authority-in-drafts]}
   [command]
   (do-remove-auth command username))
 
@@ -168,13 +171,15 @@
 (defcommand unsubscribe-notifications
   {:parameters [:id :username]
    :user-roles #{:applicant :authority}
-   :states all-application-states}
+   :states all-application-states
+   :pre-checks [application/validate-authority-in-drafts]}
   [command]
   (manage-unsubscription command true))
 
 (defcommand subscribe-notifications
   {:parameters [:id :username]
    :user-roles #{:applicant :authority}
-   :states all-application-states}
+   :states all-application-states
+   :pre-checks [application/validate-authority-in-drafts]}
   [command]
   (manage-unsubscription command false))
