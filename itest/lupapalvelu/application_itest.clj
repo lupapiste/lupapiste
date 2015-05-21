@@ -6,7 +6,7 @@
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.application :as app]
+            [lupapalvelu.application-api :as app]
             [lupapalvelu.document.tools :as tools]))
 
 (mongo/connect!)

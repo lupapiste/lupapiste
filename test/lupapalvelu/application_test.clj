@@ -3,6 +3,7 @@
             [midje.util :refer [testable-privates]]
             [lupapalvelu.test-util :refer :all]
             [lupapalvelu.action :refer [update-application]]
+            [lupapalvelu.application-api :refer [filter-repeating-party-docs ]]
             [lupapalvelu.application :refer :all]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.domain :as domain]
@@ -16,7 +17,9 @@
     ..application.. =contains=> {:id ..id..}
     (mongo/update-by-query :applications {:_id ..id..} ..changes..) => 1))
 
-(testable-privates lupapalvelu.application validate-x validate-y add-operation-allowed? is-link-permit-required)
+(testable-privates lupapalvelu.application-api validate-x validate-y add-operation-allowed?)
+(testable-privates lupapalvelu.application is-link-permit-required)
+
 
 (facts "coordinate validation"
   (validate-x {:data {:x nil}}) => nil
