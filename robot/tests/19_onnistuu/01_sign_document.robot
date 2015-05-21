@@ -21,12 +21,12 @@ Bob decides to register his company after all, but still chikens out
   Select account type  account5
   Wait until  Element should be visible  xpath=//*[@data-test-id='register-company-submit']
   Input text by test id  register-company-name        Peten rakennus Oy
-  Input text by test id  register-company-y           FI2341528-4
+  Input text by test id  register-company-y           2341528-4
   Input text by test id  register-company-firstName   Pete
   Input text by test id  register-company-lastName    Puuha
   Input text by test id  register-company-email       puuha.pete@pete-rakennus.fi
   Input text by test id  register-company-ovt         0037123456710007
-  Input text by test id  register-company-pop         003776543212
+  Select From List  xpath=//span[@data-test-id="register-company-pop"]/select  Basware Oyj (BAWCFI22)
   Click enabled by test id  register-company-submit
   Wait Until  Element Should Be Disabled  xpath=//*[@data-test-id='register-company-submit']
   Element Should Be Disabled  xpath=//*[@data-test-id='register-company-cancel']
@@ -41,12 +41,12 @@ Bob decides to register his company after all, and this time he means it
   Select account type  account5
   Wait until  Element should be visible  xpath=//*[@data-test-id='register-company-submit']
   Input text by test id  register-company-name        Peten rakennus Oy
-  Input text by test id  register-company-y           FI2341528-4
+  Input text by test id  register-company-y           2341528-4
   Input text by test id  register-company-firstName   Pete
   Input text by test id  register-company-lastName    Puuha
   Input text by test id  register-company-email       puuha.pete@pete-rakennus.fi
   Input text by test id  register-company-ovt         0037123456710007
-  Input text by test id  register-company-pop         003776543212
+  Select From List  xpath=//span[@data-test-id="register-company-pop"]/select  Basware Oyj (BAWCFI22)
   Click enabled by test id  register-company-submit
   Wait Until  Element Should Be Disabled  xpath=//*[@data-test-id='register-company-submit']
   Element Should Be Disabled  xpath=//*[@data-test-id='register-company-cancel']
@@ -69,7 +69,7 @@ Registrations succeeds, user gets email
 Second link in email should lead to password reset
   Click Element  xpath=(//a)[2]
   Wait Until  Element should be visible  new-company-user
-  Wait Until  Page should contain  FI2341528-4
+  Wait Until  Page should contain  2341528-4
   Page should contain  puuha.pete@pete-rakennus.fi
   Fill in new password  new-company-user  company123
 

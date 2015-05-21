@@ -107,7 +107,7 @@
                             :postinumero {:value "33210"}
                             :postitoimipaikannimi {:value "Tammerfors"}}
                    :verkkolaskutustieto {:ovtTunnus {:value "003712345671"}
-                                         :valittajaTunnus {:value "valittajatunnus"}
+                                         :valittajaTunnus {:value "BAWCFI22"}
                                          :verkkolaskuTunnus {:value "verkkolaskuTunnus"}}
                    :yhteyshenkilo {:henkilotiedot {:etunimi {:value "Pappa"}
                                                    :sukunimi {:value "Betalare"}

@@ -61,6 +61,8 @@
 (def pre-verdict-states #{:draft :info :answered :open :submitted :complement-needed})
 (def post-verdict-states (difference all-application-states pre-verdict-states))
 
+(def post-submitted-states #{:sent :complement-needed :verdictGiven :constructionStarted :closed})
+
 (defn all-states-but [drop-states-array]
   (difference all-states (set drop-states-array)))
 
@@ -114,6 +116,13 @@
     (filter-params-of-command params command
       (partial some #(or (nil? %) (and (string? %) (s/blank? %))))
       :error.vector-parameters-with-blank-items )))
+
+(defn vector-parameters-with-at-least-n-non-blank-items [n params command]
+  (or
+    (vector-parameters-with-non-blank-items params command)
+    (filter-params-of-command params command
+      #(> n (count %))
+      :error.vector-parameters-with-items-missing-required-keys)))
 
 (defn vector-parameters-with-map-items-with-required-keys [params required-keys command]
   (or
@@ -279,12 +288,12 @@
   "if :id parameter is present read application from command
    (pre-loaded) or load application for user."
   [{{id :id} :data user :user application :application}]
-  (and id user (or application (domain/get-application-as id user true))))
+  (and id user (or application (domain/get-application-as id user :include-canceled-apps? true))))
 
 (defn- user-authz? [command-meta-data application user]
-  (let [allowed-roles (get command-meta-data :user-authz-roles #{})]
-    (when-let [role-in-app (keyword (:role (domain/get-auth application (:id user))))]
-     (allowed-roles role-in-app))))
+  (let [allowed-roles (get command-meta-data :user-authz-roles #{})
+        roles-in-app  (map (comp keyword :role) (domain/get-auths application (:id user)))]
+    (some allowed-roles roles-in-app)))
 
 (defn- organization-authz? [command-meta-data {organization :organization} user]
   (let [required-authz (:org-authz-roles command-meta-data)
@@ -367,10 +376,10 @@
         (fail :error.unknown)))))
 
 (defn execute [{action :action :as command}]
-  (let [before   (System/nanoTime)
+  (let [before   (System/currentTimeMillis)
         response (run command execute-validators true)
-        after    (System/nanoTime)]
-    (debug action "->" (:ok response) "(took" (- after before) "ns)")
+        after    (System/currentTimeMillis)]
+    (debug action "->" (:ok response) "(took" (- after before) "ms)")
     (swap! actions update-in [(keyword action) :call-count] #(if % (inc %) 1))
     response))
 

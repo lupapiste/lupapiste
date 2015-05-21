@@ -19,7 +19,6 @@ jQuery(function($) {
       url: "/dev/create",
       data: { address: "Latokuja 3",
               propertyId: municipality + "-416-55-7",
-              municipality: municipality,
               operation: operation,
               x: "404369.304000",
               y: "6693806.957000" },
@@ -124,7 +123,7 @@ jQuery(function($) {
 
         var formData = {
           name:      "Oy FooBar Ab",
-          y:         "FI1234567-1",
+          y:         "1234567-1",
           reference: "Kansantanhu osasto",
           address1:  "Latokuja 1",
           po:        "Sipoo",

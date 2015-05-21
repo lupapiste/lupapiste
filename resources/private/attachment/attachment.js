@@ -421,15 +421,9 @@ var attachment = (function() {
     model.allowedAttachmentTypes(application.allowedAttachmentTypes);
     model.attachmentType(attachmentType(attachment.type["type-group"], attachment.type["type-id"]));
 
-    var metadataArray = _.map(attachment.metadata, function(value, key) {
-      if (_.isObject(value)) {
-        value = _.map(value, function(subvalue, subkey) {
-          return {name: subkey, value: subvalue};
-        });
-      }
-      return {name: key, value: value};
-    });
-    model.metadata(metadataArray);
+    model.metadata(_.sortBy(_.map(attachment.metadata, function(value, key) {
+      return metadata.translateMetaData(key, value);
+    }), "name"));
 
     model.id(attachmentId);
 

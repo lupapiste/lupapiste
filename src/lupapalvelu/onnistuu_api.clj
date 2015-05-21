@@ -9,7 +9,6 @@
             [hiccup.form :as form]
             [slingshot.slingshot :refer [try+]]
             [sade.env :as env]
-            [sade.util :refer [y? max-length-string valid-email?]]
             [sade.core :refer [ok fail fail! now]]
             [sade.session :as ssess]
             [sade.strings :as ss]
@@ -35,7 +34,6 @@
 
 (defcommand init-sign
   {:parameters [company signer lang]
-   :feature :companyRegistration
    :user-roles #{:anonymous}}
   [{:keys [created user]}]
   (sc/validate c/Company company)
@@ -64,7 +62,6 @@
 
 (defcommand cancel-sign
   {:parameters [processId]
-   :feature :companyRegistration
    :user-roles #{:anonymous}}
   [{:keys [created]}]
   (p/cancel-sign-process! processId created)

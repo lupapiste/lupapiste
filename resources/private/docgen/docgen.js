@@ -50,6 +50,7 @@ var docgen = (function () {
     });
 
     $("select[data-select-other-id]", docgenDiv).each(initSelectWithOther).change(selectWithOtherChanged);
+    $(".sticky", docgenDiv).Stickyfill();
   }
 
   return {

@@ -5,10 +5,12 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mime :as mime]
             [lupapalvelu.xml.validator :as validator]
+            [lupapalvelu.document.schemas :as schemas]
             [sade.env :as env]
             [sade.util :as util]
             [cheshire.core :as json]
             [lupapalvelu.attachment :refer [attachment-types-osapuoli, attachment-scales, attachment-sizes]]
+            [lupapalvelu.company :as company]
             [lupapalvelu.stamper :refer [file-types]]
             [scss-compiler.core :as scss]))
 
@@ -21,20 +23,22 @@
               :name "jquery"})
 
 (defn- conf []
-  (let [js-conf {:maps              (env/value :maps)
-                 :analytics         (env/value :analytics)
-                 :fileExtensions    mime/allowed-extensions
-                 :passwordMinLength (env/value :password :minlength)
-                 :mode              env/mode
-                 :build             (:build-number env/buildinfo)
-                 :cookie            (env/value :cookie)
-                 :wannaJoinUrl      (env/value :oir :wanna-join-url)
-                 :userAttachmentTypes (map #(str "osapuolet." (name %)) attachment-types-osapuoli)
-                 :attachmentScales  attachment-scales
-                 :attachmentSizes   attachment-sizes
-                 :postVerdictStates lupapalvelu.application-meta-fields/post-verdict-states
-                 :stampableMimes    (filter identity (map mime/mime-types file-types))
-                 :foremanRoles      (:body (first lupapalvelu.document.schemas/kuntaroolikoodi-tyonjohtaja))
+  (let [js-conf {:maps                  (env/value :maps)
+                 :analytics             (env/value :analytics)
+                 :fileExtensions        mime/allowed-extensions
+                 :passwordMinLength     (env/value :password :minlength)
+                 :mode                  env/mode
+                 :build                 (:build-number env/buildinfo)
+                 :cookie                (env/value :cookie)
+                 :wannaJoinUrl          (env/value :oir :wanna-join-url)
+                 :userAttachmentTypes   (map #(str "osapuolet." (name %)) attachment-types-osapuoli)
+                 :attachmentScales      attachment-scales
+                 :attachmentSizes       attachment-sizes
+                 :accountTypes          company/account-types
+                 :eInvoiceOperators     schemas/e-invoice-operators
+                 :postVerdictStates     lupapalvelu.application-meta-fields/post-verdict-states
+                 :stampableMimes        (filter identity (map mime/mime-types file-types))
+                 :foremanRoles          (:body (first lupapalvelu.document.schemas/kuntaroolikoodi-tyonjohtaja))
                  :foremanReadonlyFields ["luvanNumero", "katuosoite", "rakennustoimenpide", "kokonaisala"]
                  :asianhallintaVersions (util/convert-values ; asianhallinta versions have "ah-" prefix
                                           validator/supported-asianhallinta-versions-by-permit-type
@@ -54,15 +58,16 @@
 
 (def ui-components
   {;; 3rd party libs
-   :cdn-fallback   {:js ["jquery-1.8.3.min.js" "jquery-ui-1.10.2.min.js" "jquery.dataTables.min.js"]}
+   :cdn-fallback   {:js ["jquery-1.11.3.min.js" "jquery-ui-1.10.2.min.js" "jquery.dataTables.min.js"]}
    :jquery         {:js ["jquery.ba-hashchange.js" "jquery.metadata-2.1.js" "jquery.cookie.js" "jquery.caret.js"]}
    :jquery-upload  {:js ["jquery.ui.widget.js" "jquery.iframe-transport.js" "jquery.fileupload.js"]}
-   :knockout       {:js ["knockout-3.2.0.min.js" "knockout.mapping-2.4.1.js" "knockout.validation.min.js" "knockout-repeat-2.0.0.js"]}
+   :knockout       {:js ["knockout-3.3.0.min.js" "knockout.mapping-2.4.1.js" "knockout.validation.min.js" "knockout-repeat-2.0.0.js"]}
    :lo-dash        {:js ["lodash.min.js"]}
    :underscore     {:depends [:lo-dash]
                     :js ["underscore.string.min.js" "underscore.string.init.js"]}
    :moment         {:js ["moment.min.js"]}
    :open-layers    {:js ["openlayers-2.13_20140619.min.lupapiste.js"]}
+   :stickyfill     {:js ["stickyfill.min.js"]}
 
    ;; Init can also be used as a standalone lib, see web.clj
    :init         {:depends [:underscore]
@@ -85,10 +90,10 @@
                        :js ["expanded-content.js"]}
 
    :common       {:depends [:init :jquery :jquery-upload :knockout :underscore :moment :i18n :selectm
-                            :expanded-content :mockjax :open-layers]
+                            :expanded-content :mockjax :open-layers :stickyfill]
                   :js ["register-components.js" "util.js" "event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js"
                        "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "perfmon.js" "features.js"
-                       "statuses.js" "statusmodel.js" "authorization.js" "vetuma.js"]}
+                       "statuses.js" "statusmodel.js" "authorization.js" "vetuma.js" "metadata.js"]}
 
    :common-html  {:depends [:selectm-html]
                   :css [(partial main-style-file "common-html/css/main.css" "common-html/sass/main.scss") "jquery-ui.css"]
@@ -104,8 +109,7 @@
                      :html ["screenmessage.html"]}
 
    :map          {:depends [:common-html]
-                  :js [ "gis.js" "locationsearch.js"]
-                  :html ["map-popup.html"]}
+                  :js [ "gis.js" "locationsearch.js"]}
 
    :mypage       {:depends [:common-html]
                   :js ["mypage.js"]
@@ -211,9 +215,9 @@
    :docgen       {:depends [:accordion :common-html]
                   :js ["docmodel.js" "docgen.js"]}
 
-   :create       {:depends [:common-html]
+   :create       {:depends [:common-html :map]
                   :js ["municipalities.js" "create.js"]
-                  :html ["create.html"]}
+                  :html ["map-popup.html" "create.html"]}
 
    :iframe       {:depends [:common-html]
                   :css ["iframe.css"]}
@@ -265,7 +269,9 @@
                         "neighbors/neighbors-edit-dialog-model.js"
                         "company-selector/company-selector-model.js"
                         "company-invite/company-invite-model.js"
-                        "company-invite/company-invite-dialog-model.js"]
+                        "company-invite/company-invite-dialog-model.js"
+                        "autocomplete/autocomplete-model.js"
+                        "invoice-operator-selector/invoice-operator-selector-model.js"]
                    :html ["fill-info/fill-info-template.html"
                           "foreman-history/foreman-history-template.html"
                           "foreman-other-applications/foreman-other-applications-template.html"
@@ -285,7 +291,9 @@
                           "neighbors/neighbors-edit-dialog-template.html"
                           "company-selector/company-selector-template.html"
                           "company-invite/company-invite-template.html"
-                          "company-invite/company-invite-dialog-template.html"]}
+                          "company-invite/company-invite-dialog-template.html"
+                          "autocomplete/autocomplete-template.html"
+                          "invoice-operator-selector/invoice-operator-selector-template.html"]}
 
    ;; Single Page Apps and standalone components:
    ;; (compare to auth-methods in web.clj)

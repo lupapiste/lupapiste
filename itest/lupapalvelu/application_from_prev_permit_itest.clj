@@ -53,7 +53,7 @@
     (fact "db has app that has the kuntalupatunnus in its verdict and its organization matches"
       (create-app-from-prev-permit raktark-jarvenpaa) => (contains {:ok true :id "lupis-id"})
       (provided
-        (domain/get-application-as anything anything) => {:id "lupis-id" :state "verdictGiven"}))
+        (domain/get-application-as anything anything :include-canceled-apps? false) => {:id "lupis-id" :state "verdictGiven"}))
 
     ; 3: jos taustajarjestelmasta ei saada xml-sisaltoa -> (fail :error.no-previous-permit-found-from-backend)
     (fact "no xml content received from backend with the kuntalupatunnus"
@@ -96,7 +96,6 @@
                       :x "6707184.319"
                       :y "393021.589"
                       :address "Kylykuja 3"
-                      :municipality "186"
                       :propertyId "18600303560005") => ok?
               app-id (:id resp1)
               application (query-application local-query raktark-jarvenpaa app-id)
@@ -119,7 +118,6 @@
                         :x "6707184.319"
                         :y "393021.589"
                         :address "Kylykuja 3"
-                        :municipality "186"
                         :propertyId "18600303560005") => ok?]
             (:id resp2) =not=> app-id)))))
 
@@ -141,7 +139,7 @@
             (keyword (:text resp-body)) => :created-new-application))
 
         (fact "should return the LP application if the kuntalupatunnus matches an existing app"
-          (let [{app-id :id} (create-and-submit-application pena :municipality jarvenpaa-muni)
+          (let [{app-id :id} (create-and-submit-application pena :propertyId jarvenpaa-property-id)
                 verdict-resp (give-verdict raktark-jarvenpaa app-id :verdictId example-kuntalupatunnus)
                 response     (http/get rest-address params)
                 resp-body    (:body (util/decode-response response))]
@@ -151,7 +149,7 @@
             (keyword (:text resp-body)) => :already-existing-application))
 
         (fact "create new LP app if kuntalupatunnus matches existing app in another organization"
-         (let [{app-id :id} (create-and-submit-application pena :municipality sonja-muni)
+         (let [{app-id :id} (create-and-submit-application pena :propertyId sipoo-property-id)
                _            (give-verdict sonja app-id :verdictId example-kuntalupatunnus)
                response     (http/get rest-address params)
                resp-body    (:body (util/decode-response response))]

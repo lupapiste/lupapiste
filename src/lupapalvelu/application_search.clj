@@ -6,6 +6,7 @@
             [monger.query :as query]
             [sade.strings :as ss]
             [sade.util :as util]
+            [sade.property :as p]
             [sade.core :refer :all]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.domain :as domain]
@@ -89,7 +90,7 @@
   {:pre [filter-search]}
   (cond
     (re-matches #"^([Ll][Pp])-\d{3}-\d{4}-\d{5}$" filter-search) {:_id (ss/upper-case filter-search)}
-    (re-matches util/property-id-pattern filter-search) {:propertyId (util/to-property-id filter-search)}
+    (re-matches p/property-id-pattern filter-search) {:propertyId (p/to-property-id filter-search)}
     :else (make-free-text-query filter-search)))
 
 (defn make-query [query {:keys [filter-search filter-kind filter-state filter-user filter-username]} user]

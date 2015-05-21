@@ -11,7 +11,7 @@ Mikko prepares the application
   Mikko logs in
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  VETUMA_${secs}
-  Create application the fast way  ${appname}  753  753-416-25-22  kerrostalo-rivitalo
+  Create application the fast way  ${appname}  753-416-25-22  kerrostalo-rivitalo
   Open to authorities  Lapsille vesiliuku eiku Vetuma-tunnukset
   Logout
 

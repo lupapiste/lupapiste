@@ -13,7 +13,8 @@
             [sade.strings :as ss]
             [sade.xml :as xml]
             [sade.core :refer :all]
-            [lupapalvelu.action :refer [defquery defcommand update-application without-system-keys notify application->command] :as action]
+            [sade.property :as p]
+            [lupapalvelu.action :refer [defraw defquery defcommand update-application without-system-keys notify application->command] :as action]
             [lupapalvelu.mongo :refer [$each] :as mongo]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.domain :as domain]
@@ -104,7 +105,7 @@
   (util/not-empty-or-nil? (:submitted (mongo/by-id "applications" link-id [:submitted]))))
 
 (defn- foreman-submittable? [application]
-  (let [result (when (-> application :state #{:draft :open :submitted :complement-needed})
+  (let [result (when (-> application :state keyword #{:draft :open :submitted :complement-needed})
                  (when-let [lupapiste-link (filter #(= (:type %) "lupapistetunnus") (:linkPermitData application))]
                    (when (seq lupapiste-link) (link-permit-submitted? (-> lupapiste-link first :id)))))]
     (if (nil? result)
@@ -600,6 +601,7 @@
   (when-not (operations/operations (keyword operation)) (fail :error.unknown-type)))
 
 (defn make-application [id operation x y address property-id municipality organization info-request? open-inforequest? messages user created manual-schema-datas]
+  {:pre [id operation address property-id (not (nil? info-request?)) (not (nil? open-inforequest?)) user created]}
   (let [permit-type (operations/permit-type-of-operation operation)
         owner (user/user-in-role user :owner :type :owner)
         op (make-op operation created)
@@ -638,12 +640,13 @@
                           :documents   (make-documents user created op application manual-schema-datas)}))))
 
 (defn do-create-application
-  [{{:keys [operation x y address propertyId municipality infoRequest messages]} :data :keys [user created] :as command} & [manual-schema-datas]]
-  (let [permit-type (operations/permit-type-of-operation operation)
-        organization (organization/resolve-organization municipality permit-type)
-        scope (organization/resolve-organization-scope municipality permit-type organization)
-        organization-id (:id organization)
-        info-request? (boolean infoRequest)
+  [{{:keys [operation x y address propertyId infoRequest messages]} :data :keys [user created] :as command} & [manual-schema-datas]]
+  (let [municipality      (p/municipality-id-by-property-id propertyId)
+        permit-type       (operations/permit-type-of-operation operation)
+        organization      (organization/resolve-organization municipality permit-type)
+        scope             (organization/resolve-organization-scope municipality permit-type organization)
+        organization-id   (:id organization)
+        info-request?     (boolean infoRequest)
         open-inforequest? (and info-request? (:open-inforequest scope))]
 
     (when-not (or (user/applicant? user) (user/user-is-authority-in-organization? user organization-id))
@@ -661,20 +664,21 @@
 
 ;; TODO: separate methods for inforequests & applications for clarity.
 (defcommand create-application
-  {:parameters       [:operation :x :y :address :propertyId :municipality]
+  {:parameters       [:operation :x :y :address :propertyId]
    :user-roles       #{:applicant :authority}
    :notified         true                                   ; OIR
-   :input-validators [(partial action/non-blank-parameters [:operation :address :municipality])
+   :input-validators [(partial action/non-blank-parameters [:operation :address :propertyId])
                       (partial property-id-parameters [:propertyId])
                       operation-validator]}
-  [{{:keys [operation address municipality infoRequest]} :data :keys [user created] :as command}]
+  [{{:keys [operation address propertyId infoRequest]} :data :keys [user created] :as command}]
 
   ;; TODO: These let-bindings are repeated in do-create-application, merge those somehow
-  (let [permit-type (operations/permit-type-of-operation operation)
-        organization (organization/resolve-organization municipality permit-type)
-        scope (organization/resolve-organization-scope municipality permit-type organization)
-        info-request? (boolean infoRequest)
-        open-inforequest? (and info-request? (:open-inforequest scope))
+  (let [municipality        (p/municipality-id-by-property-id propertyId)
+        permit-type         (operations/permit-type-of-operation operation)
+        organization        (organization/resolve-organization municipality permit-type)
+        scope               (organization/resolve-organization-scope municipality permit-type organization)
+        info-request?       (boolean infoRequest)
+        open-inforequest?   (and info-request? (:open-inforequest scope))
         created-application (do-create-application command)]
 
     (insert-application created-application)
@@ -740,7 +744,7 @@
                       validate-x validate-y]
    :pre-checks       [authority-if-post-verdict-state]}
   [{:keys [created application] :as command}]
-  (if (= (:municipality application) (organization/municipality-by-propertyId propertyId))
+  (if (= (:municipality application) (p/municipality-id-by-property-id propertyId))
     (do
       (update-application command
                           {$set {:location   (->location x y)
@@ -957,8 +961,8 @@
 (defn- validate-new-applications-enabled [command {:keys [permitType municipality] :as application}]
   (when application
     (let [scope (organization/resolve-organization-scope municipality permitType)]
-      (when-not (= (:new-application-enabled scope) true)
-        (fail :error.new-applications.disabled)))))
+      (when-not (:new-application-enabled scope)
+        (fail :error.new-applications-disabled)))))
 
 (defcommand convert-to-application
   {:parameters [id]
@@ -979,3 +983,53 @@
                          $push {:attachments {$each (make-attachments created op organization (:state application) (:tosFunction application))}}})
     (try (autofill-rakennuspaikka application created)
          (catch Exception e (error e "KTJ data was not updated")))))
+
+(defn- validate-organization-backend-urls [_ {org-id :organization}]
+  (when org-id
+    (let [org (organization/get-organization org-id)]
+      (if-let [conf (:vendor-backend-redirect org)]
+        (->> (vals conf)
+             (remove ss/blank?)
+             (some util/validate-url))
+        (fail :error.vendor-urls-not-set)))))
+
+(defn get-vendor-backend-id [verdicts]
+  (->> verdicts
+       (remove :draft)
+       (some :kuntalupatunnus)))
+
+(defn- get-backend-and-lp-urls [org-id]
+  (-> (organization/get-organization org-id)
+      :vendor-backend-redirect
+      (util/select-values [:vendor-backend-url-for-backend-id
+                           :vendor-backend-url-for-lp-id])))
+
+(defn- correct-urls-configured [_ {:keys [verdicts organization] :as application}]
+  (when application
+    (let [vendor-backend-id          (get-vendor-backend-id verdicts)
+          [backend-id-url lp-id-url] (get-backend-and-lp-urls organization)
+          lp-id-url-missing?         (ss/blank? lp-id-url)
+          both-urls-missing?         (and lp-id-url-missing?
+                                          (ss/blank? backend-id-url))]
+      (if vendor-backend-id
+        (when both-urls-missing?
+          (fail :error.vendor-urls-not-set))
+        (when lp-id-url-missing?
+          (fail :error.vendor-urls-not-set))))))
+
+(defraw redirect-to-vendor-backend
+  {:parameters [id]
+   :user-roles #{:authority}
+   :states     action/post-submitted-states
+   :pre-checks [validate-organization-backend-urls
+                correct-urls-configured]}
+  [{{:keys [verdicts organization]} :application}]
+  (let [vendor-backend-id          (get-vendor-backend-id verdicts)
+        [backend-id-url lp-id-url] (get-backend-and-lp-urls organization)
+        url-parts                  (if (and vendor-backend-id
+                                            (not (ss/blank? backend-id-url)))
+                                     [backend-id-url vendor-backend-id]
+                                     [lp-id-url id])
+        redirect-url               (apply str url-parts)]
+    (info "Redirecting from" id "to" redirect-url)
+    {:status 303 :headers {"Location" redirect-url}}))

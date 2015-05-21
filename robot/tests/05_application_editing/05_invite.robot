@@ -9,7 +9,7 @@ Resource        ../../common_resource.robot
 
 Mikko creates a new application
   Mikko logs in
-  Create application the fast way  invite-app  753  753-423-2-159  kerrostalo-rivitalo
+  Create application the fast way  invite-app  753-423-2-159  kerrostalo-rivitalo
 
 Mikko can see the general invite button and opens invite dialog with it
   Open tab  parties
@@ -45,6 +45,8 @@ Mikko can't reinvite Teppo
 Teppo declines invitation
   Teppo logs in
   Wait until  Element should be visible  xpath=//*[@data-test-id='decline-invite-button']
+  Element Should Contain  xpath=//div[@class='invitation'][1]//h3  invite-app, Sipoo,
+  Element Text Should Be  xpath=//div[@class='invitation'][1]//p[@data-test-id='invitation-text-0']  Tervetuloa muokkaamaan hakemusta
   Click by test id  decline-invite-button
   Confirm  dynamic-yes-no-confirm-dialog
   Wait until  Element should not be visible  xpath=//*[@data-test-id='decline-invite-button']
@@ -58,9 +60,17 @@ Mikko reinvites Teppo
   Invite Teppo
   [Teardown]  logout
 
-Teppo accepts invitation
+Teppo can view application
   Teppo logs in
+  Wait Until  Element should be visible  xpath=//div[@class='invitation']//a[@data-test-id='open-application-button']
+  Click element  xpath=//div[@class='invitation']//a[@data-test-id='open-application-button']
+  Wait Until  Element text should be  xpath=//section[@id='application']//span[@data-test-id='application-title']  INVITE-APP
+  Go to page  applications
+
+Teppo accepts invitation
   Wait until  Element should be visible  xpath=//*[@data-test-id='accept-invite-button']
+  Element Should Contain  xpath=//div[@class='invitation'][1]//h3  invite-app, Sipoo,
+  Element Text Should Be  xpath=//div[@class='invitation']//p[@data-test-id='invitation-text-0']  Tervetuloa muokkaamaan hakemusta
   Click by test id  accept-invite-button
   Wait until  Element should not be visible  xpath=//*[@data-test-id='accept-invite-button']
 
@@ -101,10 +111,10 @@ Mikko adds comment so thate application will be visible to admin
 Mikko invites Solita
   # Click enabled by test id  company-invite
   Wait Until  Click Element  xpath=//div[@class='parties-list']//button[@data-test-id='company-invite']
-  Wait Until  Element should be visible  selectCompanyToInvite
-  Select From List  selectCompanyToInvite  Solita Oy, Tulli Business Park Tampere
+  Wait Until  Element should be visible  xpath=//div[@data-test-id='modal-dialog-content']
+  Select From Autocomplete  Solita Oy, Tulli Business Park Tampere
   Click enabled by test id  modal-dialog-submit-button
-  Wait Until  Page should contain  fi1060155-5
+  Wait Until  Page should contain  1060155-5
 
 Mikko decides to go to the desert, put on his ipod, and listen some some British hard-rock band
   Logout
@@ -148,7 +158,7 @@ Mikko invites previously unknown user Oskari as paasuunnittelija
 #        Testataan tyonjohtajan kutsuminen erikseen omalla hakemuksellaan.
 Mikko creates a new tyonjohtaja application
   #Mikko logs in
-  Create application the fast way  invite-app-tyonjohtaja  753  753-423-2-159  tyonjohtajan-nimeaminen
+  Create application the fast way  invite-app-tyonjohtaja  753-423-2-159  tyonjohtajan-nimeaminen
 
 Mikko can see invite tyonjohtaja button in parties tab
   Open tab  parties

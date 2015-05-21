@@ -53,14 +53,14 @@ Mikko creates an inforequest in Sipoo
   Mikko logs in
   ${secs} =  Get Time  epoch
   Set Suite Variable  ${appname}  admin${secs}
-  Create inforequest the fast way  ${appname}  360603.153  6734222.95  753  753-416-25-30  kerrostalo-rivitalo  The winter is coming
+  Create inforequest the fast way  ${appname}  360603.153  6734222.95  753-416-25-30  kerrostalo-rivitalo  The winter is coming
   [Teardown]  Logout
 
 Admin impersonated Sipoo authority
   SolitaAdmin logs in
   Click link  Organisaatiot
   Wait until  Element Should be Visible  xpath=//table[@data-test-id="organizations-table"]
-  Click link  xpath=//a[@data-impersonate="753-R"]
+  Wait until  Click link  xpath=//a[@data-impersonate="753-R"]
   Wait Until  Element should be visible  login-as-password
   Input text  login-as-password  admin
   Click enabled by test id  submit-login-as

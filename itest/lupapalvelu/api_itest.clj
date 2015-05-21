@@ -12,15 +12,13 @@
   (raw-command dummy :create-application :operation "kerrostalo-rivitalo"
     :propertyId "75312312341234"
     :x 444444 :y 6666666
-    :address "foo 42, bar"
-    :municipality "753") => invalid-csrf-token?)
+    :address "foo 42, bar") => invalid-csrf-token?)
 
 (fact "non-admin users should not be able to get actions"
   (query pena :actions) => unauthorized?
   (query sonja :actions) => unauthorized?)
 
-(let [resp  (create-app mikko :municipality sonja-muni)
-      id    (:id resp)]
+(let [{id :id :as resp}  (create-app mikko :propertyId sipoo-property-id)]
   (fact "Mikko must be able to create an application!"
     resp => ok?)
 

@@ -133,8 +133,8 @@ var util = (function($) {
   function isPartyDoc(doc) { return doc["schema-info"].type === "party"; }
   function isNotPartyDoc(doc) { return !isPartyDoc(doc); }
 
-  function isValidFinnishY(y) {
-    var m = /^FI(\d{7})-(\d)$/.exec(y || ""),
+  function isValidY(y) {
+    var m = /^(\d{7})-(\d)$/.exec(y || ""),
         number = m && m[1],
         check  = m && m[2];
 
@@ -151,36 +151,12 @@ var util = (function($) {
     return cn === parseInt(check, 10);
   }
 
-  function isValidNonFinnishY(y) {
-    var m = /^([A-Z]{2})\w+/.exec(y),
-        c = m && m[1];
-    return c && c !== "FI";
-  }
-
-  function isValidY(y) {
-    return isValidFinnishY(y) || isValidFinnishY("FI" + y) || isValidNonFinnishY(y);
-  }
-
-  function coerceNationalY(y) {
-    return isValidFinnishY("FI" + y) ? "FI" + y : y;
-  }
-
-  function isValidFinnishOVT(ovt) {
+  function isValidOVT(ovt) {
     var m = /^0037(\d{7})(\d)\d{0,5}$/.exec(ovt || ""),
         y = m && m[1],
         c = m && m[2];
     if (!y || !c) { return false; }
-    return isValidY("FI" + y + "-" + c);
-  }
-
-  function isValidNonFinnishOVT(ovt) {
-    var m = /^(\d{4}).+/.exec(ovt),
-        c = m && m[1];
-    return c && c !== "0037";
-  }
-
-  function isValidOVT(ovt) {
-    return isValidFinnishOVT(ovt) || isValidNonFinnishOVT(ovt);
+    return isValidY(y + "-" + c);
   }
 
   function extractRequiredErrors(errors) {
@@ -196,6 +172,11 @@ var util = (function($) {
     return errs;
   }
 
+  function dissoc(m, k) {
+    delete m[k];
+    return m;
+  }
+
   return {
     zeropad:             zeropad,
     fluentify:           fluentify,
@@ -203,7 +184,6 @@ var util = (function($) {
     isValidEmailAddress: isValidEmailAddress,
     isValidPassword:     isValidPassword,
     isValidY:            isValidY,
-    coerceNationalY:     coerceNationalY,
     isValidOVT:          isValidOVT,
     prop: {
       isPropertyId:           isPropertyId,
@@ -217,11 +197,12 @@ var util = (function($) {
     autofocus:    autofocus,
     isNum:        isNum,
     getIn:        getIn,
-        locKeyFromDocPath: locKeyFromDocPath,
+    locKeyFromDocPath: locKeyFromDocPath,
     getDocumentOrder: getDocumentOrder,
     isPartyDoc: isPartyDoc,
     isNotPartyDoc: isNotPartyDoc,
-    extractRequiredErrors: extractRequiredErrors
+    extractRequiredErrors: extractRequiredErrors,
+    dissoc: dissoc
   };
 
 })(jQuery);

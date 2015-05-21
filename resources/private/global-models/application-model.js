@@ -12,30 +12,9 @@ LUPAPISTE.ApplicationModel = function() {
   self.infoRequest = ko.observable();
   self.openInfoRequest = ko.observable();
   self.state = ko.observable();
-  self.inPostVerdictState = ko.observable(false);
-  self.summaryAvailable = ko.computed(function() {
-    return self.inPostVerdictState() || self.state() === "canceled";
-  });
   self.submitted = ko.observable();
   self.location = ko.observable();
   self.municipality = ko.observable();
-  self.organizationMeta = ko.observable();
-  self.asianhallintaEnabled = ko.computed(function() {
-    return self.organizationMeta() ? self.organizationMeta().asianhallinta() : false;
-  });
-  self.organizationLinks = ko.computed(function() {
-    return self.organizationMeta() ? self.organizationMeta().links() : "";
-  });
-  self.organizationName = ko.computed(function() {
-    return self.organizationMeta() ? self.organizationMeta().name() : "";
-  });
-  self.requiredFieldsFillingObligatory = ko.computed(function() {
-    return self.organizationMeta() ? self.organizationMeta().requiredFieldsFillingObligatory() : false;
-  });
-  self.incorrectlyFilledRequiredFields = ko.observable([]);
-  self.hasIncorrectlyFilledRequiredFields = ko.computed(function() {
-    return self.incorrectlyFilledRequiredFields() && self.incorrectlyFilledRequiredFields().length > 0;
-  });
   self.permitType = ko.observable("R");
   self.propertyId = ko.observable();
   self.title = ko.observable();
@@ -53,6 +32,7 @@ LUPAPISTE.ApplicationModel = function() {
   self.permitSubtype = ko.observable();
   self.operationsCount = ko.observable();
   self.applicant = ko.observable();
+  self.assignee = ko.observable();
   self.applicantPhone = ko.observable();
   self.authority = ko.observable({});
   self.neighbors = ko.observable([]);
@@ -60,6 +40,42 @@ LUPAPISTE.ApplicationModel = function() {
   self.tasks = ko.observable([]);
   self.tosFunction = ko.observable();
   self.metadataList = ko.observableArray();
+
+  // Application indicator metadata fields
+  self.unseenStatements = ko.observable();
+  self.unseenVerdicts = ko.observable();
+  self.unseenComments = ko.observable();
+  self.attachmentsRequiringAction = ko.observable();
+
+  // Application metadata fields
+  self.inPostVerdictState = ko.observable(false);
+  self.inPostSubmittedState = ko.observable(false); // TODO: remove
+  self.vendorBackendId = ko.observable(); // TODO: remove
+  self.applicantPhone = ko.observable();
+  self.organizationMeta = ko.observable();
+  self.neighbors = ko.observable([]);
+  self.submittable = ko.observable(true);
+
+  self.asianhallintaEnabled = ko.computed(function() {
+    return self.organizationMeta() ? self.organizationMeta().asianhallinta() : false;
+  });
+  self.organizationLinks = ko.computed(function() {
+    return self.organizationMeta() ? self.organizationMeta().links() : "";
+  });
+  self.organizationName = ko.computed(function() {
+    return self.organizationMeta() ? self.organizationMeta().name() : "";
+  });
+  self.requiredFieldsFillingObligatory = ko.computed(function() {
+    return self.organizationMeta() ? self.organizationMeta().requiredFieldsFillingObligatory() : false;
+  });
+  self.incorrectlyFilledRequiredFields = ko.observable([]);
+  self.hasIncorrectlyFilledRequiredFields = ko.computed(function() {
+    return self.incorrectlyFilledRequiredFields() && self.incorrectlyFilledRequiredFields().length > 0;
+  });
+
+  self.summaryAvailable = ko.computed(function() {
+    return self.inPostVerdictState() || self.state() === "canceled";
+  });
 
   self.taskGroups = ko.computed(function() {
     var tasks = ko.toJS(self.tasks) || [];
@@ -96,7 +112,6 @@ LUPAPISTE.ApplicationModel = function() {
   });
 
   self.foremanTasks = ko.observable();
-  self.submittable = ko.observable(true);
 
   self.buildings = ko.observable([]);
   self.nonpartyDocumentIndicator = ko.observable(0);
@@ -105,11 +120,6 @@ LUPAPISTE.ApplicationModel = function() {
   self.appsLinkingToUs = ko.observable(null);
   self.pending = ko.observable(false);
   self.processing = ko.observable(false);
-
-  self.attachmentsRequiringAction = ko.observable();
-  self.unseenStatements = ko.observable();
-  self.unseenVerdicts = ko.observable();
-  self.unseenComments = ko.observable();
   self.invites = ko.observableArray([]);
   self.showApplicationInfoHelp = ko.observable(false);
   self.showPartiesInfoHelp = ko.observable(false);
@@ -123,10 +133,14 @@ LUPAPISTE.ApplicationModel = function() {
 
   self.allowedAttachmentTypes = ko.observableArray([]);
 
+  self.toBackingSystem = function() {
+    window.open("/api/raw/redirect-to-vendor-backend?id=" + self.id(), "_blank");
+  };
+
   self.updateInvites = function() {
     invites.getInvites(function(data) {
       self.invites(_.filter(data.invites, function(invite) {
-        return invite.application === self.id();
+        return invite.application.id === self.id();
       }));
     });
   };
@@ -190,6 +204,9 @@ LUPAPISTE.ApplicationModel = function() {
 
   self.roles = ko.computed(function() {
     var withRoles = function(r, i) {
+      if (i.id() === "" && i.invite) {
+        i.id(util.getIn(i, ["invite", "user", "id"]));
+      }
       var a = r[i.id()] || (i.roles = [], i);
       a.roles.push(i.role());
       r[i.id()] = a;
@@ -462,6 +479,33 @@ LUPAPISTE.ApplicationModel = function() {
       .call();
   };
 
+  function focusOnElement(id, retryLimit) {
+    var targetElem = document.getElementById(id);
+
+    if (!retryLimit) {
+      if (targetElem) {
+        // last chance: hope that the browser scrolls to somewhere near the focused element.
+        targetElem.focus();
+      }
+      // no more retries and no element: give up
+      return;
+    }
+
+    var offset = $(targetElem).offset();
+
+    if (!offset || offset.left === 0 || !targetElem) {
+      // Element is not yet visible, wait for a short moment.
+      // Because of the padding, offset left is never zero when
+      // the element is visible.
+      setTimeout(_.partial(focusOnElement, id, --retryLimit), 5);
+    } else {
+      var navHeight = $("nav").first().height() || 0;
+      var roomForLabel = (targetElem.nodeName === "UL") ? 0 : 30;
+      window.scrollTo(0, offset.top - navHeight - roomForLabel);
+      targetElem.focus();
+    }
+  }
+
   self.targetTab.subscribe(function(target) {
     if (target.tab === "requiredFieldSummary") {
       ajax
@@ -474,11 +518,8 @@ LUPAPISTE.ApplicationModel = function() {
     }
     window.location.hash = "!/application/" + self.id() + "/" + target.tab;
     if (target.id) {
-      // The Nayta-links in "Puuttuvat pakolliset tiedot"-list do not work properly without using
-      // the setTimeout function with 0 time here.
-      setTimeout(function() {
-        window.scrollTo(0, $("#" + target.id).offset().top - 60);
-      }, 0);
+      var maxRetries = 10; // quite arbitrary, might need to increase for slower browsers
+      focusOnElement(target.id, maxRetries);
     }
   });
 

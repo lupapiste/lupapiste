@@ -115,7 +115,7 @@
                                                ["terassit" "ya-kayttolupa-terassit"]]]]]]))
 
   (fact* "Query selected operations"
-    (let [id   (create-app-id pena :operation "kerrostalo-rivitalo" :municipality sonja-muni)
+    (let [id   (create-app-id pena :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id)
           resp (query pena "addable-operations" :id id) => ok?]
       (:operations resp) => [["Rakentaminen ja purkaminen" [["Uuden rakennuksen rakentaminen" [["pientalo" "pientalo"]]] ["Rakennelman rakentaminen" [["Aita" "aita"]]]]]]))
 
@@ -125,7 +125,7 @@
       (get-in resp [:organization :selectedOperations]) => {:R ["aita" "pientalo"]}))
 
   (fact "An application query correctly returns the 'required fields filling obligatory' and 'kopiolaitos-email' info in the organization meta data"
-    (let [app-id (create-app-id pena :operation "kerrostalo-rivitalo" :municipality sonja-muni)
+    (let [app-id (create-app-id pena :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id)
           app    (query-application pena app-id)
           org    (query admin "organization-by-id" :organizationId  (:organization app))
           kopiolaitos-email "kopiolaitos@example.com"
@@ -203,6 +203,7 @@
       :applicationEnabled false
       :openInforequestEnabled false
       :openInforequestEmail "someone@localhost"
+
       :opening 123)
     (let [m (query pena :municipality-active :municipality "999")]
       (:applications m) => empty?
@@ -225,3 +226,17 @@
 
   (fact "Valid attachment is ok"
     (command sipoo :organization-operations-attachments :operation "pientalo" :attachments [["muut" "muu"]]) => ok?))
+
+(facts "permanent-archive-can-be-set"
+  (let [organization  (first (:organizations (query admin :organizations)))
+        id (:id organization)]
+
+    (fact "Permanent archive can be enabled"
+      (command admin "set-organization-permanent-archive-enabled" :enabled true :organizationId id) => ok?
+      (let [updated-org (query admin "organization-by-id" :organizationId id)]
+        (:permanent-archive-enabled updated-org) => true))
+
+    (fact "Permanent archive can be disabled"
+      (command admin "set-organization-permanent-archive-enabled" :enabled false :organizationId id) => ok?
+      (let [updated-org (query admin "organization-by-id" :organizationId id)]
+        (:permanent-archive-enabled updated-org) => false))))

@@ -87,8 +87,8 @@
                                           :user-roles #{:authority}
                                           :org-authz-roles #{:authority}
                                           :states     all-states}}
-    (domain/get-application-as "123" {:id "user123" :organizations ["ankkalinna"] :orgAuthz {:ankkalinna #{:authority}} :role :authority} true) =>  {:state "submitted" :organization "ankkalinna"}
-    (domain/get-application-as "123" {:id "user123" :organizations ["hanhivaara"] :orgAuthz {:hanhivaara #{:authority}} :role :authority} true) =>  nil)
+    (domain/get-application-as "123" {:id "user123" :organizations ["ankkalinna"] :orgAuthz {:ankkalinna #{:authority}} :role :authority} :include-canceled-apps? true) =>  {:state "submitted" :organization "ankkalinna"}
+    (domain/get-application-as "123" {:id "user123" :organizations ["hanhivaara"] :orgAuthz {:hanhivaara #{:authority}} :role :authority} :include-canceled-apps? true) =>  nil)
 
   (fact "regular user is not authority"
     (execute {:action "test-command-auth" :user {:id "user123"} :data {:id "123"}}) => unauthorized)
@@ -111,27 +111,27 @@
                                             :org-authz-roles #{:authority}
                                             :states all-states
                                             :user-authz-roles default-authz-writer-roles}}
-    (domain/get-application-as "123" {:id "some1" :organizations ["999-R"] :orgAuthz {:999-R #{:authority}} :role :authority} true) => {:organization "999-R"
-                                                                                                        :state "submitted"
-                                                                                                        :auth [{:id "user123" :role "someRole"}]}
+    (domain/get-application-as "123" {:id "some1" :organizations ["999-R"] :orgAuthz {:999-R #{:authority}} :role :authority} :include-canceled-apps? true) => {:organization "999-R"
+                                                                                                                                                                :state "submitted"
+                                                                                                                                                                :auth [{:id "user123" :role "someRole"}]}
 
-    (domain/get-application-as "123" {:id "some1" :organizations ["999-R"] :orgAuthz {:999-R #{:authority}} :role :applicant} true) => {:organization "999-R" :state "submitted" :auth []}
+    (domain/get-application-as "123" {:id "some1" :organizations ["999-R"] :orgAuthz {:999-R #{:authority}} :role :applicant} :include-canceled-apps? true) => {:organization "999-R" :state "submitted" :auth []}
 
-    (domain/get-application-as "123" {:id "user123" :organizations [] :role :authority} true) =>  {:organization "999-R"
-                                                                                                   :state "submitted"
-                                                                                                   :auth [{:id "user123" :role "someRole"}]}
+    (domain/get-application-as "123" {:id "user123" :organizations [] :role :authority} :include-canceled-apps? true) =>  {:organization "999-R"
+                                                                                                                           :state "submitted"
+                                                                                                                           :auth [{:id "user123" :role "someRole"}]}
 
-    (domain/get-application-as "123" {:id "user234" :organizations [] :role :authority} true) =>  {:organization "999-R"
-                                                                                                   :state "submitted"
-                                                                                                   :auth [{:id "user234" :role "otherRole"}]}
+    (domain/get-application-as "123" {:id "user234" :organizations [] :role :authority} :include-canceled-apps? true) =>  {:organization "999-R"
+                                                                                                                           :state "submitted"
+                                                                                                                           :auth [{:id "user234" :role "otherRole"}]}
 
-    (domain/get-application-as "123" {:id "user345" :organizations [] :role :authority} true) =>  {:organization "999-R"
-                                                                                                   :state "submitted"
-                                                                                                   :auth [{:id "user345" :role "writer"}]}
+    (domain/get-application-as "123" {:id "user345" :organizations [] :role :authority} :include-canceled-apps? true) =>  {:organization "999-R"
+                                                                                                                           :state "submitted"
+                                                                                                                           :auth [{:id "user345" :role "writer"}]}
 
-    (domain/get-application-as "123" {:id "user456" :organizations [] :role :authority} true) =>  {:organization "999-R"
-                                                                                                   :state "submitted"
-                                                                                                   :auth [{:id "user456" :role "3rdRole"}]}
+    (domain/get-application-as "123" {:id "user456" :organizations [] :role :authority} :include-canceled-apps? true) =>  {:organization "999-R"
+                                                                                                                           :state "submitted"
+                                                                                                                           :auth [{:id "user456" :role "3rdRole"}]}
     )
 
   (fact "Authority from same org has access"
@@ -165,7 +165,7 @@
     (get-actions) => {:test-command1 {:pre-checks [(constantly (fail "FAIL"))], :user-roles #{:authority}, :org-authz-roles #{:authority}}
                       :test-command2 {:pre-checks [(constantly nil)], :user-roles #{:authority}, :org-authz-roles #{:authority}}
                       :test-command3 {:pre-checks [(constantly nil) (constantly nil) (constantly (fail "FAIL"))], :user-roles #{:authority}, :org-authz-roles #{:authority}}}
-    (domain/get-application-as "123" {:id "user123" :organizations ["ankkalinna"] :orgAuthz {:ankkalinna #{:authority}} :role :authority} true) =>  {:organization "ankkalinna" :state "submitted"})
+    (domain/get-application-as "123" {:id "user123" :organizations ["ankkalinna"] :orgAuthz {:ankkalinna #{:authority}} :role :authority} :include-canceled-apps? true) =>  {:organization "ankkalinna" :state "submitted"})
 
   (fact (execute {:action "test-command1" :user {:id "user123" :organizations ["ankkalinna"] :orgAuthz {:ankkalinna #{:authority}} :role :authority} :data {:id "123"}}) => {:ok false :text "FAIL"})
   (fact (execute {:action "test-command2" :user {:id "user123" :organizations ["ankkalinna"] :orgAuthz {:ankkalinna #{:authority}} :role :authority} :data {:id "123"}}) => ok?)
@@ -176,7 +176,7 @@
     (get-actions) => {:test-command1 {:input-validators [(constantly (fail "FAIL"))], :user-roles #{:authority}, :org-authz-roles #{:authority}}
                       :test-command2 {:input-validators [(constantly nil)], :user-roles #{:authority}, :org-authz-roles #{:authority}}
                       :test-command3 {:input-validators [(constantly nil) (constantly nil) (constantly (fail "FAIL"))], :user-roles #{:authority}, :org-authz-roles #{:authority}}}
-    (domain/get-application-as "123" {:id "user123" :organizations ["ankkalinna"] :orgAuthz {:ankkalinna #{:authority}} :role :authority} true) =>  {:organization "ankkalinna" :state "submitted"})
+    (domain/get-application-as "123" {:id "user123" :organizations ["ankkalinna"] :orgAuthz {:ankkalinna #{:authority}} :role :authority} :include-canceled-apps? true) =>  {:organization "ankkalinna" :state "submitted"})
 
   (fact (execute {:action "test-command1" :user {:id "user123" :organizations ["ankkalinna"] :orgAuthz {:ankkalinna #{:authority}} :role :authority} :data {:id "123"}}) => {:ok false :text "FAIL"})
   (fact (execute {:action "test-command2" :user {:id "user123" :organizations ["ankkalinna"] :orgAuthz {:ankkalinna #{:authority}} :role :authority} :data {:id "123"}}) => ok?)
@@ -185,7 +185,7 @@
 (facts "Input-validator is not run during auth check"
   (against-background
     (get-actions) => {:test-command1 {:input-validators [(constantly (fail "FAIL"))], :user-roles #{:authority}, :org-authz-roles #{:authority}}}
-    (domain/get-application-as "123" {:id "user123" :organizations ["ankkalinna"] :orgAuthz {:ankkalinna #{:authority}} :role :authority} true) =>  {:organization "ankkalinna" :state "submitted"})
+    (domain/get-application-as "123" {:id "user123" :organizations ["ankkalinna"] :orgAuthz {:ankkalinna #{:authority}} :role :authority} :include-canceled-apps? true) =>  {:organization "ankkalinna" :state "submitted"})
   (validate {:action "test-command1" :user {:id "user123" :organizations ["ankkalinna"] :orgAuthz {:ankkalinna #{:authority}} :role :authority} :data {:id "123"}}) => ok?)
 
 (facts "Defined querys work only in query pipelines"

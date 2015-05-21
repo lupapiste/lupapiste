@@ -105,11 +105,11 @@ LUPAPISTE.verdictPageController = (function($) {
         ajax
         .command("save-verdict-draft",
             {id: currentApplicationId, verdictId: currentVerdictId,
-          backendId: self.backendId(), status: self.status(),
-          name: self.name(), text: self.text(),
-          section: self.section(),
-          agreement: self.agreement() || false,
-          given: givenMillis, official: officialMillis})
+             backendId: self.backendId(), status: self.status(),
+             name: self.name(), text: self.text(),
+             section: self.section(),
+             agreement: self.agreement() || false,
+             given: givenMillis, official: officialMillis})
           .success(onSuccess)
           .processing(self.processing)
           .call();

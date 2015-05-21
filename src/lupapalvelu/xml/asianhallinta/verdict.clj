@@ -100,14 +100,17 @@
       (let [parsed-xml (-> (first xmls) slurp xml/parse cr/strip-xml-namespaces xml/xml->edn)
             attachments (-> (get-in parsed-xml [:AsianPaatos :Liitteet])
                             (cr/ensure-sequential :Liite)
-                            :Liite)]
+                            :Liite)
+            application-id (get-in parsed-xml [:AsianPaatos :HakemusTunnus])]
         ; Check that all referenced attachments were included in zip
         (ensure-attachments-present! unzipped-path attachments)
 
+        (when-not application-id
+          (error-and-fail! "Asianhallinta verdict - Application id is nil" :error.integration.asianhallinta.no-application-id))
+
         ; Create verdict
         ; -> fetch application
-        (let [application-id (get-in parsed-xml [:AsianPaatos :HakemusTunnus])
-              application (domain/get-application-no-access-checking application-id)
+        (let [application (domain/get-application-no-access-checking application-id)
               org-scope (org/resolve-organization-scope (:municipality application) (:permitType application))]
 
           ; -> check ftp-user has right to modify app
@@ -140,7 +143,7 @@
                 poytakirja-id))
             (notifications/notify! :application-verdict command)
             (ok)))))
-    (catch Exception e
+    (catch Throwable e
       (if-let [error-key (some-> e ex-data :object :text)]
         (fail error-key)
-        (fail :error.unknown)))))
+        (throw e)))))

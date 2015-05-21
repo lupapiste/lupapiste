@@ -154,19 +154,22 @@
   (let [visible-area (rotate-rectangle crop-box page-rotation)
         sides (get-sides visible-area)
         page-size (get-sides (rotate-rectangle page-box page-rotation))
-        rotate? (pos? (mod page-rotation 180))
         ; If the visible area does not fit into page, we must crop
-        max-x (if (or (< (:width page-size) (+ (:right sides) (:left sides)))
-                    (and (not (zero? (:bottom (get-sides page-box)))) (= page-rotation 270))
-                    )
-               (- (:right sides) (:left sides))
-               (:right sides))
+        ;; TODO: how these special conditions could be merged and generalized?
+        max-x (if (or
+                    ;; TODO: This is possibly better condition than the one below, as it does not trust that page's left side is at 0 position.
+                    ;        Though, with it some 'problematic pdf' tests in stamper_test.clj will not pass.
+                    ;(< (+ (:left page-size) (:width page-size)) (+ (:left sides) (:width sides)))
+                    (and (< (:width page-size) (+ (:right sides) (:left sides))) (not= page-rotation 0))
+                    (and (not (zero? (:bottom (get-sides page-box)))) (= page-rotation 270)))
+                (- (:right sides) (:left sides))
+                (:right sides))
         min-y (if (and (zero? (:bottom (get-sides crop-box))) (zero? (:bottom (get-sides page-box))))
                 (:bottom page-size)
                 (:bottom sides))
         x (- max-x stamp-width (mm->u x-margin))
         y (+ min-y (mm->u y-margin))]
-    (debugf "Rotation %s, visible-area with rotation: %s, page with rotation %s,  max-x/min-y: %s/%s, stamp location x/y: %s/%s"
+    (debugf "Rotation %s, crop-box with rotation: %s, page-box with rotation: %s,  max-x/min-y: %s/%s, stamp location x/y: %s/%s"
       page-rotation sides page-size max-x min-y x y)
     [x y]))
 
