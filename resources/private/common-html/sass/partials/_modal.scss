@@ -36,6 +36,12 @@
           margin-right: $marginM;
         }
       }
+      .button-group .ok {
+        text-align: center;
+        .btn-dialog {
+          position: relative;
+        }
+      }
     }
     .header {
       padding-top: 2px;

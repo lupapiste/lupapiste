@@ -7,9 +7,8 @@
         <p data-bind="lhtml: text" class="dialog-desc"></p>
       </div>
       <div class="button-group">
-        <button class="btn btn-primary"
-                data-test-id="ok-button"
-                data-bind="click: ok, ltext: 'ok'"></button>
+      <div data-bind="component: {name:'ok-button-group',
+                                  params: {okFn: ok}}"></div>
       </div>
     </script>
   </section>

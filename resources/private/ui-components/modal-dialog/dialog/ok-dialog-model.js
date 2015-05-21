@@ -1,10 +1,8 @@
-LUPAPISTE.YesNoDialogModel = function (params) {
+LUPAPISTE.OkDialogModel = function (params) {
   "use strict";
   var self = this;
 
   self.text = params.text;
 
-  self.ok = function() {
-    hub.send("close-dialog");
-  };
+  self.ok = params.okFn || function() { _.noop(); };
 };
