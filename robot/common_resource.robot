@@ -278,11 +278,12 @@ Jarvenpaa authority logs in
 #
 
 Input text by test id
-  [Arguments]  ${id}  ${value}
+  [Arguments]  ${id}  ${value}  ${leaveFocus}=${false}
   Wait until page contains element  xpath=//input[@data-test-id="${id}"]
   Wait until  Element should be visible  xpath=//input[@data-test-id="${id}"]
   Wait until  Element should be enabled  xpath=//input[@data-test-id="${id}"]
   Execute Javascript  $("input[data-test-id='${id}']").val("${value}").change().blur();
+  Run Keyword Unless  ${leaveFocus}  Execute Javascript  $("input[data-test-id='${id}']").blur();
 
 Select From List by test id
   [Arguments]  ${id}  ${value}
@@ -293,7 +294,7 @@ Select From Autocomplete
   [Arguments]  ${value}
   Wait until  Element should be visible  xpath=//span[@class='autocomplete-selection']
   Click Element  xpath=//span[@class='autocomplete-selection']
-  Input text by test id  autocomplete-input  ${value}
+  Input text by test id  autocomplete-input  ${value}  ${true}
   Wait until  Element should be visible  xpath=//li/span[contains(text(), '${value}')]
   Click Element  xpath=//li/span[contains(text(), '${value}')]
 
