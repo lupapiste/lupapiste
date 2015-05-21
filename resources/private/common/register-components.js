@@ -23,7 +23,7 @@ jQuery(document).ready(function() {
     "submit-button-group",
     "yes-no-dialog",
     "invoice-operator-selector",
-    "user-notification"
+    "ok-dialog"
   ];
 
   _.forEach(components, function(component) {
