@@ -50,7 +50,7 @@
   "Validator: Restric authority access in draft application.
    To be used in commands' :pre-checks vector."
   [{user :user} {state :state}]
-  (when (and (= :draft (keyword state)) (= :authority (keyword (:role user))))
+  (when (and (= :draft (keyword state)) (user/authority? user))
     unauthorized))
 
 ;;
