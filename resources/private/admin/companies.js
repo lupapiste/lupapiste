@@ -6,7 +6,7 @@
 
   function CreateCompanyModel() {
     var self = this;
-    var fieldNames = ["name", "y", "address1", "address2", "po", "zip", "email"];
+    var fieldNames = ["name", "y", "address1", "po", "zip", "email"];
 
     self.errorMessage = ko.observable();
 
@@ -15,7 +15,6 @@
       name:         ko.observable().extend(required),
       y:            ko.observable().extend(required).extend({y: true}),
       address1:     ko.observable().extend(notRequired),
-      address2:     ko.observable().extend(notRequired),
       po:           ko.observable().extend(notRequired),
       zip:          ko.observable().extend(notRequired),
       // Signer:
