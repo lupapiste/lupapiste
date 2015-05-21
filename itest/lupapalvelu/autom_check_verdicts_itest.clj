@@ -4,7 +4,6 @@
             [lupapalvelu.factlet :refer [fact* facts*]]
             [sade.dummy-email-server :as dummy-email-server]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.application :as application]
             [lupapalvelu.integrations-api]
             [lupapalvelu.verdict-api]
             [lupapalvelu.fixture.minimal :as minimal]
