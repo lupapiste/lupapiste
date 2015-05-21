@@ -55,20 +55,10 @@
     (re-matches #"^\d{14}$" v) nil
     :else [:warn "illegal-kiinteistotunnus"]))
 
-(defn- y-tunnus? [s]
-  (when-let [[_ checksum] (re-matches #"[0-9]{7}-([0-9])" s)]
-    (let [sum (->> s
-                (map ->int)
-                (map * [7 9 10 5 8 4 2])
-                (reduce +))
-          mod (mod sum 11)
-          chk (if (zero? mod) 0 (- 11 mod))]
-      (= (str chk) checksum))))
-
 (defmethod subtype-validation :y-tunnus [_ v]
   (cond
     (blank? v) nil
-    (y-tunnus? v) nil
+    (util/finnish-y? v) nil
     :else [:warn "illegal-y-tunnus"]))
 
 (defmethod subtype-validation :zip [_ v]
