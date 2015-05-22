@@ -1,6 +1,7 @@
 (ns lupapalvelu.authorization-api
   "API for manipulating application.auth"
-  (:require [clojure.string :refer [blank? join trim split]]
+  (:require [taoensso.timbre :refer [debug]]
+            [clojure.string :refer [blank? join trim split]]
             [swiss.arrows :refer [-<>>]]
             [monger.operators :refer :all]
             [sade.strings :as ss]
@@ -43,6 +44,15 @@
 (notifications/defemail :invite  {:recipients-fn :recipients
                                   :model-fn create-invite-email-model})
 
+(defn- create-prev-permit-invite-email-model [command conf recipient]
+  (assoc (notifications/create-app-model command conf recipient)
+    :kuntalupatunnus (get-in command [:data :kuntalupatunnus])
+    :recipient-email (:email recipient)))
+
+(notifications/defemail :invite-to-prev-permit  {:recipients-fn :recipients
+                                                 :model-fn create-prev-permit-invite-email-model
+                                                 :subject-key "invite"})
+
 (defn- valid-role [role]
   (#{:writer :foreman} (keyword role)))
 
@@ -59,12 +69,11 @@
                 :inviter      (user/summary inviter)}]
     (assoc (user/user-in-role invited :reader) :invite invite)))
 
-(defn send-invite! [{{:keys [email text documentName documentId path role]} :data
+(defn send-invite! [{{:keys [email text documentName documentId path role notification]} :data
                      timestamp :created
                      inviter :user
                      application :application
-                     :as command}
-                    & {:keys [disable-notifications] :or {disable-notifications false}}]
+                     :as command}]
   {:pre [(valid-role role)]}
   (let [email (user/canonize-email email)
         existing-user (user/get-user-by-email email)]
@@ -76,7 +85,8 @@
           {:auth {$not {$elemMatch {:invite.user.username (:email invited)}}}}
           {$push {:auth     auth}
            $set  {:modified timestamp}})
-        (when-not disable-notifications
+        (if (= notification "invite-to-prev-permit")
+          (notifications/notify! :invite-to-prev-permit (assoc command :recipients [invited]))
           (notifications/notify! :invite (assoc command :recipients [invited])))
         (ok)))))
 
