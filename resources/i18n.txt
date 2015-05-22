@@ -1,3 +1,0 @@
-userinfo.architect.degree.choose: Valitse...
-userinfo.architect.degree.choose.help: Valitse suorittamasi tutkinto. Jos sinulla on useampia tutkintoja, valitse niistä mielestäsi merkityksellisin. Voit hakemuksissa valita muunkin tutkinnon, jos se on siihen tehtävään oleellisempi.
-koulutus.help: Valitse suorittamasi tutkinto. Jos sinulla on useita tutkintoja, valitse tähän tehtävään merkityksellisin tutkinto.
