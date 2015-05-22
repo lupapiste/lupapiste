@@ -33,7 +33,7 @@ Mikko adds txt attachment without comment
 Mikko deletes attachment immediately by using remove icon
   [Tags]  attachments
   Click element  xpath=//div[@id="application-attachments-tab"]//span[@data-test-icon="delete-muut.muu"]
-  Confirm  dynamic-yes-no-confirm-dialog
+  Confirm yes no dialog
   Wait Until  Element should not be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${TXT_TESTFILE_NAME}')]
 
 Mikko adds again txt attachment without comment
@@ -60,7 +60,7 @@ Mikko does not see Approve-button
 Mikko deletes attachment
   [Tags]  attachments
   Click enabled by test id  delete-attachment
-  Confirm  dialog-confirm-delete-attachment
+  Confirm yes no dialog
   Wait Until Page Contains  753-416-25-30
   Wait Until  Page Should Not Contain  xpath=//a[@data-test-type="muut.muu"]
 
@@ -156,7 +156,7 @@ Sonja sees that new attachment template is visible in attachments list
 
 Sonja deletes the newly created attachment template
   Click element  xpath=//div[@id="application-attachments-tab"]//span[@data-test-icon="delete-muut.muu"]
-  Confirm  dynamic-yes-no-confirm-dialog
+  Confirm yes no dialog
   Wait Until  Element should not be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[@data-test-type="muut.muu"]
 
 Sonja continues with Mikko's attachment. She sees that attachment is for authority

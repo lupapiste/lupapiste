@@ -997,6 +997,16 @@
           doc))
       {query {$in old-op-names}})))
 
+(defmigration add-permanent-archive-property-to-organizations
+  {:apply-when (pos? (mongo/count :organizations {:permanent-archive-enabled {$exists false}}))}
+  (doseq [organization (mongo/select :organizations {:permanent-archive-enabled {$exists false}})]
+    (mongo/update-by-id :organizations (:id organization)
+      {$set {:permanent-archive-enabled false}})))
+
+(defmigration unset-company-address2
+  {:apply-when (pos? (mongo/count :companies {:address2 {$exists true}}))}
+  (mongo/update-n :companies {:address2 {$exists true}} {$unset {:address2 1}} :multi true))
+
 ; To find current unmapped operator values
 (comment
   (let [cur-vals (mc/distinct :applications "documents.data.yritys.verkkolaskutustieto.valittajaTunnus.value")]

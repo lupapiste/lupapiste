@@ -310,9 +310,10 @@
                       action/email-validator]
    :user-roles #{:authorityAdmin}}
   [{caller :user}]
-  (let [actual-roles     (if (env/feature? :tiedonohjaus) roles ["authority"])
+  (let [new-organization (user/authority-admins-organization-id caller)
+        has-archive?     (:permanent-archive-enabled (organization/get-organization new-organization))
+        actual-roles     (if (and (env/feature? :tiedonohjaus) has-archive?) roles ["authority"])
         email            (user/canonize-email email)
-        new-organization (user/authority-admins-organization-id caller)
         query            {:email email, :role "authority"}
         update-count     (mongo/update-n :users query {$set {(str "orgAuthz." new-organization) actual-roles}})]
     (debug "update user" email)
@@ -404,7 +405,7 @@
   (let [email (user/canonize-email (:email data))]
     (user/change-password email password)
     (infof "password reset performed: email=%s" email)
-    (resp/status 200 (resp/json {:ok true}))))
+    (ok)))
 
 ;;
 ;; enable/disable:
