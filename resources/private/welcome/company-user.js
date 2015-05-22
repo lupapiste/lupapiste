@@ -105,11 +105,11 @@
     self.open = function(e) {
       self.result("pending");
       ajax
-      .post("/api/token/" + e.pagePath[tokenIndex])
-      .json({ok: true})
-      .success(_.partial(self.result, "ok"))
-      .fail(_.partial(self.result, "fail"))
-      .call();
+        .post("/api/token/" + e.pagePath[tokenIndex])
+        .json({ok: true})
+        .success(_.partial(self.result, "ok"))
+        .fail(_.partial(self.result, "fail"))
+        .call();
     };
 
     hub.onPageLoad(pageName, self.open);
