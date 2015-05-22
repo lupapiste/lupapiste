@@ -14,13 +14,14 @@ var notify = (function() {
   }
 
   function success(title, data) {
-    debug(title, data);
+    LUPAPISTE.ModalDialog.close();
+    LUPAPISTE.ModalDialog.showDynamicOk(title, data);
   }
 
   function error(title, data) {
     LUPAPISTE.ModalDialog.close();
     if (data !== undefined) {
-    LUPAPISTE.ModalDialog.showDynamicOk(title, data);
+      LUPAPISTE.ModalDialog.showDynamicOk(title, data);
     } else {
       LUPAPISTE.ModalDialog.showDynamicOk(loc("error.dialog.title"), title);
     }
