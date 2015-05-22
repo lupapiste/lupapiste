@@ -88,41 +88,54 @@
   // Invite:
   //
 
-  function InviteCompanyUser() {
-    this.result   = ko.observable("pending");
-    this.pending  = ko.computed(function() { return this.result() === "pending"; }, this);
-    this.ok       = ko.computed(function() { return this.result() === "ok"; }, this);
-    this.fail     = ko.computed(function() { return this.result() === "fail"; }, this);
-    hub.onPageLoad("invite-company-user", this.open.bind(this));
+  function BaseModel() {
+    var self = this;
+    self.result   = ko.observable("pending");
+
+    self.pending  = ko.pureComputed(function() {
+      return self.result() === "pending";
+    });
+    self.ok = ko.pureComputed(function() {
+      return self.result() === "ok";
+    });
+    self.fail = ko.pureComputed(function() {
+      return self.result() === "fail";
+    });
   }
 
-  InviteCompanyUser.prototype.open = function(e) {
-    this.result("pending");
-    ajax
-      .post("/api/token/" + e.pagePath[1])
-      .json({ok: true})
-      .success(this.result.bind(this, "ok"))
-      .fail(this.result.bind(this, "fail"))
-      .call();
-  };
+  function InviteCompanyUser() {
+    var self = this;
+    self.open = function(e) {
+      self.result("pending");
+      ajax
+        .post("/api/token/" + e.pagePath[1])
+        .json({ok: true})
+        .success(_.partial(self.result, "ok"))
+        .fail(_.partial(self.result, "fail"))
+        .call();
+    };
+
+    hub.onPageLoad("invite-company-user", self.open);
+  }
+  InviteCompanyUser.prototype = new BaseModel();
+  InviteCompanyUser.prototype.constructor = InviteCompanyUser;
 
   function AcceptCompanyInvitation() {
-    this.result   = ko.observable("pending");
-    this.pending  = ko.computed(function() { return this.result() === "pending"; }, this);
-    this.ok       = ko.computed(function() { return this.result() === "ok"; }, this);
-    this.fail     = ko.computed(function() { return this.result() === "fail"; }, this);
-    hub.onPageLoad("accept-company-invitation", this.open.bind(this));
+    var self = this;
+    self.open = function(e) {
+      self.result("pending");
+      ajax
+        .post("/api/token/" + e.pagePath[0])
+        .json({ok: true})
+        .success(_.partial(self.result, "ok"))
+        .fail(_.partial(self.result, "fail"))
+        .call();
+    };
+    hub.onPageLoad("accept-company-invitation", self.open);
   }
 
-  AcceptCompanyInvitation.prototype.open = function(e) {
-    this.result("pending");
-    ajax
-      .post("/api/token/" + e.pagePath[0])
-      .json({ok: true})
-      .success(this.result.bind(this, "ok"))
-      .fail(this.result.bind(this, "fail"))
-      .call();
-  };
+  AcceptCompanyInvitation.prototype = new BaseModel();
+  AcceptCompanyInvitation.prototype.constructor = AcceptCompanyInvitation;
 
   //
   // Initialize:
