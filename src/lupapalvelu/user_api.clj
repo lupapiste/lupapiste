@@ -257,8 +257,8 @@
 ;;
 
 (def- user-data-editable-fields [:firstName :lastName :street :city :zip :phone
-                                          :architect :degree :graduatingYear :fise
-                                          :companyName :companyId :allowDirectMarketing])
+                                 :architect :degree :graduatingYear :fise
+                                 :companyName :companyId :allowDirectMarketing])
 
 (defn- validate-update-user! [caller user-data]
   (let [admin?          (= (-> caller :role keyword) :admin)
