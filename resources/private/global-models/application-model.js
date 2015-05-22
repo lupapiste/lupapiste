@@ -251,10 +251,7 @@ LUPAPISTE.ApplicationModel = function() {
 
   self.requestForComplement = function(model) {
     ajax.command("request-for-complement", { id: self.id()})
-      .success(function() {
-        notify.success("pyynt\u00F6 l\u00E4hetetty",model);
-        self.reload();
-      })
+      .success(self.reload)
       .processing(self.processing)
       .call();
     return false;

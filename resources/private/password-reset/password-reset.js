@@ -26,22 +26,29 @@
     self.token = ko.observable();
     self.password1 = ko.observable();
     self.password2 = ko.observable();
-    self.passwordQuality = ko.computed(function() { return util.getPwQuality(self.password1()); });
-    self.ok = ko.computed(function() {
+    self.passwordQuality = ko.pureComputed(function() { return util.getPwQuality(self.password1()); });
+    self.ok = ko.pureComputed(function() {
       var t = self.token(),
           p1 = self.password1(),
           p2 = self.password2();
-      return t && t.length && p1 && p1.length > 5 && p1 === p2;
+      return t && t.length && p1 && p1.length >= LUPAPISTE.config.passwordMinLength && p1 === p2;
     });
-    self.success = ko.observable(false);
     self.fail = ko.observable(false);
+
+    var successOkButton = {title: loc("welcome.login"),
+        fn: function() {
+          LUPAPISTE.ModalDialog.close();
+          window.location.hash = "!/login";}};
 
     self.send = function() {
       ajax
         .post("/api/token/" + self.token())
         .json({password: self.password1()})
-        .success(function() { self.success(true).fail(false).password1("").password2(""); })
-        .fail(function() { self.success(false).fail(true).password1("").password2(""); $("#setpw input:first").focus(); })
+        .success(function() {
+          self.fail(false).password1("").password2("");
+          LUPAPISTE.ModalDialog.showDynamicOk(loc("success.dialog.title"), loc("setpw.success"), successOkButton);
+        })
+        .fail(function() { self.fail(true).password1("").password2(""); $("#setpw input:first").focus(); })
         .call();
     };
 

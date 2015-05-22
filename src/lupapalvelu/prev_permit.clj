@@ -1,5 +1,5 @@
 (ns lupapalvelu.prev-permit
-  (:require [taoensso.timbre :refer [info]]
+  (:require [taoensso.timbre :refer [debug info]]
             [sade.core :refer :all]
             [sade.strings :as ss]
             [lupapalvelu.application :as application]
@@ -43,8 +43,7 @@
                                                    :documentName nil
                                                    :documentId   nil
                                                    :path         nil
-                                                   :role         "writer"})
-                 :disable-notifications (env/feature? :disable-prev-permit-notifications))
+                                                   :role         "writer"}))
                (info "Prev permit application creation, invited " applicant-email " to created app " (get-in command [:data :id]))
 
                ;; Set applicants' user info to Hakija documents
@@ -100,7 +99,7 @@
         ;                              :state (some #(when (= (-> app-info :viimeisin-tila :tila) (val %)) (first %)) lupapalvelu.document.canonical-common/application-state-to-krysp-state))
 
         ;; attaches the new application, and its id to path [:data :id], into the command
-        command (merge command (action/application->command created-application))]
+        command (util/deep-merge command (action/application->command created-application))]
 
     ;; The application has to be inserted first, because it is assumed to be in the database when checking for verdicts (and their attachments).
     (application/insert-application created-application)

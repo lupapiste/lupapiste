@@ -257,8 +257,8 @@
 ;;
 
 (def- user-data-editable-fields [:firstName :lastName :street :city :zip :phone
-                                          :architect :degree :graduatingYear :fise
-                                          :companyName :companyId :allowDirectMarketing])
+                                 :architect :degree :graduatingYear :fise
+                                 :companyName :companyId :allowDirectMarketing])
 
 (defn- validate-update-user! [caller user-data]
   (let [admin?          (= (-> caller :role keyword) :admin)
@@ -405,7 +405,7 @@
   (let [email (user/canonize-email (:email data))]
     (user/change-password email password)
     (infof "password reset performed: email=%s" email)
-    (resp/status 200 (resp/json {:ok true}))))
+    (ok)))
 
 ;;
 ;; enable/disable:

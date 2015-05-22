@@ -1,5 +1,5 @@
 (ns lupapalvelu.prev-permit-api
-  (:require [taoensso.timbre :refer [info]]
+  (:require [taoensso.timbre :refer [debug info]]
             [lupapalvelu.action :as action]
             [sade.strings :as ss]
             [sade.core :refer :all]

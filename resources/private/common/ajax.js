@@ -44,7 +44,7 @@ var ajax = (function($) {
     self.successHandler = function() { };
     self.errorHandler = function(e) {
       error("AJAX: ERROR", self.request.url, e);
-      notify.error(loc("error.dialog.title"), loc(e.text));
+      notify.error(loc(e.text));
     };
     self.failHandler = function(jqXHR, textStatus, errorThrown) {
       if (jqXHR && jqXHR.status > 0 &&jqXHR.status !== 403 && jqXHR.readyState > 0) {

@@ -112,7 +112,7 @@ Mikko invites Solita
   # Click enabled by test id  company-invite
   Wait Until  Click Element  xpath=//div[@class='parties-list']//button[@data-test-id='company-invite']
   Wait Until  Element should be visible  xpath=//div[@data-test-id='modal-dialog-content']
-  Select From Autocomplete  Solita Oy, Tulli Business Park Tampere
+  Select From Autocomplete  Solita Oy
   Click enabled by test id  modal-dialog-submit-button
   Wait Until  Page should contain  1060155-5
 

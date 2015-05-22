@@ -44,7 +44,8 @@
               (sc/optional-key :reference)   max-64-or-nil
               (sc/optional-key :address1)    max-64-or-nil
               (sc/optional-key :po)          max-64-or-nil
-              (sc/optional-key :zip)         (sc/pred util/finnish-zip? "Not a valid zip code")
+              (sc/optional-key :zip)         (sc/either (sc/pred util/finnish-zip? "Not a valid zip code")
+                                                        (sc/pred ss/blank?))
               (sc/optional-key :country)     max-64-or-nil
               (sc/optional-key :ovt)         (sc/either (sc/pred util/finnish-ovt? "Not a valid OVT code")
                                                         (sc/pred ss/blank?))
@@ -255,11 +256,9 @@
 
 (defmethod token/handle-token :accept-company-invitation [{{:keys [company-id application-id]} :data} _]
   (infof "company %s accepted application %s" company-id application-id)
-  (if-let [application (domain/get-application-no-access-checking application-id)]
-    (do
-      (update-application
-        (application->command application)
-        {:auth {$elemMatch {:invite.user.id company-id}}}
-        {$set  {:auth.$  (-> (find-company! {:id company-id}) (company->auth) (assoc :inviteAccepted (now)))}})
-      (ok))
-    (fail :error.unknown)))
+  (when-let [application (domain/get-application-no-access-checking application-id)]
+    (update-application
+      (application->command application)
+      {:auth {$elemMatch {:invite.user.id company-id}}}
+      {$set  {:auth.$  (-> (find-company! {:id company-id}) (company->auth) (assoc :inviteAccepted (now)))}})
+    (ok)))
