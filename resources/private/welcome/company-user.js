@@ -47,13 +47,18 @@
         .fail(false);
     };
 
+    var successOkButton = {title: loc("welcome.login"),
+                           fn: function() {
+                             LUPAPISTE.ModalDialog.close();
+                             window.location.hash = "!/login";}};
+
     self.send = function() {
       ajax
         .post("/api/token/" + self.token())
         .json({password: self.password1()})
         .success(function() {
           self.password1("").password2("");
-          notify.success(loc("setpw.success"));
+          LUPAPISTE.ModalDialog.showDynamicOk(loc("success.dialog.title"), loc("setpw.success"), successOkButton);
         })
         .fail(function() {
           notify.error(loc("setpw.fail"));
