@@ -1,0 +1,2 @@
+success.dialog.title: Toiminto onnistui
+setpw.success: Salasana asetettu. Voit nyt kirjautua sisään.

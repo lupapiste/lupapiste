@@ -191,9 +191,6 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel, verdictAttachme
         .success(function() {
           self.appModel.reload();
         })
-        .error(function (e) {
-          LUPAPISTE.ModalDialog.showDynamicOk(loc("error.dialog.title"), loc(e.text));
-        })
         .processing(self.appModel.processing)
         .call();
         hub.send("track-click", {category:"Application", label: "", event:"deleteSingleAttachment"});
