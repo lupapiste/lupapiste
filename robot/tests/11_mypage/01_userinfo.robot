@@ -17,8 +17,6 @@ Mikko goes to own page
 There is no company info
   Element should not be visible  //div[@data-test-id='my-company']
 
-# TODO: Muokkaa naita testeja
-
 Mikko changes his name and experience
   Change Textfield Value  firstName  Mikko  Mika
   Change Textfield Value  lastName  Intonen  Intola
