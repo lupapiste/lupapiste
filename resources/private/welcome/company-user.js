@@ -88,7 +88,7 @@
   // Invite:
   //
 
-  function BaseModel() {
+  function AcceptInviteModel(pageName, tokenIndex) {
     var self = this;
     self.result   = ko.observable("pending");
 
@@ -101,49 +101,27 @@
     self.fail = ko.pureComputed(function() {
       return self.result() === "fail";
     });
-  }
 
-  function InviteCompanyUser() {
-    var self = this;
     self.open = function(e) {
       self.result("pending");
       ajax
-        .post("/api/token/" + e.pagePath[1])
-        .json({ok: true})
-        .success(_.partial(self.result, "ok"))
-        .fail(_.partial(self.result, "fail"))
-        .call();
+      .post("/api/token/" + e.pagePath[tokenIndex])
+      .json({ok: true})
+      .success(_.partial(self.result, "ok"))
+      .fail(_.partial(self.result, "fail"))
+      .call();
     };
 
-    hub.onPageLoad("invite-company-user", self.open);
+    hub.onPageLoad(pageName, self.open);
   }
-  InviteCompanyUser.prototype = new BaseModel();
-  InviteCompanyUser.prototype.constructor = InviteCompanyUser;
-
-  function AcceptCompanyInvitation() {
-    var self = this;
-    self.open = function(e) {
-      self.result("pending");
-      ajax
-        .post("/api/token/" + e.pagePath[0])
-        .json({ok: true})
-        .success(_.partial(self.result, "ok"))
-        .fail(_.partial(self.result, "fail"))
-        .call();
-    };
-    hub.onPageLoad("accept-company-invitation", self.open);
-  }
-
-  AcceptCompanyInvitation.prototype = new BaseModel();
-  AcceptCompanyInvitation.prototype.constructor = AcceptCompanyInvitation;
 
   //
   // Initialize:
   //
 
   var newCompanyUser = new NewCompanyUser();
-  var inviteCompanyUser = new InviteCompanyUser();
-  var acceptCompanyInvitation = new AcceptCompanyInvitation();
+  var inviteCompanyUser = new AcceptInviteModel("invite-company-user", 1);
+  var acceptCompanyInvitation = new AcceptInviteModel("accept-company-invitation", 0);
 
   $(function() {
     $("section#new-company-user").applyBindings(newCompanyUser);
