@@ -42,9 +42,7 @@
         .email("")
         .pending(true)
         .password1("")
-        .password2("")
-        .success(false)
-        .fail(false);
+        .password2("");
     };
 
     var successOkButton = {title: loc("welcome.login"),
