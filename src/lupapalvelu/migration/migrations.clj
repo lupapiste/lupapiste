@@ -1016,9 +1016,7 @@
 (defmigration tutkinto-mapping-in-own-info
   (let [target-keys-set (conj (set (map :name (:body lupapalvelu.document.schemas/koulutusvalinta))) "other")
         mapping (er/read-map "tutkinto-mapping.xlsx")]
-    (doseq [user (mongo/select :users
-                   {"degree" {$exists true}}
-                   {:architect 1 :degree 1 :graduatingYear 1})]
+    (doseq [user (mongo/select :users {"degree" {$exists true}} {:degree 1})]
       (when-let [koulutus (:degree user)]
         (let [normalized (-> koulutus ss/trim ss/lower-case)]
           (when-not (or (ss/blank? normalized) (target-keys-set normalized))
