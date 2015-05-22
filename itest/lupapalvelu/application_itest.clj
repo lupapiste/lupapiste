@@ -482,3 +482,25 @@
                                       :x (-> application :location :x) - 1
                                       :y (-> application :location :y) + 1
                                       :address (:address application) :propertyId (:propertyId application)) => ok?)))
+
+(fact "Authority can access drafts, but can't use most important commands"
+  (let [id (create-app-id pena)
+        app (query-application sonja id)
+        actions (:actions (query sonja :allowed-actions :id id))
+        denied-actions #{:delete-attachment :delete-attachment-version :upload-attachment :change-location
+                         :new-verdict-draft :create-attachments :remove-document-data :remove-doc :update-doc
+                         :reject-doc :approve-doc :stamp-attachments :create-task :cancel-application-authority
+                         :add-link-permit :set-tos-function-for-application :set-tos-function-for-operation
+                         :unsubscribe-notifications :subscribe-notifications :assign-application :neighbor-add
+                         :change-permit-sub-type :refresh-ktj :merge-details-from-krysp :remove-link-permit-by-app-id
+                         :set-attachment-type :move-attachments-to-backing-system :add-operation :remove-auth :create-doc
+                         :set-company-to-document :set-user-to-document :set-current-user-to-document :approve-application
+                         :submit-application}]
+    app => map?
+    (fact "No denied-actions in allowed-actions"
+      (some denied-actions (remove nil? (map
+                                         (fn [[action {:keys [ok]}]]
+                                           (when ok
+                                             action))
+                                         actions))) => nil?)))
+
