@@ -36,14 +36,14 @@
          (info "email was sent successfully." to subject)))))
   nil)
 
-(defn- get-email-subject [{title :title
-                           municipality :municipality} & [title-key show-municipality-in-subject]]
-  (let [title-postfix (when title-key (if (i18n/has-term? "fi" "email.title" title-key)
-                                        (i18n/localize "fi" "email.title" title-key)
-                                        (i18n/localize "fi" title-key)))
+(defn- get-email-subject [{title :title, municipality :municipality}
+                          & [subject-key show-municipality-in-subject]]
+  (let [title-postfix (when subject-key (if (i18n/has-term? "fi" "email.title" subject-key)
+                                        (i18n/localize "fi" "email.title" subject-key)
+                                        (i18n/localize "fi" subject-key)))
         title-begin (str (when show-municipality-in-subject
                          (str (i18n/localize "fi" "municipality" municipality) ", ")) title)]
-    (str "Lupapiste.fi: " title-begin (when (and title title-key)" - ") (when title-key title-postfix))))
+    (str "Lupapiste.fi: " title-begin (when (and title subject-key)" - ") (when subject-key title-postfix))))
 
 (defn- get-email-recipients-for-application
   "Emails are sent to everyone in auth array except statement persons,
