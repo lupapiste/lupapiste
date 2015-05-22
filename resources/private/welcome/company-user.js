@@ -51,8 +51,13 @@
       ajax
         .post("/api/token/" + self.token())
         .json({password: self.password1()})
-        .success(function() { self.success(true).fail(false).password1("").password2(""); })
-        .fail(function() { self.success(false).fail(true); })
+        .success(function() {
+          self.password1("").password2("");
+          notify.success(loc("setpw.success"));
+        })
+        .fail(function() {
+          notify.error(loc("setpw.fail"));
+        })
         .call();
     };
 

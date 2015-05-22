@@ -1,12 +1,12 @@
 var notify = (function() {
   "use strict";
 
-  function displayMessage(defautlTitle, title, data) {
+  function displayMessage(defaultTitle, title, data) {
     LUPAPISTE.ModalDialog.close();
     if (data !== undefined) {
       LUPAPISTE.ModalDialog.showDynamicOk(title, data);
     } else {
-      LUPAPISTE.ModalDialog.showDynamicOk(defaultTitle, data);
+      LUPAPISTE.ModalDialog.showDynamicOk(defaultTitle, title);
     }
   }
 
