@@ -1,6 +1,7 @@
 (ns lupapalvelu.application-itest
   (:require [midje.sweet :refer :all]
             [clojure.string :refer [join]]
+            [sade.core :refer [unauthorized]]
             [sade.strings :as ss]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.test-util :refer [doc-result doc-check]]
