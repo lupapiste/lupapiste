@@ -4,7 +4,7 @@
             [lupapalvelu.factlet :refer [fact* facts*]]
             [clj-time.coerce :as coerce]
             [sade.xml :as xml]
-            [lupapalvelu.xml.krysp.reader :refer :all]
+            [lupapalvelu.xml.krysp.reader :refer [property-equals ->verdicts ->buildings-summary ->rakennuksen-tiedot ->buildings  wfs-krysp-url rakval-case-type get-app-info-from-message]]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]))
@@ -19,6 +19,30 @@
 
 (fact "property-equals returns url-encoded xml-encoded data"
   (property-equals "<a>" "<b>") => "%3CPropertyIsEqualTo%3E%3CPropertyName%3E%26lt%3Ba%26gt%3B%3C%2FPropertyName%3E%3CLiteral%3E%26lt%3Bb%26gt%3B%3C%2FLiteral%3E%3C%2FPropertyIsEqualTo%3E")
+
+(defn verdict-skeleton [poytakirja-xml]
+  {:tag :paatostieto
+   :content [{:tag :paatostieto
+              :content [{:tag :Paatos
+                         :content [{:tag :poytakirja :content poytakirja-xml}]}]}]})
+
+(def future-verdict (verdict-skeleton [{:tag :paatoskoodi :content ["hyv\u00e4ksytty"]}
+                                       {:tag :paatoksentekija :content [""]}
+                                       {:tag :paatospvm :content ["1970-01-02"]}]))
+
+(def past-verdict (verdict-skeleton [{:tag :paatoskoodi :content ["hyv\u00e4ksytty"]}
+                                     {:tag :paatoksentekija :content [""]}
+                                     {:tag :paatospvm :content ["1970-01-01"]}]))
+
+(facts standard-verdicts-validator
+  (against-background
+    (sade.core/now) => 100)
+  (fact "Missing details"
+    (standard-verdicts-validator (verdict-skeleton [])) => {:ok false, :text "info.paatos-details-missing"})
+  (fact "Future date"
+    (standard-verdicts-validator future-verdict) => {:ok false, :text "info.paatos-future-date"} )
+  (fact "Past date"
+    (standard-verdicts-validator past-verdict) => nil))
 
 (facts "pysyva-rakennustunnus"
   (fact (pysyva-rakennustunnus nil) => nil)
