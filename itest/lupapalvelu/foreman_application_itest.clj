@@ -33,6 +33,9 @@
         (count applications) => 1
         (:id (first applications)) => foreman-application-id))
 
+    (fact "Can't submit foreman app before original link-permit-app is submitted"
+      (:submittable (query-application apikey foreman-application-id)) => false)
+
     (fact "Submit link-permit app"
       (command apikey :submit-application :id application-id) => ok?)
 
@@ -75,8 +78,8 @@
             foreman-doc2                  (domain/get-document-by-name foreman-application2 "tyonjohtaja-v2")]
 
         (fact "other project is updated into current foreman application"
-          (command apikey :set-user-to-document :id foreman-application1-id :documentId (:id foreman-doc1) :userId mikko-id :path "" :collection "documents" => truthy)
-          (command apikey :set-user-to-document :id foreman-application2-id :documentId (:id foreman-doc2) :userId mikko-id :path "" :collection "documents" => truthy)
+          (command apikey :set-current-user-to-document :id foreman-application1-id :documentId (:id foreman-doc1) :userId mikko-id :path "" :collection "documents" => truthy)
+          (command apikey :set-current-user-to-document :id foreman-application2-id :documentId (:id foreman-doc2) :userId mikko-id :path "" :collection "documents" => truthy)
           (command apikey :update-foreman-other-applications :id foreman-application2-id :foremanHetu "")
 
           (let [updated-application (query-application apikey foreman-application2-id)

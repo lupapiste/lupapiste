@@ -2,7 +2,7 @@
   (:require [taoensso.timbre :as timbre :refer [trace debug info infof warn warnf error fatal]]
             [monger.operators :refer :all]
             [schema.core :as sc]
-            [sade.util :refer [min-length-string max-length-string y? account-type? fn-> fn->>] :as util]
+            [sade.util :refer [min-length-string max-length-string account-type? fn-> fn->>] :as util]
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.core :refer :all]
@@ -13,30 +13,44 @@
             [lupapalvelu.ttl :as ttl]
             [lupapalvelu.notifications :as notif]
             [lupapalvelu.user-api :as uapi]
-            [lupapalvelu.user :as u])
+            [lupapalvelu.user :as u]
+            [lupapalvelu.document.schemas :as schema])
   (:import [java.util Date]))
 
 ;;
 ;; Company schema:
 ;;
 
-(def user-limit-for-account-type {:account5 5
-                                  :account15 15
-                                  :account30 30})
+(def account-types [{:name :account5
+                     :limit 5}
+                    {:name :account15
+                     :limit 15}
+                    {:name :account30
+                     :limit 30}])
+
+(defn user-limit-for-account-type [account-name]
+  (let [account-type (some #(if (= (:name %) account-name) %) account-types)]
+    (:limit account-type)))
 
 (def- max-64-or-nil (sc/either (max-length-string 64) (sc/pred nil?)))
 
+(defn supported-invoice-operator? [op]
+  (let [supported-ops (map :name schema/e-invoice-operators)]
+    (some #(= op %) supported-ops)))
+
 (def Company {:name                          (sc/both (min-length-string 1) (max-length-string 64))
-              :y                             (sc/pred y? "Not valid Y code")
+              :y                             (sc/pred util/finnish-y? "Not valid Y code")
               :accountType                   (sc/pred account-type? "Not valid account type")
               (sc/optional-key :reference)   max-64-or-nil
               (sc/optional-key :address1)    max-64-or-nil
-              (sc/optional-key :address2)    max-64-or-nil
               (sc/optional-key :po)          max-64-or-nil
-              (sc/optional-key :zip)         max-64-or-nil
+              (sc/optional-key :zip)         (sc/either (sc/pred util/finnish-zip? "Not a valid zip code")
+                                                        (sc/pred ss/blank?))
               (sc/optional-key :country)     max-64-or-nil
-              (sc/optional-key :ovt)         (sc/pred util/finnish-ovt? "Not valid OVT code")
-              (sc/optional-key :pop)         (sc/pred util/finnish-ovt? "Not valid OVT code") ; FIXME LPK-350
+              (sc/optional-key :ovt)         (sc/either (sc/pred util/finnish-ovt? "Not a valid OVT code")
+                                                        (sc/pred ss/blank?))
+              (sc/optional-key :pop)         (sc/either (sc/pred supported-invoice-operator? "Not a supported invoice operator")
+                                                        (sc/pred ss/blank?))
               (sc/optional-key :process-id)  sc/Str
               (sc/optional-key :created)     sc/Int
               })
@@ -81,7 +95,7 @@
   (or (find-company-by-id id) (fail! :company.not-found)))
 
 (defn find-companies []
-  (mongo/select :companies {} [:name :y :address1 :address2 :zip :po] (array-map :name 1)))
+  (mongo/select :companies {} [:name :y :address1 :zip :po] (array-map :name 1)))
 
 (defn find-company-users [company-id]
   (u/get-users {:company.id company-id}))
@@ -113,8 +127,13 @@
    Retuens the updated company."
   [id updates]
   (if (some #{:id :y} (keys updates)) (fail! :bad-request))
-  (let [updated (merge (dissoc (find-company-by-id! id) :id) updates)]
+  (let [company (dissoc (find-company-by-id! id) :id)
+        updated (merge company updates)
+        old-limit (user-limit-for-account-type (keyword (:accountType company)))
+        limit     (user-limit-for-account-type (keyword (:accountType updated)))]
     (sc/validate Company updated)
+    (when (< limit old-limit)
+      (fail! :company.account-type-not-downgradable))
     (mongo/update :companies {:_id id} updated)
     updated))
 
@@ -237,11 +256,9 @@
 
 (defmethod token/handle-token :accept-company-invitation [{{:keys [company-id application-id]} :data} _]
   (infof "company %s accepted application %s" company-id application-id)
-  (if-let [application (domain/get-application-no-access-checking application-id)]
-    (do
-      (update-application
-        (application->command application)
-        {:auth {$elemMatch {:invite.user.id company-id}}}
-        {$set  {:auth.$  (-> (find-company! {:id company-id}) (company->auth) (assoc :inviteAccepted (now)))}})
-      (ok))
-    (fail :error.unknown)))
+  (when-let [application (domain/get-application-no-access-checking application-id)]
+    (update-application
+      (application->command application)
+      {:auth {$elemMatch {:invite.user.id company-id}}}
+      {$set  {:auth.$  (-> (find-company! {:id company-id}) (company->auth) (assoc :inviteAccepted (now)))}})
+    (ok)))

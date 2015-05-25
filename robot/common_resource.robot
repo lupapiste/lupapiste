@@ -278,16 +278,25 @@ Jarvenpaa authority logs in
 #
 
 Input text by test id
-  [Arguments]  ${id}  ${value}
+  [Arguments]  ${id}  ${value}  ${leaveFocus}=${false}
   Wait until page contains element  xpath=//input[@data-test-id="${id}"]
   Wait until  Element should be visible  xpath=//input[@data-test-id="${id}"]
   Wait until  Element should be enabled  xpath=//input[@data-test-id="${id}"]
-  Execute Javascript  $("input[data-test-id='${id}']").val("${value}").change().blur();
+  Execute Javascript  $("input[data-test-id='${id}']").val("${value}").change();
+  Run Keyword Unless  ${leaveFocus}  Execute Javascript  $("input[data-test-id='${id}']").blur();
 
 Select From List by test id
   [Arguments]  ${id}  ${value}
   Wait until page contains element  xpath=//select[@data-test-id="${id}"]
   Select From List  xpath=//select[@data-test-id="${id}"]  ${value}
+
+Select From Autocomplete
+  [Arguments]  ${value}
+  Wait until  Element should be visible  xpath=//span[@class='autocomplete-selection']
+  Click Element  xpath=//span[@class='autocomplete-selection']
+  Input text by test id  autocomplete-input  ${value}  ${true}
+  Wait until  Element should be visible  xpath=//li/span[contains(text(), '${value}')]
+  Click Element  xpath=//li/span[contains(text(), '${value}')]
 
 Click by id
   [Arguments]  ${id}
@@ -518,6 +527,13 @@ Close current application as authority
   Wait Until  Element Should Be Enabled  xpath=//button[@data-test-id="application-cancel-authority-btn"]
   Click enabled by test id  application-cancel-authority-btn
   Confirm  dialog-cancel-application
+
+# New yes no modal dialog
+Confirm yes no dialog
+  Wait until  Element should be visible  xpath=//div[@id="modal-dialog"]//button[@data-test-id="confirm-yes"]
+  Focus  xpath=//div[@id="modal-dialog"]//button[@data-test-id="confirm-yes"]
+  Click Element  xpath=//div[@id="modal-dialog"]//button[@data-test-id="confirm-yes"]
+  Wait Until  Element Should Not Be Visible  xpath=//div[@id="modal-dialog"]//button[@data-test-id="confirm-yes"]
 
 Confirm
   [Arguments]  ${modalId}
@@ -773,8 +789,8 @@ Fill in new password
   Input text  xpath=//section[@id='${section}']//input[@placeholder='Salasana uudelleen']  ${password}
   Wait Until  Element Should Be Enabled  xpath=//section[@id='${section}']//button
   Click Element  xpath=//section[@id='${section}']//button
-  Go to login page
-
+  Wait Until  Page should contain  Salasana asetettu.
+  Confirm  dynamic-ok-confirm-dialog
 
 #
 # Mock Ajax calls: jquery.mockjax

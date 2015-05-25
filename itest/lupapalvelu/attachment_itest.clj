@@ -209,7 +209,7 @@
   (let [application (create-and-submit-application sonja :propertyId sipoo-property-id)
         application-id (:id application)
         attachment (first (:attachments application))
-        _ (upload-attachment sonja application-id attachment true :filename "dev-resources/VRK_Virhetarkistukset.pdf")
+        _ (upload-attachment sonja application-id attachment true :filename "dev-resources/test-pdf.pdf")
         application (query-application sonja application-id)
         comments (:comments application)
         {job :job :as resp} (command

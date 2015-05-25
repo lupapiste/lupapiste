@@ -105,7 +105,7 @@
   (util/not-empty-or-nil? (:submitted (mongo/by-id "applications" link-id [:submitted]))))
 
 (defn- foreman-submittable? [application]
-  (let [result (when (-> application :state #{:draft :open :submitted :complement-needed})
+  (let [result (when (-> application :state keyword #{:draft :open :submitted :complement-needed})
                  (when-let [lupapiste-link (filter #(= (:type %) "lupapistetunnus") (:linkPermitData application))]
                    (when (seq lupapiste-link) (link-permit-submitted? (-> lupapiste-link first :id)))))]
     (if (nil? result)
@@ -641,12 +641,12 @@
 
 (defn do-create-application
   [{{:keys [operation x y address propertyId infoRequest messages]} :data :keys [user created] :as command} & [manual-schema-datas]]
-  (let [municipality (p/municipality-id-by-property-id propertyId)
-        permit-type (operations/permit-type-of-operation operation)
-        organization (organization/resolve-organization municipality permit-type)
-        scope (organization/resolve-organization-scope municipality permit-type organization)
-        organization-id (:id organization)
-        info-request? (boolean infoRequest)
+  (let [municipality      (p/municipality-id-by-property-id propertyId)
+        permit-type       (operations/permit-type-of-operation operation)
+        organization      (organization/resolve-organization municipality permit-type)
+        scope             (organization/resolve-organization-scope municipality permit-type organization)
+        organization-id   (:id organization)
+        info-request?     (boolean infoRequest)
         open-inforequest? (and info-request? (:open-inforequest scope))]
 
     (when-not (or (user/applicant? user) (user/user-is-authority-in-organization? user organization-id))
@@ -673,12 +673,12 @@
   [{{:keys [operation address propertyId infoRequest]} :data :keys [user created] :as command}]
 
   ;; TODO: These let-bindings are repeated in do-create-application, merge those somehow
-  (let [municipality (p/municipality-id-by-property-id propertyId)
-        permit-type (operations/permit-type-of-operation operation)
-        organization (organization/resolve-organization municipality permit-type)
-        scope (organization/resolve-organization-scope municipality permit-type organization)
-        info-request? (boolean infoRequest)
-        open-inforequest? (and info-request? (:open-inforequest scope))
+  (let [municipality        (p/municipality-id-by-property-id propertyId)
+        permit-type         (operations/permit-type-of-operation operation)
+        organization        (organization/resolve-organization municipality permit-type)
+        scope               (organization/resolve-organization-scope municipality permit-type organization)
+        info-request?       (boolean infoRequest)
+        open-inforequest?   (and info-request? (:open-inforequest scope))
         created-application (do-create-application command)]
 
     (insert-application created-application)
@@ -961,8 +961,8 @@
 (defn- validate-new-applications-enabled [command {:keys [permitType municipality] :as application}]
   (when application
     (let [scope (organization/resolve-organization-scope municipality permitType)]
-      (when-not (= (:new-application-enabled scope) true)
-        (fail :error.new-applications.disabled)))))
+      (when-not (:new-application-enabled scope)
+        (fail :error.new-applications-disabled)))))
 
 (defcommand convert-to-application
   {:parameters [id]

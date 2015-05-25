@@ -230,16 +230,6 @@
        (finally
          (set-anti-csrf! (not old-value#))))))
 
-(defn create-app-id
-  "Verifies that an application was created and returns it's ID"
-  [apikey & args]
-  (let [resp (apply create-app apikey args)
-        id   (:id resp)]
-    (fact "Application created"
-      resp => ok?
-      id => truthy)
-    id))
-
 (defn comment-application
   ([apikey id open?]
     {:pre [(instance? Boolean open?)]}
@@ -288,6 +278,25 @@
     (let [{:keys [application ok]} (f apikey :application :id id)]
       (assert ok)
       application)))
+
+(defn- test-application-create-successful [resp app-id]
+  (fact "Application created"
+    resp => ok?
+    app-id => truthy))
+
+(defn create-app-id
+  "Verifies that an application was created and returns it's ID"
+  [apikey & args]
+  (let [{app-id :id :as resp} (apply create-app apikey args)]
+    (test-application-create-successful resp app-id)
+    app-id))
+
+(defn create-application
+  "Runs the create-application command, returns application."
+  [apikey & args]
+  (let [{app-id :id :as resp} (apply create-app apikey args)]
+    (test-application-create-successful resp app-id)
+    (query-application apikey app-id)))
 
 (defn create-and-submit-application
   "Returns the application map"

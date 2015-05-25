@@ -1,10 +1,10 @@
 (ns lupapalvelu.prev-permit
-  (:require [taoensso.timbre :refer [info]]
+  (:require [taoensso.timbre :refer [debug info]]
             [sade.core :refer :all]
             [sade.strings :as ss]
             [lupapalvelu.application :as application]
             [lupapalvelu.action :as action]
-            [lupapalvelu.verdict-api :as verdict-api]
+            [lupapalvelu.verdict :as verdict]
             [lupapalvelu.user :as user]
             [lupapalvelu.authorization-api :as authorization]
             [lupapalvelu.i18n :as i18n]
@@ -14,7 +14,8 @@
             [sade.util :as util]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch-api]
-            [lupapalvelu.organization :as organization]))
+            [lupapalvelu.organization :as organization]
+            [sade.env :as env]))
 
 (defn- get-applicant-email [applicant]
   (-> (or
@@ -98,11 +99,13 @@
         ;                              :state (some #(when (= (-> app-info :viimeisin-tila :tila) (val %)) (first %)) lupapalvelu.document.canonical-common/application-state-to-krysp-state))
 
         ;; attaches the new application, and its id to path [:data :id], into the command
-        command (merge command (action/application->command created-application))]
+        command (util/deep-merge command (action/application->command created-application))]
 
     ;; The application has to be inserted first, because it is assumed to be in the database when checking for verdicts (and their attachments).
     (application/insert-application created-application)
-    (verdict-api/find-verdicts-from-xml command xml)  ;; Get verdicts for the application
+     ;; Get verdicts for the application
+    (let [updates (verdict/find-verdicts-from-xml command xml)]
+      (action/update-application command updates))
     (invite-applicants command hakijat)
     (:id created-application)))
 
@@ -115,7 +118,7 @@
   (let [operation         :aiemmalla-luvalla-hakeminen
         permit-type       (operations/permit-type-of-operation operation)
         dummy-application {:id kuntalupatunnus :permitType permit-type :organization organizationId}
-        xml (krysp-fetch-api/get-application-xml dummy-application :kuntalupatunnus)]
+        xml               (krysp-fetch-api/get-application-xml dummy-application :kuntalupatunnus)]
     (when-not xml (fail! :error.no-previous-permit-found-from-backend)) ;; Show error if could not receive the verdict message xml for the given kuntalupatunnus
 
     (let [app-info               (krysp-reader/get-app-info-from-message xml kuntalupatunnus)

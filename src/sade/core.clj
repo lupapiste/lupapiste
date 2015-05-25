@@ -23,7 +23,8 @@
 
 (def not-accessible (fail :error.application-not-accessible))
 
-(defn ok? [m] (= (:ok m) true))
+(defn ok? [m] (true? (:ok m)))
+(defn fail? [m] (false? (:ok m)))
 
 (defn now [] (System/currentTimeMillis))
 

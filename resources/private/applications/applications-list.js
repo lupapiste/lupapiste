@@ -53,7 +53,7 @@
       window.location = "#!/create-part-1";
       };
     self.createWithPrevPermit = function() {
-      hub.send("track-click", {category:"Applications", label:"create", event:"createWithPrevPermit"}); 
+      hub.send("track-click", {category:"Applications", label:"create", event:"createWithPrevPermit"});
       window.location = "#!/create-page-prev-permit";
       };
 
@@ -82,22 +82,40 @@
       }
     };
 
+    function getHeaderText(inv) {
+      var address = inv.application.address;
+      var municipality = inv.application.municipality;
+      var operation = _.first(inv.application.operations).name;
+      return loc("auth") + ": " +
+             (address ? address + ", " : "") +
+             (municipality ? loc(["municipality", municipality]) + ", " : "") +
+             (operation ? loc(["operations", operation]) : "");
+    }
+
     self.invites = ko.observableArray([]);
-    self.updateInvites = function() {invites.getInvites(function(data) { self.invites(data.invites); }); };
+    self.updateInvites = function() {
+      invites.getInvites(function(data) {
+        var invs = _(data.invites).map(function(inv) {
+          return _.assign(inv, { headerText: getHeaderText(inv) });
+        }).value();
+
+        self.invites(invs);
+      });
+    };
     self.approveInvite = function(model) {
       hub.send("track-click", {category:"Applications", label:"", event:"approveInvite"});
       ajax
-        .command("approve-invite", {id: model.application})
+        .command("approve-invite", {id: model.application.id})
         .success(self.updateInvites)
         .call();
       return false;
     };
 
-    var acceptDecline = function(applicationId) {
+    var acceptDecline = function(application) {
       hub.send("track-click", {category:"Applications", label:"", event:"declineInvite"});
         return function() {
             ajax
-            .command("decline-invitation", {id: applicationId})
+            .command("decline-invitation", {id: application.id})
             .success(reload)
             .call();
             return false;

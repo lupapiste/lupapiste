@@ -1,10 +1,12 @@
 (ns lupapalvelu.authorization-api
   "API for manipulating application.auth"
-  (:require [clojure.string :refer [blank? join trim split]]
+  (:require [taoensso.timbre :refer [debug]]
+            [clojure.string :refer [blank? join trim split]]
             [swiss.arrows :refer [-<>>]]
             [monger.operators :refer :all]
             [sade.strings :as ss]
             [sade.core :refer [ok fail fail! unauthorized]]
+            [sade.util :as util]
             [lupapalvelu.action :refer [defquery defcommand defraw update-application all-application-states notify] :as action]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.notifications :as notifications]
@@ -23,9 +25,16 @@
   [{{:keys [id]} :user}]
   (let [common     {:auth {$elemMatch {:invite.user.id id}}}
         query      {$and [common {:state {$ne :canceled}}]}
-        data       (mongo/select :applications query [:auth])
-        invites    (filter #(= id (get-in % [:user :id])) (map :invite (mapcat :auth data)))]
-    (ok :invites invites)))
+        data       (mongo/select :applications query [:auth :operations :address :municipality])
+        invites    (filter #(= id (get-in % [:user :id])) (map :invite (mapcat :auth data)))
+        invites-with-application (map
+                                   #(update-in % [:application]
+                                               (fn [app-id]
+                                                 (select-keys
+                                                   (util/find-by-id app-id data)
+                                                   [:id :address :operations :municipality])))
+                                   invites)]
+    (ok :invites invites-with-application)))
 
 (defn- create-invite-email-model [command conf recipient]
   (assoc (notifications/create-app-model command conf recipient)
@@ -34,6 +43,15 @@
 
 (notifications/defemail :invite  {:recipients-fn :recipients
                                   :model-fn create-invite-email-model})
+
+(defn- create-prev-permit-invite-email-model [command conf recipient]
+  (assoc (notifications/create-app-model command conf recipient)
+    :kuntalupatunnus (get-in command [:data :kuntalupatunnus])
+    :recipient-email (:email recipient)))
+
+(notifications/defemail :invite-to-prev-permit  {:recipients-fn :recipients
+                                                 :model-fn create-prev-permit-invite-email-model
+                                                 :subject-key "invite"})
 
 (defn- valid-role [role]
   (#{:writer :foreman} (keyword role)))
@@ -51,7 +69,7 @@
                 :inviter      (user/summary inviter)}]
     (assoc (user/user-in-role invited :reader) :invite invite)))
 
-(defn send-invite! [{{:keys [email text documentName documentId path role]} :data
+(defn send-invite! [{{:keys [email text documentName documentId path role notification]} :data
                      timestamp :created
                      inviter :user
                      application :application
@@ -67,7 +85,9 @@
           {:auth {$not {$elemMatch {:invite.user.username (:email invited)}}}}
           {$push {:auth     auth}
            $set  {:modified timestamp}})
-        (notifications/notify! :invite (assoc command :recipients [invited]))
+        (if (= notification "invite-to-prev-permit")
+          (notifications/notify! :invite-to-prev-permit (assoc command :recipients [invited]))
+          (notifications/notify! :invite (assoc command :recipients [invited])))
         (ok)))))
 
 (defn- role-validator [{{role :role} :data}]
@@ -89,21 +109,21 @@
   {:parameters [id]
    :user-roles #{:applicant}
    :user-authz-roles action/default-authz-reader-roles
-   :states     (action/all-application-states-but [:closed :canceled])}
+   :states     action/all-application-states}
   [{:keys [created user application] :as command}]
   (when-let [my-invite (domain/invite application (:email user))]
-
-    (let [role (or (:role my-invite) (:role (domain/get-auth application (:id user))))]
+    (let [role (or (:role my-invite) (:role (domain/get-auth application (:id user))))
+          document-id (:documentId my-invite)]
       (update-application command
         {:auth {$elemMatch {:invite.user.id (:id user)}}}
         {$set {:modified created
-               :auth.$   (assoc (user/user-in-role user role) :inviteAccepted created)}}))
-
-    (when-not (empty? (:documentId my-invite))
-      (when-let [document (domain/get-document-by-id application (:documentId my-invite))]
-        ; Document can be undefined (invite's documentId is an empty string) in invite or removed by the time invite is approved.
-        ; It's not possible to combine Mongo writes here, because only the last $elemMatch counts.
-        (commands/do-set-user-to-document (domain/get-application-as id user) document (:id user) (:path my-invite) created)))))
+               :auth.$   (assoc (user/user-in-role user role) :inviteAccepted created)}})
+      (when-not (empty? document-id)
+        (let [application (domain/get-application-as id user :include-canceled-apps? true)]
+          ; Document can be undefined (invite's documentId is an empty string) in invite or removed by the time invite is approved.
+          ; It's not possible to combine Mongo writes here, because only the last $elemMatch counts.
+          (commands/do-set-user-to-document application document-id (:id user) (:path my-invite) created)))
+      (ok))))
 
 (defn generate-remove-invalid-user-from-docs-updates [{docs :documents :as application}]
   (-<>> docs

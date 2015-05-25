@@ -297,20 +297,28 @@
   (into m (filter #(->> % val not-empty-or-nil?) (apply hash-map kvs))))
 
 (defn finnish-y? [y]
-  (if-let [[_ number check] (re-matches #"(\d{7})-(\d)" y)]
-    (let [cn (mod (reduce + (map * [7 9 10 5 8 4 2] (map #(Long/parseLong (str %)) number))) 11)
-          cn (if (zero? cn) 0 (- 11 cn))]
-      (= (Long/parseLong check) cn))))
+  (if y
+    (if-let [[_ number check] (re-matches #"(\d{7})-(\d)" y)]
+      (let [cn (mod (reduce + (map * [7 9 10 5 8 4 2] (map #(Long/parseLong (str %)) number))) 11)
+            cn (if (zero? cn) 0 (- 11 cn))]
+        (= (Long/parseLong check) cn)))
+    false))
 
-(defn y? [y]
-  (cond
-    (nil? y) false
-    :else    (finnish-y? y)))
-
-(defn finnish-ovt? [ovt]
+(defn finnish-ovt?
+  "OVT-tunnus SFS 5748 standardin mukainen OVT-tunnus rakentuu ISO6523 -standardin
+   mukaisesta Suomen verohallinnon tunnuksesta 0037, Y-tunnuksesta
+   (8 merkki\u00e4 ilman v\u00e4liviivaa) sek\u00e4 vapaamuotoisesta 5 merkist\u00e4,
+   jolla voidaan antaa organisaation alataso tai kustannuspaikka.
+   http://www.tieke.fi/pages/viewpage.action?pageId=17104927"
+  [ovt]
   (if ovt
-    (if-let [[_ y c] (re-matches #"0037(\d{7})(\d)\d{0,5}" ovt)]
+    (if-let [[_ y c] (re-matches #"0037(\d{7})(\d)\w{0,5}" ovt)]
       (finnish-y? (str y \- c)))
+    false))
+
+(defn bic? [bic]
+  (if bic
+    (re-matches #"^[a-zA-Z]{6}[a-zA-Z\d]{2,5}$" bic)
     false))
 
 (defn account-type? [account-type]
@@ -337,6 +345,9 @@
 
 (defn rakennustunnus? [^String prt]
   (and (not (nil? prt)) (re-matches #"^\d{9}[0-9A-FHJ-NPR-Y]$" prt) (rakennustunnus-checksum-matches? prt)))
+
+(defn finnish-zip? [^String zip-code]
+  (boolean (when zip-code (re-matches #"^\d{5}$" zip-code))))
 
 ;;
 ;; Schema utils:

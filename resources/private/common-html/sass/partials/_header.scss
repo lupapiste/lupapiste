@@ -32,14 +32,17 @@ nav {
         text-decoration: none;
         display: inline-block;
         position: absolute;
-        top: 20px;
-        left: 200px;
+        top: 35px;
+        font-size: 0.9em;
+        left: 102px;
       }
     }
 
     .header-menu {
       display: inline-block;
-      float: right;
+      position: absolute;
+      right: 0px;
+      
       .header-box {
         display: inline-block;
         padding: $marginM;

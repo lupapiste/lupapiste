@@ -1,5 +1,6 @@
 (ns lupapalvelu.user-api
   (:require [taoensso.timbre :as timbre :refer [trace debug info infof warn warnf error fatal]]
+            [swiss.arrows :refer [-<>]]
             [clojure.set :as set]
             [noir.request :as request]
             [noir.response :as resp]
@@ -109,11 +110,16 @@
   (let [password         (:password user-data)
         user-role        (keyword (:role user-data))
         caller-role      (keyword (:role caller))
-        organization-id  (or (:organization user-data) (-> user-data :organizations first))
+        org-authz        (:orgAuthz user-data)
+        organization-id  (when (map? org-authz)
+                           (name (first (keys org-authz))))
         admin?           (= caller-role :admin)
         authorityAdmin?  (= caller-role :authorityAdmin)]
 
-    (when (not (#{:authority :authorityAdmin :applicant :dummy} user-role))
+    (when (and org-authz (not (every? coll? (vals org-authz))))
+      (fail! :error.invalid-role :desc "new user has unsupported organization roles"))
+
+    (when-not (#{:authority :authorityAdmin :applicant :dummy} user-role)
       (fail! :error.invalid-role :desc "new user has unsupported role" :user-role user-role))
 
     (when (and (= user-role :applicant) caller)
@@ -147,15 +153,11 @@
 
 (defn- create-new-user-entity [{:keys [enabled password] :as user-data}]
   (let [email (user/canonize-email (:email user-data))]
-    (-> user-data
-      (dissoc :organization)
+    (-<> user-data
       (select-keys [:email :username :role :firstName :lastName :personId
                     :phone :city :street :zip :enabled :orgAuthz
                     :allowDirectMarketing :architect :company])
-      (as-> user-data
-        (merge
-          {:firstName "" :lastName "" :username email}
-          user-data))
+      (merge {:firstName "" :lastName "" :username email} <>)
       (assoc
         :email email
         :enabled (= "true" (str enabled))
@@ -225,7 +227,7 @@
                       action/email-validator]
    :user-roles #{:admin :authorityAdmin}}
   [{user-data :data caller :user}]
-  (let [updated-user-data (if (:organization user-data) (assoc user-data :orgAuthz {(:organization user-data) (:role user-data)}) user-data)
+  (let [updated-user-data (if (:organization user-data) (assoc user-data :orgAuthz {(:organization user-data) [(:role user-data)]}) user-data)
         user (create-new-user caller updated-user-data :send-email false)]
     (infof "Added a new user: role=%s, email=%s, orgAuthz=%s" (:role user) (:email user) (:orgAuthz user))
     (if (user/authority? user)
@@ -255,8 +257,8 @@
 ;;
 
 (def- user-data-editable-fields [:firstName :lastName :street :city :zip :phone
-                                          :architect :degree :graduatingYear :fise
-                                          :companyName :companyId :allowDirectMarketing])
+                                 :architect :degree :graduatingYear :fise
+                                 :companyName :companyId :allowDirectMarketing])
 
 (defn- validate-update-user! [caller user-data]
   (let [admin?          (= (-> caller :role keyword) :admin)
@@ -308,9 +310,10 @@
                       action/email-validator]
    :user-roles #{:authorityAdmin}}
   [{caller :user}]
-  (let [actual-roles     (if (env/feature? :tiedonohjaus) roles ["authority"])
+  (let [new-organization (user/authority-admins-organization-id caller)
+        has-archive?     (:permanent-archive-enabled (organization/get-organization new-organization))
+        actual-roles     (if (and (env/feature? :tiedonohjaus) has-archive?) roles ["authority"])
         email            (user/canonize-email email)
-        new-organization (user/authority-admins-organization-id caller)
         query            {:email email, :role "authority"}
         update-count     (mongo/update-n :users query {$set {(str "orgAuthz." new-organization) actual-roles}})]
     (debug "update user" email)
@@ -402,7 +405,7 @@
   (let [email (user/canonize-email (:email data))]
     (user/change-password email password)
     (infof "password reset performed: email=%s" email)
-    (resp/status 200 (resp/json {:ok true}))))
+    (ok)))
 
 ;;
 ;; enable/disable:
@@ -471,9 +474,10 @@
 ;;
 
 (defcommand register-user
-  {:parameters [stamp email password street zip city phone]
+  {:parameters [stamp email password street zip city phone allowDirectMarketing rakentajafi]
    :user-roles #{:anonymous}
    :input-validators [(partial action/non-blank-parameters [:email :password :stamp :street :zip :city :phone])
+                      (partial action/boolean-parameters [:allowDirectMarketing :rakentajafi])
                       action/email-validator]}
   [{data :data}]
   (let [vetuma-data (vetuma/get-user stamp)
@@ -482,12 +486,12 @@
     (try
       (infof "Registering new user: %s - details from vetuma: %s" (dissoc data :password) vetuma-data)
       (if-let [user (create-new-user nil (merge
-                                           (dissoc data :personId)
                                            (set/rename-keys vetuma-data {:userid :personId})
+                                           (select-keys data [:password :street :zip :city :phone :allowDirectMarketing])
                                            {:email email :role "applicant" :enabled false}))]
         (do
           (vetuma/consume-user stamp)
-          (when (:rakentajafi data)
+          (when rakentajafi
             (util/future* (idf/send-user-data user "rakentaja.fi")))
           (ok :id (:id user)))
         (fail :error.create-user))

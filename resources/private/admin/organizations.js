@@ -1,13 +1,20 @@
 ;(function() {
   "use strict";
 
+  var isLoading = false;
+
   function OrganizationModel() {
     var self = this;
     self.organization = ko.observable({});
+    self.permanentArchiveEnabled = ko.observable(false);
+    self.indicator = ko.observable(false).extend({notify: "always"})
 
     self.open = function(organization) {
       // date picker needs an obervable
       self.organization(ko.mapping.fromJS(organization));
+      isLoading = true;
+      self.permanentArchiveEnabled(organization['permanent-archive-enabled']);
+      isLoading = false;
       window.location.hash = "!/organization";
       return false;
     };
@@ -44,9 +51,20 @@
         .success(function() {LUPAPISTE.ModalDialog.showDynamicOk(util.getIn(self.organization(), ["name", loc.getCurrentLanguage()]), loc("saved"));})
         .call();
       return false;
-
-
     };
+
+    self.permanentArchiveEnabled.subscribe(function(value) {
+      if (isLoading) {
+        return;
+      }
+      ajax.command("set-organization-permanent-archive-enabled", {organizationId: self.organization().id(), enabled: value})
+        .success(function() {
+          self.indicator(true);
+          self.organization()['permanent-archive-enabled'](value);
+        })
+        .call();
+    });
+
   }
 
   var organizationModel = new OrganizationModel();

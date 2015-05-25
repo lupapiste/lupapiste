@@ -10,16 +10,15 @@
       //Account type
       accountType:  ko.observable(undefined),
       // Company:
-      name:         ko.observable(undefined).extend({required: true}),
+      name:         ko.observable(undefined).extend({required: true, maxLength: 64}),
       y:            ko.observable("").extend({required: true, y: true}),
       reference:    ko.observable(""),
       address1:     ko.observable(""),
-      address2:     ko.observable(""),
       po:           ko.observable(""),
       zip:          ko.observable("").extend({number: true, maxLength: 5}),
       country:      ko.observable(""),
-      ovt:          ko.observable("").extend({required: true, ovt: true}),
-      pop:          ko.observable("").extend({required: true}),
+      ovt:          ko.observable("").extend({ovt: true}),
+      pop:          ko.observable(""),
       // Signer:
       firstName:    ko.observable("").extend({required: true}),
       lastName:     ko.observable("").extend({required: true}),
@@ -28,7 +27,7 @@
     });
 
     this.accountFieldNames = ["accountType"];
-    this.companyFieldNames = ["name", "y", "reference", "address1", "address2", "po", "zip", "country", "ovt", "pop"];
+    this.companyFieldNames = ["name", "y", "reference", "address1", "po", "zip", "country", "ovt", "pop"];
     this.signerFieldNames = ["firstName", "lastName", "email"];
 
     this.stateInfo  = 0;

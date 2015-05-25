@@ -314,7 +314,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     return span;
   }
 
-  self.makeApprovalButtons = function (path, model) {
+  self.makeApprovalButtons = function (path, model, title) {
     var btnContainer$ = $("<span>").addClass("form-buttons");
     var statusContainer$ = $("<span>");
     var approvalContainer$ = $("<span>").addClass("form-approval-status empty").append(statusContainer$).append(btnContainer$);
@@ -333,7 +333,11 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
           text += " (" + approval.user.lastName + " " + approval.user.firstName;
           text += " " + moment(approval.timestamp).format("D.M.YYYY HH:mm") + ")";
         }
-        statusContainer$.text(text);
+        if (title) {
+          statusContainer$.attr("title", text);
+        } else {
+          statusContainer$.text(text);
+        }
         statusContainer$.removeClass(function(index, css) {
           return _.filter(css.split(" "), function(c) { return _.includes(c, "approval-"); }).join(" ");
         });
@@ -660,24 +664,27 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
           locKey = e.i18nkey;
         } else if (subSchema.i18nkey) {
           locKey = subSchema.i18nkey + "." + e.name;
-
         }
-        return [e.name, loc(locKey)];
+        return {
+          name: e.name,
+          locName: loc(locKey),
+          disabled: e.disabled || false
+        };
       })
       .sortBy(function(e) {
-          if (subSchema.sortBy === "displayname") {
-            return e[1];
-          }
-          // lo-dash API doc tells that the sort is stable, so returning a static value equals to no sorting
-          return 0;
+        if (subSchema.sortBy === "displayname") {
+          return e.locName;
+        }
+        // lo-dash API doc tells that the sort is stable, so returning a static value equals to no sorting
+        return 0;
       }).value();
 
     _.forEach(options, function(e) {
-      var name = e[0];
       var option = document.createElement("option");
-      option.value = name;
-      option.appendChild(document.createTextNode(e[1]));
-      if (selectedOption === name) {
+      option.value = e.name;
+      option.appendChild(document.createTextNode(e.locName));
+      option.disabled = e.disabled;
+      if (selectedOption === e.name) {
         option.selected = "selected";
       }
       select.appendChild(option);
@@ -693,8 +700,8 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       select.appendChild(option);
     }
 
-    var locSelectedOption = _.find(options, function(o) {
-      return o[0] === sourceValue;
+    var locSelectedOption = _.find(options, function(e) {
+      return e.name === sourceValue;
     });
 
     sourceValueChanged(select, selectedOption, sourceValue, locSelectedOption ? locSelectedOption[1] : undefined);
@@ -739,7 +746,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     div.appendChild(groupHelpText);
 
     if (subSchema.approvable) {
-      label.appendChild(self.makeApprovalButtons(path, myModel));
+      label.appendChild(self.makeApprovalButtons(path, myModel, false));
     }
     div.appendChild(partsDiv);
 
@@ -761,6 +768,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var span = makeEntrySpan(subSchema, myPath);
     span.className = span.className + " radioGroup";
     partsDiv.id = pathStrToID(myPath);
+    partsDiv.className = subSchema.name + "-radioGroup";
 
     $.each(subSchema.body, function (i, o) {
       var pathForId = myPath + "." + o.name;
@@ -1017,7 +1025,6 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       id: self.appId,
       documentId: self.docId,
       documentName: self.schemaName,
-      userId: lupapisteApp.models.currentUser.id(),
       path: myNs,
       collection: self.getCollection()
     };
@@ -1043,11 +1050,17 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         var userId = target.value;
         if (!_.isEmpty(userId)) {
           ajax
-          .command("set-user-to-document", { id: self.appId, documentId: self.docId, userId: userId, path: myNs, collection: self.getCollection() })
-          .success(function () {
-            save(event, function () { repository.load(self.appId); });
-          })
-          .call();
+            .command("set-user-to-document", { id: self.appId, documentId: self.docId, userId: userId, path: myNs, collection: self.getCollection() })
+            .success(function () {
+              save(event, function () { repository.load(self.appId); });
+            })
+            .error(function(e) {
+              if (e.text !== "error.application-does-not-have-given-auth") {
+                error("Failed to set user to document", userId, self.docId, e);
+              }
+              notify.error(loc("error.dialog.title"), loc(e.text));
+            })
+            .call();
         }
         return false;
       };
@@ -1279,7 +1292,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         div.appendChild(groupHelpText);
 
         if (subSchema.approvable) {
-          div.appendChild(self.makeApprovalButtons(path, models));
+          div.appendChild(self.makeApprovalButtons(path, models, false));
         }
         div.appendChild(table);
 
@@ -1765,14 +1778,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     icon.className = "icon toggle-icon " + (accordionCollapsed ? "drill-right-white" : "drill-down-white");
     title.appendChild(icon);
 
-    if (op) {
-      title.appendChild(document.createTextNode(loc([op.name, "_group_label"])));
-      if (authorizationModel.ok("update-op-description")) {
-        title.appendChild(buildDescriptionElement(op));
-      }
-    } else {
-      title.appendChild(document.createTextNode(loc([self.schema.info.name, "_group_label"])));
-    }
+    title.className = "sticky";
     title.setAttribute("data-doc-id", self.docId);
     title.setAttribute("data-app-id", self.appId);
     title.onclick = accordion.click;
@@ -1788,7 +1794,16 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     }
 
     if (self.schema.info.approvable) {
-      elements.appendChild(self.makeApprovalButtons([], self.model));
+      title.appendChild(self.makeApprovalButtons([], self.model, true));
+    }
+
+    if (op) {
+      title.appendChild(document.createTextNode(loc([op.name, "_group_label"])));
+      if (authorizationModel.ok("update-op-description")) {
+        title.appendChild(buildDescriptionElement(op));
+      }
+    } else {
+      title.appendChild(document.createTextNode(loc([self.schema.info.name, "_group_label"])));
     }
 
     sectionContainer.className = "accordion_content" + (accordionCollapsed ? "" : " expanded");

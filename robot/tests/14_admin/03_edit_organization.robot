@@ -60,7 +60,7 @@ Admin impersonated Sipoo authority
   SolitaAdmin logs in
   Click link  Organisaatiot
   Wait until  Element Should be Visible  xpath=//table[@data-test-id="organizations-table"]
-  Click link  xpath=//a[@data-impersonate="753-R"]
+  Wait until  Click link  xpath=//a[@data-impersonate="753-R"]
   Wait Until  Element should be visible  login-as-password
   Input text  login-as-password  admin
   Click enabled by test id  submit-login-as

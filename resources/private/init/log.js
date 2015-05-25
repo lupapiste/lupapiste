@@ -36,9 +36,11 @@
 
   if (LUPAPISTE.config.mode !== "dev") {
     window.onerror = function(msg, url, line, col, error) {
-      var sourcePosition = (col === undefined) ? line : line + ":" + col;
-      var message = (error === undefined || !error.stack) ? msg : msg + " -- Stack: " + error.stack;
-      window.error(url + ":" + sourcePosition + " " + message);
+      if (url) {
+        var sourcePosition = (col === undefined) ? line : line + ":" + col;
+        var message = (error === undefined || !error.stack) ? msg : msg + " -- Stack: " + error.stack;
+        window.error(url + ":" + sourcePosition + " " + message);
+      }
       return true;
     };
   }

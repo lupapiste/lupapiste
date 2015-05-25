@@ -40,7 +40,7 @@ LUPAPISTE.ApplicationModel = function() {
   self.tasks = ko.observable([]);
   self.tosFunction = ko.observable();
   self.metadataList = ko.observableArray();
-  
+
   // Application indicator metadata fields
   self.unseenStatements = ko.observable();
   self.unseenVerdicts = ko.observable();
@@ -112,7 +112,7 @@ LUPAPISTE.ApplicationModel = function() {
   });
 
   self.foremanTasks = ko.observable();
-  
+
   self.buildings = ko.observable([]);
   self.nonpartyDocumentIndicator = ko.observable(0);
   self.partyDocumentIndicator = ko.observable(0);
@@ -140,7 +140,7 @@ LUPAPISTE.ApplicationModel = function() {
   self.updateInvites = function() {
     invites.getInvites(function(data) {
       self.invites(_.filter(data.invites, function(invite) {
-        return invite.application === self.id();
+        return invite.application.id === self.id();
       }));
     });
   };
@@ -204,6 +204,9 @@ LUPAPISTE.ApplicationModel = function() {
 
   self.roles = ko.computed(function() {
     var withRoles = function(r, i) {
+      if (i.id() === "" && i.invite) {
+        i.id(util.getIn(i, ["invite", "user", "id"]));
+      }
       var a = r[i.id()] || (i.roles = [], i);
       a.roles.push(i.role());
       r[i.id()] = a;
@@ -248,10 +251,7 @@ LUPAPISTE.ApplicationModel = function() {
 
   self.requestForComplement = function(model) {
     ajax.command("request-for-complement", { id: self.id()})
-      .success(function() {
-        notify.success("pyynt\u00F6 l\u00E4hetetty",model);
-        self.reload();
-      })
+      .success(self.reload)
       .processing(self.processing)
       .call();
     return false;
@@ -476,6 +476,33 @@ LUPAPISTE.ApplicationModel = function() {
       .call();
   };
 
+  function focusOnElement(id, retryLimit) {
+    var targetElem = document.getElementById(id);
+
+    if (!retryLimit) {
+      if (targetElem) {
+        // last chance: hope that the browser scrolls to somewhere near the focused element.
+        targetElem.focus();
+      }
+      // no more retries and no element: give up
+      return;
+    }
+
+    var offset = $(targetElem).offset();
+
+    if (!offset || offset.left === 0 || !targetElem) {
+      // Element is not yet visible, wait for a short moment.
+      // Because of the padding, offset left is never zero when
+      // the element is visible.
+      setTimeout(_.partial(focusOnElement, id, --retryLimit), 5);
+    } else {
+      var navHeight = $("nav").first().height() || 0;
+      var roomForLabel = (targetElem.nodeName === "UL") ? 0 : 30;
+      window.scrollTo(0, offset.top - navHeight - roomForLabel);
+      targetElem.focus();
+    }
+  }
+
   self.targetTab.subscribe(function(target) {
     if (target.tab === "requiredFieldSummary") {
       ajax
@@ -488,11 +515,8 @@ LUPAPISTE.ApplicationModel = function() {
     }
     window.location.hash = "!/application/" + self.id() + "/" + target.tab;
     if (target.id) {
-      // The Nayta-links in "Puuttuvat pakolliset tiedot"-list do not work properly without using
-      // the setTimeout function with 0 time here.
-      setTimeout(function() {
-        window.scrollTo(0, $("#" + target.id).offset().top - 60);
-      }, 0);
+      var maxRetries = 10; // quite arbitrary, might need to increase for slower browsers
+      focusOnElement(target.id, maxRetries);
     }
   });
 

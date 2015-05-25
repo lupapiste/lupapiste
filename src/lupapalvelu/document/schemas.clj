@@ -162,10 +162,9 @@
    {:name "003701150617"} ; Str\u00e5lfors Oy
    {:name "FIYAPSOL"} ; YAP Solutions Oy
    {:name "00885060259470028"} ; Tradeshift
-   {:name "TAPIFI22"} ; S-Pankki Oy
+   {:name "TAPIFI22"} ; S-Pankki Oy (vanha, ent L\u00e4hiTapiola)
    {:name "INEXCHANGE"} ; InExchange Factorum AB
    {:name "DNBAFIHX"} ; DNB Bank ASA
-   {:name "003703575029"} ; TeliaSonera Finland Oyj
    {:name "ITELFIHH"} ; S\u00e4\u00e4st\u00f6pankit
    {:name "003710948874"} ; OpusCapita Group Oy
    {:name "00885790000000418"} ; HighJump AS
@@ -173,12 +172,18 @@
    {:name "OKOYFIHH"} ; OP-Pohjola-ryhm\u00e4
    {:name "003701011385"} ; Tieto Oyj
    {:name "DABAFIHH"} ; Danske Bank Oyj
-   {:name "003703575029"} ; CGI
+   {:name "003703575029"} ; CGI / TeliaSonera Finland Oyj
+   {:name "AABAFI22"} ; \u00c5landsbanken Abp
+   {:name "SBANFIHH"} ; S-Pankki Oy (uusi)
    ])
 
 (def verkkolaskutustieto [{:name "ovtTunnus" :type :string :subtype :ovt :min-len 12 :max-len 17}
                           {:name "verkkolaskuTunnus" :type :string}
-                          {:name "valittajaTunnus" :type :string}])
+                          {:name "valittajaTunnus"
+                           :type :select
+                           :i18nkey "osapuoli.yritys.verkkolaskutustieto.valittajaTunnus"
+                           :size "l"
+                           :body e-invoice-operators}])
 
 (def yritys-with-verkkolaskutustieto (body
                                        yritys
@@ -650,7 +655,7 @@
                               {:name "F"}
                               {:name "G"}]}
                       {:name "energiatehokkuusluku" :type :string :size "s" :subtype :number}
-                      {:name "energiatehokkuusluvunYksikko" :type :select :sortBy :displayname
+                      {:name "energiatehokkuusluvunYksikko" :type :select, :sortBy :displayname, :default "kWh/m2"
                        :body [{:name "kWh/m2"}
                               {:name "kWh/brm2/vuosi"}]}
                       {:name "paloluokka" :type :select :sortBy :displayname
@@ -696,6 +701,37 @@
 
 (def rakennuksen-tiedot-muutos (conj rakennuksen-tiedot-ilman-huoneistoa-muutos huoneistotTable))
 
+(def alle-yli-radiogroup
+  {:name "alleYli" :type :radioGroup :body [{:name "alle"} {:name "yli"}] :default "alle" :required true})
+
+(defn etaisyys-row [name min-default]
+  {:name name
+   :type :group
+   :body [{:name "minimietaisyys" :type :string :size "s" :unit "m" :readonly true :default min-default :required true}
+          alle-yli-radiogroup
+          {:name "huomautukset" :type :string :size "l"}]})
+
+(def maalampokaivon-etaisyydet {:name "kaivo-etaisyydet"
+                                :i18nkey "kaivo-etaisyydet"
+                                :type :group
+                                :group-help "kaivo-etaisyydet.groupHelpText"
+                                :approvable true
+                                :body (body
+                                        (etaisyys-row "lampokaivo" "15")
+                                        (etaisyys-row "porakaivo" "40")
+                                        (etaisyys-row "rengaskaivo" "20")
+                                        (etaisyys-row "rakennus" "3")
+                                        (etaisyys-row "tontin-raja" "7.5")
+                                        (etaisyys-row "omat-vv-johdot" "3") ; vesi- ja viemarijohdot
+                                        (etaisyys-row "muut-vv-johdot" "5") ; vesi- ja viemarijohdot
+                                        (etaisyys-row "omat-lampojohdot" "3")
+                                        (etaisyys-row "muut-lampojohdot" "5")
+                                        (etaisyys-row "wc-jatevedet-purkupaikka" "30")
+                                        (etaisyys-row "harmaat-jatevedet-purkupaikka" "20"))})
+
+(def maalampokaivo-rakennelma (body
+                                kuvaus
+                                maalampokaivon-etaisyydet))
 
 (def rakennelma (body
                   [{:name "kokonaisala" :type :string :size "s" :unit "m2" :subtype :number}]
@@ -899,6 +935,11 @@
 
     {:info {:name "kaupunkikuvatoimenpide" :approvable true}
      :body (approvable-top-level-groups rakennelma)}
+
+    {:info {:name "maalampokaivo"
+            :approvable true
+            :i18name "maalampokaivo"}
+     :body (approvable-top-level-groups maalampokaivo-rakennelma)}
 
     {:info {:name "maisematyo" :approvable true}
      :body (approvable-top-level-groups maisematyo)}

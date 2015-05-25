@@ -129,9 +129,7 @@
         (:state application) => "submitted"))))
 
 (facts* "Application has opened when submitted from draft"
-  (let [resp (create-app pena) => ok?
-        id   (:id resp)
-        app1 (query-application pena id) => truthy
+  (let [{id :id :as app1} (create-application pena) => truthy
         resp (command pena :submit-application :id id) => ok?
         app2 (query-application pena id) => truthy]
     (:opened app1) => nil
@@ -252,7 +250,7 @@
       (get-in update-doc (into person-path [:hetu :value])) => "******-****"
       (get-in update-doc (into company-path [:yritysnimi :value])) => (if suunnittelija? "Yritys Oy" nil)
       (get-in update-doc (into company-path [:liikeJaYhteisoTunnus :value])) => (if suunnittelija? "1234567-1" nil)
-      (get-in update-doc (into experience-path [:koulutus :value])) => (if suunnittelija? "Tutkinto" nil)
+      (get-in update-doc (into experience-path [:koulutusvalinta :value])) => (if suunnittelija? "kirvesmies" nil)
       (get-in update-doc (into experience-path [:valmistumisvuosi :value])) => (if suunnittelija? "2000" nil)
       (get-in update-doc (into experience-path [:fise :value])) => (if suunnittelija? "f" nil))))
 
@@ -319,8 +317,8 @@
           (get-in updated-suunnittelija [:data :henkilotiedot :sukunimi :value]) => "Intonen"
           (get-in updated-suunnittelija [:data :yritys :yritysnimi :value]) => "Yritys Oy"
           (get-in updated-suunnittelija [:data :yritys :liikeJaYhteisoTunnus :value]) => "1234567-1"
-          (get-in updated-suunnittelija [:data :patevyys :koulutusvalinta :value]) => nil
-          (get-in updated-suunnittelija [:data :patevyys :koulutus :value]) => "Tutkinto"
+          (get-in updated-suunnittelija [:data :patevyys :koulutusvalinta :value]) => "kirvesmies"
+          (get-in updated-suunnittelija [:data :patevyys :koulutus :value]) => ""
           (get-in updated-suunnittelija [:data :patevyys :valmistumisvuosi :value]) => "2000"
           (get-in updated-suunnittelija [:data :patevyys :fise :value]) => "f"
 
@@ -355,12 +353,11 @@
           (get-in suunnittelija [:data :henkilotiedot :hetu :value]) => "210281-****")))))
 
 (facts "Set company to document"
-  (let [application   (create-and-submit-application pena :propertyId sipoo-property-id)
-        app-id        (:id application)
-        maksaja       (domain/get-document-by-name application "maksaja")
-        get-doc-value (fn [doc path-prefix path]
-                        (-> (get-in doc (into path-prefix path))
-                            tools/unwrapped))]
+  (let [{app-id :id :as app} (create-application pena :propertyId sipoo-property-id)
+        maksaja              (domain/get-document-by-name app "maksaja")
+        get-doc-value        (fn [doc path-prefix path]
+                               (-> (get-in doc (into path-prefix path))
+                                   tools/unwrapped))]
 
     (fact "initially maksaja company is empty"
       (let [check (partial get-doc-value maksaja [:data :yritys])]
@@ -369,7 +366,7 @@
                       [:verkkolaskutustieto :ovtTunnus]
                       [:verkkolaskutustieto :valittajaTunnus]
                       [:yhteyshenkilo :henkilotiedot :etunimi]]]
-          (check path) => "")))
+          (check path) => ss/blank?)))
 
     (let [resp (invite-company-and-accept-invitation pena app-id "solita")]
       (:status resp) => 200)
@@ -386,7 +383,7 @@
       (check [:verkkolaskutustieto :valittajaTunnus]) => (:pop company)
       (check [:yhteyshenkilo :henkilotiedot :etunimi :value]) => (-> (find-user-from-minimal-by-apikey pena) :firstName))))
 
-(fact* "Merging building information from KRYSP does not overwrite muutostyolaji"
+(fact* "Merging building information from KRYSP does not overwrite muutostyolaji or energiatehokkuusluvunYksikko"
   (let [application-id (create-app-id pena :propertyId sipoo-property-id :operation "kayttotark-muutos")
         app (query-application pena application-id)
         rakmuu-doc (domain/get-document-by-name app "rakennuksen-muuttaminen")
@@ -399,8 +396,17 @@
         resp3 (command pena :merge-details-from-krysp :id application-id :documentId (:id doc-before) :collection "documents" :buildingId building-id :path "buildingId" :overwrite true) => ok?
         merged-app (query-application pena application-id)
         doc-after (domain/get-document-by-name merged-app "rakennuksen-muuttaminen")]
-    (get-in doc-before [:data :muutostyolaji :value]) => "muut muutosty\u00f6t"
-    (get-in doc-after [:data :muutostyolaji :value]) => "muut muutosty\u00f6t"
+
+    (fact "muutostyolaji"
+      (get-in doc-before [:data :muutostyolaji :value]) => "muut muutosty\u00f6t"
+      (get-in doc-after [:data :muutostyolaji :value]) => "muut muutosty\u00f6t")
+
+    (facts "energiatehokkuusluvunYksikko"
+      (fact "document has default value"
+        (get-in doc-before [:data :luokitus :energiatehokkuusluvunYksikko :value]) => "kWh/m2")
+      (fact "was not altered"
+        (get-in doc-after [:data :luokitus :energiatehokkuusluvunYksikko :value]) => "kWh/m2"))
+
     (get-in doc-after [:data :rakennusnro :value]) => "001"
     (get-in doc-after [:data :manuaalinen_rakennusnro :value]) => ss/blank?
     (get-in doc-after [:data :valtakunnallinenNumero :value]) => "481123123R"

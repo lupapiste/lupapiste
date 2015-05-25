@@ -13,6 +13,7 @@ jQuery(document).ready(function() {
     "attachments-multiselect",
     "authority-select",
     "authority-select-dialog",
+    "autocomplete",
     "export-attachments",
     "neighbors-owners-dialog",
     "neighbors-edit-dialog",
@@ -20,7 +21,9 @@ jQuery(document).ready(function() {
     "company-invite",
     "company-invite-dialog",
     "submit-button-group",
-    "yes-no-dialog"
+    "yes-no-dialog",
+    "yes-no-button-group",
+    "invoice-operator-selector"
   ];
 
   _.forEach(components, function(component) {

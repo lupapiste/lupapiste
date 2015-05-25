@@ -25,56 +25,64 @@
 
         <div data-bind="visible: tabs.visible('info')">
           <div data-bind="with: info">
-
+            <div class="form-entry account-type-selector">
+              <label class="form-label" for="account-type" data-bind="ltext: 'register.company.form.accountType'"></label>
+              <select name="account-type"
+                      class="form-input combobox"
+                      data-bind="options: accountTypes,
+                                 optionsText: 'displayName',
+                                 optionsValue: 'name',
+                                 value: model().accountType,
+                                 optionsAfterRender: setAccountTypeOptionDisable,
+                                 enable: edit"></select>
+            </div>
             <div class="form-entry">
               <label class="form-label tip" data-bind="ltext: 'register.company.form.companyName'"></label>
-              <input class="form-input text" data-bind="textInput: model().name, enable: edit" type="text"/>
+              <input class="form-input text" data-bind="textInput: model().name, enable: edit" type="text" maxlength="64"/>
             </div>
             <div class="form-entry">
               <label class="form-label tip" data-bind="ltext: 'register.company.form.companyY'"></label>
-              <input class="form-input text" data-bind="value: model().y, enable: false" type="text"/>
+              <input class="form-input text" data-bind="value: model().y, enable: false" type="text" maxlength="9"/>
             </div>
 
             <h2 data-bind="ltext: 'register.company.form.billing'"></h2>
 
             <div class="form-entry">
               <label class="form-label" data-bind="ltext: 'register.company.form.billing.reference'"></label>
-              <input class="form-input text" data-bind="textInput: model().reference, enable: edit" type="text"/>
+              <input class="form-input text" data-bind="textInput: model().reference, enable: edit" type="text" maxlength="64"/>
             </div>
 
             <div class="form-entry">
               <label class="form-label" data-bind="ltext: 'register.company.form.billing.address'"></label>
-              <input class="form-input text" data-bind="textInput: model().address1, enable: edit" type="text"/>
-              <input class="form-input text" data-bind="textInput: model().address2, enable: edit" type="text"/>
+              <input class="form-input text" data-bind="textInput: model().address1, enable: edit" type="text" maxlength="64"/>
             </div>
 
             <br/>
 
             <div class="form-entry">
-              <label class="form-label" data-bind="ltext: 'register.company.form.billing.po'"></label>
-              <input class="form-input text" data-bind="textInput: model().po, enable: edit" type="text"/>
+              <label class="form-label" data-bind="ltext: 'register.company.form.billing.zip'"></label>
+              <input class="form-input text" data-bind="textInput: model().zip, enable: edit" type="text" maxlength="5"/>
             </div>
 
             <div class="form-entry">
-              <label class="form-label" data-bind="ltext: 'register.company.form.billing.zip'"></label>
-              <input class="form-input text" data-bind="textInput: model().zip, enable: edit" type="text"/>
+              <label class="form-label" data-bind="ltext: 'register.company.form.billing.po'"></label>
+              <input class="form-input text" data-bind="textInput: model().po, enable: edit" type="text" maxlength="64"/>
             </div>
 
             <div class="form-entry">
               <label class="form-label" data-bind="ltext: 'register.company.form.billing.country'"></label>
-              <input class="form-input text" data-bind="textInput: model().country, enable: edit" type="text"/>
+              <input class="form-input text" data-bind="textInput: model().country, enable: edit" type="text" maxlength="64"/>
             </div>
 
             <br/>
 
             <div class="form-entry">
               <label class="form-label" data-bind="ltext: 'register.company.form.billing.ovt'"></label>
-              <input class="form-input text" data-bind="textInput: model().ovt, enable: edit" type="text"/>
+              <input class="form-input text" data-bind="textInput: model().ovt, enable: edit" type="text" maxlength="17"/>
             </div>
 
             <div class="form-entry">
-              <label class="form-label" data-bind="ltext: 'register.company.form.billing.pop'"></label>
-              <input class="form-input text" data-bind="textInput: model().pop, enable: edit" type="text"/>
+              <span data-bind="component: {name: 'invoice-operator-selector', params: {selected: model().pop, enabled: edit}}"></span>
             </div>
 
             <div>
@@ -94,7 +102,7 @@
         <!-- =================== -->
 
         <div data-bind="visible: tabs.visible('users')">
-          <table data-bind="visible: !pending()" class="table table-striped">
+          <table data-bind="visible: !pending()" class="table table-striped" data-test-id="company-users-table">
             <thead>
               <tr>
                 <th data-bind="ltext: 'company.user.firstName'"></th>
@@ -119,12 +127,12 @@
                 </td>
             </tbody>
             <tbody data-bind="foreach: users">
-              <tr>
+              <tr data-bind="attr: {'data-test-id': 'company-user-' + email}">
                 <td data-bind="text: firstName"></td>
                 <td data-bind="text: lastName"></td>
                 <td data-bind="text: email"></td>
                 <td data-bind="ltext: 'company.user.enabled.' + enabled()"></td>
-                <td data-bind="ltext: 'company.user.role.' + role()"></td>
+                <td data-bind="ltext: 'company.user.role.' + role()" data-test-id="company-user-role"></td>
                 <td data-bind="visible: $parent.isAdmin">
                   <div data-bind="visible: opsEnabled">
                     <a data-bind="click: toggleEnable, ltext: 'company.user.op.enabled.' + enabled()" href="#"></a>

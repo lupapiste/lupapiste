@@ -1,23 +1,25 @@
 (ns lupapalvelu.tiedonohjaus
   (:require [sade.http :as http]
             [sade.env :as env]
-            [clojure.core.memoize :as memo]))
+            [clojure.core.memoize :as memo]
+            [lupapalvelu.organization :as o]))
 
 (defn- build-url [& path-parts]
   (apply str (env/value :toj :host) path-parts))
 
-(defn- get-tos-functions-from-toj [organization]
-  (if (env/feature? :tiedonohjaus)
-    (try
-      (let [url (build-url "/tiedonohjaus/api/org/" organization "/asiat")
-            response (http/get url {:as :json
-                                    :throw-exceptions false})]
-        (if (= 200 (:status response))
-          (:body response)
+(defn- get-tos-functions-from-toj [organization-id]
+  (let [has-archive? (:permanent-archive-enabled (o/get-organization organization-id))]
+    (if (and (env/feature? :tiedonohjaus) has-archive?)
+      (try
+        (let [url (build-url "/tiedonohjaus/api/org/" organization-id "/asiat")
+              response (http/get url {:as :json
+                                      :throw-exceptions false})]
+          (if (= 200 (:status response))
+            (:body response)
+            []))
+        (catch Exception _
           []))
-      (catch Exception _
-        []))
-    []))
+      [])))
 
 (def available-tos-functions
   (memo/ttl get-tos-functions-from-toj

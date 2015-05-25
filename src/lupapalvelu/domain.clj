@@ -67,7 +67,7 @@
         (update-in [:tasks] (partial only-authority-sees user relates-to-draft))
         (filter-notice-from-application user)))))
 
-(defn get-application-as [query-or-id user & include-canceled-apps?]
+(defn get-application-as [query-or-id user & {:keys [include-canceled-apps?] :or {include-canceled-apps? false}}]
   {:pre [query-or-id (map? user)]}
   (let [query-id-part (if (map? query-or-id) query-or-id {:_id query-or-id})
         query-user-part (if include-canceled-apps?
@@ -94,8 +94,11 @@
 (defn has-auth? [{auth :auth} user-id]
   (or (some (partial = user-id) (map :id auth)) false))
 
-(defn get-auth [{auth :auth} user-id]
-  (some #(when (= (:id %) user-id) %) auth))
+(defn get-auths [{auth :auth} user-id]
+  (filter #(= (:id %) user-id) auth))
+
+(defn get-auth [application user-id]
+  (first (get-auths application user-id)))
 
 (defn has-auth-role? [{auth :auth} user-id role]
   (has-auth? {:auth (get-auths-by-role {:auth auth} role)} user-id))

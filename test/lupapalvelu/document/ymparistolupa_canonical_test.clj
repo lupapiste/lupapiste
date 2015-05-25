@@ -178,7 +178,7 @@
       (let [Verkkolaskutus (get-in yritysmaksaja [:verkkolaskutustieto :Verkkolaskutus]) => truthy]
         (doseq [[k v] {:ovtTunnus "003712345671"
                        :verkkolaskuTunnus "verkkolaskuTunnus"
-                       :valittajaTunnus "valittajatunnus"}]
+                       :valittajaTunnus "BAWCFI22"}]
           (k Verkkolaskutus) => v))
 
       (let [Osoite (get-in yritysmaksaja [:osoitetieto :Osoite]) => truthy
