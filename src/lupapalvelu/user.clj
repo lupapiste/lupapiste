@@ -19,6 +19,13 @@
 
 (def User {:firstName                             (util/max-length-string 255)
            :lastName                              (util/max-length-string 255)
+           :role                                  (sc/enum :applicant
+                                                           :authority
+                                                           :oirAuthority
+                                                           :authorityAdmin
+                                                           :admin
+                                                           :dummy
+                                                           :rest-api)
            (sc/optional-key :street)              (util/max-length-string 255)
            (sc/optional-key :city)                (util/max-length-string 255)
            (sc/optional-key :zip)                 (sc/either (sc/pred util/finnish-zip? "Not a valid zip code")
