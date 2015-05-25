@@ -10,7 +10,27 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.security :as security]))
+            [lupapalvelu.security :as security]
+            [schema.core :as sc]))
+
+;;
+;; User schema, used in mypage
+;;
+
+(def User {:firstName                             (util/max-length-string 255)
+           :lastName                              (util/max-length-string 255)
+           (sc/optional-key :street)              (util/max-length-string 255)
+           (sc/optional-key :city)                (util/max-length-string 255)
+           (sc/optional-key :zip)                 (sc/either (sc/pred util/finnish-zip? "Not a valid zip code")
+                                                  (sc/pred ss/blank?))
+           (sc/optional-key :phone)               (util/max-length-string 255)
+           (sc/optional-key :architect)           sc/Bool
+           (sc/optional-key :degree)              (util/max-length-string 255)
+           (sc/optional-key :graduatingYear)      (sc/both (util/min-length-string 4) (util/max-length-string 4))
+           (sc/optional-key :fise)                (util/max-length-string 255)
+           (sc/optional-key :companyName)         (util/max-length-string 255)
+           (sc/optional-key :companyId)           (sc/pred util/finnish-y? "Not valid Y code")
+           (sc/optional-key :allowDirectMarketing) sc/Bool})
 
 ;;
 ;; ==============================================================================
