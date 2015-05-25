@@ -277,7 +277,9 @@
   [{caller :user user-data :data :as command}]
   (let [email     (user/canonize-email (or (:email user-data) (:email caller)))
         user-data (assoc user-data :email email)]
-    (and (sc/validate user/User (select-keys user-data user-data-editable-fields))
+    (and (sc/validate user/User (-> user-data
+                                  (assoc :role (keyword (:role caller)))
+                                  (assoc :username email)))
          (validate-update-user! caller user-data))
     (if (= 1 (mongo/update-n :users {:email email} {$set (select-keys user-data user-data-editable-fields)}))
       (if (= email (:email caller))
