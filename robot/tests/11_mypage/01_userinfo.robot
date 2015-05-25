@@ -42,7 +42,7 @@ Name and experience should have changed in Swedish page too
 Mika changes the name and experience back
   Change Textfield Value  firstName  Mika  Mikko
   Change Textfield Value  lastName  Intola  Intonen
-  Select From List  xpath=//select[@data-test-id='architect-degree-select']  timmerman
+  Select From List  xpath=//select[@data-test-id='architect-degree-select']  Timmerman
   Change Textfield Value  architect.graduatingYear  2001  2000
   Change Textfield Value  architect.fise  fise  f
   Save User Data
