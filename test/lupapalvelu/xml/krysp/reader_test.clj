@@ -12,7 +12,7 @@
 (defn- to-timestamp [yyyy-mm-dd]
   (coerce/to-long (coerce/from-string yyyy-mm-dd)))
 
-(testable-privates lupapalvelu.xml.krysp.reader ->standard-verdicts ->simple-verdicts pysyva-rakennustunnus)
+(testable-privates lupapalvelu.xml.krysp.reader ->standard-verdicts standard-verdicts-validator simple-verdicts-validator ->simple-verdicts pysyva-rakennustunnus)
 
 (fact "property-equals returns url-encoded data"
   (property-equals "_a_" "_b_") => "%3CPropertyIsEqualTo%3E%3CPropertyName%3E_a_%3C%2FPropertyName%3E%3CLiteral%3E_b_%3C%2FLiteral%3E%3C%2FPropertyIsEqualTo%3E")
@@ -31,6 +31,9 @@
       cases (->verdicts xml ->standard-verdicts)]
 
     (fact "xml is parsed" cases => truthy)
+
+    (fact "validator finds verdicts" (standard-verdicts-validator xml) => nil)
+
     (fact "xml has 2 cases" (count cases) => 2)
     (fact "second case has 2 verdicts" (-> cases last :paatokset count) => 2)
 
@@ -162,6 +165,9 @@
         cases (->verdicts xml ->standard-verdicts)]
 
     (fact "xml is parsed" cases => truthy)
+
+    (fact "validator finds verdicts" (standard-verdicts-validator xml) => nil)
+
     (fact "xml has one case" (count cases) => 1)
     (fact "case has 1 verdict" (-> cases last :paatokset count) => 1)
 
@@ -192,7 +198,8 @@
   (let [xml (xml/parse (slurp "dev-resources/krysp/notfound.xml"))
         cases (->verdicts xml ->standard-verdicts)]
     (fact "xml is parsed" cases => truthy)
-    (fact "xml has no cases" (count cases) => 0)))
+    (fact "xml has no cases" (count cases) => 0)
+    (fact "validator does not find verdicts" (standard-verdicts-validator xml) => {:ok false, :text "info.no-verdicts-found-from-backend"})))
 
 (facts "nil xml"
   (let [cases (->verdicts nil ->standard-verdicts)]
@@ -205,6 +212,7 @@
     (fact "xml is parsed" cases => truthy)
     (fact "xml has 1 case" (count cases) => 1)
     (fact "kuntalupatunnus" (:kuntalupatunnus (last cases)) => "13-0185-R")
+    (fact "validator does not find verdicts" (standard-verdicts-validator xml) => {:ok false, :text "info.no-verdicts-found-from-backend"})
     (fact "case has no verdicts" (-> cases last :paatokset count) => 0)))
 
 (facts "KRYSP yhteiset 2.1.0"
@@ -285,6 +293,8 @@
     (fact "xml has 1 cases" (count cases) => 1)
     (fact "has 1 verdicts" (-> cases last :paatokset count) => 1)
 
+    (fact "validator finds verdicts" (simple-verdicts-validator xml) => nil)
+
     (fact "kuntalupatunnus" (:kuntalupatunnus (last cases)) => "523")
 
     (let [verdict (first (:paatokset (last cases)))
@@ -320,6 +330,8 @@
       (fact "xml is parsed" cases => truthy)
       (fact "xml has 1 cases" (count cases) => 1)
       (fact "has 1 verdicts" (-> cases last :paatokset count) => 1)
+
+      (fact "validator finds verdicts" (simple-verdicts-validator xml) => nil)
 
       (fact "kuntalupatunnus"
         (:kuntalupatunnus (last cases)) => #(.startsWith % "638-2014-"))

@@ -11,7 +11,7 @@
             [sade.common-reader :as cr]
             [sade.strings :as ss]
             [sade.coordinate :as coordinate]
-            [sade.core :refer [now def-]]
+            [sade.core :refer [now def- fail]]
             [sade.property :as p]
             [lupapalvelu.document.schemas :as schema]
             [lupapalvelu.document.tools :as tools]
@@ -369,27 +369,55 @@
     (#(assoc % :status (verdict/verdict-id (:paatoskoodi %))))
     (#(update-in % [:liite] ->liite))))
 
+(defn- poytakirja-with-paatos-data [poytakirjat]
+  (some #(when (and (:paatoskoodi %) (:paatoksentekija %) (:paatospvm %)) %) poytakirjat))
+
+(defn- standard-verdicts-validator [xml]
+  (let [poytakirjat (map ->paatospoytakirja (select (cr/strip-xml-namespaces xml) [:paatostieto :Paatos :poytakirja]))
+        poytakirja (poytakirja-with-paatos-data poytakirjat)
+        paatospvm  (:paatospvm poytakirja)]
+    (cond
+      (not (seq poytakirjat)) (fail :info.no-verdicts-found-from-backend)
+      (not (seq poytakirja))  (fail :info.paatos-details-missing)
+      (< (now) paatospvm)     (fail :info.paatos-future-date))))
+
 (defn- ->standard-verdicts [xml-without-ns]
   (map (fn [paatos-xml-without-ns]
          (let [poytakirjat (map ->paatospoytakirja (select paatos-xml-without-ns [:poytakirja]))
-               poytakirja-with-paatos-data (some #(when (and (:paatoskoodi %) (:paatoksentekija %) (:paatospvm %)) %) poytakirjat)]
-           (when (and poytakirja-with-paatos-data (> (now) (:paatospvm poytakirja-with-paatos-data)))
+               poytakirja (poytakirja-with-paatos-data poytakirjat) ]
+           (when (and poytakirja (> (now) (:paatospvm poytakirja)))
              {:lupamaaraykset (->lupamaaraukset paatos-xml-without-ns)
               :paivamaarat    (get-pvm-dates paatos-xml-without-ns
                                 [:aloitettava :lainvoimainen :voimassaHetki :raukeamis :anto :viimeinenValitus :julkipano])
               :poytakirjat    (seq poytakirjat)})))
     (select xml-without-ns [:paatostieto :Paatos])))
 
-(defn- ->simple-verdicts [xml-without-ns]
-  ;; using the newest app state in the message
-  (let [app-state (->> (select xml-without-ns [:Kasittelytieto])
+(defn- application-state [xml-without-ns]
+  (->> (select xml-without-ns [:Kasittelytieto])
                     (map (fn [kasittelytieto] (-> (cr/all-of kasittelytieto) (cr/convert-keys-to-timestamps [:muutosHetki]))))
                     (filter :hakemuksenTila) ;; this because hakemuksenTila is optional in Krysp, and can be nil
                     (sort-by :muutosHetki)
                     last
                     :hakemuksenTila
-                    ss/lower-case)]
-    (when-not (#{nil "luonnos" "hakemus" "valmistelussa" "vastaanotettu" "tarkastettu, t\u00e4ydennyspyynt\u00f6"} app-state)
+    ss/lower-case))
+
+(def backend-preverdict-state
+  #{nil "luonnos" "hakemus" "valmistelussa" "vastaanotettu" "tarkastettu, t\u00e4ydennyspyynt\u00f6"})
+
+(defn- simple-verdicts-validator [xml]
+  (let [xml-without-ns (cr/strip-xml-namespaces xml)
+        app-state (application-state xml-without-ns)
+        paivamaarat (map (comp cr/to-timestamp get-text) (select xml-without-ns [:paatostieto :Paatos :paatosdokumentinPvm]))
+        max-date    (when (seq paivamaarat) (apply max paivamaarat))]
+    (cond
+      (backend-preverdict-state app-state) (fail :info.application-backend-preverdict-state)
+      (nil? max-date)    (fail :info.paatos-date-missing)
+      (< (now) max-date) (fail :info.paatos-future-date))))
+
+(defn- ->simple-verdicts [xml-without-ns]
+  ;; using the newest app state in the message
+  (let [app-state (application-state xml-without-ns)]
+    (when-not (backend-preverdict-state app-state)
       (map (fn [paatos-xml-without-ns]
              (let [paatosdokumentinPvm-timestamp (cr/to-timestamp (get-text paatos-xml-without-ns :paatosdokumentinPvm))]
                (when (and paatosdokumentinPvm-timestamp (> (now) paatosdokumentinPvm-timestamp))

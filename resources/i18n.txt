@@ -1,0 +1,4 @@
+info.paatos-details-missing: Päätöksen hakeminen epäonnistui: päätöksen koodi, tekijä tai päivämäärä puuttuu taustajärjestelmässä.
+info.paatos-future-date: Päätöksen hakeminen epäonnistui: päätöksen päivämäärä on tulevaisuudessa.
+info.paatos-date-missing: Päätöksen hakeminen epäonnistui: päätöksen päivämäärä puuttuu taustajärjestelmässä.
+info.application-backend-preverdict-state: Hakemukselle ei ole annettu päätöstä taustajärjestelmässä
