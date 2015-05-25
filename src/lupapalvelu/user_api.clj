@@ -7,6 +7,7 @@
             [noir.core :refer [defpage]]
             [slingshot.slingshot :refer [throw+]]
             [monger.operators :refer :all]
+            [schema.core :as sc]
             [sade.util :refer [future*]]
             [sade.env :as env]
             [sade.strings :as ss]
@@ -276,7 +277,8 @@
   [{caller :user user-data :data :as command}]
   (let [email     (user/canonize-email (or (:email user-data) (:email caller)))
         user-data (assoc user-data :email email)]
-    (validate-update-user! caller user-data)
+    (and (sc/validate user/User (select-keys user-data user-data-editable-fields))
+         (validate-update-user! caller user-data))
     (if (= 1 (mongo/update-n :users {:email email} {$set (select-keys user-data user-data-editable-fields)}))
       (if (= email (:email caller))
         (ssess/merge-to-session command (ok) {:user (user/session-summary (user/get-user-by-id (:id caller)))})
