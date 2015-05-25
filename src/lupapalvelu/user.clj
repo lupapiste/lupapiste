@@ -25,7 +25,10 @@
                                                            :authorityAdmin
                                                            :admin
                                                            :dummy
-                                                           :rest-api)
+                                                           :rest-api
+                                                           :trusted-etl)
+           :email                                 (sc/pred util/valid-email? "Not valid email")
+           :username                              (sc/pred util/valid-email? "Not valid email")
            (sc/optional-key :street)              (util/max-length-string 255)
            (sc/optional-key :city)                (util/max-length-string 255)
            (sc/optional-key :zip)                 (sc/either (sc/pred util/finnish-zip? "Not a valid zip code")
