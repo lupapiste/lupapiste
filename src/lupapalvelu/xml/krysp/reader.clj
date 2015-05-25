@@ -435,6 +435,13 @@
 (permit/register-function permit/MAL :verdict-krysp-reader ->simple-verdicts)
 (permit/register-function permit/VVVL :verdict-krysp-reader ->simple-verdicts)
 
+(permit/register-function permit/R :verdict-krysp-validator standard-verdicts-validator)
+(permit/register-function permit/P :verdict-krysp-validator standard-verdicts-validator)
+(permit/register-function permit/YA :verdict-krysp-validator simple-verdicts-validator)
+(permit/register-function permit/YL :verdict-krysp-validator simple-verdicts-validator)
+(permit/register-function permit/MAL :verdict-krysp-validator simple-verdicts-validator)
+(permit/register-function permit/VVVL :verdict-krysp-validator simple-verdicts-validator)
+
 (defn- ->lp-tunnus [asia]
   (or (get-text asia [:luvanTunnisteTiedot :LupaTunnus :muuTunnustieto :tunnus])
       (get-text asia [:luvanTunnistetiedot :LupaTunnus :muuTunnustieto :tunnus])))
