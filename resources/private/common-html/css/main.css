@@ -2570,7 +2570,7 @@ table.attachments-template-table td.attachment-version-info {
 /* line 29, ../sass/partials/_modal.scss */
 #modal-dialog .dialog .component .button-group {
   position: absolute;
-  bottom: 24px;
+  bottom: 12px;
   right: 12px;
   left: 12px;
 }
@@ -2579,29 +2579,39 @@ table.attachments-template-table td.attachment-version-info {
   float: right;
   margin-right: 12px;
 }
-/* line 40, ../sass/partials/_modal.scss */
+/* line 39, ../sass/partials/_modal.scss */
+#modal-dialog .dialog .component .button-group.ok {
+  text-align: center;
+}
+/* line 41, ../sass/partials/_modal.scss */
+#modal-dialog .dialog .component .button-group.ok .btn-dialog {
+  position: relative;
+}
+/* line 46, ../sass/partials/_modal.scss */
 #modal-dialog .dialog .header {
   padding-top: 2px;
   padding-bottom: 4px;
   padding-left: 24px;
   border-bottom: 1px solid;
   font-size: 20px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-/* line 46, ../sass/partials/_modal.scss */
+/* line 54, ../sass/partials/_modal.scss */
 #modal-dialog .dialog .header .title {
   line-height: 24px;
 }
-/* line 49, ../sass/partials/_modal.scss */
+/* line 57, ../sass/partials/_modal.scss */
 #modal-dialog .dialog .header .close {
   position: absolute;
   right: 12px;
   cursor: pointer;
 }
-/* line 53, ../sass/partials/_modal.scss */
+/* line 61, ../sass/partials/_modal.scss */
 #modal-dialog .dialog .header .close:after {
   content: "X";
 }
-/* line 59, ../sass/partials/_modal.scss */
+/* line 67, ../sass/partials/_modal.scss */
 #modal-dialog .mask {
   position: fixed;
   display: block;
@@ -2616,7 +2626,7 @@ table.attachments-template-table td.attachment-version-info {
 }
 
 /* Z-index of .mask must lower than .window */
-/* line 74, ../sass/partials/_modal.scss */
+/* line 82, ../sass/partials/_modal.scss */
 .mask {
   position: absolute;
   z-index: 9000;
@@ -2624,16 +2634,16 @@ table.attachments-template-table td.attachment-version-info {
   top: 0;
   left: 0;
 }
-/* line 80, ../sass/partials/_modal.scss */
+/* line 88, ../sass/partials/_modal.scss */
 .mask.black {
   background-color: #000;
 }
-/* line 83, ../sass/partials/_modal.scss */
+/* line 91, ../sass/partials/_modal.scss */
 .mask.white {
   background-color: #fff;
 }
 
-/* line 88, ../sass/partials/_modal.scss */
+/* line 96, ../sass/partials/_modal.scss */
 .window {
   position: fixed;
   display: none;
@@ -2642,12 +2652,12 @@ table.attachments-template-table td.attachment-version-info {
   background: white;
   overflow: hidden;
 }
-/* line 95, ../sass/partials/_modal.scss */
+/* line 103, ../sass/partials/_modal.scss */
 .window.rounded {
   border-radius: 6px;
 }
 
-/* line 100, ../sass/partials/_modal.scss */
+/* line 108, ../sass/partials/_modal.scss */
 .autosized {
   min-width: 22.5em;
   min-height: 144px;
@@ -2655,14 +2665,14 @@ table.attachments-template-table td.attachment-version-info {
   width: auto;
 }
 
-/* line 107, ../sass/partials/_modal.scss */
+/* line 115, ../sass/partials/_modal.scss */
 .autosized-yes-no {
   min-height: 144px;
   height: auto;
   width: 35em;
 }
 
-/* line 112, ../sass/partials/_modal.scss */
+/* line 120, ../sass/partials/_modal.scss */
 .autosized-ok {
   min-height: 120px;
   height: auto;
@@ -2670,18 +2680,18 @@ table.attachments-template-table td.attachment-version-info {
 }
 
 /* Customize your modal window here, you can add background image too */
-/* line 119, ../sass/partials/_modal.scss */
+/* line 127, ../sass/partials/_modal.scss */
 .dialog-header {
   padding: 2px 24px;
   border-bottom: 1px solid;
 }
-/* line 122, ../sass/partials/_modal.scss */
+/* line 130, ../sass/partials/_modal.scss */
 .dialog-header p {
   margin: 0px;
   font-size: 20px;
   display: inline;
 }
-/* line 127, ../sass/partials/_modal.scss */
+/* line 135, ../sass/partials/_modal.scss */
 .dialog-header .dialog-close {
   position: absolute;
   right: 14px;
@@ -2689,7 +2699,7 @@ table.attachments-template-table td.attachment-version-info {
   cursor: pointer;
 }
 
-/* line 135, ../sass/partials/_modal.scss */
+/* line 143, ../sass/partials/_modal.scss */
 .dialog-content {
   /* somewhat less than .autosized - .dialog-header */
   min-height: 96px;
@@ -2697,41 +2707,41 @@ table.attachments-template-table td.attachment-version-info {
   margin: 12px 0;
   padding-bottom: 64px;
 }
-/* line 142, ../sass/partials/_modal.scss */
+/* line 150, ../sass/partials/_modal.scss */
 .dialog-content .dialog-desc {
   width: 300px;
 }
-/* line 146, ../sass/partials/_modal.scss */
+/* line 154, ../sass/partials/_modal.scss */
 .dialog-content .dialog-desc-wide {
   width: 450px;
 }
-/* line 150, ../sass/partials/_modal.scss */
+/* line 158, ../sass/partials/_modal.scss */
 .dialog-content [type=submit], .dialog-content .btn, .dialog-content button {
   padding: 4px 24px;
   min-width: 10em;
   max-width: 16.25em;
 }
-/* line 157, ../sass/partials/_modal.scss */
+/* line 165, ../sass/partials/_modal.scss */
 .dialog-content .file-upload {
   margin: 12px 0;
 }
-/* line 161, ../sass/partials/_modal.scss */
+/* line 169, ../sass/partials/_modal.scss */
 .dialog-content .dialog-user-content {
   padding: 12px 0;
 }
 
-/* line 167, ../sass/partials/_modal.scss */
+/* line 175, ../sass/partials/_modal.scss */
 .dialog-content p {
   margin-bottom: 0;
 }
-/* line 171, ../sass/partials/_modal.scss */
+/* line 179, ../sass/partials/_modal.scss */
 .dialog-content div.finished {
   background: #fff;
   display: block;
   text-align: left;
   z-index: 5000;
 }
-/* line 178, ../sass/partials/_modal.scss */
+/* line 186, ../sass/partials/_modal.scss */
 .dialog-content div.pending {
   background: #fff;
   display: block;
@@ -2743,79 +2753,79 @@ table.attachments-template-table td.attachment-version-info {
   text-align: center;
   z-index: 5000;
 }
-/* line 188, ../sass/partials/_modal.scss */
+/* line 196, ../sass/partials/_modal.scss */
 .dialog-content div.pending div.ajax {
   background: url(/img/ajax-loader.gif) no-repeat center center;
   margin: auto;
   height: 160px;
 }
 
-/* line 196, ../sass/partials/_modal.scss */
+/* line 204, ../sass/partials/_modal.scss */
 .scrolling-content {
   overflow-y: scroll;
   max-height: 288px;
 }
 
-/* line 201, ../sass/partials/_modal.scss */
+/* line 209, ../sass/partials/_modal.scss */
 .dialog-content-low {
   min-height: 72px;
   padding-bottom: 0;
 }
 
-/* line 206, ../sass/partials/_modal.scss */
+/* line 214, ../sass/partials/_modal.scss */
 .with-map {
   display: table-row;
 }
-/* line 209, ../sass/partials/_modal.scss */
+/* line 217, ../sass/partials/_modal.scss */
 .with-map .map-container {
   padding: 0;
 }
-/* line 213, ../sass/partials/_modal.scss */
+/* line 221, ../sass/partials/_modal.scss */
 .with-map .btn-primary {
   left: auto;
   right: 260px;
   bottom: 5px;
 }
-/* line 217, ../sass/partials/_modal.scss */
+/* line 225, ../sass/partials/_modal.scss */
 .with-map a.btn-dialog {
   right: -70px;
   bottom: 10px;
   width: 100px;
 }
 
-/* line 224, ../sass/partials/_modal.scss */
+/* line 232, ../sass/partials/_modal.scss */
 .with-map > div {
   display: table-cell;
   vertical-align: top;
   padding-left: 12px;
 }
 
-/* line 230, ../sass/partials/_modal.scss */
+/* line 238, ../sass/partials/_modal.scss */
 .neighbors-message {
   margin: 12px;
 }
 
-/* line 235, ../sass/partials/_modal.scss */
+/* line 243, ../sass/partials/_modal.scss */
 #dialog-add-link-permit .combobox {
   margin-bottom: 8px;
 }
 
-/* line 241, ../sass/partials/_modal.scss */
+/* line 249, ../sass/partials/_modal.scss */
 #upload-dialog .dialog-content {
   padding-bottom: 0;
 }
 
-/* line 247, ../sass/partials/_modal.scss */
+/* line 255, ../sass/partials/_modal.scss */
 #dialog-cancel-application div.application-cancel-text-content p {
   margin-bottom: 0;
 }
 
-/* line 253, ../sass/partials/_modal.scss */
+/* line 261, ../sass/partials/_modal.scss */
 .authority-select-dialog select {
   width: 100%;
 }
 
-/* line 259, ../sass/partials/_modal.scss */
+/* line 267, ../sass/partials/_modal.scss */
 .company-invite-dialog select {
   width: 100%;
 }
@@ -3530,6 +3540,49 @@ ul.attachments-list li.mandatory-attachments {
     height: auto;
   }
 }
+/* line 1, ../sass/partials/_user_notification.scss */
+.user-notification {
+  color: white;
+  min-height: 50px;
+  background-color: #4f4f4f;
+  position: relative;
+  background: rgba(79, 79, 79, 0.9);
+  background: #4f4f4f \9;
+  /* IE 8 and below */
+  border: 1px solid #363636;
+  box-sizing: border-box;
+}
+/* line 11, ../sass/partials/_user_notification.scss */
+.user-notification .header {
+  padding: 2px 24px;
+}
+/* line 14, ../sass/partials/_user_notification.scss */
+.user-notification .header .title {
+  font-size: 20px;
+}
+/* line 18, ../sass/partials/_user_notification.scss */
+.user-notification .header .close {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  font-size: 1.8em;
+  cursor: pointer;
+}
+/* line 24, ../sass/partials/_user_notification.scss */
+.user-notification .header .close:after {
+  content: "X";
+}
+/* line 29, ../sass/partials/_user_notification.scss */
+.user-notification p.message {
+  padding: 2px 24px;
+  color: white;
+  margin-bottom: 12px;
+}
+/* line 34, ../sass/partials/_user_notification.scss */
+.user-notification a {
+  color: white;
+}
+
 /* VIEWS
 ------------------------------------------------------------------------------*/
 @media (max-width: 47.5em) {
@@ -6398,50 +6451,50 @@ div.attachment-multiselect-content tr.attachment-group-header {
 /*
   Lupapalvelu CSS:
 */
-/* line 141, ../sass/main.scss */
+/* line 142, ../sass/main.scss */
 .ltext-error {
   color: #ffd280 !important;
   font-weight: bold !important;
   text-shadow: 0px 1px 0 black !important;
 }
 
-/* line 147, ../sass/main.scss */
+/* line 148, ../sass/main.scss */
 .visible {
   display: block;
 }
 
-/* line 151, ../sass/main.scss */
+/* line 152, ../sass/main.scss */
 .hidden {
   display: none !important;
 }
 
-/* line 155, ../sass/main.scss */
+/* line 156, ../sass/main.scss */
 .inline {
   display: inline;
 }
 
-/* line 159, ../sass/main.scss */
+/* line 160, ../sass/main.scss */
 .template {
   display: none;
 }
 
-/* line 163, ../sass/main.scss */
+/* line 164, ../sass/main.scss */
 #main-nav-bar {
   display: none;
 }
 
-/* line 167, ../sass/main.scss */
+/* line 168, ../sass/main.scss */
 .inert-table tbody tr:hover td,
 .inert-table tbody tr:hover th {
   background-color: #ffffff;
 }
 
-/* line 172, ../sass/main.scss */
+/* line 173, ../sass/main.scss */
 #application table input {
   margin: 0px;
 }
 
-/* line 176, ../sass/main.scss */
+/* line 177, ../sass/main.scss */
 .droparea {
   width: 150px;
   height: 100px;
@@ -6453,27 +6506,27 @@ div.attachment-multiselect-content tr.attachment-group-header {
   display: table-cell;
 }
 
-/* line 187, ../sass/main.scss */
+/* line 188, ../sass/main.scss */
 .droparea-hover {
   border-color: #101010;
   color: #101010;
 }
 
 /* basic styles*/
-/* line 195, ../sass/main.scss */
+/* line 196, ../sass/main.scss */
 .table {
   font-size: 16px;
   line-height: 24px;
 }
 
 /* map zoomer fix */
-/* line 201, ../sass/main.scss */
+/* line 202, ../sass/main.scss */
 div.pzbDiv {
   right: 8px;
   top: 10px;
 }
 
-/* line 206, ../sass/main.scss */
+/* line 207, ../sass/main.scss */
 .dev-debug {
   z-index: 666;
   width: 146px;
@@ -6487,47 +6540,47 @@ div.pzbDiv {
   font-size: 0.8em;
   color: #333;
 }
-/* line 219, ../sass/main.scss */
+/* line 220, ../sass/main.scss */
 .dev-debug p {
   margin-bottom: 4px;
 }
-/* line 221, ../sass/main.scss */
+/* line 222, ../sass/main.scss */
 .dev-debug p a {
   display: block;
 }
 
-/* line 227, ../sass/main.scss */
+/* line 228, ../sass/main.scss */
 #ui-datepicker-div {
   display: none;
 }
 
 /* find address and poi list: */
-/* line 232, ../sass/main.scss */
+/* line 233, ../sass/main.scss */
 .create-find {
   font-size: 12px;
 }
-/* line 234, ../sass/main.scss */
+/* line 235, ../sass/main.scss */
 .create-find .type {
   color: #555;
   font-style: italic;
 }
-/* line 237, ../sass/main.scss */
+/* line 238, ../sass/main.scss */
 .create-find .type:before {
   content: " (";
 }
-/* line 238, ../sass/main.scss */
+/* line 239, ../sass/main.scss */
 .create-find .type:after {
   content: ")";
 }
-/* line 241, ../sass/main.scss */
+/* line 242, ../sass/main.scss */
 .create-find .number:before {
   content: " ";
 }
-/* line 243, ../sass/main.scss */
+/* line 244, ../sass/main.scss */
 .create-find .municipality {
   color: #555;
 }
-/* line 245, ../sass/main.scss */
+/* line 246, ../sass/main.scss */
 .create-find .municipality:before {
   content: ", ";
 }
