@@ -85,7 +85,8 @@ var repository = (function() {
       }
 
       function setOperation(application, doc) {
-        console.log("setOperation", application, doc);
+        // TODO: set primary operation on client until primaryOperation is separated in the backend
+        application.primaryOperation = _.first(application.operations);
         var schemaInfo = doc["schema-info"];
         if (schemaInfo.op) {
           var op = _.findWhere(application.operations, {id: schemaInfo.op.id});
