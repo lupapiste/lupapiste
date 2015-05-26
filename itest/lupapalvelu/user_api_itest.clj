@@ -113,6 +113,12 @@
   (fact (command sipoo :remove-user-organization :email "foo@example.com") => ok?)
   (fact (->> (query admin :user-by-email :email "foo@example.com") :user :orgAuthz keys (map name)) => ["529-R"]))
 
+(fact update-user-roles
+  (apply-remote-minimal)
+  (fact (-> (query admin :user-by-email :email "sonja.sibbo@sipoo.fi") :user :orgAuthz :753-R) => ["authority"])
+  (fact (command sipoo :update-user-roles :email "sonja.sibbo@sipoo.fi" :roles ["authority" "tos-editor"] :organization "753-R") => ok?)
+  (fact (-> (query admin :user-by-email :email "sonja.sibbo@sipoo.fi") :user :orgAuthz :753-R) => ["authority" "tos-editor"]))
+
 (fact "changing user info"
   (apply-remote-minimal)
   (fact (query teppo :user) => (every-checker ok? (contains
