@@ -29,7 +29,7 @@
         (validator-fn app-xml))
       (let [updates (verdict/find-verdicts-from-xml command app-xml)]
         (update-application command updates)
-        {:verdicts (get-in updates [$set :verdicts]) :tasks (get-in updates [$set :tasks])}))))
+        (ok :verdicts (get-in updates [$set :verdicts]) :tasks (get-in updates [$set :tasks]))))))
 
 (notifications/defemail :application-verdict
   {:subject-key    "verdict"
