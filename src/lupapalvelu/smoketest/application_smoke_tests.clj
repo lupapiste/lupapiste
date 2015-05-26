@@ -142,6 +142,16 @@
       {:ok false :results results}
       {:ok true})))
 
+#_(defmonster disabled-dummy-users-no-password
+   (let [results (seq (remove nil? (map
+                                     #(when (and (= "dummy" (:role %))
+                                                 (not (:enabled %)))
+                                        (when (-> % :private :password)
+                                          %)) @users)))]
+     (if (seq results)
+       {:ok false :results results}
+       {:ok true})))
+
 
 ;; task source is set
 
