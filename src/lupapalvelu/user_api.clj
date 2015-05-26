@@ -182,7 +182,9 @@
         {old-id :id old-role :role}  old-user
         notification {:titleI18nkey "user.notification.firstLogin.title"
                       :messageI18nkey "user.notification.firstLogin.message"}
-        new-user   (assoc new-user :notification notification)]
+        new-user   (if (= (keyword (:role user-data)) :applicant)
+                     (assoc new-user :notification notification)
+                     new-user)]
     (try
       (condp = old-role
         nil     (do
