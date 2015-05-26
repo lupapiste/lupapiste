@@ -53,6 +53,7 @@ Federated user activates account via VETUMA
 Federated user lands to empty applications page
   [Tags]  integration  ie8
   User should be logged in  Sylvi Sofie Marttila
+  Confirm notification dialog
   Applications page should be open
   Number of visible applications  0
 

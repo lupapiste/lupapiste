@@ -1,2 +1,1 @@
-company-invite-confirm.desc: Lähetämme nyt valitsemasi yrityksen {0} pääkäyttäjälle viestin, että olet valtuuttanut yrityksen edustajien pääsyn hankkeellesi. Kun pääkäyttäjä vahvistaa viestin, on valtuutus valmis.
 register.company.accountselect.help: Jos sinulla on jo käyttäjätili, kirjaudu palveluun ja perusta yrityksen tili omat tiedot-sivulta. Jos sinulla ei ole käyttäjätiliä, rekisteröidy ja luo yritystili TÄSTÄ.
