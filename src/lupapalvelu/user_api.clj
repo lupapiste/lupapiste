@@ -337,6 +337,19 @@
       (ok :operation "remove")
       (fail :error.user-not-found))))
 
+(defcommand update-user-roles
+  {:parameters [email roles organization]
+   :input-validators [(partial action/non-blank-parameters [:email :organization])
+                      (partial action/vector-parameters-with-at-least-n-non-blank-items 1 [:roles])
+                      action/email-validator]
+   :user-roles #{:authorityAdmin}}
+  (let [email            (user/canonize-email email)
+        query            {:email email}
+        update-count     (mongo/update-n :users {:email email} {$set {(str "orgAuthz." organization) roles}})]
+    (if (= 1 update-count)
+      (ok)
+      (fail :error.user-not-found))))
+
 (defmethod token/handle-token :authority-invitation [{{:keys [email organization caller-email]} :data} {password :password}]
   (infof "invitation for new authority: email=%s: processing..." email)
   (let [caller (user/get-user-by-email caller-email)]
