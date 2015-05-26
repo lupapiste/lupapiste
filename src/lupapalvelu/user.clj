@@ -32,7 +32,6 @@
            :username                              sc/Str
            :enabled                               sc/Bool
            (sc/optional-key :private)             (sc/both
-                                                    (sc/pred util/not-empty-or-nil? "Not empty private")
                                                     {(sc/optional-key :password) sc/Str
                                                     (sc/optional-key :apikey) sc/Str})
            (sc/optional-key :orgAuthz)            sc/Any
