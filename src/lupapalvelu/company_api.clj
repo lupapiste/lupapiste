@@ -99,7 +99,7 @@
   {:user-roles #{:applicant}
    :parameters [firstName lastName email]
    :pre-checks [validate-user-is-admin-or-company-admin user-limit-not-exceeded]}
-  [{user :user {:keys [admin]} :params}]
+  [{user :user, {:keys [admin]} :data}]
   (c/add-user! {:firstName firstName :lastName lastName :email email}
                (c/find-company-by-id (-> user :company :id))
                (if admin :admin :user))

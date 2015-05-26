@@ -789,8 +789,8 @@ Fill in new password
   Input text  xpath=//section[@id='${section}']//input[@placeholder='Salasana uudelleen']  ${password}
   Wait Until  Element Should Be Enabled  xpath=//section[@id='${section}']//button
   Click Element  xpath=//section[@id='${section}']//button
-  Go to login page
-
+  Wait Until  Page should contain  Salasana asetettu.
+  Confirm  dynamic-ok-confirm-dialog
 
 #
 # Mock Ajax calls: jquery.mockjax

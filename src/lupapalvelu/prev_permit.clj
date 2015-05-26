@@ -1,10 +1,10 @@
 (ns lupapalvelu.prev-permit
-  (:require [taoensso.timbre :refer [info]]
+  (:require [taoensso.timbre :refer [debug info]]
             [sade.core :refer :all]
             [sade.strings :as ss]
             [lupapalvelu.application :as application]
             [lupapalvelu.action :as action]
-            [lupapalvelu.verdict-api :as verdict-api]
+            [lupapalvelu.verdict :as verdict]
             [lupapalvelu.user :as user]
             [lupapalvelu.authorization-api :as authorization]
             [lupapalvelu.i18n :as i18n]
@@ -43,8 +43,7 @@
                                                    :documentName nil
                                                    :documentId   nil
                                                    :path         nil
-                                                   :role         "writer"})
-                 :disable-notifications (env/feature? :disable-prev-permit-notifications))
+                                                   :role         "writer"}))
                (info "Prev permit application creation, invited " applicant-email " to created app " (get-in command [:data :id]))
 
                ;; Set applicants' user info to Hakija documents
@@ -100,11 +99,13 @@
         ;                              :state (some #(when (= (-> app-info :viimeisin-tila :tila) (val %)) (first %)) lupapalvelu.document.canonical-common/application-state-to-krysp-state))
 
         ;; attaches the new application, and its id to path [:data :id], into the command
-        command (merge command (action/application->command created-application))]
+        command (util/deep-merge command (action/application->command created-application))]
 
     ;; The application has to be inserted first, because it is assumed to be in the database when checking for verdicts (and their attachments).
     (application/insert-application created-application)
-    (verdict-api/find-verdicts-from-xml command xml)  ;; Get verdicts for the application
+     ;; Get verdicts for the application
+    (let [updates (verdict/find-verdicts-from-xml command xml)]
+      (action/update-application command updates))
     (invite-applicants command hakijat)
     (:id created-application)))
 

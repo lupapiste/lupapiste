@@ -25,10 +25,12 @@ LUPAPISTE.AutocompleteModel = function(params) {
   };
 
   self.selectItem = function(item) {
-    self.value(item);
-    self.selected(item.label);
-    self.inputSelected(false);
-    self.showResult(false);
+    if (item) {
+      self.value(item);
+      self.selected(item.label);
+      self.inputSelected(false);
+      self.showResult(false);
+    }
   };
 
   self.navigate = function(data, event) {

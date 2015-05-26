@@ -1012,6 +1012,23 @@
   (let [cur-vals (mc/distinct :applications "documents.data.yritys.verkkolaskutustieto.valittajaTunnus.value")]
     (remove (fn [val] (some #(= val %) (map :name lupapalvelu.document.schemas/e-invoice-operators))) cur-vals)))
 
+
+(defmigration tutkinto-mapping-in-own-info
+  (let [target-keys-set (conj (set (map :name (:body lupapalvelu.document.schemas/koulutusvalinta))) "other")
+        mapping (er/read-map "tutkinto-mapping.xlsx")]
+    (doseq [user (mongo/select :users {"degree" {$exists true}} {:degree 1})]
+      (when-let [koulutus (:degree user)]
+        (let [normalized (-> koulutus ss/trim ss/lower-case)]
+          (when-not (or (ss/blank? normalized) (target-keys-set normalized))
+            (let [mapped (get mapping normalized "")]
+              (debugf "%s/%s: Mapping '%s' to %s" :users (:id user) koulutus mapped)
+              (mongo/update-by-id :users (:id user) {$set {:degree mapped}}))))))))
+
+(comment
+  (let [cur-vals (mc/distinct :users "degree")]
+    (remove (fn [val] (some #(= val %) (map :name (:body lupapalvelu.document.schemas/koulutusvalinta)))) cur-vals)))
+
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"

@@ -670,8 +670,11 @@
                  :postinumero          {:value ""}
                  :postitoimipaikannimi {:value "city"}}
         :patevyys {:fise {:value ""}
-                   :koulutus {:value ""}
+                   :koulutusvalinta {:value ""}
                    :valmistumisvuosi {:value ""}}
+        :patevyys-tyonjohtaja {:fise {:value ""}
+                               :koulutusvalinta {:value ""}
+                               :valmistumisvuosi {:value ""}}
         :yritys   {:liikeJaYhteisoTunnus {:value ""}
                    :yritysnimi {:value ""}}} )
 

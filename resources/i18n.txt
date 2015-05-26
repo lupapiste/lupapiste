@@ -1,3 +1,5 @@
 user.notification.firstLogin.title:  Ensimmäinen kirjautuminen
 user.notification.firstLogin.message:  Ensimmäisen kirjautumisen yhteydessä on hyvä tarkistaa omat tiedot ja ammattilaisena lisätä haluamasi liitetiedostot <a href="#!/mypage">Omat tiedot-sivulla</a>.
 
+company-invite-confirm.desc: Lähetämme nyt valitsemasi yrityksen {0} pääkäyttäjälle viestin, että olet valtuuttanut yrityksen edustajien pääsyn hankkeellesi. Kun pääkäyttäjä vahvistaa viestin, on valtuutus valmis.
+
