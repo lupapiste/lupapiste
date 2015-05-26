@@ -2,3 +2,4 @@ users.op.editUser: Muokkaa
 auth-admin.edit-roles.title: Muokkaa rooleja
 error.user-not-found: Käyttäjää ei löytynyt
 auth-admin.edit-roles.greeting: Valitse käyttäjän {0} roolit
+register.company.accountselect.help: Jos sinulla on jo käyttäjätili, kirjaudu palveluun ja perusta yrityksen tili omat tiedot-sivulta. Jos sinulla ei ole käyttäjätiliä, rekisteröidy ja luo yritystili TÄSTÄ.

@@ -179,7 +179,12 @@
                       (assoc user-entry :id (:id old-user))
                       (assoc user-entry :id (mongo/create-id)))
         email       (:email new-user)
-        {old-id :id old-role :role}  old-user]
+        {old-id :id old-role :role}  old-user
+        notification {:titleI18nkey "user.notification.firstLogin.title"
+                      :messageI18nkey "user.notification.firstLogin.message"}
+        new-user   (if (= (keyword (:role user-data)) :applicant)
+                     (assoc new-user :notification notification)
+                     new-user)]
     (try
       (condp = old-role
         nil     (do
@@ -646,3 +651,8 @@
     (if user
       (ok)
       (fail :email-not-in-use))))
+
+(defcommand remove-user-notification
+  {:user-roles #{:applicant}}
+  [{user :user}]
+  (mongo/update :users {:email (user/canonize-email (:email user))} {$unset {:notification 1}}))

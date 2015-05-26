@@ -4,7 +4,7 @@
             [sade.strings :as ss]
             [lupapalvelu.application :as application]
             [lupapalvelu.action :as action]
-            [lupapalvelu.verdict-api :as verdict-api]
+            [lupapalvelu.verdict :as verdict]
             [lupapalvelu.user :as user]
             [lupapalvelu.authorization-api :as authorization]
             [lupapalvelu.i18n :as i18n]
@@ -103,7 +103,9 @@
 
     ;; The application has to be inserted first, because it is assumed to be in the database when checking for verdicts (and their attachments).
     (application/insert-application created-application)
-    (verdict-api/find-verdicts-from-xml command xml)  ;; Get verdicts for the application
+     ;; Get verdicts for the application
+    (let [updates (verdict/find-verdicts-from-xml command xml)]
+      (action/update-application command updates))
     (invite-applicants command hakijat)
     (:id created-application)))
 

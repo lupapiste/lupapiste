@@ -4,7 +4,7 @@ Sait tämän sähköpostin, koska olet hakenut rakentamisen lupaa Helsingin rake
 
 Lupapiste on sähköinen asiointipalvelu, jossa voit hakea rakentamiseen liittyviä lupia silloin kun sinulle sopii. Helsingin kaupunki on avannut palvelun helmikuussa, ja palvelun käyttö laajenee asteittain vuoden 2015 aikana.
 
-Työnjohtajien nimeäminen tehdään tästä hetkestä eteenpäin sähköisesti Lupapisteessä. Työnjohtajan nimeämiset tehdään saatuun rakennuslupaan. Hakemasi rakennuslupa {{kuntalupatunnus}} on nyt avattu Lupapisteeseen. Pääset siihen seuraavasta linkistä:
+Työnjohtajien nimeäminen tehdään tästä hetkestä eteenpäin sähköisesti Lupapisteessä. Työnjohtajan nimeämiset tehdään saatuun rakennuslupaan. Saamasi rakennuslupa {{kuntalupatunnus}} on nyt avattu Lupapisteeseen. Pääset siihen seuraavasta linkistä:
 
 {{link-fi}}
 
@@ -12,15 +12,16 @@ Ellet ole aikaisemmin käyttänyt Lupapistettä {{recipient-email}} sähköposti
 
 Ohjeet työnjohtajan nimeämiseen löytyvät täältä: https://www.lupapiste.fi/ohjeet/luvanhakijoille/tyonjohtajan-nimeaminen
 
-Jos olet aikaisemin ilmoittaunut työnjohtajat lupaasi liittyen, nämä eivät näy Lupapisteessä. Jo tehtyjä työnjohtajien ilmoituksia tai hakemuksia ei tarvitse tehdä uudelleen.
+Jos olet aikaisemmin ilmoittanut työnjohtajat lupaasi liittyen, nämä eivät näy Lupapisteessä. Jo tehtyjä työnjohtajien ilmoituksia tai hakemuksia ei tarvitse tehdä uudelleen.
 
 ## Helsingin rakennusvalvontaviraston tiedote asiaan liittyen:
 
-25.5.2015 alkaen työnjohtajat tekevät ilmoituksen ja hakemuksen Helsingissä ainoastaan Lupapiste-palvelun kautta. Aiempi sähköinen palvelu ei ole enää käytössä.
+Työnjohtajat tekevät ilmoituksen ja hakemuksen Helsingissä Lupapiste-palvelun kautta 25.5.2015 alkaen. Aiempi sähköinen hakupalvelu ei ole enää käytössä.
 
-Lupapiste-palveluun on avattu automaattisesti korkeintaan kaksi vuotta vanhat, "paperilla haetut" rakennusluvat. Sitä vanhemmat luvat voidaan avata pyytämällä avausta Helsingin rakennusvalvontavirastolta.
+Lupapiste-palveluun on avattu automaattisesti korkeintaan kaksi vuotta vanhojen, "paperilla haettujen" rakennuslupapäätösten tiedot. Sitä vanhemmat luvat voidaan avata, kun pyydät avausta Helsingin rakennusvalvontavirastolta.
 
 Työnjohtajan pitää saada kutsu rakennusluvalle hankkeeseen ryhtyvältä. Kutsu tulee työnjohtajan sähköpostiin.
+
 
 ---
 
@@ -44,8 +45,9 @@ Ifall du redan tidigare anmält arbetsledare gällande ditt byggnadslov, syns de
 
 Från och med 25.5.2015 gör arbetsledarna i Helsingfors anmälan och ansökan endast via tjänsten Lupapiste.fi.
 
-Två år gamla bygglov, som ”sökts på papper”, kopieras automatiskt till tjänsten Lupapiste.fi. Äldre lov hämtas vid behov, ett i taget.
+Två år gamla bygglovbeslut, som "sökts på papper", kopieras automatiskt till tjänsten Lupapiste.fi. Äldre beslut hämtas vid behov, ett i taget.
 
 Arbetsledaren måste få en inbjudan till bygglovet av den som påbörjar byggprojektet. Inbjudan skickas till arbetsledarens e-post.
+
 
 
