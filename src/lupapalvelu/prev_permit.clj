@@ -10,6 +10,7 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.commands :as commands]
+            [lupapalvelu.permit :as permit]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
             [sade.util :as util]
             [lupapalvelu.operations :as operations]
@@ -81,7 +82,7 @@
 
                  (commands/set-subject-to-document application document user-info (name applicant-type) created))))))))
 
-(defn do-create-application-from-previous-permit [command operation xml app-info location-info]
+(defn- do-create-application-from-previous-permit [command operation xml app-info location-info]
   (let [{:keys [rakennusvalvontaasianKuvaus vahainenPoikkeaminen hakijat]} app-info
         manual-schema-datas {"hankkeen-kuvaus" (remove empty? (conj []
                                                                     (when-not (ss/blank? rakennusvalvontaasianKuvaus)
@@ -104,7 +105,7 @@
     ;; The application has to be inserted first, because it is assumed to be in the database when checking for verdicts (and their attachments).
     (application/insert-application created-application)
      ;; Get verdicts for the application
-    (let [updates (verdict/find-verdicts-from-xml command xml)]
+    (when-let [updates (verdict/find-verdicts-from-xml command xml)]
       (action/update-application command updates))
     (invite-applicants command hakijat)
     (:id created-application)))
@@ -114,26 +115,34 @@
     (not (ss/blank? address)) (not (ss/blank? propertyId))
     (-> x util/->double pos?) (-> y util/->double pos?)))
 
-(defn fetch-prev-application! [{{:keys [x y address propertyId organizationId kuntalupatunnus]} :data user :user :as command}]
+(defn- get-location-info [{data :data :as command} app-info]
+  (when app-info
+    (let [rakennuspaikka-exists? (and (:rakennuspaikka app-info)
+                                   (every? (-> app-info :rakennuspaikka keys set) [:x :y :address :propertyId]))
+          location-info          (cond
+                                   rakennuspaikka-exists?                          (:rakennuspaikka app-info)
+                                   (enough-location-info-from-parameters? command) (select-keys data [:x :y :address :propertyId]))]
+
+      (when (and (nil? location-info) (not rakennuspaikka-exists?))
+        (info "Prev permit application creation, rakennuspaikkatieto information incomplete:\n " (:rakennuspaikka app-info) "\n"))
+
+      location-info)))
+
+(defn fetch-prev-application! [{{:keys [organizationId kuntalupatunnus]} :data user :user :as command}]
   (let [operation         :aiemmalla-luvalla-hakeminen
         permit-type       (operations/permit-type-of-operation operation)
         dummy-application {:id kuntalupatunnus :permitType permit-type :organization organizationId}
-        xml               (krysp-fetch-api/get-application-xml dummy-application :kuntalupatunnus)]
-    (when-not xml (fail! :error.no-previous-permit-found-from-backend)) ;; Show error if could not receive the verdict message xml for the given kuntalupatunnus
+        xml               (krysp-fetch-api/get-application-xml dummy-application :kuntalupatunnus)
+        validator-fn      (permit/get-verdict-validator permit-type)
+        validation-result (validator-fn xml)
+        app-info          (krysp-reader/get-app-info-from-message xml kuntalupatunnus)
+        location-info     (get-location-info command app-info)
+        organizations-match?   (when (seq app-info)
+                                 (= organizationId (:id (organization/resolve-organization (:municipality app-info) permit-type))))]
 
-    (let [app-info               (krysp-reader/get-app-info-from-message xml kuntalupatunnus)
-          rakennuspaikka-exists? (and (:rakennuspaikka app-info)
-                                      (every? (-> app-info :rakennuspaikka keys set) [:x :y :address :propertyId]))
-          location-info          (cond
-                                   rakennuspaikka-exists?                          (:rakennuspaikka app-info)
-                                   (enough-location-info-from-parameters? command) {:x x :y y :address address :propertyId propertyId})
-          organizations-match?   (when (seq app-info)
-                                   (= organizationId (:id (organization/resolve-organization (:municipality app-info) permit-type))))]
-      (cond
-        (empty? app-info)            (fail! :error.no-previous-permit-found-from-backend)
-        (not organizations-match?)   (fail! :error.previous-permit-found-from-backend-is-of-different-organization)
-        (not location-info)          (do
-                                       (when-not rakennuspaikka-exists?
-                                         (info "Prev permit application creation, rakennuspaikkatieto information incomplete:\n " (:rakennuspaikka app-info) "\n"))
-                                       (fail! :error.more-prev-app-info-needed :needMorePrevPermitInfo true))
-        :else                        (ok :id (do-create-application-from-previous-permit command operation xml app-info location-info))))))
+    (cond
+      validation-result            validation-result
+      (empty? app-info)            (fail :error.no-previous-permit-found-from-backend)
+      (not organizations-match?)   (fail :error.previous-permit-found-from-backend-is-of-different-organization)
+      (not location-info)          (fail :error.more-prev-app-info-needed :needMorePrevPermitInfo true)
+      :else                        (ok :id (do-create-application-from-previous-permit command operation xml app-info location-info)))))

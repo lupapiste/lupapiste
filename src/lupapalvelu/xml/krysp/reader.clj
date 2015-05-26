@@ -406,11 +406,13 @@
 
 (defn- simple-verdicts-validator [xml]
   (let [xml-without-ns (cr/strip-xml-namespaces xml)
-        app-state (application-state xml-without-ns)
-        paivamaarat (filter number? (map (comp cr/to-timestamp get-text) (select xml-without-ns [:paatostieto :Paatos :paatosdokumentinPvm])))
-        max-date    (when (seq paivamaarat) (apply max paivamaarat))]
+        app-state      (application-state xml-without-ns)
+        paivamaarat    (filter number? (map (comp cr/to-timestamp get-text) (select xml-without-ns [:paatostieto :Paatos :paatosdokumentinPvm])))
+        max-date       (when (seq paivamaarat) (apply max paivamaarat))
+        pre-verdict?   (contains? backend-preverdict-state app-state)]
     (cond
-      (contains? backend-preverdict-state app-state) (fail :info.application-backend-preverdict-state)
+      (nil? xml)         (fail :info.no-verdicts-found-from-backend)
+      pre-verdict?       (fail :info.application-backend-preverdict-state)
       (nil? max-date)    (fail :info.paatos-date-missing)
       (< (now) max-date) (fail :info.paatos-future-date))))
 

@@ -5,11 +5,12 @@
             [sade.http :as http]
             [sade.strings :as ss]
             [sade.util :as util]
-            [sade.core :refer [ok fail fail!]]
+            [sade.core :refer [ok fail fail! ok?]]
             [lupapalvelu.action :refer [defquery defcommand update-application notify boolean-parameters] :as action]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.permit :as permit]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.verdict :as verdict]
             [lupapalvelu.user :as user]
@@ -20,12 +21,15 @@
 ;; KRYSP verdicts
 ;;
 
-(defn do-check-for-verdict [command]
+(defn do-check-for-verdict [{application :application :as command}]
   {:pre [(every? command [:application :user :created])]}
-  (when-let [app-xml (krysp-fetch-api/get-application-xml (:application command) :application-id)]
-    (let [updates (verdict/find-verdicts-from-xml command app-xml)]
-      (update-application command updates)
-      {:verdicts (get-in updates [$set :verdicts]) :tasks (get-in updates [$set :tasks])})))
+  (when-let [app-xml (krysp-fetch-api/get-application-xml application :application-id)]
+    (or
+      (let [validator-fn (permit/get-verdict-validator (permit/permit-type application))]
+        (validator-fn app-xml))
+      (let [updates (verdict/find-verdicts-from-xml command app-xml)]
+        (update-application command updates)
+        {:verdicts (get-in updates [$set :verdicts]) :tasks (get-in updates [$set :tasks])}))))
 
 (notifications/defemail :application-verdict
   {:subject-key    "verdict"
@@ -41,10 +45,11 @@
    :notified   true
    :on-success (notify :application-verdict)}
   [command]
-  (if-let [result (do-check-for-verdict command)]
-    (ok :verdictCount (count (:verdicts result)) :taskCount (count (:tasks result)))
-    (fail :info.no-verdicts-found-from-backend)))
-
+  (let [result (do-check-for-verdict command)]
+    (cond
+      (nil? result) (fail :info.no-verdicts-found-from-backend)
+      (ok? result) (ok :verdictCount (count (:verdicts result)) :taskCount (count (:tasks result)))
+      :else result)))
 
 ;;
 ;; Manual verdicts
