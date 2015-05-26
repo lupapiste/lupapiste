@@ -106,7 +106,7 @@
       display: none;
     }
   }
-  
+
 }
 
 .register-progress {
@@ -147,7 +147,7 @@
     .phase-title {
       font-weight: bold;
       font-size: 1.4em;
-      margin-top: $marginM; 
+      margin-top: $marginM;
       text-align: center;
       position: absolute;
       left:0;
@@ -179,7 +179,7 @@
       .phase-number {
         background-color: $lp-purple;
         color: white;
-      } 
+      }
     }
   }
 }
@@ -214,7 +214,7 @@
       border-bottom: 15px solid transparent;
     }
     &:disabled {
-      background-color: lighten($lp-purple, 10%);
+      background-color: $lp-light-grey;
       color: $color-dark-bg;
       &:after {
         border-left: 30px solid $color-dark-bg;
