@@ -259,9 +259,11 @@
                         "select/select-model.js"
                         "string/string-model.js"
                         "modal-dialog/modal-dialog-model.js"
+                        "modal-dialog/button-group/ok-button-group-model.js"
                         "modal-dialog/button-group/submit-button-group-model.js"
                         "modal-dialog/button-group/yes-no-button-group-model.js"
                         "modal-dialog/dialog/yes-no-dialog-model.js"
+                        "modal-dialog/dialog/ok-dialog-model.js"
                         "attachments-multiselect/attachments-multiselect-model.js"
                         "authority-select/authority-select-model.js"
                         "authority-select/authority-select-dialog-model.js"
@@ -272,7 +274,8 @@
                         "company-invite/company-invite-model.js"
                         "company-invite/company-invite-dialog-model.js"
                         "autocomplete/autocomplete-model.js"
-                        "invoice-operator-selector/invoice-operator-selector-model.js"]
+                        "invoice-operator-selector/invoice-operator-selector-model.js"
+                        "user-notification/user-notification-model.js"]
                    :html ["fill-info/fill-info-template.html"
                           "foreman-history/foreman-history-template.html"
                           "foreman-other-applications/foreman-other-applications-template.html"
@@ -281,9 +284,11 @@
                           "select/select-template.html"
                           "checkbox/checkbox-template.html"
                           "modal-dialog/modal-dialog-template.html"
+                          "modal-dialog/button-group/ok-button-group-template.html"
                           "modal-dialog/button-group/submit-button-group-template.html"
                           "modal-dialog/button-group/yes-no-button-group-template.html"
                           "modal-dialog/dialog/yes-no-dialog-template.html"
+                          "modal-dialog/dialog/ok-dialog-template.html"
                           "attachments-multiselect/attachments-multiselect-template.html"
                           "authority-select/authority-select-template.html"
                           "authority-select/authority-select-dialog-template.html"
@@ -294,7 +299,8 @@
                           "company-invite/company-invite-template.html"
                           "company-invite/company-invite-dialog-template.html"
                           "autocomplete/autocomplete-template.html"
-                          "invoice-operator-selector/invoice-operator-selector-template.html"]}
+                          "invoice-operator-selector/invoice-operator-selector-template.html"
+                          "user-notification/user-notification-template.html"]}
 
    ;; Single Page Apps and standalone components:
    ;; (compare to auth-methods in web.clj)
