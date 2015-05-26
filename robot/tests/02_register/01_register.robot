@@ -92,6 +92,7 @@ Vetuma-guy activates his account
 Vetuma-guy lands to empty applications page automaticly
   [Tags]  integration  ie8
   User should be logged in  Nordea Demo
+  Confirm notification dialog
   Applications page should be open
   Number of visible applications  0
 

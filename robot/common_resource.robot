@@ -551,6 +551,15 @@ Submit application
   Confirm  dynamic-yes-no-confirm-dialog
   Wait until  Application state should be  submitted
 
+Notification dialog should be open
+  Wait until  Element should be visible  xpath=//div[@id="modal-dialog"]//button[@data-test-id="ok-button"]
+
+Confirm notification dialog
+  Wait until  Element should be visible  xpath=//div[@id="modal-dialog"]//button[@data-test-id="ok-button"]
+  Focus  xpath=//div[@id="modal-dialog"]//button[@data-test-id="ok-button"]
+  Click Element  xpath=//div[@id="modal-dialog"]//button[@data-test-id="ok-button"]
+  Wait Until  Element Should Not Be Visible  xpath=//div[@id="modal-dialog"]//button[@data-test-id="ok-button"]
+
 #
 # Jump to application or inforequest:
 #
