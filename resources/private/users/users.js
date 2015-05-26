@@ -116,7 +116,7 @@ var users = (function($) {
       if (!op || !email) {
         return false;
       }
-      if (typeof(op.rowOperationFn) !== "undefined") {
+      if (op.rowOperationFn) {
         op.rowOperationFn(self.dataTable.fnGetData(target.closest("tr")[0]));
       } else {
         LUPAPISTE.ModalDialog.showDynamicYesNo(
