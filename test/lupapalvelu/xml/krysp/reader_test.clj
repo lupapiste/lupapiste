@@ -4,7 +4,7 @@
             [lupapalvelu.factlet :refer [fact* facts*]]
             [clj-time.coerce :as coerce]
             [sade.xml :as xml]
-            [lupapalvelu.xml.krysp.reader :refer :all]
+            [lupapalvelu.xml.krysp.reader :refer [property-equals ->verdicts ->buildings-summary ->rakennuksen-tiedot ->buildings  wfs-krysp-url rakval-case-type get-app-info-from-message]]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]))
@@ -12,13 +12,60 @@
 (defn- to-timestamp [yyyy-mm-dd]
   (coerce/to-long (coerce/from-string yyyy-mm-dd)))
 
-(testable-privates lupapalvelu.xml.krysp.reader ->standard-verdicts ->simple-verdicts pysyva-rakennustunnus)
+(testable-privates lupapalvelu.xml.krysp.reader ->standard-verdicts standard-verdicts-validator simple-verdicts-validator ->simple-verdicts pysyva-rakennustunnus)
 
 (fact "property-equals returns url-encoded data"
   (property-equals "_a_" "_b_") => "%3CPropertyIsEqualTo%3E%3CPropertyName%3E_a_%3C%2FPropertyName%3E%3CLiteral%3E_b_%3C%2FLiteral%3E%3C%2FPropertyIsEqualTo%3E")
 
 (fact "property-equals returns url-encoded xml-encoded data"
   (property-equals "<a>" "<b>") => "%3CPropertyIsEqualTo%3E%3CPropertyName%3E%26lt%3Ba%26gt%3B%3C%2FPropertyName%3E%3CLiteral%3E%26lt%3Bb%26gt%3B%3C%2FLiteral%3E%3C%2FPropertyIsEqualTo%3E")
+
+(defn verdict-skeleton [poytakirja-xml]
+  {:tag :paatostieto
+   :content [{:tag :paatostieto
+              :content [{:tag :Paatos
+                         :content [{:tag :poytakirja :content poytakirja-xml}]}]}]})
+
+(def future-verdict (verdict-skeleton [{:tag :paatoskoodi :content ["hyv\u00e4ksytty"]}
+                                       {:tag :paatoksentekija :content [""]}
+                                       {:tag :paatospvm :content ["1970-01-02"]}]))
+
+(def past-verdict (verdict-skeleton [{:tag :paatoskoodi :content ["hyv\u00e4ksytty"]}
+                                     {:tag :paatoksentekija :content [""]}
+                                     {:tag :paatospvm :content ["1970-01-01"]}]))
+
+(facts standard-verdicts-validator
+  (against-background
+    (sade.core/now) => 100)
+  (fact "Missing details"
+    (standard-verdicts-validator (verdict-skeleton [])) => {:ok false, :text "info.paatos-details-missing"})
+  (fact "Future date"
+    (standard-verdicts-validator future-verdict) => {:ok false, :text "info.paatos-future-date"} )
+  (fact "Past date"
+    (standard-verdicts-validator past-verdict) => nil))
+
+(defn simple-verdicts-skeleton [state verdict-date]
+  {:tag :Kayttolupa
+   :content [{:tag :kasittelytietotieto
+              :content [{:tag :Kasittelytieto
+                         :content [{:tag :muutosHetki    :content ["2014-01-29T13:57:15"]}
+                                   {:tag :hakemuksenTila :content [state]}]}]}
+             {:tag :paatostieto :content [{:tag :Paatos
+                                           :content [{:tag :paatosdokumentinPvm :content [verdict-date]}]}]}]})
+
+(facts simple-verdicts-skeleton
+  (against-background
+    (sade.core/now) => 100)
+  (fact "Empty state"
+    (simple-verdicts-validator (simple-verdicts-skeleton "" "")) => {:ok false, :text "info.application-backend-preverdict-state"})
+  (fact "Still in application state"
+    (simple-verdicts-validator (simple-verdicts-skeleton "hakemus" "1970-01-02")) => {:ok false, :text "info.application-backend-preverdict-state"})
+  (fact "Nil date"
+    (simple-verdicts-validator (simple-verdicts-skeleton nil nil)) => {:ok false, :text "info.paatos-date-missing"})
+  (fact "Future date"
+    (simple-verdicts-validator (simple-verdicts-skeleton "OK" "1970-01-02")) => {:ok false, :text "info.paatos-future-date"} )
+  (fact "Past date"
+    (simple-verdicts-validator (simple-verdicts-skeleton "OK" "1970-01-01")) => nil))
 
 (facts "pysyva-rakennustunnus"
   (fact (pysyva-rakennustunnus nil) => nil)
@@ -31,6 +78,9 @@
       cases (->verdicts xml ->standard-verdicts)]
 
     (fact "xml is parsed" cases => truthy)
+
+    (fact "validator finds verdicts" (standard-verdicts-validator xml) => nil)
+
     (fact "xml has 2 cases" (count cases) => 2)
     (fact "second case has 2 verdicts" (-> cases last :paatokset count) => 2)
 
@@ -162,6 +212,9 @@
         cases (->verdicts xml ->standard-verdicts)]
 
     (fact "xml is parsed" cases => truthy)
+
+    (fact "validator finds verdicts" (standard-verdicts-validator xml) => nil)
+
     (fact "xml has one case" (count cases) => 1)
     (fact "case has 1 verdict" (-> cases last :paatokset count) => 1)
 
@@ -192,7 +245,8 @@
   (let [xml (xml/parse (slurp "dev-resources/krysp/notfound.xml"))
         cases (->verdicts xml ->standard-verdicts)]
     (fact "xml is parsed" cases => truthy)
-    (fact "xml has no cases" (count cases) => 0)))
+    (fact "xml has no cases" (count cases) => 0)
+    (fact "validator does not find verdicts" (standard-verdicts-validator xml) => {:ok false, :text "info.no-verdicts-found-from-backend"})))
 
 (facts "nil xml"
   (let [cases (->verdicts nil ->standard-verdicts)]
@@ -205,6 +259,7 @@
     (fact "xml is parsed" cases => truthy)
     (fact "xml has 1 case" (count cases) => 1)
     (fact "kuntalupatunnus" (:kuntalupatunnus (last cases)) => "13-0185-R")
+    (fact "validator does not find verdicts" (standard-verdicts-validator xml) => {:ok false, :text "info.no-verdicts-found-from-backend"})
     (fact "case has no verdicts" (-> cases last :paatokset count) => 0)))
 
 (facts "KRYSP yhteiset 2.1.0"
@@ -285,6 +340,8 @@
     (fact "xml has 1 cases" (count cases) => 1)
     (fact "has 1 verdicts" (-> cases last :paatokset count) => 1)
 
+    (fact "validator finds verdicts" (simple-verdicts-validator xml) => nil)
+
     (fact "kuntalupatunnus" (:kuntalupatunnus (last cases)) => "523")
 
     (let [verdict (first (:paatokset (last cases)))
@@ -320,6 +377,8 @@
       (fact "xml is parsed" cases => truthy)
       (fact "xml has 1 cases" (count cases) => 1)
       (fact "has 1 verdicts" (-> cases last :paatokset count) => 1)
+
+      (fact "validator finds verdicts" (simple-verdicts-validator xml) => nil)
 
       (fact "kuntalupatunnus"
         (:kuntalupatunnus (last cases)) => #(.startsWith % "638-2014-"))

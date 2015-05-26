@@ -55,9 +55,9 @@
       (provided
         (domain/get-application-as anything anything :include-canceled-apps? false) => {:id "lupis-id" :state "verdictGiven"}))
 
-    ; 3: jos taustajarjestelmasta ei saada xml-sisaltoa -> (fail :error.no-previous-permit-found-from-backend)
+    ; 3: jos taustajarjestelmasta ei saada xml-sisaltoa -> fail
     (fact "no xml content received from backend with the kuntalupatunnus"
-      (create-app-from-prev-permit raktark-jarvenpaa) => (partial expected-failure? "error.no-previous-permit-found-from-backend")
+      (create-app-from-prev-permit raktark-jarvenpaa) => (partial expected-failure? "info.no-verdicts-found-from-backend")
       (provided
         (krysp-fetch-api/get-application-xml anything anything) => nil))
 
