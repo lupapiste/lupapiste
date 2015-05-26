@@ -59,6 +59,9 @@
         background-position: 8px -4200px;
       }
     }
+    h2 {
+      color: #fff;
+    }
     a {
         color: white;
         font-size: $font-size-body;
@@ -84,7 +87,7 @@
     .link-permit-item, .remove-link-permit {
       color: rgb(242,242,242);
     }
-    div:nth-child(odd) {
+    div:nth-child(even) {
       background:rgb(127,127,127);
     }
     p, .application_summary_text, ul {
