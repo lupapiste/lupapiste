@@ -319,6 +319,7 @@
   (mc/ensure-index :users {:company.id 1} {:sparse true})
   (mc/ensure-index :applications {:municipality 1})
   (mc/ensure-index :applications {:submitted 1})
+  (mc/ensure-index :applications {:modified 1})
   (mc/ensure-index :applications {:organization 1})
   (mc/ensure-index :applications {:auth.id 1})
   (mc/ensure-index :applications {:auth.invite.user.id 1} {:sparse true})
