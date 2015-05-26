@@ -11,7 +11,6 @@
             [sade.util :as util]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
-            [lupapalvelu.company :as company]
             [schema.core :as sc]))
 
 ;;
