@@ -23,7 +23,8 @@ jQuery(document).ready(function() {
     "submit-button-group",
     "yes-no-dialog",
     "yes-no-button-group",
-    "invoice-operator-selector"
+    "invoice-operator-selector",
+    "company-registration-init"
   ];
 
   _.forEach(components, function(component) {
