@@ -272,15 +272,19 @@
 
     true))
 
+(def ^:private UserUpdate (dissoc user/User :role :email :username))
+
+(defn- validate-updatable-user [{user-data :data}]
+  (when (sc/check UserUpdate user-data)
+    (fail :error.invalid-user-data)))
+
 (defcommand update-user
-  {:user-roles #{:applicant :authority :authorityAdmin :admin}}
+  {:user-roles #{:applicant :authority :authorityAdmin :admin}
+   :input-validators [validate-updatable-user]}
   [{caller :user user-data :data :as command}]
   (let [email     (user/canonize-email (or (:email user-data) (:email caller)))
         user-data (assoc user-data :email email)]
-    (and (sc/validate user/User (-> user-data
-                                  (assoc :role (keyword (:role caller)))
-                                  (assoc :username email)))
-         (validate-update-user! caller user-data))
+    (validate-update-user! caller user-data)
     (if (= 1 (mongo/update-n :users {:email email} {$set (select-keys user-data user-data-editable-fields)}))
       (if (= email (:email caller))
         (ssess/merge-to-session command (ok) {:user (user/session-summary (user/get-user-by-id (:id caller)))})
