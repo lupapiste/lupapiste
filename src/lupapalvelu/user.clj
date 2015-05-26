@@ -11,24 +11,33 @@
             [sade.util :as util]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.security :as security]
+            [lupapalvelu.company :as company]
             [schema.core :as sc]))
 
 ;;
-;; User schema, used in mypage
+;; User schema
 ;;
 
-(def User {:firstName                             (util/max-length-string 255)
+(def User {:id                                    sc/Str
+           :firstName                             (util/max-length-string 255)
            :lastName                              (util/max-length-string 255)
-           :role                                  (sc/enum :applicant
-                                                           :authority
-                                                           :oirAuthority
-                                                           :authorityAdmin
-                                                           :admin
-                                                           :dummy
-                                                           :rest-api
-                                                           :trusted-etl)
+           :role                                  (sc/enum "applicant"
+                                                           "authority"
+                                                           "oirAuthority"
+                                                           "authorityAdmin"
+                                                           "admin"
+                                                           "dummy"
+                                                           "rest-api"
+                                                           "trusted-etl")
            :email                                 (sc/pred util/valid-email? "Not valid email")
-           :username                              (sc/pred util/valid-email? "Not valid email")
+           :username                              sc/Str
+           :enabled                               sc/Bool
+           (sc/optional-key :private)             (sc/both
+                                                    (sc/pred util/not-empty-or-nil? "Not empty private")
+                                                    {(sc/optional-key :password) sc/Str
+                                                    (sc/optional-key :apikey) sc/Str})
+           (sc/optional-key :orgAuthz)            sc/Any
+           (sc/optional-key :personId)            (sc/pred util/finnish-hetu? "Not valid hetu")
            (sc/optional-key :street)              (util/max-length-string 255)
            (sc/optional-key :city)                (util/max-length-string 255)
            (sc/optional-key :zip)                 (sc/either (sc/pred util/finnish-zip? "Not a valid zip code")
@@ -40,7 +49,9 @@
            (sc/optional-key :fise)                (util/max-length-string 255)
            (sc/optional-key :companyName)         (util/max-length-string 255)
            (sc/optional-key :companyId)           (sc/pred util/finnish-y? "Not valid Y code")
-           (sc/optional-key :allowDirectMarketing) sc/Bool})
+           (sc/optional-key :allowDirectMarketing) sc/Bool
+           (sc/optional-key :attachments)         (sc/pred vector? "Attachments are in a vector")
+           (sc/optional-key :company)              {:id sc/Str :role sc/Str}})
 
 ;;
 ;; ==============================================================================
