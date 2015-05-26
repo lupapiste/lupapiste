@@ -394,30 +394,30 @@
 
 (defn- application-state [xml-without-ns]
   (->> (select xml-without-ns [:Kasittelytieto])
-                    (map (fn [kasittelytieto] (-> (cr/all-of kasittelytieto) (cr/convert-keys-to-timestamps [:muutosHetki]))))
-                    (filter :hakemuksenTila) ;; this because hakemuksenTila is optional in Krysp, and can be nil
-                    (sort-by :muutosHetki)
-                    last
-                    :hakemuksenTila
+    (map (fn [kasittelytieto] (-> (cr/all-of kasittelytieto) (cr/convert-keys-to-timestamps [:muutosHetki]))))
+    (filter :hakemuksenTila) ;; this because hakemuksenTila is optional in Krysp, and can be nil
+    (sort-by :muutosHetki)
+    last
+    :hakemuksenTila
     ss/lower-case))
 
 (def backend-preverdict-state
-  #{nil "luonnos" "hakemus" "valmistelussa" "vastaanotettu" "tarkastettu, t\u00e4ydennyspyynt\u00f6"})
+  #{"" "luonnos" "hakemus" "valmistelussa" "vastaanotettu" "tarkastettu, t\u00e4ydennyspyynt\u00f6"})
 
 (defn- simple-verdicts-validator [xml]
   (let [xml-without-ns (cr/strip-xml-namespaces xml)
         app-state (application-state xml-without-ns)
-        paivamaarat (map (comp cr/to-timestamp get-text) (select xml-without-ns [:paatostieto :Paatos :paatosdokumentinPvm]))
+        paivamaarat (filter number? (map (comp cr/to-timestamp get-text) (select xml-without-ns [:paatostieto :Paatos :paatosdokumentinPvm])))
         max-date    (when (seq paivamaarat) (apply max paivamaarat))]
     (cond
-      (backend-preverdict-state app-state) (fail :info.application-backend-preverdict-state)
+      (contains? backend-preverdict-state app-state) (fail :info.application-backend-preverdict-state)
       (nil? max-date)    (fail :info.paatos-date-missing)
       (< (now) max-date) (fail :info.paatos-future-date))))
 
 (defn- ->simple-verdicts [xml-without-ns]
   ;; using the newest app state in the message
   (let [app-state (application-state xml-without-ns)]
-    (when-not (backend-preverdict-state app-state)
+    (when-not (contains? backend-preverdict-state app-state)
       (map (fn [paatos-xml-without-ns]
              (let [paatosdokumentinPvm-timestamp (cr/to-timestamp (get-text paatos-xml-without-ns :paatosdokumentinPvm))]
                (when (and paatosdokumentinPvm-timestamp (> (now) paatosdokumentinPvm-timestamp))

@@ -44,6 +44,29 @@
   (fact "Past date"
     (standard-verdicts-validator past-verdict) => nil))
 
+(defn simple-verdicts-skeleton [state verdict-date]
+  {:tag :Kayttolupa
+   :content [{:tag :kasittelytietotieto
+              :content [{:tag :Kasittelytieto
+                         :content [{:tag :muutosHetki    :content ["2014-01-29T13:57:15"]}
+                                   {:tag :hakemuksenTila :content [state]}]}]}
+             {:tag :paatostieto :content [{:tag :Paatos
+                                           :content [{:tag :paatosdokumentinPvm :content [verdict-date]}]}]}]})
+
+(facts simple-verdicts-skeleton
+  (against-background
+    (sade.core/now) => 100)
+  (fact "Empty state"
+    (simple-verdicts-validator (simple-verdicts-skeleton "" "")) => {:ok false, :text "info.application-backend-preverdict-state"})
+  (fact "Still in application state"
+    (simple-verdicts-validator (simple-verdicts-skeleton "hakemus" "1970-01-02")) => {:ok false, :text "info.application-backend-preverdict-state"})
+  (fact "Nil date"
+    (simple-verdicts-validator (simple-verdicts-skeleton nil nil)) => {:ok false, :text "info.paatos-date-missing"})
+  (fact "Future date"
+    (simple-verdicts-validator (simple-verdicts-skeleton "OK" "1970-01-02")) => {:ok false, :text "info.paatos-future-date"} )
+  (fact "Past date"
+    (simple-verdicts-validator (simple-verdicts-skeleton "OK" "1970-01-01")) => nil))
+
 (facts "pysyva-rakennustunnus"
   (fact (pysyva-rakennustunnus nil) => nil)
   (fact (pysyva-rakennustunnus "") => nil)
