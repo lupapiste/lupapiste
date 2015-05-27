@@ -4,7 +4,7 @@ LUPAPISTE.OkButtonGroupModel = function (params) {
 
   self.okTitle = util.getIn(params, ["okTitle"]) || "ok";
 
-  var okFn = util.getIn(params, ["okTitle"]);
+  var okFn = util.getIn(params, ["okFn"]);
 
   self.ok = function() {
     if (_.isFunction(okFn)) {

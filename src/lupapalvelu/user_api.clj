@@ -182,7 +182,7 @@
         {old-id :id old-role :role}  old-user
         notification {:titleI18nkey "user.notification.firstLogin.title"
                       :messageI18nkey "user.notification.firstLogin.message"}
-        new-user   (if (= (keyword (:role user-data)) :applicant)
+        new-user   (if (user/applicant? user-data)
                      (assoc new-user :notification notification)
                      new-user)]
     (try
@@ -661,5 +661,5 @@
 
 (defcommand remove-user-notification
   {:user-roles #{:applicant}}
-  [{user :user}]
-  (mongo/update :users {:email (user/canonize-email (:email user))} {$unset {:notification 1}}))
+  [{{id :id} :user}]
+  (mongo/update-by-id :users id {$unset {:notification 1}}))
