@@ -137,7 +137,10 @@
       {:ok true})))
 
 (defmonster valid-users
-  (let [results (seq (remove nil? (map (partial sc/check user/User) @users)))]
+  (let [results (seq (remove nil? (map
+                                    #(if-let [res (sc/check user/User %)]
+                                       (assoc (select-keys % [:id :username]) :errors res))
+                                    @users)))]
     (if (seq results)
       {:ok false :results results}
       {:ok true})))
