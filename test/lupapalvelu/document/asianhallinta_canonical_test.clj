@@ -153,8 +153,8 @@
               op (first ops)]
           (count ops) => 1
           (keys op) => (just [:ToimenpideTunnus :ToimenpideTeksti])
-          (:ToimenpideTunnus op) => (get-in application [:operations 0 :name])
-          (:ToimenpideTeksti op) => (i18n/localize "fi" (str "operations." (get-in application [:operations 0 :name])))))
+          (:ToimenpideTunnus op) => (:primaryOperation application)
+          (:ToimenpideTeksti op) => (i18n/localize "fi" (str "operations." (:primaryOperation application)))))
 
       (fact "Asiointikieli"
         (get-in canonical [:UusiAsia :Asiointikieli]) => "fi")
@@ -185,7 +185,8 @@
               (doseq [meta metas]
                 (has-attachment-types meta)))
             (fact "Second attachment has operation meta"
-              (last (second metas)) => {:Avain "operation" :Arvo (get-in application-with-attachments [:operations 0 :name])}))))))
+              (>pprint application-with-attachments)
+              (last (second metas)) => {:Avain "operation" :Arvo (:primaryOperation application-with-attachments)}))))))
 
   (fl/facts* "TaydennysAsiaan canonical"
     (let [application poikkeus-test/poikkari-hakemus
@@ -201,4 +202,4 @@
         (facts "Attachments"
           (count canonical-attachments) => 2
           (fact "Second attachment has operation Metatieto"
-            (last (get-in (second canonical-attachments) [:Metatiedot :Metatieto])) => {:Avain "operation" :Arvo (get-in application [:operations 0 :name])}))))))
+            (last (get-in (second canonical-attachments) [:Metatiedot :Metatieto])) => {:Avain "operation" :Arvo (:primaryOperation application)}))))))
