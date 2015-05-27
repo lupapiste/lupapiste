@@ -19,7 +19,7 @@
             [lupapalvelu.domain :refer [get-document-by-name]]))
 
 (defn- do-test [application]
-  (let [operation-name-key (-> application :operations first :name keyword)
+  (let [operation-name-key (-> application :primaryOperation :name keyword)
         lupa-name-key (ya-operation-type-to-schema-name-key operation-name-key)
         canonical (application-to-canonical application "fi")
         xml-212 (yleisetalueet-element-to-xml canonical lupa-name-key "2.1.2")

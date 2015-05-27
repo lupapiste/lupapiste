@@ -162,7 +162,7 @@
                              ;;
                              (let [link-permit-app-op (when (= link-permit-type "lupapistetunnus")
                                                         (-> (mongo/by-id "applications" link-permit-id {:operations 1})
-                                                          :operations first :name))]
+                                                          :primaryOperation :name))]
                                {:id link-permit-id :type link-permit-type :operation link-permit-app-op})
 
                              {:id link-permit-id :type link-permit-type})))]

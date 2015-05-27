@@ -107,7 +107,7 @@
             (fact "Operations are correct"
               (let [operations (sxml/select xml [:UusiAsia :Toimenpiteet :Toimenpide])]
                 (count operations) => (count (:operations updated-application))
-                (sxml/get-text operations [:ToimenpideTunnus]) => (-> updated-application :operations first :name)))
+                (sxml/get-text operations [:ToimenpideTunnus]) => (-> updated-application :primaryOperation :name)))
 
             (fact "Link permits do not exist" (sxml/select xml [:UusiAsia :Viiteluvat]) => empty?))))))
 

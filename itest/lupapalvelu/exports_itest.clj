@@ -31,7 +31,7 @@
     (count (:applications resp)) => 1
     (-> resp :applications first :id) => application-id
     (fact "with price class"
-      (-> resp :applications first :operations first :priceClass) => "D"))
+      (-> resp :applications first :primaryOperation :priceClass) => "D"))
 
   (fact "but not if modified timestamp is too old"
     (let [http-resp (http/get (str (server-address) "/data-api/json/export-applications")

@@ -77,7 +77,7 @@
    :on-success (notify :application-state-change)
    :states     [:submitted :complement-needed]}
   [{:keys [application created user] :as command}]
-  (let [jatkoaika-app? (= :ya-jatkoaika (-> application :operations first :name keyword))
+  (let [jatkoaika-app? (= :ya-jatkoaika (-> application :primaryOperation :name keyword))
         foreman-notice? (when foreman/foreman-app?
                           (= "ilmoitus" (-> (domain/get-document-by-name application "tyonjohtaja-v2") :data :ilmoitusHakemusValitsin :value)))
         app-updates (merge

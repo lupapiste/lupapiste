@@ -661,7 +661,7 @@
                                           (name k)))
                                       app-link)
                       app           (first (mongo/select :applications {:_id linkpermit-id}))
-                      apptype       (->> app :operations first :name)]
+                      apptype       (->> app :primaryOperation :name)]
                   (mongo/update-by-id
                     :app-links
                     (:id app-link)

@@ -239,7 +239,7 @@
         link-permit-data (first (:linkPermitData application))
         documents (documents-by-type-without-blanks application)
         toimenpiteet (get-operations documents application)
-        operation-name (-> application :operations first :name)
+        operation-name (-> application :primaryOperation :name)
         canonical {:Rakennusvalvonta
                    {:toimituksenTiedot (toimituksen-tiedot application lang)
                     :rakennusvalvontaAsiatieto
