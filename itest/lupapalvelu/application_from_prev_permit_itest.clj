@@ -126,6 +126,7 @@
     (against-background
       (krysp-fetch-api/get-application-xml anything anything) => example-xml))
 
+
   (facts "Application from kuntalupatunnus via rest API"
     (let [rest-address (str (server-address) "/rest/get-lp-id-from-previous-permit")
           params  {:query-params {"kuntalupatunnus" example-kuntalupatunnus}
@@ -134,9 +135,11 @@
         (fact "should create new LP application if kuntalupatunnus doesn't match existing app"
           (let [response (http/get rest-address params)
                 resp-body (:body (util/decode-response response))]
-            (:status response) => 200
+            response => http200?
             resp-body => ok?
-            (keyword (:text resp-body)) => :created-new-application))
+            (keyword (:text resp-body)) => :created-new-application
+            (let [application (query-application local-query raktark-jarvenpaa (:id resp-body))]
+              (:opened application) => truthy)))
 
         (fact "should return the LP application if the kuntalupatunnus matches an existing app"
           (let [{app-id :id} (create-and-submit-application pena :propertyId jarvenpaa-property-id)
@@ -144,15 +147,16 @@
                 response     (http/get rest-address params)
                 resp-body    (:body (util/decode-response response))]
             verdict-resp => ok?
-            (:status response) => 200
+            response => http200?
             resp-body => ok?
             (keyword (:text resp-body)) => :already-existing-application))
 
         (fact "create new LP app if kuntalupatunnus matches existing app in another organization"
-         (let [{app-id :id} (create-and-submit-application pena :propertyId sipoo-property-id)
-               _            (give-verdict sonja app-id :verdictId example-kuntalupatunnus)
-               response     (http/get rest-address params)
-               resp-body    (:body (util/decode-response response))]
-           (:status response) => 200
-           resp-body => ok?
-           (keyword (:text resp-body)) => :created-new-application))))))
+          (let [{app-id :id} (create-and-submit-application pena :propertyId sipoo-property-id)
+                verdict-resp (give-verdict sonja app-id :verdictId example-kuntalupatunnus)
+                response     (http/get rest-address params)
+                resp-body    (:body (util/decode-response response))]
+            verdict-resp => ok?
+            response => http200?
+            resp-body => ok?
+            (keyword (:text resp-body)) => :created-new-application))))))
