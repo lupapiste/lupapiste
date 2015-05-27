@@ -155,19 +155,16 @@
   [{{ts :modifiedAfterTimestampMillis} :data user :user}]
   (let [query (merge
                 (domain/application-query-for user)
-                {"primaryOperation" {$exists true}}
+                {"operations.0" {$exists true}}
                 (when (ss/numeric? ts)
                   {:modified {$gte (Long/parseLong ts 10)}}))
         fields [:address :applicant :authority :closed :created :convertedToApplication :infoRequest :modified
-                :municipality :opened :openInfoRequest :primaryOperation :secondaryOperations :organization
+                :municipality :opened :openInfoRequest :operations :organization
                 :propertyId :permitSubtype :permitType :sent :started :state :submitted]
         raw-applications (mongo/select :applications query fields)
         applications (map
-                       (fn [a] (-> a
-                                 (update-in [:secondaryOperations] #(map (partial operation-mapper a) %))
-                                 (update-in [:primaryOperation] (partial operation-mapper a))))
+                       (fn [a] (update-in a [:operations] #(map (partial operation-mapper a) %)))
                        raw-applications)]
-
     (ok :applications applications)))
 
 (defexport export-organizations
