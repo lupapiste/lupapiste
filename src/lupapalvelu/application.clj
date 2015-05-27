@@ -66,7 +66,7 @@
 
 (defn- is-link-permit-required [application]
   (or (= :muutoslupa (keyword (:permitSubtype application)))
-      (some #(operations/link-permit-required-operations (keyword (:name %))) (concat [(:primaryOperation application)] (:secondaryOperations application)))))
+      (some #(operations/link-permit-required-operations (keyword (:name %))) (conj (seq (:secondaryOperations application)) (:primaryOperation application)))))
 
 (defn validate-link-permits [application]
   (let [application (meta-fields/enrich-with-link-permit-data application)
@@ -521,7 +521,7 @@
 
                 same-op-irs (filter
                               (fn [ir]
-                                (some #(= application-op-name (:name %)) (concat [:primaryOperation ir] (:secondaryOperations ir))))
+                                (some #(= application-op-name (:name %)) (conj (seq (:secondaryOperations ir)) (:primaryOperation ir))))
                               inforequests)
 
                 others (remove-irs-by-id inforequests same-op-irs)
