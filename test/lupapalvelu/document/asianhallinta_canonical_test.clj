@@ -185,7 +185,6 @@
               (doseq [meta metas]
                 (has-attachment-types meta)))
             (fact "Second attachment has operation meta"
-              (>pprint application-with-attachments)
               (last (second metas)) => {:Avain "operation" :Arvo (:primaryOperation application-with-attachments)}))))))
 
   (fl/facts* "TaydennysAsiaan canonical"
