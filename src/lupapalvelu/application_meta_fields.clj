@@ -45,9 +45,6 @@
         user (user/get-user-by-id (:id owner))]
     (:phone user)))
 
-(defn get-application-operation [app]
-  (first (:operations app)))
-
 (defn- count-unseen-comments [user app]
   (let [last-seen (get-in app [:_comments-seen-by (keyword (:id user))] 0)]
     (count (filter (fn [comment]
@@ -161,8 +158,8 @@
                              ;; TODO: Jos viitelupa on kuntalupatunnus, ei saada operaatiota!
                              ;;
                              (let [link-permit-app-op (when (= link-permit-type "lupapistetunnus")
-                                                        (-> (mongo/by-id "applications" link-permit-id {:operations 1})
-                                                          :primaryOperation :name))]
+                                                        (-> (mongo/by-id "applications" link-permit-id {:primaryOperation 1})
+                                                            :primaryOperation :name))]
                                {:id link-permit-id :type link-permit-type :operation link-permit-app-op})
 
                              {:id link-permit-id :type link-permit-type})))]
