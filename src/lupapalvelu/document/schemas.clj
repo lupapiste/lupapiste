@@ -910,7 +910,7 @@
            :approvable true
            :order 1}
     :body [kuvaus
-           {:name "poikkeamat" :type :text :max-len 4000 :layout :full-width}]}
+           {:name "poikkeamat" :type :text :max-len 5400 :layout :full-width}]}
 
    {:info {:name "uusiRakennus" :approvable true}
     :body (body rakennuksen-omistajat (approvable-top-level-groups rakennuksen-tiedot))}
