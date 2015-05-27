@@ -49,7 +49,10 @@
            (sc/optional-key :companyId)           (sc/pred util/finnish-y? "Not valid Y code")
            (sc/optional-key :allowDirectMarketing) sc/Bool
            (sc/optional-key :attachments)         (sc/pred vector? "Attachments are in a vector")
-           (sc/optional-key :company)              {:id sc/Str :role sc/Str}})
+           (sc/optional-key :company)             {:id sc/Str :role sc/Str}
+           (sc/optional-key :partnerApplications) {:rakentajafi {:id sc/Str
+                                                                 :created sc/Int
+                                                                 :origin sc/Bool}}})
 
 ;;
 ;; ==============================================================================
