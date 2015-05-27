@@ -162,12 +162,12 @@
                 :municipality :opened :openInfoRequest :primaryOperation :secondaryOperations :organization
                 :propertyId :permitSubtype :permitType :sent :started :state :submitted]
         raw-applications (mongo/select :applications query fields)
+        applications-with-operations (map
+                                       (fn [a] (assoc a :operations (conj (seq (:secondaryOperations a)) (:primaryOperation a))))
+                                       raw-applications)
         applications (map
-                       (fn [a] (-> a
-                                 (update-in [:secondaryOperations] #(map (partial operation-mapper a) %))
-                                 (update-in [:primaryOperation] (partial operation-mapper a))))
-                       raw-applications)]
-
+                       (fn [a] (update-in a [:operations] #(map (partial operation-mapper a) %)))
+                       applications-with-operations)]
     (ok :applications applications)))
 
 (defexport export-organizations
