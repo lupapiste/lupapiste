@@ -264,6 +264,12 @@
                 4 "%02d:%02d:%02d.%d")]
       (apply format fmt (map ->int matches)))))
 
+(defn to-long [s]
+  "Parses string to long. If string is not numeric returns nil."
+  (if (ss/numeric? s)
+    (Long/parseLong s)
+    nil))
+
 (defn valid-email? [email]
   (try
     (javax.mail.internet.InternetAddress. email)
