@@ -1,4 +1,0 @@
-users.op.editUser: Muokkaa
-auth-admin.edit-roles.title: Muokkaa rooleja
-error.user-not-found: Käyttäjää ei löytynyt
-auth-admin.edit-roles.greeting: Valitse käyttäjän {0} roolit
