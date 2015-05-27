@@ -230,8 +230,8 @@
    :user-roles #{:authorityAdmin}
    :input-validators  [(partial non-blank-parameters [:operations])
                        (partial vector-parameters [:operations])
-                       (fn [{{:keys [operations]} :data}]
-                         (when-not (every? (->> operations/operations keys (map name) set) operations)
+                       (fn [{{:keys [primaryOperation secondaryOperations]} :data}]
+                         (when-not (every? (->> operations/operations keys (map name) set) (conj secondaryOperations primaryOperation))
                            (fail :error.unknown-operation)))]}
   [{user :user}]
   (o/update-organization (user/authority-admins-organization-id user) {$set {:selected-operations operations}})

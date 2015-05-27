@@ -202,8 +202,8 @@
   (when-let [link-permit-app (application/get-link-permit-app application)]
     (-> link-permit-app :verdicts first :kuntalupatunnus)))
 
-(defn- has-asianhallinta-operation [_ {:keys [operations]}]
-  (when-not (operations/get-operation-metadata (:name (first operations)) :asianhallinta)
+(defn- has-asianhallinta-operation [_ {:keys [primaryOperation]}]
+  (when-not (operations/get-operation-metadata (:name primaryOperation) :asianhallinta)
     (fail :error.operations.asianhallinta-disabled)))
 
 (defcommand application-to-asianhallinta
