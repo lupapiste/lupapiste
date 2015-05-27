@@ -36,11 +36,12 @@
                                                     (sc/optional-key :apikey) sc/Str})
            (sc/optional-key :orgAuthz)            sc/Any
            (sc/optional-key :personId)            (sc/pred util/finnish-hetu? "Not valid hetu")
-           (sc/optional-key :street)              (util/max-length-string 255)
-           (sc/optional-key :city)                (util/max-length-string 255)
-           (sc/optional-key :zip)                 (sc/either (sc/pred util/finnish-zip? "Not a valid zip code")
-                                                  (sc/pred ss/blank?))
-           (sc/optional-key :phone)               (util/max-length-string 255)
+           (sc/optional-key :street)              (sc/maybe (util/max-length-string 255))
+           (sc/optional-key :city)                (sc/maybe (util/max-length-string 255))
+           (sc/optional-key :zip)                 (sc/either
+                                                    (sc/pred util/finnish-zip? "Not a valid zip code")
+                                                    (sc/pred ss/blank?))
+           (sc/optional-key :phone)               (sc/maybe (util/max-length-string 255))
            (sc/optional-key :architect)           sc/Bool
            (sc/optional-key :degree)              (util/max-length-string 255)
            (sc/optional-key :graduatingYear)      (sc/both (util/min-length-string 4) (util/max-length-string 4))
