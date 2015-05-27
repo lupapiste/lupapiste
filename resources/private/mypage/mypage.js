@@ -42,9 +42,9 @@
     self.role = ko.observable();
     self.architect = ko.observable();
     self.degree = ko.observable().extend({ maxLength: 255 });
-    self.availableDegrees = _.map(LUPAPISTE.config.degrees, function(degree) {
+    self.availableDegrees = _(LUPAPISTE.config.degrees).map(function(degree) {
       return {id: degree, name: loc(["koulutus", degree])};
-    });
+    }).sortBy("name").value();
     self.graduatingYear = ko.observable().extend({ number: true, minLength: 4, maxLength: 4 });
     self.fise = ko.observable().extend({ maxLength: 255 });
     self.companyName = ko.observable().extend({ maxLength: 255 });

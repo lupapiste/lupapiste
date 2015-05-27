@@ -132,7 +132,7 @@
        body => map?
        (fact "html" (:html body) => string?)
        (fact "plain text" (:plain body) => string?))
-     
+
      (fact "Register again with the same email"
        (last-email) ; Inbox zero
        (swap! store (constantly {})) ; clear cookies
