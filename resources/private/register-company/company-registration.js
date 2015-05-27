@@ -28,6 +28,7 @@
 
     this.accountFieldNames = ["accountType"];
     this.companyFieldNames = ["name", "y", "reference", "address1", "po", "zip", "country", "ovt", "pop"];
+    this.companyFields = this.companyFieldNames.concat(this.accountFieldNames);
     this.signerFieldNames = ["firstName", "lastName", "email"];
 
     this.stateInfo  = 0;
@@ -47,6 +48,9 @@
       });
       return true;
     };
+
+    this.submitPressed = ko.observable(false);
+    
   }
 
   CompanyRegistration.prototype.clearModel = function(fieldNames) {
@@ -82,19 +86,21 @@
       signer.currentUser = lupapisteApp.models.currentUser.id();
     }
 
-    ajax
-      .command("init-sign", {company: company, signer: signer, lang: loc.currentLanguage}, this.pending)
-      .success(function(resp) {
-        $("#onnistuu-start-form")
-          .empty()
-          .html(resp.form)
-          .find(":submit")
-          .addClass("btn btn-primary")
-          .attr("value", loc("register.company.sign.begin"))
-          .attr("data-test-id", "register-company-start-sign");
-        self.processId(resp.processId).state(self.stateReady);
-      })
-      .call();
+    self.submitPressed(true);
+
+    // ajax
+    //   .command("init-sign", {company: company, signer: signer, lang: loc.currentLanguage}, this.pending)
+    //   .success(function(resp) {
+    //     $("#onnistuu-start-form")
+    //       .empty()
+    //       .html(resp.form)
+    //       .find(":submit")
+    //       .addClass("btn btn-primary")
+    //       .attr("value", loc("register.company.sign.begin"))
+    //       .attr("data-test-id", "register-company-start-sign");
+    //     self.processId(resp.processId).state(self.stateReady);
+    //   })
+    //   .call();
     window.location.hash = "!/register-company-signing";
   };
 
