@@ -271,3 +271,9 @@
     (fact (select-values m [:bar :foo])           => ["bar" "foo"])
     (fact (select-values m [:foo :unknown :bar])  => ["foo" nil "bar"])
     (fact (select-values m [:unknown1 :unknown2]) => [nil nil])))
+
+(facts "to-long"
+  (fact (to-long "1234") => truthy)
+  (fact (to-long "213asd2") => nil)
+  (fact (to-long "") => nil)
+  (fact (to-long 1234) => nil))

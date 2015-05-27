@@ -266,7 +266,7 @@
 
 (defn to-long [s]
   "Parses string to long. If string is not numeric returns nil."
-  (when (ss/numeric? s)
+  (when (numeric? s)
     (Long/parseLong s)))
 
 (defn valid-email? [email]
