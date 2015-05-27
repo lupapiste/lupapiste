@@ -1,15 +1,8 @@
 LUPAPISTE.CompanyRegistrationInitModel = function(params) {
   "use strict";
 
-  console.log("params", params);
-
-  console.log("companyfields:", params.companyFields);
-  var company = _.reduce(params.companyFields, function(a, k) { a[k] = this[k](); return a; }, {}, params.model());
-  console.log("company:", company);
-  var signer = _.reduce(params.signerFields, function(a, k) { a[k] = this[k](); return a; }, {}, params.model());
-
   ajax
-    .command("init-sign", {company: company, signer: signer, lang: loc.currentLanguage}, this.pending)
+    .command("init-sign", {company: params.company(), signer: params.signer(), lang: loc.currentLanguage}, this.pending)
     .success(function(resp) {
       $("#onnistuu-start-form")
         .empty()
@@ -19,7 +12,8 @@ LUPAPISTE.CompanyRegistrationInitModel = function(params) {
         .attr("value", loc("register.company.sign.begin"))
         .attr("data-test-id", "register-company-start-sign");
       params.processId(resp.processId);
-      params.state(self.stateReady);
+      //params.state(self.stateReady);
+      params.state(1);
     })  
     .call();
 };

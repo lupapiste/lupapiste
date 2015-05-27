@@ -28,9 +28,8 @@
         <!--<div id="onnistuu-start-form"></div>-->
 
         <!-- ko if: submitPressed -->
-          <span data-bind="component: {name: 'company-registration-init', params: { model: model,
-                                                                                    companyFields: companyFields,
-                                                                                    signerFields: signerFieldNames,
+          <span data-bind="component: {name: 'company-registration-init', params: { company: companyData,
+                                                                                    signer: signerData,
                                                                                     processId: processId,
                                                                                     state: state }}"></span>
         <!-- /ko -->

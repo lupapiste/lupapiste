@@ -2,6 +2,8 @@
   "use strict";
 
   function CompanyRegistration() {
+    var self = this;
+
     this.userNotLoggedIn = ko.pureComputed(function() {
       return !(lupapisteApp.models.currentUser && lupapisteApp.models.currentUser.id());
     });
@@ -49,8 +51,13 @@
       return true;
     };
 
-    this.submitPressed = ko.observable(false);
-    
+    self.submitPressed = ko.observable(false);
+    self.companyData = ko.pureComputed(function() {
+      return _.reduce(self.companyFields, function(a, k) { a[k] = this[k](); return a; }, {}, self.model());
+    });
+    self.signerData = ko.pureComputed(function() {
+      return _.reduce(self.signerFieldNames, function(a, k) { a[k] = this[k](); return a; }, {}, self.model());
+    });
   }
 
   CompanyRegistration.prototype.clearModel = function(fieldNames) {
