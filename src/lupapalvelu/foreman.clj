@@ -104,4 +104,4 @@
   (-> (select-keys application [:id :state :auth :documents])
       (update-in [:documents] (fn [docs] (filter #(= (get-in % [:schema-info :name]) "tyonjohtaja-v2") docs)))))
 
-(defn foreman-app? [application] (= :tyonjohtajan-nimeaminen-v2 (-> application :operations first :name keyword)))
+(defn foreman-app? [application] (= :tyonjohtajan-nimeaminen-v2 (-> application :primaryOperation :name keyword)))
