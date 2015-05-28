@@ -4,11 +4,11 @@
   function CompanyRegistration() {
     var self = this;
 
-    this.userNotLoggedIn = ko.pureComputed(function() {
+    self.userNotLoggedIn = ko.pureComputed(function() {
       return !(lupapisteApp.models.currentUser && lupapisteApp.models.currentUser.id());
     });
 
-    this.model = ko.validatedObservable({
+    self.model = ko.validatedObservable({
       //Account type
       accountType:  ko.observable(undefined),
       // Company:
@@ -25,25 +25,25 @@
       firstName:    ko.observable("").extend({required: true}),
       lastName:     ko.observable("").extend({required: true}),
       email:        ko.observable("").extend({required: true, email: true,
-                                              usernameAsync: this.userNotLoggedIn})
+                                              usernameAsync: self.userNotLoggedIn})
     });
 
-    this.accountFieldNames = ["accountType"];
-    this.companyFieldNames = ["name", "y", "reference", "address1", "po", "zip", "country", "ovt", "pop"];
-    this.companyFields = this.companyFieldNames.concat(this.accountFieldNames);
-    this.signerFieldNames = ["firstName", "lastName", "email"];
+    self.accountFieldNames = ["accountType"];
+    self.companyFieldNames = ["name", "y", "reference", "address1", "po", "zip", "country", "ovt", "pop"];
+    self.companyFields = self.companyFieldNames.concat(self.accountFieldNames);
+    self.signerFieldNames = ["firstName", "lastName", "email"];
 
-    this.stateInfo  = 0;
-    this.stateReady = 1;
+    self.stateInfo  = 0;
+    self.stateReady = 1;
 
-    this.processId = ko.observable(null);
-    this.pending   = ko.observable(false);
-    this.state     = ko.observable(this.stateInfo);
+    self.processId = ko.observable(null);
+    self.pending   = ko.observable(false);
+    self.state     = ko.observable(self.stateInfo);
 
-    this.canSubmitInfo  = ko.computed(function() { return this.state() === this.stateInfo && !this.pending() && this.model.isValid(); }, this);
-    this.canCancelInfo  = ko.computed(function() { return this.state() === this.stateInfo && !this.pending(); }, this);
-    this.canStartSign   = ko.computed(function() { return this.state() === this.stateReady; }, this);
-    this.accountSelected = function() {
+    self.canSubmitInfo  = ko.computed(function() { return self.state() === self.stateInfo && !self.pending() && self.model.isValid(); });
+    self.canCancelInfo  = ko.computed(function() { return self.state() === self.stateInfo && !self.pending(); });
+    self.canStartSign   = ko.computed(function() { return self.state() === self.stateReady; });
+    self.accountSelected = function() {
       var buttonPos = $("#account-type-selection").position();
       $("html, body").animate({
         scrollTop: buttonPos.top
