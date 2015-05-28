@@ -18,6 +18,16 @@
 ;; User schema
 ;;
 
+(def user-skeleton
+  {:id        "4321"
+   :firstName ""
+   :lastName  ""
+   :role      "dummy"
+   :email     "dummy@example.com"
+   :username  "dummy@example.com"
+   :enabled   false})
+
+
 (def User {:id                                    sc/Str
            :firstName                             (util/max-length-string 255)
            :lastName                              (util/max-length-string 255)
