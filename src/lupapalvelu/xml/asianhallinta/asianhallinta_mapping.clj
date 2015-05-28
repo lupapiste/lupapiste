@@ -3,6 +3,7 @@
             [lupapalvelu.xml.asianhallinta.mapping_common :as ah]
             [lupapalvelu.xml.emit :as emit]
             [lupapalvelu.xml.disk-writer :as writer]
+            [lupapalvelu.application :refer [get-operations]]
             [sade.core :refer [def-]]))
 
 (def uusi-asia
@@ -91,7 +92,7 @@
 (defn taydennys-asiaan-from-application [application attachments lang ah-version begin-of-link output-dir]
   "Construct AsiaanTaydennys XML message. Writes XML and attachmets to disk (ouput-dir)"
   (let [canonical (canonical/application-to-asianhallinta-taydennys-asiaan-canonical application)
-        attachments (enrich-attachments-with-operation-data attachments (:operations application))
+        attachments (enrich-attachments-with-operation-data attachments (get-operations application))
         attachments-canonical (canonical/get-attachments-as-canonical attachments begin-of-link)
         canonical-with-attachments (assoc-in canonical [:TaydennysAsiaan :Liitteet :Liite] attachments-canonical)
         mapping (get-ta-mapping ah-version)

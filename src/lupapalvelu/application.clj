@@ -97,6 +97,9 @@
   (when-let [link (some #(when (= (:type %) "lupapistetunnus") %) linkPermitData)]
     (domain/get-application-no-access-checking (:id link))))
 
+(defn get-operations [application]
+  (conj (seq (:secondaryOperations application)) (:primaryOperation application)))
+
 ;;
 ;; Query application:
 ;;
