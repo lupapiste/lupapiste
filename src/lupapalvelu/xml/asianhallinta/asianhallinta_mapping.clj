@@ -71,7 +71,7 @@
   (mapv #(enrich-attachment-with-operation % operations) attachments))
 
 (defn enrich-application [application]
-  (update-in application [:attachments] enrich-attachments-with-operation-data (:operations application)))
+  (update-in application [:attachments] enrich-attachments-with-operation-data (conj (seq (:secondaryOperations application)) (:primaryOperation application))))
 
 (defn uusi-asia-from-application [application lang ah-version submitted-application begin-of-link output-dir]
   "Construct UusiAsia XML message. Writes XML and attachments to disk (output-dir)"
