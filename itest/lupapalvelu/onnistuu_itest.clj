@@ -27,7 +27,7 @@
                           :lastName    "Last"
                           :email       "a@b.c"}
                  :lang "fi")
-      :processId
+      :process-id
       get-process))
 
 (defn init-sign-existing-user []
@@ -40,7 +40,7 @@
                           :email       "in@va.lid"
                           :currentUser "777777777777777777000000"}
                  :lang "fi")
-      :processId
+      :process-id
       get-process))
 
 (fact "init-sign"
