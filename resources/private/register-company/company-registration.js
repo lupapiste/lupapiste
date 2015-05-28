@@ -58,6 +58,11 @@
     self.signerData = ko.pureComputed(function() {
       return _.reduce(self.signerFieldNames, function(a, k) { a[k] = this[k](); return a; }, {}, self.model());
     });
+
+    self.initSignCallback = function(processId) {
+      self.processId(processId);
+      self.state(self.stateReady);
+    };
   }
 
   CompanyRegistration.prototype.clearModel = function(fieldNames) {

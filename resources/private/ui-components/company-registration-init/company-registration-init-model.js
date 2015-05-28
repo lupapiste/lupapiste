@@ -18,12 +18,7 @@ LUPAPISTE.CompanyRegistrationInitModel = function(params) {
       self.returnFailure(resp['failure-url']);
       self.postTo(resp['post-to']);
 
-      params.processId(resp['process-id']);
-      params.state(1);
+      params.processIdCallback(resp['process-id']);
     })
     .call();
-
-  self.startSigning = function() {
-    return true;
-  };
 };
