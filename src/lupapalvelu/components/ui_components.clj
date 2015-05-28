@@ -1,6 +1,7 @@
 (ns lupapalvelu.components.ui-components
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
             [clojure.java.io :as io]
+            [lupapalvelu.action :as action]
             [lupapalvelu.components.core :as c]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mime :as mime]
@@ -43,7 +44,8 @@
                  :asianhallintaVersions (util/convert-values ; asianhallinta versions have "ah-" prefix
                                           validator/supported-asianhallinta-versions-by-permit-type
                                           (partial map #(sade.strings/suffix % "ah-")))
-                 :degrees               (map :name (:body schemas/koulutusvalinta))}]
+                 :degrees               (map :name (:body schemas/koulutusvalinta))
+                 :authorityRoles        action/authority-roles}]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
 
 (defn- loc->js []
@@ -259,9 +261,11 @@
                         "select/select-model.js"
                         "string/string-model.js"
                         "modal-dialog/modal-dialog-model.js"
+                        "modal-dialog/button-group/ok-button-group-model.js"
                         "modal-dialog/button-group/submit-button-group-model.js"
                         "modal-dialog/button-group/yes-no-button-group-model.js"
                         "modal-dialog/dialog/yes-no-dialog-model.js"
+                        "modal-dialog/dialog/ok-dialog-model.js"
                         "attachments-multiselect/attachments-multiselect-model.js"
                         "authority-select/authority-select-model.js"
                         "authority-select/authority-select-dialog-model.js"
@@ -282,9 +286,11 @@
                           "select/select-template.html"
                           "checkbox/checkbox-template.html"
                           "modal-dialog/modal-dialog-template.html"
+                          "modal-dialog/button-group/ok-button-group-template.html"
                           "modal-dialog/button-group/submit-button-group-template.html"
                           "modal-dialog/button-group/yes-no-button-group-template.html"
                           "modal-dialog/dialog/yes-no-dialog-template.html"
+                          "modal-dialog/dialog/ok-dialog-template.html"
                           "attachments-multiselect/attachments-multiselect-template.html"
                           "authority-select/authority-select-template.html"
                           "authority-select/authority-select-dialog-template.html"

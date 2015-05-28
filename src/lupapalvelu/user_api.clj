@@ -179,7 +179,12 @@
                       (assoc user-entry :id (:id old-user))
                       (assoc user-entry :id (mongo/create-id)))
         email       (:email new-user)
-        {old-id :id old-role :role}  old-user]
+        {old-id :id old-role :role}  old-user
+        notification {:titleI18nkey "user.notification.firstLogin.title"
+                      :messageI18nkey "user.notification.firstLogin.message"}
+        new-user   (if (user/applicant? user-data)
+                     (assoc new-user :notification notification)
+                     new-user)]
     (try
       (condp = old-role
         nil     (do
@@ -335,6 +340,26 @@
         update-count     (mongo/update-n :users query {$unset {(str "orgAuthz." organization) ""}})]
     (if (pos? update-count)
       (ok :operation "remove")
+      (fail :error.user-not-found))))
+
+(defn allowed-roles [allowed-roles command]
+  (let [roles (get-in command [:data :roles])
+        filtered-roles (->> roles (map keyword) (filter allowed-roles))
+        ok (= (count roles)
+              (count filtered-roles))]
+    (when-not ok
+      (fail :invalid.roles))))
+
+(defcommand update-user-roles
+  {:parameters [email roles organization]
+   :input-validators [(partial action/non-blank-parameters [:email :organization])
+                      (partial action/vector-parameters-with-at-least-n-non-blank-items 1 [:roles])
+                      action/email-validator
+                      (partial allowed-roles action/authority-roles)]
+   :user-roles #{:authorityAdmin}}
+  (let [update-count (mongo/update-n :users {:email (user/canonize-email email)} {$set {(str "orgAuthz." organization) roles}})]
+    (if (= 1 update-count)
+      (ok)
       (fail :error.user-not-found))))
 
 (defmethod token/handle-token :authority-invitation [{{:keys [email organization caller-email]} :data} {password :password}]
@@ -633,3 +658,8 @@
     (if user
       (ok)
       (fail :email-not-in-use))))
+
+(defcommand remove-user-notification
+  {:user-roles #{:applicant}}
+  [{{id :id} :user}]
+  (mongo/update-by-id :users id {$unset {:notification 1}}))

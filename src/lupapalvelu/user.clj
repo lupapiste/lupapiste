@@ -60,6 +60,9 @@
 (defn applicant? [{role :role}]
   (= :applicant (keyword role)))
 
+(defn rest-user? [{role :role}]
+  (= :rest-api (keyword role)))
+
 (defn same-user? [{id1 :id} {id2 :id}]
   (= id1 id2))
 

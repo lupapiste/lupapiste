@@ -17,10 +17,17 @@ LUPAPISTE.CurrentUser = function() {
     company: {
       id:   undefined,
       role: undefined
-    }};
+    },
+    notification: {
+      title:          undefined,
+      titleI18nkey:   undefined,
+      message:        undefined,
+      messageI18nkey: undefined
+    }
+  };
 
   function constructor(user) {
-    ko.mapping.fromJS((_.merge(defaults, user)), {}, self);
+    ko.mapping.fromJS(_.defaults(user, defaults), {}, self);
   }
 
   constructor({});
@@ -43,6 +50,50 @@ LUPAPISTE.CurrentUser = function() {
       username = self.firstName() + " " + self.lastName();
     }
     return username;
+  });
+
+  function getNotificationFields(notification) {
+    if(notification.titleI18nkey() && notification.messageI18nkey()) {
+      return {
+        title: notification.titleI18nkey(),
+        msg: notification.messageI18nkey(),
+        localize: true
+      };
+    } else if (notification.title() && notification.message()) {
+      return {
+        title: notification.title(),
+        msg: notification.message(),
+        localize: false
+      };
+    } else {
+      return undefined;
+    }
+  }
+
+  self.showNotification = ko.pureComputed(function() {
+    return !_.isEmpty(getNotificationFields(self.notification));
+  });
+
+  ko.computed(function() {
+    if (self.showNotification()) {
+      var fields = getNotificationFields(self.notification);
+      hub.send("show-dialog", {title: fields.title,
+                               localize: fields.localize,
+                               id: "user-notification-dialog",
+                               size: "medium",
+                               component: "ok-dialog",
+                               closeOnClick: true,
+                               componentParams: {text: fields.msg, localize: fields.localize}
+                              });
+    }
+  });
+
+  hub.subscribe({type: "dialog-close", id: "user-notification-dialog"}, function() {
+    ajax.command("remove-user-notification")
+      .complete(function () {
+        hub.send("reload-current-user");
+      })
+      .call();
   });
 
   hub.subscribe("login", function(data) {

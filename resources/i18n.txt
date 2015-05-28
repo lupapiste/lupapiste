@@ -1,1 +1,0 @@
-company-invite-confirm.desc: Lähetämme nyt valitsemasi yrityksen {0} pääkäyttäjälle viestin, että olet valtuuttanut yrityksen edustajien pääsyn hankkeellesi. Kun pääkäyttäjä vahvistaa viestin, on valtuutus valmis.
