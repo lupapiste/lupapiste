@@ -49,7 +49,9 @@
                                                     (sc/pred ss/blank?))
            (sc/optional-key :fise)                (util/max-length-string 255)
            (sc/optional-key :companyName)         (util/max-length-string 255)
-           (sc/optional-key :companyId)           (sc/pred util/finnish-y? "Not valid Y code")
+           (sc/optional-key :companyId)           (sc/either
+                                                    (sc/pred util/finnish-y? "Not valid Y code")
+                                                    (sc/pred ss/blank?))
            (sc/optional-key :allowDirectMarketing) sc/Bool
            (sc/optional-key :attachments)         (sc/pred vector? "Attachments are in a vector")
            (sc/optional-key :company)             {:id sc/Str :role sc/Str}
