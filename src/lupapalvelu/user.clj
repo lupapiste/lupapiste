@@ -1,5 +1,6 @@
 (ns lupapalvelu.user
   (:require [taoensso.timbre :as timbre :refer [debug debugf info warn warnf]]
+            [lupapalvelu.document.schemas :as schemas]
             [clj-time.core :as time]
             [clj-time.coerce :refer [to-date]]
             [monger.operators :refer :all]
@@ -43,7 +44,9 @@
                                                     (sc/pred ss/blank?))
            (sc/optional-key :phone)               (sc/maybe (util/max-length-string 255))
            (sc/optional-key :architect)           sc/Bool
-           (sc/optional-key :degree)              (util/max-length-string 255)
+           (sc/optional-key :degree)              (sc/either
+                                                    (apply sc/enum (map :name (:body schemas/koulutusvalinta)))
+                                                    (sc/pred ss/blank?))
            (sc/optional-key :graduatingYear)      (sc/either
                                                     (sc/both (util/min-length-string 4) (util/max-length-string 4))
                                                     (sc/pred ss/blank?))
