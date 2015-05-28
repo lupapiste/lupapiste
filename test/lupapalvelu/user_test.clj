@@ -5,7 +5,8 @@
             [lupapalvelu.user :refer :all]
             [slingshot.slingshot :refer [try+]]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.security :as security]))
+            [lupapalvelu.security :as security]
+            [schema.core :as sc]))
 
 ;;
 ;; ==============================================================================
@@ -166,4 +167,33 @@
 
   (fact "fails with uneven optional parameter pairs"
     (user-in-role {:id 1 :role :applicant} :reader :age) => (throws Exception)))
+
+;; ==========================================
+;; User schema
+;; =========================================
+
+
+
+(facts "User validation"
+  (fact "user skeleton is valid" (sc/check User user-skeleton) => nil)
+  (fact "id should exist"        (sc/check User (dissoc user-skeleton :id)) => {:id 'missing-required-key})
+  (fact "email and role should exist" (sc/check User (dissoc user-skeleton :email :role)) => {:email 'missing-required-key
+                                                                                              :role 'missing-required-key})
+  (fact "unknown key is not valid"        (sc/check User (assoc user-skeleton :unknown "nope")) => {:unknown 'disallowed-key})
+
+  (fact "invalid email is not valid" (sc/check User (assoc user-skeleton :email "invalid")) =not=> (partial :email))
+  (fact "role is enumerated" (sc/check User (assoc user-skeleton :role "wrong")) =not=> (partial :role))
+  (fact "role applicant is allowed" (sc/check User (assoc user-skeleton :role "applicant")) => nil)
+
+  (fact "enabled can only be bool" (and
+                                     (nil? (sc/check User (assoc user-skeleton :enabled false))) ; true
+                                     (:enabled (sc/check User (assoc user-skeleton :enabled "false"))))) ; false
+  (fact "only valid finnish zips" (and
+                                    (nil? (sc/check User (assoc user-skeleton :zip "33100"))) ; true
+                                    (:zip (sc/check User (assoc user-skeleton :zip 33100)))
+                                    (:zip (sc/check User (assoc user-skeleton :zip "123")))))
+  (fact "only valid finnish personids" (and
+                                         (nil? (sc/check User (assoc user-skeleton :personId "090615-690S"))) ; true
+                                         (:personId (sc/check User (assoc user-skeleton :personId "090615-690X")))))
+  )
 
