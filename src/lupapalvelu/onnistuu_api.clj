@@ -41,22 +41,23 @@
   (if-not ((set (map name i18n/languages)) lang) (fail! :bad-lang))
   (if (and (nil? (:currentUser signer)) (u/get-user-by-email (:email signer))) (fail! :email-in-use))
   (let [config       (env/value :onnistuu)
-        base-url     (or (env/value :onnistuu :return-base-url) (env/value :host))
+        base-url     (or (:return-base-url config) (env/value :host))
         document-url (str base-url "/api/sign/document")
         success-url  (str base-url "/api/sign/success")
+
         signer       (if (:currentUser signer) (-> signer
                                                    (assoc :email (:email user))
                                                    (assoc :currentUser (:id user)))
                                                signer)
-        process-data (p/init-sign-process (java.util.Date. created) (:crypto-key config) success-url document-url company signer lang)]
-    (ok :processId (:process-id process-data)
-        :form (html
-                (form/form-to [:post (:post-to config)]
-                              (form/hidden-field "customer"        (:customer-id config))
-                              (form/hidden-field "data"            (:data process-data))
-                              (form/hidden-field "iv"              (:iv process-data))
-                              (form/hidden-field "return_failure"  (str base-url "/api/sign/fail/" (:process-id process-data)))
-                              (form/submit-button ""))))))
+        process-data (p/init-sign-process (java.util.Date. created) (:crypto-key config) success-url document-url company signer lang)
+        failure-url  (str base-url "/api/sign/fail/" (:process-id process-data))]
+
+
+    (let [config-fields       (select-keys config [:post-to :customer-id])
+          process-data-fields (select-keys process-data [:process-id :data :iv])]
+      (ok (merge {:failure-url failure-url}
+                 config-fields
+                 process-data-fields)))))
 
 ; Cancel signing:
 
