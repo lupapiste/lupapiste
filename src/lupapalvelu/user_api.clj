@@ -277,7 +277,8 @@
 
     true))
 
-(def ^:private UserUpdate (dissoc user/User :role :email :username))
+;; Define schema for update data
+(def ^:private UserUpdate (dissoc user/User :id :role :email :username :enabled))
 
 (defn- validate-updatable-user [{user-data :data}]
   (when (sc/check UserUpdate user-data)
