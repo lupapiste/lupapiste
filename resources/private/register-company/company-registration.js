@@ -63,6 +63,11 @@
       self.processId(processId);
       self.state(self.stateReady);
     };
+
+    self.termsAccepted = ko.observable(false);
+    self.termsDocumentLink = ko.pureComputed(function() {
+      return "/api/sign/document/" + self.processId();
+    });
   }
 
   CompanyRegistration.prototype.clearModel = function(fieldNames) {
