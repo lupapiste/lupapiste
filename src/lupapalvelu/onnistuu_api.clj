@@ -49,11 +49,12 @@
         failure-url  (str base-url "/api/sign/fail/" (:process-id process-data))]
 
 
-    (let [config-fields       (select-keys config [:post-to :customer-id])
-          process-data-fields (select-keys process-data [:process-id :data :iv])]
-      (ok (merge {:failure-url failure-url}
-                 config-fields
-                 process-data-fields)))))
+    (ok (merge {:failure-url failure-url}
+               (select-keys config [:post-to
+                                    :customer-id])
+               (select-keys process-data [:process-id
+                                          :data
+                                          :iv])))))
 
 ; Cancel signing:
 
