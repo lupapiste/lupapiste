@@ -56,7 +56,7 @@
       return _.pick(ko.toJS(self.model()), self.companyFields);
     });
     self.signerData = ko.pureComputed(function() {
-      return _.pick(ko.toJS(self.model(), self.signerFieldNames));
+      return _.pick(ko.toJS(self.model()), self.signerFieldNames);
     });
 
     self.initSignCallback = function(processId) {
