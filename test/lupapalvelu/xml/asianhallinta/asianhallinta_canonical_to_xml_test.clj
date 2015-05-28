@@ -216,10 +216,10 @@
                 tteksti    (-> op :content second)]
             (count (:content operations)) => 1
             (fact "Toimenpide has ToimenpideTunnus and ToimenpideTeksti"
-              (sxml/get-text op [:Toimenpide :ToimenpideTunnus]) => (:primaryOperation application)
+              (sxml/get-text op [:Toimenpide :ToimenpideTunnus]) => (:name (:primaryOperation application))
               (sxml/get-text op [:Toimenpide :ToimenpideTeksti]) => (i18n/localize "fi"
                                                                       (str "operations."
-                                                                        (:primaryOperation application))))))
+                                                                        (:name (:primaryOperation application)))))))
 
         (fact "Sijainti"
           (sxml/get-text xml-parsed [:UusiAsia :Sijainti :Sijaintipiste]) => (str (get-in application [:location :x]) " " (get-in application [:location :y])))
