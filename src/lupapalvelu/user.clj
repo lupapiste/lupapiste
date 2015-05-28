@@ -44,7 +44,9 @@
            (sc/optional-key :phone)               (sc/maybe (util/max-length-string 255))
            (sc/optional-key :architect)           sc/Bool
            (sc/optional-key :degree)              (util/max-length-string 255)
-           (sc/optional-key :graduatingYear)      (sc/both (util/min-length-string 4) (util/max-length-string 4))
+           (sc/optional-key :graduatingYear)      (sc/either
+                                                    (sc/both (util/min-length-string 4) (util/max-length-string 4))
+                                                    (sc/pred ss/blank?))
            (sc/optional-key :fise)                (util/max-length-string 255)
            (sc/optional-key :companyName)         (util/max-length-string 255)
            (sc/optional-key :companyId)           (sc/pred util/finnish-y? "Not valid Y code")
