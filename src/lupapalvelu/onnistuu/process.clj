@@ -19,6 +19,7 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.company :as c]
             [lupapalvelu.user :as u]
+            [lupapalvelu.notifications :as notifications]
             [lupapalvelu.docx :as docx]))
 
 (set! *warn-on-reflection* true)
@@ -153,6 +154,10 @@
      (process-update! ~'process :error ~'ts)
      (fail! :bad-request)))
 
+(notifications/defemail :onnistuu-success
+  {:model-fn  (fn [command conf recipient] command)
+   :recipients-fn (constantly [{:email (env/value :onnistuu :success :email)}])})
+
 (defn success! [process-id data iv ts]
   (let [process    (find-sign-process! process-id)
         signer     (:signer process)
@@ -163,20 +168,23 @@
                         (crypt/base64-decode)
                         (crypt/decrypt crypto-key crypto-iv)
                         (crypt/bytes->str)
-                        (json/decode))
-        {:strs [signatures stamp document]} resp
-        {:strs [type identifier name timestamp uuid]} (first signatures)]
+                        (json/decode)
+                        walk/keywordize-keys)
+        {:keys [signatures stamp document]} resp
+        {:keys [type identifier name timestamp uuid]} (first signatures)]
     (resp-assert! (:stamp process)          stamp       "wrong stamp")
     (resp-assert! (count signatures)        1           "number of signatures")
     (resp-assert! type                      "company"   "wrong signature type")
     (process-update! process :done ts :document document)
+
     (infof "sign:success:%s: OK: identifier [%s], company: [%s], document: [%s]"
            process-id
            identifier
            name
            document)
     (let [company  (c/create-company (merge (:company process) {:name name, :process-id process-id}))
-          token-id (if (nil? (:currentUser signer)) (c/add-user-after-company-creation! signer company :admin))]
+          token-id (if (nil? (:currentUser signer)) (c/add-user-after-company-creation! signer company :admin))
+          mail-model (assoc (select-keys process [:company :signer]) :document document :signature (first signatures))]
       (infof "sign:success:%s: company-created: y [%s], company: [%s], id: [%s], token: [%s]"
              process-id
              (:y company)
@@ -187,7 +195,8 @@
         (u/link-user-to-company! (:currentUser signer) (:id company) :admin)
         (infof "added current user to created-company: company [%s], user [%s]"
                (:id company)
-               (:currentUser signer))))
+               (:currentUser signer)))
+      (notifications/notify! :onnistuu-success mail-model))
     process))
 
 ;
