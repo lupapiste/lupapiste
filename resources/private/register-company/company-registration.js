@@ -53,10 +53,10 @@
 
     self.submitPressed = ko.observable(false);
     self.companyData = ko.pureComputed(function() {
-      return _.reduce(self.companyFields, function(a, k) { a[k] = this[k](); return a; }, {}, self.model());
+      return _.pick(ko.toJS(self.model()), self.companyFields);
     });
     self.signerData = ko.pureComputed(function() {
-      return _.reduce(self.signerFieldNames, function(a, k) { a[k] = this[k](); return a; }, {}, self.model());
+      return _.pick(ko.toJS(self.model(), self.signerFieldNames));
     });
 
     self.initSignCallback = function(processId) {
