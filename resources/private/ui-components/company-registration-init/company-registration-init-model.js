@@ -8,6 +8,7 @@ LUPAPISTE.CompanyRegistrationInitModel = function(params) {
   self.iv = ko.observable();
   self.returnFailure = ko.observable();
   self.postTo = ko.observable();
+  self.buttonEnabled = params.buttonEnabled;
 
   ajax
     .command("init-sign", {company: params.company(), signer: params.signer(), lang: loc.currentLanguage})
