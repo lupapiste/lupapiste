@@ -90,6 +90,8 @@
     var company = _.pick(ko.toJS(self.model()), self.companyFields);
     var signer = _.pick(ko.toJS(self.model()), self.signerFieldNames);
 
+    self.termsAccepted(false);
+
     if (!this.userNotLoggedIn()) {
       signer.currentUser = lupapisteApp.models.currentUser.id();
     }
