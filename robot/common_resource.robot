@@ -20,7 +20,8 @@ ${APPLICATIONS PATH}            /app/fi/applicant#!/applications
 ${AUTHORITY APPLICATIONS PATH}  /app/fi/authority#!/applications
 ${FIXTURE URL}                  ${SERVER}/dev/fixture
 ${CREATE URL}                   ${SERVER}/dev/create
-${LAST EMAIL URL}                    ${SERVER}/api/last-email
+${LAST EMAIL URL}               ${SERVER}/api/last-email?reset
+${LAST EMAILS URL}              ${SERVER}/api/last-emails?reset
 ${SELENIUM}                     ${EMPTY}
 
 *** Keywords ***
@@ -41,9 +42,13 @@ Go to login page
   Wait Until  Title should be  Lupapiste
   Wait Until  Page should contain  Haluan kirjautua palveluun
 
-Go to last email
+Open last email
   Go to  ${LAST EMAIL URL}
-  Wait until  Element should be visible  //*[@id='subject']
+  Wait until  Element should be visible  //*[@data-test-id='subject']
+
+Open all latest emails
+  Go to  ${LAST EMAILS URL}
+  Wait until  Element should be visible  //*[@data-test-id='subject']
 
 Applications page should be open
   Location should contain  ${APPLICATIONS PATH}
@@ -133,8 +138,6 @@ Close side panel
   Run keyword If  ${sidePanelOpen}  Click by id  open-${name}-side-panel
   Side panel should not be visible  ${name}
 
-Open last email
-  Go to  ${SERVER}/api/last-email
 
 #
 # Login stuff

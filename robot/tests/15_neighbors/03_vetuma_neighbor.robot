@@ -41,7 +41,7 @@ Mikko sends an email invitation to neighbor 'a'
 Mail is sent
   [Tags]  integration
   Open last email
-  Wait until  Element should contain  id=to  a@example.com
+  Wait until  Element should contain  xpath=//dd[@data-test-id='to']  a@example.com
 
 Neighbor clicks on email link and sees application
   [Tags]  integration

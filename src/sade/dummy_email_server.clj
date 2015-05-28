@@ -76,11 +76,11 @@
 
   (defn msg-header [msg]
     {:tag :dl :content [{:tag :dt :content "To"}
-                        {:tag :dd :attrs {:id "to"} :content [(:to msg)]}
+                        {:tag :dd :attrs {:data-test-id "to"} :content [(:to msg)]}
                         {:tag :dt :content "Subject"}
-                        {:tag :dd :attrs {:id "subject"} :content [(:subject msg)]}
+                        {:tag :dd :attrs {:data-test-id "subject"} :content [(:subject msg)]}
                         {:tag :dt :content "Time"}
-                        {:tag :dd :attrs {:id "time"} :content [(util/to-local-datetime (:time msg))]}]})
+                        {:tag :dd :attrs {:data-test-id "time"} :content [(util/to-local-datetime (:time msg))]}]})
 
   (defpage "/api/last-email" {reset :reset}
     (if-let [msg (last (messages :reset reset))]
