@@ -5,8 +5,7 @@
                                                                       application-tyonjohtajan-nimeaminen
                                                                       application-suunnittelijan-nimeaminen
                                                                       jatkolupa-application
-                                                                      aloitusoikeus-hakemus
-                                                                      ]]
+                                                                      aloitusoikeus-hakemus]]
             [lupapalvelu.xml.krysp.rakennuslupa-mapping :refer [rakennuslupa_to_krysp_212
                                                                 rakennuslupa_to_krysp_213
                                                                 rakennuslupa_to_krysp_214
@@ -76,8 +75,10 @@
            tyonjohtaja_212 => nil
            tyonjohtaja_213 => nil
            tyonjohtaja_216 => nil))
+
       (if validate-pysyva-tunnus?
         (fact "pysyva rakennusmuero" (xml/get-text lp-xml_212 [:rakennustunnus :valtakunnallinenNumero]) => "1234567892")))
+
 
     (let [lp-xml_215 (cr/strip-xml-namespaces (xml/parse xml_215_s))]
       ; Address format has changed in 2.1.5
@@ -88,6 +89,7 @@
       (xml/get-text lp-xml_215 [:osapuolitieto :Osapuoli :yritys :verkkolaskutustieto :Verkkolaskutus :ovtTunnus]) => "003712345678"
       (xml/get-text lp-xml_215 [:osapuolitieto :Osapuoli :yritys :verkkolaskutustieto :Verkkolaskutus :verkkolaskuTunnus]) => "laskutunnus-1234"
       (xml/get-text lp-xml_215 [:osapuolitieto :Osapuoli :yritys :verkkolaskutustieto :Verkkolaskutus :valittajaTunnus]) => "BAWCFI22")
+
 
     ; Alla oleva tekee jo validoinnin, mutta annetaan olla tuossa alla viela validointi, jottei tule joku riko olemassa olevaa validointia
 
