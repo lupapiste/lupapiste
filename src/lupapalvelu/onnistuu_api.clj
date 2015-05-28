@@ -4,9 +4,6 @@
             [noir.response :as resp]
             [noir.request :as request]
             [schema.core :as sc]
-            [hiccup.core :refer [html]]
-            [hiccup.page :refer [html5]]
-            [hiccup.form :as form]
             [slingshot.slingshot :refer [try+]]
             [sade.env :as env]
             [sade.core :refer [ok fail fail! now]]
@@ -44,7 +41,6 @@
         base-url     (or (:return-base-url config) (env/value :host))
         document-url (str base-url "/api/sign/document")
         success-url  (str base-url "/api/sign/success")
-
         signer       (if (:currentUser signer) (-> signer
                                                    (assoc :email (:email user))
                                                    (assoc :currentUser (:id user)))
