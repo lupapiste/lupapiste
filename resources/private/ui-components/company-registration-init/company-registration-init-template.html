@@ -3,7 +3,13 @@
 <body>
   <section class="page container">
     <script type="text/html" id="company-registration-init-template">
-      <div id="onnistuu-start-form"/>
+      <form id="onnistuu-start-form" data-bind="submit: startSigning, attr: { action: postTo}" method="POST">
+        <input id="customer" name="customer" type="hidden" data-bind="value: customerId"/>
+        <input id="data" name="data" type="hidden" data-bind="value: data"/>
+        <input id="iv" name="iv" type="hidden" data-bind="value: iv"/>
+        <input id="return_failure" name="return_failure" type="hidden" data-bind="value: returnFailure"/>
+        <input type="submit" value="Aloita" class="btn btn-primary" data-test-id="register-company-start-sign"/>
+      </form>
     </script>
   </section>
 </body>

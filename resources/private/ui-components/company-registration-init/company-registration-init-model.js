@@ -1,19 +1,29 @@
 LUPAPISTE.CompanyRegistrationInitModel = function(params) {
   "use strict";
 
+  var self = this;
+
+  self.customerId = ko.observable();
+  self.data = ko.observable();
+  self.iv = ko.observable();
+  self.returnFailure = ko.observable();
+  self.postTo = ko.observable();
+
   ajax
-    .command("init-sign", {company: params.company(), signer: params.signer(), lang: loc.currentLanguage}, this.pending)
+    .command("init-sign", {company: params.company(), signer: params.signer(), lang: loc.currentLanguage})
     .success(function(resp) {
-      $("#onnistuu-start-form")
-        .empty()
-        .html(resp.form)
-        .find(":submit")
-        .addClass("btn btn-primary")
-        .attr("value", loc("register.company.sign.begin"))
-        .attr("data-test-id", "register-company-start-sign");
-      params.processId(resp.processId);
-      //params.state(self.stateReady);
+      self.customerId(resp['customer-id']);
+      self.data(resp['data']);
+      self.iv(resp['iv']);
+      self.returnFailure(resp['failure-url']);
+      self.postTo(resp['post-to']);
+
+      params.processId(resp['process-id']);
       params.state(1);
-    })  
+    })
     .call();
+
+  self.startSigning = function() {
+    return true;
+  };
 };

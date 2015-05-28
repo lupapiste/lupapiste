@@ -73,7 +73,6 @@
       window.location.hash = "!/register-company-account-type";
       return;
     }
-    $("#onnistuu-start-form").empty();
     this.clearModel(this.companyFieldNames.concat(this.signerFieldNames));
     // check if user is already logged in
     if (lupapisteApp.models.currentUser && !lupapisteApp.models.currentUser.company.id()) {
@@ -95,19 +94,6 @@
 
     self.submitPressed(true);
 
-    // ajax
-    //   .command("init-sign", {company: company, signer: signer, lang: loc.currentLanguage}, this.pending)
-    //   .success(function(resp) {
-    //     $("#onnistuu-start-form")
-    //       .empty()
-    //       .html(resp.form)
-    //       .find(":submit")
-    //       .addClass("btn btn-primary")
-    //       .attr("value", loc("register.company.sign.begin"))
-    //       .attr("data-test-id", "register-company-start-sign");
-    //     self.processId(resp.processId).state(self.stateReady);
-    //   })
-    //   .call();
     window.location.hash = "!/register-company-signing";
   };
 
