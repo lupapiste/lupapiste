@@ -45,37 +45,10 @@
                         {:subject-key    "state-change"
                          :application-fn (fn [{id :id}] (domain/get-application-no-access-checking id))})
 
-;; Validators
-
-(defn- property-id? [^String s]
-  (and s (re-matches #"^[0-9]{14}$" s)))
-
-(defn property-id-parameters [params command]
-  (when-let [invalid (seq (filter #(not (property-id? (get-in command [:data %]))) params))]
-    (info "invalid property id parameters:" (s/join ", " invalid))
-    (fail :error.invalid-property-id :parameters (vec invalid))))
-
-(defn- validate-x [{{:keys [x]} :data}]
-  (when (and x (not (< 10000 (util/->double x) 800000)))
-    (fail :error.illegal-coordinates)))
-
-(defn- validate-y [{{:keys [y]} :data}]
-  (when (and y (not (<= 6610000 (util/->double y) 7779999)))
-    (fail :error.illegal-coordinates)))
-
-
-(defn- is-link-permit-required [application]
-  (or (= :muutoslupa (keyword (:permitSubtype application)))
-      (some #(operations/link-permit-required-operations (keyword (:name %))) (conj (seq (:secondaryOperations application)) (:primaryOperation application)))))
-
-(defn validate-link-permits [application]
-  (let [application (meta-fields/enrich-with-link-permit-data application)
-        linkPermits (-> application :linkPermitData count)]
-    (when (and (is-link-permit-required application) (zero? linkPermits))
-      (fail :error.permit-must-have-link-permit))))
-
-
 ;; Helpers
+
+(defn get-operations [application]
+  (conj (seq (:secondaryOperations application)) (:primaryOperation application)))
 
 (defn insert-application [application]
   (mongo/insert :applications (merge application (meta-fields/applicant-index application))))
@@ -97,8 +70,34 @@
   (when-let [link (some #(when (= (:type %) "lupapistetunnus") %) linkPermitData)]
     (domain/get-application-no-access-checking (:id link))))
 
-(defn get-operations [application]
-  (conj (seq (:secondaryOperations application)) (:primaryOperation application)))
+;; Validators
+
+(defn- property-id? [^String s]
+  (and s (re-matches #"^[0-9]{14}$" s)))
+
+(defn property-id-parameters [params command]
+  (when-let [invalid (seq (filter #(not (property-id? (get-in command [:data %]))) params))]
+    (info "invalid property id parameters:" (s/join ", " invalid))
+    (fail :error.invalid-property-id :parameters (vec invalid))))
+
+(defn- validate-x [{{:keys [x]} :data}]
+  (when (and x (not (< 10000 (util/->double x) 800000)))
+    (fail :error.illegal-coordinates)))
+
+(defn- validate-y [{{:keys [y]} :data}]
+  (when (and y (not (<= 6610000 (util/->double y) 7779999)))
+    (fail :error.illegal-coordinates)))
+
+
+(defn- is-link-permit-required [application]
+  (or (= :muutoslupa (keyword (:permitSubtype application)))
+      (some #(operations/link-permit-required-operations (keyword (:name %))) (get-operations application))))
+
+(defn validate-link-permits [application]
+  (let [application (meta-fields/enrich-with-link-permit-data application)
+        linkPermits (-> application :linkPermitData count)]
+    (when (and (is-link-permit-required application) (zero? linkPermits))
+      (fail :error.permit-must-have-link-permit))))
 
 ;;
 ;; Query application:
@@ -524,7 +523,7 @@
 
                 same-op-irs (filter
                               (fn [ir]
-                                (some #(= application-op-name (:name %)) (conj (seq (:secondaryOperations ir)) (:primaryOperation ir))))
+                                (some #(= application-op-name (:name %)) (get-operations application)))
                               inforequests)
 
                 others (remove-irs-by-id inforequests same-op-irs)
