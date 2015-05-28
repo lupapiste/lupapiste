@@ -153,7 +153,7 @@
      (process-update! ~'process :error ~'ts)
      (fail! :bad-request)))
 
-(defn success [process-id data iv ts]
+(defn success! [process-id data iv ts]
   (let [process    (find-sign-process! process-id)
         signer     (:signer process)
         crypto-key (-> (env/value :onnistuu :crypto-key) (crypt/str->bytes) (crypt/base64-decode))
