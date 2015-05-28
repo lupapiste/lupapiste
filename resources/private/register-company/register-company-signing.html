@@ -30,13 +30,8 @@
           <input id="termsAccepted" type="checkbox" data-bind="checked: termsAccepted" class="form-input"/>
           <label for="termsAccepted" data-bind="ltext: 'register.company.sign.terms-accepted'" class="form-label-checkbox"/>
         </div>
-        
-        <!-- ko if: submitPressed -->
-          <span data-bind="component: {name: 'company-registration-init', params: { company: companyData,
-                                                                                    signer: signerData,
-                                                                                    processIdCallback: initSignCallback,
-                                                                                    buttonEnabled: termsAccepted }}"></span>
-        <!-- /ko -->
+        <span data-bind="component: {name: 'company-registration-init', params: { processIdCallback: initSignCallback,
+                                                                                  buttonEnabled: termsAccepted }}"></span>
         <button data-bind="click: cancelSign, ltext: 'cancel'" data-test-id="register-company-cancel-sign" type="button" class="btn"></button>
 
         <h1 data-bind="ltext: 'register.company.onnistuu.title'"></h1>

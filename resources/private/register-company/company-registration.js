@@ -51,14 +51,6 @@
       return true;
     };
 
-    self.submitPressed = ko.observable(false);
-    self.companyData = ko.pureComputed(function() {
-      return _.pick(ko.toJS(self.model()), self.companyFields);
-    });
-    self.signerData = ko.pureComputed(function() {
-      return _.pick(ko.toJS(self.model()), self.signerFieldNames);
-    });
-
     self.initSignCallback = function(processId) {
       self.processId(processId);
       self.state(self.stateReady);
@@ -94,15 +86,15 @@
   };
 
   CompanyRegistration.prototype.submitInfo = function() {
-    var company = _.reduce(this.companyFieldNames.concat(this.accountFieldNames), function(a, k) { a[k] = this[k](); return a; }, {}, this.model()),
-        signer = _.reduce(this.signerFieldNames, function(a, k) { a[k] = this[k](); return a; }, {}, this.model()),
-        self = this;
+    var self = this;
+    var company = _.pick(ko.toJS(self.model()), self.companyFields);
+    var signer = _.pick(ko.toJS(self.model()), self.signerFieldNames);
 
     if (!this.userNotLoggedIn()) {
       signer.currentUser = lupapisteApp.models.currentUser.id();
     }
-
-    self.submitPressed(true);
+    
+    hub.send("company-info-submitted", {company: company, signer: signer});
 
     window.location.hash = "!/register-company-signing";
   };
