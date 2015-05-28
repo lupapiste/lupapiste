@@ -136,4 +136,4 @@
   ; Load dummy onnistuu.fi simulator:
   ;
 
-  (require 'lupapalvelu.onnistuu.dummy-server))
+  (require 'lupapalvelu.onnistuu.dummy-onnistuu-server))
