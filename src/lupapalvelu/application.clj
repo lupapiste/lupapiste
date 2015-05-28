@@ -48,7 +48,7 @@
 ;; Helpers
 
 (defn get-operations [application]
-  (conj (seq (:secondaryOperations application)) (:primaryOperation application)))
+  (remove nil? (conj (seq (:secondaryOperations application)) (:primaryOperation application))))
 
 (defn insert-application [application]
   (mongo/insert :applications (merge application (meta-fields/applicant-index application))))
