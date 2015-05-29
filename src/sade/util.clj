@@ -378,6 +378,10 @@
 (defn max-length-string [max-len]
   (sc/both sc/Str (max-length max-len)))
 
+(def Fn (sc/pred fn? "Function"))
+
+(def IFn (sc/pred ifn? "Function"))
+
 (def difficulty-values ["AA" "A" "B" "C" "ei tiedossa"])    ;TODO: move this to schemas?
 (defn compare-difficulty [a b]                              ;TODO: make this function more generic by taking the key and comparison values as param? E.g. compare-against [a b key ref-values]
   (let [a (:difficulty a)

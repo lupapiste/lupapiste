@@ -100,7 +100,7 @@
 
 (defpage "/api/sign/success/:id" {:keys [id data iv]}
   (with-error-handling
-    (let [process (p/success id data iv (now))
+    (let [process (p/success! id data iv (now))
           lang    (-> process :lang)]
       (if (nil? (get-in process [:signer :currentUser]))
         (resp/redirect (str (env/value :host) "/app/" lang "/welcome#!/register-company-success"))
@@ -134,4 +134,4 @@
   ; Load dummy onnistuu.fi simulator:
   ;
 
-  (require 'lupapalvelu.onnistuu.dummy-server))
+  (require 'lupapalvelu.onnistuu.dummy-onnistuu-server))

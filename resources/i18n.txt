@@ -1,1 +1,2 @@
 register.company.form.personId: Henkilötunnus
+email.title.onnistuu-success: Uusi onnistuu.fi allekirjoitus
