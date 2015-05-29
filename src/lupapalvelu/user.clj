@@ -39,13 +39,14 @@
                                                            "dummy"
                                                            "rest-api"
                                                            "trusted-etl")
-           :email                                 (sc/pred util/valid-email? "Not valid email")
-           :username                              sc/Str
+           :email                                 (sc/both
+                                                    (sc/pred util/valid-email? "Not valid email")
+                                                    (util/max-length-string 255))
+           :username                              (util/max-length-string 255)
            :enabled                               sc/Bool
-           (sc/optional-key :private)             (sc/both
-                                                    {(sc/optional-key :password) sc/Str
-                                                    (sc/optional-key :apikey) sc/Str})
-           (sc/optional-key :orgAuthz)            sc/Any
+           (sc/optional-key :private)             {(sc/optional-key :password) sc/Str
+                                                   (sc/optional-key :apikey) sc/Str}
+           (sc/optional-key :orgAuthz)            {sc/Keyword (sc/pred vector? "OrgAuthz must be vector")}
            (sc/optional-key :personId)            (sc/pred util/finnish-hetu? "Not valid hetu")
            (sc/optional-key :street)              (sc/maybe (util/max-length-string 255))
            (sc/optional-key :city)                (sc/maybe (util/max-length-string 255))
@@ -73,8 +74,8 @@
            (sc/optional-key :partnerApplications) {:rakentajafi {:id sc/Str
                                                                  :created sc/Int
                                                                  :origin sc/Bool}}
-           (sc/optional-key :notification)         {:messageI18nkey sc/Str
-                                                    :titleI18nkey   sc/Str}})
+           (sc/optional-key :notification)        {:messageI18nkey sc/Str
+                                                   :titleI18nkey   sc/Str}})
 
 ;;
 ;; ==============================================================================
