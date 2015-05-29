@@ -63,10 +63,10 @@
       (< (.length v) (or (:min-len elem) 0))) [:warn "illegal-value:too-short"]))
 
 (defn- validate-hetu-date [hetu]
-  (let [dateparsts (rest (re-find #"^(\d{2})(\d{2})(\d{2})([aA+-]).*" hetu))
-        yy (last (butlast dateparsts))
-        yyyy (str (case (last dateparsts) "+" "18" "-" "19" "20") yy)
-        basic-date (str yyyy (second dateparsts) (first dateparsts))]
+  (let [dateparts (rest (re-find #"^(\d{2})(\d{2})(\d{2})([aA+-]).*" hetu))
+        yy (last (butlast dateparts))
+        yyyy (str (case (last dateparts) "+" "18" "-" "19" "20") yy)
+        basic-date (str yyyy (second dateparts) (first dateparts))]
     (try
       (timeformat/parse (timeformat/formatters :basic-date) basic-date)
       nil
