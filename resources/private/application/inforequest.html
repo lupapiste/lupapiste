@@ -26,7 +26,8 @@
           </h1>
 
           <h2 data-bind="if: primaryOperation">
-            <span data-bind="ltext: primaryOperationName, attr: {'data-test-primary-operation-id': primaryOperation().name}"></span>
+            <span data-test-id="test-application-primary-operation"
+                  data-bind="ltext: primaryOperationName, attr: {'data-test-primary-operation-id': primaryOperation().name}"></span>
           </h2>
 
           <!-- Property ID: -->
