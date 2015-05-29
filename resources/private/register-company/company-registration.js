@@ -32,7 +32,7 @@
     self.accountFieldNames = ["accountType"];
     self.companyFieldNames = ["name", "y", "reference", "address1", "po", "zip", "country", "ovt", "pop"];
     self.companyFields = self.companyFieldNames.concat(self.accountFieldNames);
-    self.signerFieldNames = ["firstName", "lastName", "email"];
+    self.signerFieldNames = ["firstName", "lastName", "email", "personId"];
 
     self.stateInfo  = 0;
     self.stateReady = 1;
