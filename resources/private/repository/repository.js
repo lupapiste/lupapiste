@@ -81,8 +81,6 @@ var repository = (function() {
           loading = loadingResponse[0],
           application = loading.application;
 
-      application.allOperations = getAllOperations(application);
-
       function setSchema(doc) {
         var schemaInfo = doc["schema-info"];
         var schema = findSchema(schemas, schemaInfo.name, schemaInfo.version);
@@ -103,7 +101,7 @@ var repository = (function() {
       if (application) {
         if (application.id === currentlyLoadingId) {
           currentlyLoadingId = null;
-
+          application.allOperations = getAllOperations(application);
           _.each(application.documents || [], function(doc) {
             setOperation(application, doc);
             setSchema(doc);
