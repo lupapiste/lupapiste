@@ -11,7 +11,7 @@
             [slingshot.slingshot :refer [throw+]]
             [noir.response :as resp]
             [sade.env :as env]
-            [sade.util :refer [max-length-string valid-email?]]
+            [sade.util :refer [max-length-string valid-email? valid-hetu?]]
             [sade.core :refer [ok]]
             [sade.crypt :as crypt]
             [lupapalvelu.mongo :as mongo]
@@ -46,7 +46,8 @@
 (def Signer {(sc/optional-key :currentUser) (sc/pred mongo/valid-key? "valid key")
              :firstName (max-length-string 64)
              :lastName  (max-length-string 64)
-             :email     (sc/pred valid-email? "valid email")})
+             :email     (sc/pred valid-email? "valid email")
+             :personId  (sc/pred valid-hetu? "valid hetu")})
 
 ;
 ; Utils:
