@@ -73,8 +73,8 @@
            (sc/optional-key :partnerApplications) {:rakentajafi {:id sc/Str
                                                                  :created sc/Int
                                                                  :origin sc/Bool}}
-           (sc/optional-key :notification         {:messageI18nkey sc/Str
-                                                   :titleI18nkey   sc/Str})})
+           (sc/optional-key :notification)         {:messageI18nkey sc/Str
+                                                    :titleI18nkey   sc/Str}})
 
 ;;
 ;; ==============================================================================
