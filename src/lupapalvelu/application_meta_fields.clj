@@ -162,7 +162,10 @@
                                                             :primaryOperation :name))]
                                {:id link-permit-id :type link-permit-type :operation link-permit-app-op})
 
-                             {:id link-permit-id :type link-permit-type})))]
+                             (let [link-permit-app-op (when (= (:type ((keyword link-permit-id) link-data)) "application")
+                                                        (-> (mongo/by-id "applications" link-permit-id {:primaryOperation 1})
+                                                          :primaryOperation :name))]
+                               {:id link-permit-id :type link-permit-type :operation link-permit-app-op}))))]
 
         (-> app
           (assoc :linkPermitData (when (seq our-link-permits)
