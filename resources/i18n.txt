@@ -1,1 +1,0 @@
-register.company.form.personId: Henkilötunnus
