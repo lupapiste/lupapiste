@@ -30,6 +30,9 @@ Bob decides to register his company after all, but still chikens out
   Click enabled by test id  register-company-submit
   Wait Until  Element Should Be Disabled  xpath=//*[@data-test-id='register-company-submit']
   Element Should Be Disabled  xpath=//*[@data-test-id='register-company-cancel']
+  Element Should Be Disabled  xpath=//*[@data-test-id='register-company-start-sign']
+  Checkbox Should Not Be Selected  termsAccepted
+  Select Checkbox  termsAccepted
   Wait until  Element Should Be Enabled  xpath=//*[@data-test-id='register-company-start-sign']
   Wait until  Element Should Be Enabled  xpath=//*[@data-test-id='register-company-cancel-sign']
   Click Element  xpath=//*[@data-test-id='register-company-cancel-sign']
@@ -50,6 +53,8 @@ Bob decides to register his company after all, and this time he means it
   Click enabled by test id  register-company-submit
   Wait Until  Element Should Be Disabled  xpath=//*[@data-test-id='register-company-submit']
   Element Should Be Disabled  xpath=//*[@data-test-id='register-company-cancel']
+  Element Should Be Disabled  xpath=//*[@data-test-id='register-company-start-sign']
+  Select Checkbox  termsAccepted
   Wait until  Element Should Be Enabled  xpath=//*[@data-test-id='register-company-start-sign']
   Wait until  Element Should Be Enabled  xpath=//*[@data-test-id='register-company-cancel-sign']
   Click Element  xpath=//*[@data-test-id='register-company-start-sign']
