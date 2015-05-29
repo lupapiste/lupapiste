@@ -1,10 +1,14 @@
 *** Settings ***
 
 Documentation   User signs company agreement
-Suite setup     Apply minimal fixture now
 Resource        ../../common_resource.robot
 
 *** Test Cases ***
+
+Setup
+  Apply minimal fixture now
+  Go to  ${LAST EMAIL URL}
+  Go to  ${LOGIN URL}
 
 Bob decides to register his company, but then cancels his mind
   Wait and click  register-button
@@ -65,11 +69,10 @@ Bob decides to register his company after all, and this time he means it
 
 Registrations succeeds, user gets email
   Wait until  Element should be visible  xpath=//section[@id='register-company-success']
-  Open last email
+  Open all latest emails
   Wait Until  Page Should Contain  puuha.pete@pete-rakennus.fi
   Page Should Contain  new-company-user
-  ${subject} =  Execute Javascript  return document.getElementById("subject").innerHTML
-  Should Be Equal  ${subject}  Lupapiste.fi: Kutsu Lupapiste-palveluun yritystilin pääkäyttäjäksi
+  Wait until     Element Text Should Be  xpath=//dd[@data-test-id='subject']  Lupapiste.fi: Kutsu Lupapiste-palveluun yritystilin pääkäyttäjäksi
 
 Second link in email should lead to password reset
   Click Element  xpath=(//a)[2]
