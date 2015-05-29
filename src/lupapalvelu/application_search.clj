@@ -86,15 +86,6 @@
       (update-in or-query [$or] concat [{:primaryOperation.name {$in ops}} {:secondaryOperations.name {$in ops}}])
       or-query)))
 
-(defn- make-free-text-query [filter-search]
-  (let [or-query {$or [{:address {$regex filter-search $options "i"}}
-                       {:verdicts.kuntalupatunnus {$regex filter-search $options "i"}}
-                       {:_applicantIndex {$regex filter-search $options "i"}}]}
-        ops (operation-names filter-search)]
-    (if (seq ops)
-      (update-in or-query [$or] conj {:operations.name {$in ops}})
-      or-query)))
-
 (defn- make-text-query [filter-search]
   {:pre [filter-search]}
   (cond
@@ -169,8 +160,8 @@
      :sEcho                 echo}))
 
 
-(defn public-fields [{:keys [municipality submitted operations]}]
-  (let [op-name (-> operations first :name)]
+(defn public-fields [{:keys [municipality submitted primaryOperation]}]
+  (let [op-name (:name primaryOperation)]
     {:municipality municipality
      :timestamp submitted
      :operation (i18n/localize :fi "operations" op-name)
