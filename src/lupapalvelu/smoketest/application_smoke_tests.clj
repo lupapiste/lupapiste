@@ -138,10 +138,10 @@
 
 (defmonster valid-users
   (let [results (seq (remove nil? (map
-                                    #(if-let [res (sc/check user/User %)]
+                                    #(when-let [res (sc/check user/User %)]
                                        (assoc (select-keys % [:id :username]) :errors res))
                                     @users)))]
-    (if (seq results)
+    (if results
       {:ok false :results results}
       {:ok true})))
 
@@ -150,7 +150,8 @@
                                    #(when (and (= "dummy" (:role %))
                                                (not (:enabled %)))
                                       (when (-> % :private :password)
-                                        %)) @users)))]
+                                        %))
+                                   @users)))]
    (if (seq results)
      {:ok false :results results}
      {:ok true})))

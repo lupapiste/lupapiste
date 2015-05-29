@@ -207,6 +207,5 @@
 
   (fact "degree is enumerated"
         (-> (sc/check User (assoc user-skeleton :degree "wrong")) :degree) =not=> nil
-        (-> (sc/check User (assoc user-skeleton :degree "arkkitehti")) :degree) => nil)
-  )
+        (-> (sc/check User (assoc user-skeleton :degree "arkkitehti")) :degree) => nil))
 
