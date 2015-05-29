@@ -20,8 +20,8 @@
              <span data-bind="ltext: 'edit.address'"></span></a>
           </h1>
 
-          <h2>
-            <span data-bind="ltext: primaryOperationName"></span>
+          <h2 data-bind="if: primaryOperation">
+            <span data-bind="ltext: primaryOperationName, attr: {'data-test-primary-operation-id': primaryOperation().name}"></span>
           </h2>
 
           <!-- State: -->
@@ -77,7 +77,7 @@
           <!-- Operations: -->
           <!-- ko if: $root.permitSubtypes().length == 0 -->
           <div>
-            <p data-bind="ltext: 'application.operations'"></p>
+            <p data-bind="ltext: 'application.operations.secondary'"></p>
             <!-- ko if: operationsCount() && operationsCount().length > 0 -->
             <ul data-bind="foreach: operationsCount">
               <li>
@@ -85,12 +85,12 @@
                   <span data-bind="text: count"></span>
                   <span>&#x00D7;</span>
                 </span>
-                <span data-bind="ltext: 'operations.' + name, attr: {'data-test-operation-id': name}" data-test-id="test-application-operation"></span>
+                <span data-bind="ltext: 'operations.' + name, attr: {'data-test-secondary-operation-id': name}" data-test-id="test-application-operation"></span>
               </li>
             </ul>
             <!-- /ko -->
             <!-- ko if: operationsCount() && operationsCount().length === 0 -->
-            <p>Ei toissijaisia toimenpiteita</p>
+            <p data-bind="ltext: 'application.operations.secondary.none'"></p>
             <!-- /ko -->
           </div>
           <!-- /ko -->
