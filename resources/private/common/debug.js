@@ -133,7 +133,8 @@ jQuery(function($) {
           pop:       "003776543212",
           firstName: "fo",
           lastName:  "ba",
-          email:     "fo@ba.com"
+          email:     "fo@ba.com",
+          personId:  "131052-308T"
         };
         if (lupapisteApp.models.currentUser) {
           delete formData.firstName;

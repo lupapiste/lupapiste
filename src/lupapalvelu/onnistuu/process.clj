@@ -85,7 +85,8 @@
         process-id   (random-password 40)
         stamp        (random-password 40)
         company-name (:name company)
-        company-y    (:y company)]
+        company-y    (:y company)
+        hetu         (:personId signer)]
     (infof "sign:init-sign-process:%s: company-name [%s], y [%s], email [%s]" process-id company-name company-y (:email signer))
     (mongo/insert :sign-processes {:_id       process-id
                                    :stamp     stamp
@@ -99,7 +100,7 @@
      :data       (->> {:stamp           stamp
                        :return_success  (str success-url "/" process-id)
                        :document        (str document-url "/" process-id)
-                       :requirements    [{:type :company, :identifier company-y}]}
+                       :requirements    [{:type :person, :identifier hetu}]}
                       (json/encode)
                       (crypt/str->bytes)
                       (crypt/encrypt (-> crypto-key (crypt/str->bytes) (crypt/base64-decode)) crypto-iv)
