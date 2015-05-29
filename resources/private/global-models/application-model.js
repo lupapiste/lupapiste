@@ -30,6 +30,7 @@ LUPAPISTE.ApplicationModel = function() {
   self.address = ko.observable();
   self.secondaryOperations = ko.observable();
   self.primaryOperation = ko.observable();
+  self.allOperations = ko.observable();
   self.permitSubtype = ko.observable();
   self.operationsCount = ko.observable();
   self.applicant = ko.observable();

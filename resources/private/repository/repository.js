@@ -55,6 +55,10 @@ var repository = (function() {
     }
   }
 
+  function getAllOperations(application) {
+    return [application.primaryOperation].concat(application.secondaryOperations);
+  };
+
   function loadingErrorHandler(id, e) {
     currentlyLoadingId = null;
     error("Application " + id + " not found", e);
@@ -77,6 +81,8 @@ var repository = (function() {
           loading = loadingResponse[0],
           application = loading.application;
 
+      application.allOperations = getAllOperations(application);
+
       function setSchema(doc) {
         var schemaInfo = doc["schema-info"];
         var schema = findSchema(schemas, schemaInfo.name, schemaInfo.version);
@@ -87,7 +93,7 @@ var repository = (function() {
       function setOperation(application, doc) {
         var schemaInfo = doc["schema-info"];
         if (schemaInfo.op) {
-          var op = _.findWhere([application.primaryOperation].concat(application.secondaryOperations), {id: schemaInfo.op.id});
+          var op = _.findWhere(application.allOperations, {id: schemaInfo.op.id});
           if (op) {
             schemaInfo.op = op;
           }
@@ -116,7 +122,7 @@ var repository = (function() {
           });
           _.each(application.attachments ||[], function(att) {
             calculateAttachmentStateIndicators(att, application);
-            setAttachmentOperation(application.operations, att);
+            setAttachmentOperation(application.allOperations, att);
           });
           hub.send("application-loaded", {applicationDetails: loading});
           if (_.isFunction(callback)) {
