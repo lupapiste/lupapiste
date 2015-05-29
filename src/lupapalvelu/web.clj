@@ -400,13 +400,13 @@
         session-user (get-in request [:session :user])
         expires (:expires session-user)
         expired? (and expires (not (user/virtual-user? session-user)) (< expires (now)))
-        updated-user (and expired? (user/get-user {:id (:id session-user), :enabled true}))
+        updated-user (and expired? (user/session-summary (user/get-user {:id (:id session-user), :enabled true})))
         user (or api-key-auth updated-user session-user)]
     (if (and expired? (not updated-user))
       (resp/status 401 "Unauthorized")
       (let [response (handler (assoc request :user user))]
         (if (and response updated-user)
-          (ssess/merge-to-session request response {:user (user/session-summary updated-user)})
+          (ssess/merge-to-session request response {:user updated-user})
           response)))))
 
 (defn wrap-authentication

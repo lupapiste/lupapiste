@@ -1,4 +1,3 @@
-company-invite-confirm.desc: Lähetämme nyt valitsemasi yrityksen {0} pääkäyttäjälle viestin, että olet valtuuttanut yrityksen edustajien pääsyn hankkeellesi. Kun pääkäyttäjä vahvistaa viestin, on valtuutus valmis.
 error.invalid-user-data: Tarkista syöttämäsi tiedot
 register.company.sign.download-contract: Lataa sopimus-PDF luettavaksi
 register.company.sign.terms-accepted: Olen lukenut ja hyväksynyt sopimusehdot
