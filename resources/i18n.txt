@@ -1,2 +1,1 @@
-register.company.sign.download-contract: Lataa sopimus-PDF luettavaksi
-register.company.sign.terms-accepted: Olen lukenut ja hyväksynyt sopimusehdot
+register.company.form.personId: Henkilötunnus
