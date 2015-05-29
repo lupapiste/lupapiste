@@ -121,6 +121,12 @@
    Use get-application-xml-getter to fetch the XML."
   (get-metadata permit-type :verdict-krysp-reader))
 
+(defn get-verdict-validator [permit-type]
+  "Returns a function that validates verdicts from KRYSP xml.
+   Function takes xml as parameter.
+   Use get-application-xml-getter to fetch the XML."
+  (get-metadata permit-type :verdict-krysp-validator))
+
 (defn get-verdict-extras-reader [permit-type]
   "Returns a function that reads some extras from verdict KRYSP xml.
    Function takes xml as parameter and returns a map that should be merged into the application."

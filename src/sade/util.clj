@@ -264,6 +264,11 @@
                 4 "%02d:%02d:%02d.%d")]
       (apply format fmt (map ->int matches)))))
 
+(defn to-long [s]
+  "Parses string to long. If string is not numeric returns nil."
+  (when (numeric? s)
+    (Long/parseLong s)))
+
 (defn valid-email? [email]
   (try
     (javax.mail.internet.InternetAddress. email)
@@ -349,6 +354,11 @@
 (defn finnish-zip? [^String zip-code]
   (boolean (when zip-code (re-matches #"^\d{5}$" zip-code))))
 
+(defn finnish-hetu? [^String hetu] ; TODO remove this and use valid-hetu? function from Tommi's branch when applicable
+  (if (re-matches #"^(0[1-9]|[12]\d|3[01])(0[1-9]|1[0-2])([5-9]\d\+|\d\d-|\d\dA)\d{3}[\dA-Y]$" hetu)
+    (= (subs hetu 10 11) (hetu-checksum hetu))
+    false))
+
 ;;
 ;; Schema utils:
 ;;
@@ -372,6 +382,10 @@
 
 (defn max-length-string [max-len]
   (sc/both sc/Str (max-length max-len)))
+
+(def Fn (sc/pred fn? "Function"))
+
+(def IFn (sc/pred ifn? "Function"))
 
 (def difficulty-values ["AA" "A" "B" "C" "ei tiedossa"])    ;TODO: move this to schemas?
 (defn compare-difficulty [a b]                              ;TODO: make this function more generic by taking the key and comparison values as param? E.g. compare-against [a b key ref-values]

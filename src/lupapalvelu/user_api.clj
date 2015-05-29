@@ -7,6 +7,7 @@
             [noir.core :refer [defpage]]
             [slingshot.slingshot :refer [throw+]]
             [monger.operators :refer :all]
+            [schema.core :as sc]
             [sade.util :refer [future*]]
             [sade.env :as env]
             [sade.strings :as ss]
@@ -182,7 +183,7 @@
         {old-id :id old-role :role}  old-user
         notification {:titleI18nkey "user.notification.firstLogin.title"
                       :messageI18nkey "user.notification.firstLogin.message"}
-        new-user   (if (= (keyword (:role user-data)) :applicant)
+        new-user   (if (user/applicant? user-data)
                      (assoc new-user :notification notification)
                      new-user)]
     (try
@@ -276,8 +277,16 @@
 
     true))
 
+;; Define schema for update data
+(def ^:private UserUpdate (dissoc user/User :id :role :email :username :enabled))
+
+(defn- validate-updatable-user [{user-data :data}]
+  (when (sc/check UserUpdate user-data)
+    (fail :error.invalid-user-data)))
+
 (defcommand update-user
-  {:user-roles #{:applicant :authority :authorityAdmin :admin}}
+  {:user-roles #{:applicant :authority :authorityAdmin :admin}
+   :input-validators [validate-updatable-user]}
   [{caller :user user-data :data :as command}]
   (let [email     (user/canonize-email (or (:email user-data) (:email caller)))
         user-data (assoc user-data :email email)]
@@ -340,6 +349,26 @@
         update-count     (mongo/update-n :users query {$unset {(str "orgAuthz." organization) ""}})]
     (if (pos? update-count)
       (ok :operation "remove")
+      (fail :error.user-not-found))))
+
+(defn allowed-roles [allowed-roles command]
+  (let [roles (get-in command [:data :roles])
+        filtered-roles (->> roles (map keyword) (filter allowed-roles))
+        ok (= (count roles)
+              (count filtered-roles))]
+    (when-not ok
+      (fail :invalid.roles))))
+
+(defcommand update-user-roles
+  {:parameters [email roles organization]
+   :input-validators [(partial action/non-blank-parameters [:email :organization])
+                      (partial action/vector-parameters-with-at-least-n-non-blank-items 1 [:roles])
+                      action/email-validator
+                      (partial allowed-roles action/authority-roles)]
+   :user-roles #{:authorityAdmin}}
+  (let [update-count (mongo/update-n :users {:email (user/canonize-email email)} {$set {(str "orgAuthz." organization) roles}})]
+    (if (= 1 update-count)
+      (ok)
       (fail :error.user-not-found))))
 
 (defmethod token/handle-token :authority-invitation [{{:keys [email organization caller-email]} :data} {password :password}]
@@ -641,5 +670,5 @@
 
 (defcommand remove-user-notification
   {:user-roles #{:applicant}}
-  [{user :user}]
-  (mongo/update :users {:email (user/canonize-email (:email user))} {$unset {:notification 1}}))
+  [{{id :id} :user}]
+  (mongo/update-by-id :users id {$unset {:notification 1}}))

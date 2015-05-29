@@ -20,7 +20,8 @@ ${APPLICATIONS PATH}            /app/fi/applicant#!/applications
 ${AUTHORITY APPLICATIONS PATH}  /app/fi/authority#!/applications
 ${FIXTURE URL}                  ${SERVER}/dev/fixture
 ${CREATE URL}                   ${SERVER}/dev/create
-${LAST EMAIL URL}                    ${SERVER}/api/last-email
+${LAST EMAIL URL}               ${SERVER}/api/last-email?reset=true
+${LAST EMAILS URL}              ${SERVER}/api/last-emails?reset=true
 ${SELENIUM}                     ${EMPTY}
 
 *** Keywords ***
@@ -41,9 +42,13 @@ Go to login page
   Wait Until  Title should be  Lupapiste
   Wait Until  Page should contain  Haluan kirjautua palveluun
 
-Go to last email
+Open last email
   Go to  ${LAST EMAIL URL}
-  Wait until  Element should be visible  //*[@id='subject']
+  Wait until  Element should be visible  //*[@data-test-id='subject']
+
+Open all latest emails
+  Go to  ${LAST EMAILS URL}
+  Wait until  Element should be visible  //*[@data-test-id='subject']
 
 Applications page should be open
   Location should contain  ${APPLICATIONS PATH}
@@ -133,8 +138,6 @@ Close side panel
   Run keyword If  ${sidePanelOpen}  Click by id  open-${name}-side-panel
   Side panel should not be visible  ${name}
 
-Open last email
-  Go to  ${SERVER}/api/last-email
 
 #
 # Login stuff
@@ -800,6 +803,14 @@ Fill in new password
   Click Element  xpath=//section[@id='${section}']//button
   Wait Until  Page should contain  Salasana asetettu.
   Confirm  dynamic-ok-confirm-dialog
+
+Open company user listing
+  Click Element  user-name
+  Wait Until  Element Should be visible  //*[@data-test-id='save-my-userinfo']
+  Element should be visible  //div[@data-test-id='my-company']
+  Click button  Hallinnoi yrityksen käyttäjiä
+  Wait until  Element should be visible  company
+
 
 #
 # Mock Ajax calls: jquery.mockjax

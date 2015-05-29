@@ -1,15 +1,18 @@
 (ns lupapalvelu.smoketest.application-smoke-tests
-  (:require [lupapalvelu.smoketest.core :refer [defmonster]]
+  (:require [schema.core :as sc]
+            [lupapalvelu.smoketest.core :refer [defmonster]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.action :as action]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.application :refer [get-operations]]
+            [lupapalvelu.user :as user]
             [lupapalvelu.server] ; ensure all namespaces are loaded
             ))
 
 (def applications (delay (mongo/select :applications)))
 (def submitted-applications (delay (mongo/select :submitted-applications)))
 (def organizations (delay (mongo/select :organizations)))
+(def users (delay (mongo/select :users)))
 
 (defn- validate-doc [ignored-errors application {id :id schema-info :schema-info :as doc}]
   (if (and (:name schema-info) (:version schema-info))
@@ -133,6 +136,26 @@
     (if (seq results)
       {:ok false :results results}
       {:ok true})))
+
+(defmonster valid-users
+  (let [results (seq (remove nil? (map
+                                    #(when-let [res (sc/check user/User %)]
+                                       (assoc (select-keys % [:id :username]) :errors res))
+                                    @users)))]
+    (if results
+      {:ok false :results results}
+      {:ok true})))
+
+(defmonster disabled-dummy-users-no-password
+ (let [results (seq (remove nil? (map
+                                   #(when (and (= "dummy" (:role %))
+                                               (not (:enabled %)))
+                                      (when (-> % :private :password)
+                                        %))
+                                   @users)))]
+   (if (seq results)
+     {:ok false :results results}
+     {:ok true})))
 
 
 ;; task source is set

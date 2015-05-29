@@ -1,6 +1,7 @@
 (ns lupapalvelu.components.ui-components
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
             [clojure.java.io :as io]
+            [lupapalvelu.action :as action]
             [lupapalvelu.components.core :as c]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mime :as mime]
@@ -43,7 +44,8 @@
                  :asianhallintaVersions (util/convert-values ; asianhallinta versions have "ah-" prefix
                                           validator/supported-asianhallinta-versions-by-permit-type
                                           (partial map #(sade.strings/suffix % "ah-")))
-                 :degrees               (map :name (:body schemas/koulutusvalinta))}]
+                 :degrees               (map :name (:body schemas/koulutusvalinta))
+                 :authorityRoles        action/authority-roles}]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
 
 (defn- loc->js []
@@ -275,7 +277,7 @@
                         "company-invite/company-invite-dialog-model.js"
                         "autocomplete/autocomplete-model.js"
                         "invoice-operator-selector/invoice-operator-selector-model.js"
-                        "user-notification/user-notification-model.js"]
+                        "company-registration-init/company-registration-init-model.js"]
                    :html ["fill-info/fill-info-template.html"
                           "foreman-history/foreman-history-template.html"
                           "foreman-other-applications/foreman-other-applications-template.html"
@@ -300,7 +302,7 @@
                           "company-invite/company-invite-dialog-template.html"
                           "autocomplete/autocomplete-template.html"
                           "invoice-operator-selector/invoice-operator-selector-template.html"
-                          "user-notification/user-notification-template.html"]}
+                          "company-registration-init/company-registration-init-template.html"]}
 
    ;; Single Page Apps and standalone components:
    ;; (compare to auth-methods in web.clj)
