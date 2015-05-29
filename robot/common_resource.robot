@@ -20,8 +20,8 @@ ${APPLICATIONS PATH}            /app/fi/applicant#!/applications
 ${AUTHORITY APPLICATIONS PATH}  /app/fi/authority#!/applications
 ${FIXTURE URL}                  ${SERVER}/dev/fixture
 ${CREATE URL}                   ${SERVER}/dev/create
-${LAST EMAIL URL}               ${SERVER}/api/last-email?reset
-${LAST EMAILS URL}              ${SERVER}/api/last-emails?reset
+${LAST EMAIL URL}               ${SERVER}/api/last-email?reset=true
+${LAST EMAILS URL}              ${SERVER}/api/last-emails?reset=true
 ${SELENIUM}                     ${EMPTY}
 
 *** Keywords ***
