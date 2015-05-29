@@ -25,7 +25,8 @@
       firstName:    ko.observable("").extend({required: true}),
       lastName:     ko.observable("").extend({required: true}),
       email:        ko.observable("").extend({required: true, email: true,
-                                              usernameAsync: self.userNotLoggedIn})
+                                              usernameAsync: self.userNotLoggedIn}),
+      personId:     ko.observable("").extend({required: true, personId: true})
     });
 
     self.accountFieldNames = ["accountType"];

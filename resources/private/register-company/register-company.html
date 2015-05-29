@@ -98,8 +98,8 @@
           <div class="form-entry">
             <label class="form-label tip" data-bind="ltext: 'register.company.form.personId'"></label>
             <input class="form-input text"
-                   
-                   data-test-id="register-company-personId" type="text" placeholder="131052-308T" maxlength="11"/>
+                   data-bind="textInput: personId, attr: {readonly: lupapisteApp.models.currentUser}"
+                   data-test-id="register-company-personId" type="text" placeholder="112233-123A" maxlength="11"/>
           </div>
         </div>
 
