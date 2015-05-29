@@ -800,6 +800,12 @@ C vähäinen
 			</xs:element>
 			<xs:element name="toiminutVastaavissaTehtavissaKytkin" type="xs:boolean" minOccurs="0"/>
 			<xs:element name="kokemusvuodet" type="xs:string" minOccurs="0"/>
+			<xs:element name="paatosPvm" type="xs:date" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Koska osapuolelle on tehty päätös</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="paatostyyppi" type="yht:PaatostyyppiType" minOccurs="0"/>
 		</xs:sequence>
 	</xs:complexType>
 	<xs:complexType name="TyonjohtajaType">
@@ -890,6 +896,12 @@ C vähäinen
 					<xs:documentation>Onko kyseessä vain tähän hankkeeseen hyväksytty työnjohtaja</xs:documentation>
 				</xs:annotation>
 			</xs:element>
+			<xs:element name="paatosPvm" type="xs:date" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Koska osapuolelle on tehty päätös</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="paatostyyppi" type="yht:PaatostyyppiType" minOccurs="0"/>
 		</xs:sequence>
 	</xs:complexType>
 	<xs:complexType name="RakennuksenTunnusType">
@@ -3709,6 +3721,14 @@ C vähäinen</xs:documentation>
 			<xs:enumeration value="B"/>
 			<xs:enumeration value="C"/>
 			<xs:enumeration value="ei tiedossa"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="PaatostyyppiType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="hyväksytty"/>
+			<xs:enumeration value="hylätty"/>
+			<xs:enumeration value="hakemusvaiheessa"/>
+			<xs:enumeration value="ilmoitus hyväksytty"/>
 		</xs:restriction>
 	</xs:simpleType>
 </xs:schema>
