@@ -25,6 +25,10 @@
              </a>
           </h1>
 
+          <h2 data-bind="if: primaryOperation">
+            <span data-bind="ltext: primaryOperationName, attr: {'data-test-primary-operation-id': primaryOperation().name}"></span>
+          </h2>
+
           <!-- Property ID: -->
           <div>
             <p data-bind="ltext: 'application.property'"></p>
@@ -55,19 +59,6 @@
           <div>
             <p data-bind="ltext: 'application.id'"></p>
             <span data-bind="text: id" data-test-id="inforequest-application-id" class="application_summary_text"></span>
-          </div>
-          <!-- Operations: -->
-          <div>
-            <p data-bind="ltext: 'application.operations'"></p>
-            <ul data-bind="foreach: operationsCount">
-              <li>
-                <span data-bind="visible: count > 1">
-                  <span data-bind="text: count"></span>
-                  <span>&#x00D7;</span>
-                </span>
-                <span data-bind="ltext: 'operations.' + name, attr: {'data-test-operation-id': name}" data-test-id="test-application-operation"></span>
-              </li>
-            </ul>
           </div>
 
           <!-- ko if: $root.authorization.ok('assign-application') -->
