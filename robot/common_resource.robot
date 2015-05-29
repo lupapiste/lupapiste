@@ -804,6 +804,14 @@ Fill in new password
   Wait Until  Page should contain  Salasana asetettu.
   Confirm  dynamic-ok-confirm-dialog
 
+Open company user listing
+  Click Element  user-name
+  Wait Until  Element Should be visible  //*[@data-test-id='save-my-userinfo']
+  Element should be visible  //div[@data-test-id='my-company']
+  Click button  Hallinnoi yrityksen käyttäjiä
+  Wait until  Element should be visible  company
+
+
 #
 # Mock Ajax calls: jquery.mockjax
 #
