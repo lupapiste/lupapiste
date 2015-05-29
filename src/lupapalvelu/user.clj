@@ -55,7 +55,9 @@
            (sc/optional-key :phone)               (sc/maybe (util/max-length-string 255))
            (sc/optional-key :architect)           sc/Bool
            (sc/optional-key :degree)              (sc/either
-                                                    (apply sc/enum (map :name (:body schemas/koulutusvalinta)))
+                                                    (apply sc/enum (conj
+                                                                     (map :name (:body schemas/koulutusvalinta))
+                                                                     "other"))
                                                     (sc/pred ss/blank?))
            (sc/optional-key :graduatingYear)      (sc/either
                                                     (sc/both (util/min-length-string 4) (util/max-length-string 4))
@@ -70,7 +72,9 @@
            (sc/optional-key :company)             {:id sc/Str :role sc/Str}
            (sc/optional-key :partnerApplications) {:rakentajafi {:id sc/Str
                                                                  :created sc/Int
-                                                                 :origin sc/Bool}}})
+                                                                 :origin sc/Bool}}
+           (sc/optional-key :notification         {:messageI18nkey sc/Str
+                                                   :titleI18nkey   sc/Str})})
 
 ;;
 ;; ==============================================================================
