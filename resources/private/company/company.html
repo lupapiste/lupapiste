@@ -114,12 +114,12 @@
               </tr>
             </thead>
             <tbody data-bind="foreach: invitations">
-              <tr>
+              <tr data-bind="attr: {'data-test-id': 'company-user-' + email}">
                 <td data-bind="text: firstName"></td>
                 <td data-bind="text: lastName"></td>
                 <td data-bind="text: email" data-test-id="company-invited-user-email"></td>
-                <td data-bind="ltext: 'company.user.invited'"></td>
-                <td data-bind="ltext: 'company.user.role.' + role"></td>
+                <td data-bind="ltext: 'company.user.invited'" data-test-id="company-user-invited"></td>
+                <td data-bind="ltext: 'company.user.role.' + role" data-test-id="company-user-role"></td>
                 <td>
                   <div data-bind="visible: opsEnabled">
                     <a href="#" data-bind="click: deleteInvitation, ltext: 'company.user.op.delete.invitation'"></a>
@@ -131,7 +131,7 @@
                 <td data-bind="text: firstName"></td>
                 <td data-bind="text: lastName"></td>
                 <td data-bind="text: email"></td>
-                <td data-bind="ltext: 'company.user.enabled.' + enabled()"></td>
+                <td data-bind="ltext: 'company.user.enabled.' + enabled()" data-test-id="company-user-invited"></td>
                 <td data-bind="ltext: 'company.user.role.' + role()" data-test-id="company-user-role"></td>
                 <td data-bind="visible: $parent.isAdmin">
                   <div data-bind="visible: opsEnabled">
@@ -218,10 +218,10 @@
         </div>
 
         <div data-bind="visible: showUserInvited">
-          <h3 data-bind="ltext: 'register.company.add-user.done.header'"></h3>
+          <h3 data-bind="ltext: 'register.company.add-user.done.header'" data-test-id="company-old-user-invited"></h3>
           <p data-bind="ltext: 'register.company.add-user.done.message'"></p>
           <p data-bind="ltext: 'register.company.add-user.done.canClose'"></p>
-          <button data-bind="ltext: 'ok'" class="btn btn-dialog close"></button>
+          <button data-bind="ltext: 'ok'" class="btn btn-dialog close" data-test-id="company-old-user-invited-close-dialog"></button>
         </div>
 
         <form data-bind="visible: showUserDetails" id="companyUserDetails">
