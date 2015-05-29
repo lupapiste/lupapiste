@@ -40,6 +40,13 @@
     message: loc("error.invalidOVT")
   };
 
+  ko.validation.rules.personId = {
+    validator: function(personId) {
+      return _.isBlank(personId) || util.isValidPersonId(personId);
+    },
+    message: loc("error.illegal-hetu")
+  };
+
   ko.validation.rules.usernameAsync = {
     async: true,
     validator: _.debounce(function(val, params, cb) {
