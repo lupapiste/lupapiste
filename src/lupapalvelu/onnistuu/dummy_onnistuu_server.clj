@@ -10,6 +10,8 @@
             [clj-time.core :as t]
             [clj-time.format :as tf]
             [clj-time.local :as tl]
+            [lupapalvelu.mongo :as mongo]
+            [sade.core :refer [now]]
             [sade.env :as env]
             [sade.crypt :as c])
   (:import [org.joda.time DateTime DateTimeZone]))
@@ -111,3 +113,10 @@
       "success"   (respond-success process company-name)
       "fail"      (respond-fail process)
       "fake"      (respond-fake process))))
+
+(defpage [:get "/dev/dummy-onnistuu/doc/:stamp"] {:keys [stamp]}
+  (if-let [pdf (mongo/download-find {:metadata.process.stamp stamp})]
+    (let [{:keys [content content-type]} pdf
+          document (content)]
+      (->> (content) (resp/status 200) (resp/content-type content-type)))
+    (resp/status 404 "Not fould")))
