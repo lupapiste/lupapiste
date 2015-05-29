@@ -1698,7 +1698,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     descriptionInput.type = "text";
     descriptionInput.className = "accordion-input text hidden";
 
-    var saveInput = function() {
+    var saveInput = _.debounce(function() {
       $(descriptionInput).off("blur");
       var value = _.trim(descriptionInput.value);
       if (value === "") {
@@ -1718,7 +1718,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       $(descriptionInput).addClass("hidden");
       $(iconSpan).removeClass("hidden");
       $(descriptionSpan).removeClass("hidden");
-    };
+    }, 250);
 
     descriptionInput.onfocus = function() {
       descriptionInput.onblur = function() {
