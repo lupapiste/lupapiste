@@ -81,12 +81,12 @@
 (defn respond-success [{:strs [stamp uuid return_success] :as process} company-name]
   (let [crypto-key (-> (env/get-config) :onnistuu :crypto-key (c/str->bytes) (c/base64-decode))
         crypto-iv  (c/make-iv)
-        y          (-> process (get "requirements") first (get "identifier"))
+        hetu       (-> process (get "requirements") first (get "identifier"))
         data       (->> {:stamp         stamp
                          :document      (str (env/value :host) "/dev/dummy-onnistuu/doc/" stamp)
                          :cancel        "cancel-url-not-used"
-                         :signatures    [{:type        :company
-                                          :identifier  y
+                         :signatures    [{:type        :person
+                                          :identifier  hetu
                                           :name        company-name
                                           :timestamp   (now-str)
                                           :uuid        uuid}]}

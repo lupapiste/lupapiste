@@ -30,6 +30,7 @@ Bob decides to register his company after all, but still chikens out
   Input text by test id  register-company-lastName    Puuha
   Input text by test id  register-company-email       puuha.pete@pete-rakennus.fi
   Input text by test id  register-company-ovt         0037123456710007
+  Input text by test id  register-company-personId    131052-308T
   Select From List  xpath=//span[@data-test-id="register-company-pop"]/select  Basware Oyj (BAWCFI22)
   Click enabled by test id  register-company-submit
   Wait Until  Element Should Be Disabled  xpath=//*[@data-test-id='register-company-submit']
@@ -53,6 +54,7 @@ Bob decides to register his company after all, and this time he means it
   Input text by test id  register-company-lastName    Puuha
   Input text by test id  register-company-email       puuha.pete@pete-rakennus.fi
   Input text by test id  register-company-ovt         0037123456710007
+  Input text by test id  register-company-personId    131052-308T
   Select From List  xpath=//span[@data-test-id="register-company-pop"]/select  Basware Oyj (BAWCFI22)
   Click enabled by test id  register-company-submit
   Wait Until  Element Should Be Disabled  xpath=//*[@data-test-id='register-company-submit']

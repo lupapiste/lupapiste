@@ -150,12 +150,6 @@
 ; Success:
 ;
 
-(defmacro resp-assert! [result expected message]
-  `(when-not (= ~result ~expected)
-     (errorf "sing:success:%s: %s: expected '%s', got '%s'" ~'process-id ~message ~result ~expected)
-     (process-update! ~'process :error ~'ts)
-     (fail! :bad-request)))
-
 (notifications/defemail :onnistuu-success
   {:model-fn  (fn [command conf recipient] command)
    :recipients-fn (constantly [{:email (env/value :onnistuu :success :email)}])})
@@ -173,10 +167,16 @@
                         (json/decode)
                         walk/keywordize-keys)
         {:keys [signatures stamp document]} resp
-        {:keys [type identifier name timestamp uuid]} (first signatures)]
-    (resp-assert! (:stamp process)          stamp       "wrong stamp")
-    (resp-assert! (count signatures)        1           "number of signatures")
-    (resp-assert! type                      "company"   "wrong signature type")
+        {:keys [type identifier name timestamp uuid]} (first signatures)
+        resp-assert! (fn [result expected message]
+                      (when-not (= result expected)
+                        (errorf "sing:success:%s: %s: expected '%s', got '%s'" process-id message result expected)
+                        (process-update! process :error ts)
+                        (fail! :bad-request)))]
+    (resp-assert! (:stamp process)          stamp              "wrong stamp")
+    (resp-assert! (count signatures)        1                  "number of signatures")
+    (resp-assert! type                      "person"           "wrong signature type")
+    (resp-assert! identifier                (:personId signer) "returned personId does not match original")
     (process-update! process :done ts :document document)
 
     (infof "sign:success:%s: OK: identifier [%s], company: [%s], document: [%s]"

@@ -186,6 +186,7 @@
                       :lastName    (:lastName user)
                       :company     {:id     (:id company)
                                     :role   role}
+                      :personId    (:personId user)
                       :password    password
                       :role        :applicant
                       :architect   true
