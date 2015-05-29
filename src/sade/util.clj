@@ -354,6 +354,11 @@
 (defn finnish-zip? [^String zip-code]
   (boolean (when zip-code (re-matches #"^\d{5}$" zip-code))))
 
+(defn finnish-hetu? [^String hetu] ; TODO remove this and use valid-hetu? function from Tommi's branch when applicable
+  (if (re-matches #"^(0[1-9]|[12]\d|3[01])(0[1-9]|1[0-2])([5-9]\d\+|\d\d-|\d\dA)\d{3}[\dA-Y]$" hetu)
+    (= (subs hetu 10 11) (hetu-checksum hetu))
+    false))
+
 ;;
 ;; Schema utils:
 ;;

@@ -7,6 +7,7 @@
             [noir.core :refer [defpage]]
             [slingshot.slingshot :refer [throw+]]
             [monger.operators :refer :all]
+            [schema.core :as sc]
             [sade.util :refer [future*]]
             [sade.env :as env]
             [sade.strings :as ss]
@@ -276,8 +277,16 @@
 
     true))
 
+;; Define schema for update data
+(def ^:private UserUpdate (dissoc user/User :id :role :email :username :enabled))
+
+(defn- validate-updatable-user [{user-data :data}]
+  (when (sc/check UserUpdate user-data)
+    (fail :error.invalid-user-data)))
+
 (defcommand update-user
-  {:user-roles #{:applicant :authority :authorityAdmin :admin}}
+  {:user-roles #{:applicant :authority :authorityAdmin :admin}
+   :input-validators [validate-updatable-user]}
   [{caller :user user-data :data :as command}]
   (let [email     (user/canonize-email (or (:email user-data) (:email caller)))
         user-data (assoc user-data :email email)]
