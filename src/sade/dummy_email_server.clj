@@ -74,17 +74,40 @@
     [{{reset :reset :or {reset true}} :data}]
     (ok :message (last (messages :reset reset))))
 
+  (defn msg-header [msg]
+    {:tag :dl :content [{:tag :dt :content "To"}
+                        {:tag :dd :attrs {:data-test-id "to"} :content [(:to msg)]}
+                        {:tag :dt :content "Subject"}
+                        {:tag :dd :attrs {:data-test-id "subject"} :content [(:subject msg)]}
+                        {:tag :dt :content "Time"}
+                        {:tag :dd :attrs {:data-test-id "time"} :content [(util/to-local-datetime (:time msg))]}]})
+
   (defpage "/api/last-email" {reset :reset}
     (if-let [msg (last (messages :reset reset))]
       (enlive/emit* (-> (enlive/html-resource (io/input-stream (.getBytes (get-in msg [:body :html]) "UTF-8")))
                       (enlive/transform [:head] (enlive/append {:tag :title :content (:subject msg)}))
-                      (enlive/transform [:body] (enlive/prepend [{:tag :dl :content [{:tag :dt :content "To"}
-                                                                                     {:tag :dd :attrs {:id "to"} :content [(:to msg)]}
-                                                                                     {:tag :dt :content "Subject"}
-                                                                                     {:tag :dd :attrs {:id "subject"} :content [(:subject msg)]}
-                                                                                     {:tag :dt :content "Time"}
-                                                                                     {:tag :dd :attrs {:id "time"} :content [(util/to-local-datetime (:time msg))]}]}
+                      (enlive/transform [:body] (enlive/prepend [(msg-header msg)
                                                                  {:tag :hr}]))))
+      {:status 404 :body "No emails"}))
+
+
+
+  (defpage "/api/last-emails" {reset :reset}
+    (if-let [msgs (seq (messages :reset reset))]
+      (enlive/emit*
+        {:tag :html
+         :content [{:tag :head :content [{:tag :title, :content "Latest emails"}
+                                         {:tag :style, :content "* {font-family: sans-serif}\ndl {background-color: #eee}"}]}
+                   {:tag :body
+                    :content (map (fn [msg]
+                                    {:tag :div
+                                     :attrs {:style "border-bottom: 4px dashed black;margin: 2em"}
+                                     :content
+                                     (vector
+                                       (msg-header msg)
+                                       (first (enlive/select (enlive/html-resource (io/input-stream (.getBytes (get-in msg [:body :html]) "UTF-8"))) [:body])))}
+                                   ) msgs)}]
+         })
       {:status 404 :body "No emails"}))
 
   (info "Dummy email server initialized"))
