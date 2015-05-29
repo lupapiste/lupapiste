@@ -19,7 +19,7 @@
 ;;
 
 (def user-skeleton
-  {:id        "4321"
+  {:id        ""
    :firstName ""
    :lastName  ""
    :role      "dummy"
