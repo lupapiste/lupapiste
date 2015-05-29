@@ -81,17 +81,17 @@
               <input class="form-input text" data-bind="textInput: model().ovt, enable: edit" type="text" maxlength="17"/>
             </div>
 
-            <div class="form-entry">
+            <div class="form-entry" data-test-id="company-pop">
               <span data-bind="component: {name: 'invoice-operator-selector', params: {selected: model().pop, enabled: edit}}"></span>
             </div>
 
             <div>
-              <button data-bind="enable: canStartEdit, click: startEdit, ltext: 'edit'" type="button" class="btn btn-primary"></button>
-              <button data-bind="enable: canSubmit, click: submit" type="submit" class="btn btn-primary">
+              <button data-bind="enable: canStartEdit, click: startEdit, ltext: 'edit'" type="button" class="btn btn-primary" data-test-id="company-details-edit"></button>
+              <button data-bind="enable: canSubmit, click: submit" type="submit" class="btn btn-primary" data-test-id="company-details-save">
                 <span data-bind="ltext: 'save'"></span>
                 <em data-bind="visible: $parent.pending" class="button-loader"></em>
               </button>
-              <button data-bind="enable: edit, click: cancelEdit, ltext: 'cancel'" type="button" class="btn"></button>
+              <button data-bind="enable: edit, click: cancelEdit, ltext: 'cancel'" type="button" class="btn" data-test-id="company-details-cancel"></button>
             </div>
 
           </div>
