@@ -130,7 +130,7 @@
           <!-- Link-permits: -->
           <!-- ko if: linkPermitData -->
           <div data-bind="with: linkPermitData" class="link-permits">
-            <p data-bind="ltext: 'application.linkPermits'"></p>
+            <p data-bind="ltext: 'application.linkPermits'" class="link-permit-title"></p>
             <span class="application_summary_text" data-bind="foreach: $data">
               <span data-bind="visible: $data.type() === 'lupapistetunnus'" class="link-permit">
                 <a data-bind="click: function(){$root.addLinkPermitModel.followAppLink($data.id())},
@@ -168,14 +168,16 @@
           <div data-bind="with: appsLinkingToUs" class="link-permits">
             <p data-bind="ltext: 'application.appsLinkingToUs'" class="link-permit-title"></p>
             <span class="application_summary_text" data-bind="foreach: $data">
-              <a data-bind="click: function(){$root.addLinkPermitModel.followAppLink($data.id())},
-                            attr: {'data-test-app-linking-to-us': $data.id}"
-                 data-test-id="test-application-app-linking-to-us"
-                 href="#" class="link-permit-item">
-                <span data-bind="text: $data.id"></span>
-                -
-                <span data-bind="ltext: 'operations.' + $data.operation()"></span>
-              </a>
+              <span class="link-permit">
+                <a data-bind="click: function(){$root.addLinkPermitModel.followAppLink($data.id())},
+                              attr: {'data-test-app-linking-to-us': $data.id}"
+                   data-test-id="test-application-app-linking-to-us"
+                   href="#" class="link-permit-item">
+                  <span data-bind="text: $data.id"></span>
+                  -
+                  <span data-bind="ltext: 'operations.' + $data.operation()"></span>
+                </a>
+              </span>
             </span>
           </div>
           <!-- /ko -->
