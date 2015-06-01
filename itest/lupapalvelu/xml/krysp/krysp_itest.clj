@@ -10,7 +10,10 @@
             [lupapalvelu.document.model :refer [default-max-len]]
             [lupapalvelu.xml.emit :refer :all]
             [lupapalvelu.xml.validator :refer [validate]]
-            [lupapalvelu.xml.krysp.rakennuslupa-mapping :refer [rakennuslupa_to_krysp_212 rakennuslupa_to_krysp_213 rakennuslupa_to_krysp_216 rakennuslupa_to_krysp_218]]
+            [lupapalvelu.xml.krysp.rakennuslupa-mapping :refer [rakennuslupa_to_krysp_212
+                                                                rakennuslupa_to_krysp_213
+                                                                rakennuslupa_to_krysp_216
+                                                                rakennuslupa_to_krysp_218]]
             [lupapalvelu.xml.krysp.poikkeamis-mapping :refer [poikkeamis_to_krysp_212]]
             [lupapalvelu.xml.krysp.ymparisto-ilmoitukset-mapping :refer [ilmoitus_to_krysp]]
             [lupapalvelu.xml.krysp.ymparistolupa-mapping :refer [ymparistolupa_to_krysp]]
