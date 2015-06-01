@@ -24,41 +24,41 @@
         uusi-rakennus (domain/get-document-by-name application "uusiRakennus")]
 
     (fact "Default value '021 rivitalot' = B"
-      (let [op (resolve-price-class application (first (:operations application)))]
+      (let [op (resolve-price-class application (:primaryOperation application))]
         (:priceClass op) => "B"))
 
     (fact "Missing value defaults to C"
       (let [doc (assoc-in uusi-rakennus [:data :kaytto :kayttotarkoitus] {})
             application (assoc application :documents [doc])
-            op (resolve-price-class application (first (:operations application)))]
+            op (resolve-price-class application (:primaryOperation application))]
         (:priceClass op) => "C"))
 
     (fact "Empty value defaults to C"
       (let [doc (assoc-in uusi-rakennus [:data :kaytto :kayttotarkoitus :value] "")
             application (assoc application :documents [doc])
-            op (resolve-price-class application (first (:operations application)))]
+            op (resolve-price-class application (:primaryOperation application))]
         (:priceClass op) => "C"))
 
     (fact "021 rivitalot = B"
       (let [doc (assoc-in uusi-rakennus [:data :kaytto :kayttotarkoitus :value] "021 rivitalot")
             application (assoc application :documents [doc])
-            op (resolve-price-class application (first (:operations application)))]
+            op (resolve-price-class application (:primaryOperation application))]
         (:priceClass op) => "B"))
 
     (fact "041 vapaa-ajan asuinrakennukset = C"
       (let [doc (assoc-in uusi-rakennus [:data :kaytto :kayttotarkoitus :value] "041 vapaa-ajan asuinrakennukset")
             application (assoc application :documents [doc])
-            op (resolve-price-class application (first (:operations application)))]
+            op (resolve-price-class application (:primaryOperation application))]
         (:priceClass op) => "C"))
 
     (fact "121 hotellit yms = A"
       (let [doc (assoc-in uusi-rakennus [:data :kaytto :kayttotarkoitus :value] "121 hotellit yms")
             application (assoc application :documents [doc])
-            op (resolve-price-class application (first (:operations application)))]
+            op (resolve-price-class application (:primaryOperation application))]
         (:priceClass op) => "A"))
 
     (fact "999 muualla luokittelemattomat rakennukset = D"
       (let [doc (assoc-in uusi-rakennus [:data :kaytto :kayttotarkoitus :value] "999 muualla luokittelemattomat rakennukset")
             application (assoc application :documents [doc])
-            op (resolve-price-class application (first (:operations application)))]
+            op (resolve-price-class application (:primaryOperation application))]
         (:priceClass op) => "D"))))

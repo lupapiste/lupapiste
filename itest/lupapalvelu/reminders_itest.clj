@@ -114,9 +114,10 @@
                   statement-matching]
      :organization "753-R"
      :title "Naapurikuja 3"
-     :operations [{:id "534bf825299508fb3618455d"
-                   :name "kerrostalo-rivitalo"
-                   :created 1397487653097}]
+     :primaryOperation {:id "534bf825299508fb3618455d"
+                        :name "kerrostalo-rivitalo"
+                        :created 1397487653097}
+     :secondaryOperations []
      :infoRequest false
      :openInfoRequest false
      :opened 1397487653750

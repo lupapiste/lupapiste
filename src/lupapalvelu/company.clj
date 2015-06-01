@@ -51,6 +51,7 @@
                                                         (sc/pred ss/blank?))
               (sc/optional-key :pop)         (sc/either (sc/pred supported-invoice-operator? "Not a supported invoice operator")
                                                         (sc/pred ss/blank?))
+              (sc/optional-key :document)    sc/Str
               (sc/optional-key :process-id)  sc/Str
               (sc/optional-key :created)     sc/Int
               })
@@ -185,6 +186,7 @@
                       :lastName    (:lastName user)
                       :company     {:id     (:id company)
                                     :role   role}
+                      :personId    (:personId user)
                       :password    password
                       :role        :applicant
                       :architect   true

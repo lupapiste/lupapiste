@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <section class="page container">
+    <script type="text/html" id="company-registration-init-template">
+      <form id="onnistuu-start-form" data-bind="submit: _.constant(true), attr: { action: postTo }" method="POST">
+        <input id="customer" name="customer" type="hidden" data-bind="value: customerId"/>
+        <input id="data" name="data" type="hidden" data-bind="value: data"/>
+        <input id="iv" name="iv" type="hidden" data-bind="value: iv"/>
+        <input id="return_failure" name="return_failure" type="hidden" data-bind="value: returnFailure"/>
+        <button type="submit" data-bind="enable: buttonEnabled, ltext: 'register.company.sign.begin'" class="btn btn-primary" data-test-id="register-company-start-sign"/>
+      </form>
+    </script>
+  </section>
+</body>

@@ -148,14 +148,14 @@ Mikko sends an email invitation to neighbor 'b'
 
 Mail is sent
   Open last email
-  Wait until  Element should contain  id=to  b@example.com
+  Wait until  Element should contain  xpath=//dd[@data-test-id='to']  b@example.com
 
 Neighbor clicks on email link and sees epplication
   Click element  xpath=//a
   Wait until  Element should be visible  xpath=//*[@data-test-id='application-title']
   Wait until  Element should contain  xpath=//*[@data-test-id='application-title']  ${appname}
   Element should contain  xpath=//*[@data-test-id='application-property-id']  753-416-25-22
-  Element should contain  xpath=//*[@data-test-id='test-application-operation']  Asuinkerrostalon tai rivitalon rakentaminen
+  Element should contain  xpath=//*[@data-test-id='test-application-primary-operation']  Asuinkerrostalon tai rivitalon rakentaminen
 
 Hetu is not shown to neighbor
   Textfield Value Should Be  xpath=//div[@id="neighborPartiesDocgen"]//input[@data-docgen-path="henkilo.henkilotiedot.hetu"]  ${EMPTY}

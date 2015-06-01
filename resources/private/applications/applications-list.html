@@ -36,7 +36,6 @@
       </div>
     </div>
 
-    <form>
 
       <div data-bind="visible: showRadioTabs" class="radio-tabs">
         <input onfocus="this.blur()" data-bind="checked: filter.kind" type="radio" id="all-radio" name="kind" value="both"/>
@@ -49,9 +48,11 @@
         <label for="inforequest-radio" data-bind="ltext: 'applications.inforequests', click: radioTabClick" class="radio-label"></label>
 
         <div class="clearable">
-          <input data-bind="attr: {placeholder: loc('application.filter.search')}, textInput: searchField"
-                 type="text" id="applications-search" class="form-input text applications-search" />
-          <span class="icon_clear ">X</span>
+          <form data-bind="submit: searchNow">
+            <input data-bind="attr: {placeholder: loc('application.filter.search')}, textInput: searchField"
+                   type="text" id="applications-search" class="form-input text applications-search" />
+            <span class="icon_clear ">X</span>
+          </form>
         </div>
 
         <button
@@ -108,7 +109,6 @@
           </div>
         </div>
       </div>
-    </form>
 
     <div data-bind="visible: showApplicationsList()">
       <table id="applications-list" class="table">
