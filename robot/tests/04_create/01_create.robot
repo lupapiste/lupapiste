@@ -33,6 +33,7 @@ Mikko sees one application and one inforequest
   Request should be visible  create-info
 
 Mikko is really hungry and runs to Selvi for some delicious liha-annos
+  [Tags]  ie8
   Logout
 
 Teppo should not see Mikko's application
@@ -78,6 +79,7 @@ Mikko closes application at Latokuja 3 and logs out
 
 # LUPA-23
 Authority (Veikko) can create an application
+  [Tags]  ie8
   Veikko logs in
   Create application the fast way  create-veikko-auth-app  837-111-172-1  kerrostalo-rivitalo
   Wait until  Application state should be  open
@@ -85,10 +87,12 @@ Authority (Veikko) can create an application
 
 # LUPA-23
 Veikko can submit the application he created
+  [Tags]  ie8
   Open tab  requiredFieldSummary
   Wait Until  Element should be visible  //*[@data-test-id='application-submit-btn']
 
 Veikko sees application in list
+  [Tags]  ie8
   Go to page  applications
   Request should be visible  create-veikko-auth-app
   [Teardown]  logout
