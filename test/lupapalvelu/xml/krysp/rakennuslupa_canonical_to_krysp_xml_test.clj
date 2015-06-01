@@ -77,7 +77,7 @@
            tyonjohtaja_216 => nil))
 
       (if validate-pysyva-tunnus?
-        (fact "pysyva rakennusmuero" (xml/get-text lp-xml_212 [:rakennustunnus :valtakunnallinenNumero]) => "1234567892")))
+        (fact "pysyva rakennusnumero" (xml/get-text lp-xml_212 [:rakennustunnus :valtakunnallinenNumero]) => "1234567892")))
 
 
     (let [lp-xml_215 (cr/strip-xml-namespaces (xml/parse xml_215_s))]

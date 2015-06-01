@@ -71,15 +71,15 @@
     "krysp/ilmoitukset-2.1.2.xsd"))
 
 (def- yht-2_1_5
-      (conj public-schema-sources
-            "krysp/yhteiset-2.1.5.xsd"
-            "krysp/rakennusvalvonta-2.1.5.xsd"
-            "krysp/poikkeamispaatos_ja_suunnittelutarveratkaisu-2.1.5.xsd"
-            "krysp/YleisenAlueenKaytonLupahakemus-2.2.0.xsd"
-            "krysp/ymparistoluvat-2.2.0.xsd"
-            "krysp/maaAinesluvat-2.2.0.xsd"
-            "krysp/vesihuoltolaki-2.2.0.xsd"
-            "krysp/ilmoitukset-2.2.0.xsd"))
+  (conj public-schema-sources
+        "krysp/yhteiset-2.1.5.xsd"
+        "krysp/rakennusvalvonta-2.1.5.xsd"
+        "krysp/poikkeamispaatos_ja_suunnittelutarveratkaisu-2.1.5.xsd"
+        "krysp/YleisenAlueenKaytonLupahakemus-2.2.0.xsd"
+        "krysp/ymparistoluvat-2.2.0.xsd"
+        "krysp/maaAinesluvat-2.2.0.xsd"
+        "krysp/vesihuoltolaki-2.2.0.xsd"
+        "krysp/ilmoitukset-2.2.0.xsd"))
 
 (def- asianhallinta
    (conj xml-sources "asianhallinta/asianhallinta.xsd"))

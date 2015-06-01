@@ -75,7 +75,7 @@
 
 (facts "KRYSP verdict"
   (let [xml (xml/parse (slurp "resources/krysp/sample/verdict.xml"))
-      cases (->verdicts xml ->standard-verdicts)]
+        cases (->verdicts xml ->standard-verdicts)]
 
     (fact "xml is parsed" cases => truthy)
 
