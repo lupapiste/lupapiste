@@ -1782,7 +1782,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     title.setAttribute("data-doc-id", self.docId);
     title.setAttribute("data-app-id", self.appId);
     title.onclick = accordion.click;
-    if (self.schema.info.removable && !self.isDisabled && authorizationModel.ok("remove-doc")) {
+    var docId = util.getIn(self, ["schema", "info", "op", "id"]);
+    var primaryOperationId = util.getIn(self.application, ["primaryOperation", "id"]);
+
+    if (self.schema.info.removable && !self.isDisabled && authorizationModel.ok("remove-doc") && (docId && docId != primaryOperationId)) {
       var removeSpan =
         $("<span>")
           .addClass("icon remove inline-right")
