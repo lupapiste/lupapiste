@@ -30,7 +30,6 @@
                                                :municipality (:municipality application)
                                                :infoRequest false
                                                :messages []}))
-                      (assoc :state (if original-open? :open :draft))
                       (assoc :opened (if original-open? created nil)))
 
         task                 (util/find-by-id taskId (:tasks application))
