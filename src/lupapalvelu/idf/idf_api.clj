@@ -100,6 +100,7 @@
               last-name  (strip-nonletters last-name)
               email      (user/canonize-email email)
               phone      (ss/trim phone)
+              ts         (util/to-long ts)
               user-id (link-user! first-name last-name email phone marketing architect app id ts)]
           (resp/response (str user-id "\n")))
         (catch Throwable t

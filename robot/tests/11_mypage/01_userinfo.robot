@@ -20,7 +20,7 @@ There is no company info
 Mikko changes his name and experience
   Change Textfield Value  firstName  Mikko  Mika
   Change Textfield Value  lastName  Intonen  Intola
-  Change Textfield Value  architect.degree  Tutkinto  Arkkitehti
+  Select From List  xpath=//select[@data-test-id='architect-degree-select']  Arkkitehti
   Change Textfield Value  architect.graduatingYear  2000  2001
   Change Textfield Value  architect.fise  f  fise
   Checkbox Should Not Be Selected  allowDirectMarketing
@@ -30,35 +30,30 @@ Mikko changes his name and experience
   Wait until  Page should contain  Tallennettu
   User should be logged in  Mika Intola
 
-Name should have changed in Swedish page too
+Name and experience should have changed in Swedish page too
   Click link  xpath=//*[@data-test-id='lang-sv']
   Wait for Page to Load  Mika  Intola
   User should be logged in  Mika Intola
   Checkbox Should Be Selected  allowDirectMarketing
-
-Experience should have changed in Swedish page too
-  Wait Until  Textfield Value Should Be  architect.fise  fise
-  Textfield Value Should Be  architect.degree  Arkkitehti
+  Wait until  List Selection Should Be  architect.degree  Arkitekt
   Textfield Value Should Be  architect.graduatingYear  2001
   Textfield Value Should Be  architect.fise  fise
 
 Mika changes the name and experience back
   Change Textfield Value  firstName  Mika  Mikko
   Change Textfield Value  lastName  Intola  Intonen
-  Change Textfield Value  architect.degree  Arkkitehti  Tutkinto
+  Select From List  xpath=//select[@data-test-id='architect-degree-select']  Timmerman
   Change Textfield Value  architect.graduatingYear  2001  2000
   Change Textfield Value  architect.fise  fise  f
   Save User Data
   Wait until  Page should contain  Sparad
 
-Name should have changed in Finnish page too
+Name and experience should have changed in Finnish page too
   Click link  xpath=//*[@data-test-id='lang-fi']
   Wait for Page to Load  Mikko  Intonen
   User should be logged in  Mikko Intonen
-
-Experience should have changed in Finnish back to original
-  Wait Until  Textfield Value Should Be  architect.fise  f
-  Textfield Value Should Be  architect.degree  Tutkinto
+  Checkbox Should Be Selected  allowDirectMarketing
+  Wait until  List Selection Should Be  architect.degree  Kirvesmies
   Textfield Value Should Be  architect.graduatingYear  2000
   Textfield Value Should Be  architect.fise  f
 

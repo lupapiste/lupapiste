@@ -64,7 +64,7 @@ jQuery(function($) {
         .append($("<input type='checkbox' id='debugHub'>").click(function() { hub.setDebug(this.checked); }))
         .append($("<label for='debugHub'>").text("Log events"))
         .append($("<br>"))
-        .append($("<a href='/api/last-email'>Last Email</a><br>"))
+        .append($("<a href='/api/last-email'>Last Email</a> - <a href='/api/last-emails'>All</a><br>"))
         .append($("<a href='/internal/reload'>Reload env/i18n</a><br>"))
         .append($("<p>")
           .append($("<span>").attr("id", "debug-apply-done").css("font-weight", "bold").hide())
@@ -133,7 +133,8 @@ jQuery(function($) {
           pop:       "003776543212",
           firstName: "fo",
           lastName:  "ba",
-          email:     "fo@ba.com"
+          email:     "fo@ba.com",
+          personId:  "131052-308T"
         };
         if (lupapisteApp.models.currentUser) {
           delete formData.firstName;

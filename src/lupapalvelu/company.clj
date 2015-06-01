@@ -43,13 +43,15 @@
               :accountType                   (sc/pred account-type? "Not valid account type")
               (sc/optional-key :reference)   max-64-or-nil
               (sc/optional-key :address1)    max-64-or-nil
-              (sc/optional-key :address2)    max-64-or-nil
               (sc/optional-key :po)          max-64-or-nil
-              (sc/optional-key :zip)         max-64-or-nil
+              (sc/optional-key :zip)         (sc/either (sc/pred util/finnish-zip? "Not a valid zip code")
+                                                        (sc/pred ss/blank?))
               (sc/optional-key :country)     max-64-or-nil
-              (sc/optional-key :ovt)         (sc/pred util/finnish-ovt? "Not a valid OVT code")
+              (sc/optional-key :ovt)         (sc/either (sc/pred util/finnish-ovt? "Not a valid OVT code")
+                                                        (sc/pred ss/blank?))
               (sc/optional-key :pop)         (sc/either (sc/pred supported-invoice-operator? "Not a supported invoice operator")
                                                         (sc/pred ss/blank?))
+              (sc/optional-key :document)    sc/Str
               (sc/optional-key :process-id)  sc/Str
               (sc/optional-key :created)     sc/Int
               })
@@ -94,7 +96,7 @@
   (or (find-company-by-id id) (fail! :company.not-found)))
 
 (defn find-companies []
-  (mongo/select :companies {} [:name :y :address1 :address2 :zip :po] (array-map :name 1)))
+  (mongo/select :companies {} [:name :y :address1 :zip :po] (array-map :name 1)))
 
 (defn find-company-users [company-id]
   (u/get-users {:company.id company-id}))
@@ -184,6 +186,7 @@
                       :lastName    (:lastName user)
                       :company     {:id     (:id company)
                                     :role   role}
+                      :personId    (:personId user)
                       :password    password
                       :role        :applicant
                       :architect   true
@@ -255,11 +258,9 @@
 
 (defmethod token/handle-token :accept-company-invitation [{{:keys [company-id application-id]} :data} _]
   (infof "company %s accepted application %s" company-id application-id)
-  (if-let [application (domain/get-application-no-access-checking application-id)]
-    (do
-      (update-application
-        (application->command application)
-        {:auth {$elemMatch {:invite.user.id company-id}}}
-        {$set  {:auth.$  (-> (find-company! {:id company-id}) (company->auth) (assoc :inviteAccepted (now)))}})
-      (ok))
-    (fail :error.unknown)))
+  (when-let [application (domain/get-application-no-access-checking application-id)]
+    (update-application
+      (application->command application)
+      {:auth {$elemMatch {:invite.user.id company-id}}}
+      {$set  {:auth.$  (-> (find-company! {:id company-id}) (company->auth) (assoc :inviteAccepted (now)))}})
+    (ok)))

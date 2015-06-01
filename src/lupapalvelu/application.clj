@@ -293,7 +293,7 @@
         op (make-op operation created)
         state (cond
                 info-request? :info
-                (user/authority? user) :open
+                (or (user/authority? user) (user/rest-user? user)) :open
                 :else :draft)
         comment-target (if open-inforequest? [:applicant :authority :oirAuthority] [:applicant :authority])
         tos-function (get-in organization [:operations-tos-functions (keyword operation)])

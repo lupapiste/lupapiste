@@ -41,7 +41,7 @@
     :username "tampere-ya"
     :street "Paapankuja 12"
     :phone "0102030405"
-    :email "tampere-ya"
+    :email "tampere-ya@example.com"
     :role "authorityAdmin"
     :zip "10203"
     :orgAuthz {:837-YA #{:authorityAdmin}}
@@ -101,7 +101,7 @@
     :username "kuopio-ya"
     :street "Paapankuja 12"
     :phone "0102030405"
-    :email "kuopio-ya"
+    :email "kuopio-ya@example.com"
     :role "authorityAdmin"
     :zip "10203"
     :orgAuthz {:297-YA #{:authorityAdmin}}
@@ -344,7 +344,6 @@
    {:lastName "Nieminen"
     :firstName "Teppo"
     :enabled true
-    :postalCode "33200"
     :username "teppo@example.com"
     :private {:password "$2a$10$KKBZSYTFTEFlRrQPa.PYPe9wz4q1sRvjgEUCG7gt8YBXoYwCihIgG"
               :apikey "502cb9e58426c613c8b85abb"}
@@ -370,7 +369,7 @@
     :city "Sipoo"
     :phone "0505503171"
     :architect true
-    :degree "Tutkinto"
+    :degree "kirvesmies"
     :graduatingYear "2000"
     :companyName "Yritys Oy"
     :companyId "1234567-1"
@@ -803,8 +802,7 @@
                  :accountType "account5"
                  :created 1412959886600
                  :name "Solita Oy"
-                 :address1 "Tulli Business Park"
-                 :address2 "\u00c5kerlundinkatu 11"
+                 :address1 "\u00c5kerlundinkatu 11"
                  :zip "33100"
                  :po "Tampere"
                  :country "FINLAND"

@@ -20,6 +20,10 @@
              <span data-bind="ltext: 'edit.address'"></span></a>
           </h1>
 
+          <h2>
+            <span data-bind="ltext: primaryOperationName"></span>
+          </h2>
+
           <!-- State: -->
           <div class="state-indication" data-bind="attr: {'data-test-state': state}" data-test-id="application-state" >
             <div data-bind="attr: {'class': state}">
@@ -447,10 +451,9 @@
           </section>
           <!-- /ko -->
 
-          <button
-              data-bind="click: $parent.addPartyModel.init, ltext: 'application.addParty', visible: $parent.authorization.ok('create-doc')"
-              class="btn btn-primary modal"
-              data-test-id="add-party">
+          <button data-bind="click: $parent.addPartyModel.init, ltext: 'application.addParty', visible: $parent.authorization.ok('create-doc')"
+                  class="btn modal"
+                  data-test-id="add-party">
           </button>
 
           <div class="process-nav">

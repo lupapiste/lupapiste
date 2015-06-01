@@ -29,6 +29,7 @@ LUPAPISTE.ApplicationModel = function() {
   });
   self.address = ko.observable();
   self.operations = ko.observable();
+  self.primaryOperation = ko.observable();
   self.permitSubtype = ko.observable();
   self.operationsCount = ko.observable();
   self.applicant = ko.observable();
@@ -109,6 +110,14 @@ LUPAPISTE.ApplicationModel = function() {
           })};})
       .sortBy("order")
       .valueOf();
+  });
+
+  self.primaryOperationName = ko.computed(function() {
+    var op = ko.unwrap(self.primaryOperation());
+    if (op) {
+      return "operations." + ko.unwrap(op.name);
+    }
+    return "";
   });
 
   self.foremanTasks = ko.observable();
@@ -251,10 +260,7 @@ LUPAPISTE.ApplicationModel = function() {
 
   self.requestForComplement = function(model) {
     ajax.command("request-for-complement", { id: self.id()})
-      .success(function() {
-        notify.success("pyynt\u00F6 l\u00E4hetetty",model);
-        self.reload();
-      })
+      .success(self.reload)
       .processing(self.processing)
       .call();
     return false;

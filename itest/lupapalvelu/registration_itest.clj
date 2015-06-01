@@ -120,7 +120,9 @@
          (fact "enabled" (:enabled new-user) => false)
          (fact "role" (:role new-user) => "applicant")
          (fact "orgAuthz" (:orgAuthz new-user) => empty?)
-         (fact "phone" (:phone new-user) => new-user-phone)))
+         (fact "phone" (:phone new-user) => new-user-phone)
+         (fact "notification" (:notification new-user) => {:messageI18nkey "user.notification.firstLogin.message"
+                                                           :titleI18nkey "user.notification.firstLogin.title"})))
 
      (fact "New user got email"
        (:to email) => new-user-email

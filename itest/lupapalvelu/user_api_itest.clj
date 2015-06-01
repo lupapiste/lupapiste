@@ -113,6 +113,15 @@
   (fact (command sipoo :remove-user-organization :email "foo@example.com") => ok?)
   (fact (->> (query admin :user-by-email :email "foo@example.com") :user :orgAuthz keys (map name)) => ["529-R"]))
 
+(fact update-user-roles
+  (apply-remote-minimal)
+  (fact (-> (query admin :user-by-email :email "sonja.sibbo@sipoo.fi") :user :orgAuthz :753-R) => ["authority"])
+  (fact (command sipoo :update-user-roles :email "sonja.sibbo@sipoo.fi" :roles ["authority" "foobar"] :organization "753-R") => fail?)
+  (fact (-> (query admin :user-by-email :email "sonja.sibbo@sipoo.fi") :user :orgAuthz :753-R) => ["authority"])
+
+  (fact (command sipoo :update-user-roles :email "sonja.sibbo@sipoo.fi" :roles ["authority" "tos-editor" "tos-publisher"] :organization "753-R") => ok?)
+  (fact (-> (query admin :user-by-email :email "sonja.sibbo@sipoo.fi") :user :orgAuthz :753-R) => ["authority" "tos-editor" "tos-publisher"]))
+
 (fact "changing user info"
   (apply-remote-minimal)
   (fact (query teppo :user) => (every-checker ok? (contains
@@ -125,7 +134,6 @@
                                                         :id "5073c0a1c2e6c470aef589a5"
                                                         :lastName "Nieminen"
                                                         :phone "0505503171"
-                                                        :postalCode "33200"
                                                         :role "applicant"
                                                         :street "Mutakatu 7"
                                                         :username "teppo@example.com"
@@ -139,11 +147,11 @@
                 :phone "0505503171"
                 :architect true
                 :allowDirectMarketing true
-                :degree "d"
-                :graduatingYear 2000
+                :degree "kirvesmies"
+                :graduatingYear "2000"
                 :fise "f"
                 :companyName "cn"
-                :companyId "cid"}]
+                :companyId "1060155-5"}]
       (apply command teppo :update-user (flatten (seq data))) => ok?
       (query teppo :user) => (contains {:user (contains data)}))))
 
