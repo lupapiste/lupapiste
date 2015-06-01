@@ -11,6 +11,7 @@
                                                                 rakennuslupa_to_krysp_214
                                                                 rakennuslupa_to_krysp_215
                                                                 rakennuslupa_to_krysp_216
+                                                                rakennuslupa_to_krysp_218
                                                                 save-katselmus-as-krysp]]
             [lupapalvelu.xml.validator :refer [validate]]
             [lupapalvelu.xml.krysp.canonical-to-krysp-xml-test-common :refer [has-tag]]
@@ -30,6 +31,7 @@
 (fact "2.1.4: :tag is set" (has-tag rakennuslupa_to_krysp_214) => true)
 (fact "2.1.5: :tag is set" (has-tag rakennuslupa_to_krysp_215) => true)
 (fact "2.1.6: :tag is set" (has-tag rakennuslupa_to_krysp_216) => true)
+(fact "2.1.8: :tag is set" (has-tag rakennuslupa_to_krysp_218) => true)
 
 (defn- do-test [application validate-tyonjohtaja? validate-pysyva-tunnus?]
   (let [canonical (application-to-canonical application "fi")
@@ -38,26 +40,31 @@
         xml_214 (rakennuslupa-element-to-xml canonical "2.1.4")
         xml_215 (rakennuslupa-element-to-xml canonical "2.1.5")
         xml_216 (rakennuslupa-element-to-xml canonical "2.1.6")
+        xml_218 (rakennuslupa-element-to-xml canonical "2.1.8")
         xml_212_s (indent-str xml_212)
         xml_213_s (indent-str xml_213)
         xml_214_s (indent-str xml_214)
         xml_215_s (indent-str xml_215)
-        xml_216_s (indent-str xml_216)]
+        xml_216_s (indent-str xml_216)
+        xml_218_s (indent-str xml_218)]
 
     (fact "2.1.2: xml exist" xml_212 => truthy)
     (fact "2.1.3: xml exist" xml_213 => truthy)
     (fact "2.1.4: xml exist" xml_214 => truthy)
     (fact "2.1.5: xml exist" xml_215 => truthy)
     (fact "2.1.6: xml exist" xml_216 => truthy)
+    (fact "2.1.8: xml exist" xml_218 => truthy)
 
 
 
     (let [lp-xml_212 (cr/strip-xml-namespaces (xml/parse xml_212_s))
           lp-xml_213 (cr/strip-xml-namespaces (xml/parse xml_213_s))
           lp-xml_216 (cr/strip-xml-namespaces (xml/parse xml_216_s))
+          lp-xml_218 (cr/strip-xml-namespaces (xml/parse xml_218_s))
           tyonjohtaja_212 (xml/select1 lp-xml_212 [:osapuolettieto :Tyonjohtaja])
           tyonjohtaja_213 (xml/select1 lp-xml_213 [:osapuolettieto :Tyonjohtaja])
-          tyonjohtaja_216 (xml/select1 lp-xml_216 [:osapuolettieto :Tyonjohtaja])]
+          tyonjohtaja_216 (xml/select1 lp-xml_216 [:osapuolettieto :Tyonjohtaja])
+          tyonjohtaja_218 (xml/select1 lp-xml_218 [:osapuolettieto :Tyonjohtaja])]
 
       (fact "saapumisPvm"
         (let [expected (sade.util/to-xml-date (:submitted application))]
@@ -74,7 +81,8 @@
         (do
            tyonjohtaja_212 => nil
            tyonjohtaja_213 => nil
-           tyonjohtaja_216 => nil))
+           tyonjohtaja_216 => nil
+           tyonjohtaja_218 => nil))
 
       (if validate-pysyva-tunnus?
         (fact "pysyva rakennusnumero" (xml/get-text lp-xml_212 [:rakennustunnus :valtakunnallinenNumero]) => "1234567892")))
@@ -97,8 +105,8 @@
     (validator/validate xml_213_s (:permitType application) "2.1.3")
     (validator/validate xml_214_s (:permitType application) "2.1.4")
     (validator/validate xml_215_s (:permitType application) "2.1.5")
-    ; TODO patevyysvaatimusluokka enum ei tiedossa is now Ei tiedossa maybe mistake in xsd?
     (validator/validate xml_216_s (:permitType application) "2.1.6")
+    (validator/validate xml_218_s (:permitType application) "2.1.8")
     ))
 
 

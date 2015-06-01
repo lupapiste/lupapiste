@@ -105,6 +105,7 @@
    "2.1.4" common-validator-2_1_2
    "2.1.5" common-validator-2_1_3
    "2.1.6" common-validator-2_1_5
+   "2.1.8" common-validator-2_1_5
    "ah-1.1" asianhallinta-validator})
 
 (def- ymp-validators
