@@ -22,36 +22,29 @@ Login fails with invalid password
   Login fails  ${LOGIN}  invalid
 
 Login fails with invalid username
-  [Tags]  ie8
   Login fails  invalid  ${PASSWORD}
 
 Login fails with invalid username and password
-  [Tags]  ie8
   Login fails  invalid  whatever
 
 Username is locked after 3 failures
-  [Tags]  ie8
   Login fails  invalid  whatever
   Wait Until  Page Should Contain  Tunnus tai salasana on väärin
   Login fails  invalid  whatever
   Wait Until  Page Should Contain  Tunnus on lukittu
 
 Username lock expires after 10 seconds
-  [Tags]  ie8
   Sleep  10
   Login fails  invalid  whatever
   Page Should Not Contain  Tunnus on lukittu
 
 Login fails with empty username
-  [Tags]  ie8
   Login fails  ${EMPTY}  ${PASSWORD}
 
 Login fails with empty password
-  [Tags]  ie8
   Login fails  ${LOGIN}  ${EMPTY}
 
 Login fails with empty username and password
-  [Tags]  ie8
   Login fails  ${EMPTY}  ${EMPTY}
 
 Mikko logs in and wants us to remember him

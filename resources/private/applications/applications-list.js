@@ -48,6 +48,8 @@
     self.searchField = ko.observable();
     self.searchField.subscribe(_.debounce(self.filter.search, 500));
 
+    self.searchNow = redraw;
+
     self.create = function() {
       hub.send("track-click", {category:"Applications", label:"create", event:"create"});
       window.location = "#!/create-part-1";

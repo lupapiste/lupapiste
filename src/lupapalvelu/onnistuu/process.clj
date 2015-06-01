@@ -11,7 +11,7 @@
             [slingshot.slingshot :refer [throw+]]
             [noir.response :as resp]
             [sade.env :as env]
-            [sade.util :refer [max-length-string valid-email?]]
+            [sade.util :refer [max-length-string valid-email? valid-hetu?]]
             [sade.core :refer [ok]]
             [sade.crypt :as crypt]
             [lupapalvelu.mongo :as mongo]
@@ -46,7 +46,8 @@
 (def Signer {(sc/optional-key :currentUser) (sc/pred mongo/valid-key? "valid key")
              :firstName (max-length-string 64)
              :lastName  (max-length-string 64)
-             :email     (sc/pred valid-email? "valid email")})
+             :email     (sc/pred valid-email? "valid email")
+             :personId  (sc/pred valid-hetu? "valid hetu")})
 
 ;
 ; Utils:
@@ -84,7 +85,8 @@
         process-id   (random-password 40)
         stamp        (random-password 40)
         company-name (:name company)
-        company-y    (:y company)]
+        company-y    (:y company)
+        hetu         (:personId signer)]
     (infof "sign:init-sign-process:%s: company-name [%s], y [%s], email [%s]" process-id company-name company-y (:email signer))
     (mongo/insert :sign-processes {:_id       process-id
                                    :stamp     stamp
@@ -98,7 +100,7 @@
      :data       (->> {:stamp           stamp
                        :return_success  (str success-url "/" process-id)
                        :document        (str document-url "/" process-id)
-                       :requirements    [{:type :company, :identifier company-y}]}
+                       :requirements    [{:type :person, :identifier hetu}]}
                       (json/encode)
                       (crypt/str->bytes)
                       (crypt/encrypt (-> crypto-key (crypt/str->bytes) (crypt/base64-decode)) crypto-iv)
@@ -148,12 +150,6 @@
 ; Success:
 ;
 
-(defmacro resp-assert! [result expected message]
-  `(when-not (= ~result ~expected)
-     (errorf "sing:success:%s: %s: expected '%s', got '%s'" ~'process-id ~message ~result ~expected)
-     (process-update! ~'process :error ~'ts)
-     (fail! :bad-request)))
-
 (notifications/defemail :onnistuu-success
   {:model-fn  (fn [command conf recipient] command)
    :recipients-fn (constantly [{:email (env/value :onnistuu :success :email)}])})
@@ -171,10 +167,16 @@
                         (json/decode)
                         walk/keywordize-keys)
         {:keys [signatures stamp document]} resp
-        {:keys [type identifier name timestamp uuid]} (first signatures)]
-    (resp-assert! (:stamp process)          stamp       "wrong stamp")
-    (resp-assert! (count signatures)        1           "number of signatures")
-    (resp-assert! type                      "company"   "wrong signature type")
+        {:keys [type identifier name timestamp uuid]} (first signatures)
+        resp-assert! (fn [result expected message]
+                      (when-not (= result expected)
+                        (errorf "sing:success:%s: %s: expected '%s', got '%s'" process-id message result expected)
+                        (process-update! process :error ts)
+                        (fail! :bad-request)))]
+    (resp-assert! (:stamp process)          stamp              "wrong stamp")
+    (resp-assert! (count signatures)        1                  "number of signatures")
+    (resp-assert! type                      "person"           "wrong signature type")
+    (resp-assert! identifier                (:personId signer) "returned personId does not match original")
     (process-update! process :done ts :document document)
 
     (infof "sign:success:%s: OK: identifier [%s], company: [%s], document: [%s]"

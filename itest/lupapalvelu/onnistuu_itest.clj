@@ -25,7 +25,8 @@
                            :accountType "account5"}
                  :signer {:firstName   "First"
                           :lastName    "Last"
-                          :email       "a@b.c"}
+                          :email       "a@b.c"
+                          :personId    "131052-308T"}
                  :lang "fi")
       :process-id
       get-process))
@@ -38,7 +39,8 @@
                  :signer {:firstName   "Pena"
                           :lastName    "Panaani"
                           :email       "in@va.lid"
-                          :currentUser "777777777777777777000000"}
+                          :currentUser "777777777777777777000000"
+                          :personId    "131052-308T"}
                  :lang "fi")
       :process-id
       get-process))
@@ -50,7 +52,8 @@
                                       :accountType "account5"}
                             :signer {:firstName   "First"
                                      :lastName    "Last"
-                                     :email        "a@b.c"}
+                                     :email        "a@b.c"
+                                     :personId    "131052-308T"}
                             :status  "created"
                             :lang    "fi"}))
 
@@ -83,7 +86,8 @@
                                              :signer  {:firstName   "Pena"
                                                        :lastName    "Panaani"
                                                        :email       "pena@example.com"
-                                                       :currentUser "777777777777777777000020"}
+                                                       :currentUser "777777777777777777000020"
+                                                       :personId    "131052-308T"}
                                              :status  "created"
                                              :lang    "fi"}))
 
@@ -99,13 +103,13 @@
         stamp (:stamp process)
         crypto-key (-> (env/get-config) :onnistuu :crypto-key (crypt/str->bytes) (crypt/base64-decode))
         crypto-iv (crypt/make-iv)
-        y (get-in process [:company :y])
+        hetu (get-in process [:signer :personId])
         uuid (str (java.util.UUID/randomUUID))
         data (->> {:stamp      stamp
                    :document   (str "/dev/dummy-onnistuu/doc/" stamp)
                    :cancel     "cancel-url-not-used"
-                   :signatures [{:type       :company
-                                 :identifier y
+                   :signatures [{:type       :person
+                                 :identifier hetu
                                  :name       "foobar"
                                  :timestamp  "foobar"
                                  :uuid       uuid}]}
