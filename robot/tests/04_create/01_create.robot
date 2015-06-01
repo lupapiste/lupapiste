@@ -23,7 +23,7 @@ Mikko sees application in list
 Mikko creates a new inforequest
   Create inforequest  create-info  753  753-416-25-22  Hoblaa  R
   Wait until  Element text should be  //section[@id='inforequest']//span[@data-test-id='inforequest-application-applicant']  Intonen Mikko
-  Wait until  Element should be visible  //section[@id='inforequest']//span[@data-test-operation-id='kerrostalo-rivitalo']
+  Wait until  Element should be visible  //section[@id='inforequest']//span[@data-test-primary-operation-id='kerrostalo-rivitalo']
   Element should not be visible  //h2[@data-test-id='wanna-join']
   Title Should Be  create-info - Lupapiste
 

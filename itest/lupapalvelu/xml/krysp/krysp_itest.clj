@@ -78,7 +78,7 @@
 (defn- generate-attachment [{id :id :as application} apikey password]
   (when-let [first-attachment (or
                                 (get-in application [:attachments 0])
-                                (case (-> application :operations first :name)
+                                (case (-> application :primaryOperation :name)
                                   "aloitusoikeus" {:type {:type-group "paapiirustus"
                                                           :type-id    "asemapiirros"}
                                                    :id   id}

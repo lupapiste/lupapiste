@@ -207,7 +207,7 @@
                     (sxml/get-text (:content (second metas)) [:Arvo]) => (get-in attachments [1 :type :type-id]))
                   (fact "Operation meta check"
                     (sxml/get-text (:content (last metas)) [:Avain]) => "operation"
-                    (sxml/get-text (:content (last metas)) [:Arvo]) => (-> application :operations first :name)))))))
+                    (sxml/get-text (:content (last metas)) [:Arvo]) => (-> application :primaryOperation :name)))))))
 
         (facts "Toimenpiteet"
           (let [operations (sxml/select1 xml-parsed [:UusiAsia :Toimenpiteet])
@@ -216,10 +216,10 @@
                 tteksti    (-> op :content second)]
             (count (:content operations)) => 1
             (fact "Toimenpide has ToimenpideTunnus and ToimenpideTeksti"
-              (sxml/get-text op [:Toimenpide :ToimenpideTunnus]) => (get-in application [:operations 0 :name])
+              (sxml/get-text op [:Toimenpide :ToimenpideTunnus]) => (:name (:primaryOperation application))
               (sxml/get-text op [:Toimenpide :ToimenpideTeksti]) => (i18n/localize "fi"
                                                                       (str "operations."
-                                                                        (get-in application [:operations 0 :name]))))))
+                                                                        (:name (:primaryOperation application)))))))
 
         (fact "Sijainti"
           (sxml/get-text xml-parsed [:UusiAsia :Sijainti :Sijaintipiste]) => (str (get-in application [:location :x]) " " (get-in application [:location :y])))

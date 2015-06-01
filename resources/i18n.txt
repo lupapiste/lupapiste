@@ -1,0 +1,2 @@
+application.operations.secondary.none:  Ei toimenpiteitä
+application.operations.secondary:  Toissijaiset toimenpiteet

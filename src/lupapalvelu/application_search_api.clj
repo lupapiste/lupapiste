@@ -6,7 +6,8 @@
             [lupapalvelu.application-search :as search]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.mongo :as mongo]))
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.application :refer [get-operations]]))
 
 
 (defquery applications-for-datatables
@@ -32,7 +33,7 @@
   [{user :user data :data}]
   (let [user-query (domain/basic-application-query-for user)
         query (search/make-query user-query data user)
-        fields (concat [:id :location :infoRequest :address :municipality :operations :drawings :permitType] (filter keyword? search/col-sources))
+        fields (concat [:id :location :infoRequest :address :municipality :primaryOperation :secondaryOperations :drawings :permitType] (filter keyword? search/col-sources))
         apps (mongo/select :applications query (zipmap fields (repeat 1)))
         rows (map #(-> %
                      (domain/filter-application-content-for user)
@@ -51,7 +52,8 @@
         limit 5
         apps (query/with-collection "applications"
                (query/find query)
-               (query/fields [:municipality :submitted :operations])
+               (query/fields [:municipality :submitted :primaryOperation])
                (query/sort {:submitted -1})
                (query/limit limit))]
-    (ok :applications (->> apps (filter (comp seq :operations)) (map search/public-fields)))))
+    (ok :applications (->> apps
+                           (map search/public-fields)))))
