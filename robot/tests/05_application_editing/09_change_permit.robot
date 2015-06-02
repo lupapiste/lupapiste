@@ -52,12 +52,12 @@ Sonja creates a change permit
 
   Element Should Not Be Visible  xpath=//*[@data-test-id='test-application-app-linking-to-us']
   Element Should Be Visible  xpath=//*[@data-test-id='test-application-link-permit-lupapistetunnus']
-  Element Text Should Be  xpath=//*[@data-test-id='test-application-link-permit-lupapistetunnus']  ${applicationid}
+  Element Text Should Be  xpath=//*[@data-test-id='test-application-link-permit-lupapistetunnus']  ${applicationid} - Asuinkerrostalon tai rivitalon rakentaminen
 
   # Go to the link permit via link
   Click by test id  test-application-link-permit-lupapistetunnus
 
   Wait Until  Element should not be visible  xpath=//*[@data-test-id='test-application-link-permit-lupapistetunnus']
   Wait Until  Element should be visible  xpath=//*[@data-test-id='test-application-app-linking-to-us']
-  Element Text Should Be  xpath=//*[@data-test-id='test-application-app-linking-to-us']  ${newApplicationid}
+  Element Text Should Be  xpath=//*[@data-test-id='test-application-app-linking-to-us']  ${newApplicationid} - Asuinkerrostalon tai rivitalon rakentaminen
 
