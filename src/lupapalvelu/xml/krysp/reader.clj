@@ -139,11 +139,12 @@
 
 (defn- ->building-ids [id-container xml-no-ns]
   (let [national-id (pysyva-rakennustunnus (get-text xml-no-ns id-container :valtakunnallinenNumero))
-        local-short-id (get-text xml-no-ns id-container :rakennusnro)]
+        local-short-id (-> (get-text xml-no-ns id-container :rakennusnro) ss/trim (#(when-not (ss/blank? %) %)))
+        kunnanSisainenPysyvaRakennusnumero (-> (get-text xml-no-ns id-container :kunnanSisainenPysyvaRakennusnumero) ss/trim (#(when-not (ss/blank? %) %)))]
     {:propertyId   (get-text xml-no-ns id-container :kiinttun)
      :buildingId   (first (remove ss/blank? [national-id local-short-id]))
      :nationalId   national-id
-     :localId      nil ; reserved for the next KRYSP schema version
+     :localId      kunnanSisainenPysyvaRakennusnumero
      :localShortId local-short-id
      :index        (get-text xml-no-ns id-container :jarjestysnumero)
      :usage        (or (get-text xml-no-ns :kayttotarkoitus) "")

@@ -931,11 +931,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         var buildingId = option$.attr("data-buildingid") || "";
         var nationalId = option$.attr("data-nationalid") || (buildingId.length === 10 ? buildingId : "");
         var localShortId = option$.attr("data-localshortid") || (buildingId.length === 3 ? buildingId : "");
-        // TODO local id coming in the next KRYSP version
-        //var localId = option$.attr("data-localid") || "";
+        var localId = option$.attr("data-localid") || "";
 
-        var paths = [basePath + ".jarjestysnumero", basePath + ".kiinttun", basePath + ".rakennusnro", basePath + ".valtakunnallinenNumero"];
-        var values = [index, propertyId, localShortId, nationalId];
+        var paths = [basePath + ".jarjestysnumero", basePath + ".kiinttun", basePath + ".rakennusnro", basePath + ".valtakunnallinenNumero", basePath + ".kunnanSisainenPysyvaRakennusnumero"];
+        var values = [index, propertyId, localShortId, nationalId, localId];
 
         if (label) {
           label.appendChild(loader);
