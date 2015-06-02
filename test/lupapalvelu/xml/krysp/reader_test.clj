@@ -73,9 +73,25 @@
   (fact (pysyva-rakennustunnus "123456") => nil)
   (fact (pysyva-rakennustunnus "1234567892") => "1234567892"))
 
+(facts "KRYSP verdict 2.1.8"
+  (let [xml (xml/parse (slurp "resources/krysp/sample/verdict - 2.1.8.xml"))
+        cases (->verdicts xml ->standard-verdicts)]
+
+    (fact "xml is parsed" cases => truthy)
+    (fact "validator finds verdicts" (standard-verdicts-validator xml) => nil)
+
+    (let [verdict (first (:paatokset (last cases)))
+          lupamaaraykset (:lupamaaraykset verdict)
+          maaraykset     (:maaraykset lupamaaraykset)]
+      (facts "m\u00e4\u00e4r\u00e4ykset"
+            (count maaraykset) => 2
+            (:sisalto (first maaraykset)) => "Radontekninen suunnitelma"
+            (:maaraysaika (first maaraykset)) => (to-timestamp "2013-08-28")
+            (:toteutusHetki (last maaraykset)) => (to-timestamp "2013-08-31")))))
+
 (facts "KRYSP verdict"
   (let [xml (xml/parse (slurp "resources/krysp/sample/verdict.xml"))
-      cases (->verdicts xml ->standard-verdicts)]
+        cases (->verdicts xml ->standard-verdicts)]
 
     (fact "xml is parsed" cases => truthy)
 

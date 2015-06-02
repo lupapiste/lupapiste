@@ -138,12 +138,13 @@
       building-id)))
 
 (defn- ->building-ids [id-container xml-no-ns]
-  (let [national-id (pysyva-rakennustunnus (get-text xml-no-ns id-container :valtakunnallinenNumero))
-        local-short-id (get-text xml-no-ns id-container :rakennusnro)]
+  (let [national-id    (pysyva-rakennustunnus (get-text xml-no-ns id-container :valtakunnallinenNumero))
+        local-short-id (-> (get-text xml-no-ns id-container :rakennusnro) ss/trim (#(when-not (ss/blank? %) %)))
+        local-id       (-> (get-text xml-no-ns id-container :kunnanSisainenPysyvaRakennusnumero) ss/trim (#(when-not (ss/blank? %) %)))]
     {:propertyId   (get-text xml-no-ns id-container :kiinttun)
      :buildingId   (first (remove ss/blank? [national-id local-short-id]))
      :nationalId   national-id
-     :localId      nil ; reserved for the next KRYSP schema version
+     :localId      local-id
      :localShortId local-short-id
      :index        (get-text xml-no-ns id-container :jarjestysnumero)
      :usage        (or (get-text xml-no-ns :kayttotarkoitus) "")
@@ -253,6 +254,8 @@
           (util/assoc-when
             {:muutostyolaji                 ...notimplemented...
              :valtakunnallinenNumero        (pysyva-rakennustunnus (get-text rakennus :rakennustunnus :valtakunnallinenNumero))
+             ;; TODO: Add support for kunnanSisainenPysyvaRakennusnumero (rakval krysp 2.1.6 +)
+;             :kunnanSisainenPysyvaRakennusnumero (get-text rakennus :rakennustunnus :kunnanSisainenPysyvaRakennusnumero)
              :rakennusnro                   (ss/trim (get-text rakennus :rakennustunnus :rakennusnro))
              :manuaalinen_rakennusnro       ""
              :jarjestysnumero               (get-text rakennus :rakennustunnus :jarjestysnumero)
@@ -329,8 +332,17 @@
           (dissoc % :vaadittuTyonjohtajatieto))))
 
     (cr/ensure-sequential :maarays)
-    (#(if-let [maarays (:maarays %)]
-        (assoc % :maaraykset (cr/convert-keys-to-timestamps maarays [:maaraysaika :toteutusHetki]))
+
+    (#(if (:maarays %)
+        (let [maaraykset (cr/convert-keys-to-timestamps (:maarays %) [:maaraysaika :maaraysPvm :toteutusHetki])
+              ;; KRYSP 2.1.5+ renamed :maaraysaika -> :maaraysPvm
+              maaraykset (mapv
+                           (fn [maar]
+                             (if (:maaraysPvm maar)
+                               (-> maar (assoc :maaraysaika (:maaraysPvm maar)) (dissoc :maaraysPvm))
+                               maar))
+                           maaraykset)]
+          (assoc % :maaraykset maaraykset))
         %))
     (dissoc :maarays)
 
