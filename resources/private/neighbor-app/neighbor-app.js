@@ -1,8 +1,9 @@
 ;(function() {
   "use strict";
 
-  var app = new LUPAPISTE.App("", true);
-  window.lupapisteApp = app;
+  window.lupapisteApp = new LUPAPISTE.App({startPage: "",
+                                           allowAnonymous: true,
+                                           showUserMenu: false});
 
   /*
    * This is a hack. Windows FF and IE can't open neighbor page when page information is in hash. They
@@ -10,20 +11,18 @@
    * remove this.
    */
 
-  app.hashChanged = function() {
+  lupapisteApp.hashChanged = function() {
     var m = window.location.pathname.match("/app/[a-z]{2}/neighbor/([^/]+)/([^/]+)/([^/]+)");
     if (!m) {
-      app.openPage(["404"]);
+      lupapisteApp.openPage(["404"]);
     } else {
       var applicationId = m[1],
           neighborId = m[2],
           tokenId = m[3];
-      app.openPage(["neighbor-show", applicationId, neighborId, tokenId]);
+      lupapisteApp.openPage(["neighbor-show", applicationId, neighborId, tokenId]);
     }
   };
 
-  $(function() {
-    app.domReady();
-  });
+  $(lupapisteApp.domReady);
 
 })();

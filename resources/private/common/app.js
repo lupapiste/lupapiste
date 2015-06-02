@@ -3,25 +3,28 @@ var LUPAPISTE = LUPAPISTE || {};
 (function($) {
   "use strict";
 
-  var startPageHref = window.location.href;
-
   /**
    * Prototype for Lupapiste Single Page Apps.
    *
-   * @param {String} startPage   ID of the landing page
-   * @param {Boolean} allowAnonymous  Allow all users to access the app. Default: require login.
+   * params:
+   * startPage (String)        ID of the landing page
+   * allowAnonymous (Boolean)  Allow all users to access the app. Default: require login.
+   * showUserMenu (Boolean)    Default: complement of allowAnonymous, i.e., show menu for users tthat have logged in
+   * @param
    */
-   LUPAPISTE.App = function (startPage, allowAnonymous, showUserMenu) {
+  LUPAPISTE.App = function (params) {
+
+
 
     var self = this;
 
     self.defaultTitle = document.title;
 
-    self.startPage = startPage;
+    self.startPage = params.startPage;
     self.currentPage = "";
     self.session = undefined;
-    self.allowAnonymous = allowAnonymous;
-    self.showUserMenu = (showUserMenu !== undefined) ? showUserMenu : !allowAnonymous;
+    self.allowAnonymous = params.allowAnonymous;
+    self.showUserMenu = (params.showUserMenu !== undefined) ? params.showUserMenu : !params.allowAnonymous;
     self.previousHash = "";
     self.currentHash = "";
 
@@ -213,7 +216,7 @@ var LUPAPISTE = LUPAPISTE || {};
           }
         } else {
           // fallback
-          window.location.href = startPageHref;
+          pageutil.openFrontpage();
         }
       }
 
