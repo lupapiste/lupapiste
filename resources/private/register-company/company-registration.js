@@ -116,7 +116,7 @@
       .command("cancel-sign", {processId: this.processId()})
       .call();
     this.clearModel();
-    window.location.hash = "!/login";
+    window.location.hash = "!/register";
   };
 
   var companyRegistration = new CompanyRegistration();

@@ -26,6 +26,7 @@
 (defn- conf []
   (let [js-conf {:maps                  (env/value :maps)
                  :analytics             (env/value :analytics)
+                 :frontpage             (env/value :frontpage)
                  :fileExtensions        mime/allowed-extensions
                  :passwordMinLength     (env/value :password :minlength)
                  :mode                  env/mode
