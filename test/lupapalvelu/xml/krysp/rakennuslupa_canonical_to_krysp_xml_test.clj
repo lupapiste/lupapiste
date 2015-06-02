@@ -62,9 +62,7 @@
           lp-xml_216 (cr/strip-xml-namespaces (xml/parse xml_216_s))
           lp-xml_218 (cr/strip-xml-namespaces (xml/parse xml_218_s))
           tyonjohtaja_212 (xml/select1 lp-xml_212 [:osapuolettieto :Tyonjohtaja])
-          tyonjohtaja_213 (xml/select1 lp-xml_213 [:osapuolettieto :Tyonjohtaja])
-          tyonjohtaja_216 (xml/select1 lp-xml_216 [:osapuolettieto :Tyonjohtaja])
-          tyonjohtaja_218 (xml/select1 lp-xml_218 [:osapuolettieto :Tyonjohtaja])]
+          tyonjohtaja_213 (xml/select1 lp-xml_213 [:osapuolettieto :Tyonjohtaja])]
 
       (fact "saapumisPvm"
         (let [expected (sade.util/to-xml-date (:submitted application))]
@@ -80,9 +78,7 @@
             (xml/get-text tyonjohtaja_213 :patevyysvaatimusluokka) => "A"))
         (do
            tyonjohtaja_212 => nil
-           tyonjohtaja_213 => nil
-           tyonjohtaja_216 => nil
-           tyonjohtaja_218 => nil))
+           tyonjohtaja_213 => nil))
 
       (if validate-pysyva-tunnus?
         (fact "pysyva rakennusnumero" (xml/get-text lp-xml_212 [:rakennustunnus :valtakunnallinenNumero]) => "1234567892")))
