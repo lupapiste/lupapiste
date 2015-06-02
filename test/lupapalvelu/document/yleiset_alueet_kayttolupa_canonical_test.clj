@@ -1,6 +1,7 @@
 (ns lupapalvelu.document.yleiset-alueet-kayttolupa-canonical-test
   (:require [lupapalvelu.document.yleiset-alueet-canonical-test-common :refer :all]
             [lupapalvelu.factlet :refer :all]
+            [lupapalvelu.test-util :refer [xml-datetime-is-roughly?]]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [lupapalvelu.document.canonical-common :refer :all]
@@ -179,7 +180,7 @@
 
     ;; Sijainti
     (fact "Sijainti-yksilointitieto" Sijainti-yksilointitieto => (:id kayttolupa-application))
-;    (fact "Sijainti-alkuHetki" Sijainti-alkuHetki => <now??>)              ;; TODO: Mita tahan?
+    (fact "Sijainti-alkuHetki" Sijainti-alkuHetki => (partial xml-datetime-is-roughly? (util/to-xml-datetime (now))))
     (fact "Sijainti-osoitenimi" Sijainti-osoitenimi => (:address kayttolupa-application))
     (fact "Sijainti-piste-xy" Sijainti-piste => (str (-> kayttolupa-application :location :x) " " (-> kayttolupa-application :location :y)))
 
