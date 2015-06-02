@@ -1698,7 +1698,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     descriptionInput.type = "text";
     descriptionInput.className = "accordion-input text hidden";
 
-    var saveInput = function() {
+    var saveInput = _.debounce(function() {
       $(descriptionInput).off("blur");
       var value = _.trim(descriptionInput.value);
       if (value === "") {
@@ -1718,7 +1718,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       $(descriptionInput).addClass("hidden");
       $(iconSpan).removeClass("hidden");
       $(descriptionSpan).removeClass("hidden");
-    };
+    }, 250);
 
     descriptionInput.onfocus = function() {
       descriptionInput.onblur = function() {
@@ -1782,7 +1782,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     title.setAttribute("data-doc-id", self.docId);
     title.setAttribute("data-app-id", self.appId);
     title.onclick = accordion.click;
-    if (self.schema.info.removable && !self.isDisabled && authorizationModel.ok("remove-doc")) {
+    var docId = util.getIn(self, ["schema", "info", "op", "id"]);
+    var notPrimaryOperation = (!docId || docId != util.getIn(self.application, ["primaryOperation", "id"]))
+
+    if (self.schema.info.removable && !self.isDisabled && authorizationModel.ok("remove-doc") && notPrimaryOperation) {
       var removeSpan =
         $("<span>")
           .addClass("icon remove inline-right")

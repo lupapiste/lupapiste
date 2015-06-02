@@ -31,9 +31,9 @@
                        (get-foreman-hetu foreman-application)
                        foreman-hetu)]
     (when-not (ss/blank? foreman-hetu)
-      (mongo/select :applications {"operations.name" "tyonjohtajan-nimeaminen-v2"
-                                   :documents        {$elemMatch {"schema-info.name"              "tyonjohtaja-v2"
-                                                                  "data.henkilotiedot.hetu.value" foreman-hetu}}}))))
+      (mongo/select :applications {"primaryOperation.name" "tyonjohtajan-nimeaminen-v2"
+                                   :documents {$elemMatch {"schema-info.name"              "tyonjohtaja-v2"
+                                                           "data.henkilotiedot.hetu.value" foreman-hetu}}}))))
 
 (defn get-foreman-project-applications
   "Based on the passed foreman application, fetches all project applications that have the same foreman as in
@@ -104,4 +104,4 @@
   (-> (select-keys application [:id :state :auth :documents])
       (update-in [:documents] (fn [docs] (filter #(= (get-in % [:schema-info :name]) "tyonjohtaja-v2") docs)))))
 
-(defn foreman-app? [application] (= :tyonjohtajan-nimeaminen-v2 (-> application :operations first :name keyword)))
+(defn foreman-app? [application] (= :tyonjohtajan-nimeaminen-v2 (-> application :primaryOperation :name keyword)))
