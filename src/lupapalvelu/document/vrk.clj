@@ -124,19 +124,6 @@
 ;; Validators
 ;;
 
-(defvalidator-old "vrk:CR327"
-  "k\u00e4ytt\u00f6tarkoituksen mukainen maksimitilavuus"
-  [{{schema-name :name} :schema-info data :data}]
-  (when (= schema-name "uusiRakennus")
-    (let [kayttotarkoitus (some->> data :kaytto :kayttotarkoitus :value ->kayttotarkoitus)
-          tilavuus        (some->> data :mitat :tilavuus :value ->int)
-          max-tilavuus    (kayttotarkoitus->tilavuus kayttotarkoitus)]
-      (when (and tilavuus max-tilavuus (> tilavuus max-tilavuus))
-        [{:path[:kaytto :kayttotarkoitus]
-          :result [:warn "vrk:CR327"]}
-         {:path[:mitat :tilavuus]
-          :result [:warn "vrk:CR327"]}]))))
-
 (defvalidator-old "vrk:BR106"
   "Puutalossa saa olla korkeintaan 4 kerrosta"
   [{{schema-name :name} :schema-info data :data}]
@@ -192,6 +179,18 @@
 ;;
 ;; new stuff
 ;;
+
+(defvalidator :vrk:CR327
+  {:doc "k\u00e4ytt\u00f6tarkoituksen mukainen maksimitilavuus"
+   :schema "uusiRakennus"
+   :fields [kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus]
+            tilavuus        [:mitat :tilavuus ->int]]
+   :facts {:ok   [["032 luhtitalot" "100000"]]
+           :fail [["032 luhtitalot" "100001"]]}}
+  (and
+    tilavuus
+    (kayttotarkoitus->tilavuus kayttotarkoitus)
+    (> tilavuus (kayttotarkoitus->tilavuus kayttotarkoitus))))
 
 (defvalidator :vrk:CR335
   {:doc "Jos lammitystapa ei ole 5 (ei kiinteaa lammitystapaa), on polttoaine ilmoitettava"
