@@ -333,8 +333,6 @@
 (def- link-permit-data-lupapistetunnus {:id "LP-753-2013-00099" :type "lupapistetunnus"})
 (def- app-linking-to-us {:id "LP-753-2013-00008"})
 
-;TODO LIITETIETO
-
 (def documents [hankkeen-kuvaus
                 hakija-henkilo
                 hakija-yritys
@@ -1171,11 +1169,6 @@
 
 (ctc/validate-all-documents jatkolupa-application)
 
-(fl/facts* "Canonical model for jatkoaika is correct"
-  (let [canonical (application-to-canonical jatkolupa-application "sv")]
-    ;(clojure.pprint/pprint canonical)
-    ;TODO tests
-    ))
 
 (fl/facts* "Canonical model for katselmus is correct"
            (let [canonical (katselmus-canonical

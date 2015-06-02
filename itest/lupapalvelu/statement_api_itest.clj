@@ -98,8 +98,6 @@
           email => (partial contains-application-link-with-tab? application-id "conversation" "authority")))
         ))
 
-    ; TODO facts about what Veikko can and can not do to application
-
     (fact "Statement person has access to application"
       (let [resp (command sonja :request-for-statement :id application-id :personIds [statement-giver-ronja]) => ok?
             application (query-application (apikey-for "ronja") application-id)]

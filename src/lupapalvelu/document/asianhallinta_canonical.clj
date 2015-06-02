@@ -24,7 +24,7 @@
     {:Jakeluosoite (get-in data [:osoite :katu])
      :Postinumero (get-in data [:osoite :postinumero])
      :Postitoimipaikka (get-in data [:osoite :postitoimipaikannimi])
-     :Maa nil ; TODO
+     :Maa nil
      :Email (get-in data [:yhteystiedot :email])
      :Puhelinnumero (get-in data [:yhteystiedot :puhelin])}))
 
