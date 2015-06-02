@@ -244,7 +244,8 @@
    :neighbors                []
    :opened                   nil ; timestamp
    :openInfoRequest          false
-   :operations               []
+   :primaryOperation         nil
+   :secondaryOperations      []
    :organization             ""
    :propertyId               ""
    :permitSubtype            ""

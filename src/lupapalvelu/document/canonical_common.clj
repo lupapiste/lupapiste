@@ -67,8 +67,8 @@
   (by-type (walk/postwalk empty-strings-to-nil documents)))
 
 (def- puolto-mapping {:condition "ehdoilla"
-                               :no "ei puolla"
-                               :yes "puoltaa"})
+                      :no "ei puolla"
+                      :yes "puoltaa"})
 
 (defn- get-statement [statement]
   (let [lausunto {:Lausunto

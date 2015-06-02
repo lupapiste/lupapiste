@@ -278,6 +278,11 @@
                  [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :osapuolettieto]
                  {:tag :osapuolettieto :child [mapping-common/osapuolet_215]})))
 
+(def rakennuslupa_to_krysp_218
+  (-> rakennuslupa_to_krysp_216
+   (assoc-in [:attr :xsi:schemaLocation]
+     (mapping-common/schemalocation "rakennusvalvonta" "2.1.8"))))
+
 (defn- get-mapping [krysp-version]
   {:pre [krysp-version]}
   (case (name krysp-version)
@@ -286,6 +291,7 @@
     "2.1.4" rakennuslupa_to_krysp_214
     "2.1.5" rakennuslupa_to_krysp_215
     "2.1.6" rakennuslupa_to_krysp_216
+    "2.1.8" rakennuslupa_to_krysp_218
     (throw (IllegalArgumentException. (str "Unsupported KRYSP version " krysp-version)))))
 
 (defn- save-katselmus-xml [application

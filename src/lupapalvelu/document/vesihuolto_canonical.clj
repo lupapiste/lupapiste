@@ -52,7 +52,7 @@
   (let [application (tools/unwrapped application)
         documents (documents-by-type-without-blanks application)
         kuvaus (-> (:hankkeen-kuvaus-vesihuolto documents) first :data :kuvaus)
-        operation-name (->> (:operations application) first :name (i18n/localize lang "operations"))
+        operation-name (->> (:primaryOperation application) :name (i18n/localize lang "operations"))
         asian-kuvaus (str operation-name " / " kuvaus)]
     {:Vesihuoltolaki
      {:toimituksenTiedot (toimituksen-tiedot application lang)

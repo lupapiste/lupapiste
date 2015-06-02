@@ -67,7 +67,10 @@
         return a;
       }));
 
-      self.operationsCount(_.map(_.countBy(a.operations, "name"), function(v, k) { return {name: k, count: v}; }));
+      self.primaryOperation(a.primaryOperation);
+      self.secondaryOperations(a.secondaryOperations);
+
+      self.operationsCount(_.map(_.countBy(a.secondaryOperations, "name"), function(v, k) { return {name: k, count: v}; }));
 
       return self;
     };
@@ -86,6 +89,16 @@
     self.message = ko.observable();
     self.operationsCount = ko.observable();
     self.tupasUser = ko.observable();
+    self.primaryOperation = ko.observable();
+    self.secondaryOperations = ko.observableArray();
+
+    self.primaryOperationName = ko.computed(function() {
+      var op = ko.unwrap(self.primaryOperation());
+      if (op) {
+        return "operations." + ko.unwrap(op.name);
+      }
+      return "";
+    });
 
     self.send = function() {
       ajax

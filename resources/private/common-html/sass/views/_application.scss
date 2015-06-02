@@ -84,9 +84,15 @@
       display: block;
     }
 
-    .link-permit-item, .remove-link-permit {
+    .remove-link-permit {
       color: rgb(242,242,242);
     }
+
+    .link-permit-item {
+      color: rgb(242,242,242);
+      text-decoration: none;
+    }
+
     div:nth-child(even) {
       background:rgb(127,127,127);
     }
@@ -99,7 +105,7 @@
       color: rgb(242,242,242);
     }
     .application_summary_text, ul {
-      width: auto;
+      width: 69%;
     }
     ul {
       li {

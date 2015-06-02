@@ -1,7 +1,8 @@
 (ns lupapalvelu.smoketest.lupamonster
   (:require [lupapalvelu.mongo :as mongo]
             [lupapalvelu.smoketest.core :refer :all]
-            [lupapalvelu.smoketest.application-smoke-tests]))
+            [lupapalvelu.smoketest.application-smoke-tests]
+            [lupapalvelu.smoketest.user-smoke-tests]))
 
 
 (defn -main [& args]

@@ -59,7 +59,10 @@
 
 (fl/facts*
   "UusiAsia xml from suunnittelija application"
-  (let [application    (ua-mapping/enrich-application rakennus-test/application-suunnittelijan-nimeaminen)
+  (let [application    (-> rakennus-test/application-suunnittelijan-nimeaminen
+                         (assoc-in [:primaryOperation :name] "poikkeamis")
+                         (assoc :permitType "P")
+                         ua-mapping/enrich-application)
         canonical      (ah/application-to-asianhallinta-canonical application "fi") => truthy
         schema-version "ah-1.1"
         mapping        (ua-mapping/get-ua-mapping (ss/suffix schema-version "-"))
@@ -82,8 +85,11 @@
 
 (fl/facts*
   "UusiAsia xml from application with two link permits"
-  (let [application    (ua-mapping/enrich-application
-                         (update-in rakennus-test/application-suunnittelijan-nimeaminen [:linkPermitData] conj link-permit-data-kuntalupatunnus))
+  (let [application    (-> rakennus-test/application-suunnittelijan-nimeaminen
+                         (assoc-in [:primaryOperation :name] "poikkeamis")
+                         (assoc :permitType "P")
+                         (update-in [:linkPermitData] conj link-permit-data-kuntalupatunnus)
+                         ua-mapping/enrich-application)
         canonical      (ah/application-to-asianhallinta-canonical application "fi") => truthy
         schema-version "ah-1.1"
         mapping        (ua-mapping/get-ua-mapping (ss/suffix schema-version "-"))
@@ -207,7 +213,7 @@
                     (sxml/get-text (:content (second metas)) [:Arvo]) => (get-in attachments [1 :type :type-id]))
                   (fact "Operation meta check"
                     (sxml/get-text (:content (last metas)) [:Avain]) => "operation"
-                    (sxml/get-text (:content (last metas)) [:Arvo]) => (-> application :operations first :name)))))))
+                    (sxml/get-text (:content (last metas)) [:Arvo]) => (-> application :primaryOperation :name)))))))
 
         (facts "Toimenpiteet"
           (let [operations (sxml/select1 xml-parsed [:UusiAsia :Toimenpiteet])
@@ -216,10 +222,10 @@
                 tteksti    (-> op :content second)]
             (count (:content operations)) => 1
             (fact "Toimenpide has ToimenpideTunnus and ToimenpideTeksti"
-              (sxml/get-text op [:Toimenpide :ToimenpideTunnus]) => (get-in application [:operations 0 :name])
+              (sxml/get-text op [:Toimenpide :ToimenpideTunnus]) => (:name (:primaryOperation application))
               (sxml/get-text op [:Toimenpide :ToimenpideTeksti]) => (i18n/localize "fi"
                                                                       (str "operations."
-                                                                        (get-in application [:operations 0 :name]))))))
+                                                                        (:name (:primaryOperation application)))))))
 
         (fact "Sijainti"
           (sxml/get-text xml-parsed [:UusiAsia :Sijainti :Sijaintipiste]) => (str (get-in application [:location :x]) " " (get-in application [:location :y])))

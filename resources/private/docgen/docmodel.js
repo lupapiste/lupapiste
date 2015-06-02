@@ -931,11 +931,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         var buildingId = option$.attr("data-buildingid") || "";
         var nationalId = option$.attr("data-nationalid") || (buildingId.length === 10 ? buildingId : "");
         var localShortId = option$.attr("data-localshortid") || (buildingId.length === 3 ? buildingId : "");
-        // TODO local id coming in the next KRYSP version
-        //var localId = option$.attr("data-localid") || "";
+        var localId = option$.attr("data-localid") || "";
 
-        var paths = [basePath + ".jarjestysnumero", basePath + ".kiinttun", basePath + ".rakennusnro", basePath + ".valtakunnallinenNumero"];
-        var values = [index, propertyId, localShortId, nationalId];
+        var paths = [basePath + ".jarjestysnumero", basePath + ".kiinttun", basePath + ".rakennusnro", basePath + ".valtakunnallinenNumero", basePath + ".kunnanSisainenPysyvaRakennusnumero"];
+        var values = [index, propertyId, localShortId, nationalId, localId];
 
         if (label) {
           label.appendChild(loader);
@@ -1698,7 +1697,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     descriptionInput.type = "text";
     descriptionInput.className = "accordion-input text hidden";
 
-    var saveInput = function() {
+    var saveInput = _.debounce(function() {
       $(descriptionInput).off("blur");
       var value = _.trim(descriptionInput.value);
       if (value === "") {
@@ -1718,7 +1717,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       $(descriptionInput).addClass("hidden");
       $(iconSpan).removeClass("hidden");
       $(descriptionSpan).removeClass("hidden");
-    };
+    }, 250);
 
     descriptionInput.onfocus = function() {
       descriptionInput.onblur = function() {
@@ -1782,7 +1781,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     title.setAttribute("data-doc-id", self.docId);
     title.setAttribute("data-app-id", self.appId);
     title.onclick = accordion.click;
-    if (self.schema.info.removable && !self.isDisabled && authorizationModel.ok("remove-doc")) {
+    var docId = util.getIn(self, ["schema", "info", "op", "id"]);
+    var notPrimaryOperation = (!docId || docId != util.getIn(self.application, ["primaryOperation", "id"]))
+
+    if (self.schema.info.removable && !self.isDisabled && authorizationModel.ok("remove-doc") && notPrimaryOperation) {
       var removeSpan =
         $("<span>")
           .addClass("icon remove inline-right")
