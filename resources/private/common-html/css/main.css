@@ -4146,7 +4146,7 @@ span.icon_clear:before {
 }
 /* line 107, ../sass/views/_application.scss */
 .application_summary .application_summary_info .application_summary_text, .application_summary .application_summary_info ul {
-  width: 70%;
+  width: 69%;
 }
 /* line 111, ../sass/views/_application.scss */
 .application_summary .application_summary_info ul li {
