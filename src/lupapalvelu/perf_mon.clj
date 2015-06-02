@@ -36,10 +36,11 @@
 ;;
 
 (defn- bypass? [request]
-  (or (get-in request [:query-params "npm"])
-      (get-in request [:headers "npm"])
-      (re-matches #"^\/api\/alive.*" (:uri request))
-      (not (re-matches #"^\/api\/.*" (:uri request)))))
+  (let [uri (:uri request)]
+    (or (get-in request [:query-params "npm"])
+        (get-in request [:headers "npm"])
+        (re-matches #"^\/api\/alive.*" uri)
+        (not (re-matches #"^\/api\/.*" uri)))))
 
 ;;
 ;; Performance monitoring:
@@ -58,6 +59,11 @@
                   (swap! context conj [f-name (- end start) @sub-context])))))))
       (apply f args))))
 
+(defn- get-total-db-call-duration [perf-context]
+  (->> perf-context
+       (map (comp first rest))
+       (reduce +)))
+
 (defn perf-mon-middleware [handler]
   (fn [request]
     (if (bypass? request)
@@ -68,13 +74,10 @@
             (handler request)
             (finally
               (let [end (System/nanoTime)]
-                (mc/insert "perf-mon"
-                           {:ts (java.util.Date.)
-                            :duration (- end start)
-                            :uri (get request :uri)
-                            :user (get-in request [:session :user :username])
-                            :perfmon @*perf-context*}
-                           WriteConcern/NONE)))))))))
+                (debug (get request :uri) ":"
+                       (- end start) "ns,"
+                       (count @*perf-context*) "db calls,"
+                       (get-total-db-call-duration @*perf-context*) "ns")))))))))
 
 ;;
 ;; Throttling:
@@ -116,10 +119,10 @@
 (defpage "/perfmon/data" {:keys [start end]}
   (->> (get-data (or (to-long start) (- (System/currentTimeMillis) (* 5 60 1000)))
                  (or (to-long end) (System/currentTimeMillis)))
-    (group-by :uri)
-    (map find-min-max-avg*)
-    (resp/json)
-    (resp/status 200)))
+       (group-by :uri)
+       (map find-min-max-avg*)
+       (resp/json)
+       (resp/status 200)))
 
 (defpage [:get "/perfmon/throttle"] _
   (->> {:db @db-throttle :web @web-throttle} (resp/json) (resp/status 200)))
