@@ -254,6 +254,8 @@
           (util/assoc-when
             {:muutostyolaji                 ...notimplemented...
              :valtakunnallinenNumero        (pysyva-rakennustunnus (get-text rakennus :rakennustunnus :valtakunnallinenNumero))
+             ;; TODO: Add support for kunnanSisainenPysyvaRakennusnumero (rakval krysp 2.1.6 +)
+;             :kunnanSisainenPysyvaRakennusnumero (get-text rakennus :rakennustunnus :kunnanSisainenPysyvaRakennusnumero)
              :rakennusnro                   (ss/trim (get-text rakennus :rakennustunnus :rakennusnro))
              :manuaalinen_rakennusnro       ""
              :jarjestysnumero               (get-text rakennus :rakennustunnus :jarjestysnumero)
