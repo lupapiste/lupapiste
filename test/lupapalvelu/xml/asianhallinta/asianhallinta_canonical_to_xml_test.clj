@@ -59,7 +59,10 @@
 
 (fl/facts*
   "UusiAsia xml from suunnittelija application"
-  (let [application    (ua-mapping/enrich-application rakennus-test/application-suunnittelijan-nimeaminen)
+  (let [application    (-> rakennus-test/application-suunnittelijan-nimeaminen
+                         (assoc-in [:primaryOperation :name] "poikkeamis")
+                         (assoc :permitType "P")
+                         ua-mapping/enrich-application)
         canonical      (ah/application-to-asianhallinta-canonical application "fi") => truthy
         schema-version "ah-1.1"
         mapping        (ua-mapping/get-ua-mapping (ss/suffix schema-version "-"))
@@ -82,8 +85,11 @@
 
 (fl/facts*
   "UusiAsia xml from application with two link permits"
-  (let [application    (ua-mapping/enrich-application
-                         (update-in rakennus-test/application-suunnittelijan-nimeaminen [:linkPermitData] conj link-permit-data-kuntalupatunnus))
+  (let [application    (-> rakennus-test/application-suunnittelijan-nimeaminen
+                         (assoc-in [:primaryOperation :name] "poikkeamis")
+                         (assoc :permitType "P")
+                         (update-in [:linkPermitData] conj link-permit-data-kuntalupatunnus)
+                         ua-mapping/enrich-application)
         canonical      (ah/application-to-asianhallinta-canonical application "fi") => truthy
         schema-version "ah-1.1"
         mapping        (ua-mapping/get-ua-mapping (ss/suffix schema-version "-"))
