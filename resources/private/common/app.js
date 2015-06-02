@@ -92,7 +92,11 @@ var LUPAPISTE = LUPAPISTE || {};
       self.previousHash = self.currentHash;
       self.currentHash = (location.hash || "").substr(3);
       if (self.currentHash === "") {
-        window.location.hash = "!/" + self.startPage;
+        if (_.isFunction(window.location.replace)) {
+          window.location.replace(startPageHref + "#!/" + self.startPage);
+        } else {
+          window.location.hash = "!/" + self.startPage;
+        }
         return;
       }
 
@@ -206,8 +210,7 @@ var LUPAPISTE = LUPAPISTE || {};
 
       function openStartPage() {
         if (self.logoPath) {
-          debug("open", self.logoPath);
-          window.location.pathname = self.logoPath;
+          window.location = window.location.protocol + "//" + window.location.host + self.logoPath;
         } else if (self.startPage && self.startPage.charAt(0) !== "/") {
           if (self.currentHash === self.startPage) {
             // trigger start page re-rendering
