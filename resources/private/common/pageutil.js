@@ -56,6 +56,12 @@ var pageutil = (function($) {
     };
   }
 
+  var frontpage = LUPAPISTE.config.frontpage[loc.getCurrentLanguage()] || "/";
+
+  function openFrontpage() {
+    window.location.pathname = frontpage;
+  }
+
   $(function() {
     ajaxLoaderContainer = $("<div>").attr("id", "ajax-loader-container")
       .append($("<div>"))
@@ -70,7 +76,9 @@ var pageutil = (function($) {
     lastSubPage:          lastSubPage,
     showAjaxWait:         showAjaxWait,
     hideAjaxWait:         hideAjaxWait,
-    makePendingAjaxWait:  makePendingAjaxWait
+    makePendingAjaxWait:  makePendingAjaxWait,
+    openFrontpage:        openFrontpage,
+    frontpage:            frontpage
   };
 
 })(jQuery);

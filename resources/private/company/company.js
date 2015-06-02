@@ -237,9 +237,9 @@
       name:         ko.observable().extend(required),
       y:            ko.observable(),
       reference:    ko.observable().extend(notRequired),
-      address1:     ko.observable().extend(notRequired),
-      po:           ko.observable().extend(notRequired),
-      zip:          ko.observable().extend(notRequired),
+      address1:     ko.observable().extend(required),
+      po:           ko.observable().extend(required),
+      zip:          ko.observable().extend({required: true, number: true, maxLength: 5}),
       country:      ko.observable().extend(notRequired),
       ovt:          ko.observable().extend(notRequired).extend({ovt: true}),
       pop:          ko.observable().extend(notRequired)

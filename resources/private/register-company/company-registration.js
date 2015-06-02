@@ -15,9 +15,9 @@
       name:         ko.observable(undefined).extend({required: true, maxLength: 64}),
       y:            ko.observable("").extend({required: true, y: true}),
       reference:    ko.observable(""),
-      address1:     ko.observable(""),
-      po:           ko.observable(""),
-      zip:          ko.observable("").extend({number: true, maxLength: 5}),
+      address1:     ko.observable("").extend({required: true}),
+      po:           ko.observable("").extend({required: true}),
+      zip:          ko.observable("").extend({required: true, number: true, maxLength: 5}),
       country:      ko.observable(""),
       ovt:          ko.observable("").extend({ovt: true}),
       pop:          ko.observable(""),
@@ -96,7 +96,7 @@
     if (!this.userNotLoggedIn()) {
       signer.currentUser = lupapisteApp.models.currentUser.id();
     }
-    
+
     hub.send("company-info-submitted", {company: company, signer: signer});
 
     window.location.hash = "!/register-company-signing";
@@ -116,7 +116,7 @@
       .command("cancel-sign", {processId: this.processId()})
       .call();
     this.clearModel();
-    window.location.hash = "!/login";
+    window.location.hash = "!/register";
   };
 
   var companyRegistration = new CompanyRegistration();
