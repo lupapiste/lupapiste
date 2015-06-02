@@ -194,7 +194,7 @@
         toiminnanKesto (:toiminnanKesto Melutarina) => truthy
 
         melutiedot (:melutiedot Melutarina) => truthy
-        koneidenLkm (:koneidenLkm melutiedot) => "Murskauksen ja rammeroinnin vaatimat koneet, sek\u00e4 py\u00f6r\u00e4kuormaaja. " ; TODO was nil, why?
+        koneidenLkm (:koneidenLkm melutiedot) => "Murskauksen ja rammeroinnin vaatimat koneet, sek\u00e4 py\u00f6r\u00e4kuormaaja. "
         melutaso (:melutaso melutiedot) => truthy
         db (:db melutaso) => "150"
         paiva (:paiva melutaso) => "150"
