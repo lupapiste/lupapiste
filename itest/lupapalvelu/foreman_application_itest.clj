@@ -4,17 +4,18 @@
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.domain :as domain]))
 
-; TODO test that document data is copied to foreman application
 (apply-remote-minimal)
 
 (facts* "Foreman application"
   (let [apikey                       mikko
         {application-id :id}         (create-app apikey :operation "kerrostalo-rivitalo") => truthy
-        {foreman-application-id :id} (command apikey :create-foreman-application :id application-id :taskId "" :foremanRole "") => truthy
+        application                  (query-application apikey application-id)
+        _                            (generate-documents application apikey)
+        {foreman-application-id :id} (command apikey :create-foreman-application :id application-id :taskId "" :foremanRole "ei tiedossa") => truthy
 
         foreman-application          (query-application apikey foreman-application-id)
         foreman-link-permit-data     (first (foreman-application :linkPermitData))
-        foreman-doc                  (lupapalvelu.domain/get-document-by-name foreman-application "tyonjohtaja-v2")
+        foreman-doc                  (domain/get-document-by-name foreman-application "tyonjohtaja-v2")
         application                  (query-application apikey application-id)
         link-to-application          (first (application :appsLinkingToUs))
         foreman-applications         (query apikey :foreman-applications :id application-id) => truthy]
@@ -32,6 +33,22 @@
       (let [applications (:applications foreman-applications)]
         (count applications) => 1
         (:id (first applications)) => foreman-application-id))
+
+    (fact "Document data is copied to foreman application"
+      (fact "Hankkeen kuvaus"
+        (let [foreman-hankkeen-kuvaus (domain/get-document-by-name foreman-application "hankkeen-kuvaus-minimum")
+              app-hankkeen-kuvaus     (domain/get-document-by-name application "hankkeen-kuvaus")]
+
+          (get-in app-hankkeen-kuvaus [:data :kuvaus :value]) => (get-in foreman-hankkeen-kuvaus [:data :kuvaus :value])))
+
+      (fact "Tyonjohtaja doc has value from the command"
+        (get-in foreman-doc [:data :kuntaRoolikoodi :value]) => "ei tiedossa")
+
+      (fact "Hakija docs are equal, expect the userId"
+        (let [hakija-doc-data         (:henkilo (:data (domain/get-document-by-name application "hakija")))
+              foreman-hakija-doc-data (:henkilo (:data (domain/get-document-by-name foreman-application "hakija")))]
+
+          (dissoc hakija-doc-data :userId) => (dissoc foreman-hakija-doc-data :userId))))
 
     (fact "Can't submit foreman app before original link-permit-app is submitted"
       (:submittable (query-application apikey foreman-application-id)) => false)
@@ -57,12 +74,15 @@
           (get-in updated-foreman-task [:data :asiointitunnus :value]) => foreman-application-id)))
 
     (facts "approve foreman"
-      (let [_ (command sonja :approve-application :id application-id :lang "fi") => ok?
-            ; TODO no need to give verdict after implementing LUPA-1819
-            _ (give-verdict sonja application-id) => ok?]
-        (fact "when foreman application is of type 'ilmoitus', after approval its state is closed"
-          (command sonja :approve-application :id foreman-application-id :lang "fi") => ok?
-          (:state (query-application apikey foreman-application-id)) => "closed")))
+      (fact "Can't approve foreman application before actual application"
+        (command sonja :approve-application :id foreman-application-id :lang "fi") => (partial expected-failure? "error.link-permit-app-not-in-post-sent-state"))
+
+      (fact "After approving actual application, foreman can be approved. No need for verdict"
+        (command sonja :approve-application :id application-id :lang "fi") => ok?
+        (command sonja :approve-application :id foreman-application-id :lang "fi") => ok?)
+
+      (fact "when foreman application is of type 'ilmoitus', after approval its state is closed"
+        (:state (query-application apikey foreman-application-id)) => "closed"))
 
     (facts "updating other foreman projects to current foreman application"
       (let [{application1-id :id}         (create-app apikey :operation "kerrostalo-rivitalo") => truthy
