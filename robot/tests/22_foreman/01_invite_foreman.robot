@@ -55,10 +55,17 @@ Application is submitted
   Submit application
   [Teardown]  logout
 
-Application is approved and given a verdict
+Authority can view draft foreman application, but can't use commands
+  # LPK-289
   Sonja logs in
   Open application at index  ${appname}  753-416-25-22  1
   Element should contain  xpath=//*[@data-test-id='test-application-operation']  Asuinkerrostalon tai rivitalon rakentaminen
+  Click by test id  test-application-app-linking-to-us
+  Wait until  Element should be visible  //section[@id='application']//span[@data-test-operation-id='tyonjohtajan-nimeaminen-v2']
+  Element should be disabled  //section[@data-doc-type="hankkeen-kuvaus-minimium"]//textarea
+
+
+Application is approved and given a verdict
   Click enabled by test id  approve-application
   Open tab  verdict
   Submit empty verdict
