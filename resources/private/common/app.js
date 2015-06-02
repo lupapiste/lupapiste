@@ -3,6 +3,8 @@ var LUPAPISTE = LUPAPISTE || {};
 (function($) {
   "use strict";
 
+  var startPageHref = window.location.href;
+
   /**
    * Prototype for Lupapiste Single Page Apps.
    *
@@ -13,14 +15,12 @@ var LUPAPISTE = LUPAPISTE || {};
    * @param
    */
   LUPAPISTE.App = function (params) {
-
-
-
     var self = this;
 
     self.defaultTitle = document.title;
 
     self.startPage = params.startPage;
+    self.logoPath = params.logoPath;
     self.currentPage = "";
     self.session = undefined;
     self.allowAnonymous = params.allowAnonymous;
@@ -205,7 +205,10 @@ var LUPAPISTE = LUPAPISTE || {};
       $(document.documentElement).keyup(function(event) { hub.send("keyup", event); });
 
       function openStartPage() {
-        if (self.startPage && self.startPage.charAt(0) !== "/") {
+        if (self.logoPath) {
+          debug("open", self.logoPath);
+          window.location.pathname = self.logoPath;
+        } else if (self.startPage && self.startPage.charAt(0) !== "/") {
           if (self.currentHash === self.startPage) {
             // trigger start page re-rendering
             self.previousHash = self.currentHash;
@@ -216,7 +219,7 @@ var LUPAPISTE = LUPAPISTE || {};
           }
         } else {
           // fallback
-          pageutil.openFrontpage();
+          window.location.href = startPageHref;
         }
       }
 
