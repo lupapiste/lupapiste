@@ -523,7 +523,7 @@
 
                 same-op-irs (filter
                               (fn [ir]
-                                (some #(= application-op-name (:name %)) (get-operations application)))
+                                (some #(= application-op-name (:name %)) (get-operations ir)))
                               inforequests)
 
                 others (remove-irs-by-id inforequests same-op-irs)
