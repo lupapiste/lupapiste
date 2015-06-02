@@ -4,18 +4,24 @@
             [sade.core :refer :all]
             [lupapalvelu.xml.disk-writer :as writer]))
 
-(def- rp-yht {"2.1.2" "2.1.0"
-              "2.1.3" "2.1.1"
-              "2.1.4" "2.1.2"
-              "2.1.5" "2.1.3"
-              "2.1.6" "2.1.5"
-              "2.1.8" "2.1.5"})
+(def- rakval-yht {"2.1.2" "2.1.0"
+                  "2.1.3" "2.1.1"
+                  "2.1.4" "2.1.2"
+                  "2.1.5" "2.1.3"
+                  "2.1.6" "2.1.5"
+                  "2.1.8" "2.1.5"})
+
+(def- poik-yht {"2.1.2" "2.1.0"
+                "2.1.3" "2.1.1"
+                "2.1.4" "2.1.2"
+                "2.1.5" "2.1.3"
+                "2.2.0" "2.1.5"})
 
 (def- ymp-yht {"2.1.2" "2.1.3"})
 
 (def- yht-version
-  {"rakennusvalvonta" rp-yht
-   "poikkeamispaatos_ja_suunnittelutarveratkaisu" rp-yht
+  {"rakennusvalvonta" rakval-yht
+   "poikkeamispaatos_ja_suunnittelutarveratkaisu" poik-yht
    "yleisenalueenkaytonlupahakemus" {"2.1.2" "2.1.0"
                                      "2.1.3" "2.1.3"}
    "ymparisto/maa_ainesluvat" ymp-yht
