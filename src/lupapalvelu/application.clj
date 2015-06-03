@@ -665,7 +665,6 @@
     (let [id (make-application-id municipality)]
       (make-application id operation x y address propertyId municipality organization info-request? open-inforequest? messages user created manual-schema-datas))))
 
-;; TODO: separate methods for inforequests & applications for clarity.
 (defcommand create-application
   {:parameters       [:operation :x :y :address :propertyId]
    :user-roles       #{:applicant :authority}
@@ -673,19 +672,10 @@
    :input-validators [(partial action/non-blank-parameters [:operation :address :propertyId])
                       (partial property-id-parameters [:propertyId])
                       operation-validator]}
-  [{{:keys [operation address propertyId infoRequest]} :data :keys [user created] :as command}]
-
-  ;; TODO: These let-bindings are repeated in do-create-application, merge those somehow
-  (let [municipality        (p/municipality-id-by-property-id propertyId)
-        permit-type         (operations/permit-type-of-operation operation)
-        organization        (organization/resolve-organization municipality permit-type)
-        scope               (organization/resolve-organization-scope municipality permit-type organization)
-        info-request?       (boolean infoRequest)
-        open-inforequest?   (and info-request? (:open-inforequest scope))
-        created-application (do-create-application command)]
-
+  [{{:keys [infoRequest]} :data :keys [created] :as command}]
+  (let [created-application (do-create-application command)]
     (insert-application created-application)
-    (when open-inforequest?
+    (when (and (boolean infoRequest) (:openInfoRequest created-application))
       (open-inforequest/new-open-inforequest! created-application))
     (try
       (autofill-rakennuspaikka created-application created)
@@ -951,12 +941,10 @@
         tyo-aika-for-jatkoaika-doc (-> continuation-app
                                        (domain/get-document-by-name "tyo-aika-for-jatkoaika")
                                        (assoc-in [:data :tyoaika-alkaa-pvm :value] tyoaika-alkaa-pvm))
-
-        continuation-app (assoc continuation-app
-                           :documents [(domain/get-document-by-name continuation-app "hankkeen-kuvaus-jatkoaika")
-                                       tyo-aika-for-jatkoaika-doc
-                                       (domain/get-document-by-name application "hakija-ya")
-                                       (domain/get-document-by-name application "yleiset-alueet-maksaja")])]
+        docs (concat
+               [(domain/get-document-by-name continuation-app "hankkeen-kuvaus-jatkoaika") tyo-aika-for-jatkoaika-doc]
+               (map #(-> (domain/get-document-by-name application %) model/without-user-id) ["hakija-ya" "yleiset-alueet-maksaja"]))
+        continuation-app (assoc continuation-app :documents docs)]
 
     (do-add-link-permit continuation-app (:id application))
     (insert-application continuation-app)

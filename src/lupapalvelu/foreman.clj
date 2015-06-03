@@ -5,6 +5,7 @@
             [sade.core :refer [fail]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.tools :as tools]
+            [lupapalvelu.document.schemas :as schema]
             [monger.operators :refer :all]))
 
 (defn other-project-document [application timestamp]
@@ -87,9 +88,10 @@
     (map (partial get-history-data-from-app links) foreman-apps)))
 
 (defn- reduce-to-highlights [history-group]
-  (let [history-group (sort-by :created history-group)]
+  (let [history-group (sort-by :created history-group)
+        difficulty-values (vec (map :name (:body schema/patevyysvaatimusluokka)))]
     (reduce (fn [highlights group]
-              (if (pos? (util/compare-difficulty (first highlights) group))
+              (if (pos? (util/compare-difficulty :difficulty difficulty-values (first highlights) group))
                 (cons group highlights)
                 highlights))
             nil

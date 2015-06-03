@@ -101,25 +101,28 @@
               application (query-application local-query raktark-jarvenpaa app-id)
               invites (filter #(= raktark-jarvenpaa-id (get-in % [:invite :inviter :id])) (:auth application))]
 
-        ;; Test count of the invited emails, because invalid emails are ignored
-        (fact "invites count"
-          (count invites) => 3
-          (count (:invites (local-query pena  :invites))) => 1
-          (count (:invites (local-query mikko :invites))) => 1
-          (count (:invites (local-query teppo :invites))) => 1)
+          ;; Test count of the invited emails, because invalid emails are ignored
+          (fact "invites count"
+            (count invites) => 3
+            (count (:invites (local-query pena  :invites))) => 1
+            (count (:invites (local-query mikko :invites))) => 1
+            (count (:invites (local-query teppo :invites))) => 1)
 
-        ;; Cancel the application and re-call 'create-app-from-prev-permit' -> should open application with different ID
-        (fact "fetching prev-permit again after canceling the previously fetched one"
-          (local-command raktark-jarvenpaa :cancel-application-authority
-            :id (:id application)
-            :text "Se on peruutus ny!"
-            :lang "fi")
-          (let [resp2 (create-app-from-prev-permit raktark-jarvenpaa
-                        :x "6707184.319"
-                        :y "393021.589"
-                        :address "Kylykuja 3"
-                        :propertyId "18600303560005") => ok?]
-            (:id resp2) =not=> app-id)))))
+          (fact "hakija document count"
+            (count (domain/get-documents-by-name application "hakija")) => 5)
+
+          ;; Cancel the application and re-call 'create-app-from-prev-permit' -> should open application with different ID
+          (fact "fetching prev-permit again after canceling the previously fetched one"
+            (local-command raktark-jarvenpaa :cancel-application-authority
+              :id (:id application)
+              :text "Se on peruutus ny!"
+              :lang "fi")
+            (let [resp2 (create-app-from-prev-permit raktark-jarvenpaa
+                          :x "6707184.319"
+                          :y "393021.589"
+                          :address "Kylykuja 3"
+                          :propertyId "18600303560005") => ok?]
+              (:id resp2) =not=> app-id)))))
 
 
     ;; This applies to all tests in this namespace

@@ -113,23 +113,24 @@
                       :linkki "http://img.sito.fi/kaavamaaraykset/91/8755.pdf"
                       :type "sito"}))
 
-  (fact "Mikkeli"
-    (let [response (plan-urls-by-point-proxy {:params {:x "533257.514" :y "6828489.823" :municipality "491"}})
-          body (json/decode (:body response) true)]
+  (comment
+    (fact "Mikkeli"
+     (let [response (plan-urls-by-point-proxy {:params {:x "533257.514" :y "6828489.823" :municipality "491"}})
+           body (json/decode (:body response) true)]
 
-      (first body) => {:id "1436"
-                       :kaavanro "12891"
-                       :kaavalaji "RKM"
-                       :kasitt_pvm "3/31/1989 12:00:00 AM"
-                       :linkki "http://194.111.49.141/asemakaavapdf/12891.pdf"
-                       :type "bentley"}
+       (first body) => {:id "1436"
+                        :kaavanro "12891"
+                        :kaavalaji "RKM"
+                        :kasitt_pvm "3/31/1989 12:00:00 AM"
+                        :linkki "http://194.111.49.141/asemakaavapdf/12891.pdf"
+                        :type "bentley"}
 
-      (second body) => {:id "1440"
-                        :kaavanro "12021"
-                        :kaavalaji "RK"
-                        :kasitt_pvm "6/1/1984 12:00:00 AM"
-                        :linkki "http://194.111.49.141/asemakaavapdf/12021.pdf"
-                        :type "bentley"})))
+       (second body) => {:id "1440"
+                         :kaavanro "12021"
+                         :kaavalaji "RK"
+                         :kasitt_pvm "6/1/1984 12:00:00 AM"
+                         :linkki "http://194.111.49.141/asemakaavapdf/12021.pdf"
+                         :type "bentley"}))))
 
 (facts "general-plan-urls-by-point-proxy"
 

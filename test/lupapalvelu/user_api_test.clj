@@ -25,7 +25,7 @@
 
 (testable-privates lupapalvelu.user-api validate-create-new-user!)
 
-(facts validate-create-new-user!
+(facts "validate-create-new-user!"
   (against-background
     [(mongo/by-id :organizations "o") => {:id "o"}
      (mongo/by-id :organizations "other") => nil
@@ -87,7 +87,7 @@
 
 (testable-privates lupapalvelu.user-api create-new-user-entity)
 
-(facts create-new-user-entity
+(facts "create-new-user-entity"
 
   (facts "emails are converted to lowercase"
     (fact (create-new-user-entity {:email "foo"})         => (contains {:email "foo"}))
@@ -126,7 +126,7 @@
 ;; ==============================================================================
 ;;
 
-(facts create-new-user
+(facts "create-new-user"
 
   (fact "register new applicant user, user did not exists before"
     (create-new-user nil {:email "email" :role "applicant"}) => ..result..
@@ -173,10 +173,29 @@
 
 (def admin-data {:role "admin" :email "admin"})
 
-(facts validate-update-user!
+(facts "validate-update-user!"
   (facts "admin can change only others data"
     (fact (validate-update-user! admin-data {:email "admin"}) => forbidden)
     (fact (validate-update-user! admin-data {:email "foo"})   => truthy))
   (fact "non-admin users can change only their own data"
     (fact (validate-update-user! {:role ..anything.. :email "foo"} {:email "foo"}) => truthy)
     (fact (validate-update-user! {:role ..anything.. :email "foo"} {:email "bar"}) => forbidden)))
+
+;;
+;; ==============================================================================
+;; Adding user attachments:
+;; ==============================================================================
+;;
+
+(testable-privates lupapalvelu.user-api add-user-attachment-allowed?)
+
+(def applicant-user-data {:role "applicant" :id "777777777777777777000020" :username "pena" :email "pena@example.com" :firstName "Pena" :lastName "Panaani"
+                          :personId "010203-040A" :attachments [] :phone "0102030405" :city "Piippola" :street "Paapankuja 12" :zip "10203" :enabled true})
+
+(def authority-user-data {:role "authority" :id "777777777777777777000023" :username "sonja" :email "sonja.sibbo@sipoo.fi" :firstName "Sonja" :lastName "Sibbo"
+                          :orgAuthz {:753-R #{:authority}, :753-YA #{:authority}, :998-R-TESTI-2 #{:authority}} :expires 1433313641389})
+
+(facts "add-user-attachment-allowed?"
+  (fact "applicant" (add-user-attachment-allowed? applicant-user-data) => truthy)
+  (fact "authority" (add-user-attachment-allowed? authority-user-data) => falsey))
+

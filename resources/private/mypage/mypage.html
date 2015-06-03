@@ -155,7 +155,7 @@
               <input data-bind="value: fise" id="architect.fise" type="text" class="form-input" maxlength="255"></input>
             </div>
 
-            <div class="form-entry clear">
+            <div class="form-entry clear" data-bind="visible: lupapisteApp.models.globalAuthModel.ok('add-user-attachment-allowed')">
               <div data-bind="visible: !hasAttachments(), ltext: 'userinfo.architect.attachments.no-attachments'"></div>
               <table data-bind="visible: hasAttachments" class="architect-attachments">
                 <thead>
