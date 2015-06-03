@@ -30,9 +30,22 @@
          (info "Prev permit application creation, not inviting the invalid email address received from backing system: " %)
          nil)))))
 
+(defn- get-applicant-type [applicant]
+  (-> applicant (select-keys [:henkilo :yritys]) keys first))
+
 (defn- invite-applicants [{:keys [lang user created application] :as command} applicants]
-  (dorun
-    (->> applicants
+
+  (let [applicants-with-no-info (filter #(not (get-applicant-type %)) applicants)
+        applicants (filter get-applicant-type applicants)]
+
+    ;; ensures execution will not throw exception here if hakija in the xml message lacks both "henkilo" and "yritys" fields
+    (doall
+      (map
+        #(info "Prev permit application creation, app id: " (:id application) ", missing hakija information -> not inviting the applicant: " %)
+        applicants-with-no-info))
+
+    (dorun
+      (->> applicants
          (map-indexed
            (fn [i applicant]
 
@@ -41,20 +54,20 @@
 
                ;; Invite applicants
                (when-not (ss/blank? applicant-email)
-               (authorization/send-invite!
-                 (update-in command [:data] merge {:email        applicant-email
-                                                   :text         (i18n/localize lang "invite.default-text")
-                                                   :documentName nil
-                                                   :documentId   nil
-                                                   :path         nil
-                                                   :role         "writer"}))
+                 (authorization/send-invite!
+                   (update-in command [:data] merge {:email        applicant-email
+                                                     :text         (i18n/localize lang "invite.default-text")
+                                                     :documentName nil
+                                                     :documentId   nil
+                                                     :path         nil
+                                                     :role         "writer"}))
                  (info "Prev permit application creation, invited " applicant-email " to created app " (get-in command [:data :id])))
 
                ;; Set applicants' user info to Hakija documents
                (let [document (if (zero? i)
                                 (domain/get-document-by-name application "hakija")
                                 (commands/do-create-doc (assoc-in command [:data :schemaName] "hakija")))
-                     applicant-type (-> applicant (select-keys [:henkilo :yritys]) keys first)
+                     applicant-type (get-applicant-type applicant)
                      user-info (case applicant-type
                                  ;; Not including here the id of the invited user into "user-info",
                                  ;; so it is not set to personSelector, and validation is thus not done.
@@ -83,7 +96,7 @@
                                             :po (get-in postiosoite [:postitoimipaikannimi])
                                             :turvakieltokytkin (:turvakieltoKytkin applicant)}))]
 
-                 (commands/set-subject-to-document application document user-info (name applicant-type) created))))))))
+                 (commands/set-subject-to-document application document user-info (name applicant-type) created)))))))))
 
 (defn- do-create-application-from-previous-permit [command operation xml app-info location-info]
   (let [{:keys [rakennusvalvontaasianKuvaus vahainenPoikkeaminen hakijat]} app-info
@@ -138,11 +151,12 @@
         app-info          (krysp-reader/get-app-info-from-message xml kuntalupatunnus)
         location-info     (get-location-info command app-info)
         organizations-match?   (when (seq app-info)
-                                 (= organizationId (:id (organization/resolve-organization (:municipality app-info) permit-type))))]
-
+                                 (= organizationId (:id (organization/resolve-organization (:municipality app-info) permit-type))))
+        no-proper-applicants? (not-any? get-applicant-type (:hakijat app-info))]
     (cond
       validation-result            validation-result
       (empty? app-info)            (fail :error.no-previous-permit-found-from-backend)
       (not organizations-match?)   (fail :error.previous-permit-found-from-backend-is-of-different-organization)
       (not location-info)          (fail :error.more-prev-app-info-needed :needMorePrevPermitInfo true)
+      no-proper-applicants?        (fail :error.no-proper-applicants-found-from-previous-permit)
       :else                        (ok :id (do-create-application-from-previous-permit command operation xml app-info location-info)))))

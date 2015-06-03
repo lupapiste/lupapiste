@@ -1,9 +1,11 @@
 (ns lupapalvelu.application-from-prev-permit-itest
   (:require [midje.sweet :refer :all]
+            [midje.util :refer [testable-privates]]
             [clojure.java.io :as io]
             [sade.core :refer [def-]]
             [sade.xml :as xml]
-            [lupapalvelu.prev-permit-api]
+            [sade.http :as http]
+            [lupapalvelu.prev-permit-api :refer :all]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.domain :as domain]
@@ -12,7 +14,6 @@
             [lupapalvelu.organization :as organization]
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch-api]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
-            [sade.http :as http]
             [lupapalvelu.itest-util :as util]))
 
 (fixture/apply-fixture "minimal")
@@ -81,7 +82,18 @@
       (provided
         (krysp-reader/get-app-info-from-message anything anything) => (dissoc example-app-info :rakennuspaikka)))
 
-    ; 7: testaa Sonjalla, etta ei ole oikeuksia luoda hakemusta, mutta jarvenpaan viranomaisella on
+    ; 7: Sanoman kaikilta hakijoilta puuttuu henkilo- ja yritystiedot
+    (fact "no proper applicants in the xml message"
+      (create-app-from-prev-permit raktark-jarvenpaa
+        :x "6707184.319"
+        :y "393021.589"
+        :address "Kylykuja 3"
+        :propertyId "18600303560005") => (partial expected-failure? "error.no-proper-applicants-found-from-previous-permit")
+      (provided
+        (krysp-reader/get-app-info-from-message anything anything) => (update-in example-app-info [:hakijat]
+                                                                        (fn [hakijat] (map #(dissoc % :henkilo :yritys) hakijat)))))
+
+    ; 8: testaa Sonjalla, etta ei ole oikeuksia luoda hakemusta, mutta jarvenpaan viranomaisella on
     (facts "authority tests"
 
       (fact "authority of different municipality cannot create application"
