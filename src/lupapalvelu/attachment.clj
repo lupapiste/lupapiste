@@ -197,7 +197,6 @@
      :or {make-comment true state :requires_authority_action} :as options}
     retry-limit]
     {:pre [(map? options) (map? application) (string? attachment-id) (string? file-id) (string? filename) (string? content-type) (number? size) (number? now) (map? user) (not (nil? stamped))]}
-    ; TODO refactor to use proper optimistic locking
     ; TODO refactor to return version-model and mongo updates, so that updates can be merged into single statement
     (if (pos? retry-limit)
       (let [latest-version (attachment-latest-version (application :attachments) attachment-id)

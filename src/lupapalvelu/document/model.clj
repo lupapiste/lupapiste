@@ -147,12 +147,6 @@
         (find-by-name (:body elem) ks)))))
 
 (defn- resolve-element-loc-key [info element path]
-  ;;
-  ;; TODO: Loytyyko talle lokalisaation etsinnalle parempaa logiikkaa?
-  ;; Esimerkiksi: (= 0 (.indexOf (lupapalvelu.i18n.localize lupapalvelu.i18n.*lang* loc-key) "???")) => group loc, muuten standard?
-  ;; Ainakin select-tyyppisten elementtien lokalisaatioavaimet ovat "._group_label"-loppuisia.
-  ;; Kts. docModel.js:n funktiot "makeLabel" ja "locKeyFromPath".
-  ;;
   (let [loc-key (str (-> info :document :locKey) "." (join "." (map name path)))]
     (if (:i18nkey element)
       (:i18nkey element)
@@ -392,7 +386,7 @@
                       (if (pred element v)
                         [k (emitter v)]
                         (when v
-                          (if (not= (keyword type) :group)  ;TODO: does this work with tables?
+                          (if (not= (keyword type) :group)  ;TODO: does this work with tables? TDD
                             [k v]
                             [k (if repeating
                                  (into {} (map (fn [k2] [k2 (doc-walk body (conj current-path k2))]) (keys v)))
