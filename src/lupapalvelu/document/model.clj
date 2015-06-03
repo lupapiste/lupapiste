@@ -230,6 +230,7 @@
   ([application document]
     (validate application document nil))
   ([application document schema]
+    {:pre [(map? application) (map? document)]}
     (let [data (:data document)
           schema (or schema (get-document-schema document))
           document-loc-key (or (-> schema :info :i18name) (-> schema :info :name))
