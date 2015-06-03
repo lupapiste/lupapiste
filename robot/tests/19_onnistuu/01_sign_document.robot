@@ -28,6 +28,9 @@ Bob decides to register his company after all, but still chikens out
   Input text by test id  register-company-y           2341528-4
   Input text by test id  register-company-firstName   Pete
   Input text by test id  register-company-lastName    Puuha
+  Input text by test id  register-company-address1    Katukatu
+  Input text by test id  register-company-zip         00001
+  Input text by test id  register-company-po          Kunta
   Input text by test id  register-company-email       puuha.pete@pete-rakennus.fi
   Input text by test id  register-company-ovt         0037123456710007
   Input text by test id  register-company-personId    131052-308T
@@ -41,10 +44,9 @@ Bob decides to register his company after all, but still chikens out
   Wait until  Element Should Be Enabled  xpath=//*[@data-test-id='register-company-start-sign']
   Wait until  Element Should Be Enabled  xpath=//*[@data-test-id='register-company-cancel-sign']
   Click Element  xpath=//*[@data-test-id='register-company-cancel-sign']
-  Wait until  Element should be visible  register-button
+  Wait until  Element should be visible  xpath=//*[@data-test-id='register-company-start']
 
 Bob decides to register his company after all, and this time he means it
-  Wait and click  register-button
   Wait and click  xpath=//*[@data-test-id='register-company-start']
   Select account type  account5
   Wait until  Element should be visible  xpath=//*[@data-test-id='register-company-submit']
@@ -53,6 +55,9 @@ Bob decides to register his company after all, and this time he means it
   Input text by test id  register-company-firstName   Pete
   Input text by test id  register-company-lastName    Puuha
   Input text by test id  register-company-email       puuha.pete@pete-rakennus.fi
+  Input text by test id  register-company-address1    Katukatu
+  Input text by test id  register-company-zip         00001
+  Input text by test id  register-company-po          Kunta
   Input text by test id  register-company-ovt         0037123456710007
   Input text by test id  register-company-personId    131052-308T
   Select From List  xpath=//span[@data-test-id="register-company-pop"]/select  Basware Oyj (BAWCFI22)
