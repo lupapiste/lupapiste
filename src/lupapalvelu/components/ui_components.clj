@@ -67,34 +67,24 @@
         mapped-files (map #(->> % .getPath (re-matches (re-pattern (str "^.*/" path "/(.*)"))) last) files)]
     mapped-files))
 
-(defn- this-jar
-  "utility function to get the name of jar in which this function is invoked"
-  [& [ns]]
-  (-> (or ns (class *ns*))
-    .getProtectionDomain .getCodeSource .getLocation .getPath))
-
 (defn- in-jar?
   [jar]
   (re-find (re-pattern ".jar$") jar))
 
-(import java.util.jar.JarFile)
-
-(defn- list-jar [jar-path inner-dir]
-  (if-let [jar         (JarFile. jar-path)]
-    (let [inner-dir    (if (and (not= "" inner-dir) (not= "/" (last inner-dir)))
-                         (str inner-dir "/")
-                         inner-dir)
-          entries      (enumeration-seq (.entries jar))
-          names        (map (fn [x] (.getName x)) entries)
-          snames       (filter (fn [x] (= 0 (.indexOf x inner-dir))) names)
-          fsnames      (map #(subs % (count inner-dir)) snames)]
-      fsnames)))
-
 (defn- read-component-list-from-jar [jar component pattern]
   (let [path (str "private/" (name component))
-        files (list-jar jar path)
+        files (util/list-jar jar path)
         filtered-files (filter #(re-find (re-pattern pattern) %) files)]
     filtered-files))
+
+(defn- get-ui-components [component type]
+  (let [jar (util/this-jar lupapalvelu.main)
+        pattern (case type
+                  :models ".*-model.js$"
+                  :templates ".*-template.html$")]
+    (if (in-jar? jar)
+      (read-component-list-from-jar jar component pattern)
+      (read-component-list-from-fs component pattern))))
 
 (def ui-components
   {;; 3rd party libs
@@ -287,13 +277,8 @@
                        :html ["integration-error.html"]}
 
    :ui-components {:depends [:common-html]
-                   :js (conj (if (in-jar? (this-jar lupapalvelu.main))
-                               (read-component-list-from-jar (this-jar lupapalvelu.main) :ui-components ".*-model.js$")
-                               (read-component-list-from-fs :ui-components ".*-model.js$"))
-                             "ui-components.js")
-                   :html (if (in-jar? (this-jar lupapalvelu.main))
-                           (read-component-list-from-jar (this-jar lupapalvelu.main) :ui-components ".*-template.html$")
-                           (read-component-list-from-fs :ui-components ".*-template.html$"))}
+                   :js (conj (get-ui-components :ui-components :models) "ui-components.js")
+                   :html (get-ui-components :ui-components :templates)}
 
    ;; Single Page Apps and standalone components:
    ;; (compare to auth-methods in web.clj)
