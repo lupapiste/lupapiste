@@ -2,7 +2,8 @@
   (:refer-clojure :exclude [pos? neg? zero?])
   (:require [sade.util :refer :all]
             [midje.sweet :refer :all]
-            [schema.core :as sc])
+            [schema.core :as sc]
+            [lupapalvelu.document.schemas :as schema])
   (:import [org.apache.commons.io.output NullWriter]))
 
 (facts "strip-nils"
@@ -257,7 +258,7 @@
   (fact (sc/check (max-length-string 1) [1]) =not=> nil))
 
 (facts "comparing history item difficulties"
-  (let [values (vec (map :name (:body lupapalvelu.document.schemas/patevyysvaatimusluokka)))]
+  (let [values (vec (map :name (:body schema/patevyysvaatimusluokka)))]
     (fact "nil and item"          (compare-difficulty :difficulty values nil {:difficulty "A"})                => pos?)
     (fact "item and nil"          (compare-difficulty :difficulty values {:difficulty "A"} nil)                => neg?)
     (fact "old more difficult"    (compare-difficulty :difficulty values {:difficulty "A"} {:difficulty "B"})  => neg?)
