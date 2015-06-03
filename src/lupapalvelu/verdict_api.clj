@@ -81,16 +81,16 @@
                       (partial action/non-blank-parameters [:verdictId])
                       (partial action/boolean-parameters [:agreement])]
    :states     [:submitted :complement-needed :sent :verdictGiven]
-   :user-roles #{:authority}}
+   :user-roles #{:authority}
+   :pre-checks [(fn [{{:keys [verdictId]} :data} application]
+                  (when verdictId
+                    (when-not (:draft (find-verdict application verdictId))
+                      (fail :error.verdict.not-draft))))]}
   [{:keys [application created data] :as command}]
-  (let [old-verdict (find-verdict application verdictId)
-        verdict (domain/->paatos
+  (let [verdict (domain/->paatos
                   (merge
                     (select-keys data [:verdictId :backendId :status :name :section :agreement :text :given :official])
                     {:timestamp created, :draft true}))]
-
-    (when-not (:draft old-verdict) (fail! :error.unknown)) ; TODO error message
-
     (update-application command
       {:verdicts {$elemMatch {:id verdictId}}}
       {$set {(str "verdicts.$") verdict}})))
