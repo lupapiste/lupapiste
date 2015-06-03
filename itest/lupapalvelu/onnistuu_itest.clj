@@ -22,7 +22,10 @@
   (-> (u/command u/pena :init-sign
                  :company {:name  "company-name"
                            :y     "2341528-4"
-                           :accountType "account5"}
+                           :accountType "account5"
+                           :address1 "katu"
+                           :zip "33100"
+                           :po "Tampere"}
                  :signer {:firstName   "First"
                           :lastName    "Last"
                           :email       "a@b.c"
@@ -35,7 +38,10 @@
   (-> (u/command u/pena :init-sign
                  :company {:name  "company-name"
                            :y     "2341528-4"
-                           :accountType "account5"}
+                           :accountType "account5"
+                           :address1 "katu"
+                           :zip "33100"
+                           :po "Tampere"}
                  :signer {:firstName   "Pena"
                           :lastName    "Panaani"
                           :email       "in@va.lid"
@@ -49,7 +55,10 @@
   (init-sign) => (contains {:stamp   #"[a-zA-Z0-9]{40}"
                             :company {:name "company-name"
                                       :y    "2341528-4"
-                                      :accountType "account5"}
+                                      :accountType "account5"
+                                      :address1 "katu"
+                                      :zip "33100"
+                                      :po "Tampere"}
                             :signer {:firstName   "First"
                                      :lastName    "Last"
                                      :email        "a@b.c"
@@ -82,7 +91,10 @@
   (init-sign-existing-user) => (contains {:stamp   #"[a-zA-Z0-9]{40}"
                                              :company {:name        "company-name"
                                                        :y           "2341528-4"
-                                                       :accountType "account5"}
+                                                       :accountType "account5"
+                                                       :address1 "katu"
+                                                       :zip "33100"
+                                                       :po "Tampere"}
                                              :signer  {:firstName   "Pena"
                                                        :lastName    "Panaani"
                                                        :email       "pena@example.com"

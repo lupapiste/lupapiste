@@ -23,7 +23,7 @@
 
     (facts "by default 4 attachments exist"
       (let [application (query-application pena application-id)
-            op-id (-> application :operations first :id)]
+            op-id (-> application :primaryOperation :id)]
         (fact "the attachments are related to operation 'kerrostalo-rivitalo'"
           (count (get-attachments-by-operation application op-id)) => 4)
         (fact "the attachments have 'required', 'notNeeded' and 'requestedByAuthority' flags correctly set"

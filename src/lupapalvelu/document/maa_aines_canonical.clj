@@ -18,14 +18,7 @@
         :lausuntotieto (canonical-common/get-statements (:statements application))
         :hakemustieto
         {:Hakemus
-         {:hakija (remove nil? (map canonical-common/get-yhteystiedot (:hakija documents)))
-          ;ottamistoiminnanYhteyshenkilo ?
-          ;:alueenKiinteistonSijainti REMOVED, using only sijaintitieto
-          ;ottamismaara ?
-          ;paatoksenToimittaminen ?
-          ; :viranomaismaksujenSuorittaja has been moved to maksajatieto
-          ;ottamissuunnitelmatieto TODO
-          }
+         {:hakija (remove nil? (map canonical-common/get-yhteystiedot (:hakija documents)))}
          }
         :maksajatieto (util/assoc-when {} :Maksaja (canonical-common/get-maksajatiedot (first (:ymp-maksaja documents))))
         :sijaintitieto (canonical-common/get-sijaintitieto application)

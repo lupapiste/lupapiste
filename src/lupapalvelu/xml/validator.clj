@@ -71,15 +71,25 @@
     "krysp/ilmoitukset-2.1.2.xsd"))
 
 (def- yht-2_1_5
-      (conj public-schema-sources
-            "krysp/yhteiset-2.1.5.xsd"
-            "krysp/rakennusvalvonta-2.1.5.xsd"
-            "krysp/poikkeamispaatos_ja_suunnittelutarveratkaisu-2.1.5.xsd"
-            "krysp/YleisenAlueenKaytonLupahakemus-2.2.0.xsd"
-            "krysp/ymparistoluvat-2.2.0.xsd"
-            "krysp/maaAinesluvat-2.2.0.xsd"
-            "krysp/vesihuoltolaki-2.2.0.xsd"
-            "krysp/ilmoitukset-2.2.0.xsd"))
+  (conj public-schema-sources
+    "krysp/yhteiset-2.1.5.xsd"
+    "krysp/rakennusvalvonta-2.1.5.xsd"
+    "krysp/poikkeamispaatos_ja_suunnittelutarveratkaisu-2.1.5.xsd"
+    "krysp/YleisenAlueenKaytonLupahakemus-2.2.0.xsd"
+    "krysp/ymparistoluvat-2.2.0.xsd"
+    "krysp/maaAinesluvat-2.2.0.xsd"
+    "krysp/vesihuoltolaki-2.2.0.xsd"
+    "krysp/ilmoitukset-2.2.0.xsd"))
+
+(def- rakval-2_1_6
+  (conj public-schema-sources
+        "krysp/yhteiset-2.1.5.xsd"
+        "krysp/rakennusvalvonta-2.1.6.xsd"))
+
+(def- rakval-2_1_8
+  (conj public-schema-sources
+        "krysp/yhteiset-2.1.5.xsd"
+        "krysp/rakennusvalvonta-2.1.8.xsd"))
 
 (def- asianhallinta
    (conj xml-sources "asianhallinta/asianhallinta.xsd"))
@@ -99,12 +109,19 @@
 ; Perhaps the permit type -- version -mapping could
 ; be generated from a single source.
 
-(def- rp-validators
+(def- rakval-validators
   {"2.1.2" common-validator-2_1_0
    "2.1.3" common-validator-2_1_1
    "2.1.4" common-validator-2_1_2
    "2.1.5" common-validator-2_1_3
-   "2.1.6" common-validator-2_1_5
+   "2.1.6" (create-validator rakval-2_1_6)
+   "2.1.8" (create-validator rakval-2_1_8)})
+
+(def- poik-validators
+  {"2.1.2" common-validator-2_1_0
+   "2.1.3" common-validator-2_1_1
+   "2.1.4" common-validator-2_1_2
+   "2.1.5" common-validator-2_1_3
    "ah-1.1" asianhallinta-validator})
 
 (def- ymp-validators
@@ -112,12 +129,11 @@
    "ah-1.1" asianhallinta-validator})
 
 (def- schema-validators
-  {:R   rp-validators
-   :P   rp-validators
+  {:R   rakval-validators
+   :P   poik-validators
    :YA  {"2.1.2" common-validator-2_1_0
          "2.1.3" common-validator-2_1_3
-         "ah-1.1" asianhallinta-validator
-         }
+         "ah-1.1" asianhallinta-validator}
    :YI  ymp-validators
    :MAL ymp-validators
    :VVVL {"2.1.3" common-validator-2_1_3

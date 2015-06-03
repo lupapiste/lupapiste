@@ -18,6 +18,11 @@
             <div data-bind="with: application" class="application_summary_info">
               <h1><span data-bind="ltext: permitType"></span> <span data-bind="text: address" data-test-id="application-title" class="address"></span> </h1>
 
+              <h2 data-bind="if: $root.primaryOperation">
+                <span data-test-id="test-application-primary-operation"
+                      data-bind="ltext: $root.primaryOperationName, attr: {'data-test-primary-operation-id': $root.primaryOperation().name}"></span>
+              </h2>
+
               <!-- Property ID: -->
               <div>
                 <p data-bind="ltext: 'application.property'"></p>
@@ -47,16 +52,21 @@
 
               <!-- Operations: -->
               <div>
-                <p data-bind="ltext: 'application.operations'"></p>
+                <p data-bind="ltext: 'application.operations.secondary'"></p>
+                <!-- ko if: $root.operationsCount() && $root.operationsCount().length > 0 -->
                 <ul data-bind="foreach: $root.operationsCount">
                   <li>
                     <span data-bind="visible: count > 1">
                       <span data-bind="text: count"></span>
                       <span>&#x00D7;</span>
                     </span>
-                    <span data-bind="ltext: 'operations.' + name, attr: {'data-test-operation-id': name}" data-test-id="test-application-operation"></span>
+                    <span data-bind="ltext: 'operations.' + name, attr: {'data-test-secondary-operation-id': name}" data-test-id="test-application-operation"></span>
                   </li>
                 </ul>
+                <!-- /ko -->
+                <!-- ko if: $root.operationsCount() && $root.operationsCount().length === 0 -->
+                <p data-bind="ltext: 'application.operations.secondary.none'"></p>
+                <!-- /ko -->
               </div>
             </div>
           </div>

@@ -20,7 +20,7 @@ Mikko invites foreman to application
   Input Text  invite-foreman-email  teppo@example.com
   Click by test id  application-invite-foreman
   Wait until  Click by test id  application-invite-foreman-close-dialog
-  Wait until  Element should be visible  //section[@id='application']//span[@data-test-operation-id='tyonjohtajan-nimeaminen-v2']
+  Wait until  Element should be visible  //section[@id='application']//span[@data-test-primary-operation-id='tyonjohtajan-nimeaminen-v2']
   ${foremanAppId} =  Get Text  xpath=//section[@id='application']//span[@data-test-id='application-id']
   Set Suite Variable  ${foremanAppId}  ${foremanAppId}
 
@@ -44,14 +44,14 @@ Foreman application can't be submitted before link permit application
   Open application at index  ${appname}  753-416-25-22  2
   Wait until  Element should be visible  xpath=//a[@data-test-id='test-application-app-linking-to-us']
   Click by test id  test-application-app-linking-to-us
-  Wait until  Element should be visible  //section[@id='application']//span[@data-test-operation-id='tyonjohtajan-nimeaminen-v2']
+  Wait until  Element should be visible  //section[@id='application']//span[@data-test-primary-operation-id='tyonjohtajan-nimeaminen-v2']
   Open tab  requiredFieldSummary
   Element should be disabled  xpath=//button[@data-test-id='application-submit-btn']
   Element should be visible  xpath=//div[@id='application-requiredFieldSummary-tab']//p[@data-test-id='foreman-not-submittable']
 
 Application is submitted
   Open application at index  ${appname}  753-416-25-22  2
-  Element should contain  xpath=//*[@data-test-id='test-application-operation']  Asuinkerrostalon tai rivitalon rakentaminen
+  Element should contain  xpath=//*[@data-test-id='test-application-primary-operation']  Asuinkerrostalon tai rivitalon rakentaminen
   Submit application
   [Teardown]  logout
 
@@ -59,7 +59,7 @@ Authority can view draft foreman application, but can't use commands
   # LPK-289
   Sonja logs in
   Open application at index  ${appname}  753-416-25-22  1
-  Element should contain  xpath=//*[@data-test-id='test-application-operation']  Asuinkerrostalon tai rivitalon rakentaminen
+  Element should contain  xpath=//*[@data-test-id='test-application-primary-operation']  Asuinkerrostalon tai rivitalon rakentaminen
   Click by test id  test-application-app-linking-to-us
   Wait until  Element should be visible  //section[@id='application']//span[@data-test-operation-id='tyonjohtajan-nimeaminen-v2']
   Element should be disabled  //section[@data-doc-type="hankkeen-kuvaus-minimium"]//textarea
@@ -102,5 +102,5 @@ Mikko can invite additional foremans to application with verdict
   Input Text  invite-foreman-email  teppo@example.com
   Click by test id  application-invite-foreman
   Wait until  Click by test id  application-invite-foreman-close-dialog
-  Wait until  Element should be visible  //section[@id='application']//span[@data-test-operation-id='tyonjohtajan-nimeaminen-v2']
+  Wait until  Element should be visible  //section[@id='application']//span[@data-test-primary-operation-id='tyonjohtajan-nimeaminen-v2']
   [Teardown]  logout

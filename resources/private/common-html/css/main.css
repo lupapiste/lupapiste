@@ -1,5 +1,4 @@
-@import url(//fonts.googleapis.com/css?family=Source+Sans+Pro:200,300,400,600,700,200italic,300italic,400italic,600italic,700italic);
-/*
+/*!
  * ajk's Hot New Template
  * Made by ajk (ajk.fi)
  */
@@ -14,7 +13,8 @@
     CSS Reset by ajk (http://ajk.im/)
     Based on http://necolas.github.com/normalize.css/
 */
-/* line 11, ../sass/partials/_reset.scss */
+@import url(//fonts.googleapis.com/css?family=Source+Sans+Pro:200,300,400,600,700,200italic,300italic,400italic,600italic,700italic);
+/* line 6, ../sass/partials/_reset.scss */
 html, body, div,
 span, object, iframe,
 h1, h2, h3, h4, h5, h6,
@@ -114,8 +114,8 @@ button, input[type="button"], input[type="reset"], input[type="submit"] {
 
 /* line 80, ../sass/partials/_reset.scss */
 input[type="checkbox"], input[type="radio"] {
-  -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
   box-sizing: border-box;
 }
 
@@ -172,7 +172,7 @@ hr {
   display: block;
   height: 1px;
   border: 0;
-  border-bottom: 1px solid #dddddd;
+  border-bottom: 1px solid #ddd;
 }
 
 /* line 131, ../sass/partials/_reset.scss */
@@ -231,8 +231,8 @@ body.admin {
 
 /* line 57, ../sass/partials/_base.scss */
 .container {
-  -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
   box-sizing: border-box;
   padding: 12px 6px 0 6px;
   width: 100%;
@@ -411,11 +411,11 @@ i {
 /* LINKS */
 /* line 1, ../sass/partials/_links.scss */
 a {
-  color: #333333;
+  color: #333;
 }
 /* line 3, ../sass/partials/_links.scss */
 a:active, a:visited, a:hover {
-  color: #333333;
+  color: #333;
 }
 
 /*------------------------------------*\
@@ -942,9 +942,9 @@ footer .informations .footer-box.sade-box a {
   font-weight: 400;
   width: 16.25em;
   margin: 0 0 6px;
-  padding: 0.25em 1.125em;
+  padding: .25em 1.125em;
   text-decoration: none;
-  text-shadow: 0px 1px 0px white;
+  text-shadow: 0px 1px 0px #fff;
   border: none;
   color: #303030;
   position: relative;
@@ -957,7 +957,7 @@ footer .informations .footer-box.sade-box a {
 [type=submit]:hover, .btn:hover, button:hover {
   background: #dddddd;
 }
-/* line 39, ../sass/partials/_buttons.scss */
+/* line 37, ../sass/partials/_buttons.scss */
 [type=submit]:disabled, [type=submit][disabled=disabled], [type=submit].disabled, [type=submit]:disabled:hover, [type=submit][disabled=disabled]:hover, [type=submit].disabled:hover, [type=submit]:disabled:active, [type=submit][disabled=disabled]:active, [type=submit].disabled:active, .btn:disabled, .btn[disabled=disabled], .btn.disabled, .btn:disabled:hover, .btn[disabled=disabled]:hover, .btn.disabled:hover, .btn:disabled:active, .btn[disabled=disabled]:active, .btn.disabled:active, button:disabled, button[disabled=disabled], button.disabled, button:disabled:hover, button[disabled=disabled]:hover, button.disabled:hover, button:disabled:active, button[disabled=disabled]:active, button.disabled:active {
   color: #aaaaaa;
   -webkit-box-shadow: none;
@@ -1211,8 +1211,8 @@ legend {
   -ms-transition: border 125ms ease;
   -o-transition: border 125ms ease;
   transition: border 125ms ease;
-  -webkit-box-shadow: inset 0 2px 3px #dddddd, 0 1px 0 white;
-  box-shadow: inset 0 2px 3px #dddddd, 0 1px 0 white;
+  -webkit-box-shadow: inset 0 2px 3px #dddddd, 0 1px 0 #fff;
+  box-shadow: inset 0 2px 3px #dddddd, 0 1px 0 #fff;
 }
 /* line 31, ../sass/partials/_forms.scss */
 [type="text"]:hover, [type="email"]:hover, [type="tel"]:hover, [type="url"]:hover, [type="password"]:hover, [type="time"]:hover, select:hover, textarea:hover {
@@ -1221,7 +1221,7 @@ legend {
 /* line 35, ../sass/partials/_forms.scss */
 [type="text"]:focus, [type="email"]:focus, [type="tel"]:focus, [type="url"]:focus, [type="password"]:focus, [type="time"]:focus, select:focus, textarea:focus {
   border-color: #17c;
-  -webkit-box-shadow: inset 0 2px 4px #c3c3c3, 0 1px 0 white;
+  -webkit-box-shadow: inset 0 2px 4px #c3c3c3, 0 1px 0 #fff;
 }
 /* line 40, ../sass/partials/_forms.scss */
 [type="text"].source-value-changed, [type="email"].source-value-changed, [type="tel"].source-value-changed, [type="url"].source-value-changed, [type="password"].source-value-changed, [type="time"].source-value-changed, select.source-value-changed, textarea.source-value-changed {
@@ -1494,7 +1494,7 @@ input[readonly]:focus, textarea[readonly]:focus {
   background: #f6f6f6;
   border-bottom: 1px solid #e9e9e9;
 }
-/* line 296, ../sass/partials/_forms.scss */
+/* line 295, ../sass/partials/_forms.scss */
 .form-group:last-child, .form-choice:last-child, .form-table:last-child {
   border-bottom: none;
 }
@@ -1723,7 +1723,7 @@ input[readonly]:focus, textarea[readonly]:focus {
 .docgen-content .form-table th {
   vertical-align: bottom;
   border-style: solid;
-  border-left: 1px solid white;
+  border-left: 1px solid #ffffff;
   border-top: none;
   border-bottom: none;
   border-right: none;
@@ -2240,10 +2240,9 @@ table.attachments-template-table td.attachment-version-info {
   content: " ";
   display: inline-block;
   border-right: 2px solid #828282;
-  -webkit-transform: skew(30deg, 5deg);
   -moz-transform: skew(30deg, 5deg);
   -ms-transform: skew(30deg, 5deg);
-  -o-transform: skew(30deg, 5deg);
+  -webkit-transform: skew(30deg, 5deg);
   transform: skew(30deg, 5deg);
   width: 10px;
   height: 13px;
@@ -2256,10 +2255,9 @@ table.attachments-template-table td.attachment-version-info {
   content: " ";
   display: inline-block;
   border-right: 2px solid #828282;
-  -webkit-transform: skew(-30deg, 5deg);
   -moz-transform: skew(-30deg, 5deg);
   -ms-transform: skew(-30deg, 5deg);
-  -o-transform: skew(-30deg, 5deg);
+  -webkit-transform: skew(-30deg, 5deg);
   transform: skew(-30deg, 5deg);
   width: 10px;
   height: 13px;
@@ -2278,7 +2276,7 @@ table.attachments-template-table td.attachment-version-info {
 
 /* line 88, ../sass/partials/_tabs.scss */
 .tabs-content-container {
-  border: 1px solid #cccccc;
+  border: 1px solid #ccc;
   border-top: none;
   padding: 10px;
   width: 400px;
@@ -2315,7 +2313,7 @@ table.attachments-template-table td.attachment-version-info {
   padding: 8px 10px;
   text-decoration: none;
   background: #f6f6f6;
-  color: #333333;
+  color: #333;
   outline: none;
   /* Note: IE filters and border-radius don't mix */
   filter: none;
@@ -2366,8 +2364,8 @@ table.attachments-template-table td.attachment-version-info {
   width: 100%;
   display: block;
   margin: 24px 30px 24px 0;
-  -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
   box-sizing: border-box;
 }
 
@@ -2866,7 +2864,7 @@ table.attachments-template-table td.attachment-version-info {
 /* line 1, ../sass/partials/_errors.scss */
 .context-error {
   color: #f00;
-  border: 1px solid red;
+  border: 1px solid #f00;
   border-radius: 3px;
   padding: 6px;
   margin: 12px 0;
@@ -3107,25 +3105,26 @@ table.attachments-template-table td.attachment-version-info {
   float: left;
   border: 1px solid #dddddd;
   display: block;
-  -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
   box-sizing: border-box;
   padding: 4px 0px 4px 12px;
   text-decoration: none;
   background: white;
-  color: #333333;
+  color: #333;
   width: 800px;
   cursor: pointer;
+  -moz-user-select: -moz-none;
+  -ms-user-select: none;
   -webkit-user-select: none;
-  -moz-user-select: none;
   user-select: none;
-  -webkit-transition-property: font-size;
   -moz-transition-property: font-size;
   -o-transition-property: font-size;
+  -webkit-transition-property: font-size;
   transition-property: font-size;
-  -webkit-transition-duration: 200ms;
   -moz-transition-duration: 200ms;
   -o-transition-duration: 200ms;
+  -webkit-transition-duration: 200ms;
   transition-duration: 200ms;
 }
 /* line 36, ../sass/partials/_tree.scss */
@@ -3173,7 +3172,7 @@ table.attachments-template-table td.attachment-version-info {
 }
 /* line 72, ../sass/partials/_tree.scss */
 .operation-tree .tree-last li a {
-  color: #333333;
+  color: #333;
 }
 /* line 76, ../sass/partials/_tree.scss */
 .operation-tree .tree-last div {
@@ -3209,8 +3208,8 @@ ul.attachments-list li.mandatory-attachments {
   z-index: 5;
   height: auto;
   margin-bottom: 6px;
-  -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
   box-sizing: border-box;
 }
 /* line 9, ../sass/partials/_accordion.scss */
@@ -3227,8 +3226,8 @@ ul.attachments-list li.mandatory-attachments {
   width: 100%;
   padding-right: 0;
   max-width: 1268px;
-  -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
   box-sizing: border-box;
 }
 /* line 23, ../sass/partials/_accordion.scss */
@@ -3525,8 +3524,8 @@ ul.attachments-list li.mandatory-attachments {
 }
 /* line 24, ../sass/partials/_selectm.scss */
 .selectm input {
-  -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
   box-sizing: border-box;
   margin: 0px;
 }
@@ -3606,110 +3605,8 @@ ul.attachments-list li.mandatory-attachments {
 }
 
 /* line 13, ../sass/views/_welcome.scss */
-.welcome_page {
-  margin-top: 0;
-}
-
-/* line 17, ../sass/views/_welcome.scss */
-.welcome_top {
-  background: #01bef5 url("/img/top-bg.jpg");
-  margin-top: 48px;
-  *zoom: 1;
-}
-/* line 22, ../sass/main.scss */
-.welcome_top:before, .welcome_top:after {
-  content: "";
-  display: table;
-}
-/* line 26, ../sass/main.scss */
-.welcome_top:after {
-  clear: both;
-}
-
-/* line 23, ../sass/views/_welcome.scss */
-.welcome_top_content {
-  position: relative;
-  padding-top: 48px;
-}
-
-/* line 28, ../sass/views/_welcome.scss */
-.welcome_top_text {
-  z-index: 2;
-  position: absolute;
-  right: 0;
-  top: 48px;
-  padding: 24px;
-  width: 22.5em;
-  background: white;
-  height: 452px;
-}
-
-/* line 39, ../sass/views/_welcome.scss */
-.welcome_info {
-  z-index: 3;
-  position: absolute;
-  top: -48px;
-  right: -48px;
-}
-
-/* line 46, ../sass/views/_welcome.scss */
-.welcome_sections {
-  width: 80%;
-  margin: 72px auto;
-  padding: 1.875em;
-  background: white;
-  *zoom: 1;
-}
-/* line 22, ../sass/main.scss */
-.welcome_sections:before, .welcome_sections:after {
-  content: "";
-  display: table;
-}
-/* line 26, ../sass/main.scss */
-.welcome_sections:after {
-  clear: both;
-}
-/* line 53, ../sass/views/_welcome.scss */
-.welcome_sections .welcome_section {
-  float: left;
-  position: relative;
-  /* Defaults for old browsers */
-  width: 100%;
-  margin-right: 1.875em;
-  *zoom: 1;
-}
-/* line 22, ../sass/main.scss */
-.welcome_sections .welcome_section:before, .welcome_sections .welcome_section:after {
-  content: "";
-  display: table;
-}
-/* line 26, ../sass/main.scss */
-.welcome_sections .welcome_section:after {
-  clear: both;
-}
-/* line 61, ../sass/views/_welcome.scss */
-.welcome_sections .welcome_section .welcome-login-section {
-  border-right: 1px solid #dddddd;
-  width: 49%;
-}
-/* line 65, ../sass/views/_welcome.scss */
-.welcome_sections .welcome_section .welcome-register-section {
-  width: 45%;
-  float: right;
-  margin-left: 48px;
-}
-
-/* nth-child(3) that works in IE8 */
-/* line 76, ../sass/views/_welcome.scss */
-.welcome_sections .welcome_section:first-child + .welcome_section + .welcome_section {
-  margin-right: 0;
-}
-
-/* line 80, ../sass/views/_welcome.scss */
-.welcome_logo {
-  position: absolute;
-  top: 48px;
-  padding: 24px;
+.welcome-register-section {
+  margin-top: 24px;
 }
 
 /* line 1, ../sass/views/_applications.scss */
@@ -3808,11 +3705,11 @@ ul.attachments-list li.mandatory-attachments {
 #applications-list_paginate .paginate_enabled_previous, #applications-list_paginate .paginate_enabled_next, .dataTables_paginate .paginate_enabled_previous, .dataTables_paginate .paginate_enabled_next {
   background: #ffffff;
   /* Old browsers */
+  background: url('data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4gPHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJncmFkIiBncmFkaWVudFVuaXRzPSJvYmplY3RCb3VuZGluZ0JveCIgeDE9IjAuNSIgeTE9IjAuMCIgeDI9IjAuNSIgeTI9IjEuMCI+PHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iI2ZmZmZmZiIvPjxzdG9wIG9mZnNldD0iNTAlIiBzdG9wLWNvbG9yPSIjZjNmM2YzIi8+PHN0b3Agb2Zmc2V0PSI1MSUiIHN0b3AtY29sb3I9IiNlZGVkZWQiLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiNmZmZmZmYiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz48cmVjdCB4PSIwIiB5PSIwIiB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyYWQpIiAvPjwvc3ZnPiA=');
   background: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #ffffff), color-stop(50%, #f3f3f3), color-stop(51%, #ededed), color-stop(100%, #ffffff));
-  background: -webkit-linear-gradient(top, #ffffff 0%, #f3f3f3 50%, #ededed 51%, #ffffff 100%);
   background: -moz-linear-gradient(top, #ffffff 0%, #f3f3f3 50%, #ededed 51%, #ffffff 100%);
-  background: -o-linear-gradient(top, #ffffff 0%, #f3f3f3 50%, #ededed 51%, #ffffff 100%);
-  background: linear-gradient(top, #ffffff 0%, #f3f3f3 50%, #ededed 51%, #ffffff 100%);
+  background: -webkit-linear-gradient(top, #ffffff 0%, #f3f3f3 50%, #ededed 51%, #ffffff 100%);
+  background: linear-gradient(to bottom, #ffffff 0%, #f3f3f3 50%, #ededed 51%, #ffffff 100%);
 }
 /* line 78, ../sass/views/_applications.scss */
 #applications-list_paginate .paginate_disabled_previous, #applications-list_paginate .paginate_enabled_previous, .dataTables_paginate .paginate_disabled_previous, .dataTables_paginate .paginate_enabled_previous {
@@ -4124,14 +4021,19 @@ span.icon_clear:before {
   display: block;
 }
 /* line 87, ../sass/views/_application.scss */
-.application_summary .application_summary_info .link-permit-item, .application_summary .application_summary_info .remove-link-permit {
+.application_summary .application_summary_info .remove-link-permit {
   color: #f2f2f2;
 }
-/* line 90, ../sass/views/_application.scss */
+/* line 91, ../sass/views/_application.scss */
+.application_summary .application_summary_info .link-permit-item {
+  color: #f2f2f2;
+  text-decoration: none;
+}
+/* line 96, ../sass/views/_application.scss */
 .application_summary .application_summary_info div:nth-child(even) {
   background: #7f7f7f;
 }
-/* line 93, ../sass/views/_application.scss */
+/* line 99, ../sass/views/_application.scss */
 .application_summary .application_summary_info p, .application_summary .application_summary_info .application_summary_text, .application_summary .application_summary_info ul {
   vertical-align: top;
   display: inline-block;
@@ -4140,20 +4042,20 @@ span.icon_clear:before {
   padding: 6px;
   color: #f2f2f2;
 }
-/* line 101, ../sass/views/_application.scss */
+/* line 107, ../sass/views/_application.scss */
 .application_summary .application_summary_info .application_summary_text, .application_summary .application_summary_info ul {
-  width: auto;
+  width: 69%;
 }
-/* line 105, ../sass/views/_application.scss */
+/* line 111, ../sass/views/_application.scss */
 .application_summary .application_summary_info ul li {
   display: block;
 }
-/* line 107, ../sass/views/_application.scss */
+/* line 113, ../sass/views/_application.scss */
 .application_summary .application_summary_info ul li span {
   width: auto;
   display: inline;
 }
-/* line 113, ../sass/views/_application.scss */
+/* line 119, ../sass/views/_application.scss */
 .application_summary .application_summary_info .state-indication {
   background-color: #4f4f4f;
   margin: 0 0 0 0;
@@ -4161,12 +4063,12 @@ span.icon_clear:before {
   white-space: nowrap;
   height: 32px;
 }
-/* line 136, ../sass/views/_application.scss */
+/* line 142, ../sass/views/_application.scss */
 .application_summary .application_summary_info .state-indication div {
   background-color: #4f4f4f;
   height: 24px;
 }
-/* line 139, ../sass/views/_application.scss */
+/* line 145, ../sass/views/_application.scss */
 .application_summary .application_summary_info .state-indication div span {
   color: #dddddd;
   position: relative;
@@ -4175,11 +4077,11 @@ span.icon_clear:before {
   margin: 0px -4px 0 0;
   border: none;
 }
-/* line 146, ../sass/views/_application.scss */
+/* line 152, ../sass/views/_application.scss */
 .application_summary .application_summary_info .state-indication div span:first-child {
   padding: 4px 8px 4px 8px;
 }
-/* line 149, ../sass/views/_application.scss */
+/* line 155, ../sass/views/_application.scss */
 .application_summary .application_summary_info .state-indication div span:after {
   display: inline-block;
   position: absolute;
@@ -4193,183 +4095,183 @@ span.icon_clear:before {
   border-bottom: 17px solid transparent;
   z-index: 1;
 }
-/* line 164, ../sass/views/_application.scss */
+/* line 170, ../sass/views/_application.scss */
 .application_summary .application_summary_info .state-indication div .constructionStarted-box, .application_summary .application_summary_info .state-indication div .closed-box, .application_summary .application_summary_info .state-indication div .complement-needed-box, .application_summary .application_summary_info .state-indication div .verdictGiven-box, .application_summary .application_summary_info .state-indication div .canceled-box {
   display: none;
 }
-/* line 168, ../sass/views/_application.scss */
+/* line 174, ../sass/views/_application.scss */
 .application_summary .application_summary_info .state-indication div.draft .draft-box {
   color: white;
   background-color: #04c714;
   display: inline-block;
 }
-/* line 130, ../sass/views/_application.scss */
+/* line 136, ../sass/views/_application.scss */
 .application_summary .application_summary_info .state-indication div.draft .draft-box:after {
   border-left: 11px solid #04c714;
 }
-/* line 173, ../sass/views/_application.scss */
+/* line 179, ../sass/views/_application.scss */
 .application_summary .application_summary_info .state-indication div.open .draft-box {
   background-color: white;
   color: #5d5d5d;
 }
-/* line 122, ../sass/views/_application.scss */
+/* line 128, ../sass/views/_application.scss */
 .application_summary .application_summary_info .state-indication div.open .draft-box:after {
   border-left: 11px solid white;
 }
-/* line 176, ../sass/views/_application.scss */
+/* line 182, ../sass/views/_application.scss */
 .application_summary .application_summary_info .state-indication div.open .open-box {
   color: white;
   background-color: #04c714;
   display: inline-block;
 }
-/* line 130, ../sass/views/_application.scss */
+/* line 136, ../sass/views/_application.scss */
 .application_summary .application_summary_info .state-indication div.open .open-box:after {
   border-left: 11px solid #04c714;
 }
-/* line 181, ../sass/views/_application.scss */
+/* line 187, ../sass/views/_application.scss */
 .application_summary .application_summary_info .state-indication div.submitted .submitted-box {
   color: white;
   background-color: #04c714;
   display: inline-block;
 }
-/* line 130, ../sass/views/_application.scss */
+/* line 136, ../sass/views/_application.scss */
 .application_summary .application_summary_info .state-indication div.submitted .submitted-box:after {
   border-left: 11px solid #04c714;
 }
-/* line 184, ../sass/views/_application.scss */
+/* line 190, ../sass/views/_application.scss */
 .application_summary .application_summary_info .state-indication div.submitted .draft-box, .application_summary .application_summary_info .state-indication div.submitted .open-box {
   background-color: white;
   color: #5d5d5d;
 }
-/* line 122, ../sass/views/_application.scss */
+/* line 128, ../sass/views/_application.scss */
 .application_summary .application_summary_info .state-indication div.submitted .draft-box:after, .application_summary .application_summary_info .state-indication div.submitted .open-box:after {
   border-left: 11px solid white;
 }
-/* line 189, ../sass/views/_application.scss */
+/* line 195, ../sass/views/_application.scss */
 .application_summary .application_summary_info .state-indication div.sent .sent-box {
   color: white;
   background-color: #04c714;
   display: inline-block;
 }
-/* line 130, ../sass/views/_application.scss */
+/* line 136, ../sass/views/_application.scss */
 .application_summary .application_summary_info .state-indication div.sent .sent-box:after {
   border-left: 11px solid #04c714;
 }
-/* line 192, ../sass/views/_application.scss */
+/* line 198, ../sass/views/_application.scss */
 .application_summary .application_summary_info .state-indication div.sent .draft-box, .application_summary .application_summary_info .state-indication div.sent .open-box, .application_summary .application_summary_info .state-indication div.sent .submitted-box {
   background-color: white;
   color: #5d5d5d;
 }
-/* line 122, ../sass/views/_application.scss */
+/* line 128, ../sass/views/_application.scss */
 .application_summary .application_summary_info .state-indication div.sent .draft-box:after, .application_summary .application_summary_info .state-indication div.sent .open-box:after, .application_summary .application_summary_info .state-indication div.sent .submitted-box:after {
   border-left: 11px solid white;
 }
-/* line 197, ../sass/views/_application.scss */
+/* line 203, ../sass/views/_application.scss */
 .application_summary .application_summary_info .state-indication div.complement-needed #complement-needed-box {
   color: white;
   background-color: #04c714;
   display: inline-block;
 }
-/* line 130, ../sass/views/_application.scss */
+/* line 136, ../sass/views/_application.scss */
 .application_summary .application_summary_info .state-indication div.complement-needed #complement-needed-box:after {
   border-left: 11px solid #04c714;
 }
-/* line 200, ../sass/views/_application.scss */
+/* line 206, ../sass/views/_application.scss */
 .application_summary .application_summary_info .state-indication div.complement-needed .draft-box, .application_summary .application_summary_info .state-indication div.complement-needed .open-box, .application_summary .application_summary_info .state-indication div.complement-needed .submitted-box {
   background-color: white;
   color: #5d5d5d;
 }
-/* line 122, ../sass/views/_application.scss */
+/* line 128, ../sass/views/_application.scss */
 .application_summary .application_summary_info .state-indication div.complement-needed .draft-box:after, .application_summary .application_summary_info .state-indication div.complement-needed .open-box:after, .application_summary .application_summary_info .state-indication div.complement-needed .submitted-box:after {
   border-left: 11px solid white;
 }
-/* line 205, ../sass/views/_application.scss */
+/* line 211, ../sass/views/_application.scss */
 .application_summary .application_summary_info .state-indication div.verdictGiven .verdictGiven-box {
   color: white;
   background-color: #04c714;
   display: inline-block;
 }
-/* line 130, ../sass/views/_application.scss */
+/* line 136, ../sass/views/_application.scss */
 .application_summary .application_summary_info .state-indication div.verdictGiven .verdictGiven-box:after {
   border-left: 11px solid #04c714;
 }
-/* line 208, ../sass/views/_application.scss */
+/* line 214, ../sass/views/_application.scss */
 .application_summary .application_summary_info .state-indication div.verdictGiven .draft-box, .application_summary .application_summary_info .state-indication div.verdictGiven .open-box, .application_summary .application_summary_info .state-indication div.verdictGiven .submitted-box, .application_summary .application_summary_info .state-indication div.verdictGiven .sent-box {
   display: none;
 }
-/* line 211, ../sass/views/_application.scss */
+/* line 217, ../sass/views/_application.scss */
 .application_summary .application_summary_info .state-indication div.verdictGiven .verdictGiven-box, .application_summary .application_summary_info .state-indication div.verdictGiven .constructionStarted-box, .application_summary .application_summary_info .state-indication div.verdictGiven .closed-box {
   display: inline-block;
 }
-/* line 216, ../sass/views/_application.scss */
+/* line 222, ../sass/views/_application.scss */
 .application_summary .application_summary_info .state-indication div.constructionStarted .constructionStarted-box {
   color: white;
   background-color: #04c714;
   display: inline-block;
 }
-/* line 130, ../sass/views/_application.scss */
+/* line 136, ../sass/views/_application.scss */
 .application_summary .application_summary_info .state-indication div.constructionStarted .constructionStarted-box:after {
   border-left: 11px solid #04c714;
 }
-/* line 219, ../sass/views/_application.scss */
+/* line 225, ../sass/views/_application.scss */
 .application_summary .application_summary_info .state-indication div.constructionStarted .verdictGiven-box {
   background-color: white;
   color: #5d5d5d;
 }
-/* line 122, ../sass/views/_application.scss */
+/* line 128, ../sass/views/_application.scss */
 .application_summary .application_summary_info .state-indication div.constructionStarted .verdictGiven-box:after {
   border-left: 11px solid white;
 }
-/* line 222, ../sass/views/_application.scss */
+/* line 228, ../sass/views/_application.scss */
 .application_summary .application_summary_info .state-indication div.constructionStarted .verdictGiven-box, .application_summary .application_summary_info .state-indication div.constructionStarted .constructionStarted-box, .application_summary .application_summary_info .state-indication div.constructionStarted .closed-box {
   display: inline-block;
 }
-/* line 225, ../sass/views/_application.scss */
+/* line 231, ../sass/views/_application.scss */
 .application_summary .application_summary_info .state-indication div.constructionStarted .draft-box, .application_summary .application_summary_info .state-indication div.constructionStarted .open-box, .application_summary .application_summary_info .state-indication div.constructionStarted .submitted-box, .application_summary .application_summary_info .state-indication div.constructionStarted .sent-box {
   display: none;
 }
-/* line 230, ../sass/views/_application.scss */
+/* line 236, ../sass/views/_application.scss */
 .application_summary .application_summary_info .state-indication div.closed .closed-box {
   color: white;
   background-color: #04c714;
   display: inline-block;
 }
-/* line 130, ../sass/views/_application.scss */
+/* line 136, ../sass/views/_application.scss */
 .application_summary .application_summary_info .state-indication div.closed .closed-box:after {
   border-left: 11px solid #04c714;
 }
-/* line 233, ../sass/views/_application.scss */
+/* line 239, ../sass/views/_application.scss */
 .application_summary .application_summary_info .state-indication div.closed .verdictGiven-box, .application_summary .application_summary_info .state-indication div.closed .constructionStarted-box {
   background-color: white;
   color: #5d5d5d;
 }
-/* line 122, ../sass/views/_application.scss */
+/* line 128, ../sass/views/_application.scss */
 .application_summary .application_summary_info .state-indication div.closed .verdictGiven-box:after, .application_summary .application_summary_info .state-indication div.closed .constructionStarted-box:after {
   border-left: 11px solid white;
 }
-/* line 236, ../sass/views/_application.scss */
+/* line 242, ../sass/views/_application.scss */
 .application_summary .application_summary_info .state-indication div.closed .verdictGiven-box, .application_summary .application_summary_info .state-indication div.closed .constructionStarted-box, .application_summary .application_summary_info .state-indication div.closed .closed-box {
   display: inline-block;
 }
-/* line 239, ../sass/views/_application.scss */
+/* line 245, ../sass/views/_application.scss */
 .application_summary .application_summary_info .state-indication div.closed .draft-box, .application_summary .application_summary_info .state-indication div.closed .open-box, .application_summary .application_summary_info .state-indication div.closed .submitted-box, .application_summary .application_summary_info .state-indication div.closed .sent-box {
   display: none;
 }
-/* line 244, ../sass/views/_application.scss */
+/* line 250, ../sass/views/_application.scss */
 .application_summary .application_summary_info .state-indication div.canceled .canceled-box {
   color: white;
   background-color: #04c714;
   display: inline-block;
 }
-/* line 130, ../sass/views/_application.scss */
+/* line 136, ../sass/views/_application.scss */
 .application_summary .application_summary_info .state-indication div.canceled .canceled-box:after {
   border-left: 11px solid #04c714;
 }
-/* line 247, ../sass/views/_application.scss */
+/* line 253, ../sass/views/_application.scss */
 .application_summary .application_summary_info .state-indication div.canceled .draft-box, .application_summary .application_summary_info .state-indication div.canceled .open-box, .application_summary .application_summary_info .state-indication div.canceled .submitted-box, .application_summary .application_summary_info .state-indication div.canceled .sent-box {
   display: none;
 }
-/* line 255, ../sass/views/_application.scss */
+/* line 261, ../sass/views/_application.scss */
 .application_summary .application_actions {
   background-color: #4f4f4f;
   position: absolute;
@@ -4377,24 +4279,24 @@ span.icon_clear:before {
   top: 12px;
   width: 16.25em;
 }
-/* line 261, ../sass/views/_application.scss */
+/* line 267, ../sass/views/_application.scss */
 .application_summary .application_actions .muncipality-info {
   background: #d0d0d0;
   width: 100%;
   padding: 24px 12px;
   margin-top: -42px;
   margin-bottom: 6px;
-  -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
   box-sizing: border-box;
 }
-/* line 268, ../sass/views/_application.scss */
+/* line 274, ../sass/views/_application.scss */
 .application_summary .application_actions .muncipality-info .h2 {
   text-transform: uppercase;
   font-size: 1em;
   text-shadow: 0px 1px 0px rgba(255, 255, 255, 0.3), 0px -1px 0px rgba(0, 0, 0, 0.7);
 }
-/* line 273, ../sass/views/_application.scss */
+/* line 279, ../sass/views/_application.scss */
 .application_summary .application_actions .muncipality-info p {
   margin-bottom: 0;
   text-transform: uppercase;
@@ -4402,42 +4304,42 @@ span.icon_clear:before {
   font-weight: 700;
   text-shadow: 0px 1px 0px rgba(255, 255, 255, 0.3), 0px -1px 0px rgba(0, 0, 0, 0.7);
 }
-/* line 280, ../sass/views/_application.scss */
+/* line 286, ../sass/views/_application.scss */
 .application_summary .application_actions .muncipality-info a {
   text-decoration: none;
   color: #f2f2f2;
 }
-/* line 285, ../sass/views/_application.scss */
+/* line 291, ../sass/views/_application.scss */
 .application_summary .application_actions button {
   width: 100%;
 }
 
-/* line 291, ../sass/views/_application.scss */
+/* line 297, ../sass/views/_application.scss */
 .attachment-legend {
   position: relative;
 }
-/* line 293, ../sass/views/_application.scss */
+/* line 299, ../sass/views/_application.scss */
 .attachment-legend span {
   height: 20px;
 }
-/* line 296, ../sass/views/_application.scss */
+/* line 302, ../sass/views/_application.scss */
 .attachment-legend span + span {
   position: absolute;
   top: -3px;
   left: 30px;
 }
 
-/* line 304, ../sass/views/_application.scss */
+/* line 310, ../sass/views/_application.scss */
 .task-legend span {
   display: inline-block;
 }
-/* line 307, ../sass/views/_application.scss */
+/* line 313, ../sass/views/_application.scss */
 .task-legend span + span {
   margin-top: 9px;
   vertical-align: top;
 }
 
-/* line 313, ../sass/views/_application.scss */
+/* line 319, ../sass/views/_application.scss */
 .ajax-loading-mask {
   display: none;
   position: absolute;
@@ -4448,267 +4350,267 @@ span.icon_clear:before {
   height: 100%;
   background: #fff;
 }
-/* line 322, ../sass/views/_application.scss */
+/* line 328, ../sass/views/_application.scss */
 .ajax-loading-mask .content {
   display: table;
   margin: 0 auto;
 }
-/* line 325, ../sass/views/_application.scss */
+/* line 331, ../sass/views/_application.scss */
 .ajax-loading-mask .content img {
   display: table;
   margin: 0 auto;
 }
-/* line 329, ../sass/views/_application.scss */
+/* line 335, ../sass/views/_application.scss */
 .ajax-loading-mask .content div {
   margin-top: 25px;
 }
 
-/* line 335, ../sass/views/_application.scss */
+/* line 341, ../sass/views/_application.scss */
 .process-nav {
   margin-top: 24px;
 }
-/* line 337, ../sass/views/_application.scss */
+/* line 343, ../sass/views/_application.scss */
 .process-nav .process-next {
   float: right;
 }
-/* line 339, ../sass/views/_application.scss */
+/* line 345, ../sass/views/_application.scss */
 .process-nav .process-next span {
   margin-right: -6px;
 }
 
-/* line 347, ../sass/views/_application.scss */
+/* line 353, ../sass/views/_application.scss */
 #create .tree-last {
   font-size: 15px;
 }
-/* line 349, ../sass/views/_application.scss */
+/* line 355, ../sass/views/_application.scss */
 #create .tree-last li {
   font-size: 15px;
 }
-/* line 352, ../sass/views/_application.scss */
+/* line 358, ../sass/views/_application.scss */
 #create .tree-last .attachments-list {
   padding-left: 25px;
 }
 
-/* line 358, ../sass/views/_application.scss */
+/* line 364, ../sass/views/_application.scss */
 #dialog-request-for-statement button {
   margin-top: 24px;
 }
 
-/* line 363, ../sass/views/_application.scss */
+/* line 369, ../sass/views/_application.scss */
 .form-input.textarea.high {
   height: 144px;
   width: 80%;
 }
 
-/* line 369, ../sass/views/_application.scss */
+/* line 375, ../sass/views/_application.scss */
 #neighbors .map {
   width: 100%;
   height: 280px;
 }
 
-/* line 375, ../sass/views/_application.scss */
+/* line 381, ../sass/views/_application.scss */
 .application-neighbors {
   padding-top: 20px;
 }
-/* line 377, ../sass/views/_application.scss */
+/* line 383, ../sass/views/_application.scss */
 .application-neighbors td {
   vertical-align: top;
 }
-/* line 379, ../sass/views/_application.scss */
+/* line 385, ../sass/views/_application.scss */
 .application-neighbors td a.command {
   display: block;
 }
-/* line 382, ../sass/views/_application.scss */
+/* line 388, ../sass/views/_application.scss */
 .application-neighbors td .owner-name {
   font-weight: bold;
 }
-/* line 385, ../sass/views/_application.scss */
+/* line 391, ../sass/views/_application.scss */
 .application-neighbors td .owner-street {
   display: block;
   padding-left: 8px;
 }
-/* line 389, ../sass/views/_application.scss */
+/* line 395, ../sass/views/_application.scss */
 .application-neighbors td .owner-zip {
   padding-left: 8px;
 }
-/* line 392, ../sass/views/_application.scss */
+/* line 398, ../sass/views/_application.scss */
 .application-neighbors td .owner-email {
   display: block;
   font-style: italic;
 }
-/* line 396, ../sass/views/_application.scss */
+/* line 402, ../sass/views/_application.scss */
 .application-neighbors td .status-state {
   font-weight: bold;
 }
-/* line 399, ../sass/views/_application.scss */
+/* line 405, ../sass/views/_application.scss */
 .application-neighbors td .status-time {
   display: block;
   font-style: italic;
 }
 
-/* line 407, ../sass/views/_application.scss */
+/* line 413, ../sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .dialog-content, #dialog-verdict-attachment-prints-order-history .dialog-content {
   padding-left: 15px;
 }
-/* line 410, ../sass/views/_application.scss */
+/* line 416, ../sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .order-amount, #dialog-verdict-attachment-prints-order-history .order-amount {
   width: 18px;
 }
-/* line 413, ../sass/views/_application.scss */
+/* line 419, ../sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .btn-prints-dialog-ok, #dialog-verdict-attachment-prints-order-history .btn-prints-dialog-ok {
   margin-left: 15px;
 }
-/* line 417, ../sass/views/_application.scss */
+/* line 423, ../sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .context-error, #dialog-verdict-attachment-prints-order-history .context-error {
   max-width: 820px;
   word-wrap: break-word;
 }
-/* line 431, ../sass/views/_application.scss */
+/* line 437, ../sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .fixed-headers, #dialog-verdict-attachment-prints-order-history .fixed-headers {
   width: 820px;
   table-layout: fixed;
   margin-right: 20px;
 }
-/* line 436, ../sass/views/_application.scss */
+/* line 442, ../sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .fixed-headers .center, #dialog-verdict-attachment-prints-order-history .fixed-headers .center {
   text-align: center;
 }
-/* line 440, ../sass/views/_application.scss */
+/* line 446, ../sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .fixed-headers td, #dialog-verdict-attachment-prints-order-history .fixed-headers td {
   word-wrap: break-word;
 }
-/* line 444, ../sass/views/_application.scss */
+/* line 450, ../sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .fixed-headers td:nth-child(1), #dialog-verdict-attachment-prints-order .fixed-headers th:nth-child(1), #dialog-verdict-attachment-prints-order-history .fixed-headers td:nth-child(1), #dialog-verdict-attachment-prints-order-history .fixed-headers th:nth-child(1) {
   width: 200px;
   max-width: 200px;
 }
-/* line 448, ../sass/views/_application.scss */
+/* line 454, ../sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .fixed-headers td:nth-child(2), #dialog-verdict-attachment-prints-order .fixed-headers th:nth-child(2), #dialog-verdict-attachment-prints-order-history .fixed-headers td:nth-child(2), #dialog-verdict-attachment-prints-order-history .fixed-headers th:nth-child(2) {
   width: 200px;
   max-width: 200px;
 }
-/* line 452, ../sass/views/_application.scss */
+/* line 458, ../sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .fixed-headers td:nth-child(3), #dialog-verdict-attachment-prints-order .fixed-headers th:nth-child(3), #dialog-verdict-attachment-prints-order-history .fixed-headers td:nth-child(3), #dialog-verdict-attachment-prints-order-history .fixed-headers th:nth-child(3) {
   width: 300px;
   max-width: 300px;
 }
-/* line 456, ../sass/views/_application.scss */
+/* line 462, ../sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .fixed-headers td:nth-child(4), #dialog-verdict-attachment-prints-order .fixed-headers th:nth-child(4), #dialog-verdict-attachment-prints-order-history .fixed-headers td:nth-child(4), #dialog-verdict-attachment-prints-order-history .fixed-headers th:nth-child(4) {
   width: 120px;
   max-width: 120px;
 }
-/* line 462, ../sass/views/_application.scss */
+/* line 468, ../sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .fixed-headers thead tr, #dialog-verdict-attachment-prints-order-history .fixed-headers thead tr {
   display: block;
   position: relative;
 }
-/* line 467, ../sass/views/_application.scss */
+/* line 473, ../sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .fixed-headers tbody, #dialog-verdict-attachment-prints-order-history .fixed-headers tbody {
   display: block;
   overflow: auto;
   width: 100%;
   max-height: 200px;
 }
-/* line 475, ../sass/views/_application.scss */
+/* line 481, ../sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .old_ie_wrapper, #dialog-verdict-attachment-prints-order-history .old_ie_wrapper {
   max-height: 200px;
   width: 820px;
   overflow-x: hidden;
   overflow-y: auto;
 }
-/* line 480, ../sass/views/_application.scss */
+/* line 486, ../sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order .old_ie_wrapper tbody, #dialog-verdict-attachment-prints-order-history .old_ie_wrapper tbody {
   height: auto;
 }
 
-/* line 485, ../sass/views/_application.scss */
+/* line 491, ../sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order-history .history-dialog-description {
   margin-bottom: 12px;
 }
-/* line 489, ../sass/views/_application.scss */
+/* line 495, ../sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order-history .history-items {
   margin-top: 6px;
   overflow-y: auto;
   max-height: 500px;
 }
-/* line 494, ../sass/views/_application.scss */
+/* line 500, ../sass/views/_application.scss */
 #dialog-verdict-attachment-prints-order-history .history-items .history-item {
   margin: 6px 0;
 }
 
-/* line 501, ../sass/views/_application.scss */
+/* line 507, ../sass/views/_application.scss */
 .key-value-pair label {
   vertical-align: top;
   display: inline-block;
   width: 25%;
 }
-/* line 506, ../sass/views/_application.scss */
+/* line 512, ../sass/views/_application.scss */
 .key-value-pair .value {
   vertical-align: top;
   display: inline-block;
 }
 
-/* line 512, ../sass/views/_application.scss */
+/* line 518, ../sass/views/_application.scss */
 .inforequest-conversation {
   margin-top: 42px;
 }
-/* line 514, ../sass/views/_application.scss */
+/* line 520, ../sass/views/_application.scss */
 .inforequest-conversation h2 {
   border-bottom: 1px solid #c3c3c3;
 }
 
-/* line 519, ../sass/views/_application.scss */
+/* line 525, ../sass/views/_application.scss */
 .attachments-actions {
   margin-bottom: 24px;
 }
-/* line 521, ../sass/views/_application.scss */
+/* line 527, ../sass/views/_application.scss */
 .attachments-actions h3 {
   margin-top: 12px;
   font-weight: bold;
 }
 
-/* line 527, ../sass/views/_application.scss */
+/* line 533, ../sass/views/_application.scss */
 .parties-list {
   width: 100%;
   margin-bottom: 6px;
 }
-/* line 530, ../sass/views/_application.scss */
+/* line 536, ../sass/views/_application.scss */
 .parties-list button {
   margin: 12px 0;
 }
-/* line 533, ../sass/views/_application.scss */
+/* line 539, ../sass/views/_application.scss */
 .parties-list .party {
   display: table-row;
 }
-/* line 535, ../sass/views/_application.scss */
+/* line 541, ../sass/views/_application.scss */
 .parties-list .party .person {
   display: table-cell;
   padding-right: 12px;
 }
-/* line 539, ../sass/views/_application.scss */
+/* line 545, ../sass/views/_application.scss */
 .parties-list .party .invite-state {
   display: table-cell;
   padding-right: 12px;
 }
-/* line 543, ../sass/views/_application.scss */
+/* line 549, ../sass/views/_application.scss */
 .parties-list .party .invite-action {
   display: table-cell;
   padding-right: 12px;
 }
 
-/* line 551, ../sass/views/_application.scss */
+/* line 557, ../sass/views/_application.scss */
 #inforequest-marker-map {
   width: 30%;
   height: 520px;
   float: right;
   z-index: 2;
 }
-/* line 556, ../sass/views/_application.scss */
+/* line 562, ../sass/views/_application.scss */
 #inforequest-marker-map image {
   cursor: pointer;
 }
 
-/* line 561, ../sass/views/_application.scss */
+/* line 567, ../sass/views/_application.scss */
 #inforequest-marker-map-contents {
   z-index: 2;
   right: 30%;
@@ -4724,66 +4626,66 @@ span.icon_clear:before {
   border: 1px solid #b5b5b5;
   box-shadow: 1px 1px 2px #828282;
 }
-/* line 576, ../sass/views/_application.scss */
+/* line 582, ../sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card {
   padding: 12px;
   z-index: 10000;
   border-top: 1px solid #b5b5b5;
   width: 100%;
 }
-/* line 582, ../sass/views/_application.scss */
+/* line 588, ../sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card h3 {
   font-size: 20px;
 }
-/* line 584, ../sass/views/_application.scss */
+/* line 590, ../sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card h3.operation-type {
   margin-bottom: 12px;
 }
-/* line 589, ../sass/views/_application.scss */
+/* line 595, ../sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card .timestamp {
   float: right;
   font-size: 14px;
 }
-/* line 593, ../sass/views/_application.scss */
+/* line 599, ../sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card a {
-  color: #333333;
+  color: #333;
 }
-/* line 596, ../sass/views/_application.scss */
+/* line 602, ../sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card:first-child {
   border-top: none;
 }
-/* line 600, ../sass/views/_application.scss */
+/* line 606, ../sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card div {
   padding-bottom: 4px;
   margin-bottom: 8px;
   border-bottom: 1px solid #e8e8e8;
 }
-/* line 604, ../sass/views/_application.scss */
+/* line 610, ../sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card div:last-child {
   border-bottom: none;
   padding-bottom: 0px;
 }
-/* line 608, ../sass/views/_application.scss */
+/* line 614, ../sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card div blockquote {
   font-size: 16px;
 }
-/* line 611, ../sass/views/_application.scss */
+/* line 617, ../sass/views/_application.scss */
 #inforequest-marker-map-contents .inforequest-card div .comment-type {
   font-weight: 700;
 }
 
-/* line 620, ../sass/views/_application.scss */
+/* line 626, ../sass/views/_application.scss */
 .verdict-text {
   white-space: pre-line;
   width: 28.75em;
 }
 
-/* line 625, ../sass/views/_application.scss */
+/* line 631, ../sass/views/_application.scss */
 .required-field-error-doc {
   margin: 24px 0 6px;
 }
 
-/* line 629, ../sass/views/_application.scss */
+/* line 635, ../sass/views/_application.scss */
 .requiredField-line {
   margin-bottom: 6px;
   vertical-align: top;
@@ -4791,120 +4693,120 @@ span.icon_clear:before {
   padding: 6px;
   height: 24px;
 }
-/* line 635, ../sass/views/_application.scss */
+/* line 641, ../sass/views/_application.scss */
 .requiredField-line span, .requiredField-line a {
   vertical-align: top;
   line-height: 14px;
   max-height: 16px;
   display: table-cell;
 }
-/* line 641, ../sass/views/_application.scss */
+/* line 647, ../sass/views/_application.scss */
 .requiredField-line a {
   padding-left: 12px;
   font-size: 14px;
 }
-/* line 646, ../sass/views/_application.scss */
+/* line 652, ../sass/views/_application.scss */
 .requiredField-line .required-field-error-element-name {
   padding-left: 6px;
 }
 
-/* line 651, ../sass/views/_application.scss */
+/* line 657, ../sass/views/_application.scss */
 .invited-foremans {
   margin-bottom: 24px;
 }
-/* line 653, ../sass/views/_application.scss */
+/* line 659, ../sass/views/_application.scss */
 .invited-foremans .foreman {
   display: table-row;
 }
-/* line 655, ../sass/views/_application.scss */
+/* line 661, ../sass/views/_application.scss */
 .invited-foremans .foreman span {
   display: table-cell;
   padding-right: 6px;
 }
-/* line 663, ../sass/views/_application.scss */
+/* line 669, ../sass/views/_application.scss */
 .invited-foremans .foreman-state:before {
   content: "(";
 }
-/* line 666, ../sass/views/_application.scss */
+/* line 672, ../sass/views/_application.scss */
 .invited-foremans .foreman-state:after {
   content: ")";
 }
 
-/* line 672, ../sass/views/_application.scss */
+/* line 678, ../sass/views/_application.scss */
 .tasks-foreman {
   position: relative;
 }
-/* line 675, ../sass/views/_application.scss */
+/* line 681, ../sass/views/_application.scss */
 .tasks-foreman .form-input {
   display: inline-block;
   margin: 0 6px 0 0;
 }
-/* line 681, ../sass/views/_application.scss */
+/* line 687, ../sass/views/_application.scss */
 .tasks-foreman .form-input.combobox.long, .tasks-foreman select.long {
   width: 41.25em;
 }
-/* line 686, ../sass/views/_application.scss */
+/* line 692, ../sass/views/_application.scss */
 .tasks-foreman thead tr:first-child td {
   padding-left: 0;
 }
-/* line 691, ../sass/views/_application.scss */
+/* line 697, ../sass/views/_application.scss */
 .tasks-foreman .foreman-state:before {
   content: "(";
 }
-/* line 694, ../sass/views/_application.scss */
+/* line 700, ../sass/views/_application.scss */
 .tasks-foreman .foreman-state:after {
   content: ")";
 }
-/* line 699, ../sass/views/_application.scss */
+/* line 705, ../sass/views/_application.scss */
 .tasks-foreman .add-foreman:before {
   content: "[";
 }
-/* line 702, ../sass/views/_application.scss */
+/* line 708, ../sass/views/_application.scss */
 .tasks-foreman .add-foreman:after {
   content: "]";
 }
 
-/* line 708, ../sass/views/_application.scss */
+/* line 714, ../sass/views/_application.scss */
 .operation-info {
   width: 55%;
   display: inline-block;
   vertical-align: top;
 }
 
-/* line 713, ../sass/views/_application.scss */
+/* line 719, ../sass/views/_application.scss */
 .organizationLinks {
   vertical-align: top;
   width: 39%;
   padding-left: 48px;
   display: inline-block;
 }
-/* line 718, ../sass/views/_application.scss */
+/* line 724, ../sass/views/_application.scss */
 .organizationLinks .organization-links {
   margin-bottom: 12px;
 }
-/* line 720, ../sass/views/_application.scss */
+/* line 726, ../sass/views/_application.scss */
 .organizationLinks .organization-links a {
-  color: #333333;
+  color: #333;
 }
-/* line 722, ../sass/views/_application.scss */
+/* line 728, ../sass/views/_application.scss */
 .organizationLinks .organization-links a:active, .organizationLinks .organization-links a:visited, .organizationLinks .organization-links a:hover {
-  color: #333333;
+  color: #333;
 }
 
-/* line 730, ../sass/views/_application.scss */
+/* line 736, ../sass/views/_application.scss */
 #application-metadata-tab h1 {
   float: none;
 }
-/* line 733, ../sass/views/_application.scss */
+/* line 739, ../sass/views/_application.scss */
 #application-metadata-tab .table-metadata {
   max-width: 875px;
 }
-/* line 735, ../sass/views/_application.scss */
+/* line 741, ../sass/views/_application.scss */
 #application-metadata-tab .table-metadata .metadata-key {
   width: 175px;
 }
 
-/* line 742, ../sass/views/_application.scss */
+/* line 748, ../sass/views/_application.scss */
 #application-requiredFieldSummary-tab .auth-actions button {
   display: block;
 }
@@ -5035,7 +4937,7 @@ span.icon_clear:before {
   margin-top: 24px;
   padding: 12px;
   border-radius: 3px;
-  border: 1px solid #01bef5;
+  border: 1px solid #01BEF5;
 }
 /* line 113, ../sass/views/_create_application.scss */
 .create-group label {
@@ -5932,7 +5834,7 @@ td.comment-text {
 #login h1 {
   margin-bottom: 1em;
   color: #f59c00;
-  font-family: "Dosis", sans-serif;
+  font-family: 'Dosis', sans-serif;
   word-spacing: 0.1em;
   line-height: 1em;
   font-size: 25px;
@@ -6130,7 +6032,7 @@ td.comment-text {
   padding-top: 3px;
   margin-left: -6px;
   margin-bottom: 4px;
-  color: #333333;
+  color: #333;
   text-shadow: none;
 }
 /* line 77, ../sass/views/_side_panel.scss */
@@ -6333,7 +6235,7 @@ td.comment-text {
 /* line 11, ../sass/views/_company.scss */
 #company-content .tabs-container li a {
   background-color: #f6f6f6;
-  color: #333333;
+  color: #333;
   text-decoration: none;
   display: inline-block;
   margin-right: 4px;
@@ -6410,17 +6312,17 @@ div.attachment-multiselect-content tr.attachment-group-header {
 /* line 3, ../sass/partials/_other.scss */
 .hide {
   visibility: hidden;
-  width: 0!important;
-  height: 0!important;
-  line-height: 0!important;
-  padding: 0!important;
-  margin: 0!important;
+  width: 0 !important;
+  height: 0 !important;
+  line-height: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
 }
 
 /* Pretty &amp; s */
 /* line 13, ../sass/partials/_other.scss */
 .amp {
-  font-family: "Goudy Old Style", Baskerville, Palatino, "Palatino Linotype", "Book Antiqua", serif;
+  font-family: 'Goudy Old Style', Baskerville, Palatino, 'Palatino Linotype', 'Book Antiqua', serif;
   font-style: italic;
 }
 
@@ -6518,7 +6420,7 @@ div.attachment-multiselect-content tr.attachment-group-header {
   display: none;
 }
 
-/* line 169, ../sass/main.scss */
+/* line 168, ../sass/main.scss */
 .inert-table tbody tr:hover td,
 .inert-table tbody tr:hover th {
   background-color: #ffffff;
@@ -6573,7 +6475,7 @@ div.pzbDiv {
   border: 1px solid black;
   box-shadow: 3px 4px 7px;
   font-size: 0.8em;
-  color: #333333;
+  color: #333;
 }
 /* line 220, ../sass/main.scss */
 .dev-debug p {

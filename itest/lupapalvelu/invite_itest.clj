@@ -51,7 +51,7 @@
         (count (:invites invs)) => 1
 
         (fact "invite response has correct application map keys"
-          (keys (:application (first (:invites invs)))) => (just [:id :municipality :address :operations] :in-any-order))
+          (keys (:application (first (:invites invs)))) => (just [:id :municipality :address :primaryOperation] :in-any-order))
 
         email => (partial contains-application-link? application-id "applicant")
         (:to email) => (contains (email-for-key teppo))

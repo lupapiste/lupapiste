@@ -28,8 +28,9 @@ LUPAPISTE.ApplicationModel = function() {
     return _.some((ko.toJS(self.attachments) || []), function(a) {return a.versions && a.versions.length;});
   });
   self.address = ko.observable();
-  self.operations = ko.observable();
+  self.secondaryOperations = ko.observable();
   self.primaryOperation = ko.observable();
+  self.allOperations = ko.observable();
   self.permitSubtype = ko.observable();
   self.operationsCount = ko.observable();
   self.applicant = ko.observable();

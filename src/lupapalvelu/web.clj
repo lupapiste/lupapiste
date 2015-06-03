@@ -282,7 +282,7 @@
   (resp/redirect (str (env/value :host) (env/value :redirect-after-logout) )))
 
 (defn redirect-to-frontpage [lang]
-  (redirect lang "welcome"))
+  (resp/redirect (str (env/value :host) (or (env/value :frontpage (keyword lang)) "/"))))
 
 (defn- landing-page
   ([]
@@ -357,6 +357,7 @@
 ;;
 
 (defpage "/" [] (landing-page))
+(defpage "/sv" [] (landing-page "sv"))
 (defpage "/app/" [] (landing-page))
 (defpage [:get ["/app/:lang"  :lang #"[a-z]{2}"]] {lang :lang} (landing-page lang))
 (defpage [:get ["/app/:lang/" :lang #"[a-z]{2}"]] {lang :lang} (landing-page lang))

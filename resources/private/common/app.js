@@ -3,25 +3,28 @@ var LUPAPISTE = LUPAPISTE || {};
 (function($) {
   "use strict";
 
-  var startPageHref = window.location.href;
+  var startPageHref = window.location.href.replace(window.location.hash, "");
 
   /**
    * Prototype for Lupapiste Single Page Apps.
    *
-   * @param {String} startPage   ID of the landing page
-   * @param {Boolean} allowAnonymous  Allow all users to access the app. Default: require login.
+   * params:
+   * startPage (String)        ID of the landing page
+   * allowAnonymous (Boolean)  Allow all users to access the app. Default: require login.
+   * showUserMenu (Boolean)    Default: complement of allowAnonymous, i.e., show menu for users tthat have logged in
+   * @param
    */
-   LUPAPISTE.App = function (startPage, allowAnonymous, showUserMenu) {
-
+  LUPAPISTE.App = function (params) {
     var self = this;
 
     self.defaultTitle = document.title;
 
-    self.startPage = startPage;
+    self.startPage = params.startPage;
+    self.logoPath = params.logoPath;
     self.currentPage = "";
     self.session = undefined;
-    self.allowAnonymous = allowAnonymous;
-    self.showUserMenu = (showUserMenu !== undefined) ? showUserMenu : !allowAnonymous;
+    self.allowAnonymous = params.allowAnonymous;
+    self.showUserMenu = (params.showUserMenu !== undefined) ? params.showUserMenu : !params.allowAnonymous;
     self.previousHash = "";
     self.currentHash = "";
 
@@ -89,7 +92,11 @@ var LUPAPISTE = LUPAPISTE || {};
       self.previousHash = self.currentHash;
       self.currentHash = (location.hash || "").substr(3);
       if (self.currentHash === "") {
-        window.location.hash = "!/" + self.startPage;
+        if (_.isFunction(window.location.replace)) {
+          window.location.replace(startPageHref + "#!/" + self.startPage);
+        } else {
+          window.location.hash = "!/" + self.startPage;
+        }
         return;
       }
 
@@ -202,7 +209,9 @@ var LUPAPISTE = LUPAPISTE || {};
       $(document.documentElement).keyup(function(event) { hub.send("keyup", event); });
 
       function openStartPage() {
-        if (self.startPage && self.startPage.charAt(0) !== "/") {
+        if (self.logoPath) {
+          window.location = window.location.protocol + "//" + window.location.host + self.logoPath;
+        } else if (self.startPage && self.startPage.charAt(0) !== "/") {
           if (self.currentHash === self.startPage) {
             // trigger start page re-rendering
             self.previousHash = self.currentHash;

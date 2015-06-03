@@ -20,8 +20,9 @@
              <span data-bind="ltext: 'edit.address'"></span></a>
           </h1>
 
-          <h2>
-            <span data-bind="ltext: primaryOperationName"></span>
+          <h2 data-bind="if: primaryOperation">
+            <span data-test-id="test-application-primary-operation"
+                  data-bind="ltext: primaryOperationName, attr: {'data-test-primary-operation-id': primaryOperation().name}"></span>
           </h2>
 
           <!-- State: -->
@@ -77,16 +78,21 @@
           <!-- Operations: -->
           <!-- ko if: $root.permitSubtypes().length == 0 -->
           <div>
-            <p data-bind="ltext: 'application.operations'"></p>
+            <p data-bind="ltext: 'application.operations.secondary'"></p>
+            <!-- ko if: operationsCount() && operationsCount().length > 0 -->
             <ul data-bind="foreach: operationsCount">
               <li>
                 <span data-bind="visible: count > 1">
                   <span data-bind="text: count"></span>
                   <span>&#x00D7;</span>
                 </span>
-                <span data-bind="ltext: 'operations.' + name, attr: {'data-test-operation-id': name}" data-test-id="test-application-operation"></span>
+                <span data-bind="ltext: 'operations.' + name, attr: {'data-test-secondary-operation-id': name}" data-test-id="test-application-operation"></span>
               </li>
             </ul>
+            <!-- /ko -->
+            <!-- ko if: operationsCount() && operationsCount().length === 0 -->
+            <p data-bind="ltext: 'application.operations.secondary.none'"></p>
+            <!-- /ko -->
           </div>
           <!-- /ko -->
 
@@ -122,15 +128,19 @@
           <!-- /ko -->
 
           <!-- Link-permits: -->
-          <div data-bind="with: linkPermitData">
-            <p data-bind="ltext: 'application.linkPermits'"></p>
+          <!-- ko if: linkPermitData -->
+          <div data-bind="with: linkPermitData" class="link-permits">
+            <p data-bind="ltext: 'application.linkPermits'" class="link-permit-title"></p>
             <span class="application_summary_text" data-bind="foreach: $data">
               <span data-bind="visible: $data.type() === 'lupapistetunnus'" class="link-permit">
-                <a data-bind="text: $data.id,
-                              click: function(){$root.addLinkPermitModel.followAppLink($data.id())},
+                <a data-bind="click: function(){$root.addLinkPermitModel.followAppLink($data.id())},
                               attr: {'data-test-app-link-permit': $data.id}"
                    data-test-id="test-application-link-permit-lupapistetunnus"
-                   class="link-permit-item"></a>
+                   class="link-permit-item">
+                  <span data-bind="text: $data.id"></span>
+                  -
+                  <span data-bind="ltext: 'operations.' + $data.operation()"></span>
+                </a>
                 <a data-bind="visible: $root.authorization.ok('remove-link-permit-by-app-id'),
                               ltext: 'application.linkPermitRemoveSelected',
                               click: function(){$root.addLinkPermitModel.removeSelectedLinkPermit($root.application.id(), $data.id())}"
@@ -151,17 +161,23 @@
               </span>
             </span>
           </div>
+          <!-- /ko -->
 
           <!-- Applications linking to us: -->
           <!-- ko if: appsLinkingToUs -->
-          <div data-bind="with: appsLinkingToUs">
-            <p data-bind="ltext: 'application.appsLinkingToUs'"></p>
+          <div data-bind="with: appsLinkingToUs" class="link-permits">
+            <p data-bind="ltext: 'application.appsLinkingToUs'" class="link-permit-title"></p>
             <span class="application_summary_text" data-bind="foreach: $data">
-              <a data-bind="text: $data.id,
-                            click: function(){$root.addLinkPermitModel.followAppLink($data.id())},
-                            attr: {'data-test-app-linking-to-us': $data.id}"
-                 data-test-id="test-application-app-linking-to-us"
-                 href="#" class="remove-link-permit"></a>
+              <span class="link-permit">
+                <a data-bind="click: function(){$root.addLinkPermitModel.followAppLink($data.id())},
+                              attr: {'data-test-app-linking-to-us': $data.id}"
+                   data-test-id="test-application-app-linking-to-us"
+                   href="#" class="link-permit-item">
+                  <span data-bind="text: $data.id"></span>
+                  -
+                  <span data-bind="ltext: 'operations.' + $data.operation()"></span>
+                </a>
+              </span>
             </span>
           </div>
           <!-- /ko -->

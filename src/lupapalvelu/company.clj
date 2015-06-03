@@ -42,10 +42,10 @@
               :y                             (sc/pred util/finnish-y? "Not valid Y code")
               :accountType                   (sc/pred account-type? "Not valid account type")
               (sc/optional-key :reference)   max-64-or-nil
-              (sc/optional-key :address1)    max-64-or-nil
-              (sc/optional-key :po)          max-64-or-nil
-              (sc/optional-key :zip)         (sc/either (sc/pred util/finnish-zip? "Not a valid zip code")
-                                                        (sc/pred ss/blank?))
+              :address1                      max-64-or-nil
+              :po                            max-64-or-nil
+              :zip                           (sc/either (sc/pred util/finnish-zip? "Not a valid zip code")
+                                                         (sc/pred ss/blank?))
               (sc/optional-key :country)     max-64-or-nil
               (sc/optional-key :ovt)         (sc/either (sc/pred util/finnish-ovt? "Not a valid OVT code")
                                                         (sc/pred ss/blank?))
@@ -60,6 +60,19 @@
                                   (map (fn [k] (if (sc/optional-key? k) (:k k) k)))
                                   (remove #{:y})))
 
+(defn- fail-property! [prop]
+  (case prop
+    :address1 (fail! :error.illegal-address)
+    :y        (fail! :error.illegal-y-tunnus)
+    :zip      (fail! :error.illegal-zip)
+    :ovt      (fail! :error.illegal-ovt-tunnus)
+    :pop      (fail! "error.illegal-value:select")
+    (fail! :error.unknown)))
+
+(defn validate! [company]
+  (when-let [errors (sc/check Company company)]
+    (fail-property! (first (keys errors)))))
+
 ;;
 ;; API:
 ;;
@@ -67,7 +80,7 @@
 (defn create-company
   "Create a new company. Returns the created company data. Throws if given company data is not valid."
   [company]
-  (sc/validate Company company)
+  (validate! company)
   (let [company (assoc company
                        :id      (mongo/create-id)
                        :created (now))]
@@ -132,7 +145,7 @@
         updated (merge company updates)
         old-limit (user-limit-for-account-type (keyword (:accountType company)))
         limit     (user-limit-for-account-type (keyword (:accountType updated)))]
-    (sc/validate Company updated)
+    (validate! updated)
     (when (< limit old-limit)
       (fail! :company.account-type-not-downgradable))
     (mongo/update :companies {:_id id} updated)

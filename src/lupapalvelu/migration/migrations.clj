@@ -1013,6 +1013,15 @@
   (let [cur-vals (mc/distinct :users "degree")]
     (remove (fn [val] (some #(= val %) (map :name (:body lupapalvelu.document.schemas/koulutusvalinta)))) cur-vals)))
 
+(defmigration separate-operations-to-primary-and-secondary-operations
+  {:apply-when (or (pos? (mongo/count :applications {:operations {$exists true}})) (pos? (mongo/count :submitted-applications {:operations {$exists true}})))}
+  (doseq [collection [:applications :submitted-applications]
+          application (mongo/select collection {:operations {$exists true}})
+          :let [primaryOperation (-> application :operations first)
+                secondaryOperations (-> application :operations rest)]]
+    (mongo/update-by-id collection (:id application) {$set   {:primaryOperation    primaryOperation
+                                                              :secondaryOperations secondaryOperations}
+                                                      $unset {:operations 1}})))
 
 ;;
 ;; ****** NOTE! ******

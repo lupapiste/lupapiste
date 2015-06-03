@@ -3,6 +3,7 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.action :as action]
             [lupapalvelu.document.model :as model]
+            [lupapalvelu.application :refer [get-operations]]
             [lupapalvelu.server] ; ensure all namespaces are loaded
             ))
 
@@ -106,7 +107,7 @@
                                       (fn [app]
                                         (when (and
                                                 ((action/all-application-states-but [:canceled :draft :open]) (keyword (:state app)))
-                                                (when-not (some #(#{"aiemmalla-luvalla-hakeminen"} (:name %)) (:operations app))
+                                                (when-not (some #(#{"aiemmalla-luvalla-hakeminen"} (:name %)) (get-operations app))
                                                   (nil? (:submitted app))))
                                           (:id app)))
                                       @applications)))]

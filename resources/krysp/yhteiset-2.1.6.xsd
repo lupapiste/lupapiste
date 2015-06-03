@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- edited with XMLSpy v2009 sp1 (http://www.altova.com) by Tero Pietila (IT-Pie Oy) -->
 <!-- KRYSP projekti-->
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:yht="http://www.paikkatietopalvelu.fi/gml/yhteiset" xmlns:gml="http://www.opengis.net/gml" xmlns:xml="http://www.w3.org/XML/1998/namespace" targetNamespace="http://www.paikkatietopalvelu.fi/gml/yhteiset" elementFormDefault="qualified" attributeFormDefault="unqualified" version="2.1.5">
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:yht="http://www.paikkatietopalvelu.fi/gml/yhteiset" xmlns:gml="http://www.opengis.net/gml" xmlns:xml="http://www.w3.org/XML/1998/namespace" targetNamespace="http://www.paikkatietopalvelu.fi/gml/yhteiset" elementFormDefault="qualified" attributeFormDefault="unqualified" version="2.1.6">
 	<xs:import namespace="http://www.opengis.net/gml" schemaLocation="http://schemas.opengis.net/gml/3.1.1/base/gml.xsd"/>
 	<xs:import namespace="http://www.w3.org/XML/1998/namespace"/>
 	<!--Local usage-->
@@ -547,6 +547,7 @@ tiedot</xs:documentation>
 			<xs:element name="autopaikkojaUlkopuolella" type="xs:int" minOccurs="0"/>
 			<xs:element name="kerrosala" type="xs:string" minOccurs="0"/>
 			<xs:element name="kokonaisala" type="xs:string" minOccurs="0"/>
+			<xs:element name="rakennusoikeudellinenKerrosala" type="xs:string" minOccurs="0"/>
 			<xs:element name="vaaditutKatselmukset" minOccurs="0" maxOccurs="unbounded">
 				<xs:complexType>
 					<xs:sequence>
@@ -596,7 +597,7 @@ tiedot</xs:documentation>
 						<xs:element name="VaadittuTyonjohtaja">
 							<xs:complexType>
 								<xs:sequence>
-									<xs:element name="tyonjohtajaLaji" type="xs:string"/>
+									<xs:element name="tyonjohtajaRooliKoodi" type="yht:TyonjohtajaRooliKoodiType"/>
 								</xs:sequence>
 							</xs:complexType>
 						</xs:element>
@@ -806,11 +807,13 @@ C vähäinen
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="paatostyyppi" type="yht:PaatostyyppiType" minOccurs="0"/>
+			<xs:element name="FISEpatevyyskortti" type="xs:string" minOccurs="0"/>
+			<xs:element name="FISEkelpoisuus" type="yht:FiseKelpoisuusType" minOccurs="0"/>
 		</xs:sequence>
 	</xs:complexType>
 	<xs:complexType name="TyonjohtajaType">
 		<xs:sequence>
-			<xs:element name="tyonjohtajaRooliKoodi" type="yht:TyonjohtajaRooliKoodiType" minOccurs="0"/>
+			<xs:element name="tyonjohtajaRooliKoodi" type="yht:TyonjohtajaRooliKoodiType"/>
 			<xs:element name="VRKrooliKoodi" minOccurs="0">
 				<xs:annotation>
 					<xs:documentation>Osapuolen rooli VRK luokituksessa</xs:documentation>
@@ -1070,7 +1073,7 @@ C vähäinen
 							</xs:sequence>
 						</xs:complexType>
 					</xs:element>
-					<xs:element name="sijaintitieto" type="yht:SijaintitietoType" minOccurs="0"/>
+					<xs:element name="sijaintitieto" type="yht:SijaintitietoType" minOccurs="0" maxOccurs="unbounded"/>
 					<xs:element name="kaavanaste" minOccurs="0">
 						<xs:annotation>
 							<xs:documentation>Kaavan tieto</xs:documentation>
@@ -1091,6 +1094,7 @@ C vähäinen
 							<xs:documentation>Voisiko poistaa, koska siirto myös rakennusoikeuksittain?</xs:documentation>
 						</xs:annotation>
 					</xs:element>
+					<xs:element name="rakennusoikeudellinenKerrosala" type="xs:string" minOccurs="0"/>
 					<xs:element name="tasosijainti" type="yht:TasosijaintiType" minOccurs="0">
 						<xs:annotation>
 							<xs:documentation>Paikan sijainti suhteessa maanpintaan</xs:documentation>
@@ -1145,6 +1149,7 @@ C vähäinen
 			<xs:enumeration value="Selityksen tai lausunnon pyytäjä"/>
 			<xs:enumeration value="Ilmoituksen tekijä"/>
 			<xs:enumeration value="Kehotuksen saaja"/>
+			<xs:enumeration value="Hakijan asiamies"/>
 			<xs:enumeration value="ei tiedossa"/>
 		</xs:restriction>
 	</xs:simpleType>
@@ -2987,6 +2992,8 @@ C vähäinen
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="turvakieltoKytkin" type="xs:boolean" minOccurs="0"/>
+			<xs:element name="suoramarkkinointikieltoKytkin" type="xs:boolean" minOccurs="0"/>
+			<xs:element name="selite" type="xs:string" minOccurs="0"/>
 		</xs:sequence>
 	</xs:complexType>
 	<xs:complexType name="OsapuoletType">
@@ -3008,7 +3015,13 @@ C vähäinen
 						<xs:element name="suunnittelijatieto" minOccurs="0" maxOccurs="unbounded">
 							<xs:complexType>
 								<xs:sequence>
-									<xs:element name="Suunnittelija" type="yht:SuunnittelijaType"/>
+									<xs:element name="Suunnittelija">
+										<xs:complexType>
+											<xs:complexContent>
+												<xs:extension base="yht:SuunnittelijaType"/>
+											</xs:complexContent>
+										</xs:complexType>
+									</xs:element>
 								</xs:sequence>
 							</xs:complexType>
 						</xs:element>
@@ -3026,8 +3039,13 @@ C vähäinen
 										<xs:complexType>
 											<xs:sequence>
 												<xs:element name="henkilo" type="xs:string" minOccurs="0"/>
+												<xs:element name="osoite" type="yht:PostiosoiteType" minOccurs="0"/>
 												<xs:element name="kiinteistotunnus" type="yht:KiinteistotunnusType" minOccurs="0"/>
 												<xs:element name="hallintasuhde" type="xs:string" minOccurs="0"/>
+												<xs:element name="saanutTiedoksiannonKytkin" type="xs:boolean" minOccurs="0"/>
+												<xs:element name="huomautettavaaKytkin" type="xs:boolean" minOccurs="0"/>
+												<xs:element name="haluaaPaatoksenKytkin" type="xs:boolean" minOccurs="0"/>
+												<xs:element name="huomautus" type="xs:string" minOccurs="0"/>
 											</xs:sequence>
 										</xs:complexType>
 									</xs:element>
@@ -3106,6 +3124,13 @@ C vähäinen
 			<xs:enumeration value="ARK-rakennussuunnittelija"/>
 			<xs:enumeration value="Vaikeiden töiden suunnittelija"/>
 			<xs:enumeration value="ei tiedossa"/>
+			<xs:enumeration value="rakennussuunnittelija"/>
+			<xs:enumeration value="kantavien rakenteiden suunnittelija"/>
+			<xs:enumeration value="pohjarakenteiden suunnittelija"/>
+			<xs:enumeration value="ilmanvaihdon suunnittelija"/>
+			<xs:enumeration value="kiinteistön vesi- ja viemäröintilaitteiston suunnittelija"/>
+			<xs:enumeration value="rakennusfysikaalinen suunnittelija"/>
+			<xs:enumeration value="kosteusvaurion korjaustyön suunnittelija"/>
 		</xs:restriction>
 	</xs:simpleType>
 	<xs:simpleType name="TyonjohtajaRooliKoodiType">
@@ -3729,6 +3754,73 @@ C vähäinen</xs:documentation>
 			<xs:enumeration value="hylätty"/>
 			<xs:enumeration value="hakemusvaiheessa"/>
 			<xs:enumeration value="ilmoitus hyväksytty"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="FiseKelpoisuusType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="tavanomainen pääsuunnittelu (uudisrakentaminen)"/>
+			<xs:enumeration value="tavanomainen pääsuunnittelu (korjausrakentaminen)"/>
+			<xs:enumeration value="vaativa pääsuunnittelu (uudisrakentaminen)"/>
+			<xs:enumeration value="vaativa pääsuunnittelu (korjausrakentaminen)"/>
+			<xs:enumeration value="poikkeuksellisen vaativa pääsuunnittelu (uudisrakentaminen)"/>
+			<xs:enumeration value="poikkeuksellisen vaativa pääsuunnittelu (korjausrakentaminen)"/>
+			<xs:enumeration value="tavanomainen rakennussuunnittelu (uudisrakentaminen)"/>
+			<xs:enumeration value="tavanomainen rakennussuunnittelu (korjausrakentaminen)"/>
+			<xs:enumeration value="vaativa rakennussuunnittelu (uudisrakentaminen)"/>
+			<xs:enumeration value="vaativa rakennussuunnittelu (korjausrakentaminen)"/>
+			<xs:enumeration value="poikkeuksellisen vaativa rakennussuunnittelu (uudisrakentaminen)"/>
+			<xs:enumeration value="poikkeuksellisen vaativa rakennussuunnittelu (korjausrakentaminen)"/>
+			<xs:enumeration value="tavanomainen betonirakenteiden suunnittelu (uudisrakentaminen)"/>
+			<xs:enumeration value="tavanomainen betonirakenteiden suunnittelu (korjausrakentaminen)"/>
+			<xs:enumeration value="vaativa betonirakenteiden suunnittelu (uudisrakentaminen)"/>
+			<xs:enumeration value="vaativa betonirakenteiden suunnittelu (korjausrakentaminen)"/>
+			<xs:enumeration value="poikkeuksellisen vaativa betonirakenteiden suunnittelu (uudisrakentaminen)"/>
+			<xs:enumeration value="poikkeuksellisen vaativa betonirakenteiden suunnittelu (korjausrakentaminen)"/>
+			<xs:enumeration value="tavanomainen puurakenteiden suunnittelu (uudisrakentaminen)"/>
+			<xs:enumeration value="tavanomainen puurakenteiden suunnittelu (korjausrakentaminen)"/>
+			<xs:enumeration value="vaativa puurakenteiden suunnittelu (uudisrakentaminen)"/>
+			<xs:enumeration value="vaativa puurakenteiden suunnittelu (korjausrakentaminen)"/>
+			<xs:enumeration value="poikkeuksellisen vaativa puurakenteiden suunnittelu (uudisrakentaminen)"/>
+			<xs:enumeration value="poikkeuksellisen vaativa puurakenteiden suunnittelu (korjausrakentaminen)"/>
+			<xs:enumeration value="tavanomainen teräsrakenteiden suunnittelu (uudisrakentaminen)"/>
+			<xs:enumeration value="tavanomainen teräsrakenteiden suunnittelu (korjausrakentaminen)"/>
+			<xs:enumeration value="vaativa teräsrakenteiden suunnittelu (uudisrakentaminen)"/>
+			<xs:enumeration value="vaativa teräsrakenteiden suunnittelu (korjausrakentaminen)"/>
+			<xs:enumeration value="poikkeuksellisen vaativa teräsrakenteiden suunnittelu (uudisrakentaminen)"/>
+			<xs:enumeration value="poikkeuksellisen vaativa teräsrakenteiden suunnittelu (korjausrakentaminen)"/>
+			<xs:enumeration value="tavanomainen pohjarakenteiden suunnittelu (uudisrakentaminen)"/>
+			<xs:enumeration value="tavanomainen pohjarakenteiden suunnittelu (korjausrakentaminen)"/>
+			<xs:enumeration value="vaativa pohjarakenteiden suunnittelu (uudisrakentaminen)"/>
+			<xs:enumeration value="vaativa pohjarakenteiden suunnittelu (korjausrakentaminen)"/>
+			<xs:enumeration value="poikkeuksellisen vaativa pohjarakenteiden suunnittelu (uudisrakentaminen)"/>
+			<xs:enumeration value="poikkeuksellisen vaativa pohjarakenteiden suunnittelu (korjausrakentaminen)"/>
+			<xs:enumeration value="tavanomainen ilmanvaihtosuunnittelu (uudisrakentaminen)"/>
+			<xs:enumeration value="tavanomainen ilmanvaihtosuunnittelu (korjausrakentaminen)"/>
+			<xs:enumeration value="vaativa ilmanvaihtosuunnittelu (uudisrakentaminen)"/>
+			<xs:enumeration value="vaativa ilmanvaihtosuunnittelu (korjausrakentaminen)"/>
+			<xs:enumeration value="poikkeuksellisen vaativa ilmanvaihtosuunnittelu (uudisrakentaminen)"/>
+			<xs:enumeration value="poikkeuksellisen vaativa ilmanvaihtosuunnittelu (korjausrakentaminen)"/>
+			<xs:enumeration value="tavanomainen kiinteistön vesi- ja viemärilaitteiston suunnittelu (uudisrakentaminen)"/>
+			<xs:enumeration value="tavanomainen kiinteistön vesi- ja viemärilaitteiston suunnittelu (korjausrakentaminen)"/>
+			<xs:enumeration value="vaativa kiinteistön vesi- ja viemärilaitteiston suunnittelu (uudisrakentaminen)"/>
+			<xs:enumeration value="vaativa kiinteistön vesi- ja viemärilaitteiston suunnittelu (korjausrakentaminen)"/>
+			<xs:enumeration value="poikkeuksellisen vaativa kiinteistön vesi- ja viemärilaitteiston suunnittelu (uudisrakentaminen)"/>
+			<xs:enumeration value="poikkeuksellisen vaativa kiinteistön vesi- ja viemärilaitteiston suunnittelu (korjausrakentaminen)"/>
+			<xs:enumeration value="tavanomainen rakennusfysikaalinen suunnittelu (uudisrakentaminen)"/>
+			<xs:enumeration value="tavanomainen rakennusfysikaalinen suunnittelu (korjausrakentaminen)"/>
+			<xs:enumeration value="vaativa rakennusfysikaalinen suunnittelu (uudisrakentaminen)"/>
+			<xs:enumeration value="vaativa rakennusfysikaalinen suunnittelu (korjausrakentaminen)"/>
+			<xs:enumeration value="poikkeuksellisen vaativa rakennusfysikaalinen suunnittelu (uudisrakentaminen)"/>
+			<xs:enumeration value="poikkeuksellisen vaativa rakennusfysikaalinen suunnittelu (korjausrakentaminen)"/>
+			<xs:enumeration value="tavanomainen akustiikkasuunnittelu (uudisrakentaminen)"/>
+			<xs:enumeration value="tavanomainen akustiikkasuunnittelu (korjausrakentaminen)"/>
+			<xs:enumeration value="vaativa akustiikkasuunnittelu (uudisrakentaminen)"/>
+			<xs:enumeration value="vaativa akustiikkasuunnittelu (korjausrakentaminen)"/>
+			<xs:enumeration value="poikkeuksellisen vaativa akustiikkasuunnittelu (uudisrakentaminen)"/>
+			<xs:enumeration value="poikkeuksellisen vaativa akustiikkasuunnittelu (korjausrakentaminen)"/>
+			<xs:enumeration value="tavanomainen kosteusvaurion korjaussuunnittelu"/>
+			<xs:enumeration value="vaativa kosteusvaurion korjaussuunnittelu"/>
+			<xs:enumeration value="poikkeuksellisen vaativa kosteusvaurion korjaussuunnittelu"/>
 		</xs:restriction>
 	</xs:simpleType>
 </xs:schema>

@@ -39,6 +39,7 @@
 
 (defcommand create-task
   {:parameters [id taskName schemaName]
+   :input-validators [(partial non-blank-parameters [:id :taskName :schemaName])]
    :user-roles #{:authority}
    :states     [:open :submitted :sent :complement-needed :verdictGiven :constructionStarted]}
   [{:keys [created application user data] :as command}]

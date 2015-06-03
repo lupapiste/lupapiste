@@ -148,7 +148,7 @@
       foremanModel.refresh(app);
 
       // Operations
-      applicationModel.operationsCount(_.map(_.countBy(app.operations, "name"), function(v, k) { return {name: k, count: v}; }));
+      applicationModel.operationsCount(_.map(_.countBy(app.secondaryOperations, "name"), function(v, k) { return {name: k, count: v}; }));
 
       verdictAttachmentPrintsOrderModel.refresh(applicationModel);
       verdictAttachmentPrintsOrderHistoryModel.refresh(applicationModel);

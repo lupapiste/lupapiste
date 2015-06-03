@@ -452,12 +452,12 @@
 (facts "Facts about update operation description"
   (let [application-id (create-app-id pena :operation "kerrostalo-rivitalo" :propertyId sipoo-property-id)
         application (query-application pena application-id)
-        op (first (:operations application))
+        op (:primaryOperation application)
         test-desc "Testdesc"]
     (fact "operation desc is empty" (-> op :description empty?) => truthy)
     (command pena :update-op-description :id application-id :op-id (:id op) :desc test-desc :collection "operations")
     (let [updated-app (query-application pena application-id)
-          updated-op (some #(when (= (:id op) (:id %)) %) (:operations updated-app))]
+          updated-op (:primaryOperation updated-app)]
       (fact "description is set" (:description updated-op) => test-desc))))
 
 (facts "Changinging application location"

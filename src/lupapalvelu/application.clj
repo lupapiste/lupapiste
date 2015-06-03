@@ -24,6 +24,11 @@
             [sade.util :as util]
             [swiss.arrows :refer [-<>>]]))
 
+
+(defn get-operations [application]
+  (remove nil? (conj (seq (:secondaryOperations application)) (:primaryOperation application))))
+
+
 ;;
 ;; Validators
 ;;
@@ -38,7 +43,7 @@
 
 (defn- is-link-permit-required [application]
   (or (= :muutoslupa (keyword (:permitSubtype application)))
-      (some #(operations/link-permit-required-operations (keyword (:name %))) (:operations application))))
+      (some #(operations/link-permit-required-operations (keyword (:name %))) (get-operations application))))
 
 (defn validate-link-permits [application]
   (let [application (meta-fields/enrich-with-link-permit-data application)
@@ -116,7 +121,7 @@
       result)))
 
 (defn- process-foreman-v2 [application]
-  (if (= (-> application :operations first :name) "tyonjohtajan-nimeaminen-v2")
+  (if (= (-> application :primary :name) "tyonjohtajan-nimeaminen-v2")
     (assoc application :submittable (foreman-submittable? application))
     application))
 
@@ -306,7 +311,8 @@
                        :permitSubtype       (first (permit/permit-subtypes permit-type))
                        :infoRequest         info-request?
                        :openInfoRequest     open-inforequest?
-                       :operations          [op]
+                       :primaryOperation    op
+                       :secondaryOperations []
                        :state               state
                        :municipality        municipality
                        :location            (->location x y)
@@ -357,7 +363,7 @@
     (str app-id "|" link-permit-id)
     (str link-permit-id "|" app-id)))
 
-(defn do-add-link-permit [{:keys [id propertyId operations]} link-permit-id]
+(defn do-add-link-permit [{:keys [id propertyId primaryOperation]} link-permit-id]
   {:pre [(mongo/valid-key? link-permit-id)
          (not= id link-permit-id)]}
   (let [db-id (make-mongo-id-for-link-permit id link-permit-id)
@@ -368,15 +374,14 @@
                         {:_id           db-id
                          :link          [id link-permit-id]
                          id             {:type       "application"
-                                         :apptype    (:name (first operations))
+                                         :apptype    (:name primaryOperation)
                                          :propertyId propertyId}
                          link-permit-id {:type           "linkpermit"
                                          :linkpermittype (if is-lupapiste-app
                                                            "lupapistetunnus"
                                                            "kuntalupatunnus")
                                          :apptype        (->> linked-app
-                                                              (:operations)
-                                                              (first)
+                                                              (:primaryOperation)
                                                               (:name))}}
                         :upsert true)))
 

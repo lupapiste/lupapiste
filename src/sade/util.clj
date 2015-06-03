@@ -375,11 +375,6 @@
 (defn finnish-zip? [^String zip-code]
   (boolean (when zip-code (re-matches #"^\d{5}$" zip-code))))
 
-(defn finnish-hetu? [^String hetu] ; TODO remove this and use valid-hetu? function from Tommi's branch when applicable
-  (if (re-matches #"^(0[1-9]|[12]\d|3[01])(0[1-9]|1[0-2])([5-9]\d\+|\d\d-|\d\dA)\d{3}[\dA-Y]$" hetu)
-    (= (subs hetu 10 11) (hetu-checksum hetu))
-    false))
-
 ;;
 ;; Schema utils:
 ;;
@@ -408,14 +403,14 @@
 
 (def IFn (sc/pred ifn? "Function"))
 
-(def difficulty-values ["AA" "A" "B" "C" "ei tiedossa"])    ;TODO: move this to schemas?
-(defn compare-difficulty [a b]                              ;TODO: make this function more generic by taking the key and comparison values as param? E.g. compare-against [a b key ref-values]
-  (let [a (:difficulty a)
-        b (:difficulty b)]
+(defn compare-difficulty [accessor-keyword values a b]
+  {:pre [(keyword? accessor-keyword) (vector? values)]}
+  (let [a (accessor-keyword a)
+        b (accessor-keyword b)]
     (cond
       (nil? b) -1
       (nil? a) 1
-      :else (- (.indexOf difficulty-values a) (.indexOf difficulty-values b)))))
+      :else (- (.indexOf values a) (.indexOf values b)))))
 
 (defn every-key-in-map? [target-map required-keys]
   (every? (-> target-map keys set) required-keys))

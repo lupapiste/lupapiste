@@ -228,7 +228,7 @@
    3rd parameter (submitted-application) is not used on YA applications."
   [application lang submitted-application krysp-version output-dir begin-of-link]
   (let [lupa-name-key (ya-operation-type-to-schema-name-key
-                        (-> application :operations first :name keyword))
+                        (-> application :primaryOperation :name keyword))
         canonical-without-attachments (ya-canonical/application-to-canonical application lang)
         attachments-canonical (mapping-common/get-attachments-as-canonical application begin-of-link)
         statement-given-ids (mapping-common/statements-ids-with-status

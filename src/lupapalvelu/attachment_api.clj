@@ -25,6 +25,7 @@
             [lupapalvelu.xml.krysp.application-as-krysp-to-backing-system :as mapping-to-krysp]
             [sade.util :as util]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.application :refer [get-operations]]
             [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.pdf-conversion :as pdf-conversion]
             [sade.env :as env])
@@ -127,7 +128,7 @@
    :user-roles #{:applicant :authority :oirAuthority}
    :states action/all-states}
   [{application :application}]
-  (ok :operations (:operations application)))
+  (ok :operations (get-operations application)))
 
 ;;
 ;; States

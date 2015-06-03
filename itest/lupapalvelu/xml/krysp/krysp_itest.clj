@@ -10,7 +10,10 @@
             [lupapalvelu.document.model :refer [default-max-len]]
             [lupapalvelu.xml.emit :refer :all]
             [lupapalvelu.xml.validator :refer [validate]]
-            [lupapalvelu.xml.krysp.rakennuslupa-mapping :refer [rakennuslupa_to_krysp_212 rakennuslupa_to_krysp_213 rakennuslupa_to_krysp_216]]
+            [lupapalvelu.xml.krysp.rakennuslupa-mapping :refer [rakennuslupa_to_krysp_212
+                                                                rakennuslupa_to_krysp_213
+                                                                rakennuslupa_to_krysp_216
+                                                                rakennuslupa_to_krysp_218]]
             [lupapalvelu.xml.krysp.poikkeamis-mapping :refer [poikkeamis_to_krysp_212]]
             [lupapalvelu.xml.krysp.ymparisto-ilmoitukset-mapping :refer [ilmoitus_to_krysp]]
             [lupapalvelu.xml.krysp.ymparistolupa-mapping :refer [ymparistolupa_to_krysp]]
@@ -78,7 +81,7 @@
 (defn- generate-attachment [{id :id :as application} apikey password]
   (when-let [first-attachment (or
                                 (get-in application [:attachments 0])
-                                (case (-> application :operations first :name)
+                                (case (-> application :primaryOperation :name)
                                   "aloitusoikeus" {:type {:type-group "paapiirustus"
                                                           :type-id    "asemapiirros"}
                                                    :id   id}
@@ -259,7 +262,8 @@
                         :R (case krysp-version
                              "2.1.2" rakennuslupa_to_krysp_212
                              "2.1.3" rakennuslupa_to_krysp_213
-                             "2.1.6" rakennuslupa_to_krysp_216)
+                             "2.1.6" rakennuslupa_to_krysp_216
+                             "2.1.8" rakennuslupa_to_krysp_218)
                         :YA (get-yleiset-alueet-krysp-mapping lupa-name-key krysp-version)
                         :P poikkeamis_to_krysp_212
                         :YI ilmoitus_to_krysp
