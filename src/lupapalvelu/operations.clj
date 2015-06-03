@@ -110,11 +110,10 @@
 
 (def- operation-tree-for-Y
   ["Ymp\u00e4rist\u00f6luvat"
-   (filterv identity ; TODO remove filter after pima feature is in production
+   (filterv identity
      [; permit/YI
       ["Meluilmoitus" :meluilmoitus]
 
-      ; at the moment permit/R
       (when (env/feature? :pima) ["Pima" :pima])
 
       ; permit/MAL
@@ -778,7 +777,7 @@
                                    :link-permit-verdict-required false
                                    :asianhallinta true}
      ;     :pima                        {:schema "pima"
-     ;                                   :permit-type permit/YL ; TODO
+     ;                                   :permit-type permit/YL
      ;                                   :required ["ymp-ilm-kesto-mini"]
      ;                                   :attachments []
      ;                                   :add-operation-allowed true

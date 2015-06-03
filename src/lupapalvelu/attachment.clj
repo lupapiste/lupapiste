@@ -109,8 +109,8 @@
       :P  attachment-types-R
       :YI attachment-types-YI
       :YL attachment-types-YL
-      :VVVL attachment-types-YI ;TODO quick fix to get test and qa work. Put correct attachment list here
-      :MM attachment-types-KT ;TODO quick fix to get test and qa work. Put correct attachment list here
+      :VVVL attachment-types-YI ;TODO Put correct attachment list here
+      :MM attachment-types-KT ;TODO Put correct attachment list here
       :MAL attachment-types-MAL
       :KT attachment-types-KT
       (fail! (str "unsupported permit-type: " (name permit-type))))))
@@ -197,7 +197,6 @@
      :or {make-comment true state :requires_authority_action} :as options}
     retry-limit]
     {:pre [(map? options) (map? application) (string? attachment-id) (string? file-id) (string? filename) (string? content-type) (number? size) (number? now) (map? user) (not (nil? stamped))]}
-    ; TODO refactor to use proper optimistic locking
     ; TODO refactor to return version-model and mongo updates, so that updates can be merged into single statement
     (if (pos? retry-limit)
       (let [latest-version (attachment-latest-version (application :attachments) attachment-id)

@@ -4,6 +4,7 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [sade.env :as env]
+            [sade.property :as p]
             [lupapalvelu.application :as application]
             [lupapalvelu.action :as action]
             [lupapalvelu.verdict :as verdict]
@@ -40,13 +41,13 @@
 
                ;; Invite applicants
                (when-not (ss/blank? applicant-email)
-                 (authorization/send-invite!
-                  (update-in command [:data] merge {:email        applicant-email
-                                                    :text         (i18n/localize lang "invite.default-text")
-                                                    :documentName nil
-                                                    :documentId   nil
-                                                    :path         nil
-                                                    :role         "writer"}))
+               (authorization/send-invite!
+                 (update-in command [:data] merge {:email        applicant-email
+                                                   :text         (i18n/localize lang "invite.default-text")
+                                                   :documentName nil
+                                                   :documentId   nil
+                                                   :path         nil
+                                                   :role         "writer"}))
                  (info "Prev permit application creation, invited " applicant-email " to created app " (get-in command [:data :id])))
 
                ;; Set applicants' user info to Hakija documents
@@ -91,8 +92,7 @@
                                                                       [["kuvaus"] rakennusvalvontaasianKuvaus])
                                                                     (when-not (ss/blank? vahainenPoikkeaminen)
                                                                       [["poikkeamat"] vahainenPoikkeaminen])))}
-        ;; TODO: Property-id structure is about to change -> Fix this municipality logic when it changes.
-        municipality (subs (:propertyId location-info) 0 3)
+        municipality (p/municipality-id-by-property-id (:propertyId location-info))
         command (update-in command [:data] merge
                   {:operation operation :municipality municipality :infoRequest false :messages []}
                   location-info)
