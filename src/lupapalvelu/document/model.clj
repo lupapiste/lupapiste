@@ -438,6 +438,11 @@
         do-mask (fn [{hetu :value :as v}] (assoc v :value (str "******" (ss/substring hetu 6 11))))]
     (convert-document-data mask-if do-mask document initial-path)))
 
+(defn without-user-id
+  "Removes userIds from the document."
+  [doc]
+  (util/postwalk-map (fn [m] (dissoc m :userId)) doc))
+
 (defn has-hetu?
   ([schema]
     (has-hetu? schema [:henkilo]))
