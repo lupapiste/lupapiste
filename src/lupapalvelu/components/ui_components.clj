@@ -13,7 +13,8 @@
             [lupapalvelu.attachment :refer [attachment-types-osapuoli, attachment-scales, attachment-sizes]]
             [lupapalvelu.company :as company]
             [lupapalvelu.stamper :refer [file-types]]
-            [scss-compiler.core :as scss]))
+            [scss-compiler.core :as scss]
+            [me.raynes.fs :as fs]))
 
 (def debugjs {:depends [:jquery]
               :js ["debug.js"]
@@ -59,6 +60,41 @@
   (if-let [main-css-file (io/resource (c/path css-file-path))]
     (slurp main-css-file)
     (scss/scss->css (.getPath (-> scss-file-path c/path io/resource)))))
+
+(defn- read-component-list-from-fs [component pattern]
+  (let [path (str "resources/private/" (name component))
+        files (me.raynes.fs/find-files path (re-pattern pattern))
+        mapped-files (map #(->> % .getPath (re-matches (re-pattern (str "^.*/" path "/(.*)"))) last) files)]
+    mapped-files))
+
+(defn- this-jar
+  "utility function to get the name of jar in which this function is invoked"
+  [& [ns]]
+  (-> (or ns (class *ns*))
+    .getProtectionDomain .getCodeSource .getLocation .getPath))
+
+(defn- in-jar?
+  [jar]
+  (re-find (re-pattern ".jar$") jar))
+
+(import java.util.jar.JarFile)
+
+(defn- list-jar [jar-path inner-dir]
+  (if-let [jar         (JarFile. jar-path)]
+    (let [inner-dir    (if (and (not= "" inner-dir) (not= "/" (last inner-dir)))
+                         (str inner-dir "/")
+                         inner-dir)
+          entries      (enumeration-seq (.entries jar))
+          names        (map (fn [x] (.getName x)) entries)
+          snames       (filter (fn [x] (= 0 (.indexOf x inner-dir))) names)
+          fsnames      (map #(subs % (count inner-dir)) snames)]
+      fsnames)))
+
+(defn- read-component-list-from-jar [jar component pattern]
+  (let [path (str "private/" (name component))
+        files (list-jar jar path)
+        filtered-files (filter #(re-find (re-pattern pattern) %) files)]
+    filtered-files))
 
 (def ui-components
   {;; 3rd party libs
@@ -250,60 +286,14 @@
    :integration-error {:js [ "integration-error.js"]
                        :html ["integration-error.html"]}
 
-   ; TODO maybe just find and add all ko components under ui-components automatically
    :ui-components {:depends [:common-html]
-                   :js ["ui-components.js"
-                        "fill-info/fill-info-model.js"
-                        "foreman-history/foreman-history-model.js"
-                        "foreman-other-applications/foreman-other-applications-model.js"
-                        "input-model.js"
-                        "message-panel/message-panel-model.js"
-                        "checkbox/checkbox-model.js"
-                        "select/select-model.js"
-                        "string/string-model.js"
-                        "modal-dialog/modal-dialog-model.js"
-                        "modal-dialog/button-group/ok-button-group-model.js"
-                        "modal-dialog/button-group/submit-button-group-model.js"
-                        "modal-dialog/button-group/yes-no-button-group-model.js"
-                        "modal-dialog/dialog/yes-no-dialog-model.js"
-                        "modal-dialog/dialog/ok-dialog-model.js"
-                        "attachments-multiselect/attachments-multiselect-model.js"
-                        "authority-select/authority-select-model.js"
-                        "authority-select/authority-select-dialog-model.js"
-                        "export-attachments/export-attachments-model.js"
-                        "neighbors/neighbors-owners-dialog-model.js"
-                        "neighbors/neighbors-edit-dialog-model.js"
-                        "company-selector/company-selector-model.js"
-                        "company-invite/company-invite-model.js"
-                        "company-invite/company-invite-dialog-model.js"
-                        "autocomplete/autocomplete-model.js"
-                        "invoice-operator-selector/invoice-operator-selector-model.js"
-                        "company-registration-init/company-registration-init-model.js"]
-                   :html ["fill-info/fill-info-template.html"
-                          "foreman-history/foreman-history-template.html"
-                          "foreman-other-applications/foreman-other-applications-template.html"
-                          "message-panel/message-panel-template.html"
-                          "string/string-template.html"
-                          "select/select-template.html"
-                          "checkbox/checkbox-template.html"
-                          "modal-dialog/modal-dialog-template.html"
-                          "modal-dialog/button-group/ok-button-group-template.html"
-                          "modal-dialog/button-group/submit-button-group-template.html"
-                          "modal-dialog/button-group/yes-no-button-group-template.html"
-                          "modal-dialog/dialog/yes-no-dialog-template.html"
-                          "modal-dialog/dialog/ok-dialog-template.html"
-                          "attachments-multiselect/attachments-multiselect-template.html"
-                          "authority-select/authority-select-template.html"
-                          "authority-select/authority-select-dialog-template.html"
-                          "export-attachments/export-attachments-template.html"
-                          "neighbors/neighbors-owners-dialog-template.html"
-                          "neighbors/neighbors-edit-dialog-template.html"
-                          "company-selector/company-selector-template.html"
-                          "company-invite/company-invite-template.html"
-                          "company-invite/company-invite-dialog-template.html"
-                          "autocomplete/autocomplete-template.html"
-                          "invoice-operator-selector/invoice-operator-selector-template.html"
-                          "company-registration-init/company-registration-init-template.html"]}
+                   :js (conj (if (in-jar? (this-jar lupapalvelu.main))
+                               (read-component-list-from-jar (this-jar lupapalvelu.main) :ui-components ".*-model.js$")
+                               (read-component-list-from-fs :ui-components ".*-model.js$"))
+                             "ui-components.js")
+                   :html (if (in-jar? (this-jar lupapalvelu.main))
+                           (read-component-list-from-jar (this-jar lupapalvelu.main) :ui-components ".*-template.html$")
+                           (read-component-list-from-fs :ui-components ".*-template.html$"))}
 
    ;; Single Page Apps and standalone components:
    ;; (compare to auth-methods in web.clj)
