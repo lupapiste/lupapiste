@@ -3,7 +3,7 @@ var LUPAPISTE = LUPAPISTE || {};
 (function($) {
   "use strict";
 
-  var startPageHref = window.location.href;
+  var startPageHref = window.location.href.replace(window.location.hash, "");
 
   /**
    * Prototype for Lupapiste Single Page Apps.
