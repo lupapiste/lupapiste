@@ -338,7 +338,7 @@
 
                 same-op-irs (filter
                               (fn [ir]
-                                (some #(= application-op-name (:name %)) (get-operations ir)))
+                                (some #(= application-op-name (:name %)) (a/get-operations ir)))
                               inforequests)
 
                 others (remove-irs-by-id inforequests same-op-irs)
@@ -359,7 +359,7 @@
                       (partial a/property-id-parameters [:propertyId])
                       operation-validator]}
   [{{:keys [infoRequest]} :data :keys [created] :as command}]
-  (let [created-application (do-create-application command)]
+  (let [created-application (a/do-create-application command)]
     (a/insert-application created-application)
     (when (and (boolean infoRequest) (:openInfoRequest created-application))
       (open-inforequest/new-open-inforequest! created-application))
