@@ -16,7 +16,8 @@
             [lupapalvelu.operations :as operations]
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch-api]
             [lupapalvelu.organization :as organization]
-            [sade.env :as env]))
+            [sade.env :as env]
+            [sade.property :as p]))
 
 (defn- get-applicant-email [applicant]
   (-> (or
@@ -89,8 +90,7 @@
                                                                       [["kuvaus"] rakennusvalvontaasianKuvaus])
                                                                     (when-not (ss/blank? vahainenPoikkeaminen)
                                                                       [["poikkeamat"] vahainenPoikkeaminen])))}
-        ;; TODO: Property-id structure is about to change -> Fix this municipality logic when it changes.
-        municipality (subs (:propertyId location-info) 0 3)
+        municipality (p/municipality-id-by-property-id (:propertyId location-info))
         command (update-in command [:data] merge
                   {:operation operation :municipality municipality :infoRequest false :messages []}
                   location-info)
