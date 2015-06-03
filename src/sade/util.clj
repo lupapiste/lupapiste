@@ -438,3 +438,22 @@
   ; Regex derived from @stephenhay's at https://mathiasbynens.be/demo/url-regex
   (when-not (re-matches #"^(https?)://[^\s/$.?#].[^\s]*$" url)
     (fail :error.invalid.url)))
+
+(defn this-jar
+  "utility function to get the name of jar in which this function is invoked"
+  [& [ns]]
+  (-> (or ns (class *ns*))
+    .getProtectionDomain .getCodeSource .getLocation .getPath))
+
+(import java.util.jar.JarFile)
+
+(defn list-jar [jar-path inner-dir]
+  (if-let [jar         (JarFile. jar-path)]
+    (let [inner-dir    (if (and (not= "" inner-dir) (not= "/" (last inner-dir)))
+                         (str inner-dir "/")
+                         inner-dir)
+          entries      (enumeration-seq (.entries jar))
+          names        (map (fn [x] (.getName x)) entries)
+          snames       (filter (fn [x] (= 0 (.indexOf x inner-dir))) names)
+          fsnames      (map #(subs % (count inner-dir)) snames)]
+      fsnames)))
