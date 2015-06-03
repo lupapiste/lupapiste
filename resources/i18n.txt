@@ -1,1 +1,0 @@
-error.verdict.not-draft: Vain päätösluonnoksia voi tallentaa
