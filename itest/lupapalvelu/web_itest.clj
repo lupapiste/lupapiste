@@ -2,6 +2,7 @@
   (:require [lupapalvelu.itest-util :refer :all]
             [clojure.walk :refer [keywordize-keys]]
             [sade.http :as http]
+            [sade.env :as env]
             [midje.sweet :refer :all]
             [cheshire.core :as json]))
 
@@ -14,7 +15,7 @@
         anti-csrf-token (ring.util.codec/url-decode (.getValue (@store "anti-csrf-token")))
         params (assoc-in initial-params [:headers "x-anti-forgery-token"] anti-csrf-token)]
     (:status resp) => 302
-    (:headers resp) => (contains {"location" "/app/fi/welcome"})
+    (:headers resp) => (contains {"location" (str (server-address) (env/value :frontpage :fi))})
 
     (http/post (str (server-address) "/api/login") (assoc params :form-params {:username "pena" :password "pena"})) => http200?
 
