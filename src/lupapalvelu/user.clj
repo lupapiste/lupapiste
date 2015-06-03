@@ -47,7 +47,7 @@
            (sc/optional-key :private)             {(sc/optional-key :password) sc/Str
                                                    (sc/optional-key :apikey) sc/Str}
            (sc/optional-key :orgAuthz)            {sc/Keyword (sc/pred vector? "OrgAuthz must be vector")}
-           (sc/optional-key :personId)            (sc/pred util/finnish-hetu? "Not valid hetu")
+           (sc/optional-key :personId)            (sc/pred util/valid-hetu? "Not valid hetu")
            (sc/optional-key :street)              (sc/maybe (util/max-length-string 255))
            (sc/optional-key :city)                (sc/maybe (util/max-length-string 255))
            (sc/optional-key :zip)                 (sc/either
