@@ -2,6 +2,8 @@
   (:require [taoensso.timbre :refer [debug info]]
             [sade.core :refer :all]
             [sade.strings :as ss]
+            [sade.util :as util]
+            [sade.env :as env]
             [lupapalvelu.application :as application]
             [lupapalvelu.action :as action]
             [lupapalvelu.verdict :as verdict]
@@ -12,11 +14,9 @@
             [lupapalvelu.document.commands :as commands]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
-            [sade.util :as util]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch-api]
-            [lupapalvelu.organization :as organization]
-            [sade.env :as env]))
+            [lupapalvelu.organization :as organization]))
 
 (defn- get-applicant-email [applicant]
   (-> (or
@@ -34,18 +34,20 @@
     (->> applicants
          (map-indexed
            (fn [i applicant]
+
              ;; only invite applicants who have a valid email address
-             (when-let [applicant-email (get-applicant-email applicant)]
+             (let [applicant-email (get-applicant-email applicant)]
 
                ;; Invite applicants
-               (authorization/send-invite!
-                 (update-in command [:data] merge {:email        applicant-email
-                                                   :text         (i18n/localize lang "invite.default-text")
-                                                   :documentName nil
-                                                   :documentId   nil
-                                                   :path         nil
-                                                   :role         "writer"}))
-               (info "Prev permit application creation, invited " applicant-email " to created app " (get-in command [:data :id]))
+               (when-not (ss/blank? applicant-email)
+                 (authorization/send-invite!
+                  (update-in command [:data] merge {:email        applicant-email
+                                                    :text         (i18n/localize lang "invite.default-text")
+                                                    :documentName nil
+                                                    :documentId   nil
+                                                    :path         nil
+                                                    :role         "writer"}))
+                 (info "Prev permit application creation, invited " applicant-email " to created app " (get-in command [:data :id])))
 
                ;; Set applicants' user info to Hakija documents
                (let [document (if (zero? i)
