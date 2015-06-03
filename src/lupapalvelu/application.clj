@@ -951,12 +951,10 @@
         tyo-aika-for-jatkoaika-doc (-> continuation-app
                                        (domain/get-document-by-name "tyo-aika-for-jatkoaika")
                                        (assoc-in [:data :tyoaika-alkaa-pvm :value] tyoaika-alkaa-pvm))
-
-        continuation-app (assoc continuation-app
-                           :documents [(domain/get-document-by-name continuation-app "hankkeen-kuvaus-jatkoaika")
-                                       tyo-aika-for-jatkoaika-doc
-                                       (domain/get-document-by-name application "hakija-ya")
-                                       (domain/get-document-by-name application "yleiset-alueet-maksaja")])]
+        docs (concat
+               [(domain/get-document-by-name continuation-app "hankkeen-kuvaus-jatkoaika") tyo-aika-for-jatkoaika-doc]
+               (map #(-> (domain/get-document-by-name application %) model/without-user-id) ["hakija-ya" "yleiset-alueet-maksaja"]))
+        continuation-app (assoc continuation-app :documents docs)]
 
     (do-add-link-permit continuation-app (:id application))
     (insert-application continuation-app)

@@ -230,6 +230,7 @@
   ([application document]
     (validate application document nil))
   ([application document schema]
+    {:pre [(map? application) (map? document)]}
     (let [data (:data document)
           schema (or schema (get-document-schema document))
           document-loc-key (or (-> schema :info :i18name) (-> schema :info :name))
@@ -436,6 +437,11 @@
   (let [mask-if (fn [{type :type} {hetu :value}] (and (= (keyword type) :hetu) hetu (pos? (count hetu))))
         do-mask (fn [{hetu :value :as v}] (assoc v :value (str "******" (ss/substring hetu 6 11))))]
     (convert-document-data mask-if do-mask document initial-path)))
+
+(defn without-user-id
+  "Removes userIds from the document."
+  [doc]
+  (util/postwalk-map (fn [m] (dissoc m :userId)) doc))
 
 (defn has-hetu?
   ([schema]
