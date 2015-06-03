@@ -257,12 +257,13 @@
   (fact (sc/check (max-length-string 1) [1]) =not=> nil))
 
 (facts "comparing history item difficulties"
-  (fact "nil and item"          (compare-difficulty nil {:difficulty "A"})                => pos?)
-  (fact "item and nil"          (compare-difficulty {:difficulty "A"} nil)                => neg?)
-  (fact "old more difficult"    (compare-difficulty {:difficulty "A"} {:difficulty "B"})  => neg?)
-  (fact "new more difficult"    (compare-difficulty {:difficulty "B"} {:difficulty "A"})  => pos?)
-  (fact "tricky difficulty val" (compare-difficulty {:difficulty "A"} {:difficulty "AA"}) => pos?)
-  (fact "equality"              (compare-difficulty {:difficulty "B"} {:difficulty "B"})  => zero?))
+  (let [values (vec (map :name (:body lupapalvelu.document.schemas/patevyysvaatimusluokka)))]
+    (fact "nil and item"          (compare-difficulty :difficulty values nil {:difficulty "A"})                => pos?)
+    (fact "item and nil"          (compare-difficulty :difficulty values {:difficulty "A"} nil)                => neg?)
+    (fact "old more difficult"    (compare-difficulty :difficulty values {:difficulty "A"} {:difficulty "B"})  => neg?)
+    (fact "new more difficult"    (compare-difficulty :difficulty values {:difficulty "B"} {:difficulty "A"})  => pos?)
+    (fact "tricky difficulty val" (compare-difficulty :difficulty values {:difficulty "A"} {:difficulty "AA"}) => pos?)
+    (fact "equality"              (compare-difficulty :difficulty values {:difficulty "B"} {:difficulty "B"})  => zero?)))
 
 (facts select-values
   (let [m {:foo "foo" :bar "bar" :baz "baz"}]

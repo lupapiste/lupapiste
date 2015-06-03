@@ -403,14 +403,14 @@
 
 (def IFn (sc/pred ifn? "Function"))
 
-(def difficulty-values ["AA" "A" "B" "C" "ei tiedossa"])    ;TODO: move this to schemas?
-(defn compare-difficulty [a b]                              ;TODO: make this function more generic by taking the key and comparison values as param? E.g. compare-against [a b key ref-values]
-  (let [a (:difficulty a)
-        b (:difficulty b)]
+(defn compare-difficulty [accessor-keyword values a b]
+  {:pre [(keyword? accessor-keyword) (vector? values)]}
+  (let [a (accessor-keyword a)
+        b (accessor-keyword b)]
     (cond
       (nil? b) -1
       (nil? a) 1
-      :else (- (.indexOf difficulty-values a) (.indexOf difficulty-values b)))))
+      :else (- (.indexOf values a) (.indexOf values b)))))
 
 (defn every-key-in-map? [target-map required-keys]
   (every? (-> target-map keys set) required-keys))
