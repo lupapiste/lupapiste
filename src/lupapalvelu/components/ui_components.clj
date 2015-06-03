@@ -250,7 +250,6 @@
    :integration-error {:js [ "integration-error.js"]
                        :html ["integration-error.html"]}
 
-   ; TODO maybe just find and add all ko components under ui-components automatically
    :ui-components {:depends [:common-html]
                    :js ["ui-components.js"
                         "fill-info/fill-info-model.js"

@@ -10,7 +10,7 @@
             [sade.strings :as ss]))
 
 ;;
-;; parsing time (TODO: might be copy-pasted from krysp)
+;; parsing time
 ;;
 
 (defn parse-date

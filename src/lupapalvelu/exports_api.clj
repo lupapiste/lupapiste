@@ -118,9 +118,6 @@
    :ranta-asemakaava-muutos                                           "D"
    :yleiskaava-laadinta                                               "D"
    :yleiskaava-muutos                                                 "D"
-
-   ;new additions to op-tree (TODO: possibly wrong price classes)
-
    :kerrostalo-rivitalo                                               uuden-rakentaminen
    :pientalo                                                          uuden-rakentaminen
    :teollisuusrakennus                                                uuden-rakentaminen

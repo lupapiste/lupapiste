@@ -30,7 +30,7 @@
                                                          :state "draft"})
 
         file         (java.io.File/createTempFile "test" ".pdf")
-        langs        ["fi"]]                                ;TODO Add sv to lang after export loc keys in excel
+        langs        ["fi" "sv"]]
 
     ; Iterate over all languages
     (doseq [lang langs]
