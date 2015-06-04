@@ -472,14 +472,6 @@
         (fact "x" x => #(and (instance? Double %) (= 393033.614 %)))
         (fact "y" y => #(and (instance? Double %) (= 6707228.994 %)))
         (fact "address" address => "Kylykuja 3-5 D 35b-c")
-        (fact "propertyId" propertyId => "18600303560006")))
-
-    (facts "Rakennus"
-      (let [{:keys [x y address propertyId] :as rakennus} ensimmainen-rakennus]
-        (fact "contains all the needed keys" (every? (-> rakennus keys set) [:x :y :address :propertyId]))
-        (fact "x" x => #(and (instance? Double %) (= 393033.614 %)))
-        (fact "y" y => #(and (instance? Double %) (= 6707228.994 %)))
-        (fact "address" address => "Kylykuja")
         (fact "propertyId" propertyId => "18600303560006")))))
 
 

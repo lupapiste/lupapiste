@@ -551,11 +551,6 @@
         (error "Creating application from previous permit. More than one RakennusvalvontaAsia element were received in the xml message with kuntalupatunnus " kuntalupatunnus "."))
 
       (let [asia (first asiat-with-kuntalupatunnus)
-            viitelupatiedot (map cr/all-of (select asia [:viitelupatieto :LupaTunnus]))
-            kasittelynTilatiedot (->> (select asia [:kasittelynTilatieto])
-                                   (map #(-> (cr/all-of % [:Tilamuutos]) (cr/convert-keys-to-timestamps [:pvm])))
-                                   (sort-by :pvm))
-            viimeisin-tila (last kasittelynTilatiedot)
             asioimiskieli (cr/all-of asia [:lisatiedot :Lisatiedot :asioimiskieli])
             asioimiskieli-code (case asioimiskieli
                                  "suomi"  "fi"
@@ -564,15 +559,8 @@
             asianTiedot (cr/all-of asia [:asianTiedot :Asiantiedot])
 
             ;;
-            ;; TODO: _Kvintus 5.11.2014_: Rakennuspaikka osoitteen ja sijainnin oikea lahde.
-            ;;       Referenssipiste ei osoita nyt talla hetkella oikeaan pisteeseen.
+            ;; _Kvintus 5.11.2014_: Rakennuspaikka osoitteen ja sijainnin oikea lahde.
             ;;
-            ;; Referenssipiste
-            referenssiPiste-xml (select1 asia [:referenssiPiste])
-            coord-array-referenssipiste (resolve-coordinates
-                                          referenssiPiste-xml
-                                          (cr/all-of referenssiPiste-xml [:Point :pos])
-                                          kuntalupatunnus)
 
             ;; Rakennuspaikka
             Rakennuspaikka (cr/all-of asia [:rakennuspaikkatieto :Rakennuspaikka])
@@ -587,52 +575,22 @@
                                          (-> Rakennuspaikka :sijaintitieto :Sijainti :piste :Point :pos)
                                          kuntalupatunnus)
 
-            ;; Rakennus tai Rakennelma
-            toimenpidetieto (-> (select asia [:toimenpidetieto]) first cr/all-of)
-            Rakennus (or
-                       (-> toimenpidetieto :Toimenpide :rakennustieto :Rakennus)
-                       (-> toimenpidetieto :Toimenpide :rakennelmatieto :Rakennelma))
-            osoite-Rakennus (-> Rakennus :rakennuksenTiedot :osoite :osoitenimi :teksti)
-            kiinteistotunnus-Rakennus (-> Rakennus :rakennuksenTiedot :rakennustunnus :kiinttun)
-            coord-array-Rakennus (resolve-coordinates
-                                   (or
-                                     (select1 asia [:toimenpidetieto :Toimenpide :rakennustieto :Rakennus :sijaintitieto :Sijainti :piste])
-                                     (select1 asia [:toimenpidetieto :Toimenpide :rakennelmatieto :Rakennelma :sijaintitieto :Sijainti :piste]))
-                                   (-> Rakennus :sijaintitieto :Sijainti :piste :Point :pos)
-                                   kuntalupatunnus)
-
-            ;; Varaudu tallaiseen. Huomaa srsName ja pilkku koordinaattien valimerkkina! (kts. LP-734-2014-00001:n paatossanoma)
-;            <yht:pistesijainti>
-;              <gml:Point srsName="http://www.opengis.net/gml/srs/epsg.xml#3877">
-;                <gml:coordinates>23528933.213,6699629.937</gml:coordinates>
-;              </gml:Point>
-;            </yht:pistesijainti>
-
             osapuolet (map cr/all-of (select asia [:osapuolettieto :Osapuolet :osapuolitieto :Osapuoli]))
             hakijat (filter #(= "hakija" (:VRKrooliKoodi %)) osapuolet)]
 
-        ((comp cleanup cr/convert-booleans)
-          (merge
-            {:id (->lp-tunnus asia)
-             :kuntalupatunnus (->kuntalupatunnus asia)
-             :municipality municipality
-             :rakennusvalvontaasianKuvaus (:rakennusvalvontaasianKuvaus asianTiedot)
-             :vahainenPoikkeaminen (:vahainenPoikkeaminen asianTiedot)
-             :hakijat hakijat
-;             :viitelupatiedot viitelupatiedot
-;             :kasittelynTilatiedot kasittelynTilatiedot
-;             :viimeisin-tila viimeisin-tila
-;             :rakennusten-tiedot (->buildings xml)
-;             :toimenpidetieto toimenpidetieto
-;             :asioimiskieli asioimiskieli
-             }
-            (when (and coord-array-Rakennus osoite-Rakennus kiinteistotunnus-Rakennus)
-              {:ensimmainen-rakennus {:x (first coord-array-Rakennus)
-                                      :y (second coord-array-Rakennus)
-                                      :address osoite-Rakennus
-                                      :propertyId kiinteistotunnus-Rakennus}})
-            (when (and coord-array-Rakennuspaikka osoite-Rakennuspaikka kiinteistotunnus)
-              {:rakennuspaikka {:x (first coord-array-Rakennuspaikka)
-                                :y (second coord-array-Rakennuspaikka)
-                                :address osoite-Rakennuspaikka
-                                :propertyId kiinteistotunnus}})))))))
+
+        (-> (merge
+              {:id                          (->lp-tunnus asia)
+               :kuntalupatunnus             (->kuntalupatunnus asia)
+               :municipality                municipality
+               :rakennusvalvontaasianKuvaus (:rakennusvalvontaasianKuvaus asianTiedot)
+               :vahainenPoikkeaminen        (:vahainenPoikkeaminen asianTiedot)
+               :hakijat                     hakijat}
+
+              (when (and coord-array-Rakennuspaikka osoite-Rakennuspaikka kiinteistotunnus)
+                {:rakennuspaikka {:x          (first coord-array-Rakennuspaikka)
+                                  :y          (second coord-array-Rakennuspaikka)
+                                  :address    osoite-Rakennuspaikka
+                                  :propertyId kiinteistotunnus}}))
+            cr/convert-booleans
+            cleanup)))))

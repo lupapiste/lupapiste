@@ -143,7 +143,7 @@
         (info "Prev permit application creation, rakennuspaikkatieto information incomplete:\n " (:rakennuspaikka app-info) "\n"))
       location-info)))
 
-(defn fetch-prev-application! [{{:keys [organizationId kuntalupatunnus]} :data user :user :as command}]
+(defn fetch-prev-application! [{{:keys [organizationId kuntalupatunnus]} :data :as command}]
   (let [operation         :aiemmalla-luvalla-hakeminen
         permit-type       (operations/permit-type-of-operation operation)
         dummy-application {:id kuntalupatunnus :permitType permit-type :organization organizationId}
