@@ -3,13 +3,10 @@
             [clojure.string :refer [join]]
             [sade.strings :as ss]
             [lupapalvelu.itest-util :refer :all]
-            [lupapalvelu.test-util :refer [doc-result doc-check]]
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.application-api :as app]
-            [lupapalvelu.application :as a]
-            [lupapalvelu.actions-api :as ca]
             [lupapalvelu.document.tools :as tools]))
 
 (mongo/connect!)
@@ -498,13 +495,12 @@
                          :change-permit-sub-type :refresh-ktj :merge-details-from-krysp :remove-link-permit-by-app-id
                          :set-attachment-type :move-attachments-to-backing-system :add-operation :remove-auth :create-doc
                          :set-company-to-document :set-user-to-document :set-current-user-to-document :approve-application
-                         :submit-application}
-        user (find-user-from-minimal-by-apikey sonja)]
+                         :submit-application}]
     app => map?
-
-    (doseq [command (ca/foreach-action user {} app)
-            :let [action (keyword (:action command))
-                  result (doc-result (a/validate-authority-in-drafts command app) action)]]
-      (when (denied-actions action)
-        result => (doc-check = unauthorized)))))
+    (fact "No denied-actions in allowed-actions"
+      (some denied-actions (remove nil? (map
+                                         (fn [[action {:keys [ok]}]]
+                                           (when ok
+                                             action))
+                                         actions))) => nil?)))
 
