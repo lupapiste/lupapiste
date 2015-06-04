@@ -3605,110 +3605,8 @@ ul.attachments-list li.mandatory-attachments {
 }
 
 /* line 13, ../sass/views/_welcome.scss */
-.welcome_page {
-  margin-top: 0;
-}
-
-/* line 17, ../sass/views/_welcome.scss */
-.welcome_top {
-  background: #01BEF5 url("/img/top-bg.jpg");
-  margin-top: 48px;
-  *zoom: 1;
-}
-/* line 22, ../sass/main.scss */
-.welcome_top:before, .welcome_top:after {
-  content: "";
-  display: table;
-}
-/* line 26, ../sass/main.scss */
-.welcome_top:after {
-  clear: both;
-}
-
-/* line 23, ../sass/views/_welcome.scss */
-.welcome_top_content {
-  position: relative;
-  padding-top: 48px;
-}
-
-/* line 28, ../sass/views/_welcome.scss */
-.welcome_top_text {
-  z-index: 2;
-  position: absolute;
-  right: 0;
-  top: 48px;
-  padding: 24px;
-  width: 22.5em;
-  background: white;
-  height: 452px;
-}
-
-/* line 39, ../sass/views/_welcome.scss */
-.welcome_info {
-  z-index: 3;
-  position: absolute;
-  top: -48px;
-  right: -48px;
-}
-
-/* line 46, ../sass/views/_welcome.scss */
-.welcome_sections {
-  width: 80%;
-  margin: 72px auto;
-  padding: 1.875em;
-  background: white;
-  *zoom: 1;
-}
-/* line 22, ../sass/main.scss */
-.welcome_sections:before, .welcome_sections:after {
-  content: "";
-  display: table;
-}
-/* line 26, ../sass/main.scss */
-.welcome_sections:after {
-  clear: both;
-}
-/* line 53, ../sass/views/_welcome.scss */
-.welcome_sections .welcome_section {
-  float: left;
-  position: relative;
-  /* Defaults for old browsers */
-  width: 100%;
-  margin-right: 1.875em;
-  *zoom: 1;
-}
-/* line 22, ../sass/main.scss */
-.welcome_sections .welcome_section:before, .welcome_sections .welcome_section:after {
-  content: "";
-  display: table;
-}
-/* line 26, ../sass/main.scss */
-.welcome_sections .welcome_section:after {
-  clear: both;
-}
-/* line 61, ../sass/views/_welcome.scss */
-.welcome_sections .welcome_section .welcome-login-section {
-  border-right: 1px solid #dddddd;
-  width: 49%;
-}
-/* line 65, ../sass/views/_welcome.scss */
-.welcome_sections .welcome_section .welcome-register-section {
-  width: 45%;
-  float: right;
-  margin-left: 48px;
-}
-
-/* nth-child(3) that works in IE8 */
-/* line 76, ../sass/views/_welcome.scss */
-.welcome_sections .welcome_section:first-child + .welcome_section + .welcome_section {
-  margin-right: 0;
-}
-
-/* line 80, ../sass/views/_welcome.scss */
-.welcome_logo {
-  position: absolute;
-  top: 48px;
-  padding: 24px;
+.welcome-register-section {
+  margin-top: 24px;
 }
 
 /* line 1, ../sass/views/_applications.scss */
@@ -4146,7 +4044,7 @@ span.icon_clear:before {
 }
 /* line 107, ../sass/views/_application.scss */
 .application_summary .application_summary_info .application_summary_text, .application_summary .application_summary_info ul {
-  width: 70%;
+  width: 69%;
 }
 /* line 111, ../sass/views/_application.scss */
 .application_summary .application_summary_info ul li {

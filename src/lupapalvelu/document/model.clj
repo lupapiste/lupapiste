@@ -147,12 +147,6 @@
         (find-by-name (:body elem) ks)))))
 
 (defn- resolve-element-loc-key [info element path]
-  ;;
-  ;; TODO: Loytyyko talle lokalisaation etsinnalle parempaa logiikkaa?
-  ;; Esimerkiksi: (= 0 (.indexOf (lupapalvelu.i18n.localize lupapalvelu.i18n.*lang* loc-key) "???")) => group loc, muuten standard?
-  ;; Ainakin select-tyyppisten elementtien lokalisaatioavaimet ovat "._group_label"-loppuisia.
-  ;; Kts. docModel.js:n funktiot "makeLabel" ja "locKeyFromPath".
-  ;;
   (let [loc-key (str (-> info :document :locKey) "." (join "." (map name path)))]
     (if (:i18nkey element)
       (:i18nkey element)
@@ -230,6 +224,7 @@
   ([application document]
     (validate application document nil))
   ([application document schema]
+    {:pre [(map? application) (map? document)]}
     (let [data (:data document)
           schema (or schema (get-document-schema document))
           document-loc-key (or (-> schema :info :i18name) (-> schema :info :name))
@@ -392,7 +387,7 @@
                       (if (pred element v)
                         [k (emitter v)]
                         (when v
-                          (if (not= (keyword type) :group)  ;TODO: does this work with tables?
+                          (if (not= (keyword type) :group)  ;TODO: does this work with tables? TDD
                             [k v]
                             [k (if repeating
                                  (into {} (map (fn [k2] [k2 (doc-walk body (conj current-path k2))]) (keys v)))
@@ -436,6 +431,11 @@
   (let [mask-if (fn [{type :type} {hetu :value}] (and (= (keyword type) :hetu) hetu (pos? (count hetu))))
         do-mask (fn [{hetu :value :as v}] (assoc v :value (str "******" (ss/substring hetu 6 11))))]
     (convert-document-data mask-if do-mask document initial-path)))
+
+(defn without-user-id
+  "Removes userIds from the document."
+  [doc]
+  (util/postwalk-map (fn [m] (dissoc m :userId)) doc))
 
 (defn has-hetu?
   ([schema]

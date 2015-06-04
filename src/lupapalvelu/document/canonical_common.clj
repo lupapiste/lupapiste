@@ -67,8 +67,8 @@
   (by-type (walk/postwalk empty-strings-to-nil documents)))
 
 (def- puolto-mapping {:condition "ehdoilla"
-                               :no "ei puolla"
-                               :yes "puoltaa"})
+                      :no "ei puolla"
+                      :yes "puoltaa"})
 
 (defn- get-statement [statement]
   (let [lausunto {:Lausunto
@@ -251,7 +251,6 @@
    "ei tiedossa"                    "ei tiedossa"
    "Rakennuksen omistaja"           "rakennuksen omistaja"
 
-   ; TODO mappings for the rest
    :rakennuspaikanomistaja          "rakennuspaikan omistaja"
    :lupapaatoksentoimittaminen      "lupap\u00e4\u00e4t\u00f6ksen toimittaminen"
    :naapuri                         "naapuri"

@@ -583,6 +583,15 @@
     (ok :attachments (:attachments current-user))
     (fail :error.user-not-found)))
 
+(defn- add-user-attachment-allowed? [user] (user/applicant? user))
+
+(defquery add-user-attachment-allowed
+  {:description "Dummy command for UI logic: returns falsey if current user is not allowed to add \"user attachments\"."
+   :pre-checks [(fn [command _]
+                  (when-not (add-user-attachment-allowed? (:user command))
+                    unauthorized))]
+   :user-roles #{:anonymous}})
+
 (defpage [:post "/api/upload/user-attachment"] {[{:keys [tempfile filename content-type size]}] :files attachmentType :attachmentType}
   (let [user              (user/current-user (request/ring-request))
         filename          (mime/sanitize-filename filename)
@@ -595,7 +604,7 @@
                            :size             size
                            :created          (now)}]
 
-    (when-not (user/applicant? user) (throw+ {:status 401 :body "forbidden"}))
+    (when-not (add-user-attachment-allowed? user) (throw+ {:status 401 :body "forbidden"}))
 
     (info "upload/user-attachment" (:username user) ":" attachment-type "/" filename content-type size "id=" attachment-id)
     (when-not ((set attachment/attachment-types-osapuoli) (:type-id attachment-type)) (fail! :error.illegal-attachment-type))
@@ -636,7 +645,7 @@
   {:parameters [id]
    :user-roles #{:applicant}
    :states     [:draft :open :submitted :complement-needed]
-   :pre-checks [(fn [command application] (not (-> command :user :architect)))]}
+   :pre-checks [(fn [command application] (not (-> command :user :architect)))]}  ;;TODO: lisaa architect? check
   [{application :application user :user}]
   (doseq [attachment (:attachments (mongo/by-id :users (:id user)))]
     (let [application-id id

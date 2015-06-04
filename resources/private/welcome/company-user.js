@@ -48,7 +48,7 @@
     var successOkButton = {title: loc("welcome.login"),
                            fn: function() {
                              LUPAPISTE.ModalDialog.close();
-                             window.location.hash = "!/login";}};
+                             pageutil.openFrontpage();}};
 
     self.send = function() {
       ajax
