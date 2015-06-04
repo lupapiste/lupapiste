@@ -2,7 +2,7 @@
   "use strict";
 
   function loadTimingData() {
-    if (!features.enabled("perfmon") || !window.performance) {
+    if (!window.performance || window.location.pathname.match(/upload/)) {
       return;
     }
 
@@ -32,10 +32,9 @@
           .append($("<td>").text(duration).css("padding", "0px").css("text-align","right")));
     });
 
-    ajax.post(window.location.protocol + "//" + window.location.host + "/api/perfmon/browser-timing")
-      .raw()
-      .json({timing: window.performance.timing})
-      .header("npm", "true")
+    ajax.command("browser-timing", {timing: window.performance.timing, pathname: window.location.pathname})
+      .error(_.noop)
+      .fail(_.noop)
       .call();
   }
 

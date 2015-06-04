@@ -463,8 +463,8 @@
     (fact "rakennusvalvontaasianKuvaus" rakennusvalvontaasianKuvaus => "Rakennetaan yksikerroksinen lautaverhottu omakotitalo jossa kytketty autokatos/ varasto.")
     (fact "vahainenPoikkeaminen" vahainenPoikkeaminen => "Poikekkaa meill\u00e4!")
     (facts "hakijat"
-      (fact "count" (count hakijat) => 4)
-      (fact "with email address" (filter identity (map #(get-in % [:henkilo :sahkopostiosoite]) hakijat)) => (just #{"pena@example.com" "mikko@example.com"})))
+      (fact "count" (count hakijat) => 6)
+      (fact "with email address" (filter identity (map #(get-in % [:henkilo :sahkopostiosoite]) hakijat)) => (just #{"pena@example.com" "mikko@example.com" " \\t   "})))
 
     (facts "Rakennuspaikka"
       (let [{:keys [x y address propertyId] :as rakennuspaikka} (:rakennuspaikka info)]
