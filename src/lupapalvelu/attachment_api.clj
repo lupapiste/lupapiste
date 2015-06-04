@@ -288,17 +288,25 @@
                          :locked locked
                          :required false
                          :user user
-                         :created created}
-        attach-file-result (attachment/attach-file! attachment-data)]
-    (if-not attach-file-result
-      (fail :error.unknown)
-      (when (env/feature? :arkistointi)
-        (when-let [processed-tempfile (when (and (= (mime/mime-type filename) "application/pdf") (not (pdf-conversion/is-pdf-a? tempfile)))
-                                        (pdf-conversion/convert-to-pdf-a tempfile))]
-          (let [new-filename (str (ss/substring filename 0 (- (count filename) 4)) "-PDFA.pdf")
-                new-id (:id attach-file-result)]
-            (when-not (attachment/attach-file! (assoc attachment-data :attachment-id new-id :content processed-tempfile :filename new-filename))
-              (fail :error.unknown))))))))
+                         :created created
+                         :valid-pdfa false
+                         :missing-fonts []}]
+    (if (and (env/feature? :arkistointi) (= (mime/mime-type filename) "application/pdf"))
+      (let [processing-result (pdf-conversion/convert-to-pdf-a tempfile)]
+        (if (:already-valid-pdfa? processing-result)
+          (when-not (attachment/attach-file! (assoc attachment-data :valid-pdfa true))
+            (fail :error.unknown))
+          (if (:pdfa? processing-result)
+            (let [attach-file-result (attachment/attach-file! attachment-data)
+                  new-filename (str (ss/substring filename 0 (- (count filename) 4)) "-PDFA.pdf")
+                  new-id (:id attach-file-result)]
+              (when-not (attachment/attach-file! (assoc attachment-data :attachment-id new-id :content (:output-file processing-result) :filename new-filename :valid-pdfa true))
+                (fail :error.unknown)))
+            (let [missing-fonts (or (:missing-fonts processing-result) [])]
+              (when-not (attachment/attach-file! (assoc attachment-data :missing-fonts missing-fonts))
+                (fail :error.unknown))))))
+      (when-not (attachment/attach-file! attachment-data)
+        (fail :error.unknown)))))
 
 
 ;;

@@ -353,7 +353,7 @@
 
 (defn allowed-roles [allowed-roles command]
   (let [roles (get-in command [:data :roles])
-        filtered-roles (->> roles (map keyword) (filter allowed-roles))
+        filtered-roles (->> roles (map keyword) (filter (into #{} allowed-roles)))
         ok (= (count roles)
               (count filtered-roles))]
     (when-not ok

@@ -5303,6 +5303,12 @@ td.comment-text {
   margin-bottom: 12px;
 }
 
+/* line 268, ../sass/views/_attachment.scss */
+.archive-valid .icon {
+  vertical-align: middle;
+  margin-left: 5px;
+}
+
 /* line 2, ../sass/views/_statement.scss */
 #statement h1 {
   width: 70%;
