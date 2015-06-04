@@ -159,6 +159,20 @@ var util = (function($) {
     return isValidY(y + "-" + c);
   }
 
+  var personIdCn = ["0","1","2","3","4","5","6","7","8","9","A","B","C","D",
+    "E","F","H","J","K","L","M","N","P","R","S","T","U","V",
+    "W","X","Y"]
+
+  function isValidPersonId(personId) {
+    var m = /^(\d{6})[aA+-]([0-9]{3})([0-9A-Z])$/.exec(personId || ""),
+        n = m && m[1] + m[2],
+        c = m && m[3];
+
+    if(!m) { return false; }
+
+    return personIdCn[parseInt(n, 10) % 31] === c;
+  }
+
   function extractRequiredErrors(errors) {
     var errs = _.map(errors, function(errArray) {
       return _.filter(errArray, function(err) {
@@ -185,6 +199,7 @@ var util = (function($) {
     isValidPassword:     isValidPassword,
     isValidY:            isValidY,
     isValidOVT:          isValidOVT,
+    isValidPersonId:     isValidPersonId,
     prop: {
       isPropertyId:           isPropertyId,
       isPropertyIdInDbFormat: isPropertyIdInDbFormat,

@@ -124,7 +124,7 @@ Mikko decides to go to the desert, put on his ipod, and listen some some British
 
 Solita accepts invite
   Open last email
-  Wait until  Element should contain  id=to  kaino@solita.fi
+  Wait until  Element should contain  xpath=//dd[@data-test-id='to']  kaino@solita.fi
   Click Element  xpath=(//a)[2]
   Wait until  Page should contain  Hakemus on liitetty onnistuneesti yrityksen tiliin.
   [Teardown]  Go to login page

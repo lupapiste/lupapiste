@@ -28,7 +28,7 @@ Mikko navigates to application
 
 Mikko goes back to project application
   Click by test id  test-application-link-permit-lupapistetunnus
-  Wait until  Element should be visible  //section[@id='application']//span[@data-test-operation-id='kerrostalo-rivitalo']
+  Wait until  Element should be visible  //section[@id='application']//span[@data-test-primary-operation-id='kerrostalo-rivitalo']
 
 Mikko invites foreman to application
   Open tab  parties
@@ -36,7 +36,7 @@ Mikko invites foreman to application
   Input Text  invite-foreman-email  teppo@example.com
   Click by test id  application-invite-foreman
   Wait until  Click by test id  application-invite-foreman-close-dialog
-  Wait until  Element should be visible  //section[@id='application']//span[@data-test-operation-id='tyonjohtajan-nimeaminen-v2']
+  Wait until  Element should be visible  //section[@id='application']//span[@data-test-primary-operation-id='tyonjohtajan-nimeaminen-v2']
   ${foremanAppId} =  Get Text  xpath=//section[@id='application']//span[@data-test-id='application-id']
   Append To List  ${foremanApps}  ${foremanAppId}
 

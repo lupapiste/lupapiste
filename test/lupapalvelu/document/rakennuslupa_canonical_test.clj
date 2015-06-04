@@ -333,8 +333,6 @@
 (def- link-permit-data-lupapistetunnus {:id "LP-753-2013-00099" :type "lupapistetunnus"})
 (def- app-linking-to-us {:id "LP-753-2013-00008"})
 
-;TODO LIITETIETO
-
 (def documents [hankkeen-kuvaus
                 hakija-henkilo
                 hakija-yritys
@@ -395,9 +393,9 @@
                                    :organization "753-R"
                                    :state "submitted"
                                    :submitted 1426247899490
-                                   :operations [{:name "tyonjohtajan-nimeaminen"
-                                                 :id "5272668be8db5aaa01084601"
-                                                 :created 1383229067483}]
+                                   :primaryOperation {:name "tyonjohtajan-nimeaminen"
+                                                      :id "5272668be8db5aaa01084601"
+                                                      :created 1383229067483}
                                    :documents [hakija-henkilo
                                                maksaja-henkilo
                                                tyonjohtaja
@@ -413,9 +411,9 @@
                                    :state "submitted"
                                    :submitted 1426247899490
                                    :propertyId "75341600550007"
-                                   :operations [{:name "suunnittelijan-nimeaminen"
-                                                 :id "527b3392e8dbbb95047a89de"
-                                                 :created 1383805842761}]
+                                   :primaryOperation {:name "suunnittelijan-nimeaminen"
+                                                      :id "527b3392e8dbbb95047a89de"
+                                                      :created 1383805842761}
                                    :documents [hakija-henkilo
                                                maksaja-henkilo
                                                suunnittelija1
@@ -1133,9 +1131,10 @@
    :attachments [],
    :organization "753-R",
    :title "It\u00e4inen Hangelbyntie 163",
-   :operations [{:id "5280b764420622588b2f04fc",
-                 :name "jatkoaika",
-                 :created 1384167268234}],
+   :primaryOperation {:id "5280b764420622588b2f04fc",
+                      :name "jatkoaika",
+                      :created 1384167268234}
+   :secondaryOperations [],
    :infoRequest false,
    :openInfoRequest false,
    :opened 1384167310181,
@@ -1170,11 +1169,6 @@
 
 (ctc/validate-all-documents jatkolupa-application)
 
-(fl/facts* "Canonical model for jatkoaika is correct"
-  (let [canonical (application-to-canonical jatkolupa-application "sv")]
-    ;(clojure.pprint/pprint canonical)
-    ;TODO tests
-    ))
 
 (fl/facts* "Canonical model for katselmus is correct"
            (let [canonical (katselmus-canonical
@@ -1184,7 +1178,7 @@
                              "Pohjakatselmus 1"
                              1354532324658
                              [{:rakennus {:rakennusnro "002" :jarjestysnumero 1 :kiinttun "01234567891234"}
-                               :tila     {:tila nil :kayttoonottava nil}}] ; TODO test these
+                               :tila     {:tila "pidetty" :kayttoonottava false}}]
                              authority-user-jussi
                              "pohjakatselmus"
                              :katselmus
@@ -1243,7 +1237,11 @@
                  lasnaolijat (:lasnaolijat Katselmus ) => "Tiivi Taavi, Hipsu ja Lala"
                  poikkeamat (:poikkeamat Katselmus) => "Ei poikkeamisia"
                  tarkastuksenTaiKatselmuksenNimi (:tarkastuksenTaiKatselmuksenNimi Katselmus) => "Pohjakatselmus 1"
-                 kayttotapaus (:kayttotapaus RakennusvalvontaAsia) => "Uusi katselmus"]
+                 kayttotapaus (:kayttotapaus RakennusvalvontaAsia) => "Uusi katselmus"
+
+                 rakennustieto (first (:katselmuksenRakennustieto Katselmus)) => truthy
+                 rakennusOsittainen (get-in rakennustieto [:KatselmuksenRakennus :katselmusOsittainen]) => "pidetty"
+                 rakennusKayttoonotto (get-in rakennustieto [:KatselmuksenRakennus :kayttoonottoKytkin]) => false]
 
              (:kuvaus huomautus) => "Saunan ovi pit\u00e4\u00e4 vaihtaa 900mm leve\u00e4ksi.\nPiha-alue siivottava v\u00e4litt\u00f6m\u00e4sti."
              (:maaraAika huomautus) => "2014-05-05"
@@ -1269,9 +1267,10 @@
      :location {:x 406390.19848633, :y 6681812.5},
      :organization "753-R",
      :title "Vainuddintie 92",
-     :operations [{:id "52c5461042065cf9f379de8b",
-                   :name "aloitusoikeus",
-                   :created 1388660240013}],
+     :primaryOperation {:id "52c5461042065cf9f379de8b",
+                        :name "aloitusoikeus",
+                        :created 1388660240013}
+     :secondaryOperations [],
      :infoRequest false,
      :openInfoRequest false,
      :opened 1388665814105,

@@ -39,19 +39,19 @@
           <h2 data-bind="ltext: 'register.company.form.billing'"></h2>
 
           <div class="form-entry">
-            <label class="form-label" data-bind="ltext: 'register.company.form.billing.address'"></label>
+            <label class="form-label tip" data-bind="ltext: 'register.company.form.billing.address'"></label>
             <input class="form-input text" data-bind="value: address1" data-test-id="register-company-address1" type="text" maxlength="64"/>
           </div>
 
           <br>
 
           <div class="form-entry">
-            <label class="form-label" data-bind="ltext: 'register.company.form.billing.zip'"></label>
+            <label class="form-label tip" data-bind="ltext: 'register.company.form.billing.zip'"></label>
             <input class="form-input text" data-bind="value: zip" data-test-id="register-company-zip" type="text" maxlength="5"/>
           </div>
 
           <div class="form-entry">
-            <label class="form-label" data-bind="ltext: 'register.company.form.billing.po'"></label>
+            <label class="form-label tip" data-bind="ltext: 'register.company.form.billing.po'"></label>
             <input class="form-input text" data-bind="value: po" data-test-id="register-company-po" type="text" maxlength="64"/>
           </div>
 
@@ -94,6 +94,12 @@
             <input class="form-input text"
                    data-bind="textInput: email, attr: {readonly: lupapisteApp.models.currentUser}"
                    data-test-id="register-company-email" type="text" placeholder="etu.suku@yritys.fi" maxlength="255"/>
+          </div>
+          <div class="form-entry">
+            <label class="form-label tip" data-bind="ltext: 'register.company.form.personId'"></label>
+            <input class="form-input text"
+                   data-bind="textInput: personId, attr: {readonly: lupapisteApp.models.currentUser}"
+                   data-test-id="register-company-personId" type="text" placeholder="112233-123A" maxlength="11"/>
           </div>
         </div>
 

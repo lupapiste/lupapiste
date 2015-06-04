@@ -1,2 +1,1 @@
-register.company.sign.download-contract: Lataa sopimus-PDF luettavaksi
-register.company.sign.terms-accepted: Olen lukenut ja hyväksynyt sopimusehdot
+error.no-proper-applicants-found-from-previous-permit: Noudettavalla luvalla olevien hakijoiden tiedot ovat puutteelliset tiedot

@@ -70,19 +70,19 @@
 
           <div class="form-entry">
             <label data-bind="ltext: 'userinfo.street'" for="street"
-              class="form-label"></label> <input
+              class="form-label tip"></label> <input
               data-bind="textInput: street, attr: {placeholder: loc('userinfo.street')}"
               id="street" type="text" class="form-input" maxlength="255"></input>
           </div>
           <div class="form-entry">
             <label data-bind="ltext: 'userinfo.zip'" for="zip"
-              class="form-label"></label> <input
+              class="form-label tip"></label> <input
               data-bind="textInput: zip, attr: {placeholder: loc('userinfo.zip')}"
               id="zip" type="text" class="form-input" maxlength="5"></input>
           </div>
           <div class="form-entry">
             <label data-bind="ltext: 'userinfo.city'" for="city"
-              class="form-label"></label> <input
+              class="form-label tip"></label> <input
               data-bind="textInput: city, attr: {placeholder: loc('userinfo.city')}"
               id="city" type="text" class="form-input" maxlength="255"></input>
           </div>
@@ -113,9 +113,14 @@
 
             <div data-bind="visible: companyLoaded">
               <label data-bind="ltext: 'userInfo.company.name'" class="form-label"></label>
-              <span data-bind="text: company.name" class="form-input"></span>
+              <span data-bind="text: company.name" class="form-input" data-test-id="my-company-name"></span>
               <label data-bind="ltext: 'userInfo.company.y'" class="form-label"></label>
-              <span data-bind="text: company.y" class="form-input"></span>
+              <span data-bind="text: company.y" class="form-input" data-test-id="my-company-id"></span>
+
+              <label data-bind="ltext: 'userInfo.company.contract'" class="form-label"></label>
+              <div data-bind="if: company.document()">
+                <a data-bind="text: company.document, attr: {href: company.document}" target="_blank"></a>
+              </div>
 
               <button data-bind="click: editCompany, ltext: 'mypage.companyAccount.editInfo'" class="btn btn-primary" data-test-id="company-edit-info"></button>
               <button data-bind="click: editUsers, ltext: 'mypage.companyAccount.editUsers'" class="btn btn-primary" data-test-id="company-edit-users"></button>
@@ -150,7 +155,7 @@
               <input data-bind="value: fise" id="architect.fise" type="text" class="form-input" maxlength="255"></input>
             </div>
 
-            <div class="form-entry clear">
+            <div class="form-entry clear" data-bind="visible: lupapisteApp.models.globalAuthModel.ok('add-user-attachment-allowed')">
               <div data-bind="visible: !hasAttachments(), ltext: 'userinfo.architect.attachments.no-attachments'"></div>
               <table data-bind="visible: hasAttachments" class="architect-attachments">
                 <thead>

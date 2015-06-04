@@ -134,7 +134,6 @@
                                                         :id "5073c0a1c2e6c470aef589a5"
                                                         :lastName "Nieminen"
                                                         :phone "0505503171"
-                                                        :postalCode "33200"
                                                         :role "applicant"
                                                         :street "Mutakatu 7"
                                                         :username "teppo@example.com"
@@ -148,11 +147,11 @@
                 :phone "0505503171"
                 :architect true
                 :allowDirectMarketing true
-                :degree "d"
-                :graduatingYear 2000
+                :degree "kirvesmies"
+                :graduatingYear "2000"
                 :fise "f"
                 :companyName "cn"
-                :companyId "cid"}]
+                :companyId "1060155-5"}]
       (apply command teppo :update-user (flatten (seq data))) => ok?
       (query teppo :user) => (contains {:user (contains data)}))))
 

@@ -9,7 +9,7 @@ LUPAPISTE.createTaskController = new (function() {
   self.taskType = ko.observable(null);
   self.taskTypes = ko.observable([]);
   self.disabled = ko.computed(function() {
-    return !self.taskType();
+    return !self.taskType() || !self.taskName();
   });
 
   self.reset = function(id, source) {

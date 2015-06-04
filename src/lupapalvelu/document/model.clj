@@ -59,27 +59,13 @@
     (not (string? v)) [:err "illegal-value:not-a-string"]
     (> (.length v) (or (:max-len elem) default-max-len)) [:err "illegal-value:too-long"]
     (and
-      (> (.length v) 0)
-      (< (.length v) (or (:min-len elem) 0))) [:warn "illegal-value:too-short"]))
-
-(defn- validate-hetu-date [hetu]
-  (let [dateparsts (rest (re-find #"^(\d{2})(\d{2})(\d{2})([aA+-]).*" hetu))
-        yy (last (butlast dateparsts))
-        yyyy (str (case (last dateparsts) "+" "18" "-" "19" "20") yy)
-        basic-date (str yyyy (second dateparsts) (first dateparsts))]
-    (try
-      (timeformat/parse (timeformat/formatters :basic-date) basic-date)
-      nil
-      (catch Exception e
-        [:err "illegal-hetu"]))))
-
-(defn- validate-hetu-checksum [hetu]
-  (when (not= (subs hetu 10 11) (util/hetu-checksum hetu)) [:err "illegal-hetu"]))
+(> (.length v) 0)
+(< (.length v) (or (:min-len elem) 0))) [:warn "illegal-value:too-short"]))
 
 (defmethod validate-field :hetu [_ _ v]
   (cond
     (ss/blank? v) nil
-    (re-matches #"^(0[1-9]|[12]\d|3[01])(0[1-9]|1[0-2])([5-9]\d\+|\d\d-|\d\dA)\d{3}[\dA-Y]$" v) (or (validate-hetu-date v) (validate-hetu-checksum v))
+    (re-matches util/finnish-hetu-regex v) (when-not (util/valid-hetu? v) [:err "illegal-hetu"])
     :else [:err "illegal-hetu"]))
 
 (defmethod validate-field :checkbox [_ _ v]
@@ -161,12 +147,6 @@
         (find-by-name (:body elem) ks)))))
 
 (defn- resolve-element-loc-key [info element path]
-  ;;
-  ;; TODO: Loytyyko talle lokalisaation etsinnalle parempaa logiikkaa?
-  ;; Esimerkiksi: (= 0 (.indexOf (lupapalvelu.i18n.localize lupapalvelu.i18n.*lang* loc-key) "???")) => group loc, muuten standard?
-  ;; Ainakin select-tyyppisten elementtien lokalisaatioavaimet ovat "._group_label"-loppuisia.
-  ;; Kts. docModel.js:n funktiot "makeLabel" ja "locKeyFromPath".
-  ;;
   (let [loc-key (str (-> info :document :locKey) "." (join "." (map name path)))]
     (if (:i18nkey element)
       (:i18nkey element)
@@ -244,6 +224,7 @@
   ([application document]
     (validate application document nil))
   ([application document schema]
+    {:pre [(map? application) (map? document)]}
     (let [data (:data document)
           schema (or schema (get-document-schema document))
           document-loc-key (or (-> schema :info :i18name) (-> schema :info :name))
@@ -406,7 +387,7 @@
                       (if (pred element v)
                         [k (emitter v)]
                         (when v
-                          (if (not= (keyword type) :group)  ;TODO: does this work with tables?
+                          (if (not= (keyword type) :group)  ;TODO: does this work with tables? TDD
                             [k v]
                             [k (if repeating
                                  (into {} (map (fn [k2] [k2 (doc-walk body (conj current-path k2))]) (keys v)))
@@ -450,6 +431,11 @@
   (let [mask-if (fn [{type :type} {hetu :value}] (and (= (keyword type) :hetu) hetu (pos? (count hetu))))
         do-mask (fn [{hetu :value :as v}] (assoc v :value (str "******" (ss/substring hetu 6 11))))]
     (convert-document-data mask-if do-mask document initial-path)))
+
+(defn without-user-id
+  "Removes userIds from the document."
+  [doc]
+  (util/postwalk-map (fn [m] (dissoc m :userId)) doc))
 
 (defn has-hetu?
   ([schema]

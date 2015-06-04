@@ -5,6 +5,7 @@
             [sade.core :refer [fail]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.tools :as tools]
+            [lupapalvelu.document.schemas :as schema]
             [monger.operators :refer :all]))
 
 (defn other-project-document [application timestamp]
@@ -31,9 +32,9 @@
                        (get-foreman-hetu foreman-application)
                        foreman-hetu)]
     (when-not (ss/blank? foreman-hetu)
-      (mongo/select :applications {"operations.name" "tyonjohtajan-nimeaminen-v2"
-                                   :documents        {$elemMatch {"schema-info.name"              "tyonjohtaja-v2"
-                                                                  "data.henkilotiedot.hetu.value" foreman-hetu}}}))))
+      (mongo/select :applications {"primaryOperation.name" "tyonjohtajan-nimeaminen-v2"
+                                   :documents {$elemMatch {"schema-info.name"              "tyonjohtaja-v2"
+                                                           "data.henkilotiedot.hetu.value" foreman-hetu}}}))))
 
 (defn get-foreman-project-applications
   "Based on the passed foreman application, fetches all project applications that have the same foreman as in
@@ -87,9 +88,10 @@
     (map (partial get-history-data-from-app links) foreman-apps)))
 
 (defn- reduce-to-highlights [history-group]
-  (let [history-group (sort-by :created history-group)]
+  (let [history-group (sort-by :created history-group)
+        difficulty-values (vec (map :name (:body schema/patevyysvaatimusluokka)))]
     (reduce (fn [highlights group]
-              (if (pos? (util/compare-difficulty (first highlights) group))
+              (if (pos? (util/compare-difficulty :difficulty difficulty-values (first highlights) group))
                 (cons group highlights)
                 highlights))
             nil
@@ -104,4 +106,4 @@
   (-> (select-keys application [:id :state :auth :documents])
       (update-in [:documents] (fn [docs] (filter #(= (get-in % [:schema-info :name]) "tyonjohtaja-v2") docs)))))
 
-(defn foreman-app? [application] (= :tyonjohtajan-nimeaminen-v2 (-> application :operations first :name keyword)))
+(defn foreman-app? [application] (= :tyonjohtajan-nimeaminen-v2 (-> application :primaryOperation :name keyword)))

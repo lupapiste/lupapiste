@@ -18,9 +18,8 @@ Mikko creates an info request to Loppi
   Wait Until  Title Should Be  ${appname} - Lupapiste
 
 Email is sent to Loppi rakennusvalvonta
-  Go to last email
-  ${subject}=  Execute Javascript  return document.getElementById("subject").innerHTML
-  Should Be Equal  ${subject}  Lupapiste.fi: ${appname} - Neuvontapyyntö
+  Open last email
+  Wait until     Element Text Should Be  xpath=//dd[@data-test-id='subject']  Lupapiste.fi: ${appname} - Neuvontapyyntö
 
 Loppi auth clicks the link in email
   Execute Javascript  document.getElementsByTagName("a")[0].click()

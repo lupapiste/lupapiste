@@ -15,9 +15,9 @@
       name:         ko.observable(undefined).extend({required: true, maxLength: 64}),
       y:            ko.observable("").extend({required: true, y: true}),
       reference:    ko.observable(""),
-      address1:     ko.observable(""),
-      po:           ko.observable(""),
-      zip:          ko.observable("").extend({number: true, maxLength: 5}),
+      address1:     ko.observable("").extend({required: true}),
+      po:           ko.observable("").extend({required: true}),
+      zip:          ko.observable("").extend({required: true, number: true, maxLength: 5}),
       country:      ko.observable(""),
       ovt:          ko.observable("").extend({ovt: true}),
       pop:          ko.observable(""),
@@ -25,13 +25,14 @@
       firstName:    ko.observable("").extend({required: true}),
       lastName:     ko.observable("").extend({required: true}),
       email:        ko.observable("").extend({required: true, email: true,
-                                              usernameAsync: self.userNotLoggedIn})
+                                              usernameAsync: self.userNotLoggedIn}),
+      personId:     ko.observable("").extend({required: true, personId: true})
     });
 
     self.accountFieldNames = ["accountType"];
     self.companyFieldNames = ["name", "y", "reference", "address1", "po", "zip", "country", "ovt", "pop"];
     self.companyFields = self.companyFieldNames.concat(self.accountFieldNames);
-    self.signerFieldNames = ["firstName", "lastName", "email"];
+    self.signerFieldNames = ["firstName", "lastName", "email", "personId"];
 
     self.stateInfo  = 0;
     self.stateReady = 1;
@@ -95,7 +96,7 @@
     if (!this.userNotLoggedIn()) {
       signer.currentUser = lupapisteApp.models.currentUser.id();
     }
-    
+
     hub.send("company-info-submitted", {company: company, signer: signer});
 
     window.location.hash = "!/register-company-signing";
@@ -115,7 +116,7 @@
       .command("cancel-sign", {processId: this.processId()})
       .call();
     this.clearModel();
-    window.location.hash = "!/login";
+    window.location.hash = "!/register";
   };
 
   var companyRegistration = new CompanyRegistration();

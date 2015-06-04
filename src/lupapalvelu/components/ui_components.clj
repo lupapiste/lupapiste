@@ -13,7 +13,8 @@
             [lupapalvelu.attachment :refer [attachment-types-osapuoli, attachment-scales, attachment-sizes]]
             [lupapalvelu.company :as company]
             [lupapalvelu.stamper :refer [file-types]]
-            [scss-compiler.core :as scss]))
+            [scss-compiler.core :as scss]
+            [me.raynes.fs :as fs]))
 
 (def debugjs {:depends [:jquery]
               :js ["debug.js"]
@@ -26,6 +27,7 @@
 (defn- conf []
   (let [js-conf {:maps                  (env/value :maps)
                  :analytics             (env/value :analytics)
+                 :frontpage             (env/value :frontpage)
                  :fileExtensions        mime/allowed-extensions
                  :passwordMinLength     (env/value :password :minlength)
                  :mode                  env/mode
@@ -58,6 +60,32 @@
   (if-let [main-css-file (io/resource (c/path css-file-path))]
     (slurp main-css-file)
     (scss/scss->css (.getPath (-> scss-file-path c/path io/resource)))))
+
+(defn- read-component-list-from-fs [component pattern]
+  (let [path (str "resources/private/" (name component))
+        files (me.raynes.fs/find-files path (re-pattern pattern))
+        mapped-files (map #(->> % .getPath (re-matches (re-pattern (str "^.*/" path "/(.*)"))) last) files)]
+    mapped-files))
+
+(defn- in-jar?
+  [jar]
+  (re-find (re-pattern ".jar$") jar))
+
+(defn- read-component-list-from-jar [jar component pattern]
+  (let [path (str "private/" (name component))
+        files (util/list-jar jar path)
+        filtered-files (filter #(re-find (re-pattern pattern) %) files)]
+    filtered-files))
+
+;; TODO build fails on CI for lupapalvelu.main is not found
+#_(defn- get-ui-components [component type]
+  (let [jar (util/this-jar lupapalvelu.main)
+        pattern (case type
+                  :models ".*-model.js$"
+                  :templates ".*-template.html$")]
+    (if (in-jar? jar)
+      (read-component-list-from-jar jar component pattern)
+      (read-component-list-from-fs component pattern))))
 
 (def ui-components
   {;; 3rd party libs
@@ -249,8 +277,9 @@
    :integration-error {:js [ "integration-error.js"]
                        :html ["integration-error.html"]}
 
-   ; TODO maybe just find and add all ko components under ui-components automatically
    :ui-components {:depends [:common-html]
+                   ;:js (distinct (conj (get-ui-components :ui-components :models) "ui-components.js" "input-model.js"))
+                   ;:html (get-ui-components :ui-components :templates)
                    :js ["ui-components.js"
                         "fill-info/fill-info-model.js"
                         "foreman-history/foreman-history-model.js"

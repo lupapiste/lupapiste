@@ -73,7 +73,8 @@
     self.company = {
       id:    ko.observable(),
       name:  ko.observable(),
-      y:     ko.observable()
+      y:     ko.observable(),
+      document: ko.observable()
     };
 
     self.companyShow = ko.observable();
@@ -93,7 +94,9 @@
         ajax
           .query("company", {company: u.company.id})
           .pending(self.companyLoading)
-          .success(function(data) { self.company.id(data.company.id).name(data.company.name).y(data.company.y); })
+          .success(function(data) {
+            ko.mapping.fromJS(data.company, {}, self.company);
+          })
           .call();
       } else {
         self

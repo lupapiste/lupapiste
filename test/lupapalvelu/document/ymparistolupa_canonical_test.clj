@@ -44,7 +44,8 @@
                   :neighbors []
                   :modified 1391415696674
                   :municipality "638"
-                  :operations [{:id "abba1" :name "yl-uusi-toiminta" :created 1391415025497}]
+                  :primaryOperation {:id "abba1" :name "yl-uusi-toiminta" :created 1391415025497}
+                  :secondaryOperations []
                   :openInfoRequest false
                   :opened 1391415025497
                   :organization "638-R"

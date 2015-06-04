@@ -53,7 +53,8 @@
                                :address "Hirvim\u00e4entie 112",
                                :location location,
                                :attachments [],
-                               :operations [operation],
+                               :primaryOperation operation,
+                               :secondaryOperations [],
                                :propertyId "75342300010054",
                                :documents documents,
                                :neighbors [],
@@ -284,9 +285,10 @@
      :title "Start_ready_app_1398343043"
      :started 1527897600000
      :closed 1530489600000
-     :operations [{:id "535905834206f413319be7f3"
-                   :name "ya-katulupa-vesi-ja-viemarityot"
-                   :created 1398343043267}]
+     :primaryOperation {:id "535905834206f413319be7f3"
+                        :name "ya-katulupa-vesi-ja-viemarityot"
+                        :created 1398343043267}
+     :secondaryOperations []
      :infoRequest false
      :openInfoRequest false
      :opened 1398343043267

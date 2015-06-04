@@ -187,7 +187,7 @@
       (if (non-local? paths)
        (response/status 400 (response/content-type "text/plain" "invalid return paths"))
        (do
-         (mongo/update-one-and-return :vetuma {:sessionid sessionid :trid trid} {:sessionid sessionid :paths paths :trid trid :created-at (java.util.Date.)} :upsert true)
+         (mongo/update :vetuma {:sessionid sessionid :trid trid} {:sessionid sessionid :paths paths :trid trid :created-at (java.util.Date.)} :upsert true)
          (html
            (form/form-to [:post (:url (config))]
              (map field vetuma-request)
