@@ -18,7 +18,8 @@
 (defcommand create-foreman-application
   {:parameters [id taskId foremanRole]
    :user-roles #{:applicant :authority}
-   :states action/all-application-states}
+   :states action/all-application-states
+   :pre-checks [application/validate-authority-in-drafts]}
   [{:keys [created user application] :as command}]
   (let [original-open? (util/pos? (:opened application))
         foreman-app (-> (application/do-create-application
