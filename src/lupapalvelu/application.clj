@@ -121,7 +121,7 @@
       result)))
 
 (defn- process-foreman-v2 [application]
-  (if (= (-> application :primary :name) "tyonjohtajan-nimeaminen-v2")
+  (if (= (-> application :primaryOperation :name) "tyonjohtajan-nimeaminen-v2")
     (assoc application :submittable (foreman-submittable? application))
     application))
 
