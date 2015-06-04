@@ -1,1 +1,0 @@
-error.no-proper-applicants-found-from-previous-permit: Noudettavalla luvalla olevien hakijoiden tiedot ovat puutteelliset tiedot
