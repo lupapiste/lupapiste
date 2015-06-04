@@ -167,13 +167,13 @@
   (defn fix-prev-permit-addresses []
     (let [operation :aiemmalla-luvalla-hakeminen]
       (doseq [collection  [:applications :submitted-applications]
-              {:keys [id permit-type verdicts organization address]} (mongo/select collection {"operations.name" operation})]
-        (let [kuntalupatunnus   (get-in verdicts [first :kuntalupatunnus])
-              dummy-application {:id kuntalupatunnus :permitType permit-type :organization organization}
+              {:keys [id permitType verdicts organization address]} (mongo/select collection {"operations.name" operation})]
+        (let [kuntalupatunnus   (get-in verdicts [0 :kuntalupatunnus])
+              dummy-application {:id kuntalupatunnus :permitType permitType :organization organization}
               xml               (krysp-fetch-api/get-application-xml dummy-application :kuntalupatunnus)
               app-info          (krysp-reader/get-app-info-from-message xml kuntalupatunnus)
-              correct-address   (:address app-info)]
+              correct-address   (get-in app-info [:rakennuspaikka :address])]
           (when-not (= correct-address address)
             (mongo/update-by-id collection id
-                              {$set {:address correct-address
-                                     :title   correct-address}})))))))
+                                {$set {:address correct-address
+                                       :title   correct-address}})))))))
