@@ -1,5 +1,6 @@
 (ns lupapalvelu.prev-permit
   (:require [taoensso.timbre :refer [debug info]]
+            [monger.operators :refer :all]
             [sade.core :refer :all]
             [sade.strings :as ss]
             [sade.util :as util]
@@ -17,7 +18,8 @@
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch-api]
-            [lupapalvelu.organization :as organization]))
+            [lupapalvelu.organization :as organization]
+            [lupapalvelu.mongo :as mongo]))
 
 (defn- get-applicant-email [applicant]
   (-> (or
@@ -133,7 +135,7 @@
 (defn- get-location-info [{data :data :as command} app-info]
   (when app-info
     (let [rakennuspaikka-exists? (and (:rakennuspaikka app-info)
-                                   (every? (-> app-info :rakennuspaikka keys set) [:x :y :address :propertyId]))
+                                      (every? (-> app-info :rakennuspaikka keys set) [:x :y :address :propertyId]))
           location-info          (cond
                                    rakennuspaikka-exists?                          (:rakennuspaikka app-info)
                                    (enough-location-info-from-parameters? command) (select-keys data [:x :y :address :propertyId]))]
@@ -160,3 +162,18 @@
       (not location-info)          (fail :error.more-prev-app-info-needed :needMorePrevPermitInfo true)
       no-proper-applicants?        (fail :error.no-proper-applicants-found-from-previous-permit)
       :else                        (ok :id (do-create-application-from-previous-permit command operation xml app-info location-info)))))
+
+(comment
+  (defn fix-prev-permit-addresses []
+    (let [operation :aiemmalla-luvalla-hakeminen]
+      (doseq [collection  [:applications :submitted-applications]
+              {:keys [id permit-type verdicts organization address]} (mongo/select collection {"operations.name" operation})]
+        (let [kuntalupatunnus   (get-in verdicts [first :kuntalupatunnus])
+              dummy-application {:id kuntalupatunnus :permitType permit-type :organization organization}
+              xml               (krysp-fetch-api/get-application-xml dummy-application :kuntalupatunnus)
+              app-info          (krysp-reader/get-app-info-from-message xml kuntalupatunnus)
+              correct-address   (:address app-info)]
+          (when-not (= correct-address address)
+            (mongo/update-by-id collection id
+                              {$set {:address correct-address
+                                     :title   correct-address}})))))))
