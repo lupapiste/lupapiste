@@ -121,7 +121,6 @@
 (def port (read-value (get-prop "lupapiste.port" "8000")))
 (def log-level (keyword (get-prop "lupapiste.loglevel" "debug")))
 (def log-dir (get-prop "lupapiste.logdir" (if (= mode :dev) "target" ".")))
-(def perf-mon-on (read-value (str (get-prop "lupapiste.perfmon" "false"))))
 (defonce proxy-off (atom (read-value (str (get-prop "lupapiste.proxy-off" "false")))))
 
 (defn dev-mode? []
