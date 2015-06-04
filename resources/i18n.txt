@@ -1,0 +1,6 @@
+error.no-proper-applicants-found-from-previous-permit: Noudettavalla luvalla olevien hakijoiden tiedot ovat puutteelliset tiedot
+
+archive.valid-format: Arkistokelpoinen
+attachment.missing-fonts: Seuraavat kirjasintyypit täytyy sisällyttää asiakirjaan arkistointia varten
+attachment.valid-pdfa: Validi PDF/A-tiedosto
+attachment.invalid-pdfa: Tiedosto ei ole validia PDF/A-muotoa
