@@ -509,6 +509,33 @@
         (coordinate/convert source-projection to-projection 3 coords)))
     (catch Exception e (error e "Coordinate conversion failed for kuntalupatunnus " kuntalupatunnus))))
 
+
+(defn- extract-osoitenimi [osoitenimi-elem lang]
+  (let [osoitenimi-elem (or (select1 osoitenimi-elem [(enlive/attr= :xml:lang lang)])
+                            (select1 osoitenimi-elem [(enlive/attr= :xml:lang "fi")]))]
+    (cr/all-of osoitenimi-elem)))
+
+(defn- build-huoneisto [huoneisto jakokirjain jakokirjain2]
+  (when huoneisto
+    (str huoneisto
+         (cond
+           (and jakokirjain jakokirjain2) (str jakokirjain "-" jakokirjain2)
+           :else jakokirjain))))
+
+(defn- build-osoitenumero [osoitenumero osoitenumero2]
+  (cond
+    (and osoitenumero osoitenumero2) (str osoitenumero "-" osoitenumero2)
+    :else osoitenumero))
+
+(defn- build-address [osoite-elem lang]
+  (let [osoitenimi        (extract-osoitenimi (select osoite-elem [:osoitenimi :teksti]) lang)
+        osoite            (cr/all-of osoite-elem)
+        osoite-components [osoitenimi
+                           (apply build-osoitenumero (util/select-values osoite [:osoitenumero :osoitenumero2]))
+                           (:porras osoite)
+                           (apply build-huoneisto (util/select-values osoite [:huoneisto :jakokirjain :jakokirjain2]))]]
+    (clojure.string/join " " (remove nil? osoite-components))))
+
 ;;
 ;; Information parsed from verdict xml message for application creation
 ;;
@@ -549,9 +576,10 @@
 
             ;; Rakennuspaikka
             Rakennuspaikka (cr/all-of asia [:rakennuspaikkatieto :Rakennuspaikka])
-            osoitteet-xml (select asia [:rakennuspaikkatieto :Rakennuspaikka :osoite :osoitenimi :teksti])
-            osoite-Rakennuspaikka (or (-> (select1 osoitteet-xml [(enlive/attr= :xml:lang asioimiskieli-code)]) cr/all-of)
-                                    (-> (select1 osoitteet-xml [(enlive/attr= :xml:lang "fi")]) cr/all-of))
+
+            osoite-xml     (select asia [:rakennuspaikkatieto :Rakennuspaikka :osoite])
+            osoite-Rakennuspaikka (build-address osoite-xml asioimiskieli-code)
+
             kiinteistotunnus (-> Rakennuspaikka :rakennuspaikanKiinteistotieto :RakennuspaikanKiinteisto :kiinteistotieto :Kiinteisto :kiinteistotunnus)
             municipality (p/municipality-id-by-property-id kiinteistotunnus)
             coord-array-Rakennuspaikka (resolve-coordinates
