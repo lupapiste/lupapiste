@@ -9,7 +9,6 @@
             [sade.email :as email]
             [sade.util :as util]
             [lupapalvelu.i18n :refer [loc] :as i18n]
-            [lupapalvelu.domain :as domain]
             [lupapalvelu.user :as u]))
 
 ;;
