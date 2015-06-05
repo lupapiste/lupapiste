@@ -35,7 +35,7 @@
         (with-open [out (io/output-stream attachment-file)
                     in (content)]
             (io/copy in out))
-          (fs/chmod "rw" attachment-file))))))
+          (fs/chmod "+rw" attachment-file))))))
 
 (defn- write-application-pdf-versions [output-dir application submitted-application lang]
   (let [id (:id application)
