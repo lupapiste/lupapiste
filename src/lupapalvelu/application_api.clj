@@ -78,14 +78,6 @@
   (let [authorities (find-authorities-in-applications-organization application)]
     (ok :authorities (map #(select-keys % [:id :firstName :lastName]) authorities))))
 
-(defn filter-repeating-party-docs [schema-version schema-names]
-  (let [schemas (schemas/get-schemas schema-version)]
-    (filter
-      (fn [schema-name]
-        (let [schema-info (get-in schemas [schema-name :info])]
-          (and (:repeating schema-info) (= (:type schema-info) :party))))
-      schema-names)))
-
 (def ktj-format (tf/formatter "yyyyMMdd"))
 (def output-format (tf/formatter "dd.MM.yyyy"))
 
@@ -118,7 +110,7 @@
           (let [documents (:documents application)
                 initialOp (:name (:primaryOperation application))
                 original-schema-names (-> initialOp keyword operations/operations :required)
-                original-party-documents (filter-repeating-party-docs (:schema-version application) original-schema-names)]
+                original-party-documents (a/filter-repeating-party-docs (:schema-version application) original-schema-names)]
             (ok :partyDocumentNames (conj original-party-documents "hakija"))))
 
 (defcommand mark-seen

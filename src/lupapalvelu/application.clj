@@ -65,6 +65,14 @@
 (defn insert-application [application]
   (mongo/insert :applications (merge application (meta-fields/applicant-index application))))
 
+(defn filter-repeating-party-docs [schema-version schema-names]
+  (let [schemas (schemas/get-schemas schema-version)]
+    (filter
+      (fn [schema-name]
+        (let [schema-info (get-in schemas [schema-name :info])]
+          (and (:repeating schema-info) (= (:type schema-info) :party))))
+      schema-names)))
+
 ; Seen updates
 (def collections-to-be-seen #{"comments" "statements" "verdicts"})
 

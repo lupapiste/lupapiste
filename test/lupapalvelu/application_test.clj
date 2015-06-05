@@ -3,7 +3,6 @@
             [midje.util :refer [testable-privates]]
             [lupapalvelu.test-util :refer :all]
             [lupapalvelu.action :refer [update-application]]
-            [lupapalvelu.application-api :refer [filter-repeating-party-docs ]]
             [lupapalvelu.application :refer :all]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.domain :as domain]
