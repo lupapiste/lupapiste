@@ -496,7 +496,7 @@
                          :change-permit-sub-type :refresh-ktj :merge-details-from-krysp :remove-link-permit-by-app-id
                          :set-attachment-type :move-attachments-to-backing-system :add-operation :remove-auth :create-doc
                          :set-company-to-document :set-user-to-document :set-current-user-to-document :approve-application
-                         :submit-application}]
+                         :submit-application :create-foreman-application}]
     app => map?
     (fact "No denied-actions in allowed-actions"
       (some denied-actions (remove nil? (map
