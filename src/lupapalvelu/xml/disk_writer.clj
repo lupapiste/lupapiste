@@ -31,9 +31,11 @@
         (do
           (info "Content for attachment file-id " file-id " is nil")
           (fail! :error.attachment.no-content))
+        (do
         (with-open [out (io/output-stream attachment-file)
                     in (content)]
-          (io/copy in out))))))
+            (io/copy in out))
+          (fs/chmod "rw" attachment-file))))))
 
 (defn- write-application-pdf-versions [output-dir application submitted-application lang]
   (let [id (:id application)
@@ -63,13 +65,16 @@
        (fail! :error.integration.send :details (.getMessage e))))
 
     (fs/mkdirs output-dir)
+
+
     (try
       (with-open [out-file-stream (io/writer tempfile)]
         (emit xml out-file-stream))
       (catch java.io.FileNotFoundException e
+        (when (fs/exists? tempfile)
+          (fs/delete tempfile))
         (error e (.getMessage e))
         (fail! :error.sftp.user.does.not.exist :details (.getMessage e))))
-
 
     (write-attachments attachments output-dir)
 
@@ -77,7 +82,8 @@
       (write-application-pdf-versions output-dir application submitted-application lang))
 
     (when (fs/exists? outfile) (fs/delete outfile))
-    (fs/rename tempfile outfile))
+    (fs/rename tempfile outfile)
+    (fs/chmod "+rw" outfile))
 
   (->>
     attachments
