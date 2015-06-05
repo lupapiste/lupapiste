@@ -9,8 +9,8 @@
       (query sonja :application :id id) => ok?
       sonja =not=> (allowed? :add-comment :id id :to irrelevant))
 
-    (fact "applicant asks for help"
-      (command pena :open-application :id id) => ok?)
+    (fact "applicant asks for help using add-comment"
+      (comment-application pena id true) => ok?)
 
     (fact "application is now in open state"
       (:state (query-application pena id)) => "open")

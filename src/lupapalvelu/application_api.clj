@@ -220,19 +220,6 @@
   (ok))
 
 
-(defcommand open-application
-  {:parameters       [id]
-   :input-validators [(partial action/non-blank-parameters [:id])]
-   :user-roles       #{:applicant :authority}
-   :notified         true
-   :on-success       (notify :application-state-change)
-   :states           [:draft]}
-  [{:keys [created] :as command}]
-  (update-application command
-                      {$set {:modified created
-                             :opened   created
-                             :state    :open}}))
-
 (defcommand request-for-complement
   {:parameters       [:id]
    :input-validators [(partial action/non-blank-parameters [:id])]
