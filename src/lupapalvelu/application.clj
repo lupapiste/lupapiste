@@ -109,7 +109,8 @@
 ;;
 
 (defn- link-permit-submitted? [link-id]
-  (util/not-empty-or-nil? (:submitted (mongo/by-id "applications" link-id [:submitted]))))
+  (-> (mongo/by-id "applications" link-id [:state])
+    :state keyword #{:submitted :sent :complement-needed :verdictGiven :constructionStarted :closed :canceled} nil? not))
 
 ; Foreman
 (defn- foreman-submittable? [application]
