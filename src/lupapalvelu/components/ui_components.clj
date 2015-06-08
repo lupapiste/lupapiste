@@ -79,7 +79,6 @@
         filtered-files (filter #(re-find (re-pattern pattern) %) files)]
     filtered-files))
 
-;; TODO build fails on CI for lupapalvelu.main is not found
 (defn- get-ui-components [component type]
   (let [jar (util/this-jar lupapalvelu.main)
         pattern (case type
