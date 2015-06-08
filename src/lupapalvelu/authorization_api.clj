@@ -154,7 +154,8 @@
   {:parameters [:id]
    :user-roles #{:applicant :authority}
    :user-authz-roles action/default-authz-reader-roles
-   :states     action/all-application-states}
+   :states     action/all-application-states
+   :pre-checks [application/validate-authority-in-drafts]}
   [command]
   (do-remove-auth command (get-in command [:user :username])))
 

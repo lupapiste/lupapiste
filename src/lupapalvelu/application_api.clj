@@ -117,7 +117,8 @@
   {:parameters       [:id type]
    :input-validators [(fn [{{type :type} :data}] (when-not (a/collections-to-be-seen type) (fail :error.unknown-type)))]
    :user-roles       #{:applicant :authority :oirAuthority}
-   :states           action/all-application-states}
+   :states           action/all-application-states
+   :pre-checks       [a/validate-authority-in-drafts]}
   [{:keys [data user created] :as command}]
   (update-application command {$set (a/mark-collection-seen-update user created type)}))
 
@@ -246,7 +247,8 @@
    :states           [:draft :open]
    :notified         true
    :on-success       (notify :application-state-change)
-   :pre-checks       [domain/validate-owner-or-write-access]}
+   :pre-checks       [domain/validate-owner-or-write-access
+                      a/validate-authority-in-drafts]}
   [{:keys [application created] :as command}]
   (or (a/validate-link-permits application)
       (do-submit command application created)))

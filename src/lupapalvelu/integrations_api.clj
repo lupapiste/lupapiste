@@ -186,7 +186,8 @@
 (defcommand get-building-info-from-wfs
   {:parameters [id]
    :user-roles #{:applicant :authority}
-   :states     (action/all-application-states-but [:sent :verdictGiven :constructionStarted :closed :canceled])}
+   :states     (action/all-application-states-but [:sent :verdictGiven :constructionStarted :closed :canceled])
+   :pre-checks [application/validate-authority-in-drafts]}
   [{{:keys [organization propertyId] :as application} :application}]
   (if-let [{url :url} (organization/get-krysp-wfs application)]
     (let [kryspxml  (krysp-reader/building-xml url propertyId)

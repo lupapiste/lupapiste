@@ -66,7 +66,8 @@
 (defcommand update-foreman-other-applications
   {:user-roles #{:applicant :authority}
    :states action/all-states
-   :parameters [:id foremanHetu]}
+   :parameters [:id foremanHetu]
+   :pre-checks [application/validate-authority-in-drafts]}
   [{application :application user :user :as command}]
   (when-let [foreman-applications (seq (foreman/get-foreman-project-applications application foremanHetu))]
     (let [other-applications (map (fn [app] (foreman/other-project-document app (:created command))) foreman-applications)
@@ -85,7 +86,8 @@
 (defcommand link-foreman-task
   {:user-roles #{:applicant :authority}
    :states action/all-states
-   :parameters [id taskId foremanAppId]}
+   :parameters [id taskId foremanAppId]
+   :pre-checks [application/validate-authority-in-drafts]}
   [{:keys [created application] :as command}]
   (let [task (util/find-by-id taskId (:tasks application))]
     (if task
