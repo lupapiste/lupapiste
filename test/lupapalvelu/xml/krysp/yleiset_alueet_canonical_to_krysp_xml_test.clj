@@ -19,7 +19,7 @@
             [lupapalvelu.domain :refer [get-document-by-name]]))
 
 (defn- do-test [application]
-  (let [operation-name-key (-> application :operations first :name keyword)
+  (let [operation-name-key (-> application :primaryOperation :name keyword)
         lupa-name-key (ya-operation-type-to-schema-name-key operation-name-key)
         canonical (application-to-canonical application "fi")
         xml-212 (yleisetalueet-element-to-xml canonical lupa-name-key "2.1.2")
@@ -42,7 +42,6 @@
 
     ;; Alla oleva tekee jo validoinnin,
     ;; mutta annetaan olla tuossa alla viela tuo validointi, jottei joku tule ja riko olemassa olevaa validointia.
-    ;; TODO: own test
     (mapping-to-krysp/save-application-as-krysp
       application "fi" application {:krysp {:YA {:ftpUser "dev_sipoo" :version "2.1.2"}}})
     (mapping-to-krysp/save-application-as-krysp

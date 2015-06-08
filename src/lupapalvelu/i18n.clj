@@ -90,7 +90,8 @@
 (def ^:dynamic *lang* nil)
 (def ^{:doc "Function that localizes provided term using the current language. Use within the \"with-lang\" block."
        :dynamic true}
-  loc)
+  loc
+  (fn [& args] (throw (Exception. (str "loc called outside with-lang context, args: " args)))))
 
 (defmacro with-lang [lang & body]
   `(binding [*lang* (keyword ~lang)

@@ -1,13 +1,14 @@
 (ns lupapalvelu.notifications
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
+            [schema.core :as sc]
             [clojure.set :as set]
             [clojure.string :as s]
             [sade.util :refer [future* to-local-date fn->]]
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.email :as email]
+            [sade.util :as util]
             [lupapalvelu.i18n :refer [loc] :as i18n]
-            [lupapalvelu.domain :as domain]
             [lupapalvelu.user :as u]))
 
 ;;
@@ -92,15 +93,34 @@
 
 (defonce ^:private mail-config (atom {}))
 
+(def Email {(sc/optional-key :template)        sc/Str
+            (sc/optional-key :subject-key)     sc/Str
+
+            ; Recipients function takes command map as parameter and
+            ; returs a sequence of recipients.
+            ; Each recipient is a map that must contain :email key,
+            ; optionally :firstName and :lastName keys (as users do).
+            (sc/optional-key :recipients-fn)   util/IFn
+
+            ; Model function takes 3 parameters: command map, configuration map given to defemail and recipient.
+            ; It must return a map, that will merged to email template.
+            (sc/optional-key :model-fn)        util/Fn
+
+            (sc/optional-key :pred-fn)         util/Fn
+            (sc/optional-key :application-fn)  util/IFn
+            (sc/optional-key :tab)             sc/Str
+            (sc/optional-key :show-municipality-in-subject) sc/Bool})
+
 ;;
 ;; Public API
 ;;
 
 (defn defemail [template-name m]
+  {:pre [(keyword? template-name) (sc/validate Email m)]}
   (swap! mail-config assoc template-name m))
 
 (defn notify! [template-name command]
-  {:pre [(template-name @mail-config)]}
+  {:pre [template-name (map? command) (template-name @mail-config)]}
   (let [conf (template-name @mail-config)]
     (when ((get conf :pred-fn (constantly true)) command)
       (let [application-fn (get conf :application-fn identity)

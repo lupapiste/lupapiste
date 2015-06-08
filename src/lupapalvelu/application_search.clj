@@ -49,7 +49,7 @@
                             :unseenComments
                             (fn [app] (if (:infoRequest app) "inforequest" "application"))
                             (juxt :address :municipality)
-                            meta-fields/get-application-operation
+                            :primaryOperation
                             :applicant
                             :submitted
                             :modified
@@ -83,7 +83,7 @@
                        {:_applicantIndex {$regex filter-search $options "i"}}]}
         ops (operation-names filter-search)]
     (if (seq ops)
-      (update-in or-query [$or] conj {:operations.name {$in ops}})
+      (update-in or-query [$or] concat [{:primaryOperation.name {$in ops}} {:secondaryOperations.name {$in ops}}])
       or-query)))
 
 (defn- make-text-query [filter-search]
@@ -160,8 +160,8 @@
      :sEcho                 echo}))
 
 
-(defn public-fields [{:keys [municipality submitted operations]}]
-  (let [op-name (-> operations first :name)]
+(defn public-fields [{:keys [municipality submitted primaryOperation]}]
+  (let [op-name (:name primaryOperation)]
     {:municipality municipality
      :timestamp submitted
      :operation (i18n/localize :fi "operations" op-name)

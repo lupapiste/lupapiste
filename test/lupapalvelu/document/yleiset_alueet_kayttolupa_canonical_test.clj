@@ -1,6 +1,7 @@
 (ns lupapalvelu.document.yleiset-alueet-kayttolupa-canonical-test
   (:require [lupapalvelu.document.yleiset-alueet-canonical-test-common :refer :all]
             [lupapalvelu.factlet :refer :all]
+            [lupapalvelu.test-util :refer [xml-datetime-is-roughly?]]
             [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
             [lupapalvelu.document.canonical-common :refer :all]
@@ -11,27 +12,27 @@
             [sade.core :refer :all]))
 
 (def- operation {:id "52380c6894a74fc25bb4ba46",
-                          :created 1379404904514,
-                          :name "ya-kayttolupa-terassit"})
+                 :created 1379404904514,
+                 :name "ya-kayttolupa-terassit"})
 
 (def- hankkeen-kuvaus {:id "52380c6894a74fc25bb4ba4a"
-                                :created 1379404904514
-                                :schema-info {:name "yleiset-alueet-hankkeen-kuvaus-kayttolupa"
-                                              :removable false
-                                              :repeating false
-                                              :version 1
-                                              :type "group"
-                                              :order 60}
-                                :data {:kayttotarkoitus {:value "Hankkeen kuvaus."}
+                       :created 1379404904514
+                       :schema-info {:name "yleiset-alueet-hankkeen-kuvaus-kayttolupa"
+                                     :removable false
+                                     :repeating false
+                                     :version 1
+                                     :type "group"
+                                     :order 60}
+                       :data {:kayttotarkoitus {:value "Hankkeen kuvaus."}
 ;                                       :sijoitusLuvanTunniste {:value "LP-753-2013-00001"}
-                                       :varattava-pinta-ala {:value "333"}}})
+                              :varattava-pinta-ala {:value "333"}}})
 
 (def- tyoaika-kayttolupa (assoc-in tyoaika [:schema-info :op] operation))
 
 (def- documents [hakija
-                          tyoaika-kayttolupa
-                          maksaja
-                          hankkeen-kuvaus])
+                 tyoaika-kayttolupa
+                 maksaja
+                 hankkeen-kuvaus])
 
 (def kayttolupa-application {:schema-version 1,
                              :id "LP-753-2013-00002",
@@ -54,7 +55,8 @@
                              :address "Latokuja 1",
                              :location location,
                              :attachments [],
-                             :operations [operation],
+                             :primaryOperation operation,
+                             :secondaryOperations [],
                              :propertyId "75341600550007",
                              :documents documents,
                              :municipality municipality,
@@ -178,7 +180,7 @@
 
     ;; Sijainti
     (fact "Sijainti-yksilointitieto" Sijainti-yksilointitieto => (:id kayttolupa-application))
-;    (fact "Sijainti-alkuHetki" Sijainti-alkuHetki => <now??>)              ;; TODO: Mita tahan?
+    (fact "Sijainti-alkuHetki" Sijainti-alkuHetki => (partial xml-datetime-is-roughly? (util/to-xml-datetime (now))))
     (fact "Sijainti-osoitenimi" Sijainti-osoitenimi => (:address kayttolupa-application))
     (fact "Sijainti-piste-xy" Sijainti-piste => (str (-> kayttolupa-application :location :x) " " (-> kayttolupa-application :location :y)))
 

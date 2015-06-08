@@ -5,7 +5,7 @@
 }
 
 .attachment-iframe{
-  height: 530px;
+  height: 570px;
   width: 600px;
   border:0;
   overflow: hidden;
@@ -262,4 +262,11 @@ td.comment-text {
     margin-bottom: $marginM;
   }
   margin-bottom: $marginL;
+}
+
+.archive-valid {
+  .icon {
+    vertical-align: middle;
+    margin-left: 5px;
+  }
 }

@@ -58,7 +58,8 @@
                             :address "Latokuja 1"
                             :location location
                             :attachments []
-                            :operations [operation]
+                            :primaryOperation operation
+                            :secondaryOperations []
                             :propertyId "75342300010054"
                             :documents documents
                             :municipality "753"

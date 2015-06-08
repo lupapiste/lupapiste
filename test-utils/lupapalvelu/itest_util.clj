@@ -153,6 +153,11 @@
   [apikey & args]
   (apply create-app-with-fn command apikey args))
 
+
+;;
+;; Test predicates
+;;
+
 (defn success [resp]
   (fact (:text resp) => nil)
   (:ok resp))
@@ -162,10 +167,6 @@
     (= status 403)
     (= (:ok body) false)
     (= (:text body) "error.invalid-csrf-token")))
-
-;;
-;; Test predicates: TODO: comment test, add facts to get real cause
-;;
 
 (fact "invalid-csrf-token?"
   (invalid-csrf-token? {:status 403 :body {:ok false :text "error.invalid-csrf-token"}}) => true
@@ -261,7 +262,8 @@
             (contains? % :permitSubtype)
             (contains? % :infoRequest)
             (contains? % :openInfoRequest)
-            (:operations %)
+            (:primaryOperation %)
+            (:secondaryOperations %)
             (:state %)
             (:municipality %)
             (:location %)

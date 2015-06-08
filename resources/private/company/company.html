@@ -53,19 +53,19 @@
             </div>
 
             <div class="form-entry">
-              <label class="form-label" data-bind="ltext: 'register.company.form.billing.address'"></label>
+              <label class="form-label tip" data-bind="ltext: 'register.company.form.billing.address'"></label>
               <input class="form-input text" data-bind="textInput: model().address1, enable: edit" type="text" maxlength="64"/>
             </div>
 
             <br/>
 
             <div class="form-entry">
-              <label class="form-label" data-bind="ltext: 'register.company.form.billing.zip'"></label>
+              <label class="form-label tip" data-bind="ltext: 'register.company.form.billing.zip'"></label>
               <input class="form-input text" data-bind="textInput: model().zip, enable: edit" type="text" maxlength="5"/>
             </div>
 
             <div class="form-entry">
-              <label class="form-label" data-bind="ltext: 'register.company.form.billing.po'"></label>
+              <label class="form-label tip" data-bind="ltext: 'register.company.form.billing.po'"></label>
               <input class="form-input text" data-bind="textInput: model().po, enable: edit" type="text" maxlength="64"/>
             </div>
 
@@ -81,17 +81,17 @@
               <input class="form-input text" data-bind="textInput: model().ovt, enable: edit" type="text" maxlength="17"/>
             </div>
 
-            <div class="form-entry">
+            <div class="form-entry" data-test-id="company-pop">
               <span data-bind="component: {name: 'invoice-operator-selector', params: {selected: model().pop, enabled: edit}}"></span>
             </div>
 
             <div>
-              <button data-bind="enable: canStartEdit, click: startEdit, ltext: 'edit'" type="button" class="btn btn-primary"></button>
-              <button data-bind="enable: canSubmit, click: submit" type="submit" class="btn btn-primary">
+              <button data-bind="enable: canStartEdit, click: startEdit, ltext: 'edit'" type="button" class="btn btn-primary" data-test-id="company-details-edit"></button>
+              <button data-bind="enable: canSubmit, click: submit" type="submit" class="btn btn-primary" data-test-id="company-details-save">
                 <span data-bind="ltext: 'save'"></span>
                 <em data-bind="visible: $parent.pending" class="button-loader"></em>
               </button>
-              <button data-bind="enable: edit, click: cancelEdit, ltext: 'cancel'" type="button" class="btn"></button>
+              <button data-bind="enable: edit, click: cancelEdit, ltext: 'cancel'" type="button" class="btn" data-test-id="company-details-cancel"></button>
             </div>
 
           </div>
@@ -114,12 +114,12 @@
               </tr>
             </thead>
             <tbody data-bind="foreach: invitations">
-              <tr>
+              <tr data-bind="attr: {'data-test-id': 'company-user-' + email}">
                 <td data-bind="text: firstName"></td>
                 <td data-bind="text: lastName"></td>
                 <td data-bind="text: email" data-test-id="company-invited-user-email"></td>
-                <td data-bind="ltext: 'company.user.invited'"></td>
-                <td data-bind="ltext: 'company.user.role.' + role"></td>
+                <td data-bind="ltext: 'company.user.invited'" data-test-id="company-user-invited"></td>
+                <td data-bind="ltext: 'company.user.role.' + role" data-test-id="company-user-role"></td>
                 <td>
                   <div data-bind="visible: opsEnabled">
                     <a href="#" data-bind="click: deleteInvitation, ltext: 'company.user.op.delete.invitation'"></a>
@@ -131,13 +131,12 @@
                 <td data-bind="text: firstName"></td>
                 <td data-bind="text: lastName"></td>
                 <td data-bind="text: email"></td>
-                <td data-bind="ltext: 'company.user.enabled.' + enabled()"></td>
+                <td data-bind="ltext: 'company.user.enabled.' + enabled()" data-test-id="company-user-invited"></td>
                 <td data-bind="ltext: 'company.user.role.' + role()" data-test-id="company-user-role"></td>
                 <td data-bind="visible: $parent.isAdmin">
                   <div data-bind="visible: opsEnabled">
-                    <a data-bind="click: toggleEnable, ltext: 'company.user.op.enabled.' + enabled()" href="#"></a>
-                    <a data-bind="click: toggleAdmin,  ltext: 'company.user.op.admin.' + admin()" href="#"></a>
-                    <a data-bind="click: deleteUser,   ltext: 'company.user.op.delete'" href="#"></a>
+                    <a data-bind="click: toggleAdmin,  ltext: 'company.user.op.admin.' + admin()" href="#" data-test-id="company-user-toggle-admin"></a>
+                    <a data-bind="click: deleteUser,   ltext: 'company.user.op.delete'" href="#" data-test-id="company-user-toggle-delete"></a>
                   </div>
                 </td>
               </tr>
@@ -177,7 +176,7 @@
                            enable: !pending(),
                            ltext: 'yes'"
                 class="btn btn-primary btn-dialog"
-                data-test-id="dialog-company-user-op.ok">
+                data-test-id="confirm-yes">
         </button>
         <button data-test-id="company-new-user-close-dialog"
                 data-bind="enable: !pending(),
@@ -209,7 +208,7 @@
 
         <div data-bind="visible: showUserInCompany">
           <span data-bind="ltext: 'register.company.add-user.already-in'"></span>
-            <button data-bind="ltext: 'ok'" class="btn btn-dialog close"></button>
+            <button data-bind="ltext: 'ok'" class="btn btn-dialog close" data-test-id="company-add-user-already-in-close"></button>
           </div>
 
         <div data-bind="visible: showUserAlreadyInvited">
@@ -218,10 +217,10 @@
         </div>
 
         <div data-bind="visible: showUserInvited">
-          <h3 data-bind="ltext: 'register.company.add-user.done.header'"></h3>
+          <h3 data-bind="ltext: 'register.company.add-user.done.header'" data-test-id="company-old-user-invited"></h3>
           <p data-bind="ltext: 'register.company.add-user.done.message'"></p>
           <p data-bind="ltext: 'register.company.add-user.done.canClose'"></p>
-          <button data-bind="ltext: 'ok'" class="btn btn-dialog close"></button>
+          <button data-bind="ltext: 'ok'" class="btn btn-dialog close" data-test-id="company-old-user-invited-close-dialog"></button>
         </div>
 
         <form data-bind="visible: showUserDetails" id="companyUserDetails">

@@ -410,7 +410,7 @@ var attachment = (function() {
     model.signatures(attachment.signatures || []);
     model.filename(attachment.filename);
     model.type(attachment.type);
-    model.selectableOperations(application.operations);
+    model.selectableOperations(application.allOperations);
     model.operation(attachment.op);
     model.selectedOperationId(attachment.op ? attachment.op.id : undefined);
     model.contents(attachment.contents);

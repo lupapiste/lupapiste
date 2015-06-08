@@ -45,37 +45,10 @@
                         {:subject-key    "state-change"
                          :application-fn (fn [{id :id}] (domain/get-application-no-access-checking id))})
 
-;; Validators
-
-(defn- property-id? [^String s]
-  (and s (re-matches #"^[0-9]{14}$" s)))
-
-(defn property-id-parameters [params command]
-  (when-let [invalid (seq (filter #(not (property-id? (get-in command [:data %]))) params))]
-    (info "invalid property id parameters:" (s/join ", " invalid))
-    (fail :error.invalid-property-id :parameters (vec invalid))))
-
-(defn- validate-x [{{:keys [x]} :data}]
-  (when (and x (not (< 10000 (util/->double x) 800000)))
-    (fail :error.illegal-coordinates)))
-
-(defn- validate-y [{{:keys [y]} :data}]
-  (when (and y (not (<= 6610000 (util/->double y) 7779999)))
-    (fail :error.illegal-coordinates)))
-
-
-(defn- is-link-permit-required [application]
-  (or (= :muutoslupa (keyword (:permitSubtype application)))
-      (some #(operations/link-permit-required-operations (keyword (:name %))) (:operations application))))
-
-(defn validate-link-permits [application]
-  (let [application (meta-fields/enrich-with-link-permit-data application)
-        linkPermits (-> application :linkPermitData count)]
-    (when (and (is-link-permit-required application) (zero? linkPermits))
-      (fail :error.permit-must-have-link-permit))))
-
-
 ;; Helpers
+
+(defn get-operations [application]
+  (remove nil? (conj (seq (:secondaryOperations application)) (:primaryOperation application))))
 
 (defn insert-application [application]
   (mongo/insert :applications (merge application (meta-fields/applicant-index application))))
@@ -97,6 +70,35 @@
   (when-let [link (some #(when (= (:type %) "lupapistetunnus") %) linkPermitData)]
     (domain/get-application-no-access-checking (:id link))))
 
+;; Validators
+
+(defn- property-id? [^String s]
+  (and s (re-matches #"^[0-9]{14}$" s)))
+
+(defn property-id-parameters [params command]
+  (when-let [invalid (seq (filter #(not (property-id? (get-in command [:data %]))) params))]
+    (info "invalid property id parameters:" (s/join ", " invalid))
+    (fail :error.invalid-property-id :parameters (vec invalid))))
+
+(defn- validate-x [{{:keys [x]} :data}]
+  (when (and x (not (< 10000 (util/->double x) 800000)))
+    (fail :error.illegal-coordinates)))
+
+(defn- validate-y [{{:keys [y]} :data}]
+  (when (and y (not (<= 6610000 (util/->double y) 7779999)))
+    (fail :error.illegal-coordinates)))
+
+
+(defn- is-link-permit-required [application]
+  (or (= :muutoslupa (keyword (:permitSubtype application)))
+      (some #(operations/link-permit-required-operations (keyword (:name %))) (get-operations application))))
+
+(defn validate-link-permits [application]
+  (let [application (meta-fields/enrich-with-link-permit-data application)
+        linkPermits (-> application :linkPermitData count)]
+    (when (and (is-link-permit-required application) (zero? linkPermits))
+      (fail :error.permit-must-have-link-permit))))
+
 ;;
 ;; Query application:
 ;;
@@ -114,7 +116,7 @@
       result)))
 
 (defn- process-foreman-v2 [application]
-  (if (= (-> application :operations first :name) "tyonjohtajan-nimeaminen-v2")
+  (if (= (-> application :primaryOperation :name) "tyonjohtajan-nimeaminen-v2")
     (assoc application :submittable (foreman-submittable? application))
     application))
 
@@ -302,7 +304,7 @@
            :states     action/all-application-states}
           [{application :application}]
           (let [documents (:documents application)
-                initialOp (:name (first (:operations application)))
+                initialOp (:name (:primaryOperation application))
                 original-schema-names (-> initialOp keyword operations/operations :required)
                 original-party-documents (filter-repeating-party-docs (:schema-version application) original-schema-names)]
             (ok :partyDocumentNames (conj original-party-documents "hakija"))))
@@ -481,7 +483,7 @@
     {:id        (:id app)
      :title     (:title app)
      :location  (:location app)
-     :operation (->> (:operations app) first :name (i18n/localize lang "operations"))
+     :operation (->> (:primaryOperation app) :name (i18n/localize lang "operations"))
      :authName  (-> app
                     (domain/get-auths-by-role :owner)
                     first
@@ -510,7 +512,7 @@
                                            (merge
                                              (domain/application-query-for user)
                                              {:infoRequest true})
-                                           [:title :auth :location :operations :comments])
+                                           [:title :auth :location :primaryOperation :secondaryOperations :comments])
 
                 same-location-irs (filter
                                     #(and (== x (-> % :location :x)) (== y (-> % :location :y)))
@@ -518,11 +520,11 @@
 
                 inforequests (remove-irs-by-id inforequests same-location-irs)
 
-                application-op-name (-> application :operations first :name) ;; an inforequest can only have one operation
+                application-op-name (-> application :primaryOperation :name) ;; an inforequest can only have one operation
 
                 same-op-irs (filter
                               (fn [ir]
-                                (some #(= application-op-name (:name %)) (:operations ir)))
+                                (some #(= application-op-name (:name %)) (get-operations ir)))
                               inforequests)
 
                 others (remove-irs-by-id inforequests same-op-irs)
@@ -608,7 +610,7 @@
         op (make-op operation created)
         state (cond
                 info-request? :info
-                (user/authority? user) :open
+                (or (user/authority? user) (user/rest-user? user)) :open
                 :else :draft)
         comment-target (if open-inforequest? [:applicant :authority :oirAuthority] [:applicant :authority])
         tos-function (get-in organization [:operations-tos-functions (keyword operation)])
@@ -621,7 +623,8 @@
                        :permitSubtype       (first (permit/permit-subtypes permit-type))
                        :infoRequest         info-request?
                        :openInfoRequest     open-inforequest?
-                       :operations          [op]
+                       :primaryOperation    op
+                       :secondaryOperations []
                        :state               state
                        :municipality        municipality
                        :location            (->location x y)
@@ -663,7 +666,6 @@
     (let [id (make-application-id municipality)]
       (make-application id operation x y address propertyId municipality organization info-request? open-inforequest? messages user created manual-schema-datas))))
 
-;; TODO: separate methods for inforequests & applications for clarity.
 (defcommand create-application
   {:parameters       [:operation :x :y :address :propertyId]
    :user-roles       #{:applicant :authority}
@@ -671,19 +673,10 @@
    :input-validators [(partial action/non-blank-parameters [:operation :address :propertyId])
                       (partial property-id-parameters [:propertyId])
                       operation-validator]}
-  [{{:keys [operation address propertyId infoRequest]} :data :keys [user created] :as command}]
-
-  ;; TODO: These let-bindings are repeated in do-create-application, merge those somehow
-  (let [municipality        (p/municipality-id-by-property-id propertyId)
-        permit-type         (operations/permit-type-of-operation operation)
-        organization        (organization/resolve-organization municipality permit-type)
-        scope               (organization/resolve-organization-scope municipality permit-type organization)
-        info-request?       (boolean infoRequest)
-        open-inforequest?   (and info-request? (:open-inforequest scope))
-        created-application (do-create-application command)]
-
+  [{{:keys [infoRequest]} :data :keys [created] :as command}]
+  (let [created-application (do-create-application command)]
     (insert-application created-application)
-    (when open-inforequest?
+    (when (and (boolean infoRequest) (:openInfoRequest created-application))
       (open-inforequest/new-open-inforequest! created-application))
     (try
       (autofill-rakennuspaikka created-application created)
@@ -691,7 +684,7 @@
     (ok :id (:id created-application))))
 
 (defn- add-operation-allowed? [_ application]
-  (let [op (-> application :operations first :name keyword)
+  (let [op (-> application :primaryOperation :name keyword)
         permit-subtype (keyword (:permitSubtype application))]
     (when-not (and (or (nil? op) (:add-operation-allowed (operations/operations op)))
                    (not= permit-subtype :muutoslupa))
@@ -707,7 +700,7 @@
   (let [op (make-op operation created)
         new-docs (make-documents nil created op application)
         organization (organization/get-organization (:organization application))]
-    (update-application command {$push {:operations  op
+    (update-application command {$push {:secondaryOperations  op
                                         :documents   {$each new-docs}
                                         :attachments {$each (make-attachments created op organization (:state application) (:tosFunction application))}}
                                  $set  {:modified created}})))
@@ -716,8 +709,10 @@
   {:parameters [id op-id desc]
    :user-roles #{:applicant :authority}
    :states     [:draft :open :submitted :complement-needed]}
-  [command]
-  (update-application command {"operations" {$elemMatch {:id op-id}}} {$set {"operations.$.description" desc}}))
+  [{:keys [application] :as command}]
+  (if (= (get-in application [:primaryOperation :id]) op-id)
+    (update-application command {$set {"primaryOperation.description" desc}})
+    (update-application command {"secondaryOperations" {$elemMatch {:id op-id}}} {$set {"secondaryOperations.$.description" desc}})))
 
 (defcommand change-permit-sub-type
   {:parameters [id permitSubtype]
@@ -785,7 +780,8 @@
                                       (merge (domain/application-query-for user) {:_id             {$nin ignore-ids}
                                                                                   :infoRequest     false
                                                                                   :permitType      (:permitType application)
-                                                                                  :operations.name {$nin ["ya-jatkoaika"]}})
+                                                                                  :secondaryOperations.name {$nin ["ya-jatkoaika"]}
+                                                                                  :primaryOperation.name {$nin ["ya-jatkoaika"]}})
                                       [:permitType :address :propertyId])
                 ;; add the text to show in the dropdown for selections
                 enriched-results (map
@@ -805,7 +801,7 @@
     (str link-permit-id "|" app-id)))
 
 
-(defn do-add-link-permit [{:keys [id propertyId operations]} link-permit-id]
+(defn do-add-link-permit [{:keys [id propertyId primaryOperation]} link-permit-id]
   {:pre [(mongo/valid-key? link-permit-id)
          (not= id link-permit-id)]}
   (let [db-id (make-mongo-id-for-link-permit id link-permit-id)
@@ -816,21 +812,20 @@
                         {:_id           db-id
                          :link          [id link-permit-id]
                          id             {:type       "application"
-                                         :apptype    (:name (first operations))
+                                         :apptype    (:name primaryOperation)
                                          :propertyId propertyId}
                          link-permit-id {:type           "linkpermit"
                                          :linkpermittype (if is-lupapiste-app
                                                            "lupapistetunnus"
                                                            "kuntalupatunnus")
                                          :apptype        (->> linked-app
-                                                              (:operations)
-                                                              (first)
+                                                              (:primaryOperation)
                                                               (:name))}}
                         :upsert true)))
 
 (defn- validate-jatkolupa-zero-link-permits [_ application]
   (let [application (meta-fields/enrich-with-link-permit-data application)]
-    (when (and (= :ya-jatkoaika (-> application :operations first :name keyword))
+    (when (and (= :ya-jatkoaika (-> application :primaryOperation :name keyword))
                (pos? (-> application :linkPermitData count)))
       (fail :error.jatkolupa-can-only-be-added-one-link-permit))))
 
@@ -917,7 +912,7 @@
         (util/to-local-date (:submitted app))))))
 
 (defn- validate-not-jatkolupa-app [_ application]
-  (when (= :ya-jatkoaika (-> application :operations first :name keyword))
+  (when (= :ya-jatkoaika (-> application :primaryOperations :name keyword))
     (fail :error.cannot-apply-jatkolupa-for-jatkolupa)))
 
 (defcommand create-continuation-period-permit
@@ -947,12 +942,10 @@
         tyo-aika-for-jatkoaika-doc (-> continuation-app
                                        (domain/get-document-by-name "tyo-aika-for-jatkoaika")
                                        (assoc-in [:data :tyoaika-alkaa-pvm :value] tyoaika-alkaa-pvm))
-
-        continuation-app (assoc continuation-app
-                           :documents [(domain/get-document-by-name continuation-app "hankkeen-kuvaus-jatkoaika")
-                                       tyo-aika-for-jatkoaika-doc
-                                       (domain/get-document-by-name application "hakija-ya")
-                                       (domain/get-document-by-name application "yleiset-alueet-maksaja")])]
+        docs (concat
+               [(domain/get-document-by-name continuation-app "hankkeen-kuvaus-jatkoaika") tyo-aika-for-jatkoaika-doc]
+               (map #(-> (domain/get-document-by-name application %) model/without-user-id) ["hakija-ya" "yleiset-alueet-maksaja"]))
+        continuation-app (assoc continuation-app :documents docs)]
 
     (do-add-link-permit continuation-app (:id application))
     (insert-application continuation-app)
@@ -971,7 +964,7 @@
    :states     action/all-inforequest-states
    :pre-checks [validate-new-applications-enabled]}
   [{:keys [user created application] :as command}]
-  (let [op (first (:operations application))
+  (let [op (:primaryOperation application)
         organization (organization/get-organization (:organization application))]
     (update-application command
                         {$set  {:infoRequest            false

@@ -37,7 +37,7 @@ Click create button
   Click button  prev-permit-create-button
   #Wait until  Element should be visible  xpath=//section[@id='application']//span[@data-test-id='application-property-id']
   Wait until  Element text should be  xpath=//section[@id='application']//span[@data-test-id='application-property-id']  186-3-356-6
-  Element text should be  xpath=//section[@id='application']//span[@data-test-id='test-application-operation']  Rakentamisen lupa (haettu paperilla)
+  Element text should be  xpath=//section[@id='application']//span[@data-test-id='test-application-primary-operation']  Rakentamisen lupa (haettu paperilla)
   Application state should be  verdictGiven
   ${applicationid} =  Get Text  xpath=//span[@data-test-id='application-id']
   Set Suite Variable  ${applicationid}

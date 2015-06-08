@@ -116,11 +116,15 @@ var users = (function($) {
       if (!op || !email) {
         return false;
       }
-      LUPAPISTE.ModalDialog.showDynamicYesNo(
+      if (op.rowOperationFn) {
+        op.rowOperationFn(self.dataTable.fnGetData(target.closest("tr")[0]));
+      } else {
+        LUPAPISTE.ModalDialog.showDynamicYesNo(
           loc(["users.op", op.name, "title"]),
           loc(["users.op", op.name, "message"], email),
           {title: loc("yes"), fn: function() { op.operation(email, self.redrawCallback); }},
           {title: loc("cancel")});
+      }
       return false;
     });
 

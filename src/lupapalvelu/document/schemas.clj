@@ -74,7 +74,8 @@
 (def rakennuksen-valitsin [{:name "buildingId" :type :buildingSelector :required true :i18nkey "rakennusnro" :other-key "manuaalinen_rakennusnro"}
                            {:name "rakennusnro" :type :string :subtype :rakennusnumero :hidden true}
                            {:name "manuaalinen_rakennusnro" :type :string :subtype :rakennusnumero :i18nkey "manuaalinen_rakennusnro" :labelclass "really-long"}
-                           {:name "valtakunnallinenNumero" :type :string  :subtype :rakennustunnus :hidden true}])
+                           {:name "valtakunnallinenNumero" :type :string  :subtype :rakennustunnus :hidden true}
+                           {:name "kunnanSisainenPysyvaRakennusnumero" :type :string :hidden true}])
 
 (def uusi-rakennuksen-valitsin [{:name "jarjestysnumero" :type :newBuildingSelector :i18nkey "rakennusnro" :required true}
                                 {:name "valtakunnallinenNumero" :type :string  :subtype :rakennustunnus :hidden true}
@@ -315,7 +316,6 @@
                            {:name "valmistumisvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size "s" :required true}
                            {:name "kokemusvuodet" :type :string :subtype :number :min-len 1 :max-len 2 :size "s" :required true}
                            {:name "valvottavienKohteidenMaara" :i18nkey "tyonjohtaja.patevyys.valvottavienKohteidenMaara" :type :string :subtype :number :size "s" :required true}
-                           ;; TODO: Miten tyonjohtajaHakemusKytkimen saa piilotettua hakijalta?
                            {:name "tyonjohtajaHakemusKytkin" :i18nkey "tyonjohtaja.patevyys.tyonjohtajaHakemusKytkin._group_label" :required true :type :select :sortBy :displayname :blacklist [:applicant]
                             :body [{:name "nimeaminen" :i18nkey "tyonjohtaja.patevyys.tyonjohtajaHakemusKytkin.nimeaminen"}
                                    {:name "hakemus" :i18nkey "tyonjohtaja.patevyys.tyonjohtajaHakemusKytkin.hakemus"}]}])
@@ -910,7 +910,7 @@
            :approvable true
            :order 1}
     :body [kuvaus
-           {:name "poikkeamat" :type :text :max-len 5400 :layout :full-width}]}
+           {:name "poikkeamat" :type :text :max-len 5400 :layout :full-width}]} ; Longest value in Helsinki production data
 
    {:info {:name "uusiRakennus" :approvable true}
     :body (body rakennuksen-omistajat (approvable-top-level-groups rakennuksen-tiedot))}

@@ -100,7 +100,7 @@
     (when-not (zero? (:exit result))
       (throw (RuntimeException. (str "pdftk returned " (:exit result) ", STDOUT: " (str (:out result) ", STDERR: " (:err result))))))))
 
-(def- tmp (str (System/getProperty "java.io.tmpdir") (System/getProperty "file.separator")))
+(def- tmp (str (System/getProperty "java.io.tmpdir") env/file-separator))
 
 (defn- retry-stamping [stamp-graphic file-id out x-margin y-margin transparency]
   (let [tmp-file-name (str tmp file-id "-" (now) ".pdf")]
@@ -155,10 +155,9 @@
         sides (get-sides visible-area)
         page-size (get-sides (rotate-rectangle page-box page-rotation))
         ; If the visible area does not fit into page, we must crop
-        ;; TODO: how these special conditions could be merged and generalized?
         max-x (if (or
-                    ;; TODO: This is possibly better condition than the one below, as it does not trust that page's left side is at 0 position.
-                    ;        Though, with it some 'problematic pdf' tests in stamper_test.clj will not pass.
+                    ; This is possibly better condition than the one below, as it does not trust that page's left side is at 0 position.
+                    ; Though, with it some 'problematic pdf' tests in stamper_test.clj will not pass.
                     ;(< (+ (:left page-size) (:width page-size)) (+ (:left sides) (:width sides)))
                     (and (< (:width page-size) (+ (:right sides) (:left sides))) (not= page-rotation 0))
                     (and (not (zero? (:bottom (get-sides page-box)))) (= page-rotation 270)))

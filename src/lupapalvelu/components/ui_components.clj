@@ -1,6 +1,9 @@
 (ns lupapalvelu.components.ui-components
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
+            [swiss.arrows :refer [-<>>]]
             [clojure.java.io :as io]
+            [clojure.string :as s]
+            [lupapalvelu.action :as action]
             [lupapalvelu.components.core :as c]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.mime :as mime]
@@ -12,7 +15,8 @@
             [lupapalvelu.attachment :refer [attachment-types-osapuoli, attachment-scales, attachment-sizes]]
             [lupapalvelu.company :as company]
             [lupapalvelu.stamper :refer [file-types]]
-            [scss-compiler.core :as scss]))
+            [scss-compiler.core :as scss]
+            [me.raynes.fs :as fs]))
 
 (def debugjs {:depends [:jquery]
               :js ["debug.js"]
@@ -25,6 +29,7 @@
 (defn- conf []
   (let [js-conf {:maps                  (env/value :maps)
                  :analytics             (env/value :analytics)
+                 :frontpage             (env/value :frontpage)
                  :fileExtensions        mime/allowed-extensions
                  :passwordMinLength     (env/value :password :minlength)
                  :mode                  env/mode
@@ -43,7 +48,8 @@
                  :asianhallintaVersions (util/convert-values ; asianhallinta versions have "ah-" prefix
                                           validator/supported-asianhallinta-versions-by-permit-type
                                           (partial map #(sade.strings/suffix % "ah-")))
-                 :degrees               (map :name (:body schemas/koulutusvalinta))}]
+                 :degrees               (map :name (:body schemas/koulutusvalinta))
+                 :authorityRoles        action/authority-roles}]
     (str "var LUPAPISTE = LUPAPISTE || {};LUPAPISTE.config = " (json/generate-string js-conf) ";")))
 
 (defn- loc->js []
@@ -56,6 +62,31 @@
   (if-let [main-css-file (io/resource (c/path css-file-path))]
     (slurp main-css-file)
     (scss/scss->css (.getPath (-> scss-file-path c/path io/resource)))))
+
+(defn- read-component-list-from-fs [component pattern]
+  (let [path (str "resources/private/" (name component))
+        files (fs/find-files path (re-pattern pattern))
+        mapped-files (map #(-<>> % .getPath (s/replace <> env/file-separator "/")  (re-matches (re-pattern (str "^.*/" path "/(.*)"))) last) files)]
+    mapped-files))
+
+(defn- in-jar?
+  [jar]
+  (re-find (re-pattern ".jar$") jar))
+
+(defn- read-component-list-from-jar [jar component pattern]
+  (let [path (str "private/" (name component))
+        files (util/list-jar jar path)
+        filtered-files (filter #(re-find (re-pattern pattern) %) files)]
+    filtered-files))
+
+(defn- get-ui-components [component type]
+  (let [jar (util/this-jar lupapalvelu.main)
+        pattern (case type
+                  :models ".*-model.js$"
+                  :templates ".*-template.html$")]
+    (if (in-jar? jar)
+      (read-component-list-from-jar jar component pattern)
+      (read-component-list-from-fs component pattern))))
 
 (def ui-components
   {;; 3rd party libs
@@ -247,60 +278,9 @@
    :integration-error {:js [ "integration-error.js"]
                        :html ["integration-error.html"]}
 
-   ; TODO maybe just find and add all ko components under ui-components automatically
    :ui-components {:depends [:common-html]
-                   :js ["ui-components.js"
-                        "fill-info/fill-info-model.js"
-                        "foreman-history/foreman-history-model.js"
-                        "foreman-other-applications/foreman-other-applications-model.js"
-                        "input-model.js"
-                        "message-panel/message-panel-model.js"
-                        "checkbox/checkbox-model.js"
-                        "select/select-model.js"
-                        "string/string-model.js"
-                        "modal-dialog/modal-dialog-model.js"
-                        "modal-dialog/button-group/ok-button-group-model.js"
-                        "modal-dialog/button-group/submit-button-group-model.js"
-                        "modal-dialog/button-group/yes-no-button-group-model.js"
-                        "modal-dialog/dialog/yes-no-dialog-model.js"
-                        "modal-dialog/dialog/ok-dialog-model.js"
-                        "attachments-multiselect/attachments-multiselect-model.js"
-                        "authority-select/authority-select-model.js"
-                        "authority-select/authority-select-dialog-model.js"
-                        "export-attachments/export-attachments-model.js"
-                        "neighbors/neighbors-owners-dialog-model.js"
-                        "neighbors/neighbors-edit-dialog-model.js"
-                        "company-selector/company-selector-model.js"
-                        "company-invite/company-invite-model.js"
-                        "company-invite/company-invite-dialog-model.js"
-                        "autocomplete/autocomplete-model.js"
-                        "invoice-operator-selector/invoice-operator-selector-model.js"
-                        "user-notification/user-notification-model.js"]
-                   :html ["fill-info/fill-info-template.html"
-                          "foreman-history/foreman-history-template.html"
-                          "foreman-other-applications/foreman-other-applications-template.html"
-                          "message-panel/message-panel-template.html"
-                          "string/string-template.html"
-                          "select/select-template.html"
-                          "checkbox/checkbox-template.html"
-                          "modal-dialog/modal-dialog-template.html"
-                          "modal-dialog/button-group/ok-button-group-template.html"
-                          "modal-dialog/button-group/submit-button-group-template.html"
-                          "modal-dialog/button-group/yes-no-button-group-template.html"
-                          "modal-dialog/dialog/yes-no-dialog-template.html"
-                          "modal-dialog/dialog/ok-dialog-template.html"
-                          "attachments-multiselect/attachments-multiselect-template.html"
-                          "authority-select/authority-select-template.html"
-                          "authority-select/authority-select-dialog-template.html"
-                          "export-attachments/export-attachments-template.html"
-                          "neighbors/neighbors-owners-dialog-template.html"
-                          "neighbors/neighbors-edit-dialog-template.html"
-                          "company-selector/company-selector-template.html"
-                          "company-invite/company-invite-template.html"
-                          "company-invite/company-invite-dialog-template.html"
-                          "autocomplete/autocomplete-template.html"
-                          "invoice-operator-selector/invoice-operator-selector-template.html"
-                          "user-notification/user-notification-template.html"]}
+                   :js (distinct (conj (get-ui-components :ui-components :models) "ui-components.js" "input-model.js"))
+                   :html (get-ui-components :ui-components :templates)}
 
    ;; Single Page Apps and standalone components:
    ;; (compare to auth-methods in web.clj)

@@ -1,5 +1,6 @@
 (ns lupapalvelu.user
   (:require [taoensso.timbre :as timbre :refer [debug debugf info warn warnf]]
+            [lupapalvelu.document.schemas :as schemas]
             [clj-time.core :as time]
             [clj-time.coerce :refer [to-date]]
             [monger.operators :refer :all]
@@ -10,7 +11,71 @@
             [sade.strings :as ss]
             [sade.util :as util]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.security :as security]))
+            [lupapalvelu.security :as security]
+            [schema.core :as sc]))
+
+;;
+;; User schema
+;;
+
+(def user-skeleton
+  {:id        ""
+   :firstName ""
+   :lastName  ""
+   :role      "dummy"
+   :email     "dummy@example.com"
+   :username  "dummy@example.com"
+   :enabled   false})
+
+
+(def User {:id                                    sc/Str
+           :firstName                             (util/max-length-string 255)
+           :lastName                              (util/max-length-string 255)
+           :role                                  (sc/enum "applicant"
+                                                           "authority"
+                                                           "oirAuthority"
+                                                           "authorityAdmin"
+                                                           "admin"
+                                                           "dummy"
+                                                           "rest-api"
+                                                           "trusted-etl")
+           :email                                 (sc/both
+                                                    (sc/pred util/valid-email? "Not valid email")
+                                                    (util/max-length-string 255))
+           :username                              (util/max-length-string 255)
+           :enabled                               sc/Bool
+           (sc/optional-key :private)             {(sc/optional-key :password) sc/Str
+                                                   (sc/optional-key :apikey) sc/Str}
+           (sc/optional-key :orgAuthz)            {sc/Keyword (sc/pred vector? "OrgAuthz must be vector")}
+           (sc/optional-key :personId)            (sc/pred util/valid-hetu? "Not valid hetu")
+           (sc/optional-key :street)              (sc/maybe (util/max-length-string 255))
+           (sc/optional-key :city)                (sc/maybe (util/max-length-string 255))
+           (sc/optional-key :zip)                 (sc/either
+                                                    (sc/pred util/finnish-zip? "Not a valid zip code")
+                                                    (sc/pred ss/blank?))
+           (sc/optional-key :phone)               (sc/maybe (util/max-length-string 255))
+           (sc/optional-key :architect)           sc/Bool
+           (sc/optional-key :degree)              (sc/either
+                                                    (apply sc/enum (conj
+                                                                     (map :name (:body schemas/koulutusvalinta))
+                                                                     "other"))
+                                                    (sc/pred ss/blank?))
+           (sc/optional-key :graduatingYear)      (sc/either
+                                                    (sc/both (util/min-length-string 4) (util/max-length-string 4))
+                                                    (sc/pred ss/blank?))
+           (sc/optional-key :fise)                (util/max-length-string 255)
+           (sc/optional-key :companyName)         (util/max-length-string 255)
+           (sc/optional-key :companyId)           (sc/either
+                                                    (sc/pred util/finnish-y? "Not valid Y code")
+                                                    (sc/pred ss/blank?))
+           (sc/optional-key :allowDirectMarketing) sc/Bool
+           (sc/optional-key :attachments)         (sc/pred vector? "Attachments are in a vector")
+           (sc/optional-key :company)             {:id sc/Str :role sc/Str}
+           (sc/optional-key :partnerApplications) {:rakentajafi {:id sc/Str
+                                                                 :created sc/Int
+                                                                 :origin sc/Bool}}
+           (sc/optional-key :notification)        {:messageI18nkey sc/Str
+                                                   :titleI18nkey   sc/Str}})
 
 ;;
 ;; ==============================================================================
@@ -59,6 +124,9 @@
 
 (defn applicant? [{role :role}]
   (= :applicant (keyword role)))
+
+(defn rest-user? [{role :role}]
+  (= :rest-api (keyword role)))
 
 (defn same-user? [{id1 :id} {id2 :id}]
   (= id1 id2))

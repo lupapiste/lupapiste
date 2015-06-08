@@ -3,6 +3,7 @@
             [clojure.set :as set]
             [clojure.string :as s]
             [clojure.set :refer [difference union]]
+            [flatland.ordered.set :refer [ordered-set]]
             [slingshot.slingshot :refer [try+]]
             [sade.dns :as dns]
             [sade.env :as env]
@@ -83,6 +84,7 @@
 
 (def default-org-authz-roles #{:authority})
 (def all-org-authz-roles (conj default-org-authz-roles :authorityAdmin)) ; TODO add TOJ roles here
+(def authority-roles [:authority :tos-editor :tos-publisher])
 
 ;; Notificator
 

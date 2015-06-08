@@ -21,9 +21,11 @@
 (defn- parse-target-env [buildinfo] (or (re-find #"[PRODEVTSQA]+" (or buildinfo "")) "local"))
 (def target-env (parse-target-env (:build-tag buildinfo)))
 
+(def file-separator (System/getProperty "file.separator"))
+
 (def- master-password
   (or
-    (let [password-file (io/file (str (System/getProperty "user.home") (System/getProperty "file.separator") "application_master_password.txt"))]
+    (let [password-file (io/file (str (System/getProperty "user.home") file-separator "application_master_password.txt"))]
       (when (.exists password-file)
         (s/trim-newline (slurp password-file))))
     (System/getProperty "application.masterpassword")
@@ -121,7 +123,6 @@
 (def port (read-value (get-prop "lupapiste.port" "8000")))
 (def log-level (keyword (get-prop "lupapiste.loglevel" "debug")))
 (def log-dir (get-prop "lupapiste.logdir" (if (= mode :dev) "target" ".")))
-(def perf-mon-on (read-value (str (get-prop "lupapiste.perfmon" "false"))))
 (defonce proxy-off (atom (read-value (str (get-prop "lupapiste.proxy-off" "false")))))
 
 (defn dev-mode? []

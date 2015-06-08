@@ -2,7 +2,8 @@
   (:refer-clojure :exclude [pos? neg? zero?])
   (:require [sade.util :refer :all]
             [midje.sweet :refer :all]
-            [schema.core :as sc])
+            [schema.core :as sc]
+            [lupapalvelu.document.schemas :as schema])
   (:import [org.apache.commons.io.output NullWriter]))
 
 (facts "strip-nils"
@@ -257,12 +258,13 @@
   (fact (sc/check (max-length-string 1) [1]) =not=> nil))
 
 (facts "comparing history item difficulties"
-  (fact "nil and item"          (compare-difficulty nil {:difficulty "A"})                => pos?)
-  (fact "item and nil"          (compare-difficulty {:difficulty "A"} nil)                => neg?)
-  (fact "old more difficult"    (compare-difficulty {:difficulty "A"} {:difficulty "B"})  => neg?)
-  (fact "new more difficult"    (compare-difficulty {:difficulty "B"} {:difficulty "A"})  => pos?)
-  (fact "tricky difficulty val" (compare-difficulty {:difficulty "A"} {:difficulty "AA"}) => pos?)
-  (fact "equality"              (compare-difficulty {:difficulty "B"} {:difficulty "B"})  => zero?))
+  (let [values (vec (map :name (:body schema/patevyysvaatimusluokka)))]
+    (fact "nil and item"          (compare-difficulty :difficulty values nil {:difficulty "A"})                => pos?)
+    (fact "item and nil"          (compare-difficulty :difficulty values {:difficulty "A"} nil)                => neg?)
+    (fact "old more difficult"    (compare-difficulty :difficulty values {:difficulty "A"} {:difficulty "B"})  => neg?)
+    (fact "new more difficult"    (compare-difficulty :difficulty values {:difficulty "B"} {:difficulty "A"})  => pos?)
+    (fact "tricky difficulty val" (compare-difficulty :difficulty values {:difficulty "A"} {:difficulty "AA"}) => pos?)
+    (fact "equality"              (compare-difficulty :difficulty values {:difficulty "B"} {:difficulty "B"})  => zero?)))
 
 (facts select-values
   (let [m {:foo "foo" :bar "bar" :baz "baz"}]
@@ -271,3 +273,9 @@
     (fact (select-values m [:bar :foo])           => ["bar" "foo"])
     (fact (select-values m [:foo :unknown :bar])  => ["foo" nil "bar"])
     (fact (select-values m [:unknown1 :unknown2]) => [nil nil])))
+
+(facts "to-long"
+  (fact (to-long "1234") => truthy)
+  (fact (to-long "213asd2") => nil)
+  (fact (to-long "") => nil)
+  (fact (to-long 1234) => nil))

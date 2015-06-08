@@ -55,6 +55,10 @@ var repository = (function() {
     }
   }
 
+  function getAllOperations(application) {
+    return [application.primaryOperation].concat(application.secondaryOperations);
+  };
+
   function loadingErrorHandler(id, e) {
     currentlyLoadingId = null;
     error("Application " + id + " not found", e);
@@ -85,11 +89,9 @@ var repository = (function() {
       }
 
       function setOperation(application, doc) {
-        // TODO: set primary operation on client until primaryOperation is separated in the backend
-        application.primaryOperation = _.first(application.operations);
         var schemaInfo = doc["schema-info"];
         if (schemaInfo.op) {
-          var op = _.findWhere(application.operations, {id: schemaInfo.op.id});
+          var op = _.findWhere(application.allOperations, {id: schemaInfo.op.id});
           if (op) {
             schemaInfo.op = op;
           }
@@ -99,7 +101,7 @@ var repository = (function() {
       if (application) {
         if (application.id === currentlyLoadingId) {
           currentlyLoadingId = null;
-
+          application.allOperations = getAllOperations(application);
           _.each(application.documents || [], function(doc) {
             setOperation(application, doc);
             setSchema(doc);
@@ -118,7 +120,7 @@ var repository = (function() {
           });
           _.each(application.attachments ||[], function(att) {
             calculateAttachmentStateIndicators(att, application);
-            setAttachmentOperation(application.operations, att);
+            setAttachmentOperation(application.allOperations, att);
           });
           hub.send("application-loaded", {applicationDetails: loading});
           if (_.isFunction(callback)) {

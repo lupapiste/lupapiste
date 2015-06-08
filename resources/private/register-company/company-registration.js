@@ -2,20 +2,22 @@
   "use strict";
 
   function CompanyRegistration() {
-    this.userNotLoggedIn = ko.pureComputed(function() {
+    var self = this;
+
+    self.userNotLoggedIn = ko.pureComputed(function() {
       return !(lupapisteApp.models.currentUser && lupapisteApp.models.currentUser.id());
     });
 
-    this.model = ko.validatedObservable({
+    self.model = ko.validatedObservable({
       //Account type
       accountType:  ko.observable(undefined),
       // Company:
       name:         ko.observable(undefined).extend({required: true, maxLength: 64}),
       y:            ko.observable("").extend({required: true, y: true}),
       reference:    ko.observable(""),
-      address1:     ko.observable(""),
-      po:           ko.observable(""),
-      zip:          ko.observable("").extend({number: true, maxLength: 5}),
+      address1:     ko.observable("").extend({required: true}),
+      po:           ko.observable("").extend({required: true}),
+      zip:          ko.observable("").extend({required: true, number: true, maxLength: 5}),
       country:      ko.observable(""),
       ovt:          ko.observable("").extend({ovt: true}),
       pop:          ko.observable(""),
@@ -23,30 +25,42 @@
       firstName:    ko.observable("").extend({required: true}),
       lastName:     ko.observable("").extend({required: true}),
       email:        ko.observable("").extend({required: true, email: true,
-                                              usernameAsync: this.userNotLoggedIn})
+                                              usernameAsync: self.userNotLoggedIn}),
+      personId:     ko.observable("").extend({required: true, personId: true})
     });
 
-    this.accountFieldNames = ["accountType"];
-    this.companyFieldNames = ["name", "y", "reference", "address1", "po", "zip", "country", "ovt", "pop"];
-    this.signerFieldNames = ["firstName", "lastName", "email"];
+    self.accountFieldNames = ["accountType"];
+    self.companyFieldNames = ["name", "y", "reference", "address1", "po", "zip", "country", "ovt", "pop"];
+    self.companyFields = self.companyFieldNames.concat(self.accountFieldNames);
+    self.signerFieldNames = ["firstName", "lastName", "email", "personId"];
 
-    this.stateInfo  = 0;
-    this.stateReady = 1;
+    self.stateInfo  = 0;
+    self.stateReady = 1;
 
-    this.processId = ko.observable(null);
-    this.pending   = ko.observable(false);
-    this.state     = ko.observable(this.stateInfo);
+    self.processId = ko.observable(null);
+    self.pending   = ko.observable(false);
+    self.state     = ko.observable(self.stateInfo);
 
-    this.canSubmitInfo  = ko.computed(function() { return this.state() === this.stateInfo && !this.pending() && this.model.isValid(); }, this);
-    this.canCancelInfo  = ko.computed(function() { return this.state() === this.stateInfo && !this.pending(); }, this);
-    this.canStartSign   = ko.computed(function() { return this.state() === this.stateReady; }, this);
-    this.accountSelected = function() {
+    self.canSubmitInfo  = ko.computed(function() { return self.state() === self.stateInfo && !self.pending() && self.model.isValid(); });
+    self.canCancelInfo  = ko.computed(function() { return self.state() === self.stateInfo && !self.pending(); });
+    self.canStartSign   = ko.computed(function() { return self.state() === self.stateReady; });
+    self.accountSelected = function() {
       var buttonPos = $("#account-type-selection").position();
       $("html, body").animate({
         scrollTop: buttonPos.top
       });
       return true;
     };
+
+    self.initSignCallback = function(processId) {
+      self.processId(processId);
+      self.state(self.stateReady);
+    };
+
+    self.termsAccepted = ko.observable(false);
+    self.termsDocumentLink = ko.pureComputed(function() {
+      return "/api/sign/document/" + self.processId();
+    });
   }
 
   CompanyRegistration.prototype.clearModel = function(fieldNames) {
@@ -62,7 +76,6 @@
       window.location.hash = "!/register-company-account-type";
       return;
     }
-    $("#onnistuu-start-form").empty();
     this.clearModel(this.companyFieldNames.concat(this.signerFieldNames));
     // check if user is already logged in
     if (lupapisteApp.models.currentUser && !lupapisteApp.models.currentUser.company.id()) {
@@ -74,27 +87,18 @@
   };
 
   CompanyRegistration.prototype.submitInfo = function() {
-    var company = _.reduce(this.companyFieldNames.concat(this.accountFieldNames), function(a, k) { a[k] = this[k](); return a; }, {}, this.model()),
-        signer = _.reduce(this.signerFieldNames, function(a, k) { a[k] = this[k](); return a; }, {}, this.model()),
-        self = this;
+    var self = this;
+    var company = _.pick(ko.toJS(self.model()), self.companyFields);
+    var signer = _.pick(ko.toJS(self.model()), self.signerFieldNames);
+
+    self.termsAccepted(false);
 
     if (!this.userNotLoggedIn()) {
       signer.currentUser = lupapisteApp.models.currentUser.id();
     }
 
-    ajax
-      .command("init-sign", {company: company, signer: signer, lang: loc.currentLanguage}, this.pending)
-      .success(function(resp) {
-        $("#onnistuu-start-form")
-          .empty()
-          .html(resp.form)
-          .find(":submit")
-          .addClass("btn btn-primary")
-          .attr("value", loc("register.company.sign.begin"))
-          .attr("data-test-id", "register-company-start-sign");
-        self.processId(resp.processId).state(self.stateReady);
-      })
-      .call();
+    hub.send("company-info-submitted", {company: company, signer: signer});
+
     window.location.hash = "!/register-company-signing";
   };
 
@@ -112,7 +116,7 @@
       .command("cancel-sign", {processId: this.processId()})
       .call();
     this.clearModel();
-    window.location.hash = "!/login";
+    window.location.hash = "!/register";
   };
 
   var companyRegistration = new CompanyRegistration();

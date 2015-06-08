@@ -201,6 +201,7 @@
     color: white;
     position: relative;
   }
+
   .btn-primary {
     background-color: $lp-purple;
     &:hover {
@@ -234,6 +235,26 @@
   p, h1 {
     color: black;
     width: 60%;
+  }
+  .register-terms {
+    margin: auto;
+    padding-bottom: 14px;
+    label {
+      cursor: pointer;
+      color: black;
+    }
+    input[type="checkbox"] {
+      cursor: pointer;
+      -moz-transform: scale(1.5);
+      -ms-transform: scale(1.5);
+      -o-transform: scale(1.5);
+      -webkit-transform: scale(1.5);
+      transform: scale(1.5);
+      vertical-align: middle;
+    }
+  }
+  button:disabled {
+    cursor: not-allowed;
   }
 }
 

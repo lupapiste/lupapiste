@@ -264,6 +264,11 @@
                 4 "%02d:%02d:%02d.%d")]
       (apply format fmt (map ->int matches)))))
 
+(defn to-long [s]
+  "Parses string to long. If string is not numeric returns nil."
+  (when (numeric? s)
+    (Long/parseLong s)))
+
 (defn valid-email? [email]
   (try
     (javax.mail.internet.InternetAddress. email)
@@ -331,11 +336,32 @@
 
 (def vrk-checksum-chars ["0" "1" "2" "3" "4" "5" "6" "7" "8" "9" "A" "B" "C" "D" "E" "F" "H" "J" "K" "L" "M" "N" "P" "R" "S" "T" "U" "V" "W" "X" "Y"])
 
+(def finnish-hetu-regex #"^(0[1-9]|[12]\d|3[01])(0[1-9]|1[0-2])([5-9]\d\+|\d\d-|\d\dA)\d{3}[\dA-Y]$")
+
 (defn vrk-checksum [^Long l]
   (nth vrk-checksum-chars (mod l 31)))
 
 (defn hetu-checksum [^String hetu]
   (vrk-checksum (Long/parseLong (str (subs hetu 0 6) (subs hetu 7 10)))))
+
+(defn- validate-hetu-date [hetu]
+  (let [dateparts (rest (re-find #"^(\d{2})(\d{2})(\d{2})([aA+-]).*" hetu))
+        yy (last (butlast dateparts))
+        yyyy (str (case (last dateparts) "+" "18" "-" "19" "20") yy)
+        basic-date (str yyyy (second dateparts) (first dateparts))]
+    (try
+      (timeformat/parse (timeformat/formatters :basic-date) basic-date)
+      true
+      (catch Exception e
+        false))))
+
+(defn- validate-hetu-checksum [hetu]
+  (= (subs hetu 10 11) (hetu-checksum hetu)))
+
+(defn valid-hetu? [^String hetu]
+  (if hetu
+    (and (validate-hetu-date hetu) (validate-hetu-checksum hetu))
+    false))
 
 (defn- rakennustunnus-checksum [^String prt]
   (vrk-checksum (Long/parseLong (subs prt 0 9))))
@@ -373,14 +399,18 @@
 (defn max-length-string [max-len]
   (sc/both sc/Str (max-length max-len)))
 
-(def difficulty-values ["AA" "A" "B" "C" "ei tiedossa"])    ;TODO: move this to schemas?
-(defn compare-difficulty [a b]                              ;TODO: make this function more generic by taking the key and comparison values as param? E.g. compare-against [a b key ref-values]
-  (let [a (:difficulty a)
-        b (:difficulty b)]
+(def Fn (sc/pred fn? "Function"))
+
+(def IFn (sc/pred ifn? "Function"))
+
+(defn compare-difficulty [accessor-keyword values a b]
+  {:pre [(keyword? accessor-keyword) (vector? values)]}
+  (let [a (accessor-keyword a)
+        b (accessor-keyword b)]
     (cond
       (nil? b) -1
       (nil? a) 1
-      :else (- (.indexOf difficulty-values a) (.indexOf difficulty-values b)))))
+      :else (- (.indexOf values a) (.indexOf values b)))))
 
 (defn every-key-in-map? [target-map required-keys]
   (every? (-> target-map keys set) required-keys))
@@ -408,3 +438,22 @@
   ; Regex derived from @stephenhay's at https://mathiasbynens.be/demo/url-regex
   (when-not (re-matches #"^(https?)://[^\s/$.?#].[^\s]*$" url)
     (fail :error.invalid.url)))
+
+(defn this-jar
+  "utility function to get the name of jar in which this function is invoked"
+  [& [ns]]
+  (-> (or ns (class *ns*))
+    .getProtectionDomain .getCodeSource .getLocation .getPath))
+
+(import java.util.jar.JarFile)
+
+(defn list-jar [jar-path inner-dir]
+  (if-let [jar         (JarFile. jar-path)]
+    (let [inner-dir    (if (and (not= "" inner-dir) (not= "/" (last inner-dir)))
+                         (str inner-dir "/")
+                         inner-dir)
+          entries      (enumeration-seq (.entries jar))
+          names        (map (fn [x] (.getName x)) entries)
+          snames       (filter (fn [x] (= 0 (.indexOf x inner-dir))) names)
+          fsnames      (map #(subs % (count inner-dir)) snames)]
+      fsnames)))
