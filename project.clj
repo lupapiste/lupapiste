@@ -65,8 +65,7 @@
                    :resource-paths ["dev-resources"]
                    :source-paths ["dev-src" "test-utils"]
                    :jvm-opts ["-Djava.awt.headless=true" "-Xmx1G"]}
-             :uberjar  {:source-paths ["main-src"]
-                        :main lupapalvelu.main
+             :uberjar  {:main lupapalvelu.main
                         :jar-exclusions [#"gems/.*"]
                         :uberjar-exclusions [#"gems/.*"]}
              :itest    {:test-paths ^:replace ["itest"]}
@@ -86,6 +85,7 @@
   :aliases {"integration" ["with-profile" "dev,itest" "midje"]
             "stest"       ["with-profile" "dev,stest" "midje"]
             "verify"      ["with-profile" "dev,alltests" "do" "nitpicker," "midje"]}
+  :aot [lupapalvelu.main]
   :main ^:skip-aot lupapalvelu.server
   :repl-options {:init-ns lupapalvelu.server}
   :pom-plugins [[org.fusesource.mvnplugins/maven-graph-plugin "1.4"]

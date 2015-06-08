@@ -135,7 +135,6 @@
                 <td data-bind="ltext: 'company.user.role.' + role()" data-test-id="company-user-role"></td>
                 <td data-bind="visible: $parent.isAdmin">
                   <div data-bind="visible: opsEnabled">
-                    <a data-bind="click: toggleEnable, ltext: 'company.user.op.enabled.' + enabled()" href="#" data-test-id="company-user-toggle-enable"></a>
                     <a data-bind="click: toggleAdmin,  ltext: 'company.user.op.admin.' + admin()" href="#" data-test-id="company-user-toggle-admin"></a>
                     <a data-bind="click: deleteUser,   ltext: 'company.user.op.delete'" href="#" data-test-id="company-user-toggle-delete"></a>
                   </div>
