@@ -25,6 +25,7 @@ Foreman sets his information to several applications
   Foreman sets role and difficulty to foreman application  3  IV-työnjohtaja   B
 
   Foreman opens application  4
+  Deny yes no dialog
   Foreman accepts invitation and fills info
   [Teardown]  logout
 
