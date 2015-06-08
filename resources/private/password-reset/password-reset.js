@@ -46,6 +46,8 @@
         .json({password: self.password1()})
         .success(function() {
           self.fail(false).password1("").password2("");
+
+
           LUPAPISTE.ModalDialog.showDynamicOk(loc("success.dialog.title"), loc("setpw.success"), successOkButton);
         })
         .fail(function() { self.fail(true).password1("").password2(""); $("#setpw input:first").focus(); })
