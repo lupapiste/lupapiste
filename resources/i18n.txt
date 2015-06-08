@@ -1,2 +1,0 @@
-application.showApplication:  Näytä hakemus
-application.inviteDialogText:  Sinut on kutsuttu tälle hakemukselle. Voit hyväksyä kutsun heti tai jatkaa hakemuksen katseluun.
