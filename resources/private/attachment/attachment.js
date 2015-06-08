@@ -196,6 +196,7 @@ var attachment = (function() {
     },
 
     showChangeTypeDialog: function() {
+      model.previewDisabled(true);
       model.changeTypeDialogModel.init(model.attachmentType());
       LUPAPISTE.ModalDialog.open("#change-type-dialog");
     },
@@ -204,7 +205,6 @@ var attachment = (function() {
       var fileId = fileModel.fileId;
       deleteAttachmentVersionFromServerProxy = function() {
         deleteAttachmentVersionFromServer(fileId);
-        model.previewDisabled(false);
       };
       model.previewDisabled(true);
       hub.send("show-dialog", {ltitle: "attachment.delete.version.header",
@@ -491,9 +491,9 @@ var attachment = (function() {
 
   hub.subscribe({type: "dialog-close", id : "upload-dialog"}, function() {
     resetUploadIframe();
-    model.previewDisabled(false);
   });
-  hub.subscribe({type: "dialog-close", id : "dialog-sign-attachment"}, function() {
+
+  hub.subscribe("dialog-close", function() {
     model.previewDisabled(false);
   });
 
