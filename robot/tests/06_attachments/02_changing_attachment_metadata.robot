@@ -27,7 +27,7 @@ Mikko adds an operation
   Wait Until  Element Should Be Visible  add-operation
   Wait and click  //section[@id="add-operation"]//div[@class="tree-content"]//*[text()="Rakentaminen, purkaminen tai maisemaan vaikuttava toimenpide"]
   Wait and click  //section[@id="add-operation"]//div[@class="tree-content"]//*[text()="Uuden rakennuksen rakentaminen"]
-  Wait and click  //section[@id="add-operation"]//div[@class="tree-content"]//*[text()="Muun kuin edellä mainitun rakennuksen rakentaminen (liike-, toimisto-, opetus-, päiväkoti-, palvelu-, hoitolaitos- tai muu rakennus)"]
+  Wait and click  //section[@id="add-operation"]//div[@class="tree-content"]//*[text()="Muun kuin edellä mainitun rakennuksen rakentaminen (navetta, liike-, toimisto-, opetus-, päiväkoti-, palvelu-, hoitolaitos- tai muu rakennus)"]
   Wait until  Element should be visible  xpath=//section[@id="add-operation"]//div[@class="tree-content"]//*[@data-test-id="add-operation-to-application"]
   Click enabled by test id  add-operation-to-application
   Wait until  Page should contain element  xpath=//section[@data-doc-type="uusiRakennus"][2]
@@ -85,7 +85,7 @@ Mikko sees that attachments are grouped by operations
   Xpath Should Match X Times  //div[@id="application-attachments-tab"]//tr[@class="attachment-group-header"]  2
 
 Mikko sees that his attachment is grouped by "Muun rakennuksen rakentaminen - Talo B" operation
-  Element Text Should Be  xpath=(//div[@id="application-attachments-tab"]//tr[@class="attachment-group-header"])[last()]//td[@data-test-id="attachment-group-header-text"]  Muun kuin edellä mainitun rakennuksen rakentaminen (liike-, toimisto-, opetus-, päiväkoti-, palvelu-, hoitolaitos- tai muu rakennus) - Talo B
+  Element Text Should Be  xpath=(//div[@id="application-attachments-tab"]//tr[@class="attachment-group-header"])[last()]//td[@data-test-id="attachment-group-header-text"]  Muun kuin edellä mainitun rakennuksen rakentaminen (navetta, liike-, toimisto-, opetus-, päiväkoti-, palvelu-, hoitolaitos- tai muu rakennus) - Talo B
 
 Mikko opens attachment and sees that attachment label metadata is set
   Open attachment details  muut.muu
