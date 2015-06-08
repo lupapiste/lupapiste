@@ -100,7 +100,7 @@
     (when-not (zero? (:exit result))
       (throw (RuntimeException. (str "pdftk returned " (:exit result) ", STDOUT: " (str (:out result) ", STDERR: " (:err result))))))))
 
-(def- tmp (str (System/getProperty "java.io.tmpdir") (System/getProperty "file.separator")))
+(def- tmp (str (System/getProperty "java.io.tmpdir") env/file-separator))
 
 (defn- retry-stamping [stamp-graphic file-id out x-margin y-margin transparency]
   (let [tmp-file-name (str tmp file-id "-" (now) ".pdf")]

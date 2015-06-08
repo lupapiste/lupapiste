@@ -1,6 +1,8 @@
 (ns lupapalvelu.components.ui-components
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
+            [swiss.arrows :refer [-<>>]]
             [clojure.java.io :as io]
+            [clojure.string :as s]
             [lupapalvelu.action :as action]
             [lupapalvelu.components.core :as c]
             [lupapalvelu.i18n :as i18n]
@@ -63,8 +65,8 @@
 
 (defn- read-component-list-from-fs [component pattern]
   (let [path (str "resources/private/" (name component))
-        files (me.raynes.fs/find-files path (re-pattern pattern))
-        mapped-files (map #(->> % .getPath (re-matches (re-pattern (str "^.*/" path "/(.*)"))) last) files)]
+        files (fs/find-files path (re-pattern pattern))
+        mapped-files (map #(-<>> % .getPath (s/replace <> env/file-separator "/")  (re-matches (re-pattern (str "^.*/" path "/(.*)"))) last) files)]
     mapped-files))
 
 (defn- in-jar?
@@ -77,7 +79,6 @@
         filtered-files (filter #(re-find (re-pattern pattern) %) files)]
     filtered-files))
 
-;; TODO build fails on CI for lupapalvelu.main is not found
 (defn- get-ui-components [component type]
   (let [jar (util/this-jar lupapalvelu.main)
         pattern (case type
