@@ -177,10 +177,10 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel, verdictAttachme
         .call();
       return false;
     };
-    hub.send("show-dialog", {title: "application.attachmentsCopyOwn",
+    hub.send("show-dialog", {ltitle: "application.attachmentsCopyOwn",
                              size: "medium",
                              component: "yes-no-dialog",
-                             componentParams: {text: "application.attachmentsCopyOwn.confirmationMessage",
+                             componentParams: {ltext: "application.attachmentsCopyOwn.confirmationMessage",
                                                yesFn: doSendAttachments}});
   };
 
@@ -196,10 +196,10 @@ LUPAPISTE.AttachmentsTabModel = function(appModel, signingModel, verdictAttachme
         hub.send("track-click", {category:"Application", label: "", event:"deleteSingleAttachment"});
       return false;
     };
-    hub.send("show-dialog", {title: "attachment.delete.header",
+    hub.send("show-dialog", {ltitle: "attachment.delete.header",
                              size: "medium",
                              component: "yes-no-dialog",
-                             componentParams: {text: "attachment.delete.message",
+                             componentParams: {ltext: "attachment.delete.message",
                                                yesFn: doDelete}});
   };
 

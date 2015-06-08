@@ -172,10 +172,10 @@ var attachment = (function() {
 
     deleteAttachment: function() {
       model.previewDisabled(true);
-      hub.send("show-dialog", {title: "attachment.delete.header",
+      hub.send("show-dialog", {ltitle: "attachment.delete.header",
                                size: "medium",
                                component: "yes-no-dialog",
-                               componentParams: {text: "attachment.delete.message",
+                               componentParams: {ltext: "attachment.delete.message",
                                                  yesFn: deleteAttachmentFromServer}});
     },
 
@@ -207,10 +207,10 @@ var attachment = (function() {
         model.previewDisabled(false);
       };
       model.previewDisabled(true);
-      hub.send("show-dialog", {title: "attachment.delete.version.header",
+      hub.send("show-dialog", {ltitle: "attachment.delete.version.header",
                                size: "medium",
                                component: "yes-no-dialog",
-                               componentParams: {text: "attachment.delete.version.message",
+                               componentParams: {ltext: "attachment.delete.version.message",
                                                  yesFn: deleteAttachmentVersionFromServerProxy}});
     },
 

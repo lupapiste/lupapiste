@@ -77,13 +77,13 @@ LUPAPISTE.CurrentUser = function() {
   ko.computed(function() {
     if (self.showNotification()) {
       var fields = getNotificationFields(self.notification);
-      hub.send("show-dialog", {title: fields.title,
+      hub.send("show-dialog", {ltitle: fields.title,
                                localize: fields.localize,
                                id: "user-notification-dialog",
                                size: "medium",
                                component: "ok-dialog",
                                closeOnClick: true,
-                               componentParams: {text: fields.msg, localize: fields.localize}
+                               componentParams: {ltext: fields.msg, localize: fields.localize}
                               });
     }
   });
