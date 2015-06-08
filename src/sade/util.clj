@@ -7,7 +7,8 @@
             [clj-time.format :as timeformat]
             [clj-time.coerce :as tc]
             [schema.core :as sc])
-  (:import [org.joda.time LocalDateTime]))
+  (:import [org.joda.time LocalDateTime]
+           [java.util.jar JarFile]))
 
 ;;
 ;; Nil-safe number utilities
@@ -444,8 +445,6 @@
   [& [ns]]
   (-> (or ns (class *ns*))
     .getProtectionDomain .getCodeSource .getLocation .getPath))
-
-(import java.util.jar.JarFile)
 
 (defn list-jar [jar-path inner-dir]
   (if-let [jar         (JarFile. jar-path)]
