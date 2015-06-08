@@ -5,11 +5,12 @@
 (fact "adding comments"
   (let [id  (create-app-id pena)]
 
-    (fact "authority can not see the application, yet anyway"
-      (query sonja :application :id id) => not-accessible?)
+    (fact "authority can see the draft application, but can't comment draft"
+      (query sonja :application :id id) => ok?
+      sonja =not=> (allowed? :add-comment :id id :to irrelevant))
 
-    (fact "applicant asks for help"
-      (command pena :open-application :id id) => ok?)
+    (fact "applicant asks for help using add-comment"
+      (comment-application pena id true) => ok?)
 
     (fact "application is now in open state"
       (:state (query-application pena id)) => "open")

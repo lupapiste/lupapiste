@@ -43,12 +43,14 @@
                            attr: { 'data-test-col-name': column.schema.name }"></td>
             <!-- /ko -->
             <td class="action-column">
-              <span class="icon remove-grey inline-right" data-bind="click: $parent.removeRow"></span>
+              <span class="icon remove-grey inline-right" data-bind="click: $parent.removeRow,
+                                                                     visible: lupapisteApp.models.applicationAuthModel.ok('remove-document-data')"></span>
             </td>
           </tr>
         </tbody>
       </table>
-      <button data-bind="ltext: 'muutHankkeet.addHanke', click: addRow"></button>
+      <button data-bind="ltext: 'muutHankkeet.addHanke', click: addRow,
+                                                         visible: lupapisteApp.models.applicationAuthModel.ok('update-doc')"></button>
     </script>
   </section>
 </body>

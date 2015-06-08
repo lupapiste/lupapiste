@@ -1,8 +1,7 @@
 (ns lupapalvelu.notice-api
   (:require [sade.core :refer [ok fail fail!]]
             [lupapalvelu.action :refer [defquery defcommand update-application notify] :as action]
-            [monger.operators :refer :all])
-)
+            [monger.operators :refer :all]))
 
 (defn validate-urgency [{{urgency :urgency} :data}]
   (when-not (#{"normal" "urgent" "pending"} urgency)
@@ -11,7 +10,7 @@
 (defcommand change-urgency
   {:parameters [id urgency]
    :user-roles #{:authority}
-   :states action/all-states
+   :states (action/all-states-but [:draft])
    :user-authz-roles #{:statementGiver}
    :input-validators [validate-urgency]}
   [command]
@@ -19,7 +18,7 @@
 
 (defcommand add-authority-notice
   {:parameters [id authorityNotice]
-   :states action/all-states
+   :states (action/all-states-but [:draft])
    :user-authz-roles #{:statementGiver}
    :user-roles #{:authority}}
   [command]

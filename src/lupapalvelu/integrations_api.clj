@@ -159,7 +159,8 @@
                       (partial action/non-blank-parameters [:documentId :path])
                       (partial action/boolean-parameters [:overwrite])]
    :user-roles #{:applicant :authority}
-   :states     (action/all-application-states-but [:sent :verdictGiven :constructionStarted :closed :canceled])}
+   :states     (action/all-application-states-but [:sent :verdictGiven :constructionStarted :closed :canceled])
+   :pre-checks [application/validate-authority-in-drafts]}
   [{created :created {:keys [organization propertyId] :as application} :application :as command}]
   (if-let [{url :url} (organization/get-krysp-wfs application)]
     (let [document     (commands/by-id application collection documentId)
@@ -185,7 +186,8 @@
 (defcommand get-building-info-from-wfs
   {:parameters [id]
    :user-roles #{:applicant :authority}
-   :states     (action/all-application-states-but [:sent :verdictGiven :constructionStarted :closed :canceled])}
+   :states     (action/all-application-states-but [:sent :verdictGiven :constructionStarted :closed :canceled])
+   :pre-checks [application/validate-authority-in-drafts]}
   [{{:keys [organization propertyId] :as application} :application}]
   (if-let [{url :url} (organization/get-krysp-wfs application)]
     (let [kryspxml  (krysp-reader/building-xml url propertyId)
