@@ -16,7 +16,7 @@
 (def ^:private ua-root-element {:UusiAsia nil})
 
 (defn- ua-get-asian-tyyppi-string [application]
-  ; KasiteltavaHakemus, TODO later: Tiedoksianto
+  ; KasiteltavaHakemus, TODO tulossa Tiedoksianto (ilmoitukset)
   "KasiteltavaHakemus")
 
 (defn- ua-get-yhteystiedot [data]
@@ -24,7 +24,7 @@
     {:Jakeluosoite (get-in data [:osoite :katu])
      :Postinumero (get-in data [:osoite :postinumero])
      :Postitoimipaikka (get-in data [:osoite :postitoimipaikannimi])
-     :Maa nil ; TODO
+     :Maa nil
      :Email (get-in data [:yhteystiedot :email])
      :Puhelinnumero (get-in data [:yhteystiedot :puhelin])}))
 
@@ -40,7 +40,7 @@
      :Sukunimi (get-in data [:henkilo :henkilotiedot :sukunimi])
      :Yhteystiedot (ua-get-yhteystiedot (:henkilo data))
      :Henkilotunnus (get-in data [:henkilo :henkilotiedot :hetu])
-     :VainSahkoinenAsiointi nil ; TODO tarviiko tata
+     :VainSahkoinenAsiointi nil ; TODO tulossa myohemmin kayttoon
      :Turvakielto (get-in data [:henkilo :henkilotiedot :turvakieltoKytkin])}))
 
 (defn- ua-get-yritys [data]

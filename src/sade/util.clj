@@ -375,11 +375,6 @@
 (defn finnish-zip? [^String zip-code]
   (boolean (when zip-code (re-matches #"^\d{5}$" zip-code))))
 
-(defn finnish-hetu? [^String hetu] ; TODO remove this and use valid-hetu? function from Tommi's branch when applicable
-  (if (re-matches #"^(0[1-9]|[12]\d|3[01])(0[1-9]|1[0-2])([5-9]\d\+|\d\d-|\d\dA)\d{3}[\dA-Y]$" hetu)
-    (= (subs hetu 10 11) (hetu-checksum hetu))
-    false))
-
 ;;
 ;; Schema utils:
 ;;
@@ -408,14 +403,14 @@
 
 (def IFn (sc/pred ifn? "Function"))
 
-(def difficulty-values ["AA" "A" "B" "C" "ei tiedossa"])    ;TODO: move this to schemas?
-(defn compare-difficulty [a b]                              ;TODO: make this function more generic by taking the key and comparison values as param? E.g. compare-against [a b key ref-values]
-  (let [a (:difficulty a)
-        b (:difficulty b)]
+(defn compare-difficulty [accessor-keyword values a b]
+  {:pre [(keyword? accessor-keyword) (vector? values)]}
+  (let [a (accessor-keyword a)
+        b (accessor-keyword b)]
     (cond
       (nil? b) -1
       (nil? a) 1
-      :else (- (.indexOf difficulty-values a) (.indexOf difficulty-values b)))))
+      :else (- (.indexOf values a) (.indexOf values b)))))
 
 (defn every-key-in-map? [target-map required-keys]
   (every? (-> target-map keys set) required-keys))
@@ -443,3 +438,22 @@
   ; Regex derived from @stephenhay's at https://mathiasbynens.be/demo/url-regex
   (when-not (re-matches #"^(https?)://[^\s/$.?#].[^\s]*$" url)
     (fail :error.invalid.url)))
+
+(defn this-jar
+  "utility function to get the name of jar in which this function is invoked"
+  [& [ns]]
+  (-> (or ns (class *ns*))
+    .getProtectionDomain .getCodeSource .getLocation .getPath))
+
+(import java.util.jar.JarFile)
+
+(defn list-jar [jar-path inner-dir]
+  (if-let [jar         (JarFile. jar-path)]
+    (let [inner-dir    (if (and (not= "" inner-dir) (not= "/" (last inner-dir)))
+                         (str inner-dir "/")
+                         inner-dir)
+          entries      (enumeration-seq (.entries jar))
+          names        (map (fn [x] (.getName x)) entries)
+          snames       (filter (fn [x] (= 0 (.indexOf x inner-dir))) names)
+          fsnames      (map #(subs % (count inner-dir)) snames)]
+      fsnames)))

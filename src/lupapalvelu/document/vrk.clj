@@ -124,74 +124,6 @@
 ;; Validators
 ;;
 
-(defvalidator-old "vrk:CR327"
-  "k\u00e4ytt\u00f6tarkoituksen mukainen maksimitilavuus"
-  [{{schema-name :name} :schema-info data :data}]
-  (when (= schema-name "uusiRakennus")
-    (let [kayttotarkoitus (some->> data :kaytto :kayttotarkoitus :value ->kayttotarkoitus)
-          tilavuus        (some->> data :mitat :tilavuus :value ->int)
-          max-tilavuus    (kayttotarkoitus->tilavuus kayttotarkoitus)]
-      (when (and tilavuus max-tilavuus (> tilavuus max-tilavuus))
-        [{:path[:kaytto :kayttotarkoitus]
-          :result [:warn "vrk:CR327"]}
-         {:path[:mitat :tilavuus]
-          :result [:warn "vrk:CR327"]}]))))
-
-(defvalidator-old "vrk:BR106"
-  "Puutalossa saa olla korkeintaan 4 kerrosta"
-  [{{schema-name :name} :schema-info data :data}]
-  (when
-    (and
-      (= schema-name "uusiRakennus")
-      (some-> data :rakenne :kantavaRakennusaine :value (= "puu"))
-      (some-> data :mitat :kerrosluku :value ->int (> 4)))
-    [{:path[:rakenne :kantavaRakennusaine]
-      :result [:warn "vrk:BR106"]}
-     {:path[:mitat :kerrosluku]
-      :result [:warn "vrk:BR106"]}]))
-
-(defvalidator-old "vrk:CR343"
-  "Jos lammitystapa on 3 (sahkolammitys), on polttoaineen oltava 4 (sahko)"
-  [{{schema-name :name} :schema-info data :data}]
-  (when
-    (and
-      (= schema-name "uusiRakennus")
-      (some-> data :lammitys :lammitystapa :value (= "suora s\u00e4hk\u00f6"))
-      (some-> data :lammitys :lammonlahde :value (not= "s\u00e4hk\u00f6")))
-    [{:path [:lammitys :lammitystapa]
-      :result [:warn "vrk:CR343"]}
-     {:path [:lammitys :lammonlahde]
-      :result [:warn "vrk:CR343"]}]))
-
-(defvalidator-old "vrk:CR342"
-  "Sahko polttoaineena vaatii sahkoliittyman"
-  [{{schema-name :name} :schema-info data :data}]
-  (when
-    (and
-      (= schema-name "uusiRakennus")
-      (some-> data :lammitys :lammonlahde :value (= "s\u00e4hk\u00f6"))
-      (some-> data :verkostoliittymat :sahkoKytkin :value not))
-    [{:path [:lammitys :lammonlahde]
-      :result [:warn "vrk:CR342"]}
-     {:path [:verkostoliittymat :sahkoKytkin]
-      :result [:warn "vrk:CR342"]}]))
-
-(defvalidator-old "vrk:CR341"
-  "Sahkolammitus vaatii sahkoliittyman"
-  [{{schema-name :name} :schema-info data :data}]
-  (when
-    (and
-      (= schema-name "uusiRakennus")
-      (some-> data :lammitys :lammitystapa :value (= "suora s\u00e4hk\u00f6"))
-      (some-> data :verkostoliittymat :sahkoKytkin :value not))
-    [{:path [:lammitys :lammitystapa]
-      :result [:warn "vrk:CR341"]}
-     {:path [:verkostoliittymat :sahkoKytkin]
-      :result [:warn "vrk:CR341"]}]))
-
-;;
-;; new stuff
-;;
 
 (defvalidator :vrk:CR335
   {:doc "Jos lammitystapa ei ole 5 (ei kiinteaa lammitystapaa), on polttoaine ilmoitettava"
@@ -490,6 +422,54 @@
                     ["931 saunarakennukset" " "]]
             :fail  [["141 ravintolat yms."  nil]]}}
   (and (<= kayttotarkoitus 729) (not lammitystapa)))
+
+(defvalidator :vrk:CR327
+  {:doc "k\u00e4ytt\u00f6tarkoituksen mukainen maksimitilavuus"
+   :schema "uusiRakennus"
+   :fields [kayttotarkoitus [:kaytto :kayttotarkoitus ->kayttotarkoitus]
+            tilavuus        [:mitat :tilavuus ->int]]
+   :facts {:ok   [["032 luhtitalot" "100000"]]
+           :fail [["032 luhtitalot" "100001"]]}}
+  (and
+    tilavuus
+    (kayttotarkoitus->tilavuus kayttotarkoitus)
+    (> tilavuus (kayttotarkoitus->tilavuus kayttotarkoitus))))
+
+(defvalidator :vrk:BR106
+  {:doc "Puutalossa saa olla korkeintaan 4 kerrosta"
+   :schema "uusiRakennus"
+   :fields [kantavaRakennusaine [:rakenne :kantavaRakennusaine]
+            kerrosluku          [:mitat :kerrosluku ->int]]
+   :facts {:ok [["puu" "3"]]
+           :fail [["puu" "5"]]}}
+  (when (= kantavaRakennusaine "puu") (> kerrosluku 4)))
+
+(defvalidator :vrk:CR343
+  {:doc "Jos lammitystapa on 3 (sahkolammitys), on polttoaineen oltava 4 (sahko)"
+   :schema "uusiRakennus"
+   :fields [lammitystapa [:lammitys :lammitystapa]
+            lammonlahde  [:lammitys :lammonlahde]]
+   :facts {:ok [["suora s\u00e4hk\u00f6" "s\u00e4hk\u00f6"]]
+           :fail [["suora s\u00e4hk\u00f6" "kaasu"]]}}
+  (when (= lammitystapa "suora s\u00e4hk\u00f6") (not= "s\u00e4hk\u00f6" lammonlahde)))
+
+(defvalidator :vrk:CR342
+  {:doc "Sahko polttoaineena vaatii sahkoliittyman"
+   :schema "uusiRakennus"
+   :fields [lammonlahde [:lammitys :lammonlahde]
+            sahkoliittyma?  [:verkostoliittymat :sahkoKytkin]]
+   :facts {:ok [["s\u00e4hk\u00f6" true]]
+           :fail [["s\u00e4hk\u00f6" false]]}}
+  (when (= lammonlahde "s\u00e4hk\u00f6") (not sahkoliittyma?)))
+
+(defvalidator :vrk:CR341
+  {:doc "Sahkolammitus vaatii sahkoliittyman"
+   :schema "uusiRakennus"
+   :fields [lammitystapa [:lammitys :lammitystapa]
+            sahkoliittyma?  [:verkostoliittymat :sahkoKytkin]]
+   :facts {:ok [["suora s\u00e4hk\u00f6" true]]
+           :fail [["suora s\u00e4hk\u00f6" false]]}}
+  (when (= lammitystapa "suora s\u00e4hk\u00f6") (not sahkoliittyma?)))
 
 #_(defvalidator :vrk:BR203
   {:doc "Jos huoneiston jakokirjain on annettu taytyy olla myos porraskirjain tai huoneistonumero"

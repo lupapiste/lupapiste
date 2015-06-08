@@ -167,6 +167,22 @@
                            data-bind="checked: isVerdictAttachment, enable: $root.authorization.ok('set-attachments-as-verdict-attachment')"></input>
                   </div>
 
+                  <div data-bind="if: features.enabled('arkistointi')">
+                    <div class="feature archive-valid" data-bind="with: latestVersion">
+                      <div>
+                        <span data-bind="ltext: 'archive.valid-format'"></span>
+                        <span class="icon ok" data-bind="visible: $data['valid-pdfa'], attr: {title: loc('attachment.valid-pdfa')}"></span>
+                        <span class="icon missing" data-bind="visible: !$data['valid-pdfa'], attr: {title: loc('attachment.invalid-pdfa')"></span>
+                      </div>
+                      <div data-bind="if: $data['missing-fonts'] && $data['missing-fonts'].length > 0">
+                        <h4><span data-bind="ltext: 'attachment.missing-fonts'"></span>:</h4>
+                        <div data-bind="foreach: $data['missing-fonts']">
+                          <span data-bind="text: $data"></span><br>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
                 </div>
               </div>
 

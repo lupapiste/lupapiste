@@ -260,6 +260,16 @@ $spritegrid: 100px;
     width: 24px;
     height: 24px;
   }
+  &.toj {
+    background-position: 0px -6400px;
+    width: 24px;
+    height: 24px;
+  }
+  &.archive {
+    background-position: 0px -6500px;
+    width: 24px;
+    height: 24px;
+  }
 
   //states
   &:hover {

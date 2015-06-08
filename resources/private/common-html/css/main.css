@@ -426,7 +426,7 @@ a:active, a:visited, a:hover {
 /* line 2, ../sass/partials/_icons.scss */
 .icon, .icon-small, .icon-tiny, .icon-large, .ui-icon {
   display: inline-block;
-  background-image: url("/img/icons-sprite-1.16.png");
+  background-image: url("/img/icons-sprite-1.17.png");
   background-repeat: no-repeat;
   overflow: hidden;
 }
@@ -732,12 +732,24 @@ a:active, a:visited, a:hover {
   width: 24px;
   height: 24px;
 }
-/* line 265, ../sass/partials/_icons.scss */
+/* line 263, ../sass/partials/_icons.scss */
+.icon.toj {
+  background-position: 0px -6400px;
+  width: 24px;
+  height: 24px;
+}
+/* line 268, ../sass/partials/_icons.scss */
+.icon.archive {
+  background-position: 0px -6500px;
+  width: 24px;
+  height: 24px;
+}
+/* line 275, ../sass/partials/_icons.scss */
 .icon:hover {
   background-position-x: -100px;
 }
 
-/* line 277, ../sass/partials/_icons.scss */
+/* line 287, ../sass/partials/_icons.scss */
 [type=submit] .icon.left-align, .btn .icon.left-align, button .icon.left-align {
   position: absolute;
   left: 12px;
@@ -745,7 +757,7 @@ a:active, a:visited, a:hover {
   top: 0;
   margin: auto;
 }
-/* line 284, ../sass/partials/_icons.scss */
+/* line 294, ../sass/partials/_icons.scss */
 [type=submit] .icon.right-align, .btn .icon.right-align, button .icon.right-align {
   position: absolute;
   right: 6px;
@@ -754,7 +766,7 @@ a:active, a:visited, a:hover {
   margin: auto;
 }
 
-/* line 293, ../sass/partials/_icons.scss */
+/* line 303, ../sass/partials/_icons.scss */
 h1 .icon {
   margin-right: 3px;
 }
@@ -1288,7 +1300,7 @@ input[readonly]:focus, textarea[readonly]:focus {
 }
 /* line 108, ../sass/partials/_forms.scss */
 .form-indicator .icon {
-  background-image: url("/img/icons-sprite-1.16.png");
+  background-image: url("/img/icons-sprite-1.17.png");
   background-repeat: no-repeat;
   display: none;
   height: 24px;
@@ -1846,7 +1858,7 @@ input[readonly]:focus, textarea[readonly]:focus {
 /* line 618, ../sass/partials/_forms.scss */
 .form-help:before {
   content: " ";
-  background-image: url("/img/icons-sprite-1.16.png");
+  background-image: url("/img/icons-sprite-1.17.png");
   background-repeat: no-repeat;
   width: 16px;
   height: 16px;
@@ -1880,7 +1892,7 @@ input[readonly]:focus, textarea[readonly]:focus {
 /* line 648, ../sass/partials/_forms.scss */
 .form-full-width .form-help:before {
   content: " ";
-  background-image: url("/img/icons-sprite-1.16.png");
+  background-image: url("/img/icons-sprite-1.17.png");
   background-repeat: no-repeat;
   width: 16px;
   height: 16px;
@@ -1893,7 +1905,7 @@ input[readonly]:focus, textarea[readonly]:focus {
 /* line 662, ../sass/partials/_forms.scss */
 .approval-approved:after {
   content: " ";
-  background-image: url("/img/icons-sprite-1.16.png");
+  background-image: url("/img/icons-sprite-1.17.png");
   background-repeat: no-repeat;
   width: 18px;
   height: 18px;
@@ -1906,7 +1918,7 @@ input[readonly]:focus, textarea[readonly]:focus {
 /* line 674, ../sass/partials/_forms.scss */
 .approval-rejected:after {
   content: " ";
-  background-image: url("/img/icons-sprite-1.16.png");
+  background-image: url("/img/icons-sprite-1.17.png");
   background-repeat: no-repeat;
   width: 18px;
   height: 18px;
@@ -2950,7 +2962,7 @@ table.attachments-template-table td.attachment-version-info {
 .instructions:before {
   content: "";
   display: block;
-  background-image: url("/img/icons-sprite-1.16.png");
+  background-image: url("/img/icons-sprite-1.17.png");
   background-repeat: no-repeat;
   background-position: 0px -2900px;
   height: 32px;
@@ -3360,7 +3372,7 @@ ul.attachments-list li.mandatory-attachments {
 /* line 136, ../sass/partials/_accordion.scss */
 .accordion-indicator .icon {
   display: none;
-  background-image: url("/img/icons-sprite-1.16.png");
+  background-image: url("/img/icons-sprite-1.17.png");
   background-repeat: no-repeat;
 }
 /* line 141, ../sass/partials/_accordion.scss */
@@ -3466,7 +3478,7 @@ ul.attachments-list li.mandatory-attachments {
 #sys-notification ul:before {
   content: "";
   display: block;
-  background-image: url("/img/icons-sprite-1.16.png");
+  background-image: url("/img/icons-sprite-1.17.png");
   background-repeat: no-repeat;
   background-position: 0px -4800px;
   height: 32px;
@@ -3740,7 +3752,7 @@ ul.attachments-list li.mandatory-attachments {
   content: "";
   display: block;
   position: absolute;
-  background-image: url("/img/icons-sprite-1.16.png");
+  background-image: url("/img/icons-sprite-1.17.png");
   background-repeat: no-repeat;
   background-position: 0px -3393px;
   height: 22px;
@@ -3754,7 +3766,7 @@ ul.attachments-list li.mandatory-attachments {
   content: "";
   display: block;
   position: absolute;
-  background-image: url("/img/icons-sprite-1.16.png");
+  background-image: url("/img/icons-sprite-1.17.png");
   background-repeat: no-repeat;
   background-position: 0px -3293px;
   height: 22px;
@@ -3843,7 +3855,7 @@ ul.attachments-list li.mandatory-attachments {
 }
 /* line 184, ../sass/views/_applications.scss */
 #applications-list .urgent {
-  background-image: url("/img/icons-sprite-1.16.png");
+  background-image: url("/img/icons-sprite-1.17.png");
   background-repeat: no-repeat;
   background-position: 0 -5300px;
   height: 24px;
@@ -3851,7 +3863,7 @@ ul.attachments-list li.mandatory-attachments {
 }
 /* line 190, ../sass/views/_applications.scss */
 #applications-list .pending {
-  background-image: url("/img/icons-sprite-1.16.png");
+  background-image: url("/img/icons-sprite-1.17.png");
   background-repeat: no-repeat;
   background-position: 0 -5500px;
   width: 24px;
@@ -3859,7 +3871,7 @@ ul.attachments-list li.mandatory-attachments {
 }
 /* line 196, ../sass/views/_applications.scss */
 #applications-list .normal {
-  background-image: url("/img/icons-sprite-1.16.png");
+  background-image: url("/img/icons-sprite-1.17.png");
   background-repeat: no-repeat;
   background-position: 0 -5600px;
   width: 24px;
@@ -3867,21 +3879,21 @@ ul.attachments-list li.mandatory-attachments {
 }
 /* line 202, ../sass/views/_applications.scss */
 #applications-list .unseen-comments {
-  background-image: url("/img/icons-sprite-1.16.png");
+  background-image: url("/img/icons-sprite-1.17.png");
   background-repeat: no-repeat;
   background-position: 0 -4295px;
   width: 21px;
 }
 /* line 207, ../sass/views/_applications.scss */
 #applications-list .unseen-indicators {
-  background-image: url("/img/icons-sprite-1.16.png");
+  background-image: url("/img/icons-sprite-1.17.png");
   background-repeat: no-repeat;
   background-position: 0 -4597px;
   width: 25px;
 }
 /* line 212, ../sass/views/_applications.scss */
 #applications-list .unseen-attachments {
-  background-image: url("/img/icons-sprite-1.16.png");
+  background-image: url("/img/icons-sprite-1.17.png");
   background-repeat: no-repeat;
   background-position: 0 -4496px;
   width: 21px;
@@ -4956,7 +4968,7 @@ span.icon_clear:before {
 
 /* line 124, ../sass/views/_create_application.scss */
 #popup-id_close {
-  background-image: url("/img/icons-sprite-1.16.png");
+  background-image: url("/img/icons-sprite-1.17.png");
   background-repeat: no-repeat;
   background-position: 0px -4100px;
   top: 4px !important;
@@ -5020,7 +5032,7 @@ span.icon_clear:before {
 
 /* line 7, ../sass/views/_attachment.scss */
 .attachment-iframe {
-  height: 530px;
+  height: 570px;
   width: 600px;
   border: 0;
   overflow: hidden;
@@ -5303,6 +5315,12 @@ td.comment-text {
   margin-bottom: 12px;
 }
 
+/* line 268, ../sass/views/_attachment.scss */
+.archive-valid .icon {
+  vertical-align: middle;
+  margin-left: 5px;
+}
+
 /* line 2, ../sass/views/_statement.scss */
 #statement h1 {
   width: 70%;
@@ -5583,7 +5601,7 @@ td.comment-text {
 /* line 67, ../sass/views/_register.scss */
 #account-type-selection .account-box.selected:after {
   content: " ";
-  background-image: url("/img/icons-sprite-1.16.png");
+  background-image: url("/img/icons-sprite-1.17.png");
   background-repeat: no-repeat;
   width: 100px;
   height: 100px;
@@ -6024,7 +6042,7 @@ td.comment-text {
 }
 /* line 64, ../sass/views/_side_panel.scss */
 #side-panel .buttons .btn-conversation .unseen-comments, #side-panel .buttons .btn-notice .unseen-comments {
-  background-image: url("/img/icons-sprite-1.16.png");
+  background-image: url("/img/icons-sprite-1.17.png");
   background-repeat: no-repeat;
   background-position: 1px -5396px;
   width: 23px;
@@ -6083,7 +6101,7 @@ td.comment-text {
 }
 /* line 114, ../sass/views/_side_panel.scss */
 #side-panel .header .close-btn {
-  background-image: url("/img/icons-sprite-1.16.png");
+  background-image: url("/img/icons-sprite-1.17.png");
   background-repeat: no-repeat;
   width: 16px;
   height: 16px;
