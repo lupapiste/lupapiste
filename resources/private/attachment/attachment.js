@@ -493,9 +493,7 @@ var attachment = (function() {
     resetUploadIframe();
   });
 
-  hub.subscribe("dialog-close", function() {
-    model.previewDisabled(false);
-  });
+  hub.subscribe("dialog-close", _.partial(model.previewDisabled, false));
 
   $(function() {
     $("#attachment").applyBindings({
