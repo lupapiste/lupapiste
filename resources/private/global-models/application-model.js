@@ -152,6 +152,9 @@ LUPAPISTE.ApplicationModel = function() {
       self.invites(_.filter(data.invites, function(invite) {
         return invite.application.id === self.id();
       }));
+      if (self.hasInvites()) {
+        self.showAcceptInvitationDialog();
+      }
     });
   };
 
@@ -585,5 +588,17 @@ LUPAPISTE.ApplicationModel = function() {
       .error(function(e) {LUPAPISTE.showIntegrationError("integration.asianhallinta.title", e.text, e.details);})
       .processing(self.processing)
       .call();
+  };
+
+  self.showAcceptInvitationDialog = function() {
+    if (self.hasInvites()) {
+      hub.send("show-dialog", {ltitle: "application.inviteSend",
+                               size: "medium",
+                               component: "yes-no-dialog",
+                               componentParams: {ltext: "application.inviteDialogText",
+                                                 lyesTitle: "applications.approveInvite",
+                                                 lnoTitle: "application.showApplication",
+                                                 yesFn: self.approveInvite}});
+    }
   };
 };
