@@ -1,6 +1,8 @@
 (function($) {
   "use strict";
 
+  var PW_CHANGED_DIALOG_ID = "password-changed-dialog";
+
   function Reset() {
     var self = this;
     self.email = ko.observable();
@@ -35,11 +37,6 @@
     });
     self.fail = ko.observable(false);
 
-    var successOkButton = {title: loc("welcome.login"),
-        fn: function() {
-          LUPAPISTE.ModalDialog.close();
-          pageutil.openFrontpage();}};
-
     self.send = function() {
       ajax
         .post("/api/token/" + self.token())
@@ -47,12 +44,18 @@
         .success(function() {
           self.fail(false).password1("").password2("");
 
-
-          LUPAPISTE.ModalDialog.showDynamicOk(loc("success.dialog.title"), loc("setpw.success"), successOkButton);
+          hub.send("show-dialog",
+              {id: PW_CHANGED_DIALOG_ID,
+               ltitle: "success.dialog.title",
+               size: "medium",
+               component: "ok-dialog",
+               componentParams: {ltext: "setpw.success", okTitle: loc("welcome.login")}});
         })
         .fail(function() { self.fail(true).password1("").password2(""); $("#setpw input:first").focus(); })
         .call();
     };
+
+    hub.subscribe({type: "dialog-close", id: PW_CHANGED_DIALOG_ID}, pageutil.openFrontpage);
 
     hub.onPageLoad("setpw", function(e) { self.token(e.pagePath[0]);});
 

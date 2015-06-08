@@ -15,7 +15,6 @@ LUPAPISTE.ModalDialogModel = function () {
     return [self.size(), self.component()].join(" ");
   });
   self.closeOnClick = ko.observable();
-  self.localize = ko.observable();
 
   self.showDialog.subscribe(function(show) {
     _.delay(function(show) {
@@ -80,7 +79,6 @@ LUPAPISTE.ModalDialogModel = function () {
     self.size(data.size ? data.size : "large");
     self.id(data.id || data.component);
     self.closeOnClick(data.closeOnClick || false);
-    self.localize(_.isUndefined(data.localize) ? true : data.localize);
     self.showDialog(true);
   });
 

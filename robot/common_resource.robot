@@ -808,7 +808,7 @@ Fill in new password
   Wait Until  Element Should Be Enabled  xpath=//section[@id='${section}']//button
   Click Element  xpath=//section[@id='${section}']//button
   Wait Until  Page should contain  Salasana asetettu.
-  Confirm  dynamic-ok-confirm-dialog
+  Confirm notification dialog
 
 Open company user listing
   Click Element  user-name
