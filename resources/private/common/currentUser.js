@@ -55,15 +55,13 @@ LUPAPISTE.CurrentUser = function() {
   function getNotificationFields(notification) {
     if(notification.titleI18nkey() && notification.messageI18nkey()) {
       return {
-        title: notification.titleI18nkey(),
-        msg: notification.messageI18nkey(),
-        localize: true
+        title: loc(notification.titleI18nkey()),
+        msg: loc(notification.messageI18nkey())
       };
     } else if (notification.title() && notification.message()) {
       return {
         title: notification.title(),
-        msg: notification.message(),
-        localize: false
+        msg: notification.message()
       };
     } else {
       return undefined;
@@ -77,13 +75,12 @@ LUPAPISTE.CurrentUser = function() {
   ko.computed(function() {
     if (self.showNotification()) {
       var fields = getNotificationFields(self.notification);
-      hub.send("show-dialog", {ltitle: fields.title,
-                               localize: fields.localize,
+      hub.send("show-dialog", {title: fields.title,
                                id: "user-notification-dialog",
                                size: "medium",
                                component: "ok-dialog",
                                closeOnClick: true,
-                               componentParams: {ltext: fields.msg, localize: fields.localize}
+                               componentParams: {text: fields.msg}
                               });
     }
   });
