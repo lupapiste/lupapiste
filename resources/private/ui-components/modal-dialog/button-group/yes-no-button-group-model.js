@@ -13,6 +13,9 @@ LUPAPISTE.YesNoButtonGroupModel = function (params) {
   };
 
   self.no = function() {
+    if (_.isFunction(params.noFn)) {
+      params.noFn();
+    }
     hub.send("close-dialog");
   };
 };

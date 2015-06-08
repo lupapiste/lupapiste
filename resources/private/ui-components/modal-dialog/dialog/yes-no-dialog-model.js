@@ -6,7 +6,5 @@ LUPAPISTE.YesNoDialogModel = function (params) {
 
   self.yes = params.yesFn || function() { _.noop(); };
 
-  self.no = function() {
-    hub.send("close-dialog");
-  };
+  self.no = params.noFn || function() { _.noop(); };
 };
