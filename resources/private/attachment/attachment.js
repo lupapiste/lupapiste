@@ -495,6 +495,9 @@ var attachment = (function() {
 
   hub.subscribe("dialog-close", _.partial(model.previewDisabled, false));
 
+  hub.subscribe("side-panel-open", _.partial(model.previewDisabled, true));
+  hub.subscribe("side-panel-close", _.partial(model.previewDisabled, false));
+
   $(function() {
     $("#attachment").applyBindings({
       attachment: model,
