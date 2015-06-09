@@ -8,8 +8,8 @@ LUPAPISTE.RegistrationModel = function(commandName, afterSuccessFn, errorSelecto
 
   var self = this;
 
-  self.keys = ks || ["stamp", "personId", "firstName", "lastName", "email", "confirmEmail",
-                     "street", "city", "zip", "phone", "password", "confirmPassword",
+  self.keys = ks || ["stamp", "email",
+                     "street", "city", "zip", "phone", "password",
                      "allowDirectMarketing", "rakentajafi",
                      "architect", "degree", "graduatingYear", "fise"];
 
@@ -93,9 +93,6 @@ LUPAPISTE.RegistrationModel = function(commandName, afterSuccessFn, errorSelecto
       var val = self.plainModel[key]();
       d[key] = val !== undefined ? val : null;
     });
-
-    d.confirmPassword = null;
-    d.confirmEmail = null;
     return d;
   };
 
