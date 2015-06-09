@@ -963,6 +963,20 @@
             }
      :body party}
 
+    {:info {:name "hakija-r"
+            :group-help "hakija.group.help"
+            :i18name "osapuoli"
+            :order 3
+            :removable true
+            :repeating true
+            :approvable true
+            :type :party
+            :subtype :hakija
+            :section-help "party.section.help"
+            :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
+            }
+     :body party}
+
     {:info {:name "hakija-ya"
             :i18name "osapuoli"
             :order 3
