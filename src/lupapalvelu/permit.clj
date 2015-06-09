@@ -1,8 +1,7 @@
 (ns lupapalvelu.permit
   (:require [taoensso.timbre :as timbre :refer [errorf warn]]
             [sade.core :refer [fail]]
-            [sade.util :as util]
-            [lupapalvelu.action :refer [defquery]]))
+            [sade.util :as util]))
 
 (defonce ^:private permit-type-defs (atom {}))
 (defn permit-types [] @permit-type-defs)
