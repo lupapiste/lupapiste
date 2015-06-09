@@ -6,8 +6,7 @@
             [lupapalvelu.application-search :as search]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.application :refer [get-operations]]))
+            [lupapalvelu.mongo :as mongo]))
 
 
 (defquery applications-for-datatables
@@ -17,14 +16,18 @@
   [{user :user}]
   (ok :data (search/applications-for-user user params)))
 
+(defn- localize-operation [op]
+  (assoc op
+    :displayNameFi (i18n/localize "fi" "operations" (:name op))
+    :displayNameSv (i18n/localize "sv" "operations" (:name op))))
 
 (defn- localize-application [application]
-  (let [op-name (fn [op lang] (i18n/localize lang "operations" (:name op)))]
-    (-> application
-      (update-in [:operations] #(map (fn [op] (assoc op :displayNameFi (op-name op "fi") :displayNameSv (op-name op "sv"))) %))
-      (assoc
-        :stateNameFi (i18n/localize "fi" (:state application))
-        :stateNameSv (i18n/localize "sv" (:state application))))))
+  (-> application
+    (update-in [:secondaryOperations] #(map localize-operation %))
+    (update-in [:primaryOperation] localize-operation)
+    (assoc
+      :stateNameFi (i18n/localize "fi" (:state application))
+      :stateNameSv (i18n/localize "sv" (:state application)))))
 
 (defquery applications
   {:description "Query for integrations"
