@@ -24,7 +24,7 @@ LUPAPISTE.RegistrationModel = function(commandName, afterSuccessFn, errorSelecto
     zip: ko.observable("").extend({required: true, number: true, maxLength: 5, minLength: 5}),
     phone: ko.observable("").extend({required: true, maxLength: 255}),
     allowDirectMarketing: ko.observable(false),
-    email: ko.observable("").extend({email: true, usernameAsync: true}),
+    email: ko.observable("").extend({email: true}),
     password: ko.observable("").extend({validPassword: true}),
     architect: ko.observable(false),
     degree: ko.observable().extend({maxLength: 255}),
