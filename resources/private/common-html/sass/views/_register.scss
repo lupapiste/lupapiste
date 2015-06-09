@@ -27,8 +27,12 @@
 
   .register-error {
     position: relative;
+    margin: $marginS 0;
   }
 
+  .architect-toggle {
+    min-height: 36px;
+  }
 
 }
 
