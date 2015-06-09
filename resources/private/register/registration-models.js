@@ -8,7 +8,10 @@ LUPAPISTE.RegistrationModel = function(commandName, afterSuccessFn, errorSelecto
 
   var self = this;
 
-  self.keys = ks || ["stamp", "personId", "firstName", "lastName", "email", "confirmEmail", "street", "city", "zip", "phone", "password", "confirmPassword", "street", "zip", "city", "allowDirectMarketing", "rakentajafi"];
+  self.keys = ks || ["stamp", "personId", "firstName", "lastName", "email", "confirmEmail",
+                     "street", "city", "zip", "phone", "password", "confirmPassword",
+                     "allowDirectMarketing", "rakentajafi",
+                     "architect", "degree", "graduatingYear", "fise"];
 
   self.plainModel = {
     personId: ko.observable(""),
