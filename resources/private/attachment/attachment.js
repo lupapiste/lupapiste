@@ -172,10 +172,10 @@ var attachment = (function() {
 
     deleteAttachment: function() {
       model.previewDisabled(true);
-      hub.send("show-dialog", {title: "attachment.delete.header",
+      hub.send("show-dialog", {ltitle: "attachment.delete.header",
                                size: "medium",
                                component: "yes-no-dialog",
-                               componentParams: {text: "attachment.delete.message",
+                               componentParams: {ltext: "attachment.delete.message",
                                                  yesFn: deleteAttachmentFromServer}});
     },
 
@@ -196,6 +196,7 @@ var attachment = (function() {
     },
 
     showChangeTypeDialog: function() {
+      model.previewDisabled(true);
       model.changeTypeDialogModel.init(model.attachmentType());
       LUPAPISTE.ModalDialog.open("#change-type-dialog");
     },
@@ -204,13 +205,12 @@ var attachment = (function() {
       var fileId = fileModel.fileId;
       deleteAttachmentVersionFromServerProxy = function() {
         deleteAttachmentVersionFromServer(fileId);
-        model.previewDisabled(false);
       };
       model.previewDisabled(true);
-      hub.send("show-dialog", {title: "attachment.delete.version.header",
+      hub.send("show-dialog", {ltitle: "attachment.delete.version.header",
                                size: "medium",
                                component: "yes-no-dialog",
-                               componentParams: {text: "attachment.delete.version.message",
+                               componentParams: {ltext: "attachment.delete.version.message",
                                                  yesFn: deleteAttachmentVersionFromServerProxy}});
     },
 
@@ -491,11 +491,12 @@ var attachment = (function() {
 
   hub.subscribe({type: "dialog-close", id : "upload-dialog"}, function() {
     resetUploadIframe();
-    model.previewDisabled(false);
   });
-  hub.subscribe({type: "dialog-close", id : "dialog-sign-attachment"}, function() {
-    model.previewDisabled(false);
-  });
+
+  hub.subscribe("dialog-close", _.partial(model.previewDisabled, false));
+
+  hub.subscribe("side-panel-open", _.partial(model.previewDisabled, true));
+  hub.subscribe("side-panel-close", _.partial(model.previewDisabled, false));
 
   $(function() {
     $("#attachment").applyBindings({

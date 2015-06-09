@@ -418,7 +418,7 @@
                           <!-- /ko -->
                         </span>
                       </span>
-                      <a class="invite-action" href="#" data-bind="ltext: 'application.remove-auth', click: $root.application.removeAuth, visible: $root.application.isNotOwner($data)"></a>
+                      <a class="invite-action" href="#" data-bind="ltext: 'application.remove-auth', click: $root.application.removeAuth, visible: $root.application.isNotOwner($data) && $root.authorization.ok('remove-auth')"></a>
                       <!-- ko if: $root.application.canSubscribe($data) -->
                       <a class="invite-action" href="#"
                          data-test-id="subscribeNotifications"

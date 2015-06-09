@@ -20,13 +20,13 @@ Mikko adds an operation
   Wait Until  Title Should Be  ${appname} - Lupapiste
   Wait and click  //section[@id="add-operation"]//div[@class="tree-content"]//*[text()="Rakentaminen, purkaminen tai maisemaan vaikuttava toimenpide"]
   Wait and click  //section[@id="add-operation"]//div[@class="tree-content"]//*[text()="Uuden rakennuksen rakentaminen"]
-  Wait and click  //section[@id="add-operation"]//div[@class="tree-content"]//*[text()="Muun kuin edellä mainitun rakennuksen rakentaminen (liike-, toimisto-, opetus-, päiväkoti-, palvelu-, hoitolaitos- tai muu rakennus)"]
+  Wait and click  //section[@id="add-operation"]//div[@class="tree-content"]//*[text()="Muun kuin edellä mainitun rakennuksen rakentaminen (navetta, liike-, toimisto-, opetus-, päiväkoti-, palvelu-, hoitolaitos- tai muu rakennus)"]
   Wait until  Element should be visible  xpath=//section[@id="add-operation"]//div[@class="tree-content"]//*[@data-test-id="add-operation-to-application"]
   Click enabled by test id  add-operation-to-application
 
 Application contains two operations
   Wait Until  Page Should Contain  Asuinkerrostalon tai rivitalon rakentaminen
-  Wait Until  Page Should Contain  Muun kuin edellä mainitun rakennuksen rakentaminen (liike-, toimisto-, opetus-, päiväkoti-, palvelu-, hoitolaitos- tai muu rakennus)
+  Wait Until  Page Should Contain  Muun kuin edellä mainitun rakennuksen rakentaminen (navetta, liike-, toimisto-, opetus-, päiväkoti-, palvelu-, hoitolaitos- tai muu rakennus)
 
 Add another operation
   Click enabled by test id  add-operation
@@ -40,5 +40,5 @@ Add another operation
 
 Application contains three operations
   Wait Until  Page Should Contain  Asuinkerrostalon tai rivitalon rakentaminen
-  Wait Until  Page Should Contain  Muun kuin edellä mainitun rakennuksen rakentaminen (liike-, toimisto-, opetus-, päiväkoti-, palvelu-, hoitolaitos- tai muu rakennus)
+  Wait Until  Page Should Contain  Muun kuin edellä mainitun rakennuksen rakentaminen (navetta, liike-, toimisto-, opetus-, päiväkoti-, palvelu-, hoitolaitos- tai muu rakennus)
   Wait Until  Page Should Contain  Vapaa-ajan asunnon tai saunarakennuksen rakentaminen

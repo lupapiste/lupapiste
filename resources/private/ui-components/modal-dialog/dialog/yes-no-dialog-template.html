@@ -4,10 +4,13 @@
   <section class="page container">
     <script type="text/html" id="yes-no-dialog-template">
       <div class="content">
-        <p data-bind="lhtml: text" class="dialog-desc"></p>
+        <p data-bind="html: text" class="dialog-desc"></p>
       </div>
       <div data-bind="component: {name:'yes-no-button-group',
-                                  params: {yesFn: yes}}"></div>
+                                  params: {yesFn: yes,
+                                           noFn:  no,
+                                           yesTitle: yesTitle,
+                                           noTitle: noTitle}}"></div>
     </script>
   </section>
 </body>

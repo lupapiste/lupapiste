@@ -6,6 +6,7 @@
             [sade.core :refer [ok fail fail!]]
             [sade.strings :as ss]
             [lupapalvelu.action :refer [defquery defcommand update-application notify] :as action]
+            [lupapalvelu.application :as application]
             [lupapalvelu.comment :as comment]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.open-inforequest :as open-inforequest]
@@ -45,7 +46,7 @@
 (defcommand can-target-comment-to-authority
   {:description "Dummy command for UI logic"
    :user-roles #{:authority}
-   :states      (action/all-states-but [:canceled])})
+   :states      (action/all-states-but [:draft :canceled])})
 
 (defcommand can-mark-answered
   {:description "Dummy command for UI logic"
@@ -57,7 +58,8 @@
    :user-roles #{:applicant :authority :oirAuthority}
    :states     (action/all-states-but [:canceled])
    :user-authz-roles action/all-authz-writer-roles
-   :pre-checks [applicant-cant-set-to]
+   :pre-checks [applicant-cant-set-to
+                application/validate-authority-in-drafts]
    :input-validators [validate-comment-target
                       (partial action/map-parameters [:target])
                       (partial action/vector-parameters [:roles])]

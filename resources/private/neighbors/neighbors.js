@@ -26,7 +26,7 @@
     };
 
     function openEditDialog(params) {
-      hub.send("show-dialog", {title: "neighbors.edit.title",
+      hub.send("show-dialog", {ltitle: "neighbors.edit.title",
                                component: "neighbors-edit-dialog",
                                componentParams: params,
                                size: "medium"});
@@ -41,7 +41,7 @@
     };
 
     self.click = function(x, y) {
-      hub.send("show-dialog", { title: "neighbor.owners.title",
+      hub.send("show-dialog", { ltitle: "neighbor.owners.title",
                                 size: "large",
                                 component: "neighbors-owners-dialog",
                                 componentParams: {x: x,

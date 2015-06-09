@@ -64,6 +64,7 @@ Teppo can view application
   Teppo logs in
   Wait Until  Element should be visible  xpath=//div[@class='invitation']//a[@data-test-id='open-application-button']
   Click element  xpath=//div[@class='invitation']//a[@data-test-id='open-application-button']
+  Deny yes no dialog
   Wait Until  Element text should be  xpath=//section[@id='application']//span[@data-test-id='application-title']  INVITE-APP
   Go to page  applications
 

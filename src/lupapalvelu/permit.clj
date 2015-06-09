@@ -2,7 +2,6 @@
   (:require [taoensso.timbre :as timbre :refer [errorf warn]]
             [sade.core :refer [fail]]
             [sade.util :as util]
-            [lupapalvelu.domain :as domain]
             [lupapalvelu.action :refer [defquery]]))
 
 (defonce ^:private permit-type-defs (atom {}))

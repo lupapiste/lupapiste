@@ -1,12 +1,16 @@
 (ns lupapalvelu.application-itest
   (:require [midje.sweet :refer :all]
             [clojure.string :refer [join]]
+            [sade.core :refer [unauthorized]]
             [sade.strings :as ss]
             [lupapalvelu.itest-util :refer :all]
+            [lupapalvelu.test-util :refer [doc-result doc-check]]
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.application :as app]
+            [lupapalvelu.application-api :as app]
+            [lupapalvelu.application :as a]
+            [lupapalvelu.actions-api :as ca]
             [lupapalvelu.document.tools :as tools]))
 
 (mongo/connect!)
@@ -482,3 +486,26 @@
                                       :x (-> application :location :x) - 1
                                       :y (-> application :location :y) + 1
                                       :address (:address application) :propertyId (:propertyId application)) => ok?)))
+
+(fact "Authority can access drafts, but can't use most important commands"
+  (let [id (create-app-id pena)
+        app (query-application sonja id)
+        actions (:actions (query sonja :allowed-actions :id id))
+        denied-actions #{:delete-attachment :delete-attachment-version :upload-attachment :change-location
+                         :new-verdict-draft :create-attachments :remove-document-data :remove-doc :update-doc
+                         :reject-doc :approve-doc :stamp-attachments :create-task :cancel-application-authority
+                         :add-link-permit :set-tos-function-for-application :set-tos-function-for-operation
+                         :unsubscribe-notifications :subscribe-notifications :assign-application :neighbor-add
+                         :change-permit-sub-type :refresh-ktj :merge-details-from-krysp :remove-link-permit-by-app-id
+                         :set-attachment-type :move-attachments-to-backing-system :add-operation :remove-auth :create-doc
+                         :set-company-to-document :set-user-to-document :set-current-user-to-document :approve-application
+                         :submit-application :create-foreman-application}
+        user (find-user-from-minimal-by-apikey sonja)]
+    app => map?
+    (doseq [command (ca/foreach-action user {} app)
+            :let [action (keyword (:action command))
+                  result (doc-result (a/validate-authority-in-drafts command app) action)]]
+      (when (denied-actions action)
+        result => (doc-check = unauthorized)))))
+
+

@@ -538,6 +538,12 @@ Confirm yes no dialog
   Click Element  xpath=//div[@id="modal-dialog"]//button[@data-test-id="confirm-yes"]
   Wait Until  Element Should Not Be Visible  xpath=//div[@id="modal-dialog"]//button[@data-test-id="confirm-yes"]
 
+Deny yes no dialog
+  Wait until  Element should be visible  xpath=//div[@id="modal-dialog"]//button[@data-test-id="confirm-no"]
+  Focus  xpath=//div[@id="modal-dialog"]//button[@data-test-id="confirm-no"]
+  Click Element  xpath=//div[@id="modal-dialog"]//button[@data-test-id="confirm-no"]
+  Wait Until  Element Should Not Be Visible  xpath=//div[@id="modal-dialog"]//button[@data-test-id="confirm-no"]
+
 Confirm
   [Arguments]  ${modalId}
   Wait until  Element should be visible  xpath=//div[@id="${modalId}"]//button[@data-test-id="confirm-yes"]
@@ -802,7 +808,7 @@ Fill in new password
   Wait Until  Element Should Be Enabled  xpath=//section[@id='${section}']//button
   Click Element  xpath=//section[@id='${section}']//button
   Wait Until  Page should contain  Salasana asetettu.
-  Confirm  dynamic-ok-confirm-dialog
+  Confirm notification dialog
 
 Open company user listing
   Click Element  user-name

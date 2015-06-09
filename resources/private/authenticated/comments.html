@@ -14,7 +14,7 @@
             maxlength="4000">
           </textarea>
           <button
-            data-bind="visible: $parent.authorization.ok('open-application'), disable: disabled, click: stateOpenApplication"
+            data-bind="visible: $parent.authorization.ok('add-comment'), disable: disabled, click: stateOpenApplication"
             data-test-id="application-open-application-btn"
             type="submit"
             class="btn btn-primary">
@@ -30,7 +30,7 @@
             <em data-bind="visible: pending" class="button-loader"></em>
           </button>
 
-          
+
 
           <div data-bind="visible: $parent.authorization.ok('can-target-comment-to-authority') || $parent.authorization.ok('can-mark-answered')" class="comment-controls">
             <div class="mark-answered" data-bind="if: $parent.authorization.ok('can-mark-answered')">

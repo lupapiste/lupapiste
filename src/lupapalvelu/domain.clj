@@ -33,7 +33,7 @@
     (basic-application-query-for user)
     (case (keyword (:role user))
       :applicant {:state {$nin ["canceled"]}}
-      :authority {:state {$nin ["draft" "canceled"]}}
+      :authority {:state {$nin ["canceled"]}}
       :oirAuthority {:state {$in ["info" "answered"]} :openInfoRequest true}
       {})))
 

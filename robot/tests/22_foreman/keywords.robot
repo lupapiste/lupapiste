@@ -62,6 +62,7 @@ Foreman accepts invitation and fills info
 Foreman sets role and difficulty to foreman application
   [Arguments]  ${index}  ${role}  ${difficulty}
   Foreman opens application  ${index}
+  Deny yes no dialog
   Foreman accepts invitation and fills info
   Wait until  Select From List by test id  kuntaRoolikoodi  ${role}
   Wait until  Select From List by test id  patevyysvaatimusluokka  ${difficulty}

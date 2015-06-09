@@ -13,7 +13,6 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as organization]
-            [lupapalvelu.application :as a]
             [lupapalvelu.application-meta-fields :as app-meta-fields]
             [lupapalvelu.operations :as op]
             [sade.env :as env]
@@ -1017,7 +1016,7 @@
 (defmigration separate-operations-to-primary-and-secondary-operations
   {:apply-when (or (pos? (mongo/count :applications {:operations {$exists true}})) (pos? (mongo/count :submitted-applications {:operations {$exists true}})))}
   (doseq [collection [:applications :submitted-applications]
-          application (mongo/select collection {:operations {$exists true}})
+          application (mongo/select collection {:operations {$exists true}} {:operations 1})
           :let [primaryOperation (-> application :operations first)
                 secondaryOperations (-> application :operations rest)]]
     (mongo/update-by-id collection (:id application) {$set   {:primaryOperation    primaryOperation

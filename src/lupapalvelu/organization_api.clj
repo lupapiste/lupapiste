@@ -12,7 +12,6 @@
             [lupapalvelu.operations :as operations]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.organization :as o]
-            [lupapalvelu.application :as application]
             [camel-snake-kebab :as csk]
             [sade.strings :as ss]
             [sade.property :as p]

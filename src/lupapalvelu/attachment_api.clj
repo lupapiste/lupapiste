@@ -105,7 +105,8 @@
    :input-validators [(partial action/non-blank-parameters [:id :attachmentId :attachmentType])]
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles action/all-authz-writer-roles
-   :states     (action/all-states-but [:answered :sent :closed :canceled])}
+   :states     (action/all-states-but [:answered :sent :closed :canceled])
+   :pre-checks [a/validate-authority-in-drafts]}
   [{:keys [application user created] :as command}]
 
   (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
@@ -138,7 +139,8 @@
    :parameters  [id attachmentId]
    :input-validators [(partial action/non-blank-parameters [:attachmentId])]
    :user-roles #{:authority}
-   :states      (action/all-states-but [:answered :sent :closed :canceled])}
+   :states      (action/all-states-but [:answered :sent :closed :canceled])
+   :pre-checks  [a/validate-authority-in-drafts]}
   [{:keys [created] :as command}]
   (attachment/update-attachment-key command attachmentId :state :ok created :set-app-modified? true :set-attachment-modified? false))
 
@@ -147,7 +149,8 @@
    :parameters  [id attachmentId]
    :input-validators [(partial action/non-blank-parameters [:attachmentId])]
    :user-roles #{:authority}
-   :states      (action/all-states-but [:answered :sent :closed :canceled])}
+   :states      (action/all-states-but [:answered :sent :closed :canceled])
+   :pre-checks  [a/validate-authority-in-drafts]}
   [{:keys [created] :as command}]
   (attachment/update-attachment-key command attachmentId :state :requires_user_action created :set-app-modified? true :set-attachment-modified? false))
 
@@ -161,7 +164,8 @@
 
    :pre-checks [(fn [{{attachment-types :attachmentTypes} :data} application]
                   (when (and attachment-types (not (every? #(allowed-attachment-type-for-application? % application) attachment-types)))
-                    (fail :error.unknown-attachment-type)))]
+                    (fail :error.unknown-attachment-type)))
+                a/validate-authority-in-drafts]
    :input-validators [(partial action/vector-parameters [:attachmentTypes])]
    :user-roles #{:authority :oirAuthority}
    :states      (action/all-states-but [:answered :sent :closed :canceled])}
@@ -180,7 +184,8 @@
    :input-validators [(partial action/non-blank-parameters [:attachmentId])]
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles action/all-authz-writer-roles
-   :states      (action/all-states-but [:answered :sent :closed :canceled])}
+   :states      (action/all-states-but [:answered :sent :closed :canceled])
+   :pre-checks  [a/validate-authority-in-drafts]}
   [{:keys [application user]}]
 
   (when-not (attachment-deletable application attachmentId (:role user))
@@ -198,7 +203,8 @@
    :input-validators [(partial action/non-blank-parameters [:attachmentId :fileId])]
    :user-roles #{:applicant :authority :oirAuthority}
    :user-authz-roles action/all-authz-writer-roles
-   :states      (action/all-states-but [:answered :sent :closed :canceled])}
+   :states      (action/all-states-but [:answered :sent :closed :canceled])
+   :pre-checks  [a/validate-authority-in-drafts]}
   [{:keys [application user]}]
 
   (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
@@ -260,7 +266,8 @@
                   (when attachment-id
                     (when-not (attachment-editable-by-applicationState? application attachment-id (:role user))
                       (fail :error.pre-verdict-attachment))))
-                validate-attachment-type]
+                validate-attachment-type
+                a/validate-authority-in-drafts]
    :input-validators [(partial action/non-blank-parameters [:id :attachmentType :filename])
                       (partial action/map-parameters-with-required-keys [:attachmentType] [:type-id :type-group])
                       (fn [{{size :size} :data}] (when-not (pos? size) (fail :error.select-file)))
@@ -288,17 +295,25 @@
                          :locked locked
                          :required false
                          :user user
-                         :created created}
-        attach-file-result (attachment/attach-file! attachment-data)]
-    (if-not attach-file-result
-      (fail :error.unknown)
-      (when (env/feature? :arkistointi)
-        (when-let [processed-tempfile (when (and (= (mime/mime-type filename) "application/pdf") (not (pdf-conversion/is-pdf-a? tempfile)))
-                                        (pdf-conversion/convert-to-pdf-a tempfile))]
-          (let [new-filename (str (ss/substring filename 0 (- (count filename) 4)) "-PDFA.pdf")
-                new-id (:id attach-file-result)]
-            (when-not (attachment/attach-file! (assoc attachment-data :attachment-id new-id :content processed-tempfile :filename new-filename))
-              (fail :error.unknown))))))))
+                         :created created
+                         :valid-pdfa false
+                         :missing-fonts []}]
+    (if (and (env/feature? :arkistointi) (= (mime/mime-type filename) "application/pdf"))
+      (let [processing-result (pdf-conversion/convert-to-pdf-a tempfile)]
+        (if (:already-valid-pdfa? processing-result)
+          (when-not (attachment/attach-file! (assoc attachment-data :valid-pdfa true))
+            (fail :error.unknown))
+          (if (:pdfa? processing-result)
+            (let [attach-file-result (attachment/attach-file! attachment-data)
+                  new-filename (str (ss/substring filename 0 (- (count filename) 4)) "-PDFA.pdf")
+                  new-id (:id attach-file-result)]
+              (when-not (attachment/attach-file! (assoc attachment-data :attachment-id new-id :content (:output-file processing-result) :filename new-filename :valid-pdfa true))
+                (fail :error.unknown)))
+            (let [missing-fonts (or (:missing-fonts processing-result) [])]
+              (when-not (attachment/attach-file! (assoc attachment-data :missing-fonts missing-fonts))
+                (fail :error.unknown))))))
+      (when-not (attachment/attach-file! attachment-data)
+        (fail :error.unknown)))))
 
 
 ;;
@@ -419,7 +434,8 @@
    :pre-checks [domain/validate-owner-or-write-access
                 (fn [_ application]
                   (when-not (pos? (count (:attachments application)))
-                    (fail :application.attachmentsEmpty)))]
+                    (fail :application.attachmentsEmpty)))
+                a/validate-authority-in-drafts]
    :user-roles #{:applicant :authority}}
   [{application :application u :user :as command}]
   (when (seq attachmentIds)
@@ -454,7 +470,8 @@
    :user-authz-roles action/all-authz-writer-roles
    :states     (action/all-states-but [:answered :sent :closed :canceled])
    :input-validators [(partial action/non-blank-parameters [:attachmentId])
-                      validate-meta validate-scale validate-size validate-operation]}
+                      validate-meta validate-scale validate-size validate-operation]
+   :pre-checks [a/validate-authority-in-drafts]}
   [{:keys [application user created] :as command}]
   (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
     (fail! :error.pre-verdict-attachment))
@@ -467,7 +484,8 @@
    :input-validators [(partial action/non-blank-parameters [:attachmentId])
                       (partial action/boolean-parameters [:notNeeded])]
    :user-roles #{:applicant :authority}
-   :states     [:draft :open :submitted]}
+   :states     [:draft :open :submitted]
+   :pre-checks [a/validate-authority-in-drafts]}
   [{:keys [created] :as command}]
   (attachment/update-attachment-key command attachmentId :notNeeded notNeeded created :set-app-modified? true :set-attachment-modified? false)
   (ok))
@@ -475,7 +493,7 @@
 (defcommand set-attachments-as-verdict-attachment
   {:parameters [:id selectedAttachmentIds unSelectedAttachmentIds]
    :user-roles #{:authority}
-   :states     (action/all-states-but [:closed :canceled])
+   :states     (action/all-states-but [:draft :closed :canceled])
    :input-validators [(partial action/vector-parameters-with-non-blank-items [:selectedAttachmentIds :unSelectedAttachmentIds])
                       (fn [{{:keys [selectedAttachmentIds unSelectedAttachmentIds]} :data}]
                         (when (seq (intersection (set selectedAttachmentIds) (set unSelectedAttachmentIds)))
