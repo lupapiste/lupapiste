@@ -52,6 +52,42 @@
           <div class="clear"></div>
         </div>
         <div class="form-group">
+          <div class="form-entry architect-toggle">
+            <label for="architect" class="form-label">
+              <input data-bind="checked: architect" id="architect" type="checkbox"></input>
+              <span data-bind="ltext: 'userinfo.architect'"></span>
+            </label>
+          </div>
+          <div data-bind="visible: architect">
+            <div class="architect-info form-group">
+              <h2 data-bind="ltext: 'architect.experience.title'"></h2>
+
+              <div class="form-entry">
+                <label data-bind="ltext: 'userinfo.architect.degree'" for="architect.degree" class="form-label"></label>
+                <select class="form-input combobox"
+                        name="architect.degree"
+                        data-test-id="architect-degree-select"
+                        title="loc('userinfo.architect.degree.choose.help')"
+                        data-bind="options: availableDegrees,
+                                   value: degree,
+                                   optionsValue: 'id',
+                                   optionsText: 'name',
+                                   optionsCaption: loc('userinfo.architect.degree.choose')"></select>
+              </div>
+
+              <div class="form-entry">
+                <label data-bind="ltext: 'userinfo.architect.graduatingYear'" for="architect.graduatingYear" class="form-label"></label>
+                <input data-bind="value: graduatingYear" id="architect.graduatingYear" type="text" class="form-input" maxlength="4"></input>
+              </div>
+
+              <div class="form-entry">
+                <label data-bind="ltext: 'userinfo.architect.fise'" for="architect.fise" class="form-label"></label>
+                <input data-bind="value: fise" id="architect.fise" type="text" class="form-input" maxlength="255"></input>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
           <div class="form-entry">
             <label class="form-label tip" data-bind="ltext: 'userinfo.password'">Salasana</label>
             <input class="form-input text " data-test-id="register-password" data-bind="value: password" type="password" required="required" />

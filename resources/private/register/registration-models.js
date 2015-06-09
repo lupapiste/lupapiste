@@ -23,6 +23,10 @@ LUPAPISTE.RegistrationModel = function(commandName, afterSuccessFn, errorSelecto
     allowDirectMarketing: ko.observable(false),
     email: ko.observable("").extend({email: true, usernameAsync: true}),
     password: ko.observable("").extend({validPassword: true}),
+    architect: ko.observable(false),
+    degree: ko.observable().extend({ maxLength: 255 }),
+    graduatingYear: ko.observable().extend({ number: true, minLength: 4, maxLength: 4 }),
+    fise: ko.observable().extend({ maxLength: 255 }),
     rakentajafi: ko.observable(false),
     acceptTerms: ko.observable(false),
     disabled: ko.observable(true),
@@ -76,6 +80,9 @@ LUPAPISTE.RegistrationModel = function(commandName, afterSuccessFn, errorSelecto
   self.plainModel.acceptTerms.subscribe(function() {
     self.plainModel.disabled(!self.model.isValid() || !self.plainModel.acceptTerms());
   });
+  self.plainModel.availableDegrees = _(LUPAPISTE.config.degrees).map(function(degree) {
+    return {id: degree, name: loc(["koulutus", degree])};
+  }).sortBy("name").value();
 
   self.json = function() {
     var d = {};
