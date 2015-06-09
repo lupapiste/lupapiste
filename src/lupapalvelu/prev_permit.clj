@@ -184,8 +184,8 @@
             (if (nil? correct-address)
               (println "No address info in XML for application" id)
               (when-not (= correct-address address)
-                #_(println "old address:" address)
-                #_(println "#_(mongo/update-by-id" collection id
+                (println "old address:" address)
+                (println "#_(mongo/update-by-id :applications" id
                        "{$set {:address" correct-address
                        ":title" correct-address "}})")
                 (mongo/update-by-id :applications id
