@@ -7,7 +7,8 @@
             [lupapalvelu.server] ; ensure all namespaces are loaded
             ))
 
-(def application-keys [:operations :secondaryOperations :primaryOperation
+(def application-keys [:infoRequest
+                       :operations :secondaryOperations :primaryOperation
                        :documents :schema-version :attachments :auth
                        :state :modified  :created :opened :submitted :sent :started :closed
                        :organization :municipality :propertyId :location])
