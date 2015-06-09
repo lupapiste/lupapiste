@@ -3,13 +3,17 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.action :as action]
             [lupapalvelu.document.model :as model]
-            [lupapalvelu.application :refer [get-operations]]
+            [lupapalvelu.application :as a]
             [lupapalvelu.server] ; ensure all namespaces are loaded
             ))
 
 (def applications (delay (mongo/select :applications)))
 (def submitted-applications (delay (mongo/select :submitted-applications)))
 (def organizations (delay (mongo/select :organizations)))
+
+(defn- resolve-operations [application]
+  ; Support the old and the new application schema
+  (or (:operations application) (a/get-operations application)))
 
 (defn- validate-doc [ignored-errors application {id :id schema-info :schema-info :as doc}]
   (if (and (:name schema-info) (:version schema-info))
@@ -55,9 +59,10 @@
 
 ;; Documents have operation information
 
-(defn- application-schemas-have-ops [{documents :documents operations :operations :as application}]
+(defn- application-schemas-have-ops [{documents :documents :as application}]
   (when-not (:infoRequest application)
-    (let [docs-with-op (count (filter #(get-in % [:schema-info :op]) documents))
+    (let [operations (resolve-operations application)
+          docs-with-op (count (filter #(get-in % [:schema-info :op]) documents))
           ops          (count operations)]
       (when-not (= docs-with-op ops)
         (:id application)))))
@@ -107,7 +112,7 @@
                                       (fn [app]
                                         (when (and
                                                 ((action/all-application-states-but [:canceled :draft :open]) (keyword (:state app)))
-                                                (when-not (some #(#{"aiemmalla-luvalla-hakeminen"} (:name %)) (get-operations app))
+                                                (when-not (some #(#{"aiemmalla-luvalla-hakeminen"} (:name %)) (resolve-operations app))
                                                   (nil? (:submitted app))))
                                           (:id app)))
                                       @applications)))]
