@@ -113,46 +113,47 @@
                       :linkki "http://img.sito.fi/kaavamaaraykset/91/8755.pdf"
                       :type "sito"}))
 
-  (comment
-    (fact "Mikkeli"
-     (let [response (plan-urls-by-point-proxy {:params {:x "533257.514" :y "6828489.823" :municipality "491"}})
+  (fact "Mikkeli"
+   (let [response (plan-urls-by-point-proxy {:params {:x "533257.514" :y "6828489.823" :municipality "491"}})
+         body (json/decode (:body response) true)]
+
+     (first body) => {:id "1436"
+                      :kaavanro "12891"
+                      :kaavalaji "RKM"
+                      :kasitt_pvm "3/31/1989 12:00:00 AM"
+                      :linkki "http://194.111.49.141/asemakaavapdf/12891.pdf"
+                      :type "bentley"}
+
+     (second body) => {:id "1440"
+                       :kaavanro "12021"
+                       :kaavalaji "RK"
+                       :kasitt_pvm "6/1/1984 12:00:00 AM"
+                       :linkki "http://194.111.49.141/asemakaavapdf/12021.pdf"
+                       :type "bentley"})))
+
+; Liiteri doesn't have the layer we're interested in,
+; disabled the test while investigating
+#_(facts "general-plan-urls-by-point-proxy"
+
+   (fact "Helsinki"
+     (let [response (general-plan-urls-by-point-proxy {:params {:x "395628" :y "6677704"}})
            body (json/decode (:body response) true)]
-
-       (first body) => {:id "1436"
-                        :kaavanro "12891"
-                        :kaavalaji "RKM"
-                        :kasitt_pvm "3/31/1989 12:00:00 AM"
-                        :linkki "http://194.111.49.141/asemakaavapdf/12891.pdf"
-                        :type "bentley"}
-
-       (second body) => {:id "1440"
-                         :kaavanro "12021"
-                         :kaavalaji "RK"
-                         :kasitt_pvm "6/1/1984 12:00:00 AM"
-                         :linkki "http://194.111.49.141/asemakaavapdf/12021.pdf"
-                         :type "bentley"}))))
-
-(facts "general-plan-urls-by-point-proxy"
-
-  (fact "Helsinki"
-    (let [response (general-plan-urls-by-point-proxy {:params {:x "395628" :y "6677704"}})
-          body (json/decode (:body response) true)]
-      (first body) => {:id "0912007"
-                       :nimi "Helsingin maanalainen kaava"
-                       :pvm "2010-12-08"
-                       :tyyppi "Kunnan hyv\u00e4ksym\u00e4"
-                       :oikeusvaik "Oikeusvaikutteinen"
-                       :lisatieto ""
-                       :linkki "http://liiteri.ymparisto.fi/maarays/0912007x.pdf"
-                       :type "yleiskaava"}
-      (second body) => {:id "0911001"
-                        :nimi "Helsingin yleiskaava 2002"
-                        :pvm "2003-11-26"
+       (first body) => {:id "0912007"
+                        :nimi "Helsingin maanalainen kaava"
+                        :pvm "2010-12-08"
                         :tyyppi "Kunnan hyv\u00e4ksym\u00e4"
                         :oikeusvaik "Oikeusvaikutteinen"
-                        :lisatieto "Kaupungin toimittamasta aineistosta puuttuu etel\u00e4inen eli merellinen osa"
-                        :linkki "http://liiteri.ymparisto.fi/maarays/0911001x.pdf"
-                        :type "yleiskaava"})))
+                        :lisatieto ""
+                        :linkki "http://liiteri.ymparisto.fi/maarays/0912007x.pdf"
+                        :type "yleiskaava"}
+       (second body) => {:id "0911001"
+                         :nimi "Helsingin yleiskaava 2002"
+                         :pvm "2003-11-26"
+                         :tyyppi "Kunnan hyv\u00e4ksym\u00e4"
+                         :oikeusvaik "Oikeusvaikutteinen"
+                         :lisatieto "Kaupungin toimittamasta aineistosta puuttuu etel\u00e4inen eli merellinen osa"
+                         :linkki "http://liiteri.ymparisto.fi/maarays/0911001x.pdf"
+                         :type "yleiskaava"})))
 
 (facts "geoserver-layers"
   (let [base-params {"FORMAT" "image/png"
