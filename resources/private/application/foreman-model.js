@@ -22,7 +22,7 @@ LUPAPISTE.ForemanModel = function() {
   self.taskId = ko.observable();
   self.isVisible = ko.computed(function() {
     return util.getIn(self, ["application", "permitType"]) === "R" &&
-      !/tyonjohtajan-nimeaminen/.test(util.getIn(self, ["application", "operations", 0, "name"]));
+      !/tyonjohtajan-nimeaminen/.test(util.getIn(self, ["application", "primaryOperation", "name"]));
   });
   self.linkedForemanApps = ko.observableArray();
   self.selectableForemen = ko.pureComputed(function() {
