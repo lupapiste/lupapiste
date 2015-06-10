@@ -2,12 +2,13 @@
   (:require [clojure.java.io :as io]
             [monger.operators :refer :all]
             [midje.sweet :refer :all]
+            [sade.dummy-email-server :as dummy-email-server]
+            [sade.core :refer [def- now]]
+            [sade.util :as util]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.factlet :refer [fact* facts*]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.action :refer :all]
-            [sade.dummy-email-server :as dummy-email-server]
-            [sade.core :refer [def- now]]
             [lupapalvelu.fixture.core :as fixture]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.batchrun :as batchrun]))
@@ -16,7 +17,7 @@
 (fixture/apply-fixture "minimal")
 
 (def- timestamp-the-beginning-of-time 0)
-(def- timestamp-1-day-ago (batchrun/get-timestamp-from-now :day 1))
+(def- timestamp-1-day-ago (util/get-timestamp-from-now :day 1))
 
 (def- neighbor-non-matching
   {:id "534bf825299508fb3618489v"
