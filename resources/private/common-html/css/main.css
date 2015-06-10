@@ -2571,13 +2571,13 @@ table.attachments-template-table td.attachment-version-info {
   z-index: 9999;
   padding: 12px;
   background-color: #fff;
-  min-height: 250px;
+  min-height: 150px;
 }
 /* line 25, ../sass/partials/_modal.scss */
 #modal-dialog .dialog .component {
   overflow: auto;
   margin: 12px 12px 75px 12px;
-  min-height: 117px;
+  min-height: 50px;
 }
 /* line 29, ../sass/partials/_modal.scss */
 #modal-dialog .dialog .component .button-group {
