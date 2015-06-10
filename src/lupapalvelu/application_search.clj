@@ -36,7 +36,7 @@
   (let [normalized (normalize-operation-name filter-search)]
     (map :op
       (filter
-        (fn [{locs :locs}] (some (fn [i18n-text] (.contains i18n-text normalized)) locs))
+        (fn [{locs :locs}] (some (fn [i18n-text] (ss/contains? i18n-text normalized)) locs))
         operation-index))))
 
 ;;

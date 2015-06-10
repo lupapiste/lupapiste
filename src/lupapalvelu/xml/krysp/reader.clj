@@ -29,7 +29,7 @@
     (try
      (let [resp (http/get url {:query-params {:request "GetCapabilities"} :throw-exceptions false})]
        (or
-         (and (= 200 (:status resp)) (ss/contains (:body resp) "<?xml "))
+         (and (= 200 (:status resp)) (ss/contains? (:body resp) "<?xml "))
          (warn "Response not OK or did not contain XML. Response was: " resp)))
      (catch Exception e
        (warn (str "Could not connect to WFS: " url ", exception was " e))))))
@@ -89,8 +89,8 @@
        </wfs:GetFeature>")})
 
 (defn wfs-krysp-url [server object-type filter]
-  (let [server (if (.contains server "?")
-                 (if (.endsWith server "&")
+  (let [server (if (ss/contains? server "?")
+                 (if (ss/ends-with server "&")
                    server
                    (str server "&"))
                  (str server "?"))]

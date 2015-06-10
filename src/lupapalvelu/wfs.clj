@@ -256,7 +256,7 @@
   "WMS query with error handling. Returns response body or nil."
   [url query-params]
   (let [{:keys [status body]} (http/get url {:query-params query-params})
-        error (when (ss/contains body "ServiceException")
+        error (when (ss/contains? body "ServiceException")
                 (-> body ss/trim
                   (->features startparse-sax-non-validating "UTF-8")
                   (xml-> :ServiceException)
@@ -398,21 +398,21 @@
 (defn general-plan-info-by-point [x y]
   (let [bbox [(- (util/->double x) 128) (- (util/->double y) 128) (+ (util/->double x) 128) (+ (util/->double y) 128)]
         query {"REQUEST" "GetFeatureInfo"
-                             "EXCEPTIONS" "application/vnd.ogc.se_xml"
-                             "SERVICE" "WMS"
-                             "INFO_FORMAT" "application/vnd.ogc.gml"
-                             "QUERY_LAYERS" "yleiskaavaindeksi,yleiskaavaindeksi_poikkeavat"
-                             "FEATURE_COUNT" "50"
-                             "Layers" "yleiskaavaindeksi,yleiskaavaindeksi_poikkeavat"
-                             "WIDTH" "256"
-                             "HEIGHT" "256"
-                             "format" "image/png"
-                             "styles" ""
-                             "srs" "EPSG:3067"
-                             "version" "1.1.1"
-                             "x" "128"
-                             "y" "128"
-                             "BBOX" (s/join "," bbox)}]
+               "EXCEPTIONS" "application/vnd.ogc.se_xml"
+               "SERVICE" "WMS"
+               "INFO_FORMAT" "application/vnd.ogc.gml"
+               "QUERY_LAYERS" "yleiskaavaindeksi,yleiskaavaindeksi_poikkeavat"
+               "FEATURE_COUNT" "50"
+               "Layers" "yleiskaavaindeksi,yleiskaavaindeksi_poikkeavat"
+               "WIDTH" "256"
+               "HEIGHT" "256"
+               "format" "image/png"
+               "styles" ""
+               "srs" "EPSG:3067"
+               "version" "1.1.1"
+               "x" "128"
+               "y" "128"
+               "BBOX" (s/join "," bbox)}]
     (wms-get wms-url query)))
 
 (defn gfi-to-general-plan-features [gfi]

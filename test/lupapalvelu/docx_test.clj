@@ -17,5 +17,5 @@
 
     (fact "PDF contains all model data"
       (doseq [[k v] (merge company contact account)
-             :let [result (doc-result (ss/contains pdf-content v) k)]]
+             :let [result (doc-result (ss/contains? pdf-content v) k)]]
        result => (doc-check true?)))))

@@ -56,7 +56,7 @@
         (if (fn? src)
           (.write (write-header kind out (str "fn: " (fn-name src))) (src))
           (with-open [in (-> src c/path io/resource io/input-stream io/reader)]
-            (if (or (ss/contains src "debug") (ss/contains src ".min."))
+            (if (or (ss/contains? src "debug") (ss/contains? src ".min."))
               (IOUtils/copy in (write-header kind out src))
               (minified kind in (write-header kind out src)))))))
     (.toByteArray stream)))
