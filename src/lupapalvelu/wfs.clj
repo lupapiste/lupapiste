@@ -256,7 +256,7 @@
   "WMS query with error handling. Returns response body or nil."
   [url query-params]
   (let [{:keys [status body]} (http/get url {:query-params query-params})
-        error (when (ss/contains body "ServiceException")
+        error (when (ss/contains? body "ServiceException")
                 (-> body ss/trim
                   (->features startparse-sax-non-validating "UTF-8")
                   (xml-> :ServiceException)
