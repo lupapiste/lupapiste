@@ -1030,6 +1030,7 @@
             :order 6
             :removable true
             :approvable true
+            :subtype :maksaja
             :type :party}
      :body maksaja}
 
