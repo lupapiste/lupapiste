@@ -160,8 +160,13 @@
 
 (defn get-applicant-documents
   "returns applicant documents from application"
+  [{documents :documents}]
+  (filter (comp (partial = "hakija") :subtype :schema-info) documents))
+
+(defn get-applicant-document
+  "returns first applicant document from application"
   [application]
-  (filter (comp (partial = "hakija") :subtype :schema-info) (:documents application)))
+  (first (get-applicant-documents application)))
 
 (defn invites [{auth :auth}]
   (map :invite (filter :invite auth)))
