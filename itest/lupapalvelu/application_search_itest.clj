@@ -1,8 +1,10 @@
 (ns lupapalvelu.application-search-itest
-  (:require [midje.sweet :refer :all]
+  (:require [clojure.string :as s]
+            [midje.sweet :refer :all]
             [lupapalvelu.itest-util :refer :all]
             [lupapalvelu.factlet  :refer :all]
             [sade.property :as p]
+            [sade.util :as util]
             ))
 
 (apply-remote-minimal)
@@ -32,6 +34,9 @@
                         (one-result? response)
                         (= (get-in response [:data :aaData 0 :id]) application-id)))]
 
+    (command mikko :add-operation :id application-id :operation "pientalo") => ok?
+    (:secondaryOperations (query-application mikko application-id)) => seq
+
     (facts "by applicant"
       (fact "no matches" (search "Pena") => no-results?)
       (fact "one match" (search "Mikko") => id-matches?))
@@ -43,7 +48,7 @@
     (facts "by ID"
       (fact "no matches" (search (str "LP-" sonja-muni "-2010-00001")) => no-results?)
       (fact "one match" (search application-id) => id-matches?)
-      (fact "one match - lower case query" (search (clojure.string/lower-case application-id)) => id-matches?))
+      (fact "one match - lower case query" (search (s/lower-case application-id)) => id-matches?))
 
     (facts "by property ID"
       (fact "no matches" (search (str sonja-muni "-123-0000-1230")) => no-results?)
@@ -71,4 +76,26 @@
           (get-in application [:operationName :sv]) => seq
           (:timestamp application) => pos?
           (count (keys application)) => 4)))
+
+    (fact "applications integration endpoint returns localized data"
+      (let [application (util/find-by-id application-id (:applications (query mikko :applications) ))
+            {primary :primaryOperation secondaries :secondaryOperations} application
+            {state-fi :stateNameFi state-sv :stateNameSv} application]
+
+        (fact "Primary operation is localized"
+          (:displayNameFi primary) => "Muun kuin edell\u00e4 mainitun rakennuksen rakentaminen (navetta, liike-, toimisto-, opetus-, p\u00e4iv\u00e4koti-, palvelu-, hoitolaitos- tai muu rakennus)"
+          (:displayNameSv primary) => seq)
+
+        (fact "Secondary operation is localized"
+          (count secondaries) => 1
+          (-> secondaries first :name) => "pientalo"
+          (-> secondaries first :displayNameFi) =>
+            "Asuinpientalon rakentaminen (enint\u00e4\u00e4n kaksiasuntoinen erillispientalo)"
+          (-> secondaries first :displayNameSv) =>
+            "Byggande av sm\u00e5hus (h\u00f6gst ett frist\u00e5ende sm\u00e5hus f\u00f6r tv\u00e5 bost\u00e4der)")
+
+        (fact "Sonja gave verdict"
+          state-fi => "P\u00e4\u00e4t\u00f6s annettu"
+          state-sv => "Beslut givet")))
+
     ))

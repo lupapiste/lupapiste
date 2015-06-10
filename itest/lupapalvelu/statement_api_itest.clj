@@ -26,7 +26,7 @@
 
   (let [ronja-email  (email-for "ronja")
         veikko-email (email-for "veikko")
-        application-id     (create-app-id sonja :propertyId sipoo-property-id :address "Lausuntobulevardi 1 A 1")
+        application-id     (:id (create-and-submit-application mikko :propertyId sipoo-property-id :address "Lausuntobulevardi 1 A 1"))
         resp (command sipoo :create-statement-giver :email (email-for "ronja") :text "<b>bold</b>") => ok?
         statement-giver-ronja (:id resp)
         email (last-email)]
@@ -87,15 +87,24 @@
             (giver-emails ronja-email) => ronja-email
             (giver-emails veikko-email) => veikko-email))
 
+        (fact "Veikko can see unsubmitted statements"
+          (query veikko :should-see-unsubmitted-statements :id application-id) => ok?)
+
+        (fact "Sonja can see unsubmitted statements"
+          (query veikko :should-see-unsubmitted-statements :id application-id) => ok?)
+
+        (fact "Applicant can not see unsubmitted statements"
+          (query mikko :should-see-unsubmitted-statements :id application-id) => unauthorized?)
+
         (get-in statement [:person :email]) => veikko-email
         (command veikko :give-statement :id application-id :statementId (:id statement) :status "yes" :text "I will approve" :lang "fi") => ok?
 
-        (fact "Sonja got email"
+        (fact "Applicant got email"
           (let [emails (sent-emails)
                 email  (first emails)]
           (count emails) => 1
-          (:to email) => (contains sonja-email)
-          email => (partial contains-application-link-with-tab? application-id "conversation" "authority")))
+          (:to email) => (contains "mikko@example.com")
+          email => (partial contains-application-link-with-tab? application-id "conversation" "applicant")))
         ))
 
     (fact "Statement person has access to application"

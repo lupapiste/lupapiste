@@ -83,4 +83,4 @@
           (fact "Add operation allowed" operation-allowed => (doc-check nil?)))))
 
     (fact "Add operation not allowed for :muutoslupa"
-      (add-operation-allowed? nil {:operations [{:name "kerrostalo-rivitalo"}] :permitSubtype :muutoslupa}) => error)))
+      (add-operation-allowed? nil {:primaryOperation {:name "kerrostalo-rivitalo"} :permitSubtype :muutoslupa}) => error)))
