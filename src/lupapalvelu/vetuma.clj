@@ -1,7 +1,7 @@
 (ns lupapalvelu.vetuma
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error errorf fatal]]
             [clojure.set :refer [rename-keys]]
-            [clojure.string :as string]
+            [sade.strings :as ss]
             [noir.core :refer [defpage]]
             [noir.request :as request]
             [noir.response :as response]
@@ -67,7 +67,7 @@
 (defn apply-template
   "changes all variables in braces {} with keywords with same name.
    for example (apply-template \"hi {name}\" {:name \"Teppo\"}) returns \"hi Teppo\""
-  [v m] (string/replace v #"\{(\w+)\}" (fn [[_ word]] (or (m (keyword word)) ""))))
+  [v m] (ss/replace v #"\{(\w+)\}" (fn [[_ word]] (or (m (keyword word)) ""))))
 
 (defn apply-templates
   "runs apply-template on all values, using the map as input"
@@ -86,7 +86,7 @@
     vec
     (conj (secret m))
     (conj "")
-    (->> (string/join "&"))
+    (->> (ss/join "&"))
     mac))
 
 (defn- with-mac [m]
@@ -103,19 +103,20 @@
 ;;
 
 (defn extract-subjectdata [{s :subjectdata}]
-  (-> s
-    (string/split #", ")
-    (->> (map #(string/split % #"=")))
-    (->> (into {}))
-    keys-as-keywords
-    (rename-keys {:etunimi :firstname})
-    (rename-keys {:sukunimi :lastname})))
+  (when (ss/contains? s ",")
+    (-> s
+      (ss/split #", ")
+      (->> (map #(ss/split % #"=")))
+      (->> (into {}))
+      keys-as-keywords
+      (rename-keys {:etunimi :firstname})
+      (rename-keys {:sukunimi :lastname}))))
 
 (defn- extract-vtjdata [{:keys [vtjdata]}]
   (vtj/extract-vtj vtjdata))
 
 (defn- extract-userid [{s :extradata}]
-  {:userid (last (string/split s #"="))})
+  {:userid (last (ss/split s #"="))})
 
 (defn- extract-request-id [{id :trid}]
   {:pre [id]}
@@ -163,7 +164,7 @@
 
 (defn host-and-ssl-port
   "returns host with port changed from 8000 to 8443. Shitty crap."
-  [host] (string/replace host #":8000" ":8443"))
+  [host] (ss/replace host #":8000" ":8443"))
 
 (defn host
   ([] (host :current))
