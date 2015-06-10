@@ -357,10 +357,13 @@
     {tag-name (doc-transformer osapuoli party-type)}))
 
 (defn get-parties [documents]
-  (filter #(seq (:Osapuoli %))
-    (into
-      (get-parties-by-type documents :Osapuoli :hakija get-osapuoli-data)
-      (get-parties-by-type documents :Osapuoli :maksaja get-osapuoli-data))))
+  (let [hakija-key (if (:hakija-r documents)
+                     :hakija-r
+                     :hakija)]
+    (filter #(seq (:Osapuoli %))
+            (into
+              (get-parties-by-type documents :Osapuoli hakija-key get-osapuoli-data)
+              (get-parties-by-type documents :Osapuoli :maksaja get-osapuoli-data)))))
 
 (defn get-suunnittelija-data [suunnittelija party-type]
   (when (-> suunnittelija :henkilotiedot :sukunimi)
