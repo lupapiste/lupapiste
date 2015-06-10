@@ -160,13 +160,13 @@
 
 (defn get-documents-by-subtype [documents subtype]
   "Returns documents of given subtype"
-  {:pre [(vector? documents)]}
+  {:pre [(sequential? documents)]}
   (filter (comp (partial = (name subtype)) :subtype :schema-info) documents))
 
 (defn get-applicant-documents
   "returns applicant documents from given application documents"
   [documents]
-  {:pre [(vector? documents)]}
+  {:pre [(sequential? documents)]}
   (get-documents-by-subtype documents "hakija"))
 
 (defn get-applicant-document
