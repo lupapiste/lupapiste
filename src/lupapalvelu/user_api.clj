@@ -515,7 +515,7 @@
 (defcommand register-user
   {:parameters       [stamp email password street zip city phone allowDirectMarketing rakentajafi]
    :user-roles       #{:anonymous}
-   :input-validators [validate-registrable-user]}
+   :input-validators [action/email-validator validate-registrable-user]}
   [{data :data}]
   (let [vetuma-data (vetuma/get-user stamp)
         email (user/canonize-email email)]
