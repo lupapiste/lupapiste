@@ -46,11 +46,11 @@
                                (assoc-in tyonjohtaja-doc [:data :kuntaRoolikoodi :value] foremanRole)
                                tyonjohtaja-doc)
 
-        hakija-docs          (domain/get-documents-by-name application "hakija")
+        hakija-docs          (domain/get-documents-by-name application "hakija-r")
         hakija-docs          (map cleanup-hakija-doc hakija-docs)
 
         new-application-docs (->> (:documents foreman-app)
-                                  (remove #(#{"hankkeen-kuvaus-minimum" "hakija" "tyonjohtaja-v2"} (-> % :schema-info :name)))
+                                  (remove #(#{"hankkeen-kuvaus-minimum" "hakija-r" "tyonjohtaja-v2"} (-> % :schema-info :name)))
                                   (concat (remove nil? [hakija-docs hankkeen-kuvaus-doc tyonjohtaja-doc]))
                                   flatten)
 
