@@ -34,7 +34,7 @@
                                      {:tag :paatoksentekija :content [""]}
                                      {:tag :paatospvm :content ["1970-01-01"]}]))
 
-(facts standard-verdicts-validator
+(facts "standard-verdicts-validator"
   (against-background
     (sade.core/now) => 100)
   (fact "Missing details"
@@ -53,7 +53,7 @@
              {:tag :paatostieto :content [{:tag :Paatos
                                            :content [{:tag :paatosdokumentinPvm :content [verdict-date]}]}]}]})
 
-(facts simple-verdicts-skeleton
+(facts "simple-verdicts-skeleton"
   (against-background
     (sade.core/now) => 100)
   (fact "Empty state"
@@ -447,14 +447,10 @@
 (facts* "Testing information parsed from a verdict xml message for application creation"
   (let [xml (xml/parse (slurp "resources/krysp/sample/verdict-rakval-from-kuntalupatunnus-query.xml"))
         info (get-app-info-from-message xml "14-0241-R 3") => truthy
-        {:keys [id kuntalupatunnus municipality rakennusvalvontaasianKuvaus vahainenPoikkeaminen rakennuspaikka ensimmainen-rakennus hakijat
-                ; viitelupatiedot viimeisin-tila asioimiskieli
-                ]} info]
+        {:keys [id kuntalupatunnus municipality rakennusvalvontaasianKuvaus vahainenPoikkeaminen rakennuspaikka ensimmainen-rakennus hakijat]} info]
 
     (fact "info contains the needed keys" (every? (partial contains info)
-                                            [:id :kuntalupatunnus :municipality :rakennusvalvontaasianKuvaus :vahainenPoikkeaminen :rakennuspaikka :ensimmainen-rakennus :hakijat
-                                             ; :viitelupatiedot :viimeisin-tila :asioimiskieli
-                                             ]))
+                                            [:id :kuntalupatunnus :municipality :rakennusvalvontaasianKuvaus :vahainenPoikkeaminen :rakennuspaikka :ensimmainen-rakennus :hakijat]))
 
     (fact "invalid kuntalupatunnus" (get-app-info-from-message xml "invalid-kuntalupatunnus") => nil)
 
