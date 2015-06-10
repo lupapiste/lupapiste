@@ -519,15 +519,12 @@
                        "mark-done" (get-neighbor (-> neighbor :owner :name) propertyId)
                        nil)))))
 
-(defn osapuolet
-  ([documents-by-types lang]
-    (osapuolet documents-by-types nil))
-  ([documents-by-types neighbors lang]
-    {:Osapuolet
-     {:osapuolitieto (get-parties documents-by-types)
-      :suunnittelijatieto (get-designers documents-by-types)
-      :tyonjohtajatieto (get-foremen documents-by-types lang)
-      :naapuritieto (get-neighbors neighbors)}}))
+(defn osapuolet [documents-by-types neighbors lang]
+  {:Osapuolet
+   {:osapuolitieto (get-parties documents-by-types)
+    :suunnittelijatieto (get-designers documents-by-types)
+    :tyonjohtajatieto (get-foremen documents-by-types lang)
+    :naapuritieto (get-neighbors neighbors)}})
 
 (defn change-value-to-when [value to_compare new_val]
   (if (= value to_compare) new_val value))
