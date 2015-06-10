@@ -108,6 +108,7 @@ LUPAPISTE.RegistrationModel = function(commandName, afterSuccessFn, errorSelecto
     self.plainModel.rakentajafi(false);
     self.plainModel.acceptTerms(false);
     self.plainModel.allowDirectMarketing(false);
+    self.plainModel.architect(false);
     self.plainModel.tokenId(pageutil.subPage());
     return false;
   };
