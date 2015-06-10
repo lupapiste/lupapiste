@@ -76,6 +76,9 @@
   [{documents :documents}]
   (by-type (walk/postwalk empty-strings-to-nil documents)))
 
+(defn documents-without-blanks [{documents :documents}]
+  (walk/postwalk empty-strings-to-nil documents))
+
 (def- puolto-mapping {:condition "ehdoilla"
                       :no "ei puolla"
                       :yes "puoltaa"})
