@@ -116,14 +116,15 @@ LUPAPISTE.RegistrationModel = function(commandName, afterSuccessFn, errorSelecto
   self.reset = self.model().reset;
 
   self.setVetumaData = function(data) {
+    // convert nulls to undefined
     var d = {
-      personId: data.userid || undefined,
-      firstName: data.firstName || undefined,
-      lastName: data.lastName || undefined,
-      stamp: data.stamp || undefined,
-      city: data.city || undefined,
-      zip: data.zip || undefined,
-      street: data.street || undefined
+      personId: data.userid ? data.userid : undefined,
+      firstName: data.firstName ? data.firstName : undefined,
+      lastName: data.lastName ? data.lastName : undefined,
+      stamp: data.stamp ? data.stamp : undefined,
+      city: data.city ? data.city : undefined,
+      zip: data.zip ? data.zip : undefined,
+      street: data.street ? data.street : undefined
     };
     self.model().setData(d);
   };
