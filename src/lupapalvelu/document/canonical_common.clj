@@ -7,6 +7,7 @@
             [sade.core :refer :all]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.document.schemas :as schemas]
             [cljts.geom :as geo]
             [cljts.io :as jts]
             [sade.env :as env]))
@@ -54,6 +55,15 @@
     (map
       (fn [state] [state (state-timestamp (assoc application :state state))])
       (keys state-timestamp-fn))))
+
+(defn get-first-document-by-subtype [subtype documents]
+  "Find first document that matches the given subtype. Documents from function 'by-type'."
+  (util/find-first
+    (fn [doc]
+      (let [doc (if (sequential? doc) (first doc) doc)
+            schema (schemas/get-schema (:schema-info doc))]
+        (= (keyword subtype) (get-in schema [:info :subtype]))))
+    (vals documents)))
 
 (defn by-type [documents]
   (group-by (comp keyword :name :schema-info) documents))
