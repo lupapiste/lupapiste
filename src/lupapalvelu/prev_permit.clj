@@ -65,8 +65,8 @@
 
                ;; Set applicants' user info to Hakija documents
                (let [document (if (zero? i)
-                                (domain/get-document-by-name application "hakija")
-                                (commands/do-create-doc (assoc-in command [:data :schemaName] "hakija")))
+                                (domain/get-applicant-document (:documents application))
+                                (commands/do-create-doc (assoc-in command [:data :schemaName] "hakija-r")))
                      applicant-type (get-applicant-type applicant)
                      user-info (case applicant-type
                                  ;; Not including here the id of the invited user into "user-info",
