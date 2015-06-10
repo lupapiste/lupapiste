@@ -1,6 +1,7 @@
 (ns lupapalvelu.document.asianhallinta_canonical
-  (require [lupapalvelu.document.canonical-common :refer :all]
+  (require [lupapalvelu.document.canonical-common :as common]
            [lupapalvelu.document.tools :as tools]
+           [lupapalvelu.domain :as domain]
            [lupapalvelu.xml.disk-writer :as writer]
            [lupapalvelu.mongo :as mongo]
            [clojure.string :as s]
@@ -156,14 +157,12 @@
 
 (defn application-to-asianhallinta-canonical [application lang]
   "Return canonical, does not contain attachments"
-  (let [documents (tools/unwrapped (documents-by-type-without-blanks application))]
+  (let [documents (tools/unwrapped (common/documents-without-blanks application))]
     (-> (assoc-in ua-root-element [:UusiAsia :Tyyppi] (ua-get-asian-tyyppi-string application))
       (assoc-in [:UusiAsia :Kuvaus] (:title application))
       (assoc-in [:UusiAsia :Kuntanumero] (:municipality application))
-      (assoc-in [:UusiAsia :Hakijat] (ua-get-hakijat (or (:hakija documents)
-                                                         (get-first-document-by-subtype :hakija documents))))
-      (assoc-in [:UusiAsia :Maksaja] (ua-get-maksaja (first (or (:maksaja documents)
-                                                                (get-first-document-by-subtype :maksaja documents)))))
+      (assoc-in [:UusiAsia :Hakijat] (ua-get-hakijat (domain/get-applicant-documents documents)))
+      (assoc-in [:UusiAsia :Maksaja] (ua-get-maksaja (first (domain/get-documents-by-subtype documents "maksaja"))))
       (assoc-in [:UusiAsia :HakemusTunnus] (:id application))
       (assoc-in [:UusiAsia :VireilletuloPvm] (util/to-xml-date (:submitted application)))
       (assoc-in [:UusiAsia :Asiointikieli] lang)
