@@ -33,6 +33,15 @@
     (fact (get-document-by-type application :location) => {:id 1 :data "jee" :schema-info {:name "kukka" :type :location}})
     (fact (get-document-by-type application "location") => {:id 1 :data "jee" :schema-info {:name "kukka" :type :location}})))
 
+(facts "get documents by subtype"
+  (let [documents [{:id 1 :data "jee" :schema-info {:name "hakija-ya" :type :location :subtype "hakija"}}
+                   {:id 2 :data "jee2" :schema-info {:name "hakija-r" :type :location :subtype "hakija"}}
+                   {:id 3 :data "error type" :schema-info {:name "other" :type :location :subtype "error"}}]]
+    (fact "two hakija docs" (get-documents-by-subtype documents "hakija") => (just [(first documents) (second documents)]))
+    (fact "one error docs" (get-documents-by-subtype documents "error") => (just [(last documents)]))
+    (fact "unknown returns in empty list" (get-documents-by-subtype documents "unknown") => empty?)
+    (fact "keyword also works" (get-documents-by-subtype documents :hakija) => (just [(first documents) (second documents)]))))
+
 (facts "invites"
   (let [invite1 {:email "abba@example.com"}
         invite2 {:email "kiss@example.com"}

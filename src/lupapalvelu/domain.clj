@@ -158,15 +158,21 @@
   (let [op-id (if (map? operation) (:id operation) operation)]
     (first (filter #(= op-id (get-in % [:schema-info :op :id])) documents))))
 
+(defn get-documents-by-subtype [documents subtype]
+  "Returns documents of given subtype"
+  {:pre [(vector? documents)]}
+  (filter (comp (partial = (name subtype)) :subtype :schema-info) documents))
+
 (defn get-applicant-documents
-  "returns applicant documents from application"
-  [{documents :documents}]
-  (filter (comp (partial = "hakija") :subtype :schema-info) documents))
+  "returns applicant documents from given application documents"
+  [documents]
+  {:pre [(vector? documents)]}
+  (get-documents-by-subtype documents "hakija"))
 
 (defn get-applicant-document
-  "returns first applicant document from application"
-  [application]
-  (first (get-applicant-documents application)))
+  "returns first applicant document from given application documents"
+  [documents]
+  (first (get-applicant-documents documents)))
 
 (defn invites [{auth :auth}]
   (map :invite (filter :invite auth)))
