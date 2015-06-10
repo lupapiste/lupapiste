@@ -124,7 +124,7 @@ LUPAPISTE.RegistrationModel = function(commandName, afterSuccessFn, errorSelecto
       stamp: data.stamp ? data.stamp : undefined,
       city: data.city ? data.city : undefined,
       zip: data.zip ? data.zip : undefined,
-      street: data.street ? data.street : undefined
+      street: data.street ? data.street : undefined
     };
     self.model().setData(d);
   };
