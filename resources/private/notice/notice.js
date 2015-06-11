@@ -11,6 +11,15 @@ LUPAPISTE.NoticeModel = function() {
 
   self.availableUrgencyStates = ko.observableArray(["normal", "urgent", "pending"]);
 
+  self.selectedTags = ko.observableArray();
+
+  self.applicationTagsProvider = new function() {
+    var self = this;
+
+    self.query = ko.observable();
+    self.data = ko.observableArray([{label: "foo"}, {label: "bar"}, {label: "baz"}]);
+  }
+
   var subscriptions = [];
 
   var subscribe = function() {

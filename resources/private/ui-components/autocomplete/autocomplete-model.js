@@ -7,14 +7,16 @@ LUPAPISTE.AutocompleteModel = function(params) {
 
   self.value = params.value;
 
+  // tagging support
+  self.tags = params.tags;
+
   self.query = self.dataProvider.query;
 
   self.inputSelected = ko.observable(false);
   self.showResult = ko.observable(false);
   self.selected = ko.observable("");
   self.index = ko.observable(0);
-
-
+  self.selectedTags = ko.observableArray();
   self.dataSubscription = self.dataProvider.data.subscribe(function() {
     self.index(0);
   });
@@ -26,8 +28,14 @@ LUPAPISTE.AutocompleteModel = function(params) {
 
   self.selectItem = function(item) {
     if (item) {
-      self.value(item);
-      self.selected(item.label);
+      if (self.tags) {
+        console.log("add tag");
+        self.selectedTags.push(item);
+        self.value(self.selectedTags());
+      } else {
+         self.value(item);
+         self.selected(item.label);
+      }
       self.inputSelected(false);
       self.showResult(false);
     }
