@@ -12,6 +12,7 @@
             [clj-time.format :as format]
             [pandect.core :as pandect]
             [sade.env :as env]
+            [sade.strings :as ss]
             [sade.core :refer :all]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.vtj :as vtj]))
@@ -103,13 +104,14 @@
 ;;
 
 (defn extract-subjectdata [{s :subjectdata}]
-  (-> s
-    (string/split #", ")
-    (->> (map #(string/split % #"=")))
-    (->> (into {}))
-    keys-as-keywords
-    (rename-keys {:etunimi :firstname})
-    (rename-keys {:sukunimi :lastname})))
+  (when (ss/contains s ",")
+    (-> s
+      (string/split #", ")
+      (->> (map #(string/split % #"=")))
+      (->> (into {}))
+      keys-as-keywords
+      (rename-keys {:etunimi :firstname})
+      (rename-keys {:sukunimi :lastname}))))
 
 (defn- extract-vtjdata [{:keys [vtjdata]}]
   (vtj/extract-vtj vtjdata))
