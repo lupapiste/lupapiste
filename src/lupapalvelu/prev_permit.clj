@@ -70,8 +70,9 @@
 
                ;; Set applicants' user info to Hakija documents
                (let [document (if (zero? i)
-                                (domain/get-document-by-name application "hakija")
-                                (commands/do-create-doc (assoc-in command [:data :schemaName] "hakija")))
+                                (domain/get-applicant-document (:documents application))
+                                (commands/do-create-doc
+                                  (assoc-in command [:data :schemaName] (permit/get-applicant-doc-schema (permit/permit-type application)))))
                      applicant-type (get-applicant-type applicant)
                      user-info (case applicant-type
                                  ;; Not including here the id of the invited user into "user-info",
@@ -237,7 +238,7 @@
         (tools/default-values element)))))
 
 (defn- applicant->applicant-doc [applicant]
-  (let [schema         (schema/get-schema 1 "hakija")
+  (let [schema         (schema/get-schema 1 "hakija-r")
         default-values (tools/create-document-data schema tools/default-values)
         document       {:id          (mongo/create-id)
                         :created     (now)
@@ -264,7 +265,7 @@
                 app-info          (krysp-reader/get-app-info-from-message xml kuntalupatunnus)]
             (if (seq app-info)
               (let [dummy-command         (action/application->command application)
-                    old-applicants        (filter #(= (get-in % [:schema-info :name]) "hakija") documents)
+                    old-applicants        (filter #(= (get-in % [:schema-info :name]) "hakija-r") documents)
                     new-applicants        (map applicant->applicant-doc (:hakijat app-info))]
 
                 ; remove old applicants from application & create applicant doc for each

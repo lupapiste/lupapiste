@@ -111,7 +111,7 @@
                 initialOp (:name (:primaryOperation application))
                 original-schema-names (-> initialOp keyword operations/operations :required)
                 original-party-documents (a/filter-repeating-party-docs (:schema-version application) original-schema-names)]
-            (ok :partyDocumentNames (conj original-party-documents "hakija"))))
+            (ok :partyDocumentNames (conj original-party-documents (permit/get-applicant-doc-schema (permit/permit-type application))))))
 
 (defcommand mark-seen
   {:parameters       [:id type]

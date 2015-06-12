@@ -7,6 +7,7 @@
             [sade.core :refer :all]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.document.schemas :as schemas]
             [cljts.geom :as geo]
             [cljts.io :as jts]
             [sade.env :as env]))
@@ -65,6 +66,9 @@
   "Converts blank strings to nils and groups documents by schema name"
   [{documents :documents}]
   (by-type (walk/postwalk empty-strings-to-nil documents)))
+
+(defn documents-without-blanks [{documents :documents}]
+  (walk/postwalk empty-strings-to-nil documents))
 
 (def- puolto-mapping {:condition "ehdoilla"
                       :no "ei puolla"
@@ -337,17 +341,20 @@
             {:yritys (get-yritys-data (:yritys osapuoli))})
           (when omistajalaji {:omistajalaji omistajalaji}))))))
 
-(defn get-parties-by-type [documents tag-name party-type doc-transformer]
-  (for [doc (documents party-type)
+(defn get-parties-by-type [documents-by-type tag-name party-type doc-transformer]
+  (for [doc (documents-by-type party-type)
         :let [osapuoli (:data doc)]
         :when (seq osapuoli)]
     {tag-name (doc-transformer osapuoli party-type)}))
 
 (defn get-parties [documents]
-  (filter #(seq (:Osapuoli %))
-    (into
-      (get-parties-by-type documents :Osapuoli :hakija get-osapuoli-data)
-      (get-parties-by-type documents :Osapuoli :maksaja get-osapuoli-data))))
+  (let [hakija-key (if (:hakija-r documents)
+                     :hakija-r
+                     :hakija)]
+    (filter #(seq (:Osapuoli %))
+            (into
+              (get-parties-by-type documents :Osapuoli hakija-key get-osapuoli-data)
+              (get-parties-by-type documents :Osapuoli :maksaja get-osapuoli-data)))))
 
 (defn get-suunnittelija-data [suunnittelija party-type]
   (when (-> suunnittelija :henkilotiedot :sukunimi)
@@ -503,15 +510,12 @@
                        "mark-done" (get-neighbor (-> neighbor :owner :name) propertyId)
                        nil)))))
 
-(defn osapuolet
-  ([documents-by-types lang]
-    (osapuolet documents-by-types nil))
-  ([documents-by-types neighbors lang]
-    {:Osapuolet
-     {:osapuolitieto (get-parties documents-by-types)
-      :suunnittelijatieto (get-designers documents-by-types)
-      :tyonjohtajatieto (get-foremen documents-by-types lang)
-      :naapuritieto (get-neighbors neighbors)}}))
+(defn osapuolet [documents-by-types neighbors lang]
+  {:Osapuolet
+   {:osapuolitieto (get-parties documents-by-types)
+    :suunnittelijatieto (get-designers documents-by-types)
+    :tyonjohtajatieto (get-foremen documents-by-types lang)
+    :naapuritieto (get-neighbors neighbors)}})
 
 (defn change-value-to-when [value to_compare new_val]
   (if (= value to_compare) new_val value))

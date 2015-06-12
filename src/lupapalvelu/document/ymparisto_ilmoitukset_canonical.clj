@@ -1,6 +1,7 @@
 (ns lupapalvelu.document.ymparisto-ilmoitukset-canonical
   (:require [lupapalvelu.document.canonical-common :as canonical-common]
             [lupapalvelu.document.tools :as tools]
+            [lupapalvelu.permit :as permit]
             [sade.util :as util]
             [sade.strings :as ss]))
 
@@ -14,14 +15,15 @@
         muu-rakentaminen? (not (ss/blank? muu-rakentaminen))
         kesto (-> (:ymp-ilm-kesto documents) first :data :kesto)
         kello (apply merge (filter map? (vals kesto)))
-        melu (-> meluilmo :data :melu)]
+        melu (-> meluilmo :data :melu)
+        hakija-key (keyword (permit/get-applicant-doc-schema (permit/permit-type application)))]
     {:Ilmoitukset {:toimituksenTiedot (canonical-common/toimituksen-tiedot application lang)
                    :melutarina {:Melutarina {:yksilointitieto (:id application)
                                              :alkuHetki (util/to-xml-datetime (:submitted application))
                                              :kasittelytietotieto (canonical-common/get-kasittelytieto-ymp application :Kasittelytieto)
                                              :luvanTunnistetiedot (canonical-common/lupatunnus application)
                                              :lausuntotieto (canonical-common/get-statements (:statements application))
-                                             :ilmoittaja (canonical-common/get-yhteystiedot (first (:hakija documents)))
+                                             :ilmoittaja (canonical-common/get-yhteystiedot (first (get documents hakija-key)))
                                              :toiminnanSijaintitieto
                                              (cons
                                                {:ToiminnanSijainti

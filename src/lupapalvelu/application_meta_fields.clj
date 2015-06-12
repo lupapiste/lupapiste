@@ -30,7 +30,7 @@
         (s/trim (str (:value last-name) \space (:value first-name)))))))
 
 (defn applicant-index [application]
-  (let [applicants (remove s/blank? (map applicant-name-from-doc (domain/get-applicant-documents application)))
+  (let [applicants (remove s/blank? (map applicant-name-from-doc (domain/get-applicant-documents (:documents application))))
         applicant (or (first applicants) (applicant-name-from-auth application))
         index (if (seq applicants) applicants [applicant])]
     (tracef "applicant: '%s', applicant-index: %s" applicant index)

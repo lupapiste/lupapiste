@@ -52,7 +52,7 @@
                  [fr.opensagres.xdocreport/fr.opensagres.xdocreport.template.freemarker "1.0.5" :exclusions [org.freemarker/freemarker]]
                  [scss-compiler "0.1.2"]
                  [org.clojure/core.memoize "0.5.7"]
-                 [lupapiste/commons "0.4.0"]]
+                 [lupapiste/commons "0.5.0"]]
   :profiles {:dev {:dependencies [[midje "1.6.3"]
                                   [ring-mock "0.1.5"]
                                   [clj-ssh "0.5.7"]
