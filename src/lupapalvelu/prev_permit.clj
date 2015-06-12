@@ -152,8 +152,8 @@
         validation-result (validator-fn xml)
         app-info          (krysp-reader/get-app-info-from-message xml kuntalupatunnus)
         location-info     (get-location-info command app-info)
-        organizations-match?   (when (seq app-info)
-                                 (= organizationId (:id (organization/resolve-organization (:municipality app-info) permit-type))))
+        organizations-match? (when (:municipality app-info)
+                               (= organizationId (:id (organization/resolve-organization (:municipality app-info) permit-type))))
         no-proper-applicants? (not-any? get-applicant-type (:hakijat app-info))]
     (cond
       validation-result            validation-result
