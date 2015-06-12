@@ -158,10 +158,14 @@
   (let [op-id (if (map? operation) (:id operation) operation)]
     (first (filter #(= op-id (get-in % [:schema-info :op :id])) documents))))
 
+(defn get-subtype [{schema-info :schema-info :as doc}]
+  (when (:subtype schema-info)
+    (name (:subtype schema-info))))
+
 (defn get-documents-by-subtype [documents subtype]
   "Returns documents of given subtype"
   {:pre [(sequential? documents)]}
-  (filter (comp (partial = (name subtype)) :subtype :schema-info) documents))
+  (filter (comp (partial = (name subtype)) get-subtype) documents))
 
 (defn get-applicant-documents
   "returns applicant documents from given application documents"
