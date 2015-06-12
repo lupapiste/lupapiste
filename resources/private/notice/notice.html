@@ -25,13 +25,15 @@
         <span data-bind="saveIndicator: indicator, name: 'notice'"></span>
       </div>
 
-      <div class="textarea-wrapper">
-        <textarea
-          data-bind="attr: {placeholder: loc('comment.placeholder')}, textInput: authorityNotice"
-          data-test-id="application-authority-notice"
-          class="form-input textarea"
-          maxlength="4000">
-        </textarea>
+      <div class="application-text">
+        <div class="textarea-wrapper">
+          <textarea
+            data-bind="attr: {placeholder: loc('comment.placeholder')}, textInput: authorityNotice"
+            data-test-id="application-authority-notice"
+            class="form-input textarea"
+            maxlength="4000">
+          </textarea>
+        </div>
       </div>
     </script>
   </section>

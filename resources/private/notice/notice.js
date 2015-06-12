@@ -17,7 +17,7 @@ LUPAPISTE.NoticeModel = function() {
     var self = this;
 
     self.query = ko.observable();
-    self.data = ko.observableArray([{label: "foo"}, {label: "bar"}, {label: "baz"}]);
+    self.data = ko.observableArray([{label: "foo fat foo faa"}, {label: "bar bati bar bar"}, {label: "baz zzz"}]);
   }
 
   var subscriptions = [];

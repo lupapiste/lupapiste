@@ -3020,11 +3020,10 @@ table.attachments-template-table td.attachment-version-info {
 /* line 18, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-selection-wrapper {
   position: relative;
-  height: 32px;
   line-height: 32px;
   width: inherit;
 }
-/* line 23, ../sass/partials/_autocomplete.scss */
+/* line 22, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-selection-wrapper span.autocomplete-selection {
   width: 100%;
   height: 100%;
@@ -3036,13 +3035,14 @@ table.attachments-template-table td.attachment-version-info {
   border-radius: 5px;
   background-color: #fff;
 }
-/* line 33, ../sass/partials/_autocomplete.scss */
+/* line 32, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-selection-wrapper span.autocomplete-selection span.tag {
   background-color: #dddddd;
   padding: 2px 6px;
   margin-right: 6px;
   border-radius: 5px;
   border: 1px solid #4f4f4f;
+  white-space: nowrap;
 }
 /* line 39, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-selection-wrapper span.autocomplete-selection span.tag span.tag-label {
@@ -6192,56 +6192,57 @@ td.comment-text {
 }
 /* line 169, ../sass/views/_side_panel.scss */
 #side-panel #notice-panel .application-urgency {
-  position: relative;
   margin-bottom: 6px;
   width: 215px;
 }
-/* line 175, ../sass/views/_side_panel.scss */
-#side-panel #notice-panel .application-notices {
+/* line 177, ../sass/views/_side_panel.scss */
+#side-panel #notice-panel .application-text {
   position: relative;
+  height: calc(100% - 118px);
+  height: 100% \9;
 }
-/* line 179, ../sass/views/_side_panel.scss */
+/* line 183, ../sass/views/_side_panel.scss */
 #side-panel #notice-panel .icon.urgent {
   margin-top: 10px;
   vertical-align: middle;
 }
-/* line 184, ../sass/views/_side_panel.scss */
+/* line 188, ../sass/views/_side_panel.scss */
 #side-panel #notice-panel .icon.hold {
   margin-top: 10px;
   vertical-align: middle;
 }
-/* line 189, ../sass/views/_side_panel.scss */
+/* line 193, ../sass/views/_side_panel.scss */
 #side-panel #notice-panel label {
   vertical-align: bottom;
 }
-/* line 192, ../sass/views/_side_panel.scss */
+/* line 197, ../sass/views/_side_panel.scss */
 #side-panel #notice-panel .textarea-wrapper {
   position: absolute;
-  top: 117px;
+  top: 0;
   left: 0;
   right: 0;
   bottom: 0;
 }
-/* line 199, ../sass/views/_side_panel.scss */
+/* line 205, ../sass/views/_side_panel.scss */
 #side-panel #notice-panel .form-input.textarea {
   height: 100%;
   margin: 0;
 }
-/* line 205, ../sass/views/_side_panel.scss */
+/* line 211, ../sass/views/_side_panel.scss */
 #side-panel #notice-panel .notice-prompt-info:before {
   content: "(";
 }
-/* line 208, ../sass/views/_side_panel.scss */
+/* line 214, ../sass/views/_side_panel.scss */
 #side-panel #notice-panel .notice-prompt-info:after {
   content: ")";
 }
 
-/* line 216, ../sass/views/_side_panel.scss */
+/* line 222, ../sass/views/_side_panel.scss */
 #side-panel.show-side-panel {
   right: 0px;
 }
 
-/* line 221, ../sass/views/_side_panel.scss */
+/* line 227, ../sass/views/_side_panel.scss */
 #conversation-panel textarea {
   -webkit-transition: box-shadow 250ms ease;
   -moz-transition: box-shadow 250ms ease;
@@ -6250,24 +6251,24 @@ td.comment-text {
   transition: box-shadow 250ms ease;
 }
 
-/* line 231, ../sass/views/_side_panel.scss */
+/* line 237, ../sass/views/_side_panel.scss */
 #conversation-panel.highlight-conversation textarea {
   box-shadow: inset 0 0 10px #dd780c;
   border-color: #f39129;
 }
 
 @media all and (max-width: 1280px) {
-  /* line 239, ../sass/views/_side_panel.scss */
+  /* line 245, ../sass/views/_side_panel.scss */
   #side-panel .content-wrapper {
     width: 300px;
   }
 
-  /* line 244, ../sass/views/_side_panel.scss */
+  /* line 250, ../sass/views/_side_panel.scss */
   #side-panel {
     right: -300px;
   }
 
-  /* line 249, ../sass/views/_side_panel.scss */
+  /* line 255, ../sass/views/_side_panel.scss */
   .comment-controls .comment-request {
     margin-left: 0;
   }

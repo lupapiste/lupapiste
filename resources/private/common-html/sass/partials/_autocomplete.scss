@@ -17,7 +17,6 @@
   width: 430px;
   .autocomplete-selection-wrapper {
     position: relative;
-    height: 32px;
     line-height: 32px;
     width: inherit;
     span.autocomplete-selection {
@@ -36,6 +35,7 @@
         margin-right: $marginS;
         border-radius: 5px;
         border: 1px solid $lp-dark-grey;
+        white-space: nowrap;
         span.tag-label {
           color: $lp-dark-grey;
         }
