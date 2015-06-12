@@ -1023,6 +1023,18 @@
                                                               :secondaryOperations secondaryOperations}
                                                       $unset {:operations 1}})))
 
+(defmigration hakija-documents-to-hakija-r
+  {:apply-when (or (pos? (mongo/count :applications {$and [{:permitType "R"} {:documents {$elemMatch {"schema-info.name" "hakija"}}}]}))
+                   (pos? (mongo/count :submitted-applications {$and [{:permitType "R"} {:documents {$elemMatch {"schema-info.name" "hakija"}}}]})))}
+  (update-applications-array
+    :documents
+    (fn [{schema-info :schema-info :as doc}]
+      (if (= "hakija" (:name schema-info))
+        (assoc-in doc [:schema-info :name] "hakija-r")
+        doc))
+    {$and [{:permitType "R"} {:documents {$elemMatch {"schema-info.name" "hakija"}}}]}))
+
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"
