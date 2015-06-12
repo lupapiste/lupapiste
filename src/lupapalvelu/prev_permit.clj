@@ -273,9 +273,7 @@
                 (println "Updated" id)
                 (swap! fix-prev-permit-counter inc))
               (println "No XML for application" id)))
-          (println "No verdict for application" id)))
-      )
+          (println "No verdict for application" id))))
     (println "fixed" @fix-prev-permit-counter "applications")
     (finally
-      (mongo/disconnect!)))
-  )
+      (mongo/disconnect!))))
