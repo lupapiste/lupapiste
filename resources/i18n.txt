@@ -5,4 +5,4 @@ attachmentType.osapuolet.cv: CV tai referenssiluettelo
 op-description.edit: Lisää tunniste
 application.invites: Olet saanut kutsuja seuraaviin hankkeisiin
 attachmentType.hakija.valtakirja.info: Jos hakijaa tai muuta hankkeen osapuolta ei ole valtuutettu Lupapisteessä
-tyonjohtaja.ilmoitusHakemusValitsin._group_label.help: Ilmoitus on voimassa välittömästi, hakemuksen käsittelee viranomainen
+tyonjohtaja.ilmoitusHakemusValitsin._group_label.help: Ilmoitus on voimassa heti hakemuksen jättämisen jälkeen. Hakemuksen käsittelee viranomainen. Voit käyttää ilmiotusta, kun olet aiemmin toiminut samassa roolissa hankkeen kunnan alueella vastaavissa tai vaativimmissa työnjohtotehtävissä. Muussa tapauksessa valitse 'Hakemus'.
