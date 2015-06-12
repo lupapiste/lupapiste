@@ -1034,6 +1034,16 @@
         doc))
     {$and [{:permitType "R"} {:documents {$elemMatch {"schema-info.name" "hakija"}}}]}))
 
+(defmigration add-subtype-for-maksaja-documents
+  {:apply-when (or (pos? (mongo/count :applications {$and [{:permitType "R"} {:documents {$elemMatch {"schema-info.name" "maksaja"}}}]}))
+                   (pos? (mongo/count :submitted-applications {$and [{:permitType "R"} {:documents {$elemMatch {"schema-info.name" "maksaja"}}}]})))}
+  (update-applications-array
+    :documents
+    (fn [{schema-info :schema-info :as doc}]
+      (if-not (:subtype schema-info)
+        (assoc-in doc [:schema-info :subtype] "maksaja")
+        doc))
+    {$and [{:permitType "R"} {:documents {$elemMatch {"schema-info.name" "maksaja"}}}]}))
 
 ;;
 ;; ****** NOTE! ******
