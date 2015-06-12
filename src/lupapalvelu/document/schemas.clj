@@ -80,7 +80,8 @@
 (def uusi-rakennuksen-valitsin [{:name "jarjestysnumero" :type :newBuildingSelector :i18nkey "rakennusnro" :required true}
                                 {:name "valtakunnallinenNumero" :type :string  :subtype :rakennustunnus :hidden true}
                                 {:name "rakennusnro" :type :string :subtype :rakennusnumero :hidden true}
-                                {:name "kiinttun" :type :string :subtype :kiinteistotunnus :hidden true}])
+                                {:name "kiinttun" :type :string :subtype :kiinteistotunnus :hidden true}
+                                {:name "kunnanSisainenPysyvaRakennusnumero" :type :string :hidden true}])
 
 (def simple-osoite [{:name "osoite"
                      :type :group
