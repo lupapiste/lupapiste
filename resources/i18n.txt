@@ -1,7 +1,0 @@
-hakija-r._group_label: Hakija (hankkeeseen ryhtyvä)
-hakija-r._append_label: Lisää hakija
-userinfo.architect.attachments.name.cv: CV tai referenssiluettelo
-op-description.edit: Lisää tunniste
-application.invites: Olet saanut kutsuja seuraaviin hankkeisiin
-attachmentType.hakija.valtakirja.info: Jos hakijaa tai muuta hankkeen osapuolta ei ole valtuutettu Lupapisteessä
-tyonjohtaja.ilmoitusHakemusValitsin._group_label.help: Ilmoitus on voimassa heti hakemuksen jättämisen jälkeen. Hakemuksen käsittelee viranomainen. Voit käyttää ilmoitusta, kun olet aiemmin toiminut samassa roolissa hankkeen kunnan alueella vastaavissa tai vaativimmissa työnjohtotehtävissä. Muussa tapauksessa valitse 'Hakemus'.
