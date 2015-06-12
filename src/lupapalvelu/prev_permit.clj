@@ -238,7 +238,7 @@
         (tools/default-values element)))))
 
 (defn- applicant->applicant-doc [applicant]
-  (let [schema         (schema/get-schema 1 "hakija")
+  (let [schema         (schema/get-schema 1 "hakija-r")
         default-values (tools/create-document-data schema tools/default-values)
         document       {:id          (mongo/create-id)
                         :created     (now)
@@ -265,7 +265,7 @@
                 app-info          (krysp-reader/get-app-info-from-message xml kuntalupatunnus)]
             (if (seq app-info)
               (let [dummy-command         (action/application->command application)
-                    old-applicants        (filter #(= (get-in % [:schema-info :name]) "hakija") documents)
+                    old-applicants        (filter #(= (get-in % [:schema-info :name]) "hakija-r") documents)
                     new-applicants        (map applicant->applicant-doc (:hakijat app-info))]
 
                 ; remove old applicants from application & create applicant doc for each
