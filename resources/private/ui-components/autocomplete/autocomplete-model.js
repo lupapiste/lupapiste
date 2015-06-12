@@ -21,6 +21,11 @@ LUPAPISTE.AutocompleteModel = function(params) {
     self.index(0);
   });
 
+  self.showCaption = ko.pureComputed(function() {
+    return !self.selected() && self.selectedTags().length == 0
+  });
+
+
   self.selectInput = function() {
     self.inputSelected(true);
     self.showResult(true);
@@ -81,6 +86,7 @@ LUPAPISTE.AutocompleteModel = function(params) {
 
   self.removeTag = function(tag) {
     console.log("remove-tag", tag);
+    self.selectedTags.remove(tag);
     return false;
   }
 
