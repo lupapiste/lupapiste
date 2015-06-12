@@ -10,8 +10,9 @@
             <span data-bind="visible: showCaption, ltext: 'choose'"></span>
             <!-- ko foreach: selectedTags -->
             <span class="tag">
-              <span class="tag-remove" data-bind="click: $parent.removeTag, clickBubble: false, event: { mousedown: function() {} }, mousedownBubble: false">x</span>
               <span class="tag-label" data-bind="text: $data"></span>
+              <span class="tag-remove icon remove left-align"
+                    data-bind="click: $parent.removeTag, clickBubble: false, event: { mousedown: function() {} }, mousedownBubble: false"></span>
             </span>
             <!-- /ko -->
           </span>
