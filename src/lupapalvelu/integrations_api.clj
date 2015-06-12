@@ -109,14 +109,17 @@
 
 (defn- application-already-exported [type]
   (fn [_ application]
-    (let [filtered-transfers (filter #(some #{(keyword (:type %))} [:exported-to-backing-system :exported-to-asianhallinta]) (:transfers application))]
-      (when-not (= (keyword (:type (last filtered-transfers))) type)
-        (fail :error.application-not-exported)))))
+    (when-not (= "aiemmalla-luvalla-hakeminen" (get-in application [:primaryOperation :name]))
+      (let [export-ops #{:exported-to-backing-system :exported-to-asianhallinta}
+            filtered-transfers (filter (comp export-ops :type) (:transfers application))]
+       (when-not (= (keyword (:type (last filtered-transfers))) type)
+         (fail :error.application-not-exported))))))
 
 (defcommand move-attachments-to-backing-system
   {:parameters [id lang attachmentIds]
    :user-roles #{:authority}
-   :pre-checks [(permit/validate-permit-type-is permit/R) (application-already-exported :exported-to-backing-system)]
+   :pre-checks [(permit/validate-permit-type-is permit/R)
+                (application-already-exported :exported-to-backing-system)]
    :states     [:verdictGiven :constructionStarted]
    :description "Sends such selected attachments to backing system that are not yet sent."}
   [{:keys [created application user] :as command}]
