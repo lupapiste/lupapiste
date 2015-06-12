@@ -46,7 +46,7 @@
                                (assoc-in tyonjohtaja-doc [:data :kuntaRoolikoodi :value] foremanRole)
                                tyonjohtaja-doc)
 
-        hakija-docs          (domain/get-documents-by-name application "hakija-r")
+        hakija-docs          (domain/get-applicant-documents (:documents application))
         hakija-docs          (map cleanup-hakija-doc hakija-docs)
 
         new-application-docs (->> (:documents foreman-app)
