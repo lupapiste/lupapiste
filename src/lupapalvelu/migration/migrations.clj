@@ -1040,7 +1040,7 @@
   (update-applications-array
     :documents
     (fn [{schema-info :schema-info :as doc}]
-      (if (and (= "maksaja" (:name schema-info)) (util/empty-or-nil? (:subtype schema-info)))
+      (if (and (= "maksaja" (:name schema-info)) (ss/blank? (:subtype schema-info)))
         (assoc-in doc [:schema-info :subtype] "maksaja")
         doc))
     {"documents" {$elemMatch {"schema-info.name" "maksaja", "schema-info.subtype" {$exists false}}}}))
