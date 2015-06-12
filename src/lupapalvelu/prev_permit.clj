@@ -237,11 +237,14 @@
         (tools/default-values element)))))
 
 (defn- applicant->applicant-doc [applicant]
-  (let [schema (schema/get-schema 1 "hakija")]
-    {:id          (mongo/create-id)
-     :created     (now)
-     :schema-info (:info schema)
-     :data        (tools/create-document-data schema (partial applicant-field-values applicant))}))
+  (let [schema         (schema/get-schema 1 "hakija")
+        default-values (tools/create-document-data schema tools/default-values)
+        document       {:id          (mongo/create-id)
+                        :created     (now)
+                        :schema-info (:info schema)
+                        :data        (tools/create-document-data schema (partial applicant-field-values applicant))}
+        unset-type     (if (contains? applicant :henkilo) :yritys :henkilo)]
+    (assoc-in document [:data unset-type] (unset-type default-values))))
 
 (defn fix-prev-permit-applicants []
   (when @mongo/connected
@@ -252,9 +255,10 @@
 
     (let [operation :aiemmalla-luvalla-hakeminen
           applications (mongo/select :applications
-                                     {"primaryOperation.name" operation}
+                                     {:_id "LP-091-2015-00408"
+                                      "primaryOperation.name" operation}
                                      {:id 1 :permitType 1 :verdicts 1 :organization 1 :documents 1})]
-      (doseq [{:keys [id permitType verdicts organization documents] :as application} (take 3 applications)]
+      (doseq [{:keys [id permitType verdicts organization documents] :as application} (take 1 applications)]
         (if-let [kuntalupatunnus (get-in verdicts [0 :kuntalupatunnus])]
           (let [dummy-application {:id kuntalupatunnus :permitType permitType :organization organization}
                 xml               (krysp-fetch-api/get-application-xml dummy-application :kuntalupatunnus)
@@ -265,16 +269,14 @@
                     new-applicants        (map applicant->applicant-doc (:hakijat app-info))]
 
                 ; remove old applicants from application & create applicant doc for each
-                #_(println "action/update-application " dummy-command "{$pull {:documents {:id {$in" (map :id old-applicants) "}}}
-                                          $push {:documents {$each" new-applicants "}}}")
-                (println "Removing" (map :id old-applicants))
                 (action/update-application dummy-command {$pull {:documents {:id {$in (map :id old-applicants)}}}})
                 (action/update-application dummy-command {$pushAll {:documents new-applicants}})
-                (println "Updated" id))
+                (println "Updated" id)
+                (swap! fix-prev-permit-counter inc))
               (println "No XML for application" id)))
           (println "No verdict for application" id)))
       )
-
+    (println "fixed" @fix-prev-permit-counter "applications")
     (finally
       (mongo/disconnect!)))
   )
