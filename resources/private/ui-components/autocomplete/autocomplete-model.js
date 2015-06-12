@@ -75,7 +75,7 @@ LUPAPISTE.AutocompleteModel = function(params) {
     };
 
     if (event.keyCode === 13) {
-      self.selectItem(self.dataProvider.data()[self.index()]);
+      self.selectItem(self.dataProvider.data()[self.index()].label);
     }
     else if (event.keyCode === 38) {
       self.index(self.index() > 0 ? self.index() - 1 : 0);
