@@ -11,7 +11,7 @@
             <!-- ko foreach: selectedTags -->
             <span class="tag">
               <span class="tag-remove" data-bind="click: $parent.removeTag, clickBubble: false, event: { mousedown: function() {} }, mousedownBubble: false">x</span>
-              <span class="tag-label" data-bind="text: $data.label"></span>
+              <span class="tag-label" data-bind="text: $data"></span>
             </span>
             <!-- /ko -->
           </span>
@@ -24,7 +24,7 @@
           <ul class="autocomplete-result"
               data-bind="foreach: dataProvider.data">
             <li class="autocomplete-result-item"
-                data-bind="click: $parent.selectItem,
+                data-bind="click: function(data, event) { $parent.selectItem(data.label) },
                            event: {mouseover: $parent.changeIndex.bind($data, $index())},
                            css: {active: $index() === $parent.index()}">
               <span data-bind="text: label"></span>
