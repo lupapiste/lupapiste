@@ -6,7 +6,7 @@
             [cheshire.core :as json]
             [sade.env :as env]
             [sade.core :refer :all]
-            [lupapiste-commons.i18n :as commons]))
+            [lupapiste-commons.i18n.core :as commons]))
 
 (def default-lang :fi)
 
