@@ -79,6 +79,11 @@ LUPAPISTE.AutocompleteModel = function(params) {
     self.index(index);
   };
 
+  self.removeTag = function(tag) {
+    console.log("remove-tag", tag);
+    return false;
+  }
+
   self.dispose = function() {
     self.dataSubscription.dispose();
   };

@@ -30,6 +30,23 @@
       box-sizing: border-box;
       border-radius: 5px;
       background-color: #fff;
+      span.tag {
+        background-color: darken($lp-light-grey, 10%);
+        padding: $marginS / 3 $marginS;
+        margin-right: $marginS;
+        border-radius: 5px;
+        border: 1px solid $lp-dark-grey;
+        span.tag-label {
+          color: $lp-dark-grey;
+        }
+        span.tag-remove {
+          color: darken($lp-light-grey, 30%);
+          cursor: pointer;
+          &:hover {
+            color: $lp-dark-grey;
+          }
+        }
+      }
     }
     span.autocomplete-selection-arrow {
       position: absolute;

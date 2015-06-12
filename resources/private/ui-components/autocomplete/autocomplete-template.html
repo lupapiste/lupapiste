@@ -8,6 +8,12 @@
           <span class="autocomplete-selection">
             <span data-bind="visible: selected, text: selected"></span>
             <span data-bind="visible: !selected(), ltext: 'choose'"></span>
+            <!-- ko foreach: selectedTags -->
+            <span class="tag">
+              <span class="tag-remove" data-bind="click: $parent.removeTag, clickBubble: false, event: { mousedown: function() {} }, mousedownBubble: false">x</span>
+              <span class="tag-label" data-bind="text: $data.label"></span>
+            </span>
+            <!-- /ko -->
           </span>
           <span class="autocomplete-selection-arrow icon drill-down-black-smaller"></span>
         </div>
