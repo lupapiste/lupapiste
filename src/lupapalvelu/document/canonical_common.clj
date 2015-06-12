@@ -341,8 +341,8 @@
             {:yritys (get-yritys-data (:yritys osapuoli))})
           (when omistajalaji {:omistajalaji omistajalaji}))))))
 
-(defn get-parties-by-type [documents tag-name party-type doc-transformer]
-  (for [doc (documents party-type)
+(defn get-parties-by-type [documents-by-type tag-name party-type doc-transformer]
+  (for [doc (documents-by-type party-type)
         :let [osapuoli (:data doc)]
         :when (seq osapuoli)]
     {tag-name (doc-transformer osapuoli party-type)}))
