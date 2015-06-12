@@ -1,7 +1,6 @@
 hakija-r._group_label: Hakija (hankkeeseen ryhtyvä)
 hakija-r._append_label: Lisää hakija
 userinfo.architect.attachments.name.cv: CV tai referenssiluettelo
-attachmentType.osapuolet.cv: CV tai referenssiluettelo
 op-description.edit: Lisää tunniste
 application.invites: Olet saanut kutsuja seuraaviin hankkeisiin
 attachmentType.hakija.valtakirja.info: Jos hakijaa tai muuta hankkeen osapuolta ei ole valtuutettu Lupapisteessä
