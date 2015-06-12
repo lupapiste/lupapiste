@@ -1,5 +1,6 @@
 (ns lupapalvelu.prev-permit
   (:require [taoensso.timbre :refer [debug info]]
+            [monger.operators :refer :all]
             [sade.core :refer :all]
             [sade.strings :as ss]
             [sade.util :as util]
@@ -13,11 +14,15 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.commands :as commands]
+            [lupapalvelu.document.model :as model]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
             [lupapalvelu.operations :as operations]
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch-api]
-            [lupapalvelu.organization :as organization]))
+            [lupapalvelu.organization :as organization]
+            [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.document.schemas :as schema]
+            [lupapalvelu.document.tools :as tools]))
 
 (defn- get-applicant-email [applicant]
   (-> (or
@@ -134,7 +139,7 @@
 (defn- get-location-info [{data :data :as command} app-info]
   (when app-info
     (let [rakennuspaikka-exists? (and (:rakennuspaikka app-info)
-                                   (every? (-> app-info :rakennuspaikka keys set) [:x :y :address :propertyId]))
+                                      (every? (-> app-info :rakennuspaikka keys set) [:x :y :address :propertyId]))
           location-info          (cond
                                    rakennuspaikka-exists?                          (:rakennuspaikka app-info)
                                    (enough-location-info-from-parameters? command) (select-keys data [:x :y :address :propertyId]))]
@@ -142,7 +147,7 @@
         (info "Prev permit application creation, rakennuspaikkatieto information incomplete:\n " (:rakennuspaikka app-info) "\n"))
       location-info)))
 
-(defn fetch-prev-application! [{{:keys [organizationId kuntalupatunnus]} :data user :user :as command}]
+(defn fetch-prev-application! [{{:keys [organizationId kuntalupatunnus]} :data :as command}]
   (let [operation         :aiemmalla-luvalla-hakeminen
         permit-type       (operations/permit-type-of-operation operation)
         dummy-application {:id kuntalupatunnus :permitType permit-type :organization organizationId}
@@ -161,3 +166,115 @@
       (not location-info)          (fail :error.more-prev-app-info-needed :needMorePrevPermitInfo true)
       no-proper-applicants?        (fail :error.no-proper-applicants-found-from-previous-permit)
       :else                        (ok :id (do-create-application-from-previous-permit command operation xml app-info location-info)))))
+
+
+(def fix-prev-permit-counter (atom 0))
+
+(defn fix-prev-permit-addresses []
+  (when @mongo/connected
+    (throw "Mongo already connected, aborting"))
+  (try
+    (mongo/connect!)
+    (reset! fix-prev-permit-counter 0)
+
+    (let [operation :aiemmalla-luvalla-hakeminen
+          applications (mongo/select :applications
+                                     {"primaryOperation.name" operation}
+                                     {:id 1 :permitType 1 :verdicts 1 :organization 1 :address 1})]
+      (doseq [{:keys [id permitType verdicts organization address]} applications]
+        (if-let [kuntalupatunnus (get-in verdicts [0 :kuntalupatunnus])]
+          (let [dummy-application {:id kuntalupatunnus :permitType permitType :organization organization}
+                xml (krysp-fetch-api/get-application-xml dummy-application :kuntalupatunnus)
+                app-info (krysp-reader/get-app-info-from-message xml kuntalupatunnus)
+                correct-address (get-in app-info [:rakennuspaikka :address])]
+            (if (nil? correct-address)
+              (println "No address info in XML for application" id)
+              (when-not (= correct-address address)
+                (println "old address:" address)
+                (println "#_(mongo/update-by-id :applications" id
+                       "{$set {:address" correct-address
+                       ":title" correct-address "}})")
+                (mongo/update-by-id :applications id
+                                    {$set {:address correct-address
+                                           :title   correct-address}})
+                (mongo/update-by-id :submitted-applications id
+                                    {$set {:address correct-address
+                                           :title   correct-address}})
+                (swap! fix-prev-permit-counter inc))))
+          (println "No verdict for application" id))))
+    (println "fixed" @fix-prev-permit-counter "applications")
+    (finally
+      (mongo/disconnect!))))
+
+(defn- applicant-field-values [applicant {:keys [name] :as element}]
+  (if (contains? applicant :henkilo)
+    (case (keyword name)
+      :_selected "henkilo"
+      :userId nil
+      :etunimi (get-in applicant [:henkilo :nimi :etunimi])
+      :sukunimi (get-in applicant [:henkilo :nimi :sukunimi])
+      :hetu (get-in applicant [:henkilo :henkilotunnus])
+      :turvakieltoKytkin (or (:turvakieltoKytkin applicant) false)
+      :katu (get-in applicant [:henkilo :osoite :osoitenimi :teksti])
+      :postinumero (get-in applicant [:henkilo :osoite :postinumero])
+      :postitoimipaikannimi (get-in applicant [:henkilo :osoite :postitoimipaikannimi])
+      :puhelin (get-in applicant [:henkilo :puhelin])
+      :email (get-in applicant [:henkilo :sahkopostiosoite])
+      (tools/default-values element))
+    (let [postiosoite (or
+                        (get-in applicant [:yritys :postiosoite])
+                        (get-in applicant [:yritys :postiosoitetieto :postiosoite]))]
+      (case (keyword name)
+        :_selected "yritys"
+        :companyId nil
+        :yritysnimi (get-in applicant [:yritys :nimi])
+        :liikeJaYhteisoTunnus (get-in applicant [:yritys :liikeJaYhteisotunnus])
+        :katu (get-in postiosoite [:osoitenimi :teksti])
+        :postinumero (get-in postiosoite [:postinumero])
+        :postitoimipaikannimi (get-in postiosoite [:postitoimipaikannimi])
+        :turvakieltoKytkin (or (:turvakieltoKytkin applicant) false)
+        :puhelin (get-in applicant [:yritys :puhelin])
+        :email (get-in applicant [:yritys :sahkopostiosoite])
+        (tools/default-values element)))))
+
+(defn- applicant->applicant-doc [applicant]
+  (let [schema         (schema/get-schema 1 "hakija")
+        default-values (tools/create-document-data schema tools/default-values)
+        document       {:id          (mongo/create-id)
+                        :created     (now)
+                        :schema-info (:info schema)
+                        :data        (tools/create-document-data schema (partial applicant-field-values applicant))}
+        unset-type     (if (contains? applicant :henkilo) :yritys :henkilo)]
+    (assoc-in document [:data unset-type] (unset-type default-values))))
+
+(defn fix-prev-permit-applicants []
+  (when @mongo/connected
+    (throw "Mongo already connected, aborting"))
+  (try
+    (mongo/connect!)
+    (reset! fix-prev-permit-counter 0)
+
+    (let [operation :aiemmalla-luvalla-hakeminen
+          applications (mongo/select :applications
+                                     {"primaryOperation.name" operation}
+                                     {:id 1 :permitType 1 :verdicts 1 :organization 1 :documents 1})]
+      (doseq [{:keys [id permitType verdicts organization documents] :as application} applications]
+        (if-let [kuntalupatunnus (get-in verdicts [0 :kuntalupatunnus])]
+          (let [dummy-application {:id kuntalupatunnus :permitType permitType :organization organization}
+                xml               (krysp-fetch-api/get-application-xml dummy-application :kuntalupatunnus)
+                app-info          (krysp-reader/get-app-info-from-message xml kuntalupatunnus)]
+            (if (seq app-info)
+              (let [dummy-command         (action/application->command application)
+                    old-applicants        (filter #(= (get-in % [:schema-info :name]) "hakija") documents)
+                    new-applicants        (map applicant->applicant-doc (:hakijat app-info))]
+
+                ; remove old applicants from application & create applicant doc for each
+                (action/update-application dummy-command {$pull {:documents {:id {$in (map :id old-applicants)}}}})
+                (action/update-application dummy-command {$pushAll {:documents new-applicants}})
+                (println "Updated" id)
+                (swap! fix-prev-permit-counter inc))
+              (println "No XML for application" id)))
+          (println "No verdict for application" id))))
+    (println "fixed" @fix-prev-permit-counter "applications")
+    (finally
+      (mongo/disconnect!))))
