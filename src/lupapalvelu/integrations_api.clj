@@ -111,9 +111,9 @@
   (fn [_ application]
     (when-not (= "aiemmalla-luvalla-hakeminen" (get-in application [:primaryOperation :name]))
       (let [export-ops #{:exported-to-backing-system :exported-to-asianhallinta}
-            filtered-transfers (filter (comp export-ops :type) (:transfers application))]
-       (when-not (= (keyword (:type (last filtered-transfers))) type)
-         (fail :error.application-not-exported))))))
+            filtered-transfers (filter (comp export-ops keyword :type) (:transfers application))]
+        (when-not (= (keyword (:type (last filtered-transfers))) type)
+          (fail :error.application-not-exported))))))
 
 (defcommand move-attachments-to-backing-system
   {:parameters [id lang attachmentIds]
