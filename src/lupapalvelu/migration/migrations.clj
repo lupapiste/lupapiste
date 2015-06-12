@@ -1035,15 +1035,15 @@
     {$and [{:permitType "R"} {:documents {$elemMatch {"schema-info.name" "hakija"}}}]}))
 
 (defmigration add-subtype-for-maksaja-documents
-  {:apply-when (or (pos? (mongo/count :applications {$and [{:permitType "R"} {:documents {$elemMatch {"schema-info.name" "maksaja"}}}]}))
-                   (pos? (mongo/count :submitted-applications {$and [{:permitType "R"} {:documents {$elemMatch {"schema-info.name" "maksaja"}}}]})))}
+  {:apply-when (or (pos? (mongo/count :applications {"documents" {$elemMatch {"schema-info.name" "maksaja", "schema-info.subtype" {$exists false}}}}))
+                   (pos? (mongo/count :submitted-applications {"documents" {$elemMatch {"schema-info.name" "maksaja", "schema-info.subtype" {$exists false}}}})))}
   (update-applications-array
     :documents
     (fn [{schema-info :schema-info :as doc}]
-      (if-not (:subtype schema-info)
+      (if (and (= "maksaja" (:name schema-info)) (util/empty-or-nil? (:subtype schema-info)))
         (assoc-in doc [:schema-info :subtype] "maksaja")
         doc))
-    {$and [{:permitType "R"} {:documents {$elemMatch {"schema-info.name" "maksaja"}}}]}))
+    {"documents" {$elemMatch {"schema-info.name" "maksaja", "schema-info.subtype" {$exists false}}}}))
 
 ;;
 ;; ****** NOTE! ******
