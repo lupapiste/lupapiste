@@ -113,7 +113,7 @@
 
     (fact "Mikko is the applicant"
       (let [application  (query-application mikko application-id)
-            first-hakija (domain/get-document-by-name application "hakija")]
+            first-hakija (domain/get-applicant-document (:documents application))]
         (:id first-hakija) =not=> hakija-doc
         (get-in first-hakija [:data :henkilo :henkilotiedot :etunimi :value]) => ""
         (:applicant application ) => "Intonen Mikko"))

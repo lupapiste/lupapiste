@@ -1668,14 +1668,15 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var descriptionSpan = document.createElement("span");
     var description = document.createTextNode("");
     var descriptionInput = document.createElement("input");
+    var iconSpanWrapper = document.createElement("span");
     var iconSpan = document.createElement("span");
-    var iconSpanDescription = document.createElement("span");
-    iconSpanDescription.appendChild(document.createTextNode(loc("edit")));
+    var iconTextSpan = document.createElement("span");
+    iconTextSpan.appendChild(document.createTextNode(loc("op-description.edit")));
 
     // test ids
     if (options && options.dataTestSpecifiers) {
       descriptionSpan.setAttribute("data-test-id", "op-description");
-      iconSpan.setAttribute("data-test-id", "edit-op-description");
+      iconSpanWrapper.setAttribute("data-test-id", "edit-op-description");
       descriptionInput.setAttribute("data-test-id", "op-description-editor");
     }
 
@@ -1685,7 +1686,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       description.nodeValue = operation.description;
       descriptionInput.value = operation.description;
     } else {
-      iconSpan.appendChild(iconSpanDescription);
+      iconSpanWrapper.appendChild(iconTextSpan);
     }
 
     wrapper.onclick = function(e) {
@@ -1702,7 +1703,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       var value = _.trim(descriptionInput.value);
       if (value === "") {
         value = null;
-        iconSpan.appendChild(iconSpanDescription);
+        iconSpanWrapper.appendChild(iconTextSpan);
       }
 
       ajax.command("update-op-description", {id: self.appId, "op-id": operation.id, desc: value })
@@ -1715,7 +1716,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
       description.nodeValue = descriptionInput.value;
       $(descriptionInput).addClass("hidden");
-      $(iconSpan).removeClass("hidden");
+      $(iconSpanWrapper).removeClass("hidden");
       $(descriptionSpan).removeClass("hidden");
     }, 250);
 
@@ -1737,24 +1738,26 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     };
 
     iconSpan.className = "icon edit";
-    iconSpan.onclick = function(e) {
+    iconSpanWrapper.onclick = function(e) {
       var event = getEvent(e);
       event.stopPropagation();
 
-      if (iconSpan.contains(iconSpanDescription)) {
-        iconSpan.removeChild(iconSpanDescription);
+      if (iconSpanWrapper.contains(iconTextSpan)) {
+        iconSpanWrapper.removeChild(iconTextSpan);
       }
 
-      $(iconSpan).addClass("hidden");
+      $(iconSpanWrapper).addClass("hidden");
       $(descriptionSpan).addClass("hidden");
       $(descriptionInput).removeClass("hidden");
       descriptionInput.focus();
     };
 
     descriptionSpan.appendChild(description);
+    iconSpanWrapper.appendChild(iconSpan);
+    iconSpanWrapper.appendChild(iconTextSpan);
     wrapper.appendChild(descriptionSpan);
     wrapper.appendChild(descriptionInput);
-    wrapper.appendChild(iconSpan);
+    wrapper.appendChild(iconSpanWrapper);
     return wrapper;
   }
 

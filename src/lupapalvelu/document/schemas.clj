@@ -958,7 +958,21 @@
             :repeating true
             :approvable true
             :type :party
-            :subtype :hakija
+            :subtype "hakija"
+            :section-help "party.section.help"
+            :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
+            }
+     :body party}
+
+    {:info {:name "hakija-r"
+            :group-help "hakija.group.help"
+            :i18name "osapuoli"
+            :order 3
+            :removable true
+            :repeating true
+            :approvable true
+            :type :party
+            :subtype "hakija"
             :section-help "party.section.help"
             :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
             }
@@ -971,7 +985,7 @@
             :repeating false
             :approvable true
             :type :party
-            :subtype :hakija
+            :subtype "hakija"
             :section-help "party.section.help"
             :after-update 'lupapalvelu.application-meta-fields/applicant-index-update}
      :body (schema-body-without-element-by-name ya-party turvakielto)}
@@ -1017,6 +1031,7 @@
             :order 6
             :removable true
             :approvable true
+            :subtype :maksaja
             :type :party}
      :body maksaja}
 
