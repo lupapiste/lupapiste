@@ -116,10 +116,6 @@
                   {:operation operation :municipality municipality :infoRequest false :messages []}
                   location-info)
         created-application (application/do-create-application command manual-schema-datas)
-        ;; TODO: Aseta applicationille viimeisin state? (lupapalvelu.document.canonical-common/application-state-to-krysp-state kaanteisesti)
-        ;        created-application (assoc created-application
-        ;                              :state (some #(when (= (-> app-info :viimeisin-tila :tila) (val %)) (first %)) lupapalvelu.document.canonical-common/application-state-to-krysp-state))
-
         ;; attaches the new application, and its id to path [:data :id], into the command
         command (util/deep-merge command (action/application->command created-application))]
 
