@@ -4,6 +4,7 @@
   <section class="page container" id="notices">
     <script type="text/html" id="notice-template">
       <div class="application-tags">
+        <label data-bind="ltext: 'application.tags'"></label>
         <span data-bind="saveIndicator: indicator, name: 'tags'"></span>
         <div data-bind="component: {name: 'autocomplete', params: {tags: true, dataProvider: applicationTagsProvider, value: selectedTags}}"></div>
       </div>

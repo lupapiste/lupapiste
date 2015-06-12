@@ -6198,13 +6198,13 @@ td.comment-text {
   width: 215px;
 }
 /* line 175, ../sass/views/_side_panel.scss */
-#side-panel #notice-panel .application-notices {
+#side-panel #notice-panel .application-notices, #side-panel #notice-panel .application-tags {
   position: relative;
 }
 /* line 179, ../sass/views/_side_panel.scss */
 #side-panel #notice-panel .application-text {
   position: relative;
-  height: calc(100% - 118px);
+  height: calc(100% - 144px);
   height: 100% \9;
 }
 /* line 185, ../sass/views/_side_panel.scss */
