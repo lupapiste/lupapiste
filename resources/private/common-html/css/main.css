@@ -3022,7 +3022,7 @@ table.attachments-template-table td.attachment-version-info {
   position: relative;
   height: 32px;
   line-height: 32px;
-  width: 100%;
+  width: inherit;
 }
 /* line 23, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-selection-wrapper span.autocomplete-selection {
@@ -3046,7 +3046,7 @@ table.attachments-template-table td.attachment-version-info {
 }
 /* line 43, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown {
-  width: 100%;
+  width: inherit;
   position: relative;
   z-index: 1;
 }
@@ -3063,8 +3063,7 @@ table.attachments-template-table td.attachment-version-info {
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result {
   position: fixed;
   z-index: 1000;
-  width: 430px;
-  max-width: 430px;
+  width: inherit;
   max-height: 300px;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -3075,22 +3074,22 @@ table.attachments-template-table td.attachment-version-info {
   background-color: #fff;
   color: black;
 }
-/* line 69, ../sass/partials/_autocomplete.scss */
+/* line 68, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item, .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-empty {
   cursor: default;
   display: list-item;
   list-style-type: none;
   padding: 6px 6px;
 }
-/* line 75, ../sass/partials/_autocomplete.scss */
+/* line 74, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item {
   cursor: pointer;
 }
-/* line 78, ../sass/partials/_autocomplete.scss */
+/* line 77, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item.active {
   background-color: #fef4ea;
 }
-/* line 80, ../sass/partials/_autocomplete.scss */
+/* line 79, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item.active:active {
   background-color: #f8c38a;
   color: black;
