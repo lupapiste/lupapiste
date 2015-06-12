@@ -3052,12 +3052,13 @@ table.attachments-template-table td.attachment-version-info {
 .autocomplete-component .autocomplete-selection-wrapper span.autocomplete-selection span.tag span.tag-remove {
   color: #aaaaaa;
   cursor: pointer;
+  font-weight: bold;
 }
-/* line 45, ../sass/partials/_autocomplete.scss */
+/* line 46, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-selection-wrapper span.autocomplete-selection span.tag span.tag-remove:hover {
   color: #4f4f4f;
 }
-/* line 51, ../sass/partials/_autocomplete.scss */
+/* line 52, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-selection-wrapper span.autocomplete-selection-arrow {
   position: absolute;
   top: 0;
@@ -3065,13 +3066,13 @@ table.attachments-template-table td.attachment-version-info {
   margin: auto;
   right: 9px;
 }
-/* line 60, ../sass/partials/_autocomplete.scss */
+/* line 61, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown {
   width: inherit;
   position: relative;
   z-index: 1;
 }
-/* line 64, ../sass/partials/_autocomplete.scss */
+/* line 65, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown input.autocomplete-input {
   width: 100%;
   height: 28px;
@@ -3080,7 +3081,7 @@ table.attachments-template-table td.attachment-version-info {
   display: block;
   box-sizing: border-box;
 }
-/* line 72, ../sass/partials/_autocomplete.scss */
+/* line 73, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result {
   position: fixed;
   z-index: 1000;
@@ -3095,22 +3096,22 @@ table.attachments-template-table td.attachment-version-info {
   background-color: #fff;
   color: black;
 }
-/* line 85, ../sass/partials/_autocomplete.scss */
+/* line 86, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item, .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-empty {
   cursor: default;
   display: list-item;
   list-style-type: none;
   padding: 6px 6px;
 }
-/* line 91, ../sass/partials/_autocomplete.scss */
+/* line 92, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item {
   cursor: pointer;
 }
-/* line 94, ../sass/partials/_autocomplete.scss */
+/* line 95, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item.active {
   background-color: #fef4ea;
 }
-/* line 96, ../sass/partials/_autocomplete.scss */
+/* line 97, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item.active:active {
   background-color: #f8c38a;
   color: black;

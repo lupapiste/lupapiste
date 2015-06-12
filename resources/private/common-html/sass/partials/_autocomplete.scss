@@ -42,6 +42,7 @@
         span.tag-remove {
           color: darken($lp-light-grey, 30%);
           cursor: pointer;
+          font-weight: bold;
           &:hover {
             color: $lp-dark-grey;
           }
