@@ -158,6 +158,7 @@
     (cond
       validation-result            validation-result
       (empty? app-info)            (fail :error.no-previous-permit-found-from-backend)
+      (not (:municipality app-info)) (fail :error.previous-permit-no-propertyid)
       (not organizations-match?)   (fail :error.previous-permit-found-from-backend-is-of-different-organization)
       (not location-info)          (fail :error.more-prev-app-info-needed :needMorePrevPermitInfo true)
       no-proper-applicants?        (fail :error.no-proper-applicants-found-from-previous-permit)
