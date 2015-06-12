@@ -255,10 +255,9 @@
 
     (let [operation :aiemmalla-luvalla-hakeminen
           applications (mongo/select :applications
-                                     {:_id "LP-091-2015-00408"
-                                      "primaryOperation.name" operation}
+                                     {"primaryOperation.name" operation}
                                      {:id 1 :permitType 1 :verdicts 1 :organization 1 :documents 1})]
-      (doseq [{:keys [id permitType verdicts organization documents] :as application} (take 1 applications)]
+      (doseq [{:keys [id permitType verdicts organization documents] :as application} applications]
         (if-let [kuntalupatunnus (get-in verdicts [0 :kuntalupatunnus])]
           (let [dummy-application {:id kuntalupatunnus :permitType permitType :organization organization}
                 xml               (krysp-fetch-api/get-application-xml dummy-application :kuntalupatunnus)
