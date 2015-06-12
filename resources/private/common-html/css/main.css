@@ -6193,30 +6193,35 @@ td.comment-text {
 }
 /* line 169, ../sass/views/_side_panel.scss */
 #side-panel #notice-panel .application-urgency {
+  position: relative;
   margin-bottom: 6px;
   width: 215px;
 }
-/* line 177, ../sass/views/_side_panel.scss */
+/* line 175, ../sass/views/_side_panel.scss */
+#side-panel #notice-panel .application-notices {
+  position: relative;
+}
+/* line 179, ../sass/views/_side_panel.scss */
 #side-panel #notice-panel .application-text {
   position: relative;
   height: calc(100% - 118px);
   height: 100% \9;
 }
-/* line 183, ../sass/views/_side_panel.scss */
+/* line 185, ../sass/views/_side_panel.scss */
 #side-panel #notice-panel .icon.urgent {
   margin-top: 10px;
   vertical-align: middle;
 }
-/* line 188, ../sass/views/_side_panel.scss */
+/* line 190, ../sass/views/_side_panel.scss */
 #side-panel #notice-panel .icon.hold {
   margin-top: 10px;
   vertical-align: middle;
 }
-/* line 193, ../sass/views/_side_panel.scss */
+/* line 195, ../sass/views/_side_panel.scss */
 #side-panel #notice-panel label {
   vertical-align: bottom;
 }
-/* line 197, ../sass/views/_side_panel.scss */
+/* line 199, ../sass/views/_side_panel.scss */
 #side-panel #notice-panel .textarea-wrapper {
   position: absolute;
   top: 0;
@@ -6224,26 +6229,26 @@ td.comment-text {
   right: 0;
   bottom: 0;
 }
-/* line 205, ../sass/views/_side_panel.scss */
+/* line 207, ../sass/views/_side_panel.scss */
 #side-panel #notice-panel .form-input.textarea {
   height: 100%;
   margin: 0;
 }
-/* line 211, ../sass/views/_side_panel.scss */
+/* line 213, ../sass/views/_side_panel.scss */
 #side-panel #notice-panel .notice-prompt-info:before {
   content: "(";
 }
-/* line 214, ../sass/views/_side_panel.scss */
+/* line 216, ../sass/views/_side_panel.scss */
 #side-panel #notice-panel .notice-prompt-info:after {
   content: ")";
 }
 
-/* line 222, ../sass/views/_side_panel.scss */
+/* line 224, ../sass/views/_side_panel.scss */
 #side-panel.show-side-panel {
   right: 0px;
 }
 
-/* line 227, ../sass/views/_side_panel.scss */
+/* line 229, ../sass/views/_side_panel.scss */
 #conversation-panel textarea {
   -webkit-transition: box-shadow 250ms ease;
   -moz-transition: box-shadow 250ms ease;
@@ -6252,24 +6257,24 @@ td.comment-text {
   transition: box-shadow 250ms ease;
 }
 
-/* line 237, ../sass/views/_side_panel.scss */
+/* line 239, ../sass/views/_side_panel.scss */
 #conversation-panel.highlight-conversation textarea {
   box-shadow: inset 0 0 10px #dd780c;
   border-color: #f39129;
 }
 
 @media all and (max-width: 1280px) {
-  /* line 245, ../sass/views/_side_panel.scss */
+  /* line 247, ../sass/views/_side_panel.scss */
   #side-panel .content-wrapper {
     width: 300px;
   }
 
-  /* line 250, ../sass/views/_side_panel.scss */
+  /* line 252, ../sass/views/_side_panel.scss */
   #side-panel {
     right: -300px;
   }
 
-  /* line 255, ../sass/views/_side_panel.scss */
+  /* line 257, ../sass/views/_side_panel.scss */
   .comment-controls .comment-request {
     margin-left: 0;
   }

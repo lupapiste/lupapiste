@@ -167,11 +167,13 @@
     height: 100%;
 
     .application-urgency {
+      position: relative;
       margin-bottom: $marginS;
       width: 215px;
     }
 
     .application-notices {
+      position: relative;
     }
 
     .application-text {
