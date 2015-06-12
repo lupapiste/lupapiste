@@ -29,7 +29,7 @@
     (try
      (let [resp (http/get url {:query-params {:request "GetCapabilities"} :throw-exceptions false})]
        (or
-         (and (= 200 (:status resp)) (ss/contains (:body resp) "<?xml "))
+         (and (= 200 (:status resp)) (ss/contains? (:body resp) "<?xml "))
          (warn "Response not OK or did not contain XML. Response was: " resp)))
      (catch Exception e
        (warn (str "Could not connect to WFS: " url ", exception was " e))))))
@@ -89,8 +89,8 @@
        </wfs:GetFeature>")})
 
 (defn wfs-krysp-url [server object-type filter]
-  (let [server (if (.contains server "?")
-                 (if (.endsWith server "&")
+  (let [server (if (ss/contains? server "?")
+                 (if (ss/ends-with server "&")
                    server
                    (str server "&"))
                  (str server "?"))]
@@ -387,11 +387,12 @@
 (defn- standard-verdicts-validator [xml]
   (let [poytakirjat (map ->paatospoytakirja (select (cr/strip-xml-namespaces xml) [:paatostieto :Paatos :poytakirja]))
         poytakirja (poytakirja-with-paatos-data poytakirjat)
-        paatospvm  (:paatospvm poytakirja)]
+        paatospvm  (:paatospvm poytakirja)
+        timestamp-1-day-from-now (util/get-timestamp-from-now :day 1)]
     (cond
-      (not (seq poytakirjat)) (fail :info.no-verdicts-found-from-backend)
-      (not (seq poytakirja))  (fail :info.paatos-details-missing)
-      (< (now) paatospvm)     (fail :info.paatos-future-date))))
+      (not (seq poytakirjat))                (fail :info.no-verdicts-found-from-backend)
+      (not (seq poytakirja))                 (fail :info.paatos-details-missing)
+      (< timestamp-1-day-from-now paatospvm) (fail :info.paatos-future-date))))
 
 (defn- ->standard-verdicts [xml-without-ns]
   (map (fn [paatos-xml-without-ns]

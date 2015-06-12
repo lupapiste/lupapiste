@@ -119,7 +119,7 @@
               data    (tools/unwrapped (get-in application [:documents 4 :data]))
               yritys  (:Yritys maksaja)]
           (fact "Maksaja is yritys, and has Laskuviite and Verkkolaskutustieto"
-            (keys maksaja) => (just [:Yritys :Laskuviite]))
+            (keys maksaja) => (just [:Yritys :Laskuviite] :in-any-order))
           (fact "Maksaja is not Henkilo"
             (keys keys) =not=> (contains [:Henkilo]))
           (facts "Yritys"

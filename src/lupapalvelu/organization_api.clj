@@ -322,7 +322,8 @@
       (fail :error.unknown-organization))))
 
 (defquery get-organization-names
-  {:user-roles #{:anonymous}}
+  {:description "Returns an organization id -> name map. (Used by TOJ.)"
+   :user-roles #{:anonymous}}
   [_]
   (ok :names (into {} (for [{:keys [id name]} (o/get-organizations {})]
                         [id name]))))

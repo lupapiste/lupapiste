@@ -87,10 +87,14 @@
          person-id (:userid vetuma-data) => string?
          new-user-email "jukka@example.com"
          new-user-address  "Osootes"
-         new-user-zip      "0"
+         new-user-zip      "12345"
          new-user-city     "Tammerfors"
          new-user-pw "salasana"
          new-user-phone "0500"
+         new-user-architect true
+         new-user-graduatingYear "1978"
+         new-user-fise "foobar"
+         new-user-degree "diplomi-insin\u00f6\u00f6ri"
          cmd-opts {:cookies {"anti-csrf-token" {:value "123"}}
                    :headers {"x-anti-forgery-token" "123"}}
          resp (register cmd-opts {:stamp stamp
@@ -102,7 +106,10 @@
                                   :email new-user-email
                                   :rakentajafi false
                                   :allowDirectMarketing true
-                                  :personId "inject!"})
+                                  :architect new-user-architect
+                                  :graduatingYear new-user-graduatingYear
+                                  :fise new-user-fise
+                                  :degree new-user-degree})
          user-id (:id resp) => string?
          email (last-email)
          body (:body email)]
@@ -121,6 +128,10 @@
          (fact "role" (:role new-user) => "applicant")
          (fact "orgAuthz" (:orgAuthz new-user) => empty?)
          (fact "phone" (:phone new-user) => new-user-phone)
+         (fact "architect" (:architect new-user) => new-user-architect)
+         (fact "graduatingYear" (:graduatingYear new-user) => new-user-graduatingYear)
+         (fact "fise" (:fise new-user) => new-user-fise)
+         (fact "degree" (:degree new-user) => new-user-degree)
          (fact "notification" (:notification new-user) => {:messageI18nkey "user.notification.firstLogin.message"
                                                            :titleI18nkey "user.notification.firstLogin.title"})))
 
@@ -149,11 +160,10 @@
              resp (register cmd-opts {:stamp stamp
                                       :phone new-user-phone2
                                       :city "Tampere"
-                                      :zip "0"
+                                      :zip "12345"
                                       :street "street"
                                       :password new-user-pw
                                       :email new-user-email
-                                      :personId "inject!"
                                       :rakentajafi false
                                       :allowDirectMarketing true}) => ok?
              user-id (:id resp) => string?

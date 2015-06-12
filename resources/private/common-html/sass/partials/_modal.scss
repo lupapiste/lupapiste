@@ -21,11 +21,11 @@
     z-index: 9999;
     padding: $marginM;
     background-color: #fff;
-    min-height: 250px;
+    min-height: 150px;
     .component {
       overflow: auto;
       margin: $marginM $marginM 75px $marginM;
-      min-height: 117px;
+      min-height: 50px;
       .button-group {
         position: absolute;
         bottom: $marginM;

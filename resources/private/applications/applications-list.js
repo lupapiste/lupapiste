@@ -87,7 +87,7 @@
     function getHeaderText(inv) {
       var address = inv.application.address;
       var municipality = inv.application.municipality;
-      var operation = inv.application.primaryOperation.name;
+      var operation = util.getIn(inv, ["application", "primaryOperation", "name"]);
       return loc("auth") + ": " +
              (address ? address + ", " : "") +
              (municipality ? loc(["municipality", municipality]) + ", " : "") +

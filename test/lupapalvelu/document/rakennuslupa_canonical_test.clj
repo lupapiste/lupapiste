@@ -567,7 +567,7 @@
     (fact "valvottavienKohteidenMaara" (:valvottavienKohteidenMaara tyonjohtaja-model) => (-> tyonjohtaja :data :patevyys-tyonjohtaja :valvottavienKohteidenMaara :value))
     (fact "tyonjohtajaHakemusKytkin" (:tyonjohtajaHakemusKytkin tyonjohtaja-model) => true)
     (fact "vastattavatTyotehtavat" (:vastattavatTyotehtavat tyonjohtaja-model) =>
-      "kiinteistonilmanvaihtolaitteistonRakentaminen,rakennelmaTaiLaitos,kiinteistonVesiJaViemarilaitteistonRakentaminen,maanrakennustyo,Muu tyotehtava")
+      "kiinteistonVesiJaViemarilaitteistonRakentaminen,kiinteistonilmanvaihtolaitteistonRakentaminen,maanrakennustyo,rakennelmaTaiLaitos,Muu tyotehtava")
     (fact "henkilo" (:henkilo tyonjohtaja-model) => truthy)
     (fact "yritys" (:yritys tyonjohtaja-model) => truthy)
     (fact "sijaisuus" sijaistus-213 => truthy)

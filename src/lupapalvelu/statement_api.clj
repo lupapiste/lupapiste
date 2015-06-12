@@ -83,6 +83,8 @@
 
 (defquery should-see-unsubmitted-statements
   {:description "Pseudo query for UI authorization logic"
+   :parameters [:id]
+   :states (action/all-application-states-but [:draft])
    :user-roles #{:authority}
    :user-authz-roles #{:statementGiver}}
   [_])

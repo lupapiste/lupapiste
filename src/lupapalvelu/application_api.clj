@@ -559,7 +559,7 @@
         (util/to-local-date (:submitted app))))))
 
 (defn- validate-not-jatkolupa-app [_ application]
-  (when (= :ya-jatkoaika (-> application :operations first :name keyword))
+  (when (= :ya-jatkoaika (-> application :primaryOperation :name keyword))
     (fail :error.cannot-apply-jatkolupa-for-jatkolupa)))
 
 (defcommand create-continuation-period-permit

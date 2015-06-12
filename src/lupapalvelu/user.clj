@@ -47,7 +47,9 @@
            (sc/optional-key :private)             {(sc/optional-key :password) sc/Str
                                                    (sc/optional-key :apikey) sc/Str}
            (sc/optional-key :orgAuthz)            {sc/Keyword (sc/pred vector? "OrgAuthz must be vector")}
-           (sc/optional-key :personId)            (sc/pred util/valid-hetu? "Not valid hetu")
+           (sc/optional-key :personId)            (sc/either
+                                                    (sc/pred nil?)
+                                                    (sc/pred util/valid-hetu? "Not valid hetu"))
            (sc/optional-key :street)              (sc/maybe (util/max-length-string 255))
            (sc/optional-key :city)                (sc/maybe (util/max-length-string 255))
            (sc/optional-key :zip)                 (sc/either
@@ -77,6 +79,29 @@
            (sc/optional-key :notification)        {:messageI18nkey sc/Str
                                                    :titleI18nkey   sc/Str}})
 
+(def RegisterUser {:email     (sc/both
+                                (sc/pred util/valid-email? "Not valid email")
+                                (util/max-length-string 255))
+                   :street    (sc/maybe (util/max-length-string 255))
+                   :city      (sc/maybe (util/max-length-string 255))
+                   :zip       (sc/either
+                                (sc/pred util/finnish-zip? "Not a valid zip code")
+                                (sc/pred ss/blank?))
+                   :phone (sc/maybe (util/max-length-string 255))
+                   (sc/optional-key :architect) sc/Bool
+                   (sc/optional-key :degree) (sc/either
+                                               (apply sc/enum (conj
+                                                                (map :name (:body schemas/koulutusvalinta))
+                                                                "other"))
+                                               (sc/pred ss/blank?))
+                   (sc/optional-key :graduatingYear) (sc/either
+                                                       (sc/both (util/min-length-string 4) (util/max-length-string 4))
+                                                       (sc/pred ss/blank?))
+                   (sc/optional-key :fise) (util/max-length-string 255)
+                   :allowDirectMarketing sc/Bool
+                   :rakentajafi sc/Bool
+                   :stamp (sc/maybe (util/max-length-string 255))
+                   :password (util/max-length-string 255)})
 ;;
 ;; ==============================================================================
 ;; Utils:

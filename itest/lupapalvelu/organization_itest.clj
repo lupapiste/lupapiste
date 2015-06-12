@@ -240,3 +240,9 @@
       (command admin "set-organization-permanent-archive-enabled" :enabled false :organizationId id) => ok?
       (let [updated-org (query admin "organization-by-id" :organizationId id)]
         (:permanent-archive-enabled updated-org) => false))))
+
+(facts "Organization names"
+  (let [{names :names :as resp} (query pena :get-organization-names)]
+    resp => ok?
+    (count names) => pos?
+    (-> names :753-R :fi) => "Sipoon rakennusvalvonta"))

@@ -33,7 +33,7 @@
           application (query-application pena app-id) => truthy
           organization (organization/resolve-organization velho-muni (:permitType application)) => truthy
           scope  (organization/resolve-organization-scope velho-muni (:permitType application) organization) => truthy]
-      (keys (:caseManagement scope)) => (just [:ftpUser :version :enabled])
+      (keys (:caseManagement scope)) => (just [:ftpUser :version :enabled] :in-any-order)
 
       (generate-documents application pena)
       (upload-attachment-to-all-placeholders pena application)
@@ -193,7 +193,7 @@
           application (query-application pena app-id) => truthy
           organization (organization/resolve-organization velho-muni (:permitType application)) => truthy
           scope  (organization/resolve-organization-scope velho-muni (:permitType application) organization) => truthy]
-      (keys (:caseManagement scope)) => (just [:ftpUser :version :enabled])
+      (keys (:caseManagement scope)) => (just [:ftpUser :version :enabled] :in-any-order)
       (generate-documents application pena)
       (upload-attachment-to-all-placeholders pena application)
       (command pena :submit-application :id app-id) => ok?
