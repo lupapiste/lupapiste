@@ -75,7 +75,7 @@
     [_]
     (ok :user (user/get-user-by-email email))))
 
-(defcommand users-for-datatables
+(defquery users-for-datatables
   {:user-roles #{:admin :authorityAdmin}}
   [{caller :user {params :params} :data}]
   (ok :data (user/users-for-datatables caller params)))
@@ -496,13 +496,14 @@
         (fail :error.login)))))
 
 (defcommand impersonate-authority
-  {:parameters [organizationId password]
+  {:parameters [organizationId role password]
    :user-roles #{:admin}
-   :input-validators [(partial action/non-blank-parameters [:organizationId])]
+   :input-validators [(partial action/non-blank-parameters [:organizationId])
+                      (fn [{data :data}] (when-not (#{"authority" "authorityAdmin"} (:role data)) (fail :error.invalid-role)))]
    :description "Changes admin session into authority session with access to given organization"}
   [{user :user :as command}]
   (if (user/get-user-with-password (:username user) password)
-    (let [imposter (assoc user :impersonating true :role "authority" :orgAuthz {(keyword organizationId) #{:authority}})]
+    (let [imposter (assoc user :impersonating true :role role :orgAuthz {(keyword organizationId) #{(keyword role)}})]
       (ssess/merge-to-session command (ok) {:user imposter}))
     (fail :error.login)))
 

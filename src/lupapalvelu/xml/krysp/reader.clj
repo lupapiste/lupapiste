@@ -579,7 +579,6 @@
             osapuolet (map cr/all-of (select asia [:osapuolettieto :Osapuolet :osapuolitieto :Osapuoli]))
             hakijat (filter #(= "hakija" (:VRKrooliKoodi %)) osapuolet)]
 
-
         (-> (merge
               {:id                          (->lp-tunnus asia)
                :kuntalupatunnus             (->kuntalupatunnus asia)
@@ -588,7 +587,7 @@
                :vahainenPoikkeaminen        (:vahainenPoikkeaminen asianTiedot)
                :hakijat                     hakijat}
 
-              (when (and coord-array-Rakennuspaikka osoite-Rakennuspaikka kiinteistotunnus)
+              (when (and (seq coord-array-Rakennuspaikka) (not-any? ss/blank? [osoite-Rakennuspaikka kiinteistotunnus]))
                 {:rakennuspaikka {:x          (first coord-array-Rakennuspaikka)
                                   :y          (second coord-array-Rakennuspaikka)
                                   :address    osoite-Rakennuspaikka

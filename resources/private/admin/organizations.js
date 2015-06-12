@@ -7,13 +7,13 @@
     var self = this;
     self.organization = ko.observable({});
     self.permanentArchiveEnabled = ko.observable(false);
-    self.indicator = ko.observable(false).extend({notify: "always"})
+    self.indicator = ko.observable(false).extend({notify: "always"});
 
     self.open = function(organization) {
       // date picker needs an obervable
       self.organization(ko.mapping.fromJS(organization));
       isLoading = true;
-      self.permanentArchiveEnabled(organization['permanent-archive-enabled']);
+      self.permanentArchiveEnabled(organization["permanent-archive-enabled"]);
       isLoading = false;
       window.location.hash = "!/organization";
       return false;
@@ -60,7 +60,7 @@
       ajax.command("set-organization-permanent-archive-enabled", {organizationId: self.organization().id(), enabled: value})
         .success(function() {
           self.indicator(true);
-          self.organization()['permanent-archive-enabled'](value);
+          self.organization()["permanent-archive-enabled"](value);
         })
         .call();
     });
@@ -91,6 +91,7 @@
 
   function LoginAsModel() {
     var self = this;
+    self.role = ko.observable("authority");
     self.password = ko.observable("");
     self.organizationId = null;
 
@@ -102,9 +103,9 @@
 
     self.login = function() {
       ajax
-        .command("impersonate-authority", {organizationId: self.organizationId, password: self.password()})
+        .command("impersonate-authority", {organizationId: self.organizationId, role: self.role(), password: self.password()})
         .success(function() {
-          window.location.href = "/app/fi/authority";
+          window.location.href = "/app/fi/" + _.kebabCase(self.role());
         })
         .call();
       return false;

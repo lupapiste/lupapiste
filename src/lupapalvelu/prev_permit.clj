@@ -116,10 +116,6 @@
                   {:operation operation :municipality municipality :infoRequest false :messages []}
                   location-info)
         created-application (application/do-create-application command manual-schema-datas)
-        ;; TODO: Aseta applicationille viimeisin state? (lupapalvelu.document.canonical-common/application-state-to-krysp-state kaanteisesti)
-        ;        created-application (assoc created-application
-        ;                              :state (some #(when (= (-> app-info :viimeisin-tila :tila) (val %)) (first %)) lupapalvelu.document.canonical-common/application-state-to-krysp-state))
-
         ;; attaches the new application, and its id to path [:data :id], into the command
         command (util/deep-merge command (action/application->command created-application))]
 
@@ -156,12 +152,13 @@
         validation-result (validator-fn xml)
         app-info          (krysp-reader/get-app-info-from-message xml kuntalupatunnus)
         location-info     (get-location-info command app-info)
-        organizations-match?   (when (seq app-info)
-                                 (= organizationId (:id (organization/resolve-organization (:municipality app-info) permit-type))))
+        organizations-match? (when (:municipality app-info)
+                               (= organizationId (:id (organization/resolve-organization (:municipality app-info) permit-type))))
         no-proper-applicants? (not-any? get-applicant-type (:hakijat app-info))]
     (cond
       validation-result            validation-result
       (empty? app-info)            (fail :error.no-previous-permit-found-from-backend)
+      (not (:municipality app-info)) (fail :error.previous-permit-no-propertyid)
       (not organizations-match?)   (fail :error.previous-permit-found-from-backend-is-of-different-organization)
       (not location-info)          (fail :error.more-prev-app-info-needed :needMorePrevPermitInfo true)
       no-proper-applicants?        (fail :error.no-proper-applicants-found-from-previous-permit)
