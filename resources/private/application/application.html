@@ -76,7 +76,7 @@
           <!-- /ko -->
 
           <!-- Operations: -->
-          <!-- ko if: $root.permitSubtypes().length == 0 -->
+          <!-- ko if: $root.permitSubtypes().length == 0  && operationsCount() && operationsCount().length > 0 -->
           <div>
             <p data-bind="ltext: 'application.operations.secondary'"></p>
             <!-- ko if: operationsCount() && operationsCount().length > 0 -->

@@ -7,14 +7,14 @@
             [lupapalvelu.server] ; ensure all namespaces are loaded
             ))
 
-(def application-keys [:operations :secondaryOperations :primaryOperation
+(def application-keys [:infoRequest
+                       :operations :secondaryOperations :primaryOperation
                        :documents :schema-version :attachments :auth
                        :state :modified  :created :opened :submitted :sent :started :closed
                        :organization :municipality :propertyId :location])
 
 (def applications (delay (mongo/select :applications {} application-keys)))
 (def submitted-applications (delay (mongo/select :submitted-applications {} application-keys)))
-(def organizations (delay (mongo/select :organizations)))
 
 (defn- resolve-operations [application]
   ; Support the old and the new application schema
@@ -137,15 +137,6 @@
 (defmonster closed-timestamp
   (timestamp-is-set :closed #{:closed}))
 
-(defmonster permit-type-only-in-single-municipality-scope
-  (let [results (->> @organizations
-                     (mapcat :scope)
-                     (group-by :municipality)
-                     (map (fn [[muni scopes]] [muni (map :permitType scopes)]))
-                     (remove #(apply distinct? (second %))))]
-    (if (seq results)
-      {:ok false :results results}
-      {:ok true})))
 
 ; Not a valid test anymore. Fails if a verdict is replaced.
 (comment

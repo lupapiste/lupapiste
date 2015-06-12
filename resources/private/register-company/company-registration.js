@@ -17,7 +17,7 @@
       reference:    ko.observable(""),
       address1:     ko.observable("").extend({required: true}),
       po:           ko.observable("").extend({required: true}),
-      zip:          ko.observable("").extend({required: true, number: true, maxLength: 5}),
+      zip:          ko.observable("").extend({required: true, number: true, maxLength: 5, minLength: 5}),
       country:      ko.observable(""),
       ovt:          ko.observable("").extend({ovt: true}),
       pop:          ko.observable(""),

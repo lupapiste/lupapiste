@@ -1,6 +1,6 @@
 (defproject lupapalvelu "0.1.0-SNAPSHOT"
   :description "lupapalvelu"
-  :dependencies [[org.clojure/clojure "1.6.0"]
+  :dependencies [[org.clojure/clojure "1.7.0-RC1"]
                  [org.clojure/data.zip "0.1.1"]
                  [org.clojure/data.xml "0.0.8"]
                  [org.clojure/tools.nrepl "0.2.6"]
@@ -52,7 +52,7 @@
                  [fr.opensagres.xdocreport/fr.opensagres.xdocreport.template.freemarker "1.0.5" :exclusions [org.freemarker/freemarker]]
                  [scss-compiler "0.1.2"]
                  [org.clojure/core.memoize "0.5.7"]
-                 [lupapiste/commons "0.2.0"]]
+                 [lupapiste/commons "0.4.0"]]
   :profiles {:dev {:dependencies [[midje "1.6.3"]
                                   [ring-mock "0.1.5"]
                                   [clj-ssh "0.5.7"]
@@ -64,7 +64,7 @@
                              [lein-scss-compiler "0.1.4"]]
                    :resource-paths ["dev-resources"]
                    :source-paths ["dev-src" "test-utils"]
-                   :jvm-opts ["-Djava.awt.headless=true" "-Xmx1G"]}
+                   :jvm-opts ["-Djava.awt.headless=true" "-Xmx2G"]}
              :uberjar  {:main lupapalvelu.main
                         :jar-exclusions [#"gems/.*"]
                         :uberjar-exclusions [#"gems/.*"]}

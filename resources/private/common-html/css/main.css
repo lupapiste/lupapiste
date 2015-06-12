@@ -2571,13 +2571,13 @@ table.attachments-template-table td.attachment-version-info {
   z-index: 9999;
   padding: 12px;
   background-color: #fff;
-  min-height: 250px;
+  min-height: 150px;
 }
 /* line 25, ../sass/partials/_modal.scss */
 #modal-dialog .dialog .component {
   overflow: auto;
   margin: 12px 12px 75px 12px;
-  min-height: 117px;
+  min-height: 50px;
 }
 /* line 29, ../sass/partials/_modal.scss */
 #modal-dialog .dialog .component .button-group {
@@ -5555,24 +5555,33 @@ td.comment-text {
 /* line 28, ../sass/views/_register.scss */
 .register-form .register-error, #pw-form .register-error {
   position: relative;
+  margin: 6px 0;
+}
+/* line 33, ../sass/views/_register.scss */
+.register-form .architect-toggle, #pw-form .architect-toggle {
+  min-height: 36px;
+}
+/* line 37, ../sass/views/_register.scss */
+.register-form .info-indicator, #pw-form .info-indicator {
+  cursor: pointer;
 }
 
-/* line 35, ../sass/views/_register.scss */
+/* line 43, ../sass/views/_register.scss */
 #dialogRakentajafi .dialog-content {
   width: 400px;
 }
-/* line 37, ../sass/views/_register.scss */
+/* line 45, ../sass/views/_register.scss */
 #dialogRakentajafi .dialog-content p {
   margin-bottom: 12px;
 }
 
-/* line 42, ../sass/views/_register.scss */
+/* line 50, ../sass/views/_register.scss */
 .account-select-help {
   margin-top: 24px;
   margin-left: 24px;
 }
 
-/* line 48, ../sass/views/_register.scss */
+/* line 56, ../sass/views/_register.scss */
 #account-type-selection .account-box {
   width: 33%;
   display: inline-block;
@@ -5582,23 +5591,23 @@ td.comment-text {
   cursor: pointer;
   margin-bottom: 24px;
 }
-/* line 56, ../sass/views/_register.scss */
+/* line 64, ../sass/views/_register.scss */
 #account-type-selection .account-box:hover {
   background-color: #f1c8f8;
 }
-/* line 59, ../sass/views/_register.scss */
+/* line 67, ../sass/views/_register.scss */
 #account-type-selection .account-box.selected {
   background-color: #da6ded;
 }
-/* line 61, ../sass/views/_register.scss */
+/* line 69, ../sass/views/_register.scss */
 #account-type-selection .account-box.selected .price {
   color: white;
 }
-/* line 64, ../sass/views/_register.scss */
+/* line 72, ../sass/views/_register.scss */
 #account-type-selection .account-box.selected .bullet {
   border-top: 3px dotted white;
 }
-/* line 67, ../sass/views/_register.scss */
+/* line 75, ../sass/views/_register.scss */
 #account-type-selection .account-box.selected:after {
   content: " ";
   background-image: url("/img/icons-sprite-1.17.png");
@@ -5613,7 +5622,7 @@ td.comment-text {
   margin-left: auto;
   margin-right: auto;
 }
-/* line 81, ../sass/views/_register.scss */
+/* line 89, ../sass/views/_register.scss */
 #account-type-selection .account-box label {
   position: absolute;
   top: 0;
@@ -5622,13 +5631,13 @@ td.comment-text {
   height: 100%;
   cursor: pointer;
 }
-/* line 89, ../sass/views/_register.scss */
+/* line 97, ../sass/views/_register.scss */
 #account-type-selection .account-box h4 {
   font-size: 2em;
   margin: 0 0 48px;
   text-align: center;
 }
-/* line 94, ../sass/views/_register.scss */
+/* line 102, ../sass/views/_register.scss */
 #account-type-selection .account-box .price {
   font-size: 4em;
   display: block;
@@ -5637,7 +5646,7 @@ td.comment-text {
   color: #da6ded;
   font-weight: bold;
 }
-/* line 102, ../sass/views/_register.scss */
+/* line 110, ../sass/views/_register.scss */
 #account-type-selection .account-box .bullet {
   display: block;
   font-size: 1em;
@@ -5645,17 +5654,17 @@ td.comment-text {
   text-align: center;
   border-top: 3px dotted #da6ded;
 }
-/* line 109, ../sass/views/_register.scss */
+/* line 117, ../sass/views/_register.scss */
 #account-type-selection .account-box input {
   display: none;
 }
 
-/* line 116, ../sass/views/_register.scss */
+/* line 124, ../sass/views/_register.scss */
 .register-progress {
   padding: 0 24px;
   height: 162px;
 }
-/* line 120, ../sass/views/_register.scss */
+/* line 128, ../sass/views/_register.scss */
 .register-progress .register-phase {
   display: inline-block;
   width: 24%;
@@ -5663,12 +5672,12 @@ td.comment-text {
   margin-bottom: 40px;
   height: 100px;
 }
-/* line 127, ../sass/views/_register.scss */
+/* line 135, ../sass/views/_register.scss */
 .register-progress .register-phase a {
   text-decoration: none;
   color: #da6ded;
 }
-/* line 132, ../sass/views/_register.scss */
+/* line 140, ../sass/views/_register.scss */
 .register-progress .register-phase .phase-number {
   width: 100px;
   height: 100px;
@@ -5687,7 +5696,7 @@ td.comment-text {
   margin-right: auto;
   box-sizing: border-box;
 }
-/* line 151, ../sass/views/_register.scss */
+/* line 159, ../sass/views/_register.scss */
 .register-progress .register-phase .phase-title {
   font-weight: bold;
   font-size: 1.4em;
@@ -5700,7 +5709,7 @@ td.comment-text {
   margin-right: auto;
   top: 88px;
 }
-/* line 165, ../sass/views/_register.scss */
+/* line 173, ../sass/views/_register.scss */
 .register-progress .register-phase.active::after {
   content: " ";
   display: block;
@@ -5717,13 +5726,13 @@ td.comment-text {
   margin-left: auto;
   margin-right: auto;
 }
-/* line 183, ../sass/views/_register.scss */
+/* line 191, ../sass/views/_register.scss */
 .register-progress .register-phase.done .phase-number {
   background-color: #da6ded;
   color: white;
 }
 
-/* line 192, ../sass/views/_register.scss */
+/* line 200, ../sass/views/_register.scss */
 .company-account-register button, .company-account-register .btn, .register-contentbox button, .register-contentbox .btn {
   font-size: 18px;
   text-shadow: none;
@@ -5736,15 +5745,15 @@ td.comment-text {
   color: white;
   position: relative;
 }
-/* line 205, ../sass/views/_register.scss */
+/* line 213, ../sass/views/_register.scss */
 .company-account-register .btn-primary, .register-contentbox .btn-primary {
   background-color: #da6ded;
 }
-/* line 207, ../sass/views/_register.scss */
+/* line 215, ../sass/views/_register.scss */
 .company-account-register .btn-primary:hover, .register-contentbox .btn-primary:hover {
   background-color: #ce40e7;
 }
-/* line 210, ../sass/views/_register.scss */
+/* line 218, ../sass/views/_register.scss */
 .company-account-register .btn-primary:after, .register-contentbox .btn-primary:after {
   content: " ";
   position: absolute;
@@ -5756,38 +5765,38 @@ td.comment-text {
   border-left: 30px solid white;
   border-bottom: 15px solid transparent;
 }
-/* line 221, ../sass/views/_register.scss */
+/* line 229, ../sass/views/_register.scss */
 .company-account-register .btn-primary:disabled, .register-contentbox .btn-primary:disabled {
   background-color: #f6f6f6;
   color: #888a8c;
 }
-/* line 224, ../sass/views/_register.scss */
+/* line 232, ../sass/views/_register.scss */
 .company-account-register .btn-primary:disabled:after, .register-contentbox .btn-primary:disabled:after {
   border-left: 30px solid #888a8c;
   color: #888a8c;
 }
 
-/* line 232, ../sass/views/_register.scss */
+/* line 240, ../sass/views/_register.scss */
 .register-contentbox {
   background-color: #f1c8f8;
   padding: 24px;
 }
-/* line 235, ../sass/views/_register.scss */
+/* line 243, ../sass/views/_register.scss */
 .register-contentbox p, .register-contentbox h1 {
   color: black;
   width: 60%;
 }
-/* line 239, ../sass/views/_register.scss */
+/* line 247, ../sass/views/_register.scss */
 .register-contentbox .register-terms {
   margin: auto;
   padding-bottom: 14px;
 }
-/* line 242, ../sass/views/_register.scss */
+/* line 250, ../sass/views/_register.scss */
 .register-contentbox .register-terms label {
   cursor: pointer;
   color: black;
 }
-/* line 246, ../sass/views/_register.scss */
+/* line 254, ../sass/views/_register.scss */
 .register-contentbox .register-terms input[type="checkbox"] {
   cursor: pointer;
   -moz-transform: scale(1.5);
@@ -5797,45 +5806,45 @@ td.comment-text {
   transform: scale(1.5);
   vertical-align: middle;
 }
-/* line 256, ../sass/views/_register.scss */
+/* line 264, ../sass/views/_register.scss */
 .register-contentbox button:disabled {
   cursor: not-allowed;
 }
 
-/* line 262, ../sass/views/_register.scss */
+/* line 270, ../sass/views/_register.scss */
 #register-company .register-form, #new-company-user .register-form {
   background-color: #f1c8f8;
   padding: 6px;
 }
-/* line 265, ../sass/views/_register.scss */
+/* line 273, ../sass/views/_register.scss */
 #register-company .register-form .form-group, #new-company-user .register-form .form-group {
   background-color: inherit;
   display: block;
   border: none;
   padding: 0;
 }
-/* line 270, ../sass/views/_register.scss */
+/* line 278, ../sass/views/_register.scss */
 #register-company .register-form .form-group h2, #new-company-user .register-form .form-group h2 {
   text-transform: uppercase;
   font-weight: 400;
   color: black;
 }
-/* line 275, ../sass/views/_register.scss */
+/* line 283, ../sass/views/_register.scss */
 #register-company .register-form .form-group .form-entry, #new-company-user .register-form .form-group .form-entry {
   width: 32%;
   box-sizing: border-box;
   padding-right: 24px;
   display: inline-block;
 }
-/* line 280, ../sass/views/_register.scss */
+/* line 288, ../sass/views/_register.scss */
 #register-company .register-form .form-group .form-entry .form-label, #new-company-user .register-form .form-group .form-entry .form-label {
   color: black;
 }
-/* line 282, ../sass/views/_register.scss */
+/* line 290, ../sass/views/_register.scss */
 #register-company .register-form .form-group .form-entry .form-label.tip, #new-company-user .register-form .form-group .form-entry .form-label.tip {
   color: black;
 }
-/* line 286, ../sass/views/_register.scss */
+/* line 294, ../sass/views/_register.scss */
 #register-company .register-form .form-group .form-entry .form-input, #new-company-user .register-form .form-group .form-entry .form-input {
   height: 40px;
   width: 100%;
@@ -5843,7 +5852,7 @@ td.comment-text {
   box-shadow: none;
 }
 
-/* line 298, ../sass/views/_register.scss */
+/* line 306, ../sass/views/_register.scss */
 #onnistuu-start-form {
   display: inline-block;
 }

@@ -87,7 +87,7 @@
     function getHeaderText(inv) {
       var address = inv.application.address;
       var municipality = inv.application.municipality;
-      var operation = inv.application.primaryOperation.name;
+      var operation = util.getIn(inv, ["application", "primaryOperation", "name"]);
       return loc("auth") + ": " +
              (address ? address + ", " : "") +
              (municipality ? loc(["municipality", municipality]) + ", " : "") +
@@ -228,7 +228,7 @@
 
   function fetch(source, data, callback) {
     if (model.filter.initialized() && applicationsPageVisible) {
-      var loader = _.delay(pageutil.showAjaxWait, 200, true);
+      var loader = _.delay(pageutil.showAjaxWait, 200);
       var params = _(data)
         .concat(_.map(model.filter, function(v, k) { var value = v(); return {name: "filter-" + k, value: _.isObject(value) ? value.id : value}; }))
         .reduce(function(m, p) { m[p.name] = p.value; return m; }, {});

@@ -2,6 +2,7 @@
   (:require [lupapalvelu.mongo :as mongo]
             [lupapalvelu.smoketest.core :refer :all]
             [lupapalvelu.smoketest.application-smoke-tests]
+            [lupapalvelu.smoketest.organization-smoke-tests]
             [lupapalvelu.smoketest.user-smoke-tests]))
 
 
