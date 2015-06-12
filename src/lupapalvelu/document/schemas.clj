@@ -957,7 +957,7 @@
             :repeating true
             :approvable true
             :type :party
-            :subtype :hakija
+            :subtype "hakija"
             :section-help "party.section.help"
             :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
             }
@@ -971,7 +971,7 @@
             :repeating true
             :approvable true
             :type :party
-            :subtype :hakija
+            :subtype "hakija"
             :section-help "party.section.help"
             :after-update 'lupapalvelu.application-meta-fields/applicant-index-update
             }
@@ -984,7 +984,7 @@
             :repeating false
             :approvable true
             :type :party
-            :subtype :hakija
+            :subtype "hakija"
             :section-help "party.section.help"
             :after-update 'lupapalvelu.application-meta-fields/applicant-index-update}
      :body (schema-body-without-element-by-name ya-party turvakielto)}
