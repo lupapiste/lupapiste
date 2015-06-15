@@ -14,7 +14,7 @@
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.verdict :as verdict]
             [lupapalvelu.user :as user]
-            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch-api]
+            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]))
 
 ;;
@@ -23,7 +23,7 @@
 
 (defn do-check-for-verdict [{application :application :as command}]
   {:pre [(every? command [:application :user :created])]}
-  (when-let [app-xml (krysp-fetch-api/get-application-xml application :application-id)]
+  (when-let [app-xml (krysp-fetch/get-application-xml application :application-id)]
     (or
       (let [validator-fn (permit/get-verdict-validator (permit/permit-type application))]
         (validator-fn app-xml))

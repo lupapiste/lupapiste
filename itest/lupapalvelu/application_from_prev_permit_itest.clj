@@ -12,7 +12,7 @@
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.fixture.core :as fixture]
             [lupapalvelu.organization :as organization]
-            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch-api]
+            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
             [lupapalvelu.itest-util :as util]))
 
@@ -60,7 +60,7 @@
     (fact "no xml content received from backend with the kuntalupatunnus"
       (create-app-from-prev-permit raktark-jarvenpaa) => (partial expected-failure? "info.no-verdicts-found-from-backend")
       (provided
-        (krysp-fetch-api/get-application-xml anything anything) => nil))
+        (krysp-fetch/get-application-xml anything anything) => nil))
 
     ; 4: jos (krysp-reader/get-app-info-from-message xml kuntalupatunnus) palauttaa nillin -> (fail :error.no-previous-permit-found-from-backend)
     (fact "no application info could be parsed"
@@ -145,7 +145,7 @@
 
     ;; This applies to all tests in this namespace
     (against-background
-      (krysp-fetch-api/get-application-xml anything anything) => example-xml))
+      (krysp-fetch/get-application-xml anything anything) => example-xml))
 
 
   (facts "Application from kuntalupatunnus via rest API"
