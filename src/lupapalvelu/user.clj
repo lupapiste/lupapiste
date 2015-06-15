@@ -347,7 +347,6 @@
 ;;
 
 (defn- validate-create-new-user! [caller user-data]
-;  (println "\n validate-create-new-user!, caller: " caller ", user-data: " user-data "\n")
   (when-let [missing (util/missing-keys user-data [:email :role])]
     (fail! :error.missing-parameters :parameters missing))
 

@@ -1,7 +1,6 @@
 (ns lupapalvelu.user-api-test
   (:require [midje.sweet :refer :all]
             [midje.util :refer [testable-privates]]
-;            [slingshot.slingshot :refer [try+]]
             [lupapalvelu.user-api :refer :all]
             [lupapalvelu.itest-util :refer [expected-failure? unauthorized?]]
             [lupapalvelu.mongo :as mongo]
