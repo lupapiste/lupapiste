@@ -109,7 +109,7 @@
   (or (find-company-by-id id) (fail! :company.not-found)))
 
 (defn find-companies []
-  (mongo/select :companies {} [:name :y :address1 :zip :po] (array-map :name 1)))
+  (mongo/select :companies {} [:name :y :address1 :zip :po :accountType :customAccountLimit] (array-map :name 1)))
 
 (defn find-company-users [company-id]
   (u/get-users {:company.id company-id}))
