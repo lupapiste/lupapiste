@@ -31,13 +31,13 @@
   (fact (-> (query admin :users :role "authority" :organization "753-R") :users count) => 3))
 
 (facts users-for-datatables
- (fact (command admin :users-for-datatables :params {:iDisplayLength 5 :iDisplayStart 0 :sEcho "123" :enabled "true" :organizations ["753-R"]})
+ (fact (datatables admin :users-for-datatables :params {:iDisplayLength 5 :iDisplayStart 0 :sEcho "123" :enabled "true" :organizations ["753-R"]})
    => (contains {:ok true
                  :data (contains {:rows (comp (partial = 4) count)
                                   :total 4
                                   :display 4
                                   :echo "123"})}))
- (fact (command admin :users-for-datatables :params {:iDisplayLength 5 :iDisplayStart 0 :sEcho "123" :enabled "true" :organizations ["753-R"] :filter-search "Suur"})
+ (fact (datatables admin :users-for-datatables :params {:iDisplayLength 5 :iDisplayStart 0 :sEcho "123" :enabled "true" :organizations ["753-R"] :filter-search "Suur"})
    => (contains {:ok true
                  :data (contains {:rows (comp (partial = 1) count)
                                   :total 4
@@ -235,7 +235,7 @@
                       (-> (http/post
                             (str (server-address) "/api/command/impersonate-authority")
                             (assoc params
-                              :form-params (merge {:organizationId sipoo-rakval} (when password {:password password}))
+                              :form-params (merge {:organizationId sipoo-rakval :role "authority"} (when password {:password password}))
                               :content-type :json))
                         decode-response :body))
        role         (fn [] (-> (http/get (str (server-address) "/api/query/user") params) decode-response :body :user :role))
