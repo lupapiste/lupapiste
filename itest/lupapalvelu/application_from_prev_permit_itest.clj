@@ -48,7 +48,7 @@
         :x "6707184.319"
         :y "393021.589"
         :address "Kylykuja 3"
-        :propertyId "18600303560005") => (partial expected-failure? "error.unauthorized"))
+        :propertyId "18600303560005") => unauthorized?)
 
     ; 2: Kannassa on ei-peruutettu hakemus, jonka organization ja verdictin kuntalupatunnus matchaa haettuihin. Palautuu lupapiste-tunnus, jolloin hakemus avataan.
     (fact "db has app that has the kuntalupatunnus in its verdict and its organization matches"
@@ -107,7 +107,7 @@
           :x "6707184.319"
           :y "393021.589"
           :address "Kylykuja 3"
-          :propertyId "18600303560005") => (partial expected-failure? "error.unauthorized"))
+          :propertyId "18600303560005") => unauthorized?)
 
       (fact* "authority of same municipality can create application"
         (let [resp1 (create-app-from-prev-permit raktark-jarvenpaa
