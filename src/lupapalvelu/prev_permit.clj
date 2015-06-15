@@ -18,7 +18,7 @@
             [lupapalvelu.permit :as permit]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]
             [lupapalvelu.operations :as operations]
-            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch-api]
+            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.schemas :as schema]
@@ -51,22 +51,22 @@
 
     (dorun
       (->> applicants
-         (map-indexed
-           (fn [i applicant]
+        (map-indexed
+          (fn [i applicant]
 
-             ;; only invite applicants who have a valid email address
-             (let [applicant-email (get-applicant-email applicant)]
+            ;; only invite applicants who have a valid email address
+            (let [applicant-email (get-applicant-email applicant)]
 
-               ;; Invite applicants
-               (when-not (ss/blank? applicant-email)
-                 (authorization/send-invite!
-                   (update-in command [:data] merge {:email        applicant-email
-                                                     :text         (i18n/localize lang "invite.default-text")
-                                                     :documentName nil
-                                                     :documentId   nil
-                                                     :path         nil
-                                                     :role         "writer"}))
-                 (info "Prev permit application creation, invited " applicant-email " to created app " (get-in command [:data :id])))
+              ;; Invite applicants
+              (when-not (ss/blank? applicant-email)
+                (authorization/send-invite!
+                  (update-in command [:data] merge {:email        applicant-email
+                                                    :text         (i18n/localize lang "invite.default-text")
+                                                    :documentName nil
+                                                    :documentId   nil
+                                                    :path         nil
+                                                    :role         "writer"}))
+                (info "Prev permit application creation, invited " applicant-email " to created app " (get-in command [:data :id])))
 
                ;; Set applicants' user info to Hakija documents
                (let [document (if (zero? i)
@@ -102,7 +102,7 @@
                                             :po (get-in postiosoite [:postitoimipaikannimi])
                                             :turvakieltokytkin (:turvakieltoKytkin applicant)}))]
 
-                 (commands/set-subject-to-document application document user-info (name applicant-type) created)))))))))
+                (commands/set-subject-to-document application document user-info (name applicant-type) created)))))))))
 
 (defn- do-create-application-from-previous-permit [command operation xml app-info location-info]
   (let [{:keys [rakennusvalvontaasianKuvaus vahainenPoikkeaminen hakijat]} app-info
@@ -147,7 +147,7 @@
   (let [operation         :aiemmalla-luvalla-hakeminen
         permit-type       (operations/permit-type-of-operation operation)
         dummy-application {:id kuntalupatunnus :permitType permit-type :organization organizationId}
-        xml               (krysp-fetch-api/get-application-xml dummy-application :kuntalupatunnus)
+        xml               (krysp-fetch/get-application-xml dummy-application :kuntalupatunnus)
         validator-fn      (permit/get-verdict-validator permit-type)
         validation-result (validator-fn xml)
         app-info          (krysp-reader/get-app-info-from-message xml kuntalupatunnus)
@@ -181,7 +181,7 @@
       (doseq [{:keys [id permitType verdicts organization address]} applications]
         (if-let [kuntalupatunnus (get-in verdicts [0 :kuntalupatunnus])]
           (let [dummy-application {:id kuntalupatunnus :permitType permitType :organization organization}
-                xml (krysp-fetch-api/get-application-xml dummy-application :kuntalupatunnus)
+                xml (krysp-fetch/get-application-xml dummy-application :kuntalupatunnus)
                 app-info (krysp-reader/get-app-info-from-message xml kuntalupatunnus)
                 correct-address (get-in app-info [:rakennuspaikka :address])]
             (if (nil? correct-address)
@@ -258,7 +258,7 @@
       (doseq [{:keys [id permitType verdicts organization documents] :as application} applications]
         (if-let [kuntalupatunnus (get-in verdicts [0 :kuntalupatunnus])]
           (let [dummy-application {:id kuntalupatunnus :permitType permitType :organization organization}
-                xml               (krysp-fetch-api/get-application-xml dummy-application :kuntalupatunnus)
+                xml               (krysp-fetch/get-application-xml dummy-application :kuntalupatunnus)
                 app-info          (krysp-reader/get-app-info-from-message xml kuntalupatunnus)]
             (if (seq app-info)
               (let [dummy-command         (action/application->command application)
