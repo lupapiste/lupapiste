@@ -62,9 +62,9 @@
   <section class="page" id="create-templates">
 
     <div class="tree-title" style="padding-left: 10px;">
-      <span data-bind="visible: stack().length == 0, ltext: 'create.choose-op'">
+      <span data-bind="visible: !stack || stack().length == 0, ltext: 'create.choose-op'">
       </span>
-      <span data-bind="visible: stack().length > 0, foreach: stack">
+      <span data-bind="visible: stack && stack().length > 0, foreach: stack">
         <span data-bind="visible: $index"> / </span>
         <span data-bind="text: loc(['operations.tree', op])"></span>
       </span>

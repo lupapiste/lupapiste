@@ -3,13 +3,15 @@
             [taoensso.timbre :as timbre :refer [trace tracef debug debugf info infof warn warnf error errorf fatal fatalf]])
   (:gen-class))
 
-(def services {"server"            'lupapalvelu.server/-main
-               "migration"         'lupapalvelu.migration.migration/-main
-               "update-poi"        'lupapalvelu.mml.update-poi/-main
-               "smoketest"         'lupapalvelu.smoketest.lupamonster/-main
-               "reminders"         'lupapalvelu.batchrun/send-reminder-emails
-               "check-verdicts"    'lupapalvelu.batchrun/check-for-verdicts
-               "check-ah-verdicts" 'lupapalvelu.batchrun/check-for-asianhallinta-verdicts})
+(def services {"server"                     'lupapalvelu.server/-main
+               "migration"                  'lupapalvelu.migration.migration/-main
+               "update-poi"                 'lupapalvelu.mml.update-poi/-main
+               "smoketest"                  'lupapalvelu.smoketest.lupamonster/-main
+               "reminders"                  'lupapalvelu.batchrun/send-reminder-emails
+               "check-verdicts"             'lupapalvelu.batchrun/check-for-verdicts
+               "check-ah-verdicts"          'lupapalvelu.batchrun/check-for-asianhallinta-verdicts
+               "fix-prev-permit-addresses"  'lupapalvelu.prev-permit/fix-prev-permit-addresses
+               "fix-prev-permit-applicants" 'lupapalvelu.prev-permit/fix-prev-permit-applicants})
 
 (defn launch! [service args]
   (debugf "Loading namespace '%s'...\n" (namespace service))
@@ -26,10 +28,10 @@
 
 (defn list-services []
   (println "available services:")
-  (printf "\tservice:        symbol:\n")
-  (printf "\t-----------------------\n")
+  (printf "\tservice:                    symbol:\n")
+  (printf "\t-----------------------------------\n")
   (doseq [[n s] services]
-    (printf "\t%-15s %s\n" n (str s)))
+    (printf "\t%-27s %s\n" n (str s)))
   (flush))
 
 (defn rtfm []

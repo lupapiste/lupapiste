@@ -4,12 +4,7 @@
   <section class="page container">
     <script type="text/html" id="ok-dialog-template">
       <div class="content">
-        <!-- ko if: localize -->
-        <p data-bind="lhtml: text" class="dialog-desc"></p>
-        <!-- /ko -->
-        <!-- ko ifnot: localize -->
         <p data-bind="html: text" class="dialog-desc"></p>
-        <!-- /ko -->
       </div>
       <div class="button-group ok">
       <div data-bind="component: {name:'ok-button-group',

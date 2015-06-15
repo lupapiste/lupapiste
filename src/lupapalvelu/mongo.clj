@@ -1,5 +1,5 @@
 (ns lupapalvelu.mongo
-  (:refer-clojure :exclude [count remove])
+  (:refer-clojure :exclude [count remove update])
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf]]
             [clojure.walk :as walk]
             [clojure.string :as s]

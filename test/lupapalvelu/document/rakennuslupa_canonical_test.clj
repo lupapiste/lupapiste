@@ -52,11 +52,13 @@
 
 (def- hakija-henkilo
   {:id "hakija-henkilo" :schema-info {:name "hakija"
+                                      :subtype "hakija"
                                       :version 1}
    :data {:henkilo henkilo}})
 
 (def- hakija-yritys
   {:id "hakija-yritys" :schema-info {:name "hakija"
+                                     :subtype "hakija"
                                      :version 1}
    :data {:_selected {:value "yritys"}, :yritys yritys}})
 
@@ -565,7 +567,7 @@
     (fact "valvottavienKohteidenMaara" (:valvottavienKohteidenMaara tyonjohtaja-model) => (-> tyonjohtaja :data :patevyys-tyonjohtaja :valvottavienKohteidenMaara :value))
     (fact "tyonjohtajaHakemusKytkin" (:tyonjohtajaHakemusKytkin tyonjohtaja-model) => true)
     (fact "vastattavatTyotehtavat" (:vastattavatTyotehtavat tyonjohtaja-model) =>
-      "kiinteistonilmanvaihtolaitteistonRakentaminen,rakennelmaTaiLaitos,kiinteistonVesiJaViemarilaitteistonRakentaminen,maanrakennustyo,Muu tyotehtava")
+      "kiinteistonVesiJaViemarilaitteistonRakentaminen,kiinteistonilmanvaihtolaitteistonRakentaminen,maanrakennustyo,rakennelmaTaiLaitos,Muu tyotehtava")
     (fact "henkilo" (:henkilo tyonjohtaja-model) => truthy)
     (fact "yritys" (:yritys tyonjohtaja-model) => truthy)
     (fact "sijaisuus" sijaistus-213 => truthy)

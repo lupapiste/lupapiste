@@ -37,7 +37,7 @@
     self.username = ko.observable();
     self.street = ko.observable().extend({ maxLength: 255 });
     self.city = ko.observable().extend({ maxLength: 255 });
-    self.zip = ko.observable().extend({number: true, maxLength: 5});
+    self.zip = ko.observable().extend({number: true, maxLength: 5, minLength: 5});
     self.phone = ko.observable().extend({ maxLength: 255 });
     self.role = ko.observable();
     self.architect = ko.observable();

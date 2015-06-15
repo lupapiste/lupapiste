@@ -34,7 +34,7 @@
                                      {:tag :paatoksentekija :content [""]}
                                      {:tag :paatospvm :content ["1970-01-01"]}]))
 
-(facts standard-verdicts-validator
+(facts "standard-verdicts-validator"
   (against-background
     (sade.util/get-timestamp-from-now :day 1) => (+ (to-timestamp "1970-01-01") 100))
   (fact "Missing details"
@@ -53,7 +53,7 @@
              {:tag :paatostieto :content [{:tag :Paatos
                                            :content [{:tag :paatosdokumentinPvm :content [verdict-date]}]}]}]})
 
-(facts simple-verdicts-skeleton
+(facts "simple-verdicts-skeleton"
   (against-background
     (sade.core/now) => 100)
   (fact "Empty state"
@@ -447,14 +447,10 @@
 (facts* "Testing information parsed from a verdict xml message for application creation"
   (let [xml (xml/parse (slurp "resources/krysp/sample/verdict-rakval-from-kuntalupatunnus-query.xml"))
         info (get-app-info-from-message xml "14-0241-R 3") => truthy
-        {:keys [id kuntalupatunnus municipality rakennusvalvontaasianKuvaus vahainenPoikkeaminen rakennuspaikka ensimmainen-rakennus hakijat
-                ; viitelupatiedot viimeisin-tila asioimiskieli
-                ]} info]
+        {:keys [id kuntalupatunnus municipality rakennusvalvontaasianKuvaus vahainenPoikkeaminen rakennuspaikka ensimmainen-rakennus hakijat]} info]
 
     (fact "info contains the needed keys" (every? (partial contains info)
-                                            [:id :kuntalupatunnus :municipality :rakennusvalvontaasianKuvaus :vahainenPoikkeaminen :rakennuspaikka :ensimmainen-rakennus :hakijat
-                                             ; :viitelupatiedot :viimeisin-tila :asioimiskieli
-                                             ]))
+                                            [:id :kuntalupatunnus :municipality :rakennusvalvontaasianKuvaus :vahainenPoikkeaminen :rakennuspaikka :ensimmainen-rakennus :hakijat]))
 
     (fact "invalid kuntalupatunnus" (get-app-info-from-message xml "invalid-kuntalupatunnus") => nil)
 
@@ -467,19 +463,12 @@
       (fact "with email address" (filter identity (map #(get-in % [:henkilo :sahkopostiosoite]) hakijat)) => (just #{"pena@example.com" "mikko@example.com" " \\t   "})))
 
     (facts "Rakennuspaikka"
-      (let [{:keys [x y address propertyId] :as rakennuspaikka} (:rakennuspaikka info)]
+      (let [{:keys [x y address propertyId] :as rakennuspaikka} rakennuspaikka]
         (fact "contains all the needed keys" (every? (-> rakennuspaikka keys set) [:x :y :address :propertyId]))
         (fact "x" x => #(and (instance? Double %) (= 393033.614 %)))
         (fact "y" y => #(and (instance? Double %) (= 6707228.994 %)))
-        (fact "address" address => "Kylykuja")
-        (fact "propertyId" propertyId => "18600303560006")))
-
-    (facts "Rakennus"
-      (let [{:keys [x y address propertyId] :as rakennus} (:ensimmainen-rakennus info)]
-        (fact "contains all the needed keys" (every? (-> rakennus keys set) [:x :y :address :propertyId]))
-        (fact "x" x => #(and (instance? Double %) (= 393033.614 %)))
-        (fact "y" y => #(and (instance? Double %) (= 6707228.994 %)))
-        (fact "address" address => "Kylykuja")
+        (fact "address" address => "Kylykuja 3-5 D 35b-c")
         (fact "propertyId" propertyId => "18600303560006")))))
+
 
 

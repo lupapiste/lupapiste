@@ -18,7 +18,8 @@
 (defcommand create-foreman-application
   {:parameters [id taskId foremanRole]
    :user-roles #{:applicant :authority}
-   :states action/all-application-states}
+   :states action/all-application-states
+   :pre-checks [application/validate-authority-in-drafts]}
   [{:keys [created user application] :as command}]
   (let [original-open? (util/pos? (:opened application))
         foreman-app (-> (application/do-create-application
@@ -30,7 +31,6 @@
                                                :municipality (:municipality application)
                                                :infoRequest false
                                                :messages []}))
-                      (assoc :state (if original-open? :open :draft))
                       (assoc :opened (if original-open? created nil)))
 
         task                 (util/find-by-id taskId (:tasks application))
@@ -46,11 +46,11 @@
                                (assoc-in tyonjohtaja-doc [:data :kuntaRoolikoodi :value] foremanRole)
                                tyonjohtaja-doc)
 
-        hakija-docs          (domain/get-documents-by-name application "hakija")
+        hakija-docs          (domain/get-applicant-documents (:documents application))
         hakija-docs          (map cleanup-hakija-doc hakija-docs)
 
         new-application-docs (->> (:documents foreman-app)
-                                  (remove #(#{"hankkeen-kuvaus-minimum" "hakija" "tyonjohtaja-v2"} (-> % :schema-info :name)))
+                                  (remove #(#{"hankkeen-kuvaus-minimum" "hakija-r" "tyonjohtaja-v2"} (-> % :schema-info :name)))
                                   (concat (remove nil? [hakija-docs hankkeen-kuvaus-doc tyonjohtaja-doc]))
                                   flatten)
 
@@ -66,7 +66,8 @@
 (defcommand update-foreman-other-applications
   {:user-roles #{:applicant :authority}
    :states action/all-states
-   :parameters [:id foremanHetu]}
+   :parameters [:id foremanHetu]
+   :pre-checks [application/validate-authority-in-drafts]}
   [{application :application user :user :as command}]
   (when-let [foreman-applications (seq (foreman/get-foreman-project-applications application foremanHetu))]
     (let [other-applications (map (fn [app] (foreman/other-project-document app (:created command))) foreman-applications)
@@ -85,7 +86,8 @@
 (defcommand link-foreman-task
   {:user-roles #{:applicant :authority}
    :states action/all-states
-   :parameters [id taskId foremanAppId]}
+   :parameters [id taskId foremanAppId]
+   :pre-checks [application/validate-authority-in-drafts]}
   [{:keys [created application] :as command}]
   (let [task (util/find-by-id taskId (:tasks application))]
     (if task

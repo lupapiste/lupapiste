@@ -1,12 +1,16 @@
 (ns lupapalvelu.application-itest
   (:require [midje.sweet :refer :all]
             [clojure.string :refer [join]]
+            [sade.core :refer [unauthorized]]
             [sade.strings :as ss]
             [lupapalvelu.itest-util :refer :all]
+            [lupapalvelu.test-util :refer [doc-result doc-check]]
             [lupapalvelu.factlet :refer :all]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.application :as app]
+            [lupapalvelu.application-api :as app]
+            [lupapalvelu.application :as a]
+            [lupapalvelu.actions-api :as ca]
             [lupapalvelu.document.tools :as tools]))
 
 (mongo/connect!)
@@ -43,8 +47,7 @@
 
 (fact "creating application with message"
   (let [application-id  (create-app-id pena :messages ["hello"])
-        application     (query-application pena application-id)
-        hakija          (domain/get-document-by-name application "hakija")]
+        application     (query-application pena application-id)]
     (:state application) => "draft"
     (:opened application) => nil
     (count (:comments application)) => 1
@@ -52,34 +55,29 @@
 
 (fact "application created to Sipoo belongs to organization Sipoon Rakennusvalvonta"
   (let [application-id  (create-app-id pena :propertyId sipoo-property-id)
-        application     (query-application pena application-id)
-        hakija (domain/get-document-by-name application "hakija")]
+        application     (query-application pena application-id)]
     (:organization application) => "753-R"))
 
 (fact "the ready-calculated validation errors about required document fields, included by a newly created application, are updated when those application fields are filled"
   (let [application-id  (create-app-id pena :propertyId sipoo-property-id)
         application     (query-application pena application-id)
-        hakija          (domain/get-document-by-name application "hakija")
+        hakija          (domain/get-applicant-document (:documents application))
         errs            (:validationErrors hakija)]
     (count errs) => pos?
     (some #(= "illegal-value:required" (-> % :result second)) errs)
 
     (generate-documents application pena)
 
-    (let [application     (query-application pena application-id)
-          hakija          (domain/get-document-by-name application "hakija")]
-      (not-any? #(= "illegal-value:required" (-> % :result second)) errs))))
+    (not-any? #(= "illegal-value:required" (-> % :result second)) errs)))
 
 (fact "application created to Tampere belongs to organization Tampereen Rakennusvalvonta"
   (let [application-id  (create-app-id pena :propertyId tampere-property-id)
-        application     (query-application pena application-id)
-        hakija (domain/get-document-by-name application "hakija")]
+        application     (query-application pena application-id)]
     (:organization application) => "837-R"))
 
 (fact "application created to Reisjarvi belongs to organization Peruspalvelukuntayhtyma Selanne"
   (let [application-id  (create-app-id pena :propertyId "62600000000000")
-        application     (query-application pena application-id)
-        hakija (domain/get-document-by-name application "hakija")]
+        application     (query-application pena application-id)]
     (:organization application) => "069-R"))
 
 (fact* "Assign application to an authority"
@@ -270,7 +268,7 @@
         application-id   (:id application)
         paasuunnittelija (domain/get-document-by-name application "paasuunnittelija")
         suunnittelija    (domain/get-document-by-name application "suunnittelija")
-        hakija     (domain/get-document-by-name application "hakija")
+        hakija     (domain/get-applicant-document (:documents application))
         maksaja    (domain/get-document-by-name application "maksaja")]
 
 
@@ -482,3 +480,26 @@
                                       :x (-> application :location :x) - 1
                                       :y (-> application :location :y) + 1
                                       :address (:address application) :propertyId (:propertyId application)) => ok?)))
+
+(fact "Authority can access drafts, but can't use most important commands"
+  (let [id (create-app-id pena)
+        app (query-application sonja id)
+        actions (:actions (query sonja :allowed-actions :id id))
+        denied-actions #{:delete-attachment :delete-attachment-version :upload-attachment :change-location
+                         :new-verdict-draft :create-attachments :remove-document-data :remove-doc :update-doc
+                         :reject-doc :approve-doc :stamp-attachments :create-task :cancel-application-authority
+                         :add-link-permit :set-tos-function-for-application :set-tos-function-for-operation
+                         :unsubscribe-notifications :subscribe-notifications :assign-application :neighbor-add
+                         :change-permit-sub-type :refresh-ktj :merge-details-from-krysp :remove-link-permit-by-app-id
+                         :set-attachment-type :move-attachments-to-backing-system :add-operation :remove-auth :create-doc
+                         :set-company-to-document :set-user-to-document :set-current-user-to-document :approve-application
+                         :submit-application :create-foreman-application}
+        user (find-user-from-minimal-by-apikey sonja)]
+    app => map?
+    (doseq [command (ca/foreach-action user {} app)
+            :let [action (keyword (:action command))
+                  result (doc-result (a/validate-authority-in-drafts command app) action)]]
+      (when (denied-actions action)
+        result => (doc-check = unauthorized)))))
+
+

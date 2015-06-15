@@ -95,6 +95,10 @@ LUPAPISTE.SidePanelModel = function() {
     self.refreshConversations(self.application());
   };
 
+  self.showConversationPanel.subscribe(function(value) {
+    hub.send(value ? "side-panel-open" : "side-panel-close");
+  });
+
   self.toggleConversationPanel = function() {
     self.showConversationPanel(!self.showConversationPanel());
     self.showNoticePanel(false);

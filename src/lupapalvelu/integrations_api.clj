@@ -109,14 +109,17 @@
 
 (defn- application-already-exported [type]
   (fn [_ application]
-    (let [filtered-transfers (filter #(some #{(keyword (:type %))} [:exported-to-backing-system :exported-to-asianhallinta]) (:transfers application))]
-      (when-not (= (keyword (:type (last filtered-transfers))) type)
-        (fail :error.application-not-exported)))))
+    (when-not (= "aiemmalla-luvalla-hakeminen" (get-in application [:primaryOperation :name]))
+      (let [export-ops #{:exported-to-backing-system :exported-to-asianhallinta}
+            filtered-transfers (filter (comp export-ops keyword :type) (:transfers application))]
+        (when-not (= (keyword (:type (last filtered-transfers))) type)
+          (fail :error.application-not-exported))))))
 
 (defcommand move-attachments-to-backing-system
   {:parameters [id lang attachmentIds]
    :user-roles #{:authority}
-   :pre-checks [(permit/validate-permit-type-is permit/R) (application-already-exported :exported-to-backing-system)]
+   :pre-checks [(permit/validate-permit-type-is permit/R)
+                (application-already-exported :exported-to-backing-system)]
    :states     [:verdictGiven :constructionStarted]
    :description "Sends such selected attachments to backing system that are not yet sent."}
   [{:keys [created application user] :as command}]
@@ -159,7 +162,8 @@
                       (partial action/non-blank-parameters [:documentId :path])
                       (partial action/boolean-parameters [:overwrite])]
    :user-roles #{:applicant :authority}
-   :states     (action/all-application-states-but [:sent :verdictGiven :constructionStarted :closed :canceled])}
+   :states     (action/all-application-states-but [:sent :verdictGiven :constructionStarted :closed :canceled])
+   :pre-checks [application/validate-authority-in-drafts]}
   [{created :created {:keys [organization propertyId] :as application} :application :as command}]
   (if-let [{url :url} (organization/get-krysp-wfs application)]
     (let [document     (commands/by-id application collection documentId)
@@ -185,7 +189,8 @@
 (defcommand get-building-info-from-wfs
   {:parameters [id]
    :user-roles #{:applicant :authority}
-   :states     (action/all-application-states-but [:sent :verdictGiven :constructionStarted :closed :canceled])}
+   :states     (action/all-application-states-but [:sent :verdictGiven :constructionStarted :closed :canceled])
+   :pre-checks [application/validate-authority-in-drafts]}
   [{{:keys [organization propertyId] :as application} :application}]
   (if-let [{url :url} (organization/get-krysp-wfs application)]
     (let [kryspxml  (krysp-reader/building-xml url propertyId)

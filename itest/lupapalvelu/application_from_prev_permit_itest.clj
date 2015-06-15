@@ -68,13 +68,19 @@
       (provided
         (krysp-reader/get-app-info-from-message anything anything) => nil))
 
-    ; 5: jos parametrina annettu organisaatio ja app-infosta ratkaistu organisaatio ei matchaa -> (fail :error.previous-permit-found-from-backend-is-of-different-organization)
+    ; 5: kiinteistotunnusta ei tule sanomassa
+    (fact "propertyId is missing"
+      (create-app-from-prev-permit raktark-jarvenpaa) => (partial expected-failure? "error.previous-permit-no-propertyid")
+      (provided
+        (krysp-reader/get-app-info-from-message anything anything) => (assoc example-app-info :municipality nil)))
+
+    ; 6: jos parametrina annettu organisaatio ja app-infosta ratkaistu organisaatio ei matchaa -> (fail :error.previous-permit-found-from-backend-is-of-different-organization)
     (fact "ids of the given and resolved organizations do not match"
       (create-app-from-prev-permit raktark-jarvenpaa) => (partial expected-failure? "error.previous-permit-found-from-backend-is-of-different-organization")
       (provided
         (krysp-reader/get-app-info-from-message anything anything) => {:municipality "753"}))
 
-    ; 6: jos sanomassa ei ollut rakennuspaikkaa, ja ei alunperin annettu tarpeeksi parametreja -> (fail :error.more-prev-app-info-needed :needMorePrevPermitInfo true)
+    ; 7: jos sanomassa ei ollut rakennuspaikkaa, ja ei alunperin annettu tarpeeksi parametreja -> (fail :error.more-prev-app-info-needed :needMorePrevPermitInfo true)
     (fact "no 'rakennuspaikkatieto' element in the received xml, need more info"
       (create-app-from-prev-permit raktark-jarvenpaa) => (contains {:ok false
                                                                     :needMorePrevPermitInfo true
@@ -82,7 +88,7 @@
       (provided
         (krysp-reader/get-app-info-from-message anything anything) => (dissoc example-app-info :rakennuspaikka)))
 
-    ; 7: Sanoman kaikilta hakijoilta puuttuu henkilo- ja yritystiedot
+    ; 8: Sanoman kaikilta hakijoilta puuttuu henkilo- ja yritystiedot
     (fact "no proper applicants in the xml message"
       (create-app-from-prev-permit raktark-jarvenpaa
         :x "6707184.319"
@@ -93,7 +99,7 @@
         (krysp-reader/get-app-info-from-message anything anything) => (update-in example-app-info [:hakijat]
                                                                         (fn [hakijat] (map #(dissoc % :henkilo :yritys) hakijat)))))
 
-    ; 8: testaa Sonjalla, etta ei ole oikeuksia luoda hakemusta, mutta jarvenpaan viranomaisella on
+    ; 9: testaa Sonjalla, etta ei ole oikeuksia luoda hakemusta, mutta jarvenpaan viranomaisella on
     (facts "authority tests"
 
       (fact "authority of different municipality cannot create application"
@@ -121,7 +127,7 @@
             (count (:invites (local-query teppo :invites))) => 1)
 
           (fact "hakija document count"
-            (count (domain/get-documents-by-name application "hakija")) => 5)
+            (count (domain/get-documents-by-name application "hakija-r")) => 5)
 
           ;; Cancel the application and re-call 'create-app-from-prev-permit' -> should open application with different ID
           (fact "fetching prev-permit again after canceling the previously fetched one"

@@ -1,9 +1,7 @@
 (ns lupapalvelu.permit
   (:require [taoensso.timbre :as timbre :refer [errorf warn]]
             [sade.core :refer [fail]]
-            [sade.util :as util]
-            [lupapalvelu.domain :as domain]
-            [lupapalvelu.action :refer [defquery]]))
+            [sade.util :as util]))
 
 (defonce ^:private permit-type-defs (atom {}))
 (defn permit-types [] @permit-type-defs)
@@ -32,7 +30,7 @@
 (defpermit R  "Rakennusluvat"
   {:subtypes         []
    :sftp-directory   "/rakennus"
-   :applicant-doc-schema "hakija"
+   :applicant-doc-schema "hakija-r"
    :multiple-parties-allowed true
    :wfs-krysp-url-asia-prefix "rakval:luvanTunnisteTiedot/"})
 

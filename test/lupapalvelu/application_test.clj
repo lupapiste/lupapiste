@@ -16,7 +16,9 @@
     ..application.. =contains=> {:id ..id..}
     (mongo/update-by-query :applications {:_id ..id..} ..changes..) => 1))
 
-(testable-privates lupapalvelu.application validate-x validate-y add-operation-allowed? is-link-permit-required)
+(testable-privates lupapalvelu.application-api validate-x validate-y add-operation-allowed?)
+(testable-privates lupapalvelu.application is-link-permit-required)
+
 
 (facts "coordinate validation"
   (validate-x {:data {:x nil}}) => nil
@@ -81,4 +83,4 @@
           (fact "Add operation allowed" operation-allowed => (doc-check nil?)))))
 
     (fact "Add operation not allowed for :muutoslupa"
-      (add-operation-allowed? nil {:operations [{:name "kerrostalo-rivitalo"}] :permitSubtype :muutoslupa}) => error)))
+      (add-operation-allowed? nil {:primaryOperation {:name "kerrostalo-rivitalo"} :permitSubtype :muutoslupa}) => error)))

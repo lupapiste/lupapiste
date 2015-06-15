@@ -59,7 +59,7 @@ var pageutil = (function($) {
   var frontpage = LUPAPISTE.config.frontpage[loc.getCurrentLanguage()] || "/";
 
   function openFrontpage() {
-    window.location.pathname = frontpage;
+    window.location = window.location.protocol + "//" + window.location.host + frontpage;
   }
 
   $(function() {

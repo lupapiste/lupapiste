@@ -12,7 +12,6 @@
             [lupapalvelu.operations :as operations]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.organization :as o]
-            [lupapalvelu.application :as application]
             [camel-snake-kebab :as csk]
             [sade.strings :as ss]
             [sade.property :as p]
@@ -323,7 +322,8 @@
       (fail :error.unknown-organization))))
 
 (defquery get-organization-names
-  {:user-roles #{:anonymous}}
+  {:description "Returns an organization id -> name map. (Used by TOJ.)"
+   :user-roles #{:anonymous}}
   [_]
   (ok :names (into {} (for [{:keys [id name]} (o/get-organizations {})]
                         [id name]))))

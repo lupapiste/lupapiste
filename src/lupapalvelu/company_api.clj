@@ -1,6 +1,7 @@
 (ns lupapalvelu.company-api
   (:require [sade.core :refer [ok fail fail! unauthorized unauthorized!]]
             [lupapalvelu.action :refer [defquery defcommand] :as action]
+            [lupapalvelu.application :as application]
             [lupapalvelu.company :as c]
             [lupapalvelu.user :as u]
             [monger.operators :refer :all]
@@ -108,7 +109,8 @@
 (defcommand company-invite
   {:parameters [id company-id]
    :states (action/all-application-states-but [:closed :canceled])
-   :user-roles #{:applicant :authority}}
+   :user-roles #{:applicant :authority}
+   :pre-checks [application/validate-authority-in-drafts]}
   [{caller :user application :application}]
   (c/company-invite caller application company-id)
   (ok))

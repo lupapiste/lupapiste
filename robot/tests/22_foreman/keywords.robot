@@ -52,7 +52,6 @@ Foreman opens application
   [Arguments]  ${index}
   ${foremanAppId} =  Get From List  ${foremanApps}  ${index}
   Open application by id  ${foremanAppId}
-  Open tab  parties
 
 Foreman accepts invitation and fills info
   Wait until  Click by test id  accept-invite-button
@@ -62,6 +61,8 @@ Foreman accepts invitation and fills info
 Foreman sets role and difficulty to foreman application
   [Arguments]  ${index}  ${role}  ${difficulty}
   Foreman opens application  ${index}
+  Deny yes no dialog
+  Open tab  parties
   Foreman accepts invitation and fills info
   Wait until  Select From List by test id  kuntaRoolikoodi  ${role}
   Wait until  Select From List by test id  patevyysvaatimusluokka  ${difficulty}

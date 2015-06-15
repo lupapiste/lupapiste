@@ -152,6 +152,9 @@ LUPAPISTE.ApplicationModel = function() {
       self.invites(_.filter(data.invites, function(invite) {
         return invite.application.id === self.id();
       }));
+      if (self.hasInvites()) {
+        self.showAcceptInvitationDialog();
+      }
     });
   };
 
@@ -259,7 +262,7 @@ LUPAPISTE.ApplicationModel = function() {
     return false;
   };
 
-  self.requestForComplement = function(model) {
+  self.requestForComplement = function() {
     ajax.command("request-for-complement", { id: self.id()})
       .success(self.reload)
       .processing(self.processing)
@@ -293,7 +296,7 @@ LUPAPISTE.ApplicationModel = function() {
     return false;
   };
 
-  self.refreshKTJ = function(model) {
+  self.refreshKTJ = function() {
     ajax.command("refresh-ktj", {id: self.id()})
       .success(function() {
         self.reload();
@@ -331,7 +334,11 @@ LUPAPISTE.ApplicationModel = function() {
   };
 
   self.canSubscribe = function(model) {
-    return model.role() !== "statementGiver" && lupapisteApp.models.currentUser && (lupapisteApp.models.currentUser.isAuthority() || lupapisteApp.models.currentUser.id() ===  model.id());
+    return model.role() !== "statementGiver" &&
+           lupapisteApp.models.currentUser &&
+           (lupapisteApp.models.currentUser.isAuthority() || lupapisteApp.models.currentUser.id() ===  model.id()) &&
+           lupapisteApp.models.applicationAuthModel.ok("subscribe-notifications") &&
+           lupapisteApp.models.applicationAuthModel.ok("unsubscribe-notifications");
   };
 
   self.manageSubscription = function(command, model) {
@@ -581,5 +588,17 @@ LUPAPISTE.ApplicationModel = function() {
       .error(function(e) {LUPAPISTE.showIntegrationError("integration.asianhallinta.title", e.text, e.details);})
       .processing(self.processing)
       .call();
+  };
+
+  self.showAcceptInvitationDialog = function() {
+    if (self.hasInvites() && lupapisteApp.models.applicationAuthModel.ok("approve-invite")) {
+      hub.send("show-dialog", {ltitle: "application.inviteSend",
+                               size: "medium",
+                               component: "yes-no-dialog",
+                               componentParams: {ltext: "application.inviteDialogText",
+                                                 lyesTitle: "applications.approveInvite",
+                                                 lnoTitle: "application.showApplication",
+                                                 yesFn: self.approveInvite}});
+    }
   };
 };

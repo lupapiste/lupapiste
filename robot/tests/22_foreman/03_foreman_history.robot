@@ -25,12 +25,16 @@ Foreman sets his information to several applications
   Foreman sets role and difficulty to foreman application  3  IV-työnjohtaja   B
 
   Foreman opens application  4
+  Deny yes no dialog
+  Open tab  parties
   Foreman accepts invitation and fills info
+  Open to authorities  Apuva
   [Teardown]  logout
 
 Authority sees foreman history
   Sonja logs in
   Foreman opens application  4
+  Open tab  parties
 
   Wait until  Foreman history should have text X times  Sipoo  3
   Foreman history should have text X times  Tavanomainen  2

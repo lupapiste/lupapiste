@@ -76,7 +76,7 @@
           <!-- /ko -->
 
           <!-- Operations: -->
-          <!-- ko if: $root.permitSubtypes().length == 0 -->
+          <!-- ko if: $root.permitSubtypes().length == 0  && operationsCount() && operationsCount().length > 0 -->
           <div>
             <p data-bind="ltext: 'application.operations.secondary'"></p>
             <!-- ko if: operationsCount() && operationsCount().length > 0 -->
@@ -254,14 +254,14 @@
           <!-- Link to organization's backing system URL if given and valid -->
           <button data-bind="click: toBackingSystem, visible: $root.authorization.ok('redirect-to-vendor-backend')" class="btn">
             <span data-bind="ltext: 'application.showInBackingSystem'"></span>
-            <span class="icon approve-grey left-align"/>
+            <span class="icon approve-grey left-align"></span>
           </button>
           <!-- /ko  -->
           <!-- ko if: hasInvites -->
-          <button data-bind="click: approveInvite" class="btn btn-primary btn-mini" data-test-id="accept-invite-button">
+          <button data-bind="click: approveInvite, enable: $root.authorization.ok('approve-invite')" class="btn btn-primary btn-mini" data-test-id="accept-invite-button">
             <span data-bind="ltext: 'applications.approveInvite'"></span>
           </button>
-          <button data-bind="click: declineInvite" class="btn btn-mini" data-test-id="decline-invite-button">
+          <button data-bind="click: declineInvite, enable: $root.authorization.ok('decline-invitation')" class="btn btn-mini" data-test-id="decline-invite-button">
             <span data-bind="ltext: 'applications.declineInvite'"></span>
           </button>
           <!-- /ko -->
@@ -418,7 +418,7 @@
                           <!-- /ko -->
                         </span>
                       </span>
-                      <a class="invite-action" href="#" data-bind="ltext: 'application.remove-auth', click: $root.application.removeAuth, visible: $root.application.isNotOwner($data)"></a>
+                      <a class="invite-action" href="#" data-bind="ltext: 'application.remove-auth', click: $root.application.removeAuth, visible: $root.application.isNotOwner($data) && $root.authorization.ok('remove-auth')"></a>
                       <!-- ko if: $root.application.canSubscribe($data) -->
                       <a class="invite-action" href="#"
                          data-test-id="subscribeNotifications"

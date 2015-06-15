@@ -6,6 +6,7 @@
             [sade.util :as util]
             [sade.core :refer [ok]]
             [lupapalvelu.action :refer [defexport] :as action]
+            [lupapalvelu.application :as application]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.tools :as tools]
@@ -160,7 +161,7 @@
                 :propertyId :permitSubtype :permitType :sent :started :state :submitted]
         raw-applications (mongo/select :applications query fields)
         applications-with-operations (map
-                                       (fn [a] (assoc a :operations (conj (seq (:secondaryOperations a)) (:primaryOperation a))))
+                                       (fn [a] (assoc a :operations (application/get-operations a)))
                                        raw-applications)
         applications (map
                        (fn [a] (update-in a [:operations] #(map (partial operation-mapper a) %)))

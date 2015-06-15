@@ -13,7 +13,6 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.organization :as organization]
-            [lupapalvelu.application :as a]
             [lupapalvelu.application-meta-fields :as app-meta-fields]
             [lupapalvelu.operations :as op]
             [sade.env :as env]
@@ -1023,6 +1022,28 @@
     (mongo/update-by-id collection (:id application) {$set   {:primaryOperation    primaryOperation
                                                               :secondaryOperations secondaryOperations}
                                                       $unset {:operations 1}})))
+
+(defmigration hakija-documents-to-hakija-r
+  {:apply-when (or (pos? (mongo/count :applications {$and [{:permitType "R"} {:documents {$elemMatch {"schema-info.name" "hakija"}}}]}))
+                   (pos? (mongo/count :submitted-applications {$and [{:permitType "R"} {:documents {$elemMatch {"schema-info.name" "hakija"}}}]})))}
+  (update-applications-array
+    :documents
+    (fn [{schema-info :schema-info :as doc}]
+      (if (= "hakija" (:name schema-info))
+        (assoc-in doc [:schema-info :name] "hakija-r")
+        doc))
+    {$and [{:permitType "R"} {:documents {$elemMatch {"schema-info.name" "hakija"}}}]}))
+
+(defmigration add-subtype-for-maksaja-documents
+  {:apply-when (or (pos? (mongo/count :applications {"documents" {$elemMatch {"schema-info.name" "maksaja", "schema-info.subtype" {$exists false}}}}))
+                   (pos? (mongo/count :submitted-applications {"documents" {$elemMatch {"schema-info.name" "maksaja", "schema-info.subtype" {$exists false}}}})))}
+  (update-applications-array
+    :documents
+    (fn [{schema-info :schema-info :as doc}]
+      (if (and (= "maksaja" (:name schema-info)) (ss/blank? (:subtype schema-info)))
+        (assoc-in doc [:schema-info :subtype] "maksaja")
+        doc))
+    {"documents" {$elemMatch {"schema-info.name" "maksaja", "schema-info.subtype" {$exists false}}}}))
 
 ;;
 ;; ****** NOTE! ******

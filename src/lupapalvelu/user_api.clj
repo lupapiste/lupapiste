@@ -75,7 +75,7 @@
     [_]
     (ok :user (user/get-user-by-email email))))
 
-(defcommand users-for-datatables
+(defquery users-for-datatables
   {:user-roles #{:admin :authorityAdmin}}
   [{caller :user {params :params} :data}]
   (ok :data (user/users-for-datatables caller params)))
@@ -157,7 +157,8 @@
     (-<> user-data
       (select-keys [:email :username :role :firstName :lastName :personId
                     :phone :city :street :zip :enabled :orgAuthz
-                    :allowDirectMarketing :architect :company])
+                    :allowDirectMarketing :architect :company
+                    :graduatingYear :degree :fise])
       (merge {:firstName "" :lastName "" :username email} <>)
       (assoc
         :email email
@@ -282,6 +283,10 @@
 
 (defn- validate-updatable-user [{user-data :data}]
   (when (sc/check UserUpdate user-data)
+    (fail :error.invalid-user-data)))
+
+(defn- validate-registrable-user [{user-data :data}]
+  (when (sc/check user/RegisterUser user-data)
     (fail :error.invalid-user-data)))
 
 (defcommand update-user
@@ -491,13 +496,14 @@
         (fail :error.login)))))
 
 (defcommand impersonate-authority
-  {:parameters [organizationId password]
+  {:parameters [organizationId role password]
    :user-roles #{:admin}
-   :input-validators [(partial action/non-blank-parameters [:organizationId])]
+   :input-validators [(partial action/non-blank-parameters [:organizationId])
+                      (fn [{data :data}] (when-not (#{"authority" "authorityAdmin"} (:role data)) (fail :error.invalid-role)))]
    :description "Changes admin session into authority session with access to given organization"}
   [{user :user :as command}]
   (if (user/get-user-with-password (:username user) password)
-    (let [imposter (assoc user :impersonating true :role "authority" :orgAuthz {(keyword organizationId) #{:authority}})]
+    (let [imposter (assoc user :impersonating true :role role :orgAuthz {(keyword organizationId) #{(keyword role)}})]
       (ssess/merge-to-session command (ok) {:user imposter}))
     (fail :error.login)))
 
@@ -508,11 +514,9 @@
 ;;
 
 (defcommand register-user
-  {:parameters [stamp email password street zip city phone allowDirectMarketing rakentajafi]
-   :user-roles #{:anonymous}
-   :input-validators [(partial action/non-blank-parameters [:email :password :stamp :street :zip :city :phone])
-                      (partial action/boolean-parameters [:allowDirectMarketing :rakentajafi])
-                      action/email-validator]}
+  {:parameters       [stamp email password street zip city phone allowDirectMarketing rakentajafi]
+   :user-roles       #{:anonymous}
+   :input-validators [action/email-validator validate-registrable-user]}
   [{data :data}]
   (let [vetuma-data (vetuma/get-user stamp)
         email (user/canonize-email email)]
@@ -522,6 +526,8 @@
       (if-let [user (create-new-user nil (merge
                                            (set/rename-keys vetuma-data {:userid :personId})
                                            (select-keys data [:password :street :zip :city :phone :allowDirectMarketing])
+                                           (when (:architect data)
+                                             (select-keys data [:architect :degree :graduatingYear :fise]))
                                            {:email email :role "applicant" :enabled false}))]
         (do
           (vetuma/consume-user stamp)

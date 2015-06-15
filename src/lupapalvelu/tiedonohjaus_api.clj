@@ -35,7 +35,7 @@
 (defcommand set-tos-function-for-application
   {:parameters [:id functionCode]
    :user-roles #{:authority}
-   :states     (action/all-states-but [:closed :canceled])}
+   :states     (action/all-states-but [:draft :closed :canceled])}
   [{:keys [application created] :as command}]
   (let [orgId (:organization application)
         code-valid? (some #{functionCode} (map :code (t/available-tos-functions orgId)))]

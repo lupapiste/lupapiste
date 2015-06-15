@@ -31,13 +31,13 @@
   (fact (-> (query admin :users :role "authority" :organization "753-R") :users count) => 3))
 
 (facts users-for-datatables
- (fact (command admin :users-for-datatables :params {:iDisplayLength 5 :iDisplayStart 0 :sEcho "123" :enabled "true" :organizations ["753-R"]})
+ (fact (datatables admin :users-for-datatables :params {:iDisplayLength 5 :iDisplayStart 0 :sEcho "123" :enabled "true" :organizations ["753-R"]})
    => (contains {:ok true
                  :data (contains {:rows (comp (partial = 4) count)
                                   :total 4
                                   :display 4
                                   :echo "123"})}))
- (fact (command admin :users-for-datatables :params {:iDisplayLength 5 :iDisplayStart 0 :sEcho "123" :enabled "true" :organizations ["753-R"] :filter-search "Suur"})
+ (fact (datatables admin :users-for-datatables :params {:iDisplayLength 5 :iDisplayStart 0 :sEcho "123" :enabled "true" :organizations ["753-R"] :filter-search "Suur"})
    => (contains {:ok true
                  :data (contains {:rows (comp (partial = 1) count)
                                   :total 4
@@ -86,7 +86,7 @@
   (fact (->> (query admin :user-by-email :email "foo@example.com") :user :orgAuthz keys (map name)) => ["529-R"])
   (fact (command sipoo :update-user-organization :email "foo@example.com" :firstName "bar" :lastName "har" :roles ["authority"]) => ok?)
 
-  (fact (->> (query admin :user-by-email :email "foo@example.com") :user :orgAuthz keys (map name)) => ["529-R" "753-R"])
+  (fact (->> (query admin :user-by-email :email "foo@example.com") :user :orgAuthz keys (map name)) => (just ["529-R" "753-R"] :in-any-order))
   (fact (command sipoo :update-user-organization :email "foo@example.com" :firstName "bar" :lastName "har" :roles ["authority"]) => ok?)
 
   (fact (command sipoo :update-user-organization :email "foo@example.com" :firstName "bar" :lastName "har" :roles []) => (contains {:ok false, :parameters ["roles"], :text "error.vector-parameters-with-items-missing-required-keys"}))
@@ -109,7 +109,7 @@
 
   (fact (command naantali :create-user :email "foo@example.com" :role "authority" :enabled "true" :organization "529-R") => ok?)
   (fact (command sipoo :update-user-organization :email "foo@example.com" :firstName "bar" :lastName "har" :operation "add" :roles ["authority"]) => ok?)
-  (fact (->> (query admin :user-by-email :email "foo@example.com") :user :orgAuthz keys (map name)) => ["529-R" "753-R"])
+  (fact (->> (query admin :user-by-email :email "foo@example.com") :user :orgAuthz keys (map name)) => (just ["529-R" "753-R"] :in-any-order))
   (fact (command sipoo :remove-user-organization :email "foo@example.com") => ok?)
   (fact (->> (query admin :user-by-email :email "foo@example.com") :user :orgAuthz keys (map name)) => ["529-R"]))
 
@@ -235,7 +235,7 @@
                       (-> (http/post
                             (str (server-address) "/api/command/impersonate-authority")
                             (assoc params
-                              :form-params (merge {:organizationId sipoo-rakval} (when password {:password password}))
+                              :form-params (merge {:organizationId sipoo-rakval :role "authority"} (when password {:password password}))
                               :content-type :json))
                         decode-response :body))
        role         (fn [] (-> (http/get (str (server-address) "/api/query/user") params) decode-response :body :user :role))
