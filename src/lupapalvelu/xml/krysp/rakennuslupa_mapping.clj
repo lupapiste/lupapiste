@@ -57,6 +57,7 @@
                     {:tag :kokonaisala}
                     {:tag :kellarinpinta-ala}
                     {:tag :BIM :child []}
+                    ; <osoite> is not mapped, authority sets the address in backend system
                     {:tag :kerrosluku}
                     {:tag :kerrosala}
                     {:tag :rakentamistapa}
