@@ -41,6 +41,7 @@
 (def Company {:name                          (sc/both (min-length-string 1) (max-length-string 64))
               :y                             (sc/pred util/finnish-y? "Not valid Y code")
               :accountType                   (sc/pred account-type? "Not valid account type")
+              :customAccountLimit            (sc/maybe sc/Int)
               (sc/optional-key :reference)   max-64-or-nil
               :address1                      max-64-or-nil
               :po                            max-64-or-nil
