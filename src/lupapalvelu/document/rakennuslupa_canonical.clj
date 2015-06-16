@@ -51,8 +51,8 @@
         lammonlahde-map (muu-select-map
                           :muu (-> lammitys :muu-lammonlahde)
                           :polttoaine (if (= "kiviihiili koksi tms" (-> lammitys :lammonlahde))
-                                          (str (-> lammitys :lammonlahde) ".")
-                                          (-> lammitys :lammonlahde)))
+                                        (str (-> lammitys :lammonlahde) ".")
+                                        (-> lammitys :lammonlahde)))
         julkisivu-map (muu-select-map :muuMateriaali (-> rakenne :muuMateriaali)
                                       :julkisivumateriaali (-> rakenne :julkisivu))
         lammitystapa (-> lammitys :lammitystapa)
@@ -63,37 +63,32 @@
        :alkuHetki (util/to-xml-datetime  created)
        :sijaintitieto {:Sijainti {:tyhja empty-tag}}
        :rakentajatyyppi (-> kaytto :rakentajaTyyppi)
-       :rakennuksenTiedot (merge {:kayttotarkoitus (-> kaytto :kayttotarkoitus)
-                                  :tilavuus (-> mitat :tilavuus)
-                                  :kokonaisala (-> mitat :kokonaisala)
-                                  :kellarinpinta-ala (-> mitat :kellarinpinta-ala)
-                                  ;:BIM empty-tag
-                                  :kerrosluku (-> mitat :kerrosluku)
-                                  :kerrosala (-> mitat :kerrosala)
-                                  :rakentamistapa (-> rakenne :rakentamistapa)
-                                  :verkostoliittymat {:sahkoKytkin (true? (-> toimenpide :verkostoliittymat :sahkoKytkin))
-                                                      :maakaasuKytkin (true? (-> toimenpide :verkostoliittymat :maakaasuKytkin))
-                                                      :viemariKytkin (true? (-> toimenpide :verkostoliittymat :viemariKytkin))
-                                                      :vesijohtoKytkin (true? (-> toimenpide :verkostoliittymat :vesijohtoKytkin))
-                                                      :kaapeliKytkin (true? (-> toimenpide :verkostoliittymat :kaapeliKytkin))}
-                                  :energialuokka (-> luokitus :energialuokka)
-                                  :energiatehokkuusluku (-> luokitus :energiatehokkuusluku)
-                                  :energiatehokkuusluvunYksikko (-> luokitus :energiatehokkuusluvunYksikko)
-                                  :paloluokka (-> luokitus :paloluokka)
-                                  :lammitystapa (cond (= lammitystapa "suorasahk\u00f6") "suora s\u00e4hk\u00f6"
-                                                      (= lammitystapa "eiLammitysta") "ei l\u00e4mmityst\u00e4"
-                                                  :default lammitystapa)
-                                  :varusteet {:sahkoKytkin (true? (-> toimenpide :varusteet :sahkoKytkin))
-                                              :kaasuKytkin (true? (-> toimenpide :varusteet :kaasuKytkin))
-                                              :viemariKytkin (true? (-> toimenpide :varusteet :viemariKytkin))
-                                              :vesijohtoKytkin (true? (-> toimenpide :varusteet :vesijohtoKytkin))
-                                              :lamminvesiKytkin (true? (-> toimenpide :varusteet :lamminvesiKytkin))
-                                              :aurinkopaneeliKytkin (true? (-> toimenpide :varusteet :aurinkopaneeliKytkin))
-                                              :hissiKytkin (true? (-> toimenpide :varusteet :hissiKytkin))
-                                              :koneellinenilmastointiKytkin (true? (-> toimenpide :varusteet :koneellinenilmastointiKytkin))
-                                              :saunoja (-> toimenpide :varusteet :saunoja)
-                                              :vaestonsuoja (-> toimenpide :varusteet :vaestonsuoja)}
-                                  :liitettyJatevesijarjestelmaanKytkin (true? (-> toimenpide :varusteet :liitettyJatevesijarjestelmaanKytkin))}
+       :rakennuksenTiedot (merge
+                            (select-keys mitat [:tilavuus :kokonaisala :kellarinpinta-ala :kerrosluku :kerrosala])
+                            (select-keys luokitus [:energialuokka :energiatehokkuusluku  :paloluokka])
+                            (when-not (ss/blank? (:energiatehokkuusluku luokitus))
+                              (select-keys luokitus [:energiatehokkuusluvunYksikko]))
+                            {:kayttotarkoitus (:kayttotarkoitus kaytto)
+                             :rakentamistapa (:rakentamistapa rakenne)
+                             :verkostoliittymat {:sahkoKytkin (true? (-> toimenpide :verkostoliittymat :sahkoKytkin))
+                                                 :maakaasuKytkin (true? (-> toimenpide :verkostoliittymat :maakaasuKytkin))
+                                                 :viemariKytkin (true? (-> toimenpide :verkostoliittymat :viemariKytkin))
+                                                 :vesijohtoKytkin (true? (-> toimenpide :verkostoliittymat :vesijohtoKytkin))
+                                                 :kaapeliKytkin (true? (-> toimenpide :verkostoliittymat :kaapeliKytkin))}
+                             :lammitystapa (cond (= lammitystapa "suorasahk\u00f6") "suora s\u00e4hk\u00f6"
+                                                 (= lammitystapa "eiLammitysta") "ei l\u00e4mmityst\u00e4"
+                                             :default lammitystapa)
+                             :varusteet {:sahkoKytkin (true? (-> toimenpide :varusteet :sahkoKytkin))
+                                         :kaasuKytkin (true? (-> toimenpide :varusteet :kaasuKytkin))
+                                         :viemariKytkin (true? (-> toimenpide :varusteet :viemariKytkin))
+                                         :vesijohtoKytkin (true? (-> toimenpide :varusteet :vesijohtoKytkin))
+                                         :lamminvesiKytkin (true? (-> toimenpide :varusteet :lamminvesiKytkin))
+                                         :aurinkopaneeliKytkin (true? (-> toimenpide :varusteet :aurinkopaneeliKytkin))
+                                         :hissiKytkin (true? (-> toimenpide :varusteet :hissiKytkin))
+                                         :koneellinenilmastointiKytkin (true? (-> toimenpide :varusteet :koneellinenilmastointiKytkin))
+                                         :saunoja (-> toimenpide :varusteet :saunoja)
+                                         :vaestonsuoja (-> toimenpide :varusteet :vaestonsuoja)}
+                             :liitettyJatevesijarjestelmaanKytkin (true? (-> toimenpide :varusteet :liitettyJatevesijarjestelmaanKytkin))}
                                  (let [defaults {:jarjestysnumero nil, :kiinttun (:propertyId application)}
                                        {:keys [rakennusnro valtakunnallinenNumero manuaalinen_rakennusnro]} toimenpide]
                                    (cond

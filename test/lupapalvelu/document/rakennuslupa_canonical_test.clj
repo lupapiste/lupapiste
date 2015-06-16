@@ -51,13 +51,13 @@
                                     :puhelin {:value "03-389 1380"}}}}))
 
 (def- hakija-henkilo
-  {:id "hakija-henkilo" :schema-info {:name "hakija"
+  {:id "hakija-henkilo" :schema-info {:name "hakija-r"
                                       :subtype "hakija"
                                       :version 1}
    :data {:henkilo henkilo}})
 
 (def- hakija-yritys
-  {:id "hakija-yritys" :schema-info {:name "hakija"
+  {:id "hakija-yritys" :schema-info {:name "hakija-r"
                                      :subtype "hakija"
                                      :version 1}
    :data {:_selected {:value "yritys"}, :yritys yritys}})
@@ -463,7 +463,7 @@
 
 (facts "Canonical hakija/henkilo model is correct"
   (let [osapuoli (tools/unwrapped (:data hakija-henkilo))
-        hakija-model (get-osapuoli-data osapuoli :hakija)
+        hakija-model (get-osapuoli-data osapuoli (-> hakija-henkilo :schema-info :name keyword))
         henkilo (:henkilo hakija-model)
         ht (:henkilotiedot henkilo)
         yritys (:yritys hakija-model)]
@@ -476,7 +476,7 @@
 
 (facts "Canonical hakija/yritys model is correct"
   (let [osapuoli (tools/unwrapped (:data hakija-yritys))
-        hakija-model (get-osapuoli-data osapuoli :hakija)
+        hakija-model (get-osapuoli-data osapuoli (-> hakija-yritys :schema-info :name keyword))
         henkilo (:henkilo hakija-model)
         yritys (:yritys hakija-model)]
     (fact "model" hakija-model => truthy)
@@ -707,6 +707,18 @@
         rakennus (get-rakennus toimenpide {:id "123" :created nil} application-rakennuslupa)]
     (fact (:polttoaine (:lammonlahde (:rakennuksenTiedot rakennus))) => "turve")))
 
+(fact "LPK-427: When energiatehokkuusluku is set, energiatehokkuusluvunYksikko is inluded"
+  (let [toimenpide (tools/unwrapped {:luokitus {:energiatehokkuusluku {:value "124"}
+                                                :energiatehokkuusluvunYksikko {:value "kWh/m2"}}})
+        rakennus (get-rakennus toimenpide {:id "123" :created nil} application-rakennuslupa)]
+    (get-in rakennus [:rakennuksenTiedot :energiatehokkuusluvunYksikko]) => "kWh/m2"))
+
+(fact "LPK-427: When energiatehokkuusluku is not set, energiatehokkuusluvunYksikko is excluded"
+  (let [toimenpide (tools/unwrapped {:luokitus {:energiatehokkuusluku {:value ""}
+                                                :energiatehokkuusluvunYksikko {:value "kWh/m2"}}})
+        rakennus (get-rakennus toimenpide {:id "123" :created nil} application-rakennuslupa)]
+    (get-in rakennus [:rakennuksenTiedot :energiatehokkuusluvunYksikko]) => nil))
+
 (facts "When muu-lammonlahde is specified, it is used"
   (let [toimenpide (tools/unwrapped {:lammitys {:lammitystapa {:value nil}
                                                 :lammonlahde  {:value "other"}
@@ -846,6 +858,18 @@
     (fact "rakentajaTyyppi" (:rakentajatyyppi rakennus) => "muu")
     (fact "kayttotarkoitus" (:kayttotarkoitus rakennuksentiedot) => "012 kahden asunnon talot")
     (fact "rakentamistapa" (:rakentamistapa rakennuksentiedot) => "elementti")
+
+    (fact "tilavuus" (:tilavuus rakennuksentiedot) => "1500")
+    (fact "kokonaisala" (:kokonaisala rakennuksentiedot) => "1000")
+    (fact "kellarinpinta-ala" (:kellarinpinta-ala rakennuksentiedot) => "100")
+    (fact "kerrosluku" (:kerrosluku rakennuksentiedot) => "2")
+    (fact "kerrosala" (:kerrosala rakennuksentiedot) => "180")
+
+    (fact "paloluokka" (:paloluokka rakennuksentiedot) => "P1")
+    (fact "energialuokka" (:energialuokka rakennuksentiedot) => "C")
+    (fact "energiatehokkuusluku" (:energiatehokkuusluku rakennuksentiedot) => "124")
+    (fact "energiatehokkuusluvunYksikko" (:energiatehokkuusluvunYksikko rakennuksentiedot) => "kWh/m2")
+
     (fact "rakennuksen omistajalaji" (:omistajalaji (:omistajalaji rakennuksen-omistajatieto)) => "muu yksityinen henkil\u00f6 tai perikunta")
     (fact "KuntaRooliKoodi" (:kuntaRooliKoodi rakennuksen-omistajatieto) => "Rakennuksen omistaja")
     (fact "VRKrooliKoodi" (:VRKrooliKoodi rakennuksen-omistajatieto) => "rakennuksen omistaja")
@@ -1282,7 +1306,7 @@
                   :created 1400762767119,
                   :schema-info {:approvable true,
                                 :subtype "hakija",
-                                :name "hakija",
+                                :name "hakija-r",
                                 :removable true,
                                 :after-update "applicant-index-update",
                                 :repeating true,
@@ -1339,7 +1363,7 @@
 
 (ctc/validate-all-documents aloitusoikeus-hakemus)
 
-(fl/facts* "Canonical model is correct"
+(fl/facts* "Canonical model for aloitusoikeus is correct"
   (let [canonical (application-to-canonical aloitusoikeus-hakemus "sv") => truthy
         rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
         rakennusvalvontaasiatieto (:rakennusvalvontaAsiatieto rakennusvalvonta) => truthy

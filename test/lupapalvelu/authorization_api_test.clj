@@ -10,7 +10,7 @@
   (generate-remove-invalid-user-from-docs-updates {:auth nil, :documents nil}) => empty?
 
   (generate-remove-invalid-user-from-docs-updates {:auth nil
-                                                   :documents [{:schema-info {:name "hakija" :version 1}
+                                                   :documents [{:schema-info {:name "hakija-r" :version 1}
                                                                 :data {:henkilo {:userId {:value "123"}}}}
                                                                {:schema-info {:name "hakija" :version 1}
                                                                 :data {:henkilo {:userId {:value "345"}}}}]})
@@ -18,7 +18,7 @@
       "documents.1.data.henkilo.userId" ""}
 
   (generate-remove-invalid-user-from-docs-updates {:auth [{:id "123"}]
-                                                   :documents [{:schema-info {:name "hakija" :version 1}
+                                                   :documents [{:schema-info {:name "hakija-r" :version 1}
                                                                 :data {:henkilo {:userId {:value "123"}}}}]})
   => empty?
 

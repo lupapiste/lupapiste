@@ -34,6 +34,9 @@
       margin-left: $marginL;
       margin-right: $marginL;
       border-bottom: 1px dotted darken($lp-dark-grey, 10%);
+      a {
+        color: white;
+      }
       &:last-child {
         margin-bottom: 0px;
         border-bottom: none;
