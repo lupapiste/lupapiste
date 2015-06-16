@@ -162,15 +162,18 @@
                                        {:tag :Maksaja
                                         :child mapping-common/maksajatype-children_213})
                             (update-in [:child] mapping-common/update-child-element
-                                       [:yleinenAlueAsiatieto lupa-name-key :osapuolitieto :Osapuoli :yritystieto :Yritys ]
-                                       {:tag :Yritys :child mapping-common/yritys-child_213}))]
-
-
-
+                                       [:yleinenAlueAsiatieto lupa-name-key :osapuolitieto :Osapuoli :yritystieto :Yritys]
+                                       {:tag :Yritys :child mapping-common/yritys-child_213}))
+        ya_to_krysp_2_2_0 (-> ya_to_krysp_2_1_3 (assoc-in [:attr :xsi:schemaLocation]
+                                                  (mapping-common/schemalocation "yleisenalueenkaytonlupahakemus" "2.2.0"))
+                            (update-in [:child] mapping-common/update-child-element
+                                       [:yleinenAlueAsiatieto lupa-name-key :sijaintitieto]
+                                       {:tag :sijaintitieto :child [mapping-common/sijantiType_215]}))]
     (case (name krysp-version)
-    "2.1.2" ya_to_krysp_2_1_2
-    "2.1.3" ya_to_krysp_2_1_3
-    (throw (IllegalArgumentException. (str "Unsupported KRYSP version " krysp-version))))))
+      "2.1.2" ya_to_krysp_2_1_2
+      "2.1.3" ya_to_krysp_2_1_3
+      "2.2.0" ya_to_krysp_2_2_0
+      (throw (IllegalArgumentException. (str "Unsupported KRYSP version " krysp-version))))))
 
 (defn- add-statement-attachments [lupa-name-key canonical statement-attachments]
   ;; if we have no statement-attachments to add return the canonical map itself
