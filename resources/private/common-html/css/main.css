@@ -3494,11 +3494,15 @@ ul.attachments-list li.mandatory-attachments {
   border-bottom: 1px dotted #363636;
 }
 /* line 37, ../sass/partials/_screenmessage.scss */
+#sys-notification ul li a {
+  color: white;
+}
+/* line 40, ../sass/partials/_screenmessage.scss */
 #sys-notification ul li:last-child {
   margin-bottom: 0px;
   border-bottom: none;
 }
-/* line 43, ../sass/partials/_screenmessage.scss */
+/* line 46, ../sass/partials/_screenmessage.scss */
 #sys-notification span {
   float: right;
   margin: 16px 12px;
@@ -3506,7 +3510,7 @@ ul.attachments-list li.mandatory-attachments {
   font-size: 1.8em;
 }
 
-/* line 51, ../sass/partials/_screenmessage.scss */
+/* line 54, ../sass/partials/_screenmessage.scss */
 .screenmessagebutton {
   width: 170px;
 }
