@@ -27,6 +27,8 @@
           <div data-bind="with: info">
             <div class="form-entry account-type-selector">
               <label class="form-label" for="account-type" data-bind="ltext: 'register.company.form.accountType'"></label>
+
+            <!-- ko ifnot: model().customAccountLimit -->
               <select name="account-type"
                       class="form-input combobox"
                       data-bind="options: accountTypes,
@@ -34,7 +36,12 @@
                                  optionsValue: 'name',
                                  value: model().accountType,
                                  optionsAfterRender: setAccountTypeOptionDisable,
-                                 enable: edit"></select>
+                                 enable: edit,
+                                 valueAllowUnset: true"></select>
+            <!-- /ko -->
+            <!-- ko if: model().customAccountLimit -->
+            <span data-bind="ltext: 'register.company.' + model().accountType() + '.title'"></span>
+            <!-- /ko -->
             </div>
             <div class="form-entry">
               <label class="form-label tip" data-bind="ltext: 'register.company.form.companyName'"></label>

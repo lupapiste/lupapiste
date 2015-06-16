@@ -234,6 +234,7 @@
     this.parent = parent;
     this.model = ko.validatedObservable({
       accountType:  ko.observable().extend(required),
+      customAccountLimit: ko.observable(),
       name:         ko.observable().extend(required),
       y:            ko.observable(),
       reference:    ko.observable().extend(notRequired),
@@ -254,7 +255,8 @@
       country: undefined,
       ovt: undefined,
       pop: undefined,
-      accountType: undefined
+      accountType: undefined,
+      customAccountLimit: undefined
     };
     this.edit          = ko.observable(false);
     this.saved         = ko.observable(null);
