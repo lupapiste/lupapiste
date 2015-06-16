@@ -33,7 +33,7 @@
           </tbody>
         </table>
 
-        <button class="btn btn-primary" data-bind="click: companiesModel.create">Luo uusi yritys</button>
+        <button class="btn btn-primary" data-bind="visible: false, click: companiesModel.create">Luo uusi yritys</button>
 
       </div>
       <div id="dialog-create-company" class="window autosized" data-bind="with: createCompanyModel">
