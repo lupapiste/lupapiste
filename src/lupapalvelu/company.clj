@@ -140,14 +140,14 @@
 (defn update-company!
   "Update company. Throws if company is not found, or if provided updates would make company invalid.
    Retuens the updated company."
-  [id updates]
+  [id updates admin?]
   (if (some #{:id :y} (keys updates)) (fail! :bad-request))
   (let [company (dissoc (find-company-by-id! id) :id)
         updated (merge company updates)
         old-limit (user-limit-for-account-type (keyword (:accountType company)))
         limit     (user-limit-for-account-type (keyword (:accountType updated)))]
     (validate! updated)
-    (when (< limit old-limit)
+    (when (and (not admin?) (< limit old-limit))
       (fail! :company.account-type-not-downgradable))
     (mongo/update :companies {:_id id} updated)
     updated))
