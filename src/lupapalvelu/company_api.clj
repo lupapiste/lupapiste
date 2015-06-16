@@ -44,7 +44,7 @@
 
 (defcommand company-update
   {:user-roles #{:applicant}
-   :input-validators [validate-user-is-admin-or-company-member]
+   :input-validators [validate-user-is-admin-or-company-admin]
    :parameters [company updates]}
   (ok :company (c/update-company! company updates)))
 
