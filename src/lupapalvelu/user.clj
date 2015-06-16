@@ -153,6 +153,12 @@
 (defn rest-user? [{role :role}]
   (= :rest-api (keyword role)))
 
+(defn admin? [{role :role}]
+  (= :admin (keyword role)))
+
+(defn authority-admin? [{role :role}]
+  (= :authorityAdmin (keyword role)))
+
 (defn same-user? [{id1 :id} {id2 :id}]
   (= id1 id2))
 
@@ -227,13 +233,12 @@
 ;;
 
 (defn- users-for-datatables-base-query [caller params]
-  (let [admin?               (= (-> caller :role keyword) :admin)
-        caller-organizations (organization-ids caller)
+  (let [caller-organizations (organization-ids caller)
         organizations        (:organizations params)
-        organizations        (if admin? organizations (filter caller-organizations (or organizations caller-organizations)))
+        organizations        (if (admin? caller) organizations (filter caller-organizations (or organizations caller-organizations)))
         role                 (:filter-role params)
-        role                 (if admin? role :authority)
-        enabled              (if admin? (:filter-enabled params) true)]
+        role                 (if (admin? caller) role :authority)
+        enabled              (if (admin? caller) (:filter-enabled params) true)]
     (merge {}
       (when (seq organizations) {:organizations organizations})
       (when role                {:role role})
