@@ -2,7 +2,7 @@ LUPAPISTE.TagsDataProvider = function(filtered) {
   var self = this;
 
   self.query = ko.observable();
-  self.filtered = ko.observableArray(filtered);
+  self.filtered = ko.observableArray(_.map(filtered, function(i) { return i.label; }));
 
   var data = ["foo fat foo faa", "bar bati bar bar", "baz zzz"];
   self.data = ko.computed(function() {
@@ -71,7 +71,8 @@ LUPAPISTE.NoticeModel = function() {
       // TODO persists tags
       console.log("selected tags", val);
       self.indicator({name: "tags", type: "saved"});
-      self.applicationTagsProvider.filtered(val);
+      // TODO set filtered items
+      self.applicationTagsProvider.filtered(_.map(val, function(i) { return i.label; }));
     }));
   };
 
@@ -90,7 +91,7 @@ LUPAPISTE.NoticeModel = function() {
     self.applicationId = application.id;
     self.urgency(application.urgency);
     self.authorityNotice(application.authorityNotice);
-    self.selectedTags(["foo fat foo faa", "Live long and propel"]);
+    self.selectedTags([{label: "foo fat foo faa"}, {label: "Live long and propel"}]);
     subscribe();
 
     self.applicationTagsProvider = new LUPAPISTE.TagsDataProvider(self.selectedTags());

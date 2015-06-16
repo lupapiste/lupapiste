@@ -6,11 +6,13 @@
       <div class="autocomplete-component">
         <div class="autocomplete-selection-wrapper" data-bind="event: {mousedown: selectInput}">
           <span class="autocomplete-selection">
-            <span data-bind="visible: selected, text: selected"></span>
+            <!-- ko if: selected -->
+            <span data-bind="text: selected().label"></span>
+            <!-- /ko -->
             <span data-bind="visible: showCaption, ltext: 'choose'"></span>
             <!-- ko foreach: selectedTags -->
             <span class="tag">
-              <span class="tag-label" data-bind="text: $data"></span>
+              <span class="tag-label" data-bind="text: $data.label"></span>
               <span class="tag-remove icon remove left-align"
                     data-bind="click: $parent.removeTag, clickBubble: false, event: { mousedown: function() {} }, mousedownBubble: false"></span>
             </span>
@@ -25,7 +27,7 @@
           <ul class="autocomplete-result"
               data-bind="foreach: dataProvider.data">
             <li class="autocomplete-result-item"
-                data-bind="click: function(data, event) { $parent.selectItem(data.label) },
+                data-bind="click: $parent.selectItem,
                            event: {mouseover: $parent.changeIndex.bind($data, $index())},
                            css: {active: $index() === $parent.index()}">
               <span data-bind="text: label"></span>

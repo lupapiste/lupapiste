@@ -23,23 +23,13 @@ LUPAPISTE.AutocompleteModel = function(params) {
   });
 
   // set initial value
-  var initialValue = ko.unwrap(self.value);
-  if (initialValue) {
-    if (self.tags) {
-      self.selectedTags([].concat(initialValue));
-    } else {
-      self.selected(initialValue);
-    }
+  if (self.tags) {
+    self.selectedTags = self.value;
+  } else {
+    self.selected = self.value;
   }
+
   self.subscriptions = [];
-
-  self.subscriptions.push(self.selected.subscribe(function(val) {
-    self.value(val);
-  }));
-
-  self.subscriptions.push(self.selectedTags.subscribe(function(val) {
-    self.value(val);
-  }));
 
   self.subscriptions.push(self.dataProvider.data.subscribe(function() {
     self.index(0);
@@ -53,10 +43,9 @@ LUPAPISTE.AutocompleteModel = function(params) {
   self.selectItem = function(item) {
     if (item) {
       if (self.tags) {
-        self.selectedTags.push(item);
+        self.value.push(item);
       } else {
-         self.value(item);
-         self.selected(item);
+        self.value(item);
       }
       self.inputSelected(false);
       self.showResult(false);
@@ -102,7 +91,6 @@ LUPAPISTE.AutocompleteModel = function(params) {
   };
 
   self.removeTag = function(tag) {
-    console.log("remove-tag", tag);
     self.selectedTags.remove(tag);
     return false;
   }
