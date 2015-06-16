@@ -19,7 +19,8 @@
           </div>
           <div class="invitation-actions">
             <a data-bind="ltext: 'applications.openApplication', attr: {href: '#!/application/' + application.id}" class="btn btn-primary btn-auto" data-test-id="open-application-button"></a>
-            <button data-bind="ltext: 'applications.approveInvite', click: $root.approveInvite" class="btn btn-primary btn-auto" data-test-id="accept-invite-button"></button>
+            <button data-bind="ltext: 'applications.approveInvite', click: $root.approveInvite, enable: lupapisteApp.models.globalAuthModel.ok('approve-invite')"
+                    class="btn btn-primary btn-auto" data-test-id="accept-invite-button"></button>
             <a class="command" data-bind="ltext: 'applications.declineInvite', click: $root.declineInvite" data-test-id="decline-invite-button"></a>
           </div>
         </div>

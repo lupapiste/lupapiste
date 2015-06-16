@@ -12,7 +12,7 @@
             [lupapalvelu.token :as token]
             [lupapalvelu.ttl :as ttl]
             [lupapalvelu.notifications :as notif]
-            [lupapalvelu.user-api :as uapi]
+            [lupapalvelu.user :as user]
             [lupapalvelu.user :as u]
             [lupapalvelu.document.schemas :as schema])
   (:import [java.util Date]))
@@ -192,19 +192,17 @@
 
 (defmethod token/handle-token :new-company-user [{{:keys [user company role]} :data} {password :password}]
   (find-company-by-id! (:id company)) ; make sure company still exists
-  (uapi/create-new-user nil
-                     {:email       (:email user)
-                      :username    (:email user)
-                      :firstName   (:firstName user)
-                      :lastName    (:lastName user)
-                      :company     {:id     (:id company)
-                                    :role   role}
-                      :personId    (:personId user)
-                      :password    password
-                      :role        :applicant
-                      :architect   true
-                      :enabled     true}
-                     :send-email false)
+  (user/create-new-user nil {:email       (:email user)
+                             :username    (:email user)
+                             :firstName   (:firstName user)
+                             :lastName    (:lastName user)
+                             :company     {:id (:id company) :role role}
+                             :personId    (:personId user)
+                             :password    password
+                             :role        :applicant
+                             :architect   true
+                             :enabled     true}
+    :send-email false)
   (ok))
 
 (defn invite-user! [user-email company-id]
