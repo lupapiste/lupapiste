@@ -43,8 +43,8 @@
   (ok :companies (c/find-companies)))
 
 (defcommand company-update
-  {:user-roles #{:applicant}
-   :input-validators [validate-user-is-admin-or-company-admin]
+  {:user-roles #{:applicant :admin}
+   :pre-checks [validate-user-is-admin-or-company-admin]
    :parameters [company updates]}
   (ok :company (c/update-company! company updates)))
 
