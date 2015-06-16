@@ -29,4 +29,8 @@
     (fact "authority can set application tags"
       sonja => (allowed? :add-application-tags :id id :tags ["foo" "bar"])
       (command sonja :add-application-tags :id id :tags ["foo" "bar"]) => ok?
-      (:tags (query-application sonja id)) => ["foo" "bar"])))
+      (:tags (query-application sonja id)) => ["foo" "bar"])
+
+    ; TODO use command to add tags and test em here
+    (fact "authority can fetch available tags"
+      sonja => (allowed? :available-application-tags :id id))))

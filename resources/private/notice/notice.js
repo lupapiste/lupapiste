@@ -1,12 +1,21 @@
-LUPAPISTE.TagsDataProvider = function(filtered) {
+LUPAPISTE.TagsDataProvider = function(applicationId, filtered) {
   var self = this;
 
   self.query = ko.observable();
+
   self.filtered = ko.observableArray(_.map(filtered, function(i) { return i.label; }));
 
-  var data = ["foo fat foo faa", "bar bati bar bar", "baz zzz"];
-  self.data = ko.computed(function() {
-    var filteredData = _.filter(data, function(item) {
+  var data = ko.observable();
+
+  ajax
+    .query("available-application-tags", {id: applicationId})
+    .success(function(res) {
+      data(res.tags);
+    })
+    .call();
+
+  self.data = ko.pureComputed(function() {
+    var filteredData = _.filter(data(), function(item) {
       return !_.includes(self.filtered(), item);
     });
     var mappedData = _.map(filteredData, function(item) {
@@ -31,9 +40,6 @@ LUPAPISTE.NoticeModel = function() {
   self.availableUrgencyStates = ko.observableArray(["normal", "urgent", "pending"]);
 
   self.selectedTags = ko.observableArray();
-
-  self.applicationTagsProvider = new LUPAPISTE.TagsDataProvider(self.selectedTags());
-
 
   var subscriptions = [];
 
@@ -99,9 +105,9 @@ LUPAPISTE.NoticeModel = function() {
     self.applicationId = application.id;
     self.urgency(application.urgency);
     self.authorityNotice(application.authorityNotice);
-    // TODO get persisted tags
     self.selectedTags(_.map(application.tags, function(item) { return {label: item}; }));
-    self.applicationTagsProvider.filtered(_.map(self.selectedTags(), function(i) { return i.label; }));
+    self.applicationTagsProvider = new LUPAPISTE.TagsDataProvider(application.id, self.selectedTags());
+    // self.applicationTagsProvider.filtered(_.map(self.selectedTags(), function(i) { return i.label; }));
     subscribe();
   };
 };
