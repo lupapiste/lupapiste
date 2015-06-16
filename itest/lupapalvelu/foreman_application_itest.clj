@@ -45,8 +45,11 @@
         (get-in foreman-doc [:data :kuntaRoolikoodi :value]) => "ei tiedossa")
 
       (fact "Hakija docs are equal, expect the userId"
-        (let [hakija-doc-data         (:henkilo (:data (domain/get-document-by-name application "hakija")))
-              foreman-hakija-doc-data (:henkilo (:data (domain/get-document-by-name foreman-application "hakija")))]
+        (let [hakija-doc-data         (:henkilo (:data (domain/get-document-by-name application "hakija-r")))
+              foreman-hakija-doc-data (:henkilo (:data (domain/get-document-by-name foreman-application "hakija-r")))]
+
+          hakija-doc-data => map?
+          foreman-hakija-doc-data => map?
 
           (dissoc hakija-doc-data :userId) => (dissoc foreman-hakija-doc-data :userId))))
 

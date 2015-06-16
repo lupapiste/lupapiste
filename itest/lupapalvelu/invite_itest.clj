@@ -24,7 +24,7 @@
 
   (let [application-id (create-app-id mikko :propertyId sipoo-property-id :address "Kutsukatu 13")
         app    (query-application mikko application-id)
-        {hakija-doc :doc}  (command mikko :create-doc :id application-id :schemaName "hakija") => truthy
+        {hakija-doc :doc}  (command mikko :create-doc :id application-id :schemaName "hakija-r") => truthy
         suunnittelija-doc (:id (domain/get-document-by-name app "suunnittelija")) => truthy
         paasuunnittelija-doc (:id (domain/get-document-by-name app "paasuunnittelija")) => truthy]
 

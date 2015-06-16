@@ -24,7 +24,9 @@
 
   (let [resp  (query mikko :application :id id)
         application (:application resp)
-        hakija (domain/get-document-by-name application "hakija")]
+        hakija (domain/get-document-by-name application "hakija-r")]
+
+    hakija => map?
 
     (facts "Mikko can see his application!"
       (:ok resp)
