@@ -43,6 +43,14 @@
   }
   var createCompanyModel = new CreateCompanyModel();
 
+  function getUserLimit(c) {
+    if (c.accountType === "custom") {
+      return c.customAccountLimit ? c.customAccountLimit : 0;
+    } else {
+      return new RegExp("account(\\d+)").exec(c.accountType)[1]; // get the number after str 'account'
+    }
+  }
+
   function CompaniesModel() {
     var self = this;
 
@@ -54,7 +62,10 @@
         .query("companies")
         .pending(self.pending)
         .success(function(d) {
-          self.companies(_.sortBy(d.companies, "name"));
+          self.companies(_(d.companies).map(function(c) {
+            return _.assign(c, {userLimit: getUserLimit(c),
+                                openDialog: self.editDialog});
+          }).sortBy("name").value());
         })
         .call();
     };
