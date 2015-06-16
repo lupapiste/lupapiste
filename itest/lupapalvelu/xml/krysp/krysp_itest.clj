@@ -34,7 +34,6 @@
             [sade.env :as env]
             [sade.xml :as xml]
             [sade.util :as util]
-;            [sade.common-reader :as cr]
             [sade.core :refer [def- now]]
             [lupapalvelu.application :as ns-app])
   (:import [java.net URI]))
@@ -158,7 +157,6 @@
         xml-as-string (slurp xml-file)
         xml (parse (io/reader xml-file))
         liitetieto (xml/select xml [:liitetieto])
-;        drawing-sijainti (map cr/all-of (xml/select xml [:sijaintitieto :Sijainti]))
         polygon (xml/select xml [:Polygon])]
 
 
@@ -196,30 +194,6 @@
                            :R 0
                            :P 0
                            (count drawings)))
-
-    ;; TODO: Only works when YA krysp version is 2.2.0+  -> remove the tests?
-    #_(when (= :YA permit-type)
-       (fact "drawings' contents"
-         (-> drawing-sijainti first :piste :Point :pos) => (str (-> application :location :x) " " (-> application :location :y))
-         (-> drawing-sijainti first :osoite) => (contains {:osoitenimi {:teksti (:address application)}
-                                                           :yksilointitieto (:id application)})
-         (second drawing-sijainti) => {:nimi "A"
-                                       :kuvaus "A desc"
-                                       :korkeusTaiSyvyys "1"
-                                       :pintaAla "2686992"
-                                       :alue {:Polygon {:exterior {:LinearRing {:pos '("438952.0 6666883.25"
-                                                                                       "441420.0 6666039.25"
-                                                                                       "441920.0 6667359.25"
-                                                                                       "439508.0 6667543.25"
-                                                                                       "438952.0 6666883.25")}}}}}
-         (nth drawing-sijainti 2) => {:nimi "B"
-                                      :kuvaus "B desc"
-                                      :korkeusTaiSyvyys "12"
-                                      :pintaAla "708280"
-                                      :alue {:Polygon {:exterior {:LinearRing {:pos '("440652.0 6667459.25"
-                                                                                      "442520.0 6668435.25"
-                                                                                      "441912.0 6667359.25"
-                                                                                      "440652.0 6667459.25")}}}}}))
 
     (when (pos? expected-attachment-count)
       (let [take-liite-fn  (case permit-type
