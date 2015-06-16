@@ -176,6 +176,17 @@
       position: relative;
     }
 
+    .application-tags {
+      position: relative;
+      z-index: 1;
+    }
+
+    .application-text {
+      position: relative;
+      height: calc(100% - 144px);
+      height: 100%\9;
+    }
+
     .icon.urgent {
       margin-top: 10px;
       vertical-align: middle;
@@ -189,13 +200,15 @@
     label {
       vertical-align: bottom;
     }
+
     .textarea-wrapper {
       position: absolute;
-      top: 86px;
+      top: 0;
       left: 0;
       right: 0;
       bottom: 0;
     }
+
     .form-input.textarea {
       height: 100%;
       margin: 0;

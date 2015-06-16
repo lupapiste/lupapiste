@@ -1,3 +1,33 @@
+LUPAPISTE.TagsDataProvider = function(applicationId, filtered) {
+  var self = this;
+
+  self.query = ko.observable();
+
+  self.filtered = ko.observableArray(filtered);
+
+  var data = ko.observable();
+
+  ajax
+    .query("available-application-tags", {id: applicationId})
+    .success(function(res) {
+      data(res.tags);
+    })
+    .call();
+
+  self.data = ko.pureComputed(function() {
+    var filteredData = _.filter(data(), function(item) {
+      return !_.includes(self.filtered(), item);
+    });
+    var q = self.query() || "";
+    filteredData = _.filter(filteredData, function(item) {
+      return _.reduce(q.split(" "), function(result, word) {
+        return _.contains(item.toUpperCase(), word.toUpperCase()) && result;
+      }, true);
+    });
+    return filteredData;
+  });
+};
+
 LUPAPISTE.NoticeModel = function() {
   "use strict";
 
@@ -11,7 +41,10 @@ LUPAPISTE.NoticeModel = function() {
 
   self.availableUrgencyStates = ko.observableArray(["normal", "urgent", "pending"]);
 
+  self.selectedTags = ko.observableArray();
+
   var subscriptions = [];
+
 
   var subscribe = function() {
     subscriptions.push(self.urgency.subscribe(_.debounce(function(value) {
@@ -41,6 +74,21 @@ LUPAPISTE.NoticeModel = function() {
         })
         .call();
     }, 500)));
+
+    subscriptions.push(self.selectedTags.subscribe(_.debounce(function(tags) {
+      ajax
+        .command("add-application-tags", {
+          id: self.applicationId,
+          tags: tags})
+        .success(function() {
+          self.indicator({name: "tags", type: "saved"});
+        })
+        .error(function() {
+          self.indicator({name: "tags", type: "err"});
+        })
+        .call();
+      self.applicationTagsProvider.filtered(tags);
+    }, 500)));
   };
 
   var unsubscribe = function() {
@@ -57,6 +105,8 @@ LUPAPISTE.NoticeModel = function() {
     self.applicationId = application.id;
     self.urgency(application.urgency);
     self.authorityNotice(application.authorityNotice);
+    self.selectedTags(application.tags);
+    self.applicationTagsProvider = new LUPAPISTE.TagsDataProvider(application.id, self.selectedTags());
     subscribe();
   };
 };
