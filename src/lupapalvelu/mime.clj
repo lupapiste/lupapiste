@@ -28,10 +28,16 @@
                       "vnd\\.oasis\\.opendocument\\..+"
                       "vnd\\.openxmlformats-officedocument\\..+"]) "))")])))
 
+(def mime-type-pattern-preview
+  (re-pattern
+    (join "|" [
+               "(image/(gif|jpeg|png|tiff))"
+               "(application/pdf)"])))
+
 (def allowed-extensions
   (keys
     (into (sorted-map)
-          (filter #(re-matches mime-type-pattern (second %)) mime-types))))
+          (filter #(re-matches mime-type-pattern-preview (second %)) mime-types))))
 
 (defn mime-type [filename]
   (when filename

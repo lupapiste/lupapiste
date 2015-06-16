@@ -1,9 +1,10 @@
-(ns lupadoku.preview
+(ns lupapalvelu.preview
+  (:require [clojure.java.io :as io])
   (:import (org.apache.pdfbox.pdmodel PDDocument)
            (org.apache.pdfbox.util PDFImageWriter ImageIOUtil)
            (java.awt.image BufferedImage)
            (java.awt RenderingHints)
-           (java.io File FileOutputStream)))
+           (java.io FileOutputStream ByteArrayOutputStream ByteArrayInputStream)))
 
 (defn pdf-preview-file [filename]
   (try (let [document (PDDocument/load filename)
@@ -35,10 +36,18 @@
 
 (defn output-image [image file-output-stream compression] (ImageIOUtil/writeImage image "jpg" file-output-stream ImageIOUtil/DEFAULT_SCREEN_RESOLUTION compression))
 
-(defn pdf-to-image [pdf-input out]
+(defn pdf-to-image-output [pdf-input out]
   (let [document (PDDocument/load pdf-input)]
     (try
       (output-image (->> (.. document getDocumentCatalog getAllPages iterator next convertToImage) scale-image) out 0.5)
       true
       (catch Exception e (println e))
       (finally (.close document)))))
+
+
+(defn pdf-to-image-input-stream [pdf-input]
+  (let [content (ByteArrayOutputStream.)]
+    (pdf-to-image-output pdf-input content)
+  (ByteArrayInputStream. (.toByteArray content))))
+
+;;(io/copy (pdf-to-image-input-stream "/home/michaelho/ws/lupapalvelu/problematic-pdfs/Yhdistelmakartta_asema-johto_Oksapolku-Pihkakatu.pdf") (FileOutputStream. "/tmp/a1.jpg"))

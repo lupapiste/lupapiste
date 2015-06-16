@@ -15,7 +15,8 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.tiedonohjaus :as tos]
             [lupapiste-commons.attachment-types :as attachment-types]
-            [clojure.java.io :as io])
+            [clojure.java.io :as io]
+            [lupapalvelu.preview :as preview])
   (:import [java.util.zip ZipOutputStream ZipEntry]
            [java.io File OutputStream FilterInputStream]))
 
@@ -390,6 +391,9 @@
         sanitazed-filename (mime/sanitize-filename filename)
         content-type (mime/mime-type sanitazed-filename)
         options (merge options {:file-id file-id
+                                :preview-id (when (= "application/pdf" content-type)
+                                              (let [preview-id (mongo/create-id) preview-content (preview/pdf-to-image-input-stream content)]
+                                                (mongo/upload preview-id sanitazed-filename "image/jpg" preview-content :application application-id)))
                                 :filename sanitazed-filename
                                 :content-type content-type})]
     (mongo/upload file-id sanitazed-filename content-type content :application application-id)
