@@ -3,12 +3,17 @@
 <body>
   <section class="page container">
     <script type="text/html" id="company-edit-template">
+    <div class="content">
       <form data-bind="with: company">
-      	<label>Nimi</label>
+      	<label for="name">Nimi</label>
         <input name="name" data-bind="value: name"/>
+        <label for="y">Y-tunnus</label>
         <input name="y" data-bind="value: y"/>
+        <label for="address1">Osoite</label>
         <input name="address1" data-bind="value: address1"/>
+        <label for="zip">Postikoodi</label>
         <input name="zip" data-bind="value: zip"/>
+        <label for="po">Toimipaikka</label>
         <input name="po" data-bind="value: po"/>
         <label class="form-label" for="account-type" data-bind="ltext: 'register.company.form.accountType'"></label>
         <select name="account-type"
@@ -22,6 +27,7 @@
             	                                submit: $parent.saveCompany,
               	                              submitTitle: 'Tallenna'}}"></div>
       </form>
+      </div>
     </script>
   </section>
 </body>
