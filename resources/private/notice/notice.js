@@ -72,6 +72,7 @@ LUPAPISTE.NoticeModel = function() {
       console.log("selected tags", val);
       self.indicator({name: "tags", type: "saved"});
       // TODO set filtered items
+
       self.applicationTagsProvider.filtered(_.map(val, function(i) { return i.label; }));
     }));
   };
@@ -91,9 +92,9 @@ LUPAPISTE.NoticeModel = function() {
     self.applicationId = application.id;
     self.urgency(application.urgency);
     self.authorityNotice(application.authorityNotice);
-    self.selectedTags([{label: "foo fat foo faa"}, {label: "Live long and propel"}]);
+    // TODO get persisted tags
+    self.selectedTags([]);
+    self.applicationTagsProvider.filtered(_.map(self.selectedTags(), function(i) { return i.label; }));
     subscribe();
-
-    self.applicationTagsProvider = new LUPAPISTE.TagsDataProvider(self.selectedTags());
   };
 };
