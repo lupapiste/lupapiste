@@ -57,6 +57,12 @@
     self.companies = ko.observableArray([]);
     self.pending = ko.observable();
 
+    self.editDialog = function(company) {
+     hub.send("show-dialog", {title: "Muokkaa yritysta",
+                              component: "company-edit",
+                              componentParams: {company: company}});
+    };
+
     self.load = function() {
       ajax
         .query("companies")
