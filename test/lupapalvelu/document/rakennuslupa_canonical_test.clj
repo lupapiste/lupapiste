@@ -51,13 +51,13 @@
                                     :puhelin {:value "03-389 1380"}}}}))
 
 (def- hakija-henkilo
-  {:id "hakija-henkilo" :schema-info {:name "hakija"
+  {:id "hakija-henkilo" :schema-info {:name "hakija-r"
                                       :subtype "hakija"
                                       :version 1}
    :data {:henkilo henkilo}})
 
 (def- hakija-yritys
-  {:id "hakija-yritys" :schema-info {:name "hakija"
+  {:id "hakija-yritys" :schema-info {:name "hakija-r"
                                      :subtype "hakija"
                                      :version 1}
    :data {:_selected {:value "yritys"}, :yritys yritys}})
@@ -463,7 +463,7 @@
 
 (facts "Canonical hakija/henkilo model is correct"
   (let [osapuoli (tools/unwrapped (:data hakija-henkilo))
-        hakija-model (get-osapuoli-data osapuoli :hakija)
+        hakija-model (get-osapuoli-data osapuoli (-> hakija-henkilo :schema-info :name keyword))
         henkilo (:henkilo hakija-model)
         ht (:henkilotiedot henkilo)
         yritys (:yritys hakija-model)]
@@ -476,7 +476,7 @@
 
 (facts "Canonical hakija/yritys model is correct"
   (let [osapuoli (tools/unwrapped (:data hakija-yritys))
-        hakija-model (get-osapuoli-data osapuoli :hakija)
+        hakija-model (get-osapuoli-data osapuoli (-> hakija-yritys :schema-info :name keyword))
         henkilo (:henkilo hakija-model)
         yritys (:yritys hakija-model)]
     (fact "model" hakija-model => truthy)
@@ -1282,7 +1282,7 @@
                   :created 1400762767119,
                   :schema-info {:approvable true,
                                 :subtype "hakija",
-                                :name "hakija",
+                                :name "hakija-r",
                                 :removable true,
                                 :after-update "applicant-index-update",
                                 :repeating true,
