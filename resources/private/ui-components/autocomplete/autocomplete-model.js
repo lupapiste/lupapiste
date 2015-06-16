@@ -10,6 +10,8 @@ LUPAPISTE.AutocompleteModel = function(params) {
   // tagging support
   self.tags = params.tags;
 
+  self.selectedText = ko.observable(params.selectedText);
+
   self.query = self.dataProvider.query;
 
   self.inputSelected = ko.observable(false);

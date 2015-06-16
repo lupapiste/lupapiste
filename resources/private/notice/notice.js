@@ -3,7 +3,7 @@ LUPAPISTE.TagsDataProvider = function(applicationId, filtered) {
 
   self.query = ko.observable();
 
-  self.filtered = ko.observableArray(_.map(filtered, function(i) { return i.label; }));
+  self.filtered = ko.observableArray(filtered);
 
   var data = ko.observable();
 
@@ -24,11 +24,7 @@ LUPAPISTE.TagsDataProvider = function(applicationId, filtered) {
         return _.contains(item.toUpperCase(), word.toUpperCase()) && result;
       }, true);
     });
-    var mappedData = _.map(filteredData, function(item) {
-      return {label: item};
-    });
-    console.log("mappedData", mappedData);
-    return mappedData;
+    return filteredData;
   });
 };
 
@@ -79,8 +75,7 @@ LUPAPISTE.NoticeModel = function() {
         .call();
     }, 500)));
 
-    subscriptions.push(self.selectedTags.subscribe(_.debounce(function(value) {
-      var tags = _.map(value, function(i) { return i.label; });
+    subscriptions.push(self.selectedTags.subscribe(_.debounce(function(tags) {
       ajax
         .command("add-application-tags", {
           id: self.applicationId,
@@ -105,15 +100,13 @@ LUPAPISTE.NoticeModel = function() {
   subscribe();
 
   self.refresh = function(application) {
-    console.log("refresh");
     // unsubscribe so that refresh does not trigger save
     unsubscribe();
     self.applicationId = application.id;
     self.urgency(application.urgency);
     self.authorityNotice(application.authorityNotice);
-    self.selectedTags(_.map(application.tags, function(item) { return {label: item}; }));
+    self.selectedTags(application.tags);
     self.applicationTagsProvider = new LUPAPISTE.TagsDataProvider(application.id, self.selectedTags());
-    // self.applicationTagsProvider.filtered(_.map(self.selectedTags(), function(i) { return i.label; }));
     subscribe();
   };
 };
