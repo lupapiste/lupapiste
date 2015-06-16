@@ -263,6 +263,7 @@
 
 (def kuntaRoolikoodit
   {:paasuunnittelija       "p\u00e4\u00e4suunnittelija"
+   :hakija-r               "Rakennusvalvonta-asian hakija"
    :hakija                 "Rakennusvalvonta-asian hakija"
    :maksaja                "Rakennusvalvonta-asian laskun maksaja"
    :rakennuksenomistaja    "Rakennuksen omistaja"})
