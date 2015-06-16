@@ -112,8 +112,7 @@
                                                       :child [mapping-common/lupatunnus]}
                                                      {:tag :alkuPvm}
                                                      {:tag :loppuPvm}
-                                                     {:tag :sijaintitieto
-                                                      :child [mapping-common/sijantiType]}
+                                                     (mapping-common/sijaintitieto)
                                                      {:tag :pintaala}
                                                      {:tag :osapuolitieto     ;; hakijan ja tyomaasta-vastaavan yritys-osa
                                                       :child [{:tag :Osapuoli
