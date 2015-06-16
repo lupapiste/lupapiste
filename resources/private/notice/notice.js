@@ -100,7 +100,7 @@ LUPAPISTE.NoticeModel = function() {
     self.urgency(application.urgency);
     self.authorityNotice(application.authorityNotice);
     // TODO get persisted tags
-    self.selectedTags([]);
+    self.selectedTags(_.map(application.tags, function(item) { return {label: item}; }));
     self.applicationTagsProvider.filtered(_.map(self.selectedTags(), function(i) { return i.label; }));
     subscribe();
   };
