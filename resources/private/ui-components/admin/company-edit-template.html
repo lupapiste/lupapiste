@@ -4,17 +4,17 @@
   <section class="page container">
     <script type="text/html" id="company-edit-template">
     <div class="content">
-      <form data-bind="with: company">
-      	<label for="name">Nimi</label>
-        <input name="name" data-bind="value: name"/>
-        <label for="y">Y-tunnus</label>
-        <input name="y" data-bind="value: y"/>
-        <label for="address1">Osoite</label>
-        <input name="address1" data-bind="value: address1"/>
-        <label for="zip">Postikoodi</label>
-        <input name="zip" data-bind="value: zip"/>
-        <label for="po">Toimipaikka</label>
-        <input name="po" data-bind="value: po"/>
+      <form class="two-col" data-bind="with: company">
+        <label class="form-label" for="name">Nimi</label>
+        <input class="form-input text" name="name" data-bind="value: name, enable: false"/>
+        <label class="form-label" for="y">Y-tunnus</label>
+        <input class="form-input text" name="y" data-bind="value: y, enable: false"/>
+        <label class="form-label" for="address1">Osoite</label>
+        <input class="form-input text" name="address1" data-bind="value: address1, enable: false"/>
+        <label class="form-label" for="zip">Postikoodi</label>
+        <input class="form-input text" name="zip" data-bind="value: zip, enable: false"/>
+        <label class="form-label" for="po">Toimipaikka</label>
+        <input class="form-input text" name="po" data-bind="value: po, enable: false"/>
         <label class="form-label" for="account-type" data-bind="ltext: 'register.company.form.accountType'"></label>
         <select name="account-type"
                 class="form-input combobox"
@@ -22,10 +22,14 @@
                            optionsText: 'name',
                            optionsValue: 'name',
                            value: accountType"></select>
-				<div data-bind="component: {name: 'submit-button-group',
-        	                          params: { isSubmitVisible: true,
-            	                                submit: $parent.saveCompany,
-              	                              submitTitle: 'Tallenna'}}"></div>
+        <!-- ko if: $parent.showCustomCount -->
+        <label class="form-label">Max käyttäjät</label>
+        <input class="form-input text" name="customAccountLimit" data-bind="value: customAccountLimit" />
+        <!-- /ko -->
+        <div data-bind="component: {name: 'submit-button-group',
+                                    params: { isSubmitVisible: true,
+                                              submit: $parent.saveCompany,
+                                              submitTitle: 'Tallenna'}}"></div>
       </form>
       </div>
     </script>
