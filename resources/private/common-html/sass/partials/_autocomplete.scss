@@ -57,6 +57,13 @@
           }
         }
       }
+      .tag-ellipsis {
+        color: $lp-orange;
+        cursor: pointer;
+      }
+    }
+    span.caption {
+      cursor: default;
     }
     span.autocomplete-selection-arrow {
       position: absolute;
@@ -64,6 +71,7 @@
       bottom: 0;
       margin: auto;
       right: 9px;
+      cursor: default;
     }
   }
 

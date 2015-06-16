@@ -9,7 +9,7 @@
             <!-- ko if: selected -->
             <span data-bind="text: selected().label"></span>
             <!-- /ko -->
-            <span data-bind="visible: showCaption, ltext: 'choose'"></span>
+            <span class="caption" data-bind="visible: showCaption, ltext: 'choose'"></span>
             <!-- ko foreach: selectedTags -->
             <span class="tag">
               <span class="tag-label" data-bind="text: $data.label"></span>
@@ -17,6 +17,7 @@
                     data-bind="click: $parent.removeTag, clickBubble: false, event: { mousedown: function() {} }, mousedownBubble: false"></span>
             </span>
             <!-- /ko -->
+            <span class="tag-ellipsis" data-bind="visible: !showCaption()">...</span>
           </span>
           <span data-bind="visible: showCaption" class="autocomplete-selection-arrow icon drill-down-black-smaller"></span>
         </div>
