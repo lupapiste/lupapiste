@@ -23,3 +23,11 @@
    :user-roles #{:authority}}
   [command]
   (update-application command {$set {:authorityNotice authorityNotice}}))
+
+(defcommand add-application-tags
+  {:parameters [id tags]
+   :states (action/all-states-but [:draft])
+   :user-authz-roles #{:statementGiver}
+   :user-roles #{:authority}}
+  [command]
+  (update-application command {$set {:tags tags}}))

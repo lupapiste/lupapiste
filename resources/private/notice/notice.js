@@ -67,14 +67,21 @@ LUPAPISTE.NoticeModel = function() {
         .call();
     }, 500)));
 
-    subscriptions.push(self.selectedTags.subscribe(function(val) {
-      // TODO persists tags
-      console.log("selected tags", val);
-      self.indicator({name: "tags", type: "saved"});
-      // TODO set filtered items
-
-      self.applicationTagsProvider.filtered(_.map(val, function(i) { return i.label; }));
-    }));
+    subscriptions.push(self.selectedTags.subscribe(_.debounce(function(value) {
+      var tags = _.map(value, function(i) { return i.label; });
+      ajax
+        .command("add-application-tags", {
+          id: self.applicationId,
+          tags: tags})
+        .success(function() {
+          self.indicator({name: "tags", type: "saved"});
+        })
+        .error(function() {
+          self.indicator({name: "tags", type: "err"});
+        })
+        .call();
+      self.applicationTagsProvider.filtered(tags);
+    }, 500)));
   };
 
   var unsubscribe = function() {
