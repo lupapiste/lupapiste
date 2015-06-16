@@ -112,6 +112,13 @@
                                                       :child [{:tag :pos}]}]} ]}]}
                           {:tag :tyhja :ns "yht"}]})
 
+(def sijantiType_215
+  (update-in sijantiType [:child] conj
+    {:tag :nimi :ns "yht"}
+    {:tag :kuvaus :ns "yht"}
+    {:tag :korkeusTaiSyvyys :ns "yht"}
+    {:tag :pintaAla :ns "yht"}))
+
 (defn sijaintitieto
   "Takes an optional xml namespace for Sijainti element"
   [& [xmlns]]
