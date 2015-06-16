@@ -172,8 +172,13 @@
       width: 215px;
     }
 
-    .application-notices, .application-tags {
+    .application-notices {
       position: relative;
+    }
+
+    .application-tags {
+      position: relative;
+      z-index: 1;
     }
 
     .application-text {

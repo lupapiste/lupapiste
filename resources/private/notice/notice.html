@@ -3,12 +3,13 @@
 <body>
   <section class="page container" id="notices">
     <script type="text/html" id="notice-template">
-      <div class="application-tags">
-        <label data-bind="ltext: 'application.tags'"></label>
-        <span data-bind="saveIndicator: indicator, name: 'tags'"></span>
-        <div data-bind="component: {name: 'autocomplete', params: {tags: true, dataProvider: applicationTagsProvider, value: selectedTags}}"></div>
+      <div data-bind="if: features.enabled('alueellisetOrganisaatiot')">
+        <div class="feature application-tags">
+          <label data-bind="ltext: 'application.tags'"></label>
+          <span data-bind="saveIndicator: indicator, name: 'tags'"></span>
+          <div data-bind="component: {name: 'autocomplete', params: {tags: true, dataProvider: applicationTagsProvider, value: selectedTags}}"></div>
+        </div>
       </div>
-
       <div class="application-urgency">
         <label data-bind="ltext: 'notice.urgency'"></label>
         <span data-bind="saveIndicator: indicator, name: 'urgency'"></span>
