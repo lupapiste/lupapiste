@@ -137,13 +137,19 @@
 (defn find-company-admins [company-id]
   (u/get-users {:company.id company-id, :company.role "admin"}))
 
+(defn ensure-custom-limit [{account-type :accountType custom-limit :customAccountLimit :as data}]
+  (if (= :custom (keyword account-type))
+    (assoc data :customAccountLimit (util/->int custom-limit))
+    (assoc data :customAccountLimit nil)))
+
 (defn update-company!
   "Update company. Throws if company is not found, or if provided updates would make company invalid.
    Retuens the updated company."
   [id updates admin?]
   (if (some #{:id :y} (keys updates)) (fail! :bad-request))
   (let [company (dissoc (find-company-by-id! id) :id)
-        updated (merge company updates)
+        updated (-> (merge company updates)
+                  ensure-custom-limit)
         old-limit (user-limit-for-account-type (keyword (:accountType company)))
         limit     (user-limit-for-account-type (keyword (:accountType updated)))]
     (validate! updated)
