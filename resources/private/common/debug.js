@@ -9,10 +9,12 @@ jQuery(function($) {
     return false;
   }
 
-  function createApplication(operation) {
+  function createApplication(operation, permitType) {
     var municipality = "753";
     if (lupapisteApp.models.currentUser.isAuthority()) {
-      var org = _.keys(lupapisteApp.models.currentUser.orgAuthz())[0];
+      var probableOrg = municipality + "-" + permitType;
+      var orgAuthMuniKeys = _.keys(lupapisteApp.models.currentUser.orgAuthz());
+      var org = _.includes(orgAuthMuniKeys, probableOrg) ? probableOrg : orgAuthMuniKeys[0];
       municipality = org.split("-")[0];
     }
     $.ajax({
@@ -71,9 +73,9 @@ jQuery(function($) {
           .append($("<a>").attr("id", "debug-apply-minimal").attr("href", "#").text("Apply minimal").click(function() { applyFixture("minimal"); }))
         .append($("<p>").text("Create:")
           .append($("<span>").attr("id", "debug-create-done").css("font-weight", "bold").hide())
-          .append($("<a>").attr("id", "debug-create-application").attr("href", "#").text("R/asuinkerrostalo").click(function() { createApplication("kerrostalo-rivitalo"); }))
-          .append($("<a>").attr("id", "debug-create-application").attr("href", "#").text("R/sisatilojen muutos").click(function() { createApplication("sisatila-muutos"); }))
-          .append($("<a>").attr("id", "debug-create-application").attr("href", "#").text("YA/katulupa").click(function() { createApplication("ya-katulupa-vesi-ja-viemarityot"); }))))
+          .append($("<a>").attr("id", "debug-create-application").attr("href", "#").text("R/asuinkerrostalo").click(function() { createApplication("kerrostalo-rivitalo", "R"); }))
+          .append($("<a>").attr("id", "debug-create-application").attr("href", "#").text("R/sisatilojen muutos").click(function() { createApplication("sisatila-muutos", "R"); }))
+          .append($("<a>").attr("id", "debug-create-application").attr("href", "#").text("YA/katulupa").click(function() { createApplication("ya-katulupa-vesi-ja-viemarityot", "YA"); }))))
         .append($("<span>").attr("id", "debug-apply-done").css("font-weight", "bold").hide())
         .append($("<span>").text("Throttle web: "))
         .append($("<b>").addClass("dev-throttle-web").text("0"))
