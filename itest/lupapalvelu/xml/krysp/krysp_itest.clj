@@ -54,21 +54,19 @@
     (command apikey :update-task :id id :doc task-id :updates updates)))
 
 (def- drawings [{:id 1,
-                          :name "A",
-                          :desc "A",
-                          :category "123",
-                          :geometry
-                          "POLYGON((438952 6666883.25,441420 6666039.25,441920 6667359.25,439508 6667543.25,438952 6666883.25))",
-                          :area "2686992",
-                          :height "1"}
-                         {:id 2,
-                          :name "B",
-                          :desc "B",
-                          :category "123",
-                          :geometry
-                          "POLYGON((440652 6667459.25,442520 6668435.25,441912 6667359.25,440652 6667459.25))",
-                          :area "708280",
-                          :height "12"}])
+                 :name "A",
+                 :desc "A",
+                 :category "123",
+                 :geometry "POLYGON((438952 6666883.25,441420 6666039.25,441920 6667359.25,439508 6667543.25,438952 6666883.25))",
+                 :area "2686992",
+                 :height "1"}
+                {:id 2,
+                 :name "B",
+                 :desc "B",
+                 :category "123",
+                 :geometry "POLYGON((440652 6667459.25,442520 6668435.25,441912 6667359.25,440652 6667459.25))",
+                 :area "708280",
+                 :height "12"}])
 
 (defn- add-drawings [application]
   (command pena :save-application-drawings
