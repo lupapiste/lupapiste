@@ -26,7 +26,8 @@ jQuery(document).ready(function() {
     "company-registration-init",
     "invoice-operator-selector",
     "ok-dialog",
-    "ok-button-group"
+    "ok-button-group",
+    "company-edit"
   ];
 
   _.forEach(components, function(component) {
