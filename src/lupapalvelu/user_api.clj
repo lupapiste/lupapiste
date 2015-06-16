@@ -114,8 +114,8 @@
         org-authz        (:orgAuthz user-data)
         organization-id  (when (map? org-authz)
                            (name (first (keys org-authz))))
-        admin?           (= caller-role :admin)
-        authorityAdmin?  (= caller-role :authorityAdmin)]
+        admin?           (user/admin? caller)
+        authorityAdmin?  (user/authority-admin? caller)]
 
     (when (and org-authz (not (every? coll? (vals org-authz))))
       (fail! :error.invalid-role :desc "new user has unsupported organization roles"))
@@ -268,11 +268,10 @@
                                  :companyName :companyId :allowDirectMarketing])
 
 (defn- validate-update-user! [caller user-data]
-  (let [admin?          (= (-> caller :role keyword) :admin)
-        caller-email    (:email caller)
+  (let [caller-email    (:email caller)
         user-email      (:email user-data)]
 
-    (if admin?
+    (if (user/admin? caller)
       (when (= user-email caller-email)    (fail! :error.unauthorized :desc "admin may not change his/her own data"))
       (when (not= user-email caller-email) (fail! :error.unauthorized :desc "can't edit others data")))
 
