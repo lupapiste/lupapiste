@@ -18,6 +18,12 @@ LUPAPISTE.TagsDataProvider = function(applicationId, filtered) {
     var filteredData = _.filter(data(), function(item) {
       return !_.includes(self.filtered(), item);
     });
+    var q = self.query() || "";
+    filteredData = _.filter(filteredData, function(item) {
+      return _.reduce(q.split(" "), function(result, word) {
+        return _.contains(item.toUpperCase(), word.toUpperCase()) && result;
+      }, true);
+    });
     var mappedData = _.map(filteredData, function(item) {
       return {label: item};
     });

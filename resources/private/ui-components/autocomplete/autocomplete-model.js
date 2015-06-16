@@ -49,6 +49,7 @@ LUPAPISTE.AutocompleteModel = function(params) {
       }
       self.inputSelected(false);
       self.showResult(false);
+      self.query("");
     }
   };
 
@@ -73,7 +74,7 @@ LUPAPISTE.AutocompleteModel = function(params) {
     };
 
     if (event.keyCode === 13) {
-      self.selectItem(self.dataProvider.data()[self.index()].label);
+      self.selectItem(self.dataProvider.data()[self.index()]);
     }
     else if (event.keyCode === 38) {
       self.index(self.index() > 0 ? self.index() - 1 : 0);
