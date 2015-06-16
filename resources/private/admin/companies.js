@@ -59,6 +59,7 @@
 
     self.editDialog = function(company) {
      hub.send("show-dialog", {title: "Muokkaa yritysta",
+                              size: "medium",
                               component: "company-edit",
                               componentParams: {company: company}});
     };
@@ -85,6 +86,7 @@
   var companiesModel = new CompaniesModel();
 
   hub.subscribe("company-created", companiesModel.load);
+  hub.subscribe("company-updated", companiesModel.load);
   hub.onPageLoad("companies", companiesModel.load);
 
   $(function() {
