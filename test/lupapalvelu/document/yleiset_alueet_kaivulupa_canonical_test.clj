@@ -59,7 +59,8 @@
                             :propertyId "75341600550007"
                             :documents documents
                             :municipality municipality
-                            :statements statements})
+                            :statements statements
+                            :drawings ctc/drawings})
 
 (ctc/validate-all-documents kaivulupa-application)
 

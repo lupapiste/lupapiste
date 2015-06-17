@@ -79,14 +79,13 @@
           (xml/get-text link-permit [:tunnus]) => (-> application :linkPermitData first :id)
           (xml/get-text link-permit [:sovellus]) => "Viitelupa")))
 
-    ;; In YA krysp 2.2.0 (Yht 2.1.5) has more keys defined for drawings. The drawings are currently only in the Kayttolupa test application.
-    (when (= :Kayttolupa lupa-name-key)
-      (let [drawing-sijainti (map cr/all-of (xml/select lp-xml-220 [:sijaintitieto :Sijainti]))
-            Sijainti-piste (-> drawing-sijainti first :piste :Point :pos) => truthy
-            PisteSijanti   (second drawing-sijainti) => truthy
-            LineString1    (nth drawing-sijainti 2) => truthy
-            LineString2    (nth drawing-sijainti 3) => truthy
-            Alue           (nth drawing-sijainti 4) => truthy]
+    ;; In YA krysp 2.2.0 (Yht 2.1.5) has more keys defined for drawings.
+    (let [drawing-sijainti (map cr/all-of (xml/select lp-xml-220 [:sijaintitieto :Sijainti]))
+          Sijainti-piste (-> drawing-sijainti first :piste :Point :pos) => truthy
+          PisteSijanti   (second drawing-sijainti) => truthy
+          LineString1    (nth drawing-sijainti 2) => truthy
+          LineString2    (nth drawing-sijainti 3) => truthy
+          Alue           (nth drawing-sijainti 4) => truthy]
 
 
         (fact "Sijainti-piste-xy" Sijainti-piste => (str (-> application :location :x) " " (-> application :location :y)))
