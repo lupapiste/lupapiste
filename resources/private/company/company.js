@@ -272,7 +272,7 @@
   };
 
   CompanyInfo.prototype.updateAccountTypes = function(company) {
-    var accountType = this.accountType;
+    var accountType = this.accountType; // take correct observable to var, 'this' context differs in _.map's function
     accountType(_.findWhere(LUPAPISTE.config.accountTypes, {name: company.accountType}));
     var mappedAccountTypes = _.map(LUPAPISTE.config.accountTypes, function(type) {
       type.disable = ko.observable(accountType() ? type.limit < accountType().limit : false);
