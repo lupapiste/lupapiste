@@ -1,1 +1,1 @@
-register.company.custom.title: Räätälöity yritystili
+register.company.custom.title: Räätälöity yritystili (käyttäjäraja {0} käyttäjää)

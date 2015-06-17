@@ -40,7 +40,9 @@
                                  valueAllowUnset: true"></select>
             <!-- /ko -->
             <!-- ko if: model().customAccountLimit -->
-            <span data-bind="ltext: 'register.company.' + model().accountType() + '.title'"></span>
+            <div>
+              <span class="company-custom-account" data-bind="text: loc('register.company.' + model().accountType() + '.title', model().customAccountLimit())"></span>
+            </div>
             <!-- /ko -->
             </div>
             <div class="form-entry">
