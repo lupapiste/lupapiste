@@ -328,8 +328,8 @@
     self.pending     = ko.observable();
     self.id          = ko.observable();
     self.isAdmin     = ko.observable();
-    self.users       = ko.observableArray();
-    self.invitations = ko.observableArray();
+    self.users       = ko.observableArray([]);
+    self.invitations = ko.observableArray([]);
     self.info        = new CompanyInfo(self);
     self.tabs        = new TabsModel(self.id);
 
@@ -338,7 +338,7 @@
         .pending(false)
         .id(null)
         .info.clear()
-        .users(null)
+        .users([])
         .isAdmin(null);
     };
 

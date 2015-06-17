@@ -1,1 +1,2 @@
 register.company.custom.title: Räätälöity yritystili (käyttäjäraja {0} käyttäjää)
+company.users.count: Käyttäjiä {0} / {1}
