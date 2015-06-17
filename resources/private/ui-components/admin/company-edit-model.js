@@ -11,6 +11,7 @@ LUPAPISTE.CompanyEditModel = function(params) {
   self.showCustomCount = ko.pureComputed(function() {
     return self.company.accountType() === "custom";
   });
+  self.showCustomCount.subscribe(function() { _.delay(hub.send, 50, "resize-dialog");});
 
   self.saveCompany = function() {
     ajax
