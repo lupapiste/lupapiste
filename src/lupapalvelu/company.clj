@@ -118,6 +118,9 @@
 (defn find-company-users [company-id]
   (u/get-users {:company.id company-id}))
 
+(defn company-users-count [company-id]
+  (mongo/count :users {:company.id company-id}))
+
 (defn- map-token-to-user-invitation [token]
   (-> {}
       (assoc :firstName (get-in token [:data :user :firstName]))
