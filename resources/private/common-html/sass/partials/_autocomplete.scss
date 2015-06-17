@@ -38,28 +38,22 @@
         white-space: nowrap;
         span.tag-label {
           color: #fff;
-          margin-left: $marginL;
-          margin-right: $marginS;
-        }
-        span.left-align {
-          position: absolute;
-          left: $marginS;
-          bottom: 0;
-          top: 0;
-          margin: auto;
+          margin-left: $marginS;
+          margin-right: $marginL;
         }
         span.tag-remove {
-          color: #fff;
           cursor: pointer;
-          font-weight: bold;
-          &:hover {
-            color: black;
-          }
+          position: absolute;
+          right: $marginS;
+          top: 0;
+          bottom: 0;
+          margin: auto;
         }
       }
       .tag-ellipsis {
         color: $lp-orange;
         cursor: pointer;
+        font-weight: bold;
       }
     }
     span.caption {
