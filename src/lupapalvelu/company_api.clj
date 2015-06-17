@@ -65,9 +65,9 @@
 
 (defn- user-limit-not-exceeded [command _]
   (let [company (c/find-company-by-id (get-in command [:user :company :id]))
-        company-users (c/find-company-users (:id company))
+        company-users (c/company-users-count (:id company))
         invitations (c/find-user-invitations (:id company))
-        users (+ (count invitations) (count company-users))]
+        users (+ (count invitations) company-users)]
     (when-not (:accountType company)
       (fail! :error.account-type-not-defined-for-company))
     (let [user-limit (or (:customAccountLimit company) (c/user-limit-for-account-type (keyword (:accountType company))))]
