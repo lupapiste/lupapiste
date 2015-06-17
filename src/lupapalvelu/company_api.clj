@@ -70,7 +70,7 @@
         users (+ (count invitations) (count company-users))]
     (when-not (:accountType company)
       (fail! :error.account-type-not-defined-for-company))
-    (let [user-limit (c/user-limit-for-account-type (keyword (:accountType company)))]
+    (let [user-limit (or (:customAccountLimit company) (c/user-limit-for-account-type (keyword (:accountType company))))]
       (when-not (< users user-limit)
         (fail :error.company-user-limit-exceeded)))))
 
