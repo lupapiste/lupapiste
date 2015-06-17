@@ -61,8 +61,7 @@
     (try
       (validator/validate xml-s (permit/permit-type application) schema-version)
       (catch org.xml.sax.SAXParseException e
-       (info e "Invalid XML message")
-       (fail! :error.integration.send :details (.getMessage e))))
+        (fail! :error.integration.send :details (.getMessage e))))
 
     (fs/mkdirs output-dir)
 
