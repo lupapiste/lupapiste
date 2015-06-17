@@ -1,2 +1,3 @@
 register.company.custom.title: Räätälöity yritystili (käyttäjäraja {0} käyttäjää)
 company.users.count: Käyttäjiä {0} / {1}
+company.limit-too-small: Käyttäjämääräraja on liian pieni (yrityksessä on jo enemmän käyttäjiä)
