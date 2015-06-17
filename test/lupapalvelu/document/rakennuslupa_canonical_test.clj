@@ -155,9 +155,10 @@
                                      :muuMika {:value "Muu tyotehtava"}}
             :yritys yritysnimi-ja-ytunnus
             :sijaistus {:sijaistettavaHloEtunimi {:value "Jaska"}
-                            :sijaistettavaHloSukunimi {:value "Jokunen"}
-                            :alkamisPvm {:value "13.02.2014"}
-                            :paattymisPvm {:value "20.02.2014"}}})})
+                        :sijaistettavaHloSukunimi {:value "Jokunen"}
+                        :alkamisPvm {:value "13.02.2014"}
+                        :paattymisPvm {:value "20.02.2014"}}
+            :tyonjohtajanHyvaksynta {:tyonjohtajanHyvaksynta {:value true}}})})
 
 (def- tyonjohtaja-blank-role-and-blank-qualification
   (-> tyonjohtaja
@@ -578,6 +579,11 @@
     (fact "sijaistettavan paattymisPvm" (:paattymisPvm sijaistus-213) => "2014-02-20")
     (validate-person henkilo)
     (validate-minimal-company yritys)))
+
+(facts "Canonical tyonjohtaja v2 model is correct"
+  (let [tyonjohtaja-unwrapped (tools/unwrapped (:data tyonjohtaja))
+        tyonjohtaja-model (get-tyonjohtaja-v2-data "fi" tyonjohtaja-unwrapped :tyonjohtaja)]
+    (fact "tyonjohtajanHyvaksynta (vainTamaHankeKytkin)" (:vainTamaHankeKytkin tyonjohtaja-model) => (-> tyonjohtaja :data :tyonjohtajanHyvaksynta :tyonjohtajanHyvaksynta :value))))
 
 (facts "Canonical tyonjohtaja-blank-role-and-blank-qualification model is correct"
   (let [tyonjohtaja-unwrapped (tools/unwrapped (:data tyonjohtaja-blank-role-and-blank-qualification))
