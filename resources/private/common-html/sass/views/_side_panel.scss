@@ -220,11 +220,12 @@
 
     .textarea-wrapper {
       height: 100%;
-      padding-bottom: 62px;
+      padding-bottom: 56px;
     }
 
     .form-input.textarea {
       height: 100%;
+      height: 300px\9;
       margin: 0;
     }
 
@@ -253,7 +254,7 @@
     -o-transition: box-shadow 250ms ease;
     transition: box-shadow 250ms ease;
   }
-  padding-bottom: 56px;
+  padding-bottom: 46px;
   .header {
     h1 {
       margin-bottom: 0;

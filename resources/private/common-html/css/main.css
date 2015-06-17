@@ -6262,33 +6262,34 @@ td.comment-text {
 /* line 221, ../sass/views/_side_panel.scss */
 #side-panel #notice-panel .textarea-wrapper {
   height: 100%;
-  padding-bottom: 62px;
+  padding-bottom: 56px;
 }
 /* line 226, ../sass/views/_side_panel.scss */
 #side-panel #notice-panel .form-input.textarea {
   height: 100%;
+  height: 300px\9;
   margin: 0;
 }
-/* line 232, ../sass/views/_side_panel.scss */
+/* line 233, ../sass/views/_side_panel.scss */
 #side-panel #notice-panel .notice-prompt-info:before {
   content: "(";
 }
-/* line 235, ../sass/views/_side_panel.scss */
+/* line 236, ../sass/views/_side_panel.scss */
 #side-panel #notice-panel .notice-prompt-info:after {
   content: ")";
 }
 
-/* line 243, ../sass/views/_side_panel.scss */
+/* line 244, ../sass/views/_side_panel.scss */
 #side-panel.show-side-panel {
   right: 0px;
 }
 
-/* line 247, ../sass/views/_side_panel.scss */
+/* line 248, ../sass/views/_side_panel.scss */
 #conversation-panel {
   height: 100%;
-  padding-bottom: 56px;
+  padding-bottom: 46px;
 }
-/* line 249, ../sass/views/_side_panel.scss */
+/* line 250, ../sass/views/_side_panel.scss */
 #conversation-panel textarea {
   -webkit-transition: box-shadow 250ms ease;
   -moz-transition: box-shadow 250ms ease;
@@ -6296,7 +6297,7 @@ td.comment-text {
   -o-transition: box-shadow 250ms ease;
   transition: box-shadow 250ms ease;
 }
-/* line 258, ../sass/views/_side_panel.scss */
+/* line 259, ../sass/views/_side_panel.scss */
 #conversation-panel .header h1 {
   margin-bottom: 0;
 }
