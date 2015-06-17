@@ -191,6 +191,12 @@
   ; Pena uploads a tutkintotodistus:
   ;
 
+  (fact "Applicant Pena can upload user attachment"
+    (query pena :add-user-attachment-allowed) => ok?)
+
+  (fact "Auhtority Sonja can't upload user attachment"
+    (query sonja :add-user-attachment-allowed) => unauthorized?)
+
   (let [attachment-id (:attachment-id (upload-user-attachment pena "osapuolet.tutkintotodistus" true))]
 
     ; Now Pena has attachment
@@ -201,14 +207,12 @@
     (let [resp (raw pena "download-user-attachment" :attachment-id attachment-id) => http200?]
       (:body resp) => "This is test file for file upload in itest.")
 
-    ; Sonja can not get attachment
+    (fact "Sonja can not get attachment"
+      (raw sonja "download-user-attachment" :attachment-id attachment-id) => http401?)
 
-    (raw sonja "download-user-attachment" :attachment-id attachment-id) => http401?
-
-    ; Sonja can not delete attachment
-
-    (command sonja "remove-user-attachment" :attachment-id attachment-id)
-    (get (:attachments (query pena "user-attachments")) 0) =not=> nil?
+    (fact "Sonja can not delete attachment"
+      (command sonja "remove-user-attachment" :attachment-id attachment-id)
+      (get (:attachments (query pena "user-attachments")) 0) =not=> nil?)
 
     ; Pena can delete attachment
 
