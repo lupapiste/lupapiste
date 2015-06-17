@@ -39,8 +39,8 @@
                                         :tapahtumapaikka {:value "Sipoon urheilukentt\u00e4"}}}})
 
 (def- documents [hakija
-                          maksaja
-                          tapahtuma-info])
+                 maksaja
+                 tapahtuma-info])
 
 (def mainostus-application
   {:schema-version 1,
@@ -70,7 +70,8 @@
    :propertyId "75341600550007",
    :documents documents,
    :municipality municipality,
-   :statements statements})
+   :statements statements
+   :drawings ctc/drawings})
 
 (ctc/validate-all-documents mainostus-application)
 

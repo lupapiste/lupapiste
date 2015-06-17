@@ -92,6 +92,7 @@
     :zip "33456"
     :city "Kuopio"
     :private {:password "$2a$10$VnwROer5dhRJCQxoZusOney/hyN7Vk4ILQMSVqT8iZMO4XiQz.8Cm"}}
+
    ;; Kuopio YA-paakayttaja:  kuopio-ya / kuopio
    {:id "297-YA"
     :enabled true
@@ -106,7 +107,6 @@
     :zip "10203"
     :orgAuthz {:297-YA #{:authorityAdmin}}
     :private {:password "$2a$10$YceveAiQXbeUs65B4FZ6lez/itf0UEXooHcZlygI2WnQGhF0dJ1jO"}}
-
 
    ;; Velho Viranomainen - Kuopio R viranomaien:  velho / velho
    {:id "77777777777777777700645"
