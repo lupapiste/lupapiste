@@ -112,7 +112,9 @@
 
         <div data-bind="visible: tabs.visible('users')">
 
-          <span data-bind="text: loc('company.users.count', invitations().length + users().length, 0)"></span>
+          <span data-bind="text: loc('company.users.count',
+                                      invitations().length + users().length,
+                                      info.accountType() ? info.accountType().limit : info.model().customAccountLimit())"></span>
 
           <table data-bind="visible: !pending()" class="table table-striped" data-test-id="company-users-table">
             <thead>
