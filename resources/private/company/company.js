@@ -263,6 +263,7 @@
     this.canStartEdit  = ko.computed(function() { return !this.edit() && parent.isAdmin(); }, this);
     this.changed       = ko.computed(function() { return !_.isEqual(ko.mapping.toJS(this.model()), this.saved()); }, this);
     this.canSubmit     = ko.computed(function() { return this.edit() && this.model.isValid() && this.changed(); }, this);
+    this.accountType   = ko.observable();
     this.accountTypes  = ko.observableArray();
   }
 
@@ -271,9 +272,10 @@
   };
 
   CompanyInfo.prototype.updateAccountTypes = function(company) {
-    var currentAccountType = _.findWhere(LUPAPISTE.config.accountTypes, {name: company.accountType});
+    var accountType = this.accountType;
+    accountType(_.findWhere(LUPAPISTE.config.accountTypes, {name: company.accountType}));
     var mappedAccountTypes = _.map(LUPAPISTE.config.accountTypes, function(type) {
-      type.disable = ko.observable(currentAccountType ? type.limit < currentAccountType.limit : false);
+      type.disable = ko.observable(accountType() ? type.limit < accountType().limit : false);
       type.displayName = loc("register.company." + type.name + ".title") + " (" + loc("register.company." + type.name + ".price") + ")";
       return type;
     });
