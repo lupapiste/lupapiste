@@ -74,6 +74,9 @@
   (when-let [errors (sc/check Company company)]
     (fail-property! (first (keys errors)))))
 
+(defn custom-account? [{type :accountType}]
+  (= :custom (keyword type)))
+
 ;;
 ;; API:
 ;;
@@ -144,16 +147,19 @@
 
 (defn update-company!
   "Update company. Throws if company is not found, or if provided updates would make company invalid.
-   Retuens the updated company."
+   Returns the updated company."
   [id updates admin?]
   (if (some #{:id :y} (keys updates)) (fail! :bad-request))
   (let [company (dissoc (find-company-by-id! id) :id)
+        custom-account? (custom-account? company)
         updated (-> (merge company updates)
                   ensure-custom-limit)
         old-limit (user-limit-for-account-type (keyword (:accountType company)))
         limit     (user-limit-for-account-type (keyword (:accountType updated)))]
     (validate! updated)
-    (when (and (not admin?) (< limit old-limit))
+    (when (and (not admin?)
+               (and custom-account? (not= (:accountType updates) (:accountType company))) ; only admin can edit custom account's type
+               (< limit old-limit))
       (fail! :company.account-type-not-downgradable))
     (mongo/update :companies {:_id id} updated)
     updated))
