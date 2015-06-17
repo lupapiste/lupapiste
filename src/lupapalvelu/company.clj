@@ -57,6 +57,15 @@
               (sc/optional-key :created)     sc/Int
               })
 
+(def company-skeleton ; required keys
+  {:name nil
+   :y    nil
+   :accountType nil
+   :customAccountLimit nil
+   :address1 nil
+   :po nil
+   :zip nil})
+
 (def company-updateable-keys (->> (keys Company)
                                   (map (fn [k] (if (sc/optional-key? k) (:k k) k)))
                                   (remove #{:y})))
