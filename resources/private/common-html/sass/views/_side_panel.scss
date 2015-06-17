@@ -108,6 +108,10 @@
     cursor: default;
     h1 {
       line-height: 30px;
+      overflow: auto;
+      clear: both;
+    }
+    .title {
       float: left;
     }
     .close-btn {
@@ -116,14 +120,19 @@
       height: 16px;
       background-position: 0px -2700px;
       cursor: pointer;
-      float: right;
-      margin-top: $marginS;
+      position: absolute;
+      top: $marginS;
+      right: $marginS;
     }
     .help {
       margin-left: $marginM;
+      float: left;
       &:after {
         border-bottom-color: lighten($lp-dark-grey, 15%);
       }
+    }
+    .icon.help.expanded {
+      margin-bottom: 22px;
     }
   }
 
@@ -167,6 +176,7 @@
   .panel-info {
     background: lighten($lp-dark-grey, 15%);
     padding: $marginS;
+    clear: both;
   }
 
   p, h1 {
@@ -210,9 +220,7 @@
 
     .textarea-wrapper {
       height: 100%;
-      textarea {
-        padding-bottom: 52px;
-      }
+      padding-bottom: 62px;
     }
 
     .form-input.textarea {
@@ -245,8 +253,11 @@
     -o-transition: box-shadow 250ms ease;
     transition: box-shadow 250ms ease;
   }
-  .content {
-    padding-bottom: 56px;
+  padding-bottom: 56px;
+  .header {
+    h1 {
+      margin-bottom: 0;
+    }
   }
 }
 

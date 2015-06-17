@@ -18,9 +18,10 @@
       <div class="content-wrapper">
         <div id="conversation-panel" data-bind="visible: showConversationPanel">
           <div class="header">
-            <h1 data-bind="ltext: 'conversation.title'"></h1>
-            <span class="close-btn" data-bind="click: closeSidePanel"></span>
-            <span class="icon help" data-bind="click: toggleHelp, css: {expanded: showHelp}"></span>
+            <h1>
+              <span class="title" data-bind="ltext: 'conversation.title'"></span>
+              <span class="icon help" data-bind="click: toggleHelp, css: {expanded: showHelp}"></span>
+            </h1>
             <p data-bind="slider: showHelp, lhtml: 'help.' + permitType() + '.conversationDesc'" class="panel-info"></p>
           </div>
           <div class="content" data-bind="event: { scroll: hideHelp }, transition: showHelp, class: 'expanded'">
@@ -32,7 +33,6 @@
         <div id="notice-panel" data-bind="visible: showNoticePanel">
           <div class="header">
             <h1 data-bind="ltext: 'notice.title'"></h1>
-            <span class="close-btn" data-bind="click: closeSidePanel"></span>
           </div>
           <div class="content-table" data-bind="template: {name: 'notice-template', data: notice}"></div>
         </div>
