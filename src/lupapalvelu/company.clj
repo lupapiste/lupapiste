@@ -172,8 +172,9 @@
         limit     (user-limit-for-account-type (keyword (:accountType updated)))]
     (validate! updated)
     (when (and (not admin?)
-               (and custom-account? (not= (:accountType updates) (:accountType company))) ; only admin can edit custom account's type
-               (< limit old-limit))
+               (or
+                 (and custom-account? (not= (:accountType updates) (:accountType company))) ; only admin can edit custom account's type
+                 (< limit old-limit)))
       (fail! :company.account-type-not-downgradable))
     (mongo/update :companies {:_id id} updated)
     updated))
