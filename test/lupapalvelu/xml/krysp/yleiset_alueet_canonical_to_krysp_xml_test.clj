@@ -87,36 +87,34 @@
           LineString2    (nth drawing-sijainti 3) => truthy
           Alue           (nth drawing-sijainti 4) => truthy]
 
-
-        (fact "Sijainti-piste-xy" Sijainti-piste => (str (-> application :location :x) " " (-> application :location :y)))
-        (fact "Point drawing" PisteSijanti => {:piste {:Point {:pos "530851.15649413 6972373.1564941"}}
-                                               :nimi "Piste"
-                                               :kuvaus "Piste jutska"
-                                               :korkeusTaiSyvyys "345"})
-        (fact "LineString drawing 1" LineString1 => {:viiva {:LineString {:pos '("530856.65649413 6972312.1564941"
-                                                                                 "530906.40649413 6972355.6564941"
-                                                                                 "530895.65649413 6972366.9064941"
-                                                                                 "530851.15649413 6972325.9064941"
-                                                                                 "530856.65649413 6972312.4064941")}},
-                                                     :nimi "alue"
-                                                     :kuvaus "alue 1"
-                                                     :korkeusTaiSyvyys "1000"})
-        (fact "LineString drawing 2" LineString2 => {:viiva {:LineString {:pos '("530825.15649413 6972348.9064941"
-                                                                                 "530883.65649413 6972370.1564941"
-                                                                                 "530847.65649413 6972339.4064941"
-                                                                                 "530824.90649413 6972342.4064941")}}
-                                                     :nimi "Viiva"
-                                                     :kuvaus "Viiiva"
-                                                     :korkeusTaiSyvyys "111"})
-        (fact "Area drawing" Alue => {:alue {:Polygon {:exterior {:LinearRing {:pos '("530859.15649413 6972389.4064941"
-                                                                                      "530836.40649413 6972367.4064941"
-                                                                                      "530878.40649413 6972372.6564941"
-                                                                                      "530859.15649413 6972389.4064941")}}}}
-                                      :nimi "Alueen nimi"
-                                      :kuvaus "Alueen kuvaus"
-                                      :korkeusTaiSyvyys "333"
-                                      :pintaAla "402"})
-        ))))
+      (fact "Sijainti-piste-xy" Sijainti-piste => (str (-> application :location :x) " " (-> application :location :y)))
+      (fact "Point drawing" PisteSijanti => {:nimi "Piste"
+                                             :kuvaus "Piste jutska"
+                                             :korkeusTaiSyvyys "345"
+                                             :piste {:Point {:pos "530851.15649413 6972373.1564941"}}})
+      (fact "LineString drawing 1" LineString1 => {:nimi "alue"
+                                                   :kuvaus "alue 1"
+                                                   :korkeusTaiSyvyys "1000"
+                                                   :viiva {:LineString {:pos '("530856.65649413 6972312.1564941"
+                                                                               "530906.40649413 6972355.6564941"
+                                                                               "530895.65649413 6972366.9064941"
+                                                                               "530851.15649413 6972325.9064941"
+                                                                               "530856.65649413 6972312.4064941")}}})
+      (fact "LineString drawing 2" LineString2 => {:nimi "Viiva"
+                                                   :kuvaus "Viiiva"
+                                                   :korkeusTaiSyvyys "111"
+                                                   :viiva {:LineString {:pos '("530825.15649413 6972348.9064941"
+                                                                               "530883.65649413 6972370.1564941"
+                                                                               "530847.65649413 6972339.4064941"
+                                                                               "530824.90649413 6972342.4064941")}}})
+      (fact "Area drawing" Alue => {:nimi "Alueen nimi"
+                                    :kuvaus "Alueen kuvaus"
+                                    :korkeusTaiSyvyys "333"
+                                    :pintaAla "402"
+                                    :alue {:Polygon {:exterior {:LinearRing {:pos '("530859.15649413 6972389.4064941"
+                                                                                    "530836.40649413 6972367.4064941"
+                                                                                    "530878.40649413 6972372.6564941"
+                                                                                    "530859.15649413 6972389.4064941")}}}}}))))
 
 (facts "YA permits to canonical and then to xml with schema validation"
 
@@ -136,5 +134,4 @@
       (do-test viitoitus-application))
 
     (fact "Valmistumisilmoitus application -> canonical -> xml"
-      (do-test valmistumisilmoitus))
-    )
+      (do-test valmistumisilmoitus)))
