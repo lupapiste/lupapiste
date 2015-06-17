@@ -154,10 +154,17 @@
 
 (defn ensure-custom-limit [{id :id account-type :accountType custom-limit :customAccountLimit :as data}]
   (if (= :custom (keyword account-type))
-   (if (< (company-users-count id) (util/->int custom-limit))
-     (assoc data :customAccountLimit (util/->int custom-limit))
-     (fail! :company.limit-too-small))
+   (if-not (ss/blank? custom-limit)
+     (if (< (company-users-count id) (util/->int custom-limit))
+       (assoc data :customAccountLimit (util/->int custom-limit))
+       (fail! :company.limit-too-small))
+     (fail! :company.missing.custom-limit))
    (assoc data :customAccountLimit nil)))
+
+(defn account-type-changing-with-custom? [{old-type :accountType} {new-type :accountType}]
+  (and (not= old-type new-type)
+       (or (= :custom (keyword old-type))
+           (= :custom (keyword new-type)))))
 
 (defn update-company!
   "Update company. Throws if company is not found, or if provided updates would make company invalid.
@@ -172,9 +179,9 @@
         limit     (user-limit-for-account-type (keyword (:accountType updated)))]
     (validate! updated)
     (when (and (not admin?)
-               (or
-                 (and custom-account? (not= (:accountType updates) (:accountType company))) ; only admin can edit custom account's type
-                 (< limit old-limit)))
+               (account-type-changing-with-custom? company updates)) ; only admins are allowed to change account type to/from 'custom'
+      (fail! :unauthorized))
+    (when (and (not admin?) (< limit old-limit))
       (fail! :company.account-type-not-downgradable))
     (mongo/update :companies {:_id id} updated)
     updated))
