@@ -23,7 +23,7 @@
   position: fixed;
   right: -500px;
   top: 60px;
-  box-sizing: border-box;
+  bottom: 0;
 
   .comment-controls {
     margin-left: 0;
@@ -100,7 +100,6 @@
     background: $lp-dark-grey \9; /* IE 8 and below */
     border: 1px solid darken($lp-dark-grey, 10%);
     padding: $marginS;
-    position: relative;
     width: 500px;
   }
 
@@ -130,19 +129,38 @@
 
   .content {
     overflow: auto;
-    position: absolute;
-    top: 44px;
-    bottom: $marginS;
-    right: $marginS;
-    left: $marginS;
-    width: auto;
+    height: 100%;
+
     .form-input.textarea {
       width: 100%;
       box-sizing: border-box;
     }
+
   }
 
-  .content.expanded {
+  .content-table {
+    overflow: auto;
+    height: 100%;
+    width: 100%;
+    display: table;
+
+    .form-input.textarea {
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .content-row {
+      display: table-row;
+    }
+
+    .content-cell {
+      display: table-cell;
+      padding-bottom: $marginS;
+      position: relative;
+    }
+  }
+
+  .content.expanded, .content-table.expanded {
     top: 200px;
   }
 
@@ -167,24 +185,13 @@
     height: 100%;
 
     .application-urgency {
-      position: relative;
-      margin-bottom: $marginS;
       width: 215px;
-    }
-
-    .application-notices {
       position: relative;
     }
 
     .application-tags {
-      position: relative;
       z-index: 1;
-    }
-
-    .application-text {
       position: relative;
-      height: calc(100% - 144px);
-      height: 100%\9;
     }
 
     .icon.urgent {
@@ -202,11 +209,10 @@
     }
 
     .textarea-wrapper {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
+      height: 100%;
+      textarea {
+        padding-bottom: 52px;
+      }
     }
 
     .form-input.textarea {
@@ -231,12 +237,16 @@
 }
 
 #conversation-panel {
+  height: 100%;
   textarea {
     -webkit-transition: box-shadow 250ms ease;
     -moz-transition: box-shadow 250ms ease;
     -ms-transition: box-shadow 250ms ease;
     -o-transition: box-shadow 250ms ease;
     transition: box-shadow 250ms ease;
+  }
+  .content {
+    padding-bottom: 56px;
   }
 }
 

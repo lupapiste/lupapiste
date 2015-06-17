@@ -23,7 +23,7 @@
             <span class="icon help" data-bind="click: toggleHelp, css: {expanded: showHelp}"></span>
             <p data-bind="slider: showHelp, lhtml: 'help.' + permitType() + '.conversationDesc'" class="panel-info"></p>
           </div>
-          <div class="content" data-bind="transition: showHelp, class: 'expanded'">
+          <div class="content" data-bind="event: { scroll: hideHelp }, transition: showHelp, class: 'expanded'">
             <div data-bind="template: {name: 'comment-template', data: {comment: comment, authorities: authorities, mainConversation: mainConversation, authorization: authorization, infoRequest: infoRequest}}"></div>
             <div class="process-nav"></div>
           </div>
@@ -34,7 +34,7 @@
             <h1 data-bind="ltext: 'notice.title'"></h1>
             <span class="close-btn" data-bind="click: closeSidePanel"></span>
           </div>
-          <div class="content" data-bind="template: {name: 'notice-template', data: notice}"></div>
+          <div class="content-table" data-bind="template: {name: 'notice-template', data: notice}"></div>
         </div>
         <!-- /ko -->
       </div>
