@@ -230,13 +230,11 @@
         (fact "5 vastuuta" (count vastuu) => 5)
         (fact "vastuun alkamisPvm" (xml/get-text tyonjohtaja [:alkamisPvm]) => "2014-02-13")
         (fact "vastuun paattymisPvm" (xml/get-text tyonjohtaja [:paattymisPvm]) => "2014-02-20")
-
-        (fact "vastattavaTyo" (map #(xml/get-text % [:vastattavaTyo]) vastuu)
-          => (just #{"Kiinteist\u00f6n vesi- ja viem\u00e4rilaitteiston rakentaminen"
-                     "Kiinteist\u00f6n ilmanvaihtolaitteiston rakentaminen"
-                     "Maanrakennusty\u00f6", "Muu tyotehtava", "Rakennelma tai laitos"}))
-
+        (fact "vastattavaTyo"
+          (map #(xml/get-text % [:vastattavaTyo]) vastuu) => (just #{"Rakennuksen purkaminen"
+                                                                     "IV-laitoksen korjaus- ja muutosty\u00f6"
+                                                                     "Uudisrakennusty\u00f6 ilman maanrakennust\u00f6it\u00e4"
+                                                                     "Maanrakennusty\u00f6t"
+                                                                     "Muu tyotehtava"}))
         (fact "postiosoite"
-          (xml/get-text tyonjohtaja [:yritys :postiosoitetieto :postiosoite :osoitenimi :teksti]) => "katu")
-        ))
-    ))
+          (xml/get-text tyonjohtaja [:yritys :postiosoitetieto :postiosoite :osoitenimi :teksti]) => "katu")))))
