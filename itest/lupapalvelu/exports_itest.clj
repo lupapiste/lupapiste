@@ -53,3 +53,19 @@
     (:status http-resp) => 200
     resp => unauthorized?
     (:applications resp) => nil?))
+
+(facts "export-organizations"
+  (let [http-resp (http/get (str (server-address) "/data-api/json/export-organizations")
+                    {:basic-auth ["solita-etl" "solita-etl"]
+                     :follow-redirects false
+                     :throw-exceptions false})
+          {organizations :organizations :as resp} (:body (decode-response http-resp))]
+      resp => ok?
+
+      (fact "Some organizations returned"
+        organizations => sequential?
+        (count organizations) => pos?)
+
+      (fact "Every organization has expected keys"
+        (doseq [organization organizations]
+          organization => (contains {:id string?, :name map?, :scope sequential?})))))

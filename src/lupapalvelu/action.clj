@@ -3,7 +3,6 @@
             [clojure.set :as set]
             [clojure.string :as s]
             [clojure.set :refer [difference union]]
-            [flatland.ordered.set :refer [ordered-set]]
             [slingshot.slingshot :refer [try+]]
             [sade.dns :as dns]
             [sade.env :as env]
