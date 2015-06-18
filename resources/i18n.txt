@@ -2,3 +2,4 @@ register.company.custom.title: Räätälöity yritystili (käyttäjäraja {0} k�
 company.users.count: Käyttäjiä {0} / {1}
 company.limit-too-small: Käyttäjämääräraja on liian pieni (yrityksessä on jo enemmän käyttäjiä)
 error.illegal-company-account: Tuntematon tilityyppi
+company.missing.custom-limit: Käyttäjäraja puuttuu
