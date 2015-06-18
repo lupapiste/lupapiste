@@ -152,10 +152,11 @@
 (defn find-company-admins [company-id]
   (u/get-users {:company.id company-id, :company.role "admin"}))
 
-(defn ensure-custom-limit [{id :id account-type :accountType custom-limit :customAccountLimit :as data}]
+(defn ensure-custom-limit [company-id {account-type :accountType custom-limit :customAccountLimit :as data}]
+  "Checks that custom account's customAccountLimit is set and allowed. Nullifies customAcconutLimit with normal accounts."
   (if (= :custom (keyword account-type))
    (if-not (ss/blank? custom-limit)
-     (if (< (company-users-count id) (util/->int custom-limit))
+     (if (< (company-users-count company-id) (util/->int custom-limit))
        (assoc data :customAccountLimit (util/->int custom-limit))
        (fail! :company.limit-too-small))
      (fail! :company.missing.custom-limit))
@@ -172,15 +173,14 @@
   [id updates admin?]
   (if (some #{:id :y} (keys updates)) (fail! :bad-request))
   (let [company (dissoc (find-company-by-id! id) :id)
-        custom-account? (custom-account? company)
-        updated (-> (merge company updates)
-                  ensure-custom-limit)
+        updated (->> (merge company updates)
+                  (ensure-custom-limit id))
         old-limit (user-limit-for-account-type (keyword (:accountType company)))
         limit     (user-limit-for-account-type (keyword (:accountType updated)))]
     (validate! updated)
     (when (and (not admin?)
                (account-type-changing-with-custom? company updates)) ; only admins are allowed to change account type to/from 'custom'
-      (fail! :unauthorized))
+      (fail! :error.unauthorized))
     (when (and (not admin?) (< limit old-limit))
       (fail! :company.account-type-not-downgradable))
     (mongo/update :companies {:_id id} updated)
