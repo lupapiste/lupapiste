@@ -157,8 +157,7 @@
             :sijaistus {:sijaistettavaHloEtunimi {:value "Jaska"}
                         :sijaistettavaHloSukunimi {:value "Jokunen"}
                         :alkamisPvm {:value "13.02.2014"}
-                        :paattymisPvm {:value "20.02.2014"}}
-            :tyonjohtajanHyvaksynta {:tyonjohtajanHyvaksynta {:value true}}})})
+                        :paattymisPvm {:value "20.02.2014"}}})})
 
 (def- tyonjohtaja-blank-role-and-blank-qualification
   (-> tyonjohtaja
@@ -170,6 +169,62 @@
   (-> tyonjohtaja
     (util/dissoc-in [:data :sijaistus :alkamisPvm])
     (assoc-in  [:data :sijaistus :paattymisPvm :value] "")))
+
+(def- tyonjohtaja-v2
+  {:id "tyonjohtaja-v2"
+   :schema-info {:name "tyonjohtaja-v2"
+                 :version 1
+                 :op {:name "tyonjohtajan-nimeaminen-v2"}}
+   :data {:tyonjohtajanHyvaksynta {:tyonjohtajanHyvaksynta {:value true}
+                                   :foremanHistory {:value nil}}
+          :vastattavatTyotehtavat {:rakennuksenPurkaminen {:value true}
+                                   :ivLaitoksenKorjausJaMuutostyo {:value true}
+                                   :uudisrakennustyoIlmanMaanrakennustoita {:value true}
+                                   :maanrakennustyot {:value true}
+                                   :uudisrakennustyoMaanrakennustoineen {:value false}
+                                   :ulkopuolinenKvvTyo {:value false}
+                                   :rakennuksenMuutosJaKorjaustyo {:value false}
+                                   :linjasaneeraus {:value false}
+                                   :ivLaitoksenAsennustyo {:value false}
+                                   :sisapuolinenKvvTyo {:value false}
+                                   :muuMika {:value "Muu tyotehtava"}}
+          :sijaistus {:sijaistettavaHloSukunimi {:value "Jokunen"}
+                      :sijaistettavaHloEtunimi {:value "Jaska"}
+                      :paattymisPvm {:value "20.02.2014"}
+                      :alkamisPvm {:value "13.02.2014"}}
+          :muutHankkeet {:0 {:katuosoite {:value "katuosoite"}
+                             :3kk {:value "1"}
+                             :9kk {:value "3"}
+                             :vaihe {:value "R"}
+                             :6kk {:value "2"}
+                             :autoupdated {:value false}
+                             :rakennustoimenpide {:value "purkutoimenpide"}
+                             :kokonaisala {:value "120"}
+                             :12kk {:value "4"}
+                             :luvanNumero {:value "123"}}}
+          :fillMyInfo {:value nil}
+          :tyonjohtajaHanketieto {:taysiaikainenOsaaikainen {:value "taysiaikainen"}
+                                  :kaytettavaAika {:value "3"}
+                                  :kayntienMaara {:value "3"}
+                                  :hankeKesto {:value "3"}}
+          :kuntaRoolikoodi {:value "KVV-ty\u00f6njohtaja"}
+          :yritys {:yritysnimi {:value "yritys Oy"}
+                   :liikeJaYhteisoTunnus {:value "1234567-1"}}
+          :patevyys-tyonjohtaja {:valvottavienKohteidenMaara {:value "2"}
+                                 :valmistumisvuosi {:value "2000"}
+                                 :koulutusvalinta{:value "arkkitehtiylioppilas"}
+                                 :koulutus {:value ""}
+                                 :kokemusvuodet {:value "12"}}
+          :osoite {:postitoimipaikannimi {:value "Sipoo"}
+                   :postinumero {:value "33456"}
+                   :katu {:value "katu"}}
+          :yhteystiedot {:puhelin {:value "03121991"}
+                         :email {:value "sonja.sibbo@sipoo.fi"}}
+          :ilmoitusHakemusValitsin {:value "hakemus"}
+          :henkilotiedot {:sukunimi {:value "Sibbo"}
+                          :hetu {:value "170695-917W"}
+                          :etunimi {:value "Sonja"}}
+          :patevyysvaatimusluokka {:value "A"}}})
 
 (def- rakennuspaikka
   {:id "rakennuspaikka" :schema-info {:name "rakennuspaikka"
@@ -401,7 +456,7 @@
                                                       :created 1383229067483}
                                    :documents [hakija-henkilo
                                                maksaja-henkilo
-                                               tyonjohtaja
+                                               tyonjohtaja-v2
                                                hankkeen-kuvaus-minimum]
                                    :linkPermitData [link-permit-data-kuntalupatunnus]
                                    :appsLinkingToUs [app-linking-to-us]}))
@@ -581,9 +636,9 @@
     (validate-minimal-company yritys)))
 
 (facts "Canonical tyonjohtaja v2 model is correct"
-  (let [tyonjohtaja-unwrapped (tools/unwrapped (:data tyonjohtaja))
+  (let [tyonjohtaja-unwrapped (tools/unwrapped (:data tyonjohtaja-v2))
         tyonjohtaja-model (get-tyonjohtaja-v2-data "fi" tyonjohtaja-unwrapped :tyonjohtaja)]
-    (fact "tyonjohtajanHyvaksynta (vainTamaHankeKytkin)" (:vainTamaHankeKytkin tyonjohtaja-model) => (-> tyonjohtaja :data :tyonjohtajanHyvaksynta :tyonjohtajanHyvaksynta :value))))
+    (fact "tyonjohtajanHyvaksynta (vainTamaHankeKytkin)" (:vainTamaHankeKytkin tyonjohtaja-model) => (-> tyonjohtaja-v2 :data :tyonjohtajanHyvaksynta :tyonjohtajanHyvaksynta :value))))
 
 (facts "Canonical tyonjohtaja-blank-role-and-blank-qualification model is correct"
   (let [tyonjohtaja-unwrapped (tools/unwrapped (:data tyonjohtaja-blank-role-and-blank-qualification))
