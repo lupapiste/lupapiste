@@ -13,7 +13,7 @@
             <!-- ko foreach: selectedTags -->
             <span class="tag">
               <span class="tag-label" data-bind="text: $parent.selectedText() ? $data[$parent.selectedText()] : $data"></span>
-              <span class="tag-remove icon remove left-align"
+              <span class="tag-remove icon remove"
                     data-bind="click: $parent.removeTag, clickBubble: false, event: { mousedown: function() {} }, mousedownBubble: false"></span>
             </span>
             <!-- /ko -->

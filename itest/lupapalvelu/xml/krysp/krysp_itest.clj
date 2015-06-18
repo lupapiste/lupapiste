@@ -10,10 +10,7 @@
             [lupapalvelu.document.model :refer [default-max-len]]
             [lupapalvelu.xml.emit :refer :all]
             [lupapalvelu.xml.validator :refer [validate]]
-            [lupapalvelu.xml.krysp.rakennuslupa-mapping :refer [rakennuslupa_to_krysp_212
-                                                                rakennuslupa_to_krysp_213
-                                                                rakennuslupa_to_krysp_216
-                                                                rakennuslupa_to_krysp_218]]
+            [lupapalvelu.xml.krysp.rakennuslupa-mapping :refer [get-rakennuslupa-mapping]]
             [lupapalvelu.xml.krysp.poikkeamis-mapping :refer [poikkeamis_to_krysp_212]]
             [lupapalvelu.xml.krysp.ymparisto-ilmoitukset-mapping :refer [ilmoitus_to_krysp]]
             [lupapalvelu.xml.krysp.ymparistolupa-mapping :refer [ymparistolupa_to_krysp]]
@@ -54,21 +51,19 @@
     (command apikey :update-task :id id :doc task-id :updates updates)))
 
 (def- drawings [{:id 1,
-                          :name "A",
-                          :desc "A",
-                          :category "123",
-                          :geometry
-                          "POLYGON((438952 6666883.25,441420 6666039.25,441920 6667359.25,439508 6667543.25,438952 6666883.25))",
-                          :area "2686992",
-                          :height "1"}
-                         {:id 2,
-                          :name "B",
-                          :desc "B",
-                          :category "123",
-                          :geometry
-                          "POLYGON((440652 6667459.25,442520 6668435.25,441912 6667359.25,440652 6667459.25))",
-                          :area "708280",
-                          :height "12"}])
+                 :name "A",
+                 :desc "A desc",
+                 :category "123",
+                 :geometry "POLYGON((438952 6666883.25,441420 6666039.25,441920 6667359.25,439508 6667543.25,438952 6666883.25))",
+                 :area "2686992",
+                 :height "1"}
+                {:id 2,
+                 :name "B",
+                 :desc "B desc",
+                 :category "123",
+                 :geometry "POLYGON((440652 6667459.25,442520 6668435.25,441912 6667359.25,440652 6667459.25))",
+                 :area "708280",
+                 :height "12"}])
 
 (defn- add-drawings [application]
   (command pena :save-application-drawings
@@ -164,6 +159,7 @@
         liitetieto (xml/select xml [:liitetieto])
         polygon (xml/select xml [:Polygon])]
 
+
     (fact "Correctly named xml file is created" (.exists xml-file) => true)
 
     (fact "XML file is valid"
@@ -193,7 +189,7 @@
                (filter :sent)))
       => expected-sent-attachment-count)
 
-    (fact "XML contains correct amount polygons"
+    (fact "XML contains correct amount of polygons"
       (count polygon) => (case permit-type
                            :R 0
                            :P 0
@@ -259,11 +255,7 @@
                              :VVVL vesihuolto-canonical/vapautus-canonical)
               canonical (canonical-fn updated-application "fi")
               mapping (case permit-type
-                        :R (case krysp-version
-                             "2.1.2" rakennuslupa_to_krysp_212
-                             "2.1.3" rakennuslupa_to_krysp_213
-                             "2.1.6" rakennuslupa_to_krysp_216
-                             "2.1.8" rakennuslupa_to_krysp_218)
+                        :R (get-rakennuslupa-mapping krysp-version)
                         :YA (get-yleiset-alueet-krysp-mapping lupa-name-key krysp-version)
                         :P poikkeamis_to_krysp_212
                         :YI ilmoitus_to_krysp
@@ -384,41 +376,41 @@
       (get-in sipoo-r [:krysp :R :version]) => "2.1.6"
       (get-in jp-r [:krysp :R :version]) => "2.1.3"))
 
- (doseq [[apikey assignee property-id] [[sonja sonja-id sipoo-property-id] [raktark-jarvenpaa (id-for-key raktark-jarvenpaa) jarvenpaa-property-id]]]
-   (let [application    (create-and-submit-application apikey :propertyId property-id :address "Katselmuskatu 17")
-         application-id (:id application)
-         _ (command apikey :assign-application :id application-id :assigneeId assignee) => ok?
-         task-name      "do the shopping"
-         task-id        (:taskId (command apikey :create-task :id application-id :taskName task-name :schemaName "task-katselmus")) => truthy
-         application    (query-application apikey application-id)]
+  (doseq [[apikey assignee property-id] [[sonja sonja-id sipoo-property-id] [raktark-jarvenpaa (id-for-key raktark-jarvenpaa) jarvenpaa-property-id]]]
+    (let [application    (create-and-submit-application apikey :propertyId property-id :address "Katselmuskatu 17")
+          application-id (:id application)
+          _ (command apikey :assign-application :id application-id :assigneeId assignee) => ok?
+          task-name      "do the shopping"
+          task-id        (:taskId (command apikey :create-task :id application-id :taskName task-name :schemaName "task-katselmus")) => truthy
+          application    (query-application apikey application-id)]
 
-     (populate-task application task-id apikey) => ok?
+      (populate-task application task-id apikey) => ok?
 
-     (upload-attachment-to-target apikey application-id nil true task-id "task")
-     (upload-attachment-to-target apikey application-id nil true task-id "task" "muut.katselmuksen_tai_tarkastuksen_poytakirja")
+      (upload-attachment-to-target apikey application-id nil true task-id "task")
+      (upload-attachment-to-target apikey application-id nil true task-id "task" "muut.katselmuksen_tai_tarkastuksen_poytakirja")
 
-     (doseq [attachment (:attachments (query-application apikey application-id))]
-       (fact "sent timestamp not set"
-         (:sent attachment) => nil))
+      (doseq [attachment (:attachments (query-application apikey application-id))]
+        (fact "sent timestamp not set"
+          (:sent attachment) => nil))
 
-     (command apikey :approve-task :id application-id :taskId task-id) => ok?
-     (command apikey :send-task :id application-id :taskId task-id :lang "fi") => ok?
+      (command apikey :approve-task :id application-id :taskId task-id) => ok?
+      (command apikey :send-task :id application-id :taskId task-id :lang "fi") => ok?
 
-     (let [application (query-application apikey application-id)]
-       (final-xml-validation
-         application
-         1 ; Uploaded 2 regular attachments and
-         2 ; the other should be katselmuspoytakirja
-         (fn [xml]
-           (let [katselmus (xml/select1 xml [:RakennusvalvontaAsia :katselmustieto :Katselmus])
-                 poytakirja (xml/select1 katselmus [:katselmuspoytakirja])]
-             (validate-attachment poytakirja "katselmuksen_tai_tarkastuksen_poytakirja" application)
-             (fact "task name is transferred for muu katselmus type"
-               (xml/get-text katselmus [:tarkastuksenTaiKatselmuksenNimi]) => task-name))))
+      (let [application (query-application apikey application-id)]
+        (final-xml-validation
+          application
+          1 ; Uploaded 2 regular attachments and
+          2 ; the other should be katselmuspoytakirja
+          (fn [xml]
+            (let [katselmus (xml/select1 xml [:RakennusvalvontaAsia :katselmustieto :Katselmus])
+                  poytakirja (xml/select1 katselmus [:katselmuspoytakirja])]
+              (validate-attachment poytakirja "katselmuksen_tai_tarkastuksen_poytakirja" application)
+              (fact "task name is transferred for muu katselmus type"
+                (xml/get-text katselmus [:tarkastuksenTaiKatselmuksenNimi]) => task-name))))
 
-       (doseq [attachment (filter :latestVersion (:attachments application))]
-         (fact "sent timestamp is set"
-           (:sent attachment) => number?))))))
+        (doseq [attachment (filter :latestVersion (:attachments application))]
+          (fact "sent timestamp is set"
+            (:sent attachment) => number?))))))
 
 ;;
 ;; TODO: Fix this

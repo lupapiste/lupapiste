@@ -3047,37 +3047,29 @@ table.attachments-template-table td.attachment-version-info {
 /* line 39, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-selection-wrapper span.autocomplete-selection span.tag span.tag-label {
   color: #fff;
-  margin-left: 24px;
-  margin-right: 6px;
+  margin-left: 6px;
+  margin-right: 24px;
 }
 /* line 44, ../sass/partials/_autocomplete.scss */
-.autocomplete-component .autocomplete-selection-wrapper span.autocomplete-selection span.tag span.left-align {
+.autocomplete-component .autocomplete-selection-wrapper span.autocomplete-selection span.tag span.tag-remove {
+  cursor: pointer;
   position: absolute;
-  left: 6px;
-  bottom: 0;
+  right: 6px;
   top: 0;
+  bottom: 0;
   margin: auto;
 }
-/* line 51, ../sass/partials/_autocomplete.scss */
-.autocomplete-component .autocomplete-selection-wrapper span.autocomplete-selection span.tag span.tag-remove {
-  color: #fff;
-  cursor: pointer;
-  font-weight: bold;
-}
-/* line 55, ../sass/partials/_autocomplete.scss */
-.autocomplete-component .autocomplete-selection-wrapper span.autocomplete-selection span.tag span.tag-remove:hover {
-  color: black;
-}
-/* line 60, ../sass/partials/_autocomplete.scss */
+/* line 53, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-selection-wrapper span.autocomplete-selection .tag-ellipsis {
   color: #f39129;
   cursor: pointer;
+  font-weight: bold;
 }
-/* line 65, ../sass/partials/_autocomplete.scss */
+/* line 59, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-selection-wrapper span.caption {
   cursor: default;
 }
-/* line 68, ../sass/partials/_autocomplete.scss */
+/* line 62, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-selection-wrapper span.autocomplete-selection-arrow {
   position: absolute;
   top: 0;
@@ -3086,13 +3078,13 @@ table.attachments-template-table td.attachment-version-info {
   right: 9px;
   cursor: default;
 }
-/* line 78, ../sass/partials/_autocomplete.scss */
+/* line 72, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown {
   width: inherit;
   position: relative;
   z-index: 1;
 }
-/* line 82, ../sass/partials/_autocomplete.scss */
+/* line 76, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown input.autocomplete-input {
   width: 100%;
   height: 28px;
@@ -3101,7 +3093,7 @@ table.attachments-template-table td.attachment-version-info {
   display: block;
   box-sizing: border-box;
 }
-/* line 90, ../sass/partials/_autocomplete.scss */
+/* line 84, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result {
   position: fixed;
   z-index: 1000;
@@ -3116,22 +3108,22 @@ table.attachments-template-table td.attachment-version-info {
   background-color: #fff;
   color: black;
 }
-/* line 103, ../sass/partials/_autocomplete.scss */
+/* line 97, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item, .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-empty {
   cursor: default;
   display: list-item;
   list-style-type: none;
   padding: 6px 6px;
 }
-/* line 109, ../sass/partials/_autocomplete.scss */
+/* line 103, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item {
   cursor: pointer;
 }
-/* line 112, ../sass/partials/_autocomplete.scss */
+/* line 106, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item.active {
   background-color: #fef4ea;
 }
-/* line 114, ../sass/partials/_autocomplete.scss */
+/* line 108, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-dropdown ul.autocomplete-result li.autocomplete-result-item.active:active {
   background-color: #f8c38a;
   color: black;
@@ -6045,7 +6037,7 @@ td.comment-text {
   position: fixed;
   right: -500px;
   top: 60px;
-  box-sizing: border-box;
+  bottom: 0;
 }
 /* line 28, ../sass/views/_side_panel.scss */
 #side-panel .comment-controls {
@@ -6138,10 +6130,9 @@ td.comment-text {
   /* IE 8 and below */
   border: 1px solid #363636;
   padding: 6px;
-  position: relative;
   width: 500px;
 }
-/* line 107, ../sass/views/_side_panel.scss */
+/* line 106, ../sass/views/_side_panel.scss */
 #side-panel .header {
   -webkit-touch-callout: none;
   -webkit-user-select: none;
@@ -6151,12 +6142,17 @@ td.comment-text {
   user-select: none;
   cursor: default;
 }
-/* line 110, ../sass/views/_side_panel.scss */
+/* line 109, ../sass/views/_side_panel.scss */
 #side-panel .header h1 {
   line-height: 30px;
-  float: left;
+  overflow: auto;
+  clear: both;
 }
 /* line 114, ../sass/views/_side_panel.scss */
+#side-panel .header .title {
+  float: left;
+}
+/* line 117, ../sass/views/_side_panel.scss */
 #side-panel .header .close-btn {
   background-image: url("/img/icons-sprite-1.17.png");
   background-repeat: no-repeat;
@@ -6164,120 +6160,136 @@ td.comment-text {
   height: 16px;
   background-position: 0px -2700px;
   cursor: pointer;
-  float: right;
-  margin-top: 6px;
+  position: absolute;
+  top: 6px;
+  right: 6px;
 }
-/* line 123, ../sass/views/_side_panel.scss */
+/* line 127, ../sass/views/_side_panel.scss */
 #side-panel .header .help {
   margin-left: 12px;
+  float: left;
 }
-/* line 125, ../sass/views/_side_panel.scss */
+/* line 130, ../sass/views/_side_panel.scss */
 #side-panel .header .help:after {
   border-bottom-color: #757575;
 }
-/* line 131, ../sass/views/_side_panel.scss */
-#side-panel .content {
-  overflow: auto;
-  position: absolute;
-  top: 44px;
-  bottom: 6px;
-  right: 6px;
-  left: 6px;
-  width: auto;
+/* line 134, ../sass/views/_side_panel.scss */
+#side-panel .header .icon.help.expanded {
+  margin-bottom: 22px;
 }
 /* line 139, ../sass/views/_side_panel.scss */
+#side-panel .content {
+  overflow: auto;
+  height: 100%;
+}
+/* line 143, ../sass/views/_side_panel.scss */
 #side-panel .content .form-input.textarea {
   width: 100%;
   box-sizing: border-box;
 }
-/* line 145, ../sass/views/_side_panel.scss */
-#side-panel .content.expanded {
+/* line 150, ../sass/views/_side_panel.scss */
+#side-panel .content-table {
+  overflow: auto;
+  height: 100%;
+  width: 100%;
+  display: table;
+}
+/* line 156, ../sass/views/_side_panel.scss */
+#side-panel .content-table .form-input.textarea {
+  width: 100%;
+  box-sizing: border-box;
+}
+/* line 161, ../sass/views/_side_panel.scss */
+#side-panel .content-table .content-row {
+  display: table-row;
+}
+/* line 165, ../sass/views/_side_panel.scss */
+#side-panel .content-table .content-cell {
+  display: table-cell;
+  padding-bottom: 6px;
+  position: relative;
+}
+/* line 172, ../sass/views/_side_panel.scss */
+#side-panel .content.expanded, #side-panel .content-table.expanded {
   top: 200px;
 }
-/* line 149, ../sass/views/_side_panel.scss */
+/* line 176, ../sass/views/_side_panel.scss */
 #side-panel .panel-info {
   background: #757575;
   padding: 6px;
+  clear: both;
 }
-/* line 154, ../sass/views/_side_panel.scss */
+/* line 182, ../sass/views/_side_panel.scss */
 #side-panel p, #side-panel h1 {
   color: #fff;
 }
-/* line 158, ../sass/views/_side_panel.scss */
+/* line 186, ../sass/views/_side_panel.scss */
 #side-panel .comment {
   color: #595959;
 }
-/* line 162, ../sass/views/_side_panel.scss */
+/* line 190, ../sass/views/_side_panel.scss */
 #side-panel #notice-template {
   height: 100%;
 }
-/* line 166, ../sass/views/_side_panel.scss */
+/* line 194, ../sass/views/_side_panel.scss */
 #side-panel #notice-panel {
   height: 100%;
 }
-/* line 169, ../sass/views/_side_panel.scss */
+/* line 197, ../sass/views/_side_panel.scss */
 #side-panel #notice-panel .application-urgency {
-  position: relative;
-  margin-bottom: 6px;
   width: 215px;
-}
-/* line 175, ../sass/views/_side_panel.scss */
-#side-panel #notice-panel .application-notices {
   position: relative;
 }
-/* line 179, ../sass/views/_side_panel.scss */
+/* line 202, ../sass/views/_side_panel.scss */
 #side-panel #notice-panel .application-tags {
-  position: relative;
   z-index: 1;
-}
-/* line 184, ../sass/views/_side_panel.scss */
-#side-panel #notice-panel .application-text {
   position: relative;
-  height: calc(100% - 144px);
-  height: 100% \9;
 }
-/* line 190, ../sass/views/_side_panel.scss */
+/* line 207, ../sass/views/_side_panel.scss */
 #side-panel #notice-panel .icon.urgent {
   margin-top: 10px;
   vertical-align: middle;
 }
-/* line 195, ../sass/views/_side_panel.scss */
+/* line 212, ../sass/views/_side_panel.scss */
 #side-panel #notice-panel .icon.hold {
   margin-top: 10px;
   vertical-align: middle;
 }
-/* line 200, ../sass/views/_side_panel.scss */
+/* line 217, ../sass/views/_side_panel.scss */
 #side-panel #notice-panel label {
   vertical-align: bottom;
 }
-/* line 204, ../sass/views/_side_panel.scss */
+/* line 221, ../sass/views/_side_panel.scss */
 #side-panel #notice-panel .textarea-wrapper {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  height: 100%;
+  padding-bottom: 62px;
 }
-/* line 212, ../sass/views/_side_panel.scss */
+/* line 226, ../sass/views/_side_panel.scss */
 #side-panel #notice-panel .form-input.textarea {
   height: 100%;
+  height: 300px\9;
   margin: 0;
 }
-/* line 218, ../sass/views/_side_panel.scss */
+/* line 233, ../sass/views/_side_panel.scss */
 #side-panel #notice-panel .notice-prompt-info:before {
   content: "(";
 }
-/* line 221, ../sass/views/_side_panel.scss */
+/* line 236, ../sass/views/_side_panel.scss */
 #side-panel #notice-panel .notice-prompt-info:after {
   content: ")";
 }
 
-/* line 229, ../sass/views/_side_panel.scss */
+/* line 244, ../sass/views/_side_panel.scss */
 #side-panel.show-side-panel {
   right: 0px;
 }
 
-/* line 234, ../sass/views/_side_panel.scss */
+/* line 248, ../sass/views/_side_panel.scss */
+#conversation-panel {
+  height: 100%;
+  padding-bottom: 46px;
+}
+/* line 250, ../sass/views/_side_panel.scss */
 #conversation-panel textarea {
   -webkit-transition: box-shadow 250ms ease;
   -moz-transition: box-shadow 250ms ease;
@@ -6285,25 +6297,29 @@ td.comment-text {
   -o-transition: box-shadow 250ms ease;
   transition: box-shadow 250ms ease;
 }
+/* line 259, ../sass/views/_side_panel.scss */
+#conversation-panel .header h1 {
+  margin-bottom: 0;
+}
 
-/* line 244, ../sass/views/_side_panel.scss */
+/* line 266, ../sass/views/_side_panel.scss */
 #conversation-panel.highlight-conversation textarea {
   box-shadow: inset 0 0 10px #dd780c;
   border-color: #f39129;
 }
 
 @media all and (max-width: 1280px) {
-  /* line 252, ../sass/views/_side_panel.scss */
+  /* line 274, ../sass/views/_side_panel.scss */
   #side-panel .content-wrapper {
     width: 300px;
   }
 
-  /* line 257, ../sass/views/_side_panel.scss */
+  /* line 279, ../sass/views/_side_panel.scss */
   #side-panel {
     right: -300px;
   }
 
-  /* line 262, ../sass/views/_side_panel.scss */
+  /* line 284, ../sass/views/_side_panel.scss */
   .comment-controls .comment-request {
     margin-left: 0;
   }
@@ -6454,12 +6470,11 @@ div.attachment-multiselect-content tr.attachment-group-header {
 /* feature class for marking unfinished content */
 /* line 3, ../sass/partials/_todo.scss */
 .feature {
-  opacity: 0.8;
   border: orange dotted medium;
   padding: 6px;
   border-radius: 10px;
 }
-/* line 8, ../sass/partials/_todo.scss */
+/* line 7, ../sass/partials/_todo.scss */
 .feature .legend {
   display: inline-block;
   position: relative;

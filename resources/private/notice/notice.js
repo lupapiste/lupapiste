@@ -41,10 +41,9 @@ LUPAPISTE.NoticeModel = function() {
 
   self.availableUrgencyStates = ko.observableArray(["normal", "urgent", "pending"]);
 
-  self.selectedTags = ko.observableArray();
+  self.selectedTags = ko.observableArray([]);
 
   var subscriptions = [];
-
 
   var subscribe = function() {
     subscriptions.push(self.urgency.subscribe(_.debounce(function(value) {
@@ -105,7 +104,7 @@ LUPAPISTE.NoticeModel = function() {
     self.applicationId = application.id;
     self.urgency(application.urgency);
     self.authorityNotice(application.authorityNotice);
-    self.selectedTags(application.tags);
+    self.selectedTags(application.tags ? application.tags : []);
     self.applicationTagsProvider = new LUPAPISTE.TagsDataProvider(application.id, self.selectedTags());
     subscribe();
   };

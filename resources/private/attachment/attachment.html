@@ -107,7 +107,7 @@
               </div>
             </div>
 
-            <div data-bind="if: latestVersion">
+            <div>
               <div class="attachment-label">
                 <h4 data-bind="with: latestVersion">
                   <span class="attachment-label-header-item" id="test-attachment-file-name"><a data-bind="text: $data.filename, attr: {href: '/api/raw/download-attachment?attachment-id=' + $data.fileId}"></a></span>
@@ -186,7 +186,7 @@
                 </div>
               </div>
 
-              <div class="signatures clear">
+              <div class="signatures clear" data-bind="if: latestVersion">
                 <h3 data-bind="ltext: 'attachment.signatures'"></h3>
                 <div class="signature-table" data-bind="if: signatures && signatures().length > 0">
                   <!-- ko foreach: signatures -->

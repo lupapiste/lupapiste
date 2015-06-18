@@ -155,9 +155,9 @@
                                      :muuMika {:value "Muu tyotehtava"}}
             :yritys yritysnimi-ja-ytunnus
             :sijaistus {:sijaistettavaHloEtunimi {:value "Jaska"}
-                            :sijaistettavaHloSukunimi {:value "Jokunen"}
-                            :alkamisPvm {:value "13.02.2014"}
-                            :paattymisPvm {:value "20.02.2014"}}})})
+                        :sijaistettavaHloSukunimi {:value "Jokunen"}
+                        :alkamisPvm {:value "13.02.2014"}
+                        :paattymisPvm {:value "20.02.2014"}}})})
 
 (def- tyonjohtaja-blank-role-and-blank-qualification
   (-> tyonjohtaja
@@ -169,6 +169,50 @@
   (-> tyonjohtaja
     (util/dissoc-in [:data :sijaistus :alkamisPvm])
     (assoc-in  [:data :sijaistus :paattymisPvm :value] "")))
+
+(def- tyonjohtaja-v2
+  {:id "tyonjohtaja-v2"
+   :schema-info {:name "tyonjohtaja-v2"
+                 :version 1
+                 :op {:name "tyonjohtajan-nimeaminen-v2"}}
+   :data (merge
+           suunnittelija-henkilo
+           (select-keys (:data tyonjohtaja) [:kuntaRoolikoodi :sijaistus :yritys])
+           {:fillMyInfo {:value nil}
+            :ilmoitusHakemusValitsin {:value "hakemus"}
+            :patevyysvaatimusluokka {:value "A"}
+            :patevyys-tyonjohtaja {:koulutusvalinta {:value "arkkitehtiylioppilas"}
+                                   :koulutus {:value ""}
+                                   :valmistumisvuosi {:value "2010"}
+                                   :kokemusvuodet {:value "3"}
+                                   :valvottavienKohteidenMaara {:value "9"}}
+            :vastattavatTyotehtavat {:rakennuksenPurkaminen {:value true}
+                                     :ivLaitoksenKorjausJaMuutostyo {:value true}
+                                     :uudisrakennustyoIlmanMaanrakennustoita {:value true}
+                                     :maanrakennustyot {:value true}
+                                     :uudisrakennustyoMaanrakennustoineen {:value false}
+                                     :ulkopuolinenKvvTyo {:value false}
+                                     :rakennuksenMuutosJaKorjaustyo {:value false}
+                                     :linjasaneeraus {:value false}
+                                     :ivLaitoksenAsennustyo {:value false}
+                                     :sisapuolinenKvvTyo {:value false}
+                                     :muuMika {:value "Muu tyotehtava"}}
+            :muutHankkeet {:0 {:katuosoite {:value "katuosoite"}
+                               :3kk {:value "1"}
+                               :9kk {:value "3"}
+                               :vaihe {:value "R"}
+                               :6kk {:value "2"}
+                               :autoupdated {:value false}
+                               :rakennustoimenpide {:value "purkutoimenpide"}
+                               :kokonaisala {:value "120"}
+                               :12kk {:value "4"}
+                               :luvanNumero {:value "123"}}}
+            :tyonjohtajaHanketieto {:taysiaikainenOsaaikainen {:value "taysiaikainen"}
+                                    :kaytettavaAika {:value "3"}
+                                    :kayntienMaara {:value "3"}
+                                    :hankeKesto {:value "3"}}
+            :tyonjohtajanHyvaksynta {:tyonjohtajanHyvaksynta {:value true}
+                                     :foremanHistory {:value nil}}})})
 
 (def- rakennuspaikka
   {:id "rakennuspaikka" :schema-info {:name "rakennuspaikka"
@@ -400,7 +444,7 @@
                                                       :created 1383229067483}
                                    :documents [hakija-henkilo
                                                maksaja-henkilo
-                                               tyonjohtaja
+                                               tyonjohtaja-v2
                                                hankkeen-kuvaus-minimum]
                                    :linkPermitData [link-permit-data-kuntalupatunnus]
                                    :appsLinkingToUs [app-linking-to-us]}))
@@ -578,6 +622,25 @@
     (fact "sijaistettavan paattymisPvm" (:paattymisPvm sijaistus-213) => "2014-02-20")
     (validate-person henkilo)
     (validate-minimal-company yritys)))
+
+(facts "Canonical tyonjohtaja v2 model is correct"
+  (let [tyonjohtaja-unwrapped (tools/unwrapped (:data tyonjohtaja-v2))
+        tyonjohtaja-model (get-tyonjohtaja-v2-data "fi" tyonjohtaja-unwrapped :tyonjohtaja)]
+    (fact "tyonjohtajanHyvaksynta (vainTamaHankeKytkin)" (:vainTamaHankeKytkin tyonjohtaja-model) => (-> tyonjohtaja-v2 :data :tyonjohtajanHyvaksynta :tyonjohtajanHyvaksynta :value))
+    (fact "koulutus" (:koulutus tyonjohtaja-model) => (-> tyonjohtaja-v2 :data :patevyys-tyonjohtaja :koulutusvalinta :value))
+    (fact "valmistumisvuosi" (:valmistumisvuosi tyonjohtaja-model) => (-> tyonjohtaja-v2 :data :patevyys-tyonjohtaja :valmistumisvuosi :value))
+    (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka tyonjohtaja-model) => (-> tyonjohtaja-v2 :data :patevyysvaatimusluokka :value))
+    (fact "kokemusvuodet" (:kokemusvuodet tyonjohtaja-model) => (-> tyonjohtaja-v2 :data :patevyys-tyonjohtaja :kokemusvuodet :value))
+    (fact "valvottavienKohteidenMaara" (:valvottavienKohteidenMaara tyonjohtaja-model) => (-> tyonjohtaja-v2 :data :patevyys-tyonjohtaja :valvottavienKohteidenMaara :value))
+    (fact "tyonjohtajaHakemusKytkin" (:tyonjohtajaHakemusKytkin tyonjohtaja-model) => true)
+    (fact "vastattavatTyotehtavat"
+      (:vastattavatTyotehtavat tyonjohtaja-model) => "rakennuksenPurkaminen,ivLaitoksenKorjausJaMuutostyo,uudisrakennustyoIlmanMaanrakennustoita,maanrakennustyot,Muu tyotehtava")
+    (fact "vastattavaTyo contents"
+      (map (comp :vastattavaTyo :VastattavaTyo) (:vastattavaTyotieto tyonjohtaja-model)) => (just #{"Rakennuksen purkaminen"
+                                                                                                    "IV-laitoksen korjaus- ja muutosty\u00f6"
+                                                                                                    "Uudisrakennusty\u00f6 ilman maanrakennust\u00f6it\u00e4"
+                                                                                                    "Maanrakennusty\u00f6t"
+                                                                                                    "Muu tyotehtava"}))))
 
 (facts "Canonical tyonjohtaja-blank-role-and-blank-qualification model is correct"
   (let [tyonjohtaja-unwrapped (tools/unwrapped (:data tyonjohtaja-blank-role-and-blank-qualification))

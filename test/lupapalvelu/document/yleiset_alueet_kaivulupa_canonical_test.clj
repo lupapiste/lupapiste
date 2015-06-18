@@ -31,10 +31,10 @@
 (def- tyomaasta-vastaava-kaivulupa (assoc-in tyomaasta-vastaava [:schema-info :op] operation))
 
 (def- documents [hakija
-                          tyomaasta-vastaava-kaivulupa
-                          maksaja
-                          hankkeen-kuvaus
-                          tyoaika])
+                 tyomaasta-vastaava-kaivulupa
+                 maksaja
+                 hankkeen-kuvaus
+                 tyoaika])
 
 (def kaivulupa-application {:id "LP-753-2013-00001"
                             :permitType "YA"
@@ -59,7 +59,8 @@
                             :propertyId "75341600550007"
                             :documents documents
                             :municipality municipality
-                            :statements statements})
+                            :statements statements
+                            :drawings ctc/drawings})
 
 (ctc/validate-all-documents kaivulupa-application)
 
