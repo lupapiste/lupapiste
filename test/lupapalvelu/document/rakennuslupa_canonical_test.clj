@@ -637,9 +637,9 @@
       (:vastattavatTyotehtavat tyonjohtaja-model) => "rakennuksenPurkaminen,ivLaitoksenKorjausJaMuutostyo,uudisrakennustyoIlmanMaanrakennustoita,maanrakennustyot,Muu tyotehtava")
     (fact "vastattavaTyo contents"
       (map (comp :vastattavaTyo :VastattavaTyo) (:vastattavaTyotieto tyonjohtaja-model)) => (just #{"Rakennuksen purkaminen"
-                                                                                                    "IV-laitoksen korjaus- ja muutostyö"
-                                                                                                    "Uudisrakennustyö ilman maanrakennustöitä"
-                                                                                                    "Maanrakennustyöt"
+                                                                                                    "IV-laitoksen korjaus- ja muutosty\u00f6"
+                                                                                                    "Uudisrakennusty\u00f6 ilman maanrakennust\u00f6it\u00e4"
+                                                                                                    "Maanrakennusty\u00f6t"
                                                                                                     "Muu tyotehtava"}))))
 
 (facts "Canonical tyonjohtaja-blank-role-and-blank-qualification model is correct"
