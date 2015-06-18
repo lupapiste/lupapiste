@@ -14,10 +14,12 @@ LUPAPISTE.CompanyEditModel = function(params) {
   self.showCustomCount.subscribe(function() { _.delay(hub.send, 50, "resize-dialog");});
 
   self.saveCompany = function() {
+    var updates = _.pick(ko.mapping.toJS(self.company), ["accountType", "customAccountLimit"]);
+    updates.customAccountLimit = parseInt(updates.customAccountLimit);
     ajax
       .command("company-update",
                {company: self.company.id(),
-                updates: _.pick(ko.mapping.toJS(self.company), ["accountType", "customAccountLimit"])})
+                updates: updates})
       .success(function() {
         hub.send("company-updated");
         hub.send("close-dialog");})
