@@ -77,6 +77,7 @@
     :zip      (fail! :error.illegal-zip)
     :ovt      (fail! :error.illegal-ovt-tunnus)
     :pop      (fail! "error.illegal-value:select")
+    :accountType (fail! :error.illegal-company-account)
     (fail! :error.unknown)))
 
 (defn validate! [company]
