@@ -78,12 +78,12 @@
         (some #(= "solita" %) auth-ids) => true))))
 
 (facts* "Company details"
-  (let [company-id "solita"
-        company (query kaino :company :company company-id :users true) => truthy]
+  (let [company-id "solita"]
     (fact "Query is ok iff user is member of company"
       (query pena :company :company company-id :users true) => unauthorized?
       (query sonja :company :company company-id :users true) => unauthorized?
-      (query teppo :company :company company-id :users true) = ok?)
+      (query teppo :company :company company-id :users true) = ok?
+      (query kaino :company :company company-id :users true) => ok?)
 
     (facts "Member can't update details but company admin and solita admin can"
       (fact "Teppo is member, denied"
