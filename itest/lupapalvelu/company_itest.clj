@@ -13,7 +13,7 @@
     (count (:users company)) => 1
 
     (fact "Invite is sent"
-      (query kaino :company-invite-user :email "teppo@example.com") => ok?)
+      (command kaino :company-invite-user :email "teppo@example.com") => ok?)
 
     (fact "Sent invitation is seen in company query"
       (let [company (query kaino :company :company "solita" :users true)]
@@ -39,7 +39,7 @@
 
   (fact "Invitation is sent and cancelled"
     (fact "Invite is sent"
-      (query kaino :company-invite-user :email "rakennustarkastaja@jarvenpaa.fi") => ok?
+      (command kaino :company-invite-user :email "rakennustarkastaja@jarvenpaa.fi") => ok?
       (let [company (query kaino :company :company "solita" :users true)]
         (count (:invitations company)) => 1
         (count (:users company)) => 2))
@@ -50,8 +50,7 @@
         (command kaino :company-cancel-invite :tokenId token) => ok?
         (let [company (query kaino :company :company "solita" :users true)]
           (count (:invitations company)) => 0
-          (count (:users company)) => 2))))
-  )
+          (count (:users company)) => 2)))))
 
 
 (facts* "Company is added to application"
@@ -77,4 +76,26 @@
       (let [auth (:auth (query-application mikko application-id))
             auth-ids (flatten (map (juxt :id) auth))]
         (some #(= "solita" %) auth-ids) => true))))
+
+(facts* "Company details"
+  (let [company-id "solita"
+        company (query kaino :company :company company-id :users true) => truthy]
+    (fact "Query is ok iff user is member of company"
+      (query pena :company :company company-id :users true) => unauthorized?
+      (query sonja :company :company company-id :users true) => unauthorized?
+      (query teppo :company :company company-id :users true) = ok?)
+
+    (facts "Member can't update details but company admin and solita admin can"
+      (fact "Teppo is member, denied"
+        (command teppo :company-update :company company-id :updates {:po "Pori"}) => unauthorized?)
+      (fact "Kaino is admin, can upgrade account type, but can't use illegal values or downgrade"
+        (command kaino :company-update :company company-id :updates {:accountType "account30"}) => ok?
+        (command kaino :company-update :company company-id :updates {:accountType "account5"}) => (partial expected-failure? "company.account-type-not-downgradable")
+        (command kaino :company-update :company company-id :updates {:accountType "fail"}) => (partial expected-failure? "error.illegal-company-account"))
+      (fact "Solita admin can set account to be 'custom', customAccountLimit needs to be set"
+        (command admin :company-update :company company-id :updates {:accountType "custom"}) => (partial expected-failure? "company.missing.custom-limit")
+        (command admin :company-update :company company-id :updates {:accountType "custom" :customAccountLimit "2"}) => ok?))
+
+    (fact "When company has max count of users, new member can't be invited"
+      (command kaino :company-invite-user :email "pena@example.com") => (partial expected-failure? "error.company-user-limit-exceeded"))))
 
