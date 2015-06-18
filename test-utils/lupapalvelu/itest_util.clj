@@ -1,7 +1,21 @@
 (ns lupapalvelu.itest-util
   (:require [noir.request :refer [*request*]]
-            [lupapalvelu.fixture.minimal :as minimal]
+            [cheshire.core :as json]
+            [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
+            [clojure.walk :refer [keywordize-keys]]
+            [clojure.java.io :as io]
+            [clojure.string :as s]
+            [swiss.arrows :refer [-<>>]]
+            [clj-ssh.cli :as ssh-cli]
+            [clj-ssh.ssh :as ssh]
+            [midje.sweet :refer :all]
+            [midje.util.exceptions :refer :all]
+            [slingshot.slingshot :refer [try+]]
+            [sade.strings :as ss]
             [sade.core :refer [fail! unauthorized not-accessible]]
+            [sade.http :as http]
+            [sade.env :as env]
+            [lupapalvelu.fixture.minimal :as minimal]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.commands :as doc-commands]
@@ -9,19 +23,7 @@
             [lupapalvelu.vetuma :as vetuma]
             [lupapalvelu.web :as web]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.user :as u]
-            [sade.http :as http]
-            [sade.env :as env]
-            [midje.sweet :refer :all]
-            [cheshire.core :as json]
-            [clojure.walk :refer [keywordize-keys]]
-            [clojure.java.io :as io]
-            [clojure.string :as s]
-            [swiss.arrows :refer [-<>>]]
-            [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
-            [clj-ssh.cli :as ssh-cli]
-            [clj-ssh.ssh :as ssh]
-            [sade.strings :as ss])
+            [lupapalvelu.user :as u])
   (:import org.apache.http.client.CookieStore
            org.apache.http.cookie.Cookie))
 
@@ -173,16 +175,24 @@
   (invalid-csrf-token? {:status 403 :body {:ok false :text "error.SOME_OTHER_REASON"}}) => false
   (invalid-csrf-token? {:status 200 :body {:ok true}}) => false)
 
-(defn expected-failure? [expected-text {:keys [ok text]}]
-  (and (= ok false) (= text expected-text)))
+(defchecker expected-failure? [expected-text e]
+  (cond
+    (map? e)                (and (= (:ok e) false) (= (-> e :text name) (name expected-text)))
+    (captured-throwable? e) (= (some-> e throwable bean :data :object :text name) (name expected-text))
+    :else (throw (Exception. (str "'expected-failure?' called with invalid error parameter " e)))))
 
 (def unauthorized? (partial expected-failure? (:text unauthorized)))
 (def not-accessible? (partial expected-failure? (:text not-accessible)))
 
-(fact "unauthorized?"
-  (unauthorized? unauthorized) => true
-  (unauthorized? {:ok false :text "error.SOME_OTHER_REASON"}) => false
-  (unauthorized? {:ok true}) => false)
+
+(facts "unauthorized?"
+  (fact "with map"
+    (unauthorized? unauthorized) => true
+    (unauthorized? {:ok false :text "error.SOME_OTHER_REASON"}) => false
+    (unauthorized? {:ok true}) => false)
+  (fact "with exception"
+    (fail! (:text unauthorized)) => unauthorized?
+    (fail! "error.SOME_OTHER_REASON") =not=> unauthorized?))
 
 (defn in-state? [state]
   (fn [application] (= (:state application) (name state))))

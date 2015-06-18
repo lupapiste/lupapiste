@@ -7,7 +7,7 @@
     self.textFi = ko.observable("");
     self.textSv = ko.observable("");
 
-    self.disabled = ko.computed(function() {
+    self.disabled = ko.pureComputed(function() {
       return !self.textFi().length;
     });
 

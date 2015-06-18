@@ -1,6 +1,5 @@
 (ns lupapalvelu.user-api
   (:require [taoensso.timbre :as timbre :refer [trace debug info infof warn warnf error fatal]]
-            [swiss.arrows :refer [-<>]]
             [clojure.set :as set]
             [noir.request :as request]
             [noir.response :as resp]
@@ -104,126 +103,10 @@
   (let [token (token/make-token :authority-invitation created-by (merge new-user {:caller-email (:email created-by)}))]
     (notifications/notify! :invite-authority {:user new-user, :data {:token token}})))
 
-(defn- validate-create-new-user! [caller user-data]
-  (when-let [missing (util/missing-keys user-data [:email :role])]
-    (fail! :error.missing-parameters :parameters missing))
-
-  (let [password         (:password user-data)
-        user-role        (keyword (:role user-data))
-        caller-role      (keyword (:role caller))
-        org-authz        (:orgAuthz user-data)
-        organization-id  (when (map? org-authz)
-                           (name (first (keys org-authz))))
-        admin?           (user/admin? caller)
-        authorityAdmin?  (user/authority-admin? caller)]
-
-    (when (and org-authz (not (every? coll? (vals org-authz))))
-      (fail! :error.invalid-role :desc "new user has unsupported organization roles"))
-
-    (when-not (#{:authority :authorityAdmin :applicant :dummy} user-role)
-      (fail! :error.invalid-role :desc "new user has unsupported role" :user-role user-role))
-
-    (when (and (= user-role :applicant) caller)
-      (fail! :error.unauthorized :desc "applicants are born via registration"))
-
-    (when (and (= user-role :authorityAdmin) (not admin?))
-      (fail! :error.unauthorized :desc "only admin can create authorityAdmin users"))
-
-    (when (and (= user-role :authority) (not authorityAdmin?))
-      (fail! :error.unauthorized :desc "only authorityAdmin can create authority users" :user-role user-role :caller-role caller-role))
-
-    (when (and (= user-role :authorityAdmin) (not organization-id))
-      (fail! :error.missing-parameters :desc "new authorityAdmin user must have organization" :parameters [:organization]))
-
-    (when (and (= user-role :authority) (and organization-id (not ((user/organization-ids caller) organization-id))))
-      (fail! :error.unauthorized :desc "authorityAdmin can create users into his/her own organization only, or statement givers without any organization at all"))
-
-    (when (and (= user-role :dummy) organization-id)
-      (fail! :error.unauthorized :desc "dummy user may not have an organization" :missing :organization))
-
-    (when (and password (not (security/valid-password? password)))
-      (fail! :password-too-short :desc "password specified, but it's not valid"))
-
-    (when (and organization-id (not (organization/get-organization organization-id)))
-      (fail! :error.organization-not-found))
-
-    (when (and (:apikey user-data) (not admin?))
-      (fail! :error.unauthorized :desc "only admin can create create users with apikey")))
-
-  true)
-
-(defn- create-new-user-entity [{:keys [enabled password] :as user-data}]
-  (let [email (user/canonize-email (:email user-data))]
-    (-<> user-data
-      (select-keys [:email :username :role :firstName :lastName :personId
-                    :phone :city :street :zip :enabled :orgAuthz
-                    :allowDirectMarketing :architect :company
-                    :graduatingYear :degree :fise])
-      (merge {:firstName "" :lastName "" :username email} <>)
-      (assoc
-        :email email
-        :enabled (= "true" (str enabled))
-        :private (if password {:password (security/get-hash password)} {})))))
-
-;;
-;; TODO: Ylimaaraisen "send-email"-parametrin sijaan siirra mailin lahetys pois
-;;       activation/send-activation-mail-for -funktiosta kutsuviin funktioihin.
-;;
-(defn create-new-user
-  "Insert new user to database, returns new user data without private information. If user
-   exists and has role \"dummy\", overwrites users information. If users exists with any other
-   role, throws exception."
-  [caller user-data & {:keys [send-email] :or {send-email true}}]
-  (validate-create-new-user! caller user-data)
-  (let [user-entry  (create-new-user-entity user-data)
-        old-user    (user/get-user-by-email (:email user-entry))
-        new-user    (if old-user
-                      (assoc user-entry :id (:id old-user))
-                      (assoc user-entry :id (mongo/create-id)))
-        email       (:email new-user)
-        {old-id :id old-role :role}  old-user
-        notification {:titleI18nkey "user.notification.firstLogin.title"
-                      :messageI18nkey "user.notification.firstLogin.message"}
-        new-user   (if (user/applicant? user-data)
-                     (assoc new-user :notification notification)
-                     new-user)]
-    (try
-      (condp = old-role
-        nil     (do
-                  (info "creating new user" (dissoc new-user :private))
-                  (mongo/insert :users new-user))
-        "dummy" (do
-                  (info "rewriting over dummy user:" old-id (dissoc new-user :private :id))
-                  (mongo/update-by-id :users old-id (dissoc new-user :id)))
-        ; LUPA-1146
-        "applicant" (if (and (= (:personId old-user) (:personId new-user)) (not (:enabled old-user)))
-                      (do
-                        (info "rewriting over inactive applicant user:" old-id (dissoc new-user :private :id))
-                        (mongo/update-by-id :users old-id (dissoc new-user :id)))
-                      (fail! :error.duplicate-email))
-        (fail! :error.duplicate-email))
-
-      (when (and send-email (not= "dummy" (name (:role new-user))))
-        (activation/send-activation-mail-for new-user))
-
-      (user/get-user-by-email email)
-
-      (catch com.mongodb.MongoException$DuplicateKey e
-        (if-let [field (second (re-find #"E11000 duplicate key error index: lupapiste\.users\.\$([^\s._]+)" (.getMessage e)))]
-          (do
-            (warnf "Duplicate key detected when inserting new user: field=%s" field)
-            (fail! :duplicate-key :field field))
-          (do
-            (warn e "Inserting new user failed")
-            (fail! :cant-insert)))))))
-
 (defn- create-authority-user-with-organization [caller new-organization email firstName lastName roles]
   (let [org-authz {new-organization (into #{} roles)}
-        new-user (create-new-user
-                   caller
-                   {:email email :orgAuthz org-authz :role :authority :enabled true
-                    :firstName firstName :lastName lastName}
-                   :send-email false)]
+        user-data {:email email :orgAuthz org-authz :role :authority :enabled true :firstName firstName :lastName lastName}
+        new-user (user/create-new-user caller user-data :send-email false)]
     (infof "invitation for new authority user: email=%s, organization=%s" email new-organization)
     (notify-new-authority new-user caller)
     (ok :operation "invited")))
@@ -235,7 +118,7 @@
    :user-roles #{:admin :authorityAdmin}}
   [{user-data :data caller :user}]
   (let [updated-user-data (if (:organization user-data) (assoc user-data :orgAuthz {(:organization user-data) [(:role user-data)]}) user-data)
-        user (create-new-user caller updated-user-data :send-email false)]
+        user (user/create-new-user caller updated-user-data :send-email false)]
     (infof "Added a new user: role=%s, email=%s, orgAuthz=%s" (:role user) (:email user) (:orgAuthz user))
     (if (user/authority? user)
       (do
@@ -251,7 +134,7 @@
   (let [email (user/canonize-email email)]
     (or
       (user/get-user-by-email email)
-      (create-new-user current-user {:email email :role "dummy"}))))
+      (user/create-new-user current-user {:email email :role "dummy"}))))
 
 ;;
 ;; ==============================================================================
@@ -522,18 +405,22 @@
     (when-not vetuma-data (fail! :error.create-user))
     (try
       (infof "Registering new user: %s - details from vetuma: %s" (dissoc data :password) vetuma-data)
-      (if-let [user (create-new-user nil (merge
-                                           (set/rename-keys vetuma-data {:userid :personId})
-                                           (select-keys data [:password :street :zip :city :phone :allowDirectMarketing])
-                                           (when (:architect data)
-                                             (select-keys data [:architect :degree :graduatingYear :fise]))
-                                           {:email email :role "applicant" :enabled false}))]
+      (if-let [user (user/create-new-user
+                      nil
+                      (merge
+                        (set/rename-keys vetuma-data {:userid :personId})
+                        (select-keys data [:password :street :zip :city :phone :allowDirectMarketing])
+                        (when (:architect data)
+                          (select-keys data [:architect :degree :graduatingYear :fise]))
+                        {:email email :role "applicant" :enabled false}))]
         (do
+          (activation/send-activation-mail-for user)
           (vetuma/consume-user stamp)
           (when rakentajafi
             (util/future* (idf/send-user-data user "rakentaja.fi")))
           (ok :id (:id user)))
         (fail :error.create-user))
+
       (catch IllegalArgumentException e
         (fail (keyword (.getMessage e)))))))
 
@@ -552,7 +439,10 @@
       (fail! :error.create-user))
     (try
       (infof "Confirm linked account: %s - details from vetuma: %s" (dissoc data :password) vetuma-data)
-      (if-let [user (create-new-user nil (merge data vetuma-data {:email email :role "applicant" :enabled true}) :send-email false)]
+      (if-let [user (user/create-new-user
+                      nil
+                      (merge data vetuma-data {:email email :role "applicant" :enabled true})
+                      :send-email false)]
         (do
           (vetuma/consume-user stamp)
           (token/get-token tokenId :consume true)

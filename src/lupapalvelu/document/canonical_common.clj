@@ -263,6 +263,7 @@
 
 (def kuntaRoolikoodit
   {:paasuunnittelija       "p\u00e4\u00e4suunnittelija"
+   :hakija-r               "Rakennusvalvonta-asian hakija"
    :hakija                 "Rakennusvalvonta-asian hakija"
    :maksaja                "Rakennusvalvonta-asian laskun maksaja"
    :rakennuksenomistaja    "Rakennuksen omistaja"})
@@ -647,24 +648,31 @@
 (defn- get-pos [coordinates]
   {:pos (map #(str (-> % .x) " " (-> % .y)) coordinates)})
 
+(defn- get-basic-drawing-info [drawing]  ;; krysp Yhteiset 2.1.5+
+  (util/assoc-when {}
+    :nimi (:name drawing)
+    :kuvaus (:desc drawing)
+    :korkeusTaiSyvyys (:height drawing)
+    :pintaAla (:area drawing)))
+
 (defn- point-drawing [drawing]
-  (let  [geometry (:geometry drawing)
-         p (jts/read-wkt-str geometry)
-         cord (.getCoordinate p)]
+  (let [p (-> drawing :geometry jts/read-wkt-str)
+        cord (.getCoordinate p)]
     {:Sijainti
-     {:piste {:Point {:pos (str (-> cord .x) " " (-> cord .y))}}}}))
+     (merge {:piste {:Point {:pos (str (-> cord .x) " " (-> cord .y))}}}
+       (get-basic-drawing-info drawing))}))
 
 (defn- linestring-drawing [drawing]
-  (let  [geometry (:geometry drawing)
-         ls (jts/read-wkt-str geometry)]
+  (let [ls (-> drawing :geometry jts/read-wkt-str)]
     {:Sijainti
-     {:viiva {:LineString (get-pos (-> ls .getCoordinates))}}}))
+     (merge {:viiva {:LineString (get-pos (-> ls .getCoordinates))}}
+       (get-basic-drawing-info drawing))}))
 
 (defn- polygon-drawing [drawing]
-  (let  [geometry (:geometry drawing)
-         polygon (jts/read-wkt-str geometry)]
+  (let [polygon (-> drawing :geometry jts/read-wkt-str)]
     {:Sijainti
-     {:alue {:Polygon {:exterior {:LinearRing (get-pos (-> polygon .getCoordinates))}}}}}))
+     (merge {:alue {:Polygon {:exterior {:LinearRing (get-pos (-> polygon .getCoordinates))}}}}
+       (get-basic-drawing-info drawing))}))
 
 (defn- drawing-type? [t drawing]
   (.startsWith (:geometry drawing) t))
@@ -676,9 +684,9 @@
 
 
 (defn get-sijaintitieto [application]
-  (let [drawings (drawings-as-krysp (:drawings application))]
-    (cons {:Sijainti {:osoite {:yksilointitieto (:id application)
-                               :alkuHetki (util/to-xml-datetime (now))
-                               :osoitenimi {:teksti (:address application)}}
-                      :piste {:Point {:pos (str (:x (:location application)) " " (:y (:location application)))}}}}
-      drawings)))
+  (let [app-location-info {:Sijainti {:osoite {:yksilointitieto (:id application)
+                                               :alkuHetki (util/to-xml-datetime (now))
+                                               :osoitenimi {:teksti (:address application)}}
+                                      :piste {:Point {:pos (str (:x (:location application)) " " (:y (:location application)))}}}}
+        drawings (drawings-as-krysp (:drawings application))]
+    (cons app-location-info drawings)))

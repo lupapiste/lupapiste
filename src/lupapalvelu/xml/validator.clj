@@ -117,6 +117,12 @@
    "2.1.6" (create-validator rakval-2_1_6)
    "2.1.8" (create-validator rakval-2_1_8)})
 
+(def- ya-validators
+  {"2.1.2" common-validator-2_1_0
+   "2.1.3" common-validator-2_1_3
+   "2.2.0" common-validator-2_1_5
+   "ah-1.1" asianhallinta-validator})
+
 (def- poik-validators
   {"2.1.2" common-validator-2_1_0
    "2.1.3" common-validator-2_1_1
@@ -131,9 +137,7 @@
 (def- schema-validators
   {:R   rakval-validators
    :P   poik-validators
-   :YA  {"2.1.2" common-validator-2_1_0
-         "2.1.3" common-validator-2_1_3
-         "ah-1.1" asianhallinta-validator}
+   :YA  ya-validators
    :YI  ymp-validators
    :MAL ymp-validators
    :VVVL {"2.1.3" common-validator-2_1_3

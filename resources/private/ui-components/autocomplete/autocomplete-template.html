@@ -6,11 +6,21 @@
       <div class="autocomplete-component">
         <div class="autocomplete-selection-wrapper" data-bind="event: {mousedown: selectInput}">
           <span class="autocomplete-selection">
-            <span data-bind="visible: selected, text: selected"></span>
-            <span data-bind="visible: !selected(), ltext: 'choose'"></span>
+            <!-- ko if: selected -->
+            <span data-bind="text: selectedText() ? selected()[selectedText()] : selected()"></span>
+            <!-- /ko -->
+            <span class="caption" data-bind="visible: showCaption, ltext: 'choose'"></span>
+            <!-- ko foreach: selectedTags -->
+            <span class="tag">
+              <span class="tag-label" data-bind="text: $parent.selectedText() ? $data[$parent.selectedText()] : $data"></span>
+              <span class="tag-remove icon remove"
+                    data-bind="click: $parent.removeTag, clickBubble: false, event: { mousedown: function() {} }, mousedownBubble: false"></span>
+            </span>
+            <!-- /ko -->
+            <span class="tag-ellipsis" data-bind="visible: !showCaption() && tags">...</span>
           </span>
-          <span class="autocomplete-selection-arrow icon drill-down-black-smaller"></span>
-        <div>
+          <span data-bind="visible: showCaption" class="autocomplete-selection-arrow icon drill-down-black-smaller"></span>
+        </div>
         <div class="autocomplete-dropdown" data-bind="fader: inputSelected, duration: 100">
           <input class="autocomplete-input" type="text" data-test-id="autocomplete-input"
                  data-bind="textInput: query, hasFocus: inputSelected, event: {keydown: navigate}"></input>
@@ -21,7 +31,7 @@
                 data-bind="click: $parent.selectItem,
                            event: {mouseover: $parent.changeIndex.bind($data, $index())},
                            css: {active: $index() === $parent.index()}">
-              <span data-bind="text: label"></span>
+              <span data-bind="text: $parent.selectedText() ? $data[$parent.selectedText()] : $data"></span>
             </li>
           </ul>
           <!-- /ko -->
