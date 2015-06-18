@@ -48,16 +48,38 @@
       (c/update-company! id {:accountType "account5"} false) => (throws clojure.lang.ExceptionInfo))))
 
 (facts "Custom account"
-  (let [id "0987654321"
-        custom-data {:id id :name "custom" :y "2341528-4" :created 1 :accountType "account5"
-                     :address1 "katu" :zip "33100" :po "Tampere" :customAccountLimit nil}]
-      (against-background [(c/find-company-by-id! id) => custom-data
-                           (mongo/update :companies {:_id id} anything) => true]
+ (let [id "0987654321"
+       custom-id "123456789"
+       data {:id id :name "normal" :y "2341528-4" :created 1 :accountType "account5"
+             :address1 "katu" :zip "33100" :po "Tampere" :customAccountLimit nil}
+       custom-data {:id custom-id :name "custom" :y "2341528-4" :created 1 :accountType "custom"
+                    :address1 "katu" :zip "33100" :po "Tampere" :customAccountLimit 100}
+       expected (-> (assoc data :accountType "custom" :customAccountLimit 1000)
+                  (dissoc :id))
+       custom-expected (-> (assoc custom-data :accountType "account5" :customAccountLimit nil)
+                         (dissoc :id))]
+     (against-background [(c/find-company-by-id! id) => data
+                          (c/find-company-by-id! custom-id) => custom-data
+                          (mongo/update :companies {:_id id} anything) => true
+                          (mongo/update :companies {:_id custom-id} anything) => true
+                          (mongo/count :users {:company.id id}) => 2]
 
-    (fact "Normal user can't set account to custom, but admin can"
-      (c/update-company! id {:accountType "custom" :customAccountLimit "1000"} false) => (throws clojure.lang.ExceptionInfo #"unauthorized"))
+       (fact "Normal user can't set/change account to/from custom, but admin can"
+         (c/update-company! id {:accountType "custom" :customAccountLimit "1000"} false) => (throws clojure.lang.ExceptionInfo #"unauthorized")
+         (c/update-company! id {:accountType "custom" :customAccountLimit "1000"} true) => expected
 
-    (fact "Can't set custom account when no customAccountLimit is given"
-      (c/update-company! id {:accountType "custom"} true) => (throws clojure.lang.ExceptionInfo #"company.missing.custom-limit")))))
+         (c/update-company! custom-id {:accountType "account5"} false) => (throws clojure.lang.ExceptionInfo #"unauthorized")
+         (c/update-company! custom-id {:accountType "account5"} true) => custom-expected)
+
+       (fact "Can't set custom account when no customAccountLimit is given"
+         (c/update-company! id {:accountType "custom"} true) => (throws clojure.lang.ExceptionInfo #"company.missing.custom-limit"))
+
+       (fact "customAccountLimit is set to nil when using other than custom account"
+         (c/update-company! id {:accountType "account5" :customAccountLimit "123"} true) => (dissoc data :id))
+
+       (fact "customAccountLimit can't be set less than current count of users in company"
+         (c/update-company! id {:accountType "custom" :customAccountLimit "1"} true) => (throws clojure.lang.ExceptionInfo #"company.limit-too-small")
+         (c/update-company! id {:accountType "custom" :customAccountLimit "2"} true) => (assoc expected :customAccountLimit 2)
+         (c/update-company! id {:accountType "custom" :customAccountLimit "3"} true) => (assoc expected :customAccountLimit 3)))))
 
 
