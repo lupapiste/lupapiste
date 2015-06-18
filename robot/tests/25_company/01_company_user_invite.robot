@@ -103,3 +103,31 @@ New user logs in
 User sees herself as company admin
   Open company user listing
   Element text should be  xpath=//table[@data-test-id='company-users-table']//tr[@data-test-id='company-user-user2@solita.fi']/td[@data-test-id='company-user-role']  Ylläpitäjä
+  Logout
+
+# Custom account
+
+Solita admin sets custom account for company 'Solita Oy', max users 2
+  SolitaAdmin logs in
+  Click element  xpath=//li/a[contains(text(), "Yritykset")]
+  Click element  xpath=//table[@data-test-id="corporations-table"]//tr[@data-test-id="company-row-solita"]//a[@data-test-id="company-edit"]
+  Element text should be  xpath=//div[@data-test-id="modal-dialog-content"]/div[@class="header"]/span[@class="title"]  Muokkaa yritysta
+  Select from list by value  xpath=//select[@name="account-type"]  custom
+  Input text  xpath=//input[@name="customAccountLimit"]  2
+  Focus  xpath=//button[@data-test-id="modal-dialog-submit-button"]
+  Click by test id  modal-dialog-submit-button
+  Wait Until  Element should not be visible  xpath=//div[@data-test-id="modal-dialog-content"]
+  Logout
+
+Kaino logs in and sees account is custom, and it can't be changed by Kaino
+  Login  kaino@solita.fi  kaino123
+  User should be logged in  Kaino Solita
+  Open company details
+  Element should be visible  xpath=//span[@data-test-id="company-custom-account"]
+  Element should not be visible  xpath=//select[@data-test-id="company-account-select"]
+
+Kaino wants to invite new users, but can't because account limit is reached
+  Open company user listing
+  Element should be disabled  xpath=//button[@data-test-id="company-add-user"]
+  Element should be visible  xpath=//span[@class="user-limit-reached"]
+
