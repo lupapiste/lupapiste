@@ -2,7 +2,8 @@
   (:require [midje.sweet :refer :all]
             [lupapalvelu.company :as c]
             [lupapalvelu.mongo :as mongo]
-            [sade.core :as core]))
+            [sade.core :as core]
+            [lupapalvelu.itest-util :refer [expected-failure?]]))
 
 (facts create-company
   (fact
@@ -41,11 +42,13 @@
     (fact "Can change company name"
       (c/update-company! id {:name "bar"} false) => expected)
     (fact "Extra keys are not persisted"
-       (c/update-company! id {:name "bar" :bozo ..irrelevant..} false) => (throws clojure.lang.ExceptionInfo))
-    (fact "Can't change Y"
-      (c/update-company! id {:name "bar" :y ..irrelevant..} false) => (throws clojure.lang.ExceptionInfo))
-    (fact "Cant downgrade account type"
-      (c/update-company! id {:accountType "account5"} false) => (throws clojure.lang.ExceptionInfo))))
+       (c/update-company! id {:name "bar" :bozo ..irrelevant..} false) => (partial expected-failure? "error.unknown"))
+    (fact "Can't change Y or id"
+      (c/update-company! id {:name "bar" :y ..irrelevant..} false) => (partial expected-failure? "bad-request")
+      (c/update-company! id {:name "bar" :id ..irrelevant..} false) => (partial expected-failure? "bad-request"))
+    (fact "Cant downgrade account type, but can upgrade"
+      (c/update-company! id {:accountType "account5" :name "bar"} false) => (partial expected-failure? "company.account-type-not-downgradable")
+      (c/update-company! id {:accountType "account30" :name "bar"} false) => (assoc expected :accountType "account30"))))
 
 (facts "Custom account"
  (let [id "0987654321"
@@ -65,20 +68,20 @@
                           (mongo/count :users {:company.id id}) => 2]
 
        (fact "Normal user can't set/change account to/from custom, but admin can"
-         (c/update-company! id {:accountType "custom" :customAccountLimit "1000"} false) => (throws clojure.lang.ExceptionInfo #"unauthorized")
+         (c/update-company! id {:accountType "custom" :customAccountLimit "1000"} false) => (partial expected-failure? "error.unauthorized")
          (c/update-company! id {:accountType "custom" :customAccountLimit "1000"} true) => expected
 
-         (c/update-company! custom-id {:accountType "account5"} false) => (throws clojure.lang.ExceptionInfo #"unauthorized")
+         (c/update-company! custom-id {:accountType "account5"} false) => (partial expected-failure? "error.unauthorized")
          (c/update-company! custom-id {:accountType "account5"} true) => custom-expected)
 
        (fact "Can't set custom account when no customAccountLimit is given"
-         (c/update-company! id {:accountType "custom"} true) => (throws clojure.lang.ExceptionInfo #"company.missing.custom-limit"))
+         (c/update-company! id {:accountType "custom"} true) => (partial expected-failure? "company.missing.custom-limit"))
 
        (fact "customAccountLimit is set to nil when using other than custom account"
          (c/update-company! id {:accountType "account5" :customAccountLimit "123"} true) => (dissoc data :id))
 
        (fact "customAccountLimit can't be set less than current count of users in company"
-         (c/update-company! id {:accountType "custom" :customAccountLimit "1"} true) => (throws clojure.lang.ExceptionInfo #"company.limit-too-small")
+         (c/update-company! id {:accountType "custom" :customAccountLimit "1"} true) => (partial expected-failure? "company.limit-too-small")
          (c/update-company! id {:accountType "custom" :customAccountLimit "2"} true) => (assoc expected :customAccountLimit 2)
          (c/update-company! id {:accountType "custom" :customAccountLimit "3"} true) => (assoc expected :customAccountLimit 3)))))
 
