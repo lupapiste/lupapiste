@@ -996,23 +996,21 @@
       (some #(when (= (first %) (first part)) % ) target-tree))))
 
 (defn organization-operations [organization]
-  (let [permitTypes (->> organization :scope (map :permitType) set)
-        filtering-fn (fn [node] (permitTypes (permit-type-of-operation node)))]
+  (let [permit-types (->> organization :scope (map :permitType) set)
+        filtering-fn (fn [node] (permit-types (permit-type-of-operation node)))]
     (sort-operation-tree
       (operations-filtered filtering-fn false))))
 
 (defn selected-operations-for-organizations [organizations]
-  (let [filter-fn                 (fn [org] (seq (:selected-operations org)))
-        orgs-with-selected-ops    (filter filter-fn organizations)
+  (let [orgs-with-selected-ops (filter (comp seq :selected-operations) organizations)
         ;; Resolving operation tree for organizations with "selected-operations" defined in db
         op-trees-for-orgs-with-selected-ops (if-not (empty? orgs-with-selected-ops)
-                                              (let [selected-operations-arrays (map :selected-operations orgs-with-selected-ops)
-                                                    selected-operations (-> selected-operations-arrays
-                                                                          (#(apply concat %))
-                                                                          (#(map keyword %))
-                                                                          set)
-                                                    filtering-fn (fn [node] (selected-operations node))]
-                                                (operations-filtered filtering-fn false))
+                                              (let [selected-operations (->> orgs-with-selected-ops
+                                                                          (map :selected-operations)
+                                                                          flatten
+                                                                          (map keyword)
+                                                                          set)]
+                                                (operations-filtered selected-operations false))
                                               [])]
     (sort-operation-tree op-trees-for-orgs-with-selected-ops)))
 

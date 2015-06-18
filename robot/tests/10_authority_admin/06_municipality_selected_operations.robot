@@ -31,6 +31,7 @@ AuthAdmin removes 'Uuden rakennuksen rakentaminen' from selected operations
   # => (count (filter (fn [[_ v]] (#{permit/R permit/P permit/YI permit/YL permit/MAL permit/VVVL permit/KT permit/MM} (:permit-type v) ))  operations))
   # TODO 68 when tyonjohtaja-v2 is removed
   Wait until  Xpath Should Match X Times  //section[@id='admin']//table[@data-test-id='organization-selected-operations']//tr[@class='sel-op-row']  77
+  Xpath Should Match X Times  //span[contains(text(),'Asuinkerrostalon tai rivitalon rakentaminen')]  1
 
   Click by test id  authadmin-edit-selected-operations
 
@@ -42,6 +43,9 @@ AuthAdmin removes 'Uuden rakennuksen rakentaminen' from selected operations
   # Save
   Click element  ${dialogPath}//button[@data-loc='selectm.ok']
   Wait until  Element should not be visible  ${dialogPath}
+
+  Wait until  Xpath Should Match X Times  //span[contains(text(),'Asuinkerrostalon tai rivitalon rakentaminen')]  0
+
   Logout
 
 Operation tree does not have 'Asuinkerrostalon tai rivitalon rakentaminen' in it
