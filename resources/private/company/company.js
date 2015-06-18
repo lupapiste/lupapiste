@@ -33,7 +33,6 @@
 
     this.canSearchUser    = this.email.isValid;
     this.pending          = ko.observable();
-    this.canCancel        = ko.computed(function() { return this.pending(); }, this);
 
     this.emailEnabled     = ko.observable();
     this.done             = ko.observable();
@@ -50,7 +49,7 @@
   NewCompanyUser.prototype.searchUser = function() {
     this.emailEnabled(false);
     ajax
-      .query("company-invite-user", {email: this.email()})
+      .command("company-invite-user", {email: this.email()})
       .pending(this.pending)
       .success(function(data) {
         var result = data.result;

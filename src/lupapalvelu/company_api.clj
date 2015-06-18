@@ -75,7 +75,7 @@
         (fail :error.company-user-limit-exceeded)))))
 
 
-(defquery company-invite-user
+(defcommand company-invite-user
   {:user-roles #{:applicant}
    :pre-checks [validate-user-is-admin-or-company-admin user-limit-not-exceeded]
    :parameters [email]}
