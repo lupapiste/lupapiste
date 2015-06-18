@@ -14,20 +14,26 @@
               <th>Osoite</th>
               <th>Postinumero</th>
               <th>Postitoimipaikka</th>
+              <th>Tilityyppi</th>
+              <th>K&auml;ytt&auml;j&auml;m&auml;r&auml;</th>
+              <th>Toiminnot</th>
             </tr>
           </thead>
           <tbody data-bind="foreach: { data: companiesModel.companies, as: 'company' }">
-            <tr>
+            <tr data-bind="attr: {'data-test-id': 'company-row-' + company.id}">
               <td data-bind="text: company.name"></td>
               <td data-bind="text: company.y"></td>
               <td><span data-bind="text: company.address1"></span></td>
               <td data-bind="text: company.zip"></td>
               <td data-bind="text: company.po"></td>
+              <td data-bind="text: company.accountType"></td>
+              <td data-bind="text: company.userLimit"></td>
+              <td><a data-bind="click: company.openDialog" data-test-id="company-edit">Muokkaa</a></td>
             </tr>
           </tbody>
         </table>
 
-        <button class="btn btn-primary" data-bind="click: companiesModel.create">Luo uusi yritys</button>
+        <button class="btn btn-primary" data-bind="visible: false, click: companiesModel.create">Luo uusi yritys</button>
 
       </div>
       <div id="dialog-create-company" class="window autosized" data-bind="with: createCompanyModel">

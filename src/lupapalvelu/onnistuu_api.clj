@@ -33,28 +33,30 @@
   {:parameters [company signer lang]
    :user-roles #{:anonymous}}
   [{:keys [created user]}]
-  (sc/validate c/Company company)
-  (sc/validate p/Signer signer)
-  (if-not ((set (map name i18n/languages)) lang) (fail! :bad-lang))
-  (if (and (nil? (:currentUser signer)) (u/get-user-by-email (:email signer))) (fail! :email-in-use))
-  (let [config       (env/value :onnistuu)
-        base-url     (or (:return-base-url config) (env/value :host))
-        document-url (str base-url "/api/sign/document")
-        success-url  (str base-url "/api/sign/success")
-        signer       (if (:currentUser signer) (-> signer
-                                                   (assoc :email (:email user))
-                                                   (assoc :currentUser (:id user)))
-                                               signer)
-        process-data (p/init-sign-process (java.util.Date. created) (:crypto-key config) success-url document-url company signer lang)
-        failure-url  (str base-url "/api/sign/fail/" (:process-id process-data))]
+  (let [company (merge c/company-skeleton company)]
+    (sc/validate c/Company company)
+    (sc/validate p/Signer signer)
+    (if-not ((set (map name i18n/languages)) lang) (fail! :bad-lang))
+    (if (and (nil? (:currentUser signer)) (u/get-user-by-email (:email signer))) (fail! :email-in-use))
+    (let [config       (env/value :onnistuu)
+          base-url     (or (:return-base-url config) (env/value :host))
+          document-url (str base-url "/api/sign/document")
+          success-url  (str base-url "/api/sign/success")
+          signer       (if (:currentUser signer)
+                         (-> signer
+                           (assoc :email (:email user))
+                           (assoc :currentUser (:id user)))
+                         signer)
+          process-data (p/init-sign-process (java.util.Date. created) (:crypto-key config) success-url document-url company signer lang)
+          failure-url  (str base-url "/api/sign/fail/" (:process-id process-data))]
 
 
-    (ok (merge {:failure-url failure-url}
-               (select-keys config [:post-to
-                                    :customer-id])
-               (select-keys process-data [:process-id
-                                          :data
-                                          :iv])))))
+      (ok (merge {:failure-url failure-url}
+                 (select-keys config [:post-to
+                                      :customer-id])
+                 (select-keys process-data [:process-id
+                                            :data
+                                            :iv]))))))
 
 ; Cancel signing:
 

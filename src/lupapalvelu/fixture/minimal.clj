@@ -800,6 +800,7 @@
 
 (def companies [{:_id "solita"
                  :accountType "account5"
+                 :customAccountLimit nil
                  :created 1412959886600
                  :name "Solita Oy"
                  :address1 "\u00c5kerlundinkatu 11"
