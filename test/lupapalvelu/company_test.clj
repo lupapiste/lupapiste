@@ -68,8 +68,8 @@
                           (mongo/count :users {:company.id id}) => 2]
 
        (fact "Normal user can't set/change account to/from custom, but admin can"
-         (c/update-company! id {:accountType "custom" :customAccountLimit "1000"} false) => (partial expected-failure? "error.unauthorized")
-         (c/update-company! id {:accountType "custom" :customAccountLimit "1000"} true) => expected
+         (c/update-company! id {:accountType "custom" :customAccountLimit 1000} false) => (partial expected-failure? "error.unauthorized")
+         (c/update-company! id {:accountType "custom" :customAccountLimit 1000} true) => expected
 
          (c/update-company! custom-id {:accountType "account5"} false) => (partial expected-failure? "error.unauthorized")
          (c/update-company! custom-id {:accountType "account5"} true) => custom-expected)
@@ -78,11 +78,11 @@
          (c/update-company! id {:accountType "custom"} true) => (partial expected-failure? "company.missing.custom-limit"))
 
        (fact "customAccountLimit is set to nil when using other than custom account"
-         (c/update-company! id {:accountType "account5" :customAccountLimit "123"} true) => (dissoc data :id))
+         (c/update-company! id {:accountType "account5" :customAccountLimit 123} true) => (dissoc data :id))
 
        (fact "customAccountLimit can't be set less than current count of users in company"
-         (c/update-company! id {:accountType "custom" :customAccountLimit "1"} true) => (partial expected-failure? "company.limit-too-small")
-         (c/update-company! id {:accountType "custom" :customAccountLimit "2"} true) => (assoc expected :customAccountLimit 2)
-         (c/update-company! id {:accountType "custom" :customAccountLimit "3"} true) => (assoc expected :customAccountLimit 3)))))
+         (c/update-company! id {:accountType "custom" :customAccountLimit 1} true) => (partial expected-failure? "company.limit-too-small")
+         (c/update-company! id {:accountType "custom" :customAccountLimit 2} true) => (assoc expected :customAccountLimit 2)
+         (c/update-company! id {:accountType "custom" :customAccountLimit 3} true) => (assoc expected :customAccountLimit 3)))))
 
 

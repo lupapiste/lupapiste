@@ -156,9 +156,9 @@
 (defn ensure-custom-limit [company-id {account-type :accountType custom-limit :customAccountLimit :as data}]
   "Checks that custom account's customAccountLimit is set and allowed. Nullifies customAcconutLimit with normal accounts."
   (if (= :custom (keyword account-type))
-   (if-not (ss/blank? custom-limit)
-     (if (<= (company-users-count company-id) (util/->int custom-limit))
-       (assoc data :customAccountLimit (util/->int custom-limit))
+   (if custom-limit
+     (if (<= (company-users-count company-id) custom-limit)
+       (assoc data :customAccountLimit custom-limit)
        (fail! :company.limit-too-small))
      (fail! :company.missing.custom-limit))
    (assoc data :customAccountLimit nil)))

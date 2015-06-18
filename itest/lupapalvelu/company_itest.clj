@@ -91,10 +91,11 @@
       (fact "Kaino is admin, can upgrade account type, but can't use illegal values or downgrade"
         (command kaino :company-update :company company-id :updates {:accountType "account30"}) => ok?
         (command kaino :company-update :company company-id :updates {:accountType "account5"}) => (partial expected-failure? "company.account-type-not-downgradable")
-        (command kaino :company-update :company company-id :updates {:accountType "fail"}) => (partial expected-failure? "error.illegal-company-account"))
+        (command kaino :company-update :company company-id :updates {:accountType "fail"}) => (partial expected-failure? "error.illegal-company-account")
+        (command kaino :company-update :company company-id :updates {:accountType "custom" :customAccountLimit 5}) => (partial expected-failure? "error.unauthorized"))
       (fact "Solita admin can set account to be 'custom', customAccountLimit needs to be set"
         (command admin :company-update :company company-id :updates {:accountType "custom"}) => (partial expected-failure? "company.missing.custom-limit")
-        (command admin :company-update :company company-id :updates {:accountType "custom" :customAccountLimit "2"}) => ok?))
+        (command admin :company-update :company company-id :updates {:accountType "custom" :customAccountLimit 2}) => ok?))
 
     (fact "When company has max count of users, new member can't be invited"
       (command kaino :company-invite-user :email "pena@example.com") => (partial expected-failure? "error.company-user-limit-exceeded"))))
