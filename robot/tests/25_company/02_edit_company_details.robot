@@ -30,12 +30,3 @@ Change eInvoice operator
   Select From List  xpath=//div[@data-test-id="company-pop"]//select  Nordea (NDEAFIHH)
   Click enabled by test id  company-details-save
   Wait Until  Element should be disabled  //div[@id='company-content']//button[@data-test-id='company-details-save']
-
-
-*** Keywords ***
-Open company details
-  Click Element  user-name
-  Wait Until  Element Should be visible  //*[@data-test-id='save-my-userinfo']
-  Element should be visible  //div[@data-test-id='my-company']
-  Click button  Muokkaa yrityksen tietoja
-  Wait until  Element should be visible  company
