@@ -42,15 +42,20 @@
 (defn- organization-operations-with-attachments
   "Returns a map where key is permit type, value is a list of operations for the permit type"
   [{scope :scope :as organization}]
-  (reduce
-    #(if-not (get-in %1 [%2])
-       (assoc %1 %2 (let [operation-names (keys (filter (fn [[_ op]] (= %2 (:permit-type op))) operations/operations))
-                          empty-operation-attachments (zipmap operation-names (repeat []))
-                          saved-operation-attachments (select-keys (:operations-attachments organization) operation-names)]
-                      (merge empty-operation-attachments saved-operation-attachments)))
-       %1)
-    {}
-    (map :permitType scope)))
+  (let [selected-ops (->> organization :selected-operations (map keyword) set)]
+    (reduce
+      (fn [result-map permit-type]
+        (if-not (result-map permit-type)
+          (let [operation-names (keys (filter (fn [[_ op]] (= permit-type (:permit-type op))) operations/operations))
+                empty-operation-attachments (zipmap operation-names (repeat []))
+                saved-operation-attachments (select-keys (:operations-attachments organization) operation-names)
+                all-operation-attachments (merge empty-operation-attachments saved-operation-attachments)
+
+                selected-operation-attachments (into {} (filter (fn [[op attachments]] (selected-ops op)) all-operation-attachments))]
+            (assoc result-map permit-type selected-operation-attachments))
+          result-map))
+     {}
+     (map :permitType scope))))
 
 (defn- selected-operations-with-permit-types
   "Returns a map where key is permit type, value is a list of operations for the permit type"
