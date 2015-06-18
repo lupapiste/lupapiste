@@ -20,7 +20,7 @@
             </tr>
           </thead>
           <tbody data-bind="foreach: { data: companiesModel.companies, as: 'company' }">
-            <tr>
+            <tr data-bind="attr: {'data-test-id': 'company-row-' + company.id}">
               <td data-bind="text: company.name"></td>
               <td data-bind="text: company.y"></td>
               <td><span data-bind="text: company.address1"></span></td>
@@ -28,7 +28,7 @@
               <td data-bind="text: company.po"></td>
               <td data-bind="text: company.accountType"></td>
               <td data-bind="text: company.userLimit"></td>
-              <td><a data-bind="click: company.openDialog">Muokkaa</a></td>
+              <td><a data-bind="click: company.openDialog" data-test-id="company-edit">Muokkaa</a></td>
             </tr>
           </tbody>
         </table>
