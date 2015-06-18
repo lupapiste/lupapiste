@@ -24,13 +24,14 @@
         <!-- =================== -->
 
         <div data-bind="visible: tabs.visible('info')">
-          <div data-bind="with: info">
+          <div data-bind="with: info" data-test-id="company-info-tab">
             <div class="form-entry account-type-selector">
               <label class="form-label" for="account-type" data-bind="ltext: 'register.company.form.accountType'"></label>
 
             <!-- ko ifnot: model().customAccountLimit -->
               <select name="account-type"
                       class="form-input combobox"
+                      data-test-id="company-account-select"
                       data-bind="options: accountTypes,
                                  optionsText: 'displayName',
                                  optionsValue: 'name',
@@ -41,7 +42,7 @@
             <!-- /ko -->
             <!-- ko if: model().customAccountLimit -->
             <div>
-              <span class="company-custom-account" data-bind="text: loc('register.company.' + model().accountType() + '.title', model().customAccountLimit())"></span>
+              <span data-test-id="company-custom-account" data-bind="text: loc('register.company.' + model().accountType() + '.title', model().customAccountLimit())"></span>
             </div>
             <!-- /ko -->
             </div>
