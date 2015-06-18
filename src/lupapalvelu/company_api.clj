@@ -43,10 +43,11 @@
   (ok :companies (c/find-companies)))
 
 (defcommand company-update
-  {:user-roles #{:applicant}
-   :input-validators [validate-user-is-admin-or-company-member]
+  {:user-roles #{:applicant :admin}
+   :pre-checks [validate-user-is-admin-or-company-admin]
    :parameters [company updates]}
-  (ok :company (c/update-company! company updates)))
+  [{caller :user}]
+  (ok :company (c/update-company! company updates (u/admin? caller))))
 
 (defcommand company-user-update
   {:user-roles #{:applicant :admin}
@@ -64,17 +65,17 @@
 
 (defn- user-limit-not-exceeded [command _]
   (let [company (c/find-company-by-id (get-in command [:user :company :id]))
-        company-users (c/find-company-users (:id company))
+        company-users (c/company-users-count (:id company))
         invitations (c/find-user-invitations (:id company))
-        users (+ (count invitations) (count company-users))]
+        users (+ (count invitations) company-users)]
     (when-not (:accountType company)
       (fail! :error.account-type-not-defined-for-company))
-    (let [user-limit (c/user-limit-for-account-type (keyword (:accountType company)))]
+    (let [user-limit (or (:customAccountLimit company) (c/user-limit-for-account-type (keyword (:accountType company))))]
       (when-not (< users user-limit)
         (fail :error.company-user-limit-exceeded)))))
 
 
-(defquery company-invite-user
+(defcommand company-invite-user
   {:user-roles #{:applicant}
    :pre-checks [validate-user-is-admin-or-company-admin user-limit-not-exceeded]
    :parameters [email]}
