@@ -10,10 +10,19 @@ LUPAPISTE.TagsEditorModel = function(params) {
 
   self.tags = ko.observableArray([]);
 
-  self.indicator = ko.observable();
+  self.indicator = ko.observable().extend({notify: "always"});
 
   self.save = _.debounce(function() {
-    console.log("save", _.map(self.tags(), function(t) { return ko.unwrap(t.label); }));
+    var tags = _.map(self.tags(), function(t) { return ko.unwrap(t.label); });
+    ajax
+      .command("save-organization-tags", {tags: tags})
+      .success(function() {
+        self.indicator({type: "saved"});
+      })
+      .error(function() {
+        self.indicator({type: "err"});
+      })
+      .call();
   }, 500);
 
   ajax

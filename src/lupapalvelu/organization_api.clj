@@ -360,11 +360,11 @@
    :user-roles #{:authorityAdmin}}
   [{user :user}]
   (let [org-id (user/authority-admins-organization-id user)]
-    (ok)))
+    (o/update-organization org-id {$set {:tags tags}})))
 
 (defquery get-organization-tags
   {:user-authz-roles #{:statementGiver}
    :user-roles #{:authorityAdmin :authority}}
   [{user :user}]
   (let [org-id (user/authority-admins-organization-id user)]
-    (ok :tags ["foo" "bar" "baz"])))
+    (ok :tags (:tags (o/get-organization org-id)))))

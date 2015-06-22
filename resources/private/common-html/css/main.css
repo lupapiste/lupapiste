@@ -3647,13 +3647,17 @@ ul.attachments-list li.mandatory-attachments {
   color: white;
 }
 
-/* line 2, ../sass/partials/_tags_editor.scss */
+/* line 1, ../sass/partials/_tags_editor.scss */
+.tags-editor-component {
+  position: relative;
+}
+/* line 3, ../sass/partials/_tags_editor.scss */
 .tags-editor-component ul.tags {
   list-style: none;
   padding: 6px 0 0 0;
   overflow: auto;
 }
-/* line 6, ../sass/partials/_tags_editor.scss */
+/* line 7, ../sass/partials/_tags_editor.scss */
 .tags-editor-component ul.tags li.tag {
   position: relative;
   background-color: #f39129;
@@ -3664,22 +3668,22 @@ ul.attachments-list li.mandatory-attachments {
   margin-bottom: 6px;
   line-height: 32px;
 }
-/* line 15, ../sass/partials/_tags_editor.scss */
+/* line 16, ../sass/partials/_tags_editor.scss */
 .tags-editor-component ul.tags li.tag span.tag-label, .tags-editor-component ul.tags li.tag input.tag-editor {
   margin-left: 27px;
   font-size: 16px;
 }
-/* line 19, ../sass/partials/_tags_editor.scss */
+/* line 20, ../sass/partials/_tags_editor.scss */
 .tags-editor-component ul.tags li.tag span.tag-label {
   color: #fff;
   margin-right: 36px;
 }
-/* line 23, ../sass/partials/_tags_editor.scss */
+/* line 24, ../sass/partials/_tags_editor.scss */
 .tags-editor-component ul.tags li.tag input.tag-editor {
   color: black;
   margin-right: 6px;
 }
-/* line 27, ../sass/partials/_tags_editor.scss */
+/* line 28, ../sass/partials/_tags_editor.scss */
 .tags-editor-component ul.tags li.tag span.tag-remove {
   cursor: pointer;
   position: absolute;
@@ -3688,7 +3692,7 @@ ul.attachments-list li.mandatory-attachments {
   bottom: 0;
   margin: auto;
 }
-/* line 35, ../sass/partials/_tags_editor.scss */
+/* line 36, ../sass/partials/_tags_editor.scss */
 .tags-editor-component ul.tags li.tag span.tag-edit {
   cursor: pointer;
   position: absolute;
@@ -3697,7 +3701,7 @@ ul.attachments-list li.mandatory-attachments {
   bottom: 0;
   margin: auto;
 }
-/* line 44, ../sass/partials/_tags_editor.scss */
+/* line 45, ../sass/partials/_tags_editor.scss */
 .tags-editor-component ul.tags li.tag:last-child {
   margin-bottom: 0;
 }
