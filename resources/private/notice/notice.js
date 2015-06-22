@@ -8,7 +8,7 @@ LUPAPISTE.TagsDataProvider = function(applicationId, filtered) {
   var data = ko.observable();
 
   ajax
-    .query("available-application-tags", {id: applicationId})
+    .query("get-organization-tags", {id: applicationId})
     .success(function(res) {
       data(res.tags);
     })

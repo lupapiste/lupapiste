@@ -33,4 +33,4 @@
 
     ; TODO use command to add tags and test em here
     (fact "authority can fetch available tags"
-      sonja => (allowed? :available-application-tags :id id))))
+      sonja => (allowed? :get-organization-tags :id id))))
