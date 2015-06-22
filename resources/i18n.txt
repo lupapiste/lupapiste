@@ -1,0 +1,3 @@
+auth-admin.tags:  Tunnisteet
+auth-admin.tags.add:  Lisää tunniste
+
