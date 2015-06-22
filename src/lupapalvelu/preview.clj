@@ -4,7 +4,8 @@
            (org.apache.pdfbox.util PDFImageWriter ImageIOUtil)
            (java.awt.image BufferedImage)
            (java.awt RenderingHints)
-           (java.io FileOutputStream ByteArrayOutputStream ByteArrayInputStream)))
+           (java.io FileOutputStream ByteArrayOutputStream ByteArrayInputStream FileInputStream)
+           (javax.imageio ImageIO)))
 
 (def rez 600.0)
 
@@ -38,26 +39,31 @@
       (.dispose))
     new-image))
 
-(defn output-image
-  "Writes BufferedImage to OutputStream"
-  [image file-output-stream compression]
-  (ImageIOUtil/writeImage image "jpg" file-output-stream ImageIOUtil/DEFAULT_SCREEN_RESOLUTION compression))
-
-(defn pdf-to-image-output
+(defn scale-image-to-output
   "Converts 1. page from PDF to BufferedImage scaling and cropping to predefined resolution and writes it to given OutputStream"
-  [pdf-input out]
-  (let [document (PDDocument/load pdf-input)]
-    (try
-      (output-image (->> (.. document getDocumentCatalog getAllPages iterator next convertToImage) scale-image) out 0.5)
-      true
-      (catch Exception e (println e))
-      (finally (.close document)))))
+  [image]
+  (let [scaled-image (scale-image image)
+        output (ByteArrayOutputStream.)]
+    (ImageIOUtil/writeImage scaled-image "jpg" output ImageIOUtil/DEFAULT_SCREEN_RESOLUTION 0.5)
+    (ByteArrayInputStream. (.toByteArray output))))
 
 (defn pdf-to-image-input-stream
   "Converts 1. page from PDF to scaled and cropped predefined resolution jpg InputStream"
   [pdf-input]
-  (let [content (ByteArrayOutputStream.)]
-    (pdf-to-image-output pdf-input content)
-    (ByteArrayInputStream. (.toByteArray content))))
+  (let [document (PDDocument/load pdf-input)]
+    (try
+      (let [image (.. document getDocumentCatalog getAllPages iterator next convertToImage)]
+        (scale-image-to-output image))
+      (catch Exception e (println e))
+      (finally (.close document)))))
+
+(defn raster-to-image-input-stream
+  "Converts 1. page from PDF to scaled and cropped predefined resolution jpg InputStream"
+  [input]
+  (try
+    (let [image (ImageIO/read (if (= (type input) java.lang.String ) (FileInputStream. input) input))]
+      (scale-image-to-output image))
+    (catch Exception e (println e))
+    ))
 
 ;;(io/copy (pdf-to-image-input-stream "/home/michaelho/ws/lupapalvelu/problematic-pdfs/Yhdistelmakartta_asema-johto_Oksapolku-Pihkakatu.pdf") (FileOutputStream. "/tmp/a1.jpg"))

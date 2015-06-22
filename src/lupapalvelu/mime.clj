@@ -28,16 +28,13 @@
                       "vnd\\.oasis\\.opendocument\\..+"
                       "vnd\\.openxmlformats-officedocument\\..+"]) "))")])))
 
-(def mime-type-pattern-preview
-  (re-pattern
-    (join "|" [
-               "(image/(gif|jpeg|png|tiff))"
-               "(application/pdf)"])))
+(def mime-type-pattern-raster
+  (re-pattern "(image/(gif|jpeg|png|tiff))"))
 
 (def allowed-extensions
   (keys
     (into (sorted-map)
-          (filter #(re-matches mime-type-pattern-preview (second %)) mime-types))))
+          (filter #(re-matches mime-type-pattern (second %)) mime-types))))
 
 (defn mime-type [filename]
   (when filename
@@ -45,7 +42,11 @@
 
 (defn allowed-file? [filename]
   (when-let [t (mime-type filename)]
-      (re-matches mime-type-pattern t)))
+    (re-matches mime-type-pattern t)))
+
+(defn processible-image-file? [filename]
+  (when-let [t (mime-type filename)]
+    (re-matches mime-type-pattern-raster t)))
 
 (defn sanitize-filename [filename]
   (-> filename (ss/suffix "\\") (ss/suffix "/")))

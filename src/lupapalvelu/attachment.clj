@@ -18,7 +18,8 @@
             [clojure.java.io :as io]
             [lupapalvelu.preview :as preview])
   (:import [java.util.zip ZipOutputStream ZipEntry]
-           [java.io File OutputStream FilterInputStream]))
+           [java.io File OutputStream FilterInputStream]
+           (org.apache.commons.io FilenameUtils)))
 
 ;;
 ;; Metadata
@@ -194,7 +195,7 @@
   ([options]
     {:pre [(map? options)]}
     (set-attachment-version options 5))
-  ([{:keys [application attachment-id file-id preview-id filename content-type size comment-text now user stamped make-comment state target valid-pdfa missing-fonts]
+  ([{:keys [application attachment-id file-id filename content-type size comment-text now user stamped make-comment state target valid-pdfa missing-fonts]
      :or {make-comment true state :requires_authority_action} :as options}
     retry-limit]
     {:pre [(map? options) (map? application) (string? attachment-id) (string? file-id) (string? filename) (string? content-type) (number? size) (number? now) (map? user) (not (nil? stamped))]}
@@ -204,7 +205,6 @@
             next-version (next-attachment-version latest-version user)
             version-model {:version  next-version
                            :fileId   file-id
-                           :previewId preview-id
                            :created  now
                            :accepted nil
                            :user    (user/summary user)
@@ -282,7 +282,7 @@
 (defn- update-or-create-attachment
   "If the attachment-id matches any old attachment, a new version will be added.
    Otherwise a new attachment is created."
-  [{:keys [application attachment-id attachment-type op file-id preview-id filename content-type size comment-text created user target locked required] :as options}]
+  [{:keys [application attachment-id attachment-type op file-id filename content-type size comment-text created user target locked required] :as options}]
   {:pre [(map? application)]}
   (let [requested-by-authority? (and (ss/blank? attachment-id) (user/authority? (:user options)))
         att-id (cond
@@ -380,6 +380,21 @@
      :headers {"Content-Type" "text/plain"}
      :body "404"}))
 
+(defn output-attachment-preview
+  [attachment-id attachment-fn]
+  (debugf "file preview: attachment-id=%s" attachment-id " id type " (type attachment-id))
+  ;;TODO: create preview if not exists. problem how to detent no aceess drom not exist and check mimetype is preview can be created
+  (output-attachment (str attachment-id "-preview") false attachment-fn))
+
+(defn create-preview
+    [file-id filename content-type content application-id]
+  (debugf "Creating preview: file-id=%s"  file-id)
+  (debugf "                  %s is img=%s" content-type (re-matches mime/mime-type-pattern-raster content-type))
+  (when (= "application/pdf" content-type)
+    (mongo/upload (str file-id "-preview") (str (FilenameUtils/getBaseName filename) ".jpg") "image/jpg" (preview/pdf-to-image-input-stream content) :application application-id))
+  (when (re-matches mime/mime-type-pattern-raster content-type)
+    (mongo/upload (str file-id "-preview") (str (FilenameUtils/getBaseName filename) ".jpg") "image/jpg" (preview/raster-to-image-input-stream content) :application application-id)))
+
 (defn attach-file!
   "Uploads a file to MongoDB and creates a corresponding attachment structure to application.
    Content can be a file or input-stream.
@@ -392,13 +407,10 @@
         sanitazed-filename (mime/sanitize-filename filename)
         content-type (mime/mime-type sanitazed-filename)
         options (merge options {:file-id file-id
-                                :preview-id (when (= "application/pdf" content-type)
-                                              (let [preview-id (mongo/create-id) preview-content (preview/pdf-to-image-input-stream content)]
-                                                (mongo/upload preview-id sanitazed-filename "image/jpg" preview-content :application application-id)
-                                                preview-id))
                                 :filename sanitazed-filename
                                 :content-type content-type})]
     (mongo/upload file-id sanitazed-filename content-type content :application application-id)
+    (create-preview file-id sanitazed-filename content-type content application-id)
     (update-or-create-attachment options)))
 
 (defn get-attachments-by-operation
@@ -444,4 +456,3 @@
         (proxy-super close)
         (when (= (io/delete-file file :could-not) :could-not)
           (warnf "Could not delete temporary file: %s" (.getAbsolutePath file)))))))
-
