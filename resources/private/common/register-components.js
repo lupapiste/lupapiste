@@ -27,7 +27,8 @@ jQuery(document).ready(function() {
     "invoice-operator-selector",
     "ok-dialog",
     "ok-button-group",
-    "company-edit"
+    "company-edit",
+    "tags-editor"
   ];
 
   _.forEach(components, function(component) {
