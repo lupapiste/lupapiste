@@ -7,12 +7,14 @@ LUPAPISTE.TagsDataProvider = function(applicationId, filtered) {
 
   var data = ko.observable();
 
-  ajax
-    .query("available-application-tags", {id: applicationId})
-    .success(function(res) {
-      data(res.tags);
-    })
-    .call();
+  if (applicationId) {
+    ajax
+      .query("available-application-tags", {id: applicationId})
+      .success(function(res) {
+        data(res.tags);
+      })
+      .call();
+  }
 
   self.data = ko.pureComputed(function() {
     var filteredData = _.filter(data(), function(item) {
@@ -42,6 +44,8 @@ LUPAPISTE.NoticeModel = function() {
   self.availableUrgencyStates = ko.observableArray(["normal", "urgent", "pending"]);
 
   self.selectedTags = ko.observableArray([]);
+
+  self.applicationTagsProvider = new LUPAPISTE.TagsDataProvider(self.applicationId, self.selectedTags());
 
   var subscriptions = [];
 
