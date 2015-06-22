@@ -270,6 +270,16 @@ $spritegrid: 100px;
     width: 24px;
     height: 24px;
   }
+  &.star-selected {
+    background-position: 0px -6600px;
+    width: 18px;
+    height: 18px;
+  }
+  &.star-unselected {
+    background-position: 0px -6700px;
+    width: 18px;
+    height: 18px;
+  }
 
   //states
   &:hover {
