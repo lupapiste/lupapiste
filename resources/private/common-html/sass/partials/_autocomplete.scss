@@ -29,31 +29,41 @@
       box-sizing: border-box;
       border-radius: 5px;
       background-color: #fff;
-      span.tag {
-        position: relative;
-        background-color: $lp-orange;
-        font-size: 16px;
-        padding: $marginS / 3 0;
-        margin-right: $marginS;
-        white-space: nowrap;
-        span.tag-label {
-          color: #fff;
-          margin-left: $marginS;
-          margin-right: $marginL;
+      ul.tags {
+        list-style: none;
+        padding: $marginS 0 0 0;
+        overflow: auto;
+        li.tag {
+          position: relative;
+          background-color: $lp-orange;
+          font-size: 16px;
+          margin-right: $marginS;
+          white-space: nowrap;
+          float: left;
+          margin-bottom: $marginS;
+          span.tag-label {
+            color: #fff;
+            margin-left: $marginL + $marginS / 2;
+            margin-right: $marginM;
+          }
+          span.tag-remove {
+            cursor: pointer;
+            position: absolute;
+            left: $marginS;
+            top: 0;
+            bottom: 0;
+            margin: auto;
+          }
         }
-        span.tag-remove {
+        li.tag:last-child {
+          margin-bottom: 0;
+        }
+        li.tag-ellipsis {
+          color: $lp-orange;
           cursor: pointer;
-          position: absolute;
-          right: $marginS;
-          top: 0;
-          bottom: 0;
-          margin: auto;
+          font-weight: bold;
+          float: left;
         }
-      }
-      .tag-ellipsis {
-        color: $lp-orange;
-        cursor: pointer;
-        font-weight: bold;
       }
     }
     span.caption {
