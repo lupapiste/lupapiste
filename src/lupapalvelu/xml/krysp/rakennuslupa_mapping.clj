@@ -284,7 +284,7 @@
    (assoc-in [:attr :xsi:schemaLocation]
      (mapping-common/schemalocation "rakennusvalvonta" "2.1.8"))))
 
-(defn- get-mapping [krysp-version]
+(defn get-rakennuslupa-mapping [krysp-version]
   {:pre [krysp-version]}
   (case (name krysp-version)
     "2.1.2" rakennuslupa_to_krysp_212
@@ -338,7 +338,7 @@
                        (assoc-in % [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto :Katselmus :katselmuspoytakirja] canonical-pk)
                        %)))
 
-        xml (element-to-xml canonical (get-mapping krysp-version))
+        xml (element-to-xml canonical (get-rakennuslupa-mapping krysp-version))
         attachments-for-write (mapping-common/attachment-details-from-canonical all-canonical-attachments)]
 
     (writer/write-to-disk application attachments-for-write xml krysp-version output-dir)))
@@ -398,7 +398,7 @@
                     [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :liitetieto]
                     attachments-canonical)
 
-        xml (element-to-xml canonical (get-mapping krysp-version))
+        xml (element-to-xml canonical (get-rakennuslupa-mapping krysp-version))
         attachments-for-write (mapping-common/attachment-details-from-canonical attachments-canonical)]
 
     (writer/write-to-disk application attachments-for-write xml krysp-version output-dir)))
@@ -426,7 +426,7 @@
     ))
 
 (defn- rakennuslupa-element-to-xml [canonical krysp-version]
-  (element-to-xml (map-enums canonical krysp-version) (get-mapping krysp-version)))
+  (element-to-xml (map-enums canonical krysp-version) (get-rakennuslupa-mapping krysp-version)))
 
 (defn save-application-as-krysp
   "Sends application to municipality backend. Returns a sequence of attachment file IDs that ware sent."

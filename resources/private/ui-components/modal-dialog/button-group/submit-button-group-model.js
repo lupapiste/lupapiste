@@ -2,8 +2,8 @@ LUPAPISTE.SubmitButtonGroupModel = function (params) {
   "use strict";
   var self = this;
 
-  self.isSubmitVisible = params.isSubmitVisible;
-  self.isSubmitEnabled = params.isSubmitEnabled;
+  self.isSubmitVisible = params.isSubmitVisible || true;
+  self.isSubmitEnabled = params.isSubmitEnabled || true;
   self.submitCssClasses = params.submitCssClasses || "btn btn-primary";
   self.submitTitle = params.lSubmitTitle ? loc(params.lSubmitTitle) : params.submitTitle;
 
