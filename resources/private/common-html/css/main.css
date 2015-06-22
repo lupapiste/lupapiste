@@ -3647,6 +3647,61 @@ ul.attachments-list li.mandatory-attachments {
   color: white;
 }
 
+/* line 2, ../sass/partials/_tags_editor.scss */
+.tags-editor-component ul.tags {
+  list-style: none;
+  padding: 6px 0 0 0;
+  overflow: auto;
+}
+/* line 6, ../sass/partials/_tags_editor.scss */
+.tags-editor-component ul.tags li.tag {
+  position: relative;
+  background-color: #f39129;
+  font-size: 16px;
+  margin-right: 6px;
+  white-space: nowrap;
+  float: left;
+  margin-bottom: 6px;
+  line-height: 32px;
+}
+/* line 15, ../sass/partials/_tags_editor.scss */
+.tags-editor-component ul.tags li.tag span.tag-label, .tags-editor-component ul.tags li.tag input.tag-editor {
+  margin-left: 27px;
+  font-size: 16px;
+}
+/* line 19, ../sass/partials/_tags_editor.scss */
+.tags-editor-component ul.tags li.tag span.tag-label {
+  color: #fff;
+  margin-right: 36px;
+}
+/* line 23, ../sass/partials/_tags_editor.scss */
+.tags-editor-component ul.tags li.tag input.tag-editor {
+  color: black;
+  margin-right: 6px;
+}
+/* line 27, ../sass/partials/_tags_editor.scss */
+.tags-editor-component ul.tags li.tag span.tag-remove {
+  cursor: pointer;
+  position: absolute;
+  left: 6px;
+  top: 0;
+  bottom: 0;
+  margin: auto;
+}
+/* line 35, ../sass/partials/_tags_editor.scss */
+.tags-editor-component ul.tags li.tag span.tag-edit {
+  cursor: pointer;
+  position: absolute;
+  right: 6px;
+  top: 0;
+  bottom: 0;
+  margin: auto;
+}
+/* line 44, ../sass/partials/_tags_editor.scss */
+.tags-editor-component ul.tags li.tag:last-child {
+  margin-bottom: 0;
+}
+
 /* VIEWS
 ------------------------------------------------------------------------------*/
 @media (max-width: 47.5em) {
@@ -6501,50 +6556,50 @@ div.attachment-multiselect-content tr.attachment-group-header {
 /*
   Lupapalvelu CSS:
 */
-/* line 142, ../sass/main.scss */
+/* line 143, ../sass/main.scss */
 .ltext-error {
   color: #ffd280 !important;
   font-weight: bold !important;
   text-shadow: 0px 1px 0 black !important;
 }
 
-/* line 148, ../sass/main.scss */
+/* line 149, ../sass/main.scss */
 .visible {
   display: block;
 }
 
-/* line 152, ../sass/main.scss */
+/* line 153, ../sass/main.scss */
 .hidden {
   display: none !important;
 }
 
-/* line 156, ../sass/main.scss */
+/* line 157, ../sass/main.scss */
 .inline {
   display: inline;
 }
 
-/* line 160, ../sass/main.scss */
+/* line 161, ../sass/main.scss */
 .template {
   display: none;
 }
 
-/* line 164, ../sass/main.scss */
+/* line 165, ../sass/main.scss */
 #main-nav-bar {
   display: none;
 }
 
-/* line 168, ../sass/main.scss */
+/* line 169, ../sass/main.scss */
 .inert-table tbody tr:hover td,
 .inert-table tbody tr:hover th {
   background-color: #ffffff;
 }
 
-/* line 173, ../sass/main.scss */
+/* line 174, ../sass/main.scss */
 #application table input {
   margin: 0px;
 }
 
-/* line 177, ../sass/main.scss */
+/* line 178, ../sass/main.scss */
 .droparea {
   width: 150px;
   height: 100px;
@@ -6556,27 +6611,27 @@ div.attachment-multiselect-content tr.attachment-group-header {
   display: table-cell;
 }
 
-/* line 188, ../sass/main.scss */
+/* line 189, ../sass/main.scss */
 .droparea-hover {
   border-color: #101010;
   color: #101010;
 }
 
 /* basic styles*/
-/* line 196, ../sass/main.scss */
+/* line 197, ../sass/main.scss */
 .table {
   font-size: 16px;
   line-height: 24px;
 }
 
 /* map zoomer fix */
-/* line 202, ../sass/main.scss */
+/* line 203, ../sass/main.scss */
 div.pzbDiv {
   right: 8px;
   top: 10px;
 }
 
-/* line 207, ../sass/main.scss */
+/* line 208, ../sass/main.scss */
 .dev-debug {
   z-index: 666;
   width: 146px;
@@ -6590,47 +6645,47 @@ div.pzbDiv {
   font-size: 0.8em;
   color: #333;
 }
-/* line 220, ../sass/main.scss */
+/* line 221, ../sass/main.scss */
 .dev-debug p {
   margin-bottom: 4px;
 }
-/* line 222, ../sass/main.scss */
+/* line 223, ../sass/main.scss */
 .dev-debug p a {
   display: block;
 }
 
-/* line 228, ../sass/main.scss */
+/* line 229, ../sass/main.scss */
 #ui-datepicker-div {
   display: none;
 }
 
 /* find address and poi list: */
-/* line 233, ../sass/main.scss */
+/* line 234, ../sass/main.scss */
 .create-find {
   font-size: 12px;
 }
-/* line 235, ../sass/main.scss */
+/* line 236, ../sass/main.scss */
 .create-find .type {
   color: #555;
   font-style: italic;
 }
-/* line 238, ../sass/main.scss */
+/* line 239, ../sass/main.scss */
 .create-find .type:before {
   content: " (";
 }
-/* line 239, ../sass/main.scss */
+/* line 240, ../sass/main.scss */
 .create-find .type:after {
   content: ")";
 }
-/* line 242, ../sass/main.scss */
+/* line 243, ../sass/main.scss */
 .create-find .number:before {
   content: " ";
 }
-/* line 244, ../sass/main.scss */
+/* line 245, ../sass/main.scss */
 .create-find .municipality {
   color: #555;
 }
-/* line 246, ../sass/main.scss */
+/* line 247, ../sass/main.scss */
 .create-find .municipality:before {
   content: ", ";
 }

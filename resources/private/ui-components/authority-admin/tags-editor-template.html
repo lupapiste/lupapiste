@@ -3,7 +3,19 @@
 <body>
   <section class="page container">
     <script type="text/html" id="tags-editor-template">
-      <div>
+      <div class="tags-editor-component">
+        <ul class="tags">
+          <!-- ko foreach: tags -->
+          <li class="tag">
+            <span class="tag-remove icon remove"
+                  data-bind="click: $parent.removeTag"></span>
+            <span class="tag-label" data-bind="visible: !edit(), text: $data.label"></span>
+            <input class="tag-editor" data-bind="visible: edit, hasFocus: edit, value: $data.label, event: {keypress: $parent.onKeypress}"></input>
+            <span class="tag-edit icon edit"
+                  data-bind="visible: !edit(), click: $parent.editTag"></span>
+          </li>
+          <!-- /ko -->
+        </ul>
         <button class="btn btn-primary" data-bind="ltext: 'auth-admin.tags.add'"></button>
       </div>
     </script>
