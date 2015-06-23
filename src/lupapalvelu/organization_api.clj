@@ -365,6 +365,12 @@
 (defquery get-organization-tags
   {:user-authz-roles #{:statementGiver}
    :user-roles #{:authorityAdmin :authority}}
-  [{user :user}]
-  (let [org-id (user/authority-admins-organization-id user)]
+  [{{:keys [organizationId]} :data user :user}]
+  (if (and organizationId (not ((keyword organizationId) (:orgAuthz user))))
+    (fail! :error.unknown-organization))
+  (let [org-id (if (= :authorityAdmin (keyword (:role user)))
+                 (user/authority-admins-organization-id user)
+                 organizationId)]
+    (if-not org-id
+      (fail! :error.organization-not-found))
     (ok :tags (:tags (o/get-organization org-id)))))
