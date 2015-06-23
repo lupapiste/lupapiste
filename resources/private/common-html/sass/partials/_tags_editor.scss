@@ -24,6 +24,7 @@
       input.tag-editor {
         color: black;
         margin-right: $marginS;
+        width: 300px;
       }
       span.tag-remove {
         cursor: pointer;
@@ -41,9 +42,6 @@
         bottom: 0;
         margin: auto;
       }
-    }
-    li.tag:last-child {
-      margin-bottom: 0;
     }
   }
 }
