@@ -366,11 +366,10 @@
   {:user-authz-roles #{:statementGiver}
    :user-roles #{:authorityAdmin :authority}}
   [{{:keys [organizationId]} :data user :user}]
-  (if (and organizationId (not ((keyword organizationId) (:orgAuthz user))))
+  (when (and organizationId (not ((keyword organizationId) (:orgAuthz user))))
     (fail! :error.unknown-organization))
-  (let [org-id (if (= :authorityAdmin (keyword (:role user)))
+  (if-let [org-id (if (user/authority-admin? user)
                  (user/authority-admins-organization-id user)
                  organizationId)]
-    (if-not org-id
-      (fail! :error.organization-not-found))
-    (ok :tags (:tags (o/get-organization org-id)))))
+    (ok :tags (:tags (o/get-organization org-id)))
+    (fail! :error.organization-not-found)))
