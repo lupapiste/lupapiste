@@ -380,20 +380,28 @@
      :headers {"Content-Type" "text/plain"}
      :body "404"}))
 
-(defn output-attachment-preview
-  [attachment-id attachment-fn]
-  (debugf "file preview: attachment-id=%s" attachment-id " id type " (type attachment-id))
-  ;;TODO: create preview if not exists. problem how to detent no aceess drom not exist and check mimetype is preview can be created
-  (output-attachment (str attachment-id "-preview") false attachment-fn))
-
 (defn create-preview
     [file-id filename content-type content application-id]
   (debugf "Creating preview: file-id=%s"  file-id)
-  (debugf "                  %s is img=%s" content-type (re-matches mime/mime-type-pattern-raster content-type))
   (when (= "application/pdf" content-type)
     (mongo/upload (str file-id "-preview") (str (FilenameUtils/getBaseName filename) ".jpg") "image/jpg" (preview/pdf-to-image-input-stream content) :application application-id))
   (when (re-matches mime/mime-type-pattern-raster content-type)
     (mongo/upload (str file-id "-preview") (str (FilenameUtils/getBaseName filename) ".jpg") "image/jpg" (preview/raster-to-image-input-stream content) :application application-id)))
+
+(defn output-attachment-preview
+  [attachment-id attachment-fn]
+  (let [preview-id (str attachment-id "-preview")]
+    (when (= 0 (mongo/count :fs.files {:_id preview-id}))
+      (let [attachment (get-attachment attachment-id)
+            file-name (:file-name attachment)
+            content-type (:content-type attachment)
+            content ((:content attachment))
+            application-id (:application attachment)]
+        (create-preview attachment-id file-name content-type content application-id)
+        )
+      )
+
+    (output-attachment preview-id false attachment-fn)))
 
 (defn attach-file!
   "Uploads a file to MongoDB and creates a corresponding attachment structure to application.

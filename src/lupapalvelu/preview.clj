@@ -58,7 +58,7 @@
       (finally (.close document)))))
 
 (defn raster-to-image-input-stream
-  "Converts 1. page from PDF to scaled and cropped predefined resolution jpg InputStream"
+  "Converts Raster image to scaled and cropped predefined resolution jpg InputStream"
   [input]
   (try
     (let [image (ImageIO/read (if (= (type input) java.lang.String ) (FileInputStream. input) input))]
