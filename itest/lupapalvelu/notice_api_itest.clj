@@ -23,14 +23,18 @@
       (:authorityNotice (query-application sonja id)) => "respect my athority")
 
     (fact "user can't set application tags"
-      pena =not=> (allowed? :add-application-tags :id id :tags ["foo" "bar"])
       (command pena :add-application-tags :id id :tags ["foo" "bar"]) =not=> ok?)
 
     (fact "authority can set application tags"
-      sonja => (allowed? :add-application-tags :id id :tags ["foo" "bar"])
       (command sonja :add-application-tags :id id :tags ["foo" "bar"]) => ok?
       (:tags (query-application sonja id)) => ["foo" "bar"])
 
-    ; TODO use command to add tags and test em here
-    (fact "authority can fetch available tags"
-      sonja => (allowed? :get-organization-tags :id id))))
+    (fact "only auth admin can add new tags"
+      (command sipoo :save-organization-tags :tags ["makeja" "nigirejä"]) => ok?
+      (command sonja :save-organization-tags :tags ["illegal"] =not=> ok?)
+      (command pena :save-organization-tags :tags ["illegal"] =not=> ok?)
+      (:tags (query sipoo :get-organization-tags)) => ["makeja" "nigirejä"])
+
+    (fact "only authority can fetch available tags"
+      (query pena :get-organization-tags :organization "753-R") =not=> ok?
+      (:tags (query sonja :get-organization-tags :organizationId "753-R")) => ["makeja" "nigirejä"])))
