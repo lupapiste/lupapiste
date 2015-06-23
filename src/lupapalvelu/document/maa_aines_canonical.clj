@@ -1,11 +1,13 @@
 (ns lupapalvelu.document.maa-aines-canonical
   (require [sade.util :as util]
            [lupapalvelu.document.canonical-common :refer [empty-tag] :as canonical-common]
-           [lupapalvelu.document.tools :as tools]))
+           [lupapalvelu.document.tools :as tools]
+           [lupapalvelu.permit :as permit]))
 
 (defn maa-aines-canonical [application lang]
   (let [documents (tools/unwrapped (canonical-common/documents-by-type-without-blanks application))
-        kuvaus    (-> documents :maa-aineslupa-kuvaus first :data :kuvaus)]
+        kuvaus    (-> documents :maa-aineslupa-kuvaus first :data :kuvaus)
+        hakija-key (keyword (permit/get-applicant-doc-schema (permit/permit-type application)))]
     {:MaaAinesluvat
      {:toimituksenTiedot (canonical-common/toimituksen-tiedot application lang)
       :maaAineslupaAsiatieto
@@ -18,7 +20,7 @@
         :lausuntotieto (canonical-common/get-statements (:statements application))
         :hakemustieto
         {:Hakemus
-         {:hakija (remove nil? (map canonical-common/get-yhteystiedot (:hakija documents)))}
+         {:hakija (remove nil? (map canonical-common/get-yhteystiedot (get documents hakija-key)))}
          }
         :maksajatieto (util/assoc-when {} :Maksaja (canonical-common/get-maksajatiedot (first (:ymp-maksaja documents))))
         :sijaintitieto (canonical-common/get-sijaintitieto application)

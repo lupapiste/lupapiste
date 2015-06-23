@@ -95,7 +95,7 @@
                                       :neighborId neighborId
                                       :email "abba@example.com") => ok?
         application     (query-application pena application-id)
-        hakija-doc-id   (:id (domain/get-document-by-name application "hakija"))
+        hakija-doc-id   (:id (domain/get-applicant-document (:documents application)))
         uusirak-doc-id  (:id (domain/get-document-by-name application "uusiRakennus"))]
 
         (command pena :update-doc

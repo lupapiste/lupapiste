@@ -51,12 +51,14 @@
                                     :puhelin {:value "03-389 1380"}}}}))
 
 (def- hakija-henkilo
-  {:id "hakija-henkilo" :schema-info {:name "hakija"
+  {:id "hakija-henkilo" :schema-info {:name "hakija-r"
+                                      :subtype "hakija"
                                       :version 1}
    :data {:henkilo henkilo}})
 
 (def- hakija-yritys
-  {:id "hakija-yritys" :schema-info {:name "hakija"
+  {:id "hakija-yritys" :schema-info {:name "hakija-r"
+                                     :subtype "hakija"
                                      :version 1}
    :data {:_selected {:value "yritys"}, :yritys yritys}})
 
@@ -153,9 +155,9 @@
                                      :muuMika {:value "Muu tyotehtava"}}
             :yritys yritysnimi-ja-ytunnus
             :sijaistus {:sijaistettavaHloEtunimi {:value "Jaska"}
-                            :sijaistettavaHloSukunimi {:value "Jokunen"}
-                            :alkamisPvm {:value "13.02.2014"}
-                            :paattymisPvm {:value "20.02.2014"}}})})
+                        :sijaistettavaHloSukunimi {:value "Jokunen"}
+                        :alkamisPvm {:value "13.02.2014"}
+                        :paattymisPvm {:value "20.02.2014"}}})})
 
 (def- tyonjohtaja-blank-role-and-blank-qualification
   (-> tyonjohtaja
@@ -167,6 +169,50 @@
   (-> tyonjohtaja
     (util/dissoc-in [:data :sijaistus :alkamisPvm])
     (assoc-in  [:data :sijaistus :paattymisPvm :value] "")))
+
+(def- tyonjohtaja-v2
+  {:id "tyonjohtaja-v2"
+   :schema-info {:name "tyonjohtaja-v2"
+                 :version 1
+                 :op {:name "tyonjohtajan-nimeaminen-v2"}}
+   :data (merge
+           suunnittelija-henkilo
+           (select-keys (:data tyonjohtaja) [:kuntaRoolikoodi :sijaistus :yritys])
+           {:fillMyInfo {:value nil}
+            :ilmoitusHakemusValitsin {:value "hakemus"}
+            :patevyysvaatimusluokka {:value "A"}
+            :patevyys-tyonjohtaja {:koulutusvalinta {:value "arkkitehtiylioppilas"}
+                                   :koulutus {:value ""}
+                                   :valmistumisvuosi {:value "2010"}
+                                   :kokemusvuodet {:value "3"}
+                                   :valvottavienKohteidenMaara {:value "9"}}
+            :vastattavatTyotehtavat {:rakennuksenPurkaminen {:value true}
+                                     :ivLaitoksenKorjausJaMuutostyo {:value true}
+                                     :uudisrakennustyoIlmanMaanrakennustoita {:value true}
+                                     :maanrakennustyot {:value true}
+                                     :uudisrakennustyoMaanrakennustoineen {:value false}
+                                     :ulkopuolinenKvvTyo {:value false}
+                                     :rakennuksenMuutosJaKorjaustyo {:value false}
+                                     :linjasaneeraus {:value false}
+                                     :ivLaitoksenAsennustyo {:value false}
+                                     :sisapuolinenKvvTyo {:value false}
+                                     :muuMika {:value "Muu tyotehtava"}}
+            :muutHankkeet {:0 {:katuosoite {:value "katuosoite"}
+                               :3kk {:value "1"}
+                               :9kk {:value "3"}
+                               :vaihe {:value "R"}
+                               :6kk {:value "2"}
+                               :autoupdated {:value false}
+                               :rakennustoimenpide {:value "purkutoimenpide"}
+                               :kokonaisala {:value "120"}
+                               :12kk {:value "4"}
+                               :luvanNumero {:value "123"}}}
+            :tyonjohtajaHanketieto {:taysiaikainenOsaaikainen {:value "taysiaikainen"}
+                                    :kaytettavaAika {:value "3"}
+                                    :kayntienMaara {:value "3"}
+                                    :hankeKesto {:value "3"}}
+            :tyonjohtajanHyvaksynta {:tyonjohtajanHyvaksynta {:value true}
+                                     :foremanHistory {:value nil}}})})
 
 (def- rakennuspaikka
   {:id "rakennuspaikka" :schema-info {:name "rakennuspaikka"
@@ -398,7 +444,7 @@
                                                       :created 1383229067483}
                                    :documents [hakija-henkilo
                                                maksaja-henkilo
-                                               tyonjohtaja
+                                               tyonjohtaja-v2
                                                hankkeen-kuvaus-minimum]
                                    :linkPermitData [link-permit-data-kuntalupatunnus]
                                    :appsLinkingToUs [app-linking-to-us]}))
@@ -461,7 +507,7 @@
 
 (facts "Canonical hakija/henkilo model is correct"
   (let [osapuoli (tools/unwrapped (:data hakija-henkilo))
-        hakija-model (get-osapuoli-data osapuoli :hakija)
+        hakija-model (get-osapuoli-data osapuoli (-> hakija-henkilo :schema-info :name keyword))
         henkilo (:henkilo hakija-model)
         ht (:henkilotiedot henkilo)
         yritys (:yritys hakija-model)]
@@ -474,7 +520,7 @@
 
 (facts "Canonical hakija/yritys model is correct"
   (let [osapuoli (tools/unwrapped (:data hakija-yritys))
-        hakija-model (get-osapuoli-data osapuoli :hakija)
+        hakija-model (get-osapuoli-data osapuoli (-> hakija-yritys :schema-info :name keyword))
         henkilo (:henkilo hakija-model)
         yritys (:yritys hakija-model)]
     (fact "model" hakija-model => truthy)
@@ -576,6 +622,25 @@
     (fact "sijaistettavan paattymisPvm" (:paattymisPvm sijaistus-213) => "2014-02-20")
     (validate-person henkilo)
     (validate-minimal-company yritys)))
+
+(facts "Canonical tyonjohtaja v2 model is correct"
+  (let [tyonjohtaja-unwrapped (tools/unwrapped (:data tyonjohtaja-v2))
+        tyonjohtaja-model (get-tyonjohtaja-v2-data "fi" tyonjohtaja-unwrapped :tyonjohtaja)]
+    (fact "tyonjohtajanHyvaksynta (vainTamaHankeKytkin)" (:vainTamaHankeKytkin tyonjohtaja-model) => (-> tyonjohtaja-v2 :data :tyonjohtajanHyvaksynta :tyonjohtajanHyvaksynta :value))
+    (fact "koulutus" (:koulutus tyonjohtaja-model) => (-> tyonjohtaja-v2 :data :patevyys-tyonjohtaja :koulutusvalinta :value))
+    (fact "valmistumisvuosi" (:valmistumisvuosi tyonjohtaja-model) => (-> tyonjohtaja-v2 :data :patevyys-tyonjohtaja :valmistumisvuosi :value))
+    (fact "patevyysvaatimusluokka" (:patevyysvaatimusluokka tyonjohtaja-model) => (-> tyonjohtaja-v2 :data :patevyysvaatimusluokka :value))
+    (fact "kokemusvuodet" (:kokemusvuodet tyonjohtaja-model) => (-> tyonjohtaja-v2 :data :patevyys-tyonjohtaja :kokemusvuodet :value))
+    (fact "valvottavienKohteidenMaara" (:valvottavienKohteidenMaara tyonjohtaja-model) => (-> tyonjohtaja-v2 :data :patevyys-tyonjohtaja :valvottavienKohteidenMaara :value))
+    (fact "tyonjohtajaHakemusKytkin" (:tyonjohtajaHakemusKytkin tyonjohtaja-model) => true)
+    (fact "vastattavatTyotehtavat"
+      (:vastattavatTyotehtavat tyonjohtaja-model) => "rakennuksenPurkaminen,ivLaitoksenKorjausJaMuutostyo,uudisrakennustyoIlmanMaanrakennustoita,maanrakennustyot,Muu tyotehtava")
+    (fact "vastattavaTyo contents"
+      (map (comp :vastattavaTyo :VastattavaTyo) (:vastattavaTyotieto tyonjohtaja-model)) => (just #{"Rakennuksen purkaminen"
+                                                                                                    "IV-laitoksen korjaus- ja muutosty\u00f6"
+                                                                                                    "Uudisrakennusty\u00f6 ilman maanrakennust\u00f6it\u00e4"
+                                                                                                    "Maanrakennusty\u00f6t"
+                                                                                                    "Muu tyotehtava"}))))
 
 (facts "Canonical tyonjohtaja-blank-role-and-blank-qualification model is correct"
   (let [tyonjohtaja-unwrapped (tools/unwrapped (:data tyonjohtaja-blank-role-and-blank-qualification))
@@ -704,6 +769,18 @@
                                                 :muu-lammonlahde {:value nil}}})
         rakennus (get-rakennus toimenpide {:id "123" :created nil} application-rakennuslupa)]
     (fact (:polttoaine (:lammonlahde (:rakennuksenTiedot rakennus))) => "turve")))
+
+(fact "LPK-427: When energiatehokkuusluku is set, energiatehokkuusluvunYksikko is inluded"
+  (let [toimenpide (tools/unwrapped {:luokitus {:energiatehokkuusluku {:value "124"}
+                                                :energiatehokkuusluvunYksikko {:value "kWh/m2"}}})
+        rakennus (get-rakennus toimenpide {:id "123" :created nil} application-rakennuslupa)]
+    (get-in rakennus [:rakennuksenTiedot :energiatehokkuusluvunYksikko]) => "kWh/m2"))
+
+(fact "LPK-427: When energiatehokkuusluku is not set, energiatehokkuusluvunYksikko is excluded"
+  (let [toimenpide (tools/unwrapped {:luokitus {:energiatehokkuusluku {:value ""}
+                                                :energiatehokkuusluvunYksikko {:value "kWh/m2"}}})
+        rakennus (get-rakennus toimenpide {:id "123" :created nil} application-rakennuslupa)]
+    (get-in rakennus [:rakennuksenTiedot :energiatehokkuusluvunYksikko]) => nil))
 
 (facts "When muu-lammonlahde is specified, it is used"
   (let [toimenpide (tools/unwrapped {:lammitys {:lammitystapa {:value nil}
@@ -844,6 +921,18 @@
     (fact "rakentajaTyyppi" (:rakentajatyyppi rakennus) => "muu")
     (fact "kayttotarkoitus" (:kayttotarkoitus rakennuksentiedot) => "012 kahden asunnon talot")
     (fact "rakentamistapa" (:rakentamistapa rakennuksentiedot) => "elementti")
+
+    (fact "tilavuus" (:tilavuus rakennuksentiedot) => "1500")
+    (fact "kokonaisala" (:kokonaisala rakennuksentiedot) => "1000")
+    (fact "kellarinpinta-ala" (:kellarinpinta-ala rakennuksentiedot) => "100")
+    (fact "kerrosluku" (:kerrosluku rakennuksentiedot) => "2")
+    (fact "kerrosala" (:kerrosala rakennuksentiedot) => "180")
+
+    (fact "paloluokka" (:paloluokka rakennuksentiedot) => "P1")
+    (fact "energialuokka" (:energialuokka rakennuksentiedot) => "C")
+    (fact "energiatehokkuusluku" (:energiatehokkuusluku rakennuksentiedot) => "124")
+    (fact "energiatehokkuusluvunYksikko" (:energiatehokkuusluvunYksikko rakennuksentiedot) => "kWh/m2")
+
     (fact "rakennuksen omistajalaji" (:omistajalaji (:omistajalaji rakennuksen-omistajatieto)) => "muu yksityinen henkil\u00f6 tai perikunta")
     (fact "KuntaRooliKoodi" (:kuntaRooliKoodi rakennuksen-omistajatieto) => "Rakennuksen omistaja")
     (fact "VRKrooliKoodi" (:VRKrooliKoodi rakennuksen-omistajatieto) => "rakennuksen omistaja")
@@ -1280,7 +1369,7 @@
                   :created 1400762767119,
                   :schema-info {:approvable true,
                                 :subtype "hakija",
-                                :name "hakija",
+                                :name "hakija-r",
                                 :removable true,
                                 :after-update "applicant-index-update",
                                 :repeating true,
@@ -1337,7 +1426,7 @@
 
 (ctc/validate-all-documents aloitusoikeus-hakemus)
 
-(fl/facts* "Canonical model is correct"
+(fl/facts* "Canonical model for aloitusoikeus is correct"
   (let [canonical (application-to-canonical aloitusoikeus-hakemus "sv") => truthy
         rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
         rakennusvalvontaasiatieto (:rakennusvalvontaAsiatieto rakennusvalvonta) => truthy

@@ -128,9 +128,11 @@
                   </span>
                 </td>
                 <td>
-                  <span data-bind="click: $root.attachmentsTab.deleteSingleAttachment,
-                                  clickBubble: false,
-                                  attr: {'class': 'icon remove-grey', 'title': loc('attachment.delete')}"></span>
+                  <div data-bind="visible: $root.authorization.ok('delete-attachment')">
+                    <span data-bind="click: $root.attachmentsTab.deleteSingleAttachment,
+                                     clickBubble: false,
+                                     attr: {'class': 'icon remove-grey', 'title': loc('attachment.delete')}"></span>
+                  </div>
                 </td>
               </tr>
               <!-- /ko -->

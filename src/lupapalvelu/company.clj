@@ -2,7 +2,7 @@
   (:require [taoensso.timbre :as timbre :refer [trace debug info infof warn warnf error fatal]]
             [monger.operators :refer :all]
             [schema.core :as sc]
-            [sade.util :refer [min-length-string max-length-string account-type? fn-> fn->>] :as util]
+            [sade.util :refer [min-length-string max-length-string fn-> fn->>] :as util]
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.core :refer :all]
@@ -12,7 +12,7 @@
             [lupapalvelu.token :as token]
             [lupapalvelu.ttl :as ttl]
             [lupapalvelu.notifications :as notif]
-            [lupapalvelu.user-api :as uapi]
+            [lupapalvelu.user :as user]
             [lupapalvelu.user :as u]
             [lupapalvelu.document.schemas :as schema])
   (:import [java.util Date]))
@@ -40,7 +40,8 @@
 
 (def Company {:name                          (sc/both (min-length-string 1) (max-length-string 64))
               :y                             (sc/pred util/finnish-y? "Not valid Y code")
-              :accountType                   (sc/pred account-type? "Not valid account type")
+              :accountType                   (apply sc/enum (conj (map (comp name :name) account-types) "custom"))
+              :customAccountLimit            (sc/maybe sc/Int)
               (sc/optional-key :reference)   max-64-or-nil
               :address1                      max-64-or-nil
               :po                            max-64-or-nil
@@ -56,6 +57,15 @@
               (sc/optional-key :created)     sc/Int
               })
 
+(def company-skeleton ; required keys
+  {:name nil
+   :y    nil
+   :accountType nil
+   :customAccountLimit nil
+   :address1 nil
+   :po nil
+   :zip nil})
+
 (def company-updateable-keys (->> (keys Company)
                                   (map (fn [k] (if (sc/optional-key? k) (:k k) k)))
                                   (remove #{:y})))
@@ -67,11 +77,15 @@
     :zip      (fail! :error.illegal-zip)
     :ovt      (fail! :error.illegal-ovt-tunnus)
     :pop      (fail! "error.illegal-value:select")
+    :accountType (fail! :error.illegal-company-account)
     (fail! :error.unknown)))
 
 (defn validate! [company]
   (when-let [errors (sc/check Company company)]
     (fail-property! (first (keys errors)))))
+
+(defn custom-account? [{type :accountType}]
+  (= :custom (keyword type)))
 
 ;;
 ;; API:
@@ -109,10 +123,13 @@
   (or (find-company-by-id id) (fail! :company.not-found)))
 
 (defn find-companies []
-  (mongo/select :companies {} [:name :y :address1 :zip :po] (array-map :name 1)))
+  (mongo/select :companies {} [:name :y :address1 :zip :po :accountType :customAccountLimit] (array-map :name 1)))
 
 (defn find-company-users [company-id]
   (u/get-users {:company.id company-id}))
+
+(defn company-users-count [company-id]
+  (mongo/count :users {:company.id company-id}))
 
 (defn- map-token-to-user-invitation [token]
   (-> {}
@@ -136,17 +153,36 @@
 (defn find-company-admins [company-id]
   (u/get-users {:company.id company-id, :company.role "admin"}))
 
+(defn ensure-custom-limit [company-id {account-type :accountType custom-limit :customAccountLimit :as data}]
+  "Checks that custom account's customAccountLimit is set and allowed. Nullifies customAcconutLimit with normal accounts."
+  (if (= :custom (keyword account-type))
+   (if custom-limit
+     (if (<= (company-users-count company-id) custom-limit)
+       (assoc data :customAccountLimit custom-limit)
+       (fail! :company.limit-too-small))
+     (fail! :company.missing.custom-limit))
+   (assoc data :customAccountLimit nil)))
+
+(defn account-type-changing-with-custom? [{old-type :accountType} {new-type :accountType}]
+  (and (not= old-type new-type)
+       (or (= :custom (keyword old-type))
+           (= :custom (keyword new-type)))))
+
 (defn update-company!
   "Update company. Throws if company is not found, or if provided updates would make company invalid.
-   Retuens the updated company."
-  [id updates]
+   Returns the updated company."
+  [id updates caller]
   (if (some #{:id :y} (keys updates)) (fail! :bad-request))
   (let [company (dissoc (find-company-by-id! id) :id)
-        updated (merge company updates)
+        updated (->> (merge company updates)
+                  (ensure-custom-limit id))
         old-limit (user-limit-for-account-type (keyword (:accountType company)))
         limit     (user-limit-for-account-type (keyword (:accountType updated)))]
     (validate! updated)
-    (when (< limit old-limit)
+    (when (and (not (u/admin? caller))
+               (account-type-changing-with-custom? company updates)) ; only admins are allowed to change account type to/from 'custom'
+      (fail! :error.unauthorized))
+    (when (and (not (u/admin? caller)) (not (custom-account? company)) (< limit old-limit))
       (fail! :company.account-type-not-downgradable))
     (mongo/update :companies {:_id id} updated)
     updated))
@@ -192,19 +228,17 @@
 
 (defmethod token/handle-token :new-company-user [{{:keys [user company role]} :data} {password :password}]
   (find-company-by-id! (:id company)) ; make sure company still exists
-  (uapi/create-new-user nil
-                     {:email       (:email user)
-                      :username    (:email user)
-                      :firstName   (:firstName user)
-                      :lastName    (:lastName user)
-                      :company     {:id     (:id company)
-                                    :role   role}
-                      :personId    (:personId user)
-                      :password    password
-                      :role        :applicant
-                      :architect   true
-                      :enabled     true}
-                     :send-email false)
+  (user/create-new-user nil {:email       (:email user)
+                             :username    (:email user)
+                             :firstName   (:firstName user)
+                             :lastName    (:lastName user)
+                             :company     {:id (:id company) :role role}
+                             :personId    (:personId user)
+                             :password    password
+                             :role        :applicant
+                             :architect   true
+                             :enabled     true}
+    :send-email false)
   (ok))
 
 (defn invite-user! [user-email company-id]

@@ -30,7 +30,7 @@
 (defpermit R  "Rakennusluvat"
   {:subtypes         []
    :sftp-directory   "/rakennus"
-   :applicant-doc-schema "hakija"
+   :applicant-doc-schema "hakija-r"
    :multiple-parties-allowed true
    :wfs-krysp-url-asia-prefix "rakval:luvanTunnisteTiedot/"})
 

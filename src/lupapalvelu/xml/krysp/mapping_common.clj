@@ -11,6 +11,10 @@
                   "2.1.6" "2.1.5"
                   "2.1.8" "2.1.5"})
 
+(def- ya-yht {"2.1.2" "2.1.0"
+              "2.1.3" "2.1.3"
+              "2.2.0" "2.1.5"})
+
 (def- poik-yht {"2.1.2" "2.1.0"
                 "2.1.3" "2.1.1"
                 "2.1.4" "2.1.2"
@@ -22,8 +26,7 @@
 (def- yht-version
   {"rakennusvalvonta" rakval-yht
    "poikkeamispaatos_ja_suunnittelutarveratkaisu" poik-yht
-   "yleisenalueenkaytonlupahakemus" {"2.1.2" "2.1.0"
-                                     "2.1.3" "2.1.3"}
+   "yleisenalueenkaytonlupahakemus" ya-yht
    "ymparisto/maa_ainesluvat" ymp-yht
    "ymparisto/ilmoitukset"    ymp-yht
    "ymparisto/ymparistoluvat" ymp-yht
@@ -108,6 +111,13 @@
                                              :child [{:tag :LinearRing
                                                       :child [{:tag :pos}]}]} ]}]}
                           {:tag :tyhja :ns "yht"}]})
+
+(def sijantiType_215
+  (update-in sijantiType [:child] conj
+    {:tag :nimi :ns "yht"}
+    {:tag :kuvaus :ns "yht"}
+    {:tag :korkeusTaiSyvyys :ns "yht"}
+    {:tag :pintaAla :ns "yht"}))
 
 (defn sijaintitieto
   "Takes an optional xml namespace for Sijainti element"

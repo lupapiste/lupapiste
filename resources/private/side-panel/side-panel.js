@@ -28,19 +28,19 @@ LUPAPISTE.SidePanelModel = function() {
     return self.showConversationPanel() || self.showNoticePanel();
   });
 
+  var pages = ["application","attachment","statement","neighbors","verdict"];
+
+  self.showSidePanel = ko.pureComputed(function() {
+    return _.contains(pages, lupapisteApp.models.rootVMO.currentPage());
+  }).extend({notify: "always"});
+
+  self.showSidePanel.subscribe(function(val) {
+    if (val) {
+      $("#side-panel-template").addClass("visible");
+    }
+  });
+
   self.previousPage = undefined;
-
-  function setHeight(newHeight) {
-    $("#side-panel .content-wrapper").height(newHeight);
-  }
-
-  function calculateHeight() {
-    var top = $("#side-panel").css("top");
-    var offset = _.parseInt(top.replace(/px/, ""), 10);
-    var margin = 20; // extra 20px margin looks nice
-    var newHeight = $(window).height() - offset - margin;
-    setHeight(newHeight);
-  }
 
   var AuthorityInfo = function(id, firstName, lastName) {
     this.id = id;
@@ -106,8 +106,6 @@ LUPAPISTE.SidePanelModel = function() {
     self.comment().isSelected(self.showConversationPanel());
 
     if (self.showConversationPanel()) {
-      calculateHeight();
-
       setTimeout(function() {
         // Mark comments seen after a second
         if (self.applicationId() && self.authorization.ok("mark-seen")) {
@@ -115,8 +113,6 @@ LUPAPISTE.SidePanelModel = function() {
           .success(function() {self.unseenComments(0);})
           .call();
         }}, 1000);
-    } else {
-      setHeight(0);
     }
   };
 
@@ -135,12 +131,6 @@ LUPAPISTE.SidePanelModel = function() {
   self.toggleNoticePanel = function() {
     self.showNoticePanel(!self.showNoticePanel());
     self.showConversationPanel(false);
-
-    if (self.showNoticePanel()) {
-      calculateHeight();
-    } else {
-      setHeight(0);
-    }
   };
 
   self.closeSidePanel = function() {
@@ -150,14 +140,16 @@ LUPAPISTE.SidePanelModel = function() {
     if (self.showNoticePanel()) {
       self.toggleNoticePanel();
     }
-    setHeight(0);
   };
 
   self.toggleHelp = function() {
     self.showHelp(!self.showHelp());
   };
 
-  var pages = ["application","attachment","statement","neighbors","verdict"];
+  self.hideHelp = function() {
+    self.showHelp(false);
+  };
+
   var unsentMessage = false;
 
   var refreshSidePanel = function(previousHash) {
@@ -205,14 +197,6 @@ LUPAPISTE.SidePanelModel = function() {
   hub.subscribe({type: "page-load"}, function(data) {
     if(_.contains(pages.concat("applications"), pageutil.getPage())) {
       refreshSidePanel(data.previousHash);
-    }
-    // Show side panel on specified pages
-    if(_.contains(pages, pageutil.getPage())) {
-      $("#side-panel-template").addClass("visible");
-    }
-
-    if (self.sidePanelVisible()) {
-      calculateHeight();
     }
   });
 

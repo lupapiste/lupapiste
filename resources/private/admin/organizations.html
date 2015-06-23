@@ -58,16 +58,27 @@
         </div>
 
         <div class="dialog-content">
-          <div>
-            <label class="form-label" for="login-as-password" data-bind="ltext: 'admin.admin-password'"></label>
-            <input type="password" data-bind="textInput: password" class="form-input" id="login-as-password" >
-          </div>
+          <form>
+            <div>
+              <input type="radio" name="role" value="authority" data-bind="checked: role" id="impersonateAuthority">
+              <label data-bind="ltext: 'authority'" for="impersonateAuthority"></label>
+            </div>
+            <div>
+              <input type="radio" name="role" value="authorityAdmin" data-bind="checked: role" id="impersonateAuthorityAdmin">
+              <label data-bind="ltext: 'authorityAdmin'" for="impersonateAuthorityAdmin"></label>
+            </div>
 
-          <button data-bind="click: login, ltext: 'loginframe.login'"
-                  data-test-id="submit-login-as"
-                  class="btn btn-primary btn-dialog" ></button>
+            <div>
+              <label class="form-label" for="login-as-password" data-bind="ltext: 'admin.admin-password'"></label>
+              <input type="password" data-bind="textInput: password" class="form-input" id="login-as-password" autofocus="autofocus">
+            </div>
 
-          <a data-bind="ltext: 'cancel'" class="btn-dialog close" href="#"></a>
+            <button data-bind="click: login, ltext: 'loginframe.login'"
+                    data-test-id="submit-login-as"
+                    class="btn btn-primary btn-dialog" ></button>
+
+            <a data-bind="ltext: 'cancel'" class="btn-dialog close" href="#"></a>
+          </form>
         </div>
       </div>
 

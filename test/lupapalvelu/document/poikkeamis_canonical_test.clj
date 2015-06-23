@@ -105,6 +105,7 @@
                                       :repeating true
                                       :version 1
                                       :type "party"
+                                      :subtype "maksaja"
                                       :order 6}
                         :data {:_selected {:value "yritys"}
                                :laskuviite {:value "LVI99997"}

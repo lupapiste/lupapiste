@@ -14,8 +14,8 @@ Mikko creates an application, permit-type R
 
 Mikko sets himself the applicant
   Open tab  parties
-  Select From List  //section[@data-doc-type="hakija"]//select[@name="henkilo.userId"]  Intonen Mikko
-  Wait Until  Textfield Value Should Be  //section[@data-doc-type="hakija"]//input[@data-docgen-path="henkilo.henkilotiedot.etunimi"]  Mikko
+  Select From List  //section[@data-doc-type="hakija-r"]//select[@name="henkilo.userId"]  Intonen Mikko
+  Wait Until  Textfield Value Should Be  //section[@data-doc-type="hakija-r"]//input[@data-docgen-path="henkilo.henkilotiedot.etunimi"]  Mikko
 
 Mikko can't approve application
   Wait Until  Element should be disabled  xpath=//section[@id="application"]//button[@data-test-id='to-asianhallinta']

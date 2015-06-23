@@ -483,6 +483,7 @@
   [{:keys [application user created] :as command}]
   (when-not (attachment-editable-by-applicationState? application attachmentId (:role user))
     (fail! :error.pre-verdict-attachment))
+  ; FIXME yhdella updatella!
   (doseq [[k v] meta]
     (attachment/update-attachment-key command attachmentId k v created :set-app-modified? true :set-attachment-modified? true))
   (ok))

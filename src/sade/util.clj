@@ -337,11 +337,6 @@
     (re-matches #"^[a-zA-Z]{6}[a-zA-Z\d]{2,5}$" bic)
     false))
 
-(defn account-type? [account-type]
-  (cond
-    (nil? account-type) false
-    :else (re-matches   #"account(5|15|30)" account-type)))
-
 (defn rakennusnumero? [^String s]
   (and (not (nil? s)) (re-matches #"^\d{3}$" s)))
 

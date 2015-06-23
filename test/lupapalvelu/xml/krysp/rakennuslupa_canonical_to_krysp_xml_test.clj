@@ -33,7 +33,7 @@
 (fact "2.1.6: :tag is set" (has-tag rakennuslupa_to_krysp_216) => true)
 (fact "2.1.8: :tag is set" (has-tag rakennuslupa_to_krysp_218) => true)
 
-(defn- do-test [application validate-tyonjohtaja? validate-pysyva-tunnus?]
+(defn- do-test [application validate-tyonjohtaja-type validate-pysyva-tunnus?]
   (let [canonical (application-to-canonical application "fi")
         xml_212 (rakennuslupa-element-to-xml canonical "2.1.2")
         xml_213 (rakennuslupa-element-to-xml canonical "2.1.3")
@@ -62,20 +62,25 @@
           lp-xml_216 (cr/strip-xml-namespaces (xml/parse xml_216_s))
           lp-xml_218 (cr/strip-xml-namespaces (xml/parse xml_218_s))
           tyonjohtaja_212 (xml/select1 lp-xml_212 [:osapuolettieto :Tyonjohtaja])
-          tyonjohtaja_213 (xml/select1 lp-xml_213 [:osapuolettieto :Tyonjohtaja])]
+          tyonjohtaja_213 (xml/select1 lp-xml_213 [:osapuolettieto :Tyonjohtaja])
+          tyonjohtaja_216 (xml/select1 lp-xml_216 [:osapuolettieto :Tyonjohtaja])]
 
       (fact "saapumisPvm"
         (let [expected (sade.util/to-xml-date (:submitted application))]
           (xml/get-text lp-xml_212 [:luvanTunnisteTiedot :LupaTunnus :saapumisPvm]) => expected
           (xml/get-text lp-xml_213 [:luvanTunnisteTiedot :LupaTunnus :saapumisPvm]) => expected))
 
-      (if validate-tyonjohtaja?
+      (if validate-tyonjohtaja-type
         (do
           (fact "In KRYSP 2.1.2, patevyysvaatimusluokka A is mapped to 'ei tiedossa'"
             (xml/get-text tyonjohtaja_212 :patevyysvaatimusluokka) => "ei tiedossa")
 
           (fact "In KRYSP 2.1.3, patevyysvaatimusluokka A not mapped"
-            (xml/get-text tyonjohtaja_213 :patevyysvaatimusluokka) => "A"))
+            (xml/get-text tyonjohtaja_213 :patevyysvaatimusluokka) => "A")
+
+          (when (= :v2 validate-tyonjohtaja-type)
+            (fact "In KRYSP 2.1.6, :vainTamaHankeKytkin was added (Yhteiset schema was updated to 2.1.5 and tyonjohtaja along with it)"
+              (xml/get-text tyonjohtaja_216 :vainTamaHankeKytkin) => "true")))
         (do
            tyonjohtaja_212 => nil
            tyonjohtaja_213 => nil))
@@ -109,16 +114,16 @@
 (facts "Rakennusvalvonta type of permits to canonical and then to xml with schema validation"
 
   (fact "Rakennuslupa application -> canonical -> xml"
-    (do-test application-rakennuslupa true true))
+    (do-test application-rakennuslupa :v1 true))
 
   (fact "Ty\u00f6njohtaja application -> canonical -> xml"
-    (do-test application-tyonjohtajan-nimeaminen true false))
+    (do-test application-tyonjohtajan-nimeaminen :v2 false))
 
   (fact "Suunnittelija application -> canonical -> xml"
-    (do-test application-suunnittelijan-nimeaminen false false))
+    (do-test application-suunnittelijan-nimeaminen nil false))
 
   (fact "Aloitusoikeus -> canonical -> xml"
-    (do-test aloitusoikeus-hakemus false false)))
+    (do-test aloitusoikeus-hakemus nil false)))
 
 
 (facts "Katselmus"
@@ -225,13 +230,11 @@
         (fact "5 vastuuta" (count vastuu) => 5)
         (fact "vastuun alkamisPvm" (xml/get-text tyonjohtaja [:alkamisPvm]) => "2014-02-13")
         (fact "vastuun paattymisPvm" (xml/get-text tyonjohtaja [:paattymisPvm]) => "2014-02-20")
-
-        (fact "vastattavaTyo" (map #(xml/get-text % [:vastattavaTyo]) vastuu)
-          => (just #{"Kiinteist\u00f6n vesi- ja viem\u00e4rilaitteiston rakentaminen"
-                     "Kiinteist\u00f6n ilmanvaihtolaitteiston rakentaminen"
-                     "Maanrakennusty\u00f6", "Muu tyotehtava", "Rakennelma tai laitos"}))
-
+        (fact "vastattavaTyo"
+          (map #(xml/get-text % [:vastattavaTyo]) vastuu) => (just #{"Rakennuksen purkaminen"
+                                                                     "IV-laitoksen korjaus- ja muutosty\u00f6"
+                                                                     "Uudisrakennusty\u00f6 ilman maanrakennust\u00f6it\u00e4"
+                                                                     "Maanrakennusty\u00f6t"
+                                                                     "Muu tyotehtava"}))
         (fact "postiosoite"
-          (xml/get-text tyonjohtaja [:yritys :postiosoitetieto :postiosoite :osoitenimi :teksti]) => "katu")
-        ))
-    ))
+          (xml/get-text tyonjohtaja [:yritys :postiosoitetieto :postiosoite :osoitenimi :teksti]) => "katu")))))

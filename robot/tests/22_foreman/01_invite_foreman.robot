@@ -64,8 +64,8 @@ Authority can view draft foreman application, but can't use commands
   Wait until  Element should be visible  //section[@id='application']//span[@data-test-primary-operation-id='tyonjohtajan-nimeaminen-v2']
   Element should be disabled  xpath=//section[@data-doc-type="hankkeen-kuvaus-minimum"]//textarea
   Open tab  parties
-  Element should be disabled  xpath=//section[@data-doc-type="hakija"]//div[@data-select-one-of="henkilo"]//select[@name="henkilo.userId"]
-  Element should be disabled  xpath=//section[@data-doc-type="hakija"]//div[@data-select-one-of="henkilo"]//input[@data-docgen-path="henkilo.henkilotiedot.etunimi"]
+  Element should be disabled  xpath=//section[@data-doc-type="hakija-r"]//div[@data-select-one-of="henkilo"]//select[@name="henkilo.userId"]
+  Element should be disabled  xpath=//section[@data-doc-type="hakija-r"]//div[@data-select-one-of="henkilo"]//input[@data-docgen-path="henkilo.henkilotiedot.etunimi"]
   Open tab  attachments
   Xpath Should Match X Times  //div[@id="application-attachments-tab"]//select[@data-test-id="attachment-operations-select-lower"]/option  1
   Element text should be  xpath=//div[@id="application-attachments-tab"]//select[@data-test-id="attachment-operations-select-lower"]/option  Valitse..

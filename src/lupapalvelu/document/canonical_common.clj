@@ -7,6 +7,7 @@
             [sade.core :refer :all]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.document.schemas :as schemas]
             [cljts.geom :as geo]
             [cljts.io :as jts]
             [sade.env :as env]))
@@ -65,6 +66,9 @@
   "Converts blank strings to nils and groups documents by schema name"
   [{documents :documents}]
   (by-type (walk/postwalk empty-strings-to-nil documents)))
+
+(defn documents-without-blanks [{documents :documents}]
+  (walk/postwalk empty-strings-to-nil documents))
 
 (def- puolto-mapping {:condition "ehdoilla"
                       :no "ei puolla"
@@ -259,6 +263,7 @@
 
 (def kuntaRoolikoodit
   {:paasuunnittelija       "p\u00e4\u00e4suunnittelija"
+   :hakija-r               "Rakennusvalvonta-asian hakija"
    :hakija                 "Rakennusvalvonta-asian hakija"
    :maksaja                "Rakennusvalvonta-asian laskun maksaja"
    :rakennuksenomistaja    "Rakennuksen omistaja"})
@@ -337,17 +342,20 @@
             {:yritys (get-yritys-data (:yritys osapuoli))})
           (when omistajalaji {:omistajalaji omistajalaji}))))))
 
-(defn get-parties-by-type [documents tag-name party-type doc-transformer]
-  (for [doc (documents party-type)
+(defn get-parties-by-type [documents-by-type tag-name party-type doc-transformer]
+  (for [doc (documents-by-type party-type)
         :let [osapuoli (:data doc)]
         :when (seq osapuoli)]
     {tag-name (doc-transformer osapuoli party-type)}))
 
 (defn get-parties [documents]
-  (filter #(seq (:Osapuoli %))
-    (into
-      (get-parties-by-type documents :Osapuoli :hakija get-osapuoli-data)
-      (get-parties-by-type documents :Osapuoli :maksaja get-osapuoli-data))))
+  (let [hakija-key (if (:hakija-r documents)
+                     :hakija-r
+                     :hakija)]
+    (filter #(seq (:Osapuoli %))
+            (into
+              (get-parties-by-type documents :Osapuoli hakija-key get-osapuoli-data)
+              (get-parties-by-type documents :Osapuoli :maksaja get-osapuoli-data)))))
 
 (defn get-suunnittelija-data [suunnittelija party-type]
   (when (-> suunnittelija :henkilotiedot :sukunimi)
@@ -503,15 +511,12 @@
                        "mark-done" (get-neighbor (-> neighbor :owner :name) propertyId)
                        nil)))))
 
-(defn osapuolet
-  ([documents-by-types lang]
-    (osapuolet documents-by-types nil))
-  ([documents-by-types neighbors lang]
-    {:Osapuolet
-     {:osapuolitieto (get-parties documents-by-types)
-      :suunnittelijatieto (get-designers documents-by-types)
-      :tyonjohtajatieto (get-foremen documents-by-types lang)
-      :naapuritieto (get-neighbors neighbors)}}))
+(defn osapuolet [documents-by-types neighbors lang]
+  {:Osapuolet
+   {:osapuolitieto (get-parties documents-by-types)
+    :suunnittelijatieto (get-designers documents-by-types)
+    :tyonjohtajatieto (get-foremen documents-by-types lang)
+    :naapuritieto (get-neighbors neighbors)}})
 
 (defn change-value-to-when [value to_compare new_val]
   (if (= value to_compare) new_val value))
@@ -643,24 +648,31 @@
 (defn- get-pos [coordinates]
   {:pos (map #(str (-> % .x) " " (-> % .y)) coordinates)})
 
+(defn- get-basic-drawing-info [drawing]  ;; krysp Yhteiset 2.1.5+
+  (util/assoc-when {}
+    :nimi (:name drawing)
+    :kuvaus (:desc drawing)
+    :korkeusTaiSyvyys (:height drawing)
+    :pintaAla (:area drawing)))
+
 (defn- point-drawing [drawing]
-  (let  [geometry (:geometry drawing)
-         p (jts/read-wkt-str geometry)
-         cord (.getCoordinate p)]
+  (let [p (-> drawing :geometry jts/read-wkt-str)
+        cord (.getCoordinate p)]
     {:Sijainti
-     {:piste {:Point {:pos (str (-> cord .x) " " (-> cord .y))}}}}))
+     (merge {:piste {:Point {:pos (str (-> cord .x) " " (-> cord .y))}}}
+       (get-basic-drawing-info drawing))}))
 
 (defn- linestring-drawing [drawing]
-  (let  [geometry (:geometry drawing)
-         ls (jts/read-wkt-str geometry)]
+  (let [ls (-> drawing :geometry jts/read-wkt-str)]
     {:Sijainti
-     {:viiva {:LineString (get-pos (-> ls .getCoordinates))}}}))
+     (merge {:viiva {:LineString (get-pos (-> ls .getCoordinates))}}
+       (get-basic-drawing-info drawing))}))
 
 (defn- polygon-drawing [drawing]
-  (let  [geometry (:geometry drawing)
-         polygon (jts/read-wkt-str geometry)]
+  (let [polygon (-> drawing :geometry jts/read-wkt-str)]
     {:Sijainti
-     {:alue {:Polygon {:exterior {:LinearRing (get-pos (-> polygon .getCoordinates))}}}}}))
+     (merge {:alue {:Polygon {:exterior {:LinearRing (get-pos (-> polygon .getCoordinates))}}}}
+       (get-basic-drawing-info drawing))}))
 
 (defn- drawing-type? [t drawing]
   (.startsWith (:geometry drawing) t))
@@ -672,9 +684,9 @@
 
 
 (defn get-sijaintitieto [application]
-  (let [drawings (drawings-as-krysp (:drawings application))]
-    (cons {:Sijainti {:osoite {:yksilointitieto (:id application)
-                               :alkuHetki (util/to-xml-datetime (now))
-                               :osoitenimi {:teksti (:address application)}}
-                      :piste {:Point {:pos (str (:x (:location application)) " " (:y (:location application)))}}}}
-      drawings)))
+  (let [app-location-info {:Sijainti {:osoite {:yksilointitieto (:id application)
+                                               :alkuHetki (util/to-xml-datetime (now))
+                                               :osoitenimi {:teksti (:address application)}}
+                                      :piste {:Point {:pos (str (:x (:location application)) " " (:y (:location application)))}}}}
+        drawings (drawings-as-krysp (:drawings application))]
+    (cons app-location-info drawings)))

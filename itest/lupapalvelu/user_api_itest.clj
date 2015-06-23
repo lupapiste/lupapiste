@@ -31,13 +31,13 @@
   (fact (-> (query admin :users :role "authority" :organization "753-R") :users count) => 3))
 
 (facts users-for-datatables
- (fact (command admin :users-for-datatables :params {:iDisplayLength 5 :iDisplayStart 0 :sEcho "123" :enabled "true" :organizations ["753-R"]})
+ (fact (datatables admin :users-for-datatables :params {:iDisplayLength 5 :iDisplayStart 0 :sEcho "123" :enabled "true" :organizations ["753-R"]})
    => (contains {:ok true
                  :data (contains {:rows (comp (partial = 4) count)
                                   :total 4
                                   :display 4
                                   :echo "123"})}))
- (fact (command admin :users-for-datatables :params {:iDisplayLength 5 :iDisplayStart 0 :sEcho "123" :enabled "true" :organizations ["753-R"] :filter-search "Suur"})
+ (fact (datatables admin :users-for-datatables :params {:iDisplayLength 5 :iDisplayStart 0 :sEcho "123" :enabled "true" :organizations ["753-R"] :filter-search "Suur"})
    => (contains {:ok true
                  :data (contains {:rows (comp (partial = 1) count)
                                   :total 4
@@ -191,6 +191,12 @@
   ; Pena uploads a tutkintotodistus:
   ;
 
+  (fact "Applicant Pena can upload user attachment"
+    (query pena :add-user-attachment-allowed) => ok?)
+
+  (fact "Auhtority Sonja can't upload user attachment"
+    (query sonja :add-user-attachment-allowed) => unauthorized?)
+
   (let [attachment-id (:attachment-id (upload-user-attachment pena "osapuolet.tutkintotodistus" true))]
 
     ; Now Pena has attachment
@@ -201,14 +207,12 @@
     (let [resp (raw pena "download-user-attachment" :attachment-id attachment-id) => http200?]
       (:body resp) => "This is test file for file upload in itest.")
 
-    ; Sonja can not get attachment
+    (fact "Sonja can not get attachment"
+      (raw sonja "download-user-attachment" :attachment-id attachment-id) => http401?)
 
-    (raw sonja "download-user-attachment" :attachment-id attachment-id) => http401?
-
-    ; Sonja can not delete attachment
-
-    (command sonja "remove-user-attachment" :attachment-id attachment-id)
-    (get (:attachments (query pena "user-attachments")) 0) =not=> nil?
+    (fact "Sonja can not delete attachment"
+      (command sonja "remove-user-attachment" :attachment-id attachment-id)
+      (get (:attachments (query pena "user-attachments")) 0) =not=> nil?)
 
     ; Pena can delete attachment
 
@@ -235,7 +239,7 @@
                       (-> (http/post
                             (str (server-address) "/api/command/impersonate-authority")
                             (assoc params
-                              :form-params (merge {:organizationId sipoo-rakval} (when password {:password password}))
+                              :form-params (merge {:organizationId sipoo-rakval :role "authority"} (when password {:password password}))
                               :content-type :json))
                         decode-response :body))
        role         (fn [] (-> (http/get (str (server-address) "/api/query/user") params) decode-response :body :user :role))

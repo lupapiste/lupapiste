@@ -24,17 +24,28 @@
         <!-- =================== -->
 
         <div data-bind="visible: tabs.visible('info')">
-          <div data-bind="with: info">
+          <div data-bind="with: info" data-test-id="company-info-tab">
             <div class="form-entry account-type-selector">
               <label class="form-label" for="account-type" data-bind="ltext: 'register.company.form.accountType'"></label>
+
+            <!-- ko ifnot: model().customAccountLimit -->
               <select name="account-type"
                       class="form-input combobox"
+                      data-test-id="company-account-select"
                       data-bind="options: accountTypes,
                                  optionsText: 'displayName',
                                  optionsValue: 'name',
                                  value: model().accountType,
                                  optionsAfterRender: setAccountTypeOptionDisable,
-                                 enable: edit"></select>
+                                 enable: edit,
+                                 valueAllowUnset: true"></select>
+            <!-- /ko -->
+            <!-- ko if: model().customAccountLimit -->
+            <div>
+              <span data-test-id="company-custom-account" data-bind="text: loc('register.company.' + model().accountType() + '.title')"></span>
+              <span data-test-id="company-custom-account-limit" data-bind="text: '(' + loc('company.custom.limit', model().customAccountLimit()) + ')'">
+            </div>
+            <!-- /ko -->
             </div>
             <div class="form-entry">
               <label class="form-label tip" data-bind="ltext: 'register.company.form.companyName'"></label>
@@ -102,6 +113,11 @@
         <!-- =================== -->
 
         <div data-bind="visible: tabs.visible('users')">
+
+          <span data-bind="text: loc('company.users.count',
+                                      invitations().length + users().length,
+                                      info.accountType() ? info.accountType().limit : info.model().customAccountLimit())"></span>
+
           <table data-bind="visible: !pending()" class="table table-striped" data-test-id="company-users-table">
             <thead>
               <tr>
@@ -202,7 +218,7 @@
               <span data-bind="ltext: 'register.company.add-user.searchUser'"></span>
               <em data-bind="visible: pending" class="button-loader" style="position: relative;"></em>
             </button>
-            <button data-bind="enable: canCancel, ltext: 'cancel'" class="btn btn-dialog close"></button>
+            <button data-bind="ltext: 'cancel'" class="btn btn-dialog close"></button>
           </div>
         </form>
 

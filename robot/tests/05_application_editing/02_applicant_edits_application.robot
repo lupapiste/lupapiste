@@ -109,10 +109,10 @@ Mikko adds party maksaja using dialog
   Wait Until  Element Should Be Visible  xpath=//section[@id='application']//div[@id='application-parties-tab']//span[@data-test-class='delete-schemas.maksaja']
   Wait until  Xpath Should Match X Times  ${maksajaXpath}  1
 
-Mikko adds party hakija using button
-  Set Suite Variable  ${hakijaXpath}  //section[@id='application']//div[@id='application-parties-tab']//section[@data-doc-type='hakija']
+Mikko adds party hakija-r using button
+  Set Suite Variable  ${hakijaXpath}  //section[@id='application']//div[@id='application-parties-tab']//section[@data-doc-type='hakija-r']
   Wait until  Xpath Should Match X Times  ${hakijaXpath}  1
-  Click enabled by test id  hakija_append_btn
+  Click enabled by test id  hakija-r_append_btn
   Wait until  Xpath Should Match X Times  ${hakijaXpath}  2
 
 Mikko changes application address

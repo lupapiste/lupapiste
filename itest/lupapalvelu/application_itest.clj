@@ -47,8 +47,7 @@
 
 (fact "creating application with message"
   (let [application-id  (create-app-id pena :messages ["hello"])
-        application     (query-application pena application-id)
-        hakija          (domain/get-document-by-name application "hakija")]
+        application     (query-application pena application-id)]
     (:state application) => "draft"
     (:opened application) => nil
     (count (:comments application)) => 1
@@ -56,34 +55,29 @@
 
 (fact "application created to Sipoo belongs to organization Sipoon Rakennusvalvonta"
   (let [application-id  (create-app-id pena :propertyId sipoo-property-id)
-        application     (query-application pena application-id)
-        hakija (domain/get-document-by-name application "hakija")]
+        application     (query-application pena application-id)]
     (:organization application) => "753-R"))
 
 (fact "the ready-calculated validation errors about required document fields, included by a newly created application, are updated when those application fields are filled"
   (let [application-id  (create-app-id pena :propertyId sipoo-property-id)
         application     (query-application pena application-id)
-        hakija          (domain/get-document-by-name application "hakija")
+        hakija          (domain/get-applicant-document (:documents application))
         errs            (:validationErrors hakija)]
     (count errs) => pos?
     (some #(= "illegal-value:required" (-> % :result second)) errs)
 
     (generate-documents application pena)
 
-    (let [application     (query-application pena application-id)
-          hakija          (domain/get-document-by-name application "hakija")]
-      (not-any? #(= "illegal-value:required" (-> % :result second)) errs))))
+    (not-any? #(= "illegal-value:required" (-> % :result second)) errs)))
 
 (fact "application created to Tampere belongs to organization Tampereen Rakennusvalvonta"
   (let [application-id  (create-app-id pena :propertyId tampere-property-id)
-        application     (query-application pena application-id)
-        hakija (domain/get-document-by-name application "hakija")]
+        application     (query-application pena application-id)]
     (:organization application) => "837-R"))
 
 (fact "application created to Reisjarvi belongs to organization Peruspalvelukuntayhtyma Selanne"
   (let [application-id  (create-app-id pena :propertyId "62600000000000")
-        application     (query-application pena application-id)
-        hakija (domain/get-document-by-name application "hakija")]
+        application     (query-application pena application-id)]
     (:organization application) => "069-R"))
 
 (fact* "Assign application to an authority"
@@ -274,7 +268,7 @@
         application-id   (:id application)
         paasuunnittelija (domain/get-document-by-name application "paasuunnittelija")
         suunnittelija    (domain/get-document-by-name application "suunnittelija")
-        hakija     (domain/get-document-by-name application "hakija")
+        hakija     (domain/get-applicant-document (:documents application))
         maksaja    (domain/get-document-by-name application "maksaja")]
 
 

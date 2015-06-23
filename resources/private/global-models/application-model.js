@@ -262,7 +262,7 @@ LUPAPISTE.ApplicationModel = function() {
     return false;
   };
 
-  self.requestForComplement = function(model) {
+  self.requestForComplement = function() {
     ajax.command("request-for-complement", { id: self.id()})
       .success(self.reload)
       .processing(self.processing)
@@ -296,7 +296,7 @@ LUPAPISTE.ApplicationModel = function() {
     return false;
   };
 
-  self.refreshKTJ = function(model) {
+  self.refreshKTJ = function() {
     ajax.command("refresh-ktj", {id: self.id()})
       .success(function() {
         self.reload();
@@ -591,7 +591,7 @@ LUPAPISTE.ApplicationModel = function() {
   };
 
   self.showAcceptInvitationDialog = function() {
-    if (self.hasInvites()) {
+    if (self.hasInvites() && lupapisteApp.models.applicationAuthModel.ok("approve-invite")) {
       hub.send("show-dialog", {ltitle: "application.inviteSend",
                                size: "medium",
                                component: "yes-no-dialog",

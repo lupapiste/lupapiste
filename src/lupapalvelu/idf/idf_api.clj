@@ -10,7 +10,7 @@
             [lupapalvelu.action :refer [defquery]]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as user]
-            [lupapalvelu.user-api :as user-api]
+            [lupapalvelu.user :as user]
             [lupapalvelu.token :as token]
             [lupapalvelu.ttl :as ttl]
             [lupapalvelu.notifications :as notifications]
@@ -74,7 +74,7 @@
                    :enabled false
                    :allowDirectMarketing (Boolean/parseBoolean marketing)
                    :architect (Boolean/parseBoolean architect)}
-        user (user-api/create-new-user nil user-data)
+        user (user/create-new-user nil user-data)
         token-id (token/make-token :activate-linked-account, {}, (select-keys user [:email :phone]), :ttl ttl/idf-create-user-token-ttl, :auto-consume false)]
     (notifications/notify! :activate-linked-account {:data {:token token-id} :user {:firstName first-name :lastName last-name :email email}})
     user))

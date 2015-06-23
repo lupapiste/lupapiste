@@ -91,6 +91,12 @@ var LUPAPISTE = LUPAPISTE || {};
     self.hashChanged = function () {
       self.previousHash = self.currentHash;
       self.currentHash = (location.hash || "").substr(3);
+
+      var q = self.currentHash.indexOf("?");
+      if (q > -1) {
+        self.currentHash = self.currentHash.substring(0,q);
+      }
+
       if (self.currentHash === "") {
         if (_.isFunction(window.location.replace)) {
           window.location.replace(startPageHref + "#!/" + self.startPage);

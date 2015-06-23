@@ -25,7 +25,8 @@
                            :accountType "account5"
                            :address1 "katu"
                            :zip "33100"
-                           :po "Tampere"}
+                           :po "Tampere"
+                           :customAccountLimit nil}
                  :signer {:firstName   "First"
                           :lastName    "Last"
                           :email       "a@b.c"
@@ -41,7 +42,8 @@
                            :accountType "account5"
                            :address1 "katu"
                            :zip "33100"
-                           :po "Tampere"}
+                           :po "Tampere"
+                           :customAccountLimit nil}
                  :signer {:firstName   "Pena"
                           :lastName    "Panaani"
                           :email       "in@va.lid"
@@ -58,7 +60,8 @@
                                       :accountType "account5"
                                       :address1 "katu"
                                       :zip "33100"
-                                      :po "Tampere"}
+                                      :po "Tampere"
+                                      :customAccountLimit nil}
                             :signer {:firstName   "First"
                                      :lastName    "Last"
                                      :email        "a@b.c"
@@ -94,7 +97,8 @@
                                                        :accountType "account5"
                                                        :address1 "katu"
                                                        :zip "33100"
-                                                       :po "Tampere"}
+                                                       :po "Tampere"
+                                                       :customAccountLimit nil}
                                              :signer  {:firstName   "Pena"
                                                        :lastName    "Panaani"
                                                        :email       "pena@example.com"

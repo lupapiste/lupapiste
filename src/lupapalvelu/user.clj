@@ -1,18 +1,20 @@
 (ns lupapalvelu.user
   (:require [taoensso.timbre :as timbre :refer [debug debugf info warn warnf]]
-            [lupapalvelu.document.schemas :as schemas]
+            [swiss.arrows :refer [-<>]]
             [clj-time.core :as time]
             [clj-time.coerce :refer [to-date]]
+            [camel-snake-kebab :as kebab]
             [monger.operators :refer :all]
             [monger.query :as query]
-            [camel-snake-kebab :as kebab]
+            [schema.core :as sc]
             [sade.core :refer [fail fail! now]]
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.util :as util]
+            [lupapalvelu.document.schemas :as schemas]
+            [lupapalvelu.organization :as organization]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.security :as security]
-            [schema.core :as sc]))
+            [lupapalvelu.security :as security]))
 
 ;;
 ;; User schema
@@ -153,6 +155,12 @@
 (defn rest-user? [{role :role}]
   (= :rest-api (keyword role)))
 
+(defn admin? [{role :role}]
+  (= :admin (keyword role)))
+
+(defn authority-admin? [{role :role}]
+  (= :authorityAdmin (keyword role)))
+
 (defn same-user? [{id1 :id} {id2 :id}]
   (= id1 id2))
 
@@ -227,13 +235,12 @@
 ;;
 
 (defn- users-for-datatables-base-query [caller params]
-  (let [admin?               (= (-> caller :role keyword) :admin)
-        caller-organizations (organization-ids caller)
+  (let [caller-organizations (organization-ids caller)
         organizations        (:organizations params)
-        organizations        (if admin? organizations (filter caller-organizations (or organizations caller-organizations)))
+        organizations        (if (admin? caller) organizations (filter caller-organizations (or organizations caller-organizations)))
         role                 (:filter-role params)
-        role                 (if admin? role :authority)
-        enabled              (if admin? (:filter-enabled params) true)]
+        role                 (if (admin? caller) role :authority)
+        enabled              (if (admin? caller) (:filter-enabled params) true)]
     (merge {}
       (when (seq organizations) {:organizations organizations})
       (when role                {:role role})
@@ -337,6 +344,118 @@
        (debugf "user '%s' not found with email" ~email)
        (fail! :error.user-not-found :email ~email))
      ~@body))
+
+;;
+;; ==============================================================================
+;; Create user:
+;; ==============================================================================
+;;
+
+(defn- validate-create-new-user! [caller user-data]
+  (when-let [missing (util/missing-keys user-data [:email :role])]
+    (fail! :error.missing-parameters :parameters missing))
+
+  (let [password         (:password user-data)
+        user-role        (keyword (:role user-data))
+        caller-role      (keyword (:role caller))
+        org-authz        (:orgAuthz user-data)
+        organization-id  (when (map? org-authz)
+                           (name (first (keys org-authz))))
+        admin?           (= caller-role :admin)
+        authorityAdmin?  (= caller-role :authorityAdmin)]
+
+    (when (and org-authz (not (every? coll? (vals org-authz))))
+      (fail! :error.invalid-role :desc "new user has unsupported organization roles"))
+
+    (when-not (#{:authority :authorityAdmin :applicant :dummy} user-role)
+      (fail! :error.invalid-role :desc "new user has unsupported role" :user-role user-role))
+
+    (when (and (= user-role :applicant) caller)
+      (fail! :error.unauthorized :desc "applicants are born via registration"))
+
+    (when (and (= user-role :authorityAdmin) (not admin?))
+      (fail! :error.unauthorized :desc "only admin can create authorityAdmin users"))
+
+    (when (and (= user-role :authority) (not authorityAdmin?))
+      (fail! :error.unauthorized :desc "only authorityAdmin can create authority users" :user-role user-role :caller-role caller-role))
+
+    (when (and (= user-role :authorityAdmin) (not organization-id))
+      (fail! :error.missing-parameters :desc "new authorityAdmin user must have organization" :parameters [:organization]))
+
+    (when (and (= user-role :authority) (and organization-id (not ((organization-ids caller) organization-id))))
+      (fail! :error.unauthorized :desc "authorityAdmin can create users into his/her own organization only, or statement givers without any organization at all"))
+
+    (when (and (= user-role :dummy) organization-id)
+      (fail! :error.unauthorized :desc "dummy user may not have an organization" :missing :organization))
+
+    (when (and password (not (security/valid-password? password)))
+      (fail! :password-too-short :desc "password specified, but it's not valid"))
+
+    (when (and organization-id (not (organization/get-organization organization-id)))
+      (fail! :error.organization-not-found))
+
+    (when (and (:apikey user-data) (not admin?))
+      (fail! :error.unauthorized :desc "only admin can create create users with apikey")))
+
+  true)
+
+(defn- create-new-user-entity [{:keys [enabled password] :as user-data}]
+  (let [email (canonize-email (:email user-data))]
+    (-<> user-data
+      (select-keys [:email :username :role :firstName :lastName :personId
+                    :phone :city :street :zip :enabled :orgAuthz
+                    :allowDirectMarketing :architect :company
+                    :graduatingYear :degree :fise])
+      (merge {:firstName "" :lastName "" :username email} <>)
+      (assoc
+        :email email
+        :enabled (= "true" (str enabled))
+        :private (if password {:password (security/get-hash password)} {})))))
+
+(defn create-new-user
+  "Insert new user to database, returns new user data without private information. If user
+   exists and has role \"dummy\", overwrites users information. If users exists with any other
+   role, throws exception."
+  [caller user-data & {:keys [send-email] :or {send-email true}}]
+  (validate-create-new-user! caller user-data)
+  (let [user-entry  (create-new-user-entity user-data)
+        old-user    (get-user-by-email (:email user-entry))
+        new-user    (if old-user
+                      (assoc user-entry :id (:id old-user))
+                      (assoc user-entry :id (mongo/create-id)))
+        email       (:email new-user)
+        {old-id :id old-role :role}  old-user
+        notification {:titleI18nkey "user.notification.firstLogin.title"
+                      :messageI18nkey "user.notification.firstLogin.message"}
+        new-user   (if (applicant? user-data)
+                     (assoc new-user :notification notification)
+                     new-user)]
+    (try
+      (condp = old-role
+        nil     (do
+                  (info "creating new user" (dissoc new-user :private))
+                  (mongo/insert :users new-user))
+        "dummy" (do
+                  (info "rewriting over dummy user:" old-id (dissoc new-user :private :id))
+                  (mongo/update-by-id :users old-id (dissoc new-user :id)))
+        ; LUPA-1146
+        "applicant" (if (and (= (:personId old-user) (:personId new-user)) (not (:enabled old-user)))
+                      (do
+                        (info "rewriting over inactive applicant user:" old-id (dissoc new-user :private :id))
+                        (mongo/update-by-id :users old-id (dissoc new-user :id)))
+                      (fail! :error.duplicate-email))
+        (fail! :error.duplicate-email))
+
+      (get-user-by-email email)
+
+      (catch com.mongodb.MongoException$DuplicateKey e
+        (if-let [field (second (re-find #"E11000 duplicate key error index: lupapiste\.users\.\$([^\s._]+)" (.getMessage e)))]
+          (do
+            (warnf "Duplicate key detected when inserting new user: field=%s" field)
+            (fail! :duplicate-key :field field))
+          (do
+            (warn e "Inserting new user failed")
+            (fail! :cant-insert)))))))
 
 ;;
 ;; ==============================================================================
