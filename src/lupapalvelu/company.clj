@@ -2,7 +2,7 @@
   (:require [taoensso.timbre :as timbre :refer [trace debug info infof warn warnf error fatal]]
             [monger.operators :refer :all]
             [schema.core :as sc]
-            [sade.util :refer [min-length-string max-length-string account-type? fn-> fn->>] :as util]
+            [sade.util :refer [min-length-string max-length-string fn-> fn->>] :as util]
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.core :refer :all]
@@ -40,7 +40,7 @@
 
 (def Company {:name                          (sc/both (min-length-string 1) (max-length-string 64))
               :y                             (sc/pred util/finnish-y? "Not valid Y code")
-              :accountType                   (sc/pred account-type? "Not valid account type")
+              :accountType                   (apply sc/enum (conj (map (comp name :name) account-types) "custom"))
               :customAccountLimit            (sc/maybe sc/Int)
               (sc/optional-key :reference)   max-64-or-nil
               :address1                      max-64-or-nil
@@ -171,7 +171,7 @@
 (defn update-company!
   "Update company. Throws if company is not found, or if provided updates would make company invalid.
    Returns the updated company."
-  [id updates admin?]
+  [id updates caller]
   (if (some #{:id :y} (keys updates)) (fail! :bad-request))
   (let [company (dissoc (find-company-by-id! id) :id)
         updated (->> (merge company updates)
@@ -179,10 +179,10 @@
         old-limit (user-limit-for-account-type (keyword (:accountType company)))
         limit     (user-limit-for-account-type (keyword (:accountType updated)))]
     (validate! updated)
-    (when (and (not admin?)
+    (when (and (not (u/admin? caller))
                (account-type-changing-with-custom? company updates)) ; only admins are allowed to change account type to/from 'custom'
       (fail! :error.unauthorized))
-    (when (and (not admin?) (not (custom-account? company)) (< limit old-limit))
+    (when (and (not (u/admin? caller)) (not (custom-account? company)) (< limit old-limit))
       (fail! :company.account-type-not-downgradable))
     (mongo/update :companies {:_id id} updated)
     updated))
