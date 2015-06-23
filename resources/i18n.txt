@@ -1,3 +1,4 @@
+auth-admin.alueelliset-organisaatiot:  Alueelliset organisaatiot
 auth-admin.tags:  Avainsanat
 auth-admin.tags.add:  Lisää avainsana
-
+tags.no-tags:  Ei avainsanoja
