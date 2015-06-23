@@ -2,7 +2,7 @@
   (:require [taoensso.timbre :as timbre :refer [trace debug info infof warn warnf error fatal]]
             [monger.operators :refer :all]
             [schema.core :as sc]
-            [sade.util :refer [min-length-string max-length-string account-type? fn-> fn->>] :as util]
+            [sade.util :refer [min-length-string max-length-string fn-> fn->>] :as util]
             [sade.env :as env]
             [sade.strings :as ss]
             [sade.core :refer :all]
@@ -40,7 +40,7 @@
 
 (def Company {:name                          (sc/both (min-length-string 1) (max-length-string 64))
               :y                             (sc/pred util/finnish-y? "Not valid Y code")
-              :accountType                   (sc/pred account-type? "Not valid account type")
+              :accountType                   (apply sc/enum (conj (map (comp name :name) account-types) "custom"))
               :customAccountLimit            (sc/maybe sc/Int)
               (sc/optional-key :reference)   max-64-or-nil
               :address1                      max-64-or-nil
