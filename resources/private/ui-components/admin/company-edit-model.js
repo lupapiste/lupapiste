@@ -3,7 +3,7 @@ LUPAPISTE.CompanyEditModel = function(params) {
 
   var self = this;
 
-  self.company = ko.mapping.fromJS(params.company);
+  self.company = ko.mapping.fromJS(_.defaults(params.company, {customAccountLimit: undefined}));
 
 
   self.accountTypes = LUPAPISTE.config.accountTypes.slice(); // copy
