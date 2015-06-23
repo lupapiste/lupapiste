@@ -2,7 +2,7 @@
 <html>
 <body>
   <section class="page container" id="side-panel-template">
-    <!-- <div id="side-panel-overlay" data-bind="click: closeSidePanel" class="show-side-panel"></div> -->
+    <!-- ko if: showSidePanel -->
     <div id="side-panel" data-bind="transition: sidePanelVisible, class: 'show-side-panel'">
       <div class="buttons">
         <button class="btn-conversation" data-bind="click: toggleConversationPanel, css: {active: showConversationPanel}" id="open-conversation-side-panel">
@@ -39,6 +39,7 @@
         <!-- /ko -->
       </div>
     </div>
+    <!-- /ko -->
   </section>
 </body>
 </html>
