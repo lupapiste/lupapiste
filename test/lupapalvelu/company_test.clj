@@ -60,7 +60,9 @@
        expected (-> (assoc data :accountType "custom" :customAccountLimit 1000)
                   (dissoc :id))
        custom-expected (-> (assoc custom-data :accountType "account5" :customAccountLimit nil)
-                         (dissoc :id))]
+                         (dissoc :id))
+       admin-caller {:username "test" :role "admin"}
+       normal-caller {:username "test" :role "applicant"}]
      (against-background [(c/find-company-by-id! id) => data
                           (c/find-company-by-id! custom-id) => custom-data
                           (mongo/update :companies {:_id id} anything) => true
@@ -68,21 +70,21 @@
                           (mongo/count :users {:company.id id}) => 2]
 
        (fact "Normal user can't set/change account to/from custom, but admin can"
-         (c/update-company! id {:accountType "custom" :customAccountLimit 1000} false) => (partial expected-failure? "error.unauthorized")
-         (c/update-company! id {:accountType "custom" :customAccountLimit 1000} true) => expected
+         (c/update-company! id {:accountType "custom" :customAccountLimit 1000} normal-caller) => (partial expected-failure? "error.unauthorized")
+         (c/update-company! id {:accountType "custom" :customAccountLimit 1000} admin-caller) => expected
 
-         (c/update-company! custom-id {:accountType "account5"} false) => (partial expected-failure? "error.unauthorized")
-         (c/update-company! custom-id {:accountType "account5"} true) => custom-expected)
+         (c/update-company! custom-id {:accountType "account5"} normal-caller) => (partial expected-failure? "error.unauthorized")
+         (c/update-company! custom-id {:accountType "account5"} admin-caller) => custom-expected)
 
        (fact "Can't set custom account when no customAccountLimit is given"
-         (c/update-company! id {:accountType "custom"} true) => (partial expected-failure? "company.missing.custom-limit"))
+         (c/update-company! id {:accountType "custom"} admin-caller) => (partial expected-failure? "company.missing.custom-limit"))
 
        (fact "customAccountLimit is set to nil when using other than custom account"
-         (c/update-company! id {:accountType "account5" :customAccountLimit 123} true) => (dissoc data :id))
+         (c/update-company! id {:accountType "account5" :customAccountLimit 123} admin-caller) => (dissoc data :id))
 
        (fact "customAccountLimit can't be set less than current count of users in company"
-         (c/update-company! id {:accountType "custom" :customAccountLimit 1} true) => (partial expected-failure? "company.limit-too-small")
-         (c/update-company! id {:accountType "custom" :customAccountLimit 2} true) => (assoc expected :customAccountLimit 2)
-         (c/update-company! id {:accountType "custom" :customAccountLimit 3} true) => (assoc expected :customAccountLimit 3)))))
+         (c/update-company! id {:accountType "custom" :customAccountLimit 1} admin-caller) => (partial expected-failure? "company.limit-too-small")
+         (c/update-company! id {:accountType "custom" :customAccountLimit 2} admin-caller) => (assoc expected :customAccountLimit 2)
+         (c/update-company! id {:accountType "custom" :customAccountLimit 3} admin-caller) => (assoc expected :customAccountLimit 3)))))
 
 
