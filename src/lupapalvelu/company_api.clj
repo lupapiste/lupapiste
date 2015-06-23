@@ -47,7 +47,7 @@
    :pre-checks [validate-user-is-admin-or-company-admin]
    :parameters [company updates]}
   [{caller :user}]
-  (ok :company (c/update-company! company updates (u/admin? caller))))
+  (ok :company (c/update-company! company updates caller)))
 
 (defcommand company-user-update
   {:user-roles #{:applicant :admin}
