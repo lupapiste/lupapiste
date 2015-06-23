@@ -25,7 +25,7 @@ LUPAPISTE.TagsEditorModel = function(params) {
     self.tags.remove(function(item) {
       return _.isEmpty(ko.unwrap(item.label));
     });
-    var tags = _.map(self.tags(), function(t) { return ko.unwrap(t.label); });
+    var tags = _(self.tags()).map(function(t) { return ko.unwrap(t.label); }).uniq().value();
     ajax
       .command("save-organization-tags", {tags: tags})
       .success(function() {
