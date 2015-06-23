@@ -6,6 +6,7 @@
       <div class="tags-editor-component">
         <span data-bind="saveIndicator: indicator"></span>
         <ul class="tags">
+          <p data-bind="visible: tags().length === 0, ltext: 'tags.no-tags'"></p>
           <!-- ko foreach: tags -->
           <li class="tag">
             <span class="tag-remove icon remove"
