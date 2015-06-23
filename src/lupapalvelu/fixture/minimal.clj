@@ -539,7 +539,8 @@
                        :kopiolaitos-orderer-email "tilaaja@example.com"
                        :kopiolaitos-orderer-phone "0501231234"
                        :selected-operations (map first (filter (fn [[_ v]] (#{"R" "P" "YI" "YL" "MAL" "VVVL" "KT" "MM"} (name (:permit-type v)))) operations/operations))
-                       :permanent-archive-enabled false}
+                       :permanent-archive-enabled false
+                       :tags ["yl\u00E4maa"]}
 
                       ;; Sipoo YA
                       ;; Keeping :inforequest-enabled true and :new-application-enabled true to allow krysp itests pass.
