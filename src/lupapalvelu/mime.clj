@@ -44,9 +44,5 @@
   (when-let [t (mime-type filename)]
     (re-matches mime-type-pattern t)))
 
-(defn processible-image-file? [filename]
-  (when-let [t (mime-type filename)]
-    (re-matches mime-type-pattern-raster t)))
-
 (defn sanitize-filename [filename]
   (-> filename (ss/suffix "\\") (ss/suffix "/")))

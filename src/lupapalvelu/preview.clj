@@ -1,22 +1,12 @@
 (ns lupapalvelu.preview
-  (:require [clojure.java.io :as io])
   (:import (org.apache.pdfbox.pdmodel PDDocument)
-           (org.apache.pdfbox.util PDFImageWriter ImageIOUtil)
+           (org.apache.pdfbox.util ImageIOUtil)
            (java.awt.image BufferedImage)
            (java.awt RenderingHints)
-           (java.io FileOutputStream ByteArrayOutputStream ByteArrayInputStream FileInputStream)
+           (java.io ByteArrayOutputStream ByteArrayInputStream FileInputStream)
            (javax.imageio ImageIO)))
 
 (def rez 600.0)
-
-(defn pdf-preview-file
-  "Quick and dirty preview image file creation. "
-  [filename]
-  (try (let [document (PDDocument/load filename)
-             pdfWriter (PDFImageWriter.)]
-         (.writeImage pdfWriter document "jpg" "" 1 Integer/MAX_VALUE "preview_" 1 16))
-       true
-       (catch Exception e false)))
 
 (defn scale-image
   "Crops and scales BufferedImage to predefined resolution"
@@ -40,7 +30,7 @@
     new-image))
 
 (defn scale-image-to-output
-  "Converts 1. page from PDF to BufferedImage scaling and cropping to predefined resolution and writes it to given OutputStream"
+  "Converts BufferedImage scaling and cropping in to predefined resolution and writes it to given OutputStream"
   [image]
   (let [scaled-image (scale-image image)
         output (ByteArrayOutputStream.)]
@@ -48,7 +38,7 @@
     (ByteArrayInputStream. (.toByteArray output))))
 
 (defn pdf-to-image-input-stream
-  "Converts 1. page from PDF to scaled and cropped predefined resolution jpg InputStream"
+  "Converts 1. page from PDF to scaled and cropped jpf preview InputStream"
   [pdf-input]
   (let [document (PDDocument/load pdf-input)]
     (try
@@ -58,12 +48,9 @@
       (finally (.close document)))))
 
 (defn raster-to-image-input-stream
-  "Converts Raster image to scaled and cropped predefined resolution jpg InputStream"
+  "Converts Raster image to scaled and cropped jpg preview InputStream"
   [input]
   (try
     (let [image (ImageIO/read (if (= (type input) java.lang.String ) (FileInputStream. input) input))]
       (scale-image-to-output image))
-    (catch Exception e (println e))
-    ))
-
-;;(io/copy (pdf-to-image-input-stream "/home/michaelho/ws/lupapalvelu/problematic-pdfs/Yhdistelmakartta_asema-johto_Oksapolku-Pihkakatu.pdf") (FileOutputStream. "/tmp/a1.jpg"))
+    (catch Exception e (println e))))

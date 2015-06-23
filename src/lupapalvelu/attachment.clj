@@ -383,12 +383,13 @@
 (defn create-preview
     [file-id filename content-type content application-id]
   (debugf "Creating preview: file-id=%s"  file-id)
-  (when (= "application/pdf" content-type)
-    (mongo/upload (str file-id "-preview") (str (FilenameUtils/getBaseName filename) ".jpg") "image/jpg" (preview/pdf-to-image-input-stream content) :application application-id))
-  (when (re-matches mime/mime-type-pattern-raster content-type)
-    (mongo/upload (str file-id "-preview") (str (FilenameUtils/getBaseName filename) ".jpg") "image/jpg" (preview/raster-to-image-input-stream content) :application application-id)))
+  (when-let [full-content  (cond
+                             (= "application/pdf" content-type) (preview/pdf-to-image-input-stream content)
+                             (re-matches mime/mime-type-pattern-raster content-type) (preview/raster-to-image-input-stream content))]
+    (mongo/upload (str file-id "-preview") (str (FilenameUtils/getBaseName filename) ".jpg") "image/jpg" full-content :application application-id)))
 
 (defn output-attachment-preview
+  "Outputs attachment preview creating it if is it does not already exist"
   [attachment-id attachment-fn]
   (let [preview-id (str attachment-id "-preview")]
     (when (= 0 (mongo/count :fs.files {:_id preview-id}))
@@ -397,10 +398,7 @@
             content-type (:content-type attachment)
             content ((:content attachment))
             application-id (:application attachment)]
-        (create-preview attachment-id file-name content-type content application-id)
-        )
-      )
-
+        (create-preview attachment-id file-name content-type content application-id)))
     (output-attachment preview-id false attachment-fn)))
 
 (defn attach-file!
