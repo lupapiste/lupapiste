@@ -354,3 +354,22 @@
   (let [key    (csk/->kebab-case key)
         org-id (user/authority-admins-organization-id user)]
     (o/update-organization org-id {$set {(str "vendor-backend-redirect." key) val}})))
+
+(defcommand save-organization-tags
+  {:parameters [tags]
+   :user-roles #{:authorityAdmin}}
+  [{user :user}]
+  (let [org-id (user/authority-admins-organization-id user)]
+    (o/update-organization org-id {$set {:tags tags}})))
+
+(defquery get-organization-tags
+  {:user-authz-roles #{:statementGiver}
+   :user-roles #{:authorityAdmin :authority}}
+  [{{:keys [organizationId]} :data user :user}]
+  (when (and organizationId (not ((keyword organizationId) (:orgAuthz user))))
+    (fail! :error.unknown-organization))
+  (if-let [org-id (if (user/authority-admin? user)
+                 (user/authority-admins-organization-id user)
+                 organizationId)]
+    (ok :tags (:tags (o/get-organization org-id)))
+    (fail! :error.organization-not-found)))
