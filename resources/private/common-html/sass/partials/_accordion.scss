@@ -20,12 +20,12 @@
     padding-right:0;
     max-width: $application-max-width - $marginS * 2;
     @include box-sizing(border-box);
-    span {
-      margin-right: $marginM;
-    }
+    // span {
+    //   margin-right: $marginM;
+    // }
     .icon {
-      border-right: 1px solid white;
-      padding-right: $marginL;
+      margin-right: $marginL;
+      vertical-align: baseline;
     }
     .icon.remove {
       border-right: none;
@@ -88,6 +88,10 @@
       }
       .approval-rejected, .approval-approved {
         margin-right: 0;
+        padding-right: $marginL;
+        &:after {
+          vertical-align: baseline;
+        }
       }
     }
   }
@@ -109,7 +113,7 @@
         margin: $marginM 0;
         padding-left: 0;
       }
-      authority-accept-fields {
+      .authority-accept-fields {
         h2 {
           background: $lp-light-grey;
         }
