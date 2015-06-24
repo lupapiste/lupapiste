@@ -1,0 +1,47 @@
+.tags-editor-component {
+  position: relative;
+  ul.tags {
+    list-style: none;
+    padding: $marginS 0 0 0;
+    overflow: auto;
+    li.tag {
+      position: relative;
+      background-color: $lp-orange;
+      font-size: 16px;
+      margin-right: $marginS;
+      white-space: nowrap;
+      float: left;
+      margin-bottom: $marginS;
+      line-height: 32px;
+      span.tag-label, input.tag-editor {
+        margin-left: $marginL + $marginS / 2;
+        font-size: 16px;
+      }
+      span.tag-label {
+        color: #fff;
+        margin-right: 36px;
+      }
+      input.tag-editor {
+        color: black;
+        margin-right: $marginS;
+        width: 300px;
+      }
+      span.tag-remove {
+        cursor: pointer;
+        position: absolute;
+        left: $marginS;
+        top: 0;
+        bottom: 0;
+        margin: auto;
+      }
+      span.tag-edit {
+        cursor: pointer;
+        position: absolute;
+        right: $marginS;
+        top: 0;
+        bottom: 0;
+        margin: auto;
+      }
+    }
+  }
+}

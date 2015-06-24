@@ -47,7 +47,7 @@
     if (c.accountType === "custom") {
       return c.customAccountLimit ? c.customAccountLimit : 0;
     } else {
-      return new RegExp("account(\\d+)").exec(c.accountType)[1]; // get the number after str 'account'
+      return _.findWhere(LUPAPISTE.config.accountTypes, {name: c.accountType}).limit;
     }
   }
 

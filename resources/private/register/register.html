@@ -17,7 +17,7 @@
       <div data-bind="if: features.enabled('companyRegistration')">
         <div class="feature">
           <h1 data-bind="ltext: 'register.company.header'"></h1>
-          <p data-bind="ltext: 'register.company.info'" class="register-info"></p>
+          <p data-bind="lhtml: 'register.company.info'" class="register-info"></p>
           <p data-bind="ltext: 'register.company.create.help'" class="register-info"></p>
           <a data-bind="attr: {href: '#!/register-company-account-type'}, ltext: 'register.company.register'"
              href="#"

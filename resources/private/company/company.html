@@ -42,7 +42,8 @@
             <!-- /ko -->
             <!-- ko if: model().customAccountLimit -->
             <div>
-              <span data-test-id="company-custom-account" data-bind="text: loc('register.company.' + model().accountType() + '.title', model().customAccountLimit())"></span>
+              <span data-test-id="company-custom-account" data-bind="text: loc('register.company.' + model().accountType() + '.title')"></span>
+              <span data-test-id="company-custom-account-limit" data-bind="text: '(' + loc('company.custom.limit', model().customAccountLimit()) + ')'">
             </div>
             <!-- /ko -->
             </div>

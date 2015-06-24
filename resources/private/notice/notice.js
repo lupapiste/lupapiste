@@ -1,4 +1,4 @@
-LUPAPISTE.TagsDataProvider = function(applicationId, filtered) {
+LUPAPISTE.TagsDataProvider = function(organization, filtered) {
   var self = this;
 
   self.query = ko.observable();
@@ -7,9 +7,10 @@ LUPAPISTE.TagsDataProvider = function(applicationId, filtered) {
 
   var data = ko.observable();
 
-  if (applicationId) {
+  if (organization) {
     ajax
-      .query("available-application-tags", {id: applicationId})
+      .query("get-organization-tags", {organizationId: organization})
+      .error(_.noop)
       .success(function(res) {
         data(res.tags);
       })
@@ -109,7 +110,7 @@ LUPAPISTE.NoticeModel = function() {
     self.urgency(application.urgency);
     self.authorityNotice(application.authorityNotice);
     self.selectedTags(application.tags ? application.tags : []);
-    self.applicationTagsProvider = new LUPAPISTE.TagsDataProvider(application.id, self.selectedTags());
+    self.applicationTagsProvider = new LUPAPISTE.TagsDataProvider(application.organization, self.selectedTags());
     subscribe();
   };
 };
