@@ -34,7 +34,9 @@
 ;;
 
 (def- statement-statuses ["puoltaa" "ei-puolla" "ehdoilla"])
-(def- statement-statuses-more-options (into [] (concat statement-statuses ["ei-huomautettavaa" "ehdollinen" "puollettu" "ei-puollettu" "ei-lausuntoa" "lausunto" "kielteinen" "palautettu" "poydalle"])))  ;; Krysp Yhteiset 2.1.5+
+;; Krysp Yhteiset 2.1.5+
+(def- statement-statuses-more-options
+  (into [] (concat statement-statuses ["ei-huomautettavaa" "ehdollinen" "puollettu" "ei-puollettu" "ei-lausuntoa" "lausunto" "kielteinen" "palautettu" "poydalle"])))
 
 (defn- version-is-greater-or-equal [source target]
   (let [[source-major source-minor source-micro] (map #(util/->int % nil) (ss/split source #"\."))
