@@ -52,6 +52,10 @@ var accordion = (function() {
     return false;
   }
 
+  function toggleAll(target) {
+    $(target).closest(".application_section").find("section.accordion h2").click();
+  }
+
   $.fn.accordionOpen   = function(done) { return open(this, done); };
   $.fn.accordionClose  = function(done) { return close(this, done); };
   $.fn.accordionToggle = function(done) { return toggle(this, done); };
@@ -60,7 +64,8 @@ var accordion = (function() {
     open:   open,
     close:  close,
     toggle: toggle,
-    click:  click
+    click:  click,
+    toggleAll: toggleAll
   };
 
 })();
