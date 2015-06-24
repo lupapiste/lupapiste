@@ -502,4 +502,19 @@
       (when (denied-actions action)
         result => (doc-check = unauthorized)))))
 
-
+(fact "Primary operation can be changed"
+  (let [id (create-app-id pena)]
+    (command pena :add-operation :id id :operation "varasto-tms") => ok?
+    (let [app (query-application pena id)
+          secondary-op (first (:secondaryOperations app))
+          primary-op (:primaryOperation app)]
+      (:name secondary-op) => "varasto-tms"
+      (:name primary-op) => "kerrostalo-rivitalo"
+      (fact "Primary operation cannot be changed to unknown operation"
+        (command pena :change-primary-operation :id id :secondaryOperationId "foobar") => {:ok false, :text "error.unknown-operation"})
+      (command pena :change-primary-operation :id id :secondaryOperationId (:id secondary-op)) => ok?)
+    (let [app (query-application pena id)
+          secondary-op (first (:secondaryOperations app))
+          primary-op (:primaryOperation app)]
+      (:name secondary-op) => "kerrostalo-rivitalo"
+      (:name primary-op) => "varasto-tms")))
