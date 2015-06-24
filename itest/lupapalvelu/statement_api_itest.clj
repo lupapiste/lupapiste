@@ -97,7 +97,7 @@
           (query mikko :should-see-unsubmitted-statements :id application-id) => unauthorized?)
 
         (get-in statement [:person :email]) => veikko-email
-        (command veikko :give-statement :id application-id :statementId (:id statement) :status "yes" :text "I will approve" :lang "fi") => ok?
+        (command veikko :give-statement :id application-id :statementId (:id statement) :status "puoltaa" :text "I will approve" :lang "fi") => ok?
 
         (fact "Applicant got email"
           (let [emails (sent-emails)

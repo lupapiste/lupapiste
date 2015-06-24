@@ -428,8 +428,8 @@
                           :email "sonja.sibbo@sipoo.fi"
                           :id "516560d6c2e6f603beb85147"}
                  :requested 1368080102631
-                 :status "condition"
-                   :text "Savupiippu pit\u00e4\u00e4 olla."}]
+                 :status "ehdoilla"
+                 :text "Savupiippu pit\u00e4\u00e4 olla."}]
    :neighbors ctc/neighbors})
 
 (ctc/validate-all-documents application-rakennuslupa)

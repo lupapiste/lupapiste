@@ -141,7 +141,7 @@
 (def statements [{:id "52382cea94a74fc25bb4be5d"
                   :given 1379415837074
                   :requested 1379413226349
-                  :status "yes"
+                  :status "puoltaa"
                   :person statement-giver
                   :text "Annanpa luvan."}])
 

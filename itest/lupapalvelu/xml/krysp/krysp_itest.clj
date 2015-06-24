@@ -99,7 +99,7 @@
                                     :give-statement
                                     :id application-id
                                     :statementId statement-id
-                                    :status "yes"
+                                    :status "puoltaa"
                                     :lang "fi"
                                     :text "Annanpa luvan urakalle.")]
     (query-application pena application-id)))
