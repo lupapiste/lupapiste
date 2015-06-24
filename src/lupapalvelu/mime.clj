@@ -28,9 +28,6 @@
                       "vnd\\.oasis\\.opendocument\\..+"
                       "vnd\\.openxmlformats-officedocument\\..+"]) "))")])))
 
-(def mime-type-pattern-raster
-  (re-pattern "(image/(gif|jpeg|png|tiff))"))
-
 (def allowed-extensions
   (keys
     (into (sorted-map)

@@ -1,4 +1,5 @@
 (ns lupapalvelu.preview
+  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn warnf error errorf fatal]])
   (:import (org.apache.pdfbox.pdmodel PDDocument)
            (org.apache.pdfbox.util ImageIOUtil)
            (java.awt.image BufferedImage)
@@ -20,7 +21,7 @@
         width (* scale (- original-width crop-x))
         height (* scale (- original-height crop-y))
         new-image (BufferedImage. width height BufferedImage/TYPE_INT_RGB)]
-    (println "pdf rez: " original-width "x" original-height " crop: " crop-x "x" crop-y " scale by " scale)
+    (debugf "scale-image rez: %s x %s crop: %s x %s  scale by  %s" original-width original-height crop-x crop-y scale)
     (doto (.createGraphics new-image)
       (.setRenderingHint RenderingHints/KEY_INTERPOLATION, RenderingHints/VALUE_INTERPOLATION_BICUBIC)
       (.setRenderingHint RenderingHints/KEY_RENDERING, RenderingHints/VALUE_RENDER_QUALITY)
@@ -29,28 +30,33 @@
       (.dispose))
     new-image))
 
-(defn scale-image-to-output
-  "Converts BufferedImage scaling and cropping in to predefined resolution and writes it to given OutputStream"
+(defn buffered-image-to-input-stream
+  "Converts BufferedImage inputStream"
   [image]
-  (let [scaled-image (scale-image image)
-        output (ByteArrayOutputStream.)]
-    (ImageIOUtil/writeImage scaled-image "jpg" output ImageIOUtil/DEFAULT_SCREEN_RESOLUTION 0.5)
+  (let [output (ByteArrayOutputStream.)]
+    (ImageIOUtil/writeImage image "jpg" output ImageIOUtil/DEFAULT_SCREEN_RESOLUTION 0.5)
     (ByteArrayInputStream. (.toByteArray output))))
 
-(defn pdf-to-image-input-stream
-  "Converts 1. page from PDF to scaled and cropped jpf preview InputStream"
+(defn pdf-to-buffered-image
+  "Converts 1. page from PDF to BufferedImage"
   [pdf-input]
-  (let [document (PDDocument/load pdf-input)]
-    (try
-      (let [image (.. document getDocumentCatalog getAllPages iterator next convertToImage)]
-        (scale-image-to-output image))
-      (catch Exception e (println e))
-      (finally (.close document)))))
+  (with-open [document (PDDocument/load pdf-input)]
+    (.. document getDocumentCatalog getAllPages iterator next convertToImage)))
 
-(defn raster-to-image-input-stream
-  "Converts Raster image to scaled and cropped jpg preview InputStream"
+(defn raster-to-buffered-image
+  "Converts Raster image to BufferedImage"
   [input]
+  (ImageIO/read (if (= (type input) java.lang.String) (FileInputStream. input) input)))
+
+(defn to-buffered-image
+  [content content-type]
   (try
-    (let [image (ImageIO/read (if (= (type input) java.lang.String ) (FileInputStream. input) input))]
-      (scale-image-to-output image))
-    (catch Exception e (println e))))
+    (cond
+      (= "application/pdf" content-type) (pdf-to-buffered-image content)
+      (re-matches (re-pattern "(image/(gif|jpeg|png|tiff))") content-type) (raster-to-buffered-image content))
+    (catch Exception e (errorf "ERROR: preview to-buffered-image failed to read content type: %s, error: %e" content-type e))))
+
+(defn create-preview-input-stream
+  [content content-type]
+  (when-let [image (to-buffered-image content content-type)]
+    (buffered-image-to-input-stream (scale-image image))))
