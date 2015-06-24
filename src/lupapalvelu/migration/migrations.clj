@@ -1050,12 +1050,11 @@
   (update-applications-array
       :statements
       (fn [{status :status :as statement}]
-        (let [new-status (case status
-                           "yes" "puoltaa"
-                           "no" "ei-puolla"
-                           "condition" "ehdoilla"
-                           status)]
-          (assoc statement :status new-status)))
+        (assoc statement :status (case status
+                                   "yes"       "puoltaa"
+                                   "no"        "ei-puolla"
+                                   "condition" "ehdoilla"
+                                   status)))
       {"statements.status" {"$in" ["yes" "no" "condition"]}}))
 
 ;;
