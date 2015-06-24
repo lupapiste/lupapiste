@@ -28,6 +28,18 @@ LUPAPISTE.SidePanelModel = function() {
     return self.showConversationPanel() || self.showNoticePanel();
   });
 
+  var pages = ["application","attachment","statement","neighbors","verdict"];
+
+  self.showSidePanel = ko.pureComputed(function() {
+    return _.contains(pages, lupapisteApp.models.rootVMO.currentPage());
+  }).extend({notify: "always"});
+
+  self.showSidePanel.subscribe(function(val) {
+    if (val) {
+      $("#side-panel-template").addClass("visible");
+    }
+  });
+
   self.previousPage = undefined;
 
   var AuthorityInfo = function(id, firstName, lastName) {
@@ -138,7 +150,6 @@ LUPAPISTE.SidePanelModel = function() {
     self.showHelp(false);
   };
 
-  var pages = ["application","attachment","statement","neighbors","verdict"];
   var unsentMessage = false;
 
   var refreshSidePanel = function(previousHash) {
@@ -186,10 +197,6 @@ LUPAPISTE.SidePanelModel = function() {
   hub.subscribe({type: "page-load"}, function(data) {
     if(_.contains(pages.concat("applications"), pageutil.getPage())) {
       refreshSidePanel(data.previousHash);
-    }
-    // Show side panel on specified pages
-    if(_.contains(pages, pageutil.getPage())) {
-      $("#side-panel-template").addClass("visible");
     }
   });
 

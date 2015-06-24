@@ -19,7 +19,7 @@
         <select name="account-type"
                 class="form-input combobox"
                 data-bind="options: $parent.accountTypes,
-                           optionsText: 'name',
+                           optionsText: function(account) {return loc('register.company.' + account.name + '.title');},
                            optionsValue: 'name',
                            value: accountType"></select>
         <!-- ko if: $parent.showCustomCount -->
