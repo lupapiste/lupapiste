@@ -3468,6 +3468,13 @@ ul.attachments-list li.mandatory-attachments {
   border-right: none;
 }
 
+/* line 173, ../sass/partials/_accordion.scss */
+.open-all-accordions {
+  width: 100%;
+  text-align: right;
+  margin-bottom: 6px;
+}
+
 /* line 1, ../sass/partials/_datepicker.scss */
 #ui-datepicker-div {
   background: #f6f6f6;
