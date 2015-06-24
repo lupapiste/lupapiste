@@ -137,7 +137,7 @@
                                   simple-osoite
                                   yhteystiedot))
 
-(def yritys-minimal [{:name "yritysnimi" :type :string :required true}
+(def yritys-minimal [{:name "yritysnimi" :type :string :required true :size "l"}
                      {:name "liikeJaYhteisoTunnus" :type :string :subtype :y-tunnus :required true}])
 
 (def yritys (body
