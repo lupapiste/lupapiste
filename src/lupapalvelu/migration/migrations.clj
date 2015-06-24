@@ -1045,6 +1045,19 @@
         doc))
     {"documents" {$elemMatch {"schema-info.name" "maksaja", "schema-info.subtype" {$exists false}}}}))
 
+(defmigration convert-statement-values
+  {:apply-when (pos? (mongo/count :applications {"statements.status" {"$in" ["yes" "no" "condition"]}}))}
+  (update-applications-array
+      :statements
+      (fn [{status :status :as statement}]
+        (let [new-status (case status
+                           "yes" "puoltaa"
+                           "no" "ei-puolla"
+                           "condition" "ehdoilla"
+                           status)]
+          (assoc statement :status new-status)))
+      {"statements.status" {"$in" ["yes" "no" "condition"]}}))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"
