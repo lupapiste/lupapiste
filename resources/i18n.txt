@@ -1,2 +1,0 @@
-operations.primary:  Päätoimenpide
-operations.primary.select:  Vaihda päätoimenpiteeksi
