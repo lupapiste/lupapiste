@@ -21,7 +21,7 @@
         width (* scale (- original-width crop-x))
         height (* scale (- original-height crop-y))
         new-image (BufferedImage. width height BufferedImage/TYPE_INT_RGB)]
-    (debugf "scale-image rez: " original-width "x" original-height " crop: " crop-x "x" crop-y " scale by " scale)
+    (debugf "scale-image rez: %s x %s, crop: %s x %s, scale by %s" original-width original-height crop-x crop-y scale)
     (doto (.createGraphics new-image)
       (.setRenderingHint RenderingHints/KEY_INTERPOLATION, RenderingHints/VALUE_INTERPOLATION_BICUBIC)
       (.setRenderingHint RenderingHints/KEY_RENDERING, RenderingHints/VALUE_RENDER_QUALITY)
@@ -49,14 +49,16 @@
   (ImageIO/read (if (= (type input) java.lang.String) (FileInputStream. input) input)))
 
 (defn to-buffered-image
+  "Tries to read content to image by JAI or apache.pdfbox. Retuns nil on fail"
   [content content-type]
   (try
     (cond
       (= "application/pdf" content-type) (pdf-to-buffered-image content)
       (re-matches (re-pattern "(image/(gif|jpeg|png|tiff))") content-type) (raster-to-buffered-image content))
-    (catch Exception e (errorf "ERROR: preview to-buffered-image failed to read content type: %s, error: %e" content-type e))))
+    (catch Exception e (errorf "ERROR: preview to-buffered-image failed to read content type: %s, error: %s" content-type e))))
 
-(defn create-preview-input-stream
+(defn try-create-preview-input-stream
+  "Tries to create preview image IF content type can be processed to image by JAI or apache.pdfbox. Retuns nil on fail"
   [content content-type]
   (when-let [image (to-buffered-image content content-type)]
     (buffered-image-to-input-stream (scale-image image))))
