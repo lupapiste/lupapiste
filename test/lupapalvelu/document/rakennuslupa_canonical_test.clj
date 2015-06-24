@@ -844,8 +844,7 @@
         viranomainen (:viranomainen LL) => "Paloviranomainen"
         lausunto (:lausunto LL) => "Savupiippu pit\u00e4\u00e4 olla."
         lausuntoPvm (:lausuntoPvm LL) => "2013-05-09"
-        puoltotieto (:puoltotieto LL) => truthy
-        Puolto (:Puolto puoltotieto) => truthy
+        Puolto (-> LL :puoltotieto :Puolto) => truthy
         puolto (:puolto Puolto) => "ehdoilla"
 
         osapuolettieto (:osapuolettieto rakennusvalvontaasia) => truthy
