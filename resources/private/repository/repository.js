@@ -56,7 +56,9 @@ var repository = (function() {
   }
 
   function getAllOperations(application) {
-    return [application.primaryOperation].concat(application.secondaryOperations);
+    return _.filter([application.primaryOperation].concat(application.secondaryOperations), function(item) {
+      return !_.isEmpty(item);
+    });
   };
 
   function loadingErrorHandler(id, e) {
