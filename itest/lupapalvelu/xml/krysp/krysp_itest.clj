@@ -82,8 +82,7 @@
                                                    :id   id}
                                   nil))]
     (upload-attachment apikey id first-attachment true)
-    (sign-attachment apikey id (:id first-attachment) password)
-    ))
+    (sign-attachment apikey id (:id first-attachment) password)))
 
 
 (defn- generate-statement [application-id]
@@ -95,8 +94,7 @@
         updated-application       (query-application pena application-id)
         statement-id              (:id (first (:statements updated-application)))
         upload-statement-attachment-result (upload-attachment-for-statement sonja application-id "" true statement-id)
-        give-statement-result     (command sonja
-                                    :give-statement
+        give-statement-result     (command sonja :give-statement
                                     :id application-id
                                     :statementId statement-id
                                     :status "puoltaa"
