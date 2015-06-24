@@ -47,8 +47,10 @@
       (and (= source-major (:major target)) (= source-minor (:minor target)) (>= source-micro (:micro target))))))
 
 (defn possible-statement-statuses [application]
-  (let [{version :version} (organization/get-krysp-wfs application)
-        yht-version (mapping-common/get-yht-version (:permitType application) version)]
+  (let [{permit-type :permitType municipality :municipality} application
+        organization (organization/resolve-organization municipality permit-type)
+        version (get-in organization [:krysp (keyword permit-type) :version])
+        yht-version (mapping-common/get-yht-version permit-type version)]
     (if (version-is-greater-or-equal yht-version {:major 2 :minor 1 :micro 5})
       statement-statuses-more-options
       statement-statuses)))
