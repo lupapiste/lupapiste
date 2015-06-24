@@ -71,6 +71,8 @@
 ;; Authority operations
 ;;
 
+(def- statement-statuses ["yes" "no" "condition"])
+
 (defquery get-statement-givers
   {:parameters [:id]
    :user-roles #{:authority}
@@ -133,7 +135,7 @@
 (defcommand give-statement
   {:parameters  [id statementId status text :lang]
    :pre-checks  [statement-exists statement-owner #_statement-not-given]
-   :input-validators [(fn [{{status :status} :data}] (when-not (#{"yes", "no", "condition"} status) (fail :error.missing-parameters)))]
+   :input-validators [(fn [{{status :status} :data}] (when-not ((set statement-statuses) status) (fail :error.missing-parameters)))]
    :states      [:open :submitted :complement-needed]
    :user-roles #{:authority}
    :user-authz-roles #{:statementGiver}
