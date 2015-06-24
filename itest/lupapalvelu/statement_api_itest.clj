@@ -91,7 +91,7 @@
           (query veikko :should-see-unsubmitted-statements :id application-id) => ok?)
 
         (fact "Sonja can see unsubmitted statements"
-          (query veikko :should-see-unsubmitted-statements :id application-id) => ok?)
+          (query sonja :should-see-unsubmitted-statements :id application-id) => ok?)
 
         (fact "Applicant can not see unsubmitted statements"
           (query mikko :should-see-unsubmitted-statements :id application-id) => unauthorized?)
