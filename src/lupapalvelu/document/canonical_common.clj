@@ -81,11 +81,7 @@
                       :lausunto "lausunto"
                       :kielteinen "kielteinen"
                       :palautettu "palautettu"
-                      :poydalle "pöydälle"
-                      ;; old values
-                      :condition "ehdoilla"
-                      :no "ei puolla"
-                      :yes "puoltaa"})
+                      :poydalle "pöyd\u00e4lle"})
 
 (defn- get-statement [statement]
   (let [lausunto {:Lausunto

@@ -69,7 +69,6 @@
         ajax
           .query("get-possible-statement-statuses", {id: applicationId})
           .success(function(resp) {
-            console.log("get-possible-statement-statuses Success: data.statuses: ", resp.data);
             self.statuses(resp.data);
           })
           .call();
