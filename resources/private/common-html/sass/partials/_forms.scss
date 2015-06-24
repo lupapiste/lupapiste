@@ -242,6 +242,10 @@ input[readonly], textarea[readonly] {
   }
 }
 
+input.form-input.long {
+  width: $cols5;
+}
+
 .form-add {
   display: block;
 }
