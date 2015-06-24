@@ -184,7 +184,7 @@
       applicationModel.updateMissingApplicationInfo(nonpartyDocErrors.concat(partyDocErrors));
 
       var devMode = LUPAPISTE.config.mode === "dev";
-      docgen.displayDocuments("#applicationDocgen", app, applicationModel.summaryAvailable() ? [] : sortedNonpartyDocs, authorizationModel, {dataTestSpecifiers: devMode});
+      docgen.displayDocuments("#applicationDocgen", app, applicationModel.summaryAvailable() ? [] : sortedNonpartyDocs, authorizationModel, {dataTestSpecifiers: devMode, accordionCollapsed: true});
       docgen.displayDocuments("#partiesDocgen",     app, sortedPartyDocs, authorizationModel, {dataTestSpecifiers: devMode});
       docgen.displayDocuments("#applicationAndPartiesDocgen", app, applicationModel.summaryAvailable() ? sortedNonpartyDocs : [], authorizationModel, {dataTestSpecifiers: false, accordionCollapsed: true});
 
