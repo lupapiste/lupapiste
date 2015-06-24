@@ -8,7 +8,7 @@
            (javax.imageio ImageIO)))
 
 (def pdf-1 "../../problematic-pdfs/Yhdistelmakartta_asema-johto_Oksapolku-Pihkakatu.pdf")
-(def jpg-1 "../../resources/asianhallinta/sample/Pohjakuva 1 krs.jpg")
+(def jpg-1 "../resources/preview-sample-1.jpg")
 (def image-1 (ImageIO/read (FileInputStream. jpg-1)))
 
 (facts "Test to-buffered-image fails quietly"
@@ -26,7 +26,7 @@
 (facts "Test scale-image"
        (fact (.getWidth (scale-image image-1)) => 428))
 
-(facts "Test buffered-image-to-input-stream"
+(facts "Test buffered-image-to-input-stream NB: changing preview compression fails this test"
        (fact (.available (buffered-image-to-input-stream image-1)) => 667967))
 
 ;;(io/copy (pdf-to-image-input-stream "/home/michaelho/ws/lupapalvelu/problematic-pdfs/Yhdistelmakartta_asema-johto_Oksapolku-Pihkakatu.pdf") (FileOutputStream. "/tmp/a1.jpg"))
