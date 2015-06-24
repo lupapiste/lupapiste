@@ -1803,13 +1803,23 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var operationType = document.createElement("span");
     if (!notPrimaryOperation) {
       operationType.className = "icon star-selected";
-      operationType.title = "Päätoimenpide";
+      operationType.title = loc("operations.primary");
       title.appendChild(operationType);
     }
 
     if (isSecondaryOperation) {
       operationType.className = "icon star-unselected";
-      operationType.title = "Valitse päätoimenpiteeksi";
+      operationType.title = loc("operations.primary.select");
+      $(operationType)
+      .click(function() {
+        ajax.command("change-primary-operation", {id: self.appId, secondaryOperationId: docId})
+        .success(function() {
+          console.log("changed");
+          repository.load(self.appId);
+        })
+        .call();
+        return false;
+      });
       title.appendChild(operationType);
     }
 
