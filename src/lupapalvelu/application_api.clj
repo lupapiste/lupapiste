@@ -391,7 +391,10 @@
   (let [old-primary-op (:primaryOperation application)
         old-secondary-ops (:secondaryOperations application)
         new-primary-op (first (filter #(= secondaryOperationId (:id %)) old-secondary-ops))
-        new-secondary-ops (conj (remove #{new-primary-op} old-secondary-ops) old-primary-op)]
+        secondary-ops-without-old-primary-op (remove #{new-primary-op} old-secondary-ops)
+        new-secondary-ops (if old-primary-op ; production data contains applications with nil in primaryOperation
+                            (conj secondary-ops-without-old-primary-op old-primary-op)
+                            secondary-ops-without-old-primary-op)]
     (when-not new-primary-op
       (fail! :error.unknown-operation))
     (update-application command {$set {:primaryOperation new-primary-op
