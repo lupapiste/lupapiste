@@ -72,7 +72,16 @@
 
 (def- puolto-mapping {:condition "ehdoilla"
                       :no "ei puolla"
-                      :yes "puoltaa"})
+                      :yes "puoltaa"
+                      :ei-huomautettavaa "ei huomautettavaa"
+                      :ehdollinen "ehdollinen"
+                      :puollettu "puollettu"
+                      :ei-puollettu "ei puollettu"
+                      :ei-lausuntoa "ei lausuntoa"
+                      :lausunto "lausunto"
+                      :kielteinen "kielteinen"
+                      :palautettu "palautettu"
+                      :poydalle "pöydälle"})
 
 (defn- get-statement [statement]
   (let [lausunto {:Lausunto

@@ -2,7 +2,6 @@
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
             [monger.operators :refer :all]
             [sade.env :as env]
-            [sade.strings :as ss]
             [sade.util :as util]
             [sade.core :refer :all]
             [lupapalvelu.action :refer [defquery defcommand update-application executed] :as action]
@@ -71,7 +70,14 @@
 ;; Authority operations
 ;;
 
-(def- statement-statuses ["yes" "no" "condition"])
+(defquery get-possible-statement-statuses
+  {:description "Provides the possible statement statuses according to the krysp version in use."
+   :parameters [:id]
+   :user-roles #{:authority}
+   :user-authz-roles #{:statementGiver}
+   :states action/all-application-states}
+  [{application :application}]
+  (ok :data (possible-statement-statuses application)))
 
 (defquery get-statement-givers
   {:parameters [:id]
