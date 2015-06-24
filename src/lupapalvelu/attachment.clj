@@ -382,11 +382,10 @@
 
 (defn create-preview
     [file-id filename content-type content application-id]
-  (debugf "Creating preview: file-id=%s"  file-id)
-  (when-let [full-content  (cond
-                             (= "application/pdf" content-type) (preview/pdf-to-image-input-stream content)
-                             (re-matches mime/mime-type-pattern-raster content-type) (preview/raster-to-image-input-stream content))]
-    (mongo/upload (str file-id "-preview") (str (FilenameUtils/getBaseName filename) ".jpg") "image/jpg" full-content :application application-id)))
+  (debugf "Creating preview: id=%s, type=%s file=%s" file-id content-type filename)
+  (when-let [preview-content (preview/create-preview-input-stream content content-type)]
+    (debugf "Saving preview: id=%s, type=%s file=%s" file-id content-type filename)
+    (mongo/upload (str file-id "-preview") (str (FilenameUtils/getBaseName filename) ".jpg") "image/jpg" preview-content :application application-id)))
 
 (defn output-attachment-preview
   "Outputs attachment preview creating it if is it does not already exist"
