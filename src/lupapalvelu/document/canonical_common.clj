@@ -70,9 +70,9 @@
 (defn documents-without-blanks [{documents :documents}]
   (walk/postwalk empty-strings-to-nil documents))
 
-(def- puolto-mapping {:condition "ehdoilla"
-                      :no "ei puolla"
-                      :yes "puoltaa"
+(def- puolto-mapping {:ehdoilla "ehdoilla"
+                      :ei-puolla "ei puolla"
+                      :puoltaa "puoltaa"
                       :ei-huomautettavaa "ei huomautettavaa"
                       :ehdollinen "ehdollinen"
                       :puollettu "puollettu"
@@ -81,7 +81,11 @@
                       :lausunto "lausunto"
                       :kielteinen "kielteinen"
                       :palautettu "palautettu"
-                      :poydalle "pöydälle"})
+                      :poydalle "pöydälle"
+                      ;; old values
+                      :condition "ehdoilla"
+                      :no "ei puolla"
+                      :yes "puoltaa"})
 
 (defn- get-statement [statement]
   (let [lausunto {:Lausunto
