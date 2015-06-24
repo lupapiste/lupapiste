@@ -139,9 +139,8 @@
   (update-application command {$pull {:statements {:id statementId} :auth {:statementId statementId}}}))
 
 (defcommand give-statement
-  {:parameters  [id statementId status text :lang]
+  {:parameters  [:id statementId status text :lang]
    :pre-checks  [statement-exists statement-owner #_statement-not-given]
-   :input-validators [(fn [{{status :status} :data}] (when-not ((set statement-statuses) status) (fail :error.missing-parameters)))]
    :states      [:open :submitted :complement-needed]
    :user-roles #{:authority}
    :user-authz-roles #{:statementGiver}
@@ -149,6 +148,8 @@
    :on-success  [(fn [command _] (notifications/notify! :new-comment command))]
    :description "authrority-roled statement owners can give statements - notifies via comment."}
   [{:keys [application user created] :as command}]
+  (when-not ((set (possible-statement-statuses application)) status)
+    (fail! :error.missing-parameters))
   (let [comment-text   (if (statement-given? application statementId)
                          (i18n/loc "statement.updated")
                          (i18n/loc "statement.given"))
