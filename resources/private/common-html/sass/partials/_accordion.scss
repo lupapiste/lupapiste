@@ -25,7 +25,7 @@
     // }
     .icon {
       margin-right: $marginL;
-      vertical-align: baseline;
+      vertical-align: middle;
     }
     .icon.remove {
       border-right: none;
@@ -37,6 +37,12 @@
       padding-left: 25px;
       margin-left: $marginM;
       width: auto;
+    }
+    .icon.drill-right-white {
+      height: 16px;
+    }
+    .icon.star-selected, .icon.star-unselected {
+      height: 23px;
     }
 
     .op-description-wrapper {

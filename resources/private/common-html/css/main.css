@@ -3305,7 +3305,7 @@ ul.attachments-list li.mandatory-attachments {
 /* line 26, ../sass/partials/_accordion.scss */
 .accordion h2 .icon {
   margin-right: 24px;
-  vertical-align: baseline;
+  vertical-align: middle;
 }
 /* line 30, ../sass/partials/_accordion.scss */
 .accordion h2 .icon.remove {
@@ -3320,108 +3320,116 @@ ul.attachments-list li.mandatory-attachments {
   margin-left: 12px;
   width: auto;
 }
-/* line 42, ../sass/partials/_accordion.scss */
+/* line 41, ../sass/partials/_accordion.scss */
+.accordion h2 .icon.drill-right-white {
+  height: 16px;
+}
+/* line 44, ../sass/partials/_accordion.scss */
+.accordion h2 .icon.star-selected, .accordion h2 .icon.star-unselected {
+  height: 23px;
+}
+/* line 48, ../sass/partials/_accordion.scss */
 .accordion h2 .op-description-wrapper {
   display: inline-block;
   max-width: 700px;
   white-space: nowrap;
   line-height: 20px;
 }
-/* line 47, ../sass/partials/_accordion.scss */
+/* line 53, ../sass/partials/_accordion.scss */
 .accordion h2 .op-description-wrapper span {
   margin-right: 0;
   vertical-align: bottom;
 }
-/* line 51, ../sass/partials/_accordion.scss */
+/* line 57, ../sass/partials/_accordion.scss */
 .accordion h2 .op-description-wrapper .accordion-input {
   width: 600px;
   margin-left: 6px;
 }
-/* line 55, ../sass/partials/_accordion.scss */
+/* line 61, ../sass/partials/_accordion.scss */
 .accordion h2 .op-description-wrapper .op-description {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-/* line 58, ../sass/partials/_accordion.scss */
+/* line 64, ../sass/partials/_accordion.scss */
 .accordion h2 .op-description-wrapper .op-description:before {
   content: "-";
   margin: 0 6px;
 }
-/* line 62, ../sass/partials/_accordion.scss */
+/* line 68, ../sass/partials/_accordion.scss */
 .accordion h2 .op-description-wrapper .op-description:empty {
   display: none;
 }
-/* line 67, ../sass/partials/_accordion.scss */
+/* line 73, ../sass/partials/_accordion.scss */
 .accordion h2 .form-approval-status {
   text-transform: none;
   width: auto;
   display: inline;
   min-height: 28px;
 }
-/* line 73, ../sass/partials/_accordion.scss */
+/* line 79, ../sass/partials/_accordion.scss */
 .accordion h2 .form-approval-status.empty {
   display: none;
   height: 0;
 }
-/* line 78, ../sass/partials/_accordion.scss */
+/* line 84, ../sass/partials/_accordion.scss */
 .accordion h2 .form-approval-status .form-buttons {
   display: inline-block;
   text-align: right;
   float: right;
 }
-/* line 82, ../sass/partials/_accordion.scss */
+/* line 88, ../sass/partials/_accordion.scss */
 .accordion h2 .form-approval-status .form-buttons .btn {
   margin: 0 6px 0 0;
   line-height: 19px;
   min-height: 19px;
   vertical-align: top;
 }
-/* line 89, ../sass/partials/_accordion.scss */
+/* line 95, ../sass/partials/_accordion.scss */
 .accordion h2 .form-approval-status .approval-rejected, .accordion h2 .form-approval-status .approval-approved {
   margin-right: 0;
   padding-right: 24px;
 }
-/* line 92, ../sass/partials/_accordion.scss */
+/* line 98, ../sass/partials/_accordion.scss */
 .accordion h2 .form-approval-status .approval-rejected:after, .accordion h2 .form-approval-status .approval-approved:after {
   vertical-align: baseline;
 }
-/* line 99, ../sass/partials/_accordion.scss */
+/* line 105, ../sass/partials/_accordion.scss */
 .accordion .accordion_content {
   display: none;
   padding: 6px;
   position: relative;
   background: #e9e9e9;
 }
-/* line 104, ../sass/partials/_accordion.scss */
+/* line 110, ../sass/partials/_accordion.scss */
 .accordion .accordion_content .accordion-content-part {
   margin-left: 12px;
   margin-bottom: 12px;
 }
-/* line 108, ../sass/partials/_accordion.scss */
+/* line 114, ../sass/partials/_accordion.scss */
 .accordion .accordion_content .accordion-fields {
   width: 100%;
 }
-/* line 110, ../sass/partials/_accordion.scss */
+/* line 116, ../sass/partials/_accordion.scss */
 .accordion .accordion_content .accordion-fields h2 {
   background: #e9e9e9;
   color: black;
   margin: 12px 0;
   padding-left: 0;
 }
-/* line 117, ../sass/partials/_accordion.scss */
+/* line 123, ../sass/partials/_accordion.scss */
 .accordion .accordion_content .accordion-fields .authority-accept-fields h2 {
   background: #f6f6f6;
 }
-/* line 121, ../sass/partials/_accordion.scss */
+/* line 127, ../sass/partials/_accordion.scss */
 .accordion .accordion_content .accordion-fields h3 {
   margin-top: 12px;
 }
-/* line 127, ../sass/partials/_accordion.scss */
+/* line 133, ../sass/partials/_accordion.scss */
 .accordion .accordion_content.expanded {
   display: block;
 }
 
-/* line 132, ../sass/partials/_accordion.scss */
+/* line 138, ../sass/partials/_accordion.scss */
 .accordion-indicator {
   z-index: 12000;
   width: 112px;
@@ -3430,25 +3438,25 @@ ul.attachments-list li.mandatory-attachments {
   padding: 0 24px 0 0;
   margin-left: 12px;
 }
-/* line 140, ../sass/partials/_accordion.scss */
+/* line 146, ../sass/partials/_accordion.scss */
 .accordion-indicator .icon {
   display: none;
   background-image: url("/img/icons-sprite-1.18.png");
   background-repeat: no-repeat;
 }
-/* line 145, ../sass/partials/_accordion.scss */
+/* line 151, ../sass/partials/_accordion.scss */
 .accordion-indicator.accordion-input-saved .icon {
   display: inline-block;
   background-position: 4px -2499px;
   border-right: none;
 }
-/* line 152, ../sass/partials/_accordion.scss */
+/* line 158, ../sass/partials/_accordion.scss */
 .accordion-indicator.accordion-input-warn .icon {
   display: inline-block;
   background-position: 4px -3199px;
   border-right: none;
 }
-/* line 159, ../sass/partials/_accordion.scss */
+/* line 165, ../sass/partials/_accordion.scss */
 .accordion-indicator.accordion-input-err .icon {
   display: inline-block;
   background-position: 4px -2399px;
