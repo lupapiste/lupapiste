@@ -39,6 +39,7 @@
   (into [] (concat statement-statuses ["ei-huomautettavaa" "ehdollinen" "puollettu" "ei-puollettu" "ei-lausuntoa" "lausunto" "kielteinen" "palautettu" "poydalle"])))
 
 (defn- version-is-greater-or-equal [source target]
+  {:pre [(map? target) (every? #(target %) [:major :minor :micro]) (string? source)]}
   (let [[source-major source-minor source-micro] (map #(util/->int % nil) (ss/split source #"\."))
         source-micro (or source-micro 0)]
     (or
