@@ -7,8 +7,8 @@
   (:import (java.io FileOutputStream FileInputStream)
            (javax.imageio ImageIO)))
 
-(def pdf-1 "../../problematic-pdfs/Yhdistelmakartta_asema-johto_Oksapolku-Pihkakatu.pdf")
-(def jpg-1 "../resources/preview-sample-1.jpg")
+(def pdf-1 "problematic-pdfs/Yhdistelmakartta_asema-johto_Oksapolku-Pihkakatu.pdf")
+(def jpg-1 "test/resources/preview-sample-1.jpg")
 (def image-1 (ImageIO/read (FileInputStream. jpg-1)))
 
 (facts "Test to-buffered-image fails quietly"
