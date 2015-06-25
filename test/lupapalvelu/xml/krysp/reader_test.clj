@@ -82,12 +82,18 @@
 
     (let [verdict (first (:paatokset (last cases)))
           lupamaaraykset (:lupamaaraykset verdict)
-          maaraykset     (:maaraykset lupamaaraykset)]
-      (facts "m\u00e4\u00e4r\u00e4ykset"
-            (count maaraykset) => 2
-            (:sisalto (first maaraykset)) => "Radontekninen suunnitelma"
-            (:maaraysaika (first maaraykset)) => (to-timestamp "2013-08-28")
-            (:toteutusHetki (last maaraykset)) => (to-timestamp "2013-08-31")))))
+          maaraykset     (:maaraykset lupamaaraykset)
+          muut-maaraykset (:muutMaaraykset lupamaaraykset)]
+
+      (fact "muut maaraykset"
+          muut-maaraykset => sequential?
+          muut-maaraykset => (contains ["ES 1" "ES 22" "ES 333"] :in-any-order))
+
+      (fact "m\u00e4\u00e4r\u00e4ykset"
+        (count maaraykset) => 2
+        (:sisalto (first maaraykset)) => "Radontekninen suunnitelma"
+        (:maaraysaika (first maaraykset)) => (to-timestamp "2013-08-28")
+        (:toteutusHetki (last maaraykset)) => (to-timestamp "2013-08-31")))))
 
 (facts "KRYSP verdict"
   (let [xml (xml/parse (slurp "resources/krysp/sample/verdict.xml"))
