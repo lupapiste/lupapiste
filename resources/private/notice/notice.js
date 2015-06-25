@@ -7,7 +7,7 @@ LUPAPISTE.TagsDataProvider = function(organization, filtered) {
 
   var data = ko.observable();
 
-  if (organization) {
+  if (organization && util.getIn(lupapisteApp.models.currentUser, ["orgAuthz", organization])) {
     ajax
       .query("get-organization-tags", {organizationId: organization})
       .error(_.noop)

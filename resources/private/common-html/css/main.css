@@ -3037,13 +3037,13 @@ table.attachments-template-table td.attachment-version-info {
 /* line 18, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-selection-wrapper {
   position: relative;
-  line-height: 32px;
   width: inherit;
 }
-/* line 22, ../sass/partials/_autocomplete.scss */
+/* line 21, ../sass/partials/_autocomplete.scss */
 .autocomplete-component .autocomplete-selection-wrapper span.autocomplete-selection {
   width: 100%;
   height: 100%;
+  line-height: 32px;
   display: inline-block;
   border: 1px solid #dddddd;
   padding: 0 0 0 6px;
