@@ -666,8 +666,8 @@ input.form-input.long {
   &:after {
     content: " ";
     @include spite-bg;
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
     background-position: 0px -2500px;
     display: inline-block;
     margin-left: $marginS;
@@ -678,8 +678,8 @@ input.form-input.long {
   &:after {
     content: " ";
     @include spite-bg;
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
     background-position: 0px -2400px;
     display: inline-block;
     margin-left: $marginS;

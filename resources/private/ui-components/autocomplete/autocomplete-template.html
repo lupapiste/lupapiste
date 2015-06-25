@@ -10,7 +10,7 @@
             <span data-bind="text: selectedText() ? selected()[selectedText()] : selected()"></span>
             <!-- /ko -->
             <span class="caption" data-bind="visible: showCaption, ltext: 'choose'"></span>
-            <ul class="tags">
+            <ul data-bind="visible: tags && selectedTags().length > 0" class="tags">
               <!-- ko foreach: selectedTags -->
               <li class="tag">
                 <span class="tag-remove icon remove"

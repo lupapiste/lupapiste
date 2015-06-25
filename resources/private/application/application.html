@@ -80,7 +80,7 @@
           <div>
             <p data-bind="ltext: 'application.operations.secondary'"></p>
             <!-- ko if: operationsCount() && operationsCount().length > 0 -->
-            <ul data-bind="foreach: operationsCount">
+            <ul data-test-id="application-secondary-operations" data-bind="foreach: operationsCount">
               <li>
                 <span data-bind="visible: count > 1">
                   <span data-bind="text: count"></span>
@@ -374,6 +374,9 @@
           <p data-bind="lhtml: 'required.field.desc'"></p>
           <!-- docgen generated content: -->
           <div class="application_section">
+            <div class="open-all-accordions">
+              <a href="#" data-bind="click: function(data, event) { accordion.toggleAll(event.target); }, ltext: 'accordions.toggle-all'"></a>
+            </div>
             <div id="applicationDocgen" class="docgen-content">
               <!-- This is where generated document will be placed. -->
             </div>
@@ -448,24 +451,26 @@
 
           <!-- docgen generated content: -->
           <div class="application_section">
+            <div class="open-all-accordions">
+              <a href="#" data-bind="click: function(data, event) { accordion.toggleAll(event.target); }, ltext: 'accordions.toggle-all'"></a>
+            </div>
             <div id="partiesDocgen" class="docgen-content">
               <!-- This is where generated document will be placed. -->
             </div>
-          </div>
-
-          <!-- ko if: $root.foreman.isVisible -->
-          <section class="accordion" id="accordion-application-foreman">
-            <h2 onclick="accordion.click(this)" data-test-id="accordion-application-foreman-header">
-              <span class="icon toggle-icon drill-down-white"></span>
-              <span data-bind="ltext: 'application.parties.foreman'"></span>
-            </h2>
-            <div class="accordion_content expanded" data-accordion-state="open">
-              <div class="accordion-fields">
-                <div data-bind="template: {name: 'application-foreman-template', data: $root.foreman}"></div>
+            <!-- ko if: $root.foreman.isVisible -->
+            <section class="accordion" id="accordion-application-foreman">
+              <h2 onclick="accordion.click(this)" data-test-id="accordion-application-foreman-header">
+                <span class="icon toggle-icon drill-down-white"></span>
+                <span data-bind="ltext: 'application.parties.foreman'"></span>
+              </h2>
+              <div class="accordion_content expanded" data-accordion-state="open">
+                <div class="accordion-fields">
+                  <div data-bind="template: {name: 'application-foreman-template', data: $root.foreman}"></div>
+                </div>
               </div>
-            </div>
-          </section>
-          <!-- /ko -->
+            </section>
+            <!-- /ko -->
+          </div>
 
           <button data-bind="click: $parent.addPartyModel.init, ltext: 'application.addParty', visible: $parent.authorization.ok('create-doc')"
                   class="btn modal"
@@ -682,10 +687,11 @@
 
           <h1 data-bind="ltext: 'application.tabApplicationSummary'"></h1>
           <span class="icon help" data-bind="click: function(data, event) { toggleHelp('showSummaryInfoHelp') }, css: {expanded: showSummaryInfoHelp}"></span>
-          <div class="tab-info" data-bind="slider: showSummaryInfoHelp">
-            <p data-bind="lhtml: 'help.' + $root.application.permitType() + '.applicationSummaryDesc'"></p>
-          </div>
+
           <div class="application_section">
+            <div class="open-all-accordions">
+              <a href="#" data-bind="click: function(data, event) { accordion.toggleAll(event.target); }, ltext: 'accordions.toggle-all'"></a>
+            </div>
             <div id="applicationAndPartiesDocgen" class="docgen-content">
               <!-- This is where the generated documents will be placed. -->
             </div>

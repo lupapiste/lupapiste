@@ -382,6 +382,23 @@
     (update-application command {$set {"primaryOperation.description" desc}})
     (update-application command {"secondaryOperations" {$elemMatch {:id op-id}}} {$set {"secondaryOperations.$.description" desc}})))
 
+(defcommand change-primary-operation
+  {:parameters [id secondaryOperationId]
+   :user-roles #{:applicant :authority}
+   :states [:draft :open :submitted :complement-needed]
+   :pre-checks [a/validate-authority-in-drafts]}
+  [{:keys [application] :as command}]
+  (let [old-primary-op (:primaryOperation application)
+        old-secondary-ops (:secondaryOperations application)
+        new-primary-op (first (filter #(= secondaryOperationId (:id %)) old-secondary-ops))
+        secondary-ops-without-old-primary-op (remove #{new-primary-op} old-secondary-ops)
+        new-secondary-ops (if old-primary-op ; production data contains applications with nil in primaryOperation
+                            (conj secondary-ops-without-old-primary-op old-primary-op)
+                            secondary-ops-without-old-primary-op)]
+    (when-not new-primary-op
+      (fail! :error.unknown-operation))
+    (update-application command {$set {:primaryOperation new-primary-op
+                                       :secondaryOperations new-secondary-ops}})))
 
 (defcommand change-permit-sub-type
   {:parameters [id permitSubtype]
