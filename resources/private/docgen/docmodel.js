@@ -1671,7 +1671,10 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var iconSpanWrapper = document.createElement("span");
     var iconSpan = document.createElement("span");
     var iconTextSpan = document.createElement("span");
-    iconTextSpan.appendChild(document.createTextNode(loc("op-description.edit")));
+
+    if (_.isEmpty(operation.description)) {
+      iconTextSpan.appendChild(document.createTextNode(loc("op-description.edit")));
+    }
 
     // test ids
     if (options && options.dataTestSpecifiers) {
