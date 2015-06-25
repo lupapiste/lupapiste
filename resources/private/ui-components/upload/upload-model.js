@@ -27,6 +27,7 @@ LUPAPISTE.UploadModel = function(params) {
         },
         complete: function() {
           self.pending(false);
+          form.reset();
         }
       });
   }
