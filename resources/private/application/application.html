@@ -460,10 +460,10 @@
             <!-- ko if: $root.foreman.isVisible -->
             <section class="accordion" id="accordion-application-foreman">
               <h2 onclick="accordion.click(this)" data-test-id="accordion-application-foreman-header">
-                <span class="icon toggle-icon drill-right-white"></span>
+                <span class="icon toggle-icon drill-down-white"></span>
                 <span data-bind="ltext: 'application.parties.foreman'"></span>
               </h2>
-              <div class="accordion_content" data-accordion-state="closed">
+              <div class="accordion_content expanded" data-accordion-state="open">
                 <div class="accordion-fields">
                   <div data-bind="template: {name: 'application-foreman-template', data: $root.foreman}"></div>
                 </div>
