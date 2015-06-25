@@ -310,17 +310,14 @@
 (defn ->buildings [xml]
   (map ->rakennuksen-tiedot (-> xml cr/strip-xml-namespaces (select [:Rakennus]))))
 
-(defn- separate-vaadittuErityissuunnitelma-elements [lupamaaraykset]
+(defn- extract-vaadittuErityissuunnitelma-elements [lupamaaraykset]
   (let [vaadittuErityissuunnitelma-array (->> lupamaaraykset :vaadittuErityissuunnitelma (map ss/trim) (remove ss/blank?))]
-    (if (seq vaadittuErityissuunnitelma-array)
-      ;; resolving Tekla way of giving vaadittuErityissuunnitelmas: one "vaadittuErityissuunnitelma" with line breaks is divided into multiple "vaadittuErityissuunnitelma"s
-      (let [new-vaadittuErityissuunnitelma-array (if (and
-                                                       (= 1 (count vaadittuErityissuunnitelma-array))
-                                                       (-> vaadittuErityissuunnitelma-array first (.indexOf "\n") (>= 0)))
-                                                   (-> vaadittuErityissuunnitelma-array first (ss/split #"\n"))
-                                                   vaadittuErityissuunnitelma-array)]
-        (assoc lupamaaraykset :vaadittuErityissuunnitelma new-vaadittuErityissuunnitelma-array))
-      (dissoc lupamaaraykset :vaadittuErityissuunnitelma))))
+    ;; resolving Tekla way of giving vaadittuErityissuunnitelmas: one "vaadittuErityissuunnitelma" with line breaks is divided into multiple "vaadittuErityissuunnitelma"s
+    (if (and
+          (= 1 (count vaadittuErityissuunnitelma-array))
+          (-> vaadittuErityissuunnitelma-array first (.indexOf "\n") (>= 0)))
+      (-> vaadittuErityissuunnitelma-array first (ss/split #"\n"))
+      vaadittuErityissuunnitelma-array)))
 
 (defn- ->lupamaaraukset [paatos-xml-without-ns]
   (-> (cr/all-of paatos-xml-without-ns :lupamaaraykset)
@@ -328,7 +325,10 @@
 
     ;; KRYSP yhteiset 2.1.5+ : uudet "vaadittuErityissuunnitelma"-elementit ovat samalla tasolla kuin "vaaditutKatselmukset"-elementit
     (cr/ensure-sequential :vaadittuErityissuunnitelma)
-    separate-vaadittuErityissuunnitelma-elements
+    (#(let [vaaditut-es (extract-vaadittuErityissuunnitelma-elements %)]
+        (if (seq vaaditut-es)
+          (-> % (assoc :muutMaaraykset vaaditut-es) (dissoc :vaadittuErityissuunnitelma))
+          (dissoc % :vaadittuErityissuunnitelma))))
 
     (cr/ensure-sequential :vaaditutKatselmukset)
     (#(let [kats (map :Katselmus (:vaaditutKatselmukset %))]
