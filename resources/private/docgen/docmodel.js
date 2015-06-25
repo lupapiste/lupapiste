@@ -1804,6 +1804,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     if (!notPrimaryOperation) {
       operationType.className = "icon star-selected";
       operationType.title = loc("operations.primary");
+      operationType.setAttribute("data-op-name", op.name);
       title.appendChild(operationType);
     }
 
@@ -1819,6 +1820,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         .call();
         return false;
       });
+      operationType.setAttribute("data-op-name", op.name);
       title.appendChild(operationType);
     }
 
