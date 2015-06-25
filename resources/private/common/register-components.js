@@ -28,7 +28,8 @@ jQuery(document).ready(function() {
     "ok-dialog",
     "ok-button-group",
     "company-edit",
-    "tags-editor"
+    "tags-editor",
+    "upload"
   ];
 
   _.forEach(components, function(component) {
