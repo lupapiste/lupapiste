@@ -4,7 +4,7 @@
   <section class="page container">
     <script type="text/html" id="upload-template">
       <form enctype="multipart/form-data" data-bind="submit: submit">
-        <input class="hidden" type="file" name="file" multiple="multiple" data-bind="event: {change: fileChanged}, disable: disabled"></input>
+        <input class="hidden" type="file" name="files[]" data-bind="event: {change: fileChanged}, disable: disabled"></input>
         <a href="#" class="btn btn-primary" data-bind="click: chooseFile">Lataa tiedosto</a>
         <img src="/img/ajax-loader-12.gif" alt="..." width="12" height="12" data-bind="visible: pending"></img>
       </form>

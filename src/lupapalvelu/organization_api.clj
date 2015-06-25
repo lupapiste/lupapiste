@@ -2,10 +2,14 @@
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf fatal]]
             [clojure.string :as s]
             [monger.operators :refer :all]
-            [sade.core :refer [ok fail fail!]]
+            [noir.core :refer [defpage]]
+            [noir.response :as resp]
+            [noir.request :as request]
+            [sade.core :refer [ok fail fail! now]]
             [sade.util :as util]
             [lupapalvelu.action :refer [defquery defcommand non-blank-parameters vector-parameters boolean-parameters number-parameters email-validator]]
             [lupapalvelu.xml.krysp.reader :as krysp]
+            [lupapalvelu.mime :as mime]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as user]
             [lupapalvelu.permit :as permit]
@@ -373,3 +377,18 @@
                  organizationId)]
     (ok :tags (:tags (o/get-organization org-id)))
     (fail! :error.organization-not-found)))
+
+(defpage [:post "/api/upload/organization-area"] {[{:keys [tempfile filename content-type size]}] :files}
+         (let [user              (user/current-user (request/ring-request))
+               org-id            (user/authority-admins-organization-id user)
+               filename          (mime/sanitize-filename filename)
+               file-info         {:file-name        filename
+                                  :content-type     content-type ; Should be zip
+                                  :size             size
+                                  :organization     org-id
+                                  :created          (now)}]
+           ; TODO parse the shape file and replace organization shapes here
+           (->> (assoc file-info :ok true)
+                (resp/json)
+                (resp/content-type "text/plain")
+                (resp/status 200))))
