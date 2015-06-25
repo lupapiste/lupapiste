@@ -1671,10 +1671,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     var iconSpanWrapper = document.createElement("span");
     var iconSpan = document.createElement("span");
     var iconTextSpan = document.createElement("span");
-
-    if (_.isEmpty(operation.description)) {
-      iconTextSpan.appendChild(document.createTextNode(loc("op-description.edit")));
-    }
+    iconTextSpan.appendChild(document.createTextNode(loc("op-description.edit")));
 
     // test ids
     if (options && options.dataTestSpecifiers) {
@@ -1688,6 +1685,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     if (operation.description) {
       description.nodeValue = operation.description;
       descriptionInput.value = operation.description;
+      $(iconTextSpan).addClass("hidden");
     } else {
       iconSpanWrapper.appendChild(iconTextSpan);
     }
@@ -1707,6 +1705,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       if (value === "") {
         value = null;
         iconSpanWrapper.appendChild(iconTextSpan);
+        $(iconTextSpan).removeClass("hidden");
       }
 
       ajax.command("update-op-description", {id: self.appId, "op-id": operation.id, desc: value })
@@ -1746,7 +1745,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       event.stopPropagation();
 
       if (iconSpanWrapper.contains(iconTextSpan)) {
-        iconSpanWrapper.removeChild(iconTextSpan);
+        $(iconTextSpan).addClass("hidden");
       }
 
       $(iconSpanWrapper).addClass("hidden");
