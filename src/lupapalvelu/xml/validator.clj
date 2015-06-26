@@ -74,7 +74,7 @@
   (conj public-schema-sources
     "krysp/yhteiset-2.1.5.xsd"
     "krysp/rakennusvalvonta-2.1.5.xsd"
-    "krysp/poikkeamispaatos_ja_suunnittelutarveratkaisu-2.1.5.xsd"
+    "krysp/poikkeamispaatos_ja_suunnittelutarveratkaisu-2.2.0.xsd"
     "krysp/YleisenAlueenKaytonLupahakemus-2.2.0.xsd"
     "krysp/ymparistoluvat-2.2.0.xsd"
     "krysp/maaAinesluvat-2.2.0.xsd"
