@@ -81,6 +81,17 @@
     "krysp/vesihuoltolaki-2.2.0.xsd"
     "krysp/ilmoitukset-2.2.0.xsd"))
 
+(def- yht-2_1_6
+  (conj public-schema-sources
+    "krysp/yhteiset-2.1.6.xsd"
+    "krysp/rakennusvalvonta-2.2.0.xsd"
+    "krysp/poikkeamispaatos_ja_suunnittelutarveratkaisu-2.2.1.xsd"
+    "krysp/YleisenAlueenKaytonLupahakemus-2.2.1.xsd"
+    "krysp/ymparistoluvat-2.2.1.xsd"
+    "krysp/maaAinesluvat-2.2.1.xsd"
+    "krysp/vesihuoltolaki-2.2.1.xsd"
+    "krysp/ilmoitukset-2.2.1.xsd"))
+
 (def- rakval-2_1_6
   (conj public-schema-sources
         "krysp/yhteiset-2.1.5.xsd"
@@ -121,6 +132,7 @@
   {"2.1.2" common-validator-2_1_0
    "2.1.3" common-validator-2_1_3
    "2.2.0" common-validator-2_1_5
+   "2.2.1" common-validator-2_1_6
    "ah-1.1" asianhallinta-validator})
 
 (def- poik-validators
