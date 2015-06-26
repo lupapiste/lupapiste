@@ -1,4 +1,8 @@
 (ns lupapalvelu.organization-api
+  (:import [org.geotools.data FileDataStoreFinder])
+  (:import [org.geotools.geojson.feature FeatureJSON])
+  (:import [java.io File])
+
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf fatal]]
             [clojure.string :as s]
             [monger.operators :refer :all]
@@ -7,6 +11,7 @@
             [noir.request :as request]
             [sade.core :refer [ok fail fail! now]]
             [sade.util :as util]
+            [sade.env :as env]
             [lupapalvelu.action :refer [defquery defcommand non-blank-parameters vector-parameters boolean-parameters number-parameters email-validator]]
             [lupapalvelu.xml.krysp.reader :as krysp]
             [lupapalvelu.mime :as mime]
@@ -19,8 +24,11 @@
             [camel-snake-kebab :as csk]
             [sade.strings :as ss]
             [sade.property :as p]
-            [lupapalvelu.logging :as logging]))
-
+            [lupapalvelu.logging :as logging]
+            [lupapalvelu.xml.asianhallinta.verdict :as ah-verdict]
+            [me.raynes.fs :as fs]
+            [clojure.data.json :as json]
+            [slingshot.slingshot :refer [try+]]))
 ;;
 ;; local api
 ;;
@@ -383,12 +391,28 @@
         org-id (user/authority-admins-organization-id user)
         filename (mime/sanitize-filename filename)
         file-info {:file-name    filename
-                   :content-type content-type               ; Should be zip
+                   :content-type content-type
                    :size         size
                    :organization org-id
                    :created      (now)}]
-    ; TODO parse the shape file and replace organization shapes here
-    (->> (assoc file-info :ok false)
-         (resp/json)
-         (resp/content-type "text/plain")
-         (resp/status 200))))
+
+    (try+
+      (when-not (= content-type "application/zip")
+        (fail! :error.illegal-shapefile))
+
+      (let [target-dir (ah-verdict/unzip (.getPath tempfile) (fs/temp-dir "area"))
+            shape-filename (str (first (ss/split filename #".zip")) ".shp")
+            shape-file (new File (str target-dir env/file-separator shape-filename))
+            source (.getFeatureSource (FileDataStoreFinder/getDataStore shape-file))
+            collection (.getFeatures source)
+            io (new FeatureJSON)
+            collection-string (.toString io collection)
+            areas (json/read-str collection-string)]
+        (->> (assoc file-info :areas areas :ok true)
+             (resp/json)
+             (resp/content-type "application/json")
+             (resp/status 200)))
+      (catch [:sade.core/type :sade.core/fail] {:keys [text] :as all}
+        (resp/status 400 text))
+      (catch Object e
+        (resp/status 400 :error.shapefile-parsing-failed)))))
