@@ -33,7 +33,8 @@
                           :foreman-history
                           :reduced-foreman-history
                           :add-application-tags
-                          :get-organization-tags}
+                          :get-organization-tags
+                          :preview-attachment}
         user {:id "user123" :organizations [] :role :applicant}
         application {:organization "999-R" :auth [{:id "user123" :role "statementGiver"}]}]
     (doseq [command (ca/foreach-action user {} application)
