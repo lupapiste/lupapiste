@@ -45,13 +45,16 @@
         result => (doc-check = unauthorized)))))
 
 (facts "Actions with id and state 'draft' are not allowed for authority"
-  (doseq [[action data] (get-actions)
-          :when (and
-                  (= :command (keyword (:type data)))
-                  (:authority (:user-roles data))
-                  (some #{:id} (:parameters data))
-                  (some #{:draft} (:states data)))
-          :let [pre-checks (:pre-checks data)
-                checker-names (map #(-> % type .getName (ss/suffix "$")) pre-checks)
-                result (doc-result (some (partial = "validate_authority_in_drafts") checker-names) action)]]
-    result => (doc-check truthy)))
+  (let [allowed-actions #{:decline-invitation}] ; Authority can always decline his/hers invitation
+    (doseq [[action data] (get-actions)
+            :when (and
+                    (= :command (keyword (:type data)))
+                    (:authority (:user-roles data))
+                    (some #{:id} (:parameters data))
+                    (some #{:draft} (:states data)))
+            :let [pre-checks (:pre-checks data)
+                  checker-names (map #(-> % type .getName (ss/suffix "$")) pre-checks)
+                  result (doc-result (some (partial = "validate_authority_in_drafts") checker-names) action)]]
+      (if (allowed-actions action)
+        result => (doc-check nil?)
+        result => (doc-check truthy)))))
