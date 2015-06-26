@@ -11,6 +11,26 @@
     self.neighborId = ko.observable();
     self.map = null;
 
+    var neighborSkeleton = {propertyId: undefined,
+                            owner: {
+                                address: {
+                                  city: undefined,
+                                  street: undefined,
+                                  zip: undefined
+                                },
+                                businessID: undefined,
+                                email: undefined,
+                                name: undefined,
+                                nameOfDeceased: undefined,
+                                type: undefined
+                            }};
+
+    function ensureNeighbors(neighbor) { // ensure neighbors have correct properties defined
+      var n = _.defaults(neighbor, neighborSkeleton);
+      n.owner = _.defaults(n, neighborSkeleton.owner); // _.defaults is not deep
+      return n;
+    }
+
     self.init = function(application) {
       if (!self.map) {
         self.map = gis.makeMap("neighbors-map", false).addClickHandler(self.click);
@@ -20,7 +40,7 @@
           y = location.y;
       self
         .applicationId(application.id)
-        .neighbors(application.neighbors)
+        .neighbors(_.map(application.neighbors, ensureNeighbors))
         .neighborId(null)
         .map.clear().updateSize().center(x, y, 13).add({x: x, y: y});
     };
