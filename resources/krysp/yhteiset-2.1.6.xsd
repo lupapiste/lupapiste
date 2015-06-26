@@ -574,7 +574,11 @@ tiedot</xs:documentation>
 											</xs:restriction>
 										</xs:simpleType>
 									</xs:element>
-									<xs:element name="tarkastuksenTaiKatselmuksenNimi" type="xs:string" minOccurs="0"/>
+									<xs:element name="tarkastuksenTaiKatselmuksenNimi" type="xs:string">
+										<xs:annotation>
+											<xs:documentation>Tarkastuksen tai katselmuksen nimi, joka tarkentaa katselmuksenLaji tietoa.</xs:documentation>
+										</xs:annotation>
+									</xs:element>
 								</xs:sequence>
 							</xs:complexType>
 						</xs:element>
@@ -673,6 +677,63 @@ tiedot</xs:documentation>
 			<xs:element name="loppuHetki" type="xs:dateTime" minOccurs="0"/>
 		</xs:sequence>
 	</xs:complexType>
+	<xs:complexType name="RakennustunnusType">
+		<xs:sequence>
+			<xs:element name="valtakunnallinenNumero" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Valtakunnallinen numero tulossa</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:pattern value="(([1][0-9]{8})[0-9ABCDEFHJKLMNPRSTUVWXY])"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="kunnanSisainenPysyvaRakennusnumero" type="xs:string" minOccurs="0"/>
+			<xs:element name="jarjestysnumero" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>Luvan sisälllä juokseva numerointi. VRKta varten yksilöivä koodi</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="kiinttun" type="yht:KiinteistotunnusType" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Kiinteistötunnus, 14 merkkiä ilman väliviivoja</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="rakennusnro" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Rakennusnumero, kolmella numerolla etunollin</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:pattern value="[0-9][0-9][0-9]"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="aanestysalue" type="xs:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Äänestysalue</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="katselmusOsittainen" minOccurs="0">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="osittainen"/>
+						<xs:enumeration value="lopullinen"/>
+						<xs:enumeration value="pidetty"/>
+						<xs:enumeration value="ei tiedossa"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="kayttoonottoKytkin" type="xs:boolean" minOccurs="0"/>
+			<xs:element name="muuTunnus" type="xs:string" minOccurs="0"/>
+			<xs:element name="rakennuksenSelite" type="xs:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Voi saada arvoja esim. "Talo A", "Talo B"</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
 	<xs:complexType name="RakennusvalvontaLiiteType">
 		<xs:complexContent>
 			<xs:extension base="yht:LiiteType">
@@ -690,6 +751,13 @@ tiedot</xs:documentation>
 										</xs:sequence>
 									</xs:complexType>
 								</xs:element>
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+					<xs:element name="rakennustunnustieto" minOccurs="0" maxOccurs="unbounded">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="Rakennustunnus" type="yht:RakennustunnusType"/>
 							</xs:sequence>
 						</xs:complexType>
 					</xs:element>
@@ -787,7 +855,7 @@ C vähäinen
 			</xs:element>
 			<xs:element name="koulutus" type="xs:string" minOccurs="0"/>
 			<xs:element name="valmistumisvuosi" type="xs:string" minOccurs="0"/>
-			<xs:element name="liite" type="yht:LiiteType" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="liite" type="yht:RakennusvalvontaLiiteType" minOccurs="0" maxOccurs="unbounded"/>
 			<xs:element name="vaadittuPatevyysluokka" type="yht:PatevyysluokkaType" minOccurs="0">
 				<xs:annotation>
 					<xs:documentation>Kunnan vaatima.
@@ -807,7 +875,7 @@ C vähäinen
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="paatostyyppi" type="yht:PaatostyyppiType" minOccurs="0"/>
-			<xs:element name="FISEpatevyyskortti" type="xs:string" minOccurs="0"/>
+			<xs:element name="FISEpatevyyskortti" type="xs:anyURI" minOccurs="0"/>
 			<xs:element name="FISEkelpoisuus" type="yht:FiseKelpoisuusType" minOccurs="0"/>
 		</xs:sequence>
 	</xs:complexType>
@@ -856,7 +924,7 @@ C vähäinen
 			</xs:element>
 			<xs:element name="koulutus" type="xs:string" minOccurs="0"/>
 			<xs:element name="valmistumisvuosi" type="xs:string" minOccurs="0"/>
-			<xs:element name="liite" type="yht:LiiteType" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="liite" type="yht:RakennusvalvontaLiiteType" minOccurs="0" maxOccurs="unbounded"/>
 			<xs:element name="alkamisPvm" type="xs:date" minOccurs="0">
 				<xs:annotation>
 					<xs:documentation>vastuun alkamis päivämäärä</xs:documentation>
@@ -2992,7 +3060,12 @@ C vähäinen
 				</xs:annotation>
 			</xs:element>
 			<xs:element name="turvakieltoKytkin" type="xs:boolean" minOccurs="0"/>
-			<xs:element name="suoramarkkinointikieltoKytkin" type="xs:boolean" minOccurs="0"/>
+			<xs:element name="suoramarkkinointikieltoKytkin" type="xs:boolean" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>True tai arvo puuttuu: suoramarkkintointi ei ole sallittua. 
+False: suoramarkkinointi on sallittu</xs:documentation>
+				</xs:annotation>
+			</xs:element>
 			<xs:element name="selite" type="xs:string" minOccurs="0"/>
 		</xs:sequence>
 	</xs:complexType>

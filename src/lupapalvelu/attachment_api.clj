@@ -218,13 +218,21 @@
 ;; Download
 ;;
 
+(defraw "preview-attachment"
+        {:parameters [:attachment-id]
+         :input-validators [(partial action/non-blank-parameters [:attachment-id])]
+         :user-roles #{:applicant :authority :oirAuthority}
+         :user-authz-roles action/all-authz-roles}
+        [{{:keys [attachment-id]} :data user :user}]
+        (attachment/output-attachment-preview attachment-id (partial attachment/get-attachment-as user)))
+
 (defraw "view-attachment"
-  {:parameters [:attachment-id]
-   :input-validators [(partial action/non-blank-parameters [:attachment-id])]
-   :user-roles #{:applicant :authority :oirAuthority}
-   :user-authz-roles action/all-authz-roles}
-  [{{:keys [attachment-id]} :data user :user}]
-  (attachment/output-attachment attachment-id false (partial attachment/get-attachment-as user)))
+        {:parameters [:attachment-id]
+         :input-validators [(partial action/non-blank-parameters [:attachment-id])]
+         :user-roles #{:applicant :authority :oirAuthority}
+         :user-authz-roles action/all-authz-roles}
+        [{{:keys [attachment-id]} :data user :user}]
+        (attachment/output-attachment attachment-id false (partial attachment/get-attachment-as user)))
 
 (defraw "download-attachment"
   {:parameters [:attachment-id]
