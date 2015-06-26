@@ -1685,6 +1685,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     if (operation.description) {
       description.nodeValue = operation.description;
       descriptionInput.value = operation.description;
+      $(iconTextSpan).addClass("hidden");
     } else {
       iconSpanWrapper.appendChild(iconTextSpan);
     }
@@ -1704,6 +1705,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       if (value === "") {
         value = null;
         iconSpanWrapper.appendChild(iconTextSpan);
+        $(iconTextSpan).removeClass("hidden");
       }
 
       ajax.command("update-op-description", {id: self.appId, "op-id": operation.id, desc: value })
@@ -1743,7 +1745,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       event.stopPropagation();
 
       if (iconSpanWrapper.contains(iconTextSpan)) {
-        iconSpanWrapper.removeChild(iconTextSpan);
+        $(iconTextSpan).addClass("hidden");
       }
 
       $(iconSpanWrapper).addClass("hidden");
@@ -1804,6 +1806,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
     if (!notPrimaryOperation) {
       operationType.className = "icon star-selected";
       operationType.title = loc("operations.primary");
+      operationType.setAttribute("data-op-name", op.name);
       title.appendChild(operationType);
     }
 
@@ -1819,6 +1822,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
         .call();
         return false;
       });
+      operationType.setAttribute("data-op-name", op.name);
       title.appendChild(operationType);
     }
 

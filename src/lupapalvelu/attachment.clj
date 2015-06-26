@@ -15,9 +15,11 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.tiedonohjaus :as tos]
             [lupapiste-commons.attachment-types :as attachment-types]
-            [clojure.java.io :as io])
+            [clojure.java.io :as io]
+            [lupapalvelu.preview :as preview])
   (:import [java.util.zip ZipOutputStream ZipEntry]
-           [java.io File OutputStream FilterInputStream]))
+           [java.io File OutputStream FilterInputStream]
+           (org.apache.commons.io FilenameUtils)))
 
 ;;
 ;; Metadata
@@ -378,6 +380,26 @@
      :headers {"Content-Type" "text/plain"}
      :body "404"}))
 
+(defn create-preview
+    [file-id filename content-type content application-id]
+  (debugf "Creating preview: id=%s, type=%s file=%s" file-id content-type filename)
+  (when-let [preview-content (preview/try-create-preview-input-stream content content-type)]
+    (debugf "Saving preview: id=%s, type=%s file=%s" file-id content-type filename)
+    (mongo/upload (str file-id "-preview") (str (FilenameUtils/getBaseName filename) ".jpg") "image/jpg" preview-content :application application-id)))
+
+(defn output-attachment-preview
+  "Outputs attachment preview creating it if is it does not already exist"
+  [attachment-id attachment-fn]
+  (let [preview-id (str attachment-id "-preview")]
+    (when (= 0 (mongo/count :fs.files {:_id preview-id}))
+      (let [attachment (get-attachment attachment-id)
+            file-name (:file-name attachment)
+            content-type (:content-type attachment)
+            content ((:content attachment))
+            application-id (:application attachment)]
+        (create-preview attachment-id file-name content-type content application-id)))
+    (output-attachment preview-id false attachment-fn)))
+
 (defn attach-file!
   "Uploads a file to MongoDB and creates a corresponding attachment structure to application.
    Content can be a file or input-stream.
@@ -393,6 +415,7 @@
                                 :filename sanitazed-filename
                                 :content-type content-type})]
     (mongo/upload file-id sanitazed-filename content-type content :application application-id)
+    (create-preview file-id sanitazed-filename content-type content application-id)
     (update-or-create-attachment options)))
 
 (defn get-attachments-by-operation
@@ -438,4 +461,3 @@
         (proxy-super close)
         (when (= (io/delete-file file :could-not) :could-not)
           (warnf "Could not delete temporary file: %s" (.getAbsolutePath file)))))))
-
