@@ -83,11 +83,11 @@
     (let [verdict (first (:paatokset (last cases)))
           lupamaaraykset (:lupamaaraykset verdict)
           maaraykset     (:maaraykset lupamaaraykset)
-          muut-maaraykset (:muutMaaraykset lupamaaraykset)]
+          vaaditut-erityissuunnitelmat (:vaaditutErityissuunnitelmat lupamaaraykset)]
 
-      (fact "muut maaraykset"
-          muut-maaraykset => sequential?
-          muut-maaraykset => (contains ["ES 1" "ES 22" "ES 333"] :in-any-order))
+      (fact "vaaditut erityissuunnitelmat"
+          vaaditut-erityissuunnitelmat => sequential?
+          vaaditut-erityissuunnitelmat => (contains ["ES 1" "ES 22" "ES 333"] :in-any-order))
 
       (fact "m\u00e4\u00e4r\u00e4ykset"
         (count maaraykset) => 2
