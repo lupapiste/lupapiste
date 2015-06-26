@@ -27,7 +27,7 @@
 
     function ensureNeighbors(neighbor) { // ensure neighbors have correct properties defined
       var n = _.defaults(neighbor, neighborSkeleton);
-      n.owner = _.defaults(n, neighborSkeleton.owner); // _.defaults is not deep
+      n.owner = _.defaults(n.owner, neighborSkeleton.owner); // _.defaults is not deep
       return n;
     }
 
