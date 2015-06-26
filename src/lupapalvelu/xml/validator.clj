@@ -113,6 +113,7 @@
 (def- common-validator-2_1_2 (create-validator yht-2_1_2))
 (def- common-validator-2_1_3 (create-validator yht-2_1_3))
 (def- common-validator-2_1_5 (create-validator yht-2_1_5))
+(def- common-validator-2_1_6 (create-validator yht-2_1_6))
 
 (def- asianhallinta-validator (create-validator asianhallinta))
 
