@@ -95,6 +95,29 @@
         (:maaraysaika (first maaraykset)) => (to-timestamp "2013-08-28")
         (:toteutusHetki (last maaraykset)) => (to-timestamp "2013-08-31")))))
 
+;;
+;; TODO: Sanomassa vaara encoding ("iso-8859-1").
+;;       Readerkaan ei osaa lukea, vaan hukkaa skandit!
+;;       Tuotannossa naytti 26.6.2015 viela tulevan "utf-8-enkoodauksella", jota me tuemme.
+;;
+#_(facts "KRYSP verdict 2.1.8 - Tekla.xml"
+   (let [xml (xml/parse (slurp "resources/krysp/sample/verdict - 2.1.8 - Tekla.xml") :encoding "iso-8859-1")
+         cases (->verdicts xml ->standard-verdicts)]
+
+     (fact "xml is parsed" cases => truthy)
+     (fact "validator finds verdicts" (standard-verdicts-validator xml) => nil)
+
+     (let [verdict (first (:paatokset (last cases)))
+           lupamaaraykset (:lupamaaraykset verdict)
+           vaaditut-erityissuunnitelmat (:vaaditutErityissuunnitelmat lupamaaraykset)]
+
+       ;; In xml message, Tekla provides just one vaadittuErityissuunnitelma element
+       ;; where there are multiple "vaadittuErityissuunnitelma"s combined as one string, separated by line break.
+       ;; Testing here that the reader divides those as different elements properly.
+       (fact "vaaditut erityissuunnitelmat Tekla style"
+           vaaditut-erityissuunnitelmat => sequential?
+           vaaditut-erityissuunnitelmat => (contains ["Rakennesuunnitelmat" "Vesi- ja viem\u00e4risuunnitelmat" "Ilmanvaihtosuunnitelmat"] :in-any-order)))))
+
 (facts "KRYSP verdict"
   (let [xml (xml/parse (slurp "resources/krysp/sample/verdict.xml"))
         cases (->verdicts xml ->standard-verdicts)]
