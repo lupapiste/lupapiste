@@ -379,16 +379,16 @@
     (fail! :error.organization-not-found)))
 
 (defpage [:post "/api/upload/organization-area"] {[{:keys [tempfile filename content-type size]}] :files}
-         (let [user              (user/current-user (request/ring-request))
-               org-id            (user/authority-admins-organization-id user)
-               filename          (mime/sanitize-filename filename)
-               file-info         {:file-name        filename
-                                  :content-type     content-type ; Should be zip
-                                  :size             size
-                                  :organization     org-id
-                                  :created          (now)}]
-           ; TODO parse the shape file and replace organization shapes here
-           (->> (assoc file-info :ok true)
-                (resp/json)
-                (resp/content-type "text/plain")
-                (resp/status 200))))
+  (let [user (user/current-user (request/ring-request))
+        org-id (user/authority-admins-organization-id user)
+        filename (mime/sanitize-filename filename)
+        file-info {:file-name    filename
+                   :content-type content-type               ; Should be zip
+                   :size         size
+                   :organization org-id
+                   :created      (now)}]
+    ; TODO parse the shape file and replace organization shapes here
+    (->> (assoc file-info :ok false)
+         (resp/json)
+         (resp/content-type "text/plain")
+         (resp/status 200))))

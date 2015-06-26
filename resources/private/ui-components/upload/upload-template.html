@@ -7,6 +7,7 @@
         <input class="hidden" type="file" name="files[]" data-bind="event: {change: fileChanged}, disable: disabled"></input>
         <a href="#" class="btn btn-primary" data-bind="click: chooseFile, ltext: 'upload'"></a>
         <img src="/img/ajax-loader-12.gif" alt="..." width="12" height="12" data-bind="visible: pending"></img>
+        <span class="error-message" data-bind="visible: errorMessage, ltext: errorMessage"></span>
       </form>
     </script>
   </section>

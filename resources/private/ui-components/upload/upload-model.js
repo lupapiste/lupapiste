@@ -7,6 +7,8 @@ LUPAPISTE.UploadModel = function(params) {
 
   self.pending = ko.observable(false);
 
+  self.errorMessage = ko.observable(false);
+
   self.submit = function(form) {
     var formData = new FormData(form);
     $.ajax({
@@ -24,6 +26,10 @@ LUPAPISTE.UploadModel = function(params) {
         },
         success: function() {
           // TODO
+          self.errorMessage(undefined);
+        },
+        error: function() {
+          self.errorMessage("error.upload-failed");
         },
         complete: function() {
           self.pending(false);
