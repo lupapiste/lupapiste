@@ -547,6 +547,7 @@
 ;;
 (defn get-app-info-from-message [xml kuntalupatunnus]
   (let [xml-no-ns (cr/strip-xml-namespaces xml)
+        kuntakoodi (-> (select1 xml-no-ns [:toimituksenTiedot :kuntakoodi]) cr/all-of)
         asiat (enlive/select xml-no-ns case-elem-selector)
         ;; Take first asia with given kuntalupatunnus. There should be only one. If there are many throw error.
         asiat-with-kuntalupatunnus (filter #(when (= kuntalupatunnus (->kuntalupatunnus %)) %) asiat)]
@@ -575,7 +576,7 @@
             osoite-Rakennuspaikka (build-address osoite-xml asioimiskieli-code)
 
             kiinteistotunnus (-> Rakennuspaikka :rakennuspaikanKiinteistotieto :RakennuspaikanKiinteisto :kiinteistotieto :Kiinteisto :kiinteistotunnus)
-            municipality (p/municipality-id-by-property-id kiinteistotunnus)
+            municipality (or (p/municipality-id-by-property-id kiinteistotunnus) kuntakoodi)
             coord-array-Rakennuspaikka (resolve-coordinates
                                          (select1 asia [:rakennuspaikkatieto :Rakennuspaikka :sijaintitieto :Sijainti :piste])
                                          (-> Rakennuspaikka :sijaintitieto :Sijainti :piste :Point :pos)
