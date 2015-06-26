@@ -860,9 +860,9 @@
                             <span class="value" data-bind="text: lupamaaraykset.vaaditutTyonjohtajat"></span>
                           </div>
 
-                          <div data-bind="if: lupamaaraykset.vaadittuErityissuunnitelma && lupamaaraykset.vaadittuErityissuunnitelma.length" class="key-value-pair">
-                            <h3 data-bind="ltext: 'verdict.vaadittuErityissuunnitelma'"></h3>
-                            <ul data-bind="foreach: lupamaaraykset.vaadittuErityissuunnitelma">
+                          <div data-bind="if: lupamaaraykset.vaaditutErityissuunnitelmat && lupamaaraykset.vaaditutErityissuunnitelmat.length" class="key-value-pair">
+                            <h3 data-bind="ltext: 'verdict.vaaditutErityissuunnitelmat'"></h3>
+                            <ul data-bind="foreach: lupamaaraykset.vaaditutErityissuunnitelmat">
                               <li data-bind='text: $data'></li>
                             </ul>
                           </div>

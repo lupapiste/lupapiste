@@ -89,10 +89,9 @@
           (map (partial katselmus->task meta source) (:vaaditutKatselmukset lupamaaraykset))
           (map #(new-task "task-lupamaarays" (:sisalto %) {:maarays (:sisalto %)} meta source)
             (filter #(-> % :sisalto s/blank? not) (:maaraykset lupamaaraykset)))
-
-          (map #(new-task "task-lupamaarays" % {:vaadittuErityissuunnitelma %} meta source)
-            (filter #(-> %  s/blank? not) (:vaadittuErityissuunnitelma lupamaaraykset)))
-
+          ; KRYSP yhteiset 2.1.5+
+          (map #(new-task "task-lupamaarays" % {:vaaditutErityissuunnitelmat %} meta source)
+            (filter #(-> %  s/blank? not) (:vaaditutErityissuunnitelmat lupamaaraykset)))
           (if (seq (:vaadittuTyonjohtajatieto lupamaaraykset))
             ; KRYSP yhteiset 2.1.1+
             (map #(new-task "task-vaadittu-tyonjohtaja" % {} meta source) (:vaadittuTyonjohtajatieto lupamaaraykset))

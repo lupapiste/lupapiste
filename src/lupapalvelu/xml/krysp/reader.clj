@@ -327,7 +327,7 @@
     (cr/ensure-sequential :vaadittuErityissuunnitelma)
     (#(let [vaaditut-es (extract-vaadittuErityissuunnitelma-elements %)]
         (if (seq vaaditut-es)
-          (assoc % :vaadittuErityissuunnitelma vaaditut-es)
+          (-> % (assoc :vaaditutErityissuunnitelmat vaaditut-es) (dissoc % :vaadittuErityissuunnitelma))
           (dissoc % :vaadittuErityissuunnitelma))))
 
     (cr/ensure-sequential :vaaditutKatselmukset)

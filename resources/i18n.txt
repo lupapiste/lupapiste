@@ -1,1 +1,1 @@
-verdict.vaadittuErityissuunnitelma: Vaaditut erityissunnitelmat
+verdict.vaaditutErityissuunnitelmat: Vaaditut erityissunnitelmat
