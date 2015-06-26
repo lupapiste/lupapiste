@@ -1,6 +1,7 @@
 (ns lupapalvelu.xml.krysp.reader
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error]]
             [clojure.string :as s]
+            [clojure.set :refer [rename-keys]]
             [clojure.walk :refer [postwalk prewalk]]
             [clj-time.format :as timeformat]
             [net.cgrand.enlive-html :as enlive]
@@ -440,7 +441,11 @@
                                    :muutMaaraykset (->lupamaaraukset-text paatos-xml-without-ns)}
                   :paivamaarat    {:paatosdokumentinPvm paatosdokumentinPvm-timestamp}
                   :poytakirjat    (when-let [liitetiedot (seq (select paatos-xml-without-ns [:liitetieto]))]
-                                    (map ->liite (map (fn [[k v]] {:liite v}) (cr/all-of liitetiedot))))})))
+                                    (map ->liite
+                                         (map #(-> %
+                                                 (cr/as-is :Liite)
+                                                 (rename-keys {:Liite :liite}))
+                                              liitetiedot)))})))
         (select xml-without-ns [:paatostieto :Paatos])))))
 
 (permit/register-function permit/R :verdict-krysp-reader ->standard-verdicts)

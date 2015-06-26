@@ -96,7 +96,8 @@
   [xml & selector] (-> (select1 xml (-> selector vector flatten)) xml->edn strip-keys))
 
 (defn all-of
-  "read one element from xml with enlive selector, converts it's val to edn and strip namespaces."
+  "read one element from xml with enlive selector, converts it's vals to edn and strip namespaces.
+   Be careful not to use for getting adjacent elements, as this function uses as-is and select1."
   [xml & selector] (-> xml (as-is (-> selector vector flatten)) vals first))
 
 (defn map-index
