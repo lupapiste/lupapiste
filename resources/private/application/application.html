@@ -80,7 +80,7 @@
           <div>
             <p data-bind="ltext: 'application.operations.secondary'"></p>
             <!-- ko if: operationsCount() && operationsCount().length > 0 -->
-            <ul data-bind="foreach: operationsCount">
+            <ul data-test-id="application-secondary-operations" data-bind="foreach: operationsCount">
               <li>
                 <span data-bind="visible: count > 1">
                   <span data-bind="text: count"></span>
