@@ -324,7 +324,7 @@
   (-> (cr/all-of paatos-xml-without-ns :lupamaaraykset)
     (cleanup)
 
-    ;; KRYSP yhteiset 2.1.5+ : uudet "vaadittuErityissuunnitelma"-elementit ovat samalla tasolla kuin "vaaditutKatselmukset"-elementit
+    ;; KRYSP yhteiset 2.1.5+
     (cr/ensure-sequential :vaadittuErityissuunnitelma)
     (#(let [vaaditut-es (extract-vaadittuErityissuunnitelma-elements %)]
         (if (seq vaaditut-es)
