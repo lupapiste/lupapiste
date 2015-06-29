@@ -1,6 +1,7 @@
 (ns lupapalvelu.organization-api
   (:import [org.geotools.data FileDataStoreFinder])
   (:import [org.geotools.geojson.feature FeatureJSON])
+  (:import [org.opengis.feature.type FeatureType])
   (:import [java.io File])
 
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf fatal]]
@@ -405,9 +406,14 @@
             shape-file (new File (str target-dir env/file-separator shape-filename))
             source (.getFeatureSource (FileDataStoreFinder/getDataStore shape-file))
             collection (.getFeatures source)
+            schema (.getSchema collection)
+            crs (.getCoordinateReferenceSystem schema)
             io (new FeatureJSON)
             collection-string (.toString io collection)
-            areas (json/read-str collection-string)]
+            csr-string (.toString io crs)
+            areas (json/read-str collection-string)
+            areas (merge areas (json/read-str csr-string))]
+        ; TODO convert coordinates to WGS84 which is suppoerted by mongo 2dindex
         (->> (assoc file-info :areas areas :ok true)
              (resp/json)
              (resp/content-type "application/json")
