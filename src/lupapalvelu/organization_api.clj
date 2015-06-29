@@ -394,6 +394,24 @@
     (ok :tags (:tags (o/get-organization org-id)))
     (fail! :error.organization-not-found)))
 
+(defn- transform-coordinates-to-wgs84 [collection]
+  (let [schema (.getSchema collection)
+        crs (.getCoordinateReferenceSystem schema)
+        transform (CRS/findMathTransform crs DefaultGeographicCRS/WGS84 true)
+        iterator (.features collection)
+        feature (when (.hasNext iterator)
+                  (.next iterator))
+        list (ArrayList.)
+        _ (loop [feature (cast SimpleFeature feature)]
+            (when feature
+              (let [geometry  (.getDefaultGeometry feature)
+                    transformed-geometry (JTS/transform geometry transform)]
+                (.setDefaultGeometry feature transformed-geometry)
+                (.add list feature)))
+            (when (.hasNext iterator)
+              (recur (.next iterator))))]
+    (DataUtilities/collection list)))
+
 (defpage [:post "/api/upload/organization-area"] {[{:keys [tempfile filename content-type size]}] :files}
   (let [user (user/current-user (request/ring-request))
         org-id (user/authority-admins-organization-id user)
@@ -413,33 +431,9 @@
             shape-file (new File (str target-dir env/file-separator shape-filename))
             source (.getFeatureSource (FileDataStoreFinder/getDataStore shape-file))
             collection (.getFeatures source)
-            schema (.getSchema collection)
-            crs (.getCoordinateReferenceSystem schema)
-
-
-            transform (CRS/findMathTransform crs DefaultGeographicCRS/WGS84 true)
-
-            iterator (.features collection)
-
-            feature (when (.hasNext iterator)
-                      (.next iterator))
-
-            list (ArrayList.)
-            _ (loop [feature (cast SimpleFeature feature)]
-                (when feature
-                  (let [geometry (.getDefaultGeometry feature)
-                        geometry2 (JTS/transform geometry transform)]
-                    (.setDefaultGeometry feature geometry2)
-                    (.add list feature)))
-                (when (.hasNext iterator)
-                  (recur (.next iterator))))
-
-            new-collection (DataUtilities/collection list)
+            new-collection (transform-coordinates-to-wgs84 collection)
             io (new FeatureJSON)
-            collection-string (.toString io new-collection)
-            crs-string (.toString io crs)
-            areas (json/read-str collection-string)
-            areas (merge areas (json/read-str crs-string))]
+            areas (json/read-str (.toString io new-collection))]
         (o/update-organization org-id {$set {:areas areas}})
         (->> (assoc file-info :areas areas :ok true)
              (resp/json)
