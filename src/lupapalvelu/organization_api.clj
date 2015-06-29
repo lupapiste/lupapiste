@@ -1,7 +1,13 @@
 (ns lupapalvelu.organization-api
-  (:import [org.geotools.data FileDataStoreFinder])
+  (:import [org.geotools.data FileDataStoreFinder DataUtilities])
   (:import [org.geotools.geojson.feature FeatureJSON])
   (:import [org.opengis.feature.type FeatureType])
+  (:import [org.opengis.feature.simple SimpleFeature])
+  (:import [org.geotools.geometry.jts JTS])
+  (:import [org.geotools.referencing CRS])
+  (:import [org.geotools.referencing.crs DefaultGeographicCRS])
+  (:import [java.util ArrayList])
+  (:import [org.geotools.data.collection SpatialIndexFeatureCollection])
   (:import [java.io File])
 
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf fatal]]
@@ -29,6 +35,7 @@
             [lupapalvelu.xml.asianhallinta.verdict :as ah-verdict]
             [me.raynes.fs :as fs]
             [clojure.data.json :as json]
+            [clojure.walk :as walk]
             [slingshot.slingshot :refer [try+]]))
 ;;
 ;; local api
@@ -408,12 +415,31 @@
             collection (.getFeatures source)
             schema (.getSchema collection)
             crs (.getCoordinateReferenceSystem schema)
+
+
+            transform (CRS/findMathTransform crs DefaultGeographicCRS/WGS84 true)
+
+            iterator (.features collection)
+
+            feature (when (.hasNext iterator)
+                      (.next iterator))
+
+            list (ArrayList.)
+            _ (loop [feature (cast SimpleFeature feature)]
+                (when feature
+                  (let [geometry (.getDefaultGeometry feature)
+                        geometry2 (JTS/transform geometry transform)]
+                    (.setDefaultGeometry feature geometry2)
+                    (.add list feature)))
+                (when (.hasNext iterator)
+                  (recur (.next iterator))))
+
+            new-collection (DataUtilities/collection list)
             io (new FeatureJSON)
-            collection-string (.toString io collection)
-            csr-string (.toString io crs)
+            collection-string (.toString io new-collection)
+            crs-string (.toString io crs)
             areas (json/read-str collection-string)
-            areas (merge areas (json/read-str csr-string))]
-        ; TODO convert coordinates to WGS84 which is suppoerted by mongo 2dindex
+            areas (merge areas (json/read-str crs-string))]
         (->> (assoc file-info :areas areas :ok true)
              (resp/json)
              (resp/content-type "application/json")
@@ -421,4 +447,7 @@
       (catch [:sade.core/type :sade.core/fail] {:keys [text] :as all}
         (resp/status 400 text))
       (catch Object e
-        (resp/status 400 :error.shapefile-parsing-failed)))))
+        (resp/status 400 :error.shapefile-parsing-failed))
+      (finally
+        ;TODO close iterator and shapefiles here
+        ))))
