@@ -440,6 +440,7 @@
             crs-string (.toString io crs)
             areas (json/read-str collection-string)
             areas (merge areas (json/read-str crs-string))]
+        (o/update-organization org-id {$set {:areas areas}})
         (->> (assoc file-info :areas areas :ok true)
              (resp/json)
              (resp/content-type "application/json")
