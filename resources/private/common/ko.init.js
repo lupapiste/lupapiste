@@ -297,6 +297,21 @@
     }
   };
 
+  ko.bindingHandlers.fadeInOut = {
+    update: function(element, valueAccessor, allBindingsAccessor) {
+      var value = ko.utils.unwrapObservable(valueAccessor());
+      var bindings = ko.utils.unwrapObservable(allBindingsAccessor());
+      var duration = bindings.duration || 100;
+      var delay = (bindings.delay || 1000) + duration;
+      if (value) {
+        $(element).fadeIn({duration: duration, queue: false});
+        _.delay(function() {
+          $(element).fadeOut({duration: duration, queue: false});
+        }, delay);
+      }
+    }
+  };
+
   ko.bindingHandlers.drill = {
     init: function(element) {
       $(element).addClass("icon");

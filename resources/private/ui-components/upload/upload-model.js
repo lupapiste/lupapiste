@@ -8,6 +8,7 @@ LUPAPISTE.UploadModel = function(params) {
   self.pending = ko.observable(false);
 
   self.errorMessage = ko.observable(false);
+  self.successMessage = ko.observable(false);
 
   self.submit = function(form) {
     var formData = new FormData(form);
@@ -21,12 +22,13 @@ LUPAPISTE.UploadModel = function(params) {
         processData: false,
         beforeSend: function(request) {
           self.pending(true);
+          self.errorMessage(false);
+          self.successMessage(false);
           _.each(self.headers, function(value, key) { request.setRequestHeader(key, value); });
           request.setRequestHeader("x-anti-forgery-token", $.cookie("anti-csrf-token"));
         },
-        success: function() {
-          // TODO
-          self.errorMessage(undefined);
+        success: function(res) {
+          self.successMessage("upload.success");
         },
         error: function() {
           self.errorMessage("error.upload-failed");
