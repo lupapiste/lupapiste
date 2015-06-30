@@ -1,3 +1,5 @@
+verdict.vaaditutErityissuunnitelmat: Vaaditut erityissunnitelmat
+
 statement.puoltaa: Puoltaa
 statement.ei-puolla: Ei puolla
 statement.ehdoilla: Puoltaa ehdoilla
