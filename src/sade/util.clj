@@ -7,7 +7,8 @@
             [clj-time.format :as timeformat]
             [clj-time.core :refer [days weeks months ago]]
             [clj-time.coerce :as tc]
-            [schema.core :as sc])
+            [schema.core :as sc]
+            [taoensso.timbre :as timbre :refer [debugf]])
   (:import [org.joda.time LocalDateTime]
            [java.util.jar JarFile]))
 
@@ -461,3 +462,10 @@
           snames       (filter (fn [x] (= 0 (.indexOf x inner-dir))) names)
           fsnames      (map #(subs % (count inner-dir)) snames)]
       fsnames)))
+
+(defmacro timing [msg body]
+  `(let [start# (System/currentTimeMillis)
+         result# ~body
+         end# (System/currentTimeMillis)]
+     (debugf (str ~msg ": %dms") (- end# start#))
+     result#))
