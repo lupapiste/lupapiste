@@ -80,25 +80,26 @@ var comments = (function() {
     };
 
     self.isForNewAttachment = function(model) {
-      return model && model.target && model.target.version && true;
+      return util.getIn(model, ["target", "version"]);
     };
+
     self.isAuthorityComment = function(model) {
-      return model.user && model.user.role && model.user.role() === "authority";
+      return util.getIn(model, ["user", "role"]) === "authority";
     };
+
     self.isForAttachment = function(model) {
-      return model && model.target && model.target.type && model.target.type() === "attachment";
+      return util.getIn(model, ["target", "type"]) === "attachment";
     };
 
     function isPreparationComment(model) {
       return model && model.roles().length === 1 && model.roles()[0] === "authority";
-    }
+    };
 
     self.isVisible = function(model) {
       return !self.takeAll ||
                ((!self.isForNewAttachment(model) || self.showAttachmentComments() ) &&
                 (!isPreparationComment(model)    || self.showPreparationComments()));
     };
-
   }
 
   return {
