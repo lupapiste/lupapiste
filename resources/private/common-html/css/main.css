@@ -5661,6 +5661,15 @@ td.comment-text {
   margin-left: 6px;
 }
 
+/* line 18, ../sass/views/_authority_admin.scss */
+.organization-areas ul {
+  list-style: none;
+}
+/* line 21, ../sass/views/_authority_admin.scss */
+.organization-areas li:nth-child(even) {
+  background-color: whitesmoke;
+}
+
 /* line 2, ../sass/views/_neighbor.scss */
 #neighbor-show .pending {
   width: 100%;
