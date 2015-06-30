@@ -317,7 +317,7 @@
     (if (and
           (= 1 (count vaadittuErityissuunnitelma-array))
           (-> vaadittuErityissuunnitelma-array first (.indexOf "\n") (>= 0)))
-      (-> vaadittuErityissuunnitelma-array first (ss/split #"\n"))
+      (-> vaadittuErityissuunnitelma-array first (ss/split #"\n") ((partial remove ss/blank?)))
       vaadittuErityissuunnitelma-array)))
 
 (defn- ->lupamaaraukset [paatos-xml-without-ns]
