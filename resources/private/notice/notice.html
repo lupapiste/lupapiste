@@ -4,11 +4,13 @@
   <section class="page container" id="notices">
     <script type="text/html" id="notice-template">
       <div class="content-row application-tags">
-        <div data-bind="if: features.enabled('alueellisetOrganisaatiot')" class="feature content-cell">
+        <!-- ko if: features.enabled('alueellisetOrganisaatiot') -->
+        <div class="feature content-cell">
           <label data-bind="ltext: 'application.tags'"></label>
           <span data-bind="saveIndicator: indicator, name: 'tags'"></span>
           <div data-bind="component: {name: 'autocomplete', params: {tags: true, dataProvider: applicationTagsProvider, value: selectedTags}}"></div>
         </div>
+        <!-- /ko -->
       </div>
       <div class="content-row">
         <div class="content-cell">

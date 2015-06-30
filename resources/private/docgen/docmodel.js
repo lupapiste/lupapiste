@@ -1686,7 +1686,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       description.nodeValue = operation.description;
       descriptionInput.value = operation.description;
       $(iconTextSpan).addClass("hidden");
-    } else {
+    } else if (authorizationModel.ok("update-op-description")) {
       iconSpanWrapper.appendChild(iconTextSpan);
     }
 
@@ -1739,24 +1739,28 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
       }
     };
 
-    iconSpan.className = "icon edit";
-    iconSpanWrapper.onclick = function(e) {
-      var event = getEvent(e);
-      event.stopPropagation();
+    if (authorizationModel.ok("update-op-description")) { // don't provide edit icon
 
-      if (iconSpanWrapper.contains(iconTextSpan)) {
-        $(iconTextSpan).addClass("hidden");
-      }
+      iconSpan.className = "icon edit";
+      iconSpanWrapper.onclick = function(e) {
+        var event = getEvent(e);
+        event.stopPropagation();
 
-      $(iconSpanWrapper).addClass("hidden");
-      $(descriptionSpan).addClass("hidden");
-      $(descriptionInput).removeClass("hidden");
-      descriptionInput.focus();
-    };
+        if (iconSpanWrapper.contains(iconTextSpan)) {
+          $(iconTextSpan).addClass("hidden");
+        }
+
+        $(iconSpanWrapper).addClass("hidden");
+        $(descriptionSpan).addClass("hidden");
+        $(descriptionInput).removeClass("hidden");
+        descriptionInput.focus();
+      };
+
+      iconSpanWrapper.appendChild(iconSpan);
+      iconSpanWrapper.appendChild(iconTextSpan);
+    }
 
     descriptionSpan.appendChild(description);
-    iconSpanWrapper.appendChild(iconSpan);
-    iconSpanWrapper.appendChild(iconTextSpan);
     wrapper.appendChild(descriptionSpan);
     wrapper.appendChild(descriptionInput);
     wrapper.appendChild(iconSpanWrapper);
@@ -1832,9 +1836,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
 
     if (op) {
       title.appendChild(document.createTextNode(loc([op.name, "_group_label"])));
-      if (authorizationModel.ok("update-op-description")) {
-        title.appendChild(buildDescriptionElement(op));
-      }
+      title.appendChild(buildDescriptionElement(op));
     } else {
       title.appendChild(document.createTextNode(loc([self.schema.info.name, "_group_label"])));
     }

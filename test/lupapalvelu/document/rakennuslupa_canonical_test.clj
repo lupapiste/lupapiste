@@ -428,8 +428,8 @@
                           :email "sonja.sibbo@sipoo.fi"
                           :id "516560d6c2e6f603beb85147"}
                  :requested 1368080102631
-                 :status "condition"
-                   :text "Savupiippu pit\u00e4\u00e4 olla."}]
+                 :status "ehdoilla"
+                 :text "Savupiippu pit\u00e4\u00e4 olla."}]
    :neighbors ctc/neighbors})
 
 (ctc/validate-all-documents application-rakennuslupa)
@@ -468,6 +468,7 @@
                                    :appsLinkingToUs [app-linking-to-us]}))
 
 (ctc/validate-all-documents application-suunnittelijan-nimeaminen)
+
 
 (defn- validate-minimal-person [person]
   (fact person => (contains {:nimi {:etunimi "Pena" :sukunimi "Penttil\u00e4"}})))
@@ -844,8 +845,7 @@
         viranomainen (:viranomainen LL) => "Paloviranomainen"
         lausunto (:lausunto LL) => "Savupiippu pit\u00e4\u00e4 olla."
         lausuntoPvm (:lausuntoPvm LL) => "2013-05-09"
-        puoltotieto (:puoltotieto LL) => truthy
-        Puolto (:Puolto puoltotieto) => truthy
+        Puolto (-> LL :puoltotieto :Puolto) => truthy
         puolto (:puolto Puolto) => "ehdoilla"
 
         osapuolettieto (:osapuolettieto rakennusvalvontaasia) => truthy
@@ -903,7 +903,7 @@
         muuTunnustieto (:muuTunnustieto LupaTunnus) => truthy
         MuuTunnus (:MuuTunnus muuTunnustieto) => truthy
         kasittelynTilatieto (:kasittelynTilatieto rakennusvalvontaasia) => truthy]
-    ;(clojure.pprint/pprint canonical)
+
     (fact "contains nil" (util/contains-value? canonical nil?) => falsey)
     (fact "paasuunnitelija" paasuunnitelija => (contains {:suunnittelijaRoolikoodi "p\u00e4\u00e4suunnittelija"}))
     (fact "Osapuolien maara" (+ (count suunnittelijat) (count tyonjohtajat) (count (:osapuolitieto osapuolet))) => 8)
@@ -966,6 +966,16 @@
 
     (fact "Kaupunkikuvatoimenpiteen kuvaus" (-> kaupunkikuva-t :kaupunkikuvaToimenpide :kuvaus) => "Aidan rakentaminen")
     (fact "Kaupunkikuvatoimenpiteen rakennelman kuvaus" (-> kaupunkikuva-t :rakennelmatieto :Rakennelma :kuvaus :kuvaus) => "Aidan rakentaminen rajalle")))
+
+
+(fl/facts* "Canonical model has correct puolto"
+  (let [application (assoc-in application-rakennuslupa [:statements 0 :status] "palautettu")
+        canonical (application-to-canonical application "sv") => truthy
+        rakennusvalvonta (:Rakennusvalvonta canonical) => truthy
+        rakennusvalvontaasiatieto (:rakennusvalvontaAsiatieto rakennusvalvonta) => truthy
+        rakennusvalvontaasia (:RakennusvalvontaAsia rakennusvalvontaasiatieto) => truthy
+        puolto (-> rakennusvalvontaasia :lausuntotieto first :Lausunto :lausuntotieto :Lausunto :puoltotieto :Puolto :puolto) => truthy]
+    puolto => "palautettu"))
 
 
 (fl/facts* "Canonical model for tyonjohtajan nimeaminen is correct"

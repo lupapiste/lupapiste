@@ -73,22 +73,6 @@
   (fact (pysyva-rakennustunnus "123456") => nil)
   (fact (pysyva-rakennustunnus "1234567892") => "1234567892"))
 
-(facts "KRYSP verdict 2.1.8"
-  (let [xml (xml/parse (slurp "resources/krysp/sample/verdict - 2.1.8.xml"))
-        cases (->verdicts xml ->standard-verdicts)]
-
-    (fact "xml is parsed" cases => truthy)
-    (fact "validator finds verdicts" (standard-verdicts-validator xml) => nil)
-
-    (let [verdict (first (:paatokset (last cases)))
-          lupamaaraykset (:lupamaaraykset verdict)
-          maaraykset     (:maaraykset lupamaaraykset)]
-      (facts "m\u00e4\u00e4r\u00e4ykset"
-            (count maaraykset) => 2
-            (:sisalto (first maaraykset)) => "Radontekninen suunnitelma"
-            (:maaraysaika (first maaraykset)) => (to-timestamp "2013-08-28")
-            (:toteutusHetki (last maaraykset)) => (to-timestamp "2013-08-31")))))
-
 (facts "KRYSP verdict"
   (let [xml (xml/parse (slurp "resources/krysp/sample/verdict.xml"))
         cases (->verdicts xml ->standard-verdicts)]
@@ -172,6 +156,51 @@
           (let [poytakirjat2 (-> cases last :paatokset last :poytakirjat)]
             (count poytakirjat2) => 1
             poytakirjat2 => sequential?))))))
+
+(facts "KRYSP verdict 2.1.8"
+  (let [xml (xml/parse (slurp "resources/krysp/sample/verdict - 2.1.8.xml"))
+        cases (->verdicts xml ->standard-verdicts)]
+
+    (fact "xml is parsed" cases => truthy)
+    (fact "validator finds verdicts" (standard-verdicts-validator xml) => nil)
+
+    (let [verdict (first (:paatokset (last cases)))
+          lupamaaraykset (:lupamaaraykset verdict)
+          maaraykset     (:maaraykset lupamaaraykset)
+          vaaditut-erityissuunnitelmat (:vaaditutErityissuunnitelmat lupamaaraykset)]
+
+      (fact "vaaditut erityissuunnitelmat"
+          vaaditut-erityissuunnitelmat => sequential?
+          vaaditut-erityissuunnitelmat => (just ["ES 1" "ES 22" "ES 333"] :in-any-order))
+
+      (fact "m\u00e4\u00e4r\u00e4ykset"
+        (count maaraykset) => 2
+        (:sisalto (first maaraykset)) => "Radontekninen suunnitelma"
+        (:maaraysaika (first maaraykset)) => (to-timestamp "2013-08-28")
+        (:toteutusHetki (last maaraykset)) => (to-timestamp "2013-08-31")))))
+
+;;
+;; HUOM: Sanomassa vaara encoding ("iso-8859-1").
+;;       Readerkaan ei osaa lukea, vaan hukkaa skandit!
+;;       Tama Teklan testisanoma saatu QA:lta. Tuotannossa naytti 26.6.2015 viela tulevan "utf-8-enkoodauksella", jota me tuemme.
+;;
+(facts "KRYSP verdict 2.1.8 - Tekla.xml"
+ (let [xml (xml/parse (slurp "resources/krysp/sample/verdict - 2.1.8 - Tekla.xml") :encoding "iso-8859-1")
+       cases (->verdicts xml ->standard-verdicts)]
+
+   (fact "xml is parsed" cases => truthy)
+   (fact "validator finds verdicts" (standard-verdicts-validator xml) => nil)
+
+   (let [verdict (first (:paatokset (last cases)))
+         lupamaaraykset (:lupamaaraykset verdict)
+         vaaditut-erityissuunnitelmat (:vaaditutErityissuunnitelmat lupamaaraykset)]
+
+     ;; In xml message, Tekla provides just one vaadittuErityissuunnitelma element
+     ;; where there are multiple "vaadittuErityissuunnitelma"s combined as one string, separated by line break.
+     ;; Testing here that the reader divides those as different elements properly.
+     (fact "vaaditut erityissuunnitelmat Tekla style"
+         vaaditut-erityissuunnitelmat => sequential?
+         vaaditut-erityissuunnitelmat => (just ["Rakennesuunnitelmat" "Vesi- ja viemrisuunnitelmat" "Ilmanvaihtosuunnitelmat"] :in-any-order)))))
 
 (facts "CGI sample verdict"
   (let [xml (xml/parse (slurp "dev-resources/krysp/cgi-verdict.xml"))
