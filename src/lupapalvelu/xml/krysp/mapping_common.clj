@@ -2,6 +2,7 @@
   (:require [sade.strings :as ss]
             [sade.util :as util]
             [sade.core :refer :all]
+            [lupapalvelu.permit :as permit]
             [lupapalvelu.xml.disk-writer :as writer]))
 
 (def- rakval-yht {"2.1.2" "2.1.0"
@@ -23,14 +24,32 @@
 
 (def- ymp-yht {"2.1.2" "2.1.3"})
 
+(def- vvvl-yht {"2.1.3" "2.1.3"})
+
+(def- kt-yht {"0.9"   "2.1.3"
+              "0.9.1" "2.1.4"
+              "0.9.2" "2.1.5"
+              "1.0.0" "2.1.5"
+              "1.0.1" "2.1.5"})
+
+(def- mm-yht {"0.9"   "2.1.5"
+              "1.0.0" "2.1.5"})
+
 (def- yht-version
-  {"rakennusvalvonta" rakval-yht
-   "poikkeamispaatos_ja_suunnittelutarveratkaisu" poik-yht
-   "yleisenalueenkaytonlupahakemus" ya-yht
-   "ymparisto/maa_ainesluvat" ymp-yht
-   "ymparisto/ilmoitukset"    ymp-yht
-   "ymparisto/ymparistoluvat" ymp-yht
-   "ymparisto/vesihuoltolaki" {"2.1.3" "2.1.3"}})
+  {:R rakval-yht
+   :P poik-yht
+   :YA ya-yht
+   :MAL ymp-yht
+   :YI ymp-yht
+   :YL ymp-yht
+   :VVVL vvvl-yht
+   :KT kt-yht
+   :MM mm-yht})
+
+(defn get-yht-version [permit-type ns-version]
+  {:pre [(permit/valid-permit-type? (name permit-type))
+         ((-> yht-version keys set) (keyword permit-type))]}
+  (get-in yht-version [(keyword permit-type) ns-version]))
 
 (defn xsd-filename [ns-name]
   (case ns-name
@@ -45,12 +64,13 @@
     ns-version
     (xsd-filename ns-name)))
 
-(defn schemalocation [ns-name ns-version]
-  {:pre [(get-in yht-version [ns-name ns-version])]}
-  (str
-    (paikkatietopalvelu "yhteiset" (get-in yht-version [ns-name ns-version]))
-    "\nhttp://www.opengis.net/gml http://schemas.opengis.net/gml/3.1.1/base/gml.xsd\n"
-    (paikkatietopalvelu ns-name ns-version)))
+(defn schemalocation [permit-type ns-version]
+  {:pre [(get-yht-version permit-type ns-version)]}
+  (let [ns-name (permit/get-metadata permit-type :wfs-krysp-ns-name)]
+    (str
+     (paikkatietopalvelu "yhteiset" (get-yht-version permit-type ns-version))
+     "\nhttp://www.opengis.net/gml http://schemas.opengis.net/gml/3.1.1/base/gml.xsd\n"
+     (paikkatietopalvelu ns-name ns-version))))
 
 (def common-namespaces
   {:xmlns:yht   "http://www.paikkatietopalvelu.fi/gml/yhteiset"

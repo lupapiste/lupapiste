@@ -2,7 +2,6 @@
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error fatal]]
             [monger.operators :refer :all]
             [sade.env :as env]
-            [sade.strings :as ss]
             [sade.util :as util]
             [sade.core :refer :all]
             [lupapalvelu.action :refer [defquery defcommand update-application executed] :as action]
@@ -71,6 +70,15 @@
 ;; Authority operations
 ;;
 
+(defquery get-possible-statement-statuses
+  {:description "Provides the possible statement statuses according to the krysp version in use."
+   :parameters [:id]
+   :user-roles #{:authority}
+   :user-authz-roles #{:statementGiver}
+   :states action/all-application-states}
+  [{application :application}]
+  (ok :data (possible-statement-statuses application)))
+
 (defquery get-statement-givers
   {:parameters [:id]
    :user-roles #{:authority}
@@ -131,9 +139,8 @@
   (update-application command {$pull {:statements {:id statementId} :auth {:statementId statementId}}}))
 
 (defcommand give-statement
-  {:parameters  [id statementId status text :lang]
+  {:parameters  [:id statementId status text :lang]
    :pre-checks  [statement-exists statement-owner #_statement-not-given]
-   :input-validators [(fn [{{status :status} :data}] (when-not (#{"yes", "no", "condition"} status) (fail :error.missing-parameters)))]
    :states      [:open :submitted :complement-needed]
    :user-roles #{:authority}
    :user-authz-roles #{:statementGiver}
@@ -141,6 +148,8 @@
    :on-success  [(fn [command _] (notifications/notify! :new-comment command))]
    :description "authrority-roled statement owners can give statements - notifies via comment."}
   [{:keys [application user created] :as command}]
+  (when-not ((set (possible-statement-statuses application)) status)
+    (fail! :error.unknown-statement-status))
   (let [comment-text   (if (statement-given? application statementId)
                          (i18n/loc "statement.updated")
                          (i18n/loc "statement.given"))

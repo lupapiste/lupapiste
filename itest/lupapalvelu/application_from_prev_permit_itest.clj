@@ -1,6 +1,5 @@
 (ns lupapalvelu.application-from-prev-permit-itest
   (:require [midje.sweet :refer :all]
-            [midje.util :refer [testable-privates]]
             [clojure.java.io :as io]
             [sade.core :refer [def-]]
             [sade.xml :as xml]

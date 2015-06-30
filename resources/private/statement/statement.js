@@ -24,7 +24,7 @@
     self.data = ko.observable();
     self.application = ko.observable();
 
-    self.statuses = ["yes", "no", "condition"];
+    self.statuses = ko.observable([]);
     self.selectedStatus = ko.observable();
     self.text = ko.observable();
     self.submitting = ko.observable(false);
@@ -60,15 +60,18 @@
       if(statement) {
         self.data(ko.mapping.fromJS(statement));
 
-        // LUPA-482 part II
-        if (statement.status && !self.dirty()) {
-          self.selectedStatus(statement.status);
+        if (!self.dirty()) {
+          if (statement.status) self.selectedStatus(statement.status);  // LUPA-482 part II
+          if (statement.text) self.text(statement.text);
           self.dirty(false);
         }
-        if (statement.text && !self.dirty()) {
-          self.text(statement.text);
-          self.dirty(false);
-        }
+
+        ajax
+          .query("get-possible-statement-statuses", {id: applicationId})
+          .success(function(resp) {
+            self.statuses(resp.data);
+          })
+          .call();
 
       } else {
         window.location.hash = "!/404";
