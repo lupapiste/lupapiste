@@ -1,7 +1,6 @@
 (ns lupapalvelu.organization-api
   (:import [org.geotools.data FileDataStoreFinder DataUtilities]
            [org.geotools.geojson.feature FeatureJSON]
-           [org.opengis.feature.simple SimpleFeature]
            [org.geotools.geometry.jts JTS]
            [org.geotools.referencing CRS]
            [org.geotools.referencing.crs DefaultGeographicCRS]
@@ -33,7 +32,6 @@
             [lupapalvelu.xml.asianhallinta.verdict :as ah-verdict]
             [me.raynes.fs :as fs]
             [clojure.data.json :as json]
-            [clojure.walk :as walk]
             [slingshot.slingshot :refer [try+]]))
 ;;
 ;; local api
