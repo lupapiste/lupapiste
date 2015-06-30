@@ -14,11 +14,3 @@
   }
 }
 
-.organization-areas {
-  ul {
-    list-style: none;
-  }
-  li:nth-child(even) {
-    background-color: darken($lp-light-grey, .5%);
-  }
-}
