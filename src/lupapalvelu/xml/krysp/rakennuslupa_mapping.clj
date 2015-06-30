@@ -138,7 +138,7 @@
 (def rakennuslupa_to_krysp_212
   {:tag :Rakennusvalvonta
    :ns "rakval"
-   :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation "rakennusvalvonta" "2.1.2")
+   :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation :R "2.1.2")
                  :xmlns:rakval "http://www.paikkatietopalvelu.fi/gml/rakennusvalvonta"}
            mapping-common/common-namespaces)
    :child [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}
@@ -224,7 +224,7 @@
 
 (def rakennuslupa_to_krysp_213
   (-> rakennuslupa_to_krysp_212
-    (assoc-in [:attr :xsi:schemaLocation] (mapping-common/schemalocation "rakennusvalvonta" "2.1.3"))
+    (assoc-in [:attr :xsi:schemaLocation] (mapping-common/schemalocation :R "2.1.3"))
     (update-in [:child] mapping-common/update-child-element
       [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :katselmustieto]
       katselmus_213)
@@ -241,7 +241,7 @@
 (def rakennuslupa_to_krysp_214
   (-> rakennuslupa_to_krysp_213
     (assoc-in [:attr :xsi:schemaLocation]
-      (mapping-common/schemalocation "rakennusvalvonta" "2.1.4"))
+      (mapping-common/schemalocation :R "2.1.4"))
     (update-in [:child] mapping-common/update-child-element
       [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :osapuolettieto]
       {:tag :osapuolettieto :child [mapping-common/osapuolet_212]})))
@@ -249,7 +249,7 @@
 (def rakennuslupa_to_krysp_215
   (-> rakennuslupa_to_krysp_214
     (assoc-in [:attr :xsi:schemaLocation]
-      (mapping-common/schemalocation "rakennusvalvonta" "2.1.5"))
+      (mapping-common/schemalocation :R "2.1.5"))
 
     (update-in [:child] mapping-common/update-child-element
       [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :osapuolettieto]
@@ -274,7 +274,7 @@
 (def rakennuslupa_to_krysp_216
   (-> rakennuslupa_to_krysp_215
       (assoc-in [:attr :xsi:schemaLocation]
-                (mapping-common/schemalocation "rakennusvalvonta" "2.1.6"))
+                (mapping-common/schemalocation :R "2.1.6"))
       (update-in [:child] mapping-common/update-child-element
                  [:rakennusvalvontaAsiatieto :RakennusvalvontaAsia :osapuolettieto]
                  {:tag :osapuolettieto :child [mapping-common/osapuolet_215]})))
@@ -282,7 +282,7 @@
 (def rakennuslupa_to_krysp_218
   (-> rakennuslupa_to_krysp_216
    (assoc-in [:attr :xsi:schemaLocation]
-     (mapping-common/schemalocation "rakennusvalvonta" "2.1.8"))))
+     (mapping-common/schemalocation :R "2.1.8"))))
 
 (defn get-rakennuslupa-mapping [krysp-version]
   {:pre [krysp-version]}

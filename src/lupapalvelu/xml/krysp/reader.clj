@@ -311,9 +311,25 @@
 (defn ->buildings [xml]
   (map ->rakennuksen-tiedot (-> xml cr/strip-xml-namespaces (select [:Rakennus]))))
 
+(defn- extract-vaadittuErityissuunnitelma-elements [lupamaaraykset]
+  (let [vaadittuErityissuunnitelma-array (->> lupamaaraykset :vaadittuErityissuunnitelma (map ss/trim) (remove ss/blank?))]
+    ;; resolving Tekla way of giving vaadittuErityissuunnitelmas: one "vaadittuErityissuunnitelma" with line breaks is divided into multiple "vaadittuErityissuunnitelma"s
+    (if (and
+          (= 1 (count vaadittuErityissuunnitelma-array))
+          (-> vaadittuErityissuunnitelma-array first (.indexOf "\n") (>= 0)))
+      (-> vaadittuErityissuunnitelma-array first (ss/split #"\n") ((partial remove ss/blank?)))
+      vaadittuErityissuunnitelma-array)))
+
 (defn- ->lupamaaraukset [paatos-xml-without-ns]
   (-> (cr/all-of paatos-xml-without-ns :lupamaaraykset)
     (cleanup)
+
+    ;; KRYSP yhteiset 2.1.5+
+    (cr/ensure-sequential :vaadittuErityissuunnitelma)
+    (#(let [vaaditut-es (extract-vaadittuErityissuunnitelma-elements %)]
+        (if (seq vaaditut-es)
+          (-> % (assoc :vaaditutErityissuunnitelmat vaaditut-es) (dissoc % :vaadittuErityissuunnitelma))
+          (dissoc % :vaadittuErityissuunnitelma))))
 
     (cr/ensure-sequential :vaaditutKatselmukset)
     (#(let [kats (map :Katselmus (:vaaditutKatselmukset %))]
