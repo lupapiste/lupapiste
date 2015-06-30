@@ -381,11 +381,13 @@
      :body "404"}))
 
 (defn create-preview
-    [file-id filename content-type content application-id]
-  (debugf "Creating preview: id=%s, type=%s file=%s" file-id content-type filename)
-  (when-let [preview-content (preview/try-create-preview-input-stream content content-type)]
-    (debugf "Saving preview: id=%s, type=%s file=%s" file-id content-type filename)
-    (mongo/upload (str file-id "-preview") (str (FilenameUtils/getBaseName filename) ".jpg") "image/jpg" preview-content :application application-id)))
+  [file-id filename content-type content application-id]
+
+  (when (env/feature? :preview)
+    (when-let [preview-content (util/timing (format "Creating preview: id=%s, type=%s file=%s" file-id content-type filename)
+                                            (preview/try-create-preview-input-stream content content-type))]
+      (debugf "Saving preview: id=%s, type=%s file=%s" file-id content-type filename)
+      (mongo/upload (str file-id "-preview") (str (FilenameUtils/getBaseName filename) ".jpg") "image/jpg" preview-content :application application-id))))
 
 (defn output-attachment-preview
   "Outputs attachment preview creating it if is it does not already exist"
