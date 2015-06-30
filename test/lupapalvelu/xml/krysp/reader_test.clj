@@ -182,7 +182,7 @@
 ;;
 ;; HUOM: Sanomassa vaara encoding ("iso-8859-1").
 ;;       Readerkaan ei osaa lukea, vaan hukkaa skandit!
-;;       Tuotannossa naytti 26.6.2015 viela tulevan "utf-8-enkoodauksella", jota me tuemme.
+;;       Tama Teklan testisanoma saatu QA:lta. Tuotannossa naytti 26.6.2015 viela tulevan "utf-8-enkoodauksella", jota me tuemme.
 ;;
 (facts "KRYSP verdict 2.1.8 - Tekla.xml"
  (let [xml (xml/parse (slurp "resources/krysp/sample/verdict - 2.1.8 - Tekla.xml") :encoding "iso-8859-1")
