@@ -36,7 +36,7 @@
 (def- statement-statuses ["puoltaa" "ei-puolla" "ehdoilla"])
 ;; Krysp Yhteiset 2.1.5+
 (def- statement-statuses-more-options
-  (into [] (concat statement-statuses ["ei-huomautettavaa" "ehdollinen" "puollettu" "ei-puollettu" "ei-lausuntoa" "lausunto" "kielteinen" "palautettu" "poydalle"])))
+  (vec (concat statement-statuses ["ei-huomautettavaa" "ehdollinen" "puollettu" "ei-puollettu" "ei-lausuntoa" "lausunto" "kielteinen" "palautettu" "poydalle"])))
 
 (defn- version-is-greater-or-equal [source target]
   {:pre [(map? target) (every? #(target %) [:major :minor :micro]) (string? source)]}
