@@ -33,7 +33,7 @@
                            :email "sonja.sibbo@sipoo.fi"
                            :id "516560d6c2e6f603beb85147"}
                   :requested 1379423095616
-                  :status "yes"
+                  :status "puoltaa"
                   :text "Lausunto liitteen\u00e4."}])
 
 (def yrityshakija {:id "52f3676442067dc3ba4f1ba8",
