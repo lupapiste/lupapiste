@@ -10,3 +10,5 @@ statement.lausunto: Lausunto
 statement.kielteinen: Kielteinen
 statement.palautettu: Palautettu
 statement.poydalle: Pöydälle
+
+:error.unknown-statement-status: Tuntematon lausunnon puoltotila

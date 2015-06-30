@@ -149,7 +149,7 @@
    :description "authrority-roled statement owners can give statements - notifies via comment."}
   [{:keys [application user created] :as command}]
   (when-not ((set (possible-statement-statuses application)) status)
-    (fail! :error.missing-parameters))
+    (fail! :error.unknown-statement-status))
   (let [comment-text   (if (statement-given? application statementId)
                          (i18n/loc "statement.updated")
                          (i18n/loc "statement.given"))

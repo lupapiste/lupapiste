@@ -97,7 +97,7 @@
           (query mikko :should-see-unsubmitted-statements :id application-id) => unauthorized?)
 
         (fact "Statement cannot be given with invalid status"
-          (command veikko :give-statement :id application-id :statementId (:id statement) :status "yes" :text "I will approve" :lang "fi") => (partial expected-failure? "error.missing-parameters"))
+          (command veikko :give-statement :id application-id :statementId (:id statement) :status "yes" :text "I will approve" :lang "fi") => (partial expected-failure? "error.unknown-statement-status"))
 
         (get-in statement [:person :email]) => veikko-email
         (command veikko :give-statement :id application-id :statementId (:id statement) :status "puoltaa" :text "I will approve" :lang "fi") => ok?
