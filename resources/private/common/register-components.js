@@ -30,7 +30,7 @@ jQuery(document).ready(function() {
     "company-edit",
     "tags-editor",
     "upload",
-    "map"
+    "leaflet-map"
   ];
 
   _.forEach(components, function(component) {

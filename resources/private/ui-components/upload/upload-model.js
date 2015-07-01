@@ -8,6 +8,7 @@ LUPAPISTE.UploadModel = function(params) {
   self.pending = ko.observable(false);
 
   self.errorMessage = ko.observable(false);
+
   self.successMessage = ko.observable(false);
 
   self.submit = function(form) {
@@ -29,6 +30,9 @@ LUPAPISTE.UploadModel = function(params) {
         },
         success: function(res) {
           self.successMessage("upload.success");
+          if (_.isFunction(params.onSuccess)) {
+            params.onSuccess(res);
+          }
         },
         error: function() {
           self.errorMessage("error.upload-failed");
