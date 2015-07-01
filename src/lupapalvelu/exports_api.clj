@@ -19,8 +19,8 @@
   (let [doc (domain/get-document-by-operation application operation)
         [_ kayttotarkoitus] (first (tools/deep-find doc [:kayttotarkoitus :value]))]
     (if (ss/blank? kayttotarkoitus)
-      "C"
-      (get @kayttotarkoitus-hinnasto kayttotarkoitus))))
+      {:priceClass "C" :kayttotarkoitus nil}
+      {:priceClass (get @kayttotarkoitus-hinnasto kayttotarkoitus) :kayttotarkoitus kayttotarkoitus})))
 
 (def price-classes-for-operation
   {:asuinrakennus               uuden-rakentaminen ; old operation tree
@@ -140,7 +140,14 @@
 
 (defn- resolve-price-class [application op]
   (let [price-class (get price-classes-for-operation (keyword (:name op)))]
-    (assoc op :priceClass (if (fn? price-class) (price-class application op) price-class))))
+    (if (fn? price-class)
+      (let [price (price-class application op)] ; get kayttotarkoitus
+        (-> op
+            (assoc :priceClass (get price :priceClass))
+            (assoc :use (get price :kayttotarkoitus))))
+      (-> op ; normal price class
+        (assoc :priceClass price-class)
+        (assoc :use nil)))))
 
 (defn- operation-mapper [application op]
   (util/assoc-when (resolve-price-class application op)
