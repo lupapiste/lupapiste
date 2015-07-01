@@ -25,28 +25,33 @@
         xml-212 (yleisetalueet-element-to-xml canonical lupa-name-key "2.1.2")
         xml-213 (yleisetalueet-element-to-xml canonical lupa-name-key "2.1.3")
         xml-220 (yleisetalueet-element-to-xml canonical lupa-name-key "2.2.0")
+        xml-221 (yleisetalueet-element-to-xml canonical lupa-name-key "2.2.1")
         xml-212s (indent-str xml-212)
         xml-213s (indent-str xml-213)
         xml-220s (indent-str xml-220)
+        xml-221s (indent-str xml-221)
         lp-xml-212 (cr/strip-xml-namespaces (xml/parse xml-212s))
         lp-xml-213 (cr/strip-xml-namespaces (xml/parse xml-213s))
-        lp-xml-220 (cr/strip-xml-namespaces (xml/parse xml-220s))]
+        lp-xml-220 (cr/strip-xml-namespaces (xml/parse xml-220s))
+        lp-xml-221 (cr/strip-xml-namespaces (xml/parse xml-221s))]
 
     (fact ":tag is set (2.1.2)"
       (xml-test-common/has-tag
         (get-yleiset-alueet-krysp-mapping lupa-name-key "2.1.2")) => true)
-
     (fact ":tag is set (2.1.3)"
       (xml-test-common/has-tag
         (get-yleiset-alueet-krysp-mapping lupa-name-key "2.1.3")) => true)
-
     (fact ":tag is set (2.2.0)"
       (xml-test-common/has-tag
         (get-yleiset-alueet-krysp-mapping lupa-name-key "2.2.0")) => true)
+    (fact ":tag is set (2.2.1)"
+      (xml-test-common/has-tag
+        (get-yleiset-alueet-krysp-mapping lupa-name-key "2.2.1")) => true)
 
     (fact "2.1.2: xml exist" xml-212 => truthy)
     (fact "2.1.3: xml exist" xml-213 => truthy)
     (fact "2.2.0: xml exist" xml-220 => truthy)
+    (fact "2.2.1: xml exist" xml-221 => truthy)
 
     ;; Alla oleva tekee jo validoinnin,
     ;; mutta annetaan olla tuossa alla viela tuo validointi, jottei joku tule ja riko olemassa olevaa validointia.
@@ -56,10 +61,13 @@
       application "fi" application {:krysp {:YA {:ftpUser "dev_sipoo" :version "2.1.3"}}})
     (mapping-to-krysp/save-application-as-krysp
       application "fi" application {:krysp {:YA {:ftpUser "dev_sipoo" :version "2.2.0"}}})
+    (mapping-to-krysp/save-application-as-krysp
+      application "fi" application {:krysp {:YA {:ftpUser "dev_sipoo" :version "2.2.1"}}})
 
     (validator/validate xml-212s (:permitType application) "2.1.2")
     (validator/validate xml-213s (:permitType application) "2.1.3")
     (validator/validate xml-220s (:permitType application) "2.2.0")
+    (validator/validate xml-221s (:permitType application) "2.2.1")
 
     (fact "LP-tunnus"
       (xml/get-text lp-xml-212 [:MuuTunnus :tunnus]) => (:id application)

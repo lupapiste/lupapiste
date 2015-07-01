@@ -44,6 +44,19 @@
       (:applications resp) => sequential?
       (count (:applications resp)) => 0)))
 
+(fact "When using kayttotarkoitus operation, price and kayttotarkoitus is included in operation"
+  (let [application-id (create-app-id pena :operation "kerrostalo-rivitalo")
+        http-resp (http/get (str (server-address) "/data-api/json/export-applications")
+                    {:basic-auth ["solita-etl" "solita-etl"]
+                     :follow-redirects false
+                     :throw-exceptions false})
+        resp (:body (decode-response http-resp))]
+    (println (:operations (last (:applications resp))))
+    resp => ok?
+    (count (:applications resp)) => 2
+    (-> resp :applications last :operations first :priceClass) => "B" ; from kayttotarkoitus-hinnasto.xlsx
+    (-> resp :applications last :operations first :use) => "021 rivitalot"))
+
 (fact "Applicant can not use the api"
   (let [http-resp (http/get (str (server-address) "/data-api/json/export-applications")
                     {:basic-auth ["pena" "pena"]

@@ -32,6 +32,7 @@
    :sftp-directory   "/rakennus"
    :applicant-doc-schema "hakija-r"
    :multiple-parties-allowed true
+   :wfs-krysp-ns-name "rakennusvalvonta"
    :wfs-krysp-url-asia-prefix "rakval:luvanTunnisteTiedot/"})
 
 (defpermit YA "Yleisten alueiden luvat"
@@ -39,19 +40,22 @@
    :sftp-directory       "/yleiset_alueet"
    :applicant-doc-schema "hakija-ya"
    :multiple-parties-allowed false
+   :wfs-krysp-ns-name "yleisenalueenkaytonlupahakemus"
    :wfs-krysp-url-asia-prefix "yak:luvanTunnisteTiedot/"})
 
 (defpermit YI  "Ymparistoilmoitukset"
   {:subtypes       []
    :sftp-directory "/ymparisto"
    :applicant-doc-schema "hakija"
-   :multiple-parties-allowed true})
+   :multiple-parties-allowed true
+   :wfs-krysp-ns-name "ymparisto/ilmoitukset"})
 
 (defpermit YL  "Ymparistolupa"
   {:subtypes       []
    :sftp-directory "/ymparisto"
    :applicant-doc-schema "hakija"
    :multiple-parties-allowed true
+   :wfs-krysp-ns-name "ymparisto/ymparistoluvat"
    :wfs-krysp-url-asia-prefix "ymy:luvanTunnistetiedot/"})
 
 (defpermit VVVL  "Vapautushakemus vesijohtoon ja viemariin liittymisesta"
@@ -59,6 +63,7 @@
    :sftp-directory "/ymparisto"
    :applicant-doc-schema "hakija"
    :multiple-parties-allowed true
+   :wfs-krysp-ns-name "ymparisto/vesihuoltolaki"
    :wfs-krysp-url-asia-prefix "ymv:luvanTunnistetiedot/"})
 
 (defpermit P  "Poikkeusluvat"
@@ -66,6 +71,7 @@
    :sftp-directory   "/poikkeusasiat"
    :applicant-doc-schema "hakija"
    :multiple-parties-allowed true
+   :wfs-krysp-ns-name "poikkeamispaatos_ja_suunnittelutarveratkaisu"
    :wfs-krysp-url-asia-prefix "ppst:luvanTunnistetiedot/"})
 
 (defpermit MAL "Maa-ainesluvat"
@@ -73,6 +79,7 @@
    :sftp-directory "/ymparisto"
    :applicant-doc-schema "hakija"
    :multiple-parties-allowed true
+   :wfs-krysp-ns-name "ymparisto/maa_ainesluvat"
    :wfs-krysp-url-asia-prefix "ymm:luvanTunnistetiedot/"})
 
 (defpermit KT "Kiinteistotoimitus"
