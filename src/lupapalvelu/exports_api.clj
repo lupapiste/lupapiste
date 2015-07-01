@@ -165,7 +165,7 @@
                   {:modified {$gte (Long/parseLong ts 10)}}))
         fields [:address :applicant :authority :closed :created :convertedToApplication :infoRequest :modified
                 :municipality :opened :openInfoRequest :primaryOperation :secondaryOperations :organization
-                :propertyId :permitSubtype :permitType :sent :started :state :submitted]
+                :propertyId :permitSubtype :permitType :sent :started :state :submitted :documents]
         raw-applications (mongo/select :applications query fields)
         applications-with-operations (map
                                        (fn [a] (assoc a :operations (application/get-operations a)))
