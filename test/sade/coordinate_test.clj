@@ -8,3 +8,6 @@
 
 (fact "WGS84 to EPSG:3067 works"
   (coordinate/convert "WGS84" "EPSG:3067" 4 [25.34 64.715]) => [420893.9342 7177728.7700])
+
+(fact "EPSG:3879 to EPSG:3067 works"
+  (coordinate/convert "EPSG:3879" "EPSG:3067" 3 [2.5502936E7 6708332.0]) => [393033.614 6707228.994])

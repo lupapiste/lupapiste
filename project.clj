@@ -57,7 +57,7 @@
                  [org.geotools/gt-shapefile "13.1"]
                  [org.geotools/gt-geojson "13.1"]
                  [org.geotools/gt-referencing "13.1"]
-                 [org.geotools/gt-epsg-hsql "13.1"]
+                 [org.geotools/gt-epsg-wkt "13.1"]
                  [org.clojure/data.json "0.2.6"]]
   :profiles {:dev {:dependencies [[midje "1.6.3"]
                                   [ring-mock "0.1.5"]
