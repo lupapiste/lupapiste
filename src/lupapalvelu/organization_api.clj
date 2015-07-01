@@ -434,11 +434,11 @@
             new-collection (transform-coordinates-to-wgs84 collection)
             areas (json/read-str (.toString (FeatureJSON.) new-collection))]
         (o/update-organization org-id {$set {:areas areas}})
+        (.dispose data-store)
         (->> (assoc file-info :areas areas :ok true)
              (resp/json)
              (resp/content-type "application/json")
-             (resp/status 200))
-        (.dispose data-store))
+             (resp/status 200)))
       (catch [:sade.core/type :sade.core/fail] {:keys [text] :as all}
         (resp/status 400 text))
       (catch Object _
