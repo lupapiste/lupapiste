@@ -2890,6 +2890,11 @@ table.attachments-template-table td.attachment-version-info {
   margin: 0 0 0 12px;
 }
 
+/* line 28, ../sass/partials/_map.scss */
+.map-component {
+  height: 400px;
+}
+
 /* line 1, ../sass/partials/_errors.scss */
 .context-error {
   color: #f00;

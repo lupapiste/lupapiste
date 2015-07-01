@@ -29,7 +29,8 @@ jQuery(document).ready(function() {
     "ok-button-group",
     "company-edit",
     "tags-editor",
-    "upload"
+    "upload",
+    "map"
   ];
 
   _.forEach(components, function(component) {
