@@ -48,6 +48,7 @@
     self.clear = function() {
       self.data(null);
       self.application(null);
+      self.statuses([]);
       self.selectedStatus(null);
       self.text(null);
       self.dirty(false);
@@ -66,12 +67,14 @@
           self.dirty(false);
         }
 
-        ajax
-          .query("get-possible-statement-statuses", {id: applicationId})
-          .success(function(resp) {
-            self.statuses(resp.data);
-          })
-          .call();
+        if (authorizationModel.ok("get-possible-statement-statuses")) {
+          ajax
+            .query("get-possible-statement-statuses", {id: applicationId})
+            .success(function(resp) { self.statuses(resp.data); })
+            .call();
+        } else if (statement.status) {
+          self.statuses([statement.status]);
+        }
 
       } else {
         window.location.hash = "!/404";
