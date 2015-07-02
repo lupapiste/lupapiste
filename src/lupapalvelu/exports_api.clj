@@ -173,7 +173,7 @@
         applications (map
                        (fn [a] (->
                                  (update-in a [:operations] #(map (partial operation-mapper a) %))
-                                 (dissoc :documents))) ; documents not needed, reduces returned data by about 85 percent
+                                 (dissoc :documents))) ; documents not needed, reduces returned data by about 85 %
                        applications-with-operations)]
     (ok :applications applications)))
 
