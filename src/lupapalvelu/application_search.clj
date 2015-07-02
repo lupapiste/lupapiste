@@ -159,6 +159,20 @@
      :iTotalDisplayRecords  query-total
      :sEcho                 echo}))
 
+(defn applications-for-user-v2 [user]
+  (let [user-query  (domain/basic-application-query-for user)
+        user-total  (mongo/count :applications user-query)
+        query       (make-query user-query nil user)
+        query-total (mongo/count :applications query)
+        skip        (or 0)
+        limit       (or 10)
+        apps        (query/with-collection "applications"
+                      (query/find query)
+                      (query/sort {:modified 1})
+                      (query/skip skip)
+                      (query/limit limit))
+        rows        (map (comp (partial meta-fields/with-indicators user) #(domain/filter-application-content-for % user) ) apps)] ; Prevent XSS TODO
+    rows))
 
 (defn public-fields [{:keys [municipality submitted primaryOperation]}]
   (let [op-name (:name primaryOperation)]

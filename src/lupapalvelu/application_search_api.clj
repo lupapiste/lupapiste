@@ -16,6 +16,13 @@
   [{user :user}]
   (ok :data (search/applications-for-user user params)))
 
+(defquery applications-search
+  {:description "Service point for application search page component"
+   :parameters []
+   :user-roles #{:applicant :authority}}
+  [{user :user}]
+  (ok :data (search/applications-for-user-v2 user)))
+
 (defn- localize-operation [op]
   (assoc op
     :displayNameFi (i18n/localize "fi" "operations" (:name op))
