@@ -191,6 +191,15 @@ var util = (function($) {
     return m;
   }
 
+  function randomElementId(prefix) {
+    var random = _.random(Number.MAX_SAFE_INTEGER);
+    var id = prefix ? prefix + "-" + random : random.toString();
+    if ($(id).length) {
+      return randomElementId(prefix);
+    }
+    return id;
+  }
+
   return {
     zeropad:             zeropad,
     fluentify:           fluentify,
@@ -217,7 +226,8 @@ var util = (function($) {
     isPartyDoc: isPartyDoc,
     isNotPartyDoc: isNotPartyDoc,
     extractRequiredErrors: extractRequiredErrors,
-    dissoc: dissoc
+    dissoc: dissoc,
+    randomElementId: randomElementId
   };
 
 })(jQuery);
