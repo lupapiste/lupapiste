@@ -1,7 +1,7 @@
 /*
   Bootstrap sets img width to 100% and that messes GoogleMaps and OpenLayers.
 */
- 
+
 .map {
   margin-bottom: $marginM;
   img {
@@ -25,3 +25,10 @@
   margin: 0 0 0 12px;
 }
 
+.organization-areas-map {
+  margin-bottom: $marginS;
+}
+
+.map-component {
+  height: 400px;
+}
