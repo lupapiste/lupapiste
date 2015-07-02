@@ -5,12 +5,19 @@ LUPAPISTE.ApplicationsDataProvider = function() {
 
   self.data = ko.observableArray([]);
 
-  ajax.query("applications-search", {})
-  .success(function(data) {
-    console.log(data);
-    self.data(data.data);
-  })
-  .call();
+
+  self.searchField = ko.observable("");
+
+  ko.computed(function() {
+    ajax.query("applications-search",
+               {searchText: self.searchField()})
+      .success(function(data) {
+        console.log(data);
+        self.data(data.data);
+    })
+    .call();
+  }).extend({throttle: 250});
+
 };
 
 LUPAPISTE.ApplicationsSearchModel = function(params) {
