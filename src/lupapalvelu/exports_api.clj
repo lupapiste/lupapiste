@@ -166,12 +166,14 @@
         fields [:address :applicant :authority :closed :created :convertedToApplication :infoRequest :modified
                 :municipality :opened :openInfoRequest :primaryOperation :secondaryOperations :organization
                 :propertyId :permitSubtype :permitType :sent :started :state :submitted :documents]
-        raw-applications (mongo/select :applications query fields)
+        raw-applications (mongo/select :applications query fields) ; TODO optimize (kayttotarkoitus documents are only needed
         applications-with-operations (map
                                        (fn [a] (assoc a :operations (application/get-operations a)))
                                        raw-applications)
         applications (map
-                       (fn [a] (update-in a [:operations] #(map (partial operation-mapper a) %)))
+                       (fn [a] (->
+                                 (update-in a [:operations] #(map (partial operation-mapper a) %))
+                                 (dissoc :documents))) ; documents not needed, reduces returned data by ~ 85%
                        applications-with-operations)]
     (ok :applications applications)))
 
