@@ -1,7 +1,8 @@
 (ns lupapalvelu.organization-api
   (:import [org.geotools.data FileDataStoreFinder DataUtilities]
            [org.geotools.geojson.feature FeatureJSON]
-           [org.opengis.feature.simple SimpleFeature]
+           [org.geotools.feature.simple SimpleFeatureBuilder]
+           [org.geotools.feature.simple SimpleFeatureTypeBuilder]
            [org.geotools.geometry.jts JTS]
            [org.geotools.referencing CRS]
            [org.geotools.referencing.crs DefaultGeographicCRS]
@@ -402,10 +403,13 @@
         list (ArrayList.)
         _ (loop [feature (cast SimpleFeature feature)]
             (when feature
-              (let [geometry  (.getDefaultGeometry feature)
-                    transformed-geometry (JTS/transform geometry transform)]
-                (.setDefaultGeometry feature transformed-geometry)
-                (.add list feature)))
+              (let [transformed-geometry (JTS/transform (.getDefaultGeometry feature) transform)
+                    feature-type (DataUtilities/createSubType (.getFeatureType feature) nil DefaultGeographicCRS/WGS84) ; copy feature type with new crs
+                    builder (SimpleFeatureBuilder. feature-type) ; build new feature with changed crs
+                    _ (.init builder feature) ; init builder with original feature
+                    transformed-feature (.buildFeature builder (.getID feature))
+                    _ (.setDefaultGeometry transformed-feature transformed-geometry)]
+                (.add list transformed-feature)))
             (when (.hasNext iterator)
               (recur (.next iterator))))]
     (.close iterator)
