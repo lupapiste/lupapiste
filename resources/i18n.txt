@@ -1,3 +1,0 @@
-upload:  Lataa tiedosto
-error.upload-failed:  Tiedoston lataus epäonnistui
-upload.success:  Tiedoston lataus onnistui
