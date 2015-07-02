@@ -18,7 +18,7 @@
             [clojure.java.io :as io]
             [lupapalvelu.preview :as preview])
   (:import [java.util.zip ZipOutputStream ZipEntry]
-           [java.io File OutputStream FilterInputStream]
+           [java.io File FilterInputStream]
            (org.apache.commons.io FilenameUtils)))
 
 ;;
@@ -382,10 +382,9 @@
 
 (defn create-preview
   [file-id filename content-type content application-id]
-
-  (when (env/feature? :preview)
-    (when-let [preview-content (util/timing (format "Creating preview: id=%s, type=%s file=%s" file-id content-type filename)
-                                            (preview/try-create-preview-input-stream content content-type))]
+  (when (and (env/feature? :preview) (preview/converter content-type))
+    (mongo/upload (str file-id "-preview") (str (FilenameUtils/getBaseName filename) ".jpg") "image/jpg" (preview/placeholder-image) :application application-id)
+    (when-let [preview-content (preview/try-create-preview-input-stream content content-type)]
       (debugf "Saving preview: id=%s, type=%s file=%s" file-id content-type filename)
       (mongo/upload (str file-id "-preview") (str (FilenameUtils/getBaseName filename) ".jpg") "image/jpg" preview-content :application application-id))))
 
@@ -417,7 +416,7 @@
                                 :filename sanitazed-filename
                                 :content-type content-type})]
     (mongo/upload file-id sanitazed-filename content-type content :application application-id)
-    (create-preview file-id sanitazed-filename content-type content application-id)
+    (.start (Thread. (#(create-preview file-id sanitazed-filename content-type content application-id))))
     (update-or-create-attachment options)))
 
 (defn get-attachments-by-operation
