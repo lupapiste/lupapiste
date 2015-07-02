@@ -3,7 +3,9 @@
 <body>
   <section class="page container">
     <script type="text/html" id="applications-search-template">
-
+      <div data-bind="component: {name: 'applications-search-filter', params: {dataProvider: dataProvider}}"></div>
+      <div data-bind="component: {name: 'applications-search-results',
+                                 params: {dataProvider: dataProvider}}"></div>
     </script>
   </section>
 </body>

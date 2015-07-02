@@ -26,6 +26,10 @@
         </div>
       </div>
     </div>
+    <!-- ko if: features.enabled('alueellisetOrganisaatiot-search')-->
+    <div class="feature" data-bind="component: 'applications-search'">
+    </div>
+    <!-- /ko -->
     <div data-bind="visible: $data.showFilterControls" class="filter-controls">
       <div>
         <label for="applications-filter-user" data-bind="ltext: 'applications.filter.desc'" class="form-label"></label>

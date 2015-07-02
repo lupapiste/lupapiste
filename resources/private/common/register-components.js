@@ -31,7 +31,9 @@ jQuery(document).ready(function() {
     "tags-editor",
     "upload",
     "leaflet-map",
-    "applications-search"
+    "applications-search",
+    "applications-search-results",
+    "applications-search-filter"
   ];
 
   _.forEach(components, function(component) {
