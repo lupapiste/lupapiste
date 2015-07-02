@@ -192,7 +192,8 @@ var util = (function($) {
   }
 
   function randomElementId(prefix) {
-    var id = prefix + "-" + _.random(Number.MAX_SAFE_INTEGER);
+    var random = _.random(Number.MAX_SAFE_INTEGER);
+    var id = prefix ? prefix + "-" + random : random.toString();
     if ($(id).length) {
       return randomElementId(prefix);
     }
