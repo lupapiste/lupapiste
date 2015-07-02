@@ -2,7 +2,7 @@
   (:import [org.geotools.data FileDataStoreFinder DataUtilities]
            [org.geotools.geojson.feature FeatureJSON]
            [org.geotools.feature.simple SimpleFeatureBuilder]
-           [org.geotools.feature.simple SimpleFeatureTypeBuilder]
+           [org.opengis.feature.simple SimpleFeature]
            [org.geotools.geometry.jts JTS]
            [org.geotools.referencing CRS]
            [org.geotools.referencing.crs DefaultGeographicCRS]
