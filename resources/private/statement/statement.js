@@ -171,9 +171,10 @@
 
   repository.loaded(["statement"], function(application) {
     if (applicationId === application.id) {
-      authorizationModel.refresh(application, {statementId: statementId});
-      statementModel.refresh(application);
-      attachmentsModel.refresh(application);
+      authorizationModel.refresh(application, {statementId: statementId}, function() {
+        statementModel.refresh(application);
+        attachmentsModel.refresh(application);
+      });
     }
   });
 
