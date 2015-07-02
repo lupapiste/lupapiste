@@ -53,6 +53,7 @@
                  [scss-compiler "0.1.2"]
                  [org.clojure/core.memoize "0.5.7"]
                  [org.apache.pdfbox/pdfbox "1.8.9"]
+                 [com.levigo.jbig2/levigo-jbig2-imageio "1.6.3"]
                  [lupapiste/commons "0.5.0"]]
   :profiles {:dev {:dependencies [[midje "1.6.3"]
                                   [ring-mock "0.1.5"]
@@ -80,7 +81,9 @@
   :repositories [["solita-archiva" {:url "http://mvn.solita.fi/archiva/repository/solita"
                                     :checksum :ignore}]
                  ["mygrid-repository" {:url "http://www.mygrid.org.uk/maven/repository"
-                                       :snapshots false}]]
+                                       :snapshots false}]
+                 ["com.levigo.jbig2" {:url "http://jbig2-imageio.googlecode.com/svn/maven-repository"
+                      :snapshots false}]]
   :plugin-repositories [["solita-archiva" {:url "http://mvn.solita.fi/archiva/repository/solita"
                                            :checksum :ignore}]]
   :aliases {"integration" ["with-profile" "dev,itest" "midje"]
