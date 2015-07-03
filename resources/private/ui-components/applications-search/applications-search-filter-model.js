@@ -46,4 +46,6 @@ LUPAPISTE.ApplicationsSearchFilterModel = function(params) {
 
   self.handlersDataProvider = new LUPAPISTE.HandlersDataProvider();
 
+  // TODO just search single organization tags for now, later do some grouping stuff in autocomplete component
+  self.organizationTagsDataProvider = new LUPAPISTE.OrganizationTagsDataProvider(_.last(_.keys(lupapisteApp.models.currentUser.orgAuthz())), self.dataProvider.applicationTags);
 };
