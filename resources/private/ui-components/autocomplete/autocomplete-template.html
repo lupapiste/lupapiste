@@ -26,18 +26,21 @@
         <div class="autocomplete-dropdown" data-bind="fader: inputSelected, duration: 100">
           <input class="autocomplete-input" type="text" data-test-id="autocomplete-input"
                  data-bind="textInput: query, hasFocus: inputSelected, event: {keydown: navigate}"></input>
-          <!-- ko if: dataProvider.data().length > 0 -->
-          <ul class="autocomplete-result"
-              data-bind="foreach: dataProvider.data">
+          <!-- ko if: data().length > 0 -->
+          <ul class="autocomplete-result">
+            <!-- ko foreach: data -->
             <li class="autocomplete-result-item"
-                data-bind="click: $parent.selectItem,
-                           event: {mouseover: $parent.changeIndex.bind($data, $index())},
+                data-bind="event: {mouseover: $parent.changeIndex.bind($data, $index()),
+                                   mousedown: $parent.selectItem.bind($data)},
                            css: {active: $index() === $parent.index()}">
-              <span data-bind="text: $parent.selectedText() ? $data[$parent.selectedText()] : $data"></span>
+              <span data-bind="text:
+                                $data === null ? loc('choose'):
+                                $parent.selectedText() ? $data[$parent.selectedText()] : $data"></span>
             </li>
+            <!-- /ko -->
           </ul>
           <!-- /ko -->
-          <!-- ko if: dataProvider.data().length === 0 -->
+          <!-- ko if: data().length === 0 -->
           <ul class="autocomplete-result">
             <li class="autocomplete-result-empty" data-bind="ltext: 'autocomplete.no-results'"></li>
           </ul>

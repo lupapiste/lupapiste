@@ -20,8 +20,10 @@ LUPAPISTE.AutocompleteModel = function(params) {
   self.index = ko.observable(0);
   self.selectedTags = ko.observableArray();
 
+  self.data = ko.observableArray(self.dataProvider.data());
+
   self.showCaption = ko.pureComputed(function() {
-    return !self.selected() && self.selectedTags().length == 0
+    return !self.selected() && self.selectedTags().length === 0;
   });
 
   // set initial value
@@ -34,6 +36,11 @@ LUPAPISTE.AutocompleteModel = function(params) {
   self.subscriptions = [];
 
   self.subscriptions.push(self.dataProvider.data.subscribe(function() {
+    if (params.nullable) {
+      self.data([null].concat(self.dataProvider.data()));
+    } else {
+      self.data(self.dataProvider.data());
+    }
     self.index(0);
   }));
 
@@ -43,16 +50,14 @@ LUPAPISTE.AutocompleteModel = function(params) {
   };
 
   self.selectItem = function(item) {
-    if (item) {
-      if (self.tags) {
-        self.value.push(item);
-      } else {
-        self.value(item);
-      }
-      self.inputSelected(false);
-      self.showResult(false);
-      self.query("");
+    if (self.tags) {
+      self.value.push(item);
+    } else {
+      self.value(item);
     }
+    self.inputSelected(false);
+    self.showResult(false);
+    self.query("");
   };
 
   self.navigate = function(data, event) {
@@ -76,14 +81,14 @@ LUPAPISTE.AutocompleteModel = function(params) {
     };
 
     if (event.keyCode === 13) {
-      self.selectItem(self.dataProvider.data()[self.index()]);
+      self.selectItem(self.data()[self.index()]);
     }
     else if (event.keyCode === 38) {
       self.index(self.index() > 0 ? self.index() - 1 : 0);
       scrollToActiveItem(self.index());
     }
     else if (event.keyCode === 40) {
-      self.index(self.index() + 1 < self.dataProvider.data().length ? self.index() + 1 : self.index());
+      self.index(self.index() + 1 < self.data().length ? self.index() + 1 : self.index());
       scrollToActiveItem(self.index());
     }
     return true;
