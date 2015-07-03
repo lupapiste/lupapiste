@@ -3753,20 +3753,21 @@ ul.attachments-list li.mandatory-attachments {
 
 /* line 4, ../sass/partials/_applications_search.scss */
 .search-tabs .tab-buttons ul {
+  display: block;
   list-style: none;
   padding: 0;
 }
-/* line 8, ../sass/partials/_applications_search.scss */
+/* line 9, ../sass/partials/_applications_search.scss */
 .search-tabs .tab-buttons li {
   background-color: #f6f6f6;
   color: #333;
   cursor: pointer;
   margin-right: 6px;
-  float: left;
+  display: inline-block;
   line-height: 32px;
   padding: 0 12px;
 }
-/* line 15, ../sass/partials/_applications_search.scss */
+/* line 16, ../sass/partials/_applications_search.scss */
 .search-tabs .tab-buttons li.selected {
   background-color: #dddddd;
 }
