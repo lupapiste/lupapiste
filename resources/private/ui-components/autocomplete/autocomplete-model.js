@@ -96,7 +96,7 @@ LUPAPISTE.AutocompleteModel = function(params) {
   self.removeTag = function(tag) {
     self.selectedTags.remove(tag);
     self.inputSelected(false);
-  }
+  };
 
   self.dispose = function() {
     while(self.subscriptions.length !== 0) {

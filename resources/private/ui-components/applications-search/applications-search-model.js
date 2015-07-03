@@ -5,8 +5,9 @@ LUPAPISTE.ApplicationsDataProvider = function() {
 
   self.data = ko.observableArray([]);
 
-
   self.searchField = ko.observable("");
+
+  self.handler = ko.observable();
 
   ko.computed(function() {
     ajax.query("applications-search",
@@ -26,5 +27,4 @@ LUPAPISTE.ApplicationsSearchModel = function(params) {
   var self = this;
 
   self.dataProvider = new LUPAPISTE.ApplicationsDataProvider();
-
 };

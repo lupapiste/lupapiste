@@ -4,6 +4,7 @@
   <section class="page container">
     <script type="text/html" id="applications-search-filter-template">
     <input class="form-input text applications-search" type="text" data-bind="attr: {placeholder: loc('application.filter.search')}, textInput: dataProvider.searchField"/>
+    <div data-bind="component: {name: 'autocomplete', params: {dataProvider: handlersDataProvider, value: dataProvider.handler, selectedText: 'fullName'}}"></div>
     </script>
   </section>
 </body>
