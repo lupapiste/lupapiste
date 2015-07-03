@@ -1,11 +1,11 @@
-LUPAPISTE.TagsDataProvider = function(organization, filtered) {
+LUPAPISTE.OrganizationTagsDataProvider = function(organization, filtered) {
   "use strict";
 
   var self = this;
 
   self.query = ko.observable();
 
-  self.filtered = ko.observableArray(filtered);
+  self.filtered = filtered || ko.observableArray([]);
 
   var data = ko.observable();
 
@@ -48,7 +48,7 @@ LUPAPISTE.NoticeModel = function() {
 
   self.selectedTags = ko.observableArray([]);
 
-  self.applicationTagsProvider = new LUPAPISTE.TagsDataProvider(self.applicationId, self.selectedTags());
+  self.applicationTagsProvider = new LUPAPISTE.OrganizationTagsDataProvider(self.applicationId, self.selectedTags);
 
   var subscriptions = [];
 
@@ -93,7 +93,6 @@ LUPAPISTE.NoticeModel = function() {
           self.indicator({name: "tags", type: "err"});
         })
         .call();
-      self.applicationTagsProvider.filtered(tags);
     }, 500)));
   };
 
@@ -112,7 +111,7 @@ LUPAPISTE.NoticeModel = function() {
     self.urgency(application.urgency);
     self.authorityNotice(application.authorityNotice);
     self.selectedTags(application.tags ? application.tags : []);
-    self.applicationTagsProvider = new LUPAPISTE.TagsDataProvider(application.organization, self.selectedTags());
+    self.applicationTagsProvider = new LUPAPISTE.OrganizationTagsDataProvider(application.organization, self.selectedTags);
     subscribe();
   };
 };
