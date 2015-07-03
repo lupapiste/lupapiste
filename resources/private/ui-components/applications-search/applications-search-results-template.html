@@ -3,17 +3,26 @@
 <body>
   <section class="page container">
     <script type="text/html" id="applications-search-results-template">
-      <table>
-        <thead>
-          <tr><th>lol</th></tr>
-        </thead>
-        <tbody data-bind="foreach: data">
-          <tr>
-            <td data-bind="text: _id"></td>
-          </tr>
-        </tbody>
-      </table>
-      <pre data-bind=""></pre>
+      <div class="search-tabs">
+        <div class="tab-buttons">
+          <ul data-bind="foreach: tabs">
+            <li data-bind="ltext: 'applications-search-tab.' + $data, click: $parent.selectTab,
+                           css: {selected: $parent.selectedTab() === $data}"></li>
+          </ul>
+        </div>
+        <div class="tab-content">
+          <table>
+            <thead>
+              <tr><th>lol</th></tr>
+            </thead>
+            <tbody data-bind="foreach: data">
+              <tr>
+                <td data-bind="text: _id"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </script>
   </section>
 </body>
