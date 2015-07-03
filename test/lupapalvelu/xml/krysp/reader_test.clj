@@ -4,7 +4,7 @@
             [lupapalvelu.factlet :refer [fact* facts*]]
             [clj-time.coerce :as coerce]
             [sade.xml :as xml]
-            [lupapalvelu.xml.krysp.reader :refer [property-equals ->verdicts ->buildings-summary ->rakennuksen-tiedot ->buildings  wfs-krysp-url rakval-case-type get-app-info-from-message]]
+            [lupapalvelu.xml.krysp.reader :refer [property-equals ->verdicts ->buildings-summary ->rakennuksen-tiedot ->buildings wfs-krysp-url rakval-case-type get-app-info-from-message]]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]))
@@ -462,6 +462,15 @@
     (:kiinttun building1) => "63820130310000"
     (:rakennusnro building1) => "123"
     (:valtakunnallinenNumero building1) => "1234567892"))
+
+(facts "Maaraykset from verdict message"
+  (let [xml (xml/parse (slurp "resources/krysp/sample/sito-kajaani-LP-205-2015-00069-paatos-tyhja-maarays.xml"))
+        verdicts (->verdicts xml ->standard-verdicts)
+        paatokset (:paatokset (first verdicts))
+        lupamaaraykset (:lupamaaraykset (first paatokset))
+        maaraykset (:maaraykset lupamaaraykset)]
+    maaraykset =not=> (contains [nil])
+    (count maaraykset) => 3))
 
 (facts "wfs-krysp-url works correctly"
   (fact "without ? returns url with ?"
