@@ -1,5 +1,6 @@
 (ns lupapalvelu.document.poikkeamis-schemas
-  (:require [lupapalvelu.document.schemas :refer :all]))
+  (:require [lupapalvelu.document.schemas :refer :all]
+            [lupapiste-commons.usage-types :as usages]))
 
 (def rakennushanke {:info {:name "rakennushanke"
                            :order 50
@@ -9,13 +10,13 @@
                     :body [{:name "kaytettykerrosala" :type :group
                             :body [{:name "pintaAla" :type :string :size "s" :unit "m2" :subtype :number}
                                    {:name "kayttotarkoitusKoodi" :type :select :sortBy :displayname :size "l"
-                                    :body rakennuksen-kayttotarkoitus}]}
+                                    :body usages/rakennuksen-kayttotarkoitus}]}
                            {:name "toimenpiteet"
                             :type :group
                             :repeating false
                             :approvable true
                             :body [{:name "kayttotarkoitus" :type :select :sortBy :displayname :size "l"
-                                    :body rakennuksen-kayttotarkoitus}
+                                    :body usages/rakennuksen-kayttotarkoitus}
                                    {:name "Toimenpide" :type :select :sortBy :displayname :size "l"
                                     :body [{:name "uusi"}
                                            {:name "laajennus"}

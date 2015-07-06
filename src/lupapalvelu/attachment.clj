@@ -19,7 +19,22 @@
             [lupapalvelu.preview :as preview])
   (:import [java.util.zip ZipOutputStream ZipEntry]
            [java.io File FilterInputStream]
-           (org.apache.commons.io FilenameUtils)))
+           [org.apache.commons.io FilenameUtils]
+           [java.util.concurrent Executors ThreadFactory]))
+
+(defn thread-factory []
+  (let [security-manager (System/getSecurityManager)
+        thread-group (if security-manager
+                       (.getThreadGroup security-manager)
+                       (.getThreadGroup (Thread/currentThread)))]
+    (reify
+      ThreadFactory
+      (newThread [this runnable]
+        (doto (Thread. thread-group runnable "preview-worker")
+          (.setDaemon true)
+          (.setPriority Thread/NORM_PRIORITY))))))
+
+(defonce preview-threadpool (Executors/newFixedThreadPool 1 (thread-factory)))
 
 ;;
 ;; Metadata
@@ -384,7 +399,9 @@
   [file-id filename content-type content application-id]
   (when (and (env/feature? :preview) (preview/converter content-type))
     (mongo/upload (str file-id "-preview") (str (FilenameUtils/getBaseName filename) ".jpg") "image/jpg" (preview/placeholder-image) :application application-id)
-    (when-let [preview-content (preview/try-create-preview-input-stream content content-type)]
+    (when-let [preview-content (util/timing (format "Creating preview: id=%s, type=%s file=%s" file-id content-type filename)
+                                            (with-open [content ((:content (mongo/download file-id)))]
+                                              (preview/create-preview content content-type)))]
       (debugf "Saving preview: id=%s, type=%s file=%s" file-id content-type filename)
       (mongo/upload (str file-id "-preview") (str (FilenameUtils/getBaseName filename) ".jpg") "image/jpg" preview-content :application application-id))))
 
@@ -416,7 +433,7 @@
                                 :filename sanitazed-filename
                                 :content-type content-type})]
     (mongo/upload file-id sanitazed-filename content-type content :application application-id)
-    (.start (Thread. (#(create-preview file-id sanitazed-filename content-type content application-id))))
+    (.submit preview-threadpool #(create-preview file-id sanitazed-filename content-type content application-id))
     (update-or-create-attachment options)))
 
 (defn get-attachments-by-operation
