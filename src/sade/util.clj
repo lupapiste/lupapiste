@@ -5,7 +5,7 @@
             [sade.strings :refer [numeric? decimal-number? trim] :as ss]
             [sade.core :refer :all]
             [clj-time.format :as timeformat]
-            [clj-time.core :refer [days weeks months ago]]
+            [clj-time.core :refer [days weeks months years ago]]
             [clj-time.coerce :as tc]
             [schema.core :as sc]
             [taoensso.timbre :as timbre :refer [debugf]])
@@ -268,12 +268,13 @@
       (apply format fmt (map ->int matches)))))
 
 (defn get-timestamp-from-now [time-key amount]
-  "Returns a timestamp in history. The 'time-key' parameter can be one of these keywords: :day, :week or :year."
+  "Returns a timestamp in history. The 'time-key' parameter can be one of these keywords: :day, :week, :month or :year."
   {:pre [(#{:day :week :month} time-key)]}
   (let [time-fn (case time-key
                   :day days
                   :week weeks
-                  :month months)]
+                  :month months
+                  :years years)]
     (tc/to-long (-> amount time-fn ago))))
 
 (defn to-long [s]
