@@ -9,6 +9,7 @@
             [lupapalvelu.document.ymparisto-schemas]
             [lupapalvelu.document.yleiset-alueet-schemas]
             [lupapalvelu.document.vesihuolto-schemas]
+            [lupapiste-commons.usage-types :as usages]
             [monger.operators :refer :all]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.permit :as permit]))
@@ -312,7 +313,7 @@
   (merge
     {:asuinrakennus               {:schema "uusiRakennus"
                                    :permit-type permit/R
-                                   :schema-data [[["kaytto" "kayttotarkoitus"] schemas/yhden-asunnon-talot]
+                                   :schema-data [[["kaytto" "kayttotarkoitus"] usages/yhden-asunnon-talot]
                                                  [["huoneistot" "0" "huoneistonumero"] "000"]
                                                  [["huoneistot" "0" "muutostapa"] "lis\u00e4ys"]]
                                    :required common-rakval-schemas
@@ -323,7 +324,7 @@
                                    :asianhallinta false} ;TODO old op-tree, remove later
      :kerrostalo-rivitalo         {:schema "uusiRakennus"
                                    :permit-type permit/R
-                                   :schema-data [[["kaytto" "kayttotarkoitus"] schemas/rivitalot]
+                                   :schema-data [[["kaytto" "kayttotarkoitus"] usages/rivitalot]
                                                  [["huoneistot" "0" "huoneistonumero"] "000"]
                                                  [["huoneistot" "0" "muutostapa"] "lis\u00e4ys"]]
                                    :required common-rakval-schemas
@@ -334,7 +335,7 @@
                                    :asianhallinta false}
      :pientalo                    {:schema "uusiRakennus"
                                    :permit-type permit/R
-                                   :schema-data [[["kaytto" "kayttotarkoitus"] schemas/yhden-asunnon-talot]
+                                   :schema-data [[["kaytto" "kayttotarkoitus"] usages/yhden-asunnon-talot]
                                                  [["huoneistot" "0" "huoneistonumero"] "000"]
                                                  [["huoneistot" "0" "muutostapa"] "lis\u00e4ys"]]
                                    :required common-rakval-schemas
@@ -345,7 +346,7 @@
                                    :asianhallinta false}
      :vapaa-ajan-asuinrakennus    {:schema "uusi-rakennus-ei-huoneistoa"
                                    :permit-type permit/R
-                                   :schema-data [[["kaytto" "kayttotarkoitus"] schemas/vapaa-ajan-asuinrakennus]]
+                                   :schema-data [[["kaytto" "kayttotarkoitus"] usages/vapaa-ajan-asuinrakennus]]
                                    :required common-rakval-schemas
                                    :attachments uuden_rakennuksen_liitteet
                                    :add-operation-allowed true
@@ -354,7 +355,7 @@
                                    :asianhallinta false}
      :varasto-tms                 {:schema "uusi-rakennus-ei-huoneistoa"
                                    :permit-type permit/R
-                                   :schema-data [[["kaytto" "kayttotarkoitus"] schemas/talousrakennus]]
+                                   :schema-data [[["kaytto" "kayttotarkoitus"] usages/talousrakennus]]
                                    :required common-rakval-schemas
                                    :attachments uuden_rakennuksen_liitteet
                                    :add-operation-allowed true

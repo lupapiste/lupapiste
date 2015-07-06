@@ -6,7 +6,7 @@
             [lupapalvelu.application :as app]
             [lupapalvelu.operations :as ops]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.document.schemas :as schemas]))
+            [lupapiste-commons.usage-types :as usages]))
 
 (testable-privates lupapalvelu.exports-api resolve-price-class)
 
@@ -16,7 +16,7 @@
   (difference (keyset ops/operations) (keyset price-classes-for-operation) ) => empty?)
 
 (fact "Every kayttotarkoitus has price class"
-  (let [every-kayttotarkoitus (map :name schemas/rakennuksen-kayttotarkoitus)]
+  (let [every-kayttotarkoitus (map :name usages/rakennuksen-kayttotarkoitus)]
     (difference (set every-kayttotarkoitus) (keyset @kayttotarkoitus-hinnasto))) => empty?)
 
 (fact "Uusi kerrostalo-rivitalo"
