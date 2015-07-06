@@ -91,6 +91,14 @@
                             {:name "postinumero" :type :string :subtype :zip :size "s" :required true}
                             {:name "postitoimipaikannimi" :type :string :subtype :vrk-address :size "m" :required true}]}])
 
+(def simple-osoite-maksaja [{:name "osoite"
+                             :i18nkey "osoite-maksaja"
+                             :type :group
+                             :blacklist [turvakielto]
+                             :body [{:name "katu" :type :string :subtype :vrk-address :required true}
+                                    {:name "postinumero" :type :string :subtype :zip :size "s" :required true}
+                                    {:name "postitoimipaikannimi" :type :string :subtype :vrk-address :size "m" :required true}]}])
+
 (def rakennuksen-osoite [{:name "osoite"
                    :type :group
                    :body [{:name "kunta" :type :string}
@@ -129,6 +137,12 @@
                simple-osoite
                yhteystiedot))
 
+(def henkilo-maksaja (body
+                       henkilo-valitsin
+                       [henkilotiedot]
+                       simple-osoite-maksaja
+                       yhteystiedot))
+
 (def henkilo-with-required-hetu (body
                                   henkilo-valitsin
                                   [(assoc henkilotiedot
@@ -150,6 +164,16 @@
                :body (body
                        [henkilotiedot-minimal]
                        yhteystiedot)}))
+
+(def yritys-maksaja (body
+                      yritys-valitsin
+                      yritys-minimal
+                      simple-osoite-maksaja
+                      {:name "yhteyshenkilo"
+                       :type :group
+                       :body (body
+                               [henkilotiedot-minimal]
+                               yhteystiedot)}))
 
 (def e-invoice-operators
   [{:name "BAWCFI22"} ; Basware Oyj
@@ -189,7 +213,7 @@
                            :body e-invoice-operators}])
 
 (def yritys-with-verkkolaskutustieto (body
-                                       yritys
+                                       yritys-maksaja
                                        {:name "verkkolaskutustieto"
                                         :type :group
                                         :body (body
@@ -432,7 +456,9 @@
                       tyonjohtajan-hyvaksynta))
 
 (def maksaja (body
-               (henkilo-yritys-select-group :yritys-body yritys-with-verkkolaskutustieto)
+               (henkilo-yritys-select-group
+                 :yritys-body yritys-with-verkkolaskutustieto
+                 :henkilo-body henkilo-maksaja)
                {:name "laskuviite" :type :string :max-len 30 :layout :full-width}))
 
 (def muutostapa {:name "muutostapa" :type :select :sortBy :displayname :label false :i18nkey "huoneistot.muutostapa" :emit [:muutostapaChanged]
