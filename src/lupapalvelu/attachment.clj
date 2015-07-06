@@ -399,7 +399,9 @@
   [file-id filename content-type content application-id]
   (when (and (env/feature? :preview) (preview/converter content-type))
     (mongo/upload (str file-id "-preview") (str (FilenameUtils/getBaseName filename) ".jpg") "image/jpg" (preview/placeholder-image) :application application-id)
-    (when-let [preview-content (preview/try-create-preview-input-stream content content-type)]
+    (when-let [preview-content (util/timing (format "Creating preview: id=%s, type=%s file=%s" file-id content-type filename)
+                                            (with-open [content ((:content (mongo/download file-id)))]
+                                              (preview/create-preview content content-type)))]
       (debugf "Saving preview: id=%s, type=%s file=%s" file-id content-type filename)
       (mongo/upload (str file-id "-preview") (str (FilenameUtils/getBaseName filename) ".jpg") "image/jpg" preview-content :application application-id))))
 
