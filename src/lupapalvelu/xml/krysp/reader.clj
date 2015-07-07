@@ -431,9 +431,7 @@
   (some
     #(when (and
              (:paatosPvm %)
-             (#{"hyv\u00e4ksytty" "hyl\u00e4tty" "ilmoitus hyv\u00e4ksytty"} (:paatostyyppi %)))
-       (println "\n party-with-paatos-data, paatos OK \n")
-       %)
+             (#{"hyv\u00e4ksytty" "hyl\u00e4tty" "ilmoitus hyv\u00e4ksytty"} (:paatostyyppi %))) %)
     osapuolet))
 
 (def- osapuoli-path-key-mapping
