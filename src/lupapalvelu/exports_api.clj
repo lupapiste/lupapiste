@@ -163,15 +163,20 @@
                 {"primaryOperation" {$exists true}}
                 (when (ss/numeric? ts)
                   {:modified {$gte (Long/parseLong ts 10)}}))
-        fields [:address :applicant :authority :closed :created :convertedToApplication :infoRequest :modified
-                :municipality :opened :openInfoRequest :primaryOperation :secondaryOperations :organization
-                :propertyId :permitSubtype :permitType :sent :started :state :submitted :documents]
+        fields {:address 1 :applicant 1 :authority 1 :closed 1 :created 1 :convertedToApplication 1
+                :infoRequest 1 :modified 1 :municipality 1 :opened 1 :openInfoRequest 1
+                :primaryOperation 1 :secondaryOperations 1 :organization 1 :propertyId 1
+                :permitSubtype 1 :permitType 1 :sent 1 :started 1 :state 1 :submitted 1
+                :documents.data.kaytto.kayttotarkoitus.value 1
+                :documents.schema-info.op.id 1}
         raw-applications (mongo/select :applications query fields)
         applications-with-operations (map
                                        (fn [a] (assoc a :operations (application/get-operations a)))
                                        raw-applications)
         applications (map
-                       (fn [a] (update-in a [:operations] #(map (partial operation-mapper a) %)))
+                       (fn [a] (->
+                                 (update-in a [:operations] #(map (partial operation-mapper a) %))
+                                 (dissoc :documents))) ; documents not needed in DW
                        applications-with-operations)]
     (ok :applications applications)))
 

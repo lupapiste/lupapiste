@@ -353,12 +353,12 @@
     (#(if (:maarays %)
         (let [maaraykset (cr/convert-keys-to-timestamps (:maarays %) [:maaraysaika :maaraysPvm :toteutusHetki])
               ;; KRYSP 2.1.5+ renamed :maaraysaika -> :maaraysPvm
-              maaraykset (mapv
+              maaraykset (remove nil? (mapv
                            (fn [maar]
                              (if (:maaraysPvm maar)
                                (-> maar (assoc :maaraysaika (:maaraysPvm maar)) (dissoc :maaraysPvm))
                                maar))
-                           maaraykset)]
+                           maaraykset))]
           (assoc % :maaraykset maaraykset))
         %))
     (dissoc :maarays)

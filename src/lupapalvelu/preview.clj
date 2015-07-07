@@ -1,5 +1,5 @@
 (ns lupapalvelu.preview
-  (:require [taoensso.timbre :as timbre :refer [trace debug debugf info infof warn warnf error errorf fatal]])
+  (:require [taoensso.timbre :refer [debugf errorf]])
   (:import (org.apache.pdfbox.pdmodel PDDocument)
            (org.apache.pdfbox.util ImageIOUtil)
            (java.awt.image BufferedImage)
@@ -8,6 +8,13 @@
            (javax.imageio ImageIO)))
 
 (def rez 600.0)
+
+(defn buffered-image-to-input-stream
+  "Converts BufferedImage inputStream"
+  [image]
+  (let [output (ByteArrayOutputStream.)]
+    (ImageIOUtil/writeImage image "jpg" output ImageIOUtil/DEFAULT_SCREEN_RESOLUTION 0.5)
+    (ByteArrayInputStream. (.toByteArray output))))
 
 (defn scale-image
   "Crops and scales BufferedImage to predefined resolution"
@@ -30,13 +37,6 @@
       (.dispose))
     new-image))
 
-(defn buffered-image-to-input-stream
-  "Converts BufferedImage inputStream"
-  [image]
-  (let [output (ByteArrayOutputStream.)]
-    (ImageIOUtil/writeImage image "jpg" output ImageIOUtil/DEFAULT_SCREEN_RESOLUTION 0.5)
-    (ByteArrayInputStream. (.toByteArray output))))
-
 (defn pdf-to-buffered-image
   "Converts 1. page from PDF to BufferedImage"
   [pdf-input]
@@ -48,17 +48,23 @@
   [input]
   (ImageIO/read (if (= (type input) java.lang.String) (FileInputStream. input) input)))
 
+(defn converter [content-type]
+  (cond
+    (= "application/pdf" content-type) pdf-to-buffered-image
+    (re-matches (re-pattern "(image/(gif|jpeg|png|tiff))") content-type) raster-to-buffered-image))
+
 (defn to-buffered-image
   "Tries to read content to image by JAI or apache.pdfbox. Retuns nil on fail"
   [content content-type]
   (try
-    (cond
-      (= "application/pdf" content-type) (pdf-to-buffered-image content)
-      (re-matches (re-pattern "(image/(gif|jpeg|png|tiff))") content-type) (raster-to-buffered-image content))
+    (when-let [op (converter content-type)]
+      (op content))
     (catch Exception e (errorf "ERROR: preview to-buffered-image failed to read content type: %s, error: %s" content-type e))))
 
-(defn try-create-preview-input-stream
+(defn create-preview
   "Tries to create preview image IF content type can be processed to image by JAI or apache.pdfbox. Retuns nil on fail"
   [content content-type]
   (when-let [image (to-buffered-image content content-type)]
     (buffered-image-to-input-stream (scale-image image))))
+
+(defn placeholder-image [] (ByteArrayInputStream. (byte-array 0)))
