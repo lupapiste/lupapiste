@@ -14,6 +14,8 @@
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.verdict :as verdict]
             [lupapalvelu.user :as user]
+            [lupapalvelu.application :as application]
+            [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
             [lupapalvelu.xml.krysp.reader :as krysp-reader]))
 
@@ -23,13 +25,43 @@
 
 (defn do-check-for-verdict [{application :application :as command}]
   {:pre [(every? command [:application :user :created])]}
-  (when-let [app-xml (krysp-fetch/get-application-xml application :application-id)]
+  (if-let [app-xml (krysp-fetch/get-application-xml application :application-id)]
+
     (or
       (let [validator-fn (permit/get-verdict-validator (permit/permit-type application))]
         (validator-fn app-xml))
       (let [updates (verdict/find-verdicts-from-xml command app-xml)]
         (update-application command updates)
-        (ok :verdicts (get-in updates [$set :verdicts]) :tasks (get-in updates [$set :tasks]))))))
+        (ok :verdicts (get-in updates [$set :verdicts]) :tasks (get-in updates [$set :tasks]))))
+
+    ;; Trimble writes verdict for tyonjohtaja/suunnittelija applications to their link permits.
+    (let [application-op-name (-> application :primaryOperation :name)]
+      (when (#{"tyonjohtajan-nimeaminen-v2" "tyonjohtajan-nimeaminen" "suunnittelijan-nimeaminen"} application-op-name)
+        (let [application (meta-fields/enrich-with-link-permit-data application)
+              link-permit (application/get-link-permit-app application)
+              link-permit-xml (krysp-fetch/get-application-xml link-permit :application-id)
+              application-type (cond
+                                 (or (= "tyonjohtajan-nimeaminen" application-op-name) (= "tyonjohtajan-nimeaminen-v2" application-op-name)) "tyonjohtaja"
+                                 (= "suunnittelijan-nimeaminen" application-op-name) "suunnittelija")
+              doc-name-mapping {"tyonjohtajan-nimeaminen"    "tyonjohtaja"
+                                "tyonjohtajan-nimeaminen-v2" "tyonjohtaja-v2"
+                                "suunnittelijan-nimeaminen"  "suunnittelija"}
+              doc-name (doc-name-mapping application-op-name)
+              target-kuntaRoolikoodi (some-> application-op-name
+                                       doc-name-mapping
+                                       ((partial domain/get-document-by-name application))
+                                       :data :kuntaRoolikoodi :value)
+              ]
+        (when (and link-permit-xml application-type target-kuntaRoolikoodi)
+          (or
+           (krysp-reader/tj-suunnittelija-verdicts-validator link-permit-xml application-type target-kuntaRoolikoodi)
+           ;;
+           ;; TODO: Ota selvaa, mita paatokseen pitaa tulla, vrt. verdict/find-verdicts-from-xml
+           ;;
+           #_(let [updates (verdict/find-tj-suunnittelija-verdicts-from-xml command link-permit-xml)]
+              (update-application command updates)
+              (ok :verdicts (get-in updates [$set :verdicts]) :tasks (get-in updates [$set :tasks])))
+           )))))))
 
 (notifications/defemail :application-verdict
   {:subject-key    "verdict"

@@ -1,0 +1,1 @@
+info.tj-suunnittelija-paatos-details-missing: Päätöksen hakeminen epäonnistui: päätöksen tyyppi tai päivämäärä puuttuu taustajärjestelmässä.

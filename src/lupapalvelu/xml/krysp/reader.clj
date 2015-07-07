@@ -422,6 +422,60 @@
               :poytakirjat    (seq poytakirjat)})))
     (select xml-without-ns [:paatostieto :Paatos])))
 
+
+(defn- ->paatos-osapuoli [path-key osapuoli-xml-without-ns]
+  (-> (cr/all-of osapuoli-xml-without-ns path-key)
+    (cr/convert-keys-to-timestamps [:paatosPvm])))
+
+(defn- party-with-paatos-data [osapuolet]
+  (some
+    #(when (and
+             (:paatosPvm %)
+             (#{"hyv\u00e4ksytty" "hyl\u00e4tty" "ilmoitus hyv\u00e4ksytty"} (:paatostyyppi %)))
+       (println "\n party-with-paatos-data, paatos OK \n")
+       %)
+    osapuolet))
+
+(def- osapuoli-path-key-mapping
+  {"tyonjohtaja"   {:path [:osapuolettieto :Osapuolet :tyonjohtajatieto :Tyonjohtaja]
+                    :key :tyonjohtajaRooliKoodi}
+   "suunnittelija" {:path [:osapuolettieto :Osapuolet :suunnittelijatieto :Suunnittelija]
+                    :key :suunnittelijaRoolikoodi}})
+
+(defn tj-suunnittelija-verdicts-validator [xml osapuoli-type kuntaRoolikoodi]
+  {:pre [xml (#{"tyonjohtaja" "suunnittelija"} osapuoli-type) kuntaRoolikoodi]}
+  (let [osapuoli-path (:path (osapuoli-path-key-mapping osapuoli-type))
+        osapuoli-key (last osapuoli-path)
+        kuntaRoolikoodi-key (:key (osapuoli-path-key-mapping osapuoli-type))
+        osapuolet (->> (select (cr/strip-xml-namespaces xml) osapuoli-path)
+                    (map (partial ->paatos-osapuoli osapuoli-key))
+                    (filter #(= kuntaRoolikoodi (get % kuntaRoolikoodi-key))))
+        osapuoli (party-with-paatos-data osapuolet)
+        paatospvm  (:paatosPvm osapuoli)
+        timestamp-1-day-from-now (util/get-timestamp-from-now :day 1)]
+    (cond
+      (not (seq osapuolet))                  (fail :info.no-verdicts-found-from-backend)
+      (not (seq osapuoli))                   (fail :info.tj-suunnittelija-paatos-details-missing)
+      (< timestamp-1-day-from-now paatospvm) (fail :info.paatos-future-date))))
+
+(defn ->tj-suunnittelija-verdicts [xml-without-ns osapuoli-type kuntaRoolikoodi]
+  ;;
+  ;; TODO: Tee yllaolevan validaattorin mukaan, kuten ->standard-verdicts:ssakin.
+  ;;       Katso myos verdict/find-verdicts-from-xml.
+  ;;
+  #_(map (fn [osapuolet-xml-without-ns]
+        (let [poytakirjat (map ->paatospoytakirja (select osapuolet-xml-without-ns [:poytakirja]))
+              poytakirja (poytakirja-with-paatos-data poytakirjat) ]
+          (when (and poytakirja (> (now) (:paatospvm poytakirja)))
+            {:lupamaaraykset (->lupamaaraukset osapuolet-xml-without-ns)
+             :paivamaarat    (get-pvm-dates osapuolet-xml-without-ns
+                               [:aloitettava :lainvoimainen :voimassaHetki :raukeamis :anto :viimeinenValitus :julkipano])
+             :poytakirjat    (seq poytakirjat)})))
+   (select xml-without-ns [:osapuolettieto :Osapuolet])))
+
+
+
+
 (defn- application-state [xml-without-ns]
   (->> (select xml-without-ns [:Kasittelytieto])
     (map (fn [kasittelytieto] (-> (cr/all-of kasittelytieto) (cr/convert-keys-to-timestamps [:muutosHetki]))))
