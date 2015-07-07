@@ -548,9 +548,7 @@
                            (->function)
                            (cleanup)
                            (filter seq))]
-        (if (seq verdicts)
-          (assoc verdict-model :paatokset verdicts)
-          verdict-model)))
+        (util/assoc-when verdict-model :paatokset verdicts)))
     (enlive/select (cr/strip-xml-namespaces xml) case-elem-selector)))
 
 (defn- buildings-summary-for-application [xml]
