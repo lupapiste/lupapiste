@@ -1057,6 +1057,16 @@
                                    status)))
       {"statements.status" {"$in" ["yes" "no" "condition"]}}))
 
+(defmigration location-to-array
+  {:apply-when (pos? (mongo/count :applications {:location {$type 3}}))}
+  (reduce + 0
+          (for [collection [:applications :submitted-applications]
+                application (mongo/select collection {} {:location 1})]
+            (mongo/update-n collection {:_id (:id application)} {$set {:location (reduce (fn [acc [_ v]]
+                                                                                           (conj acc v))
+                                                                                         []
+                                                                                         (:location application))}}))))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"
