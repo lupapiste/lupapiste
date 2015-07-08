@@ -228,7 +228,7 @@
                                                                         (:name (:primaryOperation application)))))))
 
         (fact "Sijainti"
-          (sxml/get-text xml-parsed [:UusiAsia :Sijainti :Sijaintipiste]) => (str (get-in application [:location :x]) " " (get-in application [:location :y])))
+          (sxml/get-text xml-parsed [:UusiAsia :Sijainti :Sijaintipiste]) => (str (get-in application [:location 0]) " " (get-in application [:location 1])))
         (fact "Kiinteistotunnus"
           (sxml/get-text xml-parsed [:UusiAsia :Kiinteistotunnus]) => (p/to-human-readable-property-id (:propertyId application)))))))
 
