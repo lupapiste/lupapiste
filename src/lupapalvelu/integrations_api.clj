@@ -1,7 +1,7 @@
 (ns lupapalvelu.integrations-api
   "API for commands/functions working with integrations (ie. KRYSP, Asianhallinta)"
   (:require [taoensso.timbre :as timbre :refer [infof error]]
-            [monger.operators :refer [$in $set $push]]
+            [monger.operators :refer [$in $set $push $elemMatch]]
             [lupapalvelu.action :refer [defcommand update-application notify] :as action]
             [lupapalvelu.application :as application]
             [lupapalvelu.application-meta-fields :as meta-fields]
@@ -156,6 +156,22 @@
       all-data
       (select-keys all-data (keys krysp-reader/empty-building-ids)))))
 
+(defn- update-to-defaults
+  "Mongo updates given document's data to default values. Given 'data' is persisted."
+  [application doc-id schema & [data]]
+  (let [update-data (util/deep-merge
+                      (tools/create-document-data schema tools/default-values)
+                      (when (and data (map? data))
+                        (tools/wrapped data)))
+        validation-results (model/validate application {:data update-data :id doc-id} schema)]
+    (if-not (model/has-errors? validation-results)
+      (mongo/update-by-query
+        :applications
+        {"documents" {$elemMatch {:id doc-id}}}
+        {$set
+         {"documents.$.data" update-data}})
+      (fail! :document-would-be-in-error-after-update :results validation-results))))
+
 (defcommand merge-details-from-krysp
   {:parameters [id documentId path buildingId overwrite collection]
    :input-validators [commands/validate-collection
@@ -168,17 +184,19 @@
   (if-let [{url :url} (organization/get-krysp-wfs application)]
     (let [document     (commands/by-id application collection documentId)
           schema       (schemas/get-schema (:schema-info document))
-          clear-ids?   (or (ss/blank? buildingId) (= "other" buildingId))
-          base-updates (concat
-                         (commands/->model-updates [[path buildingId]])
-                         (tools/path-vals
-                           (if clear-ids?
-                             krysp-reader/empty-building-ids
-                             (load-building-data url propertyId buildingId overwrite))))
-          ; Path should exist in schema!
-          updates      (filter (fn [[path _]] (model/find-by-name (:body schema) path)) base-updates)]
-      (infof "merging data into %s %s" (get-in document [:schema-info :name]) (:id document))
-      (commands/persist-model-updates application collection document updates created :source "krysp")
+          clear-ids?   (or (ss/blank? buildingId) (= "other" buildingId))]
+      (if clear-ids?
+        (do
+          (infof "setting default data into %s %s" (get-in document [:schema-info :name]) (:id document))
+          (update-to-defaults application documentId schema {(keyword path) buildingId}))
+        (let [base-updates (concat
+                             (commands/->model-updates [[path buildingId]])
+                             (tools/path-vals
+                               (load-building-data url propertyId buildingId overwrite)))
+              ; Path should exist in schema!
+              updates      (filter (fn [[path _]] (model/find-by-name (:body schema) path)) base-updates)]
+          (infof "merging data into %s %s" (get-in document [:schema-info :name]) (:id document))
+          (commands/persist-model-updates application collection document updates created :source "krysp")))
       (ok))
     (fail :error.no-legacy-available)))
 
