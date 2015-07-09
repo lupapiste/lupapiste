@@ -24,7 +24,7 @@
     self.data = ko.observable();
     self.application = ko.observable();
 
-    self.statuses = ko.observable([]);
+    self.statuses = ko.observableArray([]);
     self.selectedStatus = ko.observable();
     self.text = ko.observable();
     self.submitting = ko.observable(false);
@@ -55,6 +55,12 @@
       return self;
     };
 
+    var sortStatementValues = function(left, right) {
+      var leftLoc = loc(["statement", left]);
+      var rightLoc = loc(["statement", right]);
+      return leftLoc == rightLoc ? 0 : (leftLoc < rightLoc ? -1 : 1);
+    };
+
     self.refresh = function(application) {
       self.application(ko.mapping.fromJS(application));
       var statement = application.statements && _.find(application.statements, function(statement) { return statement.id === statementId; });
@@ -70,7 +76,10 @@
         if (authorizationModel.ok("get-possible-statement-statuses")) {
           ajax
             .query("get-possible-statement-statuses", {id: applicationId})
-            .success(function(resp) { self.statuses(resp.data); })
+            .success(function(resp) {
+              self.statuses(resp.data);
+              self.statuses.sort(sortStatementValues);
+            })
             .call();
         } else if (statement.status) {
           self.statuses([statement.status]);
