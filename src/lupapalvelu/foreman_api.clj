@@ -24,8 +24,8 @@
   (let [original-open? (util/pos? (:opened application))
         foreman-app (-> (application/do-create-application
                          (assoc command :data {:operation "tyonjohtajan-nimeaminen-v2"
-                                               :x (-> application :location :x)
-                                               :y (-> application :location :y)
+                                               :x (-> application :location first)
+                                               :y (-> application :location second)
                                                :address (:address application)
                                                :propertyId (:propertyId application)
                                                :municipality (:municipality application)

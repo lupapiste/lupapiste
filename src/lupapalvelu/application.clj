@@ -7,6 +7,7 @@
             [clojure.zip :as zip]
             [lupapalvelu.action :as action]
             [lupapalvelu.application-meta-fields :as meta-fields]
+            [lupapalvelu.application-utils :refer [location->object]]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.company :as c]
             [lupapalvelu.document.model :as model]
@@ -105,7 +106,7 @@
     (update-in application [:documents] (partial map doc-mapper))))
 
 (defn ->location [x y]
-  {:x (util/->double x) :y (util/->double y)})
+  [(util/->double x) (util/->double y)])
 
 (defn get-link-permit-app [{:keys [linkPermitData]}]
   "Return associated (first lupapistetunnus) link-permit application."
@@ -233,7 +234,8 @@
        process-foreman-v2
        (process-documents user)
        process-tasks
-       (enrich-docs-disabled-flag user)))
+       (enrich-docs-disabled-flag user)
+       location->object))
 
 ;;
 ;; Application creation

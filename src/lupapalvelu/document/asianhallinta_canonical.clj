@@ -104,7 +104,7 @@
     {:Viitelupa (map ua-get-viitelupa linkPermitData)}))
 
 (defn- ua-get-sijaintipiste [{:keys [location]}]
-  {:Sijaintipiste (str (:x location) " " (:y location))})
+  {:Sijaintipiste (str (first location) " " (second location))})
 
 (defn- ua-get-liite [attachment link]
   "Return attachment in canonical format, with provided link as LinkkiLiitteeseen"
