@@ -162,7 +162,7 @@
      :municipality (address-part feature :oso:kuntatunnus)
      :name {:fi (address-part feature :oso:kuntanimiFin)
             :sv (address-part feature :oso:kuntanimiSwe)}
-     :location [x y]}))
+     :location {:x x :y y}}))
 
 (defn feature-to-simple-address-string [feature]
   (let [{street :street number :number {fi :fi sv :sv} :name} (feature-to-address feature)]
