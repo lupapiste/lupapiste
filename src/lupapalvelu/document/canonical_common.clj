@@ -696,6 +696,6 @@
   (let [app-location-info {:Sijainti {:osoite {:yksilointitieto (:id application)
                                                :alkuHetki (util/to-xml-datetime (now))
                                                :osoitenimi {:teksti (:address application)}}
-                                      :piste {:Point {:pos (str (:x (:location application)) " " (:y (:location application)))}}}}
+                                      :piste {:Point {:pos (str (first (:location application)) " " (second (:location application)))}}}}
         drawings (drawings-as-krysp (:drawings application))]
     (cons app-location-info drawings)))

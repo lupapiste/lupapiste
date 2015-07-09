@@ -275,11 +275,11 @@
                         {$set {:modified created
                                :drawings drawings}})))
 
-(defn- make-marker-contents [id lang app]
+(defn- make-marker-contents [id lang {:keys [location] :as app}]
   (merge
     {:id        (:id app)
      :title     (:title app)
-     :location  (:location app)
+     :location  {:x (first location) :y (second location)}
      :operation (->> (:primaryOperation app) :name (i18n/localize lang "operations"))
      :authName  (-> app
                     (domain/get-auths-by-role :owner)
@@ -312,7 +312,7 @@
                                            [:title :auth :location :primaryOperation :secondaryOperations :comments])
 
                 same-location-irs (filter
-                                    #(and (== x (-> % :location :x)) (== y (-> % :location :y)))
+                                    #(and (== x (-> % :location first)) (== y (-> % :location second)))
                                     inforequests)
 
                 inforequests (remove-irs-by-id inforequests same-location-irs)
@@ -590,8 +590,8 @@
 
   (let [continuation-app (a/do-create-application
                            (assoc command :data {:operation    "ya-jatkoaika"
-                                                 :x            (-> application :location :x)
-                                                 :y            (-> application :location :y)
+                                                 :x            (-> application :location first)
+                                                 :y            (-> application :location second)
                                                  :address      (:address application)
                                                  :propertyId   (:propertyId application)
                                                  :municipality (:municipality application)
