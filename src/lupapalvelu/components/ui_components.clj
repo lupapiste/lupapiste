@@ -99,6 +99,8 @@
                     :js ["underscore.string.min.js" "underscore.string.init.js"]}
    :moment         {:js ["moment.min.js"]}
    :open-layers    {:js ["openlayers-2.13_20140619.min.lupapiste.js"]}
+   :leaflet        {:js ["leaflet.js"]
+                    :css ["leaflet.css"]}
    :stickyfill     {:js ["stickyfill.min.js"]}
 
    ;; Init can also be used as a standalone lib, see web.clj
@@ -122,12 +124,12 @@
                        :js ["expanded-content.js"]}
 
    :common       {:depends [:init :jquery :jquery-upload :knockout :underscore :moment :i18n :selectm
-                            :expanded-content :mockjax :open-layers :stickyfill]
+                            :expanded-content :mockjax :open-layers :stickyfill :leaflet]
                   :js ["register-components.js" "util.js" "event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js"
                        "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "perfmon.js" "features.js"
                        "statuses.js" "statusmodel.js" "authorization.js" "vetuma.js" "metadata.js"]}
 
-   :common-html  {:depends [:selectm-html]
+   :common-html  {:depends [:selectm-html :leaflet]
                   :css [(partial main-style-file "common-html/css/main.css" "common-html/sass/main.scss") "jquery-ui.css"]
                   :html ["404.html" "footer.html"]}
 
@@ -331,6 +333,7 @@
 
    :welcome {:depends [:welcome-app :login :register :register-company :link-account :debug :user-menu :screenmessages :password-reset :analytics]
              :js ["company-user.js"]
+             
              :html ["index.html" "login.html" "company-user.html"]}
 
    :oskari  {:css ["oskari.css"]}

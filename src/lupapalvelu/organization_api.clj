@@ -1,11 +1,26 @@
 (ns lupapalvelu.organization-api
+  (:import [org.geotools.data FileDataStoreFinder DataUtilities]
+           [org.geotools.geojson.feature FeatureJSON]
+           [org.geotools.feature.simple SimpleFeatureBuilder]
+           [org.opengis.feature.simple SimpleFeature]
+           [org.geotools.geometry.jts JTS]
+           [org.geotools.referencing CRS]
+           [org.geotools.referencing.crs DefaultGeographicCRS]
+           [java.util ArrayList]
+           [java.io File])
+
   (:require [taoensso.timbre :as timbre :refer [trace debug debugf info warn error errorf fatal]]
             [clojure.string :as s]
             [monger.operators :refer :all]
-            [sade.core :refer [ok fail fail!]]
+            [noir.core :refer [defpage]]
+            [noir.response :as resp]
+            [noir.request :as request]
+            [sade.core :refer [ok fail fail! now]]
             [sade.util :as util]
+            [sade.env :as env]
             [lupapalvelu.action :refer [defquery defcommand non-blank-parameters vector-parameters boolean-parameters number-parameters email-validator]]
             [lupapalvelu.xml.krysp.reader :as krysp]
+            [lupapalvelu.mime :as mime]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.user :as user]
             [lupapalvelu.permit :as permit]
@@ -15,8 +30,11 @@
             [camel-snake-kebab :as csk]
             [sade.strings :as ss]
             [sade.property :as p]
-            [lupapalvelu.logging :as logging]))
-
+            [lupapalvelu.logging :as logging]
+            [lupapalvelu.xml.asianhallinta.verdict :as ah-verdict]
+            [me.raynes.fs :as fs]
+            [clojure.data.json :as json]
+            [slingshot.slingshot :refer [try+]]))
 ;;
 ;; local api
 ;;
@@ -373,3 +391,62 @@
                  organizationId)]
     (ok :tags (:tags (o/get-organization org-id)))
     (fail! :error.organization-not-found)))
+
+(defn- transform-coordinates-to-wgs84 [collection]
+  "Convert feature coordinates in collection to WGS84 which is supported by mongo 2dsphere index"
+  (let [schema (.getSchema collection)
+        crs (.getCoordinateReferenceSystem schema)
+        transform (CRS/findMathTransform crs DefaultGeographicCRS/WGS84 true)
+        iterator (.features collection)
+        feature (when (.hasNext iterator)
+                  (.next iterator))
+        list (ArrayList.)
+        _ (loop [feature (cast SimpleFeature feature)]
+            (when feature
+              (let [transformed-geometry (JTS/transform (.getDefaultGeometry feature) transform)
+                    feature-type (DataUtilities/createSubType (.getFeatureType feature) nil DefaultGeographicCRS/WGS84) ; copy feature type with new crs
+                    builder (SimpleFeatureBuilder. feature-type) ; build new feature with changed crs
+                    _ (.init builder feature) ; init builder with original feature
+                    transformed-feature (.buildFeature builder (.getID feature))
+                    _ (.setDefaultGeometry transformed-feature transformed-geometry)]
+                (.add list transformed-feature)))
+            (when (.hasNext iterator)
+              (recur (.next iterator))))]
+    (.close iterator)
+    (DataUtilities/collection list)))
+
+(defpage [:post "/api/upload/organization-area"] {[{:keys [tempfile filename content-type size]}] :files}
+  (let [user (user/current-user (request/ring-request))
+        org-id (user/authority-admins-organization-id user)
+        filename (mime/sanitize-filename filename)
+        file-info {:file-name    filename
+                   :content-type content-type
+                   :size         size
+                   :organization org-id
+                   :created      (now)}]
+
+    (try+
+      (when-not (= content-type "application/zip")
+        (fail! :error.illegal-shapefile))
+
+      (let [target-dir (ah-verdict/unzip (.getPath tempfile) (fs/temp-dir "area"))
+            shape-filename (str (first (ss/split filename #".zip")) ".shp")
+            shape-file (new File (str target-dir env/file-separator shape-filename))
+            data-store (FileDataStoreFinder/getDataStore shape-file)
+            source (.getFeatureSource data-store)
+            collection (.getFeatures source)
+            new-collection (transform-coordinates-to-wgs84 collection)
+            areas (json/read-str (.toString (FeatureJSON.) new-collection))]
+        (o/update-organization org-id {$set {:areas areas}})
+        (.dispose data-store)
+        (->> (assoc file-info :areas areas :ok true)
+             (resp/json)
+             (resp/content-type "application/json")
+             (resp/status 200)))
+      (catch [:sade.core/type :sade.core/fail] {:keys [text] :as all}
+        (resp/status 400 text))
+      (catch Object _
+        (resp/status 400 :error.shapefile-parsing-failed))
+      (finally
+        ;TODO dispose shape-file here
+        ))))

@@ -1,6 +1,6 @@
 (defproject lupapalvelu "0.1.0-SNAPSHOT"
   :description "lupapalvelu"
-  :dependencies [[org.clojure/clojure "1.7.0-RC1"]
+  :dependencies [[org.clojure/clojure "1.7.0"]
                  [org.clojure/data.zip "0.1.1"]
                  [org.clojure/data.xml "0.0.8"]
                  [org.clojure/tools.nrepl "0.2.6"]
@@ -39,7 +39,6 @@
                  [fi.sito/oskari "0.9.44"]
                  [slingshot "0.10.3"]
                  [com.google.zxing/javase "2.2"]
-                 [org.geotoolkit/geotk-referencing "3.20-geoapi-3.0"]
                  [prismatic/schema "0.2.4"]
                  [cljts "0.2.0" :exclusions [xerces/xercesImpl]]
                  ; batik-js includes a built-in rhino, which breaks yuicompressor (it too has rhino built in)
@@ -53,7 +52,14 @@
                  [scss-compiler "0.1.2"]
                  [org.clojure/core.memoize "0.5.7"]
                  [org.apache.pdfbox/pdfbox "1.8.9"]
-                 [lupapiste/commons "0.5.0"]]
+                 [com.levigo.jbig2/levigo-jbig2-imageio "1.6.3"]
+                 [org.geotools/gt-main "13.1"]
+                 [org.geotools/gt-shapefile "13.1"]
+                 [org.geotools/gt-geojson "13.1"]
+                 [org.geotools/gt-referencing "13.1"]
+                 [org.geotools/gt-epsg-wkt "13.1"]
+                 [org.clojure/data.json "0.2.6"]
+                 [lupapiste/commons "0.5.2-SNAPSHOT"]]
   :profiles {:dev {:dependencies [[midje "1.6.3"]
                                   [ring-mock "0.1.5"]
                                   [clj-ssh "0.5.7"]
@@ -80,7 +86,10 @@
   :repositories [["solita-archiva" {:url "http://mvn.solita.fi/archiva/repository/solita"
                                     :checksum :ignore}]
                  ["mygrid-repository" {:url "http://www.mygrid.org.uk/maven/repository"
-                                       :snapshots false}]]
+                                       :snapshots false}]
+                 ["osgeo" {:url "http://download.osgeo.org/webdav/geotools"}]
+                 ["com.levigo.jbig2" {:url "http://jbig2-imageio.googlecode.com/svn/maven-repository"
+                                      :snapshots false}]]
   :plugin-repositories [["solita-archiva" {:url "http://mvn.solita.fi/archiva/repository/solita"
                                            :checksum :ignore}]]
   :aliases {"integration" ["with-profile" "dev,itest" "midje"]

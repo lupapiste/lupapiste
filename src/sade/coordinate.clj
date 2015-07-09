@@ -1,9 +1,9 @@
 (ns sade.coordinate
   (:require [taoensso.timbre :as timbre :refer [debug info warn error]]
             [clojure.string :as s])
-  (:import [org.geotoolkit.referencing.crs DefaultGeographicCRS]
-           [org.geotoolkit.referencing CRS]
-           [org.geotoolkit.geometry GeneralDirectPosition]))
+  (:import [org.geotools.referencing.crs DefaultGeographicCRS]
+           [org.geotools.referencing CRS]
+           [org.geotools.geometry GeneralDirectPosition]))
 
 (defn round-to [n acc]
   (.setScale n acc BigDecimal/ROUND_HALF_UP))

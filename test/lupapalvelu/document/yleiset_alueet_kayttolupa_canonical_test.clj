@@ -167,7 +167,7 @@
     (fact "Sijainti-yksilointitieto" Sijainti-yksilointitieto => (:id kayttolupa-application))
     (fact "Sijainti-alkuHetki" Sijainti-alkuHetki => (partial xml-datetime-is-roughly? (util/to-xml-datetime (now))))
     (fact "Sijainti-osoitenimi" Sijainti-osoitenimi => (:address kayttolupa-application))
-    (fact "Sijainti-piste-xy" Sijainti-piste => (str (-> kayttolupa-application :location :x) " " (-> kayttolupa-application :location :y)))
+    (fact "Sijainti-piste-xy" Sijainti-piste => (str (-> kayttolupa-application :location first) " " (-> kayttolupa-application :location second)))
     (fact "PisteSijanti" PisteSijanti => {:piste {:Point {:pos "530851.15649413 6972373.1564941"}}
                                           :nimi "Piste"
                                           :kuvaus "Piste jutska"

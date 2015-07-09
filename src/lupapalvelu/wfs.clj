@@ -162,8 +162,7 @@
      :municipality (address-part feature :oso:kuntatunnus)
      :name {:fi (address-part feature :oso:kuntanimiFin)
             :sv (address-part feature :oso:kuntanimiSwe)}
-     :location {:x x
-                :y y}}))
+     :location {:x x :y y}}))
 
 (defn feature-to-simple-address-string [feature]
   (let [{street :street number :number {fi :fi sv :sv} :name} (feature-to-address feature)]
@@ -438,7 +437,8 @@
 ;; Raster images:
 ;;
 (defn raster-images [request service]
-  (let [layer (get-in request [:params :LAYER])]
+  (let [layer (or (get-in request [:params :LAYER])
+                  (get-in request [:params :layer]))]
     (case service
       "nls" (http/get "https://ws.nls.fi/rasteriaineistot/image"
               {:query-params (:params request)
@@ -456,10 +456,10 @@
                               "kiinteistotunnukset" "kiinteisto")
                    wmts-url (str "https://karttakuva.maanmittauslaitos.fi/" url-part "/wmts")]
                (http/get wmts-url
-                 {:query-params (:params request)
-                  :headers {"accept-encoding" (get-in request [:headers "accept-encoding"])}
-                  :basic-auth [username password]
-                  :as :stream}))
+                         {:query-params (:params request)
+                          :headers {"accept-encoding" (get-in request [:headers "accept-encoding"])}
+                          :basic-auth [username password]
+                          :as :stream}))
       "plandocument" (let [id (get-in request [:params :id])]
                        (assert (ss/numeric? id))
                        (http/get (str "http://194.28.3.37/maarays/" id "x.pdf")

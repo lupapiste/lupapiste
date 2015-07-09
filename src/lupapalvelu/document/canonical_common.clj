@@ -70,9 +70,18 @@
 (defn documents-without-blanks [{documents :documents}]
   (walk/postwalk empty-strings-to-nil documents))
 
-(def- puolto-mapping {:condition "ehdoilla"
-                      :no "ei puolla"
-                      :yes "puoltaa"})
+(def- puolto-mapping {:ehdoilla "ehdoilla"
+                      :ei-puolla "ei puolla"
+                      :puoltaa "puoltaa"
+                      :ei-huomautettavaa "ei huomautettavaa"
+                      :ehdollinen "ehdollinen"
+                      :puollettu "puollettu"
+                      :ei-puollettu "ei puollettu"
+                      :ei-lausuntoa "ei lausuntoa"
+                      :lausunto "lausunto"
+                      :kielteinen "kielteinen"
+                      :palautettu "palautettu"
+                      :poydalle "p\u00f6yd\u00e4lle"})
 
 (defn- get-statement [statement]
   (let [lausunto {:Lausunto
@@ -687,6 +696,6 @@
   (let [app-location-info {:Sijainti {:osoite {:yksilointitieto (:id application)
                                                :alkuHetki (util/to-xml-datetime (now))
                                                :osoitenimi {:teksti (:address application)}}
-                                      :piste {:Point {:pos (str (:x (:location application)) " " (:y (:location application)))}}}}
+                                      :piste {:Point {:pos (str (first (:location application)) " " (second (:location application)))}}}}
         drawings (drawings-as-krysp (:drawings application))]
     (cons app-location-info drawings)))

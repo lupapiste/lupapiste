@@ -99,7 +99,7 @@
   {:pre [krysp-version]}
   (let [ya_to_krysp_2_1_2 {:tag :YleisetAlueet
                            :ns "yak"
-                           :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation "yleisenalueenkaytonlupahakemus" "2.1.2")
+                           :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation :YA "2.1.2")
                                          :xmlns:yak "http://www.paikkatietopalvelu.fi/gml/yleisenalueenkaytonlupahakemus"}
                                         mapping-common/common-namespaces)
 
@@ -156,7 +156,7 @@
                                                                         ;:tag :tunniste
                                                                         }]}]}]}]}]}
         ya_to_krysp_2_1_3 (-> ya_to_krysp_2_1_2 (assoc-in [:attr :xsi:schemaLocation]
-                                                          (mapping-common/schemalocation "yleisenalueenkaytonlupahakemus" "2.1.3"))
+                                                          (mapping-common/schemalocation :YA "2.1.3"))
                             (update-in [:child] mapping-common/update-child-element
                                        [:yleinenAlueAsiatieto lupa-name-key :maksajatieto :Maksaja]
                                        {:tag :Maksaja
@@ -165,14 +165,18 @@
                                        [:yleinenAlueAsiatieto lupa-name-key :osapuolitieto :Osapuoli :yritystieto :Yritys]
                                        {:tag :Yritys :child mapping-common/yritys-child_213}))
         ya_to_krysp_2_2_0 (-> ya_to_krysp_2_1_3 (assoc-in [:attr :xsi:schemaLocation]
-                                                  (mapping-common/schemalocation "yleisenalueenkaytonlupahakemus" "2.2.0"))
+                                                  (mapping-common/schemalocation :YA "2.2.0"))
                             (update-in [:child] mapping-common/update-child-element
                                        [:yleinenAlueAsiatieto lupa-name-key :sijaintitieto]
-                                       {:tag :sijaintitieto :child [mapping-common/sijantiType_215]}))]
+                                       {:tag :sijaintitieto :child [mapping-common/sijantiType_215]}))
+        ya_to_krysp_2_2_1 (-> ya_to_krysp_2_2_0
+                            (assoc-in [:attr :xsi:schemaLocation]
+                              (mapping-common/schemalocation :YA "2.2.1")))]
     (case (name krysp-version)
       "2.1.2" ya_to_krysp_2_1_2
       "2.1.3" ya_to_krysp_2_1_3
       "2.2.0" ya_to_krysp_2_2_0
+      "2.2.1" ya_to_krysp_2_2_1
       (throw (IllegalArgumentException. (str "Unsupported KRYSP version " krysp-version))))))
 
 (defn- add-statement-attachments [lupa-name-key canonical statement-attachments]

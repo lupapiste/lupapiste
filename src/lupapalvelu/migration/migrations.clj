@@ -1045,6 +1045,26 @@
         doc))
     {"documents" {$elemMatch {"schema-info.name" "maksaja", "schema-info.subtype" {$exists false}}}}))
 
+(defmigration convert-statement-values
+  {:apply-when (pos? (mongo/count :applications {"statements.status" {"$in" ["yes" "no" "condition"]}}))}
+  (update-applications-array
+      :statements
+      (fn [{status :status :as statement}]
+        (assoc statement :status (case status
+                                   "yes"       "puoltaa"
+                                   "no"        "ei-puolla"
+                                   "condition" "ehdoilla"
+                                   status)))
+      {"statements.status" {"$in" ["yes" "no" "condition"]}}))
+
+(defmigration location-to-array
+  {:apply-when (pos? (mongo/count :applications {:location {$type 3}}))}
+  (reduce + 0
+          (for [collection [:applications :submitted-applications]
+                application (mongo/select collection {} {:location 1})]
+            (let [{:keys [x y]} (:location application)]
+              (mongo/update-n collection {:_id (:id application)} {$set {:location [x y]}})))))
+
 ;;
 ;; ****** NOTE! ******
 ;;  When you are writing a new migration that goes through the collections "Applications" and "Submitted-applications"

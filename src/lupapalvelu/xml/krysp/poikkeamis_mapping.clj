@@ -58,7 +58,7 @@
 (def poikkeamis_to_krysp_212
   {:tag :Popast
    :ns "ppst"
-   :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation "poikkeamispaatos_ja_suunnittelutarveratkaisu" "2.1.2")
+   :attr (merge {:xsi:schemaLocation (mapping-common/schemalocation :P "2.1.2")
                  :xmlns:ppst "http://www.paikkatietopalvelu.fi/gml/poikkeamispaatos_ja_suunnittelutarveratkaisu"}
            mapping-common/common-namespaces)
    :child [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}
@@ -67,21 +67,21 @@
 
 (def poikkeamis_to_krysp_213
   (-> poikkeamis_to_krysp_212
-    (assoc-in [:attr :xsi:schemaLocation] (mapping-common/schemalocation "poikkeamispaatos_ja_suunnittelutarveratkaisu" "2.1.3"))
+    (assoc-in [:attr :xsi:schemaLocation] (mapping-common/schemalocation :P "2.1.3"))
     (assoc :child [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}
                    {:tag :poikkeamisasiatieto :child [{:tag :Poikkeamisasia :child abstract-poikkeamistype-213}]}
                    {:tag :suunnittelutarveasiatieto :child [{:tag :Suunnittelutarveasia :child abstract-poikkeamistype-213}]}])))
 
 (def poikkeamis_to_krysp_214
   (-> poikkeamis_to_krysp_213
-    (assoc-in [:attr :xsi:schemaLocation] (mapping-common/schemalocation "poikkeamispaatos_ja_suunnittelutarveratkaisu" "2.1.4"))
+    (assoc-in [:attr :xsi:schemaLocation] (mapping-common/schemalocation :P "2.1.4"))
     (assoc :child [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}
                    {:tag :poikkeamisasiatieto :child [{:tag :Poikkeamisasia :child abstract-poikkeamistype-214}]}
                    {:tag :suunnittelutarveasiatieto :child [{:tag :Suunnittelutarveasia :child abstract-poikkeamistype-214}]}])))
 
 (def poikkeamis_to_krysp_215
   (-> poikkeamis_to_krysp_214
-    (assoc-in [:attr :xsi:schemaLocation] (mapping-common/schemalocation "poikkeamispaatos_ja_suunnittelutarveratkaisu" "2.1.5"))
+    (assoc-in [:attr :xsi:schemaLocation] (mapping-common/schemalocation :P "2.1.5"))
     (assoc :child [{:tag :toimituksenTiedot :child mapping-common/toimituksenTiedot}
                    {:tag :poikkeamisasiatieto :child [{:tag :Poikkeamisasia :child abstract-poikkeamistype-215}]}
                    {:tag :suunnittelutarveasiatieto :child [{:tag :Suunnittelutarveasia :child abstract-poikkeamistype-215}]}])))

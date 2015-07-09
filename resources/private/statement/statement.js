@@ -24,7 +24,7 @@
     self.data = ko.observable();
     self.application = ko.observable();
 
-    self.statuses = ["yes", "no", "condition"];
+    self.statuses = ko.observableArray([]);
     self.selectedStatus = ko.observable();
     self.text = ko.observable();
     self.submitting = ko.observable(false);
@@ -48,10 +48,17 @@
     self.clear = function() {
       self.data(null);
       self.application(null);
+      self.statuses([]);
       self.selectedStatus(null);
       self.text(null);
       self.dirty(false);
       return self;
+    };
+
+    var sortStatementValues = function(left, right) {
+      var leftLoc = loc(["statement", left]);
+      var rightLoc = loc(["statement", right]);
+      return leftLoc == rightLoc ? 0 : (leftLoc < rightLoc ? -1 : 1);
     };
 
     self.refresh = function(application) {
@@ -60,14 +67,22 @@
       if(statement) {
         self.data(ko.mapping.fromJS(statement));
 
-        // LUPA-482 part II
-        if (statement.status && !self.dirty()) {
-          self.selectedStatus(statement.status);
+        if (!self.dirty()) {
+          if (statement.status) self.selectedStatus(statement.status);  // LUPA-482 part II
+          if (statement.text) self.text(statement.text);
           self.dirty(false);
         }
-        if (statement.text && !self.dirty()) {
-          self.text(statement.text);
-          self.dirty(false);
+
+        if (authorizationModel.ok("get-possible-statement-statuses")) {
+          ajax
+            .query("get-possible-statement-statuses", {id: applicationId})
+            .success(function(resp) {
+              self.statuses(resp.data);
+              self.statuses.sort(sortStatementValues);
+            })
+            .call();
+        } else if (statement.status) {
+          self.statuses([statement.status]);
         }
 
       } else {
@@ -165,9 +180,10 @@
 
   repository.loaded(["statement"], function(application) {
     if (applicationId === application.id) {
-      authorizationModel.refresh(application, {statementId: statementId});
-      statementModel.refresh(application);
-      attachmentsModel.refresh(application);
+      authorizationModel.refresh(application, {statementId: statementId}, function() {
+        statementModel.refresh(application);
+        attachmentsModel.refresh(application);
+      });
     }
   });
 
