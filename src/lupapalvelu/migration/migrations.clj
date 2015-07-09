@@ -1062,10 +1062,8 @@
   (reduce + 0
           (for [collection [:applications :submitted-applications]
                 application (mongo/select collection {} {:location 1})]
-            (mongo/update-n collection {:_id (:id application)} {$set {:location (reduce (fn [acc [_ v]]
-                                                                                           (conj acc v))
-                                                                                         []
-                                                                                         (:location application))}}))))
+            (let [{:keys [x y]} (:location application)]
+              (mongo/update-n collection {:_id (:id application)} {$set {:location [x y]}})))))
 
 ;;
 ;; ****** NOTE! ******
