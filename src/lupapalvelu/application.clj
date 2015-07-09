@@ -106,7 +106,7 @@
     (update-in application [:documents] (partial map doc-mapper))))
 
 (defn ->location [x y]
-  [x y])
+  [(util/->double x) (util/->double y)])
 
 (defn get-link-permit-app [{:keys [linkPermitData]}]
   "Return associated (first lupapistetunnus) link-permit application."
