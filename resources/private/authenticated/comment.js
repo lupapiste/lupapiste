@@ -79,10 +79,6 @@ var comments = (function() {
       return doAddComment(false, true);
     };
 
-    self.isForNewAttachment = function(model) {
-      return util.getIn(model, ["target", "version"]);
-    };
-
     self.isAuthorityComment = function(model) {
       return util.getIn(model, ["user", "role"]) === "authority";
     };
@@ -97,7 +93,7 @@ var comments = (function() {
 
     self.isVisible = function(model) {
       return !self.takeAll ||
-               ((!self.isForNewAttachment(model) || self.showAttachmentComments() ) &&
+               (self.showAttachmentComments() &&
                 (!isPreparationComment(model)    || self.showPreparationComments()));
     };
   }
