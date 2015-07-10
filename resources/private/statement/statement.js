@@ -55,12 +55,6 @@
       return self;
     };
 
-    var sortStatementValues = function(left, right) {
-      var leftLoc = loc(["statement", left]);
-      var rightLoc = loc(["statement", right]);
-      return leftLoc == rightLoc ? 0 : (leftLoc < rightLoc ? -1 : 1);
-    };
-
     self.refresh = function(application) {
       self.application(ko.mapping.fromJS(application));
       var statement = application.statements && _.find(application.statements, function(statement) { return statement.id === statementId; });
@@ -77,8 +71,11 @@
           ajax
             .query("get-possible-statement-statuses", {id: applicationId})
             .success(function(resp) {
-              self.statuses(resp.data);
-              self.statuses.sort(sortStatementValues);
+              var sorted = _(resp.data)
+                .map(function(item) { return {id: item, name: loc(['statement', item])}; })
+                .sortBy("name")
+                .value();
+              self.statuses(sorted);
             })
             .call();
         } else if (statement.status) {
