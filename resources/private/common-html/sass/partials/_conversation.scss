@@ -89,9 +89,6 @@
       border-right: 12px solid transparent;
       border-top: 24px solid lighten($lp-green, 40%);
     }
-    &:nth-child(even) {
-      background-color: lighten($lp-green, 40%);
-    }
     .comment-party {
       position: relative;
       &:after {
