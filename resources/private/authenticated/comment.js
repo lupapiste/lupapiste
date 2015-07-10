@@ -14,7 +14,7 @@ var comments = (function() {
     self.processing = ko.observable();
     self.pending = ko.observable();
     self.to = ko.observable();
-    self.showAttachmentComments = ko.observable(false);
+    self.showAttachmentComments = ko.observable(true);
     self.showPreparationComments = ko.observable(false);
     self.isSelected = ko.observable();
 
