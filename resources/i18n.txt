@@ -1,2 +1,0 @@
-attachment.removed: Poistettu liite
-conversation.attachment.toggle: Näytä liitteiden kommentointi
