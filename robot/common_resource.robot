@@ -669,7 +669,7 @@ Mark answered
   Wait until  element should not be visible  xpath=//div[@id='dynamic-ok-confirm-dialog']
 
 Comment count is
-  [Arguments]  ${section}  ${amount}
+  [Arguments]  ${amount}
   Open side panel  conversation
   Wait until  Xpath Should Match X Times  //div[@id='conversation-panel']//div[contains(@class,'comment-text')]  ${amount}
   Close side panel  conversation

@@ -68,7 +68,7 @@
         <div class="table table-striped conversation" data-test-id="comments-table">
           <div data-bind="foreach: comments().slice(0).reverse()">
             <!-- ko if: !($parents[1].infoRequest() && $parent.isForAttachment($data)) -->
-            <div data-bind="css: {'attachment-comment': $parent.isForNewAttachment($data),
+            <div data-bind="css: {'attachment-comment': $parent.isForAttachment($data),
                                   'comment-for-me':     $parent.isForMe($data),
                                   'authority-comment':  $parent.isAuthorityComment($data),
                                   'comment':            true},
@@ -83,18 +83,17 @@
                 <span class="role" data-bind="ltext: user.role"></span>
               </div>
               <div class="comment-text">
-                <span data-bind="if: $parents[1].mainConversation">
-                  <span data-bind="if: $parent.isForAttachment($data)" class="attachment-details">
-                    <span data-bind="if: target.id()">
+                <span data-bind="if: $parent.isForAttachment($data)" class="attachment-details">
+                  <span data-bind="if: target.id()">
+                    <!-- ko if: target.attachmentType -->
                     <a data-bind="attr: {href: '#!/attachment/' + $parent.applicationId + '/' + target.id()}">
                       <span data-bind="text: target.attachmentType"></span>
-                    </a></span>
+                    </a>
+                    <!-- /ko -->
+                    <!-- ko ifnot: target.attachmentType -->
+                    <span class="deleted-attachment" data-bind="ltext: 'attachment.removed'"></span>
+                    <!-- /ko -->
                   </span>
-                </span>
-                <span data-bind="if: $parent.isForNewAttachment($data)" class="new-attachment-version-details">
-                  <span data-bind="ltext: 'newAttachmentVersion'"></span>
-                  <span data-bind="version: target.version"></span>:
-                  <a data-bind="text: target.filename, attr: {href: '/api/raw/download-attachment?attachment-id=' + target.fileId()}"></a>
                 </span>
                 <span data-bind="text: text" class="comment-message"></span>
               </div>

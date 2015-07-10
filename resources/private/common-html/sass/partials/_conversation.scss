@@ -59,6 +59,11 @@
   .attachment-details a, .new-attachment-version-details a {
     color: $grey-text;
   }
+
+  .deleted-attachment {
+    font-style: italic;
+  }
+
   &.attachment-comment {
     &:after {
       border-top: 24px solid darken($lp-light-grey, 5%);
