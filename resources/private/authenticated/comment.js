@@ -88,12 +88,13 @@ var comments = (function() {
     };
 
     function isPreparationComment(model) {
+      // verdict's comments
       return model && model.roles().length === 1 && model.roles()[0] === "authority";
-    };
+    }
 
     self.isVisible = function(model) {
       return !self.takeAll ||
-               (self.showAttachmentComments() &&
+               ((self.showAttachmentComments() || !self.isForAttachment(model)) &&
                 (!isPreparationComment(model)    || self.showPreparationComments()));
     };
   }
