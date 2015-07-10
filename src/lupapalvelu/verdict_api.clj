@@ -40,9 +40,9 @@
         (let [application (meta-fields/enrich-with-link-permit-data application)
               link-permit (application/get-link-permit-app application)
               link-permit-xml (krysp-fetch/get-application-xml link-permit :application-id)
-              application-type (cond
-                                 (or (= "tyonjohtajan-nimeaminen" application-op-name) (= "tyonjohtajan-nimeaminen-v2" application-op-name)) "tyonjohtaja"
-                                 (= "suunnittelijan-nimeaminen" application-op-name) "suunnittelija")
+              osapuoli-type (cond
+                              (or (= "tyonjohtajan-nimeaminen" application-op-name) (= "tyonjohtajan-nimeaminen-v2" application-op-name)) "tyonjohtaja"
+                              (= "suunnittelijan-nimeaminen" application-op-name) "suunnittelija")
               doc-name-mapping {"tyonjohtajan-nimeaminen"    "tyonjohtaja"
                                 "tyonjohtajan-nimeaminen-v2" "tyonjohtaja-v2"
                                 "suunnittelijan-nimeaminen"  "suunnittelija"}
@@ -50,18 +50,14 @@
               target-kuntaRoolikoodi (some-> application-op-name
                                        doc-name-mapping
                                        ((partial domain/get-document-by-name application))
-                                       :data :kuntaRoolikoodi :value)
-              ]
-        (when (and link-permit-xml application-type target-kuntaRoolikoodi)
-          (or
-           (krysp-reader/tj-suunnittelija-verdicts-validator link-permit-xml application-type target-kuntaRoolikoodi)
-           ;;
-           ;; TODO: Ota selvaa, mita paatokseen pitaa tulla, vrt. verdict/find-verdicts-from-xml
-           ;;
-           #_(let [updates (verdict/find-tj-suunnittelija-verdicts-from-xml command link-permit-xml)]
-              (update-application command updates)
-              (ok :verdicts (get-in updates [$set :verdicts]) :tasks (get-in updates [$set :tasks])))
-           )))))))
+                                       :data :kuntaRoolikoodi :value)]
+
+          (when (and link-permit-xml osapuoli-type target-kuntaRoolikoodi)
+            (or
+              (krysp-reader/tj-suunnittelija-verdicts-validator link-permit-xml osapuoli-type target-kuntaRoolikoodi)
+              (let [updates (verdict/find-tj-suunnittelija-verdicts-from-xml command link-permit-xml osapuoli-type target-kuntaRoolikoodi)]
+                (update-application command updates)
+                (ok :verdicts (get-in updates [$set :verdicts]))))))))))
 
 (notifications/defemail :application-verdict
   {:subject-key    "verdict"

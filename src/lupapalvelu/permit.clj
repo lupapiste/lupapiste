@@ -137,6 +137,12 @@
    Function takes xml as parameter and returns a map that should be merged into the application."
   (get-metadata permit-type :verdict-extras-krysp-reader))
 
+(defn get-tj-suunnittelija-verdict-reader [permit-type]
+  "Returns a function that reads tj/suunnittelija verdicts from KRYSP xml.
+   Function takes xml, party type and party's kuntaRoolikoodi as parameter.
+   Use get-application-xml-getter to fetch the XML."
+  (get-metadata permit-type :tj-suunnittelija-verdict-krysp-reader))
+
 (defn get-application-xml-getter [permit-type]
   "Returns a function that fetches KRYSP XML from municipality backend.
    Function parameters: 1) url,

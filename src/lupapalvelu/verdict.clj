@@ -60,18 +60,18 @@
                      (update-in paatos [:poytakirjat] #(map (partial get-poytakirja application user timestamp verdict-id) %)))
                 paatokset))))))))
 
-(defn- get-verdicts-with-attachments [application user timestamp xml]
-  (let [permit-type (:permitType application)
-        reader (permit/get-verdict-reader permit-type)
-        verdicts (krysp-reader/->verdicts xml reader)]
-    (filter seq (map (partial verdict-attachments application user timestamp) verdicts))))
+(defn- get-verdicts-with-attachments [application user timestamp xml reader]  ;; TODO: reader-parametri tullut lisaa -> korjaa testit
+  (->> (krysp-reader/->verdicts xml reader)
+    (map (partial verdict-attachments application user timestamp))
+    (filter seq)))
 
 (defn find-verdicts-from-xml
   "Returns a monger update map"
   [{:keys [application user created] :as command} app-xml]
   {:pre [(every? command [:application :user :created]) app-xml]}
-  (let [extras-reader (permit/get-verdict-extras-reader (:permitType application))]
-    (when-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created app-xml))]
+  (let [verdict-reader (permit/get-verdict-reader (:permitType application))
+        extras-reader (permit/get-verdict-extras-reader (:permitType application))]
+    (when-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created app-xml verdict-reader))]
       (let [has-old-verdict-tasks (some #(= "verdict" (get-in % [:source :type]))  (:tasks application))
             tasks (tasks/verdicts->tasks (assoc application :verdicts verdicts-with-attachments) created)]
         {$set (merge {:verdicts verdicts-with-attachments
@@ -79,3 +79,20 @@
                       :state    :verdictGiven}
                 (when-not has-old-verdict-tasks {:tasks tasks})
                 (when extras-reader (extras-reader app-xml)))}))))
+
+;;
+;; TODO:
+;;  - yhdista tama funktio jotenkin ylla olevan find-verdicts-from-xml:n kanssa?
+;;  - Kayta testaamiseen "verdict - 2.1.8 - Tekla.xml" -tiedoston sisaltoa (esim kopioi verdict.xml:n paalle)
+;;
+(defn find-tj-suunnittelija-verdicts-from-xml
+  [{:keys [application user created] :as command} app-xml osapuoli-type target-kuntaRoolikoodi]
+  {:pre [(every? command [:application :user :created]) app-xml]}
+  (let [verdict-reader (partial
+                         (permit/get-tj-suunnittelija-verdict-reader (:permitType application))
+                         osapuoli-type target-kuntaRoolikoodi)]
+    (when-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created app-xml verdict-reader))]
+      {$set {:verdicts verdicts-with-attachments
+             :modified created
+             :state    :verdictGiven}})))
+

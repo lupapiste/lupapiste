@@ -423,6 +423,16 @@
     (select xml-without-ns [:paatostieto :Paatos])))
 
 
+;; TJ/Suunnittelija verdict
+
+(def- tj-suunnittelija-verdict-statuses-to-loc-keys-mapping
+  {"hyv\u00e4ksytty" "hyvaksytty"
+   "hyl\u00e4tty" "hylatty"
+   "ilmoitus hyv\u00e4ksytty" "ilmoitus-hyvaksytty"})
+
+(def- tj-suunnittelija-verdict-statuses
+  (-> tj-suunnittelija-verdict-statuses-to-loc-keys-mapping keys set))
+
 (defn- ->paatos-osapuoli [path-key osapuoli-xml-without-ns]
   (-> (cr/all-of osapuoli-xml-without-ns path-key)
     (cr/convert-keys-to-timestamps [:paatosPvm])))
@@ -431,20 +441,19 @@
   (some
     #(when (and
              (:paatosPvm %)
-             (#{"hyv\u00e4ksytty" "hyl\u00e4tty" "ilmoitus hyv\u00e4ksytty"} (:paatostyyppi %))) %)
+             (tj-suunnittelija-verdict-statuses (:paatostyyppi %))) %)
     osapuolet))
 
 (def- osapuoli-path-key-mapping
-  {"tyonjohtaja"   {:path [:osapuolettieto :Osapuolet :tyonjohtajatieto :Tyonjohtaja]
+  {"tyonjohtaja"   {:path [:tyonjohtajatieto :Tyonjohtaja]
                     :key :tyonjohtajaRooliKoodi}
-   "suunnittelija" {:path [:osapuolettieto :Osapuolet :suunnittelijatieto :Suunnittelija]
+   "suunnittelija" {:path [:suunnittelijatieto :Suunnittelija]
                     :key :suunnittelijaRoolikoodi}})
 
 (defn tj-suunnittelija-verdicts-validator [xml osapuoli-type kuntaRoolikoodi]
   {:pre [xml (#{"tyonjohtaja" "suunnittelija"} osapuoli-type) kuntaRoolikoodi]}
-  (let [osapuoli-path (:path (osapuoli-path-key-mapping osapuoli-type))
+  (let [{osapuoli-path :path kuntaRoolikoodi-key :key} (osapuoli-path-key-mapping osapuoli-type)
         osapuoli-key (last osapuoli-path)
-        kuntaRoolikoodi-key (:key (osapuoli-path-key-mapping osapuoli-type))
         osapuolet (->> (select (cr/strip-xml-namespaces xml) osapuoli-path)
                     (map (partial ->paatos-osapuoli osapuoli-key))
                     (filter #(= kuntaRoolikoodi (get % kuntaRoolikoodi-key))))
@@ -456,20 +465,26 @@
       (not (seq osapuoli))                   (fail :info.tj-suunnittelija-paatos-details-missing)
       (< timestamp-1-day-from-now paatospvm) (fail :info.paatos-future-date))))
 
-(defn ->tj-suunnittelija-verdicts [xml-without-ns osapuoli-type kuntaRoolikoodi]
-  ;;
-  ;; TODO: Tee yllaolevan validaattorin mukaan, kuten ->standard-verdicts:ssakin.
-  ;;       Katso myos verdict/find-verdicts-from-xml.
-  ;;
-  #_(map (fn [osapuolet-xml-without-ns]
-        (let [poytakirjat (map ->paatospoytakirja (select osapuolet-xml-without-ns [:poytakirja]))
-              poytakirja (poytakirja-with-paatos-data poytakirjat) ]
-          (when (and poytakirja (> (now) (:paatospvm poytakirja)))
-            {:lupamaaraykset (->lupamaaraukset osapuolet-xml-without-ns)
-             :paivamaarat    (get-pvm-dates osapuolet-xml-without-ns
-                               [:aloitettava :lainvoimainen :voimassaHetki :raukeamis :anto :viimeinenValitus :julkipano])
-             :poytakirjat    (seq poytakirjat)})))
-   (select xml-without-ns [:osapuolettieto :Osapuolet])))
+(defn ->tj-suunnittelija-verdicts [osapuoli-type kuntaRoolikoodi xml-without-ns]
+  (let [{osapuoli-path :path kuntaRoolikoodi-key :key} (osapuoli-path-key-mapping osapuoli-type)
+        osapuoli-key (last osapuoli-path)]
+    (map (fn [osapuolet-xml-without-ns]
+           (let [osapuolet (->> (select osapuolet-xml-without-ns osapuoli-path)
+                             (map (partial ->paatos-osapuoli osapuoli-key))
+                             (filter #(= kuntaRoolikoodi (get % kuntaRoolikoodi-key))))
+                 osapuoli (party-with-paatos-data osapuolet)]
+           (when (and osapuoli (> (now) (:paatosPvm osapuoli)))
+             {
+;              :lupamaaraykset {:paatostyyppi (:paatostyyppi osapuoli)}
+;              :paivamaarat    {:paatosPvm (:paatosPvm osapuoli)}
+              :poytakirjat    [{
+                               :status (get tj-suunnittelija-verdict-statuses-to-loc-keys-mapping (:paatostyyppi osapuoli))   ;; TODO: tee oma lokalisaatioavain, jottei tarvi kayttaa valilynteja ja aakkosia
+                               :paatospvm (:paatosPvm osapuoli)
+                               :liite (:liite osapuoli) ;; tanne liite?
+                               }]
+              }
+             )))
+  (select xml-without-ns [:osapuolettieto :Osapuolet]))))
 
 
 
@@ -522,6 +537,8 @@
 (permit/register-function permit/YL :verdict-krysp-reader ->simple-verdicts)
 (permit/register-function permit/MAL :verdict-krysp-reader ->simple-verdicts)
 (permit/register-function permit/VVVL :verdict-krysp-reader ->simple-verdicts)
+
+(permit/register-function permit/R :tj-suunnittelija-verdict-krysp-reader ->tj-suunnittelija-verdicts)
 
 (permit/register-function permit/R :verdict-krysp-validator standard-verdicts-validator)
 (permit/register-function permit/P :verdict-krysp-validator standard-verdicts-validator)
