@@ -159,7 +159,7 @@
       (fact "Asiointikieli"
         (get-in canonical [:UusiAsia :Asiointikieli]) => "fi")
       (fact "Sijainti is correct"
-        (get-in canonical [:UusiAsia :Sijainti :Sijaintipiste]) => (str (-> application :location :x) " " (-> application :location :y)))
+        (get-in canonical [:UusiAsia :Sijainti :Sijaintipiste]) => (str (-> application :location first) " " (-> application :location second)))
       (fact "Kiinteistotunnus is human readable"
         (get-in canonical [:UusiAsia :Kiinteistotunnus]) => (p/to-human-readable-property-id (:propertyId application))))
 

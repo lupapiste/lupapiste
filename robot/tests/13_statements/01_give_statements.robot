@@ -71,9 +71,9 @@ Sonja can't give statement to Ronjas statement
   Statement is disabled
 
 Sonja can comment on Ronjas statement
-  Wait until  Comment count is  statement  0
+  Wait until  Comment count is  0
   Input comment  kas kummaa.
-  Wait until  Comment count is  statement  1
+  Wait until  Comment count is  1
   [Teardown]  Return from statement
 
 Sonja can give statement to own request
@@ -86,7 +86,7 @@ Sonja can give statement to own request
 Comment is added
   Open statement  2
   Sleep  1
-  Wait until  Comment count is  statement  1
+  Wait until  Comment count is  1
 
 Sonja can regive statement to own statement
   Select From List  statement-type-select  puoltaa
@@ -96,7 +96,7 @@ Sonja can regive statement to own statement
 Another comment is added
   Open statement  2
   Sleep  1
-  Wait until  Comment count is  statement  2
+  Wait until  Comment count is  2
 
 Veikko can see statements as he is beeing requested a statement to the application
   Logout

@@ -51,7 +51,3 @@ Veikko should see only zero (Tampere) applications
   [Teardown]  logout
 
 *** Keywords ***
-
-Comment count is
-  [Arguments]  ${amount}
-  Xpath Should Match X Times  //section[@id='application']//div[@data-test-id='comments-table']//div[contains(@class, 'comment')]  ${amount}

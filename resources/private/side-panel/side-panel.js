@@ -66,9 +66,11 @@ LUPAPISTE.SidePanelModel = function() {
           self.comment().refresh(application, false, {type: type, id: pageutil.lastSubPage()});
           break;
         case "statement":
+          self.mainConversation(false);
           self.comment().refresh(application, false, {type: type, id: pageutil.lastSubPage()});
           break;
         case "verdict":
+          self.mainConversation(false);
           self.comment().refresh(application, false, {type: type, id: pageutil.lastSubPage()}, ["authority"]);
           break;
         default:

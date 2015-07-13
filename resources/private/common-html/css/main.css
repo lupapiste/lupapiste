@@ -2466,20 +2466,24 @@ table.attachments-template-table td.attachment-version-info {
   color: #595959;
 }
 /* line 63, ../sass/partials/_conversation.scss */
+.comment .deleted-attachment {
+  font-style: italic;
+}
+/* line 68, ../sass/partials/_conversation.scss */
 .comment.attachment-comment:after {
   border-top: 24px solid #e9e9e9;
 }
-/* line 67, ../sass/partials/_conversation.scss */
+/* line 72, ../sass/partials/_conversation.scss */
 .comment .comment-text {
   position: relative;
   display: inline-block;
   width: 100%;
 }
-/* line 72, ../sass/partials/_conversation.scss */
+/* line 77, ../sass/partials/_conversation.scss */
 .comment.authority-comment {
   background-color: #9afda2;
 }
-/* line 74, ../sass/partials/_conversation.scss */
+/* line 79, ../sass/partials/_conversation.scss */
 .comment.authority-comment:after {
   position: absolute;
   content: " ";
@@ -2493,73 +2497,69 @@ table.attachments-template-table td.attachment-version-info {
   border-right: 12px solid transparent;
   border-top: 24px solid #9afda2;
 }
-/* line 87, ../sass/partials/_conversation.scss */
-.comment.authority-comment:nth-child(even) {
-  background-color: #9afda2;
-}
-/* line 90, ../sass/partials/_conversation.scss */
+/* line 92, ../sass/partials/_conversation.scss */
 .comment.authority-comment .comment-party {
   position: relative;
 }
-/* line 92, ../sass/partials/_conversation.scss */
+/* line 94, ../sass/partials/_conversation.scss */
 .comment.authority-comment .comment-party:after {
   display: none;
 }
-/* line 97, ../sass/partials/_conversation.scss */
+/* line 99, ../sass/partials/_conversation.scss */
 .comment.authority-comment.attachment-comment:after {
   border-top: 24px solid #e9e9e9;
 }
 
-/* line 104, ../sass/partials/_conversation.scss */
+/* line 106, ../sass/partials/_conversation.scss */
 .comment-for-me {
   border: solid 2px #f39129;
 }
 
-/* line 109, ../sass/partials/_conversation.scss */
+/* line 111, ../sass/partials/_conversation.scss */
 .conversation div {
   vertical-align: top;
 }
 
-/* line 114, ../sass/partials/_conversation.scss */
+/* line 116, ../sass/partials/_conversation.scss */
 .conversation .attachment-comment {
   vertical-align: top;
   background-color: #e9e9e9;
 }
 
-/* line 119, ../sass/partials/_conversation.scss */
+/* line 121, ../sass/partials/_conversation.scss */
 .comment-controls {
   display: inline-block;
   margin-left: 24px;
 }
-/* line 123, ../sass/partials/_conversation.scss */
+/* line 125, ../sass/partials/_conversation.scss */
 .comment-controls .comment-request {
   display: inline-block;
   margin-left: 24px;
 }
-/* line 126, ../sass/partials/_conversation.scss */
+/* line 128, ../sass/partials/_conversation.scss */
 .comment-controls .comment-request label {
   display: block;
 }
-/* line 129, ../sass/partials/_conversation.scss */
+/* line 131, ../sass/partials/_conversation.scss */
 .comment-controls .comment-request select {
   display: block;
 }
-/* line 134, ../sass/partials/_conversation.scss */
+/* line 136, ../sass/partials/_conversation.scss */
 .comment-controls .mark-answered {
   margin-left: 24px;
   display: inline-block;
 }
-/* line 137, ../sass/partials/_conversation.scss */
+/* line 139, ../sass/partials/_conversation.scss */
 .comment-controls .mark-answered label, .comment-controls .mark-answered input {
   display: inline;
 }
 
-/* line 144, ../sass/partials/_conversation.scss */
+/* line 146, ../sass/partials/_conversation.scss */
 .comment-toggle {
   margin-bottom: 8px;
 }
 
-/* line 148, ../sass/partials/_conversation.scss */
+/* line 150, ../sass/partials/_conversation.scss */
 .comment-message {
   white-space: pre-line;
 }
