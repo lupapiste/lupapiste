@@ -219,7 +219,7 @@
     ;; Sijainti
     (fact "Sijainti-yksilointitieto" Sijainti-yksilointitieto => (:id mainostus-application))
     (fact "Sijainti-osoitenimi" Sijainti-osoitenimi => (:address mainostus-application))
-    (fact "Sijainti-piste-xy" Sijainti-piste => (str (-> mainostus-application :location :x) " " (-> mainostus-application :location :y)))
+    (fact "Sijainti-piste-xy" Sijainti-piste => (str (-> mainostus-application :location first) " " (-> mainostus-application :location second)))
 
     ;; Maksajan tiedot
     (fact "maksaja-laskuviite" (:laskuviite Maksaja) => (:value _laskuviite))

@@ -408,7 +408,7 @@
            :role "owner"}]
    :state "open"
    :opened 1354532324658
-   :location {:x 408048, :y 6693225},
+   :location [408048 6693225]
    :attachments [],
    :authority {:id "777777777777777777000023"
                :username "sonja"
@@ -1226,7 +1226,7 @@
    :submitted 1384167310181,
    :state "submitted",
    :permitSubtype nil,
-   :location {:x 411063.82824707, :y 6685145.8129883},
+   :location [411063.82824707 6685145.8129883],
    :attachments [],
    :organization "753-R",
    :title "It\u00e4inen Hangelbyntie 163",
@@ -1363,7 +1363,7 @@
              :id "777777777777777777000020"}],
      :submitted 1388665814105,
      :state "submitted",
-     :location {:x 406390.19848633, :y 6681812.5},
+     :location [406390.19848633 6681812.5],
      :organization "753-R",
      :title "Vainuddintie 92",
      :primaryOperation {:id "52c5461042065cf9f379de8b",
