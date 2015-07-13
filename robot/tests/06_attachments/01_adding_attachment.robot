@@ -36,11 +36,12 @@ Mikko deletes attachment immediately by using remove icon
   Confirm yes no dialog
   Wait Until  Element should not be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${TXT_TESTFILE_NAME}')]
 
-Mikko adds again txt attachment without comment
+Mikko adds again txt attachment with comment
   [Tags]  attachments
-  Add attachment  ${TXT_TESTFILE_PATH}  ${EMPTY}  Asuinkerrostalon tai rivitalon rakentaminen
+  Add attachment  ${TXT_TESTFILE_PATH}  Poistetun liitteen kommentti  Asuinkerrostalon tai rivitalon rakentaminen
   Application state should be  draft
   Wait Until  Element should be visible  xpath=//div[@data-test-id='application-pre-attachments-table']//a[contains(., '${TXT_TESTFILE_NAME}')]
+  Comment count is  1
 
 "Download all attachments" should be visible in the attachment actions dropdown
   Page should contain element  xpath=//select[@data-test-id="attachment-operations-select-lower"]//option[@value='downloadAll']
@@ -63,6 +64,12 @@ Mikko deletes attachment
   Confirm yes no dialog
   Wait Until Page Contains  753-416-25-30
   Wait Until  Page Should Not Contain  xpath=//a[@data-test-type="muut.muu"]
+
+Comment is present after delete
+  [Tags]  attachments
+  Open side panel  conversation
+  Wait until  Xpath Should Match X Times  //div[@id='conversation-panel']//div[@class='comment-text']//span[@class='deleted-attachment']  1
+  Close side panel  conversation
 
 Mikko adds txt attachment with comment
   [Tags]  attachments
@@ -139,7 +146,7 @@ Sonja goes to conversation tab
   Open application  ${appname}  753-416-25-30
   Open side panel  conversation
   Click Element  link=Ote alueen peruskartasta
-  Wait Until Page Contains  ${TXT_TESTFILE_NAME}
+  Wait Until  Element text should be  xpath=//section[@id="attachment"]//span[@id="test-attachment-file-name"]/a  ${TXT_TESTFILE_NAME}
   Close side panel  conversation
 
 Sonja goes to attachments tab
@@ -208,9 +215,3 @@ Attachment state should be
   ${STATE_ATTR_VALUE} =  Get Element Attribute  xpath=//*[@data-test-state and @data-test-type="${type}"]@data-test-state
   Log  ${STATE_ATTR_VALUE}
   Should Be Equal  ${STATE_ATTR_VALUE}  ${state}
-
-Comment count is
-  [Arguments]  ${amount}
-  Open side panel  conversation
-  Xpath Should Match X Times  //div[@id='conversation-panel']//div[@data-bind='foreach: comments().slice(0).reverse()']/div  ${amount}
-  Close side panel  conversation

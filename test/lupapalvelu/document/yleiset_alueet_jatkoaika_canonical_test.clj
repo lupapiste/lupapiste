@@ -161,7 +161,7 @@
     ;; Sijainti
     (fact "Sijainti-yksilointitieto" Sijainti-yksilointitieto => (:id jatkoaika-application))
     (fact "Sijainti-osoitenimi" Sijainti-osoitenimi => (:address jatkoaika-application))
-    (fact "Sijainti-piste-xy" Sijainti-piste => (str (-> jatkoaika-application :location :x) " " (-> jatkoaika-application :location :y)))
+    (fact "Sijainti-piste-xy" Sijainti-piste => (str (-> jatkoaika-application :location first) " " (-> jatkoaika-application :location second)))
 
     ;; Maksajan tiedot
     (fact "Henkilomaksaja 2.1.2"

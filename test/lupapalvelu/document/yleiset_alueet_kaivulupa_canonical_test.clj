@@ -193,7 +193,7 @@
       (fact "Sijainti-yksilointitieto" Sijainti-yksilointitieto => (:id kaivulupa-application))
       (fact "Sijainti-alkuHetki" Sijainti-alkuHetki => (partial xml-datetime-is-roughly? (util/to-xml-datetime (now))))
       (fact "Sijainti-osoitenimi" Sijainti-osoitenimi => (:address kaivulupa-application))
-      (fact "Sijainti-piste-xy" Sijainti-piste => (str (-> kaivulupa-application :location :x) " " (-> kaivulupa-application :location :y)))
+      (fact "Sijainti-piste-xy" Sijainti-piste => (str (-> kaivulupa-application :location first) " " (-> kaivulupa-application :location second)))
 
       ;; Maksajan tiedot
       (fact "maksaja-laskuviite" (:laskuviite Maksaja) => (:value _laskuviite))

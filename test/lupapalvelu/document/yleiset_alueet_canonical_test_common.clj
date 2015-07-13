@@ -3,7 +3,7 @@
 
 (def municipality 753)
 
-(def location {:x 404335.789, :y 6693783.426})
+(def location [404335.789 6693783.426])
 
 
 (def pena {:id "777777777777777777000020",

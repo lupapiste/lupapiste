@@ -95,7 +95,7 @@
           LineString2    (nth drawing-sijainti 3) => truthy
           Alue           (nth drawing-sijainti 4) => truthy]
 
-      (fact "Sijainti-piste-xy" Sijainti-piste => (str (-> application :location :x) " " (-> application :location :y)))
+      (fact "Sijainti-piste-xy" Sijainti-piste => (str (-> application :location first) " " (-> application :location second)))
       (fact "Point drawing" PisteSijanti => {:nimi "Piste"
                                              :kuvaus "Piste jutska"
                                              :korkeusTaiSyvyys "345"

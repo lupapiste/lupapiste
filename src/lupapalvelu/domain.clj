@@ -43,10 +43,18 @@
 (defn- only-authority-sees-drafts [user verdicts]
   (only-authority-sees user :draft verdicts))
 
-(defn- commented-attachment-exists [application]
+(defn- filter-targeted-attachment-comments
+  "If comment target type is attachment, check that attachment exists.
+   If not, show only comments with non-blank text related to deleted attachment"
+  [application]
   (let [attachments (set (map :id (:attachments application)))]
     (update-in application [:comments]
-      #(filter (fn [{target :target}] (or (empty? target) (not= (:type target) "attachment") (attachments (:id target)))) %))))
+      #(filter (fn [{:keys [target text]}] (or
+                                             (empty? target)
+                                             (not= (:type target) "attachment")
+                                             (or
+                                               (attachments (:id target))
+                                               (not (ss/blank? text))))) %))))
 
 (defn- filter-notice-from-application [application user]
   (if (user/authority? user)
@@ -63,7 +71,7 @@
         (update-in [:comments] #(filter (fn [comment] ((set (:roles comment)) (name (:role user)))) %))
         (update-in [:verdicts] (partial only-authority-sees-drafts user))
         (update-in [:attachments] (partial only-authority-sees user relates-to-draft))
-        commented-attachment-exists
+        filter-targeted-attachment-comments
         (update-in [:tasks] (partial only-authority-sees user relates-to-draft))
         (filter-notice-from-application user)))))
 

@@ -24,7 +24,7 @@
     self.data = ko.observable();
     self.application = ko.observable();
 
-    self.statuses = ko.observable([]);
+    self.statuses = ko.observableArray([]);
     self.selectedStatus = ko.observable();
     self.text = ko.observable();
     self.submitting = ko.observable(false);
@@ -70,7 +70,13 @@
         if (authorizationModel.ok("get-possible-statement-statuses")) {
           ajax
             .query("get-possible-statement-statuses", {id: applicationId})
-            .success(function(resp) { self.statuses(resp.data); })
+            .success(function(resp) {
+              var sorted = _(resp.data)
+                .map(function(item) { return {id: item, name: loc(['statement', item])}; })
+                .sortBy("name")
+                .value();
+              self.statuses(sorted);
+            })
             .call();
         } else if (statement.status) {
           self.statuses([statement.status]);

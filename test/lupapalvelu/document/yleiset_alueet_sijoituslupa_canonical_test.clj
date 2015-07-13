@@ -168,7 +168,7 @@
     ;; Sijainti
     (fact "Sijainti-yksilointitieto" Sijainti-yksilointitieto => (:id sijoituslupa-application))
     (fact "Sijainti-osoitenimi" Sijainti-osoitenimi => (:address sijoituslupa-application))
-    (fact "Sijainti-piste-xy" Sijainti-piste => (str (-> sijoituslupa-application :location :x) " " (-> sijoituslupa-application :location :y)))
+    (fact "Sijainti-piste-xy" Sijainti-piste => (str (-> sijoituslupa-application :location first) " " (-> sijoituslupa-application :location second)))
 
     ;; Maksajan tiedot
     (fact "maksaja-laskuviite" (:laskuviite Maksaja) => (:value _laskuviite))
@@ -266,7 +266,7 @@
      :title "Start_ready_app_1398343043"
      :address "Start_ready_app_1398343043"
      :propertyId "75341600250023"
-     :location {:x 10000.1, :y 6610000.0}
+     :location [10000.1 6610000.0]
      :created 1398343043267
      :opened 1398343043267
      :submitted 1398343047691
