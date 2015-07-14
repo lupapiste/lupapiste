@@ -1,7 +1,7 @@
 (ns lupapalvelu.integrations-api
   "API for commands/functions working with integrations (ie. KRYSP, Asianhallinta)"
   (:require [taoensso.timbre :as timbre :refer [infof error]]
-            [monger.operators :refer [$in $set $push $elemMatch]]
+            [monger.operators :refer [$in $set $unset $push $elemMatch]]
             [lupapalvelu.action :refer [defcommand update-application notify] :as action]
             [lupapalvelu.application :as application]
             [lupapalvelu.application-meta-fields :as meta-fields]
@@ -172,6 +172,16 @@
          {"documents.$.data" update-data}})
       (fail! :document-would-be-in-error-after-update :results validation-results))))
 
+(defn clean-before-merge
+  "Ensures that no old data is left before KRYSP building data merge, by unsetting the values"
+  [collection building-data doc-id]
+  (let [unset-strings (map #(str collection ".$.data." (name %)) (keys building-data))
+        unset-map (reduce (fn [map str] (assoc map str "")) {} unset-strings)]
+    (mongo/update-by-query
+       :applications
+       {collection {$elemMatch {:id doc-id}}}
+       {$unset unset-map})))
+
 (defcommand merge-details-from-krysp
   {:parameters [id documentId path buildingId overwrite collection]
    :input-validators [commands/validate-collection
@@ -189,12 +199,15 @@
         (do
           (infof "setting default data into %s %s" (get-in document [:schema-info :name]) (:id document))
           (update-to-defaults application documentId schema {(keyword path) buildingId}))
-        (let [base-updates (concat
+        (let [building-data (load-building-data url propertyId buildingId overwrite)
+              base-updates (concat
                              (commands/->model-updates [[path buildingId]])
                              (tools/path-vals
-                               (load-building-data url propertyId buildingId overwrite)))
+                               building-data))
               ; Path should exist in schema!
               updates      (filter (fn [[path _]] (model/find-by-name (:body schema) path)) base-updates)]
+          (when overwrite
+            (clean-before-merge collection building-data documentId))
           (infof "merging data into %s %s" (get-in document [:schema-info :name]) (:id document))
           (commands/persist-model-updates application collection document updates created :source "krysp")))
       (ok))
