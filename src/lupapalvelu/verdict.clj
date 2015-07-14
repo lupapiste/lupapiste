@@ -5,6 +5,7 @@
             [sade.http :as http]
             [sade.strings :as ss]
             [sade.util :as util]
+            [lupapalvelu.action :as action]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.permit :as permit]
@@ -75,8 +76,9 @@
       (let [has-old-verdict-tasks (some #(= "verdict" (get-in % [:source :type]))  (:tasks application))
             tasks (tasks/verdicts->tasks (assoc application :verdicts verdicts-with-attachments) created)]
         {$set (merge {:verdicts verdicts-with-attachments
-                      :modified created
-                      :state    :verdictGiven}
+                      :modified created}
+                (when-not (action/post-verdict-states (keyword (:state application)))
+                  {:state :verdictGiven})
                 (when-not has-old-verdict-tasks {:tasks tasks})
                 (when extras-reader (extras-reader app-xml)))}))))
 

@@ -68,7 +68,7 @@
                  If the command is run more than once, existing verdicts are
                  replaced by the new ones."
    :parameters [:id]
-   :states     [:submitted :complement-needed :sent :verdictGiven] ; states reviewed 2013-09-17
+   :states     [:submitted :complement-needed :sent :verdictGiven :constructionStarted] ; states reviewed 2015-07-13
    :user-roles #{:authority}
    :notified   true
    :on-success (notify :application-verdict)}
