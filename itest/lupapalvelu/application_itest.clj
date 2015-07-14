@@ -417,19 +417,58 @@
       (get-in doc-after [:data :mitat :tilavuus :sourceValue]) => "8240"
       (get-in doc-after [:data :mitat :tilavuus :value]) => "8240")
 
+    (fact "Repeating data has been cleared before new merge (overwrite true)"
+      (let [building-id-2 (:buildingId (second (:data building-info)))
+            _ (command pena :merge-details-from-krysp :id application-id :documentId (:id doc-before) :collection "documents" :buildingId building-id-2 :path "buildingId" :overwrite true) => ok?
+            merged-app (query-application pena application-id)
+            doc-after-2 (domain/get-document-by-name merged-app "rakennuksen-muuttaminen")]
+
+        (fact "count of huoneistot is correct"
+          (count (get-in doc-after [:data :huoneistot])) => 21
+          (count (get-in doc-after-2 [:data :huoneistot])) => 2)
+        (fact "count of rakennuksenOmistajat is correct"
+          (count (get-in doc-after [:data :rakennuksenOmistajat])) => 2
+          (count (get-in doc-after-2 [:data :rakennuksenOmistajat])) => 4)))
+
+    ; Merge back building-id data for next test
+    (command pena :merge-details-from-krysp :id application-id :documentId (:id doc-before) :collection "documents" :buildingId building-id :path "buildingId" :overwrite true) => ok?
+
     (fact "Merging ID only"
       (let [building-id-2 (:buildingId (second (:data building-info)))
             _ (command pena :merge-details-from-krysp :id application-id :documentId (:id doc-before) :collection "documents" :buildingId building-id-2 :path "buildingId" :overwrite false) => ok?
             merged-app (query-application pena application-id)
-            doc-after-2 (domain/get-document-by-name merged-app "rakennuksen-muuttaminen")]
+            doc-after-3 (domain/get-document-by-name merged-app "rakennuksen-muuttaminen")]
 
         (fact "kayttotarkoitus remains the same"
-          (get-in doc-after-2 [:data :kaytto :kayttotarkoitus :value]) => "039 muut asuinkerrostalot")
+          (get-in doc-after-3 [:data :kaytto :kayttotarkoitus :value]) => "039 muut asuinkerrostalot")
 
         (fact "ID has changed"
-          (get-in doc-after-2 [:data :valtakunnallinenNumero :value]) => "478123123J"
-          (get-in doc-after-2 [:data :rakennusnro :value]) => "002"
-          (get-in doc-after-2 [:data :manuaalinen_rakennusnro :value]) => ss/blank?)))))
+          (get-in doc-after-3 [:data :valtakunnallinenNumero :value]) => "478123123J"
+          (get-in doc-after-3 [:data :rakennusnro :value]) => "002"
+          (get-in doc-after-3 [:data :manuaalinen_rakennusnro :value]) => ss/blank?)))
+
+    (fact "When selecting 'other' from building selector, old KRYSP source data is not present (data is set to defaults)"
+      (let [_ (command pena :merge-details-from-krysp :id application-id :documentId (:id doc-before) :collection "documents" :buildingId "other" :path "buildingId" :overwrite false) => ok?
+            merged-app (query-application pena application-id)
+            doc-after-4 (domain/get-document-by-name merged-app "rakennuksen-muuttaminen")]
+
+        (fact "buildingId is 'other'"
+          (get-in doc-after-4 [:data :buildingId :value]) => "other")
+
+        (fact "source and sourceValues are not present in updated document"
+          (get-in doc-after [:data :mitat :tilavuus :sourceValue]) => "8240"
+          (get-in doc-after [:data :mitat :tilavuus :source]) => "krysp"
+
+          (get-in doc-after-4 [:data :mitat :tilavuus :sourceValue]) => nil
+          (get-in doc-after-4 [:data :mitat :tilavuus :source]) => nil)
+
+        (fact "values have been set to schema defaults"
+          (get-in doc-after-4 [:data :rakennusnro :value]) => ss/blank?
+          (get-in doc-after-4 [:data :manuaalinen_rakennusnro :value]) => ss/blank?
+          (get-in doc-after-4 [:data :valtakunnallinenNumero :value]) => ss/blank?
+          (count (get-in doc-after-4 [:data :huoneistot])) => 1
+          (get-in doc-after-4 [:data :kaytto :kayttotarkoitus :value]) => nil ; default value for select is null
+          (get-in doc-after-4 [:data :kaytto :kayttotarkoitus :source]) => nil)))))
 
 (fact* "Merging building information from KRYSP succeeds even if document schema does not have place for all the info"
   (let [application-id (create-app-id pena :propertyId sipoo-property-id :operation "purkaminen")
