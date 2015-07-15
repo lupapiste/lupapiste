@@ -6,7 +6,9 @@
             [lupapalvelu.organization-api :as oa]
             [lupapalvelu.user :as user]
             [monger.operators :refer :all]
-            [lupapalvelu.action :as action]))
+            [lupapalvelu.action :as action]
+            [lupapiste-commons.tos-metadata-schema :as tms]
+            [schema.core :as s]))
 
 (defquery available-tos-functions
   {:user-roles       #{:anonymous}
@@ -48,3 +50,23 @@
                                           :metadata updated-metadata
                                           :attachments updated-attachments}}))
       (fail "Invalid TOS function code"))))
+
+(def schema-to-input-type-map
+  {s/Str   "text"
+   tms/Vuodet "number"})
+
+(defn metadata-schema-for-ui [field]
+  (cond-> field
+    (:dependencies field) (->> (:dependencies)
+                               (map (fn [[k v]] {k (map metadata-schema-for-ui v)}))
+                               (into {})
+                               (assoc field :dependencies))
+    (:subfields field) (->> (:subfields)
+                            (map metadata-schema-for-ui)
+                            (assoc field :subfields))
+    (:schema field) (-> (assoc :inputType (get schema-to-input-type-map (:schema field)))
+                        (dissoc :schema))))
+
+(defquery tos-metadata-schema
+  {:user-roles #{:anonymous}}
+  (ok :schema (map metadata-schema-for-ui tms/common-metadata-fields)))
