@@ -126,6 +126,7 @@ var attachment = (function() {
     groupIndex:                   ko.observable(),
     changeTypeDialogModel:        undefined,
     metadata:                     ko.observableArray(),
+    metadataMap:                  ko.observable(),
     showTosMetadata:              ko.observable(false),
 
     toggleHelp: function() {
@@ -420,7 +421,7 @@ var attachment = (function() {
     model.applicationState(attachment.applicationState);
     model.allowedAttachmentTypes(application.allowedAttachmentTypes);
     model.attachmentType(attachmentType(attachment.type["type-group"], attachment.type["type-id"]));
-
+    model.metadataMap(attachment.metadata);
     model.metadata(_.sortBy(_.map(attachment.metadata, function(value, key) {
       return metadata.translateMetaData(key, value);
     }), "name"));

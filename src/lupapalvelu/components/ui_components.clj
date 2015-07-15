@@ -174,6 +174,10 @@
                   :html ["signing-dialogs.html"]
                   :js ["signing-model.js" "verdict-signing-model.js"]}
 
+   :metadata-editor {:depends [:common-html]
+                     :html ["metadata-editor.html"]
+                     :js ["metadata-editor.js"]}
+
    :stamp        {:depends [:common-html]
                   :html ["stamp-template.html"]
                   :js ["stamp-model.js" "stamp.js"]}
@@ -304,7 +308,7 @@
    :authority-app {:depends [:ui-components] :js ["authority.js"]}
    :authority     {:depends [:ui-components :authority-app :common-html :authenticated :map :applications :notice :application
                              :statement :verdict :neighbors :docgen :create :mypage :user-menu :debug
-                             :company :stamp :integration-error :analytics]}
+                             :company :stamp :integration-error :analytics :metadata-editor]}
 
    :oir-app {:depends [:ui-components] :js ["oir.js"]}
    :oir     {:depends [:oir-app :common-html :authenticated :map :application :attachment

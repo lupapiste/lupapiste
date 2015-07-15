@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<body>
+<section class="page container" id="stamping">
+  <script type="text/html" id="metadata-editor-template">
+    <div class="stamp-info-container">
+      <div>
+        <button data-bind="click: edit">Muokkaa</button>
+      </div>
+
+      <div class="editor">
+        <div class="editor-form" data-bind="foreach: schema">
+          <div>
+            <label data-bind="ltext: type"></label><br>
+            <div data-bind="if: $data.values">
+              <div data-bind="visible: !$parent.editable,
+                              ltext: $parent.editedMetadata()[type]"></div>
+              <select data-bind="visible: $parent.editable,
+                                   options: values,
+                                   optionsText: loc,
+                                   value: $parent.editedMetadata()[type]" ></select>
+            </div>
+            <div data-bind="if: $data.inputType">
+              <div data-bind="visible: !$parent.editable,
+                              text: $parent.editedMetadata()[type]"></div>
+              <input data-bind="visible: $parent.editable,
+                                attr: {type: inputType},
+                                value: $parent.editedMetadata()[type]">
+            </div>
+            <div data-bind="if: $data.subfields">
+              <div data-bind="foreach: subfields">
+                <label data-bind="ltext: type"></label><br>
+                <div data-bind="if: $data.values">
+                  <div data-bind="visible: !$parent.editable,
+                                  ltext: $parents[1].editedMetadata()[$parent.type][type]"></div>
+                  <select data-bind="visible: $parent.editable,
+                                     options: values,
+                                     optionsText: loc,
+                                     value: $parents[1].editedMetadata()[$parent.type][type]"></select>
+                </div>
+                <div data-bind="if: $data.inputType">
+                  <div data-bind="visible: !$parent.editable,
+                                  text: $parents[1].editedMetadata()[$parent.type][type]"></div>
+                  <input data-bind="visible: $parent.editable,
+                                    attr: {type: inputType},
+                                    value: $parents[1].editedMetadata()[$parent.type][type]">
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+
+    </div>
+ </script>
+</section>
+</body>
+</html>
