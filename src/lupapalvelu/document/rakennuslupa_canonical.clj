@@ -365,7 +365,6 @@
                     {:RakennusvalvontaAsia
                      {:kasittelynTilatieto (get-state application)
                       :luvanTunnisteTiedot (lupatunnus application)
-                      :osapuolettieto {:Osapuolet {:osapuolitieto hakija-info}}
                       :lisatiedot (get-lisatiedot (:lisatiedot documents) lang)
                       :kayttotapaus "Liitetiedoston lis\u00e4ys"
                       }}}}]

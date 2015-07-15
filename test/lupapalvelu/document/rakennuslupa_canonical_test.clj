@@ -1189,27 +1189,12 @@
         luvanTunnisteTiedot (:luvanTunnisteTiedot RakennusvalvontaAsia) => truthy
         LupaTunnus (:LupaTunnus luvanTunnisteTiedot) => truthy
         muuTunnustieto (:muuTunnustieto LupaTunnus) => truthy
-        mt (:MuuTunnus muuTunnustieto) => truthy
-
-        osapuolettieto (:osapuolettieto RakennusvalvontaAsia) => truthy
-        Osapuolet (:Osapuolet osapuolettieto) => truthy
-        osapuolitieto (:osapuolitieto Osapuolet) => truthy
-        Osapuoli (:Osapuoli osapuolitieto) => truthy
-        henkilo (:henkilo Osapuoli) => truthy
-        nimi (:nimi henkilo) => truthy
-        osoite (:osoite henkilo) => truthy]
+        mt (:MuuTunnus muuTunnustieto) => truthy]
 
     (fact "tila" (:tila Tilamuutos) => "p\u00e4\u00e4t\u00f6s toimitettu")
     (fact "tunnus" (:tunnus mt) => "LP-753-2013-00001")
     (fact "sovellus" (:sovellus mt) => "Lupapiste")
-    (fact "kayttotapaus" (:kayttotapaus RakennusvalvontaAsia) => "Liitetiedoston lis\u00e4ys")
-
-    (facts "Osapuolet"
-      (fact "kuntaRooliKoodi" (:kuntaRooliKoodi Osapuoli) => "ei tiedossa")
-      (fact "etunimi" (:etunimi nimi) => "Pena")
-      (fact "sukunimi" (:sukunimi nimi) => "Penttil\u00e4")
-      (fact "osoitenimi" (-> osoite :osoitenimi :teksti) => "katu")
-      (fact "puhelin" (:puhelin henkilo) => "+358401234567"))))
+    (fact "kayttotapaus" (:kayttotapaus RakennusvalvontaAsia) => "Liitetiedoston lis\u00e4ys")))
 
 
 
