@@ -450,13 +450,16 @@
    "suunnittelija" {:path [:suunnittelijatieto :Suunnittelija]
                     :key :suunnittelijaRoolikoodi}})
 
-(defn tj-suunnittelija-verdicts-validator [xml osapuoli-type kuntaRoolikoodi]
+(defn tj-suunnittelija-verdicts-validator [{{:keys [yhteystiedot]} :data} xml osapuoli-type kuntaRoolikoodi]
   {:pre [xml (#{"tyonjohtaja" "suunnittelija"} osapuoli-type) kuntaRoolikoodi]}
   (let [{osapuoli-path :path kuntaRoolikoodi-key :key} (osapuoli-path-key-mapping osapuoli-type)
         osapuoli-key (last osapuoli-path)
         osapuolet (->> (select (cr/strip-xml-namespaces xml) osapuoli-path)
                     (map (partial ->paatos-osapuoli osapuoli-key))
-                    (filter #(= kuntaRoolikoodi (get % kuntaRoolikoodi-key))))
+                    (filter #(and
+                               (= kuntaRoolikoodi (get % kuntaRoolikoodi-key))
+                               (:paatosPvm %)
+                               (= (get-in yhteystiedot [:email :value]) (get-in % [:henkilo :sahkopostiosoite])))))
         osapuoli (party-with-paatos-data osapuolet)
         paatospvm  (:paatosPvm osapuoli)
         timestamp-1-day-from-now (util/get-timestamp-from-now :day 1)]
@@ -465,13 +468,16 @@
       (not (seq osapuoli))                   (fail :info.tj-suunnittelija-paatos-details-missing)
       (< timestamp-1-day-from-now paatospvm) (fail :info.paatos-future-date))))
 
-(defn ->tj-suunnittelija-verdicts [osapuoli-type kuntaRoolikoodi xml-without-ns]
+(defn ->tj-suunnittelija-verdicts [{{:keys [yhteystiedot]} :data} osapuoli-type kuntaRoolikoodi xml-without-ns]
   (let [{osapuoli-path :path kuntaRoolikoodi-key :key} (osapuoli-path-key-mapping osapuoli-type)
         osapuoli-key (last osapuoli-path)]
     (map (fn [osapuolet-xml-without-ns]
            (let [osapuolet (->> (select osapuolet-xml-without-ns osapuoli-path)
                              (map (partial ->paatos-osapuoli osapuoli-key))
-                             (filter #(= kuntaRoolikoodi (get % kuntaRoolikoodi-key))))
+                             (filter #(and
+                                        (= kuntaRoolikoodi (get % kuntaRoolikoodi-key))
+                                        (:paatosPvm %)
+                                        (= (get-in yhteystiedot [:email :value]) (get-in % [:henkilo :sahkopostiosoite])))))
                  osapuoli (party-with-paatos-data osapuolet)]
            (when (and osapuoli (> (now) (:paatosPvm osapuoli)))
              {

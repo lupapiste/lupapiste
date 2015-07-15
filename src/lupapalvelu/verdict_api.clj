@@ -47,15 +47,13 @@
                                 "tyonjohtajan-nimeaminen-v2" "tyonjohtaja-v2"
                                 "suunnittelijan-nimeaminen"  "suunnittelija"}
               doc-name (doc-name-mapping application-op-name)
-              target-kuntaRoolikoodi (some-> application-op-name
-                                       doc-name-mapping
-                                       ((partial domain/get-document-by-name application))
-                                       :data :kuntaRoolikoodi :value)]
+              doc (domain/get-document-by-name application doc-name)
+              target-kuntaRoolikoodi (get-in doc [:data :kuntaRoolikoodi :value])]
 
-          (when (and link-permit-xml osapuoli-type target-kuntaRoolikoodi)
+          (when (and link-permit-xml osapuoli-type doc target-kuntaRoolikoodi)
             (or
-              (krysp-reader/tj-suunnittelija-verdicts-validator link-permit-xml osapuoli-type target-kuntaRoolikoodi)
-              (let [updates (verdict/find-tj-suunnittelija-verdicts-from-xml command link-permit-xml osapuoli-type target-kuntaRoolikoodi)]
+              (krysp-reader/tj-suunnittelija-verdicts-validator doc link-permit-xml osapuoli-type target-kuntaRoolikoodi)
+              (let [updates (verdict/find-tj-suunnittelija-verdicts-from-xml command doc link-permit-xml osapuoli-type target-kuntaRoolikoodi)]
                 (update-application command updates)
                 (ok :verdicts (get-in updates [$set :verdicts]))))))))))
 

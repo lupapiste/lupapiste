@@ -88,11 +88,11 @@
 ;;  - Kayta testaamiseen "verdict - 2.1.8 - Tekla.xml" -tiedoston sisaltoa (esim kopioi verdict.xml:n paalle)
 ;;
 (defn find-tj-suunnittelija-verdicts-from-xml
-  [{:keys [application user created] :as command} app-xml osapuoli-type target-kuntaRoolikoodi]
+  [{:keys [application user created] :as command} doc app-xml osapuoli-type target-kuntaRoolikoodi]
   {:pre [(every? command [:application :user :created]) app-xml]}
   (let [verdict-reader (partial
                          (permit/get-tj-suunnittelija-verdict-reader (:permitType application))
-                         osapuoli-type target-kuntaRoolikoodi)]
+                         doc osapuoli-type target-kuntaRoolikoodi)]
     (when-let [verdicts-with-attachments (seq (get-verdicts-with-attachments application user created app-xml verdict-reader))]
       {$set {:verdicts verdicts-with-attachments
              :modified created
