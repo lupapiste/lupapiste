@@ -39,7 +39,7 @@
                  [fi.sito/oskari "0.9.44"]
                  [slingshot "0.10.3"]
                  [com.google.zxing/javase "2.2"]
-                 [prismatic/schema "0.2.4"]
+                 [prismatic/schema "0.4.3"]
                  [cljts "0.2.0" :exclusions [xerces/xercesImpl]]
                  ; batik-js includes a built-in rhino, which breaks yuicompressor (it too has rhino built in)
                  ; xalan excluded just to avoid bloat, presumably XSLT is not needed
