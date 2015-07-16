@@ -9,6 +9,7 @@
             [lupapalvelu.action :refer [defquery defcommand update-application notify boolean-parameters] :as action]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.document.tools :as tools]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.notifications :as notifications]
@@ -47,9 +48,8 @@
                                 "tyonjohtajan-nimeaminen-v2" "tyonjohtaja-v2"
                                 "suunnittelijan-nimeaminen"  "suunnittelija"}
               doc-name (doc-name-mapping application-op-name)
-              doc (domain/get-document-by-name application doc-name)
-              target-kuntaRoolikoodi (get-in doc [:data :kuntaRoolikoodi :value])]
-
+              doc (tools/unwrapped (domain/get-document-by-name application doc-name))
+              target-kuntaRoolikoodi (get-in doc [:data :kuntaRoolikoodi])]
           (when (and link-permit-xml osapuoli-type doc target-kuntaRoolikoodi)
             (or
               (krysp-reader/tj-suunnittelija-verdicts-validator doc link-permit-xml osapuoli-type target-kuntaRoolikoodi)

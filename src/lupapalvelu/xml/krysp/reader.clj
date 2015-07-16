@@ -443,17 +443,17 @@
     (and ; sijaistettava must be empty in both, KRSYP and document
       (ss/blank? (:sijaistettavaHlo osapuoli))
       (and
-        (ss/blank? (get-in sijaistus [:sijaistettavaHloEtunimi :value]))
-        (ss/blank? (get-in sijaistus [:sijaistettavaHloSukunimi :value]))))
+        (ss/blank? (:sijaistettavaHloEtunimi sijaistus))
+        (ss/blank? (:sijaistettavaHloSukunimi sijaistus))))
     (and ; .. or dates and input values of KRYSP xml must match document values
-      (= (:alkamisPvm osapuoli) (util/to-xml-date-from-string (get-in sijaistus [:alkamisPvm :value])))
-      (= (:paattymisPvm osapuoli) (util/to-xml-date-from-string (get-in sijaistus [:paattymisPvm :value])))
+      (= (:alkamisPvm osapuoli) (util/to-xml-date-from-string (:alkamisPvm sijaistus)))
+      (= (:paattymisPvm osapuoli) (util/to-xml-date-from-string (:paattymisPvm sijaistus)))
       (=
         (ss/trim (:sijaistettavaHlo osapuoli))
         (ss/trim (str ; original string build in canonical-common 'get-sijaistustieto'
-                   (get-in sijaistus [:sijaistettavaHloEtunimi :value])
+                   (:sijaistettavaHloEtunimi sijaistus)
                    " "
-                   (get-in sijaistus [:sijaistettavaHloSukunimi :value])))))))
+                   (:sijaistettavaHloSukunimi sijaistus)))))))
 
 (defn- party-with-paatos-data [osapuolet sijaistus]
   (some
@@ -479,7 +479,7 @@
                     (filter #(and
                                (= kuntaRoolikoodi (get % kuntaRoolikoodi-key))
                                (:paatosPvm %)
-                               (= (get-in yhteystiedot [:email :value]) (get-in % [:henkilo :sahkopostiosoite])))))
+                               (= (:email yhteystiedot) (get-in % [:henkilo :sahkopostiosoite])))))
         osapuoli (party-with-paatos-data osapuolet sijaistus)
         paatospvm  (:paatosPvm osapuoli)
         timestamp-1-day-from-now (util/get-timestamp-from-now :day 1)]
@@ -497,7 +497,7 @@
                              (filter #(and
                                         (= kuntaRoolikoodi (get % kuntaRoolikoodi-key))
                                         (:paatosPvm %)
-                                        (= (get-in yhteystiedot [:email :value]) (get-in % [:henkilo :sahkopostiosoite])))))
+                                        (= (:email yhteystiedot) (get-in % [:henkilo :sahkopostiosoite])))))
                  osapuoli (party-with-paatos-data osapuolet sijaistus)]
            (when (and osapuoli (> (now) (:paatosPvm osapuoli)))
              {
