@@ -858,19 +858,19 @@
         tyonjohtajat (:tyonjohtajatieto osapuolet) => truthy
         tyonjohtajatieto (:Tyonjohtaja (last tyonjohtajat)) => truthy
 
-        naapuritieto (:naapuritieto osapuolet) => truthy
-        naapuricount (count naapuritieto) => 2
-        naapuri (first naapuritieto) => truthy
-        Naapuri (:Naapuri naapuri) => truthy
-        naapuri-henkilo (:henkilo Naapuri) => "PORTAALIA TESTAA"
-        kiiteistotunnus (:kiinteistotunnus Naapuri) => "75342600060211"
-        hallintasuhde (:hallintasuhde Naapuri) => "Ei tiedossa"
+        ;naapuritieto (:naapuritieto osapuolet) => truthy
+        ;naapuricount (count naapuritieto) => 2
+        ;naapuri (first naapuritieto) => truthy
+        ;Naapuri (:Naapuri naapuri) => truthy
+        ;naapuri-henkilo (:henkilo Naapuri) => "PORTAALIA TESTAA"
+        ;kiiteistotunnus (:kiinteistotunnus Naapuri) => "75342600060211"
+        ;hallintasuhde (:hallintasuhde Naapuri) => "Ei tiedossa"
 
-        naapuri (last naapuritieto) => truthy
-        Naapuri (:Naapuri naapuri) => truthy
-        naapuri-henkilo (:henkilo Naapuri) => "L\u00f6nnqvist, Rauno Georg Christian"
-        kiiteistotunnus (:kiinteistotunnus Naapuri) => "75342600090092"
-        hallintasuhde (:hallintasuhde Naapuri) => "Ei tiedossa"
+        ;naapuri (last naapuritieto) => truthy
+        ;Naapuri (:Naapuri naapuri) => truthy
+        ;naapuri-henkilo (:henkilo Naapuri) => "L\u00f6nnqvist, Rauno Georg Christian"
+        ;kiiteistotunnus (:kiinteistotunnus Naapuri) => "75342600090092"
+        ;hallintasuhde (:hallintasuhde Naapuri) => "Ei tiedossa"
 
         sijaistus (:sijaistustieto tyonjohtajatieto) => truthy
         sijaistus (:Sijaistus (last sijaistus)) = truthy

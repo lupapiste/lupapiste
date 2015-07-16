@@ -522,7 +522,8 @@
    {:osapuolitieto (get-parties documents-by-types)
     :suunnittelijatieto (get-designers documents-by-types)
     :tyonjohtajatieto (get-foremen documents-by-types lang)
-    :naapuritieto (get-neighbors neighbors)}})
+    ;:naapuritieto (get-neighbors neighbors)LPK-215
+    }})
 
 (defn change-value-to-when [value to_compare new_val]
   (if (= value to_compare) new_val value))
