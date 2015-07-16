@@ -383,6 +383,19 @@
 (defn finnish-zip? [^String zip-code]
   (boolean (when zip-code (re-matches #"^\d{5}$" zip-code))))
 
+(defn version-is-greater-or-equal
+  "True if given version string is greater than version defined in target map, else nil"
+  [source target]
+  {:pre [(map? target) (every? #(target %) [:major :minor :micro]) (string? source)]}
+  (let [[source-major source-minor source-micro] (map #(->int %) (ss/split source #"\."))
+        source-major (or source-major 0)
+        source-minor (or source-minor 0)
+        source-micro (or source-micro 0)]
+    (or
+      (> source-major (:major target))
+      (and (= source-major (:major target)) (> source-minor (:minor target)))
+      (and (= source-major (:major target)) (= source-minor (:minor target)) (>= source-micro (:micro target))))))
+
 ;;
 ;; Schema utils:
 ;;

@@ -279,3 +279,18 @@
   (fact (to-long "213asd2") => nil)
   (fact (to-long "") => nil)
   (fact (to-long 1234) => nil))
+
+(facts "version-is-greater-or-equal"
+  (fact "source (evaluated) version"
+    (version-is-greater-or-equal "2"     {:major 2 :minor 1 :micro 5}) => false
+    (version-is-greater-or-equal "2.1"   {:major 2 :minor 1 :micro 5}) => false
+    (version-is-greater-or-equal "2.1.4" {:major 2 :minor 1 :micro 5}) => false
+    (version-is-greater-or-equal "2.1.5" {:major 2 :minor 1 :micro 5}) => true
+    (version-is-greater-or-equal "2.1.6" {:major 2 :minor 1 :micro 5}) => true
+
+    (version-is-greater-or-equal "2"     {:major 2 :minor 0 :micro 0}) => true
+    (version-is-greater-or-equal "2.1"   {:major 2 :minor 1 :micro 0}) => true)
+  (fact "target version"
+    (version-is-greater-or-equal 2.1     {:major 2 :minor 1 :micro 5}) => (throws AssertionError)
+    (version-is-greater-or-equal "2.1.4" "2.1.5")                      => (throws AssertionError)
+    (version-is-greater-or-equal "2.1.4" {:major 2 :minor 1})          => (throws AssertionError)))
