@@ -3751,6 +3751,96 @@ ul.attachments-list li.mandatory-attachments {
   color: #04c714;
 }
 
+/* line 1, ../sass/partials/_metadata-editor.scss */
+.metadata-editor-container {
+  width: 100%;
+}
+/* line 3, ../sass/partials/_metadata-editor.scss */
+.metadata-editor-container .editor {
+  background-color: #f5f5f4;
+  font-size: 14px;
+  border-radius: 3px;
+  box-shadow: 2px 2px 2px #999999;
+  padding: 15px;
+}
+/* line 11, ../sass/partials/_metadata-editor.scss */
+.metadata-editor-container .editor .editor-form select, .metadata-editor-container .editor .editor-form input {
+  width: 100%;
+}
+/* line 14, ../sass/partials/_metadata-editor.scss */
+.metadata-editor-container .editor .editor-form label {
+  display: inline-block;
+  margin-bottom: 5px;
+  font-weight: 700;
+}
+/* line 19, ../sass/partials/_metadata-editor.scss */
+.metadata-editor-container .editor .editor-form .code-input {
+  margin-left: 4px;
+  width: 60px;
+}
+/* line 23, ../sass/partials/_metadata-editor.scss */
+.metadata-editor-container .editor .editor-form div {
+  margin-bottom: 5px;
+}
+/* line 27, ../sass/partials/_metadata-editor.scss */
+.metadata-editor-container .editor .editor-form .years-field input {
+  width: 50px;
+  text-align: right;
+}
+/* line 31, ../sass/partials/_metadata-editor.scss */
+.metadata-editor-container .editor .editor-form .years-field .year-label {
+  margin-left: 5px;
+}
+/* line 37, ../sass/partials/_metadata-editor.scss */
+.metadata-editor-container .editor .button {
+  cursor: pointer;
+}
+/* line 41, ../sass/partials/_metadata-editor.scss */
+.metadata-editor-container .editor .invalid-edit {
+  border: 2px solid #ff0643;
+  border-radius: 2px;
+  outline: none;
+}
+/* line 47, ../sass/partials/_metadata-editor.scss */
+.metadata-editor-container .editor .subtable {
+  background-color: #e8e8e7;
+  padding: 10px;
+  border-radius: 4px;
+  margin-top: 10px;
+}
+/* line 52, ../sass/partials/_metadata-editor.scss */
+.metadata-editor-container .editor .subtable h4 {
+  font-size: 16px;
+  margin-top: 0;
+}
+/* line 56, ../sass/partials/_metadata-editor.scss */
+.metadata-editor-container .editor .subtable h5 {
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+/* line 61, ../sass/partials/_metadata-editor.scss */
+.metadata-editor-container .editor .editor-buttons {
+  *zoom: 1;
+  padding-top: 15px;
+}
+/* line 22, ../sass/main.scss */
+.metadata-editor-container .editor .editor-buttons:before, .metadata-editor-container .editor .editor-buttons:after {
+  content: "";
+  display: table;
+}
+/* line 26, ../sass/main.scss */
+.metadata-editor-container .editor .editor-buttons:after {
+  clear: both;
+}
+/* line 64, ../sass/partials/_metadata-editor.scss */
+.metadata-editor-container .editor .editor-buttons .save {
+  float: left;
+}
+/* line 67, ../sass/partials/_metadata-editor.scss */
+.metadata-editor-container .editor .editor-buttons .delete {
+  float: right;
+}
+
 /* VIEWS
 ------------------------------------------------------------------------------*/
 @media (max-width: 47.5em) {
@@ -6605,50 +6695,50 @@ div.attachment-multiselect-content tr.attachment-group-header {
 /*
   Lupapalvelu CSS:
 */
-/* line 144, ../sass/main.scss */
+/* line 145, ../sass/main.scss */
 .ltext-error {
   color: #ffd280 !important;
   font-weight: bold !important;
   text-shadow: 0px 1px 0 black !important;
 }
 
-/* line 150, ../sass/main.scss */
+/* line 151, ../sass/main.scss */
 .visible {
   display: block;
 }
 
-/* line 154, ../sass/main.scss */
+/* line 155, ../sass/main.scss */
 .hidden {
   display: none !important;
 }
 
-/* line 158, ../sass/main.scss */
+/* line 159, ../sass/main.scss */
 .inline {
   display: inline;
 }
 
-/* line 162, ../sass/main.scss */
+/* line 163, ../sass/main.scss */
 .template {
   display: none;
 }
 
-/* line 166, ../sass/main.scss */
+/* line 167, ../sass/main.scss */
 #main-nav-bar {
   display: none;
 }
 
-/* line 170, ../sass/main.scss */
+/* line 171, ../sass/main.scss */
 .inert-table tbody tr:hover td,
 .inert-table tbody tr:hover th {
   background-color: #ffffff;
 }
 
-/* line 175, ../sass/main.scss */
+/* line 176, ../sass/main.scss */
 #application table input {
   margin: 0px;
 }
 
-/* line 179, ../sass/main.scss */
+/* line 180, ../sass/main.scss */
 .droparea {
   width: 150px;
   height: 100px;
@@ -6660,27 +6750,27 @@ div.attachment-multiselect-content tr.attachment-group-header {
   display: table-cell;
 }
 
-/* line 190, ../sass/main.scss */
+/* line 191, ../sass/main.scss */
 .droparea-hover {
   border-color: #101010;
   color: #101010;
 }
 
 /* basic styles*/
-/* line 198, ../sass/main.scss */
+/* line 199, ../sass/main.scss */
 .table {
   font-size: 16px;
   line-height: 24px;
 }
 
 /* map zoomer fix */
-/* line 204, ../sass/main.scss */
+/* line 205, ../sass/main.scss */
 div.pzbDiv {
   right: 8px;
   top: 10px;
 }
 
-/* line 209, ../sass/main.scss */
+/* line 210, ../sass/main.scss */
 .dev-debug {
   z-index: 666;
   width: 146px;
@@ -6694,47 +6784,47 @@ div.pzbDiv {
   font-size: 0.8em;
   color: #333;
 }
-/* line 222, ../sass/main.scss */
+/* line 223, ../sass/main.scss */
 .dev-debug p {
   margin-bottom: 4px;
 }
-/* line 224, ../sass/main.scss */
+/* line 225, ../sass/main.scss */
 .dev-debug p a {
   display: block;
 }
 
-/* line 230, ../sass/main.scss */
+/* line 231, ../sass/main.scss */
 #ui-datepicker-div {
   display: none;
 }
 
 /* find address and poi list: */
-/* line 235, ../sass/main.scss */
+/* line 236, ../sass/main.scss */
 .create-find {
   font-size: 12px;
 }
-/* line 237, ../sass/main.scss */
+/* line 238, ../sass/main.scss */
 .create-find .type {
   color: #555;
   font-style: italic;
 }
-/* line 240, ../sass/main.scss */
+/* line 241, ../sass/main.scss */
 .create-find .type:before {
   content: " (";
 }
-/* line 241, ../sass/main.scss */
+/* line 242, ../sass/main.scss */
 .create-find .type:after {
   content: ")";
 }
-/* line 244, ../sass/main.scss */
+/* line 245, ../sass/main.scss */
 .create-find .number:before {
   content: " ";
 }
-/* line 246, ../sass/main.scss */
+/* line 247, ../sass/main.scss */
 .create-find .municipality {
   color: #555;
 }
-/* line 248, ../sass/main.scss */
+/* line 249, ../sass/main.scss */
 .create-find .municipality:before {
   content: ", ";
 }

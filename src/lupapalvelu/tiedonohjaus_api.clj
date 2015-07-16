@@ -53,6 +53,7 @@
 
 (def schema-to-input-type-map
   {s/Str   "text"
+   tms/NonEmptyStr "text"
    tms/Vuodet "number"})
 
 (defn metadata-schema-for-ui [field]
