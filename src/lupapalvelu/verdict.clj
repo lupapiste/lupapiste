@@ -106,9 +106,6 @@
              :state    :verdictGiven}})))
 
 
-;; Jos taustajärjestelmästä ei löydy TJ- tai Suunnittelija-hakemukselle päätöstä,
-;; ja organisaatiolla käytössä krysp 2.1.8-versio tai uudempi, haetaan varsinainen lupa (viitelupa)
-;; ja katsotaan löytyykö samalla TJ ja päätöstä saman roolin työnjohtajasta tai suunnittelijasta.
 ;; Trimble writes verdict for tyonjohtaja/suunnittelija applications to their link permits.
 (defn fetch-tj-suunnittelija-verdict [{{:keys [municipality permitType] :as application} :application :as command}]
   (let [application-op-name (-> application :primaryOperation :name)
