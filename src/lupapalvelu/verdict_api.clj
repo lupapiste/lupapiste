@@ -11,6 +11,7 @@
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.organization :as organization]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.verdict :as verdict]
@@ -24,7 +25,7 @@
 ;; KRYSP verdicts
 ;;
 
-(defn do-check-for-verdict [{application :application :as command}]
+(defn do-check-for-verdict [{{:keys [municipality permitType] :as application} :application :as command}]
   {:pre [(every? command [:application :user :created])]}
   (if-let [app-xml (krysp-fetch/get-application-xml application :application-id)]
 
@@ -36,8 +37,12 @@
         (ok :verdicts (get-in updates [$set :verdicts]) :tasks (get-in updates [$set :tasks]))))
 
     ;; Trimble writes verdict for tyonjohtaja/suunnittelija applications to their link permits.
-    (let [application-op-name (-> application :primaryOperation :name)]
-      (when (#{"tyonjohtajan-nimeaminen-v2" "tyonjohtajan-nimeaminen" "suunnittelijan-nimeaminen"} application-op-name)
+    (let [application-op-name (-> application :primaryOperation :name)
+          organization (organization/resolve-organization municipality permitType)
+          krysp-version (get-in organization [:krysp (keyword permitType) :version])]
+      (when (and
+              (#{"tyonjohtajan-nimeaminen-v2" "tyonjohtajan-nimeaminen" "suunnittelijan-nimeaminen"} application-op-name)
+              (util/version-is-greater-or-equal krysp-version {:major 2 :minor 1 :micro 8}))
         (let [application (meta-fields/enrich-with-link-permit-data application)
               link-permit (application/get-link-permit-app application)
               link-permit-xml (krysp-fetch/get-application-xml link-permit :application-id)
