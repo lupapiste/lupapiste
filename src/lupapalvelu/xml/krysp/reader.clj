@@ -437,11 +437,31 @@
   (-> (cr/all-of osapuoli-xml-without-ns path-key)
     (cr/convert-keys-to-timestamps [:paatosPvm])))
 
-(defn- party-with-paatos-data [osapuolet]
+(defn- validate-sijaistustieto [osapuoli sijaistus]
+  (or
+    (nil? sijaistus) ; sijaistus only used with foreman roles
+    (and ; sijaistettava must be empty in both, KRSYP and document
+      (ss/blank? (:sijaistettavaHlo osapuoli))
+      (and
+        (ss/blank? (get-in sijaistus [:sijaistettavaHloEtunimi :value]))
+        (ss/blank? (get-in sijaistus [:sijaistettavaHloSukunimi :value]))))
+    (and ; .. or dates and input values of KRYSP xml must match document values
+      (= (:alkamisPvm osapuoli) (util/to-xml-date-from-string (get-in sijaistus [:alkamisPvm :value])))
+      (= (:paattymisPvm osapuoli) (util/to-xml-date-from-string (get-in sijaistus [:paattymisPvm :value])))
+      (=
+        (ss/trim (:sijaistettavaHlo osapuoli))
+        (ss/trim (str ; original string build in canonical-common 'get-sijaistustieto'
+                   (get-in sijaistus [:sijaistettavaHloEtunimi :value])
+                   " "
+                   (get-in sijaistus [:sijaistettavaHloSukunimi :value])))))))
+
+(defn- party-with-paatos-data [osapuolet sijaistus]
   (some
     #(when (and
              (:paatosPvm %)
-             (tj-suunnittelija-verdict-statuses (:paatostyyppi %))) %)
+             (tj-suunnittelija-verdict-statuses (:paatostyyppi %))
+             (validate-sijaistustieto % sijaistus))
+       %)
     osapuolet))
 
 (def- osapuoli-path-key-mapping
@@ -450,7 +470,7 @@
    "suunnittelija" {:path [:suunnittelijatieto :Suunnittelija]
                     :key :suunnittelijaRoolikoodi}})
 
-(defn tj-suunnittelija-verdicts-validator [{{:keys [yhteystiedot]} :data} xml osapuoli-type kuntaRoolikoodi]
+(defn tj-suunnittelija-verdicts-validator [{{:keys [yhteystiedot sijaistus]} :data} xml osapuoli-type kuntaRoolikoodi]
   {:pre [xml (#{"tyonjohtaja" "suunnittelija"} osapuoli-type) kuntaRoolikoodi]}
   (let [{osapuoli-path :path kuntaRoolikoodi-key :key} (osapuoli-path-key-mapping osapuoli-type)
         osapuoli-key (last osapuoli-path)
@@ -460,7 +480,7 @@
                                (= kuntaRoolikoodi (get % kuntaRoolikoodi-key))
                                (:paatosPvm %)
                                (= (get-in yhteystiedot [:email :value]) (get-in % [:henkilo :sahkopostiosoite])))))
-        osapuoli (party-with-paatos-data osapuolet)
+        osapuoli (party-with-paatos-data osapuolet sijaistus)
         paatospvm  (:paatosPvm osapuoli)
         timestamp-1-day-from-now (util/get-timestamp-from-now :day 1)]
     (cond
@@ -468,7 +488,7 @@
       (not (seq osapuoli))                   (fail :info.tj-suunnittelija-paatos-details-missing)
       (< timestamp-1-day-from-now paatospvm) (fail :info.paatos-future-date))))
 
-(defn ->tj-suunnittelija-verdicts [{{:keys [yhteystiedot]} :data} osapuoli-type kuntaRoolikoodi xml-without-ns]
+(defn ->tj-suunnittelija-verdicts [{{:keys [yhteystiedot sijaistus]} :data} osapuoli-type kuntaRoolikoodi xml-without-ns]
   (let [{osapuoli-path :path kuntaRoolikoodi-key :key} (osapuoli-path-key-mapping osapuoli-type)
         osapuoli-key (last osapuoli-path)]
     (map (fn [osapuolet-xml-without-ns]
@@ -478,7 +498,7 @@
                                         (= kuntaRoolikoodi (get % kuntaRoolikoodi-key))
                                         (:paatosPvm %)
                                         (= (get-in yhteystiedot [:email :value]) (get-in % [:henkilo :sahkopostiosoite])))))
-                 osapuoli (party-with-paatos-data osapuolet)]
+                 osapuoli (party-with-paatos-data osapuolet sijaistus)]
            (when (and osapuoli (> (now) (:paatosPvm osapuoli)))
              {
 ;              :lupamaaraykset {:paatostyyppi (:paatostyyppi osapuoli)}
