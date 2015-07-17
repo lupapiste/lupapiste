@@ -10,7 +10,8 @@
            [lupapalvelu.verdict :refer :all]
            [lupapalvelu.permit :as permit]
            [lupapalvelu.organization :as organization]
-           [sade.core :refer [now]]))
+           [sade.core :refer [now]]
+           [sade.xml :as xml]))
 
 (testable-privates lupapalvelu.verdict get-verdicts-with-attachments)
 
@@ -28,7 +29,7 @@
                :sijaistettavaHloEtunimi {:value ""}}
               :kuntaRoolikoodi {:value "vastaava työnjohtaja"},
               :yhteystiedot
-              {:email {:value "jukka.vanttinen@trimble.com"}
+              {:email {:value "jukka.testaaja@example.com"}
                :puhelin {:value ""}}}})
 
 (def tj-app {:id "2"
@@ -43,13 +44,21 @@
                :primaryOperation {:name "kerrostalo-rivitalo"}})
 
 (facts "Tyonjohtaja and suunnittelijan nimeaminen tests"
-  (fact "Whole"
-    (fetch-tj-suunnittelija-verdict {:application tj-app :user {:username "sonja"} :created (now)}) => false
-  (provided
-    (organization/resolve-organization "753" "R") => {:krysp {:R {:version "2.1.8"}}}
-    (meta-fields/enrich-with-link-permit-data irrelevant) => tj-app
-    (application/get-link-permit-app irrelevant) => link-app
-    (krysp-fetch/get-application-xml link-app :application-id) => (sade.xml/parse (slurp "resources/krysp/sample/verdict - 2.1.8 - Tekla.xml"))
-    (domain/get-document-by-name tj-app irrelevant) => tj-doc
-    (action/update-application irrelevant irrelevant) => nil
-    )))
+  (let [xml (xml/parse (slurp "resources/krysp/sample/verdict - 2.1.8 - Tekla.xml"))]
+
+    (fact "Success when TJ data is ok, compared to XML. Email is same, kuntaRoolikoodi is same"
+      (count (:verdicts (fetch-tj-suunnittelija-verdict {:application tj-app :user {:username "sonja"} :created (now)}))) => 1
+
+      (fact "KRYSP version needs to be 2.1.8 or higher"
+        (fetch-tj-suunnittelija-verdict {:application tj-app :user {:username "sonja"} :created (now)}) => nil
+        (provided
+          (organization/resolve-organization "753" "R") => {:krysp {:R {:version "2.1.7"}}}))
+
+      (against-background
+        (krysp-fetch/get-application-xml anything anything) => nil
+        (organization/resolve-organization "753" "R") => {:krysp {:R {:version "2.1.8"}}}
+        (meta-fields/enrich-with-link-permit-data irrelevant) => tj-app
+        (application/get-link-permit-app irrelevant) => link-app
+        (krysp-fetch/get-application-xml link-app :application-id) => xml
+        (domain/get-document-by-name tj-app irrelevant) => tj-doc
+        (action/update-application irrelevant irrelevant) => nil))))
