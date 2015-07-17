@@ -5,6 +5,7 @@
             [clj-time.coerce :as coerce]
             [sade.xml :as xml]
             [lupapalvelu.xml.krysp.reader :refer [property-equals ->verdicts ->buildings-summary ->rakennuksen-tiedot ->buildings wfs-krysp-url rakval-case-type get-app-info-from-message]]
+            [sade.common-reader :as cr]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]))
@@ -12,7 +13,16 @@
 (defn- to-timestamp [yyyy-mm-dd]
   (coerce/to-long (coerce/from-string yyyy-mm-dd)))
 
-(testable-privates lupapalvelu.xml.krysp.reader ->standard-verdicts standard-verdicts-validator simple-verdicts-validator ->simple-verdicts pysyva-rakennustunnus)
+(testable-privates lupapalvelu.xml.krysp.reader
+  ->standard-verdicts
+  standard-verdicts-validator
+  simple-verdicts-validator
+  ->simple-verdicts
+  pysyva-rakennustunnus
+  tj-suunnittelija-verdicts-validator
+  party-with-paatos-data
+  validate-sijaistustieto
+  osapuoli-path-key-mapping)
 
 (fact "property-equals returns url-encoded data"
   (property-equals "_a_" "_b_") => "%3CPropertyIsEqualTo%3E%3CPropertyName%3E_a_%3C%2FPropertyName%3E%3CLiteral%3E_b_%3C%2FLiteral%3E%3C%2FPropertyIsEqualTo%3E")
@@ -510,5 +520,43 @@
         (fact "address" address => "Kylykuja 3-5 D 35b-c")
         (fact "propertyId" propertyId => "18600303560006")))))
 
+
+(facts* "Tests for TJ/suunnittelijan verdicts parsing"
+  (let [xml (xml/parse (slurp "resources/krysp/sample/verdict - 2.1.8 - Tekla.xml"))
+        osapuoli {:alkamisPvm "2015-07-07"
+                  :paattymisPvm "2015-07-10"
+                  :sijaistettavaHlo "Pena Panaani"
+                  :paatosPvm 1435708800000 ; 01.07.2015
+                  :paatostyyppi "hyv\u00e4ksytty"}
+        sijaistus {:alkamisPvm "07.07.2015"
+                   :paattymisPvm "10.07.2015"
+                   :sijaistettavaHloEtunimi "Pena"
+                   :sijaistettavaHloSukunimi "Panaani"}]
+
+    (facts "Sijaistus"
+      (validate-sijaistustieto nil nil) => falsey
+      (validate-sijaistustieto nil sijaistus) => falsey
+      (validate-sijaistustieto osapuoli nil) => truthy
+      (fact "True when values match"
+        (validate-sijaistustieto osapuoli sijaistus) => truthy)
+      (fact "Dates must match"
+        (validate-sijaistustieto (assoc osapuoli :alkamisPvm "2015-07-06") sijaistus) => falsey
+        (validate-sijaistustieto osapuoli (assoc sijaistus :paattymisPvm "09.07.2015")) => falsey)
+      (fact "Name must match"
+        (validate-sijaistustieto (assoc osapuoli :sijaistettavaHlo "Panaani Pena") sijaistus) => falsey
+        (validate-sijaistustieto osapuoli (assoc sijaistus :sijaistettavaHloEtunimi "Paavo")) => falsey)
+      (fact "Name can have whitespace"
+        (validate-sijaistustieto osapuoli (assoc sijaistus :sijaistettavaHloSukunimi "  Panaani ")) => truthy))
+
+    (facts "Osapuoli with paatos data"
+      (party-with-paatos-data nil nil) => falsey
+      (party-with-paatos-data [osapuoli] sijaistus) => osapuoli
+      (fact "PaatosPvm must be there"
+        (party-with-paatos-data [(dissoc osapuoli :alkamisPvm)] anything) => nil)
+      (fact "Paatostyyppi must be correct"
+        (party-with-paatos-data [(assoc osapuoli :paatostyyppi "test")] anything) => nil
+        (party-with-paatos-data [(assoc osapuoli :paatostyyppi "hyl\u00e4tty")] sijaistus) => truthy)
+      (fact "Sijaistus can be nil"
+        (party-with-paatos-data [osapuoli] nil) => truthy))))
 
 
