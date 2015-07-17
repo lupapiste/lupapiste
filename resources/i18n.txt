@@ -2,3 +2,4 @@ info.tj-suunnittelija-paatos-details-missing: Päätöksen hakeminen epäonnistu
 verdict.status.hyvaksytty: Hyväksytty
 verdict.status.hylatty: Hylätty
 verdict.status.ilmoitus-hyvaksytty: Ilmoitus hyväksytty
+verdict.status.hakemusvaiheessa: Hakemusvaiheessa

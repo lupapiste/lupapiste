@@ -428,6 +428,7 @@
 (def- tj-suunnittelija-verdict-statuses-to-loc-keys-mapping
   {"hyv\u00e4ksytty" "hyvaksytty"
    "hyl\u00e4tty" "hylatty"
+   "hakemusvaiheessa" "hakemusvaiheessa"
    "ilmoitus hyv\u00e4ksytty" "ilmoitus-hyvaksytty"})
 
 (def- tj-suunnittelija-verdict-statuses
