@@ -438,22 +438,23 @@
     (cr/convert-keys-to-timestamps [:paatosPvm])))
 
 (defn- validate-sijaistustieto [osapuoli sijaistus]
-  (or
-    (nil? sijaistus) ; sijaistus only used with foreman roles
-    (and ; sijaistettava must be empty in both, KRSYP and document
-      (ss/blank? (:sijaistettavaHlo osapuoli))
-      (and
-        (ss/blank? (:sijaistettavaHloEtunimi sijaistus))
-        (ss/blank? (:sijaistettavaHloSukunimi sijaistus))))
-    (and ; .. or dates and input values of KRYSP xml must match document values
-      (= (:alkamisPvm osapuoli) (util/to-xml-date-from-string (:alkamisPvm sijaistus)))
-      (= (:paattymisPvm osapuoli) (util/to-xml-date-from-string (:paattymisPvm sijaistus)))
-      (=
-        (ss/trim (:sijaistettavaHlo osapuoli))
-        (ss/trim (str ; original string build in canonical-common 'get-sijaistustieto'
-                   (:sijaistettavaHloEtunimi sijaistus)
-                   " "
-                   (:sijaistettavaHloSukunimi sijaistus)))))))
+  (when osapuoli
+    (or
+     (nil? sijaistus) ; sijaistus only used with foreman roles
+     (and ; sijaistettava must be empty in both, KRSYP and document
+       (ss/blank? (:sijaistettavaHlo osapuoli))
+       (and
+         (ss/blank? (:sijaistettavaHloEtunimi sijaistus))
+         (ss/blank? (:sijaistettavaHloSukunimi sijaistus))))
+     (and ; .. or dates and input values of KRYSP xml must match document values
+       (= (:alkamisPvm osapuoli) (util/to-xml-date-from-string (:alkamisPvm sijaistus)))
+       (= (:paattymisPvm osapuoli) (util/to-xml-date-from-string (:paattymisPvm sijaistus)))
+       (=
+         (ss/trim (:sijaistettavaHlo osapuoli))
+         (str ; original string build in canonical-common 'get-sijaistustieto'
+           (ss/trim (:sijaistettavaHloEtunimi sijaistus))
+           " "
+           (ss/trim (:sijaistettavaHloSukunimi sijaistus))))))))
 
 (defn- party-with-paatos-data [osapuolet sijaistus]
   (some
