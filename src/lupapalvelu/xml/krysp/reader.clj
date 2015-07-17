@@ -502,16 +502,12 @@
                                         (= (:email yhteystiedot) (get-in % [:henkilo :sahkopostiosoite])))))
                  osapuoli (party-with-paatos-data osapuolet sijaistus)]
            (when (and osapuoli (> (now) (:paatosPvm osapuoli)))
-             {
-;              :lupamaaraykset {:paatostyyppi (:paatostyyppi osapuoli)}
-;              :paivamaarat    {:paatosPvm (:paatosPvm osapuoli)}
-              :poytakirjat    [{
-                               :status (get tj-suunnittelija-verdict-statuses-to-loc-keys-mapping (:paatostyyppi osapuoli))   ;; TODO: tee oma lokalisaatioavain, jottei tarvi kayttaa valilynteja ja aakkosia
-                               :paatospvm (:paatosPvm osapuoli)
-                               :liite (:liite osapuoli) ;; tanne liite?
-                               }]
-              }
-             )))
+             {:poytakirjat
+              [{:status (get tj-suunnittelija-verdict-statuses-to-loc-keys-mapping (:paatostyyppi osapuoli))
+                :paatospvm (:paatosPvm osapuoli)
+                :liite (:liite osapuoli)
+                }]
+              })))
   (select xml-without-ns [:osapuolettieto :Osapuolet]))))
 
 

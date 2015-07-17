@@ -28,7 +28,7 @@
                                 :alkamisPvm {:value nil},
                                 :sijaistettavaHloSukunimi {:value ""},
                                 :sijaistettavaHloEtunimi {:value ""}}
-                    :kuntaRoolikoodi {:value "vastaava työnjohtaja"},
+                    :kuntaRoolikoodi {:value "vastaava ty\u00f6njohtaja"},
                     :yhteystiedot {:email {:value "jukka.testaaja@example.com"}
                                    :puhelin {:value ""}}}})
 

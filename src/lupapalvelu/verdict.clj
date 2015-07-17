@@ -68,7 +68,7 @@
                      (update-in paatos [:poytakirjat] #(map (partial get-poytakirja application user timestamp verdict-id) %)))
                 paatokset))))))))
 
-(defn- get-verdicts-with-attachments [application user timestamp xml reader]  ;; TODO: reader-parametri tullut lisaa -> korjaa testit
+(defn- get-verdicts-with-attachments [application user timestamp xml reader]
   (->> (krysp-reader/->verdicts xml reader)
     (map (partial verdict-attachments application user timestamp))
     (filter seq)))
@@ -92,7 +92,6 @@
 ;;
 ;; TODO:
 ;;  - yhdista tama funktio jotenkin ylla olevan find-verdicts-from-xml:n kanssa?
-;;  - Kayta testaamiseen "verdict - 2.1.8 - Tekla.xml" -tiedoston sisaltoa (esim kopioi verdict.xml:n paalle)
 ;;
 (defn find-tj-suunnittelija-verdicts-from-xml
   [{:keys [application user created] :as command} doc app-xml osapuoli-type target-kuntaRoolikoodi]
