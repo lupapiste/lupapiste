@@ -42,7 +42,7 @@
       (if (and (foreman/foreman-app? application) (some #{(keyword (:state link-permit-app))} meta-fields/post-submitted-states))
         application
         (do
-          (error "Not able to get a kuntalupatunnus for the application  " (:id application) " from it's link permit's (" link-permit-app-id ") verdict."
+          (info "Not able to get a kuntalupatunnus for the application  " (:id application) " from it's link permit's (" link-permit-app-id ") verdict."
                  " Associated Link-permit data: " (:linkPermitData application))
           (if (foreman/foreman-app? application)
             (fail! :error.link-permit-app-not-in-post-sent-state)
