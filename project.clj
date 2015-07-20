@@ -6,7 +6,7 @@
                  [org.clojure/tools.nrepl "0.2.6"]
                  [org.clojure/tools.trace "0.7.8"]
                  [commons-fileupload "1.3.1"] ; The latest version - ring requires 1.3
-                 [ring "1.3.1"]
+                 [ring "1.4.0"]
                  [noir "1.3.0" :exclusions [compojure clj-stacktrace org.clojure/tools.macro ring hiccup bultitude]]
                  [bultitude "0.2.6"] ; noir requires 0.2.0, midje 1.6 requires 0.2.2
                  [compojure "1.1.9" :exclusions [org.clojure/tools.macro]]
