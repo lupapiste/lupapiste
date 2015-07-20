@@ -1,6 +1,6 @@
 (ns lupapalvelu.integrations-api
   "API for commands/functions working with integrations (ie. KRYSP, Asianhallinta)"
-  (:require [taoensso.timbre :as timbre :refer [infof error]]
+  (:require [taoensso.timbre :as timbre :refer [infof info error]]
             [monger.operators :refer [$in $set $push]]
             [lupapalvelu.action :refer [defcommand update-application notify] :as action]
             [lupapalvelu.application :as application]
