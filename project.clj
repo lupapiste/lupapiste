@@ -6,7 +6,7 @@
                  [org.clojure/tools.nrepl "0.2.6"]
                  [org.clojure/tools.trace "0.7.8"]
                  [commons-fileupload "1.3.1"] ; The latest version - ring requires 1.3
-                 [ring "1.3.1"]
+                 [ring "1.4.0"]
                  [noir "1.3.0" :exclusions [compojure clj-stacktrace org.clojure/tools.macro ring hiccup bultitude]]
                  [bultitude "0.2.6"] ; noir requires 0.2.0, midje 1.6 requires 0.2.2
                  [compojure "1.1.9" :exclusions [org.clojure/tools.macro]]
@@ -21,10 +21,10 @@
                  [camel-snake-kebab "0.1.2"]
                  [org.bouncycastle/bcprov-jdk15on "1.46"]
                  [pandect "0.3.0" :exclusions [org.bouncycastle/bcprov-jdk15on]]
-                 [clj-time "0.8.0"]
+                 [clj-time "0.9.0"]
                  [org.apache.commons/commons-lang3 "3.3.2"] ; Already a dependency but required explicitly
                  [commons-io/commons-io "2.4"]
-                 [commons-codec/commons-codec "1.9"]
+                 [commons-codec/commons-codec "1.10"]
                  [com.lowagie/itext "4.2.1" :exclusions [org.bouncycastle/bctsp-jdk14]]
                  [net.java.dev.jai-imageio/jai-imageio-core-standalone "1.2-pre-dr-b04-2014-09-13"]
                  [de.ubercode.clostache/clostache "1.4.0"]
@@ -37,7 +37,7 @@
                  [com.googlecode.htmlcompressor/htmlcompressor "1.5.2"]
                  [com.yahoo.platform.yui/yuicompressor "2.4.8" :exclusions [rhino/js]] ; http://jira.xwiki.org/browse/XWIKI-6148?focusedCommentId=59523#comment-59523
                  [fi.sito/oskari "0.9.44"]
-                 [slingshot "0.10.3"]
+                 [slingshot "0.12.2"]
                  [com.google.zxing/javase "2.2"]
                  [prismatic/schema "0.2.4"]
                  [cljts "0.2.0" :exclusions [xerces/xercesImpl]]
@@ -60,7 +60,7 @@
                  [org.geotools/gt-epsg-wkt "13.1"]
                  [org.clojure/data.json "0.2.6"]
                  [lupapiste/commons "0.5.2-SNAPSHOT"]]
-  :profiles {:dev {:dependencies [[midje "1.6.3"]
+  :profiles {:dev {:dependencies [[midje "1.7.0"]
                                   [ring-mock "0.1.5"]
                                   [clj-ssh "0.5.7"]
                                   [pdfboxing "0.1.5"]]
