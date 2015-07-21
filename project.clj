@@ -52,7 +52,7 @@
                  [fr.opensagres.xdocreport/fr.opensagres.xdocreport.template.freemarker "1.0.5" :exclusions [org.freemarker/freemarker]]
                  [scss-compiler "0.1.2"]
                  [org.clojure/core.memoize "0.5.7"]
-                 [org.apache.pdfbox/pdfbox "1.8.9"]
+                 [org.apache.pdfbox/pdfbox "1.8.9" :exclusions [commons-logging]]
                  [com.levigo.jbig2/levigo-jbig2-imageio "1.6.3"]
                  [org.geotools/gt-main "13.1"]
                  [org.geotools/gt-shapefile "13.1"]
