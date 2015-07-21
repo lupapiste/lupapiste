@@ -16,7 +16,7 @@
   `(binding [context (merge context ~logging-context)]
      (do ~@body)))
 
-(defn- log-prefix [{:keys [level timestamp ns]}]
+(defn- output-fmt-fn [{:keys [level timestamp ns message throwable]}]
   (let [{:keys [session-id applicationId userId]} context]
     (str
       (-> level name s/upper-case)
@@ -24,13 +24,15 @@
       \[ session-id \] \space
       \[ applicationId \] \space
       \[ userId \] \space
-      ns)))
+      ns " - "
+      (or message "")
+      (or (timbre/stacktrace throwable "\n") ""))))
 
 (def time-format "yyyy-MM-dd HH:mm:ss.SSS")
 
 (timbre/set-level! env/log-level)
 (timbre/set-config! [:timestamp-pattern] time-format)
-(timbre/set-config! [:prefix-fn] log-prefix)
+(timbre/set-config! [:fmt-output-fn] output-fmt-fn)
 
 ;;
 ;; event log:
@@ -40,7 +42,7 @@
 (def- ^java.io.Writer event-log-out (io/writer (io/file (doto (io/file env/log-dir "logs") (.mkdirs)) "events.log") :append true))
 
 (defn- unsecure-log-event [level event]
-  (.write event-log-out (str (log-prefix {:level level :timestamp (.print time-fmt (System/currentTimeMillis)) :ns ""}) " - " event \newline))
+  (.write event-log-out (str (output-fmt-fn {:level level :timestamp (.print time-fmt (System/currentTimeMillis)) :ns ""}) event \newline))
   (.flush event-log-out))
 
 (defn log-event [level event]
