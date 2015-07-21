@@ -26,9 +26,9 @@
               <label data-bind="ltext: type"></label><br>
               <div data-bind="visible: $parent.displayOnly,
                               text: $parent.editedMetadata()[type]"></div>
-              <input data-bind="visible: $parent.editable,
-                                attr: {type: inputType},
-                                value: $parent.editedMetadata()[type]">
+              <input class="form-input" data-bind="visible: $parent.editable,
+                                                   attr: {type: inputType},
+                                                   value: $parent.editedMetadata()[type]">
             </div>
             <div data-bind="if: $data.subfields">
               <div class="subtable">
@@ -37,24 +37,46 @@
                   <label data-bind="ltext: type"></label><br>
                   <div data-bind="if: $data.values">
                     <div data-bind="visible: $parents[1].displayOnly,
-                                    ltext: $parents[1].editedMetadata()[$parent.type]()[type]"></div>
+                                    ltext: $parents[1].editedMetadata()[$parent.type][type]"></div>
                     <select data-bind="visible: $parents[1].editable,
                                        options: values,
                                        optionsText: loc,
-                                       value: $parents[1].editedMetadata()[$parent.type]()[type]"></select>
+                                       value: $parents[1].editedMetadata()[$parent.type][type]"></select>
                   </div>
                   <div data-bind="if: $data.inputType">
                     <div data-bind="visible: $parents[1].displayOnly,
-                                    text: $parents[1].editedMetadata()[$parent.type]()[type]"></div>
+                                    text: $parents[1].editedMetadata()[$parent.type][type]"></div>
                     <div data-bind="visible: $parents[1].editable">
-                      <input type="text" data-bind="value: $parents[1].editedMetadata()[$parent.type]()[type]">
+                      <input class="form-input" type="text" data-bind="value: $parents[1].editedMetadata()[$parent.type][type]">
                     </div>
                   </div>
+
+                  <div data-bind="if: $data.dependencies && $data.dependencies[$parents[1].editedMetadata()[$parent.type][type]()]">
+                    <div data-bind="foreach: $data.dependencies[$parents[1].editedMetadata()[$parent.type][type]()]">
+                      <label data-bind="ltext: type"></label><br>
+                      <div data-bind="if: $data.values">
+                        <div data-bind="visible: $parents[2].displayOnly,
+                                  ltext: $parents[2].editedMetadata()[$parents[1].type][type]"></div>
+                        <select data-bind="visible: $parents[2].editable,
+                                     options: values,
+                                     optionsText: loc,
+                                     value: $parents[2].editedMetadata()[$parents[1].type][type]"></select>
+                      </div>
+                      <div data-bind="if: $data.inputType">
+                        <div data-bind="visible: $parents[2].displayOnly,
+                                  text: $parents[2].editedMetadata()[$parents[1].type][type]"></div>
+                        <div data-bind="visible: $parents[2].editable">
+                          <input class="form-input" type="text" data-bind="value: $parents[2].editedMetadata()[$parents[1].type][type]">
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
                 </div>
               </div>
             </div>
-            <div data-bind="if: $data.dependencies && $data.dependencies[$parent.editedMetadata()[type]]">
-              <div data-bind="foreach: dependencies[$parent.editedMetadata()[type]]">
+            <div data-bind="if: $data.dependencies && $data.dependencies[$parent.editedMetadata()[type]()]">
+              <div data-bind="foreach: $data.dependencies[$parent.editedMetadata()[type]()]">
                 <label data-bind="ltext: type"></label><br>
                 <div data-bind="if: $data.values">
                   <div data-bind="visible: $parents[1].displayOnly,
@@ -68,7 +90,7 @@
                   <div data-bind="visible: $parents[1].displayOnly,
                                   text: $parents[1].editedMetadata()[type]"></div>
                   <div data-bind="visible: $parents[1].editable">
-                    <input type="text" data-bind="value: $parents[1].editedMetadata()[type]">
+                    <input class="form-input" type="text" data-bind="value: $parents[1].editedMetadata()[type]">
                   </div>
                 </div>
               </div>
