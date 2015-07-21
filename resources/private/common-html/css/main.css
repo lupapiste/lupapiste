@@ -900,55 +900,71 @@ nav .nav-wrapper .header-menu .header-box a {
   z-index: 2;
 }
 
-/* line 1, ../sass/partials/_footer.scss */
+/* line 10, ../sass/partials/_footer.scss */
 footer {
   margin-top: 72px;
   padding-top: 24px;
   position: absolute;
   clear: both;
-  color: white;
-  background-color: #4f4f4f;
+  color: #fff;
+  background-color: #333;
   height: auto;
   bottom: 0;
   width: 100%;
 }
-/* line 12, ../sass/partials/_footer.scss */
+/* line 21, ../sass/partials/_footer.scss */
 footer .informations {
   padding: 12px;
   width: 100%;
   max-width: 1280px;
   margin: 0 auto 12px;
 }
-/* line 17, ../sass/partials/_footer.scss */
+/* line 26, ../sass/partials/_footer.scss */
 footer .informations .footer-box {
   font-size: 16px;
   vertical-align: top;
   width: 24.5%;
   display: inline-block;
+  float: left;
   padding-right: 24px;
   box-sizing: border-box;
 }
-/* line 24, ../sass/partials/_footer.scss */
+/* line 34, ../sass/partials/_footer.scss */
 footer .informations .footer-box h3 {
   font-size: 18px;
   font-weight: bold;
 }
-/* line 28, ../sass/partials/_footer.scss */
+/* line 38, ../sass/partials/_footer.scss */
 footer .informations .footer-box a {
-  color: #f39129;
-  display: block;
+  color: #f7ac2e;
+  display: inline-block;
 }
-/* line 33, ../sass/partials/_footer.scss */
+/* line 41, ../sass/partials/_footer.scss */
+footer .informations .footer-box a:hover, footer .informations .footer-box a:active {
+  color: #fff;
+}
+/* line 44, ../sass/partials/_footer.scss */
 footer .informations .footer-box.sade-box a {
   display: inline;
 }
+@media (max-width: 991px) {
+  /* line 51, ../sass/partials/_footer.scss */
+  footer .footer-box:nth-child(2n+1) {
+    clear: left;
+  }
+  /* line 54, ../sass/partials/_footer.scss */
+  footer .footer-box {
+    min-width: 49%;
+  }
+}
 
-/* line 42, ../sass/partials/_footer.scss */
+/* line 60, ../sass/partials/_footer.scss */
 #buildinfo {
+  clear: both;
   display: block;
-  background-color: black;
+  background-color: #111;
   padding: 12px;
-  color: #595959;
+  color: #555;
 }
 
 /*------------------------------------*\

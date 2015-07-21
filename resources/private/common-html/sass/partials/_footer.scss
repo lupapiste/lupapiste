@@ -1,10 +1,19 @@
+// Footer colors.
+$footer-bg: #333;
+$footer-bi-bg: #111; // bi = build info
+$footer-txt: #fff;
+$footer-link: #f7ac2e;
+$footer-hover: #fff; // Hover and down
+$footer-bi: #555;
+
+
 footer {
   margin-top: $marginL*3;
   padding-top: $marginL;
   position: absolute;
   clear:both;
-  color: white;
-  background-color: $lp-dark-grey;
+  color: $footer-txt;
+  background-color: $footer-bg;
   height: auto;
   bottom: 0;
   width: 100%;
@@ -19,6 +28,7 @@ footer {
       vertical-align: top;
       width: 24.5%;
       display: inline-block;
+      float: left;
       padding-right: $marginL;
       box-sizing: border-box;
       h3 {
@@ -26,23 +36,32 @@ footer {
         font-weight: bold;
       }
       a {
-       color: $lp-orange;
-       display: block;
+       color: $footer-link;
+       display: inline-block;
+       &:hover, &:active { color: $footer-hover }
       }
       &.sade-box {
         a {
           display: inline;
         }
       }
-
     }
+  }
+  @media (max-width:991px) {
+      .footer-box:nth-child(2n+1) {
+          clear: left;
+      }
+      .footer-box {
+          min-width: 49%;
+      }
   }
 }
   
 #buildinfo {
-  display: block;
-  background-color: black;
-  padding: $marginM;
-  color: $grey-text;
+    clear: both;
+    display: block;
+    background-color: $footer-bi-bg;
+    padding: $marginM;
+    color: $footer-bi;
 }
 
