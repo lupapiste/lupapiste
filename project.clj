@@ -61,7 +61,7 @@
                  [org.geotools/gt-epsg-wkt "13.1"]
                  [org.clojure/data.json "0.2.6"]
                  [lupapiste/commons "0.5.2-SNAPSHOT"]]
-  :profiles {:dev {:dependencies [[midje "1.7.0"]
+  :profiles {:dev {:dependencies [[midje "1.7.0" :exclusions [org.clojure/tools.namespace]]
                                   [ring-mock "0.1.5"]
                                   [clj-ssh "0.5.7"]
                                   [pdfboxing "0.1.5"]]
