@@ -1,0 +1,5 @@
+footer.support.request.text: Tukipyyntölomake
+footer.support.request.href: https://www.lupapiste.fi/ota-yhteytta?contact_type=tukipyynto
+footer.help.text: Palvelun käytön ohjeet
+footer.help.href: https://www.lupapiste.fi/ohjeet
+footer.service.info: Palveluinfo

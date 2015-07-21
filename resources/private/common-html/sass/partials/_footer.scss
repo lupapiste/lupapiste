@@ -32,13 +32,15 @@ footer {
       padding-right: $marginL;
       box-sizing: border-box;
       h3 {
-        font-size: 18px;
-        font-weight: bold;
+          font-size: 18px;
+          font-weight: bold;
+          margin-bottom: .5em;
       }
-      a {
-       color: $footer-link;
-       display: inline-block;
-       &:hover, &:active { color: $footer-hover }
+      a:link, a:visited {
+          color: $footer-link;
+          display: inline-block;
+          text-decoration: none;
+          &:hover, &:active { color: $footer-hover }
       }
       &.sade-box {
         a {
@@ -56,7 +58,20 @@ footer {
       }
   }
 }
-  
+
+footer ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+footer ul li {
+    margin: {
+        bottom: 1em;
+        top: 0;
+    }
+}
+
 #buildinfo {
     clear: both;
     display: block;
