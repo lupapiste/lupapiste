@@ -3,7 +3,8 @@
 
   var model = function(params) {
     var self = this;
-    self.attachmentId = params.attachmentId;
+    self.attachmentId = params.attachmentId();
+    self.applicationId = params.applicationId();
     self.metadata = params.metadata();
     self.editable = ko.observable(false);
     self.editedMetadata = ko.observable(ko.mapping.fromJS(self.metadata));
@@ -29,8 +30,13 @@
     };
 
     self.save = function() {
-      self.metadata = ko.mapping.toJS(self.editedMetadata);
-      self.editable(false);
+      ajax.command('store-tos-metadata-for-attachment')
+        .json({id: self.applicationId, attachmentId: self.attachmentId, metadata: ko.mapping.toJS(self.editedMetadata)})
+        .success(function() {
+          self.metadata = ko.mapping.toJS(self.editedMetadata);
+          self.editable(false);
+        })
+        .call();
     }
   };
 

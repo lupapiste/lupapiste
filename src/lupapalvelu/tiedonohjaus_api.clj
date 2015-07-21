@@ -8,7 +8,9 @@
             [monger.operators :refer :all]
             [lupapalvelu.action :as action]
             [lupapiste-commons.tos-metadata-schema :as tms]
-            [schema.core :as s]))
+            [schema.core :as s]
+            [clojure.walk :refer [postwalk]]
+            [clojure.string :as string]))
 
 (defquery available-tos-functions
   {:user-roles       #{:anonymous}
@@ -71,3 +73,29 @@
 (defquery tos-metadata-schema
   {:user-roles #{:anonymous}}
   (ok :schema (map metadata-schema-for-ui tms/common-metadata-fields)))
+
+(defn keywordize-keys-and-some-values [m]
+  (let [f (fn [[k v]] (let [new-key (if (string? k) (keyword k) k)
+                            new-value (if (and (string? v) (not= :tila k) (= (count (string/split v #"\s")) 1)) (keyword v) v)]
+                        [new-key new-value]))]
+    (postwalk (fn [x] (if (map? x) (into {} (map f x)) x)) m)))
+
+(defcommand store-tos-metadata-for-attachment
+  {:parameters [:id attachmentId metadata]
+   :user-roles #{:authority}
+   :states     (action/all-states-but [:draft :closed :canceled])}
+  [{:keys [application created] :as command}]
+  (try
+    (let [attachments (:attachments application)
+          metadata (keywordize-keys-and-some-values metadata)]
+      (println metadata)
+      (if-let [attachment (first (filter #(= (:id %) attachmentId) attachments))]
+        (let [updated-attachment (assoc attachment :metadata (s/validate tms/AsiakirjaMetaDataMap metadata))
+              updated-attachments (-> (remove #(= % attachment) attachments)
+                                    (conj updated-attachment))]
+          (action/update-application command
+            {$set {:modified created
+                   :attachments updated-attachments}}))))
+    (catch RuntimeException e
+      (.printStackTrace e)
+      (fail "Invalid metadata"))))
