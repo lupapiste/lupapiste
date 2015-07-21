@@ -41,7 +41,7 @@
                  [slingshot "0.12.2"]
                  [com.google.zxing/javase "2.2"]
                  [prismatic/schema "0.4.3"]
-                 [cljts "0.2.0" :exclusions [xerces/xercesImpl]]
+                 [cljts "0.3.0-20150228.035522-2" :exclusions [xerces/xercesImpl]]
                  ; batik-js includes a built-in rhino, which breaks yuicompressor (it too has rhino built in)
                  ; xalan excluded just to avoid bloat, presumably XSLT is not needed
                  [clj-pdf "1.11.21" :exclusions [xalan org.apache.xmlgraphics/batik-js]]
