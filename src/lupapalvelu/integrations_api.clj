@@ -156,44 +156,6 @@
       all-data
       (select-keys all-data (keys krysp-reader/empty-building-ids)))))
 
-(defn- update-to-defaults
-  "Mongo updates given document's data to default values. Given 'data' is persisted."
-  [application doc-id schema & [data]]
-  (let [update-data (util/deep-merge
-                      (tools/create-document-data schema tools/default-values)
-                      (when (and data (map? data))
-                        (tools/wrapped data)))
-        validation-results (model/validate application {:data update-data :id doc-id} schema)]
-    (if-not (model/has-errors? validation-results)
-      (mongo/update-by-query
-        :applications
-        {"documents" {$elemMatch {:id doc-id}}}
-        {$set
-         {"documents.$.data" update-data}})
-      (fail! :document-would-be-in-error-after-update :results validation-results))))
-
-(defn- clean-before-merge
-  "Ensures that no old data is left before KRYSP building data merge, by unsetting the values"
-  [collection doc-id building-data]
-  (let [unset-strings (map #(str collection ".$.data." (name %)) (keys building-data))
-        unset-map (reduce (fn [map str] (assoc map str "")) {} unset-strings)]
-    (mongo/update-by-query
-       :applications
-       {collection {$elemMatch {:id doc-id}}}
-       {$unset unset-map})))
-
-(defn- remove-krysp-data
-  "Clears KRYSP data from document"
-  [document]
-  (util/postwalk-map
-    (fn [m]
-      (if (= "krysp" (:source m))
-        (-> m
-          (dissoc :source :sourceValue :modified)
-          (assoc :value nil))
-        m))
-    document))
-
 (defcommand merge-details-from-krysp
   {:parameters [id documentId path buildingId overwrite collection]
    :input-validators [commands/validate-collection
