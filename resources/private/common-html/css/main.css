@@ -3796,7 +3796,7 @@ ul.attachments-list li.mandatory-attachments {
   cursor: pointer;
 }
 /* line 41, ../sass/partials/_metadata-editor.scss */
-.metadata-editor-container .editor .invalid-edit {
+.metadata-editor-container .editor .invalid {
   border: 2px solid #ff0643;
   border-radius: 2px;
   outline: none;

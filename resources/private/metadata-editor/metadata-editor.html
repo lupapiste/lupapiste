@@ -28,7 +28,8 @@
                               text: $parent.editedMetadata()[type]"></div>
               <input class="form-input" data-bind="visible: $parent.editable,
                                                    attr: {type: inputType},
-                                                   value: $parent.editedMetadata()[type]">
+                                                   textInput: $parent.editedMetadata()[type],
+                                                   css: {invalid: $parent.invalidFields().indexOf(type) >= 0}">
             </div>
             <div data-bind="if: $data.subfields">
               <div class="subtable">
@@ -47,7 +48,8 @@
                     <div data-bind="visible: $parents[1].displayOnly,
                                     text: $parents[1].editedMetadata()[$parent.type][type]"></div>
                     <div data-bind="visible: $parents[1].editable">
-                      <input class="form-input" type="text" data-bind="value: $parents[1].editedMetadata()[$parent.type][type]">
+                      <input class="form-input" data-bind="textInput: $parents[1].editedMetadata()[$parent.type][type], attr: {type: inputType},
+                                                           css: {invalid: $parents[1].invalidFields().indexOf(type) >= 0}">
                     </div>
                   </div>
 
@@ -66,7 +68,8 @@
                         <div data-bind="visible: $parents[2].displayOnly,
                                   text: $parents[2].editedMetadata()[$parents[1].type][type]"></div>
                         <div data-bind="visible: $parents[2].editable">
-                          <input class="form-input" type="text" data-bind="value: $parents[2].editedMetadata()[$parents[1].type][type]">
+                          <input class="form-input" data-bind="textInput: $parents[2].editedMetadata()[$parents[1].type][type], attr: {type: inputType},
+                                                               css: {invalid: $parents[2].invalidFields().indexOf(type) >= 0}">
                         </div>
                       </div>
                     </div>
@@ -90,7 +93,8 @@
                   <div data-bind="visible: $parents[1].displayOnly,
                                   text: $parents[1].editedMetadata()[type]"></div>
                   <div data-bind="visible: $parents[1].editable">
-                    <input class="form-input" type="text" data-bind="value: $parents[1].editedMetadata()[type]">
+                    <input class="form-input" data-bind="textInput: $parents[1].editedMetadata()[type], attr: {type: inputType},
+                                                         css: {invalid: $parents[1].invalidFields().indexOf(type) >= 0}">
                   </div>
                 </div>
               </div>
@@ -99,7 +103,7 @@
         </div>
         <div data-bind="if: editable">
           <div class="editor-buttons">
-            <button class="save" data-bind="click: save">Tallenna</button>
+            <button class="save" data-bind="click: save, enable: invalidFields().length === 0">Tallenna</button>
             <button class="delete" data-bind="click: cancelEdit" a>Peruuta</button>
           </div>
         </div>
