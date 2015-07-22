@@ -182,6 +182,18 @@
        {collection {$elemMatch {:id doc-id}}}
        {$unset unset-map})))
 
+(defn- remove-krysp-data
+  "Clears KRYSP data from document"
+  [document]
+  (util/postwalk-map
+    (fn [m]
+      (if (= "krysp" (:source m))
+        (-> m
+          (dissoc :source :sourceValue :modified)
+          (assoc :value nil))
+        m))
+    document))
+
 (defcommand merge-details-from-krysp
   {:parameters [id documentId path buildingId overwrite collection]
    :input-validators [commands/validate-collection
