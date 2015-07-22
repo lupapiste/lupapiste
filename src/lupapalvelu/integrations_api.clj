@@ -206,22 +206,29 @@
   (if-let [{url :url} (organization/get-krysp-wfs application)]
     (let [document     (commands/by-id application collection documentId)
           schema       (schemas/get-schema (:schema-info document))
-          clear-ids?   (or (ss/blank? buildingId) (= "other" buildingId))]
-      (if clear-ids?
-        (do
-          (infof "setting default data into %s %s" (get-in document [:schema-info :name]) (:id document))
-          (update-to-defaults application documentId schema {(keyword path) buildingId}))
-        (let [building-data (load-building-data url propertyId buildingId overwrite)
-              base-updates (concat
-                             (commands/->model-updates [[path buildingId]])
-                             (tools/path-vals
-                               building-data))
-              ; Path should exist in schema!
-              updates      (filter (fn [[path _]] (model/find-by-name (:body schema) path)) base-updates)]
-          (when overwrite
-            (clean-before-merge collection documentId building-data))
-          (infof "merging data into %s %s" (get-in document [:schema-info :name]) (:id document))
-          (commands/persist-model-updates application collection document updates created :source "krysp")))
+          clear-ids?   (or (ss/blank? buildingId) (= "other" buildingId))
+          converted-doc (model/convert-document-data ; remove old krysp data
+                          (fn [_ value] ; pred
+                            (= "krysp" (:source value)))
+                          (fn [schema value] ; emitter sets default values
+                            (-> value
+                              (dissoc :source :sourceValue :modified)
+                              (assoc :value (tools/default-values schema))))
+                          document
+                          nil)
+          cleared-data (dissoc (:data converted-doc) :buildingId) ; buildingId is set below explicitly
+          base-updates (concat
+                         (commands/->model-updates [[path buildingId]])
+                         (tools/path-vals
+                           (util/deep-merge
+                             (tools/unwrapped cleared-data)
+                             (if clear-ids?
+                               krysp-reader/empty-building-ids
+                               (load-building-data url propertyId buildingId overwrite)))))
+          updates      (filter (fn [[path _]] (model/find-by-name (:body schema) path)) base-updates)]
+
+      (infof "merging data into %s %s" (get-in document [:schema-info :name]) (:id document))
+      (commands/persist-model-updates application collection document updates created :source "krysp")
       (ok))
     (fail :error.no-legacy-available)))
 
