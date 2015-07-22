@@ -54,7 +54,7 @@
            {:name "asiointitunnus" :type :string :max-len 17}]}
 
    {:info {:name "task-lupamaarays" :type :task :order 20}
-    :body [{:name "maarays" :type :text :max-len 4000 :readonly true :layout :full-width}
+    :body [{:name "maarays" :type :text :max-len 5500 :readonly true :layout :full-width}
            {:name "kuvaus"  :type :text :max-len 4000 :layout :full-width}]}])
 
 (defn new-task [schema-name task-name data {:keys [created assignee state] :as meta :or {state :requires_user_action}} source]

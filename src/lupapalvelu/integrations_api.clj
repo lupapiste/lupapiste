@@ -1,6 +1,6 @@
 (ns lupapalvelu.integrations-api
   "API for commands/functions working with integrations (ie. KRYSP, Asianhallinta)"
-  (:require [taoensso.timbre :as timbre :refer [infof error]]
+  (:require [taoensso.timbre :as timbre :refer [infof info error]]
             [monger.operators :refer [$in $set $push]]
             [lupapalvelu.action :refer [defcommand update-application notify] :as action]
             [lupapalvelu.application :as application]
@@ -42,7 +42,7 @@
       (if (and (foreman/foreman-app? application) (some #{(keyword (:state link-permit-app))} meta-fields/post-submitted-states))
         application
         (do
-          (error "Not able to get a kuntalupatunnus for the application  " (:id application) " from it's link permit's (" link-permit-app-id ") verdict."
+          (info "Not able to get a kuntalupatunnus for the application  " (:id application) " from it's link permit's (" link-permit-app-id ") verdict."
                  " Associated Link-permit data: " (:linkPermitData application))
           (if (foreman/foreman-app? application)
             (fail! :error.link-permit-app-not-in-post-sent-state)
