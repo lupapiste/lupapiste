@@ -51,6 +51,9 @@
            doc-after-2 (domain/get-document-by-name merged-app "rakennuksen-muuttaminen")
            huoneistot (get-in doc-after-2 [:data :huoneistot])]
 
+       (fact "muutostyo not changed because it's not KRYSP field"
+         (get-in doc-after-2 [:data :muutostyolaji :value]) => "muut muutosty\u00f6t")
+
        (fact "count of huoneistot is the same, because data is set to defaults"
          (count (get-in doc-after [:data :huoneistot])) => 21
          (count huoneistot) => 21)
@@ -78,6 +81,9 @@
             merged-app (query-application pena application-id)
             doc-after-3 (domain/get-document-by-name merged-app "rakennuksen-muuttaminen")]
 
+        (fact "muutostyo not changed because it's not KRYSP field"
+         (get-in doc-after-3 [:data :muutostyolaji :value]) => "muut muutosty\u00f6t")
+
         (fact "kayttotarkoitus remains the same"
           (get-in doc-after-3 [:data :kaytto :kayttotarkoitus :value]) => "039 muut asuinkerrostalot")
 
@@ -90,6 +96,9 @@
       (let [_ (command pena :merge-details-from-krysp :id application-id :documentId (:id doc-before) :collection "documents" :buildingId "other" :path "buildingId" :overwrite true) => ok?
             merged-app (query-application pena application-id)
             doc-after-4 (domain/get-document-by-name merged-app "rakennuksen-muuttaminen")]
+
+        (fact "muutostyo not changed because it's not KRYSP field"
+          (get-in doc-after-4 [:data :muutostyolaji :value]) => "muut muutosty\u00f6t")
 
         (fact "buildingId is 'other'"
           (get-in doc-after-4 [:data :buildingId :value]) => "other")
