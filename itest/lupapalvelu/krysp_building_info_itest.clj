@@ -44,18 +44,30 @@
       (get-in doc-after [:data :mitat :tilavuus :sourceValue]) => "8240"
       (get-in doc-after [:data :mitat :tilavuus :value]) => "8240")
 
-    (fact "Repeating data has been cleared before new merge (overwrite true)"
-      (let [building-id-2 (:buildingId (second (:data building-info)))
-            _ (command pena :merge-details-from-krysp :id application-id :documentId (:id doc-before) :collection "documents" :buildingId building-id-2 :path "buildingId" :overwrite true) => ok?
-            merged-app (query-application pena application-id)
-            doc-after-2 (domain/get-document-by-name merged-app "rakennuksen-muuttaminen")]
+    (fact "Data has been cleared before new merge (overwrite true)"
+     (let [building-id-2 (:buildingId (second (:data building-info)))
+           _ (command pena :merge-details-from-krysp :id application-id :documentId (:id doc-before) :collection "documents" :buildingId building-id-2 :path "buildingId" :overwrite true) => ok?
+           merged-app (query-application pena application-id)
+           doc-after-2 (domain/get-document-by-name merged-app "rakennuksen-muuttaminen")
+           huoneistot (get-in doc-after-2 [:data :huoneistot])]
 
-        (fact "count of huoneistot is correct"
-          (count (get-in doc-after [:data :huoneistot])) => 21
-          (count (get-in doc-after-2 [:data :huoneistot])) => 2)
-        (fact "count of rakennuksenOmistajat is correct"
-          (count (get-in doc-after [:data :rakennuksenOmistajat])) => 2
-          (count (get-in doc-after-2 [:data :rakennuksenOmistajat])) => 4)))
+       (fact "count of huoneistot is the same, because data is set to defaults"
+         (count (get-in doc-after [:data :huoneistot])) => 21
+         (count huoneistot) => 21)
+
+       (fact "two of the huoneistot have source data, others are empty"
+         (count (filter
+                  (fn [[i data]]
+                    (some #(:source %) (vals data)))
+                  huoneistot)) => 2
+         (count (filter
+                  (fn [[i data]]
+                    (every? #(nil? (:source %)) (vals data)))
+                  huoneistot)) => 19)
+
+       (fact "count of rakennuksenOmistajat is correct"
+         (count (get-in doc-after [:data :rakennuksenOmistajat])) => 2
+         (count (get-in doc-after-2 [:data :rakennuksenOmistajat])) => 4)))
 
     ; Merge back building-id data for next test
     (command pena :merge-details-from-krysp :id application-id :documentId (:id doc-before) :collection "documents" :buildingId building-id :path "buildingId" :overwrite true) => ok?
@@ -75,7 +87,7 @@
           (get-in doc-after-3 [:data :manuaalinen_rakennusnro :value]) => ss/blank?)))
 
     (fact "When selecting 'other' from building selector, old KRYSP source data is not present (data is set to defaults)"
-      (let [_ (command pena :merge-details-from-krysp :id application-id :documentId (:id doc-before) :collection "documents" :buildingId "other" :path "buildingId" :overwrite false) => ok?
+      (let [_ (command pena :merge-details-from-krysp :id application-id :documentId (:id doc-before) :collection "documents" :buildingId "other" :path "buildingId" :overwrite true) => ok?
             merged-app (query-application pena application-id)
             doc-after-4 (domain/get-document-by-name merged-app "rakennuksen-muuttaminen")]
 
@@ -86,14 +98,14 @@
           (get-in doc-after [:data :mitat :tilavuus :sourceValue]) => "8240"
           (get-in doc-after [:data :mitat :tilavuus :source]) => "krysp"
 
-          (get-in doc-after-4 [:data :mitat :tilavuus :sourceValue]) => nil
+          (get-in doc-after-4 [:data :mitat :tilavuus :sourceValue]) => "" ; default values are set
           (get-in doc-after-4 [:data :mitat :tilavuus :source]) => nil)
 
         (fact "values have been set to schema defaults"
           (get-in doc-after-4 [:data :rakennusnro :value]) => ss/blank?
           (get-in doc-after-4 [:data :manuaalinen_rakennusnro :value]) => ss/blank?
           (get-in doc-after-4 [:data :valtakunnallinenNumero :value]) => ss/blank?
-          (count (get-in doc-after-4 [:data :huoneistot])) => 1
+          (count (get-in doc-after-4 [:data :huoneistot])) => 21 ; huoneistot are not deleted, only cleared from KRYSP data
           (get-in doc-after-4 [:data :kaytto :kayttotarkoitus :value]) => nil ; default value for select is null
           (get-in doc-after-4 [:data :kaytto :kayttotarkoitus :source]) => nil)))))
 
