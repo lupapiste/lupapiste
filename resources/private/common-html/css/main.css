@@ -1307,7 +1307,7 @@ footer ul {
 
 /* line 68, ../sass/partials/_footer.scss */
 footer ul li {
-  margin-bottom: 1em;
+  margin-bottom: .5em;
   margin-top: 0;
 }
 
