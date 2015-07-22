@@ -9,8 +9,8 @@
             [lupapalvelu.action :as action]
             [lupapiste-commons.tos-metadata-schema :as tms]
             [schema.core :as s]
-            [clojure.walk :refer [postwalk]]
-            [clojure.string :as string]))
+            [taoensso.timbre :as timbre])
+  (:import (schema.core EnumSchema)))
 
 (defquery available-tos-functions
   {:user-roles       #{:anonymous}
@@ -74,11 +74,27 @@
   {:user-roles #{:anonymous}}
   (ok :schema (map metadata-schema-for-ui tms/common-metadata-fields)))
 
-(defn keywordize-keys-and-some-values [m]
-  (let [f (fn [[k v]] (let [new-key (if (string? k) (keyword k) k)
-                            new-value (if (and (string? v) (not= :tila k) (= (count (string/split v #"\s")) 1)) (keyword v) v)]
-                        [new-key new-value]))]
-    (postwalk (fn [x] (if (map? x) (into {} (map f x)) x)) m)))
+(defn get-in-metadata-map [map ks]
+  (let [k (first ks)
+        value (or (get map k)
+                (second (first (filter (fn [[key-in-map _]] (= k (:k key-in-map))) map))))]
+    (if (and (map? value) (next ks))
+      (get-in-metadata-map value (next ks))
+      value)))
+
+(defn convert-value-to-schema-type [ks v]
+  (when-let [schema (get-in-metadata-map tms/AsiakirjaMetaDataMap ks)]
+    (if (= EnumSchema (type schema)) (keyword v) v)))
+
+(defn keywordize-keys-and-some-values [m ks]
+  (->> m
+       (map (fn [[k v]] (let [new-k (if (string? k) (keyword k) k)
+                              new-ks (conj ks new-k)
+                              new-v (if (map? v)
+                                      (keywordize-keys-and-some-values v new-ks)
+                                      (convert-value-to-schema-type new-ks v))]
+                          [new-k new-v])))
+       (into {})))
 
 (defcommand store-tos-metadata-for-attachment
   {:parameters [:id attachmentId metadata]
@@ -86,16 +102,17 @@
    :states     (action/all-states-but [:draft :closed :canceled])}
   [{:keys [application created] :as command}]
   (try
-    (let [attachments (:attachments application)
-          metadata (keywordize-keys-and-some-values metadata)]
-      (println metadata)
-      (if-let [attachment (first (filter #(= (:id %) attachmentId) attachments))]
-        (let [updated-attachment (assoc attachment :metadata (s/validate tms/AsiakirjaMetaDataMap metadata))
-              updated-attachments (-> (remove #(= % attachment) attachments)
-                                    (conj updated-attachment))]
-          (action/update-application command
-            {$set {:modified created
-                   :attachments updated-attachments}}))))
+    (if-let [attachment (first (filter #(= (:id %) attachmentId) (:attachments application)))]
+      (let [metadata (->> (keywordize-keys-and-some-values metadata [])
+                          (tms/sanitize-metadata)
+                          (#(assoc % :tila (get-in attachment [:metadata :tila])))
+                          (s/validate tms/AsiakirjaMetaDataMap))
+            updated-attachment (assoc attachment :metadata metadata)
+            updated-attachments (-> (remove #(= % attachment) (:attachments application))
+                                  (conj updated-attachment))]
+        (action/update-application command
+          {$set {:modified created
+                 :attachments updated-attachments}})))
     (catch RuntimeException e
-      (.printStackTrace e)
-      (fail "Invalid metadata"))))
+      (timbre/error e)
+      (fail "Virheelliset metatiedot"))))
