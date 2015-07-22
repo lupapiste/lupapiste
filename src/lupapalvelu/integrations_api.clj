@@ -169,22 +169,24 @@
     (let [document     (commands/by-id application collection documentId)
           schema       (schemas/get-schema (:schema-info document))
           clear-ids?   (or (ss/blank? buildingId) (= "other" buildingId))
-          converted-doc (model/convert-document-data ; remove old krysp data
-                          (fn [_ value] ; pred
-                            (= "krysp" (:source value)))
-                          (fn [schema value] ; emitter sets default values
-                            (-> value
-                              (dissoc :source :sourceValue :modified)
-                              (assoc :value (tools/default-values schema))))
-                          document
-                          nil)
+          converted-doc (when overwrite ; don't clean data if user doesn't wish to override
+                          (model/convert-document-data ; remove old krysp data
+                                   (fn [_ value] ; pred
+                                     (= "krysp" (:source value)))
+                                   (fn [schema value] ; emitter sets default values
+                                     (-> value
+                                       (dissoc :source :sourceValue :modified)
+                                       (assoc :value (tools/default-values schema))))
+                                   document
+                                   nil))
           cleared-data (dissoc (:data converted-doc) :buildingId) ; buildingId is set below explicitly
 
           buildingId-updates (commands/->model-updates [[path buildingId]])
           buildingId-update-map (commands/validated-model-updates application collection document buildingId-updates created :source nil)
 
           clearing-updates (tools/path-vals (tools/unwrapped cleared-data))
-          clearing-update-map (commands/validated-model-updates application collection document clearing-updates created :source nil)
+          clearing-update-map (when-not (util/empty-or-nil? clearing-updates) ; create updates only when there is data
+                                (commands/validated-model-updates application collection document clearing-updates created :source nil))
 
           krysp-updates (filter
                           (fn [[path _]] (model/find-by-name (:body schema) path))
