@@ -207,8 +207,6 @@
                 </button>
               </div>
 
-              <metadata-editor params="attachmentId: id, metadata: metadataMap, applicationId: application.id"></metadata-editor>
-
               <button id="show-tos-metadata"
                       class="btn"
                       style="margin-top: 15px"
@@ -219,43 +217,7 @@
               </button>
 
               <div class="tos-metadata-content" data-bind="slider: showTosMetadata, visible: metadata().length > 0">
-                <h3 data-bind="ltext: 'attachment.tosMetadata'"></h3>
-                <table class="table table-striped">
-                  <thead>
-                  <tr>
-                    <th data-bind="ltext: 'attachment.tosMetadataKey'"></th>
-                    <th data-bind="ltext: 'attachment.tosMetadataValue'"></th>
-                  </tr>
-                  </thead>
-                  <tbody data-bind="foreach: metadata">
-                    <tr>
-                      <td data-bind="text: name"></td>
-                      <td>
-                        <div data-bind="if: typeof(value) == 'object'">
-                          <table class="subtable">
-                            <thead>
-                            <tr>
-                              <th data-bind="ltext: 'attachment.tosMetadataKey'"></th>
-                              <th data-bind="ltext: 'attachment.tosMetadataValue'"></th>
-                            </tr>
-                            </thead>
-                            <tbody data-bind="foreach: value">
-                            <tr>
-                              <td data-bind="text: name"></td>
-                              <td>
-                                <span data-bind="text: value"></span>
-                              </td>
-                            </tr>
-                            </tbody>
-                          </table>
-                        </div>
-                        <span data-bind="if: typeof(value) != 'object'">
-                          <span data-bind="text: value"></span>
-                        </span>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+                <metadata-editor params="attachmentId: id, metadata: metadataMap, applicationId: application.id"></metadata-editor>
               </div>
 
             </div>
