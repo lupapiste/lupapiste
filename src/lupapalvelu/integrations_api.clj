@@ -179,18 +179,27 @@
                           document
                           nil)
           cleared-data (dissoc (:data converted-doc) :buildingId) ; buildingId is set below explicitly
-          base-updates (concat
-                         (commands/->model-updates [[path buildingId]])
-                         (tools/path-vals
-                           (util/deep-merge
-                             (tools/unwrapped cleared-data)
-                             (if clear-ids?
-                               krysp-reader/empty-building-ids
-                               (load-building-data url propertyId buildingId overwrite)))))
-          updates      (filter (fn [[path _]] (model/find-by-name (:body schema) path)) base-updates)]
 
+          buildingId-updates (commands/->model-updates [[path buildingId]])
+          buildingId-update-map (commands/validated-model-updates application collection document buildingId-updates created :source nil)
+
+          clearing-updates (tools/path-vals (tools/unwrapped cleared-data))
+          clearing-update-map (commands/validated-model-updates application collection document clearing-updates created :source nil)
+
+          krysp-updates (filter
+                          (fn [[path _]] (model/find-by-name (:body schema) path))
+                          (tools/path-vals
+                            (if clear-ids?
+                              krysp-reader/empty-building-ids
+                              (load-building-data url propertyId buildingId overwrite))))
+          krysp-update-map (commands/validated-model-updates application collection document krysp-updates created :source "krysp")
+
+          {:keys [mongo-query mongo-updates]} (util/deep-merge
+                                                buildingId-update-map
+                                                clearing-update-map
+                                                krysp-update-map)]
       (infof "merging data into %s %s" (get-in document [:schema-info :name]) (:id document))
-      (commands/persist-model-updates application collection document updates created :source "krysp")
+      (update-application command mongo-query mongo-updates)
       (ok))
     (fail :error.no-legacy-available)))
 
