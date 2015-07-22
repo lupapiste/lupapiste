@@ -1,13 +1,52 @@
+$header-padding: 12px;
+$header-height: 60px;
+$brand-widhth: 188px;
+
+@mixin header-padding {
+    padding: {
+      left: $header-padding;
+      right: $header-padding;
+    }
+}
+
+@mixin nav-link {
+    a {
+        font-size: 16px;
+        vertical-align: middle;
+        white-space: nowrap;
+        position: relative;
+        display: inline-block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        // Reminder of order: link, visited, hover, active
+        &:link, &:visited {
+                    color: $orange;
+                    text-decoration: none;
+                    span {
+                        color: $orange;
+                    }
+                }
+        &:hover, &:active {
+                     color: white;
+                     span {
+                         color: white;
+                     }
+                 }
+        span {
+            vertical-align: middle;
+        }
+    }
+}
+
 
 nav {
   position: fixed;
   top:0;
   z-index: 2002;
-  background: #fff;
-  height: 60px;
+  height: $header-height;
   box-sizing: border-box;
   width: 100%;
-  background: $lp-dark-grey;
+  background: $gray51;
   .nav-wrapper {
     width: 100%;
     max-width: $application-max-width;
@@ -16,26 +55,27 @@ nav {
     box-sizing: border-box;
     .brand {
       position: relative;
-      width: 300px;
+      width: 188px;
       display: inline-block;
-      .logo {
-        margin: 12px;
-      }
+      float: left;
       a img {
         float: left;
         width: 164px;
         height: 35px;
         margin: 12px;
       }
-      .change-language {
-        color: $lp-orange;
-        text-decoration: none;
+    }
+    .language-select {
+        @include nav-link;
+        @include header-padding;
         display: inline-block;
-        position: absolute;
-        top: 35px;
-        font-size: 0.9em;
-        left: 102px;
-      }
+        a, span {
+            vertical-align: middle;
+            line-height: $header-height;
+            text-transform: uppercase;
+        }
+        float: left;
+        position: relative;
     }
 
     .header-menu {
@@ -44,26 +84,17 @@ nav {
       right: 0px;
       
       .header-box {
-        display: inline-block;
-        padding: $marginM;
-        height: 60px;
-        a, span {
-          color: white;
-          font-size: 16px;
-          text-decoration: none;
-          vertical-align: middle;
-        }
-        a {
-          white-space: nowrap;
-          position: relative;
-          max-width: 300px;
+          @include nav-link;
+          @include header-padding;
           display: inline-block;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
+          height: $header-height;
+          a {
+              max-width: 300px;
+          }
+          a, span {
+            line-height: $header-height;
+          }
       }
     }
   }
 }
-
-

@@ -1,0 +1,2 @@
+fi: suomi
+sv: svenska
