@@ -386,11 +386,11 @@
                       (if (pred element v)
                         [k (emitter element v)]
                         (when v
-                          (if (not= (keyword type) :group)  ;TODO: does this work with tables? TDD
-                            [k v]
+                          (if (or (= (keyword type) :group) (= (keyword type) :table))
                             [k (if repeating
                                  (into {} (map (fn [k2] [k2 (doc-walk body (conj current-path k2))]) (keys v)))
-                                 (doc-walk body current-path))])))))
+                                 (doc-walk body current-path))]
+                            [k v])))))
                   schema-body)))]
       (let [path (vec initial-path)
             schema (get-document-schema document)
