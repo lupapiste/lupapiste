@@ -11,7 +11,7 @@
                  [bultitude "0.2.6"] ; noir requires 0.2.0, midje 1.6 requires 0.2.2
                  [compojure "1.1.9" :exclusions [org.clojure/tools.macro]]
                  [com.novemberain/monger "1.7.0"]
-                 [com.taoensso/timbre "3.4.0"]
+                 [com.taoensso/timbre "4.0.2"]
                  [org.slf4j/slf4j-log4j12 "1.7.7"]
                  [enlive "1.1.5"]
                  [org.jasypt/jasypt "1.9.2"]
