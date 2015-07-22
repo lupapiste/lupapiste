@@ -5,11 +5,13 @@
   <script type="text/html" id="metadata-editor-template">
     <div class="metadata-editor-container">
 
-      <h3>Arkistointitiedot</h3>
+      <h3 data-bind="ltext: 'attachment.tosMetadata'"></h3>
 
       <div class="editor">
-        <div style="float: right" data-bind="if: displayOnly">
-          <button data-bind="click: edit">Muokkaa</button>
+        <div data-bind="if: displayOnly">
+          <div class="edit-button" data-bind="click: edit">
+            <i class="icon edit"></i>
+          </div>
         </div>
         <div class="editor-form" data-bind="foreach: schema">
           <div>
@@ -103,8 +105,8 @@
         </div>
         <div data-bind="if: editable">
           <div class="editor-buttons">
-            <button class="save" data-bind="click: save, enable: invalidFields().length === 0">Tallenna</button>
-            <button class="delete" data-bind="click: cancelEdit" a>Peruuta</button>
+            <button class="btn-primary save" data-bind="click: save, ltext: 'save', enable: invalidFields().length === 0"></button>
+            <button class="delete" data-bind="click: cancelEdit, ltext: 'cancel'"></button>
           </div>
         </div>
       </div>

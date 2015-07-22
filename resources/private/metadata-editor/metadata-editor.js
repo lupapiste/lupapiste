@@ -99,7 +99,6 @@
 
     self.invalidFields = ko.pureComputed(function () {
       var errors = validateMetadata(ko.mapping.toJS(self.editedMetadata), self.schema());
-      console.log(errors.length);
       return errors;
     });
 
