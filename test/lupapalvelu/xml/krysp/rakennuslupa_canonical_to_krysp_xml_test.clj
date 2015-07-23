@@ -72,10 +72,12 @@
 
       (if validate-tyonjohtaja-type
         (do
-          (fact "In KRYSP 2.1.2, vaadittuPatevyysluokka A is mapped to 'ei tiedossa'"
-            (xml/get-text tyonjohtaja_212 :vaadittuPatevyysluokka) => "ei tiedossa")
+          (fact "In KRYSP 2.1.2, patevyysvaatimusluokka/vaadittuPatevyysluokka A are mapped to 'ei tiedossa'"
+            (xml/get-text tyonjohtaja_212 :vaadittuPatevyysluokka) => "ei tiedossa"
+            (xml/get-text tyonjohtaja_212 :patevyysvaatimusluokka) => "ei tiedossa")
 
-          (fact "In KRYSP 2.1.3, vaadittuPatevyysluokka A not mapped"
+          (fact "In KRYSP 2.1.3, patevyysvaatimusluokka/vaadittuPatevyysluokka A is not mapped"
+            (xml/get-text tyonjohtaja_213 :patevyysvaatimusluokka) => "A"
             (xml/get-text tyonjohtaja_213 :vaadittuPatevyysluokka) => "A")
 
           (when (= :v2 validate-tyonjohtaja-type)
