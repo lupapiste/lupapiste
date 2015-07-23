@@ -46,9 +46,11 @@
   (or (= :muutoslupa (keyword (:permitSubtype application)))
       (some #(operations/link-permit-required-operations (keyword (:name %))) (get-operations application))))
 
-(defn validate-link-permits [application]
-  (let [application (meta-fields/enrich-with-link-permit-data application)
-        linkPermits (-> application :linkPermitData count)]
+(defn validate-link-permits [{:keys [linkPermitData] :as application}]
+  (let [{:keys [linkPermitData] :as application} (if linkPermitData
+                                                   application
+                                                   (meta-fields/enrich-with-link-permit-data application))
+        linkPermits (count linkPermitData)]
     (when (and (is-link-permit-required application) (zero? linkPermits))
       (fail :error.permit-must-have-link-permit))))
 
