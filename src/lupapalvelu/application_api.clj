@@ -11,22 +11,22 @@
             [sade.property :as p]
             [lupapalvelu.action :refer [defraw defquery defcommand update-application notify] :as action]
             [lupapalvelu.application :as a]
-            [lupapalvelu.mongo :refer [$each] :as mongo]
+            [lupapalvelu.application-meta-fields :as meta-fields]
             [lupapalvelu.attachment :as attachment]
-            [lupapalvelu.domain :as domain]
-            [lupapalvelu.notifications :as notifications]
+            [lupapalvelu.comment :as comment]
             [lupapalvelu.document.commands :as commands]
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
-            [lupapalvelu.user :as user]
-            [lupapalvelu.organization :as organization]
-            [lupapalvelu.operations :as operations]
-            [lupapalvelu.permit :as permit]
-            [lupapalvelu.ktj :as ktj]
-            [lupapalvelu.open-inforequest :as open-inforequest]
+            [lupapalvelu.domain :as domain]
             [lupapalvelu.i18n :as i18n]
-            [lupapalvelu.application-meta-fields :as meta-fields]
-            [lupapalvelu.comment :as comment]))
+            [lupapalvelu.ktj :as ktj]
+            [lupapalvelu.mongo :refer [$each] :as mongo]
+            [lupapalvelu.notifications :as notifications]
+            [lupapalvelu.open-inforequest :as open-inforequest]
+            [lupapalvelu.operations :as operations]
+            [lupapalvelu.organization :as organization]
+            [lupapalvelu.permit :as permit]
+            [lupapalvelu.user :as user]))
 
 ;; Notifications
 
