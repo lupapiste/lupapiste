@@ -91,10 +91,6 @@
                 (when-not has-old-verdict-tasks {:tasks tasks})
                 (when extras-reader (extras-reader app-xml)))}))))
 
-;;
-;; TODO:
-;;  - yhdista tama funktio jotenkin ylla olevan find-verdicts-from-xml:n kanssa?
-;;
 (defn find-tj-suunnittelija-verdicts-from-xml
   [{:keys [application user created] :as command} doc app-xml osapuoli-type target-kuntaRoolikoodi]
   {:pre [(every? command [:application :user :created]) app-xml]}

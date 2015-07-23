@@ -23,7 +23,6 @@
 (defn do-check-for-verdict [{{op :primaryOperation :as application} :application :as command}]
   {:pre [(every? command [:application :user :created])]}
   (if-let [app-xml (krysp-fetch/get-application-xml application :application-id)]
-
     (or
       (let [validator-fn (permit/get-verdict-validator (permit/permit-type application))]
         (validator-fn app-xml))
