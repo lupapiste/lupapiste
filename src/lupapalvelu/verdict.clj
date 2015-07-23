@@ -109,7 +109,7 @@
 (defn- get-tj-suunnittelija-doc-name
   "Returns name of first party document of operation"
   [operation-name]
-  (let [operation (get operations/operations operation-name)
+  (let [operation (get operations/operations (keyword operation-name))
         schemas (cons (:schema operation) (:required operation))]
     (some
       #(when
