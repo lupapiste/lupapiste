@@ -438,10 +438,10 @@
   (-> (cr/all-of osapuoli-xml-without-ns path-key)
     (cr/convert-keys-to-timestamps [:paatosPvm])))
 
-(defn- validate-sijaistustieto [osapuoli sijaistus]
+(defn- valid-sijaistustieto? [osapuoli sijaistus]
   (when osapuoli
     (or
-     (nil? sijaistus) ; sijaistus only used with foreman roles
+     (empty? sijaistus) ; sijaistus only used with foreman roles
      (and ; sijaistettava must be empty in both, KRSYP and document
        (ss/blank? (:sijaistettavaHlo osapuoli))
        (and
@@ -462,7 +462,7 @@
     #(when (and
              (:paatosPvm %)
              (tj-suunnittelija-verdict-statuses (:paatostyyppi %))
-             (validate-sijaistustieto % sijaistus))
+             (valid-sijaistustieto? % sijaistus))
        %)
     osapuolet))
 
