@@ -43,7 +43,7 @@
     return _.mapValues(metadata, function(v, k) {
       if (_.isObject(v)) {
         return coerceValuesToSchemaType(v, inputTypeMap[k]);
-      } else if(inputTypeMap[k] === 'number') {
+      } else if(inputTypeMap[k] === "number") {
         return parseInt(v);
       } else {
         return v;
@@ -53,7 +53,7 @@
 
   var isValid = function(value, requiredType) {
     if (value) {
-      if (requiredType === 'number') {
+      if (requiredType === "number") {
         return !isNaN(value) && _.isFinite(parseInt(value));
       } else {
         return true;
@@ -84,9 +84,9 @@
 
   var model = function(params) {
     var self = this;
-    self.attachmentId = params.attachmentId ? params.attachmentId() : null;
-    self.applicationId = params.applicationId();
-    self.metadata = params.metadata();
+    self.attachmentId = params.attachmentId ? params.attachmentId : ko.observable(null);
+    self.applicationId = params.applicationId;
+    self.metadata = params.metadata;
     self.editable = ko.observable(false);
     self.editedMetadata = ko.observable();
     self.schema = ko.observableArray();
@@ -98,13 +98,12 @@
     });
 
     self.invalidFields = ko.pureComputed(function () {
-      var errors = validateMetadata(ko.mapping.toJS(self.editedMetadata), self.schema());
-      return errors;
+      return validateMetadata(ko.mapping.toJS(self.editedMetadata), self.schema());
     });
 
-    ajax.query('tos-metadata-schema')
+    ajax.query("tos-metadata-schema")
       .success(function(data) {
-        self.editedMetadata(ko.mapping.fromJS(constructEditableMetadata(self.metadata, data.schema)));
+        self.editedMetadata(ko.mapping.fromJS(constructEditableMetadata(self.metadata(), data.schema)));
         self.inputTypeMap = constructSchemaInputTypeMap(data.schema);
         self.schema(data.schema);
       })
@@ -115,17 +114,16 @@
     };
 
     self.cancelEdit = function() {
-      self.editedMetadata(ko.mapping.fromJS(constructEditableMetadata(self.metadata, self.schema())));
+      self.editedMetadata(ko.mapping.fromJS(constructEditableMetadata(self.metadata(), self.schema())));
       self.editable(false);
     };
 
     self.save = function() {
       var metadata = coerceValuesToSchemaType(ko.mapping.toJS(self.editedMetadata), self.inputTypeMap);
-
-      ajax.command('store-tos-metadata-for-attachment')
-        .json({id: self.applicationId, attachmentId: self.attachmentId, metadata: metadata})
+      ajax.command("store-tos-metadata-for-attachment")
+        .json({id: self.applicationId(), attachmentId: self.attachmentId(), metadata: metadata})
         .success(function() {
-          self.metadata = ko.mapping.toJS(self.editedMetadata);
+          self.metadata(ko.mapping.toJS(self.editedMetadata));
           self.editable(false);
         })
         .call();
