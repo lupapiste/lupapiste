@@ -25,7 +25,7 @@
 
 (defn exception-with-type? [error-type e]
   (and (instance? clojure.lang.ExceptionInfo e)
-       (= error-type (-> e .getData :object :error))))
+       (= error-type (-> e .getData :error))))
 
 (def not-found? (partial exception-with-type? :not-found))
 (def bad-request? (partial exception-with-type? :bad-request))

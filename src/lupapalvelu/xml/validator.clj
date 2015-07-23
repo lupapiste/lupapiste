@@ -43,7 +43,7 @@
 (def- yht-2_1_0
   (conj public-schema-sources
     "krysp/yhteiset-2.1.0.xsd"
-    "krysp/rakennusvalvonta.xsd"
+    "krysp/rakennusvalvonta-2.1.2.xsd"
     "krysp/YleisenAlueenKaytonLupahakemus.xsd"
     "krysp/poikkeamispaatos_ja_suunnittelutarveratkaisu.xsd"))
 

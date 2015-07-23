@@ -178,7 +178,7 @@
 (defchecker expected-failure? [expected-text e]
   (cond
     (map? e)                (and (= (:ok e) false) (= (-> e :text name) (name expected-text)))
-    (captured-throwable? e) (= (some-> e throwable bean :data :object :text name) (name expected-text))
+    (captured-throwable? e) (= (some-> e throwable .getData :text name) (name expected-text))
     :else (throw (Exception. (str "'expected-failure?' called with invalid error parameter " e)))))
 
 (def unauthorized? (partial expected-failure? (:text unauthorized)))

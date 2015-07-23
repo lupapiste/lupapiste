@@ -291,7 +291,7 @@
       (if @connected
        (debug "Already connected!")
        (do
-         (debug "Connecting to MongoDB:" servers (if ssl "using ssl" "without encryption"))
+         (debug "Connecting to MongoDB:" (s/join (map str servers)) (if ssl "using ssl" "without encryption"))
          (m/connect! servers (mongo-options :ssl ssl))
          (reset! connected true)
          (m/set-default-write-concern! WriteConcern/JOURNALED)
