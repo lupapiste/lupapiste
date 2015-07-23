@@ -9,9 +9,7 @@
             [lupapalvelu.action :refer [defquery defcommand update-application notify boolean-parameters] :as action]
             [lupapalvelu.attachment :as attachment]
             [lupapalvelu.domain :as domain]
-            [lupapalvelu.document.tools :as tools]
             [lupapalvelu.mongo :as mongo]
-            [lupapalvelu.organization :as organization]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.verdict :as verdict]
@@ -22,7 +20,7 @@
 ;; KRYSP verdicts
 ;;
 
-(defn do-check-for-verdict [{application :application :as command}]
+(defn do-check-for-verdict [{{op :primaryOperation :as application} :application :as command}]
   {:pre [(every? command [:application :user :created])]}
   (if-let [app-xml (krysp-fetch/get-application-xml application :application-id)]
 
@@ -32,7 +30,8 @@
       (let [updates (verdict/find-verdicts-from-xml command app-xml)]
         (update-application command updates)
         (ok :verdicts (get-in updates [$set :verdicts]) :tasks (get-in updates [$set :tasks]))))
-    (verdict/fetch-tj-suunnittelija-verdict command)))
+    (when (#{"tyonjohtajan-nimeaminen-v2" "tyonjohtajan-nimeaminen" "suunnittelijan-nimeaminen"} (:name op))
+      (verdict/fetch-tj-suunnittelija-verdict command))))
 
 (notifications/defemail :application-verdict
   {:subject-key    "verdict"
