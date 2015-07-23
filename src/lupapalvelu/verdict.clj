@@ -9,10 +9,12 @@
             [lupapalvelu.action :as action]
             [lupapalvelu.application :as application]
             [lupapalvelu.application-meta-fields :as meta-fields]
+            [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.attachment :as attachment]
+            [lupapalvelu.operations :as operations]
             [lupapalvelu.organization :as organization]
             [lupapalvelu.permit :as permit]
             [lupapalvelu.tasks :as tasks]
@@ -104,6 +106,18 @@
              :modified created
              :state    :verdictGiven}})))
 
+(defn- get-tj-suunnittelija-doc-name
+  "Returns name of first party document of operation"
+  [operation-name]
+  (let [operation (get operations/operations operation-name)
+        schemas (cons (:schema operation) (:required operation))]
+    (some
+      #(when
+         (= :party
+           (keyword
+             (get-in (schemas/get-schema {:name %}) [:info :type])))
+         %)
+      schemas)))
 
 ;; Trimble writes verdict for tyonjohtaja/suunnittelija applications to their link permits.
 (defn fetch-tj-suunnittelija-verdict [{{:keys [municipality permitType] :as application} :application :as command}]
@@ -119,10 +133,7 @@
             osapuoli-type (cond
                             (or (= "tyonjohtajan-nimeaminen" application-op-name) (= "tyonjohtajan-nimeaminen-v2" application-op-name)) "tyonjohtaja"
                             (= "suunnittelijan-nimeaminen" application-op-name) "suunnittelija")
-            doc-name-mapping {"tyonjohtajan-nimeaminen"    "tyonjohtaja"
-                              "tyonjohtajan-nimeaminen-v2" "tyonjohtaja-v2"
-                              "suunnittelijan-nimeaminen"  "suunnittelija"}
-            doc-name (doc-name-mapping application-op-name)
+            doc-name (get-tj-suunnittelija-doc-name application-op-name)
             doc (tools/unwrapped (domain/get-document-by-name application doc-name))
             target-kuntaRoolikoodi (get-in doc [:data :kuntaRoolikoodi])]
         (when (and link-permit-xml osapuoli-type doc target-kuntaRoolikoodi)
