@@ -110,10 +110,25 @@
             updated-attachment (assoc attachment :metadata metadata)
             updated-attachments (-> (remove #(= % attachment) (:attachments application))
                                   (conj updated-attachment))]
-        (action/update-application command
-          {$set {:modified created
-                 :attachments updated-attachments}}))
+        (action/update-application command {$set {:modified created
+                                                  :attachments updated-attachments}}))
       (fail "error.attachment.id"))
+    (catch RuntimeException e
+      (timbre/error e)
+      (fail "error.invalid.metadata"))))
+
+(defcommand store-tos-metadata-for-application
+  {:parameters [:id metadata]
+   :user-roles #{:authority}
+   :states     (action/all-states-but [:draft :closed :canceled])}
+  [{:keys [application created] :as command}]
+  (try
+    (let [metadata (->> (keywordize-keys-and-some-values metadata [])
+                        (tms/sanitize-metadata)
+                        (#(assoc % :tila (get-in application [:metadata :tila])))
+                        (s/validate tms/AsiakirjaMetaDataMap))]
+      (action/update-application command {$set {:modified created
+                                                :metadata metadata}}))
     (catch RuntimeException e
       (timbre/error e)
       (fail "error.invalid.metadata"))))

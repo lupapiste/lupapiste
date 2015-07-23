@@ -120,7 +120,8 @@
 
     self.save = function() {
       var metadata = coerceValuesToSchemaType(ko.mapping.toJS(self.editedMetadata), self.inputTypeMap);
-      ajax.command("store-tos-metadata-for-attachment")
+      var command = self.attachmentId() ? "store-tos-metadata-for-attachment" : "store-tos-metadata-for-application";
+      ajax.command(command)
         .json({id: self.applicationId(), attachmentId: self.attachmentId(), metadata: metadata})
         .success(function() {
           self.metadata(ko.mapping.toJS(self.editedMetadata));
