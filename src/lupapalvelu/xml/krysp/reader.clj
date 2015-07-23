@@ -472,16 +472,22 @@
    "suunnittelija" {:path [:suunnittelijatieto :Suunnittelija]
                     :key :suunnittelijaRoolikoodi}})
 
+(defn- get-tj-suunnittelija-osapuolet
+  "Returns parties which match with given kuntaRoolikoodi and yhteystiedot, and have paatosPvm"
+  [xml-without-ns osapuoli-path osapuoli-key kuntaRoolikoodi-key kuntaRoolikoodi yhteystiedot]
+  (->> (select xml-without-ns osapuoli-path)
+    (map (partial ->paatos-osapuoli osapuoli-key))
+    (filter #(and
+               (= kuntaRoolikoodi (get % kuntaRoolikoodi-key))
+               (:paatosPvm %)
+               (= (:email yhteystiedot) (get-in % [:henkilo :sahkopostiosoite]))))))
+
 (defn tj-suunnittelija-verdicts-validator [{{:keys [yhteystiedot sijaistus]} :data} xml osapuoli-type kuntaRoolikoodi]
   {:pre [xml (#{"tyonjohtaja" "suunnittelija"} osapuoli-type) kuntaRoolikoodi]}
   (let [{osapuoli-path :path kuntaRoolikoodi-key :key} (osapuoli-path-key-mapping osapuoli-type)
         osapuoli-key (last osapuoli-path)
-        osapuolet (->> (select (cr/strip-xml-namespaces xml) osapuoli-path)
-                    (map (partial ->paatos-osapuoli osapuoli-key))
-                    (filter #(and
-                               (= kuntaRoolikoodi (get % kuntaRoolikoodi-key))
-                               (:paatosPvm %)
-                               (= (:email yhteystiedot) (get-in % [:henkilo :sahkopostiosoite])))))
+        xml-without-ns (cr/strip-xml-namespaces xml)
+        osapuolet (get-tj-suunnittelija-osapuolet xml-without-ns osapuoli-path osapuoli-key kuntaRoolikoodi-key kuntaRoolikoodi yhteystiedot)
         osapuoli (party-with-paatos-data osapuolet sijaistus)
         paatospvm  (:paatosPvm osapuoli)
         timestamp-1-day-from-now (util/get-timestamp-from-now :day 1)]
@@ -494,12 +500,7 @@
   (let [{osapuoli-path :path kuntaRoolikoodi-key :key} (osapuoli-path-key-mapping osapuoli-type)
         osapuoli-key (last osapuoli-path)]
     (map (fn [osapuolet-xml-without-ns]
-           (let [osapuolet (->> (select osapuolet-xml-without-ns osapuoli-path)
-                             (map (partial ->paatos-osapuoli osapuoli-key))
-                             (filter #(and
-                                        (= kuntaRoolikoodi (get % kuntaRoolikoodi-key))
-                                        (:paatosPvm %)
-                                        (= (:email yhteystiedot) (get-in % [:henkilo :sahkopostiosoite])))))
+           (let [osapuolet (get-tj-suunnittelija-osapuolet xml-without-ns osapuoli-path osapuoli-key kuntaRoolikoodi-key kuntaRoolikoodi yhteystiedot)
                  osapuoli (party-with-paatos-data osapuolet sijaistus)]
            (when (and osapuoli (> (now) (:paatosPvm osapuoli)))
              {:poytakirjat
@@ -509,9 +510,6 @@
                 }]
               })))
   (select xml-without-ns [:osapuolettieto :Osapuolet]))))
-
-
-
 
 (defn- application-state [xml-without-ns]
   (->> (select xml-without-ns [:Kasittelytieto])
