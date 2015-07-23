@@ -436,7 +436,7 @@
            tyotehtavat))})))
 
 (defn get-tyonjohtaja-data [lang tyonjohtaja party-type]
-  (let [foremans (dissoc (get-suunnittelija-data tyonjohtaja party-type) :suunnittelijaRoolikoodi)
+  (let [foremans (dissoc (get-suunnittelija-data tyonjohtaja party-type) :suunnittelijaRoolikoodi :patevyysvaatimusluokka)
         patevyys (:patevyys-tyonjohtaja tyonjohtaja)
         ;; The mappings in backing system providers' end make us pass "muu" when "muu koulutus" is selected.
         ;; Thus cannot use just this as koulutus:
@@ -453,7 +453,7 @@
       {:tyonjohtajaRooliKoodi rooli
        :vastattavatTyotehtavat (concat-tyotehtavat-to-string (:vastattavatTyotehtavat tyonjohtaja))
        :koulutus koulutus
-       :patevyysvaatimusluokka (:patevyysvaatimusluokka patevyys)
+       :vaadittuPatevyysluokka (:patevyysvaatimusluokka patevyys)
        :valmistumisvuosi (:valmistumisvuosi patevyys)
        :kokemusvuodet (:kokemusvuodet patevyys)
        :valvottavienKohteidenMaara (:valvottavienKohteidenMaara patevyys)
@@ -467,7 +467,7 @@
           {:sijaistettavaHlo sijaistettava-hlo})))))
 
 (defn get-tyonjohtaja-v2-data [lang tyonjohtaja party-type]
-  (let [foremans (dissoc (get-suunnittelija-data tyonjohtaja party-type) :suunnittelijaRoolikoodi)
+  (let [foremans (dissoc (get-suunnittelija-data tyonjohtaja party-type) :suunnittelijaRoolikoodi :patevyysvaatimusluokka)
         patevyys (:patevyys-tyonjohtaja tyonjohtaja)
         koulutus (if (= "other" (:koulutusvalinta patevyys))
                    "muu"
@@ -481,7 +481,7 @@
        :koulutus (if (= "other" (:koulutusvalinta patevyys))
                    "muu"
                    (:koulutusvalinta patevyys))
-       :patevyysvaatimusluokka (:patevyysvaatimusluokka tyonjohtaja)
+       :vaadittuPatevyysluokka (:patevyysvaatimusluokka tyonjohtaja)
        :valmistumisvuosi (:valmistumisvuosi patevyys)
        :kokemusvuodet (:kokemusvuodet patevyys)
        :valvottavienKohteidenMaara (:valvottavienKohteidenMaara patevyys)
