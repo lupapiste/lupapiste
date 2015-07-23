@@ -18,6 +18,7 @@
             [lupapalvelu.document.model :as model]
             [lupapalvelu.document.schemas :as schemas]
             [lupapalvelu.domain :as domain]
+            [lupapalvelu.foreman :as foreman]
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.ktj :as ktj]
             [lupapalvelu.mongo :refer [$each] :as mongo]
@@ -252,8 +253,11 @@
    :pre-checks       [domain/validate-owner-or-write-access
                       a/validate-authority-in-drafts]}
   [{:keys [application created] :as command}]
-  (or (a/validate-link-permits application)
-      (do-submit command application created)))
+  (let [application (meta-fields/enrich-with-link-permit-data application)]
+    (or
+      (foreman/validate-notice-submittable application)
+      (a/validate-link-permits application)
+      (do-submit command application created))))
 
 (defcommand refresh-ktj
   {:parameters [:id]

@@ -1,8 +1,9 @@
 (ns lupapalvelu.foreman
-  (:require [lupapalvelu.domain :as domain]
+  (:require [lupapalvelu.action :as action]
+            [lupapalvelu.domain :as domain]
             [sade.strings :as ss]
             [sade.util :as util]
-            [sade.core :refer [fail]]
+            [sade.core :refer :all]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.document.tools :as tools]
             [lupapalvelu.document.schemas :as schema]
@@ -114,3 +115,11 @@
   (and
     (foreman-app? application)
     (= "ilmoitus" (-> (domain/get-document-by-name application "tyonjohtaja-v2") :data :ilmoitusHakemusValitsin :value))))
+
+(defn validate-notice-submittable [{:keys [primaryOperation linkPermitData] :as application}]
+  (when (notice? application)
+    (when-let [link (some #(when (= (:type %) "lupapistetunnus") %) linkPermitData)]
+      (when-not (action/post-verdict-states (get
+                                              (mongo/select-one :applications {:_id (:id link)} {:state 1})
+                                              :state))
+        (fail! :error.foreman.notice-not-submittable)))))
