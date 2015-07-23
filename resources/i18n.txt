@@ -1,5 +1,0 @@
-info.tj-suunnittelija-paatos-details-missing: Päätöksen hakeminen epäonnistui: päätöksen tyyppi tai päivämäärä puuttuu taustajärjestelmässä.
-verdict.status.hyvaksytty: Hyväksytty
-verdict.status.hylatty: Hylätty
-verdict.status.ilmoitus-hyvaksytty: Ilmoitus hyväksytty
-verdict.status.hakemusvaiheessa: Hakemusvaiheessa
