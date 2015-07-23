@@ -806,6 +806,10 @@
                             <label data-bind="ltext: 'verdict.paatosdokumentinPvm'"></label>
                             <span class="value" data-bind="dateString: paivamaarat.paatosdokumentinPvm"></span>
                           </div>
+                           <div data-bind="if: paivamaarat.paatosPvm" class="key-value-pair">
+                             <label data-bind="ltext: 'verdict.paatosPvm'"></label>
+                             <span class="value" data-bind="dateString: paivamaarat.paatosPvm"></span>
+                           </div>
                           <div data-bind="if: paivamaarat.julkipano" class="key-value-pair">
                             <label data-bind="ltext: 'verdict.julkipano'"></label>
                             <span class="value" data-bind="dateString: paivamaarat.julkipano"></span>
@@ -837,7 +841,7 @@
                         <h2 data-bind="ltext: 'verdict.lupamaaraukset'"></h2>
                         <div class="accordion-content-part">
 
-                          <!--  ko if:  $data.lupamaaraykset -->
+                          <!--  ko if:  $data.lupamaaraykset && $data.lupamaaraykset.length -->
                           <div data-bind="if: lupamaaraykset.autopaikkojaEnintaan" class="key-value-pair">
                             <label data-bind="ltext: 'verdict.autopaikkojaEnintaan'"></label><span class="value" data-bind="text: lupamaaraykset.autopaikkojaEnintaan"></span></div>
                           <div data-bind="if: lupamaaraykset.autopaikkojaVahintaan" class="key-value-pair">
@@ -907,7 +911,7 @@
                           </div>
                           <!-- /ko --> <!-- /lupamaaraykset -->
 
-                          <!--  ko ifnot:  $data.lupamaaraykset -->
+                          <!--  ko ifnot:  $data.lupamaaraykset && $data.lupamaaraykset.length -->
                           <div data-bind="ltext: 'verdict.lupamaaraukset.missing'"></div>
                           <!-- /ko -->
 

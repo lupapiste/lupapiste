@@ -320,11 +320,6 @@
                    default-role)]
       (if (s/blank? code) default-role code))))
 
-
-(defn- get-roolikoodit [kuntaRoolikoodi]
-  {:kuntaRooliKoodi kuntaRoolikoodi ; Note the upper case 'Koodi'
-   :VRKrooliKoodi (kuntaRoolikoodi-to-vrkRooliKoodi kuntaRoolikoodi)})
-
 (defn get-osapuoli-data [osapuoli party-type]
   (let [selected-value (or (-> osapuoli :_selected) (-> osapuoli first key))
         yritys-type-osapuoli? (= "yritys" selected-value)

@@ -38,20 +38,11 @@
 (def- statement-statuses-more-options
   (vec (concat statement-statuses ["ei-huomautettavaa" "ehdollinen" "puollettu" "ei-puollettu" "ei-lausuntoa" "lausunto" "kielteinen" "palautettu" "poydalle"])))
 
-(defn- version-is-greater-or-equal [source target]
-  {:pre [(map? target) (every? #(target %) [:major :minor :micro]) (string? source)]}
-  (let [[source-major source-minor source-micro] (map #(util/->int % nil) (ss/split source #"\."))
-        source-micro (or source-micro 0)]
-    (or
-      (> source-major (:major target))
-      (and (= source-major (:major target)) (> source-minor (:minor target)))
-      (and (= source-major (:major target)) (= source-minor (:minor target)) (>= source-micro (:micro target))))))
-
 (defn possible-statement-statuses [application]
   (let [{permit-type :permitType municipality :municipality} application
         organization (organization/resolve-organization municipality permit-type)
         version (get-in organization [:krysp (keyword permit-type) :version])
         yht-version (mapping-common/get-yht-version permit-type version)]
-    (if (version-is-greater-or-equal yht-version {:major 2 :minor 1 :micro 5})
+    (if (util/version-is-greater-or-equal yht-version {:major 2 :minor 1 :micro 5})
       statement-statuses-more-options
       statement-statuses)))
