@@ -28,7 +28,7 @@
     }
 
     .editor-form {
-      padding: 5px 15px 15px 15px;
+      padding: 0 15px 15px 15px;
       select, input {
         width: 100%;
         box-sizing: border-box;
@@ -36,26 +36,26 @@
       }
       input[type=number] {
         width: 50px;
+        text-align: right;
       }
       label {
         display: inline-block;
-        margin-bottom: 5px;
+        margin: 5px 0 5px 0;
         font-weight: 700;
       }
-      .code-input {
-        margin-left: 4px;
-        width: 60px;
-      }
       div {
-        margin-bottom: 5px;
+        //margin-bottom: 5px;
       }
-      .years-field {
-        input {
-          width: 50px;
-          text-align: right;
+      .text-input-container {
+        div {
+          display: inline-block;
+          margin: 0;
         }
         .year-label {
           margin-left: 5px;
+        }
+        .form-input {
+          margin: 0;
         }
       }
     }

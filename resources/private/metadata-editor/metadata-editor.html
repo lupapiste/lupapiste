@@ -27,14 +27,16 @@
                                    optionsText: loc,
                                    value: $parent.editedMetadata()[type]" ></select>
             </div>
-            <div data-bind="if: $data.inputType">
+            <div data-bind="if: $data.inputType" class="text-input-container">
               <label data-bind="ltext: type"></label><br>
               <div data-bind="visible: $parent.displayOnly,
-                              text: $parent.editedMetadata()[type]"></div>
-              <input class="form-input" data-bind="visible: $parent.editable,
-                                                   attr: {type: inputType},
-                                                   textInput: $parent.editedMetadata()[type],
-                                                   css: {invalid: $parent.invalidFields().indexOf(type) >= 0}">
+                              text: $parent.editedMetadata()[type]"></div
+              ><div data-bind="visible: $parent.editable">
+                <input class="form-input" data-bind="attr: {type: inputType},
+                                                     textInput: $parent.editedMetadata()[type],
+                                                     css: {invalid: $parent.invalidFields().indexOf(type) >= 0}">
+              </div
+              ><div data-bind="if: inputType === 'number'" class="year-label"><span data-bind="ltext: 'vuotta'"></span></div>
             </div>
             <div data-bind="if: $data.subfields">
               <div class="subtable">
@@ -49,13 +51,14 @@
                                        optionsText: loc,
                                        value: $parents[1].editedMetadata()[$parent.type][type]"></select>
                   </div>
-                  <div data-bind="if: $data.inputType">
+                  <div data-bind="if: $data.inputType" class="text-input-container">
                     <div data-bind="visible: $parents[1].displayOnly,
-                                    text: $parents[1].editedMetadata()[$parent.type][type]"></div>
-                    <div data-bind="visible: $parents[1].editable">
+                                    text: $parents[1].editedMetadata()[$parent.type][type]"></div
+                    ><div data-bind="visible: $parents[1].editable">
                       <input class="form-input" data-bind="textInput: $parents[1].editedMetadata()[$parent.type][type], attr: {type: inputType},
                                                            css: {invalid: $parents[1].invalidFields().indexOf(type) >= 0}">
-                    </div>
+                    </div
+                    ><div data-bind="if: inputType === 'number'" class="year-label"><span data-bind="ltext: 'vuotta'"></span></div>
                   </div>
 
                   <div data-bind="if: $data.dependencies && $data.dependencies[$parents[1].editedMetadata()[$parent.type][type]()]">
@@ -69,13 +72,14 @@
                                      optionsText: loc,
                                      value: $parents[2].editedMetadata()[$parents[1].type][type]"></select>
                       </div>
-                      <div data-bind="if: $data.inputType">
+                      <div data-bind="if: $data.inputType" class="text-input-container">
                         <div data-bind="visible: $parents[2].displayOnly,
-                                  text: $parents[2].editedMetadata()[$parents[1].type][type]"></div>
-                        <div data-bind="visible: $parents[2].editable">
+                                  text: $parents[2].editedMetadata()[$parents[1].type][type]"></div
+                        ><div data-bind="visible: $parents[2].editable">
                           <input class="form-input" data-bind="textInput: $parents[2].editedMetadata()[$parents[1].type][type], attr: {type: inputType},
                                                                css: {invalid: $parents[2].invalidFields().indexOf(type) >= 0}">
-                        </div>
+                        </div
+                        ><div data-bind="if: inputType === 'number'" class="year-label"><span data-bind="ltext: 'vuotta'"></span></div>
                       </div>
                     </div>
                   </div>
@@ -94,13 +98,14 @@
                                      optionsText: loc,
                                      value: $parents[1].editedMetadata()[type]"></select>
                 </div>
-                <div data-bind="if: $data.inputType">
+                <div data-bind="if: $data.inputType" class="text-input-container">
                   <div data-bind="visible: $parents[1].displayOnly,
-                                  text: $parents[1].editedMetadata()[type]"></div>
-                  <div data-bind="visible: $parents[1].editable">
+                                  text: $parents[1].editedMetadata()[type]"></div
+                  ><div data-bind="visible: $parents[1].editable">
                     <input class="form-input" data-bind="textInput: $parents[1].editedMetadata()[type], attr: {type: inputType},
                                                          css: {invalid: $parents[1].invalidFields().indexOf(type) >= 0}">
-                  </div>
+                  </div
+                  ><div data-bind="if: inputType === 'number'" class="year-label"><span data-bind="ltext: 'vuotta'"></span></div>
                 </div>
               </div>
             </div>

@@ -4157,7 +4157,7 @@ ul.attachments-list li.mandatory-attachments {
 }
 /* line 30, ../sass/partials/_metadata-editor.scss */
 .metadata-editor-container .editor .editor-form {
-  padding: 5px 15px 15px 15px;
+  padding: 0 15px 15px 15px;
 }
 /* line 32, ../sass/partials/_metadata-editor.scss */
 .metadata-editor-container .editor .editor-form select, .metadata-editor-container .editor .editor-form input {
@@ -4168,30 +4168,26 @@ ul.attachments-list li.mandatory-attachments {
 /* line 37, ../sass/partials/_metadata-editor.scss */
 .metadata-editor-container .editor .editor-form input[type=number] {
   width: 50px;
-}
-/* line 40, ../sass/partials/_metadata-editor.scss */
-.metadata-editor-container .editor .editor-form label {
-  display: inline-block;
-  margin-bottom: 5px;
-  font-weight: 700;
-}
-/* line 45, ../sass/partials/_metadata-editor.scss */
-.metadata-editor-container .editor .editor-form .code-input {
-  margin-left: 4px;
-  width: 60px;
-}
-/* line 49, ../sass/partials/_metadata-editor.scss */
-.metadata-editor-container .editor .editor-form div {
-  margin-bottom: 5px;
-}
-/* line 53, ../sass/partials/_metadata-editor.scss */
-.metadata-editor-container .editor .editor-form .years-field input {
-  width: 50px;
   text-align: right;
 }
-/* line 57, ../sass/partials/_metadata-editor.scss */
-.metadata-editor-container .editor .editor-form .years-field .year-label {
+/* line 41, ../sass/partials/_metadata-editor.scss */
+.metadata-editor-container .editor .editor-form label {
+  display: inline-block;
+  margin: 5px 0 5px 0;
+  font-weight: 700;
+}
+/* line 50, ../sass/partials/_metadata-editor.scss */
+.metadata-editor-container .editor .editor-form .text-input-container div {
+  display: inline-block;
+  margin: 0;
+}
+/* line 54, ../sass/partials/_metadata-editor.scss */
+.metadata-editor-container .editor .editor-form .text-input-container .year-label {
   margin-left: 5px;
+}
+/* line 57, ../sass/partials/_metadata-editor.scss */
+.metadata-editor-container .editor .editor-form .text-input-container .form-input {
+  margin: 0;
 }
 /* line 64, ../sass/partials/_metadata-editor.scss */
 .metadata-editor-container .editor button:disabled {
