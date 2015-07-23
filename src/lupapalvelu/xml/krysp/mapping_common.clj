@@ -278,6 +278,7 @@
            {:tag :alkamisPvm}
            {:tag :paattymisPvm}
            {:tag :tyonjohtajaHakemusKytkin}
+           {:tag :vaadittuPatevyysluokka}
            {:tag :kokemusvuodet}
            {:tag :sijaistustieto
             :child [{:tag :Sijaistus
@@ -299,6 +300,7 @@
            {:tag :paattymisPvm}
            ;{:tag :valvottavienKohteidenMaara}  ;; Tama tulossa kryspiin -> TODO: Ota sitten kayttoon!
            {:tag :tyonjohtajaHakemusKytkin}
+           {:tag :vaadittuPatevyysluokka}
            {:tag :kokemusvuodet}
            {:tag :vastattavaTyotieto
             :child [{:tag :VastattavaTyo

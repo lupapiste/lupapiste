@@ -403,14 +403,17 @@
 
     (writer/write-to-disk application attachments-for-write xml krysp-version output-dir)))
 
+(defn- patevyysvaatimusluokka212 [luokka]
+  (if (and luokka (not (#{"AA" "ei tiedossa"} luokka)))
+    "ei tiedossa" ; values that are not supported in 2.1.2 will be converted to "ei tiedossa"
+    luokka))
+
 (defn- map-tyonjohtaja-patevyysvaatimusluokka [canonical]
   (update-in canonical [:Rakennusvalvonta :rakennusvalvontaAsiatieto :RakennusvalvontaAsia :osapuolettieto :Osapuolet :tyonjohtajatieto]
     #(map (fn [tj]
-            (update-in tj [:Tyonjohtaja :patevyysvaatimusluokka]
-              (fn [luokka]
-                (if (and luokka (not (#{"AA" "ei tiedossa"} luokka)))
-                  "ei tiedossa" ; values that are not supported in 2.1.2 will be converted to "ei tiedossa"
-                  luokka))))
+            (-> tj
+              (update-in [:Tyonjohtaja :patevyysvaatimusluokka] patevyysvaatimusluokka212)
+              (update-in [:Tyonjohtaja :vaadittuPatevyysluokka] patevyysvaatimusluokka212)))
        %)))
 
 (defn- map-enums-212 [canonical]
