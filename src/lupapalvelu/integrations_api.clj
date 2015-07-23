@@ -197,8 +197,8 @@
           krysp-update-map (commands/validated-model-updates application collection document krysp-updates created :source "krysp")
 
           {:keys [mongo-query mongo-updates]} (util/deep-merge
-                                                buildingId-update-map
                                                 clearing-update-map
+                                                buildingId-update-map
                                                 krysp-update-map)]
       (infof "merging data into %s %s" (get-in document [:schema-info :name]) (:id document))
       (update-application command mongo-query mongo-updates)
