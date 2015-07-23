@@ -144,6 +144,6 @@
             (notifications/notify! :application-verdict command)
             (ok)))))
     (catch Throwable e
-      (if-let [error-key (some-> e ex-data :object :text)]
+      (if-let [error-key (some-> e ex-data :text)]
         (fail error-key)
         (throw e)))))

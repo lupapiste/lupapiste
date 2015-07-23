@@ -6,7 +6,7 @@
     (merge map-args {:ok false :text (name text)})))
 
 (defmacro fail! [& args]
-  `(throw+ (merge (fail ~@args) {::type ::fail ::file ~*file* ::line ~(:line (meta &form))})))
+  `(throw+ (merge (fail ~@args) {::type ::fail ::file ~*file* ::line (or ~(:line (meta &form)) 0)})))
 
 (defn ok [& kv]
   (let [first (first kv)
