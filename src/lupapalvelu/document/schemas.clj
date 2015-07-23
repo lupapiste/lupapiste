@@ -338,7 +338,7 @@
 
 (def patevyys-tyonjohtaja [koulutusvalinta
                            {:name "koulutus" :type :string :required true :i18nkey "muukoulutus"}
-                           patevyysvaatimusluokka
+                           patevyysvaatimusluokka ; Actually vaadittuPatevyysluokka in KRYSP
                            {:name "valmistumisvuosi" :type :string :subtype :number :min-len 4 :max-len 4 :size "s" :required true}
                            {:name "kokemusvuodet" :type :string :subtype :number :min-len 1 :max-len 2 :size "s" :required true}
                            {:name "valvottavienKohteidenMaara" :i18nkey "tyonjohtaja.patevyys.valvottavienKohteidenMaara" :type :string :subtype :number :size "s" :required true}
@@ -447,7 +447,7 @@
                       designer-basic
                       ilmoitus-hakemus-valitsin
                       kuntaroolikoodi-tyonjohtaja-v2
-                      patevyysvaatimusluokka
+                      patevyysvaatimusluokka ; Actually vaadittuPatevyysluokka in KRYSP
                       vastattavat-tyotehtavat-tyonjohtaja-v2
                       tyonjohtaja-hanketieto
                       sijaisuus-tyonjohtaja

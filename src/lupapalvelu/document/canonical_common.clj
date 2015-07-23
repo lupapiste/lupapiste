@@ -453,7 +453,8 @@
       {:tyonjohtajaRooliKoodi rooli
        :vastattavatTyotehtavat (concat-tyotehtavat-to-string (:vastattavatTyotehtavat tyonjohtaja))
        :koulutus koulutus
-       :patevyysvaatimusluokka (:patevyysvaatimusluokka patevyys)
+        :patevyysvaatimusluokka (:patevyysvaatimusluokka patevyys)
+       :vaadittuPatevyysluokka (:patevyysvaatimusluokka patevyys)
        :valmistumisvuosi (:valmistumisvuosi patevyys)
        :kokemusvuodet (:kokemusvuodet patevyys)
        :valvottavienKohteidenMaara (:valvottavienKohteidenMaara patevyys)
@@ -482,6 +483,7 @@
                    "muu"
                    (:koulutusvalinta patevyys))
        :patevyysvaatimusluokka (:patevyysvaatimusluokka tyonjohtaja)
+       :vaadittuPatevyysluokka (:patevyysvaatimusluokka tyonjohtaja)
        :valmistumisvuosi (:valmistumisvuosi patevyys)
        :kokemusvuodet (:kokemusvuodet patevyys)
        :valvottavienKohteidenMaara (:valvottavienKohteidenMaara patevyys)
