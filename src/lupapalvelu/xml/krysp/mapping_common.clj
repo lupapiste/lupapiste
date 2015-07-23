@@ -253,6 +253,19 @@
                         :child [{:tag :henkilo}
                                 {:tag :kiinteistotunnus}
                                 {:tag :hallintasuhde}]}]})
+
+(def tyonjohtaja_210
+  {:tag :Tyonjohtaja
+   :child [{:tag :tyonjohtajaRooliKoodi}
+           {:tag :VRKrooliKoodi}
+           henkilo
+           yritys_211
+           {:tag :patevyysvaatimusluokka}
+           {:tag :koulutus}
+           {:tag :valmistumisvuosi}
+           {:tag :tyonjohtajaHakemusKytkin}
+           {:tag :vaadittuPatevyysluokka}]})
+
 (def tyonjohtaja_211
   {:tag :Tyonjohtaja
    :child [{:tag :tyonjohtajaRooliKoodi}
@@ -260,6 +273,7 @@
            henkilo
            yritys_211
            {:tag :patevyysvaatimusluokka}
+           {:tag :vaadittuPatevyysluokka}
            {:tag :koulutus}
            {:tag :valmistumisvuosi}
            {:tag :alkamisPvm}
@@ -280,6 +294,7 @@
            henkilo
            yritys_211
            {:tag :patevyysvaatimusluokka}
+           {:tag :vaadittuPatevyysluokka}
            {:tag :koulutus}
            {:tag :valmistumisvuosi}
            {:tag :alkamisPvm}
@@ -298,17 +313,9 @@
 
 (def tyonjohtaja_215 (update-in tyonjohtaja_213 [:child] conj {:tag :vainTamaHankeKytkin}))
 
-(def tyonjohtajatieto
+(def tyonjohtajatieto_210
   {:tag :tyonjohtajatieto
-   :child [{:tag :Tyonjohtaja
-            :child [{:tag :tyonjohtajaRooliKoodi}
-                    {:tag :VRKrooliKoodi}
-                    henkilo
-                    yritys_211
-                    {:tag :patevyysvaatimusluokka}
-                    {:tag :koulutus}
-                    {:tag :valmistumisvuosi}
-                    {:tag :tyonjohtajaHakemusKytkin}]}]})
+   :child [tyonjohtaja_210]})
 
 (def tyonjohtajatieto_211
   {:tag :tyonjohtajatieto
@@ -326,7 +333,7 @@
   {:tag :tyonjohtajatieto
    :child [tyonjohtaja_215]})
 
-(def osapuolet
+(def osapuolet_210
   {:tag :Osapuolet :ns "yht"
    :child [{:tag :osapuolitieto
             :child [osapuoli-body_211]}
@@ -339,7 +346,7 @@
                              {:tag :patevyysvaatimusluokka}
                              {:tag :koulutus}
                              ]}]}
-           tyonjohtajatieto
+           tyonjohtajatieto_210
            naapuri]})
 
 (def suunnittelijatieto_211

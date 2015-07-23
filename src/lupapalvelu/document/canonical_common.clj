@@ -320,11 +320,6 @@
                    default-role)]
       (if (s/blank? code) default-role code))))
 
-
-(defn- get-roolikoodit [kuntaRoolikoodi]
-  {:kuntaRooliKoodi kuntaRoolikoodi ; Note the upper case 'Koodi'
-   :VRKrooliKoodi (kuntaRoolikoodi-to-vrkRooliKoodi kuntaRoolikoodi)})
-
 (defn get-osapuoli-data [osapuoli party-type]
   (let [selected-value (or (-> osapuoli :_selected) (-> osapuoli first key))
         yritys-type-osapuoli? (= "yritys" selected-value)
@@ -458,7 +453,8 @@
       {:tyonjohtajaRooliKoodi rooli
        :vastattavatTyotehtavat (concat-tyotehtavat-to-string (:vastattavatTyotehtavat tyonjohtaja))
        :koulutus koulutus
-       :patevyysvaatimusluokka (:patevyysvaatimusluokka patevyys)
+        :patevyysvaatimusluokka (:patevyysvaatimusluokka patevyys)
+       :vaadittuPatevyysluokka (:patevyysvaatimusluokka patevyys)
        :valmistumisvuosi (:valmistumisvuosi patevyys)
        :kokemusvuodet (:kokemusvuodet patevyys)
        :valvottavienKohteidenMaara (:valvottavienKohteidenMaara patevyys)
@@ -487,6 +483,7 @@
                    "muu"
                    (:koulutusvalinta patevyys))
        :patevyysvaatimusluokka (:patevyysvaatimusluokka tyonjohtaja)
+       :vaadittuPatevyysluokka (:patevyysvaatimusluokka tyonjohtaja)
        :valmistumisvuosi (:valmistumisvuosi patevyys)
        :kokemusvuodet (:kokemusvuodet patevyys)
        :valvottavienKohteidenMaara (:valvottavienKohteidenMaara patevyys)
