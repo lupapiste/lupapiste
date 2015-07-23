@@ -25,7 +25,7 @@
     (defschema version schema)))
 
 (defn get-schema
-  ([{:keys [version name]}] (get-schema version name))
+  ([{:keys [version name] :or {version 1}}] (get-schema version name))
   ([schema-version schema-name]
     {:pre [schema-version schema-name]}
     (get-in @registered-schemas [schema-version (name schema-name)])))
