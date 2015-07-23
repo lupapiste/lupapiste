@@ -161,7 +161,7 @@ var util = (function($) {
 
   var personIdCn = ["0","1","2","3","4","5","6","7","8","9","A","B","C","D",
     "E","F","H","J","K","L","M","N","P","R","S","T","U","V",
-    "W","X","Y"]
+    "W","X","Y"];
 
   function isValidPersonId(personId) {
     var m = /^(\d{6})[aA+-]([0-9]{3})([0-9A-Z])$/.exec(personId || ""),
@@ -209,6 +209,8 @@ var util = (function($) {
     isValidY:            isValidY,
     isValidOVT:          isValidOVT,
     isValidPersonId:     isValidPersonId,
+    lowerCase: function(s) {return _.isString(s) ? s.toLowerCase() : s;},
+    upperCase: function(s) {return _.isString(s) ? s.toUpperCase() : s;},
     prop: {
       isPropertyId:           isPropertyId,
       isPropertyIdInDbFormat: isPropertyIdInDbFormat,
