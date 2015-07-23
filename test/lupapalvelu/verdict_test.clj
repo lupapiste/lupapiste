@@ -67,9 +67,9 @@
 
       (fact "Validator doesn't accept unknown kuntaRoolikoodi"
         (fetch-tj-suunnittelija-verdict
-          (assoc-in command [:application :documents 0 :data :kuntaRoolikoodi :value] "error")) => (partial expected-failure? "info.no-verdicts-found-from-backend")
+          (assoc-in command [:application :documents 0 :data :kuntaRoolikoodi :value] "KVV-ty\u00f6njohtaja")) => (partial expected-failure? "info.no-verdicts-found-from-backend")
         (provided
-          (meta-fields/enrich-with-link-permit-data irrelevant) => (assoc-in tj-app [:documents 0 :data :kuntaRoolikoodi :value] "error")))
+          (meta-fields/enrich-with-link-permit-data irrelevant) => (assoc-in tj-app [:documents 0 :data :kuntaRoolikoodi :value] "KVV-ty\u00f6njohtaja")))
 
       (fact "Validator error if document's email doesn't match with XML osapuoli email"
         (fetch-tj-suunnittelija-verdict

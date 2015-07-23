@@ -21,7 +21,7 @@
   pysyva-rakennustunnus
   tj-suunnittelija-verdicts-validator
   party-with-paatos-data
-  validate-sijaistustieto
+  valid-sijaistustieto?
   osapuoli-path-key-mapping)
 
 (fact "property-equals returns url-encoded data"
@@ -534,29 +534,31 @@
                    :sijaistettavaHloSukunimi "Panaani"}]
 
     (facts "Sijaistus"
-      (validate-sijaistustieto nil nil) => falsey
-      (validate-sijaistustieto nil sijaistus) => falsey
-      (validate-sijaistustieto osapuoli nil) => truthy
+      (valid-sijaistustieto? nil nil) => falsey
+      (valid-sijaistustieto? nil sijaistus) => falsey
+      (valid-sijaistustieto? osapuoli nil) => truthy
       (fact "True when values match"
-        (validate-sijaistustieto osapuoli sijaistus) => truthy)
+        (valid-sijaistustieto? osapuoli sijaistus) => truthy)
       (fact "Dates must match"
-        (validate-sijaistustieto (assoc osapuoli :alkamisPvm "2015-07-06") sijaistus) => falsey
-        (validate-sijaistustieto osapuoli (assoc sijaistus :paattymisPvm "09.07.2015")) => falsey)
+        (valid-sijaistustieto? (assoc osapuoli :alkamisPvm "2015-07-06") sijaistus) => falsey
+        (valid-sijaistustieto? osapuoli (assoc sijaistus :paattymisPvm "09.07.2015")) => falsey)
       (fact "Name must match"
-        (validate-sijaistustieto (assoc osapuoli :sijaistettavaHlo "Panaani Pena") sijaistus) => falsey
-        (validate-sijaistustieto osapuoli (assoc sijaistus :sijaistettavaHloEtunimi "Paavo")) => falsey)
+        (valid-sijaistustieto? (assoc osapuoli :sijaistettavaHlo "Panaani Pena") sijaistus) => falsey
+        (valid-sijaistustieto? osapuoli (assoc sijaistus :sijaistettavaHloEtunimi "Paavo")) => falsey)
       (fact "Name can have whitespace"
-        (validate-sijaistustieto osapuoli (assoc sijaistus :sijaistettavaHloSukunimi "  Panaani ")) => truthy))
+        (valid-sijaistustieto? osapuoli (assoc sijaistus :sijaistettavaHloSukunimi "  Panaani ")) => truthy))
 
     (facts "Osapuoli with paatos data"
       (party-with-paatos-data nil nil) => falsey
       (party-with-paatos-data [osapuoli] sijaistus) => osapuoli
       (fact "PaatosPvm must be there"
-        (party-with-paatos-data [(dissoc osapuoli :alkamisPvm)] anything) => nil)
+        (party-with-paatos-data [(dissoc osapuoli :paatosPvm)] anything) => nil)
       (fact "Paatostyyppi must be correct"
         (party-with-paatos-data [(assoc osapuoli :paatostyyppi "test")] anything) => nil
         (party-with-paatos-data [(assoc osapuoli :paatostyyppi "hyl\u00e4tty")] sijaistus) => truthy)
       (fact "Sijaistus can be nil"
-        (party-with-paatos-data [osapuoli] nil) => truthy))))
+        (party-with-paatos-data [osapuoli] nil) => truthy)
+      (fact "Sijaistus can be empty"
+        (party-with-paatos-data [osapuoli] {}) => truthy))))
 
 
