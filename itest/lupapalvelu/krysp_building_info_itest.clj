@@ -38,13 +38,14 @@
     (count (get-in doc-after [:data :huoneistot])) => 21
     (get-in doc-after [:data :kaytto :kayttotarkoitus :value]) => "039 muut asuinkerrostalot"
     (get-in doc-after [:data :kaytto :kayttotarkoitus :source]) => "krysp"
+    (get-in doc-after [:data :varusteet :sahkoKytkin :value]) => true
 
     (fact "KRYSP data is stored in source value field"
       (get-in doc-before [:data :mitat :tilavuus :sourceValue]) => nil
       (get-in doc-after [:data :mitat :tilavuus :sourceValue]) => "8240"
       (get-in doc-after [:data :mitat :tilavuus :value]) => "8240")
 
-    (fact "Data has been cleared before new merge (overwrite true)"
+    (fact "Data changes correctly between two different buildings (overwrite true)"
      (let [building-id-2 (:buildingId (second (:data building-info)))
            _ (command pena :merge-details-from-krysp :id application-id :documentId (:id doc-before) :collection "documents" :buildingId building-id-2 :path "buildingId" :overwrite true) => ok?
            merged-app (query-application pena application-id)
@@ -53,12 +54,15 @@
 
        (fact "muutostyo not changed because it's not KRYSP field"
          (get-in doc-after-2 [:data :muutostyolaji :value]) => "muut muutosty\u00f6t")
+       (fact "Kayttotarkoitus has new value from KRYSP data"
+         (get-in doc-after-2 [:data :kaytto :kayttotarkoitus :value]) => "021 rivitalot"
+         (get-in doc-after-2 [:data :kaytto :kayttotarkoitus :source]) => "krysp")
 
-       (fact "count of huoneistot is the same, because data is set to defaults"
+       (fact "count of huoneistot is the same, because data is set to defaults not deleted"
          (count (get-in doc-after [:data :huoneistot])) => 21
          (count huoneistot) => 21)
 
-       (fact "two of the huoneistot have source data, others are empty"
+       (fact "two of the huoneistot have actual source data, others are empty"
          (count (filter
                   (fn [[i data]]
                     (some #(:source %) (vals data)))
@@ -72,7 +76,7 @@
          (count (get-in doc-after [:data :rakennuksenOmistajat])) => 2
          (count (get-in doc-after-2 [:data :rakennuksenOmistajat])) => 4)))
 
-    ; Merge back building-id data for next test
+    ; Merge back building-id 1 data for next test
     (command pena :merge-details-from-krysp :id application-id :documentId (:id doc-before) :collection "documents" :buildingId building-id :path "buildingId" :overwrite true) => ok?
 
     (fact "Merging ID only"
@@ -116,7 +120,8 @@
           (get-in doc-after-4 [:data :valtakunnallinenNumero :value]) => ss/blank?
           (count (get-in doc-after-4 [:data :huoneistot])) => 21 ; huoneistot are not deleted, only cleared from KRYSP data
           (get-in doc-after-4 [:data :kaytto :kayttotarkoitus :value]) => nil ; default value for select is null
-          (get-in doc-after-4 [:data :kaytto :kayttotarkoitus :source]) => nil)))))
+          (get-in doc-after-4 [:data :kaytto :kayttotarkoitus :source]) => nil
+          (get-in doc-after-4 [:data :varusteet :sahkoKytkin :value]) => false)))))
 
 (fact* "Merging building information from KRYSP succeeds even if document schema does not have place for all the info"
   (let [application-id (create-app-id pena :propertyId sipoo-property-id :operation "purkaminen")
