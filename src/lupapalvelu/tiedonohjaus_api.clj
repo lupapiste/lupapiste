@@ -112,7 +112,8 @@
                                   (conj updated-attachment))]
         (action/update-application command
           {$set {:modified created
-                 :attachments updated-attachments}})))
+                 :attachments updated-attachments}}))
+      (fail "error.attachment.id"))
     (catch RuntimeException e
       (timbre/error e)
-      (fail "Virheelliset metatiedot"))))
+      (fail "error.invalid.metadata"))))
