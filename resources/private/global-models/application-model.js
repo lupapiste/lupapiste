@@ -220,9 +220,12 @@ LUPAPISTE.ApplicationModel = function() {
       if (i.id() === "" && i.invite) {
         i.id(util.getIn(i, ["invite", "user", "id"]));
       }
-      var a = r[i.id()] || (i.roles = [], i);
-      a.roles.push(i.role());
-      r[i.id()] = a;
+      var auth = r[i.id()] || (i.roles = [], i);
+      var role = i.role();
+      if (!_.contains(auth.roles, role)) {
+        auth.roles.push(role);
+      }
+      r[i.id()] = auth;
       return r;
     };
     var pimped = _.reduce(self.auth(), withRoles, {});

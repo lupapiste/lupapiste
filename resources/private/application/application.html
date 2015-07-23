@@ -408,7 +408,7 @@
                       <span class="person">
                         <span data-bind="fullName: $data"></span>
                         (<span data-bind="text: username"></span>)
-                        <i><span data-bind="foreach: roles"><span data-bind="text: loc($data)"></span> </span></i>
+                        <i><span data-bind="text: _.map(roles, _.compose(util.lowerCase, loc)).join(', ')"> </span></i>
                       </span>
                       <span class="invite-state">
                         <span data-bind="if: $data.invite">
