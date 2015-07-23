@@ -107,3 +107,10 @@
       (update-in [:documents] (fn [docs] (filter #(= (get-in % [:schema-info :name]) "tyonjohtaja-v2") docs)))))
 
 (defn foreman-app? [application] (= :tyonjohtajan-nimeaminen-v2 (-> application :primaryOperation :name keyword)))
+
+(defn notice?
+  "True if application is foreman application and of type notice (ilmoitus)"
+  [application]
+  (and
+    (foreman-app? application)
+    (= "ilmoitus" (-> (domain/get-document-by-name application "tyonjohtaja-v2") :data :ilmoitusHakemusValitsin :value))))

@@ -78,8 +78,7 @@
    :states     [:submitted :complement-needed]}
   [{:keys [application created user] :as command}]
   (let [jatkoaika-app? (= :ya-jatkoaika (-> application :primaryOperation :name keyword))
-        foreman-notice? (when foreman/foreman-app?
-                          (= "ilmoitus" (-> (domain/get-document-by-name application "tyonjohtaja-v2") :data :ilmoitusHakemusValitsin :value)))
+        foreman-notice? (foreman/notice? application)
         app-updates (merge
                       {:modified created
                        :sent created
