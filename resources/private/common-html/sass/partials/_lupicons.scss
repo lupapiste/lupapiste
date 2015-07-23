@@ -24,14 +24,6 @@
     -moz-osx-font-smoothing: grayscale;
 }
 
-// Convenience typo (?) fixes for log-in and log-out (see below).
-.lupicon-login:before {
-        content: "\e62f";
-}
-.lupicon-logout:before {
-        content: "\e630";
-}
-
 .lupicon-archives:before {
 	content: "\e600";
 }

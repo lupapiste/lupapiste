@@ -1,6 +1,8 @@
 $header-padding: 12px;
 $header-height: 60px;
-$brand-widhth: 188px;
+$brand-width: 188px;
+$language-bg: $gray85;
+$language-padding: 20px;
 
 @mixin header-padding {
     padding: {
@@ -9,7 +11,7 @@ $brand-widhth: 188px;
     }
 }
 
-@mixin nav-link {
+@mixin nav-link( $link: $orange, $hover: white, $hover-bg: inherit ) {
     a {
         font-size: 16px;
         vertical-align: middle;
@@ -20,16 +22,17 @@ $brand-widhth: 188px;
         text-overflow: ellipsis;
         // Reminder of order: link, visited, hover, active
         &:link, &:visited {
-                    color: $orange;
+                    color: $link;
                     text-decoration: none;
                     span {
-                        color: $orange;
+                        color: $link;
                     }
                 }
         &:hover, &:active {
-                     color: white;
+                     color: $hover;
+                     background-color: $hover-bg;
                      span {
-                         color: white;
+                         color: $hover;
                      }
                  }
         span {
@@ -38,12 +41,32 @@ $brand-widhth: 188px;
     }
 }
 
+@mixin language-select( $link: $orange, $hover: white, $bg: inherit ) {
+    @include nav-link( $link: $link, $hover: $hover, $hover-bg: $language-bg );
+    background-color: $bg;
+    display: inline-block;
+    margin: 0;
+    float: left;
+    a {
+        padding: {
+          left: $language-padding;
+          right: $language-padding;
+          top: 0;
+          bottom: 0;
+      }
+    }
+    a, span {
+        vertical-align: middle;
+        line-height: $header-height;
+        text-transform: uppercase;
+        overflow: hidden;
+    }
+}
 
 nav {
   position: fixed;
   top:0;
   z-index: 2002;
-  height: $header-height;
   box-sizing: border-box;
   width: 100%;
   background: $gray51;
@@ -51,11 +74,12 @@ nav {
     width: 100%;
     max-width: $application-max-width;
     margin: 0 auto;
+    float: left;
     position: relative;
     box-sizing: border-box;
     .brand {
       position: relative;
-      width: 188px;
+      width: $brand-width;
       display: inline-block;
       float: left;
       a img {
@@ -65,19 +89,13 @@ nav {
         margin: 12px;
       }
     }
-    .language-select {
-        @include nav-link;
-        @include header-padding;
-        display: inline-block;
-        a, span {
-            vertical-align: middle;
-            line-height: $header-height;
-            text-transform: uppercase;
-        }
-        float: left;
-        position: relative;
-    }
+    .language-closed {
+        @include language-select;
 
+    }
+    .language-open {
+        @include language-select( $link: white, $hover: $orange, $bg: $language-bg );
+    }
     .header-menu {
       display: inline-block;
       position: absolute;
@@ -96,5 +114,27 @@ nav {
           }
       }
     }
+  }
+  .language-menu {
+      width: 100%;
+      clear: left;
+      padding: {
+          top: 1em;
+          left: $brand-width + $language-padding;
+          bottom: .5em;
+      }
+      background-color: $language-bg;
+      ul {
+          list-style-type: none;
+          padding: 0;
+          margin: 0;
+          li {
+              @include nav-link( $link: white, $hover: $orange);
+              margin: {
+                bottom: .5em;
+                top: 0;
+              }
+          }
+      }
   }
 }
