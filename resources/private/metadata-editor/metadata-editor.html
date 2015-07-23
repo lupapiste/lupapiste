@@ -4,17 +4,20 @@
 <section class="page container" id="stamping">
   <script type="text/html" id="metadata-editor-template">
     <div class="metadata-editor-container">
-
-      <h3 data-bind="ltext: 'attachment.tosMetadata'"></h3>
-
       <div class="editor">
-        <div data-bind="if: displayOnly">
-          <div class="edit-button" data-bind="click: edit">
-            <i class="icon edit"></i>
+        <div class="editor-header">
+          <div data-bind="ltext: 'attachment.tosMetadata'"></div>
+          <div class="edit-button-container">
+            <div class="edit-button" data-bind="click: edit, if: displayOnly">
+              <i class="lupicon-pen edit"></i>
+            </div>
+            <div class="edit-button" data-bind="click: cancelEdit, if: editable">
+              <i class="lupicon-circle-remove edit"></i>
+            </div>
           </div>
         </div>
-        <div class="editor-form" data-bind="foreach: schema">
-          <div>
+        <div class="editor-form">
+          <div data-bind="foreach: schema">
             <div data-bind="if: $data.values">
               <label data-bind="ltext: type"></label><br>
               <div data-bind="visible: $parent.displayOnly,
@@ -102,11 +105,8 @@
               </div>
             </div>
           </div>
-        </div>
-        <div data-bind="if: editable">
-          <div class="editor-buttons">
+          <div data-bind="if: editable" class="editor-buttons">
             <button class="btn-primary save" data-bind="click: save, ltext: 'save', enable: invalidFields().length === 0"></button>
-            <button class="delete" data-bind="click: cancelEdit, ltext: 'cancel'"></button>
           </div>
         </div>
       </div>

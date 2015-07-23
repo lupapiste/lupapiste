@@ -1592,7 +1592,7 @@ legend {
 }
 
 /* line 13, ../sass/partials/_forms.scss */
-[type="text"], [type="email"], [type="tel"], [type="url"], [type="password"], [type="time"], select, textarea {
+[type="text"], [type="email"], [type="tel"], [type="url"], [type="password"], [type="time"], [type="number"], select, textarea {
   background: #fff;
   border: 1px solid #c9c9c9;
   font-size: 0.875em;
@@ -1608,30 +1608,30 @@ legend {
   box-shadow: inset 0 2px 3px #dddddd, 0 1px 0 #fff;
 }
 /* line 31, ../sass/partials/_forms.scss */
-[type="text"]:hover, [type="email"]:hover, [type="tel"]:hover, [type="url"]:hover, [type="password"]:hover, [type="time"]:hover, select:hover, textarea:hover {
+[type="text"]:hover, [type="email"]:hover, [type="tel"]:hover, [type="url"]:hover, [type="password"]:hover, [type="time"]:hover, [type="number"]:hover, select:hover, textarea:hover {
   border-color: #b5b5b5;
 }
 /* line 35, ../sass/partials/_forms.scss */
-[type="text"]:focus, [type="email"]:focus, [type="tel"]:focus, [type="url"]:focus, [type="password"]:focus, [type="time"]:focus, select:focus, textarea:focus {
+[type="text"]:focus, [type="email"]:focus, [type="tel"]:focus, [type="url"]:focus, [type="password"]:focus, [type="time"]:focus, [type="number"]:focus, select:focus, textarea:focus {
   border-color: #17c;
   -webkit-box-shadow: inset 0 2px 4px #c3c3c3, 0 1px 0 #fff;
 }
 /* line 40, ../sass/partials/_forms.scss */
-[type="text"].source-value-changed, [type="email"].source-value-changed, [type="tel"].source-value-changed, [type="url"].source-value-changed, [type="password"].source-value-changed, [type="time"].source-value-changed, select.source-value-changed, textarea.source-value-changed {
+[type="text"].source-value-changed, [type="email"].source-value-changed, [type="tel"].source-value-changed, [type="url"].source-value-changed, [type="password"].source-value-changed, [type="time"].source-value-changed, [type="number"].source-value-changed, select.source-value-changed, textarea.source-value-changed {
   border: 2px solid #04c714;
 }
 /* line 43, ../sass/partials/_forms.scss */
-[type="text"].error, [type="email"].error, [type="tel"].error, [type="url"].error, [type="password"].error, [type="time"].error, select.error, textarea.error {
+[type="text"].error, [type="email"].error, [type="tel"].error, [type="url"].error, [type="password"].error, [type="time"].error, [type="number"].error, select.error, textarea.error {
   border-color: red;
   border-width: 3px;
 }
 /* line 47, ../sass/partials/_forms.scss */
-[type="text"].warn, [type="email"].warn, [type="tel"].warn, [type="url"].warn, [type="password"].warn, [type="time"].warn, select.warn, textarea.warn {
+[type="text"].warn, [type="email"].warn, [type="tel"].warn, [type="url"].warn, [type="password"].warn, [type="time"].warn, [type="number"].warn, select.warn, textarea.warn {
   border-color: red;
   border-width: 3px;
 }
 /* line 51, ../sass/partials/_forms.scss */
-[type="text"].tip, [type="email"].tip, [type="tel"].tip, [type="url"].tip, [type="password"].tip, [type="time"].tip, select.tip, textarea.tip {
+[type="text"].tip, [type="email"].tip, [type="tel"].tip, [type="url"].tip, [type="password"].tip, [type="time"].tip, [type="number"].tip, select.tip, textarea.tip {
   border-color: #f6aa59;
   border-width: 1px;
 }
@@ -4129,83 +4129,98 @@ ul.attachments-list li.mandatory-attachments {
 .metadata-editor-container .editor {
   background-color: #f5f5f4;
   font-size: 14px;
-  padding: 15px;
 }
-/* line 10, ../sass/partials/_metadata-editor.scss */
+/* line 8, ../sass/partials/_metadata-editor.scss */
+.metadata-editor-container .editor .editor-header {
+  width: 100%;
+  display: table;
+  margin: 0 0 15px 0;
+  font-size: 20px;
+  color: white;
+  background-color: #4f4f4f;
+  padding: 15px;
+  min-height: 65px;
+}
+/* line 11, ../sass/partials/_metadata-editor.scss */
+.metadata-editor-container .editor .editor-header div {
+  vertical-align: middle;
+  display: table-cell;
+}
+/* line 15, ../sass/partials/_metadata-editor.scss */
+.metadata-editor-container .editor .editor-header .edit-button-container {
+  width: 28px;
+  cursor: pointer;
+}
+/* line 18, ../sass/partials/_metadata-editor.scss */
+.metadata-editor-container .editor .editor-header .edit-button-container i {
+  margin: 0;
+}
+/* line 30, ../sass/partials/_metadata-editor.scss */
+.metadata-editor-container .editor .editor-form {
+  padding: 5px 15px 15px 15px;
+}
+/* line 32, ../sass/partials/_metadata-editor.scss */
 .metadata-editor-container .editor .editor-form select, .metadata-editor-container .editor .editor-form input {
   width: 100%;
   box-sizing: border-box;
   height: 30px;
 }
-/* line 15, ../sass/partials/_metadata-editor.scss */
+/* line 37, ../sass/partials/_metadata-editor.scss */
 .metadata-editor-container .editor .editor-form input[type=number] {
   width: 50px;
 }
-/* line 18, ../sass/partials/_metadata-editor.scss */
+/* line 40, ../sass/partials/_metadata-editor.scss */
 .metadata-editor-container .editor .editor-form label {
   display: inline-block;
   margin-bottom: 5px;
   font-weight: 700;
 }
-/* line 23, ../sass/partials/_metadata-editor.scss */
+/* line 45, ../sass/partials/_metadata-editor.scss */
 .metadata-editor-container .editor .editor-form .code-input {
   margin-left: 4px;
   width: 60px;
 }
-/* line 27, ../sass/partials/_metadata-editor.scss */
+/* line 49, ../sass/partials/_metadata-editor.scss */
 .metadata-editor-container .editor .editor-form div {
   margin-bottom: 5px;
 }
-/* line 31, ../sass/partials/_metadata-editor.scss */
+/* line 53, ../sass/partials/_metadata-editor.scss */
 .metadata-editor-container .editor .editor-form .years-field input {
   width: 50px;
   text-align: right;
 }
-/* line 35, ../sass/partials/_metadata-editor.scss */
+/* line 57, ../sass/partials/_metadata-editor.scss */
 .metadata-editor-container .editor .editor-form .years-field .year-label {
   margin-left: 5px;
 }
-/* line 41, ../sass/partials/_metadata-editor.scss */
-.metadata-editor-container .editor .edit-button {
-  cursor: pointer;
-  float: right;
-  background-color: #4f4f4f;
-  text-align: center;
-  padding: 5px 5px 0 5px;
-  border-radius: 5px;
+/* line 64, ../sass/partials/_metadata-editor.scss */
+.metadata-editor-container .editor button:disabled {
+  cursor: not-allowed;
 }
-/* line 48, ../sass/partials/_metadata-editor.scss */
-.metadata-editor-container .editor .edit-button i {
-  margin: 0;
-}
-/* line 52, ../sass/partials/_metadata-editor.scss */
-.metadata-editor-container .editor .button {
-  cursor: pointer;
-}
-/* line 56, ../sass/partials/_metadata-editor.scss */
+/* line 69, ../sass/partials/_metadata-editor.scss */
 .metadata-editor-container .editor .invalid {
   border: 2px solid #ff0643;
   border-radius: 2px;
   outline: none;
 }
-/* line 62, ../sass/partials/_metadata-editor.scss */
+/* line 75, ../sass/partials/_metadata-editor.scss */
 .metadata-editor-container .editor .subtable {
   background-color: #e8e8e7;
   padding: 10px;
   border-radius: 4px;
   margin-top: 10px;
 }
-/* line 67, ../sass/partials/_metadata-editor.scss */
+/* line 80, ../sass/partials/_metadata-editor.scss */
 .metadata-editor-container .editor .subtable h4 {
   font-size: 16px;
   margin-top: 0;
 }
-/* line 71, ../sass/partials/_metadata-editor.scss */
+/* line 84, ../sass/partials/_metadata-editor.scss */
 .metadata-editor-container .editor .subtable h5 {
   font-weight: 700;
   margin-bottom: 5px;
 }
-/* line 76, ../sass/partials/_metadata-editor.scss */
+/* line 89, ../sass/partials/_metadata-editor.scss */
 .metadata-editor-container .editor .editor-buttons {
   *zoom: 1;
   padding-top: 15px;
@@ -4219,11 +4234,11 @@ ul.attachments-list li.mandatory-attachments {
 .metadata-editor-container .editor .editor-buttons:after {
   clear: both;
 }
-/* line 79, ../sass/partials/_metadata-editor.scss */
+/* line 92, ../sass/partials/_metadata-editor.scss */
 .metadata-editor-container .editor .editor-buttons .save {
   float: left;
 }
-/* line 82, ../sass/partials/_metadata-editor.scss */
+/* line 95, ../sass/partials/_metadata-editor.scss */
 .metadata-editor-container .editor .editor-buttons .delete {
   float: right;
 }
