@@ -373,8 +373,7 @@
 (defn convert-document-data
   "Walks document data starting from initial-path.
    If predicate matches, value is outputted using emitter function.
-   Predicate takes two parameters: element schema definition and the value map.
-   Emitter takes one parameter, the value map."
+   Both predicate and emitter take two parameters: element schema definition and the value map."
   [pred emitter {data :data :as document} initial-path]
   (when data
     (letfn [(doc-walk [schema-body path]
@@ -385,13 +384,13 @@
                           current-path (conj path k)
                           v (get-in data current-path)]
                       (if (pred element v)
-                        [k (emitter v)]
+                        [k (emitter element v)]
                         (when v
-                          (if (not= (keyword type) :group)  ;TODO: does this work with tables? TDD
-                            [k v]
+                          (if (or (= (keyword type) :group) (= (keyword type) :table))
                             [k (if repeating
                                  (into {} (map (fn [k2] [k2 (doc-walk body (conj current-path k2))]) (keys v)))
-                                 (doc-walk body current-path))])))))
+                                 (doc-walk body current-path))]
+                            [k v])))))
                   schema-body)))]
       (let [path (vec initial-path)
             schema (get-document-schema document)
@@ -422,14 +421,14 @@
   "Replaces last characters of person IDs with asterisks (e.g., 010188-123A -> 010188-****)"
   [document & [initial-path]]
   (let [mask-if (fn [{type :type} {hetu :value}] (and (= (keyword type) :hetu) hetu (> (count hetu) 7)))
-        do-mask (fn [{hetu :value :as v}] (assoc v :value (str (subs hetu 0 7) "****")))]
+        do-mask (fn [_ {hetu :value :as v}] (assoc v :value (str (subs hetu 0 7) "****")))]
     (convert-document-data mask-if do-mask document initial-path)))
 
 (defn mask-person-id-birthday
   "Replaces first characters of person IDs with asterisks (e.g., 010188-123A -> ******-123A)"
   [document & [initial-path]]
   (let [mask-if (fn [{type :type} {hetu :value}] (and (= (keyword type) :hetu) hetu (pos? (count hetu))))
-        do-mask (fn [{hetu :value :as v}] (assoc v :value (str "******" (ss/substring hetu 6 11))))]
+        do-mask (fn [_ {hetu :value :as v}] (assoc v :value (str "******" (ss/substring hetu 6 11))))]
     (convert-document-data mask-if do-mask document initial-path)))
 
 (defn without-user-id

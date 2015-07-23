@@ -8,7 +8,6 @@
             [lupapalvelu.i18n :as i18n]
             [lupapalvelu.domain :as domain]
             [lupapalvelu.document.schemas :as schemas]
-            [cljts.geom :as geo]
             [cljts.io :as jts]
             [sade.env :as env]))
 

@@ -838,7 +838,7 @@ var DocModel = function(schema, doc, application, authorizationModel, options) {
               {title: loc("no"), fn: _.partial(mergeFromWfs, false)}
           );
         } else {
-          mergeFromWfs(false);
+          mergeFromWfs(true);
         }
         return false;
       };
