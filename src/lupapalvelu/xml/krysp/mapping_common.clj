@@ -298,7 +298,7 @@
 
 (def tyonjohtaja_215 (update-in tyonjohtaja_213 [:child] conj {:tag :vainTamaHankeKytkin}))
 
-(def tyonjohtajatieto
+(def tyonjohtajatieto_210
   {:tag :tyonjohtajatieto
    :child [{:tag :Tyonjohtaja
             :child [{:tag :tyonjohtajaRooliKoodi}
@@ -326,7 +326,7 @@
   {:tag :tyonjohtajatieto
    :child [tyonjohtaja_215]})
 
-(def osapuolet
+(def osapuolet_210
   {:tag :Osapuolet :ns "yht"
    :child [{:tag :osapuolitieto
             :child [osapuoli-body_211]}
@@ -339,7 +339,7 @@
                              {:tag :patevyysvaatimusluokka}
                              {:tag :koulutus}
                              ]}]}
-           tyonjohtajatieto
+           tyonjohtajatieto_210
            naapuri]})
 
 (def suunnittelijatieto_211
