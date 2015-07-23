@@ -195,10 +195,6 @@
       applicationModel.nonpartyDocumentIndicator(_.reduce(nonpartyDocs, sumDocIndicators, 0));
       applicationModel.partyDocumentIndicator(_.reduce(partyDocs, sumDocIndicators, 0));
 
-      applicationModel.metadataList(_.sortBy(_.map(app.metadata, function(value, key) {
-        return metadata.translateMetaData(key, value);
-      }), "name"));
-
       isInitializing = false;
       pageutil.hideAjaxWait();
 

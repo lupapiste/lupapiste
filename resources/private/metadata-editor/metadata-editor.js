@@ -3,18 +3,18 @@
 
   var constructEditableMetadata = function(actualMetadata, schema) {
     var newMap = {};
-    _.forEach(schema, function(v) {
+    _.forEach(schema, function (v) {
       if (v.dependencies) {
-        _.forEach(v.dependencies, function(depArray) {
-          _.forEach(depArray, function(depVal) {
-            newMap[depVal.type] = actualMetadata[depVal.type] || null;
+        _.forEach(v.dependencies, function (depArray) {
+          _.forEach(depArray, function (depVal) {
+            newMap[depVal.type] = actualMetadata && actualMetadata[depVal.type] ? actualMetadata[depVal.type] : null;
           });
         });
       }
       if (v.subfields) {
         newMap[v.type] = constructEditableMetadata(actualMetadata[v.type], v.subfields);
       } else {
-        newMap[v.type] = actualMetadata[v.type] || null;
+        newMap[v.type] = actualMetadata && actualMetadata[v.type] ? actualMetadata[v.type] : null;
       }
     });
     return newMap;
@@ -84,7 +84,7 @@
 
   var model = function(params) {
     var self = this;
-    self.attachmentId = params.attachmentId();
+    self.attachmentId = params.attachmentId ? params.attachmentId() : null;
     self.applicationId = params.applicationId();
     self.metadata = params.metadata();
     self.editable = ko.observable(false);

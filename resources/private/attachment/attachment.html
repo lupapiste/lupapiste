@@ -210,14 +210,14 @@
               <button id="show-tos-metadata"
                       class="btn"
                       style="margin-top: 15px"
-                      data-bind="click: toggleTosMetadata, visible: metadata().length > 0">
+                      data-bind="click: toggleTosMetadata, visible: !_.isEmpty(metadata())">
                 <span data-bind="ltext: 'attachment.showTosMetadata'"></span>
                 <span class="left-align"
                       data-bind="drill: showTosMetadata, color: 'black'"></span>
               </button>
 
-              <div class="tos-metadata-content" data-bind="slider: showTosMetadata, visible: metadata().length > 0">
-                <metadata-editor params="attachmentId: id, metadata: metadataMap, applicationId: application.id"></metadata-editor>
+              <div class="tos-metadata-content" data-bind="slider: showTosMetadata, visible: !_.isEmpty(metadata())">
+                <metadata-editor params="attachmentId: id, metadata: metadata, applicationId: application.id"></metadata-editor>
               </div>
 
             </div>

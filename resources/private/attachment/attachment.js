@@ -421,10 +421,7 @@ var attachment = (function() {
     model.applicationState(attachment.applicationState);
     model.allowedAttachmentTypes(application.allowedAttachmentTypes);
     model.attachmentType(attachmentType(attachment.type["type-group"], attachment.type["type-id"]));
-    model.metadataMap(attachment.metadata);
-    model.metadata(_.sortBy(_.map(attachment.metadata, function(value, key) {
-      return metadata.translateMetaData(key, value);
-    }), "name"));
+    model.metadata(attachment.metadata);
 
     model.id(attachmentId);
 
