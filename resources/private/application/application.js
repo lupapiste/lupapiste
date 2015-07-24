@@ -95,7 +95,9 @@
       ajax
         .command("set-tos-function-for-application", {id: currentId, functionCode: value})
         .success(function() {
-          repository.load(currentId, applicationModel.pending);
+          repository.load(currentId, applicationModel.pending, function(application) {
+            applicationModel.metadata(application.metadata);
+          });
         })
         .call();
     }

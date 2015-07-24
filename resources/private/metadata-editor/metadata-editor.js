@@ -7,14 +7,14 @@
       if (v.dependencies) {
         _.forEach(v.dependencies, function (depArray) {
           _.forEach(depArray, function (depVal) {
-            newMap[depVal.type] = actualMetadata && actualMetadata[depVal.type] ? actualMetadata[depVal.type] : null;
+            newMap[depVal.type] = ko.observable(actualMetadata && actualMetadata[depVal.type] ? actualMetadata[depVal.type] : null);
           });
         });
       }
       if (v.subfields) {
-        newMap[v.type] = constructEditableMetadata(actualMetadata[v.type], v.subfields);
+        newMap[v.type] = ko.mapping.fromJS(constructEditableMetadata(actualMetadata[v.type], v.subfields));
       } else {
-        newMap[v.type] = actualMetadata && actualMetadata[v.type] ? actualMetadata[v.type] : null;
+        newMap[v.type] = ko.observable(actualMetadata && actualMetadata[v.type] ? actualMetadata[v.type] : null);
       }
     });
     return newMap;
@@ -92,18 +92,21 @@
     self.schema = ko.observableArray();
     self.inputTypeMap = {};
 
-    // It does not seem to be possible to use visible: !editable, so we need another observable for that.
-    self.displayOnly = ko.pureComputed(function() {
-      return !self.editable();
-    });
-
     self.invalidFields = ko.pureComputed(function () {
       return validateMetadata(ko.mapping.toJS(self.editedMetadata), self.schema());
     });
 
+    self.metadata.subscribe(function(newValue) {
+      // If metadata changes outside this component, we update the new values to the local copy
+      if (!_.isEmpty(self.schema())) {
+        var newData = constructEditableMetadata(ko.mapping.toJS(newValue), self.schema());
+        self.editedMetadata(newData);
+      }
+    });
+
     ajax.query("tos-metadata-schema")
       .success(function(data) {
-        self.editedMetadata(ko.mapping.fromJS(constructEditableMetadata(self.metadata(), data.schema)));
+        self.editedMetadata(constructEditableMetadata(ko.mapping.toJS(self.metadata), data.schema));
         self.inputTypeMap = constructSchemaInputTypeMap(data.schema);
         self.schema(data.schema);
       })
@@ -114,7 +117,7 @@
     };
 
     self.cancelEdit = function() {
-      self.editedMetadata(ko.mapping.fromJS(constructEditableMetadata(self.metadata(), self.schema())));
+      self.editedMetadata(constructEditableMetadata(ko.mapping.toJS(self.metadata), self.schema()));
       self.editable(false);
     };
 
@@ -124,7 +127,7 @@
       ajax.command(command)
         .json({id: self.applicationId(), attachmentId: self.attachmentId(), metadata: metadata})
         .success(function() {
-          self.metadata(ko.mapping.toJS(self.editedMetadata));
+          self.metadata(ko.mapping.fromJS(ko.mapping.toJS(self.editedMetadata)));
           self.editable(false);
         })
         .call();

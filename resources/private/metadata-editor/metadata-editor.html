@@ -8,7 +8,7 @@
         <div class="editor-header">
           <div data-bind="ltext: 'attachment.tosMetadata'"></div>
           <div class="edit-button-container">
-            <div class="edit-button" data-bind="click: edit, if: displayOnly">
+            <div class="edit-button" data-bind="click: edit, if: !editable()">
               <i class="lupicon-pen edit"></i>
             </div>
             <div class="edit-button" data-bind="click: cancelEdit, if: editable">
@@ -16,9 +16,9 @@
             </div>
           </div>
         </div>
-        <div class="editor-form">
+        <div class="editor-form" data-bind="if: !_.isEmpty(editedMetadata())">
 
-          <div data-bind="template: {name: 'metadata-list-template', data: {schemaList: schema, values: editedMetadata(), invalidFields: invalidFields(), editable: editable}}"></div>
+          <div data-bind="template: {name: 'metadata-list-template', data: {schemaList: schema, values: editedMetadata, invalidFields: invalidFields, editable: editable}}"></div>
 
           <div data-bind="if: editable" class="editor-buttons">
             <button class="btn-primary save" data-bind="click: save, ltext: 'save', enable: invalidFields().length === 0"></button>
@@ -33,30 +33,33 @@
       <div data-bind="if: $data.values">
         <label data-bind="ltext: type"></label><br>
         <div data-bind="visible: !$parent.editable(),
-                        ltext: $parent.values[type]"></div>
+                        ltext: function(){return $parent.values()[type]() ? $parent.values()[type]() : '<Arvo puuttuu>';}()"></div>
         <select data-bind="visible: $parent.editable,
-                                   options: values,
-                                   optionsText: loc,
-                                   value: $parent.values[type]" ></select>
+                           options: values,
+                           optionsText: loc,
+                           value: $parent.values()[type],
+                           valueAllowUnset: true" ></select>
       </div>
       <div data-bind="if: $data.inputType" class="text-input-container">
         <label data-bind="ltext: type"></label><br>
         <div data-bind="visible: !$parent.editable(),
-                        text: $parent.values[type]"></div
-        ><input class="form-input" data-bind="visible: $parent.editable, attr: {type: inputType},
-                                             textInput: $parent.values[type],
-                                             css: {invalid: $parent.invalidFields.indexOf(type) >= 0}"
-        ><div data-bind="visible: inputType === 'number', ltext: 'vuotta'" class="year-label"></div>
+                        text: $parent.values()[type]"></div>
+        <input class="form-input" data-bind="visible: $parent.editable, attr: {type: inputType},
+                                             textInput: $parent.values()[type],
+                                             css: {invalid: $parent.invalidFields().indexOf(type) >= 0}">
+        <div data-bind="visible: inputType === 'number', ltext: 'vuotta'" class="year-label"></div>
       </div>
-      <div data-bind="if: $data.subfields">
-        <div class="subtable">
-          <h4 data-bind="ltext: type"></h4>
-          <div data-bind="template: {name: 'metadata-list-template', data: {schemaList: subfields, values: $parent.values[type], invalidFields: $parent.invalidFields, editable: $parent.editable}}"></div>
-        </div>
+      <!-- ko if: $data.subfields -->
+      <div class="subtable">
+        <h4 data-bind="ltext: type"></h4>
+        <div data-bind="template: {name: 'metadata-list-template',
+                        data: {schemaList: subfields, values: function() {return $parent.values()[type]}, invalidFields: $parent.invalidFields, editable: $parent.editable}}"></div>
       </div>
-      <div data-bind="if: $data.dependencies && $data.dependencies[$parent.values[type]()]">
-        <div data-bind="template: {name: 'metadata-list-template', data: {schemaList: $data.dependencies[$parent.values[type]()], values: $parent.values, invalidFields: $parent.invalidFields, editable: $parent.editable}}"></div>
-      </div>
+      <!-- /ko -->
+      <!-- ko if: $data.dependencies && _.isFunction($parent.values()[type]) && $data.dependencies[$parent.values()[type]()] -->
+      <div data-bind="template: {name: 'metadata-list-template',
+                      data: {schemaList: $data.dependencies[$parent.values()[type]()], values: $parent.values, invalidFields: $parent.invalidFields, editable: $parent.editable}}"></div>
+      <!-- /ko -->
     </div>
   </script>
 </section>
