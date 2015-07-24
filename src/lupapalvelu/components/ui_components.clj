@@ -99,7 +99,7 @@
                     :js ["underscore.string.min.js" "underscore.string.init.js"]}
    :moment         {:js ["moment.min.js"]}
    :open-layers    {:js ["openlayers-2.13_20140619.min.lupapiste.js"]}
-   :leaflet        {:js ["leaflet.js"]
+   :leaflet        {:js ["leaflet.min.js"]
                     :css ["leaflet.css"]}
    :stickyfill     {:js ["stickyfill.min.js"]}
 
@@ -333,7 +333,7 @@
 
    :welcome {:depends [:welcome-app :login :register :register-company :link-account :debug :user-menu :screenmessages :password-reset :analytics]
              :js ["company-user.js"]
-             
+
              :html ["index.html" "login.html" "company-user.html"]}
 
    :oskari  {:css ["oskari.css"]}
