@@ -4,8 +4,9 @@
             [noir.core :refer [defpage]]
             [noir.request :as request]
             [noir.response :as response]
-            [hiccup.core :refer [html]]
+            [hiccup.core :as hiccup]
             [hiccup.form :as form]
+            [hiccup.element :as elem]
             [monger.operators :refer :all]
             [clj-time.local :refer [local-now]]
             [clj-time.format :as format]
@@ -183,7 +184,7 @@
 
 (defpage "/api/vetuma" {:keys [success cancel error language] :as data}
   (let [paths     {:success success :error error :cancel cancel}
-        lang  (get supported-langs language (name i18n/default-lang))
+        lang      (get supported-langs language (name i18n/default-lang))
         sessionid (session-id)
         vetuma-request (request-data (host :secure) lang)
         trid      (vetuma-request "TRID")
@@ -193,10 +194,11 @@
       (if (every? util/relative-local-url? (vals paths))
         (do
           (mongo/update :vetuma {:sessionid sessionid :trid trid} {:sessionid sessionid :paths paths :trid trid :created-at (java.util.Date.)} :upsert true)
-          (html
-            (form/form-to [:post (:url (config))]
+          (hiccup/html
+            (form/form-to {:id "vf"} [:post (:url (config)) ]
               (map field vetuma-request)
-              (form/submit-button label))))
+              (form/submit-button {:id "btn"} label)
+              (elem/javascript-tag "document.getElementById('vf').submit();document.getElementById('btn').disabled = true;"))))
         (response/status 400 (response/content-type "text/plain" "invalid return paths")))
       (response/status 400 (response/content-type "test/plain" "Session not initialized")))))
 
