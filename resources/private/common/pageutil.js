@@ -65,7 +65,7 @@ var pageutil = (function($) {
   function openPage(page) {
     if (!page) {
       openFrontpage();
-    } else if (page.inndexOf("!/") === 0) {
+    } else if (page.indexOf("!/") === 0) {
       window.location.hash = page;
     } else {
       window.location.hash = "!/" + page;
