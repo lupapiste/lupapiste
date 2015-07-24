@@ -3,6 +3,7 @@
 Documentation   Neighbor logs in with Vetuma and comments the application
 Suite teardown  Logout
 Resource        ../../common_resource.robot
+Resource        ../02_register/keywords.robot
 
 *** Test Cases ***
 
@@ -53,12 +54,7 @@ Neighbor clicks on email link and sees application
 
 Neighbor clicks vetuma button to identify herself
   [Tags]  integration
-  Wait and click  xpath=//*[@data-test-id='vetuma-init']
-  Wait and click  xpath=//img[@alt='Pankkitunnistus']
-  Wait and click  xpath=//a[@class='nordea']
-  Wait and click  xpath=//input[@name='Ok']
-  Wait and click  xpath=//input[@type='submit']
-  Wait and click  xpath=//button[@type='submit']
+  Authenticate via Nordea via Vetuma
 
 Neighbor is back and leaves a comment
   [Tags]  integration
