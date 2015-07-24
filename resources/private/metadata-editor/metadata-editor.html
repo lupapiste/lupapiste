@@ -17,108 +17,50 @@
           </div>
         </div>
         <div class="editor-form">
-          <div data-bind="foreach: schema">
-            <div data-bind="if: $data.values">
-              <label data-bind="ltext: type"></label><br>
-              <div data-bind="visible: $parent.displayOnly,
-                              ltext: $parent.editedMetadata()[type]"></div>
-              <select data-bind="visible: $parent.editable,
-                                   options: values,
-                                   optionsText: loc,
-                                   value: $parent.editedMetadata()[type]" ></select>
-            </div>
-            <div data-bind="if: $data.inputType" class="text-input-container">
-              <label data-bind="ltext: type"></label><br>
-              <div data-bind="visible: $parent.displayOnly,
-                              text: $parent.editedMetadata()[type]"></div
-              ><div data-bind="visible: $parent.editable">
-                <input class="form-input" data-bind="attr: {type: inputType},
-                                                     textInput: $parent.editedMetadata()[type],
-                                                     css: {invalid: $parent.invalidFields().indexOf(type) >= 0}">
-              </div
-              ><div data-bind="if: inputType === 'number'" class="year-label"><span data-bind="ltext: 'vuotta'"></span></div>
-            </div>
-            <div data-bind="if: $data.subfields">
-              <div class="subtable">
-                <h4 data-bind="ltext: type"></h4>
-                <div data-bind="foreach: subfields">
-                  <label data-bind="ltext: type"></label><br>
-                  <div data-bind="if: $data.values">
-                    <div data-bind="visible: $parents[1].displayOnly,
-                                    ltext: $parents[1].editedMetadata()[$parent.type][type]"></div>
-                    <select data-bind="visible: $parents[1].editable,
-                                       options: values,
-                                       optionsText: loc,
-                                       value: $parents[1].editedMetadata()[$parent.type][type]"></select>
-                  </div>
-                  <div data-bind="if: $data.inputType" class="text-input-container">
-                    <div data-bind="visible: $parents[1].displayOnly,
-                                    text: $parents[1].editedMetadata()[$parent.type][type]"></div
-                    ><div data-bind="visible: $parents[1].editable">
-                      <input class="form-input" data-bind="textInput: $parents[1].editedMetadata()[$parent.type][type], attr: {type: inputType},
-                                                           css: {invalid: $parents[1].invalidFields().indexOf(type) >= 0}">
-                    </div
-                    ><div data-bind="if: inputType === 'number'" class="year-label"><span data-bind="ltext: 'vuotta'"></span></div>
-                  </div>
 
-                  <div data-bind="if: $data.dependencies && $data.dependencies[$parents[1].editedMetadata()[$parent.type][type]()]">
-                    <div data-bind="foreach: $data.dependencies[$parents[1].editedMetadata()[$parent.type][type]()]">
-                      <label data-bind="ltext: type"></label><br>
-                      <div data-bind="if: $data.values">
-                        <div data-bind="visible: $parents[2].displayOnly,
-                                  ltext: $parents[2].editedMetadata()[$parents[1].type][type]"></div>
-                        <select data-bind="visible: $parents[2].editable,
-                                     options: values,
-                                     optionsText: loc,
-                                     value: $parents[2].editedMetadata()[$parents[1].type][type]"></select>
-                      </div>
-                      <div data-bind="if: $data.inputType" class="text-input-container">
-                        <div data-bind="visible: $parents[2].displayOnly,
-                                  text: $parents[2].editedMetadata()[$parents[1].type][type]"></div
-                        ><div data-bind="visible: $parents[2].editable">
-                          <input class="form-input" data-bind="textInput: $parents[2].editedMetadata()[$parents[1].type][type], attr: {type: inputType},
-                                                               css: {invalid: $parents[2].invalidFields().indexOf(type) >= 0}">
-                        </div
-                        ><div data-bind="if: inputType === 'number'" class="year-label"><span data-bind="ltext: 'vuotta'"></span></div>
-                      </div>
-                    </div>
-                  </div>
+          <div data-bind="template: {name: 'metadata-list-template', data: {schemaList: schema, values: editedMetadata(), invalidFields: invalidFields(), editable: editable}}"></div>
 
-                </div>
-              </div>
-            </div>
-            <div data-bind="if: $data.dependencies && $data.dependencies[$parent.editedMetadata()[type]()]">
-              <div data-bind="foreach: $data.dependencies[$parent.editedMetadata()[type]()]">
-                <label data-bind="ltext: type"></label><br>
-                <div data-bind="if: $data.values">
-                  <div data-bind="visible: $parents[1].displayOnly,
-                                  ltext: $parents[1].editedMetadata()[type]"></div>
-                  <select data-bind="visible: $parents[1].editable,
-                                     options: values,
-                                     optionsText: loc,
-                                     value: $parents[1].editedMetadata()[type]"></select>
-                </div>
-                <div data-bind="if: $data.inputType" class="text-input-container">
-                  <div data-bind="visible: $parents[1].displayOnly,
-                                  text: $parents[1].editedMetadata()[type]"></div
-                  ><div data-bind="visible: $parents[1].editable">
-                    <input class="form-input" data-bind="textInput: $parents[1].editedMetadata()[type], attr: {type: inputType},
-                                                         css: {invalid: $parents[1].invalidFields().indexOf(type) >= 0}">
-                  </div
-                  ><div data-bind="if: inputType === 'number'" class="year-label"><span data-bind="ltext: 'vuotta'"></span></div>
-                </div>
-              </div>
-            </div>
-          </div>
           <div data-bind="if: editable" class="editor-buttons">
             <button class="btn-primary save" data-bind="click: save, ltext: 'save', enable: invalidFields().length === 0"></button>
           </div>
         </div>
       </div>
-
-
     </div>
- </script>
+  </script>
+
+  <script type="text/html" id="metadata-list-template">
+    <div data-bind="foreach: schemaList">
+      <div data-bind="if: $data.values">
+        <label data-bind="ltext: type"></label><br>
+        <div data-bind="visible: !$parent.editable(),
+                        ltext: $parent.values[type]"></div>
+        <select data-bind="visible: $parent.editable,
+                                   options: values,
+                                   optionsText: loc,
+                                   value: $parent.values[type]" ></select>
+      </div>
+      <div data-bind="if: $data.inputType" class="text-input-container">
+        <label data-bind="ltext: type"></label><br>
+        <div data-bind="visible: !$parent.editable(),
+                        text: $parent.values[type]"></div
+        ><div data-bind="visible: $parent.editable">
+        <input class="form-input" data-bind="attr: {type: inputType},
+                                             textInput: $parent.values[type],
+                                             css: {invalid: $parent.invalidFields.indexOf(type) >= 0}">
+      </div
+      ><div data-bind="if: inputType === 'number'" class="year-label"><span data-bind="ltext: 'vuotta'"></span></div>
+      </div>
+      <div data-bind="if: $data.subfields">
+        <div class="subtable">
+          <h4 data-bind="ltext: type"></h4>
+          <div data-bind="template: {name: 'metadata-list-template', data: {schemaList: subfields, values: $parent.values[type], invalidFields: $parent.invalidFields, editable: $parent.editable}}"></div>
+        </div>
+      </div>
+      <div data-bind="if: $data.dependencies && $data.dependencies[$parent.values[type]()]">
+        <div data-bind="template: {name: 'metadata-list-template', data: {schemaList: $data.dependencies[$parent.values[type]()], values: $parent.values, invalidFields: $parent.invalidFields, editable: $parent.editable}}"></div>
+      </div>
+    </div>
+  </script>
 </section>
 </body>
 </html>
