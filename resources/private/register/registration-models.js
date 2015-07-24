@@ -13,7 +13,7 @@ LUPAPISTE.RegistrationModel = function(commandName, vetumaParams, afterSuccessFn
                      "allowDirectMarketing", "rakentajafi",
                      "architect", "degree", "graduatingYear", "fise"];
 
-  var plainModel = function(data, keys) {
+  var PlainModel = function(data, keys) {
     var self = this;
 
     var defaults = {
@@ -107,7 +107,7 @@ LUPAPISTE.RegistrationModel = function(commandName, vetumaParams, afterSuccessFn
     }).sortBy("name").value();
   };
 
-  self.model = ko.validatedObservable(new plainModel({}, self.keys));
+  self.model = ko.validatedObservable(new PlainModel({}, self.keys));
 
   self.model().disabled = ko.computed(function() {
     return !self.model.isValid() || !self.model().acceptTerms();
