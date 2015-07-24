@@ -1,6 +1,11 @@
 ;(function() {
   "use strict";
 
+  var urlPrefix = "/app/" + loc.getCurrentLanguage() + "/welcome";
+  var vetumaParams = {success: "",
+                      cancel:  "",
+                      error:   ""};
+
   var afterRegistrationSuccess = function(username, password) {
     // Display ajax loader
     window.location.hash = "!/link-account-3";
@@ -19,7 +24,7 @@
   };
   var statusModel = new LUPAPISTE.StatusModel();
 
-  var registrationModel = new LUPAPISTE.RegistrationModel("confirm-account-link", afterRegistrationSuccess, "#link-account-error2",
+  var registrationModel = new LUPAPISTE.RegistrationModel("confirm-account-link", vetumaParams, afterRegistrationSuccess, "#link-account-error2",
       ["stamp", "tokenId", "personId", "firstName", "lastName", "email", "confirmEmail", "street", "city", "zip", "phone", "password", "confirmPassword", "street", "zip", "city", "allowDirectMarketing"]);
 
 
@@ -45,7 +50,6 @@
 
   hub.onPageLoad("link-account", function() {
     var token = getToken();
-    var urlPrefix = "/app/" + loc.getCurrentLanguage() + "/welcome";
 
     ajax.query("get-link-account-token", {tokenId: token})
       .success(function(resp) {

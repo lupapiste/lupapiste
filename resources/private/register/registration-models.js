@@ -3,7 +3,7 @@
  * Username and password from user input are given to afterSuccessFn function.
  * Used keys can be set with optional last constructor parameter.
  */
-LUPAPISTE.RegistrationModel = function(commandName, afterSuccessFn, errorSelector, ks) {
+LUPAPISTE.RegistrationModel = function(commandName, vetumaParams, afterSuccessFn, errorSelector, ks) {
   "use strict";
 
   var self = this;
@@ -34,7 +34,7 @@ LUPAPISTE.RegistrationModel = function(commandName, afterSuccessFn, errorSelecto
       architect: false,
       allowDirectMarketing: false,
       rakentajafi: false,
-      acceptTerms: false,
+      acceptTerms: false
     };
 
     self.showRakentajafiInfo = function() {
@@ -43,13 +43,13 @@ LUPAPISTE.RegistrationModel = function(commandName, afterSuccessFn, errorSelecto
 
     function json() {
       return _.pick(ko.mapping.toJS(self), keys);
-    };
+    }
 
     self.setData = function(data) {
       ko.mapping.fromJS(_.defaults(data, defaults), {}, self);
-    }
+    };
 
-    self.reset = function(data) {
+    self.reset = function() {
       self.setData({});
       return false;
     };

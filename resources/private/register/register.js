@@ -1,7 +1,12 @@
 (function() {
   "use strict";
 
-  var registrationModel = new LUPAPISTE.RegistrationModel("register-user", function() {window.location.hash = "!/register3";}, "#register-email-error");
+  var urlPrefix = "/app/" + loc.getCurrentLanguage() + "/welcome";
+  var vetumaParams = {success: urlPrefix + "#!/register2",
+                      cancel:  urlPrefix + "#!/register/cancel",
+                      error:   urlPrefix + "#!/register/error"};
+
+  var registrationModel = new LUPAPISTE.RegistrationModel("register-user", vetumaParams,  function() {window.location.hash = "!/register3";}, "#register-email-error");
   var statusModel = new LUPAPISTE.StatusModel();
 
   hub.onPageLoad("register", function() {
