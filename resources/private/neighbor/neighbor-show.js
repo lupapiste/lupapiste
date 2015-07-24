@@ -2,9 +2,18 @@
   "use strict";
 
   var url = window.location.pathname + window.location.search + window.location.hash;
-  var vetumaParams = {success: url,
-                      cancel: url,
-                      error: url};
+
+  var VetumaButtonModel = function() {
+    var self = this;
+    self.id = "vetuma-init";
+    self.success = url;
+    self.cancel = url;
+    self.error = url;
+    self.visible = ko.observable(true);
+  };
+
+  var vetumaParams = new VetumaButtonModel();
+
 
   function Model() {
     var self = this;
@@ -128,24 +137,19 @@
     var grouped = _.groupBy(attachments, function(attachment) { return attachment.type["type-group"]; });
     return _.map(grouped, function(attachments, group) { return {group: group, attachments: attachments}; });
   }
+
   var model = new Model();
+  model.vetuma = vetumaParams;
+
+  function gotUser(user) {
+    vetumaParams.visible(false);
+    model.tupasUser(user);
+    $("html, body").animate({ scrollTop: 10000});
+  }
 
   hub.onPageLoad("neighbor-show", function(e) {
     model.init(e);
-
-    vetuma.getUser(
-        function (user) {
-          model.tupasUser(user);
-          $("html, body").animate({ scrollTop: 10000});
-        },
-        function () {
-            $.get("/api/vetuma", vetumaParams, function(form) {
-              $("#vetuma-neighbor").html(form).find(":submit").addClass("btn btn-primary")
-                                           .attr("value",loc("register.action"))
-                                           .attr("data-test-id", "vetuma-init");
-            });
-        }
-    );
+    vetuma.getUser(gotUser, util.nop);
   });
 
   $(function() {

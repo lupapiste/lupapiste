@@ -4,18 +4,13 @@
   var urlPrefix = "/app/" + loc.getCurrentLanguage() + "/welcome";
   var vetumaParams = {success: urlPrefix + "#!/register2",
                       cancel:  urlPrefix + "#!/register/cancel",
-                      error:   urlPrefix + "#!/register/error"};
+                      error:   urlPrefix + "#!/register/error",
+                      id:      "vetuma-init"};
 
   var registrationModel = new LUPAPISTE.RegistrationModel("register-user", _.partial(pageutil.openPage, "!/register3"), "#register-email-error");
   var statusModel = new LUPAPISTE.StatusModel();
 
   hub.onPageLoad("register", function() {
-    $.get("/api/vetuma", vetumaParams, function(d) {
-      $("#vetuma-register")
-        .html(d).find(":submit").addClass("btn btn-primary")
-                                .attr("value",loc("register.action"))
-                                .attr("id", "vetuma-init");
-    });
     statusModel.subPage(pageutil.subPage());
   });
 
@@ -27,7 +22,7 @@
   });
 
   $(function(){
-    $("#register").applyBindings({status:statusModel});
+    $("#register").applyBindings({status:statusModel, vetuma: vetumaParams});
     $("#register2").applyBindings(registrationModel.model);
     $("#register3").applyBindings(registrationModel.model);
   });

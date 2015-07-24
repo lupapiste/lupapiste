@@ -2,9 +2,28 @@
   "use strict";
 
   var urlPrefix = "/app/" + loc.getCurrentLanguage() + "/welcome";
-  var vetumaParams = {success: "",
-                      cancel:  "",
-                      error:   ""};
+
+  var VetumaButtonModel = function() {
+    var self = this;
+
+    self.id = "vetuma-linking-init";
+
+    self.token = ko.observable();
+
+    self.success = ko.pureComputed(function() {
+      return urlPrefix + "#!/link-account-2/" + self.token();
+    });
+    self.cancel = ko.pureComputed(function() {
+      return urlPrefix + "#!/link-account/" + self.token() + "/cancel";
+    });
+    self.error = ko.pureComputed(function() {
+      return urlPrefix + "#!/link-account/" + self.token() + "/error";
+    });
+
+    self.visible = ko.observable(false);
+  };
+
+  var vetumaParams = new VetumaButtonModel();
 
   var afterRegistrationSuccess = function(username, password) {
     // Display ajax loader
@@ -55,17 +74,11 @@
       .success(function(resp) {
         var tokenData = resp.data;
         if (tokenData && tokenData.email) {
-          $.get("/api/vetuma",
-              {success: urlPrefix + "#!/link-account-2/" + token,
-               cancel:  urlPrefix + "#!/link-account/" + token + "/cancel",
-               error:   urlPrefix + "#!/link-account/" + token + "/error"},
-              function(d) {
-                 $("#vetuma-link-account").html(d).find(":submit")
-                   .addClass("btn btn-primary")
-                   .val(loc("register.action"))
-                   .attr("id", "vetuma-linking-init");
-              });
+          vetumaParams.visible(true);
+          vetumaParams.token(token);
         } else {
+          vetumaParams.visible(false);
+          vetumaParams.token("");
           invalidToken();
         }
       }).call();
@@ -96,7 +109,7 @@
   });
 
   $(function(){
-    $("#link-account").applyBindings({status: statusModel});
+    $("#link-account").applyBindings({status: statusModel, vetuma: vetumaParams});
     $("#link-account-2").applyBindings(registrationModel.model);
     $("#link-account-3").applyBindings({});
   });

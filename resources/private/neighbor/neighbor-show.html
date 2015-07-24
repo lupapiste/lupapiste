@@ -136,10 +136,9 @@
           <h1 data-bind="ltext: 'neighbor.show.form'"></h1>
           <p data-bind="ltext: 'neighbor.show.responce.desc'" class="tab-info"></p>
           <div class="neighbor-reply-form">
-            <div data-bind="ifnot: tupasUser">
-              <!-- generated vetuma-form comes here -->
-              <div id="vetuma-neighbor"></div>
-            </div>
+
+            <div data-bind="component: {name: 'vetuma-init', params: vetuma}"></div>
+
             <div data-bind="if: tupasUser">
               <div id="vetuma-neighbor2"></div>
               <p data-bind="ltext: 'neighbor.show.reply.text'"></p>

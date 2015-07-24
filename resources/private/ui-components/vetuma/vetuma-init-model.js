@@ -6,7 +6,7 @@ LUPAPISTE.VetumaInitModel = function(params) {
   var VETUMA_BASE = "/api/vetuma?";
 
   function appendParam(url, param) {
-    return url + param + "=" + encodeURIComponent(ko.unwrap(params.vetuma[param])) +  "&";
+    return url + param + "=" + encodeURIComponent(ko.unwrap(params[param])) +  "&";
   }
 
   self.id = _.isUndefined(params.id) ?  "vetuma-init" : params.id;
