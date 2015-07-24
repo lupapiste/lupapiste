@@ -10,10 +10,7 @@
   var statusModel = new LUPAPISTE.StatusModel();
 
   hub.onPageLoad("register", function() {
-    var urlPrefix = "/app/" + loc.getCurrentLanguage() + "/welcome";
-    $.get("/api/vetuma", {success: urlPrefix + "#!/register2",
-                          cancel:  urlPrefix + "#!/register/cancel",
-                          error:   urlPrefix + "#!/register/error"}, function(d) {
+    $.get("/api/vetuma", vetumaParams, function(d) {
       $("#vetuma-register")
         .html(d).find(":submit").addClass("btn btn-primary")
                                 .attr("value",loc("register.action"))
@@ -24,17 +21,9 @@
 
   hub.onPageLoad("register2", function() {
     registrationModel.reset();
-    ajax.get("/api/vetuma/user")
-      .raw(true)
-      .success(function(data) {
-        if (data) {
-          registrationModel.setVetumaData(data);
-        } else {
-          window.location.hash = "!/register";
-        }
-      })
-      .error(function(e){$("#register-email-error").text(loc(e.text));})
-      .call();
+    vetuma.getUser(registrationModel.setVetumaData,
+                   _.partial(pageutil.openPage, "!/register"),
+                   function(e) {$("#register-email-error").text(loc(e.text));});
   });
 
   $(function(){

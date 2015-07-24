@@ -1,4 +1,4 @@
-;(function() {
+;(function($) {
   "use strict";
 
   function Model() {
@@ -127,10 +127,22 @@
 
   hub.onPageLoad("neighbor-show", function(e) {
     model.init(e);
-    vetuma($("#vetuma-neighbor"), function(user) {
-      model.tupasUser(user);
-      $("html, body").animate({ scrollTop: 10000});
-    });
+
+    vetuma.getUser(
+        function (user) {
+          model.tupasUser(user);
+          $("html, body").animate({ scrollTop: 10000});
+        },
+        function () {
+            var url = window.location.pathname + window.location.search + window.location.hash;
+            var urlmap = {success: url, cancel: url, error: url};
+            $.get("/api/vetuma", urlmap, function(form) {
+              $("#vetuma-neighbor").html(form).find(":submit").addClass("btn btn-primary")
+                                           .attr("value",loc("register.action"))
+                                           .attr("data-test-id", "vetuma-init");
+            });
+        }
+    );
   });
 
   $(function() {
@@ -141,4 +153,4 @@
     $("#neighbor-show").applyBindings(model);
   });
 
-})();
+})(jQuery);

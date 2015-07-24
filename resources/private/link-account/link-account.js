@@ -76,27 +76,23 @@
   hub.onPageLoad("link-account-2", function() {
     var token = getToken();
     registrationModel.reset();
-    ajax.get("/api/vetuma/user")
-      .raw(true)
-      .success(function(vetumaData) {
-        if (vetumaData) {
+    vetuma.getUser(
+        function(vetumaData) {
           ajax.query("get-link-account-token", {tokenId: token})
-            .success(function(resp) {
-              var tokenData = resp.data;
-              if (tokenData && tokenData.email) {
-                registrationModel.setVetumaData(vetumaData);
-                registrationModel.setPhone(tokenData.phone);
-                registrationModel.setEmail(tokenData.email);
-              } else {
-                invalidToken();
-              }
-            }).call();
-        } else {
-          window.location.hash = "!/link-account/" + token;
-        }
-      })
-      .error(function(e){$("#link-account-error2").text(loc(e.text));})
-      .call();
+              .success(function(resp) {
+                var tokenData = resp.data;
+                if (tokenData && tokenData.email) {
+                  registrationModel.setVetumaData(vetumaData);
+                  registrationModel.setPhone(tokenData.phone);
+                  registrationModel.setEmail(tokenData.email);
+                } else {
+                  invalidToken();
+                }
+              }).call();
+        },
+        _.partial(pageutil.openPage, "!/link-account/" + token),
+        function(e){$("#link-account-error2").text(loc(e.text));}
+    );
   });
 
   $(function(){
