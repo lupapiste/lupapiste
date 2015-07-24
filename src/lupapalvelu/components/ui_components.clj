@@ -149,7 +149,7 @@
                   :js ["mypage.js"]
                   :html ["mypage.html"]}
 
-   :user-menu     {:html ["nav.html"]}
+   :header     {:html ["header.html"], :js ["header.js"]}
 
    :modal-datepicker {:depends [:common-html]
                       :html ["modal-datepicker.html"]
@@ -298,28 +298,28 @@
                    :js ["applicant.js"]}
    :applicant     {:depends [:applicant-app
                              :common-html :authenticated :map :applications :application
-                             :statement :docgen :create :mypage :user-menu :debug
+                             :statement :docgen :create :mypage :header :debug
                              :company :analytics :register-company]}
 
    :authority-app {:depends [:ui-components] :js ["authority.js"]}
    :authority     {:depends [:ui-components :authority-app :common-html :authenticated :map :applications :notice :application
-                             :statement :verdict :neighbors :docgen :create :mypage :user-menu :debug
+                             :statement :verdict :neighbors :docgen :create :mypage :header :debug
                              :company :stamp :integration-error :analytics]}
 
    :oir-app {:depends [:ui-components] :js ["oir.js"]}
    :oir     {:depends [:oir-app :common-html :authenticated :map :application :attachment
-                       :docgen :debug :notice :analytics]
+                       :docgen :debug :notice :analytics :header]
              :css ["oir.css"]}
 
    :authority-admin-app {:depends [:ui-components]
                          :js ["authority-admin.js" "register-authority-admin-models.js"]}
-   :authority-admin     {:depends [:authority-admin-app :common-html :authenticated :admins :mypage :user-menu :debug :analytics]
+   :authority-admin     {:depends [:authority-admin-app :common-html :authenticated :admins :mypage :header :debug :analytics]
                          :js ["admin.js" schema-versions-by-permit-type]
                          :html ["admin.html"]}
 
    :admin-app {:depends [:ui-components]
                :js ["admin.js" "register-admin-models.js"]}
-   :admin     {:depends [:admin-app :common-html :authenticated :admins :map :mypage :user-menu :debug]
+   :admin     {:depends [:admin-app :common-html :authenticated :admins :map :mypage :header :debug]
                :css ["admin.css"]
                :js ["admin-users.js" "organizations.js" "companies.js" "features.js" "actions.js" "screenmessages-list.js"]
                :html ["index.html" "admin.html" "organization.html"
@@ -331,7 +331,7 @@
    :welcome-app {:depends [:ui-components]
                  :js ["welcome.js"]}
 
-   :welcome {:depends [:welcome-app :login :register :register-company :link-account :debug :user-menu :screenmessages :password-reset :analytics]
+   :welcome {:depends [:welcome-app :login :register :register-company :link-account :debug :header :screenmessages :password-reset :analytics]
              :js ["company-user.js"]
              
              :html ["index.html" "login.html" "company-user.html"]}
@@ -340,7 +340,7 @@
 
    :neighbor-app {:depends [:ui-components]
                   :js ["neighbor-app.js"]}
-   :neighbor {:depends [:neighbor-app :common-html :global-models :map :debug :docgen :debug :user-menu :screenmessages :analytics]
+   :neighbor {:depends [:neighbor-app :common-html :global-models :map :debug :docgen :debug :header :screenmessages :analytics]
               :html ["neighbor-show.html"]
               :js ["neighbor-show.js"]}})
 

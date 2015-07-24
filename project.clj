@@ -96,7 +96,7 @@
   :aliases {"integration" ["with-profile" "dev,itest" "midje"]
             "stest"       ["with-profile" "dev,stest" "midje"]
             "verify"      ["with-profile" "dev,alltests" "do" "nitpicker," "midje"]}
-  :aot [lupapalvelu.main]
+  :aot [lupapalvelu.main clj-time.core]
   :main ^:skip-aot lupapalvelu.server
   :repl-options {:init-ns lupapalvelu.server}
   :pom-plugins [[org.fusesource.mvnplugins/maven-graph-plugin "1.4"]
