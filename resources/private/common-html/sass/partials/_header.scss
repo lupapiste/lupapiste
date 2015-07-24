@@ -114,10 +114,14 @@ nav {
           }
       }
     }
+    #sys-notification {
+        clear: left;
+    }
   }
   .language-menu {
       width: 100%;
       clear: left;
+      display: none; // Hide initially
       padding: {
           top: 1em;
           left: $brand-width + $language-padding;

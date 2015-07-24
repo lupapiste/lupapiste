@@ -1,2 +1,3 @@
 fi: Suomi
 sv: Svenska
+url.guide: https://www.lupapiste.fi/ohjeet

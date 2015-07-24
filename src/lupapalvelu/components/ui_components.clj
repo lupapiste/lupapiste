@@ -308,7 +308,7 @@
 
    :oir-app {:depends [:ui-components] :js ["oir.js"]}
    :oir     {:depends [:oir-app :common-html :authenticated :map :application :attachment
-                       :docgen :debug :notice :analytics]
+                       :docgen :debug :notice :analytics :header]
              :css ["oir.css"]}
 
    :authority-admin-app {:depends [:ui-components]

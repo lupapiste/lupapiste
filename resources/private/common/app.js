@@ -246,6 +246,7 @@ var LUPAPISTE = LUPAPISTE || {};
       }
       $(".brand").applyBindings( model );
       $(".header-menu").applyBindings( model ).css( "visibility", "visible");
+      $("#sys-notification").applyBindings( model );
       $("footer").applyBindings(model).css("visibility", "visible");
     };
   };

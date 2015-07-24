@@ -1322,22 +1322,27 @@ nav .nav-wrapper .header-menu .header-box a {
 nav .nav-wrapper .header-menu .header-box a, nav .nav-wrapper .header-menu .header-box span {
   line-height: 60px;
 }
-/* line 118, ../sass/partials/_header.scss */
+/* line 117, ../sass/partials/_header.scss */
+nav .nav-wrapper #sys-notification {
+  clear: left;
+}
+/* line 121, ../sass/partials/_header.scss */
 nav .language-menu {
   width: 100%;
   clear: left;
+  display: none;
   padding-top: 1em;
   padding-left: 208px;
   padding-bottom: .5em;
   background-color: #555555;
 }
-/* line 127, ../sass/partials/_header.scss */
+/* line 131, ../sass/partials/_header.scss */
 nav .language-menu ul {
   list-style-type: none;
   padding: 0;
   margin: 0;
 }
-/* line 131, ../sass/partials/_header.scss */
+/* line 135, ../sass/partials/_header.scss */
 nav .language-menu ul li {
   margin-bottom: .5em;
   margin-top: 0;
