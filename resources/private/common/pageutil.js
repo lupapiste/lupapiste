@@ -62,6 +62,16 @@ var pageutil = (function($) {
     window.location = window.location.protocol + "//" + window.location.host + frontpage;
   }
 
+  function openPage(page) {
+    if (!page) {
+      openFrontpage();
+    } else if (page.inndexOf("!/") === 0) {
+      window.location.hash = page;
+    } else {
+      window.location.hash = "!/" + page;
+    }
+  }
+
   $(function() {
     ajaxLoaderContainer = $("<div>").attr("id", "ajax-loader-container")
       .append($("<div>"))
@@ -78,6 +88,7 @@ var pageutil = (function($) {
     hideAjaxWait:         hideAjaxWait,
     makePendingAjaxWait:  makePendingAjaxWait,
     openFrontpage:        openFrontpage,
+    openPage:             openPage,
     frontpage:            frontpage
   };
 
