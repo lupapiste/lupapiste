@@ -1131,47 +1131,61 @@ h1 .icon {
 
 /* NAV
 ----------------------------------------------------------------------------- */
-/* line 66, ../sass/partials/_header.scss */
+/* line 75, ../sass/partials/_header.scss */
+.nav-wrapper {
+  width: 100%;
+}
+
+/* line 79, ../sass/partials/_header.scss */
 nav {
   position: fixed;
   top: 0;
   z-index: 2002;
   box-sizing: border-box;
   width: 100%;
-  background: #333333;
 }
-/* line 73, ../sass/partials/_header.scss */
-nav .nav-wrapper {
+/* line 85, ../sass/partials/_header.scss */
+nav .nav-top {
+  width: 100%;
+  background-color: #333333;
+  display: block;
+  clear: both;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+/* line 88, ../sass/partials/_header.scss */
+nav .nav-box {
   width: 100%;
   max-width: 1280px;
   margin: 0 auto;
-  float: left;
   position: relative;
   box-sizing: border-box;
+  margin-left: auto;
+  margin-right: auto;
 }
-/* line 80, ../sass/partials/_header.scss */
-nav .nav-wrapper .brand {
+/* line 98, ../sass/partials/_header.scss */
+nav .nav-box .brand {
   position: relative;
   width: 188px;
   display: inline-block;
   float: left;
 }
-/* line 85, ../sass/partials/_header.scss */
-nav .nav-wrapper .brand a img {
+/* line 103, ../sass/partials/_header.scss */
+nav .nav-box .brand a img {
   float: left;
   width: 164px;
   height: 35px;
   margin: 12px;
 }
-/* line 92, ../sass/partials/_header.scss */
-nav .nav-wrapper .language-closed {
+/* line 110, ../sass/partials/_header.scss */
+nav .nav-box .language-closed {
   background-color: inherit;
   display: inline-block;
   margin: 0;
   float: left;
 }
 /* line 15, ../sass/partials/_header.scss */
-nav .nav-wrapper .language-closed a {
+nav .nav-box .language-closed a {
   font-size: 16px;
   vertical-align: middle;
   white-space: nowrap;
@@ -1181,50 +1195,50 @@ nav .nav-wrapper .language-closed a {
   text-overflow: ellipsis;
 }
 /* line 24, ../sass/partials/_header.scss */
-nav .nav-wrapper .language-closed a:link, nav .nav-wrapper .language-closed a:visited {
+nav .nav-box .language-closed a:link, nav .nav-box .language-closed a:visited {
   color: #f7ac2e;
   text-decoration: none;
 }
 /* line 27, ../sass/partials/_header.scss */
-nav .nav-wrapper .language-closed a:link span, nav .nav-wrapper .language-closed a:visited span {
+nav .nav-box .language-closed a:link span, nav .nav-box .language-closed a:visited span {
   color: #f7ac2e;
 }
 /* line 31, ../sass/partials/_header.scss */
-nav .nav-wrapper .language-closed a:hover, nav .nav-wrapper .language-closed a:active {
+nav .nav-box .language-closed a:hover, nav .nav-box .language-closed a:active {
   color: white;
   background-color: #555555;
 }
 /* line 34, ../sass/partials/_header.scss */
-nav .nav-wrapper .language-closed a:hover span, nav .nav-wrapper .language-closed a:active span {
+nav .nav-box .language-closed a:hover span, nav .nav-box .language-closed a:active span {
   color: white;
 }
 /* line 38, ../sass/partials/_header.scss */
-nav .nav-wrapper .language-closed a span {
+nav .nav-box .language-closed a span {
   vertical-align: middle;
 }
 /* line 50, ../sass/partials/_header.scss */
-nav .nav-wrapper .language-closed a {
+nav .nav-box .language-closed a {
   padding-left: 20px;
   padding-right: 20px;
   padding-top: 0;
   padding-bottom: 0;
 }
 /* line 58, ../sass/partials/_header.scss */
-nav .nav-wrapper .language-closed a, nav .nav-wrapper .language-closed span {
+nav .nav-box .language-closed a, nav .nav-box .language-closed span {
   vertical-align: middle;
   line-height: 60px;
   text-transform: uppercase;
   overflow: hidden;
 }
-/* line 96, ../sass/partials/_header.scss */
-nav .nav-wrapper .language-open {
+/* line 114, ../sass/partials/_header.scss */
+nav .nav-box .language-open {
   background-color: #555555;
   display: inline-block;
   margin: 0;
   float: left;
 }
 /* line 15, ../sass/partials/_header.scss */
-nav .nav-wrapper .language-open a {
+nav .nav-box .language-open a {
   font-size: 16px;
   vertical-align: middle;
   white-space: nowrap;
@@ -1234,56 +1248,56 @@ nav .nav-wrapper .language-open a {
   text-overflow: ellipsis;
 }
 /* line 24, ../sass/partials/_header.scss */
-nav .nav-wrapper .language-open a:link, nav .nav-wrapper .language-open a:visited {
+nav .nav-box .language-open a:link, nav .nav-box .language-open a:visited {
   color: white;
   text-decoration: none;
 }
 /* line 27, ../sass/partials/_header.scss */
-nav .nav-wrapper .language-open a:link span, nav .nav-wrapper .language-open a:visited span {
+nav .nav-box .language-open a:link span, nav .nav-box .language-open a:visited span {
   color: white;
 }
 /* line 31, ../sass/partials/_header.scss */
-nav .nav-wrapper .language-open a:hover, nav .nav-wrapper .language-open a:active {
+nav .nav-box .language-open a:hover, nav .nav-box .language-open a:active {
   color: #f7ac2e;
   background-color: #555555;
 }
 /* line 34, ../sass/partials/_header.scss */
-nav .nav-wrapper .language-open a:hover span, nav .nav-wrapper .language-open a:active span {
+nav .nav-box .language-open a:hover span, nav .nav-box .language-open a:active span {
   color: #f7ac2e;
 }
 /* line 38, ../sass/partials/_header.scss */
-nav .nav-wrapper .language-open a span {
+nav .nav-box .language-open a span {
   vertical-align: middle;
 }
 /* line 50, ../sass/partials/_header.scss */
-nav .nav-wrapper .language-open a {
+nav .nav-box .language-open a {
   padding-left: 20px;
   padding-right: 20px;
   padding-top: 0;
   padding-bottom: 0;
 }
 /* line 58, ../sass/partials/_header.scss */
-nav .nav-wrapper .language-open a, nav .nav-wrapper .language-open span {
+nav .nav-box .language-open a, nav .nav-box .language-open span {
   vertical-align: middle;
   line-height: 60px;
   text-transform: uppercase;
   overflow: hidden;
 }
-/* line 99, ../sass/partials/_header.scss */
-nav .nav-wrapper .header-menu {
+/* line 117, ../sass/partials/_header.scss */
+nav .nav-box .header-menu {
   display: inline-block;
   position: absolute;
   right: 0px;
 }
-/* line 104, ../sass/partials/_header.scss */
-nav .nav-wrapper .header-menu .header-box {
+/* line 122, ../sass/partials/_header.scss */
+nav .nav-box .header-menu .header-box {
   padding-left: 12px;
   padding-right: 12px;
   display: inline-block;
   height: 60px;
 }
 /* line 15, ../sass/partials/_header.scss */
-nav .nav-wrapper .header-menu .header-box a {
+nav .nav-box .header-menu .header-box a {
   font-size: 16px;
   vertical-align: middle;
   white-space: nowrap;
@@ -1293,62 +1307,66 @@ nav .nav-wrapper .header-menu .header-box a {
   text-overflow: ellipsis;
 }
 /* line 24, ../sass/partials/_header.scss */
-nav .nav-wrapper .header-menu .header-box a:link, nav .nav-wrapper .header-menu .header-box a:visited {
+nav .nav-box .header-menu .header-box a:link, nav .nav-box .header-menu .header-box a:visited {
   color: #f7ac2e;
   text-decoration: none;
 }
 /* line 27, ../sass/partials/_header.scss */
-nav .nav-wrapper .header-menu .header-box a:link span, nav .nav-wrapper .header-menu .header-box a:visited span {
+nav .nav-box .header-menu .header-box a:link span, nav .nav-box .header-menu .header-box a:visited span {
   color: #f7ac2e;
 }
 /* line 31, ../sass/partials/_header.scss */
-nav .nav-wrapper .header-menu .header-box a:hover, nav .nav-wrapper .header-menu .header-box a:active {
+nav .nav-box .header-menu .header-box a:hover, nav .nav-box .header-menu .header-box a:active {
   color: white;
   background-color: inherit;
 }
 /* line 34, ../sass/partials/_header.scss */
-nav .nav-wrapper .header-menu .header-box a:hover span, nav .nav-wrapper .header-menu .header-box a:active span {
+nav .nav-box .header-menu .header-box a:hover span, nav .nav-box .header-menu .header-box a:active span {
   color: white;
 }
 /* line 38, ../sass/partials/_header.scss */
-nav .nav-wrapper .header-menu .header-box a span {
+nav .nav-box .header-menu .header-box a span {
   vertical-align: middle;
 }
-/* line 109, ../sass/partials/_header.scss */
-nav .nav-wrapper .header-menu .header-box a {
+/* line 127, ../sass/partials/_header.scss */
+nav .nav-box .header-menu .header-box a {
   max-width: 300px;
 }
-/* line 112, ../sass/partials/_header.scss */
-nav .nav-wrapper .header-menu .header-box a, nav .nav-wrapper .header-menu .header-box span {
+/* line 130, ../sass/partials/_header.scss */
+nav .nav-box .header-menu .header-box a, nav .nav-box .header-menu .header-box span {
   line-height: 60px;
 }
-/* line 117, ../sass/partials/_header.scss */
-nav .nav-wrapper #sys-notification {
-  clear: left;
-}
-/* line 121, ../sass/partials/_header.scss */
-nav .language-menu {
+/* line 136, ../sass/partials/_header.scss */
+nav .nav-bottom {
   width: 100%;
-  clear: left;
-  display: none;
+  background-color: #555555;
+  display: block;
+  clear: both;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+/* line 138, ../sass/partials/_header.scss */
+nav .nav-bottom .language-menu {
+  width: 100%;
+  clear: both;
   padding-top: 1em;
   padding-left: 208px;
   padding-bottom: .5em;
   background-color: #555555;
 }
-/* line 131, ../sass/partials/_header.scss */
-nav .language-menu ul {
+/* line 147, ../sass/partials/_header.scss */
+nav .nav-bottom .language-menu ul {
   list-style-type: none;
   padding: 0;
   margin: 0;
 }
-/* line 135, ../sass/partials/_header.scss */
-nav .language-menu ul li {
+/* line 151, ../sass/partials/_header.scss */
+nav .nav-bottom .language-menu ul li {
   margin-bottom: .5em;
   margin-top: 0;
 }
 /* line 15, ../sass/partials/_header.scss */
-nav .language-menu ul li a {
+nav .nav-bottom .language-menu ul li a {
   font-size: 16px;
   vertical-align: middle;
   white-space: nowrap;
@@ -1358,25 +1376,25 @@ nav .language-menu ul li a {
   text-overflow: ellipsis;
 }
 /* line 24, ../sass/partials/_header.scss */
-nav .language-menu ul li a:link, nav .language-menu ul li a:visited {
+nav .nav-bottom .language-menu ul li a:link, nav .nav-bottom .language-menu ul li a:visited {
   color: white;
   text-decoration: none;
 }
 /* line 27, ../sass/partials/_header.scss */
-nav .language-menu ul li a:link span, nav .language-menu ul li a:visited span {
+nav .nav-bottom .language-menu ul li a:link span, nav .nav-bottom .language-menu ul li a:visited span {
   color: white;
 }
 /* line 31, ../sass/partials/_header.scss */
-nav .language-menu ul li a:hover, nav .language-menu ul li a:active {
+nav .nav-bottom .language-menu ul li a:hover, nav .nav-bottom .language-menu ul li a:active {
   color: #f7ac2e;
   background-color: inherit;
 }
 /* line 34, ../sass/partials/_header.scss */
-nav .language-menu ul li a:hover span, nav .language-menu ul li a:active span {
+nav .nav-bottom .language-menu ul li a:hover span, nav .nav-bottom .language-menu ul li a:active span {
   color: #f7ac2e;
 }
 /* line 38, ../sass/partials/_header.scss */
-nav .language-menu ul li a span {
+nav .nav-bottom .language-menu ul li a span {
   vertical-align: middle;
 }
 
