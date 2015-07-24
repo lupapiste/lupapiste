@@ -6,7 +6,7 @@
                       cancel:  urlPrefix + "#!/register/cancel",
                       error:   urlPrefix + "#!/register/error"};
 
-  var registrationModel = new LUPAPISTE.RegistrationModel("register-user", function() {window.location.hash = "!/register3";}, "#register-email-error");
+  var registrationModel = new LUPAPISTE.RegistrationModel("register-user", _.partial(pageutil.openPage, "!/register3"), "#register-email-error");
   var statusModel = new LUPAPISTE.StatusModel();
 
   hub.onPageLoad("register", function() {
