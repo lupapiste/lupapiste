@@ -11,10 +11,10 @@
 
       <div data-bind="component: {name: 'vetuma-init', params: {}}"></div>
 
-      <div data-bind="if: isCancel">
+      <div data-bind="if: status.isCancel">
         <div id="register-cancel" data-bind="ltext: 'register.cancel'" class="context-error"></div>
       </div>
-      <div data-bind="if: isError">
+      <div data-bind="if: status.isError">
         <div id="register-error" data-bind="ltext: 'register.error'" class="context-error"></div>
       </div>
 

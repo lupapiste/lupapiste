@@ -6,10 +6,10 @@
       <h1 data-bind="ltext: 'register.header1'"></h1>
       <p data-bind="ltext: 'link-account.info'" class="register-info"></p>
       <div id="vetuma-link-account"></div>
-      <div data-bind="if: isCancel">
+      <div data-bind="if: status.isCancel">
         <div id="link-account-cancel" data-bind="ltext: 'register.cancel'" class="context-error"></div>
       </div>
-      <div data-bind="if: isError">
+      <div data-bind="if: status.isError">
         <div id="link-account-error" data-bind="ltext: 'register.error'" class="context-error"></div>
       </div>
     </div>

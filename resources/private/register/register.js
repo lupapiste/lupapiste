@@ -27,7 +27,7 @@
   });
 
   $(function(){
-    $("#register").applyBindings(statusModel);
+    $("#register").applyBindings({status:statusModel});
     $("#register2").applyBindings(registrationModel.model);
     $("#register3").applyBindings(registrationModel.model);
   });

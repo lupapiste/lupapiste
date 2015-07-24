@@ -96,7 +96,7 @@
   });
 
   $(function(){
-    $("#link-account").applyBindings(statusModel);
+    $("#link-account").applyBindings({status: statusModel});
     $("#link-account-2").applyBindings(registrationModel.model);
     $("#link-account-3").applyBindings({});
   });
