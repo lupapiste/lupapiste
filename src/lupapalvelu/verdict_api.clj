@@ -14,22 +14,23 @@
             [lupapalvelu.notifications :as notifications]
             [lupapalvelu.verdict :as verdict]
             [lupapalvelu.user :as user]
-            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]
-            [lupapalvelu.xml.krysp.reader :as krysp-reader]))
+            [lupapalvelu.xml.krysp.application-from-krysp :as krysp-fetch]))
 
 ;;
 ;; KRYSP verdicts
 ;;
 
-(defn do-check-for-verdict [{application :application :as command}]
+(defn do-check-for-verdict [{{op :primaryOperation :as application} :application :as command}]
   {:pre [(every? command [:application :user :created])]}
-  (when-let [app-xml (krysp-fetch/get-application-xml application :application-id)]
+  (if-let [app-xml (krysp-fetch/get-application-xml application :application-id)]
     (or
       (let [validator-fn (permit/get-verdict-validator (permit/permit-type application))]
         (validator-fn app-xml))
       (let [updates (verdict/find-verdicts-from-xml command app-xml)]
         (update-application command updates)
-        (ok :verdicts (get-in updates [$set :verdicts]) :tasks (get-in updates [$set :tasks]))))))
+        (ok :verdicts (get-in updates [$set :verdicts]) :tasks (get-in updates [$set :tasks]))))
+    (when (#{"tyonjohtajan-nimeaminen-v2" "tyonjohtajan-nimeaminen" "suunnittelijan-nimeaminen"} (:name op))
+      (verdict/fetch-tj-suunnittelija-verdict command))))
 
 (notifications/defemail :application-verdict
   {:subject-key    "verdict"

@@ -1,3 +1,0 @@
-fi: Suomi
-sv: Svenska
-path.guide: /ohjeet
