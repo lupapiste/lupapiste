@@ -3,7 +3,7 @@ LUPAPISTE.VetumaInitModel = function(params) {
 
   var self = this;
 
-  self.visible = params.visible || true;
+  self.visible = _.isUndefined(params.visible) ?  true : params.visible;
   self.href = "";
 
 };
