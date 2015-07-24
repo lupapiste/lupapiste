@@ -1,7 +1,6 @@
 (ns lupapalvelu.vetuma
   (:require [taoensso.timbre :as timbre :refer [trace debug info warn error errorf fatal]]
             [clojure.set :refer [rename-keys]]
-            [sade.strings :as ss]
             [noir.core :refer [defpage]]
             [noir.request :as request]
             [noir.response :as response]
@@ -11,8 +10,10 @@
             [clj-time.local :refer [local-now]]
             [clj-time.format :as format]
             [pandect.core :as pandect]
-            [sade.env :as env]
             [sade.core :refer :all]
+            [sade.env :as env]
+            [sade.util :as util]
+            [sade.strings :as ss]
             [lupapalvelu.mongo :as mongo]
             [lupapalvelu.vtj :as vtj]))
 
@@ -160,8 +161,6 @@
 (defn- field [[k v]]
   (form/hidden-field k v))
 
-(defn- non-local? [paths] (some #(not= -1 (.indexOf (or % "") ":")) (vals paths)))
-
 (defn host-and-ssl-port
   "returns host with port changed from 8000 to 8443. Shitty crap."
   [host] (ss/replace host #":8000" ":8443"))
@@ -185,14 +184,14 @@
         trid      (vetuma-request "TRID")]
 
     (if sessionid
-      (if (non-local? paths)
-       (response/status 400 (response/content-type "text/plain" "invalid return paths"))
-       (do
-         (mongo/update :vetuma {:sessionid sessionid :trid trid} {:sessionid sessionid :paths paths :trid trid :created-at (java.util.Date.)} :upsert true)
-         (html
-           (form/form-to [:post (:url (config))]
-             (map field vetuma-request)
-             (form/submit-button "submit")))))
+      (if (every? util/relative-local-url? (vals paths))
+        (do
+          (mongo/update :vetuma {:sessionid sessionid :trid trid} {:sessionid sessionid :paths paths :trid trid :created-at (java.util.Date.)} :upsert true)
+          (html
+            (form/form-to [:post (:url (config))]
+              (map field vetuma-request)
+              (form/submit-button "submit"))))
+        (response/status 400 (response/content-type "text/plain" "invalid return paths")))
       (response/status 400 (response/content-type "test/plain" "Session not initialized")))))
 
 (defpage [:post "/api/vetuma"] []
