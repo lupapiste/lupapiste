@@ -15,6 +15,7 @@
             [sade.util :as util]
             [sade.strings :as ss]
             [lupapalvelu.mongo :as mongo]
+            [lupapalvelu.i18n :as i18n]
             [lupapalvelu.vtj :as vtj]))
 
 ;;
@@ -133,8 +134,11 @@
 ;; Request & Response mapping to clojure
 ;;
 
-(defn request-data [host]
+(def supported-langs #{"fi" "sv" "en"})
+
+(defn request-data [host lang]
   (-> (config)
+    (assoc :lg lang)
     (assoc :trid (generate-stamp))
     (assoc :timestmp (timestamp))
     (assoc :host  host)
@@ -177,11 +181,13 @@
                    (host :current)
                    (str "https://" (host-and-ssl-port hostie)))))))
 
-(defpage "/api/vetuma" {:keys [success, cancel, error] :as data}
+(defpage "/api/vetuma" {:keys [success cancel error language] :as data}
   (let [paths     {:success success :error error :cancel cancel}
+        lang  (get supported-langs language (name i18n/default-lang))
         sessionid (session-id)
-        vetuma-request (request-data (host :secure))
-        trid      (vetuma-request "TRID")]
+        vetuma-request (request-data (host :secure) lang)
+        trid      (vetuma-request "TRID")
+        label     (i18n/localize lang "vetuma.continue")]
 
     (if sessionid
       (if (every? util/relative-local-url? (vals paths))
@@ -190,7 +196,7 @@
           (html
             (form/form-to [:post (:url (config))]
               (map field vetuma-request)
-              (form/submit-button "submit"))))
+              (form/submit-button label))))
         (response/status 400 (response/content-type "text/plain" "invalid return paths")))
       (response/status 400 (response/content-type "test/plain" "Session not initialized")))))
 

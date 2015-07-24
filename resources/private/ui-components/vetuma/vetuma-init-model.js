@@ -2,8 +2,12 @@ LUPAPISTE.VetumaInitModel = function(params) {
   "use strict";
 
   var self = this;
-  var VETUMA_PARAMS = ["success", "error", "cancel"];
+  var VETUMA_PARAMS = ["success", "error", "cancel", "language"];
   var VETUMA_BASE = "/api/vetuma?";
+
+  if (_.isUndefined(params.language)) {
+    params.language = loc.currentLanguage;
+  }
 
   function appendParam(url, param) {
     return url + param + "=" + encodeURIComponent(ko.unwrap(params[param])) +  "&";
