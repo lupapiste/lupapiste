@@ -1,6 +1,11 @@
 ;(function($) {
   "use strict";
 
+  var url = window.location.pathname + window.location.search + window.location.hash;
+  var vetumaParams = {success: url,
+                      cancel: url,
+                      error: url};
+
   function Model() {
     var self = this;
 
@@ -134,9 +139,7 @@
           $("html, body").animate({ scrollTop: 10000});
         },
         function () {
-            var url = window.location.pathname + window.location.search + window.location.hash;
-            var urlmap = {success: url, cancel: url, error: url};
-            $.get("/api/vetuma", urlmap, function(form) {
+            $.get("/api/vetuma", vetumaParams, function(form) {
               $("#vetuma-neighbor").html(form).find(":submit").addClass("btn btn-primary")
                                            .attr("value",loc("register.action"))
                                            .attr("data-test-id", "vetuma-init");

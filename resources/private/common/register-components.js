@@ -30,7 +30,8 @@ jQuery(document).ready(function() {
     "company-edit",
     "tags-editor",
     "upload",
-    "leaflet-map"
+    "leaflet-map",
+    "vetuma-init"
   ];
 
   _.forEach(components, function(component) {
