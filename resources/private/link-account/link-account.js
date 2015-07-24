@@ -24,7 +24,7 @@
   };
   var statusModel = new LUPAPISTE.StatusModel();
 
-  var registrationModel = new LUPAPISTE.RegistrationModel("confirm-account-link", vetumaParams, afterRegistrationSuccess, "#link-account-error2",
+  var registrationModel = new LUPAPISTE.RegistrationModel("confirm-account-link", afterRegistrationSuccess, "#link-account-error2",
       ["stamp", "tokenId", "personId", "firstName", "lastName", "email", "confirmEmail", "street", "city", "zip", "phone", "password", "confirmPassword", "street", "zip", "city", "allowDirectMarketing"]);
 
 

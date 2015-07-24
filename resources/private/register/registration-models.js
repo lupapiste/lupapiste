@@ -3,7 +3,7 @@
  * Username and password from user input are given to afterSuccessFn function.
  * Used keys can be set with optional last constructor parameter.
  */
-LUPAPISTE.RegistrationModel = function(commandName, vetumaParams, afterSuccessFn, errorSelector, ks) {
+LUPAPISTE.RegistrationModel = function(commandName, afterSuccessFn, errorSelector, ks) {
   "use strict";
 
   var self = this;
