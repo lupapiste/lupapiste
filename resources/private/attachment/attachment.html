@@ -210,15 +210,17 @@
               <button id="show-tos-metadata"
                       class="btn"
                       style="margin-top: 15px"
-                      data-bind="click: toggleTosMetadata, visible: !_.isEmpty(metadata())">
+                      data-bind="click: toggleTosMetadata, visible: !_.isEmpty(metadata()) && $root.authorization.ok('store-tos-metadata-for-application')">
                 <span data-bind="ltext: 'attachment.showTosMetadata'"></span>
                 <span class="left-align"
                       data-bind="drill: showTosMetadata, color: 'black'"></span>
               </button>
 
-              <div class="tos-metadata-content" data-bind="slider: showTosMetadata, visible: !_.isEmpty(metadata())">
-                <metadata-editor params="attachmentId: id, metadata: metadata, applicationId: application.id"></metadata-editor>
-              </div>
+              <!-- ko if: $root.authorization.ok('store-tos-metadata-for-attachment') -->
+                <div class="tos-metadata-content" data-bind="slider: showTosMetadata, visible: !_.isEmpty(metadata())">
+                  <metadata-editor params="attachmentId: id, metadata: metadata, applicationId: application.id"></metadata-editor>
+                </div>
+              <!-- /ko -->
 
             </div>
           </div>

@@ -125,8 +125,7 @@ var attachment = (function() {
     groupAttachments:             ko.observableArray(),
     groupIndex:                   ko.observable(),
     changeTypeDialogModel:        undefined,
-    metadata:                     ko.observableArray(),
-    metadataMap:                  ko.observable(),
+    metadata:                     ko.observable(),
     showTosMetadata:              ko.observable(false),
 
     toggleHelp: function() {
