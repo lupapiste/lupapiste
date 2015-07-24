@@ -43,12 +43,10 @@
         <label data-bind="ltext: type"></label><br>
         <div data-bind="visible: !$parent.editable(),
                         text: $parent.values[type]"></div
-        ><div data-bind="visible: $parent.editable">
-        <input class="form-input" data-bind="attr: {type: inputType},
+        ><input class="form-input" data-bind="visible: $parent.editable, attr: {type: inputType},
                                              textInput: $parent.values[type],
-                                             css: {invalid: $parent.invalidFields.indexOf(type) >= 0}">
-      </div
-      ><div data-bind="if: inputType === 'number'" class="year-label"><span data-bind="ltext: 'vuotta'"></span></div>
+                                             css: {invalid: $parent.invalidFields.indexOf(type) >= 0}"
+        ><div data-bind="visible: inputType === 'number', ltext: 'vuotta'" class="year-label"></div>
       </div>
       <div data-bind="if: $data.subfields">
         <div class="subtable">
