@@ -37,7 +37,7 @@ $orange-light:    rgb(251, 199, 50);
 $orange-lightest: rgb(255, 226, 54);
 $orange-link:     $orange-dark;
 $orange-hover:    $orange;
-$orange-active:     $orange-light;
+$orange-active:   $orange-light;
 
 $green-darkest:  rgb(17, 162, 42);
 $green-dark:     rgb(44, 169, 44);
@@ -46,7 +46,7 @@ $green-light:    rgb(97, 183, 47);
 $green-lightest: rgb(123, 190, 48);
 $green-link:     $green-dark;
 $green-hover:    $green;
-$green-active:     $green-light;
+$green-active:   $green-light;
 
 $red-darkest:  rgb(219, 33, 17);
 $red-dark:     rgb(223, 50, 21);
@@ -55,7 +55,7 @@ $red-light:    rgb(231, 84, 29);
 $red-lightest: rgb(235, 101, 33);
 $red-link:     $red-dark;
 $red-hover:    $red;
-$red-active:     $red-light;
+$red-active:   $red-light;
 
 // Turquoise
 $turqo-darkest:  rgb(2, 178, 165);
@@ -65,7 +65,7 @@ $turqo-light:    rgb(7, 227, 194);
 $turqo-lightest: rgb(8, 244, 204);
 $turqo-link:     $turqo-dark;
 $turqo-hover:    $turqo;
-$turqo-active:     $turqo-light;
+$turqo-active:   $turqo-light;
 
 // Grays from the darkest to the lightest (white);
 @function make-gray( $n ) {
