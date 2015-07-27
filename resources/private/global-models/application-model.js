@@ -254,6 +254,19 @@ LUPAPISTE.ApplicationModel = function() {
           .success(function() {
             self.reload();
           })
+          .error(function(e) {
+            if (e.text === "error.foreman.notice-not-submittable") {
+              hub.send("show-dialog", {ltitle: "foreman.dialog.notice-submit-warning.title",
+                                       size: "medium",
+                                       component: "yes-no-dialog",
+                                       componentParams: {ltext: "foreman.dialog.notice-submit-warning.text",
+                                                         lyesTitle: "foreman.dialog.notice-submit-warning.yes",
+                                                         lnoTitle: "foreman.dialog.notice-submit-warning.no",
+                                                         yesFn: self.submitApplication}});
+            } else {
+              return e;
+            }
+          })
           .processing(self.processing)
           .call();
         hub.send("track-click", {category:"Application", label:"submit", event:"applicationSubmitted"});
