@@ -317,7 +317,7 @@
               <a data-bind="click: changeTab" href="#" data-target="applicationSummary" data-test-id="application-open-applicationSummary-tab">
                 <span data-bind="ltext: 'application.applicationSummary'"></span></a></li>
 
-            <li data-bind="if: !_.isEmpty(metadata()) && $root.authorization.ok('store-tos-metadata-for-application'),
+            <li data-bind="if: !_.isEmpty(metadata()) && $root.authorization.ok('store-tos-metadata-for-application') && features.enabled('arkistointi'),
                            css: {'active': $parent.selectedTabName() === 'metadata'}">
               <a data-bind="click: changeTab" href="#" data-target="metadata" data-test-id="application-open-tasks-tab">
                 <span data-bind="ltext: 'attachment.tosMetadata'"></span>
@@ -1035,8 +1035,12 @@
         <!-- Metadata tab -->
 
         <!-- ko if: selectedTabName() === 'metadata' && $root.authorization.ok("store-tos-metadata-for-application") -->
-        <div id="application-metadata-tab" class="tab-content" >
-          <metadata-editor params="metadata: application.metadata, applicationId: application.id"></metadata-editor>
+        <div id="application-metadata-tab" class="tab-content">
+          <div data-bind="if: features.enabled('arkistointi')">
+            <div class="feature">
+              <metadata-editor params="metadata: application.metadata, applicationId: application.id"></metadata-editor>
+            </div>
+          </div>
         </div>
         <!-- /ko -->
 

@@ -9,7 +9,8 @@
             [lupapalvelu.action :as action]
             [lupapiste-commons.tos-metadata-schema :as tms]
             [schema.core :as s]
-            [taoensso.timbre :as timbre])
+            [taoensso.timbre :as timbre]
+            [sade.env :as env])
   (:import (schema.core EnumSchema)))
 
 (defquery available-tos-functions
@@ -101,34 +102,36 @@
    :user-roles #{:authority}
    :states     (action/all-states-but [:draft :closed :canceled])}
   [{:keys [application created] :as command}]
-  (try
-    (if-let [attachment (first (filter #(= (:id %) attachmentId) (:attachments application)))]
-      (let [metadata (->> (keywordize-keys-and-some-values metadata [])
-                          (tms/sanitize-metadata)
-                          (#(assoc % :tila (get-in attachment [:metadata :tila])))
-                          (s/validate tms/AsiakirjaMetaDataMap))
-            updated-attachment (assoc attachment :metadata metadata)
-            updated-attachments (-> (remove #(= % attachment) (:attachments application))
-                                  (conj updated-attachment))]
-        (action/update-application command {$set {:modified created
-                                                  :attachments updated-attachments}}))
-      (fail "error.attachment.id"))
-    (catch RuntimeException e
-      (timbre/error e)
-      (fail "error.invalid.metadata"))))
+  (when (env/feature? :tiedonohjaus)
+    (try
+      (if-let [attachment (first (filter #(= (:id %) attachmentId) (:attachments application)))]
+        (let [metadata (->> (keywordize-keys-and-some-values metadata [])
+                            (tms/sanitize-metadata)
+                            (#(assoc % :tila (get-in attachment [:metadata :tila])))
+                            (s/validate tms/AsiakirjaMetaDataMap))
+              updated-attachment (assoc attachment :metadata metadata)
+              updated-attachments (-> (remove #(= % attachment) (:attachments application))
+                                      (conj updated-attachment))]
+          (action/update-application command {$set {:modified created
+                                                    :attachments updated-attachments}}))
+        (fail "error.attachment.id"))
+      (catch RuntimeException e
+        (timbre/error e)
+        (fail "error.invalid.metadata")))))
 
 (defcommand store-tos-metadata-for-application
   {:parameters [:id metadata]
    :user-roles #{:authority}
    :states     (action/all-states-but [:draft :closed :canceled])}
   [{:keys [application created] :as command}]
-  (try
-    (let [metadata (->> (keywordize-keys-and-some-values metadata [])
-                        (tms/sanitize-metadata)
-                        (#(assoc % :tila (get-in application [:metadata :tila])))
-                        (s/validate tms/AsiakirjaMetaDataMap))]
-      (action/update-application command {$set {:modified created
-                                                :metadata metadata}}))
-    (catch RuntimeException e
-      (timbre/error e)
-      (fail "error.invalid.metadata"))))
+  (when (env/feature? :tiedonohjaus)
+    (try
+      (let [metadata (->> (keywordize-keys-and-some-values metadata [])
+                          (tms/sanitize-metadata)
+                          (#(assoc % :tila (get-in application [:metadata :tila])))
+                          (s/validate tms/AsiakirjaMetaDataMap))]
+        (action/update-application command {$set {:modified created
+                                                  :metadata metadata}}))
+      (catch RuntimeException e
+        (timbre/error e)
+        (fail "error.invalid.metadata")))))
