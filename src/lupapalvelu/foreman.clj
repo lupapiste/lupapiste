@@ -119,7 +119,8 @@
 (defn validate-notice-submittable [{:keys [primaryOperation linkPermitData] :as application} confirm]
   (when (and (not confirm) (notice? application))
     (when-let [link (some #(when (= (:type %) "lupapistetunnus") %) linkPermitData)]
-      (when-not (action/post-verdict-states (get
-                                              (mongo/select-one :applications {:_id (:id link)} {:state 1})
-                                              :state))
+      (when-not (action/post-verdict-states (keyword
+                                              (get
+                                                (mongo/select-one :applications {:_id (:id link)} {:state 1})
+                                                :state)))
         (fail! :error.foreman.notice-not-submittable)))))
