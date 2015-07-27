@@ -6,8 +6,10 @@
   <body>
     <section id="neighbor-show" class="page">
       <div data-bind="if: inError">
-        <h1 data-bind="ltext: errorText"></h1>
-        <p data-bind="ltext: 'neighbor.invite.failed.long'"></p>
+        <div class="container">
+          <h1 data-bind="ltext: errorText"></h1>
+          <p data-bind="ltext: 'neighbor.invite.failed.long'"></p>
+        </div>
       </div>
       <div data-bind="ifnot: inError">
         <div class="application_summary">

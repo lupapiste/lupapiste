@@ -5,3 +5,4 @@ neighbor-vetuma.error-y: Yrityksen verkkopankkitunnuksella tai mobiilivarmenteel
 neighbor-vetuma.error-vtj: Henkilötietojen haku epäonnistui. Ole hyvä ja yritä uudelleen. Jos virhe toistuu, yritä myöhemmin uudelleen. Hämtning av personuppgifter misslyckades. Var god och försök på nytt. Om felet upprepas, försök på nytt senare.
 register.error-y: Yrityksen verkkopankkitunnuksella tai mobiilivarmenteella rekisteröityminen ei onnistu, joten käytä henkilökohtaisia tunnuksiasi. / Det går inte att identifiera sig med ett företags nätbankskoder eller mobilcertifiering, så använd dina privata koder.
 register.error-vtj: Henkilötietojen haku epäonnistui. Ole hyvä ja yritä uudelleen. Jos virhe toistuu, yritä myöhemmin uudelleen. Hämtning av personuppgifter misslyckades. Var god och försök på nytt. Om felet upprepas, försök på nytt senare.
+neighbor.invite.failed.long: Ota yhteyttä naapuriisi. / Ta kontakt med din granne.
