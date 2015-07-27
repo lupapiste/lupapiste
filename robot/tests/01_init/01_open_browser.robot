@@ -18,5 +18,5 @@ Disable proxy
 
 Login page is in Finnish
   [Tags]  ie8
-  Page Should Not Contain  Suomeksi
-  Page Should Contain  På svenska
+  Element Should Not Contain  language-select  SV
+  Element Should Contain  language-select  FI
