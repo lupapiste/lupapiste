@@ -14,10 +14,10 @@
     (mac test-parameters) => "72A72A046BD5561BD1C47F3B77FC9456AD58C9C428CACF44D502834C9F8C02A3")
 
   (fact "request-data can be generated"
-    (request-data url) => truthy)
+    (request-data url "fi") => truthy)
 
   (fact "request-data does not contain (secret) key"
-    (contains? (request-data url) "KEY") => falsey)
+    (contains? (request-data url "fi") "KEY") => falsey)
 
   (fact "response-data can be parsed"
     (parsed valid-response) => (contains {:userid "210281-9988"})

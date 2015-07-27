@@ -41,7 +41,7 @@ LUPAPISTE.ApplicationModel = function() {
   self.statements = ko.observable([]);
   self.tasks = ko.observable([]);
   self.tosFunction = ko.observable();
-  self.metadataList = ko.observableArray();
+  self.metadata = ko.observable();
 
   // Application indicator metadata fields
   self.unseenStatements = ko.observable();
