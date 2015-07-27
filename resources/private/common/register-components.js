@@ -31,7 +31,8 @@ jQuery(document).ready(function() {
     "tags-editor",
     "upload",
     "leaflet-map",
-    "vetuma-init"
+    "vetuma-init",
+    "vetuma-status"
   ];
 
   _.forEach(components, function(component) {

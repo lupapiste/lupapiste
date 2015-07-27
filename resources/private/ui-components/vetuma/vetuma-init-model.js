@@ -2,7 +2,7 @@ LUPAPISTE.VetumaInitModel = function(params) {
   "use strict";
 
   var self = this;
-  var VETUMA_PARAMS = ["success", "error", "cancel", "language"];
+  var VETUMA_PARAMS = ["success", "error", "cancel", "y", "vtj", "language"];
   var VETUMA_BASE = "/api/vetuma?";
 
   if (_.isUndefined(params.language)) {

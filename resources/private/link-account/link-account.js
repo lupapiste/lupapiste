@@ -19,6 +19,12 @@
     self.error = ko.pureComputed(function() {
       return urlPrefix + "#!/link-account/" + self.token() + "/error";
     });
+    self.y = ko.pureComputed(function() {
+      return urlPrefix + "#!/link-account/" + self.token() + "/y";
+    });
+    self.vtj = ko.pureComputed(function() {
+      return urlPrefix + "#!/link-account/" + self.token() + "/vtj";
+    });
 
     self.visible = ko.observable(false);
   };
@@ -41,7 +47,7 @@
       })
       .call();
   };
-  var statusModel = new LUPAPISTE.StatusModel();
+  var statusModel = ko.observable();
 
   var registrationModel = new LUPAPISTE.RegistrationModel("confirm-account-link", afterRegistrationSuccess, "#link-account-error2",
       ["stamp", "tokenId", "personId", "firstName", "lastName", "email", "confirmEmail", "street", "city", "zip", "phone", "password", "confirmPassword", "street", "zip", "city", "allowDirectMarketing"]);
@@ -83,7 +89,7 @@
         }
       }).call();
 
-    statusModel.subPage(pageutil.lastSubPage());
+    statusModel(pageutil.lastSubPage());
   });
 
   hub.onPageLoad("link-account-2", function() {

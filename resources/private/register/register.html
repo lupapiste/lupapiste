@@ -9,12 +9,7 @@
 
       <div data-bind="component: {name: 'vetuma-init', params: vetuma}"></div>
 
-      <div data-bind="if: status.isCancel">
-        <div id="register-cancel" data-bind="ltext: 'register.cancel'" class="context-error"></div>
-      </div>
-      <div data-bind="if: status.isError">
-        <div id="register-error" data-bind="ltext: 'register.error'" class="context-error"></div>
-      </div>
+      <div data-bind="component: {name: 'vetuma-status', params: {status: status, idPrefix: 'register-', errorLocPrefix: 'register'}}"></div>
 
       <div data-bind="if: features.enabled('companyRegistration')">
         <div class="feature">

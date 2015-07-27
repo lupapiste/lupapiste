@@ -1,17 +1,19 @@
 (function() {
   "use strict";
 
-  var urlPrefix = "/app/" + loc.getCurrentLanguage() + "/welcome";
-  var vetumaParams = {success: urlPrefix + "#!/register2",
-                      cancel:  urlPrefix + "#!/register/cancel",
-                      error:   urlPrefix + "#!/register/error",
+  var urlPrefix = "/app/" + loc.getCurrentLanguage() + "/welcome#!/register";
+  var vetumaParams = {success: urlPrefix + "2",
+                      cancel:  urlPrefix + "/cancel",
+                      error:   urlPrefix + "/error",
+                      y:       urlPrefix + "/error",
+                      vtj:     urlPrefix + "/error",
                       id:      "vetuma-init"};
 
   var registrationModel = new LUPAPISTE.RegistrationModel("register-user", _.partial(pageutil.openPage, "!/register3"), "#register-email-error");
-  var statusModel = new LUPAPISTE.StatusModel();
+  var statusModel = ko.observable();
 
   hub.onPageLoad("register", function() {
-    statusModel.subPage(pageutil.subPage());
+    statusModel(pageutil.subPage());
   });
 
   hub.onPageLoad("register2", function() {

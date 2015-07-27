@@ -196,10 +196,10 @@
           (mongo/update :vetuma {:sessionid sessionid :trid trid} {:sessionid sessionid :paths paths :trid trid :created-at (java.util.Date.)} :upsert true)
           (response/set-headers
             {"Cache-Control" "no-store, no-cache, must-revalidate"}
-          (hiccup/html
-            (form/form-to {:id "vf"} [:post (:url (config)) ]
-              (map field vetuma-request)
-              (form/submit-button {:id "btn"} label)
+            (hiccup/html
+              (form/form-to {:id "vf"} [:post (:url (config)) ]
+                (map field vetuma-request)
+                (form/submit-button {:id "btn"} label)
                 (elem/javascript-tag "document.getElementById('vf').submit();document.getElementById('btn').disabled = true;")))))
         (response/status 400 (response/content-type "text/plain" "invalid return paths")))
       (response/status 400 (response/content-type "test/plain" "Session not initialized")))))
@@ -222,19 +222,45 @@
    "ERROR" "Kutsu oli virheellinen."
    "FAILURE" "Kutsun palveleminen ep\u00e4onnistui jostain muusta syyst\u00e4 kuin siit\u00e4, ett\u00e4 taustapalvelu hylk\u00e4si suorittamisen."})
 
-(defpage [:any ["/api/vetuma/:status" :status #"(cancel|error)"]] {status :status}
-  (let [params       (:form-params (request/ring-request))
-        status-param (get params "STATUS")
-        trid         (get params "TRID")
-        data         (mongo/select-one :vetuma {:sessionid (session-id) :trid trid})
-        return-uri   (get-in data [:paths (keyword status)])
-        return-uri   (or return-uri "/")]
+(defn- redirect [cause vetuma-data]
+  {:pre [(keyword? cause) (map? vetuma-data)]}
+  (let [url (or (get-in vetuma-data [:paths cause]) (get-in vetuma-data [:paths :error] "/"))]
+    (response/redirect url)))
 
-    (case status
-      "cancel" (info "Vetuma cancel")
-      "error"  (error "Vetuma failure, STATUS =" status-param "=" (get error-status-codes status-param) "Request parameters:" (keys-as-keywords params)))
+(defn- handle-cancel [vetuma-data]
+  (info "Vetuma cancel")
+  (redirect :cancel vetuma-data))
 
-    (response/redirect return-uri)))
+(defn- handle-reject [vetuma-data]
+  (warn "Vetuma backend rejected authentication")
+  (redirect :error vetuma-data))
+
+(defn- handle-error [params vetuma-data]
+  (error "Vetuma returned ERROR! Request parameters:" params "Vetuma data:" vetuma-data)
+  (redirect :error vetuma-data))
+
+(defn- handle-failure [{:keys [extradata subjectdata] :as params} vetuma-data]
+  (let [cause (cond
+                (util/finnish-y? extradata) :y
+                (ss/contains? extradata "Cannot use VTJ") :vtj
+                :else :error)]
+    (case cause
+      :y      (warn  "Company account login attempted. Subject data:" subjectdata)
+      :vtj    (error "Vetuma could not use VTJ! Subject data:" subjectdata)
+      :error  (error "Unexpected Vetuma FAILURE! Request parameters:" params))
+
+    (redirect cause vetuma-data)))
+
+(defpage [:any ["/api/vetuma/:failure" :failure #"(cancel|error)"]] {failure :failure}
+  (let [{:keys [trid status] :as params} (-> (request/ring-request) :form-params keys-as-keywords)
+        data   (mongo/select-one :vetuma {:sessionid (session-id) :trid trid})]
+
+    (if (= failure "cancel")
+      (handle-cancel data)
+      (case status
+        "REJECTED" (handle-reject data)
+        "ERROR"    (handle-error params data)
+        "FAILURE"  (handle-failure params data)))))
 
 (defpage "/api/vetuma/user" []
   (let [data (last (mongo/select :vetuma {:sessionid (session-id), :user.stamp {$exists true}} [:user] {:created-at 1}))
