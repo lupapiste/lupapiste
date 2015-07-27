@@ -11,6 +11,12 @@ var ajax = (function($) {
       notify.error(loc(e.text));
     };
 
+    self.customErrorHandlers = {};
+
+    var resolveErrorHandler = function(e) {
+      return self.customErrorHandlers[e.text] ? self.customErrorHandlers[e.text] : self.errorHandler;
+    };
+
     self.onComplete = function(jqXHR, textStatus) {
       if (self.pendingListener) {
         clearTimeout(self.pendingHandler);
@@ -33,7 +39,7 @@ var ajax = (function($) {
       rawData:   false,
       complete:  self.onComplete,
       success: function(e) {
-        var handler = (self.rawData || e.ok) ? self.successHandler : self.errorHandler;
+        var handler = (self.rawData || e.ok) ? self.successHandler : resolveErrorHandler(e);
         var res = handler.call(self.savedThis, e);
         if ( res && !res.ok ) {
           defaultError(e);
@@ -93,6 +99,12 @@ var ajax = (function($) {
 
     self.successEvent = function(n) {
       return self.success(function(e) { hub.send(n, e); });
+    };
+
+    self.onError = function(errorText, f, savedThis) {
+      self.customErrorHandlers[errorText] = f;
+      self.savedThis = savedThis;
+      return self;
     };
 
     self.error = function(f, savedThis) {
