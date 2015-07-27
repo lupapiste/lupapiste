@@ -605,7 +605,7 @@
             <!-- /ko -->
              <button class="btn btn-primary"
                      data-test-id="application-submit-btn"
-                     data-bind="click: submitApplication,
+                     data-bind="click: function() { submitApplication(false); },
                                 visible: $root.authorization.ok('submit-application'),
                                 enable: submitButtonEnabled">
                <span data-bind="ltext: 'application.submitApplication'"></span>

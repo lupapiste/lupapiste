@@ -244,8 +244,9 @@
       )))
 
 (defcommand submit-application
-  {:parameters       [id]
-   :input-validators [(partial action/non-blank-parameters [:id])]
+  {:parameters       [id confirm]
+   :input-validators [(partial action/non-blank-parameters [:id])
+                      (partial action/boolean-parameters [:confirm])]
    :user-roles       #{:applicant :authority}
    :states           [:draft :open]
    :notified         true
