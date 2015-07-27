@@ -6,6 +6,11 @@ var ajax = (function($) {
   function Call(url, type) {
     var self = this;
 
+    var defaultError = function(e) {
+      error("AJAX: ERROR", self.request.url, e);
+      notify.error(loc(e.text));
+    };
+
     self.onComplete = function(jqXHR, textStatus) {
       if (self.pendingListener) {
         clearTimeout(self.pendingHandler);
@@ -29,7 +34,10 @@ var ajax = (function($) {
       complete:  self.onComplete,
       success: function(e) {
         var handler = (self.rawData || e.ok) ? self.successHandler : self.errorHandler;
-        handler.call(self.savedThis, e);
+        var res = handler.call(self.savedThis, e);
+        if ( res && !res.ok ) {
+          defaultError(e);
+        }
       },
       error: function(jqXHR, textStatus, errorThrown) {
         self.failHandler(jqXHR, textStatus, errorThrown);
@@ -42,10 +50,7 @@ var ajax = (function($) {
     };
 
     self.successHandler = function() { };
-    self.errorHandler = function(e) {
-      error("AJAX: ERROR", self.request.url, e);
-      notify.error(loc(e.text));
-    };
+    self.errorHandler = defaultError;
     self.failHandler = function(jqXHR, textStatus, errorThrown) {
       if (jqXHR && jqXHR.status > 0 &&jqXHR.status !== 403 && jqXHR.readyState > 0) {
         error("Ajax: FAIL", self.request.url, jqXHR, textStatus, errorThrown);
