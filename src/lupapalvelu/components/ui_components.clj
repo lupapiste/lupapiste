@@ -127,7 +127,7 @@
                             :expanded-content :mockjax :open-layers :stickyfill :leaflet]
                   :js ["register-components.js" "util.js" "event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js"
                        "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "perfmon.js" "features.js"
-                       "statuses.js" "statusmodel.js" "authorization.js" "vetuma.js" "metadata.js"]}
+                       "statuses.js" "statusmodel.js" "authorization.js" "vetuma.js"]}
 
    :common-html  {:depends [:selectm-html :leaflet]
                   :css [(partial main-style-file "common-html/css/main.css" "common-html/sass/main.scss") "jquery-ui.css"]
@@ -173,6 +173,10 @@
    :signing      {:depends [:common-html]
                   :html ["signing-dialogs.html"]
                   :js ["signing-model.js" "verdict-signing-model.js"]}
+
+   :metadata-editor {:depends [:common-html]
+                     :html ["metadata-editor.html"]
+                     :js ["metadata-editor.js"]}
 
    :stamp        {:depends [:common-html]
                   :html ["stamp-template.html"]
@@ -304,7 +308,7 @@
    :authority-app {:depends [:ui-components] :js ["authority.js"]}
    :authority     {:depends [:ui-components :authority-app :common-html :authenticated :map :applications :notice :application
                              :statement :verdict :neighbors :docgen :create :mypage :header :debug
-                             :company :stamp :integration-error :analytics]}
+                             :company :stamp :integration-error :analytics :metadata-editor]}
 
    :oir-app {:depends [:ui-components] :js ["oir.js"]}
    :oir     {:depends [:oir-app :common-html :authenticated :map :application :attachment
