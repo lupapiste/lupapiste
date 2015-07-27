@@ -116,8 +116,8 @@
     (foreman-app? application)
     (= "ilmoitus" (-> (domain/get-document-by-name application "tyonjohtaja-v2") :data :ilmoitusHakemusValitsin :value))))
 
-(defn validate-notice-submittable [{:keys [primaryOperation linkPermitData] :as application}]
-  (when (notice? application)
+(defn validate-notice-submittable [{:keys [primaryOperation linkPermitData] :as application} confirm]
+  (when (and (not confirm) (notice? application))
     (when-let [link (some #(when (= (:type %) "lupapistetunnus") %) linkPermitData)]
       (when-not (action/post-verdict-states (get
                                               (mongo/select-one :applications {:_id (:id link)} {:state 1})
