@@ -217,7 +217,9 @@
                 </button>
 
                 <div class="tos-metadata-content" data-bind="slider: showTosMetadata, visible: !_.isEmpty(metadata())">
-                  <metadata-editor params="attachmentId: id, metadata: metadata, applicationId: application.id"></metadata-editor>
+                  <div data-bind="component: {name: 'metadata-editor',
+                                              params: {attachmentId: id, metadata: metadata, applicationId: application.id}}">
+                  </div>
                 </div>
               </div>
               <!-- /ko -->

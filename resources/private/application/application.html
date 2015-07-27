@@ -1037,8 +1037,8 @@
         <!-- ko if: selectedTabName() === 'metadata' && $root.authorization.ok("store-tos-metadata-for-application") -->
         <div id="application-metadata-tab" class="tab-content">
           <div data-bind="if: features.enabled('arkistointi')">
-            <div class="feature">
-              <metadata-editor params="metadata: application.metadata, applicationId: application.id"></metadata-editor>
+            <div class="feature" data-bind="component: {name: 'metadata-editor',
+                                            params: {metadata: application.metadata, applicationId: application.id}}">
             </div>
           </div>
         </div>
