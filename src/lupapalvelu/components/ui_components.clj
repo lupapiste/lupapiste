@@ -99,7 +99,7 @@
                     :js ["underscore.string.min.js" "underscore.string.init.js"]}
    :moment         {:js ["moment.min.js"]}
    :open-layers    {:js ["openlayers-2.13_20140619.min.lupapiste.js"]}
-   :leaflet        {:js ["leaflet.js"]
+   :leaflet        {:js ["leaflet.min.js"]
                     :css ["leaflet.css"]}
    :stickyfill     {:js ["stickyfill.min.js"]}
 
@@ -127,7 +127,7 @@
                             :expanded-content :mockjax :open-layers :stickyfill :leaflet]
                   :js ["register-components.js" "util.js" "event.js" "pageutil.js" "notify.js" "ajax.js" "app.js" "nav.js"
                        "ko.init.js" "dialog.js" "datepicker.js" "requestcontext.js" "currentUser.js" "perfmon.js" "features.js"
-                       "statuses.js" "statusmodel.js" "authorization.js" "vetuma.js"]}
+                       "statuses.js" "authorization.js" "vetuma.js"]}
 
    :common-html  {:depends [:selectm-html :leaflet]
                   :css [(partial main-style-file "common-html/css/main.css" "common-html/sass/main.scss") "jquery-ui.css"]
@@ -337,7 +337,7 @@
 
    :welcome {:depends [:welcome-app :login :register :register-company :link-account :debug :header :screenmessages :password-reset :analytics]
              :js ["company-user.js"]
-             
+
              :html ["index.html" "login.html" "company-user.html"]}
 
    :oskari  {:css ["oskari.css"]}
