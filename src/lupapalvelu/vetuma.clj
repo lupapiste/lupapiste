@@ -182,8 +182,8 @@
                    (host :current)
                    (str "https://" (host-and-ssl-port hostie)))))))
 
-(defpage "/api/vetuma" {:keys [success cancel error language] :as data}
-  (let [paths     {:success success :error error :cancel cancel}
+(defpage "/api/vetuma" {:keys [language] :as data}
+  (let [paths     (select-keys data [:success :cancel :error :y :vtj])
         lang      (get supported-langs language (name i18n/default-lang))
         sessionid (session-id)
         vetuma-request (request-data (host :secure) lang)
@@ -194,11 +194,13 @@
       (if (every? util/relative-local-url? (vals paths))
         (do
           (mongo/update :vetuma {:sessionid sessionid :trid trid} {:sessionid sessionid :paths paths :trid trid :created-at (java.util.Date.)} :upsert true)
+          (response/set-headers
+            {"Cache-Control" "no-store, no-cache, must-revalidate"}
           (hiccup/html
             (form/form-to {:id "vf"} [:post (:url (config)) ]
               (map field vetuma-request)
               (form/submit-button {:id "btn"} label)
-              (elem/javascript-tag "document.getElementById('vf').submit();document.getElementById('btn').disabled = true;"))))
+                (elem/javascript-tag "document.getElementById('vf').submit();document.getElementById('btn').disabled = true;")))))
         (response/status 400 (response/content-type "text/plain" "invalid return paths")))
       (response/status 400 (response/content-type "test/plain" "Session not initialized")))))
 
