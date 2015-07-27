@@ -383,7 +383,7 @@
   "Returns the application map"
   [apikey & args]
   (let [id    (:id (apply create-local-app apikey args))
-        resp  (local-command apikey :submit-application :id id)]
+        resp  (local-command apikey :submit-application :id id :confirm false)]
     resp => ok?
     (query-application local-query apikey id)))
 
