@@ -167,7 +167,7 @@
                            data-bind="checked: isVerdictAttachment, enable: $root.authorization.ok('set-attachments-as-verdict-attachment')"></input>
                   </div>
 
-                  <div data-bind="if: features.enabled('arkistointi')">
+                  <div data-bind="if: features.enabled('arkistointi') && latestVersion">
                     <div class="feature archive-valid" data-bind="with: latestVersion">
                       <div>
                         <span data-bind="ltext: 'archive.valid-format'"></span>
@@ -207,54 +207,20 @@
                 </button>
               </div>
 
-              <button id="show-tos-metadata"
-                      class="btn"
-                      style="margin-top: 15px"
-                      data-bind="click: toggleTosMetadata, visible: metadata().length > 0">
-                <span data-bind="ltext: 'attachment.showTosMetadata'"></span>
-                <span class="left-align"
-                      data-bind="drill: showTosMetadata, color: 'black'"></span>
-              </button>
+              <!-- ko if: features.enabled('tiedonohjaus') && !_.isEmpty(metadata()) && $root.authorization.ok('store-tos-metadata-for-attachment') -->
+              <div class="feature" style="margin-top: 15px;">
+                <button id="show-tos-metadata" class="btn"
+                        data-bind="click: toggleTosMetadata, visible: !_.isEmpty(metadata()) && $root.authorization.ok('store-tos-metadata-for-application')">
+                  <span data-bind="ltext: 'attachment.showTosMetadata'"></span>
+                  <span class="left-align"
+                        data-bind="drill: showTosMetadata, color: 'black'"></span>
+                </button>
 
-              <div class="tos-metadata-content" data-bind="slider: showTosMetadata, visible: metadata().length > 0">
-                <h3 data-bind="ltext: 'attachment.tosMetadata'"></h3>
-                <table class="table table-striped">
-                  <thead>
-                  <tr>
-                    <th data-bind="ltext: 'attachment.tosMetadataKey'"></th>
-                    <th data-bind="ltext: 'attachment.tosMetadataValue'"></th>
-                  </tr>
-                  </thead>
-                  <tbody data-bind="foreach: metadata">
-                    <tr>
-                      <td data-bind="text: name"></td>
-                      <td>
-                        <div data-bind="if: typeof(value) == 'object'">
-                          <table class="subtable">
-                            <thead>
-                            <tr>
-                              <th data-bind="ltext: 'attachment.tosMetadataKey'"></th>
-                              <th data-bind="ltext: 'attachment.tosMetadataValue'"></th>
-                            </tr>
-                            </thead>
-                            <tbody data-bind="foreach: value">
-                            <tr>
-                              <td data-bind="text: name"></td>
-                              <td>
-                                <span data-bind="text: value"></span>
-                              </td>
-                            </tr>
-                            </tbody>
-                          </table>
-                        </div>
-                        <span data-bind="if: typeof(value) != 'object'">
-                          <span data-bind="text: value"></span>
-                        </span>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+                <div class="tos-metadata-content" data-bind="slider: showTosMetadata, visible: !_.isEmpty(metadata())">
+                  <metadata-editor params="attachmentId: id, metadata: metadata, applicationId: application.id"></metadata-editor>
+                </div>
               </div>
+              <!-- /ko -->
 
             </div>
           </div>
