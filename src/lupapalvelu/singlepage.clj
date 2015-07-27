@@ -66,6 +66,7 @@
     (assoc c
       :header (concat (:header c) (enlive/select h [:header]))
       :nav    (concat (:nav c)    (enlive/select h [:nav]))
+      :info   (concat (:info c)   (enlive/select h [:div.notification]))
       :footer (concat (:footer c) (enlive/select h [:footer]))
       :page   (concat (:page  c)  (enlive/select h [:section.page])))))
 
@@ -80,11 +81,12 @@
           (tc/to-date (tc/from-long (:time env/buildinfo)))
           (:build-number env/buildinfo)))
 
-(defn inject-content [t {:keys [header nav page footer]} component]
+(defn inject-content [t {:keys [header nav info page footer]} component]
   (enlive/emit* (-> t
                   (enlive/transform [:body] (fn [e] (assoc-in e [:attrs :class] (name component))))
                   (enlive/transform [:header] (constantly (first header)))
                   (enlive/transform [:nav] (enlive/content (map :content nav)))
+                  (enlive/transform [:div.notification] (enlive/content (map :content info)))
                   (enlive/transform [:section] (enlive/content page))
                   (enlive/transform [:footer] (enlive/content (map :content footer)))
                   (enlive/transform [:script] (fn [e] (if (= (-> e :attrs :src) "inject-common") (assoc-in e [:attrs :src] (resource-url :common :js)) e)))

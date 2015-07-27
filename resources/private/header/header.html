@@ -57,21 +57,23 @@
                 </ul>
             </div>
         </div>
-        <div id="sys-notification" class="nav-notification" style="display:none"
-             data-bind="visible: $data.screenMessage.messages && $data.screenMessage.messages().length > 0">
-            <div class="nav-box">
-                <div class="notification-info"><span class="lupicon-circle-info"></span><</div>
-                <div  class="notification-list">
-                    <ul class="wrapper" data-bind="foreach: $data.screenMessage.messages">
-                        <li data-bind="html: $data[loc.getCurrentLanguage()]" data-test-id="test-screenmessage"></li>
-                    </ul>
-                </div>
-                <div class="notification-close">
-                    <span class="lupicon-remove" data-bind="click: $root.screenMessage.hide"></span>
-                </div>
+    </div>
+</nav>
+<div  class="notification">
+    <div  class="nav-notification" id="sys-notification" style="display: none"
+          data-bind="visible: $data.screenMessage.messages && $data.screenMessage.messages().length > 0">
+        <div class="nav-box">
+            <div class="notification-info"><span class="lupicon-circle-info"></span><</div>
+            <div  class="notification-list">
+                <ul class="wrapper" data-bind="foreach: $data.screenMessage.messages">
+                    <li data-bind="html: $data[loc.getCurrentLanguage()]" data-test-id="test-screenmessage"></li>
+                </ul>
+            </div>
+            <div class="notification-close">
+                <span class="lupicon-remove" data-bind="click: $root.screenMessage.hide"></span>
             </div>
         </div>
     </div>
-</nav>
+</div>
 </body>
 </html>
