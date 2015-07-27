@@ -1,1 +1,5 @@
 error.foreman.notice-not-submittable: Työnjohtajan ilmoitusta ei voi jättää ennen kuin viitteenä oleva hakemus on saanut päätöksen.
+foreman.dialog.notice-submit-warning.title: Työnjohtajan ilmoitus, oletko varma?
+foreman.dialog.notice-submit-warning.text: Olet jättämässä työnjohtajan ilmoitusta. Viitelupana olevaan hankkeeseen ei ole vielä annettu päätöstä. Työnjohtajan ilmoituksen voi jättää, jos on tarve aloittaa työskentely ennen kuin varsinainen hanke on saanut viranomaisen päätöksen. Muussa tapauksessa suosittelemme muuttamaan ilmoituksen hakemukseksi Työnjohtajan nimeäminen-lomakkeelta.
+foreman.dialog.notice-submit-warning.yes: Jätä hakemus ilmoituksena
+foreman.dialog.notice-submit-warning.no: Palaa hakemukseen

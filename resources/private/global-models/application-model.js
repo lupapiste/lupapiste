@@ -245,6 +245,7 @@ LUPAPISTE.ApplicationModel = function() {
 
   self.submitApplication = function(confirm) {
     hub.send("track-click", {category:"Application", label:"submit", event:"submitApplication"});
+
     var submitFn = function() {
       ajax.command("submit-application", {id: self.id(), confirm: confirm})
         .success(function() {
@@ -268,6 +269,7 @@ LUPAPISTE.ApplicationModel = function() {
       hub.send("track-click", {category:"Application", label:"submit", event:"applicationSubmitted"});
       return false;
     };
+
     if ( confirm ) {
       submitFn();
     } else {
