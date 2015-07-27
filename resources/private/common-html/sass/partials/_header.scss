@@ -3,6 +3,7 @@ $header-height: 60px;
 $brand-width: 188px;
 $language-bg: $gray85;
 $language-padding: 20px;
+$notification-bg: $orange-dark;
 
 @mixin header-padding {
   padding: {
@@ -88,6 +89,7 @@ nav {
   .nav-box {
     width: 100%;
     max-width: $application-max-width;
+    min-width: $application-min-width;
     margin: 0 auto;
     position: relative;
     box-sizing: border-box;
@@ -156,6 +158,17 @@ nav {
           }
         }
       }
+    }
+  }
+  .nav-notification {
+    @include nav-row( $orange-dark );
+    padding: {
+      left: $header-padding;
+      top: $header-padding;
+      bottom: $header-padding;
+    }
+    &:after {
+      clear: both;
     }
   }
 }
