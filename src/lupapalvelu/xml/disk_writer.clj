@@ -42,7 +42,9 @@
         submitted-file (io/file (str output-dir "/" (get-submitted-filename id)))
         current-file (io/file (str output-dir "/" (get-current-filename id)))]
     (pdf-export/generate submitted-application lang submitted-file)
-    (pdf-export/generate application lang current-file)))
+    (pdf-export/generate application lang current-file)
+    (fs/chmod "+rw" submitted-file)
+    (fs/chmod "+rw" current-file)))
 
 (defn write-to-disk
   "Writes XML string to disk and copies attachments from database. XML is validated before writing.

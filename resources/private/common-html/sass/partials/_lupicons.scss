@@ -12,6 +12,7 @@
 [class^="lupicon-"], [class*=" lupicon-"] {
     font-family: 'lupapiste';
     speak: none;
+    font-size: 22px;
     font-style: normal;
     font-weight: normal;
     font-variant: normal;
@@ -165,10 +166,10 @@
 	content: "\e62e";
 }
 .lupicon-log-in:before {
-	content: "\e62f";
+        content: "\e62f";
 }
 .lupicon-log-out:before {
-	content: "\e630";
+        content: "\e630";
 }
 .lupicon-menu:before {
 	content: "\e631";

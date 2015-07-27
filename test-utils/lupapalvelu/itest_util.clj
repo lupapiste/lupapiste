@@ -225,6 +225,9 @@
 (defn http404? [{:keys [status]}]
   (= status 404))
 
+(defn redirects-to [to {headers :headers :as resp}]
+  (and (http302? resp) (ss/ends-with (headers "location") to)))
+
 ;;
 ;; DSLs
 ;;

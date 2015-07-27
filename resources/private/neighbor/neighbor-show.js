@@ -1,5 +1,20 @@
-;(function() {
+;(function($) {
   "use strict";
+
+  var url = window.location.pathname + window.location.search;
+
+  var VetumaButtonModel = function() {
+    var self = this;
+    self.id = "vetuma-init";
+    self.success = url;
+    self.cancel  = url + "#cancel";
+    self.error   = url + "#error";
+    self.y       = url + "#y";
+    self.vtj     = url + "#vtj";
+    self.visible = ko.observable(true);
+  };
+
+  var vetumaParams = new VetumaButtonModel();
 
   function Model() {
     var self = this;
@@ -116,6 +131,8 @@
         })
         .call();
     };
+
+    self.status = ko.observable();
   }
 
   function getAttachmentsByGroup(source) {
@@ -123,14 +140,30 @@
     var grouped = _.groupBy(attachments, function(attachment) { return attachment.type["type-group"]; });
     return _.map(grouped, function(attachments, group) { return {group: group, attachments: attachments}; });
   }
+
   var model = new Model();
+  model.vetuma = vetumaParams;
+
+  function scrollToResponse() {
+    document.getElementById("responseHeading").scrollIntoView();
+    window.scrollBy(0, -60); // header blocks the view
+  }
+
+  function gotUser(user) {
+    vetumaParams.visible(false);
+    model.tupasUser(user);
+    scrollToResponse();
+  }
 
   hub.onPageLoad("neighbor-show", function(e) {
+    var hash = window.location.hash.replace("#","");
     model.init(e);
-    vetuma($("#vetuma-neighbor"), function(user) {
-      model.tupasUser(user);
-      $("html, body").animate({ scrollTop: 10000});
-    });
+    if (hash) {
+      model.status(hash);
+      scrollToResponse();
+    } else {
+      vetuma.getUser(gotUser, util.nop);
+    }
   });
 
   $(function() {
@@ -141,4 +174,4 @@
     $("#neighbor-show").applyBindings(model);
   });
 
-})();
+})(jQuery);

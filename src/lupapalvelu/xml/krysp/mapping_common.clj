@@ -253,6 +253,19 @@
                         :child [{:tag :henkilo}
                                 {:tag :kiinteistotunnus}
                                 {:tag :hallintasuhde}]}]})
+
+(def tyonjohtaja_210
+  {:tag :Tyonjohtaja
+   :child [{:tag :tyonjohtajaRooliKoodi}
+           {:tag :VRKrooliKoodi}
+           henkilo
+           yritys_211
+           {:tag :patevyysvaatimusluokka}
+           {:tag :koulutus}
+           {:tag :valmistumisvuosi}
+           {:tag :tyonjohtajaHakemusKytkin}
+           {:tag :vaadittuPatevyysluokka}]})
+
 (def tyonjohtaja_211
   {:tag :Tyonjohtaja
    :child [{:tag :tyonjohtajaRooliKoodi}
@@ -260,6 +273,7 @@
            henkilo
            yritys_211
            {:tag :patevyysvaatimusluokka}
+           {:tag :vaadittuPatevyysluokka}
            {:tag :koulutus}
            {:tag :valmistumisvuosi}
            {:tag :alkamisPvm}
@@ -280,6 +294,7 @@
            henkilo
            yritys_211
            {:tag :patevyysvaatimusluokka}
+           {:tag :vaadittuPatevyysluokka}
            {:tag :koulutus}
            {:tag :valmistumisvuosi}
            {:tag :alkamisPvm}
@@ -300,15 +315,7 @@
 
 (def tyonjohtajatieto_210
   {:tag :tyonjohtajatieto
-   :child [{:tag :Tyonjohtaja
-            :child [{:tag :tyonjohtajaRooliKoodi}
-                    {:tag :VRKrooliKoodi}
-                    henkilo
-                    yritys_211
-                    {:tag :patevyysvaatimusluokka}
-                    {:tag :koulutus}
-                    {:tag :valmistumisvuosi}
-                    {:tag :tyonjohtajaHakemusKytkin}]}]})
+   :child [tyonjohtaja_210]})
 
 (def tyonjohtajatieto_211
   {:tag :tyonjohtajatieto

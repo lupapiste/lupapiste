@@ -92,6 +92,14 @@ Wait for jQuery
 Kill dev-box
   Execute Javascript  $(".dev-debug").hide();
 
+Language To
+  [Arguments]  ${lang}
+  Element Should Not Contain  language-select  ${lang}
+  Click Link  xpath=//a[@data-test-id='language-link']
+  Wait Until  Element Should Be Visible  css=div.language-menu
+  Click Element  partial link=${lang}
+  Wait Until  Element Should Contain  language-select  ${lang}
+
 
 #
 # Navigation

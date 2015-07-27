@@ -95,7 +95,9 @@
       ajax
         .command("set-tos-function-for-application", {id: currentId, functionCode: value})
         .success(function() {
-          repository.load(currentId, applicationModel.pending);
+          repository.load(currentId, applicationModel.pending, function(application) {
+            applicationModel.metadata(application.metadata);
+          });
         })
         .call();
     }
@@ -194,10 +196,6 @@
       }
       applicationModel.nonpartyDocumentIndicator(_.reduce(nonpartyDocs, sumDocIndicators, 0));
       applicationModel.partyDocumentIndicator(_.reduce(partyDocs, sumDocIndicators, 0));
-
-      applicationModel.metadataList(_.sortBy(_.map(app.metadata, function(value, key) {
-        return metadata.translateMetaData(key, value);
-      }), "name"));
 
       isInitializing = false;
       pageutil.hideAjaxWait();

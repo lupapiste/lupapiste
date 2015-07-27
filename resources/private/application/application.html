@@ -317,7 +317,8 @@
               <a data-bind="click: changeTab" href="#" data-target="applicationSummary" data-test-id="application-open-applicationSummary-tab">
                 <span data-bind="ltext: 'application.applicationSummary'"></span></a></li>
 
-            <li data-bind="if: metadataList().length > 0, css: {'active': $parent.selectedTabName() === 'metadata'}">
+            <li data-bind="if: !_.isEmpty(metadata()) && $root.authorization.ok('store-tos-metadata-for-application') && features.enabled('arkistointi'),
+                           css: {'active': $parent.selectedTabName() === 'metadata'}">
               <a data-bind="click: changeTab" href="#" data-target="metadata" data-test-id="application-open-tasks-tab">
                 <span data-bind="ltext: 'attachment.tosMetadata'"></span>
               </a></li>
@@ -841,7 +842,7 @@
                         <h2 data-bind="ltext: 'verdict.lupamaaraukset'"></h2>
                         <div class="accordion-content-part">
 
-                          <!--  ko if:  $data.lupamaaraykset && $data.lupamaaraykset.length -->
+                          <!--  ko if:  $data.lupamaaraykset -->
                           <div data-bind="if: lupamaaraykset.autopaikkojaEnintaan" class="key-value-pair">
                             <label data-bind="ltext: 'verdict.autopaikkojaEnintaan'"></label><span class="value" data-bind="text: lupamaaraykset.autopaikkojaEnintaan"></span></div>
                           <div data-bind="if: lupamaaraykset.autopaikkojaVahintaan" class="key-value-pair">
@@ -911,7 +912,7 @@
                           </div>
                           <!-- /ko --> <!-- /lupamaaraykset -->
 
-                          <!--  ko ifnot:  $data.lupamaaraykset && $data.lupamaaraykset.length -->
+                          <!--  ko ifnot:  $data.lupamaaraykset -->
                           <div data-bind="ltext: 'verdict.lupamaaraukset.missing'"></div>
                           <!-- /ko -->
 
@@ -1033,46 +1034,12 @@
 
         <!-- Metadata tab -->
 
-        <!-- ko if: selectedTabName() === 'metadata' -->
-        <div id="application-metadata-tab" class="tab-content" >
-          <h1 data-bind="ltext: 'attachment.tosMetadata'"></h1>
-          <div class="tos-metadata-content" data-bind="with: application">
-            <table class="table table-striped table-metadata">
-              <thead>
-              <tr>
-                <th data-bind="ltext: 'attachment.tosMetadataKey'" class="metadata-key"></th>
-                <th data-bind="ltext: 'attachment.tosMetadataValue'"></th>
-              </tr>
-              </thead>
-              <tbody data-bind="foreach: metadataList">
-              <tr>
-                <td data-bind="text: name" class="metadata-key"></td>
-                <td>
-                  <div data-bind="if: typeof(value) == 'object'">
-                    <table class="subtable">
-                      <thead>
-                      <tr>
-                        <th data-bind="ltext: 'attachment.tosMetadataKey'"></th>
-                        <th data-bind="ltext: 'attachment.tosMetadataValue'"></th>
-                      </tr>
-                      </thead>
-                      <tbody data-bind="foreach: value">
-                      <tr>
-                        <td data-bind="text: name" class="metadata-key"></td>
-                        <td>
-                          <span data-bind="text: value"></span>
-                        </td>
-                      </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                  <span data-bind="if: typeof(value) != 'object'">
-                    <span data-bind="text: value"></span>
-                  </span>
-                </td>
-              </tr>
-              </tbody>
-            </table>
+        <!-- ko if: selectedTabName() === 'metadata' && $root.authorization.ok("store-tos-metadata-for-application") -->
+        <div id="application-metadata-tab" class="tab-content">
+          <div data-bind="if: features.enabled('arkistointi')">
+            <div class="feature" data-bind="component: {name: 'metadata-editor',
+                                            params: {metadata: application.metadata, applicationId: application.id}}">
+            </div>
           </div>
         </div>
         <!-- /ko -->
