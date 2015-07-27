@@ -36,10 +36,9 @@
                                         :kopiolaitos-orderer-phone "0501231234"})
 
 (facts "Kopiolaitos order"
-  (let [app-id (create-app-id pena)
-        app (query-application pena app-id)
+  (let [app (create-and-submit-application pena)
+        app-id (:id app)
         _ (upload-attachment-to-all-placeholders pena app)
-        _ (command pena :submit-application :id app-id)
         app (query-application pena app-id)]
 
     (fact* "Sonja sets two attachments to be verdict attachments"
