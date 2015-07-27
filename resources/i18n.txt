@@ -1,8 +1,8 @@
 vetuma.continue: Jatka Vetumaan / Fortsätt till Vetuma
 neighbor-vetuma.cancel: Tunnistautuminen peruutettiin. Ole hyvä ja yritä uudelleen. / Identifiering avbruten. Var god och försök på nytt.
 neighbor-vetuma.error: Tunnistautumisessa tapahtui virhe. Ole hyvä ja yritä uudelleen. Jos virhe toistuu, yritä myöhemmin uudelleen. / Ett fel uppstod vid identifieringen. Var god och försök på nytt. Om felet upprepas, försök på nytt senare.
-neighbor-vetuma.error-y: Yrityksen verkkopankkitunnuksella tai mobiilivarmenteella rekisteröityminen ei onnistu, joten käytä henkilökohtaisia tunnuksiasi. / Det går inte att identifiera sig med ett företags nätbankskoder eller mobilcertifiering, så använd dina privata koder.
+neighbor-vetuma.error-y: Yrityksen verkkopankkitunnuksella tai mobiilivarmenteella tunnistautuminen ei onnistu, joten käytä henkilökohtaisia tunnuksiasi. / Det går inte att identifiera sig med ett företags nätbankskoder eller mobilcertifiering, så använd dina privata koder.
 neighbor-vetuma.error-vtj: Henkilötietojen haku epäonnistui. Ole hyvä ja yritä uudelleen. Jos virhe toistuu, yritä myöhemmin uudelleen. Hämtning av personuppgifter misslyckades. Var god och försök på nytt. Om felet upprepas, försök på nytt senare.
-register.error-y: Yrityksen verkkopankkitunnuksella tai mobiilivarmenteella rekisteröityminen ei onnistu, joten käytä henkilökohtaisia tunnuksiasi. / Det går inte att identifiera sig med ett företags nätbankskoder eller mobilcertifiering, så använd dina privata koder.
+register.error-y: Yrityksen verkkopankkitunnuksella tai mobiilivarmenteella rekisteröityminen ei onnistu, joten käytä henkilökohtaisia tunnuksiasi. / Det går inte att registrera sig med ett företags nätbankskoder eller mobilcertifiering, så använd dina privata koder.
 register.error-vtj: Henkilötietojen haku epäonnistui. Ole hyvä ja yritä uudelleen. Jos virhe toistuu, yritä myöhemmin uudelleen. Hämtning av personuppgifter misslyckades. Var god och försök på nytt. Om felet upprepas, försök på nytt senare.
-neighbor.invite.failed.long: Ota yhteyttä naapuriisi. / Ta kontakt med din granne.
+neighbor.invite.failed.long: Ota yhteyttä naapuriisi tai kunnan viranomaiseen. / Ta kontakt med din granne eller kommunens myndigheten.
