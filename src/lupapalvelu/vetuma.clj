@@ -288,8 +288,7 @@
 
 (env/in-dev
   (defpage "/dev/api/vetuma" {:as data}
-    (let [stamp (generate-stamp)
-          user  (select-keys data [:userid :firstname :lastname])
-          user  (assoc user :stamp stamp)]
-      (mongo/insert :vetuma {:user user :created-at (java.util.Date.)})
+    (let [user  (-> (select-keys data [:userid :firstname :lastname])
+                  (assoc :stamp (generate-stamp)))]
+      (mongo/insert :vetuma {:user user :created-at (java.util.Date.) :trid (generate-stamp)})
       (response/json user))))
