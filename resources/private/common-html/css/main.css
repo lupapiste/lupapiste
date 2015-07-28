@@ -1401,7 +1401,7 @@ nav .header-menu .header-box a, nav .header-menu .header-box span {
   vertical-align: middle;
 }
 
-/* line 170, ../sass/partials/_header.scss */
+/* line 173, ../sass/partials/_header.scss */
 .nav-notification {
   width: 100%;
   background-color: #f39129;
@@ -1410,19 +1410,19 @@ nav .header-menu .header-box a, nav .header-menu .header-box span {
   box-sizing: border-box;
   overflow: hidden;
   padding-left: 12px;
-  padding-top: 12px;
+  padding-top: 13px;
   padding-bottom: 12px;
-  margin-top: 61px;
+  margin-top: 60px;
   margin-bottom: -60px;
 }
-/* line 181, ../sass/partials/_header.scss */
+/* line 184, ../sass/partials/_header.scss */
 .nav-notification:after {
   clear: both;
 }
 
-/* line 189, ../sass/partials/_header.scss */
+/* line 192, ../sass/partials/_header.scss */
 .admin .nav-notification {
-  margin-top: 107px;
+  margin-top: 106px;
   margin-bottom: -48px;
 }
 

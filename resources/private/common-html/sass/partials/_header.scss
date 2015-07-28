@@ -163,15 +163,18 @@ nav {
   }
 }
 
+// The margins/paddings may seem arbitrary, but
+// they are due to rendering differences between
+// different browsers.
 $notification-bg: $orange-dark;
-$notification-top: 61px;
+$notification-top: 60px;
 $notification-bottom: -60px;
 
 .nav-notification {
   @include nav-row( $orange-dark );
   padding: {
     left: $header-padding;
-    top: $header-padding;
+    top: $header-padding + 1px;
     bottom: $header-padding;
   }
   margin: {
